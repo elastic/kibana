@@ -48,7 +48,12 @@ export const AssistantListView: React.FC<AssistantListViewProps> = ({ agents }) 
       sortable: true,
       render: (name: Agent['name'], agent: Agent) => (
         <EuiFlexGroup gutterSize="s" alignItems="center">
-          <EuiAvatar name={agent.name} size="s" />
+          <EuiAvatar
+            size="m"
+            name={agent.name}
+            initials={agent.avatar?.text}
+            color={agent.avatar?.color}
+          />
           <EuiButtonEmpty
             onClick={() => navigateToWorkchatUrl(appPaths.assistants.edit({ agentId: agent.id }))}
           >

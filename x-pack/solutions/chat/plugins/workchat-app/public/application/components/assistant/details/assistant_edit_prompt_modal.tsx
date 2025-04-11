@@ -22,7 +22,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../../hooks/use_kibana';
-import { AgentEditState } from '../../../hooks/use_agent_edition';
+import { useAgentEdition } from '../../../hooks/use_agent_edition';
+import { assistantLabels } from '../i18n';
 
 const USE_CASES = [
   { value: 'customerSupport', text: 'Customer Support' },
@@ -30,25 +31,26 @@ const USE_CASES = [
 ];
 
 export interface EditPromptProps {
-  onCancel: () => void;
-  editState: AgentEditState;
-  setFieldValue: <T extends keyof AgentEditState>(key: T, value: AgentEditState[T]) => void;
-  submit: () => void;
-  isSubmitting: boolean;
+  onClose: () => void;
+  agentId: string;
 }
 
-export const EditPrompt: React.FC<EditPromptProps> = ({
-  onCancel,
-  editState,
-  setFieldValue,
-  submit,
-  isSubmitting,
-}) => {
+export const EditPrompt: React.FC<EditPromptProps> = ({ onClose, agentId }) => {
   const {
     services: { notifications },
   } = useKibana();
 
-  console.log(editState);
+  const { editState, setFieldValue, submit, isSubmitting } = useAgentEdition({
+    agentId,
+    onSaveSuccess: () => {
+      notifications.toasts.addSuccess(
+        i18n.translate('workchatApp.assistants.editPromptModal.saveSuccessMessage', {
+          defaultMessage: 'Assistant updated successfully',
+        })
+      );
+      onClose();
+    },
+  });
 
   const handleUseCaseChange = useCallback(
     (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -79,14 +81,14 @@ export const EditPrompt: React.FC<EditPromptProps> = ({
 
       submit();
     },
-    [submit, notifications.toasts]
+    [editState.systemPrompt, submit, notifications.toasts]
   );
 
   // Get the current useCase from editState or default
   const useCase = editState.useCase;
 
   return (
-    <EuiModal onClose={onCancel} maxWidth={640}>
+    <EuiModal onClose={onClose} style={{ width: 800 }}>
       <EuiModalHeader>
         <EuiModalHeaderTitle>
           {i18n.translate('workchatApp.assistants.editPromptModal.title', {
@@ -96,11 +98,12 @@ export const EditPrompt: React.FC<EditPromptProps> = ({
       </EuiModalHeader>
 
       <EuiModalBody>
-        <EuiForm component="form" onSubmit={handleSubmit}>
+        <EuiForm component="form" onSubmit={handleSubmit} fullWidth>
           <EuiFormRow
             label={i18n.translate('workchatApp.assistants.editPromptModal.useCaseLabel', {
               defaultMessage: 'Use case',
             })}
+            fullWidth
           >
             <EuiSelect
               data-test-subj="assistantUseCaseSelect"
@@ -117,6 +120,7 @@ export const EditPrompt: React.FC<EditPromptProps> = ({
             label={i18n.translate('workchatApp.assistants.editPromptModal.promptLabel', {
               defaultMessage: 'Prompt',
             })}
+            fullWidth
           >
             <EuiTextArea
               data-test-subj="assistantPromptTextArea"
@@ -130,10 +134,8 @@ export const EditPrompt: React.FC<EditPromptProps> = ({
       </EuiModalBody>
 
       <EuiModalFooter>
-        <EuiButtonEmpty data-test-subj="cancelPromptButton" onClick={onCancel}>
-          {i18n.translate('workchatApp.assistants.editPromptModal.cancelButtonLabel', {
-            defaultMessage: 'Cancel',
-          })}
+        <EuiButtonEmpty onClick={onClose}>
+          {assistantLabels.editView.cancelButtonLabel}
         </EuiButtonEmpty>
 
         <EuiButton
@@ -142,9 +144,7 @@ export const EditPrompt: React.FC<EditPromptProps> = ({
           onClick={handleSubmit}
           isLoading={isSubmitting}
         >
-          {i18n.translate('workchatApp.assistants.editPromptModal.saveButtonLabel', {
-            defaultMessage: 'Save',
-          })}
+          {assistantLabels.editView.saveButtonLabel}
         </EuiButton>
       </EuiModalFooter>
     </EuiModal>

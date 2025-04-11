@@ -17,11 +17,14 @@ import {
   EuiText,
   EuiFieldText,
   EuiFormHelpText,
+  EuiAvatar,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../../hooks/use_kibana';
-import { AssistantAvatar } from '../assistant_avatar';
-import { AgentEditState } from '../../../hooks/use_agent_edition';
+import { useAgentEdition } from '../../../hooks/use_agent_edition';
+import { appPaths } from '../../../app_paths';
+import { useNavigation } from '../../../hooks/use_navigation';
+import { assistantLabels } from '../i18n';
 
 const AVATAR_COLORS = [
   '#F1FA8C',
@@ -35,23 +38,32 @@ const AVATAR_COLORS = [
 ];
 
 export interface EditAssistantBasicInfoProps {
-  onCancel: () => void;
-  editState: AgentEditState;
-  setFieldValue: <T extends keyof AgentEditState>(key: T, value: AgentEditState[T]) => void;
-  submit: () => void;
-  isSubmitting: boolean;
+  onClose: () => void;
+  agentId: string;
 }
 
 export const EditAssistantBasicInfo: React.FC<EditAssistantBasicInfoProps> = ({
-  onCancel,
-  editState,
-  setFieldValue,
-  submit,
-  isSubmitting,
+  onClose,
+  agentId,
 }) => {
   const {
     services: { notifications },
   } = useKibana();
+
+  const { navigateToWorkchatUrl } = useNavigation();
+
+  const { editState, setFieldValue, submit, isSubmitting } = useAgentEdition({
+    agentId,
+    onSaveSuccess: () => {
+      notifications.toasts.addSuccess(
+        i18n.translate('workchatApp.assistants.editBasicsModal.saveSuccessMessage', {
+          defaultMessage: 'Assistant updated successfully',
+        })
+      );
+      onClose();
+      navigateToWorkchatUrl(appPaths.assistants.edit({ agentId: agentId }));
+    },
+  });
 
   const handleNameChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -100,7 +112,7 @@ export const EditAssistantBasicInfo: React.FC<EditAssistantBasicInfoProps> = ({
   );
 
   return (
-    <EuiModal onClose={onCancel} maxWidth={640}>
+    <EuiModal onClose={onClose} style={{ width: 800 }}>
       <EuiModalHeader>
         <EuiModalHeaderTitle>
           {i18n.translate('workchatApp.assistants.editBasicsModal.title', {
@@ -151,8 +163,7 @@ export const EditAssistantBasicInfo: React.FC<EditAssistantBasicInfoProps> = ({
           </EuiFormRow>
           <EuiFormHelpText>
             {i18n.translate('workchatApp.assistants.editBasicsModal.descriptionHelpText', {
-              defaultMessage:
-                'Describe what this assistant is going to be used for. Informational only.',
+              defaultMessage: 'Describe what this assistant is going to be used for.',
             })}
           </EuiFormHelpText>
 
@@ -170,14 +181,12 @@ export const EditAssistantBasicInfo: React.FC<EditAssistantBasicInfoProps> = ({
 
           <EuiFlexGroup alignItems="center">
             <EuiFlexItem grow={false}>
-              <AssistantAvatar
-                customText={editState.avatarCustomText}
+              <EuiAvatar
+                initials={editState.avatarCustomText}
                 name={editState.name}
-                color={editState.avatarColor as string}
+                color={editState.avatarColor}
                 size="xl"
-              >
-                {editState.avatarCustomText}
-              </AssistantAvatar>
+              />
             </EuiFlexItem>
 
             <EuiFlexItem>
@@ -225,10 +234,8 @@ export const EditAssistantBasicInfo: React.FC<EditAssistantBasicInfoProps> = ({
       </EuiModalBody>
 
       <EuiModalFooter>
-        <EuiButtonEmpty data-test-subj="cancelBasicInfoButton" onClick={onCancel}>
-          {i18n.translate('workchatApp.assistants.editBasicsModal.cancelButtonLabel', {
-            defaultMessage: 'Cancel',
-          })}
+        <EuiButtonEmpty onClick={onClose}>
+          {assistantLabels.editView.cancelButtonLabel}
         </EuiButtonEmpty>
 
         <EuiButton
@@ -237,9 +244,7 @@ export const EditAssistantBasicInfo: React.FC<EditAssistantBasicInfoProps> = ({
           onClick={handleSubmit}
           isLoading={isSubmitting}
         >
-          {i18n.translate('workchatApp.assistants.editBasicsModal.saveButtonLabel', {
-            defaultMessage: 'Save',
-          })}
+          {assistantLabels.editView.saveButtonLabel}
         </EuiButton>
       </EuiModalFooter>
     </EuiModal>

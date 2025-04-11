@@ -17,11 +17,11 @@ import {
   EuiTitle,
   EuiLink,
   EuiLoadingElastic,
+  EuiAvatar,
 } from '@elastic/eui';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { useNavigation } from '../../../hooks/use_navigation';
 import { useBreadcrumb } from '../../../hooks/use_breadcrumbs';
-import { useKibana } from '../../../hooks/use_kibana';
 import { appPaths } from '../../../app_paths';
 import { assistantLabels } from '../i18n';
 import { i18n } from '@kbn/i18n';
@@ -29,10 +29,8 @@ import { useAgent } from '../../../hooks/use_agent';
 import { useConversationList } from '../../../hooks/use_conversation_list';
 import { sortAndGroupConversations } from '../../../utils/sort_and_group_conversations';
 import { sliceRecentConversations } from '../../../utils/slice_recent_conversations';
-import { useAgentEdition } from '../../../hooks/use_agent_edition';
 import { EditAssistantBasicInfo } from './assistant_edit_basic_info_modal';
 import { EditPrompt } from './assistant_edit_prompt_modal';
-import { AssistantAvatar } from '../assistant_avatar';
 
 interface AssistantDetailsProps {
   agentId: string;
@@ -40,9 +38,6 @@ interface AssistantDetailsProps {
 
 export const AssistantDetails: React.FC<AssistantDetailsProps> = ({ agentId }) => {
   const { navigateToWorkchatUrl, createWorkchatUrl } = useNavigation();
-  const {
-    services: { notifications },
-  } = useKibana();
   const { agent: assistant, isLoading } = useAgent({ agentId });
   const { conversations } = useConversationList({ agentId });
 
@@ -66,22 +61,6 @@ export const AssistantDetails: React.FC<AssistantDetailsProps> = ({ agentId }) =
 
   useBreadcrumb(breadcrumb);
 
-  // Using the agent edition hook
-  const { editState, setFieldValue, submit, isSubmitting } = useAgentEdition({
-    agentId,
-    onSaveSuccess: (agent) => {
-      notifications.toasts.addSuccess(
-        i18n.translate('workchatApp.assistants.editSuccessMessage', {
-          defaultMessage: 'Assistant updated successfully',
-        })
-      );
-      // Close both modals when save is successful
-      setIsBasicInfoModalVisible(false);
-      setIsPromptModalVisible(false);
-    },
-  });
-
-  // Handlers for modals
   const handleOpenBasicInfoModal = useCallback(() => {
     setIsBasicInfoModalVisible(true);
   }, []);
@@ -105,7 +84,6 @@ export const AssistantDetails: React.FC<AssistantDetailsProps> = ({ agentId }) =
       </KibanaPageTemplate.EmptyPrompt>
     );
   }
-  console.log(assistant);
 
   const AssistantBasicInfo = () => (
     <EuiPanel hasShadow={false} hasBorder={true}>
@@ -113,10 +91,10 @@ export const AssistantDetails: React.FC<AssistantDetailsProps> = ({ agentId }) =
         <EuiFlexItem>
           <EuiFlexGroup alignItems="center" direction="row" gutterSize="xl">
             <EuiFlexItem grow={false}>
-              <AssistantAvatar
+              <EuiAvatar
                 size="xl"
                 name={assistant.name}
-                customText={assistant.avatar?.text}
+                initials={assistant.avatar?.text}
                 color={assistant.avatar?.color}
               />
             </EuiFlexItem>
@@ -266,24 +244,9 @@ export const AssistantDetails: React.FC<AssistantDetailsProps> = ({ agentId }) =
 
       {/* Modals */}
       {isBasicInfoModalVisible && (
-        <EditAssistantBasicInfo
-          onCancel={handleCloseBasicInfoModal}
-          editState={editState}
-          setFieldValue={setFieldValue}
-          submit={submit}
-          isSubmitting={isSubmitting}
-        />
+        <EditAssistantBasicInfo agentId={agentId} onClose={handleCloseBasicInfoModal} />
       )}
-
-      {isPromptModalVisible && (
-        <EditPrompt
-          onCancel={handleClosePromptModal}
-          editState={editState}
-          setFieldValue={setFieldValue}
-          submit={submit}
-          isSubmitting={isSubmitting}
-        />
-      )}
+      {isPromptModalVisible && <EditPrompt agentId={agentId} onClose={handleClosePromptModal} />}
     </>
   );
 };

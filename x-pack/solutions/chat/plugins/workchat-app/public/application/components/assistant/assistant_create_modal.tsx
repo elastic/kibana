@@ -16,6 +16,7 @@ import { useKibana } from '../../hooks/use_kibana';
 import { useAgentEdition } from '../../hooks/use_agent_edition';
 import { appPaths } from '../../app_paths';
 import { useNavigation } from '../../hooks/use_navigation';
+import { assistantLabels } from './i18n';
 
 export interface CreateNewAssistantModalProps {
   onClose: () => void;
@@ -28,7 +29,6 @@ export const CreateNewAssistantModal: React.FC<CreateNewAssistantModalProps> = (
 
   const { navigateToWorkchatUrl } = useNavigation();
 
-  // Using the agent edition hook
   const { editState, setFieldValue, submit, isSubmitting } = useAgentEdition({
     onSaveSuccess: (agent) => {
       notifications.toasts.addSuccess(
@@ -67,7 +67,7 @@ export const CreateNewAssistantModal: React.FC<CreateNewAssistantModalProps> = (
   );
 
   return (
-    <EuiModal onClose={onClose} maxWidth={640}>
+    <EuiModal onClose={onClose} style={{ width: 640 }}>
       <EuiModalHeader>
         <EuiModalHeaderTitle>
           {i18n.translate('workchatApp.assistants.create.title', {
@@ -95,10 +95,8 @@ export const CreateNewAssistantModal: React.FC<CreateNewAssistantModalProps> = (
       </EuiModalBody>
 
       <EuiModalFooter>
-        <EuiButtonEmpty data-test-subj="cancelBasicInfoButton" onClick={onClose}>
-          {i18n.translate('workchatApp.assistants.editBasicsModal.cancelButtonLabel', {
-            defaultMessage: 'Cancel',
-          })}
+        <EuiButtonEmpty onClick={onClose}>
+          {assistantLabels.editView.cancelButtonLabel}
         </EuiButtonEmpty>
 
         <EuiButton
@@ -107,9 +105,7 @@ export const CreateNewAssistantModal: React.FC<CreateNewAssistantModalProps> = (
           onClick={handleSubmit}
           isLoading={isSubmitting}
         >
-          {i18n.translate('workchatApp.assistants.editBasicsModal.saveButtonLabel', {
-            defaultMessage: 'Save',
-          })}
+          {assistantLabels.editView.saveButtonLabel}
         </EuiButton>
       </EuiModalFooter>
     </EuiModal>

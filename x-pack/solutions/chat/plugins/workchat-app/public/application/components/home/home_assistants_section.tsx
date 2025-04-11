@@ -33,7 +33,12 @@ export const HomeAssistantsSection: React.FC<{}> = () => {
       <EuiPanel key={assistant.id} paddingSize="m" hasBorder={true}>
         <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="s">
           <EuiFlexItem grow={false}>
-            <EuiAvatar size="l" name={assistant.name} />
+            <EuiAvatar
+              size="l"
+              name={assistant.name}
+              initials={assistant.avatar?.text}
+              color={assistant.avatar?.color}
+            />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButtonIcon
