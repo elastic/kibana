@@ -10,7 +10,7 @@ import { render, fireEvent } from '@testing-library/react';
 import { CardSelectorList } from './card_selector_list';
 import type { CardSelectorListItem } from './card_selector_list';
 import { RulesCardItemId } from '../rules/types';
-import { OnboardingCardId } from '@kbn/security-solution-plugin/public/onboarding/constants';
+import { OnboardingCardId } from '../../../../constants';
 
 const mockOnSelect = jest.fn();
 
