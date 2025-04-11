@@ -593,7 +593,8 @@ export class TaskRunner<
         if (isOk(schedule)) {
           nextRun = getNextRun({ startDate: startedAt, interval: schedule.value.interval });
         } else if (taskSchedule) {
-          nextRun = getNextRun({ startDate: startedAt, interval: taskSchedule.interval });
+          // rules cannot use rrule for scheduling yet
+          nextRun = getNextRun({ startDate: startedAt, interval: taskSchedule.interval! });
         }
 
         const { executionStatus, executionMetrics, lastRun, outcome } = processRunResults({
