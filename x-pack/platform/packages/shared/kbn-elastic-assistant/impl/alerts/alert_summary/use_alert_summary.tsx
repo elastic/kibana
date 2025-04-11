@@ -42,7 +42,7 @@ export const useAlertSummary = ({
   promptContext,
   showAnonymizedValues,
 }: Props): UseAlertSummary => {
-  const { abortStream, isLoading, sendMessage } = useChatComplete({
+  const { abortStream, sendMessage } = useChatComplete({
     connectorId: defaultConnectorId,
   });
   const { data: anonymizationFields, isFetched: isFetchedAnonymizationFields } =
@@ -55,7 +55,11 @@ export const useAlertSummary = ({
   } | null>(null);
   // indicates that an alert summary exists or is being created/fetched
   const [hasAlertSummary, setHasAlertSummary] = useState<boolean>(false);
-  const { data: fetchedAlertSummary, isFetched: isAlertSummaryFetched } = useFetchAlertSummary({
+  const {
+    data: fetchedAlertSummary,
+    refetch: refetchAlertSummary,
+    isFetched: isAlertSummaryFetched,
+  } = useFetchAlertSummary({
     alertId,
     connectorId: defaultConnectorId,
   });
@@ -122,9 +126,11 @@ export const useAlertSummary = ({
     fetchedAlertSummary.prompt,
     promptContext,
   ]);
+  const [isGenerating, setIsGenerating] = useState(false);
 
   const fetchAISummary = useCallback(() => {
     const fetchSummary = async (content: { message: string; replacements: Replacements }) => {
+      setIsGenerating(true);
       setHasAlertSummary(true);
 
       const rawResponse = await sendMessage({
@@ -143,25 +149,6 @@ export const useAlertSummary = ({
       } catch (e) {
         // AI did not return the expected JSON
         responseSummary = rawResponse.response;
-      }
-
-      setAlertSummary(
-        showAnonymizedValues
-          ? responseSummary
-          : replaceAnonymizedValuesWithOriginalValues({
-              messageContent: responseSummary,
-              replacements: content.replacements,
-            })
-      );
-      if (responseRecommendedActions) {
-        setRecommendedActions(
-          showAnonymizedValues
-            ? responseRecommendedActions
-            : replaceAnonymizedValuesWithOriginalValues({
-                messageContent: responseRecommendedActions,
-                replacements: content.replacements,
-              })
-        );
       }
 
       if (!rawResponse.isError) {
@@ -196,7 +183,18 @@ export const useAlertSummary = ({
             },
           });
         }
+        await refetchAlertSummary();
+      } else {
+        setAlertSummary(
+          showAnonymizedValues
+            ? responseSummary
+            : replaceAnonymizedValuesWithOriginalValues({
+                messageContent: responseSummary,
+                replacements: content.replacements,
+              })
+        );
       }
+      setIsGenerating(false);
     };
 
     if (messageAndReplacements !== null) fetchSummary(messageAndReplacements);
@@ -205,6 +203,7 @@ export const useAlertSummary = ({
     bulkUpdate,
     fetchedAlertSummary.data,
     messageAndReplacements,
+    refetchAlertSummary,
     sendMessage,
     showAnonymizedValues,
   ]);
@@ -218,7 +217,7 @@ export const useAlertSummary = ({
     alertSummary,
     hasAlertSummary,
     fetchAISummary,
-    isLoading,
+    isLoading: isGenerating,
     messageAndReplacements,
     recommendedActions,
   };
