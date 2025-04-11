@@ -5,53 +5,22 @@
  * 2.0.
  */
 
-import { useCallback } from 'react';
-import { useAbortableAsync } from '@kbn/react-hooks';
-import type { ConversationEventChanges } from '../../../common/chat_events';
-import { useChat } from './use_chat';
+import { useQuery } from '@tanstack/react-query';
 import { useWorkChatServices } from './use_workchat_service';
+import { queryKeys } from '../query_keys';
 
-export const useConversation = ({
-  agentId,
-  conversationId,
-  connectorId,
-  onConversationUpdate,
-}: {
-  agentId: string;
-  conversationId: string | undefined;
-  connectorId?: string;
-  onConversationUpdate: (update: ConversationEventChanges) => void;
-}) => {
+export const useConversation = ({ conversationId }: { conversationId: string | undefined }) => {
   const { conversationService } = useWorkChatServices();
 
-  const onConversationUpdateInternal = useCallback(
-    (update: ConversationEventChanges) => {
-      onConversationUpdate(update);
+  const { data: conversation, isLoading } = useQuery({
+    queryKey: queryKeys.conversations.byId(conversationId ?? 'new'),
+    queryFn: async () => {
+      if (conversationId) {
+        return conversationService.get(conversationId);
+      }
+      return undefined;
     },
-    [onConversationUpdate]
-  );
-
-  const {
-    conversationEvents,
-    setConversationEvents,
-    sendMessage,
-    status: chatStatus,
-  } = useChat({
-    agentId,
-    conversationId,
-    connectorId,
-    onConversationUpdate: onConversationUpdateInternal,
   });
 
-  useAbortableAsync(async () => {
-    // TODO: better conv state management - only has events atm
-    if (conversationId) {
-      const conversation = await conversationService.get(conversationId);
-      setConversationEvents(conversation.events);
-    } else {
-      setConversationEvents([]);
-    }
-  }, [conversationId, conversationService]);
-
-  return { conversationEvents, chatStatus, sendMessage };
+  return { conversation, isLoading };
 };
