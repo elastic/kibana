@@ -12,6 +12,16 @@
 /* eslint-disable import/no-extraneous-dependencies */
 // @ts-expect-error
 const nodeLibsBrowser = require('node-libs-browser');
+const nodeStdlibBrowser = require('node-stdlib-browser');
+
+/**
+ * @param {string} pkgName
+ * @returns {string}
+ */
+const getStdLibBrowserPackage = (pkgName) => {
+  // @ts-expect-error
+  return nodeStdlibBrowser[pkgName];
+};
 
 const NodeLibsBrowserPlugin = class NodeLibsBrowserPlugin {
   /**
@@ -27,7 +37,7 @@ const NodeLibsBrowserPlugin = class NodeLibsBrowserPlugin {
     );
 
     compiler.options.resolve.fallback = {
-      assert: nodeLibsBrowser.assert,
+      assert: getStdLibBrowserPackage('assert'),
       buffer: nodeLibsBrowser.buffer,
       child_process: false,
       cluster: false,
