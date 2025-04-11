@@ -236,6 +236,17 @@ const generalLayoutNavTree: NavigationTreeDefinitionUI = {
                       href: '/app/kibana',
                       withBadge: true,
                     },
+                    {
+                      id: 'sub2',
+                      path: '',
+                      title: 'Item-Labs',
+                      href: '/app/kibana',
+                      withBadge: true,
+                      badgeOptions: {
+                        icon: 'bell',
+                        tooltip: 'This is a tooltip',
+                      },
+                    },
                   ],
                 },
                 {
@@ -405,7 +416,6 @@ const generalLayoutNavTree: NavigationTreeDefinitionUI = {
               title: 'Item-Beta',
               href: '/app/kibana',
               withBadge: true,
-              isExternalLink: true,
             },
             {
               id: 'item-labs',
