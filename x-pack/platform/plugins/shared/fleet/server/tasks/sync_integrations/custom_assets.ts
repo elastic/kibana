@@ -138,6 +138,7 @@ export async function getPipelinesFromVars(
 ): Promise<CustomAssetsData[]> {
   const packagePolicies = await packagePolicyService.list(soClient, {
     perPage: SO_SEARCH_LIMIT,
+    spaceId: '*',
   });
   const customPipelineFromVars: CustomAssetsData[] = [];
   for (const packagePolicy of packagePolicies.items) {
