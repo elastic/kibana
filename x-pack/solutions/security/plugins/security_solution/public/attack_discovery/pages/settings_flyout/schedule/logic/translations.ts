@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 export const FETCH_ATTACK_DISCOVERY_SCHEDULES_FAILURE = (single = true) =>
   i18n.translate('xpack.securitySolution.attackDiscovery.schedule.fetchSchedulesFailDescription', {
     defaultMessage:
-      'Failed to fetch {failed, plural, one {# attack discovery schedule} other {# attack discovery schedules}}',
+      'Failed to fetch {failed, plural, one {attack discovery schedule} other {attack discovery schedules}}',
     values: { failed: single ? 1 : 2 },
   });
 
