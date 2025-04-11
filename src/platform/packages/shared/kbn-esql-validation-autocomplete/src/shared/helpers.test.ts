@@ -254,6 +254,18 @@ describe('getExpressionType', () => {
       expect(getExpressionType(getASTForExpression('accepts_dates("", "")'))).toBe('keyword');
     });
 
+    it('handles conflict fields', () => {
+      expect(
+        getExpressionType(
+          getASTForExpression('to_long(conflictField)'),
+          new Map([
+            [`conflictField`, { name: 'conflictField', type: 'unsupported', hasConflict: true }],
+          ]),
+          new Map()
+        )
+      ).toBe('keyword');
+    });
+
     it('deals with functions that do not exist', () => {
       expect(getExpressionType(getASTForExpression('does_not_exist()'))).toBe('unknown');
     });
