@@ -61,6 +61,10 @@ export interface TabState extends TabItem {
   chartRequest: ChartRequest;
 }
 
+export interface RecentlyClosedTabState extends TabState {
+  closedAt: number;
+}
+
 export interface DiscoverInternalState {
   initializationState: { hasESData: boolean; hasUserDataView: boolean };
   savedDataViews: DataViewListItem[];
@@ -70,6 +74,7 @@ export interface DiscoverInternalState {
   tabs: {
     byId: Record<string, TabState>;
     allIds: string[];
+    recentlyClosedTabs: RecentlyClosedTabState[];
     /**
      * WARNING: You probably don't want to use this property.
      * This is used high in the component tree for managing tabs,

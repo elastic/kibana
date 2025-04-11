@@ -28,6 +28,7 @@ import {
   type DiscoverInternalState,
   type InternalStateDataRequestParams,
   type TabState,
+  type RecentlyClosedTabState,
 } from './types';
 import { loadDataViewList, setTabs } from './actions';
 import { selectTab } from './selectors';
@@ -67,7 +68,7 @@ const initialState: DiscoverInternalState = {
   savedDataViews: [],
   expandedDoc: undefined,
   isESQLToDataViewTransitionModalVisible: false,
-  tabs: { byId: {}, allIds: [], unsafeCurrentId: '' },
+  tabs: { byId: {}, allIds: [], unsafeCurrentId: '', recentlyClosedTabs: [] },
 };
 
 export type TabActionPayload<T extends { [key: string]: unknown } = {}> = { tabId: string } & T;
@@ -97,7 +98,14 @@ export const internalStateSlice = createSlice({
       state.initializationState = action.payload;
     },
 
-    setTabs: (state, action: PayloadAction<{ allTabs: TabState[]; selectedTabId: string }>) => {
+    setTabs: (
+      state,
+      action: PayloadAction<{
+        allTabs: TabState[];
+        selectedTabId: string;
+        recentlyClosedTabs: RecentlyClosedTabState[];
+      }>
+    ) => {
       state.tabs.byId = action.payload.allTabs.reduce<Record<string, TabState>>(
         (acc, tab) => ({
           ...acc,
@@ -107,6 +115,7 @@ export const internalStateSlice = createSlice({
       );
       state.tabs.allIds = action.payload.allTabs.map((tab) => tab.id);
       state.tabs.unsafeCurrentId = action.payload.selectedTabId;
+      state.tabs.recentlyClosedTabs = action.payload.recentlyClosedTabs;
     },
 
     setDataViewId: (state, action: TabAction<{ dataViewId: string | undefined }>) =>

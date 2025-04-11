@@ -16,7 +16,7 @@ import {
 import type { TabItem } from '@kbn/unified-tabs';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import { TABS_STATE_URL_KEY } from '../../../../common/constants';
-import type { TabState } from './redux/types';
+import type { TabState, RecentlyClosedTabState } from './redux/types';
 import { createTabItem } from './redux/utils';
 
 const TABS_LOCAL_STORAGE_KEY = 'discover.tabs';
@@ -26,14 +26,21 @@ interface TabStateInLocalStorage {
   version: string;
 }
 
+interface RecentlyClosedTabStateInLocalStorage extends Omit<TabStateInLocalStorage, 'tabState'> {
+  tabState: TabStateInLocalStorage['tabState'] & {
+    closedAt: number;
+  };
+}
+
 interface TabsStateInLocalStorage {
   openTabs: TabStateInLocalStorage[];
-  closedTabs: Array<TabStateInLocalStorage & { closedAt: number }>;
+  closedTabs: RecentlyClosedTabStateInLocalStorage[];
 }
 
 interface TabsInternalStatePayload {
   allTabs: TabState[];
   selectedTabId: string;
+  recentlyClosedTabs: RecentlyClosedTabState[];
 }
 
 export interface TabsStorageState {
@@ -123,6 +130,19 @@ export const getTabsStorageManager = ({
     };
   };
 
+  const toRecentlyClosedTabStateInStorage = (
+    tabState: RecentlyClosedTabState
+  ): RecentlyClosedTabStateInLocalStorage => {
+    const state = toTabStateInStorage(tabState);
+    return {
+      ...state,
+      tabState: {
+        ...state.tabState,
+        closedAt: tabState.closedAt,
+      },
+    };
+  };
+
   const readFromLocalStorage = (): TabsStateInLocalStorage => {
     const storedTabsState = storage.get(TABS_LOCAL_STORAGE_KEY);
     let parsedTabsState: TabsStateInLocalStorage | null = null;
@@ -140,28 +160,20 @@ export const getTabsStorageManager = ({
     };
   };
 
-  const persistLocally = async ({ allTabs, selectedTabId }: TabsInternalStatePayload) => {
+  const persistLocally = async ({
+    allTabs,
+    selectedTabId,
+    recentlyClosedTabs,
+  }: TabsInternalStatePayload) => {
     await pushSelectedTabIdToUrl(selectedTabId);
-    const tabsToPersist: TabStateInLocalStorage[] = allTabs.map(toTabStateInStorage);
-    const storedTabs = readFromLocalStorage();
-    const storedOpenTabs = storedTabs.openTabs;
-    const storedClosedTabs = storedTabs.closedTabs;
-
-    const closedAt = Date.now();
-    const newClosedTabs = storedOpenTabs
-      .filter(
-        (tab: TabStateInLocalStorage) =>
-          !tabsToPersist.find((t) => t.tabState.id === tab.tabState.id)
-      )
-      .map((tab: TabStateInLocalStorage) => ({
-        ...tab,
-        closedAt,
-      }));
+    const openTabs: TabsStateInLocalStorage['openTabs'] = allTabs.map(toTabStateInStorage);
+    const closedTabs: TabsStateInLocalStorage['closedTabs'] = recentlyClosedTabs.map(
+      toRecentlyClosedTabStateInStorage
+    );
 
     const nextTabsInStorage: TabsStateInLocalStorage = {
-      openTabs: tabsToPersist,
-      // TODO: add logic to keep only the last 10 closed tabs
-      closedTabs: [...storedClosedTabs, ...newClosedTabs], // wil be used for "Recently closed tabs" feature
+      openTabs,
+      closedTabs, // wil be used for "Recently closed tabs" feature
     };
 
     storage.set(TABS_LOCAL_STORAGE_KEY, JSON.stringify(nextTabsInStorage));
@@ -209,9 +221,16 @@ export const getTabsStorageManager = ({
         ...tabStateInStorage.tabState.globalState,
       },
     });
+    const toRecentlyClosedTabState = (
+      tabStateInStorage: RecentlyClosedTabStateInLocalStorage
+    ): RecentlyClosedTabState => ({
+      ...toTabState(tabStateInStorage),
+      closedAt: tabStateInStorage.tabState.closedAt,
+    });
     const selectedTabId = getSelectedTabIdFromUrl();
     const storedTabsState = readFromLocalStorage();
     const openTabs = storedTabsState.openTabs.map(toTabState);
+    const closedTabs = storedTabsState.closedTabs.map(toRecentlyClosedTabState);
 
     if (selectedTabId) {
       // restore previously opened tabs
@@ -219,6 +238,7 @@ export const getTabsStorageManager = ({
         return {
           allTabs: openTabs,
           selectedTabId,
+          recentlyClosedTabs: closedTabs,
         };
       }
 
@@ -230,9 +250,10 @@ export const getTabsStorageManager = ({
         // restore previously closed tabs, for example when only the default tab was shown
         return {
           allTabs: storedTabsState.closedTabs
-            .filter((tab) => tab.closedAt === storedClosedTab.closedAt)
+            .filter((tab) => tab.tabState.closedAt === storedClosedTab.tabState.closedAt)
             .map(toTabState),
           selectedTabId,
+          recentlyClosedTabs: closedTabs,
         };
       }
     }
@@ -245,6 +266,7 @@ export const getTabsStorageManager = ({
     return {
       allTabs: [defaultTab],
       selectedTabId: defaultTab.id,
+      recentlyClosedTabs: closedTabs,
     };
   };
 

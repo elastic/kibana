@@ -28,7 +28,10 @@ export const TabsView = (props: DiscoverSessionViewProps) => {
   const services = useDiscoverServices();
   const dispatch = useInternalStateDispatch();
   const allTabs = useInternalStateSelector(selectAllTabs);
-  const currentTabId = useInternalStateSelector((state) => state.tabs.unsafeCurrentId);
+  const { currentTabId, recentlyClosedItems } = useInternalStateSelector((state) => ({
+    currentTabId: state.tabs.unsafeCurrentId,
+    recentlyClosedItems: state.tabs.recentlyClosedTabs,
+  }));
   const [initialItems] = useState<TabItem[]>(() => allTabs.map((tab) => pick(tab, 'id', 'label')));
 
   return (
@@ -36,6 +39,7 @@ export const TabsView = (props: DiscoverSessionViewProps) => {
       services={services}
       initialItems={initialItems}
       initialSelectedItemId={currentTabId}
+      recentlyClosedItems={recentlyClosedItems}
       onChanged={(updateState) => dispatch(internalStateActions.updateTabs(updateState))}
       createItem={() => createTabItem(allTabs)}
       getPreviewData={(item) => {
