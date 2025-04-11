@@ -93,6 +93,7 @@ export const QueryRuleDraggableList: React.FC<QueryRuleDraggableListProps> = ({
             draggableId={queryRule.rule_id}
             customDragHandle={true}
             hasInteractiveChildren={true}
+            data-test-subj="searchQueryRulesDraggableItem"
           >
             {(provided) => (
               <EuiPanel paddingSize="s">

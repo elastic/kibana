@@ -8,14 +8,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import {
-  EuiButton,
-  EuiButtonEmpty,
-  EuiFieldText,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiText,
-} from '@elastic/eui';
+import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useParams } from 'react-router-dom';
 import { QueryRulesQueryRule } from '@elastic/elasticsearch/lib/api/types';
@@ -67,13 +60,14 @@ export const QueryRulesetDetail: React.FC = () => {
           pageTitle={rulesetId}
           restrictWidth
           color="primary"
+          data-test-subj="queryRulesetDetailHeader"
           rightSideItems={[
             <EuiFlexGroup alignItems="center" key="queryRulesetDetailHeaderButtons">
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty
                   iconType="database"
                   color="primary"
-                  data-test-subj="queryRulesetDetailDataButton"
+                  data-test-subj="queryRulesetDetailHeaderDataButton"
                   onClick={() => {
                     // Logic to handle data button click
                   }}
@@ -89,7 +83,7 @@ export const QueryRulesetDetail: React.FC = () => {
                   iconType="save"
                   fill
                   color="primary"
-                  data-test-subj="queryRulesetDetailSaveButton"
+                  data-test-subj="queryRulesetDetailHeaderSaveButton"
                   onClick={() => {
                     // Logic to save the query ruleset
                   }}
@@ -146,9 +140,6 @@ export const QueryRulesetDetail: React.FC = () => {
                       </EuiText>
                     </EuiFlexItem>
                   </EuiFlexGroup>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiFieldText data-test-subj="searchQueryRulesQueryRulesetDetailFieldText" />
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>
