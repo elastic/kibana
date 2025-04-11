@@ -79,7 +79,7 @@ describe('<InvestigateInTimelineContextMenu /> <InvestigateInTimelineButtonIcon 
     const mockData: Indicator = generateMockUrlIndicator();
 
     const { container } = render(
-      <TestProvidersComponent securityContextOverrides={{ hasAccessToTimeline: false }}>
+      <TestProvidersComponent>
         <InvestigateInTimelineContextMenu data={mockData} data-test-subj={TEST_ID} />
       </TestProvidersComponent>
     );

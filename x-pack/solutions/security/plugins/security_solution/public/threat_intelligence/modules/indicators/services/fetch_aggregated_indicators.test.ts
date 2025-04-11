@@ -117,9 +117,9 @@ describe('FetchAggregatedIndicatorsService', () => {
 
     describe('when query fails', () => {
       beforeEach(() => {
-        mockedSearchService.search.mockReturnValue(
-          throwError(() => new Error('some random exception'))
-        );
+        jest
+          .mocked(mockedSearchService.search)
+          .mockReturnValue(throwError(() => new Error('some random exception')));
       });
 
       it('should throw an error', async () => {

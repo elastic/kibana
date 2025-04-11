@@ -14,7 +14,9 @@ const indicatorsResponse = { rawResponse: { hits: { hits: [], total: 0 } } };
 
 describe('useIndicatorsTotalCount()', () => {
   beforeEach(() => {
-    mockedSearchService.search.mockReturnValue(new BehaviorSubject(indicatorsResponse));
+    jest
+      .mocked(mockedSearchService.search)
+      .mockReturnValue(new BehaviorSubject(indicatorsResponse));
     jest.clearAllMocks();
   });
 

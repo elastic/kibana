@@ -162,7 +162,7 @@ describe('<AddToTimelineButtonIcon /> <AddToTimelineContextMenu />', () => {
     const mockData: Indicator = generateMockIndicator();
 
     const { container } = render(
-      <TestProvidersComponent securityContextOverrides={{ hasAccessToTimeline: false }}>
+      <TestProvidersComponent>
         <AddToTimelineContextMenu field={mockField} data={mockData} data-test-subj={TEST_ID} />
       </TestProvidersComponent>
     );
