@@ -14,6 +14,7 @@ import {
   EuiCheckbox,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
   EuiSpacer,
   useEuiTheme,
   useGeneratedHtmlId,
@@ -21,26 +22,68 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { type ChangelogEntry } from '../utils';
+import { type BreakingChangesLog } from '../utils';
 
 interface UpdateAvailableCalloutProps {
   version: string;
   toggleChangelogModal: () => void;
   breakingChanges: {
-    changes: ChangelogEntry[];
+    changelog: BreakingChangesLog;
     isUnderstood: boolean;
     toggleIsUnderstood: () => void;
     onOpen: () => void;
   };
 }
 
+const BreakingChangesButton = ({
+  changelog,
+  onClick,
+}: {
+  changelog: BreakingChangesLog;
+  onClick: () => void;
+}) => {
+  const { euiTheme } = useEuiTheme();
+  const isOneChange = changelog.length === 1 && changelog[0].changes.length === 1;
+
+  const buttonCSS = css`
+    background-color: ${euiTheme.colors.backgroundFilledWarning};
+  `;
+
+  const ButtonText = () => (
+    <FormattedMessage
+      id="xpack.fleet.integrations.settings.versionInfo.reviewBreakingChangesButton"
+      defaultMessage="Review breaking changes"
+    />
+  );
+
+  if (isOneChange) {
+    return (
+      <EuiButton
+        color="warning"
+        css={buttonCSS}
+        href={changelog[0].changes[0].link}
+        target="_blank"
+      >
+        <ButtonText />
+        <EuiIcon type="popout" />
+      </EuiButton>
+    );
+  }
+
+  return (
+    <EuiButton color="warning" css={buttonCSS} onClick={onClick}>
+      <ButtonText />
+    </EuiButton>
+  );
+};
+
 export const UpdateAvailableCallout = ({
   version,
   toggleChangelogModal,
   breakingChanges,
 }: UpdateAvailableCalloutProps) => {
-  const { euiTheme } = useEuiTheme();
-  const hasBreakingChanges = breakingChanges.changes.length > 0;
+  const hasBreakingChanges = breakingChanges.changelog.length > 0;
+
   const checkboxId = useGeneratedHtmlId({ prefix: 'understoodBreakingChangeCheckbox' });
   const defaultTitle = 'New version available';
   const breakingChangesTitleClause = ': Action required due to breaking changes';
@@ -68,18 +111,10 @@ export const UpdateAvailableCallout = ({
       <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
         {hasBreakingChanges && (
           <EuiFlexItem grow={false}>
-            <EuiButton
-              color="warning"
-              css={css`
-                background-color: ${euiTheme.colors.backgroundFilledWarning};
-              `}
+            <BreakingChangesButton
+              changelog={breakingChanges.changelog}
               onClick={breakingChanges.onOpen}
-            >
-              <FormattedMessage
-                id="xpack.fleet.integrations.settings.versionInfo.reviewBreakingChangesButton"
-                defaultMessage="Review breaking changes"
-              />
-            </EuiButton>
+            />
           </EuiFlexItem>
         )}
         <EuiFlexItem grow={false}>
@@ -96,7 +131,7 @@ export const UpdateAvailableCallout = ({
           <EuiSpacer size="m" />
           <EuiCheckbox
             id={checkboxId}
-            label="I've reviewed the breaking changes and understand the impact"
+            label="I've reviewed the breaking changes and understand the impact."
             onChange={breakingChanges.toggleIsUnderstood}
             checked={breakingChanges.isUnderstood}
           />

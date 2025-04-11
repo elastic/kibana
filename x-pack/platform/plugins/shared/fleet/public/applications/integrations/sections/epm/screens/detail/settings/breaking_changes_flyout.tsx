@@ -17,14 +17,14 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import { type ChangelogEntry } from '../utils';
+import { type BreakingChangesLog } from '../utils';
 
 interface BreakingChangesFlyoutProps {
-  breakingChanges: ChangelogEntry[];
+  breakingChanges: BreakingChangesLog;
   onClose: () => void;
 }
 
-const BreakingChangesList = ({ changelog }: { changelog: ChangelogEntry[] }) => {
+const BreakingChangesList = ({ changelog }: { changelog: BreakingChangesLog }) => {
   return changelog.map(({ version, changes }) => {
     const prLinks = changes.map(({ link }) => ({
       label: link,
@@ -37,7 +37,7 @@ const BreakingChangesList = ({ changelog }: { changelog: ChangelogEntry[] }) => 
         <EuiTitle size="xxxs">
           <h3>Version {version}</h3>
         </EuiTitle>
-        <EuiListGroup listItems={prLinks} color="primary" flush />
+        <EuiListGroup listItems={prLinks} color="primary" maxWidth="100%" flush />
       </>
     );
   });
@@ -45,7 +45,7 @@ const BreakingChangesList = ({ changelog }: { changelog: ChangelogEntry[] }) => 
 
 export const BreakingChangesFlyout = ({ onClose, breakingChanges }: BreakingChangesFlyoutProps) => {
   return (
-    <EuiFlyout onClose={onClose}>
+    <EuiFlyout onClose={onClose} size="m">
       <EuiFlyoutHeader hasBorder>
         <EuiTitle>
           <h2>Review breaking changes</h2>

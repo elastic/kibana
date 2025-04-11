@@ -18,10 +18,10 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { type ChangelogEntry, formatChangelog } from '../utils';
+import { type Changelog, formatChangelog } from '../utils';
 
 interface Props {
-  changelog: ChangelogEntry[];
+  changelog: Changelog;
   isLoading: boolean;
   onClose: () => void;
 }

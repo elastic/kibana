@@ -305,7 +305,7 @@ export const SettingsPage: React.FC<Props> = memo(
                         version={latestVersion}
                         toggleChangelogModal={toggleChangelogModal}
                         breakingChanges={{
-                          changes: breakingChanges,
+                          changelog: breakingChanges,
                           isUnderstood: isBreakingChangesUnderstood,
                           toggleIsUnderstood: () => setIsBreakingChangesUnderstood((prev) => !prev),
                           onOpen: () => setIsBreakingChangesFlyoutOpen(true),

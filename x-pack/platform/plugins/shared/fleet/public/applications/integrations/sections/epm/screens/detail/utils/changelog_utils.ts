@@ -15,18 +15,22 @@ enum ChangelogChangeType {
   BugFix = 'bugfix',
 }
 
-export interface ChangelogChange {
+interface ChangelogChange<T = ChangelogChangeType> {
   description: string;
   link: string;
-  type: ChangelogChangeType;
+  type: T;
 }
 
-export interface ChangelogEntry {
+interface ChangelogEntry<T = ChangelogChangeType> {
   version: string;
-  changes: ChangelogChange[];
+  changes: Array<ChangelogChange<T>>;
 }
 
-export const formatChangelog = (parsedChangelog: ChangelogEntry[]) => {
+export type Changelog = ChangelogEntry[];
+
+export type BreakingChangesLog = Array<ChangelogEntry<ChangelogChangeType.BreakingChange>>;
+
+export const formatChangelog = (parsedChangelog: Changelog) => {
   if (!parsedChangelog) return '';
 
   return parsedChangelog.reduce((acc, val) => {
@@ -40,7 +44,7 @@ export const parseYamlChangelog = (
   latestVersion: string,
   currentVersion?: string
 ) => {
-  const parsedChangelog: ChangelogEntry[] = changelogText ? load(changelogText) : [];
+  const parsedChangelog: Changelog = changelogText ? load(changelogText) : [];
 
   if (!currentVersion) return parsedChangelog.filter((e) => semverLte(e.version, latestVersion));
 
@@ -49,11 +53,15 @@ export const parseYamlChangelog = (
   );
 };
 
-export const getBreakingChanges = (changelog: ChangelogEntry[]) => {
-  return changelog.reduce<ChangelogEntry[]>((acc, entry) => {
-    const breakingChanges = entry.changes.filter(
-      (change) => change.type === ChangelogChangeType.BreakingChange
-    );
+const isBreakingChange = (
+  change: ChangelogChange
+): change is ChangelogChange<ChangelogChangeType.BreakingChange> => {
+  return change.type === ChangelogChangeType.BreakingChange;
+};
+
+export const getBreakingChanges = (changelog: Changelog): BreakingChangesLog => {
+  return changelog.reduce<BreakingChangesLog>((acc, entry) => {
+    const breakingChanges = entry.changes.filter(isBreakingChange);
 
     if (breakingChanges.length > 0) {
       return [...acc, { ...entry, changes: breakingChanges }];
