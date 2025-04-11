@@ -127,7 +127,7 @@ describe('RulesListNotifyBadge', () => {
         isRuleEditable={false}
       />
     );
-    expect(screen.queryByTestId('rulesListNotifyBadge-unsnoozed')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('rulesListNotifyBadge')).not.toBeInTheDocument();
   });
 
   it('should allow the user to unsnooze rules', async () => {
