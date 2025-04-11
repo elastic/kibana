@@ -28,6 +28,7 @@ import {
 import { ChatGenerationChunk } from '@langchain/core/outputs';
 import { ToolCallChunk } from '@langchain/core/dist/messages/tool';
 import { Readable } from 'stream';
+import { lte } from 'lodash/fp';
 import { StreamParser } from './types';
 
 export function convertResponseContentToChatGenerationChunk(
@@ -317,12 +318,26 @@ export const parseGeminiStreamAsAsyncIterator = async function* (
     });
   }
   try {
+    let tokenBuffer = '';
     for await (const chunk of stream) {
-      const decoded = chunk.toString();
-      const parsed = parseGeminiResponse(decoded);
+      let decoded = chunk.toString();
+      if (tokenBuffer) {
+        // If tokenBuffer is not empty we have an errored out chunk in it, try appending new chunk and parsing together
+        decoded = tokenBuffer + chunk;
+        tokenBuffer = '';
+      }
+      let parsed;
+      try {
+        parsed = parseGeminiResponse(decoded);
+      } catch {
+        tokenBuffer = decoded;
+        logger.error('Gemini stream parsing error in async iterator, attempting to re-parse with next chunk');
+      }
       // Split the parsed string into chunks of 5 characters
-      for (let i = 0; i < parsed.length; i += 5) {
-        yield parsed.substring(i, i + 5);
+      if (parsed){
+        for (let i = 0; i < parsed.length; i += 5) {
+          yield parsed.substring(i, i + 5);
+        }
       }
     }
   } catch (err) {
@@ -341,10 +356,22 @@ export const parseGeminiStream: StreamParser = async (
   tokenHandler
 ) => {
   let responseBody = '';
+  let tokenBuffer = '';
   stream.on('data', (chunk) => {
-    const decoded = chunk.toString();
-    const parsed = parseGeminiResponse(decoded);
-    if (tokenHandler) {
+    let decoded = chunk.toString();
+    if (tokenBuffer) {
+      // If tokenBuffer is not empty we have an errored out chunk in it, try appending new chunk and parsing together
+      decoded = tokenBuffer + chunk;
+      tokenBuffer = '';
+    }
+    let parsed;
+    try {
+      parsed = parseGeminiResponse(decoded);
+    } catch {
+      tokenBuffer = decoded;
+      logger.error('Gemini stream parsing error, attempting to re-parse with next chunk', decoded);
+    }
+    if (parsed && tokenHandler) {
       // Split the parsed string into chunks of 5 characters
       for (let i = 0; i < parsed.length; i += 5) {
         tokenHandler(parsed.substring(i, i + 5));
@@ -374,7 +401,9 @@ export const parseGeminiResponse = (responseBody: string) => {
   return responseBody
     .split('\n')
     .filter((line) => line.startsWith('data: ') && !line.endsWith('[DONE]'))
-    .map((line) => JSON.parse(line.replace('data: ', '')))
+    .map((line) => {
+      return JSON.parse(line.replace('data: ', ''));
+    })
     .filter(
       (
         line
@@ -389,7 +418,7 @@ export const parseGeminiResponse = (responseBody: string) => {
           candidatesTokenCount: number;
           totalTokenCount: number;
         };
-      } => 'candidates' in line
+      } => line && 'candidates' in line
     )
     .reduce((prev, line) => {
       if (line.candidates[0] && line.candidates[0].content) {
