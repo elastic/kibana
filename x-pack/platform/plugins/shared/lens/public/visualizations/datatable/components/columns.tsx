@@ -74,7 +74,7 @@ export const createGridColumns = (
   };
 
   return visibleColumns.map((field) => {
-    const { name, index: colIndex } = columnsReverseLookup[field];
+    const { name, index: colIndex } = columnsReverseLookup[field] || {};
     const filterable = columnFilterable?.[colIndex] || false;
 
     const columnArgs = columnConfig.columns.find(({ columnId }) => columnId === field);
