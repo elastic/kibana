@@ -13,6 +13,7 @@ Array [
       >
         <h1
           class="euiTitle emotion-euiTitle-s"
+          id="inspector-panel-title"
         >
           Inspector
         </h1>
