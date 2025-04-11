@@ -198,6 +198,7 @@ export const initializeSearchEmbeddableApi = async (
       setQuery,
       canEditUnifiedSearch,
     },
+    stateManager,
     anyStateChange$: onAnyStateChange.pipe(map(() => undefined)),
     comparators: {
       sort: (a, b) => deepEqual(a ?? [], b ?? []),
@@ -224,6 +225,5 @@ export const initializeSearchEmbeddableApi = async (
       savedSearchViewMode$.next(lastSaved?.viewMode);
       density$.next(lastSaved?.density);
     },
-    stateManager,
   };
 };
