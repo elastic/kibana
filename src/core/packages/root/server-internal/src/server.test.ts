@@ -327,6 +327,35 @@ describe('stripUnknownsWorkaround', () => {
       expect.anything(),
       expect.objectContaining({ stripUnknownKeys: true })
     );
+    expect(logger.get('config-validation').error).toHaveBeenCalledTimes(0); // No error logged as it lets the validation fail
+  });
+
+  test(`if the 2nd validation succeeds, it logs an error to highlight that it's running in compat mode`, async () => {
+    mockEnsureValidConfiguration.mockImplementation(() => ({})); // Success by default
+    mockEnsureValidConfiguration.mockRejectedValueOnce(new Error('Unknown configuration keys')); // Fail the first time
+
+    mockConfigService.atPath.mockReturnValue(
+      new BehaviorSubject({
+        lifecycle: { disablePreboot: true },
+        enableStripUnknownConfigWorkaround: true,
+      })
+    );
+
+    const server = new Server(rawConfigService, env, logger);
+    await server.preboot();
+    await expect(server.setup()).resolves.toBeDefined();
+    expect(mockEnsureValidConfiguration).toHaveBeenCalledTimes(2);
+    expect(mockEnsureValidConfiguration).toHaveBeenNthCalledWith(
+      2,
+      expect.anything(),
+      expect.objectContaining({ stripUnknownKeys: true })
+    );
+    expect(logger.get('config-validation').error).toHaveBeenCalledTimes(1);
+    expect(logger.get('config-validation').error).toHaveBeenCalledWith(
+      expect.stringContaining(
+        'Strict config validation failed! Extra unknown keys removed in Serverless-compatible mode. Original error'
+      )
+    );
   });
 });
 
