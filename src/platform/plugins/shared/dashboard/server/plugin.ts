@@ -144,7 +144,7 @@ export class DashboardPlugin
     }
 
     return {
-      contentClient: this.contentClient,
+      getContentClient: () => this.contentClient,
     };
   }
 
