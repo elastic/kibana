@@ -244,6 +244,5 @@
     "@kbn/security-plugin-types-common",
     "@kbn/management-settings-ids",
     "@kbn/inference-endpoint-ui-common",
-    "@kbn/security-solution-plugin"
   ]
 }
