@@ -132,7 +132,7 @@ export const coreWorkerFixtures = base.extend<
   samlAuth: [
     ({ log, config, esClient, kbnClient }, use, workerInfo) => {
       /**
-       * When running tests against Cloud, ensure the `.ftr/user_roles.json` file is populated with the required roles
+       * When running tests against Cloud, ensure the `.ftr/role_users.json` file is populated with the required roles
        * and credentials. Each worker uses a unique custom role named `custom_role_worker_<index>`.
        * If running tests in parallel, make sure the file contains enough entries to accommodate all workers.
        * The file should be structured as follows:
