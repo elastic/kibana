@@ -22,35 +22,25 @@ import {
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useAgentEdition } from '../../../hooks/use_agent_edition';
-import { appPaths } from '../../../app_paths';
-import { useNavigation } from '../../../hooks/use_navigation';
 import { assistantLabels } from '../i18n';
-
-const AVATAR_COLORS = [
-  '#F1FA8C',
-  '#BD93F9',
-  '#50FA7B',
-  '#FF79C6',
-  '#8BE9FD',
-  '#FFB86C',
-  '#FF5555',
-  '#44475A',
-];
+import { euiPaletteColorBlind } from '@elastic/eui';
 
 export interface EditAssistantBasicInfoProps {
   onClose: () => void;
+  onSaveSuccess: () => void;
   agentId: string;
 }
+
+const AVATAR_COLORS = euiPaletteColorBlind();
 
 export const EditAssistantBasicInfo: React.FC<EditAssistantBasicInfoProps> = ({
   onClose,
   agentId,
+  onSaveSuccess,
 }) => {
   const {
     services: { notifications },
   } = useKibana();
-
-  const { navigateToWorkchatUrl } = useNavigation();
 
   const { editState, setFieldValue, submit, isSubmitting } = useAgentEdition({
     agentId,
@@ -60,8 +50,8 @@ export const EditAssistantBasicInfo: React.FC<EditAssistantBasicInfoProps> = ({
           defaultMessage: 'Assistant updated successfully',
         })
       );
+      onSaveSuccess();
       onClose();
-      navigateToWorkchatUrl(appPaths.assistants.edit({ agentId: agentId }));
     },
   });
 

@@ -24,7 +24,7 @@ const emptyState = (): AgentEditState => {
     name: '',
     description: '',
     systemPrompt: '',
-    avatarColor: '',
+    avatarColor: undefined,
     avatarCustomText: '',
     useCase: '',
     public: false,
@@ -53,8 +53,8 @@ export const useAgentEdition = ({
           systemPrompt: agent.configuration.systemPrompt ?? '',
           public: agent.public,
           useCase: agent.configuration.useCase ?? '',
-          avatarColor: agent.avatar?.color ?? '',
-          avatarCustomText: agent.avatar?.text ?? '',
+          avatarColor: agent.avatar.color,
+          avatarCustomText: agent.avatar.text ?? '',
         });
       }
     };

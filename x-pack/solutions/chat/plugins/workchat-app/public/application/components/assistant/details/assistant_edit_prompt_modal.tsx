@@ -32,10 +32,11 @@ const USE_CASES = [
 
 export interface EditPromptProps {
   onClose: () => void;
+  onSaveSuccess: () => void;
   agentId: string;
 }
 
-export const EditPrompt: React.FC<EditPromptProps> = ({ onClose, agentId }) => {
+export const EditPrompt: React.FC<EditPromptProps> = ({ onClose, onSaveSuccess, agentId }) => {
   const {
     services: { notifications },
   } = useKibana();
@@ -48,6 +49,7 @@ export const EditPrompt: React.FC<EditPromptProps> = ({ onClose, agentId }) => {
           defaultMessage: 'Assistant updated successfully',
         })
       );
+      onSaveSuccess();
       onClose();
     },
   });

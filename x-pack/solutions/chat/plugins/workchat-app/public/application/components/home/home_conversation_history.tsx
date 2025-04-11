@@ -59,7 +59,12 @@ export const HomeConversationHistorySection: React.FC<{}> = () => {
                   <EuiFlexGroup gutterSize="s" alignItems="center">
                     {agent && (
                       <EuiFlexItem grow={false}>
-                        <EuiAvatar name={agent.name} size="s" />
+                        <EuiAvatar
+                          name={agent.name}
+                          initials={agent.avatar.text}
+                          color={agent.avatar.color}
+                          size="s"
+                        />
                       </EuiFlexItem>
                     )}
                     <EuiFlexItem direction="column" grow={false}>

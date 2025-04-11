@@ -18,9 +18,9 @@ export interface Agent {
   user: UserNameAndId;
   public: boolean;
   configuration: Record<string, any>;
-  avatar?: {
-    color: string;
-    text: string;
+  avatar: {
+    color?: string;
+    text?: string;
   };
 }
 

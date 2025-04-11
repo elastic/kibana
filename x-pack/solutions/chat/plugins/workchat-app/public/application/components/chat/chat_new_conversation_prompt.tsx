@@ -97,6 +97,8 @@ export const ChatNewConversationPrompt: React.FC<ChatNewConversationPromptProps>
                 name={agent?.name ?? chatCommonLabels.assistant.defaultNameLabel}
                 size="xl"
                 type="user"
+                initials={agent?.avatar?.text}
+                color={agent?.avatar?.color}
               />
             </EuiFlexItem>
             <EuiFlexItem>

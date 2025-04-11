@@ -13,6 +13,7 @@ import { agentTypeName, type AgentAttributes } from '../../saved_objects/agents'
 import { WorkchatError } from '../../errors';
 import { createBuilder } from '../../utils/so_filters';
 import { savedObjectToModel, createRequestToRaw, updateToAttributes } from './convert_model';
+import { getRandomColorFromPalette } from '../../utils/color';
 
 interface AgentClientOptions {
   logger: Logger;
@@ -77,19 +78,21 @@ export class AgentClientImpl implements AgentClient {
 
   async get({ agentId }: { agentId: string }): Promise<Agent> {
     const conversationSo = await this._rawGet({ agentId });
-    console.log(conversationSo);
     return savedObjectToModel(conversationSo);
   }
 
   async create(createRequest: AgentCreateRequest): Promise<Agent> {
     const now = new Date();
     const id = createRequest.id ?? uuidv4();
+    const color = createRequest.avatar?.color ?? getRandomColorFromPalette();
     const attributes = createRequestToRaw({
       createRequest,
       id,
       user: this.user,
       creationDate: now,
+      color,
     });
+
     const created = await this.client.create<AgentAttributes>(agentTypeName, attributes, { id });
     return savedObjectToModel(created);
   }
@@ -100,8 +103,6 @@ export class AgentClientImpl implements AgentClient {
       ...conversationSo.attributes,
       ...updateToAttributes({ updatedFields }),
     };
-
-    console.log(updatedAttributes);
 
     await this.client.update<AgentAttributes>(agentTypeName, conversationSo.id, updatedAttributes);
 

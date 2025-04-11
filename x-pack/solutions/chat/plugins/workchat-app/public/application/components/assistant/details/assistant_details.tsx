@@ -38,7 +38,7 @@ interface AssistantDetailsProps {
 
 export const AssistantDetails: React.FC<AssistantDetailsProps> = ({ agentId }) => {
   const { navigateToWorkchatUrl, createWorkchatUrl } = useNavigation();
-  const { agent: assistant, isLoading } = useAgent({ agentId });
+  const { agent: assistant, isLoading, refetch } = useAgent({ agentId });
   const { conversations } = useConversationList({ agentId });
 
   // State for modals
@@ -76,6 +76,10 @@ export const AssistantDetails: React.FC<AssistantDetailsProps> = ({ agentId }) =
   const handleClosePromptModal = useCallback(() => {
     setIsPromptModalVisible(false);
   }, []);
+
+  const handleSaveSuccess = useCallback(() => {
+    refetch();
+  }, [refetch]);
 
   if (isLoading || !assistant) {
     return (
@@ -244,9 +248,19 @@ export const AssistantDetails: React.FC<AssistantDetailsProps> = ({ agentId }) =
 
       {/* Modals */}
       {isBasicInfoModalVisible && (
-        <EditAssistantBasicInfo agentId={agentId} onClose={handleCloseBasicInfoModal} />
+        <EditAssistantBasicInfo
+          agentId={agentId}
+          onClose={handleCloseBasicInfoModal}
+          onSaveSuccess={handleSaveSuccess}
+        />
       )}
-      {isPromptModalVisible && <EditPrompt agentId={agentId} onClose={handleClosePromptModal} />}
+      {isPromptModalVisible && (
+        <EditPrompt
+          agentId={agentId}
+          onClose={handleClosePromptModal}
+          onSaveSuccess={handleSaveSuccess}
+        />
+      )}
     </>
   );
 };
