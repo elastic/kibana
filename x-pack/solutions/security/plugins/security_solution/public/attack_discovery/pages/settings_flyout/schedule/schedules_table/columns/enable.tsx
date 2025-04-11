@@ -38,7 +38,7 @@ const EnableSwitch = ({
   const onScheduleStateChange = useCallback(
     async (event: EuiSwitchEvent) => {
       setMyIsLoading(true);
-      onSwitchChange(scheduleId, !enabled);
+      await onSwitchChange(scheduleId, !enabled);
       setMyIsLoading(false);
     },
     [enabled, onSwitchChange, scheduleId]
