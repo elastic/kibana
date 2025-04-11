@@ -56,11 +56,14 @@ const TimeWindowSchema = schema.string({
     }
 
     const match = value.match(/^(\d+)([mhdw])$/);
-    const timeSize = parseInt(match[1], 10);
-    const timeUnit = match[2];
 
-    if (timeUnit === 'm' && timeSize < 5) {
-      return 'Not a valid time window';
+    if (match) {
+      const timeSize = parseInt(match[1], 10);
+      const timeUnit = match[2];
+
+      if (timeUnit === 'm' && timeSize < 5) {
+        return 'Not a valid time window';
+      }
     }
   },
 });
