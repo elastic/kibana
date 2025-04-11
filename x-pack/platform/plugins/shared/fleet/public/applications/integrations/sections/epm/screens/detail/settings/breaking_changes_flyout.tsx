@@ -34,7 +34,7 @@ const BreakingChangesList = ({ changelog }: { changelog: BreakingChangesLog }) =
       target: '_blank',
       css: css`
         & > a {
-          padding-inline: 0px;
+          padding-inline-start: 0px;
         }
       `,
     }));
@@ -42,9 +42,16 @@ const BreakingChangesList = ({ changelog }: { changelog: BreakingChangesLog }) =
     return (
       <>
         <EuiTitle size="xxxs">
-          <h3>Version {version}</h3>
+          <h3>
+            <FormattedMessage
+              id="xpack.fleet.integrations.settings.breakingChangesFlyout.changeVersionHeader"
+              defaultMessage="Version {version}"
+              values={{ version }}
+            />
+          </h3>
         </EuiTitle>
         <EuiListGroup listItems={prLinks} color="primary" maxWidth="100%" flush />
+        <EuiSpacer size="m" />
       </>
     );
   });
