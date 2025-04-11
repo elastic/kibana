@@ -18,7 +18,6 @@ const MORE_THAN_1024_CHARS =
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');
   const synthtrace = getService('synthtrace');
-  const esClient = getService('es');
   const start = '2025-04-11T08:00:00.000Z';
   const end = '2025-04-11T08:05:30.000Z';
   const type = 'logs';
@@ -26,7 +25,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const namespace = 'default';
   const serviceName = 'my-service';
   const otherServiceName = 'my-other-service';
-  const hostName = 'synth-host';
 
   async function callApiAs(
     roleScopedSupertestWithCookieCredentials: SupertestWithRoleScopeType,

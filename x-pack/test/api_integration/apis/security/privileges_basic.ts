@@ -308,7 +308,7 @@ export default function ({ getService }: FtrProviderContext) {
             securitySolutionNotes: ['all', 'read', 'minimal_all', 'minimal_read'],
             infrastructure: ['all', 'read', 'minimal_all', 'minimal_read'],
             logs: ['all', 'read', 'minimal_all', 'minimal_read'],
-            dataQuality: ['all', 'read', 'minimal_all', 'minimal_read'],
+            dataQuality: ['all', 'read', 'minimal_all', 'minimal_read', 'manage_rules'],
             apm: ['all', 'read', 'minimal_all', 'minimal_read', 'settings_save'],
             discover: [
               'all',

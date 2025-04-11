@@ -10713,3 +10713,35 @@ Object {
   },
 }
 `;
+
+exports[`Alert as data fields checks detect AAD fields changes for: datasetQuality.degradedDocs 1`] = `
+Object {
+  "fieldMap": Object {
+    "kibana.alert.evaluation.conditions": Object {
+      "array": false,
+      "required": false,
+      "type": "keyword",
+    },
+    "kibana.alert.evaluation.threshold": Object {
+      "required": false,
+      "scaling_factor": 100,
+      "type": "scaled_float",
+    },
+    "kibana.alert.evaluation.value": Object {
+      "array": false,
+      "required": false,
+      "type": "keyword",
+    },
+    "kibana.alert.reason": Object {
+      "array": false,
+      "required": false,
+      "type": "keyword",
+    },
+    "kibana.alert.title": Object {
+      "array": false,
+      "required": false,
+      "type": "keyword",
+    },
+  },
+}
+`;
