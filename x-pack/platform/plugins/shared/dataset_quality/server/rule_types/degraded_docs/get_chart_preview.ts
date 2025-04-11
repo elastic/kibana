@@ -129,23 +129,20 @@ export async function getChartPreview({
       groupBy,
       bucketKey: Array.isArray(bucket.key) ? bucket.key : [bucket.key],
     });
-    bucket.timeseries.buckets.forEach(
-      (timeseriesBucket: {
-        key: number;
-        doc_count?: number;
-        ignored_fields?: { doc_count?: number };
-      }) => {
-        const x = timeseriesBucket.key;
-        const totalCount = timeseriesBucket.doc_count ?? 0;
-        const ignoredCount = timeseriesBucket.ignored_fields?.doc_count ?? 0;
+    const timeSeriesBuckets = bucket.timeseries as estypes.AggregationsTimeSeriesAggregate;
+    const timeseries = timeSeriesBuckets.buckets as estypes.AggregationsTimeSeriesBucket[];
+    timeseries.forEach((timeseriesBucket: estypes.AggregationsTimeSeriesBucket) => {
+      const x = (timeseriesBucket as Record<string, estypes.FieldValue>).key as number;
+      const totalCount = timeseriesBucket.doc_count ?? 0;
+      const ignoredCount =
+        (timeseriesBucket.ignored_fields as estypes.AggregationsMultiBucketBase)?.doc_count ?? 0;
 
-        if (acc[bucketKey.join(',')]) {
-          acc[bucketKey.join(',')].push({ x, totalCount, ignoredCount });
-        } else {
-          acc[bucketKey.join(',')] = [{ x, totalCount, ignoredCount }];
-        }
+      if (acc[bucketKey.join(',')]) {
+        acc[bucketKey.join(',')].push({ x, totalCount, ignoredCount });
+      } else {
+        acc[bucketKey.join(',')] = [{ x, totalCount, ignoredCount }];
       }
-    );
+    });
 
     return acc;
   }, {} as Record<string, DataStreamTotals[]>);

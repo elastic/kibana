@@ -23,7 +23,6 @@ import { getRuleExecutor } from './executor';
 import {
   ALERT_EVALUATION_CONDITIONS,
   ALERT_TITLE,
-  DATASET_QUALITY_AAD_FIELDS,
   DATASET_QUALITY_REGISTRATION_CONTEXT,
   DatasetQualityAlert,
   DatasetQualityAlertContext,
@@ -47,7 +46,6 @@ export function DegradedDocsRuleType(): RuleType<
       defaultMessage: 'Degraded docs',
     }),
     solution: 'stack',
-    fieldsForAAD: DATASET_QUALITY_AAD_FIELDS,
     validate: {
       params: degradedDocsParamsSchema,
     },

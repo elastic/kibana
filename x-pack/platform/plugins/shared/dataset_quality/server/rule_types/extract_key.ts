@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { FieldValue } from '@elastic/elasticsearch/lib/api/types';
 import { INDEX } from '../../common/es_fields';
 import { extractIndexNameFromBackingIndex } from '../../common/utils';
 
@@ -26,19 +27,19 @@ export const extractKey = ({
   bucketKey,
 }: {
   groupBy: string[];
-  bucketKey: string[];
+  bucketKey: FieldValue[];
 }): string[] => {
   if (!groupBy.includes(INDEX)) {
-    return bucketKey;
+    return bucketKey as string[];
   }
 
   const dataStreamIndex = groupBy.findIndex((group) => group === INDEX);
-  const dataStreamName = extractIndexNameFromBackingIndex(bucketKey[dataStreamIndex]);
+  const dataStreamName = extractIndexNameFromBackingIndex(bucketKey[dataStreamIndex] as string);
   const key = [
     ...bucketKey.slice(0, dataStreamIndex),
     dataStreamName,
     ...bucketKey.slice(dataStreamIndex + 1),
   ];
 
-  return key;
+  return key as string[];
 };
