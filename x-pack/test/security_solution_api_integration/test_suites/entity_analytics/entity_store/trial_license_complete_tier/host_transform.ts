@@ -5,10 +5,16 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
-import type { EcsHost } from '@elastic/ecs';
+import type { Ecs, EcsHost } from '@elastic/ecs';
+import type {
+  IndexRequest,
+  SearchHit,
+  SearchTotalHits,
+} from '@elastic/elasticsearch/lib/api/types';
 import { FtrProviderContext } from '@kbn/ftr-common-functional-services';
 import type { GetEntityStoreStatusResponse } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/status.gen';
 import { dataViewRouteHelpersFactory } from '../../utils/data_view';
+import { EntityStoreUtils } from '../../utils';
 
 const DATASTREAM_NAME: string = 'logs-elastic_agent.cloudbeat-test';
 const HOST_TRANSFORM_ID: string = 'entities-v1-latest-security_host_default';
@@ -20,6 +26,7 @@ export default function (providerContext: FtrProviderContext) {
   const retry = providerContext.getService('retry');
   const es = providerContext.getService('es');
   const dataView = dataViewRouteHelpersFactory(supertest);
+  const utils = EntityStoreUtils(providerContext.getService);
 
   describe('Host transform logic', () => {
     describe('Entity Store is not installed by default', () => {
@@ -41,7 +48,7 @@ export default function (providerContext: FtrProviderContext) {
         await es.indices.createDataStream({ name: DATASTREAM_NAME });
 
         // Now we can enable the Entity Store...
-        response = await supertest
+        const response = await supertest
           .post('/api/entity_store/enable')
           .set('kbn-xsrf', 'xxxx')
           .send({});
@@ -78,6 +85,9 @@ export default function (providerContext: FtrProviderContext) {
         expect(response.status).to.eql('running');
         for (const engine of response.engines) {
           expect(engine.status).to.eql('started');
+          if (!engine.components) {
+            continue;
+          }
           for (const component of engine.components) {
             expect(component.installed).to.be(true);
           }
@@ -87,11 +97,11 @@ export default function (providerContext: FtrProviderContext) {
       it('Should successfully trigger a host transform', async () => {
         const HOST_NAME: string = 'host-transform-test-ip';
         const IPs: string[] = ['1.1.1.1', '2.2.2.2'];
-        const response = await es.transform.getTransformStats({
+        const { count, transforms } = await es.transform.getTransformStats({
           transform_id: HOST_TRANSFORM_ID,
         });
-        expect(response.count).to.eql(1);
-        const transform = response.transforms[0];
+        expect(count).to.eql(1);
+        let transform = transforms[0];
         expect(transform.id).to.eql(HOST_TRANSFORM_ID);
         const triggerCount: number = transform.stats.trigger_count;
         const docsProcessed: number = transform.stats.documents_processed;
@@ -112,7 +122,7 @@ export default function (providerContext: FtrProviderContext) {
           const response = await es.transform.getTransformStats({
             transform_id: HOST_TRANSFORM_ID,
           });
-          const transform = response.transforms[0];
+          transform = response.transforms[0];
           expect(transform.stats.trigger_count).to.greaterThan(triggerCount);
           expect(transform.stats.documents_processed).to.greaterThan(docsProcessed);
           return true;
@@ -130,9 +140,12 @@ export default function (providerContext: FtrProviderContext) {
                 },
               },
             });
-            expect(result.hits.total.value).to.eql(1);
-            expect(result.hits.hits[0]._source.host.name).to.eql(HOST_NAME);
-            expect(result.hits.hits[0]._source.host.ip).to.eql(IPs);
+            const total = result.hits.total as SearchTotalHits;
+            expect(total.value).to.eql(1);
+            const hit = result.hits.hits[0] as SearchHit<Ecs>;
+            expect(hit._source).ok();
+            expect(hit._source?.host?.name).to.eql(HOST_NAME);
+            expect(hit._source?.host?.ip).to.eql(IPs);
 
             return true;
           }
@@ -142,16 +155,16 @@ export default function (providerContext: FtrProviderContext) {
   });
 }
 
-function buildHostTransformDocument(name: string, host: EcsHost): Object {
+function buildHostTransformDocument(name: string, host: EcsHost): IndexRequest {
+  host.name = name;
   // Get timestamp without the millisecond part
   const isoTimestamp: string = new Date().toISOString().split('.')[0];
-  const document: Object = {
+  const document: IndexRequest = {
     index: DATASTREAM_NAME,
     document: {
       '@timestamp': isoTimestamp,
       host,
     },
   };
-  document.document.host.name = name;
   return document;
 }
