@@ -46,7 +46,6 @@ export function TransactionNameLink({ transactionName, serviceName }: Transactio
     ? getRouterLinkProps({
         href,
         onClick: () => {
-          // TODO add telemetry (https://github.com/elastic/kibana/issues/208919)
           apmLinkToTransactionByNameLocator?.navigate({
             serviceName,
             transactionName,
