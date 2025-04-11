@@ -407,9 +407,10 @@ export function Detail() {
 
   const saveReadMeChanges = (updatedReadMe: string | undefined) => {
     setIsEditReadMeOpen(false);
-
-    //  Todo: need to call the api here, stil trying to figure out the 'best' way to handle this
-    updateCustomIntegration('435', [
+    console.log('the package info', packageInfo);
+    console.log('the updatedReadMe', updatedReadMe);
+    //  call the api using the hook
+    updateCustomIntegration(packageInfo?.name || '', [
       { readMeData: updatedReadMe, categories: ['new', 'something'] },
     ]);
 
@@ -424,6 +425,7 @@ export function Detail() {
       if (!readmePath) {
         return;
       }
+
       sendGetFileByPath(readmePath).then((res) => {
         setReadMeContent(res.data || '');
         setIsEditReadMeOpen(true);

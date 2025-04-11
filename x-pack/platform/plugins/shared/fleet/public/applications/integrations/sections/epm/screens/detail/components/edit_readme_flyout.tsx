@@ -68,7 +68,7 @@ export const EditReadmeFlyout: React.FunctionComponent<{
             <EuiButtonEmpty onClick={onClose}>Cancel</EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton fill color="primary" onClick={() => onSave(readMeContent)}>
+            <EuiButton fill color="primary" onClick={() => onSave(editedContent)}>
               Save Changes
             </EuiButton>
           </EuiFlexItem>

@@ -17,23 +17,26 @@ export const updateCustomIntegrationHandler: FleetRequestHandler<
 > = async (context, request, response) => {
   const [coreContext] = await Promise.all([context.core, context.fleet]);
   const esClient = coreContext.elasticsearch.client.asInternalUser;
+  const soClient = coreContext.savedObjects.client;
 
+  // call the service here to do the actual logic
   try {
-    //  TODO: based on the passed in fields here, we need to update them accordingly. As of now, we are only taking readMeData and categories, so we will update them using esclient
-    const { id, fields } = request.body; // placeholder
-    const { readMeData, categories } = fields[0]; // another placeholder for now
+    const { id, fields } = request.body as TypeOf<typeof CustomIntegrationRequestSchema.body>;
 
-    // call the service here to do the actual logic
-    const res = await updateCustomIntegration(esClient, id, fields);
-    return response.ok({ body: res });
+    const result = await updateCustomIntegration(esClient, soClient, id, fields);
+
+    return response.ok({
+      body: {
+        id,
+        ...result,
+      },
+    });
   } catch (error) {
-    if (error.isBoom) {
-      return response.customError({
-        statusCode: error.output.statusCode,
-        body: { message: `Failed to update custom integration` },
-      });
-    }
-
-    throw error;
+    return response.customError({
+      statusCode: 500,
+      body: {
+        message: `Failed to update integration: ${error.message}`,
+      },
+    });
   }
 };
