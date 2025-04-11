@@ -33,6 +33,7 @@ export default ({ getService }: FtrProviderContext) => {
   const log = getService('log');
   const es = getService('es');
   const ml = getService('ml') as ReturnType<typeof MachineLearningProvider>;
+  const esArchiver = getService('esArchiver');
 
   /**
    * Results will be written to LangSmith for project associated with the langSmithAPIKey, then later
@@ -46,10 +47,16 @@ export default ({ getService }: FtrProviderContext) => {
     before(async () => {
       await installTinyElser(ml);
       await setupKnowledgeBase(supertest, log);
+      await esArchiver.load(
+        'x-pack/test/functional/es_archives/security_solution/attack_discovery_alerts'
+      );
     });
 
     after(async () => {
       await deleteTinyElser(ml);
+      await esArchiver.unload(
+        'x-pack/test/functional/es_archives/security_solution/attack_discovery_alerts'
+      );
     });
 
     afterEach(async () => {
@@ -89,8 +96,8 @@ export default ({ getService }: FtrProviderContext) => {
             .expect(200);
         });
 
+        // Uses attack discovery alerts from episodes 1-8
         it('should successfully run the "Alerts RAG Regression (Episodes 1-8)" dataset', async () => {
-          // TODO: Load alerts from episodes 1-8
           const evalPayload: PostEvaluateBody = {
             ...defaultEvalPayload,
             graphs: ['DefaultAssistantGraph'],
@@ -123,7 +130,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       describe('Attack Discovery', () => {
-        // Note: This LangSmith dataset includes alerts the alert data, so need to preload the alerts
+        // Note: This LangSmith dataset includes alerts the alert data, so no need to preload the alerts
         it('should successfully run the "Eval AD: All Scenarios" dataset', async () => {
           const evalPayload: PostEvaluateBody = {
             ...defaultEvalPayload,
