@@ -123,6 +123,7 @@ describe('State', () => {
               type: 'upsert',
               definition: {
                 name: 'whatever',
+                description: '',
                 group: {
                   members: [],
                 },
