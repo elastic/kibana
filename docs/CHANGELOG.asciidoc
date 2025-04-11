@@ -370,7 +370,7 @@ Machine Learning::
 [[release-notes-8.17.5]]
 == {kib} 8.17.5
 
-The 8.17.5 release includes the following fixes.
+The 8.17.5 release includes the following enhancements and fixes.
 
 [float]
 [[enhancement-v8.17.5]]
