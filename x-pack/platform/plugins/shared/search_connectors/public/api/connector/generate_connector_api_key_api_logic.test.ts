@@ -28,7 +28,7 @@ describe('generateConnectorApiKeyApiLogic', () => {
       const result = generateApiKey({ http, indexName: 'indexName', isNative: false });
       await nextTick();
       expect(http.post).toHaveBeenCalledWith(
-        '/internal/search_connectors/indices/indexName/api_key',
+        '/internal/content_connectors/indices/indexName/api_key',
         {
           body: '{"is_native":false}',
         }
@@ -44,7 +44,7 @@ describe('generateConnectorApiKeyApiLogic', () => {
       const result = generateApiKey({ http, indexName: 'indexName', isNative: true });
       await nextTick();
       expect(http.post).toHaveBeenCalledWith(
-        '/internal/search_connectors/indices/indexName/api_key',
+        '/internal/content_connectors/indices/indexName/api_key',
         {
           body: '{"is_native":true}',
         }

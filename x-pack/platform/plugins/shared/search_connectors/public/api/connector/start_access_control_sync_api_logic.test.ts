@@ -26,7 +26,7 @@ describe('startAccessControlSyncApiLogic', () => {
       const result = startAccessControlSync({ connectorId, http });
       await nextTick();
       expect(http.post).toHaveBeenCalledWith(
-        `/internal/search_connectors/connectors/${connectorId}/start_access_control_sync`
+        `/internal/content_connectors/connectors/${connectorId}/start_access_control_sync`
       );
       await expect(result).resolves.toEqual('result');
     });

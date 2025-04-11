@@ -8,5 +8,5 @@
 import { i18n } from '@kbn/i18n';
 
 export const PLUGIN_NAME = i18n.translate('xpack.searchConnectors.name', {
-  defaultMessage: 'Search Connectors',
+  defaultMessage: 'Content Connectors',
 });

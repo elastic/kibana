@@ -14,7 +14,7 @@ import { fetchSyncJobsStats } from '../lib/stats/get_sync_jobs';
 export function registerStatsRoutes({ router, log }: SearchConnectorsPluginSetupDependencies) {
   router.get(
     {
-      path: '/internal/search_connectors/stats/sync_jobs',
+      path: '/internal/content_connectors/stats/sync_jobs',
       security: {
         authz: {
           enabled: false,

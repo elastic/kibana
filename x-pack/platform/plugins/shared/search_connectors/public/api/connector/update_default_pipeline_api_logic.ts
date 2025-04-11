@@ -17,7 +17,7 @@ export type PostDefaultPipelineArgs = IngestPipelineParams & { http?: HttpSetup 
 export const updateDefaultPipeline = async (
   args: PostDefaultPipelineArgs
 ): Promise<PostDefaultPipelineResponse> => {
-  const route = '/internal/search_connectors/connectors/default_pipeline';
+  const route = '/internal/content_connectors/connectors/default_pipeline';
   const pipeline = {
     extract_binary_content: args.extract_binary_content,
     name: args.name,

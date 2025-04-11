@@ -17,7 +17,7 @@ export interface FetchSyncJobsStatsApiLogicArgs {
 }
 
 export const fetchSyncJobsStats = async ({ isCrawler, http }: FetchSyncJobsStatsApiLogicArgs) => {
-  const route = '/internal/search_connectors/stats/sync_jobs';
+  const route = '/internal/content_connectors/stats/sync_jobs';
   const options = isCrawler !== undefined ? { query: { isCrawler } } : undefined;
   return await http?.get<FetchSyncJobsStatsResponse>(route, options);
 };

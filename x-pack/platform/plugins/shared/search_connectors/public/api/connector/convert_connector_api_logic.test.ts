@@ -23,7 +23,7 @@ describe('ConvertConnectorApilogic', () => {
       const result = convertConnector({ connectorId: 'connectorId1', http });
       await nextTick();
       expect(http.put).toHaveBeenCalledWith(
-        '/internal/search_connectors/connectors/connectorId1/native',
+        '/internal/content_connectors/connectors/connectorId1/native',
         { body: JSON.stringify({ is_native: false }) }
       );
       await expect(result).resolves.toEqual('result');

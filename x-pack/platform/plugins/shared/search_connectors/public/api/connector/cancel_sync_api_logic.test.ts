@@ -23,7 +23,7 @@ describe('CancelSyncApiLogic', () => {
       const result = cancelSync({ syncJobId: 'syncJobId1', http });
       await nextTick();
       expect(http.put).toHaveBeenCalledWith(
-        '/internal/search_connectors/connectors/syncJobId1/cancel_sync'
+        '/internal/content_connectors/connectors/syncJobId1/cancel_sync'
       );
       await expect(result).resolves.toEqual({ success: true });
     });

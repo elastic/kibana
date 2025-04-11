@@ -10,7 +10,7 @@ import { APIKeyResponse } from '../../../common/types/api';
 import { createApiLogic } from '../api_logic/create_api_logic';
 
 export const getApiKeyById = async ({ id, http }: { id: string; http?: HttpSetup }) => {
-  const route = `/internal/search_connectors/api_keys/${id}`;
+  const route = `/internal/content_connectors/api_keys/${id}`;
 
   return await http?.get<APIKeyResponse>(route);
 };

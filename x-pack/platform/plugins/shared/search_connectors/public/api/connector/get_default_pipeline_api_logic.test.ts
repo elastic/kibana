@@ -23,7 +23,7 @@ describe('getDefaultPipelineApiLogic', () => {
       const result = getDefaultPipeline(http);
       await nextTick();
       expect(http.get).toHaveBeenCalledWith(
-        '/internal/search_connectors/connectors/default_pipeline'
+        '/internal/content_connectors/connectors/default_pipeline'
       );
       await expect(result).resolves.toEqual('result');
     });

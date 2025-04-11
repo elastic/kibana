@@ -21,7 +21,7 @@ describe('deleteIndexApiLogic', () => {
       http.post.mockReturnValue(promise);
       const result = deleteIndex({ indexName: 'deleteIndex', http });
       await nextTick();
-      expect(http.delete).toHaveBeenCalledWith('/internal/search_connectors/indices/deleteIndex');
+      expect(http.delete).toHaveBeenCalledWith('/internal/content_connectors/indices/deleteIndex');
       await expect(result).resolves;
     });
   });

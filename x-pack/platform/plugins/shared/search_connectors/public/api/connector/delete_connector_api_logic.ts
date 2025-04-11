@@ -27,7 +27,7 @@ export const deleteConnector = async ({
   shouldDeleteIndex = false,
   http,
 }: DeleteConnectorApiLogicArgs): Promise<DeleteConnectorApiLogicResponse> => {
-  await http?.delete(`/internal/search_connectors/connectors/${connectorId}`, {
+  await http?.delete(`/internal/content_connectors/connectors/${connectorId}`, {
     query: {
       shouldDeleteIndex,
     },

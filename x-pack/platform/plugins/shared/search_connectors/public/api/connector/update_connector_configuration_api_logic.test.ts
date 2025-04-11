@@ -28,7 +28,7 @@ describe('updateConnectorConfigurationLogic', () => {
       });
       await nextTick();
       expect(http.post).toHaveBeenCalledWith(
-        '/internal/search_connectors/connectors/anIndexId/configuration',
+        '/internal/content_connectors/connectors/anIndexId/configuration',
         { body: JSON.stringify(configuration) }
       );
       await expect(result).resolves.toEqual({ configuration: 'result' });

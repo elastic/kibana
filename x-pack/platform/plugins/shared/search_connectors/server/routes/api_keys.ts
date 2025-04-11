@@ -11,7 +11,7 @@ import { SearchConnectorsPluginSetupDependencies } from '../types';
 export function registerApiKeysRoutes({ router }: SearchConnectorsPluginSetupDependencies) {
   router.get(
     {
-      path: '/internal/search_connectors/api_keys',
+      path: '/internal/content_connectors/api_keys',
       security: {
         authz: {
           enabled: false,
@@ -48,7 +48,7 @@ export function registerApiKeysRoutes({ router }: SearchConnectorsPluginSetupDep
 
   router.get(
     {
-      path: '/internal/search_connectors/api_keys/{apiKeyId}',
+      path: '/internal/content_connectors/api_keys/{apiKeyId}',
       security: {
         authz: {
           enabled: false,
@@ -88,7 +88,7 @@ export function registerApiKeysRoutes({ router }: SearchConnectorsPluginSetupDep
 
   router.post(
     {
-      path: '/internal/search_connectors/api_keys',
+      path: '/internal/content_connectors/api_keys',
       security: {
         authz: {
           enabled: false,

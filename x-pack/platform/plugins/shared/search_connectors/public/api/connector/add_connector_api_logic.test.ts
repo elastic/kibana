@@ -27,7 +27,7 @@ describe('addConnectorApiLogic', () => {
         http,
       });
       await nextTick();
-      expect(http.post).toHaveBeenCalledWith('/internal/search_connectors/connectors', {
+      expect(http.post).toHaveBeenCalledWith('/internal/content_connectors/connectors', {
         body: JSON.stringify({
           index_name: 'indexName',
           is_native: false,
@@ -52,7 +52,7 @@ describe('addConnectorApiLogic', () => {
         http,
       });
       await nextTick();
-      expect(http.post).toHaveBeenCalledWith('/internal/search_connectors/connectors', {
+      expect(http.post).toHaveBeenCalledWith('/internal/content_connectors/connectors', {
         body: JSON.stringify({
           delete_existing_connector: true,
           index_name: 'indexName',

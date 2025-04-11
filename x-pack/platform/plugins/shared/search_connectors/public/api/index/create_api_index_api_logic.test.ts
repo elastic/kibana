@@ -21,7 +21,7 @@ describe('createApiIndexApiLogic', () => {
       http.post.mockReturnValue(promise);
       const result = createApiIndex({ http, indexName: 'indexName', language: 'en' });
       await nextTick();
-      expect(http.post).toHaveBeenCalledWith('/internal/search_connectors/indices', {
+      expect(http.post).toHaveBeenCalledWith('/internal/content_connectors/indices', {
         body: JSON.stringify({ index_name: 'indexName', language: 'en' }),
       });
       await expect(result).resolves.toEqual({ indexName: 'indexName' });

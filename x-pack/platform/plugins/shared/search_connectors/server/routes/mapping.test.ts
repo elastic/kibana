@@ -27,7 +27,7 @@ describe('Elasticsearch Index Mapping', () => {
     mockRouter = new MockRouter({
       context,
       method: 'get',
-      path: '/internal/search_connectors/mappings/{index_name}',
+      path: '/internal/content_connectors/mappings/{index_name}',
     });
 
     registerMappingRoute({
@@ -35,7 +35,7 @@ describe('Elasticsearch Index Mapping', () => {
       router: mockRouter.router,
     });
   });
-  describe('GET /internal/search_connectors/mappings/{index_name}', () => {
+  describe('GET /internal/content_connectors/mappings/{index_name}', () => {
     it('fails validation without index_name', () => {
       const request = { params: {} };
       mockRouter.shouldThrow(request);

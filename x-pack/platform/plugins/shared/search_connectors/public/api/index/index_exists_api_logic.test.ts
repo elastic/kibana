@@ -21,7 +21,7 @@ describe('IndexExistsApiLogic', () => {
       http.get.mockReturnValue(promise);
       const result = fetchIndexExists({ http, indexName: 'indexName' });
       await nextTick();
-      expect(http.get).toHaveBeenCalledWith('/internal/search_connectors/indices/indexName/exists');
+      expect(http.get).toHaveBeenCalledWith('/internal/content_connectors/indices/indexName/exists');
       await expect(result).resolves.toEqual({ exists: true, indexName: 'indexName' });
     });
   });

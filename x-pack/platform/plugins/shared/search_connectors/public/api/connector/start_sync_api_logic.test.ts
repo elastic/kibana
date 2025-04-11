@@ -23,7 +23,7 @@ describe('startSync', () => {
       const result = startSync({ http, connectorId: 'connectorId' });
       await nextTick();
       expect(http.post).toHaveBeenCalledWith(
-        '/internal/search_connectors/connectors/connectorId/start_sync'
+        '/internal/content_connectors/connectors/connectorId/start_sync'
       );
       await expect(result).resolves.toEqual('result');
     });

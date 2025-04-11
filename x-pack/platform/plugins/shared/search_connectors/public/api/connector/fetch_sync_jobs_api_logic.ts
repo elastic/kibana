@@ -26,7 +26,7 @@ export const fetchSyncJobs = async ({
   size = 10,
   type,
 }: FetchSyncJobsArgs) => {
-  const route = `/internal/search_connectors/connectors/${connectorId}/sync_jobs`;
+  const route = `/internal/content_connectors/connectors/${connectorId}/sync_jobs`;
   const query = { from, size, type };
   return await http?.get<Paginate<ConnectorSyncJob>>(route, { query });
 };

@@ -48,7 +48,7 @@ export class SearchConnectorsPlugin
         id: PLUGIN_ID,
         title: PLUGIN_NAME,
         order: 8,
-        keywords: ['search connectors', 'search'],
+        keywords: ['content connectors', 'search'],
         async mount(params: ManagementAppMountParams) {
           const [{ renderApp }, [coreStart, pluginsStartDeps, pluginStart]] = await Promise.all([
             import('./app'),

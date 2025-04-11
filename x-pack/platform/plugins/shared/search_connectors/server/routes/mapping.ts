@@ -17,7 +17,7 @@ import { createError } from '../utils/create_error';
 export function registerMappingRoute({ router, log }: SearchConnectorsPluginSetupDependencies) {
   router.get(
     {
-      path: '/internal/search_connectors/mappings/{index_name}',
+      path: '/internal/content_connectors/mappings/{index_name}',
       security: {
         authz: {
           enabled: false,

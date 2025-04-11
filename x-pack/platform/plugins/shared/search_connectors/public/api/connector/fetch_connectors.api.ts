@@ -36,7 +36,7 @@ export const fetchConnectors = async ({
     return;
   }
   const isInitialRequest = from === 0 && !searchQuery;
-  const route = '/internal/search_connectors/connectors';
+  const route = '/internal/content_connectors/connectors';
   const query = { fetchCrawlersOnly, from, searchQuery, size };
   const response = await http.get<FetchConnectorsApiLogicResponse>(route, {
     query,

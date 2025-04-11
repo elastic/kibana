@@ -24,7 +24,7 @@ export const attachIndex = async ({
   indexName,
   http,
 }: AttachIndexApiLogicArgs): Promise<AttachIndexApiLogicResponse> => {
-  const route = `/internal/search_connectors/connectors/${connectorId}/index_name/${indexName}`;
+  const route = `/internal/content_connectors/connectors/${connectorId}/index_name/${indexName}`;
 
   await http?.put(route);
   return { connectorId, indexName };

@@ -36,7 +36,7 @@ export const searchDocuments = async ({
   http,
 }: SearchDocumentsApiLogicArgs) => {
   const newIndexName = encodeURIComponent(indexName);
-  const route = `/internal/search_connectors/indices/${newIndexName}/search`;
+  const route = `/internal/content_connectors/indices/${newIndexName}/search`;
   const query = {
     page: pagination.pageIndex,
     size: docsPerPage || pagination.pageSize,

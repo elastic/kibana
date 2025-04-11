@@ -21,7 +21,7 @@ describe('FetchIndexApiLogic', () => {
       http.get.mockReturnValue(promise);
       const result = fetchIndex({ http, indexName: 'indexName' });
       await nextTick();
-      expect(http.get).toHaveBeenCalledWith('/internal/search_connectors/indices/indexName');
+      expect(http.get).toHaveBeenCalledWith('/internal/content_connectors/indices/indexName');
       await expect(result).resolves.toEqual('result');
     });
   });

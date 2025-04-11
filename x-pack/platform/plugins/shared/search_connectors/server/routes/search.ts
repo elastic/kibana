@@ -18,7 +18,7 @@ import { createError } from '../utils/create_error';
 export function registerSearchRoute({ router, log }: SearchConnectorsPluginSetupDependencies) {
   router.post(
     {
-      path: '/internal/search_connectors/indices/{index_name}/search',
+      path: '/internal/content_connectors/indices/{index_name}/search',
       security: {
         authz: {
           enabled: false,

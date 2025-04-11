@@ -51,7 +51,7 @@ const CreateConnector = lazy(() => import('./create_connector/create_connector')
 export const connectorsBreadcrumbs = [
   {
     text: i18n.translate('xpack.searchConnectorscontent.connectors.breadcrumb', {
-      defaultMessage: 'Search Connectors',
+      defaultMessage: 'Content Connectors',
     }),
   },
 ];
@@ -108,7 +108,7 @@ const Connectors: React.FC<ConnectorsProps> = ({ isCrawler, isCrawlerSelfManaged
       pageHeader={{
         pageTitle: !isCrawler
           ? i18n.translate('xpack.searchConnectors.title', {
-              defaultMessage: 'Elasticsearch connectors',
+              defaultMessage: 'Content connectors',
             })
           : i18n.translate('xpack.searchConnectorscrawlers.title', {
               defaultMessage: 'Elastic Web Crawler',
