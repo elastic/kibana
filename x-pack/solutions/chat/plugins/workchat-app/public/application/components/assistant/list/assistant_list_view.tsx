@@ -20,11 +20,11 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { Agent } from '../../../../../common/agents';
 import { useNavigation } from '../../../hooks/use_navigation';
 import { appPaths } from '../../../app_paths';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { CreateNewAssistantModal } from '../assistant_create_modal';
 
 interface AssistantListViewProps {
@@ -148,9 +148,9 @@ export const AssistantListView: React.FC<AssistantListViewProps> = ({ agents }) 
   };
 
   const pagination = {
-    pageIndex: pageIndex,
-    pageSize: pageSize,
-    totalItemCount: totalItemCount,
+    pageIndex,
+    pageSize,
+    totalItemCount,
     pageSizeOptions: [10, 20, 50],
   };
 

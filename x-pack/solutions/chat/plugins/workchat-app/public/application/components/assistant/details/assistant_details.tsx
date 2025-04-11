@@ -20,11 +20,11 @@ import {
   EuiAvatar,
 } from '@elastic/eui';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
+import { i18n } from '@kbn/i18n';
 import { useNavigation } from '../../../hooks/use_navigation';
 import { useBreadcrumb } from '../../../hooks/use_breadcrumbs';
 import { appPaths } from '../../../app_paths';
 import { assistantLabels } from '../i18n';
-import { i18n } from '@kbn/i18n';
 import { useAgent } from '../../../hooks/use_agent';
 import { useConversationList } from '../../../hooks/use_conversation_list';
 import { sortAndGroupConversations } from '../../../utils/sort_and_group_conversations';

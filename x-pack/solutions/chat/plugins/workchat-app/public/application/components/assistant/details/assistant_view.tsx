@@ -7,13 +7,13 @@
 
 import React from 'react';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
+import { i18n } from '@kbn/i18n';
+import { EuiButton, EuiButtonEmpty } from '@elastic/eui';
 import { useNavigation } from '../../../hooks/use_navigation';
 import { appPaths } from '../../../app_paths';
-import { i18n } from '@kbn/i18n';
 import { AssistantDetails } from './assistant_details';
 import { AssistantWorkflow } from './assistant_workflow';
 import { useAgent } from '../../../hooks/use_agent';
-import { EuiButton, EuiButtonEmpty } from '@elastic/eui';
 
 interface AssistantViewProps {
   agentId: string;
@@ -23,7 +23,7 @@ interface AssistantViewProps {
 export const AssistantView: React.FC<AssistantViewProps> = ({ agentId, selectedTab }) => {
   const { navigateToWorkchatUrl } = useNavigation();
 
-  const { agent } = useAgent({ agentId: agentId });
+  const { agent } = useAgent({ agentId });
 
   const tabs = [
     {

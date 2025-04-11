@@ -48,7 +48,7 @@ export const createRequestToRaw = ({
   id,
   user,
   creationDate,
-  color
+  color,
 }: {
   createRequest: AgentCreateRequest;
   id: string;
@@ -69,7 +69,7 @@ export const createRequestToRaw = ({
     },
     avatar: {
       color: color || createRequest.avatar.color,
-      text: createRequest.avatar.text
+      text: createRequest.avatar.text,
     },
   };
 };
