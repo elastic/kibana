@@ -2209,21 +2209,6 @@
                   "artifacts": {
                     "additionalProperties": false,
                     "properties": {
-                      "dashboards": {
-                        "items": {
-                          "additionalProperties": false,
-                          "properties": {
-                            "id": {
-                              "type": "string"
-                            }
-                          },
-                          "required": [
-                            "id"
-                          ],
-                          "type": "object"
-                        },
-                        "type": "array"
-                      },
                       "investigation_guide": {
                         "additionalProperties": false,
                         "properties": {
