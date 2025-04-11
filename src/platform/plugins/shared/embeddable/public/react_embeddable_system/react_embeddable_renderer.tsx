@@ -9,7 +9,6 @@
 
 import { apiIsPresentationContainer, HasSerializedChildState } from '@kbn/presentation-containers';
 import { PresentationPanel, PresentationPanelProps } from '@kbn/presentation-panel-plugin/public';
-import { SerializedPanelState } from '@kbn/presentation-publishing';
 import React, { useImperativeHandle, useMemo, useRef } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { v4 as generateId } from 'uuid';
@@ -82,7 +81,9 @@ export const EmbeddableRenderer = <
             } as unknown as Api;
           };
 
-          const initialState = parentApi.getSerializedStateForChild(uuid);
+          const initialState = parentApi.getSerializedStateForChild(uuid) ?? {
+            rawState: {} as SerializedState,
+          };
           const { api, Component } = await factory.buildEmbeddable({
             initialState,
             finalizeApi,
