@@ -23,6 +23,7 @@ import { useFetchAttackDiscovery } from './use_fetch_attack_discovery';
 import * as i18n from './translations';
 
 interface Props {
+  // TODO use alert id for attack discovery
   id?: string;
 }
 export const AttackDiscoveryWidget: React.FC<Props> = ({ id }) => {
@@ -72,6 +73,7 @@ export const AttackDiscoveryWidget: React.FC<Props> = ({ id }) => {
           <EuiButtonEmpty
             iconSide="right"
             iconType="popout"
+            data-test-subj="attackDiscoveryViewDetails"
             onClick={handleNavigateToAttackDiscovery}
             css={css`
               padding: 0;

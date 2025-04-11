@@ -82,7 +82,7 @@ export const SuggestedPrompts: React.FC<Props> = ({ getPromptContext, ruleName, 
   return (
     <>
       <EuiTitle size="xxs">
-        <h4>{i18n.SUGGESTED_PROMPTS}</h4>
+        <h4 data-test-subj="suggested-prompts">{i18n.SUGGESTED_PROMPTS}</h4>
       </EuiTitle>
       <EuiSpacer size="xs" />
       {prompts.map((prompt, index) => (

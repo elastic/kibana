@@ -78,6 +78,7 @@ export const Conversations: React.FC<Props> = ({ id }) => {
                     css={css`
                       color: ${euiTheme.colors.textPrimary};
                     `}
+                    data-test-subj="conversation-count"
                   >
                     {conversationCount}
                   </EuiBadge>
@@ -88,7 +89,12 @@ export const Conversations: React.FC<Props> = ({ id }) => {
               <EuiFlexItem grow={false}>
                 <EuiPopover
                   button={
-                    <EuiButtonEmpty iconSide="right" iconType="arrowDown" onClick={togglePopover}>
+                    <EuiButtonEmpty
+                      data-test-subj="view-conversations"
+                      iconSide="right"
+                      iconType="arrowDown"
+                      onClick={togglePopover}
+                    >
                       {i18n.VIEW}
                     </EuiButtonEmpty>
                   }
@@ -111,7 +117,7 @@ export const Conversations: React.FC<Props> = ({ id }) => {
             )}
           </EuiFlexGroup>
         ) : (
-          <EuiSkeletonText lines={1} size="xs" />
+          <EuiSkeletonText data-test-subj="loading-skeleton" lines={1} size="xs" />
         )}
       </EuiPanel>
     </>
