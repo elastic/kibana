@@ -72,10 +72,10 @@ describe('EditContextFlyout component tests', () => {
     expect(buttonGroup).toBeInTheDocument();
 
     // Check if all options are rendered within the button group
-    expect(buttonGroup).toHaveTextContent('1');
-    expect(buttonGroup).toHaveTextContent('3');
-    expect(buttonGroup).toHaveTextContent('5');
-    expect(buttonGroup).toHaveTextContent('10');
+    expect(screen.getByTestId('playground_context_doc_number-1')).toBeInTheDocument();
+    expect(screen.getByTestId('playground_context_doc_number-3')).toBeInTheDocument();
+    expect(screen.getByTestId('playground_context_doc_number-5')).toBeInTheDocument();
+    expect(screen.getByTestId('playground_context_doc_number-10')).toBeInTheDocument();
   });
 
   it('should see the context fields', async () => {

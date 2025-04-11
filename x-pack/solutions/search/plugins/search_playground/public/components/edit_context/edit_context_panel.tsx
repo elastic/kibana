@@ -92,21 +92,25 @@ export const EditContextPanel: React.FC = () => {
                       id: `${idPrefix}-1`,
                       label: '1',
                       value: 1,
+                      'data-test-subj': `${idPrefix}-1`,
                     },
                     {
                       id: `${idPrefix}-3`,
                       label: '3',
                       value: 3,
+                      'data-test-subj': `${idPrefix}-3`,
                     },
                     {
                       id: `${idPrefix}-5`,
                       label: '5',
                       value: 5,
+                      'data-test-subj': `${idPrefix}-5`,
                     },
                     {
                       id: `${idPrefix}-10`,
                       label: '10',
                       value: 10,
+                      'data-test-subj': `${idPrefix}-10`,
                     },
                   ]}
                   idSelected={`${idPrefix}-${docSize}`}
