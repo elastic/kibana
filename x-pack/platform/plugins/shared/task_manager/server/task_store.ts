@@ -49,7 +49,6 @@ import type {
   PartialConcreteTaskInstance,
   PartialSerializedConcreteTaskInstance,
   ApiKeyOptions,
-  RruleSchedule,
 } from './task';
 import { TaskStatus, TaskLifecycleResult } from './task';
 
