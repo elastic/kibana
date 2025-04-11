@@ -54,7 +54,7 @@ export function getMockStreamsAppContext(): StreamsAppKibanaContext {
       start: start.getTime(),
       end: end.getTime(),
     },
-    fetch$: new Subject(),
+    timeState$: new Subject(),
     refresh: jest.fn(),
   });
 

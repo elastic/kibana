@@ -32,7 +32,7 @@ export function PreviewPanel({
   definition: WiredStreamGetResponse;
   routingAppState: ReturnType<typeof useRoutingState>;
 }) {
-  const { timeState, fetch$ } = useTimefilter();
+  const { timeState, timeState$ } = useTimefilter();
 
   const {
     isLoadingDocuments,
@@ -53,9 +53,9 @@ export function PreviewPanel({
   });
 
   useEffect(() => {
-    const subscription = fetch$.subscribe({
-      next: ({ refresh: refreshType }) => {
-        if (refreshType !== 'none') {
+    const subscription = timeState$.subscribe({
+      next: ({ kind }) => {
+        if (kind === 'override') {
           refresh();
         }
       },
@@ -63,7 +63,7 @@ export function PreviewPanel({
     return () => {
       subscription.unsubscribe();
     };
-  }, [fetch$, refresh]);
+  }, [timeState$, refresh]);
 
   let content;
 
