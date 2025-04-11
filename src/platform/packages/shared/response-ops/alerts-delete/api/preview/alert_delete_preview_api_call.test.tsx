@@ -27,7 +27,7 @@ describe('alertDeletePreviewApiCall', () => {
         isInactiveAlertDeleteEnabled: false,
         activeAlertDeleteThreshold: 10,
         inactiveAlertDeleteThreshold: 0,
-        categoryIds: ['category1'],
+        categoryIds: ['management'],
       },
     });
 
@@ -39,7 +39,7 @@ describe('alertDeletePreviewApiCall', () => {
           is_inactive_alert_delete_enabled: false,
           active_alert_delete_threshold: 10,
           inactive_alert_delete_threshold: 0,
-          category_ids: ['category1'],
+          category_ids: ['management'],
         },
       })
     );
@@ -58,7 +58,7 @@ describe('alertDeletePreviewApiCall', () => {
           isInactiveAlertDeleteEnabled: false,
           activeAlertDeleteThreshold: 1,
           inactiveAlertDeleteThreshold: 0,
-          categoryIds: ['category1'],
+          categoryIds: ['management'],
         },
       })
     ).rejects.toThrow('API Error');
