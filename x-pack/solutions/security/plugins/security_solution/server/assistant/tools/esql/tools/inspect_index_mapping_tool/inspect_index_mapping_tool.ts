@@ -10,22 +10,34 @@ import { tool } from '@langchain/core/tools';
 import { z } from '@kbn/zod';
 import { IndexPatternsFetcher } from '@kbn/data-views-plugin/server';
 import {
-  shallowObjectViewTruncated,
   getNestedValue,
   mapFieldDescriptorToNestedObject,
+  shallowObjectViewTruncated,
 } from './inspect_index_utils';
-import { convertObjectFormat } from './compress_mapping';
 
 export const toolDetails = {
   name: 'inspect_index_mapping',
-  description: `Use this tool when there is a "verification_exception Unknown column" error or to see which fields and types are used in the index.`
+  description: 'Use this tool when there is a "verification_exception Unknown column" error or to see which fields and types are used in the index.' +
+    'This function will return as much of the index mapping as possible. If the index mapping is too large, some values will be truncated as indicated by "...".' +
+    'Call the function again to inspected truncated values.' +
+    `Example:
+Index mapping:
+{"user":{"address":{"city":{"name":{"type":"keyword"},"zip":{"type":"integer"}}}}}}
+
+Call #1:
+Property: "" // empty string to get the root
+Function response: {"user":{"address":{"city":"...","zip":"..."}}}
+
+Call #2:
+Property: "user.address.city"
+Function response: {"name":{"type":"keyword"}
+`,
 };
 
-export const getInspectIndexMappingTool = ({ esClient }: { esClient: ElasticsearchClient }) => {
+export const getInspectIndexMappingTool = ({ esClient, indexPattern }: { esClient: ElasticsearchClient, indexPattern: string }) => {
   const indexPatternsFetcher = new IndexPatternsFetcher(esClient);
-
   return tool(
-    async ({ indexPattern }) => {
+    async ({ property }) => {
       const { fields } = await indexPatternsFetcher.getFieldsForWildcard({
         pattern: indexPattern,
         fieldCapsOptions: {
@@ -34,22 +46,21 @@ export const getInspectIndexMappingTool = ({ esClient }: { esClient: Elasticsear
         },
       });
 
-      const prunedFields = fields.map(p=>({name:p.name, type: p.esTypes[0]}))
+      const prunedFields = fields.map(p => ({ name: p.name, type: p.esTypes[0] }))
       const nestedObject = mapFieldDescriptorToNestedObject(prunedFields);
-      const result = convertObjectFormat(nestedObject);
-  
-      const message = `The index pattern '${indexPattern}' has the following keys and types:\n${result}`;
+      const nestedValue = getNestedValue(nestedObject, property);
+      const result = shallowObjectViewTruncated(nestedValue, 30000);
 
-      return message;
+      return result ? JSON.stringify(result) : `No value found for property "${property}".`;
     },
     {
       name: toolDetails.name,
       description: toolDetails.description,
       schema: z.object({
-        indexPattern: z
+        property: z
           .string()
           .describe(
-            `The index name to get the properties of. For example "logs-*" or "traces.default.2022-01-01"`
+            `The property to inspect. The property should be a dot-separated path to the field in the index mapping. For example, "user.name" or "user.address.city". Empty string will return the root.`
           ),
       }),
     }

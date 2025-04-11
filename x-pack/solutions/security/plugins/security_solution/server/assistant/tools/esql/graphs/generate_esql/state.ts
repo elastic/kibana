@@ -10,17 +10,13 @@ import { Annotation, messagesStateReducer } from '@langchain/langgraph';
 import type { ValidateEsqlResult } from './nodes/validate_esql_in_last_message_node/utils';
 
 export const GenerateEsqlAnnotation = Annotation.Root({
-  input: Annotation<string>({
+  input: Annotation<{ question: string, indexPattern?: string } | undefined>({
     reducer: (currentValue, newValue) => newValue ?? currentValue,
-    default: () => '',
+    default: () => undefined,
   }),
   messages: Annotation<BaseMessage[]>({
     reducer: messagesStateReducer,
     default: () => [],
-  }),
-  objectiveSummary: Annotation<string>({
-    reducer: (currentValue, newValue) => newValue ?? currentValue,
-    default: () => '',
   }),
   validateEsqlResults: Annotation<ValidateEsqlResult[]>({
     reducer: (currentValue, newValue) => newValue ?? currentValue,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { convertObjectFormat } from './compress_mapping';
+import { compressMapping } from '../../graphs/analyse_index_pattern/nodes/analyze_compressed_index_mapping_agent/compress_mapping';
 import {
   getNestedValue,
   mapFieldDescriptorToNestedObject,
@@ -553,7 +553,7 @@ describe('inspect index', () => {
     console.log(JSON.stringify(nestedObject, null, 2))
  
     
-    const result = convertObjectFormat(nestedObject);
+    const result = compressMapping(nestedObject);
     console.log(result)
     
 

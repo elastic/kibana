@@ -32,16 +32,14 @@ import {
   NL_TO_ESQL_AGENT_NODE,
   NL_TO_ESQL_AGENT_WITHOUT_VALIDATION_NODE,
   SELECT_INDEX_PATTERN_GRAPH,
-  SUMMARIZE_OBJECTIVE,
   TOOLS_NODE,
   VALIDATE_ESQL_FROM_LAST_MESSAGE_NODE,
-} from './contants';
+} from './constants';
 import { getBuildErrorReportFromLastMessageNode } from './nodes/build_error_report_from_last_message/build_error_report_from_last_message';
 import { getBuildSuccessReportFromLastMessageNode } from './nodes/build_success_report_from_last_message/build_success_report_from_last_message';
 import { getNlToEsqlAgentWithoutValidation } from './nodes/nl_to_esql_agent_without_validation/nl_to_esql_agent_without_validation';
 import { getBuildUnvalidatedReportFromLastMessageNode } from './nodes/build_unvalidated_report_from_last_message/build_unvalidated_report_from_last_message';
 
-import { getSummarizeObjective } from './nodes/summarize_objective/summarize_objective';
 import { getSelectIndexPattern } from './nodes/select_index_pattern/select_index_pattern';
 import { getSelectIndexPatternGraph } from '../select_index_pattern/select_index_pattern';
 
@@ -63,19 +61,18 @@ export const getGenerateEsqlGraph = ({
     | ActionsClientChatVertexAI
     | ActionsClientChatOpenAI;
 }) => {
-  const inspectIndexMappingTool = getInspectIndexMappingTool({
-    esClient,
-  });
-
-  const tools: StructuredToolInterface[] = [inspectIndexMappingTool];
-  const toolNode = new ToolNode(tools);
 
   const nlToEsqlAgentNode = getNlToEsqlAgent({
     connectorId,
     inference,
     logger,
     request,
-    tools,
+    tools: [
+      getInspectIndexMappingTool({
+        esClient,
+        indexPattern: 'placeholder',
+      })
+    ],
   });
 
   const nlToEsqlAgentWithoutValidationNode = getNlToEsqlAgentWithoutValidation({
@@ -106,12 +103,23 @@ export const getGenerateEsqlGraph = ({
 
   const graph = new StateGraph(GenerateEsqlAnnotation)
     // Nodes
-    .addNode(SUMMARIZE_OBJECTIVE, getSummarizeObjective({ createLlmInstance }))
     .addNode(SELECT_INDEX_PATTERN_GRAPH, selectIndexPatternSubGraph, {
       subgraphs: [identifyIndexGraph],
     })
     .addNode(NL_TO_ESQL_AGENT_NODE, nlToEsqlAgentNode, { retryPolicy: { maxAttempts: 3 } })
-    .addNode(TOOLS_NODE, toolNode)
+    .addNode(TOOLS_NODE, (state: typeof GenerateEsqlAnnotation.State) => {
+      const { selectedIndexPattern } = state
+      if (selectedIndexPattern == null) {
+        throw new Error('Input is required');
+      }
+      const inspectIndexMappingTool = getInspectIndexMappingTool({
+        esClient: esClient,
+        indexPattern: selectedIndexPattern,
+      })
+      const tools = [inspectIndexMappingTool]
+      const toolNode = new ToolNode(tools)
+      return toolNode.invoke(state)
+    })
     .addNode(VALIDATE_ESQL_FROM_LAST_MESSAGE_NODE, validateEsqlInLastMessageNode)
     .addNode(BUILD_SUCCESS_REPORT_FROM_LAST_MESSAGE_NODE, buildSuccessReportFromLastMessageNode)
     .addNode(BUILD_ERROR_REPORT_FROM_LAST_MESSAGE_NODE, buildErrorReportFromLastMessageNode)
@@ -122,8 +130,7 @@ export const getGenerateEsqlGraph = ({
     )
 
     // Edges
-    .addEdge(START, SUMMARIZE_OBJECTIVE)
-    .addEdge(SUMMARIZE_OBJECTIVE, SELECT_INDEX_PATTERN_GRAPH)
+    .addEdge(START, SELECT_INDEX_PATTERN_GRAPH)
     .addConditionalEdges(SELECT_INDEX_PATTERN_GRAPH, selectIndexStepRouter, {
       [NL_TO_ESQL_AGENT_NODE]: NL_TO_ESQL_AGENT_NODE,
       [END]: END,

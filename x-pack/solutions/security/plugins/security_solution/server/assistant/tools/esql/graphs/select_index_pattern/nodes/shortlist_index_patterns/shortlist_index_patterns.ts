@@ -35,14 +35,14 @@ export const getShortlistIndexPatterns = ({
 
   return async (state: typeof SelectIndexPatternAnnotation.State) => {
     const systemMessage = new SystemMessage({
-      content: `You are a security analyst who is an expert in Elasticsearch and particularly writing Elastic Search queries. You have been given a list of index patterns and a summary of the query that we are trying to generate. 
-To generate the query we first need to identify which index pattern should be used. To do this you short list a maximum of 3 index patterns that are the most likily to contain the fields required to write the query. Select a variety index patterns.`,
+      content: `You are a security analyst who is an expert in Elasticsearch and particularly writing Elastic Search queries. You have been given a list of index patterns and an explanation of the query we would like to generate. 
+To generate the query we first need to identify which index pattern should be used. To do this you short list a maximum of 3 index patterns that are the most likely to contain the fields required to write the query. Select a variety index patterns.`,
     });
     const humanMessage = new HumanMessage({
-      content: `These are the index patterns available:\n ${state.indexPatterns.join(
+      content: `Available index patterns:\n ${state.indexPatterns.join(
         '\n'
-      )} \n\n This is a summary of the query we are trying to generate: \n\n ${
-        state.objectiveSummary
+      )} \n\n Explanation of the query: \n\n ${
+        state.input?.question
       } \n\n Based on this information, please shortlist a maximum of 3 index patterns that are the most likely to contain the fields required to write the query.`,
     });
 

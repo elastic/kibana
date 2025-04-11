@@ -18,7 +18,7 @@ function hasTypeProperty(obj: TypedProperty | NestedObject): obj is TypedPropert
     return 'type' in obj && typeof obj.type === 'string';
 }
 
-export function convertObjectFormat(obj: NestedObject): string {
+export function compressMapping(obj: NestedObject): string {
     // Group top-level keys by type
     const typeGroups: Record<string, string[]> = {};
     const nestedObjs: [string, NestedObject][] = [];

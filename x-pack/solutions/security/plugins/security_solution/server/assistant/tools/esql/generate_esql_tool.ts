@@ -77,7 +77,7 @@ export const GENERATE_ESQL_TOOL: AssistantTool = {
         const result = await selfHealingGraph.invoke(
           {
             messages: [new HumanMessage({ content: question })],
-            input: question,
+            input: { question },
           },
           { recursionLimit: 30 }
         );

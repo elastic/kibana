@@ -16,13 +16,8 @@ import {
   NL_TO_ESQL_AGENT_WITHOUT_VALIDATION_NODE,
   TOOLS_NODE,
   VALIDATE_ESQL_FROM_LAST_MESSAGE_NODE,
-} from './contants';
-
-export const messageContainsToolCalls = (message: BaseMessage): message is AIMessage => {
-  return (
-    'tool_calls' in message && Array.isArray(message.tool_calls) && message.tool_calls?.length > 0
-  );
-};
+} from './constants';
+import { messageContainsToolCalls } from '../../utils/common';
 
 export const validateEsqlFromLastMessageStepRouter = (
   state: typeof GenerateEsqlAnnotation.State

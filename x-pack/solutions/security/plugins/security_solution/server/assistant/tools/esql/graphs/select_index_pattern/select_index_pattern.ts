@@ -23,6 +23,7 @@ import { fetchIndexPatterns } from './nodes/fetch_index_patterns/fetch_index_pat
 import { getShortlistIndexPatterns } from './nodes/shortlist_index_patterns/shortlist_index_patterns';
 import { getAnalyseIndexPattern } from './nodes/analyse_index_pattern/analyse_index_pattern';
 import { getSelectIndexPattern } from './nodes/select_index/select_index';
+import { getAnalyzeIndexPatternGraph } from '../analyse_index_pattern/analyse_index_pattern';
 
 export const getSelectIndexPatternGraph = ({
   createLlmInstance,
@@ -35,6 +36,11 @@ export const getSelectIndexPatternGraph = ({
   esClient: ElasticsearchClient;
 }) => {
 
+  const analyzeIndexPatternGraph = getAnalyzeIndexPatternGraph({
+    esClient,
+    createLlmInstance,
+  })
+
   const graph = new StateGraph(SelectIndexPatternAnnotation)
     .addNode(GET_INDEX_PATTERNS, fetchIndexPatterns({ esClient }), {
       retryPolicy: { maxAttempts: 3 },
@@ -45,10 +51,9 @@ export const getSelectIndexPatternGraph = ({
     .addNode(
       ANALYSE_INDEX_PATTERN,
       getAnalyseIndexPattern({
-        esClient,
-        createLlmInstance
+        analyzeIndexPatternGraph
       }),
-      { retryPolicy: { maxAttempts: 3 } }
+      { retryPolicy: { maxAttempts: 3 }, subgraphs: [analyzeIndexPatternGraph] }
     )
     .addNode(SELECT_INDEX_PATTERN, getSelectIndexPattern({ createLlmInstance }), {
       retryPolicy: { maxAttempts: 3 },
@@ -60,11 +65,18 @@ export const getSelectIndexPatternGraph = ({
       SHORTLIST_INDEX_PATTERNS,
       (state: typeof SelectIndexPatternAnnotation.State) => {
         return state.shortlistedIndexPatterns.map(
-          (indexPattern) =>
-            new Send(ANALYSE_INDEX_PATTERN, {
-              objectiveSummary: state.objectiveSummary,
-              indexPattern,
+          (indexPattern) => {
+            const { input } = state;
+            if (input === undefined) {
+              throw new Error('State input is undefined');
+            }
+            return new Send(ANALYSE_INDEX_PATTERN, {
+              input: {
+                question: input.question,
+                indexPattern,
+              }
             })
+          }
         );
       },
       {

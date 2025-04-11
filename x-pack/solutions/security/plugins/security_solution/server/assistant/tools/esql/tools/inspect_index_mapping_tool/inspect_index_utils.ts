@@ -31,12 +31,12 @@ export const shallowObjectView = (obj: unknown, maxDepth = 1): object | string |
   }
 
   if (Array.isArray(obj)) {
-    return maxDepth <= 0 ? 'Array' : obj;
+    return maxDepth <= 0 ? '...' : obj;
   }
 
   if (typeof obj === 'object' && obj !== null) {
     if (maxDepth <= 0) {
-      return 'Object';
+      return '...';
     }
     return Object.fromEntries(
       Object.entries(obj).map(([key, value]) => [

@@ -18,7 +18,6 @@ export const getSelectIndexPattern = ({
   return async (state: typeof GenerateEsqlAnnotation.State) => {
     const childGraphOutput = await identifyIndexGraph.invoke({
       input: state.input,
-      objectiveSummary: state.objectiveSummary,
     });
 
     if (!childGraphOutput.selectedIndexPattern) {
@@ -36,19 +35,17 @@ export const getSelectIndexPattern = ({
       });
     }
 
-    const compressedIndexMapping =
-      childGraphOutput.selectedIndexPattern in childGraphOutput.indexPatternAnalysis
-        ? childGraphOutput.indexPatternAnalysis[childGraphOutput.selectedIndexPattern].compressedIndexMapping
-        : undefined;
+    const context = childGraphOutput.selectedIndexPattern in childGraphOutput.indexPatternAnalysis
+      ? childGraphOutput.indexPatternAnalysis[childGraphOutput.selectedIndexPattern].context
+      : undefined;
 
     return new Command({
       update: {
         selectedIndexPattern: childGraphOutput.selectedIndexPattern,
         messages: [
           new HumanMessage({
-            content: `We have analyzed multiple index patterns to see if they contain the data required for the query. The following index pattern should be used for the query verbatim: '${
-              childGraphOutput.selectedIndexPattern
-            }'. ${compressedIndexMapping ? `This is the index mapping for it\n: ${compressedIndexMapping}` : ''}`,
+            content: `We have analyzed multiple index patterns to see if they contain the data required for the query. The following index pattern should be used for the query verbatim: '${childGraphOutput.selectedIndexPattern}'. ` + 
+            `Some context about the index mapping:\n\n ${context ? context : ''}`,
           }),
         ],
       },

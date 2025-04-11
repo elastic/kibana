@@ -13,13 +13,9 @@ export const SelectIndexPatternAnnotation = Annotation.Root({
     reducer: messagesStateReducer,
     default: () => [],
   }),
-  input: Annotation<string>({
+  input: Annotation<{ question: string, indexPattern?: string} | undefined>({
     reducer: (currentValue, newValue) => newValue ?? currentValue,
-    default: () => '',
-  }),
-  objectiveSummary: Annotation<string>({
-    reducer: (currentValue, newValue) => newValue ?? currentValue,
-    default: () => '',
+    default: () => undefined,
   }),
   indexPatterns: Annotation<string[]>({
     reducer: (currentValue, newValue) => newValue ?? currentValue,
@@ -30,7 +26,7 @@ export const SelectIndexPatternAnnotation = Annotation.Root({
     default: () => [],
   }),
   indexPatternAnalysis: Annotation<
-    Record<string, { compressedIndexMapping: string; containsRequiredData: boolean; indexPattern: string }>
+    Record<string, { containsRequiredData: boolean; indexPattern: string, context: string }>
   >({
     reducer: (currentValue, newValue) => ({ ...currentValue, ...newValue }),
     default: () => ({}),

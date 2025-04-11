@@ -87,7 +87,7 @@ export const getIndexPatterns = (
       break;
     }
 
-    const { node, prefix, indexPatternAdded: parendIndexPatternAdded } = next;
+    const { node, prefix, indexPatternAdded: parentIndexPatternAdded } = next;
 
     if (
       node.children &&
@@ -105,12 +105,12 @@ export const getIndexPatterns = (
         stack.push({
           node: child,
           prefix: `${prefix}${node.value}`,
-          indexPatternAdded: parendIndexPatternAdded || indexPatternAdded,
+          indexPatternAdded: parentIndexPatternAdded || indexPatternAdded,
         });
       }
     } else {
       // If there are no children, we can create a specific index pattern
-      if (!(parendIndexPatternAdded || indexPatternAdded)) {
+      if (!(parentIndexPatternAdded || indexPatternAdded)) {
         remainingIndices.add(`${prefix}${node.value}`);
       }
     }
