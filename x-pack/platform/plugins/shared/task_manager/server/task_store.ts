@@ -36,7 +36,6 @@ import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-s
 
 import { decodeRequestVersion, encodeVersion } from '@kbn/core-saved-objects-base-server-internal';
 import { nodeBuilder } from '@kbn/es-query';
-import { RRule } from '@kbn/rrule';
 import type { RequestTimeoutsConfig } from './config';
 import type { Result } from './lib/result_type';
 import { asOk, asErr, unwrap } from './lib/result_type';
@@ -64,6 +63,7 @@ import { MsearchError } from './lib/msearch_error';
 import { BulkUpdateError } from './lib/bulk_update_error';
 import { TASK_SO_NAME } from './saved_objects';
 import { getApiKeyAndUserScope } from './lib/api_key_utils';
+import { getFirstRunAt } from './lib/get_first_run_at';
 
 export interface StoreOpts {
   esClient: ElasticsearchClient;
@@ -318,18 +318,13 @@ export class TaskStore {
       const validatedTaskInstance =
         this.taskValidator.getValidatedTaskInstanceForUpdating(taskInstance);
 
-      const runAt = getRunAt({
-        taskInstance: validatedTaskInstance,
-        logger: this.logger,
-      });
-
       savedObject = await soClient.create<SerializedConcreteTaskInstance>(
         'task',
         {
           ...taskInstanceToAttributes(validatedTaskInstance, id),
           ...(userScope ? { userScope } : {}),
           ...(apiKey ? { apiKey } : {}),
-          runAt,
+          runAt: getFirstRunAt({ taskInstance: validatedTaskInstance, logger: this.logger }),
         },
         { id, refresh: false }
       );
@@ -368,17 +363,14 @@ export class TaskStore {
       this.definitions.ensureHas(taskInstance.taskType);
       const validatedTaskInstance =
         this.taskValidator.getValidatedTaskInstanceForUpdating(taskInstance);
-      const runAt = getRunAt({
-        taskInstance: validatedTaskInstance,
-        logger: this.logger,
-      });
+
       return {
         type: 'task',
         attributes: {
           ...taskInstanceToAttributes(validatedTaskInstance, id),
           ...(apiKey ? { apiKey } : {}),
           ...(userScope ? { userScope } : {}),
-          runAt,
+          runAt: getFirstRunAt({ taskInstance: validatedTaskInstance, logger: this.logger }),
         },
         id,
       };
@@ -1078,40 +1070,4 @@ function ensureAggregationOnlyReturnsEnabledTaskObjects(opts: AggregationOpts): 
 
 function isMGetSuccess(doc: estypes.MgetResponseItem<unknown>): doc is estypes.GetGetResult {
   return (doc as estypes.GetGetResult).found !== undefined;
-}
-
-function rruleHasFixedTime(schedule: RruleSchedule['rrule']): boolean {
-  const keys = Object.keys(schedule);
-  const baseFields = ['freq', 'interval', 'tzid'];
-
-  if ((keys.length === 2 || keys.length === 3) && keys.every((key) => baseFields.includes(key))) {
-    return false;
-  }
-
-  return true;
-}
-
-function getRunAt({
-  taskInstance,
-  logger,
-}: {
-  taskInstance: TaskInstance;
-  logger: Logger;
-}): string {
-  const now = new Date();
-  const nowString = now.toISOString();
-
-  if (taskInstance.schedule?.rrule && rruleHasFixedTime(taskInstance.schedule.rrule)) {
-    try {
-      const rrule = new RRule({
-        ...taskInstance.schedule.rrule,
-        dtstart: now,
-      });
-      return rrule.after(now)?.toISOString() || nowString;
-    } catch (e) {
-      logger.error(`runAt for the rrule with fixed time could not be calculated: ${e}`);
-    }
-  }
-
-  return taskInstance.runAt?.toISOString() || nowString;
 }

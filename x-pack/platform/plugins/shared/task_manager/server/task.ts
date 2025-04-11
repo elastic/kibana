@@ -88,7 +88,7 @@ export type SuccessfulRunResult = {
        * continue to use which ever schedule it already has, and if no there is
        * no previous schedule then it will be treated as a single-run task.
        */
-      schedule?: IntervalSchedule;
+      schedule?: IntervalSchedule | RruleSchedule;
       runAt?: never;
     }
 );
@@ -269,7 +269,7 @@ interface RruleMonthly extends RruleCommon {
   bymonthday?: number[];
   byhour?: number[];
   byminute?: number[];
-  byweekday?: never;
+  byweekday?: Weekday[];
 }
 interface RruleWeekly extends RruleCommon {
   freq: Frequency.WEEKLY;
@@ -282,8 +282,8 @@ interface RruleDaily extends RruleCommon {
   freq: Frequency.DAILY;
   byhour?: number[];
   byminute?: number[];
+  byweekday?: Weekday[];
   bymonthday?: never;
-  byweekday?: never;
 }
 
 export interface TaskUserScope {

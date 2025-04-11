@@ -17,6 +17,7 @@ import {
 import { EventEmitter } from 'events';
 import { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { BACKGROUND_TASK_NODE_SO_NAME } from '@kbn/task-manager-plugin/server/saved_objects';
+import { rruleSchedule } from '@kbn/task-manager-plugin/server/saved_objects/schemas/rrule';
 
 const scope = 'testing';
 const taskManagerQuery = {
@@ -40,9 +41,14 @@ const taskSchema = schema.object({
     enabled: schema.boolean({ defaultValue: true }),
     taskType: schema.string(),
     schedule: schema.maybe(
-      schema.object({
-        interval: schema.string(),
-      })
+      schema.oneOf([
+        schema.object({
+          interval: schema.string(),
+        }),
+        schema.object({
+          rrule: rruleSchedule,
+        }),
+      ])
     ),
     interval: schema.maybe(schema.string()),
     params: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),

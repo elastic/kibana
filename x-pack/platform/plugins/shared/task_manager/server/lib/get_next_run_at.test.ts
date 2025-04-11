@@ -85,7 +85,9 @@ describe('getNextRunAt', () => {
     if (currentHour < 12) {
       expect(nextRunAt.getUTCDay()).toBe(currentDay);
     } else {
-      expect(nextRunAt.getUTCDay()).toBe(currentDay + 1);
+      const tomorrow = new Date();
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      expect(nextRunAt.getUTCDay()).toBe(tomorrow.getUTCDay());
     }
     expect(nextRunAt.getUTCHours()).toBe(12);
     expect(nextRunAt.getUTCMinutes()).toBe(15);

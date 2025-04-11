@@ -7,35 +7,49 @@
 
 import { schema } from '@kbn/config-schema';
 import { Frequency } from '@kbn/rrule';
+import moment from 'moment-timezone';
+
+function validateTimezone(timezone: string) {
+  if (moment.tz.zone(timezone) != null) {
+    return;
+  }
+
+  return 'string is not a valid timezone: ' + timezone;
+}
 
 const rruleCommon = schema.object({
-  freq: schema.literal(Frequency.MONTHLY),
+  freq: schema.number(),
   interval: schema.number(),
-  tzid: schema.string({ defaultValue: 'UTC' }),
+  tzid: schema.string({ validate: validateTimezone, defaultValue: 'UTC' }),
 });
+
+const byminute = schema.maybe(schema.arrayOf(schema.number({ min: 0, max: 59 })));
+const byhour = schema.maybe(schema.arrayOf(schema.number({ min: 0, max: 23 })));
+const byweekday = schema.maybe(schema.arrayOf(schema.number({ min: 1, max: 7 })));
+const bymonthday = schema.maybe(schema.arrayOf(schema.number({ min: 1, max: 31 })));
 
 const rruleMonthly = rruleCommon.extends({
   freq: schema.literal(Frequency.MONTHLY),
-  byhour: schema.maybe(schema.arrayOf(schema.number())),
-  byminute: schema.maybe(schema.arrayOf(schema.number())),
-  byweekday: schema.maybe(schema.never()),
-  bymonthday: schema.maybe(schema.arrayOf(schema.number())),
+  byhour,
+  byminute,
+  byweekday,
+  bymonthday,
 });
 
 const rruleWeekly = rruleCommon.extends({
   freq: schema.literal(Frequency.WEEKLY),
-  bbyhour: schema.maybe(schema.arrayOf(schema.number())),
-  byminute: schema.maybe(schema.arrayOf(schema.number())),
-  byweekday: schema.maybe(schema.arrayOf(schema.number())), // TODO: use Weekday enum
-  bymonthday: schema.maybe(schema.never()),
+  byhour,
+  byminute,
+  byweekday,
+  bymonthday: schema.never(),
 });
 
 const rruleDaily = rruleCommon.extends({
   freq: schema.literal(Frequency.DAILY),
-  byhour: schema.maybe(schema.arrayOf(schema.number())),
-  byminute: schema.maybe(schema.arrayOf(schema.number())),
-  byweekday: schema.maybe(schema.never()),
-  bymonthday: schema.maybe(schema.never()),
+  byhour,
+  byminute,
+  byweekday,
+  bymonthday: schema.never(),
 });
 
 export const rruleSchedule = schema.oneOf([rruleMonthly, rruleWeekly, rruleDaily]);
