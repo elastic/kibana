@@ -225,15 +225,16 @@ export const LogEntryExampleMessageTable: React.FC<{
     },
     {
       id: 'message',
-      header: i18n.translate('xpack.infra.logEntryExampleMessageHeaders.messageHeader', {
-        defaultMessage: 'Message',
-      }),
+      header: i18n.translate(
+        'xpack.infra.logEntryExampleMessageHeaders.logColumnHeader.messageLabel',
+        {
+          defaultMessage: 'Message',
+        }
+      ),
     },
     {
       id: 'dataset',
-      header: i18n.translate('xpack.infra.logEntryExampleMessageHeaders.datasetHeader', {
-        defaultMessage: 'event.dataset',
-      }),
+      header: 'event.dataset',
       width: '250px',
     },
     {
