@@ -486,16 +486,14 @@ describe('#start()', () => {
   it('calls rendering#renderCore()', async () => {
     await startCore();
     expect(MockRenderingService.renderCore).toHaveBeenCalledTimes(1);
-    expect(MockRenderingService.renderCore).toHaveBeenCalledWith({
-      analytics: expect.any(Object),
-      application: expect.any(Object),
-      chrome: expect.any(Object),
-      overlays: expect.any(Object),
-      i18n: expect.any(Object),
-      theme: expect.any(Object),
-      userProfile: expect.any(Object),
-      targetDomElement: expect.any(HTMLElement),
-    });
+    expect(MockRenderingService.renderCore).toHaveBeenCalledWith(
+      {
+        application: expect.any(Object),
+        chrome: expect.any(Object),
+        overlays: expect.any(Object),
+      },
+      expect.any(HTMLElement)
+    );
   });
 
   it('calls integrations#start()', async () => {

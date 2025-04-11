@@ -261,7 +261,6 @@ export class CoreSystem {
       const settings = this.settings.setup({ http, injectedMetadata });
       const notifications = this.notifications.setup({ uiSettings, analytics });
       const customBranding = this.customBranding.setup({ injectedMetadata });
-
       const application = this.application.setup({ http, analytics });
       this.coreApp.setup({ application, http, injectedMetadata, notifications });
       const featureFlags = this.featureFlags.setup({ injectedMetadata });
@@ -316,7 +315,6 @@ export class CoreSystem {
       const i18n = this.i18n.start();
       const fatalErrors = this.fatalErrors.start();
       const theme = this.theme.start();
-      const customBranding = this.customBranding.start();
       await this.integrations.start({ uiSettings });
 
       const coreUiTargetDomElement = document.createElement('div');
@@ -334,6 +332,7 @@ export class CoreSystem {
         targetDomElement: overlayTargetDomElement,
       });
 
+      const customBranding = this.customBranding.start();
       const application = await this.application.start({
         http,
         theme,
@@ -344,7 +343,6 @@ export class CoreSystem {
       const executionContext = this.executionContext.start({
         curApp$: application.currentAppId$,
       });
-
       const rendering = this.rendering.start({
         analytics,
         executionContext,
@@ -372,7 +370,6 @@ export class CoreSystem {
         userProfile,
         uiSettings,
       });
-
       const deprecations = this.deprecations.start({ http });
 
       this.coreApp.start({
