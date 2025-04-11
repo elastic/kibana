@@ -212,6 +212,10 @@ export interface ValidationErrors {
     message: string;
     type: { identifier: string };
   };
+  tooManyForks: {
+    message: string;
+    type: {};
+  };
 }
 
 export type ErrorTypes = keyof ValidationErrors;
