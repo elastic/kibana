@@ -12,7 +12,9 @@ import { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import { EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
+  SERVICE_NAME_FIELD,
   SPAN_DURATION_FIELD,
+  SPAN_NAME_FIELD,
   TRANSACTION_ID_FIELD,
   getTraceDocumentOverview,
 } from '@kbn/discover-utils';
@@ -74,7 +76,12 @@ export function SpanOverview({
           {spanDuration && (
             <>
               <EuiSpacer size="m" />
-              <SpanDurationSummary duration={spanDuration} />
+              <SpanDurationSummary
+                spanDuration={spanDuration}
+                spanName={parsedDoc[SPAN_NAME_FIELD] || ''}
+                transactionId={parsedDoc[TRANSACTION_ID_FIELD] || ''}
+                serviceName={parsedDoc[SERVICE_NAME_FIELD]}
+              />
             </>
           )}
         </EuiPanel>

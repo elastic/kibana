@@ -17,15 +17,31 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Duration } from '@kbn/apm-ui-shared';
+import { Duration, DurationDistributionChart } from '@kbn/apm-ui-shared';
+import { FETCH_STATUS, ProcessorEvent } from '@kbn/apm-ui-shared/src/enums';
 import { useTransactionContext } from '../../hooks/use_transaction';
+import { useSpanLatencyChart } from '../../hooks/use_span_latency_chart';
 
 export interface SpanDurationSummaryProps {
-  duration: number;
+  spanDuration: number;
+  spanName: string;
+  transactionId: string;
+  serviceName: string;
 }
 
-export function SpanDurationSummary({ duration }: SpanDurationSummaryProps) {
+export function SpanDurationSummary({
+  spanDuration,
+  spanName,
+  transactionId,
+  serviceName,
+}: SpanDurationSummaryProps) {
   const { transaction, loading } = useTransactionContext();
+
+  const { data: latencyChartData, loading: latencyChartLoading } = useSpanLatencyChart({
+    spanName,
+    transactionId,
+    serviceName,
+  });
 
   return (
     <>
@@ -52,33 +68,58 @@ export function SpanDurationSummary({ duration }: SpanDurationSummaryProps) {
 
       <>
         <EuiFlexGroup>
-          <EuiFlexItem grow={1}>
-            <EuiFlexGroup alignItems="center" gutterSize="xs">
-              <EuiFlexItem grow={false}>
-                <EuiTitle size="xxxs">
-                  <h3>
-                    {i18n.translate(
-                      'unifiedDocViewer.observability.traces.docViewerSpanOverview.spanDurationSummary.duration.title',
-                      {
-                        defaultMessage: 'Duration',
-                      }
-                    )}
-                  </h3>
-                </EuiTitle>
-              </EuiFlexItem>
-            </EuiFlexGroup>
+          <EuiFlexItem grow={false}>
+            <EuiTitle size="xxxs">
+              <h3>
+                {i18n.translate(
+                  'unifiedDocViewer.observability.traces.docViewerSpanOverview.spanDurationSummary.duration.title',
+                  {
+                    defaultMessage: 'Duration',
+                  }
+                )}
+              </h3>
+            </EuiTitle>
           </EuiFlexItem>
 
           <EuiFlexItem grow={2}>
             <EuiText size="xs">
               <Duration
-                duration={duration}
+                duration={spanDuration}
                 parent={{ loading, duration: transaction?.duration, type: 'transaction' }}
               />
             </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiHorizontalRule margin="xs" />
+
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <EuiTitle size="xxxs">
+              <h3>
+                {i18n.translate(
+                  'unifiedDocViewer.observability.traces.docViewerTransactionOverview.spanDurationSummary.latency.title',
+                  {
+                    defaultMessage: 'Latency',
+                  }
+                )}
+              </h3>
+            </EuiTitle>
+
+            {(latencyChartLoading || latencyChartData) && (
+              <DurationDistributionChart
+                data={latencyChartData?.spanDistributionChartData ?? []}
+                markerValue={latencyChartData?.percentileThresholdValue ?? 0}
+                markerCurrentEvent={spanDuration}
+                hasData={!latencyChartLoading}
+                status={latencyChartLoading ? FETCH_STATUS.LOADING : FETCH_STATUS.SUCCESS}
+                eventType={ProcessorEvent.span}
+                showAxisTitle={false}
+                showLegend={false}
+                dataTestSubPrefix="docViewerSpanOverview"
+              />
+            )}
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </>
     </>
   );
