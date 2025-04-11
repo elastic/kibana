@@ -14,7 +14,7 @@ import { untilPluginStartServicesReady } from '../services/kibana_services';
 
 const Component = dynamic(async () => {
   const [{ DashboardRenderer }] = await Promise.all([
-    import('./dashboard_module'),
+    import('./dashboard_renderer'),
     untilPluginStartServicesReady(),
   ]);
   return {

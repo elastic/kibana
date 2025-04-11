@@ -78,3 +78,6 @@ export const DashboardListingTable = ({
     </I18nProvider>
   );
 };
+
+// eslint-disable-next-line import/no-default-export
+export default DashboardListingTable;
