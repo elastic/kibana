@@ -17,7 +17,7 @@ import {
   PublishingSubject,
 } from '@kbn/presentation-publishing';
 
-const DEBOUNCE_TIME = 100;
+export const DEBOUNCE_TIME = 100;
 
 /**
  *  Create an observable stream of unsaved changes from all react embeddable children
