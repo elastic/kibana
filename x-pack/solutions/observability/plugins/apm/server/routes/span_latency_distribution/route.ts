@@ -17,7 +17,7 @@ import { latencyDistributionChartTypeRt } from '../../../common/latency_distribu
 import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 import type { OverallLatencyDistributionResponse } from '../latency_distribution/types';
 
-const spanLatencyOverallDistributionRoute = createApmServerRoute({
+const latencyOverallSpanDistributionRoute = createApmServerRoute({
   endpoint: 'POST /internal/apm/latency/overall_distribution/spans',
   params: t.type({
     body: t.intersection([
@@ -89,4 +89,4 @@ const spanLatencyOverallDistributionRoute = createApmServerRoute({
   },
 });
 
-export const spanLatencyDistributionRouteRepository = spanLatencyOverallDistributionRoute;
+export const spanLatencyDistributionRouteRepository = latencyOverallSpanDistributionRoute;
