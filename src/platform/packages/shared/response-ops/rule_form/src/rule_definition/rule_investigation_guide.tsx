@@ -8,7 +8,6 @@
  */
 
 import {
-  // EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIconTip,
@@ -17,54 +16,10 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-// import type { EuiMarkdownEditorUiPluginEditorProps } from '@elastic/eui/src/components/markdown_editor/markdown_types';
 import { RuleTypeParams } from '@kbn/alerts-ui-shared';
 import { i18n } from '@kbn/i18n';
-import React, { useCallback, useState } from 'react';
+import React from 'react';
 
-// const dropHandlers = [
-//   {
-//     supportedFiles: ['.jpg', '.jpeg'],
-//     accepts: (itemType) => itemType === 'image/jpeg',
-//     getFormattingForItem: (item) => {
-//       // fake an upload
-//       return new Promise((resolve) => {
-//         setTimeout(() => {
-//           const url = URL.createObjectURL(item);
-//           resolve({
-//             text: `![${item.name}](${url})`,
-//             config: { block: true },
-//           });
-//         }, 1000);
-//       });
-//     },
-//   },
-// ];
-
-// function plugin() {
-//   return {
-//     name: 'test-plugin',
-//     button: {
-//       label: 'Test',
-//       iconType: 'observabilityApp',
-//       isDisabled: false,
-//     },
-//     helpText: (
-//       <div>
-//         <p>Test plugin</p>
-//       </div>
-//     ),
-//     editor: React.memo(function TestPlugin(props: EuiMarkdownEditorUiPluginEditorProps) {
-//       const { onCancel } = props;
-//       console.log('props', props);
-//       return (
-//         <div>
-//           I am a test editor <EuiButton onClick={onCancel}>Close</EuiButton>
-//         </div>
-//       );
-//     }),
-//   };
-// }
 export function InvestigationManager<T extends RuleTypeParams>({
   setRuleParams,
   value,
@@ -72,12 +27,8 @@ export function InvestigationManager<T extends RuleTypeParams>({
   setRuleParams: (v: { investigation_guide: { blob: string } }) => void;
   value: string;
 }) {
-  const [messages, setMessages] = useState<string[]>([]);
-  const onParse = useCallback((error: any, { messages: msg, astVal }: any) => {
-    setMessages(error ? [error] : [msg]);
-  }, []);
   return (
-    <div>
+    <>
       <EuiFlexGroup gutterSize="xs" alignItems="center">
         <EuiFlexItem grow={false}>
           <EuiText>
@@ -103,16 +54,11 @@ export function InvestigationManager<T extends RuleTypeParams>({
         })}
         value={value}
         onChange={(blob) => setRuleParams({ investigation_guide: { blob } })}
-        errors={messages}
         height={400}
-        onParse={onParse}
         data-test-subj="investigationGuideEditor"
-        // uiPlugins={[plugin()]}
         initialViewMode="editing"
-        // dropHandlers={dropHandlers}
-        // isReadonly={false}
       />
-    </div>
+    </>
   );
 }
 
