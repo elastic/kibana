@@ -7,13 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import classNames from 'classnames';
-import deepEqual from 'fast-deep-equal';
-import { cloneDeep, isEqual } from 'lodash';
 import React, { useEffect, useMemo, useRef, useState, useCallback } from 'react';
-import { combineLatest, pairwise, map, distinctUntilChanged } from 'rxjs';
-
+import classNames from 'classnames';
+import { cloneDeep } from 'lodash';
 import { css } from '@emotion/react';
+import { combineLatest, pairwise } from 'rxjs';
 
 import { GridHeightSmoother } from './grid_height_smoother';
 import {
@@ -49,12 +47,12 @@ const getGridElementData = (
   gridLayoutStateManager: GridLayoutStateManager,
   layout?: GridLayoutData
 ) => {
-     const currentLayout = layout ||
-      gridLayoutStateManager.proposedGridLayout$.getValue() ||
-      gridLayoutStateManager.gridLayout$.getValue();
+  const currentLayout =
+    layout ||
+    gridLayoutStateManager.proposedGridLayout$.getValue() ||
+    gridLayoutStateManager.gridLayout$.getValue();
   const rowIdsInOrder = getRowKeysInOrder(layout || currentLayout);
   const flattenedGridElements: GridElementData[] = rowIdsInOrder.flatMap((rowId) => {
- 
     const row = currentLayout[rowId];
     const panels = row.panels;
     const panelIdsInOrder = getPanelKeysInOrder(panels);
@@ -131,9 +129,9 @@ export const GridLayout = ({
       .subscribe(([layoutBefore, layoutAfter]) => {
         if (!isLayoutEqual(layoutBefore, layoutAfter)) {
           onLayoutChange(layoutAfter);
-          console.log('onLayoutChangeSubscription')
-          if (!deepEqual(Object.keys(layoutBefore), Object.keys(layoutAfter))) {
-            setGridElements(getGridElementData(gridLayoutStateManager));
+          const newGridElements = getGridElementData(gridLayoutStateManager);
+          if (gridElements.join() !== newGridElements.join()) {
+            setGridElements(newGridElements);
           }
         }
       });
@@ -145,7 +143,6 @@ export const GridLayout = ({
   }, [onLayoutChange]);
 
   useEffect(() => {
-  
     /**
      * This subscription adds and/or removes the necessary class names related to styling for
      * mobile view and a static (non-interactable) grid layout
@@ -207,65 +204,6 @@ export const GridLayout = ({
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  useEffect(
-    () => {
-      /**
-       * This subscription ensures that the layout will re-render when one of the following changes:
-       * - x - Collapsed state
-       * - Panel IDs (adding/removing/replacing, but not reordering)
-       */
-      const gridStateSubscription = combineLatest([
-        gridLayoutStateManager.proposedGridLayout$,
-        gridLayoutStateManager.gridLayout$,
-      ])
-        .pipe(
-          map(([proposedGridLayout, gridLayout]) => {
-            const displayedGridLayout = proposedGridLayout ?? gridLayout;
-            const flattenedPanelIds = Object.values(displayedGridLayout).flatMap((row) =>
-              Object.keys(row.panels ?? {})
-            );
-            return flattenedPanelIds;
-          }),
-          pairwise()
-        )
-        .subscribe(([oldPanelIds, newPanelIds]) => {
-          if (
-            oldPanelIds.length !== newPanelIds.length ||
-            !(
-              oldPanelIds.every((p) => newPanelIds.includes(p)) &&
-              newPanelIds.every((p) => oldPanelIds.includes(p))
-            )
-          ) {
-            setGridElements(getGridElementData(gridLayoutStateManager));
-          }
-        });
-
-      /** /**
-       * This subscription ensures that the layout will re-render when one of the following changes:
-       * - Collapsed state
-       * This subscription ensures that rows get re-rendered when their orders change
-       * - Ensure the row re-renders to reflect the new panel order after a drag-and-drop interaction, since
-       * the order of rendered panels need to be aligned with how they are displayed in the grid for accessibility
-       * reasons (screen readers and focus management).
-       */
-      const gridLayoutSubscription = gridLayoutStateManager.gridLayout$.subscribe((gridLayout) => {
-        if (!gridLayout) return;
-        const newGridElements = getGridElementData(gridLayoutStateManager);
-        console.log('gridLayoutSubscription')
-        if (gridElements.join() !== newGridElements.join()) {
-          setGridElements(newGridElements);
-        }
-      });
-
-      return () => {
-        gridLayoutSubscription.unsubscribe();
-        gridStateSubscription.unsubscribe();
-      };
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
-  );
 
   const toggleIsCollapsed = useCallback(
     (rowwId: string) => {
