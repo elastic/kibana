@@ -12,3 +12,4 @@ export const ADD_OR_OPERATION_BUTTON_SUBJ = 'addOrOperationButton';
 export const ADD_AND_OPERATION_BUTTON_SUBJ = 'addAndOperationButton';
 export const SOLUTION_SELECTOR_SUBJ = 'solutionSelector';
 export const FORM_ITEM_SUBJ = 'formItem';
+export const SUPPORTED_SOLUTIONS = ['stack', 'security', 'observability'] as const;

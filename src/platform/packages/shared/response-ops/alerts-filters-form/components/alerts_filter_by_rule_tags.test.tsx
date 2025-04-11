@@ -48,6 +48,25 @@ describe('AlertsFilterByRuleTags', () => {
     expect(screen.getByText('tag2')).toBeInTheDocument();
   });
 
+  it('should show the selected tag in the combobox', async () => {
+    mockUseGetRuleTagsQuery.mockReturnValue({
+      tags: ['tag1', 'tag2'],
+      isLoading: false,
+      isError: false,
+      ...ruleTagsBaseQueryResult,
+    });
+    render(
+      <AlertsFiltersFormContextProvider
+        value={{ ruleTypeIds: ['.es-query'], services: { http, notifications } }}
+      >
+        <AlertsFilterByRuleTags value={['tag1']} onChange={jest.fn()} />
+      </AlertsFiltersFormContextProvider>
+    );
+    const comboboxPills = screen.getAllByTestId('euiComboBoxPill');
+    expect(comboboxPills).toHaveLength(1);
+    expect(comboboxPills[0]).toHaveTextContent('tag1');
+  });
+
   it('should set the combobox in loading mode while loading the available tags', async () => {
     mockUseGetRuleTagsQuery.mockReturnValue({
       tags: [],
@@ -90,17 +109,25 @@ describe('AlertsFilterByRuleTags', () => {
       expect(filterMetadata.component).toEqual(AlertsFilterByRuleTags);
     });
 
-    it('should detect empty values', () => {
-      expect(filterMetadata.isEmpty(undefined)).toEqual(true);
-      expect(filterMetadata.isEmpty([])).toEqual(true);
-      expect(filterMetadata.isEmpty(['test-tag'])).toEqual(false);
+    describe('isEmpty', () => {
+      it.each([undefined, null, []])('should return false for %s', (value) => {
+        expect(
+          filterMetadata.isEmpty(value as Parameters<typeof filterMetadata.isEmpty>[0])
+        ).toEqual(true);
+      });
+
+      it('should return true for non-empty values', () => {
+        expect(filterMetadata.isEmpty(['test-tag'])).toEqual(false);
+      });
     });
 
-    it('should convert the filter value to an es query', () => {
-      expect(filterMetadata.toEsQuery(['test-tag'])).toEqual({
-        terms: {
-          [ALERT_RULE_TAGS]: ['test-tag'],
-        },
+    describe('toEsQuery', () => {
+      it('should convert the filter value to an es query', () => {
+        expect(filterMetadata.toEsQuery(['test-tag'])).toEqual({
+          terms: {
+            [ALERT_RULE_TAGS]: ['test-tag'],
+          },
+        });
       });
     });
   });

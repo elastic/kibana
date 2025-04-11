@@ -46,6 +46,25 @@ describe('AlertsFilterByRuleTypes', () => {
     expect(screen.getByText('Index threshold')).toBeInTheDocument();
   });
 
+  it('should show the selected type in the combobox', async () => {
+    mockUseGetInternalRuleTypesQuery.mockReturnValue({
+      data: [
+        { id: '.es-query', name: 'Elasticsearch Query' },
+        { id: '.index-threshold', name: 'Index threshold' },
+      ] as InternalRuleType[],
+      isLoading: false,
+      isError: false,
+    });
+    render(
+      <AlertsFiltersFormContextProvider value={{ ruleTypeIds, services: { http, notifications } }}>
+        <AlertsFilterByRuleTypes value={['.es-query']} onChange={jest.fn()} />
+      </AlertsFiltersFormContextProvider>
+    );
+    const comboboxPills = screen.getAllByTestId('euiComboBoxPill');
+    expect(comboboxPills).toHaveLength(1);
+    expect(comboboxPills[0]).toHaveTextContent('Elasticsearch Query');
+  });
+
   it('should filter available types according to the provided ruleTypeIds', async () => {
     mockUseGetInternalRuleTypesQuery.mockReturnValue({
       data: [
@@ -103,17 +122,25 @@ describe('AlertsFilterByRuleTypes', () => {
       expect(filterMetadata.component).toEqual(AlertsFilterByRuleTypes);
     });
 
-    it('should detect empty values', () => {
-      expect(filterMetadata.isEmpty(undefined)).toEqual(true);
-      expect(filterMetadata.isEmpty([])).toEqual(true);
-      expect(filterMetadata.isEmpty(['test-type'])).toEqual(false);
+    describe('isEmpty', () => {
+      it.each([undefined, null, []])('should return false for %s', (value) => {
+        expect(
+          filterMetadata.isEmpty(value as Parameters<typeof filterMetadata.isEmpty>[0])
+        ).toEqual(true);
+      });
+
+      it('should return true for non-empty values', () => {
+        expect(filterMetadata.isEmpty(['test-type'])).toEqual(false);
+      });
     });
 
-    it('should convert the filter value to an es query', () => {
-      expect(filterMetadata.toEsQuery(['test-type'])).toEqual({
-        terms: {
-          [ALERT_RULE_TYPE_ID]: ['test-type'],
-        },
+    describe('toEsQuery', () => {
+      it('should convert the filter value to an es query', () => {
+        expect(filterMetadata.toEsQuery(['test-type'])).toEqual({
+          terms: {
+            [ALERT_RULE_TYPE_ID]: ['test-type'],
+          },
+        });
       });
     });
   });

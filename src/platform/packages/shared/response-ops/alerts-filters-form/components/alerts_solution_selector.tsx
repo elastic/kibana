@@ -19,7 +19,8 @@ import { capitalize } from 'lodash';
 import type { HttpStart } from '@kbn/core-http-browser';
 import { useGetInternalRuleTypesQuery } from '@kbn/response-ops-rules-apis/hooks/use_get_internal_rule_types_query';
 import { RuleTypeSolution } from '@kbn/alerting-types';
-import { SOLUTION_SELECTOR_SUBJ } from '../constants';
+import { InternalRuleType } from '@kbn/response-ops-rules-apis/apis/get_internal_rule_types';
+import { SOLUTION_SELECTOR_SUBJ, SUPPORTED_SOLUTIONS } from '../constants';
 import {
   RULE_TYPES_LOAD_ERROR_MESSAGE,
   SOLUTION_SELECTOR_LABEL,
@@ -40,6 +41,24 @@ const featuresIcons: Record<string, string> = {
   observability: 'logoObservability',
 };
 
+const getAvailableSolutions = (ruleTypes: InternalRuleType[]) => {
+  const solutions = new Set<RuleTypeSolution>();
+
+  for (const ruleType of ruleTypes) {
+    // We want to filter out solutions we do not support in case someone
+    // abuses the solution rule type attribute
+    if (SUPPORTED_SOLUTIONS.includes(ruleType.solution)) {
+      solutions.add(ruleType.solution);
+    }
+  }
+
+  if (solutions.has('stack') && solutions.has('observability')) {
+    solutions.delete('stack');
+  }
+
+  return solutions;
+};
+
 /**
  * A solution selector for segregated rule types authorization
  * When only one solution is available, it will be selected by default
@@ -55,26 +74,9 @@ export const AlertsSolutionSelector = ({
   services: { http },
 }: AlertsSolutionSelectorProps) => {
   const { data: ruleTypes, isLoading, isError } = useGetInternalRuleTypesQuery({ http });
+  const availableSolutions = useMemo(() => getAvailableSolutions(ruleTypes ?? []), [ruleTypes]);
   const options = useMemo<Array<EuiSuperSelectOption<RuleTypeSolution>>>(() => {
-    const choices = (ruleTypes ?? []).reduce(
-      (set, sol) => set.add(sol.solution),
-      new Set<RuleTypeSolution>()
-    );
-    if (
-      // If the user can access only types from one solution
-      // that will be the only option (no need to show the selector)
-      choices.size > 1 &&
-      // If the user can access all three solutions
-      (choices.size > 2 ||
-        // Or if the user can only access non-siem rule types
-        !choices.has('security'))
-    ) {
-      // We don't need to show the stack option: stack rules are implicitly
-      // included in the Observability option and are only shown for users
-      // that have only access to Security and Stack rules
-      choices.delete('stack');
-    }
-    return Array.from(choices.values()).map((sol) => ({
+    return Array.from(availableSolutions.values()).map((sol) => ({
       value: sol,
       inputDisplay: (
         <EuiFlexGroup gutterSize="s" alignItems="center">
@@ -85,7 +87,7 @@ export const AlertsSolutionSelector = ({
         </EuiFlexGroup>
       ),
     }));
-  }, [ruleTypes]);
+  }, [availableSolutions]);
 
   if (options.length < 2) {
     if (options.length === 1) {

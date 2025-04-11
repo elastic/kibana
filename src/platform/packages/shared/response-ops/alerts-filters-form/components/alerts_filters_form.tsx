@@ -105,6 +105,7 @@ export const AlertsFiltersForm = ({
 
   const deleteOperand = useCallback((atIndex: number) => {
     setFlatExpression((oldExpression) => {
+      // Remove two items: the operator and the following filter
       oldExpression.splice(atIndex, 2);
       return [...oldExpression];
     });

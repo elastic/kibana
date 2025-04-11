@@ -33,6 +33,13 @@ export const AlertsFiltersFormSandbox = ({
     () => (!ruleTypes || !solution ? [] : getRuleTypeIdsForSolution(ruleTypes, solution)),
     [ruleTypes, solution]
   );
+  const services = useMemo(
+    () => ({
+      http,
+      notifications,
+    }),
+    [http, notifications]
+  );
 
   return (
     <EuiPanel
@@ -72,10 +79,7 @@ export const AlertsFiltersFormSandbox = ({
                   value={filters}
                   onChange={setFilters}
                   isDisabled={!solution}
-                  services={{
-                    http,
-                    notifications,
-                  }}
+                  services={services}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>

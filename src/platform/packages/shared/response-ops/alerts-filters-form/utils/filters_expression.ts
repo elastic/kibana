@@ -12,10 +12,10 @@ const isFilter = (item?: AlertsFiltersExpression | AlertsFilter): item is Alerts
   item != null && !('operator' in item);
 
 export const isFlatExpressionFilter = (
-  item: FlattenedExpressionItem
+  item?: FlattenedExpressionItem
 ): item is {
   filter: AlertsFilter;
-} => 'filter' in item;
+} => (!item ? false : 'filter' in item);
 
 /**
  * Traverses the expression tree in pre-order and returns a flat array of
