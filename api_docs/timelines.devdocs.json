@@ -3961,6 +3961,14 @@
           },
           {
             "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/flyout/ai_for_soc/context.tsx"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/flyout/ai_for_soc/context.tsx"
+          },
+          {
+            "plugin": "securitySolution",
             "path": "x-pack/solutions/security/plugins/security_solution/public/flyout/document_details/shared/context.tsx"
           },
           {
