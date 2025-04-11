@@ -21,11 +21,7 @@ import {
   PlaygroundSavedObject,
 } from '../types';
 import { errorHandler } from '../utils/error_handler';
-import {
-  parsePlaygroundSO,
-  parsePlaygroundSOList,
-  validatePlayground,
-} from '../utils/saved_objects';
+import { parsePlaygroundSO, parsePlaygroundSOList, validatePlayground } from '../utils/playgrounds';
 import { playgroundAttributesSchema } from '../playground_saved_object/schema/v1/v1';
 
 export const defineSavedPlaygroundRoutes = ({ logger, router }: DefineRoutesOptions) => {
