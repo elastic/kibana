@@ -40,8 +40,7 @@ export const cli = () => {
     async ({ log: _cliLogger }) => {
       const { argv } = yargs(process.argv.slice(2))
         .coerce('configFile', (arg) => (_.isArray(arg) ? _.last(arg) : arg))
-        .coerce('spec', (arg) => arg)
-        // .coerce('spec', (arg) => (_.isArray(arg) ? _.last(arg) : arg))
+        .coerce('spec', (arg) => (_.isArray(arg) ? _.last(arg) : arg))
         .coerce('env', (arg: string) =>
           arg.split(',').reduce((acc, curr) => {
             const [key, value] = curr.split('=');
