@@ -16,17 +16,15 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { RuleTypeParams } from '@kbn/alerts-ui-shared';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 
-export function InvestigationManager<T extends RuleTypeParams>({
-  setRuleParams,
-  value,
-}: {
+interface Props {
   setRuleParams: (v: { investigation_guide: { blob: string } }) => void;
   value: string;
-}) {
+}
+
+export function InvestigationGuideEditor({ setRuleParams, value }: Props) {
   return (
     <>
       <EuiFlexGroup gutterSize="xs" alignItems="center">
@@ -61,6 +59,3 @@ export function InvestigationManager<T extends RuleTypeParams>({
     </>
   );
 }
-
-// eslint-disable-next-line import/no-default-export
-export default InvestigationManager;

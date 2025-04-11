@@ -58,5 +58,14 @@ export default ({ getService }: FtrProviderContext) => {
 
       /* TODO: Add more test cases */
     });
+
+    describe('Investigation Guide', () => {
+      it('should add investigation guide', async () => {
+        return observability.alerts.common.navigateToRulesPage();
+      });
+      it('should add investigation guide to rule', async () => {
+        await new Promise((r) => setTimeout(r, 100000));
+      });
+    });
   });
 };

@@ -56,7 +56,7 @@ import { getAuthorizedConsumers } from '../utils';
 import { RuleAlertDelay } from './rule_alert_delay';
 import { RuleConsumerSelection } from './rule_consumer_selection';
 import { RuleSchedule } from './rule_schedule';
-import InvestigationManager from './rule_investigation_guide';
+import { InvestigationGuideEditor } from './rule_investigation_guide';
 
 export const RuleDefinition = () => {
   const {
@@ -301,7 +301,7 @@ export const RuleDefinition = () => {
             <Suspense fallback={null}>
               <EuiFlexItem>
                 <EuiSpacer size="l" />
-                <InvestigationManager
+                <InvestigationGuideEditor
                   setRuleParams={onSetArtifacts}
                   value={formData.artifacts?.investigation_guide?.blob ?? ''}
                 />
