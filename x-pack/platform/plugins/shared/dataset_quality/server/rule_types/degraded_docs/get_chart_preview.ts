@@ -163,7 +163,7 @@ export async function getChartPreview({
         .values()
     ).map((item: DataStreamTotals) => ({
       x: item.x,
-      y: (item.ignoredCount / item.totalCount) * 100,
+      y: item.totalCount ? (item.ignoredCount / item.totalCount) * 100 : 0,
     })),
   }));
 
