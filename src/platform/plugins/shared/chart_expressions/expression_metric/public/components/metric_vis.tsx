@@ -174,6 +174,7 @@ export const MetricVis = ({
               : Number(config.metric.secondaryTrend.baseline),
           palette: config.metric.secondaryTrend.palette,
           borderColor: undefined,
+          compareToPrimary: config.metric.secondaryTrend.baseline === 'primary',
         }
       : undefined;
 

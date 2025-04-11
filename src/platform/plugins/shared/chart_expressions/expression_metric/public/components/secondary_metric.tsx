@@ -22,6 +22,7 @@ export interface TrendConfig {
   palette: [string, string, string];
   baselineValue: number | undefined;
   borderColor?: string;
+  compareToPrimary: boolean;
 }
 
 const notAvailable = i18n.translate('expressionMetricVis.secondaryMetric.notAvailable', {

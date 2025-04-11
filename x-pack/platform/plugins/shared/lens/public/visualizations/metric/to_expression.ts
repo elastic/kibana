@@ -20,6 +20,7 @@ import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugi
 import { Ast } from '@kbn/interpreter';
 import { LayoutDirection } from '@elastic/charts';
 import { hasIcon } from '@kbn/visualization-ui-components';
+import { i18n } from '@kbn/i18n';
 import { CollapseArgs, CollapseFunction } from '../../../common/expressions';
 import { CollapseExpressionFunction } from '../../../common/expressions/defs/collapse/types';
 import { DatasourceLayers } from '../../types';
@@ -157,10 +158,18 @@ export const toExpression = (
   const isSecondaryDynamicColorMode = secondaryDynamicColorMode === 'dynamic';
   const secondaryTrend = { ...getDefaultTrendConfig(), ...state.secondaryTrend };
 
+  // replace the secondary prefix if a dynamic coloring with primary metric baseline is picked
+  const secondaryPrefix =
+    isSecondaryDynamicColorMode && secondaryTrend.baselineValue === 'primary'
+      ? i18n.translate('xpack.lens.metric.secondaryMetric.prefixOverride.label', {
+          defaultMessage: 'Changed to',
+        })
+      : state.secondaryPrefix;
+
   const metricFn = buildExpressionFunction<MetricVisExpressionFunctionDefinition>('metricVis', {
     metric: state.metricAccessor,
     secondaryMetric: state.secondaryMetricAccessor,
-    secondaryPrefix: state.secondaryPrefix,
+    secondaryPrefix,
     secondaryColor:
       secondaryDynamicColorMode === 'static'
         ? state.secondaryColor ?? SECONDARY_DEFAULT_STATIC_COLOR
