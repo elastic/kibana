@@ -26,6 +26,8 @@ import {
   prepareForImport,
 } from '../../lib/content';
 
+const MAX_CONTENT_PACK_SIZE_BYTES = 1024 * 1024 * 5; // 5MB
+
 const exportContentRoute = createServerRoute({
   endpoint: 'POST /api/streams/{name}/content/export 2023-10-31',
   options: {
@@ -114,7 +116,7 @@ const importContentRoute = createServerRoute({
     description: 'Links content objects to a stream.',
     body: {
       accepts: 'multipart/form-data',
-      maxBytes: 2000000,
+      maxBytes: MAX_CONTENT_PACK_SIZE_BYTES,
       output: 'stream',
     },
   },
@@ -156,7 +158,7 @@ const importContentRoute = createServerRoute({
       savedObjects: contentPack.entries,
     });
 
-    const { successResults, errors } = await importer.import({
+    const { successResults, errors = [] } = await importer.import({
       readStream: createListStream(savedObjects),
       createNewCopies: false,
       overwrite: true,
@@ -189,7 +191,7 @@ const previewContentRoute = createServerRoute({
     description: 'Returns a json representation of a content pack.',
     body: {
       accepts: 'multipart/form-data',
-      maxBytes: 2000000,
+      maxBytes: MAX_CONTENT_PACK_SIZE_BYTES,
       output: 'stream',
     },
   },

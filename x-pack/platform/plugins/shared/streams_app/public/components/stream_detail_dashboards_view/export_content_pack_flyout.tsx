@@ -106,6 +106,7 @@ export function ExportContentPackFlyout({
     []
   );
   const [replacedIndexPatterns, setReplacedIndexPatterns] = useState<Record<string, boolean>>({});
+  const [isExporting, setIsExporting] = useState(false);
 
   return (
     <EuiFlyout onClose={onClose}>
@@ -193,13 +194,19 @@ export function ExportContentPackFlyout({
           <EuiFlexItem grow={false}>
             <EuiButton
               data-test-subj="streamsAppModalFooterButton"
-              isLoading={isLoadingContentPack}
-              isDisabled={selectedContentPackObjects.length === 0 || manifest?.name.length === 0}
+              isLoading={isExporting}
+              isDisabled={
+                isLoadingContentPack ||
+                selectedContentPackObjects.length === 0 ||
+                manifest?.name.length === 0
+              }
               fill
               onClick={async () => {
                 if (!exportResponse || !manifest || selectedContentPackObjects.length === 0) {
                   return;
                 }
+
+                setIsExporting(true);
 
                 const replacedPatterns = Object.entries(replacedIndexPatterns)
                   .filter(([, selected]) => selected)
@@ -234,6 +241,8 @@ export function ExportContentPackFlyout({
                       defaultMessage: 'Failed to export content pack',
                     }),
                   });
+                } finally {
+                  setIsExporting(true);
                 }
               }}
             >

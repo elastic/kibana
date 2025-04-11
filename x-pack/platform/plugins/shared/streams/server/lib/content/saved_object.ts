@@ -85,10 +85,10 @@ export function prepareForImport({
     return replaceIndexPatterns(object, replacements);
   });
 
-  return replaceReferences(uniqObjects);
+  return updateIds(uniqObjects);
 }
 
-export function replaceReferences(savedObjects: ContentPackSavedObject[]) {
+export function updateIds(savedObjects: ContentPackSavedObject[]) {
   const idReplacements = savedObjects.reduce((acc, object) => {
     acc[object.id] = v4();
     return acc;
@@ -97,7 +97,13 @@ export function replaceReferences(savedObjects: ContentPackSavedObject[]) {
   savedObjects.forEach((object) => {
     object.id = idReplacements[object.id];
     object.references.forEach((ref) => {
-      ref.id = idReplacements[ref.id];
+      // only update the id if the reference is included in the content pack.
+      // a missing reference is not necessarily an error condition since it could
+      // point to a pre existing saved object, for example logs-* and metrics-*
+      // data views
+      if (savedObjects.find((so) => so.id === ref.id)) {
+        ref.id = idReplacements[ref.id];
+      }
     });
   });
 
