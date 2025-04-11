@@ -13,6 +13,9 @@ export interface AgentEditState {
   name: string;
   description: string;
   systemPrompt: string;
+  avatarColor?: string;
+  avatarCustomText?: string;
+  useCase?: string;
   public: boolean;
 }
 
@@ -21,6 +24,9 @@ const emptyState = (): AgentEditState => {
     name: '',
     description: '',
     systemPrompt: '',
+    avatarColor: '',
+    avatarCustomText: '',
+    useCase: '',
     public: false,
   };
 };
@@ -29,7 +35,7 @@ export const useAgentEdition = ({
   agentId,
   onSaveSuccess,
 }: {
-  agentId: string | undefined;
+  agentId?: string;
   onSaveSuccess: (agent: Agent) => void;
 }) => {
   const { agentService } = useWorkChatServices();
@@ -46,6 +52,9 @@ export const useAgentEdition = ({
           description: agent.description,
           systemPrompt: agent.configuration.systemPrompt ?? '',
           public: agent.public,
+          useCase: agent.configuration.useCase ?? '',
+          avatarColor: agent.avatar?.color ?? '',
+          avatarCustomText: agent.avatar?.text ?? '',
         });
       }
     };
@@ -64,6 +73,11 @@ export const useAgentEdition = ({
       description: editState.description,
       configuration: {
         systemPrompt: editState.systemPrompt,
+        useCase: editState.useCase,
+      },
+      avatar: {
+        color: editState.avatarColor,
+        text: editState.avatarCustomText,
       },
       public: editState.public,
     };

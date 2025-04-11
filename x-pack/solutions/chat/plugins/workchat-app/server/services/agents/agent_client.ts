@@ -21,7 +21,7 @@ interface AgentClientOptions {
 }
 
 export type AgentUpdatableFields = Partial<
-  Pick<Agent, 'name' | 'description' | 'configuration' | 'public'>
+  Pick<Agent, 'name' | 'description' | 'configuration' | 'public' | 'avatar'>
 >;
 
 /**
@@ -77,6 +77,7 @@ export class AgentClientImpl implements AgentClient {
 
   async get({ agentId }: { agentId: string }): Promise<Agent> {
     const conversationSo = await this._rawGet({ agentId });
+    console.log(conversationSo);
     return savedObjectToModel(conversationSo);
   }
 
@@ -99,6 +100,8 @@ export class AgentClientImpl implements AgentClient {
       ...conversationSo.attributes,
       ...updateToAttributes({ updatedFields }),
     };
+
+    console.log(updatedAttributes);
 
     await this.client.update<AgentAttributes>(agentTypeName, conversationSo.id, updatedAttributes);
 

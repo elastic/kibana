@@ -63,8 +63,15 @@ export const registerAgentRoutes = ({ getServices, router, logger }: RouteDepend
           description: schema.string({ defaultValue: '' }),
           configuration: schema.object({
             systemPrompt: schema.maybe(schema.string()),
+            useCase: schema.maybe(schema.string()),
           }),
           public: schema.boolean({ defaultValue: false }),
+          avatar: schema.maybe(
+            schema.object({
+              color: schema.string(),
+              text: schema.string(),
+            })
+          ),
         }),
       },
     },
@@ -105,7 +112,14 @@ export const registerAgentRoutes = ({ getServices, router, logger }: RouteDepend
           description: schema.string({ defaultValue: '' }),
           configuration: schema.object({
             systemPrompt: schema.maybe(schema.string()),
+            useCase: schema.maybe(schema.string()),
           }),
+          avatar: schema.maybe(
+            schema.object({
+              color: schema.string(),
+              text: schema.string(),
+            })
+          ),
           public: schema.boolean({ defaultValue: false }),
         }),
       },

@@ -9,28 +9,32 @@ import React from 'react';
 import { Route, Routes } from '@kbn/shared-ux-router';
 import { WorkChatHomePage } from './pages/home';
 import { WorkchatChatPage } from './pages/chat';
-import { WorkChatAgentsPage } from './pages/agents';
-import { WorkChatAgentEditOrCreatePage } from './pages/agent_edit_or_create';
+import { WorkChatAssistantsPage } from './pages/assistants';
+import { WorkChatAssistantOverviewPage } from './pages/assistant_details';
 import { WorkChatIntegrationsPage } from './pages/integrations';
 import { WorkChatIntegrationEditOrCreatePage } from './pages/integration_edit_or_create';
+import { WorkChatAssistantWorkflowPage } from './pages/assistant_workflow';
 export const WorkchatAppRoutes: React.FC<{}> = () => {
   return (
     <Routes>
-      <Route path="/agents/:agentId/chat/:conversationId">
+      <Route path="/assistants/:agentId/chat/:conversationId">
         <WorkchatChatPage />
       </Route>
-      <Route path="/agents/:agentId/chat">
+      <Route path="/assistants/:agentId/chat">
         <WorkchatChatPage />
       </Route>
 
-      <Route path="/agents/create" strict>
-        <WorkChatAgentEditOrCreatePage />
+      <Route path="/assistants/create" strict>
+        <WorkChatAssistantOverviewPage />
       </Route>
-      <Route path="/agents/:agentId/edit" strict>
-        <WorkChatAgentEditOrCreatePage />
+      <Route path="/assistants/:agentId/edit" strict>
+        <WorkChatAssistantOverviewPage />
       </Route>
-      <Route path="/agents" strict>
-        <WorkChatAgentsPage />
+      <Route path="/assistants/:agentId/workflow" strict>
+        <WorkChatAssistantWorkflowPage />
+      </Route>
+      <Route path="/assistants" strict>
+        <WorkChatAssistantsPage />
       </Route>
 
       <Route path="/integrations/create">

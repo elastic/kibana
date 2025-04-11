@@ -40,7 +40,7 @@ export const HomeAssistantsSection: React.FC<{}> = () => {
               iconType="gear"
               color="text"
               onClick={() => {
-                navigateToWorkchatUrl(appPaths.agents.edit({ agentId: assistant.id }));
+                navigateToWorkchatUrl(appPaths.assistants.edit({ agentId: assistant.id }));
               }}
             />
           </EuiFlexItem>

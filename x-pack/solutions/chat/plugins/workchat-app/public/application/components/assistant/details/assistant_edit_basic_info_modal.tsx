@@ -1,0 +1,247 @@
+import React, { useCallback } from 'react';
+import {
+  EuiButton,
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiForm,
+  EuiFormRow,
+  EuiModal,
+  EuiModalBody,
+  EuiModalFooter,
+  EuiModalHeader,
+  EuiModalHeaderTitle,
+  EuiSpacer,
+  EuiTextArea,
+  EuiColorPicker,
+  EuiText,
+  EuiFieldText,
+  EuiFormHelpText,
+} from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { useKibana } from '../../../hooks/use_kibana';
+import { AssistantAvatar } from '../assistant_avatar';
+import { AgentEditState } from '../../../hooks/use_agent_edition';
+
+const AVATAR_COLORS = [
+  '#F1FA8C',
+  '#BD93F9',
+  '#50FA7B',
+  '#FF79C6',
+  '#8BE9FD',
+  '#FFB86C',
+  '#FF5555',
+  '#44475A',
+];
+
+export interface EditAssistantBasicInfoProps {
+  onCancel: () => void;
+  editState: AgentEditState;
+  setFieldValue: <T extends keyof AgentEditState>(key: T, value: AgentEditState[T]) => void;
+  submit: () => void;
+  isSubmitting: boolean;
+}
+
+export const EditAssistantBasicInfo: React.FC<EditAssistantBasicInfoProps> = ({
+  onCancel,
+  editState,
+  setFieldValue,
+  submit,
+  isSubmitting,
+}) => {
+  const {
+    services: { notifications },
+  } = useKibana();
+
+  const handleNameChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      setFieldValue('name', e.target.value);
+    },
+    [setFieldValue]
+  );
+
+  const handleDescriptionChange = useCallback(
+    (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+      setFieldValue('description', e.target.value);
+    },
+    [setFieldValue]
+  );
+
+  const handleAvatarColorChange = useCallback(
+    (color: string) => {
+      setFieldValue('avatarColor', color);
+    },
+    [setFieldValue]
+  );
+
+  const handleAvatarTextChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      setFieldValue('avatarCustomText', e.target.value);
+    },
+    [setFieldValue]
+  );
+
+  const handleSubmit = useCallback(
+    (e: React.FormEvent) => {
+      e.preventDefault();
+
+      if (!editState.name.trim()) {
+        notifications.toasts.addDanger(
+          i18n.translate('workchatApp.assistants.editBasicsModal.nameRequiredError', {
+            defaultMessage: 'Name is required',
+          })
+        );
+        return;
+      }
+
+      submit();
+    },
+    [editState.name, submit, notifications.toasts]
+  );
+
+  return (
+    <EuiModal onClose={onCancel} maxWidth={640}>
+      <EuiModalHeader>
+        <EuiModalHeaderTitle>
+          {i18n.translate('workchatApp.assistants.editBasicsModal.title', {
+            defaultMessage: 'Edit Assistant Basics',
+          })}
+        </EuiModalHeaderTitle>
+      </EuiModalHeader>
+
+      <EuiModalBody>
+        <EuiForm component="form" onSubmit={handleSubmit} fullWidth>
+          <EuiText>
+            <h4>
+              {i18n.translate('workchatApp.assistants.editBasicsModal.identificationSection', {
+                defaultMessage: 'Identification',
+              })}
+            </h4>
+          </EuiText>
+
+          <EuiSpacer size="m" />
+
+          <EuiFormRow
+            label={i18n.translate('workchatApp.assistants.editBasicsModal.nameLabel', {
+              defaultMessage: 'Name',
+            })}
+            fullWidth
+          >
+            <EuiFieldText
+              data-test-subj="assistantNameInput"
+              value={editState.name}
+              onChange={handleNameChange}
+              fullWidth
+            />
+          </EuiFormRow>
+
+          <EuiFormRow
+            label={i18n.translate('workchatApp.assistants.editBasicsModal.descriptionLabel', {
+              defaultMessage: 'Description',
+            })}
+            fullWidth
+          >
+            <EuiTextArea
+              data-test-subj="assistantDescriptionInput"
+              value={editState.description}
+              onChange={handleDescriptionChange}
+              fullWidth
+              rows={6}
+            />
+          </EuiFormRow>
+          <EuiFormHelpText>
+            {i18n.translate('workchatApp.assistants.editBasicsModal.descriptionHelpText', {
+              defaultMessage:
+                'Describe what this assistant is going to be used for. Informational only.',
+            })}
+          </EuiFormHelpText>
+
+          <EuiSpacer size="l" />
+
+          <EuiText>
+            <h4>
+              {i18n.translate('workchatApp.assistants.editBasicsModal.avatarSection', {
+                defaultMessage: 'Avatar',
+              })}
+            </h4>
+          </EuiText>
+
+          <EuiSpacer size="m" />
+
+          <EuiFlexGroup alignItems="center">
+            <EuiFlexItem grow={false}>
+              <AssistantAvatar
+                customText={editState.avatarCustomText}
+                name={editState.name}
+                color={editState.avatarColor as string}
+                size="xl"
+              >
+                {editState.avatarCustomText}
+              </AssistantAvatar>
+            </EuiFlexItem>
+
+            <EuiFlexItem>
+              <EuiFlexGroup>
+                <EuiFlexItem>
+                  <EuiFormRow
+                    label={i18n.translate('workchatApp.assistants.editBasicsModal.colorLabel', {
+                      defaultMessage: 'Color',
+                    })}
+                    fullWidth
+                  >
+                    <EuiColorPicker
+                      data-test-subj="assistantAvatarColorPicker"
+                      onChange={handleAvatarColorChange}
+                      color={editState.avatarColor}
+                      swatches={AVATAR_COLORS}
+                    />
+                  </EuiFormRow>
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiFormRow
+                    label={i18n.translate('workchatApp.assistants.editBasicsModal.textLabel', {
+                      defaultMessage: 'Custom Text',
+                    })}
+                    helpText={i18n.translate(
+                      'workchatApp.assistants.editBasicsModal.emojiHelpText',
+                      {
+                        defaultMessage: 'Press CTRL + CMD + Space for emojis',
+                      }
+                    )}
+                    fullWidth
+                  >
+                    <EuiFieldText
+                      data-test-subj="assistantAvatarTextField"
+                      value={editState.avatarCustomText}
+                      onChange={handleAvatarTextChange}
+                      fullWidth
+                    />
+                  </EuiFormRow>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiForm>
+      </EuiModalBody>
+
+      <EuiModalFooter>
+        <EuiButtonEmpty data-test-subj="cancelBasicInfoButton" onClick={onCancel}>
+          {i18n.translate('workchatApp.assistants.editBasicsModal.cancelButtonLabel', {
+            defaultMessage: 'Cancel',
+          })}
+        </EuiButtonEmpty>
+
+        <EuiButton
+          data-test-subj="saveBasicInfoButton"
+          fill
+          onClick={handleSubmit}
+          isLoading={isSubmitting}
+        >
+          {i18n.translate('workchatApp.assistants.editBasicsModal.saveButtonLabel', {
+            defaultMessage: 'Save',
+          })}
+        </EuiButton>
+      </EuiModalFooter>
+    </EuiModal>
+  );
+};
