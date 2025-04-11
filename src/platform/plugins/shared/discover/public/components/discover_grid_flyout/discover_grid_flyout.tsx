@@ -39,6 +39,7 @@ export interface DiscoverGridFlyoutProps {
   onFilter?: DocViewFilterFn;
   onRemoveColumn: (column: string) => void;
   setExpandedDoc: (doc?: DataTableRecord) => void;
+  initialTab?: string;
 }
 
 /**
@@ -58,6 +59,7 @@ export function DiscoverGridFlyout({
   onRemoveColumn,
   onAddColumn,
   setExpandedDoc,
+  initialTab,
 }: DiscoverGridFlyoutProps) {
   const services = useDiscoverServices();
   const flyoutCustomization = useDiscoverCustomization('flyout');
@@ -118,6 +120,7 @@ export function DiscoverGridFlyout({
       onClose={onClose}
       onFilter={onFilter}
       setExpandedDoc={setExpandedDoc}
+      initialTab={initialTab}
     />
   );
 }

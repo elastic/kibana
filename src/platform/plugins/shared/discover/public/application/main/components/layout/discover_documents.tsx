@@ -138,6 +138,8 @@ function DiscoverDocumentsComponent({
     ];
   });
   const expandedDoc = useInternalStateSelector((state) => state.expandedDoc);
+  const openDocTab = useInternalStateSelector((state) => state.initialTab);
+  const resetDocTabId = useInternalStateSelector((state) => state.resetDocTabId);
   const isEsqlMode = useIsEsqlMode();
   const documentState = useDataState(documents$);
   const isDataLoading =
@@ -203,8 +205,12 @@ function DiscoverDocumentsComponent({
   );
 
   const setExpandedDoc = useCallback(
-    (doc: DataTableRecord | undefined) => {
+    (doc: DataTableRecord | undefined, initialTab?: string) => {
       dispatch(internalStateActions.setExpandedDoc(doc));
+      if (initialTab) {
+        dispatch(internalStateActions.resetDocTab()); // Ugly hack required to handle remount of DocViewer component when opening it via LeadingControlActions
+        dispatch(internalStateActions.setDocTab(initialTab));
+      }
     },
     [dispatch]
   );
@@ -300,6 +306,8 @@ function DiscoverDocumentsComponent({
         onClose={() => setExpandedDoc(undefined)}
         setExpandedDoc={setExpandedDoc}
         query={query}
+        initialTab={openDocTab}
+        key={resetDocTabId} // Hack to remount the component when opening it in order to switch tabs when flyout is already open
       />
     ),
     [
@@ -307,9 +315,11 @@ function DiscoverDocumentsComponent({
       onAddColumnWithTracking,
       onAddFilter,
       onRemoveColumnWithTracking,
+      openDocTab,
       query,
       savedSearch.id,
       setExpandedDoc,
+      resetDocTabId,
     ]
   );
 

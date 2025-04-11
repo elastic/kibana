@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { UnifiedDocViewerLogsOverview } from '@kbn/unified-doc-viewer-plugin/public';
+import useObservable from 'react-use/lib/useObservable';
 import type { ProfileProviderServices } from '../../../profile_provider_services';
 import type { LogDocumentProfileProvider } from '../profile';
 import type { LogOverViewAccordionExpandedValue } from '../../logs_data_source_profile/profile';
@@ -36,22 +37,10 @@ export const createGetDocViewer =
           }),
           order: 0,
           component: function LogOverviewTab(props) {
-            const [initialAccordionSection, setAccordionSection] =
-              useState<LogOverViewAccordionExpandedValue>(
-                context.initialLogOverviewAccordionSection$.getValue()
-              );
-
-            useEffect(() => {
-              const subscription = context.initialLogOverviewAccordionSection$.subscribe(
-                (value: LogOverViewAccordionExpandedValue) => {
-                  setAccordionSection(value);
-                }
-              );
-
-              return () => {
-                subscription.unsubscribe();
-              };
-            }, []);
+            const initialAccordionSection = useObservable<LogOverViewAccordionExpandedValue>(
+              context.initialLogOverviewAccordionSection$,
+              context.initialLogOverviewAccordionSection$.getValue()
+            );
 
             const accordionState = React.useMemo(() => {
               if (!initialAccordionSection) return {};
@@ -61,7 +50,7 @@ export const createGetDocViewer =
             return (
               <UnifiedDocViewerLogsOverview
                 {...props}
-                key={initialAccordionSection} // Force remount when section changes
+                key={initialAccordionSection} // Force remount to handle use case where user clicks on stacktrace and then degraded docs on the same row when the flyout os already open
                 docViewerAccordionState={accordionState}
                 renderAIAssistant={logsAIAssistantFeature?.render}
                 renderStreamsField={streamsFeature?.renderStreamsField}

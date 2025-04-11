@@ -20,6 +20,7 @@ import {
   getDataGridDensity,
   getRowHeight,
 } from '@kbn/unified-data-table';
+import { v4 as uuidv4 } from 'uuid';
 import { DiscoverGrid } from '../../components/discover_grid';
 import { DiscoverGridFlyout } from '../../components/discover_grid_flyout';
 import { SavedSearchEmbeddableBase } from './saved_search_embeddable_base';
@@ -44,6 +45,20 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
   const { interceptedWarnings, enableDocumentViewer, ...gridProps } = props;
 
   const [expandedDoc, setExpandedDoc] = useState<DataTableRecord | undefined>(undefined);
+  const [initialTab, setInitialTab] = useState<string | undefined>(undefined);
+  const [resetTabId, setResetTabId] = useState(uuidv4());
+
+  const setExpandedDocWithInitialTab = useCallback(
+    (doc: DataTableRecord | undefined, initialTabValue?: string) => {
+      console.log('Proceeding to set expanded doc');
+      setExpandedDoc(doc);
+      if (initialTabValue) {
+        setResetTabId(uuidv4());
+        setInitialTab(initialTabValue);
+      }
+    },
+    []
+  );
 
   const renderDocumentView = useCallback(
     (
@@ -64,19 +79,24 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
         onRemoveColumn={props.onRemoveColumn}
         onAddColumn={props.onAddColumn}
         onClose={() => setExpandedDoc(undefined)}
-        setExpandedDoc={setExpandedDoc}
+        setExpandedDoc={setExpandedDocWithInitialTab}
+        initialTab={initialTab}
         query={props.query}
         filters={props.filters}
+        key={resetTabId}
       />
     ),
     [
       props.dataView,
-      props.onAddColumn,
+      props.savedSearchId,
       props.onFilter,
       props.onRemoveColumn,
+      props.onAddColumn,
       props.query,
       props.filters,
-      props.savedSearchId,
+      setExpandedDocWithInitialTab,
+      initialTab,
+      resetTabId,
     ]
   );
 
@@ -127,7 +147,7 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
         {...gridProps}
         isPaginationEnabled={!gridProps.isPlainRecord}
         totalHits={props.totalHitCount}
-        setExpandedDoc={setExpandedDoc}
+        setExpandedDoc={setExpandedDocWithInitialTab}
         expandedDoc={expandedDoc}
         showMultiFields={props.services.uiSettings.get(SHOW_MULTIFIELDS)}
         maxDocFieldsDisplayed={props.services.uiSettings.get(MAX_DOC_FIELDS_DISPLAYED)}

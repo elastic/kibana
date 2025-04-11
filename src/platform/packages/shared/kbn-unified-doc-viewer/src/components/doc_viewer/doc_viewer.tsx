@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import { EuiTabbedContent, EuiTabbedContentTab } from '@elastic/eui';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { DocViewerTab } from './doc_viewer_tab';
@@ -17,6 +17,7 @@ export const INITIAL_TAB = 'unifiedDocViewer:initialTab';
 
 export interface DocViewerProps extends DocViewRenderProps {
   docViews: DocView[];
+  initialTab?: DocView['id'];
 }
 
 /**
@@ -25,32 +26,37 @@ export interface DocViewerProps extends DocViewRenderProps {
  * A view can contain a React `component`, or any JS framework by using
  * a `render` function.
  */
-export function DocViewer({ docViews, ...renderProps }: DocViewerProps) {
+export function DocViewer({ docViews, initialTab, ...renderProps }: DocViewerProps) {
   const tabs = docViews
     .filter(({ enabled }) => enabled) // Filter out disabled doc views
-    .map(({ id, title, render, component }: DocView) => {
-      return {
-        id: `kbn_doc_viewer_tab_${id}`, // `id` value is used to persist the selected tab in localStorage
-        name: title,
-        content: (
-          <DocViewerTab
-            id={id}
-            title={title}
-            component={component}
-            renderProps={renderProps}
-            render={render}
-          />
-        ),
-        ['data-test-subj']: `docViewerTab-${id}`,
-      };
-    });
+    .map(({ id, title, render, component }: DocView) => ({
+      id: `kbn_doc_viewer_tab_${id}`, // `id` value is used to persist the selected tab in localStorage
+      name: title,
+      content: (
+        <DocViewerTab
+          id={id}
+          title={title}
+          component={component}
+          renderProps={renderProps}
+          render={render}
+        />
+      ),
+      ['data-test-subj']: `docViewerTab-${id}`,
+    }));
 
-  const [initialTabId, setInitialTabId] = useLocalStorage<string>(INITIAL_TAB);
-  const initialSelectedTab = initialTabId ? tabs.find(({ id }) => id === initialTabId) : undefined;
+  const [storedInitialTabId, setInitialTabId] = useLocalStorage<string>(INITIAL_TAB);
+  const [selectedTabId, setSelectedTabId] = useState<string | undefined>(
+    initialTab || storedInitialTabId
+  );
+
+  const initialSelectedTab = selectedTabId
+    ? tabs.find(({ id }) => id === selectedTabId)
+    : undefined;
 
   const onTabClick = useCallback(
     (tab: EuiTabbedContentTab) => {
-      setInitialTabId(tab.id);
+      setSelectedTabId(tab.id);
+      setInitialTabId(tab.id); // Persist the selected tab in localStorage
     },
     [setInitialTabId]
   );

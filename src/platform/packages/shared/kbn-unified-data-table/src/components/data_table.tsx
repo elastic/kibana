@@ -191,7 +191,7 @@ export interface UnifiedDataTableProps {
   /**
    * Function to set the expanded document, which is displayed in a flyout
    */
-  setExpandedDoc?: (doc?: DataTableRecord) => void;
+  setExpandedDoc?: (doc?: DataTableRecord, initialTab?: string) => void;
   /**
    * Grid display settings persisted in Elasticsearch (e.g. column width)
    */

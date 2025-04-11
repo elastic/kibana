@@ -182,10 +182,11 @@ export interface RowControlsExtensionParams {
    */
   query?: DiscoverAppState['query'];
   /**
-   * Todo: Define this parameter
-   * @param record
+   * Function to set the expanded document, which is displayed in a flyout
+   * @param record - The record to display in the flyout
+   * @param initialTab - The tab to display in the flyout
    */
-  setExpandedDoc?: (record: DataTableRecord) => void;
+  setExpandedDoc?: (record: DataTableRecord, initialTab?: string) => void;
 }
 
 /**
