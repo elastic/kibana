@@ -7,32 +7,25 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiHeaderBreadcrumbs } from '@elastic/eui';
+import { EuiHeaderBreadcrumbs, makeHighContrastColor, shade, tint } from '@elastic/eui';
 import classNames from 'classnames';
 import React from 'react';
+import { css } from '@emotion/react';
 import useObservable from 'react-use/lib/useObservable';
 import { Observable } from 'rxjs';
 import type { ChromeBreadcrumb } from '@kbn/core-chrome-browser';
 
 interface Props {
   breadcrumbs$: Observable<ChromeBreadcrumb[]>;
-  isDarkMode: boolean;
 }
 
-export function HeaderBreadcrumbs({ breadcrumbs$, isDarkMode }: Props) {
+export function HeaderBreadcrumbs({ breadcrumbs$ }: Props) {
   const breadcrumbs = useObservable(breadcrumbs$, []);
   let crumbs = breadcrumbs;
 
   if (breadcrumbs.length === 0) {
     crumbs = [{ text: 'Kibana' }];
   }
-
-  // Modify last breadcrumb's text color to comply with A11y contrast ratio (AAA)
-  // https://github.com/elastic/kibana/issues/214597
-  const getLastBreadcrumbColor = (isLast: boolean, darkMode: boolean) => {
-    if (!isLast) return;
-    return !darkMode ? { color: '#4a4f5c' } : { color: '#d1d1d1' };
-  };
 
   crumbs = crumbs.map((breadcrumb, i) => {
     const isLast = i === breadcrumbs.length - 1;
@@ -49,9 +42,28 @@ export function HeaderBreadcrumbs({ breadcrumbs$, isDarkMode }: Props) {
         i === 0 && 'first',
         isLast && 'last'
       ),
-      style: getLastBreadcrumbColor(isLast, isDarkMode),
     };
   });
-
-  return <EuiHeaderBreadcrumbs breadcrumbs={crumbs} max={10} data-test-subj="breadcrumbs" />;
+  // Modify last breadcrumb's text color to comply with A11y contrast ratio (AA)
+  // https://github.com/elastic/kibana/issues/214597
+  return (
+    <EuiHeaderBreadcrumbs
+      breadcrumbs={crumbs}
+      max={10}
+      data-test-subj="breadcrumbs"
+      css={({ euiTheme, colorMode }) => css`
+        [class*='euiBreadcrumb-application'] .euiBreadcrumb__content:not(.euiLink) {
+          color: ${makeHighContrastColor(
+            colorMode === 'DARK'
+              ? shade(euiTheme.colors.darkestShade, 0.2)
+              : tint(euiTheme.colors.darkestShade, 0.2)
+          )(
+            colorMode === 'DARK'
+              ? shade(euiTheme.colors.darkestShade, 0.7)
+              : tint(euiTheme.colors.darkestShade, 0.85)
+          )};
+        }
+      `}
+    />
+  );
 }

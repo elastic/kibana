@@ -426,7 +426,6 @@ export class ChromeService {
         const isVisible = useObservable(this.isVisible$);
         const chromeStyle = useObservable(chromeStyle$, defaultChromeStyle);
 
-        const currentTheme = useObservable(theme.theme$);
         if (!isVisible) {
           return (
             <div data-test-subj="kibanaHeaderChromeless">
@@ -494,7 +493,6 @@ export class ChromeService {
 
         return (
           <Header
-            isDarkMode={currentTheme?.darkMode ?? false}
             isServerless={this.isServerless}
             loadingCount$={http.getLoadingCount$()}
             application={application}

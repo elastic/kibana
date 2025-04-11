@@ -17,7 +17,7 @@ describe('HeaderBreadcrumbs', () => {
   it('renders updates to the breadcrumbs$ observable', async () => {
     const breadcrumbs$ = new BehaviorSubject([{ text: 'First' }]);
 
-    render(<HeaderBreadcrumbs breadcrumbs$={breadcrumbs$} isDarkMode={false} />);
+    render(<HeaderBreadcrumbs breadcrumbs$={breadcrumbs$} />);
 
     expect(await screen.findByLabelText('Breadcrumbs')).toHaveTextContent('First');
 
@@ -36,7 +36,7 @@ describe('HeaderBreadcrumbs', () => {
       { text: 'Last', href: '/something', onClick: jest.fn() },
     ]);
 
-    render(<HeaderBreadcrumbs breadcrumbs$={breadcrumbs$} isDarkMode={false} />);
+    render(<HeaderBreadcrumbs breadcrumbs$={breadcrumbs$} />);
 
     const lastBreadcrumb = await screen.findByTitle('Last');
 
