@@ -83,34 +83,37 @@ export const AssistantListView: React.FC<AssistantListViewProps> = ({ agents }) 
   ];
 
   const findAgents = (
-    agents: Agent[],
-    pageIndex: number,
-    pageSize: number,
-    sortField: keyof Agent,
-    sortDirection: 'asc' | 'desc'
+    agentsList: Agent[],
+    currentPageIndex: number,
+    currentPageSize: number,
+    currentSortField: keyof Agent,
+    currentSortDirection: 'asc' | 'desc'
   ) => {
     let items;
 
-    if (sortField) {
-      items = agents
+    if (currentSortField) {
+      items = agentsList
         .slice(0)
-        .sort(Comparators.property(sortField, Comparators.default(sortDirection)));
+        .sort(Comparators.property(currentSortField, Comparators.default(currentSortDirection)));
     } else {
-      items = agents;
+      items = agentsList;
     }
 
     let pageOfItems;
 
-    if (!pageIndex && !pageSize) {
+    if (!currentPageIndex && !currentPageSize) {
       pageOfItems = items;
     } else {
-      const startIndex = pageIndex * pageSize;
-      pageOfItems = items.slice(startIndex, Math.min(startIndex + pageSize, agents.length));
+      const startIndex = currentPageIndex * currentPageSize;
+      pageOfItems = items.slice(
+        startIndex,
+        Math.min(startIndex + currentPageSize, agentsList.length)
+      );
     }
 
     return {
       pageOfItems,
-      totalItemCount: agents.length,
+      totalItemCount: agentsList.length,
     };
   };
 

@@ -28,7 +28,7 @@ export const AssistantWorkflow: React.FC<AssistantWorkflowProps> = ({ agentId })
       },
       { text: assistantLabels.breadcrumb.assistantWorkflowPill },
     ];
-  }, [agentId, createWorkchatUrl]);
+  }, [createWorkchatUrl]);
 
   useBreadcrumb(breadcrumb);
   return <KibanaPageTemplate.Section paddingSize="m">todo...</KibanaPageTemplate.Section>;

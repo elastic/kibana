@@ -51,7 +51,7 @@ export interface AgentAttributes {
     public: boolean;
   };
   avatar: {
-    color: string;
-    text: string;
+    color?: string;
+    text?: string;
   };
 }
