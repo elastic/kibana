@@ -303,10 +303,8 @@ export default function ({ getService }: FtrProviderContext) {
             rrule: {
               freq: 3,
               interval: 1,
-              byhour: [15],
+              byhour: [30], // invalid
               byminute: [27],
-              // @ts-ignore
-              bymonthday: [1], // daily schedule cannot have bymonthday
             },
           },
           params: {},
