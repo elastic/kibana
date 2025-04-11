@@ -242,7 +242,6 @@ export const RulesSettingsFlyout = memo((props: RulesSettingsFlyoutProps) => {
             hasError={hasFlappingError}
           />
         )}
-        {isAlertDeletionSettingsEnabled && <div>Alert Deletion Settings Placeholder</div>}
         {isServerless && queryDelaySettings && (
           <>
             <EuiSpacer />
@@ -255,7 +254,7 @@ export const RulesSettingsFlyout = memo((props: RulesSettingsFlyoutProps) => {
             />
           </>
         )}
-        {readAlertDeleteSettingsUI && (
+        {isAlertDeletionSettingsEnabled && readAlertDeleteSettingsUI && (
           <>
             <EuiSpacer />
             <AlertDeleteDescriptiveFormGroup

@@ -183,10 +183,6 @@ export interface AlertingServerStart {
     settings: RulesSettingsAlertDeleteProperties,
     spaceIds: string[]
   ): Promise<void>;
-  previewAlertDeletion(
-    settings: RulesSettingsAlertDeleteProperties,
-    spaceId: string
-  ): Promise<number>;
   getLastRunAlertDeletion(req: KibanaRequest): Promise<string | undefined>;
 }
 
@@ -684,8 +680,6 @@ export class AlertingPlugin {
         settings: RulesSettingsAlertDeleteProperties,
         spaceIds: string[]
       ) => await this.alertDeletionClient!.scheduleTask(req, settings, spaceIds),
-      previewAlertDeletion: async (settings: RulesSettingsAlertDeleteProperties, spaceId: string) =>
-        await this.alertDeletionClient!.previewTask(settings, spaceId),
       getLastRunAlertDeletion: async (req: KibanaRequest) =>
         await this.alertDeletionClient!.getLastRun(req),
     };

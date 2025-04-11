@@ -133,7 +133,8 @@ export const AlertDeleteModal = ({
     validations.isActiveThresholdValid &&
     validations.isInactiveThresholdValid &&
     deleteConfirmation.length > 0 &&
-    (activeState.checked || inactiveState.checked);
+    (activeState.checked || inactiveState.checked) &&
+    previewAffectedAlertsCount > 0;
 
   const activeAlertsCallbacks = {
     onChangeEnabled: (e: React.ChangeEvent<HTMLInputElement>) => {
