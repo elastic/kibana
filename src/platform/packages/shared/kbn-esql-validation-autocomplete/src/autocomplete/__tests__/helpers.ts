@@ -8,7 +8,6 @@
  */
 
 import { camelCase } from 'lodash';
-import { parse } from '@kbn/esql-ast';
 import { scalarFunctionDefinitions } from '../../definitions/generated/scalar_functions';
 import { operatorsDefinitions } from '../../definitions/all_operators';
 import { NOT_SUGGESTED_TYPES } from '../../shared/resources_helpers';
@@ -353,13 +352,7 @@ export const setup = async (caret = '/') => {
       ? { triggerKind: 1, triggerCharacter: opts.triggerCharacter }
       : { triggerKind: 0 };
 
-    return await autocomplete.suggest(
-      querySansCaret,
-      pos,
-      ctx,
-      (_query: string | undefined) => parse(_query, { withFormatting: true }),
-      opts.callbacks ?? callbacks
-    );
+    return await autocomplete.suggest(querySansCaret, pos, ctx, opts.callbacks ?? callbacks);
   };
 
   const assertSuggestions: AssertSuggestionsFn = async (query, expected, opts) => {

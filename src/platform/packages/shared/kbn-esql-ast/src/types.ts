@@ -489,13 +489,6 @@ export interface ESQLMessage {
   code: string;
 }
 
-export type AstProviderFn = (text: string | undefined) =>
-  | Promise<{
-      ast: ESQLAst;
-      errors: EditorError[];
-    }>
-  | { ast: ESQLAst; errors: EditorError[] };
-
 export interface EditorError {
   startLineNumber: number;
   endLineNumber: number;

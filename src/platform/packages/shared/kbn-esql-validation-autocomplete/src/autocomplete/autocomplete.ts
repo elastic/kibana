@@ -9,7 +9,7 @@
 
 import { uniq } from 'lodash';
 import {
-  type AstProviderFn,
+  parse,
   type ESQLAstItem,
   type ESQLCommand,
   type ESQLCommandOption,
@@ -87,13 +87,12 @@ export async function suggest(
   fullText: string,
   offset: number,
   context: EditorContext,
-  astProvider: AstProviderFn,
   resourceRetriever?: ESQLCallbacks
 ): Promise<SuggestionRawDefinition[]> {
   // Partition out to inner ast / ast context for the latest command
   const innerText = fullText.substring(0, offset);
   const correctedQuery = correctQuerySyntax(innerText, context);
-  const { ast } = await astProvider(correctedQuery);
+  const { ast } = parse(correctedQuery, { withFormatting: true });
   const astContext = getAstContext(innerText, ast, offset);
 
   if (astContext.type === 'comment') {

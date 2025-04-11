@@ -26,7 +26,6 @@ export type {
   ESQLColumn,
   ESQLLiteral,
   ESQLParamLiteral,
-  AstProviderFn,
   EditorError,
   ESQLAstNode,
   ESQLInlineCast,

@@ -7,31 +7,30 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { suggest } from './autocomplete';
+import { commandDefinitions as unmodifiedCommandDefinitions } from '../definitions/commands';
 import { scalarFunctionDefinitions } from '../definitions/generated/scalar_functions';
 import { timeUnitsToSuggest } from '../definitions/literals';
-import { commandDefinitions as unmodifiedCommandDefinitions } from '../definitions/commands';
-import { getSafeInsertText, TIME_SYSTEM_PARAMS, TRIGGER_SUGGESTION_COMMAND } from './factories';
-import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
-import {
-  policies,
-  getFunctionSignaturesByReturnType,
-  getFieldNamesByType,
-  createCustomCallbackMocks,
-  createCompletionContext,
-  getPolicyFields,
-  PartialSuggestionWithText,
-  TIME_PICKER_SUGGESTION,
-  setup,
-  attachTriggerCommand,
-  SuggestOptions,
-  fields,
-} from './__tests__/helpers';
+import { Location } from '../definitions/types';
 import { METADATA_FIELDS } from '../shared/constants';
 import { ESQL_STRING_TYPES } from '../shared/esql_types';
-import { getRecommendedQueries } from './recommended_queries/templates';
+import {
+  attachTriggerCommand,
+  createCompletionContext,
+  createCustomCallbackMocks,
+  fields,
+  getFieldNamesByType,
+  getFunctionSignaturesByReturnType,
+  getPolicyFields,
+  PartialSuggestionWithText,
+  policies,
+  setup,
+  SuggestOptions,
+  TIME_PICKER_SUGGESTION,
+} from './__tests__/helpers';
+import { suggest } from './autocomplete';
 import { getDateHistogramCompletionItem } from './commands/stats/util';
-import { Location } from '../definitions/types';
+import { getSafeInsertText, TIME_SYSTEM_PARAMS, TRIGGER_SUGGESTION_COMMAND } from './factories';
+import { getRecommendedQueries } from './recommended_queries/templates';
 
 const commandDefinitions = unmodifiedCommandDefinitions.filter(({ hidden }) => !hidden);
 
@@ -213,13 +212,7 @@ describe('autocomplete', () => {
       const statement = 'from a | drop keywordField | eval var0 = abs(doubleField) ';
       const triggerOffset = statement.lastIndexOf(' ');
       const context = createCompletionContext(statement[triggerOffset]);
-      await suggest(
-        statement,
-        triggerOffset + 1,
-        context,
-        async (text) => (text ? getAstAndSyntaxErrors(text) : { ast: [], errors: [] }),
-        callbackMocks
-      );
+      await suggest(statement, triggerOffset + 1, context, callbackMocks);
       expect(callbackMocks.getColumnsFor).toHaveBeenCalledWith({
         query: 'from a | drop keywordField',
       });
@@ -229,13 +222,7 @@ describe('autocomplete', () => {
       const statement = 'from a | drop | eval var0 = abs(doubleField) ';
       const triggerOffset = statement.lastIndexOf('p') + 1; // drop <here>
       const context = createCompletionContext(statement[triggerOffset]);
-      await suggest(
-        statement,
-        triggerOffset + 1,
-        context,
-        async (text) => (text ? getAstAndSyntaxErrors(text) : { ast: [], errors: [] }),
-        callbackMocks
-      );
+      await suggest(statement, triggerOffset + 1, context, callbackMocks);
       expect(callbackMocks.getColumnsFor).toHaveBeenCalledWith({ query: 'from a' });
     });
   });
