@@ -21,9 +21,9 @@ export const genericEntityEngineDescription: EntityDescription = {
   fields: [
     newestValue({ source: 'entity.name' }),
     newestValue({ source: 'entity.source' }),
-    newestValue({ source: 'entity.category' }),
     newestValue({ source: 'entity.type' }),
-    newestValue({ source: 'entity.address' }),
+    newestValue({ source: 'entity.sub_type' }),
+    newestValue({ source: 'entity.url' }),
 
     newestValue({ source: 'cloud.account.id' }),
     newestValue({ source: 'cloud.account.name' }),
