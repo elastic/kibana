@@ -3,9 +3,9 @@ info:
   title: Post Entity Search discovery API endpoint
   version: '1'
 paths:
-  /internal/elastic_assistant/entity_resolution:
+  /internal/elastic_assistant/risk_spikes:
     post:
-      operationId: EntityResolutionPost
+      operationId: RiskScoreSpikesPost
       x-codegen-enabled: true
       description: Find matching entity suggestions
       summary: Generate matching entity suggestions for the given entity via the Elastic Assistant
@@ -19,13 +19,12 @@ paths:
               type: object
               required:
                 - apiConfig
-                - entitiesIndexPattern
-                - size
-                - subAction
+                - identifier
+                - identifierKey
               properties:
-                filter:
-                  type: object
-                entitiesIndexPattern:
+                identifier:
+                  type: string
+                identifierKey:
                   type: string
                 apiConfig:
                   $ref: '../conversations/common_attributes.schema.yaml#/components/schemas/ApiConfig'
@@ -38,14 +37,6 @@ paths:
                   type: string
                 model:
                   type: string
-                promptTemplate:
-                  description: Optional prompt template must include $$ENTITY and $$CANDIDATES for entity and candidates respectively to be replaced
-                  example: "Does $$ENTITY match one of these candidates? $$CANDIDATES"
-                  type: string
-                size:
-                  type: number
-                  minimum: 1
-                  maximum: 100
       responses:
         '200':
           description: Successful response
@@ -53,13 +44,18 @@ paths:
             application/json:
               schema:
                 type: object
+                required:
+                  - summary
+                  - detailedExplanation
+                  - recommendations
                 properties:
-                  foundSuggestion:
-                    type: boolean
-                  suggestions:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/EntityResolutionSuggestion'
+                  summary:
+                    type: string
+                  detailedExplanation:
+                    type: string
+                  recommendations: 
+                    type: string
+                  
         '400':
           description: Bad request
           content:
@@ -73,24 +69,4 @@ paths:
                     type: string
                   message:
                     type: string
-components:
-  schemas:
-    EntityResolutionSuggestion:
-      type: object
-      properties:
-        index:
-          type: string
-        id:
-          type: string
-        reason:
-          type: string
-        confidence:
-          enum:
-            - high
-            - medium
-            - low
-        document:
-          type: object
-        entity:
-          type: object
 

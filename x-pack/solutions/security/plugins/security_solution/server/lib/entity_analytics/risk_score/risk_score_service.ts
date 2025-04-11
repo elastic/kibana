@@ -40,7 +40,7 @@ export interface RiskScoreService {
   getRiskInputsIndex: ({ dataViewId }: { dataViewId: string }) => Promise<RiskInputsIndexResponse>;
   scheduleLatestTransformNow: () => Promise<void>;
   refreshRiskScoreIndex: () => Promise<void>;
-  getRiskScoreSpikes: () => Promise<GetRiskScoreSpikesResponse['spikes']>;
+  getRiskScoreSpikes: () => Promise<GetRiskScoreSpikesResponse>;
 }
 
 export interface RiskScoreServiceFactoryParams {

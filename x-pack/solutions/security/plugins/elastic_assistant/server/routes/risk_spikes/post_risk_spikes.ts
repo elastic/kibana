@@ -8,13 +8,15 @@
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { type IKibanaResponse, IRouter, Logger } from '@kbn/core/server';
 import {
-  EntityResolutionPostRequestBody,
-  EntityResolutionPostResponse,
+  RiskScoreSpikesPostRequestBody,
+  RiskScoreSpikesPostResponse,
 } from '@kbn/elastic-assistant-common';
 import { transformError } from '@kbn/securitysolution-es-utils';
 
 import moment from 'moment/moment';
-import { ENTITY_RESOLUTION } from '../../../common/constants';
+import { Alert } from '@kbn/alerts-as-data-utils';
+import _ from 'lodash';
+import { RISK_SPIKES } from '../../../common/constants';
 import { getAssistantTool, getAssistantToolParams } from './helpers';
 import { DEFAULT_PLUGIN_NAME, getPluginNameFromRequest } from '../helpers';
 import { buildResponse } from '../../lib/build_response';
@@ -24,13 +26,11 @@ const ROUTE_HANDLER_TIMEOUT = 10 * 60 * 1000; // 10 * 60 seconds = 10 minutes
 const LANG_CHAIN_TIMEOUT = ROUTE_HANDLER_TIMEOUT - 10_000; // 9 minutes 50 seconds
 const CONNECTOR_TIMEOUT = LANG_CHAIN_TIMEOUT - 10_000; // 9 minutes 40 seconds
 
-export const postEntityResolutionRoute = (
-  router: IRouter<ElasticAssistantRequestHandlerContext>
-) => {
+export const postRiskSpikesRoute = (router: IRouter<ElasticAssistantRequestHandlerContext>) => {
   router.versioned
     .post({
       access: 'internal',
-      path: ENTITY_RESOLUTION,
+      path: RISK_SPIKES,
       options: {
         tags: ['access:elasticAssistant'],
         timeout: {
@@ -48,20 +48,16 @@ export const postEntityResolutionRoute = (
         version: '1',
         validate: {
           request: {
-            body: buildRouteValidationWithZod(EntityResolutionPostRequestBody),
+            body: buildRouteValidationWithZod(RiskScoreSpikesPostRequestBody),
           },
           response: {
             200: {
-              body: { custom: buildRouteValidationWithZod(EntityResolutionPostResponse) },
+              body: { custom: buildRouteValidationWithZod(RiskScoreSpikesPostResponse) },
             },
           },
         },
       },
-      async (
-        context,
-        request,
-        response
-      ): Promise<IKibanaResponse<EntityResolutionPostResponse>> => {
+      async (context, request, response): Promise<IKibanaResponse<RiskScoreSpikesPostResponse>> => {
         const startTime = moment(); // start timing the generation
         const resp = buildResponse(response);
         const assistantContext = await context.elasticAssistant;
@@ -85,27 +81,74 @@ export const postEntityResolutionRoute = (
           });
 
           // get parameters from the request body
-          const entitiesIndexPattern = decodeURIComponent(request.body.entitiesIndexPattern);
-          const { apiConfig, langSmithApiKey, langSmithProject, size, promptTemplate } =
-            request.body;
+          const { apiConfig, langSmithApiKey, langSmithProject, identifier, identifierKey } =
+            request.body as RiskScoreSpikesPostRequestBody;
 
-          // if (!searchEntity) {
-          //   return resp.error({
-          //     body: `Entity to resolve not found`,
-          //     statusCode: 400,
-          //   });
-          // }
+          if (!identifier || !identifierKey) {
+            return resp.error({
+              body: `Identifier and identifierKey are required`,
+              statusCode: 400,
+            });
+          }
 
           // get an Elasticsearch client for the authenticated user:
           const esClient = (await context.core).elasticsearch.client.asCurrentUser;
-          // const entityResolutionClient = await assistantContext.getEntityResolutionDataClient();
+          // const RiskSpikesClient = await assistantContext.getRiskSpikesDataClient();
 
-          // if (!entityResolutionClient) {
+          // if (!RiskSpikesClient) {
           //   return resp.error({
           //     body: `Entity resolution data client not initialized`,
           //     statusCode: 500,
           //   });
           // }
+
+          const searchRes = await esClient.search({
+            index: '.internal.alerts-security.alerts-default*',
+            size: 25,
+            sort: [
+              {
+                '@timestamp': {
+                  order: 'desc',
+                },
+              },
+            ],
+            query: {
+              terms: {
+                [identifierKey]: [identifier],
+              },
+            },
+          });
+
+          const mostRecentAlerts: Alert[] = searchRes.hits.hits.map(
+            (hit) =>
+              _.omit(hit._source as object, [
+                'Endpoint',
+                'process.Ext',
+                'process.parent',
+                'ecs',
+                'data_stream',
+                'elastic',
+                'agent',
+                'kibana.alert.rule.severity_mapping',
+                'kibana.alert.ancestors',
+                'kibana.alert.rule.producer',
+                'kibana.alert.rule.revision',
+                'kibana.alert.rule.rule_type_id',
+                'kibana.alert.original_event.agent_id_status',
+                'kibana.alert.original_event.sequence',
+                'kibana.alert.original_event.action',
+                'kibana.alert.original_event.id',
+                'kibana.alert.rule.parameters.severity_mapping',
+                'kibana.alert.rule.parameters["severity_mapping"]', // Expressed as a lodash path
+              ]) as Alert
+          );
+
+          mostRecentAlerts.forEach((alert) => {
+            // @ts-ignore
+            delete alert['kibana.alert.rule.parameters'].severity_mapping;
+            // @ts-ignore
+            delete alert['kibana.alert.rule.parameters'].risk_score_mapping;
+          });
 
           const assistantTool = getAssistantTool(
             (await context.elasticAssistant).getRegisteredTools,
@@ -113,14 +156,14 @@ export const postEntityResolutionRoute = (
           );
 
           if (!assistantTool) {
-            return response.notFound(); // attack discovery tool not found
+            return response.notFound();
           }
 
           const assistantToolParams = getAssistantToolParams({
-            promptTemplate,
+            mostRecentAlerts,
+            identifier,
+            identifierKey,
             actionsClient,
-            // entityResolutionClient,
-            entitiesIndexPattern,
             apiConfig,
             esClient,
             connectorTimeout: CONNECTOR_TIMEOUT,
@@ -129,10 +172,8 @@ export const postEntityResolutionRoute = (
             langSmithApiKey,
             logger,
             request,
-            size,
           });
 
-          // invoke the attack discovery tool:
           const toolInstance = assistantTool.getTool(assistantToolParams);
 
           const result = await toolInstance?.invoke('');
@@ -144,7 +185,7 @@ export const postEntityResolutionRoute = (
             });
           }
 
-          const castResult = JSON.parse(result) as EntityResolutionPostResponse;
+          const castResult = JSON.parse(result) as RiskScoreSpikesPostResponse;
           const endTime = moment(); // end timing the generation
 
           logger.info(

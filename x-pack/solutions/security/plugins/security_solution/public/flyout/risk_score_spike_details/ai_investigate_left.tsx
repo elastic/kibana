@@ -17,11 +17,24 @@ import {
   EuiSpacer,
   EuiButton,
   EuiImage,
+  EuiLoadingSpinner,
+  EuiAccordion,
+  EuiTitle,
 } from '@elastic/eui';
 import type { SpikeEntity } from '../../../common/api/entity_analytics';
-import { FlyoutLoading } from '../shared/components/flyout_loading';
 import { RiskScoreSpikeBadges } from './badges';
 import entityImage from './img/entity_high.png';
+import { useRiskScoreSpikesAiSummary } from '../../entity_analytics/api/hooks/use_risk_spikes';
+
+// replaces a space followed by numbers followed by a closing bracket ) with a newline and a dash followed by the numbers for
+// better readability e,g  1) becomes \n - 1
+const constConvertNumbersToLists = (str: string) => {
+  const regex = /(\s\d+\))/g;
+  return str.replace(regex, (match) => {
+    const number = match.trim();
+    return `<br/><br/> - ${number}`;
+  });
+};
 
 export interface InvestigateRiskScoreSpikeExpandableFlyoutProps extends FlyoutPanelProps {
   key: 'investigate-risk-score-spike';
@@ -38,10 +51,16 @@ export interface InvestigateRiskScoreSpikePanelProps extends Record<string, unkn
 export const InvestigateRiskScoreSpikeLeftPanel = ({
   spike,
 }: InvestigateRiskScoreSpikePanelProps) => {
-  const loading = false;
   const [connectorId, setConnectorId] = React.useState<string | undefined>(undefined);
+  const [performRequest, setPerformRequest] = React.useState(false);
+  const { data, isLoading } = useRiskScoreSpikesAiSummary({
+    identifier: spike.identifier,
+    identifierKey: spike.identifierKey,
+    connectorId,
+    enabled: performRequest,
+  });
 
-  if (loading) return <FlyoutLoading />;
+  const requestLoading = performRequest && isLoading;
 
   const onConnectorIdSelected = (newId: string) => {
     setConnectorId(newId);
@@ -55,50 +74,128 @@ export const InvestigateRiskScoreSpikeLeftPanel = ({
     <EuiPanel hasShadow={false} hasBorder={true}>
       <EuiFlexGroup direction="column" gutterSize="s">
         <EuiFlexItem grow={false}>
-          <EuiText>
-            <h4>{`Investigate Risk Score Spike for ${spike.identifier}`}</h4>
-          </EuiText>
+          <EuiTitle>
+            <h3>{`Investigate Risk Score Spike for ${spike.identifier}`}</h3>
+          </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <RiskScoreSpikeBadges spike={spike} />
         </EuiFlexItem>
         <EuiHorizontalRule margin="m" />
         <EuiFlexItem grow={false}>
-          <EuiFlexGroup direction="row" gutterSize="s" justifyContent="flexEnd">
-            <EuiFlexItem grow={false}>
-              <ConnectorSelectorInline
-                onConnectorSelected={noop}
-                onConnectorIdSelected={onConnectorIdSelected}
-                selectedConnectorId={connectorId}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
+          {!data && (
+            <EuiFlexGroup direction="row" gutterSize="s" justifyContent="flexEnd">
+              <EuiFlexItem grow={false}>
+                <ConnectorSelectorInline
+                  onConnectorSelected={noop}
+                  onConnectorIdSelected={onConnectorIdSelected}
+                  selectedConnectorId={connectorId}
+                />
+                <EuiSpacer size="xl" />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          )}
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiSpacer size="xl" />
-          <EuiFlexGroup justifyContent="center">
-            <EuiFlexItem grow={false}>
-              <EuiImage
-                size="m"
-                hasShadow={false}
-                hasBorder={false}
-                alt="Entity"
-                url={entityImage}
-              />
-              <EuiButton
-                iconType="arrowRight"
-                iconSide="right"
-                onClick={() => {
-                  // Handle the click event
-                }}
-                isDisabled={!connectorId}
-                size="m"
-                css={{ maxWidth: '200px' }}
-              >
-                {'Begin Investigation'}
-              </EuiButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+          {!data && (
+            <EuiFlexGroup justifyContent="center">
+              <EuiFlexItem grow={false}>
+                <EuiImage
+                  size="m"
+                  hasShadow={false}
+                  alt="Entity"
+                  url={entityImage}
+                  css={{
+                    animation: requestLoading ? 'bounce 2s infinite ease-in-out' : 'none',
+                  }}
+                />
+                <EuiButton
+                  iconType="arrowRight"
+                  iconSide="right"
+                  onClick={() => setPerformRequest(true)}
+                  isDisabled={!connectorId || requestLoading}
+                  size="m"
+                  css={{ maxWidth: '200px' }}
+                >
+                  {requestLoading ? <EuiLoadingSpinner size="s" /> : 'Begin Investigation'}
+                </EuiButton>
+                <style>
+                  {`
+                  @keyframes bounce {
+                    0%, 100% {
+                    transform: translateY(0);
+                    }
+                    50% {
+                    transform: translateY(-10px);
+                    }
+                  }
+                  `}
+                </style>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          )}
+          {data && (
+            <EuiFlexGroup direction="column" gutterSize="m">
+              <EuiFlexItem grow={false}>
+                <EuiAccordion
+                  id="risk-summary"
+                  buttonContent={
+                    <EuiTitle>
+                      <h5>{'Risk Summary'}</h5>
+                    </EuiTitle>
+                  }
+                  initialIsOpen={true}
+                >
+                  <EuiSpacer size="s" />
+                  <EuiText>
+                    <span
+                      dangerouslySetInnerHTML={{
+                        __html: constConvertNumbersToLists(data.summary),
+                      }}
+                    />
+                  </EuiText>
+                </EuiAccordion>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiAccordion
+                  id="detailed-explanation"
+                  buttonContent={
+                    <EuiTitle>
+                      <h5>{'Detailed Explanation'}</h5>
+                    </EuiTitle>
+                  }
+                >
+                  <EuiSpacer size="s" />
+                  <EuiText>
+                    <span
+                      dangerouslySetInnerHTML={{
+                        __html: constConvertNumbersToLists(data.detailedExplanation),
+                      }}
+                    />
+                  </EuiText>
+                </EuiAccordion>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiAccordion
+                  id="recommendations"
+                  buttonContent={
+                    <EuiTitle>
+                      <h5>{'Recommendations'}</h5>
+                    </EuiTitle>
+                  }
+                >
+                  <EuiSpacer size="s" />
+                  <EuiText>
+                    <span
+                      dangerouslySetInnerHTML={{
+                        __html: constConvertNumbersToLists(data.recommendations),
+                      }}
+                    />
+                  </EuiText>
+                </EuiAccordion>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          )}
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPanel>

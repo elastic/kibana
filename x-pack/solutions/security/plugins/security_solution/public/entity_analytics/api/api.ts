@@ -6,6 +6,10 @@
  */
 
 import { useMemo } from 'react';
+import type {
+  RiskScoreSpikesPostResponse,
+  RiskScoreSpikesPostRequestBody,
+} from '@kbn/elastic-assistant-common';
 import {
   ENTITY_STORE_INTERNAL_PRIVILEGES_URL,
   LIST_ENTITIES_URL,
@@ -294,7 +298,15 @@ export const useEntityAnalyticsRoutes = () => {
         method: 'GET',
       });
 
+    const fetchRiskScoreSpikesAiSummary = (params: RiskScoreSpikesPostRequestBody) =>
+      http.fetch<RiskScoreSpikesPostResponse>('/internal/elastic_assistant/risk_spikes', {
+        version: API_VERSIONS.internal.v1,
+        method: 'POST',
+        body: JSON.stringify(params),
+      });
+
     return {
+      fetchRiskScoreSpikesAiSummary,
       fetchRiskScoreSpikes,
       fetchRiskScorePreview,
       fetchRiskEngineStatus,

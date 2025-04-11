@@ -41,7 +41,7 @@ import {
 import { deleteKnowledgeBaseEntryRoute } from './knowledge_base/entries/delete_route';
 import { updateKnowledgeBaseEntryRoute } from './knowledge_base/entries/update_route';
 import { getKnowledgeBaseEntryRoute } from './knowledge_base/entries/get_route';
-import { postEntityResolutionRoute } from './entity_resolution/post_entity_resolution';
+import { postRiskSpikesRoute } from './risk_spikes/post_risk_spikes';
 export const registerRoutes = (
   router: ElasticAssistantPluginRouter,
   logger: Logger,
@@ -106,5 +106,5 @@ export const registerRoutes = (
   getDefendInsightsRoute(router);
   postDefendInsightsRoute(router);
 
-  postEntityResolutionRoute(router);
+  postRiskSpikesRoute(router);
 };

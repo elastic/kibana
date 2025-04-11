@@ -9,7 +9,7 @@ import { KibanaRequest, Logger } from '@kbn/core/server';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import {
   ApiConfig,
-  EntityResolutionPostRequestBody,
+  RiskScoreSpikesPostRequestBody,
   newContentReferencesStore,
 } from '@kbn/elastic-assistant-common';
 import { ActionsClientLlm } from '@kbn/langchain/server';
@@ -17,13 +17,15 @@ import { ActionsClientLlm } from '@kbn/langchain/server';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import { getLangSmithTracer } from '@kbn/langchain/server/tracers/langsmith';
+import { Alert } from '@kbn/alerts-as-data-utils';
 import { getLlmType } from '../utils';
 import type { GetRegisteredTools } from '../../services/app_context';
 import { AssistantToolParams } from '../../types';
 export const getAssistantToolParams = ({
-  promptTemplate,
+  mostRecentAlerts,
+  identifier,
+  identifierKey,
   actionsClient,
-  entitiesIndexPattern,
   apiConfig,
   esClient,
   connectorTimeout,
@@ -32,11 +34,11 @@ export const getAssistantToolParams = ({
   langSmithApiKey,
   logger,
   request,
-  size,
 }: {
-  promptTemplate?: string;
+  mostRecentAlerts: Alert[];
+  identifier: string;
+  identifierKey: string;
   actionsClient: PublicMethodsOf<ActionsClient>;
-  entitiesIndexPattern: string;
   apiConfig: ApiConfig;
   esClient: ElasticsearchClient;
   connectorTimeout: number;
@@ -44,8 +46,7 @@ export const getAssistantToolParams = ({
   langSmithProject?: string;
   langSmithApiKey?: string;
   logger: Logger;
-  request: KibanaRequest<unknown, unknown, EntityResolutionPostRequestBody>;
-  size: number;
+  request: KibanaRequest<unknown, unknown, RiskScoreSpikesPostRequestBody>;
 }): AssistantToolParams => {
   const traceOptions = {
     projectName: langSmithProject,
@@ -71,19 +72,20 @@ export const getAssistantToolParams = ({
   const contentReferencesStore = newContentReferencesStore();
 
   return {
+    mostRecentAlerts,
+    identifier,
+    identifierKey,
     isEnabledKnowledgeBase: false, // not required
     esClient,
     langChainTimeout,
     llm,
     logger,
     request,
-    size,
     contentReferencesStore,
   };
 };
 
 export const getAssistantTool = (getRegisteredTools: GetRegisteredTools, pluginName: string) => {
-  // get the entity resolution tool:
   const assistantTools = getRegisteredTools(pluginName);
-  return assistantTools.find((tool) => tool.id === 'entity-resolution');
+  return assistantTools.find((tool) => tool.id === 'risk-spikes');
 };
