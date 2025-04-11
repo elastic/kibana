@@ -40,7 +40,7 @@ spec:
         everyone:
           access_level: READ_ONLY
       schedules:
-        Daily build:
+        Weekly build:
           cronline: 0 0 * * 1 GMT
           message: Weekly Security GenAI Evals
           branch: main
