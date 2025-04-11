@@ -25,5 +25,6 @@ declare namespace Cypress {
     updateAdvancedSettings(settings: Record<string, unknown>): void;
     getByTestSubj(selector: string): Chainable<JQuery<Element>>;
     withHidden(selector: string, callback: () => void): void;
+    waitUntilPageContentIsLoaded(): void;
   }
 }
