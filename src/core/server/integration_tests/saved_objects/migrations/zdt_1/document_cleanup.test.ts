@@ -61,8 +61,8 @@ describe('ZDT upgrades - document cleanup', () => {
     }));
 
     const deletedObjs = range(5).map<SavedObjectsBulkCreateObject>((number) => ({
-      id: `server-${number}`,
-      type: 'server',
+      id: `server-test-${number}`,
+      type: 'server-test',
       attributes: {
         text: `some text`,
       },
@@ -110,7 +110,7 @@ describe('ZDT upgrades - document cleanup', () => {
     // unknown type
     expect(countResultsByType(indexContent, 'bar')).toEqual(0);
     // deleted type
-    expect(countResultsByType(indexContent, 'server')).toEqual(0);
+    expect(countResultsByType(indexContent, 'server-test')).toEqual(0);
     // excludeOnUpgrade type
     expect(countResultsByType(indexContent, 'excluded')).toEqual(3);
   });

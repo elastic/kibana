@@ -111,7 +111,7 @@ export const getSampleBType = () => {
 export const getDeletedType = () => {
   return createType({
     // we cant' easily introduce a deleted type, so we're using an existing one
-    name: 'server',
+    name: 'server-test',
     mappings: {
       properties: {
         text: { type: 'text' },
