@@ -12,6 +12,7 @@ import type {
   AuditLogger,
   IScopedClusterClient,
   AuditEvent,
+  IUiSettingsClient,
   AnalyticsServiceSetup,
   KibanaRequest,
 } from '@kbn/core/server';
@@ -26,12 +27,14 @@ import type { EntityDefinitionWithState } from '@kbn/entityManager-plugin/server
 import type { EntityDefinition } from '@kbn/entities-schema';
 import type { estypes } from '@elastic/elasticsearch';
 import { SO_ENTITY_DEFINITION_TYPE } from '@kbn/entityManager-plugin/server/saved_objects';
+import { SECURITY_SOLUTION_ENABLE_ASSET_INVENTORY_SETTING } from '@kbn/management-settings-ids';
 import { RISK_SCORE_INDEX_PATTERN } from '../../../../common/constants';
 import {
   ENTITY_STORE_INDEX_PATTERN,
   ENTITY_STORE_REQUIRED_ES_CLUSTER_PRIVILEGES,
   ENTITY_STORE_SOURCE_REQUIRED_ES_INDEX_PRIVILEGES,
 } from '../../../../common/entity_analytics/entity_store/constants';
+import { getEnabledEntityTypes } from '../../../../common/entity_analytics/utils';
 import {
   getAllMissingPrivileges,
   getMissingPrivilegesErrorMessage,
@@ -142,6 +145,7 @@ interface EntityStoreClientOpts {
   apiKeyManager?: ApiKeyManager;
   security: SecurityPluginStart;
   request: KibanaRequest;
+  uiSettingsClient: IUiSettingsClient;
 }
 
 interface SearchEntitiesParams {
@@ -160,6 +164,7 @@ export class EntityStoreDataClient {
   private riskScoreDataClient: RiskScoreDataClient;
   private esClient: ElasticsearchClient;
   private apiKeyGenerator?: ApiKeyManager;
+  private uiSettingsClient: IUiSettingsClient;
 
   constructor(private readonly options: EntityStoreClientOpts) {
     const {
@@ -170,9 +175,11 @@ export class EntityStoreDataClient {
       kibanaVersion,
       namespace,
       apiKeyManager,
+      uiSettingsClient,
     } = options;
     this.esClient = clusterClient.asCurrentUser;
     this.apiKeyGenerator = apiKeyManager;
+    this.uiSettingsClient = uiSettingsClient;
 
     this.entityClient = new EntityClient({
       clusterClient,
@@ -251,7 +258,11 @@ export class EntityStoreDataClient {
     const run = <T>(fn: () => Promise<T>) =>
       new Promise<T>((resolve) => setTimeout(() => fn().then(resolve), 0));
 
-    const enabledEntityTypes = Object.values(EntityType);
+    const genericEntityStoreEnabled = await this.uiSettingsClient.get<boolean>(
+      SECURITY_SOLUTION_ENABLE_ASSET_INVENTORY_SETTING
+    );
+
+    const enabledEntityTypes = getEnabledEntityTypes(genericEntityStoreEnabled);
 
     // When entityTypes param is defined it only enables the engines that are provided
     const enginesTypes = requestBodyOverrides.entityTypes

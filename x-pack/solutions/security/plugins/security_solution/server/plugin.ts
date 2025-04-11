@@ -266,7 +266,6 @@ export class Plugin implements ISecuritySolutionPlugin {
         kibanaVersion: pluginContext.env.packageInfo.version,
       });
     }
-
     const requestContextFactory = new RequestContextFactory({
       config,
       logger,

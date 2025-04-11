@@ -6,11 +6,22 @@
  */
 
 import { useMemo } from 'react';
-import { getEntityAnalyticsEntityTypes } from '../../../common/entity_analytics/utils';
-import { EntityType } from '../../../common/entity_analytics/types';
+import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
+import { SECURITY_SOLUTION_ENABLE_ASSET_INVENTORY_SETTING } from '@kbn/management-settings-ids';
+import {
+  getEntityAnalyticsEntityTypes,
+  getEnabledEntityTypes,
+} from '../../../common/entity_analytics/utils';
 
 export const useStoreEntityTypes = () => {
-  return useMemo(() => Object.values(EntityType), []);
+  const [genericEntityStoreEnabled] = useUiSetting$<boolean>(
+    SECURITY_SOLUTION_ENABLE_ASSET_INVENTORY_SETTING
+  );
+
+  return useMemo(
+    () => getEnabledEntityTypes(genericEntityStoreEnabled),
+    [genericEntityStoreEnabled]
+  );
 };
 
 export const useRiskEngineEntityTypes = () => {
