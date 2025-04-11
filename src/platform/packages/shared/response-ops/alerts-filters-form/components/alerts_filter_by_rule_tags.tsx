@@ -84,7 +84,7 @@ export const filterMetadata: AlertsFilterMetadata<string[]> = {
   id: 'ruleTags',
   displayName: RULE_TAGS_FILTER_LABEL,
   component: AlertsFilterByRuleTags,
-  isEmpty: (value?: string[]) => !value?.length,
+  isEmpty: (value?: string[]) => !Boolean(value?.length),
   toEsQuery: (value: string[]) => {
     return {
       terms: {
