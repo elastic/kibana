@@ -161,7 +161,10 @@ export function ErrorSampleDetails({
   // In case of OTel the error data is not available in the error response and we need to use
   // the associated root span data (which is called "transaction" here because of the APM data model).
   const errorUrl =
-    (error.error.page?.url || error.url?.full) ?? buildUrl(error?.url ? error : transaction);
+    error.error.page?.url ||
+    error.url?.full ||
+    transaction?.url?.full ||
+    buildUrl(error?.url ? error : transaction);
   const method = error.http?.request?.method ?? transaction?.http?.request?.method;
   const status = error.http?.response?.status_code ?? transaction?.http?.response?.status_code;
   const userAgent = error?.user_agent ?? transaction?.user_agent;
