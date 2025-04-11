@@ -232,6 +232,28 @@ export const OutputFormRemoteEsSection: React.FunctionComponent<Props> = (props)
           {inputs.syncIntegrationsInput.value === true && (
             <>
               <EuiSpacer size="m" />
+              <EuiFormRow
+                fullWidth
+                helpText={
+                  <FormattedMessage
+                    id="xpack.fleet.settings.editOutputFlyout.syncUninstalledIntegrationsFormRowLabel"
+                    defaultMessage="If enabled, uninstalled integrations will also be uninstalled on the remote Elasticsearch cluster"
+                  />
+                }
+                {...inputs.syncUninstalledIntegrationsInput.formRowProps}
+              >
+                <EuiSwitch
+                  {...inputs.syncUninstalledIntegrationsInput.props}
+                  data-test-subj="syncUninstalledIntegrationsSwitch"
+                  label={
+                    <FormattedMessage
+                      id="xpack.fleet.settings.editOutputFlyout.syncUninstalledIntegrationsSwitchLabel"
+                      defaultMessage="Uninstall integrations on remote"
+                    />
+                  }
+                />
+              </EuiFormRow>
+              <EuiSpacer size="m" />
               <EuiCallOut
                 iconType="iInCircle"
                 title={

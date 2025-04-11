@@ -617,6 +617,7 @@ export function transformOutputToFullPolicyOutput(
   if (output.type === outputType.RemoteElasticsearch) {
     newOutput.service_token = output.service_token;
     newOutput.sync_integrations = output.sync_integrations;
+    newOutput.sync_uninstalled_integrations = output.sync_uninstalled_integrations;
   }
 
   if (outputTypeSupportPresets(output.type)) {
