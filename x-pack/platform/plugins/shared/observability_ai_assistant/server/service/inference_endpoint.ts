@@ -12,8 +12,10 @@ import {
   InferenceInferenceEndpointInfo,
   MappingSemanticTextProperty,
   MlGetTrainedModelsStatsResponse,
+  MlTrainedModelStats,
 } from '@elastic/elasticsearch/lib/api/types';
 import pRetry from 'p-retry';
+import { KnowledgeBaseState } from '../../common';
 import { ObservabilityAIAssistantConfig } from '../config';
 import { resourceNames } from '.';
 
@@ -72,7 +74,13 @@ export async function getKbModelStatus({
   logger: Logger;
   config: ObservabilityAIAssistantConfig;
   inferenceId?: string;
-}) {
+}): Promise<{
+  enabled: boolean;
+  endpoint?: InferenceInferenceEndpointInfo;
+  modelStats?: MlTrainedModelStats;
+  errorMessage?: string;
+  kbState: KnowledgeBaseState;
+}> {
   const enabled = config.enableKnowledgeBase;
 
   if (!inferenceId) {
@@ -82,10 +90,9 @@ export async function getKbModelStatus({
     } catch (error) {
       logger.debug(`Inference id not found: ${error.message}`);
       return {
-        endpoint: { inference_id: inferenceId },
-        ready: false,
         enabled,
         errorMessage: error.message,
+        kbState: KnowledgeBaseState.NOT_INSTALLED,
       };
     }
   }
@@ -100,14 +107,8 @@ export async function getKbModelStatus({
     if (!isInferenceEndpointMissingOrUnavailable(error)) {
       throw error;
     }
-
     logger.debug(`Inference endpoint "${inferenceId}" not found or unavailable: ${error.message}`);
-    return {
-      ready: false,
-      enabled,
-      errorMessage: error.message,
-      endpoint: { inference_id: inferenceId },
-    };
+    return { enabled, errorMessage: error.message, kbState: KnowledgeBaseState.NOT_INSTALLED };
   }
 
   const modelId = endpoint?.service_settings?.model_id;
@@ -120,32 +121,39 @@ export async function getKbModelStatus({
     logger.debug(
       `Failed to get model stats for model "${modelId}" and inference id ${inferenceId}: ${error.message}`
     );
-    return {
-      ready: false,
-      enabled,
-      errorMessage: error.message,
-      endpoint,
-    };
+    return { enabled, errorMessage: error.message, kbState: KnowledgeBaseState.ERROR };
   }
 
   const modelStats = trainedModelStatsResponse.trained_model_stats.find(
     (stats) => stats.deployment_stats?.deployment_id === inferenceId
   );
-  const deploymentState = modelStats?.deployment_stats?.state;
-  const allocationState = modelStats?.deployment_stats?.allocation_status?.state;
-  const allocationCount = modelStats?.deployment_stats?.allocation_status?.allocation_count ?? 0;
-  const ready =
-    deploymentState === 'started' && allocationState === 'fully_allocated' && allocationCount > 0;
+
+  let kbState: KnowledgeBaseState;
+
+  if (!modelStats) {
+    kbState = KnowledgeBaseState.PENDING_MODEL_DEPLOYMENT;
+  } else if (modelStats.deployment_stats?.state === 'failed') {
+    kbState = KnowledgeBaseState.ERROR;
+  } else if (
+    modelStats?.deployment_stats?.state === 'starting' &&
+    modelStats?.deployment_stats?.allocation_status?.allocation_count === 0
+  ) {
+    kbState = KnowledgeBaseState.DEPLOYING_MODEL;
+  } else if (
+    modelStats?.deployment_stats?.state === 'started' &&
+    modelStats?.deployment_stats?.allocation_status?.state === 'fully_allocated' &&
+    modelStats?.deployment_stats?.allocation_status?.allocation_count > 0
+  ) {
+    kbState = KnowledgeBaseState.READY;
+  } else {
+    kbState = KnowledgeBaseState.ERROR;
+  }
 
   return {
     endpoint,
-    ready,
     enabled,
-    model_stats: {
-      allocation_count: allocationCount,
-      deployment_state: deploymentState,
-      allocation_state: allocationState,
-    },
+    modelStats,
+    kbState,
   };
 }
 
@@ -166,8 +174,9 @@ export async function waitForKbModel({
 
   return pRetry(
     async () => {
-      const { ready } = await getKbModelStatus({ esClient, logger, config, inferenceId });
-      if (!ready) {
+      const { kbState } = await getKbModelStatus({ esClient, logger, config, inferenceId });
+
+      if (kbState !== KnowledgeBaseState.READY) {
         logger.debug('Knowledge base model is not yet ready. Retrying...');
         throw new Error('Knowledge base model is not yet ready');
       }
