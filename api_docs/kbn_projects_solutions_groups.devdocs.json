@@ -185,7 +185,7 @@
           "\nA type that defines the existing groups (platform + solutions)."
         ],
         "signature": [
-          "\"search\" | \"security\" | \"observability\" | \"platform\" | \"chat\""
+          "\"search\" | \"security\" | \"observability\" | \"chat\" | \"platform\""
         ],
         "path": "src/platform/packages/private/kbn-projects-solutions-groups/index.ts",
         "deprecated": false,
@@ -236,7 +236,7 @@
           "\nThe groups to which a module can belong.\n'common' is the default for uncategorised modules."
         ],
         "signature": [
-          "\"search\" | \"security\" | \"observability\" | \"platform\" | \"chat\" | \"common\""
+          "\"search\" | \"security\" | \"observability\" | \"chat\" | \"platform\" | \"common\""
         ],
         "path": "src/platform/packages/private/kbn-projects-solutions-groups/index.ts",
         "deprecated": false,

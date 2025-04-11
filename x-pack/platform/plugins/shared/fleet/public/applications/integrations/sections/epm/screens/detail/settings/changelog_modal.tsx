@@ -31,6 +31,7 @@ export const ChangelogModal: React.FunctionComponent<Props> = ({
   isLoading,
   onClose,
 }) => {
+
   const changelogText = formatChangelog(changelog);
 
   return (
