@@ -161,8 +161,13 @@ describe('AlertRuleFromVisAction', () => {
     action.execute({
       embeddable: embeddableMock,
       data: {
-        query: 'FROM uhhh_can_i_get_a_uhhhhhhhhhhhh_index | STATS COUNT(*), PERCENTILE(owowo, 99)',
-        thresholdValues: { 'COUNT(*)': 210, 'PERCENTILE(owowo, 99)': 42.6 },
+        query:
+          'FROM uhhh_can_i_get_a_uhhhhhhhhhhhh_index | RENAME bytes as `meow bytes` | STATS COUNT(*), PERCENTILE(owowo, 99), COUNT(`meow bytes`)',
+        thresholdValues: {
+          'COUNT(*)': 210,
+          'PERCENTILE(owowo, 99)': 42.6,
+          'COUNT(`meow bytes`)': 1312,
+        },
         splitValues: {},
       },
     });
@@ -171,11 +176,11 @@ describe('AlertRuleFromVisAction', () => {
         "params": Object {
           "esqlQuery": Object {
             "esql": "// Original ES|QL query derived from the visualization:
-      FROM uhhh_can_i_get_a_uhhhhhhhhhhhh_index | STATS COUNT(*), PERCENTILE(owowo, 99)
+      FROM uhhh_can_i_get_a_uhhhhhhhhhhhh_index | RENAME bytes as \`meow bytes\` | STATS COUNT(*), PERCENTILE(owowo, 99), COUNT(\`meow bytes\`)
       // Evaluate the following columns so they can be used as part of the alerting threshold:
-      | EVAL _count_ = \`COUNT(*)\` | EVAL _percentile_owowo_99 = \`PERCENTILE(owowo, 99)\` 
+      | EVAL _count = \`COUNT(*)\` | EVAL _percentile_owowo_99 = \`PERCENTILE(owowo, 99)\` | EVAL _count_meow_bytes = \`COUNT(\`meow bytes\`)\` 
       // Threshold automatically generated from the selected values on the chart. This rule will generate an alert based on the following conditions:
-      | WHERE _count_ >= 210 AND _percentile_owowo_99 >= 42.6",
+      | WHERE _count >= 210 AND _percentile_owowo_99 >= 42.6 AND _count_meow_bytes >= 1312",
           },
           "searchType": "esqlQuery",
           "timeField": "@timestamp",

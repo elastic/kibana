@@ -91,8 +91,12 @@ export class AlertRuleFromVisAction implements Action<Context> {
         // e.g. FUNCTION(arg1, arg2) -> _function_arg1_arg2
         const colName = `_${fieldName
           .toLowerCase()
-          .replace(/[\),*]/g, '') // Eliminate parens, asterisks, commas
-          .replace(/[\( ]/g, '_')}`; // Replace opening paren and spaces with underscores
+          // Replace opening paren and spaces with underscores
+          .replace(/[\( ]/g, '_')}`
+          // Eliminate non-alphanumeric and non-underscore characters
+          .replace(/[^a-z0-9_]/g, '')
+          // If last escaped character is an underscore, remove it
+          .replace(/_$/, '');
         // Add this to the evalQuery as a side effect
         evalQuery += `| EVAL ${colName} = \`${fieldName}\` `;
         return colName;
