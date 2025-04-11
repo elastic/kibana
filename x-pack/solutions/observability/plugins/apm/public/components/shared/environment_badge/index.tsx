@@ -15,7 +15,6 @@ import {
 
 interface Props {
   environments: string[];
-  isMetricsSignalType?: boolean;
 }
 
 export function EnvironmentBadge({ environments = [] }: Props) {
