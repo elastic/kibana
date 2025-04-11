@@ -57,7 +57,7 @@ export function initializeStateManagement(
     getComparators: () => {
       return {
         attributes: initialState.savedObjectId === undefined
-          ? 'referenceEquality'
+          ? 'deepEquality'
           : 'skip',
         savedObjectId: 'skip',
       }
