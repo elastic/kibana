@@ -42,6 +42,13 @@ export interface RenderingServiceRenderCoreDeps {
   overlays: OverlayStart;
 }
 
+export interface RenderingServiceInternalStart extends IRenderingService {
+  renderCore: (
+    renderCoreDeps: RenderingServiceRenderCoreDeps,
+    targetDomElement: HTMLDivElement
+  ) => void;
+}
+
 /**
  * Renders all Core UI in a single React tree.
  *
@@ -53,9 +60,14 @@ export interface RenderingServiceRenderCoreDeps {
 export class RenderingService implements IRenderingService {
   private contextDeps = new BehaviorSubject<RenderingServiceContextDeps | null>(null);
 
-  start(deps: RenderingServiceContextDeps) {
+  start(deps: RenderingServiceContextDeps): RenderingServiceInternalStart {
     this.contextDeps.next(deps);
-    return this;
+
+    const contract = {
+      renderCore: this.renderCore.bind(this),
+      addContext: this.addContext.bind(this),
+    };
+    return contract;
   }
 
   renderCore(renderCoreDeps: RenderingServiceRenderCoreDeps, targetDomElement: HTMLDivElement) {
