@@ -55,7 +55,7 @@ export const AlertSummary: FunctionComponent<Props> = ({
   return (
     <>
       <EuiTitle size={'s'}>
-        <h2>{i18n.AI_SUMMARY}</h2>
+        <h2 data-test-subj="ai-summary-title">{i18n.AI_SUMMARY}</h2>
       </EuiTitle>
       <EuiSpacer size="s" />
       {hasAlertSummary ? (
@@ -67,6 +67,7 @@ export const AlertSummary: FunctionComponent<Props> = ({
                 font-style: italic;
               `}
               size="s"
+              data-test-subj="generating-summary"
             >
               {i18n.GENERATING}
             </EuiText>
@@ -95,7 +96,7 @@ export const AlertSummary: FunctionComponent<Props> = ({
                   onClick={fetchAISummary}
                   color="primary"
                   size="m"
-                  data-test-subj="generateInsights"
+                  data-test-subj="regenerateInsights"
                   isLoading={messageAndReplacements == null}
                 >
                   <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap={false}>
