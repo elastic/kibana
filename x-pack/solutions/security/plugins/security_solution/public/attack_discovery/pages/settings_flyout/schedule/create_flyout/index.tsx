@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import {
   EuiFlyoutBody,
   EuiFlyoutFooter,
@@ -49,6 +49,7 @@ export const CreateFlyout: React.FC<Props> = React.memo(({ onClose }) => {
   const { data: aiConnectors, isLoading: isLoadingConnectors } = useLoadConnectors({
     http,
   });
+  const [isCreatingSchedule, setIsCreatingSchedule] = useState(false);
 
   const { sourcererDataView } = useSourcererDataView();
 
@@ -91,7 +92,9 @@ export const CreateFlyout: React.FC<Props> = React.memo(({ onClose }) => {
         schedule: { interval: scheduleData.interval },
         actions: scheduleData.actions,
       };
+      setIsCreatingSchedule(true);
       await createAttackDiscoverySchedule({ scheduleToCreate });
+      setIsCreatingSchedule(false);
       onClose();
     },
     [
@@ -106,7 +109,7 @@ export const CreateFlyout: React.FC<Props> = React.memo(({ onClose }) => {
 
   const { editForm, actionButtons } = useEditForm({
     onSave: onCreateSchedule,
-    saveButtonDisabled: isLoadingConnectors,
+    saveButtonDisabled: isLoadingConnectors || isCreatingSchedule,
     saveButtonTitle: i18n.SCHEDULE_CREATE_BUTTON_TITLE,
   });
 
