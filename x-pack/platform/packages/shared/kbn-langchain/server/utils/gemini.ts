@@ -28,7 +28,6 @@ import {
 import { ChatGenerationChunk } from '@langchain/core/outputs';
 import { ToolCallChunk } from '@langchain/core/dist/messages/tool';
 import { Readable } from 'stream';
-import { lte } from 'lodash/fp';
 import { StreamParser } from './types';
 
 export function convertResponseContentToChatGenerationChunk(
@@ -374,6 +373,7 @@ export const parseGeminiStream: StreamParser = async (
   let responseBody = '';
   stream.on('data', (chunk) => {
       const decoded = chunk.toString();
+
       const parsed = parseGeminiResponse(decoded);
     
     if (tokenHandler) {
