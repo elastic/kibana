@@ -5,26 +5,27 @@
  * 2.0.
  */
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import type { FC, ReactNode } from 'react';
 import React from 'react';
 import type { RenderHookResult } from '@testing-library/react';
 import { renderHook } from '@testing-library/react';
 import { casesPluginMock } from '@kbn/cases-plugin/public/mocks';
-import { KibanaContext } from '../../../hooks/use_kibana';
 import { useCaseDisabled } from './use_case_permission';
 import { TestProvidersComponent } from '../../../mocks/test_providers';
 import { EMPTY_VALUE } from '../../../constants/common';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 
 const casesServiceMock = casesPluginMock.createStartContract();
 
 const getProviderComponent =
   (mockedServices: unknown) =>
+  // eslint-disable-next-line react/display-name
   ({ children }: { children: ReactNode }) =>
     (
       <TestProvidersComponent>
-        <KibanaContext.Provider value={{ services: mockedServices } as any}>
-          {children}
-        </KibanaContext.Provider>
+        <KibanaContextProvider services={mockedServices as any}>{children}</KibanaContextProvider>
       </TestProvidersComponent>
     );
 

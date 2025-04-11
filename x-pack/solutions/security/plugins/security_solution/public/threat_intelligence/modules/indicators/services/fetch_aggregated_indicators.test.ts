@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { mockedQueryService, mockedSearchService } from '../../../mocks/test_providers';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { BehaviorSubject, throwError } from 'rxjs';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import type { Aggregation } from './fetch_aggregated_indicators';
@@ -13,8 +14,12 @@ import {
   convertAggregationToChartSeries,
   createFetchAggregatedIndicators,
 } from './fetch_aggregated_indicators';
-import { BARCHART_AGGREGATION_NAME, FactoryQueryType } from '../../../../common/constants';
 import { mockUiSetting } from '../../../mocks/mock_kibana_ui_settings_service';
+import {
+  BARCHART_AGGREGATION_NAME,
+  FactoryQueryType,
+} from '../../../../../common/threat_intelligence/constants';
+import { mockedQueryService, mockedSearchService } from '../../../mocks/test_providers';
 
 const aggregationResponse = {
   rawResponse: { aggregations: { [BARCHART_AGGREGATION_NAME]: { buckets: [] } } },
@@ -67,7 +72,9 @@ describe('FetchAggregatedIndicatorsService', () => {
   describe('aggregatedIndicatorsQuery()', () => {
     describe('when query is successful', () => {
       beforeEach(() => {
-        mockedSearchService.search.mockReturnValue(new BehaviorSubject(aggregationResponse));
+        jest
+          .mocked(mockedSearchService.search)
+          .mockReturnValue(new BehaviorSubject(aggregationResponse));
       });
 
       it('should pass the query down to searchService', async () => {

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { mockedSearchService } from '../../../mocks/test_providers';
 import { BehaviorSubject, throwError } from 'rxjs';
 import { createFetchIndicatorById } from './fetch_indicator_by_id';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
+import { mockedSearchService } from '../../../mocks/test_providers';
 
 const indicatorsResponse = {
   rawResponse: { hits: { hits: [{ _id: 'testId' }], total: 0 } },
@@ -20,7 +20,9 @@ describe('FetchIndicatorByIdService', () => {
   describe('fetchIndicatorById()', () => {
     describe('when query is successful', () => {
       beforeEach(() => {
-        mockedSearchService.search.mockReturnValue(new BehaviorSubject(indicatorsResponse));
+        jest
+          .mocked(mockedSearchService.search)
+          .mockReturnValue(new BehaviorSubject(indicatorsResponse));
       });
 
       it('should pass the query down to searchService', async () => {
@@ -55,9 +57,9 @@ describe('FetchIndicatorByIdService', () => {
 
     describe('when query fails', () => {
       beforeEach(() => {
-        mockedSearchService.search.mockReturnValue(
-          throwError(() => new Error('some random exception'))
-        );
+        jest
+          .mocked(mockedSearchService.search)
+          .mockReturnValue(throwError(() => new Error('some random exception')));
       });
 
       it('should throw an error', async () => {

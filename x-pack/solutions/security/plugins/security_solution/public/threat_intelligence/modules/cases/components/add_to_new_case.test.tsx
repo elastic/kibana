@@ -13,28 +13,13 @@ import {
 } from '../../../../../common/threat_intelligence/types/indicator';
 import { TestProvidersComponent } from '../../../mocks/test_providers';
 import { AddToNewCase } from './add_to_new_case';
-import { casesPluginMock } from '@kbn/cases-plugin/public/mocks';
 
 const TEST_ID = 'test';
 const indicator: Indicator = generateMockFileIndicator();
 const onClick = () => window.alert('clicked');
-const casesServiceMock = casesPluginMock.createStartContract();
 
 describe('AddToNewCase', () => {
   it('should render an EuiContextMenuItem', () => {
-    const mockedServices = {
-      cases: {
-        ...casesServiceMock,
-        helpers: {
-          ...casesServiceMock.helpers,
-          canUseCases: () => ({
-            createComment: true,
-            update: true,
-          }),
-        },
-      },
-    };
-
     const { getByTestId, getAllByText } = render(
       <TestProvidersComponent>
         <AddToNewCase indicator={indicator} onClick={onClick} data-test-subj={TEST_ID} />
@@ -45,19 +30,6 @@ describe('AddToNewCase', () => {
   });
 
   it('should render the EuiContextMenuItem disabled if indicator is missing name', () => {
-    const mockedServices = {
-      cases: {
-        ...casesServiceMock,
-        helpers: {
-          ...casesServiceMock.helpers,
-          canUseCases: () => ({
-            createComment: true,
-            update: true,
-          }),
-        },
-      },
-    };
-
     const fields = { ...indicator.fields };
     delete fields['threat.indicator.name'];
     const indicatorMissingName = {
@@ -74,19 +46,6 @@ describe('AddToNewCase', () => {
   });
 
   it('should render the EuiContextMenuItem disabled if user have no create permission', () => {
-    const mockedServices = {
-      cases: {
-        ...casesServiceMock,
-        helpers: {
-          ...casesServiceMock.helpers,
-          canUseCases: () => ({
-            createComment: false,
-            update: false,
-          }),
-        },
-      },
-    };
-
     const { getByTestId } = render(
       <TestProvidersComponent>
         <AddToNewCase indicator={indicator} onClick={onClick} data-test-subj={TEST_ID} />

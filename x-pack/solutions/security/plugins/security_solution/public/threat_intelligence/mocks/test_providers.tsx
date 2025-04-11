@@ -13,6 +13,7 @@ import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MemoryRouter } from 'react-router-dom';
+import type { ISearchStart } from '@kbn/data-plugin/public';
 import { IndicatorsFiltersContext } from '../modules/indicators/hooks/use_filters_context';
 import { mockIndicatorsFiltersContext } from './mock_indicators_filters_context';
 import { FieldTypesContext } from '../containers/field_types_provider';
@@ -39,12 +40,22 @@ export const localStorageMock = (): IStorage => {
   };
 };
 
+export const mockedSearchService = {
+  search: jest.fn(),
+} as unknown as ISearchStart;
+
+export const mockedQueryService = {};
+
 export const createTiStorageMock = () => {
   const localStorage = localStorageMock();
   return {
     localStorage,
     storage: new Storage(localStorage),
   };
+};
+
+export const mockedServices = {
+  ...createTiStorageMock(),
 };
 
 export const unifiedSearch = unifiedSearchPluginMock.createStartContract();

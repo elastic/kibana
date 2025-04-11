@@ -13,28 +13,13 @@ import {
   generateMockFileIndicator,
   type Indicator,
 } from '../../../../../common/threat_intelligence/types/indicator';
-import { casesPluginMock } from '@kbn/cases-plugin/public/mocks';
 
 const TEST_ID = 'test';
 const indicator: Indicator = generateMockFileIndicator();
 const onClick = () => window.alert('clicked');
-const casesServiceMock = casesPluginMock.createStartContract();
 
 describe('AddToExistingCase', () => {
   it('should render an EuiContextMenuItem', () => {
-    const mockedServices = {
-      cases: {
-        ...casesServiceMock,
-        helpers: {
-          ...casesServiceMock.helpers,
-          canUseCases: () => ({
-            createComment: true,
-            update: true,
-          }),
-        },
-      },
-    };
-
     const { getByTestId, getAllByText } = render(
       <TestProvidersComponent>
         <AddToExistingCase indicator={indicator} onClick={onClick} data-test-subj={TEST_ID} />
@@ -45,19 +30,6 @@ describe('AddToExistingCase', () => {
   });
 
   it('should render the EuiContextMenuItem disabled if indicator is missing name', () => {
-    const mockedServices = {
-      cases: {
-        ...casesServiceMock,
-        helpers: {
-          ...casesServiceMock.helpers,
-          canUseCases: () => ({
-            createComment: true,
-            update: true,
-          }),
-        },
-      },
-    };
-
     const fields = { ...indicator.fields };
     delete fields['threat.indicator.name'];
     const indicatorMissingName = {
@@ -77,19 +49,6 @@ describe('AddToExistingCase', () => {
   });
 
   it('should render the EuiContextMenuItem disabled if user has no update permission', () => {
-    const mockedServices = {
-      cases: {
-        ...casesServiceMock,
-        helpers: {
-          ...casesServiceMock.helpers,
-          canUseCases: () => ({
-            createComment: false,
-            update: false,
-          }),
-        },
-      },
-    };
-
     const { getByTestId } = render(
       <TestProvidersComponent>
         <AddToExistingCase indicator={indicator} onClick={onClick} data-test-subj={TEST_ID} />

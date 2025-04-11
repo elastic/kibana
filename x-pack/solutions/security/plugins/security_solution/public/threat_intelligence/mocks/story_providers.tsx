@@ -16,8 +16,6 @@ import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 import { mockIndicatorsFiltersContext } from './mock_indicators_filters_context';
-import { SecuritySolutionContext } from '../containers/security_solution_context';
-import { getSecuritySolutionContextMock } from './mock_security_context';
 import { IndicatorsFiltersContext } from '../modules/indicators/hooks/use_filters_context';
 import { FieldTypesContext } from '../containers/field_types_provider';
 import { generateFieldTypeMap } from './mock_field_type_map';
@@ -102,20 +100,16 @@ export const StoryProvidersComponent: FC<StoryProvidersComponentProps> = ({
     ...kibana,
     securityLayout,
   });
-  const securitySolutionContextMock = getSecuritySolutionContextMock();
-
   return (
     <EuiThemeProvider>
       <QueryClientProvider client={new QueryClient()}>
         <InspectorContext.Provider value={{ requests: new RequestAdapter() }}>
           <FieldTypesContext.Provider value={generateFieldTypeMap()}>
-            <SecuritySolutionContext.Provider value={securitySolutionContextMock}>
-              <IndicatorsFiltersContext.Provider value={mockIndicatorsFiltersContext}>
-                <KibanaReactContext.Provider>
-                  <BlockListProvider>{children}</BlockListProvider>
-                </KibanaReactContext.Provider>
-              </IndicatorsFiltersContext.Provider>
-            </SecuritySolutionContext.Provider>
+            <IndicatorsFiltersContext.Provider value={mockIndicatorsFiltersContext}>
+              <KibanaReactContext.Provider>
+                <BlockListProvider>{children}</BlockListProvider>
+              </KibanaReactContext.Provider>
+            </IndicatorsFiltersContext.Provider>
           </FieldTypesContext.Provider>
         </InspectorContext.Provider>
       </QueryClientProvider>

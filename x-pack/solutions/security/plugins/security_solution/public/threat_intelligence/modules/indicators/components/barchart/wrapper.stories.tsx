@@ -14,7 +14,7 @@ import type { TimeRange } from '@kbn/es-query';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import { BARCHART_AGGREGATION_NAME } from '../../../../../common/constants';
+import { BARCHART_AGGREGATION_NAME } from '../../../../../../common/threat_intelligence/constants';
 import { StoryProvidersComponent } from '../../../../mocks/story_providers';
 import { mockKibanaTimelinesService } from '../../../../mocks/mock_kibana_timelines_service';
 import { IndicatorsBarChartWrapper } from './wrapper';
