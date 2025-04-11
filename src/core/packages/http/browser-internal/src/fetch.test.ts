@@ -522,6 +522,21 @@ describe('Fetch', () => {
         expect.objectContaining({ [ELASTIC_HTTP_VERSION_HEADER.toLowerCase()]: '99' })
       );
     });
+
+    it('should pass through `filter_path` as a query parameter', async () => {
+      fetchMock.get('*', { body: {} });
+      await fetchInstance.fetch('/my/path', { filterPath: ['foo', 'bar.baz'] });
+      expect(fetchMock.lastUrl()).toContain('?filter_path=foo&filter_path=bar.baz');
+    });
+
+    it('should not allow overriding of `filter_path` if provided', async () => {
+      fetchMock.get('*', { body: {} });
+      await fetchInstance.fetch('/my/path', {
+        query: { filter_path: 'someString' },
+        filterPath: ['foo', 'bar.baz'],
+      });
+      expect(fetchMock.lastUrl()).toContain('?filter_path=foo&filter_path=bar.baz');
+    });
   });
 
   describe('interception', () => {
