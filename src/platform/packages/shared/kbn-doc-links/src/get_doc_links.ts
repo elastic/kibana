@@ -972,16 +972,16 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
     },
     inferenceManagement: {
       inferenceAPIDocumentation: isServerless
-      ? `${ELASTICSEARCH_SERVERLESS_APIS}operation/operation-inference-put`
-      : `${ELASTICSEARCH_APIS}operation/operation-inference-put`,
+        ? `${ELASTICSEARCH_SERVERLESS_APIS}operation/operation-inference-put`
+        : `${ELASTICSEARCH_APIS}operation/operation-inference-put`,
     },
     synonyms: {
       synonymsAPIDocumentation: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/current/synonyms-apis.html`,
     },
     queryRules: {
       queryRulesAPIDocumentation: isServerless
-      ? `${ELASTICSEARCH_SERVERLESS_APIS}group/endpoint-query_rules`
-      : `${ELASTICSEARCH_APIS}group/endpoint-query_rules`,
+        ? `${ELASTICSEARCH_SERVERLESS_APIS}group/endpoint-query_rules`
+        : `${ELASTICSEARCH_APIS}group/endpoint-query_rules`,
     },
   });
 };
