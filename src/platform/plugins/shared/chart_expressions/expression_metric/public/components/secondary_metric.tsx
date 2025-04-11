@@ -8,13 +8,13 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import React from 'react';
 import { EuiBadge, EuiThemeComputed, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { DatatableColumn, DatatableRow } from '@kbn/expressions-plugin/common';
 import { type FieldFormatConvertFunction } from '@kbn/field-formats-plugin/common';
 import { type VisParams } from '@kbn/visualizations-plugin/common';
 import { getColumnByAccessor } from '@kbn/visualizations-plugin/common/utils';
-import React from 'react';
 
 export interface TrendConfig {
   icon: boolean;
@@ -29,6 +29,7 @@ const notAvailable = i18n.translate('expressionMetricVis.secondaryMetric.notAvai
 });
 
 function getDeltaValue(rawValue: number | undefined, baselineValue: number | undefined) {
+  // Return 0 delta for now if either side of the formula is not a number
   if (rawValue == null || baselineValue == null || Number.isNaN(baselineValue)) {
     return 0;
   }
@@ -40,7 +41,7 @@ function getBadgeConfiguration(trendConfig: TrendConfig, deltaValue: number) {
     return {
       icon: trendConfig.icon ? 'sortDown' : undefined,
       iconLabel: i18n.translate('expressionMetricVis.secondaryMetric.trend.decrease', {
-        defaultMessage: 'down',
+        defaultMessage: 'downward direction',
       }),
       color: trendConfig.palette[0],
     };
@@ -49,13 +50,13 @@ function getBadgeConfiguration(trendConfig: TrendConfig, deltaValue: number) {
     return {
       icon: trendConfig.icon ? 'sortUp' : undefined,
       iconLabel: i18n.translate('expressionMetricVis.secondaryMetric.trend.increase', {
-        defaultMessage: 'up',
+        defaultMessage: 'upward direction',
       }),
       color: trendConfig.palette[2],
     };
   }
   return {
-    icon: trendConfig.icon ? 'minus' : undefined,
+    icon: trendConfig.icon ? 'grab' : undefined,
     iconLabel: i18n.translate('expressionMetricVis.secondaryMetric.trend.stable', {
       defaultMessage: 'stable',
     }),
@@ -128,7 +129,7 @@ function SecondaryMetricValue({
           trendConfig.value
             ? undefined
             : i18n.translate('expressionMetricVis.secondaryMetric.trend', {
-                defaultMessage: 'Value: {value} - trend {direction}',
+                defaultMessage: 'Value: {value} - Changed to {direction}',
                 values: {
                   value: formattedValue,
                   direction: iconLabel,
