@@ -16,8 +16,8 @@ describe(
   { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] },
   () => {
     let ruleId: string;
+    let ruleName: string;
 
-    let ruleName;
     before(() => {
       initializeDataViews();
       loadRule(true).then((data) => {
