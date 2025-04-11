@@ -10,6 +10,7 @@ import { render, fireEvent } from '@testing-library/react';
 import { CardSelectorList } from './card_selector_list';
 import type { CardSelectorListItem } from './card_selector_list';
 import { RulesCardItemId } from '../rules/types';
+import { OnboardingCardId } from '@kbn/security-solution-plugin/public/onboarding/constants';
 
 const mockOnSelect = jest.fn();
 
@@ -31,6 +32,7 @@ const defaultProps = {
   onSelect: mockOnSelect,
   selectedItem: items[0],
   title: 'Select a Rule',
+  cardId: OnboardingCardId.rules,
 };
 
 describe('CardSelectorList', () => {
