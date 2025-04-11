@@ -32,7 +32,7 @@ export const initializeUnsavedChanges = <SerializedStateType extends object = ob
   anyStateChange$: Observable<void>;
   serializeState: () => SerializedPanelState<SerializedStateType>;
   getComparators: () => StateComparators<SerializedStateType>;
-  onReset: (lastSavedState?: SerializedPanelState<SerializedStateType>) => MaybePromise<void>;
+  onReset: (lastSavedPanelState?: SerializedPanelState<SerializedStateType>) => MaybePromise<void>;
 }): PublishesUnsavedChanges => {
   if (!apiHasLastSavedChildState<SerializedStateType>(parentApi)) {
     return {

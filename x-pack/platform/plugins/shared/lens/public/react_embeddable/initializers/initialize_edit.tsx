@@ -12,6 +12,7 @@ import {
   PublishesDisabledActionIds,
   PublishesViewMode,
   PublishingSubject,
+  StateComparators,
   ViewMode,
   apiHasAppContext,
   apiPublishesDisabledActionIds,
@@ -21,7 +22,7 @@ import { noop } from 'lodash';
 import { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
 import { tracksOverlays } from '@kbn/presentation-containers';
 import { i18n } from '@kbn/i18n';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
 import { APP_ID, getEditPath } from '../../../common/constants';
 import {
   GetStateType,
@@ -29,10 +30,9 @@ import {
   LensInspectorAdapters,
   LensInternalApi,
   LensRuntimeState,
+  LensSerializedState,
 } from '../types';
 import {
-  buildObservableVariable,
-  emptySerializer,
   extractInheritedViewModeObservable,
 } from '../helper';
 import { prepareInlineEditPanel } from '../inline_editing/setup_inline_editing';
@@ -87,9 +87,6 @@ export function initializeEditApi(
     HasEditCapabilities &
     HasReadOnlyCapabilities &
     PublishesViewMode & { uuid: string };
-  comparators: {};
-  serialize: () => {};
-  cleanup: () => void;
 } {
   const supportedTriggers = getSupportedTriggers(getState, startDependencies.visualizationMap);
   const isManaged = (currentState: LensRuntimeState) => {
@@ -98,9 +95,7 @@ export function initializeEditApi(
 
   const isESQLModeEnabled = () => uiSettings.get(ENABLE_ESQL);
 
-  const [viewMode$] = buildObservableVariable<ViewMode>(
-    extractInheritedViewModeObservable(parentApi)
-  );
+  const viewMode$ = extractInheritedViewModeObservable(parentApi);
 
   const { disabledActionIds$, setDisabledActionIds } = apiPublishesDisabledActionIds(parentApi)
     ? parentApi
@@ -247,9 +242,6 @@ export function initializeEditApi(
   };
 
   return {
-    comparators: { disabledActionIds$: [disabledActionIds$, setDisabledActionIds] },
-    serialize: emptySerializer,
-    cleanup: noop,
     api: {
       uuid,
       viewMode$,

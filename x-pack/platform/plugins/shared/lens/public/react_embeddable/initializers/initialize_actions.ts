@@ -20,7 +20,6 @@ import {
   PublishingSubject,
   StateComparators,
   apiPublishesUnifiedSearch,
-  getUnchangingComparator,
 } from '@kbn/presentation-publishing';
 import { HasDynamicActions } from '@kbn/embeddable-enhanced-plugin/public';
 import { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public/plugin';
@@ -31,16 +30,18 @@ import { TableInspectorAdapter } from '../../editor_frame_service/types';
 
 import { Datasource, IndexPatternMap } from '../../types';
 import { getMergedSearchContext } from '../expressions/merged_search_context';
-import { buildObservableVariable, isTextBasedLanguage } from '../helper';
+import { isTextBasedLanguage } from '../helper';
 import type {
   GetStateType,
   LensEmbeddableStartServices,
   LensInternalApi,
   LensRuntimeState,
+  LensSerializedState,
   ViewInDiscoverCallbacks,
   ViewUnderlyingDataArgs,
 } from '../types';
 import { getActiveDatasourceIdFromDoc, getActiveVisualizationIdFromDoc } from '../../utils';
+import { BehaviorSubject, Observable } from 'rxjs';
 
 function getViewUnderlyingDataArgs({
   activeDatasource,
@@ -212,7 +213,7 @@ function createViewUnderlyingDataApis(
 ): ViewInDiscoverCallbacks {
   let viewUnderlyingDataArgs: undefined | ViewUnderlyingDataArgs;
 
-  const [canViewUnderlyingData$] = buildObservableVariable<boolean>(false);
+  const canViewUnderlyingData$ = new BehaviorSubject<boolean>(false);
 
   return {
     canViewUnderlyingData$,
@@ -247,20 +248,22 @@ export function initializeActionApi(
   services: LensEmbeddableStartServices
 ): {
   api: ViewInDiscoverCallbacks & HasDynamicActions;
-  comparators: StateComparators<DynamicActionsSerializedState>;
-  serialize: () => {};
+  anyStateChange$: Observable<void>;
+  getComparators: () => StateComparators<DynamicActionsSerializedState>;
+  getLatestState: () => DynamicActionsSerializedState;
   cleanup: () => void;
+  reinitializeState: (lastSaved?: LensSerializedState) => void;
 } {
-  const dynamicActionsApi = services.embeddableEnhanced?.initializeReactEmbeddableDynamicActions(
+  const dynamicActionsManger = services.embeddableEnhanced?.initializeEmbeddableDynamicActions(
     uuid,
     () => title$.getValue(),
     initialState
   );
-  const maybeStopDynamicActions = dynamicActionsApi?.startDynamicActions();
+  const maybeStopDynamicActions = dynamicActionsManger?.startDynamicActions();
 
   return {
     api: {
-      ...(isTextBasedLanguage(initialState) ? {} : dynamicActionsApi?.dynamicActionsApi ?? {}),
+      ...(isTextBasedLanguage(initialState) ? {} : dynamicActionsManger?.api ?? {}),
       ...createViewUnderlyingDataApis(
         getLatestState,
         internalApi,
@@ -269,14 +272,18 @@ export function initializeActionApi(
         services
       ),
     },
-    comparators: {
-      ...(dynamicActionsApi?.dynamicActionsComparator ?? {
-        enhancements: getUnchangingComparator(),
+    anyStateChange$: dynamicActionsManger?.anyStateChange$ ?? new BehaviorSubject(undefined),
+    getComparators: () => ({
+      ...(dynamicActionsManger?.comparators ?? {
+        enhancements: 'skip',
       }),
-    },
-    serialize: () => dynamicActionsApi?.serializeDynamicActions() ?? {},
+    }),
+    getLatestState: () => dynamicActionsManger?.getLatestState ?? {},
     cleanup: () => {
       maybeStopDynamicActions?.stopDynamicActions();
+    },
+    reinitializeState: (lastSaved?: LensSerializedState) => {
+      dynamicActionsManger?.reinitializeState(lastSaved ?? {});
     },
   };
 }
