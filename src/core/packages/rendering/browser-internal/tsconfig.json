@@ -5,12 +5,13 @@
     "types": [
       "jest",
       "node",
-      "react"
+      "react",
+      "@testing-library/jest-dom"
     ]
   },
   "include": [
     "**/*.ts",
-    "**/*.tsx",
+    "**/*.tsx"
   ],
   "kbn_references": [
     "@kbn/core-application-common",
@@ -35,6 +36,6 @@
     "@kbn/react-kibana-context-render"
   ],
   "exclude": [
-    "target/**/*",
+    "target/**/*"
   ]
 }

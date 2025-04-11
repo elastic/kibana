@@ -155,9 +155,7 @@ describe('RenderingService', () => {
 
       render(TestComponent);
 
-      // @ts-expect-error
       expect(screen.getByText('Test Element')).toBeInTheDocument();
-      // @ts-expect-error
       expect(screen.getByTestId('kibana-render-context')).toBeInTheDocument();
     });
   });
