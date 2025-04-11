@@ -15,7 +15,7 @@ import React, {
 } from 'react';
 import type { AlertsTableImperativeApi } from '@kbn/response-ops-alerts-table/types';
 import { useSpaceId } from '../../../common/hooks/use_space_id';
-import { useStoredAIForSOCShowAnonymization } from '../../../onboarding/components/hooks/use_stored_state';
+import { useStoredAIAlertFlyoutShowAnonymization } from '../../../onboarding/components/hooks/use_stored_state';
 
 /**
  * Temporary context to share imperative APIs between the alerts table and other higher level
@@ -35,7 +35,7 @@ const AlertsContext = createContext<{
 const AlertsContextProviderComponent = ({ children }: PropsWithChildren) => {
   const alertsTableRef = useRef<AlertsTableImperativeApi>(null);
   const spaceId = useSpaceId();
-  const [showAnonymizedValues, setShowAnonymizedValues] = useStoredAIForSOCShowAnonymization(
+  const [showAnonymizedValues, setShowAnonymizedValues] = useStoredAIAlertFlyoutShowAnonymization(
     spaceId ?? 'default'
   );
   return (
