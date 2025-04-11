@@ -127,11 +127,6 @@ describe('Rule Definition', () => {
     useRuleFormState.mockReturnValue({
       plugins,
       formData: {
-        artifacts: {
-          investigation_guide: {
-            blob: '# Example investigation guide',
-          },
-        },
         id: 'test-id',
         params: {},
         schedule: {
