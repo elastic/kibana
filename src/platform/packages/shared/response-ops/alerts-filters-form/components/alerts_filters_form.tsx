@@ -118,7 +118,6 @@ export const AlertsFiltersForm = ({
         if (isFlatExpressionFilter(expressionItem)) {
           oldExpression[atIndex] = {
             filter: {
-              ...expressionItem.filter,
               type: newType,
             },
           };
