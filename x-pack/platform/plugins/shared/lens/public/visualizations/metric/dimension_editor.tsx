@@ -127,9 +127,12 @@ function MaximumEditor({ setState, state, idPrefix }: SubProps) {
 
 function getDefaultPalette(): EuiColorPalettePickerPaletteFixedProps {
   return {
-    title: i18n.translate('xpack.lens.secondaryMetric.trend.dynamicColoring.palette.trend.label', {
-      defaultMessage: 'Trend Vis',
-    }),
+    title: i18n.translate(
+      'xpack.lens.secondaryMetric.compareTo.dynamicColoring.palette.trend.label',
+      {
+        defaultMessage: 'Trend Vis',
+      }
+    ),
     value: 'default_trend_palette',
     // the #24C292 value here is the vis green color missing token from EUI
     palette: ['euiColorVis6', 'backgroundBaseDisabled', '#24C292'],
@@ -143,7 +146,7 @@ function getAllPalettes(): EuiColorPalettePickerPaletteFixedProps[] {
   const reversedPalette: EuiColorPalettePickerPaletteFixedProps = {
     ...getDefaultPalette(),
     title: i18n.translate(
-      'xpack.lens.secondaryMetric.trend.dynamicColoring.palette.trendReversed.label',
+      'xpack.lens.secondaryMetric.compareTo.dynamicColoring.palette.trendReversed.label',
       {
         defaultMessage: 'Trend Reversed',
       }
@@ -157,7 +160,7 @@ function getAllPalettes(): EuiColorPalettePickerPaletteFixedProps[] {
   const temperaturePalette: EuiColorPalettePickerPaletteFixedProps = {
     ...getDefaultPalette(),
     title: i18n.translate(
-      'xpack.lens.secondaryMetric.trend.dynamicColoring.palette.temperature.label',
+      'xpack.lens.secondaryMetric.compareTo.dynamicColoring.palette.temperature.label',
       {
         defaultMessage: 'Temperature',
       }
@@ -168,7 +171,7 @@ function getAllPalettes(): EuiColorPalettePickerPaletteFixedProps[] {
   const complementaryPalette: EuiColorPalettePickerPaletteFixedProps = {
     ...getDefaultPalette(),
     title: i18n.translate(
-      'xpack.lens.secondaryMetric.trend.dynamicColoring.palette.complementary.label',
+      'xpack.lens.secondaryMetric.compareTo.dynamicColoring.palette.complementary.label',
       {
         defaultMessage: 'Complementary',
       }
@@ -225,7 +228,7 @@ function TrendEditor({
       <EuiFormRow
         display="columnCompressed"
         label={i18n.translate(
-          'xpack.lens.secondaryMetric.trend.staticColoring.palettePicker.label',
+          'xpack.lens.secondaryMetric.compareTo.staticColoring.palettePicker.label',
           {
             defaultMessage: 'Color palette',
           }
@@ -257,35 +260,35 @@ function TrendEditor({
       <EuiFormRow
         display="columnCompressed"
         fullWidth
-        label={i18n.translate('xpack.lens.metric.secondary.trend.display', {
+        label={i18n.translate('xpack.lens.metric.secondaryMetric.compareTo.display', {
           defaultMessage: 'Display',
         })}
       >
         <EuiButtonGroup
           isFullWidth
           buttonSize="compressed"
-          legend={i18n.translate('xpack.lens.metric.secondary.trend.display', {
+          legend={i18n.translate('xpack.lens.metric.secondaryMetric.compareTo.display', {
             defaultMessage: 'Display',
           })}
           data-test-subj="lnsMetric_secondary_trend_display_buttons"
           options={[
             {
               id: `${idPrefix}display_icon`,
-              label: i18n.translate('xpack.lens.metric.secondary.trend.display.icon', {
+              label: i18n.translate('xpack.lens.metric.secondaryMetric.compareTo.display.icon', {
                 defaultMessage: 'Icon',
               }),
               'data-test-subj': 'lnsMetric_secondary_trend_display_icon',
             },
             {
               id: `${idPrefix}display_value`,
-              label: i18n.translate('xpack.lens.metric.secondary.trend.display.value', {
+              label: i18n.translate('xpack.lens.metric.secondaryMetric.compareTo.display.value', {
                 defaultMessage: 'Value',
               }),
               'data-test-subj': 'lnsMetric_secondary_trend_display_value',
             },
             {
               id: `${idPrefix}display_both`,
-              label: i18n.translate('xpack.lens.metric.secondary.trend.display.both', {
+              label: i18n.translate('xpack.lens.metric.secondaryMetric.compareTo.display.both', {
                 defaultMessage: 'Both',
               }),
               'data-test-subj': 'lnsMetric_secondary_trend_display_both',
@@ -315,38 +318,47 @@ function TrendEditor({
       <EuiFormRow
         display="columnCompressed"
         fullWidth
-        label={i18n.translate('xpack.lens.metric.secondary.trend', {
-          defaultMessage: 'Trend',
+        label={i18n.translate('xpack.lens.metric.secondaryMetric.compareTo', {
+          defaultMessage: 'Compare to',
         })}
       >
         <>
           <EuiButtonGroup
             isFullWidth
             buttonSize="compressed"
-            legend={i18n.translate('xpack.lens.metric.secondary.trend.baseline', {
+            legend={i18n.translate('xpack.lens.metric.secondaryMetric.compareTo.baseline', {
               defaultMessage: 'Baseline',
             })}
             data-test-subj="lnsMetric_secondary_trend_baseline_buttons"
             options={[
               {
                 id: `${idPrefix}static`,
-                label: i18n.translate('xpack.lens.metric.secondary.trend.baseline.static', {
-                  defaultMessage: 'Static value',
-                }),
+                label: i18n.translate(
+                  'xpack.lens.metric.secondaryMetric.compareTo.baseline.static',
+                  {
+                    defaultMessage: 'Static value',
+                  }
+                ),
                 'data-test-subj': 'lnsMetric_secondary_trend_baseline_static',
               },
               {
                 id: `${idPrefix}primary`,
-                label: i18n.translate('xpack.lens.metric.secondary.trend.baseline.primary', {
-                  defaultMessage: 'Primary metric',
-                }),
+                label: i18n.translate(
+                  'xpack.lens.metric.secondaryMetric.compareTo.baseline.primary',
+                  {
+                    defaultMessage: 'Primary metric',
+                  }
+                ),
                 'data-test-subj': 'lnsMetric_secondary_trend_baseline_primary',
                 isDisabled: !primaryMetricCanTrend,
                 toolTipContent: primaryMetricCanTrend
                   ? undefined
-                  : i18n.translate('xpack.lens.metric.secondary.trend.baseline.primary.disabled', {
-                      defaultMessage: 'Primary metric must be numeric to use it as baseline',
-                    }),
+                  : i18n.translate(
+                      'xpack.lens.metric.secondaryMetric.compareTo.baseline.primary.disabled',
+                      {
+                        defaultMessage: 'Primary metric must be numeric to use it as baseline',
+                      }
+                    ),
               },
             ]}
             idSelected={`${idPrefix}${
@@ -510,35 +522,35 @@ function SecondaryMetricEditor({
         <EuiButtonGroup
           isFullWidth
           buttonSize="compressed"
-          legend={i18n.translate('xpack.lens.metric.secondary.colorByValue.label', {
+          legend={i18n.translate('xpack.lens.metric.secondaryMetric.colorByValue.label', {
             defaultMessage: 'Color by value',
           })}
           data-test-subj="lnsMetric_color_mode_buttons"
           options={[
             {
               id: `${idPrefix}none`,
-              label: i18n.translate('xpack.lens.metric.secondary.colorMode.none', {
+              label: i18n.translate('xpack.lens.metric.secondaryMetric.colorMode.none', {
                 defaultMessage: 'None',
               }),
               'data-test-subj': 'lnsMetric_color_mode_none',
             },
             {
               id: `${idPrefix}static`,
-              label: i18n.translate('xpack.lens.metric.secondary.colorMode.static', {
+              label: i18n.translate('xpack.lens.metric.secondaryMetric.colorMode.static', {
                 defaultMessage: 'Static',
               }),
               'data-test-subj': 'lnsMetric_color_mode_static',
             },
             {
               id: `${idPrefix}dynamic`,
-              label: i18n.translate('xpack.lens.metric.secondary.colorMode.dynamic', {
+              label: i18n.translate('xpack.lens.metric.secondaryMetric.colorMode.dynamic', {
                 defaultMessage: 'Dynamic',
               }),
               'data-test-subj': 'lnsMetric_color_mode_dynamic',
               isDisabled: !isNumericType,
               toolTipContent: isNumericType
                 ? undefined
-                : i18n.translate('xpack.lens.metric.secondary.colorMode.dynamic.disabled', {
+                : i18n.translate('xpack.lens.metric.secondaryMetric.colorMode.dynamic.disabled', {
                     defaultMessage: 'Dynamic coloring is only available for numeric fields',
                   }),
             },
