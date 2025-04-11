@@ -18,6 +18,7 @@ import { registerFeatures } from './features';
 import type { InternalServices } from './services/types';
 import { IntegrationRegistry } from './services/integrations';
 import { createServices } from './services/create_services';
+import type { WorkChatAppConfig } from './config';
 import type {
   WorkChatAppPluginSetup,
   WorkChatAppPluginStart,
@@ -35,11 +36,13 @@ export class WorkChatAppPlugin
     >
 {
   private readonly logger: LoggerFactory;
+  private readonly config: WorkChatAppConfig;
   private readonly integrationRegistry = new IntegrationRegistry();
   private services?: InternalServices;
 
   constructor(context: PluginInitializerContext) {
     this.logger = context.logger;
+    this.config = context.config.get<WorkChatAppConfig>();
   }
 
   public setup(
@@ -78,6 +81,7 @@ export class WorkChatAppPlugin
   ): WorkChatAppPluginStart {
     this.services = createServices({
       core,
+      config: this.config,
       logger: this.logger,
       pluginsDependencies,
       integrationRegistry: this.integrationRegistry,
