@@ -44,30 +44,28 @@ export const buildTopCountriesQuery = ({
     allow_no_indices: true,
     index: defaultIndex,
     ignore_unavailable: true,
-    body: {
-      aggregations: {
-        ...getCountAgg(flowTarget),
-        ...getFlowTargetAggs(sort, flowTarget, querySize),
-      },
-      query: {
-        bool: ip
-          ? {
-              filter,
-              should: [
-                {
-                  term: {
-                    [`${getOppositeField(flowTarget)}.ip`]: ip,
-                  },
-                },
-              ],
-              minimum_should_match: 1,
-            }
-          : {
-              filter,
-            },
-      },
-      size: 0,
+    aggregations: {
+      ...getCountAgg(flowTarget),
+      ...getFlowTargetAggs(sort, flowTarget, querySize),
     },
+    query: {
+      bool: ip
+        ? {
+            filter,
+            should: [
+              {
+                term: {
+                  [`${getOppositeField(flowTarget)}.ip`]: ip,
+                },
+              },
+            ],
+            minimum_should_match: 1,
+          }
+        : {
+            filter,
+          },
+    },
+    size: 0,
     track_total_hits: false,
   };
   return dslQuery;

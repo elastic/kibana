@@ -12,6 +12,8 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
+import { SpaceTestApiClient } from '../space_awareness/api_helper';
+import { cleanFleetIndices, expectToRejectWithError } from '../space_awareness/helpers';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
@@ -19,6 +21,8 @@ export default function (providerContext: FtrProviderContext) {
   const es: Client = getService('es');
   const supertest = getService('supertest');
   const kibanaServer = getService('kibanaServer');
+  const fleetAndAgents = getService('fleetAndAgents');
+  const apiClient = new SpaceTestApiClient(supertest);
 
   const getPackagePolicyById = async (id: string) => {
     const { body } = await supertest.get(`/api/fleet/package_policies/${id}`);
@@ -30,34 +34,24 @@ export default function (providerContext: FtrProviderContext) {
     let agentPolicyId2: string;
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
-      await getService('esArchiver').load(
-        'x-pack/test/functional/es_archives/fleet/empty_fleet_server'
-      );
-      const { body: agentPolicyResponse } = await supertest
-        .post(`/api/fleet/agent_policies`)
-        .set('kbn-xsrf', 'xxxx')
-        .send({
-          name: `Test policy ${uuidv4()}`,
-          namespace: 'default',
-        })
-        .expect(200);
-      agentPolicyId = agentPolicyResponse.item.id;
+      await cleanFleetIndices(es);
+      await fleetAndAgents.setup();
 
-      const { body: agentPolicyResponse2 } = await supertest
-        .post(`/api/fleet/agent_policies`)
-        .set('kbn-xsrf', 'xxxx')
-        .send({
+      const [agentPolicyResponse, agentPolicyResponse2] = await Promise.all([
+        apiClient.createAgentPolicy(undefined, {
           name: `Test policy ${uuidv4()}`,
           namespace: 'default',
-        })
-        .expect(200);
+        }),
+        apiClient.createAgentPolicy(undefined, {
+          name: `Test policy ${uuidv4()}`,
+          namespace: 'default',
+        }),
+      ]);
+
+      agentPolicyId = agentPolicyResponse.item.id;
       agentPolicyId2 = agentPolicyResponse2.item.id;
     });
     after(async () => {
-      await kibanaServer.savedObjects.cleanStandardList();
-      await getService('esArchiver').unload(
-        'x-pack/test/functional/es_archives/fleet/empty_fleet_server'
-      );
       await supertest
         .post(`/api/fleet/agent_policies/delete`)
         .set('kbn-xsrf', 'xxxx')
@@ -66,6 +60,9 @@ export default function (providerContext: FtrProviderContext) {
         .post(`/api/fleet/agent_policies/delete`)
         .set('kbn-xsrf', 'xxxx')
         .send({ agentPolicyId: agentPolicyId2 });
+
+      await kibanaServer.savedObjects.cleanStandardList();
+      await cleanFleetIndices(es);
     });
 
     it('can only add to hosted agent policies using the force parameter', async function () {
@@ -261,6 +258,11 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     it('should not allow multiple limited packages on the same agent policy', async function () {
+      await apiClient.installPackage({
+        pkgName: 'endpoint',
+        pkgVersion: '8.5.0',
+        force: true,
+      });
       await supertest
         .post(`/api/fleet/package_policies`)
         .set('kbn-xsrf', 'xxxx')
@@ -274,7 +276,7 @@ export default function (providerContext: FtrProviderContext) {
           package: {
             name: 'endpoint',
             title: 'Endpoint',
-            version: '8.4.0',
+            version: '8.5.0',
           },
           force: true,
         })
@@ -522,6 +524,85 @@ export default function (providerContext: FtrProviderContext) {
           },
         })
         .expect(200);
+    });
+
+    it('should support additional_datastreams_permissions', async () => {
+      const createPackagePolicyRes = await apiClient.createPackagePolicy(undefined, {
+        name: 'filetest-3-' + Date.now(),
+        description: '',
+        namespace: 'default',
+        policy_ids: [agentPolicyId],
+        enabled: true,
+        inputs: [
+          {
+            enabled: true,
+            streams: [],
+            type: 'single_input',
+          },
+        ],
+        package: {
+          name: 'filetest',
+          title: 'For File Tests',
+          version: '0.1.0',
+        },
+        additional_datastreams_permissions: ['logs-tata-default', 'metrics-tata-default'],
+      } as any);
+
+      const getPackagePolicyRes = await apiClient.getPackagePolicy(createPackagePolicyRes.item.id);
+
+      expect(getPackagePolicyRes.item.additional_datastreams_permissions).to.eql([
+        'logs-tata-default',
+        'metrics-tata-default',
+      ]);
+
+      const policyDocRes = await es.search({
+        index: '.fleet-policies',
+        sort: [{ '@timestamp': 'desc' }],
+        query: {
+          term: {
+            policy_id: agentPolicyId,
+          },
+        },
+      });
+
+      const packagePolicyPermission = (policyDocRes.hits?.hits[0]._source as any).data
+        ?.output_permissions?.default?.[createPackagePolicyRes.item.id];
+
+      expect(
+        packagePolicyPermission.indices.find((permissions: any) =>
+          permissions.names.includes('logs-tata-default')
+        )
+      ).to.eql({
+        names: ['logs-tata-default', 'metrics-tata-default'],
+        privileges: ['auto_configure', 'create_doc'],
+      });
+    });
+
+    it('should throw with invalid additional_datastreams_permissions', async () => {
+      await expectToRejectWithError(
+        () =>
+          apiClient.createPackagePolicy(undefined, {
+            name: 'filetest-3-' + Date.now(),
+            description: '',
+            namespace: 'default',
+            policy_ids: [agentPolicyId],
+            enabled: true,
+            inputs: [
+              {
+                enabled: true,
+                streams: [],
+                type: 'single_input',
+              },
+            ],
+            package: {
+              name: 'filetest',
+              title: 'For File Tests',
+              version: '0.1.0',
+            },
+            additional_datastreams_permissions: ['invalid-tata-default', 'metrics-tata-default'],
+          } as any),
+        /400 "Bad Request"/
+      );
     });
 
     it('should return 200 and formatted inputs when the format=simplified query param is passed', async function () {
@@ -988,6 +1069,60 @@ export default function (providerContext: FtrProviderContext) {
             },
           })
           .expect(400);
+      });
+
+      it('should support additional_datastreams_permissions', async () => {
+        const createPackagePolicyRes = await apiClient.createPackagePolicy(undefined, {
+          name: `create-simplified-package-policy-required-variables-${Date.now()}`,
+          description: '',
+          namespace: 'default',
+          policy_ids: [agentPolicyId],
+          inputs: {
+            'with_required_variables-test_input': {
+              streams: {
+                'with_required_variables.log': {
+                  vars: { test_var_required: 'I am required' },
+                },
+              },
+            },
+          },
+          package: {
+            name: 'with_required_variables',
+            version: '0.1.0',
+          },
+          additional_datastreams_permissions: ['logs-test-default', 'metrics-test-default'],
+        });
+
+        const getPackagePolicyRes = await apiClient.getPackagePolicy(
+          createPackagePolicyRes.item.id
+        );
+
+        expect(getPackagePolicyRes.item.additional_datastreams_permissions).to.eql([
+          'logs-test-default',
+          'metrics-test-default',
+        ]);
+
+        const policyDocRes = await es.search({
+          index: '.fleet-policies',
+          sort: [{ '@timestamp': 'desc' }],
+          query: {
+            term: {
+              policy_id: agentPolicyId,
+            },
+          },
+        });
+
+        const packagePolicyPermission = (policyDocRes.hits?.hits[0]._source as any).data
+          ?.output_permissions?.default?.[createPackagePolicyRes.item.id];
+
+        expect(
+          packagePolicyPermission.indices.find((permissions: any) =>
+            permissions.names.includes('logs-test-default')
+          )
+        ).to.eql({
+          names: ['logs-test-default', 'metrics-test-default'],
+          privileges: ['auto_configure', 'create_doc'],
+        });
       });
     });
 

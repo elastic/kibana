@@ -27,12 +27,12 @@ export async function createIndexWithDocuments(
     },
   });
 
-  const bulkActions = options.documents.flatMap((doc) => {
+  const operations = options.documents.flatMap((doc) => {
     return [{ create: { _index: options.index } }, doc];
   });
 
   await client.bulk({
-    body: bulkActions,
+    operations,
     refresh: 'wait_for',
   });
 

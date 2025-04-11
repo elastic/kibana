@@ -6,7 +6,7 @@
  */
 
 import { omit } from 'lodash';
-import { ActionsConfig, ActionTypeConfig } from '../config';
+import type { ActionsConfig, ActionTypeConfig } from '../config';
 
 export interface ActionsConfigMap {
   default: ActionTypeConfig;

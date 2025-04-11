@@ -89,11 +89,11 @@ export const initUptimeServer = (
             options: {
               tags: options?.tags,
             },
+            security,
           })
           .addVersion(
             {
               version: INITIAL_REST_VERSION,
-              security,
               validate: {
                 request: {
                   body: validate ? validate?.body : undefined,
@@ -117,11 +117,11 @@ export const initUptimeServer = (
             options: {
               tags: options?.tags,
             },
+            security,
           })
           .addVersion(
             {
               version: INITIAL_REST_VERSION,
-              security,
               validate: {
                 request: {
                   body: validate ? validate?.body : undefined,

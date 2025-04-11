@@ -7,7 +7,7 @@
 
 import { processVertexStreamMock } from './gemini_adapter.test.mocks';
 import { PassThrough } from 'stream';
-import { noop, tap, lastValueFrom, toArray, Subject } from 'rxjs';
+import { noop, tap, lastValueFrom, toArray, of } from 'rxjs';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { InferenceExecutor } from '../../utils/inference_executor';
 import { observableIntoEventSourceStream } from '../../../util/observable_into_event_source_stream';
@@ -48,16 +48,18 @@ describe('geminiAdapter', () => {
     });
 
     it('calls `executor.invoke` with the right fixed parameters', () => {
-      geminiAdapter.chatComplete({
-        logger,
-        executor: executorMock,
-        messages: [
-          {
-            role: MessageRole.User,
-            content: 'question',
-          },
-        ],
-      });
+      geminiAdapter
+        .chatComplete({
+          logger,
+          executor: executorMock,
+          messages: [
+            {
+              role: MessageRole.User,
+              content: 'question',
+            },
+          ],
+        })
+        .subscribe(noop);
 
       expect(executorMock.invoke).toHaveBeenCalledTimes(1);
       expect(executorMock.invoke).toHaveBeenCalledWith({
@@ -77,34 +79,36 @@ describe('geminiAdapter', () => {
     });
 
     it('correctly format tools', () => {
-      geminiAdapter.chatComplete({
-        logger,
-        executor: executorMock,
-        messages: [
-          {
-            role: MessageRole.User,
-            content: 'question',
-          },
-        ],
-        tools: {
-          myFunction: {
-            description: 'myFunction',
-          },
-          myFunctionWithArgs: {
-            description: 'myFunctionWithArgs',
-            schema: {
-              type: 'object',
-              properties: {
-                foo: {
-                  type: 'string',
-                  description: 'foo',
+      geminiAdapter
+        .chatComplete({
+          logger,
+          executor: executorMock,
+          messages: [
+            {
+              role: MessageRole.User,
+              content: 'question',
+            },
+          ],
+          tools: {
+            myFunction: {
+              description: 'myFunction',
+            },
+            myFunctionWithArgs: {
+              description: 'myFunctionWithArgs',
+              schema: {
+                type: 'object',
+                properties: {
+                  foo: {
+                    type: 'string',
+                    description: 'foo',
+                  },
                 },
+                required: ['foo'],
               },
-              required: ['foo'],
             },
           },
-        },
-      });
+        })
+        .subscribe(noop);
 
       expect(executorMock.invoke).toHaveBeenCalledTimes(1);
 
@@ -117,7 +121,7 @@ describe('geminiAdapter', () => {
               name: 'myFunction',
               parameters: {
                 properties: {},
-                type: 'OBJECT',
+                type: 'object',
               },
             },
             {
@@ -128,11 +132,11 @@ describe('geminiAdapter', () => {
                   foo: {
                     description: 'foo',
                     enum: undefined,
-                    type: 'STRING',
+                    type: 'string',
                   },
                 },
                 required: ['foo'],
-                type: 'OBJECT',
+                type: 'object',
               },
             },
           ],
@@ -141,47 +145,49 @@ describe('geminiAdapter', () => {
     });
 
     it('correctly format messages', () => {
-      geminiAdapter.chatComplete({
-        logger,
-        executor: executorMock,
-        messages: [
-          {
-            role: MessageRole.User,
-            content: 'question',
-          },
-          {
-            role: MessageRole.Assistant,
-            content: 'answer',
-          },
-          {
-            role: MessageRole.User,
-            content: 'another question',
-          },
-          {
-            role: MessageRole.Assistant,
-            content: null,
-            toolCalls: [
-              {
-                function: {
-                  name: 'my_function',
-                  arguments: {
-                    foo: 'bar',
-                  },
-                },
-                toolCallId: '0',
-              },
-            ],
-          },
-          {
-            name: 'my_function',
-            role: MessageRole.Tool,
-            toolCallId: '0',
-            response: {
-              bar: 'foo',
+      geminiAdapter
+        .chatComplete({
+          logger,
+          executor: executorMock,
+          messages: [
+            {
+              role: MessageRole.User,
+              content: 'question',
             },
-          },
-        ],
-      });
+            {
+              role: MessageRole.Assistant,
+              content: 'answer',
+            },
+            {
+              role: MessageRole.User,
+              content: 'another question',
+            },
+            {
+              role: MessageRole.Assistant,
+              content: null,
+              toolCalls: [
+                {
+                  function: {
+                    name: 'my_function',
+                    arguments: {
+                      foo: 'bar',
+                    },
+                  },
+                  toolCallId: '0',
+                },
+              ],
+            },
+            {
+              name: 'my_function',
+              role: MessageRole.Tool,
+              toolCallId: '0',
+              response: {
+                bar: 'foo',
+              },
+            },
+          ],
+        })
+        .subscribe(noop);
 
       expect(executorMock.invoke).toHaveBeenCalledTimes(1);
 
@@ -240,45 +246,100 @@ describe('geminiAdapter', () => {
       ]);
     });
 
-    it('correctly formats content parts', () => {
-      geminiAdapter.chatComplete({
-        executor: executorMock,
-        logger,
-        messages: [
-          {
-            role: MessageRole.User,
-            content: [
-              {
-                type: 'text',
-                text: 'question',
-              },
-            ],
-          },
-          {
-            role: MessageRole.Assistant,
-            content: 'answer',
-          },
-          {
-            role: MessageRole.User,
-            content: [
-              {
-                type: 'image',
-                source: {
-                  data: 'aaaaaa',
-                  mimeType: 'image/png',
+    it('encapsulates string tool messages', () => {
+      geminiAdapter
+        .chatComplete({
+          logger,
+          executor: executorMock,
+          messages: [
+            {
+              role: MessageRole.User,
+              content: 'question',
+            },
+            {
+              role: MessageRole.Assistant,
+              content: null,
+              toolCalls: [
+                {
+                  function: {
+                    name: 'my_function',
+                    arguments: {
+                      foo: 'bar',
+                    },
+                  },
+                  toolCallId: '0',
                 },
+              ],
+            },
+            {
+              name: 'my_function',
+              role: MessageRole.Tool,
+              toolCallId: '0',
+              response: JSON.stringify({ bar: 'foo' }),
+            },
+          ],
+        })
+        .subscribe(noop);
+
+      expect(executorMock.invoke).toHaveBeenCalledTimes(1);
+
+      const { messages } = getCallParams();
+      expect(messages[messages.length - 1]).toEqual({
+        role: 'user',
+        parts: [
+          {
+            functionResponse: {
+              name: '0',
+              response: {
+                response: JSON.stringify({ bar: 'foo' }),
               },
-              {
-                type: 'image',
-                source: {
-                  data: 'bbbbbb',
-                  mimeType: 'image/png',
-                },
-              },
-            ],
+            },
           },
         ],
       });
+    });
+
+    it('correctly formats content parts', () => {
+      geminiAdapter
+        .chatComplete({
+          executor: executorMock,
+          logger,
+          messages: [
+            {
+              role: MessageRole.User,
+              content: [
+                {
+                  type: 'text',
+                  text: 'question',
+                },
+              ],
+            },
+            {
+              role: MessageRole.Assistant,
+              content: 'answer',
+            },
+            {
+              role: MessageRole.User,
+              content: [
+                {
+                  type: 'image',
+                  source: {
+                    data: 'aaaaaa',
+                    mimeType: 'image/png',
+                  },
+                },
+                {
+                  type: 'image',
+                  source: {
+                    data: 'bbbbbb',
+                    mimeType: 'image/png',
+                  },
+                },
+              ],
+            },
+          ],
+        })
+        .subscribe(noop);
 
       expect(executorMock.invoke).toHaveBeenCalledTimes(1);
 
@@ -321,39 +382,41 @@ describe('geminiAdapter', () => {
     });
 
     it('groups messages from the same user', () => {
-      geminiAdapter.chatComplete({
-        logger,
-        executor: executorMock,
-        messages: [
-          {
-            role: MessageRole.User,
-            content: 'question',
-          },
-          {
-            role: MessageRole.User,
-            content: 'another question',
-          },
-          {
-            role: MessageRole.Assistant,
-            content: 'answer',
-          },
-          {
-            role: MessageRole.Assistant,
-            content: null,
-            toolCalls: [
-              {
-                function: {
-                  name: 'my_function',
-                  arguments: {
-                    foo: 'bar',
+      geminiAdapter
+        .chatComplete({
+          logger,
+          executor: executorMock,
+          messages: [
+            {
+              role: MessageRole.User,
+              content: 'question',
+            },
+            {
+              role: MessageRole.User,
+              content: 'another question',
+            },
+            {
+              role: MessageRole.Assistant,
+              content: 'answer',
+            },
+            {
+              role: MessageRole.Assistant,
+              content: null,
+              toolCalls: [
+                {
+                  function: {
+                    name: 'my_function',
+                    arguments: {
+                      foo: 'bar',
+                    },
                   },
+                  toolCallId: '0',
                 },
-                toolCallId: '0',
-              },
-            ],
-          },
-        ],
-      });
+              ],
+            },
+          ],
+        })
+        .subscribe(noop);
 
       expect(executorMock.invoke).toHaveBeenCalledTimes(1);
 
@@ -390,17 +453,19 @@ describe('geminiAdapter', () => {
     });
 
     it('correctly format system message', () => {
-      geminiAdapter.chatComplete({
-        logger,
-        executor: executorMock,
-        system: 'Some system message',
-        messages: [
-          {
-            role: MessageRole.User,
-            content: 'question',
-          },
-        ],
-      });
+      geminiAdapter
+        .chatComplete({
+          logger,
+          executor: executorMock,
+          system: 'Some system message',
+          messages: [
+            {
+              role: MessageRole.User,
+              content: 'question',
+            },
+          ],
+        })
+        .subscribe(noop);
 
       expect(executorMock.invoke).toHaveBeenCalledTimes(1);
 
@@ -409,17 +474,19 @@ describe('geminiAdapter', () => {
     });
 
     it('correctly format tool choice', () => {
-      geminiAdapter.chatComplete({
-        logger,
-        executor: executorMock,
-        messages: [
-          {
-            role: MessageRole.User,
-            content: 'question',
-          },
-        ],
-        toolChoice: ToolChoiceType.required,
-      });
+      geminiAdapter
+        .chatComplete({
+          logger,
+          executor: executorMock,
+          messages: [
+            {
+              role: MessageRole.User,
+              content: 'question',
+            },
+          ],
+          toolChoice: ToolChoiceType.required,
+        })
+        .subscribe(noop);
 
       expect(executorMock.invoke).toHaveBeenCalledTimes(1);
 
@@ -428,17 +495,19 @@ describe('geminiAdapter', () => {
     });
 
     it('correctly format tool choice for named function', () => {
-      geminiAdapter.chatComplete({
-        logger,
-        executor: executorMock,
-        messages: [
-          {
-            role: MessageRole.User,
-            content: 'question',
-          },
-        ],
-        toolChoice: { function: 'foobar' },
-      });
+      geminiAdapter
+        .chatComplete({
+          logger,
+          executor: executorMock,
+          messages: [
+            {
+              role: MessageRole.User,
+              content: 'question',
+            },
+          ],
+          toolChoice: { function: 'foobar' },
+        })
+        .subscribe(noop);
 
       expect(executorMock.invoke).toHaveBeenCalledTimes(1);
 
@@ -447,7 +516,7 @@ describe('geminiAdapter', () => {
     });
 
     it('process response events via processVertexStream', async () => {
-      const source$ = new Subject<Record<string, any>>();
+      const source$ = of({ chunk: 1 }, { chunk: 2 });
 
       const tapFn = jest.fn();
       processVertexStreamMock.mockImplementation(() => tap(tapFn));
@@ -471,10 +540,6 @@ describe('geminiAdapter', () => {
         ],
       });
 
-      source$.next({ chunk: 1 });
-      source$.next({ chunk: 2 });
-      source$.complete();
-
       const allChunks = await lastValueFrom(response$.pipe(toArray()));
 
       expect(allChunks).toEqual([{ chunk: 1 }, { chunk: 2 }]);
@@ -487,12 +552,14 @@ describe('geminiAdapter', () => {
     it('propagates the abort signal when provided', () => {
       const abortController = new AbortController();
 
-      geminiAdapter.chatComplete({
-        logger,
-        executor: executorMock,
-        messages: [{ role: MessageRole.User, content: 'question' }],
-        abortSignal: abortController.signal,
-      });
+      geminiAdapter
+        .chatComplete({
+          logger,
+          executor: executorMock,
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          abortSignal: abortController.signal,
+        })
+        .subscribe(noop);
 
       expect(executorMock.invoke).toHaveBeenCalledTimes(1);
       expect(executorMock.invoke).toHaveBeenCalledWith({
@@ -504,12 +571,14 @@ describe('geminiAdapter', () => {
     });
 
     it('propagates the temperature parameter', () => {
-      geminiAdapter.chatComplete({
-        logger,
-        executor: executorMock,
-        messages: [{ role: MessageRole.User, content: 'question' }],
-        temperature: 0.6,
-      });
+      geminiAdapter
+        .chatComplete({
+          logger,
+          executor: executorMock,
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          temperature: 0.6,
+        })
+        .subscribe(noop);
 
       expect(executorMock.invoke).toHaveBeenCalledTimes(1);
       expect(executorMock.invoke).toHaveBeenCalledWith({
@@ -521,12 +590,14 @@ describe('geminiAdapter', () => {
     });
 
     it('propagates the modelName parameter', () => {
-      geminiAdapter.chatComplete({
-        logger,
-        executor: executorMock,
-        messages: [{ role: MessageRole.User, content: 'question' }],
-        modelName: 'gemini-1.5',
-      });
+      geminiAdapter
+        .chatComplete({
+          logger,
+          executor: executorMock,
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          modelName: 'gemini-1.5',
+        })
+        .subscribe(noop);
 
       expect(executorMock.invoke).toHaveBeenCalledTimes(1);
       expect(executorMock.invoke).toHaveBeenCalledWith({

@@ -17,6 +17,10 @@ export type GetRegisteredFeatures = (pluginName: string) => AssistantFeatures;
 export interface ElasticAssistantAppContext {
   logger: Logger;
 }
+export enum CallbackIds {
+  DefendInsightsPostCreate = 'defend-insights:post-create',
+}
+export type RegisteredCallbacks = Map<CallbackIds, Function[]>;
 
 /**
  * Service for managing context specific to the Elastic Assistant
@@ -27,6 +31,7 @@ class AppContextService {
   private logger: Logger | undefined;
   private registeredTools: RegisteredToolsStorage = new Map<PluginName, Set<AssistantTool>>();
   private registeredFeatures: RegisteredFeaturesStorage = new Map<PluginName, AssistantFeatures>();
+  private registeredCallbacks: RegisteredCallbacks = new Map<CallbackIds, Function[]>();
 
   public start(appContext: ElasticAssistantAppContext) {
     this.logger = appContext.logger;
@@ -115,6 +120,24 @@ class AppContextService {
     );
 
     return features;
+  }
+
+  /**
+   * Register a callback to a callbackId
+   * @param callbackId
+   * @param callback
+   */
+  public registerCallback(callbackId: CallbackIds, callback: Function) {
+    const callbacks = this.registeredCallbacks.get(callbackId) ?? [];
+    this.registeredCallbacks.set(callbackId, [...callbacks, callback]);
+  }
+
+  /**
+   * Get all registered callbacks for a callbackId
+   * @param callbackId
+   */
+  public getRegisteredCallbacks(callbackId: CallbackIds): Function[] {
+    return this.registeredCallbacks.get(callbackId) ?? [];
   }
 }
 

@@ -40,22 +40,20 @@ export async function getDownstreamServiceResource({
         },
       ],
     },
-    body: {
-      track_total_hits: false,
-      size: 1,
-      _source: ['span.destination.service'],
-      query: {
-        bool: {
-          filter: [
-            ...termQuery(TRACE_ID, traceId),
-            ...termQuery(EVENT_OUTCOME, 'failure'),
-            ...rangeQuery(start, end),
-            { exists: { field: SPAN_DESTINATION_SERVICE_RESOURCE } },
-          ],
-        },
+    track_total_hits: false,
+    size: 1,
+    _source: ['span.destination.service'],
+    query: {
+      bool: {
+        filter: [
+          ...termQuery(TRACE_ID, traceId),
+          ...termQuery(EVENT_OUTCOME, 'failure'),
+          ...rangeQuery(start, end),
+          { exists: { field: SPAN_DESTINATION_SERVICE_RESOURCE } },
+        ],
       },
-      fields: requiredFields,
     },
+    fields: requiredFields,
   });
 
   const event = unflattenKnownApmEventFields(maybe(response.hits.hits[0])?.fields, requiredFields);

@@ -6,10 +6,29 @@
  */
 
 import { createEsContext } from './context';
-import { Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { createReadySignal } from '../lib/ready_signal';
-import { GetDataStreamsResponse } from './cluster_client_adapter.test';
+import type { estypes } from '@elastic/elasticsearch';
+
+// Not importing because it'd run the tests in that file again
+// import { GetDataStreamsResponse } from './cluster_client_adapter.test';
+export const GetDataStreamsResponse: estypes.IndicesGetDataStreamResponse = {
+  data_streams: [
+    {
+      name: 'foo',
+      timestamp_field: { name: '@timestamp' },
+      status: 'GREEN' as estypes.HealthStatus,
+      generation: 0,
+      indices: [],
+      template: '',
+      hidden: true,
+      prefer_ilm: false,
+      rollover_on_write: true,
+      next_generation_managed_by: 'Index Lifecycle Management',
+    },
+  ],
+};
 
 jest.mock('../../../../../../package.json', () => ({ version: '1.2.3' }));
 jest.mock('./init');

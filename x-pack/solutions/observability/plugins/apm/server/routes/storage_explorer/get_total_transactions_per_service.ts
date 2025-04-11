@@ -41,31 +41,29 @@ export async function getTotalTransactionsPerService({
     apm: {
       events: [getProcessorEventForTransactions(searchAggregatedTransactions)],
     },
-    body: {
-      size: 0,
-      track_total_hits: false,
-      query: {
-        bool: {
-          filter: [
-            ...getBackwardCompatibleDocumentTypeFilter(searchAggregatedTransactions),
-            ...environmentQuery(environment),
-            ...kqlQuery(kuery),
-            ...rangeQuery(start, end),
-            ...(indexLifecyclePhase !== IndexLifecyclePhaseSelectOption.All
-              ? termQuery(TIER, indexLifeCyclePhaseToDataTier[indexLifecyclePhase])
-              : []),
-          ],
-        },
+    size: 0,
+    track_total_hits: false,
+    query: {
+      bool: {
+        filter: [
+          ...getBackwardCompatibleDocumentTypeFilter(searchAggregatedTransactions),
+          ...environmentQuery(environment),
+          ...kqlQuery(kuery),
+          ...rangeQuery(start, end),
+          ...(indexLifecyclePhase !== IndexLifecyclePhaseSelectOption.All
+            ? termQuery(TIER, indexLifeCyclePhaseToDataTier[indexLifecyclePhase])
+            : []),
+        ],
       },
-      aggs: {
-        sample: {
-          random_sampler: randomSampler,
-          aggs: {
-            services: {
-              terms: {
-                field: SERVICE_NAME,
-                size: 500,
-              },
+    },
+    aggs: {
+      sample: {
+        random_sampler: randomSampler,
+        aggs: {
+          services: {
+            terms: {
+              field: SERVICE_NAME,
+              size: 500,
             },
           },
         },

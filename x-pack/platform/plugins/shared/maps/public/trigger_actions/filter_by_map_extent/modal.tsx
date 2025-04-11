@@ -14,23 +14,14 @@ import {
   EuiSwitch,
   EuiSwitchEvent,
 } from '@elastic/eui';
-import { createReactOverlays } from '@kbn/kibana-react-plugin/public';
 import { mapEmbeddablesSingleton } from '../../react_embeddable/map_embeddables_singleton';
-import { getCore } from '../../kibana_services';
-
-export function openModal(title: string) {
-  const { openModal: reactOverlaysOpenModal } = createReactOverlays(getCore());
-  const modalSession = reactOverlaysOpenModal(
-    <FilterByMapExtentModal onClose={() => modalSession.close()} title={title} />
-  );
-}
 
 interface Props {
   onClose: () => void;
   title: string;
 }
 
-class FilterByMapExtentModal extends Component<Props> {
+export class FilterByMapExtentModal extends Component<Props> {
   _renderSwitches() {
     return mapEmbeddablesSingleton.getMapPanels().map((mapPanel) => {
       return (

@@ -10,6 +10,7 @@ import { toBooleanRt, toNumberRt } from '@kbn/io-ts-utils';
 import { Outlet } from '@kbn/typed-react-router-config';
 import * as t from 'io-ts';
 import React from 'react';
+import { dynamic } from '@kbn/shared-ux-utility';
 import { offsetRt } from '../../../../common/comparison_rt';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import { environmentRt } from '../../../../common/environment_rt';
@@ -30,6 +31,12 @@ import { CrashGroupDetails } from '../../app/mobile/errors_and_crashes_group_det
 import { MobileErrorCrashesOverview } from '../../app/mobile/errors_and_crashes_overview';
 import { ServiceDependencies } from '../../app/service_dependencies';
 import { ServiceDashboards } from '../../app/service_dashboards';
+import type { MobileSearchBar } from '../../app/mobile/search_bar';
+
+const ServiceLogs = dynamic(() =>
+  import('../../app/service_logs').then((mod) => ({ default: mod.ServiceLogs }))
+);
+
 export function page({
   title,
   tabKey,
@@ -39,13 +46,7 @@ export function page({
   title: string;
   tabKey: React.ComponentProps<typeof MobileServiceTemplate>['selectedTabKey'];
   element: React.ReactElement<any, any>;
-  searchBarOptions?: {
-    showUnifiedSearchBar?: boolean;
-    showTransactionTypeSelector?: boolean;
-    showTimeComparison?: boolean;
-    showMobileFilters?: boolean;
-    hidden?: boolean;
-  };
+  searchBarOptions?: React.ComponentProps<typeof MobileSearchBar>;
 }): {
   element: React.ReactElement<any, any>;
 } {
@@ -252,6 +253,17 @@ export const mobileServiceDetailRoute = {
         element: <ServiceMapServiceDetail />,
         searchBarOptions: {
           hidden: true,
+        },
+      }),
+      '/mobile-services/{serviceName}/logs': page({
+        tabKey: 'logs',
+        title: i18n.translate('xpack.apm.views.logs.title', {
+          defaultMessage: 'Logs',
+        }),
+        element: <ServiceLogs />,
+        searchBarOptions: {
+          showMobileFilters: false,
+          showQueryInput: false,
         },
       }),
       '/mobile-services/{serviceName}/alerts': {

@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import {
+import type {
   Field,
   QueryDslFieldAndFormat,
   QueryDslQueryContainer,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+} from '@elastic/elasticsearch/lib/api/types';
 import { GetPingsParams, HttpResponseBody, Ping, PingsResponse } from '../../common/runtime_types';
 import { SyntheticsEsClient } from '../lib';
 import { SUMMARY_FILTER } from '../../common/constants/client_defaults';
@@ -97,7 +97,7 @@ export async function queryPings<F>(
       body: {
         hits: { hits, total },
       },
-    } = await syntheticsEsClient.search({ body: searchBody });
+    } = await syntheticsEsClient.search(searchBody);
 
     return {
       total: total.value,
@@ -109,7 +109,7 @@ export async function queryPings<F>(
     body: {
       hits: { hits, total },
     },
-  } = await syntheticsEsClient.search({ body: searchBody });
+  } = await syntheticsEsClient.search(searchBody);
 
   const pings: Ping[] = hits.map((doc: any) => {
     const { _id, _source } = doc;

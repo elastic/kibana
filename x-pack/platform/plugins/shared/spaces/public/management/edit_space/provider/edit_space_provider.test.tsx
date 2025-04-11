@@ -70,6 +70,7 @@ const SUTProvider = ({
           getSecurityLicense: getSecurityLicenseMock,
           navigateToUrl: jest.fn(),
           capabilities,
+          enableSecurityLink: '',
         }}
       >
         {children}

@@ -44,7 +44,9 @@ const thresholdDefaultActionMessage = i18n.translate(
 const thresholdDefaultRecoveryMessage = i18n.translate(
   'xpack.observability.customThreshold.rule.alerting.threshold.defaultRecoveryMessage',
   {
-    defaultMessage: `'{{rule.name}}' has recovered.
+    defaultMessage: `Recovered: '{{context.reason}}'
+    
+    '{{rule.name}}' has recovered.
 
 [View alert details]('{{context.alertDetailsUrl}}')
 `,

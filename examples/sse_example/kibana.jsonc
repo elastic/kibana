@@ -1,0 +1,13 @@
+{
+  "type": "plugin",
+  "id": "@kbn/sse-example-plugin",
+  "owner": "@elastic/kibana-core",
+  "description": "Plugin that shows how to implement Server-Sent Events.",
+  "plugin": {
+    "id": "sseExample",
+    "server": true,
+    "browser": true,
+    "requiredPlugins": ["developerExamples"],
+    "optionalPlugins": []
+  }
+}

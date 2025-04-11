@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import type { Story } from '@storybook/react';
+import type { StoryFn } from '@storybook/react';
 import { mockGroupingProps } from './grouping.mock';
 import { Grouping } from './grouping';
 import readme from '../../README.mdx';
@@ -24,6 +24,6 @@ export default {
   },
 };
 
-export const Empty: Story<void> = () => {
+export const Empty: StoryFn = () => {
   return <Grouping {...mockGroupingProps} />;
 };

@@ -43,6 +43,9 @@ xpack.fleet.internal.registry.excludePackages: [
 
   # Profiling integrations
   'profiler_agent',
+
+  # Search connectors
+  'elastic_connectors',
 ]
 
 ## Fine-tune the search solution feature privileges. Also, refer to `serverless.yml` for the project-agnostic overrides.
@@ -81,7 +84,7 @@ telemetry.labels.serverless: search
 
 # Alerts and LLM config
 xpack.actions.enabledActionTypes:
-  ['.email', '.index', '.slack', '.jira', '.webhook', '.teams', '.gen-ai', '.bedrock', '.gemini']
+  ['.email', '.index', '.slack', '.jira', '.webhook', '.teams', '.gen-ai', '.bedrock', '.gemini', '.inference']
 
 # Customize empty page state for analytics apps
 no_data_page.analyticsNoDataPageFlavor: 'serverless_search'
@@ -113,7 +116,7 @@ xpack.ml.compatibleModuleType: 'search'
 data_visualizer.resultLinks.fileBeat.enabled: false
 
 # Search Notebooks
-xpack.search.notebooks.catalog.url: https://elastic-enterprise-search.s3.us-east-2.amazonaws.com/serverless/catalog.json
+xpack.searchNotebooks.catalog.url: https://elastic-enterprise-search.s3.us-east-2.amazonaws.com/serverless/catalog.json
 
 # Semantic text UI
 
@@ -131,3 +134,6 @@ xpack.observabilityAiAssistantManagement.visibilityEnabled: false
 
 # Synonyms UI
 xpack.searchSynonyms.enabled: true
+
+# Query Rules UI
+xpack.searchQueryRules.enabled: false

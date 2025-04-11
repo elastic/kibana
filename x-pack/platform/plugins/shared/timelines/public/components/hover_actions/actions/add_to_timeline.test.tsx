@@ -437,7 +437,7 @@ describe('add to timeline', () => {
         children: i18n.ADDED_TO_TIMELINE_OR_TEMPLATE_MESSAGE(providerA.name, true),
       };
       const wrapper = render(<AddSuccessMessage {...message} />);
-      expect(wrapper.container.textContent).toBe('Added a to timeline');
+      expect(wrapper.container.textContent).toBe('Added a to Timeline');
     });
 
     test('Add success is called with "template" if timeline type is template', () => {

@@ -21,7 +21,6 @@ export interface WorkerConfig {
   readonly profileWebpack: boolean;
   readonly browserslistEnv: string;
   readonly optimizerCacheKey: unknown;
-  readonly reactVersion: string;
 }
 
 export type CacheableWorkerConfig = Omit<WorkerConfig, 'watch' | 'profileWebpack' | 'cache'>;
@@ -73,11 +72,6 @@ export function parseWorkerConfig(json: string): WorkerConfig {
       throw new Error('`browserslistEnv` must be a string');
     }
 
-    const reactVersion = parsed.reactVersion;
-    if (typeof reactVersion !== 'string') {
-      throw new Error('`reactVersion` must be a string');
-    }
-
     const themes = parseThemeTags(parsed.themeTags);
 
     return {
@@ -89,7 +83,6 @@ export function parseWorkerConfig(json: string): WorkerConfig {
       optimizerCacheKey,
       browserslistEnv,
       themeTags: themes,
-      reactVersion,
     };
   } catch (error) {
     throw new Error(`unable to parse worker config: ${error.message}`);

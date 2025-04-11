@@ -21,6 +21,7 @@ import type {
   AssetSOObject,
   InstallResultStatus,
   PackageMetadata,
+  InstallationInfo,
 } from '../models/epm';
 
 export interface GetCategoriesRequest {
@@ -39,6 +40,7 @@ export interface GetPackagesRequest {
     category?: string;
     prerelease?: boolean;
     excludeInstallStatus?: boolean;
+    withPackagePoliciesCount?: boolean;
   };
 }
 
@@ -89,7 +91,7 @@ export interface GetInfoRequest {
 }
 
 export interface GetInfoResponse {
-  item: PackageInfo;
+  item: PackageInfo & { installationInfo?: InstallationInfo };
   metadata?: PackageMetadata;
 }
 
@@ -153,6 +155,28 @@ export interface BulkInstallPackageInfo {
 
 export interface BulkInstallPackagesResponse {
   items: Array<BulkInstallPackageInfo | IBulkInstallPackageHTTPError>;
+}
+
+export interface BulkUpgradePackagesRequest {
+  packages: Array<{ name: string; version?: string }>;
+  upgrade_package_policies?: boolean;
+  force?: boolean;
+  prerelease?: boolean;
+}
+
+export interface BulkUninstallPackagesRequest {
+  packages: Array<{ name: string; version: string }>;
+  force?: boolean;
+}
+
+export interface BulkOperationPackagesResponse {
+  taskId: string;
+}
+
+export interface GetOneBulkOperationPackagesResponse {
+  status: string;
+  error?: { message: string };
+  results?: Array<{ name: string; success?: boolean; error?: { message: string } }>;
 }
 
 export interface BulkInstallPackagesRequest {

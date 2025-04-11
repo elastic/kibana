@@ -31,26 +31,24 @@ export const buildTiDataSourceQuery = ({
     allow_no_indices: true,
     ignore_unavailable: true,
     track_total_hits: true,
-    body: {
-      aggs: {
-        dataset: {
-          terms: { field: 'event.dataset' },
-          aggs: {
-            name: {
-              terms: { field: 'threat.feed.name' },
-            },
-            dashboard: {
-              terms: {
-                field: 'threat.feed.dashboard_id',
-              },
+    aggs: {
+      dataset: {
+        terms: { field: 'event.dataset' },
+        aggs: {
+          name: {
+            terms: { field: 'threat.feed.name' },
+          },
+          dashboard: {
+            terms: {
+              field: 'threat.feed.dashboard_id',
             },
           },
         },
       },
-      query: {
-        bool: {
-          filter,
-        },
+    },
+    query: {
+      bool: {
+        filter,
       },
     },
   };

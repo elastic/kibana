@@ -113,6 +113,30 @@ export default function ({ getService, getPageObjects }) {
       expect(fields).to.eql(['@timestamp', '_id', '_ignored', '_index', '_score', '_source']);
     });
 
+    it('create hybrid index pattern - with alias to rollup index', async () => {
+      const rollupAlias = 'rollup-alias';
+      await es.indices.putAlias({
+        index: rollupTargetIndexName,
+        name: rollupAlias,
+      });
+      await PageObjects.common.navigateToApp('settings');
+      await PageObjects.settings.createIndexPattern(rollupAlias, '@timestamp', false);
+
+      await PageObjects.settings.clickKibanaIndexPatterns();
+      const indexPatternNames = await PageObjects.settings.getAllIndexPatternNames();
+      //The assertion is going to check that the string has the right name and that the text Rollup
+      //is included (since there is a Rollup tag).
+      const filteredIndexPatternNames = indexPatternNames.filter(
+        (i) => i.includes(rollupIndexPatternName) && i.includes('Rollup')
+      );
+      expect(filteredIndexPatternNames.length).to.be(1);
+
+      // ensure all fields are available
+      await PageObjects.settings.clickIndexPatternByName(rollupAlias);
+      const fields = await PageObjects.settings.getFieldNames();
+      expect(fields).to.eql(['@timestamp', '_id', '_ignored', '_index', '_score', '_source']);
+    });
+
     after(async () => {
       // Delete the rollup job.
       await es.rollup.deleteJob({ id: rollupJobName });

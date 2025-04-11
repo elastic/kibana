@@ -151,6 +151,10 @@ export function getCoreUsageCollector(
             type: 'long',
             _meta: { description: 'Maximum payload size in bytes that is allowed.' },
           },
+          protocol: {
+            type: 'keyword',
+            _meta: { description: 'Protocol to serve the requests ("http1" | "http2")' },
+          },
           rewriteBasePath: {
             type: 'boolean',
             _meta: { description: 'Indicates if the base path should be rewritten.' },

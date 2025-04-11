@@ -14,14 +14,12 @@ export const OverviewLoader = ({ rows }: { rows?: number }) => {
   const COLUMNS = 4;
   const loaders = Array(ROWS * COLUMNS).fill(null);
   return (
-    <>
-      <EuiFlexGrid gutterSize="m" columns={COLUMNS}>
-        {loaders.map((_, i) => (
-          <EuiFlexItem key={i}>
-            <OverviewGridItemLoader />
-          </EuiFlexItem>
-        ))}
-      </EuiFlexGrid>
-    </>
+    <EuiFlexGrid gutterSize="m" columns={COLUMNS}>
+      {loaders.map((_, i) => (
+        <EuiFlexItem key={i}>
+          <OverviewGridItemLoader />
+        </EuiFlexItem>
+      ))}
+    </EuiFlexGrid>
   );
 };

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObjectsModelVersionMap } from '@kbn/core-saved-objects-server';
+import type { SavedObjectsModelVersionMap } from '@kbn/core-saved-objects-server';
 import { taskSchemaV1, taskSchemaV2, taskSchemaV3, taskSchemaV4 } from '../schemas/task';
 
 // IMPORTANT!!!
@@ -58,8 +58,11 @@ export const taskModelVersions: SavedObjectsModelVersionMap = {
       {
         type: 'mappings_addition',
         addedMappings: {
-          apiKey: { type: 'binary' },
-          invalidateApiKey: { type: 'boolean' },
+          userScope: {
+            properties: {
+              apiKeyId: { type: 'keyword' },
+            },
+          },
         },
       },
     ],

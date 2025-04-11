@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { get } from 'lodash';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { getUrlPrefix, getTestRuleData, ObjectRemover } from '../../../../common/lib';
 import { Spaces } from '../../../scenarios';
 
@@ -135,24 +135,22 @@ export default function createFlappingHistoryTests({ getService }: FtrProviderCo
     const result: any = await retry.try(async () => {
       const searchResult = await es.search({
         index: '.kibana_task_manager',
-        body: {
-          query: {
-            bool: {
-              must: [
-                {
-                  term: {
-                    'task.taskType': 'alerting:test.patternFiring',
+        query: {
+          bool: {
+            must: [
+              {
+                term: {
+                  'task.taskType': 'alerting:test.patternFiring',
+                },
+              },
+              {
+                range: {
+                  'task.scheduledAt': {
+                    gte: start,
                   },
                 },
-                {
-                  range: {
-                    'task.scheduledAt': {
-                      gte: start,
-                    },
-                  },
-                },
-              ],
-            },
+              },
+            ],
           },
         },
       });

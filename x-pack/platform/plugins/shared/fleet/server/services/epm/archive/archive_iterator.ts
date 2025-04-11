@@ -74,10 +74,15 @@ export const createArchiveIterator = (
  */
 export const createArchiveIteratorFromMap = (assetsMap: AssetsMap): ArchiveIterator => {
   const traverseEntries = async (
-    onEntry: (entry: ArchiveEntry) => Promise<void>
+    onEntry: (entry: ArchiveEntry) => Promise<void>,
+    readBuffer?: (path: string) => boolean
   ): Promise<void> => {
     for (const [path, buffer] of assetsMap) {
-      await onEntry({ path, buffer });
+      if (readBuffer && !readBuffer(path)) {
+        await onEntry({ path });
+      } else {
+        await onEntry({ path, buffer });
+      }
     }
   };
 

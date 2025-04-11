@@ -9,17 +9,15 @@
 
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { DocViewsRegistry } from '@kbn/unified-doc-viewer';
-import {
-  DataSourceCategory,
+import type {
   DataSourceContext,
   DocumentProfileProviderParams,
-  DocumentType,
   RootContext,
-  SolutionType,
 } from '../../../profiles';
+import { DataSourceCategory, DocumentType, SolutionType } from '../../../profiles';
 import { createContextAwarenessMocks } from '../../../__mocks__';
 import { createObservabilityLogDocumentProfileProvider } from './profile';
-import { ContextWithProfileId } from '../../../profile_service';
+import type { ContextWithProfileId } from '../../../profile_service';
 import { OBSERVABILITY_ROOT_PROFILE_ID } from '../consts';
 
 const mockServices = createContextAwarenessMocks().profileProviderServices;

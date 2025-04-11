@@ -17,52 +17,50 @@ export const buildActionResultsQuery = ({
   const dslQuery = {
     allow_no_indices: true,
     index: [ENDPOINT_ACTION_RESPONSES_INDEX],
-    body: {
-      fields,
-      _source: false,
-      size: 1,
-      query: {
-        term: { action_id: actionId },
-      },
+    fields,
+    _source: false,
+    size: 1,
+    query: {
+      term: { action_id: actionId },
+    },
+    aggs: {
       aggs: {
+        global: {},
         aggs: {
-          global: {},
-          aggs: {
-            responses_by_action_id: {
-              filter: {
-                bool: {
-                  must: [
-                    {
-                      match: {
-                        action_id: actionId,
-                      },
+          responses_by_action_id: {
+            filter: {
+              bool: {
+                must: [
+                  {
+                    match: {
+                      action_id: actionId,
                     },
-                  ],
-                },
-              },
-              aggs: {
-                responses: {
-                  terms: {
-                    script: {
-                      lang: 'painless',
-                      source:
-                        "if (doc.containsKey('error.code') && doc['error.code'].size()==0) { return 'success' } else { return 'error' }",
-                    } as const,
                   },
+                ],
+              },
+            },
+            aggs: {
+              responses: {
+                terms: {
+                  script: {
+                    lang: 'painless',
+                    source:
+                      "if (doc.containsKey('error.code') && doc['error.code'].size()==0) { return 'success' } else { return 'error' }",
+                  } as const,
                 },
               },
             },
           },
         },
       },
-      sort: [
-        {
-          [sort.field]: {
-            order: sort.order,
-          },
-        },
-      ],
     },
+    sort: [
+      {
+        [sort.field]: {
+          order: sort.order,
+        },
+      },
+    ],
   };
 
   return dslQuery;

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import {
   EXCLUDE_RUN_ONCE_FILTER,
   SUMMARY_FILTER,
@@ -60,7 +60,7 @@ export const getLatestMonitor: UMElasticsearchQueryFn<GetLatestMonitorParams, Pi
     },
   };
 
-  const { body: result } = await uptimeEsClient.search({ body: params });
+  const { body: result } = await uptimeEsClient.search(params);
 
   const doc = result.hits?.hits?.[0];
   const docId = (doc?._id as string | undefined) ?? '';

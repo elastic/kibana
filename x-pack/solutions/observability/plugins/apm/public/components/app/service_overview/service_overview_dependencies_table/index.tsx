@@ -9,25 +9,26 @@ import { EuiIconTip } from '@elastic/eui';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
 import type { ReactNode } from 'react';
-import React, { useEffect, useRef } from 'react';
-import { FETCH_STATUS, useUiTracker } from '@kbn/observability-shared-plugin/public';
+import React, { useEffect } from 'react';
+import { useUiTracker } from '@kbn/observability-shared-plugin/public';
 import { usePerformanceContext } from '@kbn/ebt-tools';
 import { isTimeComparison } from '../../../shared/time_comparison/get_comparison_options';
 import { getNodeName, NodeType } from '../../../../../common/connections';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { useApmParams } from '../../../../hooks/use_apm_params';
-import { useFetcher } from '../../../../hooks/use_fetcher';
+import { useFetcher, isSuccess } from '../../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import { DependencyLink } from '../../../shared/links/dependency_link';
 import { DependenciesTable } from '../../../shared/dependencies_table';
 import { ServiceLink } from '../../../shared/links/apm/service_link';
+import type { TablesLoadedState } from '../apm_overview';
 
 interface ServiceOverviewDependenciesTableProps {
   fixedHeight?: boolean;
   link?: ReactNode;
   showPerPageOptions?: boolean;
   showSparkPlots?: boolean;
-  onLoadTable?: () => void;
+  onLoadTable?: (key: keyof TablesLoadedState) => void;
 }
 
 export function ServiceOverviewDependenciesTable({
@@ -55,7 +56,6 @@ export function ServiceOverviewDependenciesTable({
   const { serviceName, transactionType } = useApmServiceContext();
   const { onPageReady } = usePerformanceContext();
   const trackEvent = useUiTracker();
-  const hasTableLoaded = useRef(false);
   const { data, status } = useFetcher(
     (callApmApi) => {
       if (!start || !end) {
@@ -79,11 +79,11 @@ export function ServiceOverviewDependenciesTable({
   );
 
   useEffect(() => {
-    // this component is used both for the service overview tab and the transactions tab,
+    // this component is used both for the service overview tab and the dependency tab,
     // onLoadTable will be defined if it's the service overview tab
-    if (status === FETCH_STATUS.SUCCESS && !hasTableLoaded.current) {
+    if (isSuccess(status)) {
       if (onLoadTable) {
-        onLoadTable();
+        onLoadTable('dependencies');
       } else {
         onPageReady({
           meta: {
@@ -92,9 +92,8 @@ export function ServiceOverviewDependenciesTable({
           },
         });
       }
-      hasTableLoaded.current = true;
     }
-  }, [status, onLoadTable, onPageReady, rangeFrom, rangeTo]);
+  }, [status, onPageReady, rangeFrom, rangeTo, onLoadTable]);
 
   const dependencies =
     data?.serviceDependencies.map((dependency) => {

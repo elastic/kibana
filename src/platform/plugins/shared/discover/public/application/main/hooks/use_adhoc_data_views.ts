@@ -9,30 +9,24 @@
 
 import { useEffect } from 'react';
 import { METRIC_TYPE } from '@kbn/analytics';
-import { DiscoverServices } from '../../../build_services';
 import { useSavedSearch } from '../state_management/discover_state_provider';
-import { useInternalStateSelector } from '../state_management/discover_internal_state_container';
 import { ADHOC_DATA_VIEW_RENDER_EVENT } from '../../../constants';
-import { DiscoverStateContainer } from '../state_management/discover_state';
 import { useFiltersValidation } from './use_filters_validation';
 import { useIsEsqlMode } from './use_is_esql_mode';
+import { useCurrentDataView } from '../state_management/redux';
+import { useDiscoverServices } from '../../../hooks/use_discover_services';
 
-export const useAdHocDataViews = ({
-  services,
-}: {
-  stateContainer: DiscoverStateContainer;
-  services: DiscoverServices;
-}) => {
-  const dataView = useInternalStateSelector((state) => state.dataView);
+export const useAdHocDataViews = () => {
+  const dataView = useCurrentDataView();
   const savedSearch = useSavedSearch();
   const isEsqlMode = useIsEsqlMode();
-  const { filterManager, toastNotifications } = services;
+  const { filterManager, toastNotifications, trackUiMetric } = useDiscoverServices();
 
   useEffect(() => {
     if (dataView && !dataView.isPersisted()) {
-      services.trackUiMetric?.(METRIC_TYPE.COUNT, ADHOC_DATA_VIEW_RENDER_EVENT);
+      trackUiMetric?.(METRIC_TYPE.COUNT, ADHOC_DATA_VIEW_RENDER_EVENT);
     }
-  }, [dataView, isEsqlMode, services]);
+  }, [dataView, isEsqlMode, trackUiMetric]);
 
   /**
    * Takes care of checking data view id references in filters

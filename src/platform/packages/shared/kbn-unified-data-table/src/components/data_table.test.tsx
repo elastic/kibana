@@ -633,12 +633,10 @@ describe('UnifiedDataTable', () => {
 
   describe('display settings', () => {
     it(
-      'should include additional display settings if onUpdateSampleSize is provided',
+      'should set allowRowHeight to true if onUpdateRowHeight is provided',
       async () => {
         const component = await getComponent({
           ...getProps(),
-          sampleSizeState: 150,
-          onUpdateSampleSize: jest.fn(),
           onUpdateRowHeight: jest.fn(),
         });
 
@@ -648,21 +646,10 @@ describe('UnifiedDataTable', () => {
             "additionalControls": null,
             "showColumnSelector": false,
             "showDisplaySelector": Object {
-              "additionalDisplaySettings": <React.Fragment>
-                <UnifiedDataTableAdditionalDisplaySettings
-                  headerLineCountInput={1}
-                  headerRowHeight="custom"
-                  lineCountInput={3}
-                  onChangeRowHeight={[Function]}
-                  onChangeRowHeightLines={[Function]}
-                  onChangeSampleSize={[MockFunction]}
-                  rowHeight="custom"
-                  sampleSize={150}
-                />
-              </React.Fragment>,
               "allowDensity": false,
               "allowResetButton": false,
-              "allowRowHeight": false,
+              "allowRowHeight": true,
+              "customRender": [Function],
             },
             "showFullScreenSelector": true,
             "showKeyboardShortcuts": true,
@@ -674,12 +661,12 @@ describe('UnifiedDataTable', () => {
     );
 
     it(
-      'should not include additional display settings if onUpdateSampleSize is not provided',
+      'should set allowRowHeight to false if onUpdateRowHeight is not provided',
       async () => {
         const component = await getComponent({
           ...getProps(),
-          sampleSizeState: 200,
-          onUpdateRowHeight: jest.fn(),
+          onUpdateSampleSize: jest.fn(),
+          onUpdateRowHeight: undefined,
         });
 
         expect(component.find(EuiDataGrid).first().prop('toolbarVisibility'))
@@ -688,20 +675,69 @@ describe('UnifiedDataTable', () => {
             "additionalControls": null,
             "showColumnSelector": false,
             "showDisplaySelector": Object {
-              "additionalDisplaySettings": <React.Fragment>
-                <UnifiedDataTableAdditionalDisplaySettings
-                  headerLineCountInput={1}
-                  headerRowHeight="custom"
-                  lineCountInput={3}
-                  onChangeRowHeight={[Function]}
-                  onChangeRowHeightLines={[Function]}
-                  rowHeight="custom"
-                  sampleSize={200}
-                />
-              </React.Fragment>,
               "allowDensity": false,
               "allowResetButton": false,
               "allowRowHeight": false,
+              "customRender": [Function],
+            },
+            "showFullScreenSelector": true,
+            "showKeyboardShortcuts": true,
+            "showSortSelector": true,
+          }
+        `);
+      },
+      EXTENDED_JEST_TIMEOUT
+    );
+
+    it(
+      'should set allowDensity to true if onUpdateDataGridDensity is provided',
+      async () => {
+        const component = await getComponent({
+          ...getProps(),
+          onUpdateRowHeight: jest.fn(),
+          onUpdateDataGridDensity: jest.fn(),
+        });
+
+        expect(component.find(EuiDataGrid).first().prop('toolbarVisibility'))
+          .toMatchInlineSnapshot(`
+          Object {
+            "additionalControls": null,
+            "showColumnSelector": false,
+            "showDisplaySelector": Object {
+              "allowDensity": true,
+              "allowResetButton": false,
+              "allowRowHeight": true,
+              "customRender": [Function],
+            },
+            "showFullScreenSelector": true,
+            "showKeyboardShortcuts": true,
+            "showSortSelector": true,
+          }
+        `);
+      },
+      EXTENDED_JEST_TIMEOUT
+    );
+
+    it(
+      'should set allowDensity to false if onUpdateDataGridDensity is not provided',
+      async () => {
+        const component = await getComponent({
+          ...getProps(),
+          onUpdateSampleSize: jest.fn(),
+          onUpdateRowHeight: jest.fn(),
+          onUpdateDataGridDensity: undefined,
+        });
+
+        expect(component.find(EuiDataGrid).first().prop('toolbarVisibility'))
+          .toMatchInlineSnapshot(`
+          Object {
+            "additionalControls": null,
+            "showColumnSelector": false,
+            "showDisplaySelector": Object {
+              "allowDensity": false,
+              "allowResetButton": false,
+              "allowRowHeight": true,
+              "customRender": [Function],
             },
             "showFullScreenSelector": true,
             "showKeyboardShortcuts": true,
@@ -723,15 +759,15 @@ describe('UnifiedDataTable', () => {
 
         expect(component.find(EuiDataGrid).first().prop('toolbarVisibility'))
           .toMatchInlineSnapshot(`
-        Object {
-          "additionalControls": null,
-          "showColumnSelector": false,
-          "showDisplaySelector": undefined,
-          "showFullScreenSelector": true,
-          "showKeyboardShortcuts": true,
-          "showSortSelector": true,
-        }
-      `);
+                  Object {
+                    "additionalControls": null,
+                    "showColumnSelector": false,
+                    "showDisplaySelector": undefined,
+                    "showFullScreenSelector": true,
+                    "showKeyboardShortcuts": true,
+                    "showSortSelector": true,
+                  }
+              `);
       },
       EXTENDED_JEST_TIMEOUT
     );

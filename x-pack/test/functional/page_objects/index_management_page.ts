@@ -18,7 +18,11 @@ export function IndexManagementPageProvider({ getService }: FtrProviderContext) 
       return await testSubjects.getVisibleText('appTitle');
     },
 
-    async expectToBeOnIndicesManagement() {
+    async expectToBeOnSearchIndexManagement() {
+      await testSubjects.existOrFail('elasticsearchIndexManagement');
+    },
+
+    async expectToBeOnIndexManagement() {
       const headingText = await testSubjects.getVisibleText('appTitle');
       expect(headingText).to.be('Index Management');
     },
@@ -207,6 +211,13 @@ export function IndexManagementPageProvider({ getService }: FtrProviderContext) 
         tab: 'indexDetailsTab-mappings' | 'indexDetailsTab-overview' | 'indexDetailsTab-settings'
       ) {
         await testSubjects.click(tab);
+      },
+      async expectBreadcrumbNavigationToHaveBreadcrumbName(breadcrumbName: string) {
+        await testSubjects.existOrFail('euiBreadcrumb');
+        expect(await testSubjects.getVisibleText('breadcrumb first')).to.contain(
+          'Stack Management'
+        );
+        expect(await testSubjects.getVisibleText('breadcrumb last')).to.contain(breadcrumbName);
       },
     },
     async clickCreateIndexButton() {

@@ -84,7 +84,10 @@ export async function getTransactionErrorCountChartPreview({
 
   const params = {
     apm: { events: [ProcessorEvent.error] },
-    body: { size: 0, track_total_hits: false, query, aggs },
+    size: 0,
+    track_total_hits: false,
+    query,
+    aggs,
   };
 
   const resp = await apmEventClient.search('get_error_count_chart_preview', params);

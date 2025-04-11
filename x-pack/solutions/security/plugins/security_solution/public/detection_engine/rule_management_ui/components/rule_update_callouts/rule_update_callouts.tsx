@@ -18,15 +18,23 @@ import {
 } from '../mini_callout/translations';
 import { AllRulesTabs } from '../rules_table/rules_table_toolbar';
 
-export const RuleUpdateCallouts = () => {
+interface RuleUpdateCalloutsProps {
+  shouldShowNewRulesCallout?: boolean;
+  shouldShowUpdateRulesCallout?: boolean;
+}
+
+export const RuleUpdateCallouts = ({
+  shouldShowNewRulesCallout = false,
+  shouldShowUpdateRulesCallout = false,
+}: RuleUpdateCalloutsProps) => {
   const { data: prebuiltRulesStatus } = usePrebuiltRulesStatus();
 
-  const rulesToInstallCount = prebuiltRulesStatus?.num_prebuilt_rules_to_install ?? 0;
-  const rulesToUpgradeCount = prebuiltRulesStatus?.num_prebuilt_rules_to_upgrade ?? 0;
+  const rulesToInstallCount = prebuiltRulesStatus?.stats.num_prebuilt_rules_to_install ?? 0;
+  const rulesToUpgradeCount = prebuiltRulesStatus?.stats.num_prebuilt_rules_to_upgrade ?? 0;
 
   // Check against rulesInstalledCount since we don't want to show banners if we're showing the empty prompt
-  const shouldDisplayNewRulesCallout = rulesToInstallCount > 0;
-  const shouldDisplayUpdateRulesCallout = rulesToUpgradeCount > 0;
+  const shouldDisplayNewRulesCallout = shouldShowNewRulesCallout && rulesToInstallCount > 0;
+  const shouldDisplayUpdateRulesCallout = shouldShowUpdateRulesCallout && rulesToUpgradeCount > 0;
 
   const getSecuritySolutionLinkProps = useGetSecuritySolutionLinkProps();
   const { href } = getSecuritySolutionLinkProps({

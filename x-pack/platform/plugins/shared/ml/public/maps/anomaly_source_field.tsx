@@ -12,7 +12,7 @@ import type {
   AggregationsExtendedStatsAggregation,
   AggregationsPercentilesAggregation,
   AggregationsTermsAggregation,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+} from '@elastic/elasticsearch/lib/api/types';
 import { escape } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import type { Filter } from '@kbn/es-query';

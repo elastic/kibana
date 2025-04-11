@@ -9,7 +9,7 @@ import type { FC, PropsWithChildren } from 'react';
 import React, { useState, useCallback } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import {
   EuiFlexGroup,
   EuiFlexItem,

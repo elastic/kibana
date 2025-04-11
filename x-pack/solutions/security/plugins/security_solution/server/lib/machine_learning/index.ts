@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 
 import type { MlAnomalyRecordDoc as Anomaly } from '@kbn/ml-anomaly-utils';
 import type { Filter } from '@kbn/es-query';
@@ -37,35 +37,33 @@ export const getAnomalies = async (
 export const buildAnomalyQuery = (params: AnomaliesSearchParams): estypes.SearchRequest => {
   const boolCriteria = buildCriteria(params);
   return {
-    body: {
-      size: params.maxRecords || 100,
-      query: {
-        bool: {
-          filter: [
-            {
-              query_string: {
-                query: 'result_type:record',
-                analyze_wildcard: false,
-              },
+    size: params.maxRecords || 100,
+    query: {
+      bool: {
+        filter: [
+          {
+            query_string: {
+              query: 'result_type:record',
+              analyze_wildcard: false,
             },
-            { term: { is_interim: false } },
-            {
-              bool: {
-                must: boolCriteria,
-              },
+          },
+          { term: { is_interim: false } },
+          {
+            bool: {
+              must: boolCriteria,
             },
-          ],
-          must_not: params.exceptionFilter?.query,
-        },
+          },
+        ],
+        must_not: params.exceptionFilter?.query,
       },
-      fields: [
-        {
-          field: '*',
-          include_unmapped: true,
-        },
-      ],
-      sort: [{ record_score: { order: 'desc' as const } }],
     },
+    fields: [
+      {
+        field: '*',
+        include_unmapped: true,
+      },
+    ],
+    sort: [{ record_score: { order: 'desc' as const } }],
   };
 };
 

@@ -5,10 +5,12 @@
  * 2.0.
  */
 import type { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
-import { LATEST_FINDINGS_RETENTION_POLICY } from '@kbn/cloud-security-posture-common';
+import {
+  LATEST_FINDINGS_RETENTION_POLICY,
+  FINDINGS_INDEX_PATTERN,
+} from '@kbn/cloud-security-posture-common';
 import {
   CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
-  FINDINGS_INDEX_PATTERN,
   LATEST_FINDINGS_INDEX_DEFAULT_NS,
 } from '../../common/constants';
 

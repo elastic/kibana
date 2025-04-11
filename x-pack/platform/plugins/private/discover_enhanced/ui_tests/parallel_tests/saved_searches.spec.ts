@@ -54,13 +54,13 @@ spaceTest.describe(
       await scoutSpace.uiSettings.setDefaultTime({ from: START_TIME, to: END_TIME });
     });
 
+    spaceTest.beforeEach(async ({ browserAuth }) => {
+      await browserAuth.loginAsPrivilegedUser();
+    });
+
     spaceTest.afterAll(async ({ scoutSpace }) => {
       await scoutSpace.uiSettings.unset('defaultIndex', 'timepicker:timeDefaults');
       await scoutSpace.savedObjects.cleanStandardList();
-    });
-
-    spaceTest.beforeEach(async ({ browserAuth }) => {
-      await browserAuth.loginAsPrivilegedUser();
     });
 
     spaceTest('should customize time range on dashboards', async ({ pageObjects, page }) => {

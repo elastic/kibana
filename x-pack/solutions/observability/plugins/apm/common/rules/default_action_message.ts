@@ -26,7 +26,7 @@ export const errorCountMessage = i18n.translate(
 export const errorCountRecoveryMessage = i18n.translate(
   'xpack.apm.alertTypes.errorCount.defaultRecoveryMessage',
   {
-    defaultMessage: `'{{context.reason}}'
+    defaultMessage: `Recovered: '{{context.reason}}'
 
 '{{rule.name}}' has recovered.
 
@@ -61,7 +61,7 @@ export const transactionDurationMessage = i18n.translate(
 export const transactionDurationRecoveryMessage = i18n.translate(
   'xpack.apm.alertTypes.transactionDuration.defaultRecoveryMessage',
   {
-    defaultMessage: `'{{context.reason}}'
+    defaultMessage: `Recovered: '{{context.reason}}'
 
 '{{rule.name}}' has recovered.
 
@@ -97,7 +97,7 @@ export const transactionErrorRateMessage = i18n.translate(
 export const transactionErrorRateRecoveryMessage = i18n.translate(
   'xpack.apm.alertTypes.transactionErrorRate.defaultRecoveryMessage',
   {
-    defaultMessage: `'{{context.reason}}'
+    defaultMessage: `Recovered: '{{context.reason}}'
 
 '{{rule.name}}' has recovered.
 
@@ -132,7 +132,7 @@ export const anomalyMessage = i18n.translate(
 export const anomalyRecoveryMessage = i18n.translate(
   'xpack.apm.alertTypes.transactionDurationAnomaly.defaultRecoveryMessage',
   {
-    defaultMessage: `'{{context.reason}}'
+    defaultMessage: `Recovered: '{{context.reason}}'
 
 '{{rule.name}}' has recovered.
 

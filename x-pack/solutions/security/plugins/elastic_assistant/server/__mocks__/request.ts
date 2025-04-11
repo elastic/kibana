@@ -9,13 +9,20 @@ import {
   ATTACK_DISCOVERY,
   ATTACK_DISCOVERY_BY_CONNECTOR_ID,
   ATTACK_DISCOVERY_CANCEL_BY_CONNECTOR_ID,
+  ATTACK_DISCOVERY_SCHEDULES,
+  ATTACK_DISCOVERY_SCHEDULES_BY_ID,
+  ATTACK_DISCOVERY_SCHEDULES_BY_ID_DISABLE,
+  ATTACK_DISCOVERY_SCHEDULES_BY_ID_ENABLE,
+  ATTACK_DISCOVERY_SCHEDULES_FIND,
   CAPABILITIES,
 } from '../../common/constants';
 import type {
+  CreateAttackDiscoverySchedulesRequestBody,
   DefendInsightsGetRequestQuery,
   DefendInsightsPostRequestBody,
   DeleteKnowledgeBaseEntryRequestParams,
   KnowledgeBaseEntryUpdateProps,
+  UpdateAttackDiscoverySchedulesRequestBody,
   UpdateKnowledgeBaseEntryRequestParams,
 } from '@kbn/elastic-assistant-common';
 import {
@@ -130,6 +137,15 @@ export const getPostEvaluateRequest = ({ body }: { body: PostEvaluateRequestBody
     body,
     method: 'post',
     path: ELASTIC_AI_ASSISTANT_EVALUATE_URL,
+  });
+
+export const getKnowledgeBaseEntryGetRequest = (
+  id: string = '04128c15-0d1b-4716-a4c5-46997ac7f3bd'
+) =>
+  requestMock.create({
+    method: 'get',
+    path: ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_ENTRIES_URL_BY_ID,
+    params: { id },
   });
 
 export const getKnowledgeBaseEntryFindRequest = () =>
@@ -286,4 +302,58 @@ export const postDefendInsightsRequest = (body: DefendInsightsPostRequestBody) =
     method: 'post',
     path: DEFEND_INSIGHTS,
     body,
+  });
+
+export const findAttackDiscoverySchedulesRequest = () =>
+  requestMock.create({
+    method: 'get',
+    path: ATTACK_DISCOVERY_SCHEDULES_FIND,
+  });
+
+export const createAttackDiscoverySchedulesRequest = (
+  body: CreateAttackDiscoverySchedulesRequestBody
+) =>
+  requestMock.create({
+    method: 'post',
+    path: ATTACK_DISCOVERY_SCHEDULES,
+    body,
+  });
+
+export const deleteAttackDiscoverySchedulesRequest = (id: string) =>
+  requestMock.create({
+    method: 'delete',
+    path: ATTACK_DISCOVERY_SCHEDULES_BY_ID,
+    params: { id },
+  });
+
+export const getAttackDiscoverySchedulesRequest = (id: string) =>
+  requestMock.create({
+    method: 'get',
+    path: ATTACK_DISCOVERY_SCHEDULES_BY_ID,
+    params: { id },
+  });
+
+export const updateAttackDiscoverySchedulesRequest = (
+  id: string,
+  body: UpdateAttackDiscoverySchedulesRequestBody
+) =>
+  requestMock.create({
+    method: 'put',
+    path: ATTACK_DISCOVERY_SCHEDULES_BY_ID,
+    params: { id },
+    body,
+  });
+
+export const enableAttackDiscoverySchedulesRequest = (id: string) =>
+  requestMock.create({
+    method: 'post',
+    path: ATTACK_DISCOVERY_SCHEDULES_BY_ID_ENABLE,
+    params: { id },
+  });
+
+export const disableAttackDiscoverySchedulesRequest = (id: string) =>
+  requestMock.create({
+    method: 'put',
+    path: ATTACK_DISCOVERY_SCHEDULES_BY_ID_DISABLE,
+    params: { id },
   });

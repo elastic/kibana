@@ -26,7 +26,7 @@ import {
   type UseIndexDataReturnType,
 } from '@kbn/ml-data-grid';
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import { DataLoader } from '../../../../../datavisualizer/index_based/data_loader';
 import {
   useColorRange,

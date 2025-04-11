@@ -32,6 +32,11 @@ export const settingsNavLinks: SolutionNavLink[] = [
     isFooterLink: true,
   },
   {
+    id: ExternalPageName.managementMonitoring,
+    title: i18n.MONITORING_TITLE,
+    isFooterLink: true,
+  },
+  {
     id: ExternalPageName.integrationsSecurity,
     title: i18n.INTEGRATIONS_TITLE,
     isFooterLink: true,

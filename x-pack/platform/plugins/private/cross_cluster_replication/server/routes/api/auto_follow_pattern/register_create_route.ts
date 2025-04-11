@@ -64,7 +64,7 @@ export const registerCreateRoute = ({
       try {
         const responseBody = await client.asCurrentUser.ccr.putAutoFollowPattern({
           name: id,
-          body,
+          ...body,
         });
 
         return response.ok({

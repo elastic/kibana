@@ -22,9 +22,9 @@ node scripts/build \
     --docker-tag-qualifier="$BUILDKITE_COMMIT" \
     --docker-push \
     --skip-docker-ubi \
-    --skip-docker-ubuntu \
     --skip-docker-wolfi \
     --skip-docker-cloud \
+    --skip-docker-cloud-fips \
     --skip-docker-serverless \
     --skip-docker-contexts
 
@@ -32,13 +32,12 @@ node scripts/build \
 cd "$KIBANA_DIR/target"
 buildkite-agent artifact upload "./*docker-image*.tar.gz"
 
-KIBANA_UBI_FIPS_IMAGE="docker.elastic.co/kibana-ci/kibana-ubi-fips:$FULL_VERSION-$BUILDKITE_COMMIT"
+KIBANA_FIPS_IMAGE="docker.elastic.co/kibana-ci/kibana-wolfi-fips:$FULL_VERSION-$BUILDKITE_COMMIT"
 
-cat <<EOF | buildkite-agent annotate --style "info" --context fips
-  ### Kibana FIPS Image
+cat <<EOF | buildkite-agent annotate --style "info" --context kibana-wolfi-fips-image
 
-  UBI image: \`$KIBANA_UBI_FIPS_IMAGE\`
+  Kibana FIPS image: \`$KIBANA_FIPS_IMAGE\`
 EOF
 
-buildkite-agent meta-data set pr_comment:build_fips:head "* Kibana UBI FIPS Image: \`$KIBANA_UBI_FIPS_IMAGE\`"
+buildkite-agent meta-data set pr_comment:build_fips:head "* Kibana FIPS Image: \`$KIBANA_FIPS_IMAGE\`"
 buildkite-agent meta-data set pr_comment:early_comment_job_id "$BUILDKITE_JOB_ID"

@@ -16,18 +16,30 @@
 
 import { z } from '@kbn/zod';
 
-import { ListRequestQuery } from './list_metadata.gen';
-import { SuccessResponse } from '../model/schema/common.gen';
+import {
+  Page,
+  PageSize,
+  Kuery,
+  HostStatuses,
+  SortField,
+  SortDirection,
+} from '../model/schema/common.gen';
+import { MetadataListResponse } from './list_metadata.gen';
 
 export type GetEndpointMetadataListRequestQuery = z.infer<
   typeof GetEndpointMetadataListRequestQuery
 >;
 export const GetEndpointMetadataListRequestQuery = z.object({
-  query: ListRequestQuery,
+  page: Page.optional(),
+  pageSize: PageSize.optional(),
+  kuery: Kuery.optional(),
+  hostStatuses: HostStatuses,
+  sortField: SortField.optional(),
+  sortDirection: SortDirection.optional(),
 });
 export type GetEndpointMetadataListRequestQueryInput = z.input<
   typeof GetEndpointMetadataListRequestQuery
 >;
 
 export type GetEndpointMetadataListResponse = z.infer<typeof GetEndpointMetadataListResponse>;
-export const GetEndpointMetadataListResponse = SuccessResponse;
+export const GetEndpointMetadataListResponse = MetadataListResponse;

@@ -18,8 +18,8 @@ import { Loader } from '../../../../common/components/loader';
 import { useBoolState } from '../../../../common/hooks/use_bool_state';
 import { PrePackagedRulesPrompt } from '../../../../detections/components/rules/pre_packaged_rules/load_empty_prompt';
 import type { Rule } from '../../../rule_management/logic';
-import * as i18n from '../../../../detections/pages/detection_engine/rules/translations';
-import type { EuiBasicTableOnChange } from '../../../../detections/pages/detection_engine/rules/types';
+import * as i18n from '../../../common/translations';
+import type { EuiBasicTableOnChange } from '../../../common/types';
 import { BulkActionDryRunConfirmation } from './bulk_actions/bulk_action_dry_run_confirmation';
 import { BulkEditFlyout } from './bulk_actions/bulk_edit_flyout';
 import { useBulkActions } from './bulk_actions/use_bulk_actions';
@@ -275,7 +275,7 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
               : i18n.BULK_DELETE_CONFIRMATION_TITLE
           }
           onCancel={handleDeletionCancel}
-          onConfirm={handleDeletionConfirm}
+          onConfirm={() => handleDeletionConfirm()}
           confirmButtonText={i18n.DELETE_CONFIRMATION_CONFIRM}
           cancelButtonText={i18n.DELETE_CONFIRMATION_CANCEL}
           buttonColor="danger"

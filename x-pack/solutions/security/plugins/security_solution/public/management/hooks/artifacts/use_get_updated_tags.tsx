@@ -8,20 +8,31 @@
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { useCallback } from 'react';
 import type { TagFilter } from '../../../../common/endpoint/service/artifacts/utils';
+import {
+  isOwnerSpaceIdTag,
+  isFilterProcessDescendantsTag,
+  isPolicySelectionTag,
+} from '../../../../common/endpoint/service/artifacts/utils';
 
-type TagFiltersType = {
-  [tagCategory in string]: TagFilter;
-};
+interface TagFiltersType {
+  [tagCategory: string]: TagFilter;
+}
 
-type GetTagsUpdatedBy<TagFilters> = (tagsToUpdate: keyof TagFilters, newTags: string[]) => string[];
+type GetTagsUpdatedBy<TagFilters> = (tagType: keyof TagFilters, newTags: string[]) => string[];
+
+const DEFAULT_FILTERS = Object.freeze({
+  policySelection: isPolicySelectionTag,
+  processDescendantsFiltering: isFilterProcessDescendantsTag,
+  ownerSpaceId: isOwnerSpaceIdTag,
+} as const);
 
 /**
- * A hook to be used to generate a new `tags` array that contains multiple 'categories' of tags,
- * e.g. policy assignment, some special settings, in a desired order.
+ * A hook that returns a callback for using in updating the complete list of `tags` on an artifact.
+ * The callback will replace a given type of tag with new set of values - example: update the list
+ * of tags on an artifact with a new list of policy assignment tags.
  *
- * The hook excepts a `filter` object that contain a simple filter function for every tag
- * category. The `filter` object should contain the filters in the same ORDER as the categories
- * should appear in the `tags` array.
+ * The hook uses a `filter` object (can be overwritten on input) that contain a simple filter
+ * function that is used to identify tags for that category.
  *
  * ```
  * const FILTERS_IN_ORDER = { // preferably defined out of the component
@@ -42,25 +53,21 @@ type GetTagsUpdatedBy<TagFilters> = (tagsToUpdate: keyof TagFilters, newTags: st
  * @param filters
  * @returns `getTagsUpdatedBy(tagCategory, ['new', 'tags'])`
  */
-export const useGetUpdatedTags = <TagFilters extends TagFiltersType>(
+export const useGetUpdatedTags = <TagFilters extends TagFiltersType = typeof DEFAULT_FILTERS>(
   exception: Partial<Pick<ExceptionListItemSchema, 'tags'>>,
-  filters: TagFilters
-): {
+  filters: TagFilters = DEFAULT_FILTERS as unknown as TagFilters
+): Readonly<{
   getTagsUpdatedBy: GetTagsUpdatedBy<TagFilters>;
-} => {
+}> => {
   const getTagsUpdatedBy: GetTagsUpdatedBy<TagFilters> = useCallback(
-    (tagsToUpdate, newTags) => {
-      const tagCategories = Object.keys(filters);
+    (tagType, newTags) => {
+      if (!filters[tagType]) {
+        throw new Error(
+          `getTagsUpdateBy() was called with an unknown tag type: ${String(tagType)}`
+        );
+      }
 
-      const arrayOfTagArrays: string[][] = tagCategories.map((category) => {
-        if (tagsToUpdate === category) {
-          return newTags;
-        }
-
-        return (exception.tags ?? []).filter(filters[category]);
-      });
-
-      return arrayOfTagArrays.flat();
+      return (exception.tags ?? []).filter((tag) => !filters[tagType](tag)).concat(...newTags);
     },
     [exception, filters]
   );

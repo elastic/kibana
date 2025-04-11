@@ -5,9 +5,10 @@
  * 2.0.
  */
 
+import type { KibanaRequest } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
 
-import { FleetNotFoundError } from '../../errors';
+import { FleetError, FleetNotFoundError } from '../../errors';
 import { appContextService } from '../../services';
 import {
   deleteKibanaAssetsAndReferencesForSpace,
@@ -24,6 +25,21 @@ import type {
 } from '../../types';
 import { createArchiveIteratorFromMap } from '../../services/epm/archive/archive_iterator';
 
+export async function checkIntegrationsAllPrivilegesForSpaces(
+  request: KibanaRequest,
+  spaceIds: string[]
+) {
+  const security = appContextService.getSecurity();
+  const res = await security.authz.checkPrivilegesWithRequest(request).atSpaces(spaceIds, {
+    kibana: [security.authz.actions.api.get(`integrations-all`)],
+  });
+  if (!res.hasAllRequested) {
+    throw new FleetError(
+      `No enough permissions to install assets in spaces ${spaceIds.join(', ')}`
+    );
+  }
+}
+
 export const installPackageKibanaAssetsHandler: FleetRequestHandler<
   TypeOf<typeof InstallKibanaAssetsRequestSchema.params>,
   undefined,
@@ -34,6 +50,10 @@ export const installPackageKibanaAssetsHandler: FleetRequestHandler<
   const logger = appContextService.getLogger();
   const spaceId = fleetContext.spaceId;
   const { pkgName, pkgVersion } = request.params;
+
+  if (request.body?.space_ids) {
+    await checkIntegrationsAllPrivilegesForSpaces(request, request.body?.space_ids);
+  }
 
   const installedPkgWithAssets = await getInstalledPackageWithAssets({
     savedObjectsClient,
@@ -56,22 +76,25 @@ export const installPackageKibanaAssetsHandler: FleetRequestHandler<
 
   const { packageInfo } = installedPkgWithAssets;
 
-  await installKibanaAssetsAndReferences({
-    savedObjectsClient,
-    logger,
-    pkgName,
-    pkgTitle: packageInfo.title,
-    installAsAdditionalSpace: true,
-    spaceId,
-    assetTags: installedPkgWithAssets.packageInfo?.asset_tags,
-    installedPkg: installation,
-    packageInstallContext: {
-      packageInfo,
-      paths: installedPkgWithAssets.paths,
-      assetsMap: installedPkgWithAssets.assetsMap,
-      archiveIterator: createArchiveIteratorFromMap(installedPkgWithAssets.assetsMap),
-    },
-  });
+  const spaceIds = request.body?.space_ids ?? [spaceId];
+
+  for (const spaceToInstallId of spaceIds) {
+    await installKibanaAssetsAndReferences({
+      savedObjectsClient: appContextService.getInternalUserSOClientForSpaceId(spaceToInstallId),
+      logger,
+      pkgName,
+      pkgTitle: packageInfo.title,
+      installAsAdditionalSpace: true,
+      spaceId: spaceToInstallId,
+      assetTags: installedPkgWithAssets.packageInfo?.asset_tags,
+      installedPkg: installation,
+      packageInstallContext: {
+        packageInfo,
+        paths: installedPkgWithAssets.paths,
+        archiveIterator: createArchiveIteratorFromMap(installedPkgWithAssets.assetsMap),
+      },
+    });
+  }
 
   return response.ok({ body: { success: true } });
 };

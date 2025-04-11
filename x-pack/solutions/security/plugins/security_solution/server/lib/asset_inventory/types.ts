@@ -7,10 +7,8 @@
 
 import type { Logger } from '@kbn/core/server';
 import type { SecuritySolutionPluginRouter } from '../../types';
-import type { ConfigType } from '../../config';
 
 export interface AssetInventoryRoutesDeps {
   router: SecuritySolutionPluginRouter;
   logger: Logger;
-  config: ConfigType;
 }

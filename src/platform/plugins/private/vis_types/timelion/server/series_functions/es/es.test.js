@@ -251,19 +251,19 @@ describe('es', () => {
       expect(request.params.index).toEqual('beer');
     });
 
-    test('always sets body.size to 0', () => {
+    test('always sets size to 0', () => {
       const request = fn(config, tlConfig, emptyScriptFields);
 
-      expect(request.params.body.size).toEqual(0);
+      expect(request.params.size).toEqual(0);
     });
 
     test('creates a filters agg that contains each of the queries passed', () => {
       config.q = ['foo', 'bar'];
       const request = fn(config, tlConfig, emptyScriptFields);
 
-      expect(request.params.body.aggs.q.meta.type).toEqual('split');
+      expect(request.params.aggs.q.meta.type).toEqual('split');
 
-      const filters = request.params.body.aggs.q.filters.filters;
+      const filters = request.params.aggs.q.filters.filters;
       expect(filters.foo.query_string.query).toEqual('foo');
       expect(filters.bar.query_string.query).toEqual('bar');
     });
@@ -347,10 +347,10 @@ describe('es', () => {
         });
       });
 
-      test('adds the contents of body.extended.es.filter to a filter clause of the bool', () => {
+      test('adds the contents of extended.es.filter to a filter clause of the bool', () => {
         config.kibana = true;
         const request = fn(config, tlConfig, emptyScriptFields);
-        const filter = request.params.body.query.bool.filter.bool;
+        const filter = request.params.query.bool.filter.bool;
         expect(filter.must.length).toEqual(1);
         expect(filter.must_not.length).toEqual(2);
       });
@@ -358,13 +358,13 @@ describe('es', () => {
       test('does not include filters if config.kibana = false', () => {
         config.kibana = false;
         const request = fn(config, tlConfig, emptyScriptFields);
-        expect(request.params.body.query.bool.filter).toEqual(undefined);
+        expect(request.params.query.bool.filter).toEqual(undefined);
       });
 
       test('adds a time filter to the bool querys must clause', () => {
         let request = fn(config, tlConfig, emptyScriptFields);
-        expect(request.params.body.query.bool.must.length).toEqual(1);
-        expect(request.params.body.query.bool.must[0]).toEqual({
+        expect(request.params.query.bool.must.length).toEqual(1);
+        expect(request.params.query.bool.must[0]).toEqual({
           range: {
             '@timestamp': {
               format: 'strict_date_optional_time',
@@ -376,7 +376,7 @@ describe('es', () => {
 
         config.kibana = true;
         request = fn(config, tlConfig, emptyScriptFields);
-        expect(request.params.body.query.bool.must.length).toEqual(1);
+        expect(request.params.query.bool.must.length).toEqual(1);
       });
     });
 
@@ -385,7 +385,7 @@ describe('es', () => {
         config.split = ['beer:5', 'wine:10', ':lemo:nade::15', ':jui:ce:723::45'];
         const request = fn(config, tlConfig, {});
 
-        let aggs = request.params.body.aggs.q.aggs;
+        let aggs = request.params.aggs.q.aggs;
 
         expect(aggs.beer.meta.type).toEqual('split');
         expect(aggs.beer.terms.field).toEqual('beer');
@@ -426,7 +426,7 @@ describe('es', () => {
         };
         const request = fn(config, tlConfig, scriptFields);
 
-        const aggs = request.params.body.aggs.q.aggs;
+        const aggs = request.params.aggs.q.aggs;
 
         expect(aggs.scriptedBeer.meta.type).toEqual('split');
         expect(aggs.scriptedBeer.terms.script).toEqual({

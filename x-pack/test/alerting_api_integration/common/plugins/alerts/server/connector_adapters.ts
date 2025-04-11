@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { ConnectorAdapter } from '@kbn/alerting-plugin/server';
-import { CoreSetup } from '@kbn/core/server';
+import type { ConnectorAdapter } from '@kbn/alerting-plugin/server';
+import type { CoreSetup } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
-import { FixtureStartDeps, FixtureSetupDeps } from './plugin';
+import type { FixtureStartDeps, FixtureSetupDeps } from './plugin';
 
 export function defineConnectorAdapters(
   core: CoreSetup<FixtureStartDeps>,

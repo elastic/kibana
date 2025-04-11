@@ -6,7 +6,7 @@
  */
 
 import { v5 as uuidv5 } from 'uuid';
-import { uniqBy } from 'lodash';
+import { omit, uniqBy } from 'lodash';
 import pMap from 'p-map';
 import type { SavedObjectsImportSuccess } from '@kbn/core-saved-objects-common';
 import { taggableTypes } from '@kbn/saved-objects-tagging-plugin/common/constants';
@@ -14,13 +14,10 @@ import type { IAssignmentService } from '@kbn/saved-objects-tagging-plugin/serve
 import type { ITagsClient } from '@kbn/saved-objects-tagging-plugin/common/types';
 
 import { MAX_CONCURRENT_PACKAGE_ASSETS } from '../../../../constants';
-import type { KibanaAssetType } from '../../../../../common';
+
 import type { PackageSpecTags } from '../../../../types';
 
 import { appContextService } from '../../../app_context';
-
-import type { ArchiveAsset } from './install';
-import { KibanaSavedObjectTypeMapping } from './install';
 
 interface ObjectReference {
   type: string;
@@ -85,7 +82,6 @@ const getRandomColor = () => {
 interface TagAssetsParams {
   savedObjectTagAssignmentService: IAssignmentService;
   savedObjectTagClient: ITagsClient;
-  kibanaAssets: Record<KibanaAssetType, ArchiveAsset[]>;
   pkgTitle: string;
   pkgName: string;
   spaceId: string;
@@ -93,14 +89,15 @@ interface TagAssetsParams {
   assetTags?: PackageSpecTags[];
 }
 
-export async function tagKibanaAssets(opts: TagAssetsParams) {
-  const { savedObjectTagAssignmentService, kibanaAssets, importedAssets } = opts;
+const getNewId = (asset: SavedObjectsImportSuccess) =>
+  asset?.destinationId ? asset.destinationId : asset.id;
 
-  const getNewId = (assetId: string) =>
-    importedAssets.find((imported) => imported.id === assetId)?.destinationId ?? assetId;
-  const taggableAssets = getTaggableAssets(kibanaAssets).map((asset) => ({
-    ...asset,
-    id: getNewId(asset.id),
+export async function tagKibanaAssets(opts: TagAssetsParams) {
+  const { savedObjectTagAssignmentService, importedAssets } = opts;
+
+  const taggableAssets = getTaggableAssets(importedAssets).map((asset) => ({
+    ...omit(asset, 'destinationId'),
+    id: getNewId(asset),
   }));
   if (taggableAssets.length > 0) {
     const [managedTagId, packageTagId] = await Promise.all([
@@ -150,18 +147,8 @@ export async function tagKibanaAssets(opts: TagAssetsParams) {
   }
 }
 
-function getTaggableAssets(kibanaAssets: TagAssetsParams['kibanaAssets']) {
-  return Object.entries(kibanaAssets).flatMap(([assetType, assets]) => {
-    if (!taggableTypes.includes(KibanaSavedObjectTypeMapping[assetType as KibanaAssetType])) {
-      return [];
-    }
-
-    if (!assets.length) {
-      return [];
-    }
-
-    return assets;
-  });
+function getTaggableAssets(importedAssets: SavedObjectsImportSuccess[]) {
+  return importedAssets.filter((asset) => taggableTypes.includes(asset.type));
 }
 
 async function ensureManagedTag(
@@ -219,7 +206,7 @@ async function ensurePackageTag(
 
 // Ensure that asset tags coming from the kibana/tags.yml file are correctly parsed and created
 async function getPackageSpecTags(
-  taggableAssets: ArchiveAsset[],
+  taggableAssets: SavedObjectsImportSuccess[],
   opts: Pick<TagAssetsParams, 'spaceId' | 'savedObjectTagClient' | 'pkgName' | 'assetTags'>
 ): Promise<PackageSpecTagsAssets[]> {
   const { spaceId, savedObjectTagClient, pkgName, assetTags } = opts;
@@ -254,7 +241,7 @@ async function getPackageSpecTags(
 // Get all the assets of types defined in tag.asset_types from taggable kibanaAssets
 const getAssetTypesObjectReferences = (
   assetTypes: string[] | undefined,
-  taggableAssets: ArchiveAsset[]
+  taggableAssets: SavedObjectsImportSuccess[]
 ): ObjectReference[] => {
   if (!assetTypes || assetTypes.length === 0) return [];
 
@@ -268,7 +255,7 @@ const getAssetTypesObjectReferences = (
 // Get the references to ids defined in tag.asset_ids from taggable kibanaAssets
 const getAssetIdsObjectReferences = (
   assetIds: string[] | undefined,
-  taggableAssets: ArchiveAsset[]
+  taggableAssets: SavedObjectsImportSuccess[]
 ): ObjectReference[] => {
   if (!assetIds || assetIds.length === 0) return [];
 

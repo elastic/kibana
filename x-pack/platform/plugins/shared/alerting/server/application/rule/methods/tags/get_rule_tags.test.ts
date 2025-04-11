@@ -5,7 +5,8 @@
  * 2.0.
  */
 import { v4 } from 'uuid';
-import { RulesClient, ConstructorOptions } from '../../../../rules_client/rules_client';
+import type { ConstructorOptions } from '../../../../rules_client/rules_client';
+import { RulesClient } from '../../../../rules_client/rules_client';
 import {
   savedObjectsClientMock,
   loggingSystemMock,
@@ -17,15 +18,16 @@ import { ruleTypeRegistryMock } from '../../../../rule_type_registry.mock';
 import { alertingAuthorizationMock } from '../../../../authorization/alerting_authorization.mock';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
-import { AlertingAuthorization } from '../../../../authorization/alerting_authorization';
-import { ActionsAuthorization } from '@kbn/actions-plugin/server';
+import type { AlertingAuthorization } from '../../../../authorization/alerting_authorization';
+import type { ActionsAuthorization } from '@kbn/actions-plugin/server';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { getBeforeSetup } from '../../../../rules_client/tests/lib';
 import { RecoveredActionGroup } from '../../../../../common';
-import { RegistryRuleType } from '../../../../rule_type_registry';
+import type { RegistryRuleType } from '../../../../rule_type_registry';
 import { ConnectorAdapterRegistry } from '../../../../connector_adapters/connector_adapter_registry';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { backfillClientMock } from '../../../../backfill_client/backfill_client.mock';
+import { fromKueryExpression, toKqlExpression } from '@kbn/es-query';
 
 const taskManager = taskManagerMock.createStart();
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
@@ -80,9 +82,9 @@ const listedTypes = new Map<string, RegistryRuleType>([
       name: 'myType',
       category: 'test',
       producer: 'myApp',
+      solution: 'stack',
       enabledInLicense: true,
       hasAlertsMappings: false,
-      hasFieldsForAAD: false,
       validLegacyConsumers: [],
     },
   ],
@@ -300,5 +302,29 @@ describe('getTags()', () => {
 
     const result = await rulesClient.getTags({ page: 1 });
     expect(result.perPage).toEqual(50);
+  });
+
+  test('combines the filters with the auth filter correctly', async () => {
+    const filter = fromKueryExpression(
+      'alert.attributes.alertTypeId:myType and alert.attributes.consumer:myApp'
+    );
+
+    authorization.getFindAuthorizationFilter.mockResolvedValue({
+      filter,
+      ensureRuleTypeIsAuthorized() {},
+    });
+
+    const rulesClient = new RulesClient(rulesClientParams);
+    await rulesClient.getTags({
+      page: 1,
+      ruleTypeIds: ['.es-query', '.index-threshold'],
+      search: 'search',
+    });
+
+    const finalFilter = unsecuredSavedObjectsClient.find.mock.calls[0][0].filter;
+
+    expect(toKqlExpression(finalFilter)).toMatchInlineSnapshot(
+      `"(((alert.attributes.alertTypeId: .es-query OR alert.attributes.alertTypeId: .index-threshold) AND alert.attributes.tags: search*) AND (alert.attributes.alertTypeId: myType AND alert.attributes.consumer: myApp))"`
+    );
   });
 });

@@ -240,7 +240,7 @@ describe('GaugeComponent', function () {
       const datum = bullet.prop<BulletProps['data']>('data')[0]?.[0];
       expect((datum?.ticks as () => number[])?.()).toEqual([0, 1, 2, 3, 4, 10]);
       const colorBands = bullet.prop<Color[]>('colorBands');
-      expect(colorBands).toEqual(['#D3DAE6', '#D3DAE6']);
+      expect(colorBands).toEqual(['#CAD3E2', '#CAD3E2']);
     });
     it('sets proper color bands if palette steps are smaller than minimum', () => {
       const palette = {
@@ -268,7 +268,7 @@ describe('GaugeComponent', function () {
       } as GaugeRenderProps;
       const bullet = shallowWithIntl(<GaugeComponent {...customProps} />).find(Bullet);
       const colorBands = bullet.prop<Color[]>('colorBands');
-      expect(colorBands).toEqual(['#D3DAE6', '#D3DAE6']);
+      expect(colorBands).toEqual(['#CAD3E2', '#CAD3E2']);
     });
     it('sets proper color bands if percent palette steps are smaller than 0', () => {
       const palette = {
@@ -296,7 +296,7 @@ describe('GaugeComponent', function () {
       } as GaugeRenderProps;
       const bullet = shallowWithIntl(<GaugeComponent {...customProps} />).find(Bullet);
       const colorBands = bullet.prop<Color[]>('colorBands');
-      expect(colorBands).toEqual(['#D3DAE6', '#D3DAE6']);
+      expect(colorBands).toEqual(['#CAD3E2', '#CAD3E2']);
     });
     it('doesnt set bands for values differing <10%', () => {
       const palette = {
@@ -324,7 +324,7 @@ describe('GaugeComponent', function () {
       } as GaugeRenderProps;
       const bullet = shallowWithIntl(<GaugeComponent {...customProps} />).find(Bullet);
       const colorBands = bullet.prop<Color[]>('colorBands');
-      expect(colorBands).toEqual(['#D3DAE6', '#D3DAE6']);
+      expect(colorBands).toEqual(['#CAD3E2', '#CAD3E2']);
     });
     it('sets proper color bands for values greater than maximum', () => {
       const palette = {
@@ -352,7 +352,7 @@ describe('GaugeComponent', function () {
       } as GaugeRenderProps;
       const bullet = shallowWithIntl(<GaugeComponent {...customProps} />).find(Bullet);
       const colorBands = bullet.prop<Color[]>('colorBands');
-      expect(colorBands).toEqual(['#D3DAE6', '#D3DAE6']);
+      expect(colorBands).toEqual(['#CAD3E2', '#CAD3E2']);
     });
     it('passes number bands from color palette with no stops defined', () => {
       const palette = {

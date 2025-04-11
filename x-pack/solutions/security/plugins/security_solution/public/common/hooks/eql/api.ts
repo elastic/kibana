@@ -9,7 +9,7 @@ import { firstValueFrom } from 'rxjs';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { EqlSearchStrategyRequest, EqlSearchStrategyResponse } from '@kbn/data-plugin/common';
 import { EQL_SEARCH_STRATEGY } from '@kbn/data-plugin/common';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 
 import type { EqlOptions } from '../../../../common/search_strategy';
 import {
@@ -68,7 +68,9 @@ export const validateEql = async ({
         {
           params: {
             index: dataViewTitle,
-            body: { query, runtime_mappings: runtimeMappings, size: 0 },
+            query,
+            runtime_mappings: runtimeMappings,
+            size: 0,
             // Prevent passing empty string values
             timestamp_field: eqlOptions?.timestampField ? eqlOptions.timestampField : undefined,
             tiebreaker_field: eqlOptions?.tiebreakerField ? eqlOptions.tiebreakerField : undefined,

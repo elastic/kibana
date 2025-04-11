@@ -39,7 +39,9 @@
       "triggersActionsUi",
       "uiActions",
       "unifiedSearch",
-      "usageCollection"
+      "usageCollection",
+      "fieldsMetadata",
+      "apmSourcesAccess"
     ],
     "optionalPlugins": [
       "cloud",

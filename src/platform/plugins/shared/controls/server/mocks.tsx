@@ -11,11 +11,10 @@ import type { OptionsListControlState } from '../common/options_list';
 import type { DefaultDataControlState } from '../common/types';
 
 export const mockDataControlState = {
-  id: 'id',
   fieldName: 'sample field',
   dataViewId: 'sample id',
   value: ['0', '10'],
-} as DefaultDataControlState & { id: string };
+} as DefaultDataControlState;
 
 export const mockOptionsListControlState = {
   ...mockDataControlState,

@@ -44,6 +44,7 @@ jest.mock('../helpers', () => {
   };
 });
 const mockAppendAssistantMessageToConversation = appendAssistantMessageToConversation as jest.Mock;
+const mockCreateConversationWithUserInput = createConversationWithUserInput as jest.Mock;
 
 const mockLangChainExecute = langChainExecute as jest.Mock;
 const mockStream = jest.fn().mockImplementation(() => new PassThrough());
@@ -136,6 +137,7 @@ const mockRequest = {
   events: {
     aborted$: NEVER,
   },
+  query: {},
 };
 
 const mockResponse = {
@@ -150,7 +152,7 @@ describe('chatCompleteRoute', () => {
     jest.clearAllMocks();
     mockAppendAssistantMessageToConversation.mockResolvedValue(true);
     license.hasAtLeast.mockReturnValue(true);
-    (createConversationWithUserInput as jest.Mock).mockResolvedValue({ id: 'something' });
+    mockCreateConversationWithUserInput.mockResolvedValue({ id: 'something' });
     mockLangChainExecute.mockImplementation(
       async ({
         connectorId,
@@ -166,12 +168,14 @@ describe('chatCompleteRoute', () => {
         ) => Promise<void>;
       }) => {
         if (!isStream && connectorId === 'mock-connector-id') {
+          onLlmResponse('Non-streamed test reply.', {}, false).catch(() => {});
           return {
             connector_id: 'mock-connector-id',
             data: mockActionResponse,
             status: 'ok',
           };
         } else if (isStream && connectorId === 'mock-connector-id') {
+          onLlmResponse('Streamed test reply.', {}, false).catch(() => {});
           return mockStream;
         } else {
           onLlmResponse('simulated error', {}, true).catch(() => {});
@@ -395,6 +399,143 @@ describe('chatCompleteRoute', () => {
       },
     };
     await chatCompleteRoute(
+      mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>,
+      mockGetElser
+    );
+  });
+
+  it('should add assistant reply to existing conversation when `persist=true`', async () => {
+    const mockRouter = {
+      versioned: {
+        post: jest.fn().mockImplementation(() => {
+          return {
+            addVersion: jest.fn().mockImplementation(async (_, handler) => {
+              await handler(
+                mockContext,
+                {
+                  ...mockRequest,
+                  body: {
+                    ...mockRequest.body,
+                    conversationId: existingConversation.id,
+                  },
+                },
+                mockResponse
+              );
+              expect(mockAppendAssistantMessageToConversation).toHaveBeenCalledWith(
+                expect.objectContaining({
+                  messageContent: 'Non-streamed test reply.',
+                  isError: false,
+                })
+              );
+              expect(mockCreateConversationWithUserInput).toHaveBeenCalledTimes(0);
+            }),
+          };
+        }),
+      },
+    };
+
+    chatCompleteRoute(
+      mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>,
+      mockGetElser
+    );
+  });
+
+  it('should not add assistant reply to existing conversation when `persist=false`', async () => {
+    const mockRouter = {
+      versioned: {
+        post: jest.fn().mockImplementation(() => {
+          return {
+            addVersion: jest.fn().mockImplementation(async (_, handler) => {
+              await handler(
+                mockContext,
+                {
+                  ...mockRequest,
+                  body: {
+                    ...mockRequest.body,
+                    conversationId: existingConversation.id,
+                    persist: false,
+                  },
+                },
+                mockResponse
+              );
+              expect(mockAppendAssistantMessageToConversation).toHaveBeenCalledTimes(0);
+              expect(mockCreateConversationWithUserInput).toHaveBeenCalledTimes(0);
+            }),
+          };
+        }),
+      },
+    };
+
+    chatCompleteRoute(
+      mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>,
+      mockGetElser
+    );
+  });
+
+  it('should add assistant reply to new conversation when `persist=true`', async () => {
+    const mockRouter = {
+      versioned: {
+        post: jest.fn().mockImplementation(() => {
+          return {
+            addVersion: jest.fn().mockImplementation(async (_, handler) => {
+              await handler(
+                mockContext,
+                {
+                  ...mockRequest,
+                  body: {
+                    ...mockRequest.body,
+                    conversationId: undefined,
+                    persist: true,
+                  },
+                },
+                mockResponse
+              );
+              expect(mockAppendAssistantMessageToConversation).toHaveBeenCalledWith(
+                expect.objectContaining({
+                  messageContent: 'Non-streamed test reply.',
+                  isError: false,
+                })
+              );
+              expect(mockCreateConversationWithUserInput).toHaveBeenCalledTimes(1);
+            }),
+          };
+        }),
+      },
+    };
+
+    chatCompleteRoute(
+      mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>,
+      mockGetElser
+    );
+  });
+
+  it('should not create a new conversation when `persist=false`', async () => {
+    const mockRouter = {
+      versioned: {
+        post: jest.fn().mockImplementation(() => {
+          return {
+            addVersion: jest.fn().mockImplementation(async (_, handler) => {
+              await handler(
+                mockContext,
+                {
+                  ...mockRequest,
+                  body: {
+                    ...mockRequest.body,
+                    conversationId: undefined,
+                    persist: false,
+                  },
+                },
+                mockResponse
+              );
+              expect(mockAppendAssistantMessageToConversation).toHaveBeenCalledTimes(0);
+              expect(mockCreateConversationWithUserInput).toHaveBeenCalledTimes(0);
+            }),
+          };
+        }),
+      },
+    };
+
+    chatCompleteRoute(
       mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>,
       mockGetElser
     );

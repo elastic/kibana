@@ -29,14 +29,7 @@ import {
 } from './use_change_csp_rule_state';
 import { CspBenchmarkRulesWithStates } from './rules_container';
 import { MultiSelectFilter } from '../../common/component/multi_select_filter';
-
-export const RULES_BULK_ACTION_BUTTON = 'bulk-action-button';
-export const RULES_BULK_ACTION_OPTION_ENABLE = 'bulk-action-option-enable';
-export const RULES_BULK_ACTION_OPTION_DISABLE = 'bulk-action-option-disable';
-export const RULES_SELECT_ALL_RULES = 'select-all-rules-button';
-export const RULES_CLEAR_ALL_RULES_SELECTION = 'clear-rules-selection-button';
-export const RULES_DISABLED_FILTER = 'rules-disabled-filter';
-export const RULES_ENABLED_FILTER = 'rules-enabled-filter';
+import { RULES_TABLE_HEADER_TEST_SUBJ } from './test_subjects';
 
 interface RulesTableToolbarProps {
   search: (value: string) => void;
@@ -109,6 +102,7 @@ export const RulesTableHeader = ({
         <EuiFlexItem grow={0}>
           <EuiFlexGroup gutterSize="s" direction="row">
             <EuiFlexItem
+              data-test-subj={RULES_TABLE_HEADER_TEST_SUBJ.RULES_TABLE_HEADER_MULTI_SELECT}
               css={css`
                 min-width: 160px;
               `}
@@ -135,6 +129,7 @@ export const RulesTableHeader = ({
               css={css`
                 min-width: 160px;
               `}
+              data-test-subj={RULES_TABLE_HEADER_TEST_SUBJ.RULES_TABLE_HEADER_RULE_NUMBER_SELECT}
             >
               <MultiSelectFilter
                 buttonLabel={i18n.translate(
@@ -164,7 +159,7 @@ export const RulesTableHeader = ({
                   withNext
                   hasActiveFilters={enabledDisabledItemsFilterState === 'enabled'}
                   onClick={toggleEnabledRulesFilter}
-                  data-test-subj={RULES_ENABLED_FILTER}
+                  data-test-subj={RULES_TABLE_HEADER_TEST_SUBJ.RULES_ENABLED_FILTER}
                 >
                   <FormattedMessage
                     id="xpack.csp.rules.rulesTable.enabledRuleFilterButton"
@@ -174,7 +169,7 @@ export const RulesTableHeader = ({
                 <EuiFilterButton
                   hasActiveFilters={enabledDisabledItemsFilterState === 'disabled'}
                   onClick={toggleDisabledRulesFilter}
-                  data-test-subj={RULES_DISABLED_FILTER}
+                  data-test-subj={RULES_TABLE_HEADER_TEST_SUBJ.RULES_DISABLED_FILTER}
                 >
                   <FormattedMessage
                     id="xpack.csp.rules.rulesTable.disabledRuleFilterButton"
@@ -214,6 +209,7 @@ const SearchField = ({
     <div>
       <EuiFlexItem grow={true} style={{ alignItems: 'flex-end' }}>
         <EuiFieldSearch
+          data-test-subj={RULES_TABLE_HEADER_TEST_SUBJ.RULES_TABLE_HEADER_SEARCH_INPUT}
           isLoading={isSearching}
           placeholder={i18n.translate('xpack.csp.rules.rulesTable.searchPlaceholder', {
             defaultMessage: 'Search by Rule Name',
@@ -278,7 +274,7 @@ const CurrentPageOfTotal = ({
       size="xs"
       iconType="arrowDown"
       iconSide="right"
-      data-test-subj={RULES_BULK_ACTION_BUTTON}
+      data-test-subj={RULES_TABLE_HEADER_TEST_SUBJ.BULK_ACTION_BUTTON}
     >
       Bulk actions
     </EuiButtonEmpty>
@@ -287,7 +283,7 @@ const CurrentPageOfTotal = ({
     <EuiContextMenuItem
       disabled={selectedRules.length === 0 || areAllSelectedRulesUnmuted}
       onClick={changeCspRuleStateUnmute}
-      data-test-subj={RULES_BULK_ACTION_OPTION_ENABLE}
+      data-test-subj={RULES_TABLE_HEADER_TEST_SUBJ.BULK_ACTION_OPTION_ENABLE}
     >
       <EuiText key="disabled">
         <FormattedMessage id="xpack.csp.rules.rulesTable.optionEnable" defaultMessage="Enable" />
@@ -296,7 +292,7 @@ const CurrentPageOfTotal = ({
     <EuiContextMenuItem
       disabled={selectedRules.length === 0 || areAllSelectedRulesMuted}
       onClick={changeCspRuleStateMute}
-      data-test-subj={RULES_BULK_ACTION_OPTION_DISABLE}
+      data-test-subj={RULES_TABLE_HEADER_TEST_SUBJ.BULK_ACTION_OPTION_DISABLE}
     >
       <EuiText>
         <FormattedMessage id="xpack.csp.rules.rulesTable.optionDisable" defaultMessage="Disable" />
@@ -308,7 +304,10 @@ const CurrentPageOfTotal = ({
     <EuiFlexItem grow={false}>
       <EuiSpacer size="s" />
       <EuiFlexGroup gutterSize="s" alignItems={'center'}>
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem
+          grow={false}
+          data-test-subj={RULES_TABLE_HEADER_TEST_SUBJ.RULES_TABLE_HEADER_RULE_SHOWING_LABEL}
+        >
           <EuiText size="xs" textAlign="left" color="subdued" style={{ marginLeft: '8px' }}>
             <FormattedMessage
               id="xpack.csp.rules.rulesTable.showingPageOfTotalLabel"
@@ -328,7 +327,7 @@ const CurrentPageOfTotal = ({
               onClick={setSelectAllRules}
               size="xs"
               iconType="pagesSelect"
-              data-test-subj={RULES_SELECT_ALL_RULES}
+              data-test-subj={RULES_TABLE_HEADER_TEST_SUBJ.SELECT_ALL_RULES}
             >
               <FormattedMessage
                 id="xpack.csp.rules.rulesTable.selectAllRulesOption"
@@ -341,7 +340,7 @@ const CurrentPageOfTotal = ({
               onClick={() => setSelectedRules([])}
               size="xs"
               iconType="cross"
-              data-test-subj={RULES_CLEAR_ALL_RULES_SELECTION}
+              data-test-subj={RULES_TABLE_HEADER_TEST_SUBJ.CLEAR_ALL_RULES_SELECTION}
             >
               <FormattedMessage
                 id="xpack.csp.rules.rulesTable.clearSelectionOption"

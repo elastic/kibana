@@ -25,7 +25,6 @@ import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import type { Subscription } from 'rxjs';
 import { debounce, isEqual, isEqualWith } from 'lodash';
 import type { FilterGroupProps, FilterControlConfig } from './types';
-import './index.scss';
 import { FilterGroupLoading } from './loading';
 import { useControlGroupSyncToLocalStorage } from './hooks/use_control_group_sync_to_local_storage';
 import { useViewEditMode } from './hooks/use_view_edit_mode';
@@ -60,6 +59,7 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
     Storage,
     ruleTypeIds,
     storageKey,
+    disableLocalStorageSync = false,
   } = props;
 
   const filterChangedSubscription = useRef<Subscription>();
@@ -105,7 +105,7 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
   } = useControlGroupSyncToLocalStorage({
     Storage,
     storageKey: localStoragePageFilterKey,
-    shouldSync: isViewMode,
+    shouldSync: !disableLocalStorageSync && isViewMode,
   });
 
   useEffect(() => {

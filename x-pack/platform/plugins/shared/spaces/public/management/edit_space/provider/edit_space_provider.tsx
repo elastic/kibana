@@ -49,6 +49,7 @@ export interface EditSpaceProviderRootProps
   getRolesAPIClient: () => Promise<RolesAPIClient>;
   getPrivilegesAPIClient: () => Promise<PrivilegesAPIClientPublicContract>;
   getSecurityLicense: () => Promise<SecurityLicense>;
+  enableSecurityLink: string;
 }
 
 interface EditSpaceClients {

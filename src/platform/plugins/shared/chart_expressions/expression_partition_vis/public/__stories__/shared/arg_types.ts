@@ -8,7 +8,7 @@
  */
 
 import { LegendValue, Position } from '@elastic/charts';
-import { ArgTypes } from '@storybook/addons';
+import type { ArgTypes } from '@storybook/react';
 import { EmptySizeRatios, LegendDisplay } from '../../../common';
 import { ChartTypes } from '../../../common/types';
 
@@ -19,7 +19,7 @@ export const argTypes: ArgTypes = {
     name: `${visConfigName}.addTooltip`,
     description: 'Add tooltip on hover',
     type: { name: 'boolean', required: false },
-    table: { type: { summary: 'boolean' }, defaultValue: { summary: true } },
+    table: { type: { summary: 'boolean' } },
     control: { type: 'boolean' },
   },
   legendDisplay: {
@@ -42,7 +42,7 @@ export const argTypes: ArgTypes = {
     name: `${visConfigName}.truncateLegend`,
     description: 'Truncate too long legend',
     type: { name: 'boolean', required: false },
-    table: { type: { summary: 'boolean' }, defaultValue: { summary: true } },
+    table: { type: { summary: 'boolean' } },
     control: { type: 'boolean' },
   },
   maxLegendLines: {
@@ -112,14 +112,14 @@ export const pieDonutArgTypes: ArgTypes = {
     name: `${visConfigName}.isDonut`,
     description: 'Render a donut chart',
     type: { name: 'boolean', required: false },
-    table: { type: { summary: 'boolean' }, defaultValue: { summary: false } },
+    table: { type: { summary: 'boolean' } },
     control: { type: 'boolean' },
   },
   emptySizeRatio: {
     name: `${visConfigName}.emptySizeRatio`,
     description: 'The hole size of the donut chart',
     type: { name: 'number', required: false },
-    table: { type: { summary: 'number' }, defaultValue: { summary: EmptySizeRatios.SMALL } },
+    table: { type: { summary: 'number' } },
     options: [EmptySizeRatios.SMALL, EmptySizeRatios.MEDIUM, EmptySizeRatios.LARGE],
     control: { type: 'select' },
   },
@@ -127,28 +127,28 @@ export const pieDonutArgTypes: ArgTypes = {
     name: `${visConfigName}.distinctColors`,
     description: 'Enable distinct colors',
     type: { name: 'boolean', required: false },
-    table: { type: { summary: 'boolean' }, defaultValue: { summary: false } },
+    table: { type: { summary: 'boolean' } },
     control: { type: 'boolean' },
   },
   respectSourceOrder: {
     name: `${visConfigName}.respectSourceOrder`,
     description: 'Save default order of the incomming data',
     type: { name: 'boolean', required: false },
-    table: { type: { summary: 'boolean' }, defaultValue: { summary: true } },
+    table: { type: { summary: 'boolean' } },
     control: { type: 'boolean' },
   },
   startFromSecondLargestSlice: {
     name: `${visConfigName}.startFromSecondLargestSlice`,
     description: 'Start placement of slices from the second largest slice',
     type: { name: 'boolean', required: false },
-    table: { type: { summary: 'boolean' }, defaultValue: { summary: true } },
+    table: { type: { summary: 'boolean' } },
     control: { type: 'boolean' },
   },
   nestedLegend: {
     name: `${visConfigName}.nestedLegend`,
     description: 'Enable nested legend',
     type: { name: 'boolean', required: false },
-    table: { type: { summary: 'boolean' }, defaultValue: { summary: false } },
+    table: { type: { summary: 'boolean' } },
     control: { type: 'boolean' },
   },
 };
@@ -169,7 +169,7 @@ export const treemapArgTypes: ArgTypes = {
     name: `${visConfigName}.nestedLegend`,
     description: 'Enable nested legend',
     type: { name: 'boolean', required: false },
-    table: { type: { summary: 'boolean' }, defaultValue: { summary: false } },
+    table: { type: { summary: 'boolean' } },
     control: { type: 'boolean' },
   },
 };
@@ -190,7 +190,7 @@ export const mosaicArgTypes: ArgTypes = {
     name: `${visConfigName}.nestedLegend`,
     description: 'Enable nested legend',
     type: { name: 'boolean', required: false },
-    table: { type: { summary: 'boolean' }, defaultValue: { summary: false } },
+    table: { type: { summary: 'boolean' } },
     control: { type: 'boolean' },
   },
 };

@@ -200,21 +200,18 @@ export function getTestDataLoader({ getService }: Pick<FtrProviderContext, 'getS
       await es.deleteByQuery({
         index: ALL_SAVED_OBJECT_INDICES,
         wait_for_completion: true,
-        body: {
-          // @ts-expect-error
-          conflicts: 'proceed',
-          query: {
-            bool: {
-              must_not: [
-                {
-                  term: {
-                    type: {
-                      value: 'space',
-                    },
+        conflicts: 'proceed',
+        query: {
+          bool: {
+            must_not: [
+              {
+                term: {
+                  type: {
+                    value: 'space',
                   },
                 },
-              ],
-            },
+              },
+            ],
           },
         },
       });

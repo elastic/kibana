@@ -21,6 +21,7 @@ interface Props {
   processExecutable: string | undefined | null;
   processPid: number | undefined | null;
   processName: string | undefined | null;
+  scopeId: string;
 }
 
 export const ProcessDraggable = React.memo<Props>(
@@ -32,6 +33,7 @@ export const ProcessDraggable = React.memo<Props>(
     processExecutable,
     processName,
     processPid,
+    scopeId,
   }) => {
     if (
       isNillEmptyOrNotFinite(processName) &&
@@ -48,6 +50,7 @@ export const ProcessDraggable = React.memo<Props>(
         {!isNillEmptyOrNotFinite(processName) ? (
           <EuiFlexItem grow={false}>
             <DraggableBadge
+              scopeId={scopeId}
               contextId={contextId}
               eventId={eventId}
               field="process.name"
@@ -60,6 +63,7 @@ export const ProcessDraggable = React.memo<Props>(
         ) : !isNillEmptyOrNotFinite(processExecutable) ? (
           <EuiFlexItem grow={false}>
             <DraggableBadge
+              scopeId={scopeId}
               contextId={contextId}
               eventId={eventId}
               field="process.executable"
@@ -72,6 +76,7 @@ export const ProcessDraggable = React.memo<Props>(
         ) : !isNillEmptyOrNotFinite(endgameProcessName) ? (
           <EuiFlexItem grow={false}>
             <DraggableBadge
+              scopeId={scopeId}
               contextId={contextId}
               eventId={eventId}
               field="endgame.process_name"
@@ -86,6 +91,7 @@ export const ProcessDraggable = React.memo<Props>(
         {!isNillEmptyOrNotFinite(processPid) ? (
           <EuiFlexItem grow={false}>
             <DraggableBadge
+              scopeId={scopeId}
               contextId={contextId}
               eventId={eventId}
               field="process.pid"
@@ -98,6 +104,7 @@ export const ProcessDraggable = React.memo<Props>(
         ) : !isNillEmptyOrNotFinite(endgamePid) ? (
           <EuiFlexItem grow={false}>
             <DraggableBadge
+              scopeId={scopeId}
               contextId={contextId}
               eventId={eventId}
               field="endgame.pid"
@@ -124,6 +131,7 @@ export const ProcessDraggableWithNonExistentProcess = React.memo<Props>(
     processExecutable,
     processName,
     processPid,
+    scopeId,
   }) => {
     if (
       endgamePid == null &&
@@ -143,6 +151,7 @@ export const ProcessDraggableWithNonExistentProcess = React.memo<Props>(
           processExecutable={processExecutable}
           processName={processName}
           processPid={processPid}
+          scopeId={scopeId}
         />
       );
     }

@@ -54,8 +54,11 @@ export function ActionsAPIServiceProvider({ getService }: FtrProviderContext) {
         .get(`/api/actions/connectors`)
         .set({ ...additionalRequestHeaders, 'kbn-xsrf': 'foo' })
         .expect(200);
-
       for (const connector of body) {
+        // preconfigured connectors cannot be deleted
+        if (connector.is_preconfigured) {
+          continue;
+        }
         await this.deleteConnector(connector.id, additionalRequestHeaders);
       }
     },

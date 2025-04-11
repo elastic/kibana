@@ -15,6 +15,7 @@ import { pick } from 'lodash';
 import React, { useEffect, useMemo, useState, type FC } from 'react';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject, combineLatest, distinctUntilChanged, map } from 'rxjs';
+import type { PublishesFilters } from '@kbn/presentation-publishing';
 import {
   ChangePointDetectionControlsContextProvider,
   type ChangePointAnnotation,
@@ -62,6 +63,7 @@ export interface ChangePointDetectionProps {
   onLoading: (isLoading: boolean) => void;
   onRenderComplete: () => void;
   onError: (error: Error) => void;
+  filtersApi?: PublishesFilters;
 }
 
 const ChangePointDetectionWrapper: FC<ChangePointDetectionPropsWithDeps> = ({
@@ -82,6 +84,7 @@ const ChangePointDetectionWrapper: FC<ChangePointDetectionPropsWithDeps> = ({
   onRenderComplete,
   embeddingOrigin,
   lastReloadRequestTime,
+  filtersApi,
 }) => {
   const deps = useMemo(() => {
     const { charts, lens, data, usageCollection, fieldFormats, share, storage, unifiedSearch } =
@@ -147,7 +150,7 @@ const ChangePointDetectionWrapper: FC<ChangePointDetectionPropsWithDeps> = ({
               dataViews={pluginStart.data.dataViews}
               dataViewId={dataViewId}
             >
-              <FilterQueryContextProvider timeRange={timeRange}>
+              <FilterQueryContextProvider timeRange={timeRange} filtersApi={filtersApi}>
                 <ChangePointDetectionControlsContextProvider>
                   <ChartGridEmbeddableWrapper
                     viewType={viewType}

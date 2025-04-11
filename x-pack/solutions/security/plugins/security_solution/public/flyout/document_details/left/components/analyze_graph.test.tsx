@@ -17,6 +17,7 @@ import { ANALYZER_GRAPH_TEST_ID } from './test_ids';
 import { useWhichFlyout } from '../../shared/hooks/use_which_flyout';
 import { mockFlyoutApi } from '../../shared/mocks/mock_flyout_context';
 import { DocumentDetailsAnalyzerPanelKey } from '../../shared/constants/panel_keys';
+import { useIsInvestigateInResolverActionEnabled } from '../../../../detections/components/alerts_table/timeline_actions/investigate_in_resolver';
 
 jest.mock('react-router-dom', () => {
   const actual = jest.requireActual('react-router-dom');
@@ -25,6 +26,10 @@ jest.mock('react-router-dom', () => {
 jest.mock('@kbn/expandable-flyout');
 jest.mock('../../../../resolver/view/use_resolver_query_params_cleaner');
 jest.mock('../../shared/hooks/use_which_flyout');
+jest.mock(
+  '../../../../detections/components/alerts_table/timeline_actions/investigate_in_resolver'
+);
+
 const mockUseWhichFlyout = useWhichFlyout as jest.Mock;
 const FLYOUT_KEY = 'securitySolution';
 
@@ -38,6 +43,9 @@ jest.mock('react-redux', () => {
   };
 });
 
+const NO_ANALYZER_MESSAGE =
+  'You can only visualize events triggered by hosts configured with the Elastic Defend integration or any sysmon data from winlogbeat. Refer to Visual event analyzer(external, opens in a new tab or window) for more information.';
+
 describe('<AnalyzeGraph />', () => {
   beforeEach(() => {
     mockUseWhichFlyout.mockReturnValue(FLYOUT_KEY);
@@ -45,6 +53,7 @@ describe('<AnalyzeGraph />', () => {
   });
 
   it('renders analyzer graph correctly', () => {
+    (useIsInvestigateInResolverActionEnabled as jest.Mock).mockReturnValue(true);
     const contextValue = {
       eventId: 'eventId',
       scopeId: TableId.test,
@@ -60,7 +69,26 @@ describe('<AnalyzeGraph />', () => {
     expect(wrapper.getByTestId(ANALYZER_GRAPH_TEST_ID)).toBeInTheDocument();
   });
 
+  it('renders no data message when analyzer is not enabled', () => {
+    (useIsInvestigateInResolverActionEnabled as jest.Mock).mockReturnValue(false);
+    const contextValue = {
+      eventId: 'eventId',
+      scopeId: TableId.test,
+      dataAsNestedObject: {},
+    } as unknown as DocumentDetailsContext;
+
+    const { container } = render(
+      <TestProviders>
+        <DocumentDetailsContext.Provider value={contextValue}>
+          <AnalyzeGraph />
+        </DocumentDetailsContext.Provider>
+      </TestProviders>
+    );
+    expect(container).toHaveTextContent(NO_ANALYZER_MESSAGE);
+  });
+
   it('clicking view button should open details panel in preview', () => {
+    (useIsInvestigateInResolverActionEnabled as jest.Mock).mockReturnValue(true);
     const contextValue = {
       eventId: 'eventId',
       scopeId: TableId.test,

@@ -13,7 +13,7 @@ import { EuiCallOut, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isOutlierAnalysis, FEATURE_INFLUENCE } from '@kbn/ml-data-frame-analytics-utils';
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import {
   useColorRange,
   COLOR_RANGE,

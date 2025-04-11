@@ -52,7 +52,7 @@ export interface GetRuleMigrationStatsParams {
   /** Optional AbortSignal for cancelling request */
   signal?: AbortSignal;
 }
-/** Retrieves the stats for all the existing migrations, aggregated by `migration_id`. */
+/** Retrieves the stats for the specific migration. */
 export const getRuleMigrationStats = async ({
   migrationId,
   signal,

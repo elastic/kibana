@@ -56,9 +56,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       before(async () => {
         await remoteEs.indices.create({
           index: leaderName,
-          body: {
-            settings: { number_of_shards: 1, soft_deletes: { enabled: true } },
-          },
+          settings: { number_of_shards: 1, soft_deletes: { enabled: true } },
         });
         await pageObjects.common.navigateToApp('crossClusterReplication');
         await retry.waitFor('indices table to be visible', async () => {
@@ -79,7 +77,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       before(async () => {
         await remoteEs.index({
           index: leaderName,
-          body: { a: 'b' },
+          document: { a: 'b' },
         });
         await pageObjects.common.navigateToApp('indexManagement');
         await retry.waitForWithTimeout('indices table to be visible', 15000, async () => {

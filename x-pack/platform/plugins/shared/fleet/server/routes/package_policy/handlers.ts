@@ -60,7 +60,7 @@ import type {
   SimplifiedInputs,
   SimplifiedPackagePolicy,
 } from '../../../common/services/simplified_package_policy_helper';
-
+import { runWithCache } from '../../services/epm/packages/cache';
 import { validateAgentlessInputs } from '../../../common/services/agentless_policy_helper';
 
 import {
@@ -515,7 +515,7 @@ export const upgradePackagePolicyHandler: RequestHandler<
   const soClient = coreContext.savedObjects.client;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const user = appContextService.getSecurityCore().authc.getCurrentUser(request) || undefined;
-  const body: UpgradePackagePolicyResponse = await packagePolicyService.upgrade(
+  const body: UpgradePackagePolicyResponse = await packagePolicyService.bulkUpgrade(
     soClient,
     esClient,
     request.body.packagePolicyIds,
@@ -544,11 +544,12 @@ export const dryRunUpgradePackagePolicyHandler: RequestHandler<
 
   const body: UpgradePackagePolicyDryRunResponse = [];
   const { packagePolicyIds } = request.body;
-
-  for (const id of packagePolicyIds) {
-    const result = await packagePolicyService.getUpgradeDryRunDiff(soClient, id);
-    body.push(result);
-  }
+  await runWithCache(async () => {
+    for (const id of packagePolicyIds) {
+      const result = await packagePolicyService.getUpgradeDryRunDiff(soClient, id);
+      body.push(result);
+    }
+  });
 
   const firstFatalError = body.find((item) => item.statusCode && item.statusCode !== 200);
 

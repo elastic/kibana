@@ -35,7 +35,7 @@ interface Props {
   comments: JSX.Element;
   currentConversation: Conversation | undefined;
   currentSystemPromptId: string | undefined;
-  handleOnConversationSelected: ({ cId, cTitle }: { cId: string; cTitle: string }) => Promise<void>;
+  handleOnConversationSelected: ({ cId }: { cId: string }) => Promise<void>;
   isAssistantEnabled: boolean;
   isSettingsModalVisible: boolean;
   isWelcomeSetup: boolean;

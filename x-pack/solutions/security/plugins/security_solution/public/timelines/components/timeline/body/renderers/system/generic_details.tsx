@@ -40,6 +40,7 @@ interface Props {
   userDomain: string | null | undefined;
   userName: string | null | undefined;
   workingDirectory: string | null | undefined;
+  scopeId: string;
 }
 
 export const SystemGenericLine = React.memo<Props>(
@@ -61,10 +62,12 @@ export const SystemGenericLine = React.memo<Props>(
     userDomain,
     userName,
     workingDirectory,
+    scopeId,
   }) => (
     <>
       <EuiFlexGroup alignItems="center" justifyContent="center" gutterSize="none" wrap={true}>
         <UserHostWorkingDir
+          scopeId={scopeId}
           contextId={contextId}
           eventId={id}
           hostName={hostName}
@@ -77,6 +80,7 @@ export const SystemGenericLine = React.memo<Props>(
         </TokensFlexItem>
         <TokensFlexItem grow={false} component="span">
           <ProcessDraggable
+            scopeId={scopeId}
             contextId={contextId}
             endgamePid={undefined}
             endgameProcessName={undefined}
@@ -93,6 +97,7 @@ export const SystemGenericLine = React.memo<Props>(
         )}
         <TokensFlexItem grow={false} component="span">
           <DraggableBadge
+            scopeId={scopeId}
             contextId={contextId}
             eventId={id}
             field="event.outcome"
@@ -103,12 +108,14 @@ export const SystemGenericLine = React.memo<Props>(
           />
         </TokensFlexItem>
         <AuthSsh
+          scopeId={scopeId}
           contextId={contextId}
           eventId={id}
           sshSignature={sshSignature}
           sshMethod={sshMethod}
         />
         <Package
+          scopeId={scopeId}
           contextId={contextId}
           eventId={id}
           packageName={packageName}
@@ -162,6 +169,7 @@ export const SystemGenericDetails = React.memo<GenericDetailsProps>(
     return (
       <Details>
         <SystemGenericLine
+          scopeId={timelineId}
           contextId={contextId}
           hostName={hostName}
           id={id}

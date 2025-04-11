@@ -6,7 +6,7 @@
  */
 
 import { groupBy } from 'lodash';
-import type * as estypes from '@elastic/elasticsearch/lib/api/types';
+import type { estypes } from '@elastic/elasticsearch';
 import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 import type { SavedObjectsClientContract, ElasticsearchClient } from '@kbn/core/server';
 import type { KueryNode } from '@kbn/es-query';
@@ -32,6 +32,7 @@ import { getCurrentNamespace } from '../spaces/get_current_namespace';
 import { isSpaceAwarenessEnabled } from '../spaces/helpers';
 import { isAgentInNamespace } from '../spaces/agent_namespaces';
 import { addNamespaceFilteringToQuery } from '../spaces/query_namespaces_filtering';
+import { createEsSearchIterable } from '../utils/create_es_search_iterable';
 
 import { searchHitToAgent, agentSOAttributesToFleetServerAgentDoc } from './helpers';
 import { buildAgentStatusRuntimeField } from './build_status_runtime_field';
@@ -117,16 +118,16 @@ export async function getAgents(
 
 export async function openPointInTime(
   esClient: ElasticsearchClient,
+  keepAlive: string = '10m',
   index: string = AGENTS_INDEX
 ): Promise<string> {
-  const pitKeepAlive = '10m';
   const pitRes = await esClient.openPointInTime({
     index,
-    keep_alive: pitKeepAlive,
+    keep_alive: keepAlive,
   });
 
   auditLoggingService.writeCustomAuditLog({
-    message: `User opened point in time query [index=${index}] [pitId=${pitRes.id}]`,
+    message: `User opened point in time query [index=${index}] [keepAlive=${keepAlive}] [pitId=${pitRes.id}]`,
   });
 
   return pitRes.id;
@@ -202,8 +203,10 @@ export async function getAgentsByKuery(
     getStatusSummary?: boolean;
     sortField?: string;
     sortOrder?: 'asc' | 'desc';
-    pitId?: string;
     searchAfter?: SortResults;
+    openPit?: boolean;
+    pitId?: string;
+    pitKeepAlive?: string;
     aggregations?: Record<string, AggregationsAggregationContainer>;
   }
 ): Promise<{
@@ -224,20 +227,13 @@ export async function getAgentsByKuery(
     getStatusSummary = false,
     showUpgradeable,
     searchAfter,
+    openPit,
     pitId,
+    pitKeepAlive = '1m',
     aggregations,
     spaceId,
   } = options;
-  const filters = [];
-
-  const useSpaceAwareness = await isSpaceAwarenessEnabled();
-  if (useSpaceAwareness && spaceId) {
-    if (spaceId === DEFAULT_SPACE_ID) {
-      filters.push(`namespaces:"${DEFAULT_SPACE_ID}" or not namespaces:*`);
-    } else {
-      filters.push(`namespaces:"${spaceId}"`);
-    }
-  }
+  const filters = await _getSpaceAwarenessFilter(spaceId);
 
   if (kuery && kuery !== '') {
     filters.push(kuery);
@@ -270,7 +266,11 @@ export async function getAgentsByKuery(
     uninstalled: 0,
   };
 
-  const queryAgents = async (from: number, size: number) => {
+  const pitIdToUse = pitId || (openPit ? await openPointInTime(esClient, pitKeepAlive) : undefined);
+
+  const queryAgents = async (
+    queryOptions: { from: number; size: number } | { searchAfter: SortResults; size: number }
+  ) => {
     const aggs = {
       ...(aggregations || getStatusSummary
         ? {
@@ -294,32 +294,38 @@ export async function getAgentsByKuery(
       FleetServerAgent,
       { status: { buckets: Array<{ key: AgentStatus; doc_count: number }> } }
     >({
-      from,
-      size,
+      ...('from' in queryOptions
+        ? { from: queryOptions.from }
+        : {
+            search_after: queryOptions.searchAfter,
+          }),
+      size: queryOptions.size,
       track_total_hits: true,
       rest_total_hits_as_int: true,
       runtime_mappings: runtimeFields,
       fields: Object.keys(runtimeFields),
       sort,
       query: kueryNode ? toElasticsearchQuery(kueryNode) : undefined,
-      ...(pitId
+      ...(pitIdToUse
         ? {
             pit: {
-              id: pitId,
-              keep_alive: '1m',
+              id: pitIdToUse,
+              keep_alive: pitKeepAlive,
             },
           }
         : {
             index: AGENTS_INDEX,
             ignore_unavailable: true,
           }),
-      ...(pitId && searchAfter ? { search_after: searchAfter, from: 0 } : {}),
       ...aggs,
     });
   };
   let res;
+
   try {
-    res = await queryAgents((page - 1) * perPage, perPage);
+    res = await queryAgents(
+      searchAfter ? { searchAfter, size: perPage } : { from: (page - 1) * perPage, size: perPage }
+    );
   } catch (err) {
     appContextService.getLogger().error(`Error getting agents by kuery: ${JSON.stringify(err)}`);
     throw err;
@@ -335,7 +341,7 @@ export async function getAgentsByKuery(
     // query all agents, then filter upgradeable, and return the requested page and correct total
     // if there are more than SO_SEARCH_LIMIT agents, the logic falls back to same as before
     if (total < SO_SEARCH_LIMIT) {
-      const response = await queryAgents(0, SO_SEARCH_LIMIT);
+      const response = await queryAgents({ from: 0, size: SO_SEARCH_LIMIT });
       agents = response.hits.hits
         .map(searchHitToAgent)
         .filter((agent) => isAgentUpgradeAvailable(agent, latestAgentVersion));
@@ -366,8 +372,9 @@ export async function getAgentsByKuery(
   return {
     agents,
     total,
-    page,
+    ...(searchAfter ? { page: 0 } : { page }),
     perPage,
+    ...(pitIdToUse ? { pit: pitIdToUse } : {}),
     ...(aggregations ? { aggregations: res.aggregations } : {}),
     ...(getStatusSummary ? { statusSummary } : {}),
   };
@@ -393,6 +400,59 @@ export async function getAllAgentsByKuery(
     agents: res.agents,
     total: res.total,
   };
+}
+
+/**
+ * Fetch all agents by kuery in batches.
+ * @param esClient
+ * @param soClient
+ * @param options
+ */
+export async function fetchAllAgentsByKuery(
+  esClient: ElasticsearchClient,
+  soClient: SavedObjectsClientContract,
+  options: ListWithKuery & { spaceId?: string }
+): Promise<AsyncIterable<Agent[]>> {
+  const {
+    kuery = '',
+    perPage = SO_SEARCH_LIMIT,
+    sortField = 'enrolled_at',
+    sortOrder = 'desc',
+    spaceId,
+  } = options;
+
+  const filters = await _getSpaceAwarenessFilter(spaceId);
+  if (kuery && kuery !== '') {
+    filters.push(kuery);
+  }
+  const kueryNode = _joinFilters(filters);
+  const query = kueryNode ? { query: toElasticsearchQuery(kueryNode) } : {};
+  const runtimeFields = await buildAgentStatusRuntimeField(soClient);
+  const sort = getSortConfig(sortField, sortOrder);
+
+  try {
+    return createEsSearchIterable<FleetServerAgent>({
+      esClient,
+      searchRequest: {
+        index: AGENTS_INDEX,
+        size: perPage,
+        rest_total_hits_as_int: true,
+        track_total_hits: true,
+        runtime_mappings: runtimeFields,
+        fields: Object.keys(runtimeFields),
+        sort,
+        ...query,
+      },
+      resultsMapper: (data): Agent[] => {
+        return data.hits.hits.map(searchHitToAgent);
+      },
+    });
+  } catch (err) {
+    appContextService
+      .getLogger()
+      .error(`Error fetching all agents by kuery: ${JSON.stringify(err)}`);
+    throw err;
+  }
 }
 
 export async function getAgentById(
@@ -716,5 +776,17 @@ export async function getAgentPolicyForAgent(
   const agentPolicy = await agentPolicyService.get(soClient, agent.policy_id, false);
   if (agentPolicy) {
     return agentPolicy;
+  }
+}
+
+async function _getSpaceAwarenessFilter(spaceId: string | undefined) {
+  const useSpaceAwareness = await isSpaceAwarenessEnabled();
+  if (!useSpaceAwareness || !spaceId) {
+    return [];
+  }
+  if (spaceId === DEFAULT_SPACE_ID) {
+    return [`namespaces:"${DEFAULT_SPACE_ID}" or not namespaces:*`];
+  } else {
+    return [`namespaces:"${spaceId}"`];
   }
 }

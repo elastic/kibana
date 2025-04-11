@@ -6,10 +6,11 @@
  */
 
 import { omitBy, isUndefined } from 'lodash';
-import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
-import { Logger, SavedObjectsClientContract, SavedObjectsUtils } from '@kbn/core/server';
+import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
+import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import { SavedObjectsUtils } from '@kbn/core/server';
 import { retryIfConflicts } from './retry_if_conflicts';
-import { ConnectorToken } from '../types';
+import type { ConnectorToken } from '../types';
 import { CONNECTOR_TOKEN_SAVED_OBJECT_TYPE } from '../constants/saved_objects';
 
 export const MAX_TOKENS_RETURNED = 1;

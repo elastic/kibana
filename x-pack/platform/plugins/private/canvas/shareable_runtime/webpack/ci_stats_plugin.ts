@@ -5,11 +5,9 @@
  * 2.0.
  */
 
-/* eslint-disable import/no-extraneous-dependencies */
-
 import Path from 'path';
 
-import webpack from 'webpack';
+import type { Compiler } from 'webpack';
 import { ToolingLog } from '@kbn/tooling-log';
 import { CiStatsReporter } from '@kbn/ci-stats-reporter';
 import { isNormalModule, isConcatenatedModule } from '@kbn/optimizer-webpack-helpers';
@@ -28,7 +26,7 @@ export class CiStatsPlugin {
     }
   ) {}
 
-  public apply(compiler: webpack.Compiler) {
+  public apply(compiler: Compiler) {
     const log = new ToolingLog({
       level: 'error',
       writeTo: process.stdout,
@@ -67,7 +65,7 @@ export class CiStatsPlugin {
         throw new Error(`Unable to find bundle entry named [${entryName}]`);
       }
 
-      const moduleCount = compilation.modules.reduce((acc, module) => {
+      const moduleCount = Array.from(compilation.modules).reduce((acc, module) => {
         if (isNormalModule(module)) {
           return acc + 1;
         }

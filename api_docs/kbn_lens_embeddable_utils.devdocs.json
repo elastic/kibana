@@ -2055,16 +2055,16 @@
                 "pluginId": "lens",
                 "scope": "public",
                 "docId": "kibLensPluginApi",
-                "section": "def-public.DateHistogramIndexPatternColumn",
-                "text": "DateHistogramIndexPatternColumn"
+                "section": "def-public.GenericIndexPatternColumn",
+                "text": "GenericIndexPatternColumn"
               },
               " | ",
               {
                 "pluginId": "lens",
                 "scope": "public",
                 "docId": "kibLensPluginApi",
-                "section": "def-public.GenericIndexPatternColumn",
-                "text": "GenericIndexPatternColumn"
+                "section": "def-public.DateHistogramIndexPatternColumn",
+                "text": "DateHistogramIndexPatternColumn"
               },
               "; }"
             ],

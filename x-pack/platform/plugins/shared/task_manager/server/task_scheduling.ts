@@ -8,21 +8,21 @@
 import pMap from 'p-map';
 import { chunk, flatten, omit } from 'lodash';
 import agent from 'elastic-apm-node';
-import { Logger } from '@kbn/core/server';
-import { Middleware } from './lib/middleware';
+import type { Logger } from '@kbn/core/server';
+import type { Middleware } from './lib/middleware';
 import { parseIntervalAsMillisecond } from './lib/intervals';
-import {
+import type {
   ConcreteTaskInstance,
   IntervalSchedule,
   ScheduleOptions,
   TaskInstanceWithDeprecatedFields,
   TaskInstanceWithId,
-  TaskStatus,
 } from './task';
-import { TaskStore } from './task_store';
+import { TaskStatus } from './task';
+import type { TaskStore } from './task_store';
 import { ensureDeprecatedFieldsAreCorrected } from './lib/correct_deprecated_fields';
 import { retryableBulkUpdate } from './lib/retryable_bulk_update';
-import { ErrorOutput } from './lib/bulk_operation_buffer';
+import type { ErrorOutput } from './lib/bulk_operation_buffer';
 
 const VERSION_CONFLICT_STATUS = 409;
 const BULK_ACTION_SIZE = 100;
@@ -98,10 +98,11 @@ export class TaskScheduling {
         traceparent: traceparent || '',
         enabled: modifiedTask.enabled ?? true,
       },
-      {
-        apiKey: options?.apiKey,
-        request: options?.request,
-      }
+      options?.request
+        ? {
+            request: options?.request,
+          }
+        : undefined
     );
   }
 
@@ -133,10 +134,14 @@ export class TaskScheduling {
       })
     );
 
-    return await this.store.bulkSchedule(modifiedTasks, {
-      apiKey: options?.apiKey,
-      request: options?.request,
-    });
+    return await this.store.bulkSchedule(
+      modifiedTasks,
+      options?.request
+        ? {
+            request: options?.request,
+          }
+        : undefined
+    );
   }
 
   public async bulkDisable(taskIds: string[], clearStateIdsOrBoolean?: string[] | boolean) {

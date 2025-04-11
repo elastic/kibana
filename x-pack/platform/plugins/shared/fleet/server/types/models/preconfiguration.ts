@@ -9,7 +9,7 @@ import { schema } from '@kbn/config-schema';
 import semverValid from 'semver/functions/valid';
 
 import { PRECONFIGURATION_LATEST_KEYWORD } from '../../constants';
-import type { PreconfiguredOutput } from '../../../common/types';
+import { clientAuth, type PreconfiguredOutput } from '../../../common/types';
 
 import {
   ElasticSearchSchema,
@@ -34,6 +34,13 @@ const varsSchema = schema.maybe(
     })
   )
 );
+
+const secretRefSchema = schema.oneOf([
+  schema.object({
+    id: schema.string(),
+  }),
+  schema.string(),
+]);
 
 export const PreconfiguredPackagesSchema = schema.arrayOf(
   schema.object({
@@ -109,6 +116,31 @@ export const PreconfiguredFleetServerHostsSchema = schema.arrayOf(
     is_internal: schema.maybe(schema.boolean()),
     host_urls: schema.arrayOf(schema.string(), { minSize: 1 }),
     proxy_id: schema.nullable(schema.string()),
+    secrets: schema.maybe(
+      schema.object({
+        ssl: schema.maybe(schema.object({ key: schema.maybe(secretRefSchema) })),
+      })
+    ),
+    ssl: schema.maybe(
+      schema.oneOf([
+        schema.literal(null),
+        schema.object({
+          certificate_authorities: schema.maybe(schema.arrayOf(schema.string())),
+          certificate: schema.maybe(schema.string()),
+          key: schema.maybe(schema.string()),
+          es_certificate_authorities: schema.maybe(schema.arrayOf(schema.string())),
+          es_certificate: schema.maybe(schema.string()),
+          es_key: schema.maybe(schema.string()),
+          client_auth: schema.maybe(
+            schema.oneOf([
+              schema.literal(clientAuth.Optional),
+              schema.literal(clientAuth.Required),
+              schema.literal(clientAuth.None),
+            ])
+          ),
+        }),
+      ])
+    ),
   }),
   { defaultValue: [] }
 );

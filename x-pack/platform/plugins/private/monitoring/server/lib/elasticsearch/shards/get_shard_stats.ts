@@ -110,19 +110,17 @@ export function getShardStats(
     index: indexPatterns,
     size: 0,
     ignore_unavailable: true,
-    body: {
-      sort: { timestamp: { order: 'desc', unmapped_type: 'long' } },
-      query: createQuery({
-        type,
-        dsDataset: getElasticsearchDataset(dataset),
-        metricset: dataset,
-        clusterUuid: cluster.cluster_uuid ?? cluster.elasticsearch?.cluster?.id,
-        metric,
-        filters,
-      }),
-      aggs: {
-        ...getShardAggs(config, includeNodes, includeIndices),
-      },
+    sort: { timestamp: { order: 'desc', unmapped_type: 'long' } },
+    query: createQuery({
+      type,
+      dsDataset: getElasticsearchDataset(dataset),
+      metricset: dataset,
+      clusterUuid: cluster.cluster_uuid ?? cluster.elasticsearch?.cluster?.id,
+      metric,
+      filters,
+    }),
+    aggs: {
+      ...getShardAggs(config, includeNodes, includeIndices),
     },
   };
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');

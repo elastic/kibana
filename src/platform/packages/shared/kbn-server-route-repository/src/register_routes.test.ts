@@ -17,6 +17,13 @@ import { registerRoutes } from './register_routes';
 import { passThroughValidationObject, noParamsValidationObject } from './validation_objects';
 import { ServerRouteRepository } from '@kbn/server-route-repository-utils';
 
+const disabledAuthz = {
+  authz: {
+    enabled: false as const,
+    reason: 'This is a test',
+  },
+};
+
 describe('registerRoutes', () => {
   const post = jest.fn();
   const postAddVersion = jest.fn();
@@ -55,10 +62,12 @@ describe('registerRoutes', () => {
       'POST /internal/route': {
         endpoint: 'POST /internal/route',
         handler: jest.fn(),
+        security: disabledAuthz,
       },
       'POST /api/public_route version': {
         endpoint: 'POST /api/public_route version',
         handler: jest.fn(),
+        security: disabledAuthz,
       },
       'POST /api/internal_but_looks_like_public version': {
         endpoint: 'POST /api/internal_but_looks_like_public version',
@@ -66,6 +75,7 @@ describe('registerRoutes', () => {
           access: 'internal',
         },
         handler: jest.fn(),
+        security: disabledAuthz,
       },
       'POST /internal/route_with_security': {
         endpoint: `POST /internal/route_with_security`,
@@ -437,6 +447,7 @@ describe('registerRoutes', () => {
         aService: mockService,
       },
       repository,
+      runDevModeChecks: true,
     });
   }
 });

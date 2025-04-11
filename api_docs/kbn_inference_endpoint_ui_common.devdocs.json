@@ -44,7 +44,7 @@
         "label": "InferenceServiceFormFields",
         "description": [],
         "signature": [
-          "({ http, toasts, isEdit, }: InferenceServicesProps) => React.JSX.Element | null"
+          "({ http, toasts, isEdit, isPreconfigured, }: InferenceServicesProps) => React.JSX.Element | null"
         ],
         "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/inference_service_form_fields.tsx",
         "deprecated": false,
@@ -55,7 +55,7 @@
             "id": "def-public.InferenceServiceFormFields.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  http,\n  toasts,\n  isEdit,\n}",
+            "label": "{\n  http,\n  toasts,\n  isEdit,\n  isPreconfigured,\n}",
             "description": [],
             "signature": [
               "InferenceServicesProps"
@@ -1714,6 +1714,104 @@
               {
                 "parentPluginId": "@kbn/inference-endpoint-ui-common",
                 "id": "def-public.SERVICE_PROVIDERS.ServiceProviderKeys.jinaai.solutions",
+                "type": "Array",
+                "tags": [],
+                "label": "solutions",
+                "description": [],
+                "signature": [
+                  "\"Search\"[]"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/inference-endpoint-ui-common",
+            "id": "def-public.SERVICE_PROVIDERS.ServiceProviderKeys.voyageai",
+            "type": "Object",
+            "tags": [],
+            "label": "[ServiceProviderKeys.voyageai]",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/inference-endpoint-ui-common",
+                "id": "def-public.SERVICE_PROVIDERS.ServiceProviderKeys.voyageai.icon",
+                "type": "string",
+                "tags": [],
+                "label": "icon",
+                "description": [],
+                "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/inference-endpoint-ui-common",
+                "id": "def-public.SERVICE_PROVIDERS.ServiceProviderKeys.voyageai.name",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/inference-endpoint-ui-common",
+                "id": "def-public.SERVICE_PROVIDERS.ServiceProviderKeys.voyageai.solutions",
+                "type": "Array",
+                "tags": [],
+                "label": "solutions",
+                "description": [],
+                "signature": [
+                  "\"Search\"[]"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/inference-endpoint-ui-common",
+            "id": "def-public.SERVICE_PROVIDERS.ServiceProviderKeys.deepseek",
+            "type": "Object",
+            "tags": [],
+            "label": "[ServiceProviderKeys.deepseek]",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/inference-endpoint-ui-common",
+                "id": "def-public.SERVICE_PROVIDERS.ServiceProviderKeys.deepseek.icon",
+                "type": "string",
+                "tags": [],
+                "label": "icon",
+                "description": [],
+                "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/inference-endpoint-ui-common",
+                "id": "def-public.SERVICE_PROVIDERS.ServiceProviderKeys.deepseek.name",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/providers/render_service_provider/service_provider.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/inference-endpoint-ui-common",
+                "id": "def-public.SERVICE_PROVIDERS.ServiceProviderKeys.deepseek.solutions",
                 "type": "Array",
                 "tags": [],
                 "label": "solutions",

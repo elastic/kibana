@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../common/ftr_provider_context';
 import {
   createSpacesAndUsers,
   deleteSpacesAndUsers,
@@ -31,6 +31,8 @@ export default ({ loadTestFile, getService }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./cases/user_actions/find_user_actions'));
     loadTestFile(require.resolve('./cases/assignees'));
     loadTestFile(require.resolve('./cases/find_cases'));
+    loadTestFile(require.resolve('./cases/post_case'));
+    loadTestFile(require.resolve('./cases/patch_case'));
     loadTestFile(require.resolve('./configure'));
     loadTestFile(require.resolve('./attachments_framework/registered_persistable_state_trial'));
     // sub privileges are only available with a license above basic

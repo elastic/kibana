@@ -92,7 +92,7 @@ Array [
             aria-label="Loading"
             class="euiLoadingSpinner emotion-euiLoadingSpinner-m"
             role="progressbar"
-            style="border-color: #0077cc currentcolor currentcolor currentcolor;"
+            style="border-color: #1750ba currentcolor currentcolor currentcolor;"
           />
           Turn on monitoring
         </span>

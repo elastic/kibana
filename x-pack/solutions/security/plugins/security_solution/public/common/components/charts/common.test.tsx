@@ -5,9 +5,12 @@
  * 2.0.
  */
 
-import { shallow } from 'enzyme';
+import { mount } from 'enzyme';
 import React from 'react';
 import { renderHook } from '@testing-library/react';
+import { matchers } from '@emotion/jest';
+
+expect.extend(matchers);
 
 import { useDarkMode } from '../../lib/kibana';
 import type { ChartSeriesData } from './common';
@@ -25,12 +28,12 @@ jest.mock('../../lib/kibana');
 
 describe('WrappedByAutoSizer', () => {
   it('should render correct default height', () => {
-    const wrapper = shallow(<WrappedByAutoSizer />);
+    const wrapper = mount(<WrappedByAutoSizer />);
     expect(wrapper).toHaveStyleRule('height', defaultChartHeight);
   });
 
   it('should render correct given height', () => {
-    const wrapper = shallow(<WrappedByAutoSizer height="100px" />);
+    const wrapper = mount(<WrappedByAutoSizer height="100px" />);
     expect(wrapper).toHaveStyleRule('height', '100px');
   });
 });

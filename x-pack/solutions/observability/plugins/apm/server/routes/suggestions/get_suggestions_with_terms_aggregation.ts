@@ -37,22 +37,24 @@ export async function getSuggestionsWithTermsAggregation({
         ProcessorEvent.metric,
       ],
     },
-    body: {
-      track_total_hits: false,
-      timeout: '1500ms',
-      size: 0,
-      query: {
-        bool: {
-          filter: [
-            ...termQuery(SERVICE_NAME, serviceName),
-            ...rangeQuery(start, end),
-            ...(fieldName ? wildcardQuery(fieldName, fieldValue) : []),
-          ],
-        },
+    track_total_hits: false,
+    timeout: '1500ms',
+    size: 0,
+    query: {
+      bool: {
+        filter: [
+          ...termQuery(SERVICE_NAME, serviceName),
+          ...rangeQuery(start, end),
+          ...(fieldName ? wildcardQuery(fieldName, fieldValue) : []),
+        ],
       },
-      aggs: {
-        items: {
-          terms: { field: fieldName, size },
+    },
+    aggs: {
+      items: {
+        terms: {
+          field: fieldName,
+          size,
+          order: { _key: 'asc' as const },
         },
       },
     },

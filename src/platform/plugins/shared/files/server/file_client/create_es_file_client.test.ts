@@ -16,7 +16,7 @@ import { MockedLogger } from '@kbn/logging-mocks';
 import { createEsFileClient } from './create_es_file_client';
 import { FileClient } from './types';
 import { ElasticsearchBlobStorageClient } from '../blob_storage_service';
-import * as estypes from '@elastic/elasticsearch/lib/api/types';
+import type { estypes } from '@elastic/elasticsearch';
 import { FileDocument } from './file_metadata_client/adapters/es_index';
 
 describe('When initializing file client via createESFileClient()', () => {
@@ -81,14 +81,12 @@ describe('When initializing file client via createESFileClient()', () => {
     it('should use es.search() to retrieve file metadata', async () => {
       await fileClient.get({ id: '123' });
       expect(esClient.search).toHaveBeenCalledWith({
-        body: {
-          query: {
-            term: {
-              _id: '123',
-            },
+        query: {
+          term: {
+            _id: '123',
           },
-          size: 1,
         },
+        size: 1,
         index: 'file-meta',
       });
     });

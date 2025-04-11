@@ -17,11 +17,11 @@ import {
   EuiLoadingLogo,
 } from '@elastic/eui';
 
-import { ViewMode } from '@kbn/embeddable-plugin/public';
 import type { DashboardApi, DashboardCreationOptions } from '@kbn/dashboard-plugin/public';
 import { DashboardRenderer } from '@kbn/dashboard-plugin/public';
 import type { SerializableRecord } from '@kbn/utility-types';
 
+import type { ViewMode } from '@kbn/presentation-publishing';
 import { EmptyDashboards } from './empty_dashboards';
 import { GotoDashboard, LinkDashboard } from './actions';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
@@ -101,7 +101,7 @@ export function ServiceDashboards() {
 
   const getCreationOptions = useCallback((): Promise<DashboardCreationOptions> => {
     const getInitialInput = () => ({
-      viewMode: ViewMode.VIEW,
+      viewMode: 'view' as ViewMode,
       timeRange: { from: rangeFrom, to: rangeTo },
     });
     return Promise.resolve<DashboardCreationOptions>({

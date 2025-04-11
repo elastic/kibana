@@ -6,11 +6,12 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { Logger } from '@kbn/logging';
-import { CoreSetup, ElasticsearchClient } from '@kbn/core/server';
-import { schema, TypeOf } from '@kbn/config-schema';
+import type { Logger } from '@kbn/logging';
+import type { CoreSetup, ElasticsearchClient } from '@kbn/core/server';
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 import { curry, range, times } from 'lodash';
-import {
+import type {
   RuleType,
   AlertInstanceState,
   AlertInstanceContext,
@@ -18,7 +19,7 @@ import {
   RuleTypeParams,
 } from '@kbn/alerting-plugin/server';
 import { ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
-import { FixtureStartDeps, FixtureSetupDeps } from './plugin';
+import type { FixtureStartDeps, FixtureSetupDeps } from './plugin';
 
 export const EscapableStrings = {
   escapableBold: '*bold*',
@@ -48,6 +49,7 @@ export const DeepContextVariables = {
   nullJ: null,
   undefinedK: undefined,
   dateL: '2023-04-20T04:13:17.858Z',
+  encodeableUrl: 'https://www.elastic.co?foo=bar&baz= qux',
 };
 
 function getAlwaysFiringRuleType() {
@@ -85,6 +87,7 @@ function getAlwaysFiringRuleType() {
     },
     category: 'kibana',
     producer: 'alertsFixture',
+    solution: 'stack',
     defaultActionGroupId: 'default',
     minimumLicenseRequired: 'basic',
     isExportable: true,
@@ -121,7 +124,7 @@ async function alwaysFiringExecutor(alertExecutorOptions: any) {
   await services.scopedClusterClient.asCurrentUser.index({
     index: params.index,
     refresh: 'wait_for',
-    body: {
+    document: {
       state,
       params,
       reference: params.reference,
@@ -153,6 +156,7 @@ function getCumulativeFiringRuleType() {
     ],
     category: 'kibana',
     producer: 'alertsFixture',
+    solution: 'stack',
     defaultActionGroupId: 'default',
     minimumLicenseRequired: 'basic',
     isExportable: true,
@@ -205,6 +209,7 @@ function getNeverFiringRuleType() {
     },
     category: 'kibana',
     producer: 'alertsFixture',
+    solution: 'stack',
     defaultActionGroupId: 'default',
     minimumLicenseRequired: 'basic',
     isExportable: true,
@@ -249,6 +254,7 @@ function getFailingRuleType() {
     ],
     category: 'kibana',
     producer: 'alertsFixture',
+    solution: 'stack',
     defaultActionGroupId: 'default',
     minimumLicenseRequired: 'basic',
     isExportable: true,
@@ -290,6 +296,7 @@ function getExceedsAlertLimitRuleType() {
     ],
     category: 'kibana',
     producer: 'alertsFixture',
+    solution: 'stack',
     defaultActionGroupId: 'default',
     minimumLicenseRequired: 'basic',
     isExportable: true,
@@ -347,6 +354,7 @@ function getAuthorizationRuleType(core: CoreSetup<FixtureStartDeps>) {
     defaultActionGroupId: 'default',
     category: 'kibana',
     producer: 'alertsFixture',
+    solution: 'stack',
     minimumLicenseRequired: 'basic',
     isExportable: true,
     validate: {
@@ -437,6 +445,7 @@ function getValidationRuleType() {
     ],
     category: 'kibana',
     producer: 'alertsFixture',
+    solution: 'stack',
     minimumLicenseRequired: 'basic',
     isExportable: true,
     defaultActionGroupId: 'default',
@@ -468,6 +477,7 @@ function getPatternFiringRuleType() {
     actionGroups: [{ id: 'default', name: 'Default' }],
     category: 'kibana',
     producer: 'alertsFixture',
+    solution: 'stack',
     defaultActionGroupId: 'default',
     minimumLicenseRequired: 'basic',
     isExportable: true,
@@ -553,6 +563,7 @@ function getPatternFiringAlertsAsDataRuleType() {
     actionGroups: [{ id: 'default', name: 'Default' }],
     category: 'management',
     producer: 'alertsFixture',
+    solution: 'stack',
     defaultActionGroupId: 'default',
     minimumLicenseRequired: 'basic',
     isExportable: true,
@@ -652,6 +663,7 @@ function getPatternSuccessOrFailureRuleType() {
     actionGroups: [{ id: 'default', name: 'Default' }],
     category: 'kibana',
     producer: 'alertsFixture',
+    solution: 'stack',
     defaultActionGroupId: 'default',
     minimumLicenseRequired: 'basic',
     isExportable: true,
@@ -701,6 +713,7 @@ function getPatternFiringAutoRecoverFalseRuleType() {
     actionGroups: [{ id: 'default', name: 'Default' }],
     category: 'kibana',
     producer: 'alertsFixture',
+    solution: 'stack',
     defaultActionGroupId: 'default',
     minimumLicenseRequired: 'basic',
     isExportable: true,
@@ -789,6 +802,7 @@ function getLongRunningPatternRuleType(cancelAlertsOnRuleTimeout: boolean = true
     actionGroups: [{ id: 'default', name: 'Default' }],
     category: 'kibana',
     producer: 'alertsFixture',
+    solution: 'stack',
     defaultActionGroupId: 'default',
     minimumLicenseRequired: 'basic',
     isExportable: true,
@@ -834,6 +848,7 @@ function getCancellableRuleType() {
     actionGroups: [{ id: 'default', name: 'Default' }],
     category: 'kibana',
     producer: 'alertsFixture',
+    solution: 'stack',
     defaultActionGroupId: 'default',
     minimumLicenseRequired: 'basic',
     isExportable: true,
@@ -902,6 +917,7 @@ function getAlwaysFiringAlertAsDataRuleType() {
     },
     category: 'management',
     producer: 'alertsFixture',
+    solution: 'stack',
     defaultActionGroupId: 'default',
     minimumLicenseRequired: 'basic',
     isExportable: true,
@@ -964,6 +980,7 @@ function getWaitingRuleType(logger: Logger) {
     actionGroups: [{ id: 'default', name: 'Default' }],
     category: 'kibana',
     producer: 'alertsFixture',
+    solution: 'stack',
     defaultActionGroupId: 'default',
     minimumLicenseRequired: 'basic',
     isExportable: true,
@@ -1035,6 +1052,7 @@ function getSeverityRuleType() {
     ],
     category: 'management',
     producer: 'alertsFixture',
+    solution: 'stack',
     defaultActionGroupId: 'low',
     minimumLicenseRequired: 'basic',
     isExportable: true,
@@ -1135,7 +1153,7 @@ async function getSignalDocs(es: ElasticsearchClient, source: string, reference:
     index: ES_TEST_INDEX_NAME,
     size: 1000,
     _source: false,
-    body,
+    ...body,
   };
   const result = await es.search(params, { meta: true });
   return result?.body?.hits?.hits || [];
@@ -1152,6 +1170,7 @@ export function defineRuleTypes(
     actionGroups: [{ id: 'default', name: 'Default' }],
     category: 'kibana',
     producer: 'alertsFixture',
+    solution: 'stack',
     defaultActionGroupId: 'default',
     minimumLicenseRequired: 'basic',
     isExportable: true,
@@ -1168,6 +1187,7 @@ export function defineRuleTypes(
     actionGroups: [{ id: 'default', name: 'Default' }],
     category: 'kibana',
     producer: 'alertsFixture',
+    solution: 'stack',
     defaultActionGroupId: 'default',
     minimumLicenseRequired: 'gold',
     isExportable: true,
@@ -1184,6 +1204,7 @@ export function defineRuleTypes(
     actionGroups: [{ id: 'default', name: 'Default' }],
     category: 'kibana',
     producer: 'alertsFixture',
+    solution: 'stack',
     defaultActionGroupId: 'default',
     minimumLicenseRequired: 'basic',
     isExportable: true,
@@ -1203,6 +1224,7 @@ export function defineRuleTypes(
     actionGroups: [{ id: 'default', name: 'Default' }],
     category: 'kibana',
     producer: 'alertsFixture',
+    solution: 'stack',
     defaultActionGroupId: 'default',
     actionVariables: {
       state: [{ name: 'aStateVariable', description: 'this is a state variable' }],
@@ -1227,6 +1249,7 @@ export function defineRuleTypes(
     ],
     category: 'kibana',
     producer: 'alertsFixture',
+    solution: 'stack',
     defaultActionGroupId: 'default',
     minimumLicenseRequired: 'basic',
     isExportable: true,
@@ -1254,6 +1277,7 @@ export function defineRuleTypes(
       ],
       category: 'kibana',
       producer: 'alertsFixture',
+      solution: 'stack',
       defaultActionGroupId: 'default',
       minimumLicenseRequired: 'basic',
       isExportable: true,
@@ -1284,6 +1308,7 @@ export function defineRuleTypes(
     },
     category: 'kibana',
     producer: 'alertsFixture',
+    solution: 'stack',
     validate: {
       params: schema.any(),
     },
@@ -1307,6 +1332,7 @@ export function defineRuleTypes(
     ],
     category: 'kibana',
     producer: 'alertsFixture',
+    solution: 'stack',
     defaultActionGroupId: 'default',
     minimumLicenseRequired: 'basic',
     isExportable: true,

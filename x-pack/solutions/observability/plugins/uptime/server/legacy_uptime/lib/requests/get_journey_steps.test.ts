@@ -118,7 +118,7 @@ describe('getJourneySteps request module', () => {
       const call: any = mockEsClient.search.mock.calls[0][0];
 
       // check that default `synthetics.type` value is supplied,
-      expect(call.body.query.bool.filter[0]).toMatchInlineSnapshot(`
+      expect(call.query.bool.filter[0]).toMatchInlineSnapshot(`
         Object {
           "terms": Object {
             "synthetics.type": Array [
@@ -133,7 +133,7 @@ describe('getJourneySteps request module', () => {
       `);
 
       // given check group is used for the terms filter
-      expect(call.body.query.bool.filter[1]).toMatchInlineSnapshot(`
+      expect(call.query.bool.filter[1]).toMatchInlineSnapshot(`
         Object {
           "term": Object {
             "monitor.check_group": "2bf952dc-64b5-11eb-8b3b-42010a84000d",
@@ -142,7 +142,7 @@ describe('getJourneySteps request module', () => {
       `);
 
       // should sort by step index, then timestamp
-      expect(call.body.sort).toMatchInlineSnapshot(`
+      expect(call.sort).toMatchInlineSnapshot(`
         Array [
           Object {
             "synthetics.step.index": Object {
@@ -184,7 +184,7 @@ describe('getJourneySteps request module', () => {
       const call: any = mockEsClient.search.mock.calls[0][0];
 
       // assert that filters for only the provided step types are used
-      expect(call.body.query.bool.filter[0]).toMatchInlineSnapshot(`
+      expect(call.query.bool.filter[0]).toMatchInlineSnapshot(`
         Object {
           "terms": Object {
             "synthetics.type": Array [

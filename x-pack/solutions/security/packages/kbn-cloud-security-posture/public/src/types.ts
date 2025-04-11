@@ -15,7 +15,7 @@ import { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { ToastsStart } from '@kbn/core/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-
+import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { DiscoverStart } from '@kbn/discover-plugin/public';
 import type { FleetStart } from '@kbn/fleet-plugin/public';
@@ -23,11 +23,11 @@ import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import { SharePluginStart } from '@kbn/share-plugin/public';
 import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { CspFinding } from '@kbn/cloud-security-posture-common';
-import type * as estypes from '@elastic/elasticsearch/lib/api/types';
+import type { estypes } from '@elastic/elasticsearch';
 import type { IKibanaSearchResponse, IKibanaSearchRequest } from '@kbn/search-types';
 
 import type { BoolQuery } from '@kbn/es-query';
-export interface FindingsBaseEsQuery {
+export interface BaseEsQuery {
   query?: {
     bool: BoolQuery;
   };
@@ -64,7 +64,7 @@ export interface CspBaseEsQuery {
 }
 
 export interface UseCspOptions extends CspBaseEsQuery {
-  sort: Array<{
+  sort?: Array<{
     [key: string]: string;
   }>;
   enabled: boolean;
@@ -79,4 +79,13 @@ export type LatestFindingsResponse = IKibanaSearchResponse<
 
 export interface FindingsAggs {
   count: estypes.AggregationsMultiBucketAggregateBase<estypes.AggregationsStringRareTermsBucketKeys>;
+}
+
+export interface FindingMisconfigurationFlyoutProps extends Record<string, unknown> {
+  ruleId: string;
+  resourceId: string;
+}
+export interface FindingsMisconfigurationPanelExpandableFlyoutProps extends FlyoutPanelProps {
+  key: 'findings-misconfiguration-panel';
+  params: FindingMisconfigurationFlyoutProps;
 }

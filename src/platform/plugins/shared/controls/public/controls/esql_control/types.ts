@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { PublishesESQLVariable } from '@kbn/esql-variables-types';
+import { PublishesESQLVariable } from '@kbn/esql-types';
 import type { HasEditCapabilities, PublishesTitle } from '@kbn/presentation-publishing';
 import type { DefaultControlApi } from '../types';
 

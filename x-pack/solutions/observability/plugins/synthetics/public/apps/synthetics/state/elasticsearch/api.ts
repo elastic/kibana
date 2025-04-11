@@ -6,7 +6,7 @@
  */
 import type { IKibanaSearchResponse } from '@kbn/search-types';
 import { isRunningResponse } from '@kbn/data-plugin/common';
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import { ESSearchResponse } from '@kbn/es-types';
 import { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
 import { getInspectResponse } from '@kbn/observability-shared-plugin/common';

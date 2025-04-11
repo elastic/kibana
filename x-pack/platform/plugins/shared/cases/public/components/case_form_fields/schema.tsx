@@ -102,6 +102,7 @@ export const schema: FormSchema<CaseFormFieldsSchemaProps> = {
   connectorId: {
     label: i18n.CONNECTORS,
     defaultValue: 'none',
+    labelAppend: OptionalFieldLabel,
   },
   fields: {
     defaultValue: null,

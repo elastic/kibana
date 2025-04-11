@@ -8,7 +8,7 @@
 import { get } from 'lodash';
 import moment from 'moment';
 import { ElasticsearchClient } from '@kbn/core/server';
-import type * as estypes from '@elastic/elasticsearch/lib/api/types';
+import type { estypes } from '@elastic/elasticsearch';
 import { createQuery } from './create_query';
 import {
   INDEX_PATTERN_ELASTICSEARCH,

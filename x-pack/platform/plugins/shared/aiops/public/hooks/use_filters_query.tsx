@@ -19,6 +19,7 @@ import { useTimeRangeUpdates } from '@kbn/ml-date-picker';
 import { type AggregateQuery } from '@kbn/es-query';
 import type { TimeRangeBounds } from '@kbn/data-plugin/common';
 import { getBoundsRoundedToInterval, useTimeBuckets } from '@kbn/ml-time-buckets';
+import type { PublishesFilters } from '@kbn/presentation-publishing';
 import { useAiopsAppContext } from './use_aiops_app_context';
 import { useReload } from './use_reload';
 
@@ -60,8 +61,9 @@ export const FilterQueryContext = createContext<{
 export const FilterQueryContextProvider: FC<
   PropsWithChildren<{
     timeRange?: TimeRange;
+    filtersApi?: PublishesFilters;
   }>
-> = ({ children, timeRange }) => {
+> = ({ children, timeRange, filtersApi }) => {
   const {
     data: {
       query: { filterManager, queryString, timefilter },
@@ -78,13 +80,25 @@ export const FilterQueryContextProvider: FC<
   const timeRangeUpdates = useTimeRangeUpdates(false);
 
   useEffect(() => {
-    const sub = filterManager.getUpdates$().subscribe(() => {
-      setResultFilter(filterManager.getFilters());
-    });
-    return () => {
-      sub.unsubscribe();
-    };
-  }, [filterManager]);
+    // Embeddable API exposes not just filters from query bar, but also
+    // filters from other dashboard controls
+    // so if that information is available, we should prioritize it
+    if (filtersApi?.filters$) {
+      const sub = filtersApi?.filters$.subscribe(() => {
+        setResultFilter(filtersApi?.filters$.getValue() ?? []);
+      });
+      return () => {
+        sub.unsubscribe();
+      };
+    } else {
+      const sub = filterManager.getUpdates$().subscribe(() => {
+        setResultFilter(filterManager.getFilters());
+      });
+      return () => {
+        sub.unsubscribe();
+      };
+    }
+  }, [filterManager, filtersApi]);
 
   useEffect(() => {
     const sub = queryString.getUpdates$().subscribe(() => {

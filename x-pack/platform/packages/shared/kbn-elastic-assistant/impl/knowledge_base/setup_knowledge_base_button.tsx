@@ -33,11 +33,7 @@ export const SetupKnowledgeBaseButton: React.FC<Props> = React.memo(({ display }
   const { mutate: setupKB, isLoading: isSettingUpKB } = useSetupKnowledgeBase({ http, toasts });
 
   const isSetupInProgress = kbStatus?.is_setup_in_progress || isSettingUpKB;
-  const isSetupComplete =
-    kbStatus?.elser_exists &&
-    kbStatus?.index_exists &&
-    kbStatus?.pipeline_exists &&
-    kbStatus?.security_labs_exists;
+  const isSetupComplete = kbStatus?.elser_exists && kbStatus?.security_labs_exists;
 
   const onInstallKnowledgeBase = useCallback(() => {
     setupKB();

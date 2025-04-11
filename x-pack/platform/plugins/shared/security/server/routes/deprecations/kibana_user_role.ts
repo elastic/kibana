@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/types';
+import type { estypes } from '@elastic/elasticsearch';
 
 import type { RouteDefinitionParams } from '..';
 import { KIBANA_ADMIN_ROLE_NAME, KIBANA_USER_ROLE_NAME } from '../../deprecations';
@@ -74,8 +74,8 @@ export function defineKibanaUserRoleDeprecationRoutes({ router, logger }: RouteD
 
         try {
           await esClient.asCurrentUser.security.putUser({
-            username: userToUpdate.username,
-            body: { ...userToUpdate, roles },
+            ...userToUpdate,
+            roles,
           });
         } catch (err) {
           logger.error(
@@ -136,7 +136,8 @@ export function defineKibanaUserRoleDeprecationRoutes({ router, logger }: RouteD
         try {
           await esClient.asCurrentUser.security.putRoleMapping({
             name: mappingNameToUpdate,
-            body: { ...mappingToUpdate, roles },
+            ...mappingToUpdate,
+            roles,
           });
         } catch (err) {
           logger.error(

@@ -9,6 +9,7 @@ import React, { useEffect } from 'react';
 
 import { useActions, useValues } from 'kea';
 
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { EnterpriseSearchAnalyticsPageTemplate } from '../../layout/page_template';
@@ -36,12 +37,30 @@ export const AnalyticsCollectionExplorer: React.FC = ({}) => {
       pageViewTelemetry={`View Analytics Collection - explorer`}
       pageHeader={{
         bottomBorder: false,
-        pageTitle: i18n.translate(
-          'xpack.enterpriseSearch.analytics.collectionsView.explorerView.title',
-          {
-            defaultMessage: 'Explorer',
-          }
+        pageTitle: (
+          <EuiFlexGroup responsive={false} alignItems="center">
+            <EuiFlexItem grow={false}>
+              <EuiTitle>
+                <h1>
+                  {i18n.translate(
+                    'xpack.enterpriseSearch.analytics.collectionsView.explorerView.title',
+                    {
+                      defaultMessage: 'Explorer',
+                    }
+                  )}
+                </h1>
+              </EuiTitle>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiBadge color="warning">
+                {i18n.translate('xpack.enterpriseSearch.analytics.collections.deprecatedBadge', {
+                  defaultMessage: 'Deprecated',
+                })}
+              </EuiBadge>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         ),
+
         rightSideItems: [<AnalyticsCollectionToolbar />],
       }}
     >

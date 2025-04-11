@@ -133,7 +133,13 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
   };
 
   const renderElasticsearchSection = () => {
-    return <OutputFormElasticsearchSection inputs={inputs} />;
+    return (
+      <OutputFormElasticsearchSection
+        inputs={inputs}
+        useSecretsStorage={useSecretsStorage}
+        onToggleSecretStorage={onToggleSecretStorage}
+      />
+    );
   };
 
   const renderRemoteElasticsearchSection = () => {

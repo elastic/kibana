@@ -66,7 +66,11 @@ export {
   KnowledgeBaseEntryRole,
   concatenateChatCompletionChunks,
   StreamingChatResponseEventType,
+  ConversationAccess,
+  KnowledgeBaseType,
+  KnowledgeBaseState,
 } from '../common';
+
 export type {
   CompatibleJSONSchema,
   Conversation,
@@ -76,8 +80,6 @@ export type {
   ChatCompletionChunkEvent,
   ShortIdTable,
 } from '../common';
-
-export { KnowledgeBaseType } from '../common';
 
 export type { TelemetryEventTypeWithPayload } from './analytics';
 export { ObservabilityAIAssistantTelemetryEventType } from './analytics/telemetry_event_type';

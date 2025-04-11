@@ -13,10 +13,10 @@ import { getTopNavUnsavedChangesBadge } from '@kbn/unsaved-changes-badge';
 import { getManagedContentBadge } from '@kbn/managed-content-badge';
 import { i18n } from '@kbn/i18n';
 import { dismissFlyouts, DiscoverFlyouts } from '@kbn/discover-utils';
-import { DiscoverStateContainer } from '../../state_management/discover_state';
+import type { DiscoverStateContainer } from '../../state_management/discover_state';
 import type { TopNavCustomization } from '../../../../customizations';
 import { onSaveSearch } from './on_save_search';
-import { DiscoverServices } from '../../../../build_services';
+import type { DiscoverServices } from '../../../../build_services';
 import { SolutionsViewBadge } from './solutions_view_badge';
 
 /**

@@ -16,14 +16,10 @@ import {
   MAX_REPORTERS_FILTER_LENGTH,
   MAX_TAGS_FILTER_LENGTH,
 } from '@kbn/cases-plugin/common/constants';
-import {
-  Case,
-  CaseSeverity,
-  CaseStatuses,
-  AttachmentType,
-} from '@kbn/cases-plugin/common/types/domain';
+import type { Case } from '@kbn/cases-plugin/common/types/domain';
+import { CaseSeverity, CaseStatuses, AttachmentType } from '@kbn/cases-plugin/common/types/domain';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 import {
   postCaseReq,
@@ -645,12 +641,10 @@ export default ({ getService }: FtrProviderContext): void => {
       const getAllCasesSortedByCreatedAtAsc = async () => {
         const cases = await es.search<CaseAttributes>({
           index: ALERTING_CASES_SAVED_OBJECT_INDEX,
-          body: {
-            size: 10000,
-            sort: [{ 'cases.created_at': { unmapped_type: 'date', order: 'asc' } }],
-            query: {
-              term: { type: 'cases' },
-            },
+          size: 10000,
+          sort: [{ 'cases.created_at': { unmapped_type: 'date', order: 'asc' } }],
+          query: {
+            term: { type: 'cases' },
           },
         });
         return cases.hits.hits.map((hit) => hit._source);

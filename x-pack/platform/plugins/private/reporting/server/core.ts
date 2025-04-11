@@ -28,7 +28,7 @@ import type { DiscoverServerPluginStart } from '@kbn/discover-plugin/server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
-import type { ReportingServerInfo } from '@kbn/reporting-common/types';
+import type { ReportingHealthInfo, ReportingServerInfo } from '@kbn/reporting-common/types';
 import { CsvSearchSourceExportType, CsvV2ExportType } from '@kbn/reporting-export-types-csv';
 import { PdfExportType, PdfV1ExportType } from '@kbn/reporting-export-types-pdf';
 import { PngExportType } from '@kbn/reporting-export-types-png';
@@ -61,16 +61,16 @@ import { EventTracker } from './usage';
 
 export interface ReportingInternalSetup {
   basePath: Pick<IBasePath, 'set'>;
-  router: ReportingPluginRouter;
-  features: FeaturesPluginSetup;
-  security?: SecurityPluginSetup;
-  encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
-  spaces?: SpacesPluginSetup;
-  usageCounter?: UsageCounter;
-  taskManager: TaskManagerSetupContract;
-  logger: Logger;
-  status: StatusServiceSetup;
   docLinks: DocLinksServiceSetup;
+  encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
+  features: FeaturesPluginSetup;
+  logger: Logger;
+  router: ReportingPluginRouter;
+  security?: SecurityPluginSetup;
+  spaces?: SpacesPluginSetup;
+  status: StatusServiceSetup;
+  taskManager: TaskManagerSetupContract;
+  usageCounter?: UsageCounter;
 }
 
 export interface ReportingInternalStart {
@@ -267,6 +267,32 @@ export class ReportingCore {
     };
   }
 
+  public async getHealthInfo(): Promise<ReportingHealthInfo> {
+    const { encryptedSavedObjects } = this.getPluginSetupDeps();
+    const { securityService } = await this.getPluginStartDeps();
+    const isSecurityEnabled = await this.isSecurityEnabled();
+
+    let isSufficientlySecure: boolean;
+    const apiKeysAreEnabled = (await securityService.authc.apiKeys.areAPIKeysEnabled()) ?? false;
+
+    if (isSecurityEnabled === null) {
+      isSufficientlySecure = false;
+    } else {
+      // if esSecurityIsEnabled = true, then areApiKeysEnabled must be true to be considered secure
+      // if esSecurityIsEnabled = false, then it does not matter what areApiKeysEnabled is
+      if (!isSecurityEnabled) {
+        isSufficientlySecure = false;
+      } else {
+        isSufficientlySecure = apiKeysAreEnabled;
+      }
+    }
+
+    return {
+      isSufficientlySecure,
+      hasPermanentEncryptionKey: encryptedSavedObjects.canEncrypt,
+    };
+  }
+
   /*
    * Gives synchronous access to the config
    */
@@ -332,6 +358,22 @@ export class ReportingCore {
 
     return await Rx.firstValueFrom(
       license$.pipe(map((license) => checkLicense(registry, license)))
+    );
+  }
+
+  public async isSecurityEnabled() {
+    const { license$ } = (await this.getPluginStartDeps()).licensing;
+    return await Rx.firstValueFrom(
+      license$.pipe(
+        map((license) => {
+          if (!license || !license?.isAvailable) {
+            return null;
+          }
+
+          const { isEnabled } = license.getFeature('security');
+          return isEnabled;
+        })
+      )
     );
   }
 

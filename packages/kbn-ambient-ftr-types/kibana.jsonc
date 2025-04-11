@@ -1,6 +1,0 @@
-{
-  "type": "shared-common",
-  "id": "@kbn/ambient-ftr-types",
-  "owner": ["@elastic/kibana-operations", "@elastic/appex-qa"],
-  "devOnly": true
-}

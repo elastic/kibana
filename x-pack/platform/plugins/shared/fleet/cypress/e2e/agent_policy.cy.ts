@@ -139,6 +139,7 @@ describe('Edit agent policy', () => {
     visit('/app/fleet/policies/policy-1');
 
     cy.getBySel(AGENT_POLICY_DETAILS_PAGE.ADD_AGENT_LINK).click();
+    cy.getBySel(AGENT_FLYOUT.PLATFORM_SELECTOR_EXTENDED).click();
     cy.getBySel(AGENT_FLYOUT.KUBERNETES_PLATFORM_TYPE).click();
     cy.contains('https://xxx.yyy.zzz:443');
     cy.contains('this-is-the-api-key');

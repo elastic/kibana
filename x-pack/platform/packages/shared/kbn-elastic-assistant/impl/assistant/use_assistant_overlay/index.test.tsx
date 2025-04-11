@@ -5,12 +5,9 @@
  * 2.0.
  */
 
-import { DefinedUseQueryResult } from '@tanstack/react-query';
-
 import { useAssistantOverlay } from '.';
 import { waitFor, renderHook, act } from '@testing-library/react';
-import { useFetchCurrentUserConversations } from '../api';
-import { Conversation } from '../../assistant_context/types';
+import { FetchCurrentUserConversations, useFetchCurrentUserConversations } from '../api';
 import { mockConnectors } from '../../mock/connectors';
 
 const mockUseAssistantContext = {
@@ -76,15 +73,20 @@ describe('useAssistantOverlay', () => {
       refetch: jest.fn().mockResolvedValue({
         isLoading: false,
         data: {
-          ...mockData,
-          welcome_id: {
-            ...mockData.welcome_id,
-            apiConfig: { newProp: true },
-          },
+          pages: [
+            {
+              page: 1,
+              perPage: 28,
+              total: 150,
+              data: Object.values(mockData),
+            },
+          ],
         },
       }),
       isFetched: true,
-    } as unknown as DefinedUseQueryResult<Record<string, Conversation>, unknown>);
+      isFetching: false,
+      setPaginationObserver: jest.fn(),
+    } as unknown as FetchCurrentUserConversations);
   });
 
   it('calls registerPromptContext with the expected context', async () => {
@@ -141,7 +143,7 @@ describe('useAssistantOverlay', () => {
     expect(mockUseAssistantContext.unRegisterPromptContext).toHaveBeenCalledWith('id');
   });
 
-  it('calls `showAssistantOverlay` from the assistant context', () => {
+  it('calls `showAssistantOverlay` when the conversation does not exist', async () => {
     const isAssistantAvailable = true;
     const { result } = renderHook(() =>
       useAssistantOverlay(
@@ -160,47 +162,13 @@ describe('useAssistantOverlay', () => {
       result.current.showAssistantOverlay(true);
     });
 
-    expect(mockCreateConversation).not.toHaveBeenCalled();
-    expect(mockUseAssistantContext.showAssistantOverlay).toHaveBeenCalledWith({
-      showOverlay: true,
-      promptContextId: 'id',
-      conversationTitle: 'conversation-id',
-    });
-  });
-
-  it('calls `showAssistantOverlay` and creates a new conversation when shouldCreateConversation: true and the conversation does not exist', async () => {
-    const isAssistantAvailable = true;
-    const { result } = renderHook(() =>
-      useAssistantOverlay(
-        'event',
-        'conversation-id',
-        'description',
-        () => Promise.resolve('data'),
-        'id',
-        null,
-        'tooltip',
-        isAssistantAvailable
-      )
-    );
-
-    act(() => {
-      result.current.showAssistantOverlay(true, true);
-    });
-
-    expect(mockCreateConversation).toHaveBeenCalledWith({
-      title: 'conversation-id',
-      apiConfig: {
-        actionTypeId: '.gen-ai',
-        connectorId: 'connectorId',
-      },
-      category: 'assistant',
-    });
-
     await waitFor(() => {
       expect(mockUseAssistantContext.showAssistantOverlay).toHaveBeenCalledWith({
         showOverlay: true,
         promptContextId: 'id',
-        conversationTitle: 'conversation-id',
+        selectedConversation: {
+          title: 'conversation-id',
+        },
       });
     });
   });
@@ -221,16 +189,16 @@ describe('useAssistantOverlay', () => {
     );
 
     act(() => {
-      result.current.showAssistantOverlay(true, true);
+      result.current.showAssistantOverlay(true);
     });
-
-    expect(mockCreateConversation).not.toHaveBeenCalled();
 
     await waitFor(() => {
       expect(mockUseAssistantContext.showAssistantOverlay).toHaveBeenCalledWith({
         showOverlay: true,
         promptContextId: 'id',
-        conversationTitle: 'electric sheep',
+        selectedConversation: {
+          id: 'electric_sheep_id',
+        },
       });
     });
   });

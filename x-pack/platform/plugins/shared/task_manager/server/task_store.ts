@@ -11,59 +11,57 @@
 import murmurhash from 'murmurhash';
 import { v4 } from 'uuid';
 import { Subject } from 'rxjs';
-import { omit, defaults, get, truncate } from 'lodash';
-import { SavedObjectError } from '@kbn/core-saved-objects-common';
+import { omit, defaults, get } from 'lodash';
+import type { SavedObjectError } from '@kbn/core-saved-objects-common';
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import {
+import type { estypes } from '@elastic/elasticsearch';
+import type {
   SavedObjectsBulkDeleteResponse,
   Logger,
-  SecurityServiceStart,
   SavedObjectsServiceStart,
+  SecurityServiceStart,
   KibanaRequest,
-  SPACES_EXTENSION_ID,
-} from '@kbn/core/server';
-
-import {
   SavedObject,
   ISavedObjectsSerializer,
   SavedObjectsRawDoc,
   ISavedObjectsRepository,
   SavedObjectsUpdateResponse,
   ElasticsearchClient,
-  SECURITY_EXTENSION_ID,
 } from '@kbn/core/server';
 
-import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
+import { SECURITY_EXTENSION_ID, SPACES_EXTENSION_ID } from '@kbn/core/server';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+
+import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-shared';
 
 import { decodeRequestVersion, encodeVersion } from '@kbn/core-saved-objects-base-server-internal';
 import { nodeBuilder } from '@kbn/es-query';
-import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
-import { RequestTimeoutsConfig } from './config';
-import { asOk, asErr, Result, unwrap } from './lib/result_type';
+import type { RequestTimeoutsConfig } from './config';
+import type { Result } from './lib/result_type';
+import { asOk, asErr, unwrap } from './lib/result_type';
 
-import {
+import type {
   ConcreteTaskInstance,
   ConcreteTaskInstanceVersion,
   TaskInstance,
-  TaskStatus,
   TaskLifecycle,
-  TaskLifecycleResult,
   SerializedConcreteTaskInstance,
   PartialConcreteTaskInstance,
   PartialSerializedConcreteTaskInstance,
   ApiKeyOptions,
 } from './task';
+import { TaskStatus, TaskLifecycleResult } from './task';
 
-import { TaskTypeDictionary } from './task_type_dictionary';
-import { AdHocTaskCounter } from './lib/adhoc_task_counter';
+import type { TaskTypeDictionary } from './task_type_dictionary';
+import type { AdHocTaskCounter } from './lib/adhoc_task_counter';
 import { TaskValidator } from './task_validator';
 import { claimSort } from './queries/mark_available_tasks_as_claimed';
 import { MAX_PARTITIONS } from './lib/task_partitioner';
-import { ErrorOutput } from './lib/bulk_operation_buffer';
+import type { ErrorOutput } from './lib/bulk_operation_buffer';
 import { MsearchError } from './lib/msearch_error';
 import { BulkUpdateError } from './lib/bulk_update_error';
 import { TASK_SO_NAME } from './saved_objects';
+import { getApiKeyAndUserScope } from './lib/api_key_utils';
 
 export interface StoreOpts {
   esClient: ElasticsearchClient;
@@ -79,6 +77,8 @@ export interface StoreOpts {
   requestTimeouts: RequestTimeoutsConfig;
   security: SecurityServiceStart;
   canEncryptSavedObjects?: boolean;
+  esoClient?: EncryptedSavedObjectsClient;
+  spaces?: SpacesPluginStart;
 }
 
 export interface SearchOpts {
@@ -148,6 +148,7 @@ export class TaskStore {
   private requestTimeouts: RequestTimeoutsConfig;
   private security: SecurityServiceStart;
   private canEncryptSavedObjects?: boolean;
+  private spaces?: SpacesPluginStart;
 
   /**
    * Constructs a new TaskStore.
@@ -160,6 +161,7 @@ export class TaskStore {
    */
   constructor(opts: StoreOpts) {
     this.esClient = opts.esClient;
+    this.esoClient = opts.esoClient;
     this.index = opts.index;
     this.taskManagerId = opts.taskManagerId;
     this.definitions = opts.definitions;
@@ -179,6 +181,7 @@ export class TaskStore {
     });
     this.requestTimeouts = opts.requestTimeouts;
     this.security = opts.security;
+    this.spaces = opts.spaces;
     this.canEncryptSavedObjects = opts.canEncryptSavedObjects;
   }
 
@@ -191,20 +194,8 @@ export class TaskStore {
   }
 
   private getSoClientForCreate(options: ApiKeyOptions) {
-    let requestToUse = options.request;
-    if (options.apiKey) {
-      requestToUse = kibanaRequestFactory({
-        headers: {
-          authorization: `ApiKey ${options.apiKey}`,
-        },
-        path: '/',
-        route: { settings: {} },
-        url: { href: {}, hash: '' } as URL,
-        raw: { req: { url: '/' } } as any,
-      });
-    }
-    if (requestToUse) {
-      return this.savedObjectsService.getScopedClient(requestToUse, {
+    if (options.request) {
+      return this.savedObjectsService.getScopedClient(options.request, {
         includedHiddenTypes: [TASK_SO_NAME],
         excludedExtensions: [SECURITY_EXTENSION_ID, SPACES_EXTENSION_ID],
       });
@@ -212,41 +203,30 @@ export class TaskStore {
     return this.savedObjectsRepository;
   }
 
-  private async createAPIKey(request?: KibanaRequest) {
+  private async maybeGetApiKeyFromRequest(taskInstances: TaskInstance[], request?: KibanaRequest) {
     if (!request) {
       return null;
     }
 
-    if (!this.canEncryptSo()) {
-      throw Error(
-        'Unable to create API keys because the Encrypted Saved Objects plugin has not been registered or is missing encryption key'
+    let userScopeAndApiKey;
+    try {
+      userScopeAndApiKey = await getApiKeyAndUserScope(
+        taskInstances,
+        request,
+        this.canEncryptSo(),
+        this.security,
+        this.spaces
       );
+    } catch (e) {
+      this.errors$.next(e);
+      throw e;
     }
 
-    if (!this.security.authc.apiKeys.areAPIKeysEnabled()) {
-      throw Error('API keys are not enabled, cannot create API key.');
-    }
-
-    const user = this.security.authc.getCurrentUser(request);
-    if (!user) {
-      throw Error('Cannot authenticate current user.');
-    }
-
-    const apiKeyCreateResult = await this.security.authc.apiKeys.grantAsInternalUser(request, {
-      name: truncate(`TaskManager: ${user.username}}`, { length: 256 }),
-      role_descriptors: {},
-      metadata: { managed: true },
-    });
-
-    if (!apiKeyCreateResult) {
-      throw Error('Cannot create API key.');
-    }
-
-    return Buffer.from(`${apiKeyCreateResult.id}:${apiKeyCreateResult.api_key}`).toString('base64');
+    return userScopeAndApiKey;
   }
 
-  private async bulkGetDecryptedTasks(ids: string[]) {
-    const result = new Map<string, ConcreteTaskInstance>();
+  private async bulkGetDecryptedTaskApiKeys(ids: string[]) {
+    const result = new Map<string, string | undefined>();
     if (!this.canEncryptSo() || !ids.length) {
       return result;
     }
@@ -267,7 +247,7 @@ export class TaskStore {
 
     for await (const response of finder.find()) {
       response.saved_objects.forEach((savedObject) => {
-        result.set(savedObject.id, savedObjectToConcreteTaskInstance(savedObject));
+        result.set(savedObject.id, savedObject.attributes.apiKey);
       });
     }
     await finder.close();
@@ -288,12 +268,12 @@ export class TaskStore {
       return tasks;
     }
 
-    const decryptedTaskMap = await this.bulkGetDecryptedTasks(ids);
+    const decryptedTaskApiKeysMap = await this.bulkGetDecryptedTaskApiKeys(ids);
 
     const tasksWithDecryptedApiKeys = tasks.map((task) => ({
       ...task,
-      ...(decryptedTaskMap.get(task.id)?.apiKey
-        ? { apiKey: decryptedTaskMap.get(task.id)!.apiKey }
+      ...(decryptedTaskApiKeysMap.get(task.id)
+        ? { apiKey: decryptedTaskApiKeysMap.get(task.id) }
         : {}),
     }));
 
@@ -322,7 +302,10 @@ export class TaskStore {
   ): Promise<ConcreteTaskInstance> {
     this.definitions.ensureHas(taskInstance.taskType);
 
-    const apiKey = options?.apiKey || (await this.createAPIKey(options?.request));
+    const apiKeyAndUserScopeMap =
+      (await this.maybeGetApiKeyFromRequest([taskInstance], options?.request)) || new Map();
+    const { apiKey, userScope } = apiKeyAndUserScopeMap.get(taskInstance.id) || {};
+
     const soClient = this.getSoClientForCreate(options || {});
 
     let savedObject;
@@ -334,10 +317,8 @@ export class TaskStore {
         'task',
         {
           ...taskInstanceToAttributes(validatedTaskInstance, id),
+          ...(userScope ? { userScope } : {}),
           ...(apiKey ? { apiKey } : {}),
-          // Set invalidateApiKey to true if the user passed in a request, since we do
-          // not want to invalidate a specific API key that was not created by the task manager
-          ...(apiKey ? { invalidateApiKey: !!options?.request } : {}),
         },
         { id, refresh: false }
       );
@@ -362,10 +343,13 @@ export class TaskStore {
     taskInstances: TaskInstance[],
     options?: ApiKeyOptions
   ): Promise<ConcreteTaskInstance[]> {
-    const apiKey = options?.apiKey || (await this.createAPIKey(options?.request));
+    const apiKeyAndUserScopeMap =
+      (await this.maybeGetApiKeyFromRequest(taskInstances, options?.request)) || new Map();
+
     const soClient = this.getSoClientForCreate(options || {});
 
     const objects = taskInstances.map((taskInstance) => {
+      const { apiKey, userScope } = apiKeyAndUserScopeMap.get(taskInstance.id) || {};
       const id = taskInstance.id || v4();
       this.definitions.ensureHas(taskInstance.taskType);
       const validatedTaskInstance =
@@ -375,9 +359,7 @@ export class TaskStore {
         attributes: {
           ...taskInstanceToAttributes(validatedTaskInstance, id),
           ...(apiKey ? { apiKey } : {}),
-          // Set invalidateApiKey to true if the user passed in a request, since we do
-          // not want to invalidate a specific API key that was not created by the task manager
-          ...(apiKey ? { invalidateApiKey: !!options?.request } : {}),
+          ...(userScope ? { userScope } : {}),
         },
         id,
       };
@@ -606,10 +588,12 @@ export class TaskStore {
    */
   public async remove(id: string): Promise<void> {
     const taskInstance = await this.get(id);
+    const { apiKey, userScope } = taskInstance;
 
-    if (taskInstance.apiKey && taskInstance.invalidateApiKey) {
-      const apiKeyId = Buffer.from(taskInstance.apiKey, 'base64').toString().split(':')[0];
-      this.security.authc.apiKeys.invalidateAsInternalUser({ ids: [apiKeyId] });
+    if (apiKey && userScope) {
+      if (!userScope.apiKeyCreatedByUser) {
+        await this.security.authc.apiKeys.invalidateAsInternalUser({ ids: [userScope.apiKeyId] });
+      }
     }
 
     try {
@@ -632,15 +616,18 @@ export class TaskStore {
 
     taskInstances.forEach((taskInstance) => {
       const unwrappedTaskInstance = unwrap(taskInstance) as ConcreteTaskInstance;
-      if (unwrappedTaskInstance.apiKey && unwrappedTaskInstance.invalidateApiKey) {
-        apiKeyIdsToRemove.push(
-          Buffer.from(unwrappedTaskInstance.apiKey, 'base64').toString().split(':')[0]
-        );
+      const { apiKey, userScope } = unwrappedTaskInstance;
+      if (apiKey && userScope) {
+        if (!userScope.apiKeyCreatedByUser) {
+          apiKeyIdsToRemove.push(userScope.apiKeyId);
+        }
       }
     });
 
     if (apiKeyIdsToRemove.length) {
-      this.security.authc.apiKeys.invalidateAsInternalUser({ ids: apiKeyIdsToRemove });
+      await this.security.authc.apiKeys.invalidateAsInternalUser({
+        ids: [...new Set(apiKeyIdsToRemove)],
+      });
     }
 
     try {
@@ -721,9 +708,7 @@ export class TaskStore {
       taskVersions = await this.esClientWithoutRetries.mget<never>({
         index: this.index,
         _source: false,
-        body: {
-          ids,
-        },
+        ids,
       });
     } catch (e) {
       this.errors$.next(e);
@@ -781,12 +766,12 @@ export class TaskStore {
     const queries = opts.map(({ sort = [{ 'task.runAt': 'asc' }], ...opt }) =>
       ensureQueryOnlyReturnsTaskObjects({ sort, ...opt })
     );
-    const body = queries.flatMap((query) => [{}, query]);
+    const searches = queries.flatMap((query) => [{}, query]);
 
     const result = await this.esClientWithoutRetries.msearch<SavedObjectsRawDoc['_source']>({
       index: this.index,
       ignore_unavailable: true,
-      body,
+      searches,
     });
     const { responses } = result;
 
@@ -823,7 +808,8 @@ export class TaskStore {
       const result = await this.esClientWithoutRetries.search<SavedObjectsRawDoc['_source']>({
         index: this.index,
         ignore_unavailable: true,
-        body: { ...opts, query },
+        ...opts,
+        query,
         ...(limitResponse ? { _source_excludes: ['task.state', 'task.params'] } : {}),
       });
 
@@ -900,7 +886,7 @@ export class TaskStore {
       index: this.index,
       ignore_unavailable: true,
       track_total_hits: true,
-      body: ensureAggregationOnlyReturnsEnabledTaskObjects({
+      ...ensureAggregationOnlyReturnsEnabledTaskObjects({
         query,
         aggs,
         runtime_mappings,
@@ -916,22 +902,24 @@ export class TaskStore {
     { max_docs: max_docs }: UpdateByQueryOpts = {}
   ): Promise<UpdateByQueryResult> {
     const { query } = ensureQueryOnlyReturnsTaskObjects(opts);
+    const { sort, ...rest } = opts;
     try {
-      const // eslint-disable-next-line @typescript-eslint/naming-convention
-        { total, updated, version_conflicts } = await this.esClientWithoutRetries.updateByQuery(
-          {
-            index: this.index,
-            ignore_unavailable: true,
-            refresh: true,
-            conflicts: 'proceed',
-            body: {
-              ...opts,
-              max_docs,
-              query,
-            },
-          },
-          { requestTimeout: this.requestTimeouts.update_by_query }
-        );
+      // eslint-disable-next-line @typescript-eslint/naming-convention
+      const { total, updated, version_conflicts } = await this.esClientWithoutRetries.updateByQuery(
+        {
+          index: this.index,
+          ignore_unavailable: true,
+          refresh: true,
+          conflicts: 'proceed',
+          ...rest,
+          max_docs,
+          query,
+          // @ts-expect-error According to the docs, sort should be a comma-separated list of fields and goes in the querystring.
+          // However, this one is using a "body" format?
+          body: { sort },
+        },
+        { requestTimeout: this.requestTimeouts.update_by_query }
+      );
 
       const conflictsCorrectedForContinuation = correctVersionConflictsForContinuation(
         updated,
@@ -984,7 +972,7 @@ export function taskInstanceToAttributes(
   id: string
 ): SerializedConcreteTaskInstance {
   return {
-    ...omit(doc, 'id', 'version', 'apiKey', 'invalidateApiKey'),
+    ...omit(doc, 'id', 'version', 'userScope', 'apiKey'),
     params: JSON.stringify(doc.params || {}),
     state: JSON.stringify(doc.state || {}),
     attempts: (doc as ConcreteTaskInstance).attempts || 0,
@@ -1001,7 +989,7 @@ export function partialTaskInstanceToAttributes(
   doc: PartialConcreteTaskInstance
 ): PartialSerializedConcreteTaskInstance {
   return {
-    ...omit(doc, 'id', 'version', 'apiKey', 'invalidateApiKey'),
+    ...omit(doc, 'id', 'version', 'userScope', 'apiKey'),
     ...(doc.params ? { params: JSON.stringify(doc.params) } : {}),
     ...(doc.state ? { state: JSON.stringify(doc.state) } : {}),
     ...(doc.scheduledAt ? { scheduledAt: doc.scheduledAt.toISOString() } : {}),

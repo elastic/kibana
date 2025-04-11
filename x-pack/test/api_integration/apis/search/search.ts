@@ -45,7 +45,7 @@ export default function ({ getService }: FtrProviderContext) {
       await es.index({
         index: 'search-api-test',
         id: 'search-api-test-doc',
-        body: { message: 'test doc' },
+        document: { message: 'test doc' },
         refresh: 'wait_for',
       });
     });
@@ -395,7 +395,12 @@ export default function ({ getService }: FtrProviderContext) {
             },
           })
           .expect(400);
-        verifyErrorResponse(resp.body, 400, 'illegal_argument_exception', true);
+        verifyErrorResponse(
+          resp.body,
+          400,
+          '"params.index" is required when performing a rollup search',
+          false
+        );
       });
 
       it('should return 400 if rollup search is without non-existent index', async () => {

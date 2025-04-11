@@ -11,9 +11,13 @@ import type { EuiDataGridStyle } from '@elastic/eui';
 
 export const DEFAULT_CONTROL_COLUMN_WIDTH = 24;
 
+export const SCORE_COLUMN_NAME = '_score';
+
 export const DEFAULT_ROWS_PER_PAGE = 100;
 export const MAX_LOADED_GRID_ROWS = 10000;
 export const ROWS_PER_PAGE_OPTIONS = [10, 25, 50, DEFAULT_ROWS_PER_PAGE, 250, 500];
+
+export const DEFAULT_PAGINATION_MODE = 'multiPage';
 /**
  * Row height might be a value from -1 to 20
  * A value of -1 automatically adjusts the row height to fit the contents.

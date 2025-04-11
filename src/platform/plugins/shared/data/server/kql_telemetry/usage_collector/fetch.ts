@@ -32,7 +32,7 @@ export function fetchProvider(getIndexForType: (type: string) => Promise<string>
       esClient.search(
         {
           index: await getIndexForType('config'),
-          body: { query: { term: { type: 'config' } } },
+          query: { term: { type: 'config' } },
         },
         { ignore: [404] }
       ),

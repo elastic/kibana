@@ -184,20 +184,18 @@ async function fetchSeries(
     index: indexPatterns,
     size: 0,
     ignore_unavailable: true,
-    body: {
-      query: createQuery({
-        start: adjustedMin,
-        end: Number(max),
-        metric,
-        clusterUuid: metricOptions.skipClusterUuidFilter
-          ? STANDALONE_CLUSTER_CLUSTER_UUID
-          : req.params.clusterUuid,
-        // TODO: Pass in the UUID as an explicit function parameter
-        uuid: getUuid(req, metric),
-        filters,
-      }),
-      aggs,
-    },
+    query: createQuery({
+      start: adjustedMin,
+      end: Number(max),
+      metric,
+      clusterUuid: metricOptions.skipClusterUuidFilter
+        ? STANDALONE_CLUSTER_CLUSTER_UUID
+        : req.params.clusterUuid,
+      // TODO: Pass in the UUID as an explicit function parameter
+      uuid: getUuid(req, metric),
+      filters,
+    }),
+    aggs,
   };
 
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');

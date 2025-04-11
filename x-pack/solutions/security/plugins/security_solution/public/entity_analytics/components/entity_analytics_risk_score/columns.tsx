@@ -9,7 +9,7 @@ import type { SyntheticEvent } from 'react';
 import React from 'react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiLink } from '@elastic/eui';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 import { get } from 'lodash/fp';
 
 import { EntityTypeToIdentifierField } from '../../../../common/entity_analytics/types';
@@ -40,7 +40,7 @@ import { FormattedRelativePreferenceDate } from '../../../common/components/form
 import { formatRiskScore } from '../../common';
 
 const StyledCellActions = styled(SecurityCellActions)`
-  padding-left: ${({ theme }) => theme.eui.euiSizeS};
+  padding-left: ${({ theme: { euiTheme } }) => euiTheme.size.s};
 `;
 
 type OpenEntityOnAlertsPage = (entityName: string) => void;

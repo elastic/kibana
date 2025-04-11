@@ -34,6 +34,7 @@ function createRenderingService() {
   const mock: RenderingServiceMock = {
     preboot: jest.fn(),
     setup: jest.fn(),
+    start: jest.fn(),
     stop: jest.fn(),
   };
 

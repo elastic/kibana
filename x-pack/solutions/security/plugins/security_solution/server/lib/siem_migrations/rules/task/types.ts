@@ -12,6 +12,7 @@ import type { SiemRuleMigrationsClientDependencies } from '../types';
 import type { getRuleMigrationAgent } from './agent';
 import type { SiemMigrationTelemetryClient } from './rule_migrations_telemetry_client';
 import type { ChatModel } from './util/actions_client_chat';
+import type { RuleMigrationsRetriever } from './retrievers';
 
 export type MigrationAgent = ReturnType<typeof getRuleMigrationAgent>;
 
@@ -32,7 +33,9 @@ export interface RuleMigrationTaskRunParams extends RuleMigrationTaskStartParams
   abortController: AbortController;
 }
 
-export interface RuleMigrationTaskCreateAgentParams extends RuleMigrationTaskStartParams {
+export interface RuleMigrationTaskCreateAgentParams {
+  connectorId: string;
+  retriever: RuleMigrationsRetriever;
   telemetryClient: SiemMigrationTelemetryClient;
   model: ChatModel;
 }

@@ -17,8 +17,7 @@ import type { CasesClientMock } from '@kbn/cases-plugin/server/client/mocks';
 import { createCasesClientMock } from '@kbn/cases-plugin/server/client/mocks';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { merge } from 'lodash';
-import type * as esTypes from '@elastic/elasticsearch/lib/api/types';
-import type { TransportResult } from '@elastic/elasticsearch';
+import type { TransportResult, estypes } from '@elastic/elasticsearch';
 import type { AttachmentsSubClient } from '@kbn/cases-plugin/server/client/attachments/client';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
@@ -128,9 +127,9 @@ const createConstructorOptionsMock = (): Required<ResponseActionsClientOptionsMo
 };
 
 const createEsIndexTransportResponseMock = (
-  overrides: DeepPartial<TransportResult<esTypes.IndexResponse, unknown>> = {}
-): TransportResult<esTypes.IndexResponse, unknown> => {
-  const responseDoc: TransportResult<esTypes.IndexResponse, unknown> = {
+  overrides: DeepPartial<TransportResult<estypes.IndexResponse, unknown>> = {}
+): TransportResult<estypes.IndexResponse, unknown> => {
+  const responseDoc: TransportResult<estypes.IndexResponse, unknown> = {
     body: {
       _id: 'indexed-1-2-3',
       _index: 'some-index',

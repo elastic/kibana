@@ -29,12 +29,14 @@ const fleetServerHost = {
   is_preconfigured: false,
 };
 
-export const FleetServerHostsFlyout = ({ width }: Args) => {
-  return (
-    <div style={{ width }}>
-      <Component proxies={[]} onClose={() => {}} fleetServerHost={fleetServerHost} />
-    </div>
-  );
-};
+export const FleetServerHostsFlyout = {
+  render: ({ width }: Args) => {
+    return (
+      <div style={{ width }}>
+        <Component proxies={[]} onClose={() => {}} fleetServerHost={fleetServerHost} />
+      </div>
+    );
+  },
 
-FleetServerHostsFlyout.args = args;
+  args,
+};

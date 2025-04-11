@@ -16,6 +16,7 @@ describe('setTLSRecoveredAlertsContext', () => {
   const basePath = {
     publicBaseUrl: 'https://localhost:5601',
   } as IBasePath;
+
   const alertState = {
     summary: 'test-summary',
     status: 'has expired',

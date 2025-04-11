@@ -8,6 +8,7 @@
 import type { OnTimeChangeProps } from '@elastic/eui';
 import { EuiSuperDatePicker, EuiSpacer } from '@elastic/eui';
 import { css } from '@emotion/react';
+import type { FilterManager } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { Filter, Query } from '@kbn/es-query';
 import { debounce } from 'lodash/fp';
@@ -17,8 +18,8 @@ import { useKibana } from '../../../../../common/lib/kibana';
 import { getCommonTimeRanges } from '../helpers/get_common_time_ranges';
 import { useSourcererDataView } from '../../../../../sourcerer/containers';
 import { SourcererScopeName } from '../../../../../sourcerer/store/model';
-import * as i18n from '../translations';
 import { useDataView } from '../use_data_view';
+import type { AlertsSelectionSettings } from '../../types';
 
 export const MAX_ALERTS = 500;
 export const MIN_ALERTS = 50;
@@ -26,25 +27,15 @@ export const STEP = 50;
 export const NO_INDEX_PATTERNS: DataView[] = [];
 
 interface Props {
-  end: string;
-  filters: Filter[];
-  query: Query;
-  setEnd: React.Dispatch<React.SetStateAction<string>>;
-  setFilters: React.Dispatch<React.SetStateAction<Filter[]>>;
-  setQuery: React.Dispatch<React.SetStateAction<Query>>;
-  setStart: React.Dispatch<React.SetStateAction<string>>;
-  start: string;
+  filterManager: FilterManager;
+  onSettingsChanged?: (settings: AlertsSelectionSettings) => void;
+  settings: AlertsSelectionSettings;
 }
 
 const AlertSelectionQueryComponent: React.FC<Props> = ({
-  end,
-  filters,
-  query,
-  setEnd,
-  setFilters,
-  setQuery,
-  setStart,
-  start,
+  filterManager,
+  onSettingsChanged,
+  settings,
 }) => {
   const {
     unifiedSearch: {
@@ -108,30 +99,33 @@ const AlertSelectionQueryComponent: React.FC<Props> = ({
    */
   const onTimeChange = useCallback(
     ({ start: startDate, end: endDate }: OnTimeChangeProps) => {
-      if (unSubmittedQuery != null) {
-        const newUnSubmittedQuery: Query = {
-          query: unSubmittedQuery,
-          language: 'kuery',
-        };
-
-        setQuery(newUnSubmittedQuery); // <-- set the query to the unsubmitted query
-      }
-
-      setStart(startDate);
-      setEnd(endDate);
+      const query =
+        unSubmittedQuery != null
+          ? {
+              query: unSubmittedQuery, // <-- set the query to the unsubmitted query
+              language: 'kuery',
+            }
+          : settings.query;
+      const updatedSettings = {
+        ...settings,
+        end: endDate,
+        start: startDate,
+        query,
+      };
+      onSettingsChanged?.(updatedSettings);
     },
-    [setEnd, setQuery, setStart, unSubmittedQuery]
+    [onSettingsChanged, settings, unSubmittedQuery]
   );
 
   /**
    * `onFiltersUpdated` is called by the `SearchBar` when the filters, (which
-   * appear belew the `SearchBar` input), are updated.
+   * appear below the `SearchBar` input), are updated.
    */
   const onFiltersUpdated = useCallback(
     (newFilters: Filter[]) => {
-      setFilters(newFilters);
+      filterManager.setFilters(newFilters);
     },
-    [setFilters]
+    [filterManager]
   );
 
   /**
@@ -140,10 +134,13 @@ const AlertSelectionQueryComponent: React.FC<Props> = ({
   const onQuerySubmit = useCallback(
     ({ query: newQuery }: { query?: Query | undefined }) => {
       if (newQuery != null) {
-        setQuery(newQuery);
+        onSettingsChanged?.({
+          ...settings,
+          query: newQuery,
+        });
       }
     },
-    [setQuery]
+    [onSettingsChanged, settings]
   );
 
   return (
@@ -160,10 +157,11 @@ const AlertSelectionQueryComponent: React.FC<Props> = ({
           appName="siem"
           data-test-subj="alertSelectionSearchBar"
           indexPatterns={indexPatterns}
-          filters={filters}
+          filters={settings.filters}
           showDatePicker={false}
           showFilterBar={true}
           showQueryInput={true}
+          showSavedQueryControls={false}
           showSubmitButton={false}
           isLoading={isLoadingIndexPattern}
           onFiltersUpdated={onFiltersUpdated}
@@ -171,8 +169,7 @@ const AlertSelectionQueryComponent: React.FC<Props> = ({
             debouncedOnQueryChange(debouncedQuery?.query);
           }}
           onQuerySubmit={onQuerySubmit}
-          placeholder={i18n.FILTER_YOUR_DATA}
-          query={query}
+          query={settings.query}
         />
       </div>
 
@@ -182,11 +179,11 @@ const AlertSelectionQueryComponent: React.FC<Props> = ({
       <EuiSuperDatePicker
         commonlyUsedRanges={commonlyUsedRanges}
         data-test-subj="alertSelectionDatePicker"
-        end={end}
+        end={settings.end}
         isDisabled={false}
         onTimeChange={onTimeChange}
         showUpdateButton="iconOnly"
-        start={start}
+        start={settings.start}
       />
     </>
   );

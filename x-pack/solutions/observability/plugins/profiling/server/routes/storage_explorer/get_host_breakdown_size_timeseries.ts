@@ -37,43 +37,41 @@ export async function getHostBreakdownSizeTimeseries({
     getIndicesStats({ client: client.getEsClient(), indices: allIndices }),
     client.search('profiling_events_metrics_size', {
       index: ['profiling-events-*', 'profiling-metrics'],
-      body: {
-        query: {
-          bool: {
-            filter: [
-              ...kqlQuery(kuery),
-              {
-                range: {
-                  [ProfilingESField.Timestamp]: {
-                    gte: String(timeFrom),
-                    lt: String(timeTo),
-                    format: 'epoch_second',
-                  },
+      query: {
+        bool: {
+          filter: [
+            ...kqlQuery(kuery),
+            {
+              range: {
+                [ProfilingESField.Timestamp]: {
+                  gte: String(timeFrom),
+                  lt: String(timeTo),
+                  format: 'epoch_second',
                 },
               },
-              ...(indexLifecyclePhase !== IndexLifecyclePhaseSelectOption.All
-                ? termQuery('_tier', indexLifeCyclePhaseToDataTier[indexLifecyclePhase])
-                : []),
-            ],
-          },
-        },
-        aggs: {
-          hosts: {
-            terms: {
-              field: ProfilingESField.HostID,
             },
-            aggs: {
-              storageTimeseries: {
-                date_histogram: {
-                  field: ProfilingESField.Timestamp,
-                  fixed_interval: `${bucketWidth}s`,
-                },
-                aggs: {
-                  indices: {
-                    terms: {
-                      field: '_index',
-                      size: 500,
-                    },
+            ...(indexLifecyclePhase !== IndexLifecyclePhaseSelectOption.All
+              ? termQuery('_tier', indexLifeCyclePhaseToDataTier[indexLifecyclePhase])
+              : []),
+          ],
+        },
+      },
+      aggs: {
+        hosts: {
+          terms: {
+            field: ProfilingESField.HostID,
+          },
+          aggs: {
+            storageTimeseries: {
+              date_histogram: {
+                field: ProfilingESField.Timestamp,
+                fixed_interval: `${bucketWidth}s`,
+              },
+              aggs: {
+                indices: {
+                  terms: {
+                    field: '_index',
+                    size: 500,
                   },
                 },
               },

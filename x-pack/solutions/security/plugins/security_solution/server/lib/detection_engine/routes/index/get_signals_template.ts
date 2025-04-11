@@ -12,6 +12,7 @@ import ecsMapping from './ecs_mapping.json';
 import otherMapping from './other_mappings.json';
 import aadFieldConversion from './signal_aad_mapping.json';
 import signalExtraFields from './signal_extra_fields.json';
+import { createMappingsFor818Compatibility } from './8_18_alerts_compatibility_mappings';
 
 /**
   @constant
@@ -28,7 +29,7 @@ import signalExtraFields from './signal_extra_fields.json';
   incremented by 10 in order to add "room" for the aforementioned patch
   release
 */
-export const SIGNALS_TEMPLATE_VERSION = 77;
+export const SIGNALS_TEMPLATE_VERSION = 87;
 /**
   @constant
   @type {number}
@@ -42,7 +43,7 @@ export const SIGNALS_TEMPLATE_VERSION = 77;
   UI will call create_index_route and and go through the index update process. Increment this number if
   making changes to the field aliases we use to make signals forwards-compatible.
 */
-export const SIGNALS_FIELD_ALIASES_VERSION = 4;
+export const SIGNALS_FIELD_ALIASES_VERSION = 5;
 
 /**
   @constant
@@ -77,19 +78,25 @@ export const getSignalsTemplate = (index: string, aadIndexAliasName: string, spa
         },
       },
       mappings: {
-        dynamic: false,
-        properties: merge(
-          ecsMapping.mappings.properties,
-          otherMapping.mappings.properties,
-          fieldAliases,
-          signalsMapping.mappings.properties,
+        ...merge(
           {
-            [SPACE_IDS]: {
-              type: 'constant_keyword',
-              value: spaceId,
-            },
-          }
+            properties: merge(
+              ecsMapping.mappings.properties,
+              otherMapping.mappings.properties,
+              fieldAliases,
+              signalsMapping.mappings.properties,
+              {
+                [SPACE_IDS]: {
+                  type: 'constant_keyword',
+                  value: spaceId,
+                },
+              }
+            ),
+          },
+          createMappingsFor818Compatibility(),
+          { dynamic: false }
         ),
+
         _meta: {
           version: SIGNALS_TEMPLATE_VERSION,
           [ALIAS_VERSION_FIELD]: SIGNALS_FIELD_ALIASES_VERSION,
@@ -168,6 +175,11 @@ export const backwardsCompatibilityMappings = (spaceId: string) => [
         },
       },
     },
+  },
+  {
+    minVersion: 0,
+    maxVersion: 77,
+    mapping: createMappingsFor818Compatibility(),
   },
 ];
 

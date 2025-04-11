@@ -7,7 +7,7 @@
 
 import { useEffect, useMemo, useRef } from 'react';
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import type { EuiDataGridColumn } from '@elastic/eui';
 
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
@@ -152,17 +152,15 @@ export const useIndexData = (options: UseIndexDataOptions): UseIndexDataReturnTy
   } = useDataSearch(
     {
       index: indexPattern,
-      body: {
-        fields: ['*'],
-        _source: false,
-        query: isDefaultQuery(query) ? defaultQuery : queryWithBaseFilterCriteria,
-        from: pagination.pageIndex * pagination.pageSize,
-        size: pagination.pageSize,
-        ...(Object.keys(sort).length > 0 ? { sort } : {}),
-        ...(isRuntimeMappings(combinedRuntimeMappings)
-          ? { runtime_mappings: combinedRuntimeMappings }
-          : {}),
-      },
+      fields: ['*'],
+      _source: false,
+      query: isDefaultQuery(query) ? defaultQuery : queryWithBaseFilterCriteria,
+      from: pagination.pageIndex * pagination.pageSize,
+      size: pagination.pageSize,
+      ...(Object.keys(sort).length > 0 ? { sort } : {}),
+      ...(isRuntimeMappings(combinedRuntimeMappings)
+        ? { runtime_mappings: combinedRuntimeMappings }
+        : {}),
     },
     // Check whether fetching should be enabled
     dataViewFields.length > 0

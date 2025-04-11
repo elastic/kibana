@@ -26,7 +26,7 @@ describe('ElasticsearchMonitorsAdapter', () => {
 
     set(
       mockEsClient.search.mock.calls[0],
-      'body.aggs.timeseries.date_histogram.fixed_interval',
+      'aggs.timeseries.date_histogram.fixed_interval',
       '36000ms'
     );
     expect(mockEsClient.search.mock.calls[0]).toMatchSnapshot();

@@ -16,12 +16,46 @@ paths:
           required: true
           schema:
             type: string
+            description: The ID of the action to retrieve.
+            example: 'fr518850-681a-4y60-aa98-e22640cae2b8'
       responses:
         '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: '../../model/schema/common.schema.yaml#/components/schemas/SuccessResponse'
+                $ref: '#/components/schemas/GetEndpointActionResponse'
+components:
+  schemas:
+    GetEndpointActionResponse:
+      type: object
+      properties: { }
+      example:
+        data:
+          id: "b3d6de74-36b0-4fa8-be46-c375bf1771bf"
+          agents:
+            - "afdc366c-e2e0-4cdb-ae1d-94575bd2d8e0"
+          agentType: "endpoint"
+          command: "running-processes"
+          startedAt: "2022-08-08T15:24:57.402Z"
+          completedAt: "2022-08-08T09:50:47.672Z"
+          createdBy: "elastic"
+          isCompleted: true
+          wasSuccessful: true
+          isExpired: false
+          outputs:
+            afdc366c-e2e0-4cdb-ae1d-94575bd2d8e0:
+              type: "json"
+              content:
+                entries:
+                  - pid: "822"
+                    entity_id: "fk2ym7bl3oiu3okjcik0xosc0i0m75x3eh49nu3uaqt4dqanjt"
+                    user: "Dexter"
+                    command: "/opt/cmd1"
+                  - pid: "984"
+                    entity_id: "pwvz91m48wpj9j7ov9gtw8fp7u2rat4eu5ipte37hnhdcbi2pt"
+                    user: "Jada"
+                    command: "/opt/cmd3/opt/cmd3/opt/cmd3/opt/cmd3"
+
 
 

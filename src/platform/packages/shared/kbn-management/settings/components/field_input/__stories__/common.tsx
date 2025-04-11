@@ -8,7 +8,7 @@
  */
 
 import React, { useState } from 'react';
-import type { ComponentMeta } from '@storybook/react';
+import type { Meta } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 
 import { EuiPanel } from '@elastic/eui';
@@ -23,7 +23,7 @@ import {
 import { getFieldDefinition } from '@kbn/management-settings-field-definition';
 import { getDefaultValue, getUserValue } from '@kbn/management-settings-utilities/storybook';
 import { FieldInputProvider } from '../services';
-import { FieldInput as Component, FieldInput } from '../field_input';
+import { FieldInput } from '../field_input';
 import { InputProps } from '../types';
 
 /**
@@ -92,7 +92,7 @@ export const getStory = (title: string, description: string) =>
         </FieldInputProvider>
       ),
     ],
-  } as ComponentMeta<typeof Component>);
+  } as Meta<typeof FieldInput>);
 
 /**
  * Utility function for returning a {@link FieldInput} Storybook story.

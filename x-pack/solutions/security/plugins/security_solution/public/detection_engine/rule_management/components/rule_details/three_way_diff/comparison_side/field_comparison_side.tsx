@@ -50,11 +50,12 @@ export function FieldComparisonSide(): JSX.Element {
   useEffect(() => {
     if (
       selectedOption !== VersionsPickerOptionEnum.MyChanges &&
+      prevResolvedValue !== undefined &&
       !isEqual(prevResolvedValue, resolvedValue)
     ) {
       setSelectedOption(VersionsPickerOptionEnum.MyChanges);
     }
-  }, [hasResolvedValueDifferentFromSuggested, selectedOption, prevResolvedValue, resolvedValue]);
+  }, [selectedOption, prevResolvedValue, resolvedValue]);
 
   return (
     <>
@@ -73,7 +74,6 @@ export function FieldComparisonSide(): JSX.Element {
               options={options}
               selectedOption={selectedOption}
               onChange={setSelectedOption}
-              hasResolvedValueDifferentFromSuggested={hasResolvedValueDifferentFromSuggested}
             />
           </EuiFlexItem>
         </EuiFlexGroup>

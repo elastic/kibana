@@ -41,7 +41,7 @@ export const ENVIRONMENT_NOT_DEFINED = {
   label: getEnvironmentLabel(ENVIRONMENT_NOT_DEFINED_VALUE),
 };
 
-function isEnvironmentDefined(environment: string) {
+export function isEnvironmentDefined(environment: string) {
   return (
     environment &&
     environment !== ENVIRONMENT_NOT_DEFINED_VALUE &&

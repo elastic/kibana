@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import {
+import type {
   IRouter,
   RequestHandlerContext,
   KibanaRequest,
@@ -13,18 +13,19 @@ import {
   KibanaResponseFactory,
   Logger,
 } from '@kbn/core/server';
-import { IClusterClient } from '@kbn/core/server';
-import { Observable, Subject } from 'rxjs';
+import type { IClusterClient } from '@kbn/core/server';
+import type { Observable } from 'rxjs';
+import { Subject } from 'rxjs';
 import { throttleTime, tap, map } from 'rxjs';
-import { UsageCounter } from '@kbn/usage-collection-plugin/server';
-import { MonitoringStats } from '../monitoring';
-import { TaskManagerConfig } from '../config';
-import {
+import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
+import type { MonitoringStats } from '../monitoring';
+import type { TaskManagerConfig } from '../config';
+import type {
   BackgroundTaskUtilizationStat,
   PublicBackgroundTaskUtilizationStat,
-  summarizeUtilizationStats,
 } from '../monitoring/background_task_utilization_statistics';
-import { MonitoredStat } from '../monitoring/monitoring_stats_stream';
+import { summarizeUtilizationStats } from '../monitoring/background_task_utilization_statistics';
+import type { MonitoredStat } from '../monitoring/monitoring_stats_stream';
 
 export interface MonitoredUtilization {
   process_uuid: string;
@@ -119,7 +120,11 @@ export function backgroundTaskUtilizationRoute(
           },
         },
         // Uncomment when we determine that we can restrict API usage to Global admins based on telemetry
-        // options: { tags: ['access:taskManager'] },
+        // security: {
+        //   authz: {
+        //     requiredPrivileges: ['taskManager'],
+        //   },
+        // },
         validate: false,
         options: {
           access: 'public', // access must be public to allow "system" users, like metrics collectors, to access these routes
@@ -141,15 +146,13 @@ export function backgroundTaskUtilizationRoute(
           const hasPrivilegesResponse = await clusterClient
             .asScoped(req)
             .asCurrentUser.security.hasPrivileges({
-              body: {
-                application: [
-                  {
-                    application: `kibana-${kibanaIndexName}`,
-                    resources: ['*'],
-                    privileges: [`api:${kibanaVersion}:taskManager`],
-                  },
-                ],
-              },
+              application: [
+                {
+                  application: `kibana-${kibanaIndexName}`,
+                  resources: ['*'],
+                  privileges: [`api:${kibanaVersion}:taskManager`],
+                },
+              ],
             });
 
           // Keep track of total access vs admin access

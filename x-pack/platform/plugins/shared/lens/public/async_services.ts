@@ -23,6 +23,7 @@ export * from './visualizations/metric';
 export * from './visualizations/partition/pie_visualization';
 export * from './visualizations/partition';
 export * from './visualizations/xy/xy_visualization';
+export * from './visualizations/xy/types';
 export * from './visualizations/xy';
 export * from './visualizations/heatmap/heatmap_visualization';
 export * from './visualizations/heatmap';
@@ -47,7 +48,16 @@ export * from './app_plugin/mounter';
 export * from './lens_attribute_service';
 export * from './app_plugin/save_modal_container';
 export * from './chart_info_api';
+export * from './utils';
 
 export * from './trigger_actions/open_in_discover_helpers';
-export * from './trigger_actions/open_lens_config/create_action_helpers';
 export * from './trigger_actions/open_lens_config/in_app_embeddable_edit/in_app_embeddable_edit_action_helpers';
+export { EditLensEmbeddableAction } from './trigger_actions/open_lens_config/in_app_embeddable_edit/in_app_embeddable_edit_action';
+export { getAddLensPanelAction } from './trigger_actions/add_lens_panel_action';
+export { AddESQLPanelAction } from './trigger_actions/open_lens_config/add_esql_panel_action';
+export { convertToLensActionFactory } from './trigger_actions/convert_to_lens_action';
+export { visualizeTSVBAction } from './trigger_actions/visualize_tsvb_actions';
+export { visualizeFieldAction } from './trigger_actions/visualize_field_actions';
+
+export { deserializeState } from './react_embeddable/helper';
+export * from './react_embeddable/lens_embeddable';

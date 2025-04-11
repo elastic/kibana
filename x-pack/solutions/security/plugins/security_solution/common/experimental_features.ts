@@ -115,16 +115,6 @@ export const allowedExperimentalValues = Object.freeze({
   assistantModelEvaluation: false,
 
   /**
-   * Enables filtering of Attack Discovery alerts in a flyout
-   */
-  attackDiscoveryAlertFiltering: false,
-
-  /**
-   * Enables content references (citations) in the AI Assistant
-   */
-  contentReferencesEnabled: false,
-
-  /**
    * Enables the Managed User section inside the new user details flyout.
    */
   newUserDetailsFlyoutManagedUser: false,
@@ -190,17 +180,6 @@ export const allowedExperimentalValues = Object.freeze({
   jamfDataInAnalyzerEnabled: true,
 
   /**
-   * Enables an ability to customize Elastic prebuilt rules.
-   *
-   * Ticket: https://github.com/elastic/kibana/issues/174168
-   * Owners: https://github.com/orgs/elastic/teams/security-detection-rule-management
-   * Added: on Jun 24, 2024 in https://github.com/elastic/kibana/pull/186823
-   * Turned: TBD
-   * Expires: TBD
-   */
-  prebuiltRulesCustomizationEnabled: false,
-
-  /**
    * Makes Elastic Defend integration's Malware On-Write Scan option available to edit.
    */
   malwareOnWriteScanOptionAvailable: true,
@@ -242,6 +221,11 @@ export const allowedExperimentalValues = Object.freeze({
   serviceEntityStoreEnabled: true,
 
   /**
+   * Enables Privilege Monitoring
+   */
+  privilegeMonitoringEnabled: false,
+
+  /**
    * Disables the siem migrations feature
    */
   siemMigrationsDisabled: false,
@@ -252,26 +236,15 @@ export const allowedExperimentalValues = Object.freeze({
   defendInsights: true,
 
   /**
-   * Enables flyout history and new preview navigation
+   * Disables flyout history and new preview navigation
    */
-  newExpandableFlyoutNavigationEnabled: false,
+  newExpandableFlyoutNavigationDisabled: false,
 
   /**
    * Enables CrowdStrike's RunScript RTR command
    * Release: 8.18/9.0
    */
   crowdstrikeRunScriptEnabled: true,
-
-  /**
-   * Enables the Asset Inventory Entity Store feature.
-   * Allows initializing the Universal Entity Store via the API.
-   */
-  assetInventoryStoreEnabled: false,
-
-  /**
-   * Enables the Asset Inventory feature
-   */
-  assetInventoryUXEnabled: false,
 
   /**
    * Enabled Microsoft Defender for  Endpoint actions: Isolate and Release.
@@ -282,7 +255,10 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables banner for informing users about changes in data collection.
    */
-  eventCollectionDataReductionBannerEnabled: false,
+  eventCollectionDataReductionBannerEnabled: true,
+
+  /** Enables new Data View Picker */
+  newDataViewPickerEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

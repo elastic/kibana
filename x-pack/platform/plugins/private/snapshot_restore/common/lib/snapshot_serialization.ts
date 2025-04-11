@@ -8,6 +8,7 @@
 import { sortBy } from 'lodash';
 import { flow, map, flatten, uniq } from 'lodash/fp';
 
+import type { SlmRetention } from '@elastic/elasticsearch/lib/api/types';
 import {
   SnapshotDetails,
   SnapshotDetailsEs,
@@ -175,9 +176,7 @@ export function serializeSnapshotConfig(snapshotConfig: SnapshotConfig): Snapsho
   }, {});
 }
 
-export function deserializeSnapshotRetention(
-  snapshotRetentionEs: SnapshotRetentionEs
-): SnapshotRetention {
+export function deserializeSnapshotRetention(snapshotRetentionEs: SlmRetention): SnapshotRetention {
   const {
     expire_after: expireAfter,
     max_count: maxCount,
@@ -213,7 +212,7 @@ export function deserializeSnapshotRetention(
 
 export function serializeSnapshotRetention(
   snapshotRetention: SnapshotRetention
-): SnapshotRetentionEs | undefined {
+): SlmRetention | undefined {
   const { expireAfterValue, expireAfterUnit, minCount, maxCount } = snapshotRetention;
 
   const snapshotRetentionEs: SnapshotRetentionEs = {

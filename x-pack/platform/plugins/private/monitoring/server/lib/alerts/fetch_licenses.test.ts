@@ -60,7 +60,7 @@ describe('fetchLicenses', () => {
     const clusters = [{ clusterUuid, clusterName }];
     await fetchLicenses(esClient, clusters);
     const params = esClient.search.mock.calls[0][0] as any;
-    expect(params?.body?.query.bool.filter[0].terms.cluster_uuid).toEqual([clusterUuid]);
+    expect(params?.query.bool.filter[0].terms.cluster_uuid).toEqual([clusterUuid]);
   });
 
   it('should limit the time period in the query', async () => {
@@ -68,7 +68,7 @@ describe('fetchLicenses', () => {
     const clusters = [{ clusterUuid, clusterName }];
     await fetchLicenses(esClient, clusters);
     const params = esClient.search.mock.calls[0][0] as any;
-    expect(params?.body?.query.bool.filter[2].range.timestamp.gte).toBe('now-2m');
+    expect(params?.query.bool.filter[2].range.timestamp.gte).toBe('now-2m');
   });
   it('should call ES with correct query', async () => {
     const esClient = elasticsearchServiceMock.createScopedClusterClient().asCurrentUser;
@@ -89,33 +89,31 @@ describe('fetchLicenses', () => {
         'hits.hits._source.elasticsearch.cluster.id',
         'hits.hits._index',
       ],
-      body: {
-        size: 1,
-        sort: [{ timestamp: { order: 'desc', unmapped_type: 'long' } }],
-        query: {
-          bool: {
-            filter: [
-              { terms: { cluster_uuid: ['clusterA'] } },
-              {
-                bool: {
-                  should: [
-                    { term: { type: 'cluster_stats' } },
-                    { term: { 'metricset.name': 'cluster_stats' } },
-                    {
-                      term: {
-                        'data_stream.dataset': 'elasticsearch.stack_monitoring.cluster_stats',
-                      },
+      size: 1,
+      sort: [{ timestamp: { order: 'desc', unmapped_type: 'long' } }],
+      query: {
+        bool: {
+          filter: [
+            { terms: { cluster_uuid: ['clusterA'] } },
+            {
+              bool: {
+                should: [
+                  { term: { type: 'cluster_stats' } },
+                  { term: { 'metricset.name': 'cluster_stats' } },
+                  {
+                    term: {
+                      'data_stream.dataset': 'elasticsearch.stack_monitoring.cluster_stats',
                     },
-                  ],
-                  minimum_should_match: 1,
-                },
+                  },
+                ],
+                minimum_should_match: 1,
               },
-              { range: { timestamp: { gte: 'now-2m' } } },
-            ],
-          },
+            },
+            { range: { timestamp: { gte: 'now-2m' } } },
+          ],
         },
-        collapse: { field: 'cluster_uuid' },
       },
+      collapse: { field: 'cluster_uuid' },
     });
   });
   it('should call ES with correct query  when ccs disabled', async () => {

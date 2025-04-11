@@ -20,10 +20,20 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('GET internal/cloud_security_posture/rules/_find', () => {
     let agentPolicyId: string;
+    const savedObjects = [
+      'ingest-agent-policies',
+      'fleet-agent-policies',
+      'ingest-package-policies',
+      'fleet-package-policies',
+      'cloud-security-posture-settings',
+    ];
+
+    before(async () => {
+      await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+    });
 
     beforeEach(async () => {
-      await kibanaServer.savedObjects.cleanStandardList();
-      await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+      await kibanaServer.savedObjects.clean({ types: savedObjects });
 
       const { body: agentPolicyResponse } = await supertest
         .post(`/api/fleet/agent_policies`)
@@ -98,7 +108,10 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     afterEach(async () => {
-      await kibanaServer.savedObjects.cleanStandardList();
+      await kibanaServer.savedObjects.clean({ types: savedObjects });
+    });
+
+    after(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
     });
 

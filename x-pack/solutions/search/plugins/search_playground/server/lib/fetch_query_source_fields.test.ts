@@ -493,20 +493,18 @@ describe('fetch_query_source_fields', () => {
       await fetchFields(client, indices);
       expect(client.asCurrentUser.search).toHaveBeenCalledWith({
         index: 'search-example-main',
-        body: {
-          size: 0,
-          aggs: {
-            'page_content_e5_embbeding.model_id': {
-              terms: {
-                field: 'page_content_e5_embbeding.model_id.keyword',
-                size: 1,
-              },
+        size: 0,
+        aggs: {
+          'page_content_e5_embbeding.model_id': {
+            terms: {
+              field: 'page_content_e5_embbeding.model_id.keyword',
+              size: 1,
             },
-            'page_content_ner.model_id': {
-              terms: {
-                field: 'page_content_ner.model_id',
-                size: 1,
-              },
+          },
+          'page_content_ner.model_id': {
+            terms: {
+              field: 'page_content_ner.model_id',
+              size: 1,
             },
           },
         },
@@ -531,14 +529,12 @@ describe('fetch_query_source_fields', () => {
       const response = await fetchFields(client, indices);
       expect(client.asCurrentUser.search).toHaveBeenCalledWith({
         index: 'search-test-e5',
-        body: {
-          size: 0,
-          aggs: {
-            'ml.inference.body_content.model_id': {
-              terms: {
-                field: 'ml.inference.body_content.model_id.enum',
-                size: 1,
-              },
+        size: 0,
+        aggs: {
+          'ml.inference.body_content.model_id': {
+            terms: {
+              field: 'ml.inference.body_content.model_id.enum',
+              size: 1,
             },
           },
         },
@@ -579,14 +575,12 @@ describe('fetch_query_source_fields', () => {
       await fetchFields(client, indices);
       expect(client.asCurrentUser.search).toHaveBeenCalledWith({
         index: 'index',
-        body: {
-          size: 0,
-          aggs: {
-            model_id: {
-              terms: {
-                field: 'model_id.keyword',
-                size: 1,
-              },
+        size: 0,
+        aggs: {
+          model_id: {
+            terms: {
+              field: 'model_id.keyword',
+              size: 1,
             },
           },
         },

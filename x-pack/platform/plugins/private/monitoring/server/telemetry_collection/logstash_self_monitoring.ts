@@ -6,7 +6,7 @@
  */
 
 import { ElasticsearchClient } from '@kbn/core/server';
-import type * as estypes from '@elastic/elasticsearch/lib/api/types';
+import type { estypes } from '@elastic/elasticsearch';
 import { createQuery } from './create_query';
 import { mapToList } from './get_high_level_stats';
 import { incrementByKey } from './get_high_level_stats';
@@ -103,7 +103,7 @@ export class LogstashSelfMonitoring implements LogstashMonitoring {
         clusters[clusterUuid].versions = mapToList(a, 'version');
 
         // Internal Collection has no agent field, so default to 'internal_collection'
-        const thisCollectionType = hit._source?.agent?.type || 'internal_collection';
+        const thisCollectionType = 'internal_collection';
         if (!Object.hasOwn(clusterStats, 'collection_types')) {
           clusterStats.collection_types = {};
         }

@@ -12,8 +12,7 @@ import {
   ApmSynthtraceKibanaClient,
 } from '@kbn/apm-synthtrace';
 import { ToolingLog } from '@kbn/tooling-log';
-import { isPromise } from 'util/types';
-import { Logger } from '@kbn/apm-synthtrace/src/lib/utils/create_logger';
+import { extendToolingLog } from '@kbn/apm-synthtrace';
 import { Client } from '@elastic/elasticsearch';
 
 export interface SynthtraceEsClients {
@@ -31,29 +30,7 @@ export async function setupSynthtrace({
   client: Client;
   target: string;
 }): Promise<SynthtraceEsClients> {
-  const logger: Logger = {
-    debug: (...args) => log.debug(...args),
-    info: (...args) => log.info(...args),
-    error: (...args) => log.error(args.map((arg) => arg.toString()).join(' ')),
-    perf: (name, cb) => {
-      const now = performance.now();
-
-      const result = cb();
-
-      function measure() {
-        const after = performance.now();
-        log.debug(`[${name}] took ${after - now} ms`);
-      }
-
-      if (isPromise(result)) {
-        result.finally(measure);
-      } else {
-        measure();
-      }
-
-      return result;
-    },
-  };
+  const logger = extendToolingLog(log);
   const kibanaClient = new ApmSynthtraceKibanaClient({
     target,
     logger,

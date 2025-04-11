@@ -10,11 +10,12 @@ import { i18n } from '@kbn/i18n';
 import { EuiProgress, EuiText } from '@elastic/eui';
 import { ES_FIELD_TYPES } from '@kbn/data-plugin/public';
 import { getDataViewsService } from '../kibana_services';
-import { GeoUploadForm, OnFileSelectParameters } from './geo_upload_form';
+import type { OnFileSelectParameters } from './geo_upload_form';
+import { GeoUploadForm } from './geo_upload_form';
 import { ImportCompleteView } from './import_complete_view';
 import type { FileUploadComponentProps, FileUploadGeoResults } from '../lazy_load_bundle';
-import { ImportResults } from '../importer';
-import { GeoFileImporter } from '../importer/geo';
+import type { ImportResults } from '../importer';
+import type { GeoFileImporter } from '../importer/geo';
 import { hasImportPermission } from '../api';
 import { getPartialImportMessage } from './utils';
 
@@ -109,10 +110,7 @@ export class GeoUploadWizard extends Component<FileUploadComponentProps, State> 
         },
       },
     };
-    const ingestPipeline = {
-      description: '',
-      processors: [],
-    };
+
     this.setState({
       importStatus: i18n.translate('xpack.fileUpload.geoUploadWizard.dataIndexingStarted', {
         defaultMessage: 'Creating index: {indexName}',
@@ -125,7 +123,7 @@ export class GeoUploadWizard extends Component<FileUploadComponentProps, State> 
       this.state.indexName,
       {},
       mappings,
-      ingestPipeline
+      []
     );
     if (!this._isMounted) {
       return;
@@ -147,9 +145,8 @@ export class GeoUploadWizard extends Component<FileUploadComponentProps, State> 
     });
     this._geoFileImporter.setSmallChunks(this.state.smallChunks);
     const importResults = await this._geoFileImporter.import(
-      initializeImportResp.id,
       this.state.indexName,
-      initializeImportResp.pipelineId,
+      initializeImportResp.pipelineIds[0],
       (progress) => {
         if (this._isMounted) {
           this.setState({

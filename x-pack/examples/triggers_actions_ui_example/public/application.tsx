@@ -9,7 +9,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { QueryClient } from '@tanstack/react-query';
-import { EuiPage, EuiTitle, EuiText, EuiSpacer, EuiButton } from '@elastic/eui';
+import { EuiPage, EuiTitle, EuiText, EuiSpacer } from '@elastic/eui';
 import { AppMountParameters, CoreStart, ScopedHistory } from '@kbn/core/public';
 import { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
@@ -22,6 +22,9 @@ import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { CREATE_RULE_ROUTE, EDIT_RULE_ROUTE, RuleForm } from '@kbn/response-ops-rule-form';
+import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import { TriggersActionsUiExamplePublicStartDeps } from './plugin';
 
 import { Page } from './components/page';
@@ -37,6 +40,7 @@ import { RuleStatusDropdownSandbox } from './components/rule_status_dropdown_san
 import { RuleStatusFilterSandbox } from './components/rule_status_filter_sandbox';
 import { AlertsTableSandbox } from './components/alerts_table_sandbox';
 import { RulesSettingsLinkSandbox } from './components/rules_settings_link_sandbox';
+import { TaskWithApiKeySandbox } from './components/task_with_api_key_sandbox';
 
 export interface TriggersActionsUiExampleComponentParams {
   http: CoreStart['http'];
@@ -54,6 +58,9 @@ export interface TriggersActionsUiExampleComponentParams {
   dataViews: DataViewsPublicPluginStart;
   dataViewsEditor: DataViewEditorStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
+  fieldFormats: FieldFormatsStart;
+  licensing: LicensingPluginStart;
+  fieldsMetadata: FieldsMetadataPublicStart;
 }
 
 const TriggersActionsUiExampleApp = ({
@@ -68,6 +75,8 @@ const TriggersActionsUiExampleApp = ({
   charts,
   dataViews,
   unifiedSearch,
+  fieldFormats,
+  licensing,
   ...startServices
 }: TriggersActionsUiExampleComponentParams) => {
   return (
@@ -169,7 +178,17 @@ const TriggersActionsUiExampleApp = ({
             path="/alerts_table"
             render={() => (
               <Page title="Alerts Table">
-                <AlertsTableSandbox triggersActionsUi={triggersActionsUi} />
+                <AlertsTableSandbox
+                  services={{
+                    data,
+                    http,
+                    notifications,
+                    fieldFormats,
+                    application,
+                    licensing,
+                    settings,
+                  }}
+                />
               </Page>
             )}
           />
@@ -235,53 +254,7 @@ const TriggersActionsUiExampleApp = ({
             path="/task_manager_with_api_key"
             render={() => (
               <Page title="Task Manager with API Key">
-                <div>
-                  <div>
-                    <EuiButton
-                      onClick={() => {
-                        http.post('/api/alerting/schedule_task_with_api_key/task1');
-                      }}
-                    >
-                      Schedule Task 1
-                    </EuiButton>
-                  </div>
-                  <div>
-                    <EuiButton
-                      onClick={() => {
-                        http.post('/api/alerting/schedule_task_with_api_key/task2');
-                      }}
-                    >
-                      Schedule Task 2
-                    </EuiButton>
-                  </div>
-                  <div>
-                    <EuiButton
-                      onClick={() => {
-                        http.post('/api/alerting/remove_task_with_api_key/task1');
-                      }}
-                    >
-                      Remove Task 1
-                    </EuiButton>
-                    <EuiButton
-                      onClick={() => {
-                        http.post('/api/alerting/remove_task_with_api_key/task2');
-                      }}
-                    >
-                      Remove Task 2
-                    </EuiButton>
-                  </div>
-                  <div>
-                    <EuiButton
-                      onClick={() => {
-                        http.post('/api/alerting/bulk_remove_task_with_api_key', {
-                          body: JSON.stringify({ ids: ['task1', 'task2'] }),
-                        });
-                      }}
-                    >
-                      Remove All Tasks
-                    </EuiButton>
-                  </div>
-                </div>
+                <TaskWithApiKeySandbox http={http} />
               </Page>
             )}
           />
@@ -321,6 +294,9 @@ export const renderApp = (
               dataViews={deps.dataViews}
               dataViewsEditor={deps.dataViewsEditor}
               unifiedSearch={deps.unifiedSearch}
+              fieldFormats={deps.fieldFormats}
+              licensing={deps.licensing}
+              fieldsMetadata={deps.fieldsMetadata}
               {...core}
             />
           </IntlProvider>

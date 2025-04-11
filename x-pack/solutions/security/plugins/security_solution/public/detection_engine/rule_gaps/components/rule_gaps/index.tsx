@@ -24,6 +24,7 @@ import {
   EuiText,
   EuiHealth,
   EuiSuperDatePicker,
+  EuiTextColor,
 } from '@elastic/eui';
 import { useUserData } from '../../../../detections/components/user_info';
 import { hasUserCRUDPermission } from '../../../../common/utils/privileges';
@@ -182,10 +183,12 @@ export const RuleGaps = ({ ruleId, enabled }: { ruleId: string; enabled: boolean
     sortOrder: sort.direction,
   });
 
+  const totalItemCount = data?.total ?? 0;
+  const MaxItemCount = 10000;
   const pagination = {
     pageIndex,
     pageSize,
-    totalItemCount: data?.total ?? 0,
+    totalItemCount: Math.min(totalItemCount, MaxItemCount),
   };
 
   const columns = getGapsTableColumns(hasCRUDPermissions, ruleId, enabled);
@@ -269,7 +272,15 @@ export const RuleGaps = ({ ruleId, enabled }: { ruleId: string; enabled: boolean
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiFlexGroup justifyContent="flexEnd">
+      <EuiFlexGroup justifyContent="spaceBetween">
+        <EuiFlexItem grow={false}>
+          {totalItemCount > MaxItemCount && (
+            <EuiTextColor color="danger">
+              {i18n.GAPS_TABLE_TOTAL_GAPS_LABEL(totalItemCount, MaxItemCount)}
+            </EuiTextColor>
+          )}
+        </EuiFlexItem>
+
         <EuiFlexItem grow={false}>
           {timelines.getLastUpdated({
             showUpdating: isLoading,

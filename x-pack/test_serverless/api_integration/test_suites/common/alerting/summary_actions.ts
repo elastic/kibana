@@ -26,6 +26,7 @@ import {
   SPACE_IDS,
   TAGS,
   ALERT_PREVIOUS_ACTION_GROUP,
+  ALERT_PENDING_RECOVERED_COUNT,
 } from '@kbn/rule-data-utils';
 import { omit, padStart } from 'lodash';
 import { FtrProviderContext } from '../../../ftr_provider_context';
@@ -216,6 +217,7 @@ export default function ({ getService }: FtrProviderContext) {
         [ALERT_RULE_UUID]: ruleId,
         [SPACE_IDS]: ['default'],
         [TAGS]: [],
+        [ALERT_PENDING_RECOVERED_COUNT]: 0,
       });
     });
 
@@ -350,6 +352,7 @@ export default function ({ getService }: FtrProviderContext) {
         [ALERT_RULE_UUID]: ruleId,
         [SPACE_IDS]: ['default'],
         [TAGS]: [],
+        [ALERT_PENDING_RECOVERED_COUNT]: 0,
       });
     });
 
@@ -573,6 +576,7 @@ export default function ({ getService }: FtrProviderContext) {
         [ALERT_RULE_UUID]: ruleId,
         [SPACE_IDS]: ['default'],
         [TAGS]: [],
+        [ALERT_PENDING_RECOVERED_COUNT]: 0,
       });
     });
   });

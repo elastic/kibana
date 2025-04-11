@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import type { Story } from '@storybook/react';
+import type { StoryFn } from '@storybook/react';
 import { TestProvider } from '@kbn/expandable-flyout/src/test/provider';
 import { EntityType } from '../../../../common/search_strategy';
 import { StorybookProviders } from '../../../common/mock/storybook_providers';
@@ -18,7 +18,7 @@ export default {
   title: 'Components/FlyoutRiskSummary',
 };
 
-export const Default: Story<void> = () => {
+export const Default: StoryFn = () => {
   return (
     <StorybookProviders>
       <TestProvider>
@@ -37,7 +37,7 @@ export const Default: Story<void> = () => {
   );
 };
 
-export const LinkEnabledInPreviewMode: Story<void> = () => {
+export const LinkEnabledInPreviewMode: StoryFn = () => {
   return (
     <StorybookProviders>
       <TestProvider>
@@ -57,7 +57,7 @@ export const LinkEnabledInPreviewMode: Story<void> = () => {
   );
 };
 
-export const LinkDisabled: Story<void> = () => {
+export const LinkDisabled: StoryFn = () => {
   return (
     <StorybookProviders>
       <TestProvider>

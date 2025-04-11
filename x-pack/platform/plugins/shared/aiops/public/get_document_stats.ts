@@ -7,7 +7,7 @@
 
 import { get } from 'lodash';
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 
 import dateMath from '@kbn/datemath';
 import { getExtendedChangePoint, type DocumentCountStats } from '@kbn/aiops-log-rate-analysis';

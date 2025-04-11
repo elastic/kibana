@@ -48,12 +48,7 @@ export const InstallSection: React.FunctionComponent<Props> = ({
       <PlatformSelector
         fullCopyButton={fullCopyButton}
         onCopy={onCopy}
-        linuxCommand={installCommand.linux}
-        macCommand={installCommand.mac}
-        windowsCommand={installCommand.windows}
-        linuxDebCommand={installCommand.deb}
-        linuxRpmCommand={installCommand.rpm}
-        k8sCommand={installCommand.kubernetes}
+        installCommand={installCommand}
         hasK8sIntegration={isK8s === 'IS_KUBERNETES' || isK8s === 'IS_KUBERNETES_MULTIPAGE'}
         cloudSecurityIntegration={cloudSecurityIntegration}
         hasK8sIntegrationMultiPage={isK8s === 'IS_KUBERNETES_MULTIPAGE'}

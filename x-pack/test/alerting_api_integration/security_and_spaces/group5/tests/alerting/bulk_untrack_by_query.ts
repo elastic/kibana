@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
 import { ALERT_STATUS, ALERT_RULE_NAME } from '@kbn/rule-data-utils';
 import { getUrlPrefix, ObjectRemover, getTestRuleData, getEventLog } from '../../../../common/lib';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { UserAtSpaceScenarios } from '../../../scenarios';
 
 const alertAsDataIndex = '.internal.alerts-observability.test.alerts.alerts-default-000001';
@@ -104,7 +104,7 @@ export default function bulkUntrackByQueryTests({ getService }: FtrProviderConte
               hits: { hits: activeAlerts },
             } = await es.search({
               index: alertAsDataIndex,
-              body: { query: { match_all: {} } },
+              query: { match_all: {} },
             });
 
             activeAlerts.forEach((activeAlert: any) => {
@@ -151,7 +151,7 @@ export default function bulkUntrackByQueryTests({ getService }: FtrProviderConte
                   hits: { hits },
                 } = await es.search({
                   index: alertAsDataIndex,
-                  body: { query: { match_all: {} } },
+                  query: { match_all: {} },
                 });
 
                 hits.forEach((alert: any) => {

@@ -6,16 +6,33 @@
  */
 
 import React, { useState, useCallback } from 'react';
-
+import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import { ChartsPluginStart } from '@kbn/charts-plugin/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import { CoreStart } from '@kbn/core/public';
+import { RuleFormFlyout } from '@kbn/response-ops-rule-form/flyout';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { EuiIcon, EuiFlexItem, EuiCard, EuiFlexGroup } from '@elastic/eui';
+import { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 
 import { AlertingExampleComponentParams } from '../application';
 import { ALERTING_EXAMPLE_APP_ID } from '../../common/constants';
 
+type KibanaDeps = {
+  dataViews: DataViewsPublicPluginStart;
+  charts: ChartsPluginStart;
+  data: DataPublicPluginStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
+  fieldsMetadata: FieldsMetadataPublicStart;
+} & CoreStart;
+
 export const CreateAlert = ({
-  triggersActionsUi: { getAddRuleFlyout: AddRuleFlyout },
+  triggersActionsUi: { ruleTypeRegistry, actionTypeRegistry },
 }: Pick<AlertingExampleComponentParams, 'triggersActionsUi'>) => {
   const [ruleFlyoutVisible, setRuleFlyoutVisibility] = useState<boolean>(false);
+
+  const { services } = useKibana<KibanaDeps>();
 
   const onCloseAlertFlyout = useCallback(
     () => setRuleFlyoutVisibility(false),
@@ -34,7 +51,12 @@ export const CreateAlert = ({
       </EuiFlexItem>
       <EuiFlexItem>
         {ruleFlyoutVisible ? (
-          <AddRuleFlyout consumer={ALERTING_EXAMPLE_APP_ID} onClose={onCloseAlertFlyout} />
+          <RuleFormFlyout
+            plugins={{ ...services, ruleTypeRegistry, actionTypeRegistry }}
+            consumer={ALERTING_EXAMPLE_APP_ID}
+            onCancel={onCloseAlertFlyout}
+            onSubmit={onCloseAlertFlyout}
+          />
         ) : null}
       </EuiFlexItem>
     </EuiFlexGroup>

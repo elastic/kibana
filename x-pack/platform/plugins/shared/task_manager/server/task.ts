@@ -7,12 +7,14 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { ObjectType, schema, TypeOf } from '@kbn/config-schema';
+import type { ObjectType, TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 import { isNumber } from 'lodash';
-import { KibanaRequest } from '@kbn/core/server';
+import type { KibanaRequest } from '@kbn/core/server';
 import { isErr, tryAsResult } from './lib/result_type';
-import { Interval, isInterval, parseIntervalAsMillisecond } from './lib/intervals';
-import { DecoratedError } from './task_running';
+import type { Interval } from './lib/intervals';
+import { isInterval, parseIntervalAsMillisecond } from './lib/intervals';
+import type { DecoratedError } from './task_running';
 
 export const DEFAULT_TIMEOUT = '5m';
 
@@ -249,6 +251,12 @@ export interface IntervalSchedule {
   interval: Interval;
 }
 
+export interface TaskUserScope {
+  apiKeyId: string;
+  spaceId?: string;
+  apiKeyCreatedByUser: boolean;
+}
+
 /*
  * A task instance represents all of the data required to store, fetch,
  * and execute a task.
@@ -355,12 +363,20 @@ export interface TaskInstance {
    */
   partition?: number;
 
+  /**
+   * Used to allow tasks to be scoped to a user via their API key
+   */
+  apiKey?: string;
+
+  /**
+   * Meta data related to the API key associated with this task
+   */
+  userScope?: TaskUserScope;
+
   /*
    * Optionally override the priority defined in the task type for this specific task instance
    */
   priority?: TaskPriority;
-
-  apiKey?: string;
 
   invalidateApiKey?: boolean;
 }
@@ -496,7 +512,7 @@ export type SerializedConcreteTaskInstance = Omit<
   runAt: string;
   partition?: number;
   apiKey?: string;
-  invalidateApiKey?: boolean;
+  userScope?: TaskUserScope;
 };
 
 export type PartialSerializedConcreteTaskInstance = Partial<SerializedConcreteTaskInstance> & {
@@ -505,7 +521,6 @@ export type PartialSerializedConcreteTaskInstance = Partial<SerializedConcreteTa
 
 export interface ApiKeyOptions {
   request?: KibanaRequest;
-  apiKey?: string;
 }
 
 export type ScheduleOptions = Record<string, unknown> & ApiKeyOptions;

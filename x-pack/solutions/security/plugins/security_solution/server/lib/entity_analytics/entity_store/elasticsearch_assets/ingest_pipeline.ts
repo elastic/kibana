@@ -138,20 +138,18 @@ export const createPlatformPipeline = async ({
 
   const pipeline = {
     id: getPlatformPipelineId(description.id),
-    body: {
-      _meta: {
-        managed_by: 'entity_store',
-        managed: true,
-      },
-      description: `Ingest pipeline for entity definition ${description.id}`,
-      processors: buildIngestPipeline({
-        namespace: options.namespace,
-        description,
-        version: description.version,
-        allEntityFields,
-        debugMode,
-      }),
+    _meta: {
+      managed_by: 'entity_store',
+      managed: true,
     },
+    description: `Ingest pipeline for entity definition ${description.id}`,
+    processors: buildIngestPipeline({
+      namespace: options.namespace,
+      description,
+      version: description.version,
+      allEntityFields,
+      debugMode,
+    }),
   };
 
   logger.debug(`Attempting to create pipeline: ${JSON.stringify(pipeline)}`);

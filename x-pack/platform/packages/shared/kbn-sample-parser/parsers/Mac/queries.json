@@ -1,0 +1,457 @@
+{
+  "queries": [
+    {
+      "id": "startup_delay_hci_reset",
+      "title": "Startup Delay HCI Reset",
+      "description": "Returns log messages related to BroadcomBluetoothHostController SetupController delaying HCI reset.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "BroadcomBluetoothHostController SetupController Delay HCI Reset",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "startup_completed_matched_device",
+      "title": "Startup Completed Matched Device",
+      "description": "Returns log messages related to BroadcomBluetoothHostControllerUSBTransport start completed and matched on device.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "BroadcomBluetoothHostControllerUSBTransport start Completed matched on Device",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "startup_calling_register_service",
+      "title": "Startup Calling Register Service",
+      "description": "Returns log messages related to IOBluetoothFamily calling registerService during ProcessBluetoothTransportShowsUpActionWL.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "IOBluetoothFamily ProcessBluetoothTransportShowsUpActionWL calling registerService",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "startup_connected_transport_successfully",
+      "title": "Startup Connected to Transport Successfully",
+      "description": "Returns log messages related to IOBluetoothFamily successfully connecting to the transport during ProcessBluetoothTransportShowsUpActionWL.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "IOBluetoothFamily ProcessBluetoothTransportShowsUpActionWL Connected to the transport successfully",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "startup_completed_result_true",
+      "title": "Startup Completed Result TRUE",
+      "description": "Returns log messages related to IOBluetoothHostControllerUSBTransport start completed with result TRUE.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "IOBluetoothHostControllerUSBTransport start completed result TRUE",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "init_host_controller_published",
+      "title": "INIT Host Controller Published",
+      "description": "Returns log messages related to the initialization of the host controller being published.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "INIT Host controller is published",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "error_import_bailout",
+      "title": "Error Import Bailout",
+      "description": "Returns log messages related to ImportBailout error asking to exit for Diskarb.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "ImportBailout.Error Asked to exit for Diskarb",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "warning_sdef_argument",
+      "title": "Warning SDEF Argument",
+      "description": "Returns log messages related to sdef warning for argument of command in Microsoft Word Suite.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "sdef warning for argument of command can continue previous list in suite Microsoft Word Suite is not a valid type name",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "warning_dns_config_service",
+      "title": "Warning DNS Config Service",
+      "description": "Returns log messages related to DNS config service posix failing to read DnsConfig.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "WARNING dns_config_service_posix.cc Failed to read DnsConfig",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "error_bluetooth_hid_device_controller",
+      "title": "Error Bluetooth HID Device Controller",
+      "description": "Returns log messages related to BluetoothHIDDeviceController error of not finding the disconnected object.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "BluetoothHIDDeviceController ERROR Could not find the disconnected object",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "error_carddavplugin_offline",
+      "title": "Error CardDAVPlugin Offline",
+      "description": "Returns log messages related to CardDAVPlugin error indicating the internet connection appears to be offline.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "CardDAVPlugin-ERROR getPrincipalInfo Error Domain NSURLErrorDomain Code The Internet connection appears to be offline",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "error_carddavplugin_timeout",
+      "title": "Error CardDAVPlugin Timeout",
+      "description": "Returns log messages related to CardDAVPlugin error indicating the request timed out.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "CardDAVPlugin-ERROR getPrincipalInfo Error Domain NSURLErrorDomain Code The request timed out",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "error_apple_device_management_hid_event_service",
+      "title": "Error Apple Device Management HID Event Service",
+      "description": "Returns log messages related to AppleDeviceManagementHIDEventService error of not making a string from connection notification key.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "HID ATC Error AppleDeviceManagementHIDEventService start Could not make a string from out connection notification key",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "error_timed_out",
+      "title": "Error Timed Out",
+      "description": "Returns log messages related to errors indicating a timeout.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "regexp": {
+                "message": ".*ERROR.*timed out after.*"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "error_media_validator_unrecognized_codec",
+      "title": "Error Media Validator Unrecognized Codec",
+      "description": "Returns log messages related to MediaValidator unrecognized codec failing codec specific check.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "MediaValidator Unrecognized codec Failed codec specific check",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "error_media_validator_lookup_codec_support",
+      "title": "Error Media Validator Lookup Codec Support",
+      "description": "Returns log messages related to MediaValidator mv_LookupCodecSupport unrecognized codec.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "MediaValidator mv_LookupCodecSupport Unrecognized codec",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "error_daemon_connection_invalidated",
+      "title": "Error Daemon Connection Invalidated",
+      "description": "Returns log messages related to daemon connection being invalidated.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "Daemon connection invalidated",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "error_db_no_such_table",
+      "title": "Error DB No Such Table",
+      "description": "Returns log messages related to database error indicating no such table.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "DB Error no such table",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "error_core_drag_remove_receive_handler",
+      "title": "Error Core Drag Remove Receive Handler",
+      "description": "Returns log messages related to error in CoreDragRemoveReceiveHandler.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "Error in CoreDragRemoveReceiveHandler",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "error_core_drag_remove_tracking_handler",
+      "title": "Error Core Drag Remove Tracking Handler",
+      "description": "Returns log messages related to error in CoreDragRemoveTrackingHandler.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "Error in CoreDragRemoveTrackingHandler",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "error_iconservicesagent",
+      "title": "Error IconServicesAgent",
+      "description": "Returns log messages related to error returned from iconservicesagent.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "Error returned from iconservicesagent",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "error_service_exited_abnormal_code",
+      "title": "Error Service Exited Abnormal Code",
+      "description": "Returns log messages related to service exiting with abnormal code.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "Service exited with abnormal code",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "warning_hibernate_page_list_setall",
+      "title": "Warning Hibernate Page List SetAll",
+      "description": "Returns log messages related to hibernate_page_list_setall skipping xpmapped pages.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "WARNING hibernate_page_list_setall skipped xpmapped pages",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "warning_type1_font_data",
+      "title": "Warning Type1 Font Data",
+      "description": "Returns log messages related to Type1 font data not being in the correct format required by the Adobe Type Font Format specification.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "WARNING Type1 font data isn't in the correct format required by the Adobe Type Font Format specification",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

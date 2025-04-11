@@ -12,6 +12,7 @@ import type { IToasts } from '@kbn/core-notifications-browser';
 import { i18n } from '@kbn/i18n';
 import { useCallback } from 'react';
 import { ReadKnowledgeBaseResponse } from '@kbn/elastic-assistant-common';
+import { InstallationStatus } from '@kbn/product-doc-base-plugin/common/install_status';
 import { getKnowledgeBaseStatus } from './api';
 
 const KNOWLEDGE_BASE_STATUS_QUERY_KEY = ['elastic-assistant', 'knowledge-base-status'];
@@ -38,7 +39,10 @@ export const useKnowledgeBaseStatus = ({
   resource,
   toasts,
   enabled,
-}: UseKnowledgeBaseStatusParams): UseQueryResult<ReadKnowledgeBaseResponse, IHttpFetchError> => {
+}: UseKnowledgeBaseStatusParams): UseQueryResult<
+  ReadKnowledgeBaseResponse & { product_documentation_status: InstallationStatus },
+  IHttpFetchError
+> => {
   return useQuery(
     KNOWLEDGE_BASE_STATUS_QUERY_KEY,
     async ({ signal }) => {
@@ -49,7 +53,10 @@ export const useKnowledgeBaseStatus = ({
       retry: false,
       keepPreviousData: true,
       // Polling interval for Knowledge Base setup in progress
-      refetchInterval: (data) => (data?.is_setup_in_progress ? 30000 : false),
+      refetchInterval: (data) =>
+        data?.is_setup_in_progress || data?.product_documentation_status === 'installing'
+          ? 30000
+          : false,
       // Deprecated, hoist to `queryCache` w/in `QueryClient. See: https://stackoverflow.com/a/76961109
       onError: (error: IHttpFetchError<ResponseErrorBody>) => {
         if (error.name !== 'AbortError') {
@@ -79,7 +86,7 @@ export const useInvalidateKnowledgeBaseStatus = () => {
 
   return useCallback(() => {
     queryClient.invalidateQueries(KNOWLEDGE_BASE_STATUS_QUERY_KEY, {
-      refetchType: 'active',
+      refetchType: 'all',
     });
   }, [queryClient]);
 };
@@ -93,8 +100,6 @@ export const useInvalidateKnowledgeBaseStatus = () => {
  */
 export const isKnowledgeBaseSetup = (kbStatus: ReadKnowledgeBaseResponse | undefined): boolean =>
   (kbStatus?.elser_exists &&
-    kbStatus?.index_exists &&
-    kbStatus?.pipeline_exists &&
     // Allows to use UI while importing Security Labs docs
     (kbStatus?.security_labs_exists ||
       kbStatus?.is_setup_in_progress ||

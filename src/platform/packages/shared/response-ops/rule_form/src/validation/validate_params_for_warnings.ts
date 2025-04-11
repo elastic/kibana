@@ -10,7 +10,7 @@
 import { i18n } from '@kbn/i18n';
 import Mustache from 'mustache';
 import { some } from 'lodash';
-import { ActionVariable, RuleActionParam } from '@kbn/alerting-types';
+import type { ActionVariable, RuleActionParam } from '@kbn/alerting-types';
 
 const publicUrlWarning = i18n.translate('responseOpsRuleForm.ruleForm.actionsForm.publicBaseUrl', {
   defaultMessage:

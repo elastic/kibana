@@ -19,8 +19,8 @@ const rootStreamDefinition: WiredStreamDefinition = {
   ingest: {
     lifecycle: { dsl: {} },
     processing: [],
-    routing: [],
     wired: {
+      routing: [],
       fields: {
         '@timestamp': {
           type: 'date',
@@ -35,7 +35,7 @@ const rootStreamDefinition: WiredStreamDefinition = {
           type: 'keyword',
         },
         'stream.name': {
-          type: 'keyword',
+          type: 'system',
         },
       },
     },
@@ -60,6 +60,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     it('Should not allow processing changes', async () => {
       const body: IngestStreamUpsertRequest = {
         dashboards: [],
+        queries: [],
         stream: {
           ingest: {
             ...rootStreamDefinition.ingest,
@@ -80,17 +81,19 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       const response = await putStream(apiClient, 'logs', body, 400);
       expect(response).to.have.property(
         'message',
-        'Root stream processing rules cannot be changed'
+        'Desired stream state is invalid: Root stream processing rules cannot be changed'
       );
     });
 
     it('Should not allow fields changes', async () => {
       const body: IngestStreamUpsertRequest = {
         dashboards: [],
+        queries: [],
         stream: {
           ingest: {
             ...rootStreamDefinition.ingest,
             wired: {
+              ...rootStreamDefinition.ingest.wired,
               fields: {
                 ...rootStreamDefinition.ingest.wired.fields,
                 'log.level': {
@@ -102,25 +105,32 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         },
       };
       const response = await putStream(apiClient, 'logs', body, 400);
-      expect(response).to.have.property('message', 'Root stream fields cannot be changed');
+      expect(response).to.have.property(
+        'message',
+        'Desired stream state is invalid: Root stream fields cannot be changed'
+      );
     });
 
     it('Should allow routing changes', async () => {
       const body: IngestStreamUpsertRequest = {
         dashboards: [],
+        queries: [],
         stream: {
           ingest: {
             ...rootStreamDefinition.ingest,
-            routing: [
-              {
-                destination: 'logs.gcpcloud',
-                if: {
-                  field: 'cloud.provider',
-                  operator: 'eq',
-                  value: 'gcp',
+            wired: {
+              ...rootStreamDefinition.ingest.wired,
+              routing: [
+                {
+                  destination: 'logs.gcpcloud',
+                  if: {
+                    field: 'cloud.provider',
+                    operator: 'eq',
+                    value: 'gcp',
+                  },
                 },
-              },
-            ],
+              ],
+            },
           },
         },
       };

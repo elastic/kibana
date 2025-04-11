@@ -13,7 +13,7 @@ import type {
   CriticalityLevel,
 } from '../../../../common/entity_analytics/asset_criticality/types';
 import { RISK_SCORING_NORMALIZATION_MAX } from '../risk_score/constants';
-import type { CriticalityValues } from './constants';
+import { type CriticalityValues } from './constants';
 
 /**
  * Retrieves the criticality modifier for a given criticality level.
@@ -82,14 +82,15 @@ const entityTypeByIdField = {
   'host.name': 'host',
   'user.name': 'user',
   'service.name': 'service',
-  'related.entity': 'universal',
 } as const;
 
 export const getImplicitEntityFields = (record: AssetCriticalityUpsertWithDeleted) => {
   const entityType = entityTypeByIdField[record.idField];
   return {
     [entityType]: {
-      asset: { criticality: record.criticalityLevel },
+      asset: {
+        criticality: record.criticalityLevel,
+      },
       name: record.idValue,
     },
   };

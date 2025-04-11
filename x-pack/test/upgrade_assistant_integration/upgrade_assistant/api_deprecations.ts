@@ -8,13 +8,13 @@
 import expect from '@kbn/expect';
 import { expect as expectExpect } from 'expect';
 import { setTimeout as setTimeoutAsync } from 'timers/promises';
-import { UsageCountersSavedObject } from '@kbn/usage-collection-plugin/server';
-import _ from 'lodash';
+import type { UsageCountersSavedObjectAttributes } from '@kbn/usage-collection-plugin/server';
 import type {
   ApiDeprecationDetails,
   DomainDeprecationDetails,
 } from '@kbn/core-deprecations-common';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
+import { USAGE_COUNTERS_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
+import type { FtrProviderContext } from '../../common/ftr_provider_context';
 
 const getApiDeprecations = (allDeprecations: DomainDeprecationDetails[]) => {
   return (
@@ -34,11 +34,24 @@ export default function ({ getService }: FtrProviderContext) {
   const retry = getService('retry');
   const es = getService('es');
 
+  const getDeprecationsCounters = async () => {
+    const should = ['total', 'resolved', 'marked_as_resolved'].map((type) => ({
+      match: { 'usage-counter.counterType': `deprecated_api_call:${type}` },
+    }));
+
+    const { hits } = await es.search<{ 'usage-counter': UsageCountersSavedObjectAttributes }>({
+      index: USAGE_COUNTERS_SAVED_OBJECT_INDEX,
+      query: { bool: { should } },
+    });
+
+    return hits.hits.map((hit) => hit._source!['usage-counter']);
+  };
+
   describe('Kibana API Deprecations', function () {
     // bail on first error in this suite since cases sequentially depend on each other
     this.bail(true);
 
-    before(async () => {
+    before(async function cleanupSoIndices() {
       // await kibanaServer.savedObjects.cleanStandardList();
       await esArchiver.emptyKibanaIndex();
     });
@@ -151,23 +164,29 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('keeps track of all counters via saved objects and core usage counters', async () => {
-      const should = ['total', 'resolved', 'marked_as_resolved'].map((type) => ({
-        match: { 'usage-counter.counterType': `deprecated_api_call:${type}` },
-      }));
-
-      const { hits } = await es.search<{ 'usage-counter': UsageCountersSavedObject }>({
-        index: '.kibana_usage_counters',
-        body: {
-          query: { bool: { should } },
-        },
+      // sleep a little until the usage counter is synced into ES
+      await setTimeoutAsync(3000);
+      await retry.tryForTime(15 * 1000, async () => {
+        const actualUsageCounters = await getDeprecationsCounters();
+        // Kibana might introduce more deprecation counters behind the scenes, so we must make sure our expected ones are there
+        expectedSuiteUsageCounters.forEach((expectedCounter) => {
+          expectExpect(actualUsageCounters).toContainEqual(expectedCounter);
+        });
       });
-
-      expect(hits.hits.length).to.equal(4);
-      const counters = hits.hits.map((hit) => hit._source!['usage-counter']).sort();
-      expectExpect(_.sortBy(counters, 'counterType')).toEqual(expectedSuiteUsageCounters);
     });
 
     it('Does not increment internal origin calls', async () => {
+      const expectedTestUsageCounters = [
+        ...expectedSuiteUsageCounters,
+        {
+          domainId: 'core',
+          counterName: '2023-10-31|get|/api/routing_example/d/versioned_route',
+          counterType: 'deprecated_api_call:total',
+          source: 'server',
+          count: 1,
+        },
+      ];
+
       await supertest
         .get(`/api/routing_example/d/removed_route?elasticInternalOrigin=true`)
         .expect(200);
@@ -179,34 +198,14 @@ export default function ({ getService }: FtrProviderContext) {
       // sleep a little until the usage counter is synced into ES
       await setTimeoutAsync(3000);
       await retry.tryForTime(15 * 1000, async () => {
-        const should = ['total', 'resolved', 'marked_as_resolved'].map((type) => ({
-          match: { 'usage-counter.counterType': `deprecated_api_call:${type}` },
-        }));
-
-        const { hits } = await es.search<{ 'usage-counter': UsageCountersSavedObject }>({
-          index: '.kibana_usage_counters',
-          body: {
-            query: { bool: { should } },
-          },
+        const actualUsageCounters = await getDeprecationsCounters();
+        expectedTestUsageCounters.forEach((expectedCounter) => {
+          expectExpect(actualUsageCounters).toContainEqual(expectedCounter);
         });
-
-        expect(hits.hits.length).to.equal(5);
-        const counters = hits.hits.map((hit) => hit._source!['usage-counter']).sort();
-        expectExpect(_.sortBy(counters, 'counterType')).toEqual(
-          [
-            ...expectedSuiteUsageCounters,
-            {
-              domainId: 'core',
-              counterName: '2023-10-31|get|/api/routing_example/d/versioned_route',
-              counterType: 'deprecated_api_call:total',
-              source: 'server',
-              count: 1,
-            },
-          ].sort()
-        );
       });
     });
-    it('GET /api/upgrade_assistant/status does not return { readyForUpgrade: false } if there are only critical API deprecations', async () => {
+
+    it('Readiness status excludes critical deprecations based on Kibana API usage', async () => {
       /** Throw in another critical deprecation... */
       await supertest.get(`/api/routing_example/d/removed_route`).expect(200);
       // sleep a little until the usage counter is synced into ES
@@ -223,12 +222,18 @@ export default function ({ getService }: FtrProviderContext) {
         2000
       );
       const { body } = await supertest.get(`/api/upgrade_assistant/status`).expect(200);
-      expect(body.readyForUpgrade).to.be(true);
+
+      // There are critical deprecations for Kibana API usage, but we do not
+      // surface them in readiness status
+      expectExpect(body).toEqual({
+        readyForUpgrade: true,
+        details: 'All deprecation warnings have been resolved.',
+      });
     });
   });
 }
 
-const expectedSuiteUsageCounters = [
+const expectedSuiteUsageCounters: UsageCountersSavedObjectAttributes[] = [
   {
     domainId: 'core',
     counterName: 'unversioned|get|/api/routing_example/d/removed_route',

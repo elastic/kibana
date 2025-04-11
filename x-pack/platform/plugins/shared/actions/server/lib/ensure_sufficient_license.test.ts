@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { ActionType } from '../types';
+import type { ActionType } from '../types';
 import { ensureSufficientLicense } from './ensure_sufficient_license';
 
 const sampleActionType: ActionType = {

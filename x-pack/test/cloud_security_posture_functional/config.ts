@@ -67,10 +67,11 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         // `--xpack.fleet.registryUrl=https://localhost:8080`,
         `--xpack.fleet.agents.fleet_server.hosts=["https://ftr.kibana:8220"]`,
         `--xpack.fleet.internal.fleetServerStandalone=true`,
+        `--xpack.fleet.internal.registry.kibanaVersionCheckEnabled=false`,
         // Required for telemetry e2e tests
         `--plugin-path=${resolve(
           __dirname,
-          '../../../test/analytics/plugins/analytics_ftr_helpers'
+          '../../../src/platform/test/analytics/plugins/analytics_ftr_helpers'
         )}`,
       ],
     },

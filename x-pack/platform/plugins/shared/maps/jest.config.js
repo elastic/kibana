@@ -14,4 +14,5 @@ module.exports = {
   collectCoverageFrom: [
     '<rootDir>/x-pack/platform/plugins/shared/maps/{common,public,server}/**/*.{js,ts,tsx}',
   ],
+  setupFiles: ['<rootDir>/x-pack/platform/plugins/shared/maps/jest_setup.ts'],
 };

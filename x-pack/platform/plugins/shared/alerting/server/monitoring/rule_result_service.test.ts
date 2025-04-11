@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { PublicLastRunSetters } from '../types';
-import { RuleResultServiceResults, RuleResultService } from './rule_result_service';
+import type { PublicLastRunSetters } from '../types';
+import type { RuleResultServiceResults } from './rule_result_service';
+import { RuleResultService } from './rule_result_service';
 
 describe('RuleResultService', () => {
   let ruleResultService: RuleResultService;

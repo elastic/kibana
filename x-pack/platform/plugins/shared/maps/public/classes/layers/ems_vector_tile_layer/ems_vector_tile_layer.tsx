@@ -25,6 +25,7 @@ import { isRetina } from '../../../util';
 import { DataRequestContext } from '../../../actions';
 import { EMSTMSSource } from '../../sources/ems_tms_source';
 import { EMSVectorTileStyle } from '../../styles/ems/ems_vector_tile_style';
+import type { SpriteMeta } from '../../sources/ems_tms_source/ems_tms_source';
 
 interface SourceRequestMeta {
   tileLayerId: string;
@@ -33,10 +34,7 @@ interface SourceRequestMeta {
 interface SourceRequestData {
   spriteSheetImageData?: ImageData;
   vectorStyleSheet?: StyleSpecification;
-  spriteMeta?: {
-    png: string;
-    json: EmsSpriteSheet;
-  };
+  spriteMeta?: SpriteMeta;
 }
 
 export class EmsVectorTileLayer extends AbstractLayer {
@@ -400,6 +398,7 @@ export class EmsVectorTileLayer extends AbstractLayer {
     const { operation, percentage } = colorOperation;
 
     const properties = TMSService.transformColorProperties(
+      // @ts-expect-error TMSService is using maplibre 3.1.0 so LayerSpecification type from 5.1.1 does not match
       mbLayer,
       color,
       operation as unknown as blendMode,
@@ -436,8 +435,10 @@ export class EmsVectorTileLayer extends AbstractLayer {
 
     const textProperty =
       locale === AUTOSELECT_EMS_LOCALE
-        ? TMSService.transformLanguageProperty(mbLayer, i18n.getLocale())
-        : TMSService.transformLanguageProperty(mbLayer, locale);
+        ? // @ts-expect-error TMSService is using maplibre 3.1.0 so LayerSpecification type from 5.1.1 does not match
+          TMSService.transformLanguageProperty(mbLayer, i18n.getLocale())
+        : // @ts-expect-error TMSService is using maplibre 3.1.0 so LayerSpecification type from 5.1.1 does not match
+          TMSService.transformLanguageProperty(mbLayer, locale);
     if (textProperty !== undefined) {
       mbMap.setLayoutProperty(mbLayerId, 'text-field', textProperty);
     }

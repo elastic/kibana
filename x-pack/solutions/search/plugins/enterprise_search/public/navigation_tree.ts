@@ -121,16 +121,14 @@ export const getNavigationTreeDefinition = ({
                 {
                   children: [
                     {
-                      breadcrumbStatus:
-                        'hidden' /* management sub-pages set their breadcrumbs themselves */,
                       getIsActive: ({ pathNameSerialized, prepend }) => {
                         return (
                           pathNameSerialized.startsWith(
-                            prepend('/app/management/data/index_management/')
+                            prepend('/app/elasticsearch/index_management/indices')
                           ) || pathNameSerialized.startsWith(prepend('/app/elasticsearch/indices'))
                         );
                       },
-                      link: 'management:index_management',
+                      link: 'elasticsearchIndexManagement',
                     },
                     { link: 'enterpriseSearchContent:connectors' },
                     { link: 'enterpriseSearchContent:webCrawlers' },
@@ -186,6 +184,12 @@ export const getNavigationTreeDefinition = ({
                       },
                       link: 'enterpriseSearchAnalytics',
                       renderAs: 'item',
+                      sideNavStatus: collections?.some((collection) =>
+                        collection.items?.some((item) => item.isSelected)
+                      )
+                        ? 'visible'
+                        : 'hidden',
+
                       ...(collections
                         ? {
                             children: collections.map(euiItemTypeToNodeDefinition),
@@ -204,6 +208,7 @@ export const getNavigationTreeDefinition = ({
                   children: [
                     { link: 'searchInferenceEndpoints:inferenceEndpoints' },
                     { link: 'searchSynonyms:synonyms' },
+                    { link: 'searchQueryRules' },
                   ],
                   id: 'relevance',
                   title: i18n.translate('xpack.enterpriseSearch.searchNav.relevance', {
@@ -233,11 +238,11 @@ export const getNavigationTreeDefinition = ({
               breadcrumbStatus: 'hidden',
               children: [
                 {
-                  link: 'ml:modelManagement',
+                  link: 'management:trained_models',
                   title: i18n.translate(
                     'xpack.enterpriseSearch.searchNav.management.trainedModels',
                     {
-                      defaultMessage: 'Trained models',
+                      defaultMessage: 'Trained Models',
                     }
                   ),
                 },
@@ -276,6 +281,10 @@ export const getNavigationTreeDefinition = ({
                       title: 'Alerts and Insights',
                     },
                     {
+                      children: [{ link: 'management:trained_models' }],
+                      title: 'Machine Learning',
+                    },
+                    {
                       children: [
                         { link: 'management:users' },
                         { link: 'management:roles' },
@@ -306,12 +315,15 @@ export const getNavigationTreeDefinition = ({
                     },
                   ],
                   id: 'stack_management', // This id can't be changed as we use it to open the panel programmatically
-                  link: 'management',
                   renderAs: 'panelOpener',
                   spaceBefore: null,
                   title: i18n.translate('xpack.enterpriseSearch.searchNav.mngt', {
                     defaultMessage: 'Stack Management',
                   }),
+                },
+                {
+                  id: 'monitoring',
+                  link: 'monitoring',
                 },
               ],
               icon: 'gear',

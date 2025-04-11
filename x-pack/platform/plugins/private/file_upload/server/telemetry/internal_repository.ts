@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObjectsServiceStart, ISavedObjectsRepository } from '@kbn/core/server';
+import type { SavedObjectsServiceStart, ISavedObjectsRepository } from '@kbn/core/server';
 
 let internalRepository: ISavedObjectsRepository | null = null;
 export const setInternalRepository = (

@@ -20,17 +20,17 @@ import { css } from '@emotion/react';
 import type { Code, InlineCode, Parent, Text } from 'mdast';
 import React, { useMemo } from 'react';
 import type { Node } from 'unist';
-import type { ContentReferences } from '@kbn/elastic-assistant-common';
 import { customCodeBlockLanguagePlugin } from '../custom_codeblock/custom_codeblock_markdown_plugin';
 import { CustomCodeBlock } from '../custom_codeblock/custom_code_block';
-import { ContentReferenceParser } from '../content_reference/content_reference_parser';
-import { contentReferenceComponentFactory } from '../content_reference/components/content_reference_component_factory';
+import { contentReferenceParser } from '../content_reference/content_reference_parser';
+import type { StreamingOrFinalContentReferences } from '../content_reference/components/content_reference_component_factory';
+import { ContentReferenceComponentFactory } from '../content_reference/components/content_reference_component_factory';
 
 interface Props {
   content: string;
-  contentReferences?: ContentReferences;
+  contentReferences: StreamingOrFinalContentReferences;
   contentReferencesVisible: boolean;
-  contentReferencesEnabled: boolean;
+  contentReferencesDisabled: boolean; // Disables parsing of content references
   index: number;
   loading: boolean;
   ['data-test-subj']?: string;
@@ -105,17 +105,15 @@ const loadingCursorPlugin = () => {
 };
 
 interface GetPluginDependencies {
-  contentReferences?: ContentReferences;
-  loading: boolean;
+  contentReferences: StreamingOrFinalContentReferences;
   contentReferencesVisible: boolean;
-  contentReferencesEnabled: boolean;
+  contentReferencesDisabled: boolean;
 }
 
 const getPluginDependencies = ({
   contentReferences,
   contentReferencesVisible,
-  loading,
-  contentReferencesEnabled,
+  contentReferencesDisabled,
 }: GetPluginDependencies) => {
   const parsingPlugins = getDefaultEuiMarkdownParsingPlugins();
 
@@ -125,20 +123,19 @@ const getPluginDependencies = ({
 
   processingPlugins[1][1].components = {
     ...components,
-    ...(contentReferencesEnabled
-      ? {
-          contentReference: contentReferenceComponentFactory({
-            contentReferences,
-            contentReferencesVisible,
-            loading,
-          }),
-        }
-      : {}),
+    contentReference: (contentReferenceNode) => {
+      return (
+        <ContentReferenceComponentFactory
+          contentReferencesVisible={contentReferencesVisible}
+          contentReferenceNode={contentReferenceNode}
+        />
+      );
+    },
     cursor: Cursor,
     customCodeBlock: (props) => {
       return (
         <>
-          <CustomCodeBlock value={props.value} />
+          <CustomCodeBlock value={props.value} lang={props.lang} />
           <EuiSpacer size="m" />
         </>
       );
@@ -169,7 +166,7 @@ const getPluginDependencies = ({
       loadingCursorPlugin,
       customCodeBlockLanguagePlugin,
       ...parsingPlugins,
-      ...(contentReferencesEnabled ? [ContentReferenceParser] : []),
+      ...(!contentReferencesDisabled ? [contentReferenceParser({ contentReferences })] : []),
     ],
     processingPluginList: processingPlugins,
   };
@@ -180,7 +177,7 @@ export function MessageText({
   content,
   contentReferences,
   contentReferencesVisible,
-  contentReferencesEnabled,
+  contentReferencesDisabled,
   index,
   'data-test-subj': dataTestSubj,
 }: Props) {
@@ -193,10 +190,9 @@ export function MessageText({
       getPluginDependencies({
         contentReferences,
         contentReferencesVisible,
-        contentReferencesEnabled,
-        loading,
+        contentReferencesDisabled,
       }),
-    [contentReferences, contentReferencesVisible, contentReferencesEnabled, loading]
+    [contentReferences, contentReferencesVisible, contentReferencesDisabled]
   );
 
   return (

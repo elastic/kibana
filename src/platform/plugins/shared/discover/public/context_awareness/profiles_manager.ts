@@ -25,7 +25,7 @@ import type {
   DocumentContext,
 } from './profiles';
 import type { ContextWithProfileId } from './profile_service';
-import type { DiscoverEBTManager } from '../services/discover_ebt_manager';
+import type { DiscoverEBTManager } from '../plugin_imports/discover_ebt_manager';
 import type { AppliedProfile } from './composable_profile';
 
 interface SerializedRootProfileParams {

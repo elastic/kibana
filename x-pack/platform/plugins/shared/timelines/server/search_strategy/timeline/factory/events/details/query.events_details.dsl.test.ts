@@ -20,42 +20,40 @@ describe('buildTimelineDetailsQuery', () => {
 
     expect(query).toMatchInlineSnapshot(`
       Object {
+        "_source": true,
         "allow_no_indices": true,
-        "body": Object {
-          "_source": true,
-          "fields": Array [
-            Object {
-              "field": "*",
-              "include_unmapped": true,
-            },
-            Object {
-              "field": "@timestamp",
-              "format": "strict_date_optional_time",
-            },
-            Object {
-              "field": "code_signature.timestamp",
-              "format": "strict_date_optional_time",
-            },
-            Object {
-              "field": "dll.code_signature.timestamp",
-              "format": "strict_date_optional_time",
-            },
-          ],
-          "query": Object {
-            "terms": Object {
-              "_id": Array [
-                "f0a936d50b5b3a5a193d415459c14587fe633f7e519df7b5dc151d56142680e3",
-              ],
-            },
+        "fields": Array [
+          Object {
+            "field": "*",
+            "include_unmapped": true,
           },
-          "runtime_mappings": Object {},
-          "stored_fields": Array [
-            "*",
-          ],
-        },
+          Object {
+            "field": "@timestamp",
+            "format": "strict_date_optional_time",
+          },
+          Object {
+            "field": "code_signature.timestamp",
+            "format": "strict_date_optional_time",
+          },
+          Object {
+            "field": "dll.code_signature.timestamp",
+            "format": "strict_date_optional_time",
+          },
+        ],
         "ignore_unavailable": true,
         "index": ".siem-signals-default",
+        "query": Object {
+          "terms": Object {
+            "_id": Array [
+              "f0a936d50b5b3a5a193d415459c14587fe633f7e519df7b5dc151d56142680e3",
+            ],
+          },
+        },
+        "runtime_mappings": Object {},
         "size": 1,
+        "stored_fields": Array [
+          "*",
+        ],
       }
     `);
   });

@@ -62,7 +62,7 @@ exports[`View policy flyout shows all phases 1`] = `
                       data-test-subj="ilmTimelinePhase-hot"
                     >
                       <div
-                        class="ilmTimeline__colorBar  css-nkokfp"
+                        class="ilmTimeline__colorBar  css-1ppjwir"
                       />
                       <div
                         class="euiFlexGroup emotion-euiFlexGroup-responsive-s-flexStart-center-row"
@@ -88,7 +88,7 @@ exports[`View policy flyout shows all phases 1`] = `
                       data-test-subj="ilmTimelinePhase-warm"
                     >
                       <div
-                        class="ilmTimeline__colorBar css-1gruzq0"
+                        class="ilmTimeline__colorBar css-1rqi1ak"
                       />
                       <div
                         class="euiFlexGroup emotion-euiFlexGroup-responsive-s-flexStart-center-row"
@@ -114,7 +114,7 @@ exports[`View policy flyout shows all phases 1`] = `
                       data-test-subj="ilmTimelinePhase-cold"
                     >
                       <div
-                        class="ilmTimeline__colorBar css-33s0i"
+                        class="ilmTimeline__colorBar css-vpsh6t"
                       />
                       <div
                         class="euiFlexGroup emotion-euiFlexGroup-responsive-s-flexStart-center-row"
@@ -140,7 +140,7 @@ exports[`View policy flyout shows all phases 1`] = `
                       data-test-subj="ilmTimelinePhase-frozen"
                     >
                       <div
-                        class="ilmTimeline__colorBar css-x0nb1a"
+                        class="ilmTimeline__colorBar css-1gluxhr"
                       />
                       <div
                         class="euiFlexGroup emotion-euiFlexGroup-responsive-s-flexStart-center-row"

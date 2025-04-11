@@ -74,18 +74,16 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       await retry.waitForWithTimeout('SLO summary data is deleted', 60 * 1000, async () => {
         const sloSummaryResponseAfterDeletion = await esClient.search({
           index: SUMMARY_DESTINATION_INDEX_PATTERN,
-          body: {
-            query: {
-              bool: {
-                filter: [
-                  {
-                    term: { 'slo.id': id },
-                  },
-                  {
-                    term: { isTempDoc: false },
-                  },
-                ],
-              },
+          query: {
+            bool: {
+              filter: [
+                {
+                  term: { 'slo.id': id },
+                },
+                {
+                  term: { isTempDoc: false },
+                },
+              ],
             },
           },
         });
@@ -98,15 +96,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       await retry.waitForWithTimeout('SLO rollup data is deleted', 60 * 1000, async () => {
         const sloRollupResponseAfterDeletion = await esClient.search({
           index: SLI_DESTINATION_INDEX_PATTERN,
-          body: {
-            query: {
-              bool: {
-                filter: [
-                  {
-                    term: { 'slo.id': id },
-                  },
-                ],
-              },
+          query: {
+            bool: {
+              filter: [
+                {
+                  term: { 'slo.id': id },
+                },
+              ],
             },
           },
         });

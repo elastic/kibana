@@ -8,7 +8,7 @@
  */
 
 import { useCallback, useEffect, useState } from 'react';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import { lastValueFrom } from 'rxjs';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
@@ -17,7 +17,7 @@ import { buildDataTableRecord } from '@kbn/discover-utils';
 import { ElasticRequestState } from '@kbn/unified-doc-viewer';
 import { getUnifiedDocViewerServices } from '../plugin';
 
-type RequestBody = Pick<estypes.SearchRequest, 'body'>;
+type RequestBody = estypes.SearchRequest;
 
 export interface EsDocSearchProps {
   /**
@@ -33,9 +33,9 @@ export interface EsDocSearchProps {
    */
   dataView: DataView;
   /**
-   * Records fetched from text based query
+   * Record fetched from ES|QL query
    */
-  textBasedHits?: DataTableRecord[];
+  esqlHit?: DataTableRecord;
   /**
    * An optional callback that will be called before fetching the doc
    */
@@ -54,7 +54,7 @@ export function useEsDocSearch({
   id,
   index,
   dataView,
-  textBasedHits,
+  esqlHit,
   onBeforeFetch,
   onProcessRecord,
 }: EsDocSearchProps): [ElasticRequestState, DataTableRecord | null, () => void] {
@@ -76,7 +76,7 @@ export function useEsDocSearch({
         data.search.search({
           params: {
             index: dataView.getIndexPattern(),
-            body: buildSearchBody(id, index, dataView)?.body,
+            ...buildSearchBody(id, index, dataView),
           },
         })
       );
@@ -111,16 +111,13 @@ export function useEsDocSearch({
   }, [analytics, data.search, dataView, id, index, onBeforeFetch, onProcessRecord]);
 
   useEffect(() => {
-    if (textBasedHits) {
-      const selectedHit = textBasedHits?.find((r) => r.id === id);
-      if (selectedHit) {
-        setStatus(ElasticRequestState.Found);
-        setHit(selectedHit);
-      }
+    if (esqlHit) {
+      setStatus(ElasticRequestState.Found);
+      setHit(esqlHit);
     } else {
       requestData();
     }
-  }, [id, requestData, textBasedHits]);
+  }, [id, requestData, esqlHit]);
 
   return [status, hit, requestData];
 }
@@ -133,19 +130,17 @@ export function buildSearchBody(id: string, index: string, dataView: DataView): 
   const computedFields = dataView.getComputedFields();
   const runtimeFields = computedFields.runtimeFields as estypes.MappingRuntimeFields;
   const request: RequestBody = {
-    body: {
-      query: {
-        bool: {
-          filter: [{ ids: { values: [id] } }, { term: { _index: index } }],
-        },
+    query: {
+      bool: {
+        filter: [{ ids: { values: [id] } }, { term: { _index: index } }],
       },
-      stored_fields: ['*'],
-      script_fields: computedFields.scriptFields,
-      version: true,
-      _source: true,
-      runtime_mappings: runtimeFields ? runtimeFields : {},
-      fields: [{ field: '*', include_unmapped: true }, ...(computedFields.docvalueFields || [])],
     },
+    stored_fields: ['*'],
+    script_fields: computedFields.scriptFields,
+    version: true,
+    _source: true,
+    runtime_mappings: runtimeFields ? runtimeFields : {},
+    fields: [{ field: '*', include_unmapped: true }, ...(computedFields.docvalueFields || [])],
   };
   return request;
 }

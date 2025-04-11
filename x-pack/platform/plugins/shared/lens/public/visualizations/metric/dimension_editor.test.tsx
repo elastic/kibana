@@ -17,10 +17,12 @@ import { MetricVisualizationState } from './types';
 import {
   DimensionEditor,
   DimensionEditorAdditionalSection,
+  DimensionEditorDataExtraComponent,
   SupportingVisType,
 } from './dimension_editor';
 import { DatasourcePublicAPI } from '../..';
-import { createMockFramePublicAPI, generateActiveData } from '../../mocks';
+import { createMockFramePublicAPI } from '../../mocks';
+import { GROUP_ID } from './constants';
 
 // see https://github.com/facebook/jest/issues/4402#issuecomment-534516219
 const expectCalledBefore = (mock1: jest.Mock, mock2: jest.Mock) =>
@@ -71,21 +73,28 @@ describe('dimension editor', () => {
     trendlineBreakdownByAccessor: 'trendline-breakdown-col-id',
   };
 
-  const nonNumericMetricFrame = createMockFramePublicAPI({
-    activeData: generateActiveData([
-      {
-        id: 'first',
-        rows: Array(3).fill({
-          'metric-col-id': faker.lorem.word(3),
-          'max-col-id': faker.number.int(),
-        }),
-      },
-    ]),
-  });
-
   let props: VisualizationDimensionEditorProps<MetricVisualizationState> & {
     paletteService: PaletteRegistry;
   };
+
+  const getNonNumericDatasource = () =>
+    ({
+      hasDefaultTimeField: jest.fn(() => true),
+      getOperationForColumnId: jest.fn(() => ({
+        hasReducedTimeRange: false,
+        dataType: 'keyword',
+      })),
+    } as unknown as DatasourcePublicAPI);
+
+  const getNumericDatasourceWithArraySupport = () =>
+    ({
+      hasDefaultTimeField: jest.fn(() => true),
+      getOperationForColumnId: jest.fn(() => ({
+        hasReducedTimeRange: false,
+        dataType: 'number',
+        hasArraySupport: true,
+      })),
+    } as unknown as DatasourcePublicAPI);
 
   beforeEach(() => {
     props = {
@@ -97,21 +106,12 @@ describe('dimension editor', () => {
         hasDefaultTimeField: jest.fn(() => true),
         getOperationForColumnId: jest.fn(() => ({
           hasReducedTimeRange: false,
+          dataType: 'number',
         })),
       } as unknown as DatasourcePublicAPI,
       removeLayer: jest.fn(),
       addLayer: jest.fn(),
-      frame: createMockFramePublicAPI({
-        activeData: generateActiveData([
-          {
-            id: 'first',
-            rows: Array(3).fill({
-              'metric-col-id': faker.number.int(),
-              'secondary-metric-col-id': faker.number.int(),
-            }),
-          },
-        ]),
-      }),
+      frame: createMockFramePublicAPI(),
       setState: jest.fn(),
       panelRef: {} as React.MutableRefObject<HTMLDivElement | null>,
       paletteService: chartPluginMock.createPaletteRegistry(),
@@ -177,7 +177,16 @@ describe('dimension editor', () => {
     });
 
     it('Color mode switch is not shown when the primary metric is non-numeric', () => {
-      const { colorModeGroup } = renderPrimaryMetricEditor({ frame: nonNumericMetricFrame });
+      const { colorModeGroup } = renderPrimaryMetricEditor({
+        datasource: getNonNumericDatasource(),
+      });
+      expect(colorModeGroup).not.toBeInTheDocument();
+    });
+
+    it('Color mode switch is not shown when the primary metric is numeric but with array support', () => {
+      const { colorModeGroup } = renderPrimaryMetricEditor({
+        datasource: getNumericDatasourceWithArraySupport(),
+      });
       expect(colorModeGroup).not.toBeInTheDocument();
     });
 
@@ -196,7 +205,7 @@ describe('dimension editor', () => {
       });
       it('is visible when metric is non-numeric even if palette is set', () => {
         const { staticColorPicker } = renderPrimaryMetricEditor({
-          frame: nonNumericMetricFrame,
+          datasource: getNonNumericDatasource(),
           state: { ...metricAccessorState, palette },
         });
         expect(staticColorPicker).toBeInTheDocument();
@@ -394,11 +403,6 @@ describe('dimension editor', () => {
         />
       );
 
-      const selectCollapseBy = async (collapseFn: string) => {
-        const collapseBySelect = screen.getByLabelText(/collapse by/i);
-        await userEvent.selectOptions(collapseBySelect, collapseFn);
-      };
-
       const setMaxCols = async (maxCols: number) => {
         const maxColsInput = screen.getByLabelText(/layout columns/i);
         await userEvent.clear(maxColsInput);
@@ -407,8 +411,18 @@ describe('dimension editor', () => {
 
       return {
         ...rtlRender,
-        selectCollapseBy,
         setMaxCols,
+        rerender: (newOverrides = {}) => {
+          rtlRender.rerender(
+            <DimensionEditor
+              {...props}
+              state={{ ...fullState, breakdownByAccessor: accessor }}
+              accessor={accessor}
+              setState={mockSetState}
+              {...newOverrides}
+            />
+          );
+        },
       };
     }
 
@@ -418,14 +432,6 @@ describe('dimension editor', () => {
       expect(screen.queryByTestId(SELECTORS.SECONDARY_METRIC_EDITOR)).not.toBeInTheDocument();
       expect(screen.queryByTestId(SELECTORS.MAX_EDITOR)).not.toBeInTheDocument();
       expect(screen.queryByTestId(SELECTORS.BREAKDOWN_EDITOR)).toBeInTheDocument();
-    });
-
-    it('supports setting a collapse function', async () => {
-      const { selectCollapseBy } = renderBreakdownEditor();
-      const newCollapseFn = 'min';
-      await selectCollapseBy(newCollapseFn);
-
-      expect(mockSetState).toHaveBeenCalledWith({ ...fullState, collapseFn: newCollapseFn });
     });
 
     it('sets max columns', async () => {
@@ -441,6 +447,71 @@ describe('dimension editor', () => {
       await setMaxCols(3);
       await waitFor(() =>
         expect(mockSetState).toHaveBeenCalledWith(expect.objectContaining({ maxCols: 3 }))
+      );
+    });
+
+    describe('data section', () => {
+      function renderBreakdownEditorDataSection(overrides = {}) {
+        const rtlRender = render(
+          <DimensionEditorDataExtraComponent
+            {...props}
+            groupId={GROUP_ID.BREAKDOWN_BY}
+            state={{ ...fullState, breakdownByAccessor: accessor }}
+            accessor={accessor}
+            setState={mockSetState}
+            {...overrides}
+          />
+        );
+
+        const selectCollapseBy = async (collapseFn: string) => {
+          const collapseBySelect = screen.getByLabelText(/collapse by/i);
+          await userEvent.selectOptions(collapseBySelect, collapseFn);
+        };
+
+        return {
+          ...rtlRender,
+          selectCollapseBy,
+          rerender: (newOverrides = {}) => {
+            rtlRender.rerender(
+              <DimensionEditorDataExtraComponent
+                {...props}
+                groupId={GROUP_ID.BREAKDOWN_BY}
+                state={{ ...fullState, breakdownByAccessor: accessor }}
+                accessor={accessor}
+                setState={mockSetState}
+                {...newOverrides}
+              />
+            );
+          },
+        };
+      }
+
+      it('supports setting a collapse function', async () => {
+        const { selectCollapseBy } = renderBreakdownEditorDataSection();
+        const newCollapseFn = 'min';
+        await selectCollapseBy(newCollapseFn);
+
+        expect(mockSetState).toHaveBeenCalledWith({ ...fullState, collapseFn: newCollapseFn });
+      });
+
+      it('should not display the collapse function if the primary metric is not numeric', async () => {
+        const { rerender, container } = renderBreakdownEditorDataSection({
+          datasource: getNonNumericDatasource(),
+        });
+
+        expect(container).toBeEmptyDOMElement();
+
+        // now rerender with a numeric metric
+        rerender({ datasource: props.datasource });
+        expect(screen.getByLabelText(/collapse by/i)).toBeInTheDocument();
+      });
+
+      it.each([[GROUP_ID.METRIC], [GROUP_ID.SECONDARY_METRIC], [GROUP_ID.MAX]])(
+        'should not render for other group types: %s',
+        async (groupId) => {
+          const { container } = renderBreakdownEditorDataSection({ groupId });
+          expect(container).toBeEmptyDOMElement();
+        }
       );
     });
   });
@@ -571,6 +642,7 @@ describe('dimension editor', () => {
             ...props.datasource,
             getOperationForColumnId: (id: string) => ({
               hasReducedTimeRange: id === stateWOTrend.metricAccessor,
+              dataType: 'number',
             }),
           },
         });
@@ -579,7 +651,7 @@ describe('dimension editor', () => {
 
       it('should not show a trendline button group when primary metric dimension is non-numeric', () => {
         const { container } = renderAdditionalSectionEditor({
-          frame: nonNumericMetricFrame,
+          datasource: getNonNumericDatasource(),
         });
         expect(container).toBeEmptyDOMElement();
       });

@@ -126,7 +126,7 @@ export const createFetchAggregatedIndicators =
       {
         params: {
           index: selectedPatterns,
-          body: searchRequestBody,
+          ...searchRequestBody,
         },
         factoryQueryType: FactoryQueryType.Barchart,
         dateRange: {

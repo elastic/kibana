@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import deepEqual from 'fast-deep-equal';
 import { GridLayoutData, GridPanelData } from '../types';
 
 export const isGridDataEqual = (a?: GridPanelData, b?: GridPanelData) => {
@@ -20,14 +21,16 @@ export const isGridDataEqual = (a?: GridPanelData, b?: GridPanelData) => {
 };
 
 export const isLayoutEqual = (a: GridLayoutData, b: GridLayoutData) => {
-  if (a.length !== b.length) return false;
+  if (!deepEqual(Object.keys(a), Object.keys(b))) return false;
 
   let isEqual = true;
-  for (let rowIndex = 0; rowIndex < a.length && isEqual; rowIndex++) {
-    const rowA = a[rowIndex];
-    const rowB = b[rowIndex];
+  const keys = Object.keys(a); // keys of A are equal to keys of b
+  for (const key of keys) {
+    const rowA = a[key];
+    const rowB = b[key];
 
     isEqual =
+      rowA.order === rowB.order &&
       rowA.title === rowB.title &&
       rowA.isCollapsed === rowB.isCollapsed &&
       Object.keys(rowA.panels).length === Object.keys(rowB.panels).length;
@@ -38,6 +41,7 @@ export const isLayoutEqual = (a: GridLayoutData, b: GridLayoutData) => {
         if (!isEqual) break;
       }
     }
+    if (!isEqual) break;
   }
 
   return isEqual;

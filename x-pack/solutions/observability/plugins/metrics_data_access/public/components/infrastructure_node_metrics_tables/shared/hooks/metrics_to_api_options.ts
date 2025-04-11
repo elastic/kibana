@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { ObjectValues } from '../../../../../common/utility_types';
 import type {
   MetricsExplorerOptions,
@@ -21,7 +21,7 @@ The metrics_explorer endpoint expects a list of the metrics to use, like this:
   { field: 'some.other.metric.field', aggregation: 'min' },
 ]
 
-The API then responds with a series, which is a list of rows (buckets from a date_histogram 
+The API then responds with a series, which is a list of rows (buckets from a date_histogram
 aggregation), where each bucket has this format:
 { metric_0: 99, metric_1: 88 }
 
@@ -29,9 +29,9 @@ For each metric in the request, a key like metric_X is defined, and the number u
 which the metric appeared in the request. So if the metric for 'some.metric.field' is first, it'll
 be mapped to metric_0, but if the code changes and it is now second, it will be mapped to metric_1.
 
-This makes the code that consumes the API response fragile to such re-ordering, the types and 
+This makes the code that consumes the API response fragile to such re-ordering, the types and
 functions in this file are used to reduce this fragility and allowing consuming code to reference
-the metrics by their field names instead. 
+the metrics by their field names instead.
 The returned metricByField object, handles the translation from field name to "index name".
 For example, in the transform function passed to useInfrastructureNodeMetrics it can be used
 to find a field metric like this:

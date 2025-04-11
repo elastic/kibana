@@ -24,20 +24,25 @@ paths:
                 timelineId:
                   type: string
                   nullable: true
+                  example: '15c1929b-0af7-42bd-85a8-56e234cc7c4e'
+                  description: The `savedObjectId` of the Timeline or Timeline template that you’re updating.
                 version:
                   type: string
                   nullable: true
+                  example: 'WzE0LDFd'
+                  description: The version of the Timeline or Timeline template that you’re updating.
                 timeline:
                   $ref: '../model/components.schema.yaml#/components/schemas/SavedTimeline'
+                  description: The timeline object of the Timeline or Timeline template that you’re updating.
       responses:
         '200':
-          description: Indicates that the draft Timeline was successfully created. In the event the user already has a draft Timeline, the existing draft Timeline is cleared and returned.
+          description: Indicates that the Timeline was successfully updated.
           content:
             application/json:
               schema:
                 $ref: '../model/components.schema.yaml#/components/schemas/PersistTimelineResponse'
         '405':
-          description: Indicates that the user does not have the required access to create a draft Timeline.
+          description: Indicates that the user does not have the required access to create a Timeline.
           content:
             application/json:
               schema:
@@ -45,5 +50,8 @@ paths:
                 properties:
                   body:
                     type: string
+                    description: The error message
+                    example: update timeline error
                   statusCode:
                     type: number
+                    example: 405

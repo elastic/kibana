@@ -11,7 +11,7 @@ import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import { UserProfilesProvider } from '@kbn/content-management-user-profiles';
 import { I18nProvider } from '@kbn/i18n-react';
-
+import { QueryClientProvider, QueryClient } from '@tanstack/react-query';
 import { ActivityView as ActivityViewComponent, ActivityViewProps } from './activity_view';
 
 const mockGetUserProfile = jest.fn(async (uid: string) => ({
@@ -21,12 +21,15 @@ const mockGetUserProfile = jest.fn(async (uid: string) => ({
   user: { username: uid, full_name: uid.toLocaleUpperCase() },
 }));
 
+const queryClient = new QueryClient();
 const ActivityView = (props: ActivityViewProps) => {
   return (
     <I18nProvider>
-      <UserProfilesProvider bulkGetUserProfiles={jest.fn()} getUserProfile={mockGetUserProfile}>
-        <ActivityViewComponent {...props} />
-      </UserProfilesProvider>
+      <QueryClientProvider client={queryClient}>
+        <UserProfilesProvider bulkGetUserProfiles={jest.fn()} getUserProfile={mockGetUserProfile}>
+          <ActivityViewComponent {...props} />
+        </UserProfilesProvider>
+      </QueryClientProvider>
     </I18nProvider>
   );
 };

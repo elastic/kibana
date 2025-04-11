@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { RuleTypeModel } from '../../types';
+import type { RuleTypeModel } from '../../types';
+import type { RuleTypeGroup } from './rule_type_compare';
 import {
-  RuleTypeGroup,
   ruleTypeGroupCompare,
   ruleTypeCompare,
   ruleTypeUngroupedCompare,
 } from './rule_type_compare';
-import { IsEnabledResult, IsDisabledResult } from './check_rule_type_enabled';
+import type { IsEnabledResult, IsDisabledResult } from './check_rule_type_enabled';
 
 test('should sort groups by containing enabled rule types first and then by name', async () => {
   const ruleTypes: RuleTypeGroup[] = [

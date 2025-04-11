@@ -2,11 +2,10 @@
 
 The tests and helper methods (services, page objects) defined here in
 `x-pack/test_serverless` cover the serverless functionality introduced by the
- `serverless`, `serverless_observability`, `serverless_search` and
- `serverless_security` plugins.
+ `serverless`, `serverless_observability`, `serverless_search`, `security_solution_serverless` and `serverless_chat` plugins.
 
  For how to set up Docker for serverless ES images, please refer to
- [packages/kbn-es/README](https://github.com/elastic/kibana/blob/main/packages/kbn-es/README.mdx).
+ [src/platform/packages/shared/kbn-es/README](https://github.com/elastic/kibana/blob/main/src/platform/packages/shared/kbn-es/README.mdx).
 
 ## Serverless testing structure and conventions
 
@@ -19,6 +18,7 @@ set of helper methods and sub-directories for
 - `observability` project specific functionality
 - `search` project specific functionality
 - `security` project specific functionality
+- `chat` project specific functionality
 
 The `shared` directory contains fixtures, services, ... that are shared across
 `api_integration` abd `functional` tests.
@@ -28,6 +28,7 @@ x-pack/test_serverless/
 ├─ api_integration
 │  ├─ services
 │  ├─ test_suites
+│  │  ├─ chat
 │  │  ├─ common
 │  │  ├─ observability
 │  │  ├─ search
@@ -36,6 +37,7 @@ x-pack/test_serverless/
 │  ├─ page_objects
 │  ├─ services
 │  ├─ test_suites
+│  │  ├─ chat
 │  │  ├─ common
 │  │  ├─ observability
 │  │  ├─ search
@@ -52,25 +54,25 @@ covering functionality that's shared across serverless projects. That's why thes
 don't have a dedicated config file and instead need to be included in project specific
 configurations.
 
-**If you add a new `api_integration` or `functional` `common` sub-directory, remember to add it to the corresponding `common_configs` of all projects (`x-pack/test_serverless/[api_integration|functional]/test_suites/[observability|search|security]/common_configs`).**
+**If you add a new `api_integration` or `functional` `common` sub-directory, remember to add it to the corresponding `common_configs` of all projects (`x-pack/test_serverless/[api_integration|functional]/test_suites/[chat|observability|search|security]/common_configs`).**
 
 In case a common test needs to be skipped for one of the projects 
 (in both regular pipelines that start KBN in serverless mode [against serverless ES] & pipelines creating serverless projects in MKI [Cloud]),
 there are the following suite tags available to do so: 
-`skipSvlOblt`, `skipSvlSearch`, `skipSvlSec`, which can be added like this to a test suite:
+`skipSvlChat`, `skipSvlOblt`, `skipSvlSearch`, `skipSvlSec`, which can be added like this to a test suite:
 
 ```
 describe('my test suite', function () {
-  this.tags(['skipSvlOblt', 'skipSvlSearch', 'skipSvlSec']);
+  this.tags(['skipSvlChat', 'skipSvlOblt', 'skipSvlSearch', 'skipSvlSec']);
   // or for a single tag: this.tags('skipSvlSec');
   [...]
 });
 ```
 
 Tests that are designed to only run in one of the projects should be added to the project
-specific test directory and not to `common` with two skips.
+specific test directory and not to `common` with three skips.
 
-Note, that `common` tests are invoked three times in a full test run: once per project to make
+Note, that `common` tests are invoked up to four times in a full test run: once per project to make
 sure the covered shared functionality works correctly in every project. So when writing tests there, be mindful about the test run time.
 
 See also the README files for [Serverless Common API Integration Tests](https://github.com/elastic/kibana/blob/main/x-pack/test_serverless/api_integration/test_suites/common/README.md) and [Serverless Common Functional Tests](https://github.com/elastic/kibana/blob/main/x-pack/test_serverless/functional/test_suites/common/README.md).
@@ -93,6 +95,7 @@ following namespaces:
 | observability | svlOblt                      |
 | search        | svlSearch                    |
 | security      | svlSec                       |
+| chat          | svlChat                      |
 
 ### Adding Serverless Tests
 
@@ -106,7 +109,7 @@ particularly when it comes to timing for API requests and UI interaction.
 
 ### Roles-based testing
 
-Each serverless project has its own set of SAML roles with [specfic permissions defined in roles.yml](https://github.com/elastic/kibana/blob/main/packages/kbn-es/src/serverless_resources/project_roles)
+Each serverless project has its own set of SAML roles with [specfic permissions defined in roles.yml](https://github.com/elastic/kibana/blob/main/src/platform/packages/shared/kbn-es/src/serverless_resources/project_roles)
 and in oder to properly test Kibana functionality, test design requires to login with
 a project-supported SAML role. FTR provides `svlUserManager` service to do SAML authentication, that allows UI tests to set
 the SAML cookie in the browser context and generates api key to use in the api integration tests. See examples below.

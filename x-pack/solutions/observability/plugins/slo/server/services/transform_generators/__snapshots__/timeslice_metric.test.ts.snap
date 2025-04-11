@@ -13,14 +13,23 @@ Object {
       },
       Object {
         "bool": Object {
-          "minimum_should_match": 1,
-          "should": Array [
+          "filter": Array [
             Object {
-              "match_phrase": Object {
-                "test.category": "test",
+              "bool": Object {
+                "minimum_should_match": 1,
+                "should": Array [
+                  Object {
+                    "match_phrase": Object {
+                      "test.category": "test",
+                    },
+                  },
+                ],
               },
             },
           ],
+          "must": Array [],
+          "must_not": Array [],
+          "should": Array [],
         },
       },
     ],
@@ -54,28 +63,46 @@ Object {
         },
         "filter": Object {
           "bool": Object {
-            "minimum_should_match": 1,
-            "should": Array [
+            "filter": Array [
               Object {
-                "match_phrase": Object {
-                  "test.category": "test",
+                "bool": Object {
+                  "minimum_should_match": 1,
+                  "should": Array [
+                    Object {
+                      "match_phrase": Object {
+                        "test.category": "test",
+                      },
+                    },
+                  ],
                 },
               },
             ],
+            "must": Array [],
+            "must_not": Array [],
+            "should": Array [],
           },
         },
       },
       "_B": Object {
         "filter": Object {
           "bool": Object {
-            "minimum_should_match": 1,
-            "should": Array [
+            "filter": Array [
               Object {
-                "match_phrase": Object {
-                  "test.category": "test",
+                "bool": Object {
+                  "minimum_should_match": 1,
+                  "should": Array [
+                    Object {
+                      "match_phrase": Object {
+                        "test.category": "test",
+                      },
+                    },
+                  ],
                 },
               },
             ],
+            "must": Array [],
+            "must_not": Array [],
+            "should": Array [],
           },
         },
       },
@@ -194,14 +221,23 @@ Object {
           },
           Object {
             "bool": Object {
-              "minimum_should_match": 1,
-              "should": Array [
+              "filter": Array [
                 Object {
-                  "match_phrase": Object {
-                    "test.category": "test",
+                  "bool": Object {
+                    "minimum_should_match": 1,
+                    "should": Array [
+                      Object {
+                        "match_phrase": Object {
+                          "test.category": "test",
+                        },
+                      },
+                    ],
                   },
                 },
               ],
+              "must": Array [],
+              "must_not": Array [],
+              "should": Array [],
             },
           },
         ],
@@ -245,28 +281,46 @@ Object {
         },
         "filter": Object {
           "bool": Object {
-            "minimum_should_match": 1,
-            "should": Array [
+            "filter": Array [
               Object {
-                "match_phrase": Object {
-                  "test.category": "test",
+                "bool": Object {
+                  "minimum_should_match": 1,
+                  "should": Array [
+                    Object {
+                      "match_phrase": Object {
+                        "test.category": "test",
+                      },
+                    },
+                  ],
                 },
               },
             ],
+            "must": Array [],
+            "must_not": Array [],
+            "should": Array [],
           },
         },
       },
       "_B": Object {
         "filter": Object {
           "bool": Object {
-            "minimum_should_match": 1,
-            "should": Array [
+            "filter": Array [
               Object {
-                "match_phrase": Object {
-                  "test.category": "test",
+                "bool": Object {
+                  "minimum_should_match": 1,
+                  "should": Array [
+                    Object {
+                      "match_phrase": Object {
+                        "test.category": "test",
+                      },
+                    },
+                  ],
                 },
               },
             ],
+            "must": Array [],
+            "must_not": Array [],
+            "should": Array [],
           },
         },
       },
@@ -385,14 +439,23 @@ Object {
           },
           Object {
             "bool": Object {
-              "minimum_should_match": 1,
-              "should": Array [
+              "filter": Array [
                 Object {
-                  "match_phrase": Object {
-                    "test.category": "test",
+                  "bool": Object {
+                    "minimum_should_match": 1,
+                    "should": Array [
+                      Object {
+                        "match_phrase": Object {
+                          "test.category": "test",
+                        },
+                      },
+                    ],
                   },
                 },
               ],
+              "must": Array [],
+              "must_not": Array [],
+              "should": Array [],
             },
           },
         ],

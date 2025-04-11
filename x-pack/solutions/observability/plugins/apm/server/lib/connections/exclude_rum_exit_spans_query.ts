@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { AGENT_NAME } from '../../../common/es_fields/apm';
 import { RUM_AGENT_NAMES } from '../../../common/agent_name';
 

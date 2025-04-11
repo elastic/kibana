@@ -9,8 +9,8 @@ import { EuiLoadingSpinner } from '@elastic/eui';
 import React from 'react';
 import { UsersAvatarsPanel } from '../../../../../common/components/user_profiles/users_avatars_panel';
 import type { ColumnRenderer } from './column_renderer';
-import type { RenderCellValueContext } from '../../../../../detections/configurations/security_solution_detections/fetch_page_context';
 import { profileUidColumns } from '../../../../../detections/configurations/security_solution_detections/fetch_page_context';
+import type { AlertsUserProfilesData } from '../../../../../detections/configurations/security_solution_detections/fetch_page_context';
 
 export const userProfileColumnRenderer: ColumnRenderer = {
   isInstance: (columnName, _, context) => profileUidColumns.includes(columnName) && !!context,
@@ -19,7 +19,7 @@ export const userProfileColumnRenderer: ColumnRenderer = {
     context,
   }: {
     values: string[] | undefined | null;
-    context?: RenderCellValueContext;
+    context?: AlertsUserProfilesData;
   }) => {
     // Show spinner if loading profiles or if there are no fetched profiles yet
     // Do not show the loading spinner if context is not provided at all

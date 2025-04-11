@@ -59,7 +59,7 @@ describe('Alerts cell actions', { tags: ['@ess', '@serverless'] }, () => {
           .first()
           .invoke('text')
           .then((severityVal) => {
-            filterForAlertProperty(ALERT_TABLE_SEVERITY_VALUES, 1);
+            filterForAlertProperty(ALERT_TABLE_SEVERITY_VALUES, 0);
             cy.get(FILTER_BADGE)
               .first()
               .should('have.text', `kibana.alert.severity: ${severityVal.toLowerCase()}`);
@@ -99,7 +99,7 @@ describe('Alerts cell actions', { tags: ['@ess', '@serverless'] }, () => {
           .first()
           .invoke('text')
           .then((severityVal) => {
-            filterOutAlertProperty(ALERT_TABLE_SEVERITY_VALUES, 1);
+            filterOutAlertProperty(ALERT_TABLE_SEVERITY_VALUES, 0);
             cy.get(FILTER_BADGE)
               .first()
               .should('have.text', `NOT kibana.alert.severity: ${severityVal.toLowerCase()}`);
@@ -113,7 +113,7 @@ describe('Alerts cell actions', { tags: ['@ess', '@serverless'] }, () => {
       cy.window().then((win) => {
         cy.stub(win, 'prompt').returns('DISABLED WINDOW PROMPT');
       });
-      clickExpandActions(ALERT_TABLE_SEVERITY_VALUES, 1);
+      clickExpandActions(ALERT_TABLE_SEVERITY_VALUES, 0);
       // We are not able to test the "copy to clipboard" action execution
       // due to browsers security limitation accessing the clipboard services.
       // We assume external `copy` library works
@@ -127,7 +127,7 @@ describe('Alerts cell actions', { tags: ['@ess', '@serverless'] }, () => {
         .first()
         .invoke('text')
         .then((severityVal) => {
-          addAlertPropertyToTimeline(ALERT_TABLE_SEVERITY_VALUES, 1);
+          addAlertPropertyToTimeline(ALERT_TABLE_SEVERITY_VALUES, 0);
           openActiveTimeline();
           cy.get(PROVIDER_BADGE)
             .first()
@@ -150,7 +150,7 @@ describe('Alerts cell actions', { tags: ['@ess', '@serverless'] }, () => {
   it('should show top N for a property', () => {
     scrollAlertTableColumnIntoViewAndTest(ALERT_TABLE_SEVERITY_HEADER, () => {
       cy.get(ALERT_TABLE_SEVERITY_VALUES);
-      showTopNAlertProperty(ALERT_TABLE_SEVERITY_VALUES, 1);
+      showTopNAlertProperty(ALERT_TABLE_SEVERITY_VALUES, 0);
       cy.get(SHOW_TOP_N_HEADER).first().should('have.text', `Top kibana.alert.severity`);
     });
   });

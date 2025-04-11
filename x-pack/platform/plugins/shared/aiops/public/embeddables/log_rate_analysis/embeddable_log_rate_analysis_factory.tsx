@@ -17,6 +17,7 @@ import type { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import {
   apiHasExecutionContext,
+  apiPublishesFilters,
   fetch$,
   initializeTimeRange,
   initializeTitleManager,
@@ -81,6 +82,7 @@ export const getLogRateAnalysisEmbeddableFactory = (
         ),
       ]);
 
+      const filtersApi = apiPublishesFilters(parentApi) ? parentApi : undefined;
       const api = buildApi(
         {
           ...timeRangeManager.api,
@@ -190,6 +192,7 @@ export const getLogRateAnalysisEmbeddableFactory = (
 
           return (
             <LogRateAnalysisEmbeddableWrapper
+              filtersApi={filtersApi}
               dataViewId={dataViewId}
               timeRange={timeRange}
               onLoading={onLoading}

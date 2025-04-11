@@ -53,16 +53,20 @@ export const getLayers = (
     fillLabel.valueFormatter = () => '';
   }
 
+  const categories =
+    chartType === ChartTypes.MOSAIC && columns.length === 2
+      ? getColorCategories(rows, columns[1]?.id)
+      : getColorCategories(rows, columns[0]?.id);
+
+  const colorIndexMap = new Map(categories.map((c, i) => [String(c), i]));
+
   const isSplitChart = Boolean(visParams.dimensions.splitColumn || visParams.dimensions.splitRow);
   let byDataPalette: ReturnType<typeof byDataColorPaletteMap>;
   if (!syncColors && columns[1]?.id && paletteService && visParams.palette) {
     byDataPalette = byDataColorPaletteMap(
-      rows,
-      columns[1],
       paletteService?.get(visParams.palette.name),
       visParams.palette,
-      formatters,
-      formatter
+      colorIndexMap
     );
   }
 
@@ -113,7 +117,7 @@ export const getLayers = (
                 isDarkMode,
                 formatter,
                 col,
-                formatters
+                colorIndexMap
               ),
       },
     };

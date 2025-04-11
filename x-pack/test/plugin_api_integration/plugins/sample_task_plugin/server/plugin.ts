@@ -70,7 +70,7 @@ export class SampleTaskManagerFixturePlugin
           const [{ elasticsearch }] = await core.getStartServices();
           await elasticsearch.client.asInternalUser.index({
             index: '.kibana_task_manager_test_result',
-            body: {
+            document: {
               type: 'task',
               taskId: taskInstance.id,
               params: JSON.stringify(runParams),

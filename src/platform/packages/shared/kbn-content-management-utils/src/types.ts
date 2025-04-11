@@ -33,7 +33,7 @@ import type {
   SortOrder,
   AggregationsAggregationContainer,
   SortResults,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+} from '@elastic/elasticsearch/lib/api/types';
 
 import type {
   MutatingOperationRefreshSetting,

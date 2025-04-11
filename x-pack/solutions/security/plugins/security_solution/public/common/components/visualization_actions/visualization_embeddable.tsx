@@ -7,7 +7,8 @@
 
 import React, { useCallback, useEffect, useRef, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
-import { css } from 'styled-components';
+import { css } from '@emotion/react';
+
 import { ChartLabel } from '../../../overview/components/detection_response/alerts_by_status/chart_label';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
 import { inputsActions, inputsSelectors } from '../../store/inputs';

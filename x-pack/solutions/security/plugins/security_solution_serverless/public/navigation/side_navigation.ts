@@ -5,40 +5,22 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-import type { GroupDefinition } from '@kbn/core-chrome-browser';
-import produce from 'immer';
-import { map } from 'rxjs';
+import type { SecurityProductTypes } from '../../common/config';
 import { type Services } from '../common/services';
+import { createAiSocNavigationTree$, shouldUseAINavigation } from './ai_soc/ai_soc_navigation';
+import { createSecurityNavigationTree$ } from './security_side_navigation';
 
-const PROJECT_SETTINGS_TITLE = i18n.translate(
-  'xpack.securitySolutionServerless.navLinks.projectSettings.title',
-  { defaultMessage: 'Project Settings' }
-);
-
-export const initSideNavigation = async (services: Services) => {
+export const initSideNavigation = async (
+  services: Services,
+  productTypes: SecurityProductTypes
+) => {
   services.securitySolution.setIsSolutionNavigationEnabled(true);
 
-  const { navigationTree$, panelContentProvider } =
-    await services.securitySolution.getSolutionNavigation();
+  const navigationTree$ = shouldUseAINavigation(productTypes)
+    ? createAiSocNavigationTree$()
+    : createSecurityNavigationTree$(services);
 
-  const serverlessNavigationTree$ = navigationTree$.pipe(
-    map((navigationTree) =>
-      produce(navigationTree, (draft) => {
-        // Adds serverless cloud links to the footer group ("Product settings" dropdown)
-        const footerGroup: GroupDefinition | undefined = draft.footer?.find(
-          ({ type }) => type === 'navGroup'
-        ) as GroupDefinition;
-        if (footerGroup) {
-          footerGroup.title = PROJECT_SETTINGS_TITLE;
-          footerGroup.children.push({ cloudLink: 'billingAndSub', openInNewTab: true });
-        }
-      })
-    )
-  );
-
-  services.serverless.initNavigation('security', serverlessNavigationTree$, {
-    panelContentProvider,
+  services.serverless.initNavigation('security', navigationTree$, {
     dataTestSubj: 'securitySolutionSideNav',
   });
 };

@@ -21,14 +21,14 @@ spaceTest.describe(
       });
     });
 
-    spaceTest.afterAll(async ({ scoutSpace }) => {
-      await scoutSpace.uiSettings.unset('defaultIndex', 'timepicker:timeDefaults');
-      await scoutSpace.savedObjects.cleanStandardList();
-    });
-
     spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
       await browserAuth.loginAsViewer();
       await pageObjects.discover.goto();
+    });
+
+    spaceTest.afterAll(async ({ scoutSpace }) => {
+      await scoutSpace.uiSettings.unset('defaultIndex', 'timepicker:timeDefaults');
+      await scoutSpace.savedObjects.cleanStandardList();
     });
 
     spaceTest('dont show up if outside of range', async ({ page, pageObjects }) => {

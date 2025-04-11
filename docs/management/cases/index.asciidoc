@@ -1,4 +1,0 @@
-include::cases.asciidoc[]
-include::setup-cases.asciidoc[leveloffset=+1]
-include::manage-cases.asciidoc[leveloffset=+1]
-include::manage-cases-settings.asciidoc[leveloffset=+1]

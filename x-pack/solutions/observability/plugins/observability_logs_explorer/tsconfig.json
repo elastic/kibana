@@ -9,7 +9,7 @@
     "public/**/*",
     "server/**/*",
     ".storybook/**/*.tsx",
-    "emotion.d.ts",
+    "emotion.d.ts"
   ],
   "kbn_references": [
     "@kbn/config-schema",
@@ -19,7 +19,5 @@
     "@kbn/shared-ux-router",
     "@kbn/deeplinks-analytics",
   ],
-  "exclude": [
-    "target/**/*"
-  ]
+  "exclude": ["target/**/*"]
 }

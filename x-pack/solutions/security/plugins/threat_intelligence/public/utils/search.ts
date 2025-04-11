@@ -57,7 +57,7 @@ const requestInspector = (
       }
 
       inspectorRequest.stats({}).ok({ json: response });
-      inspectorRequest.json(searchRequest.params?.body || {});
+      inspectorRequest.json(searchRequest.params || {});
     },
 
     resetRequest() {

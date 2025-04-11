@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { Sort, QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { Sort, QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import { unflattenKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
@@ -87,32 +87,30 @@ export async function getTraceSamples({
         events: [ProcessorEvent.transaction],
       },
       _source: [TRANSACTION_ID, TRACE_ID, '@timestamp'],
-      body: {
-        track_total_hits: false,
-        query: {
-          bool: {
-            filter: [...commonFilters, { term: { [TRANSACTION_SAMPLED]: true } }],
-            should: [
-              { term: { [TRACE_ID]: traceId } },
-              { term: { [TRANSACTION_ID]: transactionId } },
-            ] as QueryDslQueryContainer[],
+      track_total_hits: false,
+      query: {
+        bool: {
+          filter: [...commonFilters, { term: { [TRANSACTION_SAMPLED]: true } }],
+          should: [
+            { term: { [TRACE_ID]: traceId } },
+            { term: { [TRANSACTION_ID]: transactionId } },
+          ] as QueryDslQueryContainer[],
+        },
+      },
+      size: TRACE_SAMPLES_SIZE,
+      fields: requiredFields,
+      sort: [
+        {
+          _score: {
+            order: 'desc',
           },
         },
-        size: TRACE_SAMPLES_SIZE,
-        fields: requiredFields,
-        sort: [
-          {
-            _score: {
-              order: 'desc',
-            },
+        {
+          [AT_TIMESTAMP]: {
+            order: 'desc',
           },
-          {
-            [AT_TIMESTAMP]: {
-              order: 'desc',
-            },
-          },
-        ] as Sort,
-      },
+        },
+      ] as Sort,
     });
 
     const traceSamples = response.hits.hits.map((hit) => {

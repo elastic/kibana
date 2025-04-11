@@ -129,15 +129,15 @@ export const sampleAttributeCoreWebVital = {
           xAccessor: 'x-axis-column-layer0',
           yConfig: [
             {
-              color: '#209280',
+              color: '#24c292',
               forAccessor: 'y-axis-column',
             },
             {
-              color: '#d6bf57',
+              color: '#fcd883',
               forAccessor: 'y-axis-column-1',
             },
             {
-              color: '#cc5642',
+              color: '#f6726a',
               forAccessor: 'y-axis-column-2',
             },
           ],

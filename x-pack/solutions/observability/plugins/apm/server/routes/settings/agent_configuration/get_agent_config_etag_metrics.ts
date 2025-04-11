@@ -16,24 +16,22 @@ export async function getAgentConfigEtagMetrics(apmEventClient: APMEventClient, 
     apm: {
       events: [ProcessorEvent.metric],
     },
-    body: {
-      track_total_hits: 0,
-      size: 0,
-      query: {
-        bool: {
-          filter: [
-            ...termQuery(METRICSET_NAME, 'agent_config'),
-            ...termQuery('labels.etag', etag),
-            ...rangeQuery(datemath.parse('now-15m')!.valueOf(), datemath.parse('now')!.valueOf()),
-          ],
-        },
+    track_total_hits: 0,
+    size: 0,
+    query: {
+      bool: {
+        filter: [
+          ...termQuery(METRICSET_NAME, 'agent_config'),
+          ...termQuery('labels.etag', etag),
+          ...rangeQuery(datemath.parse('now-15m')!.valueOf(), datemath.parse('now')!.valueOf()),
+        ],
       },
-      aggs: {
-        config_by_etag: {
-          terms: {
-            field: 'labels.etag',
-            size: 200,
-          },
+    },
+    aggs: {
+      config_by_etag: {
+        terms: {
+          field: 'labels.etag',
+          size: 200,
         },
       },
     },

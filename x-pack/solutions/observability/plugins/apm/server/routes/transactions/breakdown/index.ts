@@ -107,24 +107,22 @@ export async function getTransactionBreakdown({
     apm: {
       events: [ProcessorEvent.metric],
     },
-    body: {
-      track_total_hits: false,
-      size: 0,
-      query: {
-        bool: {
-          filter: filters,
-        },
+    track_total_hits: false,
+    size: 0,
+    query: {
+      bool: {
+        filter: filters,
       },
-      aggs: {
-        ...subAggs,
-        by_date: {
-          date_histogram: getMetricsDateHistogramParams({
-            start,
-            end,
-            metricsInterval: config.metricsInterval,
-          }),
-          aggs: subAggs,
-        },
+    },
+    aggs: {
+      ...subAggs,
+      by_date: {
+        date_histogram: getMetricsDateHistogramParams({
+          start,
+          end,
+          metricsInterval: config.metricsInterval,
+        }),
+        aggs: subAggs,
       },
     },
   };

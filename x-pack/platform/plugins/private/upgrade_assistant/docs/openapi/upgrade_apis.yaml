@@ -1,0 +1,40 @@
+openapi: 3.0.3
+info:
+  title: Upgrade assistant APIs
+  description: Kibana APIs for the upgrade assistant feature
+  version: "1.0.0"
+  license:
+    name: Elastic License 2.0
+    url: https://www.elastic.co/licensing/elastic-license
+tags:
+  - name: upgrade
+    description: The assistant helps you prepare for the next major version of Elasticsearch.
+    x-displayName: Upgrade assistant
+servers:
+  - url: /
+paths:
+  /api/upgrade_assistant/status:
+    get:
+      summary: Get the upgrade readiness status
+      description: Check the status of your cluster.
+      x-state: Technical Preview
+      operationId: get-upgrade-status
+      tags:
+        - upgrade
+      responses:
+        '200':
+          description: Indicates a successful call.
+          content:
+            application/json:
+              examples:
+                getUpgradeStatusResponseExample1:
+                  value: |-
+                    {
+                      "readyForUpgrade": false,
+                      "cluster": [
+                        {
+                          "message": "Cluster deprecated issue",
+                          "details":"You have 2 system indices that must be migrated and 5 Elasticsearch deprecation issues and 0 Kibana deprecation issues that must be resolved before upgrading."
+                        }
+                      ]
+                    }

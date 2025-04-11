@@ -13,6 +13,7 @@ import type {
   NewPackagePolicy,
   RegistryPolicyTemplate,
   NewPackagePolicyInputStream,
+  NewPackagePolicyInput,
 } from '../types';
 
 import {
@@ -347,6 +348,7 @@ describe('Fleet - validatePackagePolicy()', () => {
 
     const noErrorsValidationResults = {
       name: null,
+      additional_datastreams_permissions: null,
       description: null,
       namespace: null,
       inputs: {
@@ -395,6 +397,7 @@ describe('Fleet - validatePackagePolicy()', () => {
         name: ['Name is required'],
         description: null,
         namespace: null,
+        additional_datastreams_permissions: null,
         inputs: {
           foo: {
             vars: {
@@ -461,6 +464,7 @@ describe('Fleet - validatePackagePolicy()', () => {
         name: ['Name is required'],
         description: null,
         namespace: null,
+        additional_datastreams_permissions: null,
         inputs: {
           foo: {
             vars: {
@@ -514,6 +518,7 @@ describe('Fleet - validatePackagePolicy()', () => {
         name: null,
         description: null,
         namespace: null,
+        additional_datastreams_permissions: null,
         inputs: {},
         vars: {},
       });
@@ -530,6 +535,7 @@ describe('Fleet - validatePackagePolicy()', () => {
         name: null,
         description: null,
         namespace: null,
+        additional_datastreams_permissions: null,
         inputs: {},
         vars: {},
       });
@@ -549,6 +555,7 @@ describe('Fleet - validatePackagePolicy()', () => {
         name: null,
         description: null,
         namespace: null,
+        additional_datastreams_permissions: null,
         inputs: {},
         vars: {},
       });
@@ -564,6 +571,7 @@ describe('Fleet - validatePackagePolicy()', () => {
       ).toEqual({
         name: null,
         description: null,
+        additional_datastreams_permissions: null,
         namespace: null,
         inputs: {},
         vars: {},
@@ -602,6 +610,7 @@ describe('Fleet - validatePackagePolicy()', () => {
         name: null,
         description: null,
         namespace: null,
+        additional_datastreams_permissions: null,
         inputs: {
           foo: {
             streams: {
@@ -730,6 +739,7 @@ describe('Fleet - validatePackagePolicy()', () => {
         )
       ).toEqual({
         description: null,
+        additional_datastreams_permissions: null,
         inputs: {
           'linux/metrics': {
             streams: {
@@ -777,7 +787,7 @@ describe('Fleet - validatePackagePolicy()', () => {
 });
 
 describe('Fleet - validateConditionalRequiredVars()', () => {
-  const createMockRequiredVarPackageInfo = (streams: unknown) => {
+  const createMockRequiredVarPackageInfo = (streams: unknown, inputs: unknown[]) => {
     return {
       name: 'mock-package',
       title: 'Mock package',
@@ -868,13 +878,17 @@ describe('Fleet - validateConditionalRequiredVars()', () => {
               enabled: true,
               vars: [{ required: true, name: 'var-name', type: 'text' }],
             },
+            ...inputs,
           ],
         },
       ],
     } as unknown as PackageInfo;
   };
 
-  const createPackagePolicyForRequiredVars = (streams: NewPackagePolicyInputStream[]) => {
+  const createPackagePolicyForRequiredVars = (
+    streams: NewPackagePolicyInputStream[],
+    inputs: NewPackagePolicyInput[]
+  ) => {
     return {
       name: 'pkgPolicy1-1',
       namespace: 'default',
@@ -888,32 +902,58 @@ describe('Fleet - validateConditionalRequiredVars()', () => {
           enabled: true,
           streams,
         },
+        ...inputs,
       ],
       vars: {},
     };
   };
 
   it('should return package policy validation error if invalid required_vars exist', () => {
-    const mockPackageInfoRequireVars = createMockRequiredVarPackageInfo([
-      {
-        title: 'Foo',
-        input: 'foo-input',
-        vars: [
-          { name: 'foo-name', type: 'text' },
-          { name: 'foo-age', type: 'text' },
-        ],
-        required_vars: {
-          'foo-required-var-name': [{ name: 'foo-name' }, { name: 'foo-age', value: '1' }],
+    const mockPackageInfoRequireVars = createMockRequiredVarPackageInfo(
+      [
+        {
+          title: 'Foo',
+          input: 'foo-input',
+          vars: [
+            { name: 'foo-name', type: 'text' },
+            { name: 'foo-age', type: 'text' },
+          ],
+          required_vars: {
+            'foo-required-var-name': [{ name: 'foo-name' }, { name: 'foo-age', value: '1' }],
+          },
         },
-      },
-    ]);
-    const invalidPackagePolicyWithRequiredVars = createPackagePolicyForRequiredVars([
-      {
-        data_stream: { dataset: 'foo', type: 'logs' },
-        enabled: true,
-        vars: { 'foo-name': { type: 'text' }, 'foo-age': { type: 'text' } },
-      },
-    ]);
+      ],
+      [
+        {
+          type: 'lorem',
+          title: 'Lorem',
+          vars: [
+            { name: 'lorem-name', type: 'text' },
+            { name: 'lorem-age', type: 'text' },
+          ],
+          required_vars: {
+            'lorem-required-var-name': [{ name: 'lorem-name' }, { name: 'lorem-age', value: '1' }],
+          },
+        },
+      ]
+    );
+    const invalidPackagePolicyWithRequiredVars = createPackagePolicyForRequiredVars(
+      [
+        {
+          data_stream: { dataset: 'foo', type: 'logs' },
+          enabled: true,
+          vars: { 'foo-name': { type: 'text' }, 'foo-age': { type: 'text' } },
+        },
+      ],
+      [
+        {
+          type: 'lorem',
+          enabled: true,
+          vars: { 'lorem-name': { type: 'text' }, 'lorem-age': { type: 'text' } },
+          streams: [],
+        },
+      ]
+    );
 
     const validationResults = validatePackagePolicy(
       invalidPackagePolicyWithRequiredVars,
@@ -921,53 +961,99 @@ describe('Fleet - validateConditionalRequiredVars()', () => {
       load
     );
 
-    expect(validationResults).toEqual(
-      expect.objectContaining({
-        inputs: {
-          'foo-input': {
-            streams: {
-              foo: {
-                required_vars: {
-                  'foo-required-var-name': [
-                    { name: 'foo-name', invalid: true },
-                    { name: 'foo-age', invalid: true },
-                  ],
-                },
-                vars: {
-                  'foo-name': null,
-                  'foo-age': null,
-                },
+    expect(validationResults).toEqual({
+      name: null,
+      description: null,
+      namespace: null,
+      additional_datastreams_permissions: null,
+      inputs: {
+        'foo-input': {
+          streams: {
+            foo: {
+              required_vars: {
+                'foo-required-var-name': [
+                  { name: 'foo-name', invalid: true },
+                  { name: 'foo-age', invalid: true },
+                ],
+              },
+              vars: {
+                'foo-name': null,
+                'foo-age': null,
               },
             },
           },
         },
-      })
-    );
+        lorem: {
+          vars: {
+            'lorem-name': null,
+            'lorem-age': null,
+          },
+          required_vars: {
+            'lorem-required-var-name': [
+              {
+                name: 'lorem-name',
+                invalid: true,
+              },
+              {
+                name: 'lorem-age',
+                invalid: true,
+              },
+            ],
+          },
+        },
+      },
+      vars: {},
+    });
 
     expect(validationHasErrors(validationResults)).toBe(true);
   });
 
   it('should return package policy validation error if partial invalid required_vars exist', () => {
-    const mockPackageInfoRequireVars = createMockRequiredVarPackageInfo([
-      {
-        title: 'Foo',
-        input: 'foo-input',
-        vars: [
-          { name: 'foo-name', type: 'text' },
-          { name: 'foo-age', type: 'text' },
-        ],
-        required_vars: {
-          'foo-required-var-name': [{ name: 'foo-name' }, { name: 'foo-age', value: '1' }],
+    const mockPackageInfoRequireVars = createMockRequiredVarPackageInfo(
+      [
+        {
+          title: 'Foo',
+          input: 'foo-input',
+          vars: [
+            { name: 'foo-name', type: 'text' },
+            { name: 'foo-age', type: 'text' },
+          ],
+          required_vars: {
+            'foo-required-var-name': [{ name: 'foo-name' }, { name: 'foo-age', value: '1' }],
+          },
         },
-      },
-    ]);
-    const invalidPackagePolicyWithRequiredVars = createPackagePolicyForRequiredVars([
-      {
-        data_stream: { dataset: 'foo', type: 'logs' },
-        enabled: true,
-        vars: { 'foo-name': { type: 'text' }, 'foo-age': { type: 'text', value: '1' } },
-      },
-    ]);
+      ],
+      [
+        {
+          type: 'lorem',
+          title: 'Lorem',
+          vars: [
+            { name: 'lorem-name', type: 'text' },
+            { name: 'lorem-age', type: 'text' },
+          ],
+          required_vars: {
+            'lorem-required-var-name': [{ name: 'lorem-name' }, { name: 'lorem-age', value: '1' }],
+          },
+        },
+      ]
+    );
+    const invalidPackagePolicyWithRequiredVars = createPackagePolicyForRequiredVars(
+      [
+        {
+          data_stream: { dataset: 'foo', type: 'logs' },
+          enabled: true,
+          vars: { 'foo-name': { type: 'text' }, 'foo-age': { type: 'text', value: '1' } },
+        },
+      ],
+      [
+        {
+          type: 'lorem',
+          enabled: true,
+          vars: { 'lorem-name': { type: 'text' }, 'lorem-age': { type: 'text', value: '1' } },
+          streams: [],
+        },
+      ]
+    );
 
     const validationResults = validatePackagePolicy(
       invalidPackagePolicyWithRequiredVars,
@@ -975,53 +1061,103 @@ describe('Fleet - validateConditionalRequiredVars()', () => {
       load
     );
 
-    expect(validationResults).toEqual(
-      expect.objectContaining({
-        inputs: {
-          'foo-input': {
-            streams: {
-              foo: {
-                required_vars: {
-                  'foo-required-var-name': [{ name: 'foo-name', invalid: true }],
-                },
-                vars: {
-                  'foo-name': null,
-                  'foo-age': null,
-                },
+    expect(validationResults).toEqual({
+      name: null,
+      description: null,
+      namespace: null,
+      additional_datastreams_permissions: null,
+      inputs: {
+        'foo-input': {
+          streams: {
+            foo: {
+              vars: {
+                'foo-name': null,
+                'foo-age': null,
+              },
+              required_vars: {
+                'foo-required-var-name': [
+                  {
+                    name: 'foo-name',
+                    invalid: true,
+                  },
+                ],
               },
             },
           },
         },
-      })
-    );
+        lorem: {
+          vars: {
+            'lorem-name': null,
+            'lorem-age': null,
+          },
+          required_vars: {
+            'lorem-required-var-name': [
+              {
+                name: 'lorem-name',
+                invalid: true,
+              },
+            ],
+          },
+        },
+      },
+      vars: {},
+    });
 
     expect(validationHasErrors(validationResults)).toBe(true);
   });
 
   it('should not return package policy validation errors if required_vars have existence and a value', () => {
-    const mockPackageInfoRequireVars = createMockRequiredVarPackageInfo([
-      {
-        title: 'Foo',
-        input: 'foo-input',
-        vars: [
-          { name: 'foo-name', type: 'text' },
-          { name: 'foo-age', type: 'text' },
-        ],
-        required_vars: {
-          'foo-required-var-name': [{ name: 'foo-name' }, { name: 'foo-age', value: '1' }],
+    const mockPackageInfoRequireVars = createMockRequiredVarPackageInfo(
+      [
+        {
+          title: 'Foo',
+          input: 'foo-input',
+          vars: [
+            { name: 'foo-name', type: 'text' },
+            { name: 'foo-age', type: 'text' },
+          ],
+          required_vars: {
+            'foo-required-var-name': [{ name: 'foo-name' }, { name: 'foo-age', value: '1' }],
+          },
         },
-      },
-    ]);
-    const invalidPackagePolicyWithRequiredVars = createPackagePolicyForRequiredVars([
-      {
-        data_stream: { dataset: 'foo', type: 'logs' },
-        enabled: true,
-        vars: {
-          'foo-name': { type: 'text', value: 'Some name' },
-          'foo-age': { type: 'text', value: '1' },
+      ],
+      [
+        {
+          type: 'lorem',
+          title: 'Lorem',
+          vars: [
+            { name: 'lorem-name', type: 'text' },
+            { name: 'lorem-age', type: 'text' },
+          ],
+          required_vars: {
+            'lorem-required-var-name': [{ name: 'lorem-name' }, { name: 'lorem-age', value: '1' }],
+          },
         },
-      },
-    ]);
+      ]
+    );
+    const invalidPackagePolicyWithRequiredVars = createPackagePolicyForRequiredVars(
+      [
+        {
+          data_stream: { dataset: 'foo', type: 'logs' },
+          enabled: true,
+          vars: {
+            'foo-name': { type: 'text', value: 'Some name' },
+            'foo-age': { type: 'text', value: '1' },
+          },
+        },
+      ],
+      [
+        {
+          type: 'lorem',
+          enabled: true,
+          vars: {
+            'lorem-name': { type: 'text', value: 'Some name' },
+            'lorem-age': { type: 'text', value: '1' },
+          },
+          streams: [],
+        },
+      ]
+    );
 
     const validationResults = validatePackagePolicy(
       invalidPackagePolicyWithRequiredVars,
@@ -1029,53 +1165,93 @@ describe('Fleet - validateConditionalRequiredVars()', () => {
       load
     );
 
-    expect(validationResults).toEqual(
-      expect.objectContaining({
-        inputs: {
-          'foo-input': {
-            streams: {
-              foo: {
-                vars: {
-                  'foo-name': null,
-                  'foo-age': null,
-                },
+    expect(validationResults).toEqual({
+      name: null,
+      description: null,
+      namespace: null,
+      additional_datastreams_permissions: null,
+      inputs: {
+        'foo-input': {
+          streams: {
+            foo: {
+              vars: {
+                'foo-name': null,
+                'foo-age': null,
               },
             },
           },
         },
-      })
-    );
+        lorem: {
+          vars: {
+            'lorem-name': null,
+            'lorem-age': null,
+          },
+        },
+      },
+      vars: {},
+    });
 
     expect(validationHasErrors(validationResults)).toBe(false);
   });
 
   it('should not return package policy validation errors if required_vars all have values', () => {
-    const mockPackageInfoRequireVars = createMockRequiredVarPackageInfo([
-      {
-        title: 'Foo',
-        input: 'foo-input',
-        vars: [
-          { name: 'foo-name', type: 'text' },
-          { name: 'foo-age', type: 'text' },
-        ],
-        required_vars: {
-          'foo-required-var-name': [
-            { name: 'foo-name', value: 'Some name' },
-            { name: 'foo-age', value: '1' },
+    const mockPackageInfoRequireVars = createMockRequiredVarPackageInfo(
+      [
+        {
+          title: 'Foo',
+          input: 'foo-input',
+          vars: [
+            { name: 'foo-name', type: 'text' },
+            { name: 'foo-age', type: 'text' },
           ],
+          required_vars: {
+            'foo-required-var-name': [
+              { name: 'foo-name', value: 'Some name' },
+              { name: 'foo-age', value: '1' },
+            ],
+          },
         },
-      },
-    ]);
-    const invalidPackagePolicyWithRequiredVars = createPackagePolicyForRequiredVars([
-      {
-        data_stream: { dataset: 'foo', type: 'logs' },
-        enabled: true,
-        vars: {
-          'foo-name': { type: 'text', value: 'Some name' },
-          'foo-age': { type: 'text', value: '1' },
+      ],
+      [
+        {
+          type: 'lorem',
+          title: 'Lorem',
+          vars: [
+            { name: 'lorem-name', type: 'text' },
+            { name: 'lorem-age', type: 'text' },
+          ],
+          required_vars: {
+            'lorem-required-var-name': [
+              { name: 'lorem-name', value: 'Some name' },
+              { name: 'lorem-age', value: '1' },
+            ],
+          },
         },
-      },
-    ]);
+      ]
+    );
+    const invalidPackagePolicyWithRequiredVars = createPackagePolicyForRequiredVars(
+      [
+        {
+          data_stream: { dataset: 'foo', type: 'logs' },
+          enabled: true,
+          vars: {
+            'foo-name': { type: 'text', value: 'Some name' },
+            'foo-age': { type: 'text', value: '1' },
+          },
+        },
+      ],
+      [
+        {
+          type: 'lorem',
+          enabled: true,
+          vars: {
+            'lorem-name': { type: 'text', value: 'Some name' },
+            'lorem-age': { type: 'text', value: '1' },
+          },
+          streams: [],
+        },
+      ]
+    );
 
     const validationResults = validatePackagePolicy(
       invalidPackagePolicyWithRequiredVars,
@@ -1083,22 +1259,31 @@ describe('Fleet - validateConditionalRequiredVars()', () => {
       load
     );
 
-    expect(validationResults).toEqual(
-      expect.objectContaining({
-        inputs: {
-          'foo-input': {
-            streams: {
-              foo: {
-                vars: {
-                  'foo-name': null,
-                  'foo-age': null,
-                },
+    expect(validationResults).toEqual({
+      name: null,
+      description: null,
+      namespace: null,
+      additional_datastreams_permissions: null,
+      inputs: {
+        'foo-input': {
+          streams: {
+            foo: {
+              vars: {
+                'foo-name': null,
+                'foo-age': null,
               },
             },
           },
         },
-      })
-    );
+        lorem: {
+          vars: {
+            'lorem-name': null,
+            'lorem-age': null,
+          },
+        },
+      },
+      vars: {},
+    });
 
     expect(validationHasErrors(validationResults)).toBe(false);
   });
@@ -1150,6 +1335,7 @@ describe('Fleet - validationHasErrors()', () => {
       validationHasErrors({
         name: ['name error'],
         description: null,
+        additional_datastreams_permissions: null,
         namespace: null,
         inputs: {
           input1: {
@@ -1159,10 +1345,12 @@ describe('Fleet - validationHasErrors()', () => {
         },
       })
     ).toBe(true);
+
     expect(
       validationHasErrors({
         name: null,
         description: null,
+        additional_datastreams_permissions: null,
         namespace: null,
         inputs: {
           input1: {
@@ -1176,6 +1364,7 @@ describe('Fleet - validationHasErrors()', () => {
       validationHasErrors({
         name: null,
         description: null,
+        additional_datastreams_permissions: null,
         namespace: null,
         inputs: {
           input1: {
@@ -1193,6 +1382,7 @@ describe('Fleet - validationHasErrors()', () => {
         name: null,
         description: null,
         namespace: null,
+        additional_datastreams_permissions: null,
         inputs: {
           input1: {
             vars: { foo: null, bar: null },
@@ -1420,7 +1610,7 @@ describe('Fleet - validatePackagePolicyConfig', () => {
 
       expect(res).toBeNull();
     });
-    it('should accept a secret ref instead of a text value for a secret field', () => {
+    it('should accept a secret ref id instead of a text value for a secret field', () => {
       const res = validatePackagePolicyConfig(
         {
           value: { isSecretRef: true, id: 'secret1' },
@@ -1436,7 +1626,24 @@ describe('Fleet - validatePackagePolicyConfig', () => {
 
       expect(res).toBeNull();
     });
-    it('secret refs should always have an id', () => {
+    it('should accept secret ref ids instead of a text value for a secret field', () => {
+      const res = validatePackagePolicyConfig(
+        {
+          value: { isSecretRef: true, ids: ['secret1', 'secret2'] },
+        },
+        {
+          name: 'secret_variable',
+          type: 'text',
+          multi: true,
+          secret: true,
+        },
+        'secret_variable',
+        load
+      );
+
+      expect(res).toBeNull();
+    });
+    it('secret refs should always have an id or ids', () => {
       const res = validatePackagePolicyConfig(
         {
           value: { isSecretRef: true },
@@ -1450,7 +1657,7 @@ describe('Fleet - validatePackagePolicyConfig', () => {
         load
       );
 
-      expect(res).toEqual(['Secret reference is invalid, id must be a string']);
+      expect(res).toEqual(['Secret reference is invalid, id or ids must be provided']);
     });
     it('secret ref id should be a string', () => {
       const res = validatePackagePolicyConfig(
@@ -1467,6 +1674,23 @@ describe('Fleet - validatePackagePolicyConfig', () => {
       );
 
       expect(res).toEqual(['Secret reference is invalid, id must be a string']);
+    });
+    it('secret ref ids should all be strings', () => {
+      const res = validatePackagePolicyConfig(
+        {
+          value: { isSecretRef: true, ids: ['someid', 123] },
+        },
+        {
+          name: 'secret_variable',
+          type: 'text',
+          multi: true,
+          secret: true,
+        },
+        'secret_variable',
+        load
+      );
+
+      expect(res).toEqual(['Secret reference is invalid, ids must be an array of strings']);
     });
   });
 

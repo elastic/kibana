@@ -15,16 +15,22 @@ import {
   EuiProgress,
   EuiSpacer,
   EuiText,
-  useEuiTheme,
 } from '@elastic/eui';
 import React, { useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { TableId } from '@kbn/securitysolution-data-table';
+import { ProgressBarRow } from './alerts_progress_bar_row';
 import type { AlertsProgressBarData, GroupBySelection } from './types';
 import type { AddFilterProps } from '../common/types';
 import { getAggregateData } from './helpers';
-import { DefaultDraggable } from '../../../../common/components/draggables';
 import * as i18n from './translations';
+import {
+  CellActionsMode,
+  SecurityCellActions,
+  SecurityCellActionsTrigger,
+  SecurityCellActionType,
+} from '../../../../common/components/cell_actions';
+import { getSourcererScopeId } from '../../../../helpers';
 
 const ProgressWrapper = styled.div`
   height: 160px;
@@ -47,10 +53,26 @@ const DataStatsWrapper = styled.div`
   width: 250px;
 `;
 
+const EmptyAction = styled.div`
+  padding-left: ${({ theme }) => theme.eui.euiSizeL};
+`;
+
 export interface AlertsProcessBarProps {
+  /**
+   * Alerts data
+   */
   data: AlertsProgressBarData[];
+  /**
+   * If true, component renders an EuiProgressBar
+   */
   isLoading: boolean;
+  /**
+   * Callback to allow the charts to add filters to the SiemSearchBar
+   */
   addFilter?: ({ field, value, negate }: AddFilterProps) => void;
+  /**
+   * Field the alerts data is grouped by
+   */
   groupBySelection: GroupBySelection;
 }
 
@@ -60,12 +82,12 @@ export const AlertsProgressBar: React.FC<AlertsProcessBarProps> = ({
   addFilter,
   groupBySelection,
 }) => {
-  const { euiTheme } = useEuiTheme();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const onButtonClick = () => setIsPopoverOpen(!isPopoverOpen);
   const closePopover = () => setIsPopoverOpen(false);
 
-  const [nonEmpty, formattedNonEmptyPercent] = getAggregateData(data);
+  const [nonEmpty, formattedNonEmptyPercent] = useMemo(() => getAggregateData(data), [data]);
+  const sourcererScopeId = useMemo(() => getSourcererScopeId(TableId.alertsOnAlertsPage), []);
 
   const dataStatsButton = (
     <EuiButtonIcon
@@ -95,32 +117,6 @@ export const AlertsProgressBar: React.FC<AlertsProcessBarProps> = ({
         </EuiLink>
       </EuiText>
     </DataStatsWrapper>
-  );
-
-  const labelWithHoverActions = (key: string) => {
-    return (
-      <DefaultDraggable
-        field={groupBySelection}
-        hideTopN={true}
-        id={`top-alerts-${key}`}
-        value={key}
-        queryValue={key}
-        tooltipContent={null}
-        scopeId={TableId.alertsOnAlertsPage}
-      >
-        <EuiText size="xs" className="eui-textTruncate">
-          {key}
-        </EuiText>
-      </DefaultDraggable>
-    );
-  };
-
-  const color = useMemo(
-    () =>
-      euiTheme.themeName === 'EUI_THEME_BOREALIS'
-        ? euiTheme.colors.vis.euiColorVis6
-        : euiTheme.colors.vis.euiColorVis9,
-    [euiTheme]
   );
 
   return (
@@ -158,28 +154,38 @@ export const AlertsProgressBar: React.FC<AlertsProcessBarProps> = ({
               </>
             ) : (
               <>
-                {data.map(
-                  (item) =>
-                    item.key !== '-' && (
-                      <div key={`${item.key}`} data-test-subj={`progress-bar-${item.key}`}>
-                        <EuiProgress
-                          valueText={
-                            <EuiText size="xs" color="default">
-                              <strong>{item.percentageLabel}</strong>
-                            </EuiText>
-                          }
-                          max={1}
-                          color={color}
-                          size="s"
-                          value={item.percentage}
-                          label={
-                            item.key === 'Other' ? item.label : labelWithHoverActions(item.key)
-                          }
-                        />
-                        <EuiSpacer size="s" />
-                      </div>
-                    )
-                )}
+                {data
+                  .filter((item) => item.key !== '-')
+                  .map((item) => (
+                    <div key={`${item.key}`} data-test-subj={`progress-bar-${item.key}`}>
+                      <EuiFlexGroup alignItems="center" gutterSize="xs">
+                        <EuiFlexItem>
+                          <ProgressBarRow item={item} />
+                        </EuiFlexItem>
+                        <EuiFlexItem
+                          grow={false}
+                          data-test-subj={`progress-bar-${item.key}-actions`}
+                        >
+                          {item.key !== 'Other' ? (
+                            <SecurityCellActions
+                              mode={CellActionsMode.INLINE}
+                              visibleCellActions={0}
+                              triggerId={SecurityCellActionsTrigger.DEFAULT}
+                              data={{ field: groupBySelection, value: item.key }}
+                              sourcererScopeId={sourcererScopeId}
+                              metadata={{ scopeId: TableId.alertsOnAlertsPage }}
+                              disabledActionTypes={[SecurityCellActionType.SHOW_TOP_N]}
+                              extraActionsIconType="boxesVertical"
+                              extraActionsColor="text"
+                            />
+                          ) : (
+                            <EmptyAction />
+                          )}
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
+                      <EuiSpacer size="s" />
+                    </div>
+                  ))}
               </>
             )}
             <EuiSpacer size="s" />

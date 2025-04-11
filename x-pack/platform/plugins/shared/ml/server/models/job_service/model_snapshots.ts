@@ -64,9 +64,7 @@ export function modelSnapshotProvider(client: IScopedClusterClient, mlClient: Ml
     const { model } = await mlClient.revertModelSnapshot({
       job_id: jobId,
       snapshot_id: snapshotId,
-      body: {
-        delete_intervening_results: deleteInterveningResults,
-      },
+      delete_intervening_results: deleteInterveningResults,
     });
 
     // create calendar (if specified) and replay datafeed

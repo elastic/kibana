@@ -153,12 +153,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await es.indices.create({
         index: additionalIndexWithWrongMapping,
-        body: {
-          mappings: {
-            properties: {
-              bytes: {
-                type: 'keyword',
-              },
+        mappings: {
+          properties: {
+            bytes: {
+              type: 'keyword',
             },
           },
         },

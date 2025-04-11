@@ -6,8 +6,8 @@
  */
 
 import { isEmpty } from 'lodash';
-import type { SearchRequest as ESSearchRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { InferSearchResponseOf } from '@kbn/es-types';
+import type { SortOptions } from '@elastic/elasticsearch/lib/api/types';
+import type { ESSearchRequest, InferSearchResponseOf } from '@kbn/es-types';
 import type { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
 import { OBSERVABILITY_RULE_TYPE_IDS } from '@kbn/rule-data-utils';
 import type { InventoryRouteHandlerResources } from '../../routes/types';
@@ -26,8 +26,11 @@ export async function createAlertsClient({
     throw Error('No alert indices exist');
   }
   type RequiredParams = ESSearchRequest & {
+    _source?: string[] | false;
+    sort?: SortOptions[];
     size: number;
     track_total_hits: boolean | number;
+    search_after?: Array<string | number>;
   };
 
   return {

@@ -11,8 +11,9 @@ import { ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
 
 import { ALERT_REASON, ALERT_URL } from '@kbn/rule-data-utils';
 import { Spaces } from '../../../../../scenarios';
-import { FtrProviderContext } from '../../../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../../../common/ftr_provider_context';
 import { getUrlPrefix, ObjectRemover } from '../../../../../../common/lib';
+import type { SourceField } from './common';
 import {
   createConnector,
   ES_GROUPS_TO_WRITE,
@@ -25,7 +26,6 @@ import {
   RULE_INTERVAL_MILLIS,
   RULE_INTERVAL_SECONDS,
   RULE_TYPE_ID,
-  SourceField,
 } from './common';
 import { createDataStream, deleteDataStream } from '../../../create_test_data';
 
@@ -151,7 +151,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
 
         const docs = await waitForDocs(2);
         const messagePattern =
-          /Document count is \d+.?\d* in the last 30s in .kibana-alerting-test-data (?:index|data view). Alert when greater than -1./;
+          /Document count is \d+.?\d* in the last 30s in kibana-alerting-test-data (?:index|data view). Alert when greater than -1./;
 
         for (let i = 0; i < docs.length; i++) {
           const doc = docs[i];
@@ -182,7 +182,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
         );
         expect(alertDoc['kibana.alert.evaluation.threshold']).to.eql(-1);
         const value = parseInt(alertDoc['kibana.alert.evaluation.value'], 10);
-        expect(value).greaterThan(0);
+        expect(value >= 0).to.be(true);
         expect(alertDoc[ALERT_URL]).to.contain('/s/space1/app/');
         expect(alertDoc['host.name']).to.eql(['host-1']);
         expect(alertDoc['host.hostname']).to.eql(['host-1']);
@@ -269,7 +269,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
         await initData();
 
         const messagePattern =
-          /Document count is \d+.?\d* in the last 30s in .kibana-alerting-test-data (?:index|data view). Alert when greater than -1./;
+          /Document count is \d+.?\d* in the last 30s in kibana-alerting-test-data (?:index|data view). Alert when greater than -1./;
 
         const docs = await waitForDocs(2);
         for (let i = 0; i < docs.length; i++) {
@@ -391,7 +391,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
         await initData();
 
         const messagePattern =
-          /Document count is \d+.?\d* in the last 30s for group-\d+ in .kibana-alerting-test-data (?:index|data view). Alert when greater than -1./;
+          /Document count is \d+.?\d* in the last 30s for group-\d+ in kibana-alerting-test-data (?:index|data view). Alert when greater than -1./;
         const titlePattern = /rule 'always fire' matched query for group group-\d/;
         const conditionPattern =
           /Number of matching documents for group "group-\d" is greater than -1/;
@@ -478,7 +478,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
         await initData();
 
         const messagePattern =
-          /Document count is \d+.?\d* in the last 30s for group-\d+,\d+ in .kibana-alerting-test-data (?:index|data view). Alert when greater than -1./;
+          /Document count is \d+.?\d* in the last 30s for group-\d+,\d+ in kibana-alerting-test-data (?:index|data view). Alert when greater than -1./;
         const titlePattern = /rule 'always fire' matched query for group group-\d+,\d+/;
         const conditionPattern =
           /Number of matching documents for group "group-\d+,\d+" is greater than -1/;
@@ -608,7 +608,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
           const titlePattern = /rule 'always fire' matched query for group group-\d/;
           expect(title).to.match(titlePattern);
           const messagePattern =
-            /Document count is \d+.?\d* in the last 30s for group-\d+ in .kibana-alerting-test-data (?:index|data view). Alert when greater than -1./;
+            /Document count is \d+.?\d* in the last 30s for group-\d+ in kibana-alerting-test-data (?:index|data view). Alert when greater than -1./;
           expect(message).to.match(messagePattern);
           expect(hits).not.to.be.empty();
 
@@ -696,7 +696,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
           expect(name).to.be('always fire');
           expect(title).to.be(`rule 'always fire' matched query`);
           const messagePattern =
-            /Document count is \d+.?\d* in the last 30s in .kibana-alerting-test-data (?:index|data view). ./;
+            /Document count is \d+.?\d* in the last 30s in kibana-alerting-test-data (?:index|data view). ./;
           expect(message).to.match(messagePattern);
           expect(hits).not.to.be.empty();
 
@@ -806,7 +806,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
           expect(name).to.be('fires once');
           expect(title).to.be(`rule 'fires once' matched query`);
           const messagePattern =
-            /Document count is \d+.?\d* in the last 30s in .kibana-alerting-test-data (?:index|data view). Alert when greater than or equal to 0./;
+            /Document count is \d+.?\d* in the last 30s in kibana-alerting-test-data (?:index|data view). Alert when greater than or equal to 0./;
           expect(message).to.match(messagePattern);
           expect(hits).not.to.be.empty();
           expect(previousTimestamp).to.be.empty();
@@ -866,7 +866,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
           expect(name).to.be('always fire');
           expect(title).to.be(`rule 'always fire' matched query`);
           const messagePattern =
-            /Document count is \d+.?\d* in the last 30s in .kibana-alerting-test-data (?:index|data view). Alert when less than 1./;
+            /Document count is \d+.?\d* in the last 30s in kibana-alerting-test-data (?:index|data view). Alert when less than 1./;
           expect(message).to.match(messagePattern);
           expect(hits).to.be.empty();
 
@@ -944,7 +944,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
         expect(activeTitle).to.be(`rule 'fire then recovers' matched query`);
         expect(activeValue).to.be('0');
         expect(activeMessage).to.match(
-          /Document count is \d+.?\d* in the last 6s in .kibana-alerting-test-data (?:index|data view). Alert when less than 1./
+          /Document count is \d+.?\d* in the last 6s in kibana-alerting-test-data (?:index|data view). Alert when less than 1./
         );
 
         await createEsDocumentsInGroups(1, endDate);
@@ -959,7 +959,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
         expect(recoveredName).to.be('fire then recovers');
         expect(recoveredTitle).to.be(`rule 'fire then recovers' recovered`);
         expect(recoveredMessage).to.match(
-          /Document count is \d+.?\d* in the last 6s in .kibana-alerting-test-data (?:index|data view). Alert when less than 1./
+          /Document count is \d+.?\d* in the last 6s in kibana-alerting-test-data (?:index|data view). Alert when less than 1./
         );
       })
     );
@@ -1101,7 +1101,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
 
         const docs = await waitForDocs(2);
         const messagePattern =
-          /Document count is \d+.?\d* in the last 300s in .kibana-alerting-test-data (?:index|data view). Alert when greater than 0./;
+          /Document count is \d+.?\d* in the last 300s in kibana-alerting-test-data (?:index|data view). Alert when greater than 0./;
         expect(docs[0]._source.hits.length).greaterThan(0);
         expect(docs[0]._source.params.message).to.match(messagePattern);
 
@@ -1125,7 +1125,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
 
         const docs = await waitForDocs(2);
         const messagePattern =
-          /Document count is \d+.?\d* in the last 300s in .kibana-alerting-test-data (?:index|data view). Alert when greater than 0./;
+          /Document count is \d+.?\d* in the last 300s in kibana-alerting-test-data (?:index|data view). Alert when greater than 0./;
         expect(docs[0]._source.hits.length).greaterThan(0);
         expect(docs[0]._source.params.message).to.match(messagePattern);
 
@@ -1150,7 +1150,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
 
         const docs = await waitForDocs(2);
         const messagePattern =
-          /Document count is \d+.?\d* in the last 300s in .kibana-alerting-test-data (?:index|data view). Alert when greater than 0./;
+          /Document count is \d+.?\d* in the last 300s in kibana-alerting-test-data (?:index|data view). Alert when greater than 0./;
         expect(docs[0]._source.hits.length).greaterThan(0);
         expect(docs[0]._source.params.message).to.match(messagePattern);
 
@@ -1179,7 +1179,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
 
         expect(docs[0]._source.hits.length).greaterThan(0);
         const messagePattern =
-          /Document count is \d+.?\d* in the last 30s in .kibana-alerting-test-data (?:index|data view). Alert when greater than 0./;
+          /Document count is \d+.?\d* in the last 30s in kibana-alerting-test-data (?:index|data view). Alert when greater than 0./;
         expect(docs[0]._source.params.message).to.match(messagePattern);
 
         expect(docs[1]._source.hits.length).to.be(0);

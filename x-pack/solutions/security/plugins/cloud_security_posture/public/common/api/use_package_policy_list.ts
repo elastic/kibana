@@ -14,7 +14,7 @@ import {
 import { useQuery } from '@tanstack/react-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { CoreStart } from '@kbn/core/public';
-import { DETECTION_RULE_RULES_API_CURRENT_VERSION } from '../../../common/constants';
+import { DETECTION_RULE_RULES_API_CURRENT_VERSION } from '@kbn/cloud-security-posture-common';
 
 interface PackagePolicyListData {
   items: PackagePolicy[];

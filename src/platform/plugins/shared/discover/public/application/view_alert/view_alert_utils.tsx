@@ -11,16 +11,17 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import type { AggregateQuery } from '@kbn/es-query';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
-import { CoreStart, ToastsStart } from '@kbn/core/public';
+import type { CoreStart, ToastsStart } from '@kbn/core/public';
 import type { DataView, DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { Rule } from '@kbn/alerting-plugin/common';
 import type { RuleTypeParams } from '@kbn/alerting-plugin/common';
-import { ISearchSource, SerializedSearchSourceFields, getTime } from '@kbn/data-plugin/common';
+import type { ISearchSource, SerializedSearchSourceFields } from '@kbn/data-plugin/common';
+import { getTime } from '@kbn/data-plugin/common';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { Markdown } from '@kbn/shared-ux-markdown';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { Filter } from '@kbn/es-query';
-import { DiscoverAppLocatorParams } from '../../../common/app_locator';
+import type { Filter } from '@kbn/es-query';
+import type { DiscoverAppLocatorParams } from '../../../common/app_locator';
 
 export interface SearchThresholdAlertParams extends RuleTypeParams {
   searchConfiguration: SerializedSearchSourceFields;

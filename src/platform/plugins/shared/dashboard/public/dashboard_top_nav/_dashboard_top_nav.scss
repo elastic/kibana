@@ -1,6 +1,7 @@
 .kbnBody {
   .dshTitleBreadcrumbs__updateIcon {
     margin-left: $euiSizeXS;
+    margin-top: calc(-1 * $euiSizeXS / 2);
     cursor: pointer;
   }
 

@@ -28,7 +28,7 @@ import {
   ReqStatus,
   selectFetchNotesByDocumentIdsError,
   selectFetchNotesByDocumentIdsStatus,
-  selectSortedNotesByDocumentId,
+  makeSelectNotesByDocumentId,
 } from '../../../../notes/store/notes.slice';
 import { useDocumentDetailsContext } from '../../shared/context';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
@@ -95,13 +95,8 @@ export const NotesDetails = memo(() => {
       );
     }
   }, [dispatch, eventId, timelineSavedObjectId, timeline.pinnedEventIds]);
-
-  const notes: Note[] = useSelector((state: State) =>
-    selectSortedNotesByDocumentId(state, {
-      documentId: eventId,
-      sort: { field: 'created', direction: 'asc' },
-    })
-  );
+  const selectNotesByDocumentId = useMemo(() => makeSelectNotesByDocumentId(), []);
+  const notes: Note[] = useSelector((state: State) => selectNotesByDocumentId(state, eventId));
   const fetchStatus = useSelector((state: State) => selectFetchNotesByDocumentIdsStatus(state));
   const fetchError = useSelector((state: State) => selectFetchNotesByDocumentIdsError(state));
 

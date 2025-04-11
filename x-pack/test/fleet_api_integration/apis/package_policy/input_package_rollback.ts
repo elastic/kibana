@@ -116,7 +116,7 @@ export default function (providerContext: FtrProviderContext) {
     it('should rollback package install on package policy create failure', async () => {
       const res = await createPackagePolicyWithDataset(agentPolicyId, 'test*', 400);
       expect(res.body.message).to.eql(
-        'Package policy is invalid: inputs.logfile.streams.input_package_upgrade.logs.vars.data_stream.dataset: Dataset contains invalid characters'
+        'Package policy is invalid: inputs.logfile.streams.input_package_upgrade.logs.vars.data_stream.dataset: ["Dataset contains invalid characters"]'
       );
 
       const pkg = await getPackage(PACKAGE_NAME, START_VERSION);

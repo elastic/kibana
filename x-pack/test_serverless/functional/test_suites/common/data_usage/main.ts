@@ -46,11 +46,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       for (const { name } of dataStreamsMockResponse) {
         await es.indices.putIndexTemplate({
           name,
-          body: {
-            index_patterns: [name],
-            data_stream: {},
-            priority: 200,
-          },
+          index_patterns: [name],
+          data_stream: {},
+          priority: 200,
         });
         await es.indices.createDataStream({ name });
       }

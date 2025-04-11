@@ -12,3 +12,4 @@ export * from './use_scopes';
 export * from './use_genai_connectors';
 export * from './use_confirm_modal';
 export * from './use_conversations_by_date';
+export * from './use_conversation_context_menu';

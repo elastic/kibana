@@ -7,7 +7,7 @@
 
 import { cloneDeep, get, isEmpty, isNull, isUndefined, merge, omit } from 'lodash';
 import type { Alert } from '@kbn/alerts-as-data-utils';
-import { RuleAlertData } from '../../types';
+import type { RuleAlertData } from '../../types';
 import { REFRESH_FIELDS_ALL } from './alert_conflict_resolver';
 
 const expandDottedField = (dottedFieldName: string, val: unknown): object => {

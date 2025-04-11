@@ -31,7 +31,6 @@ export const getRetrieveIntegrationsNode = ({
 }: GetRetrieveIntegrationsNodeParams): GraphNode => {
   return async (state) => {
     const query = state.semantic_query;
-
     const integrations = await ruleMigrationsRetriever.integrations.getIntegrations(query);
     if (integrations.length === 0) {
       telemetryClient.reportIntegrationsMatch({
@@ -66,7 +65,6 @@ export const getRetrieveIntegrationsNode = ({
       integrations: integrationsJson,
       splunk_rule: JSON.stringify(splunkRule, null, 2),
     })) as GetMatchedIntegrationResponse;
-
     const comments = response.summary
       ? [generateAssistantComment(cleanMarkdown(response.summary))]
       : undefined;

@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import type { TransportResult } from '@elastic/elasticsearch';
 import {
   ConcreteTaskInstance,
@@ -61,11 +61,9 @@ export default function createGetTests({ getService }: FtrProviderContext) {
       > = await es.search(
         {
           index: '.kibana_task_manager',
-          body: {
-            query: {
-              term: {
-                _id: 'task:be7e1250-3322-11eb-94c1-db6995e8389f',
-              },
+          query: {
+            term: {
+              _id: 'task:be7e1250-3322-11eb-94c1-db6995e8389f',
             },
           },
         },
@@ -90,11 +88,9 @@ export default function createGetTests({ getService }: FtrProviderContext) {
       > = await es.search(
         {
           index: '.kibana_task_manager',
-          body: {
-            query: {
-              term: {
-                _id: 'task:d33d7590-8377-11ec-8c11-2dfe94229b95',
-              },
+          query: {
+            term: {
+              _id: 'task:d33d7590-8377-11ec-8c11-2dfe94229b95',
             },
           },
         },
@@ -144,11 +140,9 @@ export default function createGetTests({ getService }: FtrProviderContext) {
         {
           index: '.kibana_task_manager',
           size: 100,
-          body: {
-            query: {
-              bool: {
-                filter: [{ term: { type: 'task' } }],
-              },
+          query: {
+            bool: {
+              filter: [{ term: { type: 'task' } }],
             },
           },
         },
@@ -173,11 +167,9 @@ export default function createGetTests({ getService }: FtrProviderContext) {
         {
           index: '.kibana_task_manager',
           size: 100,
-          body: {
-            query: {
-              bool: {
-                filter: [{ term: { type: 'task' } }],
-              },
+          query: {
+            bool: {
+              filter: [{ term: { type: 'task' } }],
             },
           },
         },
@@ -203,11 +195,9 @@ export default function createGetTests({ getService }: FtrProviderContext) {
           {
             index: '.kibana_task_manager',
             size: 100,
-            body: {
-              query: {
-                bool: {
-                  filter: [{ term: { type: 'task' } }],
-                },
+            query: {
+              bool: {
+                filter: [{ term: { type: 'task' } }],
               },
             },
           },
@@ -242,11 +232,9 @@ export default function createGetTests({ getService }: FtrProviderContext) {
           {
             index: '.kibana_task_manager',
             size: 100,
-            body: {
-              query: {
-                bool: {
-                  filter: [{ term: { type: 'task' } }],
-                },
+            query: {
+              bool: {
+                filter: [{ term: { type: 'task' } }],
               },
             },
           },

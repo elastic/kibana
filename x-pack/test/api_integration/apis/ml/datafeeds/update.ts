@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../../functional/services/ml/security_common';
@@ -29,12 +29,12 @@ export default ({ getService }: FtrProviderContext) => {
     expectedStatusCode: number,
     space?: string
   ) {
-    const datafeedId = datafeedConfig.datafeed_id;
+    const { datafeed_id: datafeedId, ...requestBody } = datafeedConfig;
     const { body, status } = await supertest
       .post(`${space ? `/s/${space}` : ''}/internal/ml/datafeeds/${datafeedId}/_update`)
       .auth(user, ml.securityCommon.getPasswordForUser(user))
       .set(getCommonRequestHeader('1'))
-      .send(datafeedConfig.body);
+      .send(requestBody);
     ml.api.assertResponseStatusCode(expectedStatusCode, status, body);
 
     return body;
@@ -62,7 +62,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     it('should update datafeed with correct space', async () => {
       await updateDatafeed(
-        { datafeed_id: datafeedIdSpace1, body: { query_delay: newQueryDelay } },
+        { datafeed_id: datafeedIdSpace1, query_delay: newQueryDelay },
         USER.ML_POWERUSER_ALL_SPACES,
         200,
         idSpace1
@@ -79,7 +79,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     it('should not update datafeed with incorrect space', async () => {
       await updateDatafeed(
-        { datafeed_id: datafeedIdSpace1, body: { query_delay: newQueryDelay } },
+        { datafeed_id: datafeedIdSpace1, query_delay: newQueryDelay },
         USER.ML_POWERUSER_ALL_SPACES,
         404,
         idSpace2
@@ -88,7 +88,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     it('should not be updatable by ml viewer user', async () => {
       await updateDatafeed(
-        { datafeed_id: datafeedIdSpace1, body: { query_delay: newQueryDelay } },
+        { datafeed_id: datafeedIdSpace1, query_delay: newQueryDelay },
         USER.ML_VIEWER_ALL_SPACES,
         403,
         idSpace1

@@ -32,13 +32,7 @@ const mockChatService: MockedChatService = {
   hasFunction: jest.fn().mockReturnValue(false),
   hasRenderFunction: jest.fn().mockReturnValue(true),
   renderFunction: jest.fn(),
-  getSystemMessage: jest.fn().mockReturnValue({
-    '@timestamp': new Date().toISOString(),
-    message: {
-      content: 'system',
-      role: MessageRole.System,
-    },
-  }),
+  getSystemMessage: jest.fn().mockReturnValue('system'),
   getScopes: jest.fn(),
 };
 
@@ -88,11 +82,11 @@ describe('useChat', () => {
       });
     });
 
-    it('returns the initial messages including the system message', () => {
+    it('returns the initial messages', () => {
       const { messages } = hookResult.result.current;
-      expect(messages.length).toBe(2);
-      expect(messages[0].message.role).toBe('system');
-      expect(messages[1].message.content).toBe('hello');
+      expect(messages.length).toBe(1);
+      expect(messages[0].message.role).toBe(MessageRole.User);
+      expect(messages[0].message.content).toBe('hello');
     });
 
     it('sets chatState to ready', () => {
@@ -166,8 +160,7 @@ describe('useChat', () => {
       });
 
       it('shows an empty list of messages', () => {
-        expect(hookResult.result.current.messages.length).toBe(1);
-        expect(hookResult.result.current.messages[0].message.role).toBe(MessageRole.System);
+        expect(hookResult.result.current.messages.length).toBe(0);
       });
 
       it('aborts the running request', () => {
@@ -187,7 +180,7 @@ describe('useChat', () => {
           });
         });
 
-        expect(hookResult.result.current.messages[2].message.content).toBe('good');
+        expect(hookResult.result.current.messages[1].message.content).toBe('good');
       });
     });
 
@@ -222,7 +215,7 @@ describe('useChat', () => {
           subject.complete();
         });
 
-        expect(hookResult.result.current.messages[2].message.content).toBe('goodbye');
+        expect(hookResult.result.current.messages[1].message.content).toBe('goodbye');
         expect(hookResult.result.current.state).toBe(ChatState.Ready);
       });
     });
@@ -242,7 +235,7 @@ describe('useChat', () => {
       });
 
       it('shows the partial message and sets chatState to aborted', () => {
-        expect(hookResult.result.current.messages[2].message.content).toBe('good');
+        expect(hookResult.result.current.messages[1].message.content).toBe('good');
         expect(hookResult.result.current.state).toBe(ChatState.Aborted);
       });
 
@@ -285,7 +278,7 @@ describe('useChat', () => {
       });
 
       it('shows the partial message and sets chatState to error', () => {
-        expect(hookResult.result.current.messages[2].message.content).toBe('good');
+        expect(hookResult.result.current.messages[1].message.content).toBe('good');
         expect(hookResult.result.current.state).toBe(ChatState.Error);
       });
 

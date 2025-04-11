@@ -66,7 +66,7 @@ describe('createKnowledgeBaseEntry', () => {
       telemetry,
     });
     expect(esClient.create).toHaveBeenCalledWith({
-      body: {
+      document: {
         '@timestamp': '2024-01-28T04:20:02.394Z',
         created_at: '2024-01-28T04:20:02.394Z',
         created_by: 'my_profile_uid',
@@ -79,7 +79,7 @@ describe('createKnowledgeBaseEntry', () => {
         source: 'test',
         text: 'test',
         name: 'test',
-        kb_resource: 'test',
+        kb_resource: 'user',
         required: false,
         vector: undefined,
       },
@@ -118,7 +118,7 @@ describe('createKnowledgeBaseEntry', () => {
       telemetry,
     });
     expect(esClient.create).toHaveBeenCalledWith({
-      body: {
+      document: {
         '@timestamp': '2024-01-28T04:20:02.394Z',
         created_at: '2024-01-28T04:20:02.394Z',
         created_by: 'my_profile_uid',

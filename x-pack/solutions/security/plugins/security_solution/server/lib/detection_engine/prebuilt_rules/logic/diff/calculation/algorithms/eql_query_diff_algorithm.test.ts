@@ -37,7 +37,7 @@ describe('eqlQueryDiffAlgorithm', () => {
       },
     };
 
-    const result = eqlQueryDiffAlgorithm(mockVersions);
+    const result = eqlQueryDiffAlgorithm(mockVersions, false);
 
     expect(result).toEqual(
       expect.objectContaining({
@@ -68,7 +68,7 @@ describe('eqlQueryDiffAlgorithm', () => {
       },
     };
 
-    const result = eqlQueryDiffAlgorithm(mockVersions);
+    const result = eqlQueryDiffAlgorithm(mockVersions, false);
 
     expect(result).toEqual(
       expect.objectContaining({
@@ -99,7 +99,7 @@ describe('eqlQueryDiffAlgorithm', () => {
       },
     };
 
-    const result = eqlQueryDiffAlgorithm(mockVersions);
+    const result = eqlQueryDiffAlgorithm(mockVersions, false);
 
     expect(result).toEqual(
       expect.objectContaining({
@@ -130,7 +130,7 @@ describe('eqlQueryDiffAlgorithm', () => {
       },
     };
 
-    const result = eqlQueryDiffAlgorithm(mockVersions);
+    const result = eqlQueryDiffAlgorithm(mockVersions, false);
 
     expect(result).toEqual(
       expect.objectContaining({
@@ -162,7 +162,7 @@ describe('eqlQueryDiffAlgorithm', () => {
         },
       };
 
-      const result = eqlQueryDiffAlgorithm(mockVersions);
+      const result = eqlQueryDiffAlgorithm(mockVersions, false);
 
       expect(result).toEqual(
         expect.objectContaining({
@@ -193,7 +193,7 @@ describe('eqlQueryDiffAlgorithm', () => {
         },
       };
 
-      const result = eqlQueryDiffAlgorithm(mockVersions);
+      const result = eqlQueryDiffAlgorithm(mockVersions, false);
 
       expect(result).toEqual(
         expect.objectContaining({
@@ -207,62 +207,124 @@ describe('eqlQueryDiffAlgorithm', () => {
   });
 
   describe('if base_version is missing', () => {
-    it('returns current_version as merged output if current_version and target_version are the same - scenario -AA', () => {
-      const mockVersions: ThreeVersionsOf<RuleEqlQuery> = {
-        base_version: MissingVersion,
-        current_version: {
-          query: 'query where true',
-          language: 'eql',
-          filters: [],
-        },
-        target_version: {
-          query: 'query where true',
-          language: 'eql',
-          filters: [],
-        },
-      };
+    describe('if current_version and target_version are the same - scenario -AA', () => {
+      it('returns NONE conflict if rule is NOT customized', () => {
+        const mockVersions: ThreeVersionsOf<RuleEqlQuery> = {
+          base_version: MissingVersion,
+          current_version: {
+            query: 'query where true',
+            language: 'eql',
+            filters: [],
+          },
+          target_version: {
+            query: 'query where true',
+            language: 'eql',
+            filters: [],
+          },
+        };
 
-      const result = eqlQueryDiffAlgorithm(mockVersions);
+        const result = eqlQueryDiffAlgorithm(mockVersions, false);
 
-      expect(result).toEqual(
-        expect.objectContaining({
-          has_base_version: false,
-          base_version: undefined,
-          merged_version: mockVersions.current_version,
-          diff_outcome: ThreeWayDiffOutcome.MissingBaseNoUpdate,
-          merge_outcome: ThreeWayMergeOutcome.Current,
-          conflict: ThreeWayDiffConflict.NONE,
-        })
-      );
+        expect(result).toEqual(
+          expect.objectContaining({
+            has_base_version: false,
+            base_version: undefined,
+            merged_version: mockVersions.target_version,
+            diff_outcome: ThreeWayDiffOutcome.MissingBaseNoUpdate,
+            merge_outcome: ThreeWayMergeOutcome.Target,
+            conflict: ThreeWayDiffConflict.NONE,
+          })
+        );
+      });
+
+      it('returns NONE conflict if rule is customized', () => {
+        const mockVersions: ThreeVersionsOf<RuleEqlQuery> = {
+          base_version: MissingVersion,
+          current_version: {
+            query: 'query where true',
+            language: 'eql',
+            filters: [],
+          },
+          target_version: {
+            query: 'query where true',
+            language: 'eql',
+            filters: [],
+          },
+        };
+
+        const result = eqlQueryDiffAlgorithm(mockVersions, true);
+
+        expect(result).toEqual(
+          expect.objectContaining({
+            has_base_version: false,
+            base_version: undefined,
+            merged_version: mockVersions.target_version,
+            diff_outcome: ThreeWayDiffOutcome.MissingBaseNoUpdate,
+            merge_outcome: ThreeWayMergeOutcome.Target,
+            conflict: ThreeWayDiffConflict.NONE,
+          })
+        );
+      });
     });
 
-    it('returns target_version as merged output if current_version and target_version are different - scenario -AB', () => {
-      const mockVersions: ThreeVersionsOf<RuleEqlQuery> = {
-        base_version: MissingVersion,
-        current_version: {
-          query: 'query where true',
-          language: 'eql',
-          filters: [],
-        },
-        target_version: {
-          query: 'query where false',
-          language: 'eql',
-          filters: [],
-        },
-      };
+    describe('if current_version and target_version are different - scenario -AB', () => {
+      it('returns NONE conflict if rule is NOT customized', () => {
+        const mockVersions: ThreeVersionsOf<RuleEqlQuery> = {
+          base_version: MissingVersion,
+          current_version: {
+            query: 'query where true',
+            language: 'eql',
+            filters: [],
+          },
+          target_version: {
+            query: 'query where false',
+            language: 'eql',
+            filters: [],
+          },
+        };
 
-      const result = eqlQueryDiffAlgorithm(mockVersions);
+        const result = eqlQueryDiffAlgorithm(mockVersions, false);
 
-      expect(result).toEqual(
-        expect.objectContaining({
-          has_base_version: false,
-          base_version: undefined,
-          merged_version: mockVersions.target_version,
-          diff_outcome: ThreeWayDiffOutcome.MissingBaseCanUpdate,
-          merge_outcome: ThreeWayMergeOutcome.Target,
-          conflict: ThreeWayDiffConflict.SOLVABLE,
-        })
-      );
+        expect(result).toEqual(
+          expect.objectContaining({
+            has_base_version: false,
+            base_version: undefined,
+            merged_version: mockVersions.target_version,
+            diff_outcome: ThreeWayDiffOutcome.MissingBaseCanUpdate,
+            merge_outcome: ThreeWayMergeOutcome.Target,
+            conflict: ThreeWayDiffConflict.NONE,
+          })
+        );
+      });
+
+      it('returns SOLVABLE conflict if rule is customized', () => {
+        const mockVersions: ThreeVersionsOf<RuleEqlQuery> = {
+          base_version: MissingVersion,
+          current_version: {
+            query: 'query where true',
+            language: 'eql',
+            filters: [],
+          },
+          target_version: {
+            query: 'query where false',
+            language: 'eql',
+            filters: [],
+          },
+        };
+
+        const result = eqlQueryDiffAlgorithm(mockVersions, true);
+
+        expect(result).toEqual(
+          expect.objectContaining({
+            has_base_version: false,
+            base_version: undefined,
+            merged_version: mockVersions.target_version,
+            diff_outcome: ThreeWayDiffOutcome.MissingBaseCanUpdate,
+            merge_outcome: ThreeWayMergeOutcome.Target,
+            conflict: ThreeWayDiffConflict.SOLVABLE,
+          })
+        );
+      });
     });
   });
 });

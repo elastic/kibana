@@ -82,7 +82,8 @@ export const spacesManagementApp = Object.freeze({
           text: title,
           href: `/`,
         };
-        const { notifications, application, chrome, http, overlays } = coreStart;
+        const { notifications, application, chrome, http, overlays, docLinks } = coreStart;
+        const enableSecurityLink = docLinks.links.security.enableElasticSearchSecurityFeatures;
 
         chrome.docTitle.change(title);
 
@@ -174,6 +175,7 @@ export const spacesManagementApp = Object.freeze({
               allowFeatureVisibility={config.allowFeatureVisibility}
               allowSolutionVisibility={config.allowSolutionVisibility}
               getPrivilegesAPIClient={getPrivilegesAPIClient}
+              enableSecurityLink={enableSecurityLink}
             />
           );
         };

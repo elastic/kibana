@@ -8,12 +8,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { AuthenticatedUser } from '@kbn/core-security-common';
-
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 
-import type { DefendInsightsDataClient } from '../../ai_assistant_data_clients/defend_insights';
-
-import { transformESSearchToDefendInsights } from '../../ai_assistant_data_clients/defend_insights/helpers';
+import type { DefendInsightsDataClient } from '../../lib/defend_insights/persistence';
+import { transformESSearchToDefendInsights } from '../../lib/defend_insights/persistence/helpers';
 import { getDefendInsightsSearchEsMock } from '../../__mocks__/defend_insights_schema.mock';
 import { getDefendInsightRequest } from '../../__mocks__/request';
 import {
@@ -63,7 +61,7 @@ describe('getDefendInsightRoute', () => {
     mockDataClient = getDefaultDataClient();
     mockCurrentInsight = transformESSearchToDefendInsights(getDefendInsightsSearchEsMock())[0];
 
-    context.elasticAssistant.getCurrentUser.mockReturnValue(mockUser);
+    context.elasticAssistant.getCurrentUser.mockResolvedValue(mockUser);
     context.elasticAssistant.getDefendInsightsDataClient.mockResolvedValue(mockDataClient);
     getDefendInsightRoute(server.router);
     (updateDefendInsightLastViewedAt as jest.Mock).mockResolvedValue(mockCurrentInsight);
@@ -109,7 +107,7 @@ describe('getDefendInsightRoute', () => {
   });
 
   it('should handle missing authenticated user', async () => {
-    context.elasticAssistant.getCurrentUser.mockReturnValueOnce(null);
+    context.elasticAssistant.getCurrentUser.mockResolvedValueOnce(null);
     const response = await server.inject(
       getDefendInsightRequest('insight-id1'),
       requestContextMock.convertContext(context)

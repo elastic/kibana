@@ -137,7 +137,7 @@ describe('dynamic', () => {
             fieldMetaOptions,
           } as ColorDynamicOptions,
         } as ColorDynamicStylePropertyDescriptor;
-        expect(extractColorFromStyleProperty(colorStyleProperty, defaultColor)).toBe('#9eb9d8');
+        expect(extractColorFromStyleProperty(colorStyleProperty, defaultColor)).toBe('#9dc3ff');
       });
     });
 

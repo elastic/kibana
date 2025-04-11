@@ -56,6 +56,7 @@ export type ReportingUser = { username: AuthenticatedUser['username'] } | false;
 export type ScrollConfig = ReportingConfigType['csv']['scroll'];
 
 export interface ReportingSetupDeps {
+  encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
   features: FeaturesPluginSetup;
   screenshotMode: ScreenshotModePluginSetup;
   taskManager: TaskManagerSetupContract;
@@ -63,7 +64,6 @@ export interface ReportingSetupDeps {
   security?: SecurityPluginSetup;
   spaces?: SpacesPluginSetup;
   usageCollection?: UsageCollectionSetup;
-  encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
 }
 
 export interface ReportingStartDeps {

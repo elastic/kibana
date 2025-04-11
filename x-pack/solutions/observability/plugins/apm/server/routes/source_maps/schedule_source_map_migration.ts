@@ -10,9 +10,9 @@ import type { FleetStartContract } from '@kbn/fleet-plugin/server';
 import type { ArtifactsClientInterface } from '@kbn/fleet-plugin/server/services';
 import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 import type { CoreStart, Logger } from '@kbn/core/server';
+import { APM_SOURCE_MAP_INDEX } from '@kbn/apm-sources-access-plugin/server';
 import { getApmArtifactClient } from '../fleet/source_maps';
 import { bulkCreateApmSourceMaps } from './bulk_create_apm_source_maps';
-import { APM_SOURCE_MAP_INDEX } from '../settings/apm_indices/apm_system_index_constants';
 import type { ApmSourceMap } from './create_apm_source_map_index_template';
 import type { APMPluginStartDependencies } from '../../types';
 import { createApmSourceMapIndexTemplate } from './create_apm_source_map_index_template';
@@ -125,8 +125,7 @@ export async function runFleetSourcemapArtifactsMigration({
       internalESClient,
     });
   } catch (e) {
-    logger.error('Failed to migrate APM fleet source map artifacts');
-    logger.error(e);
+    logger.error('Failed to migrate APM fleet source map artifacts', { error: e });
   }
 }
 
@@ -184,7 +183,7 @@ async function paginateArtifacts({
   }
 
   const migratedCount = (page - 1) * PER_PAGE + artifacts.length;
-  logger.info(`Migrating ${migratedCount} of ${total} source maps`);
+  logger.debug(`Migrating ${migratedCount} of ${total} source maps`);
 
   await bulkCreateApmSourceMaps({ artifacts, internalESClient });
 
@@ -199,7 +198,7 @@ async function paginateArtifacts({
       internalESClient,
     });
   } else {
-    logger.info(`Successfully migrated ${total} source maps`);
+    logger.debug(`Successfully migrated ${total} source maps`);
   }
 }
 
@@ -209,10 +208,8 @@ async function getLatestApmSourceMap(internalESClient: ElasticsearchClient) {
     track_total_hits: false,
     size: 1,
     _source: ['created'],
-    sort: [{ created: { order: 'desc' } }],
-    body: {
-      query: { match_all: {} },
-    },
+    sort: [{ created: { order: 'desc' as const } }],
+    query: { match_all: {} },
   };
   const res = await internalESClient.search<ApmSourceMap>(params);
   return res.hits.hits[0]?._source?.created;

@@ -10,7 +10,6 @@ import React from 'react';
 import { EuiText } from '@elastic/eui';
 import {
   ENTERPRISE_SEARCH_APP_ID,
-  ENTERPRISE_SEARCH_ANALYTICS_APP_ID,
   SEARCH_ELASTICSEARCH,
   SEARCH_VECTOR_SEARCH,
   SEARCH_SEMANTIC_SEARCH,
@@ -49,7 +48,7 @@ export const buildBaseClassicNavItems = (): ClassicNavItem[] => {
       {
         'data-test-subj': 'searchSideNav-Indices',
         deepLink: {
-          link: 'management:index_management',
+          link: 'elasticsearchIndexManagement',
         },
         id: 'search_indices',
       },
@@ -95,13 +94,6 @@ export const buildBaseClassicNavItems = (): ClassicNavItem[] => {
         },
         id: 'searchApplications',
       },
-      {
-        'data-test-subj': 'searchSideNav-BehavioralAnalytics',
-        deepLink: {
-          link: ENTERPRISE_SEARCH_ANALYTICS_APP_ID,
-        },
-        id: 'analyticsCollections',
-      },
     ],
     name: i18n.translate('xpack.enterpriseSearch.nav.applicationsTitle', {
       defaultMessage: 'Build',
@@ -127,6 +119,14 @@ export const buildBaseClassicNavItems = (): ClassicNavItem[] => {
           shouldShowActiveForSubroutes: true,
         },
         id: 'synonyms',
+      },
+      {
+        'data-test-subj': 'searchSideNav-QueryRules',
+        deepLink: {
+          link: 'searchQueryRules',
+          shouldShowActiveForSubroutes: true,
+        },
+        id: 'searchQueryRules',
       },
     ],
     name: i18n.translate('xpack.enterpriseSearch.nav.relevanceTitle', {

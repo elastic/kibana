@@ -9,6 +9,7 @@ import type { SavedObjectReference } from '@kbn/core-saved-objects-api-server';
 import { DataViewSpec, DataViewPersistableStateService } from '@kbn/data-views-plugin/common';
 import { AggregateQuery, Query, Filter } from '@kbn/es-query';
 import { FilterManager } from '@kbn/data-plugin/public';
+import { Datatable } from '@kbn/expressions-plugin/common';
 import { DOC_TYPE, INDEX_PATTERN_TYPE } from '../../common/constants';
 import { VisualizationState, DatasourceStates } from '.';
 import { LensDocument } from '../persistence';
@@ -121,4 +122,18 @@ export function mergeToNewDoc(
       adHocDataViews: persistableAdHocDataViews,
     },
   };
+}
+
+export function getActiveDataFromDatatable(
+  defaultLayerId: string,
+  tables: Record<string, Datatable> = {}
+) {
+  return Object.entries(tables).reduce<Record<string, Datatable>>(
+    (acc, [key, value], _index, { length }) => {
+      const id = length === 1 ? defaultLayerId : key;
+      acc[id] = value as Datatable;
+      return acc;
+    },
+    {}
+  );
 }

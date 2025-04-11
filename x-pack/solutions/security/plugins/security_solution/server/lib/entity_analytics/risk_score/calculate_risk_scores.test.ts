@@ -204,30 +204,6 @@ describe('calculateRiskScores()', () => {
       expect(response.scores.service).toHaveLength(2);
     });
 
-    it('calculates risk score for service when the experimental flag is enabled', async () => {
-      const response = await calculateRiskScores({
-        ...params,
-        experimentalFeatures: {
-          ...mockGlobalState.app.enableExperimental,
-          serviceEntityStoreEnabled: true,
-        },
-      });
-
-      expect(response.scores.service).toHaveLength(2);
-    });
-
-    it('does NOT calculates risk score for service when the experimental flag is disabled', async () => {
-      const response = await calculateRiskScores({
-        ...params,
-        experimentalFeatures: {
-          ...mockGlobalState.app.enableExperimental,
-          serviceEntityStoreEnabled: false,
-        },
-      });
-
-      expect(response.scores.service).toHaveLength(0);
-    });
-
     it('returns scores in the expected format', async () => {
       const {
         scores: { host: hostScores },

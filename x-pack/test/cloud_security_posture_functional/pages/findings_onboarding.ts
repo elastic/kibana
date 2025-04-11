@@ -9,14 +9,22 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
-export default ({ getPageObjects }: FtrProviderContext) => {
+export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const PageObjects = getPageObjects(['common', 'findings', 'header']);
+  const retry = getService('retry');
 
   describe('Findings Page onboarding', function () {
     this.tags(['cloud_security_posture_findings_onboarding']);
     let findings: typeof PageObjects.findings;
     let notInstalledCSP: typeof findings.notInstalledCSP;
     let thirdPartyIntegrationsNoMisconfigurationsFindingsPrompt: typeof findings.thirdPartyIntegrationsNoMisconfigurationsFindingsPrompt;
+
+    // wrapper function to waitUntilLoadingHasFinished
+    const navigateToMisconfigurationsWithRetry = async () => {
+      await retry.try(async () => {
+        await PageObjects.header.waitUntilLoadingHasFinished();
+      });
+    };
 
     beforeEach(async () => {
       findings = PageObjects.findings;
@@ -29,7 +37,7 @@ export default ({ getPageObjects }: FtrProviderContext) => {
 
     it('Misconfigurations - clicking on the `No integrations installed` prompt action button - `install cloud posture integration`: navigates to the CSPM integration installation page', async () => {
       await findings.navigateToMisconfigurations();
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await navigateToMisconfigurationsWithRetry();
       const element = await notInstalledCSP.getElement();
       expect(element).to.not.be(null);
 
@@ -40,7 +48,7 @@ export default ({ getPageObjects }: FtrProviderContext) => {
 
     it('Misconfigurations - clicking on the `No integrations installed` prompt action button - `install kubernetes posture integration`: navigates to the KSPM integration installation page', async () => {
       await findings.navigateToMisconfigurations();
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await navigateToMisconfigurationsWithRetry();
       const element = await notInstalledCSP.getElement();
       expect(element).to.not.be(null);
 
@@ -51,7 +59,7 @@ export default ({ getPageObjects }: FtrProviderContext) => {
 
     it('Misconfigurations - clicking on the `Third party integrations` prompt action button - `Wiz Integration`: navigates to the Wiz integration installation page', async () => {
       await findings.navigateToMisconfigurations();
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await navigateToMisconfigurationsWithRetry();
       const element = await thirdPartyIntegrationsNoMisconfigurationsFindingsPrompt.getElement();
       expect(element).to.not.be(null);
 

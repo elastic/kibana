@@ -253,9 +253,7 @@ export const listArtifacts = async (
       size: perPage,
       track_total_hits: true,
       rest_total_hits_as_int: true,
-      body: {
-        sort: [{ [sortField]: { order: sortOrder } }],
-      },
+      sort: [{ [sortField]: { order: sortOrder } }],
     });
 
     return {

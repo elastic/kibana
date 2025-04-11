@@ -7,7 +7,8 @@
 
 import React from 'react';
 import { EuiSkeletonText } from '@elastic/eui';
-import { FileUploadComponentProps, lazyLoadModules } from '../lazy_load_bundle';
+import type { FileUploadComponentProps } from '../lazy_load_bundle';
+import { lazyLoadModules } from '../lazy_load_bundle';
 
 interface State {
   GeoUploadWizard: React.ComponentType<FileUploadComponentProps> | null;

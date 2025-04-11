@@ -36,6 +36,9 @@ const {
   clickInsightsResultRemediationButton,
   scanButtonShouldBe,
   clickTrustedAppFormSubmissionButton,
+  validateErrorToastContent,
+  surveySectionExists,
+  surveySectionDoesNotExist,
 } = workflowInsightsSelectors;
 
 describe(
@@ -47,13 +50,6 @@ describe(
       // skipped on MKI since feature flags are not supported there
       '@skipInServerlessMKI',
     ],
-    env: {
-      ftrConfig: {
-        kbnServerArgs: [
-          `--xpack.securitySolution.enableExperimental=${JSON.stringify(['defendInsights'])}`,
-        ],
-      },
-    },
   },
   () => {
     const connectorName = 'TEST-CONNECTOR';
@@ -110,6 +106,23 @@ describe(
         selectConnector(connectorId);
         chooseConnectorButtonExistsWithLabel(connectorName);
 
+        surveySectionDoesNotExist();
+
+        scanButtonShouldBe('enabled');
+      });
+
+      it('should display an error toast if connector was created with invalid tokens', () => {
+        const failureReason = 'Invalid token';
+        loadEndpointDetailsFlyout(endpointId);
+
+        chooseConnectorButtonExistsWithLabel('Select a connector');
+        selectConnector(connectorId);
+        chooseConnectorButtonExistsWithLabel(connectorName);
+        stubDefendInsightsApiResponse({ status: 'failed', failureReason }, { times: 1 });
+
+        clickScanButton();
+
+        validateErrorToastContent(failureReason);
         scanButtonShouldBe('enabled');
       });
     });
@@ -126,6 +139,7 @@ describe(
       it('should properly initialize workflow insights with a connector already defined', () => {
         loadEndpointDetailsFlyout(endpointId);
         chooseConnectorButtonExistsWithLabel(connectorName);
+        surveySectionDoesNotExist();
         scanButtonShouldBe('enabled');
       });
 
@@ -154,6 +168,8 @@ describe(
         loadEndpointDetailsFlyout(endpointId);
 
         insightsResultExists();
+        surveySectionExists();
+
         insightsEmptyResultsCalloutDoesNotExist();
         clickInsightsResultRemediationButton();
 

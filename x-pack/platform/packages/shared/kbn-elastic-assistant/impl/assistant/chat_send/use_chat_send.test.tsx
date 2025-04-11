@@ -130,7 +130,6 @@ describe('use chat send', () => {
 
     await waitFor(() => {
       expect(reportAssistantMessageSent).toHaveBeenNthCalledWith(1, {
-        conversationId: testProps.currentConversation?.title,
         role: 'user',
         actionTypeId: '.gen-ai',
         model: undefined,
@@ -138,7 +137,6 @@ describe('use chat send', () => {
         isEnabledKnowledgeBase: false,
       });
       expect(reportAssistantMessageSent).toHaveBeenNthCalledWith(2, {
-        conversationId: testProps.currentConversation?.title,
         role: 'assistant',
         actionTypeId: '.gen-ai',
         model: undefined,

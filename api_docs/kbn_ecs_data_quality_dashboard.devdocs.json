@@ -13,7 +13,7 @@
         "signature": [
           "(indexName: string) => string"
         ],
-        "path": "x-pack/solutions/security/packages/ecs_data_quality_dashboard/impl/data_quality_panel/translations.ts",
+        "path": "x-pack/solutions/security/packages/ecs-data-quality-dashboard/impl/data_quality_panel/translations.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -27,7 +27,7 @@
             "signature": [
               "string"
             ],
-            "path": "x-pack/solutions/security/packages/ecs_data_quality_dashboard/impl/data_quality_panel/translations.ts",
+            "path": "x-pack/solutions/security/packages/ecs-data-quality-dashboard/impl/data_quality_panel/translations.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -48,7 +48,7 @@
         "signature": [
           "React.NamedExoticComponent<Props>"
         ],
-        "path": "x-pack/solutions/security/packages/ecs_data_quality_dashboard/impl/data_quality_panel/index.tsx",
+        "path": "x-pack/solutions/security/packages/ecs-data-quality-dashboard/impl/data_quality_panel/index.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -82,7 +82,7 @@
         "signature": [
           "(phase: string) => string"
         ],
-        "path": "x-pack/solutions/security/packages/ecs_data_quality_dashboard/impl/data_quality_panel/utils/get_ilm_phase_description.ts",
+        "path": "x-pack/solutions/security/packages/ecs-data-quality-dashboard/impl/data_quality_panel/utils/get_ilm_phase_description.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -96,7 +96,7 @@
             "signature": [
               "string"
             ],
-            "path": "x-pack/solutions/security/packages/ecs_data_quality_dashboard/impl/data_quality_panel/utils/get_ilm_phase_description.ts",
+            "path": "x-pack/solutions/security/packages/ecs-data-quality-dashboard/impl/data_quality_panel/utils/get_ilm_phase_description.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -116,7 +116,7 @@
         "tags": [],
         "label": "DATA_QUALITY_DASHBOARD_CONVERSATION_ID",
         "description": [],
-        "path": "x-pack/solutions/security/packages/ecs_data_quality_dashboard/impl/data_quality_panel/translations.ts",
+        "path": "x-pack/solutions/security/packages/ecs-data-quality-dashboard/impl/data_quality_panel/translations.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -128,7 +128,7 @@
         "tags": [],
         "label": "DATA_QUALITY_PROMPT_CONTEXT_PILL_TOOLTIP",
         "description": [],
-        "path": "x-pack/solutions/security/packages/ecs_data_quality_dashboard/impl/data_quality_panel/translations.ts",
+        "path": "x-pack/solutions/security/packages/ecs-data-quality-dashboard/impl/data_quality_panel/translations.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -142,7 +142,7 @@
         "description": [
           "The subtitle displayed on the Data Quality dashboard"
         ],
-        "path": "x-pack/solutions/security/packages/ecs_data_quality_dashboard/impl/data_quality_panel/translations.ts",
+        "path": "x-pack/solutions/security/packages/ecs-data-quality-dashboard/impl/data_quality_panel/translations.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -154,7 +154,7 @@
         "tags": [],
         "label": "DATA_QUALITY_SUGGESTED_USER_PROMPT",
         "description": [],
-        "path": "x-pack/solutions/security/packages/ecs_data_quality_dashboard/impl/data_quality_panel/translations.ts",
+        "path": "x-pack/solutions/security/packages/ecs-data-quality-dashboard/impl/data_quality_panel/translations.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -169,7 +169,7 @@
         "signature": [
           "\"https://www.elastic.co/guide/en/ecs/current/ecs-field-reference.html\""
         ],
-        "path": "x-pack/solutions/security/packages/ecs_data_quality_dashboard/impl/data_quality_panel/constants.ts",
+        "path": "x-pack/solutions/security/packages/ecs-data-quality-dashboard/impl/data_quality_panel/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -186,7 +186,7 @@
         "signature": [
           "\"https://www.elastic.co/guide/en/ecs/current/ecs-reference.html\""
         ],
-        "path": "x-pack/solutions/security/packages/ecs_data_quality_dashboard/impl/data_quality_panel/constants.ts",
+        "path": "x-pack/solutions/security/packages/ecs-data-quality-dashboard/impl/data_quality_panel/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -200,7 +200,7 @@
         "description": [
           "The label displayed for the `ILM phase` combo box on the Data Quality dashboard"
         ],
-        "path": "x-pack/solutions/security/packages/ecs_data_quality_dashboard/impl/data_quality_panel/translations.ts",
+        "path": "x-pack/solutions/security/packages/ecs-data-quality-dashboard/impl/data_quality_panel/translations.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -214,7 +214,7 @@
         "description": [
           "The tooltip for the `ILM phase` combo box on the Data Quality Dashboard"
         ],
-        "path": "x-pack/solutions/security/packages/ecs_data_quality_dashboard/impl/data_quality_panel/translations.ts",
+        "path": "x-pack/solutions/security/packages/ecs-data-quality-dashboard/impl/data_quality_panel/translations.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -229,7 +229,7 @@
         "signature": [
           "\"https://www.elastic.co/guide/en/elasticsearch/reference/current/mapping.html\""
         ],
-        "path": "x-pack/solutions/security/packages/ecs_data_quality_dashboard/impl/data_quality_panel/constants.ts",
+        "path": "x-pack/solutions/security/packages/ecs-data-quality-dashboard/impl/data_quality_panel/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -243,7 +243,7 @@
         "description": [
           "The placeholder for the `ILM phase` combo box on the Data Quality Dashboard"
         ],
-        "path": "x-pack/solutions/security/packages/ecs_data_quality_dashboard/impl/data_quality_panel/translations.ts",
+        "path": "x-pack/solutions/security/packages/ecs-data-quality-dashboard/impl/data_quality_panel/translations.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

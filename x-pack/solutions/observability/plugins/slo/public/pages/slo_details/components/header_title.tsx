@@ -5,12 +5,19 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiMarkdownFormat, EuiSkeletonText } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiMarkdownFormat,
+  EuiSkeletonText,
+  EuiText,
+} from '@elastic/eui';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
-import moment from 'moment';
 import React from 'react';
-import { SloStateBadge, SloStatusBadge } from '../../../components/slo/slo_badges';
+import { TagsList } from '@kbn/observability-shared-plugin/public';
+import { i18n } from '@kbn/i18n';
+import moment from 'moment';
+import { SloStateBadge, SloStatusBadge, SloValueBadge } from '../../../components/slo/slo_badges';
 import { SloRemoteBadge } from '../../slos/components/badges/slo_remote_badge';
 import { SLOGroupings } from './groupings/slo_groupings';
 
@@ -34,41 +41,36 @@ export function HeaderTitle({ isLoading, slo }: Props) {
         responsive={false}
         wrap={true}
       >
-        <SloStatusBadge slo={slo} />
+        <SloValueBadge slo={slo} isLoading={isLoading} />
+        <SloStatusBadge slo={slo} isLoading={isLoading} />
         <SloStateBadge slo={slo} />
         <SloRemoteBadge slo={slo} />
-        <EuiFlexGroup
-          direction="row"
-          gutterSize="m"
-          alignItems="center"
-          justifyContent="flexStart"
-          responsive={false}
-          wrap={true}
-        >
-          <EuiFlexItem grow={false}>
-            <EuiMarkdownFormat textSize="xs" color="subdued">
-              {i18n.translate('xpack.slo.sloDetails.headerTitle.lastUpdatedLabel', {
-                defaultMessage: '**Last updated by** {updatedBy} **on** {updatedAt}',
-                values: {
-                  updatedBy: slo.updatedBy ?? NOT_AVAILABLE_LABEL,
-                  updatedAt: moment(slo.updatedAt).format('ll'),
-                },
-              })}
-            </EuiMarkdownFormat>
+        {!!slo?.tags?.length && (
+          <EuiFlexItem grow={true}>
+            <TagsList tags={slo.tags} />
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiMarkdownFormat textSize="xs" color="subdued">
-              {i18n.translate('xpack.slo.sloDetails.headerTitle.createdLabel', {
-                defaultMessage: '**Created by** {createdBy} **on** {createdAt}',
-                values: {
-                  createdBy: slo.createdBy ?? NOT_AVAILABLE_LABEL,
-                  createdAt: moment(slo.createdAt).format('ll'),
-                },
-              })}
-            </EuiMarkdownFormat>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        )}
       </EuiFlexGroup>
+      {slo.description && (
+        <EuiFlexItem grow={true}>
+          <EuiText className={'eui-textBreakWord'}>
+            <EuiMarkdownFormat textSize="xs" color="subdued">
+              {slo.description}
+            </EuiMarkdownFormat>
+          </EuiText>
+        </EuiFlexItem>
+      )}
+      <EuiFlexItem grow={false}>
+        <EuiMarkdownFormat textSize="xs" color="subdued">
+          {i18n.translate('xpack.slo.sloDetails.headerTitle.lastUpdatedLabel', {
+            defaultMessage: '**Last updated by** {updatedBy} **on** {updatedAt}',
+            values: {
+              updatedBy: slo.updatedBy ?? NOT_AVAILABLE_LABEL,
+              updatedAt: moment(slo.updatedAt).format('ll'),
+            },
+          })}
+        </EuiMarkdownFormat>
+      </EuiFlexItem>
       <SLOGroupings slo={slo} />
     </EuiFlexGroup>
   );

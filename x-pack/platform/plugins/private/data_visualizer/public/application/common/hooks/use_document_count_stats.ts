@@ -9,7 +9,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { stringHash } from '@kbn/ml-string-hash';
 import { extractErrorProperties } from '@kbn/ml-error-utils';
 import type { Query } from '@kbn/es-query';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import type { SignificantItem } from '@kbn/ml-agg-utils';
 import type { RandomSampler, RandomSamplerWrapper } from '@kbn/ml-random-sampler-utils';
 import { createRandomSamplerWrapper } from '@kbn/ml-random-sampler-utils';
@@ -111,7 +111,7 @@ export const getDocumentCountStatsRequest = (
   };
   return {
     index,
-    body: searchBody,
+    ...searchBody,
   };
 };
 
@@ -122,7 +122,7 @@ export const processDocumentCountStats = (
 ): DocumentCountStats | undefined => {
   if (!body) return undefined;
 
-  const totalCount = (body.hits.total as estypes.SearchTotalHits).value ?? body.hits.total ?? 0;
+  const totalCount = (body.hits.total as estypes.SearchTotalHits)?.value ?? body.hits.total ?? 0;
 
   if (
     params.intervalMs === undefined ||

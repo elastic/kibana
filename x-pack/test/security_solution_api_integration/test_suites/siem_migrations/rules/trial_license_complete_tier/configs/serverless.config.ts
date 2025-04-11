@@ -5,16 +5,18 @@
  * 2.0.
  */
 
+import { PRECONFIGURED_BEDROCK_ACTION } from '../../../../../config/shared';
 import { createTestConfig } from '../../../../../config/serverless/config.base';
 
 export default createTestConfig({
   kbnTestServerArgs: [
-    `--xpack.securitySolution.enableExperimental=${JSON.stringify([])}`, // override to empty array so the flag is not disabled
+    `--xpack.securitySolution.enableExperimental=${JSON.stringify([])}`,
     `--xpack.securitySolutionServerless.productTypes=${JSON.stringify([
       { product_line: 'security', product_tier: 'complete' },
       { product_line: 'endpoint', product_tier: 'complete' },
       { product_line: 'cloud', product_tier: 'complete' },
     ])}`,
+    `--xpack.actions.preconfigured=${JSON.stringify(PRECONFIGURED_BEDROCK_ACTION)}`,
   ],
   testFiles: [require.resolve('..')],
   junit: {

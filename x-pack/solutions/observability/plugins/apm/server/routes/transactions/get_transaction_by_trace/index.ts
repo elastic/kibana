@@ -68,28 +68,26 @@ export async function getRootTransactionByTraceId({
     apm: {
       events: [ProcessorEvent.transaction as const],
     },
-    body: {
-      track_total_hits: false,
-      size: 1,
-      terminate_after: 1,
-      query: {
-        bool: {
-          should: [
-            {
-              constant_score: {
-                filter: {
-                  bool: {
-                    must_not: { exists: { field: PARENT_ID } },
-                  },
+    track_total_hits: false,
+    size: 1,
+    terminate_after: 1,
+    query: {
+      bool: {
+        should: [
+          {
+            constant_score: {
+              filter: {
+                bool: {
+                  must_not: { exists: { field: PARENT_ID } },
                 },
               },
             },
-          ],
-          filter: [{ term: { [TRACE_ID]: traceId } }, ...rangeQuery(start, end)],
-        },
+          },
+        ],
+        filter: [{ term: { [TRACE_ID]: traceId } }, ...rangeQuery(start, end)],
       },
-      fields: requiredFields,
     },
+    fields: requiredFields,
   };
 
   const resp = await apmEventClient.search('get_root_transaction_by_trace_id', params);

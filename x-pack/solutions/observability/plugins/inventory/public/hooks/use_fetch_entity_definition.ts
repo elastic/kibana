@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useAbortableAsync } from '@kbn/observability-utils-browser/hooks/use_abortable_async';
+import { useAbortableAsync } from '@kbn/react-hooks';
 import { useKibana } from './use_kibana';
 
 export const useFetchEntityDefinition = (id: string) => {

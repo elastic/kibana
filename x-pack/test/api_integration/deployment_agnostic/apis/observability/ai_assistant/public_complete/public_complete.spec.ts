@@ -10,30 +10,23 @@ import {
   MessageRole,
   type Message,
 } from '@kbn/observability-ai-assistant-plugin/common';
-import { type StreamingChatResponseEvent } from '@kbn/observability-ai-assistant-plugin/common/conversation_complete';
-import { pick } from 'lodash';
-import type OpenAI from 'openai';
-import { type AdHocInstruction } from '@kbn/observability-ai-assistant-plugin/common/types';
+import {
+  MessageAddEvent,
+  type StreamingChatResponseEvent,
+} from '@kbn/observability-ai-assistant-plugin/common/conversation_complete';
+import { type Instruction } from '@kbn/observability-ai-assistant-plugin/common/types';
 import {
   createLlmProxy,
-  isFunctionTitleRequest,
   LlmProxy,
-  LlmResponseSimulator,
 } from '../../../../../../observability_ai_assistant_api_integration/common/create_llm_proxy';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
+import { decodeEvents } from '../utils/conversation';
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const log = getService('log');
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
 
   const messages: Message[] = [
-    {
-      '@timestamp': new Date().toISOString(),
-      message: {
-        role: MessageRole.System,
-        content: 'You are a helpful assistant',
-      },
-    },
     {
       '@timestamp': new Date().toISOString(),
       message: {
@@ -46,96 +39,41 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   describe('/api/observability_ai_assistant/chat/complete', function () {
     // Fails on MKI: https://github.com/elastic/kibana/issues/205581
     this.tags(['failsOnMKI']);
-    let proxy: LlmProxy;
+    let llmProxy: LlmProxy;
     let connectorId: string;
 
-    interface RequestOptions {
+    async function callPublicChatComplete({
+      actions,
+      instructions,
+      format = 'default',
+      persist = true,
+    }: {
       actions?: Array<Pick<FunctionDefinition, 'name' | 'description' | 'parameters'>>;
-      instructions?: AdHocInstruction[];
+      instructions?: Array<string | Instruction>;
       format?: 'openai' | 'default';
-    }
-
-    type ConversationSimulatorCallback = (
-      conversationSimulator: LlmResponseSimulator
-    ) => Promise<void>;
-
-    async function getResponseBody(
-      { actions, instructions, format = 'default' }: RequestOptions,
-      conversationSimulatorCallback: ConversationSimulatorCallback
-    ) {
-      const titleInterceptor = proxy.intercept('title', (body) => isFunctionTitleRequest(body));
-
-      const conversationInterceptor = proxy.intercept(
-        'conversation',
-        (body) => !isFunctionTitleRequest(body)
-      );
-
-      const responsePromise = observabilityAIAssistantAPIClient.admin({
+      persist?: boolean;
+    }) {
+      const response = await observabilityAIAssistantAPIClient.admin({
         endpoint: 'POST /api/observability_ai_assistant/chat/complete 2023-10-31',
         params: {
           query: { format },
           body: {
             messages,
             connectorId,
-            persist: true,
+            persist,
             actions,
             instructions,
           },
         },
       });
 
-      const [conversationSimulator, titleSimulator] = await Promise.race([
-        Promise.all([
-          conversationInterceptor.waitForIntercept(),
-          titleInterceptor.waitForIntercept(),
-        ]),
-        // make sure any request failures (like 400s) are properly propagated
-        responsePromise.then(() => []),
-      ]);
-
-      await titleSimulator.status(200);
-      await titleSimulator.next('My generated title');
-      await titleSimulator.tokenCount({ completion: 0, prompt: 0, total: 0 });
-      await titleSimulator.complete();
-
-      await conversationSimulator.status(200);
-      if (conversationSimulatorCallback) {
-        await conversationSimulatorCallback(conversationSimulator);
-      }
-
-      const response = await responsePromise;
-
       return String(response.body);
     }
 
-    async function getEvents(
-      options: RequestOptions,
-      conversationSimulatorCallback: ConversationSimulatorCallback
-    ) {
-      const responseBody = await getResponseBody(options, conversationSimulatorCallback);
-      return responseBody
-        .split('\n')
-        .map((line) => line.trim())
-        .filter(Boolean)
-        .map((line) => JSON.parse(line) as StreamingChatResponseEvent)
-        .slice(2); // ignore context request/response, we're testing this elsewhere
-    }
-
-    async function getOpenAIResponse(conversationSimulatorCallback: ConversationSimulatorCallback) {
-      const responseBody = await getResponseBody(
-        {
-          format: 'openai',
-        },
-        conversationSimulatorCallback
-      );
-
-      return responseBody;
-    }
-
     before(async () => {
-      proxy = await createLlmProxy(log);
+      llmProxy = await createLlmProxy(log);
       connectorId = await observabilityAIAssistantAPIClient.createProxyActionConnector({
-        port: proxy.getPort(),
+        port: llmProxy.getPort(),
       });
     });
 
@@ -143,123 +81,76 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       await observabilityAIAssistantAPIClient.deleteActionConnector({
         actionId: connectorId,
       });
-      proxy.close();
+      llmProxy.close();
     });
 
-    describe('after executing an action', () => {
+    const action = {
+      name: 'my_action',
+      description: 'My action',
+      parameters: {
+        type: 'object',
+        properties: {
+          foo: {
+            type: 'string',
+          },
+        },
+      },
+    } as const;
+
+    afterEach(async () => {
+      llmProxy.clear();
+    });
+
+    describe('after executing an action and closing the stream', () => {
       let events: StreamingChatResponseEvent[];
 
       before(async () => {
-        events = await getEvents(
-          {
-            actions: [
-              {
-                name: 'my_action',
-                description: 'My action',
-                parameters: {
-                  type: 'object',
-                  properties: {
-                    foo: {
-                      type: 'string',
-                    },
-                  },
-                },
-              },
-            ],
-          },
-          async (conversationSimulator) => {
-            await conversationSimulator.next({
-              tool_calls: [
-                {
-                  id: 'fake-id',
-                  index: 'fake-index',
-                  function: {
-                    name: 'my_action',
-                    arguments: JSON.stringify({ foo: 'bar' }),
-                  },
-                },
-              ],
-            });
-            await conversationSimulator.tokenCount({ completion: 0, prompt: 0, total: 0 });
-            await conversationSimulator.complete();
-          }
-        );
+        void llmProxy.interceptTitle('My Title');
+        void llmProxy.interceptWithFunctionRequest({
+          name: 'my_action',
+          arguments: () => JSON.stringify({ foo: 'bar' }),
+        });
+
+        const responseBody = await callPublicChatComplete({
+          actions: [action],
+        });
+
+        await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
+
+        events = decodeEvents(responseBody);
       });
 
-      it('closes the stream without persisting the conversation', () => {
-        expect(
-          pick(
-            events[events.length - 1],
-            'message.message.content',
-            'message.message.function_call',
-            'message.message.role'
-          )
-        ).to.eql({
-          message: {
-            message: {
-              content: '',
-              function_call: {
-                name: 'my_action',
-                arguments: JSON.stringify({ foo: 'bar' }),
-                trigger: MessageRole.Assistant,
-              },
-              role: MessageRole.Assistant,
-            },
-          },
+      it('does not persist the conversation (the last event is not a conversationUpdated event)', () => {
+        const lastEvent = events[events.length - 1] as MessageAddEvent;
+        expect(lastEvent.type).to.not.be('conversationUpdate');
+        expect(lastEvent.type).to.be('messageAdd');
+        expect(lastEvent.message.message.function_call).to.eql({
+          name: 'my_action',
+          arguments: JSON.stringify({ foo: 'bar' }),
+          trigger: MessageRole.Assistant,
         });
       });
     });
 
     describe('after adding an instruction', () => {
-      let body: OpenAI.Chat.ChatCompletionCreateParamsNonStreaming;
-
       before(async () => {
-        await getEvents(
-          {
-            instructions: [
-              {
-                text: 'This is a random instruction',
-                instruction_type: 'user_instruction',
-              },
-            ],
-            actions: [
-              {
-                name: 'my_action',
-                description: 'My action',
-                parameters: {
-                  type: 'object',
-                  properties: {
-                    foo: {
-                      type: 'string',
-                    },
-                  },
-                },
-              },
-            ],
-          },
-          async (conversationSimulator) => {
-            body = conversationSimulator.body;
+        void llmProxy.interceptWithFunctionRequest({
+          name: 'my_action',
+          arguments: () => JSON.stringify({ foo: 'bar' }),
+        });
 
-            await conversationSimulator.next({
-              tool_calls: [
-                {
-                  id: 'fake-id',
-                  index: 'fake-index',
-                  function: {
-                    name: 'my_action',
-                    arguments: JSON.stringify({ foo: 'bar' }),
-                  },
-                },
-              ],
-            });
-            await conversationSimulator.tokenCount({ completion: 0, prompt: 0, total: 0 });
-            await conversationSimulator.complete();
-          }
-        );
+        await callPublicChatComplete({
+          instructions: ['This is a random instruction'],
+          actions: [action],
+          persist: false,
+        });
+
+        await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
       });
 
-      it.skip('includes the instruction in the system message', async () => {
-        expect(body.messages[0].content).to.contain('This is a random instruction');
+      it('includes the instruction in the system message', async () => {
+        const { requestBody } = llmProxy.interceptedRequests[0];
+        expect(requestBody.messages[0].content).to.contain('This is a random instruction');
       });
     });
 
@@ -267,11 +158,12 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       let responseBody: string;
 
       before(async () => {
-        responseBody = await getOpenAIResponse(async (conversationSimulator) => {
-          await conversationSimulator.next('Hello');
-          await conversationSimulator.tokenCount({ completion: 5, prompt: 10, total: 15 });
-          await conversationSimulator.complete();
-        });
+        void llmProxy.interceptTitle('My Title');
+        void llmProxy.interceptConversation('Hello');
+
+        responseBody = await callPublicChatComplete({ format: 'openai' });
+
+        await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
       });
 
       function extractDataParts(lines: string[]) {
@@ -283,12 +175,12 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         });
       }
 
-      function getLines() {
-        return responseBody.split('\n\n').filter(Boolean);
+      function getLines(str: string) {
+        return str.split('\n\n').filter(Boolean);
       }
 
       it('outputs each line an SSE-compatible format (data: ...)', () => {
-        const lines = getLines();
+        const lines = getLines(responseBody);
 
         lines.forEach((line) => {
           expect(line.match(/^data: /));
@@ -296,14 +188,14 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       });
 
       it('ouputs one chunk, and one [DONE] event', () => {
-        const dataParts = extractDataParts(getLines());
+        const dataParts = extractDataParts(getLines(responseBody));
 
         expect(dataParts[0]).not.to.be.empty();
         expect(dataParts[1]).to.be('[DONE]');
       });
 
       it('outuputs an OpenAI-compatible chunk', () => {
-        const [dataLine] = extractDataParts(getLines());
+        const [dataLine] = extractDataParts(getLines(responseBody));
 
         expect(() => {
           JSON.parse(dataLine);

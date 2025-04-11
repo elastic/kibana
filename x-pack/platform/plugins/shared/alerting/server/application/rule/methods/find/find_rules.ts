@@ -7,7 +7,7 @@
 
 import Boom from '@hapi/boom';
 import { pick } from 'lodash';
-import { KueryNode } from '@kbn/es-query';
+import type { KueryNode } from '@kbn/es-query';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import {
   buildConsumersFilter,
@@ -16,7 +16,7 @@ import {
   combineFilters,
 } from '../../../../rules_client/common/filters';
 import { AlertingAuthorizationEntity } from '../../../../authorization/types';
-import { SanitizedRule, Rule as DeprecatedRule, RawRule } from '../../../../types';
+import type { SanitizedRule, Rule as DeprecatedRule, RawRule } from '../../../../types';
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
 import {
   mapSortField,
@@ -36,7 +36,7 @@ import { formatLegacyActions, getAlertFromRaw } from '../../../../rules_client/l
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import type { FindRulesParams } from './types';
 import { findRulesParamsSchema } from './schemas';
-import { Rule, RuleParams } from '../../types';
+import type { Rule, RuleParams } from '../../types';
 import { findRulesSo } from '../../../../data/rule';
 
 export interface FindResult<Params extends RuleParams> {

@@ -8,6 +8,7 @@
 import type { FC } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { EuiButtonEmpty } from '@elastic/eui';
+import { RuleFormFlyout } from '@kbn/response-ops-rule-form/flyout';
 
 import type { Rule } from '@kbn/triggers-actions-ui-plugin/public';
 import type { JobId } from '../../common/types/anomaly_detection_jobs';
@@ -38,47 +39,46 @@ export const MlAnomalyAlertFlyout: FC<MlAnomalyAlertFlyoutProps> = ({
   onSave,
 }) => {
   const {
-    services: { triggersActionsUi },
+    services: { triggersActionsUi, ...services },
   } = useMlKibana();
 
   const AlertFlyout = useMemo(() => {
     if (!triggersActionsUi) return;
 
+    const { ruleTypeRegistry, actionTypeRegistry } = triggersActionsUi;
+
     const commonProps = {
-      onClose: () => {
+      plugins: { ...services, ruleTypeRegistry, actionTypeRegistry },
+      onCancel: () => {
         onCloseFlyout();
       },
-      onSave: async () => {
+      onSubmit: async () => {
         if (onSave) {
           onSave();
         }
+        onCloseFlyout();
       },
     };
 
     if (initialAlert) {
-      return triggersActionsUi.getEditRuleFlyout({
-        ...commonProps,
-        initialRule: {
-          ...initialAlert,
-          ruleTypeId: initialAlert.ruleTypeId ?? initialAlert.alertTypeId,
-        },
-      });
+      return <RuleFormFlyout {...commonProps} id={initialAlert.id} />;
     }
 
-    return triggersActionsUi.getAddRuleFlyout({
-      ...commonProps,
-      consumer: PLUGIN_ID,
-      canChangeTrigger: false,
-      ruleTypeId: ML_ALERT_TYPES.ANOMALY_DETECTION,
-      metadata: {},
-      initialValues: {
-        params: {
-          jobSelection: {
-            jobIds,
+    return (
+      <RuleFormFlyout
+        {...commonProps}
+        consumer={PLUGIN_ID}
+        ruleTypeId={ML_ALERT_TYPES.ANOMALY_DETECTION}
+        initialMetadata={{}}
+        initialValues={{
+          params: {
+            jobSelection: {
+              jobIds,
+            },
           },
-        },
-      },
-    });
+        }}
+      />
+    );
     // deps on id to avoid re-rendering on auto-refresh
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [triggersActionsUi, initialAlert?.id, jobIds]);

@@ -64,7 +64,7 @@ describe('observabilityRootProfileProvider', () => {
       )();
       expect(defaultDataViews).toEqual([
         {
-          id: 'discover-observability-root-profile-all-logs',
+          id: 'discover-observability-solution-all-logs',
           name: 'All logs',
           timeFieldName: '@timestamp',
           title: 'logs-*',

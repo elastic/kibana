@@ -12,6 +12,7 @@ import type { ComponentType } from 'react';
 import { from } from 'rxjs';
 import { ContentEditorProvider } from '@kbn/content-management-content-editor';
 import { UserProfilesProvider, UserProfilesServices } from '@kbn/content-management-user-profiles';
+import { MaybeQueryClientProvider } from '../query_client';
 
 import { TagList } from '../mocks';
 import { TableListViewProvider, Services } from '../services';
@@ -46,13 +47,15 @@ export function WithServices<P>(
   return (props: P) => {
     const services = getMockServices(overrides);
     return (
-      <UserProfilesProvider {...services}>
-        <ContentEditorProvider openFlyout={jest.fn()} notifyError={() => undefined}>
-          <TableListViewProvider {...services}>
-            <Comp {...(props as any)} />
-          </TableListViewProvider>
-        </ContentEditorProvider>
-      </UserProfilesProvider>
+      <MaybeQueryClientProvider>
+        <UserProfilesProvider {...services}>
+          <ContentEditorProvider openFlyout={jest.fn()} notifyError={() => undefined}>
+            <TableListViewProvider {...services}>
+              <Comp {...(props as any)} />
+            </TableListViewProvider>
+          </ContentEditorProvider>
+        </UserProfilesProvider>
+      </MaybeQueryClientProvider>
     );
   };
 }

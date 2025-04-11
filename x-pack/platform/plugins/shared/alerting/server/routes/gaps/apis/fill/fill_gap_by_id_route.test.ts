@@ -11,7 +11,7 @@ import { verifyApiAccess } from '../../../../lib/license_api_access';
 import { mockHandlerArguments } from '../../../_mock_handler_arguments';
 import { rulesClientMock } from '../../../../rules_client.mock';
 import { fillGapByIdRoute } from './fill_gap_by_id_route';
-import { ScheduleBackfillResults } from '../../../../application/backfill/methods/schedule/types';
+import type { ScheduleBackfillResults } from '../../../../application/backfill/methods/schedule/types';
 
 jest.mock('../../../../lib/license_api_access', () => ({
   verifyApiAccess: jest.fn(),

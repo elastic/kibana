@@ -8,6 +8,7 @@
 import { HttpSetup } from '@kbn/core-http-browser';
 import { useCallback, useRef, useState } from 'react';
 import { ApiConfig, Replacements } from '@kbn/elastic-assistant-common';
+import moment from 'moment';
 import { useAssistantContext } from '../../assistant_context';
 import { fetchConnectorExecuteAction, FetchConnectorExecuteResponse } from '../api';
 import * as i18n from './translations';
@@ -65,6 +66,9 @@ export const useSendMessage = (): UseSendMessage => {
           signal: abortController.current.signal,
           size: knowledgeBase.latestAlerts,
           traceOptions,
+          screenContext: {
+            timeZone: moment.tz.guess(),
+          },
         });
       } finally {
         clearTimeout(timeoutId);

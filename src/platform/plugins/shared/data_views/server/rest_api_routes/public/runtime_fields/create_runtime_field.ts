@@ -79,68 +79,74 @@ const runtimeCreateFieldRouteFactory =
     >,
     usageCollection?: UsageCounter
   ) => {
-    router.versioned.post({ path, access: 'public', description }).addVersion(
-      {
-        version: INITIAL_REST_VERSION,
+    router.versioned
+      .post({
+        path,
+        access: 'public',
+        description,
         security: {
           authz: {
             requiredPrivileges: ['indexPatterns:manage'],
           },
         },
-        validate: {
-          request: {
-            params: schema.object({
-              id: schema.string({
-                minLength: 1,
-                maxLength: 1_000,
+      })
+      .addVersion(
+        {
+          version: INITIAL_REST_VERSION,
+          validate: {
+            request: {
+              params: schema.object({
+                id: schema.string({
+                  minLength: 1,
+                  maxLength: 1_000,
+                }),
               }),
-            }),
-            body: schema.object({
-              name: schema.string({
-                minLength: 1,
-                maxLength: 1_000,
+              body: schema.object({
+                name: schema.string({
+                  minLength: 1,
+                  maxLength: 1_000,
+                }),
+                runtimeField: runtimeFieldSchema,
               }),
-              runtimeField: runtimeFieldSchema,
-            }),
-          },
-          response: {
-            200: {
-              body: runtimeResponseSchema,
+            },
+            response: {
+              200: {
+                body: runtimeResponseSchema,
+              },
             },
           },
         },
-      },
-      handleErrors(async (ctx, req, res) => {
-        const core = await ctx.core;
-        const savedObjectsClient = core.savedObjects.client;
-        const elasticsearchClient = core.elasticsearch.client.asCurrentUser;
-        const [, , { dataViewsServiceFactory }] = await getStartServices();
-        const dataViewsService = await dataViewsServiceFactory(
-          savedObjectsClient,
-          elasticsearchClient,
-          req
-        );
-        const id = req.params.id;
-        const { name, runtimeField } = req.body;
+        handleErrors(async (ctx, req, res) => {
+          const core = await ctx.core;
+          const savedObjectsClient = core.savedObjects.client;
+          const elasticsearchClient = core.elasticsearch.client.asCurrentUser;
+          const [, , { dataViewsServiceFactory }] = await getStartServices();
+          const dataViewsService = await dataViewsServiceFactory(
+            savedObjectsClient,
+            elasticsearchClient,
+            req
+          );
+          const id = req.params.id;
+          const { name, runtimeField } = req.body;
 
-        const { dataView, fields } = await createRuntimeField({
-          dataViewsService,
-          usageCollection,
-          counterName: `${req.route.method} ${path}`,
-          id,
-          name,
-          runtimeField: runtimeField as RuntimeField,
-        });
+          const { dataView, fields } = await createRuntimeField({
+            dataViewsService,
+            usageCollection,
+            counterName: `${req.route.method} ${path}`,
+            id,
+            name,
+            runtimeField: runtimeField as RuntimeField,
+          });
 
-        const response: RuntimeResponseType = await responseFormatter({
-          serviceKey,
-          dataView,
-          fields,
-        });
+          const response: RuntimeResponseType = await responseFormatter({
+            serviceKey,
+            dataView,
+            fields,
+          });
 
-        return res.ok(response);
-      })
-    );
+          return res.ok(response);
+        })
+      );
   };
 
 export const registerCreateRuntimeFieldRoute = runtimeCreateFieldRouteFactory(

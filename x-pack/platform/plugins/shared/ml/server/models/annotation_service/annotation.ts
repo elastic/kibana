@@ -9,7 +9,7 @@ import Boom from '@hapi/boom';
 import { each, get } from 'lodash';
 import type { IScopedClusterClient } from '@kbn/core/server';
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import { ML_PARTITION_FIELDS } from '@kbn/ml-anomaly-utils';
 import { ANNOTATION_EVENT_USER, ANNOTATION_TYPE } from '../../../common/constants/annotations';
 import {
@@ -43,13 +43,6 @@ export interface IndexAnnotationArgs {
   event?: Annotation['event'];
 }
 
-export interface GetParams {
-  index: string;
-  size: number;
-  body: object;
-  track_total_hits: boolean;
-}
-
 export interface GetResponse {
   success: true;
   annotations: Record<JobId, Annotations>;
@@ -81,12 +74,10 @@ export function annotationProvider({ asInternalUser }: IScopedClusterClient) {
   async function fetchAnnotationIndex(id: string) {
     const searchParams: estypes.SearchRequest = {
       index: ML_ANNOTATIONS_INDEX_ALIAS_READ,
-      body: {
-        size: 1,
-        query: {
-          ids: {
-            values: [id],
-          },
+      size: 1,
+      query: {
+        ids: {
+          values: [id],
         },
       },
     };
@@ -281,28 +272,26 @@ export function annotationProvider({ asInternalUser }: IScopedClusterClient) {
       ];
     }
 
-    const params: GetParams = {
+    const params: estypes.SearchRequest = {
       index: ML_ANNOTATIONS_INDEX_ALIAS_READ,
       size: maxAnnotations,
       track_total_hits: true,
-      body: {
-        query: {
-          bool: {
-            filter: [
-              {
-                query_string: {
-                  query: `type:${ANNOTATION_TYPE.ANNOTATION}`,
-                  analyze_wildcard: false,
-                },
+      query: {
+        bool: {
+          filter: [
+            {
+              query_string: {
+                query: `type:${ANNOTATION_TYPE.ANNOTATION}`,
+                analyze_wildcard: false,
               },
-              {
-                bool: {
-                  must: boolCriteria,
-                },
+            },
+            {
+              bool: {
+                must: boolCriteria,
               },
-            ],
-            ...(shouldClauses ? { should: shouldClauses, minimum_should_match: 1 } : {}),
-          },
+            },
+          ],
+          ...(shouldClauses ? { should: shouldClauses, minimum_should_match: 1 } : {}),
         },
       },
     };
@@ -365,34 +354,32 @@ export function annotationProvider({ asInternalUser }: IScopedClusterClient) {
   }): Promise<Annotation[]> {
     const params: estypes.SearchRequest = {
       index: ML_ANNOTATIONS_INDEX_ALIAS_READ,
-      body: {
-        size: 0,
-        query: {
-          bool: {
-            filter: [
-              ...(earliestMs ? [{ range: { end_timestamp: { gte: earliestMs } } }] : []),
-              {
-                term: { event: { value: 'delayed_data' } },
-              },
-              { terms: { job_id: jobIds } },
-            ],
-          },
+      size: 0,
+      query: {
+        bool: {
+          filter: [
+            ...(earliestMs ? [{ range: { end_timestamp: { gte: earliestMs } } }] : []),
+            {
+              term: { event: { value: 'delayed_data' } },
+            },
+            { terms: { job_id: jobIds } },
+          ],
         },
-        aggs: {
-          by_job: {
-            terms: { field: 'job_id', size: jobIds.length },
-            aggs: {
-              latest_delayed: {
-                top_hits: {
-                  size: 1,
-                  sort: [
-                    {
-                      end_timestamp: {
-                        order: 'desc',
-                      },
+      },
+      aggs: {
+        by_job: {
+          terms: { field: 'job_id', size: jobIds.length },
+          aggs: {
+            latest_delayed: {
+              top_hits: {
+                size: 1,
+                sort: [
+                  {
+                    end_timestamp: {
+                      order: 'desc',
                     },
-                  ],
-                },
+                  },
+                ],
               },
             },
           },

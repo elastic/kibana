@@ -17,6 +17,7 @@
     "@kbn/dev-cli-errors",
     "@kbn/tooling-log",
     "@kbn/repo-packages",
+    "@kbn/projects-solutions-groups",
   ],
   "exclude": [
     "target/**/*",

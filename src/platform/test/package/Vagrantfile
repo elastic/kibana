@@ -1,0 +1,42 @@
+Vagrant.configure("2") do |config|
+  config.vm.synced_folder '../../../../target/', '/packages', SharedFoldersEnableSymlinksCreate: false
+  config.vm.boot_timeout = 600
+  config.vm.define "deb" do |deb|
+    deb.vm.provider :virtualbox do |vb|
+      vb.memory = 4096
+      vb.cpus = 2
+    end
+    deb.vm.box = 'ubuntu/jammy64'
+    deb.vm.provision "ansible" do |ansible|
+      ansible.playbook = "deb.yml"
+    end
+    deb.vm.network "private_network", ip: "192.168.56.5"
+  end
+
+  config.vm.define "rpm" do |rpm|
+    rpm.vm.provider :virtualbox do |vb|
+      vb.memory = 4096
+      vb.cpus = 2
+    end
+    rpm.vm.box = 'almalinux/9'
+    # `rpm -i` is broken in 9.4 when installing from a shared folder
+    # alternative workaround is to copy /packages/kibana.tar.gz to the cwd
+    rpm.vm.box_version = '9.3.20231118'
+    rpm.vm.provision "ansible" do |ansible|
+      ansible.playbook = "rpm.yml"
+    end
+    rpm.vm.network "private_network", ip: "192.168.56.6"
+  end
+
+  config.vm.define "docker" do |docker|
+    docker.vm.provider :virtualbox do |vb|
+      vb.memory = 4096
+      vb.cpus = 2
+    end
+    docker.vm.box = 'ubuntu/jammy64'
+    docker.vm.provision "ansible" do |ansible|
+      ansible.playbook = "docker.yml"
+    end
+    docker.vm.network "private_network", ip: "192.168.56.7"
+  end
+end

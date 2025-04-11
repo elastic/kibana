@@ -26,8 +26,8 @@ import React, { useEffect, useMemo } from 'react';
 import { NEW_FEATURES_TOUR_STORAGE_KEYS } from '../../../../../../common/constants';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { useIsElementMounted } from '../rules_table/guided_onboarding/use_is_element_mounted';
-import { PREBUILT_RULE_UPDATE_FLYOUT_ANCHOR } from '../upgrade_prebuilt_rules_table/upgrade_prebuilt_rules_table_context';
 import * as i18n from './translations';
+import { PREBUILT_RULE_UPDATE_FLYOUT_ANCHOR } from '../../../../rule_management/hooks/use_prebuilt_rules_upgrade';
 
 export interface RulesFeatureTourContextType {
   steps: EuiTourStepProps[];

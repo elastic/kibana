@@ -11,13 +11,13 @@ import type { Filter } from '@kbn/es-query';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import type { ColumnHeaderOptions, RowRenderer } from '../../../../../../common/types';
 import type { TimelineNonEcsData } from '../../../../../../common/search_strategy/timeline';
-import type { RenderCellValueContext } from '../../../../../detections/configurations/security_solution_detections/fetch_page_context';
+import type { AlertsUserProfilesData } from '../../../../../detections/configurations/security_solution_detections/fetch_page_context';
 
 export interface ColumnRenderer {
   isInstance: (
     columnName: string,
     data: TimelineNonEcsData[],
-    context?: RenderCellValueContext
+    context?: AlertsUserProfilesData
   ) => boolean;
   renderColumn: ({
     className,
@@ -38,7 +38,7 @@ export interface ColumnRenderer {
     className?: string;
     columnName: string;
     ecsData?: Ecs;
-    eventId: string;
+    eventId?: string;
     field: ColumnHeaderOptions;
     globalFilters?: Filter[];
     isDetails?: boolean;
@@ -48,6 +48,6 @@ export interface ColumnRenderer {
     truncate?: boolean;
     values: string[] | null | undefined;
     key?: string;
-    context?: RenderCellValueContext;
+    context?: AlertsUserProfilesData;
   }) => React.ReactNode;
 }

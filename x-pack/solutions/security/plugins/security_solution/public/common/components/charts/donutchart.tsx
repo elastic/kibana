@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { EuiFlexGroupProps } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 
 import type { Datum, NodeColorAccessor, PartialTheme, ElementClickListener } from '@elastic/charts';
+import type { SerializedStyles } from '@emotion/react';
 import {
   Chart,
   Partition,
@@ -18,10 +18,9 @@ import {
   defaultPartitionValueFormatter,
 } from '@elastic/charts';
 import { isEmpty } from 'lodash';
-import type { FlattenSimpleInterpolation } from 'styled-components';
-import styled from 'styled-components';
 
 import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/react';
 import { useThemes } from './common';
 import { DraggableLegend } from './draggable_legend';
 import type { LegendItem } from './draggable_legend_item';
@@ -63,36 +62,34 @@ export interface DonutChartWrapperProps {
   children?: React.ReactElement;
   dataExists: boolean;
   donutTextWrapperClassName?: string;
-  donutTextWrapperStyles?: FlattenSimpleInterpolation;
+  donutTextWrapperStyles?: SerializedStyles;
   isChartEmbeddablesEnabled?: boolean;
   label?: React.ReactElement | string;
   title: React.ReactElement | string | number | null;
 }
 
-/* Make this position absolute in order to overlap the text onto the donut */
-export const DonutTextWrapper = styled(EuiFlexGroup)<
-  EuiFlexGroupProps & {
-    $dataExists?: boolean;
-    $donutTextWrapperStyles?: FlattenSimpleInterpolation;
-    $isChartEmbeddablesEnabled?: boolean;
-    className?: string;
-  }
->`
-  top: ${({ $isChartEmbeddablesEnabled, $dataExists }) =>
-    $isChartEmbeddablesEnabled && !$dataExists ? `66%` : `34%;`};
-  width: 100%;
-  max-width: 77px;
-  position: absolute;
-  z-index: 1;
+const getStyles = (
+  dataExists: boolean,
+  isChartEmbeddablesEnabled?: boolean,
+  donutTextWrapperStyles?: SerializedStyles,
+  className?: string
+) => {
+  return {
+    donutTextWrapper: css`
+      top: ${isChartEmbeddablesEnabled && !dataExists ? '66%' : '34%'};
+      width: 100%;
+      max-width: 77px;
+      position: absolute; // Make this position absolute in order to overlap the text onto the donut
+      z-index: 1;
 
-  ${({ className, $donutTextWrapperStyles }) =>
-    className && $donutTextWrapperStyles ? `&.${className} {${$donutTextWrapperStyles}}` : ''}
-`;
-
-export const StyledEuiFlexItem = styled(EuiFlexItem)`
-  position: relative;
-  align-items: center;
-`;
+      ${className && donutTextWrapperStyles ? `&.${className} {${donutTextWrapperStyles}}` : ''}
+    `,
+    flexItem: css`
+      position: relative;
+      align-items: center;
+    `,
+  };
+};
 
 const DonutChartWrapperComponent: React.FC<DonutChartWrapperProps> = ({
   children,
@@ -104,6 +101,12 @@ const DonutChartWrapperComponent: React.FC<DonutChartWrapperProps> = ({
   title,
 }) => {
   const { euiTheme } = useEuiTheme();
+  const styles = getStyles(
+    dataExists,
+    isChartEmbeddablesEnabled,
+    donutTextWrapperStyles,
+    donutTextWrapperClassName
+  );
   const emptyLabelStyle = useMemo(
     () => ({
       color: euiTheme.colors.textSubdued,
@@ -120,11 +123,9 @@ const DonutChartWrapperComponent: React.FC<DonutChartWrapperProps> = ({
       gutterSize="l"
       data-test-subj="donut-chart"
     >
-      <StyledEuiFlexItem grow={isChartEmbeddablesEnabled}>
-        <DonutTextWrapper
-          $dataExists={dataExists}
-          $donutTextWrapperStyles={donutTextWrapperStyles}
-          $isChartEmbeddablesEnabled={isChartEmbeddablesEnabled}
+      <EuiFlexItem css={styles.flexItem} grow={isChartEmbeddablesEnabled}>
+        <EuiFlexGroup
+          css={styles.donutTextWrapper}
           alignItems="center"
           className={donutTextWrapperClassName}
           direction="column"
@@ -145,9 +146,9 @@ const DonutChartWrapperComponent: React.FC<DonutChartWrapperProps> = ({
               </EuiToolTip>
             </EuiFlexItem>
           )}
-        </DonutTextWrapper>
+        </EuiFlexGroup>
         {children}
-      </StyledEuiFlexItem>
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 };

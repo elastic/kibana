@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import { Filter, FilterMeta, FILTERS } from './types';
 import { getPhraseScript, PhraseFilterValue } from './phrase_filter';
 import type { DataViewFieldBase, DataViewBaseNoFields } from '../../es_query';

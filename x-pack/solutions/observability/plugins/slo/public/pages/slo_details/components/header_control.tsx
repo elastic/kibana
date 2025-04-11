@@ -13,6 +13,7 @@ import {
   EuiPopover,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { RuleFormFlyout } from '@kbn/response-ops-rule-form/flyout';
 import { sloFeatureId } from '@kbn/observability-plugin/common';
 import { SLO_BURN_RATE_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
@@ -40,11 +41,12 @@ export interface Props {
 }
 
 export function HeaderControl({ slo }: Props) {
+  const { services } = useKibana();
   const {
     application: { navigateToUrl, capabilities },
     http: { basePath },
-    triggersActionsUi: { getAddRuleFlyout: AddRuleFlyout },
-  } = useKibana().services;
+    triggersActionsUi: { ruleTypeRegistry, actionTypeRegistry },
+  } = services;
 
   const hasApmReadCapabilities = capabilities.apm.show;
   const { data: permissions } = usePermissions();
@@ -400,13 +402,14 @@ export function HeaderControl({ slo }: Props) {
       />
 
       {isRuleFlyoutVisible ? (
-        <AddRuleFlyout
+        <RuleFormFlyout
+          plugins={{ ...services, actionTypeRegistry, ruleTypeRegistry }}
           consumer={sloFeatureId}
           ruleTypeId={SLO_BURN_RATE_RULE_TYPE_ID}
-          canChangeTrigger={false}
-          onClose={onCloseRuleFlyout}
+          onCancel={onCloseRuleFlyout}
+          onSubmit={onCloseRuleFlyout}
           initialValues={{ name: `${slo.name} burn rate`, params: { sloId: slo.id } }}
-          useRuleProducer
+          shouldUseRuleProducer
         />
       ) : null}
 

@@ -6,7 +6,7 @@
  */
 
 import { isEmpty } from 'lodash';
-import type { SearchRequest as ESSearchRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { SearchRequest as ESSearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { InferSearchResponseOf } from '@kbn/es-types';
 import type { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
 import type { DataTier } from '@kbn/observability-shared-plugin/common';
@@ -22,6 +22,9 @@ export type ApmAlertsRequiredParams = ESSearchRequest & {
   size: number;
   track_total_hits: boolean | number;
   query?: estypes.QueryDslQueryContainer;
+  sort?: estypes.SortOptions[];
+  _source?: string[] | false;
+  search_after?: Array<string | number>;
 };
 
 export async function getApmAlertsClient({

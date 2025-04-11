@@ -94,7 +94,7 @@ export function jobsQueryFactory(
       });
 
       const response = (await execQuery((elasticsearchClient) =>
-        elasticsearchClient.search({ body, index: REPORTING_DATA_STREAM_WILDCARD_WITH_LEGACY })
+        elasticsearchClient.search({ ...body, index: REPORTING_DATA_STREAM_WILDCARD_WITH_LEGACY })
       )) as estypes.SearchResponse<ReportSource>;
 
       return (
@@ -125,7 +125,7 @@ export function jobsQueryFactory(
       };
 
       const response = await execQuery((elasticsearchClient) =>
-        elasticsearchClient.count({ body, index: REPORTING_DATA_STREAM_WILDCARD_WITH_LEGACY })
+        elasticsearchClient.count({ ...body, index: REPORTING_DATA_STREAM_WILDCARD_WITH_LEGACY })
       );
 
       return response?.count ?? 0;
@@ -155,7 +155,7 @@ export function jobsQueryFactory(
 
       const response = await execQuery((elasticsearchClient) =>
         elasticsearchClient.search<ReportSource>({
-          body,
+          ...body,
           index: REPORTING_DATA_STREAM_WILDCARD_WITH_LEGACY,
         })
       );
@@ -189,7 +189,7 @@ export function jobsQueryFactory(
 
       const response = await execQuery((elasticsearchClient) =>
         elasticsearchClient.search<ReportSource>({
-          body,
+          ...body,
           index: REPORTING_DATA_STREAM_WILDCARD_WITH_LEGACY,
         })
       );
