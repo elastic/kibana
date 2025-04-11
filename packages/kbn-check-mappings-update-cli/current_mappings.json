@@ -1101,6 +1101,7 @@
     }
   },
   "epm-packages": {
+    "dynamic": false,
     "properties": {
       "additional_spaces_installed_kibana": {
         "index": false,
@@ -2909,6 +2910,14 @@
       "note": {
         "index": false,
         "type": "text"
+      }
+    }
+  },
+  "privilege-monitoring-status": {
+    "dynamic": false,
+    "properties": {
+      "status": {
+        "type": "keyword"
       }
     }
   },

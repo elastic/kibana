@@ -303,9 +303,19 @@ OAS for public routes are written to the Kibana repo as a snapshot that will ult
 <DocCallOut title="Under construction" color="warning">
   At the time of writing we only capture OAS for a subset of Kibana's HTTP APIs to give teams time to check and improve the quality of generated OAS.
 
-  If you would like OAS for your endpoints to be included in the snapshot, **please reach out to #kibana-core**.
+  If you would like OAS for your endpoints to be included in the snapshot, **please reach out to #kibana-core** or follow the instructions below.
 </DocCallOut>
 
+To publish OAS to our docs site create a pull request updating [this command](https://github.com/elastic/kibana/blob/970e9fe4a3c29df81ccff6761d4986d316338398/.buildkite/scripts/steps/checks/capture_oas_snapshot.sh#L11) to include your HTTP API path.
+
+The OAS will be pushed and published to our [stateful](https://www.elastic.co/docs/api/doc/kibana/) and [serverless](https://www.elastic.co/docs/api/doc/serverless/) docs hosted by bump.sh.
+
+If you would like to preview your docs before merging, you can do the following:
+
+1. Install the bump cli: https://www.npmjs.com/package/bump-cli
+2. Save your docs to a local file `curl localhost:5601/api/oas\?access\=public\&version\=2023-10-31\&pathStartsWith\=/api/saved_objects/_export > temp.json`
+3. `npx bump preview temp.json`
+4. Once done, your docs should be hosted at a temporary location provided by bump.sh
 
 ### FAQs
 

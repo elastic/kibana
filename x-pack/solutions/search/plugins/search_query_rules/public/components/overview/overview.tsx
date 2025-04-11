@@ -25,6 +25,7 @@ import { EmptyPrompt } from '../empty_prompt/empty_prompt';
 import { ErrorPrompt } from '../error_prompt/error_prompt';
 import { isPermissionError } from '../../utils/query_rules_utils';
 import queryRulesBackground from '../../assets/query-rule-background.svg';
+import { QueryRulesSets } from '../query_rules_sets/query_rules_sets';
 
 export const QueryRulesOverview = () => {
   const {
@@ -103,7 +104,6 @@ export const QueryRulesOverview = () => {
       )}
       <KibanaPageTemplate.Section
         restrictWidth
-        alignment="center"
         contentProps={{
           css:
             !isInitialLoading && !isError && queryRulesData?._meta.totalItemCount !== 0
@@ -114,6 +114,9 @@ export const QueryRulesOverview = () => {
         {isInitialLoading && <EuiLoadingSpinner />}
         {isError && (
           <ErrorPrompt errorType={isPermissionError(error) ? 'missingPermissions' : 'generic'} />
+        )}
+        {!isInitialLoading && queryRulesData && queryRulesData._meta.totalItemCount > 0 && (
+          <QueryRulesSets />
         )}
         {!isInitialLoading && queryRulesData && queryRulesData._meta.totalItemCount === 0 && (
           <EuiFlexGroup justifyContent="center" alignItems="center" direction="column">

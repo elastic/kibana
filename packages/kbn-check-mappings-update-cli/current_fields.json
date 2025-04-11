@@ -873,6 +873,9 @@
   "policy-settings-protection-updates-note": [
     "note"
   ],
+  "privilege-monitoring-status": [
+    "status"
+  ],
   "product-doc-install-status": [
     "index_name",
     "installation_status",

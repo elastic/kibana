@@ -133,7 +133,7 @@ mapped_pages:
 | [dashboardEnhanced](dashboard-enhanced-plugin.md) | Adds drilldown capabilities to dashboard.  Owned by the Kibana App team. |
 | [dataQuality](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/data_quality/README.md) | Page where users can see the quality of their log data sets. |
 | [datasetQuality](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/dataset_quality/README.md) | In order to make ongoing maintenance of log collection easy we want to introduce the concept of data set quality, where users can easily get an overview on the data sets they have with information such as integration, size, last activity, among others. |
-| [dataUsage](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/private/data_usage/README.md) | Serverless only plugin for users to view data usage |
+| [dataUsage](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/private/data_usage/README.md) | Serverless-only plugin for users to view data usage. Available in all 3 solutions. |
 | [dataVisualizer](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/private/data_visualizer/README.md) | The data_visualizer plugin enables you to explore the fields in your data. |
 | [discoverEnhanced](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/private/discover_enhanced/README.md) | Contains the enhancements to the OSS discover app. |
 | [ecsDataQualityDashboard](https://github.com/elastic/kibana/blob/main/x-pack/solutions/security/plugins/ecs_data_quality_dashboard/README.md) | This plugin implements (server) APIs used to render the content of the Data Quality dashboard. |
@@ -163,8 +163,6 @@ mapped_pages:
 | [infra](https://github.com/elastic/kibana/blob/main/x-pack/solutions/observability/plugins/infra/README.md) | This is the home of the infra plugin, which aims to provide a solution for the infrastructure monitoring use-case within Kibana. |
 | [ingestPipelines](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/ingest_pipelines/README.md) | The ingest_pipelines plugin provides Kibana support for Elasticsearch's ingest pipelines. |
 | [inventory](https://github.com/elastic/kibana/blob/main/x-pack/solutions/observability/plugins/inventory/README.md) | Home of the Inventory plugin, which renders the... inventory. |
-| [investigate](https://github.com/elastic/kibana/blob/main/x-pack/solutions/observability/plugins/investigate/README.md) | WARNING: Missing or empty README. |
-| [investigateApp](https://github.com/elastic/kibana/blob/main/x-pack/solutions/observability/plugins/investigate_app/README.md) | WARNING: Missing or empty README. |
 | [lens](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/lens/readme.md) | Lens is a visualization editor allowing to quickly and easily configure compelling visualizations to use on dashboards and canvas workpads. |
 | [licenseApiGuard](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/private/license_api_guard/README.md) | This plugin is used by ES UI plugins to reject API requests when the plugin is unsupported by the user's license. |
 | [licenseManagement](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/license_management/README.md) | This plugin enables users to activate a trial license, downgrade to Basic, and upload a new license. |
