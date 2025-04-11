@@ -12,7 +12,6 @@
     "**/*.tsx"
   ],
   "kbn_references": [
-    "@kbn/utility-types",
     "@kbn/core-rendering-browser"
   ],
   "exclude": [
