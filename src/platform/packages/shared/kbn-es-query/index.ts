@@ -41,6 +41,7 @@ export type {
   TimeRange,
   TimeState,
   RelativeTimeRange,
+  AbsoluteTimeRange,
   CombinedFilter,
 } from './src/filters';
 
