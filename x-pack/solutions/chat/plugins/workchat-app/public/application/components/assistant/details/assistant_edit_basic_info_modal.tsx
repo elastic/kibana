@@ -27,10 +27,10 @@ import {
   EuiAvatar,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { euiPaletteColorBlind } from '@elastic/eui';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useAgentEdition } from '../../../hooks/use_agent_edition';
 import { assistantLabels } from '../i18n';
-import { euiPaletteColorBlind } from '@elastic/eui';
 
 export interface EditAssistantBasicInfoProps {
   onClose: () => void;
