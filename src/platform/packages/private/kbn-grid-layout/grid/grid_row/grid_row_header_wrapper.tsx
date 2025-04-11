@@ -32,6 +32,7 @@ export const HeaderGhost = React.memo(({ rowId }: { rowId: string }) => {
         gridRowEnd: 1,
         pointerEvents: 'none',
         height: '0px',
+        background: '#f7f9fc',
       }}
       ref={(element: HTMLDivElement | null) => {
         gridLayoutStateManager.headerRefs.current[rowId] = element;

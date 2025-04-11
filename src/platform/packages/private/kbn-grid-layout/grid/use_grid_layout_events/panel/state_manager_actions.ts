@@ -97,7 +97,9 @@ export const moveAction = (
     Object.entries(gridRowHeaders).forEach(([id, row]) => {
       if (!row) return;
       const rowTop = row.getBoundingClientRect().top;
-      const rowBottom = gridRowFooters[id]?.getBoundingClientRect().bottom || rowTop + rowHeight;
+      const footerRef = gridRowFooters[id];
+      if (!footerRef) return; // the row is collapsed so we cannot drop into it
+      const rowBottom = footerRef?.getBoundingClientRect().bottom || rowTop + rowHeight;
       const overlap = Math.min(previewBottom, rowBottom) - Math.max(previewRect.top, rowTop);
       if (overlap > highestOverlap) {
         highestOverlap = overlap;

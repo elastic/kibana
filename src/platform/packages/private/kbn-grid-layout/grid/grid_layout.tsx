@@ -240,6 +240,9 @@ export const GridLayout = ({
                 case 'header-ghost':
                   return <HeaderGhost key={typeId} rowId={rowId} />;
                 case 'footer-ghost':
+                  if (isCollapsed) {
+                    return null;
+                  }
                   return <GhostFooter rowId={rowId} key={`${rowId}-footer`} />;
                 default:
                   if (isCollapsed) {
