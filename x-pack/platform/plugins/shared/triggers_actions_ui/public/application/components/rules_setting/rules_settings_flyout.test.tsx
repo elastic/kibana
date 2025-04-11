@@ -85,6 +85,7 @@ const flyoutProps: RulesSettingsFlyoutProps = {
   setUpdatingRulesSettings: jest.fn(),
   onClose: jest.fn(),
   onSave: jest.fn(),
+  alertDeleteCategoryIds: ['management'],
 };
 
 const RulesSettingsFlyoutWithProviders: React.FunctionComponent<RulesSettingsFlyoutProps> = (
