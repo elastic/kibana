@@ -16,7 +16,8 @@ export default function ({ getService }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
 
   const expectedAnonymizationFieldsCount = 102;
-
+  const parallelRequests = 30;
+  const parallelSpaceRequests = 20;
   describe('Anonymization Fields Duplication Tests', () => {
     let supertest: TestAgent;
     let search: SearchService;
@@ -63,7 +64,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       // Create an array of promises for concurrent requests
       const requests = [];
-      const parallelRequests = 20;
+
       for (let i = 0; i < parallelRequests; i++) {
         requests.push(
           supertest
@@ -350,7 +351,6 @@ export default function ({ getService }: FtrProviderContext) {
       // Create multiple spaces and access them simultaneously
       log.debug('Creating multiple spaces and accessing anonymization fields simultaneously');
 
-      const parallelSpaceRequests = 20;
       // Create multiple space IDs
       const spaceIds = Array.from({ length: parallelSpaceRequests }, () => uuid.v4());
 
@@ -414,7 +414,7 @@ export default function ({ getService }: FtrProviderContext) {
       const requests = [];
 
       // First half of anonymization fields requests for existing space
-      for (let i = 0; i < 5; i++) {
+      for (let i = 0; i < parallelRequests; i++) {
         requests.push(
           supertest
             .get(
@@ -439,7 +439,7 @@ export default function ({ getService }: FtrProviderContext) {
       );
 
       // Add anonymization fields requests for the new space
-      for (let i = 0; i < 5; i++) {
+      for (let i = 0; i < parallelRequests; i++) {
         requests.push(
           supertest
             .get(
