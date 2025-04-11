@@ -655,8 +655,9 @@ Object {
       "breadcrumbStatus": "hidden",
       "children": Array [
         Object {
-          "id": "discover:",
-          "link": "discover",
+          "id": "alert_summary",
+          "link": "securitySolutionUI:alert_summary",
+          "spaceBefore": "s",
         },
         Object {
           "id": "attack_discovery",
@@ -678,90 +679,7 @@ Object {
           "id": "cases",
           "link": "securitySolutionUI:cases",
           "renderAs": "panelOpener",
-        },
-        Object {
-          "children": Array [
-            Object {
-              "breadcrumbStatus": "hidden",
-              "children": Array [
-                Object {
-                  "id": "ml:overview",
-                  "link": "ml:overview",
-                  "title": "Overview",
-                },
-                Object {
-                  "id": "ml:data_visualizer",
-                  "link": "ml:dataVisualizer",
-                  "title": "Data visualizer",
-                },
-              ],
-            },
-            Object {
-              "breadcrumbStatus": "hidden",
-              "children": Array [
-                Object {
-                  "id": "ml:anomalyExplorer",
-                  "link": "ml:anomalyExplorer",
-                  "title": "Anomaly explorer",
-                },
-                Object {
-                  "id": "ml:singleMetricViewer",
-                  "link": "ml:singleMetricViewer",
-                  "title": "Single metric viewer",
-                },
-              ],
-              "id": "category-anomaly_detection",
-              "title": "Anomaly detection",
-            },
-            Object {
-              "breadcrumbStatus": "hidden",
-              "children": Array [
-                Object {
-                  "id": "ml:resultExplorer",
-                  "link": "ml:resultExplorer",
-                  "title": "Result explorer",
-                },
-                Object {
-                  "id": "ml:analyticsMap",
-                  "link": "ml:analyticsMap",
-                  "title": "Analytics map",
-                },
-              ],
-              "id": "category-data_frame analytics",
-              "title": "Data frame analytics",
-            },
-            Object {
-              "breadcrumbStatus": "hidden",
-              "children": Array [
-                Object {
-                  "id": "ml:logRateAnalysis",
-                  "link": "ml:logRateAnalysis",
-                  "title": "Log rate analysis",
-                },
-                Object {
-                  "id": "ml:logPatternAnalysis",
-                  "link": "ml:logPatternAnalysis",
-                  "title": "Log pattern analysis",
-                },
-                Object {
-                  "id": "ml:changePointDetections",
-                  "link": "ml:changePointDetections",
-                  "title": "Change point detection",
-                },
-              ],
-              "id": "category-aiops_labs",
-              "title": "Aiops labs",
-            },
-          ],
-          "id": "machine_learning-landing",
-          "link": "securitySolutionUI:machine_learning-landing",
-          "renderAs": "panelOpener",
-          "title": "Machine learning",
-          "type": "navGroup",
-        },
-        Object {
-          "id": "alert_summary",
-          "link": "securitySolutionUI:alert_summary",
+          "spaceBefore": "m",
         },
         Object {
           "children": Array [
@@ -778,6 +696,12 @@ Object {
           "id": "configurations",
           "link": "securitySolutionUI:configurations",
           "renderAs": "panelOpener",
+          "spaceBefore": null,
+        },
+        Object {
+          "id": "discover:",
+          "link": "discover",
+          "spaceBefore": "m",
         },
       ],
       "defaultIsCollapsed": false,
