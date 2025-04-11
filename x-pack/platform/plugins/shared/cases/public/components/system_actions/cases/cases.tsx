@@ -41,14 +41,18 @@ export function getConnectorType(): ConnectorTypeModel<{}, {}, CasesActionParams
         errors,
       };
       const timeWindowRegex = new RegExp(CASES_CONNECTOR_TIME_WINDOW_REGEX, 'g');
+      const timeWindow = actionParams.subActionParams?.timeWindow;
 
-      if (
-        actionParams.subActionParams &&
-        (!actionParams.subActionParams.timeWindow ||
-          !actionParams.subActionParams.timeWindow.length ||
-          !timeWindowRegex.test(actionParams.subActionParams.timeWindow))
-      ) {
+      if (!timeWindow || !timeWindow.length || !timeWindowRegex.test(timeWindow)) {
         errors.timeWindow.push(i18n.TIME_WINDOW_SIZE_ERROR);
+      } else {
+        const match = timeWindow.match(/^(\d+)([mhdw])$/);
+        const timeSize = parseInt(match[1], 10);
+        const timeUnit = match[2];
+
+        if (timeUnit === 'm' && timeSize < 5) {
+          errors.timeWindow.push(i18n.MIN_TIME_WINDOW_SIZE_ERROR);
+        }
       }
       return validationResult;
     },

@@ -35,6 +35,13 @@ export const TIME_WINDOW_SIZE_ERROR = i18n.translate(
   }
 );
 
+export const MIN_TIME_WINDOW_SIZE_ERROR = i18n.translate(
+  'xpack.cases.systemActions.casesConnector.minTimeWindowSizeError',
+  {
+    defaultMessage: 'Time window must be at least 5 minutes',
+  }
+);
+
 export const REOPEN_WHEN_CASE_IS_CLOSED = i18n.translate(
   'xpack.cases.systemActions.casesConnector.reopenWhenCaseIsClosed',
   {

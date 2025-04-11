@@ -116,11 +116,12 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
       );
     }
 
-    if (timeWindowUnit === 'm' && parseInt(timeWindowSize, 10) <= 20) {
-      setShowTimeWindowWarning(true);
-    } else {
-      setShowTimeWindowWarning(false);
-    }
+    const showWarning =
+      timeWindowUnit === 'm' &&
+      parseInt(timeWindowSize, 10) >= 5 &&
+      parseInt(timeWindowSize, 10) <= 20;
+
+    setShowTimeWindowWarning(showWarning);
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [actionParams, timeWindowUnit, timeWindowSize]);
@@ -144,17 +145,11 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
 
       const timeSize = key === 'timeWindowSize' ? value : timeWindowSize;
       const timeUnit = key === 'timeWindowUnit' ? value : timeWindowUnit;
+      const numericTimeSize = parseInt(timeSize, 10);
 
-      if (timeUnit === 'm' && parseInt(timeSize, 10) < 5) {
-        setShowTimeWindowWarning(false);
-        return;
-      }
+      const showWarning = timeUnit === 'm' && numericTimeSize >= 5 && numericTimeSize <= 20;
 
-      if (timeUnit === 'm' && parseInt(timeSize, 10) <= 20) {
-        setShowTimeWindowWarning(true);
-      } else {
-        setShowTimeWindowWarning(false);
-      }
+      setShowTimeWindowWarning(showWarning);
 
       const newTimeWindow =
         key === 'timeWindowSize' ? `${value}${timeWindowUnit}` : `${timeWindowSize}${value}`;
