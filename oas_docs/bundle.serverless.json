@@ -49583,6 +49583,9 @@
                       "stream": {
                         "additionalProperties": false,
                         "properties": {
+                          "description": {
+                            "type": "string"
+                          },
                           "group": {
                             "additionalProperties": false,
                             "properties": {
@@ -49601,6 +49604,7 @@
                           }
                         },
                         "required": [
+                          "description",
                           "group"
                         ],
                         "type": "object"
@@ -49994,9 +49998,6 @@
                   {
                     "additionalProperties": false,
                     "properties": {
-                      "description": {
-                        "type": "string"
-                      },
                       "ingest": {
                         "additionalProperties": false,
                         "properties": {
@@ -51674,7 +51675,6 @@
                       }
                     },
                     "required": [
-                      "description",
                       "ingest"
                     ],
                     "type": "object"
@@ -51682,9 +51682,6 @@
                   {
                     "additionalProperties": false,
                     "properties": {
-                      "description": {
-                        "type": "string"
-                      },
                       "ingest": {
                         "additionalProperties": false,
                         "properties": {
@@ -53109,7 +53106,6 @@
                       }
                     },
                     "required": [
-                      "description",
                       "ingest"
                     ],
                     "type": "object"
