@@ -24,7 +24,7 @@ const column: Datatable['columns'][number] = {
 const formattedValue = faker.string.numeric(3);
 const rawValue = parseInt(formattedValue, 10);
 
-const trendLabels = { sortUp: 'up', sortDown: 'down', grab: 'stable' };
+const trendLabels = { sortUp: 'upward direction', sortDown: 'downward direction', grab: 'stable' };
 
 function renderSecondaryMetric(props: Partial<SecondaryMetricProps> = {}) {
   render(
@@ -127,7 +127,7 @@ describe('Secondary metric', () => {
             // unfortuantely the icon is not rendered, so check for the wrapper for now
             expect(el.firstChild?.firstChild).toHaveAttribute('data-euiicon-type', icon);
             expect(
-              screen.queryByLabelText(`Value: ${formattedValue} - trend ${trendLabel}`)
+              screen.queryByLabelText(`Value: ${formattedValue} - Changed to ${trendLabel}`)
             ).not.toBeInTheDocument();
           }
         );
@@ -153,7 +153,7 @@ describe('Secondary metric', () => {
           // unfortuantely the icon is not rendered, so check for the wrapper for now
           expect(el.firstChild?.firstChild).toHaveAttribute('data-euiicon-type', icon);
           expect(
-            screen.queryByLabelText(`Value: ${formattedValue} - trend ${trendLabel}`)
+            screen.queryByLabelText(`Value: ${formattedValue} - Changed to ${trendLabel}`)
           ).not.toBeInTheDocument();
         });
 
@@ -180,7 +180,7 @@ describe('Secondary metric', () => {
           // unfortuantely the icon is not rendered, so check for the wrapper for now
           expect(el.firstChild?.firstChild).toHaveAttribute('data-euiicon-type', icon);
           expect(
-            screen.queryByLabelText(`Value: 'N/A' - trend ${trendLabel}`)
+            screen.queryByLabelText(`Value: 'N/A' - Changed to ${trendLabel}`)
           ).not.toBeInTheDocument();
         });
 
@@ -207,7 +207,7 @@ describe('Secondary metric', () => {
           // unfortuantely the icon is not rendered, so check for the wrapper for now
           expect(el.firstChild?.firstChild).toHaveAttribute('data-euiicon-type', icon);
           expect(
-            screen.queryByLabelText(`Value: N/A - trend ${trendLabel}`)
+            screen.queryByLabelText(`Value: N/A - Changed to ${trendLabel}`)
           ).not.toBeInTheDocument();
         });
       });
@@ -227,7 +227,7 @@ describe('Secondary metric', () => {
 
             const trendLabel = trendLabels[icon];
 
-            const el = screen.getByLabelText(`Value: ${formattedValue} - trend ${trendLabel}`);
+            const el = screen.getByLabelText(`Value: ${formattedValue} - Changed to ${trendLabel}`);
 
             expect(el).toBeInTheDocument();
             expect(el).toHaveStyle(`--euiBadgeBackgroundColor: ${color}`);
@@ -257,7 +257,7 @@ describe('Secondary metric', () => {
               `--euiBadgeBackgroundColor: ${color}`
             );
             expect(
-              screen.queryByLabelText(`Value: ${formattedValue} - trend ${trendLabel}`)
+              screen.queryByLabelText(`Value: ${formattedValue} - Changed to ${trendLabel}`)
             ).not.toBeInTheDocument();
             expect(screen.getByText(formattedValue)).toBeInTheDocument();
           }
