@@ -5834,6 +5834,20 @@
           },
           {
             "parentPluginId": "@kbn/test",
+            "id": "def-common.SamlSessionManagerOptions.cloudHostName",
+            "type": "string",
+            "tags": [],
+            "label": "cloudHostName",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-test/src/auth/session_manager.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test",
             "id": "def-common.SamlSessionManagerOptions.cloudUsersFilePath",
             "type": "string",
             "tags": [],

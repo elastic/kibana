@@ -3038,10 +3038,6 @@
               },
               {
                 "plugin": "@kbn/core",
-                "path": "src/core/packages/saved-objects/server-internal/src/routes/legacy_import_export/export.ts"
-              },
-              {
-                "plugin": "@kbn/core",
                 "path": "src/core/packages/ui-settings/server-internal/src/routes/get.ts"
               },
               {
@@ -3373,10 +3369,6 @@
                 "path": "x-pack/platform/plugins/shared/rule_registry/server/routes/get_browser_fields_by_rule_type_ids.ts"
               },
               {
-                "plugin": "ruleRegistry",
-                "path": "x-pack/platform/plugins/shared/rule_registry/server/routes/get_aad_fields_by_rule_type.ts"
-              },
-              {
                 "plugin": "inference",
                 "path": "x-pack/platform/plugins/shared/inference/server/routes/connectors.ts"
               },
@@ -3555,6 +3547,10 @@
               {
                 "plugin": "reporting",
                 "path": "x-pack/platform/plugins/private/reporting/server/routes/internal/diagnostic/browser.ts"
+              },
+              {
+                "plugin": "reporting",
+                "path": "x-pack/platform/plugins/private/reporting/server/routes/internal/health/health.ts"
               },
               {
                 "plugin": "reporting",
@@ -3869,6 +3865,30 @@
                 "path": "x-pack/platform/plugins/shared/spaces/server/lib/request_interceptors/on_request_interceptor.test.ts"
               },
               {
+                "plugin": "workchatApp",
+                "path": "x-pack/solutions/chat/plugins/workchat-app/server/routes/conversation.ts"
+              },
+              {
+                "plugin": "workchatApp",
+                "path": "x-pack/solutions/chat/plugins/workchat-app/server/routes/connectors.ts"
+              },
+              {
+                "plugin": "workchatApp",
+                "path": "x-pack/solutions/chat/plugins/workchat-app/server/routes/integrations.ts"
+              },
+              {
+                "plugin": "workchatApp",
+                "path": "x-pack/solutions/chat/plugins/workchat-app/server/routes/integrations.ts"
+              },
+              {
+                "plugin": "workchatApp",
+                "path": "x-pack/solutions/chat/plugins/workchat-app/server/routes/agents.ts"
+              },
+              {
+                "plugin": "workchatApp",
+                "path": "x-pack/solutions/chat/plugins/workchat-app/server/routes/agents.ts"
+              },
+              {
                 "plugin": "visTypeTimeseries",
                 "path": "src/platform/plugins/shared/vis_types/timeseries/server/routes/fields.ts"
               },
@@ -4075,6 +4095,10 @@
               {
                 "plugin": "searchPlayground",
                 "path": "x-pack/solutions/search/plugins/search_playground/server/routes.ts"
+              },
+              {
+                "plugin": "searchQueryRules",
+                "path": "x-pack/solutions/search/plugins/search_query_rules/server/routes.ts"
               },
               {
                 "plugin": "searchSynonyms",
@@ -5350,10 +5374,6 @@
               },
               {
                 "plugin": "@kbn/core",
-                "path": "src/core/packages/saved-objects/server-internal/src/routes/legacy_import_export/import.ts"
-              },
-              {
-                "plugin": "@kbn/core",
                 "path": "src/core/packages/saved-objects/server-internal/src/routes/bulk_resolve.ts"
               },
               {
@@ -5997,10 +6017,6 @@
                 "path": "x-pack/platform/plugins/private/upgrade_assistant/server/routes/update_index.ts"
               },
               {
-                "plugin": "upgradeAssistant",
-                "path": "x-pack/platform/plugins/private/upgrade_assistant/server/lib/enterprise_search/enterprise_search_deprecations_routes.ts"
-              },
-              {
                 "plugin": "watcher",
                 "path": "x-pack/platform/plugins/private/watcher/server/routes/api/indices/register_get_route.ts"
               },
@@ -6155,6 +6171,26 @@
               {
                 "plugin": "@kbn/search-api-keys-server",
                 "path": "x-pack/solutions/search/packages/kbn-search-api-keys-server/src/routes/routes.ts"
+              },
+              {
+                "plugin": "workchatApp",
+                "path": "x-pack/solutions/chat/plugins/workchat-app/server/routes/chat.ts"
+              },
+              {
+                "plugin": "workchatApp",
+                "path": "x-pack/solutions/chat/plugins/workchat-app/server/routes/conversation.ts"
+              },
+              {
+                "plugin": "workchatApp",
+                "path": "x-pack/solutions/chat/plugins/workchat-app/server/routes/integrations.ts"
+              },
+              {
+                "plugin": "workchatApp",
+                "path": "x-pack/solutions/chat/plugins/workchat-app/server/routes/agents.ts"
+              },
+              {
+                "plugin": "wciIndexSource",
+                "path": "x-pack/solutions/chat/plugins/wci-index-source/server/routes/configuration.ts"
               },
               {
                 "plugin": "visTypeTimeseries",
@@ -7549,6 +7585,14 @@
                 "path": "x-pack/platform/plugins/private/grokdebugger/server/lib/kibana_framework.ts"
               },
               {
+                "plugin": "workchatApp",
+                "path": "x-pack/solutions/chat/plugins/workchat-app/server/routes/integrations.ts"
+              },
+              {
+                "plugin": "workchatApp",
+                "path": "x-pack/solutions/chat/plugins/workchat-app/server/routes/agents.ts"
+              },
+              {
                 "plugin": "infra",
                 "path": "x-pack/solutions/observability/plugins/infra/server/lib/adapters/framework/kibana_framework_adapter.ts"
               },
@@ -8215,6 +8259,10 @@
               {
                 "plugin": "grokdebugger",
                 "path": "x-pack/platform/plugins/private/grokdebugger/server/lib/kibana_framework.ts"
+              },
+              {
+                "plugin": "workchatApp",
+                "path": "x-pack/solutions/chat/plugins/workchat-app/server/routes/integrations.ts"
               },
               {
                 "plugin": "infra",
@@ -10746,7 +10794,8 @@
             "label": "anyRequired",
             "description": [],
             "signature": [
-              "string[] | undefined"
+              "AnyRequiredCondition",
+              " | undefined"
             ],
             "path": "src/core/packages/http/server/src/router/route.ts",
             "deprecated": false,
@@ -10760,7 +10809,8 @@
             "label": "allRequired",
             "description": [],
             "signature": [
-              "string[] | undefined"
+              "AllRequiredCondition",
+              " | undefined"
             ],
             "path": "src/core/packages/http/server/src/router/route.ts",
             "deprecated": false,
@@ -13686,6 +13736,14 @@
                 "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/knowledge_base/entries/get_route.ts"
               },
               {
+                "plugin": "elasticAssistant",
+                "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/attack_discovery/schedules/get.ts"
+              },
+              {
+                "plugin": "elasticAssistant",
+                "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/attack_discovery/schedules/find.ts"
+              },
+              {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/api/get_prebuilt_rules_and_timelines_status/get_prebuilt_rules_and_timelines_status_route.ts"
               },
@@ -14106,6 +14164,10 @@
                 "path": "x-pack/platform/plugins/shared/automatic_import/server/__mocks__/mock_server.ts"
               },
               {
+                "plugin": "cloud",
+                "path": "x-pack/platform/plugins/shared/cloud/server/routes/get_cloud_data_route.test.ts"
+              },
+              {
                 "plugin": "canvas",
                 "path": "x-pack/platform/plugins/private/canvas/server/routes/custom_elements/find.test.ts"
               },
@@ -14355,6 +14417,10 @@
               {
                 "plugin": "elasticAssistant",
                 "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/knowledge_base/entries/update_route.ts"
+              },
+              {
+                "plugin": "elasticAssistant",
+                "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/attack_discovery/schedules/update.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -15212,6 +15278,18 @@
                 "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/defend_insights/post_defend_insights.ts"
               },
               {
+                "plugin": "elasticAssistant",
+                "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/attack_discovery/schedules/create.ts"
+              },
+              {
+                "plugin": "elasticAssistant",
+                "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/attack_discovery/schedules/disable.ts"
+              },
+              {
+                "plugin": "elasticAssistant",
+                "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/attack_discovery/schedules/enable.ts"
+              },
+              {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_actions_legacy/api/create_legacy_notification/route.ts"
               },
@@ -15878,6 +15956,10 @@
                 "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/knowledge_base/entries/delete_route.ts"
               },
               {
+                "plugin": "elasticAssistant",
+                "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/attack_discovery/schedules/delete.ts"
+              },
+              {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_management/api/rules/delete_rule/route.ts"
               },
@@ -16280,6 +16362,21 @@
     "misc": [
       {
         "parentPluginId": "@kbn/core-http-server",
+        "id": "def-server.AllRequiredCondition",
+        "type": "Type",
+        "tags": [],
+        "label": "AllRequiredCondition",
+        "description": [],
+        "signature": [
+          "(string | { anyOf: string[]; })[]"
+        ],
+        "path": "src/core/packages/http/server/src/router/route.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-http-server",
         "id": "def-server.AnyKibanaRequest",
         "type": "Type",
         "tags": [],
@@ -16292,6 +16389,21 @@
           ">"
         ],
         "path": "src/core/packages/http/server/src/router/request.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-http-server",
+        "id": "def-server.AnyRequiredCondition",
+        "type": "Type",
+        "tags": [],
+        "label": "AnyRequiredCondition",
+        "description": [],
+        "signature": [
+          "(string | { allOf: string[]; })[]"
+        ],
+        "path": "src/core/packages/http/server/src/router/route.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
