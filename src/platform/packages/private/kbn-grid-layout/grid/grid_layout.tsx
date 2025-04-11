@@ -46,11 +46,15 @@ export type GridLayoutProps = {
 type GridElementData = [string, string, boolean];
 
 const getGridElementData = (
-  rowIdsInOrder: string[],
-  gridLayoutStateManager: GridLayoutStateManager
+  gridLayoutStateManager: GridLayoutStateManager,
+  layout?: GridLayoutData
 ) => {
+     const currentLayout = layout ||
+      gridLayoutStateManager.proposedGridLayout$.getValue() ||
+      gridLayoutStateManager.gridLayout$.getValue();
+  const rowIdsInOrder = getRowKeysInOrder(layout || currentLayout);
   const flattenedGridElements: GridElementData[] = rowIdsInOrder.flatMap((rowId) => {
-    const currentLayout = gridLayoutStateManager.proposedGridLayout$.getValue() || gridLayoutStateManager.gridLayout$.getValue();
+ 
     const row = currentLayout[rowId];
     const panels = row.panels;
     const panelIdsInOrder = getPanelKeysInOrder(panels);
@@ -92,9 +96,8 @@ export const GridLayout = ({
   // offset layout vs saved layout (?)
   // we'd have an object here withz
 
-  const [rowIdsInOrder, setRowIdsInOrder] = useState<string[]>(getRowKeysInOrder(layout));
   const [gridElements, setGridElements] = useState<GridElementData[]>(() =>
-    getGridElementData(rowIdsInOrder, gridLayoutStateManager)
+    getGridElementData(gridLayoutStateManager, layout)
   );
 
   /**
@@ -128,11 +131,9 @@ export const GridLayout = ({
       .subscribe(([layoutBefore, layoutAfter]) => {
         if (!isLayoutEqual(layoutBefore, layoutAfter)) {
           onLayoutChange(layoutAfter);
-
+          console.log('onLayoutChangeSubscription')
           if (!deepEqual(Object.keys(layoutBefore), Object.keys(layoutAfter))) {
-            const reorderedRows = getRowKeysInOrder(layoutAfter);
-            setRowIdsInOrder(reorderedRows);
-            setGridElements(getGridElementData(reorderedRows, gridLayoutStateManager));
+            setGridElements(getGridElementData(gridLayoutStateManager));
           }
         }
       });
@@ -144,24 +145,7 @@ export const GridLayout = ({
   }, [onLayoutChange]);
 
   useEffect(() => {
-    /**
-     * This subscription ensures that rows get re-rendered when their orders change
-     */
-    const rowOrderSubscription = combineLatest([
-      gridLayoutStateManager.proposedGridLayout$,
-      gridLayoutStateManager.gridLayout$,
-    ])
-      .pipe(
-        map(([proposedGridLayout, gridLayout]) =>
-          getRowKeysInOrder(proposedGridLayout ?? gridLayout)
-        ),
-        distinctUntilChanged(deepEqual)
-      )
-      .subscribe((rowKeys) => {
-        setRowIdsInOrder(rowKeys);
-        setGridElements(getGridElementData(rowKeys, gridLayoutStateManager));
-      });
-
+  
     /**
      * This subscription adds and/or removes the necessary class names related to styling for
      * mobile view and a static (non-interactable) grid layout
@@ -186,7 +170,6 @@ export const GridLayout = ({
     });
 
     return () => {
-      rowOrderSubscription.unsubscribe();
       gridLayoutClassSubscription.unsubscribe();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -213,7 +196,7 @@ export const GridLayout = ({
     ]).subscribe(([interactionEvent]) => {
       if (!layoutRef.current || gridLayoutStateManager.expandedPanelId$.getValue()) return;
       if (!interactionEvent) {
-        layoutRef.current.classList.remove('kbnGridLayout--active'); // todo: fix how these styles display for header - should they be visible for the whole page till the bottom?
+        layoutRef.current.classList.remove('kbnGridLayout--active');
         return;
       }
       layoutRef.current.classList.add('kbnGridLayout--active');
@@ -225,11 +208,11 @@ export const GridLayout = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-    useEffect(
+  useEffect(
     () => {
       /**
        * This subscription ensures that the layout will re-render when one of the following changes:
-       * - Collapsed state
+       * - x - Collapsed state
        * - Panel IDs (adding/removing/replacing, but not reordering)
        */
       const gridStateSubscription = combineLatest([
@@ -239,39 +222,37 @@ export const GridLayout = ({
         .pipe(
           map(([proposedGridLayout, gridLayout]) => {
             const displayedGridLayout = proposedGridLayout ?? gridLayout;
-            const collapsedRowIds = Object.values(displayedGridLayout).filter((row) => row.isCollapsed).map((row) => row.id);
-            const flattenedPanelIds = Object.values(displayedGridLayout).flatMap((row) => Object.keys(row.panels ?? {}));
-            return {
-              collapsedRowIds,
-              panelIds: flattenedPanelIds,
-            };
+            const flattenedPanelIds = Object.values(displayedGridLayout).flatMap((row) =>
+              Object.keys(row.panels ?? {})
+            );
+            return flattenedPanelIds;
           }),
           pairwise()
         )
-        .subscribe(([oldRowData, newRowData]) => {
-          
-          if (!isEqual(oldRowData.collapsedRowIds, newRowData.collapsedRowIds)) {
-            setGridElements(getGridElementData(rowIdsInOrder, gridLayoutStateManager));
-          }
+        .subscribe(([oldPanelIds, newPanelIds]) => {
           if (
-            oldRowData.panelIds.length !== newRowData.panelIds.length ||
+            oldPanelIds.length !== newPanelIds.length ||
             !(
-              oldRowData.panelIds.every((p) => newRowData.panelIds.includes(p)) &&
-              newRowData.panelIds.every((p) => oldRowData.panelIds.includes(p))
+              oldPanelIds.every((p) => newPanelIds.includes(p)) &&
+              newPanelIds.every((p) => oldPanelIds.includes(p))
             )
           ) {
-           setGridElements(getGridElementData(rowIdsInOrder, gridLayoutStateManager));
+            setGridElements(getGridElementData(gridLayoutStateManager));
           }
         });
 
-      /**
-       * Ensure the row re-renders to reflect the new panel order after a drag-and-drop interaction, since
+      /** /**
+       * This subscription ensures that the layout will re-render when one of the following changes:
+       * - Collapsed state
+       * This subscription ensures that rows get re-rendered when their orders change
+       * - Ensure the row re-renders to reflect the new panel order after a drag-and-drop interaction, since
        * the order of rendered panels need to be aligned with how they are displayed in the grid for accessibility
        * reasons (screen readers and focus management).
        */
       const gridLayoutSubscription = gridLayoutStateManager.gridLayout$.subscribe((gridLayout) => {
         if (!gridLayout) return;
-        const newGridElements = getGridElementData(rowIdsInOrder, gridLayoutStateManager)
+        const newGridElements = getGridElementData(gridLayoutStateManager);
+        console.log('gridLayoutSubscription')
         if (gridElements.join() !== newGridElements.join()) {
           setGridElements(newGridElements);
         }
