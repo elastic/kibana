@@ -22,7 +22,6 @@ const ConfirmModal = ({
   confirmButtonText: React.ReactNode;
   setElement: (element: React.ReactNode | undefined) => void;
 }) => {
-
   return (
     <EuiConfirmModal
       title={title}
