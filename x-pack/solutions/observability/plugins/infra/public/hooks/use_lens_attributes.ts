@@ -18,6 +18,11 @@ import {
 
 import { useKibanaContextForPlugin } from './use_kibana';
 
+const isAppleDevice =
+  typeof window !== 'undefined' && /Mac|iPhone|iPad/.test(window.navigator.userAgent);
+const isMetaKey = ({ metaKey, ctrlKey }: { metaKey: boolean; ctrlKey: boolean }) =>
+  isAppleDevice ? metaKey : ctrlKey;
+
 export type UseLensAttributesParams = LensConfig;
 
 export const useLensAttributes = (params: UseLensAttributesParams) => {
@@ -144,11 +149,11 @@ const getOpenInLensAction = (onExecute: (openInNewTab: boolean) => void): Action
       return true;
     },
     async execute({ event }: ActionExecutionContext): Promise<void> {
-      const openInNewTab = event ? isCommandOrControlClick(event) : false;
+      const openInNewTab = event
+        ? isMetaKey({ metaKey: event.metaKey, ctrlKey: event.ctrlKey })
+        : false;
       onExecute(openInNewTab);
     },
     order: 100,
   };
 };
-
-const isCommandOrControlClick = (event: React.MouseEvent) => !!(event.metaKey || event.ctrlKey);
