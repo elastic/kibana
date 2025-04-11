@@ -26,6 +26,7 @@ export const updateIndexTemplateFieldsLimit = ({
         settings: {
           ...template.index_template.template?.settings,
           'index.mapping.total_fields.limit': limit,
+          'index.mapping.total_fields.ignore_dynamic_beyond_limit': true,
         },
       },
     },

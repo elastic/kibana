@@ -184,6 +184,7 @@ describe('createOrUpdateComponentTemplate', () => {
           settings: {
             ...existingIndexTemplate.index_template.template?.settings,
             'index.mapping.total_fields.limit': 2500,
+            'index.mapping.total_fields.ignore_dynamic_beyond_limit': true,
           },
         },
       },
@@ -290,6 +291,7 @@ describe('createOrUpdateComponentTemplate', () => {
           settings: {
             ...existingIndexTemplate.index_template.template?.settings,
             'index.mapping.total_fields.limit': 2500,
+            'index.mapping.total_fields.ignore_dynamic_beyond_limit': true,
           },
         },
       },
