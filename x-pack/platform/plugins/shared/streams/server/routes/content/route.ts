@@ -147,6 +147,9 @@ const importContentRoute = createServerRoute({
 
     const importer = (await context.core).savedObjects.getImporter(soClient);
 
+    // this is required to support integration package's dashboards. since they
+    // reference pre-existing metrics-* and logs-* data views we they need to
+    // install them before import
     await installManagedIndexPattern({
       savedObjectsClient: soClient,
       savedObjectsImporter: importer,
