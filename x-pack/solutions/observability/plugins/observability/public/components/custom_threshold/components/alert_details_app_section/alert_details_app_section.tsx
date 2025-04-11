@@ -58,6 +58,7 @@ export default function AlertDetailsAppSection({ alert }: AppSectionProps) {
   const services = useKibana().services;
   const {
     charts,
+    dataViews,
     data,
     share: {
       url: { locators },
@@ -130,7 +131,6 @@ export default function AlertDetailsAppSection({ alert }: AppSectionProps) {
   if (!ruleParams.criteria) {
     return null;
   }
-
   return (
     <EuiFlexGroup direction="column" data-test-subj="thresholdAlertOverviewSection">
       {ruleParams.criteria.map((criterion, index) => {
@@ -143,6 +143,7 @@ export default function AlertDetailsAppSection({ alert }: AppSectionProps) {
             ruleParams.searchConfiguration as SearchConfigurationWithExtractedReferenceType,
           startedAt: alertStart,
           endedAt: alertEnd,
+          dataViewSpec: dataView?.toSpec(),
         });
 
         return (
@@ -173,7 +174,7 @@ export default function AlertDetailsAppSection({ alert }: AppSectionProps) {
               </EuiFlexGroup>
               <EuiSpacer size="m" />
               <EuiFlexGroup>
-                <EuiFlexItem style={{ minHeight: 150, minWidth: 160 }} grow={1}>
+                <EuiFlexItem css={{ minHeight: 150, minWidth: 160 }} grow={1}>
                   <Threshold
                     chartProps={chartProps}
                     id={`threshold-${index}`}

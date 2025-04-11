@@ -6,7 +6,7 @@
  */
 
 import * as rt from 'io-ts';
-import { DataViewSpec, SerializedSearchSourceFields } from '@kbn/data-plugin/common';
+import { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import { Filter, Query } from '@kbn/es-query';
 import { COMPARATORS } from '@kbn/alerting-comparators';
 import { LEGACY_COMPARATORS } from '../utils/convert_legacy_outside_comparator';
@@ -117,8 +117,7 @@ export interface SearchConfigurationType {
 }
 
 export interface SearchConfigurationWithExtractedReferenceType {
-  // Index will be a data view spec after extracting references
-  index: DataViewSpec;
+  index: string;
   query: {
     query: string;
     language: string;
