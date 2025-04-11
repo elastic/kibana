@@ -9,27 +9,30 @@
 
 import classNames from 'classnames';
 import deepEqual from 'fast-deep-equal';
-import { cloneDeep } from 'lodash';
+import { cloneDeep, isEqual } from 'lodash';
 import React, { useEffect, useMemo, useRef, useState, useCallback } from 'react';
 import { combineLatest, pairwise, map, distinctUntilChanged } from 'rxjs';
 
 import { css } from '@emotion/react';
 
 import { GridHeightSmoother } from './grid_height_smoother';
-import { GridAccessMode, GridLayoutData, GridSettings, UseCustomDragHandle } from './types';
 import {
-  GridLayoutContext,
-  GridLayoutContextType,
-  useGridLayoutContext,
-} from './use_grid_layout_context';
+  GridAccessMode,
+  GridLayoutData,
+  GridLayoutStateManager,
+  GridSettings,
+  UseCustomDragHandle,
+} from './types';
+import { GridLayoutContext, GridLayoutContextType } from './use_grid_layout_context';
 import { useGridLayoutState } from './use_grid_layout_state';
 import { isLayoutEqual } from './utils/equality_checks';
 import { getPanelKeysInOrder, getRowKeysInOrder, resolveGridRow } from './utils/resolve_grid_row';
-import { GridRowHeader } from './grid_row/grid_row_header';
 import { GridPanelDragPreview } from './grid_panel/grid_panel_drag_preview';
 import { GridPanel } from './grid_panel';
-import { getTopOffsetForRow, getTopOffsetForRowFooter } from './utils/calculations';
+
 import { GridRowDragPreview } from './grid_row/grid_row_drag_preview';
+import { HeaderGhost, GridRowHeaderWrapper } from './grid_row/grid_row_header_wrapper';
+import { GhostFooter } from './grid_row/grid_row_ghost';
 
 export type GridLayoutProps = {
   layout: GridLayoutData;
@@ -39,6 +42,33 @@ export type GridLayoutProps = {
   accessMode?: GridAccessMode;
   className?: string; // this makes it so that custom CSS can be passed via Emotion
 } & UseCustomDragHandle;
+
+type GridElementData = [string, string, boolean];
+
+const getGridElementData = (
+  rowIdsInOrder: string[],
+  gridLayoutStateManager: GridLayoutStateManager
+) => {
+  const flattenedGridElements: GridElementData[] = rowIdsInOrder.flatMap((rowId) => {
+    const currentLayout = gridLayoutStateManager.proposedGridLayout$.getValue() || gridLayoutStateManager.gridLayout$.getValue();
+    const row = currentLayout[rowId];
+    const panels = row.panels;
+    const panelIdsInOrder = getPanelKeysInOrder(panels);
+
+    const headerElement: GridElementData = [
+      row.order === 0 ? 'header-ghost' : 'header',
+      rowId,
+      row.isCollapsed,
+    ];
+    const footerElement: GridElementData = ['footer-ghost', rowId, row.isCollapsed];
+    return [
+      headerElement,
+      ...panelIdsInOrder.map((panelId): GridElementData => [panelId, rowId, row.isCollapsed]),
+      footerElement,
+    ];
+  });
+  return flattenedGridElements;
+};
 
 export const GridLayout = ({
   layout,
@@ -62,32 +92,10 @@ export const GridLayout = ({
   // offset layout vs saved layout (?)
   // we'd have an object here withz
 
-  const rows = gridLayoutStateManager.gridLayout$.value;
-
   const [rowIdsInOrder, setRowIdsInOrder] = useState<string[]>(getRowKeysInOrder(layout));
-
-  // TODO: move this to state so the updates are not so frequent
-  const headersAndPanelsIds = rowIdsInOrder.flatMap((rowId) => {
-    const headerAndPanels = [];
-    const row = rows[rowId];
-    const panels = row.panels;
-    const panelIdsInOrder = getPanelKeysInOrder(panels);
-    if (row.order === 0) {
-      headerAndPanels.push(['header-ghost', rowId, row.isCollapsed]);
-    } else {
-      headerAndPanels.push(['header', rowId, row.isCollapsed]);
-    }
-    return [
-      ...headerAndPanels,
-      ...panelIdsInOrder.map((panelId) => [panelId, rowId, row.isCollapsed]),
-      ['footer-ghost', rowId, row.isCollapsed],
-    ];
-  });
-
-  //  const [panelIdsInOrder, setPanelIdsInOrder] = useState<string[]>(() =>
-  //   getPanelKeysInOrder(rows[rowIdsInOrder[0]].panels)
-  // );
-  // const [isCollapsed, setIsCollapsed] = useState<boolean>(currentRow.isCollapsed);
+  const [gridElements, setGridElements] = useState<GridElementData[]>(() =>
+    getGridElementData(rowIdsInOrder, gridLayoutStateManager)
+  );
 
   /**
    * Update the `gridLayout$` behaviour subject in response to the `layout` prop changing
@@ -122,7 +130,9 @@ export const GridLayout = ({
           onLayoutChange(layoutAfter);
 
           if (!deepEqual(Object.keys(layoutBefore), Object.keys(layoutAfter))) {
-            setRowIdsInOrder(getRowKeysInOrder(layoutAfter));
+            const reorderedRows = getRowKeysInOrder(layoutAfter);
+            setRowIdsInOrder(reorderedRows);
+            setGridElements(getGridElementData(reorderedRows, gridLayoutStateManager));
           }
         }
       });
@@ -149,6 +159,7 @@ export const GridLayout = ({
       )
       .subscribe((rowKeys) => {
         setRowIdsInOrder(rowKeys);
+        setGridElements(getGridElementData(rowKeys, gridLayoutStateManager));
       });
 
     /**
@@ -214,6 +225,67 @@ export const GridLayout = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+    useEffect(
+    () => {
+      /**
+       * This subscription ensures that the layout will re-render when one of the following changes:
+       * - Collapsed state
+       * - Panel IDs (adding/removing/replacing, but not reordering)
+       */
+      const gridStateSubscription = combineLatest([
+        gridLayoutStateManager.proposedGridLayout$,
+        gridLayoutStateManager.gridLayout$,
+      ])
+        .pipe(
+          map(([proposedGridLayout, gridLayout]) => {
+            const displayedGridLayout = proposedGridLayout ?? gridLayout;
+            const collapsedRowIds = Object.values(displayedGridLayout).filter((row) => row.isCollapsed).map((row) => row.id);
+            const flattenedPanelIds = Object.values(displayedGridLayout).flatMap((row) => Object.keys(row.panels ?? {}));
+            return {
+              collapsedRowIds,
+              panelIds: flattenedPanelIds,
+            };
+          }),
+          pairwise()
+        )
+        .subscribe(([oldRowData, newRowData]) => {
+          
+          if (!isEqual(oldRowData.collapsedRowIds, newRowData.collapsedRowIds)) {
+            setGridElements(getGridElementData(rowIdsInOrder, gridLayoutStateManager));
+          }
+          if (
+            oldRowData.panelIds.length !== newRowData.panelIds.length ||
+            !(
+              oldRowData.panelIds.every((p) => newRowData.panelIds.includes(p)) &&
+              newRowData.panelIds.every((p) => oldRowData.panelIds.includes(p))
+            )
+          ) {
+           setGridElements(getGridElementData(rowIdsInOrder, gridLayoutStateManager));
+          }
+        });
+
+      /**
+       * Ensure the row re-renders to reflect the new panel order after a drag-and-drop interaction, since
+       * the order of rendered panels need to be aligned with how they are displayed in the grid for accessibility
+       * reasons (screen readers and focus management).
+       */
+      const gridLayoutSubscription = gridLayoutStateManager.gridLayout$.subscribe((gridLayout) => {
+        if (!gridLayout) return;
+        const newGridElements = getGridElementData(rowIdsInOrder, gridLayoutStateManager)
+        if (gridElements.join() !== newGridElements.join()) {
+          setGridElements(newGridElements);
+        }
+      });
+
+      return () => {
+        gridLayoutSubscription.unsubscribe();
+        gridStateSubscription.unsubscribe();
+      };
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  );
+
   const toggleIsCollapsed = useCallback(
     (rowwId: string) => {
       const newLayout = cloneDeep(gridLayoutStateManager.gridLayout$.value);
@@ -235,42 +307,27 @@ export const GridLayout = ({
             className={classNames('kbnGrid', className)}
             css={[styles.hasActivePanel, styles.singleColumn, styles.fullHeight, styles.grid]}
           >
-            {headersAndPanelsIds.map(([typeId, rowId, isCollapsed]) => {
-              // todo: fix types
-              if (typeId === 'header') {
-                return (
-                  <GridRowHeaderWrapper
-                    rowId={rowId}
-                    toggleIsCollapsed={toggleIsCollapsed}
-                    key={rowId}
-                    isCollapsed={!!isCollapsed}
-                  />
-                );
-              } else if (typeId === 'header-ghost') {
-                return (
-                  <div
-                    key={typeId}
-                    className="kbnGridRowHeader--ghost" // this used only for calculating the position of the row
-                    style={{
-                      gridColumnStart: 1,
-                      gridColumnEnd: -1,
-                      gridRowStart: 1,
-                      gridRowEnd: 1,
-                      pointerEvents: 'none',
-                      height: '0px',
-                    }}
-                    ref={(element: HTMLDivElement | null) => {
-                      gridLayoutStateManager.headerRefs.current[rowId] = element;
-                    }}
-                  />
-                );
-              } else if (typeId === 'footer-ghost') {
-                return <GhostFooter rowId={rowId} key={`${rowId}-footer`} />;
+            {gridElements.map(([typeId, rowId, isCollapsed]) => {
+              switch (typeId) {
+                case 'header':
+                  return (
+                    <GridRowHeaderWrapper
+                      key={rowId}
+                      rowId={rowId}
+                      toggleIsCollapsed={toggleIsCollapsed}
+                      isCollapsed={!!isCollapsed}
+                    />
+                  );
+                case 'header-ghost':
+                  return <HeaderGhost key={typeId} rowId={rowId} />;
+                case 'footer-ghost':
+                  return <GhostFooter rowId={rowId} key={`${rowId}-footer`} />;
+                default:
+                  if (isCollapsed) {
+                    return null;
+                  }
+                  return <GridPanel key={typeId} panelId={typeId} rowId={rowId} />;
               }
-              if (!isCollapsed) {
-                return <GridPanel key={typeId} panelId={typeId} rowId={rowId} />;
-              }
-              return null;
             })}
             <GridPanelDragPreview />
             <GridRowDragPreview />
@@ -278,115 +335,6 @@ export const GridLayout = ({
         </div>
       </GridHeightSmoother>
     </GridLayoutContext.Provider>
-  );
-};
-
-const GhostFooter = ({ rowId }: { rowId: string }) => {
-  const { gridLayoutStateManager } = useGridLayoutContext();
-  const styles = {
-    pointerEvents: 'none' as const,
-    height: '0px',
-  };
-
-  useEffect(
-    () => {
-      /** Update the styles of the drag preview via a subscription to prevent re-renders */
-      const styleSubscription = combineLatest([
-        gridLayoutStateManager.gridLayout$,
-        gridLayoutStateManager.proposedGridLayout$,
-      ]).subscribe(([gridLayout, proposedGridLayout]) => {
-        const footerRef = gridLayoutStateManager.footerRefs.current[rowId];
-        if (!footerRef) return;
-        const currentGridLayout = proposedGridLayout || gridLayout;
-        const topOffset = getTopOffsetForRowFooter(rowId, currentGridLayout);
-        footerRef.style.display = 'block';
-        footerRef.style.gridColumnStart = `1`;
-        footerRef.style.gridColumnEnd = `-1`;
-        footerRef.style.gridRowStart = `${topOffset + 1}`;
-        footerRef.style.gridRowEnd = `${topOffset + 3}`;
-      });
-
-      return () => {
-        styleSubscription.unsubscribe();
-      };
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
-  );
-  return (
-    <div
-      style={styles}
-      className="kbnGridRowFooter--ghost"
-      ref={(element: HTMLDivElement | null) =>
-        (gridLayoutStateManager.footerRefs.current[rowId] = element)
-      }
-    /> // this is used only for calculating the position of the row
-  );
-};
-
-const GridRowHeaderWrapper = ({
-  rowId,
-  toggleIsCollapsed,
-  isCollapsed,
-}: {
-  rowId: string;
-  toggleIsCollapsed: (rowId: string) => void;
-  isCollapsed: boolean;
-}) => {
-  const collapseButtonRef = useRef<HTMLButtonElement | null>(null);
-  const { gridLayoutStateManager } = useGridLayoutContext();
-
-  useEffect(() => {
-    /**
-     * Set `aria-expanded` without passing the expanded state as a prop to `GridRowHeader` in order
-     * to prevent `GridRowHeader` from rerendering when this state changes
-     */
-    if (!collapseButtonRef.current) return;
-    collapseButtonRef.current.ariaExpanded = `${!isCollapsed}`;
-  }, [isCollapsed]);
-
-  useEffect(
-    () => {
-      /** Update the styles of the drag preview via a subscription to prevent re-renders */
-      const styleSubscription = combineLatest([
-        gridLayoutStateManager.gridLayout$,
-        gridLayoutStateManager.proposedGridLayout$,
-      ]).subscribe(([gridLayout, proposedGridLayout]) => {
-        const headerRef = gridLayoutStateManager.headerRefs.current[rowId];
-        if (!headerRef) return;
-        const currentGridLayout = proposedGridLayout || gridLayout;
-        const topOffset = getTopOffsetForRow(rowId, currentGridLayout);
-        headerRef.style.display = 'block';
-        headerRef.style.gridColumnStart = `1`;
-        headerRef.style.gridColumnEnd = `-1`;
-        headerRef.style.gridRowStart = `${topOffset + 1}`;
-        headerRef.style.gridRowEnd = `${topOffset + 3}`;
-      });
-
-      return () => {
-        styleSubscription.unsubscribe();
-      };
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
-  );
-
-  return (
-    <div
-      className={classNames({ 'kbnGridRowHeader--collapsed': isCollapsed })}
-      id={`kbnGridRow-${rowId}`}
-      role="region"
-      aria-labelledby={`kbnGridRowTitle-${rowId}`}
-      ref={(element: HTMLDivElement | null) =>
-        (gridLayoutStateManager.headerRefs.current[rowId] = element)
-      }
-    >
-      <GridRowHeader
-        rowId={rowId}
-        toggleIsCollapsed={toggleIsCollapsed}
-        collapseButtonRef={collapseButtonRef}
-      />
-    </div>
   );
 };
 
