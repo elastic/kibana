@@ -18,7 +18,7 @@ import {
 import * as i18n from './translations';
 
 import { useFindAttackDiscoverySchedules } from '../schedule/logic/use_find_schedules';
-import { EmptyPage } from '../schedule/empty_page/empty_schedule';
+import { EmptyPage } from '../schedule/empty_page';
 import { SchedulesTable } from '../schedule/schedules_table';
 import { CreateFlyout } from '../schedule/create_flyout';
 
