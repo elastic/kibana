@@ -24,7 +24,7 @@ const column: Datatable['columns'][number] = {
 const formattedValue = faker.string.numeric(3);
 const rawValue = parseInt(formattedValue, 10);
 
-const trendLabels = { sortUp: 'up', sortDown: 'down', minus: 'stable' };
+const trendLabels = { sortUp: 'up', sortDown: 'down', grab: 'stable' };
 
 function renderSecondaryMetric(props: Partial<SecondaryMetricProps> = {}) {
   render(
@@ -103,7 +103,7 @@ describe('Secondary metric', () => {
       const trendCombinations = [
         { baseline: rawValue - 1, color: palette[2], icon: 'sortUp' as const },
         { baseline: rawValue + 1, color: palette[0], icon: 'sortDown' as const },
-        { baseline: rawValue, color: palette[1], icon: 'minus' as const },
+        { baseline: rawValue, color: palette[1], icon: 'grab' as const },
       ];
       describe('with both icon and values', () => {
         it.each(trendCombinations)(
@@ -142,7 +142,7 @@ describe('Secondary metric', () => {
             },
           });
 
-          const icon = 'minus';
+          const icon = 'grab';
 
           const trendLabel = trendLabels[icon];
           const el = screen.getByTitle(formattedValue);
@@ -169,7 +169,7 @@ describe('Secondary metric', () => {
             },
           });
 
-          const icon = 'minus';
+          const icon = 'grab';
 
           const trendLabel = trendLabels[icon];
           const el = screen.getByTitle('N/A');
@@ -196,7 +196,7 @@ describe('Secondary metric', () => {
             },
           });
 
-          const icon = 'minus';
+          const icon = 'grab';
 
           const trendLabel = trendLabels[icon];
           const el = screen.getByTitle('N/A');
