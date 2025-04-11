@@ -30,6 +30,9 @@ export const useIndexNameAutocomplete = ({ query }: { query: string }) => {
   const { isLoading, data } = useQuery({
     queryKey: ['index-name-autocomplete', debouncedQuery],
     queryFn: async () => {
+      if (query.length < 3) {
+        return [];
+      }
       const response = await http.get<SearchIndicesResponse>(
         `/internal/wci-index-source/indices-autocomplete`,
         {
