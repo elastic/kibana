@@ -40,6 +40,30 @@ import { IndexClosedParagraph } from '../index_closed_paragraph';
 
 const ML_ANOMALIES_PREFIX = '.ml-anomalies-';
 
+const FollowerIndexCallout = () => (
+  <>
+    <EuiCallOut
+      title={
+        <FormattedMessage
+          id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.followerIndexTitle"
+          defaultMessage="Unfollow leader index is recomended"
+        />
+      }
+      color="primary"
+      iconType="iInCircle"
+      data-test-subj="followerIndexCallout"
+    >
+      <p>
+        <FormattedMessage
+          id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.followerIndexText"
+          defaultMessage="This index is a cross-cluster replication follower index. We recomend you to unfollow the leader index."
+        />
+      </p>
+    </EuiCallOut>
+    <EuiSpacer size="m" />
+  </>
+);
+
 /**
  * Displays a flyout that shows the details / corrective action for a "reindex" deprecation for a given index.
  */
@@ -177,18 +201,21 @@ export const ReindexDetailsFlyoutStep: React.FunctionComponent<{
           {showMlAnomalyReindexingGuidance && <MlAnomalyGuidance />}
           {showReadOnlyGuidance && (
             <Fragment>
+              {isFollowerIndex && <FollowerIndexCallout />}
               <p>
                 <FormattedMessage
                   id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.readonlyCompatibleIndexText"
                   defaultMessage="This index was created in ES 7.x. It has been marked as read-only, which enables compatibility with the next major version."
                 />
               </p>
-              <p>
-                <FormattedMessage
-                  id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.reindexText"
-                  defaultMessage="The reindex operation allows transforming an index into a new, compatible one. It will copy all of the existing documents into a new index and remove the old one. Depending on size and resources, reindexing may take extended time and your data will be in a read-only state until the job has completed."
-                />
-              </p>
+              {!isFollowerIndex && (
+                <p>
+                  <FormattedMessage
+                    id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.reindexText"
+                    defaultMessage="The reindex operation allows transforming an index into a new, compatible one. It will copy all of the existing documents into a new index and remove the old one. Depending on size and resources, reindexing may take extended time and your data will be in a read-only state until the job has completed."
+                  />
+                </p>
+              )}
               {isClosedIndex && (
                 <p>
                   <IndexClosedParagraph />
@@ -198,29 +225,7 @@ export const ReindexDetailsFlyoutStep: React.FunctionComponent<{
           )}
           {showDefaultGuidance && (
             <Fragment>
-              {isFollowerIndex && (
-                <>
-                  <EuiCallOut
-                    title={
-                      <FormattedMessage
-                        id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.followerIndexTitle"
-                        defaultMessage="Unfollow leader index is recomended"
-                      />
-                    }
-                    color="primary"
-                    iconType="iInCircle"
-                    data-test-subj="followerIndexCallout"
-                  >
-                    <p>
-                      <FormattedMessage
-                        id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.followerIndexText"
-                        defaultMessage="This index is a cross-cluster replication follower index. We recomend you to unfollow the leader index."
-                      />
-                    </p>
-                  </EuiCallOut>
-                  <EuiSpacer size="m" />
-                </>
-              )}
+              {isFollowerIndex && <FollowerIndexCallout />}
               <p>
                 <FormattedMessage
                   id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.notCompatibleIndexText"
