@@ -68,47 +68,37 @@ export const useBulkUpdateAlertSummary = (): UseBulkUpdateAlertSummary => {
   return { isLoading, bulkUpdate, abortStream: cancelRequest };
 };
 
-export const bulkUpdateAlertSummary = async ({
+const bulkUpdateAlertSummary = async ({
   alertSummary,
   http,
   signal,
-  toasts,
 }: {
   alertSummary: PerformAlertSummaryBulkActionRequestBody;
   http: HttpSetup;
   signal?: AbortSignal;
   toasts?: IToasts;
 }): Promise<PerformAlertSummaryBulkActionResponse | void> => {
-  try {
-    const result = await http.fetch<PerformAlertSummaryBulkActionResponse>(
-      ELASTIC_AI_ASSISTANT_ALERT_SUMMARY_URL_BULK_ACTION,
-      {
-        method: 'POST',
-        version: API_VERSIONS.internal.v1,
-        body: JSON.stringify(alertSummary),
-        signal,
-      }
-    );
-
-    if (!result.success) {
-      const serverError = result.attributes.errors
-        ?.map(
-          (e) =>
-            `${e.status_code ? `Error code: ${e.status_code}. ` : ''}Error message: ${
-              e.message
-            } for alert summaries ${e.alert_summaries.map((c) => c.id).join(', ')}`
-        )
-        .join(',\n');
-      throw new Error(serverError);
+  const result = await http.fetch<PerformAlertSummaryBulkActionResponse>(
+    ELASTIC_AI_ASSISTANT_ALERT_SUMMARY_URL_BULK_ACTION,
+    {
+      method: 'POST',
+      version: API_VERSIONS.internal.v1,
+      body: JSON.stringify(alertSummary),
+      signal,
     }
+  );
 
-    return result;
-  } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : String(error);
-    toasts?.addError(new Error(errorMessage), {
-      title: i18n.translate('xpack.elasticAssistant.alertSummary.bulkActionsAlertSummaryError', {
-        defaultMessage: 'Error updating alert summaries',
-      }),
-    });
+  if (!result.success) {
+    const serverError = result.attributes.errors
+      ?.map(
+        (e) =>
+          `${e.status_code ? `Error code: ${e.status_code}. ` : ''}Error message: ${
+            e.message
+          } for alert summaries ${e.alert_summaries.map((c) => c.id).join(', ')}`
+      )
+      .join(',\n');
+    throw new Error(serverError);
   }
+
+  return result;
 };
