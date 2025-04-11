@@ -4,24 +4,25 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { Subject } from 'rxjs';
-import { getChartsTheme } from '@elastic/charts';
+
 import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import type { DataStreamsStatsClient } from '@kbn/dataset-quality-plugin/public/services/data_streams_stats/data_streams_stats_client';
+import { DataStreamsStatsClient } from '@kbn/dataset-quality-plugin/public/services/data_streams_stats/data_streams_stats_client';
+import { DiscoverSharedPublicStart } from '@kbn/discover-shared-plugin/public';
 import { fieldsMetadataPluginPublicMock } from '@kbn/fields-metadata-plugin/public/mocks';
+import { IndexManagementPluginStart } from '@kbn/index-management-shared-types';
+import { IngestPipelinesPluginStart } from '@kbn/ingest-pipelines-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
+import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import { ObservabilityAIAssistantPublicStart } from '@kbn/observability-ai-assistant-plugin/public';
 import { IUnifiedSearchPluginServices, SearchBar } from '@kbn/unified-search-plugin/public';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import { merge } from 'lodash';
 import React, { useMemo } from 'react';
+import { Subject } from 'rxjs';
 import { DeepPartial } from 'utility-types';
-import { DiscoverSharedPublicStart } from '@kbn/discover-shared-plugin/public';
-import { IndexManagementPluginStart } from '@kbn/index-management-shared-types';
-import { IngestPipelinesPluginStart } from '@kbn/ingest-pipelines-plugin/public';
-import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
-import { ObservabilityAIAssistantPublicStart } from '@kbn/observability-ai-assistant-plugin/public';
+import { getChartsTheme } from '@elastic/charts';
 import type { StreamsAppKibanaContext } from '../public/hooks/use_kibana';
 import { StreamsTelemetryService } from '../public/telemetry/service';
 import { StreamsAppStartDependencies } from '../public/types';
@@ -53,7 +54,7 @@ export function getMockStreamsAppContext(): StreamsAppKibanaContext {
       start: start.getTime(),
       end: end.getTime(),
     },
-    fetch$: new Subject(),
+    timeState$: new Subject(),
     refresh: jest.fn(),
   });
 

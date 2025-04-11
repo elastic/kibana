@@ -75,7 +75,7 @@ export function IngestionRate({
           </EuiFlexItem>
 
           <EuiFlexItem grow={false}>
-            <StreamsAppSearchBar />
+            <StreamsAppSearchBar showDatePicker />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPanel>

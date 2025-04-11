@@ -43,7 +43,7 @@ export function useStreamsAppFetch<
 
   const { disableToastOnError = false, withRefresh = false, withTimeRange = false } = options || {};
 
-  const { timeState, fetch$ } = useTimefilter();
+  const { timeState, timeState$ } = useTimefilter();
 
   const onError = (error: Error) => {
     let requestUrl: string | undefined;
@@ -97,7 +97,7 @@ export function useStreamsAppFetch<
     ({ signal }) => {
       const parameters = {
         signal,
-        ...(withTimeRange ? { timeState } : {}),
+        ...(withTimeRange ? { timeState: timeStateRef.current } : {}),
       } as ParametersFromOptions<TOptions>;
 
       return callback(parameters);
@@ -111,10 +111,10 @@ export function useStreamsAppFetch<
   refreshRef.current = state.refresh;
 
   useEffect(() => {
-    const subscription = fetch$.subscribe({
-      next: ({ refresh }) => {
+    const subscription = timeState$.subscribe({
+      next: ({ kind }) => {
         const shouldRefresh =
-          (withTimeRange && refresh === 'shift') || (withRefresh && refresh !== 'none');
+          (withTimeRange && kind === 'shift') || (withRefresh && kind !== 'initial');
 
         if (shouldRefresh) {
           refreshRef.current();
@@ -124,7 +124,7 @@ export function useStreamsAppFetch<
     return () => {
       subscription.unsubscribe();
     };
-  }, [fetch$, withTimeRange, withRefresh]);
+  }, [timeState$, withTimeRange, withRefresh]);
 
   return state;
 }

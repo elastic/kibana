@@ -24,12 +24,12 @@ import { useKibana } from '../../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../../hooks/use_streams_app_fetch';
 import { useTimefilter } from '../../../hooks/use_timefilter';
 import { SparkPlot } from '../../spark_plot';
-import { StreamsAppSearchBar } from '../../streams_app_search_bar';
 import { ChangePointSummary } from '../change_point_summary';
 import {
   SignificantEventSuggestionPreview,
   useSignificantEventSuggestionPreviews,
 } from './use_suggestion_preview';
+import { UncontrolledStreamsAppSearchBar } from '../../streams_app_search_bar/uncontrolled_streams_app_bar';
 
 export function SignificantEventSuggestionsList({
   name,
@@ -48,7 +48,9 @@ export function SignificantEventSuggestionsList({
     },
   } = useKibana();
 
-  const { timeRange: initialTimeRange } = useTimefilter();
+  const {
+    timeState: { timeRange: initialTimeRange },
+  } = useTimefilter();
 
   const [timeRange, setTimeRange] = useState(initialTimeRange);
 
@@ -177,7 +179,7 @@ export function SignificantEventSuggestionsList({
 
   return (
     <EuiFlexGroup direction="column">
-      <StreamsAppSearchBar
+      <UncontrolledStreamsAppSearchBar
         onQuerySubmit={(next) => {
           if (next.dateRange) {
             setTimeRange(next.dateRange);

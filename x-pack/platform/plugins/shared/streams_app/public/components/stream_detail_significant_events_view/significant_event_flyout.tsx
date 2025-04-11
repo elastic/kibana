@@ -27,13 +27,13 @@ import { fromKueryExpression } from '@kbn/es-query';
 import moment from 'moment';
 import { calculateAuto } from '@kbn/calculate-auto';
 import { getAbsoluteTimeRange } from '@kbn/data-plugin/common';
-import { StreamsAppSearchBar } from '../streams_app_search_bar';
 import { useKibana } from '../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
 import { SparkPlot } from '../spark_plot';
 import { formatChangePoint } from './change_point';
 import { getAnnotationFromFormattedChangePoint } from './utils/get_annotation_from_formatted_change_point';
 import { useTimefilter } from '../../hooks/use_timefilter';
+import { UncontrolledStreamsAppSearchBar } from '../streams_app_search_bar/uncontrolled_streams_app_bar';
 
 function getTitle(query?: StreamQueryKql) {
   if (!query) {
@@ -93,7 +93,9 @@ export function SignificantEventFlyoutContents({
     },
   } = useKibana();
 
-  const { timeRange: initialTimeRange } = useTimefilter();
+  const {
+    timeState: { timeRange: initialTimeRange },
+  } = useTimefilter();
 
   const [timeRange, setTimeRange] = useState(initialTimeRange);
 
@@ -284,7 +286,7 @@ export function SignificantEventFlyoutContents({
             }
             {...validationMessages.kql}
           >
-            <StreamsAppSearchBar
+            <UncontrolledStreamsAppSearchBar
               query={queryValues.kql?.query ?? ''}
               showQueryInput
               onQueryChange={() => {

@@ -22,8 +22,6 @@ import { formatChangePoint } from './change_point';
 import { ChangePointSummary } from './change_point_summary';
 import { useTimefilter } from '../../hooks/use_timefilter';
 import { useStreamsAppParams } from '../../hooks/use_streams_app_params';
-import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
-import { useStreamsAppRoutePath } from '../../hooks/use_streams_app_route_path';
 import { LoadingPanel } from '../loading_panel';
 import { SignificantEventsViewEmptyState } from './empty_state';
 import { SignificantEventSuggestionsFlyout } from './suggestions_flyout';
@@ -42,19 +40,11 @@ export function StreamDetailSignificantEventsView({
   } = useKibana();
 
   const {
-    path,
-    query,
     query: { kql },
   } = useStreamsAppParams('/{key}/*');
 
-  const streamsAppRouter = useStreamsAppRouter();
-
-  const routePath = useStreamsAppRoutePath();
-
   const {
-    timeRange,
-    setTimeRange,
-    absoluteTimeRange: { start, end },
+    timeState: { start, end },
   } = useTimefilter();
 
   const theme = useEuiTheme().euiTheme;
@@ -173,39 +163,7 @@ export function StreamDetailSignificantEventsView({
         <EuiFlexItem grow={false}>
           <EuiFlexGroup direction="row" gutterSize="s">
             <EuiFlexItem grow>
-              <StreamsAppSearchBar
-                query={kql}
-                onQuerySubmit={(next, isUpdate) => {
-                  if (!isUpdate) {
-                    significantEventsFetchState.refresh();
-                    return;
-                  }
-
-                  if (next.dateRange) {
-                    streamsAppRouter.push(routePath, {
-                      path,
-                      query: {
-                        ...query,
-                        kql: next.query,
-                        rangeFrom: next.dateRange?.from,
-                        rangeTo: next.dateRange?.to,
-                      },
-                    });
-
-                    setTimeRange({
-                      from: next.dateRange.from,
-                      to: next.dateRange.to,
-                      mode: next.dateRange.mode,
-                    });
-                  }
-                }}
-                onRefresh={() => {
-                  significantEventsFetchState.refresh();
-                }}
-                dateRangeFrom={timeRange.from}
-                dateRangeTo={timeRange.to}
-                showQueryInput
-              />
+              <StreamsAppSearchBar query={kql} showQueryInput />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButton

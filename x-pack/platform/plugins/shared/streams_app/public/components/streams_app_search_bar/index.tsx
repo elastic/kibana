@@ -6,6 +6,9 @@
  */
 import type { DataView } from '@kbn/data-views-plugin/common';
 import React from 'react';
+import { isEqual } from 'lodash';
+import { TimeRange } from '@kbn/es-query';
+import { getAbsoluteTimeRange } from '@kbn/data-plugin/common';
 import { useTimefilter } from '../../hooks/use_timefilter';
 import { UncontrolledStreamsAppSearchBar } from './uncontrolled_streams_app_bar';
 
@@ -20,23 +23,39 @@ export interface StreamsAppSearchBarProps {
   showDatePicker?: boolean;
 }
 
+// if the absolute time stays the same
+function needsRefresh(left: TimeRange, right: TimeRange) {
+  const forceNow = new Date();
+  const leftAbsolute = getAbsoluteTimeRange(left, { forceNow });
+  const rightAbsolute = getAbsoluteTimeRange(right, { forceNow });
+
+  return isEqual(leftAbsolute, rightAbsolute);
+}
+
 export function StreamsAppSearchBar({
   onQueryChange,
   onQuerySubmit,
   query,
   placeholder,
   dataViews,
-  showQueryInput = false,
   showDatePicker = false,
   showSubmitButton = true,
 }: StreamsAppSearchBarProps) {
-  const { timeState, setTime } = useTimefilter();
+  const { timeState, setTime, refresh } = useTimefilter();
+
+  function refreshOrSetTime(next: TimeRange) {
+    if (needsRefresh(timeState.timeRange, next)) {
+      refresh();
+    } else {
+      setTime(next);
+    }
+  }
 
   return (
     <UncontrolledStreamsAppSearchBar
-      onQuerySubmit={({ dateRange, query: nextQuery }) => {
+      onQuerySubmit={({ dateRange, query: nextQuery }, isUpdate) => {
         if (dateRange) {
-          setTime(dateRange);
+          refreshOrSetTime(dateRange);
         }
         onQuerySubmit?.({ query: nextQuery });
       }}
@@ -44,7 +63,6 @@ export function StreamsAppSearchBar({
         onQueryChange?.({ query: nextQuery });
       }}
       query={query}
-      showQueryInput={showQueryInput}
       showSubmitButton={showSubmitButton}
       dateRangeFrom={showDatePicker ? timeState.timeRange.from : undefined}
       dateRangeTo={showDatePicker ? timeState.timeRange.to : undefined}

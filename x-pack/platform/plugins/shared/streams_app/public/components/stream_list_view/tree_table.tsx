@@ -95,7 +95,7 @@ export function StreamsTreeTable({
         box: {
           incremental: true,
         },
-        toolsRight: <StreamsAppSearchBar />,
+        toolsRight: <StreamsAppSearchBar showDatePicker />,
       }}
     />
   );

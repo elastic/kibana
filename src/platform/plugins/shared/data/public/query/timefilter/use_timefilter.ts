@@ -8,27 +8,30 @@
  */
 
 import { TimeRange, TimeState } from '@kbn/es-query';
-import { BehaviorSubject, Observable, Subject, forkJoin, map, share } from 'rxjs';
+import { BehaviorSubject, Observable, Subject, combineLatest, map, share, skip } from 'rxjs';
 import { cloneDeep } from 'lodash';
 import useObservable from 'react-use/lib/useObservable';
 import type { Timefilter } from './timefilter';
 import { getAbsoluteTimeRange } from '../../../common';
+import { NowProviderInternalContract } from '../../now_provider';
 
-interface TimeStateUpdate {
+type TimeStateChange = 'initial' | 'shift' | 'override';
+
+export interface TimeStateUpdate {
   timeState: TimeState;
-  refresh: 'shift' | 'override' | 'none';
+  kind: TimeStateChange;
 }
 
 export interface TimefilterHook {
   timeState: TimeState;
   refresh: () => void;
-  fetch$: Observable<TimeStateUpdate>;
+  timeState$: Observable<TimeStateUpdate>;
 }
 
-function materializeTimeRange(timeRange: TimeRange): TimeState {
-  const asAbsolute = getAbsoluteTimeRange(timeRange);
-  const start = new Date(timeRange.from);
-  const end = new Date(timeRange.to);
+function materializeTimeRange(timeRange: TimeRange, forceNow: Date): TimeState {
+  const asAbsolute = getAbsoluteTimeRange(timeRange, { forceNow });
+  const start = new Date(asAbsolute.from);
+  const end = new Date(asAbsolute.to);
 
   return {
     timeRange,
@@ -40,34 +43,62 @@ function materializeTimeRange(timeRange: TimeRange): TimeState {
     },
   };
 }
+/**
+ * Creates a useTimefilter hook that can be used in applications. Here's
+ * how the hook works: any time fetch$ (from Timefilter) emits, it will
+ * materialize the input time range (where it converts possibly relative
+ * time ranges into an absolute time range). This is referred to as the
+ * TimeState. It's both returned as state, and an observable. It also
+ * exposes a refresh callback - it will simply refresh the current time
+ * range. While timeFilter.setTime is memoized, refresh() is not - that
+ * means that even if the time changes, timeState$ will emit a new
+ * value. Additionally, the kind of change is included:
+ * - 'initial' means that this is the first emitted value, based on
+ * timeFilter.getTime().
+ * - 'shift' means that the absolute time has changed.
+ * - 'override' means that the absolute time did NOT change.
+ *
+ * The reason for 'override' is that quite often, consumers will use
+ * the absolute timestamps (in epoch or ISO) to determine whether
+ * their state needs to be recalculated (commonly an API request) - but
+ * these values will not change in this case. Subscribe to state$, and
+ * check for `kind == 'override'` to determine whether a manual refresh
+ * is needed.
+ */
+export function createUseTimefilterHook(
+  timefilter: Timefilter,
+  nowProvider: NowProviderInternalContract
+) {
+  const refresh$ = new Subject<void>();
 
-export function createUseTimefilterHook(timefilter: Timefilter) {
-  const initialTimeRange = timefilter.getTime();
-
-  const refresh$ = new Subject<boolean>();
-
-  const currentTime$ = new BehaviorSubject(initialTimeRange);
+  const inputTime$ = new BehaviorSubject(timefilter.getTime());
 
   const timeState$ = new BehaviorSubject<TimeStateUpdate>({
-    timeState: materializeTimeRange(initialTimeRange),
-    refresh: 'shift' as const,
+    timeState: materializeTimeRange(inputTime$.value, nowProvider.get()),
+    kind: 'initial',
   });
 
-  forkJoin([currentTime$, refresh$])
+  const refresh = () => {
+    refresh$.next();
+  };
+
+  combineLatest([inputTime$, refresh$])
     .pipe(
-      map(([range, fromRefresh]): TimeStateUpdate => {
-        const next = materializeTimeRange(getAbsoluteTimeRange(range));
-        const current = timeState$.value.timeState;
+      skip(1),
+      map(([range]): TimeStateUpdate => {
+        const state = {
+          current: timeState$.value.timeState,
+          next: materializeTimeRange(range, nowProvider.get()),
+        };
 
-        let refresh: TimeStateUpdate['refresh'] = fromRefresh ? 'override' : 'none';
+        const isStateChange =
+          state.current.start !== state.next.start || state.current.end !== state.next.end;
 
-        if (current.start !== next.start || current.end !== next.end) {
-          refresh = 'shift';
-        }
+        const kind: TimeStateChange = !isStateChange ? 'override' : 'shift';
 
         return {
-          timeState: next,
-          refresh,
+          timeState: state.next,
+          kind,
         };
       })
     )
@@ -79,15 +110,15 @@ export function createUseTimefilterHook(timefilter: Timefilter) {
 
   timefilter.getFetch$().subscribe({
     next: () => {
-      currentTime$.next(cloneDeep(currentTime$.value));
+      inputTime$.next(cloneDeep(timefilter.getTime()));
     },
   });
 
   const timeStateConsumer$ = timeState$.pipe(share());
 
-  const refresh = () => {
-    refresh$.next(true);
-  };
+  // make sure refresh$ has emitted at least a single value,
+  // otherwise combineLatest won't call
+  refresh$.next();
 
   return function useTimefilter(): TimefilterHook {
     const { timeState } = useObservable(timeStateConsumer$, timeState$.value);
@@ -95,7 +126,7 @@ export function createUseTimefilterHook(timefilter: Timefilter) {
     return {
       timeState,
       refresh,
-      fetch$: timeStateConsumer$,
+      timeState$: timeStateConsumer$,
     };
   };
 }
