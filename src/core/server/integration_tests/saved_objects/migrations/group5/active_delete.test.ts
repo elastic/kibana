@@ -158,7 +158,7 @@ describe('when upgrading to a new stack version', () => {
         expect(logs).toMatch('CHECK_VERSION_INDEX_READY_ACTIONS -> DONE.');
 
         const indexContents = await client.search({ index: defaultKibanaIndex, size: 100 });
-        expect(indexContents.hits.hits.length).toEqual(25);
+        expect(indexContents.hits.hits.length).toEqual(35);
       });
     });
   });
@@ -286,7 +286,7 @@ describe('when upgrading to a new stack version', () => {
 
         const indexContents = await client.search({ index: defaultKibanaIndex, size: 100 });
 
-        expect(indexContents.hits.hits.length).toEqual(25);
+        expect(indexContents.hits.hits.length).toEqual(35);
       });
     });
   });
@@ -327,6 +327,7 @@ describe('when upgrading to a new stack version', () => {
           "basic": 10,
           "complex": 4,
           "deprecated": 10,
+          "server-test": 10,
           "task": 10,
         }
       `);
