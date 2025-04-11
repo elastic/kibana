@@ -12,7 +12,6 @@ import {
   MACHINE_LEARNING_FEATURE,
   NOTES_FEATURE,
   SECURITY_FEATURE,
-  SECURITY_FEATURE_SUB_PRIVILEGE_SWITCH,
   TIMELINE_FEATURE,
 } from '../../../screens/custom_roles/assign_to_space_flyout';
 import { login } from '../../../tasks/login';
@@ -32,7 +31,7 @@ describe('Custom role creation', { tags: '@serverless' }, () => {
       // should not have Security sub-privileges
       cy.get(SECURITY_FEATURE).should('exist');
       cy.get(SECURITY_FEATURE).click();
-      cy.get(SECURITY_FEATURE_SUB_PRIVILEGE_SWITCH).should('not.exist');
+      cy.get(`${SECURITY_FEATURE} button.euiAccordion__arrow`).should('not.exist');
     });
 
     it('should not show `Timelines` and `Notes` features', () => {

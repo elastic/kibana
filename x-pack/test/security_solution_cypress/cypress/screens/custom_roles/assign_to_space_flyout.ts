@@ -13,9 +13,6 @@ export const SECURITY_CATEGORY = '[data-test-subj="featureCategory_securitySolut
 // Sub-privileges
 export const SECURITY_FEATURE = '[data-test-subj="featureCategory_securitySolution_siemV2"]';
 
-export const SECURITY_FEATURE_SUB_PRIVILEGE_SWITCH =
-  '[data-test-subj="securitySolution_siemV2_customizeSubFeaturesSwitchContainer"]';
-
 export const CASES_FEATURE =
   '[data-test-subj="featureCategory_securitySolution_securitySolutionCasesV3"]';
 export const MACHINE_LEARNING_FEATURE = '[data-test-subj="featureCategory_securitySolution_ml"]';
