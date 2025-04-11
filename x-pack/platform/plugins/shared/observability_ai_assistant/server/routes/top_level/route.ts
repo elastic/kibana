@@ -5,20 +5,29 @@
  * 2.0.
  */
 
+import * as t from 'io-ts';
 import { createOrUpdateIndexAssets } from '../../service/startup_migrations/create_or_update_index_assets';
 import { createObservabilityAIAssistantServerRoute } from '../create_observability_ai_assistant_server_route';
 
 const createOrUpdateIndexAssetsRoute = createObservabilityAIAssistantServerRoute({
   endpoint: 'POST /internal/observability_ai_assistant/index_assets',
+  params: t.type({
+    query: t.type({
+      inference_id: t.string,
+    }),
+  }),
   security: {
     authz: {
       requiredPrivileges: ['ai_assistant'],
     },
   },
   handler: async (resources): Promise<void> => {
+    const { inference_id: inferenceId } = resources.params.query;
+
     return createOrUpdateIndexAssets({
       logger: resources.logger,
       core: resources.plugins.core.setup,
+      inferenceId,
     });
   },
 });

@@ -33,7 +33,7 @@ export class LockManagerService {
   ) {
     const [coreStart] = await this.coreSetup.getStartServices();
     const esClient = coreStart.elasticsearch.client.asInternalUser;
-    const logger = this.logger.get('LockManager');
+    const logger = this.logger.get('lock-manager');
 
     return withLock<T>({ esClient, logger, lockId, metadata }, callback);
   }

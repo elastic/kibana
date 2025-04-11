@@ -10,7 +10,6 @@ import type { CoreSetup, ElasticsearchClient, IUiSettingsClient } from '@kbn/cor
 import type { Logger } from '@kbn/logging';
 import { orderBy } from 'lodash';
 import { encode } from 'gpt-tokenizer';
-import { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 import { resourceNames } from '..';
 import {
   Instruction,
@@ -22,8 +21,7 @@ import { getAccessQuery, getUserAccessFilters } from '../util/get_access_query';
 import { getCategoryQuery } from '../util/get_category_query';
 import { getSpaceQuery } from '../util/get_space_query';
 import {
-  createInferenceEndpoint,
-  deleteInferenceEndpoint,
+  getInferenceIdFromWriteIndex,
   getKbModelStatus,
   isInferenceEndpointMissingOrUnavailable,
 } from '../inference_endpoint';
@@ -32,7 +30,7 @@ import { ObservabilityAIAssistantPluginStartDependencies } from '../../types';
 import { ObservabilityAIAssistantConfig } from '../../config';
 import { reIndexKnowledgeBaseWithLock } from './reindex_knowledge_base';
 import { LockAcquisitionError } from '../distributed_lock_manager/lock_manager_client';
-import { isSemanticTextUnsupportedError } from '../startup_migrations/populate_missing_semantic_text_field_migration';
+import { isSemanticTextUnsupportedError } from '../startup_migrations/run_startup_migrations';
 import { isKnowledgeBaseIndexWriteBlocked } from './index_write_block_utils';
 
 interface Dependencies {
@@ -53,40 +51,12 @@ export interface RecalledEntry {
   labels?: Record<string, string>;
 }
 
-function throwKnowledgeBaseNotReady(body: any) {
-  throw serverUnavailable(`Knowledge base is not ready yet`, body);
+function throwKnowledgeBaseNotReady(error: Error) {
+  throw serverUnavailable(`Knowledge base is not ready yet: ${error.message}`);
 }
 
 export class KnowledgeBaseService {
   constructor(private readonly dependencies: Dependencies) {}
-
-  async recreateInferenceEndpoint(
-    esClient: {
-      asCurrentUser: ElasticsearchClient;
-      asInternalUser: ElasticsearchClient;
-    },
-    modelId: string,
-    taskType: InferenceTaskType
-  ) {
-    await deleteInferenceEndpoint({ esClient }).catch((e) => {}); // ensure existing inference endpoint is deleted
-    return createInferenceEndpoint({
-      esClient,
-      logger: this.dependencies.logger,
-      modelId,
-      taskType,
-    });
-  }
-
-  async reset(esClient: { asCurrentUser: ElasticsearchClient }) {
-    try {
-      await deleteInferenceEndpoint({ esClient });
-    } catch (error) {
-      if (isInferenceEndpointMissingOrUnavailable(error)) {
-        return;
-      }
-      throw error;
-    }
-  }
 
   private async recallFromKnowledgeBase({
     queries,
@@ -173,7 +143,7 @@ export class KnowledgeBaseService {
         namespace,
       }).catch((error) => {
         if (isInferenceEndpointMissingOrUnavailable(error)) {
-          throwKnowledgeBaseNotReady(error.body);
+          throwKnowledgeBaseNotReady(error);
         }
         throw error;
       }),
@@ -337,7 +307,7 @@ export class KnowledgeBaseService {
       };
     } catch (error) {
       if (isInferenceEndpointMissingOrUnavailable(error)) {
-        throwKnowledgeBaseNotReady(error.body);
+        throwKnowledgeBaseNotReady(error);
       }
       throw error;
     }
@@ -461,14 +431,17 @@ export class KnowledgeBaseService {
     } catch (error) {
       this.dependencies.logger.debug(`Failed to add entry to knowledge base ${error}`);
       if (isInferenceEndpointMissingOrUnavailable(error)) {
-        throwKnowledgeBaseNotReady(error.body);
+        throwKnowledgeBaseNotReady(error);
       }
 
       if (isSemanticTextUnsupportedError(error)) {
+        const inferenceId = await getInferenceIdFromWriteIndex(this.dependencies.esClient);
+
         reIndexKnowledgeBaseWithLock({
           core: this.dependencies.core,
           logger: this.dependencies.logger,
           esClient: this.dependencies.esClient,
+          inferenceId,
         }).catch((e) => {
           if (error instanceof LockAcquisitionError) {
             this.dependencies.logger.debug(`Re-indexing operation is already in progress`);
@@ -503,7 +476,7 @@ export class KnowledgeBaseService {
       return Promise.resolve();
     } catch (error) {
       if (isInferenceEndpointMissingOrUnavailable(error)) {
-        throwKnowledgeBaseNotReady(error.body);
+        throwKnowledgeBaseNotReady(error);
       }
       throw error;
     }

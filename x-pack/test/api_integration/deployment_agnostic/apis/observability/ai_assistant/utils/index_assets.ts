@@ -9,29 +9,29 @@ import expect from '@kbn/expect';
 import { Client } from '@elastic/elasticsearch';
 import { resourceNames } from '@kbn/observability-ai-assistant-plugin/server/service';
 import type { ObservabilityAIAssistantApiClient } from '../../../../services/observability_ai_assistant_api';
+import { TINY_ELSER_INFERENCE_ID } from './knowledge_base';
 
 export async function createOrUpdateIndexAssets(
   observabilityAIAssistantAPIClient: ObservabilityAIAssistantApiClient
 ) {
   const { status } = await observabilityAIAssistantAPIClient.editor({
     endpoint: 'POST /internal/observability_ai_assistant/index_assets',
+    params: {
+      query: {
+        inference_id: TINY_ELSER_INFERENCE_ID,
+      },
+    },
   });
   expect(status).to.be(200);
 }
 
-async function deleteWriteIndices(es: Client) {
+export async function deleteIndexAssets(es: Client) {
+  // delete write indices
   const response = await es.indices.get({ index: Object.values(resourceNames.indexPatterns) });
   const indicesToDelete = Object.keys(response);
   if (indicesToDelete.length > 0) {
     await es.indices.delete({ index: indicesToDelete, ignore_unavailable: true });
   }
-}
-
-export async function restoreIndexAssets(
-  observabilityAIAssistantAPIClient: ObservabilityAIAssistantApiClient,
-  es: Client
-) {
-  await deleteWriteIndices(es);
 
   // delete index templates
   await es.indices.deleteIndexTemplate(
@@ -44,7 +44,12 @@ export async function restoreIndexAssets(
     { name: Object.values(resourceNames.componentTemplate) },
     { ignore: [404] }
   );
+}
 
-  // create index assets from scratch
+export async function restoreIndexAssets(
+  observabilityAIAssistantAPIClient: ObservabilityAIAssistantApiClient,
+  es: Client
+) {
+  await deleteIndexAssets(es);
   await createOrUpdateIndexAssets(observabilityAIAssistantAPIClient);
 }

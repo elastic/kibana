@@ -14,13 +14,12 @@ import {
 import pRetry from 'p-retry';
 import { useKibana } from './use_kibana';
 import { useAIAssistantAppService } from './use_ai_assistant_app_service';
-import type { KbModel } from '../knowledge_base/select_knowledge_base_model';
 
 export interface UseKnowledgeBaseResult {
   status: AbortableAsyncState<APIReturnType<'GET /internal/observability_ai_assistant/kb/status'>>;
   isInstalling: boolean;
   installError?: Error;
-  install: (kbModel: KbModel | undefined) => Promise<void>;
+  install: (inferenceId: string) => Promise<void>;
 }
 
 export function useKnowledgeBase(): UseKnowledgeBaseResult {
@@ -40,7 +39,7 @@ export function useKnowledgeBase(): UseKnowledgeBaseResult {
   const [isPollingForDeployment, setIsPollingForDeployment] = useState(false);
 
   const install = useCallback(
-    async (kbModel: KbModel | undefined) => {
+    async (inferenceId: string) => {
       setIsInstalling(true);
       setIsPollingForDeployment(false);
       setInstallError(undefined);
@@ -75,8 +74,7 @@ export function useKnowledgeBase(): UseKnowledgeBaseResult {
                 signal: null,
                 params: {
                   query: {
-                    model_id: kbModel?.modelId,
-                    task_type: kbModel?.taskType,
+                    inference_id: '.elser-2-elasticsearch',
                   },
                 },
               });

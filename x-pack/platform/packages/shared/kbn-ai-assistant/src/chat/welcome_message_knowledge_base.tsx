@@ -20,7 +20,6 @@ import {
 import usePrevious from 'react-use/lib/usePrevious';
 import { WelcomeMessageKnowledgeBaseSetupErrorPanel } from './welcome_message_knowledge_base_setup_error_panel';
 import type { UseKnowledgeBaseResult } from '../hooks/use_knowledge_base';
-import { KbModel } from '../knowledge_base/select_knowledge_base_model';
 
 export function WelcomeMessageKnowledgeBase({
   knowledgeBase,
@@ -32,7 +31,7 @@ export function WelcomeMessageKnowledgeBase({
   // track whether the "inspect issues" popover is open
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
-  const [selectedKbModel] = useState<KbModel | undefined>();
+  const [selectedInferenceId] = useState<string | undefined>();
 
   useEffect(() => {
     if (
@@ -44,9 +43,9 @@ export function WelcomeMessageKnowledgeBase({
     }
   }, [knowledgeBase.isInstalling, knowledgeBase.installError, prevIsInstalling]);
 
-  const handleInstall = async (kbModel: KbModel | undefined) => {
+  const handleInstall = async (inferenceId: string) => {
     setIsPopoverOpen(false);
-    await knowledgeBase.install(kbModel);
+    await knowledgeBase.install(inferenceId);
   };
 
   // If we are installing at any step (POST /setup + model deployment)
@@ -99,7 +98,7 @@ export function WelcomeMessageKnowledgeBase({
                 fill
                 isLoading={false}
                 iconType="importAction"
-                onClick={() => handleInstall(selectedKbModel)}
+                onClick={() => handleInstall('.elser-2-elasticsearch')} // TODO: remove hardcoded inferenceId
               >
                 {i18n.translate('xpack.aiAssistant.welcomeMessage.retryButtonLabel', {
                   defaultMessage: 'Install Knowledge base',
@@ -134,7 +133,7 @@ export function WelcomeMessageKnowledgeBase({
                 >
                   <WelcomeMessageKnowledgeBaseSetupErrorPanel
                     knowledgeBase={knowledgeBase}
-                    onRetryInstall={() => handleInstall(selectedKbModel)}
+                    onRetryInstall={() => handleInstall('.elser-2-elasticsearch')} // TODO: remove hardcoded inferenceId
                   />
                 </EuiPopover>
               </EuiFlexItem>

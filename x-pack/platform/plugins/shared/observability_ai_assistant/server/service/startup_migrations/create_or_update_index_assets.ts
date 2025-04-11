@@ -6,18 +6,20 @@
  */
 
 import { createConcreteWriteIndex, getDataStreamAdapter } from '@kbn/alerting-plugin/server';
-import type { CoreSetup, ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { CoreSetup, Logger } from '@kbn/core/server';
 import type { ObservabilityAIAssistantPluginStartDependencies } from '../../types';
 import { conversationComponentTemplate } from '../conversation_component_template';
-import { kbComponentTemplate } from '../kb_component_template';
+import { DEFAULT_INFERENCE_ENDPOINT, getComponentTemplate } from './kb_component_template';
 import { resourceNames } from '..';
 
 export async function updateExistingIndexAssets({
   logger,
   core,
+  inferenceId,
 }: {
   logger: Logger;
   core: CoreSetup<ObservabilityAIAssistantPluginStartDependencies>;
+  inferenceId?: string;
 }) {
   const [coreStart] = await core.getStartServices();
   const { asInternalUser } = coreStart.elasticsearch.client;
@@ -35,15 +37,17 @@ export async function updateExistingIndexAssets({
     return;
   }
 
-  await createOrUpdateIndexAssets({ logger, core });
+  await createOrUpdateIndexAssets({ logger, core, inferenceId });
 }
 
 export async function createOrUpdateIndexAssets({
   logger,
   core,
+  inferenceId = DEFAULT_INFERENCE_ENDPOINT, // TODO: use `.elser-v2-elastic` for serverless on EIS
 }: {
   logger: Logger;
   core: CoreSetup<ObservabilityAIAssistantPluginStartDependencies>;
+  inferenceId?: string;
 }) {
   try {
     logger.debug('Setting up index assets');
@@ -92,7 +96,7 @@ export async function createOrUpdateIndexAssets({
     await asInternalUser.cluster.putComponentTemplate({
       create: false,
       name: resourceNames.componentTemplate.kb,
-      template: kbComponentTemplate,
+      template: getComponentTemplate(inferenceId),
     });
 
     // Knowledge base: index template
@@ -112,36 +116,24 @@ export async function createOrUpdateIndexAssets({
     });
 
     // Knowledge base: write index
-    await createKbConcreteIndex({ logger, esClient: coreStart.elasticsearch.client });
+    const kbAliasName = resourceNames.writeIndexAlias.kb;
+    await createConcreteWriteIndex({
+      esClient: asInternalUser,
+      logger,
+      totalFieldsLimit: 10000,
+      indexPatterns: {
+        alias: kbAliasName,
+        pattern: `${kbAliasName}*`,
+        basePattern: `${kbAliasName}*`,
+        name: resourceNames.concreteWriteIndexName.kb,
+        template: resourceNames.indexTemplate.kb,
+      },
+      dataStreamAdapter: getDataStreamAdapter({ useDataStreamForAlerts: false }),
+    });
 
     logger.info('Successfully set up index assets');
   } catch (error) {
     logger.error(`Failed setting up index assets: ${error.message}`);
     logger.debug(error);
   }
-}
-
-export async function createKbConcreteIndex({
-  logger,
-  esClient,
-}: {
-  logger: Logger;
-  esClient: {
-    asInternalUser: ElasticsearchClient;
-  };
-}) {
-  const kbAliasName = resourceNames.writeIndexAlias.kb;
-  return createConcreteWriteIndex({
-    esClient: esClient.asInternalUser,
-    logger,
-    totalFieldsLimit: 10000,
-    indexPatterns: {
-      alias: kbAliasName,
-      pattern: `${kbAliasName}*`,
-      basePattern: `${kbAliasName}*`,
-      name: resourceNames.concreteWriteIndexName.kb,
-      template: resourceNames.indexTemplate.kb,
-    },
-    dataStreamAdapter: getDataStreamAdapter({ useDataStreamForAlerts: false }),
-  });
 }

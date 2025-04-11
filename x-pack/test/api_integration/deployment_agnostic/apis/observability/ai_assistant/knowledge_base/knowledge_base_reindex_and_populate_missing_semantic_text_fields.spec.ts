@@ -7,14 +7,13 @@
 
 import { orderBy } from 'lodash';
 import expect from '@kbn/expect';
-import { AI_ASSISTANT_KB_INFERENCE_ID } from '@kbn/observability-ai-assistant-plugin/server/service/inference_endpoint';
 import { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { KnowledgeBaseEntry } from '@kbn/observability-ai-assistant-plugin/common';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 import {
-  deleteKnowledgeBaseModel,
-  clearKnowledgeBase,
-  setupKnowledgeBase,
+  deleteTinyElserModelAndInferenceEndpoint,
+  deployTinyElserAndSetupKb,
+  TINY_ELSER_INFERENCE_ID,
 } from '../utils/knowledge_base';
 import { restoreIndexAssets } from '../utils/index_assets';
 
@@ -67,15 +66,14 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     this.tags(['skipServerless']);
 
     before(async () => {
-      await deleteKnowledgeBaseModel(getService);
+      await deleteTinyElserModelAndInferenceEndpoint(getService);
       await restoreIndexAssets(observabilityAIAssistantAPIClient, es);
-      await clearKnowledgeBase(es);
       await esArchiver.load(archive);
-      await setupKnowledgeBase(getService);
+      await deployTinyElserAndSetupKb(getService);
     });
 
     after(async () => {
-      await deleteKnowledgeBaseModel(getService);
+      await deleteTinyElserModelAndInferenceEndpoint(getService);
       await restoreIndexAssets(observabilityAIAssistantAPIClient, es);
     });
 
@@ -90,8 +88,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     describe('after migrating', () => {
       before(async () => {
         const { status } = await observabilityAIAssistantAPIClient.editor({
-          endpoint:
-            'POST /internal/observability_ai_assistant/kb/migrations/populate_missing_semantic_text_field',
+          endpoint: 'POST /internal/observability_ai_assistant/kb/migrations/startup',
         });
         expect(status).to.be(200);
       });
@@ -116,12 +113,12 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           ).to.eql([
             {
               text: 'To infinity and beyond!',
-              inferenceId: AI_ASSISTANT_KB_INFERENCE_ID,
+              inferenceId: TINY_ELSER_INFERENCE_ID,
               chunkCount: 1,
             },
             {
               text: "The user's favourite color is blue.",
-              inferenceId: AI_ASSISTANT_KB_INFERENCE_ID,
+              inferenceId: TINY_ELSER_INFERENCE_ID,
               chunkCount: 1,
             },
           ]);
@@ -129,13 +126,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       });
 
       it('returns entries correctly via API', async () => {
-        const { status } = await observabilityAIAssistantAPIClient.editor({
-          endpoint:
-            'POST /internal/observability_ai_assistant/kb/migrations/populate_missing_semantic_text_field',
-        });
-
-        expect(status).to.be(200);
-
         const res = await observabilityAIAssistantAPIClient.editor({
           endpoint: 'GET /internal/observability_ai_assistant/kb/entries',
           params: {

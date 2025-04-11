@@ -7,109 +7,127 @@
 
 import expect from '@kbn/expect';
 import { resourceNames } from '@kbn/observability-ai-assistant-plugin/server/service';
+import { getInferenceIdFromWriteIndex } from '@kbn/observability-ai-assistant-plugin/server/service/inference_endpoint';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 import {
-  TINY_ELSER,
-  deleteKnowledgeBaseModel,
+  TINY_ELSER_INFERENCE_ID,
+  deleteTinyElserModelAndInferenceEndpoint,
   getConcreteWriteIndexFromAlias,
-  hasIndexWriteBlock,
-  setupKnowledgeBase,
+  deployTinyElserAndSetupKb,
+  createTinyElserInferenceEndpoint,
+  waitForKnowledgeBaseReady,
+  deleteInferenceEndpoint,
 } from '../utils/knowledge_base';
 import { restoreIndexAssets } from '../utils/index_assets';
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const es = getService('es');
   const retry = getService('retry');
+  const log = getService('log');
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
 
   describe('/internal/observability_ai_assistant/kb/setup', function () {
     before(async () => {
-      await deleteKnowledgeBaseModel(getService);
+      await deleteTinyElserModelAndInferenceEndpoint(getService);
       await restoreIndexAssets(observabilityAIAssistantAPIClient, es);
     });
 
     afterEach(async () => {
-      await deleteKnowledgeBaseModel(getService);
+      await deleteTinyElserModelAndInferenceEndpoint(getService);
       await restoreIndexAssets(observabilityAIAssistantAPIClient, es);
     });
 
-    it('returns model info when successful', async () => {
-      const res = await setupKnowledgeBase(getService);
-
-      expect(res.body.service_settings.model_id).to.be('pt_tiny_elser');
-      expect(res.body.inference_id).to.be('obs_ai_assistant_kb_inference');
+    it('returns 200 when model is deployed', async () => {
+      const { status } = await deployTinyElserAndSetupKb(getService);
+      expect(status).to.be(200);
     });
 
-    it('returns error message if model is not deployed', async () => {
-      const res = await setupKnowledgeBase(getService, { deployModel: false });
+    it('returns 200 if model is not deployed', async () => {
+      const { status } = await setupKbAsAdmin(TINY_ELSER_INFERENCE_ID);
+      expect(status).to.be(200);
+    });
 
-      expect(res.status).to.be(500);
-
-      // @ts-expect-error
-      expect(res.body.message).to.include.string(
-        'No known trained model with model_id [pt_tiny_elser]'
-      );
-
-      // @ts-expect-error
-      expect(res.body.statusCode).to.be(500);
+    it('has "pt_tiny_elser_inference_id" as initial inference id', async () => {
+      const inferenceId = await getInferenceIdFromWriteIndex({ asInternalUser: es });
+      expect(inferenceId).to.be(TINY_ELSER_INFERENCE_ID);
     });
 
     describe('re-indexing', () => {
-      it('re-indexes KB if it has existing entries', async () => {
-        await setupKnowledgeBase(getService);
-        await addKbEntry();
-        const setupPromise = setupKnowledgeBase(getService, { deployModel: false });
+      describe('running setup for a different inference endpoint', () => {
+        const CUSTOM_TINY_ELSER_INFERENCE_ID = 'custom_tiny_elser_inference_id';
+        let body: Awaited<ReturnType<typeof setupKbAsAdmin>>['body'];
 
-        // index block should be added
-        await retry.try(async () => {
-          const isBlocked = await hasIndexWriteBlock(es, resourceNames.writeIndexAlias.kb);
-          expect(isBlocked).to.be(true);
+        before(async () => {
+          // setup KB initially
+          await deployTinyElserAndSetupKb(getService);
+
+          // setup KB with custom inference endpoint
+          await createTinyElserInferenceEndpoint(es, log, CUSTOM_TINY_ELSER_INFERENCE_ID);
+          const res = await setupKbAsAdmin(CUSTOM_TINY_ELSER_INFERENCE_ID);
+          body = res.body;
+
+          await waitForKnowledgeBaseReady({ observabilityAIAssistantAPIClient, log, retry });
         });
 
-        // index block should be removed
-        await retry.try(async () => {
-          const isBlocked = await hasIndexWriteBlock(es, resourceNames.writeIndexAlias.kb);
-          expect(isBlocked).to.be(false);
+        after(async () => {
+          await deleteInferenceEndpoint({ es, log, inferenceId: CUSTOM_TINY_ELSER_INFERENCE_ID });
         });
 
-        const writeIndex = await getConcreteWriteIndexFromAlias(es);
-        expect(writeIndex).to.be(`${resourceNames.writeIndexAlias.kb}-000002`);
-        await setupPromise;
+        it('should re-index the KB', async () => {
+          expect(body.reindex).to.be(true);
+          expect(body.currentInferenceId).to.be(TINY_ELSER_INFERENCE_ID);
+          expect(body.nextInferenceId).to.be(CUSTOM_TINY_ELSER_INFERENCE_ID);
+          await expectWriteIndexName(`${resourceNames.writeIndexAlias.kb}-000002`);
+        });
       });
 
-      it('does not re-index if KB is empty', async () => {
-        await setupKnowledgeBase(getService);
-        await setupKnowledgeBase(getService, { deployModel: false });
+      describe('running setup for the same inference id', () => {
+        let body: Awaited<ReturnType<typeof setupKbAsAdmin>>['body'];
 
-        const writeIndex = await getConcreteWriteIndexFromAlias(es);
-        expect(writeIndex).to.eql(`${resourceNames.writeIndexAlias.kb}-000001`);
+        before(async () => {
+          await deployTinyElserAndSetupKb(getService);
+          const res = await setupKbAsAdmin(TINY_ELSER_INFERENCE_ID);
+          body = res.body;
+        });
+
+        it('does not re-index', async () => {
+          expect(body.reindex).to.be(false);
+          expect(body.currentInferenceId).to.be(TINY_ELSER_INFERENCE_ID);
+          expect(body.nextInferenceId).to.be(TINY_ELSER_INFERENCE_ID);
+          await expectWriteIndexName(`${resourceNames.writeIndexAlias.kb}-000001`);
+        });
       });
     });
 
     describe('security roles and access privileges', () => {
       it('should deny access for users without the ai_assistant privilege', async () => {
-        const { status } = await observabilityAIAssistantAPIClient.viewer({
-          endpoint: 'POST /internal/observability_ai_assistant/kb/setup',
-          params: {
-            query: {
-              model_id: TINY_ELSER.id,
-            },
-          },
-        });
+        const { status } = await setupKbAsViewer(TINY_ELSER_INFERENCE_ID);
         expect(status).to.be(403);
       });
     });
   });
 
-  function addKbEntry() {
-    return observabilityAIAssistantAPIClient.editor({
-      endpoint: 'POST /internal/observability_ai_assistant/kb/entries/save',
+  async function expectWriteIndexName(expectedName: string) {
+    await retry.try(async () => {
+      const writeIndex = await getConcreteWriteIndexFromAlias(es);
+      expect(writeIndex).to.be(expectedName);
+    });
+  }
+
+  function setupKbAsAdmin(inferenceId: string) {
+    return observabilityAIAssistantAPIClient.admin({
+      endpoint: 'POST /internal/observability_ai_assistant/kb/setup',
       params: {
-        body: {
-          id: 'my-doc-id-1',
-          title: 'My title',
-          text: 'My content',
-        },
+        query: { inference_id: inferenceId },
+      },
+    });
+  }
+
+  function setupKbAsViewer(inferenceId: string) {
+    return observabilityAIAssistantAPIClient.viewer({
+      endpoint: 'POST /internal/observability_ai_assistant/kb/setup',
+      params: {
+        query: { inference_id: inferenceId },
       },
     });
   }

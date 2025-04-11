@@ -15,8 +15,8 @@ import type { DeploymentAgnosticFtrProviderContext } from '../../../../../ftr_pr
 import { invokeChatCompleteWithFunctionRequest } from '../../utils/conversation';
 import {
   clearKnowledgeBase,
-  deleteKnowledgeBaseModel,
-  setupKnowledgeBase,
+  deleteTinyElserModelAndInferenceEndpoint,
+  deployTinyElserAndSetupKb,
 } from '../../utils/knowledge_base';
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
@@ -31,9 +31,9 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     let connectorId: string;
 
     before(async () => {
-      await setupKnowledgeBase(getService);
-
+      await deployTinyElserAndSetupKb(getService);
       proxy = await createLlmProxy(log);
+
       connectorId = await observabilityAIAssistantAPIClient.createProxyActionConnector({
         port: proxy.getPort(),
       });
@@ -61,12 +61,12 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     });
 
     after(async () => {
-      proxy.close();
+      proxy?.close();
 
       await observabilityAIAssistantAPIClient.deleteActionConnector({
         actionId: connectorId,
       });
-      await deleteKnowledgeBaseModel(getService);
+      await deleteTinyElserModelAndInferenceEndpoint(getService);
       await clearKnowledgeBase(es);
     });
 

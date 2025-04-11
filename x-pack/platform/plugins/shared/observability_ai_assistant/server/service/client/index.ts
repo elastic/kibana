@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { InferenceTaskType, SearchHit } from '@elastic/elasticsearch/lib/api/types';
+import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import { notFound, forbidden } from '@hapi/boom';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { CoreSetup, ElasticsearchClient, IUiSettingsClient } from '@kbn/core/server';
@@ -67,13 +67,13 @@ import { continueConversation } from './operators/continue_conversation';
 import { convertInferenceEventsToStreamingEvents } from './operators/convert_inference_events_to_streaming_events';
 import { extractMessages } from './operators/extract_messages';
 import { getGeneratedTitle } from './operators/get_generated_title';
-import { populateMissingSemanticTextFieldMigration } from '../startup_migrations/populate_missing_semantic_text_field_migration';
+import { runStartupMigrations } from '../startup_migrations/run_startup_migrations';
 import { ObservabilityAIAssistantPluginStartDependencies } from '../../types';
 import { ObservabilityAIAssistantConfig } from '../../config';
-import { getElserModelId } from '../knowledge_base_service/get_elser_model_id';
 import { apmInstrumentation } from './operators/apm_instrumentation';
-import { waitForKbModel } from '../inference_endpoint';
+import { getInferenceIdFromWriteIndex, waitForKbModel, warmupModel } from '../inference_endpoint';
 import { reIndexKnowledgeBaseWithLock } from '../knowledge_base_service/reindex_knowledge_base';
+import { populateMissingSemanticTextFieldWithLock } from '../startup_migrations/populate_missing_semantic_text_fields';
 
 const MAX_FUNCTION_CALLS = 8;
 
@@ -670,70 +670,64 @@ export class ObservabilityAIAssistantClient {
   };
 
   setupKnowledgeBase = async (
-    modelId: string | undefined,
-    taskType: InferenceTaskType | undefined = 'sparse_embedding'
-  ) => {
-    const { esClient, core, logger, knowledgeBaseService } = this.dependencies;
+    inferenceId: string
+  ): Promise<{
+    reindex: boolean;
+    currentInferenceId: string | undefined;
+    nextInferenceId: string;
+  }> => {
+    const { esClient, core, logger } = this.dependencies;
 
-    if (!modelId) {
-      modelId = await getElserModelId({ core, logger });
+    logger.debug(`Setting up knowledge base with inference_id: ${inferenceId}`);
+
+    const currentInferenceId = await getInferenceIdFromWriteIndex(esClient).catch(() => {
+      logger.debug(
+        `Current KB write index does not have an inference_id. This is to be expected for indices created before 8.16`
+      );
+      return undefined;
+    });
+
+    if (currentInferenceId === inferenceId) {
+      logger.debug('Inference ID is unchanged. No need to re-index knowledge base.');
+      warmupModel({ esClient, logger, inferenceId }).catch(() => {});
+      return { reindex: false, currentInferenceId, nextInferenceId: inferenceId };
     }
 
-    this.dependencies.logger.debug(
-      `Setting up knowledge base with model_id: ${modelId} and task_type: ${taskType}`
-    );
+    waitForKbModel({ esClient, logger, config: this.dependencies.config, inferenceId })
+      .then(async () => {
+        logger.info(
+          `Inference ID has changed from "${currentInferenceId}" to "${inferenceId}". Re-indexing knowledge base.`
+        );
 
-    const inferenceEndpointResult = await knowledgeBaseService.recreateInferenceEndpoint(
-      esClient,
-      modelId,
-      taskType
-    );
-
-    knowledgeBaseService
-      .hasEntries()
-      .then(async (hasEntries) => {
-        // re-index knowledge base if there are existing entries
-        if (hasEntries) {
-          logger.debug(
-            `The knowledge base contains existing entries and will therefore be re-indexed.`
-          );
-          await waitForKbModel({ esClient, logger, config: this.dependencies.config });
-          await reIndexKnowledgeBaseWithLock({ core, logger, esClient });
-        }
-
-        // schedule a task to populate missing semantic_text field
-        await populateMissingSemanticTextFieldMigration({
+        await reIndexKnowledgeBaseWithLock({ core, logger, esClient, inferenceId });
+        await populateMissingSemanticTextFieldWithLock({
           core,
           logger,
           config: this.dependencies.config,
-        }).catch((e) => {
-          this.dependencies.logger.error(
-            `Failed to populate missing semantic text fields: ${e.message}`
-          );
+          esClient: this.dependencies.esClient,
         });
       })
-      .catch((error) => {
-        logger.error(`Failed to re-index knowledge base: ${error}`);
+      .catch((e) => {
+        logger.error(
+          `Failed to setup knowledge base with inference_id: ${inferenceId}. Error: ${e.message}`
+        );
+        logger.debug(e);
       });
 
-    return inferenceEndpointResult;
+    return { reindex: true, currentInferenceId, nextInferenceId: inferenceId };
   };
 
-  resetKnowledgeBase = () => {
-    const { esClient } = this.dependencies;
-    return this.dependencies.knowledgeBaseService.reset(esClient);
-  };
-
-  reIndexKnowledgeBaseWithLock = () => {
+  reIndexKnowledgeBaseWithLock = (inferenceId: string) => {
     return reIndexKnowledgeBaseWithLock({
       core: this.dependencies.core,
       esClient: this.dependencies.esClient,
       logger: this.dependencies.logger,
+      inferenceId,
     });
   };
 
-  populateMissingSemanticTextFieldMigration = () => {
-    return populateMissingSemanticTextFieldMigration({
+  runStartupMigrations = () => {
+    return runStartupMigrations({
       core: this.dependencies.core,
       logger: this.dependencies.logger,
       config: this.dependencies.config,

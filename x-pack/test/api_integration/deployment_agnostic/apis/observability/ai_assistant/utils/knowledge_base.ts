@@ -7,63 +7,63 @@
 
 import expect from '@kbn/expect';
 import { Client } from '@elastic/elasticsearch';
-import { AI_ASSISTANT_KB_INFERENCE_ID } from '@kbn/observability-ai-assistant-plugin/server/service/inference_endpoint';
 import { ToolingLog } from '@kbn/tooling-log';
 import { RetryService } from '@kbn/ftr-common-functional-services';
 import { Instruction } from '@kbn/observability-ai-assistant-plugin/common/types';
 import { resourceNames } from '@kbn/observability-ai-assistant-plugin/server/service';
+import { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 import { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 import type { ObservabilityAIAssistantApiClient } from '../../../../services/observability_ai_assistant_api';
 import { MachineLearningProvider } from '../../../../../services/ml';
 import { SUPPORTED_TRAINED_MODELS } from '../../../../../../functional/services/ml/api';
 import { setAdvancedSettings } from './advanced_settings';
 
-export const TINY_ELSER = {
-  ...SUPPORTED_TRAINED_MODELS.TINY_ELSER,
-  id: SUPPORTED_TRAINED_MODELS.TINY_ELSER.name,
-};
+export const LEGACY_INFERENCE_ID = 'obs_ai_assistant_kb_inference';
+export const TINY_ELSER_MODEL_ID = SUPPORTED_TRAINED_MODELS.TINY_ELSER.name;
+export const TINY_ELSER_INFERENCE_ID = 'pt_tiny_elser_inference_id';
 
 export async function importTinyElserModel(ml: ReturnType<typeof MachineLearningProvider>) {
   const config = {
-    ...ml.api.getTrainedModelConfig(TINY_ELSER.name),
+    ...ml.api.getTrainedModelConfig(TINY_ELSER_MODEL_ID),
     input: {
       field_names: ['text_field'],
     },
   };
   // necessary for MKI, check indices before importing model.  compatible with stateful
   await ml.api.assureMlStatsIndexExists();
-  await ml.api.importTrainedModel(TINY_ELSER.name, TINY_ELSER.id, config);
+  await ml.api.importTrainedModel(TINY_ELSER_MODEL_ID, TINY_ELSER_MODEL_ID, config);
 }
 
-export async function setupKnowledgeBase(
-  getService: DeploymentAgnosticFtrProviderContext['getService'],
-  {
-    deployModel: deployModel = true,
-  }: {
-    deployModel?: boolean;
-  } = {}
+export function createTinyElserInferenceEndpoint(es: Client, log: ToolingLog, inferenceId: string) {
+  return createInferenceEndpoint({
+    es,
+    log,
+    modelId: TINY_ELSER_MODEL_ID,
+    inferenceId,
+    taskType: 'sparse_embedding',
+  });
+}
+
+export async function deployTinyElserAndSetupKb(
+  getService: DeploymentAgnosticFtrProviderContext['getService']
 ) {
   const log = getService('log');
   const ml = getService('ml');
   const retry = getService('retry');
+  const es = getService('es');
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
 
-  if (deployModel) {
-    await importTinyElserModel(ml);
-  }
+  await importTinyElserModel(ml);
+  await createTinyElserInferenceEndpoint(es, log, TINY_ELSER_INFERENCE_ID).catch(() => {});
 
   const { status, body } = await observabilityAIAssistantAPIClient.admin({
     endpoint: 'POST /internal/observability_ai_assistant/kb/setup',
     params: {
-      query: {
-        model_id: TINY_ELSER.id,
-      },
+      query: { inference_id: TINY_ELSER_INFERENCE_ID },
     },
   });
 
-  if (deployModel) {
-    await waitForKnowledgeBaseReady({ observabilityAIAssistantAPIClient, log, retry });
-  }
+  await waitForKnowledgeBaseReady({ observabilityAIAssistantAPIClient, log, retry });
 
   return { status, body };
 }
@@ -73,6 +73,11 @@ export async function reIndexKnowledgeBase(
 ) {
   return observabilityAIAssistantAPIClient.admin({
     endpoint: 'POST /internal/observability_ai_assistant/kb/reindex',
+    params: {
+      query: {
+        inference_id: TINY_ELSER_INFERENCE_ID,
+      },
+    },
   });
 }
 
@@ -92,37 +97,38 @@ export async function waitForKnowledgeBaseReady({
     });
     expect(res.status).to.be(200);
     expect(res.body.ready).to.be(true);
+    log.debug(`Knowledge base is ready.`);
   });
 }
 
-export async function deleteKnowledgeBaseModel(
-  getService: DeploymentAgnosticFtrProviderContext['getService'],
-  {
-    shouldDeleteInferenceEndpoint = true,
-  }: {
-    shouldDeleteInferenceEndpoint?: boolean;
-  } = {}
+export async function deleteTinyElserModel(
+  getService: DeploymentAgnosticFtrProviderContext['getService']
 ) {
   const log = getService('log');
   const ml = getService('ml');
-  const es = getService('es');
 
   try {
-    await ml.api.stopTrainedModelDeploymentES(TINY_ELSER.id, true);
-    await ml.api.deleteTrainedModelES(TINY_ELSER.id);
+    await ml.api.stopTrainedModelDeploymentES(TINY_ELSER_MODEL_ID, true);
+    await ml.api.deleteTrainedModelES(TINY_ELSER_MODEL_ID);
     await ml.testResources.cleanMLSavedObjects();
-
-    if (shouldDeleteInferenceEndpoint) {
-      await deleteInferenceEndpoint({ es });
-    }
+    log.info(`Knowledge base model deleted.`);
   } catch (e) {
     if (e.message.includes('resource_not_found_exception')) {
       log.debug(`Knowledge base model was already deleted.`);
-      return;
+    } else {
+      log.error(`Could not delete knowledge base model: ${e}`);
     }
-
-    log.error(`Could not delete knowledge base model: ${e}`);
   }
+}
+
+export async function deleteTinyElserModelAndInferenceEndpoint(
+  getService: DeploymentAgnosticFtrProviderContext['getService']
+) {
+  const log = getService('log');
+  const es = getService('es');
+
+  await deleteTinyElserModel(getService);
+  await deleteInferenceEndpoint({ es, log, inferenceId: TINY_ELSER_INFERENCE_ID });
 }
 
 export async function clearKnowledgeBase(es: Client) {
@@ -144,12 +150,59 @@ export async function getAllKbEntries(es: Client) {
 
 export async function deleteInferenceEndpoint({
   es,
-  name = AI_ASSISTANT_KB_INFERENCE_ID,
+  log,
+  inferenceId,
 }: {
   es: Client;
-  name?: string;
+  log: ToolingLog;
+  inferenceId: string;
 }) {
-  return es.inference.delete({ inference_id: name, force: true });
+  try {
+    await es.inference.delete({ inference_id: inferenceId, force: true });
+    log.info(`Inference endpoint "${inferenceId}" deleted.`);
+  } catch (e) {
+    if (e.message.includes('resource_not_found_exception')) {
+      log.debug(`Inference endpoint "${inferenceId}" was already deleted.`);
+    } else {
+      log.error(`Could not delete inference endpoint "${inferenceId}": ${e}`);
+    }
+  }
+}
+
+export async function createInferenceEndpoint({
+  es,
+  log,
+  modelId,
+  inferenceId,
+  taskType,
+}: {
+  es: Client;
+  log: ToolingLog;
+  modelId: string;
+  inferenceId: string;
+  taskType?: InferenceTaskType;
+}) {
+  try {
+    const res = await es.inference.put({
+      inference_id: inferenceId,
+      task_type: taskType,
+      inference_config: {
+        service: 'elasticsearch',
+        service_settings: {
+          model_id: modelId,
+          adaptive_allocations: { enabled: true, min_number_of_allocations: 1 },
+          num_threads: 1,
+        },
+        task_settings: {},
+      },
+    });
+
+    log.info(`Inference endpoint ${inferenceId} created.`);
+    return res;
+  } catch (e) {
+    log.error(`Error creating inference endpoint "${inferenceId}": ${e}`);
+    throw e;
+  }
 }
 
 export async function addSampleDocsToInternalKb(
@@ -184,7 +237,7 @@ export async function addSampleDocsToCustomIndex(
     mappings: {
       properties: {
         title: { type: 'text' },
-        text: { type: 'semantic_text', inference_id: AI_ASSISTANT_KB_INFERENCE_ID },
+        text: { type: 'semantic_text', inference_id: TINY_ELSER_INFERENCE_ID },
       },
     },
   });

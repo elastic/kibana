@@ -15,7 +15,6 @@ import {
   MlDeploymentAssignmentState,
   MlTrainedModelDeploymentAllocationStatus,
 } from '@elastic/elasticsearch/lib/api/types';
-import moment from 'moment';
 import { createObservabilityAIAssistantServerRoute } from '../create_observability_ai_assistant_server_route';
 import { Instruction, KnowledgeBaseEntry, KnowledgeBaseEntryRole } from '../../../common/types';
 
@@ -52,62 +51,36 @@ const getKnowledgeBaseStatus = createObservabilityAIAssistantServerRoute({
 
 const setupKnowledgeBase = createObservabilityAIAssistantServerRoute({
   endpoint: 'POST /internal/observability_ai_assistant/kb/setup',
-  params: t.partial({
-    query: t.partial({
-      model_id: t.string,
-      task_type: t.union([
-        t.literal('text_embedding'),
-        t.literal('sparse_embedding'),
-        t.literal('rerank'),
-        t.literal('completion'),
-      ]),
+  params: t.type({
+    query: t.type({
+      inference_id: t.string,
     }),
   }),
-  options: {
-    timeout: {
-      idleSocket: moment.duration(20, 'minutes').asMilliseconds(),
-    },
-  },
   security: {
     authz: {
       requiredPrivileges: ['ai_assistant'],
     },
   },
-  handler: async (resources): Promise<InferenceInferenceEndpointInfo> => {
+  handler: async (
+    resources
+  ): Promise<{
+    reindex: boolean;
+    currentInferenceId: string | undefined;
+    nextInferenceId: string;
+  }> => {
     const client = await resources.service.getClient({ request: resources.request });
-
-    if (!client) {
-      throw notImplemented();
-    }
-
-    const { model_id: modelId, task_type: taskType } = resources.params?.query ?? {};
-
-    return await client.setupKnowledgeBase(modelId, taskType);
-  },
-});
-
-const resetKnowledgeBase = createObservabilityAIAssistantServerRoute({
-  endpoint: 'POST /internal/observability_ai_assistant/kb/reset',
-  security: {
-    authz: {
-      requiredPrivileges: ['ai_assistant'],
-    },
-  },
-  handler: async (resources): Promise<{ result: string }> => {
-    const client = await resources.service.getClient({ request: resources.request });
-
-    if (!client) {
-      throw notImplemented();
-    }
-
-    await client.resetKnowledgeBase();
-
-    return { result: 'success' };
+    const { inference_id: inferenceId } = resources.params.query;
+    return client.setupKnowledgeBase(inferenceId);
   },
 });
 
 const reIndexKnowledgeBase = createObservabilityAIAssistantServerRoute({
   endpoint: 'POST /internal/observability_ai_assistant/kb/reindex',
+  params: t.type({
+    query: t.type({
+      inference_id: t.string,
+    }),
+  }),
   security: {
     authz: {
       requiredPrivileges: ['ai_assistant'],
@@ -115,14 +88,14 @@ const reIndexKnowledgeBase = createObservabilityAIAssistantServerRoute({
   },
   handler: async (resources): Promise<{ result: boolean }> => {
     const client = await resources.service.getClient({ request: resources.request });
-    const result = await client.reIndexKnowledgeBaseWithLock();
+    const { inference_id: inferenceId } = resources.params.query;
+    const result = await client.reIndexKnowledgeBaseWithLock(inferenceId);
     return { result };
   },
 });
 
 const semanticTextMigrationKnowledgeBase = createObservabilityAIAssistantServerRoute({
-  endpoint:
-    'POST /internal/observability_ai_assistant/kb/migrations/populate_missing_semantic_text_field',
+  endpoint: 'POST /internal/observability_ai_assistant/kb/migrations/startup',
   security: {
     authz: {
       requiredPrivileges: ['ai_assistant'],
@@ -135,7 +108,7 @@ const semanticTextMigrationKnowledgeBase = createObservabilityAIAssistantServerR
       throw notImplemented();
     }
 
-    return client.populateMissingSemanticTextFieldMigration();
+    return client.runStartupMigrations();
   },
 });
 
@@ -344,7 +317,6 @@ export const knowledgeBaseRoutes = {
   ...reIndexKnowledgeBase,
   ...semanticTextMigrationKnowledgeBase,
   ...setupKnowledgeBase,
-  ...resetKnowledgeBase,
   ...reIndexKnowledgeBase,
   ...getKnowledgeBaseStatus,
   ...getKnowledgeBaseEntries,

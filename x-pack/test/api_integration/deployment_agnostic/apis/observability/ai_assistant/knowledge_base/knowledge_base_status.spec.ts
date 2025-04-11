@@ -8,23 +8,26 @@
 import expect from '@kbn/expect';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 import {
-  deleteKnowledgeBaseModel,
-  TINY_ELSER,
+  deleteTinyElserModelAndInferenceEndpoint,
   deleteInferenceEndpoint,
-  setupKnowledgeBase,
+  deployTinyElserAndSetupKb,
+  TINY_ELSER_MODEL_ID,
+  TINY_ELSER_INFERENCE_ID,
+  deleteTinyElserModel,
 } from '../utils/knowledge_base';
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const es = getService('es');
+  const log = getService('log');
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
 
   describe('/internal/observability_ai_assistant/kb/status', function () {
     beforeEach(async () => {
-      await setupKnowledgeBase(getService);
+      await deployTinyElserAndSetupKb(getService);
     });
 
     afterEach(async () => {
-      await deleteKnowledgeBaseModel(getService);
+      await deleteTinyElserModelAndInferenceEndpoint(getService);
     });
 
     it('returns correct status after knowledge base is setup', async () => {
@@ -36,11 +39,11 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
       expect(res.body.ready).to.be(true);
       expect(res.body.enabled).to.be(true);
-      expect(res.body.endpoint?.service_settings?.model_id).to.eql(TINY_ELSER.id);
+      expect(res.body.endpoint?.service_settings?.model_id).to.eql(TINY_ELSER_MODEL_ID);
     });
 
     it('returns correct status after model is deleted', async () => {
-      await deleteKnowledgeBaseModel(getService, { shouldDeleteInferenceEndpoint: false });
+      await deleteTinyElserModel(getService);
 
       const res = await observabilityAIAssistantAPIClient.editor({
         endpoint: 'GET /internal/observability_ai_assistant/kb/status',
@@ -56,7 +59,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     });
 
     it('returns correct status after inference endpoint is deleted', async () => {
-      await deleteInferenceEndpoint({ es });
+      await deleteInferenceEndpoint({ es, log, inferenceId: TINY_ELSER_INFERENCE_ID });
 
       const res = await observabilityAIAssistantAPIClient.editor({
         endpoint: 'GET /internal/observability_ai_assistant/kb/status',
@@ -67,7 +70,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       expect(res.body.ready).to.be(false);
       expect(res.body.enabled).to.be(true);
       expect(res.body.errorMessage).to.include.string(
-        'Inference endpoint not found [obs_ai_assistant_kb_inference]'
+        'Inference endpoint not found [pt_tiny_elser_inference_id]'
       );
     });
 

@@ -10,8 +10,8 @@ import { type KnowledgeBaseEntry } from '@kbn/observability-ai-assistant-plugin/
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 import {
   clearKnowledgeBase,
-  deleteKnowledgeBaseModel,
-  setupKnowledgeBase,
+  deleteTinyElserModelAndInferenceEndpoint,
+  deployTinyElserAndSetupKb,
 } from '../utils/knowledge_base';
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
@@ -45,11 +45,11 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
   describe('Knowledge base', function () {
     before(async () => {
-      await setupKnowledgeBase(getService);
+      await deployTinyElserAndSetupKb(getService);
     });
 
     after(async () => {
-      await deleteKnowledgeBaseModel(getService);
+      await deleteTinyElserModelAndInferenceEndpoint(getService);
       await clearKnowledgeBase(es);
     });
 

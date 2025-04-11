@@ -25,8 +25,8 @@ import type { DeploymentAgnosticFtrProviderContext } from '../../../../../ftr_pr
 import {
   addSampleDocsToInternalKb,
   clearKnowledgeBase,
-  deleteKnowledgeBaseModel,
-  setupKnowledgeBase,
+  deleteTinyElserModelAndInferenceEndpoint,
+  deployTinyElserAndSetupKb,
 } from '../../utils/knowledge_base';
 import { chatComplete } from '../../utils/conversation';
 
@@ -84,7 +84,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       connectorId = await observabilityAIAssistantAPIClient.createProxyActionConnector({
         port: llmProxy.getPort(),
       });
-      await setupKnowledgeBase(getService);
+      await deployTinyElserAndSetupKb(getService);
       await addSampleDocsToInternalKb(getService, sampleDocsForInternalKb);
 
       ({ getDocuments } = llmProxy.interceptScoreToolChoice(log));
@@ -107,7 +107,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         actionId: connectorId,
       });
 
-      await deleteKnowledgeBaseModel(getService);
+      await deleteTinyElserModelAndInferenceEndpoint(getService);
       await clearKnowledgeBase(es);
     });
 

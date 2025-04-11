@@ -12,17 +12,24 @@ import path from 'path';
 import { AI_ASSISTANT_SNAPSHOT_REPO_PATH } from '../../../../default_configs/stateful.config.base';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 import {
-  deleteKbIndices,
-  deleteKnowledgeBaseModel,
-  setupKnowledgeBase,
+  TINY_ELSER_INFERENCE_ID,
+  TINY_ELSER_MODEL_ID,
+  createTinyElserInferenceEndpoint,
+  deleteTinyElserModelAndInferenceEndpoint,
+  importTinyElserModel,
 } from '../utils/knowledge_base';
-import { createOrUpdateIndexAssets, restoreIndexAssets } from '../utils/index_assets';
+import {
+  createOrUpdateIndexAssets,
+  deleteIndexAssets,
+  restoreIndexAssets,
+} from '../utils/index_assets';
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
   const es = getService('es');
   const retry = getService('retry');
   const log = getService('log');
+  const ml = getService('ml');
 
   describe('when the knowledge base index was created before 8.11', function () {
     // Intentionally skipped in all serverless environnments (local and MKI)
@@ -34,43 +41,87 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       log.debug(`Unzipping ${zipFilePath} to ${AI_ASSISTANT_SNAPSHOT_REPO_PATH}`);
       new AdmZip(zipFilePath).extractAllTo(path.dirname(AI_ASSISTANT_SNAPSHOT_REPO_PATH), true);
 
-      await setupKnowledgeBase(getService).catch(() => {});
-    });
-
-    beforeEach(async () => {
-      await deleteKbIndices(es);
-      await restoreKbSnapshot();
-      await createOrUpdateIndexAssets(observabilityAIAssistantAPIClient);
+      // in a real environment we will use the ELSER inference endpoint (`.elser-2-elasticsearch`) which is pre-installed
+      // the model is also preloaded (but not deployed)
+      await importTinyElserModel(ml);
+      await createTinyElserInferenceEndpoint(es, log, TINY_ELSER_INFERENCE_ID);
     });
 
     after(async () => {
       await restoreIndexAssets(observabilityAIAssistantAPIClient, es);
-      await deleteKnowledgeBaseModel(getService);
+      await deleteTinyElserModelAndInferenceEndpoint(getService);
     });
 
-    it('has an index created version earlier than 8.11', async () => {
-      await retry.try(async () => {
-        expect(await getKbIndexCreatedVersion()).to.be.lessThan(8110000);
+    describe('before running migrations', () => {
+      before(async () => {
+        await deleteIndexAssets(es);
+        await restoreKbSnapshot();
+        await createOrUpdateIndexAssets(observabilityAIAssistantAPIClient);
+      });
+
+      it('has an index created version earlier than 8.11', async () => {
+        await retry.try(async () => {
+          expect(await getKbIndexCreatedVersion()).to.be.lessThan(8110000);
+        });
+      });
+
+      it('cannot add new entries to KB until reindex has completed', async () => {
+        const res1 = await createKnowledgeBaseEntry();
+
+        expect(res1.status).to.be(503);
+        expect((res1.body as unknown as Error).message).to.eql(
+          'The index ".kibana-observability-ai-assistant-kb" does not support semantic text and must be reindexed. This re-index operation has been scheduled and will be started automatically. Please try again later.'
+        );
+
+        // wait for reindex to have updated the index
+        await retry.try(async () => {
+          expect(await getKbIndexCreatedVersion()).to.be.greaterThan(8180000);
+        });
+
+        const res2 = await createKnowledgeBaseEntry();
+        expect(res2.status).to.be(200);
       });
     });
 
-    it('cannot add new entries to KB', async () => {
-      const { status, body } = await createKnowledgeBaseEntry();
+    describe('after running migrations', () => {
+      beforeEach(async () => {
+        await deleteIndexAssets(es);
+        await restoreKbSnapshot();
+        await createOrUpdateIndexAssets(observabilityAIAssistantAPIClient);
+        await runStartupMigrations();
+      });
 
-      // @ts-expect-error
-      expect(body.message).to.eql(
-        'The index ".kibana-observability-ai-assistant-kb" does not support semantic text and must be reindexed. This re-index operation has been scheduled and will be started automatically. Please try again later.'
-      );
+      it('has an index created version later than 8.18', async () => {
+        await retry.try(async () => {
+          const indexCreatedVersion = await getKbIndexCreatedVersion();
+          expect(indexCreatedVersion).to.be.greaterThan(8180000);
+        });
+      });
 
-      expect(status).to.be(503);
-    });
-
-    it('can add new entries after running the semantic text migration', async () => {
-      await populateMissingSemanticTextField();
-
-      await retry.try(async () => {
+      it('can add new entries', async () => {
         const { status } = await createKnowledgeBaseEntry();
         expect(status).to.be(200);
+      });
+
+      it('has default ELSER inference endpoint', async () => {
+        await retry.try(async () => {
+          const { body } = await observabilityAIAssistantAPIClient.editor({
+            endpoint: 'GET /internal/observability_ai_assistant/kb/status',
+          });
+
+          expect(body.endpoint?.inference_id).to.eql(TINY_ELSER_INFERENCE_ID);
+          expect(body.endpoint?.service_settings.model_id).to.eql(TINY_ELSER_MODEL_ID);
+        });
+      });
+
+      it('have a deployed model', async () => {
+        await retry.try(async () => {
+          const { body } = await observabilityAIAssistantAPIClient.editor({
+            endpoint: 'GET /internal/observability_ai_assistant/kb/status',
+          });
+
+          expect(body.ready).to.be(true);
+        });
       });
     });
 
@@ -90,7 +141,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
   async function getKbIndexCreatedVersion() {
     const indexSettings = await es.indices.getSettings({
-      index: resourceNames.concreteWriteIndexName.kb,
+      index: resourceNames.writeIndexAlias.kb,
     });
 
     const { settings } = Object.values(indexSettings)[0];
@@ -122,10 +173,9 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     await es.snapshot.deleteRepository({ name: snapshotRepoName });
   }
 
-  async function populateMissingSemanticTextField() {
+  async function runStartupMigrations() {
     const { status } = await observabilityAIAssistantAPIClient.editor({
-      endpoint:
-        'POST /internal/observability_ai_assistant/kb/migrations/populate_missing_semantic_text_field',
+      endpoint: 'POST /internal/observability_ai_assistant/kb/migrations/startup',
     });
     expect(status).to.be(200);
   }

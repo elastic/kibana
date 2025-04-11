@@ -274,9 +274,7 @@ export async function withLock<T>(
 
   // extend the ttl periodically
   const extendInterval = Math.floor(ttl / 4);
-  logger.debug(
-    `Lock "${lockId}" acquired. Extending TTL every ${prettyMilliseconds(extendInterval)}`
-  );
+  logger.debug(`Extending TTL for lock "${lockId}" every ${prettyMilliseconds(extendInterval)}`);
 
   let extendTTlPromise = Promise.resolve(true);
   const intervalId = setInterval(() => {

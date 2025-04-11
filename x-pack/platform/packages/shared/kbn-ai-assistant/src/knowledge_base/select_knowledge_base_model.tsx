@@ -7,52 +7,44 @@
 
 import React, { useEffect, useMemo } from 'react';
 import { EuiSelect } from '@elastic/eui';
-import { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
-
-export interface KbModel {
-  modelId: string;
-  taskType: InferenceTaskType;
-}
 
 export function SelectKnowledgeBaseModel({
-  onSelectKbModel,
-  kbModel,
+  onSelectInferenceId,
+  inferenceId,
 }: {
-  onSelectKbModel: (model: KbModel) => void;
-  kbModel: KbModel | undefined;
+  onSelectInferenceId: (inferenceId: string) => void;
+  inferenceId: string;
 }) {
-  const kbModels: Array<KbModel & { label: string }> = useMemo(
+  const inferenceEndpoints: Array<{ id: string; label: string }> = useMemo(
     () => [
       {
         label: 'ELSER v2 (English-only)',
-        modelId: '.elser_model_2', // TODO: should use `.elser_model_2_linux-x86_64` on linux
-        taskType: 'sparse_embedding',
+        id: '.elser-2-elasticsearch',
       },
       {
         label: 'E5 Small (Multilingual)',
-        modelId: '.multilingual-e5-small',
-        taskType: 'text_embedding',
+        id: '.multilingual-e5-small-elasticsearch',
       },
     ],
     []
   );
 
   useEffect(() => {
-    if (!kbModel) {
-      onSelectKbModel(kbModels[0]);
+    if (!inferenceId) {
+      onSelectInferenceId(inferenceEndpoints[0].id);
     }
-  }, [kbModel, onSelectKbModel, kbModels]);
+  }, [inferenceId, inferenceEndpoints, onSelectInferenceId]);
 
   return (
     <EuiSelect
       fullWidth
       data-test-subj="observabilityAiAssistantKbModelSelect"
-      options={kbModels.map(({ label, modelId }) => ({ value: modelId, text: label }))}
+      options={inferenceEndpoints.map(({ label, id }) => ({ value: id, text: label }))}
       onChange={(event) => {
-        const selectedModel = kbModels.find(({ modelId }) => modelId === event.target.value)!;
-        onSelectKbModel(selectedModel);
+        const inferenceEndpoint = inferenceEndpoints.find(({ id }) => id === event.target.value)!;
+        onSelectInferenceId(inferenceEndpoint.id);
       }}
-      value={kbModel?.modelId}
+      value={inferenceId}
     />
   );
 }
