@@ -291,3 +291,6 @@ describe('GridLayout', () => {
     });
   });
 });
+
+// 'renders all the panels in a row'
+// 'does not show the panels in a row that is collapsed'

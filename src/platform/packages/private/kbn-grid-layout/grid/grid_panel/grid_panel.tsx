@@ -38,11 +38,11 @@ export const GridPanel = React.memo(({ panelId, rowId }: GridPanelProps) => {
       gridLayoutStateManager.gridLayout$.getValue();
     const panelRow = activeLayout[rowId];
     // we don't add header to the first rowId so we don't account for this height
-    const headerOffset = panelRow.order === 0 ? 0 : 2;
 
     const initialPanel = activeLayout[rowId].panels[panelId];
 
     // offset of the element including the header and the previous rows
+    const headerOffset = panelRow.order === 0 ? 0 : 2;
     const gridRowOffset = headerOffset + getTopOffsetForRow(rowId, activeLayout);
     return css`
       position: relative;
@@ -94,7 +94,6 @@ export const GridPanel = React.memo(({ panelId, rowId }: GridPanelProps) => {
 
           let panel = activeLayout[row]?.panels[panelId];
           if (!panel) {
-            // search for panel in each of the `activeLayout[row]` - save panel to panel variable and row to row variable
             Object.entries(activeLayout).forEach(([rId, rowData]) => {
               if (rowData.panels[panelId]) {
                 panel = rowData.panels[panelId];

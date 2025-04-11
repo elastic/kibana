@@ -36,7 +36,7 @@ export interface GridRowHeaderProps {
 export const GridRowHeader = React.memo(
   ({ rowId, toggleIsCollapsed, collapseButtonRef }: GridRowHeaderProps) => {
     const { gridLayoutStateManager } = useGridLayoutContext();
-    const { startDrag, onBlur } = useGridLayoutRowEvents({ rowId });
+    const { startDrag } = useGridLayoutRowEvents({ rowId });
 
     const [isActive, setIsActive] = useState<boolean>(false);
     const [editTitleOpen, setEditTitleOpen] = useState<boolean>(false);
@@ -212,7 +212,6 @@ export const GridRowHeader = React.memo(
                         onMouseDown={startDrag}
                         onTouchStart={startDrag}
                         onKeyDown={startDrag}
-                        // onBlur={onBlur}
                         data-test-subj={`kbnGridRowHeader-${rowId}--dragHandle`}
                       />
                     </EuiFlexItem>

@@ -34,8 +34,8 @@ export const GridPanelDragPreview = React.memo(() => {
           if (!rowId || !proposedGridLayout) return;
 
           const row = proposedGridLayout?.[rowId];
-          const headerOffset = row.order === 0 ? 0 : 2;
 
+          const headerOffset = row.order === 0 ? 0 : 2;
           const offset = getTopOffsetForRow(rowId, proposedGridLayout) + headerOffset;
 
           if (!activePanel || !row.panels[activePanel.id]) {

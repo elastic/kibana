@@ -95,11 +95,12 @@ export const useGridLayoutRowEvents = ({ rowId }: { rowId: string }) => {
           onMove,
           onEnd,
           onCancel,
+          onBlur: onEnd,
         });
       }
     },
     [gridLayoutStateManager, rowId, onEnd, onCancel]
   );
 
-  return { startDrag: startInteraction, onBlur: onEnd };
+  return { startDrag: startInteraction };
 };

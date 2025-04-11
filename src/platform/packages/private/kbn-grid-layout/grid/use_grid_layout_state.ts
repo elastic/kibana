@@ -150,14 +150,17 @@ export const useGridLayoutState = ({
       .pipe(distinctUntilChanged(deepEqual))
       .subscribe(({ gutterSize, columnPixelWidth, rowHeight, columnCount }) => {
         if (!layoutRef.current) return;
-        // todo: not use parentNode
-        layoutRef.current.parentNode.style.setProperty('--kbnGridGutterSize', `${gutterSize}`);
-        layoutRef.current.parentNode.style.setProperty('--kbnGridRowHeight', `${rowHeight}`);
-        layoutRef.current.parentNode.style.setProperty(
+
+        layoutRef.current.parentElement?.style.setProperty('--kbnGridGutterSize', `${gutterSize}`);
+        layoutRef.current.parentElement?.style.setProperty('--kbnGridRowHeight', `${rowHeight}`);
+        layoutRef.current.parentElement?.style.setProperty(
           '--kbnGridColumnWidth',
           `${columnPixelWidth}`
         );
-        layoutRef.current.parentNode.style.setProperty('--kbnGridColumnCount', `${columnCount}`);
+        layoutRef.current.parentElement?.style.setProperty(
+          '--kbnGridColumnCount',
+          `${columnCount}`
+        );
       });
 
     return () => {
