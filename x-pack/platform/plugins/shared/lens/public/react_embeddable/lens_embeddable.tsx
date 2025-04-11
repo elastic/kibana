@@ -140,6 +140,7 @@ export const createLensEmbeddableFactory = (
             ...searchContextComparators,
             ...stateConfig.getComparators(),
             isNewPanel: 'skip',
+            references: 'skip',
           };
         },
         onReset: async (lastSaved) => {

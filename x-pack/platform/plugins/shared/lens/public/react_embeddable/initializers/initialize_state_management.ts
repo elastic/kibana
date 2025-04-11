@@ -24,7 +24,7 @@ export interface StateManagementConfig {
     PublishesRendered &
     PublishesBlockingError;
   anyStateChange$: Observable<void>;
-  getComparators: () => StateComparators<Pick<LensSerializedState, 'attributes'>>
+  getComparators: () => StateComparators<Pick<LensSerializedState, 'attributes' | 'savedObjectId'>>
   reinitializeRuntimeState: (lastSavedRuntimeState: LensRuntimeState) => void;
   getLatestState: () => Pick<LensSerializedState, 'attributes' | 'savedObjectId'>;
   cleanup: () => void;
