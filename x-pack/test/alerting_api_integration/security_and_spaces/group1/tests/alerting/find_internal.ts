@@ -291,9 +291,6 @@ export default function createFindTests({ getService }: FtrProviderContext) {
                 throttle: '1m',
                 updated_by: 'elastic',
                 api_key_owner: null,
-                artifacts: {
-                  dashboards: [],
-                },
                 mute_all: false,
                 muted_alert_ids: [],
                 notify_when: 'onThrottleInterval',
