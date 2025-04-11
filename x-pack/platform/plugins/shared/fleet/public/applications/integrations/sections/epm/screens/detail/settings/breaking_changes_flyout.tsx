@@ -16,6 +16,7 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { type BreakingChangesLog } from '../utils';
 
@@ -48,11 +49,21 @@ export const BreakingChangesFlyout = ({ onClose, breakingChanges }: BreakingChan
     <EuiFlyout onClose={onClose} size="m">
       <EuiFlyoutHeader hasBorder>
         <EuiTitle>
-          <h2>Review breaking changes</h2>
+          <h2>
+            <FormattedMessage
+              id="xpack.fleet.integrations.settings.breakingChangesFlyout.headerTitle"
+              defaultMessage="Review breaking changes"
+            />
+          </h2>
         </EuiTitle>
         <EuiSpacer size="s" />
         <EuiText size="s" color="subdued">
-          <p>Please review the changes carefully before upgrading.</p>
+          <p>
+            <FormattedMessage
+              id="xpack.fleet.integrations.settings.breakingChangesFlyout.headerDescription"
+              defaultMessage="Please review the changes carefully before upgrading."
+            />
+          </p>
         </EuiText>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>

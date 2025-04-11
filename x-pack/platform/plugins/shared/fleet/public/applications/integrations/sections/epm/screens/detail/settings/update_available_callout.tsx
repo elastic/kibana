@@ -19,7 +19,6 @@ import {
   useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { type BreakingChangesLog } from '../utils';
@@ -45,16 +44,10 @@ const BreakingChangesButton = ({
   const { euiTheme } = useEuiTheme();
   const isOneChange = changelog.length === 1 && changelog[0].changes.length === 1;
 
+  const buttonText = 'Review breaking changes';
   const buttonCSS = css`
     background-color: ${euiTheme.colors.backgroundFilledWarning};
   `;
-
-  const ButtonText = () => (
-    <FormattedMessage
-      id="xpack.fleet.integrations.settings.versionInfo.reviewBreakingChangesButton"
-      defaultMessage="Review breaking changes"
-    />
-  );
 
   if (isOneChange) {
     return (
@@ -64,7 +57,10 @@ const BreakingChangesButton = ({
         href={changelog[0].changes[0].link}
         target="_blank"
       >
-        <ButtonText />
+        <FormattedMessage
+          id="xpack.fleet.integrations.settings.versionInfo.reviewBreakingChangesButton"
+          defaultMessage={buttonText}
+        />
         <EuiIcon type="popout" />
       </EuiButton>
     );
@@ -72,7 +68,10 @@ const BreakingChangesButton = ({
 
   return (
     <EuiButton color="warning" css={buttonCSS} onClick={onClick}>
-      <ButtonText />
+      <FormattedMessage
+        id="xpack.fleet.integrations.settings.versionInfo.reviewBreakingChangesButton"
+        defaultMessage={buttonText}
+      />
     </EuiButton>
   );
 };
@@ -85,8 +84,20 @@ export const UpdateAvailableCallout = ({
   const hasBreakingChanges = breakingChanges.changelog.length > 0;
 
   const checkboxId = useGeneratedHtmlId({ prefix: 'understoodBreakingChangeCheckbox' });
-  const defaultTitle = 'New version available';
-  const breakingChangesTitleClause = ': Action required due to breaking changes';
+
+  const defaultTitle = (
+    <FormattedMessage
+      id="xpack.fleet.integrations.settings.versionInfo.updatesAvailable"
+      defaultMessage="New version available"
+    />
+  );
+
+  const titleWithBreakingChanges = (
+    <FormattedMessage
+      id="xpack.fleet.integrations.settings.versionInfo.updatesAvailableWithBreakingChanges"
+      defaultMessage="New version available: Action required due to breaking changes"
+    />
+  );
 
   const defaultBody = 'Upgrade to version {version} to get the latest features.';
   const breakingChangesBody =
@@ -96,17 +107,25 @@ export const UpdateAvailableCallout = ({
     <EuiCallOut
       color="warning"
       iconType="warning"
-      title={i18n.translate('xpack.fleet.integrations.settings.versionInfo.updatesAvailable', {
-        defaultMessage: `${defaultTitle}${hasBreakingChanges ? breakingChangesTitleClause : ''}`,
-      })}
+      title={hasBreakingChanges ? titleWithBreakingChanges : defaultTitle}
     >
-      <FormattedMessage
-        id="xpack.fleet.integration.settings.versionInfo.updatesAvailableBody"
-        defaultMessage={hasBreakingChanges ? breakingChangesBody : defaultBody}
-        values={{
-          version,
-        }}
-      />
+      {hasBreakingChanges ? (
+        <FormattedMessage
+          id="xpack.fleet.integration.settings.versionInfo.updatesAvailableWithBreakingChangesBody"
+          defaultMessage={breakingChangesBody}
+          values={{
+            version,
+          }}
+        />
+      ) : (
+        <FormattedMessage
+          id="xpack.fleet.integration.settings.versionInfo.updatesAvailableBody"
+          defaultMessage={defaultBody}
+          values={{
+            version,
+          }}
+        />
+      )}
       <EuiSpacer size="s" />
       <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
         {hasBreakingChanges && (
