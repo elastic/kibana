@@ -6,7 +6,6 @@
  */
 
 import { findSLOParamsSchema } from '@kbn/slo-schema';
-import { executeWithErrorHandler } from '../../errors';
 import { FindSLO, KibanaSavedObjectsSLORepository } from '../../services';
 import { DefaultSummarySearchClient } from '../../services/summary_search_client/summary_search_client';
 import { createSloServerRoute } from '../create_slo_server_route';
@@ -33,6 +32,6 @@ export const findSLORoute = createSloServerRoute({
 
     const findSLO = new FindSLO(repository, summarySearchClient);
 
-    return await executeWithErrorHandler(() => findSLO.execute(params?.query ?? {}));
+    return await findSLO.execute(params?.query ?? {});
   },
 });

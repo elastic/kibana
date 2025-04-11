@@ -39,7 +39,7 @@ jest.mock('../../../../../../../app_context', () => {
 
 describe('ReindexDetailsFlyoutStep', () => {
   const defaultDeprecation: () => EnrichedDeprecationInfo = () => ({
-    isCritical: true,
+    level: 'critical',
     message: 'foo',
     resolveDuringUpgrade: false,
     type: 'index_settings',
@@ -302,7 +302,7 @@ describe('ReindexDetailsFlyoutStep', () => {
                     ],
                     "type": "reindex",
                   },
-                  "isCritical": true,
+                  "level": "critical",
                   "message": "foo",
                   "resolveDuringUpgrade": false,
                   "type": "index_settings",

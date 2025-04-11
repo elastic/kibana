@@ -72,7 +72,7 @@ describe('ReindexStep', () => {
       },
     } as ReindexState,
     deprecation: {
-      isCritical: true,
+      level: 'critical',
       resolveDuringUpgrade: false,
       type: 'index_settings',
       message: 'Index created before 7.0',

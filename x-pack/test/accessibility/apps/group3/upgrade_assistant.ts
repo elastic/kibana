@@ -20,7 +20,8 @@ export default function upgradeAssistantPage({ getService, getPageObjects }: Ftr
   const es = getService('es');
   const log = getService('log');
 
-  describe('Upgrade Assistant Accessibility', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/217262
+  describe.skip('Upgrade Assistant Accessibility', function () {
     // Only run this test in 8 as the deprecation we are testing is only available in 8
     this.onlyEsVersion('8');
 
