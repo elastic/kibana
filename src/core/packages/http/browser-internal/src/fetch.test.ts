@@ -529,7 +529,7 @@ describe('Fetch', () => {
       expect(fetchMock.lastUrl()).toContain('?filter_path=foo&filter_path=bar.baz');
     });
 
-    it('should not allow overriding of `filter_path` if provided', async () => {
+    it('gives precedence to the `filter_path` provided in top level options', async () => {
       fetchMock.get('*', { body: {} });
       await fetchInstance.fetch('/my/path', {
         query: { filter_path: 'someString' },
