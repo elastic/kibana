@@ -372,36 +372,11 @@ export const parseGeminiStream: StreamParser = async (
   tokenHandler
 ) => {
   let responseBody = '';
-  let tokenBuffer = '';
-  let consecutiveParseErrors = 0;
   stream.on('data', (chunk) => {
-    let decoded = chunk.toString();
-    if (tokenBuffer) {
-      // If tokenBuffer is not empty we have an errored out chunk in it, try appending new chunk and parsing together
-      decoded = tokenBuffer + chunk;
-      tokenBuffer = '';
-    }
-    let parsed;
-    try {
-      parsed = parseGeminiResponse(decoded);
-    } catch {
-      consecutiveParseErrors += 1;
-      if (consecutiveParseErrors > MAX_CONSECUTIVE_PARSE_ERRORS) {
-        logger.error(
-          `Gemini stream parsing error in async iterator, consecutive errors: ${consecutiveParseErrors}, aborting`
-        );
-        throw new Error('Gemini stream parsing error, aborting');
-      }
-      tokenBuffer = decoded;
-      logger.error('Gemini stream parsing error, attempting to re-parse with next chunk', decoded);
-    }
-    if (parsed && tokenHandler) {
-      if (consecutiveParseErrors) {
-        logger.info(
-          `Gemini stream parsing was successful after ${consecutiveParseErrors} consecutive errors`
-        );
-      }
-      consecutiveParseErrors = 0; // Reset the error count if parsing was successful
+      const decoded = chunk.toString();
+      const parsed = parseGeminiResponse(decoded);
+    
+    if (tokenHandler) {
       // Split the parsed string into chunks of 5 characters
       for (let i = 0; i < parsed.length; i += 5) {
         tokenHandler(parsed.substring(i, i + 5));
