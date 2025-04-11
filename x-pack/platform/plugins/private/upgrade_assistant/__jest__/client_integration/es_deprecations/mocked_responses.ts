@@ -11,7 +11,7 @@ export const MOCK_SNAPSHOT_ID = '1';
 export const MOCK_JOB_ID = 'deprecation_check_job';
 
 export const MOCK_ML_DEPRECATION: EnrichedDeprecationInfo = {
-  isCritical: true,
+  level: 'critical',
   resolveDuringUpgrade: false,
   type: 'ml_settings',
   message: 'model snapshot [1] for job [deprecation_check_job] needs to be deleted or upgraded',
@@ -26,7 +26,7 @@ export const MOCK_ML_DEPRECATION: EnrichedDeprecationInfo = {
 };
 
 export const MOCK_REINDEX_DEPRECATION: EnrichedDeprecationInfo = {
-  isCritical: true,
+  level: 'critical',
   resolveDuringUpgrade: false,
   type: 'index_settings',
   message: 'Index created before 7.0',
@@ -44,7 +44,7 @@ export const MOCK_REINDEX_DEPRECATION: EnrichedDeprecationInfo = {
 };
 
 const MOCK_INDEX_SETTING_DEPRECATION: EnrichedDeprecationInfo = {
-  isCritical: false,
+  level: 'warning',
   resolveDuringUpgrade: false,
   type: 'index_settings',
   message: 'Setting [index.routing.allocation.include._tier] is deprecated',
@@ -58,7 +58,7 @@ const MOCK_INDEX_SETTING_DEPRECATION: EnrichedDeprecationInfo = {
 };
 
 const MOCK_CLUSTER_SETTING_DEPRECATION: EnrichedDeprecationInfo = {
-  isCritical: false,
+  level: 'warning',
   resolveDuringUpgrade: false,
   type: 'cluster_settings',
   message: 'Setting [cluster.routing.allocation.require._tier] is deprecated',
@@ -71,7 +71,7 @@ const MOCK_CLUSTER_SETTING_DEPRECATION: EnrichedDeprecationInfo = {
 };
 
 const MOCK_DEFAULT_DEPRECATION: EnrichedDeprecationInfo = {
-  isCritical: false,
+  level: 'warning',
   resolveDuringUpgrade: false,
   type: 'index_settings',
   message: 'multi-fields within multi-fields',
