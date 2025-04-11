@@ -136,6 +136,7 @@ export const getSearchEmbeddableFactory = ({
         serializeState: () => serialize(savedObjectId$.getValue()),
         anyStateChange$: merge(
           ...(dynamicActionsManager ? [dynamicActionsManager.anyStateChange$] : []),
+          searchEmbeddable.anyStateChange$,
           titleManager.anyStateChange$,
           timeRangeManager.anyStateChange$
         ),
@@ -144,14 +145,26 @@ export const getSearchEmbeddableFactory = ({
             ...(dynamicActionsManager?.comparators ?? { enhancements: 'skip' }),
             ...titleComparators,
             ...timeRangeComparators,
+            ...searchEmbeddable.comparators,
+            attributes: 'skip',
+            breakdownField: 'skip',
+            hideAggregatedPreview: 'skip',
+            hideChart: 'skip',
+            isTextBasedQuery: 'skip',
+            kibanaSavedObjectMeta: 'skip',
             nonPersistedDisplayOptions: 'skip',
-            // ...searchEmbeddable.comparators,
+            refreshInterval: 'skip',
+            savedObjectId: 'skip',
+            timeRestore: 'skip',
+            usesAdHocDataView: 'skip',
+            visContext: 'skip',
           };
         },
         onReset: (lastSaved) => {
           dynamicActionsManager?.reinitializeState(lastSaved?.rawState ?? {});
           timeRangeManager.reinitializeState(lastSaved?.rawState);
           titleManager.reinitializeState(lastSaved?.rawState);
+          searchEmbeddable.reinitializeState(lastSaved?.rawState);
         },
       });
 
