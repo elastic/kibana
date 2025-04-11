@@ -23,27 +23,25 @@ import { useRootTransactionContext } from '../../hooks/use_root_transaction';
 import { useTransactionLatencyChart } from '../../hooks/use_transaction_latency_chart';
 
 export interface TransactionDurationSummaryProps {
-  transaction: {
-    duration: number;
-    type: string;
-    name: string;
-  };
-  service: {
-    name: string;
-  };
+  transactionDuration: number;
+  transactionName: string;
+  transactionType: string;
+  serviceName: string;
 }
 
 export function TransactionDurationSummary({
-  transaction,
-  service,
+  transactionDuration,
+  transactionName,
+  transactionType,
+  serviceName,
 }: TransactionDurationSummaryProps) {
   const { transaction: rootTransaction, loading: rootTransactionLoading } =
     useRootTransactionContext();
 
   const { data: latencyChartData, loading: latencyChartLoading } = useTransactionLatencyChart({
-    transactionName: transaction.name,
-    transactionType: transaction.type,
-    serviceName: service.name,
+    transactionName,
+    transactionType,
+    serviceName,
   });
 
   return (
@@ -91,7 +89,7 @@ export function TransactionDurationSummary({
           <EuiFlexItem grow={2}>
             <EuiText size="xs">
               <Duration
-                duration={transaction.duration}
+                duration={transactionDuration}
                 parent={{
                   type: 'trace',
                   duration: rootTransaction?.duration,
@@ -120,10 +118,10 @@ export function TransactionDurationSummary({
               <DurationDistributionChart
                 data={latencyChartData?.transactionDistributionChartData ?? []}
                 markerValue={latencyChartData?.percentileThresholdValue ?? 0}
-                markerCurrentEvent={transaction.duration}
+                markerCurrentEvent={transactionDuration}
                 hasData={!latencyChartLoading}
                 status={latencyChartLoading ? FETCH_STATUS.LOADING : FETCH_STATUS.SUCCESS}
-                eventType={ProcessorEvent.transaction} // TODO PUEDE SER SPAN?
+                eventType={ProcessorEvent.transaction}
                 showAxisTitle={false}
                 showLegend={false}
                 dataTestSubPrefix="docViewerTransactionOverview"
