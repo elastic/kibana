@@ -8,6 +8,7 @@
 import type { CoreStart } from '@kbn/core/server';
 import type { LoggerFactory } from '@kbn/core/server';
 import type { WorkChatAppPluginStartDependencies } from '../types';
+import type { WorkChatAppConfig } from '../config';
 import type { InternalServices } from './types';
 import { IntegrationsServiceImpl } from './integrations/integrations_service';
 import { ConversationServiceImpl } from './conversations';
@@ -18,6 +19,7 @@ import { IntegrationRegistry } from './integrations';
 
 interface CreateServicesParams {
   core: CoreStart;
+  config: WorkChatAppConfig;
   logger: LoggerFactory;
   pluginsDependencies: WorkChatAppPluginStartDependencies;
   integrationRegistry: IntegrationRegistry;
@@ -25,6 +27,7 @@ interface CreateServicesParams {
 
 export function createServices({
   core,
+  config,
   logger,
   pluginsDependencies,
   integrationRegistry,
@@ -53,6 +56,7 @@ export function createServices({
 
   const agentFactory = new AgentFactory({
     inference: pluginsDependencies.inference,
+    tracingConfig: config.tracing,
     logger: logger.get('services.agentFactory'),
     agentService,
     integrationsService,
