@@ -110,15 +110,15 @@ export const useChat = ({
           }
         },
         complete: () => {
-          setConversationEvents((prevEvents) => [...prevEvents, ...streamMessages]);
           setPendingMessages([]);
           setProgressionEvents([]);
+          setConversationEvents((prevEvents) => [...prevEvents, ...streamMessages]);
           setStatus('ready');
         },
         error: (err) => {
-          setConversationEvents((prevEvents) => [...prevEvents, ...streamMessages]);
           setPendingMessages([]);
           setProgressionEvents([]);
+          setConversationEvents((prevEvents) => [...prevEvents, ...streamMessages]);
           setStatus('error');
           onError?.(err);
 
@@ -144,7 +144,9 @@ export const useChat = ({
   );
 
   const setConversationEventsExternal = useCallback((newEvents: ConversationEvent[]) => {
+    // TODO: unsub from observable + set status ready
     setConversationEvents(newEvents);
+    setProgressionEvents([]);
     setPendingMessages([]);
   }, []);
 
