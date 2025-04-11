@@ -112,7 +112,7 @@ describe('fetchArtifactVersions', () => {
     });
   });
 
-  it('support win32 env', async () => {
+  it('supports win32 env', async () => {
     const artifactNames = [
       getArtifactName({ productName: 'kibana', productVersion: '8.16' }),
       getArtifactName({ productName: 'elasticsearch', productVersion: '8.16' }),
