@@ -62,6 +62,9 @@ export const useContextMenuUtils = () => {
         run: async (ed) => {
           const selection = ed.getSelection();
           const model = ed.getModel();
+          if (!selection || !model) {
+            return;
+          }
           const selectedText = model.getValueInRange(selection);
 
           try {
@@ -100,6 +103,9 @@ export const useContextMenuUtils = () => {
       run: async (ed) => {
         const selection = ed.getSelection();
         const model = ed.getModel();
+        if (!selection || !model) {
+          return;
+        }
         const selectedText = model.getValueInRange(selection);
         try {
           if (!window.navigator?.clipboard) {
@@ -129,7 +135,9 @@ export const useContextMenuUtils = () => {
         contextMenuOrder: 3,
         run: async (ed) => {
           const selection = ed.getSelection();
-
+          if (!selection) {
+            return;
+          }
           try {
             if (!window.navigator?.clipboard) {
               throw new Error('Could not paste from clipboard!');
