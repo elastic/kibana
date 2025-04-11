@@ -14,7 +14,7 @@ import { schema } from '@kbn/config-schema';
 const SECURITY_GEN_AI_CONNECTORS_ENV_VAR = 'KIBANA_SECURITY_TESTING_AI_CONNECTORS';
 const SECURITY_GEN_AI_LANGSMITH_KEY_ENV_VAR = 'KIBANA_SECURITY_TESTING_LANGSMITH_KEY';
 
-// Main Secrets // TODO: Discuss w/ operations to see if we can use this vault so we can self-manage
+// siem-team secrets discussed w/ operations and we will mirror them here
 // const SECURITY_GEN_AI_VAULT = 'secret/siem-team/security-gen-ai';
 
 // CI Vault

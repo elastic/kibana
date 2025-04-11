@@ -10,7 +10,7 @@ Ensure you are authenticated with vault for LLM + LangSmith creds:
 Fetch Connectors and LangSmith creds:
 
 > [!NOTE]
-> In discussion with @elastic/kibana-operations on if we can store these in the main elastic secrets vault so we can self-manage vs storing them in the CI specific vault. Will update description and add README once decided.
+> In discussion with @elastic/kibana-operations it was preferred to use the ci-prod vault, but they are currently mirrored to `SECURITY_GEN_AI_VAULT` which can be modified manage_secrets.ts so we can self-manage to a degree.
 
 ```
 cd x-pack/test/security_solution_api_integration
