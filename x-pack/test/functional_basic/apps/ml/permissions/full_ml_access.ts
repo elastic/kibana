@@ -64,19 +64,18 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.testExecution.logTestStep('should display the disabled "Overview" tab');
           await ml.navigation.assertOverviewTabEnabled(false);
 
-          await ml.testExecution.logTestStep('should display the disabled "Anomaly Detection" tab');
-          await ml.navigation.assertAnomalyDetectionTabEnabled(false);
+          await ml.testExecution.logTestStep(
+            'should display the disabled "Anomaly Detection" tabs'
+          );
+          await ml.navigation.assertAnomalyDetectionTabsEnabled(false);
 
           await ml.testExecution.logTestStep(
-            'should display the disabled "Data Frame Analytics" tab'
+            'should display the disabled "Data Frame Analytics" tabs'
           );
-          await ml.navigation.assertDataFrameAnalyticsTabEnabled(false);
+          await ml.navigation.assertDataFrameAnalyticsTabsEnabled(false);
 
           await ml.testExecution.logTestStep('should display the enabled "Data Visualizer" tab');
           await ml.navigation.assertDataVisualizerTabEnabled(true);
-
-          await ml.testExecution.logTestStep('should display the disabled "Settings" tab');
-          await ml.navigation.assertSettingsTabEnabled(false);
         });
 
         it('should display elements on Data Visualizer home page correctly', async () => {
@@ -153,12 +152,7 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.testExecution.logTestStep(
             'should load the stack management with the ML menu item being absent'
           );
-          await ml.navigation.navigateToStackManagement();
-
-          await ml.testExecution.logTestStep(
-            'should load the stack management with insufficient license warning'
-          );
-          await ml.navigation.navigateToStackManagementInsuficientLicensePage();
+          await ml.navigation.navigateToStackManagement({ expectMlLink: false });
         });
       });
     }
