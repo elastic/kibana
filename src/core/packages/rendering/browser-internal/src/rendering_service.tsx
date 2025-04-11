@@ -28,7 +28,7 @@ import { KibanaRootContextProvider } from '@kbn/react-kibana-context-root';
 import { RenderingService as IRenderingService } from '@kbn/core-rendering-browser';
 import { AppWrapper } from './app_containers';
 
-interface ContextDeps {
+export interface RenderingServiceContextDeps {
   analytics: AnalyticsServiceStart;
   executionContext: ExecutionContextStart;
   i18n: I18nStart;
@@ -36,7 +36,7 @@ interface ContextDeps {
   userProfile: UserProfileService;
 }
 
-interface RenderCoreDeps {
+export interface RenderingServiceRenderCoreDeps {
   application: InternalApplicationStart;
   chrome: InternalChromeStart;
   overlays: OverlayStart;
@@ -51,14 +51,14 @@ interface RenderCoreDeps {
  * @internal
  */
 export class RenderingService implements IRenderingService {
-  private contextDeps = new BehaviorSubject<ContextDeps | null>(null);
+  private contextDeps = new BehaviorSubject<RenderingServiceContextDeps | null>(null);
 
-  start(deps: ContextDeps) {
+  start(deps: RenderingServiceContextDeps) {
     this.contextDeps.next(deps);
     return this;
   }
 
-  renderCore(renderCoreDeps: RenderCoreDeps, targetDomElement: HTMLDivElement) {
+  renderCore(renderCoreDeps: RenderingServiceRenderCoreDeps, targetDomElement: HTMLDivElement) {
     const { chrome, application, overlays } = renderCoreDeps;
     const startServices = this.contextDeps.getValue()!;
     const chromeHeader = chrome.getHeaderComponent();

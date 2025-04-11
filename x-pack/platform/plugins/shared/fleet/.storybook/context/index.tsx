@@ -135,6 +135,7 @@ export const StorybookContext: React.FC<{
         },
       },
       guidedOnboarding: {},
+      rendering: {} as any,
     }),
     [isCloudEnabled]
   );
