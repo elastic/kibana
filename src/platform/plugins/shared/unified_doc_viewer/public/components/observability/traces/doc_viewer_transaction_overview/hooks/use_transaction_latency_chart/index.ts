@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { useState, useEffect } from 'react';
 
 import { EuiThemeComputed, useEuiTheme } from '@elastic/eui';
-import { HistogramItem } from '@kbn/apm-ui-shared/src/typings';
+import { HistogramItem } from '@kbn/apm-ui-shared';
 import { DurationDistributionChartData } from '@kbn/apm-ui-shared';
 import { getUnifiedDocViewerServices } from '../../../../../../plugin';
 

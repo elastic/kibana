@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Duration, DurationDistributionChart } from '@kbn/apm-ui-shared';
-import { FETCH_STATUS, ProcessorEvent } from '@kbn/apm-ui-shared/src/enums';
+import { FETCH_STATUS, ProcessorEvent } from '@kbn/apm-ui-shared';
 import { useTransactionContext } from '../../hooks/use_transaction';
 import { useSpanLatencyChart } from '../../hooks/use_span_latency_chart';
 
