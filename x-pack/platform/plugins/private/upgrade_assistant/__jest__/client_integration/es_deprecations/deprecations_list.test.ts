@@ -140,12 +140,13 @@ describe('ES deprecations table', () => {
 
       expect(find('deprecationTableRow').length).toEqual(criticalDeprecations.length);
 
+      await actions.searchBar.clickStatusFilterDropdown();
       await actions.searchBar.clickFilterByTitle('Critical'); // Reset filter
 
       expect(find('deprecationTableRow').length).toEqual(
         esDeprecationsMockResponse.migrationsDeprecations.length
       );
-    }, 10000); // Increase the timeout to 10s since it was exceeden timeout of 5000ms in CI
+    });
 
     it('filters results by type', async () => {
       const { find, actions } = testBed;
