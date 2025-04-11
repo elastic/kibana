@@ -10,7 +10,7 @@
 import React, { useCallback, type FC } from 'react';
 import classNames from 'classnames';
 import { css } from '@emotion/react';
-import { transparentize, EuiButton, useEuiTheme } from '@elastic/eui';
+import { transparentize, EuiButton, useEuiTheme, EuiButtonEmpty } from '@elastic/eui';
 import type { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
 import { SubItemTitle } from './subitem_title';
 import { isActiveFromUrl } from '../../utils';
@@ -68,6 +68,7 @@ export const NavigationItemOpenPanel: FC<Props> = ({ item, activeNodes }: Props)
       size="s"
       fullWidth
       css={({ euiTheme }) => css`
+        width: 100%;
         background-color: ${isActive
           ? transparentize(euiTheme.colors.lightShade, 0.5)
           : 'transparent'};
