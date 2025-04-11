@@ -92,7 +92,6 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
       const specPattern = specArg ?? specConfig;
       const excludeSpecPattern = cypressConfigFile.e2e.excludeSpecPattern;
 
-      console.log({ specArg });
       log.info('Config spec pattern:', specConfig);
       log.info('Exclude spec pattern:', excludeSpecPattern);
       log.info('Arguments spec pattern:', specArg);
