@@ -132,6 +132,7 @@ import { scheduleEntityAnalyticsMigration } from './lib/entity_analytics/migrati
 import { SiemMigrationsService } from './lib/siem_migrations/siem_migrations_service';
 import { TelemetryConfigProvider } from '../common/telemetry_config/telemetry_config_provider';
 import { TelemetryConfigWatcher } from './endpoint/lib/policy/telemetry_watch';
+import { registerPrivilegeMonitoringTask } from './lib/entity_analytics/privilege_monitoring/tasks/privilege_monitoring_task';
 
 export type { SetupPlugins, StartPlugins, PluginSetup, PluginStart } from './plugin_contract';
 
@@ -266,6 +267,16 @@ export class Plugin implements ISecuritySolutionPlugin {
         kibanaVersion: pluginContext.env.packageInfo.version,
       });
     }
+
+    registerPrivilegeMonitoringTask({
+      getStartServices: core.getStartServices,
+      taskManager: plugins.taskManager,
+      logger: this.logger,
+      telemetry: core.analytics,
+      kibanaVersion: pluginContext.env.packageInfo.version,
+      experimentalFeatures,
+    });
+
     const requestContextFactory = new RequestContextFactory({
       config,
       logger,
