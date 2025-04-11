@@ -11,6 +11,13 @@ import * as t from 'io-ts';
 import { CoreSetup } from '@kbn/core-lifecycle-browser';
 import { createRepositoryClient } from './create_repository_client';
 
+const disabledAuthz = {
+  authz: {
+    enabled: false as const,
+    reason: 'This is a test',
+  },
+};
+
 describe('createRepositoryClient', () => {
   const getMock = jest.fn();
   const coreSetupMock = {
@@ -28,6 +35,7 @@ describe('createRepositoryClient', () => {
       'GET /internal/handler': {
         endpoint: 'GET /internal/handler',
         handler: jest.fn().mockResolvedValue('OK'),
+        security: disabledAuthz,
       },
     };
     const { fetch } = createRepositoryClient<typeof repository>(coreSetupMock);
@@ -47,6 +55,7 @@ describe('createRepositoryClient', () => {
       'GET /api/handler 2024-08-05': {
         endpoint: 'GET /api/handler 2024-08-05',
         handler: jest.fn().mockResolvedValue('OK'),
+        security: disabledAuthz,
       },
     };
     const { fetch } = createRepositoryClient<typeof repository>(coreSetupMock);
@@ -66,6 +75,7 @@ describe('createRepositoryClient', () => {
       'GET /internal/handler': {
         endpoint: 'GET /internal/handler',
         handler: jest.fn().mockResolvedValue('OK'),
+        security: disabledAuthz,
       },
     };
     const { fetch } = createRepositoryClient<typeof repository>(coreSetupMock);
@@ -97,6 +107,7 @@ describe('createRepositoryClient', () => {
           }),
         }),
         handler: jest.fn().mockResolvedValue('OK'),
+        security: disabledAuthz,
       },
     };
     const { fetch } = createRepositoryClient<typeof repository>(coreSetupMock);
@@ -127,6 +138,7 @@ describe('createRepositoryClient', () => {
           }),
         }),
         handler: jest.fn().mockResolvedValue('OK'),
+        security: disabledAuthz,
       },
     };
     const { fetch } = createRepositoryClient<typeof repository>(coreSetupMock);
@@ -159,6 +171,7 @@ describe('createRepositoryClient', () => {
           }),
         }),
         handler: jest.fn().mockResolvedValue('OK'),
+        security: disabledAuthz,
       },
     };
     const { fetch } = createRepositoryClient<typeof repository>(coreSetupMock);

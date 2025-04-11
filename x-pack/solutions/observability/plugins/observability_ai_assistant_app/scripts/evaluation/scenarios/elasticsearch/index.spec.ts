@@ -48,9 +48,6 @@ describe('Elasticsearch functions', () => {
               },
             },
           },
-          settings: {
-            'index.mapping.semantic_text.use_legacy_format': false,
-          },
         });
 
         await esClient.index({

@@ -227,7 +227,7 @@ const ProcessorsEditor = React.memo(() => {
           <SortableList onDragItem={handlerItemDrag}>
             {processorsRefs.map((processorRef, idx) => (
               <DraggableProcessorListItem
-                disableDrag={!definition.privileges.manage}
+                disableDrag={!definition.privileges.simulate}
                 key={processorRef.id}
                 idx={idx}
                 processorRef={processorRef}
