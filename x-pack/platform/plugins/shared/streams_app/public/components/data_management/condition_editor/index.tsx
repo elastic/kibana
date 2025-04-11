@@ -5,15 +5,18 @@
  * 2.0.
  */
 
+import React from 'react';
+import useToggle from 'react-use/lib/useToggle';
 import {
+  EuiCodeBlock,
   EuiFieldText,
   EuiFlexGroup,
-  EuiFlexItem,
   EuiForm,
   EuiFormRow,
-  EuiSelect,
-  EuiSwitch,
   EuiIconTip,
+  EuiSelect,
+  EuiSelectOption,
+  EuiSwitch,
 } from '@elastic/eui';
 import {
   BinaryFilterCondition,
@@ -21,31 +24,20 @@ import {
   FilterCondition,
   isNeverCondition,
 } from '@kbn/streams-schema';
-import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { CodeEditor } from '@kbn/code-editor';
-import { useBoolean } from '@kbn/react-hooks';
+import { isPlainObject } from 'lodash';
 import {
-  EMPTY_EQUALS_CONDITION,
+  ALWAYS_CONDITION,
   NEVER_CONDITION,
   alwaysToEmptyEquals,
   emptyEqualsToAlways,
 } from '../../../util/condition';
 
-export function ConditionEditor(props: {
-  condition: Condition;
-  onConditionChange: (condition: Condition) => void;
-}) {
-  const condition = alwaysToEmptyEquals(props.condition);
-  const isEnabled = !isNeverCondition(condition);
+export type RoutingConditionEditorProps = ConditionEditorProps;
 
-  const [usingSyntaxEditor, { toggle: toggleSyntaxEditor, off: closeSyntaxEditor }] = useBoolean(
-    !('operator' in condition)
-  );
-
-  const handleConditionChange = (updatedCondition: Condition) => {
-    props.onConditionChange(emptyEqualsToAlways(updatedCondition));
-  };
+export function RoutingConditionEditor(props: RoutingConditionEditorProps) {
+  const isEnabled = !isNeverCondition(props.condition);
 
   return (
     <EuiForm fullWidth>
@@ -71,50 +63,11 @@ export function ConditionEditor(props: {
           compressed
           checked={isEnabled}
           onChange={(event) => {
-            handleConditionChange(event.target.checked ? EMPTY_EQUALS_CONDITION : NEVER_CONDITION);
-            closeSyntaxEditor();
+            props.onConditionChange(event.target.checked ? ALWAYS_CONDITION : NEVER_CONDITION);
           }}
         />
       </EuiFormRow>
-      {isEnabled && (
-        <EuiFormRow
-          label={i18n.translate('xpack.streams.conditionEditor.title', {
-            defaultMessage: 'Condition',
-          })}
-          labelAppend={
-            <EuiSwitch
-              label={i18n.translate('xpack.streams.conditionEditor.switch', {
-                defaultMessage: 'Syntax editor',
-              })}
-              compressed
-              checked={usingSyntaxEditor}
-              onChange={toggleSyntaxEditor}
-            />
-          }
-        >
-          {usingSyntaxEditor ? (
-            <CodeEditor
-              height={200}
-              languageId="json"
-              value={JSON.stringify(condition, null, 2)}
-              onChange={(value) => {
-                try {
-                  handleConditionChange(JSON.parse(value));
-                } catch (error: unknown) {
-                  // do nothing
-                }
-              }}
-            />
-          ) : 'operator' in condition ? (
-            <FilterForm
-              condition={condition || EMPTY_EQUALS_CONDITION}
-              onConditionChange={handleConditionChange}
-            />
-          ) : (
-            <pre>{JSON.stringify(condition, null, 2)}</pre>
-          )}
-        </EuiFormRow>
-      )}
+      {isEnabled && <ConditionEditor {...props} />}
     </EuiForm>
   );
 }
@@ -137,77 +90,132 @@ const operatorMap = {
   notExists: i18n.translate('xpack.streams.filter.notExists', { defaultMessage: 'not exists' }),
 };
 
+const operatorOptions: EuiSelectOption[] = Object.entries(operatorMap).map(([value, text]) => ({
+  value,
+  text,
+}));
+
+export interface ConditionEditorProps {
+  condition: Condition;
+  onConditionChange: (condition: Condition) => void;
+}
+
+export function ConditionEditor(props: ConditionEditorProps) {
+  const condition = alwaysToEmptyEquals(props.condition);
+
+  const isFilterCondition = isPlainObject(condition) && 'operator' in condition;
+
+  const [usingSyntaxEditor, toggleSyntaxEditor] = useToggle(!isFilterCondition);
+
+  const handleConditionChange = (updatedCondition: Condition) => {
+    props.onConditionChange(emptyEqualsToAlways(updatedCondition));
+  };
+
+  return (
+    <EuiFormRow
+      label={i18n.translate('xpack.streams.conditionEditor.title', {
+        defaultMessage: 'Condition',
+      })}
+      labelAppend={
+        <EuiSwitch
+          label={i18n.translate('xpack.streams.conditionEditor.switch', {
+            defaultMessage: 'Syntax editor',
+          })}
+          compressed
+          checked={usingSyntaxEditor}
+          onChange={toggleSyntaxEditor}
+        />
+      }
+    >
+      {usingSyntaxEditor ? (
+        <CodeEditor
+          height={200}
+          languageId="json"
+          value={JSON.stringify(condition, null, 2)}
+          onChange={(value) => {
+            try {
+              handleConditionChange(JSON.parse(value));
+            } catch (error: unknown) {
+              // do nothing
+            }
+          }}
+        />
+      ) : isFilterCondition ? (
+        <FilterForm condition={condition} onConditionChange={handleConditionChange} />
+      ) : (
+        <EuiCodeBlock language="json" paddingSize="m" isCopyable>
+          {JSON.stringify(condition, null, 2)}
+        </EuiCodeBlock>
+      )}
+    </EuiFormRow>
+  );
+}
+
 function FilterForm(props: {
   condition: FilterCondition;
   onConditionChange: (condition: FilterCondition) => void;
 }) {
+  const handleConditionChange = (updatedCondition: Partial<FilterCondition>) => {
+    props.onConditionChange({
+      ...props.condition,
+      ...updatedCondition,
+    } as FilterCondition);
+  };
+
   return (
     <EuiFlexGroup gutterSize="s" alignItems="center">
-      <EuiFlexItem grow>
-        <EuiFieldText
-          data-test-subj="streamsAppFilterFormFieldText"
-          aria-label={i18n.translate('xpack.streams.filter.field', { defaultMessage: 'Field' })}
-          compressed
-          placeholder={i18n.translate('xpack.streams.filter.fieldPlaceholder', {
-            defaultMessage: 'Field',
-          })}
-          value={props.condition.field}
-          onChange={(e) => {
-            props.onConditionChange({ ...props.condition, field: e.target.value });
-          }}
-        />
-      </EuiFlexItem>
-      <EuiFlexItem grow>
-        <EuiSelect
-          aria-label={i18n.translate('xpack.streams.filter.operator', {
-            defaultMessage: 'Operator',
-          })}
-          data-test-subj="streamsAppFilterFormSelect"
-          options={
-            Object.entries(operatorMap).map(([value, text]) => ({
-              value,
-              text,
-            })) as Array<{ value: FilterCondition['operator']; text: string }>
-          }
-          value={props.condition.operator}
-          compressed
-          onChange={(e) => {
-            const newCondition: Partial<FilterCondition> = {
-              ...props.condition,
-            };
+      <EuiFieldText
+        data-test-subj="streamsAppFilterFormFieldText"
+        aria-label={i18n.translate('xpack.streams.filter.field', { defaultMessage: 'Field' })}
+        compressed
+        placeholder={i18n.translate('xpack.streams.filter.fieldPlaceholder', {
+          defaultMessage: 'Field',
+        })}
+        value={props.condition.field}
+        onChange={(e) => {
+          handleConditionChange({ field: e.target.value });
+        }}
+      />
 
-            const newOperator = e.target.value as FilterCondition['operator'];
-            if (newOperator === 'exists' || newOperator === 'notExists') {
-              if ('value' in newCondition) delete newCondition.value;
-            } else if (!('value' in newCondition)) {
-              (newCondition as BinaryFilterCondition).value = '';
-            }
-            props.onConditionChange({
-              ...newCondition,
-              operator: newOperator,
-            } as FilterCondition);
-          }}
-        />
-      </EuiFlexItem>
+      <EuiSelect
+        aria-label={i18n.translate('xpack.streams.filter.operator', {
+          defaultMessage: 'Operator',
+        })}
+        data-test-subj="streamsAppFilterFormSelect"
+        options={operatorOptions}
+        value={props.condition.operator}
+        compressed
+        onChange={(e) => {
+          const newCondition: Partial<FilterCondition> = {
+            ...props.condition,
+          };
+
+          const newOperator = e.target.value as FilterCondition['operator'];
+          if (newOperator === 'exists' || newOperator === 'notExists') {
+            if ('value' in newCondition) delete newCondition.value;
+          } else if (!('value' in newCondition)) {
+            (newCondition as BinaryFilterCondition).value = '';
+          }
+          handleConditionChange({
+            ...newCondition,
+            operator: newOperator,
+          } as FilterCondition);
+        }}
+      />
 
       {'value' in props.condition && (
-        <EuiFlexItem grow>
-          <EuiFieldText
-            aria-label={i18n.translate('xpack.streams.filter.value', { defaultMessage: 'Value' })}
-            placeholder={i18n.translate('xpack.streams.filter.valuePlaceholder', {
-              defaultMessage: 'Value',
-            })}
-            compressed
-            value={String(props.condition.value)}
-            data-test-subj="streamsAppFilterFormValueText"
-            onChange={(e) => {
-              props.onConditionChange({
-                ...props.condition,
-                value: e.target.value,
-              } as BinaryFilterCondition);
-            }}
-          />
-        </EuiFlexItem>
+        <EuiFieldText
+          aria-label={i18n.translate('xpack.streams.filter.value', { defaultMessage: 'Value' })}
+          placeholder={i18n.translate('xpack.streams.filter.valuePlaceholder', {
+            defaultMessage: 'Value',
+          })}
+          compressed
+          value={String(props.condition.value)}
+          data-test-subj="streamsAppFilterFormValueText"
+          onChange={(e) => {
+            handleConditionChange({ value: e.target.value });
+          }}
+        />
       )}
     </EuiFlexGroup>
   );

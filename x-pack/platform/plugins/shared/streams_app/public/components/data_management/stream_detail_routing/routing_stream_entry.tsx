@@ -23,7 +23,7 @@ import React from 'react';
 import { css } from '@emotion/css';
 import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
 import { alwaysToEmptyEquals } from '../../../util/condition';
-import { ConditionEditor } from '../condition_editor';
+import { RoutingConditionEditor } from '../condition_editor';
 import { ConditionMessage } from '../condition_message';
 import { ControlBar } from './control_bar';
 
@@ -140,8 +140,8 @@ export function RoutingStreamEntry({
       </EuiFlexGroup>
       {edit && (
         <EuiFlexGroup direction="column" gutterSize="s">
-          <ConditionEditor
-            condition={alwaysToEmptyEquals(child.if)}
+          <RoutingConditionEditor
+            condition={child.if}
             onConditionChange={(condition) => {
               onChildChange({
                 ...child,
