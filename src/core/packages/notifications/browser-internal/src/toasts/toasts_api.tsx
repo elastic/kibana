@@ -11,6 +11,7 @@ import React from 'react';
 import * as Rx from 'rxjs';
 import { omitBy, isUndefined } from 'lodash';
 
+import { apm } from '@elastic/apm-rum';
 import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
 import type { I18nStart } from '@kbn/core-i18n-browser';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
@@ -35,6 +36,10 @@ const normalizeToast = (toastOrTitle: ToastInput): ToastInputFields => {
     };
   }
   return omitBy(toastOrTitle, isUndefined);
+};
+
+const ERROR_TOAST_LABELS = {
+  errorType: 'ToastError',
 };
 
 interface StartDeps {
@@ -175,6 +180,9 @@ export class ToastsApi implements IToasts {
    * @returns a {@link Toast}
    */
   public addError(error: Error, options: ErrorToastOptions) {
+    apm.captureError(error, {
+      labels: ERROR_TOAST_LABELS,
+    });
     const message = options.toastMessage || error.message;
     return this.add({
       color: 'danger',
