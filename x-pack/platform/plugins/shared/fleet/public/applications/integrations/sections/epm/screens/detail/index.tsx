@@ -407,16 +407,22 @@ export function Detail() {
 
   const saveReadMeChanges = (updatedReadMe: string | undefined) => {
     setIsEditReadMeOpen(false);
-    console.log('the package info', packageInfo);
-    console.log('the updatedReadMe', updatedReadMe);
-    //  call the api using the hook
+
     updateCustomIntegration(packageInfo?.name || '', [
-      { readMeData: updatedReadMe, categories: ['new', 'something'] },
+      { readMeData: updatedReadMe, categories: [] },
     ]);
 
-    // refresh the UI by passing something down to the component that shows the readme content
+    services.notifications.toasts.addSuccess({
+      title: i18n.translate('xpack.fleet.epm.editReadMeSuccessToastTitle', {
+        defaultMessage: 'Read me updated',
+      }),
+      text: i18n.translate('xpack.fleet.epm.editReadMeSuccessToastText', {
+        defaultMessage: 'The read me content has been updated successfully.',
+      }),
+    });
 
-    // show the toast at the bottom
+    // TODO: reload the content of the integration but we need the cached headers to be fixed first
+    refetchPackageInfo();
   };
   const handleEditReadMeClick = useCallback<ReactEventHandler>(
     (ev) => {
