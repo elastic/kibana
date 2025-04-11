@@ -8,6 +8,19 @@
 import { RuleExecutorOptions, RuleType, RuleTypeState } from '@kbn/alerting-plugin/server';
 import { SecurityAttackDiscoveryAlert } from '@kbn/alerts-as-data-utils';
 import { AttackDiscoveryScheduleParams } from '@kbn/elastic-assistant-common';
+import { ALERT_ATTACK_DISCOVERY_USERS } from './fields';
+
+export type AttackDiscoveryAlert = Omit<
+  SecurityAttackDiscoveryAlert,
+  | 'kibana.alert.attack_discovery.users'
+  | 'kibana.alert.attack_discovery.users.id'
+  | 'kibana.alert.attack_discovery.users.name'
+> & {
+  [ALERT_ATTACK_DISCOVERY_USERS]?: {
+    id?: string;
+    name: string;
+  };
+};
 
 export type AttackDiscoveryExecutorOptions = RuleExecutorOptions<
   AttackDiscoveryScheduleParams,
@@ -15,7 +28,7 @@ export type AttackDiscoveryExecutorOptions = RuleExecutorOptions<
   {},
   {},
   'default',
-  SecurityAttackDiscoveryAlert
+  AttackDiscoveryAlert
 >;
 
 export type AttackDiscoveryScheduleType = RuleType<
@@ -26,5 +39,5 @@ export type AttackDiscoveryScheduleType = RuleType<
   {},
   'default',
   never,
-  SecurityAttackDiscoveryAlert
+  AttackDiscoveryAlert
 >;
