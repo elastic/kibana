@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
-import { PluginConfigDescriptor } from '@kbn/core/server';
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
+import type { PluginConfigDescriptor } from '@kbn/core/server';
 
 export const config: PluginConfigDescriptor = {
   deprecations: ({ unused }) => [unused('unsafe.indexUpgrade.enabled', { level: 'warning' })],

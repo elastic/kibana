@@ -23,7 +23,7 @@ import {
 import type { Action, Reducer, Store } from 'redux';
 import { QueryClient } from '@tanstack/react-query';
 import { coreMock } from '@kbn/core/public/mocks';
-import { PLUGIN_ID } from '@kbn/fleet-plugin/common';
+import { INTEGRATIONS_PLUGIN_ID, PLUGIN_ID } from '@kbn/fleet-plugin/common';
 import type { UseBaseQueryResult } from '@tanstack/react-query';
 import ReactDOM from 'react-dom';
 import type { DeepReadonly } from 'utility-types';
@@ -120,7 +120,8 @@ export type ReactQueryHookRenderer<
    * query response state value to be true
    */
   waitForHook?: WaitForReactHookState,
-  options?: RenderHookOptions<TProps>
+  options?: RenderHookOptions<TProps>,
+  timeout?: number
 ) => Promise<TResult>;
 
 export interface UserPrivilegesMockSetter {
@@ -346,12 +347,13 @@ export const createAppRootMockRenderer = (): AppContextTestRender => {
      * If defined (default is `isSuccess`), the renderer will wait for the given react query to be truthy
      */
     waitForHook: WaitForReactHookState = 'isSuccess',
-    options: RenderHookOptions<TProps> = {}
+    options: RenderHookOptions<TProps> = {},
+    timeout = 1000
   ) => {
     const { result: hookResult } = renderHook<TResult, TProps>(hookFn, options);
 
     if (waitForHook) {
-      await waitFor(() => expect(hookResult.current[waitForHook]).toBe(true));
+      await waitFor(() => expect(hookResult.current[waitForHook]).toBe(true), { timeout });
     }
 
     return hookResult.current;
@@ -434,18 +436,28 @@ const createCoreStartMock = (
 
   const linkPaths = getLinksPaths(appLinks);
 
-  // Mock the certain APP Ids returned by `application.getUrlForApp()`
-  coreStart.application.getUrlForApp.mockImplementation((appId, { deepLinkId, path } = {}) => {
+  // Mock certain APP Ids returned by `application.getUrlForApp()`
+  coreStart.application.getUrlForApp.mockImplementation((appId, { deepLinkId, path = '' } = {}) => {
+    let appUrl: string = '';
+
     switch (appId) {
       case PLUGIN_ID:
-        return '/app/fleet';
+        appUrl = '/app/fleet';
+        break;
+      case INTEGRATIONS_PLUGIN_ID:
+        appUrl = '/app/integrations';
+        break;
+
       case APP_UI_ID:
-        return `${APP_PATH}${deepLinkId && linkPaths[deepLinkId] ? linkPaths[deepLinkId] : ''}${
-          path ?? ''
-        }`;
+        appUrl = `${APP_PATH}${deepLinkId && linkPaths[deepLinkId] ? linkPaths[deepLinkId] : ''}`;
+        break;
+
       default:
-        return `${appId} not mocked!`;
+        appUrl = `app-id-${appId}-not-mocked!`;
+        break;
     }
+
+    return `${appUrl}${path}`;
   });
 
   coreStart.application.navigateToApp.mockImplementation((appId, { deepLinkId, path } = {}) => {

@@ -42,6 +42,10 @@ export function registerBatchReindexIndicesRoutes(
           reason: 'Relies on es client for authorization',
         },
       },
+      options: {
+        access: 'public',
+        summary: `Get the batch reindex queue`,
+      },
       validate: {},
     },
     versionCheckHandlerWrapper(async ({ core }, request, response) => {
@@ -82,6 +86,10 @@ export function registerBatchReindexIndicesRoutes(
           enabled: false,
           reason: 'Relies on es client for authorization',
         },
+      },
+      options: {
+        access: 'public',
+        summary: `Batch start or resume reindex`,
       },
       validate: {
         body: schema.object({

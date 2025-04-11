@@ -1681,6 +1681,9 @@ describe('generateFleetConfig', () => {
           certificate: 'my-cert',
           key: 'my-key',
         },
+        secrets: {
+          service_token: { id: 'my-service-token' },
+        },
       },
       {
         id: 'output-2',
@@ -1707,6 +1710,9 @@ describe('generateFleetConfig', () => {
         certificate: 'my-cert',
         certificate_authorities: ['/tmp/ssl/ca.crt'],
         key: 'my-key',
+      },
+      secrets: {
+        service_token: { id: 'my-service-token' },
       },
     });
   });
@@ -1842,6 +1848,7 @@ describe('generateFleetConfig', () => {
           ssl: {
             key: { id: 'my-secret-key' },
           },
+          service_token: { id: 'my-service-token' },
         },
       },
     ] as any;
@@ -1864,6 +1871,7 @@ describe('generateFleetConfig', () => {
             id: 'my-secret-key',
           },
         },
+        service_token: { id: 'my-service-token' },
       },
       ssl: {
         certificate: 'my-cert',

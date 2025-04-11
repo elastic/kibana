@@ -14,7 +14,7 @@ import {
   SavedObjectsClientContract,
 } from '@kbn/core/server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import type {
+import {
   ApiConfig,
   ContentReferencesStore,
   DefendInsightGenerationInterval,
@@ -22,6 +22,10 @@ import type {
   DefendInsightsPostRequestBody,
   DefendInsightsResponse,
   Replacements,
+  DEFEND_INSIGHTS_ID,
+  DefendInsightStatus,
+  DefendInsightType,
+  DefendInsightsGetRequestQuery,
 } from '@kbn/elastic-assistant-common';
 import type { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
@@ -30,12 +34,6 @@ import { ActionsClientLlm } from '@kbn/langchain/server';
 import { getLangSmithTracer } from '@kbn/langchain/server/tracers/langsmith';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import {
-  DEFEND_INSIGHTS_ID,
-  DefendInsightStatus,
-  DefendInsightType,
-  DefendInsightsGetRequestQuery,
-} from '@kbn/elastic-assistant-common';
 
 import { getDefendInsightsPrompt } from '../../lib/defend_insights/graphs/default_defend_insights_graph/nodes/helpers/prompts';
 import type { GraphState } from '../../lib/defend_insights/graphs/default_defend_insights_graph/types';
@@ -269,6 +267,18 @@ export async function createDefendInsight(
   };
 }
 
+const extractInsightsForTelemetryReporting = (
+  insightType: DefendInsightType,
+  insights: DefendInsights
+): string[] => {
+  switch (insightType) {
+    case DefendInsightType.Enum.incompatible_antivirus:
+      return insights.map((insight) => insight.group);
+    default:
+      return [];
+  }
+};
+
 export async function updateDefendInsights({
   anonymizedEvents,
   apiConfig,
@@ -280,6 +290,7 @@ export async function updateDefendInsights({
   logger,
   startTime,
   telemetry,
+  insightType,
 }: {
   anonymizedEvents: Document[];
   apiConfig: ApiConfig;
@@ -291,6 +302,7 @@ export async function updateDefendInsights({
   logger: Logger;
   startTime: Moment;
   telemetry: AnalyticsServiceSetup;
+  insightType: DefendInsightType;
 }) {
   try {
     const currentInsight = await dataClient.getDefendInsight({
@@ -324,13 +336,19 @@ export async function updateDefendInsights({
       defendInsightUpdateProps: updateProps,
       authenticatedUser,
     });
+
     telemetry.reportEvent(DEFEND_INSIGHT_SUCCESS_EVENT.eventType, {
       actionTypeId: apiConfig.actionTypeId,
       eventsContextCount: updateProps.eventsContextCount,
       insightsGenerated: updateProps.insights?.length ?? 0,
+      insightsDetails: extractInsightsForTelemetryReporting(
+        insightType,
+        updateProps.insights || []
+      ),
       durationMs,
       model: apiConfig.model,
       provider: apiConfig.provider,
+      insightType,
     });
   } catch (updateErr) {
     logger.error(updateErr);

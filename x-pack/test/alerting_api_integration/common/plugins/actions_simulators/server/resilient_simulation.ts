@@ -5,15 +5,16 @@
  * 2.0.
  */
 
-import http from 'http';
-import {
+import type http from 'http';
+import type {
   RequestHandlerContext,
   KibanaRequest,
   KibanaResponseFactory,
   IKibanaResponse,
   IRouter,
 } from '@kbn/core/server';
-import { ProxyArgs, Simulator } from './simulator';
+import type { ProxyArgs } from './simulator';
+import { Simulator } from './simulator';
 
 export const resilientFailedResponse = {
   errors: {
@@ -67,6 +68,12 @@ export function initPlugin(router: IRouter, path: string) {
   router.post(
     {
       path: `${path}/rest/orgs/201/incidents`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       options: {
         authRequired: false,
       },
@@ -87,6 +94,12 @@ export function initPlugin(router: IRouter, path: string) {
   router.patch(
     {
       path: `${path}/rest/orgs/201/incidents/{id}`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       options: {
         authRequired: false,
       },
@@ -106,6 +119,12 @@ export function initPlugin(router: IRouter, path: string) {
   router.get(
     {
       path: `${path}/rest/orgs/201/incidents/{id}`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       options: {
         authRequired: false,
       },
@@ -129,6 +148,12 @@ export function initPlugin(router: IRouter, path: string) {
   router.post(
     {
       path: `${path}/rest/api/2/issue/{id}/comment`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       options: {
         authRequired: false,
       },

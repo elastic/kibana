@@ -7,19 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { monaco } from '@kbn/monaco';
+import { ESQLControlVariable, ESQLVariableType } from '@kbn/esql-types';
 import {
   updateQueryStringWithVariable,
   getQueryForFields,
   areValuesIntervalsValid,
   getRecurrentVariableName,
   validateVariableName,
+  checkVariableExistence,
 } from './helpers';
 
 describe('helpers', () => {
   describe('updateQueryStringWithVariable', () => {
     it('should update the query string with the variable for an one line query string', () => {
       const queryString = 'FROM my_index | STATS BY ';
-      const variable = 'my_variable';
+      const variable = '?my_variable';
       const cursorPosition = { column: 26, lineNumber: 1 } as monaco.Position;
       const updatedQueryString = updateQueryStringWithVariable(
         queryString,
@@ -31,7 +33,7 @@ describe('helpers', () => {
 
     it('should update the query string with the variable for multiline query string', () => {
       const queryString = 'FROM my_index \n| STATS BY ';
-      const variable = 'my_variable';
+      const variable = '?my_variable';
       const cursorPosition = { column: 12, lineNumber: 2 } as monaco.Position;
       const updatedQueryString = updateQueryStringWithVariable(
         queryString,
@@ -39,6 +41,70 @@ describe('helpers', () => {
         cursorPosition
       );
       expect(updatedQueryString).toBe('FROM my_index \n| STATS BY ?my_variable');
+    });
+
+    it('should adjust the query string for trailing question mark', () => {
+      const queryString = 'FROM my_index | STATS BY ?';
+      const cursorPosition = { column: 27, lineNumber: 1 } as monaco.Position;
+      const variable = '?my_variable';
+
+      const updatedQueryString = updateQueryStringWithVariable(
+        queryString,
+        variable,
+        cursorPosition
+      );
+      expect(updatedQueryString).toBe('FROM my_index | STATS BY ?my_variable');
+    });
+
+    it('should adjust the query string if there is a ? at the second last position', () => {
+      const queryString = 'FROM my_index | STATS PERCENTILE(bytes, ?)';
+      const cursorPosition = { column: 42, lineNumber: 1 } as monaco.Position;
+      const variable = '?my_variable';
+
+      const updatedQueryString = updateQueryStringWithVariable(
+        queryString,
+        variable,
+        cursorPosition
+      );
+      expect(updatedQueryString).toBe('FROM my_index | STATS PERCENTILE(bytes, ?my_variable)');
+    });
+
+    it('should adjust the query string if there is a ? at the last cursor position', () => {
+      const queryString =
+        'FROM my_index | STATS COUNT() BY BUCKET(@timestamp, ?, ?_tstart, ?_tend)';
+      const cursorPosition = {
+        lineNumber: 1,
+        column: 54,
+      } as monaco.Position;
+      const variable = '?my_variable';
+
+      const updatedQueryString = updateQueryStringWithVariable(
+        queryString,
+        variable,
+        cursorPosition
+      );
+      expect(updatedQueryString).toBe(
+        'FROM my_index | STATS COUNT() BY BUCKET(@timestamp, ?my_variable, ?_tstart, ?_tend)'
+      );
+    });
+
+    it('should adjust the query string if there is a ? at the last cursor position for multilines query', () => {
+      const queryString =
+        'FROM my_index \n| STATS COUNT() BY BUCKET(@timestamp, ?, ?_tstart, ?_tend)';
+      const cursorPosition = {
+        lineNumber: 2,
+        column: 40,
+      } as monaco.Position;
+      const variable = '?my_variable';
+
+      const updatedQueryString = updateQueryStringWithVariable(
+        queryString,
+        variable,
+        cursorPosition
+      );
+      expect(updatedQueryString).toBe(
+        'FROM my_index \n| STATS COUNT() BY BUCKET(@timestamp, ?my_variable, ?_tstart, ?_tend)'
+      );
     });
   });
 
@@ -90,18 +156,51 @@ describe('helpers', () => {
 
   describe('validateVariableName', () => {
     it('should return the variable without special characters', () => {
-      const variable = validateVariableName('my_variable/123');
-      expect(variable).toBe('my_variable123');
+      const variable = validateVariableName('?my_variable/123', '?');
+      expect(variable).toBe('?my_variable123');
     });
 
-    it('should remove the questionarks', () => {
-      const variable = validateVariableName('?my_variable');
-      expect(variable).toBe('my_variable');
+    it('should add questionarks if they dont exist', () => {
+      const variable = validateVariableName('my_variable', '?');
+      expect(variable).toBe('?my_variable');
     });
 
-    it('should remove the _ in the first char', () => {
-      const variable = validateVariableName('?_my_variable');
-      expect(variable).toBe('my_variable');
+    it('should remove the _ after the ? prefix', () => {
+      const variable = validateVariableName('?_my_variable', '?');
+      expect(variable).toBe('?my_variable');
+    });
+
+    it('should remove the _ after the ?? prefix', () => {
+      const variable = validateVariableName('??_my_variable', '??');
+      expect(variable).toBe('??my_variable');
+    });
+
+    it('should not allow more than 2 questiomarks', () => {
+      const variable = validateVariableName('???my_variable', '??');
+      expect(variable).toBe('??my_variable');
+    });
+  });
+
+  describe('checkVariableExistence', () => {
+    it('should return true if the variable exists', () => {
+      const variables = [
+        { key: 'my_variable', type: ESQLVariableType.VALUES, value: 'value1' },
+        { key: 'my_variable2', type: ESQLVariableType.FIELDS, value: 'value2' },
+      ] as ESQLControlVariable[];
+      const variableName = '?my_variable';
+      const exists = checkVariableExistence(variables, variableName);
+      expect(exists).toBe(true);
+    });
+
+    it('should return false if the variable does not exist', () => {
+      const variables = [
+        { key: 'my_variable', type: ESQLVariableType.VALUES, value: 'value1' },
+        { key: 'my_variable2', type: ESQLVariableType.FIELDS, value: 'value2' },
+      ] as ESQLControlVariable[];
+      // here ?variable2 is different from ??variable2
+      const variableName = '?my_variable2';
+      const exists = checkVariableExistence(variables, variableName);
+      expect(exists).toBe(false);
     });
   });
 });

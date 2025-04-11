@@ -138,6 +138,8 @@ export const getSerializedState = ({
     { embeddablePersistableStateService: embeddableService }
   );
 
+  // TODO Provide tags as an array of tag names in the attribute. In that case, tag references
+  // will be extracted by the server.
   const savedObjectsTaggingApi = savedObjectsTaggingService?.getTaggingApi();
   const references = savedObjectsTaggingApi?.ui.updateTagsReferences
     ? savedObjectsTaggingApi?.ui.updateTagsReferences(dashboardReferences, tags)

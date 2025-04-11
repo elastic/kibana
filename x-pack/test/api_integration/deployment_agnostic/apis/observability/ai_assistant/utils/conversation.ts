@@ -14,6 +14,7 @@ import {
   MessageRole,
   StreamingChatResponseEvent,
   StreamingChatResponseEventType,
+  type ConversationCreateRequest,
 } from '@kbn/observability-ai-assistant-plugin/common';
 import { Readable } from 'stream';
 import type { AssistantScope } from '@kbn/ai-assistant-common';
@@ -84,11 +85,13 @@ export async function chatComplete({
   userPrompt,
   screenContexts = [],
   connectorId,
+  persist = false,
   observabilityAIAssistantAPIClient,
 }: {
   userPrompt: string;
   screenContexts?: ObservabilityAIAssistantScreenContextRequest[];
   connectorId: string;
+  persist?: boolean;
   observabilityAIAssistantAPIClient: ObservabilityAIAssistantApiClient;
 }) {
   const { status, body } = await observabilityAIAssistantAPIClient.editor({
@@ -105,7 +108,7 @@ export async function chatComplete({
           },
         ],
         connectorId,
-        persist: false,
+        persist,
         screenContexts,
         scopes: ['observability' as const],
       },
@@ -113,9 +116,10 @@ export async function chatComplete({
   });
 
   expect(status).to.be(200);
+  const messageEvents = decodeEvents(body);
   const messageAddedEvents = getMessageAddedEvents(body);
-
-  return { messageAddedEvents, body, status };
+  const conversationCreateEvent = getConversationCreatedEvent(body);
+  return { messageAddedEvents, conversationCreateEvent, messageEvents, status };
 }
 
 // order of instructions can vary, so we sort to compare them
@@ -160,12 +164,6 @@ export function getConversationCreatedEvent(body: Readable | string) {
     (event) => event.type === StreamingChatResponseEventType.ConversationCreate
   ) as ConversationCreateEvent;
 
-  if (!conversationCreatedEvent) {
-    throw new Error(
-      `No conversation created event found: ${JSON.stringify(decodedEvents, null, 2)}`
-    );
-  }
-
   return conversationCreatedEvent;
 }
 
@@ -182,4 +180,46 @@ export function getConversationUpdatedEvent(body: Readable | string) {
   }
 
   return conversationUpdatedEvent;
+}
+
+export const conversationCreate: ConversationCreateRequest = {
+  '@timestamp': new Date().toISOString(),
+  conversation: {
+    title: 'My title',
+  },
+  labels: {},
+  numeric_labels: {},
+  systemMessage: 'this is a system message',
+  messages: [
+    {
+      '@timestamp': new Date().toISOString(),
+      message: {
+        role: MessageRole.User,
+        content: 'My message',
+      },
+    },
+  ],
+  public: false,
+  archived: false,
+};
+
+export async function createConversation({
+  observabilityAIAssistantAPIClient,
+  user = 'editor',
+  isPublic = false,
+}: {
+  observabilityAIAssistantAPIClient: ObservabilityAIAssistantApiClient;
+  user?: 'admin' | 'editor' | 'viewer';
+  isPublic?: boolean;
+}) {
+  const response = await observabilityAIAssistantAPIClient[user]({
+    endpoint: 'POST /internal/observability_ai_assistant/conversation',
+    params: {
+      body: {
+        conversation: { ...conversationCreate, public: isPublic },
+      },
+    },
+  });
+
+  return response;
 }

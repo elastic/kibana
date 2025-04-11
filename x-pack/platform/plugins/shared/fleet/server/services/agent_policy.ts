@@ -189,15 +189,17 @@ class AgentPolicyService {
     }
   ): Promise<AgentPolicy> {
     const savedObjectType = await getAgentPolicySavedObjectType();
-    auditLoggingService.writeCustomSoAuditLog({
-      action: 'update',
-      id,
-      savedObjectType,
-    });
+
     const logger = appContextService.getLogger();
     logger.debug(`Starting update of agent policy ${id}`);
 
     const existingAgentPolicy = await this.get(soClient, id, true);
+    auditLoggingService.writeCustomSoAuditLog({
+      action: 'update',
+      id,
+      name: existingAgentPolicy?.name,
+      savedObjectType,
+    });
 
     if (!existingAgentPolicy) {
       throw new AgentPolicyNotFoundError('Agent policy not found');
@@ -392,6 +394,7 @@ class AgentPolicyService {
     auditLoggingService.writeCustomSoAuditLog({
       action: 'create',
       id: options.id,
+      name: agentPolicy.name,
       savedObjectType,
     });
     await this.runExternalCallbacks('agentPolicyCreate', agentPolicy);
@@ -515,6 +518,7 @@ class AgentPolicyService {
     auditLoggingService.writeCustomSoAuditLog({
       action: 'get',
       id,
+      name: agentPolicy.name,
       savedObjectType,
     });
 
@@ -580,6 +584,7 @@ class AgentPolicyService {
       auditLoggingService.writeCustomSoAuditLog({
         action: 'get',
         id: agentPolicy.id,
+        name: agentPolicy.name,
         savedObjectType,
       });
     }
@@ -684,6 +689,7 @@ class AgentPolicyService {
       auditLoggingService.writeCustomSoAuditLog({
         action: 'find',
         id: agentPolicy.id,
+        name: agentPolicy.name,
         savedObjectType,
       });
     }
@@ -843,32 +849,48 @@ class AgentPolicyService {
       options
     );
 
-    // Copy all package policies and append (copy n) to their names
     if (baseAgentPolicy.package_policies) {
-      const newPackagePolicies = await pMap(
-        baseAgentPolicy.package_policies as PackagePolicy[],
-        async (packagePolicy: PackagePolicy) => {
-          const { id: packagePolicyId, version, ...newPackagePolicy } = packagePolicy;
+      // Copy non-shared package policies and append (copy n) to their names.
+      const basePackagePolicies = baseAgentPolicy.package_policies.filter(
+        (packagePolicy) => packagePolicy.policy_ids.length < 2
+      );
+      if (basePackagePolicies.length > 0) {
+        const newPackagePolicies = await pMap(
+          basePackagePolicies,
+          async (packagePolicy: PackagePolicy) => {
+            const { id: packagePolicyId, version, ...newPackagePolicy } = packagePolicy;
 
-          const updatedPackagePolicy = {
+            const updatedPackagePolicy = {
+              ...newPackagePolicy,
+              name: await incrementPackagePolicyCopyName(soClient, packagePolicy.name),
+            };
+            return updatedPackagePolicy;
+          }
+        );
+        await packagePolicyService.bulkCreate(
+          soClient,
+          esClient,
+          newPackagePolicies.map((newPackagePolicy) => ({
             ...newPackagePolicy,
-            name: await incrementPackagePolicyCopyName(soClient, packagePolicy.name),
-          };
-          return updatedPackagePolicy;
-        }
+            policy_ids: [newAgentPolicy.id],
+          })),
+          {
+            ...options,
+            bumpRevision: false,
+          }
+        );
+      }
+      // Link shared package policies to new agent policy.
+      const sharedBasePackagePolicies = baseAgentPolicy.package_policies.filter(
+        (packagePolicy) => packagePolicy.policy_ids.length > 1
       );
-      await packagePolicyService.bulkCreate(
-        soClient,
-        esClient,
-        newPackagePolicies.map((newPackagePolicy) => ({
-          ...newPackagePolicy,
-          policy_ids: [newAgentPolicy.id],
-        })),
-        {
-          ...options,
-          bumpRevision: false,
-        }
-      );
+      if (sharedBasePackagePolicies.length > 0) {
+        const updatedSharedPackagePolicies = sharedBasePackagePolicies.map((packagePolicy) => ({
+          ...packagePolicy,
+          policy_ids: [...packagePolicy.policy_ids, newAgentPolicy.id],
+        }));
+        await packagePolicyService.bulkUpdate(soClient, esClient, updatedSharedPackagePolicies);
+      }
     }
 
     // Tamper protection is dependent on endpoint package policy
@@ -913,13 +935,18 @@ class AgentPolicyService {
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
     id: string,
-    options?: { user?: AuthenticatedUser; removeProtection?: boolean; asyncDeploy?: boolean }
+    options?: {
+      user?: AuthenticatedUser;
+      removeProtection?: boolean;
+      asyncDeploy?: boolean;
+      skipValidation?: boolean;
+    }
   ): Promise<void> {
     return withSpan('bump_agent_policy_revision', async () => {
       await this._update(soClient, esClient, id, {}, options?.user, {
         bumpRevision: true,
         removeProtection: options?.removeProtection ?? false,
-        skipValidation: false,
+        skipValidation: options?.skipValidation ?? true,
         returnUpdatedPolicy: false,
         asyncDeploy: options?.asyncDeploy,
       });
@@ -1198,13 +1225,14 @@ class AgentPolicyService {
     const logger = appContextService.getLogger();
     logger.debug(`Deleting agent policy ${id}`);
     const savedObjectType = await getAgentPolicySavedObjectType();
+
+    const agentPolicy = await this.get(soClient, id, false);
     auditLoggingService.writeCustomSoAuditLog({
       action: 'delete',
       id,
+      name: agentPolicy?.name,
       savedObjectType,
     });
-
-    const agentPolicy = await this.get(soClient, id, false);
     if (!agentPolicy) {
       throw new AgentPolicyNotFoundError('Agent policy not found');
     }
@@ -1782,14 +1810,14 @@ class AgentPolicyService {
     { perPage = 1000, kuery = undefined, spaceId = undefined }: FetchAllAgentPolicyIdsOptions = {}
   ): Promise<AsyncIterable<string[]>> {
     const savedObjectType = await getAgentPolicySavedObjectType();
-    return createSoFindIterable<{}>({
+    return createSoFindIterable<{ name: string }>({
       soClient,
       findRequest: {
         type: savedObjectType,
         perPage,
         sortField: 'created_at',
         sortOrder: 'asc',
-        fields: ['id'],
+        fields: ['id', 'name'],
         filter: kuery ? normalizeKuery(savedObjectType, kuery) : undefined,
         namespaces: spaceId ? [spaceId] : undefined,
       },
@@ -1798,6 +1826,7 @@ class AgentPolicyService {
           auditLoggingService.writeCustomSoAuditLog({
             action: 'find',
             id: agentPolicySO.id,
+            name: agentPolicySO.attributes.name,
             savedObjectType,
           });
           return agentPolicySO.id;

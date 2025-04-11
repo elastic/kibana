@@ -12,6 +12,7 @@ import { BehaviorSubject } from 'rxjs';
 import { ObservedSize } from 'use-resize-observer/polyfilled';
 import {
   ActivePanel,
+  ActiveRowEvent,
   GridAccessMode,
   GridLayoutData,
   GridLayoutStateManager,
@@ -35,6 +36,7 @@ export const mockRenderPanelContents = jest.fn((panelId) => (
 
 export const getGridLayoutStateManagerMock = (overrides?: Partial<GridLayoutStateManager>) => {
   return {
+    layoutRef: { current: {} },
     expandedPanelId$: new BehaviorSubject<string | undefined>(undefined),
     isMobileView$: new BehaviorSubject<boolean>(false),
     gridLayout$: new BehaviorSubject<GridLayoutData>(getSampleLayout()),
@@ -42,13 +44,16 @@ export const getGridLayoutStateManagerMock = (overrides?: Partial<GridLayoutStat
     runtimeSettings$: new BehaviorSubject<RuntimeGridSettings>({
       ...gridSettings,
       columnPixelWidth: 0,
+      keyboardDragTopLimit: 0,
     }),
-    panelRefs: { current: [] },
-    rowRefs: { current: [] },
+    panelRefs: { current: {} },
+    rowRefs: { current: {} },
+    headerRefs: { current: {} },
     accessMode$: new BehaviorSubject<GridAccessMode>('EDIT'),
     interactionEvent$: new BehaviorSubject<PanelInteractionEvent | undefined>(undefined),
     activePanel$: new BehaviorSubject<ActivePanel | undefined>(undefined),
+    activeRowEvent$: new BehaviorSubject<ActiveRowEvent | undefined>(undefined),
     gridDimensions$: new BehaviorSubject<ObservedSize>({ width: 600, height: 900 }),
     ...overrides,
-  };
+  } as GridLayoutStateManager;
 };

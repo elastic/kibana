@@ -56,6 +56,11 @@
     "@kbn/core-saved-objects-api-server-mocks",
     "@kbn/security-ai-prompts",
     "@kbn/datemath",
+    "@kbn/alerts-as-data-utils",
+    "@kbn/alerting-plugin",
+    "@kbn/rule-data-utils",
+    "@kbn/alerting-types",
+    "@kbn/zod-helpers",
   ],
   "exclude": [
     "target/**/*",
