@@ -61,6 +61,14 @@ export class ServerlessAuthProvider implements AuthProvider {
     this.rolesDefinitionPath = resolve(SERVERLESS_ROLES_ROOT_PATH, this.projectType, 'roles.yml');
   }
 
+  isServerless(): boolean {
+    return true;
+  }
+
+  getProjectType() {
+    return this.projectType;
+  }
+
   getSupportedRoleDescriptors() {
     const roleDescriptors = new Map<string, any>(
       Object.entries(

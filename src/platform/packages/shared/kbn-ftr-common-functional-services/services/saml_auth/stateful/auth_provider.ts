@@ -19,6 +19,14 @@ import {
 export class StatefulAuthProvider implements AuthProvider {
   private readonly rolesDefinitionPath = resolve(REPO_ROOT, STATEFUL_ROLES_ROOT_PATH, 'roles.yml');
 
+  isServerless() {
+    return false;
+  }
+
+  getProjectType() {
+    return undefined;
+  }
+
   getSupportedRoleDescriptors() {
     const roleDescriptors = new Map<string, any>(
       Object.entries(

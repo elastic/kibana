@@ -75,6 +75,9 @@ export function SamlAuthProvider({ getService }: FtrProviderContext) {
   const INTERNAL_REQUEST_HEADERS = authRoleProvider.getInternalRequestHeader();
   const CUSTOM_ROLE = authRoleProvider.getCustomRole();
   const isCustomRoleEnabled = authRoleProvider.isCustomRoleEnabled();
+  const distroName = authRoleProvider.isServerless()
+    ? `serverless ${authRoleProvider.getProjectType()} project`
+    : 'stateful deployment';
 
   const getAdminCredentials = async () => {
     return await sessionManager.getApiCredentialsForRole('admin');
@@ -141,11 +144,16 @@ export function SamlAuthProvider({ getService }: FtrProviderContext) {
     },
 
     checkRoleIsSupported(role: string): void {
+      if (role === CUSTOM_ROLE && !isCustomRoleEnabled) {
+        throw new Error(
+          `Custom roles are disabled for the current ${distroName}. Please use built-in roles or update the FTR config file to enable custom roles.`
+        );
+      }
       if (!supportedRoles.includes(role)) {
         throw new Error(
-          `Role "${role}" is not supported for this deployment. Supported roles are: ${supportedRoles.join(
+          `The '${role}' role is not supported for the current ${distroName}. Supported roles are: ${supportedRoles.join(
             ', '
-          )}`
+          )}. Default roles are defined in '${authRoleProvider.getRolesDefinitionPath()}'. If you need to use a custom role, use 'samlAuth.CUSTOM_ROLE' instead.`
         );
       }
     },
@@ -157,9 +165,6 @@ export function SamlAuthProvider({ getService }: FtrProviderContext) {
 
     async createM2mApiKeyWithRoleScope(role: string): Promise<RoleCredentials> {
       this.checkRoleIsSupported(role);
-      if (role === CUSTOM_ROLE && !isCustomRoleEnabled) {
-        throw new Error(`Custom roles are not supported for the current deployment`);
-      }
       // Get admin credentials in order to create the API key
       const adminCookieHeader = await getAdminCredentials();
       let roleDescriptors = {};
@@ -170,7 +175,7 @@ export function SamlAuthProvider({ getService }: FtrProviderContext) {
           throw new Error(
             role === CUSTOM_ROLE
               ? `Before creating API key for '${CUSTOM_ROLE}', use 'samlAuth.setCustomRole' to set the role privileges`
-              : `Cannot create API key for role "${role}", role descriptor not found`
+              : `Cannot create API key for role "${role}", role descriptor is not defined in '${authRoleProvider.getRolesDefinitionPath()}'`
           );
         }
         log.debug(
