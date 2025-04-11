@@ -77,14 +77,10 @@ export function TransactionOverview({
             <>
               <EuiSpacer size="m" />
               <TransactionDurationSummary
-                transaction={{
-                  duration: transactionDuration,
-                  type: parsedDoc[TRANSACTION_TYPE_FIELD],
-                  name: parsedDoc[TRANSACTION_NAME_FIELD],
-                }}
-                service={{
-                  name: parsedDoc[SERVICE_NAME_FIELD],
-                }}
+                transactionDuration={transactionDuration}
+                transactionName={parsedDoc[TRANSACTION_NAME_FIELD]}
+                transactionType={parsedDoc[TRANSACTION_TYPE_FIELD]}
+                serviceName={parsedDoc[SERVICE_NAME_FIELD]}
               />
             </>
           )}

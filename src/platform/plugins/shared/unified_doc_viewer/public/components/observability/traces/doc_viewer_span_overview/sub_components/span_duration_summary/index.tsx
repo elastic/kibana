@@ -8,19 +8,14 @@
  */
 
 import React from 'react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiHorizontalRule,
-  EuiSpacer,
-  EuiText,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiText, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Duration, DurationDistributionChart } from '@kbn/apm-ui-shared';
 import { FETCH_STATUS, ProcessorEvent } from '@kbn/apm-ui-shared';
 import { useTransactionContext } from '../../hooks/use_transaction';
 import { useSpanLatencyChart } from '../../hooks/use_span_latency_chart';
+import { FieldWithoutActions } from '../../../components/field_without_actions';
+import { Section } from '../../../components/section';
 
 export interface SpanDurationSummaryProps {
   spanDuration: number;
@@ -43,52 +38,36 @@ export function SpanDurationSummary({
   });
 
   return (
-    <>
-      <EuiTitle size="s">
-        <h2>
-          {i18n.translate(
-            'unifiedDocViewer.observability.traces.docViewerSpanOverview.spanDurationSummary.title',
+    <Section
+      title={i18n.translate(
+        'unifiedDocViewer.observability.traces.docViewerSpanOverview.spanDurationSummary.title',
+        {
+          defaultMessage: 'Duration',
+        }
+      )}
+      subtitle={i18n.translate(
+        'unifiedDocViewer.observability.traces.docViewerSpanOverview.spanDurationSummary.description',
+        {
+          defaultMessage: 'Time taken to complete this span from start to finish.',
+        }
+      )}
+    >
+      <>
+        <FieldWithoutActions
+          label={i18n.translate(
+            'unifiedDocViewer.observability.traces.docViewerSpanOverview.spanDurationSummary.duration.title',
             {
               defaultMessage: 'Duration',
             }
           )}
-        </h2>
-      </EuiTitle>
-      <EuiSpacer size="m" />
-      <EuiText color="subdued" size="xs">
-        {i18n.translate(
-          'unifiedDocViewer.observability.traces.docViewerSpanOverview.spanDurationSummary.description',
-          {
-            defaultMessage: 'Time taken to complete this span from start to finish.',
-          }
-        )}
-      </EuiText>
-      <EuiSpacer size="m" />
-
-      <>
-        <EuiFlexGroup>
-          <EuiFlexItem grow={false}>
-            <EuiTitle size="xxxs">
-              <h3>
-                {i18n.translate(
-                  'unifiedDocViewer.observability.traces.docViewerSpanOverview.spanDurationSummary.duration.title',
-                  {
-                    defaultMessage: 'Duration',
-                  }
-                )}
-              </h3>
-            </EuiTitle>
-          </EuiFlexItem>
-
-          <EuiFlexItem grow={2}>
-            <EuiText size="xs">
-              <Duration
-                duration={spanDuration}
-                parent={{ loading, duration: transaction?.duration, type: 'transaction' }}
-              />
-            </EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        >
+          <EuiText size="xs">
+            <Duration
+              duration={spanDuration}
+              parent={{ loading, duration: transaction?.duration, type: 'transaction' }}
+            />
+          </EuiText>
+        </FieldWithoutActions>
         <EuiHorizontalRule margin="xs" />
 
         {transactionId && (
@@ -122,6 +101,6 @@ export function SpanDurationSummary({
           </EuiFlexGroup>
         )}
       </>
-    </>
+    </Section>
   );
 }
