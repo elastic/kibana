@@ -129,7 +129,7 @@ export function SamlAuthProvider({ getService }: FtrProviderContext) {
       return sessionManager.getApiCredentialsForRole(role, options);
     },
 
-    async getM2MApiCookieCredentialsWitCustomRoleScope(
+    async getM2MApiCookieCredentialsWithCustomRoleScope(
       options?: GetCookieOptions
     ): Promise<CookieCredentials> {
       return this.getM2MApiCookieCredentialsWithRoleScope(CUSTOM_ROLE, options);
