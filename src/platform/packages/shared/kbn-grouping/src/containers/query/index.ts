@@ -17,6 +17,9 @@ export const DEFAULT_GROUP_BY_FIELD_SIZE = 10;
 // https://github.com/elastic/kibana/issues/151913
 export const MAX_QUERY_SIZE = 10000;
 
+// there is known limitation for max size of runtime field which is used in the runtime_mappings script
+export const MAX_RUNTIME_FIELD_SIZE = 100;
+
 /**
  * Composes grouping query and aggregations
  * @param additionalFilters Global filtering applicable to the grouping component.
@@ -64,7 +67,8 @@ export const getGroupingQuery = ({
         script: {
           source:
             // when size()==0, emits a uniqueValue as the value to represent this group
-            "if (doc[params['selectedGroup']].size()==0) { emit(params['uniqueValue']) }" +
+            `if (doc[params['selectedGroup']].size()==0 || doc[params['selectedGroup']].size() > ${MAX_RUNTIME_FIELD_SIZE} ) { emit(params['uniqueValue']) }` +
+            // `if (doc[params['selectedGroup']].size()==0 ) { emit(params['uniqueValue']) }` +
             /*
              * condition to decide between joining values or flattening based on shouldFlattenMultiValueField and groupByField parameters
              * if shouldFlattenMultiValueField is true, and the selectedGroup field is an array, then emit each value in the array
@@ -78,7 +82,7 @@ export const getGroupingQuery = ({
              * We will format into a proper array in parseGroupingQuery
              */
             (shouldFlattenMultiValueField
-              ? " else { for (def id : doc[params['selectedGroup']]) { emit(id) }}"
+              ? ` else { int i = 0; for (def id : doc['vulnerability.id']) { if (i++ >= ${MAX_RUNTIME_FIELD_SIZE}) break; emit(id)}}`
               : " else { emit(doc[params['selectedGroup']].join(params['uniqueValue']))}"),
           params: {
             selectedGroup: groupByField,

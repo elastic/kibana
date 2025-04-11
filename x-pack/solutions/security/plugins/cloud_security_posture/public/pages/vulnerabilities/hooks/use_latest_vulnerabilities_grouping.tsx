@@ -12,6 +12,7 @@ import {
   isNoneGroup,
   NamedAggregation,
   parseGroupingQuery,
+  MAX_RUNTIME_FIELD_SIZE,
 } from '@kbn/grouping/src';
 import { useMemo } from 'react';
 import {
@@ -134,6 +135,42 @@ const getRuntimeMappingsByGroupField = (
 };
 
 /**
+ * Returns the root aggregations query for the vulnerabilities grouping
+ */
+const getRootAggregations = (currentSelectedGroup: string): NamedAggregation[] => [
+  {
+    ...(!isNoneGroup([currentSelectedGroup]) && {
+      nullGroupItems: {
+        filter: {
+          bool: {
+            should: [
+              {
+                bool: {
+                  must_not: {
+                    exists: {
+                      field: currentSelectedGroup,
+                    },
+                  },
+                },
+              },
+              {
+                script: {
+                  script: {
+                    source: `doc['${currentSelectedGroup}'].size() > ${MAX_RUNTIME_FIELD_SIZE}`,
+                    lang: 'painless',
+                  },
+                },
+              },
+            ],
+            minimum_should_match: 1,
+          },
+        },
+      },
+    }),
+  },
+];
+
+/**
  * Type Guard for checking if the given source is a VulnerabilitiesRootGroupingAggregation
  */
 export const isVulnerabilitiesRootGroupingAggregation = (
@@ -205,15 +242,7 @@ export const useLatestVulnerabilitiesGrouping = ({
     sort: [{ groupByField: { order: 'desc' } }],
     statsAggregations: getAggregationsByGroupField(currentSelectedGroup),
     runtimeMappings: getRuntimeMappingsByGroupField(currentSelectedGroup),
-    rootAggregations: [
-      {
-        ...(!isNoneGroup([currentSelectedGroup]) && {
-          nullGroupItems: {
-            missing: { field: currentSelectedGroup },
-          },
-        }),
-      },
-    ],
+    rootAggregations: getRootAggregations(currentSelectedGroup),
     multiValueFieldsToFlatten: VULNERABILITY_GROUPING_MULTIPLE_VALUE_FIELDS,
     countByKeyForMultiValueFields: EVENT_ID,
   });
