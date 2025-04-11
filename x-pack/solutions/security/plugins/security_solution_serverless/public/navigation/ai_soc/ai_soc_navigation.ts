@@ -5,71 +5,105 @@
  * 2.0.
  */
 
-import type {
-  AppDeepLinkId,
-  GroupDefinition,
-  NavigationTreeDefinition,
-} from '@kbn/core-chrome-browser';
+import * as Rx from 'rxjs';
 
-import type { WritableDraft } from 'immer/dist/internal';
-import { ExternalPageName, SecurityPageName } from '@kbn/security-solution-navigation';
-import { alertSummaryLink, configurationsLink } from './links';
-import { AiForTheSocIcon } from './icons';
-import { filterFromWhitelist } from './utils';
+import type { NavigationTreeDefinition } from '@kbn/core-chrome-browser';
+import { i18n } from '@kbn/i18n';
+
+import { SecurityPageName } from '@kbn/security-solution-navigation';
+import { i18nStrings, securityLink } from '@kbn/security-solution-navigation/links';
+
 import { type SecurityProductTypes } from '../../../common/config';
 import { ProductLine } from '../../../common/product';
+import { createStackManagementNavigationTree } from '../stack_management_navigation';
+import { AiForTheSocIcon } from './icons';
 
-const shouldUseAINavigation = (productTypes: SecurityProductTypes) => {
-  return productTypes.some((productType) => productType.product_line === ProductLine.aiSoc);
-};
+const SOLUTION_NAME = i18n.translate(
+  'xpack.securitySolutionServerless.socNavLinks.projectType.title',
+  { defaultMessage: 'AI for SOC' }
+);
 
-export const aiGroup: GroupDefinition<AppDeepLinkId, string, string> = {
-  type: 'navGroup',
-  id: 'security_solution_ai_nav',
-  title: 'AI for SOC',
-  icon: AiForTheSocIcon,
-  breadcrumbStatus: 'hidden',
-  defaultIsCollapsed: false,
-  isCollapsible: false,
-  children: [],
-};
-// Elements we want to show in AI for SOC navigation
-// This is a temporary solution until we figure out a way to handle Upselling with new Tier
-const whitelist = [
-  SecurityPageName.case,
-  SecurityPageName.caseCreate,
-  SecurityPageName.caseConfigure,
-  SecurityPageName.alertSummary,
-  SecurityPageName.attackDiscovery,
-  SecurityPageName.configurations,
-  ExternalPageName.discover,
-  SecurityPageName.mlLanding,
-];
+export const shouldUseAINavigation = (productTypes: SecurityProductTypes) =>
+  productTypes.some((productType) => productType.product_line === ProductLine.aiSoc);
 
-// Apply AI for SOC navigation tree changes.
-// The navigation tree received by parameter is generated at: x-pack/solutions/security/plugins/security_solution/public/app/solution_navigation/navigation_tree.ts
-// An example of static navigation tree: x-pack/solutions/observability/plugins/observability/public/navigation_tree.ts
+export const createAiSocNavigationTree$ = (): Rx.Observable<NavigationTreeDefinition> => {
+  return Rx.of({
+    body: [
+      {
+        type: 'navGroup',
+        id: 'security_solution_ai_nav',
+        title: SOLUTION_NAME,
+        icon: AiForTheSocIcon,
+        breadcrumbStatus: 'hidden',
+        defaultIsCollapsed: false,
+        isCollapsible: false,
+        children: [
+          {
+            id: 'alert_summary',
+            link: securityLink(SecurityPageName.alertSummary),
+            spaceBefore: 's',
+          },
 
-// !! This is a temporary solution until the "classic" navigation is deprecated and the "generated" navigationTree is replaced by a static navigationTree (probably multiple of them).
-export const applyAiSocNavigation = (
-  draft: WritableDraft<NavigationTreeDefinition<AppDeepLinkId>>,
-  productTypes: SecurityProductTypes
-): void => {
-  if (!shouldUseAINavigation(productTypes)) {
-    return;
-  }
-
-  const securityGroup = draft.body[0] as WritableDraft<
-    GroupDefinition<AppDeepLinkId, string, string>
-  >;
-
-  // hardcode elements existing only in AI for SOC group
-  securityGroup.children.push(alertSummaryLink, configurationsLink);
-
-  // Overwrite the children with only the elements available for AI for SOC navigation
-  // Temporary solution until we have clarity how to proceed with Upselling in the new Tier
-  // (eg. Threat Intelligence couldn't be hidden)
-  securityGroup.children = filterFromWhitelist(securityGroup.children, whitelist);
-
-  draft.body = [{ ...aiGroup, children: securityGroup.children }];
+          {
+            id: 'attack_discovery',
+            link: securityLink(SecurityPageName.attackDiscovery),
+          },
+          {
+            id: 'cases',
+            spaceBefore: 'm',
+            link: securityLink(SecurityPageName.case),
+            children: [
+              {
+                id: 'cases_create',
+                link: securityLink(SecurityPageName.caseCreate),
+                sideNavStatus: 'hidden',
+              },
+              {
+                id: 'cases_configure',
+                link: securityLink(SecurityPageName.caseConfigure),
+                sideNavStatus: 'hidden',
+              },
+            ],
+            renderAs: 'panelOpener',
+          },
+          {
+            id: 'configurations',
+            spaceBefore: null,
+            link: securityLink(SecurityPageName.configurations),
+            renderAs: 'panelOpener',
+            children: [
+              {
+                link: securityLink(SecurityPageName.configurationsAiSettings),
+              },
+              {
+                link: securityLink(SecurityPageName.configurationsBasicRules),
+              },
+              {
+                link: securityLink(SecurityPageName.configurationsIntegrations),
+              },
+            ],
+          },
+          {
+            id: 'discover:',
+            link: 'discover',
+            spaceBefore: 'm',
+          },
+        ],
+      },
+    ],
+    footer: [
+      {
+        type: 'navItem',
+        link: securityLink(SecurityPageName.landing),
+        icon: 'launch',
+      },
+      {
+        type: 'navItem',
+        link: 'dev_tools',
+        title: i18nStrings.devTools,
+        icon: 'editorCodeBlock',
+      },
+      createStackManagementNavigationTree(),
+    ],
+  });
 };
