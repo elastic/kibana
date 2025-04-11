@@ -56,7 +56,6 @@ export {
   parseErrors,
   type ParseOptions,
   type ParseResult,
-  getAstAndSyntaxErrors,
   ESQLErrorListener,
 } from './src/parser';
 
