@@ -76,8 +76,6 @@ describe('findAttackDiscoverySchedulesRoute', () => {
     );
     expect(response.status).toEqual(200);
     expect(response.body).toEqual({
-      page: 1,
-      perPage: 20,
       total: 1,
       data: [expect.objectContaining(basicAttackDiscoveryScheduleMock)],
     });
