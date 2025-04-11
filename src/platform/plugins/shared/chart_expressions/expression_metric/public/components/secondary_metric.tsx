@@ -95,12 +95,14 @@ function SecondaryMetricValue({
   trendConfig,
   color,
   fontSize,
+  formatter,
 }: {
   rawValue?: number | string;
   formattedValue?: string;
   trendConfig?: TrendConfig;
   color?: string;
   fontSize: number;
+  formatter: FieldFormatConvertFunction;
 }) {
   const { euiTheme } = useEuiTheme();
   const safeFormattedValue = formattedValue ?? notAvailable;
@@ -123,6 +125,7 @@ function SecondaryMetricValue({
     const deltaValue = getDeltaValue(rawValue, trendConfig.baselineValue);
     const { icon, color: trendColor, iconLabel } = getBadgeConfiguration(trendConfig, deltaValue);
     const translatedColor = getBadgeColor(trendColor, euiTheme);
+    const valueToShow = trendConfig.compareToPrimary ? formatter(deltaValue) : safeFormattedValue;
     return (
       <EuiBadge
         aria-label={
@@ -143,7 +146,7 @@ function SecondaryMetricValue({
         data-test-subj={`expressionMetricVis-secondaryMetric-badge-${rawValue}`}
         css={badgeCss}
       >
-        {trendConfig.value ? safeFormattedValue : null}
+        {trendConfig.value ? valueToShow : null}
       </EuiBadge>
     );
   }
@@ -199,6 +202,7 @@ export function SecondaryMetric({
         trendConfig={color ? undefined : trendConfig}
         color={color}
         fontSize={fontSize}
+        formatter={formatSecondaryMetric}
       />
     </span>
   );
