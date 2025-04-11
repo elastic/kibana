@@ -150,14 +150,32 @@ export const defineSavedPlaygroundRoutes = ({ logger, router }: DefineRoutesOpti
             body: responseBody,
             headers: { 'content-type': 'application/json' },
           });
-        } catch (error) {
-          logger.error(
-            i18n.translate('xpack.searchPlayground.savedPlaygrounds.getError', {
-              defaultMessage: 'Error getting search playground {id}',
-              values: { id: request.params.id },
-            })
-          );
-          throw error;
+        } catch (e) {
+          if (e?.output?.statusCode === 404) {
+            return response.notFound({
+              body: {
+                message: i18n.translate('xpack.searchPlayground.savedPlaygrounds.notFoundError', {
+                  defaultMessage: '{id} playground not found',
+                  values: { id: request.params.id },
+                }),
+              },
+            });
+          }
+          const errorMsg = i18n.translate('xpack.searchPlayground.savedPlaygrounds.getError', {
+            defaultMessage: 'Error getting search playground {id}',
+            values: { id: request.params.id },
+          });
+          logger.error(errorMsg);
+          if (e.output?.statusCode && typeof e.output.statusCode === 'number') {
+            logger.error(e);
+            return response.customError({
+              statusCode: e.output.statusCode,
+              body: {
+                message: e?.message ?? errorMsg,
+              },
+            });
+          }
+          throw e;
         }
       })
     );
