@@ -72,7 +72,7 @@ export interface DiscoverDataStateContainer {
   /**
    * Implicitly starting fetching data from ES
    */
-  fetch: (initial?: boolean) => void;
+  fetch: () => void;
   /**
    * Fetch more data from ES
    */
