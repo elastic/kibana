@@ -41,7 +41,6 @@
     "@kbn/core-logging-server-mocks",
     "@kbn/stack-connectors-plugin",
     "@kbn/actions-plugin",
-    "@kbn/management-cards-navigation",
     "@kbn/discover-plugin",
     "@kbn/logging",
     "@kbn/automatic-import-plugin",
