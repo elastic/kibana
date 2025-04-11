@@ -60,7 +60,10 @@ export interface RenderingServiceInternalStart extends IRenderingService {
 export class RenderingService implements IRenderingService {
   private contextDeps = new BehaviorSubject<RenderingServiceContextDeps | null>(null);
 
-  start(deps: RenderingServiceContextDeps): RenderingServiceInternalStart {
+  /**
+   * @internal
+   */
+  public start(deps: RenderingServiceContextDeps): RenderingServiceInternalStart {
     this.contextDeps.next(deps);
 
     const contract = {
@@ -70,7 +73,13 @@ export class RenderingService implements IRenderingService {
     return contract;
   }
 
-  renderCore(renderCoreDeps: RenderingServiceRenderCoreDeps, targetDomElement: HTMLDivElement) {
+  /**
+   * @internal
+   */
+  public renderCore(
+    renderCoreDeps: RenderingServiceRenderCoreDeps,
+    targetDomElement: HTMLDivElement
+  ) {
     const { chrome, application, overlays } = renderCoreDeps;
     const startServices = this.contextDeps.getValue()!;
     const chromeHeader = chrome.getHeaderComponent();
@@ -112,6 +121,9 @@ export class RenderingService implements IRenderingService {
     );
   }
 
+  /**
+   * @public
+   */
   public addContext(element: React.ReactNode): React.ReactElement<string> {
     const Component: React.FC = () => {
       /**

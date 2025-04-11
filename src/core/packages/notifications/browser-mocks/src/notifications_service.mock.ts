@@ -28,8 +28,17 @@ const createStartContractMock = () => {
   return startContract;
 };
 
+/**
+ * This is declared internally to avoid a circular dependency issue
+ */
+export interface NotificationsServiceContract {
+  setup: typeof createSetupContractMock;
+  start: ({ targetDomElement }: { targetDomElement: HTMLElement }) => void;
+  stop: () => void;
+}
+
 const createMock = () => {
-  const mocked: jest.Mocked<any> = {
+  const mocked: jest.Mocked<NotificationsServiceContract> = {
     setup: jest.fn(),
     start: jest.fn(),
     stop: jest.fn(),

@@ -15,7 +15,7 @@ import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import type { OverlayStart } from '@kbn/core-overlays-browser';
 import type { NotificationsSetup, NotificationsStart } from '@kbn/core-notifications-browser';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import type { RenderingService } from '@kbn/core-rendering-browser-internal';
+import type { RenderingService } from '@kbn/core-rendering-browser';
 import { showErrorDialog, ToastsService } from './toasts';
 import { EventReporter, eventTypes } from './toasts/telemetry';
 

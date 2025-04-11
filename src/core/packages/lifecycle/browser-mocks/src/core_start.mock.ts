@@ -48,7 +48,7 @@ export function createCoreStartMock({ basePath = '' } = {}) {
     fatalErrors: fatalErrorsServiceMock.createStartContract(),
     security: securityServiceMock.createStart(),
     userProfile: userProfileServiceMock.createStart(),
-    rendering: renderingServiceMock.createInternal() as any,
+    rendering: renderingServiceMock.create(),
     plugins: {
       onStart: jest.fn(),
     },

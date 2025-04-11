@@ -483,7 +483,7 @@ describe('#start()', () => {
     expect(MockOverlayService.start).toHaveBeenCalledTimes(1);
   });
 
-  it('calls rendering#start()', async () => {
+  it('calls rendering#renderCore()', async () => {
     await startCore();
     expect(MockRenderingService.renderCore).toHaveBeenCalledTimes(1);
     expect(MockRenderingService.renderCore).toHaveBeenCalledWith({
@@ -597,7 +597,7 @@ describe('#stop()', () => {
     await coreSystem.setup();
     await coreSystem.start();
     expect(rootDomElement.innerHTML).not.toBe('');
-    await coreSystem.stop();
+    coreSystem.stop();
     expect(rootDomElement.innerHTML).toBe('');
   });
 });
@@ -629,11 +629,9 @@ describe('Notifications targetDomElement', () => {
     });
 
     let targetDomElementInStart: HTMLElement | null;
-    MockNotificationsService.start.mockImplementation(
-      ({ targetDomElement }: { targetDomElement: HTMLElement }): any => {
-        targetDomElementInStart = targetDomElement;
-      }
-    );
+    MockNotificationsService.start.mockImplementation(({ targetDomElement }): void => {
+      targetDomElementInStart = targetDomElement;
+    });
 
     // Starting the core system should pass the targetDomElement as a child of the rootDomElement
     await core.setup();

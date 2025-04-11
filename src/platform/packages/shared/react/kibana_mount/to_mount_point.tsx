@@ -8,7 +8,7 @@
  */
 
 import type { MountPoint } from '@kbn/core-mount-utils-browser';
-import type { RenderingService } from '@kbn/core-rendering-browser-internal';
+import type { RenderingService } from '@kbn/core-rendering-browser';
 import {
   KibanaRenderContextProvider,
   KibanaRenderContextProviderProps,

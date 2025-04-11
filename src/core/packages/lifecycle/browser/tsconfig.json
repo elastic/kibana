@@ -31,7 +31,7 @@
     "@kbn/core-security-browser",
     "@kbn/core-user-profile-browser",
     "@kbn/core-feature-flags-browser",
-    "@kbn/core-rendering-browser-internal"
+    "@kbn/core-rendering-browser"
   ],
   "exclude": [
     "target/**/*",
