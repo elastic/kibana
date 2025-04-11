@@ -236,13 +236,19 @@ export function SamlAuthProvider({ getService }: FtrProviderContext) {
         elasticsearch: descriptors.elasticsearch ?? [],
       };
 
-      const { status } = await supertestWithoutAuth
+      const response = await supertestWithoutAuth
         .put(`/api/security/role/${CUSTOM_ROLE}`)
         .set(INTERNAL_REQUEST_HEADERS)
         .set(adminCookieHeader)
         .send(customRoleDescriptors);
 
-      expect(status).to.be(204);
+      if (response.status !== 204) {
+        const errorMessage =
+          response.status === 403
+            ? `Failed to update custom role, status code: ${response.status}. Ensure the 'admin' user has the required privileges.`
+            : `Failed to update custom role with status code: ${response.status}`;
+        throw new Error(errorMessage);
+      }
 
       // Update descriptors for the custom role, it will be used to create API key
       supportedRoleDescriptors.set(CUSTOM_ROLE, customRoleDescriptors);
