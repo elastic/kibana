@@ -26,7 +26,9 @@ export const createNavigationTree = (services: Services): NavigationTreeDefiniti
       breadcrumbStatus: 'hidden',
       defaultIsCollapsed: false,
       children: [
-        { link: 'discover' },
+        {
+          link: 'discover',
+        },
         {
           id: SecurityPageName.dashboards,
           link: securityLink(SecurityPageName.dashboards),
@@ -35,32 +37,26 @@ export const createNavigationTree = (services: Services): NavigationTreeDefiniti
             {
               id: SecurityPageName.overview,
               link: securityLink(SecurityPageName.overview),
-              sideNavStatus: 'hidden',
             },
             {
               id: SecurityPageName.detectionAndResponse,
               link: securityLink(SecurityPageName.detectionAndResponse),
-              sideNavStatus: 'hidden',
             },
             {
               id: SecurityPageName.cloudSecurityPostureDashboard,
               link: securityLink(SecurityPageName.cloudSecurityPostureDashboard),
-              sideNavStatus: 'hidden',
             },
             {
               id: SecurityPageName.cloudSecurityPostureVulnerabilityDashboard,
               link: securityLink(SecurityPageName.cloudSecurityPostureVulnerabilityDashboard),
-              sideNavStatus: 'hidden',
             },
             {
               id: SecurityPageName.entityAnalytics,
               link: securityLink(SecurityPageName.entityAnalytics),
-              sideNavStatus: 'hidden',
             },
             {
               id: SecurityPageName.dataQuality,
               link: securityLink(SecurityPageName.dataQuality),
-              sideNavStatus: 'hidden',
             },
           ],
         },
@@ -70,6 +66,7 @@ export const createNavigationTree = (services: Services): NavigationTreeDefiniti
             {
               id: SecurityGroupName.rules,
               title: SecurityLinkGroup[SecurityGroupName.rules].title,
+              renderAs: 'panelOpener',
               children: [
                 {
                   title: i18nStrings.rules.management.title,
@@ -115,7 +112,6 @@ export const createNavigationTree = (services: Services): NavigationTreeDefiniti
                   ],
                 },
               ],
-              renderAs: 'panelOpener',
             },
             {
               id: SecurityPageName.alerts,
@@ -132,19 +128,17 @@ export const createNavigationTree = (services: Services): NavigationTreeDefiniti
             {
               id: SecurityPageName.case,
               link: securityLink(SecurityPageName.case),
+              renderAs: 'item',
               children: [
                 {
                   id: SecurityPageName.caseCreate,
                   link: securityLink(SecurityPageName.caseCreate),
-                  sideNavStatus: 'hidden',
                 },
                 {
                   id: SecurityPageName.caseConfigure,
                   link: securityLink(SecurityPageName.caseConfigure),
-                  sideNavStatus: 'hidden',
                 },
               ],
-              renderAs: 'panelOpener',
             },
           ],
         },
@@ -154,6 +148,7 @@ export const createNavigationTree = (services: Services): NavigationTreeDefiniti
             {
               id: SecurityGroupName.investigations,
               title: SecurityLinkGroup[SecurityGroupName.investigations].title,
+              renderAs: 'panelOpener',
               children: [
                 {
                   id: SecurityPageName.timelines,
@@ -163,21 +158,17 @@ export const createNavigationTree = (services: Services): NavigationTreeDefiniti
                     {
                       id: SecurityPageName.timelinesTemplates,
                       link: securityLink(SecurityPageName.timelinesTemplates),
-                      sideNavStatus: 'hidden',
                     },
                   ],
                 },
                 {
                   id: SecurityPageName.notes,
                   link: securityLink(SecurityPageName.notes),
-                  renderAs: 'item',
                 },
                 {
                   link: 'osquery',
-                  renderAs: 'item',
                 },
               ],
-              renderAs: 'panelOpener',
             },
             {
               id: SecurityPageName.threatIntelligence,
@@ -186,6 +177,7 @@ export const createNavigationTree = (services: Services): NavigationTreeDefiniti
             {
               id: SecurityGroupName.explore,
               title: SecurityLinkGroup[SecurityGroupName.explore].title,
+              renderAs: 'panelOpener',
               children: [
                 {
                   id: SecurityPageName.hosts,
@@ -294,7 +286,6 @@ export const createNavigationTree = (services: Services): NavigationTreeDefiniti
                   ],
                 },
               ],
-              renderAs: 'panelOpener',
             },
           ],
         },
@@ -304,6 +295,7 @@ export const createNavigationTree = (services: Services): NavigationTreeDefiniti
             {
               id: SecurityGroupName.assets,
               title: SecurityLinkGroup[SecurityGroupName.assets].title,
+              renderAs: 'panelOpener',
               children: [
                 {
                   link: 'fleet',
@@ -371,7 +363,6 @@ export const createNavigationTree = (services: Services): NavigationTreeDefiniti
                   renderItem: () => renderIntegrationsLinkCallout(services),
                 },
               ],
-              renderAs: 'panelOpener',
             },
           ],
         },
@@ -381,6 +372,7 @@ export const createNavigationTree = (services: Services): NavigationTreeDefiniti
             {
               id: SecurityGroupName.machineLearning,
               title: SecurityLinkGroup[SecurityGroupName.machineLearning].title,
+              renderAs: 'panelOpener',
               children: [
                 {
                   breadcrumbStatus: 'hidden',
@@ -442,7 +434,6 @@ export const createNavigationTree = (services: Services): NavigationTreeDefiniti
                   ],
                 },
               ],
-              renderAs: 'panelOpener',
             },
           ],
         },

@@ -78,6 +78,7 @@ export const createNavigationTree = (services: Services): NavigationTreeDefiniti
         {
           id: SecurityGroupName.rules,
           title: SecurityLinkGroup[SecurityGroupName.rules].title,
+          renderAs: 'panelOpener',
           children: [
             {
               title: i18nStrings.rules.management.title,
@@ -123,7 +124,6 @@ export const createNavigationTree = (services: Services): NavigationTreeDefiniti
               ],
             },
           ],
-          renderAs: 'panelOpener',
         },
         {
           id: SecurityPageName.alerts,
@@ -140,23 +140,22 @@ export const createNavigationTree = (services: Services): NavigationTreeDefiniti
         {
           id: SecurityPageName.case,
           link: securityLink(SecurityPageName.case),
+          renderAs: 'item',
           children: [
             {
               id: SecurityPageName.caseCreate,
               link: securityLink(SecurityPageName.caseCreate),
-              sideNavStatus: 'hidden',
             },
             {
               id: SecurityPageName.caseConfigure,
               link: securityLink(SecurityPageName.caseConfigure),
-              sideNavStatus: 'hidden',
             },
           ],
-          renderAs: 'item',
         },
         {
           id: SecurityGroupName.investigations,
           title: SecurityLinkGroup[SecurityGroupName.investigations].title,
+          renderAs: 'panelOpener',
           children: [
             {
               id: SecurityPageName.timelines,
@@ -173,14 +172,11 @@ export const createNavigationTree = (services: Services): NavigationTreeDefiniti
             {
               id: SecurityPageName.notes,
               link: securityLink(SecurityPageName.notes),
-              renderAs: 'item',
             },
             {
               link: 'osquery',
-              renderAs: 'item',
             },
           ],
-          renderAs: 'panelOpener',
         },
         {
           id: SecurityPageName.threatIntelligence,
@@ -190,6 +186,7 @@ export const createNavigationTree = (services: Services): NavigationTreeDefiniti
           id: SecurityGroupName.explore,
           title: SecurityLinkGroup[SecurityGroupName.explore].title,
           spaceBefore: null,
+          renderAs: 'panelOpener',
           children: [
             {
               id: SecurityPageName.hosts,
@@ -298,11 +295,11 @@ export const createNavigationTree = (services: Services): NavigationTreeDefiniti
               ],
             },
           ],
-          renderAs: 'panelOpener',
         },
         {
           id: SecurityGroupName.assets,
           title: SecurityLinkGroup[SecurityGroupName.assets].title,
+          renderAs: 'panelOpener',
           children: [
             {
               link: 'fleet',
@@ -370,7 +367,6 @@ export const createNavigationTree = (services: Services): NavigationTreeDefiniti
               renderItem: () => renderIntegrationsLinkCallout(services),
             },
           ],
-          renderAs: 'panelOpener',
         },
         createMachineLearningNavigationTree(),
       ],

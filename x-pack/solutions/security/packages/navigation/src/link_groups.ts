@@ -8,14 +8,15 @@
 import { SecurityGroupName } from './constants';
 import { i18nStrings } from './i18n_strings';
 
-export interface SecurityLinkGroup {
+export interface SecurityLinkGroupDefinition {
   title: string;
 }
 
-export const SecurityLinkGroup: Record<SecurityGroupName, SecurityLinkGroup> = Object.freeze({
-  [SecurityGroupName.rules]: { title: i18nStrings.rules.title },
-  [SecurityGroupName.explore]: { title: i18nStrings.explore.title },
-  [SecurityGroupName.investigations]: { title: i18nStrings.investigations.title },
-  [SecurityGroupName.assets]: { title: i18nStrings.assets.title },
-  [SecurityGroupName.machineLearning]: { title: i18nStrings.ml.title },
-});
+export const SecurityLinkGroup: Record<SecurityGroupName, SecurityLinkGroupDefinition> =
+  Object.freeze({
+    [SecurityGroupName.rules]: { title: i18nStrings.rules.title },
+    [SecurityGroupName.explore]: { title: i18nStrings.explore.title },
+    [SecurityGroupName.investigations]: { title: i18nStrings.investigations.title },
+    [SecurityGroupName.assets]: { title: i18nStrings.assets.title },
+    [SecurityGroupName.machineLearning]: { title: i18nStrings.ml.title },
+  });

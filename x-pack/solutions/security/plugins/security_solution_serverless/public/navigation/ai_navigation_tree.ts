@@ -41,6 +41,7 @@ export const createAiNavigationTree = (): NavigationTreeDefinition => ({
         {
           id: SecurityPageName.case,
           link: securityLink(SecurityPageName.case),
+          renderAs: 'item',
           children: [
             {
               id: SecurityPageName.caseCreate,
@@ -53,7 +54,6 @@ export const createAiNavigationTree = (): NavigationTreeDefinition => ({
               sideNavStatus: 'hidden',
             },
           ],
-          renderAs: 'panelOpener',
         },
         createMachineLearningNavigationTree(),
         {

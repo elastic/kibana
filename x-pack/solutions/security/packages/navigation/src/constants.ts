@@ -16,6 +16,12 @@ export enum LinkCategoryType {
   separator = 'separator',
 }
 
+/**
+ * Navigation group names.
+ * They are nodes used to group links in the navigationTree but don't have a page on their own.
+ * All values need to have the "securityGroup:" prefix to avoid collisions with regular `SecurityPageName`
+ * since they are mixed together in the navigationTree.
+ */
 export enum SecurityGroupName {
   rules = 'securityGroup:rules',
   explore = 'securityGroup:explore',

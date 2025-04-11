@@ -47,7 +47,7 @@ const classicFormatter: (appLinks: AppLinkItems) => AppDeepLink[] = (appLinks) =
  * @param normalizedLinks - The normalized links to use for formatting
  * @returns The formatted deep links
  */
-const solutionFormatter = (
+export const solutionFormatter = (
   navigationTree: NavigationTreeDefinition,
   normalizedLinks: NormalizedLinks
 ): AppDeepLink[] => {
@@ -56,8 +56,7 @@ const solutionFormatter = (
   [...body, ...footer].forEach((rootNode) => {
     if (rootNode.type === 'navGroup') {
       nodes.push(...rootNode.children);
-    }
-    if (!rootNode.type || rootNode.type === 'navItem') {
+    } else {
       nodes.push(rootNode);
     }
   });
