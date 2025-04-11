@@ -7,7 +7,7 @@
 import { EuiBadge, EuiBasicTable } from '@elastic/eui';
 import React from 'react';
 import { DashboardAttributes } from '@kbn/dashboard-plugin/common/content_management/v2';
-import { capitalize, compact, uniqBy } from 'lodash';
+import { capitalize } from 'lodash';
 import { ContentPackEntry } from '@kbn/content-packs-schema';
 
 export function ContentPackObjectsList({
