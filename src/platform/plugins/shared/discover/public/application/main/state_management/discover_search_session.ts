@@ -70,13 +70,6 @@ export class DiscoverSearchSessionManager {
   }
 
   /**
-   * Get current search session id
-   */
-  getCurrentSearchSessionId() {
-    return this.deps.session.getSessionId();
-  }
-
-  /**
    * Removes Discovers {@link SEARCH_SESSION_ID_QUERY_PARAM} from the URL
    * @param replace - methods to change the URL
    */
