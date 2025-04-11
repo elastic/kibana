@@ -7,8 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './src/components';
-export * from './src/enums';
-export * from './src/hooks';
-export * from './src/typings';
-export * from './src/utils';
+export * from './duration';
+export * from './duration_distribution_chart';
