@@ -296,7 +296,7 @@ describe('stripUnknownsWorkaround', () => {
     });
   });
 
-  test(`aborts on the first validation attempt if allowStripUnknownsWorkaround is not true`, async () => {
+  test(`aborts on the first validation attempt if enableStripUnknownConfigWorkaround is not true`, async () => {
     mockConfigService.atPath.mockReturnValue(
       new BehaviorSubject({ lifecycle: { disablePreboot: true } })
     );
@@ -308,11 +308,11 @@ describe('stripUnknownsWorkaround', () => {
     expect(mockEnsureValidConfiguration).toHaveBeenCalledTimes(1);
   });
 
-  test(`tries again with stripUnknownKeys: true when allowStripUnknownsWorkaround is true`, async () => {
+  test(`tries again with stripUnknownKeys: true when enableStripUnknownConfigWorkaround is true`, async () => {
     mockConfigService.atPath.mockReturnValue(
       new BehaviorSubject({
         lifecycle: { disablePreboot: true },
-        allowStripUnknownsWorkaround: true,
+        enableStripUnknownConfigWorkaround: true,
       })
     );
 

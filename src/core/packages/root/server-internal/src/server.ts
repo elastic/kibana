@@ -524,7 +524,7 @@ export class Server {
       const config = await firstValueFrom(
         this.configService.atPath<CoreConfigType>(coreConfig.path)
       );
-      if (!config.allowStripUnknownsWorkaround) {
+      if (!config.enableStripUnknownConfigWorkaround) {
         throw validationError;
       }
       // When running on serverless, we may allow unknown keys, but stripping them from the final config object.

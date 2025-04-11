@@ -23,7 +23,7 @@ const coreConfigSchema = schema.object({
    * However, on Serverless, we'd like to set it to true to avoid bootlooping in case of any temporary misalignment
    * between our kibana-controller and the Kibana versions.
    */
-  allowStripUnknownsWorkaround: schema.boolean({ defaultValue: false }),
+  enableStripUnknownConfigWorkaround: schema.boolean({ defaultValue: false }),
 });
 
 export type CoreConfigType = TypeOf<typeof coreConfigSchema>;
