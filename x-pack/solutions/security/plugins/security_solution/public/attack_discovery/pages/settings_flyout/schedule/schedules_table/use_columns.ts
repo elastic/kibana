@@ -6,7 +6,6 @@
  */
 
 import { useCallback, useMemo } from 'react';
-import type { AttackDiscoverySchedule } from '@kbn/elastic-assistant-common';
 
 import type { TableColumn } from './columns';
 import {
@@ -23,7 +22,6 @@ export const useColumns = ({
   enableSchedule,
   disableSchedule,
   deleteSchedule,
-  getScheduleData,
 }: {
   isDisabled: boolean;
   isLoading: boolean;
@@ -31,7 +29,6 @@ export const useColumns = ({
   enableSchedule: (scheduleId: string) => Promise<void>;
   disableSchedule: (scheduleId: string) => Promise<void>;
   deleteSchedule: (scheduleId: string) => Promise<void>;
-  getScheduleData: (scheduleId: string) => AttackDiscoverySchedule | undefined;
 }): TableColumn[] => {
   const onSwitchChange = useCallback(
     async (scheduleId: string, enabled: boolean) => {

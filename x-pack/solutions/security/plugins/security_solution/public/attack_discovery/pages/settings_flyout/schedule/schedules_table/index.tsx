@@ -73,20 +73,9 @@ export const SchedulesTable: React.FC = React.memo(() => {
 
   const [isTableLoading, setTableLoading] = useState(false);
 
-  const isSchedulesLoading = isDataLoading || isTableLoading;
-
   const { mutateAsync: enableAttackDiscoverySchedule } = useEnableAttackDiscoverySchedule();
   const { mutateAsync: disableAttackDiscoverySchedule } = useDisableAttackDiscoverySchedule();
   const { mutateAsync: deleteAttackDiscoverySchedule } = useDeleteAttackDiscoverySchedule();
-
-  const getScheduleData = useCallback(
-    (scheduleId: string) => {
-      if (!isSchedulesLoading && schedules.length) {
-        return schedules.find((item) => item.id === scheduleId);
-      }
-    },
-    [isSchedulesLoading, schedules]
-  );
 
   const openScheduleDetails = useCallback((scheduleId: string) => {
     // TODO: implement attack discovery schedule details
@@ -123,7 +112,6 @@ export const SchedulesTable: React.FC = React.memo(() => {
     enableSchedule,
     disableSchedule,
     deleteSchedule,
-    getScheduleData,
   });
 
   return (

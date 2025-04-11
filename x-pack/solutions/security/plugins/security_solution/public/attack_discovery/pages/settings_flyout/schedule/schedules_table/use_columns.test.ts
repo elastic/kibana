@@ -28,7 +28,6 @@ const openScheduleDetails = jest.fn();
 const enableSchedule = jest.fn();
 const disableSchedule = jest.fn();
 const deleteSchedule = jest.fn();
-const getScheduleData = jest.fn();
 
 describe('useColumns', () => {
   beforeEach(() => {
@@ -42,7 +41,6 @@ describe('useColumns', () => {
         enableSchedule,
         disableSchedule,
         deleteSchedule,
-        getScheduleData,
       })
     );
   });
