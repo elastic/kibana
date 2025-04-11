@@ -18,17 +18,18 @@ export const updateIndexTemplateFieldsLimit = ({
 }) => {
   return esClient.indices.putIndexTemplate({
     name: template.name,
-    body: {
-      ...template.index_template,
-      // @ts-expect-error elasticsearch@9.0.0 https://github.com/elastic/elasticsearch-js/issues/2584
-      template: {
-        ...template.index_template.template,
-        settings: {
-          ...template.index_template.template?.settings,
-          'index.mapping.total_fields.limit': limit,
-          'index.mapping.total_fields.ignore_dynamic_beyond_limit': true,
-        },
+    ...template.index_template,
+    template: {
+      ...template.index_template.template,
+      settings: {
+        ...template.index_template.template?.settings,
+        'index.mapping.total_fields.limit': limit,
+        'index.mapping.total_fields.ignore_dynamic_beyond_limit': true,
       },
     },
+    // GET brings string | string[] | undefined but this PUT expects string[]
+    ignore_missing_component_templates: template.index_template.ignore_missing_component_templates
+      ? [template.index_template.ignore_missing_component_templates].flat()
+      : undefined,
   });
 };
