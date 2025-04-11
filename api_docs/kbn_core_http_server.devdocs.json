@@ -3369,10 +3369,6 @@
                 "path": "x-pack/platform/plugins/shared/rule_registry/server/routes/get_browser_fields_by_rule_type_ids.ts"
               },
               {
-                "plugin": "ruleRegistry",
-                "path": "x-pack/platform/plugins/shared/rule_registry/server/routes/get_aad_fields_by_rule_type.ts"
-              },
-              {
                 "plugin": "inference",
                 "path": "x-pack/platform/plugins/shared/inference/server/routes/connectors.ts"
               },
@@ -14162,6 +14158,10 @@
               {
                 "plugin": "automaticImport",
                 "path": "x-pack/platform/plugins/shared/automatic_import/server/__mocks__/mock_server.ts"
+              },
+              {
+                "plugin": "cloud",
+                "path": "x-pack/platform/plugins/shared/cloud/server/routes/get_cloud_data_route.test.ts"
               },
               {
                 "plugin": "canvas",
