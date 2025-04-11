@@ -535,8 +535,8 @@ const getDocumentStatus = (
   if (ingestDocErrors.some((error) => error.type === 'field_mapping_failure')) {
     return 'failed';
   }
-  // Remove the always present base processor for dot expander
-  const processorResults = doc.processor_results.slice(1);
+  // Remove the always present base processor for dot expanders
+  const processorResults = doc.processor_results.slice(3);
 
   if (processorResults.every(isSkippedProcessor)) {
     return 'skipped';
