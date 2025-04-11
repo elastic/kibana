@@ -85,8 +85,6 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
     [actionParams.subActionParams]
   );
 
-  const [showTimeWindowWarning, setShowTimeWindowWarning] = useState(false);
-
   const parsedTimeWindowSize = timeWindow.slice(0, timeWindow.length - 1);
   const parsedTimeWindowUnit = timeWindow.slice(-1);
 
@@ -97,6 +95,13 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
   const timeWindowUnit = Object.values(TIME_UNITS).includes(parsedTimeWindowUnit as TIME_UNITS)
     ? parsedTimeWindowUnit
     : DEFAULT_TIME_WINDOW[1];
+
+  const showWarning =
+    timeWindowUnit === 'm' &&
+    parseInt(timeWindowSize, 10) >= 5 &&
+    parseInt(timeWindowSize, 10) <= 20;
+
+  const [showTimeWindowWarning, setShowTimeWindowWarning] = useState(showWarning);
 
   useEffect(() => {
     if (!actionParams.subAction) {
@@ -115,16 +120,8 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
         index
       );
     }
-
-    const showWarning =
-      timeWindowUnit === 'm' &&
-      parseInt(timeWindowSize, 10) >= 5 &&
-      parseInt(timeWindowSize, 10) <= 20;
-
-    setShowTimeWindowWarning(showWarning);
-
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [actionParams, timeWindowUnit, timeWindowSize]);
+  }, [actionParams]);
 
   const editSubActionProperty = useCallback(
     (key: string, value: unknown) => {

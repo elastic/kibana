@@ -372,6 +372,8 @@ describe('CasesParamsFields renders', () => {
     it('renders time window warning', async () => {
       render(<CasesParamsFields {...defaultProps} />);
 
+      expect(await screen.queryByTestId('show-time-window-warning')).not.toBeInTheDocument();
+
       const timeWindowSizeInput = await screen.findByTestId('time-window-size-input');
       const timeWindowUnitInput = await screen.findByTestId('time-window-unit-select');
 

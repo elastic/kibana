@@ -62,7 +62,7 @@ const TimeWindowSchema = schema.string({
       const timeUnit = match[2];
 
       if (timeUnit === 'm' && timeSize < 5) {
-        return 'Not a valid time window';
+        return 'Time window should be at least 5 minutes';
       }
     }
   },

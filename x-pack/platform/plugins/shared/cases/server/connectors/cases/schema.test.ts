@@ -107,6 +107,12 @@ describe('CasesConnectorRunParamsSchema', () => {
       ).toThrow();
     });
 
+    it('throws if the timeWindow is less than 5 minutes', () => {
+      expect(() =>
+        CasesConnectorRunParamsSchema.validate(getParams({ timeWindow: '3m' }))
+      ).toThrow();
+    });
+
     it('throws if there is a non valid letter at the end', () => {
       expect(() =>
         CasesConnectorRunParamsSchema.validate(getParams({ timeWindow: '10d#' }))
