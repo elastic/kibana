@@ -8,13 +8,13 @@
  */
 
 import { castArray } from 'lodash';
-import { DataTableRecord, TraceDocumentOverview, fieldConstants } from '../..';
+import { DataTableRecord, SpanDocumentOverview, fieldConstants } from '../..';
 
-export function getTraceDocumentOverview(doc: DataTableRecord): TraceDocumentOverview {
-  const formatField = <T extends keyof TraceDocumentOverview>(field: T) =>
-    castArray(doc.flattened[field])[0] as TraceDocumentOverview[T];
+export function getSpanDocumentOverview(doc: DataTableRecord): SpanDocumentOverview {
+  const formatField = <T extends keyof SpanDocumentOverview>(field: T) =>
+    castArray(doc.flattened[field])[0] as SpanDocumentOverview[T];
 
-  const fields: Array<keyof TraceDocumentOverview> = [
+  const fields: Array<keyof SpanDocumentOverview> = [
     fieldConstants.TIMESTAMP_FIELD,
     fieldConstants.PARENT_ID_FIELD,
     fieldConstants.HTTP_RESPONSE_STATUS_CODE_FIELD,
@@ -23,9 +23,7 @@ export function getTraceDocumentOverview(doc: DataTableRecord): TraceDocumentOve
     fieldConstants.SERVICE_ENVIRONMENT_FIELD,
     fieldConstants.AGENT_NAME_FIELD,
     fieldConstants.TRANSACTION_ID_FIELD,
-    fieldConstants.TRANSACTION_TYPE_FIELD,
     fieldConstants.TRANSACTION_NAME_FIELD,
-    fieldConstants.TRANSACTION_DURATION_FIELD,
     fieldConstants.SPAN_NAME_FIELD,
     fieldConstants.SPAN_ACTION_FIELD,
     fieldConstants.SPAN_DURATION_FIELD,
@@ -40,5 +38,5 @@ export function getTraceDocumentOverview(doc: DataTableRecord): TraceDocumentOve
   return fields.reduce((acc, field) => {
     acc[field] = formatField(field);
     return acc;
-  }, {} as { [key in keyof TraceDocumentOverview]?: string | number }) as TraceDocumentOverview;
+  }, {} as { [key in keyof SpanDocumentOverview]?: string | number }) as SpanDocumentOverview;
 }

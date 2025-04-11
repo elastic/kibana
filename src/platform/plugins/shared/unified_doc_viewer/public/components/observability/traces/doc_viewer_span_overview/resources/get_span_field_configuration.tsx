@@ -10,10 +10,10 @@
 import {
   SPAN_NAME_FIELD,
   SPAN_DESTINATION_SERVICE_RESOURCE_FIELD,
-  TraceDocumentOverview,
   SERVICE_ENVIRONMENT_FIELD,
   SPAN_SUBTYPE_FIELD,
   SPAN_TYPE_FIELD,
+  SpanDocumentOverview,
 } from '@kbn/discover-utils';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
@@ -25,7 +25,7 @@ import {
 } from '../../resources/get_field_configuration';
 
 export const getSpanFieldConfiguration = (
-  attributes: TraceDocumentOverview
+  attributes: SpanDocumentOverview
 ): Record<string, FieldConfiguration> => {
   return {
     ...getCommonFieldConfiguration(attributes),

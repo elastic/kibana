@@ -17,7 +17,7 @@ import {
   TRANSACTION_DURATION_FIELD,
   TRANSACTION_NAME_FIELD,
   TRANSACTION_TYPE_FIELD,
-  getTraceDocumentOverview,
+  getTransactionDocumentOverview,
 } from '@kbn/discover-utils';
 import { FieldActionsProvider } from '../../../../hooks/use_field_actions';
 import { transactionFields } from './resources/fields';
@@ -37,7 +37,7 @@ export function TransactionOverview({
   onRemoveColumn,
   tracesIndexPattern,
 }: TransactionOverviewProps) {
-  const parsedDoc = getTraceDocumentOverview(hit);
+  const parsedDoc = getTransactionDocumentOverview(hit);
   const transactionDuration = parsedDoc[TRANSACTION_DURATION_FIELD];
 
   const detailTitle = i18n.translate(
@@ -79,8 +79,8 @@ export function TransactionOverview({
               <TransactionDurationSummary
                 transaction={{
                   duration: transactionDuration,
-                  type: parsedDoc[TRANSACTION_TYPE_FIELD] || '', // TODO split getTraceDocumentOverview in span and transaction?
-                  name: parsedDoc[TRANSACTION_NAME_FIELD] || '',
+                  type: parsedDoc[TRANSACTION_TYPE_FIELD],
+                  name: parsedDoc[TRANSACTION_NAME_FIELD],
                 }}
                 service={{
                   name: parsedDoc[SERVICE_NAME_FIELD],

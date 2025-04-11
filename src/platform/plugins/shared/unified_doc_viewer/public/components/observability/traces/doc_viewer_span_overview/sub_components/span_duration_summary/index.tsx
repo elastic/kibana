@@ -25,8 +25,8 @@ import { useSpanLatencyChart } from '../../hooks/use_span_latency_chart';
 export interface SpanDurationSummaryProps {
   spanDuration: number;
   spanName: string;
-  transactionId: string;
   serviceName: string;
+  transactionId?: string;
 }
 
 export function SpanDurationSummary({
@@ -36,10 +36,9 @@ export function SpanDurationSummary({
   serviceName,
 }: SpanDurationSummaryProps) {
   const { transaction, loading } = useTransactionContext();
-
   const { data: latencyChartData, loading: latencyChartLoading } = useSpanLatencyChart({
     spanName,
-    transactionId,
+    transactionId: transactionId || '',
     serviceName,
   });
 
@@ -92,34 +91,36 @@ export function SpanDurationSummary({
         </EuiFlexGroup>
         <EuiHorizontalRule margin="xs" />
 
-        <EuiFlexGroup>
-          <EuiFlexItem>
-            <EuiTitle size="xxxs">
-              <h3>
-                {i18n.translate(
-                  'unifiedDocViewer.observability.traces.docViewerTransactionOverview.spanDurationSummary.latency.title',
-                  {
-                    defaultMessage: 'Latency',
-                  }
-                )}
-              </h3>
-            </EuiTitle>
+        {transactionId && (
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              <EuiTitle size="xxxs">
+                <h3>
+                  {i18n.translate(
+                    'unifiedDocViewer.observability.traces.docViewerTransactionOverview.spanDurationSummary.latency.title',
+                    {
+                      defaultMessage: 'Latency',
+                    }
+                  )}
+                </h3>
+              </EuiTitle>
 
-            {(latencyChartLoading || latencyChartData) && (
-              <DurationDistributionChart
-                data={latencyChartData?.spanDistributionChartData ?? []}
-                markerValue={latencyChartData?.percentileThresholdValue ?? 0}
-                markerCurrentEvent={spanDuration}
-                hasData={!latencyChartLoading}
-                status={latencyChartLoading ? FETCH_STATUS.LOADING : FETCH_STATUS.SUCCESS}
-                eventType={ProcessorEvent.span}
-                showAxisTitle={false}
-                showLegend={false}
-                dataTestSubPrefix="docViewerSpanOverview"
-              />
-            )}
-          </EuiFlexItem>
-        </EuiFlexGroup>
+              {(latencyChartLoading || latencyChartData) && (
+                <DurationDistributionChart
+                  data={latencyChartData?.spanDistributionChartData ?? []}
+                  markerValue={latencyChartData?.percentileThresholdValue ?? 0}
+                  markerCurrentEvent={spanDuration}
+                  hasData={!latencyChartLoading}
+                  status={latencyChartLoading ? FETCH_STATUS.LOADING : FETCH_STATUS.SUCCESS}
+                  eventType={ProcessorEvent.span}
+                  showAxisTitle={false}
+                  showLegend={false}
+                  dataTestSubPrefix="docViewerSpanOverview"
+                />
+              )}
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        )}
       </>
     </>
   );

@@ -16,7 +16,7 @@ import {
   SPAN_DURATION_FIELD,
   SPAN_NAME_FIELD,
   TRANSACTION_ID_FIELD,
-  getTraceDocumentOverview,
+  getSpanDocumentOverview,
 } from '@kbn/discover-utils';
 import { FieldActionsProvider } from '../../../../hooks/use_field_actions';
 import { TransactionProvider } from './hooks/use_transaction';
@@ -37,7 +37,7 @@ export function SpanOverview({
   onRemoveColumn,
   transactionIndexPattern,
 }: SpanOverviewProps) {
-  const parsedDoc = getTraceDocumentOverview(hit);
+  const parsedDoc = getSpanDocumentOverview(hit);
   const spanDuration = parsedDoc[SPAN_DURATION_FIELD];
 
   return (
@@ -78,8 +78,8 @@ export function SpanOverview({
               <EuiSpacer size="m" />
               <SpanDurationSummary
                 spanDuration={spanDuration}
-                spanName={parsedDoc[SPAN_NAME_FIELD] || ''}
-                transactionId={parsedDoc[TRANSACTION_ID_FIELD] || ''}
+                spanName={parsedDoc[SPAN_NAME_FIELD]}
+                transactionId={parsedDoc[TRANSACTION_ID_FIELD]}
                 serviceName={parsedDoc[SERVICE_NAME_FIELD]}
               />
             </>

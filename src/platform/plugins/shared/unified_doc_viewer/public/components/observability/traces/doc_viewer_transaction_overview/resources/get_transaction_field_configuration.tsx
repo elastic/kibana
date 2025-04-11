@@ -9,8 +9,8 @@
 
 import {
   USER_AGENT_NAME_FIELD,
-  TraceDocumentOverview,
   USER_AGENT_VERSION_FIELD,
+  TransactionDocumentOverview,
 } from '@kbn/discover-utils';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
@@ -21,7 +21,7 @@ import {
 } from '../../resources/get_field_configuration';
 
 export const getTransactionFieldConfiguration = (
-  attributes: TraceDocumentOverview
+  attributes: TransactionDocumentOverview
 ): Record<string, FieldConfiguration> => {
   return {
     ...getCommonFieldConfiguration(attributes),
