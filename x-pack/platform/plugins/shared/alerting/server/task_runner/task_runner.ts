@@ -829,7 +829,8 @@ export class TaskRunner<
 
     let nextRun: string | null = null;
     if (taskSchedule) {
-      nextRun = getNextRun({ startDate: startedAt, interval: taskSchedule.interval });
+      // rules cannot use rrule for scheduling yet
+      nextRun = getNextRun({ startDate: startedAt, interval: taskSchedule.interval! });
     }
 
     const outcomeMsg = [
