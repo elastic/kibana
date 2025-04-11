@@ -40,6 +40,7 @@ describe('State', () => {
   it('loads the state and initializes the correct Stream class instances', async () => {
     const wiredStream: WiredStreamDefinition = {
       name: 'wired_stream',
+      description: '',
       ingest: {
         lifecycle: { inherit: {} },
         processing: [],
@@ -51,6 +52,7 @@ describe('State', () => {
     };
     const unwiredStream: UnwiredStreamDefinition = {
       name: 'unwired_stream',
+      description: '',
       ingest: {
         lifecycle: { inherit: {} },
         processing: [],
@@ -59,6 +61,7 @@ describe('State', () => {
     };
     const groupStream: GroupStreamDefinition = {
       name: 'group_stream',
+      description: '',
       group: {
         members: [],
       },
@@ -151,6 +154,7 @@ describe('State', () => {
               type: 'upsert',
               definition: {
                 name: 'new_group_stream',
+                description: '',
                 group: {
                   members: [],
                 },
@@ -184,6 +188,7 @@ describe('State', () => {
               type: 'upsert',
               definition: {
                 name: 'new_test_stream',
+                description: '',
                 group: {
                   members: [],
                 },
@@ -322,6 +327,7 @@ function streamThatCascadesTooMuch(stateDependenciesMock: any) {
             type: 'upsert',
             definition: {
               name: 'and_another',
+              description: '',
               group: {
                 members: [],
               },
