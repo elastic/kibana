@@ -463,7 +463,7 @@ export function ChatBody({
         <IncorrectLicensePanel />
       </EuiFlexItem>
     );
-  } else if (connectors.loading || (knowledgeBase.status.loading && !knowledgeBase.isInstalling)) {
+  } else if (connectors.loading) {
     footer = (
       <div className={loadingClassname}>
         <AssistantBeacon size="xxl" backgroundColor="backgroundBasePlain" />

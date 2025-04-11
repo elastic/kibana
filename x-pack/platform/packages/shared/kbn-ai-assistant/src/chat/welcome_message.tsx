@@ -91,7 +91,7 @@ export function WelcomeMessage({
       return <AddConnector onAddConnector={handleConnectorClick} />;
     }
 
-    if (knowledgeBase.isInstalling || !isKnowledgeBaseReady) {
+    if (knowledgeBase.isInstalling || !isKnowledgeBaseReady || knowledgeBase.isPolling) {
       return <WelcomeMessageKnowledgeBase knowledgeBase={knowledgeBase} />;
     }
 
