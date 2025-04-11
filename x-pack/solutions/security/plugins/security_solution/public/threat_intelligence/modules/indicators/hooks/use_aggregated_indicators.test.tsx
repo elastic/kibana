@@ -10,7 +10,7 @@ import type { UseAggregatedIndicatorsParam } from './use_aggregated_indicators';
 import { useAggregatedIndicators } from './use_aggregated_indicators';
 import { createFetchAggregatedIndicators } from '../services/fetch_aggregated_indicators';
 import { mockTimeRange } from '../../../mocks/mock_indicators_filters_context';
-import { TestProvidersComponent } from '../../../mocks/test_providers';
+import { TestProvidersComponent, mockedTimefilterService } from '../../../mocks/test_providers';
 
 jest.mock('../services/fetch_aggregated_indicators');
 

@@ -58,6 +58,12 @@ export const mockedServices = {
   ...createTiStorageMock(),
 };
 
+export const mockedTimefilterService = {
+  timefilter: {
+    calculateBounds: jest.fn(),
+  },
+};
+
 export const unifiedSearch = unifiedSearchPluginMock.createStartContract();
 
 export const EMPTY_PAGE_SECURITY_TEMPLATE = 'empty-page-security-template' as const;
