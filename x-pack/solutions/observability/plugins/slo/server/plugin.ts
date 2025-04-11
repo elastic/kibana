@@ -136,7 +136,7 @@ export class SLOPlugin
 
     registerSloUsageCollector(plugins.usageCollection);
 
-    const routeHandlerPlugins = mapValues(plugins, (value, key) => {
+    const mappedPlugins = mapValues(plugins, (value, key) => {
       return {
         setup: value,
         start: () =>
@@ -150,7 +150,7 @@ export class SLOPlugin
       core,
       dependencies: {
         corePlugins: core,
-        plugins: routeHandlerPlugins,
+        plugins: mappedPlugins,
       },
       logger: this.logger,
       repository: getSloServerRouteRepository({ isServerless: this.isServerless }),
@@ -184,7 +184,7 @@ export class SLOPlugin
 
     new BulkDeleteTask({
       core,
-      taskManager: plugins.taskManager,
+      plugins: mappedPlugins,
       logFactory: this.initContext.logger,
     });
 

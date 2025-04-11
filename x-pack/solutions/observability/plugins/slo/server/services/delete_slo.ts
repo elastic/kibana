@@ -6,7 +6,7 @@
  */
 
 import { RulesClientApi } from '@kbn/alerting-plugin/server/types';
-import { ElasticsearchClient, IScopedClusterClient } from '@kbn/core/server';
+import { IScopedClusterClient } from '@kbn/core/server';
 import {
   SLI_DESTINATION_INDEX_PATTERN,
   SUMMARY_DESTINATION_INDEX_PATTERN,
@@ -24,7 +24,6 @@ export class DeleteSLO {
     private repository: SLORepository,
     private transformManager: TransformManager,
     private summaryTransformManager: TransformManager,
-    private esClient: ElasticsearchClient,
     private scopedClusterClient: IScopedClusterClient,
     private rulesClient: RulesClientApi
   ) {}
@@ -32,20 +31,23 @@ export class DeleteSLO {
   public async execute(sloId: string): Promise<void> {
     const slo = await this.repository.findById(sloId);
 
-    await Promise.all([this.deleteSummaryTransform(slo), this.deleteRollupTransform(slo)]);
-
-    await retryTransientEsErrors(() =>
-      this.scopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline(
-        { id: getWildcardPipelineId(slo.id, slo.revision) },
-        { ignore: [404] }
-      )
-    );
+    // First delete the linked resources before deleting the data
+    await Promise.all([
+      this.deleteSummaryTransform(slo),
+      this.deleteRollupTransform(slo),
+      retryTransientEsErrors(() =>
+        this.scopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline(
+          { id: getWildcardPipelineId(slo.id, slo.revision) },
+          { ignore: [404] }
+        )
+      ),
+      this.repository.deleteById(slo.id, { ignoreNotFound: true }),
+    ]);
 
     await Promise.all([
       this.deleteRollupData(slo.id),
       this.deleteSummaryData(slo.id),
       this.deleteAssociatedRules(slo.id),
-      this.repository.deleteById(slo.id),
     ]);
   }
 
@@ -60,7 +62,7 @@ export class DeleteSLO {
   }
 
   private async deleteRollupData(sloId: string): Promise<void> {
-    await this.esClient.deleteByQuery({
+    await this.scopedClusterClient.asCurrentUser.deleteByQuery({
       index: SLI_DESTINATION_INDEX_PATTERN,
       wait_for_completion: false,
       conflicts: 'proceed',
@@ -78,9 +80,9 @@ export class DeleteSLO {
   }
 
   private async deleteSummaryData(sloId: string): Promise<void> {
-    await this.esClient.deleteByQuery({
+    await this.scopedClusterClient.asCurrentUser.deleteByQuery({
       index: SUMMARY_DESTINATION_INDEX_PATTERN,
-      refresh: true,
+      refresh: false,
       wait_for_completion: false,
       conflicts: 'proceed',
       slices: 'auto',

@@ -5,12 +5,9 @@
  * 2.0.
  */
 
-import {
-  ElasticsearchClient,
-  KibanaRequest,
-  Logger,
-  SavedObjectsClientContract,
-} from '@kbn/core/server';
+import { RulesClientApi } from '@kbn/alerting-plugin/server/types';
+import { IScopedClusterClient, Logger } from '@kbn/core/server';
+import pLimit from 'p-limit';
 import {
   SLI_DESTINATION_INDEX_PATTERN,
   SUMMARY_DESTINATION_INDEX_PATTERN,
@@ -19,107 +16,123 @@ import {
   getWildcardPipelineId,
 } from '../../../../common/constants';
 import { retryTransientEsErrors } from '../../../utils/retry';
-import { KibanaSavedObjectsSLORepository } from '../../slo_repository';
+import { SLORepository } from '../../slo_repository';
+import { TransformManager } from '../../transform_manager';
+import { SLODefinition } from '../../../domain/models';
 
 interface Dependencies {
-  internalEsClient: ElasticsearchClient;
+  scopedClusterClient: IScopedClusterClient;
+  rulesClient: RulesClientApi;
+  repository: SLORepository;
+  transformManager: TransformManager;
+  summaryTransformManager: TransformManager;
   logger: Logger;
-  internalSoClient: SavedObjectsClientContract;
   abortController: AbortController;
-  request: KibanaRequest;
-}
-
-async function waitFor(time: number) {
-  return new Promise((resolve) => setTimeout(() => resolve(1), time));
 }
 
 export async function runBulkDelete(
   params: { list: string[] },
-  { internalEsClient, internalSoClient, logger, abortController, request }: Dependencies
+  {
+    scopedClusterClient,
+    rulesClient,
+    repository,
+    transformManager,
+    summaryTransformManager,
+    logger,
+  }: Dependencies
 ) {
-  // main problem to figure out: we only have the esClient internal user.
-  logger.info(`running bulk deletion: ${params.list}`);
+  logger.debug(`running bulk deletion for SLO [${params.list.join(', ')}]`);
+  const limiter = pLimit(5);
 
-  await waitFor(20000);
+  const promises = params.list.map(async (sloId) => {
+    return limiter(async () => {
+      let slo: SLODefinition;
+      try {
+        slo = await repository.findById(sloId);
+      } catch (err) {
+        return {
+          id: sloId,
+          success: false,
+          error: err.message,
+        };
+      }
 
-  const repository = new KibanaSavedObjectsSLORepository(internalSoClient, logger);
+      try {
+        const rollupTransformId = getSLOTransformId(slo.id, slo.revision);
+        const summaryTransformId = getSLOSummaryTransformId(slo.id, slo.revision);
 
-  // handle loop
-  const slo = await repository.findById(params.list[0]).catch((err) => undefined);
-  if (!slo) {
-    return;
+        await Promise.all([
+          transformManager.uninstall(rollupTransformId),
+          summaryTransformManager.uninstall(summaryTransformId),
+          retryTransientEsErrors(() =>
+            scopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline(
+              { id: getWildcardPipelineId(slo.id, slo.revision) },
+              { ignore: [404] }
+            )
+          ),
+          repository.deleteById(slo.id, { ignoreNotFound: true }),
+        ]);
+      } catch (err) {
+        return {
+          id: sloId,
+          success: false,
+          error: err.message,
+        };
+      }
+
+      return { id: sloId, success: true };
+    });
+  });
+
+  const results = await Promise.all(promises);
+
+  const itemsDeleted = results
+    .filter((result) => result.success === true)
+    .map((result) => result.id);
+
+  await Promise.all([
+    scopedClusterClient.asCurrentUser.deleteByQuery({
+      index: SLI_DESTINATION_INDEX_PATTERN,
+      refresh: false,
+      wait_for_completion: false,
+      conflicts: 'proceed',
+      slices: 'auto',
+      query: {
+        bool: {
+          filter: {
+            terms: {
+              'slo.id': itemsDeleted,
+            },
+          },
+        },
+      },
+    }),
+    scopedClusterClient.asCurrentUser.deleteByQuery({
+      index: SUMMARY_DESTINATION_INDEX_PATTERN,
+      refresh: false,
+      wait_for_completion: false,
+      conflicts: 'proceed',
+      slices: 'auto',
+      query: {
+        bool: {
+          filter: {
+            terms: {
+              'slo.id': itemsDeleted,
+            },
+          },
+        },
+      },
+    }),
+  ]);
+
+  try {
+    await rulesClient.bulkDeleteRules({
+      filter: `alert.attributes.params.sloId:${itemsDeleted.join(' or ')}`,
+    });
+  } catch (err) {
+    // no-op
   }
 
-  // handle requests parallelism
-  await retryTransientEsErrors(
-    () =>
-      internalEsClient.transform.deleteTransform(
-        { transform_id: getSLOTransformId(slo.id, slo.revision), force: true },
-        { ignore: [404] }
-      ),
-    { logger }
-  );
-
-  await retryTransientEsErrors(
-    () =>
-      internalEsClient.transform.deleteTransform(
-        { transform_id: getSLOSummaryTransformId(slo.id, slo.revision), force: true },
-        { ignore: [404] }
-      ),
-    { logger }
-  );
-
-  await retryTransientEsErrors(() =>
-    internalEsClient.ingest.deletePipeline(
-      { id: getWildcardPipelineId(slo.id, slo.revision) },
-      { ignore: [404] }
-    )
-  );
-
-  await repository.deleteById(slo.id);
-
-  // I think we should craft one delete_by_query for all SLO ids
-  await internalEsClient.deleteByQuery({
-    index: SLI_DESTINATION_INDEX_PATTERN,
-    wait_for_completion: false,
-    conflicts: 'proceed',
-    slices: 'auto',
-    query: {
-      bool: {
-        filter: {
-          term: {
-            'slo.id': slo.id,
-          },
-        },
-      },
-    },
-  });
-
-  // I think we should craft one delete_by_query for all SLO ids
-  await internalEsClient.deleteByQuery({
-    index: SUMMARY_DESTINATION_INDEX_PATTERN,
-    refresh: false,
-    wait_for_completion: false,
-    conflicts: 'proceed',
-    slices: 'auto',
-    query: {
-      bool: {
-        filter: {
-          term: {
-            'slo.id': slo.id,
-          },
-        },
-      },
-    },
-  });
-
-  // bulk remove for all slo id at once
-  // rules client is tied to a request... need to investigate
-  // await rulesClient.bulkDeleteRules({
-  //   filter: `alert.attributes.params.sloId:${slo.id}`,
-  // });
-
-  logger.info(`completed bulk deletion: ${params.list}`);
-
-  return;
+  logger.info(`completed bulk deletion: [${itemsDeleted.join(',')}]`);
+  return results;
 }

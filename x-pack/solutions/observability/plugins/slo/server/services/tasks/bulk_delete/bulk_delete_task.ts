@@ -5,26 +5,33 @@
  * 2.0.
  */
 
-import { errors } from '@elastic/elasticsearch';
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
-import {
-  FakeRawRequest,
-  SavedObjectsClient,
-  type CoreSetup,
-  type Headers,
-  type Logger,
-  type LoggerFactory,
-} from '@kbn/core/server';
+import { FakeRawRequest, type CoreSetup, type Logger, type LoggerFactory } from '@kbn/core/server';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/server';
-import { ConcreteTaskInstance, TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
+import { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
+import { IndicatorTypes } from '../../../domain/models';
+import { SLOPluginSetupDependencies, SLOPluginStartDependencies } from '../../../types';
+import { KibanaSavedObjectsSLORepository } from '../../slo_repository';
+import { DefaultSummaryTransformGenerator } from '../../summary_transform_generator/summary_transform_generator';
+import { DefaultSummaryTransformManager } from '../../summay_transform_manager';
+import { TransformGenerator } from '../../transform_generators';
+import { DefaultTransformManager } from '../../transform_manager';
 import { runBulkDelete } from './run_bulk_delete';
 
 export const TYPE = 'slo:bulk-delete-task';
 
 interface TaskSetupContract {
-  taskManager: TaskManagerSetupContract;
   core: CoreSetup;
   logFactory: LoggerFactory;
+  plugins: {
+    [key in keyof SLOPluginSetupDependencies]: {
+      setup: Required<SLOPluginSetupDependencies>[key];
+    };
+  } & {
+    [key in keyof SLOPluginStartDependencies]: {
+      start: () => Promise<Required<SLOPluginStartDependencies>[key]>;
+    };
+  };
 }
 
 export class BulkDeleteTask {
@@ -32,12 +39,12 @@ export class BulkDeleteTask {
   private logger: Logger;
 
   constructor(setupContract: TaskSetupContract) {
-    const { core, taskManager, logFactory } = setupContract;
+    const { core, plugins, logFactory } = setupContract;
     this.logger = logFactory.get(TYPE);
 
     this.logger.debug('Registering task with [10m] timeout');
 
-    taskManager.registerTaskDefinitions({
+    plugins.taskManager.setup.registerTaskDefinitions({
       [TYPE]: {
         title: 'SLO bulk delete',
         timeout: '10m',
@@ -45,37 +52,73 @@ export class BulkDeleteTask {
         createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
           return {
             run: async () => {
-              this.logger.debug(`started`);
-              const [coreStart] = await core.getStartServices();
-              const internalEsClient = coreStart.elasticsearch.client.asInternalUser;
-              const internalSoClient = new SavedObjectsClient(
-                coreStart.savedObjects.createInternalRepository()
-              );
+              this.logger.debug(`starting bulk delete operation`);
+              if (taskInstance.state.isDone) {
+                // The task was done in the previous, we only rescheduled it once for keeping an ephemeral state for the user
+                return;
+              }
 
-              // @ts-ignore
-              const request = getFakeKibanaRequest(params.spaceId, params.authorizationHeader);
-
-              // add zod checks
               if (!taskInstance.params.list || taskInstance.params.list.length === 0) {
                 return;
               }
 
+              const [coreStart] = await core.getStartServices();
+              const fakeRawRequest: FakeRawRequest = {
+                headers: { authorization: `ApiKey ${taskInstance?.apiKey}` },
+                path: '/',
+              };
+              const path = addSpaceIdToPath('/', taskInstance?.userScope?.spaceId ?? 'default');
+
+              // Fake request from the API key
+              const fakeRequest = kibanaRequestFactory(fakeRawRequest);
+              coreStart.http.basePath.set(fakeRequest, path);
+
+              const scopedClusterClient = coreStart.elasticsearch.client.asScoped(fakeRequest);
+              const scopedSoClient = coreStart.savedObjects.getScopedClient(fakeRequest);
+              const alerting = await plugins.alerting.start();
+              const rulesClient = await alerting.getRulesClientWithRequest(fakeRequest);
+
+              const repository = new KibanaSavedObjectsSLORepository(scopedSoClient, this.logger);
+              const transformManager = new DefaultTransformManager(
+                {} as Record<IndicatorTypes, TransformGenerator>,
+                scopedClusterClient,
+                this.logger
+              );
+              const summaryTransformManager = new DefaultSummaryTransformManager(
+                new DefaultSummaryTransformGenerator(),
+                scopedClusterClient,
+                this.logger
+              );
+
               try {
                 const params = { list: taskInstance.params.list as string[] };
-                return await runBulkDelete(params, {
-                  internalEsClient,
-                  internalSoClient,
-                  request,
+
+                const results = await runBulkDelete(params, {
+                  scopedClusterClient,
+                  rulesClient,
+                  repository,
+                  transformManager,
+                  summaryTransformManager,
                   logger: this.logger,
                   abortController: this.abortController,
                 });
-              } catch (err) {
-                if (err instanceof errors.RequestAbortedError) {
-                  this.logger.warn(`Request aborted due to timeout: ${err}`);
 
-                  return;
-                }
+                return {
+                  runAt: new Date(Date.now() + 60 * 60 * 1000),
+                  state: {
+                    isDone: true,
+                    results,
+                  },
+                };
+              } catch (err) {
                 this.logger.debug(`Error: ${err}`);
+                return {
+                  runAt: new Date(Date.now() + 60 * 60 * 1000),
+                  state: {
+                    isDone: true,
+                    error: err.message,
+                  },
+                };
               }
             },
 
@@ -87,23 +130,4 @@ export class BulkDeleteTask {
       },
     });
   }
-}
-
-export function getFakeKibanaRequest(spaceId: string, apiKey: string) {
-  const requestHeaders: Headers = {};
-
-  if (apiKey) {
-    requestHeaders.authorization = `ApiKey ${apiKey}`;
-  }
-
-  const path = addSpaceIdToPath('/', spaceId);
-
-  const fakeRawRequest: FakeRawRequest = {
-    headers: requestHeaders,
-    path,
-  };
-
-  const fakeRequest = kibanaRequestFactory(fakeRawRequest);
-
-  return fakeRequest;
 }
