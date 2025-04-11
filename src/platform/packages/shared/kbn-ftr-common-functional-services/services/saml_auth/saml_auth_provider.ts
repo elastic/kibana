@@ -243,11 +243,14 @@ export function SamlAuthProvider({ getService }: FtrProviderContext) {
         .send(customRoleDescriptors);
 
       if (response.status !== 204) {
-        const errorMessage =
+        const baseErrorMessage = `Failed to update custom role, status code: ${response.status}.`;
+        const additionalMessage =
           response.status === 403
-            ? `Failed to update custom role, status code: ${response.status}. Ensure the 'admin' user has the required privileges.`
-            : `Failed to update custom role with status code: ${response.status}`;
-        throw new Error(errorMessage);
+            ? isCloud
+              ? ` \nEnsure the user listed as 'admin' in '${cloudUsersFilePath}' has the required privileges.`
+              : ` \nEnsure the 'admin' role has the required privileges in '${authRoleProvider.getRolesDefinitionPath()}'.`
+            : '';
+        throw new Error(baseErrorMessage + additionalMessage);
       }
 
       // Update descriptors for the custom role, it will be used to create API key
