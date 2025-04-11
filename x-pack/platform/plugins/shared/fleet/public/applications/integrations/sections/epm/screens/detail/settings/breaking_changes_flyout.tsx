@@ -17,6 +17,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { css } from '@emotion/react';
 
 import { type BreakingChangesLog } from '../utils';
 
@@ -31,6 +32,11 @@ const BreakingChangesList = ({ changelog }: { changelog: BreakingChangesLog }) =
       label: link,
       href: link,
       target: '_blank',
+      css: css`
+        & > a {
+          padding-inline: 0px;
+        }
+      `,
     }));
 
     return (

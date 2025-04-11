@@ -9,26 +9,26 @@ import { load } from 'js-yaml';
 import semverGte from 'semver/functions/gte';
 import semverLte from 'semver/functions/lte';
 
-enum ChangelogChangeType {
+enum ChangeType {
   Enhancement = 'enhancement',
   BreakingChange = 'breaking-change',
   BugFix = 'bugfix',
 }
 
-interface ChangelogChange<T = ChangelogChangeType> {
+interface Change<T extends ChangeType = ChangeType> {
   description: string;
   link: string;
   type: T;
 }
 
-interface ChangelogEntry<T = ChangelogChangeType> {
+interface ChangelogEntry<T extends ChangeType = ChangeType> {
   version: string;
-  changes: Array<ChangelogChange<T>>;
+  changes: Array<Change<T>>;
 }
 
 export type Changelog = ChangelogEntry[];
 
-export type BreakingChangesLog = Array<ChangelogEntry<ChangelogChangeType.BreakingChange>>;
+export type BreakingChangesLog = Array<ChangelogEntry<ChangeType.BreakingChange>>;
 
 export const formatChangelog = (parsedChangelog: Changelog) => {
   if (!parsedChangelog) return '';
@@ -53,15 +53,13 @@ export const parseYamlChangelog = (
   );
 };
 
-const isBreakingChange = (
-  change: ChangelogChange
-): change is ChangelogChange<ChangelogChangeType.BreakingChange> => {
-  return change.type === ChangelogChangeType.BreakingChange;
-};
-
 export const getBreakingChanges = (changelog: Changelog): BreakingChangesLog => {
   return changelog.reduce<BreakingChangesLog>((acc, entry) => {
-    const breakingChanges = entry.changes.filter(isBreakingChange);
+    const breakingChanges = entry.changes.filter(
+      (change): change is Change<ChangeType.BreakingChange> => {
+        return change.type === ChangeType.BreakingChange;
+      }
+    );
 
     if (breakingChanges.length > 0) {
       return [...acc, { ...entry, changes: breakingChanges }];
