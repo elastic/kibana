@@ -428,4 +428,13 @@ export class TestSubjects extends FtrService {
       await this.click(selector);
     }
   }
+
+  public async getAccordionState(selector: string) {
+    const container = await this.find(selector);
+    const buttons = await container.findAllByCssSelector('button');
+
+    const firstButton = buttons[0];
+
+    return await firstButton.getAttribute('aria-expanded');
+  }
 }

@@ -424,6 +424,26 @@ export class DataGridService extends FtrService {
     return (await this.getBodyRows(options, selector))[options.rowIndex || 0];
   }
 
+  public async clickQualityIssueLeadingControl(rowIndex: number) {
+    const buttons = await this.testSubjects.findAll('docTableDegradedDocExist');
+    const selectedButton = buttons[rowIndex];
+
+    if (selectedButton) {
+      await selectedButton.moveMouseTo();
+      await selectedButton.click();
+    }
+  }
+
+  public async clickStacktraceLeadingControl(rowIndex: number) {
+    const buttons = await this.testSubjects.findAll('docTableStacktraceExist');
+    const selectedButton = buttons[rowIndex];
+
+    if (selectedButton) {
+      await selectedButton.moveMouseTo();
+      await selectedButton.click();
+    }
+  }
+
   public async clickRowToggle(
     { defaultTabId, ...options }: SelectOptions & { defaultTabId?: string | false } = {
       isAnchorRow: false,
