@@ -16,7 +16,7 @@ import { useEnhancedIntegrationCards } from '../../common/lib/search_ai_lake/hoo
 import { ConfigurationTabs, IntegrationsFacets } from '../constants';
 
 import { withLazyHook } from '../../common/components/with_lazy_hook';
-import { IntegrationsGrid, IntegrationsSkeleton } from '../../common/lib/search_ai_lake';
+import { IntegrationsPage, IntegrationsSkeleton } from '../../common/lib/search_ai_lake';
 
 export interface IntegrationsPageProps {
   useAvailablePackages: AvailablePackagesHookType;
@@ -44,7 +44,7 @@ export const ConfigurationsIntegrationsHome = React.memo<IntegrationsPageProps>(
               <Route
                 path={`${CONFIGURATIONS_PATH}/${ConfigurationTabs.integrations}/:view(${IntegrationsFacets.available})`}
               >
-                <IntegrationsGrid
+                <IntegrationsPage
                   view={IntegrationsFacets.available}
                   availableIntegrations={available}
                   installedIntegrations={installed}
@@ -55,7 +55,7 @@ export const ConfigurationsIntegrationsHome = React.memo<IntegrationsPageProps>(
               <Route
                 path={`${CONFIGURATIONS_PATH}/${ConfigurationTabs.integrations}/:view(${IntegrationsFacets.installed})`}
               >
-                <IntegrationsGrid
+                <IntegrationsPage
                   view={IntegrationsFacets.installed}
                   availableIntegrations={available}
                   installedIntegrations={installed}

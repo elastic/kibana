@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export { IntegrationsGrid } from './integrations_grid';
+export { IntegrationsPage } from './integrations_page';
 export { IntegrationsSkeleton } from './integrations_skeleton';

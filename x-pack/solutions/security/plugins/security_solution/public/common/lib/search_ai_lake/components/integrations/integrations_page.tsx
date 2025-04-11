@@ -28,7 +28,7 @@ export interface IntegrationsGridProps {
   setSearchTerm: (searchTerm: string) => void;
 }
 
-export const IntegrationsGrid = React.memo<IntegrationsGridProps>(
+export const IntegrationsPage = React.memo<IntegrationsGridProps>(
   ({ view, availableIntegrations, installedIntegrations, searchTerm, setSearchTerm }) => {
     return (
       <EuiFlexGroup direction="column" gutterSize="none">
@@ -62,9 +62,9 @@ export const IntegrationsGrid = React.memo<IntegrationsGridProps>(
                   : []
               }
               scrollElementId={'integrations-scroll-container'}
-              searchTerm={searchTerm}
               selectedCategory={'security'}
               selectedSubCategory={''}
+              searchTerm={searchTerm}
               setSearchTerm={setSearchTerm}
               setCategory={noop}
               setUrlandPushHistory={noop}
@@ -81,4 +81,4 @@ export const IntegrationsGrid = React.memo<IntegrationsGridProps>(
     );
   }
 );
-IntegrationsGrid.displayName = 'IntegrationsGrid';
+IntegrationsPage.displayName = 'IntegrationsGrid';
