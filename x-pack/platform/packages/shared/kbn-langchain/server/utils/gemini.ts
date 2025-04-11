@@ -307,6 +307,8 @@ const getSafetyReasons = (safetyRatings: SafetyReason[]) => {
   );
 };
 
+const MAX_CONSECUTIVE_PARSE_ERRORS = 3;
+
 export const parseGeminiStreamAsAsyncIterator = async function* (
   stream: Readable,
   logger: Logger,
@@ -319,6 +321,7 @@ export const parseGeminiStreamAsAsyncIterator = async function* (
   }
   try {
     let tokenBuffer = '';
+    let consecutiveParseErrors = 0;
     for await (const chunk of stream) {
       let decoded = chunk.toString();
       if (tokenBuffer) {
@@ -330,11 +333,13 @@ export const parseGeminiStreamAsAsyncIterator = async function* (
       try {
         parsed = parseGeminiResponse(decoded);
       } catch {
+        consecutiveParseErrors += 1;
         tokenBuffer = decoded;
         logger.error('Gemini stream parsing error in async iterator, attempting to re-parse with next chunk');
       }
       // Split the parsed string into chunks of 5 characters
-      if (parsed){
+      if (parsed) {
+        consecutiveParseErrors = 0; // Reset the error count if parsing was successful
         for (let i = 0; i < parsed.length; i += 5) {
           yield parsed.substring(i, i + 5);
         }
