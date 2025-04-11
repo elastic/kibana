@@ -141,7 +141,7 @@ describe('getRemoteSyncedIntegrationsInfoByOutputId', () => {
 
     await expect(
       getRemoteSyncedIntegrationsInfoByOutputId(soClientMock, 'remote1')
-    ).rejects.toThrowError('Remote kibana url not available');
+    ).rejects.toThrowError('Remote Kibana URL not set on the output.');
   });
 
   it('should throw error if kibanaApiKey is not present', async () => {
@@ -156,7 +156,7 @@ describe('getRemoteSyncedIntegrationsInfoByOutputId', () => {
 
     await expect(
       getRemoteSyncedIntegrationsInfoByOutputId(soClientMock, 'remote1')
-    ).rejects.toThrowError('Kibana api key for http://remote-kibana-host not found');
+    ).rejects.toThrowError('Remote Kibana API key for http://remote-kibana-host not found');
   });
 
   it('should throw error if it cannot establish a connection with remote kibana', async () => {

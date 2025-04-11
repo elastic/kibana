@@ -47,10 +47,10 @@ export const getRemoteSyncedIntegrationsInfoByOutputId = async (
       throw new FleetError(`Synced integrations not enabled`);
     }
     if (!kibanaUrl || kibanaUrl === '') {
-      throw new FleetError(`Remote kibana url not available`);
+      throw new FleetError(`Remote Kibana URL not set on the output.`);
     }
     if (!kibanaApiKey) {
-      throw new FleetError(`Kibana api key for ${kibanaUrl} not found`);
+      throw new FleetError(`Remote Kibana API key for ${kibanaUrl} not found`);
     }
     const options: RequestInit = {
       headers: {
