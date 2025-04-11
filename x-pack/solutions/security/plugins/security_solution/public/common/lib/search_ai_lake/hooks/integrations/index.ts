@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { IntegrationsPage, IntegrationsSkeleton } from './integrations';
+export { useEnhancedIntegrationCards } from './use_enhanced_integration_cards';

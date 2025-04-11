@@ -10,11 +10,13 @@ import { EuiSkeletonLoading } from '@elastic/eui';
 import type { AvailablePackagesHookType } from '@kbn/fleet-plugin/public';
 import { Routes, Route } from '@kbn/shared-ux-router';
 import { Redirect } from 'react-router-dom';
-import { AI4DSOC_ALLOWED_INTEGRATIONS, CONFIGURATIONS_PATH } from '../../../common/constants';
-import { useEnhancedIntegrationCards } from './hooks/use_enhanced_integration_cards';
+import { CONFIGURATIONS_PATH } from '../../../common/constants';
+import { SEARCH_AI_LAKE_ALLOWED_INTEGRATIONS } from '../../common/lib/search_ai_lake/constants';
+import { useEnhancedIntegrationCards } from '../../common/lib/search_ai_lake/hooks';
 import { ConfigurationTabs, IntegrationsFacets } from '../constants';
-import { IntegrationsPage, IntegrationsSkeleton } from './components';
+
 import { withLazyHook } from '../../common/components/with_lazy_hook';
+import { IntegrationsGrid, IntegrationsSkeleton } from '../../common/lib/search_ai_lake';
 
 export interface IntegrationsPageProps {
   useAvailablePackages: AvailablePackagesHookType;
@@ -27,7 +29,7 @@ export const ConfigurationsIntegrationsHome = React.memo<IntegrationsPageProps>(
     });
 
     const allowedIntegrations = filteredCards.filter((card) =>
-      AI4DSOC_ALLOWED_INTEGRATIONS.includes(card.name)
+      SEARCH_AI_LAKE_ALLOWED_INTEGRATIONS.includes(card.name)
     );
 
     const { available, installed } = useEnhancedIntegrationCards(allowedIntegrations);
@@ -42,7 +44,7 @@ export const ConfigurationsIntegrationsHome = React.memo<IntegrationsPageProps>(
               <Route
                 path={`${CONFIGURATIONS_PATH}/${ConfigurationTabs.integrations}/:view(${IntegrationsFacets.available})`}
               >
-                <IntegrationsPage
+                <IntegrationsGrid
                   view={IntegrationsFacets.available}
                   availableIntegrations={available}
                   installedIntegrations={installed}
@@ -53,7 +55,7 @@ export const ConfigurationsIntegrationsHome = React.memo<IntegrationsPageProps>(
               <Route
                 path={`${CONFIGURATIONS_PATH}/${ConfigurationTabs.integrations}/:view(${IntegrationsFacets.installed})`}
               >
-                <IntegrationsPage
+                <IntegrationsGrid
                   view={IntegrationsFacets.installed}
                   availableIntegrations={available}
                   installedIntegrations={installed}

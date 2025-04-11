@@ -493,15 +493,6 @@ export const DEFAULT_ALERT_TAGS_VALUE = [
   i18n.FURTHER_INVESTIGATION_REQUIRED,
 ] as const;
 
-/** Allow list of integrations to be available in the AI4DSOC integrations page */
-export const AI4DSOC_ALLOWED_INTEGRATIONS: string[] = [
-  'crowdstrike',
-  'google_secops',
-  'microsoft_sentinel',
-  'sentinel_one',
-  'splunk',
-];
-
 /**
  * Max length for the comments within security solution
  */

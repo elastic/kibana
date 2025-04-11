@@ -12,7 +12,7 @@ import type { IntegrationCardItem } from '@kbn/fleet-plugin/public';
 import { noop } from 'lodash';
 import { FACETS_MAX_WIDTH_PX, INTEGRATIONS_GRID_MAX_WIDTH_PX } from './constants';
 import { IntegrationViewFacets } from './view_facets';
-import { IntegrationsFacets } from '../../../constants';
+import { IntegrationsFacets } from '../../../../../configurations/constants';
 
 export const PackageListGrid = lazy(async () => ({
   default: await import('@kbn/fleet-plugin/public')
