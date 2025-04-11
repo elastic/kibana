@@ -6,19 +6,20 @@
  */
 import { i18n } from '@kbn/i18n';
 import { useCallback, useEffect, useState } from 'react';
+import pRetry from 'p-retry';
 import {
   type AbortableAsyncState,
   useAbortableAsync,
   APIReturnType,
+  KnowledgeBaseState,
 } from '@kbn/observability-ai-assistant-plugin/public';
-import pRetry from 'p-retry';
 import { useKibana } from './use_kibana';
 import { useAIAssistantAppService } from './use_ai_assistant_app_service';
 
 export interface UseKnowledgeBaseResult {
   status: AbortableAsyncState<APIReturnType<'GET /internal/observability_ai_assistant/kb/status'>>;
   isInstalling: boolean;
-  installError?: Error;
+  isPolling: boolean;
   install: (inferenceId: string) => Promise<void>;
 }
 
@@ -34,109 +35,76 @@ export function useKnowledgeBase(): UseKnowledgeBaseResult {
   );
 
   const [isInstalling, setIsInstalling] = useState(false);
+  const isPolling =
+    !!statusRequest.value?.endpoint && statusRequest.value?.kbState !== KnowledgeBaseState.READY;
 
-  const [installError, setInstallError] = useState<Error>();
-  const [isPollingForDeployment, setIsPollingForDeployment] = useState(false);
+  useEffect(() => {
+    if (isInstalling && !!statusRequest.value?.endpoint) {
+      setIsInstalling(false);
+    }
+  }, [isInstalling, statusRequest]);
 
   const install = useCallback(
     async (inferenceId: string) => {
       setIsInstalling(true);
-      setIsPollingForDeployment(false);
-      setInstallError(undefined);
-
       try {
-        await installKnowledgeBase();
-
+        // Retry the setup with a maximum of 5 attempts
+        await pRetry(
+          async () => {
+            await service.callApi('POST /internal/observability_ai_assistant/kb/setup', {
+              params: {
+                query: {
+                  inference_id: inferenceId,
+                },
+              },
+              signal: null,
+            });
+          },
+          {
+            retries: 5,
+          }
+        );
         if (ml.mlApi?.savedObjects.syncSavedObjects) {
           await ml.mlApi.savedObjects.syncSavedObjects();
         }
 
-        // do one refresh to get an initial status
+        // Refresh status after installation
         statusRequest.refresh();
-
-        // start polling for readiness
-        setIsPollingForDeployment(true);
-      } catch (e) {
-        setInstallError(e);
-        notifications!.toasts.addError(e, {
+      } catch (error) {
+        notifications!.toasts.addError(error, {
           title: i18n.translate('xpack.aiAssistant.errorSettingUpInferenceEndpoint', {
             defaultMessage: 'Could not create inference endpoint',
           }),
         });
-        setIsInstalling(false);
-      }
-
-      async function installKnowledgeBase() {
-        await pRetry(
-          async () => {
-            try {
-              await service.callApi('POST /internal/observability_ai_assistant/kb/setup', {
-                signal: null,
-                params: {
-                  query: {
-                    inference_id: '.elser-2-elasticsearch',
-                  },
-                },
-              });
-            } catch (error) {
-              // retry on 503 and 504
-              if (error.body?.statusCode === 503 || error.body?.statusCode === 504) {
-                throw error;
-              }
-
-              // Abort retrying
-              throw new pRetry.AbortError(error);
-            }
-          },
-          { retries: 5 }
-        );
       }
     },
     [ml, service, notifications, statusRequest]
   );
 
-  // poll the status if isPollingForDeployment === true
-  // stop when ready === true or some error
+  // poll the status if isPolling (inference endpoint is created but deployment is not ready)
   useEffect(() => {
-    if (!isPollingForDeployment) {
+    if (!isPolling) {
       return;
     }
 
-    const interval = setInterval(async () => {
-      // re-fetch /status
-      statusRequest.refresh();
+    const interval = setInterval(statusRequest.refresh, 5000);
 
-      const { value: currentStatus } = statusRequest;
-
-      // check if the model is now ready
-      if (currentStatus?.ready) {
-        // done installing
-        setIsInstalling(false);
-        setIsPollingForDeployment(false);
-        clearInterval(interval);
-        return;
-      }
-
-      // if "deployment failed" state
-      if (currentStatus?.model_stats?.deployment_state === 'failed') {
-        setInstallError(new Error('model deployment failed'));
-        setIsInstalling(false);
-        setIsPollingForDeployment(false);
-        clearInterval(interval);
-        return;
-      }
-    }, 5000);
+    if (statusRequest.value?.kbState === KnowledgeBaseState.READY) {
+      // done installing
+      clearInterval(interval);
+      return;
+    }
 
     // cleanup the interval if unmount
     return () => {
       clearInterval(interval);
     };
-  }, [isPollingForDeployment, statusRequest]);
+  }, [statusRequest, isPolling]);
 
   return {
     status: statusRequest,
     install,
     isInstalling,
-    installError,
+    isPolling,
   };
 }
