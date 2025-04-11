@@ -2173,16 +2173,6 @@ paths:
                   additionalProperties: false
                   type: object
                   properties:
-                    dashboards:
-                      items:
-                        additionalProperties: false
-                        type: object
-                        properties:
-                          id:
-                            type: string
-                        required:
-                          - id
-                      type: array
                     investigation_guide:
                       additionalProperties: false
                       type: object
