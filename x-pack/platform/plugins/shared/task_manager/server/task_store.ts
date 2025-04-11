@@ -902,24 +902,24 @@ export class TaskStore {
     { max_docs: max_docs }: UpdateByQueryOpts = {}
   ): Promise<UpdateByQueryResult> {
     const { query } = ensureQueryOnlyReturnsTaskObjects(opts);
+    const { sort, ...rest } = opts;
     try {
-      const // @ts-expect-error elasticsearch@9.0.0 https://github.com/elastic/elasticsearch-js/issues/2584 types complain because the body should not be there.
-        // However, we can't use this API without the body because it fails to claim the tasks.
-        // eslint-disable-next-line @typescript-eslint/naming-convention
-        { total, updated, version_conflicts } = await this.esClientWithoutRetries.updateByQuery(
-          {
-            index: this.index,
-            ignore_unavailable: true,
-            refresh: true,
-            conflicts: 'proceed',
-            body: {
-              ...opts,
-              max_docs,
-              query,
-            },
-          },
-          { requestTimeout: this.requestTimeouts.update_by_query }
-        );
+      // eslint-disable-next-line @typescript-eslint/naming-convention
+      const { total, updated, version_conflicts } = await this.esClientWithoutRetries.updateByQuery(
+        {
+          index: this.index,
+          ignore_unavailable: true,
+          refresh: true,
+          conflicts: 'proceed',
+          ...rest,
+          max_docs,
+          query,
+          // @ts-expect-error According to the docs, sort should be a comma-separated list of fields and goes in the querystring.
+          // However, this one is using a "body" format?
+          body: { sort },
+        },
+        { requestTimeout: this.requestTimeouts.update_by_query }
+      );
 
       const conflictsCorrectedForContinuation = correctVersionConflictsForContinuation(
         updated,

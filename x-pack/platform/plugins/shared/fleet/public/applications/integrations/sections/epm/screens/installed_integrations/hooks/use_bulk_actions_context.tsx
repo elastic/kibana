@@ -5,13 +5,11 @@
  * 2.0.
  */
 
-import React, { useCallback, useContext, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useQueries, useQueryClient } from '@tanstack/react-query';
 
 import {
-  sendBulkUninstallPackagesForRq,
-  sendBulkUpgradePackagesForRq,
   sendGetOneBulkUninstallPackagesForRq,
   sendGetOneBulkUpgradePackagesForRq,
   useStartServices,
@@ -145,110 +143,3 @@ export const BulkActionContextProvider: React.FunctionComponent<{ children: Reac
     </bulkActionsContext.Provider>
   );
 };
-
-export function useBulkActions() {
-  const {
-    upgradingIntegrations,
-    uninstallingIntegrations,
-    bulkActions: { setPollingBulkActions },
-  } = useContext(bulkActionsContext);
-  const {
-    notifications: { toasts },
-  } = useStartServices();
-
-  const bulkUpgradeIntegrations = useCallback(
-    async (items: InstalledPackageUIPackageListItem[], updatePolicies?: boolean) => {
-      try {
-        const res = await sendBulkUpgradePackagesForRq({
-          packages: items.map((item) => ({ name: item.name })),
-          upgrade_package_policies: updatePolicies,
-        });
-
-        setPollingBulkActions((actions) => [
-          ...actions,
-          {
-            taskId: res.taskId,
-            type: 'bulk_upgrade',
-            integrations: items,
-          },
-        ]);
-        toasts.addInfo({
-          title: i18n.translate(
-            'xpack.fleet.epmInstalledIntegrations.bulkActions.bulkUpgradeInProgressTitle',
-            {
-              defaultMessage: 'Upgrade in progress',
-            }
-          ),
-          content: i18n.translate(
-            'xpack.fleet.epmInstalledIntegrations.bulkActions.bulkUpgradeInProgressDescription',
-            {
-              defaultMessage:
-                'The integrations and the policies are upgrading to the latest version.',
-            }
-          ),
-        });
-      } catch (error) {
-        toasts.addError(error, {
-          title: i18n.translate(
-            'xpack.fleet.epmInstalledIntegrations.bulkActions.bulkUpgradeErrorTitle',
-            {
-              defaultMessage: 'Error upgrading integrations',
-            }
-          ),
-        });
-      }
-    },
-    [setPollingBulkActions, toasts]
-  );
-
-  const bulkUninstallIntegrations = useCallback(
-    async (items: InstalledPackageUIPackageListItem[], updatePolicies?: boolean) => {
-      try {
-        const res = await sendBulkUninstallPackagesForRq({
-          packages: items.map((item) => ({
-            name: item.name,
-            version: item.installationInfo!.version,
-          })),
-        });
-
-        setPollingBulkActions((actions) => [
-          ...actions,
-          {
-            taskId: res.taskId,
-            type: 'bulk_uninstall',
-            integrations: items,
-          },
-        ]);
-        toasts.addInfo({
-          title: i18n.translate(
-            'xpack.fleet.epmInstalledIntegrations.bulkActions.bulkUninstallInProgressTitle',
-            {
-              defaultMessage: 'Uninstall in progress',
-            }
-          ),
-        });
-      } catch (error) {
-        toasts.addError(error, {
-          title: i18n.translate(
-            'xpack.fleet.epmInstalledIntegrations.bulkActions.bulkUninstallErrorTitle',
-            {
-              defaultMessage: 'Error uninstalling integrations',
-            }
-          ),
-        });
-      }
-    },
-    [toasts, setPollingBulkActions]
-  );
-
-  const actions = useMemo(
-    () => ({ bulkUpgradeIntegrations, bulkUninstallIntegrations }),
-    [bulkUpgradeIntegrations, bulkUninstallIntegrations]
-  );
-
-  return {
-    actions,
-    upgradingIntegrations,
-    uninstallingIntegrations,
-  };
-}
