@@ -17,6 +17,7 @@ export interface DocLinksMeta {
   elasticGithubUrl: string;
   docsWebsiteUrl: string;
   searchLabsUrl: string;
+  apiDocsUrl: string;
 }
 
 /**
