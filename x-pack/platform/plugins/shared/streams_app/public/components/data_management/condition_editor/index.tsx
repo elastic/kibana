@@ -162,6 +162,21 @@ function FilterForm(props: {
     } as FilterCondition);
   };
 
+  const handleOperatorChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    const newCondition: Partial<FilterCondition> = { ...props.condition };
+
+    const newOperator = event.target.value;
+    if ((newOperator === 'exists' || newOperator === 'notExists') && 'value' in newCondition) {
+      delete newCondition.value;
+    } else if (!('value' in newCondition)) {
+      (newCondition as BinaryFilterCondition).value = '';
+    }
+    handleConditionChange({
+      ...newCondition,
+      operator: newOperator,
+    } as FilterCondition);
+  };
+
   return (
     <EuiFlexGroup gutterSize="s" alignItems="center">
       <EuiFieldText
@@ -185,24 +200,8 @@ function FilterForm(props: {
         options={operatorOptions}
         value={props.condition.operator}
         compressed
-        onChange={(e) => {
-          const newCondition: Partial<FilterCondition> = {
-            ...props.condition,
-          };
-
-          const newOperator = e.target.value as FilterCondition['operator'];
-          if (newOperator === 'exists' || newOperator === 'notExists') {
-            if ('value' in newCondition) delete newCondition.value;
-          } else if (!('value' in newCondition)) {
-            (newCondition as BinaryFilterCondition).value = '';
-          }
-          handleConditionChange({
-            ...newCondition,
-            operator: newOperator,
-          } as FilterCondition);
-        }}
+        onChange={handleOperatorChange}
       />
-
       {'value' in props.condition && (
         <EuiFieldText
           aria-label={i18n.translate('xpack.streams.filter.value', { defaultMessage: 'Value' })}
