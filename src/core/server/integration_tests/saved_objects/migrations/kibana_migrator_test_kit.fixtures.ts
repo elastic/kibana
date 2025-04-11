@@ -21,7 +21,7 @@ import {
 } from './kibana_migrator_test_kit';
 
 export const baselineIndexTypesMap: IndexTypesMap = {
-  [defaultKibanaIndex]: ['basic', 'complex', 'server', 'deprecated'],
+  [defaultKibanaIndex]: ['basic', 'complex', 'server-test', 'deprecated'],
   [defaultKibanaTaskIndex]: ['task'],
 };
 
@@ -46,7 +46,7 @@ const defaultType: SavedObjectsType<any> = {
 export const baselineTypes: Array<SavedObjectsType<any>> = [
   {
     ...defaultType,
-    name: 'server',
+    name: 'server-test',
   },
   {
     ...defaultType,
@@ -202,9 +202,9 @@ export const getBaselineDocuments = (
 
   return [
     ...new Array(documentsPerType).fill(true).map((_, index) => ({
-      type: 'server',
+      type: 'server-test',
       attributes: {
-        name: `server-${index}`,
+        name: `server-test-${index}`,
       },
     })),
     ...new Array(documentsPerType).fill(true).map((_, index) => ({
