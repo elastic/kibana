@@ -11,7 +11,7 @@ import { Writable } from 'stream';
 
 import type { TypeOf } from '@kbn/config-schema';
 import type { CustomRequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
-import type { KibanaRequest } from '@kbn/core/server';
+import type { KibanaRequest } from '@kbn/core-http-server';
 import type { CancellationToken } from '@kbn/reporting-common';
 import type {
   BaseParams,

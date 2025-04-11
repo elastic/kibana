@@ -377,8 +377,6 @@ export interface TaskInstance {
    * Optionally override the priority defined in the task type for this specific task instance
    */
   priority?: TaskPriority;
-
-  invalidateApiKey?: boolean;
 }
 
 /**

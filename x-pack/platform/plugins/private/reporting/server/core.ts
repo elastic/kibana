@@ -149,8 +149,6 @@ export class ReportingCore {
       et.setup(setupDeps);
     });
 
-    // setupDeps.taskManager.registerEncryptedSavedObjects(setupDeps.encryptedSavedObjects);
-
     const { executeTask, runScheduledReportTask } = this;
     setupDeps.taskManager.registerTaskDefinitions({
       [executeTask.TYPE]: executeTask.getTaskDefinition(),
@@ -167,7 +165,6 @@ export class ReportingCore {
     this.pluginStart$.next(startDeps); // trigger the observer
     this.pluginStartDeps = startDeps; // cache
 
-    // startDeps.taskManager.registerEncryptedSavedObjectsPlugin(startDeps.encryptedSavedObjects);
     this.exportTypesRegistry.getAll().forEach((et) => {
       et.start({ ...startDeps });
     });
