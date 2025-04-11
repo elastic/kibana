@@ -456,6 +456,7 @@ describe('Observability AI Assistant client', () => {
               labels: {},
               numeric_labels: {},
               public: false,
+              archived: false,
               namespace: 'default',
               user: {
                 name: 'johndoe',

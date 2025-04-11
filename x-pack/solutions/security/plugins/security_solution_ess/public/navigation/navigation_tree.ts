@@ -390,12 +390,8 @@ export const createNavigationTree = (services: Services): NavigationTreeDefiniti
                       title: i18nStrings.ml.overview,
                     },
                     {
-                      link: 'ml:notifications',
-                      title: i18nStrings.ml.notifications,
-                    },
-                    {
-                      link: 'ml:memoryUsage',
-                      title: i18nStrings.ml.memoryUsage,
+                      link: 'ml:dataVisualizer',
+                      title: i18nStrings.ml.dataVisualizer,
                     },
                   ],
                 },
@@ -404,24 +400,12 @@ export const createNavigationTree = (services: Services): NavigationTreeDefiniti
                   breadcrumbStatus: 'hidden',
                   children: [
                     {
-                      link: 'ml:anomalyDetection',
-                      title: i18nStrings.ml.anomalyDetection.jobs,
-                    },
-                    {
                       link: 'ml:anomalyExplorer',
                       title: i18nStrings.ml.anomalyDetection.anomalyExplorer,
                     },
                     {
                       link: 'ml:singleMetricViewer',
                       title: i18nStrings.ml.anomalyDetection.singleMetricViewer,
-                    },
-                    {
-                      link: 'ml:suppliedConfigurations',
-                      title: i18nStrings.ml.anomalyDetection.suppliedConfigurations,
-                    },
-                    {
-                      link: 'ml:settings',
-                      title: i18nStrings.ml.anomalyDetection.settings,
                     },
                   ],
                 },
@@ -430,48 +414,12 @@ export const createNavigationTree = (services: Services): NavigationTreeDefiniti
                   breadcrumbStatus: 'hidden',
                   children: [
                     {
-                      link: 'ml:dataFrameAnalytics',
-                      title: i18nStrings.ml.dataFrameAnalytics.jobs,
-                    },
-                    {
                       link: 'ml:resultExplorer',
                       title: i18nStrings.ml.dataFrameAnalytics.resultExplorer,
                     },
                     {
                       link: 'ml:analyticsMap',
                       title: i18nStrings.ml.dataFrameAnalytics.analyticsMap,
-                    },
-                  ],
-                },
-                {
-                  title: i18nStrings.ml.modelManagement.title,
-                  breadcrumbStatus: 'hidden',
-                  children: [
-                    {
-                      link: 'ml:nodesOverview',
-                      title: i18nStrings.ml.modelManagement.trainedModels,
-                    },
-                  ],
-                },
-                {
-                  title: i18nStrings.ml.dataVisualizer.title,
-                  breadcrumbStatus: 'hidden',
-                  children: [
-                    {
-                      link: 'ml:fileUpload',
-                      title: i18nStrings.ml.dataVisualizer.fileDataVisualizer,
-                    },
-                    {
-                      link: 'ml:indexDataVisualizer',
-                      title: i18nStrings.ml.dataVisualizer.dataViewDataVisualizer,
-                    },
-                    {
-                      link: 'ml:esqlDataVisualizer',
-                      title: i18nStrings.ml.dataVisualizer.esqlDataVisualizer,
-                    },
-                    {
-                      link: 'ml:dataDrift',
-                      title: i18nStrings.ml.dataVisualizer.dataDrift,
                     },
                   ],
                 },
@@ -495,23 +443,6 @@ export const createNavigationTree = (services: Services): NavigationTreeDefiniti
                 },
               ],
               renderAs: 'panelOpener',
-            },
-          ],
-        },
-        {
-          breadcrumbStatus: 'hidden',
-          children: [
-            {
-              id: SecurityPageName.entityAnalyticsManagement,
-              link: securityLink(SecurityPageName.entityAnalyticsManagement),
-              title: i18nStrings.entityRiskScore,
-              sideNavStatus: 'hidden',
-            },
-            {
-              id: SecurityPageName.entityAnalyticsEntityStoreManagement,
-              link: securityLink(SecurityPageName.entityAnalyticsEntityStoreManagement),
-              title: i18nStrings.entityStore,
-              sideNavStatus: 'hidden',
             },
           ],
         },
@@ -615,6 +546,16 @@ export const createNavigationTree = (services: Services): NavigationTreeDefiniti
                   id: SecurityPageName.entityAnalyticsEntityStoreManagement,
                   link: securityLink(SecurityPageName.entityAnalyticsEntityStoreManagement),
                 },
+              ],
+            },
+            {
+              title: i18nStrings.ml.title,
+              children: [
+                { link: 'management:overview' },
+                { link: 'management:anomaly_detection' },
+                { link: 'management:analytics' },
+                { link: 'management:trained_models' },
+                { link: 'management:supplied_configurations' },
               ],
             },
             {

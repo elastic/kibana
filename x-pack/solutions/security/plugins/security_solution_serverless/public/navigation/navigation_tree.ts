@@ -16,6 +16,7 @@ import {
 } from '@kbn/security-solution-navigation/links';
 
 import { type Services } from '../common/services';
+import { createMachineLearningNavigationTree } from './ml_navigation';
 import { createStackManagementNavigationTree } from './stack_management_navigation';
 
 const SOLUTION_NAME = i18n.translate(
@@ -31,6 +32,7 @@ export const createNavigationTree = (services: Services): NavigationTreeDefiniti
       title: SOLUTION_NAME,
       icon: 'logoSecurity',
       breadcrumbStatus: 'hidden',
+      isCollapsible: false,
       defaultIsCollapsed: false,
       children: [
         {
@@ -370,138 +372,8 @@ export const createNavigationTree = (services: Services): NavigationTreeDefiniti
           ],
           renderAs: 'panelOpener',
         },
-        {
-          id: SecurityGroupName.machineLearning,
-          title: SecurityLinkGroup[SecurityGroupName.machineLearning].title,
-          children: [
-            {
-              breadcrumbStatus: 'hidden',
-              children: [
-                {
-                  link: 'ml:overview',
-                  title: i18nStrings.ml.overview,
-                },
-                {
-                  link: 'ml:notifications',
-                  title: i18nStrings.ml.notifications,
-                },
-                {
-                  link: 'ml:memoryUsage',
-                  title: i18nStrings.ml.memoryUsage,
-                },
-              ],
-            },
-            {
-              title: i18nStrings.ml.anomalyDetection.title,
-              breadcrumbStatus: 'hidden',
-              children: [
-                {
-                  link: 'ml:anomalyDetection',
-                  title: i18nStrings.ml.anomalyDetection.jobs,
-                },
-                {
-                  link: 'ml:anomalyExplorer',
-                  title: i18nStrings.ml.anomalyDetection.anomalyExplorer,
-                },
-                {
-                  link: 'ml:singleMetricViewer',
-                  title: i18nStrings.ml.anomalyDetection.singleMetricViewer,
-                },
-                {
-                  link: 'ml:suppliedConfigurations',
-                  title: i18nStrings.ml.anomalyDetection.suppliedConfigurations,
-                },
-                {
-                  link: 'ml:settings',
-                  title: i18nStrings.ml.anomalyDetection.settings,
-                },
-              ],
-            },
-            {
-              title: i18nStrings.ml.dataFrameAnalytics.title,
-              breadcrumbStatus: 'hidden',
-              children: [
-                {
-                  link: 'ml:dataFrameAnalytics',
-                  title: i18nStrings.ml.dataFrameAnalytics.jobs,
-                },
-                {
-                  link: 'ml:resultExplorer',
-                  title: i18nStrings.ml.dataFrameAnalytics.resultExplorer,
-                },
-                {
-                  link: 'ml:analyticsMap',
-                  title: i18nStrings.ml.dataFrameAnalytics.analyticsMap,
-                },
-              ],
-            },
-            {
-              title: i18nStrings.ml.modelManagement.title,
-              breadcrumbStatus: 'hidden',
-              children: [
-                {
-                  link: 'ml:nodesOverview',
-                  title: i18nStrings.ml.modelManagement.trainedModels,
-                },
-              ],
-            },
-            {
-              title: i18nStrings.ml.dataVisualizer.title,
-              breadcrumbStatus: 'hidden',
-              children: [
-                {
-                  link: 'ml:fileUpload',
-                  title: i18nStrings.ml.dataVisualizer.fileDataVisualizer,
-                },
-                {
-                  link: 'ml:indexDataVisualizer',
-                  title: i18nStrings.ml.dataVisualizer.dataViewDataVisualizer,
-                },
-                {
-                  link: 'ml:esqlDataVisualizer',
-                  title: i18nStrings.ml.dataVisualizer.esqlDataVisualizer,
-                },
-                {
-                  link: 'ml:dataDrift',
-                  title: i18nStrings.ml.dataVisualizer.dataDrift,
-                },
-              ],
-            },
-            {
-              title: i18nStrings.ml.aiopsLabs.title,
-              breadcrumbStatus: 'hidden',
-              children: [
-                {
-                  link: 'ml:logRateAnalysis',
-                  title: i18nStrings.ml.aiopsLabs.logRateAnalysis,
-                },
-                {
-                  link: 'ml:logPatternAnalysis',
-                  title: i18nStrings.ml.aiopsLabs.logPatternAnalysis,
-                },
-                {
-                  link: 'ml:changePointDetections',
-                  title: i18nStrings.ml.aiopsLabs.changePointDetection,
-                },
-              ],
-            },
-          ],
-          renderAs: 'panelOpener',
-        },
-        {
-          id: SecurityPageName.entityAnalyticsManagement,
-          link: securityLink(SecurityPageName.entityAnalyticsManagement),
-          title: i18nStrings.entityRiskScore,
-          sideNavStatus: 'hidden',
-        },
-        {
-          id: SecurityPageName.entityAnalyticsEntityStoreManagement,
-          link: securityLink(SecurityPageName.entityAnalyticsEntityStoreManagement),
-          title: i18nStrings.entityStore,
-          sideNavStatus: 'hidden',
-        },
+        createMachineLearningNavigationTree(),
       ],
-      isCollapsible: false,
     },
   ],
   footer: [

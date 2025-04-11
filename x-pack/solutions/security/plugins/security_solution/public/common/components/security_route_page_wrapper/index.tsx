@@ -15,14 +15,22 @@ import { useUpsellingPage } from '../../hooks/use_upselling';
 import { SpyRoute } from '../../utils/route/spy_routes';
 import { useNavLinkExists } from '../../links/links_hooks';
 
-interface SecurityRoutePageWrapperProps {
-  pageName: SecurityPageName;
+interface SecurityRoutePageWrapperOptionProps {
   /**
    * Property to redirect to the Security home page instead of rendering the generic "NoPrivileges" page when the `pageName` is missing in the links registry.
    * @default false
    */
   redirectOnMissing?: boolean;
+  /**
+   * Used to disable the SpyRoute for the page, if e.g. the page's need to render their own specific SpyRoute.
+   * @default false
+   */
+  omitSpyRoute?: boolean;
 }
+
+type SecurityRoutePageWrapperProps = {
+  pageName: SecurityPageName;
+} & SecurityRoutePageWrapperOptionProps;
 
 /**
  * This component is created to wrap all the pages in the security solution app.
@@ -42,7 +50,7 @@ interface SecurityRoutePageWrapperProps {
  * ```
  */
 export const SecurityRoutePageWrapper: React.FC<PropsWithChildren<SecurityRoutePageWrapperProps>> =
-  React.memo(({ children, pageName, redirectOnMissing = false }) => {
+  React.memo(({ children, pageName, omitSpyRoute = false, redirectOnMissing = false }) => {
     const link = useLinkInfo(pageName);
     const navLinkExists = useNavLinkExists(pageName);
     const UpsellingPage = useUpsellingPage(pageName);
@@ -81,7 +89,7 @@ export const SecurityRoutePageWrapper: React.FC<PropsWithChildren<SecurityRouteP
     return (
       <TrackApplicationView viewId={pageName}>
         {children}
-        <SpyRoute pageName={pageName} />
+        {!omitSpyRoute && <SpyRoute pageName={pageName} />}
       </TrackApplicationView>
     );
   });
@@ -93,11 +101,11 @@ SecurityRoutePageWrapper.displayName = 'SecurityRoutePageWrapper';
 export const withSecurityRoutePageWrapper = <T extends {}>(
   Component: React.ComponentType<T>,
   pageName: SecurityPageName,
-  { redirectOnMissing }: { redirectOnMissing?: boolean } = {}
+  options: SecurityRoutePageWrapperOptionProps = {}
 ) => {
   return function WithSecurityRoutePageWrapper(props: T) {
     return (
-      <SecurityRoutePageWrapper pageName={pageName} redirectOnMissing={redirectOnMissing}>
+      <SecurityRoutePageWrapper pageName={pageName} {...options}>
         <Component {...props} />
       </SecurityRoutePageWrapper>
     );
