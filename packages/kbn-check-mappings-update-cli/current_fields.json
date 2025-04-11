@@ -920,6 +920,21 @@
     "username"
   ],
   "search-telemetry": [],
+  "search_playground": [
+    "citations",
+    "context",
+    "context.docSize",
+    "context.sourceFields",
+    "elasticsearchQueryJSON",
+    "indices",
+    "name",
+    "prompt",
+    "queryFields",
+    "summarizationModel",
+    "summarizationModel.connectorId",
+    "summarizationModel.value",
+    "userElasticsearchQueryJSON"
+  ],
   "security-ai-prompt": [
     "description",
     "model",
