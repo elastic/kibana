@@ -2167,21 +2167,21 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-0.1.1.tgz#2829b0f3cc750c582baa683c2f503594676ba08a"
   integrity sha512-dCoXcCT8V1djwWrP0XSG0gXN5fYDtAw5aF88BPArVBbuCQSWPEBpR9avaWJ6uVjAsOteQ7tdwLMtzrvMKgKKIA==
 
-"@elastic/eui-theme-borealis@file:./elastic_eui_theme_borealis_0.1.0_v2_poc_007.tgz":
+"@elastic/eui-theme-borealis@file:./elastic_eui_theme_borealis_0.1.0_v2_poc_009.tgz":
   version "0.1.0"
-  resolved "file:./elastic_eui_theme_borealis_0.1.0_v2_poc_007.tgz#271b53afb002408f4bff27a23af09d91d2fea58a"
+  resolved "file:./elastic_eui_theme_borealis_0.1.0_v2_poc_009.tgz#ebae186c0552212df5fec9d3e9c775a02ab6e8b3"
 
-"@elastic/eui-theme-common@file:./elastic_eui_theme_common_0.1.0_v2_poc_007.tgz":
+"@elastic/eui-theme-common@file:./elastic_eui_theme_common_0.1.0_v2_poc_009.tgz":
   version "0.1.0"
-  resolved "file:./elastic_eui_theme_common_0.1.0_v2_poc_007.tgz#399616f8c5820e2e557c729393be8efbe2c60fe4"
+  resolved "file:./elastic_eui_theme_common_0.1.0_v2_poc_009.tgz#bd09ed246fb7961c48bb27107c4b68bdfc1854eb"
   dependencies:
     "@types/lodash" "^4.14.202"
     chroma-js "^2.4.2"
     lodash "^4.17.21"
 
-"@elastic/eui@file:./elastic_eui_101.2.0_v2_poc_007.tgz":
-  version "101.2.0"
-  resolved "file:./elastic_eui_101.2.0_v2_poc_007.tgz#fc089897a5ce073b9b733e2fe126b9905f2aa7f9"
+"@elastic/eui@file:./elastic_eui_101.3.0_v2_poc_009.tgz":
+  version "101.3.0"
+  resolved "file:./elastic_eui_101.3.0_v2_poc_009.tgz#24e8abd8021b1036b1d13d0aeb001e84cfa563de"
   dependencies:
     "@elastic/prismjs-esql" "^1.0.0"
     "@hello-pangea/dnd" "^16.6.0"
