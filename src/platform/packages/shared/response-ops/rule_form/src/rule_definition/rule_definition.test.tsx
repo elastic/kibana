@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render as rtlRender, screen } from '@testing-library/react';
 
 import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -112,6 +112,8 @@ const { useRuleFormState, useRuleFormDispatch } = jest.requireMock('../hooks');
 
 const mockOnChange = jest.fn();
 
+const render = (toRender: any) => rtlRender(toRender, { wrapper: IntlProvider });
+
 describe('Rule Definition', () => {
   beforeEach(() => {
     useRuleFormDispatch.mockReturnValue(mockOnChange);
@@ -125,6 +127,11 @@ describe('Rule Definition', () => {
     useRuleFormState.mockReturnValue({
       plugins,
       formData: {
+        artifacts: {
+          investigation_guide: {
+            blob: '# Example investigation guide',
+          },
+        },
         id: 'test-id',
         params: {},
         schedule: {
@@ -502,5 +509,59 @@ describe('Rule Definition', () => {
     await userEvent.click(screen.getByTestId('ruleSettingsFlappingTitleTooltipButton'));
 
     expect(screen.queryByTestId('ruleSettingsFlappingTooltipTitle')).not.toBeVisible();
+  });
+
+  test('should call dispatch with artifacts object when investigation guide is added', async () => {
+    useRuleFormState.mockReturnValue({
+      plugins,
+      formData: {
+        id: 'test-id',
+        params: {},
+        schedule: {
+          interval: '1m',
+        },
+        alertDelay: {
+          active: 5,
+        },
+        notifyWhen: null,
+        consumer: 'stackAlerts',
+        ruleTypeId: '.es-query',
+      },
+      selectedRuleType: ruleType,
+      selectedRuleTypeModel: ruleModel,
+      availableRuleTypes: [ruleType],
+      canShowConsumerSelection: true,
+      validConsumers: ['logs', 'stackAlerts'],
+    });
+    render(<RuleDefinition />);
+
+    const investigationGuideEditor = screen.getByTestId('investigationGuideEditor');
+    const investigationGuideTextArea = screen.getByLabelText(
+      'Add guidelines for addressing alerts created by this rule'
+    );
+    expect(investigationGuideEditor).toBeInTheDocument();
+    expect(investigationGuideEditor).toBeVisible();
+    expect(
+      screen.getByPlaceholderText('Add guidelines for addressing alerts created by this rule')
+    );
+
+    fireEvent.change(investigationGuideTextArea, {
+      target: {
+        value: '# Example investigation guide',
+      },
+    });
+
+    expect(mockOnChange).toHaveBeenCalledWith({
+      type: 'setRuleProperty',
+      payload: {
+        property: 'artifacts',
+        value: {
+          investigation_guide: {
+            blob: '# Example investigation guide',
+          },
+        },
+      },
+    });
+    expect(mockOnChange).toHaveBeenCalledTimes(1);
   });
 });

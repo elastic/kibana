@@ -106,6 +106,7 @@ export function InvestigationManager<T extends RuleTypeParams>({
         errors={messages}
         height={400}
         onParse={onParse}
+        data-test-subj="investigationGuideEditor"
         // uiPlugins={[plugin()]}
         initialViewMode="editing"
         // dropHandlers={dropHandlers}
