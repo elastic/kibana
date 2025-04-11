@@ -121,9 +121,23 @@ export class AlertRuleFromVisAction implements Action<Context> {
 
     const splitValueQueries = Object.entries(splitValues).map(([fieldName, values]) => {
       const queries = `${values
-        .map((v) =>
-          v ? `${escapeFieldName(fieldName)} == ${typeof v === 'number' ? v : `"${v}"`}` : ''
-        )
+        .map((v) => {
+          try {
+            if (typeof v === 'string') {
+              const parsed = JSON.parse(v);
+              if (Array.isArray(parsed)) {
+                return `${escapeFieldName(fieldName)} IN (${parsed
+                  .map((multiVal) => `"${multiVal}"`)
+                  .join(',')})`;
+              }
+            }
+          } catch {
+            // Do nothing, continue to return statement
+          }
+          return v
+            ? `${escapeFieldName(fieldName)} == ${typeof v === 'number' ? v : `"${v}"`}`
+            : '';
+        })
         .filter(Boolean)
         .join(' OR ')}`;
       return values.length === 1 ? queries : `(${queries})`;
