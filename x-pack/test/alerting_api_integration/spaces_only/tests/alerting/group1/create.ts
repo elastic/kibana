@@ -891,6 +891,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
             .set('kbn-xsrf', 'foo')
             .send(getTestRuleData(expectedArtifacts))
             .expect(200);
+          objectRemover.add(Spaces.space1.id, createResponse.body.id, 'rule', 'alerting');
 
           const esResponse = await es.get<SavedObject<RawRule>>(
             {
