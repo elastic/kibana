@@ -340,7 +340,9 @@ export const parseGeminiStreamAsAsyncIterator = async function* (
           throw new Error('Gemini stream parsing error, aborting');
         }
         tokenBuffer = decoded;
-        logger.error('Gemini stream parsing error in async iterator, attempting to re-parse with next chunk');
+        logger.error(
+          'Gemini stream parsing error in async iterator, attempting to re-parse with next chunk'
+        );
       }
       // Split the parsed string into chunks of 5 characters
       if (parsed) {
@@ -372,10 +374,10 @@ export const parseGeminiStream: StreamParser = async (
 ) => {
   let responseBody = '';
   stream.on('data', (chunk) => {
-      const decoded = chunk.toString();
+    const decoded = chunk.toString();
 
-      const parsed = parseGeminiResponse(decoded);
-    
+    const parsed = parseGeminiResponse(decoded);
+
     if (tokenHandler) {
       // Split the parsed string into chunks of 5 characters
       for (let i = 0; i < parsed.length; i += 5) {
