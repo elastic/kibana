@@ -82,25 +82,40 @@ export const SchedulesTable: React.FC = React.memo(() => {
   }, []);
   const enableSchedule = useCallback(
     async (id: string) => {
-      setTableLoading(true);
-      await enableAttackDiscoverySchedule({ id });
-      setTableLoading(false);
+      try {
+        setTableLoading(true);
+        await enableAttackDiscoverySchedule({ id });
+      } catch (err) {
+        // Error is handled by the mutation's onError callback, so no need to do anything here
+      } finally {
+        setTableLoading(false);
+      }
     },
     [enableAttackDiscoverySchedule]
   );
   const disableSchedule = useCallback(
     async (id: string) => {
-      setTableLoading(true);
-      await disableAttackDiscoverySchedule({ id });
-      setTableLoading(false);
+      try {
+        setTableLoading(true);
+        await disableAttackDiscoverySchedule({ id });
+      } catch (err) {
+        // Error is handled by the mutation's onError callback, so no need to do anything here
+      } finally {
+        setTableLoading(false);
+      }
     },
     [disableAttackDiscoverySchedule]
   );
   const deleteSchedule = useCallback(
     async (id: string) => {
-      setTableLoading(true);
-      await deleteAttackDiscoverySchedule({ id });
-      setTableLoading(false);
+      try {
+        setTableLoading(true);
+        await deleteAttackDiscoverySchedule({ id });
+      } catch (err) {
+        // Error is handled by the mutation's onError callback, so no need to do anything here
+      } finally {
+        setTableLoading(false);
+      }
     },
     [deleteAttackDiscoverySchedule]
   );

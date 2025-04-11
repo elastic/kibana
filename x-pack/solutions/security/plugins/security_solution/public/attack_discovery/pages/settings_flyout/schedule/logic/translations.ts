@@ -7,21 +7,12 @@
 
 import { i18n } from '@kbn/i18n';
 
-// Attack discovery
-
-export const GET_ATTACK_DISCOVERY_SCHEDULE_FAILURE = i18n.translate(
-  'xpack.securitySolution.attackDiscovery.schedule.getScheduleFailDescription',
-  {
-    defaultMessage: 'Failed to fetch attack discovery schedule',
-  }
-);
-
-export const FIND_ATTACK_DISCOVERY_SCHEDULE_FAILURE = i18n.translate(
-  'xpack.securitySolution.attackDiscovery.schedule.findScheduleFailDescription',
-  {
-    defaultMessage: 'Failed to fetch attack discovery schedules',
-  }
-);
+export const FETCH_ATTACK_DISCOVERY_SCHEDULES_FAILURE = (single = true) =>
+  i18n.translate('xpack.securitySolution.attackDiscovery.schedule.fetchSchedulesFailDescription', {
+    defaultMessage:
+      'Failed to fetch {failed, plural, one {# attack discovery schedule} other {# attack discovery schedules}}',
+    values: { failed: single ? 1 : 2 },
+  });
 
 export const CREATE_ATTACK_DISCOVERY_SCHEDULES_SUCCESS = (succeeded = 1) =>
   i18n.translate('xpack.securitySolution.attackDiscovery.schedule.createSchedulesSuccess', {

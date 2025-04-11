@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback } from 'react';
 import {
   EuiFlyoutBody,
   EuiFlyoutFooter,
@@ -49,11 +49,11 @@ export const CreateFlyout: React.FC<Props> = React.memo(({ onClose }) => {
   const { data: aiConnectors, isLoading: isLoadingConnectors } = useLoadConnectors({
     http,
   });
-  const [isCreatingSchedule, setIsCreatingSchedule] = useState(false);
 
   const { sourcererDataView } = useSourcererDataView();
 
-  const { mutateAsync: createAttackDiscoverySchedule } = useCreateAttackDiscoverySchedule();
+  const { mutateAsync: createAttackDiscoverySchedule, isLoading: isLoadingQuery } =
+    useCreateAttackDiscoverySchedule();
 
   const onCreateSchedule = useCallback(
     async (scheduleData: AttackDiscoveryScheduleSchema) => {
@@ -61,41 +61,44 @@ export const CreateFlyout: React.FC<Props> = React.memo(({ onClose }) => {
       if (!connector) {
         return;
       }
-      const genAiConfig = getGenAiConfig(connector);
 
-      const [filterQuery, kqlError] = convertToBuildEsQuery({
-        config: getEsQueryConfig(uiSettings),
-        dataViewSpec: sourcererDataView,
-        queries: [scheduleData.alertsSelectionSettings.query],
-        filters: scheduleData.alertsSelectionSettings.filters,
-      });
-      const filter = parseFilterQuery({ filterQuery, kqlError });
+      try {
+        const genAiConfig = getGenAiConfig(connector);
 
-      const apiConfig = {
-        connectorId: connector.id,
-        name: connector.name,
-        actionTypeId: connector.actionTypeId,
-        provider: connector.apiProvider,
-        model: genAiConfig?.defaultModel,
-      };
-      const scheduleToCreate = {
-        name: scheduleData.name,
-        enabled: true,
-        params: {
-          alertsIndexPattern: alertsIndexPattern ?? '',
-          apiConfig,
-          end: scheduleData.alertsSelectionSettings.end,
-          filter,
-          size: scheduleData.alertsSelectionSettings.size,
-          start: scheduleData.alertsSelectionSettings.start,
-        },
-        schedule: { interval: scheduleData.interval },
-        actions: scheduleData.actions,
-      };
-      setIsCreatingSchedule(true);
-      await createAttackDiscoverySchedule({ scheduleToCreate });
-      setIsCreatingSchedule(false);
-      onClose();
+        const [filterQuery, kqlError] = convertToBuildEsQuery({
+          config: getEsQueryConfig(uiSettings),
+          dataViewSpec: sourcererDataView,
+          queries: [scheduleData.alertsSelectionSettings.query],
+          filters: scheduleData.alertsSelectionSettings.filters,
+        });
+        const filter = parseFilterQuery({ filterQuery, kqlError });
+
+        const apiConfig = {
+          connectorId: connector.id,
+          name: connector.name,
+          actionTypeId: connector.actionTypeId,
+          provider: connector.apiProvider,
+          model: genAiConfig?.defaultModel,
+        };
+        const scheduleToCreate = {
+          name: scheduleData.name,
+          enabled: true,
+          params: {
+            alertsIndexPattern: alertsIndexPattern ?? '',
+            apiConfig,
+            end: scheduleData.alertsSelectionSettings.end,
+            filter,
+            size: scheduleData.alertsSelectionSettings.size,
+            start: scheduleData.alertsSelectionSettings.start,
+          },
+          schedule: { interval: scheduleData.interval },
+          actions: scheduleData.actions,
+        };
+        await createAttackDiscoverySchedule({ scheduleToCreate });
+        onClose();
+      } catch (err) {
+        // Error is handled by the mutation's onError callback, so no need to do anything here
+      }
     },
     [
       aiConnectors,
@@ -109,7 +112,7 @@ export const CreateFlyout: React.FC<Props> = React.memo(({ onClose }) => {
 
   const { editForm, actionButtons } = useEditForm({
     onSave: onCreateSchedule,
-    saveButtonDisabled: isLoadingConnectors || isCreatingSchedule,
+    saveButtonDisabled: isLoadingConnectors || isLoadingQuery,
     saveButtonTitle: i18n.SCHEDULE_CREATE_BUTTON_TITLE,
   });
 

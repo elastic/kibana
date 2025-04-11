@@ -31,7 +31,7 @@ export const useGetAttackDiscoverySchedule = (params: { id: string }) => {
     {
       ...DEFAULT_QUERY_OPTIONS,
       onError: (error) => {
-        addError(error, { title: i18n.GET_ATTACK_DISCOVERY_SCHEDULE_FAILURE });
+        addError(error, { title: i18n.FETCH_ATTACK_DISCOVERY_SCHEDULES_FAILURE() });
       },
     }
   );
