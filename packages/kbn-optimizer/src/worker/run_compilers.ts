@@ -13,7 +13,6 @@ import webpack, { Stats } from 'webpack';
 import * as Rx from 'rxjs';
 import { mergeMap, map, mapTo, takeUntil } from 'rxjs';
 import { isFailureStats, failedStatsToErrorMessage } from '@kbn/optimizer-webpack-helpers';
-import * as fs from 'fs';
 
 import {
   CompilerMsgs,
