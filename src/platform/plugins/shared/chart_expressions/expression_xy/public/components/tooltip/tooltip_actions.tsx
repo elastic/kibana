@@ -352,5 +352,7 @@ export const getTooltipActions = (
           },
         ]
       : [];
-  return [...xSeriesActions, ...breakdownTooltipActions, ...alertRulesTooltipActions];
+  const actions = [...xSeriesActions, ...breakdownTooltipActions, ...alertRulesTooltipActions];
+  if (!actions.length) return;
+  return actions;
 };
