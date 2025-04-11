@@ -25,7 +25,30 @@ const actionTypeRegistry: jest.Mocked<ActionTypeRegistryContract> = {
   list: jest.fn(),
 };
 
-const embeddableMock = getLensApiMock() as jest.Mocked<LensApi>;
+const embeddableMock = getLensApiMock({
+  serializeState: jest.fn(() => ({
+    rawState: {
+      attributes: {
+        state: {
+          datasourceStates: {
+            textBased: {
+              layers: [
+                {
+                  timeField: '@timestamp',
+                },
+              ],
+            },
+          },
+        },
+      },
+    },
+  })) as unknown as LensApi['serializeState'],
+  getInspectorAdapters: jest.fn(() => ({
+    tables: {
+      tables: [],
+    },
+  })),
+}) as jest.Mocked<LensApi>;
 const getCreateAlertRuleLastCalledInitialValues = () =>
   last(embeddableMock.createAlertRule.mock.calls)![0];
 
@@ -36,7 +59,6 @@ describe('AlertRuleFromVisAction', () => {
       embeddable: embeddableMock,
       data: {
         query: 'FROM uhhh_can_i_get_a_uhhhhhhhhhhhh_index | STATS count = COUNT(*)',
-        timeField: '@timestamp',
         thresholdValues: { count: 210 },
         splitValues: {},
       },
@@ -63,7 +85,6 @@ describe('AlertRuleFromVisAction', () => {
       data: {
         query:
           'FROM uhhh_can_i_get_a_uhhhhhhhhhhhh_index | STATS count = COUNT(*) BY uhhhhhhhh.field',
-        timeField: '@timestamp',
         thresholdValues: { count: 210 },
         splitValues: { 'uhhhhhhhh.field': ['zoop'] },
       },
@@ -90,7 +111,6 @@ describe('AlertRuleFromVisAction', () => {
       data: {
         query:
           'FROM uhhh_can_i_get_a_uhhhhhhhhhhhh_index | STATS count = COUNT(*) BY uhhhhhhhh.field',
-        timeField: '@timestamp',
         thresholdValues: { count: 210 },
         splitValues: { 'uhhhhhhhh.field': ['zoop', 'boop'] },
       },
@@ -117,7 +137,6 @@ describe('AlertRuleFromVisAction', () => {
       data: {
         query:
           'FROM uhhh_can_i_get_a_uhhhhhhhhhhhh_index | STATS count = COUNT(*), p99 = PERCENTILE(owowo, 99)',
-        timeField: '@timestamp',
         thresholdValues: { count: 210, p99: 42.6 },
         splitValues: {},
       },
@@ -143,7 +162,6 @@ describe('AlertRuleFromVisAction', () => {
       embeddable: embeddableMock,
       data: {
         query: 'FROM uhhh_can_i_get_a_uhhhhhhhhhhhh_index | STATS COUNT(*), PERCENTILE(owowo, 99)',
-        timeField: '@timestamp',
         thresholdValues: { 'COUNT(*)': 210, 'PERCENTILE(owowo, 99)': 42.6 },
         splitValues: {},
       },

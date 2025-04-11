@@ -19,6 +19,7 @@ import { MultiClickTriggerEvent } from '@kbn/charts-plugin/public';
 import { Datatable } from '@kbn/expressions-plugin/common';
 import { BooleanRelation } from '@kbn/es-query';
 import type { AlertRuleFromVisUIActionData } from '@kbn/alerts-ui-shared';
+import { ESQL_TABLE_TYPE } from '@kbn/data-plugin/common';
 import { isTimeChart } from '../../../common/helpers';
 import { CommonXYDataLayerConfig } from '../../../common';
 import { DatatablesWithFormatInfo, LayersFieldFormats } from '../../helpers';
@@ -242,7 +243,6 @@ export const getTooltipActions = (
 
             // Get the time field name from the X axis for time vizzes, default to timestamp for non-time vizzes
             const { sourceField: xSourceField } = xColumn?.meta?.sourceParams ?? {};
-            const timeField = isTimeViz && xSourceField ? String(xSourceField) : 'timestamp';
 
             // If there are split accessors, get their values. For non-time vizzes, treat the X axis as a split accessor.
             const splitValues: Record<
@@ -268,10 +268,10 @@ export const getTooltipActions = (
               }
             }
 
-            const query = table.meta?.type === 'es_ql' ? (table.meta.query as string) : null;
+            const query =
+              table.meta?.type === ESQL_TABLE_TYPE ? (table.meta.query as string) : null;
 
             const context = {
-              timeField,
               thresholdValues,
               splitValues,
               query,

@@ -6,13 +6,10 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { DataView } from '@kbn/data-views-plugin/common';
 
 export interface AlertRuleFromVisUIActionData {
-  timeField: string;
   query: string | null;
   thresholdValues: Record<string, number>;
   splitValues: Record<string, Array<string | number | null | undefined>>;
   usesPlaceholderValues?: boolean;
-  dataView?: DataView;
 }

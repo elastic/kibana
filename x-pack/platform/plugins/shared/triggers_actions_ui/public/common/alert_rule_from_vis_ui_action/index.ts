@@ -56,19 +56,29 @@ export class AlertRuleFromVisAction implements Action<Context> {
   public shouldAutoExecute = async () => true;
 
   public async execute({ embeddable, data }: Context) {
-    const { timeField, query, thresholdValues, splitValues, usesPlaceholderValues, dataView } =
-      data?.query
-        ? data
-        : data
-        ? {
-            ...data,
-            ...pick(getDataFromEmbeddable(embeddable), [
-              'query',
-              'dataView',
-              'usesPlaceholderValues',
-            ]),
-          }
-        : getDataFromEmbeddable(embeddable);
+    const { query, thresholdValues, splitValues, usesPlaceholderValues } = data?.query
+      ? data
+      : data
+      ? {
+          ...data,
+          ...pick(getDataFromEmbeddable(embeddable), [
+            'query',
+            'dataView',
+            'usesPlaceholderValues',
+          ]),
+        }
+      : getDataFromEmbeddable(embeddable);
+
+    // Get the timeField, default to `timestamp` if it can't be found
+    const datatable = getDataTableFromEmbeddable(embeddable);
+    const dataView = query
+      ? undefined
+      : embeddable.dataViews$.getValue()?.find((view) => view.id === datatable?.meta?.source);
+    const { state } = embeddable.serializeState().rawState.attributes ?? {};
+    const layers = (state?.datasourceStates?.textBased as TextBasedPersistedState | undefined)
+      ?.layers;
+    const [firstLayer] = Object.values(layers ?? {});
+    const { timeField = 'timestamp' } = firstLayer ?? { timeField: dataView?.timeFieldName };
 
     // Set up a helper function to evaluate field names that need to be escaped
     let evalQuery = '';
@@ -181,24 +191,15 @@ export class AlertRuleFromVisAction implements Action<Context> {
   }
 }
 
+const getDataTableFromEmbeddable = (embeddable: Context['embeddable']) =>
+  Object.values(embeddable.getInspectorAdapters().tables.tables ?? {})[0] as unknown as
+    | Datatable
+    | undefined;
+
 const getDataFromEmbeddable = (embeddable: Context['embeddable']): AlertRuleFromVisUIActionData => {
   const queryValue = embeddable.query$.getValue();
   const query = queryValue && 'esql' in queryValue ? queryValue.esql : null;
-  const datatable = Object.values(
-    embeddable.getInspectorAdapters().tables.tables ?? {}
-  )[0] as unknown as Datatable | undefined;
-
-  const dataView = query
-    ? undefined
-    : embeddable.dataViews$.getValue()?.find((view) => view.id === datatable?.meta?.source);
-
-  const { state } = embeddable.serializeState().rawState.attributes ?? {};
-  const layers = (state?.datasourceStates?.textBased as TextBasedPersistedState | undefined)
-    ?.layers;
-  const [firstLayer] = Object.values(layers ?? {});
-
-  const { timeField = 'timestamp' } = firstLayer ?? { timeField: dataView?.timeFieldName };
-
+  const datatable = getDataTableFromEmbeddable(embeddable);
   const thresholdValues = datatable
     ? datatable.columns
         .filter((col) => col.meta.dimensionName === 'Vertical axis')
@@ -235,11 +236,9 @@ const getDataFromEmbeddable = (embeddable: Context['embeddable']): AlertRuleFrom
 
   return {
     query,
-    timeField,
     splitValues,
     thresholdValues,
     usesPlaceholderValues: true,
-    dataView,
   };
 };
 
