@@ -24,3 +24,5 @@ export const TIMELINE_FEATURE =
   '[data-test-subj="featureCategory_securitySolution_securitySolutionTimeline"]';
 export const NOTES_FEATURE =
   '[data-test-subj="featureCategory_securitySolution_securitySolutionNotes"]';
+export const SIEM_MIGRATIONS_FEATURE =
+  '[data-test-subj="featureCategory_securitySolution_securitySolutionSiemMigrations"]';

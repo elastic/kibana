@@ -12,6 +12,7 @@ import {
   MACHINE_LEARNING_FEATURE,
   NOTES_FEATURE,
   SECURITY_FEATURE,
+  SIEM_MIGRATIONS_FEATURE,
   TIMELINE_FEATURE,
 } from '../../../screens/custom_roles/assign_to_space_flyout';
 import { login } from '../../../tasks/login';
@@ -39,6 +40,12 @@ describe('Custom role creation', { tags: '@serverless' }, () => {
       // should not have Timeline/Notes sub-privileges
       cy.get(TIMELINE_FEATURE).should('not.exist');
       cy.get(NOTES_FEATURE).should('not.exist');
+    });
+
+    it('should not show `Siem Migration` feature', () => {
+      selectAllSpaces();
+      // should not have Siem Migration sub-privileges
+      cy.get(SIEM_MIGRATIONS_FEATURE).should('not.exist');
     });
 
     it('should show `Cases`, `Machine Learning`, `Elastic AI Assistant` and `Attack discovery` features', () => {
