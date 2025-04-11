@@ -13,7 +13,7 @@ import type {
 import type { ElasticsearchClient, KibanaRequest, Logger } from '@kbn/core/server';
 import type { DataStreamSpacesAdapter } from '@kbn/data-stream-adapter';
 import type { DefendInsight, DefendInsightsPostRequestBody } from '@kbn/elastic-assistant-common';
-import { ReplaySubject, firstValueFrom, combineLatest } from 'rxjs';
+import { combineLatest, firstValueFrom, ReplaySubject } from 'rxjs';
 import { CallbackIds } from '@kbn/elastic-assistant-plugin/server/types';
 
 import type {
@@ -168,42 +168,28 @@ class SecurityWorkflowInsightsService {
       return this.update(id, insight, existingInsights[0]._index);
     }
 
-    const response = await this.esClient.index<SecurityWorkflowInsight>({
+    return this.esClient.index<SecurityWorkflowInsight>({
       index: DATA_STREAM_NAME,
       id,
       document: insight,
       refresh: 'wait_for',
       op_type: 'create',
     });
-
-    return response;
   }
 
   public async update(
     id: string,
     insight: Partial<SecurityWorkflowInsight>,
-    backingIndex?: string
+    backingIndex: string
   ): Promise<UpdateResponse> {
     await this.isInitialized;
 
-    let index = backingIndex;
-    if (!index) {
-      const retrievedInsight = (await this.fetch({ ids: [id] }))[0];
-      index = retrievedInsight?._index;
-    }
-
-    if (!index) {
-      throw new Error('invalid backing index for updating workflow insight');
-    }
-
-    const response = await this.esClient.update<SecurityWorkflowInsight>({
-      index,
+    return this.esClient.update<SecurityWorkflowInsight>({
+      index: backingIndex,
       id,
       doc: insight,
       refresh: 'wait_for',
     });
-
-    return response;
   }
 
   public async fetch(params?: SearchParams): Promise<Array<SearchHit<SecurityWorkflowInsight>>> {

@@ -71,13 +71,17 @@ const updateInsightsRouteHandler = (
     return Object.keys(body).length === 1 && Object.keys(body.action).length === 1;
   };
 
-  return async (_, request, response) => {
+  return async (context, request, response) => {
     const { insightId } = request.params;
     const { canWriteWorkflowInsights } = await endpointContext.service.getEndpointAuthz(request);
+    const { endpointManagementSpaceAwarenessEnabled } = endpointContext.experimentalFeatures;
+
     const onlyActionTypeUpdate = isOnlyActionTypeUpdate(request.body);
+
     if (!canWriteWorkflowInsights && !onlyActionTypeUpdate) {
       return response.forbidden({ body: 'Unauthorized to update workflow insights' });
     }
+
     if (onlyActionTypeUpdate) {
       if (request.body.action?.type === 'remediated') {
         const telemetry = endpointContext.service.getTelemetryService();
@@ -86,11 +90,40 @@ const updateInsightsRouteHandler = (
         });
       }
     }
+
     logger.debug(`Updating insight ${insightId}`);
+
     try {
+      const retrievedInsight = (
+        await securityWorkflowInsightsService.fetch({ ids: [insightId] })
+      )[0];
+
+      const backingIndex = retrievedInsight?._index;
+      if (!backingIndex) {
+        throw new Error('invalid backing index for updating workflow insight');
+      }
+
+      // If the endpoint management space awareness feature is enabled, we need to ensure that the agent IDs are in the current space
+      if (endpointManagementSpaceAwarenessEnabled) {
+        const spaceId = (await context.securitySolution).getSpaceId();
+        const fleetServices = endpointContext.service.getInternalFleetServices(spaceId);
+
+        // We need to make sure the agent IDs, both existing and injected through the request body, are in the current space
+        const existingAgentIds = retrievedInsight?._source?.target?.ids;
+        const rawAgentIds = request.body.target?.ids ?? existingAgentIds;
+
+        if (rawAgentIds) {
+          const agentIds = Array.from(new Set(rawAgentIds));
+          await fleetServices.ensureInCurrentSpace({ agentIds });
+        } else {
+          throw new Error('retrievedInsight._source or target.ids is undefined');
+        }
+      }
+
       const body = await securityWorkflowInsightsService.update(
         insightId,
-        request.body as Partial<SecurityWorkflowInsight>
+        request.body as Partial<SecurityWorkflowInsight>,
+        backingIndex
       );
       return response.ok({ body });
     } catch (e) {
