@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import type { ToolingLog } from '@kbn/tooling-log';
+import type SuperTest from 'supertest';
+
 import { createEntry } from '../../knowledge_base/entries/utils/create_entry';
 import { documentEntry } from '../../knowledge_base/entries/trial_license_complete_tier/mocks/entries';
 
