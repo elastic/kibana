@@ -230,4 +230,45 @@ describe('getRemoteSyncedIntegrationsInfoByOutputId', () => {
       statusWithErrorRes
     );
   });
+
+  it('should throw if the remote api returns error', async () => {
+    jest
+      .spyOn(mockedAppContextService, 'getExperimentalFeatures')
+      .mockReturnValue({ enableSyncIntegrationsOnRemote: true } as any);
+    mockedOutputService.get.mockResolvedValue({
+      ...output,
+      sync_integrations: true,
+      kibana_url: 'http://remote-kibana-host',
+      kibana_api_key: 'APIKEY',
+    } as any);
+
+    mockedFetch.mockImplementation(() => {
+      throw new Error(`some error`);
+    });
+    await expect(
+      getRemoteSyncedIntegrationsInfoByOutputId(soClientMock, 'remote1')
+    ).rejects.toThrowError('some error');
+  });
+
+  it('should throw if the remote api returns invalid response', async () => {
+    jest
+      .spyOn(mockedAppContextService, 'getExperimentalFeatures')
+      .mockReturnValue({ enableSyncIntegrationsOnRemote: true } as any);
+    mockedOutputService.get.mockResolvedValue({
+      ...output,
+      sync_integrations: true,
+      kibana_url: 'http://remote-kibana-host',
+      kibana_api_key: 'APIKEY',
+    } as any);
+
+    const invalidResponse = {
+      status: 404,
+      text: 'Not found',
+    } as any;
+    mockedFetch.mockResolvedValueOnce(invalidResponse);
+
+    await expect(
+      getRemoteSyncedIntegrationsInfoByOutputId(soClientMock, 'remote1')
+    ).rejects.toThrowError('error: Not found, status: 404');
+  });
 });

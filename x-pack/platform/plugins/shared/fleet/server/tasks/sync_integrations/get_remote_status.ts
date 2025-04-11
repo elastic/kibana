@@ -67,7 +67,11 @@ export const getRemoteSyncedIntegrationsInfoByOutputId = async (
 
     const res = await fetch(url, options);
 
-    const body = res ? await res.json() : {};
+    if (!res?.ok) {
+      throw new FleetError(`error: ${res?.text}, status: ${res?.status}`);
+    }
+
+    const body = await res.json();
 
     return body as GetRemoteSyncedIntegrationsStatusResponse;
   } catch (error) {
