@@ -177,15 +177,13 @@ describe('createOrUpdateComponentTemplate', () => {
     expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalledTimes(1);
     expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalledWith({
       name: existingIndexTemplate.name,
-      body: {
-        ...existingIndexTemplate.index_template,
-        template: {
-          ...existingIndexTemplate.index_template.template,
-          settings: {
-            ...existingIndexTemplate.index_template.template?.settings,
-            'index.mapping.total_fields.limit': 2500,
-            'index.mapping.total_fields.ignore_dynamic_beyond_limit': true,
-          },
+      ...existingIndexTemplate.index_template,
+      template: {
+        ...existingIndexTemplate.index_template.template,
+        settings: {
+          ...existingIndexTemplate.index_template.template?.settings,
+          'index.mapping.total_fields.limit': 2500,
+          'index.mapping.total_fields.ignore_dynamic_beyond_limit': true,
         },
       },
     });
@@ -284,15 +282,13 @@ describe('createOrUpdateComponentTemplate', () => {
     expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalledTimes(1);
     expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalledWith({
       name: existingIndexTemplate.name,
-      body: {
-        ...existingIndexTemplate.index_template,
-        template: {
-          ...existingIndexTemplate.index_template.template,
-          settings: {
-            ...existingIndexTemplate.index_template.template?.settings,
-            'index.mapping.total_fields.limit': 2500,
-            'index.mapping.total_fields.ignore_dynamic_beyond_limit': true,
-          },
+      ...existingIndexTemplate.index_template,
+      template: {
+        ...existingIndexTemplate.index_template.template,
+        settings: {
+          ...existingIndexTemplate.index_template.template?.settings,
+          'index.mapping.total_fields.limit': 2500,
+          'index.mapping.total_fields.ignore_dynamic_beyond_limit': true,
         },
       },
     });
