@@ -54,7 +54,6 @@ import type { SwimlaneType } from './explorer_constants';
 import { SWIMLANE_TYPE } from './explorer_constants';
 import { mlEscape } from '../util/string_utils';
 import { FormattedTooltip } from '../components/chart_tooltip/chart_tooltip';
-import './_explorer.scss';
 import { EMPTY_FIELD_VALUE_LABEL } from '../timeseriesexplorer/components/entity_control/entity_control';
 import { SWIM_LANE_LABEL_WIDTH, Y_AXIS_LABEL_PADDING } from './constants';
 
@@ -418,7 +417,18 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
   if (noSwimLaneData) {
     onRenderComplete?.();
   }
-
+  const swimlaneStyles = css({
+    '.echLegendListContainer': {
+      height: '34px !important',
+    },
+    '.echLegendList': {
+      display: 'flex !important',
+      justifyContent: 'space-between !important',
+      flexWrap: 'nowrap',
+      position: 'absolute',
+      right: 0,
+    },
+  });
   // A resize observer is required to compute the bucket span based on the chart width to fetch the data accordingly
   return (
     <EuiResizeObserver onResize={resizeHandler}>
@@ -452,86 +462,91 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
                   hidden={noSwimLaneData}
                 >
                   {showSwimlane && !isLoading && (
-                    <Chart className={'mlSwimLaneContainer'} ref={chartRef}>
-                      <Tooltip {...tooltipOptions} />
-                      <Settings
-                        theme={themeOverrides}
-                        baseTheme={baseTheme}
-                        onElementClick={onElementClick}
-                        onPointerUpdate={handleCursorUpdate}
-                        showLegend={showLegend}
-                        legendPosition={Position.Top}
-                        xDomain={xDomain}
-                        debugState={window._echDebugStateFlag ?? false}
-                        onBrushEnd={onBrushEnd as BrushEndListener}
-                        locale={i18n.getLocale()}
-                        onRenderChange={(isRendered) => {
-                          if (isRendered && onRenderComplete) {
-                            onRenderComplete();
-                          }
-                        }}
-                      />
+                    <div
+                      data-test-subj="mlSwimLaneContainer"
+                      css={{ height: '100%', width: '100%' }}
+                    >
+                      <Chart css={swimlaneStyles} ref={chartRef}>
+                        <Tooltip {...tooltipOptions} />
+                        <Settings
+                          theme={themeOverrides}
+                          baseTheme={baseTheme}
+                          onElementClick={onElementClick}
+                          onPointerUpdate={handleCursorUpdate}
+                          showLegend={showLegend}
+                          legendPosition={Position.Top}
+                          xDomain={xDomain}
+                          debugState={window._echDebugStateFlag ?? false}
+                          onBrushEnd={onBrushEnd as BrushEndListener}
+                          locale={i18n.getLocale()}
+                          onRenderChange={(isRendered) => {
+                            if (isRendered && onRenderComplete) {
+                              onRenderComplete();
+                            }
+                          }}
+                        />
 
-                      <Heatmap
-                        id={id}
-                        timeZone="UTC"
-                        colorScale={{
-                          type: 'bands',
-                          bands: [
-                            {
-                              start: ML_ANOMALY_THRESHOLD.LOW,
-                              end: ML_ANOMALY_THRESHOLD.WARNING,
-                              color: ML_SEVERITY_COLORS.LOW,
+                        <Heatmap
+                          id={id}
+                          timeZone="UTC"
+                          colorScale={{
+                            type: 'bands',
+                            bands: [
+                              {
+                                start: ML_ANOMALY_THRESHOLD.LOW,
+                                end: ML_ANOMALY_THRESHOLD.WARNING,
+                                color: ML_SEVERITY_COLORS.LOW,
+                              },
+                              {
+                                start: ML_ANOMALY_THRESHOLD.WARNING,
+                                end: ML_ANOMALY_THRESHOLD.MINOR,
+                                color: ML_SEVERITY_COLORS.WARNING,
+                              },
+                              {
+                                start: ML_ANOMALY_THRESHOLD.MINOR,
+                                end: ML_ANOMALY_THRESHOLD.MAJOR,
+                                color: ML_SEVERITY_COLORS.MINOR,
+                              },
+                              {
+                                start: ML_ANOMALY_THRESHOLD.MAJOR,
+                                end: ML_ANOMALY_THRESHOLD.CRITICAL,
+                                color: ML_SEVERITY_COLORS.MAJOR,
+                              },
+                              {
+                                start: ML_ANOMALY_THRESHOLD.CRITICAL,
+                                end: Infinity,
+                                color: ML_SEVERITY_COLORS.CRITICAL,
+                              },
+                            ],
+                          }}
+                          data={swimLanePoints}
+                          xAccessor="time"
+                          yAccessor="laneLabel"
+                          valueAccessor="value"
+                          highlightedData={highlightedData}
+                          valueFormatter={getFormattedSeverityScore}
+                          xScale={{
+                            type: ScaleType.Time,
+                            interval: {
+                              type: 'fixed',
+                              unit: 'ms',
+                              // the xDomain.minInterval should always be available at rendering time
+                              // adding a fallback to 1m bucket
+                              value: xDomain?.minInterval ?? 1000 * 60,
                             },
-                            {
-                              start: ML_ANOMALY_THRESHOLD.WARNING,
-                              end: ML_ANOMALY_THRESHOLD.MINOR,
-                              color: ML_SEVERITY_COLORS.WARNING,
-                            },
-                            {
-                              start: ML_ANOMALY_THRESHOLD.MINOR,
-                              end: ML_ANOMALY_THRESHOLD.MAJOR,
-                              color: ML_SEVERITY_COLORS.MINOR,
-                            },
-                            {
-                              start: ML_ANOMALY_THRESHOLD.MAJOR,
-                              end: ML_ANOMALY_THRESHOLD.CRITICAL,
-                              color: ML_SEVERITY_COLORS.MAJOR,
-                            },
-                            {
-                              start: ML_ANOMALY_THRESHOLD.CRITICAL,
-                              end: Infinity,
-                              color: ML_SEVERITY_COLORS.CRITICAL,
-                            },
-                          ],
-                        }}
-                        data={swimLanePoints}
-                        xAccessor="time"
-                        yAccessor="laneLabel"
-                        valueAccessor="value"
-                        highlightedData={highlightedData}
-                        valueFormatter={getFormattedSeverityScore}
-                        xScale={{
-                          type: ScaleType.Time,
-                          interval: {
-                            type: 'fixed',
-                            unit: 'ms',
-                            // the xDomain.minInterval should always be available at rendering time
-                            // adding a fallback to 1m bucket
-                            value: xDomain?.minInterval ?? 1000 * 60,
-                          },
-                        }}
-                        ySortPredicate="dataIndex"
-                        yAxisLabelFormatter={(laneLabel) => {
-                          return laneLabel === '' ? EMPTY_FIELD_VALUE_LABEL : String(laneLabel);
-                        }}
-                        xAxisLabelFormatter={(v) => {
-                          timeBuckets.setInterval(`${swimlaneData.interval}s`);
-                          const scaledDateFormat = timeBuckets.getScaledDateFormat();
-                          return moment(v).format(scaledDateFormat);
-                        }}
-                      />
-                    </Chart>
+                          }}
+                          ySortPredicate="dataIndex"
+                          yAxisLabelFormatter={(laneLabel) => {
+                            return laneLabel === '' ? EMPTY_FIELD_VALUE_LABEL : String(laneLabel);
+                          }}
+                          xAxisLabelFormatter={(v) => {
+                            timeBuckets.setInterval(`${swimlaneData.interval}s`);
+                            const scaledDateFormat = timeBuckets.getScaledDateFormat();
+                            return moment(v).format(scaledDateFormat);
+                          }}
+                        />
+                      </Chart>
+                    </div>
                   )}
 
                   {isLoading && (
@@ -544,11 +559,7 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
                         transform: 'translate(-50%,-50%)',
                       }}
                     >
-                      <EuiLoadingChart
-                        size="xl"
-                        mono={true}
-                        data-test-subj="mlSwimLaneLoadingIndicator"
-                      />
+                      <EuiLoadingChart size="xl" data-test-subj="mlSwimLaneLoadingIndicator" />
                     </EuiText>
                   )}
                 </div>

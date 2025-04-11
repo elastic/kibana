@@ -151,15 +151,10 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       // check Project Settings
       // > Trained Models
       await solutionNavigation.sidenav.clickLink({
-        deepLinkId: 'ml:modelManagement',
+        deepLinkId: 'management:trained_models',
       });
       await solutionNavigation.sidenav.expectLinkActive({
-        deepLinkId: 'ml:modelManagement',
-      });
-      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Model Management' });
-      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Trained Models' });
-      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
-        deepLinkId: 'ml:modelManagement',
+        deepLinkId: 'management:trained_models',
       });
       // > Management
       await solutionNavigation.sidenav.clickLink({ navId: 'management' });
@@ -242,6 +237,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Playground' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Relevance' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Inference Endpoints' });
+      await solutionNavigation.sidenav.expectLinkExists({ text: 'Synonyms' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Analyze' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Discover' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Dashboards' });
@@ -249,7 +245,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Maps' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Getting Started' });
 
-      await solutionNavigation.sidenav.expectLinkExists({ text: 'Trained models' });
+      await solutionNavigation.sidenav.expectLinkExists({ text: 'Trained Models' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Management' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Performance' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Billing and subscription' });
@@ -264,6 +260,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
         'build',
         'dev_tools',
         'searchPlayground',
+        'searchSynonyms',
         'relevance',
         'searchInferenceEndpoints',
         'analyze',
@@ -273,7 +270,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
         'maps',
         'gettingStarted',
         'project_settings_project_nav',
-        'ml:modelManagement',
+        'management:trained_models',
         'management',
         'cloudLinkDeployment',
         'cloudLinkBilling',

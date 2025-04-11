@@ -4,16 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
-import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
-import type { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import type { DefaultEmbeddableApi, ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { initializeTitleManager, useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
+import React from 'react';
 import { BehaviorSubject } from 'rxjs';
-import type { EmbeddableApmAlertingVizProps } from '../types';
-import type { EmbeddableDeps } from '../../types';
 import { ApmEmbeddableContext } from '../../embeddable_context';
-import { APMAlertingThroughputChart } from './chart';
+import type { EmbeddableDeps } from '../../types';
 import { APM_ALERTING_THROUGHPUT_CHART_EMBEDDABLE } from '../constants';
+import type { EmbeddableApmAlertingVizProps } from '../types';
+import { APMAlertingThroughputChart } from './chart';
 
 export const getApmAlertingThroughputChartEmbeddableFactory = (deps: EmbeddableDeps) => {
   const factory: ReactEmbeddableFactory<

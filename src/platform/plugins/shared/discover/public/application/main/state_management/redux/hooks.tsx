@@ -17,8 +17,14 @@ import {
 } from 'react-redux';
 import React, { type PropsWithChildren, useMemo, createContext } from 'react';
 import { useAdHocDataViews } from './runtime_state';
-import type { DiscoverInternalState } from './types';
-import type { InternalStateDispatch, InternalStateStore } from './internal_state';
+import type { DiscoverInternalState, TabState } from './types';
+import {
+  type TabActionPayload,
+  type InternalStateDispatch,
+  type InternalStateStore,
+} from './internal_state';
+import { selectTab } from './selectors';
+import { type TabActionInjector, createTabActionInjector } from './utils';
 
 const internalStateContext = createContext<ReactReduxContextValue>(
   // Recommended approach for versions of Redux prior to v9:
@@ -40,6 +46,47 @@ export const useInternalStateDispatch: () => InternalStateDispatch =
 
 export const useInternalStateSelector: TypedUseSelectorHook<DiscoverInternalState> =
   createSelectorHook(internalStateContext);
+
+interface CurrentTabContextValue {
+  currentTabId: string;
+  injectCurrentTab: TabActionInjector;
+}
+
+const currentTabContext = createContext<CurrentTabContextValue | undefined>(undefined);
+
+export const CurrentTabProvider = ({
+  currentTabId,
+  children,
+}: PropsWithChildren<{ currentTabId: string }>) => {
+  const contextValue = useMemo<CurrentTabContextValue>(
+    () => ({ currentTabId, injectCurrentTab: createTabActionInjector(currentTabId) }),
+    [currentTabId]
+  );
+
+  return <currentTabContext.Provider value={contextValue}>{children}</currentTabContext.Provider>;
+};
+
+export const useCurrentTabContext = () => {
+  const context = React.useContext(currentTabContext);
+
+  if (!context) {
+    throw new Error('useCurrentTabContext must be used within a CurrentTabProvider');
+  }
+
+  return context;
+};
+
+export const useCurrentTabSelector: TypedUseSelectorHook<TabState> = (selector) => {
+  const { currentTabId } = useCurrentTabContext();
+  return useInternalStateSelector((state) => selector(selectTab(state, currentTabId)));
+};
+
+export const useCurrentTabAction = <TPayload extends TabActionPayload, TReturn>(
+  actionCreator: (params: TPayload) => TReturn
+) => {
+  const { injectCurrentTab } = useCurrentTabContext();
+  return useMemo(() => injectCurrentTab(actionCreator), [actionCreator, injectCurrentTab]);
+};
 
 export const useDataViewsForPicker = () => {
   const originalAdHocDataViews = useAdHocDataViews();

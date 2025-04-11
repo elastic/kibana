@@ -22,6 +22,20 @@ import {
   createOpenTelemetryAgentInstructions,
 } from './instructions';
 
+const DEFAULT_INSTRUCTION_TITLE = i18n.translate('xpack.apm.onboarding.defaultTitle', {
+  defaultMessage: 'APM Agents',
+});
+
+function convertApmServerUrlToOtlpServiceUrl(apmServerUrl: string) {
+  if (!apmServerUrl) {
+    return '';
+  }
+
+  const urlParts = apmServerUrl.split('.');
+
+  return `${urlParts[0]}.ingest.${urlParts.slice(2).join('.')}:443`;
+}
+
 export function serverlessInstructions(
   {
     baseUrl,
@@ -46,6 +60,7 @@ export function serverlessInstructions(
   const commonOptions: AgentInstructions = {
     baseUrl,
     apmServerUrl: `${config.managedServiceUrl}:443`,
+    otlpManagedServiceUrl: convertApmServerUrlToOtlpServiceUrl(config.managedServiceUrl),
     checkAgentStatus,
     agentStatus,
     agentStatusLoading,
@@ -58,51 +73,55 @@ export function serverlessInstructions(
     },
   };
 
-  return {
-    title: i18n.translate('xpack.apm.tutorial.apmAgents.title', {
-      defaultMessage: 'APM Agents',
-    }),
-    instructionVariants: [
-      {
-        id: INSTRUCTION_VARIANT.NODE,
-        instructions: createNodeAgentInstructions(commonOptions),
-      },
-      {
-        id: INSTRUCTION_VARIANT.DJANGO,
-        instructions: createDjangoAgentInstructions(commonOptions),
-      },
-      {
-        id: INSTRUCTION_VARIANT.FLASK,
-        instructions: createFlaskAgentInstructions(commonOptions),
-      },
-      {
-        id: INSTRUCTION_VARIANT.RAILS,
-        instructions: createRailsAgentInstructions(commonOptions),
-      },
-      {
-        id: INSTRUCTION_VARIANT.RACK,
-        instructions: createRackAgentInstructions(commonOptions),
-      },
-      {
-        id: INSTRUCTION_VARIANT.GO,
-        instructions: createGoAgentInstructions(commonOptions),
-      },
-      {
-        id: INSTRUCTION_VARIANT.JAVA,
-        instructions: createJavaAgentInstructions(commonOptions),
-      },
-      {
-        id: INSTRUCTION_VARIANT.DOTNET,
-        instructions: createDotNetAgentInstructions(commonOptions),
-      },
-      {
-        id: INSTRUCTION_VARIANT.PHP,
-        instructions: createPhpAgentInstructions(commonOptions),
-      },
-      {
-        id: INSTRUCTION_VARIANT.OPEN_TELEMETRY,
-        instructions: createOpenTelemetryAgentInstructions(commonOptions),
-      },
-    ],
-  };
+  return [
+    {
+      title: DEFAULT_INSTRUCTION_TITLE,
+      id: INSTRUCTION_VARIANT.NODE,
+      instructions: createNodeAgentInstructions(commonOptions),
+    },
+    {
+      title: DEFAULT_INSTRUCTION_TITLE,
+      id: INSTRUCTION_VARIANT.DJANGO,
+      instructions: createDjangoAgentInstructions(commonOptions),
+    },
+    {
+      title: DEFAULT_INSTRUCTION_TITLE,
+      id: INSTRUCTION_VARIANT.FLASK,
+      instructions: createFlaskAgentInstructions(commonOptions),
+    },
+    {
+      title: DEFAULT_INSTRUCTION_TITLE,
+      id: INSTRUCTION_VARIANT.RAILS,
+      instructions: createRailsAgentInstructions(commonOptions),
+    },
+    {
+      title: DEFAULT_INSTRUCTION_TITLE,
+      id: INSTRUCTION_VARIANT.RACK,
+      instructions: createRackAgentInstructions(commonOptions),
+    },
+    {
+      title: DEFAULT_INSTRUCTION_TITLE,
+      id: INSTRUCTION_VARIANT.GO,
+      instructions: createGoAgentInstructions(commonOptions),
+    },
+    {
+      title: DEFAULT_INSTRUCTION_TITLE,
+      id: INSTRUCTION_VARIANT.JAVA,
+      instructions: createJavaAgentInstructions(commonOptions),
+    },
+    {
+      title: DEFAULT_INSTRUCTION_TITLE,
+      id: INSTRUCTION_VARIANT.DOTNET,
+      instructions: createDotNetAgentInstructions(commonOptions),
+    },
+    {
+      title: DEFAULT_INSTRUCTION_TITLE,
+      id: INSTRUCTION_VARIANT.PHP,
+      instructions: createPhpAgentInstructions(commonOptions),
+    },
+    {
+      id: INSTRUCTION_VARIANT.OPEN_TELEMETRY,
+      instructions: createOpenTelemetryAgentInstructions(commonOptions),
+    },
+  ];
 }
