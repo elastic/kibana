@@ -10,6 +10,7 @@ import { StreamEvent } from '@langchain/core/tracers/log_stream';
 import type { Logger } from '@kbn/core/server';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
 import type { Agent } from '../../../common/agents';
+import type { WorkChatTracingConfig } from '../../config';
 import { createAgentGraph } from './agent_graph';
 import { conversationEventsToMessages } from './utils';
 import { convertGraphEvents } from './graph_events';
@@ -17,19 +18,23 @@ import type { AgentRunner, AgentRunResult } from './types';
 import type { McpGatewaySession } from './mcp_gateway';
 import { graphNames } from './constants';
 import { getGraphMeta } from './graph_events';
+import { getTracers } from './tracing';
 
 export const createAgentRunner = async ({
   logger,
   agent,
   chatModel,
   createSession,
+  tracingConfig,
 }: {
   logger: Logger;
   agent: Agent;
   chatModel: InferenceChatModel;
   createSession: () => Promise<McpGatewaySession>;
+  tracingConfig: WorkChatTracingConfig;
 }): Promise<AgentRunner> => {
   const session = await createSession();
+  const tracers = getTracers({ config: tracingConfig });
 
   const closeSession = () => {
     session.close().catch((err) => {
@@ -55,6 +60,7 @@ export const createAgentRunner = async ({
             agentId: agent.id,
           },
           recursionLimit: 10,
+          callbacks: [...tracers],
         }
       );
 
