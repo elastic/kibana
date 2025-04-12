@@ -54,6 +54,19 @@ export interface BrowserShortUrlClientDependencies {
   http: BrowserShortUrlClientHttp;
 }
 
+const getAbsoluteTimeRange = (timeRange: { from?: string; to?: string }) => {
+  const parseTime = (value?: string) => {
+    if (!value) return;
+    const parsed = dateMath.parse(value);
+    return parsed && parsed.isValid() ? parsed.toISOString() : value;
+  };
+
+  return {
+    from: parseTime(timeRange.from),
+    to: parseTime(timeRange.to),
+  };
+};
+
 export class BrowserShortUrlClient implements IShortUrlClient {
   constructor(private readonly dependencies: BrowserShortUrlClientDependencies) {}
 
@@ -80,37 +93,14 @@ export class BrowserShortUrlClient implements IShortUrlClient {
     isAbsoluteTime?: boolean
   ): Promise<ShortUrlCreateResponse<P>> {
     let updatedParams = params;
+    const timeRange = params.params?.timeRange;
 
-    if (isAbsoluteTime && params?.params?.timeRange) {
-      const fromAbsolute = () => {
-        // @ts-ignore
-        const from = params.params.timeRange?.from;
-
-        const absoluteMoment = dateMath.parse(from);
-        if (absoluteMoment && absoluteMoment.isValid()) {
-          return absoluteMoment.toISOString(); // Absolute timestamp
-        }
-        return from;
-      };
-      const toAbsolute = () => {
-        // @ts-ignore
-        const to = params.params.timeRange?.to;
-
-        const absoluteMoment = dateMath.parse(to);
-        if (absoluteMoment && absoluteMoment.isValid()) {
-          return absoluteMoment.toISOString(); // Absolute timestamp
-        }
-        return to;
-      };
-
+    if (isAbsoluteTime && timeRange) {
       updatedParams = {
         ...params,
         params: {
           ...params.params,
-          timeRange: {
-            from: fromAbsolute(),
-            to: toAbsolute(),
-          },
+          timeRange: getAbsoluteTimeRange(timeRange as SerializableRecord),
         },
       };
     }
@@ -161,7 +151,7 @@ export class BrowserShortUrlClient implements IShortUrlClient {
       isAbsoluteTime
     );
 
-    const shortUrl = await result.locator.getUrl(result.params, { absolute: true, isAbsoluteTime });
+    const shortUrl = await result.locator.getUrl(result.params, { absolute: true });
 
     return {
       ...result,

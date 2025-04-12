@@ -14,18 +14,14 @@ import {
   EuiFlexItem,
   EuiForm,
   EuiSpacer,
-  EuiSwitch,
   EuiSwitchEvent,
   EuiText,
   EuiToolTip,
-  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useState, useRef, useEffect } from 'react';
-import dateMath from '@kbn/datemath';
-import moment from 'moment';
-import { css } from '@emotion/react';
+import { TimeTypeSection } from './time_type_section';
 import type { IShareContext, ShareContextObjectTypeConfig } from '../../context';
 
 type LinkProps = Pick<
@@ -46,39 +42,6 @@ interface UrlParams {
   };
 }
 
-const isTimeRangeRelativeTime = (from?: string, to?: string) =>
-  from?.includes('now') || to?.includes('now');
-
-const formatDate = (date: moment.Moment): string => {
-  return date.format('MMMM D, YYYY [at] h:mm A');
-};
-
-const getHumanReadableDates = (from: string, to: string, isAbsolute: boolean) => {
-  if (!from || !to) return;
-
-  const fromParsed = dateMath.parse(from);
-  const toParsed = dateMath.parse(to);
-
-  if (isAbsolute) {
-    const fromFormatted = fromParsed?.isValid() ? formatDate(fromParsed) : formatDate(moment(from));
-    const toFormatted = toParsed?.isValid() ? formatDate(toParsed) : formatDate(moment(to));
-    return {
-      fromFormatted,
-      toFormatted,
-    };
-  }
-
-  if (fromParsed?.isValid() && toParsed?.isValid()) {
-    const fromFormatted = fromParsed.fromNow();
-    const toFormatted = toParsed.fromNow();
-
-    return {
-      fromFormatted,
-      toFormatted,
-    };
-  }
-};
-
 export const LinkContent = ({
   isDirty,
   objectType,
@@ -96,15 +59,7 @@ export const LinkContent = ({
   const urlParamsRef = useRef<UrlParams | undefined>(undefined);
   const urlToCopy = useRef<string | undefined>(undefined);
   const copiedTextToolTipCleanupIdRef = useRef<ReturnType<typeof setTimeout>>();
-
   const timeRange = shareableUrlLocatorParams?.params?.timeRange;
-  const isSwitchDisabled = !isTimeRangeRelativeTime(timeRange?.from, timeRange?.to);
-  const humanReadableDates = getHumanReadableDates(timeRange?.from, timeRange?.to, isAbsoluteTime);
-
-  const { euiTheme } = useEuiTheme();
-  const boldText = css`
-    font-weight: ${euiTheme.font.weight.bold};
-  `;
 
   const getUrlWithUpdatedParams = useCallback((tempUrl: string): string => {
     const urlWithUpdatedParams = urlParamsRef.current
@@ -136,7 +91,7 @@ export const LinkContent = ({
         shareableUrlLocatorParams,
         isAbsoluteTime
       );
-      return shortUrl.locator.getUrl(shortUrl.params, { absolute: true, isAbsoluteTime });
+      return shortUrl.locator.getUrl(shortUrl.params, { absolute: true });
     } else {
       return (await shortUrlService.createFromLongUrl(snapshotUrl, isAbsoluteTime)).url;
     }
@@ -171,44 +126,20 @@ export const LinkContent = ({
   const { draftModeCallOut: DraftModeCallout } = objectConfig;
 
   const changeTimeType = (e: EuiSwitchEvent) => {
-    setIsAbsoluteTime(e.target.checked); // TODO: Make it work when link has been created already
+    setIsAbsoluteTime(e.target.checked);
+    if (urlToCopy?.current && e.target.checked !== isAbsoluteTime) {
+      urlToCopy.current = undefined;
+    }
   };
 
   return (
     <>
       <EuiForm>
-        <EuiSwitch
-          label={i18n.translate('share.link.timeRangeInfo', {
-            defaultMessage: 'Use absolute time range',
-          })}
-          checked={isAbsoluteTime}
-          disabled={isSwitchDisabled}
-          onChange={changeTimeType}
+        <TimeTypeSection
+          timeRange={timeRange}
+          isAbsoluteTime={isAbsoluteTime}
+          changeTimeType={changeTimeType}
         />
-        {humanReadableDates?.fromFormatted && humanReadableDates?.toFormatted && (
-          <>
-            <EuiSpacer size="m" />
-            <EuiText size="s">
-              <FormattedMessage
-                id="share.link.timeRangeInfoText"
-                defaultMessage="The users will see all data from {from} to {to}."
-                values={{
-                  from: (
-                    <EuiText css={boldText} component="span" size="s">
-                      {humanReadableDates.fromFormatted}
-                    </EuiText>
-                  ),
-                  to: (
-                    <EuiText css={boldText} component="span" size="s">
-                      {humanReadableDates.toFormatted}
-                    </EuiText>
-                  ),
-                }}
-              />
-            </EuiText>
-          </>
-        )}
-        <EuiSpacer size="m" />
         <EuiText size="s">
           <FormattedMessage
             id="share.link.helpText"

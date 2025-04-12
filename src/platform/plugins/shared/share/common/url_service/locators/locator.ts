@@ -91,12 +91,9 @@ export class Locator<P extends SerializableRecord> implements LocatorPublic<P> {
     return await this.definition.getLocation(params);
   }
 
-  public async getUrl(
-    params: P,
-    { absolute = false, isAbsoluteTime = false }: LocatorGetUrlParams = {}
-  ): Promise<string> {
+  public async getUrl(params: P, { absolute = false }: LocatorGetUrlParams = {}): Promise<string> {
     const location = await this.getLocation(params);
-    const url = this.deps.getUrl(location, { absolute, isAbsoluteTime });
+    const url = this.deps.getUrl(location, { absolute });
 
     return url;
   }
