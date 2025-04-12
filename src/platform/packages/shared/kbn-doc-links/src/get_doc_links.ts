@@ -52,29 +52,19 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       upgradingStackOnCloud: `${ELASTIC_WEBSITE_URL}guide/en/elastic-stack/current/upgrade-elastic-stack-for-elastic-cloud.html`,
     },
     apm: {
-      kibanaSettings: `${KIBANA_DOCS}apm-settings-in-kibana.html`,
-      supportedServiceMaps: isServerless
-        ? `${SERVERLESS_DOCS}observability-apm-service-map.html#observability-apm-service-map-supported-apm-agents`
-        : `${KIBANA_DOCS}service-maps.html#service-maps-supported`,
-      customLinks: isServerless
-        ? `${SERVERLESS_DOCS}observability-apm-create-custom-links.html`
-        : `${KIBANA_DOCS}custom-links.html`,
-      droppedTransactionSpans: `${OBSERVABILITY_DOCS}apm-data-model-spans.html#apm-data-model-dropped-spans`,
-      upgrading: `${OBSERVABILITY_DOCS}apm-upgrade.html`,
-      metaData: `${OBSERVABILITY_DOCS}apm-data-model-metadata.html`,
-      overview: `${OBSERVABILITY_DOCS}apm.html`,
-      tailSamplingPolicies: isServerless
-        ? `${SERVERLESS_DOCS}observability-apm-transaction-sampling.html`
-        : `${OBSERVABILITY_DOCS}configure-tail-based-sampling.html`,
-      elasticAgent: `${OBSERVABILITY_DOCS}/apm-upgrade-to-apm-integration.html`,
-      storageExplorer: `${KIBANA_DOCS}storage-explorer.html`,
-      spanCompression: isServerless
-        ? `${SERVERLESS_DOCS}observability-apm-compress-spans.html`
-        : `${OBSERVABILITY_DOCS}apm-data-model-spans.html#apm-spans-span-compression`,
-      transactionSampling: isServerless
-        ? `${SERVERLESS_DOCS}observability-apm-transaction-sampling.html`
-        : `${OBSERVABILITY_DOCS}sampling.html`,
-      indexLifecycleManagement: `${OBSERVABILITY_DOCS}apm-ilm-how-to.html`,
+      kibanaSettings: `https://staging-website.elastic.co/docs/solutions/observability/apm/applications-ui-settings`,
+      supportedServiceMaps: `https://www.elastic.co/docs/solutions/observability/apm/service-map`,
+      customLinks: `https://www.elastic.co/docs/solutions/observability/apm/create-custom-links`,
+      droppedTransactionSpans: `https://www.elastic.co/docs/solutions/observability/apm/spans#apm-data-model-dropped-spans`,
+      upgrading: `https://www.elastic.co/docs/solutions/observability/apm/upgrade`,
+      metaData: `https://www.elastic.co/docs/solutions/observability/apm/metadata`,
+      overview: `https://www.elastic.co/docs/solutions/observability/apm`,
+      tailSamplingPolicies: `https://www.elastic.co/docs/solutions/observability/apm/transaction-sampling`,
+      elasticAgent: `https://www.elastic.co/docs/solutions/observability/apm/switch-to-elastic-apm-integration`,
+      storageExplorer: `https://www.elastic.co/docs/solutions/observability/apm/storage-explorer`,
+      spanCompression: `https://www.elastic.co/docs/solutions/observability/apm/spans`,
+      transactionSampling: `https://www.elastic.co/docs/solutions/observability/apm/transaction-sampling`,
+      indexLifecycleManagement: `https://www.elastic.co/docs/solutions/observability/apm/index-lifecycle-management`,
     },
     canvas: {
       guide: `${KIBANA_DOCS}canvas.html`,
@@ -558,51 +548,27 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       tsvbIndexPatternMode: `${KIBANA_DOCS}legacy-editors.html#tsvb-index-patterns-mode`,
     },
     observability: {
-      guide: isServerless
-        ? `${SERVERLESS_DOCS}what-is-observability-serverless.html`
-        : `${OBSERVABILITY_DOCS}index.html`,
-      infrastructureThreshold: `${OBSERVABILITY_DOCS}infrastructure-threshold-alert.html`,
-      logsThreshold: `${OBSERVABILITY_DOCS}logs-threshold-alert.html`,
-      metricsThreshold: `${OBSERVABILITY_DOCS}metrics-threshold-alert.html`,
-      customThreshold: isServerless
-        ? `${SERVERLESS_DOCS}observability-create-custom-threshold-alert-rule.html`
-        : `${OBSERVABILITY_DOCS}custom-threshold-alert.html`,
-      monitorStatus: `${OBSERVABILITY_DOCS}monitor-status-alert.html`,
-      monitorUptime: isServerless
-        ? `${SERVERLESS_DOCS}observability-monitor-synthetics.html`
-        : `${OBSERVABILITY_DOCS}monitor-uptime.html`,
-      tlsCertificate: `${OBSERVABILITY_DOCS}tls-certificate-alert.html`,
-      uptimeDurationAnomaly: `${OBSERVABILITY_DOCS}duration-anomaly-alert.html`,
-      monitorLogs: isServerless
-        ? `${SERVERLESS_DOCS}observability-discover-and-explore-logs.html`
-        : `${OBSERVABILITY_DOCS}monitor-logs.html`,
-      analyzeMetrics: isServerless
-        ? `${SERVERLESS_DOCS}observability-infrastructure-monitoring.html`
-        : `${OBSERVABILITY_DOCS}analyze-metrics.html`,
-      monitorUptimeSynthetics: isServerless
-        ? `${SERVERLESS_DOCS}observability-monitor-synthetics.html`
-        : `${OBSERVABILITY_DOCS}monitor-uptime-synthetics.html`,
-      userExperience: `${OBSERVABILITY_DOCS}user-experience.html`,
-      createAlerts: isServerless
-        ? `${SERVERLESS_DOCS}observability-alerting.html`
-        : `${OBSERVABILITY_DOCS}create-alerts.html`,
-      syntheticsAlerting: isServerless
-        ? `${SERVERLESS_DOCS}observability-synthetics-settings.html#synthetics-settings-alerting`
-        : `${OBSERVABILITY_DOCS}synthetics-settings.html#synthetics-settings-alerting`,
-      syntheticsCommandReference: isServerless
-        ? `${SERVERLESS_DOCS}observability-synthetics-configuration.html#synthetics-configuration-playwright-options`
-        : `${OBSERVABILITY_DOCS}synthetics-configuration.html#synthetics-configuration-playwright-options`,
-      syntheticsProjectMonitors: isServerless
-        ? `${SERVERLESS_DOCS}observability-synthetics-get-started-project.html`
-        : `${OBSERVABILITY_DOCS}synthetic-run-tests.html#synthetic-monitor-choose-project`,
-      syntheticsMigrateFromIntegration: `${OBSERVABILITY_DOCS}synthetics-migrate-from-integration.html`,
-      slo: isServerless
-        ? `${SERVERLESS_DOCS}observability-slos.html`
-        : `${OBSERVABILITY_DOCS}slo.html`,
-      sloBurnRateRule: isServerless
-        ? `${SERVERLESS_DOCS}observability-create-slo-burn-rate-alert-rule.html`
-        : `${OBSERVABILITY_DOCS}slo-burn-rate-alert.html`,
-      aiAssistant: `${OBSERVABILITY_DOCS}obs-ai-assistant.html`,
+      guide: `https://www.elastic.co/docs/solutions/observability`,
+      infrastructureThreshold: `https://www.elastic.co/docs/solutions/observability/incident-management/create-an-inventory-rule`,
+      logsThreshold: `https://www.elastic.co/docs/solutions/observability/incident-management/create-log-threshold-rule`,
+      metricsThreshold: `https://www.elastic.co/docs/solutions/observability/incident-management/create-metric-threshold-rule`,
+      customThreshold: `https://www.elastic.co/docs/solutions/observability/incident-management/create-custom-threshold-rule`,
+      monitorStatus: `https://www.elastic.co/docs/solutions/observability/incident-management/create-monitor-status-rule`,
+      monitorUptime: `https://www.elastic.co/docs/solutions/observability/synthetics`,
+      tlsCertificate: `https://www.elastic.co/docs/solutions/observability/incident-management/create-tls-certificate-rule`,
+      uptimeDurationAnomaly: `https://www.elastic.co/docs/solutions/observability/incident-management/create-an-uptime-duration-anomaly-rule`,
+      monitorLogs: `https://www.elastic.co/docs/solutions/observability/logs/explore-logs`,
+      analyzeMetrics: `https://www.elastic.co/docs/solutions/observability/infra-and-hosts/analyze-infrastructure-host-metrics`,
+      monitorUptimeSynthetics: `https://www.elastic.co/docs/solutions/observability/synthetics`,
+      userExperience: `https://www.elastic.co/docs/solutions/observability/applications/user-experience`,
+      createAlerts: `https://www.elastic.co/docs/solutions/observability/incident-management/alerting`,
+      syntheticsAlerting: `https://www.elastic.co/docs/solutions/observability/synthetics/configure-settings#synthetics-settings-alerting`,
+      syntheticsCommandReference: `https://www.elastic.co/docs/solutions/observability/synthetics/configure-projects#synthetics-configuration-playwright-options`,
+      syntheticsProjectMonitors: `https://www.elastic.co/docs/solutions/observability/synthetics/create-monitors-with-projects`,
+      syntheticsMigrateFromIntegration: `https://www.elastic.co/docs/solutions/observability/synthetics/migrate-from-elastic-synthetics-integration`,
+      slo: `https://www.elastic.co/docs/solutions/observability/incident-management/service-level-objectives-slos`,
+      sloBurnRateRule: `https://www.elastic.co/docs/solutions/observability/incident-management/create-an-slo-burn-rate-rule`,
+      aiAssistant: `https://www.elastic.co/docs/explore-analyze/ai-assistant`,
     },
     alerting: {
       guide: `${ELASTIC_DOCS}explore-analyze/alerts-cases/alerts/create-manage-rules`,
@@ -642,20 +608,20 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       termJoinsExample: `${KIBANA_DOCS}terms-join.html#_example_term_join`,
     },
     monitoring: {
-      alertsKibana: `${KIBANA_DOCS}kibana-alerts.html`,
-      alertsKibanaCpuThreshold: `${KIBANA_DOCS}kibana-alerts.html#kibana-alerts-cpu-threshold`,
-      alertsKibanaDiskThreshold: `${KIBANA_DOCS}kibana-alerts.html#kibana-alerts-disk-usage-threshold`,
-      alertsKibanaJvmThreshold: `${KIBANA_DOCS}kibana-alerts.html#kibana-alerts-jvm-memory-threshold`,
-      alertsKibanaMissingData: `${KIBANA_DOCS}kibana-alerts.html#kibana-alerts-missing-monitoring-data`,
-      alertsKibanaThreadpoolRejections: `${KIBANA_DOCS}kibana-alerts.html#kibana-alerts-thread-pool-rejections`,
-      alertsKibanaCCRReadExceptions: `${KIBANA_DOCS}kibana-alerts.html#kibana-alerts-ccr-read-exceptions`,
-      alertsKibanaLargeShardSize: `${KIBANA_DOCS}kibana-alerts.html#kibana-alerts-large-shard-size`,
-      alertsKibanaClusterAlerts: `${KIBANA_DOCS}kibana-alerts.html#kibana-alerts-cluster-alerts`,
-      metricbeatBlog: `${ELASTIC_WEBSITE_URL}blog/external-collection-for-elastic-stack-monitoring-is-now-available-via-metricbeat`,
-      monitorElasticsearch: `${ELASTICSEARCH_DOCS}configuring-metricbeat.html`,
-      monitorKibana: `${KIBANA_DOCS}monitoring-metricbeat.html`,
-      monitorLogstash: `${ELASTIC_WEBSITE_URL}guide/en/logstash/${DOC_LINK_VERSION}/monitoring-with-metricbeat.html`,
-      troubleshootKibana: `${KIBANA_DOCS}monitor-troubleshooting.html`,
+      alertsKibana: `${ELASTIC_DOCS}deploy-manage/monitor/monitoring-data/configure-stack-monitoring-alerts`,
+      alertsKibanaCpuThreshold: `${ELASTIC_DOCS}deploy-manage/monitor/monitoring-data/configure-stack-monitoring-alerts#kibana-alerts-cpu-threshold`,
+      alertsKibanaDiskThreshold: `${ELASTIC_DOCS}deploy-manage/monitor/monitoring-data/configure-stack-monitoring-alerts#kibana-alerts-disk-usage-threshold`,
+      alertsKibanaJvmThreshold: `${ELASTIC_DOCS}deploy-manage/monitor/monitoring-data/configure-stack-monitoring-alerts#kibana-alerts-jvm-memory-threshold`,
+      alertsKibanaMissingData: `${ELASTIC_DOCS}deploy-manage/monitor/monitoring-data/configure-stack-monitoring-alerts#kibana-alerts-missing-monitoring-data`,
+      alertsKibanaThreadpoolRejections: `${ELASTIC_DOCS}deploy-manage/monitor/monitoring-data/configure-stack-monitoring-alerts#kibana-alerts-thread-pool-rejections`,
+      alertsKibanaCCRReadExceptions: `${ELASTIC_DOCS}deploy-manage/monitor/monitoring-data/configure-stack-monitoring-alerts#kibana-alerts-ccr-read-exceptions`,
+      alertsKibanaLargeShardSize: `${ELASTIC_DOCS}deploy-manage/monitor/monitoring-data/configure-stack-monitoring-alerts#kibana-alerts-large-shard-size`,
+      alertsKibanaClusterAlerts: `${ELASTIC_DOCS}deploy-manage/monitor/monitoring-data/configure-stack-monitoring-alerts#kibana-alerts-cluster-alerts`,
+      metricbeatBlog: `https://www.elastic.co/blog/external-collection-for-elastic-stack-monitoring-is-now-available-via-metricbeat`,
+      monitorElasticsearch: `${ELASTIC_DOCS}deploy-manage/monitor/stack-monitoring/collecting-monitoring-data-with-metricbeat`,
+      monitorKibana: `${ELASTIC_DOCS}deploy-manage/monitor/stack-monitoring/kibana-monitoring-metricbeat`,
+      monitorLogstash: `${ELASTIC_DOCS}reference/logstash/monitoring-with-metricbeat`,
+      troubleshootKibana: `${ELASTIC_DOCS}troubleshoot/kibana/monitoring`,
     },
     reporting: {
       cloudMinimumRequirements: `${ELASTIC_DOCS}explore-analyze/report-and-share#_embed_outside_of_kib`,
