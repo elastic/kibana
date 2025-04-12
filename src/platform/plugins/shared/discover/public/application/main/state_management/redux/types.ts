@@ -46,8 +46,6 @@ export interface InternalStateDataRequestParams {
 }
 
 export interface TabState extends TabItem {
-  globalState?: Record<string, unknown>;
-  appState?: Record<string, unknown>;
   lastPersistedGlobalState: {
     timeRange?: TimeRange;
     refreshInterval?: RefreshInterval;

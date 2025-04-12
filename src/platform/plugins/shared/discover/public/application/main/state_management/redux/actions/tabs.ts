@@ -9,6 +9,7 @@
 
 import type { TabbedContentState } from '@kbn/unified-tabs/src/components/tabbed_content/tabbed_content';
 import { cloneDeep, differenceBy } from 'lodash';
+import type { QueryState } from '@kbn/data-plugin/common';
 import type { TabState } from '../types';
 import { selectAllTabs, selectTab } from '../selectors';
 import {
@@ -20,6 +21,7 @@ import {
 import { createTabRuntimeState, selectTabRuntimeState } from '../runtime_state';
 import { APP_STATE_URL_KEY } from '../../../../../../common';
 import { GLOBAL_STATE_URL_KEY } from '../../discover_global_state_container';
+import type { DiscoverAppState } from '../../discover_app_state_container';
 
 export const setTabs: InternalStateThunkActionCreator<
   [Parameters<typeof internalStateSlice.actions.setTabs>[0]]
@@ -72,9 +74,6 @@ export const updateTabs: InternalStateThunkActionCreator<[TabbedContentState], P
         return { ...tab, lastPersistedGlobalState: { timeRange, refreshInterval, filters } };
       });
 
-      await urlStateStorage.set(GLOBAL_STATE_URL_KEY, null);
-      await urlStateStorage.set(APP_STATE_URL_KEY, null);
-
       const nextTab = selectedItem ? selectTab(currentState, selectedItem.id) : undefined;
       const nextTabRuntimeState = selectedItem
         ? selectTabRuntimeState(runtimeStateManager, selectedItem.id)
@@ -87,7 +86,15 @@ export const updateTabs: InternalStateThunkActionCreator<[TabbedContentState], P
           refreshInterval,
           filters: globalFilters,
         } = nextTab.lastPersistedGlobalState;
-        const { filters: appFilters, query } = nextTabStateContainer.appState.getState();
+        const appState = nextTabStateContainer.appState.getState();
+        const { filters: appFilters, query } = appState;
+
+        await urlStateStorage.set<QueryState>(GLOBAL_STATE_URL_KEY, {
+          time: timeRange,
+          refreshInterval,
+          filters: globalFilters,
+        });
+        await urlStateStorage.set<DiscoverAppState>(APP_STATE_URL_KEY, appState);
 
         services.timefilter.setTime(timeRange ?? services.timefilter.getTimeDefaults());
         services.timefilter.setRefreshInterval(
@@ -100,6 +107,9 @@ export const updateTabs: InternalStateThunkActionCreator<[TabbedContentState], P
         );
 
         nextTabStateContainer.actions.initializeAndSync();
+      } else {
+        await urlStateStorage.set(GLOBAL_STATE_URL_KEY, null);
+        await urlStateStorage.set(APP_STATE_URL_KEY, null);
       }
     }
 
