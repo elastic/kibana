@@ -132,10 +132,13 @@ export const LinkContent = ({
     const shortUrlService = urlService.shortUrls.get(null);
 
     if (shareableUrlLocatorParams) {
-      const shortUrl = await shortUrlService.createWithLocator(shareableUrlLocatorParams);
+      const shortUrl = await shortUrlService.createWithLocator(
+        shareableUrlLocatorParams,
+        isAbsoluteTime
+      );
       return shortUrl.locator.getUrl(shortUrl.params, { absolute: true, isAbsoluteTime });
     } else {
-      return (await shortUrlService.createFromLongUrl(snapshotUrl)).url;
+      return (await shortUrlService.createFromLongUrl(snapshotUrl, isAbsoluteTime)).url;
     }
   }, [shareableUrlLocatorParams, urlService.shortUrls, snapshotUrl, isAbsoluteTime]);
 
@@ -168,7 +171,7 @@ export const LinkContent = ({
   const { draftModeCallOut: DraftModeCallout } = objectConfig;
 
   const changeTimeType = (e: EuiSwitchEvent) => {
-    setIsAbsoluteTime(e.target.checked);
+    setIsAbsoluteTime(e.target.checked); // TODO: Make it work when link has been created already
   };
 
   return (
