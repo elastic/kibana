@@ -135,6 +135,11 @@ export interface LocatorGetUrlParams {
    * Whether to return an absolute long URL or relative short URL.
    */
   absolute?: boolean;
+  /**
+   * Whether absolute time should be used in the URL.
+   * If `true`, the URL will contain an absolute time range.
+   */
+  isAbsoluteTime?: boolean;
 }
 
 /**

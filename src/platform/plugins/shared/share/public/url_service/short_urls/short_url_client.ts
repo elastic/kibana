@@ -92,7 +92,10 @@ export class BrowserShortUrlClient implements IShortUrlClient {
     };
   }
 
-  public async createFromLongUrl(longUrl: string): Promise<ShortUrlCreateFromLongUrlResponse> {
+  public async createFromLongUrl(
+    longUrl: string,
+    isAbsoluteTime?: boolean
+  ): Promise<ShortUrlCreateFromLongUrlResponse> {
     const parsedUrl = parseUrl(longUrl);
 
     if (!parsedUrl || !parsedUrl.path) {
@@ -116,7 +119,7 @@ export class BrowserShortUrlClient implements IShortUrlClient {
         url: relativeUrl,
       },
     });
-    const shortUrl = await result.locator.getUrl(result.params, { absolute: true });
+    const shortUrl = await result.locator.getUrl(result.params, { absolute: true, isAbsoluteTime });
 
     return {
       ...result,
