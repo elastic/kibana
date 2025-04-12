@@ -304,7 +304,7 @@ export function getDiscoverStateContainer({
     appStateContainer,
     internalState,
     runtimeStateManager,
-    getSavedSearch: savedSearchContainer.getState,
+    savedSearchContainer,
     setDataView,
     injectCurrentTab,
     getCurrentTab,

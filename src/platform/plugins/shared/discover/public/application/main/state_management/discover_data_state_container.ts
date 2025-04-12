@@ -22,7 +22,6 @@ import {
 import type { AutoRefreshDoneFn } from '@kbn/data-plugin/public';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
-import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/common';
@@ -30,8 +29,6 @@ import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { DEFAULT_COLUMNS_SETTING, SEARCH_ON_PAGE_LOAD_SETTING } from '@kbn/discover-utils';
-import { getIndexPatternFromESQLQuery, hasTransformationalCommand } from '@kbn/esql-utils';
-import { isEqual } from 'lodash';
 import { getEsqlDataView } from './utils/get_esql_data_view';
 import type { DiscoverAppStateContainer } from './discover_app_state_container';
 import type { DiscoverServices } from '../../../build_services';
@@ -44,7 +41,8 @@ import { getFetch$ } from '../data_fetching/get_fetch_observable';
 import { getDefaultProfileState } from './utils/get_default_profile_state';
 import type { InternalStateStore, RuntimeStateManager, TabActionInjector, TabState } from './redux';
 import { internalStateActions, selectTabRuntimeState } from './redux';
-import { getValidViewMode } from '../utils/get_valid_view_mode';
+import { buildEsqlFetchSubscribe } from './utils/build_esql_fetch_subscribe';
+import type { DiscoverSavedSearchContainer } from './discover_saved_search_container';
 
 export interface SavedSearchData {
   main$: DataMain$;
@@ -137,8 +135,6 @@ export interface DiscoverDataStateContainer {
   getInitialFetchStatus: () => FetchStatus;
 }
 
-const ESQL_MAX_NUM_OF_COLUMNS = 50;
-
 /**
  * Container responsible for fetching of data in Discover Main
  * Either by triggering requests to Elasticsearch directly, or by
@@ -150,7 +146,7 @@ export function getDataStateContainer({
   appStateContainer,
   internalState,
   runtimeStateManager,
-  getSavedSearch,
+  savedSearchContainer,
   setDataView,
   injectCurrentTab,
   getCurrentTab,
@@ -160,7 +156,7 @@ export function getDataStateContainer({
   appStateContainer: DiscoverAppStateContainer;
   internalState: InternalStateStore;
   runtimeStateManager: RuntimeStateManager;
-  getSavedSearch: () => SavedSearch;
+  savedSearchContainer: DiscoverSavedSearchContainer;
   setDataView: (dataView: DataView) => void;
   injectCurrentTab: TabActionInjector;
   getCurrentTab: () => TabState;
@@ -180,7 +176,7 @@ export function getDataStateContainer({
   const getInitialFetchStatus = () => {
     const shouldSearchOnPageLoad =
       uiSettings.get<boolean>(SEARCH_ON_PAGE_LOAD_SETTING) ||
-      getSavedSearch().id !== undefined ||
+      savedSearchContainer.getState().id !== undefined ||
       !timefilter.getRefreshInterval().pause ||
       searchSessionManager.hasSearchSessionIdInURL();
     return shouldSearchOnPageLoad ? FetchStatus.LOADING : FetchStatus.UNINITIALIZED;
@@ -196,6 +192,7 @@ export function getDataStateContainer({
     documents$: new BehaviorSubject<DataDocumentsMsg>(initialState),
     totalHits$: new BehaviorSubject<DataTotalHitsMsg>(initialState),
   };
+
   // This is debugging code, helping you to understand which messages are sent to the data observables
   // Adding a debugger in the functions can be helpful to understand what triggers a message
   // dataSubjects.main$.subscribe((msg) => addLog('dataSubjects.main$', msg));
@@ -203,11 +200,26 @@ export function getDataStateContainer({
   // dataSubjects.totalHits$.subscribe((msg) => addLog('dataSubjects.totalHits$', msg););
   // Add window.ELASTIC_DISCOVER_LOGGER = 'debug' to see messages in console
 
-  let autoRefreshDone: AutoRefreshDoneFn | undefined | null = null;
+  /**
+   * Subscribes to ES|QL fetches to handle state changes when loading or before a fetch completes
+   */
+  const { esqlFetchSubscribe, cleanupEsql } = buildEsqlFetchSubscribe({
+    internalState,
+    appStateContainer,
+    dataSubjects,
+    injectCurrentTab,
+  });
+
+  // The main subscription to handle state changes
+  dataSubjects.documents$.pipe(switchMap(esqlFetchSubscribe)).subscribe();
+  // Make sure to clean up the ES|QL state when the saved search changes
+  savedSearchContainer.getInitial$().subscribe(cleanupEsql);
+
   /**
    * handler emitted by `timefilter.getAutoRefreshFetch$()`
    * to notify when data completed loading and to start a new autorefresh loop
    */
+  let autoRefreshDone: AutoRefreshDoneFn | undefined | null = null;
   const setAutoRefreshDone = (fn: AutoRefreshDoneFn | undefined) => {
     autoRefreshDone = fn;
   };
@@ -216,7 +228,7 @@ export function getDataStateContainer({
     data,
     main$: dataSubjects.main$,
     refetch$,
-    searchSource: getSavedSearch().searchSource,
+    searchSource: savedSearchContainer.getState().searchSource,
     searchSessionManager,
   }).pipe(
     filter(() => validateTimeRange(timefilter.getTime(), toastNotifications)),
@@ -231,34 +243,9 @@ export function getDataStateContainer({
   );
   let abortController: AbortController;
   let abortControllerFetchMore: AbortController;
-  let prevEsqlData: {
-    initialFetch: boolean;
-    query: string;
-    allColumns: string[];
-    defaultColumns: string[];
-  } = {
-    initialFetch: true,
-    query: '',
-    allColumns: [],
-    defaultColumns: [],
-  };
-
-  const cleanupEsql = () => {
-    if (!prevEsqlData.query) {
-      return;
-    }
-
-    // cleanup when it's not an ES|QL query
-    prevEsqlData = {
-      initialFetch: true,
-      query: '',
-      allColumns: [],
-      defaultColumns: [],
-    };
-  };
 
   function subscribe() {
-    const mainSubscription = fetch$
+    const subscription = fetch$
       .pipe(
         mergeMap(async ({ options }) => {
           const { id: currentTabId, resetDefaultProfileState, dataRequestParams } = getCurrentTab();
@@ -274,7 +261,7 @@ export function getDataStateContainer({
             services,
             getAppState: appStateContainer.getState,
             internalState,
-            savedSearch: getSavedSearch(),
+            savedSearch: savedSearchContainer.getState(),
           };
 
           abortController?.abort();
@@ -310,7 +297,7 @@ export function getDataStateContainer({
 
           await profilesManager.resolveDataSourceProfile({
             dataSource: appStateContainer.getState().dataSource,
-            dataView: getSavedSearch().searchSource.getField('index'),
+            dataView: savedSearchContainer.getState().searchSource.getField('index'),
             query: appStateContainer.getState().query,
           });
 
@@ -393,145 +380,14 @@ export function getDataStateContainer({
       )
       .subscribe();
 
-    const esqlSubscription = dataSubjects.documents$
-      .pipe(
-        switchMap(async (next) => {
-          const { query: nextQuery } = next;
-
-          if (!nextQuery) {
-            return;
-          }
-
-          if (!isOfAggregateQueryType(nextQuery)) {
-            // cleanup for a "regular" query
-            cleanupEsql();
-            return;
-          }
-
-          // We need to reset the default profile state on index pattern changes
-          // when loading starts to ensure the correct pre fetch state is available
-          // before data fetching is triggered
-          if (next.fetchStatus === FetchStatus.LOADING) {
-            // We have to grab the current query from appState
-            // here since nextQuery has not been updated yet
-            const appStateQuery = appStateContainer.getState().query;
-
-            if (isOfAggregateQueryType(appStateQuery)) {
-              if (prevEsqlData.initialFetch) {
-                prevEsqlData.query = appStateQuery.esql;
-              }
-
-              const indexPatternChanged =
-                getIndexPatternFromESQLQuery(appStateQuery.esql) !==
-                getIndexPatternFromESQLQuery(prevEsqlData.query);
-
-              // Reset all default profile state when index pattern changes
-              if (indexPatternChanged) {
-                internalState.dispatch(
-                  injectCurrentTab(internalStateActions.setResetDefaultProfileState)({
-                    resetDefaultProfileState: {
-                      columns: true,
-                      rowHeight: true,
-                      breakdownField: true,
-                    },
-                  })
-                );
-              }
-            }
-
-            return;
-          }
-
-          if (next.fetchStatus === FetchStatus.ERROR) {
-            // An error occurred, but it's still considered an initial fetch
-            prevEsqlData.initialFetch = false;
-            return;
-          }
-
-          if (next.fetchStatus !== FetchStatus.PARTIAL) {
-            return;
-          }
-
-          let nextAllColumns = prevEsqlData.allColumns;
-          let nextDefaultColumns = prevEsqlData.defaultColumns;
-
-          if (next.result?.length) {
-            nextAllColumns = Object.keys(next.result[0].raw);
-
-            if (hasTransformationalCommand(nextQuery.esql)) {
-              nextDefaultColumns = nextAllColumns.slice(0, ESQL_MAX_NUM_OF_COLUMNS);
-            } else {
-              nextDefaultColumns = [];
-            }
-          }
-
-          if (prevEsqlData.initialFetch) {
-            prevEsqlData.initialFetch = false;
-            prevEsqlData.query = nextQuery.esql;
-            prevEsqlData.allColumns = nextAllColumns;
-            prevEsqlData.defaultColumns = nextDefaultColumns;
-          }
-
-          const indexPatternChanged =
-            getIndexPatternFromESQLQuery(nextQuery.esql) !==
-            getIndexPatternFromESQLQuery(prevEsqlData.query);
-
-          const allColumnsChanged = !isEqual(nextAllColumns, prevEsqlData.allColumns);
-
-          const changeDefaultColumns =
-            indexPatternChanged || !isEqual(nextDefaultColumns, prevEsqlData.defaultColumns);
-
-          const { viewMode } = appStateContainer.getState();
-          const changeViewMode = viewMode !== getValidViewMode({ viewMode, isEsqlMode: true });
-
-          // If the index pattern hasn't changed, but the available columns have changed
-          // due to transformational commands, reset the associated default profile state
-          if (!indexPatternChanged && allColumnsChanged) {
-            internalState.dispatch(
-              injectCurrentTab(internalStateActions.setResetDefaultProfileState)({
-                resetDefaultProfileState: {
-                  columns: true,
-                  rowHeight: false,
-                  breakdownField: false,
-                },
-              })
-            );
-          }
-
-          prevEsqlData.allColumns = nextAllColumns;
-
-          if (indexPatternChanged || changeDefaultColumns || changeViewMode) {
-            prevEsqlData.query = nextQuery.esql;
-            prevEsqlData.defaultColumns = nextDefaultColumns;
-
-            // just change URL state if necessary
-            if (changeDefaultColumns || changeViewMode) {
-              const nextState = {
-                ...(changeDefaultColumns && { columns: nextDefaultColumns }),
-                ...(changeViewMode && { viewMode: undefined }),
-              };
-
-              await appStateContainer.replaceUrlState(nextState);
-            }
-          }
-
-          dataSubjects.documents$.next({
-            ...next,
-            fetchStatus: FetchStatus.COMPLETE,
-          });
-        })
-      )
-      .subscribe();
-
     return () => {
-      mainSubscription.unsubscribe();
-      esqlSubscription.unsubscribe();
+      subscription.unsubscribe();
     };
   }
 
   const fetchQuery = async () => {
     const query = appStateContainer.getState().query;
-    const currentDataView = getSavedSearch().searchSource.getField('index');
+    const currentDataView = savedSearchContainer.getState().searchSource.getField('index');
 
     if (isOfAggregateQueryType(query)) {
       const nextDataView = await getEsqlDataView(query, currentDataView, services);
