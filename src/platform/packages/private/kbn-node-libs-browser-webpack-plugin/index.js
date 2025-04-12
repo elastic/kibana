@@ -59,6 +59,7 @@ const NodeLibsBrowserPlugin = class NodeLibsBrowserPlugin {
       os: getStdLibBrowserPackage('os'),
       path: getStdLibBrowserPackage('path'),
       punycode: getStdLibBrowserPackage('punycode'),
+      // process: nodeLibsBrowser.process,
       process: getStdLibBrowserPackage('process'),
       querystring: getStdLibBrowserPackage('querystring'),
       readline: false,

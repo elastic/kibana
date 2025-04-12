@@ -4372,25 +4372,6 @@
       "enabled": true
     },
     {
-      "groupName": "node-libs-browser",
-      "matchDepNames": [
-        "node-libs-browser"
-      ],
-      "reviewers": [
-        "team:kibana-operations"
-      ],
-      "matchBaseBranches": [
-        "main"
-      ],
-      "labels": [
-        "Team:Operations",
-        "backport:prev-minor",
-        "release_note:skip"
-      ],
-      "minimumReleaseAge": "7 days",
-      "enabled": true
-    },
-    {
       "groupName": "node-stdlib-browser",
       "matchDepNames": [
         "node-stdlib-browser"
