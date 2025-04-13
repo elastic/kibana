@@ -43,7 +43,7 @@
     "@kbn/utils",
     "@kbn/core-analytics-server",
     "@kbn/fleet-plugin",
-    "@kbn/content-packs-schema"
+    "@kbn/content-packs-schema",
     "@kbn/cloud-plugin",
     "@kbn/es-types"
   ]
