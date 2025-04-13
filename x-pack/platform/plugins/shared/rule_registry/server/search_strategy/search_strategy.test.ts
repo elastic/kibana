@@ -774,4 +774,49 @@ describe('ruleRegistrySearchStrategyProvider()', () => {
       })
     );
   });
+
+  it('passes track_scores if trackScores is provided', async () => {
+    const request: RuleRegistrySearchRequest = {
+      ruleTypeIds: ['siem.esqlRule'],
+      trackScores: true,
+    };
+    const options = {};
+    const deps = {
+      request: {},
+    };
+    getAuthorizedRuleTypesMock.mockResolvedValue([]);
+    getAlertIndicesAliasMock.mockReturnValue(['security-siem']);
+
+    const strategy = ruleRegistrySearchStrategyProvider(data, alerting, logger, security, spaces);
+
+    await lastValueFrom(
+      strategy.search(request, options, deps as unknown as SearchStrategyDependencies)
+    );
+
+    const arg0 = searchStrategySearch.mock.calls[0][0];
+
+    expect(arg0).toEqual(
+      expect.objectContaining({
+        id: undefined,
+        params: expect.objectContaining({
+          allow_no_indices: true,
+          body: expect.objectContaining({
+            _source: false,
+            fields: expect.arrayContaining([
+              expect.objectContaining({
+                field: '@timestamp',
+                include_unmapped: true,
+              }),
+            ]),
+            from: 0,
+            size: 1000,
+            sort: [],
+            track_scores: true,
+          }),
+          ignore_unavailable: true,
+          index: ['security-siem'],
+        }),
+      })
+    );
+  });
 });
