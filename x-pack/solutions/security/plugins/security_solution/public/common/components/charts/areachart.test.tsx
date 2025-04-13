@@ -8,7 +8,6 @@
 import React from 'react';
 import type { RenderResult } from '@testing-library/react';
 import { screen, render } from '@testing-library/react';
-import type { AreaSeriesProps, AxisProps, ChartProps, SettingsProps } from '@elastic/charts';
 import { ScaleType, AreaSeries, Axis } from '@elastic/charts';
 
 import { AreaChartBaseComponent, AreaChartComponent } from './areachart';
@@ -20,10 +19,10 @@ jest.mock('@elastic/charts', () => {
 
   return {
     ...actual,
-    AreaSeries: jest.fn((props: AreaSeriesProps) => <div data-test-subj="area-series-mock" />),
-    Axis: jest.fn((props: AxisProps) => <div data-test-subj="axis-mock" />),
-    Chart: jest.fn((props: ChartProps) => <div data-test-subj="chart-mock">{props.children}</div>),
-    Settings: jest.fn((props: SettingsProps) => <div data-test-subj="settings-mock" />),
+    AreaSeries: jest.fn(() => <div data-test-subj="area-series-mock" />),
+    Axis: jest.fn(() => <div data-test-subj="axis-mock" />),
+    Chart: jest.fn((props) => <div data-test-subj="chart-mock">{props.children}</div>),
+    Settings: jest.fn(() => <div data-test-subj="settings-mock" />),
   };
 });
 
@@ -156,6 +155,10 @@ const chartHolderDataSets = [
   ],
 ];
 
+beforeEach(() => {
+  jest.clearAllMocks();
+});
+
 describe('AreaChartBaseComponent', () => {
   const mockAreaChartData: ChartSeriesData[] = [
     {
@@ -200,8 +203,7 @@ describe('AreaChartBaseComponent', () => {
     };
 
     let wrapper: RenderResult;
-    beforeAll(() => {
-      jest.clearAllMocks();
+    beforeEach(() => {
       wrapper = render(
         <AreaChartBaseComponent
           height={customHeight}
@@ -213,7 +215,7 @@ describe('AreaChartBaseComponent', () => {
     });
 
     it(`should render ${mockAreaChartData.length} AreaSeries`, () => {
-      expect(wrapper.container).toMatchSnapshot();
+      expect(screen.getByTestId('areaChartBaseComponent')).toMatchSnapshot();
       expect(screen.getAllByTestId('area-series-mock')).toHaveLength(mockAreaChartData.length);
     });
 
@@ -236,8 +238,7 @@ describe('AreaChartBaseComponent', () => {
 
   describe('render with default configs if no customized configs given', () => {
     let wrapper: RenderResult;
-    beforeAll(() => {
-      jest.clearAllMocks();
+    beforeEach(() => {
       wrapper = render(
         <AreaChartBaseComponent
           height={customHeight}
@@ -248,7 +249,7 @@ describe('AreaChartBaseComponent', () => {
     });
 
     it(`should ${mockAreaChartData.length} render AreaSeries`, () => {
-      expect(wrapper.container).toMatchSnapshot();
+      expect(screen.getByTestId('areaChartBaseComponent')).toMatchSnapshot();
       expect(screen.getAllByTestId('area-series-mock')).toHaveLength(mockAreaChartData.length);
     });
 
@@ -270,7 +271,7 @@ describe('AreaChartBaseComponent', () => {
   });
 
   describe('no render', () => {
-    beforeAll(() => {
+    beforeEach(() => {
       render(<AreaChartBaseComponent height={null} width={null} data={mockAreaChartData} />);
     });
 
@@ -297,8 +298,7 @@ describe('AreaChartComponent', () => {
 
   describe.each(chartDataSets as Array<[ChartSeriesData[]]>)('with valid data [%o]', (data) => {
     let wrapper: RenderResult;
-    beforeAll(() => {
-      jest.clearAllMocks();
+    beforeEach(() => {
       wrapper = render(<AreaChartComponent configs={mockConfig} areaChart={data} />);
     });
 
@@ -312,8 +312,7 @@ describe('AreaChartComponent', () => {
     'with invalid data [%o]',
     (data) => {
       let wrapper: RenderResult;
-      beforeAll(() => {
-        jest.clearAllMocks();
+      beforeEach(() => {
         wrapper = render(<AreaChartComponent configs={mockConfig} areaChart={data} />);
       });
 
