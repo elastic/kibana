@@ -36,7 +36,7 @@ interface Props {
 }
 
 const TitleComponent: React.FC<Props> = ({ title, badgeOptions }) => (
-  <EuiTitle size="l">
+  <EuiTitle data-test-subj="header-page-title-wrapper" size="l">
     <Header data-test-subj="header-page-title">
       <TitleWrapper>
         <TruncatableText tooltipContent={typeof title === 'string' ? title : null}>
@@ -47,13 +47,18 @@ const TitleComponent: React.FC<Props> = ({ title, badgeOptions }) => (
         <>
           {badgeOptions.beta ? (
             <EuiBetaBadge
+              data-test-subj="header-page-title-beta-badge"
               label={badgeOptions.text}
               tooltipContent={badgeOptions.tooltip}
               tooltipPosition="bottom"
               size={badgeOptions.size}
             />
           ) : (
-            <EuiBadge color={badgeOptions.color || 'hollow'} title="">
+            <EuiBadge
+              data-test-subj="header-page-title-badge"
+              color={badgeOptions.color || 'hollow'}
+              title=""
+            >
               {badgeOptions.text}
             </EuiBadge>
           )}
