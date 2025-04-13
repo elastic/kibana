@@ -5,15 +5,30 @@
  * 2.0.
  */
 
-import type { ShallowWrapper } from 'enzyme';
-import { shallow } from 'enzyme';
 import React from 'react';
+import type { RenderResult } from '@testing-library/react';
+import { screen, render } from '@testing-library/react';
+import type { AreaSeriesProps, AxisProps, ChartProps, SettingsProps } from '@elastic/charts';
+import { ScaleType, AreaSeries, Axis } from '@elastic/charts';
 
 import { AreaChartBaseComponent, AreaChartComponent } from './areachart';
 import type { ChartSeriesData } from './common';
-import { ScaleType, AreaSeries, Axis } from '@elastic/charts';
 
 jest.mock('../../lib/kibana');
+jest.mock('@elastic/charts', () => {
+  const actual = jest.requireActual('@elastic/charts');
+
+  return {
+    ...actual,
+    AreaSeries: jest.fn((props: AreaSeriesProps) => <div data-test-subj="area-series-mock" />),
+    Axis: jest.fn((props: AxisProps) => <div data-test-subj="axis-mock" />),
+    Chart: jest.fn((props: ChartProps) => <div data-test-subj="chart-mock">{props.children}</div>),
+    Settings: jest.fn((props: SettingsProps) => <div data-test-subj="settings-mock" />),
+  };
+});
+
+const MockedAreaSeries = AreaSeries as jest.MockedFunction<typeof AreaSeries>;
+const MockedAxis = Axis as jest.MockedFunction<typeof Axis>;
 
 const customHeight = '100px';
 const customWidth = '120px';
@@ -140,8 +155,8 @@ const chartHolderDataSets = [
     },
   ],
 ];
+
 describe('AreaChartBaseComponent', () => {
-  let shallowWrapper: ShallowWrapper;
   const mockAreaChartData: ChartSeriesData[] = [
     {
       key: 'uniqueSourceIpsHistogram',
@@ -163,23 +178,14 @@ describe('AreaChartBaseComponent', () => {
     },
   ];
 
-  describe('render', () => {
-    beforeAll(() => {
-      shallowWrapper = shallow(
-        <AreaChartBaseComponent
-          height={customHeight}
-          width={customWidth}
-          data={mockAreaChartData}
-        />
-      );
-    });
-
-    it('should render Chart', () => {
-      expect(shallowWrapper.find('Chart')).toHaveLength(1);
-    });
+  it('should render Chart', () => {
+    render(
+      <AreaChartBaseComponent height={customHeight} width={customWidth} data={mockAreaChartData} />
+    );
+    expect(screen.getByTestId('chart-mock')).toBeInTheDocument();
   });
 
-  describe('render with customized configs', () => {
+  describe('should render with customized configs', () => {
     const mockTimeFormatter = jest.fn();
     const mockNumberFormatter = jest.fn();
     const configs = {
@@ -193,8 +199,10 @@ describe('AreaChartBaseComponent', () => {
       },
     };
 
+    let wrapper: RenderResult;
     beforeAll(() => {
-      shallowWrapper = shallow(
+      jest.clearAllMocks();
+      wrapper = render(
         <AreaChartBaseComponent
           height={customHeight}
           width={customWidth}
@@ -204,35 +212,33 @@ describe('AreaChartBaseComponent', () => {
       );
     });
 
-    it(`should ${mockAreaChartData.length} render AreaSeries`, () => {
-      expect(shallow).toMatchSnapshot();
-      expect(shallowWrapper.find(AreaSeries)).toHaveLength(mockAreaChartData.length);
+    it(`should render ${mockAreaChartData.length} AreaSeries`, () => {
+      expect(wrapper.container).toMatchSnapshot();
+      expect(screen.getAllByTestId('area-series-mock')).toHaveLength(mockAreaChartData.length);
     });
 
     it('should render AreaSeries with given xScaleType', () => {
-      expect(shallowWrapper.find(AreaSeries).first().prop('xScaleType')).toEqual(
-        configs.series.xScaleType
-      );
+      expect(MockedAreaSeries.mock.calls[0][0].xScaleType).toEqual(configs.series.xScaleType);
     });
 
     it('should render AreaSeries with given yScaleType', () => {
-      expect(shallowWrapper.find(AreaSeries).first().prop('yScaleType')).toEqual(
-        configs.series.yScaleType
-      );
+      expect(MockedAreaSeries.mock.calls[0][0].yScaleType).toEqual(configs.series.yScaleType);
     });
 
     it('should render xAxis with given tick formatter', () => {
-      expect(shallowWrapper.find(Axis).first().prop('tickFormat')).toEqual(mockTimeFormatter);
+      expect(MockedAxis.mock.calls[0][0].tickFormat).toEqual(mockTimeFormatter);
     });
 
     it('should render yAxis with given tick formatter', () => {
-      expect(shallowWrapper.find(Axis).last().prop('tickFormat')).toEqual(mockNumberFormatter);
+      expect(MockedAxis.mock.calls[1][0].tickFormat).toEqual(mockNumberFormatter);
     });
   });
 
   describe('render with default configs if no customized configs given', () => {
+    let wrapper: RenderResult;
     beforeAll(() => {
-      shallowWrapper = shallow(
+      jest.clearAllMocks();
+      wrapper = render(
         <AreaChartBaseComponent
           height={customHeight}
           width={customWidth}
@@ -242,42 +248,39 @@ describe('AreaChartBaseComponent', () => {
     });
 
     it(`should ${mockAreaChartData.length} render AreaSeries`, () => {
-      expect(shallow).toMatchSnapshot();
-      expect(shallowWrapper.find(AreaSeries)).toHaveLength(mockAreaChartData.length);
+      expect(wrapper.container).toMatchSnapshot();
+      expect(screen.getAllByTestId('area-series-mock')).toHaveLength(mockAreaChartData.length);
     });
 
     it('should render AreaSeries with default xScaleType: Linear', () => {
-      expect(shallowWrapper.find(AreaSeries).first().prop('xScaleType')).toEqual(ScaleType.Linear);
+      expect(MockedAreaSeries.mock.calls[0][0].xScaleType).toEqual(ScaleType.Linear);
     });
 
     it('should render AreaSeries with default yScaleType: Linear', () => {
-      expect(shallowWrapper.find(AreaSeries).first().prop('yScaleType')).toEqual(ScaleType.Linear);
+      expect(MockedAreaSeries.mock.calls[0][0].yScaleType).toEqual(ScaleType.Linear);
     });
 
     it('should not format xTicks value', () => {
-      expect(shallowWrapper.find(Axis).last().prop('tickFormat')).toBeUndefined();
+      expect(MockedAxis.mock.calls[0][0].tickFormat).toBeUndefined();
     });
 
     it('should not format yTicks value', () => {
-      expect(shallowWrapper.find(Axis).last().prop('tickFormat')).toBeUndefined();
+      expect(MockedAxis.mock.calls[1][0].tickFormat).toBeUndefined();
     });
   });
 
   describe('no render', () => {
     beforeAll(() => {
-      shallowWrapper = shallow(
-        <AreaChartBaseComponent height={null} width={null} data={mockAreaChartData} />
-      );
+      render(<AreaChartBaseComponent height={null} width={null} data={mockAreaChartData} />);
     });
 
     it('should not render without height and width', () => {
-      expect(shallowWrapper.find('Chart')).toHaveLength(0);
+      expect(screen.queryByTestId('area-series-mock')).not.toBeInTheDocument();
     });
   });
 });
 
-describe('AreaChart', () => {
-  let shallowWrapper: ShallowWrapper;
+describe('AreaChartComponent', () => {
   const mockConfig = {
     series: {
       xScaleType: ScaleType.Time,
@@ -291,27 +294,32 @@ describe('AreaChart', () => {
     },
     customHeight: 324,
   };
+
   describe.each(chartDataSets as Array<[ChartSeriesData[]]>)('with valid data [%o]', (data) => {
+    let wrapper: RenderResult;
     beforeAll(() => {
-      shallowWrapper = shallow(<AreaChartComponent configs={mockConfig} areaChart={data} />);
+      jest.clearAllMocks();
+      wrapper = render(<AreaChartComponent configs={mockConfig} areaChart={data} />);
     });
 
     it(`should render area chart`, () => {
-      expect(shallowWrapper.find('AreaChartBase')).toHaveLength(1);
-      expect(shallowWrapper.find('ChartPlaceHolder')).toHaveLength(0);
+      expect(screen.getByTestId('chart-mock')).toBeInTheDocument();
+      expect(screen.queryByTestId('chartHolderText')).not.toBeInTheDocument();
     });
   });
 
   describe.each(chartHolderDataSets as Array<[ChartSeriesData[] | null | undefined]>)(
     'with invalid data [%o]',
     (data) => {
+      let wrapper: RenderResult;
       beforeAll(() => {
-        shallowWrapper = shallow(<AreaChartComponent configs={mockConfig} areaChart={data} />);
+        jest.clearAllMocks();
+        wrapper = render(<AreaChartComponent configs={mockConfig} areaChart={data} />);
       });
 
       it(`should render a chart place holder`, () => {
-        expect(shallowWrapper.find('AreaChartBase')).toHaveLength(0);
-        expect(shallowWrapper.find('ChartPlaceHolder')).toHaveLength(1);
+        expect(screen.queryByTestId('chart-mock')).not.toBeInTheDocument();
+        expect(screen.getByTestId('chartHolderText')).toBeInTheDocument();
       });
     }
   );
