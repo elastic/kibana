@@ -6,7 +6,6 @@
  */
 
 import { createSLOParamsSchema } from '@kbn/slo-schema';
-import { executeWithErrorHandler } from '../../errors';
 import {
   CreateSLO,
   DefaultSummaryTransformManager,
@@ -71,6 +70,6 @@ export const inspectSLORoute = createSloServerRoute({
       username
     );
 
-    return await executeWithErrorHandler(() => createSLO.inspect(params.body));
+    return await createSLO.inspect(params.body);
   },
 });
