@@ -20,7 +20,6 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
   const ui = getService('observabilityAIAssistantUI');
   const testSubjects = getService('testSubjects');
   const log = getService('log');
-  const ml = getService('ml');
   const es = getService('es');
   const { common } = getPageObjects(['common']);
 

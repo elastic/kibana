@@ -9,6 +9,7 @@ import expect from '@kbn/expect';
 import { resourceNames } from '@kbn/observability-ai-assistant-plugin/server/service';
 import AdmZip from 'adm-zip';
 import path from 'path';
+import { KnowledgeBaseState } from '@kbn/observability-ai-assistant-plugin/common';
 import { AI_ASSISTANT_SNAPSHOT_REPO_PATH } from '../../../../default_configs/stateful.config.base';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 import {
@@ -120,7 +121,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
             endpoint: 'GET /internal/observability_ai_assistant/kb/status',
           });
 
-          expect(body.ready).to.be(true);
+          expect(body.kbState === KnowledgeBaseState.READY).to.be(true);
         });
       });
     });
