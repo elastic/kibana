@@ -1,55 +1,125 @@
-[[dashboard-links]]
-=== Links panels
+#--------------------------------------------------------------------
+# Example Environment Configuration file
+#
+# This file can be used as a starting point for your own
+# custom .env files, and contains most of the possible settings
+# available in a default install.
+#
+# By default, all of the settings are commented out. If you want
+# to override the setting, you must un-comment it by removing the '#'
+# at the beginning of the line.
+#--------------------------------------------------------------------
 
-You can use **Links** panels to create links to other dashboards or external websites. When creating links to other dashboards, you have the option to carry the time range, query, and filters to apply over to the linked dashboard. Links to external websites follow the <<external-URL-policy,`externalUrl.policy`>> settings. **Links** panels support vertical and horizontal layouts and may be saved to the *Library* for use in other dashboards.
+#--------------------------------------------------------------------
+# ENVIRONMENT
+#--------------------------------------------------------------------
 
-[role="screenshot"]
-image::images/dashboard_links_panel.png[A screenshot displaying the new links panel]
+CI_ENVIRONMENT = development
 
-* <<add-links-panel, Add a links panel>>
-* <<add-links-panel-from-library, Add a links panel from the library>>
-* <<edit-links-panel, Edit links panels>>
+#--------------------------------------------------------------------
+# APP
+#--------------------------------------------------------------------
 
-[float]
-[[add-links-panel]]
-==== Add a links panel
+app.baseURL = 'https://LINK PANEL/'
+# app.forceGlobalSecureRequests = false
 
-To add a links panel to your dashboard:
+# app.sessionDriver = 'CodeIgniter\Session\Handlers\FileHandler'
+# app.sessionCookieName = 'ci_session'
+# app.sessionExpiration = 7200
+# app.sessionSavePath = NULL
+# app.sessionMatchIP = false
+# app.sessionTimeToUpdate = 300
+# app.sessionRegenerateDestroy = false
 
-. From your dashboard, select **Add panel**.
+# app.CSPEnabled = false
 
-. In the **Add panel** flyout, select **Links**. The **Create links panel** flyout appears and lets you add the link you want to display. 
+#--------------------------------------------------------------------
+# DATABASE
+#--------------------------------------------------------------------
 
-. Choose between the panel displaying vertically or horizontally on your dashboard and add your link. 
+database.default.hostname = localhost
+database.default.database = ......
+database.default.username = ......
+database.default.password = ......
+database.default.DBDriver = MySQLi
+database.default.DBPrefix =
 
-. Specify the following:
-* **Go to** - Select *Dashboard* to link to another dashboard, or **URL** to link to an external website. 
-* **Choose destination** - Use the dropdown to select another dashboard or enter an external URL.
-* **Text** - Enter text for the link, which displays in the panel. 
-* **Options** - When linking to another dashboard, use the sliders to use the filters and queries from the original dashboard, use the date range from the original dashboard, or open the dashboard in a new tab. When linking to an external URL, use the sliders to open the URL in a new tab, or encode the URL. 
-. Click **Add link**.
-. Select *Save to library* if you want to reuse the link in other dashboards, and then click **Save**.
+# database.tests.hostname = localhost
+# database.tests.database = ci4
+# database.tests.username = root
+# database.tests.password = root
+# database.tests.DBDriver = MySQLi
+# database.tests.DBPrefix =
 
-[float]
-[[add-links-panel-from-library]]
-==== Add a links panel from the library
+#--------------------------------------------------------------------
+# CONTENT SECURITY POLICY
+#--------------------------------------------------------------------
 
-To add a previously saved links panel to another dashboard:
+# contentsecuritypolicy.reportOnly = false
+# contentsecuritypolicy.defaultSrc = 'none'
+# contentsecuritypolicy.scriptSrc = 'self'
+# contentsecuritypolicy.styleSrc = 'self'
+# contentsecuritypolicy.imageSrc = 'self'
+# contentsecuritypolicy.base_uri = null
+# contentsecuritypolicy.childSrc = null
+# contentsecuritypolicy.connectSrc = 'self'
+# contentsecuritypolicy.fontSrc = null
+# contentsecuritypolicy.formAction = null
+# contentsecuritypolicy.frameAncestors = null
+# contentsecuritypolicy.frameSrc = null
+# contentsecuritypolicy.mediaSrc = null
+# contentsecuritypolicy.objectSrc = null
+# contentsecuritypolicy.pluginTypes = null
+# contentsecuritypolicy.reportURI = null
+# contentsecuritypolicy.sandbox = false
+# contentsecuritypolicy.upgradeInsecureRequests = false
 
-. From your dashboard, select **Add from library**.
-. In the **Add from library** flyout, select **Links** from the **Types** dropdown and then select the Links panel you want to add.
-. Click **Save**.  
+#--------------------------------------------------------------------
+# COOKIE
+#--------------------------------------------------------------------
 
-[float]
-[[edit-links-panel]]
-==== Edit links panels
+# cookie.prefix = ''
+# cookie.expires = 0
+# cookie.path = '/'
+# cookie.domain = ''
+# cookie.secure = false
+# cookie.httponly = false
+# cookie.samesite = 'Lax'
+# cookie.raw = false
 
-To edit links panels:
+#--------------------------------------------------------------------
+# ENCRYPTION
+#--------------------------------------------------------------------
 
-. Hover over the panel and click image:dashboard/images/edit-visualization-icon.png[Edit links icon, width=3%] to edit the link. The *Edit links panel* flyout appears.
-. Click image:dashboard/images/edit-link-icon.png[Edit link icon, width=3%] next to the link.
-+
-[role="screenshot"]
-image::images/edit-links-panel.png[A screenshot displaying the Edit icon next to the link]
-. Edit the link as needed and then click **Update link**.
-. Click **Save**.
+# encryption.key =
+# encryption.driver = OpenSSL
+# encryption.blockSize = 16
+# encryption.digest = SHA512
+
+#--------------------------------------------------------------------
+# HONEYPOT
+#--------------------------------------------------------------------
+
+# honeypot.hidden = 'true'
+# honeypot.label = 'Fill This Field'
+# honeypot.name = 'honeypot'
+# honeypot.template = '<label>{label}</label><input type="text" name="{name}" value=""/>'
+# honeypot.container = '<div style="display:none">{template}</div>'
+
+#--------------------------------------------------------------------
+# SECURITY
+#--------------------------------------------------------------------
+
+# security.tokenName = 'csrf_token_name'
+# security.headerName = 'X-CSRF-TOKEN'
+# security.cookieName = 'csrf_cookie_name'
+# security.expires = 7200
+# security.regenerate = true
+# security.redirect = true
+# security.samesite = 'Lax'
+
+#--------------------------------------------------------------------
+# LOGGER
+#--------------------------------------------------------------------
+
+# logger.threshold = 4
