@@ -13,6 +13,7 @@ import type { AggregateQuery } from '@kbn/es-query';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { IndexManagementPluginSetup } from '@kbn/index-management-shared-types';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
+import type { ILicense } from '@kbn/licensing-plugin/public';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
@@ -107,6 +108,7 @@ interface ESQLVariableService {
 export interface EsqlPluginStartBase {
   getJoinIndicesAutocomplete: () => Promise<JoinIndicesAutocompleteResult>;
   variablesService: ESQLVariableService;
+  getLicense: () => Promise<ILicense | undefined>;
 }
 
 export interface ESQLEditorDeps {
