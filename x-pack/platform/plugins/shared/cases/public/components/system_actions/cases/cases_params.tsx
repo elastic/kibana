@@ -144,9 +144,9 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
       const timeUnit = key === 'timeWindowUnit' ? value : timeWindowUnit;
       const numericTimeSize = parseInt(timeSize, 10);
 
-      const showWarning = timeUnit === 'm' && numericTimeSize >= 5 && numericTimeSize <= 20;
+      const showWindowWarning = timeUnit === 'm' && numericTimeSize >= 5 && numericTimeSize <= 20;
 
-      setShowTimeWindowWarning(showWarning);
+      setShowTimeWindowWarning(showWindowWarning);
 
       const newTimeWindow =
         key === 'timeWindowSize' ? `${value}${timeWindowUnit}` : `${timeWindowSize}${value}`;
