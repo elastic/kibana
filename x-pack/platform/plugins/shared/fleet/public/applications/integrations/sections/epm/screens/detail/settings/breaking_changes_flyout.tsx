@@ -8,16 +8,16 @@
 import React from 'react';
 
 import {
+  EuiDescriptionList,
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutHeader,
-  EuiListGroup,
+  EuiLink,
   EuiSpacer,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { css } from '@emotion/react';
 
 import { type BreakingChangesLog } from '../utils';
 
@@ -28,15 +28,13 @@ interface BreakingChangesFlyoutProps {
 
 const BreakingChangesList = ({ changelog }: { changelog: BreakingChangesLog }) => {
   return changelog.map(({ version, changes }) => {
-    const prLinks = changes.map(({ link }) => ({
-      label: link,
-      href: link,
-      target: '_blank',
-      css: css`
-        & > a {
-          padding-inline-start: 0px;
-        }
-      `,
+    const changeItems = changes.map(({ link, description }) => ({
+      description,
+      title: (
+        <EuiLink href={link} target="_blank" color="primary" data-test-subj="breakingChangeLink">
+          {link}
+        </EuiLink>
+      ),
     }));
 
     return (
@@ -50,7 +48,8 @@ const BreakingChangesList = ({ changelog }: { changelog: BreakingChangesLog }) =
             />
           </h3>
         </EuiTitle>
-        <EuiListGroup listItems={prLinks} color="primary" maxWidth="100%" flush />
+        <EuiSpacer size="s" />
+        <EuiDescriptionList listItems={changeItems} />
         <EuiSpacer size="m" />
       </>
     );
