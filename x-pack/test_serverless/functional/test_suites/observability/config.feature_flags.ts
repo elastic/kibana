@@ -9,7 +9,7 @@ import { createTestConfig } from '../../config.base';
 
 /**
  * Make sure to create a MKI deployment with custom Kibana image, that includes feature flags arguments
- * This tests most likely will fail on default MKI project
+ * These tests most likely will fail on default MKI project
  */
 export default createTestConfig({
   serverlessProject: 'oblt',

@@ -5,12 +5,13 @@
     "types": [
       "jest",
       "node",
-      "react"
+      "react",
+      "@testing-library/jest-dom"
     ]
   },
   "include": [
     "**/*.ts",
-    "**/*.tsx",
+    "**/*.tsx"
   ],
   "kbn_references": [
     "@kbn/core-application-common",
@@ -29,9 +30,12 @@
     "@kbn/core-theme-browser",
     "@kbn/core-rendering-browser",
     "@kbn/core-user-profile-browser",
-    "@kbn/core-user-profile-browser-mocks"
+    "@kbn/core-user-profile-browser-mocks",
+    "@kbn/core-execution-context-browser-mocks",
+    "@kbn/core-execution-context-browser",
+    "@kbn/react-kibana-context-render"
   ],
   "exclude": [
-    "target/**/*",
+    "target/**/*"
   ]
 }
