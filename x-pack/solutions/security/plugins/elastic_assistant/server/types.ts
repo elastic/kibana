@@ -34,6 +34,7 @@ import {
   ExecuteConnectorRequestBody,
   Replacements,
   ContentReferencesStore,
+  RiskScoreSpikesPostRequestBody,
 } from '@kbn/elastic-assistant-common';
 import { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
 import {
@@ -50,6 +51,7 @@ import {
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 
 import { ProductDocBaseStartContract } from '@kbn/product-doc-base-plugin/server';
+import { Alert } from '@kbn/alerts-as-data-utils';
 import { AlertingServerSetup, AlertingServerStart } from '@kbn/alerting-plugin/server';
 import type { GetAIAssistantKnowledgeBaseDataClientParams } from './ai_assistant_data_clients/knowledge_base';
 import { AttackDiscoveryDataClient } from './lib/attack_discovery/persistence';
@@ -247,6 +249,9 @@ export type AssistantToolLlm =
   | ActionsClientChatVertexAI;
 
 export interface AssistantToolParams {
+  mostRecentAlerts: Alert[];
+  identifier?: string;
+  identifierKey?: string;
   alertsIndexPattern?: string;
   anonymizationFields?: AnonymizationFieldResponse[];
   inference?: InferenceServerStart;
@@ -266,7 +271,10 @@ export interface AssistantToolParams {
   request: KibanaRequest<
     unknown,
     unknown,
-    ExecuteConnectorRequestBody | AttackDiscoveryPostRequestBody | DefendInsightsPostRequestBody
+    | ExecuteConnectorRequestBody
+    | AttackDiscoveryPostRequestBody
+    | DefendInsightsPostRequestBody
+    | RiskScoreSpikesPostRequestBody
   >;
   size?: number;
   telemetry?: AnalyticsServiceSetup;

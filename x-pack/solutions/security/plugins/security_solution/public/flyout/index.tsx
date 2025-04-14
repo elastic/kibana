@@ -64,6 +64,16 @@ import type { ServiceDetailsExpandableFlyoutProps } from './entity_details/servi
 import { ServiceDetailsPanel, ServiceDetailsPanelKey } from './entity_details/service_details_left';
 import { FindingsMisconfigurationPanel } from './csp_details/findings_flyout/helper';
 import { MisconfigurationFindingsPanelKey } from './csp_details/findings_flyout/constants';
+import {
+  RiskScoreSpikeDetailsPanel,
+  RiskScoreSpikeDetailsPanelKey,
+  type RiskScoreSpikeDetailsExpandableFlyoutProps,
+} from './risk_score_spike_details';
+import type { InvestigateRiskScoreSpikeExpandableFlyoutProps } from './risk_score_spike_details/ai_investigate_left';
+import {
+  InvestigateRiskScoreSpikeLeftPanel,
+  InvestigateRiskScoreSpikePanelKey,
+} from './risk_score_spike_details/ai_investigate_left';
 import { IOCPanelKey } from './ai_for_soc/constants/panel_keys';
 
 /**
@@ -199,6 +209,22 @@ const expandableFlyoutDocumentsPanels: ExpandableFlyoutProps['registeredPanels']
     component: (props) => (
       <FindingsMisconfigurationPanel
         {...(props as FindingsMisconfigurationPanelExpandableFlyoutProps).params}
+      />
+    ),
+  },
+  {
+    key: RiskScoreSpikeDetailsPanelKey,
+    component: (props) => (
+      <RiskScoreSpikeDetailsPanel
+        {...(props as RiskScoreSpikeDetailsExpandableFlyoutProps).params}
+      />
+    ),
+  },
+  {
+    key: InvestigateRiskScoreSpikePanelKey,
+    component: (props) => (
+      <InvestigateRiskScoreSpikeLeftPanel
+        {...(props as InvestigateRiskScoreSpikeExpandableFlyoutProps).params}
       />
     ),
   },

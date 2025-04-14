@@ -930,6 +930,16 @@ finalize it.
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
+    /**
+     * Returns the entities with the highest risk score spikes.
+     */
+    getRiskScoreSpikes(kibanaSpace: string = 'default') {
+      return supertest
+        .post(routeWithNamespace('/api/risk_score/spikes', kibanaSpace))
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+    },
     getRuleExecutionEvents(props: GetRuleExecutionEventsProps, kibanaSpace: string = 'default') {
       return supertest
         .put(

@@ -41,6 +41,7 @@ import {
 import { deleteKnowledgeBaseEntryRoute } from './knowledge_base/entries/delete_route';
 import { updateKnowledgeBaseEntryRoute } from './knowledge_base/entries/update_route';
 import { getKnowledgeBaseEntryRoute } from './knowledge_base/entries/get_route';
+import { postRiskSpikesRoute } from './risk_spikes/post_risk_spikes';
 import { createAttackDiscoverySchedulesRoute } from './attack_discovery/schedules/create';
 import { getAttackDiscoverySchedulesRoute } from './attack_discovery/schedules/get';
 import { updateAttackDiscoverySchedulesRoute } from './attack_discovery/schedules/update';
@@ -121,4 +122,6 @@ export const registerRoutes = (
   getDefendInsightRoute(router);
   getDefendInsightsRoute(router);
   postDefendInsightsRoute(router);
+
+  postRiskSpikesRoute(router);
 };

@@ -26,6 +26,8 @@ export const CONVERSATIONS_TABLE_MAX_PAGE_SIZE = 100;
 export const ANONYMIZATION_FIELDS_TABLE_MAX_PAGE_SIZE = 100;
 export const PROMPTS_TABLE_MAX_PAGE_SIZE = 100;
 
+export const RISK_SPIKES = `${BASE_PATH}/risk_spikes`;
+
 // Knowledge Base
 export const KNOWLEDGE_BASE_ENTRIES_TABLE_MAX_PAGE_SIZE = 100;
 

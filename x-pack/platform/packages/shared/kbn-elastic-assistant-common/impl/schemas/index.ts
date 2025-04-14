@@ -62,4 +62,5 @@ export * from './knowledge_base/entries/crud_knowledge_base_entries_route.gen';
 export * from './knowledge_base/entries/find_knowledge_base_entries_route.gen';
 
 export * from './prompts/find_prompts_route.gen';
+export * from './risk_spikes/post_risk_score_spikes.gen';
 export { PromptResponse, PromptTypeEnum } from './prompts/bulk_crud_prompts_route.gen';
