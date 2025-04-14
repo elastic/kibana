@@ -159,14 +159,16 @@ export const moveAction = (
   ) {
     lastRequestedPanelPosition.current = { ...requestedPanelData };
 
-    const nextLayout = cloneDeep(currentLayout);
+    let nextLayout = cloneDeep(currentLayout);
     Object.entries(nextLayout).forEach(([rowId, row]) => {
       const { [interactionEvent.id]: interactingPanel, ...otherPanels } = row.panels;
       nextLayout[rowId] = { ...row, panels: { ...otherPanels } };
     });
 
     // resolve destination grid
+    nextLayout = normalizeOrder(nextLayout);
     const destinationGrid = nextLayout[targetRowId];
+
     const resolvedDestinationGrid = resolveGridRow(destinationGrid, requestedPanelData);
     nextLayout[targetRowId] = resolvedDestinationGrid;
 
@@ -175,7 +177,7 @@ export const moveAction = (
       const originGrid = nextLayout[lastRowId];
       if (!originGrid.isCollapsible && isEmpty(originGrid.panels)) {
         delete nextLayout[lastRowId];
-        // nextLayout = normalizeOrder(nextLayout);
+        nextLayout = normalizeOrder(nextLayout);
       } else {
         const resolvedOriginGrid = resolveGridRow(originGrid);
         nextLayout[lastRowId] = resolvedOriginGrid;
