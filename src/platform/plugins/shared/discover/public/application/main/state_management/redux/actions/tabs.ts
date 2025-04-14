@@ -27,8 +27,8 @@ export const setTabs: InternalStateThunkActionCreator<
   (dispatch, getState, { runtimeStateManager }) => {
     const previousState = getState();
     const previousTabs = selectAllTabs(previousState);
-    const removedTabs = differenceBy(previousTabs, params.allTabs, (tab) => tab.id);
-    const addedTabs = differenceBy(params.allTabs, previousTabs, (tab) => tab.id);
+    const removedTabs = differenceBy(previousTabs, params.allTabs, differenceIterateeByTabId);
+    const addedTabs = differenceBy(params.allTabs, previousTabs, differenceIterateeByTabId);
 
     const closedAt = Date.now();
     const recentlyClosedTabs: RecentlyClosedTabState[] = [];
@@ -51,7 +51,11 @@ export const setTabs: InternalStateThunkActionCreator<
         ...params,
         // TODO: keep only the last N closed tabs
         recentlyClosedTabs: orderBy(
-          [...params.recentlyClosedTabs, ...recentlyClosedTabs],
+          differenceBy(
+            [...params.recentlyClosedTabs, ...recentlyClosedTabs],
+            params.allTabs,
+            differenceIterateeByTabId // excluding the tabs that are still open or became open
+          ),
           'closedAt',
           'desc'
         ),
@@ -151,3 +155,7 @@ export const disconnectTab: InternalStateThunkActionCreator<[TabActionPayload]> 
     stateContainer?.actions.stopSyncing();
     tabRuntimeState.customizationService$.getValue()?.cleanup();
   };
+
+function differenceIterateeByTabId(tab: TabState) {
+  return tab.id;
+}

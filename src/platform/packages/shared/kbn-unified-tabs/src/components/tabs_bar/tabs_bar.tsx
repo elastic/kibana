@@ -16,7 +16,7 @@ import type { TabItem, TabsServices } from '../../types';
 import { getTabIdAttribute } from '../../utils/get_tab_attributes';
 import { useResponsiveTabs } from '../../hooks/use_responsive_tabs';
 import { TabsBarWithBackground } from '../tabs_visual_glue_to_header/tabs_bar_with_background';
-import { TabsBarMenu } from '../tabs_bar_menu';
+import { TabsBarMenu, type TabsBarMenuProps } from '../tabs_bar_menu';
 
 const growingFlexItemCss = css`
   min-width: 0;
@@ -32,6 +32,7 @@ export type TabsBarProps = Pick<
   maxItemsCount?: number;
   services: TabsServices;
   onAdd: () => Promise<void>;
+  onSelectRecentlyClosed: TabsBarMenuProps['onSelectRecentlyClosed'];
 };
 
 export const TabsBar: React.FC<TabsBarProps> = ({
@@ -45,6 +46,7 @@ export const TabsBar: React.FC<TabsBarProps> = ({
   onAdd,
   onLabelEdited,
   onSelect,
+  onSelectRecentlyClosed,
   onClose,
   getPreviewData,
 }) => {
@@ -134,10 +136,11 @@ export const TabsBar: React.FC<TabsBarProps> = ({
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <TabsBarMenu
-          openedItems={items}
+          items={items}
           selectedItem={selectedItem}
-          onSelectOpenedTab={onSelect}
           recentlyClosedItems={recentlyClosedItems}
+          onSelect={onSelect}
+          onSelectRecentlyClosed={onSelectRecentlyClosed}
         />
       </EuiFlexItem>
     </EuiFlexGroup>

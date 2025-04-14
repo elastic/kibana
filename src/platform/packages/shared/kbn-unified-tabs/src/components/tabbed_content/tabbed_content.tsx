@@ -16,6 +16,7 @@ import {
   addTab,
   closeTab,
   selectTab,
+  selectRecentlyClosedTab,
   insertTabAfter,
   replaceTabWith,
   closeOtherTabs,
@@ -92,6 +93,13 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
     [changeState]
   );
 
+  const onSelectRecentlyClosed = useCallback(
+    async (item: TabItem) => {
+      changeState((prevState) => selectRecentlyClosedTab(prevState, item));
+    },
+    [changeState]
+  );
+
   const onClose = useCallback(
     async (item: TabItem) => {
       changeState((prevState) => closeTab(prevState, item));
@@ -138,6 +146,7 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
           onAdd={onAdd}
           onLabelEdited={onLabelEdited}
           onSelect={onSelect}
+          onSelectRecentlyClosed={onSelectRecentlyClosed}
           onClose={onClose}
           getPreviewData={getPreviewData}
         />
