@@ -108,6 +108,7 @@ export const FieldSummary = (props: FieldSummaryProps) => {
                         tab: 'schemaEditor',
                       },
                     })}
+                    target="_blank"
                   >
                     {i18n.translate('xpack.streams.fieldSummary.editInParentButtonLabel', {
                       defaultMessage: 'Edit in parent stream',
