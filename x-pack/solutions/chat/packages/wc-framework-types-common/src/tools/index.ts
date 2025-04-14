@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export type { Tool, ToolRegistry, ToolProvider } from './src/tools';
+export type { ToolDescriptor } from './tool';

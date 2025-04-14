@@ -5,6 +5,4 @@
  * 2.0.
  */
 
-export function foo() {
-  return 'hello world';
-}
+export type { ToolDescriptor } from './src/tools';
