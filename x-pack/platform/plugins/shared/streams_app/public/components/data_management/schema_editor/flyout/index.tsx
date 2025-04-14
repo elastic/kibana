@@ -88,29 +88,31 @@ export const SchemaEditorFlyout = ({
         </EuiFlexGroup>
       </EuiFlyoutBody>
 
-      <EuiFlyoutFooter>
-        <EuiFlexGroup justifyContent="spaceBetween">
-          <EuiButtonEmpty
-            data-test-subj="streamsAppSchemaEditorFlyoutCloseButton"
-            iconType="cross"
-            onClick={onClose}
-            flush="left"
-          >
-            {i18n.translate('xpack.streams.schemaEditorFlyout.closeButtonLabel', {
-              defaultMessage: 'Cancel',
-            })}
-          </EuiButtonEmpty>
-          <EuiButton
-            data-test-subj="streamsAppSchemaEditorFieldSaveButton"
-            isLoading={isSaving}
-            onClick={saveChanges}
-          >
-            {i18n.translate('xpack.streams.fieldForm.saveButtonLabel', {
-              defaultMessage: 'Save changes',
-            })}
-          </EuiButton>
-        </EuiFlexGroup>
-      </EuiFlyoutFooter>
+      {isEditing && (
+        <EuiFlyoutFooter>
+          <EuiFlexGroup justifyContent="spaceBetween">
+            <EuiButtonEmpty
+              data-test-subj="streamsAppSchemaEditorFlyoutCloseButton"
+              iconType="cross"
+              onClick={onClose}
+              flush="left"
+            >
+              {i18n.translate('xpack.streams.schemaEditorFlyout.closeButtonLabel', {
+                defaultMessage: 'Cancel',
+              })}
+            </EuiButtonEmpty>
+            <EuiButton
+              data-test-subj="streamsAppSchemaEditorFieldSaveButton"
+              isLoading={isSaving}
+              onClick={saveChanges}
+            >
+              {i18n.translate('xpack.streams.fieldForm.saveButtonLabel', {
+                defaultMessage: 'Save changes',
+              })}
+            </EuiButton>
+          </EuiFlexGroup>
+        </EuiFlyoutFooter>
+      )}
     </>
   );
 };
