@@ -26,9 +26,5 @@ export const urlField =
       return error;
     }
 
-    // if (allowDomainWithoutDots) {
-    //   return isUrlWithoutDots(value) ? undefined : error;
-    // }
-
     return isUrl(value, allowDomainWithoutDots) ? undefined : error;
   };
