@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { Readable } from 'stream';
 import { Client } from '@elastic/elasticsearch';
 import { JsonObject } from '@kbn/utility-types';
 import expect from '@kbn/expect';
@@ -12,7 +14,6 @@ import { StreamUpsertRequest } from '@kbn/streams-schema';
 import { ClientRequestParamsOf } from '@kbn/server-route-repository-utils';
 import { StreamsRouteRepository } from '@kbn/streams-plugin/server';
 import { ContentPackIncludedObjects, ContentPackManifest } from '@kbn/content-packs-schema';
-import { Readable } from 'stream';
 import { StreamsSupertestRepositoryClient } from './repository_client';
 
 export async function enableStreams(client: StreamsSupertestRepositoryClient) {
@@ -178,7 +179,7 @@ export async function importContent(
   name: string,
   body: {
     include: ContentPackIncludedObjects;
-    content: Buffer;
+    content: Readable;
   },
   expectStatusCode: number = 200
 ) {
@@ -188,9 +189,10 @@ export async function importContent(
         path: { name },
         body: {
           include: JSON.stringify(body.include),
+          content: body.content,
         },
       },
-      file: { key: 'content', filename: 'content_pack.zip', data: body.content },
+      file: { key: 'content', filename: 'content_pack.zip' },
     })
     .expect(expectStatusCode)
     .then((response) => response.body);

@@ -15,7 +15,6 @@ import {
 import { Subtract, RequiredKeys } from 'utility-types';
 import { format } from 'url';
 import supertest from 'supertest';
-import { DeepPartial } from '@kbn/utility-types';
 import { RoleScopedSupertestProvider } from '../../../api_integration/deployment_agnostic/services/role_scoped_supertest';
 
 type MaybeOptional<TArgs extends Record<string, any>> = RequiredKeys<TArgs> extends never
@@ -34,8 +33,8 @@ export interface RepositorySupertestClient<TServerRouteRepository extends Server
 
   sendFile: <TEndpoint extends EndpointOf<TServerRouteRepository>>(
     endpoint: TEndpoint,
-    options: DeepPartial<ClientRequestParamsOf<TServerRouteRepository, TEndpoint>> & {
-      file: { key: string; filename: string; data: Buffer };
+    options: ClientRequestParamsOf<TServerRouteRepository, TEndpoint> & {
+      file: { key: string; filename: string };
     }
   ) => RepositorySupertestReturnOf<TServerRouteRepository, TEndpoint>;
 }
@@ -121,9 +120,11 @@ export async function getAdminApiClient<TServerRouteRepository extends ServerRou
       const formDataRequest = supertestAdmin[method](url)
         .set(headers)
         .set('Content-type', 'multipart/form-data')
-        .attach(options.file.key, options.file.data, { filename: options.file.filename });
+        .attach(options.file.key, params.body[options.file.key], {
+          filename: options.file.filename,
+        });
 
-      for (const field of fields) {
+      for (const field of fields.filter(([key]) => key !== options.file.key)) {
         void formDataRequest.field(field[0], field[1]);
       }
 

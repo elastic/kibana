@@ -113,7 +113,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const archive = await generateArchive(contentPack, contentPack.entries);
         const response = await importContent(apiClient, 'logs.importstream', {
           include: { all: {} },
-          content: archive,
+          content: Readable.from(archive),
         });
 
         expect(response.errors.length).to.be(0);
