@@ -35,7 +35,6 @@ import { css } from '@emotion/react';
 import { ESQLVariableType, type ESQLControlVariable } from '@kbn/esql-types';
 import { type ESQLRealField } from '@kbn/esql-validation-autocomplete';
 import { FieldType } from '@kbn/esql-validation-autocomplete/src/definitions/types';
-import { euiLightVars } from '@kbn/ui-theme';
 import { EditorFooter } from './editor_footer';
 import { fetchFieldsFromESQL } from './fetch_fields_from_esql';
 import {
@@ -759,7 +758,7 @@ export const ESQLEditor = memo(function ESQLEditor({
       <EuiFlexGroup
         gutterSize="none"
         css={{
-          zIndex: euiLightVars.euiZFlyout,
+          zIndex: theme.euiTheme.levels.flyout,
           position: 'relative',
         }}
         responsive={false}
