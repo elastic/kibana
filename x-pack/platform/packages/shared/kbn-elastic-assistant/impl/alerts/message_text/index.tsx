@@ -72,6 +72,8 @@ const getPluginDependencies = () => {
   };
 };
 
+// to be used for alert summary. For AI Assistant, use `x-pack/solutions/security/plugins/security_solution/public/assistant/get_comments/stream/message_text.tsx`
+// This component does not handle rendering of any content references, does not supply a loading cursor, and does not augmentMessageCodeBlocks
 export function MessageText({ content, 'data-test-subj': dataTestSubj }: Props) {
   const containerCss = css`
     overflow-wrap: anywhere;
@@ -82,9 +84,6 @@ export function MessageText({ content, 'data-test-subj': dataTestSubj }: Props) 
   return (
     <EuiText css={containerCss} data-test-subj={dataTestSubj}>
       <EuiMarkdownFormat
-        // TODO this cant be right
-        // used by augmentMessageCodeBlocks
-        className={`message-0`}
         data-test-subj={'messageText'}
         parsingPluginList={parsingPluginList}
         processingPluginList={processingPluginList}
