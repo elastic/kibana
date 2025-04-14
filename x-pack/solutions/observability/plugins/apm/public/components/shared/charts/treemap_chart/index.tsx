@@ -6,7 +6,8 @@
  */
 import React from 'react';
 import type { Datum } from '@elastic/charts';
-import { Chart, Partition, PartitionLayout } from '@elastic/charts';
+import { Chart, Partition, PartitionLayout, Settings } from '@elastic/charts';
+import { useElasticChartsTheme } from '@kbn/charts-theme';
 import { euiPaletteColorBlind } from '@elastic/eui';
 import { percentValueGetter } from '@elastic/charts/dist/chart_types/partition_chart/layout/config';
 import { isEmpty } from 'lodash';
@@ -29,10 +30,12 @@ export function TreemapChart({
   id: string;
 }) {
   const colorPalette = euiPaletteColorBlind();
+  const chartBaseTheme = useElasticChartsTheme();
 
   return (
     <ChartContainer hasData={!isEmpty(data)} height={height} status={fetchStatus} id={id}>
       <Chart>
+        <Settings baseTheme={chartBaseTheme} />
         <Partition
           data={data}
           id="spec_1"

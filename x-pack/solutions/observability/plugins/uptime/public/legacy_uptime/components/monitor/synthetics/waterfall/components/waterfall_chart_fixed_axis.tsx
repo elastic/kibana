@@ -31,7 +31,7 @@ interface Props {
 }
 
 export const WaterfallChartFixedAxis = ({ tickFormat, domain, barStyleAccessor }: Props) => {
-  const baseChartTheme = useElasticChartsTheme();
+  const chartBaseTheme = useElasticChartsTheme();
 
   return (
     <WaterfallChartFixedAxisContainer>
@@ -40,8 +40,7 @@ export const WaterfallChartFixedAxis = ({ tickFormat, domain, barStyleAccessor }
         <Settings
           showLegend={false}
           rotation={90}
-          // TODO connect to charts.theme service see src/plugins/charts/public/services/theme/README.md
-          baseTheme={baseChartTheme}
+          baseTheme={chartBaseTheme}
           locale={i18n.getLocale()}
         />
 
