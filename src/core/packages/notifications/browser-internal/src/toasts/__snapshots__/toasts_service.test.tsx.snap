@@ -3,12 +3,17 @@
 exports[`#start() renders the GlobalToastList into the targetDomElement param 1`] = `
 Array [
   Array [
-    <KibanaRenderContextProvider
-      analytics={
-        Object {
-          "optIn": [MockFunction],
+    <GlobalToastList
+      dismissToast={[Function]}
+      reportEvent={
+        EventReporter {
           "reportEvent": [MockFunction],
-          "telemetryCounter$": Subject {
+        }
+      }
+      toasts$={
+        Observable {
+          "source": BehaviorSubject {
+            "_value": Array [],
             "closed": false,
             "currentObservers": null,
             "hasError": false,
@@ -18,53 +23,7 @@ Array [
           },
         }
       }
-      i18n={
-        Object {
-          "Context": [Function],
-        }
-      }
-      theme={
-        Object {
-          "getTheme": [MockFunction],
-          "theme$": Observable {
-            "_subscribe": [Function],
-          },
-        }
-      }
-      userProfile={
-        Object {
-          "bulkGet": [MockFunction],
-          "getCurrent": [MockFunction],
-          "getEnabled$": [MockFunction],
-          "getUserProfile$": [MockFunction],
-          "partialUpdate": [MockFunction],
-          "suggest": [MockFunction],
-          "update": [MockFunction],
-        }
-      }
-    >
-      <GlobalToastList
-        dismissToast={[Function]}
-        reportEvent={
-          EventReporter {
-            "reportEvent": [MockFunction],
-          }
-        }
-        toasts$={
-          Observable {
-            "source": BehaviorSubject {
-              "_value": Array [],
-              "closed": false,
-              "currentObservers": null,
-              "hasError": false,
-              "isStopped": false,
-              "observers": Array [],
-              "thrownError": null,
-            },
-          }
-        }
-      />
-    </KibanaRenderContextProvider>,
+    />,
     <div
       test="target-dom-element"
     />,
