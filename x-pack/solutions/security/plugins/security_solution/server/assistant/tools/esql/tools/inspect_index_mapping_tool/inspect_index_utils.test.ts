@@ -509,6 +509,7 @@ describe('inspect index', () => {
 
     const result = compressMapping(nestedObject);
     expect(result).toEqual(
-      `test,bar:long\ndns:{header_flags,id,op_code,response_code:keyword,resolved_ip:ip,Ext:{options,status:long},answers:{class,data,name,type:keyword,ttl:long},question:{class,name,registered_domain,subdomain,top_level_domain,type:keyword}}`)
+      `test,bar:long\ndns:{header_flags,id,op_code,response_code:keyword,resolved_ip:ip,Ext:{options,status:long},answers:{class,data,name,type:keyword,ttl:long},question:{class,name,registered_domain,subdomain,top_level_domain,type:keyword}}`
+    );
   });
 });

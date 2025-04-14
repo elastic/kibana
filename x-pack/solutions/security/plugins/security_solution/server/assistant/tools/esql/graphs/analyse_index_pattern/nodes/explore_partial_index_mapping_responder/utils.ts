@@ -45,7 +45,7 @@ export const buildContext = (messages: BaseMessage[]): Record<string, unknown> =
     );
 
   let context = {};
-   /* eslint-disable no-continue */
+  /* eslint-disable no-continue */
 
   for (const toolMessage of orderedInspectIndexMappingToolMessages) {
     const toolCall = inspectIndexMappingToolCallByIds[toolMessage.tool_call_id];
@@ -54,14 +54,14 @@ export const buildContext = (messages: BaseMessage[]): Record<string, unknown> =
         try {
           context = JSON.parse(toolMessage.content as string);
         } catch (e) {
-            continue
+          continue;
         }
       } else {
         try {
           const parsedContent = JSON.parse(toolMessage.content as string);
           set(context, toolCall.args.property, parsedContent);
         } catch (e) {
-            continue
+          continue;
         }
       }
     }
