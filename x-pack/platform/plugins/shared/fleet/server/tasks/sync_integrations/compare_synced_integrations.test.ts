@@ -444,6 +444,16 @@ describe('fetchAndCompareSyncedIntegrations', () => {
         ],
       },
     };
+    const customPipelineFromVar = {
+      type: 'ingest_pipeline',
+      name: 'filestream-pipeline1',
+      package_name: 'filestream',
+      package_version: '1.1.0',
+      is_deleted: false,
+      pipeline: {
+        processors: [{}],
+      },
+    };
 
     afterEach(() => {
       jest.resetAllMocks();
@@ -464,6 +474,7 @@ describe('fetchAndCompareSyncedIntegrations', () => {
                 custom_assets: {
                   'component_template:logs-system.auth@custom': customComponentTemplate,
                   'ingest_pipeline:logs-system.auth@custom': customPipeline,
+                  'ingest_pipeline:filestream-pipeline1': customPipelineFromVar,
                 },
               },
             },
@@ -554,12 +565,19 @@ describe('fetchAndCompareSyncedIntegrations', () => {
             sync_status: 'synchronizing',
             type: 'ingest_pipeline',
           },
+          'ingest_pipeline:filestream-pipeline1': {
+            name: 'filestream-pipeline1',
+            package_name: 'filestream',
+            package_version: '1.1.0',
+            sync_status: 'synchronizing',
+            type: 'ingest_pipeline',
+          },
         },
       });
     });
 
     it('should return status = completed if custom assets are equal', async () => {
-      (getPipelineMock as jest.MockedFunction<any>).mockResolvedValue({
+      (getPipelineMock as jest.MockedFunction<any>).mockResolvedValueOnce({
         'logs-system.auth@custom': {
           processors: [
             {
@@ -569,6 +587,11 @@ describe('fetchAndCompareSyncedIntegrations', () => {
               },
             },
           ],
+        },
+      });
+      (getPipelineMock as jest.MockedFunction<any>).mockResolvedValueOnce({
+        'filestream-pipeline1': {
+          processors: [{}],
         },
       });
       (getComponentTemplateMock as jest.MockedFunction<any>).mockResolvedValue({
@@ -642,6 +665,13 @@ describe('fetchAndCompareSyncedIntegrations', () => {
             sync_status: 'completed',
             type: 'ingest_pipeline',
           },
+          'ingest_pipeline:filestream-pipeline1': {
+            name: 'filestream-pipeline1',
+            package_name: 'filestream',
+            package_version: '1.1.0',
+            sync_status: 'completed',
+            type: 'ingest_pipeline',
+          },
         },
       });
     });
@@ -676,6 +706,17 @@ describe('fetchAndCompareSyncedIntegrations', () => {
                       ],
                       version: 2,
                     },
+                  },
+                  'ingest_pipeline:filestream-pipeline1': {
+                    type: 'ingest_pipeline',
+                    name: 'filestream-pipeline1',
+                    package_name: 'filestream',
+                    package_version: '1.1.0',
+                    is_deleted: false,
+                    pipeline: {
+                      processors: [{}],
+                    },
+                    version: 2,
                   },
                 },
               },
@@ -760,6 +801,13 @@ describe('fetchAndCompareSyncedIntegrations', () => {
             sync_status: 'synchronizing',
             type: 'ingest_pipeline',
           },
+          'ingest_pipeline:filestream-pipeline1': {
+            name: 'filestream-pipeline1',
+            package_name: 'filestream',
+            package_version: '1.1.0',
+            sync_status: 'synchronizing',
+            type: 'ingest_pipeline',
+          },
         },
       });
     });
@@ -784,6 +832,7 @@ describe('fetchAndCompareSyncedIntegrations', () => {
           },
         ],
       });
+      (getPipelineMock as jest.MockedFunction<any>).mockResolvedValue({});
 
       const res = await fetchAndCompareSyncedIntegrations(
         esClientMock,
@@ -804,6 +853,13 @@ describe('fetchAndCompareSyncedIntegrations', () => {
             name: 'logs-system.auth@custom',
             package_name: 'system',
             package_version: '1.67.3',
+            sync_status: 'synchronizing',
+            type: 'ingest_pipeline',
+          },
+          'ingest_pipeline:filestream-pipeline1': {
+            name: 'filestream-pipeline1',
+            package_name: 'filestream',
+            package_version: '1.1.0',
             sync_status: 'synchronizing',
             type: 'ingest_pipeline',
           },
