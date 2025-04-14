@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import type { BaseMessage } from '@langchain/core/messages';
+import type { AIMessage, BaseMessage } from '@langchain/core/messages';
 import { ToolMessage } from '@langchain/core/messages';
 import type { ToolCall } from '@langchain/core/dist/messages/tool';
-import { set } from 'lodash';
+import { set } from '@kbn/safer-lodash-set';
 import { toolDetails } from '../../../../tools/inspect_index_mapping_tool/inspect_index_mapping_tool';
 import { messageContainsToolCalls } from '../../../../utils/common';
 
 export const buildContext = (messages: BaseMessage[]): Record<string, unknown> => {
   const orderedInspectIndexMappingToolCalls = messages
     .filter((message) => messageContainsToolCalls(message))
-    .flatMap((message) => message.tool_calls)
+    .flatMap((message) => (message as AIMessage).tool_calls)
     .filter((toolCall) => toolCall !== undefined)
     .filter((toolCall) => toolCall.name === toolDetails.name);
 
@@ -36,7 +36,7 @@ export const buildContext = (messages: BaseMessage[]): Record<string, unknown> =
 
   const orderedInspectIndexMappingToolMessages = messages
     .filter((message) => message instanceof ToolMessage)
-    .filter((message) => message.tool_call_id in inspectIndexMappingToolCallByIds)
+    .filter((message) => (message as ToolMessage).tool_call_id in inspectIndexMappingToolCallByIds)
     .map((message) => message as ToolMessage)
     .sort(
       (a, b) =>
@@ -45,6 +45,7 @@ export const buildContext = (messages: BaseMessage[]): Record<string, unknown> =
     );
 
   let context = {};
+   /* eslint-disable no-continue */
 
   for (const toolMessage of orderedInspectIndexMappingToolMessages) {
     const toolCall = inspectIndexMappingToolCallByIds[toolMessage.tool_call_id];
@@ -52,15 +53,21 @@ export const buildContext = (messages: BaseMessage[]): Record<string, unknown> =
       if (toolCall.args.property === '') {
         try {
           context = JSON.parse(toolMessage.content as string);
-        } catch (e) {}
+        } catch (e) {
+            continue
+        }
       } else {
         try {
           const parsedContent = JSON.parse(toolMessage.content as string);
           set(context, toolCall.args.property, parsedContent);
-        } catch (e) {}
+        } catch (e) {
+            continue
+        }
       }
     }
   }
+
+  /* eslint-enable no-continue */
 
   return context;
 };

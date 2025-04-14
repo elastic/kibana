@@ -30,10 +30,6 @@ const sampleMapping1 = {
   },
 };
 
-interface Mapping {
-  [key: string]: { type: string } | Mapping;
-}
-
 describe('inspect index', () => {
   it.each([
     [
@@ -107,8 +103,8 @@ describe('inspect index', () => {
       },
       1,
       {
-        field1: 'Object',
-        field2: 'Object',
+        field1: '...',
+        field2: '...',
       },
     ],
     [
@@ -130,7 +126,7 @@ describe('inspect index', () => {
           type: 'keyword',
         },
         field2: {
-          properties: 'Object',
+          properties: '...',
         },
       },
     ],
@@ -149,8 +145,8 @@ describe('inspect index', () => {
       },
       1,
       {
-        field1: 'Object',
-        field2: 'Object',
+        field1: '...',
+        field2: '...',
       },
     ],
     [
@@ -167,7 +163,7 @@ describe('inspect index', () => {
       1,
       {
         field1: 'keyword',
-        field2: 'Object',
+        field2: '...',
       },
     ],
     [
@@ -185,7 +181,7 @@ describe('inspect index', () => {
       {
         field1: [1, 2, 3],
         field2: {
-          properties: 'Object',
+          properties: '...',
         },
       },
     ],
@@ -205,12 +201,12 @@ describe('inspect index', () => {
   });
 
   it('shallowObjectView returns Object for maxDepth 0', () => {
-    expect(shallowObjectView(sampleMapping1, 0)).toEqual('Object');
+    expect(shallowObjectView(sampleMapping1, 0)).toEqual('...');
   });
 
   it('shallowObjectViewTruncated returns truncated view', () => {
     expect(shallowObjectViewTruncated(sampleMapping1, 10)).toEqual({
-      mappings: 'Object',
+      mappings: '...',
     });
   });
 
@@ -222,7 +218,7 @@ describe('inspect index', () => {
             type: 'keyword',
           },
           field2: {
-            properties: 'Object',
+            properties: '...',
           },
         },
       },
@@ -232,7 +228,7 @@ describe('inspect index', () => {
   it('shallowObjectViewTruncated reduces depth if maxCharacters is exceeded', () => {
     expect(shallowObjectViewTruncated(sampleMapping1, 50)).toEqual({
       mappings: {
-        properties: 'Object',
+        properties: '...',
       },
     });
   });
@@ -511,9 +507,8 @@ describe('inspect index', () => {
       fieldDescriptors.map((p) => ({ name: p.name, type: p.esTypes[0] }))
     );
 
-    console.log(JSON.stringify(nestedObject, null, 2));
-
     const result = compressMapping(nestedObject);
-    console.log(result);
+    expect(result).toEqual(
+      `test,bar:long\ndns:{header_flags,id,op_code,response_code:keyword,resolved_ip:ip,Ext:{options,status:long},answers:{class,data,name,type:keyword,ttl:long},question:{class,name,registered_domain,subdomain,top_level_domain,type:keyword}}`)
   });
 });

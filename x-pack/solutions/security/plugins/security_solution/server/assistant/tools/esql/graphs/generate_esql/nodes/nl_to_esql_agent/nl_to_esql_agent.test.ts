@@ -46,13 +46,14 @@ describe('nl to esql agent', () => {
   };
 
   const sampleState: typeof GenerateEsqlAnnotation.State = {
-    input: '',
+    input: {
+      question: 'test',
+    },
     messages: [],
     validateEsqlResults: [],
     maximumValidationAttempts: 3,
     maximumEsqlGenerationAttempts: 3,
     selectedIndexPattern: '',
-    objectiveSummary: '',
   };
 
   const sampleMessageLog = [

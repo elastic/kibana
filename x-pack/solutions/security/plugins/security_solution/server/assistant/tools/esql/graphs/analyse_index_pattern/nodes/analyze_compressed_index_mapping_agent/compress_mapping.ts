@@ -66,6 +66,7 @@ function formatNestedObject(obj: NestedObject): string {
   while (stack.length > 0) {
     const current = stack[stack.length - 1];
 
+    /* eslint-disable no-continue */
     // If already processed this object, pop it and continue
     if (current.processed) {
       stack.pop();
@@ -73,11 +74,13 @@ function formatNestedObject(obj: NestedObject): string {
     }
 
     // If we've seen this object before, use cached result
-    if (cache.has(current.obj)) {
-      current.result = cache.get(current.obj)!;
+    const cachedValue = cache.get(current.obj)
+    if (cachedValue) {
+      current.result = cachedValue;
       stack.pop();
       continue;
     }
+    /* eslint-enable no-continue */
 
     // Group properties by type
     const typeGroups: Record<string, string[]> = {};
