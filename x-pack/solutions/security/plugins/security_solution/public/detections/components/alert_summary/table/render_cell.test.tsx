@@ -47,6 +47,23 @@ describe('CellValue', () => {
     expect(getByText('value1')).toBeInTheDocument();
   });
 
+  it('should handle a number value', () => {
+    const alert: Alert = {
+      _id: '_id',
+      _index: '_index',
+      field1: 123,
+    };
+    const columnId = 'field1';
+
+    const { getByText } = render(
+      <TestProviders>
+        <CellValue alert={alert} columnId={columnId} />
+      </TestProviders>
+    );
+
+    expect(getByText('123')).toBeInTheDocument();
+  });
+
   it('should handle array of booleans', () => {
     const alert: Alert = {
       _id: '_id',

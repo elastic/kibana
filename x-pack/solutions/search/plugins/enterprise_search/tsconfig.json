@@ -89,5 +89,6 @@
     "@kbn/search-shared-ui",
     "@kbn/file-upload-common",
     "@kbn/search-indices",
+    "@kbn/charts-theme",
   ]
 }
