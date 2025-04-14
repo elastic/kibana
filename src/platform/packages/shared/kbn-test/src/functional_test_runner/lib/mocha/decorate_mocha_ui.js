@@ -6,12 +6,17 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
+import chalk from 'chalk';
 import { relative } from 'path';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { createAssignmentProxy } from './assignment_proxy';
 import { wrapFunction } from './wrap_function';
 import { wrapRunnableArgs } from './wrap_runnable_args';
+
+// Add a global configuration for pauseOnError
+const testConfig = {
+  pauseOnError: process.argv.includes('--pauseOnError'),
+};
 
 const allTestsSkippedCache = new WeakMap();
 function allTestsAreSkipped(suite) {
@@ -39,6 +44,63 @@ function allTestsAreSkipped(suite) {
   return childrenSkipped;
 }
 
+function createErrorPauseHandler() {
+  return async (err, test, callback) => {
+    // Check if pauseOnError is enabled globally or for this specific test
+    if (testConfig.pauseOnError) {
+      const originalTimeout = test.timeout();
+      // Set minimum pause timeout to 10 minutes (600000 ms)
+      const minPauseTimeout = 600000;
+      // Extend timeout if it's less than 10 minutes
+      if (originalTimeout < minPauseTimeout) {
+        test.timeout(minPauseTimeout);
+      }
+
+      // Create a more informative pause message
+      const pauseMessage = chalk.bold.yellow(`
+        !!!!! ${chalk.red('TEST PAUSED ON ERROR')} !!!!!
+        ${chalk.blue('File:')} ${test.file}
+        ${chalk.blue('Test:')} ${test.title}
+        ${chalk.red('Error:')} ${err.message}
+
+        ${chalk.yellow('Pausing test execution. Press Ctrl+C to exit.')}
+
+      `);
+
+      // Use console.error to ensure the message is visible
+      console.error(pauseMessage);
+
+      return new Promise((resolve) => {
+        // Set a timeout to automatically resume after 10 minutes
+        const pauseTimeout = setTimeout(() => {
+          console.error('Pause timeout exceeded. Resuming test execution.');
+          resolve();
+          // Restore the original timeout
+          test.timeout(originalTimeout);
+          // Clear the timeout to prevent memory leaks
+          clearTimeout(pauseTimeout);
+
+          // call the callback to continue the test run
+          callback();
+        }, minPauseTimeout);
+
+        // Set up a way to manually interrupt
+        const interruptHandler = () => {
+          clearTimeout(pauseTimeout);
+          console.error(chalk.bold.red('\nTest run interrupted by user.'));
+          process.exit(1);
+        };
+
+        // Attach the interrupt handler
+        process.once('SIGINT', interruptHandler);
+      });
+    }
+
+    // Always trigger the existing test failure lifecycle hook
+    await callback();
+  };
+}
+
 /**
  * @param {import('../lifecycle').Lifecycle} lifecycle
  * @param {any} context
@@ -53,6 +115,9 @@ export function decorateMochaUi(lifecycle, context, { rootTags }) {
   // incremented at the start of each suite, used to know when a
   // suite is not the first suite
   let suiteCount = 0;
+
+  // Create a error pause handler specific to this lifecycle
+  const errorPauseHandler = createErrorPauseHandler(lifecycle);
 
   /**
    *  Wrap the describe() function in the mocha UI to ensure
@@ -136,7 +201,9 @@ export function decorateMochaUi(lifecycle, context, { rootTags }) {
     return wrapNonSuiteFunction(
       name,
       wrapRunnableArgs(fn, lifecycle, async (err, test) => {
-        await lifecycle.testFailure.trigger(err, test);
+        await errorPauseHandler(err, test, async () => {
+          await lifecycle.testFailure.trigger(err, test);
+        });
       })
     );
   }
@@ -154,7 +221,9 @@ export function decorateMochaUi(lifecycle, context, { rootTags }) {
     return wrapNonSuiteFunction(
       name,
       wrapRunnableArgs(fn, lifecycle, async (err, test) => {
-        await lifecycle.testHookFailure.trigger(err, test);
+        await errorPauseHandler(err, test, async () => {
+          await lifecycle.testHookFailure.trigger(err, test);
+        });
       })
     );
   }

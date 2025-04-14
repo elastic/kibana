@@ -37,6 +37,7 @@ export const MountWrapper: MountWrapperComponent = ({ mount, className = default
 
 /**
  * Mount converter for react node.
+ * This should only be used in internal Core packages to prevent circular dependency issues
  *
  * @param node to get a mount for
  * @internal
