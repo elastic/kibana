@@ -11,11 +11,20 @@ import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { Reference } from '@kbn/content-management-utils';
 import { CoreStart } from '@kbn/core-lifecycle-browser';
-import { DataView } from '@kbn/data-views-plugin/common';
-import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/public';
-import { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import {
+  DATA_VIEW_SAVED_OBJECT_TYPE,
+  type DataViewsPublicPluginStart,
+} from '@kbn/data-views-plugin/public';
+import { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { initializeTitleManager, useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
+import {
+  type SerializedPanelState,
+  type WithAllKeys,
+  initializeStateManager,
+  initializeTitleManager,
+  titleComparators,
+  useStateFromPublishingSubject,
+} from '@kbn/presentation-publishing';
 import { LazyDataViewPicker, withSuspense } from '@kbn/presentation-util-plugin/public';
 import {
   UnifiedFieldListSidebarContainer,
@@ -23,16 +32,18 @@ import {
 } from '@kbn/unified-field-list';
 import { cloneDeep } from 'lodash';
 import React, { useEffect } from 'react';
-import { BehaviorSubject, skip, Subscription, switchMap } from 'rxjs';
+import { distinctUntilChanged, merge, skip, Subscription, switchMap, tap } from 'rxjs';
+import { initializeUnsavedChanges } from '@kbn/presentation-containers';
 import { FIELD_LIST_DATA_VIEW_REF_NAME, FIELD_LIST_ID } from './constants';
-import {
-  FieldListApi,
-  Services,
-  FieldListSerializedStateState,
-  FieldListRuntimeState,
-} from './types';
+import { FieldListApi, Services, FieldListSerializedState, FieldListRuntimeState } from './types';
 
 const DataViewPicker = withSuspense(LazyDataViewPicker, null);
+
+const defaultFieldListState: WithAllKeys<FieldListRuntimeState> = {
+  dataViewId: undefined,
+  selectedFieldNames: undefined,
+  dataViews: undefined,
+};
 
 const getCreationOptions: UnifiedFieldListSidebarContainerProps['getCreationOptions'] = () => {
   return {
@@ -45,109 +56,124 @@ const getCreationOptions: UnifiedFieldListSidebarContainerProps['getCreationOpti
   };
 };
 
+const deserializeState = async (
+  dataViews: DataViewsPublicPluginStart,
+  serializedState?: SerializedPanelState<FieldListSerializedState>
+): Promise<FieldListRuntimeState> => {
+  const state = serializedState?.rawState ? cloneDeep(serializedState?.rawState) : {};
+  // inject the reference
+  const dataViewIdRef = (serializedState?.references ?? []).find(
+    (ref) => ref.name === FIELD_LIST_DATA_VIEW_REF_NAME
+  );
+  // if the serializedState already contains a dataViewId, we don't want to overwrite it. (Unsaved state can cause this)
+  if (dataViewIdRef && state && !state.dataViewId) {
+    state.dataViewId = dataViewIdRef?.id;
+  }
+
+  const [allDataViews, defaultDataViewId] = await Promise.all([
+    dataViews.getIdsWithTitle(),
+    dataViews.getDefaultId(),
+  ]);
+  if (!defaultDataViewId || allDataViews.length === 0) {
+    throw new Error(
+      i18n.translate('embeddableExamples.unifiedFieldList.noDefaultDataViewErrorMessage', {
+        defaultMessage: 'The field list must be used with at least one Data View present',
+      })
+    );
+  }
+  const initialDataViewId = state.dataViewId ?? defaultDataViewId;
+  const initialDataView = await dataViews.get(initialDataViewId);
+  return {
+    dataViewId: initialDataViewId,
+    selectedFieldNames: state.selectedFieldNames ?? [],
+    dataViews: [initialDataView],
+  };
+};
+
 export const getFieldListFactory = (
   core: CoreStart,
   { dataViews, data, charts, fieldFormats }: Services
 ) => {
-  const fieldListEmbeddableFactory: ReactEmbeddableFactory<
-    FieldListSerializedStateState,
-    FieldListRuntimeState,
-    FieldListApi
-  > = {
+  const fieldListEmbeddableFactory: EmbeddableFactory<FieldListSerializedState, FieldListApi> = {
     type: FIELD_LIST_ID,
-    deserializeState: (state) => {
-      const serializedState = cloneDeep(state.rawState);
-      // inject the reference
-      const dataViewIdRef = state.references?.find(
-        (ref) => ref.name === FIELD_LIST_DATA_VIEW_REF_NAME
-      );
-      // if the serializedState already contains a dataViewId, we don't want to overwrite it. (Unsaved state can cause this)
-      if (dataViewIdRef && serializedState && !serializedState.dataViewId) {
-        serializedState.dataViewId = dataViewIdRef?.id;
-      }
-      return serializedState;
-    },
-    buildEmbeddable: async (initialState, buildApi) => {
+    buildEmbeddable: async ({ initialState, finalizeApi, parentApi, uuid }) => {
+      const state = await deserializeState(dataViews, initialState);
+      const allDataViews = await dataViews.getIdsWithTitle();
       const subscriptions = new Subscription();
-      const titleManager = initializeTitleManager(initialState);
+      const titleManager = initializeTitleManager(initialState?.rawState ?? {});
+      const fieldListStateManager = initializeStateManager(state, defaultFieldListState);
 
-      // set up data views
-      const [allDataViews, defaultDataViewId] = await Promise.all([
-        dataViews.getIdsWithTitle(),
-        dataViews.getDefaultId(),
-      ]);
-      if (!defaultDataViewId || allDataViews.length === 0) {
-        throw new Error(
-          i18n.translate('embeddableExamples.unifiedFieldList.noDefaultDataViewErrorMessage', {
-            defaultMessage: 'The field list must be used with at least one Data View present',
-          })
-        );
-      }
-      const initialDataViewId = initialState.dataViewId ?? defaultDataViewId;
-      const initialDataView = await dataViews.get(initialDataViewId);
-      const selectedDataViewId$ = new BehaviorSubject<string | undefined>(initialDataViewId);
-      const dataViews$ = new BehaviorSubject<DataView[] | undefined>([initialDataView]);
-      const selectedFieldNames$ = new BehaviorSubject<string[] | undefined>(
-        initialState.selectedFieldNames
-      );
-
+      // Whenever the data view changes, we want to update the data views and reset the selectedFields in the field list state manager.
       subscriptions.add(
-        selectedDataViewId$
+        fieldListStateManager.api.dataViewId$
           .pipe(
             skip(1),
-            switchMap((dataViewId) => dataViews.get(dataViewId ?? defaultDataViewId))
+            distinctUntilChanged(),
+            tap(() => fieldListStateManager.api.setSelectedFieldNames([])),
+            switchMap((dataViewId) =>
+              dataViewId ? dataViews.get(dataViewId) : dataViews.getDefaultDataView()
+            )
           )
           .subscribe((nextSelectedDataView) => {
-            dataViews$.next([nextSelectedDataView]);
-            selectedFieldNames$.next([]);
+            fieldListStateManager.api.setDataViews(
+              nextSelectedDataView ? [nextSelectedDataView] : undefined
+            );
           })
       );
 
-      const api = buildApi(
-        {
-          ...titleManager.api,
-          dataViews$,
-          selectedFields: selectedFieldNames$,
-          serializeState: () => {
-            const dataViewId = selectedDataViewId$.getValue();
-            const references: Reference[] = dataViewId
-              ? [
-                  {
-                    type: DATA_VIEW_SAVED_OBJECT_TYPE,
-                    name: FIELD_LIST_DATA_VIEW_REF_NAME,
-                    id: dataViewId,
-                  },
-                ]
-              : [];
-            return {
-              rawState: {
-                ...titleManager.serialize(),
-                // here we skip serializing the dataViewId, because the reference contains that information.
-                selectedFieldNames: selectedFieldNames$.getValue(),
+      function serializeState() {
+        const { dataViewId, selectedFieldNames } = fieldListStateManager.getLatestState();
+        const references: Reference[] = dataViewId
+          ? [
+              {
+                type: DATA_VIEW_SAVED_OBJECT_TYPE,
+                name: FIELD_LIST_DATA_VIEW_REF_NAME,
+                id: dataViewId,
               },
-              references,
-            };
+            ]
+          : [];
+        return {
+          rawState: {
+            ...titleManager.getLatestState(),
+            // here we skip serializing the dataViewId, because the reference contains that information.
+            selectedFieldNames,
           },
+          references,
+        };
+      }
+
+      const unsavedChangesApi = initializeUnsavedChanges({
+        uuid,
+        parentApi,
+        serializeState,
+        anyStateChange$: merge(titleManager.anyStateChange$, fieldListStateManager.anyStateChange$),
+        getComparators: () => ({
+          ...titleComparators,
+          selectedFieldNames: (a, b) => {
+            return (a?.slice().sort().join(',') ?? '') === (b?.slice().sort().join(',') ?? '');
+          },
+        }),
+        onReset: async (lastSaved) => {
+          const lastState = await deserializeState(dataViews, lastSaved);
+          fieldListStateManager.reinitializeState(lastState);
+          titleManager.reinitializeState(lastSaved?.rawState);
         },
-        {
-          ...titleManager.comparators,
-          dataViewId: [selectedDataViewId$, (value) => selectedDataViewId$.next(value)],
-          selectedFieldNames: [
-            selectedFieldNames$,
-            (value) => selectedFieldNames$.next(value),
-            (a, b) => {
-              return (a?.slice().sort().join(',') ?? '') === (b?.slice().sort().join(',') ?? '');
-            },
-          ],
-        }
-      );
+      });
+
+      const api = finalizeApi({
+        ...titleManager.api,
+        ...unsavedChangesApi,
+        serializeState,
+      });
 
       return {
         api,
         Component: () => {
-          const [renderDataViews, selectedFieldNames] = useBatchedPublishingSubjects(
-            dataViews$,
-            selectedFieldNames$
+          const selectedFieldNames = useStateFromPublishingSubject(
+            fieldListStateManager.api.selectedFieldNames$
+          );
+          const renderDataViews = useStateFromPublishingSubject(
+            fieldListStateManager.api.dataViews$
           );
           const { euiTheme } = useEuiTheme();
 
@@ -171,9 +197,9 @@ export const getFieldListFactory = (
                 <DataViewPicker
                   dataViews={allDataViews}
                   selectedDataViewId={selectedDataView?.id}
-                  onChangeDataViewId={(nextSelection) => {
-                    selectedDataViewId$.next(nextSelection);
-                  }}
+                  onChangeDataViewId={(nextSelection) =>
+                    fieldListStateManager.api.setDataViewId(nextSelection)
+                  }
                   trigger={{
                     label:
                       selectedDataView?.getName() ??
@@ -194,14 +220,14 @@ export const getFieldListFactory = (
                     workspaceSelectedFieldNames={selectedFieldNames}
                     services={{ dataViews, data, fieldFormats, charts, core }}
                     onAddFieldToWorkspace={(field) =>
-                      selectedFieldNames$.next([
-                        ...(selectedFieldNames$.getValue() ?? []),
+                      fieldListStateManager.api.setSelectedFieldNames([
+                        ...(selectedFieldNames ?? []),
                         field.name,
                       ])
                     }
                     onRemoveFieldFromWorkspace={(field) => {
-                      selectedFieldNames$.next(
-                        (selectedFieldNames$.getValue() ?? []).filter((name) => name !== field.name)
+                      fieldListStateManager.api.setSelectedFieldNames(
+                        (selectedFieldNames ?? []).filter((name) => name !== field.name)
                       );
                     }}
                   />
