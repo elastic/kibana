@@ -9,7 +9,7 @@ import type { IRouter } from '@kbn/core/server';
 import type { ILicenseState } from '../../../../../lib';
 import { verifyAccessAndContext } from '../../../../lib';
 import type { AlertingRequestHandlerContext } from '../../../../../types';
-import { BASE_MAINTENANCE_WINDOW_API_PATH } from '../../../../../types';
+import { DELETE_MAINTENANCE_WINDOW_API_PATH } from '../../../../../types';
 import { MAINTENANCE_WINDOW_API_PRIVILEGES } from '../../../../../../common';
 
 import type { DeleteMaintenanceWindowRequestParamsV1 } from '../../../../../../common/routes/maintenance_window/external/apis/delete';
@@ -21,7 +21,7 @@ export const deleteMaintenanceWindowRoute = (
 ) => {
   router.delete(
     {
-      path: `${BASE_MAINTENANCE_WINDOW_API_PATH}/{id}`,
+      path: DELETE_MAINTENANCE_WINDOW_API_PATH,
       validate: {
         request: {
           params: deleteParamsSchemaV1,
@@ -49,6 +49,7 @@ export const deleteMaintenanceWindowRoute = (
       options: {
         access: 'public',
         summary: 'Deletes a maintenance window by ID.',
+        tags: ['oas-tag:maintenance-window'],
       },
     },
     router.handleLegacyErrors(

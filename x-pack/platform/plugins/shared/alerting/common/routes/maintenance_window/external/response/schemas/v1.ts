@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { maintenanceWindowStatus as maintenanceWindowStatusV1 } from '../constants/v1';
-import { scheduleRequestSchemaV1 } from '../../../../schedule';
+import { scheduleResponseSchemaV1 } from '../../../../schedule';
 
 export const maintenanceWindowResponseSchema = schema.object({
   id: schema.string({
@@ -78,6 +78,6 @@ export const maintenanceWindowResponseSchema = schema.object({
   ),
 
   schedule: schema.object({
-    custom: scheduleRequestSchemaV1,
+    custom: scheduleResponseSchemaV1,
   }),
 });

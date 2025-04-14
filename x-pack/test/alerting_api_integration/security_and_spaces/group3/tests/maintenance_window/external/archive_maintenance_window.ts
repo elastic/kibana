@@ -73,6 +73,7 @@ export default function archiveMaintenanceWindowTests({ getService }: FtrProvide
             case 'superuser at space1':
             case 'space_1_all at space1':
               expect(response.statusCode).to.eql(200);
+              expect(response.body.status).eql('archived');
               expect(
                 moment
                   .utc(createdMaintenanceWindow.expirationDate)

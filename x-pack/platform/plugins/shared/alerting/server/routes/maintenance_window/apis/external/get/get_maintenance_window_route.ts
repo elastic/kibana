@@ -9,7 +9,7 @@ import type { IRouter } from '@kbn/core/server';
 import type { ILicenseState } from '../../../../../lib';
 import { verifyAccessAndContext } from '../../../../lib';
 import type { AlertingRequestHandlerContext } from '../../../../../types';
-import { BASE_MAINTENANCE_WINDOW_API_PATH } from '../../../../../types';
+import { GET_MAINTENANCE_WINDOW_API_PATH } from '../../../../../types';
 import { MAINTENANCE_WINDOW_API_PRIVILEGES } from '../../../../../../common';
 import type { MaintenanceWindow } from '../../../../../application/maintenance_window/types';
 import type {
@@ -26,7 +26,7 @@ export const getMaintenanceWindowRoute = (
 ) => {
   router.get(
     {
-      path: `${BASE_MAINTENANCE_WINDOW_API_PATH}/{id}`,
+      path: GET_MAINTENANCE_WINDOW_API_PATH,
       validate: {
         request: {
           params: getParamsSchemaV1,
@@ -35,6 +35,9 @@ export const getMaintenanceWindowRoute = (
           200: {
             body: () => maintenanceWindowResponseSchemaV1,
             description: 'Indicates a successful call.',
+          },
+          400: {
+            description: 'Indicates an invalid schema or parameters.',
           },
           403: {
             description: 'Indicates that this call is forbidden.',
@@ -52,6 +55,7 @@ export const getMaintenanceWindowRoute = (
       options: {
         access: 'public',
         summary: 'Gets a maintenance window by ID.',
+        tags: ['oas-tag:maintenance-window'],
       },
     },
     router.handleLegacyErrors(

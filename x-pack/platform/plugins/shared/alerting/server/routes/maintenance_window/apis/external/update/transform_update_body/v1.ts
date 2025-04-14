@@ -25,7 +25,7 @@ export const transformUpdateBody = (
 
   return {
     ...(updateBody.title && { title: updateBody.title }),
-    ...(typeof updateBody.enabled !== 'undefined' && { enabled: updateBody.enabled }),
+    ...(updateBody.enabled !== undefined && { enabled: updateBody.enabled }),
     ...(customSchedule?.duration && { duration: customSchedule.duration }),
     ...(customSchedule?.rRule && { rRule: customSchedule.rRule }),
     ...(kql && { scopedQuery: { kql, filters: [] } }),

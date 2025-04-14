@@ -36,6 +36,9 @@ export const unarchiveMaintenanceWindowRoute = (
             body: () => maintenanceWindowResponseSchemaV1,
             description: 'Indicates a successful call.',
           },
+          400: {
+            description: 'Indicates an invalid schema or parameters.',
+          },
           403: {
             description: 'Indicates that this call is forbidden.',
           },
@@ -52,6 +55,7 @@ export const unarchiveMaintenanceWindowRoute = (
       options: {
         access: 'public',
         summary: 'Unarchives a maintenance window by ID.',
+        tags: ['oas-tag:maintenance-window'],
       },
     },
     router.handleLegacyErrors(

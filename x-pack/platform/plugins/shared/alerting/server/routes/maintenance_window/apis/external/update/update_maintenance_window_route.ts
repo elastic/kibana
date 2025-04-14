@@ -9,7 +9,7 @@ import type { IRouter } from '@kbn/core/server';
 import type { ILicenseState } from '../../../../../lib';
 import { verifyAccessAndContext } from '../../../../lib';
 import type { AlertingRequestHandlerContext } from '../../../../../types';
-import { BASE_MAINTENANCE_WINDOW_API_PATH } from '../../../../../types';
+import { UPDATE_MAINTENANCE_WINDOW_API_PATH } from '../../../../../types';
 import { MAINTENANCE_WINDOW_API_PRIVILEGES } from '../../../../../../common';
 import type { MaintenanceWindow } from '../../../../../application/maintenance_window/types';
 import type {
@@ -32,7 +32,7 @@ export const updateMaintenanceWindowRoute = (
 ) => {
   router.patch(
     {
-      path: `${BASE_MAINTENANCE_WINDOW_API_PATH}/{id}`,
+      path: UPDATE_MAINTENANCE_WINDOW_API_PATH,
       validate: {
         request: {
           body: updateMaintenanceWindowRequestBodySchemaV1,
@@ -66,6 +66,7 @@ export const updateMaintenanceWindowRoute = (
       options: {
         access: 'public',
         summary: 'Update a maintenance window.',
+        tags: ['oas-tag:maintenance-window'],
       },
     },
     router.handleLegacyErrors(

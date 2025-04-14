@@ -48,6 +48,14 @@ export default function unarchiveMaintenanceWindowTests({ getService }: FtrProvi
             true
           );
 
+          await supertest
+            .post(
+              `${getUrlPrefix(space.id)}/api/maintenance_window/${
+                createdMaintenanceWindow.id
+              }/_archive`
+            )
+            .set('kbn-xsrf', 'foo');
+
           const response = await supertestWithoutAuth
             .post(
               `${getUrlPrefix(space.id)}/api/maintenance_window/${
@@ -73,6 +81,7 @@ export default function unarchiveMaintenanceWindowTests({ getService }: FtrProvi
             case 'superuser at space1':
             case 'space_1_all at space1':
               expect(response.statusCode).to.eql(200);
+              expect(response.body.status).eql('running');
               expect(
                 moment
                   .utc(createdMaintenanceWindow.expirationDate)
