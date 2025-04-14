@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import http from 'http';
+import type http from 'http';
 import expect from '@kbn/expect';
-import { User } from '@kbn/cases-plugin/common/types/domain';
-import {
+import type { User } from '@kbn/cases-plugin/common/types/domain';
+import type {
   PushedUserAction,
   UserActionWithDeprecatedResponse,
 } from '@kbn/cases-plugin/common/types/domain';
-import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 
 import { defaultUser, getPostCaseRequest } from '../../../../../common/lib/mock';
 import {

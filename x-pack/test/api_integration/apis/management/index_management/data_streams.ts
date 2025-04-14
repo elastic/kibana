@@ -15,6 +15,7 @@ import { datastreamsHelpers } from './lib/datastreams.helpers';
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const es = getService('es');
+  const esVersion = getService('esVersion');
 
   const {
     createDataStream,
@@ -193,14 +194,26 @@ export default function ({ getService }: FtrProviderContext) {
             await deleteDataStream(logsdbDataStreamName);
           });
 
-          const logsdbSettings: Array<{ enabled: boolean | null; indexMode: string }> = [
-            { enabled: true, indexMode: 'logsdb' },
-            { enabled: false, indexMode: 'standard' },
-            { enabled: null, indexMode: 'standard' }, // In stateful Kibana, the cluster.logsdb.enabled setting is false by default, so standard index mode
+          const logsdbSettings: Array<{
+            enabled: boolean | null;
+            prior_logs_usage: boolean;
+            indexMode: string;
+          }> = [
+            { enabled: true, prior_logs_usage: true, indexMode: 'logsdb' },
+            { enabled: false, prior_logs_usage: true, indexMode: 'standard' },
+            // In stateful Kibana, when cluster.logsb.enabled setting is not set, the index mode is always standard
+            // For versions 9.0+, if prior_logs_usage is set to false, the cluster.logsdb.enabled setting is true by default, so logsdb index mode
+            { enabled: null, prior_logs_usage: true, indexMode: 'standard' },
+            {
+              enabled: null,
+              prior_logs_usage: false,
+              indexMode: esVersion.matchRange('>=9.0.0') ? 'logsdb' : 'standard',
+            },
           ];
 
-          logsdbSettings.forEach(({ enabled, indexMode }) => {
-            it(`returns ${indexMode} index mode if logsdb.enabled setting is ${enabled}`, async () => {
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          logsdbSettings.forEach(({ enabled, prior_logs_usage, indexMode }) => {
+            it(`returns ${indexMode} index mode if logsdb.enabled setting is ${enabled} and logs.prior_logs_usage is ${prior_logs_usage}`, async () => {
               await es.cluster.putSettings({
                 body: {
                   persistent: {
@@ -208,6 +221,9 @@ export default function ({ getService }: FtrProviderContext) {
                       logsdb: {
                         enabled,
                       },
+                    },
+                    logsdb: {
+                      prior_logs_usage,
                     },
                   },
                 },

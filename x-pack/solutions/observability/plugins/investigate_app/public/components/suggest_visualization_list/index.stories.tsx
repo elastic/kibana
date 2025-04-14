@@ -6,7 +6,7 @@
  */
 
 import type { Suggestion } from '@kbn/lens-plugin/public';
-import { ComponentMeta, ComponentStoryObj } from '@storybook/react';
+import { Meta, StoryObj } from '@storybook/react';
 import React from 'react';
 import { v4 } from 'uuid';
 import { SuggestVisualizationList as Component } from '.';
@@ -14,7 +14,7 @@ import '../../../.storybook/mock_kibana_services';
 import { KibanaReactStorybookDecorator } from '../../../.storybook/storybook_decorator';
 import { metricSuggestion, tableSuggestion, treemapSuggestion } from './suggestions.mock';
 
-const meta: ComponentMeta<typeof Component> = {
+const meta: Meta<typeof Component> = {
   component: Component,
   title: 'app/Molecules/SuggestVisualizationList',
   decorators: [KibanaReactStorybookDecorator],
@@ -26,13 +26,13 @@ function mapWithIds(suggestions: Suggestion[]) {
   return suggestions.map((suggestion) => ({ id: v4(), ...suggestion }));
 }
 
-const defaultProps: ComponentStoryObj<typeof Component> = {
+const defaultProps: StoryObj<typeof Component> = {
   render: (props) => {
     return <Component {...props} />;
   },
 };
 
-export const WithSuggestions: ComponentStoryObj<typeof Component> = {
+export const WithSuggestions: StoryObj<typeof Component> = {
   ...defaultProps,
   args: {
     loading: false,
@@ -41,7 +41,7 @@ export const WithSuggestions: ComponentStoryObj<typeof Component> = {
   name: 'With suggestions',
 };
 
-export const WithoutSuggestions: ComponentStoryObj<typeof Component> = {
+export const WithoutSuggestions: StoryObj<typeof Component> = {
   ...defaultProps,
   args: {
     loading: false,
@@ -50,7 +50,7 @@ export const WithoutSuggestions: ComponentStoryObj<typeof Component> = {
   name: 'Without suggestions',
 };
 
-export const LoadingStory: ComponentStoryObj<typeof Component> = {
+export const LoadingStory: StoryObj<typeof Component> = {
   ...defaultProps,
   args: {
     loading: true,
@@ -59,7 +59,7 @@ export const LoadingStory: ComponentStoryObj<typeof Component> = {
   name: 'Loading without suggestions',
 };
 
-export const LoadingWithSuggestionsStory: ComponentStoryObj<typeof Component> = {
+export const LoadingWithSuggestionsStory: StoryObj<typeof Component> = {
   ...defaultProps,
   args: {
     loading: true,
@@ -68,7 +68,7 @@ export const LoadingWithSuggestionsStory: ComponentStoryObj<typeof Component> = 
   name: 'Loading with suggestions',
 };
 
-export const ErrorStory: ComponentStoryObj<typeof Component> = {
+export const ErrorStory: StoryObj<typeof Component> = {
   ...defaultProps,
   args: {
     error: new Error('Network error'),

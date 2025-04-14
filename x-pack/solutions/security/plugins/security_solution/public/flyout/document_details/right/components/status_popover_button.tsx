@@ -88,7 +88,6 @@ export const StatusPopoverButton = memo(
           linkValue={enrichedFieldInfo.linkValue}
           fieldType={enrichedFieldInfo.data.type}
           fieldFormat={getFieldFormat(enrichedFieldInfo.data)}
-          isDraggable={false}
           truncate={false}
           isButton={statusPopoverVisible}
           onClick={statusPopoverVisible ? togglePopover : undefined}

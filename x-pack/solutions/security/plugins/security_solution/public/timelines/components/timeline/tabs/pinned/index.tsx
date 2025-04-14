@@ -139,7 +139,7 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
   );
   const { augmentedColumnHeaders } = useTimelineColumns(columns);
 
-  const [queryLoadingState, { events, totalCount, loadPage, refreshedAt, refetch }] =
+  const [queryLoadingState, { events, totalCount, loadNextBatch, refreshedAt, refetch }] =
     useTimelineEvents({
       endDate: '',
       id: `pinned-${timelineId}`,
@@ -164,8 +164,9 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
       itemsPerPage * pageIndex,
       itemsPerPage * (pageIndex + 1)
     );
-
-    loadNotesOnEventsLoad(eventsOnCurrentPage);
+    if (eventsOnCurrentPage.length > 0) {
+      loadNotesOnEventsLoad(eventsOnCurrentPage);
+    }
   }, [events, pageIndex, itemsPerPage, loadNotesOnEventsLoad]);
 
   /**
@@ -283,7 +284,7 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
         refetch={refetch}
         dataLoadingState={queryLoadingState}
         totalCount={totalCount}
-        onFetchMoreRecords={loadPage}
+        onFetchMoreRecords={loadNextBatch}
         activeTab={TimelineTabs.pinned}
         updatedAt={refreshedAt}
         isTextBasedQuery={false}

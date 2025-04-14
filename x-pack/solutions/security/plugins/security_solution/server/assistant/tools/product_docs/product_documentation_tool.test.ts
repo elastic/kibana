@@ -20,7 +20,7 @@ import type {
   ContentReferencesStore,
   ProductDocumentationContentReference,
 } from '@kbn/elastic-assistant-common';
-import { contentReferencesStoreFactoryMock } from '@kbn/elastic-assistant-common/impl/content_references/content_references_store/__mocks__/content_references_store.mock';
+import { newContentReferencesStoreMock } from '@kbn/elastic-assistant-common/impl/content_references/content_references_store/__mocks__/content_references_store.mock';
 
 describe('ProductDocumentationTool', () => {
   const chain = {} as RetrievalQAChain;
@@ -35,7 +35,7 @@ describe('ProductDocumentationTool', () => {
     retrieveDocumentationAvailable: jest.fn(),
   } as LlmTasksPluginStart;
   const connectorId = 'fake-connector';
-  const contentReferencesStore = contentReferencesStoreFactoryMock();
+  const contentReferencesStore = newContentReferencesStoreMock();
   const defaultArgs = {
     chain,
     esClient,
@@ -131,39 +131,6 @@ describe('ProductDocumentationTool', () => {
           documents: [
             {
               citation: '{reference(exampleContentReferenceId)}',
-              content: 'exampleContent',
-              title: 'exampleTitle',
-              url: 'exampleUrl',
-              summarized: false,
-            },
-          ],
-        },
-      });
-    });
-
-    it('does not include citations if contentReferencesStore is false', async () => {
-      const tool = PRODUCT_DOCUMENTATION_TOOL.getTool({
-        ...defaultArgs,
-        contentReferencesStore: false,
-      }) as DynamicStructuredTool;
-
-      (retrieveDocumentation as jest.Mock).mockResolvedValue({
-        documents: [
-          {
-            title: 'exampleTitle',
-            url: 'exampleUrl',
-            content: 'exampleContent',
-            summarized: false,
-          },
-        ] as RetrieveDocumentationResultDoc[],
-      });
-
-      const result = await tool.func({ query: 'What is Kibana Security?', product: 'kibana' });
-
-      expect(result).toEqual({
-        content: {
-          documents: [
-            {
               content: 'exampleContent',
               title: 'exampleTitle',
               url: 'exampleUrl',

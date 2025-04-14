@@ -24,6 +24,7 @@ import {
   RISK_ENGINE_PRIVILEGES_URL,
   RISK_ENGINE_CLEANUP_URL,
   RISK_ENGINE_SCHEDULE_NOW_URL,
+  RISK_ENGINE_CONFIGURE_SO_URL,
 } from '@kbn/security-solution-plugin/common/constants';
 import { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import { removeLegacyTransforms } from '@kbn/security-solution-plugin/server/lib/entity_analytics/utils/transforms';
@@ -331,9 +332,50 @@ export const waitForRiskEngineTaskToBeGone = async ({
   );
 };
 
-export const getRiskEngineConfigSO = async ({ kibanaServer }: { kibanaServer: KbnClient }) => {
+export const waitForSavedObjectToBeGone = async ({
+  log,
+  kibanaServer,
+}: {
+  log: ToolingLog;
+  kibanaServer: KbnClient;
+}): Promise<void> => {
+  await waitFor(
+    async () => {
+      const savedObject = await getRiskEngineConfigSO({ kibanaServer });
+      return savedObject == null;
+    },
+    'waitForSavedObjectToBeGone',
+    log
+  );
+};
+
+export const waitForRiskScoresToBeGone = async ({
+  es,
+  log,
+}: {
+  es: Client;
+  log: ToolingLog;
+}): Promise<void> => {
+  await waitFor(
+    async () => {
+      const riskScoreIndicesEmpty = await areRiskScoreIndicesEmpty({ es, log });
+      return riskScoreIndicesEmpty;
+    },
+    'waitForRiskScoreIndicesToBeEmpty',
+    log
+  );
+};
+
+export const getRiskEngineConfigSO = async ({
+  kibanaServer,
+  space,
+}: {
+  kibanaServer: KbnClient;
+  space?: string;
+}) => {
   const soResponse = await kibanaServer.savedObjects.find({
     type: riskEngineConfigurationTypeName,
+    space,
   });
 
   return soResponse?.saved_objects?.[0];
@@ -543,6 +585,17 @@ export const riskEngineRouteHelpersFactory = (supertest: SuperTest.Agent, namesp
         .set('elastic-api-version', '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send();
+      assertStatusCode(expectStatusCode, response);
+      return response;
+    },
+
+    soConfig: async (configParams: {}, expectStatusCode: number = 200) => {
+      const response = await supertest
+        .put(routeWithNamespace(RISK_ENGINE_CONFIGURE_SO_URL, namespace))
+        .set('kbn-xsrf', 'true')
+        .set('elastic-api-version', '2023-10-31')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .send(configParams);
       assertStatusCode(expectStatusCode, response);
       return response;
     },

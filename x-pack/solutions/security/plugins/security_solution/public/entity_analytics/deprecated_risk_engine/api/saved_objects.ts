@@ -7,7 +7,8 @@
 
 import type { HttpSetup } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import type { DashboardStart } from '@kbn/dashboard-plugin/public';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
+import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import type { StartRenderServices } from '../../../types';
 import {
   RISKY_HOSTS_DASHBOARD_TITLE,
@@ -35,7 +36,7 @@ interface Options {
 }
 
 export const bulkCreatePrebuiltSavedObjects = async ({
-  dashboard,
+  share,
   to,
   errorMessage,
   http,
@@ -45,7 +46,7 @@ export const bulkCreatePrebuiltSavedObjects = async ({
   from,
   startServices: { notifications, ...startServices },
 }: {
-  dashboard?: DashboardStart;
+  share?: SharePluginStart;
   to: string;
   errorMessage?: string;
   http: HttpSetup;
@@ -88,7 +89,7 @@ export const bulkCreatePrebuiltSavedObjects = async ({
 
         let targetUrl;
         if (targetDashboard?.id) {
-          targetUrl = dashboard?.locator?.getRedirectUrl({
+          targetUrl = share?.url.locators.get(DASHBOARD_APP_LOCATOR)?.getRedirectUrl({
             dashboardId: targetDashboard?.id,
             timeRange: {
               to,

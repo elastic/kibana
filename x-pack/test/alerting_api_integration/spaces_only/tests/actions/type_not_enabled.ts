@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 const PREWRITTEN_ACTION_ID = 'uuid-actionId';
 const DISABLED_ACTION_TYPE = 'test.not-enabled';

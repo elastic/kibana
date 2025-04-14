@@ -10,3 +10,8 @@ import { Error } from '../../shared_imports';
 export const getErrorText = (error: Error) => {
   return error.message && error.message !== '{}' ? error.message : error.error;
 };
+
+// All pipleines for integrations end in @custom
+export const isIntegrationsPipeline = (name: string) => {
+  return name.toLowerCase().endsWith('@custom');
+};

@@ -178,7 +178,7 @@ export const useInitSourcerer = (
       !loadingSignalIndex &&
       signalIndexName != null &&
       signalIndexNameSourcerer == null &&
-      (activeTimeline == null || activeTimeline.savedObjectId == null) &&
+      activeTimeline?.savedObjectId == null &&
       initialTimelineSourcerer.current &&
       defaultDataView.id.length > 0
     ) {
@@ -209,7 +209,7 @@ export const useInitSourcerer = (
       );
     } else if (
       signalIndexNameSourcerer != null &&
-      (activeTimeline == null || activeTimeline.savedObjectId == null) &&
+      activeTimeline?.savedObjectId == null &&
       initialTimelineSourcerer.current &&
       defaultDataView.id.length > 0
     ) {
@@ -240,14 +240,14 @@ export const useInitSourcerer = (
       );
     }
   }, [
-    activeTimeline,
+    activeTimeline?.savedObjectId,
     defaultDataView,
     dispatch,
     loadingSignalIndex,
     signalIndexName,
     signalIndexNameSourcerer,
   ]);
-  const { dataViewId } = useSourcererDataView(scopeId);
+  const { dataViewId, browserFields } = useSourcererDataView(scopeId);
 
   const updateSourcererDataView = useCallback(
     (newSignalsIndex: string) => {
@@ -370,4 +370,11 @@ export const useInitSourcerer = (
     signalIndexName,
     signalIndexNameSourcerer,
   ]);
+
+  return useMemo(
+    () => ({
+      browserFields,
+    }),
+    [browserFields]
+  );
 };

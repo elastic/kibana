@@ -4,15 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import stats from 'stats-lite';
-import {
+import type {
   RuleMonitoring,
   RawRuleMonitoring,
   RuleMonitoringHistory,
   RuleMonitoringLastRunMetrics,
 } from '../types';
-import { RuleDomain } from '../application/rule/types';
+import type { RuleDomain } from '../application/rule/types';
 
 const INITIAL_LAST_RUN_METRICS: RuleMonitoringLastRunMetrics = {
   duration: 0,

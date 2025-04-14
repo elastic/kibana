@@ -103,7 +103,7 @@ const createFlowRoute = createObservabilityOnboardingServerRoute({
         name: t.string,
       }),
       t.type({
-        type: t.union([t.literal('logFiles'), t.literal('systemLogs')]),
+        type: t.literal('logFiles'),
       }),
       t.partial({
         state: t.record(t.string, t.unknown),
@@ -128,14 +128,13 @@ const createFlowRoute = createObservabilityOnboardingServerRoute({
       `standalone_agent_logs_onboarding_${name}`
     );
 
-    const generatedState = type === 'systemLogs' ? { namespace: 'default' } : state;
     const savedObjectsClient = coreStart.savedObjects.getScopedClient(request);
 
     const { id } = await saveObservabilityOnboardingFlow({
       savedObjectsClient,
       observabilityOnboardingState: {
         type,
-        state: generatedState as ObservabilityOnboardingFlow['state'],
+        state: state as ObservabilityOnboardingFlow['state'],
         progress: {},
       },
     });

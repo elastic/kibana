@@ -20,67 +20,67 @@ import { canUseCases } from './can_use_cases';
 
 type CasesCapabilities = Pick<
   ApplicationStart['capabilities'],
-  'securitySolutionCasesV2' | 'observabilityCasesV2' | 'generalCasesV2'
+  'securitySolutionCasesV3' | 'observabilityCasesV3' | 'generalCasesV3'
 >;
 
 const hasAll: CasesCapabilities = {
-  securitySolutionCasesV2: allCasesCapabilities(),
-  observabilityCasesV2: allCasesCapabilities(),
-  generalCasesV2: allCasesCapabilities(),
+  securitySolutionCasesV3: allCasesCapabilities(),
+  observabilityCasesV3: allCasesCapabilities(),
+  generalCasesV3: allCasesCapabilities(),
 };
 
 const hasNone: CasesCapabilities = {
-  securitySolutionCasesV2: noCasesCapabilities(),
-  observabilityCasesV2: noCasesCapabilities(),
-  generalCasesV2: noCasesCapabilities(),
+  securitySolutionCasesV3: noCasesCapabilities(),
+  observabilityCasesV3: noCasesCapabilities(),
+  generalCasesV3: noCasesCapabilities(),
 };
 
 const hasSecurity: CasesCapabilities = {
-  securitySolutionCasesV2: allCasesCapabilities(),
-  observabilityCasesV2: noCasesCapabilities(),
-  generalCasesV2: noCasesCapabilities(),
+  securitySolutionCasesV3: allCasesCapabilities(),
+  observabilityCasesV3: noCasesCapabilities(),
+  generalCasesV3: noCasesCapabilities(),
 };
 
 const hasObservability: CasesCapabilities = {
-  securitySolutionCasesV2: noCasesCapabilities(),
-  observabilityCasesV2: allCasesCapabilities(),
-  generalCasesV2: noCasesCapabilities(),
+  securitySolutionCasesV3: noCasesCapabilities(),
+  observabilityCasesV3: allCasesCapabilities(),
+  generalCasesV3: noCasesCapabilities(),
 };
 
 const hasObservabilityWriteTrue: CasesCapabilities = {
-  securitySolutionCasesV2: noCasesCapabilities(),
-  observabilityCasesV2: writeCasesCapabilities(),
-  generalCasesV2: noCasesCapabilities(),
+  securitySolutionCasesV3: noCasesCapabilities(),
+  observabilityCasesV3: writeCasesCapabilities(),
+  generalCasesV3: noCasesCapabilities(),
 };
 
 const hasSecurityWriteTrue: CasesCapabilities = {
-  securitySolutionCasesV2: writeCasesCapabilities(),
-  observabilityCasesV2: noCasesCapabilities(),
-  generalCasesV2: noCasesCapabilities(),
+  securitySolutionCasesV3: writeCasesCapabilities(),
+  observabilityCasesV3: noCasesCapabilities(),
+  generalCasesV3: noCasesCapabilities(),
 };
 
 const hasObservabilityReadTrue: CasesCapabilities = {
-  securitySolutionCasesV2: noCasesCapabilities(),
-  observabilityCasesV2: readCasesCapabilities(),
-  generalCasesV2: noCasesCapabilities(),
+  securitySolutionCasesV3: noCasesCapabilities(),
+  observabilityCasesV3: readCasesCapabilities(),
+  generalCasesV3: noCasesCapabilities(),
 };
 
 const hasSecurityReadTrue: CasesCapabilities = {
-  securitySolutionCasesV2: readCasesCapabilities(),
-  observabilityCasesV2: noCasesCapabilities(),
-  generalCasesV2: noCasesCapabilities(),
+  securitySolutionCasesV3: readCasesCapabilities(),
+  observabilityCasesV3: noCasesCapabilities(),
+  generalCasesV3: noCasesCapabilities(),
 };
 
 const hasSecurityWriteAndObservabilityRead: CasesCapabilities = {
-  securitySolutionCasesV2: writeCasesCapabilities(),
-  observabilityCasesV2: readCasesCapabilities(),
-  generalCasesV2: noCasesCapabilities(),
+  securitySolutionCasesV3: writeCasesCapabilities(),
+  observabilityCasesV3: readCasesCapabilities(),
+  generalCasesV3: noCasesCapabilities(),
 };
 
 const hasSecurityConnectors: CasesCapabilities = {
-  securitySolutionCasesV2: readCasesCapabilities(),
-  observabilityCasesV2: noCasesCapabilities(),
-  generalCasesV2: noCasesCapabilities(),
+  securitySolutionCasesV3: readCasesCapabilities(),
+  observabilityCasesV3: noCasesCapabilities(),
+  generalCasesV3: noCasesCapabilities(),
 };
 
 describe('canUseCases', () => {

@@ -6,18 +6,16 @@
  */
 
 import React from 'react';
-import type { AppMockRenderer } from '../../common/mock';
-import { createAppMockRenderer } from '../../common/mock';
+
 import { waitFor, fireEvent, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import { UserActionsActivityBar } from '.';
 import type { UserActivityParams } from './types';
+import { renderWithTestingProviders } from '../../common/mock';
 
 describe('UserActionsActivityBar ', () => {
   const onUserActionsActivityChanged = jest.fn();
-
-  let appMockRender: AppMockRenderer;
 
   const params: UserActivityParams = {
     type: 'all',
@@ -27,12 +25,11 @@ describe('UserActionsActivityBar ', () => {
   };
 
   beforeEach(() => {
-    appMockRender = createAppMockRenderer();
     jest.clearAllMocks();
   });
 
   it('renders correctly', () => {
-    appMockRender.render(
+    renderWithTestingProviders(
       <UserActionsActivityBar
         onUserActionsActivityChanged={onUserActionsActivityChanged}
         params={params}
@@ -43,7 +40,7 @@ describe('UserActionsActivityBar ', () => {
   });
 
   it('should change filter correctly', async () => {
-    appMockRender.render(
+    renderWithTestingProviders(
       <UserActionsActivityBar
         onUserActionsActivityChanged={onUserActionsActivityChanged}
         params={params}
@@ -65,7 +62,7 @@ describe('UserActionsActivityBar ', () => {
   });
 
   it('should change sort order correctly', async () => {
-    appMockRender.render(
+    renderWithTestingProviders(
       <UserActionsActivityBar
         onUserActionsActivityChanged={onUserActionsActivityChanged}
         params={params}
@@ -84,7 +81,7 @@ describe('UserActionsActivityBar ', () => {
   });
 
   it('should not change filter when sort order changed', async () => {
-    appMockRender.render(
+    renderWithTestingProviders(
       <UserActionsActivityBar
         onUserActionsActivityChanged={onUserActionsActivityChanged}
         params={params}
@@ -109,7 +106,7 @@ describe('UserActionsActivityBar ', () => {
   });
 
   it('should not change sort order when filter changed', async () => {
-    appMockRender.render(
+    renderWithTestingProviders(
       <UserActionsActivityBar
         onUserActionsActivityChanged={onUserActionsActivityChanged}
         params={params}

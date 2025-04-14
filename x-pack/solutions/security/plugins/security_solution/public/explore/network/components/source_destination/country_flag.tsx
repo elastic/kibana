@@ -10,7 +10,7 @@ import { isEmpty } from 'lodash/fp';
 import { EuiToolTip } from '@elastic/eui';
 import countries from 'i18n-iso-countries';
 import countryJson from 'i18n-iso-countries/langs/en.json';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 
 // Fixes vertical alignment of the flag
 const FlagWrapper = styled.span`

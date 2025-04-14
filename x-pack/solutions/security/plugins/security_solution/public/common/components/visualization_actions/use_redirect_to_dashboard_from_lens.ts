@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RedirectToProps } from '@kbn/dashboard-plugin/public/dashboard_container/types';
+import type { RedirectToProps } from '@kbn/dashboard-plugin/public';
 import { useMemo, useCallback } from 'react';
 import { SecurityPageName } from '../../../../common';
 import { useNavigateTo } from '../../lib/kibana';

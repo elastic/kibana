@@ -40,6 +40,7 @@ const coreMock = {
 
 const logger = {
   info: jest.fn,
+  debug: jest.fn,
 } as unknown as Logger;
 
 const apmEventClientMock = {

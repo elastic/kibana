@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiTab, EuiTabs, useEuiBackgroundColor } from '@elastic/eui';
+import { EuiTab, EuiTabs, useEuiTheme } from '@elastic/eui';
 import type { ReactElement, VFC } from 'react';
 import React, { memo } from 'react';
 import { css } from '@emotion/react';
@@ -57,6 +57,7 @@ export interface PanelHeaderProps {
  */
 export const LeftPanelHeader: VFC<PanelHeaderProps> = memo(
   ({ selectedTabId, setSelectedTabId, tabs }) => {
+    const { euiTheme } = useEuiTheme();
     const onSelectedTabChanged = (id: EntityDetailsLeftPanelTab) => setSelectedTabId(id);
     const renderTabs = tabs.map((tab, index) => (
       <EuiTab
@@ -72,7 +73,7 @@ export const LeftPanelHeader: VFC<PanelHeaderProps> = memo(
     return (
       <FlyoutHeader
         css={css`
-          background-color: ${useEuiBackgroundColor('subdued')};
+          background-color: ${euiTheme.colors.backgroundBaseSubdued};
           padding-bottom: 0 !important;
           border-block-end: none !important;
         `}

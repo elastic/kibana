@@ -11,7 +11,6 @@ import {
   EuiComboBox,
   EuiSelect,
   EuiSpacer,
-  EuiText,
   EuiTitle,
   EuiComboBoxOptionOption,
   EuiSelectOption,
@@ -27,6 +26,7 @@ import { ResilientActionParams } from './types';
 
 import { useGetIncidentTypes } from './use_get_incident_types';
 import { useGetSeverity } from './use_get_severity';
+import { OptionalFieldLabel } from '../../common/optional_field_label';
 
 const ResilientParamsFields: React.FunctionComponent<ActionParamsProps<ResilientActionParams>> = ({
   actionConnector,
@@ -174,6 +174,7 @@ const ResilientParamsFields: React.FunctionComponent<ActionParamsProps<Resilient
           'xpack.stackConnectors.components.resilient.urgencySelectFieldLabel',
           { defaultMessage: 'Incident type' }
         )}
+        labelAppend={OptionalFieldLabel}
       >
         <EuiComboBox
           fullWidth
@@ -193,6 +194,7 @@ const ResilientParamsFields: React.FunctionComponent<ActionParamsProps<Resilient
         label={i18n.translate('xpack.stackConnectors.components.resilient.severity', {
           defaultMessage: 'Severity',
         })}
+        labelAppend={OptionalFieldLabel}
       >
         <EuiSelect
           data-test-subj="severitySelect"
@@ -217,11 +219,6 @@ const ResilientParamsFields: React.FunctionComponent<ActionParamsProps<Resilient
         label={i18n.translate('xpack.stackConnectors.components.resilient.nameFieldLabel', {
           defaultMessage: 'Name',
         })}
-        labelAppend={
-          <EuiText size="xs" color="subdued">
-            Required
-          </EuiText>
-        }
       >
         <TextFieldWithMessageVariables
           index={index}
@@ -237,22 +234,24 @@ const ResilientParamsFields: React.FunctionComponent<ActionParamsProps<Resilient
         editAction={editSubActionProperty}
         messageVariables={messageVariables}
         paramsProperty={'description'}
-        inputTargetValue={incident.description ?? undefined}
         label={i18n.translate(
           'xpack.stackConnectors.components.resilient.descriptionTextAreaFieldLabel',
           { defaultMessage: 'Description' }
         )}
+        inputTargetValue={incident.description ?? undefined}
+        isOptionalField
       />
       <TextAreaWithMessageVariables
         index={index}
         editAction={editComment}
         messageVariables={messageVariables}
         paramsProperty={'comments'}
-        inputTargetValue={comments && comments.length > 0 ? comments[0].comment : undefined}
         label={i18n.translate(
           'xpack.stackConnectors.components.resilient.commentsTextAreaFieldLabel',
           { defaultMessage: 'Additional comments' }
         )}
+        inputTargetValue={comments && comments.length > 0 ? comments[0].comment : undefined}
+        isOptionalField
       />
     </>
   );

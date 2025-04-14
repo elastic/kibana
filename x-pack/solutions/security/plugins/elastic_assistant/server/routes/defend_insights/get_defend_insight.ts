@@ -72,7 +72,7 @@ export const getDefendInsightRoute = (router: IRouter<ElasticAssistantRequestHan
           }
 
           const dataClient = await assistantContext.getDefendInsightsDataClient();
-          const authenticatedUser = assistantContext.getCurrentUser();
+          const authenticatedUser = await assistantContext.getCurrentUser();
           if (authenticatedUser == null) {
             return resp.error({
               body: `Authenticated user not found`,

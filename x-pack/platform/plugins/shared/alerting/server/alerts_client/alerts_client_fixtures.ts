@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import {
+import type {
   GetSummarizedAlertsParams,
   GetMaintenanceWindowScopedQueryAlertsParams,
   UpdateAlertsMaintenanceWindowIdByScopedQueryParams,
 } from './types';
 import type { MaintenanceWindow } from '../application/maintenance_window/types';
-import { AlertRuleData } from '.';
-import { AlertsFilter } from '../types';
+import type { AlertRuleData } from '.';
+import type { AlertsFilter } from '../types';
 
 export const alertRuleData: AlertRuleData = {
   consumer: 'bar',
@@ -257,7 +257,7 @@ export const getExpectedQueryByTimeRange = ({
     },
     { term: { 'kibana.alert.rule.uuid': ruleId } }
   );
-  if (!!excludedAlertInstanceIds?.length) {
+  if (excludedAlertInstanceIds?.length) {
     filter.push({
       bool: {
         must_not: {

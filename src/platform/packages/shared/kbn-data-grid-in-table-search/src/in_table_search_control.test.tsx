@@ -34,15 +34,18 @@ describe('InTableSearchControl', () => {
   const visibleColumns = Array.from({ length: 2 }, (_, i) => `column${i}`);
   const getColumnIndexFromId = (columnId: string) => parseInt(columnId.replace('column', ''), 10);
 
+  const getRenderCellValueWrappedMock = (data: string[][]) =>
+    jest.fn(
+      wrapRenderCellValueWithInTableSearchSupport(getRenderCellValueMock(data), 'black', 'green')
+    );
+
   it('should update correctly when deps change', async () => {
     const initialProps: InTableSearchControlProps = {
       inTableSearchTerm: 'a',
       pageSize: 10,
       visibleColumns,
       rows: testData,
-      renderCellValue: jest.fn(
-        wrapRenderCellValueWithInTableSearchSupport(getRenderCellValueMock(testData))
-      ),
+      renderCellValue: getRenderCellValueWrappedMock(testData),
       getColumnIndexFromId: jest.fn(getColumnIndexFromId),
       scrollToCell: jest.fn(),
       shouldOverrideCmdF: jest.fn(),
@@ -87,9 +90,7 @@ describe('InTableSearchControl', () => {
       <InTableSearchControl
         {...initialProps}
         rows={testData2}
-        renderCellValue={jest.fn(
-          wrapRenderCellValueWithInTableSearchSupport(getRenderCellValueMock(testData2))
-        )}
+        renderCellValue={getRenderCellValueWrappedMock(testData2)}
       />
     );
 
@@ -130,9 +131,7 @@ describe('InTableSearchControl', () => {
       pageSize: null,
       visibleColumns,
       rows: testData,
-      renderCellValue: jest.fn(
-        wrapRenderCellValueWithInTableSearchSupport(getRenderCellValueMock(testData))
-      ),
+      renderCellValue: getRenderCellValueWrappedMock(testData),
       getColumnIndexFromId: jest.fn(getColumnIndexFromId),
       scrollToCell: jest.fn(),
       shouldOverrideCmdF: jest.fn(),
@@ -160,9 +159,7 @@ describe('InTableSearchControl', () => {
       pageSize: 2,
       visibleColumns,
       rows: testData,
-      renderCellValue: jest.fn(
-        wrapRenderCellValueWithInTableSearchSupport(getRenderCellValueMock(testData))
-      ),
+      renderCellValue: getRenderCellValueWrappedMock(testData),
       getColumnIndexFromId: jest.fn(getColumnIndexFromId),
       scrollToCell: jest.fn(),
       shouldOverrideCmdF: jest.fn(),
@@ -216,9 +213,7 @@ describe('InTableSearchControl', () => {
       pageSize: 2,
       visibleColumns,
       rows: testData,
-      renderCellValue: jest.fn(
-        wrapRenderCellValueWithInTableSearchSupport(getRenderCellValueMock(testData))
-      ),
+      renderCellValue: getRenderCellValueWrappedMock(testData),
       getColumnIndexFromId: jest.fn(getColumnIndexFromId),
       scrollToCell: jest.fn(),
       shouldOverrideCmdF: jest.fn(),
@@ -328,9 +323,7 @@ describe('InTableSearchControl', () => {
       pageSize: null,
       visibleColumns,
       rows: testData,
-      renderCellValue: jest.fn(
-        wrapRenderCellValueWithInTableSearchSupport(getRenderCellValueMock(testData))
-      ),
+      renderCellValue: getRenderCellValueWrappedMock(testData),
       getColumnIndexFromId: jest.fn(getColumnIndexFromId),
       scrollToCell: jest.fn(),
       shouldOverrideCmdF: jest.fn(),
@@ -358,9 +351,7 @@ describe('InTableSearchControl', () => {
       pageSize: null,
       visibleColumns: [visibleColumns[0]],
       rows: testData,
-      renderCellValue: jest.fn(
-        wrapRenderCellValueWithInTableSearchSupport(getRenderCellValueMock(testData))
-      ),
+      renderCellValue: getRenderCellValueWrappedMock(testData),
       getColumnIndexFromId: jest.fn(getColumnIndexFromId),
       scrollToCell: jest.fn(),
       shouldOverrideCmdF: jest.fn(),

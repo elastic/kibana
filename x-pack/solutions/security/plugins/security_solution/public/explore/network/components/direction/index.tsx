@@ -60,14 +60,14 @@ export const DirectionBadge = React.memo<{
   contextId: string;
   direction?: string | null;
   eventId: string;
-  isDraggable?: boolean;
-}>(({ contextId, eventId, direction, isDraggable }) => (
+  scopeId: string;
+}>(({ contextId, eventId, direction, scopeId }) => (
   <DraggableBadge
+    scopeId={scopeId}
     contextId={contextId}
     eventId={eventId}
     field={NETWORK_DIRECTION_FIELD_NAME}
     iconType={getDirectionIcon(direction)}
-    isDraggable={isDraggable}
     value={direction}
     isAggregatable={true}
     fieldType="keyword"

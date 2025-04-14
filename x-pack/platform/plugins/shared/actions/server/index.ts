@@ -6,10 +6,11 @@
  */
 import { get } from 'lodash';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { PluginInitializerContext, PluginConfigDescriptor } from '@kbn/core/server';
-import { configSchema, ActionsConfig, CustomHostSettings } from './config';
-import { ActionsClient as ActionsClientClass } from './actions_client';
-import { ActionsAuthorization as ActionsAuthorizationClass } from './authorization/actions_authorization';
+import type { PluginInitializerContext, PluginConfigDescriptor } from '@kbn/core/server';
+import type { ActionsConfig, CustomHostSettings } from './config';
+import { configSchema } from './config';
+import type { ActionsClient as ActionsClientClass } from './actions_client';
+import type { ActionsAuthorization as ActionsAuthorizationClass } from './authorization/actions_authorization';
 
 export type { IUnsecuredActionsClient } from './unsecured_actions_client/unsecured_actions_client';
 export { UnsecuredActionsClient } from './unsecured_actions_client/unsecured_actions_client';

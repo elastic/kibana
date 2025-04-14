@@ -124,7 +124,7 @@ export function getAssistantToolParams({
   langSmithProject?: string;
   langSmithApiKey?: string;
   logger: Logger;
-  contentReferencesStore: ContentReferencesStore | false;
+  contentReferencesStore: ContentReferencesStore;
   latestReplacements: Replacements;
   onNewReplacements: (newReplacements: Replacements) => void;
   request: KibanaRequest<unknown, unknown, DefendInsightsPostRequestBody>;
@@ -136,7 +136,7 @@ export function getAssistantToolParams({
   langChainTimeout: number;
   llm: ActionsClientLlm;
   logger: Logger;
-  contentReferencesStore: ContentReferencesStore | false;
+  contentReferencesStore: ContentReferencesStore;
   replacements: Replacements;
   onNewReplacements: (newReplacements: Replacements) => void;
   request: KibanaRequest<unknown, unknown, DefendInsightsPostRequestBody>;
@@ -162,6 +162,9 @@ export function getAssistantToolParams({
     temperature: 0, // zero temperature because we want structured JSON output
     timeout: connectorTimeout,
     traceOptions,
+    telemetryMetadata: {
+      pluginId: 'security_defend_insights',
+    },
   });
 
   return {

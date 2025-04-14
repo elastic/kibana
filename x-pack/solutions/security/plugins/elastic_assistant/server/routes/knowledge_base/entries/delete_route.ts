@@ -52,7 +52,7 @@ export const deleteKnowledgeBaseEntryRoute = (router: ElasticAssistantPluginRout
           const logger = ctx.elasticAssistant.logger;
 
           // Perform license, authenticated user and FF checks
-          const checkResponse = performChecks({
+          const checkResponse = await performChecks({
             context: ctx,
             request,
             response,

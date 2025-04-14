@@ -108,9 +108,10 @@ const MaybeWrapper = ({
       onClose={() => {
         closeFlyout?.();
       }}
-      aria-labelledby={i18n.translate('xpack.lens.config.editLabel', {
+      aria-label={i18n.translate('xpack.lens.config.editLabel', {
         defaultMessage: 'Edit configuration',
       })}
+      role="dialog"
       size="s"
       hideCloseButton
       css={css`

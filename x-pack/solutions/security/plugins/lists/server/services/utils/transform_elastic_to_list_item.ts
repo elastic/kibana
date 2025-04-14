@@ -13,6 +13,7 @@ import { ErrorWithStatusCode } from '../../error_with_status_code';
 import { SearchEsListItemSchema } from '../../schemas/elastic_response';
 
 import { findSourceValue } from './find_source_value';
+import { convertDateNumberToString } from './convert_date_number_to_string';
 
 export interface TransformElasticToListItemOptions {
   response: estypes.SearchResponse<SearchEsListItemSchema>;
@@ -56,7 +57,7 @@ export const transformElasticHitsToListItem = ({
       throw new ErrorWithStatusCode(`Was expected ${type} to not be null/undefined`, 400);
     } else {
       return {
-        '@timestamp': _source?.['@timestamp'],
+        '@timestamp': convertDateNumberToString(_source?.['@timestamp']),
         _version: encodeHitVersion(hit),
         created_at,
         created_by,

@@ -12,7 +12,19 @@ export function resetSessionPageRoutes({ httpResources }: RouteDefinitionParams)
     {
       path: '/internal/security/reset_session_page.js',
       validate: false,
-      options: { authRequired: false, excludeFromOAS: true },
+      options: { excludeFromOAS: true },
+      security: {
+        authz: {
+          enabled: false,
+          reason:
+            'This route is opted out from authentication because it is a host for reset session page.',
+        },
+        authc: {
+          enabled: false,
+          reason:
+            'This route is opted out from authorization because it is a host for reset session page.',
+        },
+      },
     },
     (context, request, response) => {
       return response.renderJs({

@@ -6,9 +6,10 @@
  */
 
 import React from 'react';
+import { render } from '@testing-library/react';
 import type { IsolateHostPanelContext } from './context';
 import { useIsolateHostPanelContext } from './context';
-import { PanelHeader } from './header';
+import { PanelHeader, IsolateHostPanelHeader } from './header';
 import type { AppContextTestRender } from '../../../common/mock/endpoint';
 import { createAppRootMockRenderer, endpointAlertDataMock } from '../../../common/mock/endpoint';
 import type { ResponseActionAgentType } from '../../../../common/endpoint/service/response_actions/constants';
@@ -18,11 +19,11 @@ import { ISOLATE_HOST, UNISOLATE_HOST } from '../../../common/components/endpoin
 jest.mock('./context');
 
 describe('Isolation Flyout PanelHeader', () => {
-  let render: () => ReturnType<AppContextTestRender['render']>;
+  let renderComponent: () => ReturnType<AppContextTestRender['render']>;
 
   const setUseIsolateHostPanelContext = (data: Partial<IsolateHostPanelContext> = {}) => {
     const panelContextMock: IsolateHostPanelContext = {
-      eventId: 'some-even-1',
+      eventId: 'some-event-1',
       indexName: 'some-index-name',
       scopeId: 'some-scope-id',
       dataFormattedForFieldBrowser: endpointAlertDataMock.generateEndpointAlertDetailsItemData(),
@@ -41,7 +42,7 @@ describe('Isolation Flyout PanelHeader', () => {
       responseActionsCrowdstrikeManualHostIsolationEnabled: true,
     });
 
-    render = () => appContextMock.render(<PanelHeader />);
+    renderComponent = () => appContextMock.render(<PanelHeader />);
 
     setUseIsolateHostPanelContext({
       isolateAction: 'isolateHost',
@@ -79,10 +80,23 @@ describe('Isolation Flyout PanelHeader', () => {
         dataFormattedForFieldBrowser:
           endpointAlertDataMock.generateAlertDetailsItemDataForAgentType(agentType),
       });
-      const { getByTestId } = render();
+      const { getByTestId } = renderComponent();
 
       expect(getByTestId('flyoutHostIsolationHeaderTitle')).toHaveTextContent(title);
       expect(getByTestId('flyoutHostIsolationHeaderIntegration'));
     }
   );
+});
+
+describe('<IsolateHostPanelHeader />', () => {
+  it('should display correct flyout header title for isolateHost', () => {
+    const { getByTestId } = render(
+      <IsolateHostPanelHeader
+        isolateAction="isolateHost"
+        data={endpointAlertDataMock.generateEndpointAlertDetailsItemData()}
+      />
+    );
+    expect(getByTestId('flyoutHostIsolationHeaderTitle')).toHaveTextContent(ISOLATE_HOST);
+    expect(getByTestId('flyoutHostIsolationHeaderIntegration')).toBeInTheDocument();
+  });
 });

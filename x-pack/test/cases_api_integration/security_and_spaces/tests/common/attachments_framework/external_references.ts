@@ -13,8 +13,8 @@ import {
   CASE_USER_ACTION_SAVED_OBJECT,
 } from '@kbn/cases-plugin/common/constants';
 import { AttachmentType, UserActionTypes } from '@kbn/cases-plugin/common/types/domain';
-import { AttachmentRequest } from '@kbn/cases-plugin/common/types/api';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import type { AttachmentRequest } from '@kbn/cases-plugin/common/types/api';
+import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
   defaultUser,
   postCaseReq,

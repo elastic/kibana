@@ -558,6 +558,7 @@ Array [
       ],
       "cases": Object {
         "all": Array [],
+        "assign": Array [],
         "create": Array [],
         "createComment": Array [],
         "delete": Array [],
@@ -587,6 +588,7 @@ Array [
           "search",
           "visualization",
           "canvas-workpad",
+          "event-annotation-group",
           "lens",
           "links",
           "map",
@@ -625,6 +627,7 @@ Array [
           "search",
           "visualization",
           "canvas-workpad",
+          "event-annotation-group",
           "lens",
           "links",
           "map",
@@ -722,6 +725,7 @@ Array [
       ],
       "cases": Object {
         "all": Array [],
+        "assign": Array [],
         "create": Array [],
         "createComment": Array [],
         "delete": Array [],
@@ -1075,6 +1079,7 @@ Array [
       ],
       "cases": Object {
         "all": Array [],
+        "assign": Array [],
         "create": Array [],
         "createComment": Array [],
         "delete": Array [],
@@ -1222,6 +1227,7 @@ Array [
       ],
       "cases": Object {
         "all": Array [],
+        "assign": Array [],
         "create": Array [],
         "createComment": Array [],
         "delete": Array [],
@@ -1251,6 +1257,7 @@ Array [
           "search",
           "visualization",
           "canvas-workpad",
+          "event-annotation-group",
           "lens",
           "links",
           "map",
@@ -1289,6 +1296,7 @@ Array [
           "search",
           "visualization",
           "canvas-workpad",
+          "event-annotation-group",
           "lens",
           "links",
           "map",
@@ -1386,6 +1394,7 @@ Array [
       ],
       "cases": Object {
         "all": Array [],
+        "assign": Array [],
         "create": Array [],
         "createComment": Array [],
         "delete": Array [],
@@ -1739,6 +1748,7 @@ Array [
       ],
       "cases": Object {
         "all": Array [],
+        "assign": Array [],
         "create": Array [],
         "createComment": Array [],
         "delete": Array [],

@@ -5,20 +5,22 @@
  * 2.0.
  */
 
-import { Subject, Observable, Subscription } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { Subject, Subscription } from 'rxjs';
 import { filter } from 'rxjs';
-import { Logger, ExecutionContextStart } from '@kbn/core/server';
+import type { Logger, ExecutionContextStart } from '@kbn/core/server';
 
-import { Result, asErr, asOk } from './lib/result_type';
-import { TaskManagerConfig } from './config';
+import type { Result } from './lib/result_type';
+import { asErr, asOk } from './lib/result_type';
+import type { TaskManagerConfig } from './config';
 
 import { asTaskManagerStatEvent, isTaskRunEvent, isTaskPollingCycleEvent } from './task_events';
-import { Middleware } from './lib/middleware';
-import { EphemeralTaskInstance } from './task';
-import { TaskTypeDictionary } from './task_type_dictionary';
-import { TaskLifecycleEvent } from './polling_lifecycle';
+import type { Middleware } from './lib/middleware';
+import type { EphemeralTaskInstance } from './task';
+import type { TaskTypeDictionary } from './task_type_dictionary';
+import type { TaskLifecycleEvent } from './polling_lifecycle';
 import { EphemeralTaskManagerRunner } from './task_running/ephemeral_task_runner';
-import { TaskPool } from './task_pool';
+import type { TaskPool } from './task_pool';
 
 export interface EphemeralTaskLifecycleOpts {
   logger: Logger;

@@ -210,7 +210,7 @@ export class LogsContent extends PureComponent {
             defaultMessage="Visit {link} to dive deeper."
             values={{
               link: (
-                <EuiLink href={discoverLink}>
+                <EuiLink href={discoverLink} data-test-subj="monitoringLogsLink">
                   {i18n.translate('xpack.monitoring.logs.listing.calloutLinkText', {
                     defaultMessage: 'Discover',
                   })}
@@ -259,7 +259,7 @@ export class LogsContent extends PureComponent {
     }
 
     return (
-      <div>
+      <div data-test-subj="monitoringLogs">
         <EuiTitle>
           <h1>
             {i18n.translate('xpack.monitoring.logs.listing.pageTitle', {

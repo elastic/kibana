@@ -11,6 +11,7 @@ import {
   KnowledgeBaseEntryResponse,
 } from '@kbn/elastic-assistant-common';
 import { z } from '@kbn/zod';
+import { isArray } from 'lodash';
 
 export const isSystemEntry = (
   entry: KnowledgeBaseEntryResponse
@@ -25,7 +26,8 @@ export const isSystemEntry = (
 
 export const isGlobalEntry = (
   entry: KnowledgeBaseEntryResponse
-): entry is KnowledgeBaseEntryResponse => entry.users != null && !entry.users.length;
+): entry is KnowledgeBaseEntryResponse =>
+  entry.global ?? (isArray(entry.users) && !entry.users.length);
 
 export const isKnowledgeBaseEntryCreateProps = (
   entry: unknown

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiToolTip, EuiSpacer } from '@elastic/eui';
 import { MaintenanceWindowCallout } from '@kbn/alerts-ui-shared';
 import React, { useCallback } from 'react';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
@@ -26,8 +26,8 @@ import { AddElasticRulesButton } from '../../../../detections/components/rules/p
 import { ValueListsFlyout } from '../../../../detections/components/value_lists_management_flyout';
 import { useUserData } from '../../../../detections/components/user_info';
 import { useListsConfig } from '../../../../detections/containers/detection_engine/lists/use_lists_config';
-import { redirectToDetections } from '../../../../detections/pages/detection_engine/rules/helpers';
-import * as i18n from '../../../../detections/pages/detection_engine/rules/translations';
+import { redirectToDetections } from '../../../common/helpers';
+import * as i18n from '../../../common/translations';
 import { useInvalidateFetchRuleManagementFiltersQuery } from '../../../rule_management/api/hooks/use_fetch_rule_management_filters_query';
 import { useInvalidateFindRulesQuery } from '../../../rule_management/api/hooks/use_find_rules_query';
 import { importRules } from '../../../rule_management/logic';
@@ -35,6 +35,8 @@ import { AllRules } from '../../components/rules_table';
 import { RulesTableContextProvider } from '../../components/rules_table/rules_table/rules_table_context';
 import { useInvalidateFetchCoverageOverviewQuery } from '../../../rule_management/api/hooks/use_fetch_coverage_overview_query';
 import { HeaderPage } from '../../../../common/components/header_page';
+import { RuleUpdateCallouts } from '../../components/rule_update_callouts/rule_update_callouts';
+import { BlogPostPrebuiltRuleCustomizationCallout } from '../../../../detections/components/callouts/blog_post_prebuilt_rule_customization_callout';
 
 const RulesPageComponent: React.FC = () => {
   const [isImportModalVisible, showImportModal, hideImportModal] = useBoolState();
@@ -168,10 +170,13 @@ const RulesPageComponent: React.FC = () => {
               </EuiFlexItem>
             </EuiFlexGroup>
           </HeaderPage>
+          <RuleUpdateCallouts shouldShowUpdateRulesCallout={true} />
+          <EuiSpacer size="s" />
           <MaintenanceWindowCallout
             kibanaServices={kibanaServices}
             categories={[DEFAULT_APP_CATEGORIES.security.id]}
           />
+          <BlogPostPrebuiltRuleCustomizationCallout />
           <AllRules data-test-subj="all-rules" />
         </SecuritySolutionPageWrapper>
       </RulesTableContextProvider>

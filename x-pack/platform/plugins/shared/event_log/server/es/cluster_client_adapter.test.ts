@@ -6,18 +6,21 @@
  */
 
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
-import {
-  ClusterClientAdapter,
+import type {
   IClusterClientAdapter,
-  EVENT_BUFFER_LENGTH,
-  getQueryBody,
   FindEventsOptionsBySavedObjectFilter,
   AggregateEventsOptionsBySavedObjectFilter,
   AggregateEventsWithAuthFilter,
-  getQueryBodyWithAuthFilter,
   Doc,
 } from './cluster_client_adapter';
-import { AggregateOptionsType, queryOptionsSchema } from '../event_log_client';
+import {
+  ClusterClientAdapter,
+  EVENT_BUFFER_LENGTH,
+  getQueryBody,
+  getQueryBodyWithAuthFilter,
+} from './cluster_client_adapter';
+import type { AggregateOptionsType } from '../event_log_client';
+import { queryOptionsSchema } from '../event_log_client';
 import { delay } from '../lib/delay';
 import { pick, times } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/types';
@@ -2595,6 +2598,25 @@ describe('queryEventsByDocumentIds', () => {
   });
 });
 
+describe('refreshIndex', () => {
+  test('should successfully refresh index', async () => {
+    clusterClient.indices.refresh.mockResolvedValue({});
+
+    await clusterClientAdapter.refreshIndex();
+
+    expect(clusterClient.indices.refresh).toHaveBeenCalledWith({
+      index: 'kibana-event-log-ds',
+    });
+  });
+
+  test('should throw error when refresh fails', async () => {
+    clusterClient.indices.refresh.mockRejectedValue(new Error('Failed to refresh index'));
+
+    await expect(clusterClientAdapter.refreshIndex()).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Failed to refresh index"`
+    );
+  });
+});
 type RetryableFunction = () => boolean;
 
 const RETRY_UNTIL_DEFAULT_COUNT = 20;

@@ -294,6 +294,7 @@ export default function searchSolutionNavigation({
         'enterpriseSearchContent:webCrawlers',
         'build',
         'searchPlayground',
+        'searchSynonyms:synonyms',
         'enterpriseSearchApplications:searchApplications',
         'enterpriseSearchAnalytics',
         'relevance',
@@ -308,6 +309,7 @@ export default function searchSolutionNavigation({
         'project_settings_project_nav',
         'ml:modelManagement',
         'stack_management',
+        'monitoring',
       ]);
     });
   });

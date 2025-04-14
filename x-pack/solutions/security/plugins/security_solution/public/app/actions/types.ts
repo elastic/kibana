@@ -6,6 +6,8 @@
  */
 
 import type { CellAction, CellActionExecutionContext, CellActionFactory } from '@kbn/cell-actions';
+import type { RefObject } from 'react';
+import type { AlertsTableImperativeApi } from '@kbn/response-ops-alerts-table/types';
 import type { QueryOperator } from '../../../common/types';
 export { EsqlInTimelineTrigger, EsqlInTimelineAction } from './constants';
 export interface AndFilter {
@@ -49,6 +51,11 @@ export interface SecurityCellActionMetadata extends Record<string, unknown> {
   andFilters?: AndFilter[];
 
   dataViewId?: string;
+
+  /**
+   * Ref to the currently visible alerts table
+   */
+  alertsTableRef?: RefObject<AlertsTableImperativeApi>;
 }
 
 export interface SecurityCellActionExecutionContext extends CellActionExecutionContext {

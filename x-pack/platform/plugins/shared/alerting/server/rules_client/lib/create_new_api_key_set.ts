@@ -6,9 +6,9 @@
  */
 
 import Boom from '@hapi/boom';
-import { RawRule } from '../../types';
+import type { RawRule } from '../../types';
 import { generateAPIKeyName, apiKeyAsAlertAttributes } from '../common';
-import { RulesClientContext } from '../types';
+import type { RulesClientContext } from '../types';
 
 export async function createNewAPIKeySet(
   context: RulesClientContext,

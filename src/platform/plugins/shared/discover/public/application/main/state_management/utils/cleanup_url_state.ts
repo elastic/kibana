@@ -9,7 +9,7 @@
 
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
-import { DiscoverAppState, AppStateUrl } from '../discover_app_state_container';
+import type { DiscoverAppState, AppStateUrl } from '../discover_app_state_container';
 import { migrateLegacyQuery } from '../../../../utils/migrate_legacy_query';
 import { getMaxAllowedSampleSize } from '../../../../utils/get_allowed_sample_size';
 import { createDataViewDataSource, createEsqlDataSource } from '../../../../../common/data_sources';

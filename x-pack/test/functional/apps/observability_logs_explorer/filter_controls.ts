@@ -13,11 +13,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('Filter controls customization', () => {
     before('initialize tests', async () => {
-      await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
+      await kibanaServer.importExport.load(
+        'src/platform/test/functional/fixtures/kbn_archiver/discover'
+      );
     });
 
     after('clean up archives', async () => {
-      await kibanaServer.importExport.unload('test/functional/fixtures/kbn_archiver/discover');
+      await kibanaServer.importExport.unload(
+        'src/platform/test/functional/fixtures/kbn_archiver/discover'
+      );
     });
 
     it('renders a filter controls section as part of the unified search bar', async () => {

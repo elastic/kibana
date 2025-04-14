@@ -1,0 +1,20 @@
+{
+  "type": "plugin",
+  "id": "@kbn/kbn-sample-panel-action-plugin",
+  "owner": "@elastic/appex-sharedux",
+  "group": "platform",
+  "visibility": "private",
+  "plugin": {
+    "id": "kbnSamplePanelAction",
+    "server": false,
+    "browser": true,
+    "configPath": [
+      "kbn_sample_panel_action"
+    ],
+    "requiredPlugins": [
+      "uiActions",
+      "embeddable"
+    ],
+    "requiredBundles": []
+  }
+}

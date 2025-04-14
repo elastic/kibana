@@ -7,15 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { estypes } from '@elastic/elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 import { lastValueFrom } from 'rxjs';
-import { ISearchSource, EsQuerySortValue, SortDirection } from '@kbn/data-plugin/public';
+import type { ISearchSource, EsQuerySortValue } from '@kbn/data-plugin/public';
+import { SortDirection } from '@kbn/data-plugin/public';
 import { buildDataTableRecordList } from '@kbn/discover-utils';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { convertTimeValueToIso } from './date_conversion';
-import { IntervalValue } from './generate_intervals';
+import type { IntervalValue } from './generate_intervals';
 import type { SurrDocType } from '../services/context';
 import type { DiscoverServices } from '../../../build_services';
 

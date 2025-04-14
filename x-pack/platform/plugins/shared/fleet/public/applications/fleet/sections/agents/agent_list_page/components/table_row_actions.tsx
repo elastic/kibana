@@ -86,7 +86,7 @@ export const TableRowActions: React.FunctionComponent<{
       </EuiContextMenuItem>,
       <EuiContextMenuItem
         key="agentUnenrollBtn"
-        disabled={!agent.active}
+        disabled={!agent.active || agentPolicy?.supports_agentless === true}
         icon="trash"
         onClick={() => {
           onUnenrollClick();

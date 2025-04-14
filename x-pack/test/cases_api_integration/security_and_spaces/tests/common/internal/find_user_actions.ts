@@ -6,18 +6,11 @@
  */
 
 import expect from '@kbn/expect';
-import {
-  AttachmentType,
-  Case,
-  CaseSeverity,
-  CaseStatuses,
-} from '@kbn/cases-plugin/common/types/domain';
+import type { Case } from '@kbn/cases-plugin/common/types/domain';
+import { AttachmentType, CaseSeverity, CaseStatuses } from '@kbn/cases-plugin/common/types/domain';
 import { MAX_USER_ACTIONS_PER_PAGE } from '@kbn/cases-plugin/common/constants';
-import {
-  UserActionTypes,
-  CommentUserAction,
-  ConnectorTypes,
-} from '@kbn/cases-plugin/common/types/domain';
+import type { CommentUserAction } from '@kbn/cases-plugin/common/types/domain';
+import { UserActionTypes, ConnectorTypes } from '@kbn/cases-plugin/common/types/domain';
 import {
   globalRead,
   noKibanaPrivileges,
@@ -46,7 +39,7 @@ import {
   updateComment,
 } from '../../../../common/lib/api';
 
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {

@@ -42,7 +42,7 @@ export const INTERNAL_PLUGIN_LOCATIONS: Array<{ name: string; value: string }> =
   },
   {
     name: 'Kibana OSS Functional Testing',
-    value: Path.resolve(REPO_ROOT, 'test/plugin_functional/plugins'),
+    value: Path.resolve(REPO_ROOT, 'src/platform/test/plugin_functional/plugins'),
   },
   {
     name: 'X-Pack',

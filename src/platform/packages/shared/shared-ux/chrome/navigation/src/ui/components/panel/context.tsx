@@ -16,6 +16,7 @@ import React, {
   useState,
   ReactNode,
   useEffect,
+  useRef,
 } from 'react';
 import type { ChromeProjectNavigationNode, PanelSelectedNode } from '@kbn/core-chrome-browser';
 
@@ -25,10 +26,12 @@ import { ContentProvider } from './types';
 export interface PanelContext {
   isOpen: boolean;
   toggle: () => void;
-  open: (navNode: PanelSelectedNode) => void;
+  open: (navNode: PanelSelectedNode, openerEl: Element | null) => void;
   close: () => void;
   /** The selected node is the node in the main panel that opens the Panel */
   selectedNode: PanelSelectedNode | null;
+  /** Reference to the selected nav node element in the DOM */
+  selectedNodeEl: React.MutableRefObject<Element | null>;
   /** Handler to retrieve the component to render in the panel */
   getContent: () => React.ReactNode;
 }
@@ -51,14 +54,21 @@ export const PanelProvider: FC<PropsWithChildren<Props>> = ({
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedNode, setActiveNode] = useState<PanelSelectedNode | null>(selectedNodeProp);
+  const selectedNodeEl = useRef<Element | null>(null);
 
   const toggle = useCallback(() => {
     setIsOpen((prev) => !prev);
   }, []);
 
   const open = useCallback(
-    (navNode: PanelSelectedNode) => {
+    (navNode: PanelSelectedNode, openerEl: Element | null) => {
       setActiveNode(navNode);
+
+      const navNodeEl = openerEl?.closest(`[data-test-subj~=nav-item]`);
+      if (navNodeEl) {
+        selectedNodeEl.current = navNodeEl;
+      }
+
       setIsOpen(true);
       setSelectedNode?.(navNode);
     },
@@ -67,6 +77,7 @@ export const PanelProvider: FC<PropsWithChildren<Props>> = ({
 
   const close = useCallback(() => {
     setActiveNode(null);
+    selectedNodeEl.current = null;
     setIsOpen(false);
     setSelectedNode?.(null);
   }, [setSelectedNode]);
@@ -110,9 +121,10 @@ export const PanelProvider: FC<PropsWithChildren<Props>> = ({
       open,
       close,
       selectedNode,
+      selectedNodeEl,
       getContent,
     }),
-    [isOpen, toggle, open, close, selectedNode, getContent]
+    [isOpen, toggle, open, close, selectedNode, selectedNodeEl, getContent]
   );
 
   return <Context.Provider value={ctx}>{children}</Context.Provider>;

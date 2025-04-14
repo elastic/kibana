@@ -13,6 +13,7 @@ import { ConsoleParsedRequestsProvider, getParsedRequestsProvider, monaco } from
 import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { XJson } from '@kbn/es-ui-shared-plugin/public';
+import { ErrorAnnotation } from '@kbn/monaco/src/console/types';
 import { isQuotaExceededError } from '../../../services/history';
 import { DEFAULT_VARIABLES, KIBANA_API_PREFIX } from '../../../../common/constants';
 import { getStorage, StorageKeys } from '../../../services';
@@ -233,6 +234,30 @@ export class MonacoEditorActionsProvider {
     return selectedRequests;
   }
 
+  private async getErrorsBetweenLines(
+    startLineNumber: number,
+    endLineNumber: number
+  ): Promise<ErrorAnnotation[]> {
+    const model = this.editor.getModel();
+    if (!model) {
+      return [];
+    }
+    const parsedErrors = await this.parsedRequestsProvider.getErrors();
+    const selectedErrors: ErrorAnnotation[] = [];
+    for (const parsedError of parsedErrors) {
+      const errorLine = model.getPositionAt(parsedError.offset).lineNumber;
+      if (errorLine > endLineNumber) {
+        // error is past the selection, no need to check further errors
+        break;
+      }
+      if (errorLine >= startLineNumber) {
+        // error is selected
+        selectedErrors.push(parsedError);
+      }
+    }
+    return selectedErrors;
+  }
+
   public async getRequests() {
     const model = this.editor.getModel();
     if (!model) {
@@ -276,6 +301,25 @@ export class MonacoEditorActionsProvider {
     try {
       const allRequests = await this.getRequests();
       const selectedRequests = await this.getSelectedParsedRequests();
+      if (selectedRequests.length) {
+        const selectedErrors = await this.getErrorsBetweenLines(
+          selectedRequests.at(0)!.startLineNumber,
+          selectedRequests.at(-1)!.endLineNumber
+        );
+        if (selectedErrors.length) {
+          toasts.addDanger(
+            i18n.translate('console.notification.monaco.error.errorInSelection', {
+              defaultMessage:
+                'The selected {requestCount, plural, one {request contains} other {requests contain}} {errorCount, plural, one {an error} other {errors}}. Please resolve {errorCount, plural, one {it} other {them}} and try again.',
+              values: {
+                requestCount: selectedRequests.length,
+                errorCount: selectedErrors.length,
+              },
+            })
+          );
+          return;
+        }
+      }
 
       const requests = allRequests
         // if any request doesnt have a method then we gonna treat it as a non-valid
@@ -620,7 +664,11 @@ export class MonacoEditorActionsProvider {
   /**
    * This function applies indentations to the request in the selected text.
    */
-  public async autoIndent() {
+  public async autoIndent(context: ContextValue) {
+    const {
+      services: { notifications },
+    } = context;
+    const { toasts } = notifications;
     const parsedRequests = await this.getSelectedParsedRequests();
     const selectionStartLineNumber = parsedRequests[0].startLineNumber;
     const selectionEndLineNumber = parsedRequests[parsedRequests.length - 1].endLineNumber;
@@ -638,7 +686,12 @@ export class MonacoEditorActionsProvider {
     const selectedText = this.getTextInRange(selectedRange);
     const allText = this.getTextInRange();
 
-    const autoIndentedText = getAutoIndentedRequests(parsedRequests, selectedText, allText);
+    const autoIndentedText = getAutoIndentedRequests(
+      parsedRequests,
+      selectedText,
+      allText,
+      (text) => toasts.addWarning(text)
+    );
 
     this.editor.executeEdits(AUTO_INDENTATION_ACTION_LABEL, [
       {

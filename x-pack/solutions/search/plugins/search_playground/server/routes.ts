@@ -108,7 +108,7 @@ export function defineRoutes({
       },
     },
     errorHandler(logger)(async (context, request, response) => {
-      const [{ analytics }, { actions, cloud }] = await getStartServices();
+      const [{ analytics }, { actions, cloud, inference }] = await getStartServices();
 
       const { client } = (await context.core).elasticsearch;
       const aiClient = Assist({
@@ -122,7 +122,7 @@ export function defineRoutes({
           citations: data.citations,
           prompt: data.prompt,
         },
-        { actions, logger, request }
+        { actions, inference, logger, request }
       );
 
       let sourceFields = {};

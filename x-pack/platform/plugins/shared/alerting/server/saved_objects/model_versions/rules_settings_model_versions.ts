@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObjectsModelVersionMap } from '@kbn/core-saved-objects-server';
+import type { SavedObjectsModelVersionMap } from '@kbn/core-saved-objects-server';
 import { rawRulesSettingsSchemaV1 } from '../schemas/raw_rules_settings';
 
 export const rulesSettingsModelVersions: SavedObjectsModelVersionMap = {

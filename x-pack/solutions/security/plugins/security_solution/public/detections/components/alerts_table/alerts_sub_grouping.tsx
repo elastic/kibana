@@ -9,15 +9,15 @@ import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import type { Filter, Query } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
-import type { GroupingAggregation } from '@kbn/grouping';
+import type { GroupingAggregation, NamedAggregation } from '@kbn/grouping';
 import { isNoneGroup } from '@kbn/grouping';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import type { DynamicGroupingProps } from '@kbn/grouping/src';
 import { parseGroupingQuery } from '@kbn/grouping/src';
 import type { TableIdLiteral } from '@kbn/securitysolution-data-table';
 import type { RunTimeMappings } from '../../../sourcerer/store/model';
-import { combineQueries } from '../../../common/lib/kuery';
 import { SourcererScopeName } from '../../../sourcerer/store/model';
+import { combineQueries } from '../../../common/lib/kuery';
 import type { AlertsGroupingAggregation } from './grouping_settings/types';
 import type { Status } from '../../../../common/api/detection_engine';
 import { InspectButton } from '../../../common/components/inspect';
@@ -34,6 +34,7 @@ import { ALERTS_QUERY_NAMES } from '../../containers/detection_engine/alerts/con
 import { getAlertsGroupingQuery, useGroupTakeActionsItems } from './grouping_settings';
 
 const ALERTS_GROUPING_ID = 'alerts-grouping';
+const DEFAULT_FILTERS: Filter[] = [];
 
 interface OwnProps {
   currentAlertStatusFilterValue?: Status[];
@@ -45,6 +46,11 @@ interface OwnProps {
   globalFilters: Filter[];
   globalQuery: Query;
   groupingLevel?: number;
+  /**
+   * Function that returns the group aggregations by field.
+   * This is then used to render values in the EuiAccordion `extraAction` section.
+   */
+  groupStatsAggregations: (field: string) => NamedAggregation[];
   hasIndexMaintenance: boolean;
   hasIndexWrite: boolean;
   loading: boolean;
@@ -66,12 +72,13 @@ export type AlertsTableComponentProps = OwnProps;
 
 export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
   currentAlertStatusFilterValue,
-  defaultFilters = [],
+  defaultFilters = DEFAULT_FILTERS,
   from,
   getGrouping,
   globalFilters,
   globalQuery,
   groupingLevel,
+  groupStatsAggregations,
   hasIndexMaintenance,
   hasIndexWrite,
   loading,
@@ -146,6 +153,7 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
 
   const queryGroups = useMemo(() => {
     return getAlertsGroupingQuery({
+      groupStatsAggregations,
       additionalFilters,
       selectedGroup,
       uniqueValue,
@@ -158,6 +166,7 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
   }, [
     additionalFilters,
     from,
+    groupStatsAggregations,
     pageIndex,
     pageSize,
     runtimeMappings,
@@ -250,6 +259,13 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
     [defaultFilters, getGlobalQuery, selectedGroup, tableId, takeActionItems]
   );
 
+  const onChangeGroupsItemsPerPage = useCallback(
+    (size: number) => setPageSize(size),
+    [setPageSize]
+  );
+
+  const onChangeGroupsPage = useCallback((index: number) => setPageIndex(index), [setPageIndex]);
+
   return useMemo(
     () =>
       getGrouping({
@@ -259,8 +275,8 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
         inspectButton: inspect,
         isLoading: loading || isLoadingGroups,
         itemsPerPage: pageSize,
-        onChangeGroupsItemsPerPage: (size: number) => setPageSize(size),
-        onChangeGroupsPage: (index) => setPageIndex(index),
+        onChangeGroupsItemsPerPage,
+        onChangeGroupsPage,
         onGroupClose,
         renderChildComponent,
         selectedGroup,
@@ -274,13 +290,13 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
       inspect,
       isLoadingGroups,
       loading,
+      onChangeGroupsItemsPerPage,
+      onChangeGroupsPage,
       onGroupClose,
       pageIndex,
       pageSize,
       renderChildComponent,
       selectedGroup,
-      setPageIndex,
-      setPageSize,
     ]
   );
 };

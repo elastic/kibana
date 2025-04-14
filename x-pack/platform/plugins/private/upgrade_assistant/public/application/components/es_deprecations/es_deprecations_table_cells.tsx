@@ -17,7 +17,6 @@ interface Props {
   resolutionTableCell?: React.ReactNode;
   fieldName: DeprecationTableColumns;
   deprecation: EnrichedDeprecationInfo;
-  openFlyout: () => void;
 }
 
 const i18nTexts = {
@@ -28,7 +27,7 @@ const i18nTexts = {
     }
   ),
   manualCellTooltipLabel: i18n.translate(
-    'xpack.upgradeAssistant.esDeprecations.reindex.manualCellTooltipLabel',
+    'xpack.upgradeAssistant.esDeprecations.defaultDeprecation.manualCellTooltipLabel',
     {
       defaultMessage: 'This issue needs to be resolved manually.',
     }
@@ -39,20 +38,16 @@ export const EsDeprecationsTableCells: React.FunctionComponent<Props> = ({
   resolutionTableCell,
   fieldName,
   deprecation,
-  openFlyout,
 }) => {
   // "Status column"
-  if (fieldName === 'isCritical') {
-    return <DeprecationBadge isCritical={deprecation.isCritical} />;
+  if (fieldName === 'level') {
+    return <DeprecationBadge level={deprecation.level} />;
   }
 
   // "Issue" column
   if (fieldName === 'message') {
     return (
-      <EuiLink
-        data-test-subj={`deprecation-${deprecation.correctiveAction?.type ?? 'default'}`}
-        onClick={openFlyout}
-      >
+      <EuiLink data-test-subj={`deprecation-${deprecation.correctiveAction?.type ?? 'default'}`}>
         {deprecation.message}
       </EuiLink>
     );

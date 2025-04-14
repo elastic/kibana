@@ -11,8 +11,8 @@ import type { Type, ThreatMapping } from '@kbn/securitysolution-io-ts-alerting-t
 import * as i18n from './translations';
 
 import type { FieldValueQueryBar } from '../query_bar_field';
-import type { TimeframePreviewOptions } from '../../../../detections/pages/detection_engine/rules/types';
-import { DataSourceType } from '../../../../detections/pages/detection_engine/rules/types';
+import type { TimeframePreviewOptions } from '../../../common/types';
+import { DataSourceType } from '../../../common/types';
 import { MAX_NUMBER_OF_NEW_TERMS_FIELDS } from '../../../../../common/constants';
 
 /**
@@ -141,7 +141,10 @@ export const getIsRulePreviewDisabled = ({
       isThreatQueryBarValid,
     });
   }
-  if (ruleType === 'eql' || ruleType === 'query' || ruleType === 'threshold') {
+  if (ruleType === 'eql') {
+    return isEmpty(queryBar.query.query);
+  }
+  if (ruleType === 'query' || ruleType === 'threshold') {
     return isEmpty(queryBar.query.query) && isEmpty(queryBar.filters);
   }
   if (ruleType === 'new_terms') {

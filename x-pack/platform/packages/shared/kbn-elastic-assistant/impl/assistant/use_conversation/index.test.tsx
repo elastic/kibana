@@ -11,12 +11,13 @@ import { TestProviders } from '../../mock/test_providers/test_providers';
 import React from 'react';
 import { MessageRole } from '@kbn/elastic-assistant-common';
 import { httpServiceMock } from '@kbn/core/public/mocks';
-import { WELCOME_CONVERSATION } from './sample_conversations';
 import {
   deleteConversation,
   getConversationById as _getConversationById,
   createConversation as _createConversationApi,
+  updateConversation,
 } from '../api/conversations';
+import { welcomeConvo } from '../../mock/conversation';
 
 jest.mock('../api/conversations');
 const message = {
@@ -107,14 +108,15 @@ describe('useConversation', () => {
 
     await act(async () => {
       await result.current.setApiConfig({
-        conversation: WELCOME_CONVERSATION,
+        conversation: welcomeConvo,
         apiConfig: mockConvo.apiConfig,
       });
     });
 
-    expect(createConversation).toHaveBeenCalledWith({
+    expect(updateConversation).toHaveBeenCalledWith({
       http: httpMock,
-      conversation: { ...WELCOME_CONVERSATION, apiConfig: mockConvo.apiConfig, id: '' },
+      apiConfig: mockConvo.apiConfig,
+      conversationId: welcomeConvo.id,
     });
   });
 

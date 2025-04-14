@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { stringifyRequest, getOptions } from 'loader-utils';
 import webpack from 'webpack';
 import { parseThemeTags, ALL_THEMES, ThemeTag } from '../common';
 
@@ -16,11 +15,17 @@ const getIsDark = (tag: ThemeTag) => tag.includes('dark');
 const compare = (a: ThemeTag, b: ThemeTag) =>
   (getVersion(a) === getVersion(b) ? 1 : 0) + (getIsDark(a) === getIsDark(b) ? 1 : 0);
 
+const getStringifiedRequest = (loaderContext: webpack.LoaderContext<any>, request: string) => {
+  return JSON.stringify(
+    loaderContext.utils.contextify(loaderContext.context || loaderContext.rootContext, request)
+  );
+};
+
 // eslint-disable-next-line import/no-default-export
-export default function (this: webpack.loader.LoaderContext) {
+export default function (this: webpack.LoaderContext<any>) {
   this.cacheable(true);
 
-  const options = getOptions(this);
+  const options = this.getOptions();
   const bundleId = options.bundleId as string;
   const themeTags = parseThemeTags(options.themeTags);
 
@@ -28,7 +33,7 @@ export default function (this: webpack.loader.LoaderContext) {
     if (themeTags.includes(tag)) {
       return `
   case '${tag}':
-    return require(${stringifyRequest(this, `${this.resourcePath}?${tag}`)});`;
+    return require(${getStringifiedRequest(this, `${this.resourcePath}?${tag}`)});`;
     }
 
     const fallback = themeTags
@@ -40,7 +45,7 @@ export default function (this: webpack.loader.LoaderContext) {
     return `
   case '${tag}':
     console.error(new Error(${JSON.stringify(message)}));
-    return require(${stringifyRequest(this, `${this.resourcePath}?${fallback}`)})`;
+    return require(${getStringifiedRequest(this, `${this.resourcePath}?${fallback}`)})`;
   }).join('\n');
 
   return `

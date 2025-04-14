@@ -9,23 +9,25 @@
 
 import React from 'react';
 import { waitFor, renderHook } from '@testing-library/react';
-import { DataViewsContract } from '@kbn/data-plugin/public';
+import type { DataViewsContract } from '@kbn/data-plugin/public';
 import { discoverServiceMock } from '../../../__mocks__/services';
 import { useEsqlMode } from './use_esql_mode';
 import { FetchStatus } from '../../types';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
-import { AggregateQuery, Query } from '@kbn/es-query';
+import type { AggregateQuery, Query } from '@kbn/es-query';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
-import { DataViewListItem } from '@kbn/data-views-plugin/common';
+import type { DataViewListItem } from '@kbn/data-views-plugin/common';
 import { savedSearchMock } from '../../../__mocks__/saved_search';
 import { getDiscoverStateMock } from '../../../__mocks__/discover_state.mock';
 import { DiscoverMainProvider } from '../state_management/discover_state_provider';
-import { DiscoverAppState } from '../state_management/discover_app_state_container';
-import { DiscoverStateContainer } from '../state_management/discover_state';
+import type { DiscoverAppState } from '../state_management/discover_app_state_container';
+import type { DiscoverStateContainer } from '../state_management/discover_state';
 import { VIEW_MODE } from '@kbn/saved-search-plugin/public';
 import { dataViewAdHoc } from '../../../__mocks__/data_view_complex';
-import { buildDataTableRecord, EsHitRecord } from '@kbn/discover-utils';
+import type { EsHitRecord } from '@kbn/discover-utils';
+import { buildDataTableRecord } from '@kbn/discover-utils';
 import { omit } from 'lodash';
+import { internalStateActions } from '../state_management/redux';
 
 function getHookProps(
   query: AggregateQuery | Query | undefined,
@@ -37,7 +39,9 @@ function getHookProps(
   const stateContainer = getDiscoverStateMock({ isTimeBased: true });
   stateContainer.appState.replaceUrlState = replaceUrlState;
   stateContainer.appState.update({ columns: [], ...appState });
-  stateContainer.internalState.transitions.setSavedDataViews([dataViewMock as DataViewListItem]);
+  stateContainer.internalState.dispatch(
+    internalStateActions.setSavedDataViews([dataViewMock as DataViewListItem])
+  );
 
   const msgLoading = {
     fetchStatus: defaultFetchStatus,
@@ -502,7 +506,9 @@ describe('useEsqlMode', () => {
       FetchStatus.LOADING
     );
     const documents$ = stateContainer.dataState.data$.documents$;
-    expect(omit(stateContainer.internalState.get().resetDefaultProfileState, 'resetId')).toEqual({
+    expect(
+      omit(stateContainer.internalState.getState().resetDefaultProfileState, 'resetId')
+    ).toEqual({
       columns: false,
       rowHeight: false,
       breakdownField: false,
@@ -517,7 +523,9 @@ describe('useEsqlMode', () => {
       query: { esql: 'from pattern1' },
     });
     await waitFor(() =>
-      expect(omit(stateContainer.internalState.get().resetDefaultProfileState, 'resetId')).toEqual({
+      expect(
+        omit(stateContainer.internalState.getState().resetDefaultProfileState, 'resetId')
+      ).toEqual({
         columns: true,
         rowHeight: true,
         breakdownField: true,
@@ -527,18 +535,22 @@ describe('useEsqlMode', () => {
       fetchStatus: FetchStatus.PARTIAL,
       query: { esql: 'from pattern1' },
     });
-    stateContainer.internalState.transitions.setResetDefaultProfileState({
-      columns: false,
-      rowHeight: false,
-      breakdownField: false,
-    });
+    stateContainer.internalState.dispatch(
+      internalStateActions.setResetDefaultProfileState({
+        columns: false,
+        rowHeight: false,
+        breakdownField: false,
+      })
+    );
     stateContainer.appState.update({ query: { esql: 'from pattern1' } });
     documents$.next({
       fetchStatus: FetchStatus.LOADING,
       query: { esql: 'from pattern1' },
     });
     await waitFor(() =>
-      expect(omit(stateContainer.internalState.get().resetDefaultProfileState, 'resetId')).toEqual({
+      expect(
+        omit(stateContainer.internalState.getState().resetDefaultProfileState, 'resetId')
+      ).toEqual({
         columns: false,
         rowHeight: false,
         breakdownField: false,
@@ -554,7 +566,9 @@ describe('useEsqlMode', () => {
       query: { esql: 'from pattern2' },
     });
     await waitFor(() =>
-      expect(omit(stateContainer.internalState.get().resetDefaultProfileState, 'resetId')).toEqual({
+      expect(
+        omit(stateContainer.internalState.getState().resetDefaultProfileState, 'resetId')
+      ).toEqual({
         columns: true,
         rowHeight: true,
         breakdownField: true,
@@ -571,7 +585,9 @@ describe('useEsqlMode', () => {
     const documents$ = stateContainer.dataState.data$.documents$;
     const result1 = [buildDataTableRecord({ message: 'foo' } as EsHitRecord)];
     const result2 = [buildDataTableRecord({ message: 'foo', extension: 'bar' } as EsHitRecord)];
-    expect(omit(stateContainer.internalState.get().resetDefaultProfileState, 'resetId')).toEqual({
+    expect(
+      omit(stateContainer.internalState.getState().resetDefaultProfileState, 'resetId')
+    ).toEqual({
       columns: false,
       rowHeight: false,
       breakdownField: false,
@@ -582,7 +598,9 @@ describe('useEsqlMode', () => {
       result: result1,
     });
     await waitFor(() =>
-      expect(omit(stateContainer.internalState.get().resetDefaultProfileState, 'resetId')).toEqual({
+      expect(
+        omit(stateContainer.internalState.getState().resetDefaultProfileState, 'resetId')
+      ).toEqual({
         columns: false,
         rowHeight: false,
         breakdownField: false,
@@ -594,7 +612,9 @@ describe('useEsqlMode', () => {
       result: result2,
     });
     await waitFor(() =>
-      expect(omit(stateContainer.internalState.get().resetDefaultProfileState, 'resetId')).toEqual({
+      expect(
+        omit(stateContainer.internalState.getState().resetDefaultProfileState, 'resetId')
+      ).toEqual({
         columns: true,
         rowHeight: false,
         breakdownField: false,

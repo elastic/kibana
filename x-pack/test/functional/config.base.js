@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
 import { resolve } from 'path';
 import { services } from './services';
 import { pageObjects } from './page_objects';
@@ -22,6 +23,8 @@ export default async function ({ readConfigFile }) {
   return {
     services,
     pageObjects,
+
+    testConfigCategory: ScoutTestRunConfigCategory.UI_TEST,
 
     servers: kibanaFunctionalConfig.get('servers'),
 
@@ -220,6 +223,20 @@ export default async function ({ readConfigFile }) {
             indices: [
               {
                 names: ['logstash*'],
+                privileges: ['read', 'view_index_metadata'],
+                field_security: { grant: ['*'], except: [] },
+              },
+            ],
+            run_as: [],
+          },
+          kibana: [],
+        },
+        test_filebeat_reader: {
+          elasticsearch: {
+            cluster: [],
+            indices: [
+              {
+                names: ['filebeat*'],
                 privileges: ['read', 'view_index_metadata'],
                 field_security: { grant: ['*'], except: [] },
               },

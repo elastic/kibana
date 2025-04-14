@@ -7,31 +7,14 @@
 
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { AssistantSettingsManagement } from '@kbn/elastic-assistant/impl/assistant/settings/assistant_settings_management';
-import type { Conversation } from '@kbn/elastic-assistant';
 import { useSearchParams } from 'react-router-dom-v5-compat';
 import { i18n } from '@kbn/i18n';
-import {
-  mergeBaseWithPersistedConversations,
-  useAssistantContext,
-  useFetchCurrentUserConversations,
-  WELCOME_CONVERSATION_TITLE,
-} from '@kbn/elastic-assistant';
-import { useConversation } from '@kbn/elastic-assistant/impl/assistant/use_conversation';
-import type { FetchConversationsResponse } from '@kbn/elastic-assistant/impl/assistant/api';
 import { SECURITY_AI_SETTINGS } from '@kbn/elastic-assistant/impl/assistant/settings/translations';
 import { CONVERSATIONS_TAB } from '@kbn/elastic-assistant/impl/assistant/settings/const';
-import type { SettingsTabs } from '@kbn/elastic-assistant/impl/assistant/settings/types';
+import type { ManagementSettingsTabs } from '@kbn/elastic-assistant/impl/assistant/settings/types';
 import { useKibana } from '../../common/lib/kibana';
 
-const defaultSelectedConversationId = WELCOME_CONVERSATION_TITLE;
-
 export const ManagementSettings = React.memo(() => {
-  const {
-    baseConversations,
-    http,
-    assistantAvailability: { isAssistantEnabled },
-  } = useAssistantContext();
-
   const {
     application: {
       navigateToApp,
@@ -44,31 +27,11 @@ export const ManagementSettings = React.memo(() => {
     serverless,
   } = useKibana().services;
 
-  const onFetchedConversations = useCallback(
-    (conversationsData: FetchConversationsResponse): Record<string, Conversation> =>
-      mergeBaseWithPersistedConversations(baseConversations, conversationsData),
-    [baseConversations]
-  );
-  const { data: conversations } = useFetchCurrentUserConversations({
-    http,
-    onFetch: onFetchedConversations,
-    isAssistantEnabled,
-  });
-
-  const { getDefaultConversation } = useConversation();
-
-  const currentConversation = useMemo(
-    () =>
-      conversations?.[defaultSelectedConversationId] ??
-      getDefaultConversation({ cTitle: WELCOME_CONVERSATION_TITLE }),
-    [conversations, getDefaultConversation]
-  );
-
   docTitle.change(SECURITY_AI_SETTINGS);
 
   const [searchParams] = useSearchParams();
   const currentTab = useMemo(
-    () => (searchParams.get('tab') as SettingsTabs) ?? CONVERSATIONS_TAB,
+    () => (searchParams.get('tab') as ManagementSettingsTabs) ?? CONVERSATIONS_TAB,
     [searchParams]
   );
 
@@ -129,18 +92,13 @@ export const ManagementSettings = React.memo(() => {
     navigateToApp('home');
   }
 
-  if (conversations) {
-    return (
-      <AssistantSettingsManagement
-        selectedConversation={currentConversation}
-        dataViews={dataViews}
-        onTabChange={handleTabChange}
-        currentTab={currentTab}
-      />
-    );
-  }
-
-  return <></>;
+  return (
+    <AssistantSettingsManagement
+      dataViews={dataViews}
+      onTabChange={handleTabChange}
+      currentTab={currentTab}
+    />
+  );
 });
 
 ManagementSettings.displayName = 'ManagementSettings';

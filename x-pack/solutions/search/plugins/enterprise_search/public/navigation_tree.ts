@@ -212,6 +212,7 @@ export const getNavigationTreeDefinition = ({
                   children: [
                     { link: 'searchInferenceEndpoints:inferenceEndpoints' },
                     { link: 'searchSynonyms:synonyms' },
+                    { link: 'searchQueryRules' },
                   ],
                   id: 'relevance',
                   title: i18n.translate('xpack.enterpriseSearch.searchNav.relevance', {
@@ -358,12 +359,15 @@ export const getNavigationTreeDefinition = ({
                     },
                   ],
                   id: 'stack_management', // This id can't be changed as we use it to open the panel programmatically
-                  link: 'management',
                   renderAs: 'panelOpener',
                   spaceBefore: null,
                   title: i18n.translate('xpack.enterpriseSearch.searchNav.mngt', {
                     defaultMessage: 'Stack Management',
                   }),
+                },
+                {
+                  id: 'monitoring',
+                  link: 'monitoring',
                 },
               ],
               icon: 'gear',

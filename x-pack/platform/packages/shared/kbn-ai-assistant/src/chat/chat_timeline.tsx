@@ -46,11 +46,14 @@ export interface ChatTimelineItem
 }
 
 export interface ChatTimelineProps {
+  conversationId?: string;
   messages: Message[];
   knowledgeBase: UseKnowledgeBaseResult;
   chatService: ObservabilityAIAssistantChatService;
   hasConnector: boolean;
   chatState: ChatState;
+  isConversationOwnedByCurrentUser: boolean;
+  isArchived: boolean;
   currentUser?: Pick<AuthenticatedUser, 'full_name' | 'username'>;
   onEdit: (message: Message, messageAfterEdit: Message) => void;
   onFeedback: (feedback: Feedback) => void;
@@ -67,10 +70,13 @@ export interface ChatTimelineProps {
 }
 
 export function ChatTimeline({
+  conversationId,
   messages,
   chatService,
   hasConnector,
   currentUser,
+  isConversationOwnedByCurrentUser,
+  isArchived,
   onEdit,
   onFeedback,
   onRegenerate,
@@ -81,12 +87,15 @@ export function ChatTimeline({
 }: ChatTimelineProps) {
   const items = useMemo(() => {
     const timelineItems = getTimelineItemsfromConversation({
+      conversationId,
       chatService,
       hasConnector,
       messages,
       currentUser,
+      isConversationOwnedByCurrentUser,
       chatState,
       onActionClick,
+      isArchived,
     });
 
     const consolidatedChatItems: Array<ChatTimelineItem | ChatTimelineItem[]> = [];
@@ -109,7 +118,17 @@ export function ChatTimeline({
     }
 
     return consolidatedChatItems;
-  }, [chatService, hasConnector, messages, currentUser, chatState, onActionClick]);
+  }, [
+    conversationId,
+    chatService,
+    hasConnector,
+    messages,
+    currentUser,
+    chatState,
+    isConversationOwnedByCurrentUser,
+    isArchived,
+    onActionClick,
+  ]);
 
   return (
     <EuiCommentList
@@ -128,6 +147,7 @@ export function ChatTimeline({
             onRegenerate={onRegenerate}
             onSendTelemetry={onSendTelemetry}
             onStopGenerating={onStopGenerating}
+            isConversationOwnedByCurrentUser={isConversationOwnedByCurrentUser}
           />
         ) : (
           <ChatItem
@@ -146,6 +166,7 @@ export function ChatTimeline({
             }}
             onSendTelemetry={onSendTelemetry}
             onStopGeneratingClick={onStopGenerating}
+            isConversationOwnedByCurrentUser={isConversationOwnedByCurrentUser}
           />
         );
       })}

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ElasticsearchError, ElasticsearchErrorCausedByObject } from './types';
+import type { ElasticsearchError, ElasticsearchErrorCausedByObject } from './types';
 
 const getEsCause = (
   obj: ElasticsearchErrorCausedByObject = {},

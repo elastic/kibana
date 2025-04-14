@@ -18,6 +18,7 @@ import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
 import { of } from 'rxjs';
 import { AssistantProvider, AssistantProviderProps } from '../../assistant_context';
 import { AssistantAvailability } from '../../assistant_context/types';
+import { AssistantSpaceIdProvider } from '../../assistant/use_space_aware_context';
 
 interface Props {
   assistantAvailability?: AssistantAvailability;
@@ -84,7 +85,6 @@ export const TestProvidersComponent: React.FC<Props> = ({
             }}
             getComments={mockGetComments}
             http={mockHttp}
-            baseConversations={{}}
             navigateToApp={mockNavigateToApp}
             {...providerContext}
             currentAppId={'test'}
@@ -94,7 +94,7 @@ export const TestProvidersComponent: React.FC<Props> = ({
             userProfileService={jest.fn() as unknown as UserProfileService}
             chrome={chrome}
           >
-            {children}
+            <AssistantSpaceIdProvider spaceId="default">{children}</AssistantSpaceIdProvider>
           </AssistantProvider>
         </QueryClientProvider>
       </ThemeProvider>

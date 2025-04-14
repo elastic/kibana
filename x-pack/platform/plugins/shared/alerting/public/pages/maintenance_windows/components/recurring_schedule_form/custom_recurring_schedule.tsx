@@ -13,16 +13,14 @@ import {
   getUseField,
   useFormData,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import {
-  Field,
-  MultiButtonGroupFieldValue,
-} from '@kbn/es-ui-shared-plugin/static/forms/components';
+import type { MultiButtonGroupFieldValue } from '@kbn/es-ui-shared-plugin/static/forms/components';
+import { Field } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { EuiFlexGroup, EuiFlexItem, EuiFormLabel, EuiSpacer } from '@elastic/eui';
 import { CREATE_FORM_CUSTOM_FREQUENCY, WEEKDAY_OPTIONS } from '../../constants';
 import * as i18n from '../../translations';
 import { getInitialByWeekday } from '../../helpers/get_initial_by_weekday';
 import { getWeekdayInfo } from '../../helpers/get_weekday_info';
-import { FormProps } from '../schema';
+import type { FormProps } from '../schema';
 
 const UseField = getUseField({ component: Field });
 

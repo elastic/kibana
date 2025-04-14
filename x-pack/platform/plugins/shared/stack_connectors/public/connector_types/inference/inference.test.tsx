@@ -16,7 +16,9 @@ const ACTION_TYPE_ID = '.inference';
 let actionTypeModel: ActionTypeModel;
 
 beforeAll(() => {
-  ExperimentalFeaturesService.init({ experimentalFeatures: experimentalFeaturesMock });
+  ExperimentalFeaturesService.init({
+    experimentalFeatures: { ...experimentalFeaturesMock } as any,
+  });
   const connectorTypeRegistry = new TypeRegistry<ActionTypeModel>();
   registerConnectorTypes({ connectorTypeRegistry, services: registrationServicesMock });
   const getResult = connectorTypeRegistry.get(ACTION_TYPE_ID);
@@ -29,7 +31,7 @@ describe('actionTypeRegistry.get() works', () => {
   test('connector type static data is as expected', () => {
     expect(actionTypeModel.id).toEqual(ACTION_TYPE_ID);
     expect(actionTypeModel.selectMessage).toBe(
-      'Send requests to AI providers such as Amazon Bedrock, OpenAI and more.'
+      'Use the Elastic Managed LLM for your chat and RAG use cases.'
     );
     expect(actionTypeModel.actionTypeTitle).toBe('AI Connector');
   });

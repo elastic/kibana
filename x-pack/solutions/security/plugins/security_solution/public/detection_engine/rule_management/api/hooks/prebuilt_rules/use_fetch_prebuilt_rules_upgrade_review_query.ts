@@ -9,23 +9,31 @@ import type { UseQueryOptions } from '@tanstack/react-query';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { reviewRuleUpgrade } from '../../api';
 import { REVIEW_RULE_UPGRADE_URL } from '../../../../../../common/api/detection_engine/prebuilt_rules/urls';
-import type { ReviewRuleUpgradeResponseBody } from '../../../../../../common/api/detection_engine/prebuilt_rules';
+import type {
+  ReviewRuleUpgradeRequestBody,
+  ReviewRuleUpgradeResponseBody,
+} from '../../../../../../common/api/detection_engine/prebuilt_rules';
 import { DEFAULT_QUERY_OPTIONS } from '../constants';
+import { retryOnRateLimitedError } from './retry_on_rate_limited_error';
+import { cappedExponentialBackoff } from './capped_exponential_backoff';
 
 export const REVIEW_RULE_UPGRADE_QUERY_KEY = ['POST', REVIEW_RULE_UPGRADE_URL];
 
 export const useFetchPrebuiltRulesUpgradeReviewQuery = (
+  request: ReviewRuleUpgradeRequestBody,
   options?: UseQueryOptions<ReviewRuleUpgradeResponseBody>
 ) => {
   return useQuery<ReviewRuleUpgradeResponseBody>(
-    REVIEW_RULE_UPGRADE_QUERY_KEY,
+    [...REVIEW_RULE_UPGRADE_QUERY_KEY, request],
     async ({ signal }) => {
-      const response = await reviewRuleUpgrade({ signal });
+      const response = await reviewRuleUpgrade({ signal, request });
       return response;
     },
     {
       ...DEFAULT_QUERY_OPTIONS,
       ...options,
+      retry: retryOnRateLimitedError,
+      retryDelay: cappedExponentialBackoff,
     }
   );
 };

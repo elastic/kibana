@@ -9,7 +9,7 @@
 
 import React, { useState } from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
-import type { Meta, Story } from '@storybook/react';
+import type { Meta, StoryFn, StoryObj } from '@storybook/react';
 import { IndexPattern } from '@kbn/io-ts-utils';
 import { CoreStart } from '@kbn/core/public';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
@@ -62,7 +62,7 @@ const coreMock = {
 
 const KibanaReactContext = createKibanaReactContext(coreMock);
 
-const DataSourceSelectorTemplate: Story<DataSourceSelectorProps> = (args) => {
+const DataSourceSelectorTemplate: StoryFn<DataSourceSelectorProps> = (args) => {
   const [dataSourceSelection, setDataSourceSelection] = useState<DataSourceSelection>(() =>
     AllDatasetSelection.create({ indices: 'logs-*-*' })
   );
@@ -140,20 +140,23 @@ const DataSourceSelectorTemplate: Story<DataSourceSelectorProps> = (args) => {
   );
 };
 
-export const Basic = DataSourceSelectorTemplate.bind({});
-Basic.args = {
-  datasetsError: null,
-  dataViewsError: null,
-  integrationsError: null,
-  isLoadingDataViews: false,
-  isLoadingIntegrations: false,
-  isLoadingUncategorized: false,
-  isSearchingIntegrations: false,
-  onDataViewsReload: () => alert('Reload data views...'),
-  onDataViewsTabClick: () => console.log('Load data views...'),
-  onIntegrationsReload: () => alert('Reload integrations...'),
-  onUncategorizedTabClick: () => console.log('Load uncategorized streams...'),
-  onUncategorizedReload: () => alert('Reloading streams...'),
+export const Basic: StoryObj<DataSourceSelectorProps> = {
+  render: DataSourceSelectorTemplate,
+
+  args: {
+    datasetsError: null,
+    dataViewsError: null,
+    integrationsError: null,
+    isLoadingDataViews: false,
+    isLoadingIntegrations: false,
+    isLoadingUncategorized: false,
+    isSearchingIntegrations: false,
+    onDataViewsReload: () => alert('Reload data views...'),
+    onDataViewsTabClick: () => console.log('Load data views...'),
+    onIntegrationsReload: () => alert('Reload integrations...'),
+    onUncategorizedTabClick: () => console.log('Load uncategorized streams...'),
+    onUncategorizedReload: () => alert('Reloading streams...'),
+  },
 };
 
 const mockIntegrations: Integration[] = [

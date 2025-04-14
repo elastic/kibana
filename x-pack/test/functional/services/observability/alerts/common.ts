@@ -22,6 +22,7 @@ const DATE_WITH_DATA = {
 const ALERTS_FLYOUT_SELECTOR = 'alertsFlyout';
 const FILTER_FOR_VALUE_BUTTON_SELECTOR = 'filterForValue';
 const ALERTS_TABLE_CONTAINER_SELECTOR = 'alertsTable';
+const ALERTS_TABLE_ERROR_PROMPT_SELECTOR = 'alertsTableErrorPrompt';
 const ALERTS_TABLE_ACTIONS_MENU_SELECTOR = 'alertsTableActionsMenu';
 const VIEW_RULE_DETAILS_SELECTOR = 'viewRuleDetails';
 const VIEW_RULE_DETAILS_FLYOUT_SELECTOR = 'viewRuleDetailsFlyout';
@@ -134,12 +135,16 @@ export function ObservabilityAlertsCommonProvider({
     return await testSubjects.existOrFail(ALERTS_TABLE_CONTAINER_SELECTOR);
   };
 
+  const ensureNoTableErrorPrompt = async () => {
+    return await testSubjects.missingOrFail(ALERTS_TABLE_ERROR_PROMPT_SELECTOR);
+  };
+
   const getNoDataPageOrFail = async () => {
     return await testSubjects.existOrFail('noDataPage');
   };
 
   const getNoDataStateOrFail = async () => {
-    return await testSubjects.existOrFail('alertsStateTableEmptyState');
+    return await testSubjects.existOrFail('alertsTableEmptyState');
   };
 
   // Query Bar
@@ -404,6 +409,7 @@ export function ObservabilityAlertsCommonProvider({
     getTableCellsInRows,
     getTableColumnHeaders,
     getTableOrFail,
+    ensureNoTableErrorPrompt,
     navigateToTimeWithData,
     setKibanaTimeZoneToUTC,
     openAlertsFlyout,

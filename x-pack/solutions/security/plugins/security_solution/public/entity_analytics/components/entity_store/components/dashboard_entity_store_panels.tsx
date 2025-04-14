@@ -11,10 +11,7 @@ import {
   EuiFlexItem,
   EuiFlexGroup,
   EuiPanel,
-  EuiCallOut,
 } from '@elastic/eui';
-
-import { FormattedMessage } from '@kbn/i18n-react';
 import { useStoreEntityTypes } from '../../../hooks/use_enabled_entity_types';
 import { RiskEngineStatusEnum } from '../../../../../common/api/entity_analytics';
 import { EntitiesList } from '../entities_list';
@@ -23,6 +20,7 @@ import { EntityAnalyticsRiskScores } from '../../entity_analytics_risk_score';
 import { useRiskEngineStatus } from '../../../api/hooks/use_risk_engine_status';
 
 import { EnablementPanel } from './dashboard_enablement_panel';
+import { EntityStoreErrorCallout } from './entity_store_error_callout';
 
 const EntityStoreDashboardPanelsComponent = () => {
   const riskEngineStatus = useRiskEngineStatus();
@@ -31,25 +29,7 @@ const EntityStoreDashboardPanelsComponent = () => {
 
   const callouts = (storeStatusQuery.data?.engines ?? [])
     .filter((engine) => engine.status === 'error')
-    .map((engine) => {
-      const err = engine.error as {
-        message: string;
-      };
-      return (
-        <EuiCallOut
-          title={
-            <FormattedMessage
-              id="xpack.securitySolution.entityAnalytics.entityStore.enablement.errors.title"
-              defaultMessage={'An error occurred during entity store resource initialization'}
-            />
-          }
-          color="danger"
-          iconType="error"
-        >
-          <p>{err?.message}</p>
-        </EuiCallOut>
-      );
-    });
+    .map((engine) => <EntityStoreErrorCallout engine={engine} />);
 
   if (storeStatusQuery.status === 'loading') {
     return (
@@ -58,6 +38,10 @@ const EntityStoreDashboardPanelsComponent = () => {
       </EuiPanel>
     );
   }
+
+  const atLeastOneRiskEngineInstalled =
+    riskEngineStatus.data?.risk_engine_status !== RiskEngineStatusEnum.NOT_INSTALLED ||
+    riskEngineStatus.data?.legacy_risk_engine_status !== RiskEngineStatusEnum.NOT_INSTALLED;
 
   return (
     <EuiFlexGroup direction="column" data-test-subj="entityStorePanelsGroup">
@@ -72,7 +56,7 @@ const EntityStoreDashboardPanelsComponent = () => {
         />
       )}
 
-      {riskEngineStatus.data?.risk_engine_status !== RiskEngineStatusEnum.NOT_INSTALLED && (
+      {atLeastOneRiskEngineInstalled && (
         <>
           {entityTypes.map((entityType) => (
             <EuiFlexItem key={entityType}>

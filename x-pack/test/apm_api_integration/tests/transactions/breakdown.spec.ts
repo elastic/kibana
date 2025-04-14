@@ -103,7 +103,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       `);
 
         expectSnapshot(title).toMatchInline(`"app"`);
-        expectSnapshot(color).toMatchInline(`"#54b399"`);
+        expectSnapshot(color).toMatchInline(`"#54B399"`);
         expectSnapshot(type).toMatchInline(`"areaStacked"`);
         expectSnapshot(hideLegend).toMatchInline(`false`);
         expectSnapshot(legendValue).toMatchInline(`"100%"`);

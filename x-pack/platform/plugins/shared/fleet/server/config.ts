@@ -283,6 +283,11 @@ export const config: PluginConfigDescriptor = {
           min: 400,
         })
       ),
+      autoUpgrades: schema.maybe(
+        schema.object({
+          retryDelays: schema.maybe(schema.arrayOf(schema.string())),
+        })
+      ),
     },
     {
       validate: (configToValidate) => {

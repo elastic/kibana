@@ -12,18 +12,12 @@ import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { HostPanelKey } from '../../../../../flyout/entity_details/shared/constants';
 import { StatefulEventContext } from '../../../../../common/components/events_viewer/stateful_event_context';
 import { HostDetailsLink } from '../../../../../common/components/links';
-import { DefaultDraggable } from '../../../../../common/components/draggables';
 import { getEmptyTagValue } from '../../../../../common/components/empty_value';
 import { TruncatableText } from '../../../../../common/components/truncatable_text';
 
 interface Props {
   contextId: string;
   Component?: typeof EuiButtonEmpty | typeof EuiButtonIcon;
-  eventId: string;
-  fieldName: string;
-  fieldType: string;
-  isAggregatable: boolean;
-  isDraggable: boolean;
   isButton?: boolean;
   onClick?: () => void;
   value: string | number | undefined | null;
@@ -31,13 +25,8 @@ interface Props {
 }
 
 const HostNameComponent: React.FC<Props> = ({
-  fieldName,
-  fieldType,
-  isAggregatable,
   Component,
   contextId,
-  eventId,
-  isDraggable,
   isButton,
   onClick,
   title,
@@ -70,12 +59,11 @@ const HostNameComponent: React.FC<Props> = ({
             hostName,
             contextID: contextId,
             scopeId: timelineID,
-            isDraggable,
           },
         },
       });
     },
-    [contextId, eventContext, hostName, isDraggable, isInTimelineContext, onClick, openFlyout]
+    [contextId, eventContext, hostName, isInTimelineContext, onClick, openFlyout]
   );
 
   // The below is explicitly defined this way as the onClick takes precedence when it and the href are both defined
@@ -95,25 +83,7 @@ const HostNameComponent: React.FC<Props> = ({
     [Component, hostName, isButton, isInTimelineContext, openHostDetailsSidePanel, title]
   );
 
-  return isString(value) && hostName.length > 0 ? (
-    isDraggable ? (
-      <DefaultDraggable
-        field={fieldName}
-        fieldType={fieldType}
-        isAggregatable={isAggregatable}
-        id={`event-details-value-default-draggable-${contextId}-${eventId}-${fieldName}-${value}`}
-        isDraggable={isDraggable}
-        tooltipContent={fieldName}
-        value={hostName}
-      >
-        {content}
-      </DefaultDraggable>
-    ) : (
-      content
-    )
-  ) : (
-    getEmptyTagValue()
-  );
+  return isString(value) && hostName.length > 0 ? content : getEmptyTagValue();
 };
 
 export const HostName = React.memo(HostNameComponent);

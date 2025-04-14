@@ -29,7 +29,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
   }
 
-  async function callApiWithPrivileges(type: 'logFiles' | 'systemLogs', state = {}) {
+  async function callApiWithPrivileges(type: 'logFiles', state = {}) {
     return await observabilityOnboardingApiClient.logMonitoringUser({
       endpoint: 'POST /internal/observability_onboarding/logs/flow',
       params: {
@@ -86,21 +86,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
 
         expect(savedState.attributes).to.be.eql({ type: 'logFiles', state, progress: {} });
-      });
-
-      it('saves the expected state for systemLogs', async () => {
-        const state = {
-          namespace: 'default',
-        };
-
-        const request = await callApiWithPrivileges('systemLogs');
-
-        const savedState = await kibanaServer.savedObjects.get({
-          type: OBSERVABILITY_ONBOARDING_STATE_SAVED_OBJECT_TYPE,
-          id: request.body.onboardingId,
-        });
-
-        expect(savedState.attributes).to.be.eql({ type: 'systemLogs', state, progress: {} });
       });
     });
   });

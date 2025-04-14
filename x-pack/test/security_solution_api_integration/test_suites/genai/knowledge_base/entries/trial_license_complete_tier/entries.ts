@@ -24,6 +24,9 @@ import {
   bulkActionKnowledgeBaseEntries,
   bulkActionKnowledgeBaseEntriesForUser,
 } from '../utils/bulk_actions_entry';
+import { getEntry } from '../utils/get_entry';
+import { deleteEntry } from '../utils/delete_entry';
+import { updateEntry } from '../utils/update_entry';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
@@ -51,12 +54,10 @@ export default ({ getService }: FtrProviderContext) => {
         it('should create a new document entry for the current user', async () => {
           const entry = await createEntry({ supertest, log, entry: documentEntry });
 
-          const expectedDocumentEntry = {
+          expect(removeServerGeneratedProperties(entry)).toMatchObject({
             ...documentEntry,
             users: [{ name: 'elastic' }],
-          };
-
-          expect(removeServerGeneratedProperties(entry)).toEqual(expectedDocumentEntry);
+          });
         });
 
         it('should create a new index entry for the current user', async () => {
@@ -191,6 +192,333 @@ export default ({ getService }: FtrProviderContext) => {
         const entries = await findEntries({ supertest, log });
 
         expect(entries.total).toEqual(0);
+      });
+    });
+
+    describe('Get Entry', () => {
+      it('should see other users global entries', async () => {
+        const users = [secOnlySpacesAll];
+
+        const createdEntries = await Promise.all(
+          users.map((user) =>
+            createEntryForUser({
+              supertestWithoutAuth,
+              log,
+              entry: globalDocumentEntry,
+              user,
+            })
+          )
+        );
+        const entry = await getEntry({
+          supertest,
+          supertestWithoutAuth,
+          params: { id: createdEntries[0].id },
+          log,
+        });
+
+        expect(removeServerGeneratedProperties(entry)).toEqual(globalDocumentEntry);
+      });
+
+      it('should not see other users private entries', async () => {
+        const users = [secOnlySpacesAll];
+
+        const createdEntries = await Promise.all(
+          users.map((user) =>
+            createEntryForUser({
+              supertestWithoutAuth,
+              log,
+              entry: documentEntry,
+              user,
+            })
+          )
+        );
+
+        let entry;
+
+        try {
+          entry = await getEntry({
+            supertest,
+            supertestWithoutAuth,
+            params: { id: createdEntries[0].id },
+            log,
+          });
+          // eslint-disable-next-line no-empty
+        } catch (e) {}
+
+        expect(entry).toBeUndefined();
+      });
+    });
+
+    describe('Update Entries', () => {
+      it('should update own document entry', async () => {
+        const entry = await createEntry({ supertest, log, entry: documentEntry });
+        const updatedDocumentEntry = {
+          id: entry.id,
+          ...documentEntry,
+          text: 'This is a sample of updated document entry',
+        };
+        const response = await updateEntry({
+          supertest,
+          supertestWithoutAuth,
+          log,
+          entry: updatedDocumentEntry,
+        });
+
+        const expectedDocumentEntry = {
+          ...documentEntry,
+          users: [{ name: 'elastic' }],
+          text: 'This is a sample of updated document entry',
+        };
+
+        expect(response).toMatchObject(expectedDocumentEntry);
+      });
+
+      it('should not update private document entry created by another user', async () => {
+        const entry = await createEntryForUser({
+          supertestWithoutAuth,
+          log,
+          entry: documentEntry,
+          user: secOnlySpacesAll,
+        });
+
+        const updatedDocumentEntry = {
+          id: entry.id,
+          ...documentEntry,
+          text: 'This is a sample of updated document entry',
+        };
+        const response = await updateEntry({
+          supertest,
+          supertestWithoutAuth,
+          log,
+          entry: updatedDocumentEntry,
+          expectedHttpCode: 500,
+        });
+        expect(response).toEqual({
+          status_code: 500,
+          message: `Could not find documents to update: ${entry.id}.`,
+        });
+      });
+
+      it('should update own global document entry', async () => {
+        const entry = await createEntry({ supertest, log, entry: globalDocumentEntry });
+        const updatedDocumentEntry = {
+          id: entry.id,
+          ...globalDocumentEntry,
+          text: 'This is a sample of updated global document entry',
+        };
+        const response = await updateEntry({
+          supertest,
+          supertestWithoutAuth,
+          log,
+          entry: updatedDocumentEntry,
+        });
+
+        const expectedDocumentEntry = {
+          ...globalDocumentEntry,
+          text: 'This is a sample of updated global document entry',
+        };
+
+        expect(response).toMatchObject(expectedDocumentEntry);
+      });
+
+      it('should update own global document entry and make it private', async () => {
+        const entry = await createEntry({ supertest, log, entry: globalDocumentEntry });
+        const updatedDocumentEntry = {
+          id: entry.id,
+          ...globalDocumentEntry,
+          global: false,
+          text: 'This is a sample of updated global document entry',
+        };
+        const response = await updateEntry({
+          supertest,
+          supertestWithoutAuth,
+          log,
+          entry: updatedDocumentEntry,
+        });
+
+        const expectedDocumentEntry = {
+          ...globalDocumentEntry,
+          users: [{ name: 'elastic' }],
+          global: false,
+          text: 'This is a sample of updated global document entry',
+        };
+
+        expect(response).toMatchObject(expectedDocumentEntry);
+      });
+
+      it('should update global document entry created by another user', async () => {
+        const entry = await createEntryForUser({
+          supertestWithoutAuth,
+          log,
+          entry: globalDocumentEntry,
+          user: secOnlySpacesAll,
+        });
+        const updatedDocumentEntry = {
+          id: entry.id,
+          ...globalDocumentEntry,
+          text: 'This is a sample of updated global document entry',
+        };
+        const response = await updateEntry({
+          supertest,
+          supertestWithoutAuth,
+          log,
+          entry: updatedDocumentEntry,
+        });
+
+        const expectedDocumentEntry = {
+          ...globalDocumentEntry,
+          text: 'This is a sample of updated global document entry',
+        };
+
+        expect(response).toMatchObject(expectedDocumentEntry);
+      });
+
+      it('should update own private document even if user does not have `manage_global_knowledge_base` privileges', async () => {
+        const entry = await createEntryForUser({
+          supertestWithoutAuth,
+          log,
+          entry: documentEntry,
+          user: secOnlySpacesAllAssistantMinimalAll,
+        });
+
+        const updatedDocumentEntry = {
+          id: entry.id,
+          ...documentEntry,
+          text: 'This is a sample of updated document entry',
+        };
+        const response = await updateEntry({
+          supertest,
+          supertestWithoutAuth,
+          log,
+          entry: updatedDocumentEntry,
+          user: secOnlySpacesAllAssistantMinimalAll,
+        });
+
+        const expectedDocumentEntry = {
+          ...documentEntry,
+          users: [{ name: secOnlySpacesAllAssistantMinimalAll.username }],
+          text: 'This is a sample of updated document entry',
+        };
+
+        expect(response).toMatchObject(expectedDocumentEntry);
+      });
+
+      it('should not update global document if user does not have `manage_global_knowledge_base` privileges', async () => {
+        const entry = await createEntry({ supertest, log, entry: globalDocumentEntry });
+        const updatedDocumentEntry = {
+          id: entry.id,
+          ...globalDocumentEntry,
+          text: 'This is a sample of updated global document entry',
+        };
+        const response = await updateEntry({
+          supertest,
+          supertestWithoutAuth,
+          log,
+          entry: updatedDocumentEntry,
+          user: secOnlySpacesAllAssistantMinimalAll,
+          expectedHttpCode: 500,
+        });
+        expect(response).toEqual({
+          status_code: 500,
+          message: 'User lacks privileges to update global knowledge base entries',
+        });
+      });
+    });
+
+    describe('Delete Entries', () => {
+      it('should delete own document entry', async () => {
+        const entry = await createEntry({ supertest, log, entry: documentEntry });
+        const response = await deleteEntry({
+          supertest,
+          supertestWithoutAuth,
+          log,
+          params: { id: entry.id },
+        });
+
+        expect(response.id).toEqual(entry.id);
+      });
+
+      it('should not delete private document entry created by another user', async () => {
+        const entry = await createEntryForUser({
+          supertestWithoutAuth,
+          log,
+          entry: documentEntry,
+          user: secOnlySpacesAll,
+        });
+        const response = await deleteEntry({
+          supertest,
+          supertestWithoutAuth,
+          log,
+          params: { id: entry.id },
+          expectedHttpCode: 500,
+        });
+        expect(response).toEqual({
+          status_code: 500,
+          message: `Could not find documents to delete: ${entry.id}.`,
+        });
+      });
+
+      it('should delete own global document entry', async () => {
+        const entry = await createEntry({ supertest, log, entry: globalDocumentEntry });
+        const response = await deleteEntry({
+          supertest,
+          supertestWithoutAuth,
+          log,
+          params: { id: entry.id },
+        });
+
+        expect(response.id).toEqual(entry.id);
+      });
+
+      it('should delete global document entry created by another user', async () => {
+        const entry = await createEntryForUser({
+          supertestWithoutAuth,
+          log,
+          entry: globalDocumentEntry,
+          user: secOnlySpacesAll,
+        });
+        const response = await deleteEntry({
+          supertest,
+          supertestWithoutAuth,
+          log,
+          params: { id: entry.id },
+        });
+
+        expect(response.id).toEqual(entry.id);
+      });
+
+      it('should delete own private document even if user does not have `manage_global_knowledge_base` privileges', async () => {
+        const entry = await createEntryForUser({
+          supertestWithoutAuth,
+          log,
+          entry: documentEntry,
+          user: secOnlySpacesAllAssistantMinimalAll,
+        });
+        const response = await deleteEntry({
+          supertest,
+          supertestWithoutAuth,
+          log,
+          params: { id: entry.id },
+          user: secOnlySpacesAllAssistantMinimalAll,
+        });
+
+        expect(response.id).toEqual(entry.id);
+      });
+
+      it('should not delete global document if user does not have `manage_global_knowledge_base` privileges', async () => {
+        const entry = await createEntry({ supertest, log, entry: globalDocumentEntry });
+        const response = await deleteEntry({
+          supertest,
+          supertestWithoutAuth,
+          log,
+          params: { id: entry.id },
+          user: secOnlySpacesAllAssistantMinimalAll,
+          expectedHttpCode: 500,
+        });
+        expect(response).toEqual({
+          status_code: 500,
+          message: 'User lacks privileges to delete global knowledge base entries',
+        });
       });
     });
 

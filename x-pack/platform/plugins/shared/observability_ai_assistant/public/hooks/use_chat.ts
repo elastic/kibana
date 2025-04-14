@@ -30,18 +30,11 @@ export enum ChatState {
   Aborted = 'aborted',
 }
 
-function getWithSystemMessage(messages: Message[], systemMessage: Message) {
-  return [
-    systemMessage,
-    ...messages.filter((message) => message.message.role !== MessageRole.System),
-  ];
-}
-
 export interface UseChatResult {
   messages: Message[];
   setMessages: (messages: Message[]) => void;
   state: ChatState;
-  next: (messages: Message[]) => void;
+  next: (messages: Message[], onError?: (error: any) => void) => void;
   stop: () => void;
 }
 
@@ -138,7 +131,7 @@ function useChatWithoutContext({
   );
 
   const next = useCallback(
-    async (nextMessages: Message[]) => {
+    async (nextMessages: Message[], onError?: (error: any) => void) => {
       // make sure we ignore any aborts for the previous signal
       abortControllerRef.current.signal.removeEventListener('abort', handleSignalAbort);
 
@@ -160,7 +153,8 @@ function useChatWithoutContext({
       const next$ = chatService.complete({
         getScreenContexts: () => service.getScreenContexts(),
         connectorId,
-        messages: getWithSystemMessage(nextMessages, systemMessage),
+        messages: nextMessages,
+        systemMessage,
         persist,
         disableFunctions: disableFunctions ?? false,
         signal: abortControllerRef.current.signal,
@@ -245,6 +239,7 @@ function useChatWithoutContext({
         error: (error) => {
           setPendingMessages([]);
           setMessages(nextMessages.concat(getPendingMessages()));
+          onError?.(error);
           handleError(error);
         },
       });
@@ -275,8 +270,8 @@ function useChatWithoutContext({
   }, []);
 
   const memoizedMessages = useMemo(() => {
-    return getWithSystemMessage(messages.concat(pendingMessages ?? []), systemMessage);
-  }, [systemMessage, messages, pendingMessages]);
+    return messages.concat(pendingMessages ?? []);
+  }, [messages, pendingMessages]);
 
   const setMessagesWithAbort = useCallback((nextMessages: Message[]) => {
     abortControllerRef.current.abort();

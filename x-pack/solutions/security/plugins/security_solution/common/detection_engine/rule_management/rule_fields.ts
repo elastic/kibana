@@ -22,3 +22,4 @@ export const TAGS_FIELD = 'alert.attributes.tags';
 export const PARAMS_TYPE_FIELD = 'alert.attributes.params.type';
 export const PARAMS_IMMUTABLE_FIELD = 'alert.attributes.params.immutable';
 export const LAST_RUN_OUTCOME_FIELD = 'alert.attributes.lastRun.outcome';
+export const IS_CUSTOMIZED_FIELD = 'alert.attributes.params.ruleSource.isCustomized';

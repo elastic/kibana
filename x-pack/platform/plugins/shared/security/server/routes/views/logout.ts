@@ -12,7 +12,23 @@ import type { RouteDefinitionParams } from '..';
  */
 export function defineLogoutRoutes({ httpResources }: RouteDefinitionParams) {
   httpResources.register(
-    { path: '/logout', validate: false, options: { authRequired: false, excludeFromOAS: true } },
+    {
+      path: '/logout',
+      validate: false,
+      options: { excludeFromOAS: true },
+      security: {
+        authz: {
+          enabled: false,
+          reason:
+            'This route is opted out from authorization because it is a host for the logout view.',
+        },
+        authc: {
+          enabled: false,
+          reason:
+            'This route is opted out from authentication because it is a host for the logout view.',
+        },
+      },
+    },
     (context, request, response) => response.renderAnonymousCoreApp()
   );
 }

@@ -6,17 +6,14 @@
  */
 
 import stats from 'stats-lite';
-import { interval, merge, of, Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { interval, merge, of } from 'rxjs';
 import { filter, mergeScan, map, scan } from 'rxjs';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
-import { Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import { isEsCannotExecuteScriptError } from './identify_es_error';
-import {
-  CLAIM_STRATEGY_MGET,
-  DEFAULT_POLL_INTERVAL,
-  MAX_CAPACITY,
-  TaskManagerConfig,
-} from '../config';
+import type { TaskManagerConfig } from '../config';
+import { CLAIM_STRATEGY_MGET, DEFAULT_POLL_INTERVAL, MAX_CAPACITY } from '../config';
 import { TaskCost } from '../task';
 import { getMsearchStatusCode } from './msearch_error';
 import { getBulkUpdateStatusCode, isClusterBlockException } from './bulk_update_error';
@@ -193,11 +190,9 @@ export function countErrors(
           SavedObjectsErrorHelpers.isGeneralError(e) ||
           isEsCannotExecuteScriptError(e) ||
           getMsearchStatusCode(e) === 429 ||
-          getMsearchStatusCode(e) === 500 ||
-          getMsearchStatusCode(e) === 503 ||
+          (getMsearchStatusCode(e) !== undefined && getMsearchStatusCode(e)! >= 500) ||
           getBulkUpdateStatusCode(e) === 429 ||
-          getBulkUpdateStatusCode(e) === 500 ||
-          getBulkUpdateStatusCode(e) === 503 ||
+          (getBulkUpdateStatusCode(e) !== undefined && getBulkUpdateStatusCode(e)! >= 500) ||
           isClusterBlockException(e)
       )
     )

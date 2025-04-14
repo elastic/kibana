@@ -34,7 +34,6 @@ interface UserPanelContentProps {
   recalculatingScore: boolean;
   contextID: string;
   scopeId: string;
-  isDraggable: boolean;
   onAssetCriticalityChange: () => void;
   openDetailsPanel: (path: EntityDetailsPath) => void;
   isPreviewMode?: boolean;
@@ -49,7 +48,6 @@ export const UserPanelContent = ({
   recalculatingScore,
   contextID,
   scopeId,
-  isDraggable,
   openDetailsPanel,
   onAssetCriticalityChange,
   isPreviewMode,
@@ -60,20 +58,22 @@ export const UserPanelContent = ({
 
   return (
     <FlyoutBody>
-      {riskScoreState.isModuleEnabled && riskScoreState.data?.length !== 0 && (
-        <>
-          <FlyoutRiskSummary
-            riskScoreData={riskScoreState}
-            recalculatingScore={recalculatingScore}
-            queryId={USER_PANEL_RISK_SCORE_QUERY_ID}
-            openDetailsPanel={openDetailsPanel}
-            isPreviewMode={isPreviewMode}
-            isLinkEnabled={isLinkEnabled}
-            entityType={EntityType.user}
-          />
-          <EuiHorizontalRule />
-        </>
-      )}
+      {Array.isArray(riskScoreState.data) &&
+        riskScoreState.isModuleEnabled &&
+        riskScoreState.data.length > 0 && (
+          <>
+            <FlyoutRiskSummary
+              riskScoreData={riskScoreState}
+              recalculatingScore={recalculatingScore}
+              queryId={USER_PANEL_RISK_SCORE_QUERY_ID}
+              openDetailsPanel={openDetailsPanel}
+              isPreviewMode={isPreviewMode}
+              isLinkEnabled={isLinkEnabled}
+              entityType={EntityType.user}
+            />
+            <EuiHorizontalRule />
+          </>
+        )}
       <AssetCriticalityAccordion
         entity={{ name: userName, type: EntityType.user }}
         onChange={onAssetCriticalityChange}
@@ -89,7 +89,6 @@ export const UserPanelContent = ({
         observedData={observedUser}
         contextID={contextID}
         scopeId={scopeId}
-        isDraggable={isDraggable}
         observedFields={observedFields}
         queryId={OBSERVED_USER_QUERY_ID}
       />
@@ -98,7 +97,6 @@ export const UserPanelContent = ({
         <ManagedUser
           managedUser={managedUser}
           contextID={contextID}
-          isDraggable={isDraggable}
           openDetailsPanel={openDetailsPanel}
           isPreviewMode={isPreviewMode}
           isLinkEnabled={isLinkEnabled}

@@ -16,3 +16,11 @@ export function combineArrayToNdJson(parts: unknown[]): string {
 export function combineArraysToNdJson(...arrays: unknown[][]): string {
   return arrays.map((array) => combineArrayToNdJson(array)).join('\n');
 }
+
+export function parseNdJson(ndJson: Buffer): unknown[] {
+  return ndJson
+    .toString()
+    .split('\n')
+    .filter((line) => !!line)
+    .map((line) => JSON.parse(line));
+}

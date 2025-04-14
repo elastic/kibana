@@ -77,7 +77,7 @@ const renderSessionPreview = (context = mockContextValue) =>
 describe('SessionPreviewContainer', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(false);
+    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
     (useInvestigateInTimeline as jest.Mock).mockReturnValue({
       investigateInTimelineAlertClick: jest.fn(),
     });
@@ -235,7 +235,7 @@ describe('SessionPreviewContainer', () => {
 
       const { getByTestId, queryByTestId } = renderSessionPreview({
         ...mockContextValue,
-        isPreview: true,
+        isPreviewMode: true,
       });
 
       expect(getByTestId(SESSION_PREVIEW_TEST_ID)).toBeInTheDocument();
@@ -248,14 +248,14 @@ describe('SessionPreviewContainer', () => {
     });
   });
 
-  describe('when new navigation is enabled', () => {
+  describe('when newExpandableFlyoutNavigationDisabled is false', () => {
     describe('when visualization in flyout flag is enabled', () => {
       beforeEach(() => {
         jest.clearAllMocks();
         mockUseUiSetting.mockReturnValue([true]);
         (useSessionViewConfig as jest.Mock).mockReturnValue(sessionViewConfig);
         (useLicense as jest.Mock).mockReturnValue({ isEnterprise: () => true });
-        (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
+        (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(false);
       });
 
       it('should open left panel vizualization tab when visualization in flyout flag is on', () => {
@@ -306,7 +306,7 @@ describe('SessionPreviewContainer', () => {
         mockUseUiSetting.mockReturnValue([false]);
         (useSessionViewConfig as jest.Mock).mockReturnValue(sessionViewConfig);
         (useLicense as jest.Mock).mockReturnValue({ isEnterprise: () => true });
-        (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
+        (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(false);
       });
 
       it('should open session viewer in timeline', () => {

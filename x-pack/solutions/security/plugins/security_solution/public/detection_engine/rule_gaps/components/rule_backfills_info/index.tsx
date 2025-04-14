@@ -6,14 +6,7 @@
  */
 
 import React, { useState } from 'react';
-import {
-  EuiButton,
-  EuiBasicTable,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPanel,
-  EuiBetaBadge,
-} from '@elastic/eui';
+import { EuiButton, EuiBasicTable, EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import type { EuiBasicTableColumn, CriteriaWithPagination } from '@elastic/eui';
 import { useFindBackfillsForRules } from '../../api/hooks/use_find_backfills_for_rules';
 import { StopBackfill } from './stop_backfill';
@@ -26,7 +19,6 @@ import { useUserData } from '../../../../detections/components/user_info';
 import { getBackfillRowsFromResponse } from './utils';
 import { HeaderSection } from '../../../../common/components/header_section';
 import { TableHeaderTooltipCell } from '../../../rule_management_ui/components/rules_table/table_header_tooltip_cell';
-import { BETA, BETA_TOOLTIP } from '../../../../common/translations';
 import { useKibana } from '../../../../common/lib/kibana';
 
 const DEFAULT_PAGE_SIZE = 10;
@@ -186,7 +178,6 @@ export const RuleBackfillsInfo = React.memo<{ ruleId: string }>(({ ruleId }) => 
               title={i18n.BACKFILL_TABLE_TITLE}
               subtitle={i18n.BACKFILL_TABLE_SUBTITLE}
             />
-            <EuiBetaBadge label={BETA} tooltipContent={BETA_TOOLTIP} />
           </EuiFlexGroup>
         </EuiFlexItem>
 

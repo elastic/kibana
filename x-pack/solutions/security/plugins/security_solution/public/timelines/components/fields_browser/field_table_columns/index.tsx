@@ -22,7 +22,7 @@ import type { Action } from '@elastic/eui/src/components/basic_table/action_type
 import type {
   BrowserFieldItem,
   GetFieldTableColumns,
-} from '@kbn/triggers-actions-ui-plugin/public/types';
+} from '@kbn/response-ops-alerts-fields-browser/types';
 import * as i18n from './translations';
 import { getIconFromType } from '../../../../common/components/event_details/helpers';
 

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { DeprecationsDetails } from '@kbn/core-deprecations-common';
-import { GetDeprecationsContext } from '@kbn/core-deprecations-server';
+import type { DeprecationsDetails } from '@kbn/core-deprecations-common';
+import type { GetDeprecationsContext } from '@kbn/core-deprecations-server';
 import { i18n } from '@kbn/i18n';
-import { DocLinksServiceSetup } from '@kbn/core/server';
+import type { DocLinksServiceSetup } from '@kbn/core/server';
 
 export const getLegacyRbacDeprecationsInfo = async (
   { esClient }: GetDeprecationsContext,

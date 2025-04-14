@@ -6,13 +6,13 @@
  */
 
 import {
-  EuiButton,
-  EuiSpacer,
   EuiAccordion,
-  EuiTitle,
-  EuiPanel,
-  EuiEmptyPrompt,
+  EuiButton,
   EuiCallOut,
+  EuiEmptyPrompt,
+  EuiPanel,
+  EuiSpacer,
+  EuiTitle,
 } from '@elastic/eui';
 
 import React, { useMemo } from 'react';
@@ -42,14 +42,12 @@ const accordionStyle = css`
 export const ManagedUser = ({
   managedUser,
   contextID,
-  isDraggable,
   openDetailsPanel,
   isPreviewMode,
   isLinkEnabled,
 }: {
   managedUser: ManagedUserData;
   contextID: string;
-  isDraggable: boolean;
   openDetailsPanel: (path: EntityDetailsPath) => void;
   isPreviewMode?: boolean;
   isLinkEnabled: boolean;
@@ -135,7 +133,6 @@ export const ManagedUser = ({
                       isPreviewMode={isPreviewMode}
                     >
                       <ManagedUserTable
-                        isDraggable={isDraggable}
                         contextID={contextID}
                         managedUser={entraManagedUser.fields}
                         tableType={UserAssetTableType.assetEntra}
@@ -155,7 +152,6 @@ export const ManagedUser = ({
                       isPreviewMode={isPreviewMode}
                     >
                       <ManagedUserTable
-                        isDraggable={isDraggable}
                         contextID={contextID}
                         managedUser={oktaManagedUser.fields}
                         tableType={UserAssetTableType.assetOkta}
@@ -175,18 +171,13 @@ export const ManagedUser = ({
 export const ManagedUserTable = ({
   managedUser,
   contextID,
-  isDraggable,
   tableType,
 }: {
   managedUser: ManagedUserFields;
   contextID: string;
-  isDraggable: boolean;
   tableType: UserAssetTableType;
 }) => {
-  const managedUserTableColumns = useMemo(
-    () => getManagedUserTableColumns(contextID, isDraggable),
-    [isDraggable, contextID]
-  );
+  const managedUserTableColumns = useMemo(() => getManagedUserTableColumns(contextID), [contextID]);
   const managedItems = useManagedUserItems(tableType, managedUser);
 
   return (

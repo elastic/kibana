@@ -22,10 +22,8 @@ import {
   SEARCH_FIELDS_FROM_SOURCE,
   SORT_DEFAULT_ORDER_SETTING,
 } from '@kbn/discover-utils';
-import {
-  DiscoverAppState,
-  isEqualFilters,
-} from '../application/main/state_management/discover_app_state_container';
+import type { DiscoverAppState } from '../application/main/state_management/discover_app_state_container';
+import { isEqualFilters } from '../application/main/state_management/discover_app_state_container';
 import { getSortForSearchSource } from './sorting';
 
 /**

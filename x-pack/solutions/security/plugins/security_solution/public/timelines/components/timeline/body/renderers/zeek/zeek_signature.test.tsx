@@ -26,8 +26,19 @@ import {
   moduleStringRenderer,
   defaultStringRenderer,
 } from './zeek_signature';
+import { CellActionsWrapper } from '../../../../../../common/components/drag_and_drop/cell_actions_wrapper';
 
 jest.mock('../../../../../../common/lib/kibana');
+
+jest.mock('../../../../../../common/components/drag_and_drop/cell_actions_wrapper', () => {
+  return {
+    CellActionsWrapper: jest.fn(),
+  };
+});
+
+const MockedCellActionsWrapper = jest.fn(({ children }) => {
+  return <div data-test-subj="mock-cell-action-wrapper">{children}</div>;
+});
 
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
@@ -116,10 +127,14 @@ describe('ZeekSignature', () => {
   });
 
   describe('DraggableZeekElement', () => {
+    beforeEach(() => {
+      (CellActionsWrapper as unknown as jest.Mock).mockImplementation(MockedCellActionsWrapper);
+    });
+
     test('it returns null if value is null', () => {
       const wrapper = mount(
         <TestProviders>
-          <DraggableZeekElement id="id-123" field="zeek.notice" value={null} />
+          <DraggableZeekElement scopeId="some_scope" id="id-123" field="zeek.notice" value={null} />
         </TestProviders>
       );
       expect(wrapper.find('DraggableZeekElement').children().exists()).toBeFalsy();
@@ -128,7 +143,12 @@ describe('ZeekSignature', () => {
     test('it renders the default ZeekSignature', () => {
       const wrapper = mount(
         <TestProviders>
-          <DraggableZeekElement id="id-123" field="zeek.notice" value={'mynote'} />
+          <DraggableZeekElement
+            scopeId="some_scope"
+            id="id-123"
+            field="zeek.notice"
+            value={'mynote'}
+          />
         </TestProviders>
       );
       expect(wrapper.text()).toEqual('mynote');
@@ -138,6 +158,7 @@ describe('ZeekSignature', () => {
       const wrapper = mount(
         <TestProviders>
           <DraggableZeekElement
+            scopeId="some_scope"
             id="id-123"
             field="zeek.notice"
             value={'mynote'}
@@ -148,12 +169,38 @@ describe('ZeekSignature', () => {
       expect(wrapper.text()).toEqual('->mynote<-');
     });
 
+    test('should passing correct scopeId to cell actions', () => {
+      mount(
+        <TestProviders>
+          <DraggableZeekElement
+            scopeId="some_scope"
+            id="id-123"
+            field="zeek.notice"
+            value={'mynote'}
+            stringRenderer={(value) => `->${value}<-`}
+          />
+        </TestProviders>
+      );
+
+      expect(MockedCellActionsWrapper).toHaveBeenCalledWith(
+        expect.objectContaining({
+          scopeId: 'some_scope',
+        }),
+        {}
+      );
+    });
+
     describe('#TagTooltip', () => {
       test('it renders the name of the field in a tooltip', () => {
         const field = 'zeek.notice';
         const wrapper = mount(
           <TestProviders>
-            <DraggableZeekElement id="id-123" field={field} value={'the people you love'} />
+            <DraggableZeekElement
+              scopeId="some_scope"
+              id="id-123"
+              field={field}
+              value={'the people you love'}
+            />
           </TestProviders>
         );
 

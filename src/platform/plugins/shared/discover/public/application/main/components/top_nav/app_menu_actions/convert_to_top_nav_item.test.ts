@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
+import type {
   AppMenuActionPrimary,
   AppMenuActionSecondary,
   AppMenuActionSubmenuCustom,
-  AppMenuActionType,
 } from '@kbn/discover-utils';
+import { AppMenuActionType } from '@kbn/discover-utils';
 import { convertAppMenuItemToTopNavItem } from './convert_to_top_nav_item';
 import { discoverServiceMock } from '../../../../../__mocks__/services';
 
@@ -26,6 +26,7 @@ describe('convertAppMenuItemToTopNavItem', () => {
         testId: 'action-1',
         iconType: 'share',
         onClick: jest.fn(),
+        href: '/test-href',
       },
     };
 
@@ -42,6 +43,7 @@ describe('convertAppMenuItemToTopNavItem', () => {
       run: expect.any(Function),
       iconType: 'share',
       iconOnly: true,
+      href: '/test-href',
     });
   });
 

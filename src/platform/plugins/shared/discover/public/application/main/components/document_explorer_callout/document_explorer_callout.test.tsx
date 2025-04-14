@@ -12,7 +12,7 @@ import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { CALLOUT_STATE_KEY, DocumentExplorerCallout } from './document_explorer_callout';
 import { LocalStorageMock } from '../../../../__mocks__/local_storage_mock';
-import { DiscoverServices } from '../../../../build_services';
+import type { DiscoverServices } from '../../../../build_services';
 
 const defaultServices = {
   addBasePath: () => '',

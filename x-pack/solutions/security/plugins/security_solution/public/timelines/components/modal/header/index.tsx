@@ -73,7 +73,7 @@ export const TimelineModalHeader = React.memo<FlyoutHeaderPanelProps>(
     const { browserFields, indexPattern } = useSourcererDataView(SourcererScopeName.timeline);
     const { cases, uiSettings } = useKibana().services;
     const esQueryConfig = useMemo(() => getEsQueryConfig(uiSettings), [uiSettings]);
-    const userCasesPermissions = cases.helpers.canUseCases([APP_ID]);
+    const userCasesPermissions = useMemo(() => cases.helpers.canUseCases([APP_ID]), [cases]);
 
     const title = useSelector((state: State) => selectTitleByTimelineById(state, timelineId));
     const isDataInTimeline = useSelector((state: State) => selectDataInTimeline(state, timelineId));

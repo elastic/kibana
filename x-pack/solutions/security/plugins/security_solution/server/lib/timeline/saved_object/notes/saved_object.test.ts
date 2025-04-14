@@ -14,7 +14,7 @@ import { internalFrameworkRequest } from '../../../framework';
 import type { Note } from '../../../../../common/api/timeline';
 import { requestContextMock } from '../../../detection_engine/routes/__mocks__/request_context';
 import { noteFieldsMigrator } from './field_migrator';
-import { pickSavedNote, persistNote, createNote, updateNote } from './saved_object';
+import { createNote, persistNote, pickSavedNote, updateNote } from './saved_object';
 
 jest.mock('uuid', () => ({
   v1: jest.fn().mockReturnValue('7ba7a520-03f4-11eb-9d9d-ffba20fabba8'),
@@ -302,14 +302,15 @@ describe('persistNote', () => {
 
   it('should handle 403 errors', async () => {
     mockSavedObjectClient.find.mockResolvedValue({
-      total: 1001,
+      total: 101,
       saved_objects: [],
       per_page: 0,
       page: 0,
     });
     (createNote as jest.Mock).mockResolvedValue({
       code: 403,
-      message: 'Cannot create more than 1000 notes without associating them to a timeline',
+      message:
+        'Cannot create more than 100 notes per document without associating them to a timeline',
       note: mockNote,
     });
     mockUiSettingsClientGet.mockResolvedValue(1000);
@@ -317,7 +318,7 @@ describe('persistNote', () => {
 
     expect(result.code).toBe(403);
     expect(result.message).toBe(
-      'Cannot create more than 1000 notes without associating them to a timeline'
+      'Cannot create more than 100 notes per document without associating them to a timeline'
     );
     expect(result.note).toHaveProperty('noteId');
     expect(result.note).toHaveProperty('version', '');

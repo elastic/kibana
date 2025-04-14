@@ -623,11 +623,7 @@ export const ConfigureCases: React.FC = React.memo(() => {
 
   return (
     <EuiPageSection restrictWidth={true}>
-      <HeaderPage
-        showBackButton={true}
-        data-test-subj="case-configure-title"
-        title={i18n.CONFIGURE_CASES_PAGE_TITLE}
-      />
+      <HeaderPage data-test-subj="case-configure-title" title={i18n.CONFIGURE_CASES_PAGE_TITLE} />
       <EuiPageBody restrictWidth={true}>
         <div css={getFormWrapperCss(euiTheme)}>
           {hasMinimumLicensePermissions && (

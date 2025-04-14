@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { RuleForm } from '@kbn/response-ops-rule-form';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 import { HeaderMenu } from '../overview/components/header_menu/header_menu';
@@ -38,6 +38,11 @@ export function RulePage() {
   const { ObservabilityPageTemplate } = usePluginContext();
   const location = useLocation<{ returnApp?: string; returnPath?: string }>();
   const { returnApp, returnPath } = location.state || {};
+
+  const { id, ruleTypeId } = useParams<{
+    id?: string;
+    ruleTypeId?: string;
+  }>();
 
   useBreadcrumbs(
     [
@@ -81,6 +86,8 @@ export function RulePage() {
           actionTypeRegistry,
           ...startServices,
         }}
+        id={id}
+        ruleTypeId={ruleTypeId}
         validConsumers={observabilityRuleCreationValidConsumers}
         multiConsumerSelection={AlertConsumers.LOGS}
         isServerless={!!serverless}

@@ -30,3 +30,17 @@ export const PRECONFIGURED_ACTION_CONNECTORS: Record<string, PreconfiguredConnec
     },
   },
 };
+
+export const PRECONFIGURED_BEDROCK_ACTION = {
+  'preconfigured-bedrock': {
+    name: 'preconfigured-bedrock',
+    actionTypeId: '.bedrock',
+    config: {
+      apiUrl: 'https://example.com',
+    },
+    secrets: {
+      username: 'user',
+      password: 'password',
+    },
+  },
+};

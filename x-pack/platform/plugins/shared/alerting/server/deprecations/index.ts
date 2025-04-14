@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { CoreSetup } from '@kbn/core/server';
+import type { CoreSetup } from '@kbn/core/server';
 import { getLegacyRbacDeprecationsInfo } from './legacy_rbac';
 
 export const registerDeprecations = ({ core }: { core: CoreSetup }) => {

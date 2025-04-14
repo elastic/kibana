@@ -10,7 +10,7 @@ import {
   DEFAULT_MICROSOFT_GRAPH_API_SCOPE,
   DEFAULT_MICROSOFT_GRAPH_API_URL,
 } from '../common';
-import { ActionsConfigurationUtilities } from './actions_config';
+import type { ActionsConfigurationUtilities } from './actions_config';
 
 const createActionsConfigMock = () => {
   const mocked: jest.Mocked<ActionsConfigurationUtilities> = {

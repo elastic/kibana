@@ -48,12 +48,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('discover sidebar', function describeIndexTests() {
     before(async function () {
-      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
+      await esArchiver.loadIfNeeded(
+        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
+      );
       await PageObjects.svlCommonPage.loginAsAdmin();
     });
 
     beforeEach(async () => {
-      await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
+      await kibanaServer.importExport.load(
+        'src/platform/test/functional/fixtures/kbn_archiver/discover'
+      );
       await kibanaServer.uiSettings.replace({
         defaultIndex: 'logstash-*',
       });
@@ -63,7 +67,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     afterEach(async () => {
-      await kibanaServer.importExport.unload('test/functional/fixtures/kbn_archiver/discover');
+      await kibanaServer.importExport.unload(
+        'src/platform/test/functional/fixtures/kbn_archiver/discover'
+      );
       await kibanaServer.savedObjects.cleanStandardList();
       await kibanaServer.uiSettings.replace({});
       await PageObjects.unifiedFieldList.cleanSidebarLocalStorage();
@@ -362,7 +368,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should work correctly for a data view for a missing index', async function () {
         // but we are skipping importing the index itself
         await kibanaServer.importExport.load(
-          'test/functional/fixtures/kbn_archiver/index_pattern_without_timefield'
+          'src/platform/test/functional/fixtures/kbn_archiver/index_pattern_without_timefield'
         );
         await browser.refresh();
         await expectFieldListDescription(INITIAL_FIELD_LIST_SUMMARY);
@@ -382,16 +388,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await expectFieldListDescription(INITIAL_FIELD_LIST_SUMMARY);
         await kibanaServer.importExport.unload(
-          'test/functional/fixtures/kbn_archiver/index_pattern_without_timefield'
+          'src/platform/test/functional/fixtures/kbn_archiver/index_pattern_without_timefield'
         );
       });
 
       it('should work correctly when switching data views', async function () {
         await esArchiver.loadIfNeeded(
-          'test/functional/fixtures/es_archiver/index_pattern_without_timefield'
+          'src/platform/test/functional/fixtures/es_archiver/index_pattern_without_timefield'
         );
         await kibanaServer.importExport.load(
-          'test/functional/fixtures/kbn_archiver/index_pattern_without_timefield'
+          'src/platform/test/functional/fixtures/kbn_archiver/index_pattern_without_timefield'
         );
 
         await browser.refresh();
@@ -416,11 +422,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await expectFieldListDescription(INITIAL_FIELD_LIST_SUMMARY);
 
         await kibanaServer.importExport.unload(
-          'test/functional/fixtures/kbn_archiver/index_pattern_without_timefield'
+          'src/platform/test/functional/fixtures/kbn_archiver/index_pattern_without_timefield'
         );
 
         await esArchiver.unload(
-          'test/functional/fixtures/es_archiver/index_pattern_without_timefield'
+          'src/platform/test/functional/fixtures/es_archiver/index_pattern_without_timefield'
         );
       });
 
@@ -444,9 +450,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should work for many fields', async () => {
-        await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/many_fields');
+        await esArchiver.loadIfNeeded(
+          'src/platform/test/functional/fixtures/es_archiver/many_fields'
+        );
         await kibanaServer.importExport.load(
-          'test/functional/fixtures/kbn_archiver/many_fields_data_view'
+          'src/platform/test/functional/fixtures/kbn_archiver/many_fields_data_view'
         );
         await dataViews.switchToAndValidate('logstash-*');
         await browser.refresh();
@@ -460,9 +468,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await expectFieldListDescription(INITIAL_FIELD_LIST_SUMMARY);
 
         await kibanaServer.importExport.unload(
-          'test/functional/fixtures/kbn_archiver/many_fields_data_view'
+          'src/platform/test/functional/fixtures/kbn_archiver/many_fields_data_view'
         );
-        await esArchiver.unload('test/functional/fixtures/es_archiver/many_fields');
+        await esArchiver.unload('src/platform/test/functional/fixtures/es_archiver/many_fields');
       });
 
       it('should work with ad-hoc data views and runtime fields', async () => {
@@ -542,10 +550,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should work correctly when time range is updated', async function () {
         await esArchiver.loadIfNeeded(
-          'test/functional/fixtures/es_archiver/index_pattern_without_timefield'
+          'src/platform/test/functional/fixtures/es_archiver/index_pattern_without_timefield'
         );
         await kibanaServer.importExport.load(
-          'test/functional/fixtures/kbn_archiver/index_pattern_without_timefield'
+          'src/platform/test/functional/fixtures/kbn_archiver/index_pattern_without_timefield'
         );
         await browser.refresh();
         await expectFieldListDescription(INITIAL_FIELD_LIST_SUMMARY);
@@ -566,11 +574,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await expectFieldListDescription('7 available fields. 4 meta fields.');
 
         await kibanaServer.importExport.unload(
-          'test/functional/fixtures/kbn_archiver/index_pattern_without_timefield'
+          'src/platform/test/functional/fixtures/kbn_archiver/index_pattern_without_timefield'
         );
 
         await esArchiver.unload(
-          'test/functional/fixtures/es_archiver/index_pattern_without_timefield'
+          'src/platform/test/functional/fixtures/es_archiver/index_pattern_without_timefield'
         );
       });
 

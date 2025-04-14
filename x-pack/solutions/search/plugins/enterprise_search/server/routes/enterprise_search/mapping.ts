@@ -19,6 +19,12 @@ export function registerMappingRoute({ router, log }: RouteDependencies) {
   router.get(
     {
       path: '/internal/enterprise_search/mappings/{index_name}',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the scoped ES client',
+        },
+      },
       validate: {
         params: schema.object({
           index_name: schema.string(),

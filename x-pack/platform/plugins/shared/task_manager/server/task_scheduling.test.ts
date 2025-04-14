@@ -6,11 +6,12 @@
  */
 
 import sinon from 'sinon';
-import { BehaviorSubject, Observable, Subject } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 import moment from 'moment';
 
 import { asTaskRunEvent, TaskPersistence } from './task_events';
-import { TaskLifecycleEvent } from './polling_lifecycle';
+import type { TaskLifecycleEvent } from './polling_lifecycle';
 import { TaskScheduling } from './task_scheduling';
 import { asErr, asOk } from './lib/result_type';
 import { TaskStatus } from './task';

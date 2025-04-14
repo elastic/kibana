@@ -10,8 +10,14 @@ import expect from '@kbn/expect';
 import { AGENTLESS_SECURITY_POSTURE_PACKAGE_VERSION } from '../constants';
 import type { FtrProviderContext } from '../ftr_provider_context';
 import { setupMockServer } from './mock_agentless_api';
+import { testSubjectIds } from '../constants/test_subject_ids';
+
+const { CIS_AWS_OPTION_TEST_ID, AWS_SINGLE_ACCOUNT_TEST_ID } = testSubjectIds;
+
 // eslint-disable-next-line import/no-default-export
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
+  const agentCreationTimeout = 1000 * 60 * 1; // 1 minute
+  const retry = getService('retry');
   const mockAgentlessApiService = setupMockServer();
   const pageObjects = getPageObjects([
     'common',
@@ -21,10 +27,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     'cisAddIntegration',
   ]);
 
-  const CIS_AWS_OPTION_TEST_ID = 'cisAwsTestId';
-
-  const AWS_SINGLE_ACCOUNT_TEST_ID = 'awsSingleTestId';
-
+  // Failing: See https://github.com/elastic/kibana/issues/208495
   describe('Agentless cloud', function () {
     let cisIntegration: typeof pageObjects.cisAddIntegration;
     let cisIntegrationAws: typeof pageObjects.cisAddIntegration.cisAws;
@@ -63,8 +66,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       await cisIntegration.clickSaveButton();
       await pageObjects.header.waitUntilLoadingHasFinished();
-
-      expect(await cisIntegrationAws.showPostInstallCloudFormationModal()).to.be(false);
+      await retry.tryForTime(agentCreationTimeout, async () => {
+        await cisIntegration.waitUntilLaunchCloudFormationButtonAppears();
+        expect(await cisIntegrationAws.showPostInstallCloudFormationModal()).to.be(false);
+      });
 
       await cisIntegration.navigateToIntegrationCspList();
       await pageObjects.header.waitUntilLoadingHasFinished();
@@ -96,9 +101,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await cisIntegration.fillInTextField('passwordInput-secret-access-key', 'secret_access_key');
 
       await cisIntegration.clickSaveButton();
-      await pageObjects.header.waitUntilLoadingHasFinished();
 
-      expect(await cisIntegrationAws.showPostInstallCloudFormationModal()).to.be(false);
+      await retry.tryForTime(agentCreationTimeout, async () => {
+        await cisIntegration.waitUntilLaunchCloudFormationButtonAppears();
+        expect(await cisIntegrationAws.showPostInstallCloudFormationModal()).to.be(false);
+      });
 
       await cisIntegration.navigateToIntegrationCspList();
       await pageObjects.header.waitUntilLoadingHasFinished();
@@ -125,9 +132,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await pageObjects.header.waitUntilLoadingHasFinished();
 
       await cisIntegration.clickSaveButton();
-      await pageObjects.header.waitUntilLoadingHasFinished();
 
-      expect(await cisIntegrationAws.showPostInstallCloudFormationModal()).to.be(true);
+      // add timeout to give extra time for the modal to show up
+      await retry.tryForTime(agentCreationTimeout, async () => {
+        await cisIntegration.waitUntilLaunchCloudFormationButtonAppears();
+        const resStatus = await cisIntegrationAws.showPostInstallCloudFormationModal();
+        expect(resStatus).to.be(true);
+      });
 
       await cisIntegration.navigateToIntegrationCspList();
       await pageObjects.header.waitUntilLoadingHasFinished();
@@ -152,9 +163,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await pageObjects.header.waitUntilLoadingHasFinished();
 
       await cisIntegration.clickSaveButton();
-      await pageObjects.header.waitUntilLoadingHasFinished();
 
-      expect(await cisIntegrationAws.showPostInstallCloudFormationModal()).to.be(true);
+      await retry.tryForTime(agentCreationTimeout, async () => {
+        await cisIntegration.waitUntilLaunchCloudFormationButtonAppears();
+        expect(await cisIntegrationAws.showPostInstallCloudFormationModal()).to.be(true);
+      });
 
       const agentPolicyName = await cisIntegration.getAgentBasedPolicyValue();
 

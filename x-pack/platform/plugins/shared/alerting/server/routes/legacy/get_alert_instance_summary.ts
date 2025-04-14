@@ -6,12 +6,13 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { UsageCounter } from '@kbn/usage-collection-plugin/server';
-import { DocLinksServiceSetup } from '@kbn/core/server';
+import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
+import type { DocLinksServiceSetup } from '@kbn/core/server';
 import type { AlertingRouter } from '../../types';
-import { ILicenseState } from '../../lib/license_state';
+import type { ILicenseState } from '../../lib/license_state';
 import { verifyApiAccess } from '../../lib/license_api_access';
-import { AlertSummary, LEGACY_BASE_ALERT_API_PATH } from '../../../common';
+import type { AlertSummary } from '../../../common';
+import { LEGACY_BASE_ALERT_API_PATH } from '../../../common';
 import { trackLegacyRouteUsage } from '../../lib/track_legacy_route_usage';
 import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../constants';
 

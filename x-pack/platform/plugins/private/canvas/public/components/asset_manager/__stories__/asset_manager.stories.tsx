@@ -7,7 +7,6 @@
 
 import React from 'react';
 import { action } from '@storybook/addon-actions';
-import { storiesOf } from '@storybook/react';
 import { reduxDecorator, getAddonPanelParameters } from '../../../../storybook';
 
 import { AssetManager, AssetManagerComponent } from '..';
@@ -20,21 +19,37 @@ const promiseAction =
     return Promise.resolve();
   };
 
-storiesOf('components/Assets/AssetManager', module)
-  .addDecorator(reduxDecorator({ assets }))
-  .addParameters(getAddonPanelParameters())
-  .add('redux: AssetManager', () => <AssetManager onClose={action('onClose')} />)
-  .add('no assets', () => (
+export default {
+  title: 'components/Assets/AssetManager',
+  decorators: [reduxDecorator({ assets })],
+  parameters: getAddonPanelParameters(),
+};
+
+export const ReduxAssetManager = {
+  render: () => <AssetManager onClose={action('onClose')} />,
+  name: 'redux: AssetManager',
+};
+
+export const NoAssets = {
+  render: () => (
     <AssetManagerComponent
       assets={[]}
       onClose={action('onClose')}
       onAddAsset={promiseAction('onAddAsset')}
     />
-  ))
-  .add('two assets', () => (
+  ),
+
+  name: 'no assets',
+};
+
+export const TwoAssets = {
+  render: () => (
     <AssetManagerComponent
       assets={assets}
       onClose={action('onClose')}
       onAddAsset={promiseAction('onAddAsset')}
     />
-  ));
+  ),
+
+  name: 'two assets',
+};

@@ -39,6 +39,7 @@ export {
   type ChatCompletionMessageEvent,
   type ChatCompleteStreamResponse,
   type ChatCompleteResponse,
+  type ChatCompleteRetryConfiguration,
   type ChatCompletionTokenCount,
   type BoundChatCompleteAPI,
   type BoundChatCompleteOptions,
@@ -56,6 +57,8 @@ export {
   isToolValidationError,
   isTokenLimitReachedError,
   isToolNotFoundError,
+  type ChatCompleteMetadata,
+  type ConnectorTelemetryMetadata,
 } from './src/chat_complete';
 export {
   OutputEventType,
@@ -88,13 +91,16 @@ export {
   type InferenceTaskInternalError,
   type InferenceTaskRequestError,
   type InferenceTaskAbortedError,
+  type InferenceTaskProviderError,
   createInferenceInternalError,
   createInferenceRequestError,
   createInferenceRequestAbortedError,
+  createInferenceProviderError,
   isInferenceError,
   isInferenceInternalError,
   isInferenceRequestError,
   isInferenceRequestAbortedError,
+  isInferenceProviderError,
 } from './src/errors';
 export { generateFakeToolCallId } from './src/utils';
 export { elasticModelDictionary } from './src/const';
@@ -114,3 +120,5 @@ export {
   InferenceEndpointProvider,
   elasticModelIds,
 } from './src/inference_endpoints';
+
+export { Tokenizer } from './src/utils/tokenizer';

@@ -338,17 +338,16 @@ export const getInputVarsFields = (input: NewPackagePolicyInput, fields: GcpFiel
     });
 
 const getSetupFormatFromInput = (
-  input: Extract<
-    NewPackagePolicyPostureInput,
-    { type: 'cloudbeat/cis_aws' | 'cloudbeat/cis_eks' | 'cloudbeat/cis_gcp' }
-  >
+  input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_gcp' }>
 ): SetupFormatGCP => {
-  const credentialsType = input.streams[0].vars?.setup_access?.value;
+  const credentialsType = getGcpCredentialsType(input);
+
   // Google Cloud shell is the default value
   if (!credentialsType) {
     return GCP_SETUP_ACCESS.CLOUD_SHELL;
   }
-  if (credentialsType !== GCP_SETUP_ACCESS.CLOUD_SHELL) {
+
+  if (credentialsType !== GCP_CREDENTIALS_TYPE.CREDENTIALS_NONE) {
     return GCP_SETUP_ACCESS.MANUAL;
   }
 
@@ -474,10 +473,6 @@ export const GcpCredentialsForm = ({
 
       updatePolicy(
         getPosturePolicy(newPolicy, input.type, {
-          setup_access: {
-            value: GCP_SETUP_ACCESS.CLOUD_SHELL,
-            type: 'text',
-          },
           'gcp.credentials.type': {
             value: GCP_CREDENTIALS_TYPE.CREDENTIALS_NONE,
             type: 'text',
@@ -490,10 +485,6 @@ export const GcpCredentialsForm = ({
     } else {
       updatePolicy(
         getPosturePolicy(newPolicy, input.type, {
-          setup_access: {
-            value: GCP_SETUP_ACCESS.MANUAL,
-            type: 'text',
-          },
           'gcp.credentials.type': {
             // Restoring last manual credentials type
             value: lastCredentialsType.current || GCP_CREDENTIALS_TYPE.CREDENTIALS_FILE,

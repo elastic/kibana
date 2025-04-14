@@ -11,7 +11,7 @@ import { useHistory } from 'react-router-dom';
 import type { CustomizationCallback } from '@kbn/discover-plugin/public/customizations/types';
 import { createGlobalStyle } from 'styled-components';
 import type { ScopedHistory } from '@kbn/core/public';
-import type { Subscription } from 'rxjs';
+import { from, type Subscription } from 'rxjs';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { useQuery } from '@tanstack/react-query';
 import { isEqualWith } from 'lodash';
@@ -219,7 +219,7 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
         next: setDiscoverAppState,
       });
 
-      const internalStateSubscription = stateContainer.internalState.state$.subscribe({
+      const internalStateSubscription = from(stateContainer.internalState).subscribe({
         next: setDiscoverInternalState,
       });
 

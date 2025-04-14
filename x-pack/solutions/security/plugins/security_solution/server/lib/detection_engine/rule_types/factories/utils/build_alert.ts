@@ -152,8 +152,8 @@ export const buildParent = (doc: SimpleHit): AncestorLatest => {
  */
 export const buildAncestors = (doc: SimpleHit): AncestorLatest[] => {
   const newAncestor = buildParent(doc);
-  const existingAncestors: AncestorLatest[] =
-    (getField(doc, ALERT_ANCESTORS) as AncestorLatest[] | undefined) ?? [];
+  const ancestorsField = getField(doc, ALERT_ANCESTORS);
+  const existingAncestors: AncestorLatest[] = Array.isArray(ancestorsField) ? ancestorsField : [];
   return [...existingAncestors, newAncestor];
 };
 

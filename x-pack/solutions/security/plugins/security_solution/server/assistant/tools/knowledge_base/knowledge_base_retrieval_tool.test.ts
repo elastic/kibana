@@ -12,13 +12,13 @@ import type {
   ContentReferencesStore,
   KnowledgeBaseEntryContentReference,
 } from '@kbn/elastic-assistant-common';
-import { contentReferencesStoreFactoryMock } from '@kbn/elastic-assistant-common/impl/content_references/content_references_store/__mocks__/content_references_store.mock';
+import { newContentReferencesStoreMock } from '@kbn/elastic-assistant-common/impl/content_references/content_references_store/__mocks__/content_references_store.mock';
 import { loggerMock } from '@kbn/logging-mocks';
 import { Document } from 'langchain/document';
 
 describe('KnowledgeBaseRetievalTool', () => {
   const logger = loggerMock.create();
-  const contentReferencesStore = contentReferencesStoreFactoryMock();
+  const contentReferencesStore = newContentReferencesStoreMock();
   const getKnowledgeBaseDocumentEntries = jest.fn();
   const kbDataClient = { getKnowledgeBaseDocumentEntries };
   const defaultArgs = {
@@ -63,27 +63,6 @@ describe('KnowledgeBaseRetievalTool', () => {
       const result = await tool.func({ query: 'What is my favourite food' });
 
       expect(result).toContain('citation":"{reference(exampleContentReferenceId)}"');
-    });
-
-    it('does not include citations if contentReferenceStore is false', async () => {
-      const tool = KNOWLEDGE_BASE_RETRIEVAL_TOOL.getTool({
-        ...defaultArgs,
-        contentReferencesStore: false,
-      }) as DynamicStructuredTool;
-
-      getKnowledgeBaseDocumentEntries.mockResolvedValue([
-        new Document({
-          id: 'exampleId',
-          pageContent: 'text',
-          metadata: {
-            name: 'exampleName',
-          },
-        }),
-      ] as Document[]);
-
-      const result = await tool.func({ query: 'What is my favourite food' });
-
-      expect(result).not.toContain('citation');
     });
   });
 });

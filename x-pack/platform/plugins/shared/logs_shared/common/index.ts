@@ -41,6 +41,7 @@ export {
   FetchLogViewError,
   FetchLogViewStatusError,
   ResolveLogViewError,
+  isNoSuchRemoteClusterError,
 } from './log_views/errors';
 
 export type {

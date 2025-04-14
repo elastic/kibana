@@ -7,10 +7,8 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { getMockNetflowData, TestProviders } from '../../../../../../common/mock';
-
 import {
   eventActionMatches,
   eventCategoryMatches,
@@ -30,7 +28,6 @@ describe('netflowRowRenderer', () => {
   test('renders correctly against snapshot', () => {
     const children = netflowRowRenderer.renderRow({
       data: getMockNetflowData(),
-      isDraggable: true,
       scopeId: TimelineId.test,
     });
 
@@ -99,7 +96,6 @@ describe('netflowRowRenderer', () => {
   test('should render netflow data', () => {
     const children = netflowRowRenderer.renderRow({
       data: getMockNetflowData(),
-      isDraggable: true,
       scopeId: TimelineId.test,
     });
     render(

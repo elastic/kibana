@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { TypeOf } from '@kbn/config-schema';
-import { gapBaseSchema, findGapsParamsSchema, findGapsByIdParamsSchema } from '../schemas';
-
+import type { TypeOf } from '@kbn/config-schema';
+import type { gapBaseSchema, findGapsParamsSchema, findGapsByIdParamsSchema } from '../schemas';
 export type GapBase = TypeOf<typeof gapBaseSchema>;
 export type FindGapsParams = TypeOf<typeof findGapsParamsSchema>;
 export type FindGapsByIdParams = TypeOf<typeof findGapsByIdParamsSchema>;

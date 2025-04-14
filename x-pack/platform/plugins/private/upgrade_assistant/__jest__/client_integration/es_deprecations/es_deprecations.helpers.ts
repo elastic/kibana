@@ -8,6 +8,7 @@ import { act } from 'react-dom/test-utils';
 
 import { registerTestBed, TestBed, AsyncTestBedConfig } from '@kbn/test-jest-helpers';
 import { HttpSetup } from '@kbn/core/public';
+import { waitFor } from '@testing-library/dom';
 import { EsDeprecations } from '../../../public/application/components';
 import { WithAppDependencies } from '../helpers';
 
@@ -48,20 +49,40 @@ const createActions = (testBed: TestBed) => {
 
       component.update();
     },
-  };
-
-  const searchBar = {
-    clickTypeFilterDropdownAt: async (index: number) => {
+    clickReindexColumnAt: async (
+      columnType: 'level' | 'message' | 'type' | 'index' | 'correctiveAction',
+      index: number
+    ) => {
       await act(async () => {
-        // EUI doesn't support data-test-subj's on the filter buttons, so we must access via CSS selector
-        find('searchBarContainer')
-          .find('.euiPopover')
-          .find('button.euiFilterButton')
-          .at(index)
-          .simulate('click');
+        find(`reindexTableCell-${columnType}`).at(index).simulate('click');
       });
 
       component.update();
+    },
+  };
+
+  const clickFilterByIndex = async (index: number) => {
+    await act(async () => {
+      // EUI doesn't support data-test-subj's on the filter buttons, so we must access via CSS selector
+      find('searchBarContainer')
+        .find('.euiPopover')
+        .find('button.euiFilterButton')
+        .at(index)
+        .simulate('click');
+    });
+
+    component.update();
+
+    // Wait for the filter dropdown to be displayed
+    await new Promise(requestAnimationFrame);
+  };
+
+  const searchBar = {
+    clickTypeFilterDropdown: async () => {
+      await clickFilterByIndex(1); // Type filter is the second filter button
+    },
+    clickStatusFilterDropdown: async () => {
+      await clickFilterByIndex(0); // Status filter is the first filter button
     },
     setSearchInputValue: async (searchValue: string) => {
       await act(async () => {
@@ -72,10 +93,15 @@ const createActions = (testBed: TestBed) => {
 
       component.update();
     },
-    clickCriticalFilterButton: async () => {
-      await act(async () => {
-        // EUI doesn't support data-test-subj's on the filter buttons, so we must access via CSS selector
-        find('searchBarContainer').find('button.euiFilterButton').at(0).simulate('click');
+    clickFilterByTitle: async (title: string) => {
+      // We need to read the document "body" as the filter dropdown (an EuiSelectable)
+      // is added in a portalled popover and not inside the component DOM tree.
+      await waitFor(() => {
+        const filterButton: HTMLButtonElement | null = document.body.querySelector(
+          `.euiSelectableListItem[title=${title}]`
+        );
+        expect(filterButton).not.toBeNull();
+        filterButton!.click();
       });
 
       component.update();
@@ -142,6 +168,12 @@ const createActions = (testBed: TestBed) => {
         find('startReindexingButton').simulate('click');
       });
 
+      component.update();
+    },
+    closeFlyout: async () => {
+      await act(async () => {
+        find('closeReindexButton').simulate('click');
+      });
       component.update();
     },
   };

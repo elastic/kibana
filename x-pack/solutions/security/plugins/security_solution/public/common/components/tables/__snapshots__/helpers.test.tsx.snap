@@ -23,11 +23,7 @@ exports[`Table Helpers #RowItemOverflow it returns correctly against snapshot 1`
       />
     </EuiText>
     <EuiFlexGroup
-      css={
-        Object {
-          "paddingTop": "12px",
-        }
-      }
+      css="unknown styles"
       data-test-subj="popover-additional-overflow"
     >
       <EuiFlexItem>
@@ -58,6 +54,7 @@ exports[`Table Helpers OverflowField it returns correctly against snapshot 1`] =
   <EuiToolTip
     content="This string is exactly fifty-one chars in length!!!"
     delay="regular"
+    disableScreenReaderOutput={false}
     display="inlineBlock"
     position="top"
   >

@@ -8,7 +8,8 @@
 import { v4 as uuidv4 } from 'uuid';
 import type { LensAttributes } from '@kbn/lens-embeddable-utils';
 import capitalize from 'lodash/capitalize';
-import { SEVERITY_UI_SORT_ORDER, RISK_SEVERITY_COLOUR, RISK_SCORE_RANGES } from '../common/utils';
+
+import { SEVERITY_UI_SORT_ORDER, RISK_SCORE_RANGES, RISK_SEVERITY_COLOUR } from '../common/utils';
 import type { EntityType } from '../../../common/entity_analytics/types';
 import type { RiskSeverity } from '../../../common/search_strategy';
 import { EntityTypeToScoreField, RiskScoreFields } from '../../../common/search_strategy';
@@ -17,17 +18,20 @@ interface GetRiskScoreSummaryAttributesProps {
   query?: string;
   spaceId?: string;
   severity?: RiskSeverity;
+  // TODO: add riskColors in when severityPalette available
+  // riskColors: { [k in RiskSeverity]: string };
   riskEntity: EntityType;
 }
 
 export const getRiskScoreSummaryAttributes: (
   props: GetRiskScoreSummaryAttributesProps
+  // TODO: may need to pass riskColors in props, here, when severity palette agreed and hook created
+  // https://github.com/elastic/security-team/issues/11516 hook - https://github.com/elastic/kibana/pull/206276
 ) => LensAttributes = ({ spaceId, query, severity, riskEntity }) => {
   const layerIds = [uuidv4(), uuidv4()];
   const internalReferenceId = uuidv4();
   const columnIds = [uuidv4(), uuidv4(), uuidv4()];
   const sourceField = EntityTypeToScoreField[riskEntity];
-
   return {
     title: 'Risk score summary',
     description: '',

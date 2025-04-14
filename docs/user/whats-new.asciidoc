@@ -1,93 +1,128 @@
 [[whats-new]]
-== What's new in 8.17
+== What's new in 8.18
 
-Here are the highlights of what's new and improved in 8.17.
+Here are the highlights of what's new and improved in 8.18.
 For detailed information about this release,
 check the <<release-notes, release notes>>.
 
-Previous versions: {kibana-ref-all}/8.16/whats-new.html[8.16] | {kibana-ref-all}/8.15/whats-new.html[8.15] | {kibana-ref-all}/8.14/whats-new.html[8.14] | {kibana-ref-all}/8.13/whats-new.html[8.13] | {kibana-ref-all}/8.12/whats-new.html[8.12] | {kibana-ref-all}/8.11/whats-new.html[8.11] | {kibana-ref-all}/8.10/whats-new.html[8.10] | {kibana-ref-all}/8.9/whats-new.html[8.9] | {kibana-ref-all}/8.8/whats-new.html[8.8] | {kibana-ref-all}/8.7/whats-new.html[8.7] | {kibana-ref-all}/8.6/whats-new.html[8.6] | {kibana-ref-all}/8.5/whats-new.html[8.5] | {kibana-ref-all}/8.4/whats-new.html[8.4] | {kibana-ref-all}/8.3/whats-new.html[8.3] | {kibana-ref-all}/8.2/whats-new.html[8.2] | {kibana-ref-all}/8.1/whats-new.html[8.1] | {kibana-ref-all}/8.0/whats-new.html[8.0]
+Previous versions: {kibana-ref-all}/8.17/whats-new.html[8.17] | {kibana-ref-all}/8.16/whats-new.html[8.16] | {kibana-ref-all}/8.15/whats-new.html[8.15] | {kibana-ref-all}/8.14/whats-new.html[8.14] | {kibana-ref-all}/8.13/whats-new.html[8.13] | {kibana-ref-all}/8.12/whats-new.html[8.12] | {kibana-ref-all}/8.11/whats-new.html[8.11] | {kibana-ref-all}/8.10/whats-new.html[8.10] | {kibana-ref-all}/8.9/whats-new.html[8.9] | {kibana-ref-all}/8.8/whats-new.html[8.8] | {kibana-ref-all}/8.7/whats-new.html[8.7] | {kibana-ref-all}/8.6/whats-new.html[8.6] | {kibana-ref-all}/8.5/whats-new.html[8.5] | {kibana-ref-all}/8.4/whats-new.html[8.4] | {kibana-ref-all}/8.3/whats-new.html[8.3] | {kibana-ref-all}/8.2/whats-new.html[8.2] | {kibana-ref-all}/8.1/whats-new.html[8.1] | {kibana-ref-all}/8.0/whats-new.html[8.0]
 
 [discrete]
 === Discover and ES|QL
 
 [discrete]
-==== Improving column reordering with draggable columns
+==== In-table search and highlight
 
-We’re excited to announce an enhancement to the Discover table. You can now reorder columns by simply dragging them directly in the data table header. This intuitive feature reduces the number of interactions required to adjust your column layout by eliminating the need to open the Columns popover for sorting. This enhancement saves users valuable time and improves overall usability, leading to smoother and more efficient data exploration. 
+This release introduces an in-table search feature that scans beyond what’s currently visible, making it easier to find logs, transaction IDs, and other records in large data sets. Inspired by your browser’s native search, this new box sits at the top of the Discover table and supports keyboard navigation for navigating through matches. It’s available across Kibana wherever the Discover table is embedded. 
 
-image::https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/blt6fa3a9ee893e5603/67533de0e995a041b8dea1d9/dragging-columns-in-discover.gif[Dragging a column to adjust column layout in Discover]
+image::https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/blt30bf5f8b9a45ab74/67c234a787966d9fbc994ce0/in-table-search-demo.gif[Using the in-table search and navigating through the matches]
 
 [discrete]
-==== Starred ES|QL queries for quick access and reusability
+==== Renaming Saved search to Discover session
 
-With this release, you can bookmark your ES|QL queries directly from your query history by starring them. These starred queries are saved under a dedicated Starred tab, allowing you quick access to your most-used queries across {kib} – not just within Discover. You can reuse these queries in other areas of {kib}, such as the dashboard in-line editor and alerts. With the ability to manage up to 100 starred queries per user, you can sort them by timestamp and receive warnings as you approach the limit.
+We’ve changed Saved search to Discover session for improved clarity and to better reflect Discover’s expanding capabilities. With this updated terminology, we’re setting the stage for more powerful data exploration with Discover. 
 
-image::https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/bltdaffacc1de686bcc/67533eadb02aaf3aa84c8a3f/starred-esql-queries.gif[Running a starred query from the Starred tab in Discover]
+image::images/open-discover-session.png[Open Discover session flyout, width=90%]
+
+[discrete]
+==== Elastic AI Assistant for logs in Discover
+
+The Elastic AI Assistant is now available in the log details flyout in Discover, offering instant highlights for logs that match a logs profile and include a message field. With AI-driven context and prompts, you can diagnose issues and uncover opportunities faster, saving time and improving overall efficiency. 
+
+image::images/ai-assistant-for-logs-discover.png[Elastic AI Assistant in the log details flyout, width=100%]
+
+[discrete]
+==== Support for LOOKUP JOIN in the ES|QL editor
+
+We’ve introduced support for the LOOKUP JOIN command to enable a smooth autocomplete experience and client-side validation. The editor now suggests lookup mode indices and join condition fields, letting you craft accurate ES|QL queries more quickly and keep your data exploration flowing. 
+
+image::https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/blte43a30a93241d650/67c23670045f5839e5bfd1e4/lookup-join-demo.gif[Using the LOOKUP JOIN command to autocomplete an ES|QL query]
+
+[discrete]
+==== KQL and Lucene query translation into ES|QL
+
+Moving from Discover’s data view mode to ES|QL mode is now easier than ever. Your existing KQL or Lucene query is automatically carried over and translated into ES|QL, saving time and preserving context. This enhancement keeps you focused on uncovering insights instead of re-rentering queries. 
+
+image::https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/blt6e2ccb4a24507225/67c244de39a3cace2a10fccb/transition-to-esql-demo.gif[Query is copied over when switching to ES|QL]
 
 [discrete]
 === Dashboards
 
 [discrete]
-==== Log Rate panels
-You can now add Log Rate Analysis panels to your dashboards. Find them in the Logs analysis section alongside https://www.elastic.co/guide/en/kibana/8.16/whats-new.html#_log_pattern_analysis_dashboard_panels[Log Pattern Analysis panels] from 8.16. Find field-value pairs and log patterns that correlate with log spikes or dips across thousands of logs with just a few clicks, and move your analysis to Discover with ease. 
+==== Dashboard ES|QL controls
 
-image::https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/bltb69ebc37cbbaf5a8/6753413228d3fee1541b86ad/log-rate-panels.gif[Log Rate Analysis panel]
+preview:[]
+
+You can now bind controls to your ES|QL visualizations in dashboards. When creating a visualization, the ES|QL autocomplete will prompt control insertion for field values, field names, and function configuration. This enables controls that only apply to a specific panel, and exposes visualization configuration such as date histogram interval controls to dashboard users.
+
+Check out the following examples:
+
+* Integrate filtering into your ES|QL experience
+
+[source,esql]
+-------------------
+| WHERE field == ?value
+-------------------
+
+* Fields in controls for dynamic group by
+
+[source,esql]
+-------------------
+| STATS count=COUNT(*) BY ?field
+-------------------
+
+* Variable time ranges? Bind function configuration settings to a control
+
+[source,esql]
+-------------------
+| BUCKET(@timestamp, ?interval),
+-------------------
+
+image::https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/blte42dfaa404bfc2d6/67d2e31e2e4dc59da190d78f/dashboard-esql-controls.gif[Editing ES|QL controls from a dashboard]
 
 [discrete]
-==== Dashboard hover actions
-We received feedback from users that the View and Edit modes in dashboards look too different, mainly because of the top bar in each panel that shows the panel menu. This bar created visual problems and changed the height of panels in Edit mode, especially when they didn’t have a title.
+==== Dashboard layout engine with improved performance and usability 
 
-We fixed the issue by removing this top bar and making panel information and actions appear on top of the panel when users hover over it. Now users can get the same look in both Edit and View modes and the most common actions are accessible without having to click on the panel menu. This change improves the look and usability of dashboards. 
+We’ve rebuilt the Dashboard layout engine for faster authoring and improved performance. The new engine makes resize events behave more predictably, allows drag-and-drop of panels above and below the visible part of the dashboard, and improves browser performance to create a more responsive experience. Read more about the engineering behind this engine in our https://www.elastic.co/search-labs/blog/kibana-dashboard-build-layout[blog post]. 
 
-image::images/before-after-hover-actions.png[Before and After view of dashboard panels, width=90%]
-
-[discrete]
-==== Legacy visualization editors
-Lens is the preferred visualization editor over TSVB and Aggregation-based since it already incorporates most features of the other two editors and is much easier to use. Offering three editors at this point makes the product more complex and calls for users to learn three different ways to visualize their data for no reason.
-
-However, we are aware that there are still a few features that Lens is missing, such as small multiples or the ability to insert data and change the CSS in a Markdown file. For this reason, TSVB and Aggregation-based editors are being marked as legacy for now to encourage shifting to Lens. We will continue supporting them for some time until all features are fully incorporated into Lens, but we recommend that you start using Lens if you can. If you have good reasons to keep using TSVB or Aggregation-based editors, please add a comment to this public https://github.com/elastic/kibana/issues/198136[Github issue].
-
-image::images/legacy-visualizations.png[New Legacy tab in the Create Visualization window]
+image::https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/bltdefc1239170c7d95/67c239a724e52cd96fe6ed11/dashboard-layout-engine.gif[Dragging and dropping a dashboard panel below the visible part of the dashboard]
 
 [discrete]
-==== Improving CSV download for tables
-When exporting tables in CSV in the past, you may have encountered issues with incorrect formatting of the data, rows, and columns. These issues have now been addressed and your exported CSV file shows exactly what you see in {kib}.
+=== Managing {kib} and data
 
-image::images/csv-download-1.png[Exported CSV in the past]
-_Exported CSV in the past_
+[discrete]
+==== File uploader enhancements
 
-image::images/csv-download-2.png[Exported CSV now, with formatting improvements]
-_Exported CSV now_
+You can now access the file uploader via a flyout on the Search Overview page and Search Playground. This release also adds support for uploading multiple files with a single action. 
 
-
-//[discrete]
-//=== Alerting, cases, and connectors
-
+image::https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/blt0957c51279df4bec/67c23ac28c6f4e7a59b7f3c6/file-uploader-enhancements-8.18.gif[Uploading multiple files with the file uploader]
 
 [discrete]
 === Alerting, cases, and connectors
 
 [discrete]
-==== Alerting scalability improvements
-The {kib} alerting framework delivers enhanced scalability to meet the demands of growing workloads and is available across all {ecloud} hosted deployments. These improvements will provide you with 10x the existing capacity to run task-manager tasks -- alerting rules, connector actions, etc. We are observing the following performance improvements on early adopters of the new {kib} alerting framework:  
+==== Case templates are Generally Available
 
-** 10x reduction in alerting task delays
-** 2x increase in task execution throughput on average
-** 50% fewer requests to Elasticsearch, resulting in lower overhead
+Case templates are now Generally Available. Case templates provide useful starting points for investigations in both Security and Observability. Add templates in Case Settings and leverage them as a starting point in any new case.
 
-These customers are now enjoying higher alerting capacity and faster response times without the need for any additional configuration or hardware. Furthermore, these improvements also bring in a new unparalleled scalability for our largest alerting customers, enabling deployments of up to 192 {kib} nodes running alerting rules.
-
-We are very excited to see how these enhancements empower your alerting strategies with faster, more efficient, and scalable performance.
+image::images/add-template-flyout.png[The Add template flyout in Case Settings, width=90%]
 
 [discrete]
-==== Support for case file attachments through API actions 
-The latest enhancements to {kib} Cases introduce highly requested functionality for managing security incidents and workflows. You can now use the public API to attach files to cases to enrich them with supporting documentation, evidence, and other critical information. This improvement marks a significant enhancement in case management, providing incident response teams with greater flexibility to include all relevant details directly within their cases.
+==== Case observables 
 
-Additionally, this release expands integration capabilities with third-party systems such as ServiceNow and Tines. You can now programmatically update cases through API calls from external platforms, streamlining workflows and fostering seamless collaboration across tools. These features make it easier to automate case updates and efficiently track complex security incidents in real time. For more details, check out the https://www.elastic.co/docs/api/doc/kibana/v8/operation/operation-createcasedefaultspace[API documentation].
+Case observables enable structured data collection. You can now add common observables to any case out of the box and extend the types of observable case data to include custom options.
 
 [discrete]
-==== Jira Connector now supports Jira Data Center
-This release introduces support for Jira Data Center, expanding the existing integration capabilities previously available only for Jira Cloud instances. With this enhancement, organizations using on-premises Jira Data Center can now seamlessly integrate with {kib}, enabling more efficient workflows and streamlined incident management.
+==== Certified for ServiceNow Xanadu release
 
-With this update, users can create and manage Jira issues directly from {kib}, regardless of their Jira deployment model. This expanded compatibility highlights our commitment to supporting diverse customer deployment setups and delivering enhanced functionality tailored to enterprise environments.
+The Service Now connector is certified for the Xanadu release. 
 
+[discrete]
+==== Assign users to a case
+
+You can now enable a role to assign users to a case. 
+
+[discrete]
+==== Attach file API
+
+You can now manage case attachments programmatically with new CRUD operations on the case attachments API. Check out the https://www.elastic.co/docs/api/doc/kibana/operation/operation-addcasefiledefaultspace[API documentation] to learn more. 

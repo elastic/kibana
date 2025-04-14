@@ -12,7 +12,7 @@ import type { DataViewField, DataView } from '@kbn/data-views-plugin/common';
 import type {
   CreateFieldComponent,
   GetFieldTableColumns,
-} from '@kbn/triggers-actions-ui-plugin/public/types';
+} from '@kbn/response-ops-alerts-fields-browser/types';
 import type { ColumnHeaderOptions } from '../../../../common/types';
 import { useDataView } from '../../../common/containers/source/use_data_view';
 import { useKibana } from '../../../common/lib/kibana';

@@ -27,6 +27,7 @@ import { useAnomaliesTableData } from '../../../common/components/ml/anomaly/use
 import { useInstalledSecurityJobNameById } from '../../../common/components/ml/hooks/use_installed_security_jobs';
 import { EmptyPrompt } from '../../../common/components/empty_prompt';
 import type { NarrowDateRange } from '../../../common/components/ml/types';
+import { SourcererScopeName } from '../../../sourcerer/store/model';
 
 export interface NetworkDetailsProps {
   /**
@@ -42,11 +43,7 @@ export interface NetworkDetailsProps {
 /**
  * Component rendering all the network details for the expandable flyout
  */
-export const NetworkDetails = ({
-  ip,
-  flowTarget,
-  isDraggable,
-}: NetworkDetailsProps & { isDraggable?: boolean }) => {
+export const NetworkDetails = ({ ip, flowTarget }: NetworkDetailsProps) => {
   const dispatch = useDispatch();
   const { to, from, isInitializing } = useGlobalTime();
   const getGlobalQuerySelector = useMemo(() => inputsSelectors.globalQuerySelector(), []);
@@ -113,7 +110,6 @@ export const NetworkDetails = ({
       loading={loading}
       isInDetailsSidePanel
       isLoadingAnomaliesData={isLoadingAnomaliesData}
-      isDraggable={isDraggable}
       type={type}
       flowTarget={flowTarget}
       startDate={from}
@@ -121,6 +117,7 @@ export const NetworkDetails = ({
       narrowDateRange={narrowDateRange}
       indexPatterns={selectedPatterns}
       jobNameById={jobNameById}
+      scopeId={SourcererScopeName.default}
     />
   ) : (
     <EmptyPrompt />

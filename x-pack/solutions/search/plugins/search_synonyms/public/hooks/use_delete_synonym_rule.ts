@@ -8,6 +8,7 @@
 import { useQueryClient, useMutation } from '@tanstack/react-query';
 import { i18n } from '@kbn/i18n';
 import { KibanaServerError } from '@kbn/kibana-utils-plugin/common';
+import { SYNONYMS_RULE_FETCH_QUERY_KEY, SYNONYMS_SETS_QUERY_KEY } from '../../common/constants';
 import { useKibana } from './use_kibana';
 
 interface MutationArgs {
@@ -28,8 +29,9 @@ export const useDeleteSynonymRule = (onSuccess?: () => void, onError?: (error: s
       );
     },
     {
-      onSuccess: (_, { synonymsSetId, ruleId }) => {
-        queryClient.invalidateQueries(['synonyms-rule-delete', synonymsSetId, ruleId]);
+      onSuccess: (_, { ruleId }) => {
+        queryClient.invalidateQueries([SYNONYMS_RULE_FETCH_QUERY_KEY]);
+        queryClient.invalidateQueries([SYNONYMS_SETS_QUERY_KEY]);
         notifications?.toasts?.addSuccess({
           title: i18n.translate('xpack.searchSynonyms.deleteSynonymRuleSuccess', {
             defaultMessage: 'Synonym rule {ruleId} deleted',

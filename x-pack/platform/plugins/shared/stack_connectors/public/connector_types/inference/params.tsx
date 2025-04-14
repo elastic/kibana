@@ -5,14 +5,17 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   JsonEditorWithMessageVariables,
+  useKibana,
   type ActionParamsProps,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { EuiTextArea, EuiFormRow, EuiSpacer, EuiSelect } from '@elastic/eui';
+import { isInferenceEndpointExists } from '@kbn/inference-endpoint-ui-common';
+import { EuiTextArea, EuiFormRow, EuiSpacer, EuiSelect, EuiCallOut } from '@elastic/eui';
 import type { RuleFormParamsErrors } from '@kbn/response-ops-rule-form';
 import { ActionVariable } from '@kbn/alerting-types';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   ChatCompleteParams,
   RerankParams,
@@ -29,8 +32,22 @@ const InferenceServiceParamsFields: React.FunctionComponent<
   ActionParamsProps<InferenceActionParams>
 > = ({ actionParams, editAction, index, errors, actionConnector, messageVariables }) => {
   const { subAction, subActionParams } = actionParams;
+  const [isEndpointExists, setIsInferenceEndpointExists] = useState<boolean>(true);
 
-  const { taskType, provider } = (actionConnector as unknown as InferenceActionConnector).config;
+  const {
+    services: { http },
+  } = useKibana();
+
+  const { taskType, provider, inferenceId } = (
+    actionConnector as unknown as InferenceActionConnector
+  ).config;
+
+  useEffect(() => {
+    const f = async () => {
+      setIsInferenceEndpointExists(await isInferenceEndpointExists(http, inferenceId));
+    };
+    f();
+  }, [http, inferenceId]);
 
   useEffect(() => {
     if (!subAction) {
@@ -62,6 +79,18 @@ const InferenceServiceParamsFields: React.FunctionComponent<
     },
     [editAction, index, subActionParams]
   );
+
+  if (!isEndpointExists) {
+    return (
+      <EuiCallOut title="Missing configuration" color="warning" iconType="warning">
+        <FormattedMessage
+          id="xpack.stackConnectors.components.inference.loadingErrorText"
+          defaultMessage={'Inference Endpoint by ID {inferenceId} does not exist!'}
+          values={{ inferenceId }}
+        />
+      </EuiCallOut>
+    );
+  }
 
   if (subAction === SUB_ACTION.UNIFIED_COMPLETION) {
     return (

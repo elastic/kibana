@@ -22,7 +22,6 @@ export const Default = () => {
       options={options}
       selectedOption={selectedOption}
       onChange={setSelectedOption}
-      hasResolvedValueDifferentFromSuggested={false}
     />
   );
 };

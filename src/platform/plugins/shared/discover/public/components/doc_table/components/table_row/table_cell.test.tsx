@@ -9,7 +9,8 @@
 
 import React from 'react';
 import { mount } from 'enzyme';
-import { CellProps, TableCell } from './table_cell';
+import type { CellProps } from './table_cell';
+import { TableCell } from './table_cell';
 
 const mountComponent = (props: Omit<CellProps, 'inlineFilter'>) => {
   return mount(<TableCell {...props} inlineFilter={() => {}} />);

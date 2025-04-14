@@ -45,7 +45,7 @@ and you'll get suggestions for agents by name, ID, platform, and policy.
 . Specify the query or pack to run:
 ** *Query*: Select a saved query or enter a new one in the text box. After you enter the query, you can expand the **Advanced** section to set a timeout period for the query, and view or set <<osquery-map-fields,mapped ECS fields>> included in the results from the live query (optional). 
 +
-NOTE: Overwriting the query's default timeout period allows you to support queries that require more time to complete. The default and minimum supported value for the **Timeout** field is `60`. The maximum supported value is `900`.
+NOTE: Overwriting the query's default timeout period allows you to support queries that require more time to complete. The default and minimum supported value for the **Timeout** field is `60`. The maximum supported value is `86400` (24 hours).
 ** *Pack*: Select from available query packs. After you select a pack, all of the queries in the pack are displayed.
 +
 TIP: Refer to <<osquery-prebuilt-packs,prebuilt packs>> to learn about using and managing Elastic prebuilt packs.
@@ -110,7 +110,7 @@ Each query must include a unique query ID and the interval at which it should ru
 Optionally, set the minimum Osquery version and platform, specify a timeout period,
 or <<osquery-map-fields,map ECS fields>>. When you add a saved query to a pack, this adds a copy of the query. A connection is not maintained between saved queries and packs.
 +
-NOTE: Overwriting the query's default timeout period allows you to support queries that require more time to complete. The default and minimum supported value for the **Timeout** field is `60`. The maximum supported value is `900`.
+NOTE: Overwriting the query's default timeout period allows you to support queries that require more time to complete. The default and minimum supported value for the **Timeout** field is `60`. The maximum supported value is `86400` (24 hours).
 
 ** Upload queries from a `.conf` query pack by dragging the pack to the drop zone under the query table. To explore the community packs that Osquery publishes, click *Example packs*.
 
@@ -152,7 +152,7 @@ Once you save a query, you can only edit it from the *Saved queries* tab:
 
 * The SQL query (required). Osquery supports multi-line queries.
 
-* A timeout period (optional). Increase the query's default timeout period to support queries that require more time to complete. The default and minimum supported value for the **Timeout** field is `60`. The maximum supported value is `900`.
+* A timeout period (optional). Increase the query's default timeout period to support queries that require more time to complete. The default and minimum supported value for the **Timeout** field is `60`. The maximum supported value is `86400` (24 hours).
 
 * The <<osquery-map-fields,ECS fields>> to populate when the query is run (optional). These fields are also copied in when you add this query to a pack.
 

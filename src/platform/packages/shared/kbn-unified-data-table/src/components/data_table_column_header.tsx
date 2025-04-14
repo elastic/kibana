@@ -9,12 +9,11 @@
 
 import React, { useMemo } from 'react';
 import { css, CSSObject } from '@emotion/react';
-import { EuiIconTip } from '@elastic/eui';
+import { EuiIconTip, useEuiTheme } from '@elastic/eui';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { FieldIcon, getFieldIconProps, getTextBasedColumnIconType } from '@kbn/field-utils';
 import { isNestedFieldParent } from '@kbn/discover-utils';
 import { i18n } from '@kbn/i18n';
-import { euiThemeVars } from '@kbn/ui-theme';
 import type { DataTableColumnsMeta } from '../types';
 import ColumnHeaderTruncateContainer from './column_header_truncate_container';
 
@@ -52,15 +51,14 @@ export const DataTableColumnHeader: React.FC<DataTableColumnHeaderProps> = ({
 const DataTableColumnToken: React.FC<
   Pick<DataTableColumnHeaderProps, 'columnName' | 'columnsMeta' | 'dataView'>
 > = (props) => {
+  const { euiTheme } = useEuiTheme();
   const { columnName, columnsMeta, dataView } = props;
   const columnToken = useMemo(
     () => getRenderedToken({ columnName, columnsMeta, dataView }),
     [columnName, columnsMeta, dataView]
   );
 
-  return columnToken ? (
-    <span css={{ paddingRight: euiThemeVars.euiSizeXS }}>{columnToken}</span>
-  ) : null;
+  return columnToken ? <span css={{ paddingRight: euiTheme.size.xs }}>{columnToken}</span> : null;
 };
 
 const DataTableColumnTitle: React.FC<Pick<DataTableColumnHeaderProps, 'columnDisplayName'>> = ({
@@ -136,5 +134,44 @@ export const DataTableTimeColumnHeader = ({
         {timeFieldName} <EuiIconTip type="clock" content={primaryTimeTooltip} />
       </ColumnHeaderTruncateContainer>
     </div>
+  );
+};
+
+export const DataTableScoreColumnHeader = ({
+  isSorted,
+  showColumnTokens,
+  columnName,
+  columnsMeta,
+  dataView,
+  headerRowHeight,
+  columnDisplayName,
+}: DataTableColumnHeaderProps & { isSorted?: boolean }) => {
+  const tooltipContent = i18n.translate('unifiedDataTable.tableHeader.scoreFieldIconTooltip', {
+    defaultMessage: 'In order to retrieve values for _score, you must sort by it.',
+  });
+  const { euiTheme } = useEuiTheme();
+
+  return (
+    <ColumnHeaderTruncateContainer headerRowHeight={headerRowHeight}>
+      {showColumnTokens && isSorted && (
+        <DataTableColumnToken
+          columnName={columnName}
+          columnsMeta={columnsMeta}
+          dataView={dataView}
+        />
+      )}
+      {!isSorted && (
+        <span css={{ paddingRight: euiTheme.size.xs }}>
+          <EuiIconTip
+            content={tooltipContent}
+            color="warning"
+            size="s"
+            type="alert"
+            position="left"
+          />
+        </span>
+      )}
+      <DataTableColumnTitle columnDisplayName={columnDisplayName} />
+    </ColumnHeaderTruncateContainer>
   );
 };

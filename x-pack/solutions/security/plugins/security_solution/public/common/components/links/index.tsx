@@ -298,58 +298,81 @@ export interface NetworkDetailsLinkProps {
   ip: string | string[];
   flowTarget?: FlowTarget | FlowTargetSourceDest;
   isButton?: boolean;
-  onClick?: (e: SyntheticEvent) => void | undefined;
+  onClick?: (ip: string) => void;
   title?: string;
 }
 
-const NetworkDetailsLinkComponent: React.FC<NetworkDetailsLinkProps> = ({
-  Component,
-  children,
-  ip,
-  flowTarget = FlowTarget.source,
-  isButton,
-  onClick,
-  title,
-}) => {
-  const getSecuritySolutionLinkProps = useGetSecuritySolutionLinkProps();
+const NetworkDetailsLinkComponent: React.FC<NetworkDetailsLinkProps> = ({ ip, ...restProps }) => {
+  // We see that sometimes the `ip` is passed as a string value of "IP1,IP2".
+  // Therefore we're breaking up this string into individual IPs first.
+  const actualIp = useMemo(() => {
+    if (typeof ip === 'string' && ip.includes(',')) {
+      return ip.split(',').map((str) => str.trim());
+    } else {
+      return ip;
+    }
+  }, [ip]);
 
-  const getLink = useCallback(
-    (cIp: string, i: number) => {
-      const { onClick: onClickNavigation, href } = getSecuritySolutionLinkProps({
-        deepLinkId: SecurityPageName.network,
-        path: getNetworkDetailsUrl(encodeURIComponent(encodeIpv6(cIp)), flowTarget),
-      });
-
-      const onLinkClick = onClick ?? ((e: SyntheticEvent) => onClickNavigation(e as MouseEvent));
-
-      return isButton ? (
-        <GenericLinkButton
-          Component={Component}
-          key={`${cIp}-${i}`}
-          dataTestSubj="data-grid-network-details"
-          onClick={onLinkClick}
-          href={href}
-          title={title ?? cIp}
-        >
-          {children}
-        </GenericLinkButton>
-      ) : (
-        <LinkAnchor
-          key={`${cIp}-${i}`}
-          onClick={onLinkClick}
-          href={href}
-          data-test-subj="network-details"
-        >
-          {children ? children : cIp}
-        </LinkAnchor>
-      );
-    },
-    [children, Component, flowTarget, getSecuritySolutionLinkProps, onClick, isButton, title]
+  return isArray(actualIp) ? (
+    actualIp.map((currentIp, index) => (
+      <span key={`${currentIp}-${index}`}>
+        <IpLinkComponent ip={currentIp} {...restProps} />
+        {index === actualIp.length - 1 ? '' : ', '}
+      </span>
+    ))
+  ) : (
+    <IpLinkComponent ip={actualIp} {...restProps} />
   );
-  return isArray(ip) ? <>{ip.map(getLink)}</> : getLink(ip, 0);
 };
 
 export const NetworkDetailsLink = React.memo(NetworkDetailsLinkComponent);
+
+type IpLinkComponentProps = Omit<NetworkDetailsLinkProps, 'ip'> & { ip: string };
+
+const IpLinkComponent: React.FC<IpLinkComponentProps> = ({
+  isButton,
+  onClick,
+  ip: ipAddress,
+  flowTarget = FlowTarget.source,
+  Component,
+  title,
+  children,
+}) => {
+  const getSecuritySolutionLinkProps = useGetSecuritySolutionLinkProps();
+  const { onClick: onClickNavigation, href } = getSecuritySolutionLinkProps({
+    deepLinkId: SecurityPageName.network,
+    path: getNetworkDetailsUrl(encodeURIComponent(encodeIpv6(ipAddress)), flowTarget),
+  });
+
+  const onLinkClick = useCallback(
+    (e: SyntheticEvent) => {
+      if (onClick) {
+        e.preventDefault();
+        onClick(ipAddress);
+      } else {
+        onClickNavigation(e as MouseEvent);
+      }
+    },
+    [onClick, onClickNavigation, ipAddress]
+  );
+
+  return isButton ? (
+    <GenericLinkButton
+      Component={Component}
+      key={ipAddress}
+      dataTestSubj="data-grid-network-details"
+      onClick={onLinkClick}
+      href={href}
+      title={title ?? ipAddress}
+    >
+      {children}
+    </GenericLinkButton>
+  ) : (
+    <LinkAnchor key={ipAddress} onClick={onLinkClick} href={href} data-test-subj="network-details">
+      {children ? children : ipAddress}
+    </LinkAnchor>
+  );
+};
 
 export interface CaseDetailsLinkComponentProps {
   children?: React.ReactNode;

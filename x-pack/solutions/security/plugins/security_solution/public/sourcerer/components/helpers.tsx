@@ -5,14 +5,12 @@
  * 2.0.
  */
 
-import React from 'react';
-import type { EuiSuperSelectOption, EuiFormRowProps } from '@elastic/eui';
-import { EuiIcon, EuiBadge, EuiButtonEmpty, EuiFormRow } from '@elastic/eui';
-import styled, { css } from 'styled-components';
-
-import { euiThemeVars } from '@kbn/ui-theme';
+import React, { memo } from 'react';
+import type { EuiBadgeProps, EuiFormRowProps, EuiSuperSelectOption } from '@elastic/eui';
+import { EuiBadge, EuiButtonEmpty, EuiFormRow, EuiIcon, useEuiTheme } from '@elastic/eui';
+import styled from 'styled-components';
+import { css } from '@emotion/react';
 import type { sourcererModel } from '../store';
-
 import * as i18n from './translations';
 
 export const FormRow = styled(EuiFormRow)<EuiFormRowProps & { $expandAdvancedOptions: boolean }>`
@@ -33,6 +31,7 @@ export const StyledButtonEmpty = styled(EuiButtonEmpty)`
 
 export const ResetButton = styled(EuiButtonEmpty)`
   width: fit-content;
+
   &:enabled:focus,
   &:focus {
     background-color: transparent;
@@ -43,23 +42,54 @@ export const PopoverContent = styled.div`
   width: 600px;
 `;
 
-export const StyledBadge = styled(EuiBadge)`
-  margin-left: ${euiThemeVars.euiSizeXS};
-  &,
-  .euiBadge__text {
-    cursor: pointer;
-  }
-`;
+interface StyledBadgeProps {
+  color?: EuiBadgeProps['color'];
+  children: React.ReactNode;
+  'data-test-subj'?: string;
+}
 
-export const Blockquote = styled.span`
-  ${({ theme }) => css`
-    display: block;
-    border-color: ${theme.eui.euiColorDarkShade};
-    border-left: ${theme.eui.euiBorderThick};
-    margin: ${theme.eui.euiSizeS} 0 ${theme.eui.euiSizeS} ${theme.eui.euiSizeS};
-    padding: ${theme.eui.euiSizeS};
-  `}
-`;
+export const StyledBadge = memo(
+  ({ color, children, 'data-test-subj': dataTestSubj }: StyledBadgeProps) => {
+    const { euiTheme } = useEuiTheme();
+
+    return (
+      <EuiBadge
+        color={color}
+        data-test-subj={dataTestSubj}
+        css={css`
+          margin-left: ${euiTheme.size.xs};
+
+          &,
+          .euiBadge__text {
+            cursor: pointer;
+          }
+        `}
+      >
+        {children}
+      </EuiBadge>
+    );
+  }
+);
+StyledBadge.displayName = 'StyledBadge';
+
+export const Blockquote = memo(({ children }: { children: React.ReactNode }) => {
+  const { euiTheme } = useEuiTheme();
+
+  return (
+    <span
+      css={css`
+        display: block;
+        border-color: ${euiTheme.colors.darkShade};
+        border-left: ${euiTheme.border.thick};
+        margin: ${euiTheme.size.s} 0 ${euiTheme.size.s} ${euiTheme.size.s};
+        padding: ${euiTheme.size.s};
+      `}
+    >
+      {children}
+    </span>
+  );
+});
+Blockquote.displayName = 'Blockquote';
 
 interface GetDataViewSelectOptionsProps {
   dataViewId: string;

@@ -91,6 +91,14 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
             ? [
                 {
                   link: 'streams' as const,
+                  withBadge: true,
+                  badgeOptions: {
+                    icon: 'beaker',
+                    tooltip: i18n.translate('xpack.observability.obltNav.streamsBadgeTooltip', {
+                      defaultMessage:
+                        'This functionality is experimental and not supported. It may change or be removed at any time.',
+                    }),
+                  },
                 },
               ]
             : []),
@@ -465,7 +473,6 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
         children: [
           {
             id: 'stack_management', // This id can't be changed as we use it to open the panel programmatically
-            link: 'management',
             title: i18n.translate('xpack.observability.obltNav.stackManagement', {
               defaultMessage: 'Stack Management',
             }),
@@ -535,6 +542,10 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
                 ],
               },
             ],
+          },
+          {
+            id: 'monitoring',
+            link: 'monitoring',
           },
           {
             link: 'integrations',

@@ -58,6 +58,7 @@ import {
   CellActionsMode,
   SecurityCellActionsTrigger,
 } from '../../../../common/components/cell_actions';
+import { SourcererScopeName } from '../../../../sourcerer/store/model';
 
 const NetworkDetailsManage = manageQuery(IpOverview);
 
@@ -220,6 +221,7 @@ const NetworkDetailsComponent: React.FC = () => {
               narrowDateRange={narrowDateRange}
               indexPatterns={selectedPatterns}
               jobNameById={jobNameById}
+              scopeId={SourcererScopeName.default}
             />
 
             <EuiHorizontalRule />

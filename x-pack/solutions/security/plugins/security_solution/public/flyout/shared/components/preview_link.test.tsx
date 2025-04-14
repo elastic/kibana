@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import { FLYOUT_PREVIEW_LINK_TEST_ID } from '../../document_details/shared/components/test_ids';
+import { FLYOUT_PREVIEW_LINK_TEST_ID } from './test_ids';
 import { PreviewLink, hasPreview } from './preview_link';
 import { TestProviders } from '../../../common/mock';
 import { mockFlyoutApi } from '../../document_details/shared/mocks/mock_flyout_context';

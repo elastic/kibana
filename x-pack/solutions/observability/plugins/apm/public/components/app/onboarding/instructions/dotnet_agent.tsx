@@ -77,7 +77,16 @@ export const createDotNetAgentInstructions = (commonOptions: AgentInstructions):
             })}
           </EuiMarkdownFormat>
           <EuiSpacer />
-          <EuiCodeBlock language="bash" isCopyable={true}>
+          <EuiCodeBlock
+            language="bash"
+            isCopyable={true}
+            copyAriaLabel={i18n.translate(
+              'xpack.apm.onboarding.dotNet.configureApplication.copyAriaLabel',
+              {
+                defaultMessage: 'Copy the code to add the APM agent to the dotnet application',
+              }
+            )}
+          >
             {codeBlock}
           </EuiCodeBlock>
           <EuiSpacer />

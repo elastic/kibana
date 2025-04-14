@@ -20,6 +20,15 @@ import { PublicApiServiceSetup } from './services/public_api_service';
 export type IndexManagementLocatorParams = SerializableRecord &
   (
     | {
+        page: 'index_list';
+        filter?: string;
+        includeHiddenIndices?: boolean;
+      }
+    | {
+        page: 'data_stream_index_list';
+        dataStreamName: string;
+      }
+    | {
         page: 'data_streams_details';
         dataStreamName?: string;
       }
@@ -28,7 +37,31 @@ export type IndexManagementLocatorParams = SerializableRecord &
         indexTemplate: string;
       }
     | {
+        page: 'index_template_edit';
+        indexTemplate: string;
+      }
+    | {
+        page: 'index_template_clone';
+        indexTemplate: string;
+      }
+    | {
         page: 'component_template';
+        componentTemplate: string;
+      }
+    | {
+        page: 'component_template_list';
+        filter?: string;
+      }
+    | {
+        page: 'edit_component_template';
+        componentTemplate: string;
+      }
+    | {
+        page: 'clone_component_template';
+        componentTemplate: string;
+      }
+    | {
+        page: 'create_component_template';
         componentTemplate: string;
       }
   );
@@ -49,6 +82,15 @@ export interface IndexManagementPluginStart {
   getIndexSettingsComponent: (deps: {
     history: ScopedHistory<unknown>;
   }) => React.FC<IndexSettingProps>;
+  getComponentTemplateFlyoutComponent: (deps: {
+    history: ScopedHistory<unknown>;
+  }) => React.FC<ComponentTemplateFlyoutProps>;
+  getIndexTemplateFlyoutComponent: (deps: {
+    history: ScopedHistory<unknown>;
+  }) => React.FC<IndexTemplateFlyoutProps>;
+  getDatastreamFlyoutComponent: (deps: {
+    history: ScopedHistory<unknown>;
+  }) => React.FC<DatastreamFlyoutProps>;
 }
 
 export interface Index {
@@ -74,6 +116,22 @@ export interface Index {
   size?: string;
   primary_size?: string;
   documents_deleted?: number;
+}
+
+export interface ComponentTemplateFlyoutProps {
+  componentTemplateName: string;
+  onClose: () => void;
+}
+
+export interface IndexTemplateFlyoutProps {
+  indexTemplateName: string;
+  onClose: () => void;
+  reload: () => void;
+}
+
+export interface DatastreamFlyoutProps {
+  datastreamName: string;
+  onClose: () => void;
 }
 
 export interface IndexMappingProps {

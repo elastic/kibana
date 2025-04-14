@@ -173,10 +173,10 @@ export function CanvasPageProvider({ getService, getPageObjects }: FtrProviderCo
       await testSubjects.click('breadcrumb first');
     },
 
-    async createNewVis(visType: string) {
-      log.debug('CanvasPage.createNewVisType', visType);
+    async addNewPanel(actionName: string) {
+      log.debug('CanvasPage.addNewPanel', actionName);
       await testSubjects.click('canvasEditorMenuButton');
-      await testSubjects.click(`visType-${visType}`);
+      await testSubjects.click(`create-action-${actionName}`);
     },
 
     async getEmbeddableCount() {

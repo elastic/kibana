@@ -8,31 +8,29 @@
  */
 
 import classNames from 'classnames';
+import deepEqual from 'fast-deep-equal';
 import { cloneDeep } from 'lodash';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { combineLatest, distinctUntilChanged, map, pairwise, skip } from 'rxjs';
+import { combineLatest, pairwise, map, distinctUntilChanged } from 'rxjs';
 
 import { css } from '@emotion/react';
 
 import { GridHeightSmoother } from './grid_height_smoother';
 import { GridRow } from './grid_row';
-import { GridAccessMode, GridLayoutData, GridSettings } from './types';
+import { GridAccessMode, GridLayoutData, GridSettings, UseCustomDragHandle } from './types';
+import { GridLayoutContext, GridLayoutContextType } from './use_grid_layout_context';
 import { useGridLayoutState } from './use_grid_layout_state';
 import { isLayoutEqual } from './utils/equality_checks';
-import { resolveGridRow } from './utils/resolve_grid_row';
+import { getRowKeysInOrder, resolveGridRow } from './utils/resolve_grid_row';
 
-export interface GridLayoutProps {
+export type GridLayoutProps = {
   layout: GridLayoutData;
   gridSettings: GridSettings;
-  renderPanelContents: (
-    panelId: string,
-    setDragHandles?: (refs: Array<HTMLElement | null>) => void
-  ) => React.ReactNode;
   onLayoutChange: (newLayout: GridLayoutData) => void;
   expandedPanelId?: string;
   accessMode?: GridAccessMode;
   className?: string; // this makes it so that custom CSS can be passed via Emotion
-}
+} & UseCustomDragHandle;
 
 export const GridLayout = ({
   layout,
@@ -42,6 +40,7 @@ export const GridLayout = ({
   expandedPanelId,
   accessMode = 'EDIT',
   className,
+  useCustomDragHandle = false,
 }: GridLayoutProps) => {
   const layoutRef = useRef<HTMLDivElement | null>(null);
   const { gridLayoutStateManager, setDimensionsRef } = useGridLayoutState({
@@ -52,10 +51,7 @@ export const GridLayout = ({
     accessMode,
   });
 
-  const [rowCount, setRowCount] = useState<number>(
-    gridLayoutStateManager.gridLayout$.getValue().length
-  );
-
+  const [rowIdsInOrder, setRowIdsInOrder] = useState<string[]>(getRowKeysInOrder(layout));
   /**
    * Update the `gridLayout$` behaviour subject in response to the `layout` prop changing
    */
@@ -66,8 +62,8 @@ export const GridLayout = ({
        * the layout sent in as a prop is not guaranteed to be valid (i.e it may have floating panels) -
        * so, we need to loop through each row and ensure it is compacted
        */
-      newLayout.forEach((row, rowIndex) => {
-        newLayout[rowIndex] = resolveGridRow(row);
+      Object.entries(newLayout).forEach(([rowId, row]) => {
+        newLayout[rowId] = resolveGridRow(row);
       });
       gridLayoutStateManager.gridLayout$.next(newLayout);
     }
@@ -79,28 +75,43 @@ export const GridLayout = ({
    */
   useEffect(() => {
     /**
-     * The only thing that should cause the entire layout to re-render is adding a new row;
-     * this subscription ensures this by updating the `rowCount` state when it changes.
-     */
-    const rowCountSubscription = gridLayoutStateManager.gridLayout$
-      .pipe(
-        skip(1), // we initialized `rowCount` above, so skip the initial emit
-        map((newLayout) => newLayout.length),
-        distinctUntilChanged()
-      )
-      .subscribe((newRowCount) => {
-        setRowCount(newRowCount);
-      });
-
-    /**
-     * This subscription calls the passed `onLayoutChange` callback when the layout changes
+     * This subscription calls the passed `onLayoutChange` callback when the layout changes;
+     * if the row IDs have changed, it also sets `rowIdsInOrder` to trigger a re-render
      */
     const onLayoutChangeSubscription = gridLayoutStateManager.gridLayout$
       .pipe(pairwise())
       .subscribe(([layoutBefore, layoutAfter]) => {
         if (!isLayoutEqual(layoutBefore, layoutAfter)) {
           onLayoutChange(layoutAfter);
+
+          if (!deepEqual(Object.keys(layoutBefore), Object.keys(layoutAfter))) {
+            setRowIdsInOrder(getRowKeysInOrder(layoutAfter));
+          }
         }
+      });
+
+    return () => {
+      onLayoutChangeSubscription.unsubscribe();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [onLayoutChange]);
+
+  useEffect(() => {
+    /**
+     * This subscription ensures that rows get re-rendered when their orders change
+     */
+    const rowOrderSubscription = combineLatest([
+      gridLayoutStateManager.proposedGridLayout$,
+      gridLayoutStateManager.gridLayout$,
+    ])
+      .pipe(
+        map(([proposedGridLayout, gridLayout]) =>
+          getRowKeysInOrder(proposedGridLayout ?? gridLayout)
+        ),
+        distinctUntilChanged(deepEqual)
+      )
+      .subscribe((rowKeys) => {
+        setRowIdsInOrder(rowKeys);
       });
 
     /**
@@ -127,103 +138,105 @@ export const GridLayout = ({
     });
 
     return () => {
-      rowCountSubscription.unsubscribe();
-      onLayoutChangeSubscription.unsubscribe();
+      rowOrderSubscription.unsubscribe();
       gridLayoutClassSubscription.unsubscribe();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  /**
-   * Memoize row children components to prevent unnecessary re-renders
-   */
-  const children = useMemo(() => {
-    return Array.from({ length: rowCount }, (_, rowIndex) => {
-      return (
-        <GridRow
-          key={rowIndex}
-          rowIndex={rowIndex}
-          renderPanelContents={renderPanelContents}
-          gridLayoutStateManager={gridLayoutStateManager}
-        />
-      );
-    });
-  }, [rowCount, gridLayoutStateManager, renderPanelContents]);
+  const memoizedContext = useMemo(
+    () =>
+      ({
+        renderPanelContents,
+        useCustomDragHandle,
+        gridLayoutStateManager,
+      } as GridLayoutContextType),
+    [renderPanelContents, useCustomDragHandle, gridLayoutStateManager]
+  );
 
   return (
-    <GridHeightSmoother gridLayoutStateManager={gridLayoutStateManager}>
-      <div
-        ref={(divElement) => {
-          layoutRef.current = divElement;
-          setDimensionsRef(divElement);
-        }}
-        className={classNames('kbnGrid', className)}
-        css={css`
-          padding: calc(var(--kbnGridGutterSize) * 1px);
-
-          // disable pointer events and user select on drag + resize
-          &:has(.kbnGridPanel--active) {
-            user-select: none;
-            pointer-events: none;
-          }
-
-          &:has(.kbnGridPanel--expanded) {
-            ${expandedPanelStyles}
-          }
-          &.kbnGrid--mobileView {
-            ${singleColumnStyles}
-          }
-        `}
-      >
-        {children}
-      </div>
-    </GridHeightSmoother>
+    <GridLayoutContext.Provider value={memoizedContext}>
+      <GridHeightSmoother>
+        <div
+          ref={(divElement) => {
+            layoutRef.current = divElement;
+            setDimensionsRef(divElement);
+          }}
+          className={classNames('kbnGrid', className)}
+          css={[
+            styles.layoutPadding,
+            styles.hasActivePanel,
+            styles.singleColumn,
+            styles.hasExpandedPanel,
+          ]}
+        >
+          {rowIdsInOrder.map((rowId) => (
+            <GridRow key={rowId} rowId={rowId} />
+          ))}
+        </div>
+      </GridHeightSmoother>
+    </GridLayoutContext.Provider>
   );
 };
 
-const singleColumnStyles = css`
-  .kbnGridRow {
-    grid-template-columns: 100%;
-    grid-template-rows: auto;
-    grid-auto-flow: row;
-    grid-auto-rows: auto;
-  }
-
-  .kbnGridPanel {
-    grid-area: unset !important;
-  }
-`;
-
-const expandedPanelStyles = css`
-  height: 100%;
-
-  & .kbnGridRowContainer:has(.kbnGridPanel--expanded) {
-    // targets the grid row container that contains the expanded panel
-    .kbnGridRowHeader {
-      height: 0px; // used instead of 'display: none' due to a11y concerns
-    }
-    .kbnGridRow {
-      display: block !important; // overwrite grid display
-      height: 100%;
-      .kbnGridPanel {
-        &.kbnGridPanel--expanded {
-          height: 100% !important;
-        }
-        &:not(.kbnGridPanel--expanded) {
-          // hide the non-expanded panels
-          position: absolute;
-          top: -9999px;
-          left: -9999px;
-          visibility: hidden; // remove hidden panels and their contents from tab order for a11y
-        }
-      }
-    }
-  }
-
-  & .kbnGridRowContainer:not(:has(.kbnGridPanel--expanded)) {
-    // targets the grid row containers that **do not** contain the expanded panel
-    position: absolute;
-    top: -9999px;
-    left: -9999px;
-  }
-`;
+const styles = {
+  layoutPadding: css({
+    padding: 'calc(var(--kbnGridGutterSize) * 1px)',
+  }),
+  hasActivePanel: css({
+    '&:has(.kbnGridPanel--active), &:has(.kbnGridRowHeader--active)': {
+      // disable pointer events and user select on drag + resize
+      userSelect: 'none',
+      pointerEvents: 'none',
+    },
+  }),
+  singleColumn: css({
+    '&.kbnGrid--mobileView': {
+      '.kbnGridRow': {
+        gridTemplateColumns: '100%',
+        gridTemplateRows: 'auto',
+        gridAutoFlow: 'row',
+        gridAutoRows: 'auto',
+      },
+      '.kbnGridPanel': {
+        gridArea: 'unset !important',
+      },
+    },
+  }),
+  hasExpandedPanel: css({
+    '&:has(.kbnGridPanel--expanded)': {
+      height: '100%',
+      // targets the grid row container that contains the expanded panel
+      '& .kbnGridRowContainer:has(.kbnGridPanel--expanded)': {
+        '.kbnGridRowHeader': {
+          height: '0px', // used instead of 'display: none' due to a11y concerns
+          padding: '0px',
+          display: 'block',
+          overflow: 'hidden',
+        },
+        '.kbnGridRow': {
+          display: 'block !important', // overwrite grid display
+          height: '100%',
+          '.kbnGridPanel': {
+            '&.kbnGridPanel--expanded': {
+              height: '100% !important',
+            },
+            // hide the non-expanded panels
+            '&:not(.kbnGridPanel--expanded)': {
+              position: 'absolute',
+              top: '-9999px',
+              left: '-9999px',
+              visibility: 'hidden', // remove hidden panels and their contents from tab order for a11y
+            },
+          },
+        },
+      },
+      // targets the grid row containers that **do not** contain the expanded panel
+      '& .kbnGridRowContainer:not(:has(.kbnGridPanel--expanded))': {
+        position: 'absolute',
+        top: '-9999px',
+        left: '-9999px',
+      },
+    },
+  }),
+};

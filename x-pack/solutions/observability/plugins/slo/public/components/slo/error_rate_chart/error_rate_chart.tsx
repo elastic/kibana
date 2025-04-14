@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import moment from 'moment';
 import React from 'react';
@@ -58,7 +57,7 @@ export function ErrorRateChart({
         to,
       }}
       attributes={lensDef}
-      viewMode={ViewMode.VIEW}
+      viewMode={'view'}
       onBrushEnd={({ range }) => {
         onBrushed?.({
           from: moment(range[0]).toDate(),

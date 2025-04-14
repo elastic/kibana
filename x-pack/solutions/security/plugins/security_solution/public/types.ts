@@ -35,6 +35,7 @@ import type { MlPluginSetup, MlPluginStart } from '@kbn/ml-plugin/public';
 import type { OsqueryPluginStart } from '@kbn/osquery-plugin/public';
 import type { LicensingPluginStart, LicensingPluginSetup } from '@kbn/licensing-plugin/public';
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
@@ -62,6 +63,7 @@ import type { PluginStartContract } from '@kbn/alerting-plugin/public/plugin';
 import type { MapsStartApi } from '@kbn/maps-plugin/public';
 import type { IntegrationAssistantPluginStart } from '@kbn/integration-assistant-plugin/public';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
+import type { ProductFeatureKeys } from '@kbn/security-solution-features';
 import type { ResolverPluginSetup } from './resolver/types';
 import type { Inspect } from '../common/search_strategy';
 import type { Detections } from './detections';
@@ -93,7 +95,6 @@ import type { ExperimentalFeatures } from '../common/experimental_features';
 import type { SetComponents, GetComponents$ } from './contract_components';
 import type { ConfigSettings } from '../common/config_settings';
 import type { OnboardingService } from './onboarding/service';
-import type { SolutionNavigation } from './app/solution_navigation/solution_navigation';
 import type { TelemetryServiceStart } from './common/lib/telemetry';
 import type { SiemMigrationsService } from './siem_migrations/service';
 
@@ -160,6 +161,7 @@ export interface StartPlugins {
   integrationAssistant?: IntegrationAssistantPluginStart;
   serverless?: ServerlessPluginStart;
   productDocBase: ProductDocBasePluginStart;
+  share?: SharePluginStart;
 }
 
 export interface StartPluginsDependencies extends StartPlugins {
@@ -213,6 +215,7 @@ export type StartRenderServices = Pick<
 export interface PluginSetup {
   resolver: () => Promise<ResolverPluginSetup>;
   experimentalFeatures: ExperimentalFeatures;
+  setProductFeatureKeys: (productFeatureKeys: ProductFeatureKeys) => void;
 }
 
 export interface PluginStart {
@@ -222,7 +225,6 @@ export interface PluginStart {
   getUpselling: () => UpsellingService;
   setOnboardingSettings: OnboardingService['setSettings'];
   setIsSolutionNavigationEnabled: (isSolutionNavigationEnabled: boolean) => void;
-  getSolutionNavigation: () => Promise<SolutionNavigation>;
 }
 
 export type InspectResponse = Inspect & { response: string[] };

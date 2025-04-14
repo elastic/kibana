@@ -9,17 +9,13 @@ import React from 'react';
 import userEvent from '@testing-library/user-event';
 import { screen, waitFor, within } from '@testing-library/react';
 
-import type { AppMockRenderer } from '../../common/mock';
-import { createAppMockRenderer } from '../../common/mock';
-
 import { MAX_TEMPLATES_LENGTH } from '../../../common/constants';
 import { Templates } from '.';
 import * as i18n from './translations';
 import { templatesConfigurationMock } from '../../containers/mock';
+import { renderWithTestingProviders } from '../../common/mock';
 
 describe('Templates', () => {
-  let appMockRender: AppMockRenderer;
-
   const props = {
     disabled: false,
     isLoading: false,
@@ -30,46 +26,47 @@ describe('Templates', () => {
   };
 
   beforeEach(() => {
-    appMockRender = createAppMockRenderer();
     jest.clearAllMocks();
   });
 
   it('renders correctly', async () => {
-    appMockRender.render(<Templates {...props} />);
+    renderWithTestingProviders(<Templates {...props} />);
 
     expect(await screen.findByTestId('templates-form-group')).toBeInTheDocument();
     expect(await screen.findByTestId('add-template')).toBeInTheDocument();
   });
 
   it('renders empty templates correctly', async () => {
-    appMockRender.render(<Templates {...{ ...props, templates: [] }} />);
+    renderWithTestingProviders(<Templates {...{ ...props, templates: [] }} />);
 
     expect(await screen.findByTestId('add-template')).toBeInTheDocument();
     expect(await screen.findByTestId('empty-templates')).toBeInTheDocument();
-    expect(await screen.queryByTestId('templates-list')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('templates-list')).not.toBeInTheDocument();
   });
 
   it('renders templates correctly', async () => {
-    appMockRender.render(<Templates {...{ ...props, templates: templatesConfigurationMock }} />);
+    renderWithTestingProviders(
+      <Templates {...{ ...props, templates: templatesConfigurationMock }} />
+    );
 
     expect(await screen.findByTestId('add-template')).toBeInTheDocument();
     expect(await screen.findByTestId('templates-list')).toBeInTheDocument();
   });
 
   it('renders loading state correctly', async () => {
-    appMockRender.render(<Templates {...{ ...props, isLoading: true }} />);
+    renderWithTestingProviders(<Templates {...{ ...props, isLoading: true }} />);
 
     expect(await screen.findByRole('progressbar')).toBeInTheDocument();
   });
 
   it('renders disabled state correctly', async () => {
-    appMockRender.render(<Templates {...{ ...props, disabled: true }} />);
+    renderWithTestingProviders(<Templates {...{ ...props, disabled: true }} />);
 
     expect(await screen.findByTestId('add-template')).toHaveAttribute('disabled');
   });
 
   it('calls onChange on add option click', async () => {
-    appMockRender.render(<Templates {...props} />);
+    renderWithTestingProviders(<Templates {...props} />);
 
     await userEvent.click(await screen.findByTestId('add-template'));
 
@@ -77,7 +74,9 @@ describe('Templates', () => {
   });
 
   it('calls onEditTemplate correctly', async () => {
-    appMockRender.render(<Templates {...{ ...props, templates: templatesConfigurationMock }} />);
+    renderWithTestingProviders(
+      <Templates {...{ ...props, templates: templatesConfigurationMock }} />
+    );
 
     const list = await screen.findByTestId('templates-list');
 
@@ -93,7 +92,9 @@ describe('Templates', () => {
   });
 
   it('calls onDeleteTemplate correctly', async () => {
-    appMockRender.render(<Templates {...{ ...props, templates: templatesConfigurationMock }} />);
+    renderWithTestingProviders(
+      <Templates {...{ ...props, templates: templatesConfigurationMock }} />
+    );
 
     const list = await screen.findByTestId('templates-list');
 
@@ -122,7 +123,7 @@ describe('Templates', () => {
       });
     }
 
-    appMockRender.render(<Templates {...{ ...props, templates: mockTemplates }} />);
+    renderWithTestingProviders(<Templates {...{ ...props, templates: mockTemplates }} />);
 
     expect(await screen.findByText(i18n.MAX_TEMPLATE_LIMIT(MAX_TEMPLATES_LENGTH)));
     expect(screen.queryByTestId('add-template')).not.toBeInTheDocument();

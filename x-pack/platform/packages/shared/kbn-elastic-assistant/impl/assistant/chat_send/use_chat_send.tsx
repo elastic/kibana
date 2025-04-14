@@ -11,7 +11,6 @@ import { i18n } from '@kbn/i18n';
 import { Replacements } from '@kbn/elastic-assistant-common';
 import { useKnowledgeBaseStatus } from '../api/knowledge_base/use_knowledge_base_status';
 import { DataStreamApis } from '../use_data_stream_apis';
-import { NEW_CHAT } from '../conversations/conversation_sidepanel/translations';
 import type { ClientMessage } from '../../assistant_context/types';
 import { SelectedPromptContext } from '../prompt_context/types';
 import { useSendMessage } from '../use_send_message';
@@ -19,6 +18,7 @@ import { useConversation } from '../use_conversation';
 import { getCombinedMessage } from '../prompt/helpers';
 import { Conversation, useAssistantContext } from '../../..';
 import { getMessageFromRawResponse } from '../helpers';
+import { useAssistantSpaceId, useAssistantLastConversation } from '../use_space_aware_context';
 
 export interface UseChatSendProps {
   currentConversation?: Conversation;
@@ -57,16 +57,15 @@ export const useChatSend = ({
     toasts,
     assistantAvailability: { isAssistantEnabled },
   } = useAssistantContext();
+  const spaceId = useAssistantSpaceId();
+  const { setLastConversation } = useAssistantLastConversation({ spaceId });
   const [userPrompt, setUserPrompt] = useState<string | null>(null);
 
   const { isLoading, sendMessage, abortStream } = useSendMessage();
-  const { clearConversation, removeLastMessage } = useConversation();
+  const { clearConversation, createConversation, getConversation, removeLastMessage } =
+    useConversation();
   const { data: kbStatus } = useKnowledgeBaseStatus({ http, enabled: isAssistantEnabled });
-  const isSetupComplete =
-    kbStatus?.elser_exists &&
-    kbStatus?.index_exists &&
-    kbStatus?.pipeline_exists &&
-    kbStatus?.security_labs_exists;
+  const isSetupComplete = kbStatus?.elser_exists && kbStatus?.security_labs_exists;
 
   // Handles sending latest user prompt to API
   const handleSendMessage = useCallback(
@@ -82,15 +81,25 @@ export const useChatSend = ({
         );
         return;
       }
-
+      const apiConfig = currentConversation.apiConfig;
+      let newConvo;
+      if (currentConversation.id === '') {
+        // create conversation with empty title, GENERATE_CHAT_TITLE graph step will properly title
+        newConvo = await createConversation(currentConversation);
+        if (newConvo?.id) {
+          setLastConversation({
+            id: newConvo.id,
+          });
+        }
+      }
+      const convo: Conversation = { ...currentConversation, ...(newConvo ?? {}) };
       const userMessage = getCombinedMessage({
-        currentReplacements: currentConversation.replacements,
+        currentReplacements: convo.replacements,
         promptText,
         selectedPromptContexts,
       });
 
-      const baseReplacements: Replacements =
-        userMessage.replacements ?? currentConversation.replacements;
+      const baseReplacements: Replacements = userMessage.replacements ?? convo.replacements;
 
       const selectedPromptContextsReplacements = Object.values(
         selectedPromptContexts
@@ -100,12 +109,12 @@ export const useChatSend = ({
         ...baseReplacements,
         ...selectedPromptContextsReplacements,
       };
-      const updatedMessages = [...currentConversation.messages, userMessage].map((m) => ({
+      const updatedMessages = [...convo.messages, userMessage].map((m) => ({
         ...m,
         content: m.content ?? '',
       }));
       setCurrentConversation({
-        ...currentConversation,
+        ...convo,
         replacements,
         messages: updatedMessages,
       });
@@ -114,46 +123,49 @@ export const useChatSend = ({
       setSelectedPromptContexts({});
 
       const rawResponse = await sendMessage({
-        apiConfig: currentConversation.apiConfig,
+        apiConfig,
         http,
         message: userMessage.content ?? '',
-        conversationId: currentConversation.id,
+        conversationId: convo.id,
         replacements,
       });
 
       assistantTelemetry?.reportAssistantMessageSent({
-        conversationId: currentConversation.title,
         role: userMessage.role,
-        actionTypeId: currentConversation.apiConfig.actionTypeId,
-        model: currentConversation.apiConfig.model,
-        provider: currentConversation.apiConfig.provider,
+        actionTypeId: apiConfig.actionTypeId,
+        model: apiConfig.model,
+        provider: apiConfig.provider,
         isEnabledKnowledgeBase: isSetupComplete ?? false,
       });
 
       const responseMessage: ClientMessage = getMessageFromRawResponse(rawResponse);
-
+      if (convo.title === '') {
+        convo.title = (await getConversation(convo.id))?.title ?? '';
+      }
       setCurrentConversation({
-        ...currentConversation,
+        ...convo,
         replacements,
         messages: [...updatedMessages, responseMessage],
       });
       assistantTelemetry?.reportAssistantMessageSent({
-        conversationId: currentConversation.title,
         role: responseMessage.role,
-        actionTypeId: currentConversation.apiConfig.actionTypeId,
-        model: currentConversation.apiConfig.model,
-        provider: currentConversation.apiConfig.provider,
+        actionTypeId: apiConfig.actionTypeId,
+        model: apiConfig.model,
+        provider: apiConfig.provider,
         isEnabledKnowledgeBase: isSetupComplete ?? false,
       });
     },
     [
       assistantTelemetry,
+      createConversation,
       currentConversation,
+      getConversation,
       http,
       isSetupComplete,
       selectedPromptContexts,
       sendMessage,
       setCurrentConversation,
+      setLastConversation,
       setSelectedPromptContexts,
       toasts,
     ]
@@ -218,11 +230,10 @@ export const useChatSend = ({
   const handleChatSend = useCallback(
     async (promptText: string) => {
       await handleSendMessage(promptText);
-      if (currentConversation?.title === NEW_CHAT) {
-        await refetchCurrentUserConversations();
-      }
+      // refetch to update the conversation list
+      await refetchCurrentUserConversations();
     },
-    [currentConversation, handleSendMessage, refetchCurrentUserConversations]
+    [handleSendMessage, refetchCurrentUserConversations]
   );
 
   return {

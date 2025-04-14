@@ -106,17 +106,25 @@ export const logViewRT = rt.exact(
 );
 export type LogView = rt.TypeOf<typeof logViewRT>;
 
-export const logViewIndexStatusRT = rt.keyof({
-  available: null,
-  empty: null,
-  missing: null,
-  unknown: null,
-});
-export type LogViewIndexStatus = rt.TypeOf<typeof logViewIndexStatusRT>;
-
-export const logViewStatusRT = rt.strict({
-  index: logViewIndexStatusRT,
-});
+export const logViewStatusRT = rt.union([
+  rt.strict({
+    index: rt.literal('available'),
+  }),
+  rt.strict({
+    index: rt.literal('empty'),
+  }),
+  rt.strict({
+    index: rt.literal('missing'),
+    reason: rt.keyof({
+      noIndicesFound: null,
+      noShardsFound: null,
+      remoteClusterNotFound: null,
+    }),
+  }),
+  rt.strict({
+    index: rt.literal('unknown'),
+  }),
+]);
 export type LogViewStatus = rt.TypeOf<typeof logViewStatusRT>;
 
 export const persistedLogViewReferenceRT = rt.type({

@@ -45,6 +45,17 @@ import {
   NETWORK_PROTOCOL_FIELD_NAME,
   NETWORK_TRANSPORT_FIELD_NAME,
 } from './field_names';
+import { CellActionsWrapper } from '../../../../common/components/drag_and_drop/cell_actions_wrapper';
+
+jest.mock('../../../../common/components/drag_and_drop/cell_actions_wrapper', () => {
+  return {
+    CellActionsWrapper: jest.fn(),
+  };
+});
+
+const MockedCellActionsWrapper = jest.fn(({ children }) => {
+  return <div data-test-subj="mock-cell-action-wrapper">{children}</div>;
+});
 
 jest.mock('../../../../common/lib/kibana');
 
@@ -58,6 +69,7 @@ jest.mock('@elastic/eui', () => {
 
 const getSourceDestinationInstance = () => (
   <SourceDestination
+    scopeId="some_scope"
     contextId="test"
     destinationBytes={asArrayIfExists(get(DESTINATION_BYTES_FIELD_NAME, getMockNetflowData()))}
     destinationGeoContinentName={asArrayIfExists(
@@ -118,6 +130,10 @@ jest.mock('react-router-dom', () => {
 });
 
 describe('SourceDestination', () => {
+  beforeEach(() => {
+    (CellActionsWrapper as unknown as jest.Mock).mockImplementation(MockedCellActionsWrapper);
+  });
+
   test('renders correctly against snapshot', () => {
     const { asFragment } = render(<TestProviders>{getSourceDestinationInstance()}</TestProviders>);
     expect(asFragment).toMatchSnapshot();
@@ -152,7 +168,7 @@ describe('SourceDestination', () => {
   test('it renders destination.geo.continent_name', () => {
     render(<TestProviders>{getSourceDestinationInstance()}</TestProviders>);
 
-    expect(screen.getByTestId('draggable-content-destination.geo.continent_name').textContent).toBe(
+    expect(screen.getByTestId('render-content-destination.geo.continent_name').textContent).toBe(
       'North America'
     );
   });
@@ -160,7 +176,7 @@ describe('SourceDestination', () => {
   test('it renders destination.geo.country_name', () => {
     render(<TestProviders>{getSourceDestinationInstance()}</TestProviders>);
 
-    expect(screen.getByTestId('draggable-content-destination.geo.country_name').textContent).toBe(
+    expect(screen.getByTestId('render-content-destination.geo.country_name').textContent).toBe(
       'United States'
     );
   });
@@ -168,15 +184,15 @@ describe('SourceDestination', () => {
   test('it renders destination.geo.country_iso_code', () => {
     render(<TestProviders>{getSourceDestinationInstance()}</TestProviders>);
 
-    expect(
-      screen.getByTestId('draggable-content-destination.geo.country_iso_code').textContent
-    ).toBe('US');
+    expect(screen.getByTestId('render-content-destination.geo.country_iso_code').textContent).toBe(
+      'US'
+    );
   });
 
   test('it renders destination.geo.region_name', () => {
     render(<TestProviders>{getSourceDestinationInstance()}</TestProviders>);
 
-    expect(screen.getByTestId('draggable-content-destination.geo.region_name').textContent).toBe(
+    expect(screen.getByTestId('render-content-destination.geo.region_name').textContent).toBe(
       'New York'
     );
   });
@@ -184,7 +200,7 @@ describe('SourceDestination', () => {
   test('it renders destination.geo.city_name', () => {
     render(<TestProviders>{getSourceDestinationInstance()}</TestProviders>);
 
-    expect(screen.getByTestId('draggable-content-destination.geo.city_name').textContent).toBe(
+    expect(screen.getByTestId('render-content-destination.geo.city_name').textContent).toBe(
       'New York'
     );
   });
@@ -269,7 +285,7 @@ describe('SourceDestination', () => {
   test('it renders source.geo.continent_name', () => {
     render(<TestProviders>{getSourceDestinationInstance()}</TestProviders>);
 
-    expect(screen.getByTestId('draggable-content-source.geo.continent_name').textContent).toBe(
+    expect(screen.getByTestId('render-content-source.geo.continent_name').textContent).toBe(
       'North America'
     );
   });
@@ -277,7 +293,7 @@ describe('SourceDestination', () => {
   test('it renders source.geo.country_name', () => {
     render(<TestProviders>{getSourceDestinationInstance()}</TestProviders>);
 
-    expect(screen.getByTestId('draggable-content-source.geo.country_name').textContent).toBe(
+    expect(screen.getByTestId('render-content-source.geo.country_name').textContent).toBe(
       'United States'
     );
   });
@@ -285,25 +301,19 @@ describe('SourceDestination', () => {
   test('it renders source.geo.country_iso_code', () => {
     render(<TestProviders>{getSourceDestinationInstance()}</TestProviders>);
 
-    expect(screen.getByTestId('draggable-content-source.geo.country_iso_code').textContent).toBe(
-      'US'
-    );
+    expect(screen.getByTestId('render-content-source.geo.country_iso_code').textContent).toBe('US');
   });
 
   test('it renders source.geo.region_name', () => {
     render(<TestProviders>{getSourceDestinationInstance()}</TestProviders>);
 
-    expect(screen.getByTestId('draggable-content-source.geo.region_name').textContent).toBe(
-      'Georgia'
-    );
+    expect(screen.getByTestId('render-content-source.geo.region_name').textContent).toBe('Georgia');
   });
 
   test('it renders source.geo.city_name', () => {
     render(<TestProviders>{getSourceDestinationInstance()}</TestProviders>);
 
-    expect(screen.getByTestId('draggable-content-source.geo.city_name').textContent).toBe(
-      'Atlanta'
-    );
+    expect(screen.getByTestId('render-content-source.geo.city_name').textContent).toBe('Atlanta');
   });
 
   test('it renders the source ip and port, separated with a colon', () => {
@@ -322,5 +332,16 @@ describe('SourceDestination', () => {
     render(<TestProviders>{getSourceDestinationInstance()}</TestProviders>);
 
     expect(screen.getByText('tcp')).toBeInTheDocument();
+  });
+
+  test('should passing correct scopeId to cell actions', () => {
+    render(<TestProviders>{getSourceDestinationInstance()}</TestProviders>);
+
+    expect(MockedCellActionsWrapper).toHaveBeenCalledWith(
+      expect.objectContaining({
+        scopeId: 'some_scope',
+      }),
+      {}
+    );
   });
 });

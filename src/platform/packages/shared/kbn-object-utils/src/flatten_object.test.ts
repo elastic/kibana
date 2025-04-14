@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { flattenObject } from './flatten_object';
+import { flattenObject, flattenObjectNestedLast } from './flatten_object';
 
 describe('flattenObject', () => {
-  it('should flat gamma object properties', () => {
+  it('should flatten nested object properties', () => {
     const flattened = flattenObject({
       alpha: {
         gamma: {
@@ -24,6 +24,31 @@ describe('flattenObject', () => {
     });
 
     expect(flattened).toEqual({
+      'alpha.gamma.sigma': 1,
+      'alpha.delta.sigma': 2,
+      beta: 3,
+    });
+  });
+});
+
+describe('flattenObjectNestedLast', () => {
+  it('should give nested object properties precedence over already flattened entries', () => {
+    const flattened = flattenObjectNestedLast({
+      'alpha.beta': 99,
+      alpha: {
+        gamma: {
+          sigma: 1,
+        },
+        delta: {
+          sigma: 2,
+        },
+      },
+      beta: 3,
+      'alpha.gamma.sigma': 4,
+    });
+
+    expect(flattened).toEqual({
+      'alpha.beta': 99,
       'alpha.gamma.sigma': 1,
       'alpha.delta.sigma': 2,
       beta: 3,

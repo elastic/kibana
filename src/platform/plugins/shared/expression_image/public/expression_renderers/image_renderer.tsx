@@ -16,7 +16,6 @@ import {
   IInterpreterRenderHandlers,
 } from '@kbn/expressions-plugin/common';
 import { i18n } from '@kbn/i18n';
-import { getElasticLogo, isValidUrl } from '@kbn/presentation-util-plugin/common';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { KibanaErrorBoundary, KibanaErrorBoundaryProvider } from '@kbn/shared-ux-error-boundary';
 import { ImageRendererConfig } from '../../common/types';
@@ -43,7 +42,7 @@ export const getImageRenderer =
       config: ImageRendererConfig,
       handlers: IInterpreterRenderHandlers
     ) => {
-      const { elasticLogo } = await getElasticLogo();
+      const { elasticLogo, isValidUrl } = await import('@kbn/expression-utils');
       const dataurl = isValidUrl(config.dataurl ?? '') ? config.dataurl : elasticLogo;
 
       const style = {

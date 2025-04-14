@@ -17,6 +17,7 @@ import {
   EuiButtonColor,
   EuiButtonIcon,
 } from '@elastic/eui';
+import { getRouterLinkProps } from '@kbn/router-utils';
 import { TopNavMenuData } from './top_nav_menu_data';
 
 export interface TopNavMenuItemProps extends TopNavMenuData {
@@ -48,23 +49,28 @@ export function TopNavMenuItem(props: TopNavMenuItemProps) {
     }
   }
 
-  function handleClick(e: MouseEvent<HTMLButtonElement>) {
+  function handleClick(event: MouseEvent<HTMLButtonElement | HTMLAnchorElement>) {
     if (isDisabled()) return;
-    props.run(e.currentTarget);
+
+    props.run(event.currentTarget);
     if (props.isMobileMenu) {
       props.closePopover();
     }
   }
 
+  const routerLinkProps = props.href
+    ? getRouterLinkProps({ href: props.href, onClick: handleClick })
+    : { onClick: handleClick };
+
   const commonButtonProps = {
     isDisabled: isDisabled(),
-    onClick: handleClick,
     isLoading: props.isLoading,
     iconType: props.iconType,
     iconSide: props.iconSide,
     'data-test-subj': props.testId,
     className: props.className,
     color: (props.color ?? 'primary') as EuiButtonColor,
+    ...routerLinkProps,
   };
 
   // If the item specified a href, then override the suppress the onClick

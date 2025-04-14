@@ -30,7 +30,6 @@ export interface ServicePanelProps extends Record<string, unknown> {
   contextID: string;
   scopeId: string;
   serviceName: string;
-  isDraggable?: boolean;
 }
 
 export interface ServicePanelExpandableFlyoutProps extends FlyoutPanelProps {
@@ -44,12 +43,7 @@ const FIRST_RECORD_PAGINATION = {
   querySize: 1,
 };
 
-export const ServicePanel = ({
-  contextID,
-  scopeId,
-  serviceName,
-  isDraggable,
-}: ServicePanelProps) => {
+export const ServicePanel = ({ contextID, scopeId, serviceName }: ServicePanelProps) => {
   const serviceNameFilterQuery = useMemo(
     () => (serviceName ? buildEntityNameFilter(EntityType.service, [serviceName]) : undefined),
     [serviceName]
@@ -94,7 +88,6 @@ export const ServicePanel = ({
     serviceName,
     scopeId,
     contextID,
-    isDraggable,
     isRiskScoreExist,
   });
 
@@ -126,7 +119,6 @@ export const ServicePanel = ({
         onAssetCriticalityChange={calculateEntityRiskScore}
         contextID={contextID}
         scopeId={scopeId}
-        isDraggable={!!isDraggable}
         openDetailsPanel={openDetailsPanel}
         isLinkEnabled={isLinkEnabled}
       />

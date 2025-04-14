@@ -15,7 +15,6 @@
       "dashboardEnhanced"
     ],
     "requiredPlugins": [
-      "dashboard",
       "data",
       "embeddable",
       "share",
@@ -23,6 +22,7 @@
       "unifiedSearch"
     ],
     "requiredBundles": [
+      "dashboard",
       "embeddable",
       "embeddableEnhanced",
       "kibanaUtils",

@@ -141,7 +141,6 @@ const indexWithLifecyclePhaseDefinition: Index = {
     step_time_millis: 1544187776208,
     phase_execution: {
       policy: 'testy',
-      // @ts-expect-error ILM type is incorrect https://github.com/elastic/elasticsearch-specification/issues/2326
       phase_definition: { min_age: '0s', actions: { rollover: { max_size: '1gb' } } },
       version: 1,
       modified_date_in_millis: 1544031699844,

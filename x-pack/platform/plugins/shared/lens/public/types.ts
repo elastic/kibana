@@ -83,6 +83,9 @@ export interface IndexPatternRef {
 }
 
 export interface IndexPattern {
+  getFormatterForField( // used extensively in lens
+    sourceField: string
+  ): unknown;
   id: string;
   fields: IndexPatternField[];
   getFieldByName(name: string): IndexPatternField | undefined;
@@ -432,7 +435,8 @@ export interface Datasource<T = unknown, P = unknown, Q = Query | AggregateQuery
     indexPatterns: IndexPatternMap,
     dateRange: DateRange,
     nowInstant: Date,
-    searchSessionId?: string
+    searchSessionId?: string,
+    forceDSL?: boolean
   ) => ExpressionAstExpression | string | null;
 
   getDatasourceSuggestionsForField: (
@@ -476,7 +480,7 @@ export interface Datasource<T = unknown, P = unknown, Q = Query | AggregateQuery
     state: T,
     deps: {
       frame: FramePublicAPI;
-      setState: StateSetter<T>;
+      setState?: StateSetter<T>;
       visualizationInfo?: VisualizationInfo;
     }
   ) => UserMessage[];
@@ -528,6 +532,7 @@ export interface Datasource<T = unknown, P = unknown, Q = Query | AggregateQuery
 
 export interface DatasourceFixAction<T> {
   label: string;
+  isCompatible?: (frame: FramePublicAPI) => boolean;
   newState: (frame: FramePublicAPI) => Promise<T>;
 }
 
@@ -760,6 +765,8 @@ export interface OperationMetadata {
   // document and an aggregated metric which might be handy in some cases. Once we
   // introduce a raw document datasource, this should be considered here.
   isStaticValue?: boolean;
+  // Extra metadata to infer array support in an operation
+  hasArraySupport?: boolean;
 }
 
 /**
@@ -962,6 +969,7 @@ export interface FramePublicAPI {
    */
   activeData?: Record<string, Datatable>;
   dataViews: DataViewsState;
+  forceDSL?: boolean;
 }
 
 /**

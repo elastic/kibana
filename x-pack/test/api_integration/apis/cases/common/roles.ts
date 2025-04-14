@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Role } from '../../../../cases_api_integration/common/lib/authentication/types';
+import type { Role } from '../../../../cases_api_integration/common/lib/authentication/types';
 
 /**
  * Roles for Cases in Security Solution
@@ -127,6 +127,81 @@ export const secCasesV2All: Role = {
         feature: {
           siem: ['all'],
           securitySolutionCasesV2: ['all'],
+          actions: ['all'],
+          actionsSimulators: ['all'],
+        },
+        spaces: ['*'],
+      },
+    ],
+  },
+};
+
+export const secCasesV3All: Role = {
+  name: 'sec_cases_v3_all_role_api_int',
+  privileges: {
+    elasticsearch: {
+      indices: [
+        {
+          names: ['*'],
+          privileges: ['all'],
+        },
+      ],
+    },
+    kibana: [
+      {
+        feature: {
+          siem: ['all'],
+          securitySolutionCasesV3: ['all'],
+          actions: ['all'],
+          actionsSimulators: ['all'],
+        },
+        spaces: ['*'],
+      },
+    ],
+  },
+};
+
+export const secCasesV2NoReopenWithCreateComment: Role = {
+  name: 'sec_cases_v2_no_reopen_role_api_int',
+  privileges: {
+    elasticsearch: {
+      indices: [
+        {
+          names: ['*'],
+          privileges: ['all'],
+        },
+      ],
+    },
+    kibana: [
+      {
+        feature: {
+          siem: ['all'],
+          securitySolutionCasesV2: ['read', 'update', 'create', 'cases_delete', 'create_comment'],
+          actions: ['all'],
+          actionsSimulators: ['all'],
+        },
+        spaces: ['*'],
+      },
+    ],
+  },
+};
+
+export const secCasesV2NoCreateCommentWithReopen: Role = {
+  name: 'sec_cases_v2_create_comment_no_reopen_role_api_int',
+  privileges: {
+    elasticsearch: {
+      indices: [
+        {
+          names: ['*'],
+          privileges: ['all'],
+        },
+      ],
+    },
+    kibana: [
+      {
+        feature: {
+          siem: ['all'],
+          securitySolutionCasesV2: ['read', 'update', 'create', 'delete', 'case_reopen'],
           actions: ['all'],
           actionsSimulators: ['all'],
         },
@@ -309,6 +384,30 @@ export const secReadCasesNone: Role = {
   },
 };
 
+export const secNone: Role = {
+  name: 'sec_none_role_api_int',
+  privileges: {
+    elasticsearch: {
+      indices: [
+        {
+          names: ['*'],
+          privileges: ['all'],
+        },
+      ],
+    },
+    kibana: [
+      {
+        feature: {
+          siem: [],
+          actions: ['all'],
+          actionsSimulators: ['all'],
+        },
+        spaces: ['*'],
+      },
+    ],
+  },
+};
+
 /**
  * Roles for Cases in the stack
  */
@@ -426,6 +525,131 @@ export const casesV2All: Role = {
         base: [],
         feature: {
           generalCasesV2: ['all'],
+          actions: ['all'],
+          actionsSimulators: ['all'],
+        },
+      },
+    ],
+  },
+};
+
+export const casesV3All: Role = {
+  name: 'cases_v3_all_role_api_int',
+  privileges: {
+    elasticsearch: {
+      indices: [
+        {
+          names: ['*'],
+          privileges: ['all'],
+        },
+      ],
+    },
+    kibana: [
+      {
+        spaces: ['*'],
+        base: [],
+        feature: {
+          generalCasesV3: ['all'],
+          actions: ['all'],
+          actionsSimulators: ['all'],
+        },
+      },
+    ],
+  },
+};
+
+export const casesV3NoAssignee: Role = {
+  name: 'cases_v3_no_assignee_role_api_int',
+  privileges: {
+    elasticsearch: {
+      indices: [
+        {
+          names: ['*'],
+          privileges: ['all'],
+        },
+      ],
+    },
+    kibana: [
+      {
+        spaces: ['*'],
+        base: [],
+        feature: {
+          generalCasesV3: ['minimal_read', 'cases_delete', 'case_reopen', 'create_comment'],
+          actions: ['all'],
+          actionsSimulators: ['all'],
+        },
+      },
+    ],
+  },
+};
+
+export const casesV3ReadAndAssignee: Role = {
+  name: 'cases_v3_read_assignee_role_api_int',
+  privileges: {
+    elasticsearch: {
+      indices: [
+        {
+          names: ['*'],
+          privileges: ['all'],
+        },
+      ],
+    },
+    kibana: [
+      {
+        spaces: ['*'],
+        base: [],
+        feature: {
+          generalCasesV3: ['minimal_read', 'cases_assign'],
+          actions: ['all'],
+          actionsSimulators: ['all'],
+        },
+      },
+    ],
+  },
+};
+
+export const casesV2NoReopenWithCreateComment: Role = {
+  name: 'cases_v2_no_reopen_role_api_int',
+  privileges: {
+    elasticsearch: {
+      indices: [
+        {
+          names: ['*'],
+          privileges: ['all'],
+        },
+      ],
+    },
+    kibana: [
+      {
+        spaces: ['*'],
+        base: [],
+        feature: {
+          generalCasesV2: ['read', 'update', 'create', 'cases_delete', 'create_comment'],
+          actions: ['all'],
+          actionsSimulators: ['all'],
+        },
+      },
+    ],
+  },
+};
+
+export const casesV2NoCreateCommentWithReopen: Role = {
+  name: 'cases_v2_no_create_comment_role_api_int',
+  privileges: {
+    elasticsearch: {
+      indices: [
+        {
+          names: ['*'],
+          privileges: ['all'],
+        },
+      ],
+    },
+    kibana: [
+      {
+        spaces: ['*'],
+        base: [],
+        feature: {
+          generalCasesV2: ['read', 'update', 'create', 'cases_delete', 'case_reopen'],
           actions: ['all'],
           actionsSimulators: ['all'],
         },
@@ -583,6 +807,87 @@ export const obsCasesV2All: Role = {
   },
 };
 
+export const obsCasesV3All: Role = {
+  name: 'obs_cases_v3_all_role_api_int',
+  privileges: {
+    elasticsearch: {
+      indices: [
+        {
+          names: ['*'],
+          privileges: ['all'],
+        },
+      ],
+    },
+    kibana: [
+      {
+        spaces: ['*'],
+        base: [],
+        feature: {
+          observabilityCasesV3: ['all'],
+          actions: ['all'],
+          actionsSimulators: ['all'],
+        },
+      },
+    ],
+  },
+};
+
+export const obsCasesV2NoReopenWithCreateComment: Role = {
+  name: 'obs_cases_v2_no_reopen_role_api_int',
+  privileges: {
+    elasticsearch: {
+      indices: [
+        {
+          names: ['*'],
+          privileges: ['all'],
+        },
+      ],
+    },
+    kibana: [
+      {
+        spaces: ['*'],
+        base: [],
+        feature: {
+          observabilityCasesV2: [
+            'read',
+            'cases_update',
+            'create',
+            'cases_delete',
+            'create_comment',
+          ],
+          actions: ['all'],
+          actionsSimulators: ['all'],
+        },
+      },
+    ],
+  },
+};
+
+export const obsCasesV2NoCreateCommentWithReopen: Role = {
+  name: 'obs_cases_v2_no_create_comment_role_api_int',
+  privileges: {
+    elasticsearch: {
+      indices: [
+        {
+          names: ['*'],
+          privileges: ['all'],
+        },
+      ],
+    },
+    kibana: [
+      {
+        spaces: ['*'],
+        base: [],
+        feature: {
+          observabilityCasesV2: ['read', 'update', 'create', 'cases_delete', 'case_reopen'],
+          actions: ['all'],
+          actionsSimulators: ['all'],
+        },
+      },
+    ],
+  },
+};
+
 export const obsCasesRead: Role = {
   name: 'obs_cases_read_role_api_int',
   privileges: {
@@ -613,6 +918,9 @@ export const roles = [
   secAllCasesNoDelete,
   secAll,
   secCasesV2All,
+  secCasesV3All,
+  secCasesV2NoReopenWithCreateComment,
+  secCasesV2NoCreateCommentWithReopen,
   secAllSpace1,
   secAllCasesRead,
   secAllCasesNone,
@@ -625,11 +933,19 @@ export const roles = [
   casesNoDelete,
   casesAll,
   casesV2All,
+  casesV3All,
+  casesV3NoAssignee,
+  casesV3ReadAndAssignee,
+  casesV2NoReopenWithCreateComment,
+  casesV2NoCreateCommentWithReopen,
   casesRead,
   obsCasesOnlyDelete,
   obsCasesOnlyReadDelete,
   obsCasesNoDelete,
   obsCasesAll,
   obsCasesV2All,
+  obsCasesV3All,
+  obsCasesV2NoReopenWithCreateComment,
+  obsCasesV2NoCreateCommentWithReopen,
   obsCasesRead,
 ];

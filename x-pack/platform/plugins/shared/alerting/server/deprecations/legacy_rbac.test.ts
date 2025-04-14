@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { GetDeprecationsContext } from '@kbn/core/server';
+import type { GetDeprecationsContext } from '@kbn/core/server';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
-import { SearchHit } from '@kbn/es-types';
+import type { SearchHit } from '@kbn/es-types';
 import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
 import { getLegacyRbacDeprecationsInfo } from './legacy_rbac';
 

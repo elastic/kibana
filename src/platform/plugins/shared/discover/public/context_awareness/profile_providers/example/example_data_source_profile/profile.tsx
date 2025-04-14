@@ -8,19 +8,15 @@
  */
 
 import { EuiBadge, EuiLink, EuiFlyout, EuiPanel } from '@elastic/eui';
-import {
-  AppMenuActionId,
-  AppMenuActionType,
-  getFieldValue,
-  RowControlColumn,
-} from '@kbn/discover-utils';
+import type { RowControlColumn } from '@kbn/discover-utils';
+import { AppMenuActionId, AppMenuActionType, getFieldValue } from '@kbn/discover-utils';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
-import { euiThemeVars } from '@kbn/ui-theme';
 import { capitalize } from 'lodash';
 import React from 'react';
 import { DataSourceType, isDataSourceType } from '../../../../../common/data_sources';
-import { DataSourceCategory, DataSourceProfileProvider } from '../../../profiles';
+import type { DataSourceProfileProvider } from '../../../profiles';
+import { DataSourceCategory } from '../../../profiles';
 import { useExampleContext } from '../example_context';
 
 export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvider<{
@@ -37,7 +33,9 @@ export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvi
         if (!level) {
           return (
             <span
-              css={{ color: euiThemeVars.euiTextSubduedColor }}
+              css={({ euiTheme }) => ({
+                color: euiTheme.colors.textSubdued,
+              })}
               data-test-subj="exampleDataSourceProfileLogLevelEmpty"
             >
               (None)
@@ -257,6 +255,10 @@ export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvi
           isCompatible: ({ field }) => field.name !== 'message',
         },
       ],
+    getPaginationConfig: (prev) => () => ({
+      ...prev(),
+      paginationMode: 'singlePage',
+    }),
   },
   resolve: (params) => {
     let indexPattern: string | undefined;
@@ -271,7 +273,7 @@ export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvi
       indexPattern = params.dataView.getIndexPattern();
     }
 
-    if (indexPattern !== 'my-example-logs') {
+    if (indexPattern !== 'my-example-logs' && indexPattern !== 'my-example-logs,logstash*') {
       return { isMatch: false };
     }
 

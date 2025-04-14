@@ -10,7 +10,7 @@ import { AlertsClientError, ExecutorType, RuleExecutorOptions } from '@kbn/alert
 import { ObservabilitySloAlert } from '@kbn/alerts-as-data-utils';
 import { IBasePath } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
-import { getEcsGroups } from '@kbn/observability-alerting-rule-utils';
+import { getEcsGroups } from '@kbn/alerting-rule-utils';
 import { getAlertDetailsUrl } from '@kbn/observability-plugin/common';
 import {
   ALERT_EVALUATION_THRESHOLD,

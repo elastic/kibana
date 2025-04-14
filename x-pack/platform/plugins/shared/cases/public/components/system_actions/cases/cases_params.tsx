@@ -31,6 +31,7 @@ import type { CasesConfigurationUITemplate } from '../../../containers/types';
 import { getOwnerFromRuleConsumerProducer } from '../../../../common/utils/owner';
 import { getConfigurationByOwner } from '../../../containers/configure/utils';
 import { useGetAllCaseConfigurations } from '../../../containers/configure/use_get_all_case_configurations';
+import { OptionalFieldLabel } from '../../optional_field_label';
 
 const DEFAULT_EMPTY_TEMPLATE_KEY = 'defaultEmptyTemplateKey';
 
@@ -179,13 +180,12 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
     <>
       <EuiFlexGroup>
         <EuiFlexItem grow={true}>
-          <EuiFormRow fullWidth>
+          <EuiFormRow fullWidth label={i18n.GROUP_BY_ALERT} labelAppend={OptionalFieldLabel}>
             <EuiComboBox
               fullWidth
               isClearable={true}
               singleSelection
               data-test-subj="group-by-alert-field-combobox"
-              prepend={i18n.GROUP_BY_ALERT}
               isLoading={loadingAlertDataViews}
               isDisabled={loadingAlertDataViews}
               options={options}

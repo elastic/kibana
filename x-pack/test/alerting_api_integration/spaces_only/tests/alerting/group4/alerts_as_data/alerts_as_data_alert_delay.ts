@@ -7,8 +7,8 @@
 
 import expect from '@kbn/expect';
 import { get } from 'lodash';
-import { SearchHit } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { IValidatedEvent } from '@kbn/event-log-plugin/server';
+import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
+import type { IValidatedEvent } from '@kbn/event-log-plugin/server';
 import type { Alert } from '@kbn/alerts-as-data-utils';
 import {
   ALERT_ACTION_GROUP,
@@ -35,14 +35,14 @@ import {
 } from '@kbn/rule-data-utils';
 import { RuleNotifyWhen } from '@kbn/alerting-plugin/common';
 import { ESTestIndexTool } from '@kbn/alerting-api-integration-helpers';
-import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { Spaces } from '../../../../scenarios';
+import type { TaskManagerDoc } from '../../../../../common/lib';
 import {
   getEventLog,
   getTestRuleData,
   getUrlPrefix,
   ObjectRemover,
-  TaskManagerDoc,
 } from '../../../../../common/lib';
 
 // eslint-disable-next-line import/no-default-export

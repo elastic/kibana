@@ -17,6 +17,11 @@ import {
   getCasesBaseKibanaSubFeatureIdsV2,
   getCasesSubFeaturesMapV2,
 } from './v2_features/kibana_sub_features';
+import { getCasesBaseKibanaFeatureV3 } from './v3_features/kibana_features';
+import {
+  getCasesBaseKibanaSubFeatureIdsV3,
+  getCasesSubFeaturesMapV3,
+} from './v3_features/kibana_sub_features';
 
 /**
  * @deprecated Use getCasesV2Feature instead
@@ -35,4 +40,12 @@ export const getCasesV2Feature = (
   baseKibanaFeature: getCasesBaseKibanaFeatureV2(params),
   baseKibanaSubFeatureIds: getCasesBaseKibanaSubFeatureIdsV2(),
   subFeaturesMap: getCasesSubFeaturesMapV2(params),
+});
+
+export const getCasesV3Feature = (
+  params: CasesFeatureParams
+): ProductFeatureParams<CasesSubFeatureId> => ({
+  baseKibanaFeature: getCasesBaseKibanaFeatureV3(params),
+  baseKibanaSubFeatureIds: getCasesBaseKibanaSubFeatureIdsV3(),
+  subFeaturesMap: getCasesSubFeaturesMapV3(params),
 });

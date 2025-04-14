@@ -107,7 +107,7 @@ describe('Logs UI Observability Homepage Functions', () => {
         setup();
 
       getResolvedLogView.mockResolvedValue(createResolvedLogViewMock({ indices: 'test-index' }));
-      getResolvedLogViewStatus.mockResolvedValue({ index: 'missing' });
+      getResolvedLogViewStatus.mockResolvedValue({ index: 'missing', reason: 'noShardsFound' });
 
       const hasData = getLogsHasDataFetcher(mockedGetStartServices);
       const response = await hasData();

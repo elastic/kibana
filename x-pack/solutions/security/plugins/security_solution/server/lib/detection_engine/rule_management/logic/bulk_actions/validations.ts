@@ -15,7 +15,6 @@ import {
   BulkActionsDryRunErrCodeEnum,
 } from '../../../../../../common/api/detection_engine/rule_management';
 import type { PrebuiltRulesCustomizationStatus } from '../../../../../../common/detection_engine/prebuilt_rules/prebuilt_rule_customization_status';
-import { PrebuiltRulesCustomizationDisabledReason } from '../../../../../../common/detection_engine/prebuilt_rules/prebuilt_rule_customization_status';
 import { isEsqlRule } from '../../../../../../common/detection_engine/utils';
 import { isMlRule } from '../../../../../../common/machine_learning/helpers';
 import { invariant } from '../../../../../../common/utils/invariant';
@@ -104,14 +103,11 @@ export const validateBulkEditRule = async ({
     }
 
     // Rule customization is disabled; only certain actions can be applied to immutable rules
-    const canRuleBeEdited = istEditApplicableToImmutableRule(edit);
+    const canRuleBeEdited = isEditApplicableToImmutableRule(edit);
     if (!canRuleBeEdited) {
       await throwDryRunError(
         () => invariant(canRuleBeEdited, "Elastic rule can't be edited"),
-        ruleCustomizationStatus.customizationDisabledReason ===
-          PrebuiltRulesCustomizationDisabledReason.FeatureFlag
-          ? BulkActionsDryRunErrCodeEnum.IMMUTABLE
-          : BulkActionsDryRunErrCodeEnum.PREBUILT_CUSTOMIZATION_LICENSE
+        BulkActionsDryRunErrCodeEnum.PREBUILT_CUSTOMIZATION_LICENSE
       );
     }
   }
@@ -120,7 +116,7 @@ export const validateBulkEditRule = async ({
 /**
  * add_rule_actions, set_rule_actions can be applied to prebuilt/immutable rules
  */
-const istEditApplicableToImmutableRule = (edit: BulkActionEditPayload[]): boolean => {
+const isEditApplicableToImmutableRule = (edit: BulkActionEditPayload[]): boolean => {
   const applicableActions: BulkActionEditType[] = [
     BulkActionEditTypeEnum.set_rule_actions,
     BulkActionEditTypeEnum.add_rule_actions,

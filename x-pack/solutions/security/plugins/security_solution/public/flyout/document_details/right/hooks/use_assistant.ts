@@ -7,7 +7,7 @@
 
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import { useAssistantOverlay } from '@kbn/elastic-assistant';
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useAssistantAvailability } from '../../../../assistant/use_assistant_availability';
 import { getRawData } from '../../../../assistant/helpers';
@@ -29,7 +29,10 @@ const SUMMARY_VIEW = i18n.translate('xpack.securitySolution.eventDetails.summary
   defaultMessage: 'summary',
 });
 
-const useAssistantNoop = () => ({ promptContextId: undefined });
+const useAssistantNoop = () => ({
+  promptContextId: undefined,
+  showAssistantOverlay: (show: boolean) => {},
+});
 
 export interface UseAssistantParams {
   /**
@@ -51,6 +54,10 @@ export interface UseAssistantResult {
    * Unique identifier for prompt context
    */
   promptContextId: string;
+  /**
+   * Function to show assistant overlay
+   */
+  showAssistantOverlay: (show: boolean) => void;
 }
 
 /**
@@ -66,9 +73,21 @@ export const useAssistant = ({
     async () => getRawData(dataFormattedForFieldBrowser ?? []),
     [dataFormattedForFieldBrowser]
   );
-  const { promptContextId } = useAssistantHook(
+
+  const uniqueName = useMemo(() => {
+    const ruleName: string =
+      dataFormattedForFieldBrowser.find((item) => item.field === 'rule.name')?.values?.[0] ??
+      dataFormattedForFieldBrowser.find((item) => item.field === 'kibana.alert.rule.name')
+        ?.values?.[0] ??
+      (isAlert ? ALERT_SUMMARY_CONVERSATION_ID : EVENT_SUMMARY_CONVERSATION_ID);
+    const timestamp: string =
+      dataFormattedForFieldBrowser.find((item) => item.field === '@timestamp')?.values?.[0] ?? '';
+    return `${ruleName} - ${timestamp}`;
+  }, [dataFormattedForFieldBrowser, isAlert]);
+
+  const { promptContextId, showAssistantOverlay } = useAssistantHook(
     isAlert ? 'alert' : 'event',
-    isAlert ? ALERT_SUMMARY_CONVERSATION_ID : EVENT_SUMMARY_CONVERSATION_ID,
+    uniqueName,
     isAlert
       ? ALERT_SUMMARY_CONTEXT_DESCRIPTION(SUMMARY_VIEW)
       : EVENT_SUMMARY_CONTEXT_DESCRIPTION(SUMMARY_VIEW),
@@ -83,6 +102,7 @@ export const useAssistant = ({
 
   return {
     showAssistant: hasAssistantPrivilege && promptContextId !== null,
+    showAssistantOverlay,
     promptContextId: promptContextId || '',
   };
 };

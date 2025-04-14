@@ -11,7 +11,8 @@ export type {
   ESQLAst,
   ESQLAstItem,
   ESQLAstCommand,
-  ESQLAstMetricsCommand,
+  ESQLAstTimeseriesCommand,
+  ESQLAstJoinCommand,
   ESQLCommand,
   ESQLCommandOption,
   ESQLCommandMode,
@@ -28,6 +29,7 @@ export type {
   AstProviderFn,
   EditorError,
   ESQLAstNode,
+  ESQLInlineCast,
 } from './src/types';
 
 export {
@@ -59,7 +61,7 @@ export {
   ESQLErrorListener,
 } from './src/parser';
 
-export { Walker, type WalkerOptions, walk } from './src/walker';
+export { Walker, type WalkerOptions, walk, type WalkerAstNode } from './src/walker';
 export * as synth from './src/synth';
 
 export {

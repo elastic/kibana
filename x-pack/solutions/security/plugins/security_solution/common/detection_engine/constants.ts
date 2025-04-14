@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
+import type { Severity, Type } from '@kbn/securitysolution-io-ts-alerting-types';
 
 export enum RULE_PREVIEW_INVOCATION_COUNT {
   HOUR = 12,
@@ -60,3 +60,15 @@ export const SUPPRESSIBLE_ALERT_RULES_GA: Type[] = [
   'threat_match',
   'machine_learning',
 ];
+
+export const RISK_SCORE_LOW = 21;
+export const RISK_SCORE_MEDIUM = 47;
+export const RISK_SCORE_HIGH = 73;
+export const RISK_SCORE_CRITICAL = 99;
+
+export const defaultRiskScoreBySeverity: Record<Severity, number> = {
+  low: RISK_SCORE_LOW,
+  medium: RISK_SCORE_MEDIUM,
+  high: RISK_SCORE_HIGH,
+  critical: RISK_SCORE_CRITICAL,
+};

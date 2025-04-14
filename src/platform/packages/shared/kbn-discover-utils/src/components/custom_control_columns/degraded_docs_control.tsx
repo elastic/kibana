@@ -9,9 +9,8 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiCode } from '@elastic/eui';
+import { EuiCode, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { euiThemeVars } from '@kbn/ui-theme';
 import {
   RowControlColumn,
   RowControlComponent,
@@ -83,6 +82,8 @@ const DegradedDocs = ({
   Control: RowControlComponent;
   rowProps: RowControlRowProps;
 } & DegradedDocsControlProps) => {
+  const { euiTheme } = useEuiTheme();
+
   const isDegradedDocumentExists = DEGRADED_DOCS_FIELDS.some(
     (field) => field in record.raw && record.raw[field] !== null && record.raw[field] !== undefined
   );
@@ -91,7 +92,7 @@ const DegradedDocs = ({
     if (addIgnoredMetadataToQuery) {
       return (
         <Control
-          css={{ color: euiThemeVars.euiColorDisabledText }} // Give same color as disabled
+          css={{ color: euiTheme.colors.textDisabled }} // Give same color as disabled
           data-test-subj="docTableDegradedDocDisabled"
           iconType="indexClose"
           label={actionsHeaderAriaLabelDegradedAction}

@@ -14,7 +14,7 @@ export type SynthGenerator<N extends ESQLProperNode> = (src: string, opts?: Pars
 
 export type SynthTaggedTemplate<N extends ESQLProperNode> = (
   template: TemplateStringsArray,
-  ...params: Array<ESQLAstExpression | string>
+  ...params: Array<ESQLAstExpression | ESQLAstExpression[] | string | []>
 ) => N;
 
 export type SynthTaggedTemplateWithOpts<N extends ESQLProperNode> = (

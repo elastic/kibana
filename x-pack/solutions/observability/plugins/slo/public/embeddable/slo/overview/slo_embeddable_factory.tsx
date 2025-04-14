@@ -30,6 +30,7 @@ import { GroupSloView } from './group_view/group_view';
 import { SloOverview } from './slo_overview';
 import { SloCardChartList } from './slo_overview_grid';
 import { GroupSloCustomInput, SloOverviewApi, SloOverviewEmbeddableState } from './types';
+import { openSloConfiguration } from './slo_overview_open_configuration';
 
 const getOverviewPanelTitle = () =>
   i18n.translate('xpack.slo.sloEmbeddable.displayName', {
@@ -87,8 +88,6 @@ export const getOverviewEmbeddableFactory = ({
         isEditingEnabled: () => api.getSloGroupOverviewConfig().overviewMode === 'groups',
         onEdit: async function onEdit() {
           try {
-            const { openSloConfiguration } = await import('./slo_overview_open_configuration');
-
             const result = await openSloConfiguration(
               coreStart,
               pluginsStart,

@@ -52,6 +52,27 @@ describe('KnowledgeBaseTab', () => {
     });
   });
 
+  describe('when the knowledge base status is being fetched', () => {
+    beforeEach(() => {
+      useKnowledgeBaseMock.mockReturnValue({
+        status: {
+          value: {
+            ready: false,
+            enabled: true,
+          },
+          loading: true,
+        },
+        isInstalling: false,
+        install: jest.fn(),
+      });
+    });
+
+    it('should show a loader', () => {
+      const { getByTestId } = render(<KnowledgeBaseTab />);
+      expect(getByTestId('knowledgeBaseTabLoader')).toBeInTheDocument();
+    });
+  });
+
   describe('when the knowledge base is not installed', () => {
     beforeEach(() => {
       useKnowledgeBaseMock.mockReturnValue({

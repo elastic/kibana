@@ -83,7 +83,7 @@ export default ({ getService }: FtrProviderContext) => {
         statsResponse as MlGetTrainedModelsStatsResponse
       ).trained_model_stats.find((v) => v.deployment_stats?.deployment_id === testModel.id);
 
-      expect(modelStats!.deployment_stats!.allocation_status.state).to.match(
+      expect(modelStats!.deployment_stats!.allocation_status?.state).to.match(
         /\bstarted\b|\bfully_allocated\b/
       );
     });
@@ -110,7 +110,7 @@ export default ({ getService }: FtrProviderContext) => {
         statsResponse as MlGetTrainedModelsStatsResponse
       ).trained_model_stats.find((v) => v.deployment_stats?.deployment_id === customDeploymentId);
 
-      expect(modelStats!.deployment_stats!.allocation_status.state).to.match(
+      expect(modelStats!.deployment_stats!.allocation_status?.state).to.match(
         /\bstarted\b|\bfully_allocated\b/
       );
     });
@@ -141,7 +141,7 @@ export default ({ getService }: FtrProviderContext) => {
         statsResponse as MlGetTrainedModelsStatsResponse
       ).trained_model_stats.find((v) => v.deployment_stats?.deployment_id === testModel.id);
 
-      expect(modelStats!.deployment_stats!.allocation_status.state).to.match(
+      expect(modelStats!.deployment_stats!.allocation_status?.state).to.match(
         /\bstarted\b|\bfully_allocated\b/
       );
     });

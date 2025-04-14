@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { Logger } from '@kbn/logging';
+import type { Logger } from '@kbn/logging';
 import { ActionsCompletion } from '@kbn/alerting-state-types';
-import { RuleAction, RuleSystemAction } from '@kbn/alerting-types';
-import { RuleRunMetricsStore } from '../../../lib/rule_run_metrics_store';
-import { ActionsConfigMap } from '../../../lib/get_actions_config_map';
+import type { RuleAction, RuleSystemAction } from '@kbn/alerting-types';
+import type { RuleRunMetricsStore } from '../../../lib/rule_run_metrics_store';
+import type { ActionsConfigMap } from '../../../lib/get_actions_config_map';
 
 interface ShouldScheduleActionOpts {
   action: RuleAction | RuleSystemAction;

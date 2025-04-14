@@ -13,7 +13,7 @@ import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { Observable } from 'rxjs';
 import type { ExperimentalFeatures } from '../../server/config';
 import { DiscoverRouter } from './discover_router';
-import { DiscoverServices } from '../build_services';
+import type { DiscoverServices } from '../build_services';
 import type { DiscoverCustomizationContext } from '../customizations';
 
 export interface RenderAppProps {

@@ -93,7 +93,10 @@ export function DataSourceSelector({
     switchToDataViewsTab,
     togglePopover,
   } = useDataSourceSelector({
-    initialContext: { selection: dataSourceSelection },
+    initialContext: {
+      selection: dataSourceSelection,
+      allSelection,
+    },
     onDataViewsSearch,
     onDataViewsFilter,
     onDataViewsSort,

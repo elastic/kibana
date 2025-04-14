@@ -43,7 +43,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
         await observability.users.setTestUserRole(
           observability.users.defineBasicObservabilityRole({
-            observabilityCasesV2: ['all'],
+            observabilityCasesV3: ['all'],
             logs: ['all'],
           })
         );
@@ -96,7 +96,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
         await observability.users.setTestUserRole(
           observability.users.defineBasicObservabilityRole({
-            observabilityCasesV2: ['read'],
+            observabilityCasesV3: ['read'],
             logs: ['all'],
           })
         );

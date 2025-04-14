@@ -122,8 +122,10 @@ export function routes(coreSetup: CoreSetup<StartDeps, unknown>, logger: Logger)
     .post({
       path: '/internal/data_visualizer/inference/{inferenceId}',
       access: 'internal',
-      options: {
-        tags: ['access:fileUpload:analyzeFile'],
+      security: {
+        authz: {
+          requiredPrivileges: ['fileUpload:analyzeFile'],
+        },
       },
     })
     .addVersion(

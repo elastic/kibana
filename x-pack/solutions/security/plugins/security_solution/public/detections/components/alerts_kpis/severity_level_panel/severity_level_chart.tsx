@@ -7,14 +7,20 @@
 import React, { useCallback, useMemo } from 'react';
 import { ALERT_SEVERITY } from '@kbn/rule-data-utils';
 import styled from 'styled-components';
-import { EuiFlexGroup, EuiFlexItem, EuiInMemoryTable, EuiLoadingSpinner } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiInMemoryTable,
+  EuiLoadingSpinner,
+  useEuiTheme,
+} from '@elastic/eui';
+import { TOTAL_COUNT_OF_ALERTS } from '../../alerts_table/translations';
 import type { SeverityBuckets as SeverityData } from '../../../../overview/components/detection_response/alerts_by_status/types';
 import type { FillColor } from '../../../../common/components/charts/donutchart';
 import { DonutChart } from '../../../../common/components/charts/donutchart';
 import { ChartLabel } from '../../../../overview/components/detection_response/alerts_by_status/chart_label';
-import { getSeverityTableColumns } from './columns';
+import { useGetSeverityTableColumns } from './columns';
 import { getSeverityColor } from './helpers';
-import { TOTAL_COUNT_OF_ALERTS } from '../../alerts_table/translations';
 
 const DONUT_HEIGHT = 150;
 
@@ -32,7 +38,8 @@ export const SeverityLevelChart: React.FC<SeverityLevelProps> = ({
   isLoading,
   addFilter,
 }) => {
-  const columns = useMemo(() => getSeverityTableColumns(), []);
+  const { euiTheme } = useEuiTheme();
+  const columns = useGetSeverityTableColumns();
 
   const count = useMemo(() => {
     return data
@@ -42,9 +49,10 @@ export const SeverityLevelChart: React.FC<SeverityLevelProps> = ({
       : 0;
   }, [data]);
 
-  const fillColor: FillColor = useCallback((dataName: string) => {
-    return getSeverityColor(dataName);
-  }, []);
+  const fillColor: FillColor = useCallback(
+    (dataName: string) => getSeverityColor(dataName, euiTheme),
+    [euiTheme]
+  );
 
   const onDonutPartitionClicked = useCallback(
     (level: string) => {
@@ -56,7 +64,7 @@ export const SeverityLevelChart: React.FC<SeverityLevelProps> = ({
   );
 
   return (
-    <EuiFlexGroup gutterSize="s" data-test-subj="severity-level-chart">
+    <EuiFlexGroup gutterSize="none" data-test-subj="severity-level-chart">
       <EuiFlexItem>
         <EuiInMemoryTable
           data-test-subj="severity-level-table"

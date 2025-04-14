@@ -51,9 +51,7 @@ export interface SuggestionsAbstraction {
 
 export type SuggestionsListSize = 's' | 'l';
 
-// Needed for React.lazy
-// eslint-disable-next-line import/no-default-export
-export default class SuggestionsComponent extends PureComponent<SuggestionsComponentProps> {
+export class SuggestionsComponent extends PureComponent<SuggestionsComponentProps> {
   private childNodes: HTMLDivElement[] = [];
   private parentNode: HTMLDivElement | null = null;
 

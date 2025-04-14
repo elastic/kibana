@@ -17,7 +17,7 @@ import * as i18n from './translations';
 export type Props = Omit<PromptContext, 'id'> & {
   children?: React.ReactNode;
   /** Optionally automatically add this context to a conversation when the assistant is shown */
-  conversationId?: string;
+  conversationTitle?: string;
   /** Defaults to `discuss`. If null, the button will not have an icon. Not available for link */
   iconType?: string | null;
   /** Optionally specify a well known ID, or default to a UUID */
@@ -38,7 +38,7 @@ const NewChatComponent: React.FC<Props> = ({
   category,
   color = 'primary',
   children = i18n.NEW_CHAT,
-  conversationId,
+  conversationTitle,
   description,
   getPromptContext,
   iconType,
@@ -52,7 +52,7 @@ const NewChatComponent: React.FC<Props> = ({
 }) => {
   const { showAssistantOverlay } = useAssistantOverlay(
     category,
-    conversationId ?? null,
+    conversationTitle ?? null,
     description,
     getPromptContext,
     promptContextId ?? null,

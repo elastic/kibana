@@ -6,13 +6,17 @@
  */
 
 import { EuiComboBoxOptionOption } from '@elastic/eui';
+import { KibanaServerError } from '@kbn/kibana-utils-plugin/common';
 
 export const isExplicitSynonym = (synonym: string) => {
   return synonym.trim().includes('=>');
 };
 
 export const getExplicitSynonym = (synonym: string) => {
-  return [synonym.split('=>')[0].trim(), synonym.split('=>')[1].trim()];
+  return {
+    mapFromString: synonym.split('=>')[0].trim(),
+    mapToString: synonym.split('=>')[1].trim(),
+  };
 };
 
 export const formatSynonymsSetName = (rawName: string) =>
@@ -22,22 +26,47 @@ export const formatSynonymsSetName = (rawName: string) =>
     .replace(/^[-]+|[-]+$/g, '') // Strip all leading and trailing dashes
     .toLowerCase();
 
+type SynonymsToComboBoxOption = (synonymString: string) => {
+  parsedFromTerms: EuiComboBoxOptionOption[];
+  parsedToTermsString: string;
+  parsedIsExplicit: boolean;
+};
+
+export const synonymToComboBoxOption: SynonymsToComboBoxOption = (synonymString: string) => {
+  const isExplicit = isExplicitSynonym(synonymString);
+  if (!isExplicit) {
+    return {
+      parsedFromTerms: synonymsStringToOption(synonymString),
+      parsedToTermsString: '',
+      parsedIsExplicit: isExplicit,
+    };
+  } else {
+    const { mapFromString, mapToString } = getExplicitSynonym(synonymString);
+    return {
+      parsedFromTerms: synonymsStringToOption(mapFromString),
+      parsedToTermsString: mapToString,
+      parsedIsExplicit: isExplicit,
+    };
+  }
+};
 export const synonymsStringToOption = (synonyms: string) =>
   synonyms.length === 0
     ? []
     : synonyms
         .trim()
         .split(',')
-        .map((s, index) => ({ label: s, key: index + '-' + s }));
+        .map((s, index) => ({ label: s, key: index + '-' + s.trim() }));
+
 export const synonymsOptionToString = ({
   fromTerms,
   toTerms,
   isExplicit,
 }: {
   fromTerms: EuiComboBoxOptionOption[];
-  toTerms: EuiComboBoxOptionOption[];
+  toTerms: string;
   isExplicit: boolean;
-}) =>
-  `${fromTerms.map((s) => s.label).join(',')}${
-    isExplicit ? ' => ' + toTerms.map((s) => s.label).join(',') : ''
-  }`;
+}) => `${fromTerms.map((s) => s.label).join(',')}${isExplicit ? ' => ' + toTerms.trim() : ''}`;
+
+export const isPermissionError = (error: { body: KibanaServerError }) => {
+  return error.body.statusCode === 403;
+};

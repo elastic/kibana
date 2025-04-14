@@ -8,7 +8,7 @@
 import type { PropsOf } from '@elastic/eui';
 import { EuiCodeBlock, EuiPage, EuiPageBody, EuiPanel } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
-import type { Meta, Story } from '@storybook/react/types-6-0';
+import type { Meta, StoryFn, StoryObj } from '@storybook/react';
 import React from 'react';
 import { KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
 import type { MockIndexPatternSpec } from '../../../hooks/use_kibana_index_patterns.mock';
@@ -59,16 +59,17 @@ type IndicesConfigurationPanelProps = PropsOf<typeof IndicesConfigurationPanel>;
 
 type IndicesConfigurationPanelStoryArgs = Pick<
   IndicesConfigurationPanelProps,
-  'isLoading' | 'isReadOnly'
+  'isLoading' | 'isReadOnly' | 'logViewStatus'
 > & {
   availableIndexPatterns: MockIndexPatternSpec[];
   logIndices: LogIndicesFormState;
 };
 
-const IndicesConfigurationPanelTemplate: Story<IndicesConfigurationPanelStoryArgs> = ({
+const IndicesConfigurationPanelTemplate: StoryFn<IndicesConfigurationPanelStoryArgs> = ({
   isLoading,
   isReadOnly,
   logIndices,
+  logViewStatus,
 }) => {
   const logIndicesFormElement = useLogIndicesFormElement(logIndices);
 
@@ -78,6 +79,7 @@ const IndicesConfigurationPanelTemplate: Story<IndicesConfigurationPanelStoryArg
         isLoading={isLoading}
         isReadOnly={isReadOnly}
         indicesFormElement={logIndicesFormElement}
+        logViewStatus={logViewStatus}
       />
       <EuiCodeBlock language="json">
         // field states{'\n'}
@@ -102,6 +104,10 @@ const defaultArgs: IndicesConfigurationPanelStoryArgs = {
   logIndices: {
     type: 'index_name' as const,
     indexName: 'logs-*',
+  },
+  logViewStatus: {
+    index: 'missing',
+    reason: 'remoteClusterNotFound',
   },
   availableIndexPatterns: [
     {
@@ -134,15 +140,19 @@ const defaultArgs: IndicesConfigurationPanelStoryArgs = {
   ],
 };
 
-export const IndexNameWithDefaultFields = IndicesConfigurationPanelTemplate.bind({});
+export const IndexNameWithDefaultFields: StoryObj<IndicesConfigurationPanelStoryArgs> = {
+  render: IndicesConfigurationPanelTemplate,
 
-IndexNameWithDefaultFields.args = {
-  ...defaultArgs,
+  args: {
+    ...defaultArgs,
+  },
 };
 
-export const IndexPattern = IndicesConfigurationPanelTemplate.bind({});
+export const IndexPattern: StoryObj<IndicesConfigurationPanelStoryArgs> = {
+  render: IndicesConfigurationPanelTemplate,
 
-IndexPattern.args = {
-  ...defaultArgs,
-  logIndices: undefined,
+  args: {
+    ...defaultArgs,
+    logIndices: undefined,
+  },
 };

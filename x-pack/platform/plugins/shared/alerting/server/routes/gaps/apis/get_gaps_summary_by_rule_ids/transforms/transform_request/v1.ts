@@ -6,8 +6,8 @@
  */
 /* eslint-disable @typescript-eslint/naming-convention */
 
-import { GetGapsSummaryByRuleIdsParams } from '../../../../../../application/rule/methods/get_gaps_summary_by_rule_ids/types';
-import { GetGapsSummaryByRuleIdsBodyV1 } from '../../../../../../../common/routes/gaps/apis/get_gaps_summary_by_rule_ids';
+import type { GetGapsSummaryByRuleIdsParams } from '../../../../../../application/rule/methods/get_gaps_summary_by_rule_ids/types';
+import type { GetGapsSummaryByRuleIdsBodyV1 } from '../../../../../../../common/routes/gaps/apis/get_gaps_summary_by_rule_ids';
 
 export const transformRequest = ({
   rule_ids,

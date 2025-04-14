@@ -27,6 +27,7 @@ import { SLOPublicPluginsStart, SLORepositoryClient } from '../../../types';
 import { SLO_ALERTS_EMBEDDABLE_ID } from './constants';
 import { SloAlertsWrapper } from './slo_alerts_wrapper';
 import { SloAlertsApi, SloAlertsEmbeddableState } from './types';
+import { openSloConfiguration } from './slo_alerts_open_configuration';
 const history = createBrowserHistory();
 const queryClient = new QueryClient();
 
@@ -59,8 +60,6 @@ export function getAlertsEmbeddableFactory({
       const deps = { ...coreStart, ...pluginsStart };
       async function onEdit() {
         try {
-          const { openSloConfiguration } = await import('./slo_alerts_open_configuration');
-
           const result = await openSloConfiguration(
             coreStart,
             pluginsStart,

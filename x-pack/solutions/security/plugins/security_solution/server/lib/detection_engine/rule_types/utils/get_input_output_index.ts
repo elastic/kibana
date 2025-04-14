@@ -47,15 +47,10 @@ export const getInputIndex = async ({
   // If data views defined, use it
   if (dataViewId != null && dataViewId !== '') {
     // Check to see that the selected dataView exists
-    let dataView;
-    try {
-      dataView = await services.savedObjectsClient.get<DataViewAttributes>(
-        'index-pattern',
-        dataViewId
-      );
-    } catch (exc) {
-      throw new DataViewError(exc.message);
-    }
+    const dataView = await services.savedObjectsClient.get<DataViewAttributes>(
+      'index-pattern',
+      dataViewId
+    );
     const indices = dataView.attributes.title.split(',');
     const runtimeMappings =
       dataView.attributes.runtimeFieldMap != null

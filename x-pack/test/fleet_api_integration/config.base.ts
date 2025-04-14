@@ -13,6 +13,7 @@ import {
   defineDockerServersConfig,
   getKibanaCliLoggers,
 } from '@kbn/test';
+import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
 
 const getFullPath = (relativePath: string) => path.join(path.dirname(__filename), relativePath);
 
@@ -60,6 +61,7 @@ export default async function ({ readConfigFile, log }: FtrConfigProviderContext
   }
 
   return {
+    testConfigCategory: ScoutTestRunConfigCategory.API_TEST,
     servers: xPackAPITestsConfig.get('servers'),
     dockerServers,
     services: xPackAPITestsConfig.get('services'),
@@ -83,12 +85,7 @@ export default async function ({ readConfigFile, log }: FtrConfigProviderContext
           './apis/fixtures/package_verification/signatures/fleet_test_key_public.asc'
         )}`,
         `--xpack.securitySolution.enableExperimental=${JSON.stringify(['endpointRbacEnabled'])}`,
-        `--xpack.fleet.enableExperimental=${JSON.stringify([
-          'outputSecretsStorage',
-          'agentTamperProtectionEnabled',
-          'enableStrictKQLValidation',
-          'subfeaturePrivileges',
-        ])}`,
+        `--xpack.fleet.enableExperimental=${JSON.stringify(['enableAutomaticAgentUpgrades'])}`,
         `--xpack.cloud.id='123456789'`,
         `--xpack.fleet.agentless.enabled=true`,
         `--xpack.fleet.agentless.api.url=https://api.agentless.url/api/v1/ess`,

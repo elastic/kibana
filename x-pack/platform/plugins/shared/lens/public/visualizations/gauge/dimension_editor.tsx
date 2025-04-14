@@ -12,14 +12,13 @@ import { PaletteRegistry, CustomizablePalette, CUSTOM_PALETTE } from '@kbn/color
 import { GaugeTicksPositions, GaugeColorModes } from '@kbn/expression-gauge-plugin/common';
 import { getMaxValue, getMinValue } from '@kbn/expression-gauge-plugin/public';
 import { TooltipWrapper } from '@kbn/visualization-utils';
+import { css } from '@emotion/react';
 import { isNumericFieldForDatatable } from '../../../common/expressions/datatable/utils';
 import { applyPaletteParams, PalettePanelContainer } from '../../shared_components';
 import type { VisualizationDimensionEditorProps } from '../../types';
 import type { GaugeVisualizationState } from './constants';
 import { defaultPaletteParams } from './palette_config';
 import { getAccessorsFromState } from './utils';
-
-import './dimension_editor.scss';
 
 export function GaugeDimensionEditor(
   props: VisualizationDimensionEditorProps<GaugeVisualizationState> & {
@@ -69,7 +68,9 @@ export function GaugeDimensionEditor(
         label={i18n.translate('xpack.lens.gauge.dynamicColoring.label', {
           defaultMessage: 'Band colors',
         })}
-        className="lnsDynamicColoringRow"
+        css={css`
+          align-items: center;
+        `}
       >
         <EuiSwitch
           data-test-subj="lnsDynamicColoringGaugeSwitch"
@@ -106,12 +107,14 @@ export function GaugeDimensionEditor(
       {hasDynamicColoring && (
         <>
           <EuiFormRow
-            className="lnsDynamicColoringRow"
             display="columnCompressed"
             fullWidth
             label={i18n.translate('xpack.lens.paletteMetricGradient.label', {
               defaultMessage: 'Color mapping',
             })}
+            css={css`
+              align-items: center;
+            `}
           >
             <PalettePanelContainer
               palette={displayStops.map(({ color }) => color)}

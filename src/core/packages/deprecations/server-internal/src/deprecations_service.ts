@@ -26,7 +26,11 @@ import { DocLinksServiceSetup } from '@kbn/core-doc-links-server';
 import { DeprecationsFactory } from './deprecations_factory';
 import { registerRoutes } from './routes';
 import { config as deprecationConfig, DeprecationConfigType } from './deprecation_config';
-import { registerApiDeprecationsInfo, registerConfigDeprecationsInfo } from './deprecations';
+import {
+  registerApiDeprecationsInfo,
+  registerConfigDeprecationsInfo,
+  registerNodeJsDeprecationsInfo,
+} from './deprecations';
 
 /**
  * Deprecation Service: Internal Start contract
@@ -111,6 +115,8 @@ export class DeprecationsService
       coreUsageData,
       docLinks,
     });
+
+    registerNodeJsDeprecationsInfo({ deprecationsFactory: this.deprecationsFactory, docLinks });
 
     const deprecationsFactory = this.deprecationsFactory;
     return {

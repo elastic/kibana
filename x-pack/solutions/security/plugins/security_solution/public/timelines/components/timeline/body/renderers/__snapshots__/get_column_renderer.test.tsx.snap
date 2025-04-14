@@ -9,8 +9,7 @@ exports[`get_column_renderer renders correctly against snapshot 1`] = `
     fieldName="event.severity"
     fieldType=""
     isAggregatable={false}
-    isDraggable={true}
-    key="plain-column-renderer-formatted-field-value-timeline-test-event.severity-1-message-3-0"
+    key="plain-column-renderer-formatted-field-value-timeline-test-event.severity-1-message"
     value="3"
   />
 </span>

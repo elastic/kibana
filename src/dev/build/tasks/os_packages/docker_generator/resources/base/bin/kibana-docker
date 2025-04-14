@@ -40,6 +40,7 @@ kibana_vars=(
     csp.report_uri
     csp.report_to
     csp.report_only.form_action
+    csp.report_only.object_src
     permissionsPolicy.report_to
     data.autocomplete.valueSuggestions.terminateAfter
     data.autocomplete.valueSuggestions.timeout
@@ -241,7 +242,7 @@ kibana_vars=(
     xpack.alerting.rules.run.actions.max
     xpack.alerting.rules.run.alerts.max
     xpack.alerting.rules.run.actions.connectorTypeOverrides
-    xpack.alerting.maxScheduledPerMinute
+    xpack.alerting.rules.maxScheduledPerMinute
     xpack.alerts.healthCheck.interval
     xpack.alerts.invalidateApiKeysTask.interval
     xpack.alerts.invalidateApiKeysTask.removalDelay

@@ -6,8 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import { Client } from '@elastic/elasticsearch';
-import { SearchHit } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { Client } from '@elastic/elasticsearch';
+import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import type { Alert } from '@kbn/alerts-as-data-utils';
 import { ESTestIndexTool } from '@kbn/alerting-api-integration-helpers';
 import { basename } from 'node:path';
@@ -22,7 +22,7 @@ import {
   ALERT_WORKFLOW_TAGS,
   ALERT_CONSECUTIVE_MATCHES,
 } from '@kbn/rule-data-utils';
-import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { Spaces } from '../../../../scenarios';
 import { getTestRuleData, getUrlPrefix, ObjectRemover } from '../../../../../common/lib';
 

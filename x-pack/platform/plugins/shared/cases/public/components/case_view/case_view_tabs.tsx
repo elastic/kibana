@@ -6,14 +6,7 @@
  */
 
 import type { EuiThemeComputed } from '@elastic/eui';
-import {
-  EuiNotificationBadge,
-  EuiSpacer,
-  EuiTab,
-  EuiTabs,
-  EuiTitle,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiNotificationBadge, EuiSpacer, EuiTab, EuiTabs, useEuiTheme } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import { css } from '@emotion/react';
 import { CASE_VIEW_PAGE_TABS } from '../../../common/types';
@@ -32,14 +25,6 @@ import { useCaseObservables } from './use_case_observables';
 import { ExperimentalBadge } from '../experimental_badge/experimental_badge';
 import { useGetSimilarCases } from '../../containers/use_get_similar_cases';
 import { useCasesFeatures } from '../../common/use_cases_features';
-
-const TabTitle = ({ title }: { title: string }) => (
-  <EuiTitle size="xxs">
-    <h2 className="eui-displayInline">{title}</h2>
-  </EuiTitle>
-);
-
-TabTitle.displayName = 'TabTitle';
 
 const FilesBadge = ({
   activeTab,
@@ -260,7 +245,7 @@ export const CaseViewTabs = React.memo<CaseViewTabsProps>(({ caseData, activeTab
         onClick={() => navigateToCaseView({ detailName: caseData.id, tabId: tab.id })}
         isSelected={tab.id === activeTab}
       >
-        <TabTitle title={tab.name} />
+        {tab.name}
         {tab.badge ?? null}
       </EuiTab>
     ));

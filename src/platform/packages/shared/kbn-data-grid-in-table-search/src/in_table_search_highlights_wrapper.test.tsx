@@ -11,11 +11,16 @@ import React from 'react';
 import { InTableSearchHighlightsWrapper } from './in_table_search_highlights_wrapper';
 import { render, waitFor, screen } from '@testing-library/react';
 
+const colors = {
+  highlightColor: 'black',
+  highlightBackgroundColor: 'green',
+};
+
 describe('InTableSearchHighlightsWrapper', () => {
   describe('modifies the DOM and adds search highlights', () => {
     it('with matches', async () => {
       const { container } = render(
-        <InTableSearchHighlightsWrapper inTableSearchTerm="test">
+        <InTableSearchHighlightsWrapper inTableSearchTerm="test" {...colors}>
           <div>
             Some text here with test and test and even more Test to be sure
             <div>test</div>
@@ -31,13 +36,13 @@ describe('InTableSearchHighlightsWrapper', () => {
       });
 
       expect(container.innerHTML).toMatchInlineSnapshot(
-        `"<div><div>Some text here with <mark style=\\"background-color: rgb(229, 255, 192);\\" class=\\"dataGridInTableSearch__match\\" data-match-index=\\"0\\">test</mark> and <mark style=\\"background-color: rgb(229, 255, 192);\\" class=\\"dataGridInTableSearch__match\\" data-match-index=\\"1\\">test</mark> and even more <mark style=\\"background-color: rgb(229, 255, 192);\\" class=\\"dataGridInTableSearch__match\\" data-match-index=\\"2\\">Test</mark> to be sure<div><mark style=\\"background-color: rgb(229, 255, 192);\\" class=\\"dataGridInTableSearch__match\\" data-match-index=\\"3\\">test</mark></div><div>this</div><img src=\\"https://test.com\\" alt=\\"not for test\\"></div></div>"`
+        `"<div><div>Some text here with <mark style=\\"color: black; background-color: green;\\" class=\\"dataGridInTableSearch__match\\" data-match-index=\\"0\\">test</mark> and <mark style=\\"color: black; background-color: green;\\" class=\\"dataGridInTableSearch__match\\" data-match-index=\\"1\\">test</mark> and even more <mark style=\\"color: black; background-color: green;\\" class=\\"dataGridInTableSearch__match\\" data-match-index=\\"2\\">Test</mark> to be sure<div><mark style=\\"color: black; background-color: green;\\" class=\\"dataGridInTableSearch__match\\" data-match-index=\\"3\\">test</mark></div><div>this</div><img src=\\"https://test.com\\" alt=\\"not for test\\"></div></div>"`
       );
     });
 
     it('with single match', async () => {
       const { container } = render(
-        <InTableSearchHighlightsWrapper inTableSearchTerm="test2">
+        <InTableSearchHighlightsWrapper inTableSearchTerm="test2" {...colors}>
           <div>test2</div>
         </InTableSearchHighlightsWrapper>
       );
@@ -47,13 +52,13 @@ describe('InTableSearchHighlightsWrapper', () => {
       });
 
       expect(container.innerHTML).toMatchInlineSnapshot(
-        `"<div><div><mark style=\\"background-color: rgb(229, 255, 192);\\" class=\\"dataGridInTableSearch__match\\" data-match-index=\\"0\\">test2</mark></div></div>"`
+        `"<div><div><mark style=\\"color: black; background-color: green;\\" class=\\"dataGridInTableSearch__match\\" data-match-index=\\"0\\">test2</mark></div></div>"`
       );
     });
 
     it('with no matches', async () => {
       const { container } = render(
-        <InTableSearchHighlightsWrapper inTableSearchTerm="test3">
+        <InTableSearchHighlightsWrapper inTableSearchTerm="test3" {...colors}>
           <div>test2</div>
         </InTableSearchHighlightsWrapper>
       );
@@ -63,7 +68,7 @@ describe('InTableSearchHighlightsWrapper', () => {
 
     it('escape the input with tags', async () => {
       const { container } = render(
-        <InTableSearchHighlightsWrapper inTableSearchTerm="<hr />">
+        <InTableSearchHighlightsWrapper inTableSearchTerm="<hr />" {...colors}>
           <div>
             <hr />
             <div>test</div>
@@ -77,13 +82,13 @@ describe('InTableSearchHighlightsWrapper', () => {
       });
 
       expect(container.innerHTML).toMatchInlineSnapshot(
-        `"<div><div><hr><div>test</div><div>this <mark style=\\"background-color: rgb(229, 255, 192);\\" class=\\"dataGridInTableSearch__match\\" data-match-index=\\"0\\">&lt;hr /&gt;</mark></div></div></div>"`
+        `"<div><div><hr><div>test</div><div>this <mark style=\\"color: black; background-color: green;\\" class=\\"dataGridInTableSearch__match\\" data-match-index=\\"0\\">&lt;hr /&gt;</mark></div></div></div>"`
       );
     });
 
     it('escape the input with regex', async () => {
       const { container } = render(
-        <InTableSearchHighlightsWrapper inTableSearchTerm=".">
+        <InTableSearchHighlightsWrapper inTableSearchTerm="." {...colors}>
           <div>test this now.</div>
         </InTableSearchHighlightsWrapper>
       );
@@ -93,13 +98,13 @@ describe('InTableSearchHighlightsWrapper', () => {
       });
 
       expect(container.innerHTML).toMatchInlineSnapshot(
-        `"<div><div>test this now<mark style=\\"background-color: rgb(229, 255, 192);\\" class=\\"dataGridInTableSearch__match\\" data-match-index=\\"0\\">.</mark></div></div>"`
+        `"<div><div>test this now<mark style=\\"color: black; background-color: green;\\" class=\\"dataGridInTableSearch__match\\" data-match-index=\\"0\\">.</mark></div></div>"`
       );
     });
 
     it('with no search term', async () => {
       const { container } = render(
-        <InTableSearchHighlightsWrapper>
+        <InTableSearchHighlightsWrapper {...colors}>
           <div>test</div>
         </InTableSearchHighlightsWrapper>
       );
@@ -115,6 +120,7 @@ describe('InTableSearchHighlightsWrapper', () => {
         <InTableSearchHighlightsWrapper
           inTableSearchTerm="test"
           onHighlightsCountFound={onHighlightsCountFound}
+          {...colors}
         >
           <div>
             Some text here with test and test and even more Test to be sure
@@ -141,6 +147,7 @@ describe('InTableSearchHighlightsWrapper', () => {
         <InTableSearchHighlightsWrapper
           inTableSearchTerm="test2"
           onHighlightsCountFound={onHighlightsCountFound}
+          {...colors}
         >
           <div>test2</div>
         </InTableSearchHighlightsWrapper>
@@ -159,6 +166,7 @@ describe('InTableSearchHighlightsWrapper', () => {
         <InTableSearchHighlightsWrapper
           inTableSearchTerm="test3"
           onHighlightsCountFound={onHighlightsCountFound}
+          {...colors}
         >
           <div>test2</div>
         </InTableSearchHighlightsWrapper>
@@ -174,7 +182,7 @@ describe('InTableSearchHighlightsWrapper', () => {
     it('with no search term', async () => {
       const onHighlightsCountFound = jest.fn();
       const { container } = render(
-        <InTableSearchHighlightsWrapper onHighlightsCountFound={onHighlightsCountFound}>
+        <InTableSearchHighlightsWrapper onHighlightsCountFound={onHighlightsCountFound} {...colors}>
           <div>test</div>
         </InTableSearchHighlightsWrapper>
       );

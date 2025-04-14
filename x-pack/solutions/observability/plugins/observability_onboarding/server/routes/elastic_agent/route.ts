@@ -7,7 +7,7 @@
 
 import * as t from 'io-ts';
 import { v4 as uuidv4 } from 'uuid';
-import { generateSystemLogsYml, generateCustomLogsYml } from '../../../common/elastic_agent_logs';
+import { generateCustomLogsYml } from '../../../common/elastic_agent_logs';
 import { getAuthenticationAPIKey } from '../../lib/get_authentication_api_key';
 import { getFallbackESUrl } from '../../lib/get_fallback_urls';
 import { getObservabilityOnboardingFlow } from '../../lib/state';
@@ -43,20 +43,12 @@ const generateConfig = createObservabilityOnboardingServerRoute({
       savedObjectId: onboardingId,
     });
 
-    const yaml =
-      savedState?.type === 'systemLogs'
-        ? generateSystemLogsYml({
-            ...savedState?.state,
-            apiKey: authApiKey ? `${authApiKey?.apiKeyId}:${authApiKey?.apiKey}` : '$API_KEY',
-            esHost: elasticsearchUrl,
-            uuid: uuidv4(),
-          })
-        : generateCustomLogsYml({
-            ...savedState?.state,
-            apiKey: authApiKey ? `${authApiKey?.apiKeyId}:${authApiKey?.apiKey}` : '$API_KEY',
-            esHost: elasticsearchUrl,
-            logfileId: `custom-logs-${uuidv4()}`,
-          });
+    const yaml = generateCustomLogsYml({
+      ...savedState?.state,
+      apiKey: authApiKey ? `${authApiKey?.apiKeyId}:${authApiKey?.apiKey}` : '$API_KEY',
+      esHost: elasticsearchUrl,
+      logfileId: `custom-logs-${uuidv4()}`,
+    });
 
     return yaml;
   },

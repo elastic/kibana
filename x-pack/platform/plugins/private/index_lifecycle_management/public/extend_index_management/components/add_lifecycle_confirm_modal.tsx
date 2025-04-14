@@ -44,6 +44,7 @@ interface State {
   selectedAlias: string;
   policies: PolicyFromES[];
   policyErrorMessage?: string;
+  isLoading: boolean;
 }
 
 export class AddLifecyclePolicyConfirmModal extends Component<Props, State> {
@@ -53,6 +54,7 @@ export class AddLifecyclePolicyConfirmModal extends Component<Props, State> {
       policies: [],
       selectedPolicyName: '',
       selectedAlias: '',
+      isLoading: true,
     };
   }
   addPolicy = async () => {
@@ -218,7 +220,7 @@ export class AddLifecyclePolicyConfirmModal extends Component<Props, State> {
   async componentDidMount() {
     try {
       const policies = await loadPolicies();
-      this.setState({ policies });
+      this.setState({ policies, isLoading: false });
     } catch (err) {
       showApiError(
         err,
@@ -233,7 +235,7 @@ export class AddLifecyclePolicyConfirmModal extends Component<Props, State> {
     }
   }
   render() {
-    const { policies } = this.state;
+    const { policies, isLoading } = this.state;
     const { indexName, closeModal, getUrlForApp } = this.props;
     const title = (
       <FormattedMessage
@@ -244,7 +246,7 @@ export class AddLifecyclePolicyConfirmModal extends Component<Props, State> {
         }}
       />
     );
-    if (!policies.length) {
+    if (!isLoading && !policies.length) {
       return (
         <EuiModal onClose={closeModal}>
           <EuiModalHeader>

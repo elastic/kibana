@@ -39,5 +39,6 @@ export {
   type SearchEmbeddableApi,
   type NonPersistedDisplayOptions,
 } from './embeddable';
-export { loadSharingDataHelpers } from './utils';
 export { LogsExplorerTabs, type LogsExplorerTabsProps } from './components/logs_explorer_tabs';
+
+export const loadSharingDataHelpers = () => import('./utils/get_sharing_data');

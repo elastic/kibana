@@ -9,7 +9,7 @@
 
 import React, { Fragment } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type {
   DataTableRecord,
   ShouldShowFieldInTableHandler,

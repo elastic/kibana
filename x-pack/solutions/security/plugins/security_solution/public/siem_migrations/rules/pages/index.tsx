@@ -18,7 +18,7 @@ import { SecurityPageName } from '../../../app/types';
 
 import { MigrationRulesTable } from '../components/rules_table';
 import { NeedAdminForUpdateRulesCallOut } from '../../../detections/components/callouts/need_admin_for_update_callout';
-import { MissingPrivilegesCallOut } from '../../../detections/components/callouts/missing_privileges_callout';
+import { MissingPrivilegesCallOut } from './missing_privileges_callout';
 import { HeaderButtons } from '../components/header_buttons';
 import { UnknownMigration } from '../components/unknown_migration';
 import { useLatestStats } from '../service/hooks/use_latest_stats';
@@ -30,8 +30,9 @@ import { useInvalidateGetMigrationTranslationStats } from '../logic/use_get_migr
 import { useGetIntegrations } from '../service/hooks/use_get_integrations';
 import { PageTitle } from './page_title';
 import { RuleMigrationsUploadMissingPanel } from '../components/migration_status_panels/upload_missing_panel';
+import { EmptyMigrationRulesPage } from './empty';
 
-type MigrationRulesPageProps = RouteComponentProps<{ migrationId?: string }>;
+export type MigrationRulesPageProps = RouteComponentProps<{ migrationId?: string }>;
 
 export const MigrationRulesPage: React.FC<MigrationRulesPageProps> = React.memo(
   ({
@@ -54,13 +55,7 @@ export const MigrationRulesPage: React.FC<MigrationRulesPageProps> = React.memo(
     }, [getIntegrations]);
 
     useEffect(() => {
-      if (isLoading) {
-        return;
-      }
-
-      // Navigate to landing page if there are no migrations
-      if (!ruleMigrationsStats.length) {
-        navigateTo({ deepLinkId: SecurityPageName.landing, path: 'siem_migrations' });
+      if (isLoading || ruleMigrationsStats.length === 0) {
         return;
       }
 
@@ -96,6 +91,9 @@ export const MigrationRulesPage: React.FC<MigrationRulesPageProps> = React.memo(
     const pageTitle = useMemo(() => <PageTitle />, []);
 
     const content = useMemo(() => {
+      if (ruleMigrationsStats.length === 0 && !migrationId) {
+        return <EmptyMigrationRulesPage />;
+      }
       const migrationStats = ruleMigrationsStats.find((stats) => stats.id === migrationId);
       if (!migrationId || !migrationStats) {
         return <UnknownMigration />;
@@ -130,30 +128,28 @@ export const MigrationRulesPage: React.FC<MigrationRulesPageProps> = React.memo(
     }, [migrationId, refetchData, ruleMigrationsStats, integrations, isIntegrationsLoading]);
 
     return (
-      <>
+      <SecuritySolutionPageWrapper>
+        <HeaderPage title={pageTitle} border>
+          <HeaderButtons
+            ruleMigrationsStats={ruleMigrationsStats}
+            selectedMigrationId={migrationId}
+            onMigrationIdChange={onMigrationIdChange}
+          />
+        </HeaderPage>
         <NeedAdminForUpdateRulesCallOut />
         <MissingPrivilegesCallOut />
-
-        <SecuritySolutionPageWrapper>
-          <HeaderPage title={pageTitle} border>
-            <HeaderButtons
-              ruleMigrationsStats={ruleMigrationsStats}
-              selectedMigrationId={migrationId}
-              onMigrationIdChange={onMigrationIdChange}
-            />
-          </HeaderPage>
-          <EuiSkeletonLoading
-            isLoading={isLoading}
-            loadingContent={
-              <>
-                <EuiSkeletonTitle />
-                <EuiSkeletonText />
-              </>
-            }
-            loadedContent={content}
-          />
-        </SecuritySolutionPageWrapper>
-      </>
+        <EuiSkeletonLoading
+          data-test-subj="migrationRulesPageLoading"
+          isLoading={isLoading}
+          loadingContent={
+            <>
+              <EuiSkeletonTitle />
+              <EuiSkeletonText />
+            </>
+          }
+          loadedContent={content}
+        />
+      </SecuritySolutionPageWrapper>
     );
   }
 );

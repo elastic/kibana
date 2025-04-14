@@ -8,7 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ActionGroup } from './action_group_types';
+import type { ActionGroup } from './action_group_types';
 
 export const RecoveredActionGroup: Readonly<ActionGroup<'recovered'>> = Object.freeze({
   id: 'recovered',

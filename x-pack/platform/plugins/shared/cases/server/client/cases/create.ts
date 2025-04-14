@@ -21,6 +21,7 @@ import type { CasePostRequest } from '../../../common/types/api';
 import { CasePostRequestRt } from '../../../common/types/api';
 import {} from '../utils';
 import { validateCustomFields } from './validators';
+import { emptyCaseAssigneesSanitizer } from './sanitizers';
 import { normalizeCreateCaseRequest } from './utils';
 
 /**
@@ -40,7 +41,8 @@ export const create = async (
   } = clientArgs;
 
   try {
-    const query = decodeWithExcessOrThrow(CasePostRequestRt)(data);
+    const rawQuery = decodeWithExcessOrThrow(CasePostRequestRt)(data);
+    const query = emptyCaseAssigneesSanitizer(rawQuery);
     const configurations = await casesClient.configure.get({ owner: data.owner });
     const customFieldsConfiguration = configurations[0]?.customFields;
 
@@ -52,11 +54,17 @@ export const create = async (
     validateCustomFields(customFieldsValidationParams);
 
     const savedObjectID = SavedObjectsUtils.generateId();
-
-    await auth.ensureAuthorized({
-      operation: Operations.createCase,
-      entities: [{ owner: query.owner, id: savedObjectID }],
-    });
+    if (query.assignees && query.assignees.length > 0) {
+      await auth.ensureAuthorized({
+        operation: [Operations.assignCase, Operations.createCase],
+        entities: [{ owner: query.owner, id: savedObjectID }],
+      });
+    } else {
+      await auth.ensureAuthorized({
+        operation: Operations.createCase,
+        entities: [{ owner: query.owner, id: savedObjectID }],
+      });
+    }
 
     /**
      * Assign users to a case is only available to Platinum+

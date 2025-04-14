@@ -41,7 +41,7 @@ import {
   createCustomThresholdExecutor,
   CustomThresholdLocators,
 } from './custom_threshold_executor';
-import { CUSTOM_THRESHOLD_AAD_FIELDS, FIRED_ACTION, NO_DATA_ACTION } from './constants';
+import { FIRED_ACTION, NO_DATA_ACTION } from './constants';
 import { ObservabilityConfig } from '../../..';
 import { CustomThresholdAlert } from './types';
 
@@ -131,7 +131,6 @@ export function thresholdRuleType(
     name: i18n.translate('xpack.observability.threshold.ruleName', {
       defaultMessage: 'Custom threshold',
     }),
-    fieldsForAAD: CUSTOM_THRESHOLD_AAD_FIELDS,
     validate: {
       params: paramsSchema,
     },
@@ -184,6 +183,7 @@ export function thresholdRuleType(
     },
     category: DEFAULT_APP_CATEGORIES.observability.id,
     producer: observabilityFeatureId,
+    solution: 'observability' as const,
     alerts: MetricsRulesTypeAlertDefinition,
     getViewInAppRelativeUrl: ({ rule }: GetViewInAppRelativeUrlFnOpts<{}>) =>
       observabilityPaths.ruleDetails(rule.id),

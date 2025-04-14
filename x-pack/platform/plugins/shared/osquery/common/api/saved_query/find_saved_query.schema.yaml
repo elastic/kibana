@@ -5,14 +5,59 @@ info:
 paths: { }
 components:
   schemas:
-    FindSavedQueryRequestQuery:
+    FindSavedQueryResponse:
+        type: object
+        properties: { }
+        example:
+          page: 1
+          per_page: 100
+          total: 11
+          data:
+            - type: "osquery-saved-query"
+              id: "42ba9c50-0cc5-11ed-aa1d-2b27890bc90d"
+              namespaces:
+                - "default"
+              attributes:
+                id: "saved_query_id"
+                description: "Saved query description"
+                query: "select * from uptime;"
+                platform: "linux,darwin"
+                version: "2.8.0"
+                interval: "60"
+                ecs_mapping:
+                  host.uptime:
+                    field: "total_seconds"
+                created_by: "elastic"
+                created_at: "2022-07-26T09:28:08.597Z"
+                updated_by: "elastic"
+                updated_at: "2022-07-26T09:28:08.597Z"
+                prebuilt: false
+
+    FindSavedQueryDetailResponse:
       type: object
-      properties:
-        page:
-          $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/PageOrUndefined'
-        pageSize:
-          $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/PageSizeOrUndefined'
-        sort:
-          $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/SortOrUndefined'
-        sortOrder:
-          $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/SortOrderOrUndefined'
+      properties: { }
+      example:
+        data:
+          id: "3c42c847-eb30-4452-80e0-728584042334"
+          type: "osquery-saved-query"
+          namespaces:
+            - "default"
+          updated_at: "2022-07-26T09:28:08.600Z"
+          version: "WzQzMTcsMV0="
+          attributes:
+            id: "saved_query_id"
+            description: "Saved query description"
+            query: "select * from uptime;"
+            platform: "linux,darwin"
+            version: "2.8.0"
+            interval: "60"
+            ecs_mapping:
+              host.uptime:
+                field: "total_seconds"
+            created_by: "elastic"
+            created_at: "2022-07-26T09:28:08.597Z"
+            updated_by: "elastic"
+            updated_at: "2022-07-26T09:28:08.597Z"
+            prebuilt: false
+          references: [ ]
+          coreMigrationVersion: "8.4.0"

@@ -13,7 +13,7 @@ interface GetApmSynthtraceEsClientParams {
   packageVersion: string;
 }
 
-export async function getApmSynthtraceEsClient({
+export function getApmSynthtraceEsClient({
   client,
   packageVersion,
 }: GetApmSynthtraceEsClientParams) {

@@ -17,7 +17,8 @@ import {
   ToolBarPagination,
   MAX_ROWS_PER_PAGE_OPTION,
 } from './components/pager/tool_bar_pagination';
-import { DocTableProps, DocTableRenderProps, DocTableWrapper } from './doc_table_wrapper';
+import type { DocTableProps, DocTableRenderProps } from './doc_table_wrapper';
+import { DocTableWrapper } from './doc_table_wrapper';
 import { SavedSearchEmbeddableBase } from '../../embeddable/components/saved_search_embeddable_base';
 
 export interface DocTableEmbeddableProps extends Omit<DocTableProps, 'dataTestSubj'> {

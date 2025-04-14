@@ -5,6 +5,6 @@
  * 2.0.
  */
 import type { TypeOf } from '@kbn/config-schema';
-import { rRuleResponseSchemaV1 } from '../..';
+import type { rRuleResponseSchemaV1 } from '../..';
 
 export type RRuleResponse = TypeOf<typeof rRuleResponseSchemaV1>;

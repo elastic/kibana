@@ -58,7 +58,6 @@ export const getFieldMarkdownRenderer = (disableActions: boolean) => {
             eventId=""
             iconType={icon}
             isAggregatable={false}
-            isDraggable={false}
             field={name}
             value={value}
           >

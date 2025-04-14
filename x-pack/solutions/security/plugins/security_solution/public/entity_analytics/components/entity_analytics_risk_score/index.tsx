@@ -176,7 +176,7 @@ const EntityAnalyticsRiskScoresComponent = <T extends EntityType>({
 
   const refreshPage = useRefetchQueries();
 
-  const privileges = useMissingRiskEnginePrivileges(['read']);
+  const privileges = useMissingRiskEnginePrivileges({ readonly: true });
 
   if (!isAuthorized) {
     return null;
@@ -245,7 +245,7 @@ const EntityAnalyticsRiskScoresComponent = <T extends EntityType>({
             </EuiFlexItem>
             <EuiFlexItem>
               <StyledBasicTable
-                responsive={false}
+                responsiveBreakpoint={false}
                 items={data ?? []}
                 columns={columns}
                 loading={isTableLoading}

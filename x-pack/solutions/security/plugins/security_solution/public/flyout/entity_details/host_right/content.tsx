@@ -25,7 +25,6 @@ interface HostPanelContentProps {
   riskScoreState: RiskScoreState<EntityType.host>;
   contextID: string;
   scopeId: string;
-  isDraggable: boolean;
   openDetailsPanel: (path: EntityDetailsPath) => void;
   hostName: string;
   onAssetCriticalityChange: () => void;
@@ -41,7 +40,6 @@ export const HostPanelContent = ({
   recalculatingScore,
   contextID,
   scopeId,
-  isDraggable,
   openDetailsPanel,
   onAssetCriticalityChange,
   isPreviewMode,
@@ -51,20 +49,22 @@ export const HostPanelContent = ({
 
   return (
     <FlyoutBody>
-      {riskScoreState.isModuleEnabled && riskScoreState.data?.length !== 0 && (
-        <>
-          <FlyoutRiskSummary
-            entityType={EntityType.host}
-            riskScoreData={riskScoreState}
-            recalculatingScore={recalculatingScore}
-            queryId={HOST_PANEL_RISK_SCORE_QUERY_ID}
-            openDetailsPanel={openDetailsPanel}
-            isPreviewMode={isPreviewMode}
-            isLinkEnabled={isLinkEnabled}
-          />
-          <EuiHorizontalRule />
-        </>
-      )}
+      {Array.isArray(riskScoreState.data) &&
+        riskScoreState.isModuleEnabled &&
+        riskScoreState.data.length > 0 && (
+          <>
+            <FlyoutRiskSummary
+              entityType={EntityType.host}
+              riskScoreData={riskScoreState}
+              recalculatingScore={recalculatingScore}
+              queryId={HOST_PANEL_RISK_SCORE_QUERY_ID}
+              openDetailsPanel={openDetailsPanel}
+              isPreviewMode={isPreviewMode}
+              isLinkEnabled={isLinkEnabled}
+            />
+            <EuiHorizontalRule />
+          </>
+        )}
       <AssetCriticalityAccordion
         entity={{ name: hostName, type: EntityType.host }}
         onChange={onAssetCriticalityChange}
@@ -80,7 +80,6 @@ export const HostPanelContent = ({
         observedData={observedHost}
         contextID={contextID}
         scopeId={scopeId}
-        isDraggable={isDraggable}
         observedFields={observedFields}
         queryId={HOST_PANEL_OBSERVED_HOST_QUERY_ID}
       />

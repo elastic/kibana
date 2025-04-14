@@ -1,6 +1,6 @@
 # Security Solution Serverless Resources
 
-Directory contains ES serverless resources that can be used to override the defaults that are loaded when ES is started in serverless mode. For more information on how these are used [packages/kbn-es/src/serverless_resources/README.md](https://github.com/elastic/kibana/blob/main/packages/kbn-es/src/serverless_resources/README.md)
+Directory contains ES serverless resources that can be used to override the defaults that are loaded when ES is started in serverless mode. For more information on how these are used [src/platform/packages/shared/kbn-es/src/serverless_resources/README.md](https://github.com/elastic/kibana/blob/main/src/platform/packages/shared/kbn-es/src/serverless_resources/README.md)
 
 > **ℹ️ NOTE**
 > 

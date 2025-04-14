@@ -8,12 +8,18 @@
 import { RouteOptions } from '.';
 import { CLOUD_DATA_SAVED_OBJECT_ID } from './constants';
 import { CLOUD_DATA_SAVED_OBJECT_TYPE } from '../saved_objects';
-import { CloudDataAttributes } from './types';
+import { CloudDataAttributes } from '../../common/types';
 
 export const setGetCloudSolutionDataRoute = ({ router }: RouteOptions) => {
   router.versioned
     .get({
       path: `/internal/cloud/solution`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the saved objects client',
+        },
+      },
       access: 'internal',
       summary: 'Get cloud data for solutions',
     })

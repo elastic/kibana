@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { storiesOf } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 
 import { ExampleContext } from '../../../test/context_example';
@@ -14,18 +13,32 @@ import { PageControls, PageControlsComponent } from '../page_controls';
 
 const style = { background: '#333', padding: 10 };
 
-storiesOf('shareables/Footer/PageControls', module)
-  .add('contextual: hello', () => (
+export default {
+  title: 'shareables/Footer/PageControls',
+};
+
+export const ContextualHello = {
+  render: () => (
     <ExampleContext source="austin" {...{ style }}>
       <PageControls />
     </ExampleContext>
-  ))
-  .add('contextual: austin', () => (
+  ),
+
+  name: 'contextual: hello',
+};
+
+export const ContextualAustin = {
+  render: () => (
     <ExampleContext source="austin" {...{ style }}>
       <PageControls />
     </ExampleContext>
-  ))
-  .add('component', () => (
+  ),
+
+  name: 'contextual: austin',
+};
+
+export const Component = {
+  render: () => (
     <div {...{ style }}>
       <PageControlsComponent
         page={0}
@@ -34,4 +47,7 @@ storiesOf('shareables/Footer/PageControls', module)
         onToggleScrubber={action('onToggleScrubber')}
       />
     </div>
-  ));
+  ),
+
+  name: 'component',
+};

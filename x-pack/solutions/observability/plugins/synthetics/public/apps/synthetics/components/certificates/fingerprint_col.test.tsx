@@ -12,7 +12,7 @@ import { render } from '../../utils/testing';
 import { Cert } from '../../../../../common/runtime_types';
 
 describe('FingerprintCol', () => {
-  const cert: Cert = {
+  const cert = {
     monitors: [{ name: '', id: 'github', url: 'https://github.com/' }],
     not_after: '2020-05-08T00:00:00.000Z',
     not_before: '2018-05-08T00:00:00.000Z',
@@ -21,7 +21,7 @@ describe('FingerprintCol', () => {
     sha256: '3111500c4a66012cdae333ec3fca1c9dde45c954440e7ee413716bff3663c074'.toUpperCase(),
     common_name: 'github.com',
     configId: '123',
-  };
+  } as Cert;
 
   it('renders expected elements for valid props', async () => {
     cert.not_after = moment().add('4', 'months').toISOString();

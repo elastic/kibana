@@ -14,6 +14,7 @@ import {
 } from '@kbn/upgrade-assistant-plugin/common/types';
 import { generateNewIndexName } from '@kbn/upgrade-assistant-plugin/server/lib/reindexing/index_settings';
 import { getIndexState } from '@kbn/upgrade-assistant-plugin/common/get_index_state';
+import { sortBy } from 'lodash';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -213,12 +214,15 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    it('shows no warnings', async () => {
+    it('shows reindex and read-only warnings', async () => {
       const resp = await supertest.get(`/api/upgrade_assistant/reindex/reindexed-v7-6.0-data`); // reusing the index previously migrated in v7->v8 UA tests
+      expect(resp.body.warnings.length).to.be(2);
       // By default, all reindexing operations will replace an index with an alias (with the same name)
       // pointing to a newly created "reindexed" index.
-      expect(resp.body.warnings.length).to.be(1);
-      expect(resp.body.warnings[0].warningType).to.be('replaceIndexWithAlias');
+      expect(sortBy(resp.body.warnings, 'warningType')).to.eql([
+        { warningType: 'makeIndexReadonly', flow: 'readonly' },
+        { warningType: 'replaceIndexWithAlias', flow: 'reindex' },
+      ]);
     });
 
     it('reindexes old 7.0 index', async () => {

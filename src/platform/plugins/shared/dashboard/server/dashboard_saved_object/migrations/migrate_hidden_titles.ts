@@ -8,7 +8,6 @@
  */
 
 import type { SavedObjectMigrationFn } from '@kbn/core/server';
-import type { EmbeddableInput } from '@kbn/embeddable-plugin/common';
 import type { SavedDashboardPanel } from '../schema';
 
 import {
@@ -36,14 +35,14 @@ export const migrateExplicitlyHiddenTitles: SavedObjectMigrationFn<any, any> = (
     const newPanels: SavedDashboardPanel[] = [];
     panels.forEach((panel) => {
       // Convert each panel into the dashboard panel state
-      const originalPanelState = convertSavedDashboardPanelToPanelState<EmbeddableInput>(panel);
+      const originalPanelState = convertSavedDashboardPanelToPanelState(panel);
       newPanels.push(
-        convertPanelStateToSavedDashboardPanel({
+        convertPanelStateToSavedDashboardPanel(panel.panelIndex, {
           ...originalPanelState,
           explicitInput: {
             ...originalPanelState.explicitInput,
-            ...(originalPanelState.explicitInput.title === '' &&
-            !originalPanelState.explicitInput.hidePanelTitles
+            ...((originalPanelState.explicitInput as { title?: string }).title === '' &&
+            !(originalPanelState.explicitInput as { hidePanelTitles?: boolean }).hidePanelTitles
               ? { hidePanelTitles: true }
               : {}),
           },

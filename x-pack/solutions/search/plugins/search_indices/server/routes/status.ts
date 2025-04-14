@@ -16,6 +16,12 @@ export function registerStatusRoutes(router: IRouter, logger: Logger) {
     {
       path: GET_STATUS_ROUTE,
       validate: {},
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the scoped ES client',
+        },
+      },
       options: {
         access: 'internal',
       },
@@ -36,6 +42,12 @@ export function registerStatusRoutes(router: IRouter, logger: Logger) {
     {
       path: GET_USER_PRIVILEGES_ROUTE,
       validate: {},
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the scoped ES client',
+        },
+      },
       options: {
         access: 'internal',
       },

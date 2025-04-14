@@ -15,19 +15,21 @@ import semverSatisfies from 'semver/functions/satisfies';
 import { replaceUrlHashQuery } from '@kbn/kibana-utils-plugin/common';
 import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 
-import {
-  DashboardContainerInput,
-  DashboardPanelMap,
-  SharedDashboardState,
-  convertPanelsArrayToPanelMap,
-} from '../../../common';
+import { DashboardPanelMap, convertPanelsArrayToPanelMap } from '../../../common';
 import type { DashboardPanel } from '../../../server/content_management';
 import type { SavedDashboardPanel } from '../../../server/dashboard_saved_object';
-import { DashboardApi } from '../../dashboard_api/types';
+import { DashboardApi, DashboardState } from '../../dashboard_api/types';
 import { DASHBOARD_STATE_STORAGE_KEY, createDashboardEditUrl } from '../../utils/urls';
 import { migrateLegacyQuery } from '../../services/dashboard_content_management_service/lib/load_dashboard_state';
 import { coreServices } from '../../services/kibana_services';
 import { getPanelTooOldErrorString } from '../_dashboard_app_strings';
+
+/**
+ * For BWC reasons, dashboard state is stored with panels as an array instead of a map
+ */
+export type SharedDashboardState = Partial<
+  Omit<DashboardState, 'panels'> & { panels: DashboardPanel[] }
+>;
 
 const panelIsLegacy = (panel: unknown): panel is SavedDashboardPanel => {
   return (panel as SavedDashboardPanel).embeddableConfig !== undefined;
@@ -49,22 +51,22 @@ export const isPanelVersionTooOld = (panels: DashboardPanel[] | SavedDashboardPa
   return false;
 };
 
-function getPanelsMap(appStateInUrl: SharedDashboardState): DashboardPanelMap | undefined {
-  if (!appStateInUrl.panels) {
+function getPanelsMap(panels?: DashboardPanel[]): DashboardPanelMap | undefined {
+  if (!panels) {
     return undefined;
   }
 
-  if (appStateInUrl.panels.length === 0) {
+  if (panels.length === 0) {
     return {};
   }
 
-  if (isPanelVersionTooOld(appStateInUrl.panels)) {
+  if (isPanelVersionTooOld(panels)) {
     coreServices.notifications.toasts.addWarning(getPanelTooOldErrorString());
     return undefined;
   }
 
   // convert legacy embeddableConfig keys to panelConfig
-  const panels = appStateInUrl.panels.map((panel) => {
+  const standardizedPanels = panels.map((panel) => {
     if (panelIsLegacy(panel)) {
       const { embeddableConfig, ...rest } = panel;
       return {
@@ -75,7 +77,7 @@ function getPanelsMap(appStateInUrl: SharedDashboardState): DashboardPanelMap | 
     return panel;
   });
 
-  return convertPanelsArrayToPanelMap(panels);
+  return convertPanelsArrayToPanelMap(standardizedPanels);
 }
 
 /**
@@ -83,20 +85,20 @@ function getPanelsMap(appStateInUrl: SharedDashboardState): DashboardPanelMap | 
  */
 export const loadAndRemoveDashboardState = (
   kbnUrlStateStorage: IKbnUrlStateStorage
-): Partial<DashboardContainerInput> => {
+): Partial<DashboardState> => {
   const rawAppStateInUrl = kbnUrlStateStorage.get<SharedDashboardState>(
     DASHBOARD_STATE_STORAGE_KEY
   );
   if (!rawAppStateInUrl) return {};
 
-  const panelsMap = getPanelsMap(rawAppStateInUrl);
+  const panelsMap = getPanelsMap(rawAppStateInUrl.panels);
 
   const nextUrl = replaceUrlHashQuery(window.location.href, (hashQuery) => {
     delete hashQuery[DASHBOARD_STATE_STORAGE_KEY];
     return hashQuery;
   });
   kbnUrlStateStorage.kbnUrlControls.update(nextUrl, true);
-  const partialState: Partial<DashboardContainerInput> = {
+  const partialState: Partial<DashboardState> = {
     ..._.omit(rawAppStateInUrl, ['panels', 'query']),
     ...(panelsMap ? { panels: panelsMap } : {}),
     ...(rawAppStateInUrl.query ? { query: migrateLegacyQuery(rawAppStateInUrl.query) } : {}),

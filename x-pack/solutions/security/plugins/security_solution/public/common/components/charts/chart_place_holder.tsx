@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { EuiFlexItem, EuiText, EuiFlexGroup } from '@elastic/eui';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 import type { ChartSeriesData } from './common';
 import { checkIfAllValuesAreZero } from './common';
 import * as i18n from './translation';

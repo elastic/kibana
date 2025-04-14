@@ -24,7 +24,6 @@ export const getInlineQueryNode = ({
 }: GetInlineQueryNodeParams): GraphNode => {
   return async (state) => {
     let query = state.original_rule.query;
-
     // Check before to avoid unnecessary LLM calls
     let unsupportedComment = getUnsupportedComment(query);
     if (unsupportedComment) {

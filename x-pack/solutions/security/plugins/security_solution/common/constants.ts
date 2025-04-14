@@ -21,7 +21,7 @@ export const APP_ID = 'securitySolution' as const;
 export const APP_UI_ID = 'securitySolutionUI' as const;
 export const ASSISTANT_FEATURE_ID = 'securitySolutionAssistant' as const;
 export const ATTACK_DISCOVERY_FEATURE_ID = 'securitySolutionAttackDiscovery' as const;
-export const CASES_FEATURE_ID = 'securitySolutionCasesV2' as const;
+export const CASES_FEATURE_ID = 'securitySolutionCasesV3' as const;
 export const TIMELINE_FEATURE_ID = 'securitySolutionTimeline' as const;
 export const NOTES_FEATURE_ID = 'securitySolutionNotes' as const;
 export const SERVER_APP_ID = 'siem' as const;
@@ -73,7 +73,6 @@ export const SECURITY_TAG_NAME = 'Security Solution' as const;
 export const SECURITY_TAG_DESCRIPTION = 'Security Solution auto-generated tag' as const;
 export const DEFAULT_SPACE_ID = 'default' as const;
 export const DEFAULT_RELATIVE_DATE_THRESHOLD = 24 as const;
-export const DEFAULT_MAX_UNASSOCIATED_NOTES = 1000 as const;
 
 // Document path where threat indicator fields are expected. Fields are used
 // to enrich signals, and are copied to threat.enrichments.
@@ -204,9 +203,6 @@ export const EXTENDED_RULE_EXECUTION_LOGGING_MIN_LEVEL_SETTING =
 export const EXCLUDED_DATA_TIERS_FOR_RULE_EXECUTION =
   'securitySolution:excludedDataTiersForRuleExecution' as const;
 
-/** This Kibana Advances setting allows users to define the maximum amount of unassociated notes (notes without a `timelineId`) */
-export const MAX_UNASSOCIATED_NOTES = 'securitySolution:maxUnassociatedNotes' as const;
-
 /** This Kibana Advanced Setting allows users to enable/disable the Visualizations in Flyout feature */
 export const ENABLE_VISUALIZATIONS_IN_FLYOUT_SETTING =
   'securitySolution:enableVisualizationsInFlyout' as const;
@@ -288,6 +284,12 @@ export const NOTE_URL = '/api/note' as const;
 export const PINNED_EVENT_URL = '/api/pinned_event' as const;
 export const SOURCERER_API_URL = '/internal/security_solution/sourcerer' as const;
 export const RISK_SCORE_INDEX_STATUS_API_URL = '/internal/risk_score/index_status' as const;
+
+/**
+ * This limit exists to maintain some kind of a safety net for how many events we are fetching in total,
+ * even though in theory we are only allowing up to 100 notes per document.
+ */
+export const NOTES_PER_PAGE_HARD_LIMIT = 10000;
 
 /**
  * Default signals index key for kibana.dev.yml
@@ -388,7 +390,7 @@ export const STARTED_TRANSFORM_STATES = new Set([
 ]);
 
 /**
- * How many rules to update at a time is set to 50 from errors coming from
+ * How many rules to update at a time is set to 20 from errors coming from
  * the slow environments such as cloud when the rule updates are > 100 we were
  * seeing timeout issues.
  *
@@ -403,14 +405,14 @@ export const STARTED_TRANSFORM_STATES = new Set([
  * Lastly, we saw weird issues where Chrome on upstream 408 timeouts will re-call the REST route
  * which in turn could create additional connections we want to avoid.
  *
- * See file import_rules_route.ts for another area where 50 was chosen, therefore I chose
- * 50 here to mimic it as well. If you see this re-opened or what similar to it, consider
- * reducing the 50 above to a lower number.
+ * See file import_rules_route.ts for another area where 20 was chosen, therefore I chose
+ * 20 here to mimic it as well. If you see this re-opened or what similar to it, consider
+ * reducing the 20 above to a lower number.
  *
  * See the original ticket here:
  * https://github.com/elastic/kibana/issues/94418
  */
-export const MAX_RULES_TO_UPDATE_IN_PARALLEL = 50;
+export const MAX_RULES_TO_UPDATE_IN_PARALLEL = 20;
 
 export const LIMITED_CONCURRENCY_ROUTE_TAG_PREFIX = `${APP_ID}:limitedConcurrency`;
 
@@ -498,6 +500,11 @@ export const DEFAULT_ALERT_TAGS_VALUE = [
  * Max length for the comments within security solution
  */
 export const MAX_COMMENT_LENGTH = 30000 as const;
+
+/**
+ * Max notes count per document in security solution
+ */
+export const MAX_NOTES_PER_DOCUMENT = 100;
 
 /**
  * Cases external attachment IDs

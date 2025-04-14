@@ -10,6 +10,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type { IndicesIndexSettings } from '@elastic/elasticsearch/lib/api/types';
 import type { FileUploadResults } from '@kbn/file-upload-common';
+import type { FlyoutContent } from '@kbn/file-upload-common/src/types';
 import type { ResultLinks } from '../../common/app';
 import type { GetAdditionalLinks } from '../application/common/components/results_links';
 import { getCoreStart, getPluginsStart } from '../kibana_services';
@@ -20,7 +21,10 @@ export interface Props {
   getAdditionalLinks?: GetAdditionalLinks;
   setUploadResults?: (results: FileUploadResults) => void;
   autoAddInference?: string;
+  autoCreateDataView?: boolean;
   indexSettings?: IndicesIndexSettings;
+  initialIndexName?: string;
+  flyoutContent?: FlyoutContent;
   onClose?: () => void;
 }
 
@@ -29,7 +33,10 @@ export const FileDataVisualizerLite: FC<Props> = ({
   resultLinks,
   setUploadResults,
   autoAddInference,
+  autoCreateDataView,
   indexSettings,
+  initialIndexName,
+  flyoutContent,
   onClose,
 }) => {
   const coreStart = getCoreStart();
@@ -60,7 +67,10 @@ export const FileDataVisualizerLite: FC<Props> = ({
             capabilities={coreStart.application.capabilities}
             setUploadResults={setUploadResults}
             autoAddInference={autoAddInference}
+            autoCreateDataView={autoCreateDataView}
             indexSettings={indexSettings}
+            initialIndexName={initialIndexName}
+            flyoutContent={flyoutContent}
             onClose={onClose}
           />
         </CloudContext>

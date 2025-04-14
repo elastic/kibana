@@ -9,7 +9,7 @@ import {
   SyntheticsMonitorStatusTranslations,
   TlsTranslations,
 } from '@kbn/synthetics-plugin/common/rules/synthetics/translations';
-import { SanitizedRule } from '@kbn/alerting-types';
+import type { SanitizedRule } from '@kbn/alerting-types';
 
 export const statusRule = {
   id: 'dbbc39f0-1781-11ee-80b9-6522650f1d50',

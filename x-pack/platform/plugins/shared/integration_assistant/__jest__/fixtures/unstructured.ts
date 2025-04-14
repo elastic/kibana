@@ -14,12 +14,14 @@ export const unstructuredLogState = {
   jsonSamples: ['{"message":"dummy data"}'],
   finalized: false,
   ecsVersion: 'testVersion',
-  errors: { test: 'testerror' },
+  errors: [{ test: 'testerror' }],
   additionalProcessors: [],
+  isFirst: false,
+  unParsedSamples: ['dummy data'],
+  currentPattern: '%{GREEDYDATA:message}',
 };
 
 export const unstructuredLogResponse = {
-  grok_patterns: [
+  grok_pattern:
     '####<%{MONTH} %{MONTHDAY}, %{YEAR} %{TIME} (?:AM|PM) %{WORD:timezone}> <%{WORD:log_level}> <%{WORD:component}> <%{DATA:hostname}> <%{DATA:server_name}> <%{DATA:thread_info}> <%{DATA:user}> <%{DATA:empty_field}> <%{DATA:empty_field2}> <%{NUMBER:timestamp}> <%{DATA:message_id}> <%{GREEDYDATA:message}>',
-  ],
 };

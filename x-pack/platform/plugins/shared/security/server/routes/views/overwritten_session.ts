@@ -12,7 +12,18 @@ import type { RouteDefinitionParams } from '..';
  */
 export function defineOverwrittenSessionRoutes({ httpResources }: RouteDefinitionParams) {
   httpResources.register(
-    { path: '/security/overwritten_session', validate: false, options: { excludeFromOAS: true } },
+    {
+      path: '/security/overwritten_session',
+      validate: false,
+      options: { excludeFromOAS: true },
+      security: {
+        authz: {
+          enabled: false,
+          reason:
+            'This route is opted out from authorization because it is a host for the overwritten session view.',
+        },
+      },
+    },
     (context, req, res) => res.renderCoreApp()
   );
 }

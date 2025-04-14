@@ -12,6 +12,7 @@ export type {
   FunctionCallingMode,
   ChatCompleteStreamResponse,
   ChatCompleteResponse,
+  ChatCompleteRetryConfiguration,
 } from './api';
 export type {
   BoundChatCompleteAPI,
@@ -50,6 +51,7 @@ export {
   type UnvalidatedToolCall,
   type ToolChoice,
 } from './tools';
+export type { ChatCompleteMetadata, ConnectorTelemetryMetadata } from './metadata';
 export {
   isChatCompletionChunkEvent,
   isChatCompletionEvent,

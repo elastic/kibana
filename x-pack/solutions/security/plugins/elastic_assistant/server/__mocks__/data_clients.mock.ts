@@ -10,12 +10,18 @@ import { AIAssistantConversationsDataClient } from '../ai_assistant_data_clients
 import { AIAssistantKnowledgeBaseDataClient } from '../ai_assistant_data_clients/knowledge_base';
 import { AIAssistantDataClient } from '../ai_assistant_data_clients';
 import { AttackDiscoveryDataClient } from '../lib/attack_discovery/persistence';
+import { AttackDiscoveryScheduleDataClient } from '../lib/attack_discovery/schedules/data_client';
 
 type ConversationsDataClientContract = PublicMethodsOf<AIAssistantConversationsDataClient>;
 export type ConversationsDataClientMock = jest.Mocked<ConversationsDataClientContract>;
 type AttackDiscoveryDataClientContract = PublicMethodsOf<AttackDiscoveryDataClient>;
 export type AttackDiscoveryDataClientMock = jest.Mocked<AttackDiscoveryDataClientContract>;
-type KnowledgeBaseDataClientContract = PublicMethodsOf<AIAssistantKnowledgeBaseDataClient>;
+type AttackDiscoveryScheduleDataClientContract = PublicMethodsOf<AttackDiscoveryScheduleDataClient>;
+export type AttackDiscoveryScheduleDataClientMock =
+  jest.Mocked<AttackDiscoveryScheduleDataClientContract>;
+type KnowledgeBaseDataClientContract = PublicMethodsOf<AIAssistantKnowledgeBaseDataClient> & {
+  isSetupInProgress: AIAssistantKnowledgeBaseDataClient['isSetupInProgress'];
+};
 export type KnowledgeBaseDataClientMock = jest.Mocked<KnowledgeBaseDataClientContract>;
 
 const createConversationsDataClientMock = () => {
@@ -55,6 +61,22 @@ export const attackDiscoveryDataClientMock: {
   create: createAttackDiscoveryDataClientMock,
 };
 
+const createAttackDiscoveryScheduleDataClientMock = (): AttackDiscoveryScheduleDataClientMock => ({
+  findSchedules: jest.fn(),
+  getSchedule: jest.fn(),
+  createSchedule: jest.fn(),
+  updateSchedule: jest.fn(),
+  deleteSchedule: jest.fn(),
+  enableSchedule: jest.fn(),
+  disableSchedule: jest.fn(),
+});
+
+export const attackDiscoveryScheduleDataClientMock: {
+  create: () => AttackDiscoveryScheduleDataClientMock;
+} = {
+  create: createAttackDiscoveryScheduleDataClientMock,
+};
+
 const createKnowledgeBaseDataClientMock = () => {
   const mocked: KnowledgeBaseDataClientMock = {
     addKnowledgeBaseDocuments: jest.fn(),
@@ -73,8 +95,11 @@ const createKnowledgeBaseDataClientMock = () => {
     isModelInstalled: jest.fn(),
     isSecurityLabsDocsLoaded: jest.fn(),
     isSetupAvailable: jest.fn(),
+    isSetupInProgress: jest.fn().mockReturnValue(false)(),
     isUserDataExists: jest.fn(),
     setupKnowledgeBase: jest.fn(),
+    getLoadedSecurityLabsDocsCount: jest.fn(),
+    getProductDocumentationStatus: jest.fn(),
   };
   return mocked;
 };

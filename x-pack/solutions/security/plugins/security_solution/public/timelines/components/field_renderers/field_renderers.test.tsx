@@ -21,6 +21,7 @@ import type { AutonomousSystem } from '../../../../common/search_strategy';
 import { FlowTarget } from '../../../../common/search_strategy';
 import type { HostEcs } from '@kbn/securitysolution-ecs';
 import { mockGetUrlForApp } from '@kbn/security-solution-navigation/mocks/context';
+import { SourcererScopeName } from '../../../sourcerer/store/model';
 
 jest.mock('../../../common/lib/kibana');
 jest.mock('@kbn/security-solution-navigation/src/context');
@@ -32,6 +33,8 @@ mockGetUrlForApp.mockImplementation(
 jest.mock('../../../common/hooks/use_get_field_spec');
 
 describe('Field Renderers', () => {
+  const scopeId = SourcererScopeName.default;
+
   describe('#locationRenderer', () => {
     test('it renders correctly against snapshot', () => {
       const { asFragment } = render(
@@ -104,24 +107,32 @@ describe('Field Renderers', () => {
   describe('#hostIdRenderer', () => {
     test('it renders correctly against snapshot', () => {
       const { asFragment } = render(
-        <TestProviders>{hostNameRenderer(mockData.complete.host, '10.10.10.10')}</TestProviders>
+        <TestProviders>
+          {hostNameRenderer(scopeId, mockData.complete.host, '10.10.10.10')}
+        </TestProviders>
       );
       expect(asFragment()).toMatchSnapshot();
     });
 
     test('it renders emptyTagValue when non-matching IP is provided', () => {
       render(
-        <TestProviders>{hostNameRenderer(mockData.complete.host, '10.10.10.11')}</TestProviders>
+        <TestProviders>
+          {hostNameRenderer(scopeId, mockData.complete.host, '10.10.10.11')}
+        </TestProviders>
       );
       expect(screen.getByText(getEmptyValue())).toBeInTheDocument();
     });
 
     test('it renders emptyTagValue when no host.id is provided', () => {
-      render(<TestProviders>{hostNameRenderer(emptyIdHost, FlowTarget.source)}</TestProviders>);
+      render(
+        <TestProviders>{hostNameRenderer(scopeId, emptyIdHost, FlowTarget.source)}</TestProviders>
+      );
       expect(screen.getByText(getEmptyValue())).toBeInTheDocument();
     });
     test('it renders emptyTagValue when no host.ip is provided', () => {
-      render(<TestProviders>{hostNameRenderer(emptyIpHost, FlowTarget.source)}</TestProviders>);
+      render(
+        <TestProviders>{hostNameRenderer(scopeId, emptyIpHost, FlowTarget.source)}</TestProviders>
+      );
       expect(screen.getByText(getEmptyValue())).toBeInTheDocument();
     });
   });
@@ -129,7 +140,9 @@ describe('Field Renderers', () => {
   describe('#hostNameRenderer', () => {
     test('it renders correctly against snapshot', () => {
       const { asFragment } = render(
-        <TestProviders>{hostNameRenderer(mockData.complete.host, '10.10.10.10')}</TestProviders>
+        <TestProviders>
+          {hostNameRenderer(scopeId, mockData.complete.host, '10.10.10.10')}
+        </TestProviders>
       );
 
       expect(asFragment()).toMatchSnapshot();
@@ -137,21 +150,29 @@ describe('Field Renderers', () => {
 
     test('it renders emptyTagValue when non-matching IP is provided', () => {
       render(
-        <TestProviders>{hostNameRenderer(mockData.complete.host, '10.10.10.11')}</TestProviders>
+        <TestProviders>
+          {hostNameRenderer(scopeId, mockData.complete.host, '10.10.10.11')}
+        </TestProviders>
       );
       expect(screen.getByText(getEmptyValue())).toBeInTheDocument();
     });
 
     test('it renders emptyTagValue when no host.id is provided', () => {
-      render(<TestProviders>{hostNameRenderer(emptyIdHost, FlowTarget.source)}</TestProviders>);
+      render(
+        <TestProviders>{hostNameRenderer(scopeId, emptyIdHost, FlowTarget.source)}</TestProviders>
+      );
       expect(screen.getByText(getEmptyValue())).toBeInTheDocument();
     });
     test('it renders emptyTagValue when no host.ip is provided', () => {
-      render(<TestProviders>{hostNameRenderer(emptyIpHost, FlowTarget.source)}</TestProviders>);
+      render(
+        <TestProviders>{hostNameRenderer(scopeId, emptyIpHost, FlowTarget.source)}</TestProviders>
+      );
       expect(screen.getByText(getEmptyValue())).toBeInTheDocument();
     });
     test('it renders emptyTagValue when no host.name is provided', () => {
-      render(<TestProviders>{hostNameRenderer(emptyNameHost, FlowTarget.source)}</TestProviders>);
+      render(
+        <TestProviders>{hostNameRenderer(scopeId, emptyNameHost, FlowTarget.source)}</TestProviders>
+      );
       expect(screen.getByText(getEmptyValue())).toBeInTheDocument();
     });
   });

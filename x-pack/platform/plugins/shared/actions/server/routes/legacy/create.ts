@@ -6,10 +6,10 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { UsageCounter } from '@kbn/usage-collection-plugin/server';
-import { IRouter } from '@kbn/core/server';
-import { ActionsRequestHandlerContext } from '../../types';
-import { ILicenseState } from '../../lib';
+import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
+import type { IRouter } from '@kbn/core/server';
+import type { ActionsRequestHandlerContext } from '../../types';
+import type { ILicenseState } from '../../lib';
 import { BASE_ACTION_API_PATH } from '../../../common';
 import { verifyAccessAndContext } from '../verify_access_and_context';
 import { trackLegacyRouteUsage } from '../../lib/track_legacy_route_usage';

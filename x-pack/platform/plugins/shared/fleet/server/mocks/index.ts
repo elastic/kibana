@@ -142,6 +142,8 @@ export const createAppContextStartContractMock = (
       : {}),
     unenrollInactiveAgentsTask: {} as any,
     deleteUnenrolledAgentsTask: {} as any,
+    updateAgentlessDeploymentsTask: {} as any,
+    automaticAgentUpgradeTask: {} as any,
   };
 };
 

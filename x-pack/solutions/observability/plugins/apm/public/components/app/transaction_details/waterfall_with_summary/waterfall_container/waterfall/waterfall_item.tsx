@@ -12,7 +12,7 @@ import React, { useRef, useEffect, useState } from 'react';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { useTheme } from '../../../../../../hooks/use_theme';
 import { isMobileAgentName, isRumAgentName } from '../../../../../../../common/agent_name';
-import { TRACE_ID, TRANSACTION_ID } from '../../../../../../../common/es_fields/apm';
+import { SPAN_ID, TRACE_ID, TRANSACTION_ID } from '../../../../../../../common/es_fields/apm';
 import { asDuration } from '../../../../../../../common/utils/formatters';
 import type { Margins } from '../../../../../shared/charts/timeline';
 import { TruncateWithTooltip } from '../../../../../shared/truncate_with_tooltip';
@@ -23,6 +23,7 @@ import type { IWaterfallSpanOrTransaction } from './waterfall_helpers/waterfall_
 import { FailureBadge } from './failure_badge';
 import { useApmRouter } from '../../../../../../hooks/use_apm_router';
 import { useAnyOfApmParams } from '../../../../../../hooks/use_apm_params';
+import { OrphanItemTooltipIcon } from './orphan_item_tooltip_icon';
 
 type ItemType = 'transaction' | 'span' | 'error';
 
@@ -47,8 +48,8 @@ const Container = euiStyled.div<IContainerStyleProps>`
   margin-right: ${(props) => props.timelineMargins.right}px;
   margin-left: ${(props) =>
     props.hasToggle
-      ? props.timelineMargins.left - 30 // fix margin if there is a toggle
-      : props.timelineMargins.left}px ;
+      ? props.timelineMargins.left - 21 // fix margin if there is a toggle (toggle width is 20px)
+      : props.timelineMargins.left}px;
   background-color: ${({ isSelected, theme }) =>
     isSelected ? theme.eui.euiColorLightestShade : 'initial'};
   cursor: pointer;
@@ -284,6 +285,7 @@ export function WaterfallItem({
         <SpanActionToolTip item={item}>
           <PrefixIcon item={item} />
         </SpanActionToolTip>
+        {item.isOrphan ? <OrphanItemTooltipIcon docType={item.docType} /> : null}
         <HttpStatusCode item={item} />
         <NameLabel item={item} />
 
@@ -321,8 +323,13 @@ function RelatedErrors({
   );
 
   let kuery = `${TRACE_ID} : "${item.doc.trace.id}"`;
-  if (item.doc.transaction?.id) {
-    kuery += ` and ${TRANSACTION_ID} : "${item.doc.transaction?.id}"`;
+  const transactionId = item.doc.transaction?.id;
+  const spanId = item.doc.span?.id;
+
+  if (item.docType === 'transaction' && spanId) {
+    kuery += ` and ${SPAN_ID} : "${spanId}"`;
+  } else if (transactionId) {
+    kuery += ` and ${TRANSACTION_ID} : "${transactionId}"`;
   }
 
   const mobileHref = apmRouter.link(`/mobile-services/{serviceName}/errors-and-crashes`, {

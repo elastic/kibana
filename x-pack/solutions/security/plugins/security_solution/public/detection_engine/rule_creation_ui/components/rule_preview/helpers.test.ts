@@ -6,7 +6,7 @@
  */
 
 import moment from 'moment';
-import { DataSourceType } from '../../../../detections/pages/detection_engine/rules/types';
+import { DataSourceType } from '../../../common/types';
 import { isNoisy, getTimeframeOptions, getIsRulePreviewDisabled } from './helpers';
 
 describe('query_preview/helpers', () => {
@@ -262,6 +262,78 @@ describe('query_preview/helpers', () => {
         queryBar: {
           filters: [],
           query: { query: 'any where true', language: 'testlang' },
+          saved_id: null,
+        },
+        newTermsFields: [],
+      });
+      expect(isDisabled).toEqual(false);
+    });
+
+    test('disabled when eql rule with empty query and non-empty filters', () => {
+      const isDisabled = getIsRulePreviewDisabled({
+        ruleType: 'eql',
+        isQueryBarValid: true,
+        isThreatQueryBarValid: false,
+        index: ['test-*'],
+        dataViewId: undefined,
+        dataSourceType: DataSourceType.IndexPatterns,
+        threatIndex: [],
+        threatMapping: [],
+        machineLearningJobId: [],
+        queryBar: {
+          filters: [
+            {
+              meta: {},
+              query: {
+                exists: {
+                  field: '_index',
+                },
+              },
+            },
+          ],
+          query: { query: '', language: 'eql' },
+          saved_id: null,
+        },
+        newTermsFields: [],
+      });
+      expect(isDisabled).toEqual(true);
+    });
+
+    test('disabled when eql rule with empty query and empty filters', () => {
+      const isDisabled = getIsRulePreviewDisabled({
+        ruleType: 'eql',
+        isQueryBarValid: true,
+        isThreatQueryBarValid: false,
+        index: ['test-*'],
+        dataViewId: undefined,
+        dataSourceType: DataSourceType.IndexPatterns,
+        threatIndex: [],
+        threatMapping: [],
+        machineLearningJobId: [],
+        queryBar: {
+          filters: [],
+          query: { query: '', language: 'eql' },
+          saved_id: null,
+        },
+        newTermsFields: [],
+      });
+      expect(isDisabled).toEqual(true);
+    });
+
+    test('enabled when eql rule with non empty query', () => {
+      const isDisabled = getIsRulePreviewDisabled({
+        ruleType: 'eql',
+        isQueryBarValid: true,
+        isThreatQueryBarValid: false,
+        index: ['test-*'],
+        dataViewId: undefined,
+        dataSourceType: DataSourceType.IndexPatterns,
+        threatIndex: [],
+        threatMapping: [],
+        machineLearningJobId: [],
+        queryBar: {
+          filters: [],
+          query: { query: 'any where true', language: 'eql' },
           saved_id: null,
         },
         newTermsFields: [],

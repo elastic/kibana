@@ -70,7 +70,6 @@ exports[`zeek_row_renderer renders correctly against snapshot 1`] = `
           },
         }
       }
-      isDraggable={true}
       timelineId="timeline-test"
     />
   </RowRendererContainer>

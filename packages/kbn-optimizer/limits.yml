@@ -31,14 +31,15 @@ pageLoadAssetSize:
   dataUsage: 30000
   dataViewEditor: 28082
   dataViewFieldEditor: 42021
-  dataViewManagement: 5300
+  dataViewManagement: 6250
   dataViews: 65000
   dataVisualizer: 30000
   devTools: 38637
-  discover: 99999
+  discover: 25000
   discoverEnhanced: 42730
   discoverShared: 17111
   embeddable: 24000
+  embeddableAlertsTable: 19615
   embeddableEnhanced: 22107
   enterpriseSearch: 66810
   entityManager: 17175
@@ -95,7 +96,7 @@ pageLoadAssetSize:
   kibanaUsageCollection: 16463
   kibanaUtils: 79713
   kubernetesSecurity: 77234
-  lens: 57135
+  lens: 76079
   licenseManagement: 41817
   licensing: 29004
   links: 8000
@@ -105,7 +106,7 @@ pageLoadAssetSize:
   logsShared: 281060
   logstash: 53548
   management: 46112
-  maps: 90000
+  maps: 46000
   mapsEms: 26072
   metricsDataAccess: 73287
   ml: 85000
@@ -123,8 +124,8 @@ pageLoadAssetSize:
   observabilityShared: 111036
   osquery: 107090
   painlessLab: 179748
-  presentationPanel: 12000
-  presentationUtil: 25000
+  presentationPanel: 11550
+  presentationUtil: 9000
   productDocBase: 22500
   profiling: 36694
   remoteClusters: 51327
@@ -148,10 +149,11 @@ pageLoadAssetSize:
   searchNotebooks: 18942
   searchPlayground: 19325
   searchprofiler: 67080
+  searchQueryRules: 19708
   searchSynonyms: 20262
   security: 81771
   securitySolution: 98429
-  securitySolutionEss: 31781
+  securitySolutionEss: 36000
   securitySolutionServerless: 62488
   serverless: 16573
   serverlessObservability: 68747
@@ -165,6 +167,7 @@ pageLoadAssetSize:
   stackConnectors: 67227
   streams: 16742
   streamsApp: 20537
+  streamsAppWrapper: 20537
   synthetics: 55971
   telemetry: 51957
   telemetryManagementSection: 38586
@@ -176,9 +179,9 @@ pageLoadAssetSize:
   uiActionsEnhanced: 38494
   unifiedDocViewer: 25099
   unifiedHistogram: 19928
-  unifiedSearch: 71059
+  unifiedSearch: 23000
   upgradeAssistant: 81241
-  uptime: 37842
+  uptime: 60000
   urlDrilldown: 30063
   urlForwarding: 32579
   usageCollection: 39762

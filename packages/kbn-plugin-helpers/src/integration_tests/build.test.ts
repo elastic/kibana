@@ -40,9 +40,6 @@ it('builds a generated plugin into a viable archive', async () => {
     process.execPath,
     ['scripts/generate_plugin', '-y', '--name', 'fooTestPlugin'],
     {
-      env: {
-        NODE_OPTIONS: '--openssl-legacy-provider',
-      },
       cwd: REPO_ROOT,
       all: true,
     }
@@ -55,8 +52,7 @@ it('builds a generated plugin into a viable archive', async () => {
   };
 
   expect(filterLogs(generateProc.all)).toMatchInlineSnapshot(`
-    "Kibana is currently running with legacy OpenSSL providers enabled! For details and instructions on how to disable see https://www.elastic.co/guide/en/kibana/current/production.html#openssl-legacy-provider
-     succ 🎉
+    " succ 🎉
 
           Your plugin has been created in plugins/foo_test_plugin
     "
@@ -66,17 +62,13 @@ it('builds a generated plugin into a viable archive', async () => {
     process.execPath,
     ['../../scripts/plugin_helpers', 'build', '--kibana-version', '7.5.0'],
     {
-      env: {
-        NODE_OPTIONS: '--openssl-legacy-provider',
-      },
       cwd: PLUGIN_DIR,
       all: true,
     }
   );
 
   expect(filterLogs(buildProc.all)).toMatchInlineSnapshot(`
-    "Kibana is currently running with legacy OpenSSL providers enabled! For details and instructions on how to disable see https://www.elastic.co/guide/en/kibana/current/production.html#openssl-legacy-provider
-     info deleting the build and target directories
+    " info deleting the build and target directories
      info run bazel and build required artifacts for the optimizer
      succ bazel run successfully and artifacts were created
      info running @kbn/optimizer
@@ -106,8 +98,8 @@ it('builds a generated plugin into a viable archive', async () => {
       "kibana/fooTestPlugin/server/plugin.js",
       "kibana/fooTestPlugin/server/routes/index.js",
       "kibana/fooTestPlugin/server/types.js",
-      "kibana/fooTestPlugin/target/public/fooTestPlugin.chunk.1.js",
-      "kibana/fooTestPlugin/target/public/fooTestPlugin.chunk.1.js.br",
+      "kibana/fooTestPlugin/target/public/fooTestPlugin.chunk.998.js",
+      "kibana/fooTestPlugin/target/public/fooTestPlugin.chunk.998.js.br",
       "kibana/fooTestPlugin/target/public/fooTestPlugin.plugin.js",
       "kibana/fooTestPlugin/target/public/fooTestPlugin.plugin.js.br",
       "kibana/fooTestPlugin/translations/ja-JP.json",

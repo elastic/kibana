@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { Story, type Meta } from '@storybook/react';
+import type { StoryFn, Meta, StoryObj } from '@storybook/react';
 import { ThemeProvider, css } from '@emotion/react';
 import { ReactFlowProvider } from '@xyflow/react';
 import { action } from '@storybook/addon-actions';
@@ -28,7 +28,7 @@ export default {
   },
 } as Meta;
 
-const Template: Story<ControlsProps> = (props) => {
+const Template: StoryFn<ControlsProps> = (props) => {
   return (
     <ThemeProvider theme={{ darkMode: false }}>
       <ReactFlowProvider>
@@ -47,10 +47,12 @@ const Template: Story<ControlsProps> = (props) => {
   );
 };
 
-export const Controls = Template.bind({});
+export const Controls: StoryObj<ControlsProps> = {
+  render: Template,
 
-Controls.args = {
-  showZoom: true,
-  showFitView: true,
-  showCenter: true,
+  args: {
+    showZoom: true,
+    showFitView: true,
+    showCenter: true,
+  },
 };
