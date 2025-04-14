@@ -229,7 +229,7 @@ export const AlertDeleteModal = ({
           <p>{i18n.MODAL_DESCRIPTION}</p>
           <EuiSpacer size="l" />
 
-          <EuiPanel hasShadow={false} hasBorder color="subdued">
+          <EuiPanel hasShadow={false} hasBorder color="subdued" id="alert-delete-active-panel">
             <EuiCheckbox
               id="alert-delete-active"
               data-test-subj="alert-delete-active-checkbox"
