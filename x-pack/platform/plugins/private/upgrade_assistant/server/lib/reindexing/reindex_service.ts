@@ -169,7 +169,12 @@ export const reindexServiceFactory = (
    * @param reindexOp
    */
   const setReadonly = async (reindexOp: ReindexSavedObject) => {
-    const { indexName } = reindexOp.attributes;
+    const { indexName, rollupJob } = reindexOp.attributes;
+
+    if (rollupJob) {
+      await esClient.rollup.stopJob({ id: rollupJob, wait_for_completion: true });
+    }
+
     const putReadonly = await esClient.indices.putSettings({
       index: indexName,
       body: { blocks: { write: true } },
@@ -426,6 +431,11 @@ export const reindexServiceFactory = (
 
     if (reindexOptions?.openAndClose === true) {
       await esClient.indices.close({ index: indexName });
+    }
+
+    if (reindexOp.attributes.rollupJob) {
+      // start the rollup job. rollupJob is undefined if the rollup job is stopped
+      await esClient.rollup.startJob({ id: reindexOp.attributes.rollupJob });
     }
 
     return actions.updateReindexOp(reindexOp, {
