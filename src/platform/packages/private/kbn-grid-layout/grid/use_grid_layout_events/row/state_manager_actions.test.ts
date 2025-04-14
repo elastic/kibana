@@ -32,7 +32,7 @@ describe('row state manager actions', () => {
         second: {} as any as HTMLDivElement,
         third: {} as any as HTMLDivElement,
       };
-      gridLayoutStateManager.rowEndMarkRefs.current = {
+      gridLayoutStateManager.rowGhostRefs.current = {
         second: {} as any as HTMLDivElement,
         third: {} as any as HTMLDivElement,
       };

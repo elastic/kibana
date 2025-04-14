@@ -24,7 +24,7 @@ import { GridPanel } from './grid_panel';
 
 import { GridRowDragPreview } from './grid_row/grid_row_drag_preview';
 import { GridRowStartMark, GridRowHeaderWrapper } from './grid_row/grid_row_header_wrapper';
-import { GridRowEndMark } from './grid_row/grid_row_ghost';
+import { GridRowGhost } from './grid_row/grid_row_ghost';
 
 export type GridLayoutProps = {
   layout: GridLayoutData;
@@ -50,10 +50,7 @@ const getGridsElementData = (layout: GridLayoutData) => {
     const panelElements = row.isCollapsed
       ? []
       : panelIdsInOrder.map((panelId): GridElementData => [panelId, rowId, row.isCollapsed]);
-    const endMark: GridElementData[] = row.isCollapsed
-      ? []
-      : [['row-end-mark', rowId, row.isCollapsed]];
-    return [startMark, ...panelElements, ...endMark];
+    return [['row-ghost', rowId, row.isCollapsed], startMark, ...panelElements];
   });
   return flattenedGridElements;
 };
@@ -121,7 +118,6 @@ export const GridLayout = ({
       .subscribe(([layoutBefore, layoutAfter]) => {
         if (!isLayoutEqual(layoutBefore, layoutAfter)) {
           onLayoutChange(layoutAfter);
-          console.log(layoutAfter);
           const newGridElements = getGridsElementData(layoutAfter);
           if (gridElementsRef.current.join() !== newGridElements.join()) {
             setGridElements(newGridElements);
@@ -232,8 +228,8 @@ export const GridLayout = ({
                   );
                 case 'row-start-mark':
                   return <GridRowStartMark key={typeId} rowId={rowId} />;
-                case 'row-end-mark':
-                  return <GridRowEndMark rowId={rowId} key={`${rowId}-footer`} />;
+                case 'row-ghost':
+                  return <GridRowGhost rowId={rowId} key={`${rowId}-ghost`} />;
                 default:
                   return <GridPanel key={typeId} panelId={typeId} rowId={rowId} />;
               }

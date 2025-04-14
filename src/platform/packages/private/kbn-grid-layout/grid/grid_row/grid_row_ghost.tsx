@@ -10,13 +10,13 @@ import React, { useEffect } from 'react';
 import { combineLatest } from 'rxjs';
 
 import { useGridLayoutContext } from '../use_grid_layout_context';
-import { getTopOffsetForRowFooter } from '../utils/calculations';
+import { getRowHeight, getTopOffsetForRow } from '../utils/calculations';
 
-export const GridRowEndMark = ({ rowId }: { rowId: string }) => {
+export const GridRowGhost = ({ rowId }: { rowId: string }) => {
   const { gridLayoutStateManager } = useGridLayoutContext();
   const styles = {
     pointerEvents: 'none' as const,
-    height: '0px',
+    zIndex: 0,
   };
 
   useEffect(
@@ -26,15 +26,17 @@ export const GridRowEndMark = ({ rowId }: { rowId: string }) => {
         gridLayoutStateManager.gridLayout$,
         gridLayoutStateManager.proposedGridLayout$,
       ]).subscribe(([gridLayout, proposedGridLayout]) => {
-        const elRef = gridLayoutStateManager.rowEndMarkRefs.current[rowId];
+        const elRef = gridLayoutStateManager.rowGhostRefs.current[rowId];
         if (!elRef) return;
         const currentGridLayout = proposedGridLayout || gridLayout;
-        const topOffset = getTopOffsetForRowFooter(rowId, currentGridLayout);
+        const topOffset = getTopOffsetForRow(rowId, currentGridLayout);
+        const rowHeight = getRowHeight(currentGridLayout[rowId]);
+        const bottomPosition = topOffset + rowHeight;
         elRef.style.display = 'block';
         elRef.style.gridColumnStart = `1`;
         elRef.style.gridColumnEnd = `-1`;
         elRef.style.gridRowStart = `${topOffset + 1}`;
-        elRef.style.gridRowEnd = `${topOffset + 1}`;
+        elRef.style.gridRowEnd = `${bottomPosition + 1}`;
       });
 
       return () => {
@@ -47,9 +49,9 @@ export const GridRowEndMark = ({ rowId }: { rowId: string }) => {
   return (
     <div
       style={styles}
-      className="kbnGridRowFooter--ghost"
+      className="kbnGridRow--ghost"
       ref={(element: HTMLDivElement | null) =>
-        (gridLayoutStateManager.rowEndMarkRefs.current[rowId] = element)
+        (gridLayoutStateManager.rowGhostRefs.current[rowId] = element)
       }
     /> // this is used only for calculating the position of the row
   );

@@ -20,10 +20,10 @@ export const startAction = (
   gridLayoutStateManager: GridLayoutStateManager,
   rowId: string
 ) => {
-  const headerRef = gridLayoutStateManager.headerRefs.current[rowId];
-  if (!headerRef) return;
+  const rowRef = gridLayoutStateManager.rowGhostRefs.current[rowId];
+  if (!rowRef) return;
 
-  const startingPosition = pick(headerRef.getBoundingClientRect(), ['top', 'left']);
+  const startingPosition = pick(rowRef.getBoundingClientRect(), ['top', 'left']);
   gridLayoutStateManager.activeRowEvent$.next({
     id: rowId,
     startingPosition,
@@ -53,14 +53,10 @@ export const cancelAction = ({ activeRowEvent$, proposedGridLayout$ }: GridLayou
   proposedGridLayout$.next(undefined);
 };
 
-const getRowMidPoint = (headerRef: HTMLDivElement | null, footerRef: HTMLDivElement | null) => {
-  if (!headerRef) return 0;
-  if (!footerRef) {
-    const { top, height } = headerRef.getBoundingClientRect();
-    return top + height / 2;
-  }
-  const top = headerRef.getBoundingClientRect().top;
-  const bottom = footerRef.getBoundingClientRect().bottom;
+const getRowMidPoint = (rowRef: HTMLDivElement | null) => {
+  if (!rowRef) return 0;
+  const top = rowRef.getBoundingClientRect().top;
+  const bottom = rowRef.getBoundingClientRect().bottom;
   return top + (bottom - top) / 2;
 };
 
@@ -76,25 +72,17 @@ export const moveAction = (
     gridLayoutStateManager.proposedGridLayout$.getValue() ??
     gridLayoutStateManager.gridLayout$.getValue();
   const currentRowOrder = getRowKeysInOrder(currentLayout);
-  currentRowOrder.shift(); // drop first row since nothing can go above it
 
-  // drop first header since nothing can go above it
-  const updatedRowOrder = Object.keys(gridLayoutStateManager.headerRefs.current)
-    .slice(1)
-    .sort((idA, idB) => {
+  const updatedRowOrder = Object.keys(gridLayoutStateManager.rowGhostRefs.current).sort(
+    (idA, idB) => {
       // if expanded, get dimensions of row; otherwise, use the header
-      const midA = getRowMidPoint(
-        gridLayoutStateManager.headerRefs.current[idA],
-        gridLayoutStateManager.rowEndMarkRefs.current[idA]
-      );
-      const midB = getRowMidPoint(
-        gridLayoutStateManager.headerRefs.current[idB],
-        gridLayoutStateManager.rowEndMarkRefs.current[idB]
-      );
+      const midA = getRowMidPoint(gridLayoutStateManager.rowGhostRefs.current[idA]);
+      const midB = getRowMidPoint(gridLayoutStateManager.rowGhostRefs.current[idB]);
       if (!midA || !midB) return 0;
 
       return midA - midB;
-    });
+    }
+  );
 
   if (!deepEqual(currentRowOrder, updatedRowOrder)) {
     const updatedLayout = cloneDeep(currentLayout);

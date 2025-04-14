@@ -53,7 +53,7 @@ export const moveAction = (
     proposedGridLayout$,
     activePanel$,
     headerRefs: { current: gridRowHeaders },
-    rowEndMarkRefs: { current: gridRowFooters },
+    rowGhostRefs: { current: gridRowRefs },
   } = gridLayoutStateManager;
   const interactionEvent = interactionEvent$.value;
   if (!interactionEvent || !runtimeSettings) {
@@ -93,14 +93,12 @@ export const moveAction = (
 
     let highestOverlap = -Infinity;
     let highestOverlapRowId = '';
-    Object.entries(gridRowHeaders).forEach(([id, row]) => {
+    Object.entries(gridRowRefs).forEach(([id, row]) => {
       if (!row) return;
-      const rowTop = row.getBoundingClientRect().top;
-      const footerRef = gridRowFooters[id];
-      if (!footerRef) return; // the row is collapsed so we cannot drop into it
-      const rowBottom = footerRef?.getBoundingClientRect().bottom || rowTop + rowHeight;
+      const { top: rowTop, bottom: rowBottom } = row.getBoundingClientRect();
       const overlap = Math.min(previewBottom, rowBottom) - Math.max(previewRect.top, rowTop);
-      if (overlap > highestOverlap) {
+      // do not allow to drop into a collapsed row
+      if (overlap > highestOverlap && !currentLayout[id].isCollapsed) {
         highestOverlap = overlap;
         highestOverlapRowId = id;
       }

@@ -48,7 +48,7 @@ export const getGridLayoutStateManagerMock = (overrides?: Partial<GridLayoutStat
     }),
     panelRefs: { current: {} },
     headerRefs: { current: {} },
-    rowEndMarkRefs: { current: {} },
+    rowGhostRefs: { current: {} },
     accessMode$: new BehaviorSubject<GridAccessMode>('EDIT'),
     interactionEvent$: new BehaviorSubject<PanelInteractionEvent | undefined>(undefined),
     activePanel$: new BehaviorSubject<ActivePanel | undefined>(undefined),

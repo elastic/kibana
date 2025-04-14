@@ -20,13 +20,10 @@ export interface GridRowHeaderProps {
   collapseButtonRef: React.MutableRefObject<HTMLButtonElement | null>;
 }
 
-
-
 export const GridRowStartMark = React.memo(({ rowId }: { rowId: string }) => {
   const { gridLayoutStateManager } = useGridLayoutContext();
 
-
-   useEffect(
+  useEffect(
     () => {
       /** Update the styles of the drag preview via a subscription to prevent re-renders */
       const styleSubscription = combineLatest([
@@ -51,7 +48,6 @@ export const GridRowStartMark = React.memo(({ rowId }: { rowId: string }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   );
-
 
   return (
     <div

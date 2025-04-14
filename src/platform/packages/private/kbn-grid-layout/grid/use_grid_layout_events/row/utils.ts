@@ -24,8 +24,7 @@ export const getNextKeyboardPosition = (
     },
   } = gridLayoutStateManager;
 
-  const headerRef = headerRefs[rowId];
-  const headerRefHeight = (headerRef?.getBoundingClientRect().height || 48) * 0.5;
+  const headerRefHeight = (headerRefs[rowId]?.getBoundingClientRect().height || 48) * 0.5;
   const stepY = headerRefHeight;
 
   switch (ev.code) {
