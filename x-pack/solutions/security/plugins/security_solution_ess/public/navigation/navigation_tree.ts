@@ -367,6 +367,18 @@ export const createNavigationTree = (services: Services): NavigationTreeDefiniti
           ],
         },
         {
+          id: SecurityPageName.entityAnalyticsLanding,
+          link: securityLink(SecurityPageName.entityAnalyticsLanding),
+          renderAs: 'panelOpener',
+          spaceBefore: null,
+          children: [
+            {
+              id: SecurityPageName.privilegedUserMonitoring,
+              link: securityLink(SecurityPageName.privilegedUserMonitoring),
+            },
+          ],
+        },
+        {
           breadcrumbStatus: 'hidden',
           children: [
             {
