@@ -36,7 +36,7 @@ import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
 const SUPPRESS_BY_FIELDS = ['myhash.mysha256', 'source.ip.keyword'];
 
 describe(
-  'Detection rules, Indicator Match, Alert Suppression',
+  'Indicator Match - Alert suppression',
   {
     tags: ['@ess', '@serverless'],
   },

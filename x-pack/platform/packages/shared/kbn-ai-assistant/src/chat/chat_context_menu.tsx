@@ -129,12 +129,7 @@ export function ChatContextMenu({
         `}
         icon={<EuiIcon type="trash" size="m" color="danger" />}
         onClick={() => {
-          confirmDeleteCallback(
-            i18n.translate('xpack.aiAssistant.flyout.confirmDeleteCheckboxLabel', {
-              defaultMessage: 'Delete "{title}"',
-              values: { title: conversationTitle },
-            })
-          ).then((confirmed) => {
+          confirmDeleteCallback().then((confirmed) => {
             if (!confirmed) {
               return;
             }
