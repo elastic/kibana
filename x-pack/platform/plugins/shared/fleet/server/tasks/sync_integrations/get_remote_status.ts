@@ -47,10 +47,10 @@ export const getRemoteSyncedIntegrationsInfoByOutputId = async (
       throw new FleetError(`Synced integrations not enabled`);
     }
     if (!kibanaUrl || kibanaUrl === '') {
-      throw new FleetError(`Remote Kibana URL not set on the output.`);
+      throw new FleetNotFoundError(`Remote Kibana URL not set on the output.`);
     }
     if (!kibanaApiKey) {
-      throw new FleetError(`Remote Kibana API key for ${kibanaUrl} not found`);
+      throw new FleetNotFoundError(`Remote Kibana API key for ${kibanaUrl} not found`);
     }
     const options: RequestInit = {
       headers: {
@@ -68,6 +68,8 @@ export const getRemoteSyncedIntegrationsInfoByOutputId = async (
     const res = await fetch(url, options);
 
     if (!res?.ok) {
+      if (res?.status === 404) throw new FleetNotFoundError(`error: ${res?.text}`);
+
       throw new FleetError(`error: ${res?.text}, status: ${res?.status}`);
     }
 

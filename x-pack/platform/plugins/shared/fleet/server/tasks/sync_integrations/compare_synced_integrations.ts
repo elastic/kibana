@@ -132,13 +132,17 @@ const compareIntegrations = (
       const localIntegrationSO = installedIntegrationsByName[ccrIntegration.package_name];
       if (!localIntegrationSO) {
         return {
-          ...ccrIntegration,
+          package_name: ccrIntegration.package_name,
+          package_version: ccrIntegration.package_version,
+          updated_at: ccrIntegration.updated_at,
           sync_status: 'synchronizing' as SyncStatus.SYNCHRONIZING,
         };
       }
       if (ccrIntegration.package_version !== localIntegrationSO?.attributes.version) {
         return {
-          ...ccrIntegration,
+          package_name: ccrIntegration.package_name,
+          package_version: ccrIntegration.package_version,
+          updated_at: ccrIntegration.updated_at,
           sync_status: 'failed' as SyncStatus.FAILED,
           error: `Found incorrect installed version ${localIntegrationSO?.attributes.version}`,
         };
@@ -155,13 +159,16 @@ const compareIntegrations = (
           ? `- reason: ${localIntegrationSO?.attributes?.latest_install_failed_attempts[0].error.message}`
           : '';
         return {
-          ...ccrIntegration,
+          package_name: ccrIntegration.package_name,
+          package_version: ccrIntegration.package_version,
+          updated_at: ccrIntegration.updated_at,
           sync_status: 'failed' as SyncStatus.FAILED,
           error: `Installation status: ${localIntegrationSO?.attributes.install_status} ${latestFailedAttempt} ${latestFailedAttemptTime}`,
         };
       }
       return {
-        ...ccrIntegration,
+        package_name: ccrIntegration.package_name,
+        package_version: ccrIntegration.package_version,
         sync_status: 'completed' as SyncStatus.COMPLETED,
         updated_at: localIntegrationSO?.updated_at,
       };
