@@ -9,7 +9,7 @@
 
 import React, { Fragment, memo, useEffect, useRef, useMemo, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiText, EuiPage, EuiPageBody, EuiSpacer, useEuiPaddingSize useEuiTheme, } from '@elastic/eui';
+import { EuiText, EuiPage, EuiPageBody, EuiSpacer, useEuiPaddingSize, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { cloneDeep } from 'lodash';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
@@ -264,11 +264,12 @@ export const ContextApp = ({ dataView, anchorId, referrer }: ContextAppProps) =>
               paddingSize="none"
               css={dscDocsContentCss}
               panelProps={{ role: 'main' }}
-            >	<strong>
+            >	
               <EuiText
                 data-test-subj="contextDocumentSurroundingHeader"
                 css={css`
                   padding: ${titlePadding} ${titlePadding} 0;
+                  font-weight: ${euiTheme.font.weight.bold};
                 `}
               >
                   <FormattedMessage
@@ -276,11 +277,13 @@ export const ContextApp = ({ dataView, anchorId, referrer }: ContextAppProps) =>
                     defaultMessage="Documents surrounding "
                   />
                   <span css={css`
-                    padding: ${titlePadding} ${titlePadding} 0;
-                  `}>{anchorId}
+                    background-color: ${euiTheme.colors.backgroundBaseWarning};
+                    color: ${euiTheme.colors.textWarning};
+                    padding: 0 ${euiTheme.size.xs};
+                  `}>
+                    {anchorId}
                   </span>
               </EuiText>
-						</strong>
               <EuiSpacer size="s" />
               <ContextAppContentMemoized
                 dataView={dataView}
