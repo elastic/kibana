@@ -10,11 +10,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { FC } from 'react';
 import React from 'react';
 import type { FileUploadResults } from '@kbn/file-upload-common';
-import type { ResultLinks } from '../../common/app';
-import {
-  ResultsLinks,
-  type GetAdditionalLinks,
-} from '../application/common/components/results_links';
+import type { ResultLinks } from '../../../../common/app';
 import { FileClashWarning } from './file_clash_warning';
 import { STATUS } from './file_manager/file_manager';
 import { FilePicker } from './file_picker';
@@ -25,6 +21,8 @@ import { useFileUploadContext } from './use_file_upload';
 import { AdvancedSection } from './advanced_section';
 import { UploadImage } from './upload_image';
 import { IndexSelection } from './index_selection';
+import type { GetAdditionalLinks } from '../../common/components/results_links';
+import { ResultsLinks } from '../../common/components/results_links';
 
 interface Props {
   resultLinks?: ResultLinks;

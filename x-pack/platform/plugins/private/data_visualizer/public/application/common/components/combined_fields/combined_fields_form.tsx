@@ -21,13 +21,13 @@ import {
 
 import type { IngestPipeline } from '@kbn/file-upload-plugin/common';
 import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
-import type { FileAnalysis } from '../../../../new/file_manager/file_wrapper';
-import { getFieldsFromMappings } from '../../../../new/file_manager/merge_tools';
 import type { CombinedField } from './types';
 import { GeoPointForm } from './geo_point';
 import { CombinedFieldLabel } from './combined_field_label';
 import { removeCombinedFieldsFromMappings, removeCombinedFieldsFromPipeline } from './utils';
 import { SemanticTextForm } from './semantic_text';
+import { getFieldsFromMappings } from '../../../file_data_visualizer/new/file_manager/merge_tools';
+import type { FileAnalysis } from '../../../file_data_visualizer/new/file_manager/file_wrapper';
 
 interface Props {
   mappings: MappingTypeMapping;

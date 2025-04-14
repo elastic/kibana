@@ -14,8 +14,8 @@ import {
 } from '@kbn/file-upload-common';
 
 import type { OpenFileUploadLiteContext } from '@kbn/file-upload-common';
-import type { DataVisualizerStartDependencies } from '../application/common/types/data_visualizer_plugin';
 import { createFlyout } from './flyout/create_flyout';
+import type { DataVisualizerStartDependencies } from '../../common/types/data_visualizer_plugin';
 
 export const createOpenFileUploadLiteTrigger: Trigger = {
   id: OPEN_FILE_UPLOAD_LITE_TRIGGER,

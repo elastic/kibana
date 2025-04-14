@@ -9,7 +9,7 @@ import type { FC } from 'react';
 import React, { useEffect, useState } from 'react';
 import type { IndicesIndexSettings } from '@elastic/elasticsearch/lib/api/types';
 import useDebounce from 'react-use/lib/useDebounce';
-import { IndexSettings } from '../../application/file_data_visualizer/components/import_settings/advanced/inputs';
+import { IndexSettings } from '../../components/import_settings/advanced/inputs';
 
 interface Props {
   settings: IndicesIndexSettings;

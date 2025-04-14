@@ -12,7 +12,11 @@ import { i18n } from '@kbn/i18n';
 import { IndexInput } from './index_input';
 import { UPLOAD_TYPE, useFileUploadContext } from '../use_file_upload';
 
-export const IndexSelection: FC = () => {
+interface Props {
+  allowExistingIndices?: boolean;
+}
+
+export const IndexSelection: FC<Props> = ({ allowExistingIndices = true }) => {
   const {
     setIndexName,
     setIndexValidationStatus,
@@ -47,7 +51,7 @@ export const IndexSelection: FC = () => {
 
   return (
     <>
-      {indexCreateMode !== undefined && setIndexCreateMode !== undefined ? (
+      {allowExistingIndices === true ? (
         <>
           <EuiRadioGroup
             options={[

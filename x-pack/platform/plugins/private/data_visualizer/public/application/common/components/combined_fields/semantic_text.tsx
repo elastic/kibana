@@ -25,10 +25,10 @@ import type {
   InferenceInferenceEndpointInfo,
   MappingTypeMapping,
 } from '@elastic/elasticsearch/lib/api/types';
-import { getFieldsFromMappings } from '../../../../new/file_manager/merge_tools';
 import { createSemanticTextCombinedField, getNameCollisionMsg } from './utils';
 import { useDataVisualizerKibana } from '../../../kibana_context';
 import type { AddCombinedField } from './combined_fields_form';
+import { getFieldsFromMappings } from '../../../file_data_visualizer/new/file_manager/merge_tools';
 
 interface Props {
   addCombinedField: AddCombinedField;

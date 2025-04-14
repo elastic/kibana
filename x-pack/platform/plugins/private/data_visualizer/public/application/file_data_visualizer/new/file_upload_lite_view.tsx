@@ -23,18 +23,18 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { FC } from 'react';
 import React from 'react';
 import type { OpenFileUploadLiteContext } from '@kbn/file-upload-common';
-import type { ResultLinks } from '../../common/app';
-import type { GetAdditionalLinks } from '../application/common/components/results_links';
+
 import { FileClashWarning } from './file_clash_warning';
 import { STATUS } from './file_manager/file_manager';
 import { FilePicker } from './file_picker';
 import { FileStatus } from './file_status';
-
 import { OverallUploadStatus } from './overall_upload_status';
 import { ImportErrors } from './import_errors';
 import { useFileUploadContext } from './use_file_upload';
 import { UploadImage } from './upload_image';
 import { IndexSelection } from './index_selection';
+import type { GetAdditionalLinks } from '../../common/components/results_links';
+import type { ResultLinks } from '../../../../common/app';
 
 interface Props {
   resultLinks?: ResultLinks;
@@ -151,7 +151,11 @@ export const FileUploadLiteView: FC<Props> = ({ props, onClose }) => {
           {uploadStatus.overallImportStatus === STATUS.NOT_STARTED &&
           filesStatus.length > 0 &&
           uploadStatus.analysisStatus !== STATUS.NOT_STARTED ? (
-            <>{fileUploadManager.isExistingIndexUpload() === false ? <IndexSelection /> : null}</>
+            <>
+              {fileUploadManager.isExistingIndexUpload() === false ? (
+                <IndexSelection allowExistingIndices={false} />
+              ) : null}
+            </>
           ) : null}
           {uploadInProgress ? (
             <>

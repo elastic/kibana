@@ -27,11 +27,7 @@ import { i18n } from '@kbn/i18n';
 import type { FileUploadResults } from '@kbn/file-upload-common';
 import type { FileAnalysis } from './file_wrapper';
 import { FileWrapper } from './file_wrapper';
-import {
-  createKibanaDataView,
-  getInferenceId,
-} from '../../application/file_data_visualizer/components/import_view/import';
-import { AutoDeploy } from '../../application/file_data_visualizer/components/import_view/auto_deploy';
+
 import type { FileClash } from './merge_tools';
 import {
   CLASH_ERROR_TYPE,
@@ -39,7 +35,9 @@ import {
   getFormatClashes,
   getMappingClashInfo,
 } from './merge_tools';
-import { createUrlOverrides } from '../../application/common/components/utils';
+import { createUrlOverrides } from '../../../common/components/utils';
+import { AutoDeploy } from '../../components/import_view/auto_deploy';
+import { getInferenceId, createKibanaDataView } from '../../components/import_view/import';
 
 export enum STATUS {
   NA,

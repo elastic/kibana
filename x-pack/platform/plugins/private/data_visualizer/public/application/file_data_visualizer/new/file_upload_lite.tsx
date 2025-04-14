@@ -10,12 +10,12 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type { OpenFileUploadLiteContext } from '@kbn/file-upload-common';
 import type { CoreStart } from '@kbn/core/public';
-import type { ResultLinks } from '../../common/app';
-import type { GetAdditionalLinks } from '../application/common/components/results_links';
+import type { ResultLinks } from '../../../../common/app';
 import { FileUploadLiteView } from './file_upload_lite_view';
 import { FileUploadManager } from './file_manager/file_manager';
-import type { DataVisualizerStartDependencies } from '../application/common/types/data_visualizer_plugin';
 import { FileUploadContext, useFileUpload } from './use_file_upload';
+import type { GetAdditionalLinks } from '../../common/components/results_links';
+import type { DataVisualizerStartDependencies } from '../../common/types/data_visualizer_plugin';
 
 export interface Props {
   coreStart: CoreStart;

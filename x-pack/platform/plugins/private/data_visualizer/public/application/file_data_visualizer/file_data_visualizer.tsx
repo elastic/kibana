@@ -15,9 +15,9 @@ import { getCoreStart, getPluginsStart } from '../../kibana_services';
 // @ts-ignore
 import { FileDataVisualizerView } from './components/file_data_visualizer_view';
 import type { GetAdditionalLinks } from '../common/components/results_links';
-import { FileUploadManager } from '../../new/file_manager';
-import { FileUploadView } from '../../new/file_upload_view';
-import { FileUploadContext, useFileUpload } from '../../new/use_file_upload';
+import { FileUploadManager } from './new/file_manager';
+import { FileUploadContext, useFileUpload } from './new/use_file_upload';
+import { FileUploadView } from './new/file_upload_view';
 
 export interface Props {
   resultLinks?: ResultLinks;

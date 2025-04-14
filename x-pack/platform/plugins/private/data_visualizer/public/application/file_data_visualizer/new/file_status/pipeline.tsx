@@ -9,7 +9,7 @@ import type { FC } from 'react';
 import React, { useEffect, useState } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 import type { IngestPipeline as IngestPipelineType } from '@kbn/file-upload-plugin/common/types';
-import { IngestPipeline as IngestPipelineEditor } from '../../application/file_data_visualizer/components/import_settings/advanced/inputs';
+import { IngestPipeline as IngestPipelineEditor } from '../../components/import_settings/advanced/inputs';
 
 interface Props {
   pipeline: IngestPipelineType;

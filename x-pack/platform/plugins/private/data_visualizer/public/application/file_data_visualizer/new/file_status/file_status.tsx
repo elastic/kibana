@@ -23,19 +23,17 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { IngestPipeline as IngestPipelineType } from '@kbn/file-upload-plugin/common';
 import type { FileAnalysis } from '../file_manager/file_wrapper';
 import { STATUS } from '../file_manager/file_manager';
-import { FieldsStatsGrid } from '../../application/common/components/fields_stats_grid';
-
-import { FileContents } from '../../application/file_data_visualizer/components/file_contents';
-import { FileCouldNotBeRead } from '../../application/file_data_visualizer/components/file_data_visualizer_view/file_error_callouts';
 import { FileClashResult } from './file_clash';
 import { Mappings } from './mappings';
 import { IngestPipeline } from './pipeline';
 import { UploadProgress } from './progress';
 import { AnalysisExplanation } from './analysis_explanation';
-
 import { AnalysisOverrides } from './analysis_overrides';
-import { AnalysisSummary } from '../../application/file_data_visualizer/components/analysis_summary';
 import { useFileUploadContext } from '../use_file_upload';
+import { FieldsStatsGrid } from '../../../common/components/fields_stats_grid';
+import { AnalysisSummary } from '../../components/analysis_summary';
+import { FileContents } from '../../components/file_contents';
+import { FileCouldNotBeRead } from '../../components/file_data_visualizer_view/file_error_callouts';
 
 enum TAB {
   SUMMARY,

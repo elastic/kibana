@@ -22,10 +22,10 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { IngestPipeline } from '@kbn/file-upload-plugin/common';
 import { Mappings } from './file_status/mappings';
 import { Settings } from './file_status/settings';
-import { CreateDataViewToolTip } from '../application/file_data_visualizer/components/import_settings/create_data_view_tooltip';
-import type { CombinedField } from '../application/common/components/combined_fields';
-import { CombinedFieldsForm } from '../application/common/components/combined_fields';
 import { UPLOAD_TYPE, useFileUploadContext } from './use_file_upload';
+import type { CombinedField } from '../../common/components/combined_fields';
+import { CombinedFieldsForm } from '../../common/components/combined_fields';
+import { CreateDataViewToolTip } from '../components/import_settings/create_data_view_tooltip';
 
 interface Props {
   canCreateDataView?: boolean;

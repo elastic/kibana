@@ -10,8 +10,8 @@ import type { FC } from 'react';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { InputOverrides } from '@kbn/file-upload-plugin/common';
-import { EditFlyout } from '../../application/file_data_visualizer/components/edit_flyout';
 import type { FileAnalysis } from '../file_manager/file_wrapper';
+import { EditFlyout } from '../../components/edit_flyout';
 
 interface Props {
   fileStatus: FileAnalysis;

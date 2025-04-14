@@ -14,12 +14,12 @@ import type {
   InputOverrides,
 } from '@kbn/file-upload-plugin/common/types';
 import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
-import { isSupportedFormat } from '../../../common/constants';
-import { isTikaType } from '../../../common/utils/tika_utils';
-import { processResults, readFile } from '../../application/common/components/utils';
-import { analyzeTikaFile } from '../../application/file_data_visualizer/components/file_data_visualizer_view/tika_analyzer';
+import { isSupportedFormat } from '../../../../../common/constants';
+import { isTikaType } from '../../../../../common/utils/tika_utils';
+import { processResults, readFile } from '../../../common/components/utils';
+import { FileSizeChecker } from '../../components/file_data_visualizer_view/file_size_check';
+import { analyzeTikaFile } from '../../components/file_data_visualizer_view/tika_analyzer';
 import { STATUS } from './file_manager';
-import { FileSizeChecker } from '../../application/file_data_visualizer/components/file_data_visualizer_view/file_size_check';
 
 interface AnalysisResults {
   analysisStatus: STATUS;

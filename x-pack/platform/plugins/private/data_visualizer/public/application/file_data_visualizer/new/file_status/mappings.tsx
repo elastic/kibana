@@ -11,7 +11,7 @@ import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import useDebounce from 'react-use/lib/useDebounce';
 import { EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Mappings as MappingsEditor } from '../../application/file_data_visualizer/components/import_settings/advanced/inputs';
+import { Mappings as MappingsEditor } from '../../components/import_settings/advanced/inputs';
 
 interface Props {
   mappings: MappingTypeMapping;
