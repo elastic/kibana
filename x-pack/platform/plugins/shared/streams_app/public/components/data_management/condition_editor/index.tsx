@@ -22,6 +22,7 @@ import {
   BinaryFilterCondition,
   Condition,
   FilterCondition,
+  isCondition,
   isNeverCondition,
 } from '@kbn/streams-schema';
 import { i18n } from '@kbn/i18n';
@@ -102,6 +103,8 @@ export interface ConditionEditorProps {
 
 export function ConditionEditor(props: ConditionEditorProps) {
   const condition = alwaysToEmptyEquals(props.condition);
+  const isInvalidCondition = !isCondition(props.condition);
+  console.log(props.condition, condition);
 
   const isFilterCondition = isPlainObject(condition) && 'operator' in condition;
 
@@ -125,6 +128,14 @@ export function ConditionEditor(props: ConditionEditorProps) {
           checked={usingSyntaxEditor}
           onChange={toggleSyntaxEditor}
         />
+      }
+      isInvalid={isInvalidCondition}
+      error={
+        isInvalidCondition
+          ? i18n.translate('xpack.streams.conditionEditor.error', {
+              defaultMessage: 'The condition is invalid or in unrecognized format.',
+            })
+          : undefined
       }
     >
       {usingSyntaxEditor ? (
