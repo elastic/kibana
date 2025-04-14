@@ -485,7 +485,7 @@ const InsightEditorComponent = ({
                   filters={filtersStub}
                   onChange={onChange}
                   dataView={dataView}
-                  maxDepth={2}
+                  maxDepth={1}
                 />
               ) : (
                 <></>
