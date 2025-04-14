@@ -35,6 +35,10 @@ export const startAction = (
   });
 };
 
+const isActiveRow = (id: string, activeRowId: string) => {
+  return id === activeRowId;
+}
+
 export const commitAction = ({
   activeRowEvent$,
   proposedGridLayout$,
@@ -73,8 +77,16 @@ export const moveAction = (
   const currentRowOrder = getRowKeysInOrder(currentLayout);
 
   const updatedRowOrder = Object.entries(gridLayoutStateManager.rowGhostRefs.current)
-    .sort(([, refA], [, refB]) => getRowMidPoint(refA) - getRowMidPoint(refB))
+    .sort(([idA, refA], [idB, refB]) => {
+      // todo: find a smarter way to do this
+      // if the row is active, use the header ref to get the mid point since it is the one that is being dragged
+      const midPointA = isActiveRow(idA, currentActiveRowEvent.id) ? getRowMidPoint(gridLayoutStateManager.headerRefs.current[idA]) : getRowMidPoint(refA);
+      const midPointB = isActiveRow(idB, currentActiveRowEvent.id) ? getRowMidPoint(gridLayoutStateManager.headerRefs.current[idB]) : getRowMidPoint(refB);
+      return midPointA - midPointB;
+    })
     .map(([id]) => id);
+
+
 
   if (!deepEqual(currentRowOrder, updatedRowOrder)) {
     const updatedLayout = cloneDeep(currentLayout);
