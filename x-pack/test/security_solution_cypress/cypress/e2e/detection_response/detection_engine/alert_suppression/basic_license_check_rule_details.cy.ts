@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getNewThreatIndicatorRule } from '../../../../objects/rule';
+import { getEqlRule, getNewThreatIndicatorRule } from '../../../../objects/rule';
 
 import {
   SUPPRESS_FOR_DETAILS,
@@ -13,6 +13,7 @@ import {
   SUPPRESS_MISSING_FIELD,
   DEFINITION_DETAILS,
   ALERT_SUPPRESSION_INSUFFICIENT_LICENSING_ICON,
+  DETAILS_TITLE,
 } from '../../../../screens/rule_details';
 
 import { startBasicLicense } from '../../../../tasks/api_calls/licensing';
@@ -28,19 +29,19 @@ import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
 const SUPPRESS_BY_FIELDS = ['myhash.mysha256', 'source.ip.keyword'];
 
 describe(
-  'Detection rules, Indicator Match, Alert Suppression',
+  'Alert Suppression license check - Rule Details',
   {
     tags: ['@ess'],
   },
   () => {
-    describe('Create rule form', () => {
-      beforeEach(() => {
-        deleteAlertsAndRules();
-        login();
-        visit(CREATE_RULE_URL);
-        startBasicLicense();
-      });
+    beforeEach(() => {
+      deleteAlertsAndRules();
+      login();
+      visit(CREATE_RULE_URL);
+      startBasicLicense();
+    });
 
+    describe('Indicator match', () => {
       it('shows upselling message on rule details with suppression on basic license', () => {
         const rule = getNewThreatIndicatorRule();
 
@@ -61,6 +62,41 @@ describe(
               'have.text',
               'Do not suppress alerts for events with missing fields'
             );
+          });
+
+          // Platinum license is required for configuration to apply
+          cy.get(ALERT_SUPPRESSION_INSUFFICIENT_LICENSING_ICON).eq(2).trigger('mouseover');
+          cy.get(TOOLTIP).contains(
+            'Alert suppression is configured but will not be applied due to insufficient licensing'
+          );
+        });
+      });
+    });
+
+    describe('EQL rule', () => {
+      it('shows an upselling message on rule suppression details', () => {
+        const rule = getEqlRule();
+
+        createRule({
+          ...rule,
+          alert_suppression: {
+            group_by: SUPPRESS_BY_FIELDS,
+            duration: { value: 360, unit: 's' },
+            missing_fields_strategy: 'doNotSuppress',
+          },
+        }).then((createdRule) => {
+          visit(ruleDetailsUrl(createdRule.body.id));
+
+          cy.get(DEFINITION_DETAILS).within(() => {
+            getDetails(SUPPRESS_BY_DETAILS).should('have.text', SUPPRESS_BY_FIELDS.join(''));
+            getDetails(SUPPRESS_FOR_DETAILS).should('have.text', '360s');
+            getDetails(SUPPRESS_MISSING_FIELD).should(
+              'have.text',
+              'Do not suppress alerts for events with missing fields'
+            );
+
+            // suppression functionality should be under Tech Preview
+            cy.contains(DETAILS_TITLE, SUPPRESS_FOR_DETAILS).contains('Technical Preview');
           });
 
           // Platinum license is required for configuration to apply
