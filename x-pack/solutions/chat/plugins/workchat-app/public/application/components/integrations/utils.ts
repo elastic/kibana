@@ -30,3 +30,16 @@ export const statusToLabel = (status: Status) => {
       return status;
   }
 };
+
+export const getIntegrationIcon = (integrationType: string): string | { type: string } => {
+  switch (integrationType.toLowerCase()) {
+    case 'salesforce':
+      return 'https://upload.wikimedia.org/wikipedia/commons/f/f9/Salesforce.com_logo.svg';
+    case 'index':
+      return 'document'
+    case 'external_server':
+      return 'database'
+    default:
+      return '';
+  }
+};

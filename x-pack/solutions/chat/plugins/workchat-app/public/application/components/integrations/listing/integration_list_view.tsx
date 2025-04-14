@@ -5,14 +5,32 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
-import { EuiBasicTable, EuiBasicTableColumn, EuiButton, EuiCheckbox, EuiFlexGroup, EuiFlexItem, EuiHealth, EuiIcon, EuiSpacer, EuiTab, EuiTabs, EuiTitle } from '@elastic/eui';
+import React, { useState } from 'react';
+import {
+  Criteria,
+  EuiAccordion,
+  EuiAvatar,
+  EuiBasicTable,
+  EuiBasicTableColumn,
+  EuiButton,
+  EuiCheckbox,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHealth,
+  EuiHorizontalRule,
+  EuiIcon,
+  EuiPanel,
+  EuiSpacer,
+  EuiText,
+  IconType,
+} from '@elastic/eui';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import { IntegrationType, Status} from '@kbn/wci-common';
+import { IntegrationType, Status } from '@kbn/wci-common';
 import type { Integration } from '../../../../../common/integrations';
 import { useNavigation } from '../../../hooks/use_navigation';
 import { appPaths } from '../../../app_paths';
-import { integrationTypeToLabel } from '../utils';
+import { integrationTypeToLabel, getIntegrationIcon } from '../utils';
+import { useAgentList } from '../../../hooks/use_agent_list';
 
 interface IntegrationListViewProps {
   integrations: Integration[];
@@ -21,51 +39,29 @@ interface IntegrationListViewProps {
 export const IntegrationListView: React.FC<IntegrationListViewProps> = ({ integrations }) => {
   const [selectedItems, setSelectedItems] = useState<Record<string, boolean>>({});
   const [selectedTabId, setSelectedTabId] = useState('active');
-  
-  const onTabClick = (selectedTab: { id: string }) => {
-    setSelectedTabId(selectedTab.id);
-  };
+  const { agents } = useAgentList();
+
   const toggleItem = (itemId: string) => {
     setSelectedItems({
       ...selectedItems,
-      [itemId]: !selectedItems[itemId]
+      [itemId]: !selectedItems[itemId],
     });
   };
+
   const { navigateToWorkchatUrl } = useNavigation();
-
-  const tabs = [
-    {
-      id: 'active',
-      name: 'Active',
-      disabled: false,
-    },
-    {
-      id: 'catalog',
-      name: 'Catalog',
-      disabled: false,
-    },
-
-  ];
-
-  const [pagination, setPagination] = useState({
-    pageIndex: 0,
-    pageSize: 10,
-    totalItemCount: 0,
-  });
-  
-  const [displayedItems, setDisplayedItems] = useState<Integration[]>([]);
-  
-  useEffect(() => {
-    const startIndex = pagination.pageIndex * pagination.pageSize;
-    const endIndex = startIndex + pagination.pageSize;
-    setDisplayedItems(integrations.slice(startIndex, endIndex));
-    setPagination({
-      ...pagination,
-      totalItemCount: integrations.length,
-    });
-  }, [pagination.pageIndex, pagination.pageSize, integrations]);
-   
   const columns: Array<EuiBasicTableColumn<Integration>> = [
+    {
+      field: 'dropDown',
+      width: '30px',
+      name: '',
+      render: (_, item: Integration) => (
+        <EuiAccordion id={`accordion-${item.id}`} buttonContent="" paddingSize="s">
+          <EuiPanel color="subdued">
+            <EuiText size="s" />
+          </EuiPanel>
+        </EuiAccordion>
+      ),
+    },
     {
       field: 'selection',
       width: '40px',
@@ -77,29 +73,44 @@ export const IntegrationListView: React.FC<IntegrationListViewProps> = ({ integr
           onChange={() => toggleItem(item.id)}
           aria-label={`Select ${item.name}`}
         />
-      )
+      ),
     },
-    { field: 'name', 
+    {
+      field: 'name',
       name: 'Name',
-      render: (name: String) => (
+      render: (_, item: Integration) => (
         <EuiFlexGroup alignItems="center" gutterSize="xs">
           <EuiFlexItem grow={false}>
-          <EuiIcon type="document" />
+            <EuiIcon
+              type={getIntegrationIcon(item.type) as IconType}
+              size='m'
+            />
           </EuiFlexItem>
-          <EuiFlexItem>
-            {name}
-          </EuiFlexItem>
+          <EuiFlexItem>{item.name}</EuiFlexItem>
         </EuiFlexGroup>
-      ) },
+      ),
+    },
     {
       field: 'type',
       name: 'Type',
       render: (type: IntegrationType) => integrationTypeToLabel(type),
     },
-    { field: 'status', 
+    {
+      field: 'status',
       name: 'Status',
-      render: (status: Status) => <EuiHealth color='green'>Connected</EuiHealth>},
-    { field: 'used_in', name: 'Used in...' },
+      render: (status: Status) => <EuiHealth color="green">Healthy</EuiHealth>,
+    },
+    {
+      field: 'used_in',
+      name: 'Used in...',
+      render: () => (
+        <EuiFlexGroup gutterSize="none">
+          {agents.map((agent) => (
+            <EuiAvatar key={agent.id || agent.name} size="s" name={agent.name} />
+          ))}
+        </EuiFlexGroup>
+      ),
+    },
     {
       name: 'Actions',
       actions: [
@@ -118,57 +129,102 @@ export const IntegrationListView: React.FC<IntegrationListViewProps> = ({ integr
     },
   ];
 
-  const renderTabs = () => {
-    return tabs.map((tab) => (
-      <EuiTab
-        key={tab.id}
-        onClick={() => onTabClick(tab)}
-        isSelected={tab.id === selectedTabId}
-        disabled={tab.disabled}
-      >
-        {tab.name}
-      </EuiTab>
-    ));
+  const renderTabs = () => [
+    {
+      id: 'active',
+      label: 'Active',
+      isSelected: selectedTabId === 'active',
+      onClick: () => setSelectedTabId('active'),
+    },
+    {
+      id: 'catalog',
+      label: 'Catalog',
+      isSelected: selectedTabId === 'catalog',
+      onClick: () => setSelectedTabId('catalog'),
+    },
+  ];
+  const [pageIndex, setPageIndex] = useState(0);
+  const [pageSize, setPageSize] = useState(10);
+
+  const onTableChange = ({ page }: Criteria<Integration>) => {
+    if (page) {
+      const { index: pageIndex, size: pageSize } = page;
+      setPageIndex(pageIndex);
+      setPageSize(pageSize);
+    }
   };
 
-  return (
-    <KibanaPageTemplate panelled>
-      <KibanaPageTemplate.Header pageTitle="Integrations" description="Connect to your tools and data so you can easily find, understand, and act on the information that matters "/>
-        
-      <KibanaPageTemplate.Section grow={false} paddingSize="m">
-      <EuiFlexGroup justifyContent="flexEnd">
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              onClick={() => {
-                return navigateToWorkchatUrl(appPaths.integrations.create);
-              }}
-              iconType="plusInCircle"
-            >
-              Add integration
-            </EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </KibanaPageTemplate.Section>
+  const findIntegrations = (integrations: Integration[], pageIndex: number, pageSize: number) => {
+    let pageOfItems;
 
-      <KibanaPageTemplate.Section>
-        <EuiTabs>{renderTabs()}</EuiTabs>
-          <EuiSpacer size="m" />
-          
-          {selectedTabId === 'active' && (
-            <EuiBasicTable 
-            columns={columns} 
-            items={integrations}
+    if (!pageIndex && !pageSize) {
+      pageOfItems = integrations;
+    } else {
+      const startIndex = pageIndex * pageSize;
+      pageOfItems = integrations.slice(
+        startIndex,
+        Math.min(startIndex + pageSize, integrations.length)
+      );
+    }
+
+    return {
+      pageOfItems,
+      totalItemCount: integrations.length,
+    };
+  };
+
+  const { pageOfItems, totalItemCount } = findIntegrations(integrations, pageIndex, pageSize);
+
+  const resultsCount =
+    pageSize === 0 ? (
+      <strong>All</strong>
+    ) : (
+      <>
+        <strong>
+          {pageSize * pageIndex + 1}-{pageSize * pageIndex + pageSize}
+        </strong>{' '}
+        of {totalItemCount}
+      </>
+    );
+
+  return (
+    <KibanaPageTemplate data-test-subj="integrationsListPage">
+      <KibanaPageTemplate.Header
+        pageTitle="Integrations"
+        description="Connect to your tools and data so you can easily find, understand, and act on the information that matters."
+        tabs={renderTabs()}
+        rightSideItems={[
+          <EuiButton
+            onClick={() => {
+              return navigateToWorkchatUrl(appPaths.integrations.create);
+            }}
+            iconType="plusInCircle"
+            color="primary"
+            fill
+          >
+            Add Integration
+          </EuiButton>,
+        ]}
+      />
+      <EuiHorizontalRule margin="none" css={{ height: 2 }} />
+      {selectedTabId === 'active' && (
+        <KibanaPageTemplate.Section>
+          <EuiText size="xs">Showing {resultsCount}</EuiText>
+          <EuiSpacer size="s" />
+          <EuiBasicTable
+            columns={columns}
+            items={pageOfItems}
             pagination={{
-              pageIndex: pagination.pageIndex,
-              pageSize: pagination.pageSize,
-              totalItemCount: pagination.totalItemCount,
+              pageIndex,
+              pageSize,
+              totalItemCount,
               pageSizeOptions: [5, 10, 20, 50],
               showPerPageOptions: true,
             }}
-            onChange={({}) => {}}
-            />
-        )}
-      </KibanaPageTemplate.Section>
+            onChange={onTableChange}
+          />
+        </KibanaPageTemplate.Section>
+      )}
     </KibanaPageTemplate>
   );
 };
