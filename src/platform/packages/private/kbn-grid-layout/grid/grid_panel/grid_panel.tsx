@@ -103,7 +103,7 @@ export const GridPanel = React.memo(({ panelId, rowId }: GridPanelProps) => {
           }
           if (!ref || !panel) return;
 
-          const headerOffset = activeLayout[row].order === 0 ? 0 : 2;
+          const headerOffset = activeLayout[row].isCollapsible ? 2 : 0;
           const gridRowOffset = headerOffset + getTopOffsetForRow(row, activeLayout);
 
           if (isPanelActive) {
