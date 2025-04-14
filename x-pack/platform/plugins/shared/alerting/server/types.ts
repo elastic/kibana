@@ -59,7 +59,7 @@ import type { GetTimeRangeResult } from './lib/get_time_range';
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
 export type SpaceIdToNamespaceFunction = (spaceId?: string) => string | undefined;
 export type { RuleTypeParams };
-export type { Artifact };
+export type { Artifacts };
 /**
  * @public
  */
