@@ -72,7 +72,7 @@ export const moveAction = (
     gridLayout$: { value: gridLayout },
     activeRowEvent$: { value: activeRowEvent },
     layoutRef: { current: gridLayoutElement },
-    rowRefs: { current: gridRowElements },
+    rowContainerRefs: { current: gridRowElements },
   } = gridLayoutStateManager;
   if (!activeRowEvent) return;
 
@@ -83,13 +83,27 @@ export const moveAction = (
   const targetedGridTop = gridLayoutElement?.getBoundingClientRect().top ?? 0;
   let localYCoordinate = currentPointer.clientY - targetedGridTop;
   Object.entries(gridRowElements).forEach(([id, row]) => {
-    if (!row || (nextLayout[id] as GridRowData).isCollapsed) return;
-    const rowRect = row.getBoundingClientRect();
-    if (rowRect.y <= currentPointer.clientY) localYCoordinate -= rowRect.height;
+    if (!row) return;
+    const { top, height } = row.getBoundingClientRect();
+    if (top <= currentPointer.clientY) {
+      localYCoordinate -= height;
+      localYCoordinate += rowHeight;
+    }
   });
+
   const targetRow = Math.max(Math.round(localYCoordinate / (rowHeight + gutterSize)), 0);
-  (nextLayout[activeRowEvent.id] as GridRowData).row = targetRow;
-  nextLayout = resolveMainGrid(nextLayout);
+  const { [activeRowEvent.id]: interactingRow, ...otherWidgets } = nextLayout;
+  nextLayout = resolveMainGrid(otherWidgets, {
+    id: activeRowEvent.id,
+    row: targetRow,
+    column: 0,
+    height: 1,
+    width: 48,
+  });
+  nextLayout[activeRowEvent.id] = {
+    ...currentLayout[activeRowEvent.id],
+    row: nextLayout[activeRowEvent.id].row,
+  };
 
   if (!isLayoutEqual(currentLayout, nextLayout)) {
     gridLayoutStateManager.proposedGridLayout$.next(nextLayout);

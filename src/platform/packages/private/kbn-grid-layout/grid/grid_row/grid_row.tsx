@@ -154,6 +154,9 @@ export const GridRow = React.memo(({ rowId }: GridRowProps) => {
 
   return (
     <div
+      ref={(element: HTMLDivElement | null) =>
+        (gridLayoutStateManager.rowContainerRefs.current[rowId] = element)
+      }
       css={[
         styles.fullHeight,
         styles.gridWrapper,

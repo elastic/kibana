@@ -65,13 +65,11 @@ export const getMainLayoutInOrder = (
       if (widgetA.type === 'panel') {
         // widgetB is a section
         const [panel, section] = [widgetA as GridPanelData, widgetB as GridRowData];
-        if (panel.row >= section.row) return 1; // panel should be put after section
-        return -1; // panel should be put before section
+        return panel.row - section.row;
       } else {
         // widgetA is a section
         const [panel, section] = [widgetB as GridPanelData, widgetA as GridRowData];
-        if (panel.row >= section.row) return -1; // panel should be put after section
-        return 1; // panel should be put before section
+        return section.row - panel.row;
       }
     } else {
       return compareRow(widgetA, widgetB);
@@ -146,7 +144,7 @@ export const resolveMainGrid = (
   }
 
   const sortedLayout = getMainLayoutInOrder(nextLayoutData);
-
+  console.log(sortedLayout);
   const sectionsAsPanels: GridRowData['panels'] = sortedLayout.reduce((prev, widget) => {
     return {
       ...prev,
