@@ -17,7 +17,7 @@ export const buildContext = (messages: BaseMessage[]): Record<string, unknown> =
     .filter((message) => messageContainsToolCalls(message))
     .flatMap((message) => (message as AIMessage).tool_calls)
     .filter((toolCall) => toolCall !== undefined)
-    .filter((toolCall) => (toolCall as ToolCall).name === toolDetails.name);
+    .filter((toolCall) => (toolCall as ToolCall).name === toolDetails.name) as ToolCall[];
 
   const orderedInspectIndexMappingToolCallIds = orderedInspectIndexMappingToolCalls.map(
     (toolCall) => toolCall.id
