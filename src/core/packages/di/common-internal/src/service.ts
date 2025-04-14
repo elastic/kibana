@@ -10,7 +10,6 @@
 import { Container, type interfaces } from 'inversify';
 import type { PluginOpaqueId } from '@kbn/core-base-common';
 import type { InternalCoreDiServiceSetup, InternalCoreDiServiceStart } from './contracts';
-import { LifecycleModule } from './modules/lifecycle';
 import { Plugin, PluginModule } from './modules/plugin';
 
 /** @internal */
@@ -45,7 +44,6 @@ export class CoreInjectionService {
     const contract = {
       getContainer: this.getContainer,
     };
-    this.root.load(new LifecycleModule());
     this.root.load(new PluginModule());
 
     return contract;
