@@ -161,31 +161,6 @@ const StartStep: React.FC<StartStepProps> = ({
                 </EuiFormRow>
               </EuiFlexItem>
             </EuiFlexGroup>
-            <EuiSpacer size="m" />
-            <EuiFlexItem>
-              <EuiFormRow
-                fullWidth
-                label={i18n.translate(
-                  'xpack.searchConnectorscreateConnector.startStep.euiFormRow.descriptionLabel',
-                  { defaultMessage: 'Description' }
-                )}
-                labelAppend={
-                  <EuiText size="xs">
-                    {i18n.translate(
-                      'xpack.searchConnectorscreateConnector.startStep.euiFormRow.descriptionLabelAppend',
-                      { defaultMessage: 'Optional' }
-                    )}
-                  </EuiText>
-                }
-              >
-                <EuiFieldText
-                  disabled={!!connector}
-                  data-test-subj="enterpriseSearchStartStepFieldText"
-                  fullWidth
-                  name="connectorDescription"
-                />
-              </EuiFormRow>
-            </EuiFlexItem>
           </EuiPanel>
         </EuiFlexItem>
         {/* Set up */}
