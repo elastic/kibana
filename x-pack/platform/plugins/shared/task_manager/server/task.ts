@@ -55,6 +55,12 @@ export interface RunContext {
    * The document describing the task instance, its params, state, id, etc.
    */
   taskInstance: ConcreteTaskInstance;
+
+  /**
+   * If an API key is associated with the task, a fake KibanaRequest object
+   * is generated using the API key and passed as part of the run context.
+   */
+  fakeRequest?: KibanaRequest;
 }
 
 /**
