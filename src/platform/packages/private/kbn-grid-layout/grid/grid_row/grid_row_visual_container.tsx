@@ -12,7 +12,7 @@ import { combineLatest } from 'rxjs';
 import { useGridLayoutContext } from '../use_grid_layout_context';
 import { getRowHeight, getTopOffsetForRow } from '../utils/calculations';
 
-export const GridRowGhost = ({ rowId }: { rowId: string }) => {
+export const GridRowVisualContainer = ({ rowId }: { rowId: string }) => {
   const { gridLayoutStateManager } = useGridLayoutContext();
   const styles = {
     pointerEvents: 'none' as const,
@@ -26,7 +26,7 @@ export const GridRowGhost = ({ rowId }: { rowId: string }) => {
         gridLayoutStateManager.gridLayout$,
         gridLayoutStateManager.proposedGridLayout$,
       ]).subscribe(([gridLayout, proposedGridLayout]) => {
-        const elRef = gridLayoutStateManager.rowGhostRefs.current[rowId];
+        const elRef = gridLayoutStateManager.rowDimensionsRefs.current[rowId];
         if (!elRef) return;
         const currentGridLayout = proposedGridLayout || gridLayout;
         const topOffset = getTopOffsetForRow(rowId, currentGridLayout);
@@ -51,7 +51,7 @@ export const GridRowGhost = ({ rowId }: { rowId: string }) => {
       style={styles}
       className="kbnGridRow--ghost"
       ref={(element: HTMLDivElement | null) =>
-        (gridLayoutStateManager.rowGhostRefs.current[rowId] = element)
+        (gridLayoutStateManager.rowDimensionsRefs.current[rowId] = element)
       }
     /> // this is used only for calculating the position of the row
   );

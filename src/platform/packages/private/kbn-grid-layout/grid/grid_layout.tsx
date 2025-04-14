@@ -23,8 +23,8 @@ import { GridPanelDragPreview } from './grid_panel/grid_panel_drag_preview';
 import { GridPanel } from './grid_panel';
 
 import { GridRowDragPreview } from './grid_row/grid_row_drag_preview';
-import { GridRowStartMark, GridRowHeaderWrapper } from './grid_row/grid_row_header_wrapper';
-import { GridRowGhost } from './grid_row/grid_row_ghost';
+import { GridRowHeaderEmpty, GridRowHeaderWrapper } from './grid_row/grid_row_header_wrapper';
+import { GridRowVisualContainer } from './grid_row/grid_row_visual_container';
 
 export type GridLayoutProps = {
   layout: GridLayoutData;
@@ -227,9 +227,9 @@ export const GridLayout = ({
                     />
                   );
                 case 'row-start-mark':
-                  return <GridRowStartMark key={typeId} rowId={rowId} />;
+                  return <GridRowHeaderEmpty key={typeId} rowId={rowId} />;
                 case 'row-ghost':
-                  return <GridRowGhost rowId={rowId} key={`${rowId}-ghost`} />;
+                  return <GridRowVisualContainer rowId={rowId} key={`${rowId}-ghost`} />;
                 default:
                   return <GridPanel key={typeId} panelId={typeId} rowId={rowId} />;
               }

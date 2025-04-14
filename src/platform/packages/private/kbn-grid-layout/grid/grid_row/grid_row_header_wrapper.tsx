@@ -41,30 +41,9 @@ export const GridRowHeaderWrapper = ({
     collapseButtonRef.current.ariaExpanded = `${!isCollapsed}`;
   }, [isCollapsed]);
 
-  useEffect(
-    () => {
-      /** Update the styles of the drag preview via a subscription to prevent re-renders */
-      const styleSubscription = combineLatest([
-        gridLayoutStateManager.gridLayout$,
-        gridLayoutStateManager.proposedGridLayout$,
-      ]).subscribe(([gridLayout, proposedGridLayout]) => {
-        const headerRef = gridLayoutStateManager.headerRefs.current[rowId];
-        if (!headerRef) return;
-        const currentGridLayout = proposedGridLayout || gridLayout;
-        const topOffset = getTopOffsetForRow(rowId, currentGridLayout);
-        headerRef.style.display = 'block';
-        headerRef.style.gridColumnStart = `1`;
-        headerRef.style.gridColumnEnd = `-1`;
-        headerRef.style.gridRowStart = `${topOffset + 1}`;
-        headerRef.style.gridRowEnd = `${topOffset + 1 + COLLAPSIBLE_HEADER_HEIGHT}`;
-      });
-
-      return () => {
-        styleSubscription.unsubscribe();
-      };
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
+  useStyleSubscription(
+    rowId,
+    gridLayoutStateManager
   );
 
   return (
@@ -87,10 +66,27 @@ export const GridRowHeaderWrapper = ({
 };
 
 // equivalent of the header for non-collapsible rows used for calculations
-export const GridRowStartMark = React.memo(({ rowId }: { rowId: string }) => {
+export const GridRowHeaderEmpty = React.memo(({ rowId }: { rowId: string }) => {
   const { gridLayoutStateManager } = useGridLayoutContext();
+  useStyleSubscription(
+    rowId,
+    gridLayoutStateManager
+  );
+  return (
+    <div
+      style={{ pointerEvents: 'none', height: '0px' }}
+      ref={(element: HTMLDivElement | null) => {
+        gridLayoutStateManager.headerRefs.current[rowId] = element;
+      }}
+    />
+  );
+});
 
-  useEffect(
+const useStyleSubscription = (
+  rowId: string,
+  gridLayoutStateManager: ReturnType<typeof useGridLayoutContext>['gridLayoutStateManager']
+) => {
+    useEffect(
     () => {
       /** Update the styles of the drag preview via a subscription to prevent re-renders */
       const styleSubscription = combineLatest([
@@ -115,13 +111,5 @@ export const GridRowStartMark = React.memo(({ rowId }: { rowId: string }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   );
+};
 
-  return (
-    <div
-      style={{ pointerEvents: 'none', height: '0px' }}
-      ref={(element: HTMLDivElement | null) => {
-        gridLayoutStateManager.headerRefs.current[rowId] = element;
-      }}
-    />
-  );
-});

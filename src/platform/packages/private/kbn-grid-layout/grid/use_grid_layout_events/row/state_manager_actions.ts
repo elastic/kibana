@@ -10,7 +10,7 @@
 import deepEqual from 'fast-deep-equal';
 import { cloneDeep, pick } from 'lodash';
 
-import { ActiveRowEvent, GridLayoutStateManager } from '../../types';
+import { GridLayoutStateManager } from '../../types';
 import { getRowKeysInOrder } from '../../utils/resolve_grid_row';
 import { getSensorType } from '../sensors';
 import { PointerPosition, UserInteractionEvent } from '../types';
@@ -20,10 +20,10 @@ export const startAction = (
   gridLayoutStateManager: GridLayoutStateManager,
   rowId: string
 ) => {
-  const rowRef = gridLayoutStateManager.rowGhostRefs.current[rowId];
-  if (!rowRef) return;
+  const headerRef = gridLayoutStateManager.rowDimensionsRefs.current[rowId];
+  if (!headerRef) return;
 
-  const startingPosition = pick(rowRef.getBoundingClientRect(), ['top', 'left']);
+  const startingPosition = pick(headerRef.getBoundingClientRect(), ['top', 'left']);
   gridLayoutStateManager.activeRowEvent$.next({
     id: rowId,
     startingPosition,
@@ -37,7 +37,7 @@ export const startAction = (
 
 const isActiveRow = (id: string, activeRowId: string) => {
   return id === activeRowId;
-}
+};
 
 export const commitAction = ({
   activeRowEvent$,
@@ -76,24 +76,25 @@ export const moveAction = (
     gridLayoutStateManager.gridLayout$.getValue();
   const currentRowOrder = getRowKeysInOrder(currentLayout);
 
-
   const dropTargetRowId = getDropTarget(currentPointer, gridLayoutStateManager);
 
   let updatedRowOrder = currentRowOrder;
 
   if (dropTargetRowId && currentLayout[dropTargetRowId].isCollapsible) {
-  updatedRowOrder = Object.entries(gridLayoutStateManager.rowGhostRefs.current)
-    .sort(([idA, refA], [idB, refB]) => {
-      // todo: find a smarter way to do this
-      // if the row is active, use the header ref to get the mid point since it is the one that is being dragged
-      const midPointA = isActiveRow(idA, currentActiveRowEvent.id) ? getRowMidPoint(gridLayoutStateManager.headerRefs.current[idA]) : getRowMidPoint(refA);
-      const midPointB = isActiveRow(idB, currentActiveRowEvent.id) ? getRowMidPoint(gridLayoutStateManager.headerRefs.current[idB]) : getRowMidPoint(refB);
-      return midPointA - midPointB;
-    })
-    .map(([id]) => id);
+    updatedRowOrder = Object.entries(gridLayoutStateManager.rowDimensionsRefs.current)
+      .sort(([idA, refA], [idB, refB]) => {
+        // todo: find a smarter way to do this
+        // if the row is active, use the header ref to get the mid point since it is the one that is being dragged
+        const midPointA = isActiveRow(idA, currentActiveRowEvent.id)
+          ? getRowMidPoint(gridLayoutStateManager.headerRefs.current[idA])
+          : getRowMidPoint(refA);
+        const midPointB = isActiveRow(idB, currentActiveRowEvent.id)
+          ? getRowMidPoint(gridLayoutStateManager.headerRefs.current[idB])
+          : getRowMidPoint(refB);
+        return midPointA - midPointB;
+      })
+      .map(([id]) => id);
   }
-
-
 
   if (!deepEqual(currentRowOrder, updatedRowOrder)) {
     const updatedLayout = cloneDeep(currentLayout);
@@ -112,13 +113,11 @@ export const moveAction = (
   });
 };
 
-
-
-function getDropTarget (
+function getDropTarget(
   currentPointer: PointerPosition,
-  gridLayoutStateManager: GridLayoutStateManager,
+  gridLayoutStateManager: GridLayoutStateManager
 ) {
-  const rowRefs = gridLayoutStateManager.rowGhostRefs.current;
+  const rowRefs = gridLayoutStateManager.rowDimensionsRefs.current;
   const rowIds = Object.keys(rowRefs);
   const rowRef = rowIds.find((id) => {
     const ref = rowRefs[id];
@@ -127,4 +126,4 @@ function getDropTarget (
     return currentPointer.clientY >= top && currentPointer.clientY <= bottom;
   });
   return rowRef;
-};
+}

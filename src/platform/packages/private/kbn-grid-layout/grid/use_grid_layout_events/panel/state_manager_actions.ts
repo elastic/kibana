@@ -53,7 +53,7 @@ export const moveAction = (
     proposedGridLayout$,
     activePanel$,
     headerRefs: { current: gridRowHeaders },
-    rowGhostRefs: { current: gridRowRefs },
+    rowDimensionsRefs: { current: gridRowRefs },
   } = gridLayoutStateManager;
   const interactionEvent = interactionEvent$.value;
   if (!interactionEvent || !runtimeSettings) {

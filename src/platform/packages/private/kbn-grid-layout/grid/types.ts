@@ -89,7 +89,7 @@ export interface GridLayoutStateManager {
 
   layoutRef: React.MutableRefObject<HTMLDivElement | null>;
   headerRefs: React.MutableRefObject<{ [rowId: string]: HTMLDivElement | null }>;
-  rowGhostRefs: React.MutableRefObject<{ [rowId: string]: HTMLDivElement | null }>;
+  rowDimensionsRefs: React.MutableRefObject<{ [rowId: string]: HTMLDivElement | null }>;
   panelRefs: React.MutableRefObject<{ [panelId: string]: HTMLDivElement | null }>;
 }
 
