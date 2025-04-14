@@ -22,6 +22,8 @@ import type {
   DefendInsightsPostRequestBody,
   DeleteKnowledgeBaseEntryRequestParams,
   KnowledgeBaseEntryUpdateProps,
+  AlertSummaryCreateProps,
+  AlertSummaryUpdateProps,
   UpdateAttackDiscoverySchedulesRequestBody,
   UpdateKnowledgeBaseEntryRequestParams,
 } from '@kbn/elastic-assistant-common';
@@ -66,10 +68,6 @@ import {
   AnonymizationFieldCreateProps,
   AnonymizationFieldUpdateProps,
 } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
-import {
-  AlertSummaryCreateProps,
-  AlertSummaryUpdateProps,
-} from '@kbn/elastic-assistant-common/impl/schemas/alert_summary/bulk_crud_alert_summary_route.gen';
 
 export const requestMock = {
   create: httpServerMock.createKibanaRequest,
