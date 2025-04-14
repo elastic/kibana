@@ -40,6 +40,7 @@ enabled:
   - x-pack/test_serverless/functional/test_suites/security/config.saved_objects_management.ts
   - x-pack/test_serverless/functional/test_suites/security/config.context_awareness.ts
   - x-pack/test_serverless/functional/test_suites/security/config.examples.context_awareness.ts
+  - x-pack/test_serverless/functional/test_suites/security/common_configs/config.config_compat_mode.ts
   - x-pack/test_serverless/functional/test_suites/security/common_configs/config.group1.ts
   - x-pack/test_serverless/functional/test_suites/security/common_configs/config.group2.ts
   - x-pack/test_serverless/functional/test_suites/security/common_configs/config.group3.ts
