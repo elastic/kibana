@@ -20,14 +20,24 @@ const fixedTimePurge = t.type({
   timestamp: dateType,
 });
 
-const bulkPurgeRollupSchema = t.type({
-  query: t.partial({
-    force: t.string,
-  }),
-  body: t.type({
-    ids: t.array(t.string),
-    purgePolicy: t.union([fixedAgePurge, fixedTimePurge]),
-  }),
-});
+const purgePolicy = t.union([fixedAgePurge, fixedTimePurge]);
 
+const bulkPurgeRollupSchema = t.intersection([
+  t.partial({
+    query: t.partial({
+      force: t.string,
+    }),
+  }),
+  t.type({
+    body: t.type({
+      ids: t.array(t.string),
+      purgePolicy,
+    }),
+  }),
+]);
+
+type PurgePolicyType = t.TypeOf<typeof purgePolicy>;
+type PurgeSLIInput = t.OutputOf<(typeof bulkPurgeRollupSchema.types)[1]>; // Raw payload sent by the frontend
+
+export type { PurgePolicyType, PurgeSLIInput };
 export { bulkPurgeRollupSchema };

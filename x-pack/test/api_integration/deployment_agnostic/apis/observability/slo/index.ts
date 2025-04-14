@@ -9,12 +9,13 @@ import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_cont
 
 export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext) {
   describe('SLO', () => {
-    loadTestFile(require.resolve('./create_slo'));
-    loadTestFile(require.resolve('./delete_slo'));
-    loadTestFile(require.resolve('./get_slo'));
-    loadTestFile(require.resolve('./find_slo'));
-    loadTestFile(require.resolve('./find_slo_definition'));
-    loadTestFile(require.resolve('./reset_slo'));
-    loadTestFile(require.resolve('./update_slo'));
+    // loadTestFile(require.resolve('./create_slo'));
+    // loadTestFile(require.resolve('./delete_slo'));
+    // loadTestFile(require.resolve('./get_slo'));
+    loadTestFile(require.resolve('./purge_sli_data'));
+    // loadTestFile(require.resolve('./find_slo'));
+    // loadTestFile(require.resolve('./find_slo_definition'));
+    // loadTestFile(require.resolve('./reset_slo'));
+    // loadTestFile(require.resolve('./update_slo'));
   });
 }

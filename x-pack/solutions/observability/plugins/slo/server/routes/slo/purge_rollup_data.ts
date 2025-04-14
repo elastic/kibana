@@ -31,7 +31,7 @@ export const purgeRollupDataRoute = createSloServerRoute({
     const purgePolicy = params.body.purgePolicy;
     const purgeRollupData = new PurgeRollupData(esClient);
 
-    if (params.query.force !== 'true') {
+    if (params.query?.force !== 'true') {
       if (purgePolicy.purgeType === 'fixed_age') {
         if (
           slos.some((slo) => {

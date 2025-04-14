@@ -8,6 +8,7 @@
 import { RoleCredentials } from '@kbn/ftr-common-functional-services';
 import { CreateSLOInput, FindSLODefinitionsResponse, UpdateSLOInput } from '@kbn/slo-schema';
 import { StoredSLODefinition } from '@kbn/slo-plugin/server/domain/models/slo';
+import { PurgeSLIInput } from '@kbn/slo-schema/src/rest_specs/routes/bulk_purge_rollup';
 import { DeploymentAgnosticFtrProviderContext } from '../ftr_provider_context';
 
 interface SavedObject<Attributes extends Record<string, any>> {
@@ -157,6 +158,25 @@ export function SloApiProvider({ getService }: DeploymentAgnosticFtrProviderCont
             .expect(204);
         })
       );
+    },
+
+    async purgeRollupData(
+      ids: string[],
+      purgePolicy: PurgeSLIInput['body']['purgePolicy'],
+      roleAuthc: RoleCredentials,
+      expectedStatus: number
+    ) {
+      const { body } = await supertestWithoutAuth
+        .post(`/api/observability/slos/_purge_rollup`)
+        .set(roleAuthc.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send({
+          ids,
+          purgePolicy,
+        })
+        .expect(expectedStatus);
+
+      return body;
     },
   };
 }
