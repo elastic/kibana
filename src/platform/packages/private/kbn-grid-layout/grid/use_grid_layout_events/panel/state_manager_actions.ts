@@ -52,7 +52,6 @@ export const moveAction = (
     interactionEvent$,
     proposedGridLayout$,
     activePanel$,
-    headerRefs: { current: gridRowHeaders },
     rowDimensionsRefs: { current: gridRowRefs },
   } = gridLayoutStateManager;
   const interactionEvent = interactionEvent$.value;
@@ -93,16 +92,18 @@ export const moveAction = (
 
     let highestOverlap = -Infinity;
     let highestOverlapRowId = '';
-    Object.entries(gridRowRefs).forEach(([id, row]) => {
-      if (!row) return;
-      const { top: rowTop, bottom: rowBottom } = row.getBoundingClientRect();
-      const overlap = Math.min(previewBottom, rowBottom) - Math.max(previewRect.top, rowTop);
-      // do not allow to drop into a collapsed row
-      if (overlap > highestOverlap && !currentLayout[id].isCollapsed) {
-        highestOverlap = overlap;
-        highestOverlapRowId = id;
-      }
-    });
+    Object.entries(gridRowRefs)
+      .filter(([id]) => !currentLayout[id].isCollapsed)
+      .forEach(([id, row]) => {
+        if (!row) return;
+        const { top: rowTop, bottom: rowBottom } = row.getBoundingClientRect();
+        const overlap = Math.min(previewBottom, rowBottom) - Math.max(previewRect.top, rowTop);
+        // do not allow to drop into a collapsed row
+        if (overlap > highestOverlap) {
+          highestOverlap = overlap;
+          highestOverlapRowId = id;
+        }
+      });
     return highestOverlapRowId;
   })();
   const hasChangedGridRow = targetRowId !== lastRowId;
@@ -116,9 +117,10 @@ export const moveAction = (
   }
 
   // calculate the requested grid position
-  const targetedGridRowHeader = gridRowHeaders[targetRowId];
-  const targetedGridLeft = targetedGridRowHeader?.getBoundingClientRect().left ?? 0;
-  const targetedGridTop = targetedGridRowHeader?.getBoundingClientRect().bottom ?? 0;
+  // TODO
+  const targetedRowRef = gridRowRefs[targetRowId];
+  const targetedGridLeft = targetedRowRef?.getBoundingClientRect().left ?? 0;
+  const targetedGridTop = targetedRowRef?.getBoundingClientRect().top ?? 0;
 
   const maxColumn = isResize ? columnCount : columnCount - currentPanelData.width;
 

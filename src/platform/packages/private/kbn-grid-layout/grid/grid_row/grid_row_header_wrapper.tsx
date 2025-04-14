@@ -41,10 +41,7 @@ export const GridRowHeaderWrapper = ({
     collapseButtonRef.current.ariaExpanded = `${!isCollapsed}`;
   }, [isCollapsed]);
 
-  useStyleSubscription(
-    rowId,
-    gridLayoutStateManager
-  );
+  useStyleSubscription(rowId, gridLayoutStateManager);
 
   return (
     <div
@@ -68,10 +65,7 @@ export const GridRowHeaderWrapper = ({
 // equivalent of the header for non-collapsible rows used for calculations
 export const GridRowHeaderEmpty = React.memo(({ rowId }: { rowId: string }) => {
   const { gridLayoutStateManager } = useGridLayoutContext();
-  useStyleSubscription(
-    rowId,
-    gridLayoutStateManager
-  );
+  useStyleSubscription(rowId, gridLayoutStateManager);
   return (
     <div
       style={{ pointerEvents: 'none', height: '0px' }}
@@ -86,7 +80,7 @@ const useStyleSubscription = (
   rowId: string,
   gridLayoutStateManager: ReturnType<typeof useGridLayoutContext>['gridLayoutStateManager']
 ) => {
-    useEffect(
+  useEffect(
     () => {
       /** Update the styles of the drag preview via a subscription to prevent re-renders */
       const styleSubscription = combineLatest([
@@ -112,4 +106,3 @@ const useStyleSubscription = (
     []
   );
 };
-

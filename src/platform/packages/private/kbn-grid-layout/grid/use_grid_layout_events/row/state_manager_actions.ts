@@ -20,7 +20,7 @@ export const startAction = (
   gridLayoutStateManager: GridLayoutStateManager,
   rowId: string
 ) => {
-  const headerRef = gridLayoutStateManager.rowDimensionsRefs.current[rowId];
+  const headerRef = gridLayoutStateManager.headerRefs.current[rowId];
   if (!headerRef) return;
 
   const startingPosition = pick(headerRef.getBoundingClientRect(), ['top', 'left']);
@@ -57,10 +57,15 @@ export const cancelAction = ({ activeRowEvent$, proposedGridLayout$ }: GridLayou
   proposedGridLayout$.next(undefined);
 };
 
-const getRowMidPoint = (rowRef: HTMLDivElement | null) => {
-  if (!rowRef) return 0;
-  const { top, height } = rowRef.getBoundingClientRect();
-  return top + height / 2;
+const getRowMidPoint = (headerRef: HTMLDivElement | null, rowRef: HTMLDivElement | null) => {
+  if (!headerRef) return 0;
+  if (!rowRef) {
+    const { top, height } = headerRef.getBoundingClientRect();
+    return top + height / 2;
+  }
+  const { top } = headerRef.getBoundingClientRect();
+  const { bottom } = rowRef.getBoundingClientRect();
+  return top + (bottom - top) / 2;
 };
 
 export const moveAction = (
@@ -81,19 +86,20 @@ export const moveAction = (
   let updatedRowOrder = currentRowOrder;
 
   if (dropTargetRowId && currentLayout[dropTargetRowId].isCollapsible) {
-    updatedRowOrder = Object.entries(gridLayoutStateManager.rowDimensionsRefs.current)
-      .sort(([idA, refA], [idB, refB]) => {
+    updatedRowOrder = Object.keys(gridLayoutStateManager.headerRefs.current)
+      .sort((idA, idB) => {
         // todo: find a smarter way to do this
         // if the row is active, use the header ref to get the mid point since it is the one that is being dragged
-        const midPointA = isActiveRow(idA, currentActiveRowEvent.id)
-          ? getRowMidPoint(gridLayoutStateManager.headerRefs.current[idA])
-          : getRowMidPoint(refA);
-        const midPointB = isActiveRow(idB, currentActiveRowEvent.id)
-          ? getRowMidPoint(gridLayoutStateManager.headerRefs.current[idB])
-          : getRowMidPoint(refB);
+        const midPointA = getRowMidPoint(
+          gridLayoutStateManager.headerRefs.current[idA],
+          gridLayoutStateManager.rowDimensionsRefs.current[idA]
+        );
+        const midPointB = getRowMidPoint(
+          gridLayoutStateManager.headerRefs.current[idB],
+          gridLayoutStateManager.rowDimensionsRefs.current[idA]
+        );
         return midPointA - midPointB;
       })
-      .map(([id]) => id);
   }
 
   if (!deepEqual(currentRowOrder, updatedRowOrder)) {
