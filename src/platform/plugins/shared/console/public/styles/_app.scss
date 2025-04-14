@@ -49,7 +49,8 @@
   padding: 0;
 }
 
-.conApp__output, .conApp_example {
+.conApp__output,
+.conApp_example {
   height: 100%;
   display: flex;
   flex: 1 1 1px;
@@ -113,7 +114,8 @@
  */
 .console__monaco_editor__selectedRequests {
   position: relative;
-  padding: $euiSizeXS; /* Adds space between border and text */
+  padding: $euiSizeXS;
+  /* Adds space between border and text */
 }
 
 /* Adding a pseudo-element to create padding between the border and the line in the Monaco editor */
@@ -127,7 +129,8 @@
   background: transparentize($euiColorPrimary, .9);
   border: $euiBorderThin;
   border-color: $euiColorPrimary;
-  pointer-events: none; /* Ensures the pseudo-element doesn't block interactions */
+  pointer-events: none;
+  /* Ensures the pseudo-element doesn't block interactions */
 }
 
 /*
