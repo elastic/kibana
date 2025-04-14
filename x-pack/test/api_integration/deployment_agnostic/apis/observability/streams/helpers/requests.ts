@@ -178,40 +178,19 @@ export async function importContent(
   name: string,
   body: {
     include: ContentPackIncludedObjects;
-    content: Readable;
+    content: Buffer;
   },
   expectStatusCode: number = 200
 ) {
   return await apiClient
-    .fetch('POST /api/streams/{name}/content/import 2023-10-31', {
+    .sendFile('POST /api/streams/{name}/content/import 2023-10-31', {
       params: {
         path: { name },
         body: {
           include: JSON.stringify(body.include),
-          content: body.content,
         },
       },
-    })
-    .expect(expectStatusCode)
-    .then((response) => response.body);
-}
-
-export async function previewContent(
-  apiClient: StreamsSupertestRepositoryClient,
-  name: string,
-  body: {
-    content: Readable;
-  },
-  expectStatusCode: number = 200
-) {
-  return await apiClient
-    .fetch('POST /api/streams/{name}/content/preview 2023-10-31', {
-      params: {
-        path: { name },
-        body: {
-          content: body.content,
-        },
-      },
+      file: { key: 'content', filename: 'content_pack.zip', data: body.content },
     })
     .expect(expectStatusCode)
     .then((response) => response.body);

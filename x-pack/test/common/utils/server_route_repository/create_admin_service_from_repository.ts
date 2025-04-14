@@ -15,6 +15,7 @@ import {
 import { Subtract, RequiredKeys } from 'utility-types';
 import { format } from 'url';
 import supertest from 'supertest';
+import { DeepPartial } from '@kbn/utility-types';
 import { RoleScopedSupertestProvider } from '../../../api_integration/deployment_agnostic/services/role_scoped_supertest';
 
 type MaybeOptional<TArgs extends Record<string, any>> = RequiredKeys<TArgs> extends never
@@ -29,6 +30,13 @@ export interface RepositorySupertestClient<TServerRouteRepository extends Server
         type?: 'form-data';
       } & ClientRequestParamsOf<TServerRouteRepository, TEndpoint>
     >
+  ) => RepositorySupertestReturnOf<TServerRouteRepository, TEndpoint>;
+
+  sendFile: <TEndpoint extends EndpointOf<TServerRouteRepository>>(
+    endpoint: TEndpoint,
+    options: DeepPartial<ClientRequestParamsOf<TServerRouteRepository, TEndpoint>> & {
+      file: { key: string; filename: string; data: Buffer };
+    }
   ) => RepositorySupertestReturnOf<TServerRouteRepository, TEndpoint>;
 }
 
@@ -90,6 +98,36 @@ export async function getAdminApiClient<TServerRouteRepository extends ServerRou
       }
 
       return res as RepositorySupertestReturnOf<
+        TServerRouteRepository,
+        EndpointOf<TServerRouteRepository>
+      >;
+    },
+
+    sendFile: (endpoint, options) => {
+      const params = 'params' in options ? (options.params as Record<string, any>) : {};
+      const { method, pathname, version } = formatRequest(endpoint, params.path);
+      const url = format({ pathname, query: params.query });
+
+      const headers: Record<string, string> = {
+        'kbn-xsrf': 'foo',
+        'x-elastic-internal-origin': 'kibana',
+      };
+
+      if (version) {
+        headers['Elastic-Api-Version'] = version;
+      }
+
+      const fields: Array<[string, any]> = Object.entries(params.body);
+      const formDataRequest = supertestAdmin[method](url)
+        .set(headers)
+        .set('Content-type', 'multipart/form-data')
+        .attach(options.file.key, options.file.data, { filename: options.file.filename });
+
+      for (const field of fields) {
+        void formDataRequest.field(field[0], field[1]);
+      }
+
+      return formDataRequest as RepositorySupertestReturnOf<
         TServerRouteRepository,
         EndpointOf<TServerRouteRepository>
       >;
