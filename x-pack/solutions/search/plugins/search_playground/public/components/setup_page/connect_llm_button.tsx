@@ -5,12 +5,20 @@
  * 2.0.
  */
 
-import { EuiButton, EuiText, EuiIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiText,
+  EuiIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButtonEmpty,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useEffect, useState } from 'react';
 import { GenerativeAIForSearchPlaygroundConnectorFeatureId } from '@kbn/actions-plugin/common';
 import { useKibana } from '../../hooks/use_kibana';
 import { useLoadConnectors } from '../../hooks/use_load_connectors';
+import { i18n } from '@kbn/i18n';
 import { useUsageTracker } from '../../hooks/use_usage_tracker';
 import { AnalyticsEvents } from '../../analytics/constants';
 import { LLMs } from '../../../common/types';
@@ -74,6 +82,18 @@ export const ConnectLLMButton: React.FC = () => {
                 />
               )}
             </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              target="_blank"
+              data-test-subj="manageConnectorsLink"
+              iconType="wrench"
+              size="s"
+              onClick={handleSetupGenAiConnector}
+              aria-label={i18n.translate('xpack.searchPlayground.setupPage.manageConnectorLink', {
+                defaultMessage: 'Manage connector',
+              })}
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
       ) : (

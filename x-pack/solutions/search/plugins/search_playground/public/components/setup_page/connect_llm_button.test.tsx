@@ -85,6 +85,25 @@ describe('ConnectLLMButton', () => {
     await waitFor(() => expect(getByTestId('addConnectorFlyout')).toBeInTheDocument());
   });
 
+  it('show the flyout when manageConnectorsLink is clicked', async () => {
+    (useLoadConnectors as jest.Mock).mockReturnValue({
+      data: [
+        {
+          name: 'conn-1',
+          type: LLMs.openai,
+        },
+      ],
+      isLoading: false,
+      isSuccess: true,
+    });
+    const { getByTestId, queryByTestId } = render(<ConnectLLMButton />);
+
+    expect(queryByTestId('addConnectorFlyout')).not.toBeInTheDocument();
+
+    fireEvent.click(getByTestId('manageConnectorsLink'));
+    await waitFor(() => expect(getByTestId('addConnectorFlyout')).toBeInTheDocument());
+  });
+
   it('show success text when connector exists', async () => {
     (useLoadConnectors as jest.Mock).mockReturnValue({
       data: [
