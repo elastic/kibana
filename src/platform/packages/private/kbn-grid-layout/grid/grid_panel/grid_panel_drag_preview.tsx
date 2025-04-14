@@ -31,7 +31,10 @@ export const GridPanelDragPreview = React.memo(() => {
           if (!dragPreviewRef.current) return;
           const interactionEvent = gridLayoutStateManager.interactionEvent$.getValue();
           const rowId = interactionEvent?.targetRow;
-          if (!rowId || !proposedGridLayout) return;
+          if (!rowId || !proposedGridLayout) {
+            dragPreviewRef.current.style.display = 'none';
+            return;
+          }
 
           const row = proposedGridLayout?.[rowId];
 

@@ -22,6 +22,9 @@ export const getRowHeight = (row: GridRowData) => {
 };
 
 export const getTopOffsetForRowHeader = (rowId: string, layout: GridLayoutData) => {
+  if (!layout[rowId]) {
+    return 0;
+  }
   const rowsBeforeHeight = Object.values(layout)
     .filter((row) => row.order < layout[rowId].order)
     .reduce((acc, row) => acc + getRowHeight(row) + getHeaderHeight(row), 0);

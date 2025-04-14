@@ -88,8 +88,8 @@ export const moveAction = (
   const { columnCount, gutterSize, rowHeight, columnPixelWidth } = runtimeSettings;
 
   const findRowBelow = (rowId: string, layout: GridLayoutData) => {
-     return Object.values(currentLayout).find((r) => r.order === layout[rowId].order + 1);
-    }
+    return Object.values(currentLayout).find((r) => r.order === layout[rowId].order + 1);
+  };
 
   // find the grid that the preview rect is over
   const lastRowId = interactionEvent.targetRow;
@@ -109,7 +109,7 @@ export const moveAction = (
         highestOverlapRowId = id;
       }
     });
-     
+
     // this is the case when the target drop row is collapsed but the next one is not collapsible, so we add panel to next non collapsible row
     if (currentLayout[highestOverlapRowId] && currentLayout[highestOverlapRowId].isCollapsed) {
       const rowBelow = findRowBelow(highestOverlapRowId, currentLayout);
@@ -120,12 +120,8 @@ export const moveAction = (
     return highestOverlapRowId;
   })();
 
-  
-
-
   const hasChangedGridRow = targetRowId !== lastRowId;
 
- 
   // calculate the requested grid position
   const targetedRowRef = gridRowRefs[targetRowId];
   const targetedGridLeft = targetedRowRef?.getBoundingClientRect().left ?? 0;
@@ -177,8 +173,9 @@ export const moveAction = (
     // resolve origin grid
     if (hasChangedGridRow) {
       const originGrid = nextLayout[lastRowId];
-      if (!originGrid.isCollapsible && isEmpty(originGrid.panels)){
+      if (!originGrid.isCollapsible && isEmpty(originGrid.panels)) {
         delete nextLayout[lastRowId];
+        // nextLayout = normalizeOrder(nextLayout);
       } else {
         const resolvedOriginGrid = resolveGridRow(originGrid);
         nextLayout[lastRowId] = resolvedOriginGrid;
@@ -187,6 +184,9 @@ export const moveAction = (
     if (!deepEqual(currentLayout, nextLayout)) {
       proposedGridLayout$.next(nextLayout);
     }
+
+    console.log('nextLayout', gridLayoutStateManager.proposedGridLayout$.getValue());
+    // return;
   } else if (
     hasChangedGridRow ||
     (!isGridDataEqual(requestedPanelData, lastRequestedPanelPosition.current) &&
@@ -204,12 +204,9 @@ export const moveAction = (
         panels: { ...otherPanels },
       };
     });
-    const newRow = createNewRow({ order: targetRowOrder + 1 })
+    const newRow = createNewRow({ order: targetRowOrder + 1 });
 
-    const resolvedDestinationGrid = resolveGridRow(
-      newRow,
-      requestedPanelData
-    );
+    const resolvedDestinationGrid = resolveGridRow(newRow, requestedPanelData);
     nextLayout[newRow.id] = resolvedDestinationGrid;
 
     // resolve origin grid
@@ -217,21 +214,19 @@ export const moveAction = (
       const originGrid = nextLayout[lastRowId];
       const resolvedOriginGrid = resolveGridRow(originGrid);
       nextLayout[lastRowId] = resolvedOriginGrid;
-      console.log('originGrid', originGrid)
+      console.log('originGrid', originGrid);
     }
     if (!deepEqual(currentLayout, nextLayout)) {
       proposedGridLayout$.next(nextLayout);
     }
   }
- // re-render when the target row changes
+  // re-render when the target row changes
   if (hasChangedGridRow) {
     interactionEvent$.next({
       ...interactionEvent,
       targetRow: targetRowId,
     });
   }
-
-    console.log('nextLayout', gridLayoutStateManager.gridLayout$.getValue());
 };
 
 const createNewRow = ({ id = uuidv4(), ...rest }: Partial<GridRowData>): GridRowData => ({
@@ -267,3 +262,17 @@ export const cancelAction = ({
   interactionEvent$.next(undefined);
   proposedGridLayout$.next(undefined);
 };
+
+function normalizeOrder(obj: GridLayoutData) {
+  const entries = Object.entries(obj);
+
+  // Sort by current order
+  entries.sort(([, a], [, b]) => a.order - b.order);
+
+  // Reassign order incrementally
+  entries.forEach(([, section], index) => {
+    section.order = index;
+  });
+
+  return Object.fromEntries(entries);
+}
