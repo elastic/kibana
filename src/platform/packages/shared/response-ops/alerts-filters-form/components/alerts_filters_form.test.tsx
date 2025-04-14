@@ -32,22 +32,26 @@ jest
   ));
 
 const testExpression: AlertsFiltersExpression = [
-  { filter: { value: 'filter1' } },
+  { filter: { type: 'ruleTypes', value: 'filter1' } },
   { operator: 'and' },
-  { filter: { value: 'filter2' } },
+  { filter: { type: 'ruleTypes', value: 'filter2' } },
   { operator: 'or' },
-  { filter: { value: 'filter3' } },
+  { filter: { type: 'ruleTypes', value: 'filter3' } },
 ];
+
+const mockOnChange = jest.fn();
 
 const TestComponent = (overrides: Partial<AlertsFiltersFormProps>) => {
   const [value, setValue] = useState(testExpression);
+
+  mockOnChange.mockImplementation(setValue);
 
   return (
     <IntlProvider locale="en">
       <AlertsFiltersForm
         ruleTypeIds={[]}
         value={value}
-        onChange={setValue}
+        onChange={mockOnChange}
         services={{ http, notifications }}
         {...overrides}
       />
@@ -77,6 +81,10 @@ describe('AlertsFiltersForm', () => {
       expect(screen.getByText(filter)).toBeInTheDocument();
     });
     expect(screen.queryByText('filter2')).not.toBeInTheDocument();
+    expect(mockOnChange).toHaveBeenCalledWith([
+      ...testExpression.slice(0, 1),
+      ...testExpression.slice(3),
+    ]);
   });
 
   it('should correctly add a new operand', async () => {
@@ -90,5 +98,44 @@ describe('AlertsFiltersForm', () => {
     expect(formItems).toHaveLength(4);
     // New operands should be empty
     expect(formItems[3]).toHaveTextContent('');
+    expect(mockOnChange).toHaveBeenCalledWith([
+      ...testExpression,
+      { operator: 'or' },
+      { filter: {} },
+    ]);
+  });
+
+  it('should pass the correct props to AlertsFiltersFormItem', () => {
+    render(<TestComponent />);
+    const commonProps = {
+      type: 'ruleTypes',
+      isDisabled: false,
+      onTypeChange: expect.any(Function),
+      onValueChange: expect.any(Function),
+    };
+    expect(AlertsFiltersFormItem).toHaveBeenNthCalledWith(
+      1,
+      {
+        ...commonProps,
+        value: 'filter1',
+      },
+      {}
+    );
+    expect(AlertsFiltersFormItem).toHaveBeenNthCalledWith(
+      2,
+      {
+        ...commonProps,
+        value: 'filter2',
+      },
+      {}
+    );
+    expect(AlertsFiltersFormItem).toHaveBeenNthCalledWith(
+      3,
+      {
+        ...commonProps,
+        value: 'filter3',
+      },
+      {}
+    );
   });
 });

@@ -98,9 +98,9 @@ export const AlertsFiltersForm = ({
 
   const onFormItemTypeChange = useCallback(
     (atIndex: number, newType: AlertsFiltersFormItemType) => {
+      const newValue = [...value];
       const expressionItem = value[atIndex];
       if (isFilter(expressionItem)) {
-        const newValue = [...value];
         newValue[atIndex] = {
           filter: {
             type: newType,

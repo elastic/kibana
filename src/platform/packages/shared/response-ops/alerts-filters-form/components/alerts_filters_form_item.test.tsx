@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { render, screen } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { alertsFiltersMetadata } from '../filters';
-import { AlertsFiltersFormItem } from './alerts_filters_form_item';
+import { AlertsFiltersFormItem, AlertsFiltersFormItemProps } from './alerts_filters_form_item';
 
 jest.mock('../filters', () => {
   const original: { alertsFiltersMetadata: typeof alertsFiltersMetadata } =
@@ -34,13 +34,32 @@ jest.mock('../filters', () => {
   };
 });
 
+const mockOnTypeChange = jest.fn();
+const mockOnValueChange = jest.fn();
+
+const TestComponent = (overrides: Partial<AlertsFiltersFormItemProps<unknown>>) => {
+  const [type, setType] = useState(overrides?.type);
+  const [value, setValue] = useState(overrides?.value);
+
+  mockOnTypeChange.mockImplementation(setType);
+  mockOnValueChange.mockImplementation(setValue);
+
+  return (
+    <IntlProvider locale="en">
+      <AlertsFiltersFormItem
+        type={type}
+        onTypeChange={mockOnTypeChange}
+        value={value}
+        onValueChange={mockOnValueChange}
+        {...overrides}
+      />
+    </IntlProvider>
+  );
+};
+
 describe('AlertsFiltersFormItem', () => {
   it('should show all available filter types as options', async () => {
-    render(
-      <IntlProvider locale="en">
-        <AlertsFiltersFormItem onTypeChange={jest.fn()} onValueChange={jest.fn()} />
-      </IntlProvider>
-    );
+    render(<TestComponent />);
 
     await userEvent.click(screen.getByRole('button'));
     Object.values(alertsFiltersMetadata).forEach((filterMeta) => {
@@ -49,31 +68,31 @@ describe('AlertsFiltersFormItem', () => {
   });
 
   it('should render the correct filter component for the selected type', () => {
-    render(
-      <IntlProvider locale="en">
-        <AlertsFiltersFormItem
-          type={alertsFiltersMetadata.ruleTags.id}
-          onTypeChange={jest.fn()}
-          onValueChange={jest.fn()}
-        />
-      </IntlProvider>
-    );
+    render(<TestComponent type={alertsFiltersMetadata.ruleTags.id} />);
 
     expect(screen.getByTestId('ruleTagsFilter')).toBeInTheDocument();
   });
 
-  it('should forward the value to the selected filter component', () => {
-    render(
-      <IntlProvider locale="en">
-        <AlertsFiltersFormItem
-          type={alertsFiltersMetadata.ruleTags.id}
-          onTypeChange={jest.fn()}
-          value={['tag1']}
-          onValueChange={jest.fn()}
-        />
-      </IntlProvider>
-    );
+  it('should forward the correct props to the selected filter component', () => {
+    render(<TestComponent type={alertsFiltersMetadata.ruleTags.id} value={['tag1']} />);
 
     expect(screen.getByText('tag1')).toBeInTheDocument();
+    expect(alertsFiltersMetadata.ruleTags.component).toHaveBeenCalledWith(
+      {
+        value: ['tag1'],
+        onChange: mockOnValueChange,
+        isDisabled: false,
+      },
+      {}
+    );
+  });
+
+  it('should call onTypeChange when the type is changed', async () => {
+    render(<TestComponent />);
+
+    await userEvent.click(screen.getByRole('button'));
+    await userEvent.click(screen.getByText(alertsFiltersMetadata.ruleTags.displayName));
+
+    expect(mockOnTypeChange).toHaveBeenCalledWith(alertsFiltersMetadata.ruleTags.id);
   });
 });
