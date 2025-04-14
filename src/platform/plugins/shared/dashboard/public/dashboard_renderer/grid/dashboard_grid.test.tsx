@@ -8,6 +8,7 @@
  */
 
 import React from 'react';
+import { EuiThemeProvider } from '@elastic/eui';
 
 import { useBatchedPublishingSubjects as mockUseBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { RenderResult, act, render, screen, waitFor } from '@testing-library/react';
@@ -80,11 +81,13 @@ const createAndMountDashboardGrid = async (overrides?: {
   });
 
   const component = render(
-    <DashboardContext.Provider value={api}>
-      <DashboardInternalContext.Provider value={internalApi}>
-        <DashboardGrid />
-      </DashboardInternalContext.Provider>
-    </DashboardContext.Provider>
+    <EuiThemeProvider>
+      <DashboardContext.Provider value={api}>
+        <DashboardInternalContext.Provider value={internalApi}>
+          <DashboardGrid />
+        </DashboardInternalContext.Provider>
+      </DashboardContext.Provider>
+    </EuiThemeProvider>
   );
 
   // panels in collapsed sections should not render

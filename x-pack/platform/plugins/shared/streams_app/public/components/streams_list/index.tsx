@@ -298,7 +298,9 @@ function StreamNode({
               aria-label={i18n.translate('xpack.streams.streamsTable.management', {
                 defaultMessage: 'Management',
               })}
-              href={router.link('/{key}/{tab}', { path: { key: node.name, tab: 'management' } })}
+              href={router.link('/{key}/management/{tab}', {
+                path: { key: node.name, tab: 'route' },
+              })}
             />
           </EuiToolTip>
         </EuiFlexGroup>
