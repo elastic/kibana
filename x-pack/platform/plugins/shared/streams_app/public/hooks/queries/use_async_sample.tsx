@@ -12,6 +12,7 @@ import {
   WiredStreamGetResponse,
   conditionToQueryDsl,
   getFields,
+  isAlwaysCondition,
 } from '@kbn/streams-schema';
 import useToggle from 'react-use/lib/useToggle';
 import { MappingRuntimeField, MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
@@ -51,7 +52,7 @@ export const useAsyncSample = (options: Options) => {
 
   const convertedCondition = useMemo(() => {
     const condition = options.condition ? emptyEqualsToAlways(options.condition) : undefined;
-    return condition && 'always' in condition ? undefined : condition;
+    return condition && isAlwaysCondition(condition) ? undefined : condition;
   }, [options.condition]);
 
   useEffect(() => {
