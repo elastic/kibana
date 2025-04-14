@@ -49,7 +49,9 @@ export function StreamDetailOverview({ definition }: { definition: IngestStreamG
 
         <EuiFlexItem grow>
           <EuiFlexGroup direction="row" gutterSize="m">
-            <EuiFlexItem grow={4}>{definition && <TabsPanel tabs={tabs} />}</EuiFlexItem>
+            <EuiFlexItem grow={4}>
+              <TabsPanel tabs={tabs} />
+            </EuiFlexItem>
             <EuiFlexItem grow={8}>
               <StreamChartPanel definition={definition} />
             </EuiFlexItem>
