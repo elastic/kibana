@@ -34,7 +34,7 @@ export const StreamDetailSchemaEditor = ({ definition, refreshDefinition }: Sche
       onRefreshData={refreshFields}
       withControls
       withFieldSimulation
-      withTableActions={!isRootStreamDefinition(definition.stream)}
+      withTableActions={!isRootStreamDefinition(definition.stream) && definition.privileges.manage}
     />
   );
 };

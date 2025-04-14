@@ -337,7 +337,6 @@ export interface RuleType<
    */
   autoRecoverAlerts?: boolean;
   getViewInAppRelativeUrl?: GetViewInAppRelativeUrlFn<Params>;
-  fieldsForAAD?: string[];
 }
 export type UntypedRuleType = RuleType<
   RuleTypeParams,

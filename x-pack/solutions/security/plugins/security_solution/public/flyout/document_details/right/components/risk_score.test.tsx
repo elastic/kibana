@@ -8,50 +8,45 @@
 import React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render } from '@testing-library/react';
-import { DocumentDetailsContext } from '../../shared/context';
-import { RISK_SCORE_TITLE_TEST_ID, RISK_SCORE_VALUE_TEST_ID } from './test_ids';
+import { RISK_SCORE_VALUE_TEST_ID } from './test_ids';
 import { RiskScore } from './risk_score';
 import { mockGetFieldsData } from '../../shared/mocks/mock_get_fields_data';
 
-const renderRiskScore = (contextValue: DocumentDetailsContext) =>
-  render(
-    <IntlProvider locale="en">
-      <DocumentDetailsContext.Provider value={contextValue}>
-        <RiskScore />
-      </DocumentDetailsContext.Provider>
-    </IntlProvider>
-  );
-
 describe('<RiskScore />', () => {
   it('should render risk score information', () => {
-    const contextValue = {
-      getFieldsData: jest.fn().mockImplementation(mockGetFieldsData),
-    } as unknown as DocumentDetailsContext;
+    const getFieldsData = jest.fn().mockImplementation(mockGetFieldsData);
 
-    const { getByTestId } = renderRiskScore(contextValue);
+    const { getByTestId } = render(
+      <IntlProvider locale="en">
+        <RiskScore getFieldsData={getFieldsData} />
+      </IntlProvider>
+    );
 
-    expect(getByTestId(RISK_SCORE_TITLE_TEST_ID)).toBeInTheDocument();
     const riskScore = getByTestId(RISK_SCORE_VALUE_TEST_ID);
     expect(riskScore).toBeInTheDocument();
     expect(riskScore).toHaveTextContent('0');
   });
 
   it('should render empty component if missing getFieldsData value', () => {
-    const contextValue = {
-      getFieldsData: jest.fn(),
-    } as unknown as DocumentDetailsContext;
+    const getFieldsData = jest.fn();
 
-    const { container } = renderRiskScore(contextValue);
+    const { container } = render(
+      <IntlProvider locale="en">
+        <RiskScore getFieldsData={getFieldsData} />
+      </IntlProvider>
+    );
 
     expect(container).toBeEmptyDOMElement();
   });
 
   it('should render empty component if getFieldsData is invalid', () => {
-    const contextValue = {
-      getFieldsData: jest.fn().mockImplementation(() => 123),
-    } as unknown as DocumentDetailsContext;
+    const getFieldsData = jest.fn().mockImplementation(() => 123);
 
-    const { container } = renderRiskScore(contextValue);
+    const { container } = render(
+      <IntlProvider locale="en">
+        <RiskScore getFieldsData={getFieldsData} />
+      </IntlProvider>
+    );
 
     expect(container).toBeEmptyDOMElement();
   });
