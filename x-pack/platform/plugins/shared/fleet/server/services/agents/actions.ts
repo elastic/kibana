@@ -68,6 +68,7 @@ export async function createAgentAction(
     total: newAgentAction.total,
     traceparent: apm.currentTraceparent,
     is_automatic: newAgentAction.is_automatic,
+    policyId: newAgentAction.policyId,
   };
 
   const messageSigningService = appContextService.getMessageSigningService();
@@ -87,7 +88,9 @@ export async function createAgentAction(
   });
 
   auditLoggingService.writeCustomAuditLog({
-    message: `User created Fleet action [id=${actionId}]`,
+    message: `${
+      newAgentAction.is_automatic ? 'Automatic Upgrade' : 'User'
+    } created Fleet action [id=${actionId}]`,
   });
 
   return {
