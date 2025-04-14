@@ -38,12 +38,6 @@ interface ProviderState extends Partial<TokenPair> {
   requestIdMap?: Record<RequestId, { redirectURL: string }>;
 
   /**
-   * Stores path component of the URL only or in a combination with URL fragment that was used to
-   * initiate SAML handshake and where we should redirect user after successful authentication.
-   */
-  redirectURL?: string;
-
-  /**
    * The name of the SAML realm that was used to establish session (may not be known during URL
    * fragment capturing stage).
    */
@@ -336,13 +330,8 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
 
     // If we have a `SAMLResponse` and state, but state doesn't contain all the necessary information,
     // then something unexpected happened and we should fail.
-    const {
-      requestIdMap: stateRequestIdMap = {},
-      redirectURL: stateRedirectURL,
-      realm: stateRealm,
-    } = state || {
+    const { requestIdMap: stateRequestIdMap = {}, realm: stateRealm } = state || {
       requestIdMap: {},
-      redirectURL: '',
       realm: '',
     };
 
@@ -457,7 +446,6 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
     return AuthenticationResult.redirectTo(
       redirectURLFromRelayState ||
         redirectURLForRequestId ||
-        stateRedirectURL ||
         `${this.options.basePath.get(request)}/`,
       {
         user: this.authenticationInfoToAuthenticatedUser(result.authentication),
