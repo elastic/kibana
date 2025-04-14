@@ -73,7 +73,7 @@ export const getGridAttrs = async (
     search: data.search.search,
     signal: abortController?.signal,
     filter,
-    dropNullColumns: true,
+    dropNullColumns: false,
     timeRange: data.query.timefilter.timefilter.getAbsoluteTime(),
     variables: esqlVariables,
   });
