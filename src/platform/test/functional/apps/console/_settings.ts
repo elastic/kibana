@@ -27,8 +27,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('displays the a11y overlay', async () => {
       await PageObjects.console.pressEscape();
-      const isOverlayVisible = await PageObjects.console.isA11yOverlayVisible();
-      expect(isOverlayVisible).to.be(true);
+
+      await retry.try(async () => {
+        const isOverlayVisible = await PageObjects.console.isA11yOverlayVisible();
+        expect(isOverlayVisible).to.be(true);
+      });
     });
 
     it('disables the a11y overlay via settings', async () => {
