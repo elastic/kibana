@@ -39,6 +39,8 @@ export const AIForSOCPanel: React.FC<Partial<AIForSOCDetailsProps>> = memo(() =>
   const { eventId, getFieldsData, indexName, dataFormattedForFieldBrowser } =
     useAIForSOCDetailsContext();
 
+  const { capabilities } = useKibana().services.application;
+  const canSeeAdvancedSettings = capabilities.management.kibana.settings ?? false;
   const { showAnonymizedValues } = useAlertsContext();
   const getPromptContext = useCallback(
     async () => getRawData(dataFormattedForFieldBrowser ?? []),
@@ -77,6 +79,7 @@ export const AIForSOCPanel: React.FC<Partial<AIForSOCDetailsProps>> = memo(() =>
             <EuiFlexItem>
               <AlertSummary
                 alertId={eventId}
+                canSeeAdvancedSettings={canSeeAdvancedSettings}
                 defaultConnectorId={defaultConnectorId}
                 isContextReady={(dataFormattedForFieldBrowser ?? []).length > 0}
                 promptContext={promptContext}

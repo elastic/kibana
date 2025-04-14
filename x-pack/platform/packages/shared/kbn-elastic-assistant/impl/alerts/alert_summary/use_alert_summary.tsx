@@ -30,6 +30,7 @@ interface UseAlertSummary {
   alertSummary: string;
   hasAlertSummary: boolean;
   fetchAISummary: () => void;
+  isConnectorMissing: boolean;
   isLoading: boolean;
   messageAndReplacements: { message: string; replacements: Replacements } | null;
   recommendedActions: string | undefined;
@@ -47,6 +48,7 @@ export const useAlertSummary = ({
   });
   const { data: anonymizationFields, isFetched: isFetchedAnonymizationFields } =
     useFetchAnonymizationFields();
+  const [isConnectorMissing, setIsConnectorMissing] = useState<boolean>(false);
   const [alertSummary, setAlertSummary] = useState<string>(i18n.NO_SUMMARY_AVAILABLE);
   const [recommendedActions, setRecommendedActions] = useState<string | undefined>();
   const [messageAndReplacements, setMessageAndReplacements] = useState<{
@@ -130,6 +132,7 @@ export const useAlertSummary = ({
 
   const fetchAISummary = useCallback(() => {
     const fetchSummary = async (content: { message: string; replacements: Replacements }) => {
+      setIsConnectorMissing(false);
       setIsGenerating(true);
       setHasAlertSummary(true);
 
@@ -185,6 +188,9 @@ export const useAlertSummary = ({
         }
         await refetchAlertSummary();
       } else {
+        if (responseSummary.includes('Failed to load action')) {
+          setIsConnectorMissing(true);
+        }
         setAlertSummary(
           showAnonymizedValues
             ? responseSummary
@@ -217,6 +223,7 @@ export const useAlertSummary = ({
     alertSummary,
     hasAlertSummary,
     fetchAISummary,
+    isConnectorMissing,
     isLoading: isGenerating,
     messageAndReplacements,
     recommendedActions,

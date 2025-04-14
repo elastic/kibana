@@ -20,7 +20,6 @@ const LocalStorageKey = {
   selectedCardItemId: 'securitySolution.onboarding.selectedCardItem',
   integrationSearchTerm: 'securitySolution.onboarding.integrationSearchTerm',
   assistantConnectorId: 'securitySolution.onboarding.assistantCard.connectorId',
-  aiAlertFlyoutShowAnonymization: 'securitySolution.aiAlertFlyout.showAnonymization',
 } as const;
 
 /**
@@ -90,13 +89,4 @@ export const useStoredAssistantConnectorId = (spaceId: string) =>
   useDefinedLocalStorage<string | undefined>(
     `${LocalStorageKey.assistantConnectorId}.${spaceId}`,
     undefined
-  );
-
-/**
- * Stores the AI Alert Flyout anonymization switch value
- */
-export const useStoredAIAlertFlyoutShowAnonymization = (spaceId: string) =>
-  useDefinedLocalStorage<boolean>(
-    `${LocalStorageKey.aiAlertFlyoutShowAnonymization}.${spaceId}`,
-    false
   );

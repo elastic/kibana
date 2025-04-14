@@ -25,6 +25,7 @@ const promptContext: PromptContext = {
 };
 const defaultProps = {
   alertId: 'test-alert-id',
+  canSeeAdvancedSettings: true,
   defaultConnectorId: 'test-connector-id',
   isContextReady: true,
   promptContext,

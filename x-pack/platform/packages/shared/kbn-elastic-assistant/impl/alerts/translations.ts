@@ -37,6 +37,36 @@ export const GENERATE = i18n.translate('xpack.elasticAssistant.alertSummary.gene
 export const REGENERATE = i18n.translate('xpack.elasticAssistant.alertSummary.regenerate', {
   defaultMessage: 'Regenerate insights',
 });
+
+export const MISSING_CONNECTOR = i18n.translate(
+  'xpack.securitySolution.alertSummary.missingConnector',
+  {
+    defaultMessage: 'Missing connector',
+  }
+);
+
+export const CONNECTOR_MISSING_MESSAGE = i18n.translate(
+  'xpack.securitySolution.alertSummary.noConnectorMessage',
+  {
+    defaultMessage: 'Your default AI connector is invalid and may have been deleted.',
+  }
+);
+
+export const CONNECTOR_MISSING_MESSAGE_ADMIN = i18n.translate(
+  'xpack.securitySolution.alertSummary.noConnectorMessageForAdmin',
+  {
+    defaultMessage:
+      'Your default AI connector is invalid and may have been deleted. You may update the default AI connector via',
+  }
+);
+
+export const ADVANCED_SETTINGS_LINK_TITLE = i18n.translate(
+  'xpack.securitySolution.alertSummary.advancedSettingsLinkTitle',
+  {
+    defaultMessage: 'Security Solution advanced settings',
+  }
+);
+
 // END SUMMARY
 
 // START SUGGESTED PROMPTS

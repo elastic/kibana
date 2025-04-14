@@ -94,23 +94,19 @@ export class SecuritySolutionServerlessPlugin
     coreSetup
       .getStartServices()
       .then(async ([_, depsStart]) => {
-        await new Promise<void>(async (resolve) => {
-          try {
-            const unsecuredActionsClient = depsStart.actions.getUnsecuredActionsClient();
-            // using "default" space actually forces the api to use undefined space (see getAllUnsecured)
-            const aiConnectors = (await unsecuredActionsClient.getAll('default')).filter(
-              (connector: Connector) => isSupportedConnector(connector)
-            );
-            const defaultAIConnectorSetting = getDefaultAIConnectorSetting(aiConnectors);
-            if (defaultAIConnectorSetting !== null) {
-              await coreSetup.uiSettings.register(defaultAIConnectorSetting);
-            }
-            resolve();
-          } catch (error) {
-            this.logger.error(`Error registering default AI connector: ${error}`);
-            resolve();
+        try {
+          const unsecuredActionsClient = depsStart.actions.getUnsecuredActionsClient();
+          // using "default" space actually forces the api to use undefined space (see getAllUnsecured)
+          const aiConnectors = (await unsecuredActionsClient.getAll('default')).filter(
+            (connector: Connector) => isSupportedConnector(connector)
+          );
+          const defaultAIConnectorSetting = getDefaultAIConnectorSetting(aiConnectors);
+          if (defaultAIConnectorSetting !== null) {
+            coreSetup.uiSettings.register(defaultAIConnectorSetting);
           }
-        });
+        } catch (error) {
+          this.logger.error(`Error registering default AI connector: ${error}`);
+        }
       })
       .catch(() => {}); // it shouldn't reject, but just in case
     // Tasks

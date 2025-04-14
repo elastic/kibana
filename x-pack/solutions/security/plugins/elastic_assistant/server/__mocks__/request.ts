@@ -16,12 +16,11 @@ import {
   ATTACK_DISCOVERY_SCHEDULES_FIND,
   CAPABILITIES,
 } from '../../common/constants';
-import {
+import type {
   CreateAttackDiscoverySchedulesRequestBody,
   DefendInsightsGetRequestQuery,
   DefendInsightsPostRequestBody,
   DeleteKnowledgeBaseEntryRequestParams,
-  ELASTIC_AI_ASSISTANT_ALERT_SUMMARY_URL_BULK_ACTION,
   KnowledgeBaseEntryUpdateProps,
   UpdateAttackDiscoverySchedulesRequestBody,
   UpdateKnowledgeBaseEntryRequestParams,
@@ -32,6 +31,7 @@ import {
   ConversationUpdateProps,
   DEFEND_INSIGHTS,
   DEFEND_INSIGHTS_BY_ID,
+  ELASTIC_AI_ASSISTANT_ALERT_SUMMARY_URL_BULK_ACTION,
   ELASTIC_AI_ASSISTANT_ALERT_SUMMARY_URL_FIND,
   ELASTIC_AI_ASSISTANT_ANONYMIZATION_FIELDS_URL_BULK_ACTION,
   ELASTIC_AI_ASSISTANT_ANONYMIZATION_FIELDS_URL_FIND,

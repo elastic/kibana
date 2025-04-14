@@ -18,6 +18,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { AssistantIcon } from '@kbn/ai-assistant-icon';
+import { ConnectorMissingCallout } from './connector_missing_callout';
 import { useAlertSummary } from './use_alert_summary';
 import type { PromptContext } from '../../..';
 import { MessageText } from '../message_text';
@@ -25,6 +26,7 @@ import * as i18n from '../translations';
 
 interface Props {
   alertId: string;
+  canSeeAdvancedSettings: boolean;
   defaultConnectorId: string;
   isContextReady: boolean;
   promptContext: PromptContext;
@@ -33,6 +35,7 @@ interface Props {
 
 export const AlertSummary: FunctionComponent<Props> = ({
   alertId,
+  canSeeAdvancedSettings,
   defaultConnectorId,
   isContextReady,
   promptContext,
@@ -43,6 +46,7 @@ export const AlertSummary: FunctionComponent<Props> = ({
     recommendedActions,
     hasAlertSummary,
     fetchAISummary,
+    isConnectorMissing,
     isLoading,
     messageAndReplacements,
   } = useAlertSummary({
@@ -75,6 +79,12 @@ export const AlertSummary: FunctionComponent<Props> = ({
           </>
         ) : (
           <>
+            {isConnectorMissing && (
+              <>
+                <ConnectorMissingCallout canSeeAdvancedSettings={canSeeAdvancedSettings} />
+                <EuiSpacer size="m" />
+              </>
+            )}
             <MessageText content={alertSummary} />
 
             <EuiSpacer size="m" />
