@@ -12,7 +12,7 @@ import { AlertsFiltersForm } from '@kbn/response-ops-alerts-filters-form/compone
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiPanel, EuiText } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { AlertsFiltersExpression } from '@kbn/response-ops-alerts-filters-form/types';
+import { FlattenedExpressionItem } from '@kbn/response-ops-alerts-filters-form/types';
 import { useGetInternalRuleTypesQuery } from '@kbn/response-ops-rules-apis/hooks/use_get_internal_rule_types_query';
 import { RuleTypeSolution } from '@kbn/alerting-types';
 import { AlertsSolutionSelector } from '@kbn/response-ops-alerts-filters-form/components/alerts_solution_selector';
@@ -27,7 +27,7 @@ export const AlertsFiltersFormSandbox = ({
   };
 }) => {
   const [solution, setSolution] = useState<RuleTypeSolution | undefined>();
-  const [filters, setFilters] = useState<AlertsFiltersExpression>();
+  const [filters, setFilters] = useState<FlattenedExpressionItem[]>();
   const { data: ruleTypes, isLoading: isLoadingRuleTypes } = useGetInternalRuleTypesQuery({ http });
   const ruleTypeIds = useMemo(
     () => (!ruleTypes || !solution ? [] : getRuleTypeIdsForSolution(ruleTypes, solution)),
