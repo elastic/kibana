@@ -12,7 +12,6 @@ import { mockInitializer, mockPlugin, mockPluginReader } from './plugin.test.moc
 import { type interfaces, ContainerModule } from 'inversify';
 import { DiscoveredPlugin, PluginType } from '@kbn/core-base-common';
 import { PluginSetup, PluginStart, Setup, Start } from '@kbn/core-di';
-import { Contract } from '@kbn/core-di-internal';
 import { injectionServiceMock } from '@kbn/core-di-mocks';
 import { CoreSetup, CoreStart, PluginInitializer } from '@kbn/core-di-browser';
 import { createPluginInitializerContextMock } from './test_helpers';
@@ -83,9 +82,7 @@ describe('PluginWrapper', () => {
   test('`setup` initializes the plugin container module', () => {
     mockPluginReader.mockReturnValueOnce({ module: pluginModule });
     mockContainerModuleCallback.mockImplementationOnce((bind) => {
-      bind(Contract)
-        .toConstantValue({ contract: 'yes' })
-        .whenTargetNamed(Setup as symbol);
+      bind(Setup).toConstantValue({ contract: 'yes' });
     });
     const injection = injectionServiceMock.createInternalSetupContract();
     const deps = { otherDep: 'value' };
@@ -145,13 +142,8 @@ describe('PluginWrapper', () => {
   test('`start` loads start dependencies into the plugin container', () => {
     mockPluginReader.mockReturnValueOnce({ module: pluginModule });
     mockContainerModuleCallback.mockImplementationOnce((bind) => {
-      bind(Contract)
-        .toConstantValue({})
-        .whenTargetNamed(Setup as symbol);
-
-      bind(Contract)
-        .toConstantValue({ contract: 'yes' })
-        .whenTargetNamed(Start as symbol);
+      bind(Setup).toConstantValue({});
+      bind(Start).toConstantValue({ contract: 'yes' });
     });
     const injection = injectionServiceMock.createInternalSetupContract();
     const deps = { otherDep: 'value' };
@@ -185,13 +177,8 @@ describe('PluginWrapper', () => {
   test('`stop` cleans up the plugin container', () => {
     mockPluginReader.mockReturnValueOnce({ module: pluginModule });
     mockContainerModuleCallback.mockImplementationOnce((bind) => {
-      bind(Contract)
-        .toConstantValue({})
-        .whenTargetNamed(Setup as symbol);
-
-      bind(Contract)
-        .toConstantValue({ contract: 'yes' })
-        .whenTargetNamed(Start as symbol);
+      bind(Setup).toConstantValue({});
+      bind(Start).toConstantValue({ contract: 'yes' });
     });
     const injection = injectionServiceMock.createInternalSetupContract();
     const container = injection.getContainer();

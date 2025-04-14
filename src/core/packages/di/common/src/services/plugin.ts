@@ -15,3 +15,41 @@ import type { interfaces } from 'inversify';
 export const Global = Symbol.for(
   'Global'
 ) as interfaces.ServiceIdentifier<interfaces.ServiceIdentifier>;
+
+/**
+ * Plugin's setup contract.
+ */
+export const Setup = Symbol.for('Setup') as interfaces.ServiceIdentifier;
+
+/**
+ * Plugin's start contract.
+ */
+export const Start = Symbol.for('Start') as interfaces.ServiceIdentifier;
+
+/**
+ * Plugin's setup lifecycle hook.
+ */
+export const OnSetup = Symbol.for('OnSetup') as interfaces.ServiceIdentifier<
+  (container: interfaces.Container) => void
+>;
+
+/**
+ * Plugin's start lifecycle hook.
+ */
+export const OnStart = Symbol.for('OnStart') as interfaces.ServiceIdentifier<
+  (container: interfaces.Container) => void
+>;
+
+/**
+ * Plugin's setup dependency.
+ */
+export function PluginSetup<T>(plugin: keyof any): interfaces.ServiceIdentifier<T> {
+  return Symbol.for(`plugin.setup.${String(plugin)}`);
+}
+
+/**
+ * Plugin's start dependency.
+ */
+export function PluginStart<T>(plugin: keyof any): interfaces.ServiceIdentifier<T> {
+  return Symbol.for(`plugin.start.${String(plugin)}`);
+}

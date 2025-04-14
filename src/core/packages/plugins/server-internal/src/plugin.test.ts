@@ -23,7 +23,6 @@ import type { PluginManifest } from '@kbn/core-plugins-server';
 import { PluginType } from '@kbn/core-base-common';
 import { coreInternalLifecycleMock } from '@kbn/core-lifecycle-server-mocks';
 import { PluginSetup, PluginStart, Setup, Start } from '@kbn/core-di';
-import { Contract } from '@kbn/core-di-internal';
 import { CoreSetup, CoreStart, PluginInitializer } from '@kbn/core-di-server';
 import { createRuntimePluginContractResolverMock } from './test_helpers';
 import { PluginWrapper } from './plugin';
@@ -339,9 +338,7 @@ test('`setup` initializes the plugin container module', async () => {
   });
   const setupDependencies = { 'some-required-dep': { contract: 'no' } };
   mockContainerModuleCallback.mockImplementationOnce((bind) => {
-    bind(Contract)
-      .toConstantValue({ contract: 'yes' })
-      .whenTargetNamed(Setup as symbol);
+    bind(Setup).toConstantValue({ contract: 'yes' });
   });
   expect(plugin.setup(setupContext, setupDependencies)).toEqual({ contract: 'yes' });
 
@@ -514,13 +511,8 @@ test('`start` loads start dependencies into the plugin container', async () => {
   };
 
   mockContainerModuleCallback.mockImplementationOnce((bind) => {
-    bind(Contract)
-      .toConstantValue({})
-      .whenTargetNamed(Setup as symbol);
-
-    bind(Contract)
-      .toConstantValue(startContract)
-      .whenTargetNamed(Start as symbol);
+    bind(Setup).toConstantValue({});
+    bind(Start).toConstantValue(startContract);
   });
 
   await plugin.init();
@@ -629,9 +621,7 @@ test('`stop` cleans up the plugin container', async () => {
   });
   const setupDependencies = { 'some-required-dep': { contract: 'no' } };
   mockContainerModuleCallback.mockImplementationOnce((bind) => {
-    bind(Contract)
-      .toConstantValue({ contract: 'yes' })
-      .whenTargetNamed(Setup as symbol);
+    bind(Setup).toConstantValue({ contract: 'yes' });
   });
   expect(plugin.setup(setupContext, setupDependencies)).toEqual({ contract: 'yes' });
 

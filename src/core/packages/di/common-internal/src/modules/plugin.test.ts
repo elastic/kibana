@@ -8,7 +8,7 @@
  */
 
 import { Container, type interfaces } from 'inversify';
-import { Global, OnSetup } from '@kbn/core-di';
+import { Global, OnSetup, OnStart, Setup, Start } from '@kbn/core-di';
 import { Plugin, PluginModule } from './plugin';
 
 describe('PluginModule', () => {
@@ -67,8 +67,7 @@ describe('PluginModule', () => {
 
   describe('Global', () => {
     function activate(id: string) {
-      const plugin = root.getNamed(Plugin, id);
-      plugin.getAll(OnSetup).forEach((setup) => setup(plugin));
+      root.getNamed(Plugin, id).get(Setup);
     }
 
     let plugin1: interfaces.Container;
@@ -165,6 +164,92 @@ describe('PluginModule', () => {
 
         expect(plugin2Fork.get('service5')).toEqual(['service6.1', 'service6.2']);
       });
+    });
+  });
+
+  describe.each`
+    name       | token    | hook
+    ${'Setup'} | ${Setup} | ${OnSetup}
+    ${'Start'} | ${Start} | ${OnStart}
+  `('$name', ({ hook, token }) => {
+    let plugin: interfaces.Container;
+
+    beforeEach(() => {
+      plugin = root.getNamed(Plugin, 'plugin');
+      plugin.bind('service1').toConstantValue('service1');
+      plugin.bind('service2').toConstantValue('service2');
+    });
+
+    it('should return the default contract', () => {
+      expect(plugin.isBound(token)).toBe(true);
+      expect(plugin.get(token)).toBeUndefined();
+    });
+
+    it('should return the plugin contract', () => {
+      plugin
+        .bind(token)
+        .toDynamicValue(({ container }) => ({
+          svc1: container.get('service1'),
+          svc2: container.get('service2'),
+        }))
+        .inSingletonScope();
+
+      expect(plugin.isBound(token)).toBe(true);
+      expect(plugin.get(token)).toEqual({
+        svc1: 'service1',
+        svc2: 'service2',
+      });
+    });
+
+    it('should call the related hook functions', () => {
+      const handler1 = jest.fn();
+      const handler2 = jest.fn();
+
+      plugin.bind(hook).toConstantValue(handler1);
+      plugin.bind(hook).toConstantValue(handler2);
+      plugin.get(token);
+
+      expect(handler1).toHaveBeenCalledWith(plugin);
+      expect(handler2).toHaveBeenCalledWith(plugin);
+    });
+
+    it('should call the hook function from the parent scope', () => {
+      const handler1 = jest.fn();
+      const handler2 = jest.fn();
+
+      root.bind(hook).toConstantValue(handler1);
+      plugin.bind(hook).toConstantValue(handler2);
+      plugin.get(token);
+
+      expect(handler1).toHaveBeenCalledWith(plugin);
+      expect(handler2).toHaveBeenCalledWith(plugin);
+    });
+
+    it('should call the hook function only once per scope', () => {
+      const plugin2 = root.getNamed(Plugin, 'plugin2');
+      const handler1 = jest.fn();
+      const handler2 = jest.fn();
+      const handler3 = jest.fn();
+
+      root.bind(hook).toConstantValue(handler1);
+      plugin.bind(hook).toConstantValue(handler2);
+      plugin2.bind(hook).toConstantValue(handler3);
+
+      plugin.get(token);
+      plugin.get(token);
+      expect(handler1).toHaveBeenCalledTimes(1);
+      expect(handler2).toHaveBeenCalledTimes(1);
+      expect(handler3).not.toHaveBeenCalled();
+      expect(handler1).toHaveBeenCalledWith(plugin);
+      expect(handler2).toHaveBeenCalledWith(plugin);
+
+      plugin2.get(token);
+      plugin2.get(token);
+      expect(handler1).toHaveBeenCalledTimes(2);
+      expect(handler2).toHaveBeenCalledTimes(1);
+      expect(handler3).toHaveBeenCalledTimes(1);
+      expect(handler1).toHaveBeenCalledWith(plugin2);
+      expect(handler3).toHaveBeenCalledWith(plugin2);
     });
   });
 });

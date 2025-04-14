@@ -10,7 +10,7 @@
 import { once } from 'lodash';
 import { ContainerModule, type interfaces } from 'inversify';
 import type { PluginOpaqueId } from '@kbn/core-base-common';
-import { Global, OnSetup } from '@kbn/core-di';
+import { Global, OnSetup, OnStart, Setup, Start } from '@kbn/core-di';
 
 const Context = Symbol('Context') as interfaces.ServiceIdentifier<interfaces.Container>;
 const Id = Symbol('Id') as interfaces.ServiceIdentifier<PluginOpaqueId>;
@@ -22,14 +22,43 @@ export class PluginModule extends ContainerModule {
     interfaces.Container,
     Map<interfaces.ServiceIdentifier<unknown>, number>
   >();
+  private activated = new WeakSet<interfaces.Container>();
   private bound = new WeakSet<interfaces.Container>();
 
   constructor() {
     super((bind, _unbind, _isBound, _rebind, _unbindAsync, onActivation) => {
+      bind(Setup)
+        .toDynamicValue(() => undefined)
+        .inRequestScope();
+      bind(Start)
+        .toDynamicValue(() => undefined)
+        .inRequestScope();
       bind(OnSetup).toConstantValue((scope) => this.bindServices(scope));
       bind(Plugin).toDynamicValue(this.getScope).inRequestScope();
       onActivation(Global, this.bindService);
+      onActivation(Setup, this.activate(OnSetup));
+      onActivation(Start, this.activate(OnStart));
     });
+  }
+
+  protected activate(
+    hook: interfaces.ServiceIdentifier<(container: interfaces.Container) => void>
+  ): interfaces.BindingActivation<unknown> {
+    return ({ container }, contract) => {
+      if (this.activated.has(container)) {
+        return contract;
+      }
+
+      for (let current: typeof container.parent = container; current; current = current.parent) {
+        if (current.isCurrentBound(hook)) {
+          current.getAll(hook).forEach((callback) => callback(container));
+        }
+      }
+
+      this.activated.add(container);
+
+      return contract;
+    };
   }
 
   protected getScope: interfaces.DynamicValue<interfaces.Container> = ({

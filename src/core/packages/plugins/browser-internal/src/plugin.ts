@@ -17,7 +17,7 @@ import type {
   PluginInitializerContext,
 } from '@kbn/core-plugins-browser';
 import { PluginSetup, PluginStart, Setup, Start } from '@kbn/core-di';
-import { Contract, toContainerModule } from '@kbn/core-di-internal';
+import { toContainerModule } from '@kbn/core-di-internal';
 import {
   CoreSetup as CoreSetupService,
   CoreStart as CoreStartService,
@@ -80,10 +80,9 @@ export class PluginWrapper<
       this.container.load(toContainerModule(plugins, PluginSetup));
     }
 
-    return [
-      this.instance?.setup(setupContext, plugins),
-      this.container?.getNamed<TSetup>(Contract, Setup as symbol),
-    ].find(Boolean)!;
+    return [this.instance?.setup(setupContext, plugins), this.container?.get<TSetup>(Setup)].find(
+      Boolean
+    )!;
   }
 
   /**
@@ -102,7 +101,7 @@ export class PluginWrapper<
     this.container?.load(toContainerModule(plugins, PluginStart));
     const contract = [
       this.instance?.start(startContext, plugins),
-      this.container?.getNamed<TStart>(Contract, Start as symbol),
+      this.container?.get<TStart>(Start),
     ].find(Boolean)!;
 
     this.startDependencies$.next([startContext, plugins, contract]);
