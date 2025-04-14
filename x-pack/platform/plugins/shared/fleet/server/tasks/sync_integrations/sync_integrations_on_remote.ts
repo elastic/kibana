@@ -4,28 +4,29 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import type { ElasticsearchClient, SavedObjectsClient, Logger } from '@kbn/core/server';
 
+import semverEq from 'semver/functions/eq';
 import semverGte from 'semver/functions/gte';
 
 import type { PackageClient } from '../../services';
 import { outputService } from '../../services';
 
 import { PackageNotFoundError } from '../../errors';
+import { FLEET_SYNCED_INTEGRATIONS_CCR_INDEX_PREFIX } from '../../services/setup/fleet_synced_integrations';
+
+import { getInstallation, removeInstallation } from '../../services/epm/packages';
 
 import type { SyncIntegrationsData } from './model';
 import { installCustomAsset } from './custom_assets';
 
-const FLEET_SYNCED_INTEGRATIONS_CCR_INDEX_PREFIX = 'fleet-synced-integrations-ccr-*';
-
 const MAX_RETRY_ATTEMPTS = 5;
 const RETRY_BACKOFF_MINUTES = [5, 10, 20, 40, 60];
 
-const getSyncedIntegrationsCCRDoc = async (
+export const getFollowerIndex = async (
   esClient: ElasticsearchClient,
   abortController: AbortController
-): Promise<SyncIntegrationsData | undefined> => {
+): Promise<string | undefined> => {
   const indices = await esClient.indices.get(
     {
       index: FLEET_SYNCED_INTEGRATIONS_CCR_INDEX_PREFIX,
@@ -43,10 +44,18 @@ const getSyncedIntegrationsCCRDoc = async (
   if (indexNames.length === 0) {
     return undefined;
   }
+  return indexNames[0];
+};
+
+const getSyncedIntegrationsCCRDoc = async (
+  esClient: ElasticsearchClient,
+  abortController: AbortController
+): Promise<SyncIntegrationsData | undefined> => {
+  const index = await getFollowerIndex(esClient, abortController);
 
   const response = await esClient.search(
     {
-      index: indexNames[0],
+      index,
     },
     { signal: abortController.signal }
   );
@@ -84,10 +93,12 @@ async function installPackageIfNotInstalled(
     installation?.install_status === 'installed' &&
     semverGte(installation.version, pkg.package_version)
   ) {
+    logger.debug(`installPackageIfNotInstalled - ${pkg.package_name} already installed`);
     return;
   }
 
   if (installation?.install_status === 'installing') {
+    logger.debug(`installPackageIfNotInstalled - ${pkg.package_name} status installing`);
     return;
   }
 
@@ -95,6 +106,9 @@ async function installPackageIfNotInstalled(
     const attempt = installation.latest_install_failed_attempts?.length ?? 0;
 
     if (attempt >= MAX_RETRY_ATTEMPTS) {
+      logger.debug(
+        `installPackageIfNotInstalled - too many retry attempts at installing ${pkg.package_name}`
+      );
       return;
     }
     const lastRetryAttemptTime = installation.latest_install_failed_attempts?.[0].created_at;
@@ -144,6 +158,43 @@ async function installPackageIfNotInstalled(
   }
 }
 
+async function uninstallPackageIfInstalled(
+  esClient: ElasticsearchClient,
+  savedObjectsClient: SavedObjectsClient,
+  pkg: { package_name: string; package_version: string },
+  logger: Logger
+) {
+  const installation = await getInstallation({ savedObjectsClient, pkgName: pkg.package_name });
+  if (!installation) {
+    return;
+  }
+  if (
+    !(
+      installation.install_status === 'installed' &&
+      semverEq(installation.version, pkg.package_version)
+    )
+  ) {
+    return;
+  }
+
+  try {
+    await removeInstallation({
+      savedObjectsClient,
+      pkgName: pkg.package_name,
+      pkgVersion: pkg.package_version,
+      esClient,
+      force: false,
+    });
+    logger.info(
+      `Package ${pkg.package_name} with version ${pkg.package_version} uninstalled via integration syncing`
+    );
+  } catch (error) {
+    logger.error(
+      `Failed to uninstall package ${pkg.package_name} with version ${pkg.package_version} via integration syncing: ${error.message}`
+    );
+  }
+}
+
 export const syncIntegrationsOnRemote = async (
   esClient: ElasticsearchClient,
   soClient: SavedObjectsClient,
@@ -162,11 +213,26 @@ export const syncIntegrationsOnRemote = async (
     return;
   }
 
-  for (const pkg of syncIntegrationsDoc?.integrations ?? []) {
+  const installedIntegrations =
+    syncIntegrationsDoc?.integrations.filter(
+      (integration) => integration.install_status !== 'not_installed'
+    ) ?? [];
+  for (const pkg of installedIntegrations) {
     if (abortController.signal.aborted) {
       throw new Error('Task was aborted');
     }
     await installPackageIfNotInstalled(pkg, packageClient, logger, abortController);
+  }
+
+  const uninstalledIntegrations =
+    syncIntegrationsDoc?.integrations.filter(
+      (integration) => integration.install_status === 'not_installed'
+    ) ?? [];
+  for (const pkg of uninstalledIntegrations) {
+    if (abortController.signal.aborted) {
+      throw new Error('Task was aborted');
+    }
+    await uninstallPackageIfInstalled(esClient, soClient, pkg, logger);
   }
 
   for (const customAsset of Object.values(syncIntegrationsDoc?.custom_assets ?? {})) {

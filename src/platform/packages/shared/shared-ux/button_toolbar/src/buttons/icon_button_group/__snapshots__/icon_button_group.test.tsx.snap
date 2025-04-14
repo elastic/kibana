@@ -2,7 +2,7 @@
 
 exports[`<IconButtonGroup /> is rendered 1`] = `
 <fieldset
-  class="euiButtonGroup emotion-EuiButtonGroup"
+  class="euiButtonGroup emotion-euiButtonGroup-IconButtonGroup"
 >
   <legend
     class="emotion-euiScreenReaderOnly"

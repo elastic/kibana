@@ -25,19 +25,19 @@ import type { MainHistoryLocationState } from '../../../common';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import type { RootProfileState } from '../../context_awareness';
 
-let mockCustomizationService: DiscoverCustomizationService | undefined;
+let mockCustomizationService: Promise<DiscoverCustomizationService> | undefined;
 
 jest.mock('../../customizations', () => {
   const originalModule = jest.requireActual('../../customizations');
   return {
     ...originalModule,
-    useDiscoverCustomizationService: () => mockCustomizationService,
+    useDiscoverCustomizationService: () => () => mockCustomizationService,
   };
 });
 
 jest.mock('./components/session_view/main_app', () => {
   return {
-    DiscoverMainApp: jest.fn().mockReturnValue(<></>),
+    DiscoverMainApp: jest.fn(() => <></>),
   };
 });
 
@@ -58,7 +58,7 @@ jest.mock('../../context_awareness', () => {
 
 describe('DiscoverMainRoute', () => {
   beforeEach(() => {
-    mockCustomizationService = createCustomizationService();
+    mockCustomizationService = Promise.resolve(createCustomizationService());
     mockRootProfileState = defaultRootProfileState;
   });
 
@@ -124,13 +124,16 @@ describe('DiscoverMainRoute', () => {
   });
 
   test('renders LoadingIndicator while customizations are loading', async () => {
-    mockCustomizationService = undefined;
+    let resolveService = (_: DiscoverCustomizationService) => {};
+    mockCustomizationService = new Promise((resolve) => {
+      resolveService = resolve;
+    });
     const component = mountComponent(true, true);
     await waitFor(() => {
       component.update();
       expect(component.find(DiscoverMainApp).exists()).toBe(false);
     });
-    mockCustomizationService = createCustomizationService();
+    resolveService(createCustomizationService());
     await waitFor(() => {
       component.setProps({}).update();
       expect(component.find(DiscoverMainApp).exists()).toBe(true);

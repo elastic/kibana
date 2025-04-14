@@ -70,7 +70,7 @@ async function getHoverItemForFunction(
       buildQueryUntilPreviousCommand(ast, correctedQuery),
       ast
     );
-    const { getFieldsMap } = getFieldsByTypeRetriever(queryForFields, resourceRetriever);
+    const { getFieldsMap } = getFieldsByTypeRetriever(queryForFields, resourceRetriever, innerText);
 
     const fnDefinition = getFunctionDefinition(node.name);
     // early exit on no hit
