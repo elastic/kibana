@@ -123,7 +123,7 @@ export class FeatureRegistry {
         feature.name = featureOverride.name;
       }
 
-      if (featureOverride.description) {
+      if (typeof featureOverride.description !== 'undefined') {
         feature.description = featureOverride.description;
       }
 
