@@ -39,7 +39,7 @@ export const GridPanel = React.memo(({ panelId, rowId }: GridPanelProps) => {
     const initialPanel = activeLayout[rowId].panels[panelId];
 
     // offset of the element including the header and the previous rows
-    const gridRowOffset = getTopOffsetForRow(rowId, activeLayout, true);
+    const gridRowOffset = getTopOffsetForRow(rowId, activeLayout);
     return css`
       position: relative;
       height: calc(
@@ -99,7 +99,7 @@ export const GridPanel = React.memo(({ panelId, rowId }: GridPanelProps) => {
           }
           if (!ref || !panel) return;
 
-          const gridRowOffset = getTopOffsetForRow(row, activeLayout, true);
+          const gridRowOffset = getTopOffsetForRow(row, activeLayout);
 
           if (isPanelActive) {
             ref.classList.add('kbnGridPanel--active');

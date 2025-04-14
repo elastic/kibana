@@ -14,23 +14,29 @@ export const COLLAPSIBLE_HEADER_HEIGHT = 2;
 const getHeaderHeight = (row: GridRowData) => (row.isCollapsible ? COLLAPSIBLE_HEADER_HEIGHT : 0);
 
 export const getRowHeight = (row: GridRowData) => {
-  const headerHeight = getHeaderHeight(row);
-  if (row.isCollapsed) return headerHeight;
-  const panelsHeight = Object.values(row.panels).reduce(
+  if (row.isCollapsed) return 0;
+  return Object.values(row.panels).reduce(
     (acc, panel) => Math.max(acc, panel.row + panel.height),
     0
   );
-  return panelsHeight + headerHeight;
 };
+
+
+export const getTopOffsetForRowHeader = (
+  rowId: string,
+  layout: GridLayoutData
+) => {
+  const rowsBeforeHeight = Object.values(layout)
+    .filter((row) => row.order < layout[rowId].order)
+    .reduce((acc, row) => acc + getRowHeight(row) + getHeaderHeight(row), 0);
+
+  return rowsBeforeHeight;
+};
+
 
 export const getTopOffsetForRow = (
   rowId: string,
   layout: GridLayoutData,
-  shouldCountHeader?: boolean
 ) => {
-  const rowsBeforeHeight = Object.values(layout)
-    .filter((row) => row.order < layout[rowId].order)
-    .reduce((acc, row) => acc + getRowHeight(row), 0);
-
-  return rowsBeforeHeight + (shouldCountHeader ? getHeaderHeight(layout[rowId]) : 0);
+  return getTopOffsetForRowHeader(rowId, layout) + getHeaderHeight(layout[rowId]);
 };

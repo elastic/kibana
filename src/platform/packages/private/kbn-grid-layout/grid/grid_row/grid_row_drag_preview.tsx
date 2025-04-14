@@ -14,7 +14,7 @@ import { css } from '@emotion/react';
 
 import { combineLatest, skip } from 'rxjs';
 import { useGridLayoutContext } from '../use_grid_layout_context';
-import { getTopOffsetForRow } from '../utils/calculations';
+import { getTopOffsetForRowHeader } from '../utils/calculations';
 
 export const GridRowDragPreview = React.memo(() => {
   const dragPreviewRef = useRef<HTMLDivElement | null>(null);
@@ -38,7 +38,7 @@ export const GridRowDragPreview = React.memo(() => {
           const currentLayout =
             gridLayoutStateManager.proposedGridLayout$.getValue() ??
             gridLayoutStateManager.gridLayout$.getValue();
-          const offset = getTopOffsetForRow(rowId, currentLayout);
+          const offset = getTopOffsetForRowHeader(rowId, currentLayout);
 
           dragPreviewRef.current.style.display = 'block';
           dragPreviewRef.current.style.gridColumnStart = `1`;

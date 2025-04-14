@@ -11,7 +11,7 @@ import React, { useEffect, useRef } from 'react';
 import { combineLatest } from 'rxjs';
 
 import { useGridLayoutContext } from '../use_grid_layout_context';
-import { COLLAPSIBLE_HEADER_HEIGHT, getTopOffsetForRow } from '../utils/calculations';
+import { COLLAPSIBLE_HEADER_HEIGHT, getTopOffsetForRowHeader } from '../utils/calculations';
 import { GridRowHeader } from './grid_row_header';
 
 export interface GridRowHeaderProps {
@@ -108,7 +108,7 @@ const useStyleSubscription = (
         const headerRef = gridLayoutStateManager.headerRefs.current[rowId];
         if (!headerRef) return;
         const currentGridLayout = proposedGridLayout || gridLayout;
-        const topOffset = getTopOffsetForRow(rowId, currentGridLayout);
+        const topOffset = getTopOffsetForRowHeader(rowId, currentGridLayout);
         headerRef.style.display = 'block';
         headerRef.style.gridColumnStart = `1`;
         headerRef.style.gridColumnEnd = `-1`;
