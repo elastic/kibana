@@ -17,7 +17,8 @@ import {
 
 export const toolDetails = {
   name: 'inspect_index_mapping',
-  description: 'Use this tool when there is a "verification_exception Unknown column" error or to see which fields and types are used in the index.' +
+  description:
+    'Use this tool when there is a "verification_exception Unknown column" error or to see which fields and types are used in the index.' +
     'This function will return as much of the index mapping as possible. If the index mapping is too large, some values will be truncated as indicated by "...".' +
     'Call the function again to inspected truncated values.' +
     `Example:
@@ -34,7 +35,13 @@ Function response: {"name":{"type":"keyword"}
 `,
 };
 
-export const getInspectIndexMappingTool = ({ esClient, indexPattern }: { esClient: ElasticsearchClient, indexPattern: string }) => {
+export const getInspectIndexMappingTool = ({
+  esClient,
+  indexPattern,
+}: {
+  esClient: ElasticsearchClient;
+  indexPattern: string;
+}) => {
   const indexPatternsFetcher = new IndexPatternsFetcher(esClient);
   return tool(
     async ({ property }) => {
@@ -46,7 +53,7 @@ export const getInspectIndexMappingTool = ({ esClient, indexPattern }: { esClien
         },
       });
 
-      const prunedFields = fields.map(p => ({ name: p.name, type: p.esTypes[0] }))
+      const prunedFields = fields.map((p) => ({ name: p.name, type: p.esTypes[0] }));
       const nestedObject = mapFieldDescriptorToNestedObject(prunedFields);
       const nestedValue = getNestedValue(nestedObject, property);
       const result = shallowObjectViewTruncated(nestedValue, 30000);

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { AIMessage, BaseMessage } from '@langchain/core/messages';
 import { END } from '@langchain/langgraph';
 import type { GenerateEsqlAnnotation } from './state';
 

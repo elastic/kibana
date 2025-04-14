@@ -18,7 +18,6 @@ import {
   toolDefinitionToInference,
 } from '@kbn/inference-langchain/src/chat_model/to_inference';
 import type { GenerateEsqlAnnotation } from '../../state';
-import { requireFirstInspectIndexMappingCallWithEmptyKey } from '../../../../utils/common';
 
 export const getNlToEsqlAgent = ({
   connectorId,
@@ -50,7 +49,7 @@ export const getNlToEsqlAgent = ({
       })
     )) as ChatCompletionMessageEvent;
 
-    //const aiMessage = requireFirstInspectIndexMappingCallWithEmptyKey(responseToLangchainMessage(result), stateMessages);
+    // const aiMessage = requireFirstInspectIndexMappingCallWithEmptyKey(responseToLangchainMessage(result), stateMessages);
 
     return new Command({
       update: {

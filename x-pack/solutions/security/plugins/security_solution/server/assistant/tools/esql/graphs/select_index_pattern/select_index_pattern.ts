@@ -35,11 +35,10 @@ export const getSelectIndexPatternGraph = ({
     | ActionsClientChatOpenAI;
   esClient: ElasticsearchClient;
 }) => {
-
   const analyzeIndexPatternGraph = getAnalyzeIndexPatternGraph({
     esClient,
     createLlmInstance,
-  })
+  });
 
   const graph = new StateGraph(SelectIndexPatternAnnotation)
     .addNode(GET_INDEX_PATTERNS, fetchIndexPatterns({ esClient }), {
@@ -51,7 +50,7 @@ export const getSelectIndexPatternGraph = ({
     .addNode(
       ANALYSE_INDEX_PATTERN,
       getAnalyseIndexPattern({
-        analyzeIndexPatternGraph
+        analyzeIndexPatternGraph,
       }),
       { retryPolicy: { maxAttempts: 3 }, subgraphs: [analyzeIndexPatternGraph] }
     )
@@ -64,20 +63,18 @@ export const getSelectIndexPatternGraph = ({
     .addConditionalEdges(
       SHORTLIST_INDEX_PATTERNS,
       (state: typeof SelectIndexPatternAnnotation.State) => {
-        return state.shortlistedIndexPatterns.map(
-          (indexPattern) => {
-            const { input } = state;
-            if (input === undefined) {
-              throw new Error('State input is undefined');
-            }
-            return new Send(ANALYSE_INDEX_PATTERN, {
-              input: {
-                question: input.question,
-                indexPattern,
-              }
-            })
+        return state.shortlistedIndexPatterns.map((indexPattern) => {
+          const { input } = state;
+          if (input === undefined) {
+            throw new Error('State input is undefined');
           }
-        );
+          return new Send(ANALYSE_INDEX_PATTERN, {
+            input: {
+              question: input.question,
+              indexPattern,
+            },
+          });
+        });
       },
       {
         [ANALYSE_INDEX_PATTERN]: ANALYSE_INDEX_PATTERN,

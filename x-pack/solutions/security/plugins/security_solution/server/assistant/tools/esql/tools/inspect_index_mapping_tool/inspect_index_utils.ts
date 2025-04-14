@@ -80,7 +80,7 @@ interface NestedObject {
   [key: string]: TypedProperty | NestedObject;
 }
 
-export const mapFieldDescriptorToNestedObject = <T extends { name: string, type: string }>(
+export const mapFieldDescriptorToNestedObject = <T extends { name: string; type: string }>(
   arr: T[]
 ): NestedObject => {
   return arr.reduce<NestedObject>((acc, obj) => {
@@ -89,7 +89,9 @@ export const mapFieldDescriptorToNestedObject = <T extends { name: string, type:
       if (!(key in nested)) {
         nested[key] =
           index === keys.length - 1
-            ? Object.fromEntries(Object.entries(obj).filter(([k]) => k !== 'name')) as TypedProperty
+            ? (Object.fromEntries(
+                Object.entries(obj).filter(([k]) => k !== 'name')
+              ) as TypedProperty)
             : {};
       }
       return nested[key] as NestedObject;
@@ -97,5 +99,3 @@ export const mapFieldDescriptorToNestedObject = <T extends { name: string, type:
     return acc;
   }, {});
 };
-
-

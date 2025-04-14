@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { StructuredToolInterface } from '@langchain/core/tools';
 import type { ElasticsearchClient, KibanaRequest, Logger } from '@kbn/core/server';
 import { END, START, StateGraph } from '@langchain/langgraph';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
@@ -61,7 +60,6 @@ export const getGenerateEsqlGraph = ({
     | ActionsClientChatVertexAI
     | ActionsClientChatOpenAI;
 }) => {
-
   const nlToEsqlAgentNode = getNlToEsqlAgent({
     connectorId,
     inference,
@@ -71,7 +69,7 @@ export const getGenerateEsqlGraph = ({
       getInspectIndexMappingTool({
         esClient,
         indexPattern: 'placeholder',
-      })
+      }),
     ],
   });
 
@@ -108,17 +106,17 @@ export const getGenerateEsqlGraph = ({
     })
     .addNode(NL_TO_ESQL_AGENT_NODE, nlToEsqlAgentNode, { retryPolicy: { maxAttempts: 3 } })
     .addNode(TOOLS_NODE, (state: typeof GenerateEsqlAnnotation.State) => {
-      const { selectedIndexPattern } = state
+      const { selectedIndexPattern } = state;
       if (selectedIndexPattern == null) {
         throw new Error('Input is required');
       }
       const inspectIndexMappingTool = getInspectIndexMappingTool({
-        esClient: esClient,
+        esClient,
         indexPattern: selectedIndexPattern,
-      })
-      const tools = [inspectIndexMappingTool]
-      const toolNode = new ToolNode(tools)
-      return toolNode.invoke(state)
+      });
+      const tools = [inspectIndexMappingTool];
+      const toolNode = new ToolNode(tools);
+      return toolNode.invoke(state);
     })
     .addNode(VALIDATE_ESQL_FROM_LAST_MESSAGE_NODE, validateEsqlInLastMessageNode)
     .addNode(BUILD_SUCCESS_REPORT_FROM_LAST_MESSAGE_NODE, buildSuccessReportFromLastMessageNode)

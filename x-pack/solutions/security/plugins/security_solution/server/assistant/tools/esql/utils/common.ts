@@ -5,10 +5,15 @@
  * 2.0.
  */
 
-import { ActionsClientChatBedrockConverse, ActionsClientChatVertexAI, ActionsClientChatOpenAI } from "@kbn/langchain/server";
-import { AIMessage, BaseMessage } from "@langchain/core/messages";
-import { toolDetails } from "../tools/inspect_index_mapping_tool/inspect_index_mapping_tool";
-import { ToolCall } from "@langchain/core/dist/messages/tool";
+import type {
+  ActionsClientChatBedrockConverse,
+  ActionsClientChatVertexAI,
+  ActionsClientChatOpenAI,
+} from '@kbn/langchain/server';
+import type { BaseMessage } from '@langchain/core/messages';
+import { AIMessage } from '@langchain/core/messages';
+import type { ToolCall } from '@langchain/core/dist/messages/tool';
+import { toolDetails } from '../tools/inspect_index_mapping_tool/inspect_index_mapping_tool';
 
 export const getPromptSuffixForOssModel = (toolName: string) => `
   When using ${toolName} tool ALWAYS pass the user's questions directly as input into the tool.
@@ -19,7 +24,6 @@ export const getPromptSuffixForOssModel = (toolName: string) => `
 
   It is important that ES|QL query is preceeded by a new line.`;
 
-
 export const messageContainsToolCalls = (message: BaseMessage): message is AIMessage => {
   return (
     'tool_calls' in message && Array.isArray(message.tool_calls) && message.tool_calls?.length > 0
@@ -29,13 +33,19 @@ export const messageContainsToolCalls = (message: BaseMessage): message is AIMes
 export type CreateLlmInstance = () =>
   | ActionsClientChatBedrockConverse
   | ActionsClientChatVertexAI
-  | ActionsClientChatOpenAI
+  | ActionsClientChatOpenAI;
 
-export const requireFirstInspectIndexMappingCallWithEmptyKey = (newMessage: AIMessage, oldMessages: BaseMessage[]): AIMessage => {
+export const requireFirstInspectIndexMappingCallWithEmptyKey = (
+  newMessage: AIMessage,
+  oldMessages: BaseMessage[]
+): AIMessage => {
   const hasCalledInspectIndexMappingTool = oldMessages.find((message) => {
-    return messageContainsToolCalls(message) && message.tool_calls?.some((toolCall) => {
-      return toolCall.name === toolDetails.name;
-    });
+    return (
+      messageContainsToolCalls(message) &&
+      message.tool_calls?.some((toolCall) => {
+        return toolCall.name === toolDetails.name;
+      })
+    );
   });
 
   if (hasCalledInspectIndexMappingTool) {
@@ -52,8 +62,8 @@ export const requireFirstInspectIndexMappingCallWithEmptyKey = (newMessage: AIMe
     return newMessage;
   }
 
-  const modifiedToolCalls: ToolCall[] = []
-  let hasModifiedToolCall = false
+  const modifiedToolCalls: ToolCall[] = [];
+  let hasModifiedToolCall = false;
 
   for (const toolCall of newMessageToolCalls) {
     if (toolCall.name === toolDetails.name && !hasModifiedToolCall) {
@@ -61,18 +71,17 @@ export const requireFirstInspectIndexMappingCallWithEmptyKey = (newMessage: AIMe
         ...toolCall,
         args: {
           ...toolCall.args,
-          property: ''
-        }
+          property: '',
+        },
       });
       hasModifiedToolCall = true;
     } else {
       modifiedToolCalls.push(toolCall);
     }
   }
-  
-  return new AIMessage({
 
+  return new AIMessage({
     content: newMessage.content,
     tool_calls: modifiedToolCalls,
-  })
-}
+  });
+};

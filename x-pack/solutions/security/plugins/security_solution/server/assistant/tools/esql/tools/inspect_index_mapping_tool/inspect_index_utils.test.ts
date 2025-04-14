@@ -30,9 +30,9 @@ const sampleMapping1 = {
   },
 };
 
-type Mapping = {
+interface Mapping {
   [key: string]: { type: string } | Mapping;
-};
+}
 
 describe('inspect index', () => {
   it.each([
@@ -323,242 +323,197 @@ describe('inspect index', () => {
     });
   });
 
-
   it('1fieldDescriptor maps to nested object', () => {
     const fieldDescriptors = [
       {
-        "name": "test",
-        "type": "number",
-        "esTypes": [
-            "long"
-        ],
-        "searchable": true,
-        "aggregatable": true,
-        "readFromDocValues": true,
-        "metadata_field": false
-    },
-    {
-      "name": "bar",
-      "type": "number",
-      "esTypes": [
-          "long"
-      ],
-      "searchable": true,
-      "aggregatable": true,
-      "readFromDocValues": true,
-      "metadata_field": false
-  },
-      {
-          "name": "dns.Ext.options",
-          "type": "number",
-          "esTypes": [
-              "long"
-          ],
-          "searchable": true,
-          "aggregatable": true,
-          "readFromDocValues": true,
-          "metadata_field": false
+        name: 'test',
+        type: 'number',
+        esTypes: ['long'],
+        searchable: true,
+        aggregatable: true,
+        readFromDocValues: true,
+        metadata_field: false,
       },
       {
-          "name": "dns.Ext.status",
-          "type": "number",
-          "esTypes": [
-              "long"
-          ],
-          "searchable": true,
-          "aggregatable": true,
-          "readFromDocValues": true,
-          "metadata_field": false
+        name: 'bar',
+        type: 'number',
+        esTypes: ['long'],
+        searchable: true,
+        aggregatable: true,
+        readFromDocValues: true,
+        metadata_field: false,
       },
       {
-          "name": "dns.answers.class",
-          "type": "string",
-          "esTypes": [
-              "keyword"
-          ],
-          "searchable": true,
-          "aggregatable": true,
-          "readFromDocValues": true,
-          "metadata_field": false
+        name: 'dns.Ext.options',
+        type: 'number',
+        esTypes: ['long'],
+        searchable: true,
+        aggregatable: true,
+        readFromDocValues: true,
+        metadata_field: false,
       },
       {
-          "name": "dns.answers.data",
-          "type": "string",
-          "esTypes": [
-              "keyword"
-          ],
-          "searchable": true,
-          "aggregatable": true,
-          "readFromDocValues": true,
-          "metadata_field": false
+        name: 'dns.Ext.status',
+        type: 'number',
+        esTypes: ['long'],
+        searchable: true,
+        aggregatable: true,
+        readFromDocValues: true,
+        metadata_field: false,
       },
       {
-          "name": "dns.answers.name",
-          "type": "string",
-          "esTypes": [
-              "keyword"
-          ],
-          "searchable": true,
-          "aggregatable": true,
-          "readFromDocValues": true,
-          "metadata_field": false
+        name: 'dns.answers.class',
+        type: 'string',
+        esTypes: ['keyword'],
+        searchable: true,
+        aggregatable: true,
+        readFromDocValues: true,
+        metadata_field: false,
       },
       {
-          "name": "dns.answers.ttl",
-          "type": "number",
-          "esTypes": [
-              "long"
-          ],
-          "searchable": true,
-          "aggregatable": true,
-          "readFromDocValues": true,
-          "metadata_field": false
+        name: 'dns.answers.data',
+        type: 'string',
+        esTypes: ['keyword'],
+        searchable: true,
+        aggregatable: true,
+        readFromDocValues: true,
+        metadata_field: false,
       },
       {
-          "name": "dns.answers.type",
-          "type": "string",
-          "esTypes": [
-              "keyword"
-          ],
-          "searchable": true,
-          "aggregatable": true,
-          "readFromDocValues": true,
-          "metadata_field": false
+        name: 'dns.answers.name',
+        type: 'string',
+        esTypes: ['keyword'],
+        searchable: true,
+        aggregatable: true,
+        readFromDocValues: true,
+        metadata_field: false,
       },
       {
-          "name": "dns.header_flags",
-          "type": "string",
-          "esTypes": [
-              "keyword"
-          ],
-          "searchable": true,
-          "aggregatable": true,
-          "readFromDocValues": true,
-          "metadata_field": false
+        name: 'dns.answers.ttl',
+        type: 'number',
+        esTypes: ['long'],
+        searchable: true,
+        aggregatable: true,
+        readFromDocValues: true,
+        metadata_field: false,
       },
       {
-          "name": "dns.id",
-          "type": "string",
-          "esTypes": [
-              "keyword"
-          ],
-          "searchable": true,
-          "aggregatable": true,
-          "readFromDocValues": true,
-          "metadata_field": false
+        name: 'dns.answers.type',
+        type: 'string',
+        esTypes: ['keyword'],
+        searchable: true,
+        aggregatable: true,
+        readFromDocValues: true,
+        metadata_field: false,
       },
       {
-          "name": "dns.op_code",
-          "type": "string",
-          "esTypes": [
-              "keyword"
-          ],
-          "searchable": true,
-          "aggregatable": true,
-          "readFromDocValues": true,
-          "metadata_field": false
+        name: 'dns.header_flags',
+        type: 'string',
+        esTypes: ['keyword'],
+        searchable: true,
+        aggregatable: true,
+        readFromDocValues: true,
+        metadata_field: false,
       },
       {
-          "name": "dns.question.class",
-          "type": "string",
-          "esTypes": [
-              "keyword"
-          ],
-          "searchable": true,
-          "aggregatable": true,
-          "readFromDocValues": true,
-          "metadata_field": false
+        name: 'dns.id',
+        type: 'string',
+        esTypes: ['keyword'],
+        searchable: true,
+        aggregatable: true,
+        readFromDocValues: true,
+        metadata_field: false,
       },
       {
-          "name": "dns.question.name",
-          "type": "string",
-          "esTypes": [
-              "keyword"
-          ],
-          "searchable": true,
-          "aggregatable": true,
-          "readFromDocValues": true,
-          "metadata_field": false
+        name: 'dns.op_code',
+        type: 'string',
+        esTypes: ['keyword'],
+        searchable: true,
+        aggregatable: true,
+        readFromDocValues: true,
+        metadata_field: false,
       },
       {
-          "name": "dns.question.registered_domain",
-          "type": "string",
-          "esTypes": [
-              "keyword"
-          ],
-          "searchable": true,
-          "aggregatable": true,
-          "readFromDocValues": true,
-          "metadata_field": false
+        name: 'dns.question.class',
+        type: 'string',
+        esTypes: ['keyword'],
+        searchable: true,
+        aggregatable: true,
+        readFromDocValues: true,
+        metadata_field: false,
       },
       {
-          "name": "dns.question.subdomain",
-          "type": "string",
-          "esTypes": [
-              "keyword"
-          ],
-          "searchable": true,
-          "aggregatable": true,
-          "readFromDocValues": true,
-          "metadata_field": false
+        name: 'dns.question.name',
+        type: 'string',
+        esTypes: ['keyword'],
+        searchable: true,
+        aggregatable: true,
+        readFromDocValues: true,
+        metadata_field: false,
       },
       {
-          "name": "dns.question.top_level_domain",
-          "type": "string",
-          "esTypes": [
-              "keyword"
-          ],
-          "searchable": true,
-          "aggregatable": true,
-          "readFromDocValues": true,
-          "metadata_field": false
+        name: 'dns.question.registered_domain',
+        type: 'string',
+        esTypes: ['keyword'],
+        searchable: true,
+        aggregatable: true,
+        readFromDocValues: true,
+        metadata_field: false,
       },
       {
-          "name": "dns.question.type",
-          "type": "string",
-          "esTypes": [
-              "keyword"
-          ],
-          "searchable": true,
-          "aggregatable": true,
-          "readFromDocValues": true,
-          "metadata_field": false
+        name: 'dns.question.subdomain',
+        type: 'string',
+        esTypes: ['keyword'],
+        searchable: true,
+        aggregatable: true,
+        readFromDocValues: true,
+        metadata_field: false,
       },
       {
-          "name": "dns.resolved_ip",
-          "type": "ip",
-          "esTypes": [
-              "ip"
-          ],
-          "searchable": true,
-          "aggregatable": true,
-          "readFromDocValues": true,
-          "metadata_field": false
+        name: 'dns.question.top_level_domain',
+        type: 'string',
+        esTypes: ['keyword'],
+        searchable: true,
+        aggregatable: true,
+        readFromDocValues: true,
+        metadata_field: false,
       },
       {
-          "name": "dns.response_code",
-          "type": "string",
-          "esTypes": [
-              "keyword"
-          ],
-          "searchable": true,
-          "aggregatable": true,
-          "readFromDocValues": true,
-          "metadata_field": false
-      }
-  ]
+        name: 'dns.question.type',
+        type: 'string',
+        esTypes: ['keyword'],
+        searchable: true,
+        aggregatable: true,
+        readFromDocValues: true,
+        metadata_field: false,
+      },
+      {
+        name: 'dns.resolved_ip',
+        type: 'ip',
+        esTypes: ['ip'],
+        searchable: true,
+        aggregatable: true,
+        readFromDocValues: true,
+        metadata_field: false,
+      },
+      {
+        name: 'dns.response_code',
+        type: 'string',
+        esTypes: ['keyword'],
+        searchable: true,
+        aggregatable: true,
+        readFromDocValues: true,
+        metadata_field: false,
+      },
+    ];
 
-    const nestedObject = mapFieldDescriptorToNestedObject(fieldDescriptors.map(p=>({name:p.name, type: p.esTypes[0]})));
+    const nestedObject = mapFieldDescriptorToNestedObject(
+      fieldDescriptors.map((p) => ({ name: p.name, type: p.esTypes[0] }))
+    );
 
-    console.log(JSON.stringify(nestedObject, null, 2))
- 
-    
+    console.log(JSON.stringify(nestedObject, null, 2));
+
     const result = compressMapping(nestedObject);
-    console.log(result)
-    
-
+    console.log(result);
   });
-
-
-
 });

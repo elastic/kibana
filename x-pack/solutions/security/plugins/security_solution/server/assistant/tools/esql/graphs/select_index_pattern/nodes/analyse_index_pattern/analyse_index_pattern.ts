@@ -6,26 +6,26 @@
  */
 
 import { Command } from '@langchain/langgraph';
-import { getAnalyzeIndexPatternGraph } from '../../../analyse_index_pattern/analyse_index_pattern';
-
+import type { getAnalyzeIndexPatternGraph } from '../../../analyse_index_pattern/analyse_index_pattern';
 
 export const getAnalyseIndexPattern = ({
-  analyzeIndexPatternGraph
+  analyzeIndexPatternGraph,
 }: {
   analyzeIndexPatternGraph: ReturnType<typeof getAnalyzeIndexPatternGraph>;
 }) => {
-  return async ({ input }: {
+  return async ({
+    input,
+  }: {
     input: {
-      question: string,
-      indexPattern: string,
-    }
+      question: string;
+      indexPattern: string;
+    };
   }) => {
-
     const result = await analyzeIndexPatternGraph.invoke({
       input,
-    })
+    });
 
-    const {output} = result;
+    const { output } = result;
     if (output === undefined) {
       throw new Error('No output from analyze index pattern graph');
     }
