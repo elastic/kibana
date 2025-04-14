@@ -50,7 +50,6 @@ import type {
   SanitizedRuleConfig,
   SanitizedRule,
   RuleAlertData,
-  Artifact,
 } from '../common';
 import type { PublicAlertFactory } from './alert/create_alert_factory';
 import type { RulesSettingsFlappingProperties } from '../common/rules_settings';
