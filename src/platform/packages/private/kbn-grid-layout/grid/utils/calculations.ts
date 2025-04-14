@@ -21,11 +21,7 @@ export const getRowHeight = (row: GridRowData) => {
   );
 };
 
-
-export const getTopOffsetForRowHeader = (
-  rowId: string,
-  layout: GridLayoutData
-) => {
+export const getTopOffsetForRowHeader = (rowId: string, layout: GridLayoutData) => {
   const rowsBeforeHeight = Object.values(layout)
     .filter((row) => row.order < layout[rowId].order)
     .reduce((acc, row) => acc + getRowHeight(row) + getHeaderHeight(row), 0);
@@ -33,10 +29,6 @@ export const getTopOffsetForRowHeader = (
   return rowsBeforeHeight;
 };
 
-
-export const getTopOffsetForRow = (
-  rowId: string,
-  layout: GridLayoutData,
-) => {
+export const getTopOffsetForRow = (rowId: string, layout: GridLayoutData) => {
   return getTopOffsetForRowHeader(rowId, layout) + getHeaderHeight(layout[rowId]);
 };

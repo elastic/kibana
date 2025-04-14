@@ -68,6 +68,22 @@ const getRowMidPoint = (headerRef: HTMLDivElement | null, rowRef: HTMLDivElement
   return top + (bottom - top) / 2;
 };
 
+const sortRowsByRefs = (gridLayoutStateManager: GridLayoutStateManager) => {
+  return Object.keys(gridLayoutStateManager.headerRefs.current).sort((idA, idB) => {
+    // todo: find a smarter way to do this
+    // if the row is active, use the header ref to get the mid point since it is the one that is being dragged
+    const midPointA = getRowMidPoint(
+      gridLayoutStateManager.headerRefs.current[idA],
+      gridLayoutStateManager.rowDimensionsRefs.current[idA]
+    );
+    const midPointB = getRowMidPoint(
+      gridLayoutStateManager.headerRefs.current[idB],
+      gridLayoutStateManager.rowDimensionsRefs.current[idA]
+    );
+    return midPointA - midPointB;
+  });
+};
+
 export const moveAction = (
   gridLayoutStateManager: GridLayoutStateManager,
   startingPointer: PointerPosition,
@@ -84,33 +100,6 @@ export const moveAction = (
   const dropTargetRowId = getDropTarget(currentPointer, gridLayoutStateManager);
   console.log('dropTargetRowId', dropTargetRowId);
 
-  let updatedRowOrder = currentRowOrder;
-
-  if (dropTargetRowId && currentLayout[dropTargetRowId].isCollapsible) {
-    updatedRowOrder = Object.keys(gridLayoutStateManager.headerRefs.current)
-      .sort((idA, idB) => {
-        // todo: find a smarter way to do this
-        // if the row is active, use the header ref to get the mid point since it is the one that is being dragged
-        const midPointA = getRowMidPoint(
-          gridLayoutStateManager.headerRefs.current[idA],
-          gridLayoutStateManager.rowDimensionsRefs.current[idA]
-        );
-        const midPointB = getRowMidPoint(
-          gridLayoutStateManager.headerRefs.current[idB],
-          gridLayoutStateManager.rowDimensionsRefs.current[idA]
-        );
-        return midPointA - midPointB;
-      })
-  }
-
-  if (!deepEqual(currentRowOrder, updatedRowOrder)) {
-    const updatedLayout = cloneDeep(currentLayout);
-    updatedRowOrder.forEach((id, index) => {
-      updatedLayout[id].order = index + 1;
-    });
-    gridLayoutStateManager.proposedGridLayout$.next(updatedLayout);
-  }
-
   gridLayoutStateManager.activeRowEvent$.next({
     ...currentActiveRowEvent,
     translate: {
@@ -118,6 +107,20 @@ export const moveAction = (
       left: currentPointer.clientX - startingPointer.clientX,
     },
   });
+
+
+  if (dropTargetRowId && currentLayout[dropTargetRowId].isCollapsible) {
+    const updatedRowOrder = sortRowsByRefs(gridLayoutStateManager);
+    if (!deepEqual(currentRowOrder, updatedRowOrder)) {
+      const updatedLayout = cloneDeep(currentLayout);
+      updatedRowOrder.forEach((id, index) => {
+        updatedLayout[id].order = index + 1;
+      });
+      gridLayoutStateManager.proposedGridLayout$.next(updatedLayout);
+    }
+  }
+
+
 };
 
 function getDropTarget(
@@ -125,19 +128,16 @@ function getDropTarget(
   gridLayoutStateManager: GridLayoutStateManager
 ) {
   const headerRefs = gridLayoutStateManager.headerRefs.current;
-  const rowId =  Object.keys(headerRefs).find((id) => {
+  const rowId = Object.keys(headerRefs).find((id) => {
     const ref = headerRefs[id];
     if (!ref) return false;
-    const { top, bottom } = getRowRect(id, gridLayoutStateManager) 
+    const { top, bottom } = getRowRect(id, gridLayoutStateManager);
     return currentPointer.clientY >= top && currentPointer.clientY <= bottom;
   });
   return rowId;
 }
 
-const getRowRect = (
-  rowId: string, 
-  gridLayoutStateManager: GridLayoutStateManager
-) => {
+const getRowRect = (rowId: string, gridLayoutStateManager: GridLayoutStateManager) => {
   const headerRef = gridLayoutStateManager.headerRefs.current[rowId];
   const rowRef = gridLayoutStateManager.rowDimensionsRefs.current[rowId];
   if (!headerRef) {
@@ -149,11 +149,11 @@ const getRowRect = (
       top,
       bottom,
     };
-  };
+  }
   const top = headerRef.getBoundingClientRect().top;
   const bottom = rowRef.getBoundingClientRect().bottom;
   return {
     top,
     bottom,
   };
-}
+};

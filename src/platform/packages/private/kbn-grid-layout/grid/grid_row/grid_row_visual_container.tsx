@@ -18,7 +18,7 @@ export const GridRowVisualContainer = ({ rowId }: { rowId: string }) => {
     pointerEvents: 'none' as const,
     zIndex: 0,
     backgroundColor: 'rgb(232, 241, 255, 0.5)',
-    outline: '4px solid rgb(232, 241, 255, 0.5)'
+    outline: '4px solid rgb(232, 241, 255, 0.5)',
   };
 
   useEffect(() => {

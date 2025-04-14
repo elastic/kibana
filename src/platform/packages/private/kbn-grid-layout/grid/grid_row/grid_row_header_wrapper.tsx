@@ -43,7 +43,7 @@ export const GridRowHeaderWrapper = ({
 
   useStyleSubscription(rowId, gridLayoutStateManager);
 
-   useEffect(() => {
+  useEffect(() => {
     return () => {
       // remove reference on unmount
       delete gridLayoutStateManager.headerRefs.current[rowId];
@@ -74,7 +74,7 @@ export const GridRowHeaderWrapper = ({
 export const GridRowHeaderEmpty = React.memo(({ rowId }: { rowId: string }) => {
   const { gridLayoutStateManager } = useGridLayoutContext();
   useStyleSubscription(rowId, gridLayoutStateManager);
-  
+
   useEffect(() => {
     return () => {
       // remove reference on unmount
@@ -82,7 +82,6 @@ export const GridRowHeaderEmpty = React.memo(({ rowId }: { rowId: string }) => {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
 
   return (
     <div
