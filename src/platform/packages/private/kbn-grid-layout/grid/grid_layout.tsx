@@ -10,7 +10,7 @@
 import classNames from 'classnames';
 import deepEqual from 'fast-deep-equal';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { combineLatest, map, distinctUntilChanged, pairwise } from 'rxjs';
+import { combineLatest, map, distinctUntilChanged, pairwise, skip } from 'rxjs';
 
 import { css } from '@emotion/react';
 
@@ -58,6 +58,8 @@ export const GridLayout = ({
     expandedPanelId,
     accessMode,
   });
+
+  // console.log('LAYOUT', layout);
 
   const [widgetsInOrder, setWidgetsInOrder] = useState<
     Array<{ type: 'panel' | 'section'; id: string }>
@@ -108,6 +110,19 @@ export const GridLayout = ({
   // }, [onLayoutChange]);
 
   useEffect(() => {
+    /** Update the styles of the grid row via a subscription to prevent re-renders */
+    const interactionStyleSubscription = gridLayoutStateManager.interactionEvent$
+      .pipe(skip(1)) // skip the first emit because the `initialStyles` will take care of it
+      .subscribe((interactionEvent) => {
+        if (!layoutRef.current) return;
+        const targetRow = interactionEvent?.targetRow;
+        if (targetRow === 'main') {
+          layoutRef.current.classList.add('kbnGridRow--targeted');
+        } else {
+          layoutRef.current.classList.remove('kbnGridRow--targeted');
+        }
+      });
+
     const mainSectionWidgetsSubscription = combineLatest([
       gridLayoutStateManager.proposedGridLayout$,
       gridLayoutStateManager.gridLayout$,
@@ -136,10 +151,13 @@ export const GridLayout = ({
 
         const widgets = getMainLayoutInOrder(currentLayout);
         // console.log('widgets', widgets);
-        let gridTemplateRows = '';
         let maxRow = -Infinity;
         let startingRow = 0;
+        // const layoutRows: Array<{ type: 'row'; count: number } | { type: 'section'; id: string }> =
+        //   [];
+        let gridTemplateRows = '';
         widgets.forEach(({ id, type }) => {
+          // console.log({ type, id });
           if (type === 'panel') {
             const panelData = currentLayout[id] as GridPanelData;
             if (maxRow < 0) {
@@ -148,12 +166,33 @@ export const GridLayout = ({
             maxRow = Math.max(maxRow, panelData.row + panelData.height - startingRow);
           } else {
             const sectionData = currentLayout[id] as GridRowData;
+            // gridTemplateRows += `${
+            //   maxRow > 0 ? `repeat(${maxRow}, calc(var(--kbnGridRowHeight) * 1px))` : ''
+            // } [${
+            //   sectionData.id
+            // }-start] repeat(var(--kbnGridRowCount-${id}), calc(var(--kbnGridRowHeight) * 1px)) `;
+            // if (maxRow > 0) layoutRows.push({ type: 'row', count: maxRow });
+            // layoutRows.push({
+            //   type: 'section',
+            //   id: sectionData.id,
+            // });
             gridTemplateRows += `${
               maxRow > 0 ? `repeat(${maxRow}, calc(var(--kbnGridRowHeight) * 1px))` : ''
-            } [${sectionData.id}-start] auto `;
+            } [${sectionData.id}-start] auto [${sectionData.id}-end]`;
             maxRow = -Infinity;
           }
         });
+        gridTemplateRows = gridTemplateRows.replaceAll('] [', ' ');
+        // console.log(layoutRows);
+        // let gridTemplateRows = '';
+        // layoutRows.forEach((row) => {
+        //   if (row.type === 'row') {
+        //     gridTemplateRows += `repeat(${row.count}, calc(var(--kbnGridRowHeight) * 1px))`;
+        //   } else {
+        //     gridTemplateRows += `[${row.id}-start] auto [${sectionData.id}-end`;
+
+        //   }
+        // });
         // console.log({ currentLayout, gridTemplateRows });
         layoutRef.current.style.gridTemplateRows = gridTemplateRows;
       });
@@ -234,6 +273,7 @@ const styles = {
   grid: css({
     display: 'grid',
     gap: 'calc(var(--kbnGridGutterSize) * 1px)',
+    gridAutoRows: 'calc(var(--kbnGridRowHeight) * 1px)',
     gridTemplateColumns: `repeat(
           var(--kbnGridColumnCount),
           calc(
@@ -243,7 +283,7 @@ const styles = {
         )`,
   }),
   layoutPadding: css({
-    padding: 'calc(var(--kbnGridGutterSize) * 1px)',
+    margin: 'calc(var(--kbnGridGutterSize) * 1px)',
   }),
   hasActivePanel: css({
     '&:has(.kbnGridPanel--active), &:has(.kbnGridRowHeader--active)': {

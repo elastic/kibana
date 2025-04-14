@@ -71,13 +71,12 @@ export const moveAction = (
   }
 
   const isResize = interactionEvent.type === 'resize';
+  // console.log(interactionEvent, pointerPixel);
 
   const previewRect = (() => {
     if (isResize) {
       const layoutRef = gridLayoutStateManager.layoutRef.current;
-      const maxRight = layoutRef
-        ? layoutRef.getBoundingClientRect().right - runtimeSettings.gutterSize
-        : window.innerWidth;
+      const maxRight = layoutRef ? layoutRef.getBoundingClientRect().right : window.innerWidth;
       return getResizePreviewRect({ interactionEvent, pointerPixel, maxRight });
     } else {
       return getDragPreviewRect({ interactionEvent, pointerPixel });
@@ -123,15 +122,16 @@ export const moveAction = (
 
   // calculate the requested grid position
   const targetedGridRow = targetRowId === 'main' ? gridLayoutElement : gridRowElements[targetRowId];
-  const targetedGridLeft = targetedGridRow?.getBoundingClientRect().left ?? 0;
-  const targetedGridTop = targetedGridRow?.getBoundingClientRect().top ?? 0;
+  const targetedGridRowRect = targetedGridRow?.getBoundingClientRect();
+  const targetedGridLeft = targetedGridRowRect?.left ?? 0;
+  const targetedGridTop = targetedGridRowRect?.top ?? 0;
 
   const maxColumn = isResize ? columnCount : columnCount - currentPanelData.width;
 
   const localXCoordinate = isResize
     ? previewRect.right - targetedGridLeft
     : previewRect.left - targetedGridLeft;
-  const localYCoordinate = isResize
+  let localYCoordinate = isResize
     ? previewRect.bottom - targetedGridTop
     : previewRect.top - targetedGridTop;
 
@@ -139,6 +139,14 @@ export const moveAction = (
     Math.max(Math.round(localXCoordinate / (columnPixelWidth + gutterSize)), 0),
     maxColumn
   );
+
+  if (targetRowId === 'main') {
+    Object.entries(gridRowElements).forEach(([id, row]) => {
+      if (!row || (currentLayout[id] as GridRowData).isCollapsed) return;
+      const rowRect = row.getBoundingClientRect();
+      if (rowRect.y <= previewRect.top) localYCoordinate -= rowRect.height;
+    });
+  }
   const targetRow = Math.max(Math.round(localYCoordinate / (rowHeight + gutterSize)), 0);
 
   const requestedPanelData = { ...currentPanelData };
@@ -149,7 +157,7 @@ export const moveAction = (
     requestedPanelData.column = targetColumn;
     requestedPanelData.row = targetRow;
   }
-  // console.log({ targetRow });
+  // console.log('tARGET!!!', { targetRow, targetRowId, currentLayout });
   // resolve the new grid layout
   if (
     hasChangedGridRow ||

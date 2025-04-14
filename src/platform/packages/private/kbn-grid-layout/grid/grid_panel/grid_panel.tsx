@@ -8,7 +8,8 @@
  */
 
 import React, { useEffect, useMemo } from 'react';
-import { combineLatest, skip } from 'rxjs';
+import { BehaviorSubject, combineLatest, distinctUntilChanged, map, skip } from 'rxjs';
+import deepEqual from 'fast-deep-equal';
 
 import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -18,6 +19,7 @@ import { DefaultDragHandle } from './drag_handle/default_drag_handle';
 import { useDragHandleApi } from './drag_handle/use_drag_handle_api';
 import { ResizeHandle } from './grid_panel_resize_handle';
 import { GridPanelData, GridRowData } from '../types';
+import { getMainLayoutInOrder } from '../utils/resolve_grid_row';
 
 export interface GridPanelProps {
   panelId: string;
@@ -71,29 +73,57 @@ export const GridPanel = React.memo(({ panelId, rowId }: GridPanelProps) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // const previousSection = useMemo(() => {
+  //   if(rowId !== 'main') return undefined;
+
+  //   const test = getMainLayoutInOrder(gridLayoutStateManager.proposedGridLayout$ ??)
+  //   return
+  // }, [])
+
   useEffect(
     () => {
-      /** Update the styles of the panel via a subscription to prevent re-renders */
-      const activePanelStyleSubscription = combineLatest([
-        gridLayoutStateManager.activePanel$,
+      const startingPanel = (() => {
+        const layout =
+          gridLayoutStateManager.gridLayout$.getValue() ??
+          gridLayoutStateManager.proposedGridLayout$.getValue();
+        if (rowId === 'main') {
+          return layout[panelId] as GridPanelData;
+        } else {
+          return (layout[rowId] as GridRowData)?.panels[panelId];
+        }
+      })();
+      const currentPanel$ = new BehaviorSubject<GridPanelData>(startingPanel);
+
+      const currentPanelSubscription = combineLatest([
         gridLayoutStateManager.gridLayout$,
         gridLayoutStateManager.proposedGridLayout$,
       ])
-        .pipe(skip(1)) // skip the first emit because the `initialStyles` will take care of it
-        .subscribe(([activePanel, gridLayout, proposedGridLayout]) => {
-          const ref = gridLayoutStateManager.panelRefs.current[rowId][panelId];
-          let panel: GridPanelData;
-          if (rowId === 'main') {
-            panel = (proposedGridLayout ?? gridLayout)[panelId] as GridPanelData;
-          } else {
-            panel = ((proposedGridLayout ?? gridLayout)[rowId] as GridRowData)?.panels[panelId];
-          }
+        .pipe(
+          map(([gridLayout, proposedGridLayout]) => {
+            if (rowId === 'main') {
+              return (proposedGridLayout ?? gridLayout)[panelId] as GridPanelData;
+            } else {
+              return ((proposedGridLayout ?? gridLayout)[rowId] as GridRowData)?.panels[panelId];
+            }
+          }),
+          distinctUntilChanged(deepEqual)
+        )
+        .subscribe((panel) => {
+          currentPanel$.next(panel);
+        });
 
-          if (!ref || !panel) return;
+      /** Update the styles of the panel via a subscription to prevent re-renders */
+      const activePanelStyleSubscription = combineLatest([
+        gridLayoutStateManager.activePanel$,
+        currentPanel$,
+      ])
+        .pipe(skip(1)) // skip the first emit because the `initialStyles` will take care of it
+        .subscribe(([activePanel, currentPanel]) => {
+          const ref = gridLayoutStateManager.panelRefs.current[rowId][panelId];
+          if (!ref || currentPanel.id !== panelId) return;
 
           const currentInteractionEvent = gridLayoutStateManager.interactionEvent$.getValue();
-
-          if (panelId === activePanel?.id) {
+          if (currentPanel.id === activePanel?.id) {
             ref.classList.add('kbnGridPanel--active');
 
             // if the current panel is active, give it fixed positioning depending on the interaction event
@@ -113,8 +143,8 @@ export const GridPanel = React.memo(({ panelId, rowId }: GridPanelProps) => {
               )}px`;
 
               // undo any "lock to grid" styles **except** for the top left corner, which stays locked
-              ref.style.gridColumnStart = `${panel.column + 1}`;
-              ref.style.gridRowStart = `${panel.row + 1}`;
+              ref.style.gridColumnStart = `${currentPanel.column + 1}`;
+              ref.style.gridRowStart = `${currentPanel.row + 1}`;
               ref.style.gridColumnEnd = `auto`;
               ref.style.gridRowEnd = `auto`;
             } else {
@@ -140,13 +170,30 @@ export const GridPanel = React.memo(({ panelId, rowId }: GridPanelProps) => {
             ref.style.top = ``;
             ref.style.width = ``;
             // setting the height is necessary for mobile mode
-            ref.style.height = `calc(1px * (${panel.height} * (var(--kbnGridRowHeight) + var(--kbnGridGutterSize)) - var(--kbnGridGutterSize)))`;
+            ref.style.height = `calc(1px * (${currentPanel.height} * (var(--kbnGridRowHeight) + var(--kbnGridGutterSize)) - var(--kbnGridGutterSize)))`;
 
-            // and render the panel locked to the grid
-            ref.style.gridColumnStart = `${panel.column + 1}`;
-            ref.style.gridColumnEnd = `${panel.column + 1 + panel.width}`;
-            ref.style.gridRowStart = `${panel.row + 1}`;
-            ref.style.gridRowEnd = `${panel.row + 1 + panel.height}`;
+            // const previousSection = (() => {
+            //   if (rowId !== 'main') return undefined;
+            //   const test = getMainLayoutInOrder(proposedGridLayout ?? gridLayout);
+            //   const panelIndex = test.findIndex((widget) => widget.id === panelId);
+            //   if (panelIndex <= 0) return undefined;
+            //   for (let i = panelIndex; i--; i >= 0) {
+            //     if (test[i]?.type === 'section') return test[i].id;
+            //   }
+            //   return undefined;
+            // })();
+
+            // // and render the panel locked to the grid
+            // const relativeRow = previousSection
+            //   ? panel.row - (proposedGridLayout ?? gridLayout)[previousSection].row - 1
+            //   : panel.row + 1;
+            ref.style.gridColumnStart = `${currentPanel.column + 1}`;
+            ref.style.gridColumnEnd = `span ${currentPanel.width}`;
+            // ref.style.gridRowStart = `${
+            //   previousSection ? `${previousSection}-end ` : ''
+            // }${relativeRow}`;
+            ref.style.gridRowStart = `${currentPanel.row + 1}`;
+            ref.style.gridRowEnd = `span ${currentPanel.height}`;
           }
         });
 
@@ -174,6 +221,7 @@ export const GridPanel = React.memo(({ panelId, rowId }: GridPanelProps) => {
       );
 
       return () => {
+        currentPanelSubscription.unsubscribe();
         expandedPanelSubscription.unsubscribe();
         activePanelStyleSubscription.unsubscribe();
       };

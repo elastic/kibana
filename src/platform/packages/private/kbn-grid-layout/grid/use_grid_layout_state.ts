@@ -11,7 +11,7 @@ import { useEuiTheme } from '@elastic/eui';
 import deepEqual from 'fast-deep-equal';
 import { cloneDeep, pick } from 'lodash';
 import { useEffect, useMemo, useRef } from 'react';
-import { BehaviorSubject, combineLatest, debounceTime, distinctUntilChanged } from 'rxjs';
+import { BehaviorSubject, combineLatest, debounceTime, distinctUntilChanged, map } from 'rxjs';
 import useResizeObserver, { type ObservedSize } from 'use-resize-observer/polyfilled';
 
 import {
@@ -20,12 +20,14 @@ import {
   GridAccessMode,
   GridLayoutData,
   GridLayoutStateManager,
+  GridPanelData,
+  GridRowData,
   GridSettings,
   PanelInteractionEvent,
   RuntimeGridSettings,
 } from './types';
 import { shouldShowMobileView } from './utils/mobile_view';
-import { resolveGridRow } from './utils/resolve_grid_row';
+import { getMainLayoutInOrder, resolveGridRow } from './utils/resolve_grid_row';
 
 export const useGridLayoutState = ({
   layout,
@@ -92,6 +94,7 @@ export const useGridLayoutState = ({
 
     const gridLayout$ = new BehaviorSubject<GridLayoutData>(resolvedLayout);
     const proposedGridLayout$ = new BehaviorSubject<GridLayoutData | undefined>(undefined);
+    const normalizedGridLayout$ = new BehaviorSubject<GridLayoutData>(resolvedLayout);
     const gridDimensions$ = new BehaviorSubject<ObservedSize>({ width: 0, height: 0 });
     const interactionEvent$ = new BehaviorSubject<PanelInteractionEvent | undefined>(undefined);
     const activePanel$ = new BehaviorSubject<ActivePanel | undefined>(undefined);
@@ -119,6 +122,70 @@ export const useGridLayoutState = ({
   }, []);
 
   useEffect(() => {
+    // const test = combineLatest([
+    //   gridLayoutStateManager.proposedGridLayout$,
+    //   gridLayoutStateManager.gridLayout$,
+    // ])
+    //   // .pipe(
+    //   //   map(([proposedGridLayout, gridLayout]) => {
+    //   //     const currentLayout = proposedGridLayout ?? gridLayout;
+    //   //     console.log()
+    //   //   })
+    //   // );
+    //   .subscribe(([proposedGridLayout, gridLayout]) => {
+    //     const currentLayout = proposedGridLayout ?? gridLayout;
+    //     // console.log('HERE!!!', currentLayout);
+    //     const widgetsInOrder = getMainLayoutInOrder(currentLayout);
+    //     const normalizedLayout: { [key: string]: GridRowData } = {};
+
+    //     let sectionCount = 0;
+    //     for (let i = 0; i < widgetsInOrder.length; i++) {
+    //       let widget = widgetsInOrder[i];
+    //       const currentSection = `main-${sectionCount}`;
+    //       if (widget.type === 'panel') {
+    //         sectionCount++;
+    //         normalizedLayout[currentSection] = {
+    //           id: currentSection,
+    //           row: sectionCount,
+    //           isCollapsed: false,
+    //           panels: {},
+    //           title: 'Fake',
+    //         };
+
+    //         while (widgetsInOrder[i].type === 'panel' && i < widgetsInOrder.length) {
+    //           widget = widgetsInOrder[i];
+    //           normalizedLayout[currentSection].panels[widget.id] = cloneDeep(
+    //             currentLayout[widget.id] as GridPanelData
+    //           );
+    //           i++;
+    //         }
+    //       }
+
+    //       widget = widgetsInOrder[i];
+    //       if (widget.type === 'section') {
+    //         sectionCount++;
+    //         normalizedLayout[widget.id] = {
+    //           ...(currentLayout[widget.id] as GridRowData),
+    //           row: sectionCount,
+    //         };
+    //       }
+    //     }
+
+    //     Object.keys(normalizedLayout).forEach((sectionId) => {
+    //       let minRow = Infinity;
+    //       const panels = normalizedLayout[sectionId].panels;
+    //       Object.values(panels).forEach((panelData) => {
+    //         minRow = Math.min(minRow, panelData.row);
+    //       });
+    //       Object.values(panels).forEach((panelData) => {
+    //         normalizedLayout[sectionId].panels[panelData.id].row -= minRow;
+    //       });
+    //     });
+    //     // console.log('SECTION COUNT', sectionCount, widgetsInOrder);
+
+    //     console.log('normalizedLayout!!!', normalizedLayout);
+    //   });
+
     /**
      * debounce width changes to avoid unnecessary column width recalculation.
      */

@@ -247,9 +247,6 @@ const styles = {
     css({
       height: `calc(${euiTheme.size.xl} + (2 * ${euiTheme.size.s}))`,
       border: '1px solid transparent', // prevents layout shift
-      '.kbnGridRowContainer--collapsed &:not(.kbnGridRowHeader--active)': {
-        borderBottom: euiTheme.border.thin,
-      },
       '.kbnGridLayout--deleteRowIcon': {
         marginLeft: euiTheme.size.xs,
       },

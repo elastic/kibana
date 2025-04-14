@@ -10,10 +10,15 @@
 import deepEqual from 'fast-deep-equal';
 import { cloneDeep, pick } from 'lodash';
 
-import { GridLayoutStateManager } from '../../types';
-import { getRowKeysInOrder } from '../../utils/resolve_grid_row';
+import { GridLayoutStateManager, GridRowData } from '../../types';
+import {
+  getMainLayoutInOrder,
+  getRowKeysInOrder,
+  resolveMainGrid,
+} from '../../utils/resolve_grid_row';
 import { getSensorType } from '../sensors';
 import { PointerPosition, UserInteractionEvent } from '../types';
+import { isLayoutEqual } from '../../utils/equality_checks';
 
 export const startAction = (
   e: UserInteractionEvent,
@@ -61,38 +66,33 @@ export const moveAction = (
   const currentActiveRowEvent = gridLayoutStateManager.activeRowEvent$.getValue();
   if (!currentActiveRowEvent) return;
 
-  const currentLayout =
-    gridLayoutStateManager.proposedGridLayout$.getValue() ??
-    gridLayoutStateManager.gridLayout$.getValue();
-  const currentRowOrder = getRowKeysInOrder(currentLayout);
-  currentRowOrder.shift(); // drop first row since nothing can go above it
-  const updatedRowOrder = Object.keys(gridLayoutStateManager.headerRefs.current).sort(
-    (idA, idB) => {
-      // if expanded, get dimensions of row; otherwise, use the header
-      const rowRefA = currentLayout[idA].isCollapsed
-        ? gridLayoutStateManager.headerRefs.current[idA]
-        : gridLayoutStateManager.rowRefs.current[idA];
-      const rowRefB = currentLayout[idB].isCollapsed
-        ? gridLayoutStateManager.headerRefs.current[idB]
-        : gridLayoutStateManager.rowRefs.current[idB];
+  const {
+    runtimeSettings$: { value: runtimeSettings },
+    proposedGridLayout$: { value: proposedGridLayout },
+    gridLayout$: { value: gridLayout },
+    activeRowEvent$: { value: activeRowEvent },
+    layoutRef: { current: gridLayoutElement },
+    rowRefs: { current: gridRowElements },
+  } = gridLayoutStateManager;
+  if (!activeRowEvent) return;
 
-      if (!rowRefA || !rowRefB) return 0;
-      // switch the order when the dragged row goes beyond the mid point of the row it's compared against
-      const { top: topA, height: heightA } = rowRefA.getBoundingClientRect();
-      const { top: topB, height: heightB } = rowRefB.getBoundingClientRect();
-      const midA = topA + heightA / 2;
-      const midB = topB + heightB / 2;
+  const { gutterSize, rowHeight } = runtimeSettings;
+  const currentLayout = proposedGridLayout ?? gridLayout;
+  let nextLayout = cloneDeep(currentLayout);
 
-      return midA - midB;
-    }
-  );
+  const targetedGridTop = gridLayoutElement?.getBoundingClientRect().top ?? 0;
+  let localYCoordinate = currentPointer.clientY - targetedGridTop;
+  Object.entries(gridRowElements).forEach(([id, row]) => {
+    if (!row || (nextLayout[id] as GridRowData).isCollapsed) return;
+    const rowRect = row.getBoundingClientRect();
+    if (rowRect.y <= currentPointer.clientY) localYCoordinate -= rowRect.height;
+  });
+  const targetRow = Math.max(Math.round(localYCoordinate / (rowHeight + gutterSize)), 0);
+  (nextLayout[activeRowEvent.id] as GridRowData).row = targetRow;
+  nextLayout = resolveMainGrid(nextLayout);
 
-  if (!deepEqual(currentRowOrder, updatedRowOrder)) {
-    const updatedLayout = cloneDeep(currentLayout);
-    updatedRowOrder.forEach((id, index) => {
-      updatedLayout[id].order = index + 1;
-    });
-    gridLayoutStateManager.proposedGridLayout$.next(updatedLayout);
+  if (!isLayoutEqual(currentLayout, nextLayout)) {
+    gridLayoutStateManager.proposedGridLayout$.next(nextLayout);
   }
 
   gridLayoutStateManager.activeRowEvent$.next({

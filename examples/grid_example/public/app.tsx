@@ -308,7 +308,11 @@ const layoutStyles = ({ euiTheme }: UseEuiTheme) => {
   const gridColor = transparentize(euiTheme.colors.backgroundFilledAccentSecondary, 0.2);
   return css({
     // background for grid row that is being targetted
-    '.kbnGridRow--targeted': {
+    '.kbnGrid': {
+      backgroundColor: `red`,
+    },
+
+    '&.kbnGridRow--targeted, & .kbnGridRow--targeted': {
       backgroundPosition: `top calc((var(--kbnGridGutterSize) / 2) * -1px) left calc((var(--kbnGridGutterSize) / 2) * -1px)`,
       backgroundSize: `calc((var(--kbnGridColumnWidth) + var(--kbnGridGutterSize)) * 1px) calc((var(--kbnGridRowHeight) + var(--kbnGridGutterSize)) * 1px)`,
       backgroundImage: `linear-gradient(to right, ${gridColor} 1px, transparent 1px), linear-gradient(to bottom, ${gridColor} 1px, transparent 1px)`,
@@ -332,6 +336,9 @@ const layoutStyles = ({ euiTheme }: UseEuiTheme) => {
         opacity: 1,
         backgroundColor: `${transparentize(euiTheme.colors.accentSecondary, 0.05)}`,
       },
+    },
+    '.kbnGridRowContainer': {
+      backgroundColor: euiTheme.colors.backgroundBaseSubdued,
     },
     // styling for what the grid row header looks like when being dragged
     '.kbnGridRowHeader--active': {

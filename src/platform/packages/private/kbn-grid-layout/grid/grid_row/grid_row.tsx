@@ -51,6 +51,27 @@ export const GridRow = React.memo(({ rowId }: GridRowProps) => {
           }
         });
 
+      const rowCountSubscription = combineLatest([
+        gridLayoutStateManager.proposedGridLayout$,
+        gridLayoutStateManager.gridLayout$,
+      ])
+        .pipe(
+          map(([proposedGridLayout, gridLayout]) => {
+            const displayedGridLayout = proposedGridLayout ?? gridLayout;
+            const row = displayedGridLayout[rowId] as GridRowData;
+            if (row.isCollapsed) return 2;
+            const panels = Object.values(row.panels);
+            const maxRow =
+              panels.length > 0 ? Math.max(...panels.map(({ row, height }) => row + height)) : 0;
+            return maxRow + 2;
+          })
+        )
+        .subscribe((rowCount) => {
+          const layoutRef = gridLayoutStateManager.layoutRef.current;
+          if (!layoutRef) return;
+          layoutRef.style.setProperty(`--kbnGridRowCount-${rowId}`, `${rowCount}`);
+        });
+
       /**
        * This subscription ensures that the row will re-render when one of the following changes:
        * - Collapsed state
@@ -133,7 +154,15 @@ export const GridRow = React.memo(({ rowId }: GridRowProps) => {
 
   return (
     <div
-      css={[styles.fullHeight, styles.gridWrapper, css({ gridRowStart: `${rowId}-start` })]}
+      css={[
+        styles.fullHeight,
+        styles.gridWrapper,
+        css({
+          gridRowStart: `span ${rowId}-start` /** gridRowEnd: `span var(--kbnGridRowCount-${rowId})` */,
+          gridRowEnd: `auto` /** gridRowEnd: `span var(--kbnGridRowCount-${rowId})` */,
+          height: `calc((var(--kbnGridRowCount-${rowId}) * 20) + ((var(--kbnGridRowCount-${rowId}) - 2) * 8) * 1px)`,
+        }),
+      ]}
       className={classNames('kbnGridRowContainer', {
         'kbnGridRowContainer--collapsed': isCollapsed,
       })}
@@ -172,6 +201,8 @@ const styles = {
   gridWrapper: css({
     gridColumnStart: 1,
     gridColumnEnd: -1, // full width
+    borderBottom: `1px solid #E3E8F2`,
+    '& .kbnGridRow': { paddingBottom: '8px' },
   }),
   grid: css({
     position: 'relative',
@@ -180,12 +211,12 @@ const styles = {
     gap: 'calc(var(--kbnGridGutterSize) * 1px)',
     gridAutoRows: 'calc(var(--kbnGridRowHeight) * 1px)',
     gridTemplateColumns: `repeat(
-          var(--kbnGridColumnCount),
-          calc(
-            (100% - (var(--kbnGridGutterSize) * (var(--kbnGridColumnCount) - 1) * 1px)) /
-              var(--kbnGridColumnCount)
-          )
-        )`,
+      var(--kbnGridColumnCount),
+      calc(
+        (100% - (var(--kbnGridGutterSize) * (var(--kbnGridColumnCount) - 1) * 1px)) /
+          var(--kbnGridColumnCount)
+      )
+    )`,
   }),
 };
 
