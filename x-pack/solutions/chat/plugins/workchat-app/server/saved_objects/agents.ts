@@ -15,7 +15,7 @@ export const agentSoType: SavedObjectsType<AgentAttributes> = {
   hidden: true,
   namespaceType: 'agnostic',
   mappings: {
-    dynamic: false,
+    dynamic: 'strict',
     properties: {
       agent_id: { type: 'keyword' },
       agent_name: { type: 'text' },

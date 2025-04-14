@@ -117,14 +117,6 @@ export const AssistantListView: React.FC<AssistantListViewProps> = ({ agents }) 
     };
   };
 
-  const { pageOfItems, totalItemCount } = findAgents(
-    agents,
-    pageIndex,
-    pageSize,
-    sortField,
-    sortDirection
-  );
-
   const headerButtons = [
     <EuiButton
       iconType={'plusInCircle'}
@@ -140,6 +132,27 @@ export const AssistantListView: React.FC<AssistantListViewProps> = ({ agents }) 
     </EuiButtonEmpty>,
   ];
 
+  const onTableChange = ({ page, sort }: Criteria<Agent>) => {
+    if (page) {
+      const { index, size } = page;
+      setPageIndex(index);
+      setPageSize(size);
+    }
+    if (sort) {
+      const { field, direction } = sort;
+      setSortField(field);
+      setSortDirection(direction);
+    }
+  };
+
+  const { pageOfItems, totalItemCount } = findAgents(
+    agents,
+    pageIndex,
+    pageSize,
+    sortField,
+    sortDirection
+  );
+
   const sorting: EuiTableSortingType<Agent> = {
     sort: {
       field: sortField,
@@ -152,19 +165,6 @@ export const AssistantListView: React.FC<AssistantListViewProps> = ({ agents }) 
     pageSize,
     totalItemCount,
     pageSizeOptions: [10, 20, 50],
-  };
-
-  const onTableChange = ({ page, sort }: Criteria<Agent>) => {
-    if (page) {
-      const { index: pageIndex, size: pageSize } = page;
-      setPageIndex(pageIndex);
-      setPageSize(pageSize);
-    }
-    if (sort) {
-      const { field: sortField, direction: sortDirection } = sort;
-      setSortField(sortField);
-      setSortDirection(sortDirection);
-    }
   };
 
   const resultsCount = (
