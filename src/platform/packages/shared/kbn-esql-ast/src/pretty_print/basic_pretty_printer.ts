@@ -298,7 +298,7 @@ export class BasicPrettyPrinter {
 
       return this.decorateWithComments(ctx.node, formatted);
     })
-    
+
     .on('visitFunctionCallExpression', (ctx) => {
       const opts = this.opts;
       const node = ctx.node;

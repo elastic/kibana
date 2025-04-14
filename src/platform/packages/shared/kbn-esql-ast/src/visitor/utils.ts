@@ -61,15 +61,15 @@ export function* children(node: ESQLProperNode): Iterable<ESQLAstExpression> {
     case 'command':
     case 'order':
     case 'option': {
-      yield * singleItems(node.args);
+      yield* singleItems(node.args);
       break;
     }
     case 'list': {
-      yield * singleItems(node.values);
+      yield* singleItems(node.values);
       break;
     }
     case 'map': {
-      yield * node.entries;
+      yield* node.entries;
       break;
     }
     case 'map-entry': {
@@ -79,7 +79,7 @@ export function* children(node: ESQLProperNode): Iterable<ESQLAstExpression> {
     }
     case 'inlineCast': {
       if (Array.isArray(node.value)) {
-        yield * singleItems(node.value)
+        yield* singleItems(node.value);
       } else {
         yield node.value;
       }
