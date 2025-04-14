@@ -10,7 +10,7 @@
 import { BehaviorSubject } from 'rxjs';
 import type { ReactWrapper } from 'enzyme';
 import { findTestSubject } from '@elastic/eui/lib/test';
-import { EuiProgress } from '@elastic/eui';
+import { EuiProgress, EuiProvider } from '@elastic/eui';
 import { getDataTableRecords, realHits } from '../../../../__fixtures__/real_hits';
 import { act } from 'react-dom/test-utils';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
@@ -208,13 +208,15 @@ async function mountComponent(
 
   await act(async () => {
     comp = mountWithIntl(
-      <KibanaContextProvider services={mockedServices}>
-        <DiscoverMainProvider value={stateContainer}>
-          <RuntimeStateProvider currentDataView={props.selectedDataView!} adHocDataViews={[]}>
-            <DiscoverSidebarResponsive {...props} />{' '}
-          </RuntimeStateProvider>
-        </DiscoverMainProvider>
-      </KibanaContextProvider>
+      <EuiProvider>
+        <KibanaContextProvider services={mockedServices}>
+          <DiscoverMainProvider value={stateContainer}>
+            <RuntimeStateProvider currentDataView={props.selectedDataView!} adHocDataViews={[]}>
+              <DiscoverSidebarResponsive {...props} />{' '}
+            </RuntimeStateProvider>
+          </DiscoverMainProvider>
+        </KibanaContextProvider>
+      </EuiProvider>
     );
     // wait for lazy modules
     await new Promise((resolve) => setTimeout(resolve, 0));

@@ -16,9 +16,10 @@ export type ESQLAstNode = ESQLAstCommand | ESQLAstExpression | ESQLAstItem;
 /**
  * Represents an *expression* in the AST.
  */
-export type ESQLAstExpression = ESQLSingleAstItem | ESQLAstQueryExpression;
+export type ESQLAstExpression = ESQLSingleAstItem;
 
 export type ESQLSingleAstItem =
+  | ESQLAstQueryExpression
   | ESQLFunction
   | ESQLCommandOption
   | ESQLSource
