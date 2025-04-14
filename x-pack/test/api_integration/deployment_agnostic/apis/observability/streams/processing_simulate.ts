@@ -300,7 +300,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               ...basicDissectProcessor,
               dissect: {
                 ...basicDissectProcessor.dissect,
-                if: { field: 'message', operator: 'contains', value: 'test' },
+                if: { field: 'body.text', operator: 'contains', value: 'test' },
               },
             },
           ],
