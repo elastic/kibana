@@ -157,7 +157,7 @@ const FormRow: React.FC<FormRowProps> = ({
           ) : (
             <UseField
               path={id}
-              config={getFieldConfig({ label, type, isRequired })}
+              config={getFieldConfig({ label, type, isRequired, allowDomainWithoutDots })}
               helpText={helpText}
               component={PasswordField}
               componentProps={{
