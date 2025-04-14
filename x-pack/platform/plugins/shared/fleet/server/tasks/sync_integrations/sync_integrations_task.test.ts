@@ -481,7 +481,7 @@ describe('SyncIntegrationsTask', () => {
                   processors: [],
                 },
                 type: 'ingest_pipeline',
-             },
+              },
               'ingest_pipeline:logs-system.auth@custom': {
                 is_deleted: false,
                 name: 'logs-system.auth@custom',
