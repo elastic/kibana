@@ -219,7 +219,7 @@ export interface Dashboard extends SavedObjectAttributes {
   id: string;
 }
 
-export interface Artifact extends SavedObjectAttributes {
+export interface Artifacts extends SavedObjectAttributes {
   dashboards?: Dashboard[];
   investigation_guide?: {
     blob: string;
@@ -262,7 +262,7 @@ export interface Rule<Params extends RuleTypeParams = never> {
   viewInAppRelativeUrl?: string;
   alertDelay?: AlertDelay | null;
   flapping?: Flapping | null;
-  artifacts?: Artifact | null;
+  artifacts?: Artifacts | null;
 }
 
 export type SanitizedRule<Params extends RuleTypeParams = never> = Omit<

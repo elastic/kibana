@@ -11,12 +11,12 @@ export const investigationGuideSchema = schema.object({
   blob: schema.string(),
 });
 
-export const dashboardSchema = schema.arrayOf(
+export const dashboardsSchema = schema.arrayOf(
   schema.object({
     id: schema.string(),
   })
 );
 
-export const artifactSchema = schema.object({
-  dashboards: schema.maybe(dashboardSchema),
+export const artifactsSchema = schema.object({
+  dashboards: schema.maybe(dashboardsSchema),
 });

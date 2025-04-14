@@ -149,10 +149,10 @@ export const alertDelaySchema = schema.object({
   active: schema.number(),
 });
 
-export const dashboardSchema = schema.arrayOf(schema.object({ id: schema.string() }));
+export const dashboardsSchema = schema.arrayOf(schema.object({ id: schema.string() }));
 
-export const artifactSchema = schema.object({
-  dashboards: schema.maybe(dashboardSchema),
+export const artifactsSchema = schema.object({
+  dashboards: schema.maybe(dashboardsSchema),
   investigation_guide: schema.maybe(schema.object({ blob: schema.string() })),
 });
 
@@ -196,7 +196,7 @@ export const ruleDomainSchema = schema.object({
   alertDelay: schema.maybe(alertDelaySchema),
   legacyId: schema.maybe(schema.nullable(schema.string())),
   flapping: schema.maybe(schema.nullable(flappingSchema)),
-  artifacts: schema.maybe(artifactSchema),
+  artifacts: schema.maybe(artifactsSchema),
 });
 
 /**
@@ -238,5 +238,5 @@ export const ruleSchema = schema.object({
   alertDelay: schema.maybe(alertDelaySchema),
   legacyId: schema.maybe(schema.nullable(schema.string())),
   flapping: schema.maybe(schema.nullable(flappingSchema)),
-  artifacts: schema.maybe(artifactSchema),
+  artifacts: schema.maybe(artifactsSchema),
 });

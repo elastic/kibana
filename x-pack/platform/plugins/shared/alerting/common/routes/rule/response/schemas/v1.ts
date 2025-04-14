@@ -475,13 +475,14 @@ export const alertDelaySchema = schema.object(
   }
 );
 
-export const dashboardSchema = schema.arrayOf(schema.object({ id: schema.string() }));
+export const dashboardsSchema = schema.arrayOf(schema.object({ id: schema.string() }));
+
 export const investigationGuideSchema = schema.object({
   blob: schema.string(),
 });
 
-export const artifactSchema = schema.object({
-  dashboards: schema.maybe(dashboardSchema),
+export const artifactsSchema = schema.object({
+  dashboards: schema.maybe(dashboardsSchema),
   investigation_guide: schema.maybe(investigationGuideSchema),
 });
 
@@ -649,7 +650,7 @@ export const ruleResponseSchema = schema.object({
   ),
   alert_delay: schema.maybe(alertDelaySchema),
   flapping: schema.maybe(schema.nullable(flappingSchemaV1)),
-  artifacts: schema.maybe(artifactSchema),
+  artifacts: schema.maybe(artifactsSchema),
 });
 
 export const scheduleIdsSchema = schema.maybe(schema.arrayOf(schema.string()));
