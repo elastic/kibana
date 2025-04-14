@@ -1,0 +1,7 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/wc-framework-types-common",
+  "owner": "@elastic/search-kibana",
+  "group": "chat",
+  "visibility": "private"
+}
