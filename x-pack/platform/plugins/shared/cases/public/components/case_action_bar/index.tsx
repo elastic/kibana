@@ -24,6 +24,8 @@ import { useCasesContext } from '../cases_context/use_cases_context';
 import { useCasesFeatures } from '../../common/use_cases_features';
 import { useGetCaseConnectors } from '../../containers/use_get_case_connectors';
 import { useShouldDisableStatus } from '../actions/status/use_should_disable_status';
+import { PlaceHolderActionItem } from '../placeholder/placeholder_action_item';
+import { PlaceHolderButton } from '../placeholder/placeholder_button';
 
 export interface CaseActionBarProps {
   caseData: CaseUI;
@@ -75,6 +77,16 @@ const CaseActionBarComponent: React.FC<CaseActionBarProps> = ({
 
   return (
     <EuiFlexGroup gutterSize="l" justifyContent="flexEnd" data-test-subj="case-action-bar-wrapper">
+      <EuiFlexItem grow={false}>
+        <ActionBarStatusItem title={i18n.STATUS} dataTestSubj="case-view-status">
+          <StatusContextMenu
+            currentStatus={caseData.status}
+            disabled={isStatusMenuDisabled}
+            isLoading={isLoading}
+            onStatusChanged={onStatusChanged}
+          />
+        </ActionBarStatusItem>
+      </EuiFlexItem>
       <EuiFlexItem
         grow={false}
         css={css`
@@ -86,13 +98,8 @@ const CaseActionBarComponent: React.FC<CaseActionBarProps> = ({
           }
         `}
       >
-        <ActionBarStatusItem title={i18n.STATUS} dataTestSubj="case-view-status">
-          <StatusContextMenu
-            currentStatus={caseData.status}
-            disabled={isStatusMenuDisabled}
-            isLoading={isLoading}
-            onStatusChanged={onStatusChanged}
-          />
+        <ActionBarStatusItem title={'Solution item'}>
+          <PlaceHolderActionItem />
         </ActionBarStatusItem>
       </EuiFlexItem>
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
@@ -142,6 +149,9 @@ const CaseActionBarComponent: React.FC<CaseActionBarProps> = ({
           >
             {i18n.CASE_REFRESH}
           </EuiButtonEmpty>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <PlaceHolderButton />
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
