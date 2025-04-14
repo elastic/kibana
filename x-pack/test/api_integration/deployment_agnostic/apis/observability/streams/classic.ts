@@ -584,7 +584,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('should allow deleting', async () => {
-        await apiClient.fetch('DELETE /api/streams/{name} 2023-10-31', {
+        const response = await apiClient.fetch('DELETE /api/streams/{name} 2023-10-31', {
           params: {
             path: {
               name: ORPHANED_STREAM_NAME,
