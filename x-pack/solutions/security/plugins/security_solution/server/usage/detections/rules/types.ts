@@ -44,10 +44,16 @@ export interface RulesTypeUsage {
   esql: FeatureTypeUsage;
 }
 
+export interface SpacesUsage {
+  total: number;
+  rules_in_spaces: number[];
+}
+
 export interface RuleAdoption {
   detection_rule_detail: RuleMetric[];
   detection_rule_usage: RulesTypeUsage;
   detection_rule_status: EventLogStatusMetric;
+  spaces_usage: SpacesUsage;
 }
 
 export interface RuleMetric {
