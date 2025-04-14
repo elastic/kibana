@@ -149,7 +149,6 @@ export async function getElserModelStatus({
     kbState = KnowledgeBaseState.ERROR;
   } else if (
     elserModelStats?.deployment_stats?.state === 'starting' &&
-   
     elserModelStats?.deployment_stats?.allocation_status?.allocation_count === 0
   ) {
     kbState = KnowledgeBaseState.DEPLOYING_MODEL;
