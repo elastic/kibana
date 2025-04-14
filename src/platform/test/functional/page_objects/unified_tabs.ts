@@ -7,15 +7,33 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { FtrService } from '../ftr_provider_context';
 
 export class UnifiedTabsPageObject extends FtrService {
   private readonly retry = this.ctx.getService('retry');
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly find = this.ctx.getService('find');
+  private readonly browser = this.ctx.getService('browser');
 
   public async getTabElements() {
     return await this.find.allByCssSelector('[data-test-subj^="unifiedTabs_tab_"]');
+  }
+
+  public async getSelectedTab(): Promise<
+    { element: WebElementWrapper; index: number; label: string } | undefined
+  > {
+    const tabElements = await this.getTabElements();
+    for (const tabElement of tabElements) {
+      const tabRoleElement = await tabElement.findByCssSelector('[role="tab"]');
+      if ((await tabRoleElement.getAttribute('aria-selected')) === 'true') {
+        return {
+          element: tabElement,
+          index: tabElements.indexOf(tabElement),
+          label: await tabElement.getVisibleText(),
+        };
+      }
+    }
   }
 
   public async getTabWidths() {
@@ -23,6 +41,15 @@ export class UnifiedTabsPageObject extends FtrService {
     return await Promise.all(
       tabElements.map(async (tabElement) => {
         return (await tabElement.getSize()).width;
+      })
+    );
+  }
+
+  public async getTabLabels() {
+    const tabElements = await this.getTabElements();
+    return await Promise.all(
+      tabElements.map(async (tabElement) => {
+        return await tabElement.getVisibleText();
       })
     );
   }
@@ -37,8 +64,98 @@ export class UnifiedTabsPageObject extends FtrService {
     await this.testSubjects.click('unifiedTabs_tabsBar_newTabBtn');
     await this.retry.waitFor('the new tab to appear', async () => {
       const newNumberOfTabs = await this.getNumberOfTabs();
-      return newNumberOfTabs === numberOfTabs + 1;
+      return (
+        newNumberOfTabs === numberOfTabs + 1 &&
+        (await this.getSelectedTab())?.index === newNumberOfTabs - 1
+      );
     });
+  }
+
+  public async selectTab(index: number) {
+    const tabElements = await this.getTabElements();
+    if (index < 0 || index >= tabElements.length) {
+      throw new Error(`Tab index ${index} is out of bounds`);
+    }
+    await tabElements[index].click();
+    await this.retry.waitFor('the selected tab to change', async () => {
+      return (await this.getSelectedTab())?.index === index;
+    });
+  }
+
+  public async closeTab(index: number) {
+    const tabElements = await this.getTabElements();
+    if (index < 0 || index >= tabElements.length) {
+      throw new Error(`Tab index ${index} is out of bounds`);
+    }
+    const closeButton = await tabElements[index].findByCssSelector(
+      '[data-test-subj^="unifiedTabs_closeTabBtn_"]'
+    );
+    await closeButton.click();
+    await this.retry.waitFor('the tab to be closed', async () => {
+      return (await this.getNumberOfTabs()) === tabElements.length - 1;
+    });
+  }
+
+  public async openTabMenu(index: number) {
+    const tabElements = await this.getTabElements();
+    if (index < 0 || index >= tabElements.length) {
+      throw new Error(`Tab index ${index} is out of bounds`);
+    }
+    const menuButton = await tabElements[index].findByCssSelector(
+      '[data-test-subj^="unifiedTabs_tabMenuBtn_"]'
+    );
+    await menuButton.click();
+    await this.retry.waitFor('the menu to open', async () => {
+      return (await this.getContextMenuItems()).length > 0;
+    });
+  }
+
+  public async enterNewTabLabel(newLabel: string) {
+    await this.retry.waitFor('the tab label to be editable', async () => {
+      return Boolean(
+        await this.find.byCssSelector('[data-test-subj^="unifiedTabs_editTabLabelInput_"]')
+      );
+    });
+    const labelElement = await this.find.byCssSelector(
+      '[data-test-subj^="unifiedTabs_editTabLabelInput_"]'
+    );
+    await labelElement.clearValue();
+    await labelElement.type(newLabel, { charByChar: true });
+    await this.browser.pressKeys(this.browser.keys.ENTER);
+    await this.retry.waitFor('the tab label to change', async () => {
+      return (await this.getSelectedTab())?.label === newLabel;
+    });
+  }
+
+  public async editTabLabel(index: number, newLabel: string) {
+    const tabElements = await this.getTabElements();
+    if (index < 0 || index >= tabElements.length) {
+      throw new Error(`Tab index ${index} is out of bounds`);
+    }
+    const tabElement = tabElements[index];
+    const controlElement = await tabElement.findByCssSelector(
+      '[data-test-subj^="unifiedTabs_selectTabBtn_"]'
+    );
+    await controlElement.doubleClick();
+    await this.enterNewTabLabel(newLabel);
+  }
+
+  public async getContextMenuItems() {
+    let items: string[] = [];
+
+    await this.retry.waitFor('context menu items to appear', async () => {
+      items = [];
+      const contextMenuItems = await this.find.allByCssSelector(
+        '[data-test-subj^="unifiedTabs_tabMenuItem"]'
+      );
+      for (const item of contextMenuItems) {
+        items.push(await item.getVisibleText());
+      }
+
+      return items.length > 0;
+    });
+
+    return items;
   }
 
   public async isScrollable() {
