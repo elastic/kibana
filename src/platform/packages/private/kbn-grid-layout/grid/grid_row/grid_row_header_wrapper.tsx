@@ -20,53 +20,6 @@ export interface GridRowHeaderProps {
   collapseButtonRef: React.MutableRefObject<HTMLButtonElement | null>;
 }
 
-export const GridRowStartMark = React.memo(({ rowId }: { rowId: string }) => {
-  const { gridLayoutStateManager } = useGridLayoutContext();
-
-  useEffect(
-    () => {
-      /** Update the styles of the drag preview via a subscription to prevent re-renders */
-      const styleSubscription = combineLatest([
-        gridLayoutStateManager.gridLayout$,
-        gridLayoutStateManager.proposedGridLayout$,
-      ]).subscribe(([gridLayout, proposedGridLayout]) => {
-        const headerRef = gridLayoutStateManager.headerRefs.current[rowId];
-        if (!headerRef) return;
-        const currentGridLayout = proposedGridLayout || gridLayout;
-        const topOffset = getTopOffsetForRow(rowId, currentGridLayout);
-        headerRef.style.display = 'block';
-        headerRef.style.gridColumnStart = `1`;
-        headerRef.style.gridColumnEnd = `-1`;
-        headerRef.style.gridRowStart = `${topOffset + 1}`;
-        headerRef.style.gridRowEnd = `${topOffset + 1 + COLLAPSIBLE_HEADER_HEIGHT}`;
-      });
-
-      return () => {
-        styleSubscription.unsubscribe();
-      };
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
-  );
-
-  return (
-    <div
-      style={{
-        gridColumnStart: 1,
-        gridColumnEnd: -1,
-        gridRowStart: 1,
-        gridRowEnd: 1,
-        pointerEvents: 'none',
-        height: '0px',
-        background: '#f7f9fc',
-      }}
-      ref={(element: HTMLDivElement | null) => {
-        gridLayoutStateManager.headerRefs.current[rowId] = element;
-      }}
-    />
-  );
-});
-
 export const GridRowHeaderWrapper = ({
   rowId,
   toggleIsCollapsed,
@@ -132,3 +85,44 @@ export const GridRowHeaderWrapper = ({
     </div>
   );
 };
+
+
+// equivalent of the header for non-collapsible rows used for calculations
+export const GridRowStartMark = React.memo(({ rowId }: { rowId: string }) => {
+  const { gridLayoutStateManager } = useGridLayoutContext();
+
+  useEffect(
+    () => {
+      /** Update the styles of the drag preview via a subscription to prevent re-renders */
+      const styleSubscription = combineLatest([
+        gridLayoutStateManager.gridLayout$,
+        gridLayoutStateManager.proposedGridLayout$,
+      ]).subscribe(([gridLayout, proposedGridLayout]) => {
+        const headerRef = gridLayoutStateManager.headerRefs.current[rowId];
+        if (!headerRef) return;
+        const currentGridLayout = proposedGridLayout || gridLayout;
+        const topOffset = getTopOffsetForRow(rowId, currentGridLayout);
+        headerRef.style.display = 'block';
+        headerRef.style.gridColumnStart = `1`;
+        headerRef.style.gridColumnEnd = `-1`;
+        headerRef.style.gridRowStart = `${topOffset + 1}`;
+        headerRef.style.gridRowEnd = `${topOffset + 1 + COLLAPSIBLE_HEADER_HEIGHT}`;
+      });
+
+      return () => {
+        styleSubscription.unsubscribe();
+      };
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  );
+
+  return (
+    <div
+      style={{ pointerEvents: 'none', height: '0px' }}
+      ref={(element: HTMLDivElement | null) => {
+        gridLayoutStateManager.headerRefs.current[rowId] = element;
+      }}
+    />
+  );
+});
