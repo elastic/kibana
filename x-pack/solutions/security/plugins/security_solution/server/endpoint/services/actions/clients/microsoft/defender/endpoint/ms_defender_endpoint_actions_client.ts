@@ -22,7 +22,8 @@ import {
 } from '@kbn/stack-connectors-plugin/common/microsoft_defender_endpoint/types';
 import { groupBy } from 'lodash';
 import type { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
-import { MICROSOFT_DEFENDER_ENDPOINT_LOG_INDEX_PATTERN } from '../../../../../../../../common/endpoint/service/response_actions/microsoft_defender';
+import { buildIndexNameWithNamespace } from '../../../../../../../../common/endpoint/utils/index_name_utilities';
+import { MICROSOFT_DEFENDER_INDEX_PATTERNS_BY_INTEGRATION } from '../../../../../../../../common/endpoint/service/response_actions/microsoft_defender';
 import type {
   IsolationRouteRequestBody,
   UnisolationRouteRequestBody,
@@ -72,31 +73,77 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
     connectorActions.setup(MICROSOFT_DEFENDER_ENDPOINT_CONNECTOR_ID);
   }
 
+  /**
+   * Returns a list of all indexes for Microsoft Defender data supported for response actions
+   * @private
+   */
+  private async fetchIndexNames(): Promise<string[]> {
+    const cachedInfo = this.cache.get<string[]>('fetchIndexNames');
+
+    if (cachedInfo) {
+      this.log.debug(
+        `Returning cached response with list of index names:\n${stringify(cachedInfo)}`
+      );
+      return cachedInfo;
+    }
+
+    const integrationNames = Object.keys(MICROSOFT_DEFENDER_INDEX_PATTERNS_BY_INTEGRATION);
+    const fleetServices = this.options.endpointService.getInternalFleetServices(
+      this.options.spaceId
+    );
+    const indexNamespaces = await fleetServices.getIntegrationNamespaces(integrationNames);
+    const indexNames: string[] = [];
+
+    for (const [integrationName, namespaces] of Object.entries(indexNamespaces)) {
+      if (namespaces.length > 0) {
+        const indexPatterns =
+          MICROSOFT_DEFENDER_INDEX_PATTERNS_BY_INTEGRATION[
+            integrationName as keyof typeof MICROSOFT_DEFENDER_INDEX_PATTERNS_BY_INTEGRATION
+          ];
+
+        for (const indexPattern of indexPatterns) {
+          indexNames.push(
+            ...namespaces.map((namespace) => buildIndexNameWithNamespace(indexPattern, namespace))
+          );
+        }
+      }
+    }
+
+    this.cache.set('fetchIndexNames', indexNames);
+    this.log.debug(() => `MS Defender indexes with namespace:\n${stringify(indexNames)}`);
+
+    return indexNames;
+  }
+
   protected async fetchAgentPolicyInfo(
     agentIds: string[]
   ): Promise<LogsEndpointAction['agent']['policy']> {
     const esClient = this.options.esClient;
     const esSearchRequest: SearchRequest = {
-      index: MICROSOFT_DEFENDER_ENDPOINT_LOG_INDEX_PATTERN,
+      index: await this.fetchIndexNames(),
       query: { bool: { filter: [{ terms: { 'cloud.instance.id': agentIds } }] } },
       collapse: {
         field: 'cloud.instance.id',
         inner_hits: {
           name: 'most_recent',
           size: 1,
-          _source: ['agent', 'cloud.instance.id'],
+          _source: ['agent', 'cloud.instance.id', 'event.created'],
           sort: [{ 'event.created': 'desc' }],
         },
       },
       _source: false,
+      ignore_unavailable: true,
     };
 
-    this.log.debug(
-      () =>
-        `Looking for agents in [${MICROSOFT_DEFENDER_ENDPOINT_LOG_INDEX_PATTERN}] with:\n${stringify(
-          esSearchRequest
-        )}`
-    );
+    if (!esSearchRequest.index || esSearchRequest.index.length === 0) {
+      throw new ResponseActionsClientError(
+        `Unable to build list of indexes while retrieve policy information for Microsoft Defender agents [${agentIds.join(
+          ', '
+        )}]`
+      );
+    }
+
+    this.log.debug(() => `Searching for agents with:\n${stringify(esSearchRequest)}`);
 
     const msDefenderLogEsResults = await esClient
       .search<

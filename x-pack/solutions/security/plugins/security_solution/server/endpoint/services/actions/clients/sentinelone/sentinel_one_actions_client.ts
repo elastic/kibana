@@ -36,6 +36,7 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 import type { Readable } from 'stream';
 import type { Mutable } from 'utility-types';
+import { buildIndexNameWithNamespace } from '../../../../../../common/endpoint/utils/index_name_utilities';
 import { SENTINEL_ONE_AGENT_INDEX_PATTERN } from '../../../../../../common/endpoint/service/response_actions/sentinel_one';
 import type {
   SentinelOneKillProcessScriptArgs,
@@ -126,12 +127,45 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
     connectorActions.setup(SENTINELONE_CONNECTOR_ID);
   }
 
+  private async fetchSentinelOneAgentIndexNames(): Promise<string[]> {
+    const cachedInfo = this.cache.get<string[]>('fetchSentinelOneAgentIndexNames');
+
+    if (cachedInfo) {
+      this.log.debug(
+        `Returning cached response with list of Agent index names:\n${stringify(cachedInfo)}`
+      );
+      return cachedInfo;
+    }
+
+    const fleetServices = this.options.endpointService.getInternalFleetServices(
+      this.options.spaceId
+    );
+    const indexNamespaces = await fleetServices.getIntegrationNamespaces(['sentinel_one']);
+    const indexNames: string[] = [];
+
+    for (const [, namespaces] of Object.entries(indexNamespaces)) {
+      if (namespaces.length > 0) {
+        indexNames.push(
+          ...namespaces.map((namespace) =>
+            buildIndexNameWithNamespace(SENTINEL_ONE_AGENT_INDEX_PATTERN, namespace)
+          )
+        );
+      }
+    }
+
+    this.log.debug(() => `Index list with namespace:\n${stringify(indexNames)}`);
+
+    this.cache.set('fetchSentinelOneAgentIndexNames', indexNames);
+
+    return indexNames;
+  }
+
   protected async fetchAgentPolicyInfo(
     agentIds: string[]
   ): Promise<LogsEndpointAction['agent']['policy']> {
     const esClient = this.options.esClient;
     const esSearchRequest: SearchRequest = {
-      index: SENTINEL_ONE_AGENT_INDEX_PATTERN,
+      index: await this.fetchSentinelOneAgentIndexNames(),
       query: {
         bool: {
           filter: [{ terms: { 'sentinel_one.agent.agent.id': agentIds } }],
@@ -142,32 +176,30 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
         inner_hits: {
           name: 'most_recent',
           size: 1,
-          _source: ['agent', 'sentinel_one.agent.agent.id'],
+          _source: ['agent', 'sentinel_one.agent.agent.id', 'event.created'],
           sort: [{ 'event.created': 'desc' }],
         },
       },
       _source: false,
+      ignore_unavailable: true,
     };
 
-    this.log.debug(
-      () =>
-        `Looking for agents in [${SENTINEL_ONE_AGENT_INDEX_PATTERN}] with:\n${stringify(
-          esSearchRequest
-        )}`
-    );
+    if (!esSearchRequest.index || esSearchRequest.index.length === 0) {
+      throw new ResponseActionsClientError(
+        `Unable to build list of indexes while retrieve policy information for SentinelOne agents [${agentIds.join(
+          ', '
+        )}]`
+      );
+    }
+
+    this.log.debug(() => `Looking for agents with:\n${stringify(esSearchRequest)}`);
 
     // Get the latest ingested document for each agent ID
     const s1AgentsEsResults = await esClient
       .search<SentinelOneAgentEsDoc, { most_recent: SentinelOneAgentEsDoc }>(esSearchRequest)
       .catch(catchAndWrapError);
 
-    this.log.debug(
-      () =>
-        `SentinelOne Agent records found in [${SENTINEL_ONE_AGENT_INDEX_PATTERN}]:\n${stringify(
-          s1AgentsEsResults,
-          20
-        )}`
-    );
+    this.log.debug(() => `SentinelOne Agent records found:\n${stringify(s1AgentsEsResults, 20)}`);
 
     const fleetAgentIdToS1AgentIdMap: Record<string, string> = s1AgentsEsResults.hits.hits.reduce(
       (acc, s1AgentEsDoc) => {

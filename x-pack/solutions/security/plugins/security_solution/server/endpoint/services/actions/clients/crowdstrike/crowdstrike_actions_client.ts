@@ -17,6 +17,7 @@ import type {
 } from '@kbn/stack-connectors-plugin/common/crowdstrike/types';
 import { v4 as uuidv4 } from 'uuid';
 
+import { CROWDSTRIKE_INDEX_PATTERNS_BY_INTEGRATION } from '../../../../../../common/endpoint/service/response_actions/crowdstrike';
 import { mapParametersToCrowdStrikeArguments } from './utils';
 import type { CrowdstrikeActionRequestCommonMeta } from '../../../../../../common/endpoint/types/crowdstrike';
 import type {
@@ -50,6 +51,7 @@ import type {
   NormalizedExternalConnectorClientExecuteOptions,
 } from '../lib/normalized_external_connector_client';
 import { catchAndWrapError } from '../../../../utils';
+import { buildIndexNameWithNamespace } from '../../../../../../common/endpoint/utils/index_name_utilities';
 
 export type CrowdstrikeActionsClientOptions = ResponseActionsClientOptions & {
   connectorActions: NormalizedExternalConnectorClient;
@@ -65,13 +67,54 @@ export class CrowdstrikeActionsClient extends ResponseActionsClientImpl {
     connectorActions.setup(CROWDSTRIKE_CONNECTOR_ID);
   }
 
+  /**
+   * Returns a list of all indexes for Crowdstrike data supported for response actions
+   * @private
+   */
+  private async fetchIndexNames(): Promise<string[]> {
+    const cachedInfo = this.cache.get<string[]>('fetchIndexNames');
+
+    if (cachedInfo) {
+      this.log.debug(
+        `Returning cached response with list of index names:\n${stringify(cachedInfo)}`
+      );
+      return cachedInfo;
+    }
+
+    const integrationNames = Object.keys(CROWDSTRIKE_INDEX_PATTERNS_BY_INTEGRATION);
+    const fleetServices = this.options.endpointService.getInternalFleetServices(
+      this.options.spaceId
+    );
+    const indexNamespaces = await fleetServices.getIntegrationNamespaces(integrationNames);
+    const indexNames: string[] = [];
+
+    for (const [integrationName, namespaces] of Object.entries(indexNamespaces)) {
+      if (namespaces.length > 0) {
+        const indexPatterns =
+          CROWDSTRIKE_INDEX_PATTERNS_BY_INTEGRATION[
+            integrationName as keyof typeof CROWDSTRIKE_INDEX_PATTERNS_BY_INTEGRATION
+          ];
+
+        for (const indexPattern of indexPatterns) {
+          indexNames.push(
+            ...namespaces.map((namespace) => buildIndexNameWithNamespace(indexPattern, namespace))
+          );
+        }
+      }
+    }
+
+    this.cache.set('fetchIndexNames', indexNames);
+    this.log.debug(() => `Crowdstrike indexes with namespace:\n${stringify(indexNames)}`);
+
+    return indexNames;
+  }
+
   protected async fetchAgentPolicyInfo(
     agentIds: string[]
   ): Promise<LogsEndpointAction['agent']['policy']> {
     const esClient = this.options.esClient;
-    const indexPattern = 'logs-crowdstrike*';
     const esSearchRequest: SearchRequest = {
-      index: indexPattern,
+      index: await this.fetchIndexNames(),
       query: { bool: { filter: [{ terms: { 'device.id': agentIds } }] } },
       collapse: {
         field: 'device.id',
@@ -85,16 +128,20 @@ export class CrowdstrikeActionsClient extends ResponseActionsClientImpl {
       _source: false,
     };
 
-    this.log.debug(
-      () => `Looking for agents in [${indexPattern}] with:\n${stringify(esSearchRequest)}`
-    );
+    if (!esSearchRequest.index || esSearchRequest.index.length === 0) {
+      throw new ResponseActionsClientError(
+        `Unable to build list of indexes while retrieve policy information for Crowdstrike agents [${agentIds.join(
+          ', '
+        )}]`
+      );
+    }
+
+    this.log.debug(() => `Searching for agents with:\n${stringify(esSearchRequest)}`);
 
     // Get the latest ingested document for each agent ID
     const crowdstrikeEsResults = await esClient.search(esSearchRequest).catch(catchAndWrapError);
 
-    this.log.debug(
-      () => `Records found in [${indexPattern}]:\n${stringify(crowdstrikeEsResults, 20)}`
-    );
+    this.log.debug(() => `Records found:\n${stringify(crowdstrikeEsResults, 20)}`);
 
     const fleetAgentIdToCrowdstrikeAgentIdMap: Record<string, string> =
       crowdstrikeEsResults.hits.hits.reduce((acc, esDoc) => {
