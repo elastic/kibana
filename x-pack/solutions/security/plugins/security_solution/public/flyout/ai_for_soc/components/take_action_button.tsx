@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { memo, useCallback, useMemo, useState } from 'react';
 import { EuiButton, EuiContextMenu, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useAIForSOCDetailsContext } from '../context';
@@ -36,7 +35,7 @@ export const ADD_TO_CASE_ARIA_LABEL = i18n.translate(
  * - add to new case
  * - apply alert tags
  */
-export const TakeActionButton: FC = () => {
+export const TakeActionButton = memo(() => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const { dataAsNestedObject } = useAIForSOCDetailsContext();
@@ -94,6 +93,6 @@ export const TakeActionButton: FC = () => {
       <EuiContextMenu initialPanelId={0} panels={panels} size="s" />
     </EuiPopover>
   );
-};
+});
 
 TakeActionButton.displayName = 'TakeActionButton';
