@@ -15,7 +15,6 @@
     "@kbn/core-security-common",
     "@kbn/test-jest-helpers",
     "@kbn/config",
-    "@kbn/encrypted-saved-objects-shared",
     "@kbn/core-saved-objects-utils-server",
   ],
   "exclude": [
