@@ -196,7 +196,13 @@ export const getIndicesList = async (dataViews: DataViewsPublicPluginStart) => {
   });
 };
 
-export const getRemoteIndicesList = async (dataViews: DataViewsPublicPluginStart) => {
+export const getRemoteIndicesList = async (
+  dataViews: DataViewsPublicPluginStart,
+  areRemoteIndicesAvailable: boolean
+) => {
+  if (!areRemoteIndicesAvailable) {
+    return [];
+  }
   const indices = await dataViews.getIndices({
     showAllIndices: false,
     pattern: '*:*',
@@ -255,9 +261,13 @@ const getIntegrations = async (core: CoreStart) => {
   );
 };
 
-export const getESQLSources = async (dataViews: DataViewsPublicPluginStart, core: CoreStart) => {
+export const getESQLSources = async (
+  dataViews: DataViewsPublicPluginStart,
+  core: CoreStart,
+  areRemoteIndicesAvailable: boolean
+) => {
   const [remoteIndices, localIndices, integrations] = await Promise.all([
-    getRemoteIndicesList(dataViews),
+    getRemoteIndicesList(dataViews, areRemoteIndicesAvailable),
     getIndicesList(dataViews),
     getIntegrations(core),
   ]);
