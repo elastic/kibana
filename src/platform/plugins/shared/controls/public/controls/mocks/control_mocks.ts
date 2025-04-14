@@ -9,17 +9,22 @@
 
 import { BehaviorSubject } from 'rxjs';
 
-import { StateComparators } from '@kbn/presentation-publishing';
+import { SerializedPanelState, StateComparators } from '@kbn/presentation-publishing';
 
 import { CONTROL_GROUP_TYPE } from '../../../common';
 import type { ControlFetchContext } from '../../control_group/control_fetch/control_fetch';
 import type { ControlGroupApi } from '../../control_group/types';
 import type { ControlApiRegistration, ControlFactory, DefaultControlApi } from '../types';
 
+export type MockedControlGroupApi = ControlGroupApi & {
+  setLastSavedStateForChild: (uuid: string, state: object) => void;
+};
+
 export const getMockedControlGroupApi = (
   dashboardApi?: unknown,
   overwriteApi?: Partial<ControlGroupApi>
 ) => {
+  const controlStateMap: Record<string, BehaviorSubject<SerializedPanelState<object>>> = {};
   return {
     type: CONTROL_GROUP_TYPE,
     parentApi: dashboardApi,
@@ -27,8 +32,23 @@ export const getMockedControlGroupApi = (
     ignoreParentSettings$: new BehaviorSubject(undefined),
     controlFetch$: () => new BehaviorSubject<ControlFetchContext>({}),
     allowExpensiveQueries$: new BehaviorSubject(true),
+    lastSavedStateForChild$: (childId: string) =>
+      controlStateMap[childId] ?? new BehaviorSubject(undefined),
+    getLastSavedStateForChild: (childId: string) => {
+      return controlStateMap[childId]?.value ?? { rawState: {} };
+    },
+    setLastSavedStateForChild: (
+      childId: string,
+      serializePanelState: SerializedPanelState<object>
+    ) => {
+      if (!controlStateMap[childId]) {
+        controlStateMap[childId] = new BehaviorSubject(serializePanelState);
+        return;
+      }
+      controlStateMap[childId].next(serializePanelState);
+    },
     ...overwriteApi,
-  } as unknown as ControlGroupApi;
+  } as unknown as MockedControlGroupApi;
 };
 
 export const getMockedBuildApi =
