@@ -7,18 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
-import type { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
-
-import { LabelBadge } from './label_badge';
-
-export const NavItemLabel: React.FC<{
-  item: ChromeProjectNavigationNode;
-}> = ({ item: { title, withBadge, badgeOptions } }) => {
-  return (
-    <>
-      {title}
-      {withBadge && <LabelBadge text={badgeOptions?.text} />}
-    </>
-  );
-};
+export * from './fetch_rule_type_alert_fields';

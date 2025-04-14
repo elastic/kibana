@@ -7,4 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './fetch_rule_type_aad_template_fields';
+import React from 'react';
+
+import { EuiBetaBadge } from '@elastic/eui';
+
+export const SubItemBadge = ({ icon, tooltip }: { icon?: string; tooltip?: string }) => (
+  <EuiBetaBadge
+    size="s"
+    label=""
+    iconType={icon ?? 'beaker'}
+    alignment="middle"
+    tooltipContent={tooltip}
+  />
+);
