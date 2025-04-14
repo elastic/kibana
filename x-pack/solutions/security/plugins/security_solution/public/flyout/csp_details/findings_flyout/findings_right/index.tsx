@@ -7,7 +7,14 @@
 
 import React from 'react';
 import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
-import { EuiFlexGroup, EuiFlexItem, EuiText, EuiSpacer, EuiFlyoutFooter } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiText,
+  EuiSpacer,
+  EuiFlyoutFooter,
+  EuiFlyoutBody,
+} from '@elastic/eui';
 import type {
   FindingMisconfigurationFlyoutContentProps,
   FindingMisconfigurationFlyoutProps,
@@ -19,6 +26,7 @@ import { FlyoutHeader } from '../../../shared/components/flyout_header';
 import { useKibana } from '../../../../common/lib/kibana';
 import { PreferenceFormattedDate } from '../../../../common/components/formatted_date';
 import { FlyoutTitle } from '../../../shared/components/flyout_title';
+import { FlyoutBody } from '../../../shared/components/flyout_body';
 export interface FindingsMisconfigurationPanelExpandableFlyoutProps extends FlyoutPanelProps {
   key: 'findings-misconfiguration-panel';
   params: FindingMisconfigurationFlyoutProps;
@@ -27,6 +35,7 @@ export interface FindingsMisconfigurationPanelExpandableFlyoutProps extends Flyo
 export const FindingsMisconfigurationPanel = ({
   resourceId,
   ruleId,
+  isPreviewMode,
 }: FindingMisconfigurationFlyoutProps) => {
   const { cloudSecurityPosture } = useKibana().services;
   const CspFlyout = cloudSecurityPosture.getCloudSecurityPostureMisconfigurationFlyout();
@@ -62,7 +71,12 @@ export const FindingsMisconfigurationPanel = ({
                 </EuiFlexGroup>
                 <CspFlyout.Header finding={finding} />
               </FlyoutHeader>
-              <CspFlyout.Body finding={finding} />
+              <EuiFlyoutBody>
+                <CspFlyout.Body finding={finding} />
+              </EuiFlyoutBody>
+              {/* <FlyoutBody>
+                <CspFlyout.Body finding={finding} />
+              </FlyoutBody> */}
               <EuiFlyoutFooter>
                 <CspFlyout.Footer createRuleFn={createRuleFn} />
               </EuiFlyoutFooter>

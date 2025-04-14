@@ -203,6 +203,15 @@ const expandableFlyoutDocumentsPanels: ExpandableFlyoutProps['registeredPanels']
     ),
   },
   {
+    key: 'findings-misconfiguration-panel-preview',
+    component: (props) => (
+      <FindingsMisconfigurationPanel
+        {...(props as FindingsMisconfigurationPanelExpandableFlyoutProps).params}
+        isPreviewMode
+      />
+    ),
+  },
+  {
     key: IOCPanelKey,
     component: (props) => (
       <AIForSOCDetailsProvider {...(props as AIForSOCDetailsProps).params}>
