@@ -5,20 +5,21 @@
  * 2.0.
  */
 
-import React from 'react';
-import { fireEvent, screen, waitFor } from '@testing-library/react';
-import { FilterValueButton } from './filter_value_btn';
-import { mockUxSeries, mockUseSeriesFilter, mockUseValuesList, render } from '../../rtl_helpers';
 import {
-  USER_AGENT_NAME,
-  USER_AGENT_VERSION,
-} from '../../configurations/constants/elasticsearch_fieldnames';
+  ATTR_USER_AGENT_DEVICE_NAME,
+  ATTR_USER_AGENT_NAME,
+  ATTR_USER_AGENT_VERSION,
+} from '@kbn/observability-ui-semantic-conventions';
+import { fireEvent, screen, waitFor } from '@testing-library/react';
+import React from 'react';
+import { mockUseSeriesFilter, mockUseValuesList, mockUxSeries, render } from '../../rtl_helpers';
+import { FilterValueButton } from './filter_value_btn';
 
 describe('FilterValueButton', function () {
   it('renders', async () => {
     render(
       <FilterValueButton
-        field={USER_AGENT_NAME}
+        field={ATTR_USER_AGENT_DEVICE_NAME}
         seriesId={0}
         value={'Chrome'}
         isNestedOpen={{ value: '', negate: false }}
@@ -37,7 +38,7 @@ describe('FilterValueButton', function () {
     it('displays negate stats', async () => {
       render(
         <FilterValueButton
-          field={USER_AGENT_NAME}
+          field={ATTR_USER_AGENT_NAME}
           seriesId={0}
           value={'Chrome'}
           isNestedOpen={{ value: '', negate: false }}
@@ -61,7 +62,7 @@ describe('FilterValueButton', function () {
 
       render(
         <FilterValueButton
-          field={USER_AGENT_NAME}
+          field={ATTR_USER_AGENT_NAME}
           seriesId={0}
           value={'Chrome'}
           isNestedOpen={{ value: '', negate: false }}
@@ -79,7 +80,7 @@ describe('FilterValueButton', function () {
         expect(setFilter).toHaveBeenCalledTimes(1);
 
         expect(setFilter).toHaveBeenCalledWith({
-          field: 'user_agent.name',
+          field: ATTR_USER_AGENT_NAME,
           negate: true,
           value: 'Chrome',
         });
@@ -93,7 +94,7 @@ describe('FilterValueButton', function () {
 
       render(
         <FilterValueButton
-          field={USER_AGENT_NAME}
+          field={ATTR_USER_AGENT_NAME}
           seriesId={0}
           value={'Chrome'}
           isNestedOpen={{ value: '', negate: false }}
@@ -108,7 +109,7 @@ describe('FilterValueButton', function () {
 
       await waitFor(() => {
         expect(removeFilter).toHaveBeenCalledWith({
-          field: 'user_agent.name',
+          field: ATTR_USER_AGENT_NAME,
           negate: false,
           value: 'Chrome',
         });
@@ -121,7 +122,7 @@ describe('FilterValueButton', function () {
 
     render(
       <FilterValueButton
-        field={USER_AGENT_NAME}
+        field={ATTR_USER_AGENT_NAME}
         seriesId={0}
         value={'Chrome'}
         isNestedOpen={{ value: '', negate: false }}
@@ -136,7 +137,7 @@ describe('FilterValueButton', function () {
 
     await waitFor(() => {
       expect(removeFilter).toHaveBeenCalledWith({
-        field: 'user_agent.name',
+        field: ATTR_USER_AGENT_NAME,
         negate: true,
         value: 'Chrome',
       });
@@ -149,14 +150,14 @@ describe('FilterValueButton', function () {
 
     render(
       <FilterValueButton
-        field={USER_AGENT_NAME}
+        field={ATTR_USER_AGENT_NAME}
         seriesId={0}
         value={'Chrome'}
         isNestedOpen={{ value: 'Chrome', negate: false }}
         setIsNestedOpen={jest.fn()}
         negate={false}
         allSelectedValues={['Chrome', 'Firefox']}
-        nestedField={USER_AGENT_VERSION}
+        nestedField={ATTR_USER_AGENT_VERSION}
         series={mockUxSeries}
       />
     );
@@ -168,7 +169,7 @@ describe('FilterValueButton', function () {
           filters: [
             {
               term: {
-                [USER_AGENT_NAME]: 'Chrome',
+                [ATTR_USER_AGENT_NAME]: 'Chrome',
               },
             },
           ],
@@ -183,14 +184,14 @@ describe('FilterValueButton', function () {
 
     render(
       <FilterValueButton
-        field={USER_AGENT_NAME}
+        field={ATTR_USER_AGENT_NAME}
         seriesId={0}
         value={'Chrome'}
         isNestedOpen={{ value: 'Chrome', negate: false }}
         setIsNestedOpen={jest.fn()}
         negate={false}
         allSelectedValues={['Chrome', 'Firefox']}
-        nestedField={USER_AGENT_VERSION}
+        nestedField={ATTR_USER_AGENT_VERSION}
         series={mockUxSeries}
       />
     );
@@ -202,11 +203,11 @@ describe('FilterValueButton', function () {
           filters: [
             {
               term: {
-                [USER_AGENT_NAME]: 'Chrome',
+                [ATTR_USER_AGENT_NAME]: 'Chrome',
               },
             },
           ],
-          sourceField: USER_AGENT_VERSION,
+          sourceField: ATTR_USER_AGENT_VERSION,
         })
       );
     });
@@ -220,14 +221,14 @@ describe('FilterValueButton', function () {
 
     render(
       <FilterValueButton
-        field={USER_AGENT_NAME}
+        field={ATTR_USER_AGENT_NAME}
         seriesId={0}
         value={'Chrome'}
         isNestedOpen={{ value: '', negate: false }}
         setIsNestedOpen={setIsNestedOpen}
         negate={false}
         allSelectedValues={['Chrome', 'Firefox']}
-        nestedField={USER_AGENT_VERSION}
+        nestedField={ATTR_USER_AGENT_VERSION}
         series={mockUxSeries}
       />
     );
@@ -247,14 +248,14 @@ describe('FilterValueButton', function () {
 
     render(
       <FilterValueButton
-        field={USER_AGENT_NAME}
+        field={ATTR_USER_AGENT_NAME}
         seriesId={0}
         value={'Chrome'}
         isNestedOpen={{ value: '', negate: true }}
         setIsNestedOpen={setIsNestedOpen}
         negate={true}
         allSelectedValues={['Firefox']}
-        nestedField={USER_AGENT_VERSION}
+        nestedField={ATTR_USER_AGENT_VERSION}
         series={mockUxSeries}
       />
     );

@@ -5,14 +5,14 @@
  * 2.0.
  */
 
+import type { DataView } from '@kbn/data-views-plugin/public';
+import { FilterValueLabel } from '@kbn/exploratory-view-plugin/public';
+import { fromQuery, toQuery } from '@kbn/observability-plugin/public';
+import { ATTR_URL_FULL } from '@opentelemetry/semantic-conventions';
 import * as React from 'react';
 import { useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
-import { fromQuery, toQuery } from '@kbn/observability-plugin/public';
-import { FilterValueLabel } from '@kbn/exploratory-view-plugin/public';
-import type { DataView } from '@kbn/data-views-plugin/public';
 import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
-import { TRANSACTION_URL } from '../../../../../common/elasticsearch_fieldnames';
 
 interface Props {
   indexPattern: DataView;
@@ -49,7 +49,7 @@ export function SelectedWildcards({ indexPattern }: Props) {
         updateSearchTerm('');
       }}
       invertFilter={({ negate }) => {}}
-      field={TRANSACTION_URL}
+      field={ATTR_URL_FULL}
       value={searchTerm}
       negate={false}
       label={'URL wildcard'}

@@ -7,12 +7,12 @@
 
 import React, { useCallback } from 'react';
 import { AllSeries } from '@kbn/exploratory-view-plugin/public';
+import { ATTR_TRANSACTION_DURATION_US } from '@kbn/observability-ui-semantic-conventions';
 import { getExploratoryViewFilter } from '../../../../services/data/get_exp_view_filter';
 import { useExpViewAttributes } from './use_exp_view_attrs';
 import { BreakdownItem } from '../../../../../typings/ui_filters';
 import { useDataView } from '../local_uifilters/use_data_view';
 import { useKibanaServices } from '../../../../hooks/use_kibana_services';
-import { TRANSACTION_DURATION } from '../../../../../common/elasticsearch_fieldnames';
 import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 
 interface Props {
@@ -47,7 +47,7 @@ export function PageLoadDistChart({ onPercentileChange, breakdown }: Props) {
       reportDefinitions,
       dataType: 'ux',
       name: 'page-load-distribution',
-      selectedMetricField: TRANSACTION_DURATION,
+      selectedMetricField: ATTR_TRANSACTION_DURATION_US,
       breakdown: breakdown?.fieldName,
       filters: getExploratoryViewFilter(uxUiFilters, urlParams),
     },

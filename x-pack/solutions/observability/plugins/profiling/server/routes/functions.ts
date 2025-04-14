@@ -9,6 +9,7 @@ import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { kqlQuery } from '@kbn/observability-plugin/server';
 import { profilingFetchTopNFunctionsFromStacktraces } from '@kbn/observability-plugin/common';
+import { ATTR_SERVICE_NAME, ATTR_TIMESTAMP } from '@kbn/observability-ui-semantic-conventions';
 import type { RouteRegisterParameters } from '.';
 import { IDLE_SOCKET_TIMEOUT } from '.';
 import { getRoutePaths } from '../../common';
@@ -60,7 +61,7 @@ export function registerTopNFunctionsSearchRoute({
               ...kqlQuery(kuery),
               {
                 range: {
-                  ['@timestamp']: {
+                  [ATTR_TIMESTAMP]: {
                     gte: String(startSecs),
                     lt: String(endSecs),
                     format: 'epoch_second',
@@ -89,7 +90,7 @@ export function registerTopNFunctionsSearchRoute({
               core,
               esClient,
               query,
-              aggregationFields: ['service.name'],
+              aggregationFields: [ATTR_SERVICE_NAME],
               totalSeconds,
             });
 

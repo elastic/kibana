@@ -9,6 +9,10 @@ import React, { useCallback } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiSpacer } from '@elastic/eui';
 import { EuiLoadingChart } from '@elastic/eui';
 import styled from '@emotion/styled';
+import {
+  ATTR_USER_AGENT_NAME,
+  ATTR_USER_AGENT_OS_NAME,
+} from '@kbn/observability-ui-semantic-conventions';
 import { UxLocalUIFilterName, uxLocalUIFilterNames } from '../../../../../common/ux_ui_filter';
 import { VisitorBreakdownChart, VisitorBreakdownMetric } from '../charts/visitor_breakdown_chart';
 import { I18LABELS, VisitorBreakdownLabel } from '../translations';
@@ -20,8 +24,8 @@ import { useDataView } from '../local_uifilters/use_data_view';
 type VisitorBreakdownFieldMap = Record<VisitorBreakdownMetric, UxLocalUIFilterName>;
 
 const visitorBreakdownFieldMap: VisitorBreakdownFieldMap = {
-  [VisitorBreakdownMetric.OS_BREAKDOWN]: 'os',
-  [VisitorBreakdownMetric.UA_BREAKDOWN]: 'browser',
+  [ATTR_USER_AGENT_OS_NAME]: 'os',
+  [ATTR_USER_AGENT_NAME]: 'browser',
 };
 
 const EuiLoadingEmbeddable = styled(EuiFlexGroup)`
@@ -101,7 +105,7 @@ export function VisitorBreakdown() {
               end={end ?? ''}
               uiFilters={uxUiFilters}
               urlQuery={searchTerm}
-              metric={VisitorBreakdownMetric.UA_BREAKDOWN}
+              metric={ATTR_USER_AGENT_NAME}
               onFilter={onFilter}
             />
           )}
@@ -124,7 +128,7 @@ export function VisitorBreakdown() {
               end={end ?? ''}
               uiFilters={uxUiFilters}
               urlQuery={searchTerm}
-              metric={VisitorBreakdownMetric.OS_BREAKDOWN}
+              metric={ATTR_USER_AGENT_OS_NAME}
               onFilter={onFilter}
             />
           )}

@@ -6,13 +6,14 @@
  */
 
 import type { ESSearchResponse } from '@kbn/es-types';
-import moment from 'moment';
 import {
-  SERVICE_NAME,
-  TRANSACTION_TYPE,
-  PROCESSOR_EVENT,
-} from '../../../common/elasticsearch_fieldnames';
-import { TRANSACTION_PAGE_LOAD } from '../../../common/transaction_types';
+  ATTR_PROCESSOR_EVENT,
+  ATTR_SERVICE_NAME,
+  ATTR_TRANSACTION_TYPE,
+  PROCESSOR_EVENT_VALUE_TRANSACTION,
+  TRANSACTION_TYPE_VALUE_PAGE_LOAD,
+} from '@kbn/observability-ui-semantic-conventions';
+import moment from 'moment';
 import { rangeQuery } from './range_query';
 
 export function formatHasRumResult<T>(
@@ -39,8 +40,8 @@ export function hasRumDataQuery({
     query: {
       bool: {
         filter: [
-          { term: { [TRANSACTION_TYPE]: TRANSACTION_PAGE_LOAD } },
-          { term: { [PROCESSOR_EVENT]: 'transaction' } },
+          { term: { [ATTR_TRANSACTION_TYPE]: TRANSACTION_TYPE_VALUE_PAGE_LOAD } },
+          { term: { [ATTR_PROCESSOR_EVENT]: PROCESSOR_EVENT_VALUE_TRANSACTION } },
         ],
       },
     },
@@ -50,7 +51,7 @@ export function hasRumDataQuery({
         aggs: {
           mostTraffic: {
             terms: {
-              field: SERVICE_NAME,
+              field: ATTR_SERVICE_NAME,
               size: 1,
             },
           },

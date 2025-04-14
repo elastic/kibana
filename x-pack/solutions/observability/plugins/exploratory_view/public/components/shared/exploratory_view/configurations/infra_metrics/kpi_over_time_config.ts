@@ -5,14 +5,18 @@
  * 2.0.
  */
 
+import {
+  ATTR_AGENT_HOSTNAME,
+  ATTR_AGENT_TYPE,
+  ATTR_SERVICE_TYPE,
+  ATTR_TIMESTAMP,
+  METRIC_DOCKER_CPU_TOTAL_PCT,
+  METRIC_KUBERNETES_POD_CPU_USAGE_NODE_PCT,
+  METRIC_SYSTEM_CPU_TOTAL_NORM_PCT,
+  METRIC_SYSTEM_MEMORY_USED_PCT,
+} from '@kbn/observability-ui-semantic-conventions';
 import { ConfigProps, SeriesConfig } from '../../types';
 import { FieldLabels, OPERATION_COLUMN, REPORT_METRIC_FIELD, ReportTypes } from '../constants';
-import {
-  SYSTEM_CPU_PERCENTAGE_FIELD,
-  DOCKER_CPU_PERCENTAGE_FIELD,
-  K8S_POD_CPU_PERCENTAGE_FIELD,
-  SYSTEM_MEMORY_PERCENTAGE_FIELD,
-} from '../constants/field_names/infra_metrics';
 import {
   DOCKER_CPU_USAGE,
   K8S_POD_CPU_USAGE,
@@ -26,7 +30,7 @@ export function getMetricsKPIConfig({ dataView }: ConfigProps): SeriesConfig {
     defaultSeriesType: 'area',
     seriesTypes: [],
     xAxisColumn: {
-      sourceField: '@timestamp',
+      sourceField: ATTR_TIMESTAMP,
     },
     yAxisColumns: [
       {
@@ -35,33 +39,33 @@ export function getMetricsKPIConfig({ dataView }: ConfigProps): SeriesConfig {
       },
     ],
     hasOperationType: false,
-    filterFields: ['agent.type', 'service.type'],
-    breakdownFields: ['agent.hostname', 'service.type'],
+    filterFields: [ATTR_AGENT_TYPE, ATTR_SERVICE_TYPE],
+    breakdownFields: [ATTR_AGENT_HOSTNAME, ATTR_SERVICE_TYPE],
     baseFilters: [],
-    definitionFields: ['agent.hostname', 'service.type'],
+    definitionFields: [ATTR_AGENT_HOSTNAME, ATTR_SERVICE_TYPE],
     metricOptions: [
       {
         label: SYSTEM_CPU_USAGE,
-        field: SYSTEM_CPU_PERCENTAGE_FIELD,
-        id: SYSTEM_CPU_PERCENTAGE_FIELD,
+        field: METRIC_SYSTEM_CPU_TOTAL_NORM_PCT,
+        id: METRIC_SYSTEM_CPU_TOTAL_NORM_PCT,
         columnType: OPERATION_COLUMN,
       },
       {
         label: SYSTEM_MEMORY_USAGE,
-        field: SYSTEM_MEMORY_PERCENTAGE_FIELD,
-        id: SYSTEM_MEMORY_PERCENTAGE_FIELD,
+        field: METRIC_SYSTEM_MEMORY_USED_PCT,
+        id: METRIC_SYSTEM_MEMORY_USED_PCT,
         columnType: OPERATION_COLUMN,
       },
       {
         label: DOCKER_CPU_USAGE,
-        field: DOCKER_CPU_PERCENTAGE_FIELD,
-        id: DOCKER_CPU_PERCENTAGE_FIELD,
+        field: METRIC_DOCKER_CPU_TOTAL_PCT,
+        id: METRIC_DOCKER_CPU_TOTAL_PCT,
         columnType: OPERATION_COLUMN,
       },
       {
         label: K8S_POD_CPU_USAGE,
-        field: K8S_POD_CPU_PERCENTAGE_FIELD,
-        id: K8S_POD_CPU_PERCENTAGE_FIELD,
+        field: METRIC_KUBERNETES_POD_CPU_USAGE_NODE_PCT,
+        id: METRIC_KUBERNETES_POD_CPU_USAGE_NODE_PCT,
         columnType: OPERATION_COLUMN,
       },
     ],

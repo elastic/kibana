@@ -5,38 +5,38 @@
  * 2.0.
  */
 
-import { FieldFormat } from '../../types';
 import {
-  SYSTEM_CPU_PERCENTAGE_FIELD,
-  DOCKER_CPU_PERCENTAGE_FIELD,
-  K8S_POD_CPU_PERCENTAGE_FIELD,
-  SYSTEM_MEMORY_PERCENTAGE_FIELD,
-} from '../constants/field_names/infra_metrics';
+  METRIC_DOCKER_CPU_TOTAL_PCT,
+  METRIC_KUBERNETES_POD_CPU_USAGE_NODE_PCT,
+  METRIC_SYSTEM_CPU_TOTAL_NORM_PCT,
+  METRIC_SYSTEM_MEMORY_USED_PCT,
+} from '@kbn/observability-ui-semantic-conventions';
+import { FieldFormat } from '../../types';
 
 export const infraMetricsFieldFormats: FieldFormat[] = [
   {
-    field: SYSTEM_CPU_PERCENTAGE_FIELD,
+    field: METRIC_SYSTEM_CPU_TOTAL_NORM_PCT,
     format: {
       id: 'percent',
       params: {},
     },
   },
   {
-    field: DOCKER_CPU_PERCENTAGE_FIELD,
+    field: METRIC_DOCKER_CPU_TOTAL_PCT,
     format: {
       id: 'percent',
       params: {},
     },
   },
   {
-    field: K8S_POD_CPU_PERCENTAGE_FIELD,
+    field: METRIC_KUBERNETES_POD_CPU_USAGE_NODE_PCT,
     format: {
       id: 'percent',
       params: {},
     },
   },
   {
-    field: SYSTEM_MEMORY_PERCENTAGE_FIELD,
+    field: METRIC_SYSTEM_MEMORY_USED_PCT,
     format: {
       id: 'percent',
       params: {},
