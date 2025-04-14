@@ -13,7 +13,9 @@ import pRetry from 'p-retry';
 import {
   InferenceInferenceEndpointInfo,
   MlGetTrainedModelsStatsResponse,
+  MlTrainedModelStats,
 } from '@elastic/elasticsearch/lib/api/types';
+import { KnowledgeBaseState } from '../../common';
 import { ObservabilityAIAssistantConfig } from '../config';
 
 export const AI_ASSISTANT_KB_INFERENCE_ID = 'obs_ai_assistant_kb_inference';
@@ -51,7 +53,7 @@ export async function createInferenceEndpoint({
       }
     );
   } catch (e) {
-    logger.debug(
+    logger.error(
       `Failed to create inference endpoint "${AI_ASSISTANT_KB_INFERENCE_ID}": ${e.message}`
     );
     throw e;
@@ -105,7 +107,13 @@ export async function getKbModelStatus({
   esClient: { asInternalUser: ElasticsearchClient };
   logger: Logger;
   config: ObservabilityAIAssistantConfig;
-}) {
+}): Promise<{
+  enabled: boolean;
+  endpoint?: InferenceInferenceEndpointInfo;
+  modelStats?: MlTrainedModelStats;
+  errorMessage?: string;
+  kbState: KnowledgeBaseState;
+}> {
   const enabled = config.enableKnowledgeBase;
 
   let endpoint: InferenceInferenceEndpointInfo;
@@ -115,7 +123,7 @@ export async function getKbModelStatus({
     if (!isInferenceEndpointMissingOrUnavailable(error)) {
       throw error;
     }
-    return { ready: false, enabled, errorMessage: error.message };
+    return { enabled, errorMessage: error.message, kbState: KnowledgeBaseState.NOT_INSTALLED };
   }
 
   let trainedModelStatsResponse: MlGetTrainedModelsStatsResponse;
@@ -124,28 +132,40 @@ export async function getKbModelStatus({
       model_id: endpoint.service_settings?.model_id,
     });
   } catch (error) {
-    logger.debug(`Failed to get model stats: ${error.message}`);
-    return { ready: false, enabled, errorMessage: error.message };
+    logger.error(`Failed to get model stats: ${error.message}`);
+    return { enabled, errorMessage: error.message, kbState: KnowledgeBaseState.ERROR };
   }
 
   const modelStats = trainedModelStatsResponse.trained_model_stats.find(
     (stats) => stats.deployment_stats?.deployment_id === AI_ASSISTANT_KB_INFERENCE_ID
   );
-  const deploymentState = modelStats?.deployment_stats?.state;
-  const allocationState = modelStats?.deployment_stats?.allocation_status?.state;
-  const allocationCount = modelStats?.deployment_stats?.allocation_status?.allocation_count ?? 0;
-  const ready =
-    deploymentState === 'started' && allocationState === 'fully_allocated' && allocationCount > 0;
+
+  let kbState: KnowledgeBaseState;
+
+  if (!modelStats) {
+    kbState = KnowledgeBaseState.PENDING_MODEL_DEPLOYMENT;
+  } else if (modelStats.deployment_stats?.state === 'failed') {
+    kbState = KnowledgeBaseState.ERROR;
+  } else if (
+    modelStats?.deployment_stats?.state === 'starting' &&
+    modelStats?.deployment_stats?.allocation_status?.allocation_count === 0
+  ) {
+    kbState = KnowledgeBaseState.DEPLOYING_MODEL;
+  } else if (
+    modelStats?.deployment_stats?.state === 'started' &&
+    modelStats?.deployment_stats?.allocation_status?.state === 'fully_allocated' &&
+    modelStats?.deployment_stats?.allocation_status?.allocation_count > 0
+  ) {
+    kbState = KnowledgeBaseState.READY;
+  } else {
+    kbState = KnowledgeBaseState.ERROR;
+  }
 
   return {
     endpoint,
-    ready,
     enabled,
-    model_stats: {
-      allocation_count: allocationCount,
-      deployment_state: deploymentState,
-      allocation_state: allocationState,
-    },
+    modelStats,
+    kbState,
   };
 }
 
@@ -160,8 +180,9 @@ export async function waitForKbModel({
 }) {
   return pRetry(
     async () => {
-      const { ready } = await getKbModelStatus({ esClient, logger, config });
-      if (!ready) {
+      const { kbState } = await getKbModelStatus({ esClient, logger, config });
+
+      if (kbState !== KnowledgeBaseState.READY) {
         logger.debug('Knowledge base model is not yet ready. Retrying...');
         throw new Error('Knowledge base model is not yet ready');
       }
