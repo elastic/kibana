@@ -60,7 +60,11 @@ export const ConnectLLMButton: React.FC = () => {
                 <FormattedMessage
                   id="xpack.searchPlayground.setupPage.elasticManagedLlmConnectedButtonLabel"
                   defaultMessage="{connectorName} connected"
-                  values={{ connectorName: connectors[0]?.name || 'Elastic Managed LLM' }}
+                  values={{
+                    connectorName:
+                      connectors.filter((connector) => connector.type === LLMs.inference)[0]
+                        ?.name || 'Elastic Managed LLM',
+                  }}
                 />
               ) : (
                 <FormattedMessage
