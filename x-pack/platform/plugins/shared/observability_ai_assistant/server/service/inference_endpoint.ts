@@ -118,7 +118,7 @@ export async function getKbModelStatus({
       model_id: modelId,
     });
   } catch (error) {
-    logger.debug(
+    logger.error(
       `Failed to get model stats for model "${modelId}" and inference id ${inferenceId}: ${error.message}`
     );
     return { enabled, errorMessage: error.message, kbState: KnowledgeBaseState.ERROR };

@@ -36,11 +36,15 @@ export async function reIndexKnowledgeBaseWithLock({
 }): Promise<boolean> {
   const lmService = new LockManagerService(core, logger);
   return lmService.withLock(KB_REINDEXING_LOCK_ID, () =>
-    reIndexKnowledgeBase({ logger: logger.get('kb-reindex'), esClient, inferenceId })
+    reIndexKnowledgeBaseWithWriteIndexBlock({
+      logger: logger.get('kb-reindex'),
+      esClient,
+      inferenceId,
+    })
   );
 }
 
-async function reIndexKnowledgeBase({
+async function reIndexKnowledgeBaseWithWriteIndexBlock({
   logger,
   esClient,
   inferenceId,
@@ -55,18 +59,10 @@ async function reIndexKnowledgeBase({
       `Write block is already set on the knowledge base index: ${resourceNames.writeIndexAlias.kb}`
     );
   }
-  const activeReindexingTask = await getActiveReindexingTaskId(esClient);
-
-  if (activeReindexingTask) {
-    throw new Error(
-      `Re-indexing task "${activeReindexingTask}" is already in progress for the knowledge base index: ${resourceNames.writeIndexAlias.kb}`
-    );
-  }
-
-  await addIndexWriteBlock({ esClient, index: resourceNames.writeIndexAlias.kb });
 
   try {
-    await _reIndexKnowledgeBase({ logger, esClient, inferenceId });
+    await addIndexWriteBlock({ esClient, index: resourceNames.writeIndexAlias.kb });
+    await reIndexKnowledgeBase({ logger, esClient, inferenceId });
     logger.info('Re-indexing knowledge base completed successfully.');
   } catch (error) {
     logger.error(`Re-indexing knowledge base failed: ${error.message}`);
@@ -78,7 +74,7 @@ async function reIndexKnowledgeBase({
   return true;
 }
 
-async function _reIndexKnowledgeBase({
+async function reIndexKnowledgeBase({
   logger,
   esClient,
   inferenceId,
@@ -87,6 +83,13 @@ async function _reIndexKnowledgeBase({
   esClient: { asInternalUser: ElasticsearchClient };
   inferenceId: string;
 }): Promise<void> {
+  const activeReindexingTask = await getActiveReindexingTaskId(esClient);
+  if (activeReindexingTask) {
+    throw new Error(
+      `Re-indexing task "${activeReindexingTask}" is already in progress for the knowledge base index: ${resourceNames.writeIndexAlias.kb}`
+    );
+  }
+
   const { currentWriteIndexName, nextWriteIndexName } = await getCurrentAndNextWriteIndexNames({
     esClient,
     logger,
