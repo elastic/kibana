@@ -25,7 +25,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { useDebounceFn } from '@kbn/react-hooks';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
-import { useFetchPrivilegedUserIndices } from './hooks/use_fetch_privilegeg_user_indices';
+import { useFetchPrivilegedUserIndices } from './hooks/use_fetch_privileged_user_indices';
 
 const SELECT_INDEX_LABEL = i18n.translate(
   'xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.selectIndex.comboboxPlaceholder',
@@ -117,9 +117,7 @@ export const IndexSelectorModal = ({
               debouncedSetSearchQuery.run(query);
             }}
             async
-            optionMatcher={(_) => {
-              return false; // prevent the combo box from searching on the client side
-            }}
+            optionMatcher={(_) => false} // prevent the combo box from searching on the client side
           />
         </EuiFormRow>
       </EuiModalBody>

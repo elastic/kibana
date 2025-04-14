@@ -2146,7 +2146,7 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
     this.log.info(`${new Date().toISOString()} Calling API SearchPrivilegesIndices`);
     return this.kbnClient
       .request<SearchPrivilegesIndicesResponse>({
-        path: '/monitoring/privileges/indices',
+        path: '/api/entity_analytics/monitoring/privileges/indices',
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
         },

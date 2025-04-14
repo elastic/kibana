@@ -22,61 +22,8 @@ import { addPathParamToUrl } from '../../../common/utils/integrations';
 import { ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_PATH } from '../../../../common/constants';
 import { useNavigation } from '../../../common/lib/kibana';
 import { INTEGRATION_APP_ID } from '../../../onboarding/components/onboarding_body/cards/integrations/constants';
-import entraIdIcon from '../../icons/entra_id.svg';
-import oktaIcon from '../../icons/okta.svg';
-import activeDirectoryIcon from '../../icons/active_directory.svg';
 import { IndexSelectorModal } from './select_index_modal';
-
-const INTEGRATIONS = [
-  {
-    id: 'entityanalytics_okta',
-    icon: oktaIcon,
-    title: (
-      <FormattedMessage
-        id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.addDataSource.okta.title"
-        defaultMessage="Okta"
-      />
-    ),
-    description: (
-      <FormattedMessage
-        id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.addDataSource.okta.description"
-        defaultMessage="Collect user identities and event logs from Okta with Elastic Agent."
-      />
-    ),
-  },
-  {
-    id: 'entityanalytics_entra_id',
-    icon: entraIdIcon,
-    title: (
-      <FormattedMessage
-        id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.addDataSource.entra.title"
-        defaultMessage="Microsoft Entra ID"
-      />
-    ),
-    description: (
-      <FormattedMessage
-        id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.addDataSource.entra.description"
-        defaultMessage="Collect user identities and event logs from Microsoft Entra ID with Elastic Agent."
-      />
-    ),
-  },
-  {
-    id: 'entityanalytics_ad',
-    icon: activeDirectoryIcon,
-    title: (
-      <FormattedMessage
-        id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.addDataSource.activeDirectory.title"
-        defaultMessage="Active Directory"
-      />
-    ),
-    description: (
-      <FormattedMessage
-        id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.addDataSource.activeDirectory.description"
-        defaultMessage="Collect user identities from Active Directory with Elastic Agent."
-      />
-    ),
-  },
-];
+import { PRIVILEGED_USER_MONITORING_INTEGRATIONS } from './constants';
 
 export const AddDataSourcePanel = () => {
   const { navigateTo } = useNavigation();
@@ -121,10 +68,10 @@ export const AddDataSourcePanel = () => {
       <EuiSpacer size="xl" />
 
       <EuiFlexGroup direction="row" justifyContent="spaceBetween">
-        {INTEGRATIONS.map((integration) => (
-          <EuiFlexItem grow={1}>
+        {PRIVILEGED_USER_MONITORING_INTEGRATIONS.map((integration) => (
+          <EuiFlexItem grow={1} key={integration.id}>
             <EuiCard
-              key={integration.id}
+              data-test-subj="entity_analytics-integration-card"
               layout="horizontal"
               icon={<EuiIcon size="xl" type={integration.icon} />}
               title={integration.title}

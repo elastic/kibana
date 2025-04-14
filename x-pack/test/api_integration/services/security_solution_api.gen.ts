@@ -1520,7 +1520,7 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
     },
     searchPrivilegesIndices(props: SearchPrivilegesIndicesProps, kibanaSpace: string = 'default') {
       return supertest
-        .get(routeWithNamespace('/monitoring/privileges/indices', kibanaSpace))
+        .get(routeWithNamespace('/api/entity_analytics/monitoring/privileges/indices', kibanaSpace))
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
