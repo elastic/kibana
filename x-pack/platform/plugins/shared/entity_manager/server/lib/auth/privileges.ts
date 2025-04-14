@@ -58,26 +58,35 @@ export const canDisableEntityDiscovery = async (client: ElasticsearchClient) => 
   );
 };
 
-export const entityDefinitionRuntimePrivileges = (sourceIndices: string[]) => ({
-  cluster: ['manage_transform', 'manage_ingest_pipelines', 'manage_index_templates'],
-  index: [
-    {
-      names: [ENTITY_INTERNAL_INDICES_PATTERN],
-      privileges: ['create_index', 'delete_index', 'index', 'create_doc', 'auto_configure', 'read'],
-    },
-    {
-      names: [...sourceIndices, ENTITY_INTERNAL_INDICES_PATTERN],
-      privileges: ['read', 'view_index_metadata'],
-    },
-  ],
-  application: [
-    {
-      application: 'kibana-.kibana',
-      privileges: [`saved_object:${SO_ENTITY_DEFINITION_TYPE}/*`],
-      resources: ['*'],
-    },
-  ],
-});
+export const entityDefinitionRuntimePrivileges = (sourceIndices: string[]) => {
+  return {
+    cluster: ['manage_transform', 'manage_ingest_pipelines', 'manage_index_templates'],
+    index: [
+      {
+        names: [ENTITY_INTERNAL_INDICES_PATTERN],
+        privileges: [
+          'create_index',
+          'delete_index',
+          'index',
+          'create_doc',
+          'auto_configure',
+          'read',
+        ],
+      },
+      {
+        names: [...sourceIndices, ENTITY_INTERNAL_INDICES_PATTERN],
+        privileges: ['read', 'view_index_metadata'],
+      },
+    ],
+    application: [
+      {
+        application: 'kibana-.kibana',
+        privileges: [`saved_object:${SO_ENTITY_DEFINITION_TYPE}/*`],
+        resources: ['*'],
+      },
+    ],
+  };
+};
 
 export const entityDefinitionDeletionPrivileges = {
   cluster: ['manage_transform', 'manage_ingest_pipelines', 'manage_index_templates'],

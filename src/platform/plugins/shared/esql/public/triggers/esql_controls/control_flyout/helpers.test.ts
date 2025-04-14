@@ -42,6 +42,70 @@ describe('helpers', () => {
       );
       expect(updatedQueryString).toBe('FROM my_index \n| STATS BY ?my_variable');
     });
+
+    it('should adjust the query string for trailing question mark', () => {
+      const queryString = 'FROM my_index | STATS BY ?';
+      const cursorPosition = { column: 27, lineNumber: 1 } as monaco.Position;
+      const variable = '?my_variable';
+
+      const updatedQueryString = updateQueryStringWithVariable(
+        queryString,
+        variable,
+        cursorPosition
+      );
+      expect(updatedQueryString).toBe('FROM my_index | STATS BY ?my_variable');
+    });
+
+    it('should adjust the query string if there is a ? at the second last position', () => {
+      const queryString = 'FROM my_index | STATS PERCENTILE(bytes, ?)';
+      const cursorPosition = { column: 42, lineNumber: 1 } as monaco.Position;
+      const variable = '?my_variable';
+
+      const updatedQueryString = updateQueryStringWithVariable(
+        queryString,
+        variable,
+        cursorPosition
+      );
+      expect(updatedQueryString).toBe('FROM my_index | STATS PERCENTILE(bytes, ?my_variable)');
+    });
+
+    it('should adjust the query string if there is a ? at the last cursor position', () => {
+      const queryString =
+        'FROM my_index | STATS COUNT() BY BUCKET(@timestamp, ?, ?_tstart, ?_tend)';
+      const cursorPosition = {
+        lineNumber: 1,
+        column: 54,
+      } as monaco.Position;
+      const variable = '?my_variable';
+
+      const updatedQueryString = updateQueryStringWithVariable(
+        queryString,
+        variable,
+        cursorPosition
+      );
+      expect(updatedQueryString).toBe(
+        'FROM my_index | STATS COUNT() BY BUCKET(@timestamp, ?my_variable, ?_tstart, ?_tend)'
+      );
+    });
+
+    it('should adjust the query string if there is a ? at the last cursor position for multilines query', () => {
+      const queryString =
+        'FROM my_index \n| STATS COUNT() BY BUCKET(@timestamp, ?, ?_tstart, ?_tend)';
+      const cursorPosition = {
+        lineNumber: 2,
+        column: 40,
+      } as monaco.Position;
+      const variable = '?my_variable';
+
+      const updatedQueryString = updateQueryStringWithVariable(
+        queryString,
+        variable,
+        cursorPosition
+      );
+      expect(updatedQueryString).toBe(
+        'FROM my_index \n| STATS COUNT() BY BUCKET(@timestamp, ?my_variable, ?_tstart, ?_tend)'
+      );
+    });
   });
 
   describe('getQueryForFields', () => {
