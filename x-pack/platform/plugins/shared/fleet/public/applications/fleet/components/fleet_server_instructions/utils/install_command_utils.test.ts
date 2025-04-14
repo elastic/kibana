@@ -140,14 +140,13 @@ describe('getInstallCommandForPlatform', () => {
         })
       ).toMatchInlineSnapshot(`
         "curl -L -O https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent-9.0.0-aarch64.rpm
-        sudo rpm -vi elastic-agent-9.0.0-aarch64.rpm
+        sudo ELASTIC_AGENT_FLAVOR=servers rpm -vi elastic-agent-9.0.0-aarch64.rpm
         sudo systemctl enable elastic-agent
         sudo systemctl start elastic-agent
         sudo elastic-agent enroll \\\\
           --fleet-server-es=http://elasticsearch:9200 \\\\
           --fleet-server-service-token=service-token-1 \\\\
-          --fleet-server-port=8220 \\\\
-          --install-servers"
+          --fleet-server-port=8220"
       `);
 
       expect(
@@ -159,14 +158,13 @@ describe('getInstallCommandForPlatform', () => {
         })
       ).toMatchInlineSnapshot(`
         "curl -L -O https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent-9.0.0-x86_64.rpm
-        sudo rpm -vi elastic-agent-9.0.0-x86_64.rpm
+        sudo ELASTIC_AGENT_FLAVOR=servers rpm -vi elastic-agent-9.0.0-x86_64.rpm
         sudo systemctl enable elastic-agent
         sudo systemctl start elastic-agent
         sudo elastic-agent enroll \\\\
           --fleet-server-es=http://elasticsearch:9200 \\\\
           --fleet-server-service-token=service-token-1 \\\\
-          --fleet-server-port=8220 \\\\
-          --install-servers"
+          --fleet-server-port=8220"
       `);
     });
 
@@ -180,14 +178,13 @@ describe('getInstallCommandForPlatform', () => {
         })
       ).toMatchInlineSnapshot(`
         "curl -L -O https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent-9.0.0-arm64.deb
-        sudo dpkg -i elastic-agent-9.0.0-arm64.deb
+        sudo ELASTIC_AGENT_FLAVOR=servers dpkg -i elastic-agent-9.0.0-arm64.deb
         sudo systemctl enable elastic-agent
         sudo systemctl start elastic-agent
         sudo elastic-agent enroll \\\\
           --fleet-server-es=http://elasticsearch:9200 \\\\
           --fleet-server-service-token=service-token-1 \\\\
-          --fleet-server-port=8220 \\\\
-          --install-servers"
+          --fleet-server-port=8220"
       `);
 
       expect(
@@ -199,14 +196,13 @@ describe('getInstallCommandForPlatform', () => {
         })
       ).toMatchInlineSnapshot(`
         "curl -L -O https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent-9.0.0-amd64.deb
-        sudo dpkg -i elastic-agent-9.0.0-amd64.deb
+        sudo ELASTIC_AGENT_FLAVOR=servers dpkg -i elastic-agent-9.0.0-amd64.deb
         sudo systemctl enable elastic-agent
         sudo systemctl start elastic-agent
         sudo elastic-agent enroll \\\\
           --fleet-server-es=http://elasticsearch:9200 \\\\
           --fleet-server-service-token=service-token-1 \\\\
-          --fleet-server-port=8220 \\\\
-          --install-servers"
+          --fleet-server-port=8220"
       `);
     });
 

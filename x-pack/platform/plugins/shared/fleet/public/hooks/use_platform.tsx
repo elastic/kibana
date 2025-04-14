@@ -27,6 +27,15 @@ interface PLATFORM_OPTION {
   'data-test-subj'?: string;
 }
 
+export const PLATFORM_WITH_INSTALL_SERVERS = [
+  'linux_aarch64',
+  'linux_x86_64',
+  'mac_aarch64',
+  'mac_x86_64',
+  'windows',
+  'windows_msi',
+];
+
 export const VISIBLE_PLATFORM_OPTIONS: PLATFORM_OPTION[] = [
   {
     id: 'linux_aarch64',
