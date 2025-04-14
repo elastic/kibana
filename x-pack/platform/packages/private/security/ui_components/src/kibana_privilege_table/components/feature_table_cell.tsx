@@ -14,10 +14,11 @@ import type { SecuredFeature } from '@kbn/security-role-management-model';
 
 interface Props {
   feature: SecuredFeature;
+  hideDescription?: boolean;
   className?: string;
 }
 
-export const FeatureTableCell = ({ feature, className }: Props) => {
+export const FeatureTableCell = ({ feature, hideDescription = false, className }: Props) => {
   let tooltipElement = null;
   if (feature.getPrivilegesTooltip()) {
     const tooltipContent = (
@@ -37,6 +38,16 @@ export const FeatureTableCell = ({ feature, className }: Props) => {
     );
   }
 
+  const showFeatureDescription = React.useMemo(() => {
+    if (hideDescription) {
+      return false;
+    }
+    if (feature.description) {
+      return true;
+    }
+    return false;
+  }, [feature, hideDescription]);
+
   return (
     <EuiFlexGroup className={className} direction="column" gutterSize="none" component="span">
       <EuiFlexItem data-test-subj={`featureTableCell`} component="span">
@@ -47,7 +58,7 @@ export const FeatureTableCell = ({ feature, className }: Props) => {
           <EuiFlexItem grow={false}>{tooltipElement}</EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
-      {feature.description && (
+      {showFeatureDescription && (
         <EuiFlexItem>
           <EuiText
             color="subdued"
