@@ -22,7 +22,6 @@ import { RoutingDefinition, isDescendantOf, isNeverCondition } from '@kbn/stream
 import React from 'react';
 import { css } from '@emotion/css';
 import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
-import { alwaysToEmptyEquals } from '../../../util/condition';
 import { RoutingConditionEditor } from '../condition_editor';
 import { ConditionMessage } from '../condition_message';
 import { ControlBar } from './control_bar';
