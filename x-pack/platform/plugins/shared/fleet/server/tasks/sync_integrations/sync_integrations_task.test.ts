@@ -472,6 +472,16 @@ describe('SyncIntegrationsTask', () => {
                 template: {},
                 type: 'component_template',
               },
+              'ingest_pipeline:filestream-pipeline1': {
+                is_deleted: false,
+                name: 'filestream-pipeline1',
+                package_name: 'filestream',
+                package_version: '1.1.0',
+                pipeline: {
+                  processors: [],
+                },
+                type: 'ingest_pipeline',
+             },
               'ingest_pipeline:logs-system.auth@custom': {
                 is_deleted: false,
                 name: 'logs-system.auth@custom',
