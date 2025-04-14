@@ -106,7 +106,9 @@ export const internalStateSlice = createSlice({
         recentlyClosedTabs: RecentlyClosedTabState[];
       }>
     ) => {
-      state.tabs.byId = action.payload.allTabs.reduce<Record<string, TabState>>(
+      state.tabs.byId = [...action.payload.recentlyClosedTabs, ...action.payload.allTabs].reduce<
+        Record<string, TabState>
+      >(
         (acc, tab) => ({
           ...acc,
           [tab.id]: tab,
