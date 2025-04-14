@@ -8,6 +8,7 @@
 import { Logger } from '@kbn/logging';
 import { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server/plugin';
 import { SavedObjectsServiceStart } from '@kbn/core/server';
+import pRetry from 'p-retry';
 import { getPrivateLocations } from './get_private_locations';
 import { SyntheticsMonitorClient } from './synthetics_monitor/synthetics_monitor_client';
 
@@ -25,14 +26,17 @@ export const syncSpaceGlobalParams = async ({
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
 }) => {
   try {
-    logger.debug(`Synching global parameters of space with id ${spaceId}`);
-    const savedObjectsClient = savedObjects.createInternalRepository();
-    const allPrivateLocations = await getPrivateLocations(savedObjectsClient);
-    await syntheticsMonitorClient.syncGlobalParams({
-      spaceId,
-      allPrivateLocations,
-      soClient: savedObjectsClient,
-      encryptedSavedObjects,
+    await pRetry(async () => {
+      logger.debug(`Synching global parameters of space with id ${spaceId}`);
+      const savedObjectsClient = savedObjects.createInternalRepository();
+      const allPrivateLocations = await getPrivateLocations(savedObjectsClient);
+      await syntheticsMonitorClient.syncGlobalParams({
+        spaceId,
+        allPrivateLocations,
+        soClient: savedObjectsClient,
+        encryptedSavedObjects,
+      });
+      logger.debug(`Synch of global parameters for space with id ${spaceId} succeeded`);
     });
   } catch (error) {
     logger.error(`Sync of global parameters for space with id ${spaceId} failed: ${error.message}`);

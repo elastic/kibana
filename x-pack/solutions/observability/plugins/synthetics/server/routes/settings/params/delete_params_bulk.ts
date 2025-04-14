@@ -6,7 +6,6 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import pRetry from 'p-retry';
 import { syncSpaceGlobalParams } from '../../../synthetics_service/sync_global_params';
 import { SyntheticsRestApiRouteFactory } from '../../types';
 import { syntheticsParamType } from '../../../../common/types/saved_objects';
@@ -37,16 +36,13 @@ export const deleteSyntheticsParamsBulkRoute: SyntheticsRestApiRouteFactory<
       { force: true }
     );
 
-    void pRetry(
-      async () =>
-        await syncSpaceGlobalParams({
-          spaceId,
-          logger: server.logger,
-          encryptedSavedObjects: server.encryptedSavedObjects,
-          savedObjects: server.coreStart.savedObjects,
-          syntheticsMonitorClient,
-        })
-    );
+    void syncSpaceGlobalParams({
+      spaceId,
+      logger: server.logger,
+      encryptedSavedObjects: server.encryptedSavedObjects,
+      savedObjects: server.coreStart.savedObjects,
+      syntheticsMonitorClient,
+    });
 
     return result.statuses.map(({ id, success }) => ({ id, deleted: success }));
   },
