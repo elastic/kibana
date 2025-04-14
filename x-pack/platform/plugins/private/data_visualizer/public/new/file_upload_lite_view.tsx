@@ -67,13 +67,13 @@ export const FileUploadLiteView: FC<Props> = ({ props, onClose }) => {
               flyoutContent.title
             ) : existingIndexName ? (
               <FormattedMessage
-                id="xpack.dataVisualizer.file.uploadView.uploadFileTitle"
+                id="xpack.dataVisualizer.file.uploadView.uploadFileWithIndexNameTitle"
                 defaultMessage="Upload files to {indexName}"
                 values={{ indexName: existingIndexName }}
               />
             ) : (
               <FormattedMessage
-                id="xpack.dataVisualizer.file.uploadView.uploadFileTitle"
+                id="xpack.dataVisualizer.file.uploadView.uploadFilesTitle"
                 defaultMessage="Upload files"
               />
             )}
