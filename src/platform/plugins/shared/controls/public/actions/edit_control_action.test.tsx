@@ -15,10 +15,12 @@ import type { ViewMode } from '@kbn/presentation-publishing';
 
 import { getOptionsListControlFactory } from '../controls/data_controls/options_list_control/get_options_list_control_factory';
 import type { OptionsListControlApi } from '../controls/data_controls/options_list_control/types';
-import { getMockedBuildApi, getMockedControlGroupApi } from '../controls/mocks/control_mocks';
+import { getMockedControlGroupApi } from '../controls/mocks/control_mocks';
 import { getTimesliderControlFactory } from '../controls/timeslider_control/get_timeslider_control_factory';
 import { dataService } from '../services/kibana_services';
 import { EditControlAction } from './edit_control_action';
+import { ControlApiRegistration } from '../controls/types';
+import { TimesliderControlApi } from '../controls/timeslider_control/types';
 
 dataService.query.timefilter.timefilter.calculateBounds = (timeRange: TimeRange) => {
   const now = new Date();
@@ -43,18 +45,26 @@ beforeAll(async () => {
   const controlFactory = getOptionsListControlFactory();
 
   const optionsListUuid = 'optionsListControl';
-  const optionsListControl = await controlFactory.buildControl(
-    {
+
+  const optionsListControl = await controlFactory.buildControl({
+    initialState: {
       dataViewId: 'test-data-view',
       title: 'test',
       fieldName: 'test-field',
       width: 'medium',
       grow: false,
     },
-    getMockedBuildApi(optionsListUuid, controlFactory, controlGroupApi),
-    optionsListUuid,
-    controlGroupApi
-  );
+    finalizeApi: (api: ControlApiRegistration<OptionsListControlApi>) => {
+      return {
+        ...api,
+        uuid: optionsListUuid,
+        parentApi: controlGroupApi,
+        type: controlFactory.type,
+      };
+    },
+    uuid: optionsListUuid,
+    controlGroupApi,
+  });
 
   optionsListApi = optionsListControl.api;
 });
@@ -63,12 +73,19 @@ describe('Incompatible embeddables', () => {
   test('Action is incompatible with embeddables that are not editable', async () => {
     const timeSliderFactory = getTimesliderControlFactory();
     const timeSliderUuid = 'timeSliderControl';
-    const timeSliderControl = await timeSliderFactory.buildControl(
-      {},
-      getMockedBuildApi(timeSliderUuid, timeSliderFactory, controlGroupApi),
-      timeSliderUuid,
-      controlGroupApi
-    );
+    const timeSliderControl = await timeSliderFactory.buildControl({
+      initialState: {},
+      finalizeApi: (api: ControlApiRegistration<TimesliderControlApi>) => {
+        return {
+          ...api,
+          uuid: timeSliderUuid,
+          parentApi: controlGroupApi,
+          type: timeSliderFactory.type,
+        };
+      },
+      uuid: timeSliderUuid,
+      controlGroupApi,
+    });
     const editControlAction = new EditControlAction();
     expect(
       await editControlAction.isCompatible({
