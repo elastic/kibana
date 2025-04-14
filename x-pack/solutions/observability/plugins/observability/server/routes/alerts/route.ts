@@ -32,8 +32,8 @@ const alertsDynamicDashboardSuggestions = createObservabilityServerRoute({
     const { dependencies, params, request, response, context, logger } = services;
     const { alertId } = params.query;
     const { ruleRegistry, dashboard } = dependencies;
-    const { contentClient } = dashboard;
-    const dashboardClient = contentClient!.getForRequest<
+    const { getContentClient } = dashboard;
+    const dashboardClient = getContentClient()!.getForRequest<
       SavedObjectsFindResult<DashboardAttributes>
     >({
       requestHandlerContext: context,
