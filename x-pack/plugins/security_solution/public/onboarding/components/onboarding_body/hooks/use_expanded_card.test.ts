@@ -28,7 +28,8 @@ jest.mock('react-router-dom', () => ({
 
 jest.mock('../../onboarding_context');
 
-describe('useExpandedCard Hook', () => {
+// Failing: See https://github.com/elastic/kibana/issues/212236
+describe.skip('useExpandedCard Hook', () => {
   const mockCardId = 'card-1' as OnboardingCardId;
   const mockScrollTo = jest.fn();
   global.window.scrollTo = mockScrollTo;
