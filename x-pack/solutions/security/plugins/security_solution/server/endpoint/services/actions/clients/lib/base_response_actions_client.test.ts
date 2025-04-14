@@ -46,6 +46,7 @@ import {
   ENDPOINT_RESPONSE_ACTION_SENT_ERROR_EVENT,
   ENDPOINT_RESPONSE_ACTION_SENT_EVENT,
 } from '../../../../../lib/telemetry/event_based/events';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 
 jest.mock('../../action_details_by_id', () => {
   const original = jest.requireActual('../../action_details_by_id');
@@ -195,6 +196,7 @@ describe('ResponseActionsClientImpl base class', () => {
         esClient,
         endpointService: endpointAppContextService,
         username: 'foo',
+        spaceId: DEFAULT_SPACE_ID,
       });
       await mockInstance.updateCases(updateCasesOptions);
 
@@ -343,6 +345,7 @@ describe('ResponseActionsClientImpl base class', () => {
         },
         agent: {
           id: ['one'],
+          policy: [],
         },
         user: {
           id: 'foo',
@@ -791,6 +794,12 @@ describe('ResponseActionsClientImpl base class', () => {
 
 class MockClassWithExposedProtectedMembers extends ResponseActionsClientImpl {
   protected readonly agentType: ResponseActionAgentType = 'endpoint';
+
+  protected async fetchAgentPolicyInfo(
+    agentIds: string[]
+  ): Promise<LogsEndpointAction['agent']['policy']> {
+    return [];
+  }
 
   public async updateCases(options: ResponseActionsClientUpdateCasesOptions): Promise<void> {
     return super.updateCases(options);
