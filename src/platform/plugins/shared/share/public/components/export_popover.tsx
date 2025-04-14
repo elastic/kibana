@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { type FC, useState, Fragment, useMemo, useCallback } from 'react';
+import React, { type FC, useState, Fragment, useMemo, useCallback, useEffect } from 'react';
 import {
   EuiWrappingPopover,
   EuiListGroup,
@@ -103,6 +103,19 @@ function ExportMenuPopover({ intl }: ExportMenuProps) {
     }
   }, [intl, onClose, selectedMenuItem?.config, usePrintLayout]);
 
+  useEffect(() => {
+    // when there is only one share menu item,
+    // we want to open the flyout and not the popover
+    if (shareMenuItems.length === 1) {
+      setSelectedMenuItemId(shareMenuItems[0].id);
+      setIsFlyoutVisible(true);
+    }
+  }, [shareMenuItems]);
+
+  const flyoutOnCloseHandler = useCallback(() => {
+    return shareMenuItems.length === 1 ? onClose() : setIsFlyoutVisible(false);
+  }, [onClose, shareMenuItems.length]);
+
   return (
     <Fragment>
       <EuiWrappingPopover
@@ -133,7 +146,12 @@ function ExportMenuPopover({ intl }: ExportMenuProps) {
         </EuiListGroup>
       </EuiWrappingPopover>
       {isFlyoutVisible && (
-        <EuiFlyout size="s" onClose={() => setIsFlyoutVisible(false)} ownFocus>
+        <EuiFlyout
+          data-test-subj="exportShareFlyout"
+          size="s"
+          onClose={flyoutOnCloseHandler}
+          ownFocus
+        >
           <EuiFlyoutHeader hasBorder>
             <EuiTitle>
               <h2>
