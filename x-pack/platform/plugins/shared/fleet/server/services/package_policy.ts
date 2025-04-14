@@ -1878,55 +1878,65 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
             for (const callback of externalCallbacks) {
               let thisCallbackResponse;
 
-              if (externalCallbackType === 'packagePolicyPostCreate') {
-                thisCallbackResponse = await (callback as PostPackagePolicyPostCreateCallback)(
-                  updatedNewData as PackagePolicy,
-                  soClient,
-                  esClient,
-                  context,
-                  request
-                );
-                updatedNewData = PackagePolicySchema.validate(thisCallbackResponse);
-              } else if (externalCallbackType === 'packagePolicyPostUpdate') {
-                thisCallbackResponse = await (callback as PutPackagePolicyPostUpdateCallback)(
-                  updatedNewData as PackagePolicy,
-                  soClient,
-                  esClient,
-                  context,
-                  request
-                );
-                updatedNewData = PackagePolicySchema.validate(thisCallbackResponse);
-              } else {
-                thisCallbackResponse = await (callback as PostPackagePolicyCreateCallback)(
-                  updatedNewData as NewPackagePolicy,
-                  soClient,
-                  esClient,
-                  context,
-                  request
-                );
-              }
+              try {
+                if (externalCallbackType === 'packagePolicyPostCreate') {
+                  thisCallbackResponse = await (callback as PostPackagePolicyPostCreateCallback)(
+                    updatedNewData as PackagePolicy,
+                    soClient,
+                    esClient,
+                    context,
+                    request
+                  );
+                  updatedNewData = PackagePolicySchema.validate(thisCallbackResponse);
+                } else if (externalCallbackType === 'packagePolicyPostUpdate') {
+                  thisCallbackResponse = await (callback as PutPackagePolicyPostUpdateCallback)(
+                    updatedNewData as PackagePolicy,
+                    soClient,
+                    esClient,
+                    context,
+                    request
+                  );
+                  updatedNewData = PackagePolicySchema.validate(thisCallbackResponse);
+                } else {
+                  thisCallbackResponse = await (callback as PostPackagePolicyCreateCallback)(
+                    updatedNewData as NewPackagePolicy,
+                    soClient,
+                    esClient,
+                    context,
+                    request
+                  );
+                }
 
-              if (externalCallbackType === 'packagePolicyCreate') {
-                updatedNewData = NewPackagePolicySchema.validate(thisCallbackResponse);
-              } else if (externalCallbackType === 'packagePolicyUpdate') {
-                const omitted = {
-                  ...omit(thisCallbackResponse, [
-                    'id',
-                    'spaceIds',
-                    'version',
-                    'revision',
-                    'updated_at',
-                    'updated_by',
-                    'created_at',
-                    'created_by',
-                    'elasticsearch',
-                  ]),
-                  inputs: thisCallbackResponse.inputs.map((input) =>
-                    omit(input, ['compiled_input'])
-                  ),
-                };
+                if (externalCallbackType === 'packagePolicyCreate') {
+                  updatedNewData = NewPackagePolicySchema.validate(thisCallbackResponse);
+                } else if (externalCallbackType === 'packagePolicyUpdate') {
+                  const omitted = {
+                    ...omit(thisCallbackResponse, [
+                      'id',
+                      'spaceIds',
+                      'version',
+                      'revision',
+                      'updated_at',
+                      'updated_by',
+                      'created_at',
+                      'created_by',
+                      'elasticsearch',
+                    ]),
+                    inputs: thisCallbackResponse.inputs.map((input) =>
+                      omit(input, ['compiled_input'])
+                    ),
+                  };
 
-                updatedNewData = UpdatePackagePolicySchema.validate(omitted);
+                  updatedNewData = UpdatePackagePolicySchema.validate(omitted);
+                }
+              } catch (callbackError) {
+                logger.debug(
+                  () =>
+                    `The following [${externalCallbackType}] external callback threw an error (first 1k characters of callback):\n${callback
+                      .toString()
+                      .substring(0, 1000)}`
+                );
+                throw callbackError;
               }
             }
 
