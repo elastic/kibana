@@ -67,14 +67,12 @@ import { continueConversation } from './operators/continue_conversation';
 import { convertInferenceEventsToStreamingEvents } from './operators/convert_inference_events_to_streaming_events';
 import { extractMessages } from './operators/extract_messages';
 import { getGeneratedTitle } from './operators/get_generated_title';
-import {
-  reIndexKnowledgeBaseAndPopulateSemanticTextField,
-  scheduleKbSemanticTextMigrationTask,
-} from '../task_manager_definitions/register_kb_semantic_text_migration_task';
+import { populateMissingSemanticTextFieldMigration } from '../startup_migrations/populate_missing_semantic_text_field_migration';
 import { ObservabilityAIAssistantPluginStartDependencies } from '../../types';
 import { ObservabilityAIAssistantConfig } from '../../config';
 import { getElserModelId } from '../knowledge_base_service/get_elser_model_id';
 import { apmInstrumentation } from './operators/apm_instrumentation';
+import { reIndexKnowledgeBaseWithLock } from '../knowledge_base_service/reindex_knowledge_base';
 
 const MAX_FUNCTION_CALLS = 8;
 
@@ -390,6 +388,7 @@ export class ObservabilityAIAssistantClient {
                       numeric_labels: {},
                       systemMessage,
                       messages: initialMessagesWithAddedMessages,
+                      archived: false,
                     })
                   ).pipe(
                     map((conversationCreated): ConversationCreateEvent => {
@@ -412,26 +411,24 @@ export class ObservabilityAIAssistantClient {
             return throwError(() => error);
           }),
           tap((event) => {
-            if (this.dependencies.logger.isLevelEnabled('debug')) {
-              switch (event.type) {
-                case StreamingChatResponseEventType.MessageAdd:
-                  this.dependencies.logger.debug(
-                    () => `Added message: ${JSON.stringify(event.message)}`
-                  );
-                  break;
+            switch (event.type) {
+              case StreamingChatResponseEventType.MessageAdd:
+                this.dependencies.logger.debug(
+                  () => `Added message: ${JSON.stringify(event.message)}`
+                );
+                break;
 
-                case StreamingChatResponseEventType.ConversationCreate:
-                  this.dependencies.logger.debug(
-                    () => `Created conversation: ${JSON.stringify(event.conversation)}`
-                  );
-                  break;
+              case StreamingChatResponseEventType.ConversationCreate:
+                this.dependencies.logger.debug(
+                  () => `Created conversation: ${JSON.stringify(event.conversation)}`
+                );
+                break;
 
-                case StreamingChatResponseEventType.ConversationUpdate:
-                  this.dependencies.logger.debug(
-                    () => `Updated conversation: ${JSON.stringify(event.conversation)}`
-                  );
-                  break;
-              }
+              case StreamingChatResponseEventType.ConversationUpdate:
+                this.dependencies.logger.debug(
+                  () => `Updated conversation: ${JSON.stringify(event.conversation)}`
+                );
+                break;
             }
           }),
           shareReplay()
@@ -514,10 +511,7 @@ export class ObservabilityAIAssistantClient {
         apmInstrumentation(name),
         failOnNonExistingFunctionCall({ functions }),
         tap((event) => {
-          if (
-            event.type === StreamingChatResponseEventType.ChatCompletionChunk &&
-            this.dependencies.logger.isLevelEnabled('trace')
-          ) {
+          if (event.type === StreamingChatResponseEventType.ChatCompletionChunk) {
             this.dependencies.logger.trace(`Received chunk: ${JSON.stringify(event.message)}`);
           }
         }),
@@ -613,7 +607,7 @@ export class ObservabilityAIAssistantClient {
     updates,
   }: {
     conversationId: string;
-    updates: Partial<{ public: boolean }>;
+    updates: Partial<{ public: boolean; archived: boolean }>;
   }): Promise<Conversation> => {
     const conversation = await this.get(conversationId);
     if (!conversation) {
@@ -622,6 +616,7 @@ export class ObservabilityAIAssistantClient {
 
     const updatedConversation: Conversation = merge({}, conversation, {
       ...(updates.public !== undefined && { public: updates.public }),
+      ...(updates.archived !== undefined && { archived: updates.archived }),
     });
 
     return this.update(conversationId, updatedConversation);
@@ -641,6 +636,7 @@ export class ObservabilityAIAssistantClient {
         id: v4(),
       },
       public: false,
+      archived: false,
     });
   };
 
@@ -680,14 +676,15 @@ export class ObservabilityAIAssistantClient {
     // setup the knowledge base
     const res = await knowledgeBaseService.setup(esClient, modelId);
 
-    core
-      .getStartServices()
-      .then(([_, pluginsStart]) =>
-        scheduleKbSemanticTextMigrationTask({ taskManager: pluginsStart.taskManager, logger })
-      )
-      .catch((error) => {
-        logger.error(`Failed to schedule semantic text migration task: ${error}`);
-      });
+    populateMissingSemanticTextFieldMigration({
+      core,
+      logger,
+      config: this.dependencies.config,
+    }).catch((e) => {
+      this.dependencies.logger.error(
+        `Failed to populate missing semantic text fields: ${e.message}`
+      );
+    });
 
     return res;
   };
@@ -697,14 +694,21 @@ export class ObservabilityAIAssistantClient {
     return this.dependencies.knowledgeBaseService.reset(esClient);
   };
 
-  reIndexKnowledgeBaseAndPopulateSemanticTextField = () => {
-    return reIndexKnowledgeBaseAndPopulateSemanticTextField({
+  reIndexKnowledgeBaseWithLock = () => {
+    return reIndexKnowledgeBaseWithLock({
+      core: this.dependencies.core,
       esClient: this.dependencies.esClient,
+      logger: this.dependencies.logger,
+    });
+  };
+
+  reIndexKnowledgeBaseAndPopulateSemanticTextField = () => {
+    return populateMissingSemanticTextFieldMigration({
+      core: this.dependencies.core,
       logger: this.dependencies.logger,
       config: this.dependencies.config,
     });
   };
-
   addUserInstruction = async ({
     entry,
   }: {

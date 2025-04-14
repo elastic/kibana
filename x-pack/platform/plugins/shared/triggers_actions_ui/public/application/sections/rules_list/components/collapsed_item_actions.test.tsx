@@ -147,7 +147,7 @@ describe('CollapsedItemActions', () => {
       jest.useRealTimers();
     });
 
-    test('renders panel items as disabled', async () => {
+    test('does not render panel items when rule is not editable', async () => {
       const wrapper = mountWithIntl(
         <CollapsedItemActions {...getPropsWithRule({ isEditable: false })} />
       );
@@ -155,9 +155,8 @@ describe('CollapsedItemActions', () => {
         await nextTick();
         wrapper.update();
       });
-      expect(
-        wrapper.find('[data-test-subj="selectActionButton"]').first().props().disabled
-      ).toBeTruthy();
+
+      expect(wrapper.find('[data-test-subj="selectActionButton"]').exists()).toBeFalsy();
     });
 
     test('renders closed popover initially and opens on click with all actions enabled', async () => {
@@ -309,21 +308,6 @@ describe('CollapsedItemActions', () => {
       expect(wrapper.find(`[data-test-subj="editRule"] button`).text()).toEqual('Edit rule');
       expect(wrapper.find(`[data-test-subj="deleteRule"] button`).prop('disabled')).toBeFalsy();
       expect(wrapper.find(`[data-test-subj="deleteRule"] button`).text()).toEqual('Delete rule');
-    });
-
-    test('renders actions correctly when rule is not editable', async () => {
-      const wrapper = mountWithIntl(
-        <CollapsedItemActions {...getPropsWithRule({ isEditable: false })} />
-      );
-      wrapper.find('[data-test-subj="selectActionButton"]').first().simulate('click');
-      await act(async () => {
-        await nextTick();
-        wrapper.update();
-      });
-
-      expect(
-        wrapper.find(`[data-test-subj="selectActionButton"] button`).prop('disabled')
-      ).toBeTruthy();
     });
 
     test('renders actions correctly when rule is not enabled due to license', async () => {
