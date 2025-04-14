@@ -8,7 +8,7 @@ paths:
     get:
       x-labels: [ess, serverless]
       x-codegen-enabled: true
-      operationId: GetUser
+      operationId: GetPrivMonUser
       summary: Retrieve a monitored user by ID
       parameters:
         - name: id

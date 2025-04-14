@@ -16,14 +16,14 @@
 
 import { z } from '@kbn/zod';
 
-export type DeleteUserRequestParams = z.infer<typeof DeleteUserRequestParams>;
-export const DeleteUserRequestParams = z.object({
+export type DeletePrivMonUserRequestParams = z.infer<typeof DeletePrivMonUserRequestParams>;
+export const DeletePrivMonUserRequestParams = z.object({
   id: z.string(),
 });
-export type DeleteUserRequestParamsInput = z.input<typeof DeleteUserRequestParams>;
+export type DeletePrivMonUserRequestParamsInput = z.input<typeof DeletePrivMonUserRequestParams>;
 
-export type DeleteUserResponse = z.infer<typeof DeleteUserResponse>;
-export const DeleteUserResponse = z.object({
+export type DeletePrivMonUserResponse = z.infer<typeof DeletePrivMonUserResponse>;
+export const DeletePrivMonUserResponse = z.object({
   /**
    * Indicates if the deletion was successful
    */

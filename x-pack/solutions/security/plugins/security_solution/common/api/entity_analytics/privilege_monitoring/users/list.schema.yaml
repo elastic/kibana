@@ -8,7 +8,7 @@ paths:
     get:
       x-labels: [ess, serverless]
       x-codegen-enabled: true
-      operationId: ListUsers
+      operationId: ListPrivMonUsers
       summary: List all monitored users
       parameters:
         - name: kql

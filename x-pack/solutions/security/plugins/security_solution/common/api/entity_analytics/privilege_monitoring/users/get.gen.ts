@@ -18,11 +18,11 @@ import { z } from '@kbn/zod';
 
 import { MonitoredUserDoc } from '../common.gen';
 
-export type GetUserRequestParams = z.infer<typeof GetUserRequestParams>;
-export const GetUserRequestParams = z.object({
+export type GetPrivMonUserRequestParams = z.infer<typeof GetPrivMonUserRequestParams>;
+export const GetPrivMonUserRequestParams = z.object({
   id: z.string(),
 });
-export type GetUserRequestParamsInput = z.input<typeof GetUserRequestParams>;
+export type GetPrivMonUserRequestParamsInput = z.input<typeof GetPrivMonUserRequestParams>;
 
-export type GetUserResponse = z.infer<typeof GetUserResponse>;
-export const GetUserResponse = MonitoredUserDoc;
+export type GetPrivMonUserResponse = z.infer<typeof GetPrivMonUserResponse>;
+export const GetPrivMonUserResponse = MonitoredUserDoc;

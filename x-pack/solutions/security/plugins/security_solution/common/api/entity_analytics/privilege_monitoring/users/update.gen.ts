@@ -18,18 +18,18 @@ import { z } from '@kbn/zod';
 
 import { MonitoredUserDoc } from '../common.gen';
 
-export type UpdateUserRequestParams = z.infer<typeof UpdateUserRequestParams>;
-export const UpdateUserRequestParams = z.object({
+export type UpdatePrivMonUserRequestParams = z.infer<typeof UpdatePrivMonUserRequestParams>;
+export const UpdatePrivMonUserRequestParams = z.object({
   id: z.string(),
 });
-export type UpdateUserRequestParamsInput = z.input<typeof UpdateUserRequestParams>;
+export type UpdatePrivMonUserRequestParamsInput = z.input<typeof UpdatePrivMonUserRequestParams>;
 
-export type UpdateUserRequestBody = z.infer<typeof UpdateUserRequestBody>;
-export const UpdateUserRequestBody = z.object({
+export type UpdatePrivMonUserRequestBody = z.infer<typeof UpdatePrivMonUserRequestBody>;
+export const UpdatePrivMonUserRequestBody = z.object({
   user_name: z.string().optional(),
   is_monitored: z.boolean().optional(),
 });
-export type UpdateUserRequestBodyInput = z.input<typeof UpdateUserRequestBody>;
+export type UpdatePrivMonUserRequestBodyInput = z.input<typeof UpdatePrivMonUserRequestBody>;
 
-export type UpdateUserResponse = z.infer<typeof UpdateUserResponse>;
-export const UpdateUserResponse = MonitoredUserDoc;
+export type UpdatePrivMonUserResponse = z.infer<typeof UpdatePrivMonUserResponse>;
+export const UpdatePrivMonUserResponse = MonitoredUserDoc;

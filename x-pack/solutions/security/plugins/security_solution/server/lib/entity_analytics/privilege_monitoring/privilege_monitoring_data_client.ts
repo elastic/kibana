@@ -187,9 +187,8 @@ export class PrivilegeMonitoringDataClient {
       index: this.getIndex(),
       id,
     });
-
     return response.found
-      ? ({ ...response.fields, id: response._id } as MonitoredUserDoc)
+      ? ({ ...response._source, id: response._id } as MonitoredUserDoc)
       : undefined;
   }
 
@@ -220,7 +219,7 @@ export class PrivilegeMonitoringDataClient {
     });
     return response.hits.hits.map((hit) => ({
       id: hit._id,
-      ...hit.fields,
+      ...(hit._source as {}),
     })) as MonitoredUserDoc[];
   }
 

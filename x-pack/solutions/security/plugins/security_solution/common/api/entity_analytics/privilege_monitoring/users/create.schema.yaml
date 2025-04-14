@@ -8,7 +8,7 @@ paths:
     post:
       x-labels: [ess, serverless]
       x-codegen-enabled: true
-      operationId: CreateUser
+      operationId: CreatePrivMonUser
       summary: Create a new monitored user
       requestBody:
         required: true

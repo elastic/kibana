@@ -18,14 +18,14 @@ import { z } from '@kbn/zod';
 
 import { MonitoredUserDoc } from '../common.gen';
 
-export type ListUsersRequestQuery = z.infer<typeof ListUsersRequestQuery>;
-export const ListUsersRequestQuery = z.object({
+export type ListPrivMonUsersRequestQuery = z.infer<typeof ListPrivMonUsersRequestQuery>;
+export const ListPrivMonUsersRequestQuery = z.object({
   /**
    * KQL query to filter the list of monitored users
    */
   kql: z.string().optional(),
 });
-export type ListUsersRequestQueryInput = z.input<typeof ListUsersRequestQuery>;
+export type ListPrivMonUsersRequestQueryInput = z.input<typeof ListPrivMonUsersRequestQuery>;
 
-export type ListUsersResponse = z.infer<typeof ListUsersResponse>;
-export const ListUsersResponse = z.array(MonitoredUserDoc);
+export type ListPrivMonUsersResponse = z.infer<typeof ListPrivMonUsersResponse>;
+export const ListPrivMonUsersResponse = z.array(MonitoredUserDoc);

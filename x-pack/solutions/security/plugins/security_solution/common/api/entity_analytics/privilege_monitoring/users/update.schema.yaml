@@ -8,7 +8,7 @@ paths:
     put:
       x-labels: [ess, serverless]
       x-codegen-enabled: true
-      operationId: UpdateUser
+      operationId: UpdatePrivMonUser
       summary: Update a monitored user
       parameters:
         - name: id
