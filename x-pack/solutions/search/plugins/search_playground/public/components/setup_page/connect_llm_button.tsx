@@ -36,6 +36,8 @@ export const ConnectLLMButton: React.FC = () => {
   };
 
   useEffect(() => {
+    console.log('Conenctors: ++', connectors?.[0]);
+
     if (connectors?.length) {
       if (showCallout) {
         usageTracker?.load(AnalyticsEvents.genAiConnectorAdded);
@@ -59,12 +61,14 @@ export const ConnectLLMButton: React.FC = () => {
               {connectors.some((connector) => connector.type === LLMs.inference) ? (
                 <FormattedMessage
                   id="xpack.searchPlayground.setupPage.elasticManagedLlmConnectedButtonLabel"
-                  defaultMessage="Elastic Managed LLM connected"
+                  defaultMessage="{connectorName} connected"
+                  values={{ connectorName: connectors[0]?.name || 'Elastic Managed LLM' }}
                 />
               ) : (
                 <FormattedMessage
                   id="xpack.searchPlayground.setupPage.llmConnectedButtonLabel"
-                  defaultMessage="LLM connected"
+                  defaultMessage="{connectorName} connected"
+                  values={{ connectorName: connectors[0]?.name || 'LLM' }}
                 />
               )}
             </EuiText>

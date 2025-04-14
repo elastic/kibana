@@ -33,7 +33,7 @@ const mockConnectors = {
 
 const mockEisConnectors = {
   id: 'connectorId4',
-  name: 'EIS Connector',
+  name: 'Elastic Managed LLM',
   type: LLMs.inference,
 };
 
@@ -87,14 +87,19 @@ describe('ConnectLLMButton', () => {
 
   it('show success text when connector exists', async () => {
     (useLoadConnectors as jest.Mock).mockReturnValue({
-      data: [{}],
+      data: [
+        {
+          name: 'conn-1',
+          type: LLMs.openai,
+        },
+      ],
       isLoading: false,
       isSuccess: true,
     });
     const { queryByTestId, getByText } = render(<ConnectLLMButton />);
 
     expect(queryByTestId('successConnectLLMText')).toBeInTheDocument();
-    expect(getByText('LLM connected')).toBeInTheDocument();
+    expect(getByText('conn-1 connected')).toBeInTheDocument();
   });
 
   it('show success text when EIS connector exists', async () => {
