@@ -38,8 +38,22 @@ const normalizeToast = (toastOrTitle: ToastInput): ToastInputFields => {
   return omitBy(toastOrTitle, isUndefined);
 };
 
-const ERROR_TOAST_LABELS = {
-  errorType: 'ToastError',
+const getToastTitleOrText = (toastOrTitle: ToastInput): string => {
+  if (typeof toastOrTitle === 'string') {
+    return toastOrTitle;
+  } else if (typeof toastOrTitle.title === 'string') {
+    return toastOrTitle.title;
+  } else if (typeof toastOrTitle.text === 'string') {
+    return toastOrTitle.text;
+  }
+
+  return 'No title or text is provided.';
+};
+
+const getApmLabels = (errorType: 'ToastError' | 'ToastDanger') => {
+  return {
+    errorType,
+  };
 };
 
 interface StartDeps {
@@ -163,6 +177,10 @@ export class ToastsApi implements IToasts {
    * @returns a {@link Toast}
    */
   public addDanger(toastOrTitle: ToastInput, options?: ToastOptions) {
+    const toastTitle = getToastTitleOrText(toastOrTitle);
+    apm.captureError(toastTitle, {
+      labels: getApmLabels('ToastDanger'),
+    });
     return this.add({
       color: 'danger',
       iconType: 'error',
@@ -181,7 +199,7 @@ export class ToastsApi implements IToasts {
    */
   public addError(error: Error, options: ErrorToastOptions) {
     apm.captureError(error, {
-      labels: ERROR_TOAST_LABELS,
+      labels: getApmLabels('ToastError'),
     });
     const message = options.toastMessage || error.message;
     return this.add({
