@@ -54,8 +54,6 @@ export const performEsqlRequest = async ({
   };
   requestQueryParams?: {
     drop_null_columns?: boolean;
-    wait_for_completion_timeout?: string;
-    keep_alive?: string;
   };
   shouldStopExecution: () => boolean;
   loggedRequests?: RulePreviewLoggedRequest[];

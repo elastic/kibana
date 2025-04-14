@@ -50,12 +50,14 @@ export const esqlExecutor = async ({
   state,
   licensing,
   scheduleNotificationResponseActionsService,
+  ruleExecutionTimeout,
 }: {
   sharedParams: SecuritySharedParams<EsqlRuleParams>;
   services: SecurityRuleServices;
   state: Record<string, unknown>;
   licensing: LicensingPluginSetup;
   scheduleNotificationResponseActionsService: ScheduleNotificationResponseActionsService;
+  ruleExecutionTimeout?: string;
 }) => {
   const {
     completeRule,
@@ -97,6 +99,7 @@ export const esqlExecutor = async ({
           primaryTimestamp,
           secondaryTimestamp,
           exceptionFilter,
+          ruleExecutionTimeout,
         });
         const esqlQueryString = { drop_null_columns: true };
 

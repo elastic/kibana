@@ -298,6 +298,7 @@ export const previewRulesRoute = (
                   return { dateStart: date, dateEnd: date };
                 },
                 isServerless,
+                ruleExecutionTimeout: `${PREVIEW_TIMEOUT_SECONDS}s`,
               })) as { state: TState; loggedRequests: RulePreviewLoggedRequest[] });
 
               const errors = loggedStatusChanges
