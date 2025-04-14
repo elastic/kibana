@@ -18,6 +18,7 @@ enabled:
   - x-pack/test_serverless/functional/test_suites/observability/config.feature_flags.ts
   - x-pack/test_serverless/functional/test_suites/observability/config.saved_objects_management.ts
   - x-pack/test_serverless/functional/test_suites/observability/config.context_awareness.ts
+  - x-pack/test_serverless/functional/test_suites/observability/common_configs/config.config_compat_mode.ts
   - x-pack/test_serverless/functional/test_suites/observability/common_configs/config.group1.ts
   - x-pack/test_serverless/functional/test_suites/observability/common_configs/config.group2.ts
   - x-pack/test_serverless/functional/test_suites/observability/common_configs/config.group3.ts

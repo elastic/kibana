@@ -14,15 +14,12 @@ import {
   Chart,
   ScaleType,
   Settings,
-  LIGHT_THEME,
-  DARK_THEME,
   niceTimeFormatter,
   Tooltip,
   TooltipStickTo,
-  type SettingsProps,
 } from '@elastic/charts';
+import { useElasticChartsTheme } from '@kbn/charts-theme';
 import { i18n } from '@kbn/i18n';
-import { useEuiTheme } from '@elastic/eui';
 import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
 import { useKibana } from '../../hooks/use_kibana';
 import { esqlResultToTimeseries } from '../../util/esql_result_to_timeseries';
@@ -42,6 +39,7 @@ export function DocumentsColumn({
       },
     },
   } = useKibana();
+  const chartBaseTheme = useElasticChartsTheme();
 
   const { absoluteTimeRange } = useTimeFilter();
   const minInterval = Math.floor((absoluteTimeRange.end - absoluteTimeRange.start) / numDataPoints);
@@ -112,7 +110,10 @@ export function DocumentsColumn({
             `}
           >
             <Chart size={{ width: '100%', height: euiThemeVars.euiSizeL }}>
-              <SettingsWithTheme
+              <Settings
+                locale={i18n.getLocale()}
+                baseTheme={chartBaseTheme}
+                theme={{ background: { color: 'transparent' } }}
                 xDomain={{ min: absoluteTimeRange.start, max: absoluteTimeRange.end, minInterval }}
                 noResults={<div />}
               />
@@ -136,17 +137,5 @@ export function DocumentsColumn({
         </>
       )}
     </EuiFlexGroup>
-  );
-}
-
-function SettingsWithTheme(props: SettingsProps) {
-  const { colorMode } = useEuiTheme();
-  return (
-    <Settings
-      locale={i18n.getLocale()}
-      baseTheme={colorMode === 'LIGHT' ? LIGHT_THEME : DARK_THEME}
-      theme={{ background: { color: 'transparent' } }}
-      {...props}
-    />
   );
 }
