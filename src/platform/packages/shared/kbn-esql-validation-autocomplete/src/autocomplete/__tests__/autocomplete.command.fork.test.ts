@@ -7,12 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { ESQL_STRING_TYPES } from '../../shared/esql_types';
 import { EXPECTED_FIELD_AND_FUNCTION_SUGGESTIONS } from './autocomplete.command.sort.test';
 import {
   EMPTY_WHERE_SUGGESTIONS,
   EXPECTED_COMPARISON_WITH_TEXT_FIELD_SUGGESTIONS,
 } from './autocomplete.command.where.test';
-import { AssertSuggestionsFn, SuggestFn, setup } from './helpers';
+import { AssertSuggestionsFn, SuggestFn, getFieldNamesByType, setup } from './helpers';
 
 describe('autocomplete.suggest', () => {
   describe('FORK (COMMAND ... [| COMMAND ...]) [(COMMAND ... [| COMMAND ...])]', () => {
@@ -39,7 +40,7 @@ describe('autocomplete.suggest', () => {
       });
 
       describe('(COMMAND ... | COMMAND ...)', () => {
-        const FORK_SUBCOMMANDS = ['WHERE ', 'SORT ', 'LIMIT '];
+        const FORK_SUBCOMMANDS = ['WHERE ', 'SORT ', 'LIMIT ', 'DISSECT '];
 
         it('suggests FORK sub commands in an open branch', async () => {
           await assertSuggestions('FROM a | FORK (/)', FORK_SUBCOMMANDS);
@@ -78,6 +79,18 @@ describe('autocomplete.suggest', () => {
               'NULLS LAST',
             ]);
           });
+
+          test('dissect', async () => {
+            await assertSuggestions(
+              'FROM a | FORK (DISSECT /)',
+              getFieldNamesByType(ESQL_STRING_TYPES).map((name) => `${name} `)
+            );
+            await assertSuggestions('FROM a | FORK (DISSECT keywordField /)', ['"%{firstWord}" ']);
+            await assertSuggestions('FROM a | FORK (DISSECT keywordField "" /)', [
+              'APPEND_SEPARATOR = ',
+              '| ',
+            ]);
+          });
         });
 
         it('suggests pipe after complete subcommands', async () => {
@@ -89,6 +102,9 @@ describe('autocomplete.suggest', () => {
           await assertSuggestsPipe('FROM a | FORK (WHERE keywordField IS NOT NULL /)');
           await assertSuggestsPipe('FROM a | FORK (LIMIT 1234 /)');
           await assertSuggestsPipe('FROM a | FORK (SORT keywordField ASC /)');
+          await assertSuggestsPipe(
+            'FROM a | FORK (DISSECT keywordField "%{firstWord}" APPEND_SEPARATOR=":" /)'
+          );
         });
 
         it('suggests FORK subcommands after in-branch pipe', async () => {
