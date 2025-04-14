@@ -9,7 +9,7 @@ import { load } from 'js-yaml';
 import semverGte from 'semver/functions/gte';
 import semverLte from 'semver/functions/lte';
 
-enum ChangeType {
+export enum ChangeType {
   Enhancement = 'enhancement',
   BreakingChange = 'breaking-change',
   BugFix = 'bugfix',
