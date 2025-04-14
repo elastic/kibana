@@ -2,15 +2,7 @@
 
 exports[`ExplorerChartTooltip Render tooltip based on infoTooltip data. 1`] = `
 <div
-  css={
-    Object {
-      "map": undefined,
-      "name": "xotwi",
-      "next": undefined,
-      "styles": "max-width:384px;",
-      "toString": [Function],
-    }
-  }
+  css="unknown styles"
 >
   <TooltipDefinitionList
     toolTipData={

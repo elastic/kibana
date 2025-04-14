@@ -8,6 +8,7 @@
  */
 
 import React from 'react';
+import { EuiThemeProvider } from '@elastic/eui';
 
 import { useBatchedPublishingSubjects as mockUseBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { DashboardPanelMap } from '../../../common';
@@ -85,11 +86,13 @@ const createAndMountDashboardGrid = async (panels: DashboardPanelMap = PANELS) =
     },
   });
   const component = render(
-    <DashboardContext.Provider value={api}>
-      <DashboardInternalContext.Provider value={internalApi}>
-        <DashboardGrid />
-      </DashboardInternalContext.Provider>
-    </DashboardContext.Provider>
+    <EuiThemeProvider>
+      <DashboardContext.Provider value={api}>
+        <DashboardInternalContext.Provider value={internalApi}>
+          <DashboardGrid />
+        </DashboardInternalContext.Provider>
+      </DashboardContext.Provider>
+    </EuiThemeProvider>
   );
 
   // wait for first render
