@@ -102,9 +102,9 @@ export interface ConditionEditorProps {
 }
 
 export function ConditionEditor(props: ConditionEditorProps) {
-  const condition = alwaysToEmptyEquals(props.condition);
   const isInvalidCondition = !isCondition(props.condition);
-  console.log(props.condition, condition);
+
+  const condition = alwaysToEmptyEquals(props.condition);
 
   const isFilterCondition = isPlainObject(condition) && 'operator' in condition;
 
