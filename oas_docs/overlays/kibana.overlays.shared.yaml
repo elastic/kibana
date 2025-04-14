@@ -4,6 +4,16 @@ info:
   title: Overlays that are applicable to both serverless and non-serverless documentas
   version: 0.0.1
 actions:
+# Add some tag descriptions and displayNames
+  - target: '$.tags[?(@.name=="maintenance-window")]'
+    description: Change tag description and displayName
+    update:
+      description: >
+        You can schedule single or recurring maintenance windows to temporarily reduce rule notifications.
+        For example, a maintenance window prevents false alarms during planned outages.
+      externalDocs:
+        description: Maintenance window documentation
+        url: https://www.elastic.co/docs/explore-analyze/alerts-cases/alerts/maintenance-windows
 # Add some spaces API examples
   - target: "$.paths['/api/spaces/space']['post']"
     description: "Add example to create space API"
