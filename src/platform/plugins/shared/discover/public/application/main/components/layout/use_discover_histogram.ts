@@ -229,7 +229,11 @@ export const useDiscoverHistogram = ({
    */
   const { query, filters } = useQuerySubscriber({ data: services.data });
   const requestParams = useCurrentTabSelector((state) => state.dataRequestParams);
-  const { timeRangeRelative: relativeTimeRange, timeRangeAbsolute: timeRange } = requestParams;
+  const {
+    timeRangeRelative: relativeTimeRange,
+    timeRangeAbsolute: timeRange,
+    searchSessionId,
+  } = requestParams;
   // When in ES|QL mode, update the data view, query, and
   // columns only when documents are done fetching so the Lens suggestions
   // don't frequently change, such as when the user modifies the table
@@ -413,6 +417,7 @@ export const useDiscoverHistogram = ({
     onVisContextChanged: isEsqlMode ? onVisContextChanged : undefined,
     breakdownField,
     onBreakdownFieldChange,
+    searchSessionId,
   };
 };
 

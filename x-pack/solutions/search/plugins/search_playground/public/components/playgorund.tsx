@@ -15,7 +15,12 @@ import { SearchQueryMode } from './query_mode/search_query_mode';
 import { ChatSetupPage } from './setup_page/chat_setup_page';
 import { Header } from './header';
 import { useLoadConnectors } from '../hooks/use_load_connectors';
-import { ChatForm, ChatFormFields, PlaygroundPageMode, PlaygroundViewMode } from '../types';
+import {
+  PlaygroundForm,
+  PlaygroundFormFields,
+  PlaygroundPageMode,
+  PlaygroundViewMode,
+} from '../types';
 import { Chat } from './chat';
 import { SearchMode } from './search_mode/search_mode';
 import { SearchPlaygroundSetupPage } from './setup_page/search_playground_setup_page';
@@ -34,14 +39,14 @@ export interface AppProps {
   showDocs?: boolean;
 }
 
-export const App: React.FC<AppProps> = ({ showDocs = false }) => {
+export const Playground: React.FC<AppProps> = ({ showDocs = false }) => {
   const isSearchModeEnabled = useSearchPlaygroundFeatureFlag();
   const { pageMode, viewMode } = usePlaygroundParameters();
   const { application } = useKibana().services;
   const { data: connectors } = useLoadConnectors();
   const hasSelectedIndices = Boolean(
-    useWatch<ChatForm, ChatFormFields.indices>({
-      name: ChatFormFields.indices,
+    useWatch<PlaygroundForm, PlaygroundFormFields.indices>({
+      name: PlaygroundFormFields.indices,
     }).length
   );
   const navigateToView = useCallback(
