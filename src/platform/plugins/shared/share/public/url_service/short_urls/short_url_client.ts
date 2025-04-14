@@ -92,20 +92,19 @@ export class BrowserShortUrlClient implements IShortUrlClient {
     params: ShortUrlCreateParams<P>,
     isAbsoluteTime?: boolean
   ): Promise<ShortUrlCreateResponse<P>> {
-    let updatedParams = params;
-    const timeRange = params.params?.timeRange;
+    const getUpdatedParams = (input: ShortUrlCreateParams<P>) => {
+      if (isAbsoluteTime)
+        return {
+          ...input,
+          params: {
+            ...input.params,
+            timeRange: getAbsoluteTimeRange(input.params?.timeRange as SerializableRecord),
+          },
+        };
+      return input;
+    };
 
-    if (isAbsoluteTime && timeRange) {
-      updatedParams = {
-        ...params,
-        params: {
-          ...params.params,
-          timeRange: getAbsoluteTimeRange(timeRange as SerializableRecord),
-        },
-      };
-    }
-
-    const result = await this.create(updatedParams);
+    const result = await this.create(getUpdatedParams(params));
     const redirectLocator = this.dependencies.locators.get<ShortUrlRedirectLocatorParams>(
       SHORT_URL_REDIRECT_LOCATOR
     )!;
