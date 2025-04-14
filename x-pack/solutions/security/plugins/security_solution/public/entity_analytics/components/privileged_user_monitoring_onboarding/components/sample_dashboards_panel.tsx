@@ -23,50 +23,8 @@ export const PrivilegedUserMonitoringSampleDashboardsPanel = () => {
       `}
     >
       <DashboardsSectionHeader />
-      <EuiPanel hasShadow={false} hasBorder={false}>
-        <EuiSpacer size="xxl" />
-        <EuiSpacer size="xxl" />
-        <EuiSpacer size="xxl" />
-        <EuiSpacer size="xxl" />
-        <EuiSpacer size="xxl" />
-        <EuiSpacer size="xxl" />
-        <EuiSpacer size="xxl" />
-        <EuiSpacer size="xxl" />
-        <EuiSpacer size="xxl" />
-        <EuiSpacer size="xxl" />
-        <EuiSpacer size="xxl" />
-        <EuiSpacer size="xxl" />
-        <EuiSpacer size="xxl" />
-        <EuiSpacer size="xxl" />
-        <EuiSpacer size="xxl" />
-        <EuiSpacer size="xxl" />
-        <EuiSpacer size="xxl" />
-        <EuiSpacer size="xxl" />
-        <EuiSpacer size="xxl" />
-        <EuiSpacer size="xxl" />
-        <EuiSpacer size="xxl" />
-        <EuiSpacer size="xxl" />
-        <EuiSpacer size="xxl" />
-        <EuiSpacer size="xxl" />
-        <EuiSpacer size="xxl" />
-        <EuiSpacer size="xxl" />
-        <EuiSpacer size="xxl" />
-        <EuiSpacer size="xxl" />
-        <EuiSpacer size="xxl" />
-        <EuiSpacer size="xxl" />
-        <EuiSpacer size="xxl" />
-        <EuiSpacer size="xxl" />
-        <EuiSpacer size="xxl" />
-        <EuiSpacer size="xxl" />
-        <EuiSpacer size="xxl" />
-        <EuiSpacer size="xxl" />
-        <EuiSpacer size="xxl" />
-        <EuiSpacer size="xxl" />
-        <EuiSpacer size="xxl" />
-        <EuiSpacer size="xxl" />
-        <EuiSpacer size="xxl" />
-        <EuiSpacer size="xxl" />
-      </EuiPanel>
+      <EuiPanel hasShadow={false} hasBorder={false} />
+
       <EuiSpacer size="s" />
     </EuiPanel>
   );

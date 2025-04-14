@@ -8,14 +8,14 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { AddDataSourcePanel } from './add_data_source';
-import { TestProviders } from '../../../common/mock';
+import { TestProviders } from '../../../../common/mock';
 
 const mockUseNavigation = jest.fn().mockReturnValue({
   navigateTo: jest.fn(),
 });
 
-jest.mock('../../../common/lib/kibana', () => {
-  const original = jest.requireActual('../../../common/lib/kibana');
+jest.mock('../../../../common/lib/kibana', () => {
+  const original = jest.requireActual('../../../../common/lib/kibana');
 
   return {
     ...original,
@@ -23,7 +23,7 @@ jest.mock('../../../common/lib/kibana', () => {
   };
 });
 
-jest.mock('../../../common/hooks/integrations/use_integration_link_state', () => ({
+jest.mock('../../../../common/hooks/integrations/use_integration_link_state', () => ({
   useIntegrationLinkState: jest.fn(() => ({})),
 }));
 

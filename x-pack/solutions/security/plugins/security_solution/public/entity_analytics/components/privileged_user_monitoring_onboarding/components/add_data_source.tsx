@@ -21,7 +21,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { IndexSelectorModal } from './select_index_modal';
-import { IntegrationCards } from './integrations_cards';
+import { IntegrationCards } from '../integrations_cards';
 
 export const AddDataSourcePanel = () => {
   const [isIndexModalOpen, setIsIndexModalOpen] = useState(false);

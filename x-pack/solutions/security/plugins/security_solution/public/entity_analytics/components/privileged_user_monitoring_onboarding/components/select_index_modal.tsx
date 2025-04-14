@@ -24,8 +24,8 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { useDebounceFn } from '@kbn/react-hooks';
-import { useAppToasts } from '../../../common/hooks/use_app_toasts';
-import { useFetchPrivilegedUserIndices } from './hooks/use_fetch_privileged_user_indices';
+import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
+import { useFetchPrivilegedUserIndices } from '../hooks/use_fetch_privileged_user_indices';
 
 const SELECT_INDEX_LABEL = i18n.translate(
   'xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.selectIndex.comboboxPlaceholder',
