@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { ReactNode } from 'react';
+import React, { ReactNode, useState } from 'react';
 import { render, screen } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { AlertsFiltersForm } from './alerts_filters_form';
+import { AlertsFiltersForm, AlertsFiltersFormProps } from './alerts_filters_form';
 import { AlertsFiltersFormItem } from './alerts_filters_form_item';
 import { AlertsFiltersExpression } from '../types';
 import {
@@ -31,29 +31,33 @@ jest
     <div data-test-subj={FORM_ITEM_SUBJ}>{value as ReactNode}</div>
   ));
 
-const testExpression: AlertsFiltersExpression = {
-  operator: 'or',
-  operands: [
-    {
-      operator: 'and',
-      operands: [{ value: 'filter1' }, { value: 'filter2' }],
-    },
-    { value: 'filter3' },
-  ],
+const testExpression: AlertsFiltersExpression = [
+  { filter: { value: 'filter1' } },
+  { operator: 'and' },
+  { filter: { value: 'filter2' } },
+  { operator: 'or' },
+  { filter: { value: 'filter3' } },
+];
+
+const TestComponent = (overrides: Partial<AlertsFiltersFormProps>) => {
+  const [value, setValue] = useState(testExpression);
+
+  return (
+    <IntlProvider locale="en">
+      <AlertsFiltersForm
+        ruleTypeIds={[]}
+        value={value}
+        onChange={setValue}
+        services={{ http, notifications }}
+        {...overrides}
+      />
+    </IntlProvider>
+  );
 };
 
 describe('AlertsFiltersForm', () => {
   it('should render boolean expressions', () => {
-    render(
-      <IntlProvider locale="en">
-        <AlertsFiltersForm
-          ruleTypeIds={[]}
-          value={testExpression}
-          onChange={jest.fn()}
-          services={{ http, notifications }}
-        />
-      </IntlProvider>
-    );
+    render(<TestComponent />);
 
     ['filter1', 'filter2', 'filter3'].forEach((filter) => {
       expect(screen.getByText(filter)).toBeInTheDocument();
@@ -61,16 +65,7 @@ describe('AlertsFiltersForm', () => {
   });
 
   it('should delete the correct operand when clicking on the trash icon', async () => {
-    render(
-      <IntlProvider locale="en">
-        <AlertsFiltersForm
-          ruleTypeIds={[]}
-          value={testExpression}
-          onChange={jest.fn()}
-          services={{ http, notifications }}
-        />
-      </IntlProvider>
-    );
+    render(<TestComponent />);
 
     ['filter1', 'filter2', 'filter3'].forEach((filter) => {
       expect(screen.getByText(filter)).toBeInTheDocument();
@@ -85,16 +80,7 @@ describe('AlertsFiltersForm', () => {
   });
 
   it('should correctly add a new operand', async () => {
-    render(
-      <IntlProvider locale="en">
-        <AlertsFiltersForm
-          ruleTypeIds={[]}
-          value={testExpression}
-          onChange={jest.fn()}
-          services={{ http, notifications }}
-        />
-      </IntlProvider>
-    );
+    render(<TestComponent />);
 
     expect(screen.getAllByTestId(FORM_ITEM_SUBJ)).toHaveLength(3);
 

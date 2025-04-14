@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState, useCallback, useEffect, useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import {
   EuiButtonEmpty,
   EuiButtonIcon,
@@ -19,7 +19,6 @@ import {
   EuiHorizontalRule,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import useDeepCompareEffect from 'react-use/lib/useDeepCompareEffect';
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { NotificationsStart } from '@kbn/core-notifications-browser';
 import { AlertsFiltersFormContextProvider } from '../contexts/alerts_filters_form_context';
@@ -27,7 +26,7 @@ import {
   AlertsFiltersExpression,
   AlertsFiltersFormItemType,
   AlertsFilter,
-  FlattenedExpressionItem,
+  AlertsFiltersExpressionOperator,
 } from '../types';
 import {
   ADD_OPERATION_LABEL,
@@ -36,11 +35,7 @@ import {
   OR_OPERATOR,
 } from '../translations';
 import { AlertsFiltersFormItem } from './alerts_filters_form_item';
-import {
-  flattenFiltersExpression,
-  isFlatExpressionFilter,
-  reconstructFiltersExpression,
-} from '../utils/filters_expression';
+import { isFilter } from '../utils/filters_expression';
 import {
   ADD_AND_OPERATION_BUTTON_SUBJ,
   ADD_OR_OPERATION_BUTTON_SUBJ,
@@ -59,10 +54,7 @@ export interface AlertsFiltersFormProps {
 }
 
 // This ensures that the form is initialized with an initially empty "Filter by" selector
-const DEFAULT_VALUE: AlertsFiltersExpression = {
-  operator: 'and',
-  operands: [{}],
-};
+const DEFAULT_VALUE: AlertsFiltersExpression = [{ filter: {} }];
 
 /**
  * A form to build boolean expressions of filters for alerts searches
@@ -74,76 +66,68 @@ export const AlertsFiltersForm = ({
   isDisabled = false,
   services,
 }: AlertsFiltersFormProps) => {
-  // Intermediate flattened expression state
-  const [flatExpression, setFlatExpression] = useState(flattenFiltersExpression(value));
-  const [firstItem, ...otherItems] = flatExpression as [
+  const [firstItem, ...otherItems] = value as [
     {
       filter: AlertsFilter;
     },
-    ...FlattenedExpressionItem[]
+    ...AlertsFiltersExpression
   ];
 
-  useDeepCompareEffect(() => {
-    // From tree to flat (using deep comparison to avoid infinite loops)
-    setFlatExpression(flattenFiltersExpression(value));
-  }, [value]);
+  const addOperand = useCallback(
+    (operator: AlertsFiltersExpressionOperator) => {
+      onChange([
+        ...value,
+        {
+          operator,
+        },
+        { filter: {} },
+      ]);
+    },
+    [onChange, value]
+  );
 
-  useEffect(() => {
-    // From flat to tree
-    onChange(reconstructFiltersExpression(flatExpression));
-  }, [flatExpression, onChange]);
-
-  const addOperand = useCallback((operator: AlertsFiltersExpression['operator']) => {
-    setFlatExpression((oldExpression) => [
-      ...oldExpression,
-      {
-        operator,
-      },
-      { filter: {} },
-    ]);
-  }, []);
-
-  const deleteOperand = useCallback((atIndex: number) => {
-    setFlatExpression((oldExpression) => {
+  const deleteOperand = useCallback(
+    (atIndex: number) => {
       // Remove two items: the operator and the following filter
-      oldExpression.splice(atIndex, 2);
-      return [...oldExpression];
-    });
-  }, []);
+      const newValue = [...value];
+      newValue.splice(atIndex, 2);
+      onChange(newValue);
+    },
+    [onChange, value]
+  );
 
   const onFormItemTypeChange = useCallback(
     (atIndex: number, newType: AlertsFiltersFormItemType) => {
-      setFlatExpression((oldExpression) => {
-        const expressionItem = oldExpression[atIndex];
-        if (isFlatExpressionFilter(expressionItem)) {
-          oldExpression[atIndex] = {
-            filter: {
-              type: newType,
-            },
-          };
-          return [...oldExpression];
-        }
-        return oldExpression;
-      });
-    },
-    []
-  );
-
-  const onFormItemValueChange = useCallback((atIndex: number, newValue: unknown) => {
-    setFlatExpression((oldExpression) => {
-      const expressionItem = oldExpression[atIndex];
-      if (isFlatExpressionFilter(expressionItem)) {
-        oldExpression[atIndex] = {
+      const expressionItem = value[atIndex];
+      if (isFilter(expressionItem)) {
+        const newValue = [...value];
+        newValue[atIndex] = {
           filter: {
-            ...expressionItem.filter,
-            value: newValue,
+            type: newType,
           },
         };
-        return [...oldExpression];
+        onChange(newValue);
       }
-      return oldExpression;
-    });
-  }, []);
+    },
+    [onChange, value]
+  );
+
+  const onFormItemValueChange = useCallback(
+    (atIndex: number, newItemValue: unknown) => {
+      const newValue = [...value];
+      const expressionItem = newValue[atIndex];
+      if (isFilter(expressionItem)) {
+        newValue[atIndex] = {
+          filter: {
+            ...expressionItem.filter,
+            value: newItemValue,
+          },
+        };
+        onChange(newValue);
+      }
+    },
+    [onChange, value]
+  );
 
   const contextValue = useMemo(
     () => ({
@@ -173,9 +157,7 @@ export const AlertsFiltersForm = ({
                 const index = offsetIndex + 1;
                 return (
                   <EuiFlexItem key={index}>
-                    {'operator' in item ? (
-                      <Operator operator={item.operator} onDelete={() => deleteOperand(index)} />
-                    ) : (
+                    {isFilter(item) ? (
                       <AlertsFiltersFormItem
                         type={item.filter.type}
                         onTypeChange={(newType) => onFormItemTypeChange(index, newType)}
@@ -183,6 +165,8 @@ export const AlertsFiltersForm = ({
                         onValueChange={(newValue) => onFormItemValueChange(index, newValue)}
                         isDisabled={isDisabled}
                       />
+                    ) : (
+                      <Operator operator={item.operator} onDelete={() => deleteOperand(index)} />
                     )}
                   </EuiFlexItem>
                 );

@@ -24,11 +24,6 @@ export interface AlertsFilter {
   value?: unknown;
 }
 
-export interface AlertsFiltersExpression {
-  operator: 'and' | 'or';
-  operands: Array<AlertsFiltersExpression | AlertsFilter>;
-}
-
 export interface AlertsFilterMetadata<T> {
   id: string;
   displayName: string;
@@ -51,10 +46,14 @@ export interface AlertsFiltersFormContextValue {
 
 export type AlertsFiltersFormItemType = keyof typeof alertsFiltersMetadata;
 
-export type FlattenedExpressionItem =
+export type AlertsFiltersExpressionOperator = 'and' | 'or';
+
+export type AlertsFiltersExpressionItem =
   | {
-      operator: AlertsFiltersExpression['operator'];
+      operator: AlertsFiltersExpressionOperator;
     }
   | {
       filter: AlertsFilter;
     };
+
+export type AlertsFiltersExpression = AlertsFiltersExpressionItem[];
