@@ -18,15 +18,11 @@ export const useChangelog = (
   latestVersion: string,
   currentVersion?: string
 ) => {
-  const {
-    data: fileResponse,
-    error,
-    isLoading,
-  } = useGetFileByPathQuery(`/package/${packageName}/${latestVersion}/changelog.yml`);
+  const { data, error, isLoading } = useGetFileByPathQuery(
+    `/package/${packageName}/${latestVersion}/changelog.yml`
+  );
 
-  const changelogText = fileResponse?.data;
-
-  const changelog = parseYamlChangelog(changelogText, latestVersion, currentVersion);
+  const changelog = parseYamlChangelog(data, latestVersion, currentVersion);
 
   return {
     changelog,
