@@ -166,12 +166,13 @@ function FilterForm(props: {
     const newCondition: Partial<FilterCondition> = { ...props.condition };
 
     const newOperator = event.target.value;
-    if ((newOperator === 'exists' || newOperator === 'notExists') && 'value' in newCondition) {
-      delete newCondition.value;
+    if (newOperator === 'exists' || newOperator === 'notExists') {
+      if ('value' in newCondition) delete newCondition.value;
     } else if (!('value' in newCondition)) {
       (newCondition as BinaryFilterCondition).value = '';
     }
-    handleConditionChange({
+
+    props.onConditionChange({
       ...newCondition,
       operator: newOperator,
     } as FilterCondition);
