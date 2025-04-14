@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, Logger, SavedObjectsClient } from '@kbn/core/server';
+import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 
 import { isEqual } from 'lodash';
 import type {
@@ -71,7 +71,7 @@ export function getPipeline(
 
 export const getCustomAssets = async (
   esClient: ElasticsearchClient,
-  soClient: SavedObjectsClient,
+  soClient: SavedObjectsClientContract,
   integrations: IntegrationsData[],
   abortController: AbortController,
   previousSyncIntegrationsData: SyncIntegrationsData | undefined
@@ -133,7 +133,7 @@ export const getCustomAssets = async (
 
 export async function getPipelinesFromVars(
   esClient: ElasticsearchClient,
-  soClient: SavedObjectsClient,
+  soClient: SavedObjectsClientContract,
   abortController: AbortController
 ): Promise<CustomAssetsData[]> {
   const packagePolicies = await packagePolicyService.list(soClient, {
