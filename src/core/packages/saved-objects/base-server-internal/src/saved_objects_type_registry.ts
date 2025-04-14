@@ -43,6 +43,11 @@ export class SavedObjectTypeRegistry implements ISavedObjectTypeRegistry {
     this.types.set(type.name, deepFreeze(type) as SavedObjectsType);
   }
 
+  /** {@inheritDoc ISavedObjectTypeRegistry.getLegacyTypes} */
+  public getLegacyTypes() {
+    return this.legacyTypes;
+  }
+
   /** {@inheritDoc ISavedObjectTypeRegistry.getType} */
   public getType(type: string) {
     return this.types.get(type);

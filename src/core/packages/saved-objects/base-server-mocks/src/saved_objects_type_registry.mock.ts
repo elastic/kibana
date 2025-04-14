@@ -15,6 +15,7 @@ const createRegistryMock = (): jest.Mocked<
 > => {
   const mock = {
     registerType: jest.fn(),
+    getLegacyTypes: jest.fn(),
     getType: jest.fn(),
     getVisibleTypes: jest.fn(),
     getVisibleToHttpApisTypes: jest.fn(),

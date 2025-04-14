@@ -8,18 +8,17 @@
  */
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { REMOVED_TYPES } from '@kbn/core-saved-objects-base-server-internal';
 
 export { REMOVED_TYPES } from '@kbn/core-saved-objects-base-server-internal';
 
-export const excludeUnusedTypesQuery: QueryDslQueryContainer = {
-  bool: {
-    must_not: [
-      ...REMOVED_TYPES.map((typeName) => ({
+export const buildExcludeUnusedTypesQuery = (legacyTypes: string[]): QueryDslQueryContainer => {
+  return {
+    bool: {
+      must_not: legacyTypes.map((typeName) => ({
         term: {
           type: typeName,
         },
       })),
-    ],
-  },
+    },
+  };
 };
