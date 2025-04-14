@@ -16,9 +16,10 @@ import { SerializedPanelState } from '@kbn/presentation-publishing';
 import { fireEvent, render, waitFor } from '@testing-library/react';
 
 import { dataService, dataViewsService } from '../../../services/kibana_services';
-import { getMockedBuildApi, getMockedControlGroupApi } from '../../mocks/control_mocks';
+import { getMockedControlGroupApi } from '../../mocks/control_mocks';
 import { getRangesliderControlFactory } from './get_range_slider_control_factory';
-import { RangesliderControlState } from './types';
+import { RangesliderControlApi, RangesliderControlState } from './types';
+import { ControlApiRegistration } from '../../types';
 
 const DEFAULT_TOTAL_RESULTS = 20;
 const DEFAULT_MIN = 0;
@@ -28,6 +29,15 @@ describe('RangesliderControlApi', () => {
   const uuid = 'myControl1';
 
   const controlGroupApi = getMockedControlGroupApi();
+
+  function finalizeApi(api: ControlApiRegistration<RangesliderControlApi>) {
+    return {
+      ...api,
+      uuid,
+      parentApi: controlGroupApi,
+      type: factory.type,
+    };
+  }
 
   let totalResults = DEFAULT_TOTAL_RESULTS;
   let min: estypes.AggregationsSingleMetricAggregateBase['value'] = DEFAULT_MIN;
@@ -88,29 +98,29 @@ describe('RangesliderControlApi', () => {
 
   describe('filters$', () => {
     test('should not set filters$ when value is not provided', async () => {
-      const { api } = await factory.buildControl(
-        {
+      const { api } = await factory.buildControl({
+        initialState: {
           dataViewId: 'myDataView',
           fieldName: 'myFieldName',
         },
-        getMockedBuildApi(uuid, factory, controlGroupApi),
+        finalizeApi,
         uuid,
-        controlGroupApi
-      );
+        controlGroupApi,
+      });
       expect(api.filters$.value).toBeUndefined();
     });
 
     test('should set filters$ when value is provided', async () => {
-      const { api } = await factory.buildControl(
-        {
+      const { api } = await factory.buildControl({
+        initialState: {
           dataViewId: 'myDataViewId',
           fieldName: 'myFieldName',
           value: ['5', '10'],
         },
-        getMockedBuildApi(uuid, factory, controlGroupApi),
+        finalizeApi,
         uuid,
-        controlGroupApi
-      );
+        controlGroupApi,
+      });
       expect(api.filters$.value).toEqual([
         {
           meta: {
@@ -136,16 +146,16 @@ describe('RangesliderControlApi', () => {
     });
 
     test('should set blocking error when data view is not found', async () => {
-      const { api } = await factory.buildControl(
-        {
+      const { api } = await factory.buildControl({
+        initialState: {
           dataViewId: 'notGonnaFindMeDataView',
           fieldName: 'myFieldName',
           value: ['5', '10'],
         },
-        getMockedBuildApi(uuid, factory, controlGroupApi),
+        finalizeApi,
         uuid,
-        controlGroupApi
-      );
+        controlGroupApi,
+      });
       expect(api.filters$.value).toBeUndefined();
       expect(api.blockingError$.value?.message).toEqual(
         'no data view found for id notGonnaFindMeDataView'
@@ -158,16 +168,16 @@ describe('RangesliderControlApi', () => {
       totalResults = 0; // simulate no results by returning hits total of zero
       min = null; // simulate no results by returning min aggregation value of null
       max = null; // simulate no results by returning max aggregation value of null
-      const { Component } = await factory.buildControl(
-        {
+      const { Component } = await factory.buildControl({
+        initialState: {
           dataViewId: 'myDataViewId',
           fieldName: 'myFieldName',
           value: ['5', '10'],
         },
-        getMockedBuildApi(uuid, factory, controlGroupApi),
+        finalizeApi,
         uuid,
-        controlGroupApi
-      );
+        controlGroupApi,
+      });
       const { findByTestId } = render(<Component className={'controlPanel'} />);
       await waitFor(async () => {
         await findByTestId('range-slider-control-invalid-append-myControl1');
@@ -177,15 +187,15 @@ describe('RangesliderControlApi', () => {
 
   describe('min max', () => {
     test('bounds inputs should display min and max placeholders when there is no selected range', async () => {
-      const { Component } = await factory.buildControl(
-        {
+      const { Component } = await factory.buildControl({
+        initialState: {
           dataViewId: 'myDataViewId',
           fieldName: 'myFieldName',
         },
-        getMockedBuildApi(uuid, factory, controlGroupApi),
+        finalizeApi,
         uuid,
-        controlGroupApi
-      );
+        controlGroupApi,
+      });
       const { findByTestId } = render(<Component className={'controlPanel'} />);
       await waitFor(async () => {
         const minInput = await findByTestId('rangeSlider__lowerBoundFieldNumber');
@@ -198,30 +208,30 @@ describe('RangesliderControlApi', () => {
 
   describe('step state', () => {
     test('default value provided when state.step is undefined', async () => {
-      const { api } = await factory.buildControl(
-        {
+      const { api } = await factory.buildControl({
+        initialState: {
           dataViewId: 'myDataViewId',
           fieldName: 'myFieldName',
         },
-        getMockedBuildApi(uuid, factory, controlGroupApi),
+        finalizeApi,
         uuid,
-        controlGroupApi
-      );
+        controlGroupApi,
+      });
       const serializedState = api.serializeState() as SerializedPanelState<RangesliderControlState>;
       expect(serializedState.rawState.step).toBe(1);
     });
 
     test('retains value from initial state', async () => {
-      const { api } = await factory.buildControl(
-        {
+      const { api } = await factory.buildControl({
+        initialState: {
           dataViewId: 'myDataViewId',
           fieldName: 'myFieldName',
           step: 1024,
         },
-        getMockedBuildApi(uuid, factory, controlGroupApi),
+        finalizeApi,
         uuid,
-        controlGroupApi
-      );
+        controlGroupApi,
+      });
       const serializedState = api.serializeState() as SerializedPanelState<RangesliderControlState>;
       expect(serializedState.rawState.step).toBe(1024);
     });

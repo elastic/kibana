@@ -9,12 +9,11 @@
 
 import { BehaviorSubject, of } from 'rxjs';
 
-import { SerializedPanelState, StateComparators } from '@kbn/presentation-publishing';
+import { SerializedPanelState } from '@kbn/presentation-publishing';
 
 import { CONTROL_GROUP_TYPE } from '../../../common';
 import type { ControlFetchContext } from '../../control_group/control_fetch/control_fetch';
 import type { ControlGroupApi } from '../../control_group/types';
-import type { ControlApiRegistration, ControlFactory, DefaultControlApi } from '../types';
 
 export type MockedControlGroupApi = ControlGroupApi & {
   setLastSavedStateForChild: (uuid: string, state: object) => void;
@@ -49,22 +48,3 @@ export const getMockedControlGroupApi = (
     ...overwriteApi,
   } as unknown as MockedControlGroupApi;
 };
-
-export const getMockedBuildApi =
-  <StateType extends object = object, ApiType extends DefaultControlApi = DefaultControlApi>(
-    uuid: string,
-    factory: ControlFactory<StateType, ApiType>,
-    controlGroupApi?: ControlGroupApi
-  ) =>
-  (api: ControlApiRegistration<ApiType>, nextComparators: StateComparators<StateType>) => {
-    return {
-      ...api,
-      uuid,
-      parentApi: controlGroupApi ?? getMockedControlGroupApi(),
-      unsavedChanges$: new BehaviorSubject<Partial<StateType> | undefined>(undefined),
-      resetUnsavedChanges: () => {
-        return true;
-      },
-      type: factory.type,
-    };
-  };
