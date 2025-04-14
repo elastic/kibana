@@ -53,7 +53,7 @@ export async function createInferenceEndpoint({
       }
     );
   } catch (e) {
-    logger.debug(
+    logger.error(
       `Failed to create inference endpoint "${AI_ASSISTANT_KB_INFERENCE_ID}": ${e.message}`
     );
     throw e;
@@ -132,7 +132,7 @@ export async function getKbModelStatus({
       model_id: endpoint.service_settings?.model_id,
     });
   } catch (error) {
-    logger.debug(`Failed to get model stats: ${error.message}`);
+    logger.error(`Failed to get model stats: ${error.message}`);
     return { enabled, errorMessage: error.message, kbState: KnowledgeBaseState.ERROR };
   }
 
