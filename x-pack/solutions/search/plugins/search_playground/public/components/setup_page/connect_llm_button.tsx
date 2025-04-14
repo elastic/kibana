@@ -36,8 +36,6 @@ export const ConnectLLMButton: React.FC = () => {
   };
 
   useEffect(() => {
-    console.log('Conenctors: ++', connectors?.[0]);
-
     if (connectors?.length) {
       if (showCallout) {
         usageTracker?.load(AnalyticsEvents.genAiConnectorAdded);
