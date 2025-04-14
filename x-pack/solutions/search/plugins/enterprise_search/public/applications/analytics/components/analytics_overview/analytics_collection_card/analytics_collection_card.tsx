@@ -113,6 +113,7 @@ export const AnalyticsCollectionCard: React.FC<
 
   return (
     <EuiCard
+      data-test-subj="enterpriseSearchAnalyticsCollectionCard"
       titleSize="s"
       titleElement="h4"
       title={
@@ -174,7 +175,11 @@ export const AnalyticsCollectionCard: React.FC<
       }
     >
       {!isLoading && data?.some(([, y]) => y && y !== 0) && (
-        <Chart size={['100%', 130]} css={cardStyles.chart}>
+        <Chart
+          data-test-subj="enterpriseSearchAnalyticsCollectionCardChart"
+          size={['100%', 130]}
+          css={cardStyles.chart}
+        >
           <Settings
             baseTheme={chartBaseTheme}
             theme={{
