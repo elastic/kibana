@@ -6,7 +6,7 @@
  */
 
 import { DEFAULT_DOWNLOAD_SOURCE_URI } from '../../../../common/constants';
-import { PLATFORM_WITH_INSTALL_SERVERS, type PLATFORM_TYPE } from '../../../hooks';
+import { PLATFORM_WITH_INSTALL_SERVERS, type EXTENDED_PLATFORM_TYPE } from '../../../hooks';
 import type { DownloadSource, FleetProxy } from '../../../types';
 
 function getfleetServerHostsEnrollArgs({
@@ -20,7 +20,7 @@ function getfleetServerHostsEnrollArgs({
   fleetServerHost: string;
   fleetProxy?: FleetProxy;
   showInstallServers?: boolean;
-  platform?: PLATFORM_TYPE;
+  platform: EXTENDED_PLATFORM_TYPE;
 }) {
   const proxyHeadersArgs = fleetProxy?.proxy_headers
     ? Object.entries(fleetProxy.proxy_headers).reduce((acc, [proxyKey, proyVal]) => {
@@ -31,7 +31,7 @@ function getfleetServerHostsEnrollArgs({
     : '';
   const proxyArgs = fleetProxy ? ` --proxy-url=${fleetProxy.url}${proxyHeadersArgs}` : '';
   const showInstallServersArgs =
-    showInstallServers && platform && PLATFORM_WITH_INSTALL_SERVERS.includes(platform)
+    showInstallServers && PLATFORM_WITH_INSTALL_SERVERS.includes(platform)
       ? ' --install-servers'
       : '';
   return `--url=${
@@ -95,7 +95,7 @@ export const ManualInstructions = ({
   gcpAccountType?: string;
   showInstallServers?: boolean;
 }) => {
-  const getEnrollArgsByPlatForm = (platform?: PLATFORM_TYPE) => {
+  const getEnrollArgsByPlatForm = (platform: EXTENDED_PLATFORM_TYPE) => {
     return getfleetServerHostsEnrollArgs({
       apiKey,
       fleetServerHost,
@@ -111,7 +111,7 @@ export const ManualInstructions = ({
   const { windows: windowsDownloadSourceProxyArgs, curl: curlDownloadSourceProxyArgs } =
     getDownloadSourceProxyArgs(downloadSourceProxy);
 
-  const debOrRpmWithInstallServers = showInstallServers ? `ELASTIC_AGENT_FLAVOR=servers` : '';
+  const debOrRpmWithInstallServers = showInstallServers ? `ELASTIC_AGENT_FLAVOR=servers ` : '';
 
   const linuxAarch64Command = `curl -L -O ${downloadBaseUrl}/beats/elastic-agent/elastic-agent-${agentVersion}-linux-arm64.tar.gz ${curlDownloadSourceProxyArgs}
   tar xzvf elastic-agent-${agentVersion}-linux-arm64.tar.gz
@@ -144,31 +144,31 @@ Invoke-WebRequest -Uri ${downloadBaseUrl}/beats/elastic-agent/elastic-agent-${ag
 .\\elastic-agent.msi --% INSTALLARGS="${getEnrollArgsByPlatForm('windows_msi')}"`;
 
   const linuxDebAarch64Command = `curl -L -O ${downloadBaseUrl}/beats/elastic-agent/elastic-agent-${agentVersion}-arm64.deb ${curlDownloadSourceProxyArgs}
-sudo ${debOrRpmWithInstallServers} dpkg -i elastic-agent-${agentVersion}-arm64.deb
+sudo ${debOrRpmWithInstallServers}dpkg -i elastic-agent-${agentVersion}-arm64.deb
 sudo systemctl enable elastic-agent \nsudo systemctl start elastic-agent \nsudo elastic-agent enroll ${getEnrollArgsByPlatForm(
     'deb_aarch64'
   )} \n`;
 
   const linuxDebX8664Command = `curl -L -O ${downloadBaseUrl}/beats/elastic-agent/elastic-agent-${agentVersion}-amd64.deb ${curlDownloadSourceProxyArgs}
-sudo ${debOrRpmWithInstallServers} dpkg -i elastic-agent-${agentVersion}-amd64.deb
+sudo ${debOrRpmWithInstallServers}dpkg -i elastic-agent-${agentVersion}-amd64.deb
 sudo systemctl enable elastic-agent \nsudo systemctl start elastic-agent \nsudo elastic-agent enroll ${getEnrollArgsByPlatForm(
     'deb_x86_64'
   )} \n`;
 
   const linuxRpmAarch64Command = `curl -L -O ${downloadBaseUrl}/beats/elastic-agent/elastic-agent-${agentVersion}-aarch64.rpm ${curlDownloadSourceProxyArgs}
-sudo ${debOrRpmWithInstallServers} rpm -vi elastic-agent-${agentVersion}-aarch64.rpm
+sudo ${debOrRpmWithInstallServers}rpm -vi elastic-agent-${agentVersion}-aarch64.rpm
 sudo systemctl enable elastic-agent \nsudo systemctl start elastic-agent \nsudo elastic-agent enroll ${getEnrollArgsByPlatForm(
     'rpm_aarch64'
   )} \n`;
 
   const linuxRpmX8664Command = `curl -L -O ${downloadBaseUrl}/beats/elastic-agent/elastic-agent-${agentVersion}-x86_64.rpm ${curlDownloadSourceProxyArgs}
-sudo ${debOrRpmWithInstallServers} rpm -vi elastic-agent-${agentVersion}-x86_64.rpm
+sudo ${debOrRpmWithInstallServers}rpm -vi elastic-agent-${agentVersion}-x86_64.rpm
 sudo systemctl enable elastic-agent \nsudo systemctl start elastic-agent \nsudo elastic-agent enroll ${getEnrollArgsByPlatForm(
     'rpm_x86_64'
   )} \n`;
 
-  // to do: this should be moved to the function above
-  const googleShellEnrollArgs = getEnrollArgsByPlatForm();
+  // google shell commands
+  const googleShellEnrollArgs = getEnrollArgsByPlatForm('google_shell');
 
   const googleShellFleetServerUrl = googleShellEnrollArgs
     ?.split('--url=')
