@@ -270,7 +270,7 @@ export class FeatureTable extends Component<Props, State> {
       );
 
       const extraAction = (
-        <EuiText css={{ maxWidth: 200 }} size={'xs'} data-test-subj="reservedFeatureDescription">
+        <EuiText style={{ maxWidth: 200 }} size={'xs'} data-test-subj="reservedFeatureDescription">
           {feature.reserved.description}
         </EuiText>
       );
@@ -332,13 +332,10 @@ export class FeatureTable extends Component<Props, State> {
     }
 
     const hasSubFeaturePrivileges = feature.getSubFeaturePrivileges().length > 0;
-    const isSecurityFeature = feature.id === 'siemV2' || feature.id === 'siem';
-
     const buttonContent = (
       <FeatureTableCell
         className={classNames({ noSubFeaturePrivileges: !hasSubFeaturePrivileges })}
         feature={feature}
-        hideDescription={isSecurityFeature && !hasSubFeaturePrivileges}
       />
     );
 
@@ -356,7 +353,7 @@ export class FeatureTable extends Component<Props, State> {
             featureName: feature.name,
           },
         })}
-        css={{
+        style={{
           minWidth: 200,
         }}
       />
