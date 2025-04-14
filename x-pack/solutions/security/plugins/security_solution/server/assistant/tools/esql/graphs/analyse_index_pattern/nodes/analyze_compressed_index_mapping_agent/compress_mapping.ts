@@ -74,7 +74,7 @@ function formatNestedObject(obj: NestedObject): string {
     }
 
     // If we've seen this object before, use cached result
-    const cachedValue = cache.get(current.obj)
+    const cachedValue = cache.get(current.obj);
     if (cachedValue) {
       current.result = cachedValue;
       stack.pop();
