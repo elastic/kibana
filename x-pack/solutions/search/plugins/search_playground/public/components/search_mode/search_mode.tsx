@@ -20,19 +20,19 @@ import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { useQueryClient } from '@tanstack/react-query';
 import { DEFAULT_PAGINATION } from '../../../common';
 import { ResultList } from './result_list';
-import { ChatForm, ChatFormFields, Pagination } from '../../types';
+import { PlaygroundForm, PlaygroundFormFields, Pagination } from '../../types';
 import { useSearchPreview } from '../../hooks/use_search_preview';
 import { getPaginationFromPage } from '../../utils/pagination_helper';
 import { useIndexMappings } from '../../hooks/use_index_mappings';
 
 export const SearchMode: React.FC = () => {
   const { euiTheme } = useEuiTheme();
-  const { control } = useFormContext<ChatForm>();
+  const { control } = useFormContext<PlaygroundForm>();
   const {
     field: { value: searchBarValue },
     formState: { isSubmitting },
-  } = useController<ChatForm, ChatFormFields.searchQuery>({
-    name: ChatFormFields.searchQuery,
+  } = useController<PlaygroundForm, PlaygroundFormFields.searchQuery>({
+    name: PlaygroundFormFields.searchQuery,
   });
 
   const [searchQuery, setSearchQuery] = React.useState<{
@@ -76,7 +76,7 @@ export const SearchMode: React.FC = () => {
             <EuiFlexItem grow={false}>
               <Controller
                 control={control}
-                name={ChatFormFields.searchQuery}
+                name={PlaygroundFormFields.searchQuery}
                 render={({ field }) => (
                   <EuiFieldSearch
                     data-test-subj="searchPlaygroundSearchModeFieldText"
