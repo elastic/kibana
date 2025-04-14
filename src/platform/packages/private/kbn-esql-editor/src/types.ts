@@ -108,7 +108,7 @@ interface ESQLVariableService {
 export interface EsqlPluginStartBase {
   getJoinIndicesAutocomplete: () => Promise<JoinIndicesAutocompleteResult>;
   variablesService: ESQLVariableService;
-  getLicense: () => Promise<ILicense> | undefined;
+  getLicense: () => Promise<ILicense | undefined>;
 }
 
 export interface ESQLEditorDeps {
