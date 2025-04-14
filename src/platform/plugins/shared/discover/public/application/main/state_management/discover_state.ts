@@ -206,6 +206,15 @@ export interface DiscoverStateContainer {
       isUpdate?: boolean
     ) => void;
     /**
+     * Triggered when the unified search bar query is updated
+     * @param payload
+     * @param isUpdate
+     */
+    onChangeQuery: (
+      payload: { dateRange: TimeRange; query?: Query | AggregateQuery },
+      isUpdate?: boolean
+    ) => void;
+    /**
      * Triggered when the user selects a different data view in the data view picker
      * @param id - id of the data view
      */
@@ -528,6 +537,13 @@ export function getDiscoverStateContainer({
   };
 
   /**
+   * Triggered when a user submits a query in the search bar
+   */
+  const onChangeQuery = (payload: { dateRange: TimeRange; query?: Query | AggregateQuery }) => {
+    internalState.dispatch(injectCurrentTab(internalStateActions.setQueryChanged)(payload));
+  };
+
+  /**
    * Function e.g. triggered when user changes data view in the sidebar
    */
   const onChangeDataView = async (dataViewId: string | DataView) => {
@@ -620,6 +636,7 @@ export function getDiscoverStateContainer({
       transitionFromESQLToDataView,
       transitionFromDataViewToESQL,
       onUpdateQuery,
+      onChangeQuery,
       setDataView,
       undoSavedSearchChanges,
       updateAdHocDataViewId,

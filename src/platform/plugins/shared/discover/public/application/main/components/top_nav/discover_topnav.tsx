@@ -58,6 +58,7 @@ export const DiscoverTopNav = ({
   const isESQLToDataViewTransitionModalVisible = useInternalStateSelector(
     (state) => state.isESQLToDataViewTransitionModalVisible
   );
+  const queryChanged = useInternalStateSelector((state) => state.queryChanged);
   const savedSearch = useSavedSearchInitial();
   const isEsqlMode = useIsEsqlMode();
   const showDatePicker = useMemo(() => {
@@ -213,7 +214,7 @@ export const DiscoverTopNav = ({
 
   const shouldHideDefaultDataviewPicker =
     !!searchBarCustomization?.CustomDataViewPicker || !!searchBarCustomization?.hideDataViewPicker;
-
+  const actualQuery = queryChanged?.query ?? query;
   return (
     <>
       <SearchBar
@@ -221,10 +222,11 @@ export const DiscoverTopNav = ({
         appName="discover"
         indexPatterns={[dataView]}
         onQuerySubmit={stateContainer.actions.onUpdateQuery}
+        onQueryChange={stateContainer.actions.onChangeQuery}
         onCancel={onCancelClick}
         isLoading={isLoading}
         onSavedQueryIdChange={updateSavedQueryId}
-        query={query}
+        query={actualQuery}
         savedQueryId={savedQuery}
         screenTitle={savedSearch.title}
         showDatePicker={showDatePicker}

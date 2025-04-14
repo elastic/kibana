@@ -66,6 +66,7 @@ export interface DiscoverInternalState {
   savedDataViews: DataViewListItem[];
   defaultProfileAdHocDataViewIds: string[];
   expandedDoc: DataTableRecord | undefined;
+  queryChanged: any;
   isESQLToDataViewTransitionModalVisible: boolean;
   tabs: {
     byId: Record<string, TabState>;

@@ -18,6 +18,7 @@ import {
 } from '@reduxjs/toolkit';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import type { TabItem } from '@kbn/unified-tabs';
+import type { AggregateQuery, Query, TimeRange } from '@kbn/es-query';
 import type { DiscoverCustomizationContext } from '../../../../customizations';
 import type { DiscoverServices } from '../../../../build_services';
 import { type RuntimeStateManager } from './runtime_state';
@@ -63,6 +64,7 @@ const initialState: DiscoverInternalState = {
   expandedDoc: undefined,
   isESQLToDataViewTransitionModalVisible: false,
   tabs: { byId: {}, allIds: [], unsafeCurrentId: '' },
+  queryChanged: undefined,
 };
 
 export type TabActionPayload<T extends { [key: string]: unknown } = {}> = { tabId: string } & T;
@@ -120,6 +122,13 @@ export const internalStateSlice = createSlice({
 
     setDefaultProfileAdHocDataViewIds: (state, action: PayloadAction<string[]>) => {
       state.defaultProfileAdHocDataViewIds = action.payload;
+    },
+
+    setQueryChanged: (
+      state,
+      action: TabAction<{ dateRange: TimeRange; query?: Query | AggregateQuery }>
+    ) => {
+      state.queryChanged = action.payload;
     },
 
     setExpandedDoc: (state, action: PayloadAction<DataTableRecord | undefined>) => {

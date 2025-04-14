@@ -396,9 +396,6 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
   };
 
   public onTextLangQueryChange = (query?: any) => {
-    this.setState({
-      query,
-    });
     if (this.props.onQueryChange) {
       this.props.onQueryChange({
         query,
@@ -406,6 +403,10 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
           from: this.state.dateRangeFrom,
           to: this.state.dateRangeTo,
         },
+      });
+    } else {
+      this.setState({
+        query,
       });
     }
   };
@@ -529,7 +530,6 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
         showTimeFilterOption={this.shouldRenderTimeFilterInSavedQueryForm()}
       />
     );
-
     const queryBarMenu = this.props.showQueryMenu ? (
       <QueryBarMenu
         nonKqlMode={this.props.nonKqlMode}
