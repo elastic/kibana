@@ -58,18 +58,17 @@ const getRowMidPoint = (headerRef: HTMLDivElement | null, footerRef: HTMLDivElem
   if (!footerRef) {
     const { top, height } = headerRef.getBoundingClientRect();
     return top + height / 2;
-  } 
+  }
   const top = headerRef.getBoundingClientRect().top;
   const bottom = footerRef.getBoundingClientRect().bottom;
   return top + (bottom - top) / 2;
-}
+};
 
 export const moveAction = (
   gridLayoutStateManager: GridLayoutStateManager,
   startingPointer: PointerPosition,
   currentPointer: PointerPosition
 ) => {
-
   const currentActiveRowEvent = gridLayoutStateManager.activeRowEvent$.getValue();
   if (!currentActiveRowEvent) return;
 
@@ -79,17 +78,23 @@ export const moveAction = (
   const currentRowOrder = getRowKeysInOrder(currentLayout);
   currentRowOrder.shift(); // drop first row since nothing can go above it
 
-  // drop first header since nothing can go above it 
-  const updatedRowOrder = Object.keys(gridLayoutStateManager.headerRefs.current).slice(1).sort(
-    (idA, idB) => {
+  // drop first header since nothing can go above it
+  const updatedRowOrder = Object.keys(gridLayoutStateManager.headerRefs.current)
+    .slice(1)
+    .sort((idA, idB) => {
       // if expanded, get dimensions of row; otherwise, use the header
-      const midA = getRowMidPoint(gridLayoutStateManager.headerRefs.current[idA], gridLayoutStateManager.rowEndMarkRefs.current[idA]);
-      const midB = getRowMidPoint(gridLayoutStateManager.headerRefs.current[idB], gridLayoutStateManager.rowEndMarkRefs.current[idB]);
+      const midA = getRowMidPoint(
+        gridLayoutStateManager.headerRefs.current[idA],
+        gridLayoutStateManager.rowEndMarkRefs.current[idA]
+      );
+      const midB = getRowMidPoint(
+        gridLayoutStateManager.headerRefs.current[idB],
+        gridLayoutStateManager.rowEndMarkRefs.current[idB]
+      );
       if (!midA || !midB) return 0;
 
       return midA - midB;
-    }
-  );
+    });
 
   if (!deepEqual(currentRowOrder, updatedRowOrder)) {
     const updatedLayout = cloneDeep(currentLayout);

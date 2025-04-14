@@ -9,6 +9,10 @@
 
 import { GridLayoutData, GridRowData } from '../types';
 
+const COLLAPSIBLE_HEADER_HEIGHT = 2;
+
+const getHeaderHeight = (row: GridRowData) => (row.isCollapsible ? COLLAPSIBLE_HEADER_HEIGHT : 0);
+
 export const getRowHeight = (row: GridRowData) => {
   // for the elements build like:
   // {id: '10', row: 58, column: 0, width: 24, height: 11}
@@ -19,11 +23,14 @@ export const getRowHeight = (row: GridRowData) => {
     if (!acc) return panelEnd;
     return Math.max(acc, panelEnd);
   }, 0);
-  const headerHeight = !row.isCollapsible ? 0 : 2;
-  return panelsHeight + headerHeight;
+  return panelsHeight + getHeaderHeight(row);
 };
 
-export const getTopOffsetForRow = (rowId: string, layout: GridLayoutData) => {
+export const getTopOffsetForRow = (
+  rowId: string,
+  layout: GridLayoutData,
+  shouldCountHeader?: boolean
+) => {
   // get all the rows before the current row using the order property
   const rowsBefore = Object.values(layout).filter((row) => row.order < layout[rowId].order);
   // get the height of all the rows before the current row
@@ -31,7 +38,7 @@ export const getTopOffsetForRow = (rowId: string, layout: GridLayoutData) => {
     return acc + getRowHeight(row);
   }, 0);
 
-  return rowsBeforeHeight;
+  return rowsBeforeHeight + (shouldCountHeader ? getHeaderHeight(layout[rowId]) : 0);
 };
 
 export const getTopOffsetForRowFooter = (rowId: string, layout: GridLayoutData) => {

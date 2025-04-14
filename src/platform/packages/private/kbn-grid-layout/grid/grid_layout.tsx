@@ -14,12 +14,7 @@ import { css } from '@emotion/react';
 import { combineLatest, pairwise } from 'rxjs';
 
 import { GridHeightSmoother } from './grid_height_smoother';
-import {
-  GridAccessMode,
-  GridLayoutData,
-  GridSettings,
-  UseCustomDragHandle,
-} from './types';
+import { GridAccessMode, GridLayoutData, GridSettings, UseCustomDragHandle } from './types';
 import { GridLayoutContext, GridLayoutContextType } from './use_grid_layout_context';
 import { useGridLayoutState } from './use_grid_layout_state';
 import { isLayoutEqual } from './utils/equality_checks';
@@ -42,25 +37,23 @@ export type GridLayoutProps = {
 
 type GridElementData = [string, string, boolean];
 
-const getGridsElementData = (
-  layout: GridLayoutData
-) => {
+const getGridsElementData = (layout: GridLayoutData) => {
   const rowIdsInOrder = getRowKeysInOrder(layout);
   const flattenedGridElements: GridElementData[] = rowIdsInOrder.flatMap((rowId) => {
     const row = layout[rowId];
     const panelIdsInOrder = getPanelKeysInOrder(row.panels);
     const startMark: GridElementData = [
-      !row.isCollapsible ? 'row-start-mark' : 'header',
+      row.isCollapsible ? 'header' : 'row-start-mark',
       rowId,
       row.isCollapsed,
     ];
-    const panelElements = row.isCollapsed ? [] : panelIdsInOrder.map((panelId): GridElementData => [panelId, rowId, row.isCollapsed])
-    const endMark: GridElementData[] =  row.isCollapsed ? [] : [['row-end-mark', rowId, row.isCollapsed]];
-    return [
-      startMark,
-      ...panelElements,
-      ...endMark,
-    ];
+    const panelElements = row.isCollapsed
+      ? []
+      : panelIdsInOrder.map((panelId): GridElementData => [panelId, rowId, row.isCollapsed]);
+    const endMark: GridElementData[] = row.isCollapsed
+      ? []
+      : [['row-end-mark', rowId, row.isCollapsed]];
+    return [startMark, ...panelElements, ...endMark];
   });
   return flattenedGridElements;
 };
@@ -90,7 +83,7 @@ export const GridLayout = ({
   const [gridElements, setGridElements] = useState<GridElementData[]>(() =>
     getGridsElementData(layout)
   );
-  // we use ref because subscription is inside of the stable useEffect so the state would be stale 
+  // we use ref because subscription is inside of the stable useEffect so the state would be stale
   const gridElementsRef = useRef(gridElements);
   // Keep ref in sync with state
   useEffect(() => {
@@ -210,7 +203,6 @@ export const GridLayout = ({
       const newLayout = cloneDeep(gridLayoutStateManager.gridLayout$.value);
       newLayout[rId].isCollapsed = !newLayout[rId].isCollapsed;
       gridLayoutStateManager.gridLayout$.next(newLayout);
-      
     },
     [gridLayoutStateManager.gridLayout$]
   );

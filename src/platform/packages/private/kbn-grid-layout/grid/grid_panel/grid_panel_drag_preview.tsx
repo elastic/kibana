@@ -35,8 +35,7 @@ export const GridPanelDragPreview = React.memo(() => {
 
           const row = proposedGridLayout?.[rowId];
 
-          const headerOffset = !row.isCollapsible ? 0 : 2;
-          const offset = getTopOffsetForRow(rowId, proposedGridLayout) + headerOffset;
+          const offset = getTopOffsetForRow(rowId, proposedGridLayout, true);
 
           if (!activePanel || !row.panels[activePanel.id]) {
             dragPreviewRef.current.style.display = 'none';
