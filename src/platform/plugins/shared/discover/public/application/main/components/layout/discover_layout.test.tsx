@@ -33,7 +33,6 @@ import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
-import { createSearchSessionMock } from '../../../../__mocks__/search_session';
 import { getSessionServiceMock } from '@kbn/data-plugin/public/search/session/mocks';
 import { DiscoverMainProvider } from '../../state_management/discover_state_provider';
 import { act } from 'react-dom/test-utils';
@@ -114,7 +113,11 @@ async function mountComponent(
   );
   stateContainer.internalState.dispatch(
     stateContainer.injectCurrentTab(internalStateActions.setDataRequestParams)({
-      dataRequestParams: { timeRangeAbsolute: time, timeRangeRelative: time },
+      dataRequestParams: {
+        timeRangeAbsolute: time,
+        timeRangeRelative: time,
+        searchSessionId: '123',
+      },
     })
   );
 
@@ -131,7 +134,6 @@ async function mountComponent(
     setExpandedDoc: jest.fn(),
     updateDataViewList: jest.fn(),
   };
-  stateContainer.searchSessionManager = createSearchSessionMock(session).searchSessionManager;
 
   const component = mountWithIntl(
     <KibanaContextProvider services={services}>
