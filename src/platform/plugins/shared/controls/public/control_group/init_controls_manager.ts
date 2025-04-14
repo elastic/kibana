@@ -103,17 +103,17 @@ export function initControlsManager(
   }
 
   async function addNewPanel(
-    { panelType, initialState }: PanelPackage<{}, DefaultControlState>,
+    { panelType, serializedState }: PanelPackage<DefaultControlState>,
     index: number
   ) {
-    if ((initialState as DefaultDataControlState)?.dataViewId) {
-      lastUsedDataViewId$.next((initialState as DefaultDataControlState).dataViewId);
+    if ((serializedState?.rawState as DefaultDataControlState)?.dataViewId) {
+      lastUsedDataViewId$.next((serializedState!.rawState as DefaultDataControlState).dataViewId);
     }
-    if (initialState?.width) {
-      lastUsedWidth$.next(initialState.width);
+    if (serializedState?.rawState?.width) {
+      lastUsedWidth$.next(serializedState.rawState.width);
     }
-    if (typeof initialState?.grow === 'boolean') {
-      lastUsedGrow$.next(initialState.grow);
+    if (typeof serializedState?.rawState?.grow === 'boolean') {
+      lastUsedGrow$.next(serializedState.rawState.grow);
     }
 
     const id = generateId();
@@ -123,7 +123,7 @@ export function initControlsManager(
       type: panelType,
     });
     controlsInOrder$.next(nextControlsInOrder);
-    currentControlsState[id] = initialState ?? {};
+    currentControlsState[id] = serializedState?.rawState ?? {};
     return await untilControlLoaded(id);
   }
 

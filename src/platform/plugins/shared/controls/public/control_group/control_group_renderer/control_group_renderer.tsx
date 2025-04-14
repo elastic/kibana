@@ -12,7 +12,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
 
-import { ReactEmbeddableRenderer } from '@kbn/embeddable-plugin/public';
+import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import { useSearchApi, type ViewMode } from '@kbn/presentation-publishing';
 
@@ -162,7 +162,7 @@ export const ControlGroupRenderer = ({
   }, []);
 
   return !serializedState ? null : (
-    <ReactEmbeddableRenderer<ControlGroupSerializedState, ControlGroupRuntimeState, ControlGroupApi>
+    <EmbeddableRenderer<ControlGroupSerializedState, ControlGroupApi>
       key={regenerateId} // this key forces a re-mount when `updateInput` is called
       maybeId={id}
       type={CONTROL_GROUP_TYPE}
