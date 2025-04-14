@@ -11,8 +11,7 @@ import type {
 } from '@kbn/dashboard-plugin/common/content_management/v2';
 import { cloneDeep, mapValues, uniq } from 'lodash';
 import { AggregateQuery, Query } from '@kbn/es-query';
-import { ESQLSource, EsqlQuery } from '@kbn/esql-ast';
-import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
+import { getIndexPatternFromESQLQuery, replaceESQLQueryIndexPattern } from '@kbn/esql-utils';
 import type { LensAttributes } from '@kbn/lens-embeddable-utils';
 import type { IndexPatternRef } from '@kbn/lens-plugin/public/types';
 import type { ContentPackSavedObject } from '../models';
@@ -51,7 +50,7 @@ export function replaceIndexPatterns(
 ) {
   return locateIndexPatterns(cloneDeep(savedObject), {
     esqlQuery(query: string) {
-      return replaceESQLIndexPattern(query, replacements);
+      return replaceESQLQueryIndexPattern(query, replacements);
     },
     indexPattern<T extends { name?: string; title?: string }>(pattern: T) {
       const updatedPattern = pattern.title
@@ -141,17 +140,4 @@ function traverseLensPanel(panel: LensAttributes, options: TraverseOptions) {
   }
 
   return panel;
-}
-
-export function replaceESQLIndexPattern(esql: string, replacements: Record<string, string>) {
-  const query = EsqlQuery.fromSrc(esql);
-  const sourceCommand = query.ast.commands.find(({ name }) => ['from', 'metrics'].includes(name));
-  const args = (sourceCommand?.args ?? []) as ESQLSource[];
-  args.forEach((arg) => {
-    if (arg.sourceType === 'index' && arg.index && replacements[arg.index.valueUnquoted]) {
-      arg.index.valueUnquoted = replacements[arg.index.valueUnquoted];
-    }
-  });
-
-  return query.print();
 }
