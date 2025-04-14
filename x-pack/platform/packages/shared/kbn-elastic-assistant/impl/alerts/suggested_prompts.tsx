@@ -24,6 +24,8 @@ interface Prompt {
   title: string;
   description: string;
 }
+
+// TODO update this copy, waiting on James Spiteri's input
 const prompts: Prompt[] = [
   {
     icon: 'bullseye',

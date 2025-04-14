@@ -526,6 +526,7 @@ export const getDefaultAIConnectorSetting = (connectors: Connector[]): SettingsC
           description: i18n.translate(
             'xpack.securitySolution.uiSettings.defaultAIConnectorDescription',
             {
+              // TODO update this copy, waiting on James Spiteri's input
               defaultMessage: 'Default AI connector for serverless AI features (AI for SOC)',
             }
           ),
