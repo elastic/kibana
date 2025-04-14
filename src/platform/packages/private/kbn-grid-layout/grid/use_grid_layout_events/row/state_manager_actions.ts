@@ -128,7 +128,7 @@ function getDropTarget(
   const rowId =  Object.keys(headerRefs).find((id) => {
     const ref = headerRefs[id];
     if (!ref) return false;
-    const { top, bottom } = ref.getBoundingClientRect();
+    const { top, bottom } = getRowRect(id, gridLayoutStateManager) 
     return currentPointer.clientY >= top && currentPointer.clientY <= bottom;
   });
   return rowId;
@@ -140,7 +140,9 @@ const getRowRect = (
 ) => {
   const headerRef = gridLayoutStateManager.headerRefs.current[rowId];
   const rowRef = gridLayoutStateManager.rowDimensionsRefs.current[rowId];
-  if (!headerRef) return null;
+  if (!headerRef) {
+    throw new Error('header ref should be defined for all rows');
+  }
   if (!rowRef) {
     const { top, bottom } = headerRef.getBoundingClientRect();
     return {
