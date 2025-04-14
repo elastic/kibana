@@ -7,6 +7,7 @@
 
 import { mount, shallow } from 'enzyme';
 import React from 'react';
+import 'jest-styled-components';
 
 import { TestProviders } from '../../mock';
 import {

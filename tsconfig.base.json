@@ -2234,7 +2234,7 @@
       "node",
       "jest",
       "flot",
-      "jest-styled-components",
+      "@emotion/jest",
       "@testing-library/jest-dom",
       "@emotion/react/types/css-prop",
       "@kbn/ambient-ui-types",

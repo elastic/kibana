@@ -9,6 +9,7 @@ import { render, cleanup } from '@testing-library/react';
 import React from 'react';
 
 import '@testing-library/jest-dom';
+import 'jest-styled-components';
 import {
   useGlobalFullScreen,
   useTimelineFullScreen,

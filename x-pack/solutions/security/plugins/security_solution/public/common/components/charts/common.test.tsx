@@ -8,9 +8,6 @@
 import { mount } from 'enzyme';
 import React from 'react';
 import { renderHook } from '@testing-library/react';
-import { matchers } from '@emotion/jest';
-
-expect.extend(matchers);
 
 import { useDarkMode } from '../../lib/kibana';
 import type { ChartSeriesData } from './common';

@@ -7,6 +7,7 @@
 
 import { render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
+import 'jest-styled-components';
 import { useLocation } from 'react-router-dom';
 
 import { SecurityPageName } from '../../../../../common/constants';

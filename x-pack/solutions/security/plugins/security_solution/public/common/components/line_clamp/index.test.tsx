@@ -8,6 +8,7 @@
 import { mount } from 'enzyme';
 import { repeat } from 'lodash/fp';
 import React from 'react';
+import 'jest-styled-components';
 
 import { LineClamp } from '.';
 

@@ -7,9 +7,6 @@
 
 import { mount, shallow } from 'enzyme';
 import React from 'react';
-import { matchers } from '@emotion/jest';
-
-expect.extend(matchers);
 
 import { TestProviders } from '../../mock';
 import { getHeaderAlignment, HeaderSection } from '.';
