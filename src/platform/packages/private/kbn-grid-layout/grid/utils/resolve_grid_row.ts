@@ -65,17 +65,12 @@ export const getMainLayoutInOrder = (
       if (widgetA.type === 'panel') {
         // widgetB is a section
         const [panel, section] = [widgetA as GridPanelData, widgetB as GridRowData];
-        // if (panel.id === '7c02d081-73a7-48c7-8ca7-fff6a9bb3ac3')
-        //   console.log(panel.row, section.row);
-        if (panel.row > section.row) return 1; // panel should be put after section
+        if (panel.row >= section.row) return 1; // panel should be put after section
         return -1; // panel should be put before section
       } else {
         // widgetA is a section
         const [panel, section] = [widgetB as GridPanelData, widgetA as GridRowData];
-        if (panel.row > section.row) return -1; // panel should be put after section
-        // if (panel.id === '7c02d081-73a7-48c7-8ca7-fff6a9bb3ac3')
-        //   console.log(panel.row, section.row);
-
+        if (panel.row >= section.row) return -1; // panel should be put after section
         return 1; // panel should be put before section
       }
     } else {
