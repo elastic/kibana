@@ -188,6 +188,16 @@ const fetchAndCompareCustomAssets = async (
 
   try {
     const installedPipelines = await getPipeline(esClient, CUSTOM_ASSETS_PREFIX, abortController);
+
+    for (const [_, ccrCustomAsset] of Object.entries(ccrCustomAssets)) {
+      if (ccrCustomAsset.type === 'ingest_pipeline' && !ccrCustomAsset.name.includes('@custom')) {
+        const response = await getPipeline(esClient, ccrCustomAsset.name, abortController);
+        if (response[ccrCustomAsset.name]) {
+          installedPipelines[ccrCustomAsset.name] = response[ccrCustomAsset.name];
+        }
+      }
+    }
+
     const installedComponentTemplates = await getComponentTemplate(
       esClient,
       CUSTOM_ASSETS_PREFIX,
