@@ -12,7 +12,7 @@ import { Routes, Route } from '@kbn/shared-ux-router';
 import { Redirect } from 'react-router-dom';
 import { CONFIGURATIONS_PATH } from '../../../common/constants';
 import { SEARCH_AI_LAKE_ALLOWED_INTEGRATIONS } from '../../common/lib/search_ai_lake/integrations';
-import { useEnhancedIntegrationCards } from './integrations/hooks';
+import { useEnhancedIntegrationCards } from '../../common/lib/search_ai_lake/hooks';
 import { ConfigurationTabs, IntegrationsFacets } from '../constants';
 import { IntegrationsPage, IntegrationsSkeleton } from './integrations/components';
 import { withLazyHook } from '../../common/components/with_lazy_hook';

@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export const FACETS_MAX_WIDTH_PX = 216;
-export const INTEGRATIONS_GRID_MAX_WIDTH_PX = 1200;
+export const RETURN_APP_ID = 'returnAppId';
+export const RETURN_PATH = 'returnPath';

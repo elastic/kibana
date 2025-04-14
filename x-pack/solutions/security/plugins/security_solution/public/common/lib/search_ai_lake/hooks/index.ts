@@ -4,4 +4,4 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-export { useEnhancedIntegrationCards } from './use_enhanced_integration_cards';
+export { useEnhancedIntegrationCards } from './integrations/use_enhanced_integration_cards';

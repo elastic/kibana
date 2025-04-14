@@ -10,7 +10,7 @@ import {
   useEnhancedIntegrationCards,
   getCategoryBadgeIfAny,
 } from './use_enhanced_integration_cards';
-import { IntegrationsFacets } from '../../../constants';
+import { IntegrationsFacets } from '../../../../../configurations/constants';
 import type { IntegrationCardItem } from '@kbn/fleet-plugin/public';
 import { installationStatuses } from '@kbn/fleet-plugin/public';
 import { renderHook } from '@testing-library/react';
