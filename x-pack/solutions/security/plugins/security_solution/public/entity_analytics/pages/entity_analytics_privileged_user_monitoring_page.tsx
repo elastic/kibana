@@ -18,7 +18,7 @@ export const EntityAnalyticsPrivilegedUserMonitoringPage = () => {
       <PrivilegedUserMonitoringOnboardingPanel />
       <EuiSpacer size="l" />
       <PrivilegedUserMonitoringSampleDashboardsPanel />
-      <SpyRoute pageName={SecurityPageName.privilegedUserMonitoring} />
+      <SpyRoute pageName={SecurityPageName.entityAnalyticsPrivilegedUserMonitoring} />
     </SecuritySolutionPageWrapper>
   );
 };

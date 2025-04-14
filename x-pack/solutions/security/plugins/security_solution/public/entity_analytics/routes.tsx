@@ -124,9 +124,9 @@ EntityAnalyticsLandingContainer.displayName = 'EntityAnalyticsLandingContainer';
 
 const EntityAnalyticsPrivilegedUserMonitoringTelemetry = () => (
   <PluginTemplateWrapper>
-    <TrackApplicationView viewId={SecurityPageName.privilegedUserMonitoring}>
+    <TrackApplicationView viewId={SecurityPageName.entityAnalyticsPrivilegedUserMonitoring}>
       <EntityAnalyticsPrivilegedUserMonitoringPage />
-      <SpyRoute pageName={SecurityPageName.privilegedUserMonitoring} />
+      <SpyRoute pageName={SecurityPageName.entityAnalyticsPrivilegedUserMonitoring} />
     </TrackApplicationView>
   </PluginTemplateWrapper>
 );

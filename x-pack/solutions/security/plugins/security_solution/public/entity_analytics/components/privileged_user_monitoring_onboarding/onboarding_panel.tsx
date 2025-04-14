@@ -46,7 +46,7 @@ export const PrivilegedUserMonitoringOnboardingPanel = () => {
                     <h2>
                       <FormattedMessage
                         id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.pageTitle"
-                        defaultMessage="Privileged User Monitoring"
+                        defaultMessage="Privileged user monitoring"
                       />
                     </h2>
                   </EuiTitle>

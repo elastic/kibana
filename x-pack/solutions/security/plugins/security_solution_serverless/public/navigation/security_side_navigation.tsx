@@ -424,7 +424,7 @@ export const createSecurityNavigationTree$ = (
             children: [
               {
                 id: 'entity_analytics-privileged_user_monitoring',
-                link: securityLink(SecurityPageName.privilegedUserMonitoring),
+                link: securityLink(SecurityPageName.entityAnalyticsPrivilegedUserMonitoring),
                 renderAs: 'item',
               },
             ],
