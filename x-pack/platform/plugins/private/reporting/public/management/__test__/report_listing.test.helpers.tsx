@@ -29,6 +29,7 @@ import { SerializableRecord } from '@kbn/utility-types';
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { Observable } from 'rxjs';
+import { EuiThemeProvider } from '@elastic/eui';
 
 import { ListingProps as Props, ReportListing } from '..';
 import { mockJobs } from '../../../common/test';
@@ -106,22 +107,24 @@ export const createTestBed = registerTestBed(
     share,
     ...rest
   }: Partial<Props> & TestDependencies) => (
-    <KibanaContextProvider services={{ http, application, uiSettings, data, share }}>
-      <InternalApiClientProvider apiClient={reportingAPIClient} http={http}>
-        <IlmPolicyStatusContextProvider>
-          <ReportListing
-            license$={l$}
-            config={mockConfig}
-            redirect={jest.fn()}
-            navigateToUrl={jest.fn()}
-            urlService={urlService}
-            toasts={toasts}
-            apiClient={reportingAPIClient}
-            {...rest}
-          />
-        </IlmPolicyStatusContextProvider>
-      </InternalApiClientProvider>
-    </KibanaContextProvider>
+    <EuiThemeProvider>
+      <KibanaContextProvider services={{ http, application, uiSettings, data, share }}>
+        <InternalApiClientProvider apiClient={reportingAPIClient} http={http}>
+          <IlmPolicyStatusContextProvider>
+            <ReportListing
+              license$={l$}
+              config={mockConfig}
+              redirect={jest.fn()}
+              navigateToUrl={jest.fn()}
+              urlService={urlService}
+              toasts={toasts}
+              apiClient={reportingAPIClient}
+              {...rest}
+            />
+          </IlmPolicyStatusContextProvider>
+        </InternalApiClientProvider>
+      </KibanaContextProvider>
+    </EuiThemeProvider>
   ),
   { memoryRouter: { wrapComponent: false } }
 );

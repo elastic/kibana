@@ -12,6 +12,7 @@ import sinon from 'sinon';
 import { shallow } from 'enzyme';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { findTestSubject } from '@elastic/eui/lib/test';
+import { EuiThemeProvider } from '@elastic/eui';
 
 import { InputControlVis } from './input_control_vis';
 import { ListControl } from '../../control/list_control_factory';
@@ -51,6 +52,12 @@ const mockRangeControl: RangeControl = {
 const updateFiltersOnChange = false;
 
 const refreshControlMock = () => Promise.resolve();
+
+const Wrapper = ({ children }: { children: React.ReactNode }) => (
+  <EuiThemeProvider>
+    <div>{children}</div>
+  </EuiThemeProvider>
+);
 
 let stageFilter: sinon.SinonSpy;
 let submitFilters: sinon.SinonSpy;
@@ -150,21 +157,23 @@ test('Clear btns enabled when there are values', () => {
 
 test('clearControls', () => {
   const component = mountWithIntl(
-    <InputControlVis
-      stageFilter={stageFilter}
-      submitFilters={submitFilters}
-      resetControls={resetControls}
-      clearControls={clearControls}
-      controls={[mockListControl]}
-      updateFiltersOnChange={updateFiltersOnChange}
-      hasChanges={() => {
-        return true;
-      }}
-      hasValues={() => {
-        return true;
-      }}
-      refreshControl={refreshControlMock}
-    />
+    <Wrapper>
+      <InputControlVis
+        stageFilter={stageFilter}
+        submitFilters={submitFilters}
+        resetControls={resetControls}
+        clearControls={clearControls}
+        controls={[mockListControl]}
+        updateFiltersOnChange={updateFiltersOnChange}
+        hasChanges={() => {
+          return true;
+        }}
+        hasValues={() => {
+          return true;
+        }}
+        refreshControl={refreshControlMock}
+      />
+    </Wrapper>
   );
   findTestSubject(component, 'inputControlClearBtn').simulate('click');
   sinon.assert.calledOnce(clearControls);
@@ -175,21 +184,23 @@ test('clearControls', () => {
 
 test('submitFilters', () => {
   const component = mountWithIntl(
-    <InputControlVis
-      stageFilter={stageFilter}
-      submitFilters={submitFilters}
-      resetControls={resetControls}
-      clearControls={clearControls}
-      controls={[mockListControl]}
-      updateFiltersOnChange={updateFiltersOnChange}
-      hasChanges={() => {
-        return true;
-      }}
-      hasValues={() => {
-        return true;
-      }}
-      refreshControl={refreshControlMock}
-    />
+    <Wrapper>
+      <InputControlVis
+        stageFilter={stageFilter}
+        submitFilters={submitFilters}
+        resetControls={resetControls}
+        clearControls={clearControls}
+        controls={[mockListControl]}
+        updateFiltersOnChange={updateFiltersOnChange}
+        hasChanges={() => {
+          return true;
+        }}
+        hasValues={() => {
+          return true;
+        }}
+        refreshControl={refreshControlMock}
+      />
+    </Wrapper>
   );
   findTestSubject(component, 'inputControlSubmitBtn').simulate('click');
   sinon.assert.calledOnce(submitFilters);
@@ -200,21 +211,23 @@ test('submitFilters', () => {
 
 test('resetControls', () => {
   const component = mountWithIntl(
-    <InputControlVis
-      stageFilter={stageFilter}
-      submitFilters={submitFilters}
-      resetControls={resetControls}
-      clearControls={clearControls}
-      controls={[mockListControl]}
-      updateFiltersOnChange={updateFiltersOnChange}
-      hasChanges={() => {
-        return true;
-      }}
-      hasValues={() => {
-        return true;
-      }}
-      refreshControl={refreshControlMock}
-    />
+    <Wrapper>
+      <InputControlVis
+        stageFilter={stageFilter}
+        submitFilters={submitFilters}
+        resetControls={resetControls}
+        clearControls={clearControls}
+        controls={[mockListControl]}
+        updateFiltersOnChange={updateFiltersOnChange}
+        hasChanges={() => {
+          return true;
+        }}
+        hasValues={() => {
+          return true;
+        }}
+        refreshControl={refreshControlMock}
+      />
+    </Wrapper>
   );
   findTestSubject(component, 'inputControlCancelBtn').simulate('click');
   sinon.assert.calledOnce(resetControls);
