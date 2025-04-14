@@ -15,7 +15,6 @@ const CustomIntegrationFieldsSchema = schema.object({
 export const CustomIntegrationRequestSchema = {
   body: schema.object({
     id: schema.string(),
-    // the fields are an object
     fields: CustomIntegrationFieldsSchema,
   }),
 };
