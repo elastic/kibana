@@ -53,7 +53,7 @@ export const defaultGroupTitleRenderers: GroupPanelRenderer<AlertsGroupingAggreg
       ) : undefined;
     case 'host.name':
       return (
-        <GroupContent
+        <GroupWithIconContent
           title={bucket.key}
           icon="storage"
           nullGroupMessage={nullGroupMessage}
@@ -62,7 +62,7 @@ export const defaultGroupTitleRenderers: GroupPanelRenderer<AlertsGroupingAggreg
       );
     case 'user.name':
       return (
-        <GroupContent
+        <GroupWithIconContent
           title={bucket.key}
           icon="user"
           nullGroupMessage={nullGroupMessage}
@@ -71,7 +71,7 @@ export const defaultGroupTitleRenderers: GroupPanelRenderer<AlertsGroupingAggreg
       );
     case 'source.ip':
       return (
-        <GroupContent
+        <GroupWithIconContent
           title={bucket.key}
           icon="globe"
           nullGroupMessage={nullGroupMessage}
@@ -81,21 +81,27 @@ export const defaultGroupTitleRenderers: GroupPanelRenderer<AlertsGroupingAggreg
   }
 };
 
-const RuleNameGroupContent = React.memo<{
+export const RULE_NAME_GROUP_TEST_ID = 'rule-name-group-renderer';
+export const RULE_NAME_GROUP_TITLE_TEST_ID = 'rule-name-group-renderer-title';
+export const RULE_NAME_GROUP_DESCRIPTION_TEST_ID = 'rule-name-group-renderer-description';
+export const RULE_NAME_GROUP_TAG_TEST_ID = 'rule-name-group-renderer-tag';
+export const RULE_NAME_GROUP_TAGS_TEST_ID = 'rule-name-group-renderer-tags';
+
+export const RuleNameGroupContent = React.memo<{
   ruleName: string;
   ruleDescription: string;
   tags?: GenericBuckets[] | undefined;
 }>(({ ruleName, ruleDescription, tags }) => {
   const renderItem = (tag: string, i: number) => (
-    <EuiBadge color="hollow" key={`${tag}-${i}`} data-test-subj="tag">
+    <EuiBadge color="hollow" key={`${tag}-${i}`} data-test-subj={RULE_NAME_GROUP_TAG_TEST_ID}>
       {tag}
     </EuiBadge>
   );
   return (
     <div style={{ display: 'table', tableLayout: 'fixed', width: '100%' }}>
-      <EuiFlexGroup data-test-subj="rule-name-group-renderer" gutterSize="s" alignItems="center">
-        <EuiFlexItem grow={false} style={{ display: 'contents' }}>
-          <EuiTitle size="xs">
+      <EuiFlexGroup data-test-subj={RULE_NAME_GROUP_TEST_ID} gutterSize="s" alignItems="center">
+        <EuiFlexItem grow={false} css={{ display: 'contents' }}>
+          <EuiTitle data-test-subj={RULE_NAME_GROUP_TITLE_TEST_ID} size="xs">
             <h5 className="eui-textTruncate">{ruleName.trim()}</h5>
           </EuiTitle>
         </EuiFlexItem>
@@ -106,14 +112,13 @@ const RuleNameGroupContent = React.memo<{
               popoverTitle={COLUMN_TAGS}
               popoverButtonTitle={tags.length.toString()}
               popoverButtonIcon="tag"
-              dataTestPrefix="tags"
+              dataTestPrefix={RULE_NAME_GROUP_TAGS_TEST_ID}
               renderItem={renderItem}
             />
           </EuiFlexItem>
         ) : null}
       </EuiFlexGroup>
-
-      <EuiText size="s">
+      <EuiText data-test-subj={RULE_NAME_GROUP_DESCRIPTION_TEST_ID} size="s">
         <p className="eui-textTruncate">
           <EuiTextColor color="subdued">{ruleDescription}</EuiTextColor>
         </p>
@@ -123,7 +128,7 @@ const RuleNameGroupContent = React.memo<{
 });
 RuleNameGroupContent.displayName = 'RuleNameGroup';
 
-const GroupContent = React.memo<{
+export const GroupWithIconContent = React.memo<{
   title: string | string[];
   icon: string;
   nullGroupMessage?: string;
@@ -135,18 +140,18 @@ const GroupContent = React.memo<{
     alignItems="center"
   >
     <EuiFlexItem grow={false}>
-      <EuiIcon type={icon} size="m" />
+      <EuiIcon data-test-subj={`${dataTestSubj}-group-renderer-icon`} size="m" type={icon} />
     </EuiFlexItem>
     <EuiFlexItem grow={false}>
-      <EuiTitle size="xs">
+      <EuiTitle data-test-subj={`${dataTestSubj}-group-renderer-title`} size="xs">
         <h5>{title}</h5>
       </EuiTitle>
     </EuiFlexItem>
     {nullGroupMessage && (
-      <EuiFlexItem grow={false}>
+      <EuiFlexItem data-test-subj={`${dataTestSubj}-group-renderer-null-message`} grow={false}>
         <EuiIconTip content={nullGroupMessage} position="right" />
       </EuiFlexItem>
     )}
   </EuiFlexGroup>
 ));
-GroupContent.displayName = 'GroupContent';
+GroupWithIconContent.displayName = 'GroupWithIconContent';

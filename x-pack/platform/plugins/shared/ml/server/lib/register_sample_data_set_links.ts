@@ -21,7 +21,7 @@ export function registerSampleDataSetLinks(
     });
     const { addAppLinksToSampleDataset } = home.sampleData;
     const getCreateJobPath = (jobId: string, dataViewId: string) =>
-      `/app/ml/modules/check_view_or_create?id=${jobId}&index=${dataViewId}`;
+      `/app/management/ml/anomaly_detection/modules/check_view_or_create?id=${jobId}&index=${dataViewId}`;
 
     try {
       addAppLinksToSampleDataset('ecommerce', [
