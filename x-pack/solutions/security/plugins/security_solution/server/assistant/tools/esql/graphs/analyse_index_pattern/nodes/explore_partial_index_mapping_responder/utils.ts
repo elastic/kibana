@@ -13,11 +13,11 @@ import { toolDetails } from '../../../../tools/inspect_index_mapping_tool/inspec
 import { messageContainsToolCalls } from '../../../../utils/common';
 
 export const buildContext = (messages: BaseMessage[]): Record<string, unknown> => {
-  const orderedInspectIndexMappingToolCalls = messages
+  const orderedInspectIndexMappingToolCalls: ToolCall[] = messages
     .filter((message) => messageContainsToolCalls(message))
     .flatMap((message) => (message as AIMessage).tool_calls)
     .filter((toolCall) => toolCall !== undefined)
-    .filter((toolCall) => toolCall.name === toolDetails.name);
+    .filter((toolCall) => (toolCall as ToolCall).name === toolDetails.name);
 
   const orderedInspectIndexMappingToolCallIds = orderedInspectIndexMappingToolCalls.map(
     (toolCall) => toolCall.id
@@ -45,7 +45,7 @@ export const buildContext = (messages: BaseMessage[]): Record<string, unknown> =
     );
 
   let context = {};
-   /* eslint-disable no-continue */
+  /* eslint-disable no-continue */
 
   for (const toolMessage of orderedInspectIndexMappingToolMessages) {
     const toolCall = inspectIndexMappingToolCallByIds[toolMessage.tool_call_id];
@@ -54,14 +54,14 @@ export const buildContext = (messages: BaseMessage[]): Record<string, unknown> =
         try {
           context = JSON.parse(toolMessage.content as string);
         } catch (e) {
-            continue
+          continue;
         }
       } else {
         try {
           const parsedContent = JSON.parse(toolMessage.content as string);
           set(context, toolCall.args.property, parsedContent);
         } catch (e) {
-            continue
+          continue;
         }
       }
     }
