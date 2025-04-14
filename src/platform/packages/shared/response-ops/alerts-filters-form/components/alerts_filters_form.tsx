@@ -35,7 +35,7 @@ import {
   OR_OPERATOR,
 } from '../translations';
 import { AlertsFiltersFormItem } from './alerts_filters_form_item';
-import { isFilter } from '../utils/filters_expression';
+import { isFilter } from '../utils';
 import {
   ADD_AND_OPERATION_BUTTON_SUBJ,
   ADD_OR_OPERATION_BUTTON_SUBJ,

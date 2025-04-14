@@ -16,7 +16,7 @@ import { AlertsFiltersExpression } from '@kbn/response-ops-alerts-filters-form/t
 import { useGetInternalRuleTypesQuery } from '@kbn/response-ops-rules-apis/hooks/use_get_internal_rule_types_query';
 import { RuleTypeSolution } from '@kbn/alerting-types';
 import { AlertsSolutionSelector } from '@kbn/response-ops-alerts-filters-form/components/alerts_solution_selector';
-import { getRuleTypeIdsForSolution } from '@kbn/response-ops-alerts-filters-form/utils/get_rule_types_by_solution';
+import { getRuleTypeIdsForSolution } from '@kbn/response-ops-alerts-filters-form/utils';
 
 export const AlertsFiltersFormSandbox = ({
   services: { http, notifications },

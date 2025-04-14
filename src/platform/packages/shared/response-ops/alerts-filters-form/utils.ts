@@ -9,6 +9,7 @@
 
 import type { RuleTypeSolution } from '@kbn/alerting-types';
 import type { InternalRuleType } from '@kbn/response-ops-rules-apis/apis/get_internal_rule_types';
+import type { AlertsFilter, AlertsFiltersExpressionItem } from './types';
 
 /**
  * Filters rule types by solution and returns their ids.
@@ -30,3 +31,6 @@ export const getRuleTypeIdsForSolution = (
     )
     .map((ruleType) => ruleType.id);
 };
+
+export const isFilter = (item?: AlertsFiltersExpressionItem): item is { filter: AlertsFilter } =>
+  item != null && 'filter' in item;
