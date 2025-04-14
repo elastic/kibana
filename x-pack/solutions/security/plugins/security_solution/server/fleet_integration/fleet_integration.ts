@@ -47,7 +47,7 @@ import type { NewPolicyData, PolicyConfig } from '../../common/endpoint/types';
 import type { LicenseService } from '../../common/license';
 import type { ManifestManager } from '../endpoint/services';
 import type { IRequestContextFactory } from '../request_context_factory';
-import { installPrepackagedRules } from './handlers/install_prepackaged_rules';
+import { installEndpointSecurityPrebuiltRule } from '../lib/detection_engine/prebuilt_rules/logic/rules_package/install_endpoint_security_prebuilt_rule';
 import { createPolicyArtifactManifest } from './handlers/create_policy_artifact_manifest';
 import { createDefaultPolicy } from './handlers/create_default_policy';
 import { validatePolicyAgainstLicense } from './handlers/validate_policy_against_license';
@@ -122,7 +122,6 @@ export const getPackagePolicyCreateCallback = (
   securitySolutionRequestContextFactory: IRequestContextFactory,
   alerts: AlertingServerStart,
   licenseService: LicenseService,
-  exceptionsClient: ExceptionListClient | undefined,
   cloud: CloudSetup,
   productFeatures: ProductFeaturesService,
   telemetryConfigProvider: TelemetryConfigProvider
@@ -176,15 +175,13 @@ export const getPackagePolicyCreateCallback = (
 
     // perform these operations in parallel in order to help in not delaying the API response too much
     const [, manifestValue] = await Promise.all([
-      // Install Detection Engine prepackaged rules
-      exceptionsClient &&
-        installPrepackagedRules({
-          logger,
-          context: securitySolutionContext,
-          request,
-          alerts,
-          exceptionsClient,
-        }),
+      installEndpointSecurityPrebuiltRule({
+        logger,
+        context: securitySolutionContext,
+        request,
+        alerts,
+        soClient,
+      }),
 
       // create the Artifact Manifest for this policy
       createPolicyArtifactManifest(logger, manifestManager),
