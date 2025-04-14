@@ -81,6 +81,11 @@ describe('useKnowledgeBase', () => {
       expect(mockCallApi).toHaveBeenCalledWith(
         'POST /internal/observability_ai_assistant/kb/setup',
         {
+          params: {
+            query: {
+              inference_id: '.elser-2-elasticsearch',
+            },
+          },
           signal: null,
         }
       );
