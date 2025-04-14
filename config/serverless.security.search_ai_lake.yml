@@ -2,13 +2,17 @@
 
 ## Disable plugins
 xpack.osquery.enabled: false
+xpack.visualize.enabled: false
+xpack.maps.enabled: false
 
 xpack.features.overrides:
   ### The following features are Security features hidden in Role management UI for this specific tier.
   securitySolutionTimeline.hidden: true
   securitySolutionNotes.hidden: true
+#  maps_v2.hidden: true
+#  dashboard_v2.hidden: true
 
 ## Agentless deployment by default
 xpack.fleet.agentless.isDefault: true
 # Override integrations home
-xpack.fleet.integrationsHomeOverride: '/app/security/configurations/integrations' 
+xpack.fleet.integrationsHomeOverride: '/app/security/configurations/integrations'

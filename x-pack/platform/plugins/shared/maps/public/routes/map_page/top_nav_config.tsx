@@ -112,7 +112,7 @@ export function getTopNavConfig({
     });
   }
 
-  if (getMapsCapabilities().save) {
+  if (getMapsCapabilities()?.save) {
     const hasSaveAndReturnConfig = savedMap.hasSaveAndReturnConfig();
     const mapDescription = savedMap.getAttributes().description
       ? savedMap.getAttributes().description!
@@ -190,7 +190,7 @@ export function getTopNavConfig({
               return {};
             }
 
-            await savedMap.save({
+            await savedMap?.save({
               ...props,
               tags,
               saveByReference: props.addToLibrary,
@@ -262,7 +262,7 @@ export function getTopNavConfig({
         emphasize: true,
         iconType: 'checkInCircleFilled',
         run: () => {
-          savedMap.save({
+          savedMap?.save({
             newTitle: savedMap.getTitle(),
             newDescription: mapDescription,
             newCopyOnSave: false,

@@ -59,7 +59,7 @@ describe('getTopNavBadges()', function () {
 
   test('should not show save in unsaved changed badge for read-only user', async () => {
     const discoverServiceMockReadOnly = createDiscoverServicesMock();
-    discoverServiceMockReadOnly.capabilities.discover_v2.save = false;
+    discoverServiceMockReadOnly.capabilities.discover_v2?.save = false;
     const topNavBadges = getTopNavBadges({
       hasUnsavedChanges: true,
       services: discoverServiceMockReadOnly,
@@ -132,7 +132,7 @@ describe('getTopNavBadges()', function () {
 
   describe('solutions view badge', () => {
     const discoverServiceWithSpacesMock = createDiscoverServicesMock();
-    discoverServiceWithSpacesMock.capabilities.discover_v2.save = true;
+    discoverServiceWithSpacesMock.capabilities.discover_v2?.save = true;
     discoverServiceWithSpacesMock.spaces = spacesPluginMock.createStartContract();
 
     test('should return the solutions view badge when spaces is enabled', () => {

@@ -68,7 +68,6 @@ import type { NoDataPagePluginStart } from '@kbn/no-data-page-plugin/public';
 import { EmbeddableEnhancedPluginStart } from '@kbn/embeddable-enhanced-plugin/public';
 
 import type { TypesSetup, TypesStart } from './vis_types';
-import type { VisualizeServices } from './visualize_app/types';
 import {
   aggBasedVisualizationTrigger,
   dashboardVisualizationPanelTrigger,
@@ -200,8 +199,11 @@ export class VisualizationsPlugin
   private stopUrlTracking: (() => void) | undefined = undefined;
   private currentHistory: ScopedHistory | undefined = undefined;
   private isLinkedToOriginatingApp: (() => boolean) | undefined = undefined;
+  private readonly config: any; // TODO type
 
-  constructor(private initializerContext: PluginInitializerContext) {}
+  constructor(private initializerContext: PluginInitializerContext) {
+    this.config = initializerContext.config.get();
+  }
 
   public setup(
     core: CoreSetup<VisualizationsStartDeps, VisualizationsStart>,
@@ -264,107 +266,111 @@ export class VisualizationsPlugin
     const listingViewRegistry: ListingViewRegistry = new Set();
     const visEditorsRegistry = createVisEditorsRegistry();
 
-    core.application.register({
-      id: VisualizeConstants.APP_ID,
-      title: 'Visualize Library',
-      order: 8000,
-      euiIconType: 'logoKibana',
-      defaultPath: '#/',
-      category: DEFAULT_APP_CATEGORIES.kibana,
-      updater$: this.appStateUpdater.asObservable(),
-      // remove all references to visualize
-      mount: async (params: AppMountParameters) => {
-        const [coreStart, pluginsStart] = await core.getStartServices();
-        this.currentHistory = params.history;
+    console.log({ config: this.config });
+    // visualizations
+    if (this.config.visualize?.enabled) {
+      core.application.register({
+        id: VisualizeConstants.APP_ID,
+        title: 'Visualize Library',
+        order: 8000,
+        euiIconType: 'logoKibana',
+        defaultPath: '#/',
+        category: DEFAULT_APP_CATEGORIES.kibana,
+        updater$: this.appStateUpdater.asObservable(),
+        // remove all references to visualize
+        mount: async (params: AppMountParameters) => {
+          const [coreStart, pluginsStart] = await core.getStartServices();
+          this.currentHistory = params.history;
 
-        // allows the urlTracker to only save URLs that are not linked to an originatingApp
-        this.isLinkedToOriginatingApp = () => {
-          return Boolean(
-            pluginsStart.embeddable
-              .getStateTransfer()
-              .getIncomingEditorState(VisualizeConstants.APP_ID)?.originatingApp
-          );
-        };
+          // allows the urlTracker to only save URLs that are not linked to an originatingApp
+          this.isLinkedToOriginatingApp = () => {
+            return Boolean(
+              pluginsStart.embeddable
+                .getStateTransfer()
+                .getIncomingEditorState(VisualizeConstants.APP_ID)?.originatingApp
+            );
+          };
 
-        // make sure the index pattern list is up to date
-        pluginsStart.dataViews.clearCache();
+          // make sure the index pattern list is up to date
+          pluginsStart.dataViews.clearCache();
 
-        appMounted();
+          appMounted();
 
-        // dispatch synthetic hash change event to update hash history objects
-        // this is necessary because hash updates triggered by using popState won't trigger this event naturally.
-        const unlistenParentHistory = params.history.listen(() => {
-          window.dispatchEvent(new HashChangeEvent('hashchange'));
-        });
-        /**
-         * current implementation uses 2 history objects:
-         * 1. the hash history (used for the react hash router)
-         * 2. and the scoped history (used for url tracking)
-         * this should be replaced to use only scoped history after moving legacy apps to browser routing
-         */
-        const history = createHashHistory();
-        const [{ createVisEmbeddableFromObject }, { renderApp }] = await Promise.all([
-          import('./legacy/embeddable'),
-          import('./visualize_app'),
-        ]);
-        const services: VisualizeServices = {
-          ...coreStart,
-          history,
-          kbnUrlStateStorage: createKbnUrlStateStorage({
+          // dispatch synthetic hash change event to update hash history objects
+          // this is necessary because hash updates triggered by using popState won't trigger this event naturally.
+          const unlistenParentHistory = params.history.listen(() => {
+            window.dispatchEvent(new HashChangeEvent('hashchange'));
+          });
+          /**
+           * current implementation uses 2 history objects:
+           * 1. the hash history (used for the react hash router)
+           * 2. and the scoped history (used for url tracking)
+           * this should be replaced to use only scoped history after moving legacy apps to browser routing
+           */
+          const history = createHashHistory();
+          const [{ createVisEmbeddableFromObject }, { renderApp }] = await Promise.all([
+            import('./legacy/embeddable'),
+            import('./visualize_app'),
+          ]);
+          const services: VisualizeServices = {
+            ...coreStart,
             history,
-            useHash: coreStart.uiSettings.get('state:storeInSessionStorage'),
-            ...withNotifyOnErrors(coreStart.notifications.toasts),
-          }),
-          urlForwarding: pluginsStart.urlForwarding,
-          pluginInitializerContext: this.initializerContext,
-          chrome: coreStart.chrome,
-          data: pluginsStart.data,
-          core: coreStart,
-          dataViewEditor: pluginsStart.dataViewEditor,
-          dataViews: pluginsStart.dataViews,
-          localStorage: new Storage(localStorage),
-          navigation: pluginsStart.navigation,
-          share: pluginsStart.share,
-          toastNotifications: coreStart.notifications.toasts,
-          visualizeCapabilities: coreStart.application.capabilities.visualize_v2,
-          dashboardCapabilities: coreStart.application.capabilities.dashboard_v2,
-          embeddable: pluginsStart.embeddable,
-          stateTransferService: pluginsStart.embeddable.getStateTransfer(),
-          setActiveUrl,
-          /** @deprecated */
-          createVisEmbeddableFromObject: createVisEmbeddableFromObject({ start }),
-          scopedHistory: params.history,
-          restorePreviousUrl,
-          setHeaderActionMenu: params.setHeaderActionMenu,
-          savedObjectsTagging: pluginsStart.savedObjectsTaggingOss?.getTaggingApi(),
-          savedSearch: pluginsStart.savedSearch,
-          presentationUtil: pluginsStart.presentationUtil,
-          getKibanaVersion: () => this.initializerContext.env.packageInfo.version,
-          spaces: pluginsStart.spaces,
-          visEditorsRegistry,
-          listingViewRegistry,
-          unifiedSearch: pluginsStart.unifiedSearch,
-          serverless: pluginsStart.serverless,
-          noDataPage: pluginsStart.noDataPage,
-          contentManagement: pluginsStart.contentManagement,
-        };
+            kbnUrlStateStorage: createKbnUrlStateStorage({
+              history,
+              useHash: coreStart.uiSettings.get('state:storeInSessionStorage'),
+              ...withNotifyOnErrors(coreStart.notifications.toasts),
+            }),
+            urlForwarding: pluginsStart.urlForwarding,
+            pluginInitializerContext: this.initializerContext,
+            chrome: coreStart.chrome,
+            data: pluginsStart.data,
+            core: coreStart,
+            dataViewEditor: pluginsStart.dataViewEditor,
+            dataViews: pluginsStart.dataViews,
+            localStorage: new Storage(localStorage),
+            navigation: pluginsStart.navigation,
+            share: pluginsStart.share,
+            toastNotifications: coreStart.notifications.toasts,
+            visualizeCapabilities: coreStart.application.capabilities.visualize_v2,
+            dashboardCapabilities: coreStart.application.capabilities.dashboard_v2,
+            embeddable: pluginsStart.embeddable,
+            stateTransferService: pluginsStart.embeddable.getStateTransfer(),
+            setActiveUrl,
+            /** @deprecated */
+            createVisEmbeddableFromObject: createVisEmbeddableFromObject({ start }),
+            scopedHistory: params.history,
+            restorePreviousUrl,
+            setHeaderActionMenu: params.setHeaderActionMenu,
+            savedObjectsTagging: pluginsStart.savedObjectsTaggingOss?.getTaggingApi(),
+            savedSearch: pluginsStart.savedSearch,
+            presentationUtil: pluginsStart.presentationUtil,
+            getKibanaVersion: () => this.initializerContext.env.packageInfo.version,
+            spaces: pluginsStart.spaces,
+            visEditorsRegistry,
+            listingViewRegistry,
+            unifiedSearch: pluginsStart.unifiedSearch,
+            serverless: pluginsStart.serverless,
+            noDataPage: pluginsStart.noDataPage,
+            contentManagement: pluginsStart.contentManagement,
+          };
 
-        params.element.classList.add('visAppWrapper');
-        if (pluginsStart.screenshotMode.isScreenshotMode()) {
-          params.element.classList.add('visEditorScreenshotModeActive');
-          // @ts-expect-error TS error, cannot find type declaration for scss
-          await import('./visualize_screenshot_mode.scss');
-        }
-        const unmount = renderApp(params, services);
-        return () => {
-          data.search.session.clear();
-          params.element.classList.remove('visAppWrapper');
-          unlistenParentHistory();
-          unmount();
-          appUnMounted();
-        };
-      },
-    });
+          params.element.classList.add('visAppWrapper');
+          if (pluginsStart.screenshotMode.isScreenshotMode()) {
+            params.element.classList.add('visEditorScreenshotModeActive');
+            // @ts-expect-error TS error, cannot find type declaration for scss
+            await import('./visualize_screenshot_mode.scss');
+          }
+          const unmount = renderApp(params, services);
+          return () => {
+            data.search.session.clear();
+            params.element.classList.remove('visAppWrapper');
+            unlistenParentHistory();
+            unmount();
+            appUnMounted();
+          };
+        },
+      });
+    }
 
     urlForwarding.forwardApp('visualize', 'visualize');
 

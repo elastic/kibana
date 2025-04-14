@@ -82,6 +82,7 @@ export class EntityManagerServerPlugin
     plugins: EntityManagerPluginSetupDependencies
   ): EntityManagerServerPluginSetup {
     const ENTITY_MANAGER_FEATURE_ID = 'entityManager';
+    // TODO make sure to disable for ai_soc
     plugins.features.registerKibanaFeature({
       id: ENTITY_MANAGER_FEATURE_ID,
       name: 'Entity Manager',

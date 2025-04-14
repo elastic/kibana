@@ -71,15 +71,21 @@ export class SecuritySolutionServerlessPlugin
   }
 
   public setup(coreSetup: CoreSetup, pluginsSetup: SecuritySolutionServerlessPluginSetupDeps) {
+    console.log('1111111');
     this.config = createConfig(this.initializerContext, pluginsSetup.securitySolution);
 
+    console.log('222222');
     // Register product features
     const enabledProductFeatures = getEnabledProductFeatures(this.config.productTypes);
 
+    console.log('333333');
+
     registerProductFeatures(pluginsSetup, enabledProductFeatures, this.config);
+    console.log('4444444');
 
     // Register telemetry events
     telemetryEvents.forEach((eventConfig) => coreSetup.analytics.registerEventType(eventConfig));
+    console.log('55555555');
 
     // Setup project uiSettings whitelisting
     pluginsSetup.serverless.setupProjectSettings(SECURITY_PROJECT_SETTINGS);

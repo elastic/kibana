@@ -32,7 +32,7 @@ export const querySavedObjectType: SavedObjectsType = {
     getInAppUrl(obj) {
       return {
         path: `/app/discover#/?_a=(savedQuery:'${encodeURIComponent(obj.id)}')`,
-        uiCapabilitiesPath: 'discover_v2.show',
+        uiCapabilitiesPath: 'discover_v2?.show',
       };
     },
   },

@@ -475,7 +475,7 @@ export const LensTopNavMenu = ({
   const { from, to } = data.query.timefilter.timefilter.getTime();
 
   const savingToLibraryPermitted = Boolean(
-    isSaveable && application.capabilities.visualize_v2.save
+    isSaveable && application.capabilities.visualize_v2?.save
   );
   const savingToDashboardPermitted = Boolean(
     isSaveable && application.capabilities.dashboard_v2?.showWriteControls
