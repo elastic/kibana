@@ -109,9 +109,6 @@ export const performEsqlRequest = async ({
       if (pollCount > 60) {
         pollInterval = 60 * 1000; // Increase the poll interval after 10m
       }
-      if (pollCount > 120) {
-        pollInterval = 10 * 60 * 1000; // Increase the poll interval further after ~ 1h
-      }
 
       const isCancelled = shouldStopExecution(); // Execution will be cancelled if rule timeouts
       ruleExecutionLogger?.debug(`Polling for query ID: ${queryId}, isCancelled: ${isCancelled}`);
