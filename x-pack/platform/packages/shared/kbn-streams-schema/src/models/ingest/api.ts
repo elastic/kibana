@@ -15,12 +15,8 @@ import {
   WiredStreamDefinition,
   unwiredIngestSchema,
   unwiredStreamDefinitionSchema,
-  unwiredStreamDefinitionSchemaBase,
   wiredIngestSchema,
   wiredStreamDefinitionSchema,
-  wiredStreamDefinitionSchemaBase,
-  type UnwiredStreamDefinitionBase,
-  type WiredStreamDefinitionBase,
 } from './base';
 import { ElasticsearchAssets, elasticsearchAssetsSchema } from './common';
 import { InheritedFieldDefinition, inheritedFieldDefinitionSchema } from './fields';
@@ -146,28 +142,50 @@ const ingestStreamGetResponseSchema: z.Schema<IngestStreamGetResponse> = z.union
  * Ingest stream upsert request
  */
 
+interface UnwiredStreamDefinitionUpsertRequest {
+  ingest: UnwiredIngest;
+  description?: string;
+}
+
+const unwiredStreamDefinitionUpsertRequestSchema: z.Schema<UnwiredStreamDefinitionUpsertRequest> =
+  z.object({
+    ingest: unwiredIngestSchema,
+    description: z.string().optional(),
+  });
+
 interface UnwiredStreamUpsertRequest {
   dashboards: string[];
   queries: StreamQuery[];
-  stream: UnwiredStreamDefinitionBase;
+  stream: UnwiredStreamDefinitionUpsertRequest;
 }
 
 const unwiredStreamUpsertRequestSchema: z.Schema<UnwiredStreamUpsertRequest> = z.object({
   dashboards: z.array(NonEmptyString),
   queries: z.array(streamQuerySchema),
-  stream: unwiredStreamDefinitionSchemaBase,
+  stream: unwiredStreamDefinitionUpsertRequestSchema,
 });
+
+interface WiredStreamDefinitionUpsertRequest {
+  ingest: WiredIngest;
+  description?: string;
+}
+
+const wiredStreamDefinitionUpsertRequestSchema: z.Schema<WiredStreamDefinitionUpsertRequest> =
+  z.object({
+    ingest: wiredIngestSchema,
+    description: z.string().optional(),
+  });
 
 interface WiredStreamUpsertRequest {
   dashboards: string[];
   queries: StreamQuery[];
-  stream: WiredStreamDefinitionBase;
+  stream: WiredStreamDefinitionUpsertRequest;
 }
 
 const wiredStreamUpsertRequestSchema: z.Schema<WiredStreamUpsertRequest> = z.object({
   dashboards: z.array(NonEmptyString),
   queries: z.array(streamQuerySchema),
-  stream: wiredStreamDefinitionSchemaBase,
+  stream: wiredStreamDefinitionUpsertRequestSchema,
 });
 
 type IngestStreamUpsertRequest = WiredStreamUpsertRequest | UnwiredStreamUpsertRequest;
@@ -191,10 +209,12 @@ export {
   type IngestUpsertRequest,
   type UnwiredIngestResponse,
   type UnwiredIngestUpsertRequest,
+  type UnwiredStreamDefinitionUpsertRequest,
   type UnwiredStreamGetResponse,
   type UnwiredStreamUpsertRequest,
   type WiredIngestResponse,
   type WiredIngestUpsertRequest,
+  type WiredStreamDefinitionUpsertRequest,
   type WiredStreamGetResponse,
   type WiredStreamUpsertRequest,
 };

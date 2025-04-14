@@ -42,7 +42,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         const response = await putStream(apiClient, 'logs', {
           stream: {
-            description: '',
             ingest: {
               ...(streamDefinition as WiredStreamGetResponse).stream.ingest,
             },
@@ -65,7 +64,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     describe('Unwired streams update', () => {
       const unwiredPutBody: IngestStreamUpsertRequest = {
         stream: {
-          description: '',
           ingest: {
             lifecycle: { inherit: {} },
             processing: [],

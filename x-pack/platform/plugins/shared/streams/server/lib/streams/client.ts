@@ -199,7 +199,11 @@ export class StreamsClient {
     name: string;
     request: StreamUpsertRequest;
   }): Promise<UpsertStreamResponse> {
-    const stream: StreamDefinition = { ...request.stream, name };
+    const stream: StreamDefinition = {
+      ...request.stream,
+      description: request.stream.description ?? '',
+      name,
+    };
 
     const result = await State.attemptChanges(
       [

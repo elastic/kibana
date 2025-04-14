@@ -90,7 +90,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     const wiredPutBody: IngestStreamUpsertRequest = {
       stream: {
-        description: '',
         ingest: {
           lifecycle: { inherit: {} },
           processing: [],
@@ -397,7 +396,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     describe('Unwired streams update', () => {
       const unwiredPutBody: IngestStreamUpsertRequest = {
         stream: {
-          description: '',
           ingest: {
             lifecycle: { inherit: {} },
             processing: [],

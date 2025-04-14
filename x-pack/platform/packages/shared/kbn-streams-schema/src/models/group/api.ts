@@ -9,8 +9,8 @@ import { NonEmptyString } from '@kbn/zod-helpers';
 import { streamQuerySchema, type StreamQuery } from '../base/api';
 import {
   GroupBase,
-  groupBaseSchema,
   GroupStreamDefinitionBase,
+  groupBaseSchema,
   groupStreamDefinitionBaseSchema,
 } from './base';
 
@@ -46,16 +46,28 @@ const groupObjectUpsertRequestSchema = z.object({
 /**
  * Group upsert request
  */
+
+interface GroupStreamDefinitionUpsertRequest {
+  description?: string;
+  group: GroupBase;
+}
+
+const groupStreamDefinitionUpsertRequestSchema: z.Schema<GroupStreamDefinitionUpsertRequest> =
+  z.object({
+    description: z.string().optional(),
+    group: groupBaseSchema,
+  });
+
 interface GroupStreamUpsertRequest {
   dashboards: string[];
   queries: StreamQuery[];
-  stream: GroupStreamDefinitionBase;
+  stream: GroupStreamDefinitionUpsertRequest;
 }
 
 const groupStreamUpsertRequestSchema: z.Schema<GroupStreamUpsertRequest> = z.object({
   dashboards: z.array(NonEmptyString),
   queries: z.array(streamQuerySchema),
-  stream: groupStreamDefinitionBaseSchema,
+  stream: groupStreamDefinitionUpsertRequestSchema,
 });
 
 export {
@@ -64,6 +76,7 @@ export {
   groupStreamUpsertRequestSchema,
   type GroupObjectGetResponse,
   type GroupObjectUpsertRequest,
+  type GroupStreamDefinitionUpsertRequest,
   type GroupStreamGetResponse,
   type GroupStreamUpsertRequest,
 };

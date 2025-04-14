@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { WiredStreamDefinitionBase } from '@kbn/streams-schema';
+import { WiredStreamDefinitionUpsertRequest } from '@kbn/streams-schema';
 import { v4 } from 'uuid';
 import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import {
@@ -20,8 +20,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   let apiClient: StreamsSupertestRepositoryClient;
 
   const STREAM_NAME = 'logs.queries-test';
-  const stream: WiredStreamDefinitionBase = {
-    description: '',
+  const stream: WiredStreamDefinitionUpsertRequest = {
     ingest: {
       lifecycle: { inherit: {} },
       processing: [],
