@@ -34,56 +34,17 @@ interface UpdateAvailableCalloutProps {
   };
 }
 
-const BreakingChangesButton = ({
-  changelog,
-  onClick,
-}: {
-  changelog: BreakingChangesLog;
-  onClick: () => void;
-}) => {
-  const { euiTheme } = useEuiTheme();
-  const isOneChange = changelog.length === 1 && changelog[0].changes.length === 1;
-
-  const buttonText = 'Review breaking changes';
-  const buttonCSS = css`
-    background-color: ${euiTheme.colors.backgroundFilledWarning};
-  `;
-
-  if (isOneChange) {
-    return (
-      <EuiButton
-        color="warning"
-        css={buttonCSS}
-        href={changelog[0].changes[0].link}
-        target="_blank"
-      >
-        <FormattedMessage
-          id="xpack.fleet.integrations.settings.versionInfo.reviewBreakingChangesButton"
-          defaultMessage={buttonText}
-        />
-        <EuiIcon type="popout" />
-      </EuiButton>
-    );
-  }
-
-  return (
-    <EuiButton color="warning" css={buttonCSS} onClick={onClick}>
-      <FormattedMessage
-        id="xpack.fleet.integrations.settings.versionInfo.reviewBreakingChangesButton"
-        defaultMessage={buttonText}
-      />
-    </EuiButton>
-  );
-};
-
 export const UpdateAvailableCallout = ({
   version,
   toggleChangelogModal,
   breakingChanges,
 }: UpdateAvailableCalloutProps) => {
   const hasBreakingChanges = breakingChanges.changelog.length > 0;
+  const isOneChange =
+    breakingChanges.changelog.length === 1 && breakingChanges.changelog[0].changes.length === 1;
 
   const checkboxId = useGeneratedHtmlId({ prefix: 'understoodBreakingChangeCheckbox' });
+  const { euiTheme } = useEuiTheme();
 
   const defaultTitle = (
     <FormattedMessage
@@ -99,20 +60,37 @@ export const UpdateAvailableCallout = ({
     />
   );
 
-  const defaultBody = 'Upgrade to version {version} to get the latest features.';
-  const breakingChangesBody =
-    'Version {version} includes new features and breaking changes that may affect your current setup. Please review the changes carefully before upgrading.';
-
   return (
     <EuiCallOut
       color="warning"
       iconType="warning"
       title={hasBreakingChanges ? titleWithBreakingChanges : defaultTitle}
     >
-      {hasBreakingChanges ? (
+      {isOneChange ? (
+        <>
+          <FormattedMessage
+            id="xpack.fleet.integration.settings.versionInfo.updatesAvailableWithSingleBreakingChangesBodyIntro"
+            defaultMessage={
+              'Version {version} includes new features and a breaking change that may affect your current setup:'
+            }
+            values={{
+              version,
+            }}
+          />
+          <EuiSpacer size="m" />
+          <i style={{ paddingLeft: euiTheme.size.m }}>
+            {breakingChanges.changelog[0]?.changes[0]?.description}
+          </i>
+          <EuiSpacer size="m" />
+          <FormattedMessage
+            id="xpack.fleet.integration.settings.versionInfo.updatesAvailableWithSingleBreakingChangesBodyEnd"
+            defaultMessage="Please review the changes carefully before upgrading."
+          />
+        </>
+      ) : hasBreakingChanges ? (
         <FormattedMessage
           id="xpack.fleet.integration.settings.versionInfo.updatesAvailableWithBreakingChangesBody"
-          defaultMessage={breakingChangesBody}
+          defaultMessage="Version {version} includes new features and breaking changes that may affect your current setup. Please review the changes carefully before upgrading."
           values={{
             version,
           }}
@@ -120,7 +98,7 @@ export const UpdateAvailableCallout = ({
       ) : (
         <FormattedMessage
           id="xpack.fleet.integration.settings.versionInfo.updatesAvailableBody"
-          defaultMessage={defaultBody}
+          defaultMessage="Upgrade to version {version} to get the latest features."
           values={{
             version,
           }}
@@ -131,7 +109,7 @@ export const UpdateAvailableCallout = ({
         {hasBreakingChanges && (
           <EuiFlexItem grow={false}>
             <BreakingChangesButton
-              changelog={breakingChanges.changelog}
+              href={isOneChange ? breakingChanges.changelog[0].changes[0].link : undefined}
               onClick={breakingChanges.onOpen}
             />
           </EuiFlexItem>
@@ -157,5 +135,35 @@ export const UpdateAvailableCallout = ({
         </>
       )}
     </EuiCallOut>
+  );
+};
+
+const BreakingChangesButton = ({ href, onClick }: { href?: string; onClick: () => void }) => {
+  const { euiTheme } = useEuiTheme();
+
+  const buttonText = 'Review breaking changes';
+  const buttonCSS = css`
+    background-color: ${euiTheme.colors.backgroundFilledWarning};
+  `;
+
+  if (href) {
+    return (
+      <EuiButton color="warning" css={buttonCSS} href={href} target="_blank">
+        <FormattedMessage
+          id="xpack.fleet.integrations.settings.versionInfo.reviewBreakingChangesButton"
+          defaultMessage={buttonText}
+        />
+        <EuiIcon type="popout" />
+      </EuiButton>
+    );
+  }
+
+  return (
+    <EuiButton color="warning" css={buttonCSS} onClick={onClick}>
+      <FormattedMessage
+        id="xpack.fleet.integrations.settings.versionInfo.reviewBreakingChangesButton"
+        defaultMessage={buttonText}
+      />
+    </EuiButton>
   );
 };
