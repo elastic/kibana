@@ -7,7 +7,7 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 import type { EuiTableSelectionType } from '@elastic/eui';
-import { EuiProgress, useEuiTheme } from '@elastic/eui';
+import { EuiProgress, useEuiTheme, EuiSpacer } from '@elastic/eui';
 import { css } from '@emotion/react';
 import deepEqual from 'react-fast-compare';
 
@@ -21,7 +21,7 @@ import { CasesTableFilters } from './table_filters';
 import { CASES_TABLE_PER_PAGE_VALUES } from './types';
 import { CasesTable } from './table';
 import { useCasesContext } from '../cases_context/use_cases_context';
-import { CasesMetrics } from './cases_metrics';
+import { PlaceHolder } from '../placeholder/placeholder';
 import { useGetSupportedActionConnectors } from '../../containers/configure/use_get_supported_action_connectors';
 import { initialData, useGetCases } from '../../containers/use_get_cases';
 import { useBulkGetUserProfiles } from '../../containers/user_profiles/use_bulk_get_user_profiles';
@@ -202,7 +202,8 @@ export const AllCasesList = React.memo<AllCasesListProps>(
           }
         />
 
-        {!isSelectorView ? <CasesMetrics /> : null}
+        <PlaceHolder height={150} />
+        <EuiSpacer size="l" />
         <CasesTableFilters
           countClosedCases={data.countClosedCases}
           countOpenCases={data.countOpenCases}

@@ -11,7 +11,7 @@ import type {
   EuiContextMenuPanelItemDescriptor,
   EuiTableComputedColumnType,
 } from '@elastic/eui';
-import { EuiButtonIcon, EuiContextMenu, EuiPopover } from '@elastic/eui';
+import { EuiButtonIcon, EuiContextMenu, EuiPopover, EuiIcon } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { CaseUI } from '../../containers/types';
 import { useDeleteAction } from '../actions/delete/use_delete_action';
@@ -164,6 +164,23 @@ const ActionColumnComponent: React.FC<{ theCase: CaseUI; disableActions: boolean
         items: severityAction.getActions([theCase]),
       });
     }
+
+    mainPanelItems.push(
+      {
+        name: 'Solution action 1',
+        onClick: () => {},
+        disabled: false,
+        icon: <EuiIcon type="gear" size="m" />,
+        key: 'solution-action-item-1',
+      },
+      {
+        name: 'Solution action 2',
+        onClick: () => {},
+        disabled: false,
+        icon: <EuiIcon type="gear" size="m" />,
+        key: 'solution-action-item-2',
+      }
+    );
 
     return panelsToBuild;
   }, [

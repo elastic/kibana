@@ -15,6 +15,7 @@ import { ConfigureCaseButton, LinkButton } from '../links';
 import type { ErrorMessage } from '../use_push_to_service/callout/types';
 import { useCreateCaseNavigation } from '../../common/navigation';
 import { useCasesContext } from '../cases_context/use_cases_context';
+import { PlaceHolderButton } from '../placeholder/placeholder_button';
 
 interface OwnProps {
   actionsErrors: ErrorMessage[];
@@ -73,6 +74,9 @@ export const NavButtons: FunctionComponent<Props> = ({ actionsErrors }) => {
             </LinkButton>
           </EuiFlexItem>
         )}
+        <EuiFlexItem>
+          <PlaceHolderButton />
+        </EuiFlexItem>
       </EuiFlexGroup>
     </EuiFlexItem>
   );
