@@ -32,14 +32,14 @@ export const EmptyState: React.FC<{ height?: keyof typeof heights }> = ({ height
                   <EuiTitle>
                     <h3>
                       <FormattedMessage
-                        id="xpack.threatIntelligence.empty.title"
+                        id="xpack.securitySolution.threatIntelligence.empty.title"
                         defaultMessage="No results match your search criteria"
                       />
                     </h3>
                   </EuiTitle>
                   <p>
                     <FormattedMessage
-                      id="xpack.threatIntelligence.empty.description"
+                      id="xpack.securitySolution.threatIntelligence.empty.description"
                       defaultMessage="Try searching over a longer period of time or modifying your search"
                     />
                   </p>

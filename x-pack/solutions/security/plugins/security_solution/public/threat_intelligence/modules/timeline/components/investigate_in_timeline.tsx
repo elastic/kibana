@@ -55,7 +55,7 @@ export const InvestigateInTimelineContextMenu: FC<InvestigateInTimelineProps> = 
       <EuiContextMenuItem {...itemConfig} data-test-subj={dataTestSub}>
         <FormattedMessage
           defaultMessage="Investigate in Timeline"
-          id="xpack.threatIntelligence.investigateInTimelineButton"
+          id="xpack.securitySolution.threatIntelligence.investigateInTimelineButton"
         />
       </EuiContextMenuItem>
     );

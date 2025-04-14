@@ -71,7 +71,7 @@ export const AddToExistingCase: FC<AddToExistingCaseProps> = ({
     >
       <FormattedMessage
         defaultMessage="Add to existing case"
-        id="xpack.threatIntelligence.addToExistingCase"
+        id="xpack.securitySolution.threatIntelligence.addToExistingCase"
       />
     </EuiContextMenuItem>
   );

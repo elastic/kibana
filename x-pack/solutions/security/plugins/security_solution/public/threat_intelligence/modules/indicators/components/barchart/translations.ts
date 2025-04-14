@@ -8,12 +8,12 @@
 import { i18n } from '@kbn/i18n';
 
 export const COMBOBOX_PREPEND_LABEL = i18n.translate(
-  'xpack.threatIntelligence.indicator.fieldSelector.label',
+  'xpack.securitySolution.threatIntelligence.indicator.fieldSelector.label',
   {
     defaultMessage: 'Stack by',
   }
 );
 
-export const BUTTON_LABEL = i18n.translate('xpack.threatIntelligence.indicator.barChart.popover', {
+export const BUTTON_LABEL = i18n.translate('xpack.securitySolution.threatIntelligence.indicator.barChart.popover', {
   defaultMessage: 'More actions',
 });

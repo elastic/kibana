@@ -62,7 +62,7 @@ export const AddToBlockListContextMenu: FC<AddToBlockListProps> = ({
     >
       <FormattedMessage
         defaultMessage="Add blocklist entry"
-        id="xpack.threatIntelligence.addToBlockList"
+        id="xpack.securitySolution.threatIntelligence.addToBlockList"
       />
     </EuiContextMenuItem>
   );

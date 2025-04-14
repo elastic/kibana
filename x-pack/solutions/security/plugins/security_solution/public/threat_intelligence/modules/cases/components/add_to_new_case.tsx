@@ -71,7 +71,7 @@ export const AddToNewCase: FC<AddToNewCaseProps> = ({
     >
       <FormattedMessage
         defaultMessage="Add to new case"
-        id="xpack.threatIntelligence.addToNewCase"
+        id="xpack.securitySolution.threatIntelligence.addToNewCase"
       />
     </EuiContextMenuItem>
   );

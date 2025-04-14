@@ -19,7 +19,7 @@ export const IndicatorEmptyPrompt: FC = () => (
     title={
       <h2>
         <FormattedMessage
-          id="xpack.threatIntelligence.indicator.flyoutTable.errorMessageTitle"
+          id="xpack.securitySolution.threatIntelligence.indicator.flyoutTable.errorMessageTitle"
           defaultMessage="Unable to display indicator information"
         />
       </h2>
@@ -27,7 +27,7 @@ export const IndicatorEmptyPrompt: FC = () => (
     body={
       <p>
         <FormattedMessage
-          id="xpack.threatIntelligence.indicator.flyoutTable.errorMessageBody"
+          id="xpack.securitySolution.threatIntelligence.indicator.flyoutTable.errorMessageBody"
           defaultMessage="There was an error displaying the indicator fields and values."
         />
       </p>

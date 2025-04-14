@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 
 export const INSPECTOR_FLYOUT_TITLE = i18n.translate(
-  'xpack.threatIntelligence.inspectorFlyoutTitle',
+  'xpack.securitySolution.threatIntelligence.inspectorFlyoutTitle',
   {
     defaultMessage: 'Indicators search requests',
   }

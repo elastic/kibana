@@ -31,7 +31,7 @@ export const IndicatorFieldsTable: FC<IndicatorFieldsTableProps> = ({
         {
           name: (
             <FormattedMessage
-              id="xpack.threatIntelligence.indicator.fieldsTable.fieldColumnLabel"
+              id="xpack.securitySolution.threatIntelligence.indicator.fieldsTable.fieldColumnLabel"
               defaultMessage="Field"
             />
           ),
@@ -40,7 +40,7 @@ export const IndicatorFieldsTable: FC<IndicatorFieldsTableProps> = ({
         {
           name: (
             <FormattedMessage
-              id="xpack.threatIntelligence.indicator.fieldsTable.valueColumnLabel"
+              id="xpack.securitySolution.threatIntelligence.indicator.fieldsTable.valueColumnLabel"
               defaultMessage="Value"
             />
           ),

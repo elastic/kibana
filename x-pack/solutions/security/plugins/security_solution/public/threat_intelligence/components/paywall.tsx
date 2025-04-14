@@ -30,7 +30,7 @@ export const Paywall: FC = () => {
       title={
         <h2>
           <FormattedMessage
-            id="xpack.threatIntelligence.paywall.title"
+            id="xpack.securitySolution.threatIntelligence.paywall.title"
             defaultMessage="Do more with Security!"
           />
         </h2>
@@ -38,7 +38,7 @@ export const Paywall: FC = () => {
       body={
         <p>
           <FormattedMessage
-            id="xpack.threatIntelligence.paywall.body"
+            id="xpack.securitySolution.threatIntelligence.paywall.body"
             defaultMessage="Start a free trial or upgrade your license to Enterprise to use threat intelligence."
           />
         </p>
@@ -49,7 +49,7 @@ export const Paywall: FC = () => {
             <div>
               <EuiButton color="primary" fill href="https://www.elastic.co/subscriptions">
                 <FormattedMessage
-                  id="xpack.threatIntelligence.paywall.upgrade"
+                  id="xpack.securitySolution.threatIntelligence.paywall.upgrade"
                   defaultMessage="Upgrade"
                 />
               </EuiButton>
@@ -65,7 +65,7 @@ export const Paywall: FC = () => {
                 }
               >
                 <FormattedMessage
-                  id="xpack.threatIntelligence.paywall.trial"
+                  id="xpack.securitySolution.threatIntelligence.paywall.trial"
                   defaultMessage="Start a free trial"
                 />
               </EuiButtonEmpty>

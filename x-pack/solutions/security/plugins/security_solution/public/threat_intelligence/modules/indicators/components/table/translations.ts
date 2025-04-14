@@ -8,14 +8,14 @@
 import { i18n } from '@kbn/i18n';
 
 export const MORE_ACTIONS_BUTTON_LABEL = i18n.translate(
-  'xpack.threatIntelligence.indicator.table.moreActions',
+  'xpack.securitySolution.threatIntelligence.indicator.table.moreActions',
   {
     defaultMessage: 'More actions',
   }
 );
 
 export const VIEW_DETAILS_BUTTON_LABEL: string = i18n.translate(
-  'xpack.threatIntelligence.indicator.table.viewDetailsButton',
+  'xpack.securitySolution.threatIntelligence.indicator.table.viewDetailsButton',
   {
     defaultMessage: 'View details',
   }

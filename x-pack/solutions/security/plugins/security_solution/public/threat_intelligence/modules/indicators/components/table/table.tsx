@@ -109,7 +109,7 @@ export const IndicatorsTable: FC<IndicatorsTableProps> = ({
           : 2 * actionsColumnIconWidth,
         headerCellRender: () => (
           <FormattedMessage
-            id="xpack.threatIntelligence.indicator.table.actionColumnLabel"
+            id="xpack.securitySolution.threatIntelligence.indicator.table.actionColumnLabel"
             defaultMessage="Actions"
           />
         ),

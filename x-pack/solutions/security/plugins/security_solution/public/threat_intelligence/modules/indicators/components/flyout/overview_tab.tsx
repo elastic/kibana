@@ -101,7 +101,7 @@ export const IndicatorsFlyoutOverview: FC<IndicatorsFlyoutOverviewProps> = ({
           <EuiTitle size="xxs">
             <h5>
               <FormattedMessage
-                id="xpack.threatIntelligence.indicator.flyoutOverviewTable.highlightedFields"
+                id="xpack.securitySolution.threatIntelligence.indicator.flyoutOverviewTable.highlightedFields"
                 defaultMessage="Highlighted fields"
               />
             </h5>
@@ -110,7 +110,7 @@ export const IndicatorsFlyoutOverview: FC<IndicatorsFlyoutOverviewProps> = ({
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty onClick={onViewAllFieldsInTable}>
             <FormattedMessage
-              id="xpack.threatIntelligence.indicator.flyoutOverviewTable.viewAllFieldsInTable"
+              id="xpack.securitySolution.threatIntelligence.indicator.flyoutOverviewTable.viewAllFieldsInTable"
               defaultMessage="View all fields in table"
             />
           </EuiButtonEmpty>

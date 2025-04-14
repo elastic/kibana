@@ -68,7 +68,7 @@ export const CommentChildren: FC<CommentChildrenProps> = ({ id, metadata }) => {
             <EuiText size="s">
               <strong>
                 <FormattedMessage
-                  id="xpack.threatIntelligence.cases.indicatorName"
+                  id="xpack.securitySolution.threatIntelligence.cases.indicatorName"
                   defaultMessage="Indicator name:"
                 />
               </strong>
@@ -88,7 +88,7 @@ export const CommentChildren: FC<CommentChildrenProps> = ({ id, metadata }) => {
             <EuiText size="s">
               <strong>
                 <FormattedMessage
-                  id="xpack.threatIntelligence.cases.indicatorFeedName"
+                  id="xpack.securitySolution.threatIntelligence.cases.indicatorFeedName"
                   defaultMessage="Feed name:"
                 />
               </strong>
@@ -106,7 +106,7 @@ export const CommentChildren: FC<CommentChildrenProps> = ({ id, metadata }) => {
             <EuiText size="s">
               <strong>
                 <FormattedMessage
-                  id="xpack.threatIntelligence.cases.indicatorType"
+                  id="xpack.securitySolution.threatIntelligence.cases.indicatorType"
                   defaultMessage="Indicator type:"
                 />
               </strong>

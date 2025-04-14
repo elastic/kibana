@@ -70,7 +70,7 @@ export const TakeAction: FC<TakeActionProps> = ({ indicator }) => {
   const button = (
     <EuiButton iconType="arrowDown" iconSide="right" onClick={() => setPopover(!isPopoverOpen)}>
       <FormattedMessage
-        id="xpack.threatIntelligence.indicators.flyout.take-action.button"
+        id="xpack.securitySolution.threatIntelligence.indicators.flyout.take-action.button"
         defaultMessage="Take action"
       />
     </EuiButton>

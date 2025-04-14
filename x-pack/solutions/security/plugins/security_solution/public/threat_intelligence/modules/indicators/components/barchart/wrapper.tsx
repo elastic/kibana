@@ -76,7 +76,7 @@ export const IndicatorsBarChartWrapper = memo<IndicatorsBarChartWrapperProps>(
             <EuiTitle size={'s'}>
               <h2>
                 <FormattedMessage
-                  id="xpack.threatIntelligence.indicator.barchartSection.title"
+                  id="xpack.securitySolution.threatIntelligence.indicator.barchartSection.title"
                   defaultMessage="Trend"
                 />
               </h2>

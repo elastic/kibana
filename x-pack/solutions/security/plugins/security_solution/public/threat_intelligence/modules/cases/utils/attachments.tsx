@@ -46,7 +46,7 @@ export const generateAttachmentType = (): ExternalReferenceAttachmentType => ({
   getAttachmentViewObject: () => ({
     event: (
       <FormattedMessage
-        id="xpack.threatIntelligence.cases.eventDescription"
+        id="xpack.securitySolution.threatIntelligence.cases.eventDescription"
         defaultMessage="added an indicator of compromise"
       />
     ),

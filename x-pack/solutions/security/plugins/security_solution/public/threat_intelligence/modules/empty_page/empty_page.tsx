@@ -33,7 +33,7 @@ export const EmptyPage: FC = () => {
           title={
             <h3>
               <FormattedMessage
-                id="xpack.threatIntelligence.common.emptyPage.title"
+                id="xpack.securitySolution.threatIntelligence.common.emptyPage.title"
                 defaultMessage="Get started with Elastic Threat Intelligence"
               />
             </h3>
@@ -45,21 +45,21 @@ export const EmptyPage: FC = () => {
             <>
               <p>
                 <FormattedMessage
-                  id="xpack.threatIntelligence.common.emptyPage.body1"
+                  id="xpack.securitySolution.threatIntelligence.common.emptyPage.body1"
                   defaultMessage="Elastic Threat Intelligence makes it easy to analyze and investigate potential security
             threats by aggregating data from multiple sources in one place."
                 />
               </p>
               <p>
                 <FormattedMessage
-                  id="xpack.threatIntelligence.common.emptyPage.body2"
+                  id="xpack.securitySolution.threatIntelligence.common.emptyPage.body2"
                   defaultMessage="You’ll be able to view data from all activated threat intelligence feeds and take action
             from this page."
                 />
               </p>
               <p>
                 <FormattedMessage
-                  id="xpack.threatIntelligence.common.emptyPage.body3"
+                  id="xpack.securitySolution.threatIntelligence.common.emptyPage.body3"
                   defaultMessage="To get started with Elastic Threat Intelligence, enable one or more Threat Intelligence
             Integrations from the Integrations page or ingest data using filebeat. For more
             information, view the {docsLink}."
@@ -71,7 +71,7 @@ export const EmptyPage: FC = () => {
                         data-test-subj={DOCS_LINK_TEST_ID}
                       >
                         <FormattedMessage
-                          id="xpack.threatIntelligence.common.emptyPage.docsLinkText"
+                          id="xpack.securitySolution.threatIntelligence.common.emptyPage.docsLinkText"
                           defaultMessage="Security app documentation"
                         />
                       </EuiLink>
@@ -90,7 +90,7 @@ export const EmptyPage: FC = () => {
               fill
             >
               <FormattedMessage
-                id="xpack.threatIntelligence.common.emptyPage.buttonText"
+                id="xpack.securitySolution.threatIntelligence.common.emptyPage.buttonText"
                 defaultMessage="Add Integrations"
               />
             </EuiButton>

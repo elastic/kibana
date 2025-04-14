@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 
 export const ADD_TO_BLOCKLIST_FLYOUT_TITLE = i18n.translate(
-  'xpack.threatIntelligence.blocklist.flyoutTitle',
+  'xpack.securitySolution.threatIntelligence.blocklist.flyoutTitle',
   {
     defaultMessage: 'Add blocklist',
   }

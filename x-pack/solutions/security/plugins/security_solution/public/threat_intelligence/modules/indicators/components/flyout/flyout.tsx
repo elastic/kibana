@@ -82,7 +82,7 @@ export const IndicatorsFlyout: FC<IndicatorsFlyoutProps> = ({
         id: TAB_IDS.overview,
         name: (
           <FormattedMessage
-            id="xpack.threatIntelligence.indicator.flyout.overviewTabLabel"
+            id="xpack.securitySolution.threatIntelligence.indicator.flyout.overviewTabLabel"
             defaultMessage="Overview"
           />
         ),
@@ -97,7 +97,7 @@ export const IndicatorsFlyout: FC<IndicatorsFlyoutProps> = ({
         id: TAB_IDS.table,
         name: (
           <FormattedMessage
-            id="xpack.threatIntelligence.indicator.flyout.tableTabLabel"
+            id="xpack.securitySolution.threatIntelligence.indicator.flyout.tableTabLabel"
             defaultMessage="Table"
           />
         ),
@@ -107,7 +107,7 @@ export const IndicatorsFlyout: FC<IndicatorsFlyoutProps> = ({
         id: TAB_IDS.json,
         name: (
           <FormattedMessage
-            id="xpack.threatIntelligence.indicator.flyout.jsonTabLabel"
+            id="xpack.securitySolution.threatIntelligence.indicator.flyout.jsonTabLabel"
             defaultMessage="JSON"
           />
         ),
@@ -145,7 +145,7 @@ export const IndicatorsFlyout: FC<IndicatorsFlyoutProps> = ({
         <EuiTitle>
           <h2 data-test-subj={INDICATORS_FLYOUT_TITLE_TEST_ID} id={flyoutTitleId}>
             <FormattedMessage
-              id="xpack.threatIntelligence.indicator.flyout.panelTitleWithOverviewTab"
+              id="xpack.securitySolution.threatIntelligence.indicator.flyout.panelTitleWithOverviewTab"
               defaultMessage="Indicator details"
             />
           </h2>
@@ -154,7 +154,7 @@ export const IndicatorsFlyout: FC<IndicatorsFlyoutProps> = ({
         <EuiText size={'xs'}>
           <p data-test-subj={INDICATORS_FLYOUT_SUBTITLE_TEST_ID}>
             <FormattedMessage
-              id="xpack.threatIntelligence.indicator.flyout.panelSubTitle"
+              id="xpack.securitySolution.threatIntelligence.indicator.flyout.panelSubTitle"
               defaultMessage="First seen: "
             />
             <DateFormatter date={firstSeen} />
