@@ -25,7 +25,7 @@ import type {
 } from '@kbn/core-plugins-server';
 import type { CorePreboot, CoreSetup, CoreStart } from '@kbn/core-lifecycle-server';
 import { PluginSetup, PluginStart, Setup, Start } from '@kbn/core-di';
-import { Contract, toContainerModule } from '@kbn/core-di-internal';
+import { toContainerModule } from '@kbn/core-di-internal';
 import {
   CoreSetup as CoreSetupService,
   CoreStart as CoreStartService,
@@ -151,7 +151,7 @@ export class PluginWrapper<
 
     return [
       this.instance?.setup(setupContext as CoreSetup<TPluginsStart, TStart>, plugins),
-      this.container?.getNamed(Contract, Setup as symbol) as TSetup,
+      this.container?.get<TSetup>(Setup),
     ].find(Boolean)!;
   }
 
@@ -176,7 +176,7 @@ export class PluginWrapper<
 
     const contract = [
       this.instance?.start(startContext, plugins),
-      this.container?.getNamed(Contract, Start as symbol) as TStart,
+      this.container?.get<TStart>(Start),
     ].find(Boolean)!;
 
     if (isPromise(contract)) {
