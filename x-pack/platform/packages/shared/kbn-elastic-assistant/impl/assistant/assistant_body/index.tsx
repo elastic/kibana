@@ -21,26 +21,28 @@ import {
   EuiText,
   useEuiTheme,
 } from '@elastic/eui';
-import { HttpSetup } from '@kbn/core-http-browser';
 import { css } from '@emotion/react';
 import { PromptResponse } from '@kbn/elastic-assistant-common';
 import { AssistantBeacon } from '@kbn/ai-assistant-icon';
+import { NeedLicenseUpgrade } from '@kbn/ai-assistant-cta';
+import { SharePluginStart } from '@kbn/share-plugin/public';
 import { EmptyConvo } from './empty_convo';
-import { WelcomeSetup } from './welcome_setup';
 import { Conversation } from '../../..';
-import { UpgradeLicenseCallToAction } from '../upgrade_license_cta';
 import * as i18n from '../translations';
+import { CreateConnector } from './create_connector';
+
+const LICENSE_MANAGEMENT_LOCATOR = 'LICENSE_MANAGEMENT_LOCATOR';
+
 interface Props {
   allSystemPrompts: PromptResponse[];
   comments: JSX.Element;
   currentConversation: Conversation | undefined;
   currentSystemPromptId: string | undefined;
-  handleOnConversationSelected: ({ cId }: { cId: string }) => Promise<void>;
   isAssistantEnabled: boolean;
   isSettingsModalVisible: boolean;
   isWelcomeSetup: boolean;
   isLoading: boolean;
-  http: HttpSetup;
+  share: SharePluginStart;
   setCurrentSystemPromptId: (promptId: string | undefined) => void;
   setIsSettingsModalVisible: Dispatch<SetStateAction<boolean>>;
 }
@@ -50,9 +52,8 @@ export const AssistantBody: FunctionComponent<Props> = ({
   comments,
   currentConversation,
   currentSystemPromptId,
-  handleOnConversationSelected,
   setCurrentSystemPromptId,
-  http,
+  share,
   isAssistantEnabled,
   isLoading,
   isSettingsModalVisible,
@@ -104,21 +105,40 @@ export const AssistantBody: FunctionComponent<Props> = ({
   //  End Scrolling
 
   if (!isAssistantEnabled) {
-    return <UpgradeLicenseCallToAction http={http} />;
+    const locator = share.url.locators.get(LICENSE_MANAGEMENT_LOCATOR);
+
+    return (
+      <EuiFlexGroup justifyContent="center" alignItems="center">
+        <EuiFlexItem>
+          <NeedLicenseUpgrade
+            onManageLicense={() =>
+              locator?.navigate({
+                page: 'dashboard',
+              })
+            }
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  }
+
+  if (isWelcomeSetup) {
+    return (
+      <EuiFlexGroup direction="column" justifyContent="center">
+        <EuiFlexItem grow={false}>
+          <CreateConnector currentConversation={currentConversation} />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
   }
 
   return (
     <EuiFlexGroup direction="column" justifyContent="spaceBetween">
-      <EuiFlexItem grow={false}>
+      <EuiFlexItem>
         {isLoading ? (
           <EuiEmptyPrompt
             data-test-subj="animatedLogo"
             icon={<AssistantBeacon backgroundColor="emptyShade" />}
-          />
-        ) : isWelcomeSetup ? (
-          <WelcomeSetup
-            currentConversation={currentConversation}
-            handleOnConversationSelected={handleOnConversationSelected}
           />
         ) : isEmptyConversation ? (
           <EmptyConvo

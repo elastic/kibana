@@ -8,7 +8,7 @@
 import { startBasicLicense } from '../../tasks/api_calls/licensing';
 import { UPGRADE_CTA } from '../../screens/ai_assistant';
 import { login } from '../../tasks/login';
-import { assertConversationReadOnly, openAssistant } from '../../tasks/assistant';
+import { assertAssistantReadOnly, openAssistant } from '../../tasks/assistant';
 import { visitGetStartedPage } from '../../tasks/navigation';
 
 describe('AI Assistant - Basic License', { tags: ['@ess'] }, () => {
@@ -21,6 +21,6 @@ describe('AI Assistant - Basic License', { tags: ['@ess'] }, () => {
   it('user with Basic license should not be able to use assistant', () => {
     openAssistant();
     cy.get(UPGRADE_CTA).should('be.visible');
-    assertConversationReadOnly();
+    assertAssistantReadOnly();
   });
 });

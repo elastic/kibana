@@ -31,20 +31,6 @@ exports[`arrows ArrowBody renders correctly against snapshot 1`] = `
               data-s=""
             >
               
-              .css-1sgx2gt{inline-size:150px;}
-            </style>
-            <style
-              data-emotion="css"
-              data-s=""
-            >
-              
-              .css-1sgx2gt .euiKeyPadMenuItem__label{white-space:nowrap;overflow:hidden;}
-            </style>
-            <style
-              data-emotion="css"
-              data-s=""
-            >
-              
               .css-1f5ny76{position:absolute;top:-8px;right:-8px;}
             </style>
             <style

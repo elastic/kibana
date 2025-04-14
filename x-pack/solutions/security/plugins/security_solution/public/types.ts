@@ -62,6 +62,7 @@ import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import type { DiscoverSharedPublicStart } from '@kbn/discover-shared-plugin/public';
 import type { AutomaticImportPluginStart } from '@kbn/automatic-import-plugin/public';
 import type { ProductFeatureKeys } from '@kbn/security-solution-features';
+import type { SharePublicStart } from '@kbn/share-plugin/public/plugin';
 import type { ResolverPluginSetup } from './resolver/types';
 import type { Inspect } from '../common/search_strategy';
 import type { Detections } from './detections';
@@ -158,6 +159,7 @@ export interface StartPlugins {
   automaticImport?: AutomaticImportPluginStart;
   serverless?: ServerlessPluginStart;
   productDocBase: ProductDocBasePluginStart;
+  share: SharePublicStart;
 }
 
 export interface StartPluginsDependencies extends StartPlugins {

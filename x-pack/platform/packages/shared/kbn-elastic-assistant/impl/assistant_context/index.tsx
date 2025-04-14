@@ -9,14 +9,23 @@ import type { HttpSetup } from '@kbn/core-http-browser';
 import { omit } from 'lodash/fp';
 import React, { useCallback, useMemo, useState, useRef } from 'react';
 import type { IToasts } from '@kbn/core-notifications-browser';
-import { ActionTypeRegistryContract } from '@kbn/triggers-actions-ui-plugin/public';
+import {
+  ActionTypeRegistryContract,
+  TriggersAndActionsUIPublicPluginStart,
+} from '@kbn/triggers-actions-ui-plugin/public';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import { AssistantFeatures, defaultAssistantFeatures } from '@kbn/elastic-assistant-common';
-import { ChromeStart, NavigateToAppOptions, UserProfileService } from '@kbn/core/public';
+import {
+  ApplicationStart,
+  ChromeStart,
+  NavigateToAppOptions,
+  UserProfileService,
+} from '@kbn/core/public';
 import type { ProductDocBasePluginStart } from '@kbn/product-doc-base-plugin/public';
 import { useQuery } from '@tanstack/react-query';
+import { SharePluginStart } from '@kbn/share-plugin/public';
 import { updatePromptContexts } from './helpers';
 import type {
   PromptContext,
@@ -63,6 +72,8 @@ type ShowAssistantOverlay = ({
 export interface AssistantProviderProps {
   actionTypeRegistry: ActionTypeRegistryContract;
   alertsIndexPattern?: string;
+  application: ApplicationStart;
+  triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   assistantAvailability: AssistantAvailability;
   assistantTelemetry?: AssistantTelemetry;
   augmentMessageCodeBlocks: (
@@ -84,6 +95,7 @@ export interface AssistantProviderProps {
   productDocBase: ProductDocBasePluginStart;
   userProfileService: UserProfileService;
   chrome: ChromeStart;
+  share: SharePluginStart;
 }
 
 export interface UserAvatar {
@@ -95,6 +107,8 @@ export interface UserAvatar {
 export interface UseAssistantContext {
   actionTypeRegistry: ActionTypeRegistryContract;
   alertsIndexPattern: string | undefined;
+  application: ApplicationStart;
+  triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   assistantAvailability: AssistantAvailability;
   assistantFeatures: AssistantFeatures;
   assistantStreamingEnabled: boolean;
@@ -139,6 +153,7 @@ export interface UseAssistantContext {
   productDocBase: ProductDocBasePluginStart;
   userProfileService: UserProfileService;
   chrome: ChromeStart;
+  share: SharePluginStart;
 }
 
 const AssistantContext = React.createContext<UseAssistantContext | undefined>(undefined);
@@ -146,6 +161,7 @@ const AssistantContext = React.createContext<UseAssistantContext | undefined>(un
 export const AssistantProvider: React.FC<AssistantProviderProps> = ({
   actionTypeRegistry,
   alertsIndexPattern,
+  application,
   assistantAvailability,
   assistantTelemetry,
   augmentMessageCodeBlocks,
@@ -161,9 +177,11 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
   productDocBase,
   title = DEFAULT_ASSISTANT_TITLE,
   toasts,
+  triggersActionsUi,
   currentAppId,
   userProfileService,
   chrome,
+  share,
 }) => {
   /**
    * Session storage for traceOptions, including APM URL and LangSmith Project/API Key
@@ -285,6 +303,7 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
     () => ({
       actionTypeRegistry,
       alertsIndexPattern,
+      application,
       assistantAvailability,
       assistantFeatures: assistantFeatures ?? defaultAssistantFeatures,
       assistantTelemetry,
@@ -325,15 +344,18 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       title,
       toasts,
       traceOptions: sessionStorageTraceOptions,
+      triggersActionsUi,
       unRegisterPromptContext,
       currentAppId,
       codeBlockRef,
       userProfileService,
       chrome,
+      share,
     }),
     [
       actionTypeRegistry,
       alertsIndexPattern,
+      application,
       assistantAvailability,
       assistantFeatures,
       assistantTelemetry,
@@ -363,12 +385,14 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       showAssistantOverlay,
       title,
       toasts,
+      triggersActionsUi,
       sessionStorageTraceOptions,
       unRegisterPromptContext,
       currentAppId,
       codeBlockRef,
       userProfileService,
       chrome,
+      share,
     ]
   );
 

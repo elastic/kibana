@@ -20,6 +20,7 @@ import {
   createAndTitleConversation,
   createQuickPrompt,
   createSystemPrompt,
+  installKnowledgeBase,
   openAssistant,
   resetConversation,
   selectConnector,
@@ -77,6 +78,7 @@ describe('AI Assistant Prompts', { tags: ['@ess', '@serverless'] }, () => {
     deletePrompts();
     login(Cypress.env(IS_SERVERLESS) ? 'admin' : undefined);
     createAzureConnector();
+    installKnowledgeBase();
     waitForConversation(mockConvo1);
     waitForConversation(mockConvo2);
   });

@@ -17,7 +17,6 @@ import {
   CONNECTOR_SELECTOR,
   CONVERSATION_TITLE,
   EMPTY_CONVO,
-  WELCOME_SETUP,
   NEW_CHAT,
   CONVERSATION_SELECT,
   FLYOUT_NAV_TOGGLE,
@@ -108,7 +107,7 @@ export const typeAndSendMessage = (message: string) => {
 // message must get sent before the title can be updated
 export const createAndTitleConversation = (newTitle = 'Something else') => {
   createNewChat();
-  assertNewConversation(false, 'New chat');
+  assertNewConversation('New chat');
   assertConnectorSelected(azureConnectorAPIPayload.name);
   typeAndSendMessage('hello');
   assertMessageSent('hello');
@@ -175,15 +174,27 @@ export const selectRule = (ruleId: string) => {
   cy.get(TIMELINE_CHECKBOX(ruleId)).click();
 };
 
+export const installKnowledgeBase = () => {
+  // Mocking KB install, if KB functionality is needed please investigate using tiny_elser
+  cy.intercept('GET', '/api/security_ai_assistant/knowledge_base', (req) => {
+    req.reply((res) => {
+      res.send(200, {
+        elser_exists: true,
+        is_setup_in_progress: false,
+        is_setup_available: true,
+        security_labs_exists: true,
+        user_data_exists: true,
+        product_documentation_status: 'installed',
+      });
+    });
+  });
+};
+
 /**
  * Assertions
  */
-export const assertNewConversation = (isWelcome: boolean, title: string) => {
-  if (isWelcome) {
-    cy.get(WELCOME_SETUP).should('be.visible');
-  } else {
-    cy.get(EMPTY_CONVO).should('be.visible');
-  }
+export const assertNewConversation = (title: string) => {
+  cy.get(EMPTY_CONVO).should('be.visible');
   assertConversationTitle(title);
 };
 
@@ -221,15 +232,15 @@ export const assertConnectorSelected = (connectorName: string) => {
   cy.get(CONNECTOR_SELECTOR).should('have.text', connectorName);
 };
 
-const assertConversationTitleReadOnly = () => {
-  cy.get(CONVERSATION_TITLE + ' h2').click();
+const assertConversationTitleHidden = () => {
+  cy.get(CONVERSATION_TITLE + ' h2').should('not.exist');
   cy.get(CONVERSATION_TITLE + ' input').should('not.exist');
 };
 
-export const assertConversationReadOnly = () => {
-  assertConversationTitleReadOnly();
-  cy.get(ADD_NEW_CONNECTOR).should('be.disabled');
-  cy.get(CHAT_CONTEXT_MENU).should('be.disabled');
+export const assertAssistantReadOnly = () => {
+  assertConversationTitleHidden();
+  cy.get(ADD_NEW_CONNECTOR).should('not.exist');
+  cy.get(CHAT_CONTEXT_MENU).should('not.exist');
   cy.get(FLYOUT_NAV_TOGGLE).should('be.disabled');
   cy.get(NEW_CHAT).should('be.disabled');
 };

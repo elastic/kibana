@@ -135,7 +135,7 @@ export const createBasePrompts = async (notifications: NotificationsStart, http:
  */
 export const AssistantProvider: FC<PropsWithChildren<unknown>> = ({ children }) => {
   const {
-    application: { navigateToApp, currentAppId$ },
+    application,
     http,
     notifications,
     storage,
@@ -144,7 +144,10 @@ export const AssistantProvider: FC<PropsWithChildren<unknown>> = ({ children }) 
     userProfile,
     chrome,
     productDocBase,
+    share,
+    triggersActionsUi,
   } = useKibana().services;
+  const { navigateToApp, currentAppId$ } = application;
 
   let inferenceEnabled = false;
   try {
@@ -224,6 +227,7 @@ export const AssistantProvider: FC<PropsWithChildren<unknown>> = ({ children }) 
       actionTypeRegistry={actionTypeRegistry}
       alertsIndexPattern={alertsIndexPattern}
       augmentMessageCodeBlocks={augmentMessageCodeBlocks}
+      application={application}
       assistantAvailability={assistantAvailability}
       assistantTelemetry={assistantTelemetry}
       docLinks={{ ELASTIC_WEBSITE_URL, DOC_LINK_VERSION }}
@@ -239,6 +243,8 @@ export const AssistantProvider: FC<PropsWithChildren<unknown>> = ({ children }) 
       currentAppId={currentAppId ?? 'securitySolutionUI'}
       userProfileService={userProfile}
       chrome={chrome}
+      share={share}
+      triggersActionsUi={triggersActionsUi}
     >
       {children}
     </ElasticAssistantProvider>
