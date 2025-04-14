@@ -61,6 +61,7 @@ processingCommand
     | {this.isDevVersion()}? inlinestatsCommand
     | {this.isDevVersion()}? lookupCommand
     | {this.isDevVersion()}? changePointCommand
+    | {this.isDevVersion()}? completionCommand
     | {this.isDevVersion()}? insistCommand
     | {this.isDevVersion()}? forkCommand
     | {this.isDevVersion()}? rerankCommand
@@ -283,9 +284,12 @@ forkSubQueryCommand
     ;
 
 forkSubQueryProcessingCommand
-    : whereCommand
-    | sortCommand
+    : evalCommand
+    | whereCommand
     | limitCommand
+    | statsCommand
+    | sortCommand
+    | dissectCommand
     ;
 
 rrfCommand
@@ -294,4 +298,8 @@ rrfCommand
 
 rerankCommand
     : DEV_RERANK queryText=constant ON fields WITH inferenceId=identifierOrParameter
+    ;
+
+completionCommand
+    : DEV_COMPLETION prompt=primaryExpression WITH inferenceId=identifierOrParameter (AS targetField=qualifiedName)?
     ;
