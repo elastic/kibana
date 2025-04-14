@@ -69,6 +69,7 @@ export function ChangeDataView({
   isDisabled,
   onEditDataView,
   onCreateDefaultAdHocDataView,
+  onClosePopover,
 }: DataViewPickerProps) {
   const { euiTheme } = useEuiTheme();
   const [isPopoverOpen, setPopoverIsOpen] = useState(false);
@@ -88,6 +89,13 @@ export function ChangeDataView({
 
   // Create a reusable id to ensure search input is the first focused item in the popover even though it's not the first item
   const searchListInputId = useGeneratedHtmlId({ prefix: 'dataviewPickerListSearchInput' });
+
+  const closePopover = () => {
+    setPopoverIsOpen(false);
+    if (onClosePopover) {
+      onClosePopover();
+    }
+  };
 
   useEffect(() => {
     const fetchDataViews = async () => {
@@ -149,7 +157,7 @@ export function ChangeDataView({
           icon="indexOpen"
           data-test-subj="indexPattern-add-field"
           onClick={() => {
-            setPopoverIsOpen(false);
+            closePopover();
             onAddField();
           }}
         >
@@ -176,7 +184,7 @@ export function ChangeDataView({
                   path: `/kibana/indexPatterns/patterns/${currentDataViewId}`,
                 });
               }
-              setPopoverIsOpen(false);
+              closePopover();
             }}
           >
             {i18n.translate('unifiedSearch.query.queryBar.indexPattern.manageFieldButton', {
@@ -218,7 +226,7 @@ export function ChangeDataView({
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
                 onClick={() => {
-                  setPopoverIsOpen(false);
+                  closePopover();
                   onDataViewCreated();
                 }}
                 size="xs"
@@ -240,7 +248,7 @@ export function ChangeDataView({
           selectableProps={selectableProps}
           setPopoverIsOpen={setPopoverIsOpen}
           onChangeDataView={async (newId) => {
-            setPopoverIsOpen(false);
+            closePopover();
             onChangeDataView(newId);
           }}
           onCreateDefaultAdHocDataView={onCreateDefaultAdHocDataView}
