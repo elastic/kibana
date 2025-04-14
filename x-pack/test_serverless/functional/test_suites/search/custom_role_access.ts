@@ -79,7 +79,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('should access console with API key', async () => {
-      roleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('customRole');
+      roleAuthc = await samlAuth.createM2mApiKeyWithCustomRoleScope();
       const { body } = await supertestWithoutAuth
         .get('/api/console/api_server')
         .set(roleAuthc.apiKeyHeader)
