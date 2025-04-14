@@ -852,6 +852,18 @@ describe('getFullAgentPolicy', () => {
     });
   });
 
+  it('should not populate agent.protection and signed properties for standalone policies', async () => {
+    appContextService.start(createAppContextStartContractMock());
+
+    mockAgentPolicy({});
+    const agentPolicy = await getFullAgentPolicy(savedObjectsClientMock.create(), 'agent-policy', {
+      standalone: true,
+    });
+
+    expect(agentPolicy!.agent!.protection).toBeUndefined();
+    expect(agentPolicy!.signed).toBeUndefined();
+  });
+
   it('should compile full policy with correct namespaces', async () => {
     mockedGetPackageInfo.mockResolvedValue({
       data_streams: [
