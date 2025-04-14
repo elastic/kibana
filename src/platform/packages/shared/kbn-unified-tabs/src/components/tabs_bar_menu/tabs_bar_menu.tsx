@@ -18,6 +18,7 @@ import {
   EuiSelectable,
   EuiPopoverTitle,
   EuiHorizontalRule,
+  EuiToolTip,
   EuiSelectableOptionsListProps,
 } from '@elastic/eui';
 import type { TabItem } from '../../types';
@@ -90,14 +91,15 @@ export const TabsBarMenu: React.FC<TabsBarMenuProps> = React.memo(
           css: popoverCss,
         }}
         button={
-          <EuiButtonIcon
-            aria-label={menuButtonLabel}
-            title={menuButtonLabel}
-            color="text"
-            data-test-subj="unifiedTabs_tabsBarMenuButton"
-            iconType="boxesVertical"
-            onClick={() => setPopover((prev) => !prev)}
-          />
+          <EuiToolTip content={menuButtonLabel}>
+            <EuiButtonIcon
+              aria-label={menuButtonLabel}
+              color="text"
+              data-test-subj="unifiedTabs_tabsBarMenuButton"
+              iconType="boxesVertical"
+              onClick={() => setPopover((prev) => !prev)}
+            />
+          </EuiToolTip>
         }
       >
         <EuiSelectable
