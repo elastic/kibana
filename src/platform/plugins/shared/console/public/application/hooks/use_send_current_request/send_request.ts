@@ -158,7 +158,7 @@ export function sendRequest(args: RequestArgs): Promise<RequestResult[]> {
         }
       } catch (error) {
         let value;
-        const { response, body } = error as IHttpFetchError;
+        const { response } = error as IHttpFetchError;
 
         const { statusCode, statusText } = extractStatusCodeAndText(response, path);
 
