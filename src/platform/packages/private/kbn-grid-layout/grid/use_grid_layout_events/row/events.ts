@@ -39,8 +39,8 @@ export const useGridLayoutRowEvents = ({ rowId }: { rowId: string }) => {
 
   const onEnd = useCallback(() => {
     commitAction(gridLayoutStateManager);
-    const headerRef = gridLayoutStateManager.headerRefs.current[rowId];
-    headerRef?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    const rowRef = gridLayoutStateManager.rowGhostRefs.current[rowId];
+    rowRef?.scrollIntoView({ behavior: 'smooth', block: 'center' });
   }, [gridLayoutStateManager, rowId]);
   const onCancel = useCallback(
     () => cancelAction(gridLayoutStateManager),
@@ -64,8 +64,7 @@ export const useGridLayoutRowEvents = ({ rowId }: { rowId: string }) => {
           const pointerPixel = getNextKeyboardPosition(
             ev,
             gridLayoutStateManager,
-            getSensorPosition(e),
-            rowId
+            getSensorPosition(e)
           );
           moveAction(gridLayoutStateManager, startingPointer.current, pointerPixel);
         }

@@ -8,24 +8,24 @@
  */
 
 import { GridLayoutStateManager } from '../../types';
+import { COLLAPSIBLE_HEADER_HEIGHT } from '../../utils/calculations';
 import { updateClientY } from '../keyboard_utils';
 import { KeyboardCode, UserKeyboardEvent } from '../sensors/keyboard/types';
 
 export const getNextKeyboardPosition = (
   ev: UserKeyboardEvent,
   gridLayoutStateManager: GridLayoutStateManager,
-  handlePosition: { clientX: number; clientY: number },
-  rowId: string
+  handlePosition: { clientX: number; clientY: number }
 ) => {
   const {
-    headerRefs: { current: headerRefs },
     runtimeSettings$: {
-      value: { keyboardDragTopLimit },
+      value: { keyboardDragTopLimit, rowHeight, gutterSize },
     },
   } = gridLayoutStateManager;
 
-  const headerRefHeight = (headerRefs[rowId]?.getBoundingClientRect().height || 48) * 0.5;
-  const stepY = headerRefHeight;
+  // half of the header height
+  const stepY =
+    ((COLLAPSIBLE_HEADER_HEIGHT - 1) * gutterSize + COLLAPSIBLE_HEADER_HEIGHT * rowHeight) * 0.5;
 
   switch (ev.code) {
     case KeyboardCode.Down: {

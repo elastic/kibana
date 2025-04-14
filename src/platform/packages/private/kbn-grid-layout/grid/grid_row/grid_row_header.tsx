@@ -51,6 +51,7 @@ export const GridRowHeader = React.memo(
     useEffect(() => {
       return () => {
         // remove reference on unmount
+        // TODO: we have to be smarter here to remove rowRefs 
         delete gridLayoutStateManager.headerRefs.current[rowId];
       };
       // eslint-disable-next-line react-hooks/exhaustive-deps

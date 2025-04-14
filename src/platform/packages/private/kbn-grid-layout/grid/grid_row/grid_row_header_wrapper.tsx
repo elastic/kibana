@@ -86,7 +86,6 @@ export const GridRowHeaderWrapper = ({
   );
 };
 
-
 // equivalent of the header for non-collapsible rows used for calculations
 export const GridRowStartMark = React.memo(({ rowId }: { rowId: string }) => {
   const { gridLayoutStateManager } = useGridLayoutContext();
