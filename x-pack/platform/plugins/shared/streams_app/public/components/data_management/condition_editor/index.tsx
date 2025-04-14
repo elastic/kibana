@@ -50,7 +50,7 @@ export function RoutingConditionEditor(props: RoutingConditionEditorProps) {
             <EuiIconTip
               content={i18n.translate('xpack.streams.conditionEditor.disableTooltip', {
                 defaultMessage:
-                  'When the stream is not enabled, it does not route documents to this stream. Disabling the stream does not delete existing data.',
+                  'When disabled, the routing rule stops sending documents to this stream. It does not remove existing data.',
               })}
             />
           </EuiFlexGroup>
