@@ -79,6 +79,7 @@ export const MetricVisValue = (props: MetricVisValueProps) => {
   if (onFilter) {
     return (
       <button
+        data-test-subj="metric_value_button"
         css={{ display: 'block' }}
         onClick={() => onFilter()}
         title={i18n.translate('expressionLegacyMetricVis.filterTitle', {
