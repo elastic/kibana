@@ -266,7 +266,6 @@ export class VisualizationsPlugin
     const listingViewRegistry: ListingViewRegistry = new Set();
     const visEditorsRegistry = createVisEditorsRegistry();
 
-    console.log({ config: this.config });
     // visualizations
     if (this.config.visualize?.enabled) {
       core.application.register({

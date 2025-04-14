@@ -41,7 +41,6 @@ export class ServerlessPlugin
   }
 
   public start(_core: CoreStart) {
-    console.log({ message: 'Serverless plugin started', allow: this.projectSettingsAdded });
     if (!this.projectSettingsAdded) {
       throw new Error(
         "The uiSettings allowlist for serverless hasn't been set up. Make sure to set up your serverless project settings with setupProjectSettings()"
