@@ -493,7 +493,7 @@ src/platform/packages/shared/kbn-object-versioning-utils @elastic/appex-sharedux
 src/platform/packages/shared/kbn-openapi-bundler @elastic/security-detection-rule-management
 src/platform/packages/shared/kbn-openapi-common @elastic/security-detection-rule-management
 src/platform/packages/shared/kbn-openapi-generator @elastic/security-detection-rule-management
-src/platform/packages/shared/kbn-osquery-io-ts-types @elastic/security-asset-management
+src/platform/packages/shared/kbn-osquery-io-ts-types @elastic/security-defend-workflows
 src/platform/packages/shared/kbn-palettes @elastic/kibana-visualizations
 src/platform/packages/shared/kbn-profiling-utils @elastic/obs-ux-infra_services-team
 src/platform/packages/shared/kbn-react-field @elastic/kibana-data-discovery
@@ -865,7 +865,7 @@ x-pack/platform/plugins/private/cloud_integrations/cloud_full_story @elastic/kib
 x-pack/platform/plugins/private/cloud_integrations/cloud_links @elastic/kibana-core
 x-pack/platform/plugins/private/cross_cluster_replication @elastic/kibana-management
 x-pack/platform/plugins/private/custom_branding @elastic/appex-sharedux
-x-pack/platform/plugins/private/data_usage @elastic/obs-ai-assistant @elastic/security-solution
+x-pack/platform/plugins/private/data_usage @elastic/kibana-management
 x-pack/platform/plugins/private/data_visualizer @elastic/ml-ui
 x-pack/platform/plugins/private/discover_enhanced @elastic/kibana-data-discovery
 x-pack/platform/plugins/private/drilldowns/url_drilldown @elastic/appex-sharedux
@@ -957,7 +957,6 @@ x-pack/solutions/observability/packages/get-padded-alert-time-range-util @elasti
 x-pack/solutions/observability/packages/kbn-alerts-grouping @elastic/response-ops
 x-pack/solutions/observability/packages/kbn-custom-integrations @elastic/obs-ux-logs-team
 x-pack/solutions/observability/packages/kbn-genai-cli @elastic/obs-knowledge-team
-x-pack/solutions/observability/packages/kbn-investigation-shared @elastic/obs-ux-management-team
 x-pack/solutions/observability/packages/kbn-observability-schema @elastic/obs-ux-management-team
 x-pack/solutions/observability/packages/kbn-scout-oblt @elastic/appex-qa
 x-pack/solutions/observability/packages/observability-ai/observability-ai-common @elastic/obs-ai-assistant
@@ -975,8 +974,6 @@ x-pack/solutions/observability/plugins/exploratory_view @elastic/obs-ux-manageme
 x-pack/solutions/observability/plugins/infra @elastic/obs-ux-logs-team @elastic/obs-ux-infra_services-team
 x-pack/solutions/observability/plugins/inventory @elastic/obs-ux-infra_services-team
 x-pack/solutions/observability/plugins/inventory/e2e @elastic/obs-ux-infra_services-team
-x-pack/solutions/observability/plugins/investigate @elastic/obs-ux-management-team
-x-pack/solutions/observability/plugins/investigate_app @elastic/obs-ux-management-team
 x-pack/solutions/observability/plugins/metrics_data_access @elastic/obs-ux-infra_services-team
 x-pack/solutions/observability/plugins/observability @elastic/obs-ux-management-team
 x-pack/solutions/observability/plugins/observability_ai_assistant_app @elastic/obs-ai-assistant
@@ -1253,11 +1250,11 @@ src/platform/plugins/shared/discover/public/context_awareness/profile_providers/
 /src/platform/test/api_integration/apis/event_annotations @elastic/kibana-visualizations
 /x-pack/test_serverless/functional/test_suites/common/visualizations/ @elastic/kibana-visualizations
 /x-pack/test_serverless/functional/fixtures/kbn_archiver/lens/ @elastic/kibana-visualizations
-packages/kbn-monaco/src/esql @elastic/kibana-esql
 
-# ESQL
+# ES|QL
 /src/platform/test/api_integration/apis/esql/*.ts @elastic/kibana-esql
 /src/platform/test/functional/services/esql.ts @elastic/kibana-esql
+/src/platform/packages/shared/kbn-monaco/src/languages/esql @elastic/kibana-esql
 
 # Global Experience
 
@@ -1307,9 +1304,9 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 ### Observability Plugins
 
 # Observability AI Assistant
-/x-pack/test_serverless/api_integration/test_suites/common/data_usage @elastic/obs-ai-assistant @elastic/security-solution
-/x-pack/test_serverless/functional/test_suites/common/data_usage @elastic/obs-ai-assistant @elastic/security-solution
-/x-pack/test_serverless/functional/page_objects/svl_data_usage.ts @elastic/obs-ai-assistant @elastic/security-solution
+/x-pack/test_serverless/api_integration/test_suites/common/data_usage @elastic/kibana-management
+/x-pack/test_serverless/functional/test_suites/common/data_usage @elastic/kibana-management
+/x-pack/test_serverless/functional/page_objects/svl_data_usage.ts @elastic/kibana-management
 /x-pack/test/observability_ai_assistant_api_integration @elastic/obs-ai-assistant
 /x-pack/test/observability_ai_assistant_functional @elastic/obs-ai-assistant
 /x-pack/test_serverless/**/test_suites/observability/ai_assistant @elastic/obs-ai-assistant
@@ -1921,7 +1918,7 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 /x-pack/test/functional_gen_ai/inference @elastic/appex-ai-infra
 
 # AppEx Platform Services Security
-//x-pack/test_serverless/api_integration/test_suites/common/security_response_headers.ts  @elastic/kibana-security
+/x-pack/test_serverless/api_integration/test_suites/common/security_response_headers.ts  @elastic/kibana-security
 /x-pack/test/api_integration/apis/es  @elastic/kibana-security
 /x-pack/test/api_integration/apis/features  @elastic/kibana-security
 
@@ -2005,7 +2002,7 @@ x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/server/confi
 /x-pack/test_serverless/functional/test_suites/security/config.ts @elastic/kibana-security @elastic/appex-qa
 /x-pack/test_serverless/functional/test_suites/security/config.mki_only.ts @elastic/kibana-security @elastic/appex-qa
 /x-pack/test_serverless/functional/test_suites/security/index.mki_only.ts @elastic/kibana-security @elastic/appex-qa @elastic/kibana-cloud-security-posture
-/x-pack/test_serverless/functional/test_suites/security/config.feature_flags.ts @elastic/kibana-security @elastic/kibana-cloud-security-posture
+/x-pack/test_serverless/functional/test_suites/security/config.feature_flags.ts @elastic/kibana-security
 /x-pack/test_serverless/api_integration/test_suites/observability/config.feature_flags.ts @elastic/kibana-security
 /x-pack/test_serverless/functional/test_suites/common/spaces/multiple_spaces_enabled.ts @elastic/kibana-security
 /x-pack/test_serverless/functional/page_objects/svl_management_page.ts @elastic/kibana-security
@@ -2106,6 +2103,12 @@ x-pack/test/api_integration/apis/management/index_management/inference_endpoints
 /x-pack/test_serverless/functional/page_objects/svl_api_keys.ts @elastic/search-kibana
 /x-pack/test_serverless/functional/page_objects/svl_search_* @elastic/search-kibana
 /x-pack/test/functional_search/ @elastic/search-kibana
+
+# workchat
+/x-pack/test_serverless/api_integration/test_suites/chat @elastic/search-kibana
+/x-pack/test_serverless/api_integration/test_suites/chat/config.ts @elastic/search-kibana @elastic/appex-qa
+/x-pack/test_serverless/functional/test_suites/chat/ @elastic/search-kibana
+/x-pack/test_serverless/functional/test_suites/chat/config.ts @elastic/search-kibana @elastic/appex-qa
 
 # Management Experience - Deployment Management
 /src/platform/test/functional/fixtures/kbn_archiver/management.json @elastic/kibana-management @elastic/kibana-data-discovery # Assigned per 2 uses: test/functional/apps/management/_import_objects.ts && test/functional/apps/management/data_views/_scripted_fields_filter.ts
@@ -2757,9 +2760,13 @@ docs/settings-gen                             @elastic/platform-docs
 /x-pack/plugins/**/kibana.jsonc @elastic/kibana-core
 /x-pack/platform/plugins/shared/**/kibana.jsonc @elastic/kibana-core
 /x-pack/platform/plugins/private/**/kibana.jsonc @elastic/kibana-core
-/x-pack//solutions/observability/plugins/**/kibana.jsonc @elastic/kibana-core
-/x-pack//solutions/search/plugins/**/kibana.jsonc @elastic/kibana-core
-/x-pack//solutions/security/plugins/**/kibana.jsonc @elastic/kibana-core
+/x-pack/solutions/observability/plugins/**/kibana.jsonc @elastic/kibana-core
+/x-pack/solutions/search/plugins/**/kibana.jsonc @elastic/kibana-core
+/x-pack/solutions/security/plugins/**/kibana.jsonc @elastic/kibana-core
+
+# Plugin manifests for test plugins
+/src/platform/test/**/kibana.jsonc @elastic/appex-qa @elastic/kibana-core
+/x-pack/test/**/kibana.jsonc @elastic/appex-qa @elastic/kibana-core
 
 # Temporary Encrypted Saved Objects (ESO) guarding
 # This additional code-ownership is meant to be a temporary precaution to notify the Kibana platform security team
