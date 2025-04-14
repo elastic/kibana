@@ -5,6 +5,4 @@
  * 2.0.
  */
 
-export type { ToolDescriptor } from './src/tools';
-export type { NodeProgressionEvent, NodeEvent } from './src/nodes';
-export type { WorkflowEvent, WorkflowProgressionEvent, WorkflowRunEvent } from './src/workflows';
+export type { WorkflowState } from './state';

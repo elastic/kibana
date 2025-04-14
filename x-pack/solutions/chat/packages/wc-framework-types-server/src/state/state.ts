@@ -5,6 +5,11 @@
  * 2.0.
  */
 
-export type { ToolDescriptor } from './src/tools';
-export type { NodeProgressionEvent, NodeEvent } from './src/nodes';
-export type { WorkflowEvent, WorkflowProgressionEvent, WorkflowRunEvent } from './src/workflows';
+/**
+ * Represents the workflow state, that gets propagated through nodes during execution.
+ */
+export interface WorkflowState {
+  has(key: string): boolean;
+  get<T = unknown>(key: string): T;
+  getKeys(): string[];
+}
