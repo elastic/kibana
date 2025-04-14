@@ -11,6 +11,7 @@ import { createSerializer, matchers } from '@emotion/jest';
 import { replaceEmotionPrefix } from '@elastic/eui/lib/test';
 
 // Add the custom matchers provided by '@emotion/jest'
+// eslint-disable-next-line no-undef
 expect.extend(matchers);
 
 module.exports = createSerializer({
