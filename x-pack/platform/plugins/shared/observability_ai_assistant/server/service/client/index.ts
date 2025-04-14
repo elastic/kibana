@@ -731,6 +731,7 @@ export class ObservabilityAIAssistantClient {
       config: this.dependencies.config,
     });
   };
+
   addUserInstruction = async ({
     entry,
   }: {
