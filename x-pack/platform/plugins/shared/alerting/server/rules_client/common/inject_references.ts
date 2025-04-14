@@ -89,7 +89,7 @@ export function injectReferencesIntoArtifacts(
   return {
     ...artifacts,
     dashboards: artifacts.dashboards?.map((dashboard) => {
-      const reference = references.find((ref) => ref.name === dashboard.refId);
+      const reference = references.find((ref) => ref.name === dashboard.refId && ref.type === 'dashboard');
       if (!reference) {
         throw new Error(`Artifacts reference "${dashboard.refId}" not found in rule id: ${ruleId}`);
       }
