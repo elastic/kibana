@@ -9,8 +9,8 @@ import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 
-import { GetUserRequestParams } from '../../../../../../common/api/entity_analytics/privilege_monitoring/users/get.gen';
-import type { GetUserResponse } from '../../../../../../common/api/entity_analytics/privilege_monitoring/users/get.gen';
+import { GetPrivMonUserRequestParams } from '../../../../../../common/api/entity_analytics/privilege_monitoring/users/get.gen';
+import type { GetPrivMonUserResponse } from '../../../../../../common/api/entity_analytics/privilege_monitoring/users/get.gen';
 import { API_VERSIONS, APP_ID } from '../../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../../types';
 
@@ -30,11 +30,11 @@ export const getUserRoute = (router: EntityAnalyticsRoutesDeps['router'], logger
         version: API_VERSIONS.public.v1,
         validate: {
           request: {
-            params: GetUserRequestParams,
+            params: GetPrivMonUserRequestParams,
           },
         },
       },
-      async (context, request, response): Promise<IKibanaResponse<GetUserResponse>> => {
+      async (context, request, response): Promise<IKibanaResponse<GetPrivMonUserResponse>> => {
         const siemResponse = buildSiemResponse(response);
 
         try {

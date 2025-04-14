@@ -1,0 +1,110 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import expect from '@kbn/expect';
+import { FtrProviderContext } from '../../../../../ftr_provider_context';
+import { dataViewRouteHelpersFactory } from '../../../utils/data_view';
+import { PrivMonUtils } from './utils';
+
+export default ({ getService }: FtrProviderContext) => {
+  const api = getService('securitySolutionApi');
+  const supertest = getService('supertest');
+  const log = getService('log');
+  const privMonUtils = PrivMonUtils(getService);
+
+  describe('@ess @serverless @skipInServerlessMKI Entity Monitoring Privileged Users CRUD APIs', () => {
+    const dataView = dataViewRouteHelpersFactory(supertest);
+    before(async () => {
+      await dataView.create('security-solution');
+      await privMonUtils.initPrivMonEngine();
+    });
+
+    after(async () => {
+      await dataView.delete('security-solution');
+    });
+
+    describe('CRUD API', () => {
+      it('should create a user', async () => {
+        log.info(`creating a user`);
+        const res = await api.createPrivMonUser({
+          body: { is_monitored: true, user_name: 'test_user' },
+        });
+
+        if (res.status !== 200) {
+          log.error(`Creating privmon user failed`);
+          log.error(JSON.stringify(res.body));
+        }
+
+        expect(res.status).eql(200);
+        expect(res.body);
+      });
+
+      it('should retrieve a user', async () => {
+        log.info(`retrieving a user`);
+        const { body } = await api.createPrivMonUser({
+          body: { is_monitored: true, user_name: 'test_user' },
+        });
+
+        const res = await api.getPrivMonUser({ params: { id: body.id } });
+
+        if (res.status !== 200) {
+          log.error(`Retrieving privmon user failed`);
+          log.error(JSON.stringify(res.body));
+        }
+
+        expect(res.status).eql(200);
+      });
+
+      it('should update a user', async () => {
+        log.info(`updating a user`);
+        const { body } = await api.createPrivMonUser({
+          body: { is_monitored: true, user_name: 'test_user' },
+        });
+        const res = await api.updatePrivMonUser({
+          body: { is_monitored: false },
+          params: { id: body.id },
+        });
+
+        if (res.status !== 200) {
+          log.error(`Updating privmon user failed`);
+          log.error(JSON.stringify(res.body));
+        }
+
+        expect(res.status).eql(200);
+        expect(res.body.is_monitored).eql(false);
+      });
+
+      it('should list users', async () => {
+        log.info(`listing users`);
+        const res = await api.listPrivMonUsers({ query: {} });
+
+        if (res.status !== 200) {
+          log.error(`Listing privmon users failed`);
+          log.error(JSON.stringify(res.body));
+        }
+
+        expect(res.status).eql(200);
+        expect(res.body.length).to.be.greaterThan(0);
+      });
+      it('should delete a user', async () => {
+        log.info(`deleting a user`);
+        const { body } = await api.createPrivMonUser({
+          body: { is_monitored: true, user_name: 'test_user' },
+        });
+        const res = await api.deletePrivMonUser({ params: { id: body.id } });
+
+        if (res.status !== 200) {
+          log.error(`Deleting privmon user failed`);
+          log.error(JSON.stringify(res.body));
+        }
+
+        expect(res.status).eql(200);
+        expect(res.body).to.eql({ acknowledged: true });
+      });
+    });
+  });
+};

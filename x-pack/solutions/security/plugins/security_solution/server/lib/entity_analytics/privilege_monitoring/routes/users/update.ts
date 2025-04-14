@@ -10,8 +10,8 @@ import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 
 import {
-  UpdateUserRequestParams,
-  UpdateUserRequestBody,
+  UpdatePrivMonUserRequestParams,
+  UpdatePrivMonUserRequestBody,
 } from '../../../../../../common/api/entity_analytics/privilege_monitoring/users/update.gen';
 import { API_VERSIONS, APP_ID } from '../../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../../types';
@@ -32,8 +32,8 @@ export const updateUserRoute = (router: EntityAnalyticsRoutesDeps['router'], log
         version: API_VERSIONS.public.v1,
         validate: {
           request: {
-            params: UpdateUserRequestParams,
-            body: UpdateUserRequestBody,
+            params: UpdatePrivMonUserRequestParams,
+            body: UpdatePrivMonUserRequestBody,
           },
         },
       },

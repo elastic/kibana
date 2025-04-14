@@ -9,8 +9,8 @@ import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 
-import { DeleteUserRequestParams } from '../../../../../../common/api/entity_analytics/privilege_monitoring/users/delete.gen';
-import type { DeleteUserResponse } from '../../../../../../common/api/entity_analytics/privilege_monitoring/users/delete.gen';
+import { DeletePrivMonUserRequestParams } from '../../../../../../common/api/entity_analytics/privilege_monitoring/users/delete.gen';
+import type { DeletePrivMonUserResponse } from '../../../../../../common/api/entity_analytics/privilege_monitoring/users/delete.gen';
 import { API_VERSIONS, APP_ID } from '../../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../../types';
 
@@ -30,11 +30,11 @@ export const deleteUserRoute = (router: EntityAnalyticsRoutesDeps['router'], log
         version: API_VERSIONS.public.v1,
         validate: {
           request: {
-            params: DeleteUserRequestParams,
+            params: DeletePrivMonUserRequestParams,
           },
         },
       },
-      async (context, request, response): Promise<IKibanaResponse<DeleteUserResponse>> => {
+      async (context, request, response): Promise<IKibanaResponse<DeletePrivMonUserResponse>> => {
         const siemResponse = buildSiemResponse(response);
 
         try {
