@@ -18,7 +18,8 @@ export type PLATFORM_TYPE =
   | 'rpm_x86_64'
   | 'deb_aarch64'
   | 'deb_x86_64'
-  | 'kubernetes';
+  | 'kubernetes'
+  | 'windows_msi';
 
 interface PLATFORM_OPTION {
   label: string;
@@ -26,7 +27,7 @@ interface PLATFORM_OPTION {
   'data-test-subj'?: string;
 }
 
-export const VISIBLE_PALFORM_OPTIONS: PLATFORM_OPTION[] = [
+export const VISIBLE_PLATFORM_OPTIONS: PLATFORM_OPTION[] = [
   {
     id: 'linux_aarch64',
     label: i18n.translate('xpack.fleet.enrollmentInstructions.platformButtons.linux', {
@@ -62,6 +63,12 @@ export const EXTENDED_PLATFORM_OPTIONS: PLATFORM_OPTION[] = [
     id: 'windows',
     label: i18n.translate('xpack.fleet.enrollmentInstructions.platformButtons.windows', {
       defaultMessage: 'Windows x86_64',
+    }),
+  },
+  {
+    id: 'windows_msi',
+    label: i18n.translate('xpack.fleet.enrollmentInstructions.platformButtons.msi', {
+      defaultMessage: 'Windows MSI',
     }),
   },
   {
