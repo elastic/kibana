@@ -1612,15 +1612,15 @@
       "children": [
         {
           "parentPluginId": "dashboard",
-          "id": "def-server.DashboardPluginStart.contentClient",
-          "type": "Object",
+          "id": "def-server.DashboardPluginStart.getContentClient",
+          "type": "Function",
           "tags": [],
-          "label": "contentClient",
+          "label": "getContentClient",
           "description": [
-            "\nUse contentClient.getForRequest to get a scoped client to perform CRUD and search operations for dashboards using the methods available in the {@link DashboardStorage} class.\n"
+            "\nUse getContentClient().getForRequest to get a scoped client to perform CRUD and search operations for dashboards using the methods available in the {@link DashboardStorage} class.\n"
           ],
           "signature": [
-            "{ getForRequest: <T = unknown>({ requestHandlerContext, version, }: { requestHandlerContext: ",
+            "() => { getForRequest: <T = unknown>({ requestHandlerContext, version, }: { requestHandlerContext: ",
             "RequestHandlerContext",
             "; request: ",
             "KibanaRequest",
@@ -1630,7 +1630,9 @@
           ],
           "path": "src/platform/plugins/shared/dashboard/server/types.ts",
           "deprecated": false,
-          "trackAdoption": false
+          "trackAdoption": false,
+          "children": [],
+          "returnComment": []
         }
       ],
       "lifecycle": "start",

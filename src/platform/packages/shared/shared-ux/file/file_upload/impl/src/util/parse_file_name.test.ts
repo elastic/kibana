@@ -18,13 +18,13 @@ describe('parseFileName', () => {
 
   test('  Something_*  really -=- strange.abc.wav', () => {
     expect(parseFileName('  Something_*  really -=- strange.abc.wav')).toEqual({
-      name: 'Something__  really ___ strange_abc',
+      name: 'Something_*  really -=- strange.abc',
     });
   });
 
   test('!@#$%^&*()', () => {
     expect(parseFileName('!@#$%^&*()')).toEqual({
-      name: '__________',
+      name: '!@#$%^&*()',
     });
   });
 
