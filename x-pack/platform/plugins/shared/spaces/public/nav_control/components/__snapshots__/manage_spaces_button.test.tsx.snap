@@ -4,18 +4,7 @@ exports[`ManageSpacesButton doesn't render if user profile forbids managing spac
 
 exports[`ManageSpacesButton renders as expected 1`] = `
 <EuiButton
-  css={
-    Object {
-      "map": undefined,
-      "name": "e9jljh",
-      "next": undefined,
-      "styles": "
-        margin: 12px;
-        width: calc(100% - 12px * 2);
-      ",
-      "toString": [Function],
-    }
-  }
+  css="unknown styles"
   data-test-subj="manageSpaces"
   onClick={[Function]}
   size="s"

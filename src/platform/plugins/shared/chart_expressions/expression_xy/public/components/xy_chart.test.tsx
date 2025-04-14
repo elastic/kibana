@@ -966,7 +966,7 @@ describe('XYChart component', () => {
 
   test('it renders regular bar empty placeholder for no results', () => {
     const { data, args } = sampleArgs();
-    const component = shallow(
+    const component = mountWithIntl(
       <XYChart
         {...defaultProps}
         args={{
@@ -989,7 +989,7 @@ describe('XYChart component', () => {
         return layer;
       }
     });
-    const component = shallow(
+    const component = mountWithIntl(
       <XYChart
         {...defaultProps}
         args={{
@@ -1585,7 +1585,7 @@ describe('XYChart component', () => {
   test('it renders stacked bar empty placeholder for no results', () => {
     const { args } = sampleArgs();
 
-    const component = shallow(
+    const component = mountWithIntl(
       <XYChart
         {...defaultProps}
         args={{
