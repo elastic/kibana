@@ -123,6 +123,8 @@ export class FeatureRegistry {
         feature.name = featureOverride.name;
       }
 
+      // We are allowing null values for description to be able to remove the description from the feature.
+      // The override is used in serverless.security.search_ai_lake.yml
       if (typeof featureOverride.description !== 'undefined') {
         feature.description = featureOverride.description;
       }
