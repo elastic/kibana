@@ -521,7 +521,7 @@ export const getDefaultAIConnectorSetting = (connectors: Connector[]): SettingsC
           name: i18n.translate('xpack.securitySolution.uiSettings.defaultAIConnectorLabel', {
             defaultMessage: 'Default AI Connector',
           }),
-          // TODO, make Elastic LLM the default value
+          // TODO, make Elastic LLM the default value once fully available in serverless
           value: connectors[0].id,
           description: i18n.translate(
             'xpack.securitySolution.uiSettings.defaultAIConnectorDescription',
