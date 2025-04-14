@@ -18,11 +18,11 @@ export default {
 
 export const Default: StoryFn = () => {
   const title = 'Title with border below';
-  const children = <EuiText>Content with border above</EuiText>;
+  const children = <EuiText>{'Content with border above'}</EuiText>;
 
   return (
     <StoryProvidersComponent>
-      <DefaultPageLayout pageTitle={title} children={children} />
+      <DefaultPageLayout pageTitle={title}>{children}</DefaultPageLayout>
     </StoryProvidersComponent>
   );
 };
@@ -30,11 +30,13 @@ export const Default: StoryFn = () => {
 export const NoBorder: StoryFn = () => {
   const title = 'Title without border';
   const border = false;
-  const children = <EuiText>Content without border</EuiText>;
+  const children = <EuiText>{'Content without border'}</EuiText>;
 
   return (
     <StoryProvidersComponent>
-      <DefaultPageLayout pageTitle={title} border={border} children={children} />
+      <DefaultPageLayout pageTitle={title} border={border}>
+        {children}
+      </DefaultPageLayout>
     </StoryProvidersComponent>
   );
 };

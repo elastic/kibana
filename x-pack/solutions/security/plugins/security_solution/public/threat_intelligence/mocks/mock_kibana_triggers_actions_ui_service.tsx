@@ -9,13 +9,14 @@ import React from 'react';
 import { EuiText } from '@elastic/eui';
 import type { TriggersAndActionsUIPublicPluginStart as TriggersActionsStart } from '@kbn/triggers-actions-ui-plugin/public';
 
+const styles = { display: 'inline' };
 /**
  * Returns a default object to mock the triggers actions ui plugin for our unit tests and storybook stories.
  */
 export const mockTriggersActionsUiService: TriggersActionsStart = {
   getFieldBrowser: () => (
-    <EuiText style={{ display: 'inline' }} size="xs">
-      Fields
+    <EuiText css={styles} size="xs">
+      {'Fields'}
     </EuiText>
   ),
 } as unknown as TriggersActionsStart;

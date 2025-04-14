@@ -69,6 +69,7 @@ export const useIndicators = ({
   const { inspectorAdapters } = useInspector();
 
   const onChangeItemsPerPage = useCallback(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (pageSize: any) =>
       setPagination((currentPagination) => ({
         ...currentPagination,
@@ -79,6 +80,7 @@ export const useIndicators = ({
   );
 
   const onChangePage = useCallback(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (pageIndex: any) => setPagination((currentPagination) => ({ ...currentPagination, pageIndex })),
     []
   );

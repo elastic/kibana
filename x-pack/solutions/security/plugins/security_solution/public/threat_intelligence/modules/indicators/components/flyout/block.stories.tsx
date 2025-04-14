@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import React from 'react';
 import { IndicatorsFiltersContext } from '../../hooks/use_filters_context';
 import { IndicatorsFlyoutContext } from '../../hooks/use_flyout_context';

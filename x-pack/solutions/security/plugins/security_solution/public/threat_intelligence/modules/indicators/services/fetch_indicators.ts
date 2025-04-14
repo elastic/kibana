@@ -15,6 +15,7 @@ import { search } from '../../../utils/search';
 
 export interface RawIndicatorsResponse {
   hits: {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     hits: any[];
     total: number;
   };
@@ -34,6 +35,7 @@ interface FetchIndicatorsDependencies {
 export interface FetchParams {
   pagination: Pagination;
   selectedPatterns: string[];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   sorting: any[];
   filters: Filter[];
   timeRange?: TimeRange;

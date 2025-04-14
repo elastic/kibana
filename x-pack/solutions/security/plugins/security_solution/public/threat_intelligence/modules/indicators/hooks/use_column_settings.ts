@@ -93,6 +93,7 @@ export const useColumnSettings = (): ColumnSettingsValue => {
         return currentColumns.filter(columnsNotMatchingId);
       }
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       return [...currentColumns, { id: columnId as any, displayAsText: columnId }];
     });
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EuiBasicTableColumn, EuiInMemoryTableProps } from '@elastic/eui';
+import type { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiInMemoryTable } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { FC } from 'react';
@@ -17,7 +17,6 @@ import { IndicatorValueActions } from './indicator_value_actions';
 export interface IndicatorFieldsTableProps {
   fields: string[];
   indicator: Indicator;
-  search: EuiInMemoryTableProps['search'];
   ['data-test-subj']?: string;
 }
 

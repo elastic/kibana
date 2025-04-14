@@ -11,11 +11,13 @@ import { QueryClient, QueryClientProvider, useQuery } from '@tanstack/react-quer
 
 const createWrapper = () => {
   const queryClient = new QueryClient();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any, react/display-name
   return ({ children }: { children: any }) => (
     <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
   );
 };
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const renderUseQuery = (result: { items: any[] }) =>
   renderHook(() => useQuery(['policies'], () => result), {
     wrapper: createWrapper(),

@@ -14,6 +14,7 @@ jest.mock('../hooks/use_kibana');
 interface MockConfig {
   $filterUpdates?: BehaviorSubject<void>;
   getFilters?: jest.Mock<Filter[]>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   setFilters?: jest.Mock<any, Filter[]>;
 }
 
@@ -43,6 +44,7 @@ export const mockUseKibanaForFilters = ({
       },
       dataViews: { getFieldsForWildcard },
     },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } as any);
 
   return { getFieldsForWildcard, setFilters, getFilters, $filterUpdates };

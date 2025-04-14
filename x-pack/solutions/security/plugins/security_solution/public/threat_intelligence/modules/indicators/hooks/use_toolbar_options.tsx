@@ -40,14 +40,15 @@ export const useToolbarOptions = ({
       additionalControls: {
         left: {
           prepend: (
-            <EuiText style={{ display: 'inline' }} size="xs">
+            <EuiText css={{ display: 'inline' }} size="xs">
               {indicatorCount && end ? (
-                <>
-                  Showing {start + 1}-{end > indicatorCount ? indicatorCount : end} of{' '}
-                  {indicatorCount} indicators
-                </>
+                <>{`
+                  Showing ${start + 1}-${
+                  end > indicatorCount ? indicatorCount : end
+                } of ${indicatorCount} indicators
+                `}</>
               ) : (
-                <>-</>
+                <>{'-'}</>
               )}
             </EuiText>
           ),

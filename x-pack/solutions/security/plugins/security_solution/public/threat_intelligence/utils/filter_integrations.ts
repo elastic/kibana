@@ -30,6 +30,7 @@ export const THREAT_INTELLIGENCE_UTILITIES = 'ti_util';
  */
 export const filterIntegrations = (integrations: Integration[]): Integration[] =>
   integrations.filter(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (pkg: any) =>
       pkg.status === INSTALLATION_STATUS.Installed &&
       pkg.categories.find((category: string) => category === THREAT_INTELLIGENCE_CATEGORY) !=

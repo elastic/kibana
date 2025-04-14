@@ -57,6 +57,7 @@ describe('<IndicatorsPage />', () => {
     (useFilters as jest.MockedFunction<typeof useFilters>).mockReturnValue({
       filters: [],
       filterQuery: { language: 'kuery', query: '' },
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       filterManager: {} as any,
       timeRange: mockTimeRange,
     });

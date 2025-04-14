@@ -44,6 +44,7 @@ const requestInspector = (
   const inspectorRequest = inspectorAdapter?.start(requestName, { id: requestId });
 
   return {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     recordRequestError(error: any) {
       if (!inspectorRequest) {
         return;

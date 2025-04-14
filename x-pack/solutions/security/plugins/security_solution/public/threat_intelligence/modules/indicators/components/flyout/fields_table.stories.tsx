@@ -28,11 +28,7 @@ export function WithIndicators() {
     <StoryProvidersComponent>
       <IndicatorsFiltersContext.Provider value={mockIndicatorsFiltersContext}>
         <IndicatorsFlyoutContext.Provider value={context}>
-          <IndicatorFieldsTable
-            fields={['threat.indicator.type']}
-            indicator={indicator}
-            search={false}
-          />
+          <IndicatorFieldsTable fields={['threat.indicator.type']} indicator={indicator} />
         </IndicatorsFlyoutContext.Provider>
       </IndicatorsFiltersContext.Provider>
     </StoryProvidersComponent>
@@ -49,11 +45,7 @@ export function NoFilterButtons() {
     <StoryProvidersComponent>
       <IndicatorsFiltersContext.Provider value={mockIndicatorsFiltersContext}>
         <IndicatorsFlyoutContext.Provider value={context}>
-          <IndicatorFieldsTable
-            fields={['threat.indicator.type']}
-            indicator={indicator}
-            search={false}
-          />
+          <IndicatorFieldsTable fields={['threat.indicator.type']} indicator={indicator} />
         </IndicatorsFlyoutContext.Provider>
       </IndicatorsFiltersContext.Provider>
     </StoryProvidersComponent>

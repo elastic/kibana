@@ -21,6 +21,7 @@ interface FetchIndicatorsDependencies {
 
 export interface RawIndicatorsResponse {
   hits: {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     hits: any[];
     total: number;
   };

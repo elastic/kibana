@@ -17,6 +17,7 @@ import { CommentChildren } from './comment_children';
  * It renders some text and a flyout.
  */
 export const initComponent = () => {
+  // eslint-disable-next-line react/display-name
   return (props: ExternalReferenceAttachmentViewProps) => {
     const indicatorId: string = props.externalReferenceId;
     const metadata = props.externalReferenceMetadata as unknown as AttachmentMetadata;

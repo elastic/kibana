@@ -12,13 +12,6 @@ import { IndicatorEmptyPrompt } from './empty_prompt';
 import { IndicatorFieldsTable } from './fields_table';
 import { FLYOUT_TABLE_TEST_ID } from './test_ids';
 
-const search = {
-  box: {
-    incremental: true,
-    schema: true,
-  },
-};
-
 export interface IndicatorsFlyoutTableProps {
   /**
    * Indicator to display in table view.
@@ -38,7 +31,6 @@ export const IndicatorsFlyoutTable: FC<IndicatorsFlyoutTableProps> = ({ indicato
   ) : (
     <IndicatorFieldsTable
       data-test-subj={FLYOUT_TABLE_TEST_ID}
-      search={search}
       fields={items}
       indicator={indicator}
     />

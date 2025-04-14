@@ -45,3 +45,5 @@ export const IntegrationsGuard = memo<PropsWithChildren<unknown>>(({ children })
   const showIndicatorsPage = indicatorsTotalCount > 0 || (installedTIIntegrations || []).length > 0;
   return showIndicatorsPage ? <>{children}</> : <EmptyPage />;
 });
+
+IntegrationsGuard.displayName = 'IntegrationsGuard';

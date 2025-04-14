@@ -31,6 +31,7 @@ export function BasicEmptyPage() {
   };
 
   return (
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     <StoryProvidersComponent kibana={kibana as any}>
       <EmptyPage />
     </StoryProvidersComponent>

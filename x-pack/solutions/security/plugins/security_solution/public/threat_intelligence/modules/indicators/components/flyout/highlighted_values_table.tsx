@@ -46,7 +46,6 @@ export const HighlightedValuesTable: FC<HighlightedValuesTableProps> = ({
 
   return (
     <IndicatorFieldsTable
-      search={false}
       indicator={indicator}
       fields={highlightedFields}
       data-test-subj={dataTestSubj}

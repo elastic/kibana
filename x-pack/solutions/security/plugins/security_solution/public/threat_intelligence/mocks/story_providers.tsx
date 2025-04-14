@@ -56,6 +56,7 @@ export interface StoryProvidersComponentProps {
 const securityLayout = {
   getPluginWrapper:
     (): FC =>
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ({ children, isEmptyState, emptyPageBody }: any) => {
       if (isEmptyState && emptyPageBody) {
         return <>{emptyPageBody}</>;

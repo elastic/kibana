@@ -11,7 +11,9 @@ import { unwrapValue } from './unwrap_value';
 describe('unwrapValue()', () => {
   it('should return the first field value or null, if not present', () => {
     expect(unwrapValue({ fields: {} }, RawIndicatorFieldId.Type)).toEqual(null);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     expect(unwrapValue({} as any, RawIndicatorFieldId.Type)).toEqual(null);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     expect(unwrapValue(null as any, RawIndicatorFieldId.Type)).toEqual(null);
 
     expect(

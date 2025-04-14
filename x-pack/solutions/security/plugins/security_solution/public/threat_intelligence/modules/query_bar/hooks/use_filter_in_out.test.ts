@@ -15,8 +15,7 @@ import {
 import { TestProvidersComponent } from '../../../mocks/test_providers';
 import type { UseFilterInValue } from './use_filter_in_out';
 import { useFilterInOut } from './use_filter_in_out';
-import { FilterIn } from '../utils/filter';
-import { updateFiltersArray } from '../utils/filter';
+import { FilterIn, updateFiltersArray } from '../utils/filter';
 
 jest.mock('../utils/filter', () => ({ updateFiltersArray: jest.fn() }));
 
