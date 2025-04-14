@@ -655,7 +655,9 @@ export const RulesList = ({
   useEffect(() => {
     setHeaderActions?.([
       ...(authorizedToCreateAnyRules ? [<CreateRuleButton openFlyout={openRuleTypeModal} />] : []),
-      <RulesSettingsLink alertDeleteCategoryIds={['management']} />,
+      <RulesSettingsLink
+        alertDeleteCategoryIds={['management', 'observability', 'securitySolution']}
+      />,
       <RulesListDocLink />,
     ]);
   }, [authorizedToCreateAnyRules]);
