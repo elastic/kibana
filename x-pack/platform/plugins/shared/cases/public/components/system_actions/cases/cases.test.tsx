@@ -87,7 +87,7 @@ describe('action params validation', () => {
   test('params validation fails when timeWindow is less than 5 minutes', async () => {
     const actionParams = { subActionParams: { timeWindow: '3m' } };
     expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
-      errors: { timeWindow: ['Time window must be at least 5 minutes'] },
+      errors: { timeWindow: ['Time window should be at least 5 minutes'] },
     });
   });
 });
