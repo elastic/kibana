@@ -19,6 +19,14 @@ export const GridRowVisualContainer = ({ rowId }: { rowId: string }) => {
     zIndex: 0,
   };
 
+  useEffect(() => {
+    return () => {
+      // remove reference on unmount
+      delete gridLayoutStateManager.rowDimensionsRefs.current[rowId];
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   useEffect(
     () => {
       /** Update the styles of the drag preview via a subscription to prevent re-renders */

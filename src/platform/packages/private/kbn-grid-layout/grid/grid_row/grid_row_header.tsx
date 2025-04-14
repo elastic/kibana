@@ -49,15 +49,6 @@ export const GridRowHeader = React.memo(
     );
 
     useEffect(() => {
-      return () => {
-        // remove reference on unmount
-        // TODO: we have to be smarter here to remove rowRefs
-        delete gridLayoutStateManager.headerRefs.current[rowId];
-      };
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
-
-    useEffect(() => {
       /**
        * This subscription is responsible for controlling whether or not the section title is
        * editable and hiding all other "edit mode" actions (delete section, move section, etc)
