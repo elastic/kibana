@@ -82,6 +82,7 @@ export const moveAction = (
   const currentRowOrder = getRowKeysInOrder(currentLayout);
 
   const dropTargetRowId = getDropTarget(currentPointer, gridLayoutStateManager);
+  console.log('dropTargetRowId', dropTargetRowId);
 
   let updatedRowOrder = currentRowOrder;
 
@@ -123,13 +124,34 @@ function getDropTarget(
   currentPointer: PointerPosition,
   gridLayoutStateManager: GridLayoutStateManager
 ) {
-  const rowRefs = gridLayoutStateManager.rowDimensionsRefs.current;
-  const rowIds = Object.keys(rowRefs);
-  const rowRef = rowIds.find((id) => {
-    const ref = rowRefs[id];
+  const headerRefs = gridLayoutStateManager.headerRefs.current;
+  const rowId =  Object.keys(headerRefs).find((id) => {
+    const ref = headerRefs[id];
     if (!ref) return false;
     const { top, bottom } = ref.getBoundingClientRect();
     return currentPointer.clientY >= top && currentPointer.clientY <= bottom;
   });
-  return rowRef;
+  return rowId;
+}
+
+const getRowRect = (
+  rowId: string, 
+  gridLayoutStateManager: GridLayoutStateManager
+) => {
+  const headerRef = gridLayoutStateManager.headerRefs.current[rowId];
+  const rowRef = gridLayoutStateManager.rowDimensionsRefs.current[rowId];
+  if (!headerRef) return null;
+  if (!rowRef) {
+    const { top, bottom } = headerRef.getBoundingClientRect();
+    return {
+      top,
+      bottom,
+    };
+  };
+  const top = headerRef.getBoundingClientRect().top;
+  const bottom = rowRef.getBoundingClientRect().bottom;
+  return {
+    top,
+    bottom,
+  };
 }
