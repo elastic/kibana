@@ -2036,29 +2036,29 @@
   dependencies:
     tslib "^2.0.0"
 
-"@elastic/apm-rum-core@^5.22.1":
-  version "5.22.1"
-  resolved "https://registry.yarnpkg.com/@elastic/apm-rum-core/-/apm-rum-core-5.22.1.tgz#51f652ace73d4f3ee2d93097a3a3a042764fb26e"
-  integrity sha512-G8NHxG3R+ok3XsRSUKwUcpUQR3/cKMN2UT2LXP57hrtTaI4eKEzk3zn9IXnxAwqwSl0TMtewaIoBTI9KVDCMyQ==
+"@elastic/apm-rum-core@^5.23.0":
+  version "5.23.0"
+  resolved "https://registry.yarnpkg.com/@elastic/apm-rum-core/-/apm-rum-core-5.23.0.tgz#45f463afc14272de83af3a41e369a677b54334b6"
+  integrity sha512-kQnKwf6EaHfNvOrL66SOJuoAp8xuCdqAGb/bnxiKsFu1DKYOglJiW5Su4wSjQp82rTP7Vt2X1RZbu+7lURLX9Q==
   dependencies:
     error-stack-parser "^1.3.5"
     opentracing "^0.14.3"
     promise-polyfill "^8.1.3"
 
-"@elastic/apm-rum-react@^2.0.5":
-  version "2.0.5"
-  resolved "https://registry.yarnpkg.com/@elastic/apm-rum-react/-/apm-rum-react-2.0.5.tgz#0992d3b869f83bb97a89b22bf03b0342e3be1d54"
-  integrity sha512-yRb4qQSxAO2aQPxqBTob1t1QcoVJ35IP4ixMZkxNKFAL0bvqYRssU+92bOSkj6eyYBOets8NJKzy1Cg3/wOXGw==
+"@elastic/apm-rum-react@^2.0.6":
+  version "2.0.6"
+  resolved "https://registry.yarnpkg.com/@elastic/apm-rum-react/-/apm-rum-react-2.0.6.tgz#9e9d06cbd9c6ad0d9f65a3b6d2bcaccd75211075"
+  integrity sha512-aOk6Dt8fuy7iBlEmzyi7DN0XO+ucr0SjHZdxZmLL/o2O4dOvvBdfuwEBPxFKI6QbNgxb2ZS4QRMGHqGu7bgmhA==
   dependencies:
-    "@elastic/apm-rum" "^5.16.3"
+    "@elastic/apm-rum" "^5.17.0"
     hoist-non-react-statics "^3.3.0"
 
-"@elastic/apm-rum@^5.16.3":
-  version "5.16.3"
-  resolved "https://registry.yarnpkg.com/@elastic/apm-rum/-/apm-rum-5.16.3.tgz#11c31765477ab4174a1fb0949ca4e315f8d070db"
-  integrity sha512-gi4aFrAL46vKXOQM2S/1ZVfpklxJwlzWH2G69qFBw3drpa/lhmpjg6lW8N44v0whz1um1FiSVdl0I+QSgZNYfw==
+"@elastic/apm-rum@^5.17.0":
+  version "5.17.0"
+  resolved "https://registry.yarnpkg.com/@elastic/apm-rum/-/apm-rum-5.17.0.tgz#5f1927f28e1b45cac53c504457e5be76d37f0f79"
+  integrity sha512-e1qz79MQfSBUTlsKcAGbCyn21iARSJA6t300BGATIn+h41EMhFTgKGLT+Nk3kvQ548mx596FrOQsHLg6E/OmeQ==
   dependencies:
-    "@elastic/apm-rum-core" "^5.22.1"
+    "@elastic/apm-rum-core" "^5.23.0"
 
 "@elastic/app-search-javascript@^8.1.2":
   version "8.1.2"
@@ -15943,10 +15943,10 @@ cytoscape-dagre@^2.5.0:
   dependencies:
     dagre "^0.8.5"
 
-cytoscape@^3.31.1:
-  version "3.31.1"
-  resolved "https://registry.yarnpkg.com/cytoscape/-/cytoscape-3.31.1.tgz#29b12cac715fbb2aacc50cdf5cf1467aadde9c00"
-  integrity sha512-Hx5Mtb1+hnmAKaZZ/7zL1Y5HTFYOjdDswZy/jD+1WINRU8KVi1B7+vlHdsTwY+VCFucTreoyu1RDzQJ9u0d2Hw==
+cytoscape@^3.31.2:
+  version "3.31.2"
+  resolved "https://registry.yarnpkg.com/cytoscape/-/cytoscape-3.31.2.tgz#94d5b86d142599a2d6e750f6b2f3102518c7d48e"
+  integrity sha512-/eOXg2uGdMdpGlEes5Sf6zE+jUG+05f3htFNQIxLxduOH/SsaUZiPBfAwP1btVIVzsnhiNOdi+hvDRLYfMZjGw==
 
 "d3-array@1 - 3", "d3-array@2 - 3", "d3-array@2.10.0 - 3", "d3-array@2.5.0 - 3", d3-array@3.2.4, d3-array@^3.2.2:
   version "3.2.4"

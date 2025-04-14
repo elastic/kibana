@@ -493,7 +493,7 @@ src/platform/packages/shared/kbn-object-versioning-utils @elastic/appex-sharedux
 src/platform/packages/shared/kbn-openapi-bundler @elastic/security-detection-rule-management
 src/platform/packages/shared/kbn-openapi-common @elastic/security-detection-rule-management
 src/platform/packages/shared/kbn-openapi-generator @elastic/security-detection-rule-management
-src/platform/packages/shared/kbn-osquery-io-ts-types @elastic/security-asset-management
+src/platform/packages/shared/kbn-osquery-io-ts-types @elastic/security-defend-workflows
 src/platform/packages/shared/kbn-palettes @elastic/kibana-visualizations
 src/platform/packages/shared/kbn-profiling-utils @elastic/obs-ux-infra_services-team
 src/platform/packages/shared/kbn-react-field @elastic/kibana-data-discovery
@@ -865,7 +865,7 @@ x-pack/platform/plugins/private/cloud_integrations/cloud_full_story @elastic/kib
 x-pack/platform/plugins/private/cloud_integrations/cloud_links @elastic/kibana-core
 x-pack/platform/plugins/private/cross_cluster_replication @elastic/kibana-management
 x-pack/platform/plugins/private/custom_branding @elastic/appex-sharedux
-x-pack/platform/plugins/private/data_usage @elastic/obs-ai-assistant @elastic/security-solution
+x-pack/platform/plugins/private/data_usage @elastic/kibana-management
 x-pack/platform/plugins/private/data_visualizer @elastic/ml-ui
 x-pack/platform/plugins/private/discover_enhanced @elastic/kibana-data-discovery
 x-pack/platform/plugins/private/drilldowns/url_drilldown @elastic/appex-sharedux
@@ -1303,9 +1303,9 @@ src/platform/plugins/shared/discover/public/context_awareness/profile_providers/
 ### Observability Plugins
 
 # Observability AI Assistant
-/x-pack/test_serverless/api_integration/test_suites/common/data_usage @elastic/obs-ai-assistant @elastic/security-solution
-/x-pack/test_serverless/functional/test_suites/common/data_usage @elastic/obs-ai-assistant @elastic/security-solution
-/x-pack/test_serverless/functional/page_objects/svl_data_usage.ts @elastic/obs-ai-assistant @elastic/security-solution
+/x-pack/test_serverless/api_integration/test_suites/common/data_usage @elastic/kibana-management
+/x-pack/test_serverless/functional/test_suites/common/data_usage @elastic/kibana-management
+/x-pack/test_serverless/functional/page_objects/svl_data_usage.ts @elastic/kibana-management
 /x-pack/test/observability_ai_assistant_api_integration @elastic/obs-ai-assistant
 /x-pack/test/observability_ai_assistant_functional @elastic/obs-ai-assistant
 /x-pack/test_serverless/**/test_suites/observability/ai_assistant @elastic/obs-ai-assistant
@@ -2001,7 +2001,7 @@ x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/server/confi
 /x-pack/test_serverless/functional/test_suites/security/config.ts @elastic/kibana-security @elastic/appex-qa
 /x-pack/test_serverless/functional/test_suites/security/config.mki_only.ts @elastic/kibana-security @elastic/appex-qa
 /x-pack/test_serverless/functional/test_suites/security/index.mki_only.ts @elastic/kibana-security @elastic/appex-qa @elastic/kibana-cloud-security-posture
-/x-pack/test_serverless/functional/test_suites/security/config.feature_flags.ts @elastic/kibana-security @elastic/kibana-cloud-security-posture
+/x-pack/test_serverless/functional/test_suites/security/config.feature_flags.ts @elastic/kibana-security
 /x-pack/test_serverless/api_integration/test_suites/observability/config.feature_flags.ts @elastic/kibana-security
 /x-pack/test_serverless/functional/test_suites/common/spaces/multiple_spaces_enabled.ts @elastic/kibana-security
 /x-pack/test_serverless/functional/page_objects/svl_management_page.ts @elastic/kibana-security

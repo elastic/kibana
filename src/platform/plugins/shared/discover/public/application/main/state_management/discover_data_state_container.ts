@@ -210,9 +210,6 @@ export function getDataStateContainer({
         reset: val === 'reset',
         fetchMore: val === 'fetch_more',
       },
-      searchSessionId:
-        (val === 'fetch_more' && searchSessionManager.getCurrentSearchSessionId()) ||
-        searchSessionManager.getNextSearchSessionId(),
     })),
     share()
   );
@@ -222,7 +219,13 @@ export function getDataStateContainer({
   function subscribe() {
     const subscription = fetch$
       .pipe(
-        mergeMap(async ({ options, searchSessionId }) => {
+        mergeMap(async ({ options }) => {
+          const { id: currentTabId, resetDefaultProfileState, dataRequestParams } = getCurrentTab();
+
+          const searchSessionId =
+            (options.fetchMore && dataRequestParams.searchSessionId) ||
+            searchSessionManager.getNextSearchSessionId();
+
           const commonFetchDeps = {
             initialFetchStatus: getInitialFetchStatus(),
             inspectorAdapters,
@@ -259,6 +262,7 @@ export function getDataStateContainer({
               dataRequestParams: {
                 timeRangeAbsolute: timefilter.getAbsoluteTime(),
                 timeRangeRelative: timefilter.getTime(),
+                searchSessionId,
               },
             })
           );
@@ -269,7 +273,6 @@ export function getDataStateContainer({
             query: appStateContainer.getState().query,
           });
 
-          const { id: currentTabId, resetDefaultProfileState } = getCurrentTab();
           const { currentDataView$ } = selectTabRuntimeState(runtimeStateManager, currentTabId);
           const dataView = currentDataView$.getValue();
           const defaultProfileState = dataView
@@ -354,7 +357,7 @@ export function getDataStateContainer({
     };
   }
 
-  const fetchQuery = async (resetQuery?: boolean) => {
+  const fetchQuery = async () => {
     const query = appStateContainer.getState().query;
     const currentDataView = getSavedSearch().searchSource.getField('index');
 
@@ -365,11 +368,7 @@ export function getDataStateContainer({
       }
     }
 
-    if (resetQuery) {
-      refetch$.next('reset');
-    } else {
-      refetch$.next(undefined);
-    }
+    refetch$.next(undefined);
 
     return refetch$;
   };
