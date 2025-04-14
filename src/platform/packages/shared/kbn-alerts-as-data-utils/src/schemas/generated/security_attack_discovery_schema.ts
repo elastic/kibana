@@ -75,6 +75,8 @@ const SecurityAttackDiscoveryAlertRequired = rt.type({
   'kibana.alert.attack_discovery.api_config': schemaUnknown,
   'kibana.alert.attack_discovery.details_markdown': schemaString,
   'kibana.alert.attack_discovery.details_markdown_with_replacements': schemaString,
+  'kibana.alert.attack_discovery.replacements.uuid': schemaString,
+  'kibana.alert.attack_discovery.replacements.value': schemaString,
   'kibana.alert.attack_discovery.summary_markdown': schemaString,
   'kibana.alert.attack_discovery.summary_markdown_with_replacements': schemaString,
   'kibana.alert.attack_discovery.title': schemaString,
@@ -105,6 +107,7 @@ const SecurityAttackDiscoveryAlertOptional = rt.partial({
   'kibana.alert.attack_discovery.mitre_attack_tactics': schemaStringArray,
   'kibana.alert.attack_discovery.replacements': schemaUnknown,
   'kibana.alert.attack_discovery.user.id': schemaString,
+  'kibana.alert.attack_discovery.user.name': schemaString,
   'kibana.alert.attack_discovery.users': rt.array(
     rt.partial({
       id: schemaString,
