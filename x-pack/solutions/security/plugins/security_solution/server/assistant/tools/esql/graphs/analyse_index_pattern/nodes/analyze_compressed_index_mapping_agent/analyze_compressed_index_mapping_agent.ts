@@ -34,11 +34,13 @@ export const getAnalyzeCompressedIndexMappingAgent = ({
             .invoke([
                 new SystemMessage({
                     content: "You are a security analyst who is an expert in Elasticsearch and particularly at analyzing indices. " +
-                        "You have been given an index mapping and an explanation of the query that we are trying to generate. Analyze " +
-                        "the index mapping and determine whether it contains the fields required to write the query."
+                        "You will be given an compressed index mapping containing available fields and types and an explanation " +
+                        "of the query that we are trying to generate. Analyze the index mapping and determine whether it contains the " +
+                        "fields required to write the query. You do not need to generate the query right now, just determine whether the" +
+                        " index mapping contains the fields required to write the query."
                 }),
                 new HumanMessage({
-                    content: `Query objective:${input.question}\nIndex pattern: '${input.indexPattern}'\n\n Compressed index mapping:\n${compressedIndexMapping}`,
+                    content: `Query objective:\n'${input.question}'\n\nIndex pattern:\n'${input.indexPattern}'\n\nCompressed index mapping:\n${compressedIndexMapping}`,
                 }),
             ])
 

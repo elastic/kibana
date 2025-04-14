@@ -45,7 +45,7 @@ export const getAnalyzeIndexPatternGraph = ({
         if(state.fieldDescriptors === undefined) {
             throw new Error('Expected field descriptors to be defined');
         }
-        return state.fieldDescriptors.length > 1 ? EXPLORE_PARTIAL_INDEX_AGENT : ANALYZE_COMPRESSED_INDEX_MAPPING_AGENT;
+        return state.fieldDescriptors.length > 2500 ? EXPLORE_PARTIAL_INDEX_AGENT : ANALYZE_COMPRESSED_INDEX_MAPPING_AGENT;
     }, {
         [EXPLORE_PARTIAL_INDEX_AGENT]: EXPLORE_PARTIAL_INDEX_AGENT,
         [ANALYZE_COMPRESSED_INDEX_MAPPING_AGENT]: ANALYZE_COMPRESSED_INDEX_MAPPING_AGENT

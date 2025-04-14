@@ -48,10 +48,10 @@ export const getSelectIndexPattern = ({
       });
     }
 
-    // More than one index pattern contains the required data, we will just pick the first one
+    // More than one index pattern contains the required data, we will pick the shortest one (this is likely to be the least specific)
     return new Command({
       update: {
-        selectedIndexPattern: candidateIndexPatterns[0].indexPattern,
+        selectedIndexPattern: candidateIndexPatterns.sort((a, b) => a.indexPattern.length - b.indexPattern.length)[0].indexPattern,
       },
     });
   };

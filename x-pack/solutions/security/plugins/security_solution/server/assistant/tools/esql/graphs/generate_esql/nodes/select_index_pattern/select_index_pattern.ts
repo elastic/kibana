@@ -44,8 +44,8 @@ export const getSelectIndexPattern = ({
         selectedIndexPattern: childGraphOutput.selectedIndexPattern,
         messages: [
           new HumanMessage({
-            content: `We have analyzed multiple index patterns to see if they contain the data required for the query. The following index pattern should be used for the query verbatim: '${childGraphOutput.selectedIndexPattern}'. ` + 
-            `Some context about the index mapping:\n\n ${context ? context : ''}`,
+            content: `We have analyzed multiple index patterns to see if they contain the data required for the query. The following index pattern should be used for the query verbatim: '${childGraphOutput.selectedIndexPattern}'.\n` + 
+            `Some context about the index mapping:\n\n${context ? context : ''}`,
           }),
         ],
       },
