@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { KnowledgeBaseState } from '@kbn/observability-ai-assistant-plugin/common';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 import {
   deleteKnowledgeBaseModel,
@@ -34,7 +35,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
       expect(res.status).to.be(200);
 
-      expect(res.body.ready).to.be(true);
+      expect(res.body.kbState).to.be(KnowledgeBaseState.READY);
       expect(res.body.enabled).to.be(true);
       expect(res.body.endpoint?.service_settings?.model_id).to.eql(TINY_ELSER.id);
     });
@@ -48,7 +49,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
       expect(res.status).to.be(200);
 
-      expect(res.body.ready).to.be(false);
+      expect(res.body.kbState).to.not.be(KnowledgeBaseState.READY);
       expect(res.body.enabled).to.be(true);
       expect(res.body.errorMessage).to.include.string(
         'No known trained model with model_id [pt_tiny_elser]'
@@ -64,7 +65,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
       expect(res.status).to.be(200);
 
-      expect(res.body.ready).to.be(false);
+      expect(res.body.kbState).to.not.be(KnowledgeBaseState.READY);
       expect(res.body.enabled).to.be(true);
       expect(res.body.errorMessage).to.include.string(
         'Inference endpoint not found [obs_ai_assistant_kb_inference]'

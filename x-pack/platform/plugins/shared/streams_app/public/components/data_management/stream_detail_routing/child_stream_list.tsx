@@ -19,7 +19,7 @@ import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/css';
 import { cloneDeep } from 'lodash';
 import React from 'react';
-import { EMPTY_EQUALS_CONDITION } from '../../../util/condition';
+import { ALWAYS_CONDITION } from '../../../util/condition';
 import { NestedView } from '../../nested_view';
 import { useRoutingStateContext } from './hooks/routing_state';
 import { CurrentStreamEntry } from './current_stream_entry';
@@ -61,11 +61,11 @@ export function ChildStreamList({ availableStreams }: { availableStreams: string
               defaultMessage: 'Routing rules',
             })}
           </EuiText>
-          {(definition.privileges.simulate || definition.privileges.manage) && (
+          {definition.privileges.simulate && (
             <EuiFlexItem grow={false}>
               <EuiToolTip
                 content={
-                  definition.privileges.simulate
+                  !definition.privileges.manage
                     ? i18n.translate('xpack.streams.streamDetailRouting.rules.onlySimulate', {
                         defaultMessage:
                           "You don't have sufficient privileges to create new streams, only simulate.",
@@ -82,7 +82,7 @@ export function ChildStreamList({ availableStreams }: { availableStreams: string
                       isNew: true,
                       child: {
                         destination: `${definition.stream.name}.child`,
-                        if: cloneDeep(EMPTY_EQUALS_CONDITION),
+                        if: cloneDeep(ALWAYS_CONDITION),
                       },
                     });
                   }}
