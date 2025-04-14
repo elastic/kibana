@@ -19,7 +19,9 @@ export interface ContentReferencesStore {
    * @param generator.params.id An ID that is guaranteed to not exist in the store. Intended to be used as the Id of the ContentReference but not required.
    * @returns the new ContentReference
    */
-  add: <T extends ContentReference>(generator: (params: { id: ContentReferenceId }) => T) => T;
+  add: <T extends ContentReference>(
+    generator: (params: { id: ContentReferenceId }) => T
+  ) => T | undefined;
 
   /**
    * Used to read the content reference store.

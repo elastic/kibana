@@ -8,8 +8,9 @@
 import { EuiPanel, EuiFlexGroup, EuiFormRow, EuiFieldText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { RoutingDefinition } from '@kbn/streams-schema';
-import React from 'react';
-import { ConditionEditor } from '../condition_editor';
+import React, { useEffect, useRef } from 'react';
+import { RoutingConditionEditor } from '../condition_editor';
+import { ControlBar } from './control_bar';
 
 export function NewRoutingStreamEntry({
   child,
@@ -18,39 +19,50 @@ export function NewRoutingStreamEntry({
   child: RoutingDefinition;
   onChildChange: (child?: RoutingDefinition) => void;
 }) {
+  const panelRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (panelRef.current) {
+      panelRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }, []);
+
   return (
-    <EuiPanel hasShadow={false} hasBorder paddingSize="s">
-      <EuiFlexGroup gutterSize="m" direction="column">
-        <EuiFormRow
-          fullWidth
-          label={i18n.translate('xpack.streams.streamDetailRouting.name', {
-            defaultMessage: 'Stream name',
-          })}
-        >
-          <EuiFieldText
-            data-test-subj="streamsAppRoutingStreamEntryNameField"
-            value={child.destination}
+    <div ref={panelRef}>
+      <EuiPanel hasShadow={false} hasBorder paddingSize="s">
+        <EuiFlexGroup gutterSize="m" direction="column">
+          <EuiFormRow
             fullWidth
-            compressed
-            onChange={(e) => {
+            label={i18n.translate('xpack.streams.streamDetailRouting.name', {
+              defaultMessage: 'Stream name',
+            })}
+          >
+            <EuiFieldText
+              data-test-subj="streamsAppRoutingStreamEntryNameField"
+              value={child.destination}
+              fullWidth
+              autoFocus
+              compressed
+              onChange={(e) => {
+                onChildChange({
+                  ...child,
+                  destination: e.target.value,
+                });
+              }}
+            />
+          </EuiFormRow>
+          <RoutingConditionEditor
+            condition={child.if}
+            onConditionChange={(condition) => {
               onChildChange({
                 ...child,
-                destination: e.target.value,
+                if: condition,
               });
             }}
           />
-        </EuiFormRow>
-        <ConditionEditor
-          readonly={false}
-          condition={child.if}
-          onConditionChange={(condition) => {
-            onChildChange({
-              ...child,
-              if: condition,
-            });
-          }}
-        />
-      </EuiFlexGroup>
-    </EuiPanel>
+          <ControlBar />
+        </EuiFlexGroup>
+      </EuiPanel>
+    </div>
   );
 }

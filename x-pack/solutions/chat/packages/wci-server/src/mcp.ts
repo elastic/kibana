@@ -10,7 +10,11 @@ import type { Client as McpBaseClient } from '@modelcontextprotocol/sdk/client/i
 import { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
 import { MaybePromise } from '@kbn/utility-types';
 
-export interface McpTool<RunInput extends ZodRawShape = ZodRawShape> {
+/**
+ * Internal representation of an MCP tool.
+ * Mostly used to abstract the underlying MCP implementation we're using for "internal" servers
+ */
+export interface McpServerTool<RunInput extends ZodRawShape = ZodRawShape> {
   name: string;
   description: string;
   schema: RunInput;
@@ -29,37 +33,10 @@ export type McpClient = Pick<McpBaseClient, 'listTools' | 'callTool'> & {
   disconnect: () => Promise<void>;
 };
 
-export type McpClientFactoryFn = () => MaybePromise<McpClient>;
+export type McpClientConnectFn = () => MaybePromise<McpClient>;
 
-export interface McpProvider {
+export interface McpClientProvider {
   id: string;
-  connect: McpClientFactoryFn;
+  connect: McpClientConnectFn;
   meta?: Record<string, unknown>;
 }
-
-/**
- * Utility factory to generate MCP call tool results
- */
-export const toolResult = {
-  text: (text: string): CallToolResult => {
-    return {
-      content: [
-        {
-          type: 'text',
-          text,
-        },
-      ],
-    };
-  },
-  error: (message: string): CallToolResult => {
-    return {
-      content: [
-        {
-          type: 'text',
-          text: `Error during tool execution: ${message}`,
-        },
-      ],
-      isError: true,
-    };
-  },
-};
