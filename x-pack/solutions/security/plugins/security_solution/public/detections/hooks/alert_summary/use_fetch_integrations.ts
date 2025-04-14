@@ -8,7 +8,7 @@
 import { useMemo } from 'react';
 import type { PackageListItem } from '@kbn/fleet-plugin/common';
 import { installationStatuses, useGetPackagesQuery } from '@kbn/fleet-plugin/public';
-import { SEARCH_AI_LAKE_ALLOWED_INTEGRATIONS } from '../../../common/lib/search_ai_lake/constants';
+import { SEARCH_AI_LAKE_ALLOWED_INTEGRATIONS } from '../../../common/lib/search_ai_lake/integrations';
 
 export interface UseFetchIntegrationsResult {
   /**

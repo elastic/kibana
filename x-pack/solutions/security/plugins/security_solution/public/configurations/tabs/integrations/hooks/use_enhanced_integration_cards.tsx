@@ -9,17 +9,18 @@ import React, { useMemo } from 'react';
 import { EuiFlexItem, EuiSpacer, EuiBadge } from '@elastic/eui';
 import { installationStatuses, type IntegrationCardItem } from '@kbn/fleet-plugin/public';
 import { SECURITY_UI_APP_ID } from '@kbn/security-solution-navigation';
-import { CONFIGURATIONS_PATH } from '../../../../../../common/constants';
-import { RETURN_APP_ID, RETURN_PATH } from '../../components/integrations/constants';
-import { IntegrationsFacets } from '../../../../../configurations/constants';
+import { CONFIGURATIONS_PATH } from '../../../../../common/constants';
+import { IntegrationsFacets } from '../../../constants';
+import { RETURN_APP_ID, RETURN_PATH } from '../components/constants';
 
-export const FEATURED_INTEGRATION_SORT_ORDER = [
+const FEATURED_INTEGRATION_SORT_ORDER = [
   'epr:splunk',
   'epr:google_secops',
   'epr:microsoft_sentinel',
   'epr:sentinel_one',
   'epr:crowdstrike',
 ];
+const INTEGRATION_CARD_MAX_HEIGHT_PX = 88;
 
 const addPathParamToUrl = (url: string, path: string) => {
   const encodedPath = encodeURIComponent(path);
@@ -57,7 +58,7 @@ export const applyCategoryBadgeAndStyling = (
           </EuiFlexItem>,
         ] as React.ReactNode[])
       : [],
-    maxCardHeight: 88,
+    maxCardHeight: INTEGRATION_CARD_MAX_HEIGHT_PX,
   };
 };
 

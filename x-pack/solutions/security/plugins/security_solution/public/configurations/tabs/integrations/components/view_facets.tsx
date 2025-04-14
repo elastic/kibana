@@ -11,8 +11,8 @@ import React from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { SecurityPageName } from '@kbn/deeplinks-security';
-import { IntegrationsFacets } from '../../../../../configurations/constants';
-import { useNavigation } from '../../../kibana';
+import { IntegrationsFacets } from '../../../constants';
+import { useNavigation } from '../../../../common/lib/kibana';
 
 export interface Props {
   allCount: number;

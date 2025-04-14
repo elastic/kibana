@@ -6,12 +6,12 @@
  */
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
-import { IntegrationsFacets } from '../../../../../configurations/constants';
+import { IntegrationsFacets } from '../../../constants';
 import { IntegrationViewFacets, ALL, INSTALLED } from './view_facets';
-import { useNavigation } from '../../../kibana';
+import { useNavigation } from '../../../../common/lib/kibana';
 import { SecurityPageName } from '@kbn/deeplinks-security';
 
-jest.mock('../../../kibana', () => ({
+jest.mock('../../../../common/lib/kibana', () => ({
   useNavigation: jest.fn(),
 }));
 
