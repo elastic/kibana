@@ -48032,8 +48032,7 @@
                               }
                             },
                             "required": [
-                              "ingest",
-                              "description"
+                              "ingest"
                             ],
                             "type": "object"
                           }
@@ -49520,8 +49519,7 @@
                               }
                             },
                             "required": [
-                              "ingest",
-                              "description"
+                              "ingest"
                             ],
                             "type": "object"
                           }
@@ -49604,7 +49602,6 @@
                           }
                         },
                         "required": [
-                          "description",
                           "group"
                         ],
                         "type": "object"
