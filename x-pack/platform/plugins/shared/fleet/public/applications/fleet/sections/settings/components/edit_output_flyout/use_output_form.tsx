@@ -103,6 +103,7 @@ export interface OutputFormInputsType {
   syncIntegrationsInput: ReturnType<typeof useSwitchInput>;
   kibanaURLInput: ReturnType<typeof useInput>;
   kibanaAPIKeyInput: ReturnType<typeof useInput>;
+  syncUninstalledIntegrationsInput: ReturnType<typeof useSwitchInput>;
   sslCertificateInput: ReturnType<typeof useInput>;
   sslKeyInput: ReturnType<typeof useInput>;
   sslKeySecretInput: ReturnType<typeof useSecretInput>;
@@ -296,6 +297,11 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOupu
     (output as NewRemoteElasticsearchOutput)?.kibana_url ?? '',
     (val) => validateKibanaURL(val, syncIntegrationsInput.value),
     isDisabled('kibana_url')
+  );
+
+  const syncUninstalledIntegrationsInput = useSwitchInput(
+    (output as NewRemoteElasticsearchOutput)?.sync_uninstalled_integrations ?? false,
+    isDisabled('sync_uninstalled_integrations')
   );
   /*
   Shipper feature flag - currently depends on the content of the yaml
@@ -594,6 +600,7 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOupu
     kibanaAPIKeyInput,
     syncIntegrationsInput,
     kibanaURLInput,
+    syncUninstalledIntegrationsInput,
     sslCertificateInput,
     sslKeyInput,
     sslKeySecretInput,
@@ -992,6 +999,7 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOupu
               ...(secrets ? { secrets } : {}),
               sync_integrations: syncIntegrationsInput.value,
               kibana_url: kibanaURLInput.value || null,
+              sync_uninstalled_integrations: syncUninstalledIntegrationsInput.value,
               proxy_id: proxyIdValue,
               ...shipperParams,
               ssl: {
@@ -1125,6 +1133,7 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOupu
     serviceTokenSecretInput.value,
     kibanaAPIKeyInput.value,
     syncIntegrationsInput.value,
+    syncUninstalledIntegrationsInput.value,
     kibanaURLInput.value,
     caTrustedFingerprintInput.value,
     confirm,
