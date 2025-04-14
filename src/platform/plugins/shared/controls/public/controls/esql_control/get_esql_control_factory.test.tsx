@@ -8,8 +8,6 @@
  */
 
 import React from 'react';
-import { BehaviorSubject } from 'rxjs';
-import { StateComparators } from '@kbn/presentation-publishing';
 import { fireEvent, render, waitFor } from '@testing-library/react';
 import type { ESQLControlState } from '@kbn/esql/public';
 import { getMockedControlGroupApi } from '../mocks/control_mocks';
@@ -24,18 +22,11 @@ describe('ESQLControlApi', () => {
   const controlGroupApi = getMockedControlGroupApi(dashboardApi);
 
   const factory = getESQLControlFactory();
-  function buildApiMock(
-    api: ControlApiRegistration<ESQLControlApi>,
-    nextComparators: StateComparators<ESQLControlState>
-  ) {
+  function finalizeApi(api: ControlApiRegistration<ESQLControlApi>) {
     return {
       ...api,
       uuid,
       parentApi: controlGroupApi,
-      unsavedChanges$: new BehaviorSubject<Partial<ESQLControlState> | undefined>(undefined),
-      resetUnsavedChanges: () => {
-        return true;
-      },
       type: factory.type,
     };
   }
@@ -49,7 +40,12 @@ describe('ESQLControlApi', () => {
       esqlQuery: 'FROM foo | WHERE column = ?variable1',
       controlType: 'STATIC_VALUES',
     } as ESQLControlState;
-    const { api } = await factory.buildControl(initialState, buildApiMock, uuid, controlGroupApi);
+    const { api } = await factory.buildControl({
+      initialState,
+      finalizeApi,
+      uuid,
+      controlGroupApi,
+    });
     expect(api.esqlVariable$.value).toStrictEqual({
       key: 'variable1',
       type: 'values',
@@ -66,7 +62,12 @@ describe('ESQLControlApi', () => {
       esqlQuery: 'FROM foo | WHERE column = ?variable1',
       controlType: 'STATIC_VALUES',
     } as ESQLControlState;
-    const { api } = await factory.buildControl(initialState, buildApiMock, uuid, controlGroupApi);
+    const { api } = await factory.buildControl({
+      initialState,
+      finalizeApi,
+      uuid,
+      controlGroupApi,
+    });
     expect(api.serializeState()).toStrictEqual({
       rawState: {
         availableOptions: ['option1', 'option2'],
@@ -92,12 +93,12 @@ describe('ESQLControlApi', () => {
       esqlQuery: 'FROM foo | WHERE column = ?variable1',
       controlType: 'STATIC_VALUES',
     } as ESQLControlState;
-    const { Component, api } = await factory.buildControl(
+    const { Component, api } = await factory.buildControl({
       initialState,
-      buildApiMock,
+      finalizeApi,
       uuid,
-      controlGroupApi
-    );
+      controlGroupApi,
+    });
 
     expect(api.esqlVariable$.value).toStrictEqual({
       key: 'variable1',

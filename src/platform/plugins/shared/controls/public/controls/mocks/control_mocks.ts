@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, of } from 'rxjs';
 
 import { SerializedPanelState, StateComparators } from '@kbn/presentation-publishing';
 
@@ -32,8 +32,7 @@ export const getMockedControlGroupApi = (
     ignoreParentSettings$: new BehaviorSubject(undefined),
     controlFetch$: () => new BehaviorSubject<ControlFetchContext>({}),
     allowExpensiveQueries$: new BehaviorSubject(true),
-    lastSavedStateForChild$: (childId: string) =>
-      controlStateMap[childId] ?? new BehaviorSubject(undefined),
+    lastSavedStateForChild$: (childId: string) => controlStateMap[childId] ?? of(undefined),
     getLastSavedStateForChild: (childId: string) => {
       return controlStateMap[childId]?.value ?? { rawState: {} };
     },
