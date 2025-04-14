@@ -48557,7 +48557,6 @@ paths:
                                 - wired
                           required:
                             - ingest
-                            - description
                       required:
                         - dashboards
                         - queries
@@ -49493,7 +49492,6 @@ paths:
                                 - unwired
                           required:
                             - ingest
-                            - description
                       required:
                         - dashboards
                         - queries
@@ -49549,7 +49547,6 @@ paths:
                           required:
                             - members
                       required:
-                        - description
                         - group
                   required:
                     - dashboards
