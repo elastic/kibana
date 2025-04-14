@@ -12,10 +12,10 @@ import {
 } from '@kbn/deeplinks-observability';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { HeaderMenuPortal } from '@kbn/observability-shared-plugin/public';
 import { usePluginContext } from '../../../../hooks/use_plugin_context';
 import { useKibana } from '../../../../utils/kibana_react';
-// FIXME: import { HeaderMenuPortal } from '@kbn/observability-shared-plugin/public'
-import HeaderMenuPortal from './header_menu_portal';
+import { InspectorHeaderLink } from '../../../alert_details/components/inspector_header_link';
 
 export function HeaderMenu(): React.ReactElement | null {
   const { share, theme, http } = useKibana().services;
@@ -49,6 +49,7 @@ export function HeaderMenu(): React.ReactElement | null {
                 defaultMessage: 'Annotations',
               })}
             </EuiHeaderLink>
+            <InspectorHeaderLink />
           </EuiHeaderLinks>
         </EuiFlexItem>
       </EuiFlexGroup>
