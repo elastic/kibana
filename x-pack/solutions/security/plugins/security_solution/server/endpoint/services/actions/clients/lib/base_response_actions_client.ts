@@ -278,7 +278,7 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
     );
 
     const integrationPolicies = await fleetServices.packagePolicy
-      .list(soClient, { kuery })
+      .list(soClient, { perPage: 10_000, kuery })
       .catch(catchAndWrapError);
 
     this.log.debug(() => `Integration policies found:\n${stringify(integrationPolicies)}`);
