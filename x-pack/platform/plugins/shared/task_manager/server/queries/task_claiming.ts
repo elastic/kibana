@@ -198,14 +198,14 @@ export function isLimited(
   return batch.concurrency === BatchConcurrency.Limited;
 }
 
-function asLimited(tasksType: string): LimitedBatch {
+export function asLimited(tasksType: string): LimitedBatch {
   return {
     concurrency: BatchConcurrency.Limited,
     tasksTypes: tasksType,
   };
 }
 
-function asUnlimited(tasksTypes: Set<string>): UnlimitedBatch {
+export function asUnlimited(tasksTypes: Set<string>): UnlimitedBatch {
   return {
     concurrency: BatchConcurrency.Unlimited,
     tasksTypes,
