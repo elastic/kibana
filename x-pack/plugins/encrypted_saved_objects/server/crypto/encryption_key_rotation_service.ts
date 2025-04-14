@@ -14,6 +14,7 @@ import type {
   SavedObjectsBulkUpdateObject,
   StartServicesAccessor,
 } from 'src/core/server';
+import { ALL_NAMESPACES_STRING } from 'src/core/server/saved_objects/service/lib/utils';
 
 import type { AuthenticatedUser, SecurityPluginSetup } from '../../../security/server';
 import { getDescriptorNamespace } from '../saved_objects/get_descriptor_namespace';
@@ -258,11 +259,14 @@ export class EncryptionKeyRotationService {
         continue;
       }
 
+      const firstNamespace = savedObject.namespaces?.[0];
+
       decryptedSavedObjects.push({
         ...savedObject,
         attributes: decryptedAttributes,
-        // `bulkUpdate` expects objects with a single `namespace`.
-        namespace: savedObject.namespaces?.[0],
+        // The optional object namespace for `bulkUpdate` is used to affect objects outside of the current space
+        // '*' is an invalid option, and if the object exists in all spaces, we don't need to set the namespace
+        namespace: firstNamespace !== ALL_NAMESPACES_STRING ? firstNamespace : undefined,
       });
     }
 
