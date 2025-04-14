@@ -27,6 +27,4 @@ export type SearchPrivilegesIndicesRequestQueryInput = z.input<
 >;
 
 export type SearchPrivilegesIndicesResponse = z.infer<typeof SearchPrivilegesIndicesResponse>;
-export const SearchPrivilegesIndicesResponse = z.object({
-  started: z.boolean().optional(),
-});
+export const SearchPrivilegesIndicesResponse = z.array(z.string());

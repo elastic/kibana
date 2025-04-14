@@ -22,7 +22,7 @@ export default ({ getService }: FtrProviderContext) => {
 
   const indexName = 'user-index-test';
 
-  describe('@ess @serverless @skipInServerlessMKI EntityAnalytics Monitoring SearchIndices ', () => {
+  describe('@ess @serverless @skipInServerlessMKI EntityAnalytics Monitoring SearchIndices', () => {
     before(async () => {
       await es.indices.create({ index: indexName });
     });
@@ -32,7 +32,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     describe('search_indices API', () => {
-      it('should return an empty array if no indices match the search query ', async () => {
+      it('should return an empty array if no indices match the search query', async () => {
         const res = await api.searchPrivilegesIndices({ query: { searchQuery: 'test_1235678' } });
 
         logWhenNot200(res);
@@ -50,7 +50,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(res.body).to.contain(indexName);
       });
 
-      it('should return all index when searchQuery matches', async () => {
+      it('should return index when searchQuery matches', async () => {
         const res = await api.searchPrivilegesIndices({ query: { searchQuery: indexName } });
 
         logWhenNot200(res);

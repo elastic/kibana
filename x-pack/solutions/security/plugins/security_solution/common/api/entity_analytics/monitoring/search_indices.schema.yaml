@@ -23,7 +23,6 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  started:
-                    type: boolean
+                type: array
+                items:
+                  type: string

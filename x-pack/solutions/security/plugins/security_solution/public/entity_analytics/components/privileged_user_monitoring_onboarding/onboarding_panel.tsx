@@ -16,9 +16,18 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { ONBOARDING_VIDEO_SOURCE } from '../../../common/constants';
 import { AddDataSourcePanel } from './add_data_source';
+
+const VIDEO_TITLE = i18n.translate(
+  'securitySolution.entityAnalytics.privilegedUserMonitoring.videoTitle',
+  {
+    defaultMessage: 'Onboarding Video',
+  }
+);
+
 export const PrivilegedUserMonitoringOnboardingPanel = () => {
   return (
     <EuiPanel paddingSize="none">
@@ -68,10 +77,10 @@ export const PrivilegedUserMonitoringOnboardingPanel = () => {
                         defaultMessage="Want to learn more?"
                       />
                       <EuiLink
-                        css={{ color: '#FF007F' }} // DELETE THIS WHEN THE LINKS ARE READY
+                        css={{ color: '#FF007F' }} // TODO DELETE THIS WHEN THE HREF LINK IS READY
                         external={true}
                         data-test-subj="learnMoreLink"
-                        href="??????" // TODO
+                        href="??????" // TODO Add Link to docs
                         target="_blank"
                       >
                         <FormattedMessage
@@ -94,11 +103,11 @@ export const PrivilegedUserMonitoringOnboardingPanel = () => {
                 max-width: 480px;
               `}
               className="eui-alignMiddle"
-              style={{ border: '8px solid #FF007F' }} // DELETE THIS LINE WHEN THE VIDEO IS READY
+              style={{ border: '8px solid #FF007F' }} // TODO DELETE THIS LINE WHEN THE VIDEO IS READY
               referrerPolicy="no-referrer"
               sandbox="allow-scripts allow-same-origin"
               src={ONBOARDING_VIDEO_SOURCE}
-              title={'????????'} // TODO
+              title={VIDEO_TITLE}
             />
           </EuiFlexItem>
         </EuiFlexGroup>

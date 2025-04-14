@@ -20,12 +20,14 @@ const privMonLinks: LinkItem = {
   id: SecurityPageName.privilegedUserMonitoring,
   title: ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING,
   landingImage: privilegedUserMonitoringPageImg,
-  description: i18n.translate(
-    'xpack.securitySolution.appLinks.privilegedUserMonitoring.Description',
-    {
-      defaultMessage: '???????????????????', // TODO
-    }
-  ),
+  description: '???????????????????',
+  // TODO Add copy when available
+  // i18n.translate(
+  //   'xpack.securitySolution.appLinks.privilegedUserMonitoring.Description',
+  //   {
+  //     defaultMessage: '???????????????????',
+  //   }
+  // ),
   path: ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_PATH,
   globalSearchKeywords: [
     i18n.translate('xpack.securitySolution.appLinks.privilegedUserMonitoring', {
