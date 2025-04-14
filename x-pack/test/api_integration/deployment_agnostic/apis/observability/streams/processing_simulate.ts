@@ -483,7 +483,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             {
               id: 'draft',
               grok: {
-                field: 'message',
+                field: 'body.text',
                 patterns: ['%{TIMESTAMP_ISO8601:@timestamp}'],
                 if: { always: {} },
               },
@@ -515,7 +515,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             processing: [basicGrokProcessor],
             documents: [createTestDocument()],
             detected_fields: [
-              { name: 'parsed_timestamp', type: 'boolean' }, // Incompatible type
+              { name: 'attributes.parsed_timestamp', type: 'boolean' }, // Incompatible type
             ],
           }
         );
@@ -523,7 +523,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(detectedFieldsFailureResponse.body.documents[0].errors).to.eql([
           {
             type: 'field_mapping_failure',
-            message: `Some field types might not be compatible with this document: [1:44] failed to parse field [parsed_timestamp] of type [boolean] in document with id '0'. Preview of field's value: '${TEST_TIMESTAMP}'`,
+            message: `Some field types might not be compatible with this document: [1:44] failed to parse field [attributes.parsed_timestamp] of type [boolean] in document with id '0'. Preview of field's value: '${TEST_TIMESTAMP}'`,
           },
         ]);
         expect(detectedFieldsFailureResponse.body.documents[0].status).to.be('failed');
