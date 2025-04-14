@@ -72,8 +72,8 @@ export function useKnowledgeBase(): UseKnowledgeBaseResult {
         statusRequest.refresh();
       } catch (error) {
         notifications!.toasts.addError(error, {
-          title: i18n.translate('xpack.aiAssistant.errorSettingUpInferenceEndpoint', {
-            defaultMessage: 'Could not create inference endpoint',
+          title: i18n.translate('xpack.aiAssistant.errorSettingUpKnowledgeBase', {
+            defaultMessage: 'Could not setup knowledge base',
           }),
         });
       }
@@ -81,7 +81,7 @@ export function useKnowledgeBase(): UseKnowledgeBaseResult {
     [ml, service, notifications, statusRequest]
   );
 
-  // poll the status if isPolling (inference endpoint is created but deployment is not ready)
+  // poll the status if isPolling
   useEffect(() => {
     if (!isPolling) {
       return;

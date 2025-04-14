@@ -93,7 +93,7 @@ const reIndexKnowledgeBase = createObservabilityAIAssistantServerRoute({
   },
 });
 
-const semanticTextMigrationKnowledgeBase = createObservabilityAIAssistantServerRoute({
+const startupMigrationsKnowledgeBase = createObservabilityAIAssistantServerRoute({
   endpoint: 'POST /internal/observability_ai_assistant/kb/migrations/startup',
   security: {
     authz: {
@@ -315,7 +315,7 @@ const importKnowledgeBaseEntries = createObservabilityAIAssistantServerRoute({
 
 export const knowledgeBaseRoutes = {
   ...reIndexKnowledgeBase,
-  ...semanticTextMigrationKnowledgeBase,
+  ...startupMigrationsKnowledgeBase,
   ...setupKnowledgeBase,
   ...reIndexKnowledgeBase,
   ...getKnowledgeBaseStatus,
