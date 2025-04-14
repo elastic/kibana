@@ -9,6 +9,7 @@ import { bulkPurgeRollupSchema } from '@kbn/slo-schema';
 import { createSloServerRoute } from '../create_slo_server_route';
 import { assertPlatinumLicense } from './utils/assert_platinum_license';
 import { PurgeRollupData } from '../../services/purge_rollup_data';
+import { KibanaSavedObjectsSLORepository } from '../../services';
 
 export const purgeRollupDataRoute = createSloServerRoute({
   endpoint: 'POST /api/observability/slos/_purge_rollup 2023-10-31',
@@ -18,19 +19,45 @@ export const purgeRollupDataRoute = createSloServerRoute({
     },
   },
   params: bulkPurgeRollupSchema,
-  handler: async ({ request, response, context, params, logger, plugins }) => {
+  handler: async ({ response, context, params, logger, plugins }) => {
     await assertPlatinumLicense(plugins);
 
     const core = await context.core;
     const esClient = core.elasticsearch.client.asCurrentUser;
+    const soClient = (await context.core).savedObjects.client;
+    const repository = new KibanaSavedObjectsSLORepository(soClient, logger);
+    const slos = await repository.findAllByIds(params.body.ids);
 
+    const purgePolicy = params.body.purgePolicy;
     const purgeRollupData = new PurgeRollupData(esClient);
 
-    Promise.all(
-      params.body.ids.map((sloId) => {
-        console.log(purgeRollupData.execute(sloId));
-      })
-    );
+    if (params.query.force !== 'true') {
+      if (purgePolicy.purgeType === 'fixed_age') {
+        if (
+          slos.some((slo) => {
+            purgePolicy.age.isShorterThan(slo.timeWindow.duration);
+          })
+        ) {
+          return response.badRequest({
+            body: `Age must be greater than or equal to the time window of the SLI data being purged.`,
+          });
+        }
+        await purgeRollupData.execute(params.body.ids, purgePolicy.age);
+      } else {
+        if (
+          slos.some(
+            (slo) =>
+              purgePolicy.timestamp.getMilliseconds() >
+              Date.now() - slo.timeWindow.duration.asSeconds() * 1000
+          )
+        ) {
+          return response.badRequest({
+            body: `Timestamp must be before the effective time window of the SLI data being purged.`,
+          });
+        }
+        await purgeRollupData.execute(params.body.ids, purgePolicy.timestamp);
+      }
+    }
 
     return response.noContent();
   },

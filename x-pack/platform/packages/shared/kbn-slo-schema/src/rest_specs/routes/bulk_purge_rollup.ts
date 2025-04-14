@@ -5,11 +5,28 @@
  * 2.0.
  */
 import * as t from 'io-ts';
+import { dateType, durationType } from '../../schema';
+
+const fixedAgePurgeVal = t.literal('fixed_age');
+const fixedTimePurgeVal = t.literal('fixed_time');
+
+const fixedAgePurge = t.type({
+  purgeType: fixedAgePurgeVal,
+  age: durationType,
+});
+
+const fixedTimePurge = t.type({
+  purgeType: fixedTimePurgeVal,
+  timestamp: dateType,
+});
 
 const bulkPurgeRollupSchema = t.type({
+  query: t.partial({
+    force: t.string,
+  }),
   body: t.type({
     ids: t.array(t.string),
-    policy: t.string,
+    purgePolicy: t.union([fixedAgePurge, fixedTimePurge]),
   }),
 });
 
