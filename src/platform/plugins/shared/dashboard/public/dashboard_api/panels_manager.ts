@@ -95,10 +95,10 @@ export function initializePanelsManager(
     const references: Reference[] = [];
     const panels: DashboardPanelMap = {};
     for (const uuid of Object.keys(layout$.value)) {
-      references.push(...prefixReferencesFromPanel(uuid, currentChildState[uuid].references ?? []));
+      references.push(...prefixReferencesFromPanel(uuid, currentChildState[uuid]?.references ?? []));
       panels[uuid] = {
         ...layout$.value[uuid],
-        explicitInput: currentChildState[uuid].rawState,
+        explicitInput: currentChildState[uuid]?.rawState ?? {},
       };
     }
     return { panels, references };
@@ -175,7 +175,7 @@ export function initializePanelsManager(
     const gridData = existingPanel ? existingPanel.gridData : placeIncomingPanel(uuid, size);
     currentChildState[uuid] = {
       rawState: {
-        ...(sameType ? currentChildState[uuid].rawState : {}),
+        ...(sameType && currentChildState[uuid] ? currentChildState[uuid].rawState : {}),
         ...serializedState.rawState,
       },
       references: serializedState?.references,
@@ -249,7 +249,7 @@ export function initializePanelsManager(
 
     const allTitles: string[] = [];
     for (const uuid of Object.keys(layout$.value)) {
-      const title = (currentChildState[uuid].rawState as SerializedTitles).title;
+      const title = (currentChildState[uuid]?.rawState as SerializedTitles).title;
       if (title) allTitles.push(title);
     }
     const lastTitle = apiPublishesTitle(apiToDuplicate) ? getTitle(apiToDuplicate) ?? '' : '';
