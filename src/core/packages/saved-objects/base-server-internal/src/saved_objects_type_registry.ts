@@ -36,7 +36,7 @@ export class SavedObjectTypeRegistry implements ISavedObjectTypeRegistry {
     }
     if (this.legacyTypes.includes(type.name)) {
       throw new Error(
-        `Type '${type.name}' can't be used because it's been added to the removed types`
+        `Type '${type.name}' can't be used because it's been added to the legacy types`
       );
     }
     validateType(type);
