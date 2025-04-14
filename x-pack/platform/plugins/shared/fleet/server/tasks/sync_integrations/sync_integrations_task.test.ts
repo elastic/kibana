@@ -16,7 +16,7 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 
 import { createAppContextStartContractMock, createMockPackageService } from '../../mocks';
 
-import { appContextService, outputService } from '../../services';
+import { appContextService, outputService, packagePolicyService } from '../../services';
 
 import { SyncIntegrationsTask, TYPE, VERSION } from './sync_integrations_task';
 
@@ -28,9 +28,13 @@ jest.mock('../../services', () => ({
   outputService: {
     list: jest.fn(),
   },
+  packagePolicyService: {
+    list: jest.fn(),
+  },
 }));
 
 const mockOutputService = outputService as jest.Mocked<typeof outputService>;
+const mockPackagePolicyService = packagePolicyService as jest.Mocked<typeof packagePolicyService>;
 
 jest.mock('../../services/epm/packages/get', () => ({
   getInstalledPackageSavedObjects: jest.fn().mockResolvedValue({
@@ -139,11 +143,13 @@ describe('SyncIntegrationsTask', () => {
           },
         ],
       });
-      esClient.ingest.getPipeline.mockResolvedValue({
-        'logs-system.auth@custom': {
-          processors: [],
-        },
-      });
+      esClient.ingest.getPipeline.mockImplementation((request) =>
+        Promise.resolve({
+          [(request?.id === '*@custom' ? 'logs-system.auth@custom' : request?.id) as string]: {
+            processors: [],
+          },
+        })
+      );
     });
 
     afterEach(() => {
@@ -170,6 +176,29 @@ describe('SyncIntegrationsTask', () => {
             name: 'remote2',
             hosts: ['https://remote2:9200'],
             sync_integrations: false,
+          },
+        ],
+      } as any);
+      mockPackagePolicyService.list.mockResolvedValue({
+        items: [
+          {
+            package: {
+              name: 'filestream',
+              version: '1.1.0',
+            },
+            inputs: [
+              {
+                streams: [
+                  {
+                    vars: {
+                      pipeline: {
+                        value: 'filestream-pipeline1',
+                      },
+                    },
+                  },
+                ],
+              },
+            ],
           },
         ],
       } as any);
@@ -212,6 +241,16 @@ describe('SyncIntegrationsTask', () => {
                 name: 'logs-system.auth@custom',
                 package_name: 'system',
                 package_version: '0.1.0',
+                pipeline: {
+                  processors: [],
+                },
+                type: 'ingest_pipeline',
+              },
+              'ingest_pipeline:filestream-pipeline1': {
+                is_deleted: false,
+                name: 'filestream-pipeline1',
+                package_name: 'filestream',
+                package_version: '1.1.0',
                 pipeline: {
                   processors: [],
                 },
@@ -432,6 +471,16 @@ describe('SyncIntegrationsTask', () => {
                 package_version: '0.1.0',
                 template: {},
                 type: 'component_template',
+              },
+              'ingest_pipeline:filestream-pipeline1': {
+                is_deleted: false,
+                name: 'filestream-pipeline1',
+                package_name: 'filestream',
+                package_version: '1.1.0',
+                pipeline: {
+                  processors: [],
+                },
+                type: 'ingest_pipeline',
               },
               'ingest_pipeline:logs-system.auth@custom': {
                 is_deleted: false,
