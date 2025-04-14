@@ -14,7 +14,14 @@ import React, {
   useState,
 } from 'react';
 import { css } from '@emotion/react';
-import { EuiButton, EuiFlexItem, EuiFlexGroup, EuiLoadingSpinner } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiFlexItem,
+  EuiFlexGroup,
+  EuiLoadingSpinner,
+  EuiPopover,
+  EuiButtonEmpty,
+} from '@elastic/eui';
 import { isEmpty } from 'lodash';
 
 import {
@@ -178,6 +185,8 @@ export const AddComment = React.memo(
       const isDisabled =
         isLoading || !comment?.trim().length || comment.trim().length > MAX_COMMENT_LENGTH;
 
+      const [isPopoverOpen, setPopoverOpen] = useState(false);
+
       return (
         <span id="add-comment-permLink">
           {isLoading && showLoading && (
@@ -220,6 +229,41 @@ export const AddComment = React.memo(
                         >
                           {i18n.ADD_COMMENT}
                         </EuiButton>
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <EuiPopover
+                          ownFocus
+                          button={
+                            <EuiButton
+                              iconType="gear"
+                              onClick={() => setPopoverOpen((prev) => !prev)}
+                            >
+                              {'Actions'}
+                            </EuiButton>
+                          }
+                          id="actions"
+                          isOpen={isPopoverOpen}
+                          closePopover={() => setPopoverOpen(false)}
+                          repositionOnScroll
+                        >
+                          <EuiFlexGroup alignItems="flexStart" direction="column" gutterSize="none">
+                            <EuiFlexItem grow={false}>
+                              <EuiButtonEmpty iconSide="left" iconType={'gear'} onClick={() => {}}>
+                                {'Action 1'}
+                              </EuiButtonEmpty>
+                            </EuiFlexItem>
+                            <EuiFlexItem grow={false}>
+                              <EuiButtonEmpty iconSide="left" iconType={'gear'} onClick={() => {}}>
+                                {'Solution action 1'}
+                              </EuiButtonEmpty>
+                            </EuiFlexItem>
+                            <EuiFlexItem grow={false}>
+                              <EuiButtonEmpty iconSide="left" iconType={'gear'} onClick={() => {}}>
+                                {'Solution action 2'}
+                              </EuiButtonEmpty>
+                            </EuiFlexItem>
+                          </EuiFlexGroup>
+                        </EuiPopover>
                       </EuiFlexItem>
                     </EuiFlexGroup>
                   ),
