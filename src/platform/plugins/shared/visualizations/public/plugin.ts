@@ -68,6 +68,7 @@ import type { NoDataPagePluginStart } from '@kbn/no-data-page-plugin/public';
 import { EmbeddableEnhancedPluginStart } from '@kbn/embeddable-enhanced-plugin/public';
 
 import type { TypesSetup, TypesStart } from './vis_types';
+import type { VisualizeServices } from './visualize_app/types';
 import {
   aggBasedVisualizationTrigger,
   dashboardVisualizationPanelTrigger,
