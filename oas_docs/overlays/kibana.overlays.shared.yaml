@@ -14,6 +14,7 @@ actions:
       externalDocs:
         description: Maintenance window documentation
         url: https://www.elastic.co/docs/explore-analyze/alerts-cases/alerts/maintenance-windows
+      x-displayName: "Maintenance windows"
 # Add some spaces API examples
   - target: "$.paths['/api/spaces/space']['post']"
     description: "Add example to create space API"
