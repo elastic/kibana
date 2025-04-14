@@ -8,6 +8,7 @@
  */
 
 import { parse } from '../../parser';
+import { ESQLAstQueryExpression } from '../../types';
 import { CommandVisitorContext, WhereCommandVisitorContext } from '../contexts';
 import { Visitor } from '../visitor';
 
@@ -47,6 +48,28 @@ test('can pass inputs to visitors', () => {
   const res = visitor.visitQuery(ast);
 
   expect(res).toEqual(['pfx:from', 'pfx:limit']);
+});
+
+test('a query can have a parent fork command', () => {
+  const { ast } = parse('FROM index | FORK (WHERE 1) (WHERE 2)');
+
+  let parentCount = 0;
+  new Visitor()
+    .on('visitCommand', (ctx) => {
+      if (ctx.node.name === 'fork') {
+        ctx.node.args.forEach((subQuery) => ctx.visitSubQuery(subQuery as ESQLAstQueryExpression));
+      }
+    })
+    .on('visitQuery', (ctx) => {
+      if (ctx.parent) parentCount++;
+
+      for (const _cmdResult of ctx.visitCommands()) {
+        // nothing
+      }
+    })
+    .visitQuery(ast);
+
+  expect(parentCount).toBe(2);
 });
 
 test('can specify specific visitors for commands', () => {
