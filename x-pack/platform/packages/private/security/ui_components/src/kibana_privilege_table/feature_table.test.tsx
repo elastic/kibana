@@ -877,116 +877,6 @@ describe('FeatureTable', () => {
         spaces: ['foo'],
         base: [],
         feature: {
-          my_feature: ['all', 'sub-feat-1', 'sub-feat-2'],
-        },
-      },
-    ]);
-    const featureWithDescription = createFeature({
-      id: 'my_feature',
-      name: 'Some Feature',
-      subFeatures: [
-        {
-          name: 'Some Sub Feature',
-          privilegeGroups: [
-            {
-              groupType: 'independent',
-              privileges: [
-                {
-                  id: 'sub-feat-1',
-                  name: 'Sub Toggle 1',
-                  includeIn: 'all',
-                  savedObject: { all: [], read: [] },
-                  ui: ['sub-feat-1'],
-                },
-                {
-                  id: 'sub-feat-2',
-                  name: 'Sub Toggle 2',
-                  includeIn: 'all',
-                  savedObject: { all: [], read: [] },
-                  ui: ['sub-feat-2'],
-                },
-              ],
-            },
-          ],
-        },
-      ] as SubFeatureConfig[],
-      description: 'a description of my feature',
-    });
-
-    const { wrapper } = setup({
-      role,
-      features: [featureWithDescription],
-      privilegeIndex: 0,
-      calculateDisplayedPrivileges: false,
-      canCustomizeSubFeaturePrivileges: false,
-    });
-
-    expect(findTestSubject(wrapper, 'featurePrivilegeDescriptionText').exists()).toEqual(true);
-
-    expect(
-      findTestSubject(wrapper, 'featurePrivilegeDescriptionText').text()
-    ).toMatchInlineSnapshot(`"a description of my feature"`);
-  });
-
-  it('does not render subtext for features that define an optional description that is empty', () => {
-    const role = createRole([
-      {
-        spaces: ['foo'],
-        base: [],
-        feature: {
-          my_feature: ['all', 'sub-feat-1', 'sub-feat-2'],
-        },
-      },
-    ]);
-    const featureWithDescription = createFeature({
-      id: 'my_feature',
-      name: 'Some Feature',
-      subFeatures: [
-        {
-          name: 'Some Sub Feature',
-          privilegeGroups: [
-            {
-              groupType: 'independent',
-              privileges: [
-                {
-                  id: 'sub-feat-1',
-                  name: 'Sub Toggle 1',
-                  includeIn: 'all',
-                  savedObject: { all: [], read: [] },
-                  ui: ['sub-feat-1'],
-                },
-                {
-                  id: 'sub-feat-2',
-                  name: 'Sub Toggle 2',
-                  includeIn: 'all',
-                  savedObject: { all: [], read: [] },
-                  ui: ['sub-feat-2'],
-                },
-              ],
-            },
-          ],
-        },
-      ] as SubFeatureConfig[],
-      description: '',
-    });
-
-    const { wrapper } = setup({
-      role,
-      features: [featureWithDescription],
-      privilegeIndex: 0,
-      calculateDisplayedPrivileges: false,
-      canCustomizeSubFeaturePrivileges: false,
-    });
-
-    expect(findTestSubject(wrapper, 'featurePrivilegeDescriptionText').exists()).toEqual(false);
-  });
-
-  it('does not render subtext for features that define an optional description when no sub-privileges', () => {
-    const role = createRole([
-      {
-        spaces: ['foo'],
-        base: [],
-        feature: {
           my_feature: ['all'],
         },
       },
@@ -1005,7 +895,11 @@ describe('FeatureTable', () => {
       canCustomizeSubFeaturePrivileges: false,
     });
 
-    expect(findTestSubject(wrapper, 'featurePrivilegeDescriptionText').exists()).toEqual(false);
+    expect(findTestSubject(wrapper, 'featurePrivilegeDescriptionText').exists()).toEqual(true);
+
+    expect(
+      findTestSubject(wrapper, 'featurePrivilegeDescriptionText').text()
+    ).toMatchInlineSnapshot(`"a description of my feature"`);
   });
 
   it('does not render subtext for features without a description', () => {

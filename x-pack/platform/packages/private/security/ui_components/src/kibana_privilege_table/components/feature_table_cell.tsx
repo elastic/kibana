@@ -37,14 +37,6 @@ export const FeatureTableCell = ({ feature, className }: Props) => {
     );
   }
 
-  const showFeatureDescription = React.useMemo(
-    () =>
-      feature.description &&
-      feature.description.length > 0 &&
-      feature.getSubFeaturePrivileges().length > 0,
-    [feature]
-  );
-
   return (
     <EuiFlexGroup className={className} direction="column" gutterSize="none" component="span">
       <EuiFlexItem data-test-subj={`featureTableCell`} component="span">
@@ -55,7 +47,7 @@ export const FeatureTableCell = ({ feature, className }: Props) => {
           <EuiFlexItem grow={false}>{tooltipElement}</EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
-      {showFeatureDescription && (
+      {feature.description && (
         <EuiFlexItem>
           <EuiText
             color="subdued"

@@ -270,7 +270,7 @@ export class FeatureTable extends Component<Props, State> {
       );
 
       const extraAction = (
-        <EuiText css={{ maxWidth: 200 }} size={'xs'} data-test-subj="reservedFeatureDescription">
+        <EuiText style={{ maxWidth: 200 }} size={'xs'} data-test-subj="reservedFeatureDescription">
           {feature.reserved.description}
         </EuiText>
       );
@@ -353,7 +353,7 @@ export class FeatureTable extends Component<Props, State> {
             featureName: feature.name,
           },
         })}
-        css={{
+        style={{
           minWidth: 200,
         }}
       />
