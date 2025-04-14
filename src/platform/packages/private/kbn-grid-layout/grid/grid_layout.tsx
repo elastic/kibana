@@ -231,9 +231,9 @@ export const GridLayout = ({
                     />
                   );
                 case 'row-start-mark':
-                  return <GridRowHeaderEmpty key={typeId} rowId={rowId} />;
+                  return <GridRowHeaderEmpty key={`${rowId}-${typeId}`} rowId={rowId} />;
                 case 'row-ghost':
-                  return <GridRowVisualContainer rowId={rowId} key={`${rowId}-ghost`} />;
+                  return <GridRowVisualContainer rowId={rowId} key={`${rowId}-${typeId}`} />;
                 default:
                   return <GridPanel key={typeId} panelId={typeId} rowId={rowId} />;
               }
