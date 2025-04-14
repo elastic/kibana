@@ -73,7 +73,7 @@ describe('#withSpaceSolutionDisabledFeatures', () => {
   });
 
   describe('when the space solution is "security"', () => {
-    test('it removes the "observability" and "enterpriseSearch" features', () => {
+    test('it removes the "observability" feature', () => {
       const spaceDisabledFeatures: string[] = ['baz'];
       const spaceSolution = 'security';
 
@@ -83,7 +83,7 @@ describe('#withSpaceSolutionDisabledFeatures', () => {
         spaceSolution
       );
 
-      expect(result).toEqual(['feature1', 'feature2']); // "baz" from the spaceDisabledFeatures should not be removed
+      expect(result).toEqual(['feature1']); // "baz" from the spaceDisabledFeatures should not be removed
     });
   });
 });

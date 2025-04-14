@@ -119,10 +119,7 @@ export const ConfirmMigrationFlyoutStep: React.FunctionComponent<{
             defaultMessage="You can increase the speed of reindexing by changing throttling configuration on ES. Where changing throttling configuration allows you to utilize more resources to speed up the reindexing process. {learnMoreHtml}"
             values={{
               learnMoreHtml: (
-                <EuiLink
-                  href={`${links.elasticsearch.docsBase}data-stream-reindex-api.html#reindex-data-stream-api-settings`}
-                  target="_blank"
-                >
+                <EuiLink href={links.upgradeAssistant.dataStreamReindex} target="_blank">
                   <FormattedMessage
                     id="xpack.upgradeAssistant.dataStream.migration.flyout.warningsStep.learnMoreLink"
                     defaultMessage="Learn more"

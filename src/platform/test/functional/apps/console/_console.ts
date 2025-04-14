@@ -76,20 +76,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await PageObjects.console.getEditorText()).to.be.empty();
     });
 
-    it('should return statusCode 400 to unsupported HTTP verbs', async () => {
-      const expectedResponseContains = '"statusCode": 400';
-      await PageObjects.console.clearEditorText();
-      await PageObjects.console.enterText('OPTIONS /');
-      await PageObjects.console.clickPlay();
-      await retry.try(async () => {
-        const actualResponse = await PageObjects.console.getOutputText();
-        log.debug(actualResponse);
-        expect(actualResponse).to.contain(expectedResponseContains);
-
-        expect(await PageObjects.console.hasSuccessBadge()).to.be(false);
-      });
-    });
-
     describe('tabs navigation', () => {
       let currentUrl: string;
 

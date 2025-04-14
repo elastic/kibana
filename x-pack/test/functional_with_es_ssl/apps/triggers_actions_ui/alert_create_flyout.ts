@@ -64,7 +64,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await find.clickByCssSelector(
         '[data-test-subj="create-connector-flyout-save-btn"]:not(disabled)'
       );
-      await testSubjects.click('create-connector-flyout-save-btn');
     });
 
     const toastTitle = await toasts.getTitleAndDismiss();
@@ -119,15 +118,54 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     await rules.common.cancelRuleCreation();
   }
 
+  const esQueryRule = {
+    tags: [],
+    params: {
+      searchType: 'esQuery',
+      timeWindowSize: 5,
+      timeWindowUnit: 'm',
+      threshold: [1],
+      thresholdComparator: '>',
+      size: 100,
+      esQuery: '{\n    "query":{\n      "match_all" : {}\n    }\n  }',
+      aggType: 'count',
+      groupBy: 'all',
+      termSize: 5,
+      excludeHitsFromPreviousRun: false,
+      sourceFields: [],
+      index: ['.kibana_alerting_cases'],
+      timeField: 'updated_at',
+    },
+    schedule: {
+      interval: '1m',
+    },
+    consumer: 'stackAlerts',
+    name: 'Elasticsearch query rule',
+    rule_type_id: '.es-query',
+    actions: [],
+    alert_delay: {
+      active: 1,
+    },
+  };
+
   describe('create alert', function () {
     let apmSynthtraceEsClient: ApmSynthtraceEsClient;
     const webhookConnectorName = 'webhook-test';
+    let esQueryRuleId: string;
     before(async () => {
       await esArchiver.load(
         'src/platform/test/api_integration/fixtures/es_archiver/index_patterns/constant_keyword'
       );
 
       await createWebhookConnector(webhookConnectorName);
+
+      const { body: createdESRule } = await supertest
+        .post('/api/alerting/rule')
+        .set('kbn-xsrf', 'foo')
+        .send(esQueryRule)
+        .expect(200);
+
+      esQueryRuleId = createdESRule.id;
 
       const version = (await apmSynthtraceKibanaClient.installApmPackage()).version;
       apmSynthtraceEsClient = await getApmSynthtraceEsClient({
@@ -169,6 +207,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await esArchiver.unload(
         'src/platform/test/api_integration/fixtures/es_archiver/index_patterns/constant_keyword'
       );
+      await supertest.delete(`/api/alerting/rule/${esQueryRuleId}`).set('kbn-xsrf', 'foo');
 
       await deleteConnectorByName(webhookConnectorName);
     });
@@ -178,8 +217,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('rulesTab');
     });
 
-    // Failing: See https://github.com/elastic/kibana/issues/202328
-    it.skip('should delete the right action when the same action has been added twice', async () => {
+    it('should delete the right action when the same action has been added twice', async () => {
       // create a new rule
       const ruleName = generateUniqueKey();
       await rules.common.defineIndexThresholdAlert(ruleName);

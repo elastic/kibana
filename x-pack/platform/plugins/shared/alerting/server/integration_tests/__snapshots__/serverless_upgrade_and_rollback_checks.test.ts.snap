@@ -5709,10 +5709,12 @@ Object {
             "additionalProperties": false,
             "properties": Object {
               "id": Object {
-                "$ref": "#/allOf/0/properties/investigationFields/anyOf/0/properties/field_names/items",
+                "minLength": 1,
+                "type": "string",
               },
               "list_id": Object {
-                "$ref": "#/allOf/0/properties/investigationFields/anyOf/0/properties/field_names/items",
+                "minLength": 1,
+                "type": "string",
               },
               "namespace_type": Object {
                 "enum": Array [
@@ -5787,6 +5789,7 @@ Object {
           "type": "string",
         },
         "maxSignals": Object {
+          "default": 100,
           "minimum": 1,
           "type": "integer",
         },
@@ -5840,10 +5843,12 @@ Object {
                 "type": "boolean",
               },
               "name": Object {
-                "$ref": "#/allOf/0/properties/investigationFields/anyOf/0/properties/field_names/items",
+                "minLength": 1,
+                "type": "string",
               },
               "type": Object {
-                "$ref": "#/allOf/0/properties/investigationFields/anyOf/0/properties/field_names/items",
+                "minLength": 1,
+                "type": "string",
               },
             },
             "required": Array [
@@ -6246,7 +6251,6 @@ Object {
         "ruleId",
         "immutable",
         "outputIndex",
-        "maxSignals",
         "riskScore",
         "riskScoreMapping",
         "severity",
@@ -6376,10 +6380,12 @@ Object {
             "additionalProperties": false,
             "properties": Object {
               "id": Object {
-                "$ref": "#/allOf/0/properties/investigationFields/anyOf/0/properties/field_names/items",
+                "minLength": 1,
+                "type": "string",
               },
               "list_id": Object {
-                "$ref": "#/allOf/0/properties/investigationFields/anyOf/0/properties/field_names/items",
+                "minLength": 1,
+                "type": "string",
               },
               "namespace_type": Object {
                 "enum": Array [
@@ -6454,6 +6460,7 @@ Object {
           "type": "string",
         },
         "maxSignals": Object {
+          "default": 100,
           "minimum": 1,
           "type": "integer",
         },
@@ -6507,10 +6514,12 @@ Object {
                 "type": "boolean",
               },
               "name": Object {
-                "$ref": "#/allOf/0/properties/investigationFields/anyOf/0/properties/field_names/items",
+                "minLength": 1,
+                "type": "string",
               },
               "type": Object {
-                "$ref": "#/allOf/0/properties/investigationFields/anyOf/0/properties/field_names/items",
+                "minLength": 1,
+                "type": "string",
               },
             },
             "required": Array [
@@ -6913,7 +6922,6 @@ Object {
         "ruleId",
         "immutable",
         "outputIndex",
-        "maxSignals",
         "riskScore",
         "riskScoreMapping",
         "severity",
@@ -7106,10 +7114,12 @@ Object {
             "additionalProperties": false,
             "properties": Object {
               "id": Object {
-                "$ref": "#/allOf/0/properties/investigationFields/anyOf/0/properties/field_names/items",
+                "minLength": 1,
+                "type": "string",
               },
               "list_id": Object {
-                "$ref": "#/allOf/0/properties/investigationFields/anyOf/0/properties/field_names/items",
+                "minLength": 1,
+                "type": "string",
               },
               "namespace_type": Object {
                 "enum": Array [
@@ -7184,6 +7194,7 @@ Object {
           "type": "string",
         },
         "maxSignals": Object {
+          "default": 100,
           "minimum": 1,
           "type": "integer",
         },
@@ -7237,10 +7248,12 @@ Object {
                 "type": "boolean",
               },
               "name": Object {
-                "$ref": "#/allOf/0/properties/investigationFields/anyOf/0/properties/field_names/items",
+                "minLength": 1,
+                "type": "string",
               },
               "type": Object {
-                "$ref": "#/allOf/0/properties/investigationFields/anyOf/0/properties/field_names/items",
+                "minLength": 1,
+                "type": "string",
               },
             },
             "required": Array [
@@ -7643,7 +7656,6 @@ Object {
         "ruleId",
         "immutable",
         "outputIndex",
-        "maxSignals",
         "riskScore",
         "riskScoreMapping",
         "severity",
@@ -7754,10 +7766,12 @@ Object {
             "additionalProperties": false,
             "properties": Object {
               "id": Object {
-                "$ref": "#/allOf/0/properties/investigationFields/anyOf/0/properties/field_names/items",
+                "minLength": 1,
+                "type": "string",
               },
               "list_id": Object {
-                "$ref": "#/allOf/0/properties/investigationFields/anyOf/0/properties/field_names/items",
+                "minLength": 1,
+                "type": "string",
               },
               "namespace_type": Object {
                 "enum": Array [
@@ -7832,6 +7846,7 @@ Object {
           "type": "string",
         },
         "maxSignals": Object {
+          "default": 100,
           "minimum": 1,
           "type": "integer",
         },
@@ -7885,10 +7900,12 @@ Object {
                 "type": "boolean",
               },
               "name": Object {
-                "$ref": "#/allOf/0/properties/investigationFields/anyOf/0/properties/field_names/items",
+                "minLength": 1,
+                "type": "string",
               },
               "type": Object {
-                "$ref": "#/allOf/0/properties/investigationFields/anyOf/0/properties/field_names/items",
+                "minLength": 1,
+                "type": "string",
               },
             },
             "required": Array [
@@ -8291,7 +8308,6 @@ Object {
         "ruleId",
         "immutable",
         "outputIndex",
-        "maxSignals",
         "riskScore",
         "riskScoreMapping",
         "severity",
@@ -8360,7 +8376,8 @@ Object {
           "type": "array",
         },
         "historyWindowStart": Object {
-          "$ref": "#/allOf/0/properties/investigationFields/anyOf/0/properties/field_names/items",
+          "minLength": 1,
+          "type": "string",
         },
         "index": Object {
           "items": Object {
@@ -8457,10 +8474,12 @@ Object {
             "additionalProperties": false,
             "properties": Object {
               "id": Object {
-                "$ref": "#/allOf/0/properties/investigationFields/anyOf/0/properties/field_names/items",
+                "minLength": 1,
+                "type": "string",
               },
               "list_id": Object {
-                "$ref": "#/allOf/0/properties/investigationFields/anyOf/0/properties/field_names/items",
+                "minLength": 1,
+                "type": "string",
               },
               "namespace_type": Object {
                 "enum": Array [
@@ -8535,6 +8554,7 @@ Object {
           "type": "string",
         },
         "maxSignals": Object {
+          "default": 100,
           "minimum": 1,
           "type": "integer",
         },
@@ -8588,10 +8608,12 @@ Object {
                 "type": "boolean",
               },
               "name": Object {
-                "$ref": "#/allOf/0/properties/investigationFields/anyOf/0/properties/field_names/items",
+                "minLength": 1,
+                "type": "string",
               },
               "type": Object {
-                "$ref": "#/allOf/0/properties/investigationFields/anyOf/0/properties/field_names/items",
+                "minLength": 1,
+                "type": "string",
               },
             },
             "required": Array [
@@ -8994,7 +9016,6 @@ Object {
         "ruleId",
         "immutable",
         "outputIndex",
-        "maxSignals",
         "riskScore",
         "riskScoreMapping",
         "severity",
@@ -9162,10 +9183,12 @@ Object {
             "additionalProperties": false,
             "properties": Object {
               "id": Object {
-                "$ref": "#/allOf/0/properties/investigationFields/anyOf/0/properties/field_names/items",
+                "minLength": 1,
+                "type": "string",
               },
               "list_id": Object {
-                "$ref": "#/allOf/0/properties/investigationFields/anyOf/0/properties/field_names/items",
+                "minLength": 1,
+                "type": "string",
               },
               "namespace_type": Object {
                 "enum": Array [
@@ -9240,6 +9263,7 @@ Object {
           "type": "string",
         },
         "maxSignals": Object {
+          "default": 100,
           "minimum": 1,
           "type": "integer",
         },
@@ -9293,10 +9317,12 @@ Object {
                 "type": "boolean",
               },
               "name": Object {
-                "$ref": "#/allOf/0/properties/investigationFields/anyOf/0/properties/field_names/items",
+                "minLength": 1,
+                "type": "string",
               },
               "type": Object {
-                "$ref": "#/allOf/0/properties/investigationFields/anyOf/0/properties/field_names/items",
+                "minLength": 1,
+                "type": "string",
               },
             },
             "required": Array [
@@ -9699,7 +9725,6 @@ Object {
         "ruleId",
         "immutable",
         "outputIndex",
-        "maxSignals",
         "riskScore",
         "riskScoreMapping",
         "severity",
@@ -9867,10 +9892,12 @@ Object {
             "additionalProperties": false,
             "properties": Object {
               "id": Object {
-                "$ref": "#/allOf/0/properties/investigationFields/anyOf/0/properties/field_names/items",
+                "minLength": 1,
+                "type": "string",
               },
               "list_id": Object {
-                "$ref": "#/allOf/0/properties/investigationFields/anyOf/0/properties/field_names/items",
+                "minLength": 1,
+                "type": "string",
               },
               "namespace_type": Object {
                 "enum": Array [
@@ -9945,6 +9972,7 @@ Object {
           "type": "string",
         },
         "maxSignals": Object {
+          "default": 100,
           "minimum": 1,
           "type": "integer",
         },
@@ -9998,10 +10026,12 @@ Object {
                 "type": "boolean",
               },
               "name": Object {
-                "$ref": "#/allOf/0/properties/investigationFields/anyOf/0/properties/field_names/items",
+                "minLength": 1,
+                "type": "string",
               },
               "type": Object {
-                "$ref": "#/allOf/0/properties/investigationFields/anyOf/0/properties/field_names/items",
+                "minLength": 1,
+                "type": "string",
               },
             },
             "required": Array [
@@ -10404,7 +10434,6 @@ Object {
         "ruleId",
         "immutable",
         "outputIndex",
-        "maxSignals",
         "riskScore",
         "riskScoreMapping",
         "severity",

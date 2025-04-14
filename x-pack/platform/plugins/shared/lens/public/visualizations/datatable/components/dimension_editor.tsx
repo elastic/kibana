@@ -21,8 +21,6 @@ import {
   findMinMaxByColumnId,
   getAccessorType,
 } from '../../../shared_components';
-
-import './dimension_editor.scss';
 import { CollapseSetting } from '../../../shared_components/collapse_setting';
 import { ColorMappingByValues } from '../../../shared_components/coloring/color_mapping_by_values';
 import { ColorMappingByTerms } from '../../../shared_components/coloring/color_mapping_by_terms';

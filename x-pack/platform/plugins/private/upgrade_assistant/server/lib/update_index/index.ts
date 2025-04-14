@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient } from '@kbn/core/server';
-import type { Logger } from '@kbn/core/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { UpdateIndexOperation } from '../../../common/update_index';
+import { getRollupJobByIndexName } from '../rollup_job';
 import { getReindexWarnings } from '../reindexing/index_settings';
 
 export interface UpdateIndexParams {
   esClient: ElasticsearchClient;
   index: string;
   operations: UpdateIndexOperation[];
-  log?: Logger;
+  log: Logger;
 }
 
 /**
@@ -30,6 +30,12 @@ export async function updateIndex({ esClient, index, operations, log }: UpdateIn
 
     switch (operation) {
       case 'blockWrite': {
+        // stop related rollup job if it exists
+        const rollupJob = await getRollupJobByIndexName(esClient, log, index);
+        if (rollupJob) {
+          await esClient.rollup.stopJob({ id: rollupJob, wait_for_completion: true });
+        }
+
         res = await esClient.indices.addBlock({ index, block: 'write' });
 
         await removeDeprecatedSettings(esClient, index, log);

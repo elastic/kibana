@@ -28,6 +28,7 @@ const _allowedExperimentalValues = {
   asyncDeployPolicies: true,
   enableExportCSV: true,
   enabledUpgradeAgentlessDeploymentsTask: false,
+  enableAutomaticAgentUpgrades: false,
 };
 
 /**
