@@ -28,7 +28,6 @@
     "@kbn/chart-icons",
     "@kbn/data-plugin",
     "@kbn/react-kibana-context-render",
-    "@kbn/palettes",
     "@kbn/charts-theme",
   ],
   "exclude": [
