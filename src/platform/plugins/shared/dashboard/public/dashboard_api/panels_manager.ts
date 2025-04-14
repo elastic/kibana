@@ -95,7 +95,9 @@ export function initializePanelsManager(
     const references: Reference[] = [];
     const panels: DashboardPanelMap = {};
     for (const uuid of Object.keys(layout$.value)) {
-      references.push(...prefixReferencesFromPanel(uuid, currentChildState[uuid]?.references ?? []));
+      references.push(
+        ...prefixReferencesFromPanel(uuid, currentChildState[uuid]?.references ?? [])
+      );
       panels[uuid] = {
         ...layout$.value[uuid],
         explicitInput: currentChildState[uuid]?.rawState ?? {},
