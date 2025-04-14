@@ -108,6 +108,64 @@
             "trackAdoption": false,
             "children": [],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "cloudSecurityPosture",
+            "id": "def-public.CspSecuritySolutionContext.useExpandableFlyoutApi",
+            "type": "Function",
+            "tags": [],
+            "label": "useExpandableFlyoutApi",
+            "description": [],
+            "signature": [
+              "(() => ",
+              {
+                "pluginId": "@kbn/expandable-flyout",
+                "scope": "public",
+                "docId": "kibKbnExpandableFlyoutPluginApi",
+                "section": "def-public.ExpandableFlyoutApi",
+                "text": "ExpandableFlyoutApi"
+              },
+              ") | undefined"
+            ],
+            "path": "x-pack/solutions/security/plugins/cloud_security_posture/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "cloudSecurityPosture",
+            "id": "def-public.CspSecuritySolutionContext.useOnExpandableFlyoutClose",
+            "type": "Function",
+            "tags": [],
+            "label": "useOnExpandableFlyoutClose",
+            "description": [],
+            "signature": [
+              "(({ callback }: ",
+              "UseOnCloseParams",
+              ") => void) | undefined"
+            ],
+            "path": "x-pack/solutions/security/plugins/cloud_security_posture/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "cloudSecurityPosture",
+                "id": "def-public.CspSecuritySolutionContext.useOnExpandableFlyoutClose.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "{ callback }",
+                "description": [],
+                "signature": [
+                  "UseOnCloseParams"
+                ],
+                "path": "x-pack/solutions/security/plugins/cloud_security_posture/public/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -181,6 +239,52 @@
           "deprecated": false,
           "trackAdoption": false,
           "children": [],
+          "returnComment": []
+        },
+        {
+          "parentPluginId": "cloudSecurityPosture",
+          "id": "def-public.CspClientPluginStart.getCloudSecurityPostureMisconfigurationFlyout",
+          "type": "Function",
+          "tags": [],
+          "label": "getCloudSecurityPostureMisconfigurationFlyout",
+          "description": [],
+          "signature": [
+            "({ ruleId, resourceId, }: ",
+            {
+              "pluginId": "@kbn/cloud-security-posture",
+              "scope": "public",
+              "docId": "kibKbnCloudSecurityPosturePluginApi",
+              "section": "def-public.FindingMisconfigurationFlyoutProps",
+              "text": "FindingMisconfigurationFlyoutProps"
+            },
+            ") => React.JSX.Element"
+          ],
+          "path": "x-pack/solutions/security/plugins/cloud_security_posture/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "cloudSecurityPosture",
+              "id": "def-public.CspClientPluginStart.getCloudSecurityPostureMisconfigurationFlyout.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "{\n    ruleId,\n    resourceId,\n  }",
+              "description": [],
+              "signature": [
+                {
+                  "pluginId": "@kbn/cloud-security-posture",
+                  "scope": "public",
+                  "docId": "kibKbnCloudSecurityPosturePluginApi",
+                  "section": "def-public.FindingMisconfigurationFlyoutProps",
+                  "text": "FindingMisconfigurationFlyoutProps"
+                }
+              ],
+              "path": "x-pack/solutions/security/plugins/cloud_security_posture/public/types.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            }
+          ],
           "returnComment": []
         }
       ],

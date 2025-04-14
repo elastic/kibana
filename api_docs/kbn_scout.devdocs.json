@@ -7508,11 +7508,14 @@
           },
           {
             "parentPluginId": "@kbn/scout",
-            "id": "def-common.ScoutTestConfig.license",
+            "id": "def-common.ScoutTestConfig.cloudHostName",
             "type": "string",
             "tags": [],
-            "label": "license",
+            "label": "cloudHostName",
             "description": [],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/platform/packages/shared/kbn-scout/src/types/test_config.d.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -7523,6 +7526,17 @@
             "type": "string",
             "tags": [],
             "label": "cloudUsersFilePath",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-scout/src/types/test_config.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout",
+            "id": "def-common.ScoutTestConfig.license",
+            "type": "string",
+            "tags": [],
+            "label": "license",
             "description": [],
             "path": "src/platform/packages/shared/kbn-scout/src/types/test_config.d.ts",
             "deprecated": false,
@@ -7706,12 +7720,12 @@
           {
             "parentPluginId": "@kbn/scout",
             "id": "def-common.ScoutTestOptions.configName",
-            "type": "string",
+            "type": "CompoundType",
             "tags": [],
             "label": "configName",
             "description": [],
             "signature": [
-              "\"local\""
+              "\"local\" | \"cloud_ech\" | \"cloud_mki\""
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/types/index.ts",
             "deprecated": false,
@@ -7958,8 +7972,8 @@
                 "pluginId": "@kbn/apm-synthtrace-client",
                 "scope": "common",
                 "docId": "kibKbnApmSynthtraceClientPluginApi",
-                "section": "def-common.OtelDocument",
-                "text": "OtelDocument"
+                "section": "def-common.ApmOtelFields",
+                "text": "ApmOtelFields"
               },
               ">"
             ],

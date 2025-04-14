@@ -1101,6 +1101,7 @@
     }
   },
   "epm-packages": {
+    "dynamic": false,
     "properties": {
       "additional_spaces_installed_kibana": {
         "index": false,
@@ -2912,6 +2913,14 @@
       }
     }
   },
+  "privilege-monitoring-status": {
+    "dynamic": false,
+    "properties": {
+      "status": {
+        "type": "keyword"
+      }
+    }
+  },
   "product-doc-install-status": {
     "dynamic": false,
     "properties": {
@@ -3860,6 +3869,107 @@
       },
       "version": {
         "type": "integer"
+      }
+    }
+  },
+  "workchat_agent": {
+    "dynamic": "strict",
+    "properties": {
+      "access_control": {
+        "properties": {
+          "public": {
+            "type": "boolean"
+          }
+        }
+      },
+      "agent_id": {
+        "type": "keyword"
+      },
+      "agent_name": {
+        "type": "text"
+      },
+      "configuration": {
+        "dynamic": false,
+        "properties": {},
+        "type": "object"
+      },
+      "description": {
+        "type": "text"
+      },
+      "last_updated": {
+        "type": "date"
+      },
+      "user_id": {
+        "type": "keyword"
+      },
+      "user_name": {
+        "type": "keyword"
+      }
+    }
+  },
+  "workchat_conversation": {
+    "dynamic": "strict",
+    "properties": {
+      "access_control": {
+        "properties": {
+          "public": {
+            "type": "boolean"
+          }
+        }
+      },
+      "agent_id": {
+        "type": "keyword"
+      },
+      "conversation_id": {
+        "type": "keyword"
+      },
+      "events": {
+        "dynamic": false,
+        "properties": {},
+        "type": "object"
+      },
+      "last_updated": {
+        "type": "date"
+      },
+      "title": {
+        "type": "text"
+      },
+      "user_id": {
+        "type": "keyword"
+      },
+      "user_name": {
+        "type": "keyword"
+      }
+    }
+  },
+  "workchat_integration": {
+    "dynamic": "strict",
+    "properties": {
+      "configuration": {
+        "dynamic": false,
+        "properties": {},
+        "type": "object"
+      },
+      "created_at": {
+        "type": "date"
+      },
+      "created_by": {
+        "type": "keyword"
+      },
+      "description": {
+        "type": "text"
+      },
+      "integration_id": {
+        "type": "keyword"
+      },
+      "name": {
+        "type": "keyword"
+      },
+      "type": {
+        "type": "keyword"
+      },
+      "updated_at": {
+        "type": "date"
       }
     }
   },

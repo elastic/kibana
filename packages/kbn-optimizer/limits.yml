@@ -85,11 +85,9 @@ pageLoadAssetSize:
   infra: 184320
   ingestPipelines: 58003
   inputControlVis: 172675
-  inspector: 17600
+  inspector: 17900
   interactiveSetup: 80000
   inventory: 27430
-  investigate: 17970
-  investigateApp: 91898
   kibanaOverview: 56279
   kibanaReact: 74422
   kibanaUsageCollection: 16463
@@ -106,7 +104,7 @@ pageLoadAssetSize:
   maps: 46000
   mapsEms: 26072
   metricsDataAccess: 73287
-  ml: 85000
+  ml: 89000
   mockIdpPlugin: 30000
   monitoring: 80000
   navigation: 37269
@@ -150,7 +148,7 @@ pageLoadAssetSize:
   searchSynonyms: 20262
   security: 81771
   securitySolution: 98429
-  securitySolutionEss: 31781
+  securitySolutionEss: 36000
   securitySolutionServerless: 62488
   serverless: 16573
   serverlessChat: 22715
@@ -199,3 +197,7 @@ pageLoadAssetSize:
   visTypeXy: 46868
   visualizations: 41000
   watcher: 43598
+  wciExternalServer: 35000
+  wciIndexSource: 40000
+  wciSalesforce: 25000
+  workchatApp: 25000
