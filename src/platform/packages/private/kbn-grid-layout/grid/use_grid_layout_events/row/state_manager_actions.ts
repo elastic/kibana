@@ -10,7 +10,7 @@
 import deepEqual from 'fast-deep-equal';
 import { cloneDeep, pick } from 'lodash';
 
-import { GridLayoutStateManager } from '../../types';
+import { ActiveRowEvent, GridLayoutStateManager } from '../../types';
 import { getRowKeysInOrder } from '../../utils/resolve_grid_row';
 import { getSensorType } from '../sensors';
 import { PointerPosition, UserInteractionEvent } from '../types';
@@ -76,7 +76,13 @@ export const moveAction = (
     gridLayoutStateManager.gridLayout$.getValue();
   const currentRowOrder = getRowKeysInOrder(currentLayout);
 
-  const updatedRowOrder = Object.entries(gridLayoutStateManager.rowGhostRefs.current)
+
+  const dropTargetRowId = getDropTarget(currentPointer, gridLayoutStateManager);
+
+  let updatedRowOrder = currentRowOrder;
+
+  if (dropTargetRowId && currentLayout[dropTargetRowId].isCollapsible) {
+  updatedRowOrder = Object.entries(gridLayoutStateManager.rowGhostRefs.current)
     .sort(([idA, refA], [idB, refB]) => {
       // todo: find a smarter way to do this
       // if the row is active, use the header ref to get the mid point since it is the one that is being dragged
@@ -85,6 +91,7 @@ export const moveAction = (
       return midPointA - midPointB;
     })
     .map(([id]) => id);
+  }
 
 
 
@@ -103,4 +110,21 @@ export const moveAction = (
       left: currentPointer.clientX - startingPointer.clientX,
     },
   });
+};
+
+
+
+function getDropTarget (
+  currentPointer: PointerPosition,
+  gridLayoutStateManager: GridLayoutStateManager,
+) {
+  const rowRefs = gridLayoutStateManager.rowGhostRefs.current;
+  const rowIds = Object.keys(rowRefs);
+  const rowRef = rowIds.find((id) => {
+    const ref = rowRefs[id];
+    if (!ref) return false;
+    const { top, bottom } = ref.getBoundingClientRect();
+    return currentPointer.clientY >= top && currentPointer.clientY <= bottom;
+  });
+  return rowRef;
 };
