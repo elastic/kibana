@@ -58,7 +58,6 @@ export const getEsaggsMeta: () => Omit<EsaggsExpressionFunctionDefinition, 'fn'>
   name,
   type: 'datatable',
   inputTypes: ['kibana_context', 'null'],
-  allowCache: true,
   help: i18n.translate('data.functions.esaggs.help', {
     defaultMessage: 'Run AggConfig aggregation',
   }),
