@@ -5,22 +5,25 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { memo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiFlyoutFooter, EuiPanel } from '@elastic/eui';
+import { TakeActionButton } from './components/take_action_button';
 
 export const FLYOUT_FOOTER_TEST_ID = 'ai-for-soc-alert-flyout-footer';
 
 /**
  * Bottom section of the flyout that contains the take action button
  */
-export const PanelFooter = () => (
+export const PanelFooter = memo(() => (
   <EuiFlyoutFooter data-test-subj={FLYOUT_FOOTER_TEST_ID}>
     <EuiPanel color="transparent">
       <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
-        <EuiFlexItem grow={false} />
+        <EuiFlexItem grow={false}>
+          <TakeActionButton />
+        </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPanel>
   </EuiFlyoutFooter>
-);
+));
 
 PanelFooter.displayName = 'PanelFooter';

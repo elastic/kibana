@@ -5,20 +5,22 @@
  * 2.0.
  */
 
-import React, { memo, useCallback } from 'react';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import React, { memo } from 'react';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { Alert } from '@kbn/alerting-types';
-import { i18n } from '@kbn/i18n';
-import { IOCPanelKey } from '../../../../flyout/ai_for_soc/constants/panel_keys';
-
-export const ROW_ACTION_FLYOUT_ICON_TEST_ID = 'alert-summary-table-row-action-flyout-icon';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
+import { OpenFlyoutRowControlColumn } from './open_flyout_row_control_column';
+import { MoreActionsRowControlColumn } from './more_actions_row_control_column';
 
 export interface ActionsCellProps {
   /**
    * Alert data passed from the renderCellValue callback via the AlertWithLegacyFormats interface
    */
   alert: Alert;
+  /**
+   * The Ycs type is @deprecated but needed for the case actions within the more action dropdown
+   */
+  ecsAlert: Ecs;
 }
 
 /**
@@ -29,38 +31,15 @@ export interface ActionsCellProps {
  * - assistant (soon)
  * - more actions (soon)
  */
-export const ActionsCell = memo(({ alert }: ActionsCellProps) => {
-  const { openFlyout } = useExpandableFlyoutApi();
-  const onOpenFlyout = useCallback(
-    () =>
-      openFlyout({
-        right: {
-          id: IOCPanelKey,
-          params: {
-            id: alert._id,
-            indexName: alert._index,
-          },
-        },
-      }),
-    [alert, openFlyout]
-  );
-
-  return (
-    <EuiFlexGroup alignItems="center" gutterSize="xs">
-      <EuiFlexItem>
-        <EuiButtonIcon
-          aria-label={i18n.translate('xpack.securitySolution.alertSummary.table.flyoutIcon', {
-            defaultMessage: 'Open flyout',
-          })}
-          color="primary"
-          data-test-subj={ROW_ACTION_FLYOUT_ICON_TEST_ID}
-          iconType="expand"
-          onClick={onOpenFlyout}
-          size="xs"
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
-});
+export const ActionsCell = memo(({ alert, ecsAlert }: ActionsCellProps) => (
+  <EuiFlexGroup alignItems="center" gutterSize="xs">
+    <EuiFlexItem>
+      <OpenFlyoutRowControlColumn alert={alert} />
+    </EuiFlexItem>
+    <EuiFlexItem>
+      <MoreActionsRowControlColumn ecsAlert={ecsAlert} />
+    </EuiFlexItem>
+  </EuiFlexGroup>
+));
 
 ActionsCell.displayName = 'ActionsCell';
