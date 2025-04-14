@@ -38,8 +38,9 @@ export const createUserRoute = (router: EntityAnalyticsRoutesDeps['router'], log
         const siemResponse = buildSiemResponse(response);
 
         try {
-          // Placeholder for actual implementation
-          return response.ok({ body: { id: '123', user_name: 'test_user', is_monitored: true } });
+          const secSol = await context.securitySolution;
+          const body = await secSol.getPrivilegeMonitoringDataClient().createUser(request.body);
+          return response.ok({ body });
         } catch (e) {
           const error = transformError(e);
           logger.error(`Error creating user: ${error.message}`);

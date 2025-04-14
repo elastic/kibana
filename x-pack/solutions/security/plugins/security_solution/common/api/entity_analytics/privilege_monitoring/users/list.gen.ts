@@ -16,6 +16,8 @@
 
 import { z } from '@kbn/zod';
 
+import { MonitoredUserDoc } from '../common.gen';
+
 export type ListUsersRequestQuery = z.infer<typeof ListUsersRequestQuery>;
 export const ListUsersRequestQuery = z.object({
   /**
@@ -26,10 +28,4 @@ export const ListUsersRequestQuery = z.object({
 export type ListUsersRequestQueryInput = z.input<typeof ListUsersRequestQuery>;
 
 export type ListUsersResponse = z.infer<typeof ListUsersResponse>;
-export const ListUsersResponse = z.array(
-  z.object({
-    id: z.string().optional(),
-    user_name: z.string().optional(),
-    is_monitored: z.boolean().optional(),
-  })
-);
+export const ListUsersResponse = z.array(MonitoredUserDoc);

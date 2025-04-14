@@ -38,8 +38,9 @@ export const deleteUserRoute = (router: EntityAnalyticsRoutesDeps['router'], log
         const siemResponse = buildSiemResponse(response);
 
         try {
-          // Placeholder for actual implementation
-          return response.ok({ body: { success: true, message: 'User deleted successfully' } });
+          const secSol = await context.securitySolution;
+          await secSol.getPrivilegeMonitoringDataClient().deleteUser(request.params.id);
+          return response.ok({ body: { success: true } });
         } catch (e) {
           const error = transformError(e);
           logger.error(`Error deleting user: ${error.message}`);

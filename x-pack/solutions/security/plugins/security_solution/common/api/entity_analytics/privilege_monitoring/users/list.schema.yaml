@@ -25,11 +25,4 @@ paths:
               schema:
                 type: array
                 items:
-                  type: object
-                  properties:
-                    id:
-                      type: string
-                    user_name:
-                      type: string
-                    is_monitored:
-                      type: boolean
+                  $ref: "../common.schema.yaml#/components/schemas/MonitoredUserDoc"

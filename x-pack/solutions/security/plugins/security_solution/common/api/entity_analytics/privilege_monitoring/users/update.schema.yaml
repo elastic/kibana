@@ -27,6 +27,11 @@ paths:
                   type: string
                 is_monitored:
                   type: boolean
+
       responses:
         "200":
           description: User updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "../common.schema.yaml#/components/schemas/MonitoredUserDoc"

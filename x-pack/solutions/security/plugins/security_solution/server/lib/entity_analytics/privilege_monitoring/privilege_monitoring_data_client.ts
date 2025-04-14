@@ -17,7 +17,15 @@ import type {
 
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import moment from 'moment';
+import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
+import type { UpdateUserRequestBody } from '../../../../common/api/entity_analytics/privilege_monitoring/users/update.gen';
+
+import type {
+  CreateUserRequestBody,
+  CreateUserResponse,
+} from '../../../../common/api/entity_analytics/privilege_monitoring/users/create.gen';
 import type { InitMonitoringEngineResponse } from '../../../../common/api/entity_analytics/privilege_monitoring/engine/init.gen';
+import type { MonitoredUserDoc } from '../../../../common/api/entity_analytics/privilege_monitoring/common.gen';
 import {
   EngineComponentResourceEnum,
   type EngineComponentResource,
@@ -163,6 +171,57 @@ export class PrivilegeMonitoringDataClient {
 
   public getIndex() {
     return getPrivilegedMonitorUsersIndex(this.opts.namespace);
+  }
+
+  public async createUser(user: CreateUserRequestBody): Promise<CreateUserResponse> {
+    const res = await this.esClient.index({
+      index: this.getIndex(),
+      document: { user: { name: user.user_name }, is_monitored: user.is_monitored },
+    });
+
+    return { ...user, id: res._id };
+  }
+
+  public async getUser(id: string): Promise<MonitoredUserDoc | undefined> {
+    const response = await this.esClient.get<MonitoredUserDoc>({
+      index: this.getIndex(),
+      id,
+    });
+
+    return response.found
+      ? ({ ...response.fields, id: response._id } as MonitoredUserDoc)
+      : undefined;
+  }
+
+  public async updateUser(
+    id: string,
+    user: UpdateUserRequestBody
+  ): Promise<MonitoredUserDoc | undefined> {
+    await this.esClient.update<MonitoredUserDoc>({
+      index: this.getIndex(),
+      id,
+      doc: user,
+    });
+    return this.getUser(id);
+  }
+
+  public async deleteUser(id: string): Promise<void> {
+    await this.esClient.delete({
+      index: this.getIndex(),
+      id,
+    });
+  }
+
+  public async listUsers(kuery?: string): Promise<MonitoredUserDoc[]> {
+    const query = toElasticsearchQuery(fromKueryExpression(kuery ?? ''));
+    const response = await this.esClient.search({
+      index: this.getIndex(),
+      query,
+    });
+    return response.hits.hits.map((hit) => ({
+      id: hit._id,
+      ...hit.fields,
+    })) as MonitoredUserDoc[];
   }
 
   private log(level: Exclude<keyof Logger, 'get' | 'log' | 'isLevelEnabled'>, msg: string) {

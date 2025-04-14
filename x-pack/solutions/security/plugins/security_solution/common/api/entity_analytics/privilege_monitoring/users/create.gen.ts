@@ -16,6 +16,8 @@
 
 import { z } from '@kbn/zod';
 
+import { MonitoredUserDoc } from '../common.gen';
+
 export type CreateUserRequestBody = z.infer<typeof CreateUserRequestBody>;
 export const CreateUserRequestBody = z.object({
   /**
@@ -30,8 +32,4 @@ export const CreateUserRequestBody = z.object({
 export type CreateUserRequestBodyInput = z.input<typeof CreateUserRequestBody>;
 
 export type CreateUserResponse = z.infer<typeof CreateUserResponse>;
-export const CreateUserResponse = z.object({
-  id: z.string().optional(),
-  user_name: z.string().optional(),
-  is_monitored: z.boolean().optional(),
-});
+export const CreateUserResponse = MonitoredUserDoc;

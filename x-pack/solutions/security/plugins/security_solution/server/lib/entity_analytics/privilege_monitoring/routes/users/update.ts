@@ -41,10 +41,11 @@ export const updateUserRoute = (router: EntityAnalyticsRoutesDeps['router'], log
         const siemResponse = buildSiemResponse(response);
 
         try {
-          // Placeholder for actual implementation
-          return response.ok({
-            body: { id: request.params.id, user_name: 'updated_user', is_monitored: true },
-          });
+          const secSol = await context.securitySolution;
+          const body = await secSol
+            .getPrivilegeMonitoringDataClient()
+            .updateUser(request.params.id, request.body);
+          return response.ok({ body });
         } catch (e) {
           const error = transformError(e);
           logger.error(`Error updating user: ${error.message}`);

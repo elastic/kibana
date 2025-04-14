@@ -16,6 +16,8 @@
 
 import { z } from '@kbn/zod';
 
+import { MonitoredUserDoc } from '../common.gen';
+
 export type UpdateUserRequestParams = z.infer<typeof UpdateUserRequestParams>;
 export const UpdateUserRequestParams = z.object({
   id: z.string(),
@@ -28,3 +30,6 @@ export const UpdateUserRequestBody = z.object({
   is_monitored: z.boolean().optional(),
 });
 export type UpdateUserRequestBodyInput = z.input<typeof UpdateUserRequestBody>;
+
+export type UpdateUserResponse = z.infer<typeof UpdateUserResponse>;
+export const UpdateUserResponse = MonitoredUserDoc;

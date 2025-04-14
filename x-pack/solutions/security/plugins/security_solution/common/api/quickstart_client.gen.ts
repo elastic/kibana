@@ -283,6 +283,7 @@ import type {
 import type {
   UpdateUserRequestParamsInput,
   UpdateUserRequestBodyInput,
+  UpdateUserResponse,
 } from './entity_analytics/privilege_monitoring/users/update.gen';
 import type { BulkUploadUsersCSVResponse } from './entity_analytics/privilege_monitoring/users/upload_csv.gen';
 import type { BulkUploadUsersJSONResponse } from './entity_analytics/privilege_monitoring/users/upload_json.gen';
@@ -2437,7 +2438,7 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
   async updateUser(props: UpdateUserProps) {
     this.log.info(`${new Date().toISOString()} Calling API UpdateUser`);
     return this.kbnClient
-      .request({
+      .request<UpdateUserResponse>({
         path: replaceParams('/api/entity_analytics/monitoring/users/{id}', props.params),
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
