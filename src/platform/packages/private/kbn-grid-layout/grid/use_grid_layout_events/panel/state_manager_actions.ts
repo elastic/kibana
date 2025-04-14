@@ -213,7 +213,9 @@ export const commitAction = ({
   interactionEvent$,
   gridLayout$,
   proposedGridLayout$,
+  panelRefs,
 }: GridLayoutStateManager) => {
+  const event = interactionEvent$.getValue();
   activePanel$.next(undefined);
   interactionEvent$.next(undefined);
   if (
@@ -223,6 +225,12 @@ export const commitAction = ({
     gridLayout$.next(cloneDeep(proposedGridLayout$.value));
   }
   proposedGridLayout$.next(undefined);
+
+  if (!event) return;
+  panelRefs.current[event.targetRow][event.id]?.scrollIntoView({
+    behavior: 'smooth',
+    block: 'center',
+  });
 };
 
 export const cancelAction = ({

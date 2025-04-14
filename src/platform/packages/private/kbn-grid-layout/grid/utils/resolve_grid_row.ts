@@ -144,7 +144,6 @@ export const resolveMainGrid = (
   }
 
   const sortedLayout = getMainLayoutInOrder(nextLayoutData);
-  console.log(sortedLayout);
   const sectionsAsPanels: GridRowData['panels'] = sortedLayout.reduce((prev, widget) => {
     return {
       ...prev,
