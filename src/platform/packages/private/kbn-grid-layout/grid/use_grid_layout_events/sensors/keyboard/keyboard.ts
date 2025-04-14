@@ -43,7 +43,7 @@ const handleStart = (e: UserKeyboardEvent, onStart: EventHandler, onBlur?: Event
   disableScroll();
 
   const handleBlur = (blurEvent: Event) => {
-    onBlur?.(blurEvent as UserInteractionEvent);
+    // onBlur?.(blurEvent as UserInteractionEvent);
     enableScroll();
   };
 

@@ -37,10 +37,13 @@ export const GridPanelDragPreview = React.memo(() => {
 
           const offset = getTopOffsetForRow(rowId, proposedGridLayout, true);
 
+
           if (!activePanel || !row.panels[activePanel.id]) {
             dragPreviewRef.current.style.display = 'none';
           } else {
             const panel = row.panels[activePanel.id];
+            console.log('offset drag preview', offset);
+            console.log('panel drag preview', panel);
             dragPreviewRef.current.style.display = 'block';
             dragPreviewRef.current.style.gridColumnStart = `${panel.column + 1}`;
             dragPreviewRef.current.style.gridColumnEnd = `${panel.column + 1 + panel.width}`;

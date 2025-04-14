@@ -88,7 +88,6 @@ export const moveAction = (
   // find the grid that the preview rect is over
   const lastRowId = interactionEvent.targetRow;
   const targetRowId = (() => {
-    // TODO: temporary blocking of moving with keyboard between sections till we have a better way to handle keyboard events between rows
     if (isResize) return lastRowId;
     const previewBottom = previewRect.top + rowHeight;
 

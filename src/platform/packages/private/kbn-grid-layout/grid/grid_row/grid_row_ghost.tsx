@@ -34,7 +34,7 @@ export const GridRowEndMark = ({ rowId }: { rowId: string }) => {
         elRef.style.gridColumnStart = `1`;
         elRef.style.gridColumnEnd = `-1`;
         elRef.style.gridRowStart = `${topOffset + 1}`;
-        elRef.style.gridRowEnd = `${topOffset + 3}`;
+        elRef.style.gridRowEnd = `${topOffset + 1}`;
       });
 
       return () => {

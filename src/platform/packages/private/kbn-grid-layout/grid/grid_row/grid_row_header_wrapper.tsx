@@ -11,7 +11,7 @@ import React, { useEffect, useRef } from 'react';
 import { combineLatest } from 'rxjs';
 
 import { useGridLayoutContext } from '../use_grid_layout_context';
-import { getTopOffsetForRow } from '../utils/calculations';
+import { COLLAPSIBLE_HEADER_HEIGHT, getTopOffsetForRow } from '../utils/calculations';
 import { GridRowHeader } from './grid_row_header';
 
 export interface GridRowHeaderProps {
@@ -20,8 +20,39 @@ export interface GridRowHeaderProps {
   collapseButtonRef: React.MutableRefObject<HTMLButtonElement | null>;
 }
 
+
+
 export const GridRowStartMark = React.memo(({ rowId }: { rowId: string }) => {
   const { gridLayoutStateManager } = useGridLayoutContext();
+
+
+   useEffect(
+    () => {
+      /** Update the styles of the drag preview via a subscription to prevent re-renders */
+      const styleSubscription = combineLatest([
+        gridLayoutStateManager.gridLayout$,
+        gridLayoutStateManager.proposedGridLayout$,
+      ]).subscribe(([gridLayout, proposedGridLayout]) => {
+        const headerRef = gridLayoutStateManager.headerRefs.current[rowId];
+        if (!headerRef) return;
+        const currentGridLayout = proposedGridLayout || gridLayout;
+        const topOffset = getTopOffsetForRow(rowId, currentGridLayout);
+        headerRef.style.display = 'block';
+        headerRef.style.gridColumnStart = `1`;
+        headerRef.style.gridColumnEnd = `-1`;
+        headerRef.style.gridRowStart = `${topOffset + 1}`;
+        headerRef.style.gridRowEnd = `${topOffset + 1 + COLLAPSIBLE_HEADER_HEIGHT}`;
+      });
+
+      return () => {
+        styleSubscription.unsubscribe();
+      };
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  );
+
+
   return (
     <div
       style={{
@@ -76,7 +107,7 @@ export const GridRowHeaderWrapper = ({
         headerRef.style.gridColumnStart = `1`;
         headerRef.style.gridColumnEnd = `-1`;
         headerRef.style.gridRowStart = `${topOffset + 1}`;
-        headerRef.style.gridRowEnd = `${topOffset + 3}`;
+        headerRef.style.gridRowEnd = `${topOffset + 1 + COLLAPSIBLE_HEADER_HEIGHT}`;
       });
 
       return () => {

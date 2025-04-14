@@ -9,7 +9,7 @@
 
 import { GridLayoutData, GridRowData } from '../types';
 
-const COLLAPSIBLE_HEADER_HEIGHT = 2;
+export const COLLAPSIBLE_HEADER_HEIGHT = 2;
 
 const getHeaderHeight = (row: GridRowData) => (row.isCollapsible ? COLLAPSIBLE_HEADER_HEIGHT : 0);
 
