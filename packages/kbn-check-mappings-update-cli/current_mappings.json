@@ -3888,6 +3888,16 @@
       "agent_name": {
         "type": "text"
       },
+      "avatar": {
+        "properties": {
+          "color": {
+            "type": "keyword"
+          },
+          "text": {
+            "type": "keyword"
+          }
+        }
+      },
       "configuration": {
         "dynamic": false,
         "properties": {},
