@@ -73,12 +73,17 @@ export const getGridAttrs = async (
     search: data.search.search,
     signal: abortController?.signal,
     filter,
-    dropNullColumns: false,
+    dropNullColumns: true,
     timeRange: data.query.timefilter.timefilter.getAbsoluteTime(),
     variables: esqlVariables,
   });
 
-  const columns = formatESQLColumns(results.response.columns);
+  let queryColumns = results.response.columns;
+  if (queryColumns.length === 0 && results.response.all_columns) {
+    queryColumns = results.response.all_columns;
+  }
+
+  const columns = formatESQLColumns(queryColumns);
 
   return {
     rows: results.response.values,
