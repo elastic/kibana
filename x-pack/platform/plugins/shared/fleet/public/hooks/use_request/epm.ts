@@ -129,7 +129,10 @@ export const useGetLimitedPackages = () => {
     version: API_VERSIONS.public.v1,
   });
 };
-export const useUpdateCustomIntegration = (id: string, fields: any[]) => {
+export const useUpdateCustomIntegration = (
+  id: string,
+  fields: { readMeData: string | undefined; categories: string[] }
+) => {
   return sendRequest({
     path: epmRouteService.getUpdateCustomIntegrationsPath(),
     method: 'put',

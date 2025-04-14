@@ -8,10 +8,10 @@
 import { EuiButtonEmpty } from '@elastic/eui';
 import React from 'react';
 
-interface EditReadMeButtonProps {
+interface EditIntegrationButtonProps {
   onClick: Function;
 }
-export function EditReadMeButton(props: EditReadMeButtonProps) {
+export function EditIntegrationButton(props: EditIntegrationButtonProps) {
   const { onClick } = props;
   return (
     <EuiButtonEmpty

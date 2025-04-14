@@ -22,7 +22,7 @@ import {
 } from '@elastic/eui';
 // import { FormattedMessage } from '@kbn/i18n-react';
 
-export const EditReadmeFlyout: React.FunctionComponent<{
+export const EditIntegrationFlyout: React.FunctionComponent<{
   readMeContent: string | undefined;
   onClose: () => void;
   integrationName: string;
@@ -37,7 +37,7 @@ export const EditReadmeFlyout: React.FunctionComponent<{
     // do something with messages and ast
   }, []);
   return (
-    <EuiFlyout ownFocus onClose={onClose} aria-labelledby="editReadmeFlyoutTitle">
+    <EuiFlyout ownFocus onClose={onClose} aria-labelledby="editIntegrationFlyoutTitle">
       <EuiFlyoutHeader hasBorder>
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>
@@ -46,7 +46,7 @@ export const EditReadmeFlyout: React.FunctionComponent<{
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiTitle>
-              <h2 id="editReadmeFlyoutTitle">Editing {integrationName} overview</h2>
+              <h2 id="editIntegrationFlyoutTitle">Editing {integrationName} overview</h2>
             </EuiTitle>
           </EuiFlexItem>
         </EuiFlexGroup>

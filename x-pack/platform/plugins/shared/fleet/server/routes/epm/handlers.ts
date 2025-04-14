@@ -52,6 +52,7 @@ import type {
   GetBulkAssetsRequestSchema,
   CreateCustomIntegrationRequestSchema,
   GetInputsRequestSchema,
+  CustomIntegrationRequestSchema,
 } from '../../types';
 import {
   bulkInstallPackages,
@@ -65,6 +66,7 @@ import {
   getLimitedPackages,
   getBulkAssets,
   getTemplateInputs,
+  updateCustomIntegration,
 } from '../../services/epm/packages';
 import type { BulkInstallResponse } from '../../services/epm/packages';
 import { fleetErrorToResponseOptions, FleetError, FleetTooManyRequestsError } from '../../errors';
@@ -603,6 +605,34 @@ export const getInputsHandler: FleetRequestHandler<
     );
   }
   return response.ok({ body });
+};
+
+export const updateCustomIntegrationHandler: FleetRequestHandler<
+  TypeOf<typeof CustomIntegrationRequestSchema.body>
+> = async (context, request, response) => {
+  const [coreContext] = await Promise.all([context.core, context.fleet]);
+  const esClient = coreContext.elasticsearch.client.asInternalUser;
+  const soClient = coreContext.savedObjects.client;
+
+  try {
+    const { id, fields } = request.body as TypeOf<typeof CustomIntegrationRequestSchema.body>;
+
+    const result = await updateCustomIntegration(esClient, soClient, id, fields);
+
+    return response.ok({
+      body: {
+        id,
+        ...result,
+      },
+    });
+  } catch (error) {
+    return response.customError({
+      statusCode: 500,
+      body: {
+        message: `Failed to update integration: ${error.message}`,
+      },
+    });
+  }
 };
 
 // Don't expose the whole SO in the API response, only selected fields

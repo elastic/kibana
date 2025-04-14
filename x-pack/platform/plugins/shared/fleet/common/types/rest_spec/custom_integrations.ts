@@ -10,5 +10,5 @@ export interface UpdateCustomIntegrationRequest {
   fields: {
     readMeData?: string;
     categories?: string[];
-  }[];
+  };
 }

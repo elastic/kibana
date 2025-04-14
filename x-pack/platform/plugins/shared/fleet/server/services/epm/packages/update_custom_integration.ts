@@ -6,7 +6,7 @@
  */
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 
-import { PACKAGES_SAVED_OBJECT_TYPE, ASSETS_SAVED_OBJECT_TYPE } from '../../../common/constants';
+import { PACKAGES_SAVED_OBJECT_TYPE, ASSETS_SAVED_OBJECT_TYPE } from '../../../../common/constants';
 
 /**
  * Updates a custom integration in Elasticsearch
@@ -21,11 +21,15 @@ export async function updateCustomIntegration(
   esClient: ElasticsearchClient,
   soClient: SavedObjectsClientContract,
   id: string,
-  fields: any[]
+  fields: {
+    readMeData?: string;
+    categories?: string[];
+  }
 ) {
   try {
     // Get the current integration using the id
     const integration = await soClient.get(PACKAGES_SAVED_OBJECT_TYPE, id);
+
     // then get the package assets if theres an integration
     if (!integration) {
       throw new Error(`Integration with ID ${id} not found`);
@@ -39,9 +43,13 @@ export async function updateCustomIntegration(
       // if the readme asset is found, update the data_utf8 field with the new readme content
       if (readMeAsset) {
         const res = await soClient.update(ASSETS_SAVED_OBJECT_TYPE, readMeAsset.id, {
-          data_utf8: fields[0].readMeData,
+          data_utf8: fields.readMeData,
         });
-        return res;
+        // TODO: increment the version by 1, waiting for clarification here on how?
+
+        return {
+          readMeAsset: res,
+        };
       }
     }
   } catch (error) {

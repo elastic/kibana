@@ -83,7 +83,7 @@ import {
   IconPanel,
   LoadingIconPanel,
   AddIntegrationButton,
-  EditReadMeButton,
+  EditIntegrationButton,
 } from './components';
 import { AssetsPage } from './assets';
 import { OverviewPage } from './overview';
@@ -95,7 +95,7 @@ import { Configs } from './configs';
 
 import type { InstallPkgRouteOptions } from './utils/get_install_route_options';
 import { InstallButton } from './settings/install_button';
-import { EditReadmeFlyout } from './components/edit_readme_flyout';
+import { EditIntegrationFlyout } from './components/edit_integration_flyout';
 
 export type DetailViewPanelName =
   | 'overview'
@@ -174,7 +174,8 @@ export function Detail() {
   const isOverviewPage = panel === 'overview';
   // edit readme state
 
-  const [isEditReadMeOpen, setIsEditReadMeOpen] = useState(false);
+  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [shouldAllowEdit, setShouldAllowEdit] = useState(false);
   const [readMeContent, setReadMeContent] = useState<string>('');
   // Package info state
   const [packageInfo, setPackageInfo] = useState<PackageInfo | null>(null);
@@ -302,7 +303,9 @@ export function Detail() {
     if (packageInfoIsFetchedAfterMount && packageInfoData?.item) {
       const packageInfoResponse = packageInfoData.item;
       setPackageInfo(packageInfoResponse);
-
+      setShouldAllowEdit(
+        packageInfoResponse?.owner?.github?.endsWith('custom-integrations') ?? false
+      );
       let installedVersion;
       const { name } = packageInfoData.item;
       if ('installationInfo' in packageInfoResponse) {
@@ -405,12 +408,10 @@ export function Detail() {
     [integrationInfo, isLoading, packageInfo, fromIntegrationsPath, queryParams]
   );
 
-  const saveReadMeChanges = (updatedReadMe: string | undefined) => {
-    setIsEditReadMeOpen(false);
+  const saveIntegrationEdits = (updatedReadMe: string | undefined) => {
+    setIsEditOpen(false);
 
-    updateCustomIntegration(packageInfo?.name || '', [
-      { readMeData: updatedReadMe, categories: [] },
-    ]);
+    updateCustomIntegration(packageInfo?.name || '', { readMeData: updatedReadMe, categories: [] });
 
     services.notifications.toasts.addSuccess({
       title: i18n.translate('xpack.fleet.epm.editReadMeSuccessToastTitle', {
@@ -424,20 +425,19 @@ export function Detail() {
     // TODO: reload the content of the integration but we need the cached headers to be fixed first
     refetchPackageInfo();
   };
-  const handleEditReadMeClick = useCallback<ReactEventHandler>(
+  const handleEditIntegrationClick = useCallback<ReactEventHandler>(
     (ev) => {
       // edit button clicked so need to open the modal to edit the read me
       const readmePath = packageInfo?.readme;
       if (!readmePath) {
         return;
       }
-
       sendGetFileByPath(readmePath).then((res) => {
         setReadMeContent(res.data || '');
-        setIsEditReadMeOpen(true);
+        setIsEditOpen(true);
       });
     },
-    [packageInfo?.readme]
+    [packageInfo]
   );
   const handleAddIntegrationPolicyClick = useCallback<ReactEventHandler>(
     (ev) => {
@@ -602,9 +602,11 @@ export function Detail() {
                           tourOffset={10}
                         >
                           <EuiFlexGroup justifyContent="center">
-                            <EuiFlexItem>
-                              <EditReadMeButton onClick={handleEditReadMeClick} />
-                            </EuiFlexItem>
+                            {shouldAllowEdit && (
+                              <EuiFlexItem>
+                                <EditIntegrationButton onClick={handleEditIntegrationClick} />
+                              </EuiFlexItem>
+                            )}
                             <EuiFlexItem>
                               <AddIntegrationButton
                                 userCanInstallPackages={userCanInstallPackages}
@@ -660,7 +662,8 @@ export function Detail() {
       showVersionSelect,
       versionLabel,
       versionOptions,
-      handleEditReadMeClick,
+      handleEditIntegrationClick,
+      shouldAllowEdit,
     ]
   );
 
@@ -906,12 +909,12 @@ export function Detail() {
           <Redirect to={INTEGRATIONS_ROUTING_PATHS.integration_details_overview} />
         </Routes>
       )}
-      {isEditReadMeOpen && (
-        <EditReadmeFlyout
+      {isEditOpen && (
+        <EditIntegrationFlyout
           readMeContent={readMeContent}
           integrationName={packageInfo?.title || 'UNDEFINED'}
-          onClose={() => setIsEditReadMeOpen(false)}
-          onSave={saveReadMeChanges}
+          onClose={() => setIsEditOpen(false)}
+          onSave={saveIntegrationEdits}
         />
       )}
     </WithHeaderLayout>
