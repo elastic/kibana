@@ -8,23 +8,31 @@
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { serverMock } from '../../__mocks__/server';
 import { requestContextMock } from '../../__mocks__/request_context';
-import { getPromptsBulkActionRequest, requestMock } from '../../__mocks__/request';
+import { getAlertSummaryBulkActionRequest, requestMock } from '../../__mocks__/request';
 import { authenticatedUser } from '../../__mocks__/user';
 import { ELASTIC_AI_ASSISTANT_PROMPTS_URL_BULK_ACTION } from '@kbn/elastic-assistant-common';
-import { getEmptyFindResult, getFindPromptsResultWithSingleHit } from '../../__mocks__/response';
+import {
+  getEmptyFindResult,
+  getFindAlertSummaryResultWithSingleHit,
+} from '../../__mocks__/response';
 import { bulkAlertSummaryRoute } from './bulk_actions_route';
 import {
-  getCreatePromptSchemaMock,
   getPerformBulkActionSchemaMock,
-  getPromptMock,
-  getUpdatePromptSchemaMock,
-} from '../../__mocks__/prompts_schema.mock';
+  getCreateAlertSummarySchemaMock,
+  getUpdateAlertSummarySchemaMock,
+  getAlertSummaryMock,
+} from '../../__mocks__/alert_summary.mock';
+import { transformToUpdateScheme } from '../../ai_assistant_data_clients/alert_summary/helpers';
 
 describe('Perform bulk action route', () => {
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
-  const mockPrompt = getPromptMock(getUpdatePromptSchemaMock());
+  const mockAlertSummary = transformToUpdateScheme(
+    authenticatedUser,
+    '2019-12-13T16:40:33.400Z',
+    getAlertSummaryMock(getUpdateAlertSummarySchemaMock())
+  );
   const mockUser1 = authenticatedUser;
 
   beforeEach(async () => {
@@ -32,14 +40,14 @@ describe('Perform bulk action route', () => {
     logger = loggingSystemMock.createLogger();
     ({ clients, context } = requestContextMock.createTools());
 
-    clients.elasticAssistant.getAIAssistantPromptsDataClient.findDocuments.mockResolvedValue(
-      Promise.resolve(getFindPromptsResultWithSingleHit())
+    clients.elasticAssistant.getAlertSummaryDataClient.findDocuments.mockResolvedValue(
+      Promise.resolve(getFindAlertSummaryResultWithSingleHit())
     );
     (
-      (await clients.elasticAssistant.getAIAssistantPromptsDataClient.getWriter()).bulk as jest.Mock
+      (await clients.elasticAssistant.getAlertSummaryDataClient.getWriter()).bulk as jest.Mock
     ).mockResolvedValue({
-      docs_created: [mockPrompt, mockPrompt],
-      docs_updated: [mockPrompt, mockPrompt],
+      docs_created: [mockAlertSummary, mockAlertSummary],
+      docs_updated: [mockAlertSummary, mockAlertSummary],
       docs_deleted: [],
       errors: [],
     });
@@ -49,13 +57,13 @@ describe('Perform bulk action route', () => {
 
   describe('status codes', () => {
     it('returns 200 when performing bulk action with all dependencies present', async () => {
-      clients.elasticAssistant.getAIAssistantPromptsDataClient.findDocuments.mockResolvedValueOnce(
+      clients.elasticAssistant.getAlertSummaryDataClient.findDocuments.mockResolvedValueOnce(
         Promise.resolve(getEmptyFindResult())
       );
       const response = await server.inject(
-        getPromptsBulkActionRequest(
-          [getCreatePromptSchemaMock()],
-          [getUpdatePromptSchemaMock('49403909-ca9b-49ba-9d7a-7e5320e68d04')],
+        getAlertSummaryBulkActionRequest(
+          [getCreateAlertSummarySchemaMock()],
+          [getUpdateAlertSummarySchemaMock('49403909-ca9b-49ba-9d7a-7e5320e68d04')],
           ['99403909-ca9b-49ba-9d7a-7e5320e68d05']
         ),
         requestContextMock.convertContext(context)
@@ -63,7 +71,7 @@ describe('Perform bulk action route', () => {
       expect(response.status).toEqual(200);
       expect(response.body).toEqual({
         success: true,
-        prompts_count: 3,
+        alert_summaries_count: 3,
         attributes: {
           results: someBulkActionResults(),
           summary: {
@@ -77,38 +85,37 @@ describe('Perform bulk action route', () => {
     });
   });
 
-  describe('prompts bulk actions failures', () => {
-    it('returns partial failure error if update of few prompts fail', async () => {
+  describe('alert_summaries bulk actions failures', () => {
+    it('returns partial failure error if update of few alert summaries fail', async () => {
       (
-        (await clients.elasticAssistant.getAIAssistantPromptsDataClient.getWriter())
-          .bulk as jest.Mock
+        (await clients.elasticAssistant.getAlertSummaryDataClient.getWriter()).bulk as jest.Mock
       ).mockResolvedValue({
-        docs_created: [mockPrompt],
+        docs_created: [mockAlertSummary],
         docs_updated: [],
         docs_deleted: [],
         errors: [
           {
             message: 'mocked validation message',
-            document: { id: 'failed-prompt-id-1', name: 'Detect Root/Admin Users' },
+            document: { id: 'failed-alert-summary-id-1', name: 'Detect Root/Admin Users' },
           },
           {
             message: 'mocked validation message',
-            document: { id: 'failed-prompt-id-2', name: 'Detect Root/Admin Users' },
+            document: { id: 'failed-alert-summary-id-2', name: 'Detect Root/Admin Users' },
           },
           {
             message: 'test failure',
-            document: { id: 'failed-prompt-id-3', name: 'Detect Root/Admin Users' },
+            document: { id: 'failed-alert-summary-id-3', name: 'Detect Root/Admin Users' },
           },
         ],
         total: 4,
       });
-      clients.elasticAssistant.getAIAssistantPromptsDataClient.findDocuments.mockResolvedValueOnce(
+      clients.elasticAssistant.getAlertSummaryDataClient.findDocuments.mockResolvedValueOnce(
         Promise.resolve(getEmptyFindResult())
       );
       const response = await server.inject(
-        getPromptsBulkActionRequest(
-          [getCreatePromptSchemaMock()],
-          [getUpdatePromptSchemaMock('49403909-ca9b-49ba-9d7a-7e5320e68d04')],
+        getAlertSummaryBulkActionRequest(
+          [getCreateAlertSummarySchemaMock()],
+          [getUpdateAlertSummarySchemaMock('49403909-ca9b-49ba-9d7a-7e5320e68d04')],
           ['99403909-ca9b-49ba-9d7a-7e5320e68d05']
         ),
         requestContextMock.convertContext(context)
@@ -126,30 +133,27 @@ describe('Perform bulk action route', () => {
           errors: [
             {
               message: 'mocked validation message',
-              prompts: [
+              alert_summaries: [
                 {
-                  id: 'failed-prompt-id-1',
-                  name: '',
+                  id: 'failed-alert-summary-id-1',
                 },
               ],
               status_code: 500,
             },
             {
               message: 'mocked validation message',
-              prompts: [
+              alert_summaries: [
                 {
-                  id: 'failed-prompt-id-2',
-                  name: '',
+                  id: 'failed-alert-summary-id-2',
                 },
               ],
               status_code: 500,
             },
             {
               message: 'test failure',
-              prompts: [
+              alert_summaries: [
                 {
-                  id: 'failed-prompt-id-3',
-                  name: '',
+                  id: 'failed-alert-summary-id-3',
                 },
               ],
               status_code: 500,

@@ -7,7 +7,6 @@
 
 import React, { memo, useCallback, useMemo } from 'react';
 
-import { noop } from 'lodash/fp';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { PromptContext } from '@kbn/elastic-assistant';
 import {
@@ -50,8 +49,8 @@ export const AIForSOCPanel: React.FC<Partial<AIForSOCDetailsProps>> = memo(() =>
     description: 'Alert summary',
     getPromptContext,
     id: `contextId-${eventId}`,
-    // noop as this is not used within Assistant, but in the flyout
-    tooltip: noop,
+    // empty as tooltip is only used within Assistant, but in the flyout
+    tooltip: '',
   };
 
   const ruleName = useMemo(

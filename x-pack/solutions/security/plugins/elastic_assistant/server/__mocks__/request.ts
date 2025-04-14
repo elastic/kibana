@@ -16,11 +16,12 @@ import {
   ATTACK_DISCOVERY_SCHEDULES_FIND,
   CAPABILITIES,
 } from '../../common/constants';
-import type {
+import {
   CreateAttackDiscoverySchedulesRequestBody,
   DefendInsightsGetRequestQuery,
   DefendInsightsPostRequestBody,
   DeleteKnowledgeBaseEntryRequestParams,
+  ELASTIC_AI_ASSISTANT_ALERT_SUMMARY_URL_BULK_ACTION,
   KnowledgeBaseEntryUpdateProps,
   UpdateAttackDiscoverySchedulesRequestBody,
   UpdateKnowledgeBaseEntryRequestParams,
@@ -65,6 +66,10 @@ import {
   AnonymizationFieldCreateProps,
   AnonymizationFieldUpdateProps,
 } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
+import {
+  AlertSummaryCreateProps,
+  AlertSummaryUpdateProps,
+} from '@kbn/elastic-assistant-common/impl/schemas/alert_summary/bulk_crud_alert_summary_route.gen';
 
 export const requestMock = {
   create: httpServerMock.createKibanaRequest,
@@ -171,6 +176,7 @@ export const getCurrentUserAlertSummaryRequest = () =>
   requestMock.create({
     method: 'get',
     path: ELASTIC_AI_ASSISTANT_ALERT_SUMMARY_URL_FIND,
+    query: { connector_id: '123' },
   });
 
 export const getCurrentUserAnonymizationFieldsRequest = () =>
@@ -260,6 +266,23 @@ export const getAnonymizationFieldsBulkActionRequest = (
   requestMock.create({
     method: 'patch',
     path: ELASTIC_AI_ASSISTANT_ANONYMIZATION_FIELDS_URL_BULK_ACTION,
+    body: {
+      create,
+      update,
+      delete: {
+        ids: deleteIds,
+      },
+    },
+  });
+
+export const getAlertSummaryBulkActionRequest = (
+  create: AlertSummaryCreateProps[] = [],
+  update: AlertSummaryUpdateProps[] = [],
+  deleteIds: string[] = []
+) =>
+  requestMock.create({
+    method: 'patch',
+    path: ELASTIC_AI_ASSISTANT_ALERT_SUMMARY_URL_BULK_ACTION,
     body: {
       create,
       update,

@@ -13,7 +13,12 @@ import { getFindAlertSummaryResultWithSingleHit } from '../../__mocks__/response
 import { findAlertSummaryRoute } from './find_route';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { AuthenticatedUser } from '@kbn/core-security-common';
+import { actionsClientMock } from '@kbn/actions-plugin/server/actions_client/actions_client.mock';
 
+jest.mock('../../lib/prompt', () => ({
+  ...jest.requireActual('../../lib/prompt'),
+  getPrompt: jest.fn().mockResolvedValue('hello world'),
+}));
 describe('Find user prompts route', () => {
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
@@ -33,15 +38,11 @@ describe('Find user prompts route', () => {
     clients.elasticAssistant.getAlertSummaryDataClient.findDocuments.mockResolvedValue(
       Promise.resolve(getFindAlertSummaryResultWithSingleHit())
     );
-    context.elasticAssistant.getCurrentUser.mockResolvedValueOnce({
-      username: 'my_username',
-      authentication_realm: {
-        type: 'my_realm_type',
-        name: 'my_realm_name',
-      },
-    } as AuthenticatedUser);
     logger = loggingSystemMock.createLogger();
     context.elasticAssistant.getCurrentUser.mockResolvedValue(mockUser1);
+    (context.elasticAssistant.actions.getActionsClientWithRequest as jest.Mock) = jest
+      .fn()
+      .mockReturnValueOnce(actionsClientMock.create());
     findAlertSummaryRoute(server.router, logger);
   });
 
@@ -52,6 +53,27 @@ describe('Find user prompts route', () => {
         requestContextMock.convertContext(context)
       );
       expect(response.status).toEqual(200);
+      expect(response.body).toEqual({
+        perPage: 1,
+        page: 1,
+        total: 1,
+        data: [
+          {
+            timestamp: '2019-12-13T16:40:33.400Z',
+            createdAt: '2019-12-13T16:40:33.400Z',
+            users: [{ name: 'elastic' }],
+            summary: 'test content',
+            recommendedActions: 'do something',
+            updatedAt: '2019-12-13T16:40:33.400Z',
+            namespace: 'default',
+            id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
+            alertId: '1234',
+            createdBy: 'elastic',
+            replacements: {},
+          },
+        ],
+        prompt: 'hello world',
+      });
     });
 
     test('catches error if search throws error', async () => {
@@ -76,9 +98,10 @@ describe('Find user prompts route', () => {
         method: 'get',
         path: ELASTIC_AI_ASSISTANT_PROMPTS_URL_FIND,
         query: {
+          connector_id: '123',
           page: 2,
           per_page: 20,
-          sort_field: 'name',
+          sort_field: 'created_at',
           fields: ['field1', 'field2'],
         },
       });
@@ -92,6 +115,7 @@ describe('Find user prompts route', () => {
         method: 'get',
         path: ELASTIC_AI_ASSISTANT_PROMPTS_URL_FIND,
         query: {
+          connector_id: '123',
           page: 2,
           per_page: 20,
           sort_field: 'name1',
@@ -101,7 +125,7 @@ describe('Find user prompts route', () => {
       const result = server.validate(request);
 
       expect(result.badRequest).toHaveBeenCalledWith(
-        `sort_field: Invalid enum value. Expected 'created_at' | 'is_default' | 'name' | 'updated_at', received 'name1'`
+        `sort_field: Invalid enum value. Expected 'created_at' | 'updated_at', received 'name1'`
       );
     });
 
@@ -110,6 +134,7 @@ describe('Find user prompts route', () => {
         method: 'get',
         path: ELASTIC_AI_ASSISTANT_PROMPTS_URL_FIND,
         query: {
+          connector_id: '123',
           invalid_value: 'test 1',
         },
       });

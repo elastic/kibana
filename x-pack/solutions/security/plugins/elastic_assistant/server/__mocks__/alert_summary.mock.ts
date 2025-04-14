@@ -41,6 +41,7 @@ export const getAlertSummarySearchEsMock = () => {
             namespace: 'default',
             id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
             summary: 'test content',
+            recommended_actions: 'do something',
             alert_id: '1234',
             replacements: [],
             created_by: 'elastic',
