@@ -19,7 +19,7 @@ const http = {
   get: async (path: string) => {
     if (path.includes('_alert_delete_preview')) {
       return {
-        affected_alert_count: Math.floor(Math.random() * 100),
+        affected_alert_count: Math.floor(Math.random() * 100) > 50 ? 0 : 33,
       };
     }
     throw new Error('Not implemented');

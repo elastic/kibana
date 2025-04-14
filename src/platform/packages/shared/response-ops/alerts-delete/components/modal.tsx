@@ -95,6 +95,13 @@ export const AlertDeleteModal = ({
   });
 
   const [deleteConfirmation, setDeleteConfirmation] = useState('');
+  const [hasInteracted, setHasInteracted] = useState(false);
+
+  const handleInteraction = () => {
+    if (!hasInteracted) {
+      setHasInteracted(true);
+    }
+  };
 
   const { affectedAlertsCount: previewAffectedAlertsCount } = useAlertDeletePreview({
     services: {
@@ -134,10 +141,12 @@ export const AlertDeleteModal = ({
     validations.isInactiveThresholdValid &&
     deleteConfirmation.length > 0 &&
     (activeState.checked || inactiveState.checked) &&
+    previewAffectedAlertsCount &&
     previewAffectedAlertsCount > 0;
 
   const activeAlertsCallbacks = {
     onChangeEnabled: (e: React.ChangeEvent<HTMLInputElement>) => {
+      handleInteraction();
       setActiveState((prev) => ({ ...prev, checked: e.target.checked }));
     },
     onChangeThreshold: (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -153,6 +162,7 @@ export const AlertDeleteModal = ({
 
   const inactiveAlertsCallbacks = {
     onChangeEnabled: (e: React.ChangeEvent<HTMLInputElement>) => {
+      handleInteraction();
       setInactiveState((prev) => ({ ...prev, checked: e.target.checked }));
     },
     onChangeThreshold: (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -199,6 +209,7 @@ export const AlertDeleteModal = ({
     });
 
     setDeleteConfirmation('');
+    setHasInteracted(false);
 
     onCloseModal();
   };
@@ -270,32 +281,47 @@ export const AlertDeleteModal = ({
               }
             />
           </EuiPanel>
-          <EuiHorizontalRule />
 
-          <p>
-            <FormattedMessage
-              id="responseOpsAlertDelete.preview"
-              defaultMessage="This action will permanently delete a total of <strong>{count} {count, plural, one {alert} other {alerts}}</strong> and you won't be able to restore them."
-              values={{
-                strong: (chunks) => <strong>{chunks}</strong>,
-                count: previewAffectedAlertsCount,
-              }}
-            />
-          </p>
-          <EuiSpacer size="m" />
+          {hasInteracted && previewAffectedAlertsCount !== undefined && (
+            <>
+              <EuiHorizontalRule />
+              {previewAffectedAlertsCount === 0 ? (
+                <p>
+                  <FormattedMessage
+                    id="responseOpsAlertDelete.previewEmpty"
+                    defaultMessage="No alerts match the selected criteria."
+                  />
+                </p>
+              ) : (
+                <>
+                  <p>
+                    <FormattedMessage
+                      id="responseOpsAlertDelete.preview"
+                      defaultMessage="This action will permanently delete a total of <strong>{count} {count, plural, one {alert} other {alerts}}</strong> and you won't be able to restore them."
+                      values={{
+                        strong: (chunks) => <strong>{chunks}</strong>,
+                        count: previewAffectedAlertsCount,
+                      }}
+                    />
+                  </p>
+                  <EuiSpacer size="m" />
 
-          <EuiFormRow
-            label={i18n.DELETE_CONFIRMATION}
-            fullWidth
-            isInvalid={!validations.isDeleteConfirmationValid}
-          >
-            <EuiFieldText
-              value={deleteConfirmation}
-              disabled={isDisabled}
-              onChange={onChangeDeleteConfirmation}
-              data-test-subj="alert-delete-delete-confirmation"
-            />
-          </EuiFormRow>
+                  <EuiFormRow
+                    label={i18n.DELETE_CONFIRMATION}
+                    fullWidth
+                    isInvalid={!validations.isDeleteConfirmationValid}
+                  >
+                    <EuiFieldText
+                      value={deleteConfirmation}
+                      disabled={isDisabled}
+                      onChange={onChangeDeleteConfirmation}
+                      data-test-subj="alert-delete-delete-confirmation"
+                    />
+                  </EuiFormRow>
+                </>
+              )}
+            </>
+          )}
         </EuiModalBody>
 
         <EuiModalFooter>

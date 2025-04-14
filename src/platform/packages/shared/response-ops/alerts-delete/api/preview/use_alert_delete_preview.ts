@@ -63,8 +63,11 @@ export const useAlertDeletePreview = ({
         requestQuery: params,
       });
     },
+    keepPreviousData: true,
     enabled: params.isActiveAlertDeleteEnabled || params.isInactiveAlertDeleteEnabled,
   });
 
-  return { affectedAlertsCount: data?.affectedAlertCount ?? 0 };
+  return {
+    affectedAlertsCount: data?.affectedAlertCount,
+  };
 };

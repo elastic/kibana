@@ -54,6 +54,7 @@ export const AlertDeleteDescriptiveFormGroup = ({
           iconType={'broom'}
           css={{ alignSelf: 'flex-start', width: 'auto' }}
           data-test-subj="alert-delete-open-modal-button"
+          disabled={isDisabled}
         >
           {i18n.RUN_CLEANUP_TASK}
         </EuiButton>
