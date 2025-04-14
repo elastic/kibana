@@ -72,6 +72,7 @@ import { CompositeForkSubQueryContext } from "./esql_parser.js";
 import { ForkSubQueryProcessingCommandContext } from "./esql_parser.js";
 import { RrfCommandContext } from "./esql_parser.js";
 import { RerankCommandContext } from "./esql_parser.js";
+import { CompletionCommandContext } from "./esql_parser.js";
 import { MatchExpressionContext } from "./esql_parser.js";
 import { LogicalNotContext } from "./esql_parser.js";
 import { BooleanDefaultContext } from "./esql_parser.js";
@@ -752,6 +753,16 @@ export default class esql_parserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	exitRerankCommand?: (ctx: RerankCommandContext) => void;
+	/**
+	 * Enter a parse tree produced by `esql_parser.completionCommand`.
+	 * @param ctx the parse tree
+	 */
+	enterCompletionCommand?: (ctx: CompletionCommandContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.completionCommand`.
+	 * @param ctx the parse tree
+	 */
+	exitCompletionCommand?: (ctx: CompletionCommandContext) => void;
 	/**
 	 * Enter a parse tree produced by the `matchExpression`
 	 * labeled alternative in `esql_parser.booleanExpression`.

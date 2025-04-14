@@ -8,17 +8,15 @@
  */
 
 import React from 'react';
-import type { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
 
-import { LabelBadge } from './label_badge';
+import { EuiBetaBadge } from '@elastic/eui';
 
-export const NavItemLabel: React.FC<{
-  item: ChromeProjectNavigationNode;
-}> = ({ item: { title, withBadge, badgeOptions } }) => {
-  return (
-    <>
-      {title}
-      {withBadge && <LabelBadge text={badgeOptions?.text} />}
-    </>
-  );
-};
+export const SubItemBadge = ({ icon, tooltip }: { icon?: string; tooltip?: string }) => (
+  <EuiBetaBadge
+    size="s"
+    label=""
+    iconType={icon ?? 'beaker'}
+    alignment="middle"
+    tooltipContent={tooltip}
+  />
+);
