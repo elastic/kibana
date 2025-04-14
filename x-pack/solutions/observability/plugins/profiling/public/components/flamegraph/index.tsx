@@ -6,7 +6,8 @@
  */
 
 import type { Datum, FlameLayerValue, FlameSpec, PartialTheme } from '@elastic/charts';
-import { Chart, Flame, Settings, Tooltip, LEGACY_LIGHT_THEME } from '@elastic/charts';
+import { Chart, Flame, Settings, Tooltip } from '@elastic/charts';
+import { useElasticChartsTheme } from '@kbn/charts-theme';
 import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { Maybe } from '@kbn/observability-plugin/common/typings';
@@ -48,6 +49,8 @@ export function FlameGraph({
     setShowInformationWindow((prev) => !prev);
   }
   const theme = useEuiTheme();
+
+  const chartBaseTheme = useElasticChartsTheme();
   const trackProfilingEvent = useUiTracker({ app: 'profiling' });
 
   const columnarData = useMemo(() => {
@@ -141,8 +144,7 @@ export function FlameGraph({
                 <Chart key={columnarData.key}>
                   <Settings
                     theme={chartTheme}
-                    // TODO connect to charts.theme service see src/plugins/charts/public/services/theme/README.md
-                    baseTheme={LEGACY_LIGHT_THEME}
+                    baseTheme={chartBaseTheme}
                     onElementClick={(elements) => {
                       const selectedElement = elements[0] as Maybe<FlameLayerValue>;
                       if (Number.isNaN(selectedElement?.vmIndex)) {
