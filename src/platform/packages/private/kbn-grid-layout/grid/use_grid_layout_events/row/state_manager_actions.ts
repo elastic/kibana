@@ -55,9 +55,8 @@ export const cancelAction = ({ activeRowEvent$, proposedGridLayout$ }: GridLayou
 
 const getRowMidPoint = (rowRef: HTMLDivElement | null) => {
   if (!rowRef) return 0;
-  const top = rowRef.getBoundingClientRect().top;
-  const bottom = rowRef.getBoundingClientRect().bottom;
-  return top + (bottom - top) / 2;
+  const { top, height } = rowRef.getBoundingClientRect();
+  return top + height / 2;
 };
 
 export const moveAction = (
@@ -73,16 +72,9 @@ export const moveAction = (
     gridLayoutStateManager.gridLayout$.getValue();
   const currentRowOrder = getRowKeysInOrder(currentLayout);
 
-  const updatedRowOrder = Object.keys(gridLayoutStateManager.rowGhostRefs.current).sort(
-    (idA, idB) => {
-      // if expanded, get dimensions of row; otherwise, use the header
-      const midA = getRowMidPoint(gridLayoutStateManager.rowGhostRefs.current[idA]);
-      const midB = getRowMidPoint(gridLayoutStateManager.rowGhostRefs.current[idB]);
-      if (!midA || !midB) return 0;
-
-      return midA - midB;
-    }
-  );
+  const updatedRowOrder = Object.entries(gridLayoutStateManager.rowGhostRefs.current)
+    .sort(([, refA], [, refB]) => getRowMidPoint(refA) - getRowMidPoint(refB))
+    .map(([id]) => id);
 
   if (!deepEqual(currentRowOrder, updatedRowOrder)) {
     const updatedLayout = cloneDeep(currentLayout);
