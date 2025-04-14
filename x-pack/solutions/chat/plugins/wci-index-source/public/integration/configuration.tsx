@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import { useFieldArray, Controller } from 'react-hook-form';
 import {
   EuiTextArea,
+  EuiComboBox,
   EuiFormRow,
   EuiDescribedFormGroup,
   EuiFieldText,
@@ -21,11 +22,13 @@ import {
   EuiFlexItem,
   EuiCallOut,
   EuiButtonEmpty,
+  EuiComboBoxOptionOption,
 } from '@elastic/eui';
 import type { IndexSourceDefinition } from '@kbn/wci-common';
 import { IntegrationConfigurationFormProps } from '@kbn/wci-browser';
 import type { WCIIndexSourceFilterField, WCIIndexSourceContextField } from '../../common/types';
 import { useGenerateSchema } from '../hooks/use_generate_schema';
+import { useIndexNameAutocomplete } from '../hooks/use_index_name_autocomplete';
 
 export const IndexSourceConfigurationForm: React.FC<IntegrationConfigurationFormProps> = ({
   form,
@@ -35,6 +38,7 @@ export const IndexSourceConfigurationForm: React.FC<IntegrationConfigurationForm
     control,
     name: 'configuration.fields.filterFields',
   });
+  const [query, setQuery] = useState('');
 
   const contextFieldsArray = useFieldArray({
     control,
@@ -50,6 +54,16 @@ export const IndexSourceConfigurationForm: React.FC<IntegrationConfigurationForm
   ];
 
   const { generateSchema } = useGenerateSchema();
+  const { isLoading, data } = useIndexNameAutocomplete({ query });
+  const [selectedOptions, setSelected] = useState<EuiComboBoxOptionOption[]>([]);
+
+  const onIndexNameChange = (onChangeSelectedOptions: EuiComboBoxOptionOption[]) => {
+    setSelected(onChangeSelectedOptions);
+  };
+
+  const onSearchChange = (searchValue: string) => {
+    setQuery(searchValue);
+  };
 
   const onSchemaGenerated = useCallback(
     (definition: IndexSourceDefinition) => {
@@ -116,16 +130,28 @@ export const IndexSourceConfigurationForm: React.FC<IntegrationConfigurationForm
             name="configuration.index"
             control={control}
             render={({ field }) => (
-              <EuiFieldText
+              <EuiComboBox
                 data-test-subj="workchatAppIntegrationEditViewIndex"
-                placeholder="Enter index name"
-                {...field}
+                placeholder="Select an index"
+                isLoading={isLoading}
+                selectedOptions={selectedOptions}
+                singleSelection={{ asPlainText: true }}
+                options={data.map((option) => ({ label: option, key: option }))}
+                onChange={onIndexNameChange}
+                fullWidth={true}
+                onSearchChange={onSearchChange}
                 append={
                   <EuiButtonEmpty
                     size="xs"
                     iconType="gear"
                     onClick={() => {
-                      generateSchema({ indexName: field.value }, { onSuccess: onSchemaGenerated });
+                      if (selectedOptions.length === 0) return;
+                      if (!selectedOptions[0].key) return;
+
+                      generateSchema(
+                        { indexName: selectedOptions[0].key },
+                        { onSuccess: onSchemaGenerated }
+                      );
                     }}
                   >
                     Generate configuration
@@ -180,7 +206,7 @@ export const IndexSourceConfigurationForm: React.FC<IntegrationConfigurationForm
           </EuiFormRow>
         ) : (
           filterFieldsArray.fields.map((filterField, index) => (
-            <EuiPanel paddingSize="s" key={filterField.id} style={{ marginBottom: '8px' }}>
+            <EuiPanel paddingSize="s" key={filterField.id} css={{ marginBottom: '8px' }}>
               <EuiFlexGroup alignItems="center">
                 <EuiFlexItem>
                   <EuiFormRow label="Field name">
@@ -275,7 +301,7 @@ export const IndexSourceConfigurationForm: React.FC<IntegrationConfigurationForm
           </EuiFormRow>
         ) : (
           contextFieldsArray.fields.map((contextField, index) => (
-            <EuiPanel paddingSize="s" key={contextField.id} style={{ marginBottom: '8px' }}>
+            <EuiPanel paddingSize="s" key={contextField.id} css={{ marginBottom: '8px' }}>
               <EuiFlexGroup alignItems="center">
                 <EuiFlexItem>
                   <EuiFormRow label="Field name">

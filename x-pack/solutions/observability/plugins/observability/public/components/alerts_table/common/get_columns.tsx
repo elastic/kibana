@@ -10,12 +10,12 @@ import {
   ALERT_EVALUATION_VALUE,
   ALERT_EVALUATION_THRESHOLD,
   ALERT_DURATION,
-  ALERT_REASON,
   ALERT_RULE_NAME,
   ALERT_START,
   ALERT_STATUS,
   ALERT_INSTANCE_ID,
   TAGS,
+  ALERT_REASON,
 } from '@kbn/rule-data-utils';
 import { i18n } from '@kbn/i18n';
 
