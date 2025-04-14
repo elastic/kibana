@@ -27,7 +27,7 @@ import { AnalyticsEvents } from '../analytics/constants';
 import { useAutoBottomScroll } from '../hooks/use_auto_bottom_scroll';
 import { ChatSidebar } from './chat_sidebar';
 import { useChat } from '../hooks/use_chat';
-import { ChatForm, ChatFormFields, ChatRequestData, MessageRole } from '../types';
+import { PlaygroundForm, PlaygroundFormFields, ChatRequestData, MessageRole } from '../types';
 
 import { MessageList } from './message_list/message_list';
 import { QuestionInput } from './question_input';
@@ -38,19 +38,19 @@ import { useUsageTracker } from '../hooks/use_usage_tracker';
 import { PlaygroundBodySection } from './playground_body_section';
 import { elasticsearchQueryString } from '../utils/user_query';
 
-const buildFormData = (formData: ChatForm): ChatRequestData => ({
-  connector_id: formData[ChatFormFields.summarizationModel].connectorId!,
-  prompt: formData[ChatFormFields.prompt],
-  indices: formData[ChatFormFields.indices].join(),
-  citations: formData[ChatFormFields.citations],
+const buildFormData = (formData: PlaygroundForm): ChatRequestData => ({
+  connector_id: formData[PlaygroundFormFields.summarizationModel].connectorId!,
+  prompt: formData[PlaygroundFormFields.prompt],
+  indices: formData[PlaygroundFormFields.indices].join(),
+  citations: formData[PlaygroundFormFields.citations],
   elasticsearch_query: elasticsearchQueryString(
-    formData[ChatFormFields.elasticsearchQuery],
-    formData[ChatFormFields.userElasticsearchQuery],
-    formData[ChatFormFields.userElasticsearchQueryValidations]
+    formData[PlaygroundFormFields.elasticsearchQuery],
+    formData[PlaygroundFormFields.userElasticsearchQuery],
+    formData[PlaygroundFormFields.userElasticsearchQueryValidations]
   ),
-  summarization_model: formData[ChatFormFields.summarizationModel].value,
-  source_fields: JSON.stringify(formData[ChatFormFields.sourceFields]),
-  doc_size: formData[ChatFormFields.docSize],
+  summarization_model: formData[PlaygroundFormFields.summarizationModel].value,
+  source_fields: JSON.stringify(formData[PlaygroundFormFields.sourceFields]),
+  doc_size: formData[PlaygroundFormFields.docSize],
 });
 
 export const Chat = () => {
@@ -61,12 +61,12 @@ export const Chat = () => {
     resetField,
     handleSubmit,
     getValues,
-  } = useFormContext<ChatForm>();
+  } = useFormContext<PlaygroundForm>();
   const { messages, append, stop: stopRequest, setMessages, reload } = useChat();
   const messagesRef = useAutoBottomScroll();
   const [isRegenerating, setIsRegenerating] = useState<boolean>(false);
   const usageTracker = useUsageTracker();
-  const onSubmit = async (data: ChatForm) => {
+  const onSubmit = async (data: PlaygroundForm) => {
     await append(
       { content: data.question, role: MessageRole.user, createdAt: new Date() },
       {
@@ -75,7 +75,7 @@ export const Chat = () => {
     );
     usageTracker?.click(AnalyticsEvents.chatQuestionSent);
 
-    resetField(ChatFormFields.question);
+    resetField(PlaygroundFormFields.question);
   };
   const handleStopRequest = () => {
     stopRequest();
@@ -190,7 +190,7 @@ export const Chat = () => {
                 <EuiSpacer size="s" />
 
                 <Controller
-                  name={ChatFormFields.question}
+                  name={PlaygroundFormFields.question}
                   control={control}
                   defaultValue=""
                   rules={{

@@ -78,7 +78,6 @@
     "@kbn/alerting-rule-utils",
     "@kbn/ui-theme",
     "@kbn/core-application-common",
-    "@kbn/securitysolution-ecs",
     "@kbn/alerts-as-data-utils",
     "@kbn/datemath",
     "@kbn/logs-shared-plugin",
