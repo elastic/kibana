@@ -19,6 +19,7 @@ import { FlyoutHeader } from '../../../shared/components/flyout_header';
 import { useKibana } from '../../../../common/lib/kibana';
 import { PreferenceFormattedDate } from '../../../../common/components/formatted_date';
 import { FlyoutTitle } from '../../../shared/components/flyout_title';
+import { FlyoutBody } from '../../../shared/components/flyout_body';
 export interface FindingsMisconfigurationPanelExpandableFlyoutProps extends FlyoutPanelProps {
   key: 'findings-misconfiguration-panel';
   params: FindingMisconfigurationFlyoutProps;
@@ -62,7 +63,9 @@ export const FindingsMisconfigurationPanel = ({
                 </EuiFlexGroup>
                 <CspFlyout.Header finding={finding} />
               </FlyoutHeader>
-              <CspFlyout.Body finding={finding} />
+              <FlyoutBody>
+                <CspFlyout.Body finding={finding} />
+              </FlyoutBody>
               <EuiFlyoutFooter>
                 <CspFlyout.Footer createRuleFn={createRuleFn} />
               </EuiFlyoutFooter>
