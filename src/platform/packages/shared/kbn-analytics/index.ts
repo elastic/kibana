@@ -23,6 +23,7 @@ export {
   createPerformanceTracker,
   getPerformanceTrackersByType,
   getPerformanceTrackersGroupedById,
+  PERFORMANCE_TRACKER_TYPES,
   PERFORMANCE_TRACKER_MARKS,
   PERFORMANCE_TRACKER_MEASURES,
 } from './src/performance/performance_tracker';

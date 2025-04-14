@@ -14,7 +14,12 @@ import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common/expression_renderers';
 import { css } from '@emotion/react';
 import { StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
-import { createPerformanceTracker, METRIC_TYPE, PERFORMANCE_TRACKER_MARKS } from '@kbn/analytics';
+import {
+  createPerformanceTracker,
+  METRIC_TYPE,
+  PERFORMANCE_TRACKER_MARKS,
+  PERFORMANCE_TRACKER_TYPES,
+} from '@kbn/analytics';
 import type { IInterpreterRenderHandlers, Datatable } from '@kbn/expressions-plugin/common';
 import { getColumnByAccessor } from '@kbn/visualizations-plugin/common/utils';
 import { extractContainerType, extractVisualizationType } from '@kbn/chart-expressions-common';
@@ -58,7 +63,7 @@ export const getMetricVisRenderer = (
     reuseDomNode: true,
     render: async (domNode, { visData, visConfig, overrides }, handlers) => {
       const performanceTracker = createPerformanceTracker({
-        type: 'Lens',
+        type: PERFORMANCE_TRACKER_TYPES.LENS,
         instance: EXPRESSION_METRIC_NAME,
       });
 

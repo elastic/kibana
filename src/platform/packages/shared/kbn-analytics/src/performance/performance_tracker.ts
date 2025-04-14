@@ -10,6 +10,10 @@
 import { v4 as uuidv4 } from 'uuid';
 import { groupBy } from 'lodash';
 
+export const PERFORMANCE_TRACKER_TYPES = {
+  LENS: 'Lens',
+};
+
 export const PERFORMANCE_TRACKER_MARKS = {
   PRE_RENDER: 'preRender',
   RENDER_START: 'renderStart',

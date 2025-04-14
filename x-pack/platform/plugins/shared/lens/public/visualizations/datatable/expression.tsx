@@ -19,7 +19,11 @@ import type {
 } from '@kbn/expressions-plugin/common';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { ChartSizeEvent } from '@kbn/chart-expressions-common';
-import { createPerformanceTracker, PERFORMANCE_TRACKER_MARKS } from '@kbn/analytics';
+import {
+  createPerformanceTracker,
+  PERFORMANCE_TRACKER_MARKS,
+  PERFORMANCE_TRACKER_TYPES,
+} from '@kbn/analytics';
 import { trackUiCounterEvents } from '../../lens_ui_telemetry';
 import { DatatableComponent } from './components/table_basic';
 
@@ -102,7 +106,7 @@ export const getDatatableRenderer = (dependencies: {
     handlers: ILensInterpreterRenderHandlers
   ) => {
     const performanceTracker = createPerformanceTracker({
-      type: 'Lens',
+      type: PERFORMANCE_TRACKER_TYPES.LENS,
       instance: 'lens_datatable_renderer',
     });
 
