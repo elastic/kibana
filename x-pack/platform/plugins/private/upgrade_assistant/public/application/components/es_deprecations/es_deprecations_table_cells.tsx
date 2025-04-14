@@ -40,8 +40,8 @@ export const EsDeprecationsTableCells: React.FunctionComponent<Props> = ({
   deprecation,
 }) => {
   // "Status column"
-  if (fieldName === 'isCritical') {
-    return <DeprecationBadge isCritical={deprecation.isCritical} />;
+  if (fieldName === 'level') {
+    return <DeprecationBadge level={deprecation.level} />;
   }
 
   // "Issue" column

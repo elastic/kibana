@@ -60,7 +60,7 @@ const Step: React.FunctionComponent<StepProgressStep & { idx: number }> = ({
 
   return (
     <Fragment>
-      <div className="upgStepProgress__step">
+      <div className="upgStepProgress__step" data-test-subj="stepProgressStep">
         <StepStatus status={status} idx={idx} />
         <div className={titleClassName}>{title}</div>
       </div>

@@ -14,7 +14,7 @@ import classNames from 'classnames';
 import { css } from '@emotion/css';
 
 import { useNavigation as useServices } from '../../../services';
-import { NavItemLabel } from './panel_nav_item_label';
+import { SubItemTitle } from '../subitem_title';
 import { usePanel } from './context';
 
 interface Props {
@@ -45,7 +45,7 @@ export const PanelNavItem: FC<Props> = ({ item }) => {
   ) : (
     <EuiListGroupItem
       key={id}
-      label={<NavItemLabel item={item} />}
+      label={<SubItemTitle item={item} />}
       wrapText
       className={classNames(
         'sideNavPanelLink',
