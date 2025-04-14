@@ -53,6 +53,7 @@ export const moveAction = (
     activePanel$,
     layoutRef: { current: gridLayoutElement },
     rowRefs: { current: gridRowElements },
+    rowContainerRefs: { current: gridRowContainerElements },
   } = gridLayoutStateManager;
   const interactionEvent = interactionEvent$.value;
   const currentLayout = proposedGridLayout$.value;
@@ -141,10 +142,13 @@ export const moveAction = (
   );
 
   if (targetRowId === 'main') {
-    Object.entries(gridRowElements).forEach(([id, row]) => {
-      if (!row || (currentLayout[id] as GridRowData).isCollapsed) return;
-      const rowRect = row.getBoundingClientRect();
-      if (rowRect.y <= previewRect.top) localYCoordinate -= rowRect.height;
+    Object.entries(gridRowContainerElements).forEach(([id, row]) => {
+      if (!row) return;
+      const { top, height } = row.getBoundingClientRect();
+      if (top <= previewRect.top) {
+        localYCoordinate -= height;
+        localYCoordinate += rowHeight;
+      }
     });
   }
   const targetRow = Math.max(Math.round(localYCoordinate / (rowHeight + gutterSize)), 0);
