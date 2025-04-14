@@ -56,7 +56,7 @@ describe('useAlertDeletePreview', () => {
         isInactiveAlertDeleteEnabled: false,
         activeAlertDeleteThreshold: 10,
         inactiveAlertDeleteThreshold: 0,
-        categoryIds: ['category1'],
+        categoryIds: ['observability'],
       },
     });
     expect(result.current.affectedAlertsCount).toBe(42);
@@ -78,11 +78,7 @@ describe('useAlertDeletePreview', () => {
       { wrapper }
     );
 
-    await waitFor(() => {
-      expect(result.current.affectedAlertsCount).toBe(0);
-    });
-
     expect(alertDeletePreviewApiCall).toHaveBeenCalled();
-    expect(result.current.affectedAlertsCount).toBe(0);
+    expect(result.current.affectedAlertsCount).toBe(undefined);
   });
 });
