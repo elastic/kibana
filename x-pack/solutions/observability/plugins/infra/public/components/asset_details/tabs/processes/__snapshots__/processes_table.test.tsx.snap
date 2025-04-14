@@ -150,7 +150,7 @@ Object {
           </tr>
         </thead>
         <tbody
-          class="emotion-EuiTableBody"
+          class="css-x41dah-ProcessesTable"
         >
           <tr
             class="euiTableRow emotion-euiTableRow-desktop"
@@ -213,7 +213,7 @@ Object {
                   class="euiTableCellContent__text"
                 >
                   <div
-                    css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
+                    class="css-10w4zy3-CodeLine"
                   >
                     <code>
                       /some/test/command here 3
@@ -415,7 +415,7 @@ Object {
         </tr>
       </thead>
       <tbody
-        class="emotion-EuiTableBody"
+        class="css-x41dah-ProcessesTable"
       >
         <tr
           class="euiTableRow emotion-euiTableRow-desktop"
@@ -478,7 +478,7 @@ Object {
                 class="euiTableCellContent__text"
               >
                 <div
-                  css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
+                  class="css-10w4zy3-CodeLine"
                 >
                   <code>
                     /some/test/command here 3
