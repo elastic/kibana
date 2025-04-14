@@ -22,7 +22,7 @@ import { WaterfallItem } from '../../app/transaction_details/waterfall_with_summ
 import { TimelineAxisContainer, VerticalLinesContainer } from '../charts/timeline';
 import { TraceSummary } from './trace_summary';
 
-type FocusedTrace = APIReturnType<'GET /internal/apm/traces/{traceId}/focused'>;
+type FocusedTrace = APIReturnType<'GET /internal/apm/traces/{traceId}/{docId}'>;
 
 interface Props {
   items: FocusedTrace;

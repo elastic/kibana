@@ -15,7 +15,7 @@ interface Child {
 
 const MAX_NUMBER_OF_CHILDREN = 2;
 
-function buildChildrenTree({
+export function buildChildrenTree({
   initialTraceDoc,
   itemsGroupedByParentId,
   maxNumberOfChildren,
@@ -57,10 +57,10 @@ export interface FocusedTraceItems {
 
 export function buildFocusedTraceItems({
   traceItems,
-  focusedTraceItemId,
+  docId,
 }: {
   traceItems: TraceItems;
-  focusedTraceItemId: string;
+  docId: string;
 }): FocusedTraceItems | undefined {
   const { traceDocs } = traceItems;
 
@@ -73,7 +73,7 @@ export function buildFocusedTraceItems({
     return acc;
   }, {});
 
-  const focusedTraceDoc = itemsById[focusedTraceItemId];
+  const focusedTraceDoc = itemsById[docId];
   if (!focusedTraceDoc) {
     return undefined;
   }

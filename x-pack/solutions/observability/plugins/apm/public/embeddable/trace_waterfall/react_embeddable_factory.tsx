@@ -23,7 +23,7 @@ interface BaseProps {
 }
 
 export interface ApmTraceWaterfallEmbeddableFocusedProps extends BaseProps, SerializedTitles {
-  focusedTraceId: string;
+  docId: string;
 }
 
 export interface ApmTraceWaterfallEmbeddableEntryProps extends BaseProps, SerializedTitles {
@@ -56,9 +56,7 @@ export const getApmTraceWaterfallEmbeddableFactory = (deps: EmbeddableDeps) => {
       const rangeFrom$ = new BehaviorSubject(state.rangeFrom);
       const rangeTo$ = new BehaviorSubject(state.rangeTo);
       const displayLimit$ = new BehaviorSubject('displayLimit' in state ? state.displayLimit : 0);
-      const focusedTraceId$ = new BehaviorSubject(
-        'focusedTraceId' in state ? state.focusedTraceId : ''
-      );
+      const docId$ = new BehaviorSubject('docId' in state ? state.docId : '');
 
       const api = buildApi(
         {
@@ -73,7 +71,7 @@ export const getApmTraceWaterfallEmbeddableFactory = (deps: EmbeddableDeps) => {
                 rangeFrom: rangeFrom$.getValue(),
                 rangeTo: rangeTo$.getValue(),
                 displayLimit: displayLimit$.getValue(),
-                focusedTraceId: focusedTraceId$.getValue(),
+                docId: docId$.getValue(),
               },
             };
           },
@@ -86,7 +84,7 @@ export const getApmTraceWaterfallEmbeddableFactory = (deps: EmbeddableDeps) => {
           rangeFrom: [rangeFrom$, (value) => rangeFrom$.next(value)],
           rangeTo: [rangeTo$, (value) => rangeFrom$.next(value)],
           displayLimit: [displayLimit$, (value) => displayLimit$.next(value)],
-          focusedTraceId: [focusedTraceId$, (value) => focusedTraceId$.next(value)],
+          docId: [docId$, (value) => docId$.next(value)],
         }
       );
 
@@ -100,7 +98,7 @@ export const getApmTraceWaterfallEmbeddableFactory = (deps: EmbeddableDeps) => {
             rangeFrom,
             rangeTo,
             displayLimit,
-            focusedTraceId,
+            docId,
           ] = useBatchedPublishingSubjects(
             serviceName$,
             traceId$,
@@ -108,9 +106,9 @@ export const getApmTraceWaterfallEmbeddableFactory = (deps: EmbeddableDeps) => {
             rangeFrom$,
             rangeTo$,
             displayLimit$,
-            focusedTraceId$
+            docId$
           );
-          const content = isEmpty(focusedTraceId) ? (
+          const content = isEmpty(docId) ? (
             <TraceWaterfallEmbeddable
               serviceName={serviceName}
               traceId={traceId}
@@ -124,7 +122,7 @@ export const getApmTraceWaterfallEmbeddableFactory = (deps: EmbeddableDeps) => {
               traceId={traceId}
               rangeFrom={rangeFrom}
               rangeTo={rangeTo}
-              focusedTraceId={focusedTraceId}
+              docId={docId}
             />
           );
 

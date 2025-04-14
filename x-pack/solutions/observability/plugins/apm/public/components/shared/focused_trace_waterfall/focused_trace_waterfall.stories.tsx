@@ -11,7 +11,7 @@ import { FocusedTraceWaterfall } from '.';
 import type { APIReturnType } from '../../../services/rest/create_call_apm_api';
 import { MockApmPluginStorybook } from '../../../context/apm_plugin/mock_apm_plugin_storybook';
 
-type TraceItems = APIReturnType<'GET /internal/apm/traces/{traceId}/focused'>;
+type TraceItems = APIReturnType<'GET /internal/apm/traces/{traceId}/{docId}'>;
 
 const stories: Meta<any> = {
   title: 'app/TransactionDetails/focusedTraceWaterfall',

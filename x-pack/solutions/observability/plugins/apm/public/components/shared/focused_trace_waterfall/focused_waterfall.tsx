@@ -4,20 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
-import { i18n } from '@kbn/i18n';
 import { EuiButton, EuiFieldText, EuiLoadingSpinner } from '@elastic/eui';
-import { useState } from 'react';
-import { isEmpty } from 'lodash';
-import { FETCH_STATUS, isPending, useFetcher } from '../../../hooks/use_fetcher';
-import { useTimeRange } from '../../../hooks/use_time_range';
-import { useApmParams } from '../../../hooks/use_apm_params';
+import { i18n } from '@kbn/i18n';
+import React, { useState } from 'react';
 import { FocusedTraceWaterfall } from '.';
+import { useApmParams } from '../../../hooks/use_apm_params';
+import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
+import { useTimeRange } from '../../../hooks/use_time_range';
 
+// TODO: remove it
 export function FocusedWatefall() {
   const [focusedId, setFocusedId] = useState<string>('13f3e680dff16fd4');
   const [clicked, setClicked] = useState<number>(0);
-  console.log('### caue FocusedWatefall focusedId:', focusedId, clicked);
   const {
     query: { rangeFrom, rangeTo, traceId },
   } = useApmParams('/services/{serviceName}/transactions/view');
@@ -25,18 +23,9 @@ export function FocusedWatefall() {
 
   const { data, status } = useFetcher(
     (callApmApi) => {
-      if (!isEmpty(focusedId)) {
-        return callApmApi('GET /internal/apm/traces/{traceId}/focused', {
-          params: {
-            path: {
-              traceId: traceId!,
-            },
-            query: {
-              start,
-              end,
-              focusedTraceItemId: focusedId,
-            },
-          },
+      if (traceId && focusedId) {
+        return callApmApi('GET /internal/apm/traces/{traceId}/{docId}', {
+          params: { path: { traceId, docId: focusedId }, query: { start, end } },
         });
       }
     },

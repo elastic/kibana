@@ -118,16 +118,13 @@ const tracesByIdRoute = createApmServerRoute({
 });
 
 const tracesByIdSummaryRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/traces/{traceId}/focused',
+  endpoint: 'GET /internal/apm/traces/{traceId}/{docId}',
   params: t.type({
     path: t.type({
       traceId: t.string,
+      docId: t.string,
     }),
-    query: t.intersection([
-      rangeRt,
-      t.partial({ maxTraceItems: toNumberRt }),
-      t.type({ focusedTraceItemId: t.string }),
-    ]),
+    query: t.intersection([rangeRt, t.partial({ maxTraceItems: toNumberRt })]),
   }),
   security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (
@@ -138,8 +135,8 @@ const tracesByIdSummaryRoute = createApmServerRoute({
   }> => {
     const apmEventClient = await getApmEventClient(resources);
     const { params, config, logger } = resources;
-    const { traceId } = params.path;
-    const { start, end, focusedTraceItemId } = params.query;
+    const { traceId, docId } = params.path;
+    const { start, end } = params.query;
 
     const [traceItems, traceSummaryCount] = await Promise.all([
       getTraceItems({
@@ -154,7 +151,7 @@ const tracesByIdSummaryRoute = createApmServerRoute({
       getTraceSummaryCount({ apmEventClient, start, end, traceId }),
     ]);
 
-    const focusedTraceItems = buildFocusedTraceItems({ traceItems, focusedTraceItemId });
+    const focusedTraceItems = buildFocusedTraceItems({ traceItems, docId });
 
     return {
       traceItems: focusedTraceItems,
