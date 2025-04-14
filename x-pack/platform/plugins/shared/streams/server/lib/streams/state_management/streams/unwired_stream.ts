@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import type { IngestProcessorContainer } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  IndicesDataStream,
+  IngestProcessorContainer,
+} from '@elastic/elasticsearch/lib/api/types';
 import type {
   IngestStreamLifecycle,
   StreamDefinition,
@@ -202,7 +205,11 @@ export class UnwiredStream extends StreamActiveRecord<UnwiredStreamDefinition> {
         },
       });
 
-      const { pipeline, template } = await this.getPipelineTargets();
+      const pipelineTargets = await this.getPipelineTargets();
+      if (!pipelineTargets) {
+        throw new StatusError('Could not find pipeline targets', 500);
+      }
+      const { pipeline, template } = pipelineTargets;
       actions.push({
         type: 'delete_processor_from_ingest_pipeline',
         pipeline,
@@ -253,7 +260,11 @@ export class UnwiredStream extends StreamActiveRecord<UnwiredStreamDefinition> {
       },
     };
 
-    const { pipeline, template } = await this.getPipelineTargets();
+    const pipelineTargets = await this.getPipelineTargets();
+    if (!pipelineTargets) {
+      throw new StatusError('Could not find pipeline targets', 500);
+    }
+    const { pipeline, template } = pipelineTargets;
     actions.push({
       type: 'append_processor_to_ingest_pipeline',
       pipeline,
@@ -290,21 +301,32 @@ export class UnwiredStream extends StreamActiveRecord<UnwiredStreamDefinition> {
           name: streamManagedPipelineName,
         },
       });
-      const { pipeline, template } = await this.getPipelineTargets();
-      actions.push({
-        type: 'delete_processor_from_ingest_pipeline',
-        pipeline,
-        template,
-        dataStream: this._definition.name,
-        referencePipeline: streamManagedPipelineName,
-      });
+      const pipelineTargets = await this.getPipelineTargets();
+      if (pipelineTargets) {
+        const { pipeline, template } = pipelineTargets;
+        actions.push({
+          type: 'delete_processor_from_ingest_pipeline',
+          pipeline,
+          template,
+          dataStream: this._definition.name,
+          referencePipeline: streamManagedPipelineName,
+        });
+      }
     }
 
     return actions;
   }
 
   private async getPipelineTargets() {
-    const dataStream = await this.dependencies.streamsClient.getDataStream(this._definition.name);
+    let dataStream: IndicesDataStream;
+    try {
+      dataStream = await this.dependencies.streamsClient.getDataStream(this._definition.name);
+    } catch (error) {
+      if (isNotFoundError(error)) {
+        return undefined;
+      }
+      throw error;
+    }
     const unmanagedAssets = await getUnmanagedElasticsearchAssets({
       dataStream,
       scopedClusterClient: this.dependencies.scopedClusterClient,

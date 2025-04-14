@@ -100,7 +100,6 @@ export const WaterfallBarChart = ({
         <Settings
           showLegend={false}
           rotation={90}
-          // TODO connect to charts.theme service see src/plugins/charts/public/services/theme/README.md
           baseTheme={baseChartTheme}
           onProjectionClick={handleProjectionClick}
           onElementClick={handleElementClick}
