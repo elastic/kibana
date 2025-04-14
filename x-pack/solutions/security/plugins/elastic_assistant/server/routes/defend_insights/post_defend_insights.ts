@@ -162,6 +162,7 @@ export const postDefendInsightsRoute = (router: IRouter<ElasticAssistantRequestH
                 logger,
                 startTime,
                 telemetry,
+                insightType,
               }).then(() => insights)
             )
             .then((insights) =>

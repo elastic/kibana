@@ -988,6 +988,7 @@ export const getSavedObjectTypes = (
         importableAndExportable: false,
       },
       mappings: {
+        dynamic: false,
         properties: {
           name: { type: 'keyword' },
           version: { type: 'keyword' },
@@ -1072,6 +1073,14 @@ export const getSavedObjectTypes = (
               addedMappings: {
                 additional_spaces_installed_kibana: { type: 'flattened', index: false },
               },
+            },
+          ],
+        },
+        '4': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {}, // Empty to add dynamic:false
             },
           ],
         },
