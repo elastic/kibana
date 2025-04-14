@@ -356,5 +356,9 @@ export const getEditorOverwrites = (theme: UseEuiTheme<{}>) => {
     .monaco-list .monaco-scrollable-element .monaco-list-row.focused {
       border-radius: ${theme.euiTheme.border.radius.medium};
     }
+    // fixes the bug with the broken suggestion details https://github.com/elastic/kibana/issues/217998
+    .suggest-details > .monaco-scrollable-element > .body > .header > .type {
+      white-space: normal !important;
+    }
   `;
 };
