@@ -47,5 +47,7 @@
     "@kbn/genai-utils-server",
     "@kbn/genai-utils-common",
     "@kbn/sse-utils",
+    "@kbn/cloud-plugin",
+    "@kbn/es-types"
   ]
 }

@@ -72,6 +72,10 @@ export function StreamDetailView() {
 
   const { definition } = useStreamDetail();
 
+  if (tab === 'management') {
+    return <RedirectTo path="/{key}/management/{tab}" params={{ path: { tab: 'route' } }} />;
+  }
+
   if (!isValidStreamDetailTab(tab)) {
     return <RedirectTo path="/{key}/{tab}" params={{ path: { key, tab: 'overview' } }} />;
   }

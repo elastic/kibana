@@ -74,7 +74,10 @@ export function StreamsTreeTable({
             defaultMessage: 'Documents',
           }),
           width: '40%',
-          render: (_, item) => <DocumentsColumn indexPattern={item.name} numDataPoints={25} />,
+          render: (_, item) =>
+            item.data_stream ? (
+              <DocumentsColumn indexPattern={item.name} numDataPoints={25} />
+            ) : null,
         },
         {
           field: 'effective_lifecycle',

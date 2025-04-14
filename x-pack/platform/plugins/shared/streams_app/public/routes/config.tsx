@@ -70,11 +70,6 @@ const streamsAppRoutes = {
               }),
             }),
           },
-          '/{key}/management': {
-            element: (
-              <RedirectTo path="/{key}/management/{tab}" params={{ path: { tab: 'route' } }} />
-            ),
-          },
           '/{key}/management/{tab}': {
             element: <StreamManagementView />,
             params: t.type({

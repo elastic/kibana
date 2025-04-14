@@ -15,7 +15,7 @@ import {
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
-import { IngestStreamGetResponse } from '@kbn/streams-schema';
+import { IngestStreamGetResponse, isWiredStreamGetResponse } from '@kbn/streams-schema';
 import { computeInterval } from '@kbn/visualization-utils';
 import moment, { DurationInputArg1, DurationInputArg2 } from 'moment';
 import { useKibana } from '../../../hooks/use_kibana';
@@ -152,6 +152,8 @@ export function StreamChartPanel({ definition }: StreamChartPanelProps) {
   const docCount = docCountFetch?.value?.details.count;
   const formattedDocCount = docCount ? formatNumber(docCount, 'decimal0') : '0';
 
+  const dataStreamExists = isWiredStreamGetResponse(definition) || definition.data_stream_exists;
+
   return (
     <EuiPanel hasShadow={false} hasBorder>
       <EuiFlexGroup
@@ -179,7 +181,7 @@ export function StreamChartPanel({ definition }: StreamChartPanelProps) {
                   data-test-subj="streamsDetailOverviewOpenInDiscoverButton"
                   iconType="discoverApp"
                   href={discoverLink}
-                  isDisabled={!discoverLink}
+                  isDisabled={!discoverLink || !dataStreamExists}
                 >
                   {i18n.translate('xpack.streams.streamDetailOverview.openInDiscoverButtonLabel', {
                     defaultMessage: 'Open in Discover',
