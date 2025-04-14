@@ -10,12 +10,14 @@
 import { cloneDeep } from 'lodash';
 import deepEqual from 'fast-deep-equal';
 import { MutableRefObject } from 'react';
+import { v4 as uuidv4 } from 'uuid';
 import { GridLayoutStateManager, GridPanelData } from '../../types';
 import { getDragPreviewRect, getSensorOffsets, getResizePreviewRect } from './utils';
 import { resolveGridRow } from '../../utils/resolve_grid_row';
 import { isGridDataEqual } from '../../utils/equality_checks';
 import { PointerPosition, UserInteractionEvent } from '../types';
 import { getSensorType } from '../sensors';
+import { getRowRect } from '../../utils/calculations';
 
 export const startAction = (
   e: UserInteractionEvent,
@@ -52,6 +54,7 @@ export const moveAction = (
     interactionEvent$,
     proposedGridLayout$,
     activePanel$,
+    headerRefs: { current: gridRowHeaders },
     rowDimensionsRefs: { current: gridRowRefs },
   } = gridLayoutStateManager;
   const interactionEvent = interactionEvent$.value;
@@ -86,26 +89,28 @@ export const moveAction = (
 
   // find the grid that the preview rect is over
   const lastRowId = interactionEvent.targetRow;
-  const targetRowId = (() => {
+  let targetRowId = (() => {
     if (isResize) return lastRowId;
     const previewBottom = previewRect.top + rowHeight;
 
     let highestOverlap = -Infinity;
     let highestOverlapRowId = '';
-    Object.entries(gridRowRefs)
-      .filter(([id]) => !currentLayout[id].isCollapsed)
-      .forEach(([id, row]) => {
-        if (!row) return;
-        const { top: rowTop, bottom: rowBottom } = row.getBoundingClientRect();
-        const overlap = Math.min(previewBottom, rowBottom) - Math.max(previewRect.top, rowTop);
-        // do not allow to drop into a collapsed row
-        if (overlap > highestOverlap) {
-          highestOverlap = overlap;
-          highestOverlapRowId = id;
-        }
-      });
+    Object.entries(gridRowHeaders).forEach(([id, row]) => {
+      if (!row) return;
+      const { top: rowTop, bottom: rowBottom } = getRowRect(id, gridLayoutStateManager);
+      const overlap = Math.min(previewBottom, rowBottom) - Math.max(previewRect.top, rowTop);
+      // do not allow to drop into a collapsed row
+      if (overlap > highestOverlap) {
+        highestOverlap = overlap;
+        highestOverlapRowId = id;
+      }
+    });
     return highestOverlapRowId;
   })();
+  if (currentLayout[targetRowId].isCollapsed) {
+    targetRowId = uuidv4(); // create a new row id
+  }
+
   const hasChangedGridRow = targetRowId !== lastRowId;
 
   // re-render when the target row changes
@@ -117,7 +122,6 @@ export const moveAction = (
   }
 
   // calculate the requested grid position
-  // TODO
   const targetedRowRef = gridRowRefs[targetRowId];
   const targetedGridLeft = targetedRowRef?.getBoundingClientRect().left ?? 0;
   const targetedGridTop = targetedRowRef?.getBoundingClientRect().top ?? 0;
@@ -149,7 +153,8 @@ export const moveAction = (
   // resolve the new grid layout
   if (
     hasChangedGridRow ||
-    !isGridDataEqual(requestedPanelData, lastRequestedPanelPosition.current)
+    (!isGridDataEqual(requestedPanelData, lastRequestedPanelPosition.current) &&
+      !currentLayout[targetRowId].isCollapsed)
   ) {
     lastRequestedPanelPosition.current = { ...requestedPanelData };
 

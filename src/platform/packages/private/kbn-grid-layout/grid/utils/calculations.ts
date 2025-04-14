@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { GridLayoutData, GridRowData } from '../types';
+import { GridLayoutData, GridLayoutStateManager, GridRowData } from '../types';
 
 export const COLLAPSIBLE_HEADER_HEIGHT = 2;
 
@@ -31,4 +31,25 @@ export const getTopOffsetForRowHeader = (rowId: string, layout: GridLayoutData) 
 
 export const getTopOffsetForRow = (rowId: string, layout: GridLayoutData) => {
   return getTopOffsetForRowHeader(rowId, layout) + getHeaderHeight(layout[rowId]);
+};
+
+export const getRowRect = (rowId: string, gridLayoutStateManager: GridLayoutStateManager) => {
+  const headerRef = gridLayoutStateManager.headerRefs.current[rowId];
+  const rowRef = gridLayoutStateManager.rowDimensionsRefs.current[rowId];
+  if (!headerRef) {
+    throw new Error('header ref should be defined for all rows');
+  }
+  if (!rowRef) {
+    const { top, bottom } = headerRef.getBoundingClientRect();
+    return {
+      top,
+      bottom,
+    };
+  }
+  const top = headerRef.getBoundingClientRect().top;
+  const bottom = rowRef.getBoundingClientRect().bottom;
+  return {
+    top,
+    bottom,
+  };
 };

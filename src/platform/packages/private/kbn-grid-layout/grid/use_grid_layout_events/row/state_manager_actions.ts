@@ -10,10 +10,11 @@
 import deepEqual from 'fast-deep-equal';
 import { cloneDeep, pick } from 'lodash';
 
-import { GridLayoutStateManager } from '../../types';
+import { GridLayoutStateManager, GridRowData } from '../../types';
 import { getRowKeysInOrder } from '../../utils/resolve_grid_row';
 import { getSensorType } from '../sensors';
 import { PointerPosition, UserInteractionEvent } from '../types';
+import { getRowRect } from '../../utils/calculations';
 
 export const startAction = (
   e: UserInteractionEvent,
@@ -108,7 +109,6 @@ export const moveAction = (
     },
   });
 
-
   if (dropTargetRowId && currentLayout[dropTargetRowId].isCollapsible) {
     const updatedRowOrder = sortRowsByRefs(gridLayoutStateManager);
     if (!deepEqual(currentRowOrder, updatedRowOrder)) {
@@ -119,8 +119,6 @@ export const moveAction = (
       gridLayoutStateManager.proposedGridLayout$.next(updatedLayout);
     }
   }
-
-
 };
 
 function getDropTarget(
@@ -137,23 +135,27 @@ function getDropTarget(
   return rowId;
 }
 
-const getRowRect = (rowId: string, gridLayoutStateManager: GridLayoutStateManager) => {
-  const headerRef = gridLayoutStateManager.headerRefs.current[rowId];
-  const rowRef = gridLayoutStateManager.rowDimensionsRefs.current[rowId];
-  if (!headerRef) {
-    throw new Error('header ref should be defined for all rows');
+function partitionRowPanels(
+  obj: GridRowData['panels'],
+  keysToKeep: Array<keyof GridRowData['panels']>
+): { kept: GridRowData['panels']; omitted: GridRowData['panels'] } {
+  const kept = {} as GridRowData['panels'];
+  const omitted = {} as GridRowData['panels'];
+
+  for (const key in obj) {
+    if (keysToKeep.includes(key)) {
+      kept[key] = obj[key];
+    } else {
+      omitted[key] = obj[key];
+    }
   }
-  if (!rowRef) {
-    const { top, bottom } = headerRef.getBoundingClientRect();
-    return {
-      top,
-      bottom,
-    };
-  }
-  const top = headerRef.getBoundingClientRect().top;
-  const bottom = rowRef.getBoundingClientRect().bottom;
-  return {
-    top,
-    bottom,
-  };
-};
+
+  return { kept, omitted };
+}
+
+function insertAfter(array: string[], target: string, newElement: string): string[] {
+  const index = array.indexOf(target);
+  if (index === -1) return array; // or throw error if preferred
+
+  return [...array.slice(0, index + 1), newElement, ...array.slice(index + 1)];
+}

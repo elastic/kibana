@@ -12,14 +12,18 @@ import { combineLatest } from 'rxjs';
 import { useGridLayoutContext } from '../use_grid_layout_context';
 import { getRowHeight, getTopOffsetForRow } from '../utils/calculations';
 
+const styles = {
+  pointerEvents: 'none' as const,
+  zIndex: 0,
+};
+
+const collapsableStyles = {
+  outline: '4px solid #0b64dd4d',
+  backgroundColor: '#0b64dd4d',
+};
+
 export const GridRowVisualContainer = ({ rowId }: { rowId: string }) => {
   const { gridLayoutStateManager } = useGridLayoutContext();
-  const styles = {
-    pointerEvents: 'none' as const,
-    zIndex: 0,
-    backgroundColor: 'rgb(232, 241, 255, 0.5)',
-    outline: '4px solid rgb(232, 241, 255, 0.5)',
-  };
 
   useEffect(() => {
     return () => {
@@ -47,6 +51,11 @@ export const GridRowVisualContainer = ({ rowId }: { rowId: string }) => {
         elRef.style.gridColumnEnd = `-1`;
         elRef.style.gridRowStart = `${topOffset + 1}`;
         elRef.style.gridRowEnd = `${bottomPosition + 1}`;
+        // TODO: this should be stable and have a stable subscription (or be a prop)
+        if (currentGridLayout[rowId].isCollapsible) {
+          elRef.style.background = collapsableStyles.backgroundColor;
+          elRef.style.outline = collapsableStyles.outline;
+        }
       });
 
       return () => {
