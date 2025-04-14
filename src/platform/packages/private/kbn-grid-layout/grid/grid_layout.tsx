@@ -50,7 +50,10 @@ const getGridsElementData = (layout: GridLayoutData) => {
     const panelElements = row.isCollapsed
       ? []
       : panelIdsInOrder.map((panelId): GridElementData => [panelId, rowId, row.isCollapsed]);
-    return [['row-ghost', rowId, row.isCollapsed], startMark, ...panelElements];
+    const rowGhost: GridElementData[] = row.isCollapsed ? [] : [['row-ghost', rowId, row.isCollapsed]];
+
+    return [...rowGhost, startMark, ...panelElements];
+
   });
   return flattenedGridElements;
 };
