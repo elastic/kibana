@@ -18,6 +18,7 @@ import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
 import { cryptoFactory } from '@kbn/reporting-server';
 import { createMockScreenshottingStart } from '@kbn/screenshotting-plugin/server/mock';
 import { PdfExportType } from '.';
+import { FakeRawRequest, KibanaRequest } from '@kbn/core/server';
 
 let content: string;
 let mockPdfExportType: PdfExportType;
@@ -26,6 +27,13 @@ let stream: jest.Mocked<Writable>;
 const cancellationToken = new CancellationToken();
 const taskInstanceFields = { startedAt: null, retryAt: null };
 const mockLogger = loggingSystemMock.createLogger();
+
+const fakeRawRequest: FakeRawRequest = {
+  headers: {
+    authorization: `ApiKey skdjtq4u543yt3rhewrh`,
+  },
+  path: '/',
+};
 
 const mockEncryptionKey = 'testencryptionkey';
 const encryptHeaders = async (headers: Record<string, string>) => {
@@ -82,6 +90,7 @@ test(`passes browserTimezone to getScreenshots`, async () => {
   const browserTimezone = 'UTC';
   await mockPdfExportType.runTask({
     jobId: 'pdfJobId',
+    request: fakeRawRequest as unknown as KibanaRequest,
     payload: getBasePayload({
       forceNow: 'test',
       layout: { dimensions: {} },
@@ -103,6 +112,7 @@ test(`passes browserTimezone to getScreenshots`, async () => {
 test(`returns content_type of application/pdf`, async () => {
   const { content_type: contentType } = await mockPdfExportType.runTask({
     jobId: 'pdfJobId',
+    request: fakeRawRequest as unknown as KibanaRequest,
     payload: getBasePayload({
       layout: { dimensions: {} },
       locatorParams: [{ version: 'test', id: 'test' }] as LocatorParams[],
@@ -118,6 +128,7 @@ test(`returns content_type of application/pdf`, async () => {
 test(`returns buffer content base64 encoded`, async () => {
   await mockPdfExportType.runTask({
     jobId: 'pdfJobId',
+    request: fakeRawRequest as unknown as KibanaRequest,
     payload: getBasePayload({
       layout: { dimensions: {} },
       locatorParams: [{ version: 'test', id: 'test' }] as LocatorParams[],
@@ -136,6 +147,7 @@ test(`screenshotting plugin uses the logger provided by the PDF export-type`, as
 
   await mockPdfExportType.runTask({
     jobId: 'pdfJobId',
+    request: fakeRawRequest as unknown as KibanaRequest,
     payload: getBasePayload({
       layout: { dimensions: {} },
       locatorParams: [{ version: 'test', id: 'test' }] as LocatorParams[],

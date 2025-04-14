@@ -29,6 +29,14 @@ import { setFieldFormats } from '@kbn/reporting-server';
 import { Writable } from 'stream';
 
 import { CsvSearchSourceExportType } from '.';
+import { FakeRawRequest, KibanaRequest } from '@kbn/core/server';
+
+const fakeRawRequest: FakeRawRequest = {
+  headers: {
+    authorization: `ApiKey skdjtq4u543yt3rhewrh`,
+  },
+  path: '/',
+};
 
 const mockLogger = loggingSystemMock.createLogger();
 const encryptionKey = 'tetkey';
@@ -86,6 +94,7 @@ beforeEach(() => {
 test('gets the csv content from job parameters', async () => {
   const payload = await mockCsvSearchSourceExportType.runTask({
     jobId: 'cool-job-id',
+    request: fakeRawRequest as unknown as KibanaRequest,
     payload: {
       headers: encryptedHeaders,
       browserTimezone: 'US/Alaska',
@@ -112,6 +121,7 @@ test('uses the provided logger', async () => {
 
   await mockCsvSearchSourceExportType.runTask({
     jobId: 'cool-job-id',
+    request: fakeRawRequest as unknown as KibanaRequest,
     payload: {
       headers: encryptedHeaders,
       browserTimezone: 'US/Alaska',

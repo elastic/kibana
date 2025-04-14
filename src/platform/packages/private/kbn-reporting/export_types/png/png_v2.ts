@@ -37,7 +37,6 @@ import {
   TaskPayloadPNGV2,
 } from '@kbn/reporting-export-types-png-common';
 import {
-  decryptJobHeaders,
   ExportType,
   getFullRedirectAppUrl,
   REPORTING_TRANSACTION_TYPE,
@@ -88,7 +87,7 @@ export class PngExportType extends ExportType<JobParamsPNGV2, TaskPayloadPNGV2> 
   public runTask = ({
     jobId,
     payload,
-    fakeRequest: requestFromTask,
+    request,
     taskInstanceFields,
     cancellationToken,
     stream,
@@ -97,22 +96,9 @@ export class PngExportType extends ExportType<JobParamsPNGV2, TaskPayloadPNGV2> 
     const apmTrans = apm.startTransaction('execute-job-pdf-v2', REPORTING_TRANSACTION_TYPE);
     const apmGetAssets = apmTrans.startSpan('get-assets', 'setup');
     let apmGeneratePng: { end: () => void } | null | undefined;
-    const { encryptionKey } = this.config;
 
     const process$: Observable<TaskRunResult> = of(1).pipe(
-      mergeMap(async () => {
-        let requestToUse = requestFromTask;
-        if (!requestToUse) {
-          const headers = await decryptJobHeaders(encryptionKey, payload.headers, logger);
-          requestToUse = this.getFakeRequest(headers, payload.spaceId, logger);
-          logger.info(`Using fakeRequest from headers for job ${jobId}`);
-        } else {
-          logger.info(`Using fakeRequest from taskInstance for job ${jobId}`);
-        }
-        logger.info(`request headers ${JSON.stringify(requestToUse.headers)}`);
-        return requestToUse;
-      }),
-      mergeMap((requestToUse) => {
+      mergeMap(() => {
         const url = getFullRedirectAppUrl(
           this.config,
           this.getServerInfo(),
@@ -138,7 +124,7 @@ export class PngExportType extends ExportType<JobParamsPNGV2, TaskPayloadPNGV2> 
             format: 'png',
             browserTimezone: payload.browserTimezone,
             layout,
-            request: requestToUse,
+            request,
             urls: [[url, { [REPORTING_REDIRECT_LOCATOR_STORE_KEY]: locatorParams }]],
             taskInstanceFields,
             logger,

@@ -19,6 +19,7 @@ import { cryptoFactory } from '@kbn/reporting-server';
 import { createMockScreenshottingStart } from '@kbn/screenshotting-plugin/server/mock';
 import type { CaptureResult } from '@kbn/screenshotting-plugin/server/screenshots';
 import { PngExportType } from '.';
+import { FakeRawRequest, KibanaRequest } from '@kbn/core/server';
 
 let content: string;
 let mockPngExportType: PngExportType;
@@ -33,6 +34,14 @@ const encryptHeaders = async (headers: Record<string, string>) => {
   const crypto = cryptoFactory(mockEncryptionKey);
   return await crypto.encrypt(headers);
 };
+
+const fakeRawRequest: FakeRawRequest = {
+  headers: {
+    authorization: `ApiKey skdjtq4u543yt3rhewrh`,
+  },
+  path: '/',
+};
+
 let encryptedHeaders: string;
 
 const screenshottingMock = createMockScreenshottingStart();
@@ -77,6 +86,7 @@ test(`passes browserTimezone to getScreenshots`, async () => {
   const browserTimezone = 'UTC';
   await mockPngExportType.runTask({
     jobId: 'pngJobId',
+    request: fakeRawRequest as unknown as KibanaRequest,
     payload: getBasePayload({
       forceNow: 'test',
       layout: { dimensions: {} },
@@ -97,6 +107,7 @@ test(`passes browserTimezone to getScreenshots`, async () => {
 test(`returns content_type of application/png`, async () => {
   const { content_type: contentType } = await mockPngExportType.runTask({
     jobId: 'pngJobId',
+    request: fakeRawRequest as unknown as KibanaRequest,
     payload: getBasePayload({
       layout: { dimensions: {} },
       locatorParams: [{ version: 'test', id: 'test' }] as LocatorParams[],
@@ -112,6 +123,7 @@ test(`returns content_type of application/png`, async () => {
 test(`returns buffer content base64 encoded`, async () => {
   await mockPngExportType.runTask({
     jobId: 'pngJobId',
+    request: fakeRawRequest as unknown as KibanaRequest,
     payload: getBasePayload({
       layout: { dimensions: {} },
       locatorParams: [{ version: 'test', id: 'test' }] as LocatorParams[],
@@ -130,6 +142,7 @@ test(`screenshotting plugin uses the logger provided by the PNG export-type`, as
 
   await mockPngExportType.runTask({
     jobId: 'pngJobId',
+    request: fakeRawRequest as unknown as KibanaRequest,
     payload: getBasePayload({
       layout: { dimensions: {} },
       locatorParams: [{ version: 'test', id: 'test' }] as LocatorParams[],

@@ -9,9 +9,7 @@ import moment from 'moment';
 import * as Rx from 'rxjs';
 import { timeout } from 'rxjs';
 import { Writable } from 'stream';
-import { finished } from 'stream/promises';
-import { setTimeout } from 'timers/promises';
-
+import type { FakeRawRequest, Headers } from '@kbn/core-http-server';
 import { UpdateResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import {
@@ -29,7 +27,7 @@ import type {
   TaskInstanceFields,
   TaskRunResult,
 } from '@kbn/reporting-common/types';
-import type { ReportingConfigType } from '@kbn/reporting-server';
+import { decryptJobHeaders, type ReportingConfigType } from '@kbn/reporting-server';
 import type {
   RunContext,
   TaskManagerStartContract,
@@ -38,6 +36,8 @@ import type {
 import { throwRetryableError } from '@kbn/task-manager-plugin/server';
 
 import { ExportTypesRegistry } from '@kbn/reporting-server/export_types_registry';
+import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import {
   REPORTING_EXECUTE_TYPE,
   ReportTaskParams,
@@ -45,7 +45,7 @@ import {
   ReportingTaskStatus,
   TIME_BETWEEN_ATTEMPTS,
 } from '.';
-import { getContentStream } from '..';
+import { getContentStream, finishedWithNoPendingCallbacks } from '../content_stream';
 import type { ReportingCore } from '../..';
 import {
   isExecutionError,
@@ -66,6 +66,12 @@ interface PerformJobOpts {
   cancellationToken: CancellationToken;
   stream: Writable;
 }
+
+interface GetHeadersOpts {
+  encryptedHeaders?: string;
+  requestFromTask?: KibanaRequest;
+  spaceId: string | undefined;
+}
 interface ReportingExecuteTaskInstance {
   state: object;
   taskType: string;
@@ -75,22 +81,6 @@ interface ReportingExecuteTaskInstance {
 
 function isOutput(output: CompletedReportOutput | Error): output is CompletedReportOutput {
   return (output as CompletedReportOutput).size != null;
-}
-
-async function finishedWithNoPendingCallbacks(stream: Writable) {
-  await finished(stream, { readable: false });
-
-  // Race condition workaround:
-  // `finished(...)` will resolve while there's still pending callbacks in the writable part of the `stream`.
-  // This introduces a race condition where the code continues before the writable part has completely finished.
-  // The `pendingCallbacks` function is a hack to ensure that all pending callbacks have been called before continuing.
-  // For more information, see: https://github.com/nodejs/node/issues/46170
-  await (async function pendingCallbacks(delay = 1) {
-    if ((stream as any)._writableState.pendingcb > 0) {
-      await setTimeout(delay);
-      await pendingCallbacks(delay < 32 ? delay * 2 : delay);
-    }
-  })();
 }
 
 function parseError(error: unknown): ExecutionError | unknown {
@@ -334,6 +324,73 @@ export class ExecuteReportTask implements ReportingTask {
     return docOutput;
   }
 
+  private async _getRequestToUse({
+    requestFromTask,
+    spaceId,
+    encryptedHeaders,
+  }: GetHeadersOpts): Promise<KibanaRequest> {
+    let useApiKeyAuthentication: boolean = false;
+
+    let apiKeyAuthHeaders;
+    if (requestFromTask) {
+      apiKeyAuthHeaders = requestFromTask.headers;
+      useApiKeyAuthentication = true;
+    }
+
+    let decryptedHeaders;
+    if (this.config.encryptionKey && encryptedHeaders) {
+      // get decrypted headers
+      decryptedHeaders = await decryptJobHeaders(
+        this.config.encryptionKey,
+        encryptedHeaders,
+        this.logger
+      );
+    }
+
+    if (!decryptedHeaders && !apiKeyAuthHeaders) {
+      throw new Error('No headers found to execute report');
+    }
+
+    let headersToUse: Headers = {};
+
+    if (useApiKeyAuthentication && apiKeyAuthHeaders) {
+      const { cookie, authorization, ...restDecryptedHeaders } = decryptedHeaders || {};
+
+      headersToUse = {
+        ...apiKeyAuthHeaders,
+        ...restDecryptedHeaders,
+      };
+    } else {
+      headersToUse = decryptedHeaders || {};
+    }
+
+    this.logger.info(`Generating KibanaRequest with headers ${JSON.stringify(headersToUse)}`);
+
+    return this._getFakeRequest(headersToUse, spaceId, this.logger);
+  }
+
+  private _getFakeRequest(
+    headers: Headers,
+    spaceId: string | undefined,
+    logger = this.logger
+  ): KibanaRequest {
+    const rawRequest: FakeRawRequest = {
+      headers,
+      path: '/',
+    };
+    const fakeRequest = kibanaRequestFactory(rawRequest);
+
+    const setupDeps = this.reporting.getPluginSetupDeps();
+    const spacesService = setupDeps.spaces?.spacesService;
+    if (spacesService) {
+      if (spaceId && spaceId !== DEFAULT_SPACE_ID) {
+        logger.info(`Generating request for space: ${spaceId}`);
+        setupDeps.basePath.set(fakeRequest, `/s/${spaceId}`);
+      }
+    }
+    return fakeRequest;
+  }
+
   private async _performJob({
     task,
     fakeRequest,
@@ -342,19 +399,24 @@ export class ExecuteReportTask implements ReportingTask {
     stream,
   }: PerformJobOpts): Promise<TaskRunResult> {
     const exportType = this.exportTypesRegistry.getByJobType(task.jobtype);
-
     if (!exportType) {
       throw new Error(`No export type from ${task.jobtype} found to execute report`);
     }
     // run the report
     // if workerFn doesn't finish before timeout, call the cancellationToken and throw an error
     const queueTimeout = durationToNumber(this.config.queue.timeout);
+    const request = await this._getRequestToUse({
+      requestFromTask: fakeRequest,
+      spaceId: task.payload.spaceId,
+      encryptedHeaders: task.payload.headers,
+    });
+
     return Rx.lastValueFrom(
       Rx.from(
         exportType.runTask({
           jobId: task.id,
           payload: task.payload,
-          fakeRequest,
+          request,
           taskInstanceFields,
           cancellationToken,
           stream,
@@ -543,6 +605,7 @@ export class ExecuteReportTask implements ReportingTask {
                 size: stream.bytesWritten,
               });
             }
+
             // untrack the report for concurrency awareness
             logger.debug(`Stopping ${jobId}.`);
           } catch (failedToExecuteErr) {
@@ -600,13 +663,18 @@ export class ExecuteReportTask implements ReportingTask {
   }
 
   public async scheduleTask(request: KibanaRequest, params: ReportTaskParams) {
+    const reportingHealth = await this.reporting.getHealthInfo();
+    const shouldScheduleWithApiKey =
+      reportingHealth.hasPermanentEncryptionKey && reportingHealth.isSufficientlySecure;
     const taskInstance: ReportingExecuteTaskInstance = {
       taskType: REPORTING_EXECUTE_TYPE,
       state: {},
       params,
     };
 
-    return await this.getTaskManagerStart().schedule(taskInstance, { request });
+    return shouldScheduleWithApiKey
+      ? await this.getTaskManagerStart().schedule(taskInstance, { request })
+      : await this.getTaskManagerStart().schedule(taskInstance);
   }
 
   public getStatus() {
