@@ -668,19 +668,31 @@ describe('createConcreteWriteIndex', () => {
 
           expect(clusterClient.indices.putSettings).toHaveBeenNthCalledWith(1, {
             index: '.alerts-test.alerts-default',
-            settings: { 'index.mapping.total_fields.limit': 2500 },
+            settings: {
+              'index.mapping.total_fields.limit': 2500,
+              'index.mapping.total_fields.ignore_dynamic_beyond_limit': true,
+            },
           });
           expect(clusterClient.indices.putSettings).toHaveBeenNthCalledWith(2, {
             index: '.alerts-test.alerts-default',
-            settings: { 'index.mapping.total_fields.limit': 2501 },
+            settings: {
+              'index.mapping.total_fields.limit': 2501,
+              'index.mapping.total_fields.ignore_dynamic_beyond_limit': true,
+            },
           });
           expect(clusterClient.indices.putSettings).toHaveBeenNthCalledWith(3, {
             index: '.alerts-test.alerts-default',
-            settings: { 'index.mapping.total_fields.limit': 2503 },
+            settings: {
+              'index.mapping.total_fields.limit': 2503,
+              'index.mapping.total_fields.ignore_dynamic_beyond_limit': true,
+            },
           });
           expect(clusterClient.indices.putSettings).toHaveBeenNthCalledWith(4, {
             index: '.alerts-test.alerts-default',
-            settings: { 'index.mapping.total_fields.limit': 2506 },
+            settings: {
+              'index.mapping.total_fields.limit': 2506,
+              'index.mapping.total_fields.ignore_dynamic_beyond_limit': true,
+            },
           });
 
           expect(clusterClient.indices.putIndexTemplate).toHaveBeenNthCalledWith(1, {
@@ -759,19 +771,31 @@ describe('createConcreteWriteIndex', () => {
 
           expect(clusterClient.indices.putSettings).toHaveBeenNthCalledWith(2, {
             index: '.internal.alerts-test.alerts-default-000001',
-            settings: { 'index.mapping.total_fields.limit': 2500 },
+            settings: {
+              'index.mapping.total_fields.limit': 2500,
+              'index.mapping.total_fields.ignore_dynamic_beyond_limit': true,
+            },
           });
           expect(clusterClient.indices.putSettings).toHaveBeenNthCalledWith(3, {
             index: '.internal.alerts-test.alerts-default-000001',
-            settings: { 'index.mapping.total_fields.limit': 2501 },
+            settings: {
+              'index.mapping.total_fields.limit': 2501,
+              'index.mapping.total_fields.ignore_dynamic_beyond_limit': true,
+            },
           });
           expect(clusterClient.indices.putSettings).toHaveBeenNthCalledWith(4, {
             index: '.internal.alerts-test.alerts-default-000001',
-            settings: { 'index.mapping.total_fields.limit': 2503 },
+            settings: {
+              'index.mapping.total_fields.limit': 2503,
+              'index.mapping.total_fields.ignore_dynamic_beyond_limit': true,
+            },
           });
           expect(clusterClient.indices.putSettings).toHaveBeenNthCalledWith(5, {
             index: '.internal.alerts-test.alerts-default-000001',
-            settings: { 'index.mapping.total_fields.limit': 2506 },
+            settings: {
+              'index.mapping.total_fields.limit': 2506,
+              'index.mapping.total_fields.ignore_dynamic_beyond_limit': true,
+            },
           });
 
           // The first call to logger.info is in createAliasStream, therefore we start testing from 2nd

@@ -51,6 +51,7 @@ const updateTotalFieldLimitSetting = async ({
           index,
           settings: {
             'index.mapping.total_fields.limit': totalFieldsLimit,
+            'index.mapping.total_fields.ignore_dynamic_beyond_limit': true,
           },
         }),
       { logger }
