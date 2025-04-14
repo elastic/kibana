@@ -27,7 +27,9 @@
           "description": [],
           "signature": [
             "Observable",
-            "<{ status: \"unknown\" | \"disabled\" | \"enabled\"; }>"
+            "<",
+            "StreamsStatus",
+            ">"
           ],
           "path": "x-pack/platform/plugins/shared/streams/public/types.ts",
           "deprecated": false,
@@ -970,7 +972,9 @@
           "description": [],
           "signature": [
             "Observable",
-            "<{ status: \"unknown\" | \"disabled\" | \"enabled\"; }>"
+            "<",
+            "StreamsStatus",
+            ">"
           ],
           "path": "x-pack/platform/plugins/shared/streams/public/types.ts",
           "deprecated": false,
