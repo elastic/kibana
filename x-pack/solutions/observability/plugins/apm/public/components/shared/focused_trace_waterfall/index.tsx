@@ -109,22 +109,18 @@ export function FocusedTraceWaterfall({ items, isEmbeddable = false }: Props) {
         ? getTransactionItem(traceItems.focusedTraceDoc as WaterfallTransaction, 0)
         : getSpanItem(traceItems.focusedTraceDoc as WaterfallSpan, 0);
 
-    if (focusedItem) {
-      focusedItem.offset = calculateOffset({ item: focusedItem, rootWaterfallTransaction });
+    focusedItem.offset = calculateOffset({ item: focusedItem, rootWaterfallTransaction });
 
-      if (focusedItem.id !== rootWaterfallTransaction.id) {
-        waterfallItems.push(focusedItem);
-      }
-
-      const focusedItemChildren = traceItems.focusedTraceDocChildren.length
-        ? convertChildrenToWatefallItem(
-            traceItems.focusedTraceDocChildren,
-            rootWaterfallTransaction
-          )
-        : [];
-
-      waterfallItems.push(...focusedItemChildren);
+    if (focusedItem.id !== rootWaterfallTransaction.id) {
+      waterfallItems.push(focusedItem);
     }
+
+    const focusedItemChildren = convertChildrenToWatefallItem(
+      traceItems.focusedTraceDocChildren,
+      rootWaterfallTransaction
+    );
+
+    waterfallItems.push(...focusedItemChildren);
 
     getLegendsAndColorBy(waterfallItems);
 
