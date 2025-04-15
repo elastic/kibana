@@ -6,7 +6,7 @@
  */
 
 import type { Observable } from 'rxjs';
-import { map } from 'rxjs';
+import { firstValueFrom, map } from 'rxjs';
 
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type {
@@ -156,14 +156,19 @@ export class SpacesPlugin
     const { license } = this.spacesLicenseService.setup({ license$: plugins.licensing.license$ });
 
     this.defaultSpaceService = new DefaultSpaceService();
-    this.defaultSpaceService.setup({
-      coreStatus: core.status,
-      getSavedObjects: async () => (await core.getStartServices())[0].savedObjects,
-      license$: plugins.licensing.license$,
-      spacesLicense: license,
-      logger: this.log,
-      solution: plugins.cloud?.onboarding?.defaultSolution,
-    });
+    (async () => {
+      const config = await firstValueFrom(this.config$);
+      const defaultSolution = plugins.cloud?.onboarding?.defaultSolution ?? config.defaultSolution;
+
+      this.defaultSpaceService!.setup({
+        coreStatus: core.status,
+        getSavedObjects: async () => (await core.getStartServices())[0].savedObjects,
+        license$: plugins.licensing.license$,
+        spacesLicense: license,
+        logger: this.log,
+        solution: defaultSolution,
+      });
+    })();
 
     initSpacesViewsRoutes({
       httpResources: core.http.resources,
