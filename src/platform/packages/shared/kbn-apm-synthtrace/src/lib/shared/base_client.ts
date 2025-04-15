@@ -17,6 +17,7 @@ import {
 import { castArray, isFunction } from 'lodash';
 import { Readable, Transform } from 'stream';
 import { isGeneratorObject } from 'util/types';
+import { Refresh } from '@elastic/elasticsearch/lib/api/types';
 import { Logger } from '../utils/create_logger';
 import { sequential } from '../utils/stream_utils';
 import { KibanaClient } from './base_kibana_client';
@@ -41,6 +42,7 @@ export class SynthtraceEsClient<TFields extends Fields> {
   private readonly refreshAfterIndex: boolean;
 
   private pipelineCallback: (base: Readable) => NodeJS.WritableStream;
+  private serverless: boolean | undefined = undefined;
   protected dataStreams: string[] = [];
   protected indices: string[] = [];
 
@@ -100,6 +102,11 @@ export class SynthtraceEsClient<TFields extends Fields> {
   }
 
   async refresh() {
+    if (await this.isServerless()) {
+      this.logger.debug('Skipping manual refresh on serverless');
+      return;
+    }
+
     const allIndices = this.dataStreams.concat(this.indices);
     this.logger.info(`Refreshing "${allIndices.join(',')}"`);
 
@@ -135,48 +142,57 @@ export class SynthtraceEsClient<TFields extends Fields> {
     let count: number = 0;
 
     const stream = sequential(...allStreams);
+    const refresh: Refresh = (await this.isServerless()) ? 'wait_for' : false;
 
-    await this.client.helpers.bulk({
-      concurrency: this.concurrency,
-      refresh: false,
-      refreshOnCompletion: false,
-      flushBytes: 250000,
-      datasource: stream,
-      filter_path: 'errors,items.*.error,items.*.status',
-      onDocument: (doc: ESDocumentWithOperation<TFields>) => {
-        let action: SynthtraceESAction;
-        count++;
+    this.logger.debug(`Produced ${count} events`);
+    await this.client.helpers.bulk(
+      {
+        concurrency: this.concurrency,
+        refresh,
+        refreshOnCompletion: false,
+        flushBytes: 250000,
+        datasource: stream,
+        filter_path: 'errors,items.*.error,items.*.status',
+        onDocument: (doc: ESDocumentWithOperation<TFields>) => {
+          let action: SynthtraceESAction;
+          count++;
 
-        if (count % 100000 === 0) {
-          this.logger.debug(`Indexed ${count} documents`);
-        } else if (count % 1000 === 0) {
-          this.logger.verbose(`Indexed ${count} documents`);
-        }
-
-        if (doc._action) {
-          action = doc._action!;
-          delete doc._action;
-        } else if (doc._index) {
-          action = { create: { _index: doc._index, dynamic_templates: doc._dynamicTemplates } };
-          delete doc._index;
-          if (doc._dynamicTemplates) {
-            delete doc._dynamicTemplates;
+          if (count % 100000 === 0) {
+            this.logger.debug(`Indexed ${count} documents`);
+          } else if (count % 1000 === 0) {
+            this.logger.verbose(`Indexed ${count} documents`);
           }
-        } else {
-          this.logger.debug(doc);
-          throw new Error(
-            `Could not determine operation: _index and _action not defined in document`
-          );
-        }
 
-        return action;
-      },
-      onDrop: (doc) => {
-        this.logger.error(`Dropped document: ${JSON.stringify(doc, null, 2)}`);
-      },
-    });
+          if (doc._action) {
+            action = doc._action!;
+            delete doc._action;
+          } else if (doc._index) {
+            action = { create: { _index: doc._index, dynamic_templates: doc._dynamicTemplates } };
+            delete doc._index;
+            if (doc._dynamicTemplates) {
+              delete doc._dynamicTemplates;
+            }
+          } else {
+            this.logger.debug(doc);
+            throw new Error(
+              `Could not determine operation: _index and _action not defined in document`
+            );
+          }
 
-    this.logger.info(`Produced ${count} events`);
+          return action;
+        },
+        onDrop: (doc) => {
+          this.logger.error(`Dropped document: ${JSON.stringify(doc, null, 2)}`);
+        },
+      },
+      {
+        headers: {
+          'user-agent': 'synthtrace',
+        },
+      }
+    );
+
+    this.logger.debug(`Produced ${count} events`);
 
     // restore pipeline callback
     if (pipelineCallback) {
@@ -186,5 +202,14 @@ export class SynthtraceEsClient<TFields extends Fields> {
     if (this.refreshAfterIndex) {
       await this.refresh();
     }
+  }
+
+  private async isServerless() {
+    if (this.serverless === undefined) {
+      const info = await this.client.info();
+      this.serverless = info.version.build_flavor === 'serverless';
+    }
+
+    return this.serverless;
   }
 }
