@@ -184,7 +184,7 @@ const doesPathMatchRegex = ({ os, value }: { os: OperatingSystem; value: string 
       /^[a-z]:(?:|\\\\[^<>:"'/\\|?*]+\\[^<>:"'/\\|?*]+|%\w+%|)[\\](?:[^<>:"'/\\|?*]+[\\/])*([^<>:"'/\\|?*])+$/i;
     return filePathRegex.test(value);
   }
-  return /^(\/|(\/[\w\-]+)+|\/[\w\-]+\.[\w]+|(\/[\w-]+)+\/[\w\-]+\.[\w]+)$/i.test(value);
+  return /^((\/[\w\-]+)+|\/[\w\-]+\.[\w]+|(\/[\w-]+)+\/[\w\-]+\.[\w]+)$/i.test(value);
 };
 
 const isWindowsWildcardPathValid = (path: string): boolean => {
