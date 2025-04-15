@@ -14,9 +14,25 @@ export const PERFORMANCE_TRACKER_TYPES = {
   LENS: 'Lens',
 };
 
+/**
+ * PerformanceTrackerMarks are the marks that can be used to track performance
+ * of lens charts. They are used to mark specific points in time during
+ * the cahrt's lifecycle.
+ */
 export const PERFORMANCE_TRACKER_MARKS = {
+  /**
+   * Mark that indicates the start of everything before the rendering process.
+   */
   PRE_RENDER: 'preRender',
+  /**
+   * Mark that indicates the start of the rendering process.
+   * Should be used right before returning the chart's JSX.
+   */
   RENDER_START: 'renderStart',
+  /**
+   * Mark that indicates the end of the rendering process.
+   * Should be used at the beginning of the `renderComplete` callback.
+   */
   RENDER_COMPLETE: 'renderComplete',
 } as const;
 export type PerformanceTrackerMarks =
