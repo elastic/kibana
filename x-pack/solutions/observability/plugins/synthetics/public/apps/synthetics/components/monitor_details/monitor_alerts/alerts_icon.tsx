@@ -9,7 +9,9 @@ import { EuiBadge } from '@elastic/eui';
 import { useFetchActiveAlerts } from '../hooks/use_fetch_active_alerts';
 
 export const MonitorAlertsIcon = () => {
-  const { numberOfAlerts } = useFetchActiveAlerts();
+  const { numberOfActiveAlerts } = useFetchActiveAlerts();
 
-  return numberOfAlerts > 0 ? <EuiBadge color="danger">{numberOfAlerts}</EuiBadge> : null;
+  return numberOfActiveAlerts > 0 ? (
+    <EuiBadge color="danger">{numberOfActiveAlerts}</EuiBadge>
+  ) : null;
 };

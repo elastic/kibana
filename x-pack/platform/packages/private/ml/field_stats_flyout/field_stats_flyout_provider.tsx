@@ -129,7 +129,7 @@ export const FieldStatsFlyoutProvider: FC<FieldStatsFlyoutProviderProps> = (prop
 
       const cachedResult = manager.get(cacheKey);
       if (cachedResult) {
-        return cachedResult;
+        setPopulatedFields(cachedResult);
       } else {
         fetchPopulatedFields();
       }

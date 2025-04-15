@@ -13,7 +13,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const find = getService('find');
 
-  describe('Kibana Home Accessibility', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/216219
+  describe.skip('Kibana Home Accessibility', () => {
     before(async () => {
       await common.navigateToApp('home');
     });

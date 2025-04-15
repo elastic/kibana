@@ -105,6 +105,16 @@ export const createStackManagementNavigationTree = (): GroupDefinition => ({
           ],
         },
         {
+          title: i18nStrings.ml.title,
+          children: [
+            { link: 'management:overview' },
+            { link: 'management:anomaly_detection' },
+            { link: 'management:analytics' },
+            { link: 'management:trained_models' },
+            { link: 'management:supplied_configurations' },
+          ],
+        },
+        {
           title: i18nStrings.stackManagement.content.title,
           breadcrumbStatus: 'hidden',
           children: [

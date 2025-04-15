@@ -11,7 +11,7 @@ export function getIndexPatterns(stream: StreamDefinition | undefined) {
   if (!stream) {
     return undefined;
   }
-  if (!isUnwiredStreamDefinition(stream)) {
+  if (isUnwiredStreamDefinition(stream)) {
     return [stream.name];
   }
   const isRoot = stream.name.indexOf('.') === -1;
