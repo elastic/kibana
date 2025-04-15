@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { coreWorkerFixtures } from '.';
 import type { GotRequestFunction } from 'got';
+import { coreWorkerFixtures } from '.';
 
 export interface ApiClientFixture {
   get: GotRequestFunction;
