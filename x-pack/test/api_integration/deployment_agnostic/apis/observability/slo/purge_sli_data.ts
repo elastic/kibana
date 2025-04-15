@@ -26,7 +26,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
   let adminRoleAuthc: RoleCredentials;
 
-  describe('Purge SLI data', function () {
+  describe('Purge SLI data for rolling window', function () {
     before(async () => {
       adminRoleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('admin');
 

@@ -30,21 +30,28 @@ export const purgeRollupDataRoute = createSloServerRoute({
     const purgePolicy = params.body.purgePolicy;
     const purgeRollupData = new PurgeRollupData(esClient);
 
-    if (params.query?.force !== 'true') {
-      if (purgePolicy.purgeType === 'fixed_age') {
-        if (slos.some((slo) => purgePolicy.age.isShorterThan(slo.timeWindow.duration))) {
+    if (purgePolicy.purgeType === 'fixed_age') {
+      if (params.query?.force !== 'true') {
+        if (
+          slos.some((slo) => {
+            return purgePolicy.age.isShorterThan(slo.timeWindow.duration);
+          })
+        ) {
           return response.badRequest({
             body: `Age must be greater than or equal to the time window of the SLI data being purged.`,
           });
         }
-        await purgeRollupData.execute(params.body.ids, purgePolicy.age);
-      } else {
+      }
+      await purgeRollupData.execute(params.body.ids, purgePolicy.age);
+    } else {
+      if (params.query?.force !== 'true') {
         if (
-          slos.some(
-            (slo) =>
+          slos.some((slo) => {
+            return (
               purgePolicy.timestamp.getTime() >
               Date.now() - slo.timeWindow.duration.asSeconds() * 1000
-          )
+            );
+          })
         ) {
           return response.badRequest({
             body: `Timestamp must be before the effective time window of the SLI data being purged.`,
