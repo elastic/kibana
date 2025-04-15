@@ -41,15 +41,16 @@ To generate the query we first need to identify which index pattern should be us
     const humanMessage = new HumanMessage({
       content: `Available index patterns:\n ${state.indexPatterns.join(
         '\n'
-      )} \n\n Explanation of the query: \n\n ${state.input?.question
-        } \n\n Based on this information, please shortlist a maximum of 3 index patterns that are the most likely to contain the fields required to write the query.`,
+      )} \n\n Explanation of the query: \n\n ${
+        state.input?.question
+      } \n\n Based on this information, please shortlist a maximum of 3 index patterns that are the most likely to contain the fields required to write the query.`,
     });
 
     try {
       const result = await llm
         .withStructuredOutput(ShortlistedIndexPatterns, { name: 'shortlistedIndexPatterns' })
         .withRetry({
-          stopAfterAttempt: 3
+          stopAfterAttempt: 3,
         })
         .invoke([systemMessage, humanMessage]);
 
