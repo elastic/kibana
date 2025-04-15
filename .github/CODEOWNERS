@@ -1892,7 +1892,7 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 /x-pack/test/functional_gen_ai/inference @elastic/appex-ai-infra
 
 # AppEx Platform Services Security
-//x-pack/test_serverless/api_integration/test_suites/common/security_response_headers.ts  @elastic/kibana-security
+/x-pack/test_serverless/api_integration/test_suites/common/security_response_headers.ts  @elastic/kibana-security
 /x-pack/test/api_integration/apis/es  @elastic/kibana-security
 /x-pack/test/api_integration/apis/features  @elastic/kibana-security
 
@@ -2725,9 +2725,13 @@ docs/settings-gen                             @elastic/platform-docs
 /x-pack/plugins/**/kibana.jsonc @elastic/kibana-core
 /x-pack/platform/plugins/shared/**/kibana.jsonc @elastic/kibana-core
 /x-pack/platform/plugins/private/**/kibana.jsonc @elastic/kibana-core
-/x-pack//solutions/observability/plugins/**/kibana.jsonc @elastic/kibana-core
-/x-pack//solutions/search/plugins/**/kibana.jsonc @elastic/kibana-core
-/x-pack//solutions/security/plugins/**/kibana.jsonc @elastic/kibana-core
+/x-pack/solutions/observability/plugins/**/kibana.jsonc @elastic/kibana-core
+/x-pack/solutions/search/plugins/**/kibana.jsonc @elastic/kibana-core
+/x-pack/solutions/security/plugins/**/kibana.jsonc @elastic/kibana-core
+
+# Plugin manifests for test plugins
+/src/platform/test/**/kibana.jsonc @elastic/appex-qa @elastic/kibana-core
+/x-pack/test/**/kibana.jsonc @elastic/appex-qa @elastic/kibana-core
 
 # Temporary Encrypted Saved Objects (ESO) guarding
 # This additional code-ownership is meant to be a temporary precaution to notify the Kibana platform security team

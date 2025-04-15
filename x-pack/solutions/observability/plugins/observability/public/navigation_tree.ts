@@ -91,6 +91,14 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
             ? [
                 {
                   link: 'streams' as const,
+                  withBadge: true,
+                  badgeOptions: {
+                    icon: 'beaker',
+                    tooltip: i18n.translate('xpack.observability.obltNav.streamsBadgeTooltip', {
+                      defaultMessage:
+                        'This functionality is experimental and not supported. It may change or be removed at any time.',
+                    }),
+                  },
                 },
               ]
             : []),

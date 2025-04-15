@@ -172,7 +172,12 @@ export const ConfirmMigrationFlyoutStep: React.FunctionComponent<{
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty iconType="arrowLeft" onClick={hideWarningsStep} flush="left">
+            <EuiButtonEmpty
+              iconType="arrowLeft"
+              onClick={hideWarningsStep}
+              flush="left"
+              data-test-subj="backButton"
+            >
               <FormattedMessage
                 id="xpack.upgradeAssistant.dataStream.migration.flyout.checklistStep.backButtonLabel"
                 defaultMessage="Back"
@@ -180,7 +185,13 @@ export const ConfirmMigrationFlyoutStep: React.FunctionComponent<{
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton fill color="primary" onClick={startAction} disabled={blockAdvance}>
+            <EuiButton
+              fill
+              color="primary"
+              onClick={startAction}
+              disabled={blockAdvance}
+              data-test-subj="startActionButton"
+            >
               {startActionButtonLabel}
             </EuiButton>
           </EuiFlexItem>
