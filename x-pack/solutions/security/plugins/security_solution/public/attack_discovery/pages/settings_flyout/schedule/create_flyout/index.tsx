@@ -50,7 +50,7 @@ export const CreateFlyout: React.FC<Props> = React.memo(({ onClose }) => {
     http,
   });
 
-  const { sourcererDataView } = useSourcererDataView();
+  const { indexPattern } = useSourcererDataView();
 
   const { mutateAsync: createAttackDiscoverySchedule, isLoading: isLoadingQuery } =
     useCreateAttackDiscoverySchedule();
@@ -67,7 +67,7 @@ export const CreateFlyout: React.FC<Props> = React.memo(({ onClose }) => {
 
         const [filterQuery, kqlError] = convertToBuildEsQuery({
           config: getEsQueryConfig(uiSettings),
-          dataViewSpec: sourcererDataView,
+          indexPattern,
           queries: [scheduleData.alertsSelectionSettings.query],
           filters: scheduleData.alertsSelectionSettings.filters,
         });
@@ -105,7 +105,7 @@ export const CreateFlyout: React.FC<Props> = React.memo(({ onClose }) => {
       alertsIndexPattern,
       createAttackDiscoverySchedule,
       onClose,
-      sourcererDataView,
+      indexPattern,
       uiSettings,
     ]
   );
