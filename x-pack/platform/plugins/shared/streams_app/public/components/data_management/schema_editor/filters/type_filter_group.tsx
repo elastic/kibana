@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { uniq } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { EuiSelectableOption, EuiSelectableProps } from '@elastic/eui';
 import { FilterGroup } from './filter_group';
 import { FIELD_TYPE_MAP, FieldTypeOption } from '../constants';
 import { TControlsChangeHandler } from '../hooks/use_controls';
-import { SchemaFieldType } from '../types';
 import { useSchemaEditorContext } from '../schema_editor_context';
 
 const BUTTON_LABEL = i18n.translate(
@@ -33,14 +32,24 @@ export const FieldTypeFilterGroup = ({ onChange }: { onChange: TControlsChangeHa
     [fields]
   );
 
-  const [items, setItems] = useState<EuiSelectableOption[]>(() =>
-    fieldTypes.map((key) => {
-      return {
-        label: FIELD_TYPE_MAP[key].label,
-        key,
-      };
-    })
-  );
+  const [items, setItems] = useState<EuiSelectableOption[]>(() => getTypeOptions(fieldTypes));
+
+  // This side effect is due to the fact that the available field status can be updated once the unmapped fields are fetched.
+  useEffect(() => {
+    setItems((prevItems) => {
+      const prevSelection = new Map(prevItems.map((item) => [item.key, item.checked]));
+
+      const nextItems = getTypeOptions(fieldTypes);
+
+      nextItems.forEach((item) => {
+        if (prevSelection.has(item.key)) {
+          item.checked = prevSelection.get(item.key);
+        }
+      });
+
+      return nextItems;
+    });
+  }, [fieldTypes]);
 
   const onChangeItems = useCallback<Required<EuiSelectableProps>['onChange']>(
     (nextItems) => {
@@ -48,7 +57,7 @@ export const FieldTypeFilterGroup = ({ onChange }: { onChange: TControlsChangeHa
       onChange({
         type: nextItems
           .filter((nextItem) => nextItem.checked === 'on')
-          .map((item) => item.key as SchemaFieldType),
+          .map((item) => item.key as FieldTypeOption),
       });
     },
     [onChange]
@@ -57,4 +66,11 @@ export const FieldTypeFilterGroup = ({ onChange }: { onChange: TControlsChangeHa
   return (
     <FilterGroup items={items} filterGroupButtonLabel={BUTTON_LABEL} onChange={onChangeItems} />
   );
+};
+
+const getTypeOptions = (fieldStatus: FieldTypeOption[]): EuiSelectableOption[] => {
+  return fieldStatus.map((key) => ({
+    label: FIELD_TYPE_MAP[key].label,
+    key,
+  }));
 };

@@ -30,10 +30,17 @@ export const FieldStatusFilterGroup = ({ onChange }: { onChange: TControlsChange
   // This side effect is due to the fact that the available field status can be updated once the unmapped fields are fetched.
   useEffect(() => {
     setItems((prevItems) => {
-      const prevKeys = new Set(prevItems.map((item) => item.key as SchemaFieldStatus));
-      const newItems = fieldStatus.filter((key) => !prevKeys.has(key));
+      const prevSelection = new Map(prevItems.map((item) => [item.key, item.checked]));
 
-      return [...prevItems, ...getStatusOptions(newItems)];
+      const nextItems = getStatusOptions(fieldStatus);
+
+      nextItems.forEach((item) => {
+        if (prevSelection.has(item.key)) {
+          item.checked = prevSelection.get(item.key);
+        }
+      });
+
+      return nextItems;
     });
   }, [fieldStatus]);
 
@@ -54,7 +61,7 @@ export const FieldStatusFilterGroup = ({ onChange }: { onChange: TControlsChange
   );
 };
 
-const getStatusOptions = (fieldStatus: SchemaFieldStatus[]) => {
+const getStatusOptions = (fieldStatus: SchemaFieldStatus[]): EuiSelectableOption[] => {
   return fieldStatus.map((key) => ({
     label: FIELD_STATUS_MAP[key].label,
     key,
