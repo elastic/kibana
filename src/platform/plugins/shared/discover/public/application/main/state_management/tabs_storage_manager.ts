@@ -53,7 +53,7 @@ export interface TabsStorageManager {
    * Currently, we use it only one way - from internal state to URL.
    */
   urlStateContainer: ReduxLikeStateContainer<TabsStorageState>;
-  startUrlSync: () => () => void;
+  startUrlSync: (props: { onChanged?: (nextState: TabsStorageState) => void }) => () => void;
   persistLocally: (props: TabsInternalStatePayload) => Promise<void>;
   updateTabStateLocally: (
     tabId: string,
@@ -67,15 +67,15 @@ export interface TabsStorageManager {
 export const getTabsStorageManager = ({
   urlStateStorage,
   storage,
-  onChanged,
 }: {
   urlStateStorage: IKbnUrlStateStorage;
   storage: Storage;
-  onChanged?: (nextState: TabsStorageState) => void; // can be called when selectedTabId changes in URL to trigger app state change if needed
 }): TabsStorageManager => {
   const urlStateContainer = createStateContainer<TabsStorageState>({});
 
-  const startUrlSync = () => {
+  const startUrlSync: TabsStorageManager['startUrlSync'] = ({
+    onChanged, // can be called when selectedTabId changes in URL to trigger app state change if needed
+  }) => {
     const { start, stop } = syncState({
       stateStorage: urlStateStorage,
       stateContainer: {
@@ -112,7 +112,7 @@ export const getTabsStorageManager = ({
     const nextState: TabsStorageState = {
       id: selectedTabId,
     };
-    await urlStateStorage.set(TABS_STATE_URL_KEY, nextState); // can be called even before sync with URL started
+    await urlStateStorage.set(TABS_STATE_URL_KEY, nextState, { replace: true }); // can be called even before sync with URL started
   };
 
   const toTabStateInStorage = (
@@ -160,7 +160,7 @@ export const getTabsStorageManager = ({
     };
   };
 
-  const persistLocally = async ({
+  const persistLocally: TabsStorageManager['persistLocally'] = async ({
     allTabs,
     selectedTabId,
     recentlyClosedTabs,
@@ -204,10 +204,8 @@ export const getTabsStorageManager = ({
     }
   };
 
-  const loadLocally = ({
+  const loadLocally: TabsStorageManager['loadLocally'] = ({
     defaultTabState,
-  }: {
-    defaultTabState: Omit<TabState, keyof TabItem>;
   }): TabsInternalStatePayload => {
     const toTabState = (tabStateInStorage: TabStateInLocalStorage): TabState => ({
       ...defaultTabState,

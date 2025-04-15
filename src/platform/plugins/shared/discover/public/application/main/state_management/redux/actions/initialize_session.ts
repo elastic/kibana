@@ -36,7 +36,7 @@ import { updateSavedSearch } from '../../utils/update_saved_search';
 import { APP_STATE_URL_KEY } from '../../../../../../common';
 import { selectTabRuntimeState } from '../runtime_state';
 import type { ConnectedCustomizationService } from '../../../../../customizations';
-import { disconnectTab } from './tabs';
+import { disconnectTab, clearAllTabs } from './tabs';
 
 export interface InitializeSessionParams {
   stateContainer: DiscoverStateContainer;
@@ -44,6 +44,7 @@ export interface InitializeSessionParams {
   discoverSessionId: string | undefined;
   dataViewSpec: DataViewSpec | undefined;
   defaultUrlState: DiscoverAppState | undefined;
+  shouldClearAllTabs: boolean | undefined;
 }
 
 export const initializeSession: InternalStateThunkActionCreator<
@@ -58,6 +59,7 @@ export const initializeSession: InternalStateThunkActionCreator<
       discoverSessionId,
       dataViewSpec,
       defaultUrlState,
+      shouldClearAllTabs,
     },
   }) =>
   async (
@@ -67,6 +69,10 @@ export const initializeSession: InternalStateThunkActionCreator<
   ) => {
     dispatch(disconnectTab({ tabId }));
     dispatch(internalStateSlice.actions.resetOnSavedSearchChange({ tabId }));
+
+    if (shouldClearAllTabs) {
+      dispatch(clearAllTabs());
+    }
 
     /**
      * "No data" checks

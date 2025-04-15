@@ -8,6 +8,7 @@
  */
 
 import type { TabbedContentState } from '@kbn/unified-tabs/src/components/tabbed_content/tabbed_content';
+import { v4 as uuidv4 } from 'uuid';
 import { cloneDeep, differenceBy, orderBy } from 'lodash';
 import type { RecentlyClosedTabState, TabState } from '../types';
 import { selectAllTabs, selectTab } from '../selectors';
@@ -19,6 +20,7 @@ import {
 } from '../internal_state';
 import { createTabRuntimeState, selectTabRuntimeState } from '../runtime_state';
 import { APP_STATE_URL_KEY, GLOBAL_STATE_URL_KEY } from '../../../../../../common/constants';
+import { createTabItem } from '../utils';
 
 export const setTabs: InternalStateThunkActionCreator<
   [Parameters<typeof internalStateSlice.actions.setTabs>[0]]
@@ -63,8 +65,11 @@ export const setTabs: InternalStateThunkActionCreator<
     );
   };
 
-export const updateTabs: InternalStateThunkActionCreator<[TabbedContentState], Promise<void>> =
-  ({ items, selectedItem }) =>
+export const updateTabs: InternalStateThunkActionCreator<
+  [TabbedContentState & { resetId?: string }],
+  Promise<void>
+> =
+  ({ items, selectedItem, resetId }) =>
   async (dispatch, getState, { services, runtimeStateManager, urlStateStorage }) => {
     const currentState = getState();
     const currentTab = selectTab(currentState, currentState.tabs.unsafeCurrentId);
@@ -130,6 +135,7 @@ export const updateTabs: InternalStateThunkActionCreator<[TabbedContentState], P
         allTabs: updatedTabs,
         selectedTabId: selectedItem?.id ?? currentTab.id,
         recentlyClosedTabs: currentState.tabs.recentlyClosedTabs,
+        resetId,
       })
     );
   };
@@ -145,6 +151,15 @@ export const updateTabAppStateAndGlobalState: InternalStateThunkActionCreator<[T
       })
     );
   };
+
+export const clearAllTabs: InternalStateThunkActionCreator = () => (dispatch) => {
+  const defaultTab: TabState = {
+    ...defaultTabState,
+    ...createTabItem([]),
+  };
+
+  return dispatch(updateTabs({ items: [defaultTab], selectedItem: defaultTab, resetId: uuidv4() }));
+};
 
 export const disconnectTab: InternalStateThunkActionCreator<[TabActionPayload]> =
   ({ tabId }) =>

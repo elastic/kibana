@@ -65,6 +65,7 @@ interface SessionInitializationState {
 type InitializeSession = (options?: {
   dataViewSpec?: DataViewSpec | undefined;
   defaultUrlState?: DiscoverAppState;
+  shouldClearAllTabs?: boolean;
 }) => Promise<SessionInitializationState>;
 
 export const DiscoverSessionView = ({
@@ -89,7 +90,7 @@ export const DiscoverSessionView = ({
   );
   const initializeSessionAction = useCurrentTabAction(internalStateActions.initializeSession);
   const [initializeSessionState, initializeSession] = useAsyncFunction<InitializeSession>(
-    async ({ dataViewSpec, defaultUrlState } = {}) => {
+    async ({ dataViewSpec, defaultUrlState, shouldClearAllTabs = false } = {}) => {
       const stateContainer = getDiscoverStateContainer({
         tabId: currentTabId,
         services,
@@ -111,6 +112,7 @@ export const DiscoverSessionView = ({
             discoverSessionId,
             dataViewSpec,
             defaultUrlState,
+            shouldClearAllTabs,
           },
         })
       );
@@ -119,15 +121,18 @@ export const DiscoverSessionView = ({
       ? { loading: false, value: { showNoDataPage: false } }
       : { loading: true }
   );
-  const initializeSessionWithDefaultLocationState = useLatest(() => {
-    const historyLocationState = getScopedHistory<
-      MainHistoryLocationState & { defaultState?: DiscoverAppState }
-    >()?.location.state;
-    initializeSession({
-      dataViewSpec: historyLocationState?.dataViewSpec,
-      defaultUrlState: historyLocationState?.defaultState,
-    });
-  });
+  const initializeSessionWithDefaultLocationState = useLatest(
+    (options?: { shouldClearAllTabs?: boolean }) => {
+      const historyLocationState = getScopedHistory<
+        MainHistoryLocationState & { defaultState?: DiscoverAppState }
+      >()?.location.state;
+      initializeSession({
+        dataViewSpec: historyLocationState?.dataViewSpec,
+        defaultUrlState: historyLocationState?.defaultState,
+        shouldClearAllTabs: options?.shouldClearAllTabs,
+      });
+    }
+  );
   const initializationState = useInternalStateSelector((state) => state.initializationState);
   const currentDataView = useCurrentTabRuntimeState(
     runtimeStateManager,
@@ -149,7 +154,7 @@ export const DiscoverSessionView = ({
     history,
     savedSearchId: discoverSessionId,
     onNewUrl: () => {
-      initializeSessionWithDefaultLocationState.current();
+      initializeSessionWithDefaultLocationState.current({ shouldClearAllTabs: true });
     },
   });
 

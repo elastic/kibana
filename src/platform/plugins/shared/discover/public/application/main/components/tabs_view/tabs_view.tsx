@@ -7,9 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type TabItem, UnifiedTabs, TabStatus } from '@kbn/unified-tabs';
-import React, { useState } from 'react';
-import { pick } from 'lodash';
+import { UnifiedTabs, TabStatus } from '@kbn/unified-tabs';
+import React from 'react';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { DiscoverSessionView, type DiscoverSessionViewProps } from '../session_view';
 import {
@@ -28,16 +27,17 @@ export const TabsView = (props: DiscoverSessionViewProps) => {
   const services = useDiscoverServices();
   const dispatch = useInternalStateDispatch();
   const allTabs = useInternalStateSelector(selectAllTabs);
-  const { currentTabId, recentlyClosedItems } = useInternalStateSelector((state) => ({
+  const { currentTabId, recentlyClosedItems, resetId } = useInternalStateSelector((state) => ({
     currentTabId: state.tabs.unsafeCurrentId,
     recentlyClosedItems: state.tabs.recentlyClosedTabs,
+    resetId: state.tabs.resetId,
   }));
-  const [initialItems] = useState<TabItem[]>(() => allTabs.map((tab) => pick(tab, 'id', 'label')));
 
   return (
     <UnifiedTabs
+      key={resetId}
       services={services}
-      initialItems={initialItems}
+      initialItems={allTabs}
       initialSelectedItemId={currentTabId}
       recentlyClosedItems={recentlyClosedItems}
       onChanged={(updateState) => dispatch(internalStateActions.updateTabs(updateState))}
