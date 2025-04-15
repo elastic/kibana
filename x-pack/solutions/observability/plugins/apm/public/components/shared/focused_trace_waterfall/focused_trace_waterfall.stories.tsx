@@ -236,4 +236,9 @@ const data: TraceItems = {
       },
     ],
   },
+  summary: {
+    services: 1,
+    traceEvents: 1,
+    errors: 0,
+  },
 };
