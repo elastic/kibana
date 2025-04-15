@@ -23,7 +23,7 @@ import {
   initializeStateManager,
   initializeTitleManager,
   titleComparators,
-  useStateFromPublishingSubject,
+  useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
 import { LazyDataViewPicker, withSuspense } from '@kbn/presentation-util-plugin/public';
 import {
@@ -32,7 +32,7 @@ import {
 } from '@kbn/unified-field-list';
 import { cloneDeep } from 'lodash';
 import React, { useEffect } from 'react';
-import { distinctUntilChanged, merge, skip, Subscription, switchMap, tap } from 'rxjs';
+import { merge, skip, Subscription, switchMap } from 'rxjs';
 import { initializeUnsavedChanges } from '@kbn/presentation-containers';
 import { FIELD_LIST_DATA_VIEW_REF_NAME, FIELD_LIST_ID } from './constants';
 import { FieldListApi, Services, FieldListSerializedState, FieldListRuntimeState } from './types';
@@ -108,8 +108,6 @@ export const getFieldListFactory = (
         fieldListStateManager.api.dataViewId$
           .pipe(
             skip(1),
-            distinctUntilChanged(),
-            tap(() => fieldListStateManager.api.setSelectedFieldNames([])),
             switchMap((dataViewId) =>
               dataViewId ? dataViews.get(dataViewId) : dataViews.getDefaultDataView()
             )
@@ -118,6 +116,7 @@ export const getFieldListFactory = (
             fieldListStateManager.api.setDataViews(
               nextSelectedDataView ? [nextSelectedDataView] : undefined
             );
+            fieldListStateManager.api.setSelectedFieldNames([]);
           })
       );
 
@@ -169,10 +168,8 @@ export const getFieldListFactory = (
       return {
         api,
         Component: () => {
-          const selectedFieldNames = useStateFromPublishingSubject(
-            fieldListStateManager.api.selectedFieldNames$
-          );
-          const renderDataViews = useStateFromPublishingSubject(
+          const [selectedFieldNames, renderDataViews] = useBatchedPublishingSubjects(
+            fieldListStateManager.api.selectedFieldNames$,
             fieldListStateManager.api.dataViews$
           );
           const { euiTheme } = useEuiTheme();
