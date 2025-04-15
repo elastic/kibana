@@ -155,9 +155,14 @@ export function ChatTimeline({
       // Process assistant messages: transform the content using the cumulative redactedEntitiesMap.
       // Here we don't add highlighting because it conflicts with markdown elements.
       else if (role === 'assistant' && content) {
+        let updatedContent = content;
+
+        // Apply all replacements
         Object.entries(redactedEntitiesMap).forEach(([hash, originalText]) => {
-          item.message.message.content = content.replace(new RegExp(hash, 'g'), originalText);
+          updatedContent = updatedContent.replace(new RegExp(hash, 'g'), originalText);
         });
+
+        item.message.message.content = updatedContent;
       }
 
       if (item.display.collapsed) {
