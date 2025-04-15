@@ -131,12 +131,15 @@ cd elastic-agent-${agentVersion}-windows-x86_64
 
   const linuxDebCommand = `curl -L -O ${downloadBaseUrl}/beats/elastic-agent/elastic-agent-${agentVersion}-amd64.deb ${curlDownloadSourceProxyArgs}
 sudo ${debOrRpmWithInstallServers}dpkg -i elastic-agent-${agentVersion}-amd64.deb
-sudo systemctl enable elastic-agent \nsudo systemctl start elastic-agent \nsudo elastic-agent enroll ${getEnrollArgsByPlatForm('deb')} \n`;
+sudo systemctl enable elastic-agent \nsudo systemctl start elastic-agent \nsudo elastic-agent enroll ${getEnrollArgsByPlatForm(
+    'deb'
+  )} \n`;
 
   const linuxRpmCommand = `curl -L -O ${downloadBaseUrl}/beats/elastic-agent/elastic-agent-${agentVersion}-x86_64.rpm ${curlDownloadSourceProxyArgs}
 sudo ${debOrRpmWithInstallServers}rpm -vi elastic-agent-${agentVersion}-x86_64.rpm
-sudo systemctl enable elastic-agent \nsudo systemctl start elastic-agent \nsudo elastic-agent enroll ${getEnrollArgsByPlatForm('rpm') } \n`;
-
+sudo systemctl enable elastic-agent \nsudo systemctl start elastic-agent \nsudo elastic-agent enroll ${getEnrollArgsByPlatForm(
+    'rpm'
+  )} \n`;
 
   // google shell commands
   const googleShellEnrollArgs = getEnrollArgsByPlatForm('google_shell');

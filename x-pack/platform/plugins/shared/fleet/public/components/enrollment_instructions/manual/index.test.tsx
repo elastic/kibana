@@ -70,7 +70,6 @@ describe('ManualInstructions', () => {
       showInstallServers: true,
     });
 
-
     it('should return instructions for linux', async () => {
       expect(result.linux.split('\n')).toEqual([
         'curl -L -O https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent-9.0.0-linux-x86_64.tar.gz ',
