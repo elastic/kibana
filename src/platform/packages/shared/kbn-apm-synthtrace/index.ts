@@ -16,6 +16,7 @@ export {
 
 export {
   ApmSynthtraceEsClient,
+  ApmSynthtracePipelineTypes,
   type ApmSynthtracePipelines,
 } from './src/lib/apm/client/apm_synthtrace_es_client';
 export { ApmSynthtraceKibanaClient } from './src/lib/apm/client/apm_synthtrace_kibana_client';

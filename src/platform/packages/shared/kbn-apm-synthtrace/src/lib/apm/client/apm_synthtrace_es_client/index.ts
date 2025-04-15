@@ -25,7 +25,15 @@ export enum ComponentTemplateName {
   TracesApmRum = 'traces-apm.rum@custom',
   TracesApmSampled = 'traces-apm.sampled@custom',
 }
-export type ApmSynthtracePipelines = 'default' | 'otelToApm' | 'apmToOtel';
+export enum ApmSynthtracePipelineTypes {
+  Default = 'default',
+  OtelToApm = 'otelToApm',
+  ApmToOtel = 'apmToOtel',
+}
+export type ApmSynthtracePipelines =
+  | ApmSynthtracePipelineTypes.Default
+  | ApmSynthtracePipelineTypes.OtelToApm
+  | ApmSynthtracePipelineTypes.ApmToOtel;
 
 export interface ApmSynthtraceEsClientOptions extends Omit<SynthtraceEsClientOptions, 'pipeline'> {
   version: string;
