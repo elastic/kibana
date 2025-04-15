@@ -4,9 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { useMemo } from 'react';
 
 import { useGetFileByPathQuery } from '../../../../../hooks';
-import { parseYamlChangelog } from '../utils';
+import { getBreakingChanges, parseYamlChangelog } from '../utils';
 
 /**
  * @param packageName the package to get the changelog for
@@ -22,10 +23,18 @@ export const useChangelog = (
     `/package/${packageName}/${latestVersion}/changelog.yml`
   );
 
-  const changelog = parseYamlChangelog(data, latestVersion, currentVersion);
+  const changelog = useMemo(() => {
+    return parseYamlChangelog(data, latestVersion, currentVersion);
+  }, [data, latestVersion, currentVersion]);
+
+  const breakingChanges = useMemo(() => {
+    const _breakingChanges = getBreakingChanges(changelog);
+    return _breakingChanges.length > 0 ? _breakingChanges : null;
+  }, [changelog]);
 
   return {
     changelog,
+    breakingChanges,
     error,
     isLoading,
   };

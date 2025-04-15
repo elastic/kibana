@@ -41,9 +41,7 @@ import {
   SO_SEARCH_LIMIT,
 } from '../../../../../constants';
 import { SideBarColumn } from '../../../components/side_bar_column';
-
 import { KeepPoliciesUpToDateSwitch } from '../components';
-import { getBreakingChanges } from '../utils';
 import { useChangelog } from '../hooks';
 
 import { InstallButton } from './install_button';
@@ -111,12 +109,10 @@ export const SettingsPage: React.FC<Props> = memo(
 
     const {
       changelog,
+      breakingChanges,
       isLoading: isChangelogLoading,
       error: changelogError,
     } = useChangelog(name, latestVersion, version);
-
-    const breakingChanges = getBreakingChanges(changelog);
-    const hasBreakingChanges = breakingChanges.length > 0;
 
     const packagePolicyIds = useMemo(
       () => packagePoliciesData?.items.map(({ id }) => id),
@@ -304,12 +300,17 @@ export const SettingsPage: React.FC<Props> = memo(
                       <UpdateAvailableCallout
                         version={latestVersion}
                         toggleChangelogModal={toggleChangelogModal}
-                        breakingChanges={{
-                          changelog: breakingChanges,
-                          isUnderstood: isBreakingChangesUnderstood,
-                          toggleIsUnderstood: () => setIsBreakingChangesUnderstood((prev) => !prev),
-                          onOpen: () => setIsBreakingChangesFlyoutOpen(true),
-                        }}
+                        breakingChanges={
+                          breakingChanges
+                            ? {
+                                changelog: breakingChanges,
+                                isUnderstood: isBreakingChangesUnderstood,
+                                toggleIsUnderstood: () =>
+                                  setIsBreakingChangesUnderstood((prev) => !prev),
+                                onOpen: () => setIsBreakingChangesFlyoutOpen(true),
+                              }
+                            : null
+                        }
                       />
                       <EuiSpacer size="l" />
                       <p>
@@ -322,7 +323,7 @@ export const SettingsPage: React.FC<Props> = memo(
                           isUpgradingPackagePolicies={isUpgradingPackagePolicies}
                           setIsUpgradingPackagePolicies={setIsUpgradingPackagePolicies}
                           startServices={startServices}
-                          isDisabled={hasBreakingChanges && !isBreakingChangesUnderstood}
+                          isDisabled={Boolean(breakingChanges) && !isBreakingChangesUnderstood}
                         />
                       </p>
                     </>
@@ -491,7 +492,7 @@ export const SettingsPage: React.FC<Props> = memo(
             />
           )}
         </EuiPortal>
-        {isBreakingChangesFlyoutOpen && (
+        {isBreakingChangesFlyoutOpen && breakingChanges && (
           <BreakingChangesFlyout
             breakingChanges={breakingChanges}
             onClose={() => setIsBreakingChangesFlyoutOpen(false)}

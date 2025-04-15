@@ -31,7 +31,7 @@ interface UpdateAvailableCalloutProps {
     isUnderstood: boolean;
     toggleIsUnderstood: () => void;
     onOpen: () => void;
-  };
+  } | null;
 }
 
 export const UpdateAvailableCallout = ({
@@ -39,9 +39,8 @@ export const UpdateAvailableCallout = ({
   toggleChangelogModal,
   breakingChanges,
 }: UpdateAvailableCalloutProps) => {
-  const hasBreakingChanges = breakingChanges.changelog.length > 0;
   const isOneChange =
-    breakingChanges.changelog.length === 1 && breakingChanges.changelog[0].changes.length === 1;
+    breakingChanges?.changelog.length === 1 && breakingChanges.changelog[0].changes.length === 1;
 
   const checkboxId = useGeneratedHtmlId({ prefix: 'understoodBreakingChangeCheckbox' });
   const { euiTheme } = useEuiTheme();
@@ -64,7 +63,7 @@ export const UpdateAvailableCallout = ({
     <EuiCallOut
       color="warning"
       iconType="warning"
-      title={hasBreakingChanges ? titleWithBreakingChanges : defaultTitle}
+      title={breakingChanges ? titleWithBreakingChanges : defaultTitle}
     >
       {isOneChange ? (
         <>
@@ -79,7 +78,7 @@ export const UpdateAvailableCallout = ({
           />
           <EuiSpacer size="m" />
           <i style={{ paddingLeft: euiTheme.size.m }}>
-            {breakingChanges.changelog[0]?.changes[0]?.description}
+            {breakingChanges.changelog?.[0]?.changes[0]?.description}
           </i>
           <EuiSpacer size="m" />
           <FormattedMessage
@@ -87,7 +86,7 @@ export const UpdateAvailableCallout = ({
             defaultMessage="Please review the changes carefully before upgrading."
           />
         </>
-      ) : hasBreakingChanges ? (
+      ) : breakingChanges ? (
         <FormattedMessage
           id="xpack.fleet.integration.settings.versionInfo.updatesAvailableWithBreakingChangesBody"
           defaultMessage="Version {version} includes new features and breaking changes that may affect your current setup. Please review the changes carefully before upgrading."
@@ -106,10 +105,10 @@ export const UpdateAvailableCallout = ({
       )}
       <EuiSpacer size="s" />
       <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
-        {hasBreakingChanges && (
+        {breakingChanges && (
           <EuiFlexItem grow={false}>
             <BreakingChangesButton
-              href={isOneChange ? breakingChanges.changelog[0].changes[0].link : undefined}
+              href={isOneChange ? breakingChanges.changelog?.[0].changes[0].link : undefined}
               onClick={breakingChanges.onOpen}
             />
           </EuiFlexItem>
@@ -123,7 +122,7 @@ export const UpdateAvailableCallout = ({
           </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>
-      {hasBreakingChanges && (
+      {breakingChanges && (
         <>
           <EuiSpacer size="m" />
           <EuiCheckbox
