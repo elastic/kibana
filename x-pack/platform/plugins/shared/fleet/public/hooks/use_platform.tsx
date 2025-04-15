@@ -9,7 +9,8 @@ import { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 
 export type PLATFORM_TYPE = 'linux' | 'mac' | 'windows' | 'rpm' | 'deb' | 'kubernetes';
-export type EXTENDED_PLATFORM_TYPE = 'linux' | 'mac' | 'windows' | 'rpm' | 'deb' | 'kubernetes' | 'google_shell' | 'cloud_formation;
+export type EXTENDED_PLATFORM_TYPE = 'linux' | 'mac' | 'windows' | 'rpm' | 'deb' | 'kubernetes' | 'google_shell' | 'cloud_formation';
+
 export const PLATFORM_WITH_INSTALL_SERVERS = [
   'linux',
   'mac',
