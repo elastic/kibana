@@ -6,14 +6,9 @@
  */
 
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
-import { RuleFormFlyout } from '@kbn/response-ops-rule-form/flyout';
-import React, { useCallback, useEffect, useMemo } from 'react';
-import { isValidRuleFormPlugins } from '@kbn/response-ops-rule-form/lib';
-import { ES_QUERY_ID } from '@kbn/rule-data-utils';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { i18n } from '@kbn/i18n';
+import React, { useEffect, useMemo } from 'react';
 import { ExpressionWrapper } from '../expression_wrapper';
-import { LensInternalApi, LensApi, LensEmbeddableStartServices } from '../types';
+import { LensInternalApi, LensApi } from '../types';
 import { UserMessages } from '../user_messages/container';
 import { useMessages, useDispatcher } from './hooks';
 import { getViewMode } from '../helper';
@@ -22,12 +17,10 @@ import { addLog } from '../logger';
 export function LensEmbeddableComponent({
   internalApi,
   api,
-  services,
   onUnmount,
 }: {
   internalApi: LensInternalApi;
   api: LensApi;
-  services: LensEmbeddableStartServices;
   onUnmount: () => void;
 }) {
   const [
@@ -40,17 +33,11 @@ export function LensEmbeddableComponent({
     blockingErrors,
     // has the render completed?
     hasRendered,
-    isRuleFormVisible,
-    alertRuleInitialValues,
-    { ruleTypeRegistry, actionTypeRegistry },
   ] = useBatchedPublishingSubjects(
     internalApi.expressionParams$,
     internalApi.renderCount$,
     internalApi.validationMessages$,
     api.rendered$,
-    internalApi.isRuleFormVisible$,
-    internalApi.alertRuleInitialValues$,
-    internalApi.alertingTypeRegistries$,
     // listen to view change mode but do not use its actual value
     // just call the Lens API to know whether it's in edit mode
     api.viewMode$
@@ -82,35 +69,6 @@ export function LensEmbeddableComponent({
       }
     : undefined;
 
-  const ruleFormPlugins = useMemo(
-    () => ({
-      ...services,
-      ...services.coreStart,
-      http: services.coreHttp,
-    }),
-    [services]
-  );
-  const canShowRuleForm =
-    isValidRuleFormPlugins(ruleFormPlugins) && ruleTypeRegistry && actionTypeRegistry;
-  const closeRuleForm = useCallback(
-    () => internalApi.isRuleFormVisible$.next(false),
-    [internalApi.isRuleFormVisible$]
-  );
-  const alertRuleTitle = useMemo(
-    () =>
-      i18n.translate('xpack.lens.embeddable.alertRuleTitle', {
-        defaultMessage: '{title} rule',
-        values: {
-          title: title
-            ? title['data-title']
-            : i18n.translate('xpack.lens.embeddable.alertRuleTitle.defaultName', {
-                defaultMessage: 'Elasticsearch query from visualization',
-              }),
-        },
-      }),
-    [title]
-  );
-
   return (
     <div
       style={{ width: '100%', height: '100%' }}
@@ -130,17 +88,6 @@ export function LensEmbeddableComponent({
         infoMessages={infoMessages}
         canEdit={canEdit}
       />
-      {isRuleFormVisible && canShowRuleForm && (
-        <KibanaContextProvider services={ruleFormPlugins}>
-          <RuleFormFlyout
-            plugins={{ ...ruleFormPlugins, ruleTypeRegistry, actionTypeRegistry }}
-            ruleTypeId={ES_QUERY_ID}
-            initialValues={{ ...alertRuleInitialValues, name: alertRuleTitle }}
-            onCancel={closeRuleForm}
-            onSubmit={closeRuleForm}
-          />
-        </KibanaContextProvider>
-      )}
     </div>
   );
 }

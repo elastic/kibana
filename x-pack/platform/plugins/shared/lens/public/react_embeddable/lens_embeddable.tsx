@@ -121,7 +121,7 @@ export const createLensEmbeddableFactory = (
         services
       );
 
-      const alertRulesConfig = initializeAlertRules(internalApi, parentApi);
+      const alertRulesConfig = initializeAlertRules(uuid, parentApi, services);
 
       /**
        * This is useful to have always the latest version of the state
@@ -193,12 +193,7 @@ export const createLensEmbeddableFactory = (
       return {
         api,
         Component: () => (
-          <LensEmbeddableComponent
-            api={api}
-            internalApi={internalApi}
-            services={services}
-            onUnmount={onUnmount}
-          />
+          <LensEmbeddableComponent api={api} internalApi={internalApi} onUnmount={onUnmount} />
         ),
       };
     },
