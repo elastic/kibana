@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { uniq } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
 import { EuiSelectableOption, EuiSelectableProps } from '@elastic/eui';
 import { FilterGroup } from './filter_group';
 import { FIELD_STATUS_MAP } from '../constants';
 import { TControlsChangeHandler } from '../hooks/use_controls';
 import { SchemaFieldStatus } from '../types';
+import { useSchemaEditorContext } from '../schema_editor_context';
 
 const BUTTON_LABEL = i18n.translate(
   'xpack.streams.streamDetailSchemaEditor.fieldStatusFilterGroupButtonLabel',
@@ -20,14 +21,21 @@ const BUTTON_LABEL = i18n.translate(
 );
 
 export const FieldStatusFilterGroup = ({ onChange }: { onChange: TControlsChangeHandler }) => {
-  const [items, setItems] = useState<EuiSelectableOption[]>(() =>
-    Object.entries(FIELD_STATUS_MAP).map(([key, value]) => {
-      return {
-        label: value.label,
-        key,
-      };
-    })
-  );
+  const { fields } = useSchemaEditorContext();
+
+  const fieldStatus = useMemo(() => uniq(fields.map((field) => field.status)), [fields]);
+
+  const [items, setItems] = useState<EuiSelectableOption[]>(() => getStatusOptions(fieldStatus));
+
+  // This side effect is due to the fact that the available field status can be updated once the unmapped fields are fetched.
+  useEffect(() => {
+    setItems((prevItems) => {
+      const prevKeys = new Set(prevItems.map((item) => item.key as SchemaFieldStatus));
+      const newItems = fieldStatus.filter((key) => !prevKeys.has(key));
+
+      return [...prevItems, ...getStatusOptions(newItems)];
+    });
+  }, [fieldStatus]);
 
   const onChangeItems = useCallback<Required<EuiSelectableProps>['onChange']>(
     (nextItems) => {
@@ -44,4 +52,11 @@ export const FieldStatusFilterGroup = ({ onChange }: { onChange: TControlsChange
   return (
     <FilterGroup items={items} filterGroupButtonLabel={BUTTON_LABEL} onChange={onChangeItems} />
   );
+};
+
+const getStatusOptions = (fieldStatus: SchemaFieldStatus[]) => {
+  return fieldStatus.map((key) => ({
+    label: FIELD_STATUS_MAP[key].label,
+    key,
+  }));
 };

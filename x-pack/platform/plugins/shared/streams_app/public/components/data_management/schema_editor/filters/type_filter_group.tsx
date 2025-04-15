@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
+import { uniq } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
 import { EuiSelectableOption, EuiSelectableProps } from '@elastic/eui';
 import { FilterGroup } from './filter_group';
-import { FIELD_TYPE_MAP } from '../constants';
+import { FIELD_TYPE_MAP, FieldTypeOption } from '../constants';
 import { TControlsChangeHandler } from '../hooks/use_controls';
 import { SchemaFieldType } from '../types';
+import { useSchemaEditorContext } from '../schema_editor_context';
 
 const BUTTON_LABEL = i18n.translate(
   'xpack.streams.streamDetailSchemaEditor.fieldTypeFilterGroupButtonLabel',
@@ -20,10 +21,22 @@ const BUTTON_LABEL = i18n.translate(
 );
 
 export const FieldTypeFilterGroup = ({ onChange }: { onChange: TControlsChangeHandler }) => {
+  const { fields } = useSchemaEditorContext();
+
+  const fieldTypes = useMemo(
+    () =>
+      uniq(
+        fields
+          .map((field) => field.type)
+          .filter((type): type is FieldTypeOption => type !== undefined)
+      ),
+    [fields]
+  );
+
   const [items, setItems] = useState<EuiSelectableOption[]>(() =>
-    Object.entries(FIELD_TYPE_MAP).map(([key, value]) => {
+    fieldTypes.map((key) => {
       return {
-        label: value.label,
+        label: FIELD_TYPE_MAP[key].label,
         key,
       };
     })
