@@ -2436,6 +2436,8 @@
           "SecurityServiceStart",
           " | undefined; userProfile?: ",
           "UserProfileService",
+          " | undefined; rendering?: ",
+          "RenderingService",
           " | undefined; }"
         ],
         "path": "src/platform/plugins/shared/kibana_react/public/context/types.ts",

@@ -20,13 +20,33 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-rendering-browser-mocks",
+            "id": "def-public.renderingServiceMock.createInternal",
+            "type": "Function",
+            "tags": [],
+            "label": "createInternal",
+            "description": [],
+            "signature": [
+              "() => jest.Mocked<",
+              "RenderingServiceInternal",
+              ">"
+            ],
+            "path": "src/core/packages/rendering/browser-mocks/src/rendering_service.mock.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "@kbn/core-rendering-browser-mocks",
             "id": "def-public.renderingServiceMock.create",
             "type": "Function",
             "tags": [],
             "label": "create",
             "description": [],
             "signature": [
-              "() => jest.Mocked<RenderingServiceContract>"
+              "() => jest.Mocked<",
+              "RenderingService",
+              ">"
             ],
             "path": "src/core/packages/rendering/browser-mocks/src/rendering_service.mock.ts",
             "deprecated": false,

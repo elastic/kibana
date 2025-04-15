@@ -110,6 +110,8 @@
               "SecurityServiceStart",
               ">; userProfile: jest.Mocked<",
               "UserProfileService",
+              ">; rendering: jest.Mocked<",
+              "RenderingService",
               ">; plugins: { onStart: jest.Mock<any, any, any>; }; }, any, any]>, [], any>; http: ",
               "HttpSetupMock",
               "; notifications: ",
@@ -233,6 +235,8 @@
               "SecurityServiceStart",
               ">; userProfile: jest.Mocked<",
               "UserProfileService",
+              ">; rendering: jest.Mocked<",
+              "RenderingService",
               ">; plugins: { onStart: jest.Mock<any, any, any>; }; }"
             ],
             "path": "src/core/packages/lifecycle/browser-mocks/src/index.ts",
