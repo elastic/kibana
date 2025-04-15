@@ -152,16 +152,18 @@ export class ObservabilityAIAssistantClient {
         });
         message.message.sanitized = true;
 
-        message.message.detectedEntities = dedupedEntities.map((ent) => {
-          return {
-            entity: ent.entity,
-            class_name: ent.class_name,
-            start_pos: ent.start_pos,
-            end_pos: ent.end_pos,
-            type: ent.type,
-            hash: ent.hash,
-          };
-        });
+        if (dedupedEntities.length > 0) {
+          message.message.detectedEntities = dedupedEntities.map((ent) => {
+            return {
+              entity: ent.entity,
+              class_name: ent.class_name,
+              start_pos: ent.start_pos,
+              end_pos: ent.end_pos,
+              type: ent.type,
+              hash: ent.hash,
+            };
+          });
+        }
       }
     }
     return { sanitizedMessages: messages };
