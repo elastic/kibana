@@ -10,20 +10,20 @@
 import moment from 'moment/moment';
 import { log, timerange } from '@kbn/apm-synthtrace-client';
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../ftr_provider_context';
 import { MORE_THAN_1024_CHARS, STACKTRACE_MESSAGE } from '../const';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['common', 'discover']);
+  const PageObjects = getPageObjects(['common', 'discover', 'svlCommonPage']);
   const testSubjects = getService('testSubjects');
   const dataGrid = getService('dataGrid');
-  const synthtrace = getService('logSynthtraceEsClient');
+  const synthtrace = getService('svlLogsSynthtraceClient');
   const queryBar = getService('queryBar');
 
   const start = moment().subtract(30, 'minutes').valueOf();
   const end = moment().valueOf();
 
-  describe('extension getDocViewer ', () => {
+  describe('observability logs getDocViewer ', () => {
     before(async () => {
       await synthtrace.index([
         timerange(start, end)
@@ -36,13 +36,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               .timestamp(timestamp)
               .dataset('synth.1')
               .namespace('default')
-              .logLevel(index % 2 === 0 ? MORE_THAN_1024_CHARS : 'This is a log message')
+              .logLevel(index % 2 === 0 ? MORE_THAN_1024_CHARS : 'info')
               .defaults({
                 'service.name': 'synth-service',
                 ...(index % 2 === 0 && { 'error.stack_trace': STACKTRACE_MESSAGE }),
               })
           ),
       ]);
+
+      await PageObjects.svlCommonPage.loginAsAdmin();
 
       await PageObjects.common.navigateToActualUrl('discover', undefined, {
         ensureCurrentUrl: false,

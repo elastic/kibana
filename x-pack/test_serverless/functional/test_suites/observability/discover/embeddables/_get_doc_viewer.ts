@@ -10,20 +10,31 @@
 import moment from 'moment/moment';
 import { log, timerange } from '@kbn/apm-synthtrace-client';
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../ftr_provider_context';
 import { MORE_THAN_1024_CHARS, STACKTRACE_MESSAGE } from '../const';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['common', 'discover']);
+  const PageObjects = getPageObjects([
+    'common',
+    'discover',
+    'dashboard',
+    'header',
+    'svlCommonPage',
+  ]);
   const testSubjects = getService('testSubjects');
   const dataGrid = getService('dataGrid');
-  const synthtrace = getService('logSynthtraceEsClient');
+  const dashboardAddPanel = getService('dashboardAddPanel');
+  const synthtrace = getService('svlLogsSynthtraceClient');
   const queryBar = getService('queryBar');
+  const kibanaServer = getService('kibanaServer');
+  const dataViews = getService('dataViews');
 
   const start = moment().subtract(30, 'minutes').valueOf();
   const end = moment().valueOf();
 
-  describe('extension getDocViewer ', () => {
+  const searchQuery = 'error.stack_trace : * and _ignored : *';
+
+  describe('discover/observability saved search embeddable triggering getDocViewer ', () => {
     before(async () => {
       await synthtrace.index([
         timerange(start, end)
@@ -44,17 +55,35 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           ),
       ]);
 
+      await PageObjects.svlCommonPage.loginAsAdmin();
+
       await PageObjects.common.navigateToActualUrl('discover', undefined, {
         ensureCurrentUrl: false,
       });
 
-      await queryBar.setQuery('error.stack_trace : * and _ignored : *');
+      await queryBar.setQuery(searchQuery);
       await queryBar.submitQuery();
       await PageObjects.discover.waitUntilSearchingHasFinished();
+
+      // Required to access Dashboard page
+      await dataViews.createFromSearchBar({
+        name: 'logs-synth',
+      });
+
+      await PageObjects.discover.saveSearch('synth-search-doc-viewer');
+
+      await PageObjects.dashboard.navigateToApp();
+      await PageObjects.dashboard.gotoDashboardLandingPage();
+      await PageObjects.dashboard.clickNewDashboard();
+
+      await dashboardAddPanel.addSavedSearch('synth-search-doc-viewer');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.dashboard.waitForRenderComplete();
     });
 
     after(async () => {
       await synthtrace.clean();
+      await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern', 'dashboard'] });
     });
 
     afterEach(async () => {

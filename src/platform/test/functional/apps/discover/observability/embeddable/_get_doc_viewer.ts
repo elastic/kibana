@@ -11,7 +11,7 @@ import moment from 'moment/moment';
 import { log, timerange } from '@kbn/apm-synthtrace-client';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { MORE_THAN_1024_CHARS, STACKTRACE_MESSAGE } from '../common';
+import { MORE_THAN_1024_CHARS, STACKTRACE_MESSAGE } from '../const';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'discover', 'dashboard', 'header']);
