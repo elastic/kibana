@@ -36,10 +36,6 @@ export const startAction = (
   });
 };
 
-const isActiveRow = (id: string, activeRowId: string) => {
-  return id === activeRowId;
-};
-
 export const commitAction = ({
   activeRowEvent$,
   proposedGridLayout$,
@@ -93,13 +89,6 @@ export const moveAction = (
   const currentActiveRowEvent = gridLayoutStateManager.activeRowEvent$.getValue();
   if (!currentActiveRowEvent) return;
 
-  const currentLayout =
-    gridLayoutStateManager.proposedGridLayout$.getValue() ??
-    gridLayoutStateManager.gridLayout$.getValue();
-  const currentRowOrder = getRowKeysInOrder(currentLayout);
-
-  const dropTargetRowId = getDropTarget(currentPointer, gridLayoutStateManager);
-
   gridLayoutStateManager.activeRowEvent$.next({
     ...currentActiveRowEvent,
     translate: {
@@ -108,7 +97,18 @@ export const moveAction = (
     },
   });
 
-  if (dropTargetRowId && currentLayout[dropTargetRowId].isCollapsible) {
+  const currentLayout =
+    gridLayoutStateManager.proposedGridLayout$.getValue() ??
+    gridLayoutStateManager.gridLayout$.getValue();
+  const currentRowOrder = getRowKeysInOrder(currentLayout);
+
+  const dropTargetRowId = getDropTarget(currentPointer, gridLayoutStateManager);
+  if (!dropTargetRowId) return;
+
+  const dropTargetRow = currentLayout[dropTargetRowId];
+
+  // if the drop target row is collapsible, we only switch order of the rows
+  if (dropTargetRow.isCollapsible) {
     const updatedRowOrder = sortRowsByRefs(gridLayoutStateManager);
     if (!deepEqual(currentRowOrder, updatedRowOrder)) {
       const updatedLayout = cloneDeep(currentLayout);
@@ -117,7 +117,30 @@ export const moveAction = (
       });
       gridLayoutStateManager.proposedGridLayout$.next(updatedLayout);
     }
+    // if the drop target row is non collapsible, we might need to move panels
+  } else if (!dropTargetRow.isCollapsible) {
+    const rowPanels = dropTargetRow.panels;
+    const panelsBelowCursor = getPanelsBelowCursor(
+      currentPointer,
+      rowPanels,
+      gridLayoutStateManager
+    )
+    console.log('panelsBelowCursor', panelsBelowCursor);
   }
+};
+
+const getPanelsBelowCursor = (
+  currentPointer: PointerPosition,
+  rowPanels: GridRowData['panels'],
+  gridLayoutStateManager: GridLayoutStateManager
+) => {
+  const panelsBelowCursor = Object.keys(rowPanels).filter((panelId) => {
+    const panelRef = gridLayoutStateManager.panelRefs.current[panelId];
+    if (!panelRef) return false;
+    const { top } = panelRef.getBoundingClientRect();
+    return currentPointer.clientY <= top;
+  });
+  return panelsBelowCursor;
 };
 
 function getDropTarget(
