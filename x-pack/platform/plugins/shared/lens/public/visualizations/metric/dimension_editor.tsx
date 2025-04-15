@@ -327,7 +327,7 @@ function TrendEditor({
         helpText={
           isPrimaryMetricOptionSelected
             ? i18n.translate('xpack.lens.metric.secondaryMetric.compareTo.primaryHelpText', {
-                defaultMessage: '',
+                defaultMessage: ' ',
               })
             : undefined
         }
