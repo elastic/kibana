@@ -9,4 +9,4 @@
 
 export { BrandedLoadingIndicator } from './branded_loading_indicator';
 export { NoDataPage } from './no_data_page';
-export { DiscoverSessionView } from './session_view';
+export { DiscoverSessionView, type DiscoverSessionViewProps } from './session_view';

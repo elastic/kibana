@@ -16,17 +16,17 @@ export const setupOptionsListClusterSettingsRoute = ({ http }: CoreSetup) => {
     .get({
       access: 'internal',
       path: '/internal/controls/getExpensiveQueriesSetting',
+      security: {
+        authz: {
+          enabled: false,
+          reason:
+            'This route is opted out from authorization because it does not take a query, params, or a body, so there is no chance of leaking info.',
+        },
+      },
     })
     .addVersion(
       {
         version: '1',
-        security: {
-          authz: {
-            enabled: false,
-            reason:
-              'This route is opted out from authorization because it does not take a query, params, or a body, so there is no chance of leaking info.',
-          },
-        },
         validate: false,
       },
       async (context, _, response) => {

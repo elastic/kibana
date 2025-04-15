@@ -12,7 +12,7 @@ import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 import { SERVER_APP_ID } from '../../../../../common/constants';
 
 import { NewTermsRuleParams } from '../../rule_schema';
-import type { CreateRuleOptions, SecurityAlertType } from '../types';
+import type { SecurityAlertType } from '../types';
 import { singleSearchAfter } from '../utils/single_search_after';
 import { getFilter } from '../utils/get_filter';
 import { wrapNewTermsAlerts } from './wrap_new_terms_alerts';
@@ -50,10 +50,10 @@ import type { RulePreviewLoggedRequest } from '../../../../../common/api/detecti
 import * as i18n from '../translations';
 import { bulkCreate } from '../factories';
 
-export const createNewTermsAlertType = (
-  createOptions: CreateRuleOptions
-): SecurityAlertType<NewTermsRuleParams, { isLoggedRequestsEnabled?: boolean }> => {
-  const { logger, licensing, scheduleNotificationResponseActionsService } = createOptions;
+export const createNewTermsAlertType = (): SecurityAlertType<
+  NewTermsRuleParams,
+  { isLoggedRequestsEnabled?: boolean }
+> => {
   return {
     id: NEW_TERMS_RULE_TYPE_ID,
     name: 'New Terms Rule',
@@ -99,7 +99,7 @@ export const createNewTermsAlertType = (
     producer: SERVER_APP_ID,
     solution: 'security',
     async executor(execOptions) {
-      const { sharedParams, services, params, state } = execOptions;
+      const { sharedParams, services, params, state, logger } = execOptions;
 
       const {
         ruleExecutionLogger,
@@ -112,6 +112,8 @@ export const createNewTermsAlertType = (
         aggregatableTimestampField,
         exceptionFilter,
         unprocessedExceptions,
+        licensing,
+        scheduleNotificationResponseActionsService,
       } = sharedParams;
 
       const isLoggedRequestsEnabled = Boolean(state?.isLoggedRequestsEnabled);

@@ -5,4 +5,8 @@
  * 2.0.
  */
 
-export { NeedLicenseUpgrade, type NeedLicenseUpgradeProps } from './need_license_upgrade';
+export {
+  NeedLicenseUpgrade,
+  type NeedLicenseUpgradeProps,
+  DATA_TEST_SUBJ_MANAGE_LICENSE_BUTTON,
+} from './need_license_upgrade';

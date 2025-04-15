@@ -9,7 +9,6 @@
 
 import React, { useEffect } from 'react';
 import { RootDragDropProvider } from '@kbn/dom-drag-drop';
-import { useUrlTracking } from '../../hooks/use_url_tracking';
 import type { DiscoverStateContainer } from '../../state_management/discover_state';
 import { DiscoverLayout } from '../layout';
 import { setBreadcrumbs } from '../../../../utils/breadcrumbs';
@@ -19,7 +18,6 @@ import { useSavedSearchAliasMatchRedirect } from '../../../../hooks/saved_search
 import { useSavedSearchInitial } from '../../state_management/discover_state_provider';
 import { useAdHocDataViews } from '../../hooks/use_adhoc_data_views';
 import { useEsqlMode } from '../../hooks/use_esql_mode';
-import { addLog } from '../../../../utils/add_log';
 
 const DiscoverLayoutMemoized = React.memo(DiscoverLayout);
 
@@ -30,18 +28,15 @@ export interface DiscoverMainProps {
   stateContainer: DiscoverStateContainer;
 }
 
-export function DiscoverMainApp(props: DiscoverMainProps) {
-  const { stateContainer } = props;
+export function DiscoverMainApp({ stateContainer }: DiscoverMainProps) {
   const savedSearch = useSavedSearchInitial();
   const services = useDiscoverServices();
   const { chrome, docLinks, data, spaces, history } = services;
 
-  useUrlTracking(stateContainer);
-
   /**
    * Adhoc data views functionality
    */
-  useAdHocDataViews({ stateContainer, services });
+  useAdHocDataViews();
 
   /**
    * State changes (data view, columns), when a text base query result is returned
@@ -50,16 +45,6 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
     dataViews: services.dataViews,
     stateContainer,
   });
-
-  /**
-   * Start state syncing and fetch data if necessary
-   */
-  useEffect(() => {
-    const unsubscribe = stateContainer.actions.initializeAndSync();
-    addLog('[DiscoverMainApp] state container initialization triggers data fetching');
-    stateContainer.actions.fetchData(true);
-    return () => unsubscribe();
-  }, [stateContainer]);
 
   /**
    * SavedSearch dependent initializing

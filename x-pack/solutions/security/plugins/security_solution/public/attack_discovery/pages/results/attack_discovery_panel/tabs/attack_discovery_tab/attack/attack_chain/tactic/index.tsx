@@ -61,7 +61,7 @@ const TacticComponent: React.FC<Props> = ({ detected, tactic }) => {
           grow={false}
         >
           <div
-            // eslint-disable-next-line @kbn/css/no_css_color -- euiTheme.colors.danger is a string
+            // eslint-disable-next-line @elastic/eui/no-css-color -- euiTheme.colors.danger is a string
             css={css`
               background: transparent;
               border: 2px solid ${color};
@@ -74,7 +74,7 @@ const TacticComponent: React.FC<Props> = ({ detected, tactic }) => {
             data-test-subj="innerCircle"
           />
           <div
-            // eslint-disable-next-line @kbn/css/no_css_color -- euiTheme.colors.danger is a string
+            // eslint-disable-next-line @elastic/eui/no-css-color -- euiTheme.colors.danger is a string
             css={css`
               background: transparent;
               border: 2px solid ${color};

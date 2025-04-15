@@ -146,7 +146,6 @@ export const groupAndBulkCreate = async ({
       searchAfterTimes: [],
       enrichmentTimes: [],
       bulkCreateTimes: [],
-      lastLookBackDate: null,
       createdSignalsCount: 0,
       createdSignals: [],
       errors: [],

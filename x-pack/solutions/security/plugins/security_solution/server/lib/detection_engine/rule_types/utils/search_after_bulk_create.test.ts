@@ -35,7 +35,7 @@ import {
   SPACE_IDS,
   TIMESTAMP,
 } from '@kbn/rule-data-utils';
-import type { BulkResponse } from '../types';
+import type { BulkResponse } from '@elastic/elasticsearch/lib/api/types';
 import { getQueryRuleParams } from '../../rule_schema/mocks';
 import type { BuildReasonMessage } from './reason_formatters';
 import { SERVER_APP_ID } from '../../../../../common/constants';
@@ -178,7 +178,7 @@ describe('searchAfterAndBulkCreate', () => {
       },
     ];
 
-    const { success, createdSignalsCount, lastLookBackDate } = await searchAfterAndBulkCreate({
+    const { success, createdSignalsCount } = await searchAfterAndBulkCreate({
       sharedParams: {
         ...sharedParams,
         unprocessedExceptions: [exceptionItem],
@@ -191,7 +191,6 @@ describe('searchAfterAndBulkCreate', () => {
     expect(success).toEqual(true);
     expect(ruleServices.scopedClusterClient.asCurrentUser.search).toHaveBeenCalledTimes(5);
     expect(createdSignalsCount).toEqual(4);
-    expect(lastLookBackDate).toEqual(new Date('2020-04-20T21:27:45+0000'));
   });
 
   test('should return success with number of searches less than max signals with gap', async () => {
@@ -266,7 +265,7 @@ describe('searchAfterAndBulkCreate', () => {
         },
       },
     ];
-    const { success, createdSignalsCount, lastLookBackDate } = await searchAfterAndBulkCreate({
+    const { success, createdSignalsCount } = await searchAfterAndBulkCreate({
       sharedParams: {
         ...sharedParams,
         unprocessedExceptions: [exceptionItem],
@@ -280,7 +279,6 @@ describe('searchAfterAndBulkCreate', () => {
     expect(success).toEqual(true);
     expect(ruleServices.scopedClusterClient.asCurrentUser.search).toHaveBeenCalledTimes(4);
     expect(createdSignalsCount).toEqual(3);
-    expect(lastLookBackDate).toEqual(new Date('2020-04-20T21:27:45+0000'));
   });
 
   test('should return success when no search results are in the allowlist', async () => {
@@ -335,7 +333,7 @@ describe('searchAfterAndBulkCreate', () => {
         },
       },
     ];
-    const { success, createdSignalsCount, lastLookBackDate } = await searchAfterAndBulkCreate({
+    const { success, createdSignalsCount } = await searchAfterAndBulkCreate({
       sharedParams: {
         ...sharedParams,
         unprocessedExceptions: [exceptionItem],
@@ -348,7 +346,6 @@ describe('searchAfterAndBulkCreate', () => {
     expect(success).toEqual(true);
     expect(ruleServices.scopedClusterClient.asCurrentUser.search).toHaveBeenCalledTimes(2);
     expect(createdSignalsCount).toEqual(4);
-    expect(lastLookBackDate).toEqual(new Date('2020-04-20T21:27:45+0000'));
   });
 
   test('should return success when all search results are in the allowlist and with sortId present', async () => {
@@ -387,7 +384,7 @@ describe('searchAfterAndBulkCreate', () => {
         },
       },
     ];
-    const { success, createdSignalsCount, lastLookBackDate } = await searchAfterAndBulkCreate({
+    const { success, createdSignalsCount } = await searchAfterAndBulkCreate({
       sharedParams: {
         ...sharedParams,
         unprocessedExceptions: [exceptionItem],
@@ -400,7 +397,6 @@ describe('searchAfterAndBulkCreate', () => {
     expect(success).toEqual(true);
     expect(ruleServices.scopedClusterClient.asCurrentUser.search).toHaveBeenCalledTimes(2);
     expect(createdSignalsCount).toEqual(0); // should not create any signals because all events were in the allowlist
-    expect(lastLookBackDate).toEqual(new Date('2020-04-20T21:27:45+0000'));
   });
 
   test('should return success when empty string sortId present', async () => {
@@ -449,7 +445,7 @@ describe('searchAfterAndBulkCreate', () => {
         )
       );
 
-    const { success, createdSignalsCount, lastLookBackDate } = await searchAfterAndBulkCreate({
+    const { success, createdSignalsCount } = await searchAfterAndBulkCreate({
       sharedParams,
       services: ruleServices,
       eventsTelemetry: undefined,
@@ -459,7 +455,6 @@ describe('searchAfterAndBulkCreate', () => {
     expect(success).toEqual(true);
     expect(ruleServices.scopedClusterClient.asCurrentUser.search).toHaveBeenCalledTimes(2);
     expect(createdSignalsCount).toEqual(4);
-    expect(lastLookBackDate).toEqual(new Date('2020-04-20T21:27:45+0000'));
   });
 
   test('should return success when all search results are in the allowlist and no sortId present', async () => {
@@ -494,7 +489,7 @@ describe('searchAfterAndBulkCreate', () => {
         },
       },
     ];
-    const { success, createdSignalsCount, lastLookBackDate } = await searchAfterAndBulkCreate({
+    const { success, createdSignalsCount } = await searchAfterAndBulkCreate({
       sharedParams: {
         ...sharedParams,
         unprocessedExceptions: [exceptionItem],
@@ -507,7 +502,6 @@ describe('searchAfterAndBulkCreate', () => {
     expect(success).toEqual(true);
     expect(ruleServices.scopedClusterClient.asCurrentUser.search).toHaveBeenCalledTimes(1);
     expect(createdSignalsCount).toEqual(0); // should not create any signals because all events were in the allowlist
-    expect(lastLookBackDate).toEqual(new Date('2020-04-20T21:27:45+0000'));
   });
 
   test('should return success when no sortId present but search results are in the allowlist', async () => {
@@ -556,7 +550,7 @@ describe('searchAfterAndBulkCreate', () => {
         },
       },
     ];
-    const { success, createdSignalsCount, lastLookBackDate } = await searchAfterAndBulkCreate({
+    const { success, createdSignalsCount } = await searchAfterAndBulkCreate({
       sharedParams: {
         ...sharedParams,
         unprocessedExceptions: [exceptionItem],
@@ -569,7 +563,6 @@ describe('searchAfterAndBulkCreate', () => {
     expect(success).toEqual(true);
     expect(ruleServices.scopedClusterClient.asCurrentUser.search).toHaveBeenCalledTimes(1);
     expect(createdSignalsCount).toEqual(4);
-    expect(lastLookBackDate).toEqual(new Date('2020-04-20T21:27:45+0000'));
   });
 
   test('should return success when no exceptions list provided', async () => {
@@ -620,7 +613,7 @@ describe('searchAfterAndBulkCreate', () => {
         }))
       )
     );
-    const { success, createdSignalsCount, lastLookBackDate } = await searchAfterAndBulkCreate({
+    const { success, createdSignalsCount } = await searchAfterAndBulkCreate({
       sharedParams,
       services: ruleServices,
       eventsTelemetry: undefined,
@@ -630,7 +623,6 @@ describe('searchAfterAndBulkCreate', () => {
     expect(success).toEqual(true);
     expect(ruleServices.scopedClusterClient.asCurrentUser.search).toHaveBeenCalledTimes(2);
     expect(createdSignalsCount).toEqual(4);
-    expect(lastLookBackDate).toEqual(new Date('2020-04-20T21:27:45+0000'));
   });
 
   test('should return success with 0 total hits', async () => {
@@ -657,7 +649,7 @@ describe('searchAfterAndBulkCreate', () => {
         }))
       )
     );
-    const { success, createdSignalsCount, lastLookBackDate } = await searchAfterAndBulkCreate({
+    const { success, createdSignalsCount } = await searchAfterAndBulkCreate({
       sharedParams: {
         ...sharedParams,
         unprocessedExceptions: [exceptionItem],
@@ -669,7 +661,6 @@ describe('searchAfterAndBulkCreate', () => {
     });
     expect(success).toEqual(true);
     expect(createdSignalsCount).toEqual(0);
-    expect(lastLookBackDate).toEqual(null);
   });
 
   test('if returns false when singleSearchAfter throws an exception', async () => {
@@ -696,7 +687,7 @@ describe('searchAfterAndBulkCreate', () => {
         },
       },
     ];
-    const { success, createdSignalsCount, lastLookBackDate } = await searchAfterAndBulkCreate({
+    const { success, createdSignalsCount } = await searchAfterAndBulkCreate({
       sharedParams: {
         ...sharedParams,
         unprocessedExceptions: [exceptionItem],
@@ -708,7 +699,6 @@ describe('searchAfterAndBulkCreate', () => {
     });
     expect(success).toEqual(false);
     expect(createdSignalsCount).toEqual(0); // should not create signals if search threw error
-    expect(lastLookBackDate).toEqual(null);
   });
 
   test('it returns error array when singleSearchAfter returns errors', async () => {
@@ -816,19 +806,17 @@ describe('searchAfterAndBulkCreate', () => {
         sampleDocSearchResultsNoSortIdNoHits()
       )
     );
-    const { success, createdSignalsCount, lastLookBackDate, errors } =
-      await searchAfterAndBulkCreate({
-        sharedParams,
-        services: ruleServices,
-        eventsTelemetry: undefined,
-        filter: defaultFilter,
-        buildReasonMessage,
-      });
+    const { success, createdSignalsCount, errors } = await searchAfterAndBulkCreate({
+      sharedParams,
+      services: ruleServices,
+      eventsTelemetry: undefined,
+      filter: defaultFilter,
+      buildReasonMessage,
+    });
     expect(success).toEqual(false);
     expect(errors).toEqual(['error on creation']);
     expect(ruleServices.scopedClusterClient.asCurrentUser.search).toHaveBeenCalledTimes(5);
     expect(createdSignalsCount).toEqual(4);
-    expect(lastLookBackDate).toEqual(new Date('2020-04-20T21:27:45+0000'));
   });
 
   it('invokes the enrichment callback with signal search results', async () => {
@@ -893,7 +881,7 @@ describe('searchAfterAndBulkCreate', () => {
     );
 
     const mockEnrichment = jest.fn((a) => a);
-    const { success, createdSignalsCount, lastLookBackDate } = await searchAfterAndBulkCreate({
+    const { success, createdSignalsCount } = await searchAfterAndBulkCreate({
       sharedParams,
       enrichment: mockEnrichment,
       services: ruleServices,
@@ -927,6 +915,5 @@ describe('searchAfterAndBulkCreate', () => {
     expect(success).toEqual(true);
     expect(ruleServices.scopedClusterClient.asCurrentUser.search).toHaveBeenCalledTimes(4);
     expect(createdSignalsCount).toEqual(3);
-    expect(lastLookBackDate).toEqual(new Date('2020-04-20T21:27:45+0000'));
   });
 });

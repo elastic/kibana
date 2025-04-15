@@ -26,6 +26,7 @@ import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
 import type { ConsolePluginStart } from '@kbn/console-plugin/public';
+import type { StreamsPluginStart } from '@kbn/streams-plugin/public';
 
 import { EuiBreadcrumb } from '@elastic/eui';
 import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
@@ -55,6 +56,7 @@ export interface AppDependencies {
     console?: ConsolePluginStart;
     licensing?: LicensingPluginStart;
     ml?: MlPluginStart;
+    streams?: StreamsPluginStart;
   };
   services: {
     uiMetricService: UiMetricService;

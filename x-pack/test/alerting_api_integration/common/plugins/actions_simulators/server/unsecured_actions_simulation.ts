@@ -20,6 +20,12 @@ export function initPlugin(router: IRouter, coreSetup: CoreSetup<FixtureStartDep
   router.post(
     {
       path: `/api/sample_unsecured_action`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: schema.object({
           requesterId: schema.string(),
@@ -51,6 +57,12 @@ export function initPlugin(router: IRouter, coreSetup: CoreSetup<FixtureStartDep
   router.post(
     {
       path: `/api/execute_unsecured_action`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: schema.object({
           requesterId: schema.string(),
@@ -98,6 +110,12 @@ export function initPlugin(router: IRouter, coreSetup: CoreSetup<FixtureStartDep
   router.post(
     {
       path: `/api/get_all_unsecured_actions`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: schema.object({
           spaceId: schema.string(),

@@ -179,6 +179,30 @@ describe('single line query', () => {
         );
       });
     });
+
+    describe('FORK', () => {
+      test('from single line', () => {
+        const { text } =
+          reprint(`FROM index | FORK (WHERE keywordField != "" | LIMIT 100) (SORT doubleField ASC NULLS LAST)
+          `);
+
+        expect(text).toBe(
+          'FROM index | FORK (WHERE keywordField != "" | LIMIT 100) (SORT doubleField ASC NULLS LAST)'
+        );
+      });
+
+      test('from multiline', () => {
+        const { text } = reprint(`FROM index
+| FORK
+    (WHERE keywordField != "" | LIMIT 100)
+    (SORT doubleField ASC NULLS LAST)
+          `);
+
+        expect(text).toBe(
+          'FROM index | FORK (WHERE keywordField != "" | LIMIT 100) (SORT doubleField ASC NULLS LAST)'
+        );
+      });
+    });
   });
 
   describe('expressions', () => {
@@ -210,13 +234,31 @@ describe('single line query', () => {
       test('quoted source', () => {
         const { text } = reprint('FROM "quoted"');
 
-        expect(text).toBe('FROM quoted');
+        expect(text).toBe('FROM "quoted"');
       });
 
       test('triple-quoted source', () => {
         const { text } = reprint('FROM """quoted"""');
 
-        expect(text).toBe('FROM quoted');
+        expect(text).toBe('FROM "quoted"');
+      });
+
+      test('source selector', () => {
+        const { text } = reprint('FROM index::selector');
+
+        expect(text).toBe('FROM index::selector');
+      });
+
+      test('single-double quoted source selector', () => {
+        const { text } = reprint('FROM index::"selector"');
+
+        expect(text).toBe('FROM index::"selector"');
+      });
+
+      test('triple-double quoted source selector', () => {
+        const { text } = reprint('FROM index::"""say "jump"!"""');
+
+        expect(text).toBe('FROM index::"say \\"jump\\"!"');
       });
     });
 
@@ -609,6 +651,17 @@ describe('multiline query', () => {
     const text = multiline(query, { pipeTab: '' }).text;
 
     expect(text).toBe(query);
+  });
+
+  test('keeps FORK branches on single lines', () => {
+    const { text } = multiline(
+      `FROM index| FORK (WHERE keywordField != "" | LIMIT 100)(SORT doubleField ASC NULLS LAST)`
+    );
+
+    expect(text).toBe(`FROM index
+  | FORK
+    (WHERE keywordField != "" | LIMIT 100)
+    (SORT doubleField ASC NULLS LAST)`);
   });
 });
 

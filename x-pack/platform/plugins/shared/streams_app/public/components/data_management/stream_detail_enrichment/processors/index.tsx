@@ -38,16 +38,19 @@ import {
   isDissectProcessor,
   getDefaultFormStateByType,
   isDateProcessor,
+  SPECIALISED_TYPES,
 } from '../utils';
 import { ProcessorErrors, ProcessorMetricBadges } from './processor_metrics';
 import {
   useStreamEnrichmentEvents,
   useStreamsEnrichmentSelector,
   useSimulatorSelector,
-  StreamEnrichmentContext,
+  StreamEnrichmentContextType,
 } from '../state_management/stream_enrichment_state_machine';
 import { ProcessorMetrics } from '../state_management/simulation_state_machine';
 import { DateProcessorForm } from './date';
+import { ConfigDrivenProcessorFields } from './config_driven/components/fields';
+import { ConfigDrivenProcessorType } from './config_driven/types';
 
 export function AddProcessorPanel() {
   const { euiTheme } = useEuiTheme();
@@ -171,6 +174,9 @@ export function AddProcessorPanel() {
             {type === 'date' && <DateProcessorForm />}
             {type === 'dissect' && <DissectProcessorForm />}
             {type === 'grok' && <GrokProcessorForm />}
+            {!SPECIALISED_TYPES.includes(type) && (
+              <ConfigDrivenProcessorFields type={type as ConfigDrivenProcessorType} />
+            )}
           </EuiForm>
           {processorMetrics && !isEmpty(processorMetrics.errors) && (
             <ProcessorErrors metrics={processorMetrics} />
@@ -194,13 +200,14 @@ const createDraftProcessorFromForm = (
 };
 
 export interface EditProcessorPanelProps {
-  processorRef: StreamEnrichmentContext['processorsRefs'][number];
+  processorRef: StreamEnrichmentContextType['processorsRefs'][number];
   processorMetrics?: ProcessorMetrics;
 }
 
 export function EditProcessorPanel({ processorRef, processorMetrics }: EditProcessorPanelProps) {
   const { euiTheme } = useEuiTheme();
   const state = useSelector(processorRef, (s) => s);
+  const canEdit = useStreamsEnrichmentSelector((s) => s.context.definition.privileges.simulate);
   const previousProcessor = state.context.previousProcessor;
   const processor = state.context.processor;
 
@@ -337,6 +344,7 @@ export function EditProcessorPanel({ processorRef, processorMetrics }: EditProce
                 data-test-subj="streamsAppEditProcessorPanelButton"
                 onClick={handleOpen}
                 iconType="pencil"
+                disabled={!canEdit}
                 color="text"
                 size="xs"
                 aria-label={i18n.translate(
@@ -357,6 +365,9 @@ export function EditProcessorPanel({ processorRef, processorMetrics }: EditProce
             {type === 'date' && <DateProcessorForm />}
             {type === 'grok' && <GrokProcessorForm />}
             {type === 'dissect' && <DissectProcessorForm />}
+            {!SPECIALISED_TYPES.includes(type) && (
+              <ConfigDrivenProcessorFields type={type as ConfigDrivenProcessorType} />
+            )}
           </EuiForm>
           <EuiHorizontalRule margin="m" />
           <EuiButton

@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { JsonObject } from '@kbn/utility-types';
+import type { JsonObject } from '@kbn/utility-types';
 import { keys } from 'lodash';
 import { set } from '@kbn/safer-lodash-set';
 import { isOk, unwrap } from '../lib/result_type';
-import { TaskLifecycleEvent } from '../polling_lifecycle';
-import { TaskManagerMetric } from '../task_events';
+import type { TaskLifecycleEvent } from '../polling_lifecycle';
+import type { TaskManagerMetric } from '../task_events';
 import { getTaskTypeGroup, type SerializedHistogram, SimpleHistogram } from './lib';
-import { TaskManagerMetrics } from './task_metrics_collector';
-import { ITaskMetricsAggregator } from './types';
+import type { TaskManagerMetrics } from './task_metrics_collector';
+import type { ITaskMetricsAggregator } from './types';
 
 const HDR_HISTOGRAM_MAX = 5400; // 90 minutes
 const HDR_HISTOGRAM_BUCKET_SIZE = 10; // 10 seconds
@@ -78,7 +78,7 @@ export class TaskOverdueMetricsAggregator implements ITaskMetricsAggregator<Task
       for (const key of Object.keys(metric.numOverdueTasks)) {
         const hist = new SimpleHistogram(HDR_HISTOGRAM_MAX, HDR_HISTOGRAM_BUCKET_SIZE);
         (metric.numOverdueTasks[key] ?? []).forEach((bucket) => {
-          const overdueInSec = parseInt(bucket.key, 10);
+          const overdueInSec = parseInt(`${bucket.key}`, 10);
           hist.record(overdueInSec, bucket.doc_count);
 
           if (key === 'total') {

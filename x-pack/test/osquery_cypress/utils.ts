@@ -161,10 +161,7 @@ export const getLatestAvailableAgentVersion = async (kbnClient: KbnClient): Prom
     ? semver.maxSatisfying(agentVersions, `<=${kbnStatus.version.number}`)
     : kbnStatus.version.number;
 
-  const shouldAddSnapshot =
-    kbnStatus.version.build_snapshot || kbnStatus.version.build_hash.startsWith('XXXXXXXXXXXXXXX');
-
-  return shouldAddSnapshot ? `${version}-SNAPSHOT` : version;
+  return `${version}-SNAPSHOT`;
 };
 
 export const generateRandomString = (length: number) => {

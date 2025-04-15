@@ -6,7 +6,7 @@
  */
 
 import type { IRouter } from '@kbn/core/server';
-import { ApiPrivileges } from '@kbn/security-authorization-core-common';
+import { ApiPrivileges } from '@kbn/core-security-server';
 import {
   INSTALLATION_STATUS_API_PATH,
   INSTALL_ALL_API_PATH,

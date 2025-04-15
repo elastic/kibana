@@ -10,7 +10,7 @@
 import {
   AstProviderFn,
   ESQLAst,
-  ESQLAstMetricsCommand,
+  ESQLAstTimeseriesCommand,
   ESQLColumn,
   ESQLCommand,
   ESQLCommandOption,
@@ -28,6 +28,7 @@ import {
   isFunctionItem,
   isOptionItem,
   isParametrized,
+  isSingleItem,
   isSourceItem,
   isTimeIntervalItem,
   sourceExists,
@@ -53,7 +54,7 @@ import type {
 } from './types';
 
 import { validate as validateJoinCommand } from './commands/join';
-import { validate as validateMetricsCommand } from './commands/metrics';
+import { validate as validateTimeseriesCommand } from './commands/metrics';
 
 /**
  * ES|QL validation public API
@@ -172,15 +173,23 @@ async function validateAst(
   messages.push(...validateFieldsShadowing(availableFields, variables));
   messages.push(...validateUnsupportedTypeFields(availableFields, ast));
 
+  const references: ReferenceMaps = {
+    sources,
+    fields: availableFields,
+    policies: availablePolicies,
+    variables,
+    query: queryString,
+    joinIndices: joinIndices?.indices || [],
+  };
+  let seenFork = false;
   for (const [index, command] of ast.entries()) {
-    const references: ReferenceMaps = {
-      sources,
-      fields: availableFields,
-      policies: availablePolicies,
-      variables,
-      query: queryString,
-      joinIndices: joinIndices?.indices || [],
-    };
+    if (command.name === 'fork') {
+      if (seenFork) {
+        messages.push(errors.tooManyForks(command));
+      } else {
+        seenFork = true;
+      }
+    }
     const commandMessages = validateCommand(command, references, ast, index);
     messages.push(...commandMessages);
   }
@@ -213,9 +222,9 @@ function validateCommand(
   }
 
   switch (commandDef.name) {
-    case 'metrics': {
-      const metrics = command as ESQLAstMetricsCommand;
-      const metricsCommandErrors = validateMetricsCommand(metrics, references);
+    case 'ts': {
+      const metrics = command as ESQLAstTimeseriesCommand;
+      const metricsCommandErrors = validateTimeseriesCommand(metrics, references);
       messages.push(...metricsCommandErrors);
       break;
     }
@@ -224,6 +233,21 @@ function validateCommand(
       const joinCommandErrors = validateJoinCommand(join, references);
       messages.push(...joinCommandErrors);
       break;
+    }
+    case 'fork': {
+      references.fields.set('_fork', {
+        name: '_fork',
+        type: 'keyword',
+      });
+
+      for (const arg of command.args.flat()) {
+        if (isSingleItem(arg) && arg.type === 'query') {
+          // all the args should be commands
+          arg.commands.forEach((subCommand) => {
+            messages.push(...validateCommand(subCommand, references, ast, currentCommandIndex));
+          });
+        }
+      }
     }
     default: {
       // Now validate arguments
@@ -370,14 +394,18 @@ export function validateSource(source: ESQLSource, { sources }: ReferenceMaps) {
     return messages;
   }
 
-  if (source.sourceType === 'index' && !sourceExists(source.name, sources)) {
-    messages.push(
-      getMessageFromId({
-        messageId: 'unknownIndex',
-        values: { name: source.name },
-        locations: source.location,
-      })
-    );
+  if (source.sourceType === 'index') {
+    const index = source.index;
+    const indexName = source.cluster ? source.name : index?.valueUnquoted;
+    if (indexName && !sourceExists(indexName, sources)) {
+      messages.push(
+        getMessageFromId({
+          messageId: 'unknownIndex',
+          values: { name: source.name },
+          locations: source.location,
+        })
+      );
+    }
   }
 
   return messages;
@@ -393,7 +421,7 @@ export function validateColumnForCommand(
     if (!references.variables.has(column.name) && !isParametrized(column)) {
       messages.push(errors.unknownColumn(column));
     }
-  } else if (!getColumnExists(column, references)) {
+  } else if (!getColumnExists(column, references) && !isParametrized(column)) {
     messages.push(errors.unknownColumn(column));
   }
 
