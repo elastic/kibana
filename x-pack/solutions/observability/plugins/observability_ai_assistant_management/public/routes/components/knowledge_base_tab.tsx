@@ -28,7 +28,10 @@ import {
 } from '@elastic/eui';
 import { WelcomeMessageKnowledgeBase } from '@kbn/ai-assistant/src/chat/welcome_message_knowledge_base';
 import { css } from '@emotion/css';
-import { KnowledgeBaseEntry } from '@kbn/observability-ai-assistant-plugin/public';
+import {
+  KnowledgeBaseEntry,
+  KnowledgeBaseState,
+} from '@kbn/observability-ai-assistant-plugin/public';
 import { useKnowledgeBase } from '@kbn/ai-assistant/src/hooks';
 import { AssistantBeacon } from '@kbn/ai-assistant-icon';
 import { useGetKnowledgeBaseEntries } from '../../hooks/use_get_knowledge_base_entries';
@@ -233,7 +236,7 @@ export function KnowledgeBaseTab() {
     );
   }
 
-  return knowledgeBase.status.value?.ready ? (
+  return knowledgeBase.status.value?.kbState === KnowledgeBaseState.READY ? (
     <>
       <EuiFlexGroup direction="column">
         <EuiFlexItem grow={false}>

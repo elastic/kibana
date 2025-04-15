@@ -6,13 +6,66 @@
  */
 
 import { EuiIcon } from '@elastic/eui';
-import React from 'react';
+import React, { memo } from 'react';
 import type { GroupStatsItem, RawBucket } from '@kbn/grouping';
+import type { GenericBuckets } from '@kbn/grouping/src';
 import { DEFAULT_GROUP_STATS_RENDERER } from '../alerts_grouping';
 import type { AlertsGroupingAggregation } from './types';
 import * as i18n from '../translations';
 
-const getSeverity = (severity?: string) => {
+export const getUsersBadge = (bucket: RawBucket<AlertsGroupingAggregation>): GroupStatsItem => ({
+  title: i18n.STATS_GROUP_USERS,
+  badge: {
+    value: bucket.usersCountAggregation?.value ?? 0,
+  },
+});
+export const getHostsBadge = (bucket: RawBucket<AlertsGroupingAggregation>): GroupStatsItem => ({
+  title: i18n.STATS_GROUP_HOSTS,
+  badge: {
+    value: bucket.hostsCountAggregation?.value ?? 0,
+  },
+});
+export const getRulesBadge = (bucket: RawBucket<AlertsGroupingAggregation>): GroupStatsItem => ({
+  title: i18n.STATS_GROUP_RULES,
+  badge: {
+    value: bucket.rulesCountAggregation?.value ?? 0,
+  },
+});
+
+interface SingleSeverityProps {
+  /**
+   * Aggregation buckets for severities
+   */
+  severities: GenericBuckets[];
+}
+
+/**
+ * Returns a colored icon and severity value (low, medium, high or critical) if only a single bucket is passed in.
+ * If the value of the severity is null or incorrect, we return Unknown.
+ * If there are multiple buckets, we return multiple icons.
+ */
+export const Severity = memo(({ severities }: SingleSeverityProps) => {
+  if (severities.length > 1) {
+    return (
+      <>
+        <span className="smallDot">
+          <EuiIcon type="dot" color="#54b399" />
+        </span>
+        <span className="smallDot">
+          <EuiIcon type="dot" color="#d6bf57" />
+        </span>
+        <span className="smallDot">
+          <EuiIcon type="dot" color="#da8b45" />
+        </span>
+        <span>
+          <EuiIcon type="dot" color="#e7664c" />
+        </span>
+        {i18n.STATS_GROUP_SEVERITY_MULTI}
+      </>
+    );
+  }
+
+  const severity = severities[0].key;
   switch (severity) {
     case 'low':
       return (
@@ -42,28 +95,31 @@ const getSeverity = (severity?: string) => {
           {i18n.STATS_GROUP_SEVERITY_CRITICAL}
         </>
       );
+    default:
+      return <>{i18n.STATS_GROUP_SEVERITY_UNKNOWN}</>;
   }
-  return null;
+});
+Severity.displayName = 'Severity';
+
+/**
+ * Return a renderer for the severities aggregation.
+ */
+export const getSeverityComponent = (
+  bucket: RawBucket<AlertsGroupingAggregation>
+): GroupStatsItem[] => {
+  const severities = bucket.severitiesSubAggregation?.buckets;
+
+  if (!severities || severities.length === 0) {
+    return [];
+  }
+
+  return [
+    {
+      title: i18n.STATS_GROUP_SEVERITY,
+      component: <Severity severities={severities} />,
+    },
+  ];
 };
-
-const multiSeverity = (
-  <>
-    <span className="smallDot">
-      <EuiIcon type="dot" color="#54b399" />
-    </span>
-    <span className="smallDot">
-      <EuiIcon type="dot" color="#d6bf57" />
-    </span>
-    <span className="smallDot">
-      <EuiIcon type="dot" color="#da8b45" />
-    </span>
-
-    <span>
-      <EuiIcon type="dot" color="#e7664c" />
-    </span>
-    {i18n.STATS_GROUP_SEVERITY_MULTI}
-  </>
-);
 
 /**
  * Returns statistics to be used in the`extraAction` property of the EuiAccordion component used within the kbn-grouping package.
@@ -80,88 +136,20 @@ export const defaultGroupStatsRenderer = (
   selectedGroup: string,
   bucket: RawBucket<AlertsGroupingAggregation>
 ): GroupStatsItem[] => {
-  const singleSeverityComponent =
-    bucket.severitiesSubAggregation?.buckets && bucket.severitiesSubAggregation?.buckets?.length
-      ? getSeverity(bucket.severitiesSubAggregation?.buckets[0].key.toString())
-      : null;
-  const severityComponent =
-    bucket.countSeveritySubAggregation?.value && bucket.countSeveritySubAggregation?.value > 1
-      ? multiSeverity
-      : singleSeverityComponent;
-
-  const severityStat: GroupStatsItem[] = !severityComponent
-    ? []
-    : [
-        {
-          title: i18n.STATS_GROUP_SEVERITY,
-          component: severityComponent,
-        },
-      ];
-
+  const severityComponent: GroupStatsItem[] = getSeverityComponent(bucket);
   const defaultBadges: GroupStatsItem[] = DEFAULT_GROUP_STATS_RENDERER(selectedGroup, bucket);
+  const usersBadge: GroupStatsItem = getUsersBadge(bucket);
+  const hostsBadge: GroupStatsItem = getHostsBadge(bucket);
+  const rulesBadge: GroupStatsItem = getRulesBadge(bucket);
 
   switch (selectedGroup) {
     case 'kibana.alert.rule.name':
-      return [
-        ...severityStat,
-        {
-          title: i18n.STATS_GROUP_USERS,
-          badge: {
-            value: bucket.usersCountAggregation?.value ?? 0,
-          },
-        },
-        {
-          title: i18n.STATS_GROUP_HOSTS,
-          badge: {
-            value: bucket.hostsCountAggregation?.value ?? 0,
-          },
-        },
-        ...defaultBadges,
-      ];
+      return [...severityComponent, usersBadge, hostsBadge, ...defaultBadges];
     case 'host.name':
-      return [
-        ...severityStat,
-        {
-          title: i18n.STATS_GROUP_USERS,
-          badge: {
-            value: bucket.usersCountAggregation?.value ?? 0,
-          },
-        },
-        {
-          title: i18n.STATS_GROUP_RULES,
-          badge: {
-            value: bucket.rulesCountAggregation?.value ?? 0,
-          },
-        },
-        ...defaultBadges,
-      ];
+      return [...severityComponent, usersBadge, rulesBadge, ...defaultBadges];
     case 'user.name':
     case 'source.ip':
-      return [
-        ...severityStat,
-        {
-          title: i18n.STATS_GROUP_HOSTS,
-          badge: {
-            value: bucket.hostsCountAggregation?.value ?? 0,
-          },
-        },
-        {
-          title: i18n.STATS_GROUP_RULES,
-          badge: {
-            value: bucket.rulesCountAggregation?.value ?? 0,
-          },
-        },
-        ...defaultBadges,
-      ];
+      return [...severityComponent, hostsBadge, rulesBadge, ...defaultBadges];
   }
-  return [
-    ...severityStat,
-    {
-      title: i18n.STATS_GROUP_RULES,
-      badge: {
-        value: bucket.rulesCountAggregation?.value ?? 0,
-      },
-    },
-    ...defaultBadges,
-  ];
+  return [...severityComponent, rulesBadge, ...defaultBadges];
 };

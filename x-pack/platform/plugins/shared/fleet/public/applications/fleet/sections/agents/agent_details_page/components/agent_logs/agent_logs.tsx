@@ -34,7 +34,6 @@ import { DatasetFilter } from './filter_dataset';
 import { LogLevelFilter } from './filter_log_level';
 import { LogQueryBar } from './query_bar';
 import { buildQuery } from './build_query';
-import { SelectLogLevel } from './select_log_level';
 import { ViewLogsButton, getFormattedRange } from './view_logs_button';
 
 const WrapperFlexGroup = styled(EuiFlexGroup)`
@@ -347,12 +346,6 @@ export const AgentLogsUI: React.FunctionComponent<AgentLogsProps> = memo(
               columns={LOG_VIEW_COLUMNS}
             />
           </EuiPanel>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <SelectLogLevel
-            agent={agent}
-            agentPolicyLogLevel={agentPolicy?.advanced_settings?.agent_logging_level}
-          />
         </EuiFlexItem>
       </WrapperFlexGroup>
     );
