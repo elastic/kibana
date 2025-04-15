@@ -81,7 +81,7 @@ export const TimeTypeSection = ({ timeRange, isAbsoluteTime, changeTimeType }: P
 
   useEffect(() => {
     setIsAbsoluteTimeByDefault(
-      !timeRange?.from?.includes('now') && !timeRange?.to?.includes('now')
+      !(timeRange?.from?.includes('now') || timeRange?.to?.includes('now'))
     );
   }, [timeRange]);
 
