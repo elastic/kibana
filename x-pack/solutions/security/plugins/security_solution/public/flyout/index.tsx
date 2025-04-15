@@ -62,8 +62,8 @@ import type { ServicePanelExpandableFlyoutProps } from './entity_details/service
 import { ServicePanel } from './entity_details/service_right';
 import type { ServiceDetailsExpandableFlyoutProps } from './entity_details/service_details_left';
 import { ServiceDetailsPanel, ServiceDetailsPanelKey } from './entity_details/service_details_left';
-import { FindingsMisconfigurationPanel } from './csp_details/findings_flyout/helper';
 import { MisconfigurationFindingsPanelKey } from './csp_details/findings_flyout/constants';
+import { FindingsMisconfigurationPanel } from './csp_details/findings_flyout/findings_right';
 import { IOCPanelKey } from './ai_for_soc/constants/panel_keys';
 
 /**
