@@ -4,10 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { schema } from '@kbn/config-schema';
 
-export * from './host';
-export * from './user';
-export * from './service';
-export * from './generic';
-
-export { getCommonFieldDescriptions } from './common';
+export const GetRemoteSyncedIntegrationsInfoRequestSchema = {
+  params: schema.object({
+    outputId: schema.string(),
+  }),
+};
