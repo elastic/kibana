@@ -26,17 +26,23 @@ export const startAction = (
   rowId: string,
   panelId: string
 ) => {
-  console.log(
-    'startAction',
-    gridLayoutStateManager.activePanel$.value,
-    gridLayoutStateManager.interactionEvent$.value,
-    gridLayoutStateManager.gridLayout$.value,
-    gridLayoutStateManager.proposedGridLayout$.value
-  );
+
   const panelRef = gridLayoutStateManager.panelRefs.current[panelId];
   if (!panelRef) return;
 
   const panelRect = panelRef.getBoundingClientRect();
+  
+  console.log(
+    'startAction',
+   {
+    type,
+    id: panelId,
+    targetRow: rowId,
+    panelDiv: panelRef,
+    sensorType: getSensorType(e),
+    sensorOffsets: getSensorOffsets(e, panelRect),
+  }
+  );
 
   gridLayoutStateManager.interactionEvent$.next({
     type,
@@ -254,19 +260,20 @@ export const commitAction = ({
   gridLayout$,
   proposedGridLayout$,
 }: GridLayoutStateManager) => {
-  console.log(
-    'commitAction',
-    activePanel$.value,
-    interactionEvent$.value,
-    gridLayout$.value,
-    proposedGridLayout$.value
-  );
+ 
   activePanel$.next(undefined);
   interactionEvent$.next(undefined);
   if (proposedGridLayout$.value && !deepEqual(proposedGridLayout$.value, gridLayout$.getValue())) {
     gridLayout$.next(cloneDeep(proposedGridLayout$.value));
   }
   proposedGridLayout$.next(undefined);
+   console.log(
+    'commitAction',
+    activePanel$.value,
+    interactionEvent$.value,
+    gridLayout$.value,
+    proposedGridLayout$.value
+  );
 };
 
 export const cancelAction = ({

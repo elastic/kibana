@@ -94,20 +94,14 @@ export const useGridLayoutPanelEvents = () => {
       if (isMouseEvent(e)) {
         startMouseInteraction({
           e,
-          onStart: (e) => {
-            console.log('onStart', e);
-            return onStart(e, { interactionType, rowId, panelId });
-          },
+          onStart: (e) => onStart(e, { interactionType, rowId, panelId }),
           onMove,
           onEnd,
         });
       } else if (isTouchEvent(e)) {
         startTouchInteraction({
           e,
-          onStart: (e) => {
-            console.log('onStart', e);
-            return onStart(e, { interactionType, rowId, panelId });
-          },
+          onStart: (e) => onStart(e, { interactionType, rowId, panelId }),
           onMove,
           onEnd,
         });
@@ -116,10 +110,7 @@ export const useGridLayoutPanelEvents = () => {
         startKeyboardInteraction({
           e,
           isEventActive,
-          onStart: (e) => {
-            console.log('onStart', e);
-            return onStart(e, { interactionType, rowId, panelId });
-          },
+          onStart: (e) => onStart(e, { interactionType, rowId, panelId }),
           onMove,
           onEnd,
           onBlur,

@@ -29,7 +29,7 @@ export const useDragHandleApi = ({
 
   const startDrag = useGridLayoutPanelEvents();
 
-  
+
   // we use ref because subscription is inside of the stable useEffect so the state would be stale
   const rowIdRef = useRef(rowId);
   // Keep ref in sync with state
@@ -37,10 +37,8 @@ export const useDragHandleApi = ({
     rowIdRef.current = rowId;
   }, [rowId]);
 
-
   const startInteraction = useCallback(
     (ev: UserInteractionEvent) => {
-      console.log('row & panel',rowIdRef.current, panelId);
       return startDrag(ev, { interactionType: 'drag', rowId: rowIdRef.current, panelId });
     },
     [panelId]
