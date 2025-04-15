@@ -103,11 +103,11 @@ export const withSecurityRoutePageWrapper = <T extends {}>(
   pageName: SecurityPageName,
   options: SecurityRoutePageWrapperOptionProps = {}
 ) => {
-  return function WithSecurityRoutePageWrapper(props: T) {
+  return React.memo(function WithSecurityRoutePageWrapper(props: T) {
     return (
       <SecurityRoutePageWrapper pageName={pageName} {...options}>
         <Component {...props} />
       </SecurityRoutePageWrapper>
     );
-  };
+  });
 };
