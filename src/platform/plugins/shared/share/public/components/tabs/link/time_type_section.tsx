@@ -15,6 +15,29 @@ import moment from 'moment';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 
+const unitMap = new Map([
+  ['s', 'second'],
+  ['m', 'minute'],
+  ['h', 'hour'],
+  ['d', 'day'],
+  ['w', 'week'],
+  ['M', 'month'],
+  ['y', 'year'],
+]);
+
+const getRelativeValueAndUnit = (input?: string) => {
+  if (!input) return;
+  const match = input.match(/^now([+-]\d+)([smhdwMy])$/);
+  if (!match) return;
+
+  const [, signAndNumber, unit] = match;
+
+  return {
+    value: Number(signAndNumber),
+    unit: unitMap.get(unit),
+  };
+};
+
 const getParsedDates = (isAbsolute: boolean, from?: string, to?: string) => {
   const fromParsed = dateMath.parse(from || '');
   const toParsed = dateMath.parse(to || '');
@@ -24,10 +47,15 @@ const getParsedDates = (isAbsolute: boolean, from?: string, to?: string) => {
 
   if (isAbsolute) return { from: fromDate, to: toDate };
 
-  const now = Date.now();
-  const fromDiff = Math.round((fromDate.getTime() - now) / 1000);
-  const toDiff = Math.round((toDate.getTime() - now) / 1000);
-  return { from: fromDiff, to: toDiff };
+  const relativeFrom = getRelativeValueAndUnit(from);
+  const relativeTo = getRelativeValueAndUnit(to);
+
+  return {
+    from: relativeFrom?.value,
+    to: relativeTo?.value,
+    fromUnit: relativeFrom?.unit,
+    toUnit: relativeTo?.unit,
+  };
 };
 
 const BoldText = ({ text }: { text: ReactNode }) => {
@@ -66,7 +94,11 @@ interface Props {
 
 export const TimeTypeSection = ({ timeRange, isAbsoluteTime, changeTimeType }: Props) => {
   const [isAbsoluteTimeByDefault, setIsAbsoluteTimeByDefault] = useState(false);
-  const { from, to } = getParsedDates(isAbsoluteTime, timeRange?.from, timeRange?.to);
+  const { from, to, fromUnit, toUnit } = getParsedDates(
+    isAbsoluteTime,
+    timeRange?.from,
+    timeRange?.to
+  );
 
   useEffect(() => {
     setIsAbsoluteTimeByDefault(
@@ -104,17 +136,26 @@ export const TimeTypeSection = ({ timeRange, isAbsoluteTime, changeTimeType }: P
             id="share.link.timeRange.relativeTimeInfoText"
             defaultMessage="The users will see all data from {from} to {to}, based on when they view it."
             values={{
-              // Without updateIntervalInSeconds, you need to specify the time unit, which is not possible here since the unit is dynamic
               from: (
                 <BoldText
                   text={
-                    <FormattedRelativeTime value={from as number} updateIntervalInSeconds={60} />
+                    <FormattedRelativeTime
+                      value={from as number}
+                      // @ts-expect-error - RelativeTimeFormatSingularUnit expected here is not exported so a cast from string is not possible
+                      unit={fromUnit}
+                    />
                   }
                 />
               ),
               to: (
                 <BoldText
-                  text={<FormattedRelativeTime value={to as number} updateIntervalInSeconds={60} />}
+                  text={
+                    <FormattedRelativeTime
+                      value={to as number}
+                      // @ts-expect-error - RelativeTimeFormatSingularUnit expected here is not exported so a cast from string is not possible
+                      unit={toUnit}
+                    />
+                  }
                 />
               ),
             }}
