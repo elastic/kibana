@@ -5,20 +5,11 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
-import React from 'react';
-import {
-  Axis,
-  BarSeries,
-  Chart,
-  Position,
-  ScaleType,
-  Settings,
-  LEGACY_LIGHT_THEME,
-} from '@elastic/charts';
-import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import { EuiThemeProvider } from '@elastic/eui';
-import type { TimeRangeBounds } from '@kbn/data-plugin/common';
+import React, { type FC } from 'react';
+import { Axis, BarSeries, Chart, Position, ScaleType, Settings } from '@elastic/charts';
+import { useElasticChartsTheme } from '@kbn/charts-theme';
+import { type EuiComboBoxOptionOption, EuiThemeProvider } from '@elastic/eui';
+import { type TimeRangeBounds } from '@kbn/data-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { IndicatorBarchartLegendAction } from './legend_action';
 import { barChartTimeAxisLabelFormatter } from '../../../../utils/dates';
@@ -57,12 +48,12 @@ export const IndicatorsBarChart: FC<IndicatorsBarChartProps> = ({
   field,
   height = DEFAULT_CHART_HEIGHT,
 }) => {
+  const chartBaseTheme = useElasticChartsTheme();
   return (
     <EuiThemeProvider>
       <Chart size={{ width: DEFAULT_CHART_WIDTH, height }}>
         <Settings
-          // TODO connect to charts.theme service see src/plugins/charts/public/services/theme/README.md
-          baseTheme={LEGACY_LIGHT_THEME}
+          baseTheme={chartBaseTheme}
           showLegend
           legendPosition={Position.Right}
           legendSize={DEFAULT_LEGEND_SIZE}
