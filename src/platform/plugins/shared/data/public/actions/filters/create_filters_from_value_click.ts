@@ -162,7 +162,7 @@ export const createFilterESQL = async (
     filters.push(
       buildSimpleNumberRangeFilter(
         sourceField,
-        operationType === 'date_histogram' ? 'date': 'number',
+        operationType === 'date_histogram' ? 'date' : 'number',
         {
           gte: value,
           lt: value + (interval ?? 0),
@@ -186,8 +186,8 @@ export const createFiltersFromValueClickAction = async ({
 }: ValueClickDataContext) => {
   const filters: Filter[] = [];
 
-  for(const value of data) {
-    if(!value) {
+  for (const value of data) {
+    if (!value) {
       continue;
     }
     const { table, column, row } = value;
