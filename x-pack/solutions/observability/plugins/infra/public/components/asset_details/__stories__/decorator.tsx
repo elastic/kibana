@@ -36,6 +36,7 @@ import { ContextProviders } from '../context_providers';
 import { DataViewsProvider } from '../hooks/use_data_views';
 import type { InfraConfig } from '../../../../server';
 import { TabSwitcherProvider } from '../hooks/use_tab_switcher';
+import type { TabIds } from '../types';
 
 const settings: Record<string, any> = {
   'dateFormat:scaled': [['', 'HH:mm:ss.SSS']],
@@ -60,6 +61,11 @@ export const DecorateWithKibanaContext: Decorator = (story) => {
         action(`Navigate to: ${url}`);
       },
       getUrlForApp: (url: string) => url,
+      capabilities: {
+        maintenanceWindow: {
+          show: false,
+        },
+      },
     },
     docLinks: {
       links: {
@@ -218,11 +224,9 @@ export const DecorateWithKibanaContext: Decorator = (story) => {
           <KibanaContextProvider services={mockServices}>
             <SourceProvider sourceId="default">
               <MetricsDataViewProvider>
-                <TabSwitcherProvider>
-                  <ReloadRequestTimeProvider>
-                    <AlertPrefillProvider>{story()} </AlertPrefillProvider>
-                  </ReloadRequestTimeProvider>
-                </TabSwitcherProvider>
+                <ReloadRequestTimeProvider>
+                  <AlertPrefillProvider>{story()}</AlertPrefillProvider>
+                </ReloadRequestTimeProvider>
               </MetricsDataViewProvider>
             </SourceProvider>
           </KibanaContextProvider>
@@ -245,3 +249,13 @@ export const DecorateWithAssetDetailsStateContext: Decorator = (story) => {
     </ContextProviders>
   );
 };
+
+export const DecorateWithTabSwitcherContext =
+  (defaultActiveTabId: TabIds): Decorator =>
+  (story) => {
+    return (
+      <TabSwitcherProvider defaultActiveTabId={defaultActiveTabId}>
+        <DataViewsProvider>{story()}</DataViewsProvider>
+      </TabSwitcherProvider>
+    );
+  };
