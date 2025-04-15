@@ -9,12 +9,12 @@ import { useElasticChartsTheme } from '@kbn/charts-theme';
 import { Chart, Settings } from '@elastic/charts';
 
 export function MyComponent() {
-  const baseTheme = useElasticChartsTheme();
+  const chartBaseTheme = useElasticChartsTheme();
 
   return (
     <Chart>
       <Settings
-        baseTheme={baseTheme}
+        baseTheme={chartBaseTheme}
         {/* ... */}
       />
       {/* ... */}

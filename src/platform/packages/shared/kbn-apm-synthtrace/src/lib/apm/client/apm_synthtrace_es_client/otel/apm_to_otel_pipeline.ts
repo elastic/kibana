@@ -8,6 +8,7 @@
  */
 
 import { Readable, pipeline } from 'stream';
+import { createFilterTransform } from '../../../../utils/stream_utils';
 import { Logger } from '../../../../utils/create_logger';
 import { getSerializeTransform } from '../../../../shared/get_serialize_transform';
 import { getIntakeDefaultsTransform } from '../get_intake_defaults_transform';
@@ -27,6 +28,8 @@ export function apmToOtelPipeline(
       // @ts-expect-error Some weird stuff here with the type definition for pipeline. We have tests!
       base,
       ...serializationTransform,
+      // the exporter doesn't seem to output this metricset type
+      createFilterTransform((chunk) => chunk['metricset.name'] !== 'span_breakdown'),
       getIntakeDefaultsTransform(),
       getApmServerMetadataTransform(version),
       getOtelToApmSpanTransform(),

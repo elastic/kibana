@@ -8,28 +8,37 @@
 import React, { useState } from 'react';
 
 import { QueryRulesListRulesetsQueryRulesetListItem } from '@elastic/elasticsearch/lib/api/types';
-import { EuiBasicTable, EuiBasicTableColumn, EuiLink } from '@elastic/eui';
+import {
+  EuiBasicTable,
+  EuiBasicTableColumn,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLink,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DEFAULT_PAGE_VALUE, paginationToPage } from '../../../common/pagination';
 import { useFetchQueryRulesSets } from '../../hooks/use_fetch_query_rules_sets';
+import { useQueryRulesSetsTableData } from '../../hooks/use_query_rules_sets_table_data';
+import { QueryRulesSetsSearch } from './query_rules_sets_search';
 
 export const QueryRulesSets = () => {
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(DEFAULT_PAGE_VALUE.size);
+  const [searchKey, setSearchKey] = useState('');
   const { from } = paginationToPage({ pageIndex, pageSize, totalItemCount: 0 });
   const { data: queryRulesData } = useFetchQueryRulesSets({ from, size: pageSize });
+
+  const { queryRulesSetsFilteredData, pagination } = useQueryRulesSetsTableData(
+    queryRulesData?.data,
+    searchKey,
+    pageIndex,
+    pageSize
+  );
 
   if (!queryRulesData) {
     return null;
   }
 
-  const pagination = {
-    initialPageSize: 25,
-    pageSizeOptions: [10, 25, 50],
-    ...queryRulesData._meta,
-    pageSize,
-    pageIndex,
-  };
   const columns: Array<EuiBasicTableColumn<QueryRulesListRulesetsQueryRulesetListItem>> = [
     {
       field: 'ruleset_id',
@@ -59,15 +68,22 @@ export const QueryRulesSets = () => {
   ];
 
   return (
-    <EuiBasicTable
-      data-test-subj="queryRulesSetTable"
-      items={queryRulesData.data}
-      columns={columns}
-      pagination={pagination}
-      onChange={({ page: changedPage }) => {
-        setPageIndex(changedPage.index);
-        setPageSize(changedPage.size);
-      }}
-    />
+    <EuiFlexGroup direction="column">
+      <EuiFlexItem>
+        <QueryRulesSetsSearch searchKey={searchKey} setSearchKey={setSearchKey} />
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <EuiBasicTable
+          data-test-subj="queryRulesSetTable"
+          items={queryRulesSetsFilteredData} // Use filtered data from hook
+          columns={columns}
+          pagination={pagination}
+          onChange={({ page: changedPage }) => {
+            setPageIndex(changedPage.index);
+            setPageSize(changedPage.size);
+          }}
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };
