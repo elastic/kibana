@@ -10,6 +10,7 @@ import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { ConfigSchema } from '@kbn/unified-search-plugin/server/config';
 import type { Observable } from 'rxjs';
+import type { AlertingConfig } from '../config';
 import type { GetAlertIndicesAlias, ILicenseState } from '../lib';
 import type { AlertingRequestHandlerContext } from '../types';
 import { createRuleRoute } from './rule/apis/create';
@@ -88,6 +89,7 @@ export interface RouteOptions {
   config$?: Observable<ConfigSchema>;
   isServerless?: boolean;
   docLinks: DocLinksServiceSetup;
+  alertingConfig: AlertingConfig;
 }
 
 export function defineRoutes(opts: RouteOptions) {
@@ -98,6 +100,7 @@ export function defineRoutes(opts: RouteOptions) {
     usageCounter,
     config$,
     getAlertIndicesAlias,
+    alertingConfig,
   } = opts;
 
   createRuleRoute(opts);
@@ -140,16 +143,17 @@ export function defineRoutes(opts: RouteOptions) {
   unmuteAlertRoute(router, licenseState);
 
   // Maintenance Window APIs
-  createMaintenanceWindowRoute(router, licenseState);
-  getMaintenanceWindowRoute(router, licenseState);
-  updateMaintenanceWindowRoute(router, licenseState);
-  deleteMaintenanceWindowRoute(router, licenseState);
-  findMaintenanceWindowsRoute(router, licenseState);
-  archiveMaintenanceWindowRoute(router, licenseState);
-  finishMaintenanceWindowRoute(router, licenseState);
-  getActiveMaintenanceWindowsRoute(router, licenseState);
-  bulkGetMaintenanceWindowRoute(router, licenseState);
-
+  if (alertingConfig.maintenanceWindow.enabled) {
+    createMaintenanceWindowRoute(router, licenseState);
+    getMaintenanceWindowRoute(router, licenseState);
+    updateMaintenanceWindowRoute(router, licenseState);
+    deleteMaintenanceWindowRoute(router, licenseState);
+    findMaintenanceWindowsRoute(router, licenseState);
+    archiveMaintenanceWindowRoute(router, licenseState);
+    finishMaintenanceWindowRoute(router, licenseState);
+    getActiveMaintenanceWindowsRoute(router, licenseState);
+    bulkGetMaintenanceWindowRoute(router, licenseState);
+  }
   // backfill APIs
   scheduleBackfillRoute(router, licenseState);
   getBackfillRoute(router, licenseState);
@@ -162,15 +166,18 @@ export function defineRoutes(opts: RouteOptions) {
   getRuleIdsWithGapsRoute(router, licenseState);
   getGapsSummaryByRuleIdsRoute(router, licenseState);
 
+  // Rules Settings APIs
+  if (alertingConfig.rulesSettings.enabled) {
+    getQueryDelaySettingsRoute(router, licenseState);
+    updateQueryDelaySettingsRoute(router, licenseState);
+    getFlappingSettingsRoute(router, licenseState);
+    updateFlappingSettingsRoute(router, licenseState);
+  }
   // Other APIs
   registerFieldsRoute(router, licenseState);
   getScheduleFrequencyRoute(router, licenseState);
-  getQueryDelaySettingsRoute(router, licenseState);
-  updateQueryDelaySettingsRoute(router, licenseState);
   getGlobalExecutionLogRoute(router, licenseState);
   getActionErrorLogRoute(router, licenseState);
-  getFlappingSettingsRoute(router, licenseState);
-  updateFlappingSettingsRoute(router, licenseState);
   runSoonRoute(router, licenseState);
   healthRoute(router, licenseState, encryptedSavedObjects);
   getGlobalExecutionKPIRoute(router, licenseState);

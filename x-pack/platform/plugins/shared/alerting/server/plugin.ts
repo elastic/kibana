@@ -408,6 +408,7 @@ export class AlertingPlugin {
       config$: plugins.unifiedSearch.autocomplete.getInitializerContextConfig().create(),
       isServerless: this.isServerless,
       docLinks: core.docLinks,
+      alertingConfig: this.config,
     });
 
     return {

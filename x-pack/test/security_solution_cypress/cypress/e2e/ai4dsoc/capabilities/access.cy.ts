@@ -8,7 +8,13 @@
 import { login } from '../../../tasks/login';
 import { visit } from '../../../tasks/navigation';
 import { ALERTS_SUMMARY_PROMPT, GET_STARTED_PAGE } from '../constants';
-import { ALERT_SUMMARY_URL, ALERTS_URL, RULES_LANDING_URL } from '../../../urls/navigation';
+import {
+  ALERT_SUMMARY_URL,
+  ALERTS_URL,
+  MAINTENANCE_WINDOW_URL,
+  RULES_LANDING_URL,
+  STACK_RULES_URL,
+} from '../../../urls/navigation';
 
 const testPageAccess = () => {
   it('should show page or redirect depending on capabilities', () => {
@@ -22,6 +28,18 @@ const testPageAccess = () => {
     // should redirect out from rules to get started page
     visit(RULES_LANDING_URL);
     cy.get(GET_STARTED_PAGE).should('exist');
+
+    // should redirect out from stack rules to main management page
+    visit(STACK_RULES_URL);
+    cy.contains(
+      'Manage data and indices, oversee rules and connectors, organize saved objects and files, and create API keys in a central location.'
+    ).should('exist');
+
+    // should redirect out from maintenance window to main management page
+    visit(MAINTENANCE_WINDOW_URL);
+    cy.contains(
+      'Manage data and indices, oversee rules and connectors, organize saved objects and files, and create API keys in a central location.'
+    ).should('exist');
   });
 };
 
