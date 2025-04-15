@@ -31,6 +31,7 @@ import { zipObject } from 'lodash';
 import { catchError, defer, map, Observable, switchMap, tap, throwError } from 'rxjs';
 import { buildEsQuery, type Filter } from '@kbn/es-query';
 import type { ESQLSearchParams, ESQLSearchResponse } from '@kbn/es-types';
+import DateMath from '@kbn/datemath';
 import { getEsQueryConfig } from '../../es_query';
 import { getTime } from '../../query';
 import {
@@ -341,6 +342,13 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
           );
           const indexPattern = getIndexPatternFromESQLQuery(query);
 
+          const appliedTimeRange = input?.timeRange
+            ? {
+                from: DateMath.parse(input.timeRange.from)?.toISOString(),
+                to: DateMath.parse(input.timeRange.to, { roundUp: true })?.toISOString(),
+              }
+            : undefined;
+
           const allColumns =
             // eslint-disable-next-line @typescript-eslint/naming-convention
             (body.all_columns ?? body.columns)?.map(({ name, type, original_types }) => {
@@ -355,7 +363,7 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
                   sourceParams:
                     type === 'date'
                       ? {
-                          appliedTimeRange: input?.timeRange,
+                          appliedTimeRange,
                           params: {},
                           indexPattern,
                         }
