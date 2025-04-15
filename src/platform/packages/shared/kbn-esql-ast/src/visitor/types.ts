@@ -53,6 +53,7 @@ export type VisitorOutput<
  */
 export type ExpressionVisitorInput<Methods extends VisitorMethods> = AnyToVoid<
   | VisitorInput<Methods, 'visitExpression'> &
+      VisitorInput<Methods, 'visitQuery'> &
       VisitorInput<Methods, 'visitColumnExpression'> &
       VisitorInput<Methods, 'visitSourceExpression'> &
       VisitorInput<Methods, 'visitFunctionCallExpression'> &
@@ -70,6 +71,7 @@ export type ExpressionVisitorInput<Methods extends VisitorMethods> = AnyToVoid<
  */
 export type ExpressionVisitorOutput<Methods extends VisitorMethods> =
   | VisitorOutput<Methods, 'visitExpression'>
+  | VisitorOutput<Methods, 'visitQuery'>
   | VisitorOutput<Methods, 'visitColumnExpression'>
   | VisitorOutput<Methods, 'visitSourceExpression'>
   | VisitorOutput<Methods, 'visitFunctionCallExpression'>
@@ -173,7 +175,12 @@ export interface VisitorMethods<
   visitEnrichCommand?: Visitor<contexts.EnrichCommandVisitorContext<Visitors, Data>, any, any>;
   visitMvExpandCommand?: Visitor<contexts.MvExpandCommandVisitorContext<Visitors, Data>, any, any>;
   visitJoinCommand?: Visitor<contexts.JoinCommandVisitorContext<Visitors, Data>, any, any>;
-  visitChangePointCommand?: Visitor<contexts.JoinCommandVisitorContext<Visitors, Data>, any, any>;
+  visitChangePointCommand?: Visitor<
+    contexts.ChangePointCommandVisitorContext<Visitors, Data>,
+    any,
+    any
+  >;
+  visitForkCommand?: Visitor<contexts.ForkCommandVisitorContext<Visitors, Data>, any, any>;
   visitCommandOption?: Visitor<contexts.CommandOptionVisitorContext<Visitors, Data>, any, any>;
   visitExpression?: Visitor<contexts.ExpressionVisitorContext<Visitors, Data>, any, any>;
   visitSourceExpression?: Visitor<
