@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export type { Tool } from './tool';
-export type { ToolProvider } from './registry';
+export { type ToolRegistry, createToolRegistry } from './tool_registry';

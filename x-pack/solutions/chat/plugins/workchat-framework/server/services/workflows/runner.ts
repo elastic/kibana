@@ -19,6 +19,7 @@ import type {
 } from '@kbn/wc-framework-types-server';
 import type { Logger } from '@kbn/core/server';
 import type { createModelProviderFactory, ModelProviderFactory } from '../model_provider';
+import type { ToolRegistry } from '../tools';
 import type { NodeTypeRegistry } from '../nodes';
 import type { WorkflowRegistry } from './registry';
 import {
@@ -33,10 +34,11 @@ export interface GetWorkflowRunnerParams {
   workflowRegistry: WorkflowRegistry;
   nodeRegistry: NodeTypeRegistry;
   modelProviderFactory: ModelProviderFactory;
+  toolRegistry: ToolRegistry;
 }
 
 export const getWorkflowRunner = (params: GetWorkflowRunnerParams): WorkflowRunner => {
-  const { workflowRegistry, nodeRegistry, modelProviderFactory, logger } = params;
+  const { workflowRegistry, nodeRegistry, modelProviderFactory, toolRegistry, logger } = params;
 
   const getWorkflowDefinition = async (
     workflowId: string
@@ -48,14 +50,21 @@ export const getWorkflowRunner = (params: GetWorkflowRunnerParams): WorkflowRunn
   };
 
   const run: WorkflowRunner['run'] = async (options) => {
-    const { id: workflowId, request, inputs, onEvent, defaultConnectorId } = options;
+    const {
+      id: workflowId,
+      request,
+      inputs,
+      onEvent,
+      defaultConnectorId,
+      toolProvider: customToolProvider,
+    } = options;
 
     const modelProvider = await modelProviderFactory({ request, defaultConnectorId });
 
     const baseNodeServices: NodeFactoryBaseServices = {
       logger: logger.get('workflow-runner'),
       modelProvider,
-      toolProvider: null, // TODO ToolProvider
+      toolProvider: customToolProvider ?? toolRegistry.asToolProvider(),
     };
 
     const workflowDefinition = await getWorkflowDefinition(workflowId);

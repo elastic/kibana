@@ -5,34 +5,27 @@
  * 2.0.
  */
 
+import type { MaybePromise } from '@kbn/utility-types';
 import { Tool } from './tool';
 
 /**
  * Represents a tool provider exposed to a workflow to let it call tools.
+ *
+ * Tool providers can be either sync or async, to adapt to potential remote implementations.
  */
 export interface ToolProvider {
   /**
    * Checks if the registry contains a tool for this ID.
    */
-  has(id: string): boolean;
+  has(id: string): MaybePromise<boolean>;
   /**
    * Returns a tool based on its ID
    *
    * Will throw if no entries are found for the given id.
    */
-  get(id: string): Tool;
+  get(id: string): MaybePromise<Tool>;
   /**
    * Returns all tools that are registered in that registry.
    */
-  getAll(): Tool[];
-}
-
-/**
- * Tool registry, allowing to register tools to be used for workflows.
- */
-export interface ToolRegistry extends ToolProvider {
-  /**
-   * Registry a tool to the registry
-   */
-  register(tool: Tool): void;
+  getAll(): MaybePromise<Tool[]>;
 }

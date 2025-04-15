@@ -7,6 +7,7 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 import type { WorkflowRunEvent } from '@kbn/wc-framework-types-common';
+import type { ToolProvider } from '../tools/registry';
 
 export type WorkflowRunEventHandler = (event: WorkflowRunEvent) => void;
 
@@ -25,6 +26,12 @@ export interface RunWorkflowParams<Input = Record<string, unknown>> {
    */
   request: KibanaRequest;
   /**
+   * If specified, the workflow runner will use
+   * this tool provider instead of the default one.
+   * Can be used to expose custom tools, or only a subset of tools...
+   */
+  toolProvider?: ToolProvider;
+  /**
    * Optional event handler to handle workflow execution events.
    *
    * Can be used to handle progression events in real time.
@@ -35,8 +42,6 @@ export interface RunWorkflowParams<Input = Record<string, unknown>> {
    * instead of picking the default one automatically.
    */
   defaultConnectorId?: string;
-
-  // TODO: tool provider
 }
 
 export interface RunWorkflowOutput<Output = Record<string, unknown>> {
