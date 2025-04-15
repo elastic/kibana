@@ -17,6 +17,33 @@ describe('replaceESQLQueryIndexPattern', () => {
     expect(query).toEqual('FROM one, updated | STATS COUNT(*) BY host.name');
   });
 
+  it('replaces duplicates pattern', () => {
+    const query = replaceESQLQueryIndexPattern('FROM one, one | STATS COUNT(*) BY host.name', {
+      one: 'updated',
+    });
+    expect(query).toEqual('FROM updated, updated | STATS COUNT(*) BY host.name');
+  });
+
+  it('replaces remote index pattern', () => {
+    const query = replaceESQLQueryIndexPattern(
+      'FROM remote:one, remote_two:one | STATS COUNT(*) BY host.name',
+      {
+        'remote:one': 'remote_updated:one',
+      }
+    );
+    expect(query).toEqual('FROM remote_two:one, remote_updated:one | STATS COUNT(*) BY host.name');
+  });
+
+  it('replaces remote index patterns if only the index matches', () => {
+    const query = replaceESQLQueryIndexPattern(
+      'FROM remote_one:one, remote_two:one | STATS COUNT(*) BY host.name',
+      {
+        one: 'remote_three:one',
+      }
+    );
+    expect(query).toEqual('FROM remote_three:one, remote_three:one | STATS COUNT(*) BY host.name');
+  });
+
   it('is a noop if no matching replacements', () => {
     const query = replaceESQLQueryIndexPattern('FROM one, two | STATS COUNT(*) BY host.name', {
       three: 'updated',

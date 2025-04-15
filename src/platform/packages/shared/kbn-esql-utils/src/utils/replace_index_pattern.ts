@@ -7,17 +7,29 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ESQLSource, EsqlQuery } from '@kbn/esql-ast';
+import { EsqlQuery, mutate } from '@kbn/esql-ast';
 
 export function replaceESQLQueryIndexPattern(esql: string, replacements: Record<string, string>) {
-  const query = EsqlQuery.fromSrc(esql);
-  const sourceCommand = query.ast.commands.find(({ name }) => ['from', 'ts'].includes(name));
-  const args = (sourceCommand?.args ?? []) as ESQLSource[];
-  args.forEach((arg) => {
-    if (arg.sourceType === 'index' && arg.index && replacements[arg.index.valueUnquoted]) {
-      arg.index.valueUnquoted = replacements[arg.index.valueUnquoted];
-    }
-  });
+  const inputQuery = EsqlQuery.fromSrc(esql);
+  const outputQuery = EsqlQuery.fromSrc(esql);
 
-  return query.print();
+  for (const [source, target] of Object.entries(replacements)) {
+    const { index: sourceIndex, cluster: sourceCluster } = parseIndex(source);
+
+    while (mutate.commands.from.sources.remove(inputQuery.ast, sourceIndex, sourceCluster)) {
+      const { index: targetIndex, cluster: targetCluster } = parseIndex(target);
+      mutate.commands.from.sources.remove(outputQuery.ast, sourceIndex, sourceCluster);
+      mutate.commands.from.sources.insert(outputQuery.ast, targetIndex, targetCluster);
+    }
+  }
+
+  return outputQuery.print();
+}
+
+function parseIndex(index: string): { index: string; cluster?: string } {
+  const split = index.split(':');
+  if (split.length === 2) {
+    return { index: split[1], cluster: split[0] };
+  }
+  return { index };
 }
