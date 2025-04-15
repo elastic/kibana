@@ -20,6 +20,7 @@ import {
 import { LinkButton, i18nStrings, securityLink } from '@kbn/security-solution-navigation/links';
 
 import { type Services } from '../common/services';
+import { createMachineLearningNavigationTree } from './ml_navigation';
 import { createStackManagementNavigationTree } from './stack_management_navigation';
 
 const SOLUTION_NAME = i18n.translate(
@@ -416,148 +417,20 @@ export const createSecurityNavigationTree$ = (
             renderAs: 'panelOpener',
           },
           {
-            id: 'machine_learning-landing',
-            link: securityLink(SecurityPageName.mlLanding),
-            title: i18nStrings.ml.title,
+            id: 'entity_analytics-landing',
+            link: securityLink(SecurityPageName.entityAnalyticsLanding),
+            title: i18nStrings.entityAnalytics.landing,
+            spaceBefore: null,
             children: [
               {
-                breadcrumbStatus: 'hidden',
-                children: [
-                  {
-                    id: 'ml:overview',
-                    link: 'ml:overview',
-                    title: i18nStrings.ml.overview,
-                  },
-                  {
-                    id: 'ml:notifications',
-                    link: 'ml:notifications',
-                    title: i18nStrings.ml.notifications,
-                  },
-                  {
-                    id: 'ml:memoryUsage',
-                    link: 'ml:memoryUsage',
-                    title: i18nStrings.ml.memoryUsage,
-                  },
-                ],
-              },
-              {
-                id: 'category-anomaly_detection',
-                title: i18nStrings.ml.anomalyDetection.title,
-                breadcrumbStatus: 'hidden',
-                children: [
-                  {
-                    id: 'ml:anomalyDetection',
-                    link: 'ml:anomalyDetection',
-                    title: i18nStrings.ml.anomalyDetection.jobs,
-                  },
-                  {
-                    id: 'ml:anomalyExplorer',
-                    link: 'ml:anomalyExplorer',
-                    title: i18nStrings.ml.anomalyDetection.anomalyExplorer,
-                  },
-                  {
-                    id: 'ml:singleMetricViewer',
-                    link: 'ml:singleMetricViewer',
-                    title: i18nStrings.ml.anomalyDetection.singleMetricViewer,
-                  },
-                  {
-                    id: 'ml:suppliedConfigurations',
-                    link: 'ml:suppliedConfigurations',
-                    title: i18nStrings.ml.anomalyDetection.suppliedConfigurations,
-                  },
-                  {
-                    id: 'ml:settings',
-                    link: 'ml:settings',
-                    title: i18nStrings.ml.anomalyDetection.settings,
-                  },
-                ],
-              },
-              {
-                id: 'category-data_frame analytics',
-                title: i18nStrings.ml.dataFrameAnalytics.title,
-                breadcrumbStatus: 'hidden',
-                children: [
-                  {
-                    id: 'ml:dataFrameAnalytics',
-                    link: 'ml:dataFrameAnalytics',
-                    title: i18nStrings.ml.dataFrameAnalytics.jobs,
-                  },
-                  {
-                    id: 'ml:resultExplorer',
-                    link: 'ml:resultExplorer',
-                    title: i18nStrings.ml.dataFrameAnalytics.resultExplorer,
-                  },
-                  {
-                    id: 'ml:analyticsMap',
-                    link: 'ml:analyticsMap',
-                    title: i18nStrings.ml.dataFrameAnalytics.analyticsMap,
-                  },
-                ],
-              },
-              {
-                id: 'category-model_management',
-                title: i18nStrings.ml.modelManagement.title,
-                breadcrumbStatus: 'hidden',
-                children: [
-                  {
-                    id: 'ml:nodesOverview',
-                    link: 'ml:nodesOverview',
-                    title: i18nStrings.ml.modelManagement.trainedModels,
-                  },
-                ],
-              },
-              {
-                id: 'category-data_visualizer',
-                title: i18nStrings.ml.dataVisualizer.title,
-                breadcrumbStatus: 'hidden',
-                children: [
-                  {
-                    id: 'ml:fileUpload',
-                    link: 'ml:fileUpload',
-                    title: i18nStrings.ml.dataVisualizer.fileDataVisualizer,
-                  },
-                  {
-                    id: 'ml:indexDataVisualizer',
-                    link: 'ml:indexDataVisualizer',
-                    title: i18nStrings.ml.dataVisualizer.dataViewDataVisualizer,
-                  },
-                  {
-                    id: 'ml:esqlDataVisualizer',
-                    link: 'ml:esqlDataVisualizer',
-                    title: i18nStrings.ml.dataVisualizer.esqlDataVisualizer,
-                  },
-                  {
-                    id: 'ml:dataDrift',
-                    link: 'ml:dataDrift',
-                    title: i18nStrings.ml.dataVisualizer.dataDrift,
-                  },
-                ],
-              },
-              {
-                id: 'category-aiops_labs',
-                title: i18nStrings.ml.aiopsLabs.title,
-                breadcrumbStatus: 'hidden',
-                children: [
-                  {
-                    id: 'ml:logRateAnalysis',
-                    link: 'ml:logRateAnalysis',
-                    title: i18nStrings.ml.aiopsLabs.logRateAnalysis,
-                  },
-                  {
-                    id: 'ml:logPatternAnalysis',
-                    link: 'ml:logPatternAnalysis',
-                    title: i18nStrings.ml.aiopsLabs.logPatternAnalysis,
-                  },
-                  {
-                    id: 'ml:changePointDetections',
-                    link: 'ml:changePointDetections',
-                    title: i18nStrings.ml.aiopsLabs.changePointDetection,
-                  },
-                ],
+                id: 'entity_analytics-privileged_user_monitoring',
+                link: securityLink(SecurityPageName.privilegedUserMonitoring),
+                renderAs: 'item',
               },
             ],
             renderAs: 'panelOpener',
           },
+          createMachineLearningNavigationTree(),
           {
             id: 'entity_analytics-management',
             link: securityLink(SecurityPageName.entityAnalyticsManagement),

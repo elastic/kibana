@@ -7,6 +7,7 @@
 
 import { KibanaRequest, Logger } from '@kbn/core/server';
 import { InferenceServerStart } from '@kbn/inference-plugin/server';
+import type { WorkChatTracingConfig } from '../../config';
 import { IntegrationsServiceImpl } from '../integrations/integrations_service';
 import type { AgentService } from '../agents';
 import type { AgentRunner } from './types';
@@ -19,6 +20,7 @@ interface AgentFactoryArgs {
   inference: InferenceServerStart;
   agentService: AgentService;
   integrationsService: IntegrationsServiceImpl;
+  tracingConfig: WorkChatTracingConfig;
 }
 
 export class AgentFactory {
@@ -26,12 +28,20 @@ export class AgentFactory {
   private readonly logger: Logger;
   private readonly agentService: AgentService;
   private readonly integrationsService: IntegrationsServiceImpl;
+  private readonly tracingConfig: WorkChatTracingConfig;
 
-  constructor({ inference, logger, integrationsService, agentService }: AgentFactoryArgs) {
+  constructor({
+    inference,
+    logger,
+    integrationsService,
+    agentService,
+    tracingConfig,
+  }: AgentFactoryArgs) {
     this.inference = inference;
     this.logger = logger;
     this.integrationsService = integrationsService;
     this.agentService = agentService;
+    this.tracingConfig = tracingConfig;
   }
 
   async getAgentRunner({
@@ -61,7 +71,13 @@ export class AgentFactory {
       chatModelOptions: {},
     });
 
-    return await createAgentRunner({ agent, chatModel, createSession, logger: this.logger });
+    return await createAgentRunner({
+      agent,
+      chatModel,
+      createSession,
+      logger: this.logger,
+      tracingConfig: this.tracingConfig,
+    });
   }
 
   private async createGatewaySession({

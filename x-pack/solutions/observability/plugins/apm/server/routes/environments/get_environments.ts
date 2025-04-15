@@ -54,6 +54,7 @@ export async function getEnvironments({
         terms: {
           field: SERVICE_ENVIRONMENT,
           missing: ENVIRONMENT_NOT_DEFINED.value,
+          order: { _key: 'asc' as const },
           size,
         },
       },

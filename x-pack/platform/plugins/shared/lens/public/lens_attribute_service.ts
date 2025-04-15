@@ -6,7 +6,7 @@
  */
 
 import type { CoreStart } from '@kbn/core/public';
-import type { SavedObjectReference } from '@kbn/core/types';
+import type { SavedObjectReference } from '@kbn/core/server';
 import { OnSaveProps } from '@kbn/saved-objects-plugin/public';
 import { SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
 import { noop } from 'lodash';

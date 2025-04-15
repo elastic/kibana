@@ -37,7 +37,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       before(async () => {
         await ensureTemplatesAndIndexCreated(es);
         await createLocksWriteIndex(es);
-        await clearAllLocks(es);
+        await clearAllLocks(es, log);
       });
 
       describe('Basic lock operations', () => {
@@ -412,7 +412,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           expect(lock!.token).to.be(newToken);
 
           // cleanup
-          await clearAllLocks(es);
+          await clearAllLocks(es, log);
         });
 
         it('should use a fresh token on subsequent acquisitions', async () => {
@@ -441,7 +441,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       before(async () => {
         await ensureTemplatesAndIndexCreated(es);
         await createLocksWriteIndex(es);
-        await clearAllLocks(es);
+        await clearAllLocks(es, log);
       });
 
       const LOCK_ID = 'my_lock_with_lock';
@@ -645,15 +645,21 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   });
 }
 
-function clearAllLocks(es: Client) {
-  return es.deleteByQuery(
-    {
-      index: LOCKS_CONCRETE_INDEX_NAME,
-      query: { match_all: {} },
-      refresh: true,
-    },
-    { ignore: [404] }
-  );
+function clearAllLocks(es: Client, log: ToolingLog) {
+  try {
+    return es.deleteByQuery(
+      {
+        index: LOCKS_CONCRETE_INDEX_NAME,
+        query: { match_all: {} },
+        refresh: true,
+        conflicts: 'proceed',
+      },
+      { ignore: [404] }
+    );
+  } catch (e) {
+    log.error(`Failed to clear locks: ${e.message}`);
+    log.debug(e);
+  }
 }
 
 async function getLocks(es: Client) {

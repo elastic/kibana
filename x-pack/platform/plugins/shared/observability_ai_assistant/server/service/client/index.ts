@@ -388,6 +388,7 @@ export class ObservabilityAIAssistantClient {
                       numeric_labels: {},
                       systemMessage,
                       messages: initialMessagesWithAddedMessages,
+                      archived: false,
                     })
                   ).pipe(
                     map((conversationCreated): ConversationCreateEvent => {
@@ -410,26 +411,24 @@ export class ObservabilityAIAssistantClient {
             return throwError(() => error);
           }),
           tap((event) => {
-            if (this.dependencies.logger.isLevelEnabled('debug')) {
-              switch (event.type) {
-                case StreamingChatResponseEventType.MessageAdd:
-                  this.dependencies.logger.debug(
-                    () => `Added message: ${JSON.stringify(event.message)}`
-                  );
-                  break;
+            switch (event.type) {
+              case StreamingChatResponseEventType.MessageAdd:
+                this.dependencies.logger.debug(
+                  () => `Added message: ${JSON.stringify(event.message)}`
+                );
+                break;
 
-                case StreamingChatResponseEventType.ConversationCreate:
-                  this.dependencies.logger.debug(
-                    () => `Created conversation: ${JSON.stringify(event.conversation)}`
-                  );
-                  break;
+              case StreamingChatResponseEventType.ConversationCreate:
+                this.dependencies.logger.debug(
+                  () => `Created conversation: ${JSON.stringify(event.conversation)}`
+                );
+                break;
 
-                case StreamingChatResponseEventType.ConversationUpdate:
-                  this.dependencies.logger.debug(
-                    () => `Updated conversation: ${JSON.stringify(event.conversation)}`
-                  );
-                  break;
-              }
+              case StreamingChatResponseEventType.ConversationUpdate:
+                this.dependencies.logger.debug(
+                  () => `Updated conversation: ${JSON.stringify(event.conversation)}`
+                );
+                break;
             }
           }),
           shareReplay()
@@ -512,10 +511,7 @@ export class ObservabilityAIAssistantClient {
         apmInstrumentation(name),
         failOnNonExistingFunctionCall({ functions }),
         tap((event) => {
-          if (
-            event.type === StreamingChatResponseEventType.ChatCompletionChunk &&
-            this.dependencies.logger.isLevelEnabled('trace')
-          ) {
+          if (event.type === StreamingChatResponseEventType.ChatCompletionChunk) {
             this.dependencies.logger.trace(`Received chunk: ${JSON.stringify(event.message)}`);
           }
         }),
@@ -611,7 +607,7 @@ export class ObservabilityAIAssistantClient {
     updates,
   }: {
     conversationId: string;
-    updates: Partial<{ public: boolean }>;
+    updates: Partial<{ public: boolean; archived: boolean }>;
   }): Promise<Conversation> => {
     const conversation = await this.get(conversationId);
     if (!conversation) {
@@ -620,6 +616,7 @@ export class ObservabilityAIAssistantClient {
 
     const updatedConversation: Conversation = merge({}, conversation, {
       ...(updates.public !== undefined && { public: updates.public }),
+      ...(updates.archived !== undefined && { archived: updates.archived }),
     });
 
     return this.update(conversationId, updatedConversation);
@@ -639,6 +636,7 @@ export class ObservabilityAIAssistantClient {
         id: v4(),
       },
       public: false,
+      archived: false,
     });
   };
 

@@ -29826,25 +29826,6 @@
                               "secrets": {
                                 "additionalProperties": true,
                                 "properties": {
-                                  "kibana_api_key": {
-                                    "anyOf": [
-                                      {
-                                        "additionalProperties": true,
-                                        "properties": {
-                                          "id": {
-                                            "type": "string"
-                                          }
-                                        },
-                                        "required": [
-                                          "id"
-                                        ],
-                                        "type": "object"
-                                      },
-                                      {
-                                        "type": "string"
-                                      }
-                                    ]
-                                  },
                                   "service_token": {
                                     "anyOf": [
                                       {
@@ -29984,6 +29965,9 @@
                                 "type": "object"
                               },
                               "sync_integrations": {
+                                "type": "boolean"
+                              },
+                              "sync_uninstalled_integrations": {
                                 "type": "boolean"
                               },
                               "type": {
@@ -31007,25 +30991,6 @@
                       "secrets": {
                         "additionalProperties": false,
                         "properties": {
-                          "kibana_api_key": {
-                            "anyOf": [
-                              {
-                                "additionalProperties": false,
-                                "properties": {
-                                  "id": {
-                                    "type": "string"
-                                  }
-                                },
-                                "required": [
-                                  "id"
-                                ],
-                                "type": "object"
-                              },
-                              {
-                                "type": "string"
-                              }
-                            ]
-                          },
                           "service_token": {
                             "anyOf": [
                               {
@@ -31165,6 +31130,9 @@
                         "type": "object"
                       },
                       "sync_integrations": {
+                        "type": "boolean"
+                      },
+                      "sync_uninstalled_integrations": {
                         "type": "boolean"
                       },
                       "type": {
@@ -32121,25 +32089,6 @@
                             "secrets": {
                               "additionalProperties": true,
                               "properties": {
-                                "kibana_api_key": {
-                                  "anyOf": [
-                                    {
-                                      "additionalProperties": true,
-                                      "properties": {
-                                        "id": {
-                                          "type": "string"
-                                        }
-                                      },
-                                      "required": [
-                                        "id"
-                                      ],
-                                      "type": "object"
-                                    },
-                                    {
-                                      "type": "string"
-                                    }
-                                  ]
-                                },
                                 "service_token": {
                                   "anyOf": [
                                     {
@@ -32279,6 +32228,9 @@
                               "type": "object"
                             },
                             "sync_integrations": {
+                              "type": "boolean"
+                            },
+                            "sync_uninstalled_integrations": {
                               "type": "boolean"
                             },
                             "type": {
@@ -33400,25 +33352,6 @@
                             "secrets": {
                               "additionalProperties": true,
                               "properties": {
-                                "kibana_api_key": {
-                                  "anyOf": [
-                                    {
-                                      "additionalProperties": true,
-                                      "properties": {
-                                        "id": {
-                                          "type": "string"
-                                        }
-                                      },
-                                      "required": [
-                                        "id"
-                                      ],
-                                      "type": "object"
-                                    },
-                                    {
-                                      "type": "string"
-                                    }
-                                  ]
-                                },
                                 "service_token": {
                                   "anyOf": [
                                     {
@@ -33558,6 +33491,9 @@
                               "type": "object"
                             },
                             "sync_integrations": {
+                              "type": "boolean"
+                            },
+                            "sync_uninstalled_integrations": {
                               "type": "boolean"
                             },
                             "type": {
@@ -34566,25 +34502,6 @@
                       "secrets": {
                         "additionalProperties": false,
                         "properties": {
-                          "kibana_api_key": {
-                            "anyOf": [
-                              {
-                                "additionalProperties": false,
-                                "properties": {
-                                  "id": {
-                                    "type": "string"
-                                  }
-                                },
-                                "required": [
-                                  "id"
-                                ],
-                                "type": "object"
-                              },
-                              {
-                                "type": "string"
-                              }
-                            ]
-                          },
                           "service_token": {
                             "anyOf": [
                               {
@@ -34724,6 +34641,9 @@
                         "type": "object"
                       },
                       "sync_integrations": {
+                        "type": "boolean"
+                      },
+                      "sync_uninstalled_integrations": {
                         "type": "boolean"
                       },
                       "type": {
@@ -35665,25 +35585,6 @@
                             "secrets": {
                               "additionalProperties": true,
                               "properties": {
-                                "kibana_api_key": {
-                                  "anyOf": [
-                                    {
-                                      "additionalProperties": true,
-                                      "properties": {
-                                        "id": {
-                                          "type": "string"
-                                        }
-                                      },
-                                      "required": [
-                                        "id"
-                                      ],
-                                      "type": "object"
-                                    },
-                                    {
-                                      "type": "string"
-                                    }
-                                  ]
-                                },
                                 "service_token": {
                                   "anyOf": [
                                     {
@@ -35823,6 +35724,9 @@
                               "type": "object"
                             },
                             "sync_integrations": {
+                              "type": "boolean"
+                            },
+                            "sync_uninstalled_integrations": {
                               "type": "boolean"
                             },
                             "type": {
@@ -43767,6 +43671,147 @@
           }
         },
         "summary": "Get CCR Remote synced integrations status",
+        "tags": [
+          "CCR Remote synced integrations"
+        ]
+      }
+    },
+    "/api/fleet/remote_synced_integrations/{outputId}/remote_status": {
+      "get": {
+        "description": "[Required authorization] Route required privileges: fleet-settings-read AND integrations-read.",
+        "operationId": "get-fleet-remote-synced-integrations-outputid-remote-status",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "outputId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "custom_assets": {
+                      "additionalProperties": {
+                        "additionalProperties": false,
+                        "properties": {
+                          "name": {
+                            "type": "string"
+                          },
+                          "package_name": {
+                            "type": "string"
+                          },
+                          "package_version": {
+                            "type": "string"
+                          },
+                          "sync_status": {
+                            "enum": [
+                              "completed",
+                              "synchronizing",
+                              "failed"
+                            ],
+                            "type": "string"
+                          },
+                          "type": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "type",
+                          "name",
+                          "package_name",
+                          "package_version",
+                          "sync_status"
+                        ],
+                        "type": "object"
+                      },
+                      "type": "object"
+                    },
+                    "error": {
+                      "type": "string"
+                    },
+                    "integrations": {
+                      "items": {
+                        "additionalProperties": false,
+                        "properties": {
+                          "error": {
+                            "type": "string"
+                          },
+                          "id": {
+                            "type": "string"
+                          },
+                          "package_name": {
+                            "type": "string"
+                          },
+                          "package_version": {
+                            "type": "string"
+                          },
+                          "sync_status": {
+                            "enum": [
+                              "completed",
+                              "synchronizing",
+                              "failed"
+                            ],
+                            "type": "string"
+                          },
+                          "updated_at": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "sync_status"
+                        ],
+                        "type": "object"
+                      },
+                      "type": "array"
+                    }
+                  },
+                  "required": [
+                    "integrations"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "Generic Error",
+                  "properties": {
+                    "attributes": {},
+                    "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "statusCode": {
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "message",
+                    "attributes"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get CCR Remote synced integrations status by outputId",
         "tags": [
           "CCR Remote synced integrations"
         ]

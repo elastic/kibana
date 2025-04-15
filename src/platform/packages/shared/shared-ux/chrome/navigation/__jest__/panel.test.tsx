@@ -56,9 +56,9 @@ describe('Panel', () => {
       navTreeDef: of(navigationTree),
     });
 
-    expect(await findByTestId(/panelOpener-root.group1/)).toBeVisible();
+    expect(await findByTestId(/nav-item-root.group1/)).toBeVisible();
     expect(queryByTestId(/sideNavPanel/)).toBeNull();
-    (await findByTestId(/panelOpener-root.group1/)).click(); // open the panel
+    (await findByTestId(/nav-item-root.group1/)).click(); // open the panel
     expect(queryByTestId(/sideNavPanel/)).toBeVisible();
   });
 
@@ -77,7 +77,7 @@ describe('Panel', () => {
               title: 'Group 1',
               path: 'root.group1',
               href: '/app/item1',
-              renderAs: 'panelOpener',
+              renderAs: 'block',
               children: [
                 // All children are hidden, this group should not render
                 {
@@ -109,8 +109,8 @@ describe('Panel', () => {
       navTreeDef: of(navigationTree),
     });
 
-    expect(queryByTestId(/panelOpener-root.group1/)).toBeNull();
-    expect(queryByTestId(/panelOpener-root.group2/)).toBeVisible();
+    expect(queryByTestId(/nav-item-root.group1.item1/)).toBeNull();
+    expect(queryByTestId(/nav-item-root.group2/)).toBeVisible();
   });
 
   describe('toggle the panel open and closed', () => {
@@ -280,7 +280,7 @@ describe('Panel', () => {
       expect(queryByTestId(/sideNavPanel/)).toBeNull();
       expect(queryByTestId(/customPanelContent/)).toBeNull();
 
-      queryByTestId(/panelOpener-root.group1/)?.click(); // open the panel
+      queryByTestId(/nav-item-root.group1/)?.click(); // open the panel
 
       expect(queryByTestId(/sideNavPanel/)).not.toBeNull();
       expect(queryByTestId(/customPanelContent/)).not.toBeNull();
@@ -351,7 +351,7 @@ describe('Panel', () => {
         navTreeDef: of(navTree),
       });
 
-      queryByTestId(/panelOpener-root.group1/)?.click(); // open the panel
+      queryByTestId(/nav-item-root.group1/)?.click(); // open the panel
 
       expect(queryByTestId(/panelGroupId-foo/)).toBeVisible();
       expect(queryByTestId(/panelGroupTitleId-foo/)?.textContent).toBe('Foo');
@@ -418,7 +418,7 @@ describe('Panel', () => {
         navTreeDef: of(navTree),
       });
 
-      queryByTestId(/panelOpener-root.group1/)?.click(); // open the panel
+      queryByTestId(/nav-item-root.group1/)?.click(); // open the panel
 
       expect(queryByTestId(/panelGroupTitleId-foo/)).toBeNull(); // No title rendered
 
@@ -485,7 +485,7 @@ describe('Panel', () => {
         navTreeDef: of(navTree),
       });
 
-      queryByTestId(/panelOpener-root.group1/)?.click(); // open the panel
+      queryByTestId(/nav-item-root.group1/)?.click(); // open the panel
 
       expect(queryByTestId(/panelGroupId-foo/)).toBeVisible();
 
@@ -554,7 +554,7 @@ describe('Panel', () => {
         navTreeDef: of(navTree),
       });
 
-      queryByTestId(/panelOpener-root.group1/)?.click(); // open the panel
+      queryByTestId(/nav-item-root.group1/)?.click(); // open the panel
 
       expect(queryByTestId(/panelGroupId-foo/)).toBeVisible(); // no crash
     });
@@ -611,7 +611,7 @@ describe('Panel', () => {
 
       expect(componentSpy).not.toHaveBeenCalled();
 
-      queryByTestId(/panelOpener-root.group1/)?.click(); // open the panel
+      queryByTestId(/nav-item-root.group1/)?.click(); // open the panel
 
       expect(componentSpy).toHaveBeenCalled();
     });
