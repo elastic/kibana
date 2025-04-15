@@ -99,7 +99,10 @@ export function updateObjectsSpacesTestSuiteFactory(
             if (expectAliasDifference !== undefined) {
               // if we deleted an object that had an alias pointing to it, the alias should have been deleted as well
               if (!hasRefreshed) {
-                await es.indices.refresh({ index: ALL_SAVED_OBJECT_INDICES }); // alias deletion uses refresh: false, so we need to manually refresh the index before searching
+                await es.indices.refresh({
+                  index: ALL_SAVED_OBJECT_INDICES,
+                  allow_no_indices: true,
+                }); // alias deletion uses refresh: false, so we need to manually refresh the index before searching
                 hasRefreshed = true;
               }
               const searchResponse = await es.search({

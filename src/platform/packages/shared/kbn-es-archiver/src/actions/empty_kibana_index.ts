@@ -17,7 +17,7 @@ export async function emptyKibanaIndexAction({ client, log }: { client: Client; 
   const stats = createStats('emptyKibanaIndex', log);
 
   await cleanSavedObjectIndices({ client, stats, log });
-  await client.indices.refresh({ index: ALL_SAVED_OBJECT_INDICES });
+  await client.indices.refresh({ index: ALL_SAVED_OBJECT_INDICES, allow_no_indices: true });
 
   return stats.toJSON();
 }
