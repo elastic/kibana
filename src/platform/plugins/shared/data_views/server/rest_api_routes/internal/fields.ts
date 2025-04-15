@@ -153,6 +153,6 @@ export const registerFields = (
       },
       validate: { request: { query: querySchema }, response: validate.response },
     },
-    handler(isRollupsEnabled)
+    createHandler(isRollupsEnabled)
   );
 };
