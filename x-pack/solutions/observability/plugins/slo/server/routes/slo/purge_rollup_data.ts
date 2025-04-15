@@ -27,17 +27,12 @@ export const purgeRollupDataRoute = createSloServerRoute({
     const soClient = (await context.core).savedObjects.client;
     const repository = new KibanaSavedObjectsSLORepository(soClient, logger);
     const slos = await repository.findAllByIds(params.body.ids);
-
     const purgePolicy = params.body.purgePolicy;
     const purgeRollupData = new PurgeRollupData(esClient);
 
     if (params.query?.force !== 'true') {
       if (purgePolicy.purgeType === 'fixed_age') {
-        if (
-          slos.some((slo) => {
-            purgePolicy.age.isShorterThan(slo.timeWindow.duration);
-          })
-        ) {
+        if (slos.some((slo) => purgePolicy.age.isShorterThan(slo.timeWindow.duration))) {
           return response.badRequest({
             body: `Age must be greater than or equal to the time window of the SLI data being purged.`,
           });
@@ -47,7 +42,7 @@ export const purgeRollupDataRoute = createSloServerRoute({
         if (
           slos.some(
             (slo) =>
-              purgePolicy.timestamp.getMilliseconds() >
+              purgePolicy.timestamp.getTime() >
               Date.now() - slo.timeWindow.duration.asSeconds() * 1000
           )
         ) {

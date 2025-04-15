@@ -37,7 +37,6 @@ const bulkPurgeRollupSchema = t.intersection([
 ]);
 
 type PurgePolicyType = t.TypeOf<typeof purgePolicy>;
-type PurgeSLIInput = t.OutputOf<(typeof bulkPurgeRollupSchema.types)[1]>; // Raw payload sent by the frontend
 
-export type { PurgePolicyType, PurgeSLIInput };
+export type { PurgePolicyType };
 export { bulkPurgeRollupSchema };

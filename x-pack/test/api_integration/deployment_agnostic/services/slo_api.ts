@@ -8,7 +8,6 @@
 import { RoleCredentials } from '@kbn/ftr-common-functional-services';
 import { CreateSLOInput, FindSLODefinitionsResponse, UpdateSLOInput } from '@kbn/slo-schema';
 import { StoredSLODefinition } from '@kbn/slo-plugin/server/domain/models/slo';
-import { PurgeSLIInput } from '@kbn/slo-schema/src/rest_specs/routes/bulk_purge_rollup';
 import { DeploymentAgnosticFtrProviderContext } from '../ftr_provider_context';
 
 interface SavedObject<Attributes extends Record<string, any>> {
@@ -162,7 +161,7 @@ export function SloApiProvider({ getService }: DeploymentAgnosticFtrProviderCont
 
     async purgeRollupData(
       ids: string[],
-      purgePolicy: PurgeSLIInput['body']['purgePolicy'],
+      purgePolicy: { purgeType: 'fixed_age' | 'fixed_time'; age?: string; timestamp?: Date },
       roleAuthc: RoleCredentials,
       expectedStatus: number
     ) {

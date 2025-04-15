@@ -56,41 +56,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       await sloApi.purgeRollupData(
         [id],
-        { purgeType: 'fixed_age', age: '7d' },
-        adminRoleAuthc,
-        204
-      );
-
-      // expect rollup documents to be deleted
-
-      await retry.waitForWithTimeout('SLO rollup data is deleted', 60 * 1000, async () => {
-        const sloRollupResponseAfterDeletion = await esClient.search({
-          index: SLI_DESTINATION_INDEX_PATTERN,
-          query: {
-            bool: {
-              filter: [
-                {
-                  term: { 'slo.id': id },
-                },
-              ],
-            },
-          },
-        });
-        if (sloRollupResponseAfterDeletion.hits.hits.length > 1) {
-          throw new Error('SLO rollup data not deleted yet');
-        }
-        return true;
-      });
-    });
-
-    it('should accept a valid purge policy - timestamp', async () => {
-      const response = await sloApi.create(DEFAULT_SLO, adminRoleAuthc);
-      expect(response).property('id');
-      const id = response.id;
-
-      await sloApi.purgeRollupData(
-        [id],
-        { purgeType: 'fixed_time', timestamp: new Date('2025-01-01T00:00:00Z').toISOString() },
+        { purgeType: 'fixed_age', age: '30d' },
         adminRoleAuthc,
         204
       );
@@ -128,8 +94,37 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         adminRoleAuthc,
         400
       );
+    });
 
-      // expect rollup documents to be deleted
+    it('should accept a valid purge policy - timestamp', async () => {
+      const response = await sloApi.create(DEFAULT_SLO, adminRoleAuthc);
+      expect(response).property('id');
+      const id = response.id;
+
+      await sloApi.purgeRollupData(
+        [id],
+        { purgeType: 'fixed_time', timestamp: new Date('2025-01-01T00:00:00Z') },
+        adminRoleAuthc,
+        204
+      );
+      await retry.waitForWithTimeout('SLO rollup data is deleted', 60 * 1000, async () => {
+        const sloRollupResponseAfterDeletion = await esClient.search({
+          index: SLI_DESTINATION_INDEX_PATTERN,
+          query: {
+            bool: {
+              filter: [
+                {
+                  term: { 'slo.id': id },
+                },
+              ],
+            },
+          },
+        });
+        if (sloRollupResponseAfterDeletion.hits.hits.length > 1) {
+          throw new Error('SLO rollup data not deleted yet');
+        }
+        return true;
+      });
     });
 
     it('should reject an invalid purge policy - timestamp', async () => {
@@ -139,12 +134,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       await sloApi.purgeRollupData(
         [id],
-        { purgeType: 'fixed_time', timestamp: new Date().toISOString() },
+        { purgeType: 'fixed_time', timestamp: new Date() },
         adminRoleAuthc,
         400
       );
-
-      // expect rollup documents to be deleted
     });
   });
 }
