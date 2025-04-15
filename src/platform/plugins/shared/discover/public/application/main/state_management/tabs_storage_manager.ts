@@ -8,10 +8,10 @@
  */
 
 import {
-  createStateContainer,
+  // createStateContainer,
   type IKbnUrlStateStorage,
-  type ReduxLikeStateContainer,
-  syncState,
+  // type ReduxLikeStateContainer,
+  // syncState,
 } from '@kbn/kibana-utils-plugin/public';
 import type { TabItem } from '@kbn/unified-tabs';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
@@ -52,8 +52,8 @@ export interface TabsStorageManager {
    * Supports two-way sync of the selected tab id with the URL.
    * Currently, we use it only one way - from internal state to URL.
    */
-  urlStateContainer: ReduxLikeStateContainer<TabsStorageState>;
-  startUrlSync: (props: { onChanged?: (nextState: TabsStorageState) => void }) => () => void;
+  // urlStateContainer: ReduxLikeStateContainer<TabsStorageState>;
+  // startUrlSync: (props: { onChanged?: (nextState: TabsStorageState) => void }) => () => void;
   persistLocally: (props: TabsInternalStatePayload) => Promise<void>;
   updateTabStateLocally: (
     tabId: string,
@@ -71,38 +71,38 @@ export const getTabsStorageManager = ({
   urlStateStorage: IKbnUrlStateStorage;
   storage: Storage;
 }): TabsStorageManager => {
-  const urlStateContainer = createStateContainer<TabsStorageState>({});
-
-  const startUrlSync: TabsStorageManager['startUrlSync'] = ({
-    onChanged, // can be called when selectedTabId changes in URL to trigger app state change if needed
-  }) => {
-    const { start, stop } = syncState({
-      stateStorage: urlStateStorage,
-      stateContainer: {
-        ...urlStateContainer,
-        set: (state) => {
-          if (state) {
-            // syncState utils requires to handle incoming "null" value
-            urlStateContainer.set(state);
-          }
-        },
-      },
-      storageKey: TABS_STATE_URL_KEY,
-    });
-
-    const listener = onChanged
-      ? urlStateContainer.state$.subscribe((state) => {
-          onChanged(state);
-        })
-      : null;
-
-    start();
-
-    return () => {
-      listener?.unsubscribe();
-      stop();
-    };
-  };
+  // const urlStateContainer = createStateContainer<TabsStorageState>({});
+  //
+  // const startUrlSync: TabsStorageManager['startUrlSync'] = ({
+  //   onChanged, // can be called when selectedTabId changes in URL to trigger app state change if needed
+  // }) => {
+  //   const { start, stop } = syncState({
+  //     stateStorage: urlStateStorage,
+  //     stateContainer: {
+  //       ...urlStateContainer,
+  //       set: (state) => {
+  //         if (state) {
+  //           // syncState utils requires to handle incoming "null" value
+  //           urlStateContainer.set(state);
+  //         }
+  //       },
+  //     },
+  //     storageKey: TABS_STATE_URL_KEY,
+  //   });
+  //
+  //   const listener = onChanged
+  //     ? urlStateContainer.state$.subscribe((state) => {
+  //         onChanged(state);
+  //       })
+  //     : null;
+  //
+  //   start();
+  //
+  //   return () => {
+  //     listener?.unsubscribe();
+  //     stop();
+  //   };
+  // };
 
   const getSelectedTabIdFromUrl = () => {
     return (urlStateStorage.get(TABS_STATE_URL_KEY) as TabsStorageState)?.id; // can be called even before sync with URL started
@@ -269,8 +269,8 @@ export const getTabsStorageManager = ({
   };
 
   return {
-    urlStateContainer,
-    startUrlSync,
+    // urlStateContainer,
+    // startUrlSync,
     persistLocally,
     updateTabStateLocally,
     loadLocally,

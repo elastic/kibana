@@ -78,12 +78,12 @@ export const DiscoverMainRoute = ({
     })
   );
 
-  useEffect(() => {
-    const stopUrlSync = tabsStorageManager.startUrlSync();
-    return () => {
-      stopUrlSync();
-    };
-  }, [tabsStorageManager]);
+  // useEffect(() => {
+  //   const stopUrlSync = tabsStorageManager.startUrlSync();
+  //   return () => {
+  //     stopUrlSync();
+  //   };
+  // }, [tabsStorageManager]);
 
   const [runtimeStateManager] = useState(() => createRuntimeStateManager());
   const [internalState] = useState(() =>
