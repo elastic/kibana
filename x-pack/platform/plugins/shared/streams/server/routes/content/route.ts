@@ -24,6 +24,7 @@ import {
   parseArchive,
   prepareForExport,
   prepareForImport,
+  referenceManagedIndexPattern,
 } from '../../lib/content';
 
 const MAX_CONTENT_PACK_SIZE_BYTES = 1024 * 1024 * 5; // 5MB
@@ -147,19 +148,20 @@ const importContentRoute = createServerRoute({
 
     const importer = (await context.core).savedObjects.getImporter(soClient);
 
-    // this is required to support integration package's dashboards. since they
-    // reference pre-existing metrics-* and logs-* data views we they need to
-    // install them before import
-    await installManagedIndexPattern({
-      savedObjectsClient: soClient,
-      savedObjectsImporter: importer,
-    });
-
     const savedObjects = prepareForImport({
       target: params.path.name,
       include: params.body.include,
       savedObjects: contentPack.entries,
     });
+
+    if (referenceManagedIndexPattern(savedObjects)) {
+      // integration package's dashboards may reference pre-existing data views
+      // that we need to install before import
+      await installManagedIndexPattern({
+        savedObjectsClient: soClient,
+        savedObjectsImporter: importer,
+      });
+    }
 
     const { successResults, errors = [] } = await importer.import({
       readStream: createListStream(savedObjects),

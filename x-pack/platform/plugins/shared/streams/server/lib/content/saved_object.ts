@@ -109,3 +109,11 @@ export function updateIds(savedObjects: ContentPackSavedObject[]) {
 
   return savedObjects;
 }
+
+export function referenceManagedIndexPattern(savedObjects: ContentPackSavedObject[]) {
+  return savedObjects.some((object) =>
+    object.references.some(
+      (ref) => ref.type === 'index-pattern' && (ref.id === 'metrics-*' || ref.id === 'logs-*')
+    )
+  );
+}
