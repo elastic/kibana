@@ -14,14 +14,14 @@ describe('titles api', () => {
   const rawState: SerializedTitles = {
     title: 'very cool title',
     description: 'less cool description',
-    hidePanelTitles: false,
+    hideTitle: false,
   };
 
   it('should initialize publishing subjects with the provided rawState', () => {
     const { api } = initializeTitleManager(rawState);
     expect(api.title$.value).toBe(rawState.title);
     expect(api.description$.value).toBe(rawState.description);
-    expect(api.hidePanelTitles$.value).toBe(rawState.hidePanelTitles);
+    expect(api.hideTitle$.value).toBe(rawState.hideTitle);
   });
 
   it('should update publishing subject values when set functions are called', () => {
@@ -29,11 +29,11 @@ describe('titles api', () => {
 
     api.setTitle('even cooler title');
     api.setDescription('super uncool description');
-    api.setHidePanelTitles(true);
+    api.setHideTitle(true);
 
     expect(api.title$.value).toEqual('even cooler title');
     expect(api.description$.value).toEqual('super uncool description');
-    expect(api.hidePanelTitles$.value).toBe(true);
+    expect(api.hideTitle$.value).toBe(true);
   });
 
   it('should correctly serialize current state', () => {
@@ -44,14 +44,17 @@ describe('titles api', () => {
     expect(serializedTitles).toMatchInlineSnapshot(`
         Object {
           "description": "less cool description",
-          "hidePanelTitles": false,
+          "hideTitle": false,
           "title": "UH OH, A TITLE",
         }
       `);
   });
 
-  it('should correctly compare hidePanelTitles with custom comparator', () => {
-    const comparator = titleComparators.hidePanelTitles as ComparatorFunction<SerializedTitles, 'hidePanelTitles'>;
+  it('should correctly compare hideTitle with custom comparator', () => {
+    const comparator = titleComparators.hideTitle as ComparatorFunction<
+      SerializedTitles,
+      'hideTitle'
+    >;
     expect(comparator(true, false)).toBe(false);
     expect(comparator(undefined, false)).toBe(true);
     expect(comparator(true, undefined)).toBe(false);
