@@ -319,8 +319,8 @@ describe('map_to_columns', () => {
       );
 
       expect(result.columns).toStrictEqual([
-        { id: 'a', name: 'A', meta: { type: 'number', field: undefined, params: undefined } },
-        { id: 'b', name: 'B', meta: { type: 'number', field: undefined, params: undefined } },
+        { id: 'a', name: 'A', meta: { type: 'number', sourceParams: {} } },
+        { id: 'b', name: 'B', meta: { type: 'number', sourceParams: {} } },
       ]);
 
       expect(result.rows).toStrictEqual([
@@ -370,7 +370,7 @@ describe('map_to_columns', () => {
       );
 
       expect(result.columns).toStrictEqual([
-        { id: 'a', name: 'A', meta: { type: 'number', field: undefined, params: undefined } },
+        { id: 'a', name: 'A', meta: { type: 'number', sourceParams: {} } },
         { id: 'field', name: 'C', meta: { type: 'string' }, variable: 'field' },
       ]);
 
