@@ -85,6 +85,7 @@ export const GridRowHeaderEmpty = React.memo(({ rowId }: { rowId: string }) => {
 
   return (
     <div
+      className="kbnGridRowHeader--ghost"
       style={{ pointerEvents: 'none', height: '0px' }}
       ref={(element: HTMLDivElement | null) => {
         gridLayoutStateManager.headerRefs.current[rowId] = element;
@@ -106,8 +107,9 @@ const useStyleSubscription = (
       ]).subscribe(([gridLayout, proposedGridLayout]) => {
         const headerRef = gridLayoutStateManager.headerRefs.current[rowId];
         if (!headerRef) return;
-        const currentGridLayout = proposedGridLayout || gridLayout;
-        const topOffset = getTopOffsetForRowHeader(rowId, currentGridLayout);
+        const currentLayout = proposedGridLayout || gridLayout;
+        const topOffset = getTopOffsetForRowHeader(rowId, currentLayout);
+        console.log(rowId, topOffset, currentLayout);
         headerRef.style.display = 'block';
         headerRef.style.gridColumnStart = `1`;
         headerRef.style.gridColumnEnd = `-1`;
