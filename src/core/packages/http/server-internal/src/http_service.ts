@@ -26,6 +26,9 @@ import type {
   IContextContainer,
   IContextProvider,
   IRouter,
+  RouteAccess,
+  RouteMethod,
+  RouteSecurity,
 } from '@kbn/core-http-server';
 import type {
   InternalContextSetup,
@@ -246,6 +249,8 @@ export class HttpService
         this.registerOasApi(config);
       }
 
+      this.registerRouteInfoApi(config);
+
       await this.httpServer.start();
     }
 
@@ -321,6 +326,91 @@ export class HttpService
             })
           )
         );
+      },
+      options: {
+        app: { access: 'public' },
+        auth: false,
+        cache: {
+          privacy: 'public',
+          otherwise: 'must-revalidate',
+        },
+      },
+    });
+  }
+
+  private registerRouteInfoApi(config: HttpConfig) {
+    const basePath = this.internalSetup?.basePath;
+    const server = this.internalSetup?.server;
+
+    if (!basePath || !server) {
+      throw new Error('Cannot register Route Info API before server setup is complete');
+    }
+
+    const stringOrStringArraySchema = schema.oneOf([
+      schema.string(),
+      schema.arrayOf(schema.string()),
+    ]);
+
+    const querySchema = schema.object({
+      access: schema.maybe(schema.oneOf([schema.literal('public'), schema.literal('internal')])),
+      pathStartsWith: schema.maybe(stringOrStringArraySchema),
+      authz: schema.maybe(schema.boolean()),
+      authc: schema.maybe(schema.oneOf([schema.literal('optional'), schema.boolean()])),
+    });
+
+    server.route({
+      path: '/api/route-audit',
+      method: 'GET',
+      handler: async (req, h) => {
+        const routers = this.httpServer.getRouters();
+        const query = querySchema.validate(req.query);
+
+        const data = routers.routers
+          .map((router) => router.getRoutes({ excludeVersionedRoutes: false }))
+          .flat()
+          .reduce<
+            Array<{
+              method: RouteMethod;
+              security?: RouteSecurity;
+              access?: RouteAccess;
+              path: string;
+            }>
+          >((acc, route) => {
+            const security =
+              typeof route.security === 'function' ? route.security() : route.security;
+            const { access, authz, authc } = query;
+            const pathStartsWithNormalized =
+              typeof query.pathStartsWith === 'string'
+                ? [query.pathStartsWith]
+                : query.pathStartsWith;
+
+            // @ts-expect-error
+            const routeAuthz = security?.authz?.enabled ?? true;
+            const routeAuthc = security?.authc?.enabled ?? true;
+
+            const shouldSkipRoute =
+              route.path.startsWith('/XXXXXXXXXXXX') ||
+              (access && route.options.access !== query.access) ||
+              (authz !== undefined && authz !== routeAuthz) ||
+              (authc !== undefined && authc !== routeAuthc) ||
+              (pathStartsWithNormalized &&
+                !pathStartsWithNormalized.some((path) => route.path.startsWith(path)));
+
+            if (shouldSkipRoute) {
+              return acc;
+            }
+
+            acc.push({
+              method: route.method,
+              security,
+              access: route.options.access,
+              path: route.path,
+            });
+
+            return acc;
+          }, []);
+
+        return { data };
       },
       options: {
         app: { access: 'public' },
