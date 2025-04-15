@@ -9,7 +9,7 @@ import { DEFAULT_DOWNLOAD_SOURCE_URI } from '../../../../common/constants';
 import { PLATFORM_WITH_INSTALL_SERVERS, type EXTENDED_PLATFORM_TYPE } from '../../../hooks';
 import type { DownloadSource, FleetProxy } from '../../../types';
 
-function getfleetServerHostsEnrollArgs({
+function getFleetServerHostsEnrollArgs({
   apiKey,
   fleetServerHost,
   fleetProxy,
@@ -96,7 +96,7 @@ export const ManualInstructions = ({
   showInstallServers?: boolean;
 }) => {
   const getEnrollArgsByPlatForm = (platform: EXTENDED_PLATFORM_TYPE) => {
-    return getfleetServerHostsEnrollArgs({
+    return getFleetServerHostsEnrollArgs({
       apiKey,
       fleetServerHost,
       platform,
