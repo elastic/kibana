@@ -28,6 +28,7 @@ import {
   isFunctionItem,
   isOptionItem,
   isParametrized,
+  isSingleItem,
   isSourceItem,
   isTimeIntervalItem,
   sourceExists,
@@ -172,15 +173,23 @@ async function validateAst(
   messages.push(...validateFieldsShadowing(availableFields, variables));
   messages.push(...validateUnsupportedTypeFields(availableFields, ast));
 
+  const references: ReferenceMaps = {
+    sources,
+    fields: availableFields,
+    policies: availablePolicies,
+    variables,
+    query: queryString,
+    joinIndices: joinIndices?.indices || [],
+  };
+  let seenFork = false;
   for (const [index, command] of ast.entries()) {
-    const references: ReferenceMaps = {
-      sources,
-      fields: availableFields,
-      policies: availablePolicies,
-      variables,
-      query: queryString,
-      joinIndices: joinIndices?.indices || [],
-    };
+    if (command.name === 'fork') {
+      if (seenFork) {
+        messages.push(errors.tooManyForks(command));
+      } else {
+        seenFork = true;
+      }
+    }
     const commandMessages = validateCommand(command, references, ast, index);
     messages.push(...commandMessages);
   }
@@ -224,6 +233,21 @@ function validateCommand(
       const joinCommandErrors = validateJoinCommand(join, references);
       messages.push(...joinCommandErrors);
       break;
+    }
+    case 'fork': {
+      references.fields.set('_fork', {
+        name: '_fork',
+        type: 'keyword',
+      });
+
+      for (const arg of command.args.flat()) {
+        if (isSingleItem(arg) && arg.type === 'query') {
+          // all the args should be commands
+          arg.commands.forEach((subCommand) => {
+            messages.push(...validateCommand(subCommand, references, ast, currentCommandIndex));
+          });
+        }
+      }
     }
     default: {
       // Now validate arguments

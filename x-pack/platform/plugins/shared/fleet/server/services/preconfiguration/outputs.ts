@@ -188,13 +188,6 @@ async function hashSecrets(output: PreconfiguredOutput) {
         service_token: serviceToken,
       };
     }
-    if (typeof remoteESOutput.secrets?.kibana_api_key === 'string') {
-      const kibanaAPIKey = await hashSecret(remoteESOutput.secrets?.kibana_api_key);
-      secrets = {
-        ...(secrets ? secrets : {}),
-        kibana_api_key: kibanaAPIKey,
-      };
-    }
   }
   // common to all types
   if (typeof output.secrets?.ssl?.key === 'string') {
@@ -348,12 +341,12 @@ async function isPreconfiguredOutputDifferentFromCurrent(
         preconfiguredOutput.secrets?.service_token,
         existingOutput.secrets?.service_token
       )) ||
-      (await isSecretDifferent(
-        preconfiguredOutput.secrets?.kibana_api_key,
-        existingOutput.secrets?.kibana_api_key
-      )) ||
       isDifferent(existingOutput.kibana_url, preconfiguredOutput.kibana_url) ||
-      isDifferent(existingOutput.sync_integrations, preconfiguredOutput.sync_integrations);
+      isDifferent(existingOutput.sync_integrations, preconfiguredOutput.sync_integrations) ||
+      isDifferent(
+        existingOutput.sync_uninstalled_integrations,
+        preconfiguredOutput.sync_uninstalled_integrations
+      );
 
     return serviceTokenIsDifferent;
   };

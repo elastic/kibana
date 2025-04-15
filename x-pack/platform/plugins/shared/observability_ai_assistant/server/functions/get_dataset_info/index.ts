@@ -82,7 +82,7 @@ export async function getDatasetInfo({
     });
     return { indices, fields, stats };
   } catch (e) {
-    resources.logger.error(`Error getting relevant field names: ${e.message}`);
+    resources.logger.warn(`Error getting relevant field names: ${e.message}`);
     return { indices, fields: [] };
   }
 }

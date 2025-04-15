@@ -282,6 +282,10 @@ export default function (program) {
       devConfig: opts.devConfig,
       dev: opts.dev,
       serverless: opts.serverless || unknownOptions.serverless,
+      securityProductTier: _.get(
+        unknownOptions,
+        'xpack.securitySolutionServerless.productTypes[0].product_tier'
+      ),
     });
 
     const configsEvaluated = getConfigFromFiles(configs);
