@@ -82,6 +82,7 @@ async function reIndexKnowledgeBase({
     logger.info('Re-indexing knowledge base completed successfully');
     return true;
   } catch (error) {
+    logger.error(`Failed to re-index knowledge base: ${error.message}`);
     throw new Error(`Failed to re-index knowledge base: ${error.message}`);
   }
 }

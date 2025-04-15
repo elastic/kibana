@@ -2,6 +2,8 @@
 
 ## Disable plugins
 xpack.osquery.enabled: false
+xpack.ml.ad.enabled: false
+xpack.ml.dfa.enabled: false
 
 xpack.features.overrides:
   ### The following features are Security features hidden in Role management UI for this specific tier.
@@ -11,4 +13,4 @@ xpack.features.overrides:
 ## Agentless deployment by default
 xpack.fleet.agentless.isDefault: true
 # Override integrations home
-xpack.fleet.integrationsHomeOverride: '/app/security/configurations/integrations' 
+xpack.fleet.integrationsHomeOverride: '/app/security/configurations/integrations'

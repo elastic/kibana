@@ -2,6 +2,8 @@
   "type": "plugin",
   "id": "@kbn/ui-settings-plugin",
   "owner": "@elastic/kibana-core",
+  "group": "platform",
+  "visibility": "private",
   "plugin": {
     "id": "uiSettingsPlugin",
     "server": true,
