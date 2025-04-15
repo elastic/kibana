@@ -500,198 +500,203 @@ Object {
   ],
   "footer": Array [
     Object {
-      "icon": "launch",
-      "link": "securitySolutionUI:get_started",
-      "type": "navItem",
-    },
-    Object {
-      "icon": "editorCodeBlock",
-      "link": "dev_tools",
-      "title": "Developer tools",
-      "type": "navItem",
-    },
-    Object {
-      "breadcrumbStatus": "hidden",
       "children": Array [
         Object {
+          "icon": "launch",
+          "link": "securitySolutionUI:get_started",
+        },
+        Object {
+          "icon": "editorCodeBlock",
+          "link": "dev_tools",
+          "title": "Developer tools",
+        },
+        Object {
+          "breadcrumbStatus": "hidden",
           "children": Array [
             Object {
               "children": Array [
                 Object {
-                  "link": "management:ingest_pipelines",
+                  "children": Array [
+                    Object {
+                      "link": "management:ingest_pipelines",
+                    },
+                    Object {
+                      "link": "management:pipelines",
+                    },
+                  ],
+                  "title": "Ingest",
                 },
                 Object {
-                  "link": "management:pipelines",
+                  "children": Array [
+                    Object {
+                      "link": "management:index_management",
+                    },
+                    Object {
+                      "link": "management:index_lifecycle_management",
+                    },
+                    Object {
+                      "link": "management:snapshot_restore",
+                    },
+                    Object {
+                      "link": "management:rollup_jobs",
+                    },
+                    Object {
+                      "link": "management:transform",
+                    },
+                    Object {
+                      "link": "management:cross_cluster_replication",
+                    },
+                    Object {
+                      "link": "management:remote_clusters",
+                    },
+                    Object {
+                      "link": "management:migrate_data",
+                    },
+                  ],
+                  "title": "Data",
+                },
+                Object {
+                  "children": Array [
+                    Object {
+                      "link": "management:triggersActions",
+                    },
+                    Object {
+                      "link": "management:cases",
+                    },
+                    Object {
+                      "link": "management:triggersActionsConnectors",
+                    },
+                    Object {
+                      "link": "management:reporting",
+                    },
+                    Object {
+                      "link": "management:jobsListLink",
+                    },
+                    Object {
+                      "link": "management:watcher",
+                    },
+                    Object {
+                      "link": "management:maintenanceWindows",
+                    },
+                    Object {
+                      "link": "securitySolutionUI:entity_analytics-management",
+                    },
+                    Object {
+                      "link": "securitySolutionUI:entity_analytics-entity_store_management",
+                    },
+                  ],
+                  "title": "Alerts and Insights",
+                },
+                Object {
+                  "children": Array [
+                    Object {
+                      "link": "management:overview",
+                    },
+                    Object {
+                      "link": "management:anomaly_detection",
+                    },
+                    Object {
+                      "link": "management:analytics",
+                    },
+                    Object {
+                      "link": "management:trained_models",
+                    },
+                    Object {
+                      "link": "management:supplied_configurations",
+                    },
+                  ],
+                  "title": "Machine learning",
+                },
+                Object {
+                  "children": Array [
+                    Object {
+                      "link": "management:users",
+                    },
+                    Object {
+                      "link": "management:roles",
+                    },
+                    Object {
+                      "link": "management:api_keys",
+                    },
+                    Object {
+                      "link": "management:role_mappings",
+                    },
+                  ],
+                  "title": "Security",
+                },
+                Object {
+                  "children": Array [
+                    Object {
+                      "link": "management:dataViews",
+                    },
+                    Object {
+                      "link": "management:filesManagement",
+                    },
+                    Object {
+                      "link": "management:objects",
+                    },
+                    Object {
+                      "link": "management:tags",
+                    },
+                    Object {
+                      "link": "management:search_sessions",
+                    },
+                    Object {
+                      "link": "management:aiAssistantManagementSelection",
+                    },
+                    Object {
+                      "link": "management:spaces",
+                    },
+                    Object {
+                      "link": "maps",
+                    },
+                    Object {
+                      "link": "visualize",
+                    },
+                    Object {
+                      "link": "graph",
+                    },
+                    Object {
+                      "link": "canvas",
+                    },
+                    Object {
+                      "link": "management:settings",
+                    },
+                  ],
+                  "title": "Kibana",
+                },
+                Object {
+                  "children": Array [
+                    Object {
+                      "link": "management:license_management",
+                    },
+                    Object {
+                      "link": "management:upgrade_assistant",
+                    },
+                  ],
+                  "title": "Stack",
                 },
               ],
-              "title": "Ingest",
+              "id": "stack_management",
+              "renderAs": "panelOpener",
+              "spaceBefore": null,
+              "title": "Stack Management",
             },
             Object {
-              "children": Array [
-                Object {
-                  "link": "management:index_management",
-                },
-                Object {
-                  "link": "management:index_lifecycle_management",
-                },
-                Object {
-                  "link": "management:snapshot_restore",
-                },
-                Object {
-                  "link": "management:rollup_jobs",
-                },
-                Object {
-                  "link": "management:transform",
-                },
-                Object {
-                  "link": "management:cross_cluster_replication",
-                },
-                Object {
-                  "link": "management:remote_clusters",
-                },
-                Object {
-                  "link": "management:migrate_data",
-                },
-              ],
-              "title": "Data",
+              "link": "monitoring",
             },
             Object {
-              "children": Array [
-                Object {
-                  "link": "management:triggersActions",
-                },
-                Object {
-                  "link": "management:cases",
-                },
-                Object {
-                  "link": "management:triggersActionsConnectors",
-                },
-                Object {
-                  "link": "management:reporting",
-                },
-                Object {
-                  "link": "management:jobsListLink",
-                },
-                Object {
-                  "link": "management:watcher",
-                },
-                Object {
-                  "link": "management:maintenanceWindows",
-                },
-                Object {
-                  "link": "securitySolutionUI:entity_analytics-management",
-                },
-                Object {
-                  "link": "securitySolutionUI:entity_analytics-entity_store_management",
-                },
-              ],
-              "title": "Alerts and Insights",
-            },
-            Object {
-              "children": Array [
-                Object {
-                  "link": "management:overview",
-                },
-                Object {
-                  "link": "management:anomaly_detection",
-                },
-                Object {
-                  "link": "management:analytics",
-                },
-                Object {
-                  "link": "management:trained_models",
-                },
-                Object {
-                  "link": "management:supplied_configurations",
-                },
-              ],
-              "title": "Machine learning",
-            },
-            Object {
-              "children": Array [
-                Object {
-                  "link": "management:users",
-                },
-                Object {
-                  "link": "management:roles",
-                },
-                Object {
-                  "link": "management:api_keys",
-                },
-                Object {
-                  "link": "management:role_mappings",
-                },
-              ],
-              "title": "Security",
-            },
-            Object {
-              "children": Array [
-                Object {
-                  "link": "management:dataViews",
-                },
-                Object {
-                  "link": "management:filesManagement",
-                },
-                Object {
-                  "link": "management:objects",
-                },
-                Object {
-                  "link": "management:tags",
-                },
-                Object {
-                  "link": "management:search_sessions",
-                },
-                Object {
-                  "link": "management:aiAssistantManagementSelection",
-                },
-                Object {
-                  "link": "management:spaces",
-                },
-                Object {
-                  "link": "maps",
-                },
-                Object {
-                  "link": "visualize",
-                },
-                Object {
-                  "link": "graph",
-                },
-                Object {
-                  "link": "canvas",
-                },
-                Object {
-                  "link": "management:settings",
-                },
-              ],
-              "title": "Kibana",
-            },
-            Object {
-              "children": Array [
-                Object {
-                  "link": "management:license_management",
-                },
-                Object {
-                  "link": "management:upgrade_assistant",
-                },
-              ],
-              "title": "Stack",
+              "link": "integrations",
             },
           ],
-          "id": "stack_management",
-          "renderAs": "panelOpener",
+          "icon": "gear",
+          "id": "category-management",
+          "renderAs": "accordion",
           "spaceBefore": null,
-          "title": "Stack Management",
-        },
-        Object {
-          "link": "monitoring",
-        },
-        Object {
-          "link": "integrations",
+          "title": "Management",
         },
       ],
-      "icon": "gear",
-      "id": "category-management",
-      "title": "Management",
+      "id": "security_solution_nav_footer",
       "type": "navGroup",
     },
   ],

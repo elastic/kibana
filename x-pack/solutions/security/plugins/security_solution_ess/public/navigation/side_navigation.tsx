@@ -559,187 +559,192 @@ const createNavigationTree$ = (services: Services): Rx.Observable<NavigationTree
     ],
     footer: [
       {
-        type: 'navItem',
-        link: securityLink(SecurityPageName.landing),
-        icon: 'launch',
-      },
-      {
-        type: 'navItem',
-        link: 'dev_tools',
-        title: i18nStrings.devTools,
-        icon: 'editorCodeBlock',
-      },
-      {
         type: 'navGroup',
-        id: 'category-management',
-        title: i18nStrings.management.title,
-        icon: 'gear',
-        breadcrumbStatus: 'hidden',
+        id: 'security_solution_nav_footer',
         children: [
           {
-            title: i18nStrings.stackManagement.title,
-            renderAs: 'panelOpener',
-            id: 'stack_management',
+            link: securityLink(SecurityPageName.landing),
+            icon: 'launch',
+          },
+          {
+            link: 'dev_tools',
+            title: i18nStrings.devTools,
+            icon: 'editorCodeBlock',
+          },
+          {
+            id: 'category-management',
+            title: i18nStrings.management.title,
+            icon: 'gear',
+            breadcrumbStatus: 'hidden',
+            renderAs: 'accordion',
             spaceBefore: null,
             children: [
               {
-                title: i18nStrings.stackManagement.ingest.title,
+                title: i18nStrings.stackManagement.title,
+                renderAs: 'panelOpener',
+                id: 'stack_management',
+                spaceBefore: null,
                 children: [
                   {
-                    link: 'management:ingest_pipelines',
+                    title: i18nStrings.stackManagement.ingest.title,
+                    children: [
+                      {
+                        link: 'management:ingest_pipelines',
+                      },
+                      {
+                        link: 'management:pipelines',
+                      },
+                    ],
                   },
                   {
-                    link: 'management:pipelines',
+                    title: i18nStrings.stackManagement.data.title,
+                    children: [
+                      {
+                        link: 'management:index_management',
+                      },
+                      {
+                        link: 'management:index_lifecycle_management',
+                      },
+                      {
+                        link: 'management:snapshot_restore',
+                      },
+                      {
+                        link: 'management:rollup_jobs',
+                      },
+                      {
+                        link: 'management:transform',
+                      },
+                      {
+                        link: 'management:cross_cluster_replication',
+                      },
+                      {
+                        link: 'management:remote_clusters',
+                      },
+                      {
+                        link: 'management:migrate_data',
+                      },
+                    ],
+                  },
+                  {
+                    title: i18nStrings.stackManagement.alertsAndInsights.title,
+                    children: [
+                      {
+                        link: 'management:triggersActions',
+                      },
+                      {
+                        link: 'management:cases',
+                      },
+                      {
+                        link: 'management:triggersActionsConnectors',
+                      },
+                      {
+                        link: 'management:reporting',
+                      },
+                      {
+                        link: 'management:jobsListLink',
+                      },
+                      {
+                        link: 'management:watcher',
+                      },
+                      {
+                        link: 'management:maintenanceWindows',
+                      },
+                      {
+                        link: securityLink(SecurityPageName.entityAnalyticsManagement),
+                      },
+                      {
+                        link: securityLink(SecurityPageName.entityAnalyticsEntityStoreManagement),
+                      },
+                    ],
+                  },
+                  {
+                    title: i18nStrings.ml.title,
+                    children: [
+                      { link: 'management:overview' },
+                      { link: 'management:anomaly_detection' },
+                      { link: 'management:analytics' },
+                      { link: 'management:trained_models' },
+                      { link: 'management:supplied_configurations' },
+                    ],
+                  },
+                  {
+                    title: i18nStrings.stackManagement.security.title,
+                    children: [
+                      {
+                        link: 'management:users',
+                      },
+                      {
+                        link: 'management:roles',
+                      },
+                      {
+                        link: 'management:api_keys',
+                      },
+                      {
+                        link: 'management:role_mappings',
+                      },
+                    ],
+                  },
+                  {
+                    title: i18nStrings.stackManagement.kibana.title,
+                    children: [
+                      {
+                        link: 'management:dataViews',
+                      },
+                      {
+                        link: 'management:filesManagement',
+                      },
+                      {
+                        link: 'management:objects',
+                      },
+                      {
+                        link: 'management:tags',
+                      },
+                      {
+                        link: 'management:search_sessions',
+                      },
+                      {
+                        link: 'management:aiAssistantManagementSelection',
+                      },
+                      {
+                        link: 'management:spaces',
+                      },
+                      {
+                        link: 'maps',
+                      },
+                      {
+                        link: 'visualize',
+                      },
+                      {
+                        link: 'graph',
+                      },
+                      {
+                        link: 'canvas',
+                      },
+                      {
+                        link: 'management:settings',
+                      },
+                    ],
+                  },
+                  {
+                    title: i18nStrings.stackManagement.stack.title,
+                    children: [
+                      {
+                        link: 'management:license_management',
+                      },
+                      {
+                        link: 'management:upgrade_assistant',
+                      },
+                    ],
                   },
                 ],
               },
               {
-                title: i18nStrings.stackManagement.data.title,
-                children: [
-                  {
-                    link: 'management:index_management',
-                  },
-                  {
-                    link: 'management:index_lifecycle_management',
-                  },
-                  {
-                    link: 'management:snapshot_restore',
-                  },
-                  {
-                    link: 'management:rollup_jobs',
-                  },
-                  {
-                    link: 'management:transform',
-                  },
-                  {
-                    link: 'management:cross_cluster_replication',
-                  },
-                  {
-                    link: 'management:remote_clusters',
-                  },
-                  {
-                    link: 'management:migrate_data',
-                  },
-                ],
+                link: 'monitoring',
               },
               {
-                title: i18nStrings.stackManagement.alertsAndInsights.title,
-                children: [
-                  {
-                    link: 'management:triggersActions',
-                  },
-                  {
-                    link: 'management:cases',
-                  },
-                  {
-                    link: 'management:triggersActionsConnectors',
-                  },
-                  {
-                    link: 'management:reporting',
-                  },
-                  {
-                    link: 'management:jobsListLink',
-                  },
-                  {
-                    link: 'management:watcher',
-                  },
-                  {
-                    link: 'management:maintenanceWindows',
-                  },
-                  {
-                    link: securityLink(SecurityPageName.entityAnalyticsManagement),
-                  },
-                  {
-                    link: securityLink(SecurityPageName.entityAnalyticsEntityStoreManagement),
-                  },
-                ],
-              },
-              {
-                title: i18nStrings.ml.title,
-                children: [
-                  { link: 'management:overview' },
-                  { link: 'management:anomaly_detection' },
-                  { link: 'management:analytics' },
-                  { link: 'management:trained_models' },
-                  { link: 'management:supplied_configurations' },
-                ],
-              },
-              {
-                title: i18nStrings.stackManagement.security.title,
-                children: [
-                  {
-                    link: 'management:users',
-                  },
-                  {
-                    link: 'management:roles',
-                  },
-                  {
-                    link: 'management:api_keys',
-                  },
-                  {
-                    link: 'management:role_mappings',
-                  },
-                ],
-              },
-              {
-                title: i18nStrings.stackManagement.kibana.title,
-                children: [
-                  {
-                    link: 'management:dataViews',
-                  },
-                  {
-                    link: 'management:filesManagement',
-                  },
-                  {
-                    link: 'management:objects',
-                  },
-                  {
-                    link: 'management:tags',
-                  },
-                  {
-                    link: 'management:search_sessions',
-                  },
-                  {
-                    link: 'management:aiAssistantManagementSelection',
-                  },
-                  {
-                    link: 'management:spaces',
-                  },
-                  {
-                    link: 'maps',
-                  },
-                  {
-                    link: 'visualize',
-                  },
-                  {
-                    link: 'graph',
-                  },
-                  {
-                    link: 'canvas',
-                  },
-                  {
-                    link: 'management:settings',
-                  },
-                ],
-              },
-              {
-                title: i18nStrings.stackManagement.stack.title,
-                children: [
-                  {
-                    link: 'management:license_management',
-                  },
-                  {
-                    link: 'management:upgrade_assistant',
-                  },
-                ],
+                link: 'integrations',
               },
             ],
-          },
-          {
-            link: 'monitoring',
-          },
-          {
-            link: 'integrations',
           },
         ],
       },
