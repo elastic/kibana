@@ -43,7 +43,7 @@ export async function suggest(
   // within a branch
   if (activeBranch?.commands.length === 0 || pipePrecedesCurrentWord(params.innerText)) {
     return getCommandAutocompleteDefinitions(
-      getCommandsByName(['limit', 'sort', 'where', 'dissect', 'stats'])
+      getCommandsByName(['limit', 'sort', 'where', 'dissect', 'stats', 'eval'])
     );
   }
 

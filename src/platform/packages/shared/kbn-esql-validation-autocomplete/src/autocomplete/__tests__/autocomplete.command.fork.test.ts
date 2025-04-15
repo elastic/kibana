@@ -48,7 +48,7 @@ describe('autocomplete.suggest', () => {
       });
 
       describe('(COMMAND ... | COMMAND ...)', () => {
-        const FORK_SUBCOMMANDS = ['WHERE ', 'SORT ', 'LIMIT ', 'DISSECT ', 'STATS '];
+        const FORK_SUBCOMMANDS = ['WHERE ', 'SORT ', 'LIMIT ', 'DISSECT ', 'STATS ', 'EVAL '];
 
         it('suggests FORK sub commands in an open branch', async () => {
           await assertSuggestions('FROM a | FORK (/)', FORK_SUBCOMMANDS);
@@ -142,6 +142,36 @@ describe('autocomplete.suggest', () => {
                   ),
                 ]
               );
+            });
+          });
+
+          describe('eval', () => {
+            it('suggests for empty expression', async () => {
+              const emptyExpressionSuggestions = [
+                'var0 = ',
+                ...getFieldNamesByType('any').map((name) => `${name} `),
+                ...getFunctionSignaturesByReturnType(Location.EVAL, 'any', { scalar: true }),
+              ];
+              await assertSuggestions('FROM a | FORK (EVAL /)', emptyExpressionSuggestions);
+              await assertSuggestions(
+                'FROM a | FORK (EVAL ACOS(integerField), /)',
+                emptyExpressionSuggestions
+              );
+            });
+
+            it('suggests within a function', async () => {
+              await assertSuggestions('FROM a | FORK (EVAL ACOS(/))', [
+                ...getFieldNamesByType(['integer', 'long', 'unsigned_long', 'double']),
+                ...getFunctionSignaturesByReturnType(
+                  Location.STATS,
+                  ['integer', 'long', 'unsigned_long', 'double'],
+                  {
+                    scalar: true,
+                  },
+                  undefined,
+                  ['acos']
+                ),
+              ]);
             });
           });
         });
