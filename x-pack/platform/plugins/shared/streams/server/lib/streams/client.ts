@@ -13,7 +13,6 @@ import {
 } from '@elastic/elasticsearch/lib/api/types';
 import type { IScopedClusterClient, KibanaRequest, Logger } from '@kbn/core/server';
 import { isNotFoundError } from '@kbn/es-errors';
-import { StorageClientGetResponse } from '@kbn/storage-adapter';
 import {
   Condition,
   StreamDefinition,
@@ -378,7 +377,7 @@ export class StreamsClient {
 
   private async getStoredStreamDefinition(name: string): Promise<StreamDefinition> {
     return await Promise.all([
-      this.dependencies.storageClient.get({ id: name }).then(this.toStreamDefinition),
+      this.dependencies.storageClient.get({ id: name }).then((hit) => this.toStreamDefinition(hit)),
       checkAccess({ name, scopedClusterClient: this.dependencies.scopedClusterClient }).then(
         (privileges) => {
           if (!privileges.read) {
@@ -564,11 +563,7 @@ export class StreamsClient {
       query,
     });
 
-    const streams = streamsSearchResponse.hits.hits.flatMap((hit) => {
-      const source = hit._source;
-      assertsSchema(streamDefinitionSchema, source);
-      return source;
-    });
+    const streams = streamsSearchResponse.hits.hits.flatMap((hit) => this.toStreamDefinition(hit));
 
     const privileges = await checkAccessBulk({
       names: streams
@@ -671,9 +666,9 @@ export class StreamsClient {
     }).then((streams) => streams.filter(isWiredStreamDefinition));
   }
 
-  private toStreamDefinition(
-    storedStreamDefinition: StorageClientGetResponse<StreamDefinition>
-  ): StreamDefinition {
+  private toStreamDefinition(storedStreamDefinition: {
+    _source?: StreamDefinition;
+  }): StreamDefinition {
     const streamDefinition = {
       ...storedStreamDefinition._source,
       description: storedStreamDefinition._source?.description ?? '',
