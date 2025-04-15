@@ -38392,6 +38392,101 @@ paths:
       summary: Update a proxy
       tags:
         - Fleet proxies
+  /api/fleet/remote_synced_integrations/{outputId}/remote_status:
+    get:
+      description: '[Required authorization] Route required privileges: fleet-settings-read AND integrations-read.'
+      operationId: get-fleet-remote-synced-integrations-outputid-remote-status
+      parameters:
+        - in: path
+          name: outputId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  custom_assets:
+                    additionalProperties:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        name:
+                          type: string
+                        package_name:
+                          type: string
+                        package_version:
+                          type: string
+                        sync_status:
+                          enum:
+                            - completed
+                            - synchronizing
+                            - failed
+                          type: string
+                        type:
+                          type: string
+                      required:
+                        - type
+                        - name
+                        - package_name
+                        - package_version
+                        - sync_status
+                    type: object
+                  error:
+                    type: string
+                  integrations:
+                    items:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        error:
+                          type: string
+                        id:
+                          type: string
+                        package_name:
+                          type: string
+                        package_version:
+                          type: string
+                        sync_status:
+                          enum:
+                            - completed
+                            - synchronizing
+                            - failed
+                          type: string
+                        updated_at:
+                          type: string
+                      required:
+                        - sync_status
+                    type: array
+                required:
+                  - integrations
+        '400':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                description: Generic Error
+                type: object
+                properties:
+                  attributes: {}
+                  error:
+                    type: string
+                  errorType:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+                required:
+                  - message
+                  - attributes
+      summary: Get CCR Remote synced integrations status by outputId
+      tags:
+        - CCR Remote synced integrations
   /api/fleet/remote_synced_integrations/status:
     get:
       description: '[Required authorization] Route required privileges: fleet-settings-read AND integrations-read.'
@@ -62399,6 +62494,13 @@ components:
         - indexPattern
         - status
         - fieldHistoryLength
+    Security_Entity_Analytics_API_EngineMetadata:
+      type: object
+      properties:
+        Type:
+          type: string
+      required:
+        - Type
     Security_Entity_Analytics_API_EngineStatus:
       enum:
         - installing
@@ -62412,6 +62514,7 @@ components:
         - $ref: '#/components/schemas/Security_Entity_Analytics_API_UserEntity'
         - $ref: '#/components/schemas/Security_Entity_Analytics_API_HostEntity'
         - $ref: '#/components/schemas/Security_Entity_Analytics_API_ServiceEntity'
+        - $ref: '#/components/schemas/Security_Entity_Analytics_API_GenericEntity'
     Security_Entity_Analytics_API_EntityRiskLevels:
       enum:
         - Unknown
@@ -62494,7 +62597,42 @@ components:
         - user
         - host
         - service
+        - generic
       type: string
+    Security_Entity_Analytics_API_GenericEntity:
+      type: object
+      properties:
+        '@timestamp':
+          format: date-time
+          type: string
+        asset:
+          type: object
+          properties:
+            criticality:
+              $ref: '#/components/schemas/Security_Entity_Analytics_API_AssetCriticalityLevel'
+          required:
+            - criticality
+        entity:
+          type: object
+          properties:
+            category:
+              type: string
+            EngineMetadata:
+              $ref: '#/components/schemas/Security_Entity_Analytics_API_EngineMetadata'
+            id:
+              type: string
+            name:
+              type: string
+            source:
+              type: string
+            type:
+              type: string
+          required:
+            - id
+            - name
+            - type
+      required:
+        - entity
     Security_Entity_Analytics_API_HostEntity:
       type: object
       properties:
@@ -62511,13 +62649,18 @@ components:
         entity:
           type: object
           properties:
+            EngineMetadata:
+              $ref: '#/components/schemas/Security_Entity_Analytics_API_EngineMetadata'
             name:
               type: string
             source:
               type: string
+            type:
+              type: string
           required:
             - name
             - source
+            - type
         event:
           type: object
           properties:
@@ -62569,6 +62712,7 @@ components:
         - host.name
         - user.name
         - service.name
+        - entity.id
       type: string
     Security_Entity_Analytics_API_IndexPattern:
       type: string
@@ -62670,13 +62814,18 @@ components:
         entity:
           type: object
           properties:
+            EngineMetadata:
+              $ref: '#/components/schemas/Security_Entity_Analytics_API_EngineMetadata'
             name:
               type: string
             source:
               type: string
+            type:
+              type: string
           required:
             - name
             - source
+            - type
         event:
           type: object
           properties:
@@ -62784,13 +62933,18 @@ components:
         entity:
           type: object
           properties:
+            EngineMetadata:
+              $ref: '#/components/schemas/Security_Entity_Analytics_API_EngineMetadata'
             name:
               type: string
             source:
               type: string
+            type:
+              type: string
           required:
             - name
             - source
+            - type
         event:
           type: object
           properties:
