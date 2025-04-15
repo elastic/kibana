@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { DataViewType } from '@kbn/data-views-plugin/public';
 import type { DataViewPickerProps } from '@kbn/unified-search-plugin/public';
 import { DiscoverFlyouts, dismissAllFlyoutsExceptFor } from '@kbn/discover-utils';
@@ -53,12 +53,12 @@ export const DiscoverTopNav = ({
   const services = useDiscoverServices();
   const { dataViewEditor, navigation, dataViewFieldEditor, data, setHeaderActionMenu } = services;
   const query = useAppStateSelector((state) => state.query);
+  const [actualQuery, setActualQuery] = useState(query);
   const { savedDataViews, managedDataViews, adHocDataViews } = useDataViewsForPicker();
   const dataView = useCurrentDataView();
   const isESQLToDataViewTransitionModalVisible = useInternalStateSelector(
     (state) => state.isESQLToDataViewTransitionModalVisible
   );
-  const queryChanged = useInternalStateSelector((state) => state.queryChanged);
   const savedSearch = useSavedSearchInitial();
   const isEsqlMode = useIsEsqlMode();
   const showDatePicker = useMemo(() => {
@@ -82,6 +82,9 @@ export const DiscoverTopNav = ({
       }
     };
   }, []);
+  useEffect(() => {
+    setActualQuery(query);
+  }, [query]);
 
   const canEditDataView =
     Boolean(dataViewEditor?.userPermissions.editDataView()) || !dataView.isPersisted();
@@ -214,7 +217,7 @@ export const DiscoverTopNav = ({
 
   const shouldHideDefaultDataviewPicker =
     !!searchBarCustomization?.CustomDataViewPicker || !!searchBarCustomization?.hideDataViewPicker;
-  const actualQuery = queryChanged?.query ?? query;
+
   return (
     <>
       <SearchBar
@@ -222,7 +225,12 @@ export const DiscoverTopNav = ({
         appName="discover"
         indexPatterns={[dataView]}
         onQuerySubmit={stateContainer.actions.onUpdateQuery}
-        onQueryChange={stateContainer.actions.onChangeQuery}
+        onQueryChange={(payload) => {
+          if (payload.query) {
+            setActualQuery(payload.query);
+          }
+          stateContainer.actions.onChangeQuery(payload);
+        }}
         onCancel={onCancelClick}
         isLoading={isLoading}
         onSavedQueryIdChange={updateSavedQueryId}
