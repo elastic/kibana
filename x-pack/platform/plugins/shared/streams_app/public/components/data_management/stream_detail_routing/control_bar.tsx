@@ -8,7 +8,6 @@
 import { EuiFlexGroup, EuiButton, EuiFlexItem, EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { IngestUpsertRequest } from '@kbn/streams-schema';
 import React from 'react';
 import { useAbortController } from '@kbn/react-hooks';
 import { useKibana } from '../../../hooks/use_kibana';
@@ -88,7 +87,7 @@ export function ControlBar() {
           routing,
         },
       },
-    } as IngestUpsertRequest;
+    };
 
     return streamsRepositoryClient.fetch('PUT /api/streams/{name}/_ingest 2023-10-31', {
       signal,

@@ -6,11 +6,7 @@
  */
 import { z } from '@kbn/zod';
 import { getFlattenedObject } from '@kbn/std';
-import {
-  SampleDocument,
-  fieldDefinitionConfigSchema,
-  isWiredStreamDefinition,
-} from '@kbn/streams-schema';
+import { SampleDocument, Streams, fieldDefinitionConfigSchema } from '@kbn/streams-schema';
 import { checkAccess } from '../../../../lib/streams/stream_crud';
 import { createServerRoute } from '../../../create_server_route';
 import { DefinitionNotFoundError } from '../../../../lib/streams/errors/definition_not_found_error';
@@ -66,7 +62,7 @@ export const unmappedFieldsRoute = createServerRoute({
     // Mapped fields from the stream's definition and inherited from ancestors
     const mappedFields = new Set<string>();
 
-    if (isWiredStreamDefinition(streamDefinition)) {
+    if (Streams.WiredStream.Definition.is(streamDefinition)) {
       Object.keys(streamDefinition.ingest.wired.fields).forEach((name) => mappedFields.add(name));
     }
 

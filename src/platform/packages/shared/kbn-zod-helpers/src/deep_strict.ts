@@ -43,7 +43,11 @@ const primitiveTypes = [
  * runtime, such as failing on excess keys for
  * objects
  */
-const dangerousTypes = [ZodFirstPartyTypeKind.ZodAny, ZodFirstPartyTypeKind.ZodUnknown] as const;
+const dangerousTypes = [
+  ZodFirstPartyTypeKind.ZodAny,
+  ZodFirstPartyTypeKind.ZodUnknown,
+  ZodFirstPartyTypeKind.ZodNever,
+] as const;
 
 const typeNames = [
   ZodFirstPartyTypeKind.ZodObject,

@@ -8,7 +8,7 @@
 import { MappingProperty } from '@elastic/elasticsearch/lib/api/types';
 import { z } from '@kbn/zod';
 import { NonEmptyString } from '@kbn/zod-helpers';
-import { recursiveRecord } from '../../record_types';
+import { recursiveRecord } from '../shared/record_types';
 
 export const FIELD_DEFINITION_TYPES = [
   'keyword',

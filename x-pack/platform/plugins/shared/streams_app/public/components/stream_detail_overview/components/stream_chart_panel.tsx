@@ -15,7 +15,7 @@ import {
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
-import { IngestStreamGetResponse } from '@kbn/streams-schema';
+import type { Streams } from '@kbn/streams-schema';
 import { computeInterval } from '@kbn/visualization-utils';
 import moment, { DurationInputArg1, DurationInputArg2 } from 'moment';
 import { useKibana } from '../../../hooks/use_kibana';
@@ -25,7 +25,7 @@ import { StreamsAppSearchBar } from '../../streams_app_search_bar';
 import { useStreamsAppFetch } from '../../../hooks/use_streams_app_fetch';
 
 interface StreamChartPanelProps {
-  definition: IngestStreamGetResponse;
+  definition: Streams.ingest.all.GetResponse;
 }
 
 export function StreamChartPanel({ definition }: StreamChartPanelProps) {

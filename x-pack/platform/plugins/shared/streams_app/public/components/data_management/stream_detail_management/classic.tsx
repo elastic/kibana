@@ -6,7 +6,7 @@
  */
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { UnwiredStreamGetResponse } from '@kbn/streams-schema';
+import { Streams } from '@kbn/streams-schema';
 import { EuiCallOut, EuiFlexGroup } from '@elastic/eui';
 import { useStreamsAppParams } from '../../../hooks/use_streams_app_params';
 import { RedirectTo } from '../../redirect_to';
@@ -27,7 +27,7 @@ export function ClassicStreamDetailManagement({
   definition,
   refreshDefinition,
 }: {
-  definition: UnwiredStreamGetResponse;
+  definition: Streams.UnwiredStream.GetResponse;
   refreshDefinition: () => void;
 }) {
   const {

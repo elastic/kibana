@@ -4,13 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { IngestStreamGetResponse } from '@kbn/streams-schema';
+import { Streams } from '@kbn/streams-schema';
 import React from 'react';
 
 export function StreamDetailSignificantEventsView({
   definition,
 }: {
-  definition?: IngestStreamGetResponse;
+  definition?: Streams.all.GetResponse;
 }) {
   return <></>;
 }

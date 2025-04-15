@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { StreamDefinition } from '@kbn/streams-schema';
+import type { Streams } from '@kbn/streams-schema';
 import type { ElasticsearchAction } from '../execution_plan/types';
 import type { StateDependencies, StreamChange } from '../types';
 import type { State } from '../state';
@@ -17,7 +17,7 @@ export interface ValidationResult {
 
 export interface PrintableStream {
   changeStatus: StreamChangeStatus;
-  definition: StreamDefinition;
+  definition: Streams.all.Definition;
   [key: string]: unknown;
 }
 
@@ -28,7 +28,9 @@ export type StreamChangeStatus = 'unchanged' | 'upserted' | 'deleted';
  * And routing change requests (with cascading changes), validation requests and requests to determine Elasticsearch actions
  * to the right hook based on this state
  */
-export abstract class StreamActiveRecord<TDefinition extends StreamDefinition = StreamDefinition> {
+export abstract class StreamActiveRecord<
+  TDefinition extends Streams.all.Definition = Streams.all.Definition
+> {
   protected dependencies: StateDependencies;
   protected _definition: TDefinition;
   private _changeStatus: StreamChangeStatus = 'unchanged';
@@ -101,7 +103,7 @@ export abstract class StreamActiveRecord<TDefinition extends StreamDefinition = 
   }
 
   private async upsert(
-    definition: StreamDefinition,
+    definition: Streams.all.Definition,
     desiredState: State,
     startingState: State
   ): Promise<StreamChange[]> {
@@ -165,7 +167,7 @@ export abstract class StreamActiveRecord<TDefinition extends StreamDefinition = 
   abstract clone(): StreamActiveRecord;
 
   protected abstract doHandleUpsertChange(
-    definition: StreamDefinition,
+    definition: Streams.all.Definition,
     desiredState: State,
     startingState: State
   ): Promise<{ cascadingChanges: StreamChange[]; changeStatus: StreamChangeStatus }>;

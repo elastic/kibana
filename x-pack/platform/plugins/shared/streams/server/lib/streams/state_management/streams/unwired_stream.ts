@@ -6,12 +6,8 @@
  */
 
 import type { IngestProcessorContainer } from '@elastic/elasticsearch/lib/api/types';
-import type {
-  IngestStreamLifecycle,
-  StreamDefinition,
-  UnwiredStreamDefinition,
-} from '@kbn/streams-schema';
-import { isDslLifecycle, isInheritLifecycle, isUnwiredStreamDefinition } from '@kbn/streams-schema';
+import { IngestStreamLifecycle, Streams } from '@kbn/streams-schema';
+import { isDslLifecycle, isInheritLifecycle } from '@kbn/streams-schema';
 import _, { cloneDeep } from 'lodash';
 import { isNotFoundError } from '@kbn/es-errors';
 import { StatusError } from '../../errors/status_error';
@@ -27,15 +23,15 @@ import type {
 } from '../stream_active_record/stream_active_record';
 import { StreamActiveRecord, PrintableStream } from '../stream_active_record/stream_active_record';
 
-export class UnwiredStream extends StreamActiveRecord<UnwiredStreamDefinition> {
+export class UnwiredStream extends StreamActiveRecord<Streams.UnwiredStream.Definition> {
   private _processingChanged: boolean = false;
   private _lifeCycleChanged: boolean = false;
 
-  constructor(definition: UnwiredStreamDefinition, dependencies: StateDependencies) {
+  constructor(definition: Streams.UnwiredStream.Definition, dependencies: StateDependencies) {
     super(definition, dependencies);
   }
 
-  clone(): StreamActiveRecord<UnwiredStreamDefinition> {
+  clone(): StreamActiveRecord<Streams.UnwiredStream.Definition> {
     return new UnwiredStream(cloneDeep(this._definition), this.dependencies);
   }
 
@@ -48,7 +44,7 @@ export class UnwiredStream extends StreamActiveRecord<UnwiredStreamDefinition> {
   }
 
   protected async doHandleUpsertChange(
-    definition: StreamDefinition,
+    definition: Streams.all.Definition,
     desiredState: State,
     startingState: State
   ): Promise<{ cascadingChanges: StreamChange[]; changeStatus: StreamChangeStatus }> {
@@ -56,7 +52,7 @@ export class UnwiredStream extends StreamActiveRecord<UnwiredStreamDefinition> {
       return { cascadingChanges: [], changeStatus: this.changeStatus };
     }
 
-    if (!isUnwiredStreamDefinition(definition)) {
+    if (!Streams.UnwiredStream.Definition.is(definition)) {
       throw new StatusError('Cannot change stream types', 400);
     }
 
@@ -66,7 +62,7 @@ export class UnwiredStream extends StreamActiveRecord<UnwiredStreamDefinition> {
 
     if (
       startingStateStreamDefinition &&
-      !isUnwiredStreamDefinition(startingStateStreamDefinition)
+      !Streams.UnwiredStream.Definition.is(startingStateStreamDefinition)
     ) {
       throw new StatusError('Unexpected starting state stream type', 400);
     }

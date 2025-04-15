@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { z } from '@kbn/zod';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { NonEmptyString } from '@kbn/zod-helpers';
-import { primitive } from '../record_types';
-import { createIsNarrowSchema } from '../../helpers';
+import { primitive } from '../shared/record_types';
+import { createIsNarrowSchema } from '../shared/type_guards';
 
 interface StreamQueryBase {
   id: string;
@@ -62,13 +62,3 @@ export const upsertStreamQueryRequestSchema = z.object({
 });
 
 export const isStreamQueryKql = createIsNarrowSchema(streamQuerySchema, streamQueryKqlSchema);
-
-export const streamUpsertRequestSchemaBase: z.Schema<StreamUpsertRequestBase> = z.object({
-  dashboards: z.array(NonEmptyString),
-  queries: z.array(streamQuerySchema),
-});
-
-export const streamGetResponseSchemaBase: z.Schema<StreamGetResponseBase> = z.object({
-  dashboards: z.array(NonEmptyString),
-  queries: z.array(streamQuerySchema),
-});

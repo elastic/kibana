@@ -7,7 +7,7 @@
 
 import datemath from '@elastic/datemath';
 import { TimeRange, getCalculateAutoTimeExpression } from '@kbn/data-plugin/common';
-import { IngestStreamGetResponse, PhaseName } from '@kbn/streams-schema';
+import { PhaseName, Streams } from '@kbn/streams-schema';
 import { lastValueFrom } from 'rxjs';
 import { IKibanaSearchRequest, IKibanaSearchResponse } from '@kbn/search-types';
 import { useKibana } from '../../../../hooks/use_kibana';
@@ -47,7 +47,7 @@ export const useIngestionRate = ({
   stats,
   timeRange,
 }: {
-  definition: IngestStreamGetResponse;
+  definition: Streams.ingest.all.GetResponse;
   stats?: DataStreamStats;
   timeRange: TimeRange;
 }) => {
@@ -146,7 +146,7 @@ export const useIngestionRatePerTier = ({
   stats,
   timeRange,
 }: {
-  definition: IngestStreamGetResponse;
+  definition: Streams.ingest.all.GetResponse;
   stats?: DataStreamStats;
   timeRange: TimeRange;
 }) => {

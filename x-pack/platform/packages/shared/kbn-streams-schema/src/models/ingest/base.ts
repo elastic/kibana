@@ -4,115 +4,76 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { z } from '@kbn/zod';
-import { NonEmptyString } from '@kbn/zod-helpers';
-import { StreamDefinitionBase } from '../base';
-import { FieldDefinition, fieldDefinitionSchema } from './fields';
-import { ProcessorDefinition, processorDefinitionSchema } from './processors';
-import { RoutingDefinition, routingDefinitionSchema } from './routing';
+import { base } from '../base';
+import { ModelValidation, Validation, modelValidation, validation } from '../validation';
 import { IngestStreamLifecycle, ingestStreamLifecycleSchema } from './lifecycle';
+import { ProcessorDefinition, processorDefinitionSchema } from './processors';
+import { OmitName } from '../core';
 
-interface IngestBase {
+interface IngestStreamPrivileges {
+  // User can change everything about the stream
+  manage: boolean;
+  // User can read stats (like size in bytes) about the stream
+  monitor: boolean;
+  // User can change the retention policy of the stream
+  lifecycle: boolean;
+  // User can simulate changes to the processing or the mapping of the stream
+  simulate: boolean;
+}
+
+const ingestStreamPrivilegesSchema: z.Schema<IngestStreamPrivileges> = z.object({
+  manage: z.boolean(),
+  monitor: z.boolean(),
+  lifecycle: z.boolean(),
+  simulate: z.boolean(),
+});
+
+export interface IngestBase {
   lifecycle: IngestStreamLifecycle;
   processing: ProcessorDefinition[];
 }
 
-interface WiredIngest extends IngestBase {
-  wired: {
-    fields: FieldDefinition;
-    routing: RoutingDefinition[];
-  };
-}
-
-interface UnwiredIngest extends IngestBase {
-  unwired: {};
-}
-
-interface WiredStreamDefinitionBase {
-  ingest: WiredIngest;
-}
-
-interface UnwiredStreamDefinitionBase {
-  ingest: UnwiredIngest;
-}
-
-interface WiredStreamDefinition extends StreamDefinitionBase {
-  ingest: WiredIngest;
-}
-
-interface UnwiredStreamDefinition extends StreamDefinitionBase {
-  ingest: UnwiredIngest;
-}
-
-type IngestStreamDefinition = WiredStreamDefinition | UnwiredStreamDefinition;
-
-const ingestBaseSchema: z.Schema<IngestBase> = z.object({
-  lifecycle: ingestStreamLifecycleSchema,
-  processing: z.array(processorDefinitionSchema),
-});
-
-const unwiredIngestSchema: z.Schema<UnwiredIngest> = z.intersection(
-  ingestBaseSchema,
+export const IngestBase: Validation<unknown, IngestBase> = validation(
+  z.unknown(),
   z.object({
-    unwired: z.object({}),
+    lifecycle: ingestStreamLifecycleSchema,
+    processing: z.array(processorDefinitionSchema),
   })
 );
 
-const wiredIngestSchema: z.Schema<WiredIngest> = z.intersection(
-  ingestBaseSchema,
-  z.object({
-    wired: z.object({
-      fields: fieldDefinitionSchema,
-      routing: z.array(routingDefinitionSchema),
-    }),
-  })
-);
+/* eslint-disable @typescript-eslint/no-namespace */
+export namespace ingestBase {
+  export interface Definition extends base.Definition {
+    ingest: IngestBase;
+  }
 
-const unwiredStreamDefinitionSchemaBase: z.Schema<UnwiredStreamDefinitionBase> = z.object({
-  ingest: unwiredIngestSchema,
-});
+  export interface Source extends base.Source, ingestBase.Definition {}
 
-const wiredStreamDefinitionSchemaBase: z.Schema<WiredStreamDefinitionBase> = z.object({
-  ingest: wiredIngestSchema,
-});
+  export interface GetResponse extends base.GetResponse {
+    stream: Definition;
+    privileges: IngestStreamPrivileges;
+  }
 
-const wiredStreamDefinitionSchema: z.Schema<WiredStreamDefinition> = z.intersection(
-  z.object({
-    name: NonEmptyString,
+  export interface UpsertRequest extends base.UpsertRequest {
+    stream: OmitName<Definition>;
+  }
+
+  export interface Model {
+    Definition: ingestBase.Definition;
+    Source: ingestBase.Source;
+    GetResponse: ingestBase.GetResponse;
+    UpsertRequest: ingestBase.UpsertRequest;
+  }
+}
+
+export const ingestBase: ModelValidation<base.Model, ingestBase.Model> = modelValidation(base, {
+  Source: z.object({}),
+  Definition: z.object({
+    ingest: IngestBase.right,
   }),
-  wiredStreamDefinitionSchemaBase
-);
-
-const unwiredStreamDefinitionSchema: z.Schema<UnwiredStreamDefinition> = z.intersection(
-  z.object({
-    name: NonEmptyString,
+  GetResponse: z.object({
+    privileges: ingestStreamPrivilegesSchema,
   }),
-  unwiredStreamDefinitionSchemaBase
-);
-
-const ingestStreamDefinitionSchema: z.Schema<IngestStreamDefinition> = z.union([
-  wiredStreamDefinitionSchema,
-  unwiredStreamDefinitionSchema,
-]);
-
-const ingestStreamDefinitionSchemaBase: z.Schema<Omit<IngestStreamDefinition, 'name'>> = z.union([
-  wiredStreamDefinitionSchemaBase,
-  unwiredStreamDefinitionSchemaBase,
-]);
-
-export {
-  type WiredStreamDefinition,
-  wiredStreamDefinitionSchema,
-  wiredStreamDefinitionSchemaBase,
-  type UnwiredStreamDefinition,
-  unwiredStreamDefinitionSchema,
-  unwiredStreamDefinitionSchemaBase,
-  type IngestStreamDefinition,
-  ingestStreamDefinitionSchema,
-  ingestStreamDefinitionSchemaBase,
-  type WiredIngest,
-  wiredIngestSchema,
-  type UnwiredIngest,
-  unwiredIngestSchema,
-};
+  UpsertRequest: z.object({}),
+});

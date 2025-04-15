@@ -26,12 +26,12 @@ import {
   ProcessorDefinitionWithId,
   getProcessorType,
   ProcessorDefinition,
-  isWiredStreamDefinition,
   getInheritedFieldsFromAncestors,
   NamedFieldDefinitionConfig,
   FieldDefinitionConfig,
   InheritedFieldDefinitionConfig,
   FieldDefinition,
+  Streams,
 } from '@kbn/streams-schema';
 import { mapValues, uniq, omit, isEmpty, uniqBy, some } from 'lodash';
 import { StreamsClient } from '../../../../lib/streams/client';
@@ -728,7 +728,7 @@ const getStreamFields = async (
     streamsClient.getAncestors(streamName),
   ]);
 
-  if (isWiredStreamDefinition(stream)) {
+  if (Streams.WiredStream.Definition.is(stream)) {
     return { ...stream.ingest.wired.fields, ...getInheritedFieldsFromAncestors(ancestors) };
   }
 
