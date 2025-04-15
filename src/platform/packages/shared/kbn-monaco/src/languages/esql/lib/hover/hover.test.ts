@@ -9,7 +9,6 @@
 
 import { monaco } from '../../../../monaco_imports';
 import { getHoverItem } from './hover';
-import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
 import {
   ESQLRealField,
   getFunctionDefinition,
@@ -129,13 +128,7 @@ describe('hover', () => {
       })=> ["${expected.join('","')}"]`,
       async () => {
         const callbackMocks = createCustomCallbackMocks(...customCallbacksArgs);
-        const { contents } = await getHoverItem(
-          model,
-          position,
-          token,
-          async (text) => (text ? getAstAndSyntaxErrors(text) : { ast: [], errors: [] }),
-          callbackMocks
-        );
+        const { contents } = await getHoverItem(model, position, token, callbackMocks);
         expect(contents.map(({ value }) => value)).toEqual(expected);
       }
     );

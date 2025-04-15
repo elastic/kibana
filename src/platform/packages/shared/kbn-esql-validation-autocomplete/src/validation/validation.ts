@@ -8,7 +8,6 @@
  */
 
 import {
-  AstProviderFn,
   ESQLAst,
   ESQLAstTimeseriesCommand,
   ESQLColumn,
@@ -17,6 +16,7 @@ import {
   ESQLMessage,
   ESQLSource,
   isIdentifier,
+  parse,
   walk,
 } from '@kbn/esql-ast';
 import type { ESQLAstJoinCommand, ESQLIdentifier } from '@kbn/esql-ast/src/types';
@@ -65,11 +65,10 @@ import { validate as validateTimeseriesCommand } from './commands/metrics';
  */
 export async function validateQuery(
   queryString: string,
-  astProvider: AstProviderFn,
   options: ValidationOptions = {},
   callbacks?: ESQLCallbacks
 ): Promise<ValidationResult> {
-  const result = await validateAst(queryString, astProvider, callbacks);
+  const result = await validateAst(queryString, callbacks);
   // early return if we do not want to ignore errors
   if (!options.ignoreOnMissingCallbacks) {
     return result;
@@ -128,12 +127,11 @@ export const ignoreErrorsMap: Record<keyof ESQLCallbacks, ErrorTypes[]> = {
  */
 async function validateAst(
   queryString: string,
-  astProvider: AstProviderFn,
   callbacks?: ESQLCallbacks
 ): Promise<ValidationResult> {
   const messages: ESQLMessage[] = [];
 
-  const parsingResult = await astProvider(queryString);
+  const parsingResult = parse(queryString);
 
   const { ast } = parsingResult;
 
