@@ -143,10 +143,13 @@ export const NewConnectorLogic = kea<
     connectorCreated: ({ id, uiFlags }) => {
       if (uiFlags?.shouldNavigateToConnectorAfterCreate && props.navigateToUrl) {
         props.navigateToUrl(
-          generateEncodedPath(`app/management/data/content_connectors${CONNECTOR_DETAIL_TAB_PATH}`, {
-            connectorId: id,
-            tabId: SearchIndexTabId.CONFIGURATION,
-          })
+          generateEncodedPath(
+            `app/management/data/content_connectors${CONNECTOR_DETAIL_TAB_PATH}`,
+            {
+              connectorId: id,
+              tabId: SearchIndexTabId.CONFIGURATION,
+            }
+          )
         );
       } else {
         actions.fetchConnector({ connectorId: id, http: props.http });
