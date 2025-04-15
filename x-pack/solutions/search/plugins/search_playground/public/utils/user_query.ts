@@ -7,11 +7,11 @@
 
 import deepEqual from 'fast-deep-equal';
 import { i18n } from '@kbn/i18n';
-import type { ChatForm, ChatFormFields, UserQueryValidations } from '../types';
+import type { PlaygroundForm, PlaygroundFormFields, UserQueryValidations } from '../types';
 
 export const validateUserElasticSearchQuery = (
-  userQuery: ChatForm[ChatFormFields.userElasticsearchQuery],
-  elasticsearchQuery: ChatForm[ChatFormFields.elasticsearchQuery]
+  userQuery: PlaygroundForm[PlaygroundFormFields.userElasticsearchQuery],
+  elasticsearchQuery: PlaygroundForm[PlaygroundFormFields.elasticsearchQuery]
 ): UserQueryValidations => {
   if (userQuery === null || userQuery === undefined || typeof userQuery !== 'string') {
     return { isValid: false, isUserCustomized: false };
@@ -59,9 +59,9 @@ export const disableExecuteQuery = (
 };
 
 export const elasticsearchQueryString = (
-  elasticsearchQuery: ChatForm[ChatFormFields.elasticsearchQuery],
-  userElasticsearchQuery: ChatForm[ChatFormFields.userElasticsearchQuery],
-  userElasticsearchQueryValidations: ChatForm[ChatFormFields.userElasticsearchQueryValidations]
+  elasticsearchQuery: PlaygroundForm[PlaygroundFormFields.elasticsearchQuery],
+  userElasticsearchQuery: PlaygroundForm[PlaygroundFormFields.userElasticsearchQuery],
+  userElasticsearchQueryValidations: PlaygroundForm[PlaygroundFormFields.userElasticsearchQueryValidations]
 ) => {
   if (!userElasticsearchQuery || userElasticsearchQueryValidations?.isUserCustomized === false) {
     return JSON.stringify(elasticsearchQuery);
@@ -73,9 +73,9 @@ export const elasticsearchQueryString = (
 };
 
 export const elasticsearchQueryObject = (
-  elasticsearchQuery: ChatForm[ChatFormFields.elasticsearchQuery],
-  userElasticsearchQuery: ChatForm[ChatFormFields.userElasticsearchQuery],
-  userElasticsearchQueryValidations: ChatForm[ChatFormFields.userElasticsearchQueryValidations]
+  elasticsearchQuery: PlaygroundForm[PlaygroundFormFields.elasticsearchQuery],
+  userElasticsearchQuery: PlaygroundForm[PlaygroundFormFields.userElasticsearchQuery],
+  userElasticsearchQueryValidations: PlaygroundForm[PlaygroundFormFields.userElasticsearchQueryValidations]
 ): { retriever: any } => {
   if (!userElasticsearchQuery || userElasticsearchQueryValidations?.isUserCustomized === false) {
     return elasticsearchQuery;
@@ -87,5 +87,5 @@ export const elasticsearchQueryObject = (
 };
 
 export const formatElasticsearchQueryString = (
-  elasticsearchQuery: ChatForm[ChatFormFields.elasticsearchQuery]
+  elasticsearchQuery: PlaygroundForm[PlaygroundFormFields.elasticsearchQuery]
 ) => JSON.stringify(elasticsearchQuery, null, 2);

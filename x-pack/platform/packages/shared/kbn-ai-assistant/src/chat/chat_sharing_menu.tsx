@@ -86,7 +86,7 @@ export function ChatSharingMenu({
 
   const renderOption = useCallback(
     (option: EuiSelectableOption<OptionData>) => (
-      <EuiFlexGroup gutterSize="xs" direction="column" style={{ paddingBlock: euiTheme.size.xs }}>
+      <EuiFlexGroup gutterSize="xs" direction="column" css={{ paddingBlock: euiTheme.size.xs }}>
         <EuiFlexItem grow={false}>
           <EuiText size="s">
             <strong>{option.label}</strong>
@@ -190,7 +190,7 @@ export function ChatSharingMenu({
           data-test-subj="observabilityAiAssistantChatAccessBadge"
         >
           {selectedValue === ConversationAccess.SHARED ? sharedLabel : privateLabel}
-          <EuiIcon type="arrowDown" size="m" style={{ paddingLeft: euiTheme.size.xs }} />
+          <EuiIcon type="arrowDown" size="m" css={{ paddingLeft: euiTheme.size.xs }} />
         </EuiBadge>
       }
       isOpen={isPopoverOpen}

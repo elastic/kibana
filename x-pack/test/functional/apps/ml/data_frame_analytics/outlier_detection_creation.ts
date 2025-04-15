@@ -204,8 +204,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         it('loads the data frame analytics wizard', async () => {
           await ml.testExecution.logTestStep('loads the data frame analytics page');
-          await ml.navigation.navigateToMl();
-          await ml.navigation.navigateToDataFrameAnalytics();
+          await ml.navigation.navigateToStackManagementMlSection('analytics', 'mlAnalyticsJobList');
 
           // Disable anti-aliasing to stabilize canvas image rendering assertions
           await ml.commonUI.disableAntiAliasing();
@@ -346,7 +345,7 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.dataFrameAnalytics.waitForAnalyticsCompletion(testData.jobId);
 
           await ml.testExecution.logTestStep('displays the analytics table');
-          await ml.dataFrameAnalyticsCreation.navigateToJobManagementPage();
+          await ml.navigation.navigateToStackManagementMlSection('analytics', 'mlAnalyticsJobList');
           await ml.dataFrameAnalytics.assertAnalyticsTableExists();
 
           await ml.testExecution.logTestStep('displays the stats bar');
@@ -477,7 +476,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         it('displays the analytics job in the map view', async () => {
           await ml.testExecution.logTestStep('should open the map view for created job');
-          await ml.navigation.navigateToDataFrameAnalytics();
+          await ml.navigation.navigateToStackManagementMlSection('analytics', 'mlAnalyticsJobList');
           await ml.dataFrameAnalyticsTable.openMapView(testData.jobId);
           await ml.dataFrameAnalyticsMap.assertMapElementsExists();
           await ml.dataFrameAnalyticsMap.assertJobMapTitle(testData.jobId);

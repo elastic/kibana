@@ -96,6 +96,8 @@ describe('TelemetryService', () => {
       ...defaultEbtProps,
       sort: defaultSort,
       filters: defaultFilters,
+      target: NavigationTarget.Discover,
+      source: NavigationSource.Table,
     };
 
     telemetry.trackDatasetNavigated(exampleEventData);
