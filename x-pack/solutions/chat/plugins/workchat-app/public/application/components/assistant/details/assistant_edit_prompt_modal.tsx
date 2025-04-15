@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React from 'react';
+import { useForm, Controller } from 'react-hook-form';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -41,7 +42,7 @@ export const EditPrompt: React.FC<EditPromptProps> = ({ onClose, onSaveSuccess, 
     services: { notifications },
   } = useKibana();
 
-  const { editState, setFieldValue, submit, isSubmitting } = useAgentEdition({
+  const { state, submit, isSubmitting } = useAgentEdition({
     agentId,
     onSaveSuccess: () => {
       notifications.toasts.addSuccess(
@@ -54,40 +55,9 @@ export const EditPrompt: React.FC<EditPromptProps> = ({ onClose, onSaveSuccess, 
     },
   });
 
-  const handleUseCaseChange = useCallback(
-    (e: React.ChangeEvent<HTMLSelectElement>) => {
-      setFieldValue('useCase', e.target.value);
-    },
-    [setFieldValue]
-  );
-
-  const handleSystemPromptChange = useCallback(
-    (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-      setFieldValue('systemPrompt', e.target.value);
-    },
-    [setFieldValue]
-  );
-
-  const handleSubmit = useCallback(
-    (e: React.FormEvent) => {
-      e.preventDefault();
-
-      if (!editState.systemPrompt.trim()) {
-        notifications.toasts.addDanger(
-          i18n.translate('workchatApp.assistants.editPromptModal.promptRequiredError', {
-            defaultMessage: 'Prompt is required',
-          })
-        );
-        return;
-      }
-
-      submit();
-    },
-    [editState.systemPrompt, submit, notifications.toasts]
-  );
-
-  // Get the current useCase from editState or default
-  const useCase = editState.useCase;
+  const { control, handleSubmit } = useForm({
+    values: state,
+  });
 
   return (
     <EuiModal onClose={onClose} style={{ width: 800 }}>
@@ -100,38 +70,49 @@ export const EditPrompt: React.FC<EditPromptProps> = ({ onClose, onSaveSuccess, 
       </EuiModalHeader>
 
       <EuiModalBody>
-        <EuiForm component="form" onSubmit={handleSubmit} fullWidth>
-          <EuiFormRow
-            label={i18n.translate('workchatApp.assistants.editPromptModal.useCaseLabel', {
-              defaultMessage: 'Use case',
-            })}
-            fullWidth
-          >
-            <EuiSelect
-              data-test-subj="assistantUseCaseSelect"
-              options={USE_CASES}
-              value={useCase}
-              onChange={handleUseCaseChange}
-              fullWidth
-            />
-          </EuiFormRow>
+        <EuiForm component="form" onSubmit={handleSubmit((data) => submit(data))} fullWidth>
+          <Controller
+            name="useCase"
+            control={control}
+            render={({ field }) => (
+              <EuiFormRow
+                label={i18n.translate('workchatApp.assistants.editPromptModal.useCaseLabel', {
+                  defaultMessage: 'Use case',
+                })}
+                fullWidth
+              >
+                <EuiSelect
+                  data-test-subj="assistantUseCaseSelect"
+                  options={USE_CASES}
+                  {...field}
+                  fullWidth
+                />
+              </EuiFormRow>
+            )}
+          />
 
           <EuiSpacer size="m" />
 
-          <EuiFormRow
-            label={i18n.translate('workchatApp.assistants.editPromptModal.promptLabel', {
-              defaultMessage: 'Prompt',
-            })}
-            fullWidth
-          >
-            <EuiTextArea
-              data-test-subj="assistantPromptTextArea"
-              value={editState.systemPrompt}
-              onChange={handleSystemPromptChange}
-              fullWidth
-              rows={8}
-            />
-          </EuiFormRow>
+          <Controller
+            name="systemPrompt"
+            control={control}
+            rules={{ required: true }}
+            render={({ field }) => (
+              <EuiFormRow
+                label={i18n.translate('workchatApp.assistants.editPromptModal.promptLabel', {
+                  defaultMessage: 'Prompt',
+                })}
+                fullWidth
+              >
+                <EuiTextArea
+                  data-test-subj="assistantPromptTextArea"
+                  {...field}
+                  fullWidth
+                  rows={8}
+                />
+              </EuiFormRow>
+            )}
+          />
         </EuiForm>
       </EuiModalBody>
 
@@ -143,7 +124,7 @@ export const EditPrompt: React.FC<EditPromptProps> = ({ onClose, onSaveSuccess, 
         <EuiButton
           data-test-subj="savePromptButton"
           fill
-          onClick={handleSubmit}
+          onClick={handleSubmit((data) => submit(data))}
           isLoading={isSubmitting}
         >
           {assistantLabels.editView.saveButtonLabel}

@@ -19,8 +19,10 @@ import {
   EuiFieldText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormProvider, useForm, Controller } from 'react-hook-form';
 import { useKibana } from '../../hooks/use_kibana';
-import { useAgentEdition } from '../../hooks/use_agent_edition';
+import { AgentEditState, useAgentEdition } from '../../hooks/use_agent_edition';
+import type { Agent } from '../../../../common/agents';
 import { appPaths } from '../../app_paths';
 import { useNavigation } from '../../hooks/use_navigation';
 import { assistantLabels } from './i18n';
@@ -36,8 +38,8 @@ export const CreateNewAssistantModal: React.FC<CreateNewAssistantModalProps> = (
 
   const { navigateToWorkchatUrl } = useNavigation();
 
-  const { editState, setFieldValue, submit, isSubmitting } = useAgentEdition({
-    onSaveSuccess: (agent) => {
+  const onSaveSuccess = useCallback(
+    (agent: Agent) => {
       notifications.toasts.addSuccess(
         i18n.translate('workchatApp.assistants.createSuccessMessage', {
           defaultMessage: 'Assistant created successfully',
@@ -46,32 +48,28 @@ export const CreateNewAssistantModal: React.FC<CreateNewAssistantModalProps> = (
       onClose();
       navigateToWorkchatUrl(appPaths.assistants.edit({ agentId: agent.id }));
     },
+    [notifications, onClose, navigateToWorkchatUrl]
+  );
+
+  const onSaveError = useCallback(
+    (err: Error) => {
+      notifications.toasts.addError(err, {
+        title: 'Error',
+      });
+    },
+    [notifications]
+  );
+
+  const { state, isSubmitting, submit } = useAgentEdition({
+    onSaveSuccess,
+    onSaveError,
   });
 
-  const handleNameChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      setFieldValue('name', e.target.value);
-    },
-    [setFieldValue]
-  );
+  const formMethods = useForm<AgentEditState>({
+    values: state,
+  });
 
-  const handleSubmit = useCallback(
-    (e: React.FormEvent) => {
-      e.preventDefault();
-
-      if (!editState.name.trim()) {
-        notifications.toasts.addDanger(
-          i18n.translate('workchatApp.assistants.create.nameRequiredError', {
-            defaultMessage: 'Name is required',
-          })
-        );
-        return;
-      }
-
-      submit();
-    },
-    [editState.name, submit, notifications.toasts]
-  );
+  const { handleSubmit, control } = formMethods;
 
   return (
     <EuiModal onClose={onClose} style={{ width: 640 }}>
@@ -84,21 +82,25 @@ export const CreateNewAssistantModal: React.FC<CreateNewAssistantModalProps> = (
       </EuiModalHeader>
 
       <EuiModalBody>
-        <EuiForm component="form" onSubmit={handleSubmit} fullWidth>
-          <EuiFormRow
-            label={i18n.translate('workchatApp.assistants.create.nameLabel', {
-              defaultMessage: 'Name',
-            })}
-            fullWidth
-          >
-            <EuiFieldText
-              data-test-subj="assistantNameInput"
-              value={editState.name}
-              onChange={handleNameChange}
+        <FormProvider {...formMethods}>
+          <EuiForm component="form" onSubmit={handleSubmit((data) => submit(data))} fullWidth>
+            <EuiFormRow
+              label={i18n.translate('workchatApp.assistants.create.nameLabel', {
+                defaultMessage: 'Name',
+              })}
               fullWidth
-            />
-          </EuiFormRow>
-        </EuiForm>
+            >
+              <Controller
+                rules={{ required: true }}
+                name="name"
+                control={control}
+                render={({ field }) => (
+                  <EuiFieldText data-test-subj="assistantNameInput" {...field} fullWidth />
+                )}
+              />
+            </EuiFormRow>
+          </EuiForm>
+        </FormProvider>
       </EuiModalBody>
 
       <EuiModalFooter>
@@ -109,7 +111,7 @@ export const CreateNewAssistantModal: React.FC<CreateNewAssistantModalProps> = (
         <EuiButton
           data-test-subj="saveBasicInfoButton"
           fill
-          onClick={handleSubmit}
+          onClick={handleSubmit((data) => submit(data))}
           isLoading={isSubmitting}
         >
           {assistantLabels.editView.saveButtonLabel}

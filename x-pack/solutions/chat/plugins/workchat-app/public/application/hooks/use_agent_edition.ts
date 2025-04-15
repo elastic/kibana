@@ -34,20 +34,22 @@ const emptyState = (): AgentEditState => {
 export const useAgentEdition = ({
   agentId,
   onSaveSuccess,
+  onSaveError,
 }: {
   agentId?: string;
   onSaveSuccess: (agent: Agent) => void;
+  onSaveError?: (err: Error) => void;
 }) => {
   const { agentService } = useWorkChatServices();
 
-  const [editState, setEditState] = useState<AgentEditState>(emptyState());
+  const [state, setState] = useState<AgentEditState>(emptyState());
   const [isSubmitting, setSubmitting] = useState<boolean>(false);
 
   useEffect(() => {
     const fetchAgent = async () => {
       if (agentId) {
         const agent = await agentService.get(agentId);
-        setEditState({
+        setState({
           name: agent.name,
           description: agent.description,
           systemPrompt: agent.configuration.systemPrompt ?? '',
@@ -61,44 +63,45 @@ export const useAgentEdition = ({
     fetchAgent();
   }, [agentId, agentService]);
 
-  const setFieldValue = <T extends keyof AgentEditState>(key: T, value: AgentEditState[T]) => {
-    setEditState((previous) => ({ ...previous, [key]: value }));
-  };
+  const submit = useCallback(
+    (updatedAgent: AgentEditState) => {
+      setSubmitting(true);
 
-  const submit = useCallback(() => {
-    setSubmitting(true);
+      const payload = {
+        name: updatedAgent.name,
+        description: updatedAgent.description,
+        configuration: {
+          systemPrompt: updatedAgent.systemPrompt,
+          useCase: updatedAgent.useCase,
+        },
+        avatar: {
+          color: updatedAgent.avatarColor,
+          text: updatedAgent.avatarCustomText,
+        },
+        public: updatedAgent.public,
+      };
 
-    const payload = {
-      name: editState.name,
-      description: editState.description,
-      configuration: {
-        systemPrompt: editState.systemPrompt,
-        useCase: editState.useCase,
-      },
-      avatar: {
-        color: editState.avatarColor,
-        text: editState.avatarCustomText,
-      },
-      public: editState.public,
-    };
-
-    (agentId ? agentService.update(agentId, payload) : agentService.create(payload)).then(
-      (response) => {
-        setSubmitting(false);
-        if (response.success) {
-          onSaveSuccess(response.agent);
+      (agentId ? agentService.update(agentId, payload) : agentService.create(payload)).then(
+        (response) => {
+          setSubmitting(false);
+          if (response.success) {
+            onSaveSuccess(response.agent);
+          }
+        },
+        (err) => {
+          setSubmitting(false);
+          if (onSaveError) {
+            onSaveError(err);
+          }
         }
-      },
-      (err) => {
-        setSubmitting(false);
-      }
-    );
-  }, [agentId, editState, agentService, onSaveSuccess]);
+      );
+    },
+    [agentId, agentService, onSaveSuccess, onSaveError]
+  );
 
   return {
-    editState,
+    state,
     isSubmitting,
-    setFieldValue,
     submit,
   };
 };

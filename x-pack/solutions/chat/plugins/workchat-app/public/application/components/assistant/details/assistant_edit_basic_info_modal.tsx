@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React from 'react';
+import { useForm, Controller } from 'react-hook-form';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -49,7 +50,7 @@ export const EditAssistantBasicInfo: React.FC<EditAssistantBasicInfoProps> = ({
     services: { notifications },
   } = useKibana();
 
-  const { editState, setFieldValue, submit, isSubmitting } = useAgentEdition({
+  const { state, submit, isSubmitting } = useAgentEdition({
     agentId,
     onSaveSuccess: () => {
       notifications.toasts.addSuccess(
@@ -62,51 +63,14 @@ export const EditAssistantBasicInfo: React.FC<EditAssistantBasicInfoProps> = ({
     },
   });
 
-  const handleNameChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      setFieldValue('name', e.target.value);
-    },
-    [setFieldValue]
-  );
+  const { control, handleSubmit, watch } = useForm({
+    values: state,
+  });
 
-  const handleDescriptionChange = useCallback(
-    (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-      setFieldValue('description', e.target.value);
-    },
-    [setFieldValue]
-  );
-
-  const handleAvatarColorChange = useCallback(
-    (color: string) => {
-      setFieldValue('avatarColor', color);
-    },
-    [setFieldValue]
-  );
-
-  const handleAvatarTextChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      setFieldValue('avatarCustomText', e.target.value);
-    },
-    [setFieldValue]
-  );
-
-  const handleSubmit = useCallback(
-    (e: React.FormEvent) => {
-      e.preventDefault();
-
-      if (!editState.name.trim()) {
-        notifications.toasts.addDanger(
-          i18n.translate('workchatApp.assistants.editBasicsModal.nameRequiredError', {
-            defaultMessage: 'Name is required',
-          })
-        );
-        return;
-      }
-
-      submit();
-    },
-    [editState.name, submit, notifications.toasts]
-  );
+  // Get form values for the avatar preview
+  const name = watch('name');
+  const avatarCustomText = watch('avatarCustomText');
+  const avatarColor = watch('avatarColor');
 
   return (
     <EuiModal onClose={onClose} style={{ width: 800 }}>
@@ -119,7 +83,7 @@ export const EditAssistantBasicInfo: React.FC<EditAssistantBasicInfoProps> = ({
       </EuiModalHeader>
 
       <EuiModalBody>
-        <EuiForm component="form" onSubmit={handleSubmit} fullWidth>
+        <EuiForm component="form" onSubmit={handleSubmit((data) => submit(data))} fullWidth>
           <EuiText>
             <h4>
               {i18n.translate('workchatApp.assistants.editBasicsModal.identificationSection', {
@@ -130,34 +94,41 @@ export const EditAssistantBasicInfo: React.FC<EditAssistantBasicInfoProps> = ({
 
           <EuiSpacer size="m" />
 
-          <EuiFormRow
-            label={i18n.translate('workchatApp.assistants.editBasicsModal.nameLabel', {
-              defaultMessage: 'Name',
-            })}
-            fullWidth
-          >
-            <EuiFieldText
-              data-test-subj="assistantNameInput"
-              value={editState.name}
-              onChange={handleNameChange}
-              fullWidth
-            />
-          </EuiFormRow>
+          <Controller
+            name="name"
+            control={control}
+            rules={{ required: true }}
+            render={({ field }) => (
+              <EuiFormRow
+                label={i18n.translate('workchatApp.assistants.editBasicsModal.nameLabel', {
+                  defaultMessage: 'Name',
+                })}
+                fullWidth
+              >
+                <EuiFieldText data-test-subj="assistantNameInput" {...field} fullWidth />
+              </EuiFormRow>
+            )}
+          />
 
-          <EuiFormRow
-            label={i18n.translate('workchatApp.assistants.editBasicsModal.descriptionLabel', {
-              defaultMessage: 'Description',
-            })}
-            fullWidth
-          >
-            <EuiTextArea
-              data-test-subj="assistantDescriptionInput"
-              value={editState.description}
-              onChange={handleDescriptionChange}
-              fullWidth
-              rows={6}
-            />
-          </EuiFormRow>
+          <Controller
+            name="description"
+            control={control}
+            render={({ field }) => (
+              <EuiFormRow
+                label={i18n.translate('workchatApp.assistants.editBasicsModal.descriptionLabel', {
+                  defaultMessage: 'Description',
+                })}
+                fullWidth
+              >
+                <EuiTextArea
+                  data-test-subj="assistantDescriptionInput"
+                  {...field}
+                  fullWidth
+                  rows={6}
+                />
+              </EuiFormRow>
+            )}
+          />
           <EuiFormHelpText>
             {i18n.translate('workchatApp.assistants.editBasicsModal.descriptionHelpText', {
               defaultMessage: 'Describe what this assistant is going to be used for.',
@@ -178,51 +149,57 @@ export const EditAssistantBasicInfo: React.FC<EditAssistantBasicInfoProps> = ({
 
           <EuiFlexGroup alignItems="center">
             <EuiFlexItem grow={false}>
-              <EuiAvatar
-                initials={editState.avatarCustomText}
-                name={editState.name}
-                color={editState.avatarColor}
-                size="xl"
-              />
+              <EuiAvatar initials={avatarCustomText} name={name} color={avatarColor} size="xl" />
             </EuiFlexItem>
 
             <EuiFlexItem>
               <EuiFlexGroup>
                 <EuiFlexItem>
-                  <EuiFormRow
-                    label={i18n.translate('workchatApp.assistants.editBasicsModal.colorLabel', {
-                      defaultMessage: 'Color',
-                    })}
-                    fullWidth
-                  >
-                    <EuiColorPicker
-                      data-test-subj="assistantAvatarColorPicker"
-                      onChange={handleAvatarColorChange}
-                      color={editState.avatarColor}
-                      swatches={AVATAR_COLORS}
-                    />
-                  </EuiFormRow>
+                  <Controller
+                    name="avatarColor"
+                    control={control}
+                    render={({ field: { onChange, value } }) => (
+                      <EuiFormRow
+                        label={i18n.translate('workchatApp.assistants.editBasicsModal.colorLabel', {
+                          defaultMessage: 'Color',
+                        })}
+                        fullWidth
+                      >
+                        <EuiColorPicker
+                          data-test-subj="assistantAvatarColorPicker"
+                          onChange={onChange}
+                          color={value}
+                          swatches={AVATAR_COLORS}
+                        />
+                      </EuiFormRow>
+                    )}
+                  />
                 </EuiFlexItem>
                 <EuiFlexItem>
-                  <EuiFormRow
-                    label={i18n.translate('workchatApp.assistants.editBasicsModal.textLabel', {
-                      defaultMessage: 'Custom Text',
-                    })}
-                    helpText={i18n.translate(
-                      'workchatApp.assistants.editBasicsModal.emojiHelpText',
-                      {
-                        defaultMessage: 'Press CTRL + CMD + Space for emojis',
-                      }
+                  <Controller
+                    name="avatarCustomText"
+                    control={control}
+                    render={({ field }) => (
+                      <EuiFormRow
+                        label={i18n.translate('workchatApp.assistants.editBasicsModal.textLabel', {
+                          defaultMessage: 'Custom Text',
+                        })}
+                        helpText={i18n.translate(
+                          'workchatApp.assistants.editBasicsModal.emojiHelpText',
+                          {
+                            defaultMessage: 'Press CTRL + CMD + Space for emojis',
+                          }
+                        )}
+                        fullWidth
+                      >
+                        <EuiFieldText
+                          data-test-subj="assistantAvatarTextField"
+                          {...field}
+                          fullWidth
+                        />
+                      </EuiFormRow>
                     )}
-                    fullWidth
-                  >
-                    <EuiFieldText
-                      data-test-subj="assistantAvatarTextField"
-                      value={editState.avatarCustomText}
-                      onChange={handleAvatarTextChange}
-                      fullWidth
-                    />
-                  </EuiFormRow>
+                  />
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>
@@ -238,7 +215,7 @@ export const EditAssistantBasicInfo: React.FC<EditAssistantBasicInfoProps> = ({
         <EuiButton
           data-test-subj="saveBasicInfoButton"
           fill
-          onClick={handleSubmit}
+          onClick={handleSubmit((data) => submit(data))}
           isLoading={isSubmitting}
         >
           {assistantLabels.editView.saveButtonLabel}
