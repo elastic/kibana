@@ -107,6 +107,7 @@ export default function ({ getService }: FtrProviderContext) {
               },
               summarizationModel: {
                 connectorId: 'connectorId',
+                modelId: 'modelId',
               },
             })
             .expect(200);
@@ -139,6 +140,19 @@ export default function ({ getService }: FtrProviderContext) {
               indices: ['test-index'],
               queryFields: { 'test-index': [''] },
               elasticsearchQueryJSON: `{"retriever":{"standard":{"query":{"multi_match":{"query":"{query}","fields":["field1","field2"]}`,
+            })
+            .expect(400);
+        });
+        it('should validate playground create request with custom query', async () => {
+          await supertestDeveloperWithCookieCredentials
+            .put(INTERNAL_API_BASE_PATH)
+            .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION)
+            .send({
+              name: '',
+              indices: ['test-index'],
+              queryFields: { 'test-index': [''] },
+              elasticsearchQueryJSON: `{"retriever":{"standard":{"query":{"multi_match":{"query":"{query}","fields":["field1","field2"]}}}}}`,
+              userElasticsearchQueryJSON: `{"query":{"multi_match":{"query":"{query}","fields":["field1`,
             })
             .expect(400);
         });

@@ -128,7 +128,7 @@ export interface PlaygroundSavedObject {
   };
   summarizationModel?: {
     connectorId: string;
-    value?: string;
+    modelId?: string;
   };
 }
 

@@ -29,7 +29,7 @@ export const playgroundAttributesSchema = schema.object({
   summarizationModel: schema.maybe(
     schema.object({
       connectorId: schema.string(),
-      value: schema.maybe(schema.string()),
+      modelId: schema.maybe(schema.string()),
     })
   ),
 });

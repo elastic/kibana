@@ -27,7 +27,7 @@ const validChatPlayground: PlaygroundSavedObject = {
   },
   summarizationModel: {
     connectorId: 'connectorId',
-    value: 'model',
+    modelId: 'model',
   },
 };
 
