@@ -31,15 +31,11 @@ const testPageAccess = () => {
 
     // should redirect out from stack rules to main management page
     visit(STACK_RULES_URL);
-    cy.contains(
-      'Manage data and indices, oversee rules and connectors, organize saved objects and files, and create API keys in a central location.'
-    ).should('exist');
+    cy.contains(MANAGEMENT_PAGE_DESCRIPTION).should('exist');
 
     // should redirect out from maintenance window to main management page
     visit(MAINTENANCE_WINDOW_URL);
-    cy.contains(
-      'Manage data and indices, oversee rules and connectors, organize saved objects and files, and create API keys in a central location.'
-    ).should('exist');
+    cy.contains(MANAGEMENT_PAGE_DESCRIPTION).should('exist');
   });
 };
 

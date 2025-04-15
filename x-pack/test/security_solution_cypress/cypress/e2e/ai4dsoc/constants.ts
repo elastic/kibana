@@ -9,3 +9,6 @@ export const ALERTS_SUMMARY_PROMPT = '[data-test-subj="alert-summary-landing-pag
 export const GET_STARTED_PAGE = '[data-test-subj="onboarding-hub-page"]';
 export const AI_SOC_NAVIGATION =
   '[data-test-subj="nav-item nav-item-security_solution_ai_nav nav-item-id-security_solution_ai_nav"]';
+
+const MANAGEMENT_PAGE_DESCRIPTION =
+  'Manage data and indices, oversee rules and connectors, organize saved objects and files, and create API keys in a central location.';
