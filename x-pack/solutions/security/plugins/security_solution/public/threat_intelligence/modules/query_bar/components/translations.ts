@@ -7,10 +7,16 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const FILTER_FOR_TITLE = i18n.translate('xpack.securitySolution.threatIntelligence.queryBar.filterFor', {
-  defaultMessage: 'Filter for',
-});
+export const FILTER_FOR_TITLE = i18n.translate(
+  'xpack.securitySolution.threatIntelligence.queryBar.filterFor',
+  {
+    defaultMessage: 'Filter for',
+  }
+);
 
-export const FILTER_OUT_TITLE = i18n.translate('xpack.securitySolution.threatIntelligence.queryBar.filterOut', {
-  defaultMessage: 'Filter out',
-});
+export const FILTER_OUT_TITLE = i18n.translate(
+  'xpack.securitySolution.threatIntelligence.queryBar.filterOut',
+  {
+    defaultMessage: 'Filter out',
+  }
+);

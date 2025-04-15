@@ -14,6 +14,9 @@ export const DESCRIPTION = i18n.translate(
   }
 );
 
-export const INSPECT_BUTTON_TITLE = i18n.translate('xpack.securitySolution.threatIntelligence.inspectTitle', {
-  defaultMessage: 'Inspect',
-});
+export const INSPECT_BUTTON_TITLE = i18n.translate(
+  'xpack.securitySolution.threatIntelligence.inspectTitle',
+  {
+    defaultMessage: 'Inspect',
+  }
+);

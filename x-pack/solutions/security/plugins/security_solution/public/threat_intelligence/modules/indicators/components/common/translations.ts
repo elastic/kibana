@@ -17,21 +17,33 @@ export const COPY_TITLE = i18n.translate(
 
 /* Field Label */
 
-export const TIMESTAMP = i18n.translate('xpack.securitySolution.threatIntelligence.field.@timestamp', {
-  defaultMessage: '@timestamp',
-});
+export const TIMESTAMP = i18n.translate(
+  'xpack.securitySolution.threatIntelligence.field.@timestamp',
+  {
+    defaultMessage: '@timestamp',
+  }
+);
 
-export const INDICATORS = i18n.translate('xpack.securitySolution.threatIntelligence.field.threat.indicator.name', {
-  defaultMessage: 'Indicator',
-});
+export const INDICATORS = i18n.translate(
+  'xpack.securitySolution.threatIntelligence.field.threat.indicator.name',
+  {
+    defaultMessage: 'Indicator',
+  }
+);
 
-export const TYPE = i18n.translate('xpack.securitySolution.threatIntelligence.field.threat.indicator.type', {
-  defaultMessage: 'Indicator type',
-});
+export const TYPE = i18n.translate(
+  'xpack.securitySolution.threatIntelligence.field.threat.indicator.type',
+  {
+    defaultMessage: 'Indicator type',
+  }
+);
 
-export const FEED = i18n.translate('xpack.securitySolution.threatIntelligence.field.threat.feed.name', {
-  defaultMessage: 'Feed',
-});
+export const FEED = i18n.translate(
+  'xpack.securitySolution.threatIntelligence.field.threat.feed.name',
+  {
+    defaultMessage: 'Feed',
+  }
+);
 
 export const FIRST_SEEN = i18n.translate(
   'xpack.securitySolution.threatIntelligence.field.threat.indicator.first_seen',

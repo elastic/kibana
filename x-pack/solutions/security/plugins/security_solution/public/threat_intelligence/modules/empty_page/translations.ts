@@ -7,6 +7,9 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const IMAGE = i18n.translate('xpack.securitySolution.threatIntelligence.common.emptyPage.imgAlt', {
-  defaultMessage: 'Enable Threat Intelligence Integrations',
-});
+export const IMAGE = i18n.translate(
+  'xpack.securitySolution.threatIntelligence.common.emptyPage.imgAlt',
+  {
+    defaultMessage: 'Enable Threat Intelligence Integrations',
+  }
+);

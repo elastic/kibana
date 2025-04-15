@@ -7,9 +7,12 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const TITLE = i18n.translate('xpack.securitySolution.threatIntelligence.timeline.addToTimeline', {
-  defaultMessage: 'Add to Timeline',
-});
+export const TITLE = i18n.translate(
+  'xpack.securitySolution.threatIntelligence.timeline.addToTimeline',
+  {
+    defaultMessage: 'Add to Timeline',
+  }
+);
 
 export const BUTTON_ICON_LABEL: string = i18n.translate(
   'xpack.securitySolution.threatIntelligence.timeline.investigateInTimelineButtonIcon',

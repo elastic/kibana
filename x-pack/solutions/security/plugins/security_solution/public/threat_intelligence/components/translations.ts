@@ -7,10 +7,16 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const UPDATING = i18n.translate('xpack.securitySolution.threatIntelligence.updateStatus.updating', {
-  defaultMessage: 'Updating...',
-});
+export const UPDATING = i18n.translate(
+  'xpack.securitySolution.threatIntelligence.updateStatus.updating',
+  {
+    defaultMessage: 'Updating...',
+  }
+);
 
-export const UPDATED = i18n.translate('xpack.securitySolution.threatIntelligence.updateStatus.updated', {
-  defaultMessage: 'Updated',
-});
+export const UPDATED = i18n.translate(
+  'xpack.securitySolution.threatIntelligence.updateStatus.updated',
+  {
+    defaultMessage: 'Updated',
+  }
+);

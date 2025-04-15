@@ -14,6 +14,9 @@ export const COMBOBOX_PREPEND_LABEL = i18n.translate(
   }
 );
 
-export const BUTTON_LABEL = i18n.translate('xpack.securitySolution.threatIntelligence.indicator.barChart.popover', {
-  defaultMessage: 'More actions',
-});
+export const BUTTON_LABEL = i18n.translate(
+  'xpack.securitySolution.threatIntelligence.indicator.barChart.popover',
+  {
+    defaultMessage: 'More actions',
+  }
+);
