@@ -247,7 +247,7 @@ export default function ({ getService }: FtrProviderContext) {
         .send({ event: taskId, data })
         .expect(200);
     }
-    it.only('should schedule a task with rrule', async () => {
+    it('should schedule a task with rrule', async () => {
       const dailyTask = await scheduleTask({
         id: 'sample-recurring-task-id',
         taskType: 'sampleRecurringTask',
