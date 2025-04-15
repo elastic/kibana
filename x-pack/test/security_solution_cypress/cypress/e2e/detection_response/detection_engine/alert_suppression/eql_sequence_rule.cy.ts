@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { getEqlRule } from '../../../../objects/rule';
+import { getEqlSequenceRule } from '../../../../objects/rule';
 
 import { login } from '../../../../tasks/login';
 import { visit } from '../../../../tasks/navigation';
@@ -34,18 +34,22 @@ import {
 
 const SUPPRESS_BY_FIELDS = ['agent.type'];
 
-// Skip in MKI due to flake
 describe(
-  'Detection Rule Creation - EQL Rules - With Alert Suppression',
+  'EQL Rules - Alert suppression',
   {
-    tags: ['@ess', '@skipInServerlessMKI'],
+    tags: ['@ess', '@serverless'],
+    env: {
+      kbnServerArgs: [
+        `--xpack.securitySolution.enableExperimental=${JSON.stringify([
+          'alertSuppressionForSequenceEqlRuleEnabled',
+        ])}`,
+      ],
+    },
   },
   () => {
-    describe('with non-sequence queries', () => {
-      const rule = getEqlRule();
-      before(() => {
-        cy.task('esArchiverLoad', { archiveName: 'auditbeat_multiple' });
-      });
+    describe('with sequence queries ', () => {
+      const rule = getEqlSequenceRule();
+
       beforeEach(() => {
         deleteAlertsAndRules();
         login();
@@ -53,9 +57,6 @@ describe(
 
         selectEqlRuleType();
         fillDefineEqlRule(rule);
-      });
-      after(() => {
-        cy.task('esArchiverUnload', { archiveName: 'auditbeat_multiple' });
       });
 
       it('creates a rule with a "per rule execution" suppression duration', () => {
