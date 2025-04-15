@@ -52,7 +52,7 @@ export interface FocusedTraceItems {
   rootTransaction: TraceDoc;
   parentDoc?: TraceDoc;
   focusedTraceDoc: TraceDoc;
-  focusedTraceDocChildren: Child[];
+  focusedTraceTree: Child[];
 }
 
 export function buildFocusedTraceItems({
@@ -95,7 +95,7 @@ export function buildFocusedTraceItems({
 
   const rootTransaction = itemsGroupedByParentId.root?.[0];
 
-  const focusedTraceDocChildren = buildChildrenTree({
+  const focusedTraceTree = buildChildrenTree({
     initialTraceDoc: focusedTraceDoc,
     itemsGroupedByParentId,
     maxNumberOfChildren: MAX_NUMBER_OF_CHILDREN,
@@ -105,7 +105,7 @@ export function buildFocusedTraceItems({
     rootTransaction,
     parentDoc,
     focusedTraceDoc,
-    focusedTraceDocChildren,
+    focusedTraceTree,
   };
 }
 

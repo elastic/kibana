@@ -123,7 +123,7 @@ describe('buildFocusedTraceItems', () => {
       rootTransaction: mockTraceDoc('1'),
       parentDoc: undefined,
       focusedTraceDoc: mockTraceDoc('1'),
-      focusedTraceDocChildren: [
+      focusedTraceTree: [
         {
           traceDoc: mockTraceDoc('2', '1'),
           children: [
@@ -146,7 +146,7 @@ describe('buildFocusedTraceItems', () => {
       rootTransaction: mockTraceDoc('1'),
       parentDoc: mockTraceDoc('2', '1'),
       focusedTraceDoc: mockTraceDoc('3', '2'),
-      focusedTraceDocChildren: [],
+      focusedTraceTree: [],
     });
   });
 

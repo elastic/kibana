@@ -14,7 +14,7 @@ import type {
   IWaterfallTransaction,
 } from '../../app/transaction_details/waterfall_with_summary/waterfall_container/waterfall/waterfall_helpers/waterfall_helpers';
 import {
-  getLegendsAndColorBy,
+  assignColorsAndGenerateLegends,
   getSpanItem,
   getTransactionItem,
 } from '../../app/transaction_details/waterfall_with_summary/waterfall_container/waterfall/waterfall_helpers/waterfall_helpers';
@@ -37,11 +37,11 @@ const margin = {
 };
 
 function convertChildrenToWatefallItem(
-  children: NonNullable<FocusedTrace['traceItems']>['focusedTraceDocChildren'],
+  children: NonNullable<FocusedTrace['traceItems']>['focusedTraceTree'],
   rootWaterfallTransaction: IWaterfallTransaction
 ) {
   function convert(
-    child: NonNullable<FocusedTrace['traceItems']>['focusedTraceDocChildren'][0]
+    child: NonNullable<FocusedTrace['traceItems']>['focusedTraceTree'][0]
   ): Array<IWaterfallTransaction | IWaterfallSpan> {
     const waterfallItem =
       child.traceDoc.processor.event === 'transaction'
@@ -68,6 +68,7 @@ const calculateOffset = ({
 
 export function FocusedTraceWaterfall({ items, isEmbeddable = false }: Props) {
   const { euiTheme } = useEuiTheme();
+  console.log('### caue FocusedTraceWaterfall euiTheme:', euiTheme);
 
   const traceItems = items.traceItems;
 
@@ -116,13 +117,13 @@ export function FocusedTraceWaterfall({ items, isEmbeddable = false }: Props) {
     }
 
     const focusedItemChildren = convertChildrenToWatefallItem(
-      traceItems.focusedTraceDocChildren,
+      traceItems.focusedTraceTree,
       rootWaterfallTransaction
     );
 
     waterfallItems.push(...focusedItemChildren);
 
-    getLegendsAndColorBy(waterfallItems);
+    assignColorsAndGenerateLegends(waterfallItems);
 
     return {
       items: waterfallItems,
@@ -149,7 +150,7 @@ export function FocusedTraceWaterfall({ items, isEmbeddable = false }: Props) {
             top: var(--euiFixedHeadersOffset, 0);
             z-index: ${euiTheme.levels.menu};
             background-color: ${euiTheme.colors.emptyShade};
-            border-bottom: 1px solid ${euiTheme.colors.mediumShade};
+            border-bottom: ${euiTheme.border.thin};
           `}
         >
           <TimelineAxisContainer

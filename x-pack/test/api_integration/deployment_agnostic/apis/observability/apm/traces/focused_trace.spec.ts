@@ -86,7 +86,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       apmSynthtraceEsClient = await synthtrace.createApmSynthtraceEsClient();
     });
 
-    // after(() => apmSynthtraceEsClient.clean());
+    after(() => apmSynthtraceEsClient.clean());
 
     describe('when traces exist', () => {
       before(() => {
@@ -146,8 +146,8 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           });
 
           it('has 2 children', () => {
-            expect(focusedTrace.traceItems.focusedTraceDocChildren.length).to.eql(1);
-            expect(focusedTrace.traceItems.focusedTraceDocChildren?.[0].children.length).to.eql(1);
+            expect(focusedTrace.traceItems.focusedTraceTree.length).to.eql(1);
+            expect(focusedTrace.traceItems.focusedTraceTree?.[0].children.length).to.eql(1);
           });
 
           it('returns trace summary', () => {
@@ -163,11 +163,9 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           let nodeParentSpanId: string;
           let nodeTransactionId: string;
           before(async () => {
-            nodeParentSpanId =
-              focusedTrace.traceItems.focusedTraceDocChildren?.[0].traceDoc.span.id;
+            nodeParentSpanId = focusedTrace.traceItems.focusedTraceTree?.[0].traceDoc.span.id;
             nodeTransactionId =
-              focusedTrace.traceItems.focusedTraceDocChildren?.[0].children[0]?.traceDoc.transaction
-                .id;
+              focusedTrace.traceItems.focusedTraceTree?.[0].children[0]?.traceDoc.transaction.id;
             const focusedTraceResponse = await fetchFocusedTrace({
               traceId,
               docId: nodeTransactionId,
@@ -193,8 +191,8 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           });
 
           it('has 2 children', () => {
-            expect(focusedTrace.traceItems.focusedTraceDocChildren.length).to.eql(1);
-            expect(focusedTrace.traceItems.focusedTraceDocChildren?.[0].children.length).to.eql(1);
+            expect(focusedTrace.traceItems.focusedTraceTree.length).to.eql(1);
+            expect(focusedTrace.traceItems.focusedTraceTree?.[0].children.length).to.eql(1);
           });
         });
 

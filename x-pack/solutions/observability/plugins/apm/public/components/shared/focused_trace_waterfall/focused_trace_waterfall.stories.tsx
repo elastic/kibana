@@ -147,7 +147,7 @@ const data: TraceItems = {
         outcome: 'success',
       },
     },
-    focusedTraceDocChildren: [
+    focusedTraceTree: [
       {
         traceDoc: {
           service: {

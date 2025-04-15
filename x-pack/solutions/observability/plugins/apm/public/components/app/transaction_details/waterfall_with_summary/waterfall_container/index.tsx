@@ -18,6 +18,7 @@ import { OrphanTraceItemsWarning } from './waterfall/orphan_trace_items_warning'
 import { WaterfallFlyout } from './waterfall/waterfall_flyout';
 import type { IWaterfall, IWaterfallItem } from './waterfall/waterfall_helpers/waterfall_helpers';
 import { WaterfallLegends } from './waterfall_legends';
+import { FocusedWatefall } from '../../../../shared/focused_trace_waterfall/focused';
 
 interface Props {
   waterfallItemId?: string;
@@ -107,6 +108,9 @@ export function WaterfallContainer({
             toggleFlyout({ history, item, flyoutDetailTab })
           }
         />
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <FocusedWatefall />
       </EuiFlexItem>
 
       <WaterfallFlyout
