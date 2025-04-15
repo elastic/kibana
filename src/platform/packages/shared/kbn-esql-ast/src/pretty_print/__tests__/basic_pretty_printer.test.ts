@@ -179,6 +179,30 @@ describe('single line query', () => {
         );
       });
     });
+
+    describe('FORK', () => {
+      test('from single line', () => {
+        const { text } =
+          reprint(`FROM index | FORK (WHERE keywordField != "" | LIMIT 100) (SORT doubleField ASC NULLS LAST)
+          `);
+
+        expect(text).toBe(
+          'FROM index | FORK (WHERE keywordField != "" | LIMIT 100) (SORT doubleField ASC NULLS LAST)'
+        );
+      });
+
+      test('from multiline', () => {
+        const { text } = reprint(`FROM index
+| FORK
+    (WHERE keywordField != "" | LIMIT 100)
+    (SORT doubleField ASC NULLS LAST)
+          `);
+
+        expect(text).toBe(
+          'FROM index | FORK (WHERE keywordField != "" | LIMIT 100) (SORT doubleField ASC NULLS LAST)'
+        );
+      });
+    });
   });
 
   describe('expressions', () => {
@@ -627,6 +651,17 @@ describe('multiline query', () => {
     const text = multiline(query, { pipeTab: '' }).text;
 
     expect(text).toBe(query);
+  });
+
+  test('keeps FORK branches on single lines', () => {
+    const { text } = multiline(
+      `FROM index| FORK (WHERE keywordField != "" | LIMIT 100)(SORT doubleField ASC NULLS LAST)`
+    );
+
+    expect(text).toBe(`FROM index
+  | FORK
+    (WHERE keywordField != "" | LIMIT 100)
+    (SORT doubleField ASC NULLS LAST)`);
   });
 });
 

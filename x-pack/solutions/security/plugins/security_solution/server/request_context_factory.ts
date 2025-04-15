@@ -37,6 +37,7 @@ import type {
   SecuritySolutionApiRequestHandlerContext,
   SecuritySolutionRequestHandlerContext,
 } from './types';
+import { PrivilegeMonitoringDataClient } from './lib/entity_analytics/privilege_monitoring/privilege_monitoring_data_client';
 
 export interface IRequestContextFactory {
   create(
@@ -249,7 +250,22 @@ export class RequestContextFactory implements IRequestContextFactory {
             auditLogger: getAuditLogger(),
           })
       ),
+      getPrivilegeMonitoringDataClient: memoize(() => {
+        // TODO:add soClient with ApiKeyType as with getEntityStoreDataClient
+        return new PrivilegeMonitoringDataClient({
+          logger: options.logger,
+          clusterClient: coreContext.elasticsearch.client,
+          namespace: getSpaceId(),
+          soClient: coreContext.savedObjects.client,
+          taskManager: startPlugins.taskManager,
+          auditLogger: getAuditLogger(),
+          kibanaVersion: options.kibanaVersion,
+          telemetry: core.analytics,
+          // TODO: add apiKeyManager
+        });
+      }),
       getEntityStoreDataClient: memoize(() => {
+        // why are we defining this here, but other places we do it inline?
         const clusterClient = coreContext.elasticsearch.client;
         const logger = options.logger;
 

@@ -22,6 +22,8 @@ interface SecurityRoutePageWrapperProps {
    * Used primarily in the AI for SOC tier, to allow redirecting to the home page instead of showing the NoPrivileges page.
    */
   redirectIfUnauthorized?: boolean;
+  // Used to disable the SpyRoute for the page, if e.g. the page's children have their own SpyRoute specified.
+  omitSpyRoute?: boolean;
 }
 
 /**
@@ -46,6 +48,7 @@ export const SecurityRoutePageWrapper: FC<PropsWithChildren<SecurityRoutePageWra
   pageName,
   redirectIfUnauthorized,
   redirectOnMissing,
+  omitSpyRoute,
 }) => {
   const link = useLinkInfo(pageName);
 
@@ -91,7 +94,7 @@ export const SecurityRoutePageWrapper: FC<PropsWithChildren<SecurityRoutePageWra
   return (
     <TrackApplicationView viewId={pageName}>
       {children}
-      <SpyRoute pageName={pageName} />
+      {!omitSpyRoute && <SpyRoute pageName={pageName} />}
     </TrackApplicationView>
   );
 };
@@ -105,7 +108,12 @@ export const withSecurityRoutePageWrapper = <T extends {}>(
   {
     redirectOnMissing,
     redirectIfUnauthorized,
-  }: { redirectOnMissing?: boolean; redirectIfUnauthorized?: boolean } = {}
+    omitSpyRoute,
+  }: {
+    redirectOnMissing?: boolean;
+    redirectIfUnauthorized?: boolean;
+    omitSpyRoute?: boolean;
+  } = {}
 ) => {
   return function WithSecurityRoutePageWrapper(props: T) {
     return (
@@ -113,6 +121,7 @@ export const withSecurityRoutePageWrapper = <T extends {}>(
         pageName={pageName}
         redirectOnMissing={redirectOnMissing}
         redirectIfUnauthorized={redirectIfUnauthorized}
+        omitSpyRoute={omitSpyRoute}
       >
         <Component {...props} />
       </SecurityRoutePageWrapper>

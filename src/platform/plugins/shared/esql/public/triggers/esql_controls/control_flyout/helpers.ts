@@ -15,6 +15,32 @@ function inKnownTimeInterval(timeIntervalUnit: string): boolean {
   return timeUnits.some((unit) => unit === timeIntervalUnit.toLowerCase());
 }
 
+const getQueryPart = (queryString: string, cursorColumn: number, variable: string) => {
+  const queryStringTillCursor = queryString.slice(0, cursorColumn);
+  const lastChar = queryStringTillCursor.slice(-1);
+  const secondLastChar = queryStringTillCursor.slice(-2, -1);
+
+  if (lastChar === '?') {
+    return [
+      queryString.slice(0, cursorColumn - 2),
+      variable,
+      queryString.slice(cursorColumn - 1),
+    ].join('');
+  } else if (secondLastChar === '?') {
+    return [
+      queryString.slice(0, cursorColumn - 2),
+      variable,
+      queryString.slice(cursorColumn - 1),
+    ].join('');
+  }
+
+  return [
+    queryString.slice(0, cursorColumn - 1),
+    variable,
+    queryString.slice(cursorColumn - 1),
+  ].join('');
+};
+
 export const updateQueryStringWithVariable = (
   queryString: string,
   variable: string,
@@ -27,20 +53,13 @@ export const updateQueryStringWithVariable = (
   if (lines.length > 1) {
     const queryArray = queryString.split('\n');
     const queryPartToBeUpdated = queryArray[cursorLine - 1];
-    const queryWithVariable = [
-      queryPartToBeUpdated.slice(0, cursorColumn - 1),
-      variable,
-      queryPartToBeUpdated.slice(cursorColumn - 1),
-    ].join('');
+
+    const queryWithVariable = getQueryPart(queryPartToBeUpdated, cursorColumn, variable);
     queryArray[cursorLine - 1] = queryWithVariable;
     return queryArray.join('\n');
   }
 
-  return [
-    queryString.slice(0, cursorColumn - 1),
-    variable,
-    queryString.slice(cursorColumn - 1),
-  ].join('');
+  return [getQueryPart(queryString, cursorColumn, variable)].join('');
 };
 
 export const getQueryForFields = (queryString: string, cursorPosition?: monaco.Position) => {
