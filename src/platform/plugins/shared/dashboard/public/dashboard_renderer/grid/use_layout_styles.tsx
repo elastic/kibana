@@ -45,9 +45,7 @@ export const useLayoutStyles = () => {
         padding-bottom: calc(var(--kbnGridGutterSize) * 1px);
       }
 
-      &.kbnGridLayout--active {
-      
-
+      .kbnGridRow--targeted {
         background-position: top calc((var(--kbnGridGutterSize) / 2) * -1px) left
           calc((var(--kbnGridGutterSize) / 2) * -1px);
         background-size: calc((var(--kbnGridColumnWidth) + var(--kbnGridGutterSize)) * 1px)

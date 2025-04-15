@@ -109,7 +109,6 @@ const useStyleSubscription = (
         if (!headerRef) return;
         const currentLayout = proposedGridLayout || gridLayout;
         const topOffset = getTopOffsetForRowHeader(rowId, currentLayout);
-        console.log(rowId, topOffset, currentLayout);
         headerRef.style.display = 'block';
         headerRef.style.gridColumnStart = `1`;
         headerRef.style.gridColumnEnd = `-1`;

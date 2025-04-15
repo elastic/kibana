@@ -10,11 +10,11 @@
 import deepEqual from 'fast-deep-equal';
 import { cloneDeep, pick } from 'lodash';
 
-import { GridLayoutStateManager, GridRowData } from '../../types';
+import { GridLayoutData, GridLayoutStateManager, GridRowData } from '../../types';
 import { getRowKeysInOrder, resolveGridRow } from '../../utils/resolve_grid_row';
 import { getSensorType } from '../sensors';
 import { PointerPosition, UserInteractionEvent } from '../types';
-import { getRowRect } from '../../utils/calculations';
+import { getRowHeight, getRowRect } from '../../utils/calculations';
 import { createNewRow } from '../state_manager_selectors';
 
 export const startAction = (
@@ -117,7 +117,7 @@ export const moveAction = (
       updatedRowOrder.forEach((id, index) => {
         updatedLayout[id].order = index + 1;
       });
-      gridLayoutStateManager.proposedGridLayout$.next(updatedLayout);
+      gridLayoutStateManager.proposedGridLayout$.next(mergeAdjacentRowsIfNonCollapsible(updatedLayout));
     }
     // if the drop target row is non collapsible, we might need to move panels
   } else if (!dropTargetRow.isCollapsible) {
@@ -129,13 +129,12 @@ export const moveAction = (
       rowPanels,
       gridLayoutStateManager
     );
-    // console.log(currentLayout, rowBelow, rowBelow && currentLayout[rowBelow].isCollapsible)
+    console.log('rowBelow', rowBelow)
     if (panelsBelowCursor.length && rowBelow && currentLayout[rowBelow].isCollapsible) {
       // create a new row
       const newRow = createNewRow({});
       const { moved, kept } = partitionRowPanels(rowPanels, panelsBelowCursor);
-      // console.log('moved', moved);
-      // console.log('kept', kept);
+
       const updatedLayout = cloneDeep(currentLayout);
       updatedLayout[newRow.id] = {
         ...newRow,
@@ -147,16 +146,13 @@ export const moveAction = (
         panels: kept,
       };
       let updatedRowOrder = sortRowsByRefs(gridLayoutStateManager);
-      console.log('updatedRowOrder', updatedRowOrder, dropTargetRowId);
       updatedRowOrder = insertAfter(currentRowOrder, currentActiveRowEvent.id, newRow.id);
-      console.log('updatedRowOrder', updatedRowOrder);
       if (!deepEqual(currentRowOrder, updatedRowOrder)) {
         updatedRowOrder.forEach((id, index) => {
             updatedLayout[id].order = index + 1;
         });
       }
-      console.log(updatedLayout);
-      gridLayoutStateManager.proposedGridLayout$.next(updatedLayout);
+      gridLayoutStateManager.proposedGridLayout$.next(mergeAdjacentRowsIfNonCollapsible(updatedLayout));
     }
 
     // GO UP CASE!
@@ -224,3 +220,44 @@ function insertAfter(array: string[], target: string, newElement: string): strin
 
   return [...array.slice(0, index + 1), newElement, ...array.slice(index + 1)];
 }
+
+const mergeAdjacentRowsIfNonCollapsible = (currentLayout: GridLayoutData) => {
+
+  const currentRowOrder = getRowKeysInOrder(currentLayout);
+  const updatedLayout = cloneDeep(currentLayout);
+
+  for (let i = 0; i < currentRowOrder.length - 1; i++) {
+    const currentRowId = currentRowOrder[i];
+    const nextRowId = currentRowOrder[i + 1];
+
+    let currentRow = updatedLayout[currentRowId];
+    const nextRow = updatedLayout[nextRowId];
+
+    if (!currentRow.isCollapsible && !nextRow.isCollapsible) {
+      // Merge panels from the next row into the current row
+      const firstRowHeight = getRowHeight(currentRow);
+      Object.entries(nextRow.panels).forEach(([panelId, panel]) => {
+        panel.row = firstRowHeight + panel.row;
+        nextRow.panels[panelId] = panel;
+      })
+
+      currentRow.panels = { ...currentRow.panels, ...nextRow.panels };
+      currentRow = resolveGridRow(currentRow);
+
+      // Remove the next row from the layout
+      delete updatedLayout[nextRowId];
+
+      // Update the row order
+      currentRowOrder.splice(i + 1, 1);
+
+      // Adjust the order property of rows
+      currentRowOrder.forEach((id, index) => {
+        updatedLayout[id].order = index + 1;
+      });
+
+      // Restart the loop to ensure all adjacent rows are checked
+      i--;
+    }
+  }
+  return updatedLayout;
+};

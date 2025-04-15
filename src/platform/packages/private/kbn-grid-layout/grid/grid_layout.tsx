@@ -38,7 +38,6 @@ export type GridLayoutProps = {
 type GridElementData = [string, string, boolean];
 
 const getGridsElementData = (layout: GridLayoutData) => {
-  console.log('what')
   const rowIdsInOrder = getRowKeysInOrder(layout);
   const flattenedGridElements: GridElementData[] = rowIdsInOrder.flatMap((rowId) => {
     const row = layout[rowId];
