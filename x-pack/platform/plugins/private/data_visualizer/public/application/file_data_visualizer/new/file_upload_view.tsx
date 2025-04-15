@@ -136,7 +136,7 @@ export const FileUploadView: FC<Props> = ({ reset }) => {
         <>
           <EuiButton onClick={resetForm}>
             <FormattedMessage
-              id="xpack.dataVisualizer.file.uploadView.importButton"
+              id="xpack.dataVisualizer.file.uploadView.importAnotherButton"
               defaultMessage="Upload another file"
             />
           </EuiButton>
