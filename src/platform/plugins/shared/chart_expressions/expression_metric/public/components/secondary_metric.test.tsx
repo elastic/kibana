@@ -115,6 +115,7 @@ describe('Secondary metric', () => {
                 value: true,
                 palette,
                 baselineValue: baseline,
+                compareToPrimary: false,
               },
             });
 
@@ -139,6 +140,7 @@ describe('Secondary metric', () => {
               value: true,
               palette,
               baselineValue: undefined,
+              compareToPrimary: false,
             },
           });
 
@@ -166,6 +168,7 @@ describe('Secondary metric', () => {
               value: true,
               palette,
               baselineValue: 1,
+              compareToPrimary: false,
             },
           });
 
@@ -193,6 +196,7 @@ describe('Secondary metric', () => {
               value: true,
               palette,
               baselineValue: 0,
+              compareToPrimary: false,
             },
           });
 
@@ -210,6 +214,38 @@ describe('Secondary metric', () => {
             screen.queryByLabelText(`Value: N/A - Changed to ${trendLabel}`)
           ).not.toBeInTheDocument();
         });
+
+        it('should show the delta when compared to primary', () => {
+          const PRIMARY_VALUE = 100;
+          const RAW_VALUE = 99;
+          renderSecondaryMetric({
+            row: { [id]: RAW_VALUE },
+            getMetricFormatter: jest.fn(() => (v: unknown) => `${v}`),
+            trendConfig: {
+              icon: true,
+              value: true,
+              palette,
+              baselineValue: PRIMARY_VALUE,
+              compareToPrimary: true,
+            },
+          });
+
+          const icon = 'sortDown';
+          const finalResult = RAW_VALUE - PRIMARY_VALUE;
+
+          const trendLabel = trendLabels[icon];
+          const el = screen.getByTitle(finalResult);
+
+          expect(el).toBeInTheDocument();
+          expect(el).toHaveStyle(`--euiBadgeBackgroundColor: ${palette[0]}`);
+          expect(screen.getByText(finalResult)).toBeInTheDocument();
+          // unfortuantely the icon is not rendered, so check for the wrapper for now
+          expect(el.firstChild?.firstChild).toHaveAttribute('data-euiicon-type', icon);
+          screen.debug();
+          expect(
+            screen.queryByLabelText(`Value: ${finalResult} - Changed to ${trendLabel}`)
+          ).not.toBeInTheDocument();
+        });
       });
 
       describe('with icon only', () => {
@@ -222,6 +258,7 @@ describe('Secondary metric', () => {
                 value: false,
                 palette,
                 baselineValue: baseline,
+                compareToPrimary: false,
               },
             });
 
@@ -248,6 +285,7 @@ describe('Secondary metric', () => {
                 value: true,
                 palette,
                 baselineValue: baseline,
+                compareToPrimary: false,
               },
             });
 
