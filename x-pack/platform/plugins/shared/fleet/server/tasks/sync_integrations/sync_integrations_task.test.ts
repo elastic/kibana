@@ -16,7 +16,7 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 
 import { createAppContextStartContractMock, createMockPackageService } from '../../mocks';
 
-import { appContextService, outputService } from '../../services';
+import { appContextService, outputService, packagePolicyService } from '../../services';
 
 import { SyncIntegrationsTask, TYPE, VERSION } from './sync_integrations_task';
 
@@ -28,9 +28,13 @@ jest.mock('../../services', () => ({
   outputService: {
     list: jest.fn(),
   },
+  packagePolicyService: {
+    list: jest.fn(),
+  },
 }));
 
 const mockOutputService = outputService as jest.Mocked<typeof outputService>;
+const mockPackagePolicyService = packagePolicyService as jest.Mocked<typeof packagePolicyService>;
 
 jest.mock('../../services/epm/packages/get', () => ({
   getInstalledPackageSavedObjects: jest.fn().mockResolvedValue({
@@ -40,6 +44,7 @@ jest.mock('../../services/epm/packages/get', () => ({
           name: 'system',
           version: '0.1.0',
           updated_at: new Date().toISOString(),
+          install_status: 'installed',
         },
       },
       {
@@ -47,6 +52,7 @@ jest.mock('../../services/epm/packages/get', () => ({
           name: 'package-2',
           version: '0.2.0',
           updated_at: new Date().toISOString(),
+          install_status: 'installed',
         },
       },
     ],
@@ -137,11 +143,13 @@ describe('SyncIntegrationsTask', () => {
           },
         ],
       });
-      esClient.ingest.getPipeline.mockResolvedValue({
-        'logs-system.auth@custom': {
-          processors: [],
-        },
-      });
+      esClient.ingest.getPipeline.mockImplementation((request) =>
+        Promise.resolve({
+          [(request?.id === '*@custom' ? 'logs-system.auth@custom' : request?.id) as string]: {
+            processors: [],
+          },
+        })
+      );
     });
 
     afterEach(() => {
@@ -171,6 +179,29 @@ describe('SyncIntegrationsTask', () => {
           },
         ],
       } as any);
+      mockPackagePolicyService.list.mockResolvedValue({
+        items: [
+          {
+            package: {
+              name: 'filestream',
+              version: '1.1.0',
+            },
+            inputs: [
+              {
+                streams: [
+                  {
+                    vars: {
+                      pipeline: {
+                        value: 'filestream-pipeline1',
+                      },
+                    },
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      } as any);
       await runTask();
 
       expect(esClient.index).toHaveBeenCalledWith(
@@ -183,11 +214,13 @@ describe('SyncIntegrationsTask', () => {
                 package_name: 'system',
                 package_version: '0.1.0',
                 updated_at: expect.any(String),
+                install_status: 'installed',
               },
               {
                 package_name: 'package-2',
                 package_version: '0.2.0',
                 updated_at: expect.any(String),
+                install_status: 'installed',
               },
             ],
             remote_es_hosts: [
@@ -208,6 +241,16 @@ describe('SyncIntegrationsTask', () => {
                 name: 'logs-system.auth@custom',
                 package_name: 'system',
                 package_version: '0.1.0',
+                pipeline: {
+                  processors: [],
+                },
+                type: 'ingest_pipeline',
+              },
+              'ingest_pipeline:filestream-pipeline1': {
+                is_deleted: false,
+                name: 'filestream-pipeline1',
+                package_name: 'filestream',
+                package_version: '1.1.0',
                 pipeline: {
                   processors: [],
                 },
@@ -244,11 +287,13 @@ describe('SyncIntegrationsTask', () => {
                 package_name: 'system',
                 package_version: '0.1.0',
                 updated_at: expect.any(String),
+                install_status: 'installed',
               },
               {
                 package_name: 'package-2',
                 package_version: '0.2.0',
                 updated_at: expect.any(String),
+                install_status: 'installed',
               },
             ],
             remote_es_hosts: [
@@ -345,6 +390,113 @@ describe('SyncIntegrationsTask', () => {
       await runTask();
 
       expect(esClient.index).not.toHaveBeenCalled();
+    });
+
+    it('Should mark removed integrations as uninstalled if uninstall syncing is enabled', async () => {
+      mockOutputService.list.mockResolvedValue({
+        items: [
+          {
+            type: 'remote_elasticsearch',
+            name: 'remote1',
+            hosts: ['https://remote1:9200'],
+            sync_integrations: true,
+            sync_uninstalled_integrations: true,
+          },
+        ],
+      } as any);
+      esClient.get.mockResolvedValue({
+        _source: {
+          remote_es_hosts: [
+            { hosts: ['https://remote1:9200'], name: 'remote1', sync_integrations: false },
+          ],
+          integrations: [
+            {
+              package_name: 'system',
+              package_version: '0.1.0',
+              updated_at: new Date().toISOString(),
+              install_status: 'installed',
+            },
+            {
+              package_name: 'package-2',
+              package_version: '0.2.0',
+              updated_at: new Date().toISOString(),
+              install_status: 'installed',
+            },
+            {
+              package_name: 'package-3',
+              package_version: '0.3.0',
+              updated_at: new Date().toISOString(),
+              install_status: 'installed',
+            },
+          ],
+          custom_assets: {},
+          custom_assets_error: {},
+        },
+      } as any);
+      await runTask();
+
+      expect(esClient.index).toHaveBeenCalledWith(
+        {
+          id: 'fleet-synced-integrations',
+          index: 'fleet-synced-integrations',
+          body: {
+            integrations: [
+              {
+                package_name: 'system',
+                package_version: '0.1.0',
+                updated_at: expect.any(String),
+                install_status: 'installed',
+              },
+              {
+                package_name: 'package-2',
+                package_version: '0.2.0',
+                updated_at: expect.any(String),
+                install_status: 'installed',
+              },
+              {
+                package_name: 'package-3',
+                package_version: '0.3.0',
+                updated_at: expect.any(String),
+                install_status: 'not_installed',
+              },
+            ],
+            remote_es_hosts: [
+              { hosts: ['https://remote1:9200'], name: 'remote1', sync_integrations: true },
+            ],
+            custom_assets: {
+              'component_template:logs-system.auth@custom': {
+                is_deleted: false,
+                name: 'logs-system.auth@custom',
+                package_name: 'system',
+                package_version: '0.1.0',
+                template: {},
+                type: 'component_template',
+              },
+              'ingest_pipeline:filestream-pipeline1': {
+                is_deleted: false,
+                name: 'filestream-pipeline1',
+                package_name: 'filestream',
+                package_version: '1.1.0',
+                pipeline: {
+                  processors: [],
+                },
+                type: 'ingest_pipeline',
+              },
+              'ingest_pipeline:logs-system.auth@custom': {
+                is_deleted: false,
+                name: 'logs-system.auth@custom',
+                package_name: 'system',
+                package_version: '0.1.0',
+                pipeline: {
+                  processors: [],
+                },
+                type: 'ingest_pipeline',
+              },
+            },
+          },
+        },
+        expect.anything()
+      );
     });
   });
 });

@@ -21,3 +21,6 @@ export { getVulnerabilityStats, hasVulnerabilitiesData } from './src/utils/vulne
 export { CVSScoreBadge, SeverityStatusBadge } from './src/components/vulnerability_badges';
 export { getNormalizedSeverity } from './src/utils/get_normalized_severity';
 export { createMisconfigurationFindingsQuery } from './src/utils/findings_query_builders';
+export { ActionableBadge, type MultiValueCellAction } from './src/components/actionable_badge';
+export { MultiValueCellPopover } from './src/components/multi_value_cell_popover';
+export { findReferenceLink } from './src/utils/find_reference_link.util';

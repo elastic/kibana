@@ -140,9 +140,9 @@ export const renderApp = ({
 };
 
 function App() {
-  const { isServerless, experimentalFeatures } = usePluginContext();
+  const { isServerless } = usePluginContext();
 
-  const routes = getRoutes(isServerless, experimentalFeatures);
+  const routes = getRoutes(isServerless);
 
   return (
     <Routes enableExecutionContextTracking={true}>

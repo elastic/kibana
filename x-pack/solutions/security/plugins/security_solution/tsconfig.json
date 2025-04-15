@@ -242,6 +242,7 @@
     "@kbn/scout-security",
     "@kbn/custom-icons",
     "@kbn/security-plugin-types-common",
-    "@kbn/management-settings-ids"
+    "@kbn/management-settings-ids",
+    "@kbn/inference-endpoint-ui-common"
   ]
 }

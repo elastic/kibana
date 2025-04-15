@@ -31,8 +31,8 @@ import { registerFunctions } from './functions';
 import { recallRankingEvent } from './analytics/recall_ranking';
 import { initLangtrace } from './service/client/instrumentation/init_langtrace';
 import { aiAssistantCapabilities } from '../common/capabilities';
-import { registerAndScheduleKbSemanticTextMigrationTask } from './service/task_manager_definitions/register_kb_semantic_text_migration_task';
-import { updateExistingIndexAssets } from './service/create_or_update_index_assets';
+import { populateMissingSemanticTextFieldMigration } from './service/startup_migrations/populate_missing_semantic_text_field_migration';
+import { updateExistingIndexAssets } from './service/startup_migrations/create_or_update_index_assets';
 
 export class ObservabilityAIAssistantPlugin
   implements
@@ -130,23 +130,19 @@ export class ObservabilityAIAssistantPlugin
     }));
 
     // Update existing index assets (mappings, templates, etc). This will not create assets if they do not exist.
-    const indexAssetsUpdatedPromise = updateExistingIndexAssets({
-      logger: this.logger.get('index_assets'),
-      core,
-    }).catch((e) => this.logger.error(`Index assets could not be updated: ${e.message}`));
-
-    // register task to migrate knowledge base entries to include semantic_text field
-    registerAndScheduleKbSemanticTextMigrationTask({
-      core,
-      taskManager: plugins.taskManager,
-      logger: this.logger.get('kb_semantic_text_migration_task'),
-      config: this.config,
-      indexAssetsUpdatedPromise,
-    }).catch((e) =>
-      this.logger.error(
-        `Knowledge base semantic_text migration task could not be registered: ${e.message}`
+    updateExistingIndexAssets({ logger: this.logger, core })
+      .then(() =>
+        populateMissingSemanticTextFieldMigration({
+          core,
+          logger: this.logger,
+          config: this.config,
+        })
       )
-    );
+      .catch((e) =>
+        this.logger.error(
+          `Error during knowledge base migration in AI Assistant plugin startup: ${e.message}`
+        )
+      );
 
     service.register(registerFunctions);
 
