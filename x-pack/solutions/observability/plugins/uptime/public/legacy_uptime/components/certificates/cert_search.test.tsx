@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import 'jest-styled-components';
 import { renderWithRouter, shallowWithRouter } from '../../lib';
 import { CertificateSearch } from './cert_search';
 
