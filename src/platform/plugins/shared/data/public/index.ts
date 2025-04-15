@@ -10,6 +10,10 @@
 import { PluginInitializerContext } from '@kbn/core/public';
 import type { ConfigSchema } from '../server/config';
 
+export const EVENT_TYPE_DATA_SEARCH_TIMEOUT = 'data_search_timeout';
+export const EVENT_PROPERTY_SEARCH_TIMEOUT_MS = 'timeout_ms';
+export const EVENT_PROPERTY_EXECUTION_CONTEXT = 'execution_context';
+
 /*
  * Filters:
  */
