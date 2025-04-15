@@ -9,7 +9,7 @@
 
 import type { DataViewListItem } from '@kbn/data-views-plugin/public';
 import type { DataTableRecord } from '@kbn/discover-utils';
-import type { TimeRange } from '@kbn/es-query';
+import type { AggregateQuery, Query, TimeRange } from '@kbn/es-query';
 import type { UnifiedHistogramVisContext } from '@kbn/unified-histogram-plugin/public';
 import type { TabItem } from '@kbn/unified-tabs';
 
@@ -66,7 +66,7 @@ export interface DiscoverInternalState {
   savedDataViews: DataViewListItem[];
   defaultProfileAdHocDataViewIds: string[];
   expandedDoc: DataTableRecord | undefined;
-  queryChanged: any;
+  queryChanged: { dateRange: TimeRange; query?: Query | AggregateQuery } | undefined;
   isESQLToDataViewTransitionModalVisible: boolean;
   tabs: {
     byId: Record<string, TabState>;
