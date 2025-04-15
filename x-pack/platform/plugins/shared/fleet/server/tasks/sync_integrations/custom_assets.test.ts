@@ -13,16 +13,19 @@ describe('custom assets', () => {
       package_name: 'system',
       package_version: '0.1.0',
       updated_at: new Date().toISOString(),
+      install_status: 'installed',
     },
     {
       package_name: 'endpoint',
       package_version: '0.1.0',
       updated_at: new Date().toISOString(),
+      install_status: 'installed',
     },
     {
       package_name: 'synthetics',
       package_version: '0.1.0',
       updated_at: new Date().toISOString(),
+      install_status: 'installed',
     },
   ];
 

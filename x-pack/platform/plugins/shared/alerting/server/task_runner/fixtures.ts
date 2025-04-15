@@ -302,12 +302,8 @@ export const mockedRule: SanitizedRule<typeof mockedRawRuleSO.attributes.params>
     dashboards: [
       {
         id: 'dashboard-1',
-        refId: 'ref-1',
       },
     ],
-    investigation_guide: {
-      blob: 'guide-content',
-    },
   },
 };
 
