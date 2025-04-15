@@ -4,14 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-interface ItemType {
+export interface ItemType {
   url?: {
     scheme?: string;
     path?: string;
   };
   server?: {
     address?: string;
-    port?: string;
+    port?: number;
   };
 }
 

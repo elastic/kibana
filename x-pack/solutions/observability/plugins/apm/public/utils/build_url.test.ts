@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { buildUrl } from './build_url';
+import { type ItemType, buildUrl } from './build_url';
 
 describe('buildUrl', () => {
   it('should return a full URL when all fields are provided', () => {
@@ -16,7 +16,7 @@ describe('buildUrl', () => {
       },
       server: {
         address: 'example.com',
-        port: '443',
+        port: 443,
       },
     };
     const result = buildUrl(item);
@@ -44,7 +44,7 @@ describe('buildUrl', () => {
       },
       server: {
         address: 'example.net',
-        port: '8443',
+        port: 8443,
       },
     };
     const result = buildUrl(item);
@@ -58,7 +58,7 @@ describe('buildUrl', () => {
       },
       server: {
         address: 'example.com',
-        port: '8080',
+        port: 8080,
       },
     };
     const result = buildUrl(item);
@@ -72,7 +72,7 @@ describe('buildUrl', () => {
         path: '/missing/address',
       },
       server: {
-        port: '8080',
+        port: 8080,
       },
     };
     const result = buildUrl(item);
@@ -89,17 +89,17 @@ describe('buildUrl', () => {
       },
       server: {
         address: 'example.com',
-        port: 'invalid-port',
+        port: 'invalid', // Invalid port
       },
     };
 
-    const result = buildUrl(item);
+    const result = buildUrl(item as unknown as ItemType);
 
     expect(result).toBeUndefined();
     expect(consoleErrorSpy).toHaveBeenCalledWith(
       'Failed to build URL',
       expect.objectContaining({
-        message: 'Invalid base URL: https://example.com:invalid-port',
+        message: 'Invalid base URL: https://example.com:invalid',
       })
     );
 
