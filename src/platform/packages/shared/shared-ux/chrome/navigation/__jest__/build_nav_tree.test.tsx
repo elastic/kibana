@@ -400,6 +400,7 @@ describe('builds navigation tree', () => {
         {
           id: 'root',
           path: 'root',
+          children: [],
         },
       ],
     };

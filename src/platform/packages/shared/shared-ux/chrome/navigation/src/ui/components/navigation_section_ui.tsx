@@ -138,13 +138,17 @@ const serializeNavNode = (
 const isEuiCollapsibleNavItemProps = (
   props: EuiCollapsibleNavItemProps | EuiCollapsibleNavSubItemProps
 ): props is EuiCollapsibleNavItemProps => {
-  if (props.title == null) {
-    // title is not needed if nav item has sub-items
-    return props.items != null && props.items.length > 0;
+  // collapsible nav item should not have renderItem
+  if ('renderItem' in props) {
+    return false;
   }
 
-  // collapsible nav item should not have renderItem
-  return (props as EuiCollapsibleNavSubItemProps).renderItem === undefined;
+  if (!(props.title || props.items?.length)) {
+    // title is not needed if nav item has sub-items
+    return false;
+  }
+
+  return true;
 };
 
 const renderBlockTitle: (
