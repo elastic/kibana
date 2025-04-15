@@ -31,6 +31,7 @@ import { useNavigation } from '../../../hooks/use_navigation';
 import { appPaths } from '../../../app_paths';
 import { integrationTypeToLabel, getIntegrationIcon } from '../utils';
 import { useAgentList } from '../../../hooks/use_agent_list';
+import { integrationLabels } from '../i18n';
 
 interface IntegrationListViewProps {
   integrations: Integration[];
@@ -202,7 +203,7 @@ export const IntegrationListView: React.FC<IntegrationListViewProps> = ({ integr
             color="primary"
             fill
           >
-            Add Integration
+            {integrationLabels.listView.addIntegrationLabel}
           </EuiButton>,
         ]}
       />
