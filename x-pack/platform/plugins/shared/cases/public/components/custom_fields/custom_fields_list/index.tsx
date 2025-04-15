@@ -63,13 +63,13 @@ const CustomFieldsListComponent: React.FC<Props> = (props) => {
 
   customFields.push({
     key: 'cf-solution-1',
-    label: 'Solution custom field 1',
+    label: 'Solution cf type 1',
     type: 'cf-solution-1',
   });
 
   customFields.push({
     key: 'cf-solution-1',
-    label: 'Solution custom field 2',
+    label: 'Solution cf type 2',
     type: 'cf-solution-2',
   });
 

@@ -13,6 +13,8 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
+  EuiFormRow,
+  EuiFieldText,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useFormContext } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
@@ -160,9 +162,21 @@ export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.m
       [configuration.id, connectors, isLoading, isSubmitting]
     );
 
+    const solutionStep = useMemo(
+      () => ({
+        title: 'Solution fields',
+        children: (
+          <EuiFormRow label="Solution field 1" fullWidth>
+            <EuiFieldText name="solution field" fullWidth />
+          </EuiFormRow>
+        ),
+      }),
+      []
+    );
+
     const allSteps = useMemo(
-      () => [firstStep, secondStep, ...(isSyncAlertsEnabled ? [thirdStep] : []), fourthStep],
-      [firstStep, secondStep, isSyncAlertsEnabled, thirdStep, fourthStep]
+      () => [firstStep, secondStep, solutionStep, fourthStep],
+      [firstStep, secondStep, solutionStep, fourthStep]
     );
 
     return (
