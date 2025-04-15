@@ -7,72 +7,85 @@
 
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFlexGroup, EuiFlexItem, EuiFieldSearch, EuiButton } from '@elastic/eui';
+import { EuiComboBox, EuiComboBoxOptionOption, EuiText } from '@elastic/eui';
+import { observabilityAppId } from '@kbn/observability-shared-plugin/common';
+import { useFetchSLOSuggestions } from '../../slo_edit/hooks/use_fetch_suggestions';
+import { useKibana } from '../../../hooks/use_kibana';
 
 interface Props {
-  initialSearch?: string;
+  filters: {
+    search: string;
+    tags: string[];
+  };
+  setFilters: Function;
   onRefresh: () => void;
-  onSearch: (search: string) => void;
 }
 
-export function SloManagementSearchBar({ onSearch, onRefresh, initialSearch = '' }: Props) {
-  const [tempSearch, setTempSearch] = useState<string>(initialSearch);
-  const [search, setSearch] = useState<string>(initialSearch);
-  const refreshOrUpdateSearch = () => {
-    if (tempSearch !== search) {
-      setSearch(tempSearch);
-      onSearch(tempSearch);
-    } else {
-      onRefresh();
-    }
-  };
+export function SloManagementSearchBar({ filters, setFilters, onRefresh }: Props) {
+  const {
+    unifiedSearch: {
+      ui: { SearchBar },
+    },
+  } = useKibana().services;
 
-  const handleClick = (event: React.ChangeEvent<HTMLInputElement>) =>
-    setTempSearch(event.target.value);
-
-  const handleKeyPress = (event: React.KeyboardEvent<HTMLInputElement>) => {
-    if (event.key === 'Enter') {
-      refreshOrUpdateSearch();
-    }
-  };
+  const { suggestions } = useFetchSLOSuggestions();
+  const [selectedOptions, setSelectedOptions] = useState<Array<EuiComboBoxOptionOption<string>>>(
+    []
+  );
 
   return (
-    <EuiFlexGroup gutterSize="s">
-      <EuiFlexItem>
-        <EuiFieldSearch
-          data-test-subj="o11ySloDefinitionsFieldSearch"
-          fullWidth
-          value={tempSearch}
-          onChange={handleClick}
-          onKeyDown={handleKeyPress}
+    <SearchBar
+      appName={observabilityAppId}
+      placeholder={i18n.translate('xpack.slo.sloDefinitions.filterByName', {
+        defaultMessage: 'Filter by name',
+      })}
+      isAutoRefreshDisabled
+      disableQueryLanguageSwitcher
+      nonKqlMode="text"
+      showQueryMenu={false}
+      showDatePicker={false}
+      showSavedQueryControls={false}
+      showFilterBar={false}
+      query={{ query: filters.search, language: 'text' }}
+      onQuerySubmit={({ query: value }) => {
+        setFilters({ search: value?.query, tags: filters.tags });
+      }}
+      onRefresh={onRefresh}
+      renderQueryInputAppend={() => (
+        <EuiComboBox
+          aria-label={filterTagsLabel}
+          placeholder={filterTagsLabel}
+          delimiter=","
+          options={suggestions?.tags ? [existOption, ...suggestions?.tags] : []}
+          selectedOptions={selectedOptions}
+          onChange={(newOptions) => {
+            setSelectedOptions(newOptions);
+            setFilters({ search: filters.search, tags: newOptions.map((option) => option.value) });
+          }}
+          isClearable={true}
+          data-test-subj="filter-slos-by-tag"
         />
-      </EuiFlexItem>
-      <EuiFlexItem grow={0}>
-        {search === tempSearch && (
-          <EuiButton
-            data-test-subj="o11ySloDefinitionsRefreshButton"
-            iconType="refresh"
-            onClick={refreshOrUpdateSearch}
-          >
-            {i18n.translate('xpack.slo.sloDefinitions.refreshButtonLabel', {
-              defaultMessage: 'Refresh',
-            })}
-          </EuiButton>
-        )}
-        {search !== tempSearch && (
-          <EuiButton
-            data-test-subj="o11ySloDefinitionsUpdateButton"
-            iconType="kqlFunction"
-            color="success"
-            fill
-            onClick={refreshOrUpdateSearch}
-          >
-            {i18n.translate('xpack.slo.sloDefinitions.updateButtonLabel', {
-              defaultMessage: 'Update',
-            })}
-          </EuiButton>
-        )}
-      </EuiFlexItem>
-    </EuiFlexGroup>
+      )}
+    />
   );
 }
+
+const filterTagsLabel = i18n.translate('xpack.slo.sloDefinitions.filterByTag', {
+  defaultMessage: 'Filter tags',
+});
+
+const existOption = {
+  prepend: (
+    <EuiText size="s">
+      <strong>
+        <em>
+          {i18n.translate('xpack.slo.sloDefinitions.tagOptions.exists', {
+            defaultMessage: 'Exists',
+          })}
+        </em>
+      </strong>
+    </EuiText>
+  ),
+  label: '',
+  value: '*',
+};
