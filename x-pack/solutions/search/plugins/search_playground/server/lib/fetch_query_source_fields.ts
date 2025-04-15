@@ -320,7 +320,7 @@ export const parseFieldsCapabilities = (
           } else {
             acc[index].skipped_fields++;
           }
-        } else if ('text' in field && field.text.searchable && shouldIgnoreField(fieldKey)) {
+        } else if (shouldIgnoreField(fieldKey)) {
           acc[index].bm25_query_fields.push(fieldKey);
           acc[index].source_fields.push(fieldKey);
         } else {

@@ -21,3 +21,4 @@ export const DEFAULT_PAGINATION: Pagination = {
   size: 10,
   total: 0,
 };
+export const ContextModelLimitError = 'Context exceeds the model limit';
