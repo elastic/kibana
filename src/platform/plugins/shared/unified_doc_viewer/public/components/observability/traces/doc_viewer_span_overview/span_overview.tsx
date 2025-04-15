@@ -91,7 +91,7 @@ export function SpanOverview({
             </em>
           </p>
           <p>
-            <em>In addition to name and ID, OpenTelemetry spans have these fields:</em>
+            <em>In addition to name, OpenTelemetry spans have these fields:</em>
           </p>
         </EuiText>
         <EuiSpacer size="m" />
@@ -167,12 +167,14 @@ export function SpanOverview({
         </div>
         <div>
           <EuiBadge css={{ float: 'right' }}>
-            <code>kind</code>
+            <a href="https://opentelemetry.io/docs/specs/otel/trace/api/#spankind" target="_blank">
+              <code>kind</code>
+            </a>
           </EuiBadge>
           <FieldWithActions
             data-test-subj="unifiedDocViewerObservabilityTracesAttribute-kind"
             label="Kind"
-            field="parent_span_id"
+            field="kind"
             value={parsedDoc['kind']}
             fieldMetadata={{}}
           >
@@ -250,11 +252,17 @@ export function SpanOverview({
           <EuiText size="xs">
             <em>
               Events that happened during the span can are recorded as{' '}
-              <a href="https://opentelemetry.io/docs/specs/otel/trace/api/#add-events">
+              <a
+                href="https://opentelemetry.io/docs/specs/otel/trace/api/#add-events"
+                target="_blank"
+              >
                 Span Events
               </a>{' '}
               or{' '}
-              <a href="https://opentelemetry.io/docs/specs/otel/logs/data-model/#log-and-event-record-definition">
+              <a
+                href="https://opentelemetry.io/docs/specs/otel/logs/data-model/#log-and-event-record-definition"
+                target="_blank"
+              >
                 logs
               </a>
               . Filtering logs by{' '}
