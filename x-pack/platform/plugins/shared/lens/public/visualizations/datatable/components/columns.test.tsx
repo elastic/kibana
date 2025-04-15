@@ -177,10 +177,10 @@ describe('getContentData', () => {
     });
 
     it('should not fail for a table with empty data', () => {
-      const [{ cellActions }] = callCreateGridColumns({
+      const columns = callCreateGridColumns({
         table: emptyTable,
       });
-      expect(cellActions).toHaveLength(0);
+      expect(columns).toHaveLength(0);
     });
   });
 });
