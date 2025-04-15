@@ -102,7 +102,7 @@ function SecondaryMetricValue({
   trendConfig?: TrendConfig;
   color?: string;
   fontSize: number;
-  formatter: FieldFormatConvertFunction;
+  formatter?: FieldFormatConvertFunction;
 }) {
   const { euiTheme } = useEuiTheme();
   const safeFormattedValue = formattedValue ?? notAvailable;
@@ -125,17 +125,20 @@ function SecondaryMetricValue({
     const deltaValue = getDeltaValue(rawValue, trendConfig.baselineValue);
     const { icon, color: trendColor, iconLabel } = getBadgeConfiguration(trendConfig, deltaValue);
     const translatedColor = getBadgeColor(trendColor, euiTheme);
-    const valueToShow = trendConfig.compareToPrimary ? formatter(deltaValue) : safeFormattedValue;
+    const valueToShow = trendConfig.compareToPrimary
+      ? formatter?.(deltaValue) ?? deltaValue
+      : safeFormattedValue;
     return (
       <EuiBadge
         aria-label={
           // Make the information accessible also for screen readers
+          // so show it only when icon only mode to avoid to be reduntant
           trendConfig.value
             ? undefined
             : i18n.translate('expressionMetricVis.secondaryMetric.trend', {
                 defaultMessage: 'Value: {value} - Changed to {direction}',
                 values: {
-                  value: formattedValue,
+                  value: valueToShow,
                   direction: iconLabel,
                 },
               })
@@ -174,6 +177,20 @@ export interface SecondaryMetricProps {
   getMetricFormatter: (accessor: string, columns: DatatableColumn[]) => FieldFormatConvertFunction;
 }
 
+function getMetricColumnAndFormatter(
+  columns: SecondaryMetricProps['columns'],
+  config: SecondaryMetricProps['config'],
+  getMetricFormatter: SecondaryMetricProps['getMetricFormatter']
+) {
+  let metricColumn: DatatableColumn | undefined;
+  let metricFormatter: ReturnType<typeof getMetricFormatter> | undefined;
+  if (config.dimensions.secondaryMetric) {
+    metricColumn = getColumnByAccessor(config.dimensions.secondaryMetric, columns);
+    metricFormatter = getMetricFormatter(config.dimensions.secondaryMetric, columns);
+  }
+  return { metricFormatter, metricColumn };
+}
+
 export function SecondaryMetric({
   columns,
   row,
@@ -183,26 +200,25 @@ export function SecondaryMetric({
   color,
   fontSize,
 }: SecondaryMetricProps) {
-  let secondaryMetricColumn: DatatableColumn | undefined;
-  let formatSecondaryMetric: ReturnType<typeof getMetricFormatter>;
-  if (config.dimensions.secondaryMetric) {
-    secondaryMetricColumn = getColumnByAccessor(config.dimensions.secondaryMetric, columns);
-    formatSecondaryMetric = getMetricFormatter(config.dimensions.secondaryMetric, columns);
-  }
-  const secondaryPrefix = config.metric.secondaryPrefix ?? secondaryMetricColumn?.name;
-  const secondaryValue = secondaryMetricColumn ? row[secondaryMetricColumn.id] : undefined;
+  const { metricFormatter, metricColumn } = getMetricColumnAndFormatter(
+    columns,
+    config,
+    getMetricFormatter
+  );
+  const prefix = config.metric.secondaryPrefix ?? metricColumn?.name;
+  const value = metricColumn ? row[metricColumn.id] : undefined;
 
   return (
     <span data-test-subj="metric-secondary-element">
-      {secondaryPrefix}
-      {secondaryPrefix ? ' ' : ''}
+      {prefix}
+      {prefix ? ' ' : ''}
       <SecondaryMetricValue
-        rawValue={secondaryValue}
-        formattedValue={secondaryValue != null ? formatSecondaryMetric!(secondaryValue) : undefined}
+        rawValue={value}
+        formattedValue={value != null ? metricFormatter!(value) : undefined}
         trendConfig={color ? undefined : trendConfig}
         color={color}
         fontSize={fontSize}
-        formatter={formatSecondaryMetric}
+        formatter={metricFormatter}
       />
     </span>
   );
