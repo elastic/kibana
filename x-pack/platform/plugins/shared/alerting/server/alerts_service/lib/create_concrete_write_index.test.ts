@@ -728,6 +728,18 @@ describe('createConcreteWriteIndex', () => {
             3,
             'total_fields.limit of .alerts-test.alerts-default has been increased from 2503 to 2506'
           );
+          expect(logger.debug).toHaveBeenNthCalledWith(
+            3,
+            `Retrying PUT mapping for .alerts-test.alerts-default with increased total_fields.limit of 2501`
+          );
+          expect(logger.debug).toHaveBeenNthCalledWith(
+            4,
+            `Retrying PUT mapping for .alerts-test.alerts-default with increased total_fields.limit of 2503`
+          );
+          expect(logger.debug).toHaveBeenNthCalledWith(
+            5,
+            `Retrying PUT mapping for .alerts-test.alerts-default with increased total_fields.limit of 2506`
+          );
         } else {
           clusterClient.indices.putMapping
             .mockResolvedValueOnce({ acknowledged: true })

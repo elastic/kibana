@@ -71,6 +71,11 @@ const createOrUpdateComponentTemplateHelper = async (
   } catch (error) {
     const reason = error?.meta?.body?.error?.caused_by?.caused_by?.caused_by?.reason;
     if (reason && reason.match(/Limit of total fields \[\d+\] has been exceeded/) != null) {
+      if (reason === `Limit of total fields [${totalFieldsLimit}] has been exceeded`) {
+        logger.info(
+          `The total number of fields defined by the templates cannot exceed the limit [${totalFieldsLimit}]. if you want to add more fields, please increase the limit`
+        );
+      }
       // This error message occurs when there is an index template using this component template
       // that contains a field limit setting that using this component template exceeds
       // Specifically, this can happen for the ECS component template when we add new fields

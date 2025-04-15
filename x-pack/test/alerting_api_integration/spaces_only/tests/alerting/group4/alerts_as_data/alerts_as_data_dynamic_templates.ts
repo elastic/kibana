@@ -122,13 +122,13 @@ export default function createAlertsAsDataDynamicTemplatesTest({ getService }: F
         expect(alert._ignored).to.eql(['kibana.alert.dynamic.host.name']);
 
         const mapping = await es.indices.getMapping({ index: alertsAsDataIndex });
-        const dynamicFiled = get(
+        const dynamicField = get(
           mapping[alertsAsDataIndex],
           'mappings.properties.kibana.properties.alert.properties.dynamic.properties.host.properties.id.type'
         );
 
         // new dynamic field has been added
-        expect(dynamicFiled).to.eql('text');
+        expect(dynamicField).to.eql('text');
       });
     });
 
