@@ -25,3 +25,4 @@ export * from './monitor_details_page/monitor_summary.journey';
 export * from './test_run_details.journey';
 export * from './step_details.journey';
 export * from './project_monitor_read_only.journey';
+export * from './overview_save_lens_visualization.journey';

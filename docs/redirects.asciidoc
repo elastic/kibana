@@ -1221,3 +1221,9 @@ Refer to {api-kibana}/group/endpoint-roles[role APIs].
 == Create or update role API
 
 Refer to {api-kibana}/group/endpoint-roles[role APIs].
+
+[role="exclude",id="upgrade-assistant-api-default-field"]
+== Add default field API
+
+This API was removed in 7.13.0.
+Refer to {api-kibana}/group/endpoint-upgrade[upgrade assistant APIs].

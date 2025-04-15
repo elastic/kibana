@@ -44,7 +44,8 @@
     "@kbn/custom-integrations-plugin",
     "@kbn/server-route-repository-utils",
     "@kbn/core-application-browser",
-    "@kbn/core-plugins-server"
+    "@kbn/core-plugins-server",
+    "@kbn/ebt-tools"
   ],
   "exclude": [
     "target/**/*"
