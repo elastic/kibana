@@ -26,41 +26,9 @@ export const purgeRollupDataRoute = createSloServerRoute({
     const esClient = core.elasticsearch.client.asCurrentUser;
     const soClient = (await context.core).savedObjects.client;
     const repository = new KibanaSavedObjectsSLORepository(soClient, logger);
-    const slos = await repository.findAllByIds(params.body.ids);
-    const purgePolicy = params.body.purgePolicy;
-    const purgeRollupData = new PurgeRollupData(esClient);
+    const purgeRollupData = new PurgeRollupData(esClient, repository);
 
-    if (purgePolicy.purgeType === 'fixed_age') {
-      if (params.query?.force !== 'true') {
-        if (
-          slos.some((slo) => {
-            return purgePolicy.age.isShorterThan(slo.timeWindow.duration);
-          })
-        ) {
-          return response.badRequest({
-            body: `Age must be greater than or equal to the time window of the SLI data being purged.`,
-          });
-        }
-      }
-      await purgeRollupData.execute(params.body.ids, purgePolicy.age);
-    } else {
-      if (params.query?.force !== 'true') {
-        if (
-          slos.some((slo) => {
-            return (
-              purgePolicy.timestamp.getTime() >
-              Date.now() - slo.timeWindow.duration.asSeconds() * 1000
-            );
-          })
-        ) {
-          return response.badRequest({
-            body: `Timestamp must be before the effective time window of the SLI data being purged.`,
-          });
-        }
-        await purgeRollupData.execute(params.body.ids, purgePolicy.timestamp);
-      }
-    }
-
+    await purgeRollupData.execute(params);
     return response.noContent();
   },
 });
