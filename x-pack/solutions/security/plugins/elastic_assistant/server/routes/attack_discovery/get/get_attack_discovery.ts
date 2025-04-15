@@ -12,11 +12,11 @@ import {
   API_VERSIONS,
   AttackDiscoveryGetRequestParams,
   ELASTIC_ASSISTANT_ATTACK_DISCOVERY,
+  ATTACK_DISCOVERY_BY_CONNECTOR_ID,
 } from '@kbn/elastic-assistant-common';
 import { transformError } from '@kbn/securitysolution-es-utils';
 
 import { updateAttackDiscoveryLastViewedAt, getAttackDiscoveryStats } from '../helpers/helpers';
-import { ATTACK_DISCOVERY_BY_CONNECTOR_ID } from '../../../../common/constants';
 import { buildResponse } from '../../../lib/build_response';
 import { ElasticAssistantRequestHandlerContext } from '../../../types';
 
