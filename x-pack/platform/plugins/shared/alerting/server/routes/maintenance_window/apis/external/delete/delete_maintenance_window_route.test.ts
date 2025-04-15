@@ -46,11 +46,14 @@ describe('deleteMaintenanceWindowRoute', () => {
       { params: { id: 'test-id' } }
     );
 
-    expect(config.path).toEqual('/api/alerting/maintenance_window/{id}');
+    expect(config.path).toEqual('/api/maintenance_window/{id}');
     expect(config.options).toMatchInlineSnapshot(`
       Object {
         "access": "public",
-        "summary": "Deletes a maintenance window by ID.",
+        "summary": "Delete a maintenance window.",
+        "tags": Array [
+          "oas-tag:maintenance-window",
+        ],
       }
     `);
 

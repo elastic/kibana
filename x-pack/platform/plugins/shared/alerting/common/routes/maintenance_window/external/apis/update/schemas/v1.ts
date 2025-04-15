@@ -36,7 +36,10 @@ export const updateMaintenanceWindowRequestBodySchema = schema.object({
       alerting: schema.object({
         query: schema.object({
           kql: schema.string({
-            meta: { description: 'A filter written in Kibana Query Language (KQL).' },
+            meta: {
+              description:
+                'A filter written in Kibana Query Language (KQL). Only alerts matching this query will be supressed by the maintenance window.',
+            },
           }),
         }),
       }),

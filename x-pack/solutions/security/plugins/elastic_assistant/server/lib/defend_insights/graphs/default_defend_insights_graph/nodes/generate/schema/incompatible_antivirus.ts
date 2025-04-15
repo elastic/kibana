@@ -9,20 +9,23 @@
 // StructuredOutputParser.fromZodSchema
 
 import { z } from '@kbn/zod';
+import { DefendInsightsGenerationPrompts } from '../../helpers/prompts/incompatible_antivirus';
 
-export function getIncompatibleVirusSchema() {
+export function getDefendInsightsIncompatibleVirusGenerationSchema(
+  prompts: DefendInsightsGenerationPrompts
+) {
   return z.object({
     insights: z.array(
       z.object({
-        group: z.string().describe('The program which is triggering the events'),
+        group: z.string().describe(prompts.group),
         events: z
           .object({
-            id: z.string().describe('The event ID'),
-            endpointId: z.string().describe('The endpoint ID'),
-            value: z.string().describe('The process.executable value of the event'),
+            id: z.string().describe(prompts.eventsId),
+            endpointId: z.string().describe(prompts.eventsEndpointId),
+            value: z.string().describe(prompts.eventsValue),
           })
           .array()
-          .describe('The events that the insight is based on'),
+          .describe(prompts.events),
       })
     ),
   });

@@ -2,7 +2,15 @@
 
 exports[`ExplorerChartTooltip Render tooltip based on infoTooltip data. 1`] = `
 <div
-  className="ml-explorer-chart-info-tooltip"
+  css={
+    Object {
+      "map": undefined,
+      "name": "xotwi",
+      "next": undefined,
+      "styles": "max-width:384px;",
+      "toString": [Function],
+    }
+  }
 >
   <TooltipDefinitionList
     toolTipData={

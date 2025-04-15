@@ -199,6 +199,7 @@ export class RiskScoreDataClient {
           ...getTransformOptions({
             dest: getRiskScoreLatestIndex(namespace),
             source: [indexPatterns.alias],
+            namespace: this.options.namespace,
           }),
         },
       });
@@ -363,6 +364,7 @@ export class RiskScoreDataClient {
         ...getTransformOptions({
           dest: getRiskScoreLatestIndex(namespace),
           source: [indexPatterns.alias],
+          namespace: this.options.namespace,
         }),
       },
     });

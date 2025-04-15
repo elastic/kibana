@@ -10,12 +10,8 @@ import type {
   FindExceptionListsItemOptions,
 } from '@kbn/lists-plugin/server/services/exception_lists/exception_list_client_types';
 import type { KibanaRequest } from '@kbn/core-http-server';
+import { buildSpaceDataFilter } from './build_space_data_filter';
 import { stringify } from '../../../endpoint/utils/stringify';
-import { GLOBAL_ARTIFACT_TAG } from '../../../../common/endpoint/service/artifacts';
-import {
-  buildPerPolicyTag,
-  buildSpaceOwnerIdTag,
-} from '../../../../common/endpoint/service/artifacts/utils';
 import type { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
 
 /**
@@ -35,51 +31,8 @@ export const setFindRequestFilterScopeToActiveSpace = async (
 
     logger.debug(() => `Find options prior to adjusting filter:\n${stringify(findOptions)}`);
 
-    const spaceId = (await endpointServices.getActiveSpace(httpRequest)).id;
-    const fleetServices = endpointServices.getInternalFleetServices(spaceId);
-    const soScopedClient = fleetServices.savedObjects.createInternalScopedSoClient({ spaceId });
-    const { items: allEndpointPolicyIds } = await fleetServices.packagePolicy.listIds(
-      soScopedClient,
-      { kuery: fleetServices.endpointPolicyKuery, perPage: 10_000 }
-    );
-
-    logger.debug(
-      () =>
-        `policies currently visible in space ID [${spaceId}]:\n${stringify(allEndpointPolicyIds)}`
-    );
-
-    // Filter to scope down the data visible in active space id by appending to the Find options the following filter:
-    //      (
-    //         All global artifacts
-    //         -OR-
-    //         All per-policy artifacts assigned to a policy visible in active space
-    //      )
-    //      -OR-
-    //      (
-    //         Artifacts NOT containing a `policy:` tag ("dangling" per-policy artifacts)
-    //         -AND-
-    //         having an owner space ID value that matches active space
-    //      )
-    //
-    const spaceVisibleDataFilter = `
-      (
-        (
-          exception-list-agnostic.attributes.tags:("${GLOBAL_ARTIFACT_TAG}"${
-      allEndpointPolicyIds.length === 0
-        ? ')'
-        : ` OR ${allEndpointPolicyIds
-            .map((policyId) => `"${buildPerPolicyTag(policyId)}"`)
-            .join(' OR ')}
-          )
-        )
-        OR
-        (
-          NOT exception-list-agnostic.attributes.tags:"${buildPerPolicyTag('*')}"
-          AND
-          exception-list-agnostic.attributes.tags:"${buildSpaceOwnerIdTag(spaceId)}"
-        )
-      )`
-    }`;
+    const spaceVisibleDataFilter = (await buildSpaceDataFilter(endpointServices, httpRequest))
+      .filter;
 
     if (isSingleListFindOptions(findOptions)) {
       findOptions.filter = `${spaceVisibleDataFilter}${

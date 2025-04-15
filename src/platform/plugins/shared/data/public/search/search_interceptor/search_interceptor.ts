@@ -443,7 +443,7 @@ export class SearchInterceptor {
         {
           version: '1',
           signal: abortSignal,
-          context: executionContext,
+          context: this.deps.executionContext.withGlobalContext(executionContext),
           body: JSON.stringify({
             ...request,
             ...searchOptions,

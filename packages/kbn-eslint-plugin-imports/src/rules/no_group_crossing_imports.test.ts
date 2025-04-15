@@ -11,7 +11,7 @@ import { RuleTester } from 'eslint';
 import dedent from 'dedent';
 import { NoGroupCrossingImportsRule } from './no_group_crossing_imports';
 import { formatSuggestions } from '../helpers/report';
-import type { ModuleGroup, ModuleVisibility } from '@kbn/repo-info/types';
+import type { ModuleGroup, ModuleVisibility } from '@kbn/projects-solutions-groups';
 import type { KibanaPackageManifest } from '@kbn/repo-packages';
 
 interface ModuleInfo {

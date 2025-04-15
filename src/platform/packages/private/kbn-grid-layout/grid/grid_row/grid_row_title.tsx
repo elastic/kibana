@@ -98,6 +98,7 @@ export const GridRowTitle = React.memo(
             aria-controls={`kbnGridRow-${rowId}`}
             data-test-subj={`kbnGridRowTitle-${rowId}`}
             textProps={false}
+            className={'kbnGridRowTitle--button'}
             flush="both"
           >
             {editTitleOpen ? null : (

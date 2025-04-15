@@ -10,7 +10,7 @@
 import type { TabItem, TabsSizeConfig } from '../types';
 import { MAX_TAB_WIDTH, MIN_TAB_WIDTH } from '../constants';
 
-const PLUS_BUTTON_SPACE = 24 + 8; // button width + gap
+export const PLUS_BUTTON_SPACE = 24 + 8; // button width + gap
 
 interface GetTabsSizeConfigProps {
   items: TabItem[];
@@ -26,16 +26,22 @@ export const calculateResponsiveTabs = ({
   const availableContainerWidth =
     (containerWidth || window.innerWidth) - (hasReachedMaxItemsCount ? 0 : PLUS_BUTTON_SPACE);
 
-  let calculatedTabWidth =
-    items.length > 0 ? availableContainerWidth / items.length : MAX_TAB_WIDTH;
+  let wasSpaceEquallyDivided = items.length > 0;
+  let calculatedTabWidth = wasSpaceEquallyDivided
+    ? availableContainerWidth / items.length
+    : MAX_TAB_WIDTH;
 
   if (calculatedTabWidth > MAX_TAB_WIDTH) {
     calculatedTabWidth = MAX_TAB_WIDTH;
+    wasSpaceEquallyDivided = false;
   } else if (calculatedTabWidth < MIN_TAB_WIDTH) {
     calculatedTabWidth = MIN_TAB_WIDTH;
+    wasSpaceEquallyDivided = false;
   }
 
-  const numberOfVisibleItems = Math.floor(availableContainerWidth / calculatedTabWidth);
+  const numberOfVisibleItems = wasSpaceEquallyDivided
+    ? items.length
+    : Math.floor(availableContainerWidth / calculatedTabWidth);
 
   return {
     isScrollable: items.length > numberOfVisibleItems,

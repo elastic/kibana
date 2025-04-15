@@ -38,6 +38,12 @@ export const registerTranslationsRoute = ({
       router.get(
         {
           path: routePath,
+          security: {
+            authz: {
+              enabled: false,
+              reason: 'This route is only used for serving i18n translations.',
+            },
+          },
           validate: {
             params: schema.object({
               locale: schema.string(),

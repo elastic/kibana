@@ -57,12 +57,7 @@ describe('SecurityNavControl', () => {
 
   it('should render an avatar when user profile has loaded', async () => {
     const wrapper = shallow(
-      <SecurityNavControl
-        editProfileUrl=""
-        logoutUrl=""
-        userMenuLinks$={userMenuLinks$}
-        buildFlavour={'traditional'}
-      />
+      <SecurityNavControl editProfileUrl="" logoutUrl="" userMenuLinks$={userMenuLinks$} />
     );
 
     expect(useUserProfileMock).toHaveBeenCalledTimes(1);
@@ -111,12 +106,7 @@ describe('SecurityNavControl', () => {
     });
 
     const wrapper = shallow(
-      <SecurityNavControl
-        editProfileUrl=""
-        logoutUrl=""
-        userMenuLinks$={userMenuLinks$}
-        buildFlavour={'traditional'}
-      />
+      <SecurityNavControl editProfileUrl="" logoutUrl="" userMenuLinks$={userMenuLinks$} />
     );
 
     expect(useUserProfileMock).toHaveBeenCalledTimes(1);
@@ -144,12 +134,7 @@ describe('SecurityNavControl', () => {
 
   it('should open popover when avatar is clicked', async () => {
     const wrapper = shallow(
-      <SecurityNavControl
-        editProfileUrl=""
-        logoutUrl=""
-        userMenuLinks$={userMenuLinks$}
-        buildFlavour={'traditional'}
-      />
+      <SecurityNavControl editProfileUrl="" logoutUrl="" userMenuLinks$={userMenuLinks$} />
     );
 
     act(() => {
@@ -169,12 +154,7 @@ describe('SecurityNavControl', () => {
     });
 
     const wrapper = shallow(
-      <SecurityNavControl
-        editProfileUrl=""
-        logoutUrl=""
-        userMenuLinks$={userMenuLinks$}
-        buildFlavour={'traditional'}
-      />
+      <SecurityNavControl editProfileUrl="" logoutUrl="" userMenuLinks$={userMenuLinks$} />
     );
 
     act(() => {
@@ -206,7 +186,6 @@ describe('SecurityNavControl', () => {
             },
           ])
         }
-        buildFlavour={'traditional'}
       />
     );
 
@@ -312,7 +291,6 @@ describe('SecurityNavControl', () => {
             },
           ])
         }
-        buildFlavour={'traditional'}
       />
     );
 
@@ -375,72 +353,6 @@ describe('SecurityNavControl', () => {
     `);
   });
 
-  it('should render `Close project` link when in Serverless', async () => {
-    const wrapper = shallow(
-      <SecurityNavControl
-        editProfileUrl="edit-profile-link"
-        logoutUrl=""
-        userMenuLinks$={
-          new BehaviorSubject([
-            { label: 'link1', href: 'path-to-link-1', iconType: 'empty', order: 1 },
-          ])
-        }
-        buildFlavour={'serverless'}
-      />
-    );
-
-    expect(wrapper.find(EuiContextMenu).prop('panels')).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "content": <ContextMenuContent
-            closePopover={[Function]}
-            items={
-              Array [
-                Object {
-                  "data-test-subj": "profileLink",
-                  "href": "edit-profile-link",
-                  "icon": <EuiIcon
-                    size="m"
-                    type="user"
-                  />,
-                  "name": <Memo(MemoizedFormattedMessage)
-                    defaultMessage="Edit profile"
-                    id="xpack.security.navControlComponent.editProfileLinkText"
-                  />,
-                  "onClick": [Function],
-                },
-                Object {
-                  "content": undefined,
-                  "data-test-subj": "userMenuLink__link1",
-                  "href": "path-to-link-1",
-                  "icon": <EuiIcon
-                    size="m"
-                    type="empty"
-                  />,
-                  "name": "link1",
-                },
-                Object {
-                  "data-test-subj": "logoutLink",
-                  "href": "",
-                  "icon": <EuiIcon
-                    size="m"
-                    type="exit"
-                  />,
-                  "name": <Memo(MemoizedFormattedMessage)
-                    defaultMessage="Close project"
-                    id="xpack.security.navControlComponent.closeProjectLinkText"
-                  />,
-                },
-              ]
-            }
-          />,
-          "id": 0,
-          "title": "full name",
-        },
-      ]
-    `);
-  });
-
   it('should render anonymous user', async () => {
     useUserProfileMock.mockReturnValue({
       loading: false,
@@ -456,12 +368,7 @@ describe('SecurityNavControl', () => {
     });
 
     const wrapper = shallow(
-      <SecurityNavControl
-        editProfileUrl=""
-        logoutUrl=""
-        userMenuLinks$={userMenuLinks$}
-        buildFlavour={'traditional'}
-      />
+      <SecurityNavControl editProfileUrl="" logoutUrl="" userMenuLinks$={userMenuLinks$} />
     );
 
     expect(wrapper.find(EuiContextMenu).prop('panels')).toMatchInlineSnapshot(`

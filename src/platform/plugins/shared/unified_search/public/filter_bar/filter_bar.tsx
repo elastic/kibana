@@ -12,7 +12,7 @@ import { injectI18n, IntlShape } from '@kbn/i18n-react';
 import type { Filter } from '@kbn/es-query';
 import React, { ReactNode, useRef } from 'react';
 import { DataView } from '@kbn/data-views-plugin/public';
-import FilterItems, { type FilterItemsProps } from './filter_item/filter_items';
+import { FilterItems, type FilterItemsProps } from './filter_item/filter_items';
 
 import { filterBarStyles } from './filter_bar.styles';
 import { SuggestionsAbstraction } from '../typeahead/suggestions_component';
@@ -74,7 +74,4 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
   );
 });
 
-const FilterBar = injectI18n(FilterBarUI);
-// Needed for React.lazy
-// eslint-disable-next-line import/no-default-export
-export default FilterBar;
+export const FilterBar = injectI18n(FilterBarUI);

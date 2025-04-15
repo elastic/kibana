@@ -23,8 +23,8 @@ import {
   EuiFlexItem,
   EuiPageTemplate,
   EuiSpacer,
+  UseEuiTheme,
   transparentize,
-  useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { AppMountParameters } from '@kbn/core-application-browser';
@@ -50,6 +50,7 @@ import { dashboardInputToGridLayout, gridLayoutToDashboardPanelMap } from './uti
 const DASHBOARD_MARGIN_SIZE = 8;
 const DASHBOARD_GRID_HEIGHT = 20;
 const DASHBOARD_GRID_COLUMN_COUNT = 48;
+const DASHBOARD_DRAG_TOP_OFFSET = 150;
 
 export const GridExample = ({
   coreStart,
@@ -58,8 +59,6 @@ export const GridExample = ({
   coreStart: CoreStart;
   uiActions: UiActionsStart;
 }) => {
-  const { euiTheme } = useEuiTheme();
-
   const savedState = useRef<MockSerializedDashboardState>(getSerializedDashboardState());
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState<boolean>(false);
   const [currentLayout, setCurrentLayout] = useState<GridLayoutData>(
@@ -69,6 +68,7 @@ export const GridExample = ({
     gutterSize: DASHBOARD_MARGIN_SIZE,
     rowHeight: DASHBOARD_GRID_HEIGHT,
     columnCount: DASHBOARD_GRID_COLUMN_COUNT,
+    keyboardDragTopLimit: DASHBOARD_DRAG_TOP_OFFSET,
   });
 
   const mockDashboardApi = useMockDashboardApi({ savedState: savedState.current });
@@ -90,8 +90,8 @@ export const GridExample = ({
             const currentPanel = panels[panelId];
             const savedPanel = savedState.current.panels[panelId];
             panelsAreEqual = deepEqual(
-              { row: 'first', ...currentPanel.gridData },
-              { row: 'first', ...savedPanel.gridData }
+              { row: 'first', ...currentPanel?.gridData },
+              { row: 'first', ...savedPanel?.gridData }
             );
           }
           const hasChanges = !(panelsAreEqual && deepEqual(rows, savedState.current.rows));
@@ -172,41 +172,6 @@ export const GridExample = ({
     mockDashboardApi.panels$.next(panels);
     mockDashboardApi.rows$.next(rows);
   }, [mockDashboardApi.panels$, mockDashboardApi.rows$]);
-
-  const customLayoutCss = useMemo(() => {
-    const gridColor = transparentize(euiTheme.colors.backgroundFilledAccentSecondary, 0.2);
-    return css`
-      .kbnGridRow--targeted {
-        background-position: top calc((var(--kbnGridGutterSize) / 2) * -1px) left
-          calc((var(--kbnGridGutterSize) / 2) * -1px);
-        background-size: calc((var(--kbnGridColumnWidth) + var(--kbnGridGutterSize)) * 1px)
-          calc((var(--kbnGridRowHeight) + var(--kbnGridGutterSize)) * 1px);
-        background-image: linear-gradient(to right, ${gridColor} 1px, transparent 1px),
-          linear-gradient(to bottom, ${gridColor} 1px, transparent 1px);
-        background-color: ${transparentize(euiTheme.colors.backgroundFilledAccentSecondary, 0.1)};
-      }
-
-      .kbnGridPanel--dragPreview {
-        border-radius: ${euiTheme.border.radius};
-        background-color: ${transparentize(euiTheme.colors.backgroundFilledAccentSecondary, 0.2)};
-        transition: opacity 100ms linear;
-      }
-
-      .kbnGridPanel--resizeHandle {
-        opacity: 0;
-        transition: opacity 0.2s, border 0.2s;
-        border-radius: 7px 0 7px 0;
-        border-bottom: 2px solid ${euiTheme.colors.accentSecondary};
-        border-right: 2px solid ${euiTheme.colors.accentSecondary};
-        &:hover,
-        &:focus {
-          outline-style: none !important;
-          opacity: 1;
-          background-color: ${transparentize(euiTheme.colors.accentSecondary, 0.05)};
-        }
-      }
-    `;
-  }, [euiTheme]);
 
   return (
     <KibanaRenderContextProvider {...coreStart}>
@@ -314,7 +279,7 @@ export const GridExample = ({
             useCustomDragHandle={true}
             renderPanelContents={renderPanelContents}
             onLayoutChange={onLayoutChange}
-            css={customLayoutCss}
+            css={layoutStyles}
           />
         </EuiPageTemplate.Section>
       </EuiPageTemplate>
@@ -329,4 +294,51 @@ export const renderGridExampleApp = (
   ReactDOM.render(<GridExample {...deps} />, element);
 
   return () => ReactDOM.unmountComponentAtNode(element);
+};
+
+const layoutStyles = ({ euiTheme }: UseEuiTheme) => {
+  const gridColor = transparentize(euiTheme.colors.backgroundFilledAccentSecondary, 0.2);
+  return css({
+    // background for grid row that is being targetted
+    '.kbnGridRow--targeted': {
+      backgroundPosition: `top calc((var(--kbnGridGutterSize) / 2) * -1px) left calc((var(--kbnGridGutterSize) / 2) * -1px)`,
+      backgroundSize: `calc((var(--kbnGridColumnWidth) + var(--kbnGridGutterSize)) * 1px) calc((var(--kbnGridRowHeight) + var(--kbnGridGutterSize)) * 1px)`,
+      backgroundImage: `linear-gradient(to right, ${gridColor} 1px, transparent 1px), linear-gradient(to bottom, ${gridColor} 1px, transparent 1px)`,
+      backgroundColor: `${transparentize(euiTheme.colors.backgroundFilledAccentSecondary, 0.1)}`,
+    },
+    // styling for the "locked to grid" preview for what the panel will look like when dropped / resized
+    '.kbnGridPanel--dragPreview': {
+      borderRadius: `${euiTheme.border.radius}`,
+      backgroundColor: `${transparentize(euiTheme.colors.backgroundFilledAccentSecondary, 0.2)}`,
+      transition: `opacity 100ms linear`,
+    },
+    // styling for panel resize handle
+    '.kbnGridPanel--resizeHandle': {
+      opacity: '0',
+      transition: `opacity 0.2s, border 0.2s`,
+      borderRadius: `7px 0 7px 0`,
+      borderBottom: `2px solid ${euiTheme.colors.accentSecondary}`,
+      borderRight: `2px solid ${euiTheme.colors.accentSecondary}`,
+      '&:hover, &:focus': {
+        outlineStyle: `none !important`,
+        opacity: 1,
+        backgroundColor: `${transparentize(euiTheme.colors.accentSecondary, 0.05)}`,
+      },
+    },
+    // styling for what the grid row header looks like when being dragged
+    '.kbnGridRowHeader--active': {
+      backgroundColor: euiTheme.colors.backgroundBasePlain,
+      border: `1px solid ${euiTheme.border.color}`,
+      borderRadius: `${euiTheme.border.radius.medium} ${euiTheme.border.radius.medium}`,
+      paddingLeft: '8px',
+      // hide accordian arrow + panel count text when row is being dragged
+      '& .kbnGridRowTitle--button svg, & .kbnGridLayout--panelCount': {
+        display: 'none',
+      },
+    },
+    // styles for the area where the row will be dropped
+    '.kbnGridPanel--rowDragPreview': {
+      backgroundColor: euiTheme.components.dragDropDraggingBackground,
+    },
+  });
 };

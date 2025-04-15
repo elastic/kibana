@@ -26,8 +26,8 @@ import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { SharePluginStart } from '@kbn/share-plugin/server';
 import type { DefaultAlert, FieldMap } from '@kbn/alerts-as-data-utils';
 import type { Alert } from '@kbn/alerts-as-data-utils';
-import type { ActionsApiRequestHandlerContext } from '@kbn/actions-plugin/server';
-import type { AlertsHealth } from '@kbn/alerting-types';
+import type { ActionsApiRequestHandlerContext, ActionsClient } from '@kbn/actions-plugin/server';
+import type { AlertsHealth, RuleTypeSolution } from '@kbn/alerting-types';
 import type { RuleTypeRegistry as OrigruleTypeRegistry } from './rule_type_registry';
 import type { AlertingServerSetup, AlertingServerStart } from './plugin';
 import type { RulesClient } from './rules_client';
@@ -99,6 +99,10 @@ export interface RuleExecutorServices<
    * @deprecated
    */
   alertFactory: PublicAlertFactory<State, Context, ActionGroupIds>;
+  /**
+   * Only available for Attack Discovery
+   */
+  actionsClient?: PublicMethodsOf<ActionsClient>;
   getDataViews: () => Promise<DataViewsContract>;
   getMaintenanceWindowIds: () => Promise<string[]>;
   getSearchSourceClient: () => Promise<ISearchStartSearchSource>;
@@ -265,8 +269,6 @@ export interface IRuleTypeAlerts<AlertData extends RuleAlertData = never> {
   formatAlert?: FormatAlert<AlertData>;
 }
 
-export type RuleTypeSolution = 'observability' | 'security' | 'stack';
-
 export interface RuleType<
   Params extends RuleTypeParams = never,
   ExtractedParams extends RuleTypeParams = never,
@@ -333,7 +335,6 @@ export interface RuleType<
    */
   autoRecoverAlerts?: boolean;
   getViewInAppRelativeUrl?: GetViewInAppRelativeUrlFn<Params>;
-  fieldsForAAD?: string[];
 }
 export type UntypedRuleType = RuleType<
   RuleTypeParams,

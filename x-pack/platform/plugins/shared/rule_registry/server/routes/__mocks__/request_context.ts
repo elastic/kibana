@@ -7,7 +7,7 @@
 
 import { coreMock, elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { alertsClientMock } from '../../alert_data_client/alerts_client.mock';
-import { RacRequestHandlerContext } from '../../types';
+import type { RacRequestHandlerContext } from '../../types';
 
 const createMockClients = () => ({
   rac: alertsClientMock.create(),

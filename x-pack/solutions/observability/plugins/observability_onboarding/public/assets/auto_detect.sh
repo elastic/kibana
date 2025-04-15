@@ -112,7 +112,8 @@ update_step_progress() {
     --header "x-elastic-internal-origin: Kibana" \
     --data "$data" \
     --output /dev/null \
-    --no-progress-meter \
+    --silent \
+    --show-error \
     --fail
 }
 
@@ -288,7 +289,8 @@ install_integrations() {
     --header "kbn-xsrf: true" \
     --header "x-elastic-internal-origin: Kibana" \
     --data "$(echo -e "$install_integrations_api_body_string")" \
-    --no-progress-meter \
+    --silent \
+    --show-error \
     --fail \
     --output "$elastic_agent_tmp_config_path"
 
@@ -308,9 +310,14 @@ apply_elastic_agent_config() {
     # Remove existing config file including `inputs.d` directory
     rm -rf "$elastic_agent_config_path" "$(dirname "$elastic_agent_config_path")/inputs.d" &&
     # Extract new config files from downloaded archive
-    tar --extract --file "$elastic_agent_tmp_config_path" --directory "$(dirname "$elastic_agent_config_path")" &&
+    tar --extract --file "$elastic_agent_tmp_config_path" --directory "$(dirname "$elastic_agent_config_path")"
     # Replace placeholder with the Ingest API key
-    sed -i='' "s/\${API_KEY}/$decoded_ingest_api_key/" "$elastic_agent_config_path"
+    if [ "${OS}" == "Linux" ]; then
+      sed -i "s/\${API_KEY}/$decoded_ingest_api_key/" "$elastic_agent_config_path"
+    else
+      # macOS requires an empty string for the backup extension
+      sed -i '' "s/\${API_KEY}/$decoded_ingest_api_key/" "$elastic_agent_config_path"
+    fi
   if [ "$?" -eq 0 ]; then
     printf "\e[32;1m✓\e[0m %s\n" "Config files written to:"
     while IFS= read -r file; do

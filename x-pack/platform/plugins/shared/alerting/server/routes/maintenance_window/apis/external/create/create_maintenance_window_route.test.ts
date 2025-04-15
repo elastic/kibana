@@ -15,7 +15,6 @@ import { getMockMaintenanceWindow } from '../../../../../data/maintenance_window
 import { MaintenanceWindowStatus } from '../../../../../../common';
 import type { MaintenanceWindow } from '../../../../../application/maintenance_window/types';
 import type { CreateMaintenanceWindowRequestBody } from '../../../../../../common/routes/maintenance_window/external/apis/create';
-import { transformInternalMaintenanceWindowToExternalV1 } from '../common/transforms';
 
 const maintenanceWindowClient = maintenanceWindowClientMock.create();
 
@@ -68,11 +67,14 @@ describe('createMaintenanceWindowRoute', () => {
       { body: createParams }
     );
 
-    expect(config.path).toEqual('/api/alerting/maintenance_window');
+    expect(config.path).toEqual('/api/maintenance_window');
     expect(config.options).toMatchInlineSnapshot(`
       Object {
         "access": "public",
         "summary": "Create a maintenance window.",
+        "tags": Array [
+          "oas-tag:maintenance-window",
+        ],
       }
     `);
 
@@ -111,7 +113,26 @@ describe('createMaintenanceWindowRoute', () => {
       },
     });
     expect(res.ok).toHaveBeenLastCalledWith({
-      body: transformInternalMaintenanceWindowToExternalV1(mockMaintenanceWindow),
+      body: {
+        created_at: '2023-02-26T00:00:00.000Z',
+        created_by: 'test-user',
+        enabled: true,
+        id: 'test-id',
+        schedule: {
+          custom: {
+            duration: '60m',
+            recurring: {
+              occurrences: 2,
+            },
+            start: '2023-02-26T00:00:00.000Z',
+            timezone: 'UTC',
+          },
+        },
+        status: 'running',
+        title: 'test-title',
+        updated_at: '2023-02-26T00:00:00.000Z',
+        updated_by: 'test-user',
+      },
     });
   });
 

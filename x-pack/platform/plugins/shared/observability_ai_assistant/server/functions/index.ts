@@ -6,6 +6,7 @@
  */
 
 import dedent from 'dedent';
+import { KnowledgeBaseState } from '../../common';
 import { CONTEXT_FUNCTION_NAME, registerContextFunction } from './context';
 import { registerSummarizationFunction, SUMMARIZE_FUNCTION_NAME } from './summarize';
 import type { RegistrationCallback } from '../service/types';
@@ -13,7 +14,7 @@ import { registerElasticsearchFunction } from './elasticsearch';
 import { GET_DATASET_INFO_FUNCTION_NAME, registerGetDatasetInfoFunction } from './get_dataset_info';
 import { registerKibanaFunction } from './kibana';
 import { registerExecuteConnectorFunction } from './execute_connector';
-import { GET_DATA_ON_SCREEN_FUNCTION_NAME } from '../service/chat_function_client';
+import { GET_DATA_ON_SCREEN_FUNCTION_NAME } from './get_data_on_screen';
 
 // cannot be imported from x-pack/solutions/observability/plugins/observability_ai_assistant_app/server/functions/query/index.ts due to circular dependency
 export const QUERY_FUNCTION_NAME = 'query';
@@ -81,7 +82,8 @@ ${
       If the user asks how to change the language, reply in the same language the user asked in.`);
   }
 
-  const { ready: isKnowledgeBaseReady } = await client.getKnowledgeBaseStatus();
+  const { kbState } = await client.getKnowledgeBaseStatus();
+  const isKnowledgeBaseReady = kbState === KnowledgeBaseState.READY;
 
   functions.registerInstruction(({ availableFunctionNames }) => {
     const instructions: string[] = [];

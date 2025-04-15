@@ -18,11 +18,12 @@ import { getUpgradeType } from '../lib/upgrade_type';
  * Note that this route is primarily intended for consumption by Cloud.
  */
 export function registerUpgradeStatusRoute({
-  config: { featureSet },
+  config: { featureSet, dataSourceExclusions },
   router,
   lib: { handleEsError },
   current,
   defaultTarget,
+  log,
 }: RouteDependencies) {
   router.get(
     {
@@ -57,7 +58,7 @@ export function registerUpgradeStatusRoute({
         const {
           totalCriticalDeprecations, // critical deprecations
           totalCriticalHealthIssues, // critical health issues
-        } = await getESUpgradeStatus(esClient, featureSet);
+        } = await getESUpgradeStatus(esClient.asCurrentUser, { featureSet, dataSourceExclusions });
 
         const getSystemIndicesMigrationStatus = async () => {
           /**
@@ -159,6 +160,7 @@ export function registerUpgradeStatusRoute({
           },
         });
       } catch (error) {
+        log.error(error);
         return handleEsError({ error, response });
       }
     })

@@ -51,7 +51,7 @@ export const getServiceNameCell =
       props.fieldFormats,
       props.dataView,
       field,
-      'text'
+      'html'
     );
 
     return (

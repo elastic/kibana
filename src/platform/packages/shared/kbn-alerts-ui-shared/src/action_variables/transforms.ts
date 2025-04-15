@@ -7,10 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ActionVariable } from '@kbn/alerting-types';
+import type { ActionVariable } from '@kbn/alerting-types';
+import type { ActionVariables, OmitMessageVariablesType } from '@kbn/triggers-actions-ui-types';
 import {
-  ActionVariables,
-  OmitMessageVariablesType,
   REQUIRED_ACTION_VARIABLES,
   CONTEXT_ACTION_VARIABLES,
 } from '@kbn/triggers-actions-ui-types';

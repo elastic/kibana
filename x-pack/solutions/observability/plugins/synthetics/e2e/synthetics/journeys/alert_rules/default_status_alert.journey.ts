@@ -28,11 +28,11 @@ journey(`DefaultStatusAlert`, async ({ page, params }) => {
   let configId2: string;
 
   before(async () => {
-    await services.cleaUp();
+    await services.cleanUp();
   });
 
   after(async () => {
-    await services.cleaUp();
+    await services.cleanUp();
   });
 
   step('setup monitor', async () => {
