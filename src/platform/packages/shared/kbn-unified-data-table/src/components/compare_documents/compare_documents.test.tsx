@@ -96,7 +96,7 @@ describe('CompareDocuments', () => {
       Object {
         "aria-describedby": "test",
         "aria-labelledby": "test",
-        "className": "css-h7dgtn-useComparisonCss-useComparisonCss",
+        "className": "css-467ews-useComparisonCss-useComparisonCss",
         "columnVisibility": Object {
           "setVisibleColumns": [Function],
           "visibleColumns": Array [
