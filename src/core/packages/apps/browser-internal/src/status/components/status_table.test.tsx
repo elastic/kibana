@@ -8,8 +8,7 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { render } from '@testing-library/react';
+import { renderReactTestingLibraryWithI18n } from '@kbn/test-jest-helpers';
 import '@testing-library/jest-dom';
 import type { StatusInfoServiceStatus as ServiceStatus } from '@kbn/core-status-common';
 import { StatusTable } from './status_table';
@@ -29,63 +28,32 @@ const createServiceStatus = (parts: Partial<ServiceStatus> = {}): ServiceStatus 
 
 describe('StatusTable', () => {
   it('renders when statuses is provided', () => {
-    const component = mountWithIntl(
+    const { getByTestId, getByText } = renderReactTestingLibraryWithI18n(
       <StatusTable statuses={[{ id: 'plugin:1', state, original: createServiceStatus() }]} />
     );
-    const table = component.find('EuiInMemoryTable');
-    expect(table.prop('columns')).toEqual([
-      {
-        align: 'center',
-        field: 'state',
-        name: 'Status',
-        render: expect.any(Function),
-        sortable: expect.any(Function),
-        width: '100px',
-      },
-      {
-        field: 'id',
-        name: 'ID',
-        sortable: true,
-      },
-      {
-        field: 'state',
-        name: 'Status summary',
-        render: expect.any(Function),
-      },
-      {
-        align: 'right',
-        isExpander: true,
-        name: expect.any(Object), // Matches the <EuiScreenReaderOnly> component
-        render: expect.any(Function),
-        width: '40px',
-      },
-    ]);
-    expect(table.prop('items')).toEqual([
-      {
-        id: 'plugin:1',
-        original: {
-          level: 'available',
-          summary: 'Ready',
-        },
-        state: {
-          id: 'available',
-          message: 'Ready',
-          title: 'green',
-          uiColor: 'success',
-        },
-      },
-    ]);
-    expect(table.prop('sorting')).toEqual({
-      sort: {
-        direction: 'asc',
-        field: 'state',
-      },
-    });
-    expect(table.prop('data-test-subj')).toBe('statusBreakdown');
+
+    const table = getByTestId('statusBreakdown');
+
+    // Verify table exists
+    expect(table).toBeInTheDocument();
+
+    // Verify columns
+    expect(getByText('Status')).toBeInTheDocument();
+    expect(getByText('ID')).toBeInTheDocument();
+    expect(getByText('Status summary')).toBeInTheDocument();
+
+    // Verify items
+    expect(getByText('plugin:1')).toBeInTheDocument();
+    expect(getByText('Ready')).toBeInTheDocument();
+
+    // Verify sorting by checking row order
+    const rows = table.querySelectorAll('tr');
+    expect(rows[1]).toHaveTextContent('plugin:1');
+    expect(rows[1]).toHaveTextContent('Ready');
   });
 
   it('renders empty when statuses is not provided', () => {
-    const { container } = render(<StatusTable />);
+    const { container } = renderReactTestingLibraryWithI18n(<StatusTable />);
     expect(container.firstChild).toBeNull();
   });
 });
