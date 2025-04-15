@@ -47,7 +47,7 @@ describe('utils', () => {
         },
       ];
 
-      const result = getDefaultFormStateByType('grok',sampleDocs);
+      const result = getDefaultFormStateByType('grok', sampleDocs);
 
       expect(result).toEqual({
         type: 'grok',
@@ -75,7 +75,7 @@ describe('utils', () => {
         },
       ];
 
-      const result = getDefaultFormStateByType('grok',sampleDocs);
+      const result = getDefaultFormStateByType('grok', sampleDocs);
 
       expect(result).toEqual({
         type: 'grok',
@@ -102,7 +102,7 @@ describe('utils', () => {
         },
       ];
 
-      const result = getDefaultFormStateByType('grok',sampleDocs);
+      const result = getDefaultFormStateByType('grok', sampleDocs);
 
       // In WELL_KNOWN_TEXT_FIELDS, 'message' comes before 'error.message' and 'event.original'
       expect(result).toEqual({
