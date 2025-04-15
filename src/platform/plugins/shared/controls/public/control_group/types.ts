@@ -12,7 +12,11 @@ import type { Observable } from 'rxjs';
 import { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import { PublishesESQLVariables } from '@kbn/esql-types';
 import { Filter } from '@kbn/es-query';
-import { HasSerializedChildState, PresentationContainer } from '@kbn/presentation-containers';
+import {
+  HasLastSavedChildState,
+  HasSerializedChildState,
+  PresentationContainer,
+} from '@kbn/presentation-containers';
 import {
   HasEditCapabilities,
   HasParentApi,
@@ -20,7 +24,6 @@ import {
   PublishesFilters,
   PublishesTimeslice,
   PublishesUnifiedSearch,
-  PublishesUnsavedChanges,
   PublishingSubject,
 } from '@kbn/presentation-publishing';
 import { PublishesReload } from '@kbn/presentation-publishing/interfaces/fetch/publishes_reload';
@@ -51,7 +54,7 @@ export type ControlGroupApi = PresentationContainer &
   PublishesESQLVariables &
   HasSerializedChildState<ControlPanelState> &
   HasEditCapabilities &
-  Pick<PublishesUnsavedChanges<ControlGroupRuntimeState>, 'unsavedChanges$'> &
+  HasLastSavedChildState &
   PublishesTimeslice &
   PublishesDisabledActionIds &
   Partial<HasParentApi<PublishesUnifiedSearch> & PublishesReload> & {
@@ -59,8 +62,6 @@ export type ControlGroupApi = PresentationContainer &
     autoApplySelections$: PublishingSubject<boolean>;
     ignoreParentSettings$: PublishingSubject<ParentIgnoreSettings | undefined>;
     labelPosition: PublishingSubject<ControlLabelPosition>;
-
-    asyncResetUnsavedChanges: () => Promise<void>;
     controlFetch$: (controlUuid: string) => Observable<ControlFetchContext>;
     openAddDataControlFlyout: (options?: {
       controlStateTransform?: ControlStateTransform;
@@ -70,7 +71,6 @@ export type ControlGroupApi = PresentationContainer &
 
     /** Public getters */
     getEditorConfig: () => ControlGroupEditorConfig | undefined;
-    getLastSavedControlState: (controlUuid: string) => object;
 
     /** Public setters */
     setChainingSystem: (chainingSystem: ControlGroupChainingSystem) => void;
