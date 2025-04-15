@@ -113,9 +113,9 @@ export const getNavigationTreeDefinition = ({
                       link: 'dashboards',
                     },
                   ],
-                  id: 'kibana',
-                  title: i18n.translate('xpack.enterpriseSearch.searchNav.kibana', {
-                    defaultMessage: 'Kibana',
+                  id: 'analyze',
+                  title: i18n.translate('xpack.enterpriseSearch.searchNav.analyze', {
+                    defaultMessage: 'Analyze',
                   }),
                 },
                 {
@@ -133,9 +133,9 @@ export const getNavigationTreeDefinition = ({
                     { link: 'enterpriseSearchContent:connectors' },
                     { link: 'enterpriseSearchContent:webCrawlers' },
                   ],
-                  id: 'content',
-                  title: i18n.translate('xpack.enterpriseSearch.searchNav.content', {
-                    defaultMessage: 'Content',
+                  id: 'data',
+                  title: i18n.translate('xpack.enterpriseSearch.searchNav.data', {
+                    defaultMessage: 'Data',
                   }),
                 },
                 {
