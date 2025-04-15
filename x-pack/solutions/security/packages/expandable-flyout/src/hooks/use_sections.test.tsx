@@ -128,4 +128,26 @@ describe('useSections', () => {
 
     expect(hookResult.result.current.mostRecentPreview).toEqual({ id: 'preview3' });
   });
+
+  it('should return contextMenuSettings for the right section', () => {
+    (useExpandableFlyoutState as jest.Mock).mockReturnValue({
+      right: { id: 'right' },
+    });
+
+    const initialProps: UseSectionsParams = {
+      registeredPanels: [
+        {
+          key: 'right',
+          component: () => <div>{'component'}</div>,
+          contextSettingsMenuItems: [<div>{'setting'}</div>],
+        },
+      ],
+    };
+
+    hookResult = renderHook((props: UseSectionsParams) => useSections(props), {
+      initialProps,
+    });
+
+    expect(hookResult.result.current.contextMenuSettings).toEqual([<div>{'setting'}</div>]);
+  });
 });
