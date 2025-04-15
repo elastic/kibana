@@ -663,6 +663,10 @@ export class ObservabilityAIAssistantClient {
     );
   };
 
+  getPreconfiguredInferenceEndpoints = () => {
+    return this.dependencies.knowledgeBaseService.getPreconfiguredInferenceEndpoints();
+  };
+
   getKnowledgeBaseStatus = () => {
     return this.dependencies.knowledgeBaseService.getModelStatus();
   };

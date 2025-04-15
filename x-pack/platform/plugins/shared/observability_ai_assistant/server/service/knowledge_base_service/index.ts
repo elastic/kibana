@@ -21,6 +21,7 @@ import { getAccessQuery, getUserAccessFilters } from '../util/get_access_query';
 import { getCategoryQuery } from '../util/get_category_query';
 import { getSpaceQuery } from '../util/get_space_query';
 import {
+  getPreconfiguredInferenceEndpointsForEmbedding,
   getInferenceIdFromWriteIndex,
   getKbModelStatus,
   isInferenceEndpointMissingOrUnavailable,
@@ -487,6 +488,13 @@ export class KnowledgeBaseService {
       esClient: this.dependencies.esClient,
       logger: this.dependencies.logger,
       config: this.dependencies.config,
+    });
+  };
+
+  getPreconfiguredInferenceEndpoints = async () => {
+    return getPreconfiguredInferenceEndpointsForEmbedding({
+      esClient: this.dependencies.esClient,
+      logger: this.dependencies.logger,
     });
   };
 }

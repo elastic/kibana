@@ -14,12 +14,49 @@ import {
   MlGetTrainedModelsStatsResponse,
   MlTrainedModelStats,
 } from '@elastic/elasticsearch/lib/api/types';
+import { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 import pRetry from 'p-retry';
 import { KnowledgeBaseState } from '../../common';
 import { ObservabilityAIAssistantConfig } from '../config';
 import { resourceNames } from '.';
 
-export async function getInferenceEndpoint({
+const SUPPORTED_TASK_TYPES = ['sparse_embedding', 'text_embedding'];
+
+export const getPreconfiguredInferenceEndpointsForEmbedding = async ({
+  esClient,
+  logger,
+}: {
+  esClient: { asInternalUser: ElasticsearchClient };
+  logger: Logger;
+}): Promise<{
+  inferenceEndpoints: InferenceAPIConfigResponse[];
+}> => {
+  const { endpoints } = await esClient.asInternalUser.inference.get({
+    inference_id: '_all',
+  });
+
+  if (!endpoints.length) {
+    throw new Error('Did not find any inference endpoints');
+  }
+
+  logger.debug(`Found "${endpoints.length}" inference endpoints`);
+
+  const embeddingEndpoints = endpoints.filter((endpoint) =>
+    SUPPORTED_TASK_TYPES.includes(endpoint.task_type)
+  );
+
+  if (!embeddingEndpoints.length) {
+    throw new Error('Did not find any inference endpoints for embedding');
+  }
+
+  logger.debug(`Found "${embeddingEndpoints.length}" inference endpoints for supported task types`);
+
+  return {
+    inferenceEndpoints: embeddingEndpoints as InferenceAPIConfigResponse[],
+  };
+};
+
+async function getInferenceEndpoint({
   esClient,
   inferenceId,
 }: {
