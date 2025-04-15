@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useMemo, useState } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n-react';
 import semverLt from 'semver/functions/lt';
@@ -217,13 +217,15 @@ export const SettingsPage: React.FC<Props> = memo(
 
     const isUpdating = installationStatus === InstallStatus.installing && installedVersion;
 
-    if (changelogError) {
-      notifications.toasts.addError(changelogError, {
-        title: i18n.translate('xpack.fleet.epm.errorLoadingChangelog', {
-          defaultMessage: 'Error loading changelog information',
-        }),
-      });
-    }
+    useEffect(() => {
+      if (changelogError) {
+        notifications.toasts.addError(changelogError, {
+          title: i18n.translate('xpack.fleet.epm.errorLoadingChangelog', {
+            defaultMessage: 'Error loading changelog information',
+          }),
+        });
+      }
+    }, [changelogError, notifications.toasts]);
 
     return (
       <>
