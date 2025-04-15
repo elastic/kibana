@@ -103,7 +103,10 @@ export async function startLiveDataUpload({
       logger.debug('Indexing completed');
 
       const refreshPromise = generatorsAndClients.map(async ({ client }) => {
-        await client.refresh();
+        const canRefresh = await client.manualRefreshAllowed();
+        if (canRefresh) {
+          return client.refresh();
+        }
       });
 
       await Promise.all(refreshPromise);

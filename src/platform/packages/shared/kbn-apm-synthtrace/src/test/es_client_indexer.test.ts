@@ -42,6 +42,13 @@ describe('Synthtrace ES Client indexer', () => {
             };
           },
         },
+        info: async () => {
+          return {
+            version: {
+              build_flavor: '',
+            },
+          };
+        },
         helpers: {
           bulk: async (options: any) => {
             datasource = options.datasource;

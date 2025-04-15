@@ -17,7 +17,6 @@ import {
 import { castArray, isFunction } from 'lodash';
 import { Readable, Transform } from 'stream';
 import { isGeneratorObject } from 'util/types';
-import { Refresh } from '@elastic/elasticsearch/lib/api/types';
 import { Logger } from '../utils/create_logger';
 import { sequential } from '../utils/stream_utils';
 import { KibanaClient } from './base_kibana_client';
@@ -42,7 +41,7 @@ export class SynthtraceEsClient<TFields extends Fields> {
   private readonly refreshAfterIndex: boolean;
 
   private pipelineCallback: (base: Readable) => NodeJS.WritableStream;
-  private serverless: boolean | undefined = undefined;
+  private serverless?: boolean;
   protected dataStreams: string[] = [];
   protected indices: string[] = [];
 
@@ -102,11 +101,6 @@ export class SynthtraceEsClient<TFields extends Fields> {
   }
 
   async refresh() {
-    if (await this.isServerless()) {
-      this.logger.debug('Skipping manual refresh on serverless');
-      return;
-    }
-
     const allIndices = this.dataStreams.concat(this.indices);
     this.logger.info(`Refreshing "${allIndices.join(',')}"`);
 
@@ -142,13 +136,13 @@ export class SynthtraceEsClient<TFields extends Fields> {
     let count: number = 0;
 
     const stream = sequential(...allStreams);
-    const refresh: Refresh = (await this.isServerless()) ? 'wait_for' : false;
 
-    this.logger.debug(`Produced ${count} events`);
+    const manualRefreshAllowed = this.refreshAfterIndex || (await this.manualRefreshAllowed());
+
     await this.client.helpers.bulk(
       {
         concurrency: this.concurrency,
-        refresh,
+        refresh: manualRefreshAllowed ? false : 'wait_for',
         refreshOnCompletion: false,
         flushBytes: 250000,
         datasource: stream,
@@ -192,7 +186,7 @@ export class SynthtraceEsClient<TFields extends Fields> {
       }
     );
 
-    this.logger.debug(`Produced ${count} events`);
+    this.logger.info(`Produced ${count} events`);
 
     // restore pipeline callback
     if (pipelineCallback) {
@@ -204,12 +198,12 @@ export class SynthtraceEsClient<TFields extends Fields> {
     }
   }
 
-  private async isServerless() {
+  async manualRefreshAllowed() {
     if (this.serverless === undefined) {
       const info = await this.client.info();
       this.serverless = info.version.build_flavor === 'serverless';
     }
 
-    return this.serverless;
+    return !this.serverless;
   }
 }
