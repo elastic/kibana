@@ -5,17 +5,7 @@
  * 2.0.
  */
 import { httpServerMock } from '@kbn/core/server/mocks';
-import {
-  ATTACK_DISCOVERY,
-  ATTACK_DISCOVERY_BY_CONNECTOR_ID,
-  ATTACK_DISCOVERY_CANCEL_BY_CONNECTOR_ID,
-  ATTACK_DISCOVERY_SCHEDULES,
-  ATTACK_DISCOVERY_SCHEDULES_BY_ID,
-  ATTACK_DISCOVERY_SCHEDULES_BY_ID_DISABLE,
-  ATTACK_DISCOVERY_SCHEDULES_BY_ID_ENABLE,
-  ATTACK_DISCOVERY_SCHEDULES_FIND,
-  CAPABILITIES,
-} from '../../common/constants';
+import { CAPABILITIES } from '../../common/constants';
 import type {
   CreateAttackDiscoverySchedulesRequestBody,
   DefendInsightsGetRequestQuery,
@@ -26,6 +16,14 @@ import type {
   UpdateKnowledgeBaseEntryRequestParams,
 } from '@kbn/elastic-assistant-common';
 import {
+  ATTACK_DISCOVERY,
+  ATTACK_DISCOVERY_BY_CONNECTOR_ID,
+  ATTACK_DISCOVERY_CANCEL_BY_CONNECTOR_ID,
+  ATTACK_DISCOVERY_SCHEDULES,
+  ATTACK_DISCOVERY_SCHEDULES_BY_ID,
+  ATTACK_DISCOVERY_SCHEDULES_BY_ID_DISABLE,
+  ATTACK_DISCOVERY_SCHEDULES_BY_ID_ENABLE,
+  ATTACK_DISCOVERY_SCHEDULES_FIND,
   AttackDiscoveryPostRequestBody,
   ConversationCreateProps,
   ConversationUpdateProps,

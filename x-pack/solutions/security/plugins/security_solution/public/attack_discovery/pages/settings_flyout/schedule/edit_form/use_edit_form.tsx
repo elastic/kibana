@@ -49,11 +49,17 @@ export interface UseEditForm {
 export interface UseEditFormProps {
   initialValue?: AttackDiscoveryScheduleSchema;
   onSave?: (scheduleData: AttackDiscoveryScheduleSchema) => void;
+  saveButtonDisabled?: boolean;
   saveButtonTitle?: string;
 }
 
 export const useEditForm = (props: UseEditFormProps): UseEditForm => {
-  const { initialValue = defaultInitialValue, onSave, saveButtonTitle } = props;
+  const {
+    initialValue = defaultInitialValue,
+    onSave,
+    saveButtonDisabled = false,
+    saveButtonTitle,
+  } = props;
   const { euiTheme } = useEuiTheme();
   const {
     triggersActionsUi: { actionTypeRegistry },
@@ -173,14 +179,20 @@ export const useEditForm = (props: UseEditFormProps): UseEditForm => {
           grow={false}
         >
           <EuiFlexItem grow={false}>
-            <EuiButton data-test-subj="save" fill onClick={onCreate} size="s">
+            <EuiButton
+              data-test-subj="save"
+              fill
+              size="s"
+              onClick={onCreate}
+              disabled={saveButtonDisabled}
+            >
               {saveButtonTitle ?? i18n.SCHEDULE_SAVE_BUTTON_TITLE}
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexItem>
       </EuiFlexGroup>
     );
-  }, [euiTheme.size.s, onCreate, saveButtonTitle]);
+  }, [euiTheme.size.s, onCreate, saveButtonDisabled, saveButtonTitle]);
 
   return { editForm, actionButtons };
 };

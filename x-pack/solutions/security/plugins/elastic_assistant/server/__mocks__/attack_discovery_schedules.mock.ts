@@ -27,6 +27,7 @@ export const getAttackDiscoveryCreateScheduleMock = (
     params: {
       alertsIndexPattern: '.alerts-security.alerts-default',
       apiConfig: {
+        name: 'Mock GPT-4o',
         connectorId: 'gpt-4o',
         actionTypeId: '.gen-ai',
       },
@@ -102,6 +103,7 @@ export const getAttackDiscoveryScheduleMock = (
     params: {
       alertsIndexPattern: '.alerts-security.alerts-default',
       apiConfig: {
+        name: 'Mock GPT-4o',
         connectorId: 'gpt-4o',
         actionTypeId: '.gen-ai',
       },
