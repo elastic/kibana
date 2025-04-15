@@ -64,7 +64,7 @@ const RelatedIntegrationsList = ({
     Then we can use the "watch" feature to track their changes.
   */
   const hasRenderedInitially = flattenedFieldNames.length > 0;
-  const fieldsToWatch = hasRenderedInitially ? ['index', ...flattenedFieldNames] : [];
+  const fieldsToWatch = hasRenderedInitially ? flattenedFieldNames : [];
 
   const [formData] = useFormData({ watch: fieldsToWatch });
 
