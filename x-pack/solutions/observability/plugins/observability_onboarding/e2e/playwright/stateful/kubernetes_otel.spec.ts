@@ -49,7 +49,8 @@ test('Otel Kubernetes', async ({ page, onboardingHomePage, otelKubernetesFlowPag
   )?.replace('my-namespace', INSTRUMENTED_APP_CONTAINER_NAMESPACE);
   const restartDeploymentSnippet = (await otelKubernetesFlowPage.getRestartDeploymentSnippet())
     ?.split('\n')[0]
-    ?.replace('myapp', INSTRUMENTED_APP_NAME);
+    ?.replace('myapp', INSTRUMENTED_APP_NAME)
+    ?.replace('my-namespace', INSTRUMENTED_APP_CONTAINER_NAMESPACE);
 
   const codeSnippet = `${helmRepoSnippet}\n${installStackSnippet}\n${annotateAllResourceSnippet}\n${restartDeploymentSnippet}`;
 
@@ -62,10 +63,10 @@ test('Otel Kubernetes', async ({ page, onboardingHomePage, otelKubernetesFlowPag
   /**
    * There is no explicit data ingest indication
    * in the flow, so we need to rely on a timeout.
-   * 3 minutes should be enough for the stack to be
+   * 5 minutes should be enough for the stack to be
    * created and to start pushing data.
    */
-  await page.waitForTimeout(3 * 60000);
+  await page.waitForTimeout(5 * 60000);
 
   const otelKubernetesOverviewDashboardPage = new OtelKubernetesOverviewDashboardPage(
     await otelKubernetesFlowPage.openClusterOverviewDashboardInNewTab()
