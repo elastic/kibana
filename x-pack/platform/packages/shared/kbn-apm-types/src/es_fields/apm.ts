@@ -74,6 +74,9 @@ export const TRANSACTION_OVERFLOW_COUNT = 'transaction.aggregation.overflow_coun
 export const TRANSACTION_ROOT = 'transaction.root';
 export const TRANSACTION_PROFILER_STACK_TRACE_IDS = 'transaction.profiler_stack_trace_ids';
 
+// OTel field to link profiling and APM
+export const ELASTIC_PROFILER_STACK_TRACE_IDS = 'elastic.profiler_stack_trace_ids';
+
 export const EVENT_OUTCOME = 'event.outcome';
 
 export const TRACE_ID = 'trace.id';
