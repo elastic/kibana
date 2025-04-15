@@ -242,7 +242,7 @@ export const esqlExecutor = async ({
         });
 
         // no more results will be found
-        if (response.values.length < tuple.maxSignals) {
+        if (response.values.length < tuple.maxSignals + 1) {
           ruleExecutionLogger.debug(
             `End of search: Found ${response.values.length} results with page size ${tuple.maxSignals}`
           );
