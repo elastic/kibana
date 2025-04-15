@@ -6,9 +6,10 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
+import { uniq } from 'lodash';
 import {
   Walker,
+  walk,
   type ESQLAstItem,
   type ESQLColumn,
   type ESQLCommandOption,
@@ -17,6 +18,7 @@ import {
   type ESQLSingleAstItem,
   type ESQLSource,
   type ESQLTimeInterval,
+  type ESQLAstCommand,
 } from '@kbn/esql-ast';
 import {
   ESQLIdentifier,
@@ -24,14 +26,17 @@ import {
   ESQLParamLiteral,
   ESQLProperNode,
 } from '@kbn/esql-ast/src/types';
+
 import { aggFunctionDefinitions } from '../definitions/generated/aggregation_functions';
 import { operatorsDefinitions } from '../definitions/all_operators';
 import { commandDefinitions } from '../definitions/commands';
+import { collectVariables } from './variables';
 import { scalarFunctionDefinitions } from '../definitions/generated/scalar_functions';
 import { groupingFunctionDefinitions } from '../definitions/generated/grouping_functions';
 import { getTestFunctions } from './test_functions';
 import { getFunctionSignatures } from '../definitions/helpers';
 import { timeUnits } from '../definitions/literals';
+import type { FieldType } from '../definitions/types';
 import {
   CommandDefinition,
   FunctionParameter,
@@ -45,8 +50,10 @@ import {
 } from '../definitions/types';
 import type { ESQLRealField, ESQLVariable, ReferenceMaps } from '../validation/types';
 import { removeMarkerArgFromArgsList } from './context';
-import type { ReasonTypes } from './types';
+import type { ReasonTypes, ESQLCallbacks } from './types';
 import { DOUBLE_TICKS_REGEX, EDITOR_MARKER, SINGLE_BACKTICK } from './constants';
+import { enrichFieldsWithECSInfo } from '../autocomplete/utils/ecs_metadata_helper';
+
 import type { EditorContext } from '../autocomplete/types';
 
 export function nonNullable<T>(v: T): v is NonNullable<T> {
@@ -919,4 +926,74 @@ export function getExpressionType(
   }
 
   return 'unknown';
+}
+
+export function transformMapToRealFields(inputMap: Map<string, ESQLVariable[]>): ESQLRealField[] {
+  const realFields: ESQLRealField[] = [];
+
+  for (const [, variables] of inputMap) {
+    for (const variable of variables) {
+      // Only include variables that have a known type
+      if (variable.type !== 'unknown') {
+        realFields.push({
+          name: variable.name,
+          type: variable.type as FieldType, // Type assertion since we've filtered out 'unknown'
+        });
+      }
+    }
+  }
+
+  return realFields;
+}
+
+async function getEcsMetadata(resourceRetriever?: ESQLCallbacks) {
+  if (!resourceRetriever?.getFieldsMetadata) {
+    return undefined;
+  }
+  const client = await resourceRetriever?.getFieldsMetadata;
+  if (client.find) {
+    // Fetch full list of ECS field
+    // This list should be cached already by fieldsMetadataClient
+    const results = await client.find({ attributes: ['type'] });
+    return results?.fields;
+  }
+}
+
+export async function getSourceFields(query: string, resourceRetriever?: ESQLCallbacks) {
+  const metadata = await getEcsMetadata();
+  const fieldsOfType = await resourceRetriever?.getColumnsFor?.({ query });
+  const fieldsWithMetadata = enrichFieldsWithECSInfo(fieldsOfType || [], metadata);
+  return fieldsWithMetadata;
+}
+
+const TRANSFORMATIONAL_COMMANDS = ['stats', 'keep'];
+
+export async function getCurrentQueryAvailableFields(
+  query: string,
+  commands: ESQLAstCommand[],
+  sourceFields?: ESQLRealField[]
+) {
+  const cacheCopy = new Map<string, ESQLRealField>();
+  sourceFields?.forEach((field) => cacheCopy.set(field.name, field));
+  const userDefinedColumns = collectVariables(commands, cacheCopy, query);
+  const arrayOfUserDefinedColumns: ESQLRealField[] = transformMapToRealFields(
+    userDefinedColumns ?? new Map<string, ESQLVariable[]>()
+  );
+  const allFields = uniq([...(sourceFields ?? []), ...arrayOfUserDefinedColumns]);
+
+  const lastCommand = commands[commands.length - 1];
+  const isTransformationalCommand = TRANSFORMATIONAL_COMMANDS.includes(lastCommand.name);
+  if (isTransformationalCommand) {
+    // If the last command is transformational, we need to set only the available fields
+    const columns: ESQLColumn[] = [];
+
+    walk(lastCommand, {
+      visitColumn: (node) => columns.push(node),
+    });
+    return allFields.filter((field) => {
+      return columns.some((column) => column.name === field.name);
+    });
+  } else {
+    return allFields;
+  }
 }
