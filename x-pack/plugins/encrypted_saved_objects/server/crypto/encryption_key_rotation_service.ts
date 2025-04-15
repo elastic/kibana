@@ -266,7 +266,7 @@ export class EncryptionKeyRotationService {
         attributes: decryptedAttributes,
         // The optional object namespace for `bulkUpdate` is used to affect objects outside of the current space
         // '*' is an invalid option, and if the object exists in all spaces, we don't need to set the namespace
-        namespace: firstNamespace !== ALL_NAMESPACES_STRING ? firstNamespace : undefined,
+        namespace: firstNamespace !== '*' ? firstNamespace : undefined,
       });
     }
 
