@@ -8,21 +8,21 @@
 import { i18n } from '@kbn/i18n';
 
 export const INDICATORS = i18n.translate(
-  'xpack.securitySolution.navigation.indicatorsNavItemLabel',
+  'xpack.securitySolution.threatIntelligence.navigation.indicatorsNavItemLabel',
   {
     defaultMessage: 'Indicators',
   }
 );
 
 export const INTELLIGENCE = i18n.translate(
-  'xpack.securitySolution.navigation.intelligenceNavItemLabel',
+  'xpack.securitySolution.threatIntelligence.navigation.intelligenceNavItemLabel',
   {
     defaultMessage: 'Intelligence',
   }
 );
 
 export const DESCRIPTION = i18n.translate(
-  'xpack.securitySolution.navigation.indicatorsNavItemDescription',
+  'xpack.securitySolution.threatIntelligence.navigation.indicatorsNavItemDescription',
   {
     defaultMessage:
       'Elastic threat intelligence helps you see if you are open to or have been subject to current or historical known threats.',
@@ -30,7 +30,7 @@ export const DESCRIPTION = i18n.translate(
 );
 
 export const KEYWORDS = i18n.translate(
-  'xpack.securitySolution.navigation.indicatorsNavItemKeywords',
+  'xpack.securitySolution.threatIntelligence.navigation.indicatorsNavItemKeywords',
   {
     defaultMessage: 'Indicators',
   }
