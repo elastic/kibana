@@ -18,7 +18,6 @@ import {
   FetchConnectorsApiLogic,
   FetchConnectorsApiLogicActions,
 } from '../../api/connector/fetch_connectors.api';
-import { DeleteIndexApiActions, DeleteIndexApiLogic } from '../../api/index/delete_index_api_logic';
 import { Status } from '../../../common/types/api';
 
 export type ConnectorViewItem = Connector & { docsCount?: number; indexExists: boolean };
@@ -28,9 +27,7 @@ export interface ConnectorsActions {
   closeDeleteModal(): void;
   deleteConnector: DeleteConnectorApiLogicActions['makeRequest'];
   deleteError: DeleteConnectorApiLogicActions['apiError'];
-  deleteIndex: DeleteIndexApiActions['makeRequest'];
-  deleteIndexError: DeleteIndexApiActions['apiError'];
-  deleteIndexSuccess: DeleteIndexApiActions['apiSuccess'];
+
   deleteSuccess: DeleteConnectorApiLogicActions['apiSuccess'];
   fetchConnectors({
     fetchCrawlersOnly,
@@ -67,7 +64,6 @@ export interface ConnectorsActions {
 export interface ConnectorsValues {
   connectors: ConnectorViewItem[];
   data: typeof FetchConnectorsApiLogic.values.data;
-  deleteIndexStatus: typeof DeleteIndexApiLogic.values.status;
   deleteModalConnectorId: string;
   deleteModalConnectorName: string;
   deleteModalIndexName: string | null;
@@ -115,20 +111,12 @@ export const ConnectorsLogic = kea<MakeLogicType<ConnectorsValues, ConnectorsAct
     actions: [
       DeleteConnectorApiLogic,
       ['apiError as deleteError', 'apiSuccess as deleteSuccess', 'makeRequest as deleteConnector'],
-      DeleteIndexApiLogic,
-      [
-        'apiError as deleteIndexError',
-        'apiSuccess as deleteIndexSuccess',
-        'makeRequest as deleteIndex',
-      ],
       FetchConnectorsApiLogic,
       ['makeRequest', 'apiSuccess', 'apiError'],
     ],
     values: [
       DeleteConnectorApiLogic,
       ['status as deleteStatus'],
-      DeleteIndexApiLogic,
-      ['status as deleteIndexStatus'],
       FetchConnectorsApiLogic,
       ['data', 'status'],
     ],
@@ -239,9 +227,8 @@ export const ConnectorsLogic = kea<MakeLogicType<ConnectorsValues, ConnectorsAct
       },
     ],
     isDeleteLoading: [
-      () => [selectors.deleteStatus, selectors.deleteIndexStatus],
-      (deleteStatus, deleteIndexStatus) =>
-        Status.LOADING === deleteStatus || Status.LOADING === deleteIndexStatus,
+      () => [selectors.deleteStatus],
+      (deleteStatus) => Status.LOADING === deleteStatus,
     ],
     isEmpty: [
       () => [selectors.data],

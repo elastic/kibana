@@ -40,7 +40,7 @@ export const DeleteConnectorModal: React.FC<DeleteConnectorModalProps> = ({ isCr
   const {
     services: { http },
   } = useKibana();
-  const { closeDeleteModal, deleteConnector, deleteIndex } = useActions(ConnectorsLogic({ http }));
+  const { closeDeleteModal, deleteConnector } = useActions(ConnectorsLogic({ http }));
 
   const {
     deleteModalConnectorId: connectorId,
@@ -77,19 +77,13 @@ export const DeleteConnectorModal: React.FC<DeleteConnectorModalProps> = ({ isCr
         closeDeleteModal();
       }}
       onConfirm={() => {
-        if (isCrawler) {
-          if (deleteModalIndexName) {
-            deleteIndex({ indexName: deleteModalIndexName, http });
-          }
-        } else {
-          deleteConnector({
-            connectorId,
-            connectorName,
-            shouldDeleteIndex,
-            http,
-          });
-          setConnectorUiOptions(omit(connectorUiOptions, connectorId));
-        }
+        deleteConnector({
+          connectorId,
+          connectorName,
+          shouldDeleteIndex,
+          http,
+        });
+        setConnectorUiOptions(omit(connectorUiOptions, connectorId));
       }}
       cancelButtonText={
         isDeleteLoading
