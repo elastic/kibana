@@ -68,7 +68,6 @@ const calculateOffset = ({
 
 export function FocusedTraceWaterfall({ items, isEmbeddable = false }: Props) {
   const { euiTheme } = useEuiTheme();
-  console.log('### caue FocusedTraceWaterfall euiTheme:', euiTheme);
 
   const traceItems = items.traceItems;
 
