@@ -61,7 +61,7 @@ export class RandomnessService extends FtrService {
   }
 
   /**
-   * Generate a random number, defaults to at least 4 and no more than 8 syllables
+   * Generate a random word, defaults to at least 4 and no more than 8 syllables
    */
   word(options: { syllables?: number } = {}) {
     const { syllables = this.naturalNumber({ min: 4, max: 8 }) } = options;
@@ -77,8 +77,12 @@ export class RandomnessService extends FtrService {
   string(options: StringOptions = {}) {
     return this.chance.string({
       length: this.naturalNumber({ min: 8, max: 15 }),
-      ...(options.pool === 'undefined' ? { alpha: true, numeric: true, symbols: false } : {}),
+      ...(options.pool === undefined ? { alpha: true, numeric: true, symbols: false } : {}),
       ...options,
     });
+  }
+
+  pickFromArray<T>(arr: T[]): T {
+    return this.chance.pickone(arr);
   }
 }
