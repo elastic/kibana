@@ -19,7 +19,7 @@ import {
   EVENT_PROPERTY_EXECUTION_CONTEXT,
   EVENT_PROPERTY_SEARCH_TIMEOUT_MS,
   EVENT_TYPE_DATA_SEARCH_TIMEOUT,
-} from '.';
+} from './search/constants';
 import type { ConfigSchema } from '../server/config';
 import type {
   DataPublicPluginSetup,
