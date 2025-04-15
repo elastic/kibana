@@ -494,18 +494,23 @@ describe('editor_frame', () => {
           },
         } as EditorFrameProps;
         instance = (
-          await mountWithProvider(<EditorFrame {...props} />, {
-            preloadedState: {
-              datasourceStates: {
-                testDatasource: {
-                  isLoading: false,
-                  state: {
-                    internalState1: '',
+          await mountWithProvider(
+            <EuiThemeProvider>
+              <EditorFrame {...props} />
+            </EuiThemeProvider>,
+            {
+              preloadedState: {
+                datasourceStates: {
+                  testDatasource: {
+                    isLoading: false,
+                    state: {
+                      internalState1: '',
+                    },
                   },
                 },
               },
-            },
-          })
+            }
+          )
         ).instance;
 
         instance.update();
@@ -591,7 +596,13 @@ describe('editor_frame', () => {
           },
         } as EditorFrameProps;
 
-        instance = (await mountWithProvider(<EditorFrame {...props} />)).instance;
+        instance = (
+          await mountWithProvider(
+            <EuiThemeProvider>
+              <EditorFrame {...props} />
+            </EuiThemeProvider>
+          )
+        ).instance;
 
         instance.update();
 
