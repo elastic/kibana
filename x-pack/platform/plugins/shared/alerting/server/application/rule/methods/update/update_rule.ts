@@ -306,6 +306,7 @@ async function updateRuleAttributes<Params extends RuleParams = never>({
   let updatedRule = { ...originalRule };
 
   const allActions = [...updateRuleData.actions, ...(updateRuleData.systemActions ?? [])];
+  const artifacts = updateRuleData.artifacts ?? {};
   const ruleType = context.ruleTypeRegistry.get(updatedRule.alertTypeId);
 
   // Extract saved object references for this rule
@@ -319,7 +320,7 @@ async function updateRuleAttributes<Params extends RuleParams = never>({
     ruleType,
     allActions as NormalizedAlertActionWithGeneratedValues[],
     validatedRuleTypeParams,
-    updateRuleData.artifacts
+    artifacts
   );
 
   // Increment revision if applicable field has changed
