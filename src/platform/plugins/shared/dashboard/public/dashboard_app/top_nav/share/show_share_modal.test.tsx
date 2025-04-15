@@ -8,12 +8,12 @@
  */
 
 import { Capabilities } from '@kbn/core/public';
-import { convertPanelMapToPanelsArray, DashboardContainerInput } from '../../../../common';
-import { DashboardLocatorParams } from '../../../dashboard_container/types';
+import { convertPanelMapToPanelsArray } from '../../../../common';
 
 import { shareService } from '../../../services/kibana_services';
 import { showPublicUrlSwitch, ShowShareModal, ShowShareModalProps } from './show_share_modal';
 import { getDashboardBackupService } from '../../../services/dashboard_backup_service';
+import { DashboardLocatorParams, DashboardState } from '../../../dashboard_api/types';
 
 describe('showPublicUrlSwitch', () => {
   test('returns false if "dashboard_v2" app is not available', () => {
@@ -67,9 +67,7 @@ describe('ShowShareModal', () => {
     jest.clearAllMocks();
   });
 
-  const getPropsAndShare = (
-    unsavedState?: Partial<DashboardContainerInput>
-  ): ShowShareModalProps => {
+  const getPropsAndShare = (unsavedState?: Partial<DashboardState>): ShowShareModalProps => {
     dashboardBackupService.getState = jest.fn().mockReturnValue({ dashboardState: unsavedState });
     return {
       isDirty: true,
@@ -93,7 +91,7 @@ describe('ShowShareModal', () => {
   });
 
   it('locatorParams unsaved state is properly propagated to locator', () => {
-    const unsavedDashboardState: DashboardContainerInput = {
+    const unsavedDashboardState = {
       panels: {
         panel_1: {
           type: 'panel_type',
@@ -120,7 +118,7 @@ describe('ShowShareModal', () => {
         },
       ],
       query: { query: 'bye', language: 'kuery' },
-    } as unknown as DashboardContainerInput;
+    };
     const showModalProps = getPropsAndShare(unsavedDashboardState);
     showModalProps.getPanelsState = () => {
       return {

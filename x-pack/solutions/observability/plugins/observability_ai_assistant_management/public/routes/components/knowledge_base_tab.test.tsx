@@ -14,6 +14,7 @@ import { useDeleteKnowledgeBaseEntry } from '../../hooks/use_delete_knowledge_ba
 import { useGetKnowledgeBaseEntries } from '../../hooks/use_get_knowledge_base_entries';
 import { useImportKnowledgeBaseEntries } from '../../hooks/use_import_knowledge_base_entries';
 import { KnowledgeBaseTab } from './knowledge_base_tab';
+import { KnowledgeBaseState } from '@kbn/observability-ai-assistant-plugin/public';
 
 jest.mock('../../hooks/use_get_knowledge_base_entries');
 jest.mock('../../hooks/use_create_knowledge_base_entry');
@@ -52,12 +53,34 @@ describe('KnowledgeBaseTab', () => {
     });
   });
 
+  describe('when the knowledge base status is being fetched', () => {
+    beforeEach(() => {
+      useKnowledgeBaseMock.mockReturnValue({
+        status: {
+          value: {
+            kbState: KnowledgeBaseState.NOT_INSTALLED,
+            enabled: true,
+          },
+          loading: true,
+        },
+        isInstalling: false,
+        isPolling: false,
+        install: jest.fn(),
+      });
+    });
+
+    it('should show a loader', () => {
+      const { getByTestId } = render(<KnowledgeBaseTab />);
+      expect(getByTestId('knowledgeBaseTabLoader')).toBeInTheDocument();
+    });
+  });
+
   describe('when the knowledge base is not installed', () => {
     beforeEach(() => {
       useKnowledgeBaseMock.mockReturnValue({
         status: {
           value: {
-            ready: false,
+            kbState: KnowledgeBaseState.NOT_INSTALLED,
             enabled: true,
           },
           loading: false,
@@ -80,7 +103,7 @@ describe('KnowledgeBaseTab', () => {
       useKnowledgeBaseMock.mockReturnValue({
         status: {
           value: {
-            ready: true,
+            kbState: KnowledgeBaseState.READY,
             enabled: true,
           },
         },

@@ -7,7 +7,7 @@
 
 import type Boom from '@hapi/boom';
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 

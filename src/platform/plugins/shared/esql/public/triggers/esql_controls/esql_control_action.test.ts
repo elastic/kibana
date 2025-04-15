@@ -9,7 +9,7 @@
 
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { coreMock } from '@kbn/core/public/mocks';
-import { ESQLVariableType } from '@kbn/esql-validation-autocomplete';
+import { ESQLVariableType } from '@kbn/esql-types';
 import { CreateESQLControlAction } from './esql_control_action';
 
 describe('update ES|QL query action', () => {

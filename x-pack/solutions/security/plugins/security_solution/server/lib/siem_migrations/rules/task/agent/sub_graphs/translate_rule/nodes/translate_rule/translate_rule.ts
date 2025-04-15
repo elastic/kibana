@@ -6,24 +6,24 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import type { InferenceClient } from '@kbn/inference-plugin/server';
 import { cleanMarkdown, generateAssistantComment } from '../../../../../util/comments';
-import { getEsqlKnowledgeBase } from '../../../../../util/esql_knowledge_base_caller';
+import type { EsqlKnowledgeBase } from '../../../../../util/esql_knowledge_base';
 import type { GraphNode } from '../../types';
 import { ESQL_SYNTAX_TRANSLATION_PROMPT } from './prompts';
+import {
+  getElasticRiskScoreFromOriginalRule,
+  getElasticSeverityFromOriginalRule,
+} from './severity';
 
 interface GetTranslateRuleNodeParams {
-  inferenceClient: InferenceClient;
-  connectorId: string;
+  esqlKnowledgeBase: EsqlKnowledgeBase;
   logger: Logger;
 }
 
 export const getTranslateRuleNode = ({
-  inferenceClient,
-  connectorId,
+  esqlKnowledgeBase,
   logger,
 }: GetTranslateRuleNodeParams): GraphNode => {
-  const esqlKnowledgeBaseCaller = getEsqlKnowledgeBase({ inferenceClient, connectorId, logger });
   return async (state) => {
     const indexPatterns =
       state.integration?.data_streams?.map((dataStream) => dataStream.index_pattern).join(',') ||
@@ -40,11 +40,10 @@ export const getTranslateRuleNode = ({
       splunk_rule: JSON.stringify(splunkRule, null, 2),
       indexPatterns,
     });
-    const response = await esqlKnowledgeBaseCaller(prompt);
+    const response = await esqlKnowledgeBase.translate(prompt);
 
     const esqlQuery = response.match(/```esql\n([\s\S]*?)\n```/)?.[1].trim() ?? '';
     const translationSummary = response.match(/## Translation Summary[\s\S]*$/)?.[0] ?? '';
-
     return {
       response,
       comments: [generateAssistantComment(cleanMarkdown(translationSummary))],
@@ -52,6 +51,8 @@ export const getTranslateRuleNode = ({
         integration_ids: [integrationId],
         query: esqlQuery,
         query_language: 'esql',
+        risk_score: getElasticRiskScoreFromOriginalRule(state.original_rule),
+        severity: getElasticSeverityFromOriginalRule(state.original_rule),
       },
     };
   };

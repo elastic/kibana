@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useReducer } from 'react';
+import React, { useReducer, useState, useCallback } from 'react';
 import { RuleFormState } from '../types';
 import { RuleFormStateContext, RuleFormReducerContext } from './rule_form_state_context';
-import { ruleFormStateReducer } from './rule_form_state_reducer';
+import { RuleFormStateReducerAction, ruleFormStateReducer } from './rule_form_state_reducer';
 import { validateRuleBase, validateRuleParams } from '../validation';
 
 export interface RuleFormStateProviderProps {
@@ -20,6 +20,12 @@ export interface RuleFormStateProviderProps {
 export const RuleFormStateProvider: React.FC<
   React.PropsWithChildren<RuleFormStateProviderProps>
 > = (props) => {
+  // Tracking whether the user has changed the form is unreliable if we base it only on the difference
+  // between initial data and current data, as many rule types will use reducer actions to set their initial data.
+  // We need to track whether the user has actually physically interacted with the form before the ruleFormStateReducer
+  // can accurately determine the `touched` state
+  const [hasUserInteracted, setHasUserInteracted] = useState(false);
+
   const { children, initialRuleFormState } = props;
   const {
     formData,
@@ -27,7 +33,7 @@ export const RuleFormStateProvider: React.FC<
     minimumScheduleInterval,
   } = initialRuleFormState;
 
-  const [ruleFormState, dispatch] = useReducer(ruleFormStateReducer, {
+  const [ruleFormState, baseDispatch] = useReducer(ruleFormStateReducer, {
     ...initialRuleFormState,
     baseErrors: validateRuleBase({
       formData,
@@ -38,8 +44,25 @@ export const RuleFormStateProvider: React.FC<
       ruleTypeModel,
     }),
   });
+
+  // Prime the dispatch function to set `touched` to true on the next action, but not yet
+  const onInteraction = useCallback(() => {
+    if (!hasUserInteracted) setHasUserInteracted(true);
+  }, [hasUserInteracted]);
+  const dispatch: React.Dispatch<RuleFormStateReducerAction> = useCallback(
+    (...args) => {
+      // If the user has interacted with the form and the `touched` state is false, first update it to be true
+      // before executing the next action
+      if (hasUserInteracted && !ruleFormState.touched) {
+        baseDispatch({ type: 'setTouched' });
+      }
+      baseDispatch(...args);
+    },
+    [baseDispatch, hasUserInteracted, ruleFormState.touched]
+  );
+
   return (
-    <RuleFormStateContext.Provider value={ruleFormState}>
+    <RuleFormStateContext.Provider value={{ ...ruleFormState, onInteraction }}>
       <RuleFormReducerContext.Provider value={dispatch}>{children}</RuleFormReducerContext.Provider>
     </RuleFormStateContext.Provider>
   );

@@ -52,7 +52,11 @@ describe('<HeaderAction />', () => {
   beforeEach(() => {
     window.location.search = '?';
     jest.mocked(useGetFlyoutLink).mockReturnValue(alertUrl);
-    jest.mocked(useAssistant).mockReturnValue({ showAssistant: true, promptContextId: '' });
+    jest.mocked(useAssistant).mockReturnValue({
+      showAssistantOverlay: jest.fn(),
+      showAssistant: true,
+      promptContextId: '',
+    });
   });
 
   describe('Share alert url action', () => {
@@ -83,7 +87,11 @@ describe('<HeaderAction />', () => {
     });
 
     it('should not render chat button in the title if should not be shown', () => {
-      jest.mocked(useAssistant).mockReturnValue({ showAssistant: false, promptContextId: '' });
+      jest.mocked(useAssistant).mockReturnValue({
+        showAssistantOverlay: jest.fn(),
+        showAssistant: false,
+        promptContextId: '',
+      });
 
       const { queryByTestId } = renderHeaderActions(mockContextValue);
 

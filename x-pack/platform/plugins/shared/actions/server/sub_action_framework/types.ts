@@ -10,7 +10,7 @@ import type { Logger } from '@kbn/logging';
 import type { LicenseType } from '@kbn/licensing-plugin/common/types';
 
 import type { Method, AxiosRequestConfig } from 'axios';
-import { KibanaRequest } from '@kbn/core-http-server';
+import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ActionsConfigurationUtilities } from '../actions_config';
 import type {
   ActionTypeParams,
@@ -18,10 +18,10 @@ import type {
   Services,
   ValidatorType as ValidationSchema,
 } from '../types';
-import { SubFeature } from '../../common';
+import type { SubFeature } from '../../common';
 import type { SubActionConnector } from './sub_action_connector';
 import type { HookServices } from '../types';
-import { ActionExecutionSourceType } from '../lib';
+import type { ActionExecutionSourceType } from '../lib';
 
 export interface ServiceParams<Config, Secrets> {
   /**

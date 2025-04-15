@@ -83,15 +83,9 @@ export const MisconfigurationsInsight: React.FC<MisconfigurationsInsightProps> =
     pageSize: 1,
   });
 
-  const isNewNavigationEnabled = useIsExperimentalFeatureEnabled(
-    'newExpandableFlyoutNavigationEnabled'
+  const isNewNavigationEnabled = !useIsExperimentalFeatureEnabled(
+    'newExpandableFlyoutNavigationDisabled'
   );
-
-  useEffect(() => {
-    if (telemetryKey) {
-      uiMetricService.trackUiMetric(METRIC_TYPE.COUNT, telemetryKey);
-    }
-  }, [telemetryKey, renderingId]);
 
   const passedFindings = data?.count.passed || 0;
   const failedFindings = data?.count.failed || 0;
@@ -99,7 +93,13 @@ export const MisconfigurationsInsight: React.FC<MisconfigurationsInsightProps> =
     () => passedFindings + failedFindings,
     [passedFindings, failedFindings]
   );
-  const hasMisconfigurationFindings = totalFindings > 0;
+  const shouldRender = totalFindings > 0; // this component only renders if there are findings
+
+  useEffect(() => {
+    if (shouldRender && telemetryKey) {
+      uiMetricService.trackUiMetric(METRIC_TYPE.COUNT, telemetryKey);
+    }
+  }, [shouldRender, telemetryKey, renderingId]);
 
   const misconfigurationsStats = useMemo(
     () => getFindingsStats(passedFindings, failedFindings),
@@ -119,7 +119,8 @@ export const MisconfigurationsInsight: React.FC<MisconfigurationsInsightProps> =
             content={
               <FormattedMessage
                 id="xpack.securitySolution.flyout.insights.misconfiguration.misconfigurationCountTooltip"
-                defaultMessage="Opens list of misconfigurations in a new flyout"
+                defaultMessage="Opens {count, plural, one {this misconfiguration} other {these misconfigurations}} in a new flyout"
+                values={{ count: totalFindings }}
               />
             }
           >
@@ -161,7 +162,7 @@ export const MisconfigurationsInsight: React.FC<MisconfigurationsInsightProps> =
     ]
   );
 
-  if (!hasMisconfigurationFindings) return null;
+  if (!shouldRender) return null;
 
   return (
     <EuiFlexItem data-test-subj={dataTestSubj}>

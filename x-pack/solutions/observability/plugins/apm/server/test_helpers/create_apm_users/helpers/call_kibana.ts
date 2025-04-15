@@ -27,6 +27,7 @@ export async function callKibana<T>({
   const { data } = await axios.request({
     ...options,
     baseURL: baseUrl,
+    allowAbsoluteUrls: false,
     auth: { username, password },
     headers: { ...DEFAULT_HEADERS, ...options.headers },
   });

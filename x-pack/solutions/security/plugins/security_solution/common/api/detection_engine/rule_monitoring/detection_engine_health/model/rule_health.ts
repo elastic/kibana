@@ -6,6 +6,7 @@
  */
 
 import type { RuleResponse } from '../../../model';
+import type { GapSummary } from './gap_summary';
 import type { HealthParameters, HealthSnapshot } from './health_metadata';
 import type { HealthOverviewStats, HealthHistory } from './health_stats';
 
@@ -36,7 +37,7 @@ export interface RuleHealthSnapshot extends HealthSnapshot {
   /**
    * History of change of the same health stats during the interval.
    */
-  history_over_interval: HealthHistory<RuleHealthStats>;
+  history_over_interval: HealthHistory<HealthOverviewStats>;
 }
 
 /**
@@ -52,4 +53,9 @@ export interface RuleHealthState {
 /**
  * Health stats calculated over a given interval.
  */
-export type RuleHealthStats = HealthOverviewStats;
+export interface RuleHealthStats extends HealthOverviewStats {
+  /**
+   * Gaps summary for the rule execution.
+   */
+  gap_summary: GapSummary;
+}

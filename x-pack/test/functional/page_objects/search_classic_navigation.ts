@@ -44,7 +44,10 @@ export function SearchClassicNavigationProvider({ getService }: FtrProviderConte
         expect(itemLabel).to.equal(navItem.label);
       }
       const allSideNavItems = await testSubjects.findAll('*searchSideNav-');
-      expect(allSideNavItems.length).to.equal(items.length);
+      expect(allSideNavItems.length).to.equal(
+        items.length,
+        'Actual number of side nav items did not match the expected number'
+      );
     },
 
     async expectNavItemExists(id: string) {
@@ -63,7 +66,10 @@ export function SearchClassicNavigationProvider({ getService }: FtrProviderConte
     async expectNavItemActive(id: string) {
       await testSubjects.existOrFail(sideNavTestSubj(id));
       const item = await testSubjects.find(sideNavTestSubj(id));
-      expect(await item.elementHasClass('euiSideNavItemButton-isSelected')).to.be(true);
+      expect(await item.elementHasClass('euiSideNavItemButton-isSelected')).to.be.eql(
+        true,
+        `Expected ${id} sidenav item to be active`
+      );
     },
 
     breadcrumbs: {

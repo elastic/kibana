@@ -7,7 +7,7 @@
 
 import Boom from '@hapi/boom';
 import { sortBy, uniqBy } from 'lodash';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import type { MlAnomalyDetectors } from '@kbn/ml-plugin/server';
 import { rangeQuery, wildcardQuery } from '@kbn/observability-plugin/server';
 import { getSeverity, ML_ERRORS } from '../../../common/anomaly_detection';
@@ -50,46 +50,44 @@ export async function getServiceAnomalies({
     }
 
     const params = {
-      body: {
-        size: 0,
-        query: {
-          bool: {
-            filter: [
-              ...apmMlAnomalyQuery({
-                detectorTypes: [AnomalyDetectorType.txLatency],
-              }),
-              ...rangeQuery(Math.min(end - 30 * 60 * 1000, start), end, 'timestamp'),
-              {
-                terms: {
-                  // Only retrieving anomalies for default transaction types
-                  by_field_value: defaultTransactionTypes,
-                },
+      size: 0,
+      query: {
+        bool: {
+          filter: [
+            ...apmMlAnomalyQuery({
+              detectorTypes: [AnomalyDetectorType.txLatency],
+            }),
+            ...rangeQuery(Math.min(end - 30 * 60 * 1000, start), end, 'timestamp'),
+            {
+              terms: {
+                // Only retrieving anomalies for default transaction types
+                by_field_value: defaultTransactionTypes,
               },
-              ...wildcardQuery(ML_SERVICE_NAME_FIELD, searchQuery),
-            ] as estypes.QueryDslQueryContainer[],
-          },
-        },
-        aggs: {
-          services: {
-            composite: {
-              size: 5000,
-              sources: [
-                { serviceName: { terms: { field: ML_SERVICE_NAME_FIELD } } },
-                { jobId: { terms: { field: 'job_id' } } },
-              ] as Array<Record<string, estypes.AggregationsCompositeAggregationSource>>,
             },
-            aggs: {
-              metrics: {
-                top_metrics: {
-                  metrics: [
-                    { field: 'actual' },
-                    { field: ML_TRANSACTION_TYPE_FIELD },
-                    { field: 'result_type' },
-                    { field: 'record_score' },
-                  ],
-                  sort: {
-                    record_score: 'desc' as const,
-                  },
+            ...wildcardQuery(ML_SERVICE_NAME_FIELD, searchQuery),
+          ] as estypes.QueryDslQueryContainer[],
+        },
+      },
+      aggs: {
+        services: {
+          composite: {
+            size: 5000,
+            sources: [
+              { serviceName: { terms: { field: ML_SERVICE_NAME_FIELD } } },
+              { jobId: { terms: { field: 'job_id' } } },
+            ] as Array<Record<string, estypes.AggregationsCompositeAggregationSource>>,
+          },
+          aggs: {
+            metrics: {
+              top_metrics: {
+                metrics: [
+                  { field: 'actual' },
+                  { field: ML_TRANSACTION_TYPE_FIELD },
+                  { field: 'result_type' },
+                  { field: 'record_score' },
+                ],
+                sort: {
+                  record_score: 'desc' as const,
                 },
               },
             },
@@ -136,7 +134,7 @@ export async function getServiceAnomalies({
           serviceName: bucket.key.serviceName as string,
           jobId: bucket.key.jobId as string,
           transactionType: metrics.by_field_value as string,
-          actualValue: metrics.actual as number | null,
+          actualValue: metrics.actual as number,
           anomalyScore,
           healthStatus,
         };

@@ -18,7 +18,6 @@ import {
 import { DETECTION_ENGINE_RULES_IMPORT_URL } from '../../../../../../../common/constants';
 import type { ConfigType } from '../../../../../../config';
 import type { HapiReadableStream, SecuritySolutionPluginRouter } from '../../../../../../types';
-import type { ImportRuleResponse } from '../../../../routes/utils';
 import {
   buildSiemResponse,
   createBulkErrorObject,
@@ -29,8 +28,7 @@ import { createPrebuiltRuleAssetsClient } from '../../../../prebuilt_rules/logic
 import { importRuleActionConnectors } from '../../../logic/import/action_connectors/import_rule_action_connectors';
 import { createRuleSourceImporter } from '../../../logic/import/rule_source_importer';
 import { importRules } from '../../../logic/import/import_rules';
-// eslint-disable-next-line no-restricted-imports
-import { importRulesLegacy } from '../../../logic/import/import_rules_legacy';
+
 import { createPromiseFromRuleImportStream } from '../../../logic/import/create_promise_from_rule_import_stream';
 import { importRuleExceptions } from '../../../logic/import/import_rule_exceptions';
 import { isRuleToImport } from '../../../logic/import/utils';
@@ -39,6 +37,7 @@ import {
   migrateLegacyActionsIds,
 } from '../../../utils/utils';
 import { RULE_MANAGEMENT_IMPORT_EXPORT_SOCKET_TIMEOUT_MS } from '../../timeouts';
+import { createPrebuiltRuleObjectsClient } from '../../../../prebuilt_rules/logic/rule_objects/prebuilt_rule_objects_client';
 
 const CHUNK_PARSED_OBJECT_SIZE = 50;
 
@@ -85,8 +84,8 @@ export const importRulesRoute = (router: SecuritySolutionPluginRouter, config: C
             'licensing',
           ]);
 
+          const rulesClient = await ctx.alerting.getRulesClient();
           const detectionRulesClient = ctx.securitySolution.getDetectionRulesClient();
-          const { isRulesCustomizationEnabled } = detectionRulesClient.getRuleCustomizationStatus();
           const actionsClient = ctx.actions.getActionsClient();
           const actionSOClient = ctx.core.savedObjects.getClient({
             includedHiddenTypes: ['action'],
@@ -158,31 +157,19 @@ export const importRulesRoute = (router: SecuritySolutionPluginRouter, config: C
             config,
             context: ctx.securitySolution,
             prebuiltRuleAssetsClient: createPrebuiltRuleAssetsClient(savedObjectsClient),
-            ruleCustomizationStatus: detectionRulesClient.getRuleCustomizationStatus(),
+            prebuiltRuleObjectsClient: createPrebuiltRuleObjectsClient(rulesClient),
           });
 
           const [parsedRules, parsedRuleErrors] = partition(isRuleToImport, parsedRuleStream);
           const ruleChunks = chunk(CHUNK_PARSED_OBJECT_SIZE, parsedRules);
 
-          let importRuleResponse: ImportRuleResponse[] = [];
-
-          if (isRulesCustomizationEnabled) {
-            importRuleResponse = await importRules({
-              ruleChunks,
-              overwriteRules: request.query.overwrite,
-              allowMissingConnectorSecrets: !!actionConnectors.length,
-              ruleSourceImporter,
-              detectionRulesClient,
-            });
-          } else {
-            importRuleResponse = await importRulesLegacy({
-              ruleChunks,
-              overwriteRules: request.query.overwrite,
-              allowMissingConnectorSecrets: !!actionConnectors.length,
-              detectionRulesClient,
-              savedObjectsClient,
-            });
-          }
+          const importRuleResponse = await importRules({
+            ruleChunks,
+            overwriteRules: request.query.overwrite,
+            allowMissingConnectorSecrets: !!actionConnectors.length,
+            ruleSourceImporter,
+            detectionRulesClient,
+          });
 
           const parseErrors = parsedRuleErrors.map((error) =>
             createBulkErrorObject({

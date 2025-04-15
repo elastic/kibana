@@ -8,10 +8,11 @@
 import { useState, useCallback, useEffect, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 
+import { OutputInvalidError } from '../../../../../../common/errors';
 import { getDefaultFleetServerpolicyId } from '../../../../../../common/services/agent_policies_helpers';
 import type { useComboInput, useInput, useSwitchInput } from '../../../hooks';
 import {
-  sendCreateAgentPolicy,
+  sendCreateAgentPolicyForRq,
   sendGetOneAgentPolicy,
   useFleetStatus,
   useStartServices,
@@ -115,23 +116,40 @@ export const useQuickStartCreateForm = (): QuickStartCreateForm => {
         if (existingPolicy.data?.item) {
           setFleetServerPolicyId(existingPolicy.data?.item.id);
         } else {
-          const createPolicyResponse = await sendCreateAgentPolicy(
+          const createPolicyResponse = await sendCreateAgentPolicyForRq(
             quickStartFleetServerPolicyFields,
             {
               withSysMonitoring: true,
             }
           );
-          setFleetServerPolicyId(createPolicyResponse.data?.item.id);
+          setFleetServerPolicyId(createPolicyResponse.item.id);
         }
-
         setStatus('success');
       }
     } catch (err) {
-      notifications.toasts.addError(err, {
-        title: i18n.translate('xpack.fleet.fleetServerSetup.errorAddingFleetServerHostTitle', {
-          defaultMessage: 'Error adding Fleet Server host',
-        }),
-      });
+      if (err?.attributes?.type === OutputInvalidError.name) {
+        notifications.toasts.addError(err, {
+          title: i18n.translate(
+            'xpack.fleet.fleetServerSetup.errorCreatingFleetServerPolicyTitle',
+            {
+              defaultMessage: 'Error creating a Fleet Server policy',
+            }
+          ),
+          toastMessage: i18n.translate(
+            'xpack.fleet.fleetServerSetup.errorCreatingFleetServerPolicyMessage',
+            {
+              defaultMessage:
+                'Fleet Server policy creation failed as your default output is not an elasticsearch output. Use the advanced section to use an elasticsearch output to create that policy.',
+            }
+          ),
+        });
+      } else {
+        notifications.toasts.addError(err, {
+          title: i18n.translate('xpack.fleet.fleetServerSetup.errorAddingFleetServerHostTitle', {
+            defaultMessage: 'Error adding Fleet Server host',
+          }),
+        });
+      }
 
       setStatus('error');
       setError(err.message);

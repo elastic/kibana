@@ -28,7 +28,7 @@ export function formatDataFrameAnalyticsJobManagementUrl(
   appBasePath: string,
   mlUrlGeneratorState: DataFrameAnalyticsUrlState['pageState']
 ): string {
-  let url = `${appBasePath}/${ML_PAGES.DATA_FRAME_ANALYTICS_JOBS_MANAGE}`;
+  let url = `${appBasePath}`;
 
   if (mlUrlGeneratorState) {
     const { jobId, groupIds, globalState } = mlUrlGeneratorState;
@@ -45,7 +45,7 @@ export function formatDataFrameAnalyticsJobManagementUrl(
       };
 
       const queryState: AppPageState<ListingPageUrlState> = {
-        [ML_PAGES.DATA_FRAME_ANALYTICS_JOBS_MANAGE]: jobsListState,
+        [ML_PAGES.DATA_FRAME_ANALYTICS_JOBS_MANAGE_FOR_URL]: jobsListState,
       };
 
       url = setStateToKbnUrl<AppPageState<ListingPageUrlState>>(

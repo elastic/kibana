@@ -36,6 +36,7 @@ export const uiSettings: Record<string, UiSettingsParams> = {
     schema: schema.boolean(),
     type: 'boolean',
     requiresPageReload: true,
+    solution: 'oblt',
   },
   [aiAssistantSearchConnectorIndexPattern]: {
     category: ['observability'],
@@ -54,5 +55,6 @@ export const uiSettings: Record<string, UiSettingsParams> = {
     schema: schema.string(),
     type: 'string',
     requiresPageReload: true,
+    solution: 'oblt',
   },
 };

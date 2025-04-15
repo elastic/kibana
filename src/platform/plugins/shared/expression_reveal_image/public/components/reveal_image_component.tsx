@@ -11,7 +11,7 @@ import React, { useRef, useState, useEffect, useCallback } from 'react';
 import { useResizeObserver } from '@elastic/eui';
 import { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/common';
 import { css, CSSObject } from '@emotion/react';
-import { isValidUrl } from '@kbn/presentation-util-plugin/common';
+import { isValidUrl } from '@kbn/expression-utils';
 import { NodeDimensions, RevealImageRendererConfig, OriginString } from '../../common/types';
 
 const revealImageParentStyle = css`

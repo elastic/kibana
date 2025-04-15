@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import axios, { AxiosResponse } from 'axios';
+import type { AxiosResponse } from 'axios';
+import axios from 'axios';
 
-import { Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import { renderMustacheStringNoEscape } from '@kbn/actions-plugin/server/lib/mustache_renderer';
 import { request } from '@kbn/actions-plugin/server/lib/axios_utils';
-import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
+import type { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
 import { combineHeadersWithBasicAuthHeader } from '@kbn/actions-plugin/server/lib';
-import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
+import type { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 import { buildConnectorAuth, validateConnectorAuthConfiguration } from '../../../common/auth/utils';
 import { WebhookMethods } from '../../../common/auth/constants';
 import { validateAndNormalizeUrl, validateJson } from './validators';

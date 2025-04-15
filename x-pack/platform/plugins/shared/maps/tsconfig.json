@@ -5,6 +5,7 @@
     "allowJs": true
   },
   "include": [
+    "*.ts",
     "common/**/*",
     "public/**/*",
     "server/**/*",
@@ -93,6 +94,7 @@
     "@kbn/field-utils",
     "@kbn/react-hooks",
     "@kbn/scout",
+    "@kbn/react-kibana-mount",
   ],
   "exclude": [
     "target/**/*",

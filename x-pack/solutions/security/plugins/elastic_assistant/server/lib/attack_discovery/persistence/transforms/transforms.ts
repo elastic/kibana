@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { estypes } from '@elastic/elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 import { AttackDiscoveryResponse } from '@kbn/elastic-assistant-common';
 import { EsAttackDiscoverySchema } from '../types';
 
@@ -42,6 +42,7 @@ export const transformESSearchToAttackDiscovery = (
         },
         attackDiscoveries: adSchema.attack_discoveries.map((attackDiscovery) => ({
           alertIds: attackDiscovery.alert_ids,
+          id: attackDiscovery.id,
           title: attackDiscovery.title,
           detailsMarkdown: attackDiscovery.details_markdown,
           entitySummaryMarkdown: attackDiscovery.entity_summary_markdown,

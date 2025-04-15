@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { Story } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import React from 'react';
 import { HttpStart } from '@kbn/core/public';
@@ -17,7 +16,7 @@ import type { AutocompleteStart } from '@kbn/unified-search-plugin/public';
 import { fields } from '@kbn/data-plugin/common/mocks';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 
-import { BuilderEntryItem, EntryItemProps } from './entry_renderer';
+import { BuilderEntryItem } from './entry_renderer';
 
 const mockAutocompleteService = {
   getValueSuggestions: () =>
@@ -167,36 +166,35 @@ export default {
   title: 'BuilderEntryItem',
 };
 
-const BuilderEntryItemTemplate: Story<EntryItemProps> = (args) => <BuilderEntryItem {...args} />;
+export const Default = {
+  args: {
+    autocompleteService: mockAutocompleteService,
 
-export const Default = BuilderEntryItemTemplate.bind({});
-Default.args = {
-  autocompleteService: mockAutocompleteService,
-
-  entry: {
-    correspondingKeywordField: undefined,
-    entryIndex: 0,
-    field: undefined,
-    id: 'e37ad550-05d2-470e-9a95-487db201ab56',
-    nested: undefined,
-    operator: {
-      message: 'is',
-      operator: OperatorEnum.INCLUDED,
-      type: OperatorTypeEnum.MATCH,
-      value: 'is',
+    entry: {
+      correspondingKeywordField: undefined,
+      entryIndex: 0,
+      field: undefined,
+      id: 'e37ad550-05d2-470e-9a95-487db201ab56',
+      nested: undefined,
+      operator: {
+        message: 'is',
+        operator: OperatorEnum.INCLUDED,
+        type: OperatorTypeEnum.MATCH,
+        value: 'is',
+      },
+      parent: undefined,
+      value: '',
     },
-    parent: undefined,
-    value: '',
+    httpService: {} as HttpStart,
+    indexPattern: {
+      fields,
+      id: '1234',
+      title: 'logstash-*',
+    },
+    listType: 'detection',
+    onChange: action('onClick'),
+    onlyShowListOperators: false,
+    setErrorsExist: action('onClick'),
+    showLabel: false,
   },
-  httpService: {} as HttpStart,
-  indexPattern: {
-    fields,
-    id: '1234',
-    title: 'logstash-*',
-  },
-  listType: 'detection',
-  onChange: action('onClick'),
-  onlyShowListOperators: false,
-  setErrorsExist: action('onClick'),
-  showLabel: false,
 };

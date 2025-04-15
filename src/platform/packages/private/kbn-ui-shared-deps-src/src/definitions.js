@@ -57,6 +57,9 @@ const externals = {
   // this is how plugins/consumers from npm load monaco
   'monaco-editor/esm/vs/editor/editor.api': '__kbnSharedDeps__.MonacoBarePluginApi',
   'io-ts': '__kbnSharedDeps__.IoTs',
+  'io-ts/lib/Reporter': '__kbnSharedDeps__.IoTsReporter',
+  'io-ts/lib/PathReporter': '__kbnSharedDeps__.IoTsPathReporter',
+  'io-ts/lib/ThrowReporter': '__kbnSharedDeps__.IoTsThrowReporter',
   '@reduxjs/toolkit': '__kbnSharedDeps__.ReduxjsToolkit',
   'react-redux': '__kbnSharedDeps__.ReactRedux',
   redux: '__kbnSharedDeps__.Redux',
@@ -75,8 +78,7 @@ const externals = {
   '@elastic/eui': '__kbnSharedDeps__.ElasticEui',
   '@elastic/eui/lib/components/provider/nested':
     '__kbnSharedDeps__.ElasticEuiLibComponentsUseIsNestedEuiProvider',
-  '@elastic/eui/lib/services': '__kbnSharedDeps__.ElasticEuiLibServices',
-  '@elastic/eui/lib/services/format': '__kbnSharedDeps__.ElasticEuiLibServicesFormat',
+  '@elastic/eui/lib/services/theme/warning': '__kbnSharedDeps__.ElasticEuiLibServicesThemeWarning',
   '@elastic/eui-theme-borealis': '__kbnSharedDeps__.ElasticEuiThemeBorealis',
 
   // transient dep of eui

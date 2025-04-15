@@ -6,7 +6,7 @@
  */
 
 import _ from 'lodash';
-import type { TopLeftBottomRightGeoBounds } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { TopLeftBottomRightGeoBounds } from '@elastic/elasticsearch/lib/api/types';
 import { i18n } from '@kbn/i18n';
 import { Feature, FeatureCollection, Geometry, Polygon, Point, Position } from 'geojson';
 import { BBox } from '@turf/helpers';

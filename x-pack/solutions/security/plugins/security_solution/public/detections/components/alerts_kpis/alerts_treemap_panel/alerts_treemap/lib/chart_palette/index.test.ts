@@ -10,7 +10,7 @@ import {
   RISK_SCORE_MEDIUM,
   RISK_SCORE_HIGH,
   RISK_SCORE_CRITICAL,
-} from '../../../../../../../common/constants';
+} from '../../../../../../../../common/detection_engine/constants';
 import { getFillColor, getRiskScorePalette, RISK_SCORE_STEPS } from '.';
 import { renderHook } from '@testing-library/react';
 import { getRiskSeverityColors } from '../../../../../../../common/utils/risk_color_palette';
@@ -24,7 +24,7 @@ describe('getFillColor', () => {
     const expectedColorPalette = getRiskSeverityColors(euiTheme);
 
     it('returns the expected fill color', () => {
-      expect(getFillColor({ riskScore: 50, colorPalette })).toEqual('#F1D86F');
+      expect(getFillColor({ riskScore: 50, colorPalette })).toEqual('#D6BF57');
     });
 
     it('returns the expected fill color when risk score is zero', () => {
@@ -36,11 +36,11 @@ describe('getFillColor', () => {
     });
 
     it('returns the expected fill color when risk score is 100', () => {
-      expect(getFillColor({ riskScore: 100, colorPalette })).toEqual('#bd271e');
+      expect(getFillColor({ riskScore: 100, colorPalette })).toEqual('#E7664C');
     });
 
     it('returns the expected fill color when risk score is greater than 100', () => {
-      expect(getFillColor({ riskScore: 101, colorPalette })).toEqual('#bd271e');
+      expect(getFillColor({ riskScore: 101, colorPalette })).toEqual('#E7664C');
     });
 
     it('returns the expected fill color when risk score is greater than RISK_SCORE_CRITICAL', () => {
@@ -90,23 +90,23 @@ describe('getFillColor', () => {
     const colorPalette = euiPaletteWarm(RISK_SCORE_STEPS);
 
     it('returns the expected fill color', () => {
-      expect(getFillColor({ riskScore: 50, colorPalette })).toEqual('#efb685');
+      expect(getFillColor({ riskScore: 50, colorPalette })).toEqual('#ffaea5');
     });
 
     it('returns the expected fill color when risk score is zero', () => {
-      expect(getFillColor({ riskScore: 0, colorPalette })).toEqual('#fbfada');
+      expect(getFillColor({ riskScore: 0, colorPalette })).toEqual('#ffe7e4');
     });
 
     it('returns the expected fill color when risk score is less than zero', () => {
-      expect(getFillColor({ riskScore: -1, colorPalette })).toEqual('#fbfada');
+      expect(getFillColor({ riskScore: -1, colorPalette })).toEqual('#ffe7e4');
     });
 
     it('returns the expected fill color when risk score is 100', () => {
-      expect(getFillColor({ riskScore: 100, colorPalette })).toEqual('#e7664c');
+      expect(getFillColor({ riskScore: 100, colorPalette })).toEqual('#f6726a');
     });
 
     it('returns the expected fill color when risk score is greater than 100', () => {
-      expect(getFillColor({ riskScore: 101, colorPalette })).toEqual('#e7664c');
+      expect(getFillColor({ riskScore: 101, colorPalette })).toEqual('#f6726a');
     });
   });
 });

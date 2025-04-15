@@ -26,10 +26,14 @@ export const SEARCH_INDEX_TAB_DETAIL_PATH = `${SEARCH_INDEX_TAB_PATH}/:detailId`
 export const SEARCH_INDEX_CRAWLER_DOMAIN_DETAIL_PATH = `${SEARCH_INDEX_TAB_PATH}/:domainId`;
 export const OLD_SEARCH_INDEX_CRAWLER_DOMAIN_DETAIL_PATH = `${SEARCH_INDEX_PATH}/crawler/domains/:domainId`;
 
-export const ML_MANAGE_TRAINED_MODELS_PATH = '/app/ml/trained_models';
+export const ML_MANAGE_TRAINED_MODELS_PATH = '/app/management/ml/trained_models';
 export const ML_NOTIFICATIONS_PATH = '/app/ml/notifications';
 
 export const DEV_TOOLS_CONSOLE_PATH = '/app/dev_tools#/console';
 
 export const CONNECTOR_DETAIL_PATH = `${CONNECTORS_PATH}/:connectorId`;
 export const CONNECTOR_DETAIL_TAB_PATH = `${CONNECTOR_DETAIL_PATH}/:tabId`;
+export const CONNECTOR_INTEGRATION_DETAIL_PATH = `/app/integrations/detail/elastic_connectors/policies?integration=:serviceType`;
+export const FLEET_AGENT_DETAIL_PATH = `/app/fleet/agents/:agentId`;
+export const FLEET_AGENT_DETAIL_LOGS_PATH = `${FLEET_AGENT_DETAIL_PATH}/logs`;
+export const FLEET_POLICY_DETAIL_PATH = `/app/fleet/policies/:policyId`;

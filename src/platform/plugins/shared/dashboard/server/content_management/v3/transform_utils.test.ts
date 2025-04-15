@@ -8,17 +8,6 @@
  */
 
 import type { SavedObject } from '@kbn/core-saved-objects-api-server';
-import type {
-  DashboardSavedObjectAttributes,
-  SavedDashboardPanel,
-} from '../../dashboard_saved_object';
-import type { DashboardAttributes, DashboardItem } from './types';
-import {
-  dashboardAttributesOut,
-  getResultV3ToV2,
-  itemAttrsToSavedObjectAttrs,
-  savedObjectToItem,
-} from './transform_utils';
 import {
   DEFAULT_AUTO_APPLY_SELECTIONS,
   DEFAULT_CONTROL_CHAINING,
@@ -30,6 +19,19 @@ import {
   ControlGroupChainingSystem,
   ControlWidth,
 } from '@kbn/controls-plugin/common';
+
+import type {
+  DashboardSavedObjectAttributes,
+  SavedDashboardPanel,
+} from '../../dashboard_saved_object';
+import type { DashboardAttributes, DashboardItem } from './types';
+
+import {
+  dashboardAttributesOut,
+  getResultV3ToV2,
+  itemAttrsToSavedObject,
+  savedObjectToItem,
+} from './transform_utils';
 import { DEFAULT_DASHBOARD_OPTIONS } from '../../../common/content_management';
 
 describe('dashboardAttributesOut', () => {
@@ -205,8 +207,8 @@ describe('dashboardAttributesOut', () => {
   });
 });
 
-describe('itemAttrsToSavedObjectAttrs', () => {
-  it('should transform item attributes to saved object attributes correctly', () => {
+describe('itemAttrsToSavedObject', () => {
+  it('should transform item attributes to saved object correctly', () => {
     const input: DashboardAttributes = {
       controlGroupInput: {
         chainingSystem: 'NONE',
@@ -250,6 +252,7 @@ describe('itemAttrsToSavedObjectAttrs', () => {
           version: '2',
         },
       ],
+      tags: [],
       timeRestore: true,
       title: 'title',
       refreshInterval: { pause: true, value: 1000 },
@@ -257,7 +260,7 @@ describe('itemAttrsToSavedObjectAttrs', () => {
       timeTo: 'now',
     };
 
-    const output = itemAttrsToSavedObjectAttrs(input);
+    const output = itemAttrsToSavedObject({ attributes: input });
     expect(output).toMatchInlineSnapshot(`
       Object {
         "attributes": Object {
@@ -265,7 +268,7 @@ describe('itemAttrsToSavedObjectAttrs', () => {
             "chainingSystem": "NONE",
             "controlStyle": "twoLine",
             "ignoreParentSettingsJSON": "{\\"ignoreFilters\\":true,\\"ignoreQuery\\":true,\\"ignoreTimerange\\":true,\\"ignoreValidations\\":true}",
-            "panelsJSON": "{\\"foo\\":{\\"grow\\":false,\\"order\\":0,\\"type\\":\\"type1\\",\\"width\\":\\"small\\",\\"explicitInput\\":{\\"anyKey\\":\\"some value\\",\\"id\\":\\"foo\\"}}}",
+            "panelsJSON": "{\\"foo\\":{\\"grow\\":false,\\"order\\":0,\\"type\\":\\"type1\\",\\"width\\":\\"small\\",\\"explicitInput\\":{\\"anyKey\\":\\"some value\\"}}}",
             "showApplySelections": true,
           },
           "description": "description",
@@ -284,6 +287,7 @@ describe('itemAttrsToSavedObjectAttrs', () => {
           "title": "title",
         },
         "error": null,
+        "references": Array [],
       }
     `);
   });
@@ -298,7 +302,7 @@ describe('itemAttrsToSavedObjectAttrs', () => {
       kibanaSavedObjectMeta: {},
     };
 
-    const output = itemAttrsToSavedObjectAttrs(input);
+    const output = itemAttrsToSavedObject({ attributes: input });
     expect(output).toMatchInlineSnapshot(`
       Object {
         "attributes": Object {
@@ -312,6 +316,7 @@ describe('itemAttrsToSavedObjectAttrs', () => {
           "title": "title",
         },
         "error": null,
+        "references": Array [],
       }
     `);
   });
@@ -333,6 +338,13 @@ describe('savedObjectToItem', () => {
       attributes,
     };
   };
+
+  const getTagNamesFromReferences = jest.fn();
+
+  beforeEach(() => {
+    jest.resetAllMocks();
+  });
+
   it('should convert saved object to item with all attributes', () => {
     const input = getSavedObjectForAttributes({
       title: 'title',
@@ -392,6 +404,51 @@ describe('savedObjectToItem', () => {
         kibanaSavedObjectMeta: {
           searchSource: { query: { query: 'test', language: 'KQL' } },
         },
+      },
+    });
+  });
+
+  it('should pass references to getTagNamesFromReferences', () => {
+    getTagNamesFromReferences.mockReturnValue(['tag1', 'tag2']);
+    const input = {
+      ...getSavedObjectForAttributes({
+        title: 'dashboard with tags',
+        description: 'I have some tags!',
+        timeRestore: true,
+        kibanaSavedObjectMeta: {},
+        panelsJSON: JSON.stringify([]),
+      }),
+      references: [
+        {
+          type: 'tag',
+          id: 'tag1',
+          name: 'tag-ref-tag1',
+        },
+        {
+          type: 'tag',
+          id: 'tag2',
+          name: 'tag-ref-tag2',
+        },
+        {
+          type: 'index-pattern',
+          id: 'index-pattern1',
+          name: 'index-pattern-ref-index-pattern1',
+        },
+      ],
+    };
+    const { item, error } = savedObjectToItem(input, false, { getTagNamesFromReferences });
+    expect(getTagNamesFromReferences).toHaveBeenCalledWith(input.references);
+    expect(error).toBeNull();
+    expect(item).toEqual({
+      ...commonSavedObject,
+      references: [...input.references],
+      attributes: {
+        title: 'dashboard with tags',
+        description: 'I have some tags!',
+        panels: [],
+        timeRestore: true,
+        kibanaSavedObjectMeta: {},
+        tags: ['tag1', 'tag2'],
       },
     });
   });
@@ -587,7 +644,7 @@ describe('getResultV3ToV2', () => {
 
     // Check transformed attributes
     expect(output.item.attributes.controlGroupInput!.panelsJSON).toMatchInlineSnapshot(
-      `"{\\"foo\\":{\\"grow\\":false,\\"order\\":0,\\"type\\":\\"type1\\",\\"width\\":\\"small\\",\\"explicitInput\\":{\\"bizz\\":\\"buzz\\",\\"id\\":\\"foo\\"}}}"`
+      `"{\\"foo\\":{\\"grow\\":false,\\"order\\":0,\\"type\\":\\"type1\\",\\"width\\":\\"small\\",\\"explicitInput\\":{\\"bizz\\":\\"buzz\\"}}}"`
     );
     expect(
       output.item.attributes.controlGroupInput!.ignoreParentSettingsJSON

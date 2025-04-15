@@ -93,7 +93,7 @@ export const getVisualization = ({
           supportsMoreColumns: !state.regionAccessor,
           filterOperations: (op: OperationMetadata) => op.isBucketed && op.dataType === 'string',
           enableDimensionEditor: true,
-          required: true,
+          requiredMinDimensionCount: 1,
           dataTestSubj: 'lnsChoropleth_regionKeyDimensionPanel',
         },
         {
@@ -106,7 +106,8 @@ export const getVisualization = ({
           supportsMoreColumns: !state.valueAccessor,
           filterOperations: (op: OperationMetadata) => !op.isBucketed && op.dataType === 'number',
           enableDimensionEditor: true,
-          required: true,
+          isMetricDimension: true,
+          requiredMinDimensionCount: 1,
           dataTestSubj: 'lnsChoropleth_valueDimensionPanel',
         },
       ],

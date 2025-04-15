@@ -52,7 +52,6 @@ import {
   initializeTimelineSettings,
   updateItemsPerPage,
   updateItemsPerPageOptions,
-  applyDeltaToColumnWidth,
   clearEventsDeleted,
   clearEventsLoading,
   updateSavedSearchId,
@@ -93,14 +92,13 @@ import {
   updateFilters,
   updateTimelineSessionViewConfig,
   setLoadingTableEvents,
-  removeTableColumn,
-  upsertTableColumn,
-  updateTableColumns,
-  updateTableSort,
+  removeTimelineColumn,
+  upsertTimelineColumn,
+  updateTimelineColumns,
+  updateTimelineSort,
   setSelectedTableEvents,
   setDeletedTableEvents,
   setInitializeTimelineSettings,
-  applyDeltaToTableColumnWidth,
   updateTimelinePerPageOptions,
   updateTimelineItemsPerPage,
   updateTimelineColumnWidth,
@@ -390,7 +388,7 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
   }))
   .case(removeColumn, (state, { id, columnId }) => ({
     ...state,
-    timelineById: removeTableColumn({
+    timelineById: removeTimelineColumn({
       id,
       columnId,
       timelineById: state.timelineById,
@@ -398,11 +396,11 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
   }))
   .case(upsertColumn, (state, { column, id, index }) => ({
     ...state,
-    timelineById: upsertTableColumn({ column, id, index, timelineById: state.timelineById }),
+    timelineById: upsertTimelineColumn({ column, id, index, timelineById: state.timelineById }),
   }))
   .case(updateColumns, (state, { id, columns }) => ({
     ...state,
-    timelineById: updateTableColumns({
+    timelineById: updateTimelineColumns({
       id,
       columns,
       timelineById: state.timelineById,
@@ -410,7 +408,7 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
   }))
   .case(updateSort, (state, { id, sort }) => ({
     ...state,
-    timelineById: updateTableSort({ id, sort, timelineById: state.timelineById }),
+    timelineById: updateTimelineSort({ id, sort, timelineById: state.timelineById }),
   }))
   .case(setSelected, (state, { id, eventIds, isSelected, isSelectAllChecked }) => ({
     ...state,
@@ -463,15 +461,6 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
     timelineById: updateTimelinePerPageOptions({
       id,
       itemsPerPageOptions,
-      timelineById: state.timelineById,
-    }),
-  }))
-  .case(applyDeltaToColumnWidth, (state, { id, columnId, delta }) => ({
-    ...state,
-    timelineById: applyDeltaToTableColumnWidth({
-      id,
-      columnId,
-      delta,
       timelineById: state.timelineById,
     }),
   }))

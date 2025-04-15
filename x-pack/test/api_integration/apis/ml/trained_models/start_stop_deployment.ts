@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import type { MlGetTrainedModelsStatsResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { MlGetTrainedModelsStatsResponse } from '@elastic/elasticsearch/lib/api/types';
 import { SUPPORTED_TRAINED_MODELS } from '../../../../functional/services/ml/api';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../../functional/services/ml/security_common';
@@ -83,7 +83,7 @@ export default ({ getService }: FtrProviderContext) => {
         statsResponse as MlGetTrainedModelsStatsResponse
       ).trained_model_stats.find((v) => v.deployment_stats?.deployment_id === testModel.id);
 
-      expect(modelStats!.deployment_stats!.allocation_status.state).to.match(
+      expect(modelStats!.deployment_stats!.allocation_status?.state).to.match(
         /\bstarted\b|\bfully_allocated\b/
       );
     });
@@ -110,7 +110,7 @@ export default ({ getService }: FtrProviderContext) => {
         statsResponse as MlGetTrainedModelsStatsResponse
       ).trained_model_stats.find((v) => v.deployment_stats?.deployment_id === customDeploymentId);
 
-      expect(modelStats!.deployment_stats!.allocation_status.state).to.match(
+      expect(modelStats!.deployment_stats!.allocation_status?.state).to.match(
         /\bstarted\b|\bfully_allocated\b/
       );
     });
@@ -141,7 +141,7 @@ export default ({ getService }: FtrProviderContext) => {
         statsResponse as MlGetTrainedModelsStatsResponse
       ).trained_model_stats.find((v) => v.deployment_stats?.deployment_id === testModel.id);
 
-      expect(modelStats!.deployment_stats!.allocation_status.state).to.match(
+      expect(modelStats!.deployment_stats!.allocation_status?.state).to.match(
         /\bstarted\b|\bfully_allocated\b/
       );
     });

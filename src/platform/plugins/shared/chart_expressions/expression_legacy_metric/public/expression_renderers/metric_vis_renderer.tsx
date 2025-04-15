@@ -27,6 +27,7 @@ import {
   extractContainerType,
   extractVisualizationType,
 } from '@kbn/chart-expressions-common';
+import { css } from '@emotion/react';
 import { ExpressionLegacyMetricPluginStart } from '../plugin';
 import { EXPRESSION_METRIC_NAME, MetricVisRenderConfig, VisParams } from '../../common';
 
@@ -113,10 +114,11 @@ export const getMetricVisRenderer: (
       <KibanaRenderContextProvider {...core}>
         <VisualizationContainer
           data-test-subj="legacyMtrVis"
-          className="legacyMtrVis"
+          className="eui-scrollBar legacyMtrVis"
           showNoResult={!visData.rows?.length}
           renderComplete={renderComplete}
           handlers={handlers}
+          css={legacyMtrVisCss}
         >
           <MetricVisComponent
             visData={visData}
@@ -130,4 +132,15 @@ export const getMetricVisRenderer: (
       domNode
     );
   },
+});
+
+const legacyMtrVisCss = css({
+  height: '100%',
+  width: '100%',
+  display: 'flex',
+  flexDirection: 'row',
+  justifyContent: 'center',
+  alignItems: 'center',
+  flexWrap: 'wrap',
+  overflow: 'auto',
 });

@@ -70,6 +70,7 @@ export interface DocLinks {
     readonly configuration: string;
     readonly elasticsearchOutput: string;
     readonly elasticsearchModule: string;
+    readonly kafkaOutput: string;
     readonly startup: string;
     readonly exportedFields: string;
     readonly suricataModule: string;
@@ -140,6 +141,7 @@ export interface DocLinks {
     readonly engines: string;
     readonly indexApi: string;
     readonly inferenceApiCreate: string;
+    readonly inferenceApisConfigureChunking: string;
     readonly ingestionApis: string;
     readonly ingestPipelines: string;
     readonly knnSearch: string;
@@ -167,6 +169,7 @@ export interface DocLinks {
     readonly textEmbedding: string;
     readonly troubleshootSetup: string;
     readonly usersAccess: string;
+    readonly upgrade9x: string;
   };
   readonly heartbeat: {
     readonly base: string;
@@ -259,7 +262,9 @@ export interface DocLinks {
   readonly upgradeAssistant: {
     readonly overview: string;
     readonly batchReindex: string;
+    readonly indexBlocks: string;
     readonly remoteReindex: string;
+    readonly unfreezeApi: string;
     readonly reindexWithPipeline: string;
   };
   readonly rollupJobs: string;
@@ -309,6 +314,8 @@ export interface DocLinks {
     readonly privileges: string;
     readonly manageDetectionRules: string;
     readonly createDetectionRules: string;
+    readonly updatePrebuiltDetectionRules: string;
+    readonly prebuiltRuleCustomizationPromoBlog: string;
     readonly createEsqlRuleType: string;
     readonly ruleUiAdvancedParams: string;
     readonly entityAnalytics: {
@@ -319,7 +326,9 @@ export interface DocLinks {
     readonly detectionEngineOverview: string;
     readonly signalsMigrationApi: string;
     readonly legacyEndpointManagementApiDeprecations: string;
-    readonly legacyBulkApiDeprecations: string;
+    readonly legacyRuleManagementBulkApiDeprecations: string;
+    readonly siemMigrations: string;
+    readonly llmPerformanceMatrix: string;
   };
   readonly query: {
     readonly eql: string;
@@ -424,7 +433,6 @@ export interface DocLinks {
     slackApiAction: string;
     teamsAction: string;
     connectors: string;
-    legacyRuleApiDeprecations: string;
   }>;
   readonly taskManager: Readonly<{
     healthMonitoring: string;
@@ -439,7 +447,6 @@ export interface DocLinks {
   readonly monitoring: Record<string, string>;
   readonly reporting: Readonly<{
     cloudMinimumRequirements: string;
-    grantUserAccess: string;
     browserSystemDependencies: string;
     browserSandboxDependencies: string;
   }>;
@@ -457,6 +464,7 @@ export interface DocLinks {
     mappingRolesFieldRules: string;
     runAsPrivilege: string;
     deprecatedV1Endpoints: string;
+    enableElasticSearchSecurityFeatures: string;
   }>;
   readonly spaces: Readonly<{
     kibanaLegacyUrlAliases: string;
@@ -517,6 +525,7 @@ export interface DocLinks {
     proxiesSettings: string;
     unprivilegedMode: string;
     httpMonitoring: string;
+    agentLevelLogging: string;
   }>;
   readonly integrationDeveloper: {
     upload: string;
@@ -630,11 +639,12 @@ export interface DocLinks {
   readonly inferenceManagement: {
     readonly inferenceAPIDocumentation: string;
   };
-  readonly cases: {
-    readonly legacyApiDeprecations: string;
-  };
   readonly synonyms: {
     readonly synonymsAPIDocumentation: string;
+  };
+
+  readonly queryRules: {
+    readonly queryRulesAPIDocumentation: string;
   };
 }
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SecurityService } from '@kbn/ftr-common-functional-ui-services';
+import type { SecurityService } from '@kbn/ftr-common-functional-services';
 
 export const testUsers: {
   [rollName: string]: { username: string; password: string; permissions?: any };

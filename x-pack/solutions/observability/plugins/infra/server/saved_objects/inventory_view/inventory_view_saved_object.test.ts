@@ -57,5 +57,24 @@ describe('invetoryViewSavedObject model version transformation', () => {
       });
       expect(migrated.attributes).toEqual(inventoryViewV2.attributes);
     });
+
+    it('should return unaltered document if legend is not defined when converting from v1 to v2', () => {
+      const { legend, ...inventoryViewV2bAttributes } = inventoryViewV2.attributes;
+      const inventoryViewV1b = JSON.parse(
+        JSON.stringify({ ...inventoryViewV2, attributes: inventoryViewV2bAttributes })
+      );
+      delete inventoryViewV1b.attributes.legend;
+      const migrated = migrator.migrate({
+        document: {
+          ...inventoryViewV1b,
+          attributes: {
+            ...inventoryViewV1b.attributes,
+          },
+        },
+        fromVersion: 1,
+        toVersion: 2,
+      });
+      expect(migrated.attributes).toEqual(inventoryViewV2bAttributes);
+    });
   });
 });

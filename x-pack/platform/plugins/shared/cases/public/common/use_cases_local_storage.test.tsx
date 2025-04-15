@@ -7,14 +7,13 @@
 
 import { renderHook, act } from '@testing-library/react';
 import { Subject } from 'rxjs';
-import type { AppMockRenderer } from './mock/test_providers';
-import { createAppMockRenderer } from './mock/test_providers';
+import { TestProviders } from './mock/test_providers';
 import { useCasesLocalStorage } from './use_cases_local_storage';
+import React from 'react';
+import { coreMock } from '@kbn/core/public/mocks';
 
 describe('useCasesLocalStorage', () => {
   const initialValue = { foo: 'bar' };
-
-  let appMockRender: AppMockRenderer;
 
   beforeEach(() => {
     localStorage.clear();
@@ -24,13 +23,9 @@ describe('useCasesLocalStorage', () => {
     const lsKey = 'myKey';
     const ownerLSKey = `securitySolution.${lsKey}`;
 
-    beforeEach(() => {
-      appMockRender = createAppMockRenderer();
-    });
-
     it('initialize the local storage correctly', async () => {
       const { result } = renderHook(() => useCasesLocalStorage(lsKey, initialValue), {
-        wrapper: appMockRender.AppWrapper,
+        wrapper: TestProviders,
       });
 
       expect(result.current[0]).toEqual(initialValue);
@@ -41,7 +36,7 @@ describe('useCasesLocalStorage', () => {
       localStorage.setItem(ownerLSKey, '{"foo":"new value"}');
 
       const { result } = renderHook(() => useCasesLocalStorage(lsKey, initialValue), {
-        wrapper: appMockRender.AppWrapper,
+        wrapper: TestProviders,
       });
 
       expect(result.current[0]).toEqual({ foo: 'new value' });
@@ -50,7 +45,7 @@ describe('useCasesLocalStorage', () => {
 
     it('persists to the local storage correctly', async () => {
       const { result } = renderHook(() => useCasesLocalStorage(lsKey, initialValue), {
-        wrapper: appMockRender.AppWrapper,
+        wrapper: TestProviders,
       });
 
       act(() => {
@@ -65,7 +60,7 @@ describe('useCasesLocalStorage', () => {
       localStorage.setItem(ownerLSKey, 'test');
 
       const { result } = renderHook(() => useCasesLocalStorage(lsKey, initialValue), {
-        wrapper: appMockRender.AppWrapper,
+        wrapper: TestProviders,
       });
 
       expect(result.current[0]).toEqual(initialValue);
@@ -73,9 +68,10 @@ describe('useCasesLocalStorage', () => {
     });
 
     it('supports multiple owners correctly', async () => {
-      appMockRender = createAppMockRenderer({ owner: ['securitySolution', 'observability'] });
       const { result } = renderHook(() => useCasesLocalStorage(lsKey, initialValue), {
-        wrapper: appMockRender.AppWrapper,
+        wrapper: (props) => (
+          <TestProviders {...props} owner={['securitySolution', 'observability']} />
+        ),
       });
 
       expect(result.current[0]).toEqual(initialValue);
@@ -87,13 +83,9 @@ describe('useCasesLocalStorage', () => {
     const lsKey = 'myKey';
     const ownerLSKey = `testAppId.${lsKey}`;
 
-    beforeEach(() => {
-      appMockRender = createAppMockRenderer({ owner: [] });
-    });
-
     it('initialize the local storage correctly', async () => {
       const { result } = renderHook(() => useCasesLocalStorage(lsKey, initialValue), {
-        wrapper: appMockRender.AppWrapper,
+        wrapper: (props) => <TestProviders {...props} owner={[]} />,
       });
 
       expect(result.current[0]).toEqual(initialValue);
@@ -104,7 +96,7 @@ describe('useCasesLocalStorage', () => {
       localStorage.setItem(ownerLSKey, '{"foo":"new value"}');
 
       const { result } = renderHook(() => useCasesLocalStorage(lsKey, initialValue), {
-        wrapper: appMockRender.AppWrapper,
+        wrapper: (props) => <TestProviders {...props} owner={[]} />,
       });
 
       expect(result.current[0]).toEqual({ foo: 'new value' });
@@ -113,7 +105,7 @@ describe('useCasesLocalStorage', () => {
 
     it('persists to the local storage correctly', async () => {
       const { result } = renderHook(() => useCasesLocalStorage(lsKey, initialValue), {
-        wrapper: appMockRender.AppWrapper,
+        wrapper: (props) => <TestProviders {...props} owner={[]} />,
       });
 
       act(() => {
@@ -128,7 +120,7 @@ describe('useCasesLocalStorage', () => {
       localStorage.setItem(ownerLSKey, 'test');
 
       const { result } = renderHook(() => useCasesLocalStorage(lsKey, initialValue), {
-        wrapper: appMockRender.AppWrapper,
+        wrapper: (props) => <TestProviders {...props} owner={[]} />,
       });
 
       expect(result.current[0]).toEqual(initialValue);
@@ -136,10 +128,11 @@ describe('useCasesLocalStorage', () => {
     });
 
     it('returns the initial value and not persist to local storage if the appId is not defined', async () => {
-      appMockRender.coreStart.application.currentAppId$ = new Subject();
+      const coreStart = coreMock.createStart();
+      coreStart.application.currentAppId$ = new Subject();
 
       const { result } = renderHook(() => useCasesLocalStorage(lsKey, initialValue), {
-        wrapper: appMockRender.AppWrapper,
+        wrapper: (props) => <TestProviders {...props} owner={[]} coreStart={coreStart} />,
       });
 
       expect(result.current[0]).toEqual(initialValue);

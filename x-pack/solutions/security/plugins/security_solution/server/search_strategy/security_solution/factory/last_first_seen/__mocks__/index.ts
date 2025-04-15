@@ -125,24 +125,22 @@ export const formattedSearchStrategyFirstResponse = {
           ],
           ignore_unavailable: true,
           track_total_hits: false,
-          body: {
-            query: { bool: { filter: [{ term: { 'host.name': 'siem-kibana' } }] } },
-            _source: false,
-            fields: [
-              {
-                field: '@timestamp',
-                format: 'strict_date_optional_time',
+          query: { bool: { filter: [{ term: { 'host.name': 'siem-kibana' } }] } },
+          _source: false,
+          fields: [
+            {
+              field: '@timestamp',
+              format: 'strict_date_optional_time',
+            },
+          ],
+          size: 1,
+          sort: [
+            {
+              '@timestamp': {
+                order: Direction.asc,
               },
-            ],
-            size: 1,
-            sort: [
-              {
-                '@timestamp': {
-                  order: Direction.asc,
-                },
-              },
-            ],
-          },
+            },
+          ],
         },
         null,
         2
@@ -194,24 +192,22 @@ export const formattedSearchStrategyLastResponse = {
           ],
           ignore_unavailable: true,
           track_total_hits: false,
-          body: {
-            query: { bool: { filter: [{ term: { 'host.name': 'siem-kibana' } }] } },
-            _source: false,
-            fields: [
-              {
-                field: '@timestamp',
-                format: 'strict_date_optional_time',
+          query: { bool: { filter: [{ term: { 'host.name': 'siem-kibana' } }] } },
+          _source: false,
+          fields: [
+            {
+              field: '@timestamp',
+              format: 'strict_date_optional_time',
+            },
+          ],
+          size: 1,
+          sort: [
+            {
+              '@timestamp': {
+                order: Direction.desc,
               },
-            ],
-            size: 1,
-            sort: [
-              {
-                '@timestamp': {
-                  order: Direction.desc,
-                },
-              },
-            ],
-          },
+            },
+          ],
         },
         null,
         2
@@ -235,16 +231,14 @@ export const expectedDsl = {
   ],
   ignore_unavailable: true,
   track_total_hits: false,
-  body: {
-    _source: false,
-    fields: [
-      {
-        field: '@timestamp',
-        format: 'strict_date_optional_time',
-      },
-    ],
-    query: { bool: { filter: [{ term: { 'host.name': 'siem-kibana' } }] } },
-    size: 1,
-    sort: [{ '@timestamp': { order: Direction.asc } }],
-  },
+  _source: false,
+  fields: [
+    {
+      field: '@timestamp',
+      format: 'strict_date_optional_time',
+    },
+  ],
+  query: { bool: { filter: [{ term: { 'host.name': 'siem-kibana' } }] } },
+  size: 1,
+  sort: [{ '@timestamp': { order: Direction.asc } }],
 };

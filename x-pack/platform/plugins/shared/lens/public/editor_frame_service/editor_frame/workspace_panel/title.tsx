@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import './workspace_panel_wrapper.scss';
-
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiScreenReaderOnly } from '@elastic/eui';

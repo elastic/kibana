@@ -1,0 +1,130 @@
+# -----
+# This file is for information purpose only. 'viewer' and 'editor' roles are defined in stateful Elasticsearch by default
+# Source: https://github.com/elastic/elasticsearch/blob/4272164530807787d4d8b991e3095a6e79176dbf/x-pack/plugin/core/src/main/java/org/elasticsearch/xpack/core/security/authz/store/ReservedRolesStore.java#L861-L952
+# Note: inconsistency between these roles definition and the same roles of serverless project may break FTR deployment-agnostic tests
+# -----
+viewer:
+  cluster: []
+  indices:
+    - names:
+        - '.alerts*'
+        - '.preview.alerts*'
+      privileges:
+        - 'read'
+        - 'view_index_metadata'
+      allow_restricted_indices: false
+    - names:
+        - '.items-*'
+        - '.lists-*'
+        - '.siem-signals*'
+      privileges:
+        - 'read'
+        - 'view_index_metadata'
+      allow_restricted_indices: false
+    - names:
+        - '/~(([.]|ilm-history-).*)/'
+      privileges:
+        - 'read'
+        - 'view_index_metadata'
+      allow_restricted_indices: false
+    - names:
+        - '.profiling-*'
+        - 'profiling-*'
+      privileges:
+        - 'read'
+        - 'view_index_metadata'
+      allow_restricted_indices: false
+  applications:
+    - application: 'kibana-.kibana'
+      privileges:
+        - 'read'
+      resources:
+        - '*'
+  run_as: []
+
+editor:
+  cluster: []
+  indices:
+    - names:
+        - 'observability-annotations'
+      privileges:
+        - 'read'
+        - 'view_index_metadata'
+        - 'write'
+      allow_restricted_indices: false
+    - names:
+        - '.items-*'
+        - '.lists-*'
+        - '.siem-signals*'
+      privileges:
+        - 'maintenance'
+        - 'read'
+        - 'view_index_metadata'
+        - 'write'
+      allow_restricted_indices: false
+    - names:
+        - '/~(([.]|ilm-history-).*)/'
+      privileges:
+        - 'read'
+        - 'view_index_metadata'
+      allow_restricted_indices: false
+    - names:
+        - '.profiling-*'
+        - 'profiling-*'
+      privileges:
+        - 'read'
+        - 'view_index_metadata'
+      allow_restricted_indices: false
+    - names:
+        - '.alerts*'
+        - '.internal.alerts*'
+        - '.internal.preview.alerts*'
+        - '.preview.alerts*'
+      privileges:
+        - 'maintenance'
+        - 'read'
+        - 'view_index_metadata'
+        - 'write'
+      allow_restricted_indices: false
+  applications:
+    - application: 'kibana-.kibana'
+      privileges:
+        - 'all'
+      resources:
+        - '*'
+  run_as: []
+
+# Admin role without 'remote_indices' access definition
+# There is no such built-in role in stateful, and it's a role "similar" to the built-in 'admin' role in serverless
+admin:
+  # TODO: 'all' should be replaced with explicit list both here and serverless for deployment-agnostic tests with 'admin' role to be compatible
+  cluster: ['all']
+  indices:
+    - names: ['*']
+      privileges: ['all']
+      allow_restricted_indices: false
+    - names: ['*']
+      privileges:
+        - 'monitor'
+        - 'read'
+        - 'read_cross_cluster'
+        - 'view_index_metadata'
+      allow_restricted_indices: true
+  applications:
+    - application: '*'
+      privileges: ['*']
+      resources: ['*']
+  run_as: ['*']
+
+# temporarily added for testing purpose
+system_indices_superuser:
+  cluster: ['all']
+  indices:
+    - names: ['*']
+      privileges: ['all']
+      allow_restricted_indices: true
+  applications:
+    - application: '*'
+      privileges: ['*']
+      resources: ['*']
+  run_as: ['*']

@@ -6,6 +6,7 @@
  */
 
 import type { RequestHandler } from '@kbn/core/server';
+import { ENDPOINT_WORKFLOW_INSIGHTS_REMEDIATED_EVENT } from '../../../lib/telemetry/event_based/events';
 import type {
   UpdateWorkflowInsightsRequestBody,
   UpdateWorkflowInsightsRequestParams,
@@ -46,7 +47,7 @@ export const registerUpdateInsightsRoute = (
         },
       },
       withEndpointAuthz(
-        { all: ['canWriteWorkflowInsights'] },
+        { all: ['canReadWorkflowInsights'] },
         endpointContext.logFactory.get('workflowInsights'),
         updateInsightsRouteHandler(endpointContext)
       )
@@ -63,9 +64,28 @@ const updateInsightsRouteHandler = (
 > => {
   const logger = endpointContext.logFactory.get('workflowInsights');
 
+  const isOnlyActionTypeUpdate = (body: Partial<UpdateWorkflowInsightsRequestBody>): boolean => {
+    // Type guard is done by schema validation
+    if (!body?.action?.type) return false;
+    // Make sure the body only contains the action.type field
+    return Object.keys(body).length === 1 && Object.keys(body.action).length === 1;
+  };
+
   return async (_, request, response) => {
     const { insightId } = request.params;
-
+    const { canWriteWorkflowInsights } = await endpointContext.service.getEndpointAuthz(request);
+    const onlyActionTypeUpdate = isOnlyActionTypeUpdate(request.body);
+    if (!canWriteWorkflowInsights && !onlyActionTypeUpdate) {
+      return response.forbidden({ body: 'Unauthorized to update workflow insights' });
+    }
+    if (onlyActionTypeUpdate) {
+      if (request.body.action?.type === 'remediated') {
+        const telemetry = endpointContext.service.getTelemetryService();
+        telemetry.reportEvent(ENDPOINT_WORKFLOW_INSIGHTS_REMEDIATED_EVENT.eventType, {
+          insightId,
+        });
+      }
+    }
     logger.debug(`Updating insight ${insightId}`);
     try {
       const body = await securityWorkflowInsightsService.update(

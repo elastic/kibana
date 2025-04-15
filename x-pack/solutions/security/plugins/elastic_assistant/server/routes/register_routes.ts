@@ -38,6 +38,16 @@ import {
   getDefendInsightsRoute,
   postDefendInsightsRoute,
 } from './defend_insights';
+import { deleteKnowledgeBaseEntryRoute } from './knowledge_base/entries/delete_route';
+import { updateKnowledgeBaseEntryRoute } from './knowledge_base/entries/update_route';
+import { getKnowledgeBaseEntryRoute } from './knowledge_base/entries/get_route';
+import { createAttackDiscoverySchedulesRoute } from './attack_discovery/schedules/create';
+import { getAttackDiscoverySchedulesRoute } from './attack_discovery/schedules/get';
+import { updateAttackDiscoverySchedulesRoute } from './attack_discovery/schedules/update';
+import { deleteAttackDiscoverySchedulesRoute } from './attack_discovery/schedules/delete';
+import { findAttackDiscoverySchedulesRoute } from './attack_discovery/schedules/find';
+import { disableAttackDiscoverySchedulesRoute } from './attack_discovery/schedules/disable';
+import { enableAttackDiscoverySchedulesRoute } from './attack_discovery/schedules/enable';
 
 export const registerRoutes = (
   router: ElasticAssistantPluginRouter,
@@ -71,8 +81,11 @@ export const registerRoutes = (
   postKnowledgeBaseRoute(router);
 
   // Knowledge Base Entries
+  getKnowledgeBaseEntryRoute(router);
   findKnowledgeBaseEntriesRoute(router);
   createKnowledgeBaseEntryRoute(router);
+  updateKnowledgeBaseEntryRoute(router);
+  deleteKnowledgeBaseEntryRoute(router);
   bulkActionKnowledgeBaseEntriesRoute(router);
 
   // Actions Connector Execute (LLM Wrapper)
@@ -94,6 +107,15 @@ export const registerRoutes = (
   getAttackDiscoveryRoute(router);
   postAttackDiscoveryRoute(router);
   cancelAttackDiscoveryRoute(router);
+
+  // Attack Discovery Schedules
+  createAttackDiscoverySchedulesRoute(router);
+  getAttackDiscoverySchedulesRoute(router);
+  findAttackDiscoverySchedulesRoute(router);
+  updateAttackDiscoverySchedulesRoute(router);
+  deleteAttackDiscoverySchedulesRoute(router);
+  disableAttackDiscoverySchedulesRoute(router);
+  enableAttackDiscoverySchedulesRoute(router);
 
   // Defend insights
   getDefendInsightRoute(router);

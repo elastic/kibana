@@ -1,4 +1,3 @@
-// @ts-nocheck
 // Generated from src/antlr/esql_parser.g4 by ANTLR 4.13.2
 
 import {ParseTreeListener} from "antlr4";
@@ -18,6 +17,62 @@ import { SingleCommandQueryContext } from "./esql_parser.js";
 import { SourceCommandContext } from "./esql_parser.js";
 import { ProcessingCommandContext } from "./esql_parser.js";
 import { WhereCommandContext } from "./esql_parser.js";
+import { ToDataTypeContext } from "./esql_parser.js";
+import { RowCommandContext } from "./esql_parser.js";
+import { FieldsContext } from "./esql_parser.js";
+import { FieldContext } from "./esql_parser.js";
+import { FromCommandContext } from "./esql_parser.js";
+import { TimeSeriesCommandContext } from "./esql_parser.js";
+import { IndexPatternAndMetadataFieldsContext } from "./esql_parser.js";
+import { IndexPatternContext } from "./esql_parser.js";
+import { ClusterStringContext } from "./esql_parser.js";
+import { SelectorStringContext } from "./esql_parser.js";
+import { IndexStringContext } from "./esql_parser.js";
+import { MetadataContext } from "./esql_parser.js";
+import { EvalCommandContext } from "./esql_parser.js";
+import { StatsCommandContext } from "./esql_parser.js";
+import { AggFieldsContext } from "./esql_parser.js";
+import { AggFieldContext } from "./esql_parser.js";
+import { QualifiedNameContext } from "./esql_parser.js";
+import { QualifiedNamePatternContext } from "./esql_parser.js";
+import { QualifiedNamePatternsContext } from "./esql_parser.js";
+import { IdentifierContext } from "./esql_parser.js";
+import { IdentifierPatternContext } from "./esql_parser.js";
+import { InputParamContext } from "./esql_parser.js";
+import { InputNamedOrPositionalParamContext } from "./esql_parser.js";
+import { InputDoubleParamsContext } from "./esql_parser.js";
+import { InputNamedOrPositionalDoubleParamsContext } from "./esql_parser.js";
+import { IdentifierOrParameterContext } from "./esql_parser.js";
+import { LimitCommandContext } from "./esql_parser.js";
+import { SortCommandContext } from "./esql_parser.js";
+import { OrderExpressionContext } from "./esql_parser.js";
+import { KeepCommandContext } from "./esql_parser.js";
+import { DropCommandContext } from "./esql_parser.js";
+import { RenameCommandContext } from "./esql_parser.js";
+import { RenameClauseContext } from "./esql_parser.js";
+import { DissectCommandContext } from "./esql_parser.js";
+import { GrokCommandContext } from "./esql_parser.js";
+import { MvExpandCommandContext } from "./esql_parser.js";
+import { CommandOptionsContext } from "./esql_parser.js";
+import { CommandOptionContext } from "./esql_parser.js";
+import { ExplainCommandContext } from "./esql_parser.js";
+import { SubqueryExpressionContext } from "./esql_parser.js";
+import { ShowInfoContext } from "./esql_parser.js";
+import { EnrichCommandContext } from "./esql_parser.js";
+import { EnrichWithClauseContext } from "./esql_parser.js";
+import { LookupCommandContext } from "./esql_parser.js";
+import { InlinestatsCommandContext } from "./esql_parser.js";
+import { ChangePointCommandContext } from "./esql_parser.js";
+import { InsistCommandContext } from "./esql_parser.js";
+import { ForkCommandContext } from "./esql_parser.js";
+import { ForkSubQueriesContext } from "./esql_parser.js";
+import { ForkSubQueryContext } from "./esql_parser.js";
+import { SingleForkSubQueryCommandContext } from "./esql_parser.js";
+import { CompositeForkSubQueryContext } from "./esql_parser.js";
+import { ForkSubQueryProcessingCommandContext } from "./esql_parser.js";
+import { RrfCommandContext } from "./esql_parser.js";
+import { RerankCommandContext } from "./esql_parser.js";
+import { CompletionCommandContext } from "./esql_parser.js";
 import { MatchExpressionContext } from "./esql_parser.js";
 import { LogicalNotContext } from "./esql_parser.js";
 import { BooleanDefaultContext } from "./esql_parser.js";
@@ -41,25 +96,6 @@ import { FunctionExpressionContext } from "./esql_parser.js";
 import { FunctionNameContext } from "./esql_parser.js";
 import { MapExpressionContext } from "./esql_parser.js";
 import { EntryExpressionContext } from "./esql_parser.js";
-import { ToDataTypeContext } from "./esql_parser.js";
-import { RowCommandContext } from "./esql_parser.js";
-import { FieldsContext } from "./esql_parser.js";
-import { FieldContext } from "./esql_parser.js";
-import { FromCommandContext } from "./esql_parser.js";
-import { IndexPatternContext } from "./esql_parser.js";
-import { ClusterStringContext } from "./esql_parser.js";
-import { IndexStringContext } from "./esql_parser.js";
-import { MetadataContext } from "./esql_parser.js";
-import { MetricsCommandContext } from "./esql_parser.js";
-import { EvalCommandContext } from "./esql_parser.js";
-import { StatsCommandContext } from "./esql_parser.js";
-import { AggFieldsContext } from "./esql_parser.js";
-import { AggFieldContext } from "./esql_parser.js";
-import { QualifiedNameContext } from "./esql_parser.js";
-import { QualifiedNamePatternContext } from "./esql_parser.js";
-import { QualifiedNamePatternsContext } from "./esql_parser.js";
-import { IdentifierContext } from "./esql_parser.js";
-import { IdentifierPatternContext } from "./esql_parser.js";
 import { NullLiteralContext } from "./esql_parser.js";
 import { QualifiedIntegerLiteralContext } from "./esql_parser.js";
 import { DecimalLiteralContext } from "./esql_parser.js";
@@ -70,34 +106,12 @@ import { StringLiteralContext } from "./esql_parser.js";
 import { NumericArrayLiteralContext } from "./esql_parser.js";
 import { BooleanArrayLiteralContext } from "./esql_parser.js";
 import { StringArrayLiteralContext } from "./esql_parser.js";
-import { InputParamContext } from "./esql_parser.js";
-import { InputNamedOrPositionalParamContext } from "./esql_parser.js";
-import { IdentifierOrParameterContext } from "./esql_parser.js";
-import { LimitCommandContext } from "./esql_parser.js";
-import { SortCommandContext } from "./esql_parser.js";
-import { OrderExpressionContext } from "./esql_parser.js";
-import { KeepCommandContext } from "./esql_parser.js";
-import { DropCommandContext } from "./esql_parser.js";
-import { RenameCommandContext } from "./esql_parser.js";
-import { RenameClauseContext } from "./esql_parser.js";
-import { DissectCommandContext } from "./esql_parser.js";
-import { GrokCommandContext } from "./esql_parser.js";
-import { MvExpandCommandContext } from "./esql_parser.js";
-import { CommandOptionsContext } from "./esql_parser.js";
-import { CommandOptionContext } from "./esql_parser.js";
 import { BooleanValueContext } from "./esql_parser.js";
 import { NumericValueContext } from "./esql_parser.js";
 import { DecimalValueContext } from "./esql_parser.js";
 import { IntegerValueContext } from "./esql_parser.js";
 import { StringContext } from "./esql_parser.js";
 import { ComparisonOperatorContext } from "./esql_parser.js";
-import { ExplainCommandContext } from "./esql_parser.js";
-import { SubqueryExpressionContext } from "./esql_parser.js";
-import { ShowInfoContext } from "./esql_parser.js";
-import { EnrichCommandContext } from "./esql_parser.js";
-import { EnrichWithClauseContext } from "./esql_parser.js";
-import { LookupCommandContext } from "./esql_parser.js";
-import { InlinestatsCommandContext } from "./esql_parser.js";
 import { JoinCommandContext } from "./esql_parser.js";
 import { JoinTargetContext } from "./esql_parser.js";
 import { JoinConditionContext } from "./esql_parser.js";
@@ -173,6 +187,582 @@ export default class esql_parserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	exitWhereCommand?: (ctx: WhereCommandContext) => void;
+	/**
+	 * Enter a parse tree produced by the `toDataType`
+	 * labeled alternative in `esql_parser.dataType`.
+	 * @param ctx the parse tree
+	 */
+	enterToDataType?: (ctx: ToDataTypeContext) => void;
+	/**
+	 * Exit a parse tree produced by the `toDataType`
+	 * labeled alternative in `esql_parser.dataType`.
+	 * @param ctx the parse tree
+	 */
+	exitToDataType?: (ctx: ToDataTypeContext) => void;
+	/**
+	 * Enter a parse tree produced by `esql_parser.rowCommand`.
+	 * @param ctx the parse tree
+	 */
+	enterRowCommand?: (ctx: RowCommandContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.rowCommand`.
+	 * @param ctx the parse tree
+	 */
+	exitRowCommand?: (ctx: RowCommandContext) => void;
+	/**
+	 * Enter a parse tree produced by `esql_parser.fields`.
+	 * @param ctx the parse tree
+	 */
+	enterFields?: (ctx: FieldsContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.fields`.
+	 * @param ctx the parse tree
+	 */
+	exitFields?: (ctx: FieldsContext) => void;
+	/**
+	 * Enter a parse tree produced by `esql_parser.field`.
+	 * @param ctx the parse tree
+	 */
+	enterField?: (ctx: FieldContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.field`.
+	 * @param ctx the parse tree
+	 */
+	exitField?: (ctx: FieldContext) => void;
+	/**
+	 * Enter a parse tree produced by `esql_parser.fromCommand`.
+	 * @param ctx the parse tree
+	 */
+	enterFromCommand?: (ctx: FromCommandContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.fromCommand`.
+	 * @param ctx the parse tree
+	 */
+	exitFromCommand?: (ctx: FromCommandContext) => void;
+	/**
+	 * Enter a parse tree produced by `esql_parser.timeSeriesCommand`.
+	 * @param ctx the parse tree
+	 */
+	enterTimeSeriesCommand?: (ctx: TimeSeriesCommandContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.timeSeriesCommand`.
+	 * @param ctx the parse tree
+	 */
+	exitTimeSeriesCommand?: (ctx: TimeSeriesCommandContext) => void;
+	/**
+	 * Enter a parse tree produced by `esql_parser.indexPatternAndMetadataFields`.
+	 * @param ctx the parse tree
+	 */
+	enterIndexPatternAndMetadataFields?: (ctx: IndexPatternAndMetadataFieldsContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.indexPatternAndMetadataFields`.
+	 * @param ctx the parse tree
+	 */
+	exitIndexPatternAndMetadataFields?: (ctx: IndexPatternAndMetadataFieldsContext) => void;
+	/**
+	 * Enter a parse tree produced by `esql_parser.indexPattern`.
+	 * @param ctx the parse tree
+	 */
+	enterIndexPattern?: (ctx: IndexPatternContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.indexPattern`.
+	 * @param ctx the parse tree
+	 */
+	exitIndexPattern?: (ctx: IndexPatternContext) => void;
+	/**
+	 * Enter a parse tree produced by `esql_parser.clusterString`.
+	 * @param ctx the parse tree
+	 */
+	enterClusterString?: (ctx: ClusterStringContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.clusterString`.
+	 * @param ctx the parse tree
+	 */
+	exitClusterString?: (ctx: ClusterStringContext) => void;
+	/**
+	 * Enter a parse tree produced by `esql_parser.selectorString`.
+	 * @param ctx the parse tree
+	 */
+	enterSelectorString?: (ctx: SelectorStringContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.selectorString`.
+	 * @param ctx the parse tree
+	 */
+	exitSelectorString?: (ctx: SelectorStringContext) => void;
+	/**
+	 * Enter a parse tree produced by `esql_parser.indexString`.
+	 * @param ctx the parse tree
+	 */
+	enterIndexString?: (ctx: IndexStringContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.indexString`.
+	 * @param ctx the parse tree
+	 */
+	exitIndexString?: (ctx: IndexStringContext) => void;
+	/**
+	 * Enter a parse tree produced by `esql_parser.metadata`.
+	 * @param ctx the parse tree
+	 */
+	enterMetadata?: (ctx: MetadataContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.metadata`.
+	 * @param ctx the parse tree
+	 */
+	exitMetadata?: (ctx: MetadataContext) => void;
+	/**
+	 * Enter a parse tree produced by `esql_parser.evalCommand`.
+	 * @param ctx the parse tree
+	 */
+	enterEvalCommand?: (ctx: EvalCommandContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.evalCommand`.
+	 * @param ctx the parse tree
+	 */
+	exitEvalCommand?: (ctx: EvalCommandContext) => void;
+	/**
+	 * Enter a parse tree produced by `esql_parser.statsCommand`.
+	 * @param ctx the parse tree
+	 */
+	enterStatsCommand?: (ctx: StatsCommandContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.statsCommand`.
+	 * @param ctx the parse tree
+	 */
+	exitStatsCommand?: (ctx: StatsCommandContext) => void;
+	/**
+	 * Enter a parse tree produced by `esql_parser.aggFields`.
+	 * @param ctx the parse tree
+	 */
+	enterAggFields?: (ctx: AggFieldsContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.aggFields`.
+	 * @param ctx the parse tree
+	 */
+	exitAggFields?: (ctx: AggFieldsContext) => void;
+	/**
+	 * Enter a parse tree produced by `esql_parser.aggField`.
+	 * @param ctx the parse tree
+	 */
+	enterAggField?: (ctx: AggFieldContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.aggField`.
+	 * @param ctx the parse tree
+	 */
+	exitAggField?: (ctx: AggFieldContext) => void;
+	/**
+	 * Enter a parse tree produced by `esql_parser.qualifiedName`.
+	 * @param ctx the parse tree
+	 */
+	enterQualifiedName?: (ctx: QualifiedNameContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.qualifiedName`.
+	 * @param ctx the parse tree
+	 */
+	exitQualifiedName?: (ctx: QualifiedNameContext) => void;
+	/**
+	 * Enter a parse tree produced by `esql_parser.qualifiedNamePattern`.
+	 * @param ctx the parse tree
+	 */
+	enterQualifiedNamePattern?: (ctx: QualifiedNamePatternContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.qualifiedNamePattern`.
+	 * @param ctx the parse tree
+	 */
+	exitQualifiedNamePattern?: (ctx: QualifiedNamePatternContext) => void;
+	/**
+	 * Enter a parse tree produced by `esql_parser.qualifiedNamePatterns`.
+	 * @param ctx the parse tree
+	 */
+	enterQualifiedNamePatterns?: (ctx: QualifiedNamePatternsContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.qualifiedNamePatterns`.
+	 * @param ctx the parse tree
+	 */
+	exitQualifiedNamePatterns?: (ctx: QualifiedNamePatternsContext) => void;
+	/**
+	 * Enter a parse tree produced by `esql_parser.identifier`.
+	 * @param ctx the parse tree
+	 */
+	enterIdentifier?: (ctx: IdentifierContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.identifier`.
+	 * @param ctx the parse tree
+	 */
+	exitIdentifier?: (ctx: IdentifierContext) => void;
+	/**
+	 * Enter a parse tree produced by `esql_parser.identifierPattern`.
+	 * @param ctx the parse tree
+	 */
+	enterIdentifierPattern?: (ctx: IdentifierPatternContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.identifierPattern`.
+	 * @param ctx the parse tree
+	 */
+	exitIdentifierPattern?: (ctx: IdentifierPatternContext) => void;
+	/**
+	 * Enter a parse tree produced by the `inputParam`
+	 * labeled alternative in `esql_parser.parameter`.
+	 * @param ctx the parse tree
+	 */
+	enterInputParam?: (ctx: InputParamContext) => void;
+	/**
+	 * Exit a parse tree produced by the `inputParam`
+	 * labeled alternative in `esql_parser.parameter`.
+	 * @param ctx the parse tree
+	 */
+	exitInputParam?: (ctx: InputParamContext) => void;
+	/**
+	 * Enter a parse tree produced by the `inputNamedOrPositionalParam`
+	 * labeled alternative in `esql_parser.parameter`.
+	 * @param ctx the parse tree
+	 */
+	enterInputNamedOrPositionalParam?: (ctx: InputNamedOrPositionalParamContext) => void;
+	/**
+	 * Exit a parse tree produced by the `inputNamedOrPositionalParam`
+	 * labeled alternative in `esql_parser.parameter`.
+	 * @param ctx the parse tree
+	 */
+	exitInputNamedOrPositionalParam?: (ctx: InputNamedOrPositionalParamContext) => void;
+	/**
+	 * Enter a parse tree produced by the `inputDoubleParams`
+	 * labeled alternative in `esql_parser.doubleParameter`.
+	 * @param ctx the parse tree
+	 */
+	enterInputDoubleParams?: (ctx: InputDoubleParamsContext) => void;
+	/**
+	 * Exit a parse tree produced by the `inputDoubleParams`
+	 * labeled alternative in `esql_parser.doubleParameter`.
+	 * @param ctx the parse tree
+	 */
+	exitInputDoubleParams?: (ctx: InputDoubleParamsContext) => void;
+	/**
+	 * Enter a parse tree produced by the `inputNamedOrPositionalDoubleParams`
+	 * labeled alternative in `esql_parser.doubleParameter`.
+	 * @param ctx the parse tree
+	 */
+	enterInputNamedOrPositionalDoubleParams?: (ctx: InputNamedOrPositionalDoubleParamsContext) => void;
+	/**
+	 * Exit a parse tree produced by the `inputNamedOrPositionalDoubleParams`
+	 * labeled alternative in `esql_parser.doubleParameter`.
+	 * @param ctx the parse tree
+	 */
+	exitInputNamedOrPositionalDoubleParams?: (ctx: InputNamedOrPositionalDoubleParamsContext) => void;
+	/**
+	 * Enter a parse tree produced by `esql_parser.identifierOrParameter`.
+	 * @param ctx the parse tree
+	 */
+	enterIdentifierOrParameter?: (ctx: IdentifierOrParameterContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.identifierOrParameter`.
+	 * @param ctx the parse tree
+	 */
+	exitIdentifierOrParameter?: (ctx: IdentifierOrParameterContext) => void;
+	/**
+	 * Enter a parse tree produced by `esql_parser.limitCommand`.
+	 * @param ctx the parse tree
+	 */
+	enterLimitCommand?: (ctx: LimitCommandContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.limitCommand`.
+	 * @param ctx the parse tree
+	 */
+	exitLimitCommand?: (ctx: LimitCommandContext) => void;
+	/**
+	 * Enter a parse tree produced by `esql_parser.sortCommand`.
+	 * @param ctx the parse tree
+	 */
+	enterSortCommand?: (ctx: SortCommandContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.sortCommand`.
+	 * @param ctx the parse tree
+	 */
+	exitSortCommand?: (ctx: SortCommandContext) => void;
+	/**
+	 * Enter a parse tree produced by `esql_parser.orderExpression`.
+	 * @param ctx the parse tree
+	 */
+	enterOrderExpression?: (ctx: OrderExpressionContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.orderExpression`.
+	 * @param ctx the parse tree
+	 */
+	exitOrderExpression?: (ctx: OrderExpressionContext) => void;
+	/**
+	 * Enter a parse tree produced by `esql_parser.keepCommand`.
+	 * @param ctx the parse tree
+	 */
+	enterKeepCommand?: (ctx: KeepCommandContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.keepCommand`.
+	 * @param ctx the parse tree
+	 */
+	exitKeepCommand?: (ctx: KeepCommandContext) => void;
+	/**
+	 * Enter a parse tree produced by `esql_parser.dropCommand`.
+	 * @param ctx the parse tree
+	 */
+	enterDropCommand?: (ctx: DropCommandContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.dropCommand`.
+	 * @param ctx the parse tree
+	 */
+	exitDropCommand?: (ctx: DropCommandContext) => void;
+	/**
+	 * Enter a parse tree produced by `esql_parser.renameCommand`.
+	 * @param ctx the parse tree
+	 */
+	enterRenameCommand?: (ctx: RenameCommandContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.renameCommand`.
+	 * @param ctx the parse tree
+	 */
+	exitRenameCommand?: (ctx: RenameCommandContext) => void;
+	/**
+	 * Enter a parse tree produced by `esql_parser.renameClause`.
+	 * @param ctx the parse tree
+	 */
+	enterRenameClause?: (ctx: RenameClauseContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.renameClause`.
+	 * @param ctx the parse tree
+	 */
+	exitRenameClause?: (ctx: RenameClauseContext) => void;
+	/**
+	 * Enter a parse tree produced by `esql_parser.dissectCommand`.
+	 * @param ctx the parse tree
+	 */
+	enterDissectCommand?: (ctx: DissectCommandContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.dissectCommand`.
+	 * @param ctx the parse tree
+	 */
+	exitDissectCommand?: (ctx: DissectCommandContext) => void;
+	/**
+	 * Enter a parse tree produced by `esql_parser.grokCommand`.
+	 * @param ctx the parse tree
+	 */
+	enterGrokCommand?: (ctx: GrokCommandContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.grokCommand`.
+	 * @param ctx the parse tree
+	 */
+	exitGrokCommand?: (ctx: GrokCommandContext) => void;
+	/**
+	 * Enter a parse tree produced by `esql_parser.mvExpandCommand`.
+	 * @param ctx the parse tree
+	 */
+	enterMvExpandCommand?: (ctx: MvExpandCommandContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.mvExpandCommand`.
+	 * @param ctx the parse tree
+	 */
+	exitMvExpandCommand?: (ctx: MvExpandCommandContext) => void;
+	/**
+	 * Enter a parse tree produced by `esql_parser.commandOptions`.
+	 * @param ctx the parse tree
+	 */
+	enterCommandOptions?: (ctx: CommandOptionsContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.commandOptions`.
+	 * @param ctx the parse tree
+	 */
+	exitCommandOptions?: (ctx: CommandOptionsContext) => void;
+	/**
+	 * Enter a parse tree produced by `esql_parser.commandOption`.
+	 * @param ctx the parse tree
+	 */
+	enterCommandOption?: (ctx: CommandOptionContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.commandOption`.
+	 * @param ctx the parse tree
+	 */
+	exitCommandOption?: (ctx: CommandOptionContext) => void;
+	/**
+	 * Enter a parse tree produced by `esql_parser.explainCommand`.
+	 * @param ctx the parse tree
+	 */
+	enterExplainCommand?: (ctx: ExplainCommandContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.explainCommand`.
+	 * @param ctx the parse tree
+	 */
+	exitExplainCommand?: (ctx: ExplainCommandContext) => void;
+	/**
+	 * Enter a parse tree produced by `esql_parser.subqueryExpression`.
+	 * @param ctx the parse tree
+	 */
+	enterSubqueryExpression?: (ctx: SubqueryExpressionContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.subqueryExpression`.
+	 * @param ctx the parse tree
+	 */
+	exitSubqueryExpression?: (ctx: SubqueryExpressionContext) => void;
+	/**
+	 * Enter a parse tree produced by the `showInfo`
+	 * labeled alternative in `esql_parser.showCommand`.
+	 * @param ctx the parse tree
+	 */
+	enterShowInfo?: (ctx: ShowInfoContext) => void;
+	/**
+	 * Exit a parse tree produced by the `showInfo`
+	 * labeled alternative in `esql_parser.showCommand`.
+	 * @param ctx the parse tree
+	 */
+	exitShowInfo?: (ctx: ShowInfoContext) => void;
+	/**
+	 * Enter a parse tree produced by `esql_parser.enrichCommand`.
+	 * @param ctx the parse tree
+	 */
+	enterEnrichCommand?: (ctx: EnrichCommandContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.enrichCommand`.
+	 * @param ctx the parse tree
+	 */
+	exitEnrichCommand?: (ctx: EnrichCommandContext) => void;
+	/**
+	 * Enter a parse tree produced by `esql_parser.enrichWithClause`.
+	 * @param ctx the parse tree
+	 */
+	enterEnrichWithClause?: (ctx: EnrichWithClauseContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.enrichWithClause`.
+	 * @param ctx the parse tree
+	 */
+	exitEnrichWithClause?: (ctx: EnrichWithClauseContext) => void;
+	/**
+	 * Enter a parse tree produced by `esql_parser.lookupCommand`.
+	 * @param ctx the parse tree
+	 */
+	enterLookupCommand?: (ctx: LookupCommandContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.lookupCommand`.
+	 * @param ctx the parse tree
+	 */
+	exitLookupCommand?: (ctx: LookupCommandContext) => void;
+	/**
+	 * Enter a parse tree produced by `esql_parser.inlinestatsCommand`.
+	 * @param ctx the parse tree
+	 */
+	enterInlinestatsCommand?: (ctx: InlinestatsCommandContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.inlinestatsCommand`.
+	 * @param ctx the parse tree
+	 */
+	exitInlinestatsCommand?: (ctx: InlinestatsCommandContext) => void;
+	/**
+	 * Enter a parse tree produced by `esql_parser.changePointCommand`.
+	 * @param ctx the parse tree
+	 */
+	enterChangePointCommand?: (ctx: ChangePointCommandContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.changePointCommand`.
+	 * @param ctx the parse tree
+	 */
+	exitChangePointCommand?: (ctx: ChangePointCommandContext) => void;
+	/**
+	 * Enter a parse tree produced by `esql_parser.insistCommand`.
+	 * @param ctx the parse tree
+	 */
+	enterInsistCommand?: (ctx: InsistCommandContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.insistCommand`.
+	 * @param ctx the parse tree
+	 */
+	exitInsistCommand?: (ctx: InsistCommandContext) => void;
+	/**
+	 * Enter a parse tree produced by `esql_parser.forkCommand`.
+	 * @param ctx the parse tree
+	 */
+	enterForkCommand?: (ctx: ForkCommandContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.forkCommand`.
+	 * @param ctx the parse tree
+	 */
+	exitForkCommand?: (ctx: ForkCommandContext) => void;
+	/**
+	 * Enter a parse tree produced by `esql_parser.forkSubQueries`.
+	 * @param ctx the parse tree
+	 */
+	enterForkSubQueries?: (ctx: ForkSubQueriesContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.forkSubQueries`.
+	 * @param ctx the parse tree
+	 */
+	exitForkSubQueries?: (ctx: ForkSubQueriesContext) => void;
+	/**
+	 * Enter a parse tree produced by `esql_parser.forkSubQuery`.
+	 * @param ctx the parse tree
+	 */
+	enterForkSubQuery?: (ctx: ForkSubQueryContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.forkSubQuery`.
+	 * @param ctx the parse tree
+	 */
+	exitForkSubQuery?: (ctx: ForkSubQueryContext) => void;
+	/**
+	 * Enter a parse tree produced by the `singleForkSubQueryCommand`
+	 * labeled alternative in `esql_parser.forkSubQueryCommand`.
+	 * @param ctx the parse tree
+	 */
+	enterSingleForkSubQueryCommand?: (ctx: SingleForkSubQueryCommandContext) => void;
+	/**
+	 * Exit a parse tree produced by the `singleForkSubQueryCommand`
+	 * labeled alternative in `esql_parser.forkSubQueryCommand`.
+	 * @param ctx the parse tree
+	 */
+	exitSingleForkSubQueryCommand?: (ctx: SingleForkSubQueryCommandContext) => void;
+	/**
+	 * Enter a parse tree produced by the `compositeForkSubQuery`
+	 * labeled alternative in `esql_parser.forkSubQueryCommand`.
+	 * @param ctx the parse tree
+	 */
+	enterCompositeForkSubQuery?: (ctx: CompositeForkSubQueryContext) => void;
+	/**
+	 * Exit a parse tree produced by the `compositeForkSubQuery`
+	 * labeled alternative in `esql_parser.forkSubQueryCommand`.
+	 * @param ctx the parse tree
+	 */
+	exitCompositeForkSubQuery?: (ctx: CompositeForkSubQueryContext) => void;
+	/**
+	 * Enter a parse tree produced by `esql_parser.forkSubQueryProcessingCommand`.
+	 * @param ctx the parse tree
+	 */
+	enterForkSubQueryProcessingCommand?: (ctx: ForkSubQueryProcessingCommandContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.forkSubQueryProcessingCommand`.
+	 * @param ctx the parse tree
+	 */
+	exitForkSubQueryProcessingCommand?: (ctx: ForkSubQueryProcessingCommandContext) => void;
+	/**
+	 * Enter a parse tree produced by `esql_parser.rrfCommand`.
+	 * @param ctx the parse tree
+	 */
+	enterRrfCommand?: (ctx: RrfCommandContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.rrfCommand`.
+	 * @param ctx the parse tree
+	 */
+	exitRrfCommand?: (ctx: RrfCommandContext) => void;
+	/**
+	 * Enter a parse tree produced by `esql_parser.rerankCommand`.
+	 * @param ctx the parse tree
+	 */
+	enterRerankCommand?: (ctx: RerankCommandContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.rerankCommand`.
+	 * @param ctx the parse tree
+	 */
+	exitRerankCommand?: (ctx: RerankCommandContext) => void;
+	/**
+	 * Enter a parse tree produced by `esql_parser.completionCommand`.
+	 * @param ctx the parse tree
+	 */
+	enterCompletionCommand?: (ctx: CompletionCommandContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.completionCommand`.
+	 * @param ctx the parse tree
+	 */
+	exitCompletionCommand?: (ctx: CompletionCommandContext) => void;
 	/**
 	 * Enter a parse tree produced by the `matchExpression`
 	 * labeled alternative in `esql_parser.booleanExpression`.
@@ -438,198 +1028,6 @@ export default class esql_parserListener extends ParseTreeListener {
 	 */
 	exitEntryExpression?: (ctx: EntryExpressionContext) => void;
 	/**
-	 * Enter a parse tree produced by the `toDataType`
-	 * labeled alternative in `esql_parser.dataType`.
-	 * @param ctx the parse tree
-	 */
-	enterToDataType?: (ctx: ToDataTypeContext) => void;
-	/**
-	 * Exit a parse tree produced by the `toDataType`
-	 * labeled alternative in `esql_parser.dataType`.
-	 * @param ctx the parse tree
-	 */
-	exitToDataType?: (ctx: ToDataTypeContext) => void;
-	/**
-	 * Enter a parse tree produced by `esql_parser.rowCommand`.
-	 * @param ctx the parse tree
-	 */
-	enterRowCommand?: (ctx: RowCommandContext) => void;
-	/**
-	 * Exit a parse tree produced by `esql_parser.rowCommand`.
-	 * @param ctx the parse tree
-	 */
-	exitRowCommand?: (ctx: RowCommandContext) => void;
-	/**
-	 * Enter a parse tree produced by `esql_parser.fields`.
-	 * @param ctx the parse tree
-	 */
-	enterFields?: (ctx: FieldsContext) => void;
-	/**
-	 * Exit a parse tree produced by `esql_parser.fields`.
-	 * @param ctx the parse tree
-	 */
-	exitFields?: (ctx: FieldsContext) => void;
-	/**
-	 * Enter a parse tree produced by `esql_parser.field`.
-	 * @param ctx the parse tree
-	 */
-	enterField?: (ctx: FieldContext) => void;
-	/**
-	 * Exit a parse tree produced by `esql_parser.field`.
-	 * @param ctx the parse tree
-	 */
-	exitField?: (ctx: FieldContext) => void;
-	/**
-	 * Enter a parse tree produced by `esql_parser.fromCommand`.
-	 * @param ctx the parse tree
-	 */
-	enterFromCommand?: (ctx: FromCommandContext) => void;
-	/**
-	 * Exit a parse tree produced by `esql_parser.fromCommand`.
-	 * @param ctx the parse tree
-	 */
-	exitFromCommand?: (ctx: FromCommandContext) => void;
-	/**
-	 * Enter a parse tree produced by `esql_parser.indexPattern`.
-	 * @param ctx the parse tree
-	 */
-	enterIndexPattern?: (ctx: IndexPatternContext) => void;
-	/**
-	 * Exit a parse tree produced by `esql_parser.indexPattern`.
-	 * @param ctx the parse tree
-	 */
-	exitIndexPattern?: (ctx: IndexPatternContext) => void;
-	/**
-	 * Enter a parse tree produced by `esql_parser.clusterString`.
-	 * @param ctx the parse tree
-	 */
-	enterClusterString?: (ctx: ClusterStringContext) => void;
-	/**
-	 * Exit a parse tree produced by `esql_parser.clusterString`.
-	 * @param ctx the parse tree
-	 */
-	exitClusterString?: (ctx: ClusterStringContext) => void;
-	/**
-	 * Enter a parse tree produced by `esql_parser.indexString`.
-	 * @param ctx the parse tree
-	 */
-	enterIndexString?: (ctx: IndexStringContext) => void;
-	/**
-	 * Exit a parse tree produced by `esql_parser.indexString`.
-	 * @param ctx the parse tree
-	 */
-	exitIndexString?: (ctx: IndexStringContext) => void;
-	/**
-	 * Enter a parse tree produced by `esql_parser.metadata`.
-	 * @param ctx the parse tree
-	 */
-	enterMetadata?: (ctx: MetadataContext) => void;
-	/**
-	 * Exit a parse tree produced by `esql_parser.metadata`.
-	 * @param ctx the parse tree
-	 */
-	exitMetadata?: (ctx: MetadataContext) => void;
-	/**
-	 * Enter a parse tree produced by `esql_parser.metricsCommand`.
-	 * @param ctx the parse tree
-	 */
-	enterMetricsCommand?: (ctx: MetricsCommandContext) => void;
-	/**
-	 * Exit a parse tree produced by `esql_parser.metricsCommand`.
-	 * @param ctx the parse tree
-	 */
-	exitMetricsCommand?: (ctx: MetricsCommandContext) => void;
-	/**
-	 * Enter a parse tree produced by `esql_parser.evalCommand`.
-	 * @param ctx the parse tree
-	 */
-	enterEvalCommand?: (ctx: EvalCommandContext) => void;
-	/**
-	 * Exit a parse tree produced by `esql_parser.evalCommand`.
-	 * @param ctx the parse tree
-	 */
-	exitEvalCommand?: (ctx: EvalCommandContext) => void;
-	/**
-	 * Enter a parse tree produced by `esql_parser.statsCommand`.
-	 * @param ctx the parse tree
-	 */
-	enterStatsCommand?: (ctx: StatsCommandContext) => void;
-	/**
-	 * Exit a parse tree produced by `esql_parser.statsCommand`.
-	 * @param ctx the parse tree
-	 */
-	exitStatsCommand?: (ctx: StatsCommandContext) => void;
-	/**
-	 * Enter a parse tree produced by `esql_parser.aggFields`.
-	 * @param ctx the parse tree
-	 */
-	enterAggFields?: (ctx: AggFieldsContext) => void;
-	/**
-	 * Exit a parse tree produced by `esql_parser.aggFields`.
-	 * @param ctx the parse tree
-	 */
-	exitAggFields?: (ctx: AggFieldsContext) => void;
-	/**
-	 * Enter a parse tree produced by `esql_parser.aggField`.
-	 * @param ctx the parse tree
-	 */
-	enterAggField?: (ctx: AggFieldContext) => void;
-	/**
-	 * Exit a parse tree produced by `esql_parser.aggField`.
-	 * @param ctx the parse tree
-	 */
-	exitAggField?: (ctx: AggFieldContext) => void;
-	/**
-	 * Enter a parse tree produced by `esql_parser.qualifiedName`.
-	 * @param ctx the parse tree
-	 */
-	enterQualifiedName?: (ctx: QualifiedNameContext) => void;
-	/**
-	 * Exit a parse tree produced by `esql_parser.qualifiedName`.
-	 * @param ctx the parse tree
-	 */
-	exitQualifiedName?: (ctx: QualifiedNameContext) => void;
-	/**
-	 * Enter a parse tree produced by `esql_parser.qualifiedNamePattern`.
-	 * @param ctx the parse tree
-	 */
-	enterQualifiedNamePattern?: (ctx: QualifiedNamePatternContext) => void;
-	/**
-	 * Exit a parse tree produced by `esql_parser.qualifiedNamePattern`.
-	 * @param ctx the parse tree
-	 */
-	exitQualifiedNamePattern?: (ctx: QualifiedNamePatternContext) => void;
-	/**
-	 * Enter a parse tree produced by `esql_parser.qualifiedNamePatterns`.
-	 * @param ctx the parse tree
-	 */
-	enterQualifiedNamePatterns?: (ctx: QualifiedNamePatternsContext) => void;
-	/**
-	 * Exit a parse tree produced by `esql_parser.qualifiedNamePatterns`.
-	 * @param ctx the parse tree
-	 */
-	exitQualifiedNamePatterns?: (ctx: QualifiedNamePatternsContext) => void;
-	/**
-	 * Enter a parse tree produced by `esql_parser.identifier`.
-	 * @param ctx the parse tree
-	 */
-	enterIdentifier?: (ctx: IdentifierContext) => void;
-	/**
-	 * Exit a parse tree produced by `esql_parser.identifier`.
-	 * @param ctx the parse tree
-	 */
-	exitIdentifier?: (ctx: IdentifierContext) => void;
-	/**
-	 * Enter a parse tree produced by `esql_parser.identifierPattern`.
-	 * @param ctx the parse tree
-	 */
-	enterIdentifierPattern?: (ctx: IdentifierPatternContext) => void;
-	/**
-	 * Exit a parse tree produced by `esql_parser.identifierPattern`.
-	 * @param ctx the parse tree
-	 */
-	exitIdentifierPattern?: (ctx: IdentifierPatternContext) => void;
-	/**
 	 * Enter a parse tree produced by the `nullLiteral`
 	 * labeled alternative in `esql_parser.constant`.
 	 * @param ctx the parse tree
@@ -750,160 +1148,6 @@ export default class esql_parserListener extends ParseTreeListener {
 	 */
 	exitStringArrayLiteral?: (ctx: StringArrayLiteralContext) => void;
 	/**
-	 * Enter a parse tree produced by the `inputParam`
-	 * labeled alternative in `esql_parser.parameter`.
-	 * @param ctx the parse tree
-	 */
-	enterInputParam?: (ctx: InputParamContext) => void;
-	/**
-	 * Exit a parse tree produced by the `inputParam`
-	 * labeled alternative in `esql_parser.parameter`.
-	 * @param ctx the parse tree
-	 */
-	exitInputParam?: (ctx: InputParamContext) => void;
-	/**
-	 * Enter a parse tree produced by the `inputNamedOrPositionalParam`
-	 * labeled alternative in `esql_parser.parameter`.
-	 * @param ctx the parse tree
-	 */
-	enterInputNamedOrPositionalParam?: (ctx: InputNamedOrPositionalParamContext) => void;
-	/**
-	 * Exit a parse tree produced by the `inputNamedOrPositionalParam`
-	 * labeled alternative in `esql_parser.parameter`.
-	 * @param ctx the parse tree
-	 */
-	exitInputNamedOrPositionalParam?: (ctx: InputNamedOrPositionalParamContext) => void;
-	/**
-	 * Enter a parse tree produced by `esql_parser.identifierOrParameter`.
-	 * @param ctx the parse tree
-	 */
-	enterIdentifierOrParameter?: (ctx: IdentifierOrParameterContext) => void;
-	/**
-	 * Exit a parse tree produced by `esql_parser.identifierOrParameter`.
-	 * @param ctx the parse tree
-	 */
-	exitIdentifierOrParameter?: (ctx: IdentifierOrParameterContext) => void;
-	/**
-	 * Enter a parse tree produced by `esql_parser.limitCommand`.
-	 * @param ctx the parse tree
-	 */
-	enterLimitCommand?: (ctx: LimitCommandContext) => void;
-	/**
-	 * Exit a parse tree produced by `esql_parser.limitCommand`.
-	 * @param ctx the parse tree
-	 */
-	exitLimitCommand?: (ctx: LimitCommandContext) => void;
-	/**
-	 * Enter a parse tree produced by `esql_parser.sortCommand`.
-	 * @param ctx the parse tree
-	 */
-	enterSortCommand?: (ctx: SortCommandContext) => void;
-	/**
-	 * Exit a parse tree produced by `esql_parser.sortCommand`.
-	 * @param ctx the parse tree
-	 */
-	exitSortCommand?: (ctx: SortCommandContext) => void;
-	/**
-	 * Enter a parse tree produced by `esql_parser.orderExpression`.
-	 * @param ctx the parse tree
-	 */
-	enterOrderExpression?: (ctx: OrderExpressionContext) => void;
-	/**
-	 * Exit a parse tree produced by `esql_parser.orderExpression`.
-	 * @param ctx the parse tree
-	 */
-	exitOrderExpression?: (ctx: OrderExpressionContext) => void;
-	/**
-	 * Enter a parse tree produced by `esql_parser.keepCommand`.
-	 * @param ctx the parse tree
-	 */
-	enterKeepCommand?: (ctx: KeepCommandContext) => void;
-	/**
-	 * Exit a parse tree produced by `esql_parser.keepCommand`.
-	 * @param ctx the parse tree
-	 */
-	exitKeepCommand?: (ctx: KeepCommandContext) => void;
-	/**
-	 * Enter a parse tree produced by `esql_parser.dropCommand`.
-	 * @param ctx the parse tree
-	 */
-	enterDropCommand?: (ctx: DropCommandContext) => void;
-	/**
-	 * Exit a parse tree produced by `esql_parser.dropCommand`.
-	 * @param ctx the parse tree
-	 */
-	exitDropCommand?: (ctx: DropCommandContext) => void;
-	/**
-	 * Enter a parse tree produced by `esql_parser.renameCommand`.
-	 * @param ctx the parse tree
-	 */
-	enterRenameCommand?: (ctx: RenameCommandContext) => void;
-	/**
-	 * Exit a parse tree produced by `esql_parser.renameCommand`.
-	 * @param ctx the parse tree
-	 */
-	exitRenameCommand?: (ctx: RenameCommandContext) => void;
-	/**
-	 * Enter a parse tree produced by `esql_parser.renameClause`.
-	 * @param ctx the parse tree
-	 */
-	enterRenameClause?: (ctx: RenameClauseContext) => void;
-	/**
-	 * Exit a parse tree produced by `esql_parser.renameClause`.
-	 * @param ctx the parse tree
-	 */
-	exitRenameClause?: (ctx: RenameClauseContext) => void;
-	/**
-	 * Enter a parse tree produced by `esql_parser.dissectCommand`.
-	 * @param ctx the parse tree
-	 */
-	enterDissectCommand?: (ctx: DissectCommandContext) => void;
-	/**
-	 * Exit a parse tree produced by `esql_parser.dissectCommand`.
-	 * @param ctx the parse tree
-	 */
-	exitDissectCommand?: (ctx: DissectCommandContext) => void;
-	/**
-	 * Enter a parse tree produced by `esql_parser.grokCommand`.
-	 * @param ctx the parse tree
-	 */
-	enterGrokCommand?: (ctx: GrokCommandContext) => void;
-	/**
-	 * Exit a parse tree produced by `esql_parser.grokCommand`.
-	 * @param ctx the parse tree
-	 */
-	exitGrokCommand?: (ctx: GrokCommandContext) => void;
-	/**
-	 * Enter a parse tree produced by `esql_parser.mvExpandCommand`.
-	 * @param ctx the parse tree
-	 */
-	enterMvExpandCommand?: (ctx: MvExpandCommandContext) => void;
-	/**
-	 * Exit a parse tree produced by `esql_parser.mvExpandCommand`.
-	 * @param ctx the parse tree
-	 */
-	exitMvExpandCommand?: (ctx: MvExpandCommandContext) => void;
-	/**
-	 * Enter a parse tree produced by `esql_parser.commandOptions`.
-	 * @param ctx the parse tree
-	 */
-	enterCommandOptions?: (ctx: CommandOptionsContext) => void;
-	/**
-	 * Exit a parse tree produced by `esql_parser.commandOptions`.
-	 * @param ctx the parse tree
-	 */
-	exitCommandOptions?: (ctx: CommandOptionsContext) => void;
-	/**
-	 * Enter a parse tree produced by `esql_parser.commandOption`.
-	 * @param ctx the parse tree
-	 */
-	enterCommandOption?: (ctx: CommandOptionContext) => void;
-	/**
-	 * Exit a parse tree produced by `esql_parser.commandOption`.
-	 * @param ctx the parse tree
-	 */
-	exitCommandOption?: (ctx: CommandOptionContext) => void;
-	/**
 	 * Enter a parse tree produced by `esql_parser.booleanValue`.
 	 * @param ctx the parse tree
 	 */
@@ -963,78 +1207,6 @@ export default class esql_parserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	exitComparisonOperator?: (ctx: ComparisonOperatorContext) => void;
-	/**
-	 * Enter a parse tree produced by `esql_parser.explainCommand`.
-	 * @param ctx the parse tree
-	 */
-	enterExplainCommand?: (ctx: ExplainCommandContext) => void;
-	/**
-	 * Exit a parse tree produced by `esql_parser.explainCommand`.
-	 * @param ctx the parse tree
-	 */
-	exitExplainCommand?: (ctx: ExplainCommandContext) => void;
-	/**
-	 * Enter a parse tree produced by `esql_parser.subqueryExpression`.
-	 * @param ctx the parse tree
-	 */
-	enterSubqueryExpression?: (ctx: SubqueryExpressionContext) => void;
-	/**
-	 * Exit a parse tree produced by `esql_parser.subqueryExpression`.
-	 * @param ctx the parse tree
-	 */
-	exitSubqueryExpression?: (ctx: SubqueryExpressionContext) => void;
-	/**
-	 * Enter a parse tree produced by the `showInfo`
-	 * labeled alternative in `esql_parser.showCommand`.
-	 * @param ctx the parse tree
-	 */
-	enterShowInfo?: (ctx: ShowInfoContext) => void;
-	/**
-	 * Exit a parse tree produced by the `showInfo`
-	 * labeled alternative in `esql_parser.showCommand`.
-	 * @param ctx the parse tree
-	 */
-	exitShowInfo?: (ctx: ShowInfoContext) => void;
-	/**
-	 * Enter a parse tree produced by `esql_parser.enrichCommand`.
-	 * @param ctx the parse tree
-	 */
-	enterEnrichCommand?: (ctx: EnrichCommandContext) => void;
-	/**
-	 * Exit a parse tree produced by `esql_parser.enrichCommand`.
-	 * @param ctx the parse tree
-	 */
-	exitEnrichCommand?: (ctx: EnrichCommandContext) => void;
-	/**
-	 * Enter a parse tree produced by `esql_parser.enrichWithClause`.
-	 * @param ctx the parse tree
-	 */
-	enterEnrichWithClause?: (ctx: EnrichWithClauseContext) => void;
-	/**
-	 * Exit a parse tree produced by `esql_parser.enrichWithClause`.
-	 * @param ctx the parse tree
-	 */
-	exitEnrichWithClause?: (ctx: EnrichWithClauseContext) => void;
-	/**
-	 * Enter a parse tree produced by `esql_parser.lookupCommand`.
-	 * @param ctx the parse tree
-	 */
-	enterLookupCommand?: (ctx: LookupCommandContext) => void;
-	/**
-	 * Exit a parse tree produced by `esql_parser.lookupCommand`.
-	 * @param ctx the parse tree
-	 */
-	exitLookupCommand?: (ctx: LookupCommandContext) => void;
-	/**
-	 * Enter a parse tree produced by `esql_parser.inlinestatsCommand`.
-	 * @param ctx the parse tree
-	 */
-	enterInlinestatsCommand?: (ctx: InlinestatsCommandContext) => void;
-	/**
-	 * Exit a parse tree produced by `esql_parser.inlinestatsCommand`.
-	 * @param ctx the parse tree
-	 */
-	exitInlinestatsCommand?: (ctx: InlinestatsCommandContext) => void;
 	/**
 	 * Enter a parse tree produced by `esql_parser.joinCommand`.
 	 * @param ctx the parse tree

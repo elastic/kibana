@@ -80,13 +80,11 @@ describe('CSV Export Search Cursor', () => {
       expect(dataSearchSpy).toBeCalledWith(
         {
           params: {
-            body: {
-              fields: [],
-              query: { bool: { filter: [], must: [], must_not: [], should: [] } },
-              runtime_mappings: {},
-              script_fields: {},
-              stored_fields: ['*'],
-            },
+            fields: [],
+            query: { bool: { filter: [], must: [], must_not: [], should: [] } },
+            runtime_mappings: {},
+            script_fields: {},
+            stored_fields: ['*'],
             ignore_throttled: undefined,
             index: 'test-index-pattern-string',
             max_concurrent_shard_requests: 5,
@@ -135,13 +133,11 @@ describe('CSV Export Search Cursor', () => {
       expect(dataSearchSpy).toBeCalledWith(
         {
           params: {
-            body: {
-              fields: [],
-              query: { bool: { filter: [], must: [], must_not: [], should: [] } },
-              runtime_mappings: {},
-              script_fields: {},
-              stored_fields: ['*'],
-            },
+            fields: [],
+            query: { bool: { filter: [], must: [], must_not: [], should: [] } },
+            runtime_mappings: {},
+            script_fields: {},
+            stored_fields: ['*'],
             ignore_throttled: undefined,
             index: 'test-index-pattern-string',
             max_concurrent_shard_requests: undefined,

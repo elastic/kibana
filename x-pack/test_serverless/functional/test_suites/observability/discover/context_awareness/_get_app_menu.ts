@@ -26,11 +26,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('extension getAppMenu', () => {
     before(async () => {
       await svlCommonPage.loginAsViewer();
-      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
+      await esArchiver.loadIfNeeded(
+        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
+      );
     });
 
     after(async () => {
-      await esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
+      await esArchiver.unload(
+        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
+      );
     });
 
     beforeEach(async () => {
@@ -60,7 +64,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const createRuleButton = await testSubjects.find('discoverAppMenuCustomThresholdRule');
       await createRuleButton.click();
 
-      const ruleTitleElement = await testSubjects.find('selectedRuleTypeTitle');
+      const ruleTitleElement = await testSubjects.find('ruleDefinitionHeaderRuleTypeName');
 
       await retry.try(async () => {
         expect(await ruleTitleElement.getVisibleText()).to.equal('Custom threshold');

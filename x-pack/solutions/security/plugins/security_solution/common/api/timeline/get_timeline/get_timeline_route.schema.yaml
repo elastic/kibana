@@ -20,12 +20,12 @@ paths:
           name: template_timeline_id
           schema:
             type: string
-          description: The ID of the template timeline to retrieve
+          description: The `savedObjectId` of the template timeline to retrieve
         - in: query
           name: id
           schema:
             type: string
-          description: The ID of the Timeline to retrieve.
+          description: The `savedObjectId` of the Timeline to retrieve.
       responses:
         '200':
           description: Indicates that the (template) Timeline was found and returned.

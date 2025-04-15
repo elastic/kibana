@@ -43,6 +43,7 @@ const renderVulnerabilitiesInsight = () => {
 describe('VulnerabilitiesInsight', () => {
   beforeEach(() => {
     jest.mocked(useExpandableFlyoutApi).mockReturnValue(mockFlyoutApi);
+    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
   });
 
   it('renders', () => {
@@ -73,8 +74,8 @@ describe('VulnerabilitiesInsight', () => {
     });
   });
 
-  it('open entity details panel when clicking on the count if new navigation is enabled', () => {
-    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
+  it('open entity details panel when clicking on the count if newExpandableFlyoutNavigationDisabled is false', () => {
+    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(false);
     (useVulnerabilitiesPreview as jest.Mock).mockReturnValue({
       data: { count: { CRITICAL: 1, HIGH: 2, MEDIUM: 1, LOW: 2, NONE: 2 } },
     });

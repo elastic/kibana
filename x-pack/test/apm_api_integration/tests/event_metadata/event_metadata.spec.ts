@@ -20,16 +20,14 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   async function getMostRecentDoc(processorEvent: ProcessorEvent) {
     const response = await es.search<TransactionRaw | SpanRaw | ErrorRaw>({
       index: ['apm-*'],
-      body: {
-        query: {
-          bool: {
-            filter: [{ term: { [PROCESSOR_EVENT]: processorEvent } }],
-          },
+      query: {
+        bool: {
+          filter: [{ term: { [PROCESSOR_EVENT]: processorEvent } }],
         },
-        size: 1,
-        sort: {
-          '@timestamp': 'desc',
-        },
+      },
+      size: 1,
+      sort: {
+        '@timestamp': 'desc',
       },
     });
 

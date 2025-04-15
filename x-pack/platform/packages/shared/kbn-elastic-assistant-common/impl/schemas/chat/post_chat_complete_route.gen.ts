@@ -15,6 +15,9 @@
  */
 
 import { z } from '@kbn/zod';
+import { BooleanFromString } from '@kbn/zod-helpers';
+
+import { NonEmptyString } from '../common_attributes.gen';
 
 export type RootContext = z.infer<typeof RootContext>;
 export const RootContext = z.literal('security');
@@ -52,7 +55,7 @@ export const ChatMessage = z.object({
 
 export type ChatCompleteProps = z.infer<typeof ChatCompleteProps>;
 export const ChatCompleteProps = z.object({
-  conversationId: z.string().optional(),
+  conversationId: NonEmptyString.optional(),
   promptId: z.string().optional(),
   isStream: z.boolean().optional(),
   responseLanguage: z.string().optional(),
@@ -63,6 +66,15 @@ export const ChatCompleteProps = z.object({
   persist: z.boolean(),
   messages: z.array(ChatMessage),
 });
+
+export type ChatCompleteRequestQuery = z.infer<typeof ChatCompleteRequestQuery>;
+export const ChatCompleteRequestQuery = z.object({
+  /**
+   * If true, the response will not include content references.
+   */
+  content_references_disabled: BooleanFromString.optional().default(false),
+});
+export type ChatCompleteRequestQueryInput = z.input<typeof ChatCompleteRequestQuery>;
 
 export type ChatCompleteRequestBody = z.infer<typeof ChatCompleteRequestBody>;
 export const ChatCompleteRequestBody = ChatCompleteProps;

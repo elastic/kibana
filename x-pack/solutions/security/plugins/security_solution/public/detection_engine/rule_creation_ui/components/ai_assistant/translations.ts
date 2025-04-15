@@ -37,3 +37,10 @@ export const ASK_ASSISTANT_TOOLTIP = i18n.translate(
     defaultMessage: 'Fix query or generate new one',
   }
 );
+
+export const DETECTION_RULES_CREATE_FORM_CONVERSATION_ID = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleManagement.detectionRulesCreateEditFormConversationId',
+  {
+    defaultMessage: 'Detection Rules Create form',
+  }
+);

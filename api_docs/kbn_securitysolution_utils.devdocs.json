@@ -368,6 +368,39 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-utils",
+        "id": "def-common.getMvExpandFields",
+        "type": "Function",
+        "tags": [],
+        "label": "getMvExpandFields",
+        "description": [],
+        "signature": [
+          "(query: string) => string[]"
+        ],
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-utils/src/esql/get_mv_expand_fields.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-utils",
+            "id": "def-common.getMvExpandFields.$1",
+            "type": "string",
+            "tags": [],
+            "label": "query",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/solutions/security/packages/kbn-securitysolution-utils/src/esql/get_mv_expand_fields.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-utils",
         "id": "def-common.hasSimpleExecutableName",
         "type": "Function",
         "tags": [],

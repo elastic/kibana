@@ -4,9 +4,44 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import React from 'react';
-import { EuiConfirmModal } from '@elastic/eui';
+import { EuiConfirmModal, EuiText } from '@elastic/eui';
 import { useState } from 'react';
+
+const ConfirmModal = ({
+  onClose,
+  title,
+  children,
+  confirmButtonText,
+  setElement,
+}: {
+  onClose: (confirmed: boolean) => void;
+  title: React.ReactNode;
+  children: React.ReactNode;
+  confirmButtonText: React.ReactNode;
+  setElement: (element: React.ReactNode | undefined) => void;
+}) => {
+  return (
+    <EuiConfirmModal
+      title={title}
+      onConfirm={() => {
+        onClose(true);
+        setElement(undefined);
+      }}
+      onCancel={() => {
+        onClose(false);
+        setElement(undefined);
+      }}
+      confirmButtonText={confirmButtonText}
+      cancelButtonText="Cancel"
+      buttonColor="danger"
+      maxWidth
+    >
+      <EuiText>{children}</EuiText>
+    </EuiConfirmModal>
+  );
+};
 
 export function useConfirmModal({
   title,
@@ -16,27 +51,25 @@ export function useConfirmModal({
   title: React.ReactNode;
   children: React.ReactNode;
   confirmButtonText: React.ReactNode;
-}) {
+}): {
+  element: React.ReactNode | undefined;
+  confirm: () => Promise<boolean>;
+} {
   const [element, setElement] = useState<React.ReactNode | undefined>(undefined);
 
   const confirm = () => {
     return new Promise<boolean>((resolve) => {
-      setElement(
-        <EuiConfirmModal
-          title={title}
-          onConfirm={() => {
-            resolve(true);
-            setElement(undefined);
-          }}
-          onCancel={() => {
-            resolve(false);
-            setElement(undefined);
-          }}
-          confirmButtonText={confirmButtonText}
-        >
-          {children}
-        </EuiConfirmModal>
-      );
+      setElement(() => {
+        return (
+          <ConfirmModal
+            onClose={resolve}
+            title={title}
+            children={children}
+            confirmButtonText={confirmButtonText}
+            setElement={setElement}
+          />
+        );
+      });
     });
   };
 

@@ -9,7 +9,8 @@
 // function ends up throwing a SavedObject 409 conflict.
 // This is a copy of the retryIfConflicts function from the alerting plugin
 
-import { Logger, SavedObjectsErrorHelpers } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 
 type RetryableForConflicts<T> = () => Promise<T>;
 

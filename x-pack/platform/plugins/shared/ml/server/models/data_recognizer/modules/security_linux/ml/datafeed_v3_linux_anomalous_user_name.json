@@ -1,71 +1,76 @@
 {
-    "job_id": "JOB_ID",
-    "indices": [
-      "INDEX_PATTERN_NAME"
-    ],
-    "max_empty_searches": 10,
-    "query": {
-      "bool": {
-        "filter": [
-          {
-            "term": {
-              "event.category": "process"
-            }
-          },
-          {
-            "term": {
-              "event.type": "start"
-            }
+  "job_id": "JOB_ID",
+  "indices": [
+    "INDEX_PATTERN_NAME"
+  ],
+  "max_empty_searches": 10,
+  "query": {
+    "bool": {
+      "filter": [
+        {
+          "term": {
+            "event.category": "process"
           }
-        ],
-        "must": [
-          {
-            "bool": {
-              "should": [
-                {
-                  "match": {
-                    "host.os.type": {
-                      "query": "linux",
-                      "operator": "OR"
-                    }
-                  }
-                },
-                {
-                  "match": {
-                    "host.os.family": {
-                      "query": "debian",
-                      "operator": "OR"
-                    }
-                  }
-                },
-                {
-                  "match": {
-                    "host.os.family": {
-                      "query": "redhat",
-                      "operator": "OR"
-                    }
-                  }
-                },
-                {
-                  "match": {
-                    "host.os.family": {
-                      "query": "suse",
-                      "operator": "OR"
-                    }
-                  }
-                },
-                {
-                  "match": {
-                    "host.os.family": {
-                      "query": "ubuntu",
-                      "operator": "OR"
-                    }
+        },
+        {
+          "term": {
+            "event.type": "start"
+          }
+        }
+      ],
+      "must": [
+        {
+          "bool": {
+            "should": [
+              {
+                "match": {
+                  "host.os.type": {
+                    "query": "linux",
+                    "operator": "OR"
                   }
                 }
-              ]
-            }
+              },
+              {
+                "match": {
+                  "host.os.family": {
+                    "query": "debian",
+                    "operator": "OR"
+                  }
+                }
+              },
+              {
+                "match": {
+                  "host.os.family": {
+                    "query": "redhat",
+                    "operator": "OR"
+                  }
+                }
+              },
+              {
+                "match": {
+                  "host.os.family": {
+                    "query": "suse",
+                    "operator": "OR"
+                  }
+                }
+              },
+              {
+                "match": {
+                  "host.os.family": {
+                    "query": "ubuntu",
+                    "operator": "OR"
+                  }
+                }
+              }
+            ]
           }
-        ]
+        }
+      ],
+      "must_not": {
+        "terms": {
+          "process.name": ["elastic-agent.exe", "elastic-agent", "metricbeat.exe", "metricbeat", "filebeat.exe", "filebeat", "packetbeat.exe", "packetbeat", "winlogbeat.exe", "winlogbeat"]
+        }
       }
     }
+  }
 }

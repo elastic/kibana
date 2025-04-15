@@ -32,6 +32,7 @@ export interface FleetConfigType {
   };
   agentless?: {
     enabled: boolean;
+    isDefault?: boolean;
     api?: {
       url?: string;
       tls?: {
@@ -84,6 +85,10 @@ export interface FleetConfigType {
     };
   };
   createArtifactsBulkBatchSize?: number;
+  autoUpgrades?: {
+    retryDelays?: string[];
+  };
+  integrationsHomeOverride?: string;
 }
 
 // Calling Object.entries(PackagesGroupedByStatus) gave `status: string`

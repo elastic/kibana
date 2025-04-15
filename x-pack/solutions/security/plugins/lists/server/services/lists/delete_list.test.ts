@@ -52,9 +52,9 @@ describe('delete_list', () => {
     options.esClient.deleteByQuery = jest.fn().mockResolvedValue({ deleted: 1 });
     await deleteList(options);
     const deleteByQuery = {
-      body: { query: { term: { list_id: LIST_ID } } },
       conflicts: 'proceed',
       index: LIST_ITEM_INDEX,
+      query: { term: { list_id: LIST_ID } },
       refresh: false,
     };
     expect(options.esClient.deleteByQuery).toHaveBeenNthCalledWith(1, deleteByQuery);
@@ -67,15 +67,13 @@ describe('delete_list', () => {
     options.esClient.deleteByQuery = jest.fn().mockResolvedValue({ deleted: 1 });
     await deleteList(options);
     const deleteByQuery = {
-      body: {
-        query: {
-          ids: {
-            values: [LIST_ID],
-          },
-        },
-      },
       conflicts: 'proceed',
       index: LIST_INDEX,
+      query: {
+        ids: {
+          values: [LIST_ID],
+        },
+      },
       refresh: false,
     };
     expect(options.esClient.deleteByQuery).toHaveBeenCalledWith(deleteByQuery);

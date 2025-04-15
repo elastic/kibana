@@ -8,7 +8,7 @@
 /* eslint-disable no-console,max-classes-per-file */
 import yargs from 'yargs';
 import fs from 'fs';
-import { Client, errors } from '@elastic/elasticsearch';
+import { Client, errors, HttpConnection } from '@elastic/elasticsearch';
 import type { ClientOptions } from '@elastic/elasticsearch/lib/client';
 import { CA_CERT_PATH } from '@kbn/dev-utils';
 import type { ToolingLog } from '@kbn/tooling-log';
@@ -276,7 +276,10 @@ async function main() {
   }).argv;
 
   let ca: Buffer;
-  let clientOptions: ClientOptions;
+  let clientOptions: ClientOptions = {
+    Connection: HttpConnection,
+    requestTimeout: 30_000,
+  };
   let url: string;
   let node: string;
   const logger = createToolingLogger();
@@ -297,9 +300,9 @@ async function main() {
       certificateAuthorities: [ca],
     };
 
-    clientOptions = { node, tls: { ca: [ca] } };
+    clientOptions = { ...clientOptions, node, tls: { ca: [ca] } };
   } else {
-    clientOptions = { node: argv.node };
+    clientOptions = { ...clientOptions, node: argv.node };
   }
   let client = new Client(clientOptions);
   let kbnClient = new KbnClient({ ...kbnClientOptions });

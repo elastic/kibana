@@ -14,10 +14,14 @@ import {
 
 describe('prompts', () => {
   it.each([
-    [DEFAULT_SYSTEM_PROMPT, '{include_citations_prompt_placeholder}', 1],
-    [GEMINI_SYSTEM_PROMPT, '{include_citations_prompt_placeholder}', 1],
-    [BEDROCK_SYSTEM_PROMPT, '{include_citations_prompt_placeholder}', 1],
-    [STRUCTURED_SYSTEM_PROMPT, '{include_citations_prompt_placeholder}', 1],
+    [DEFAULT_SYSTEM_PROMPT, 'Annotate your answer with the provided citations', 1],
+    [GEMINI_SYSTEM_PROMPT, 'Annotate your answer with the provided citations', 1],
+    [BEDROCK_SYSTEM_PROMPT, 'Annotate your answer with the provided citations', 1],
+    [STRUCTURED_SYSTEM_PROMPT, 'Annotate your answer with the provided citations', 1],
+    [DEFAULT_SYSTEM_PROMPT, '{formattedTime}', 1],
+    [GEMINI_SYSTEM_PROMPT, '{formattedTime}', 1],
+    [BEDROCK_SYSTEM_PROMPT, '{formattedTime}', 1],
+    [STRUCTURED_SYSTEM_PROMPT, '{formattedTime}', 1],
     [DEFAULT_SYSTEM_PROMPT, 'You are a security analyst', 1],
     [GEMINI_SYSTEM_PROMPT, 'You are an assistant', 1],
     [BEDROCK_SYSTEM_PROMPT, 'You are a security analyst', 1],

@@ -7,7 +7,7 @@
 
 import { fold } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
-import * as rt from 'io-ts';
+import type * as rt from 'io-ts';
 import { exactCheck } from '@kbn/securitysolution-io-ts-utils';
 import { identity } from 'fp-ts/lib/function';
 import { isObject } from 'lodash';

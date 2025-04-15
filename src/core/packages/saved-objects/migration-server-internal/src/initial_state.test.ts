@@ -196,6 +196,11 @@ describe('createInitialState', () => {
               },
               Object {
                 "term": Object {
+                  "type": "investigation",
+                },
+              },
+              Object {
+                "term": Object {
                   "type": "maps-telemetry",
                 },
               },
@@ -304,6 +309,7 @@ describe('createInitialState', () => {
         "retryAttempts": 15,
         "retryCount": 0,
         "retryDelay": 0,
+        "skipRetryReset": false,
         "targetIndexMappings": Object {
           "_meta": Object {
             "indexTypesMap": Object {

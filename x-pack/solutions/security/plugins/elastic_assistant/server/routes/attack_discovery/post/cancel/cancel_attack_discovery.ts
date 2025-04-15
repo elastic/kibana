@@ -11,11 +11,11 @@ import {
   AttackDiscoveryCancelResponse,
   API_VERSIONS,
   AttackDiscoveryCancelRequestParams,
+  ATTACK_DISCOVERY_CANCEL_BY_CONNECTOR_ID,
 } from '@kbn/elastic-assistant-common';
 import { transformError } from '@kbn/securitysolution-es-utils';
 
 import { updateAttackDiscoveryStatusToCanceled } from '../../helpers/helpers';
-import { ATTACK_DISCOVERY_CANCEL_BY_CONNECTOR_ID } from '../../../../../common/constants';
 import { buildResponse } from '../../../../lib/build_response';
 import { ElasticAssistantRequestHandlerContext } from '../../../../types';
 
@@ -57,7 +57,7 @@ export const cancelAttackDiscoveryRoute = (
         try {
           const dataClient = await assistantContext.getAttackDiscoveryDataClient();
 
-          const authenticatedUser = assistantContext.getCurrentUser();
+          const authenticatedUser = await assistantContext.getCurrentUser();
           const connectorId = decodeURIComponent(request.params.connectorId);
           if (authenticatedUser == null) {
             return resp.error({

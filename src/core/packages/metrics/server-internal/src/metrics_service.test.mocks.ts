@@ -9,7 +9,10 @@
 
 import { collectorMock } from '@kbn/core-metrics-collectors-server-mocks';
 
-export const mockOpsCollector = collectorMock.create();
+export const mockOpsCollector = {
+  ...collectorMock.create(),
+  registerMetrics: jest.fn(),
+};
 
 jest.doMock('./ops_metrics_collector', () => ({
   OpsMetricsCollector: jest.fn().mockImplementation(() => mockOpsCollector),

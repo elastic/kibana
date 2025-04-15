@@ -14,9 +14,10 @@ import { mockHandlerArguments } from './_mock_handler_arguments';
 import { sleep } from '../test_utils';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
-import { MonitoringStats, RawMonitoringStats } from '../monitoring';
+import type { MonitoringStats, RawMonitoringStats } from '../monitoring';
 import { ServiceStatusLevels } from '@kbn/core/server';
-import { configSchema, TaskManagerConfig } from '../config';
+import type { TaskManagerConfig } from '../config';
+import { configSchema } from '../config';
 import { FillPoolResult } from '../lib/fill_pool';
 
 jest.mock('../monitoring', () => {
@@ -121,15 +122,13 @@ describe('healthRoute', () => {
     await handler(context, req, res);
 
     expect(mockScopedClusterClient.asCurrentUser.security.hasPrivileges).toHaveBeenCalledWith({
-      body: {
-        application: [
-          {
-            application: `kibana-foo`,
-            resources: ['*'],
-            privileges: [`api:8.0:taskManager`],
-          },
-        ],
-      },
+      application: [
+        {
+          application: `kibana-foo`,
+          resources: ['*'],
+          privileges: [`api:8.0:taskManager`],
+        },
+      ],
     });
     expect(mockUsageCounter.incrementCounter).toHaveBeenCalledTimes(1);
     expect(mockUsageCounter.incrementCounter).toHaveBeenNthCalledWith(1, {
@@ -164,15 +163,13 @@ describe('healthRoute', () => {
     await handler(context, req, res);
 
     expect(mockScopedClusterClient.asCurrentUser.security.hasPrivileges).toHaveBeenCalledWith({
-      body: {
-        application: [
-          {
-            application: `kibana-foo`,
-            resources: ['*'],
-            privileges: [`api:8.0:taskManager`],
-          },
-        ],
-      },
+      application: [
+        {
+          application: `kibana-foo`,
+          resources: ['*'],
+          privileges: [`api:8.0:taskManager`],
+        },
+      ],
     });
 
     expect(mockUsageCounter.incrementCounter).toHaveBeenCalledTimes(2);

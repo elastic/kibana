@@ -33,10 +33,10 @@ jest.mock('../../../lib/capabilities', () => ({
   hasManageApiKeysCapability: jest.fn(() => true),
 }));
 jest.mock('../../../../common/lib/kibana');
-jest.mock('../../../hooks/use_load_rule_types_query', () => ({
-  useLoadRuleTypesQuery: jest.fn(),
+jest.mock('@kbn/alerts-ui-shared/src/common/hooks', () => ({
+  useGetRuleTypesPermissions: jest.fn(),
 }));
-const { useLoadRuleTypesQuery } = jest.requireMock('../../../hooks/use_load_rule_types_query');
+const { useGetRuleTypesPermissions } = jest.requireMock('@kbn/alerts-ui-shared/src/common/hooks');
 
 const mockedRuleTypeIndex = new Map(
   Object.entries({
@@ -134,7 +134,7 @@ describe('Rule Definition', () => {
       { id: '.index', iconClass: 'indexOpen' },
     ] as ActionTypeModel[]);
 
-    useLoadRuleTypesQuery.mockReturnValue({ ruleTypesState: { data: mockedRuleTypeIndex } });
+    useGetRuleTypesPermissions.mockReturnValue({ ruleTypesState: { data: mockedRuleTypeIndex } });
 
     wrapper = mount(
       <QueryClientProvider client={new QueryClient()}>
@@ -161,8 +161,8 @@ describe('Rule Definition', () => {
     expect(wrapper.find('[data-test-subj="ruleSummaryRuleDefinition"]')).toBeTruthy();
   });
 
-  it('show rule type name from "useLoadRuleTypesQuery"', async () => {
-    expect(useLoadRuleTypesQuery).toHaveBeenCalledTimes(2);
+  it('show rule type name from "useGetRuleTypesPermissions"', async () => {
+    expect(useGetRuleTypesPermissions).toHaveBeenCalledTimes(2);
     const ruleType = wrapper.find('[data-test-subj="ruleSummaryRuleType"]');
     expect(ruleType).toBeTruthy();
     expect(ruleType.find('div.euiText').text()).toEqual(

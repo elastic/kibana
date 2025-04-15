@@ -10,7 +10,7 @@
 import type { IncomingHttpHeaders } from 'http';
 import type { IScopedClusterClient, Logger } from '@kbn/core/server';
 import { catchError, tap } from 'rxjs';
-import type { DiagnosticResult } from '@elastic/transport';
+import type { DiagnosticResult } from '@elastic/elasticsearch';
 import { SqlQueryResponse, type SqlQuerySqlFormat } from '@elastic/elasticsearch/lib/api/types';
 import { getKbnServerError } from '@kbn/kibana-utils-plugin/server';
 import { getKbnSearchError } from '../../report_search_error';

@@ -92,4 +92,37 @@ describe('DocumentList', () => {
     );
     expect(screen.getByText('Results are limited to 10,000 documents')).toBeInTheDocument();
   });
+
+  describe('executionTime badge', () => {
+    test('does not display the badge when executionTime is missing', () => {
+      const values = {
+        ...DEFAULT_VALUES,
+      };
+
+      render(
+        <I18nProvider>
+          <DocumentList {...values} />
+        </I18nProvider>
+      );
+
+      expect(screen.queryByTestId('executionTimeBadge')).not.toBeInTheDocument();
+    });
+
+    test('displays the badge when executionTime is present', () => {
+      const values = {
+        ...DEFAULT_VALUES,
+        executionTime: 234, // Set executionTime to a valid value
+      };
+
+      render(
+        <I18nProvider>
+          <DocumentList {...values} />
+        </I18nProvider>
+      );
+
+      const badge = screen.getByTestId('executionTimeBadge');
+      expect(badge).toBeInTheDocument();
+      expect(badge).toHaveTextContent('234 ms');
+    });
+  });
 });

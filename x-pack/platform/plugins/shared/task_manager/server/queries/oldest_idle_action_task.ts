@@ -22,40 +22,38 @@ export const getOldestIdleActionTask = async (
     {
       size: 1,
       index: taskManagerIndex,
-      body: {
-        sort: [{ 'task.runAt': { order: 'asc' } }],
-        query: {
-          bool: {
-            filter: {
-              bool: {
-                must: [
-                  {
-                    terms: {
-                      'task.taskType': [
-                        'actions:.email',
-                        'actions:.index',
-                        'actions:.pagerduty',
-                        'actions:.swimlane',
-                        'actions:.server-log',
-                        'actions:.slack',
-                        'actions:.webhook',
-                        'actions:.servicenow',
-                        'actions:.servicenow-sir',
-                        'actions:.jira',
-                        'actions:.resilient',
-                        'actions:.teams',
-                        'actions:.sentinelone',
-                      ],
-                    },
+      sort: [{ 'task.runAt': { order: 'asc' } }],
+      query: {
+        bool: {
+          filter: {
+            bool: {
+              must: [
+                {
+                  terms: {
+                    'task.taskType': [
+                      'actions:.email',
+                      'actions:.index',
+                      'actions:.pagerduty',
+                      'actions:.swimlane',
+                      'actions:.server-log',
+                      'actions:.slack',
+                      'actions:.webhook',
+                      'actions:.servicenow',
+                      'actions:.servicenow-sir',
+                      'actions:.jira',
+                      'actions:.resilient',
+                      'actions:.teams',
+                      'actions:.sentinelone',
+                    ],
                   },
-                  {
-                    term: { type: 'task' },
-                  },
-                  {
-                    term: { 'task.status': 'idle' },
-                  },
-                ],
-              },
+                },
+                {
+                  term: { type: 'task' },
+                },
+                {
+                  term: { 'task.status': 'idle' },
+                },
+              ],
             },
           },
         },

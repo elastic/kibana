@@ -39,6 +39,7 @@ export default function (providerContext: FtrProviderContext) {
     let defaultSpacePolicy1: CreateAgentPolicyResponse;
     let spaceTest1Policy1: CreateAgentPolicyResponse;
     let spaceTest1Policy2: CreateAgentPolicyResponse;
+    let defaultAndTestSpacePolicy: CreateAgentPolicyResponse;
 
     before(async () => {
       await setupTestUsers(getService('security'), true);
@@ -51,16 +52,24 @@ export default function (providerContext: FtrProviderContext) {
 
       await apiClient.postEnableSpaceAwareness();
 
-      const [_defaultSpacePolicy1, _spaceTest1Policy1, _spaceTest1Policy2] = await Promise.all([
+      await spaces.createTestSpace(TEST_SPACE_1);
+      const [
+        _defaultSpacePolicy1,
+        _spaceTest1Policy1,
+        _spaceTest1Policy2,
+        _defaultAndTestSpacePolicy,
+      ] = await Promise.all([
         apiClient.createAgentPolicy(),
         apiClient.createAgentPolicy(TEST_SPACE_1),
         apiClient.createAgentPolicy(TEST_SPACE_1),
+        apiClient.createAgentPolicy(undefined, {
+          space_ids: ['default', TEST_SPACE_1],
+        }),
       ]);
       defaultSpacePolicy1 = _defaultSpacePolicy1;
       spaceTest1Policy1 = _spaceTest1Policy1;
       spaceTest1Policy2 = _spaceTest1Policy2;
-
-      await spaces.createTestSpace(TEST_SPACE_1);
+      defaultAndTestSpacePolicy = _defaultAndTestSpacePolicy;
     });
 
     after(async () => {
@@ -74,20 +83,31 @@ export default function (providerContext: FtrProviderContext) {
     describe('GET /agent_policies', () => {
       it('should return policies in a specific space', async () => {
         const agentPolicies = await apiClient.getAgentPolicies(TEST_SPACE_1);
-        expect(agentPolicies.total).to.eql(2);
+        expect(agentPolicies.total).to.eql(3);
         const policyIds = agentPolicies.items?.map((item) => item.id);
         expect(policyIds).to.contain(spaceTest1Policy1.item.id);
         expect(policyIds).to.contain(spaceTest1Policy2.item.id);
+        expect(policyIds).to.contain(defaultAndTestSpacePolicy.item.id);
         expect(policyIds).not.to.contain(defaultSpacePolicy1.item.id);
       });
 
       it('should return policies in default space', async () => {
         const agentPolicies = await apiClient.getAgentPolicies();
-        expect(agentPolicies.total).to.eql(1);
+        expect(agentPolicies.total).to.eql(2);
         const policyIds = agentPolicies.items?.map((item) => item.id);
         expect(policyIds).not.to.contain(spaceTest1Policy1.item.id);
         expect(policyIds).not.contain(spaceTest1Policy2.item.id);
         expect(policyIds).to.contain(defaultSpacePolicy1.item.id);
+        expect(policyIds).to.contain(defaultAndTestSpacePolicy.item.id);
+      });
+
+      it('should return only spaces user can access', async () => {
+        const agentPolicies = await apiClientDefaultSpaceOnly.getAgentPolicies();
+
+        expect(
+          agentPolicies.items.find((item) => item.id === defaultAndTestSpacePolicy.item.id)
+            ?.space_ids
+        ).to.eql(['default', '?']);
       });
     });
 
@@ -103,6 +123,14 @@ export default function (providerContext: FtrProviderContext) {
         await expectToRejectWithNotFound(() =>
           apiClient.getAgentPolicy(defaultSpacePolicy1.item.id, TEST_SPACE_1)
         );
+      });
+
+      it('should return only spaces user can access', async () => {
+        const policyRes = await apiClientDefaultSpaceOnly.getAgentPolicy(
+          defaultAndTestSpacePolicy.item.id
+        );
+
+        expect(policyRes.item.space_ids).to.eql(['default', '?']);
       });
     });
 

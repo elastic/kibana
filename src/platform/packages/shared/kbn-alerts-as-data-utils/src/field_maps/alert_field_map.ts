@@ -16,6 +16,7 @@ import {
   ALERT_FLAPPING_HISTORY,
   ALERT_MAINTENANCE_WINDOW_IDS,
   ALERT_CONSECUTIVE_MATCHES,
+  ALERT_PENDING_RECOVERED_COUNT,
   ALERT_INSTANCE_ID,
   ALERT_LAST_DETECTED,
   ALERT_PREVIOUS_ACTION_GROUP,
@@ -50,7 +51,7 @@ import {
   TAGS,
   ALERT_INTENDED_TIMESTAMP,
 } from '@kbn/rule-data-utils';
-import { MultiField } from './types';
+import type { MultiField } from './types';
 
 export const alertFieldMap = {
   [ALERT_ACTION_GROUP]: {
@@ -89,6 +90,11 @@ export const alertFieldMap = {
     required: false,
   },
   [ALERT_CONSECUTIVE_MATCHES]: {
+    type: 'long',
+    array: false,
+    required: false,
+  },
+  [ALERT_PENDING_RECOVERED_COUNT]: {
     type: 'long',
     array: false,
     required: false,

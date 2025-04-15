@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { RawRule } from '../../types';
-import { CreateAPIKeyResult } from '../types';
-import { RuleDomain } from '../../application/rule/types';
+import type { RawRule } from '../../types';
+import type { CreateAPIKeyResult } from '../types';
+import type { RuleDomain } from '../../application/rule/types';
 
 /**
  * @deprecated TODO (http-versioning) make sure this is deprecated

@@ -275,30 +275,28 @@ export default function ({ getService }: FtrProviderContext) {
       it('should update roles with elasticsearch, kibana and other applications privileges', async () => {
         await es.security.putRole({
           name: 'bulk_role_to_update_1',
-          body: {
-            cluster: ['monitor'],
-            indices: [
-              {
-                names: ['beats-*'],
-                privileges: ['write'],
-              },
-            ],
-            applications: [
-              {
-                application: 'kibana-.kibana',
-                privileges: ['read'],
-                resources: ['*'],
-              },
-              {
-                application: 'logstash-default',
-                privileges: ['logstash-privilege'],
-                resources: ['*'],
-              },
-            ],
-            run_as: ['reporting_user'],
-            metadata: {
-              bar: 'old-metadata',
+          cluster: ['monitor'],
+          indices: [
+            {
+              names: ['beats-*'],
+              privileges: ['write'],
             },
+          ],
+          applications: [
+            {
+              application: 'kibana-.kibana',
+              privileges: ['read'],
+              resources: ['*'],
+            },
+            {
+              application: 'logstash-default',
+              privileges: ['logstash-privilege'],
+              resources: ['*'],
+            },
+          ],
+          run_as: ['reporting_user'],
+          metadata: {
+            bar: 'old-metadata',
           },
         });
         await es.security.putRole({ name: 'bulk_role_to_update_2', body: {} });

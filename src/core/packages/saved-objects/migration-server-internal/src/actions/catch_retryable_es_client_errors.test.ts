@@ -9,7 +9,10 @@
 
 import { errors as esErrors } from '@elastic/elasticsearch';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
-import { catchRetryableEsClientErrors } from './catch_retryable_es_client_errors';
+import {
+  catchRetryableEsClientErrors,
+  catchRetryableSearchPhaseExecutionException,
+} from './catch_retryable_es_client_errors';
 
 describe('catchRetryableEsClientErrors', () => {
   it('rejects non-retryable response errors', async () => {
@@ -92,5 +95,31 @@ describe('catchRetryableEsClientErrors', () => {
         });
       }
     );
+  });
+});
+
+describe('catchRetryableSearchPhaseExecutionException', () => {
+  it('retries search phase execution exception ', async () => {
+    const error = new esErrors.ResponseError(
+      elasticsearchClientMock.createApiResponse({
+        body: { error: { type: 'search_phase_execution_exception' } },
+      })
+    );
+    expect(
+      ((await Promise.reject(error).catch(catchRetryableSearchPhaseExecutionException)) as any).left
+    ).toMatchObject({
+      message: 'search_phase_execution_exception',
+      type: 'retryable_es_client_error',
+    });
+  });
+  it('does not retry other errors', async () => {
+    const error = new esErrors.ResponseError(
+      elasticsearchClientMock.createApiResponse({
+        body: { error: { type: 'cluster_block_exception' } },
+      })
+    );
+    await expect(
+      Promise.reject(error).catch(catchRetryableSearchPhaseExecutionException)
+    ).rejects.toBe(error);
   });
 });

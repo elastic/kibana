@@ -21,24 +21,28 @@ import {
   touchMoveTo,
   touchStart,
 } from './test_utils/events';
+import { EuiThemeProvider } from '@elastic/eui';
 
 const onLayoutChange = jest.fn();
 
 const renderGridLayout = (propsOverrides: Partial<GridLayoutProps> = {}) => {
-  const defaultProps: GridLayoutProps = {
+  const props = {
     accessMode: 'EDIT',
     layout: getSampleLayout(),
     gridSettings,
     renderPanelContents: mockRenderPanelContents,
     onLayoutChange,
-  };
+    ...propsOverrides,
+  } as GridLayoutProps;
 
-  const { rerender, ...rtlRest } = render(<GridLayout {...defaultProps} {...propsOverrides} />);
+  const { rerender, ...rtlRest } = render(<GridLayout {...props} />, { wrapper: EuiThemeProvider });
 
   return {
     ...rtlRest,
-    rerender: (overrides: Partial<GridLayoutProps>) =>
-      rerender(<GridLayout {...defaultProps} {...overrides} />),
+    rerender: (overrides: Partial<GridLayoutProps>) => {
+      const newProps = { ...props, ...overrides } as GridLayoutProps;
+      return rerender(<GridLayout {...newProps} />);
+    },
   };
 };
 
@@ -92,10 +96,10 @@ describe('GridLayout', () => {
 
     // if layout **has** changed, call `onLayoutChange`
     const newLayout = cloneDeep(layout);
-    newLayout[0] = {
-      ...newLayout[0],
+    newLayout.first = {
+      ...newLayout.first,
       panels: {
-        ...newLayout[0].panels,
+        ...newLayout.first.panels,
         panel1: {
           id: 'panel1',
           row: 100,
@@ -113,40 +117,72 @@ describe('GridLayout', () => {
     expect(onLayoutChange).toBeCalledTimes(1);
   });
 
-  it(`'renderPanelContents' is not called during dragging`, () => {
-    renderGridLayout();
+  describe('dragging rows', () => {
+    beforeAll(() => {
+      // scroll into view is not mocked by RTL so we need to add this to prevent these tests from throwing
+      Element.prototype.scrollIntoView = jest.fn();
+    });
 
-    // assert that renderPanelContents has been called ONLY ONCE for each of 10 panels on initial render
-    expect(mockRenderPanelContents).toHaveBeenCalledTimes(expectedInitPanelIdsInOrder.length);
-    jest.clearAllMocks();
+    it('row gets active when dragged', () => {
+      renderGridLayout();
+      expect(screen.getByTestId('kbnGridRowHeader-second')).not.toHaveClass(
+        'kbnGridRowHeader--active'
+      );
 
-    const panelHandle = getPanelHandle('panel1');
-    mouseStartDragging(panelHandle);
-    mouseMoveTo({ clientX: 256, clientY: 128 });
+      const rowHandle = screen.getByTestId(`kbnGridRowHeader-second--dragHandle`);
+      mouseStartDragging(rowHandle);
+      mouseMoveTo({ clientX: 256, clientY: 128 });
+      expect(screen.getByTestId('kbnGridRowHeader-second')).toHaveClass('kbnGridRowHeader--active');
 
-    // assert that renderPanelContents has not been called during dragging
-    expect(mockRenderPanelContents).toHaveBeenCalledTimes(0);
-
-    mouseDrop(panelHandle);
-    // assert that renderPanelContents has not been called after reordering
-    expect(mockRenderPanelContents).toHaveBeenCalledTimes(0);
+      mouseDrop(rowHandle);
+      expect(screen.getByTestId('kbnGridRowHeader-second')).not.toHaveClass(
+        'kbnGridRowHeader--active'
+      );
+    });
   });
 
-  it('panel gets active when dragged', () => {
-    renderGridLayout();
-    const panelHandle = getPanelHandle('panel1');
-    expect(screen.getByLabelText('panelId:panel1').closest('div')).toHaveClass('kbnGridPanel', {
-      exact: true,
+  describe('dragging panels', () => {
+    it(`'renderPanelContents' is not called during dragging`, () => {
+      renderGridLayout();
+
+      // assert that renderPanelContents has been called ONLY ONCE for each of 10 panels on initial render
+      expect(mockRenderPanelContents).toHaveBeenCalledTimes(expectedInitPanelIdsInOrder.length);
+      jest.clearAllMocks();
+
+      const panelHandle = getPanelHandle('panel1');
+      mouseStartDragging(panelHandle);
+      mouseMoveTo({ clientX: 256, clientY: 128 });
+
+      // assert that renderPanelContents has not been called during dragging
+      expect(mockRenderPanelContents).toHaveBeenCalledTimes(0);
+
+      mouseDrop(panelHandle);
+      // assert that renderPanelContents has not beesn called after reordering
+      expect(mockRenderPanelContents).toHaveBeenCalledTimes(0);
     });
-    mouseStartDragging(panelHandle);
-    mouseMoveTo({ clientX: 256, clientY: 128 });
-    expect(screen.getByLabelText('panelId:panel1').closest('div')).toHaveClass(
-      'kbnGridPanel kbnGridPanel--active',
-      { exact: true }
-    );
-    mouseDrop(panelHandle);
-    expect(screen.getByLabelText('panelId:panel1').closest('div')).toHaveClass('kbnGridPanel', {
-      exact: true,
+
+    it('panel gets active when dragged', () => {
+      renderGridLayout();
+      const panelHandle = getPanelHandle('panel1');
+      expect(screen.getByLabelText('panelId:panel1').closest('div')).toHaveClass(
+        'kbnGridPanel css-c5ixg-initialStyles',
+        {
+          exact: true,
+        }
+      );
+      mouseStartDragging(panelHandle);
+      mouseMoveTo({ clientX: 256, clientY: 128 });
+      expect(screen.getByLabelText('panelId:panel1').closest('div')).toHaveClass(
+        'kbnGridPanel css-c5ixg-initialStyles kbnGridPanel--active',
+        { exact: true }
+      );
+      mouseDrop(panelHandle);
+      expect(screen.getByLabelText('panelId:panel1').closest('div')).toHaveClass(
+        'kbnGridPanel css-c5ixg-initialStyles',
+        {
+          exact: true,
+        }
+      );
     });
   });
 
@@ -159,6 +195,7 @@ describe('GridLayout', () => {
       await assertTabThroughPanel('panel2');
       await assertTabThroughPanel('panel3');
     });
+
     it('on initializing', () => {
       renderGridLayout();
       expect(getAllThePanelIds()).toEqual(expectedInitPanelIdsInOrder);
@@ -187,6 +224,7 @@ describe('GridLayout', () => {
         'panel10',
       ]);
     });
+
     it('after reordering some panels via touch events', async () => {
       renderGridLayout();
 
@@ -213,7 +251,7 @@ describe('GridLayout', () => {
     it('after removing a panel', async () => {
       const { rerender } = renderGridLayout();
       const sampleLayoutWithoutPanel1 = cloneDeep(getSampleLayout());
-      delete sampleLayoutWithoutPanel1[0].panels.panel1;
+      delete sampleLayoutWithoutPanel1.first.panels.panel1;
       rerender({ layout: sampleLayoutWithoutPanel1 });
 
       expect(getAllThePanelIds()).toEqual([
@@ -232,9 +270,9 @@ describe('GridLayout', () => {
     it('after replacing a panel id', async () => {
       const { rerender } = renderGridLayout();
       const modifiedLayout = cloneDeep(getSampleLayout());
-      const newPanel = { ...modifiedLayout[0].panels.panel1, id: 'panel11' };
-      delete modifiedLayout[0].panels.panel1;
-      modifiedLayout[0].panels.panel11 = newPanel;
+      const newPanel = { ...modifiedLayout.first.panels.panel1, id: 'panel11' };
+      delete modifiedLayout.first.panels.panel1;
+      modifiedLayout.first.panels.panel11 = newPanel;
 
       rerender({ layout: modifiedLayout });
 

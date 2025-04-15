@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import { isEmpty } from 'lodash';
 
 import type {
@@ -20,16 +20,13 @@ import type {
   TimestampOverride,
 } from '../../../../../common/api/detection_engine/model/rule_schema';
 import { singleSearchAfter } from '../utils/single_search_after';
+import { buildEventsSearchQuery } from '../utils/build_events_query';
 import {
   buildThresholdMultiBucketAggregation,
   buildThresholdSingleBucketAggregation,
 } from './build_threshold_aggregation';
-import type {
-  ThresholdMultiBucketAggregationResult,
-  ThresholdBucket,
-  ThresholdSingleBucketAggregationResult,
-} from './types';
-import { shouldFilterByCardinality, searchResultHasAggs } from './utils';
+import type { ThresholdCompositeBucket } from './types';
+import { shouldFilterByCardinality } from './utils';
 import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
 import { getMaxSignalsWarning, stringifyAfterKey } from '../utils/utils';
 import type { RulePreviewLoggedRequest } from '../../../../../common/api/detection_engine/rule_preview/rule_preview.gen';
@@ -58,7 +55,6 @@ interface SearchAfterResults {
   searchErrors: string[];
 }
 
-// eslint-disable-next-line complexity
 export const findThresholdSignals = async ({
   from,
   to,
@@ -74,14 +70,14 @@ export const findThresholdSignals = async ({
   aggregatableTimestampField,
   isLoggedRequestsEnabled,
 }: FindThresholdSignalsParams): Promise<{
-  buckets: ThresholdBucket[];
+  buckets: ThresholdCompositeBucket[];
   searchDurations: string[];
   searchErrors: string[];
   warnings: string[];
   loggedRequests?: RulePreviewLoggedRequest[];
 }> => {
   // Leaf aggregations used below
-  const buckets: ThresholdBucket[] = [];
+  const buckets: ThresholdCompositeBucket[] = [];
   const searchAfterResults: SearchAfterResults = {
     searchDurations: [],
     searchErrors: [],
@@ -94,29 +90,33 @@ export const findThresholdSignals = async ({
   if (hasThresholdFields(threshold)) {
     let sortKeys: Record<string, string | number | null> | undefined;
     do {
-      const {
-        searchResult,
-        searchDuration,
-        searchErrors,
-        loggedRequests: thresholdLoggedRequests,
-      } = await singleSearchAfter({
+      const searchRequest = buildEventsSearchQuery({
         aggregations: buildThresholdMultiBucketAggregation({
           threshold,
           aggregatableTimestampField,
           sortKeys,
         }),
         index: inputIndexPattern,
-        searchAfterSortIds: undefined,
         from,
         to,
-        services,
-        ruleExecutionLogger,
-        filter,
-        pageSize: 0,
-        sortOrder: 'desc',
         runtimeMappings,
+        filter,
+        size: 0,
+        sortOrder: 'desc',
+        searchAfterSortIds: undefined,
         primaryTimestamp,
         secondaryTimestamp,
+      });
+
+      const {
+        searchResult,
+        searchDuration,
+        searchErrors,
+        loggedRequests: thresholdLoggedRequests,
+      } = await singleSearchAfter({
+        searchRequest,
+        services,
+        ruleExecutionLogger,
         loggedRequestsConfig: isLoggedRequestsEnabled
           ? {
               type: 'findThresholdBuckets',
@@ -134,40 +134,40 @@ export const findThresholdSignals = async ({
         sortKeys = undefined; // this will eject us out of the loop
         // if a search failure occurs on a secondary iteration,
         // we will return early.
-      } else if (searchResultHasAggs<ThresholdMultiBucketAggregationResult>(searchResult)) {
-        const thresholdTerms = searchResult.aggregations?.thresholdTerms;
-        sortKeys = thresholdTerms?.after_key;
-        buckets.push(
-          ...((searchResult.aggregations?.thresholdTerms.buckets as ThresholdBucket[]) ?? [])
-        );
+      } else if (searchResult.aggregations != null) {
+        const thresholdTerms = searchResult.aggregations.thresholdTerms;
+        sortKeys = thresholdTerms.after_key;
+        buckets.push(...thresholdTerms.buckets);
       } else {
         throw new Error('Aggregations were missing on threshold rule search result');
       }
     } while (sortKeys && buckets.length <= maxSignals);
   } else {
+    const searchRequest = buildEventsSearchQuery({
+      aggregations: buildThresholdSingleBucketAggregation({
+        threshold,
+        aggregatableTimestampField,
+      }),
+      index: inputIndexPattern,
+      from,
+      to,
+      runtimeMappings,
+      filter,
+      size: 0,
+      sortOrder: 'desc',
+      searchAfterSortIds: undefined,
+      primaryTimestamp,
+      secondaryTimestamp,
+    });
     const {
       searchResult,
       searchDuration,
       searchErrors,
       loggedRequests: thresholdLoggedRequests,
     } = await singleSearchAfter({
-      aggregations: buildThresholdSingleBucketAggregation({
-        threshold,
-        aggregatableTimestampField,
-      }),
-      searchAfterSortIds: undefined,
-      index: inputIndexPattern,
-      from,
-      to,
+      searchRequest,
       services,
       ruleExecutionLogger,
-      filter,
-      pageSize: 0,
-      sortOrder: 'desc',
-      trackTotalHits: true,
-      runtimeMappings,
-      primaryTimestamp,
-      secondaryTimestamp,
       loggedRequestsConfig: isLoggedRequestsEnabled
         ? {
             type: 'findThresholdBuckets',
@@ -180,12 +180,9 @@ export const findThresholdSignals = async ({
     searchAfterResults.searchErrors.push(...searchErrors);
     loggedRequests.push(...(thresholdLoggedRequests ?? []));
 
-    if (
-      !searchResultHasAggs<ThresholdSingleBucketAggregationResult>(searchResult) &&
-      isEmpty(searchErrors)
-    ) {
-      throw new Error('Aggregations were missing on threshold rule search result');
-    } else if (searchResultHasAggs<ThresholdSingleBucketAggregationResult>(searchResult)) {
+    if (isEmpty(searchErrors)) {
+      searchAfterResults.searchErrors.push(...searchErrors);
+    } else if (searchResult.aggregations != null) {
       const docCount = searchResult.hits.total.value;
       if (
         docCount >= threshold.value &&
@@ -196,13 +193,13 @@ export const findThresholdSignals = async ({
         buckets.push({
           doc_count: docCount,
           key: {},
-          max_timestamp: searchResult.aggregations?.max_timestamp ?? { value: null },
-          min_timestamp: searchResult.aggregations?.min_timestamp ?? { value: null },
-          ...(includeCardinalityFilter
-            ? { cardinality_count: searchResult.aggregations?.cardinality_count }
-            : {}),
+          max_timestamp: searchResult.aggregations.max_timestamp,
+          min_timestamp: searchResult.aggregations.min_timestamp,
+          cardinality_count: searchResult.aggregations.cardinality_count,
         });
       }
+    } else {
+      throw new Error('Aggregations were missing on threshold rule search result');
     }
   }
 

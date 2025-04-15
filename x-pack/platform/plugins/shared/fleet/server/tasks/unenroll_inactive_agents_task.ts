@@ -29,17 +29,18 @@ import { agentPolicyService, auditLoggingService } from '../services';
 
 export const TYPE = 'fleet:unenroll-inactive-agents-task';
 export const VERSION = '1.0.0';
-export const POLICIES_BATCHSIZE = 500;
 const TITLE = 'Fleet Unenroll Inactive Agent Task';
 const SCOPE = ['fleet'];
 const INTERVAL = '10m';
 const TIMEOUT = '1m';
 const UNENROLLMENT_BATCHSIZE = 1000;
+const POLICIES_BATCHSIZE = 500;
 
 interface UnenrollInactiveAgentsTaskSetupContract {
   core: CoreSetup;
   taskManager: TaskManagerSetupContract;
   logFactory: LoggerFactory;
+  unenrollBatchSize?: number;
 }
 
 interface UnenrollInactiveAgentsTaskStartContract {
@@ -50,10 +51,13 @@ export class UnenrollInactiveAgentsTask {
   private logger: Logger;
   private wasStarted: boolean = false;
   private abortController = new AbortController();
+  private unenrollBatchSize: number;
 
   constructor(setupContract: UnenrollInactiveAgentsTaskSetupContract) {
-    const { core, taskManager, logFactory } = setupContract;
+    const { core, taskManager, logFactory, unenrollBatchSize } = setupContract;
     this.logger = logFactory.get(this.taskId);
+    this.unenrollBatchSize =
+      unenrollBatchSize !== undefined ? unenrollBatchSize : UNENROLLMENT_BATCHSIZE;
 
     taskManager.registerTaskDefinitions({
       [TYPE]: {
@@ -140,7 +144,7 @@ export class UnenrollInactiveAgentsTask {
         kuery,
         showInactive: true,
         page: 1,
-        perPage: UNENROLLMENT_BATCHSIZE,
+        perPage: this.unenrollBatchSize,
       });
       if (!res.agents.length) {
         this.logger.debug(
@@ -149,7 +153,7 @@ export class UnenrollInactiveAgentsTask {
         continue;
       }
       agentCounter += res.agents.length;
-      if (agentCounter >= UNENROLLMENT_BATCHSIZE) {
+      if (agentCounter > this.unenrollBatchSize) {
         this.endRun('Reached the maximum amount of agents to unenroll, exiting.');
         return;
       }

@@ -45,9 +45,7 @@ export default function ({ getService }: FtrProviderContext) {
         templateName = `template-${getRandomString()}`;
         const indexTemplate = {
           name: templateName,
-          body: {
-            index_patterns: ['test*'],
-          },
+          index_patterns: ['test*'],
         };
         // Create a new index template to test against
         try {
@@ -152,12 +150,10 @@ export default function ({ getService }: FtrProviderContext) {
           logsdbSettings.forEach(({ enabled, indexMode }) => {
             it(`returns ${indexMode} index mode if logsdb.enabled setting is ${enabled}`, async () => {
               await es.cluster.putSettings({
-                body: {
-                  persistent: {
-                    cluster: {
-                      logsdb: {
-                        enabled,
-                      },
+                persistent: {
+                  cluster: {
+                    logsdb: {
+                      enabled,
                     },
                   },
                 },

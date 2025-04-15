@@ -21,11 +21,13 @@ jest.mock('../../../../lib/autocomplete/engine', () => {
     },
   };
 });
-import { AutoCompleteContext } from '../../../../lib/autocomplete/types';
+import { AutoCompleteContext, ResultTerm } from '../../../../lib/autocomplete/types';
 import {
   getDocumentationLinkFromAutocomplete,
   getUrlPathCompletionItems,
   shouldTriggerSuggestions,
+  getInsertText,
+  isInsideTripleQuotes,
 } from './autocomplete_utils';
 
 describe('autocomplete_utils', () => {
@@ -214,6 +216,102 @@ describe('autocomplete_utils', () => {
       const mockPosition = { lineNumber: 1, column: 6 } as unknown as monaco.Position;
       const items = getUrlPathCompletionItems(mockModel, mockPosition);
       expect(items.length).toBe(5);
+    });
+  });
+
+  describe('getInsertText', () => {
+    const mockContext = { addTemplate: false } as AutoCompleteContext;
+
+    it('returns empty string if name is undefined', () => {
+      expect(getInsertText({ name: undefined } as ResultTerm, '', mockContext)).toBe('');
+    });
+
+    it('handles unclosed quotes correctly', () => {
+      expect(
+        getInsertText(
+          { name: 'match_all' } as ResultTerm,
+          '{\n' + '    "query": {\n' + '      "match_a',
+          mockContext
+        )
+      ).toBe('match_all"');
+    });
+
+    it('wraps insertValue with quotes when appropriate', () => {
+      expect(
+        getInsertText(
+          { name: 'match_all' } as ResultTerm,
+          '{\n' + '    "query": {\n' + '      ',
+          mockContext
+        )
+      ).toBe('"match_all"');
+    });
+
+    it('appends template when available and context.addTemplate is true', () => {
+      expect(
+        getInsertText({ name: 'query', template: {} } as ResultTerm, '{\n' + '    ', {
+          ...mockContext,
+          addTemplate: true,
+        })
+      ).toBe('"query": {$0}');
+    });
+
+    it('inserts template when provided directly and context.addTemplate is true', () => {
+      expect(
+        getInsertText(
+          { name: 'terms', template: { field: '' } },
+          '{\n' + '    "aggs": {\n' + '      "NAME": {\n' + '        "',
+          { ...mockContext, addTemplate: true }
+        )
+      ).toBe('terms": {\n' + '  "field": ""\n' + '}');
+    });
+
+    it('inserts only field name when template is provided and context.addTemplate is false', () => {
+      expect(
+        getInsertText(
+          { name: 'terms', template: { field: '' } },
+          '{\n' + '    "aggs": {\n' + '      "NAME": {\n' + '        "',
+          mockContext
+        )
+      ).toBe('terms"');
+    });
+
+    it('inserts template inline', () => {
+      expect(
+        getInsertText({ name: 'term', template: { FIELD: { value: 'VALUE' } } }, '{"query": {te', {
+          ...mockContext,
+          addTemplate: true,
+        })
+      ).toBe('"term": {\n' + '  "FIELD": {\n' + '    "value": "VALUE"\n' + '  }\n' + '}');
+    });
+
+    it('adds cursor placeholder inside empty objects and arrays', () => {
+      expect(getInsertText({ name: 'field', value: '{' } as ResultTerm, '', mockContext)).toBe(
+        '"field": {$0}'
+      );
+      expect(getInsertText({ name: 'field', value: '[' } as ResultTerm, '', mockContext)).toBe(
+        '"field": [$0]'
+      );
+    });
+  });
+
+  describe('isInsideTripleQuotes', () => {
+    it('should return false for an empty string', () => {
+      expect(isInsideTripleQuotes('')).toBe(false);
+    });
+
+    it('should return false for a request without triple quotes', () => {
+      const request = `POST _search\n{\n  \"query\": {\n    \"match\": {\n      \"message\": \"hello world\"\n    }\n  }\n}`;
+      expect(isInsideTripleQuotes(request)).toBe(false);
+    });
+
+    it('should return true for a request ending inside triple quotes', () => {
+      const request = `POST _ingest/pipeline/_simulate\n{\n  \"pipeline\": {\n    \"processors\": [\n      {\n        \"script\": {\n          \"source\":\n          \"\"\"\n            for (field in params['fields']){\n                if (!$(field, '').isEmpty()){\n`;
+      expect(isInsideTripleQuotes(request)).toBe(true);
+    });
+
+    it('should return false for a properly closed triple-quoted string', () => {
+      const request = `POST _ingest/pipeline/_simulate\n{\n  \"pipeline\": {\n    \"processors\": [\n      {\n        \"script\": {\n          \"source\":\n          \"\"\"\n            return 'hello';\n          \"\"\"\n        }\n      }\n    ]\n  }\n}`;
+      expect(isInsideTripleQuotes(request)).toBe(false);
     });
   });
 });

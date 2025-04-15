@@ -30,72 +30,70 @@ export async function fetchDiskUsageNodeStats(
   const params = {
     index: indexPatterns,
     filter_path: ['aggregations'],
-    body: {
-      size: 0,
-      query: {
-        bool: {
-          filter: [
-            {
-              terms: {
-                cluster_uuid: clustersIds,
-              },
+    size: 0,
+    query: {
+      bool: {
+        filter: [
+          {
+            terms: {
+              cluster_uuid: clustersIds,
             },
-            createDatasetFilter('node_stats', 'node_stats', getElasticsearchDataset('node_stats')),
-            {
-              range: {
-                timestamp: {
-                  gte: `now-${duration}`,
-                },
-              },
-            },
-          ],
-        },
-      },
-      aggs: {
-        clusters: {
-          terms: {
-            field: 'cluster_uuid',
-            size,
-            include: clustersIds,
           },
-          aggs: {
-            nodes: {
-              terms: {
-                field: 'node_stats.node_id',
-                size,
+          createDatasetFilter('node_stats', 'node_stats', getElasticsearchDataset('node_stats')),
+          {
+            range: {
+              timestamp: {
+                gte: `now-${duration}`,
               },
-              aggs: {
-                index: {
-                  terms: {
-                    field: '_index',
-                    size: 1,
-                  },
+            },
+          },
+        ],
+      },
+    },
+    aggs: {
+      clusters: {
+        terms: {
+          field: 'cluster_uuid',
+          size,
+          include: clustersIds,
+        },
+        aggs: {
+          nodes: {
+            terms: {
+              field: 'node_stats.node_id',
+              size,
+            },
+            aggs: {
+              index: {
+                terms: {
+                  field: '_index',
+                  size: 1,
                 },
-                total_in_bytes: {
-                  max: {
-                    field: 'node_stats.fs.total.total_in_bytes',
-                  },
+              },
+              total_in_bytes: {
+                max: {
+                  field: 'node_stats.fs.total.total_in_bytes',
                 },
-                available_in_bytes: {
-                  max: {
-                    field: 'node_stats.fs.total.available_in_bytes',
-                  },
+              },
+              available_in_bytes: {
+                max: {
+                  field: 'node_stats.fs.total.available_in_bytes',
                 },
-                usage_ratio_percentile: {
-                  bucket_script: {
-                    buckets_path: {
-                      available_in_bytes: 'available_in_bytes',
-                      total_in_bytes: 'total_in_bytes',
-                    },
-                    script:
-                      '100 - Math.floor((params.available_in_bytes / params.total_in_bytes) * 100)',
+              },
+              usage_ratio_percentile: {
+                bucket_script: {
+                  buckets_path: {
+                    available_in_bytes: 'available_in_bytes',
+                    total_in_bytes: 'total_in_bytes',
                   },
+                  script:
+                    '100 - Math.floor((params.available_in_bytes / params.total_in_bytes) * 100)',
                 },
-                name: {
-                  terms: {
-                    field: 'source_node.name',
-                    size: 1,
-                  },
+              },
+              name: {
+                terms: {
+                  field: 'source_node.name',
+                  size: 1,
                 },
               },
             },
@@ -108,7 +106,7 @@ export async function fetchDiskUsageNodeStats(
   try {
     if (filterQuery) {
       const filterQueryObject = JSON.parse(filterQuery);
-      params.body.query.bool.filter.push(filterQueryObject);
+      params.query.bool.filter.push(filterQueryObject);
     }
   } catch (e) {
     // meh

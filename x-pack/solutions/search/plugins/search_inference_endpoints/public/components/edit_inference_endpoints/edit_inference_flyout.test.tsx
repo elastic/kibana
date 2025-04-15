@@ -12,7 +12,7 @@ import { render, screen } from '@testing-library/react';
 import { EditInferenceFlyout } from './edit_inference_flyout';
 import { useQueryInferenceEndpoints } from '../../hooks/use_inference_endpoints';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { InferenceEndpointUI } from '../all_inference_endpoints/types';
+import { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/types';
 
 jest.mock('../../hooks/use_kibana');
 jest.mock('../../hooks/use_inference_endpoints');
@@ -29,19 +29,17 @@ describe('EditInferenceFlyout', () => {
   const mockToasts = { addSuccess: jest.fn(), addError: jest.fn() };
   const mockHttp = jest.fn();
 
-  const mockInferenceEndpointUI = {
-    endpoint: 'test-endpoint',
-    type: 'sparse_embedding',
-    provider: {
-      service: 'openai',
-      service_settings: {
-        api_key: 'valueA',
-        organization_id: 'valueB',
-        url: 'https://someurl.com/chat/completions',
-        model_id: 'third-party',
-      },
+  const mockInferenceEndpoint: InferenceInferenceEndpointInfo = {
+    inference_id: 'test-endpoint',
+    task_type: 'sparse_embedding',
+    service: 'openai',
+    service_settings: {
+      api_key: 'valueA',
+      organization_id: 'valueB',
+      url: 'https://someurl.com/chat/completions',
+      model_id: 'third-party',
     },
-  } as InferenceEndpointUI;
+  };
 
   const queryClient = new QueryClient();
   const renderComponent = () =>
@@ -49,7 +47,7 @@ describe('EditInferenceFlyout', () => {
       <QueryClientProvider client={queryClient}>
         <EditInferenceFlyout
           onFlyoutClose={mockOnFlyoutClose}
-          inferenceEndpointUI={mockInferenceEndpointUI}
+          selectedInferenceEndpoint={mockInferenceEndpoint}
         />
       </QueryClientProvider>
     );
@@ -81,9 +79,9 @@ describe('EditInferenceFlyout', () => {
         onSubmitSuccess: expect.any(Function),
         inferenceEndpoint: {
           config: {
-            inferenceId: mockInferenceEndpointUI.endpoint,
-            taskType: mockInferenceEndpointUI.type,
-            provider: mockInferenceEndpointUI.provider.service,
+            inferenceId: mockInferenceEndpoint.inference_id,
+            taskType: mockInferenceEndpoint.task_type,
+            provider: mockInferenceEndpoint.service,
             providerConfig: {
               api_key: 'valueA',
               organization_id: 'valueB',

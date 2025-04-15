@@ -84,12 +84,10 @@ export async function getServiceMetadataIcons({
         ProcessorEvent.metric,
       ],
     },
-    body: {
-      track_total_hits: 1,
-      size: 1,
-      query: { bool: { filter, should } },
-      fields,
-    },
+    track_total_hits: 1,
+    size: 1,
+    query: { bool: { filter, should } },
+    fields,
   };
 
   const data = await apmEventClient.search('get_service_metadata_icons', params);

@@ -6,7 +6,7 @@
  */
 
 import { ElasticsearchClient } from '@kbn/core/server';
-import type * as estypes from '@elastic/elasticsearch/lib/api/types';
+import type { estypes } from '@elastic/elasticsearch';
 import moment from 'moment';
 import { createQuery } from './create_query';
 import { mapToList } from './get_high_level_stats';
@@ -120,7 +120,7 @@ export class LogstashAgentMonitoring implements LogstashMonitoring {
           }
         }
 
-        const thisCollectionType = hit._source?.agent?.type || 'agent';
+        const thisCollectionType = 'agent';
         if (!Object.hasOwn(clusterStats, 'collection_types')) {
           clusterStats.collection_types = {};
         }

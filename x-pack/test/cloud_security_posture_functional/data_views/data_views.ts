@@ -40,6 +40,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
   const kibanaServer = getService('kibanaServer');
   const spacesService = getService('spaces');
   const retry = getService('retry');
+  const fetchingOfDataViewsTimeout = 1000 * 30; // 30 seconds
 
   const pageObjects = getPageObjects([
     'common',
@@ -55,6 +56,16 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
     this.tags(['cloud_security_posture_data_views', 'cloud_security_posture_spaces']);
     let cspSecurity = pageObjects.cspSecurity;
     let findings: typeof pageObjects.findings;
+
+    const waitForDataViews = async ({
+      timeout,
+      action,
+    }: {
+      timeout: number;
+      action: () => Promise<void>;
+    }) => {
+      await retry.tryForTime(timeout, action);
+    };
 
     before(async () => {
       await spacesService.delete(TEST_SPACE);
@@ -98,14 +109,21 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
         }
 
         await findings.navigateToLatestVulnerabilitiesPage();
-        await pageObjects.header.waitUntilLoadingHasFinished();
 
-        const idDataViewExistsPostFindingsNavigation = await getDataViewSafe(
-          kibanaServer.savedObjects,
-          expectedDataViewId,
-          'default'
-        );
-        expect(idDataViewExistsPostFindingsNavigation).to.be(true);
+        // give more time for the data view to be fetched before checking loading status
+        await waitForDataViews({
+          timeout: fetchingOfDataViewsTimeout,
+          action: async () => {
+            await pageObjects.header.waitUntilLoadingHasFinished();
+
+            const idDataViewExistsPostFindingsNavigation = await getDataViewSafe(
+              kibanaServer.savedObjects,
+              expectedDataViewId,
+              'default'
+            );
+            expect(idDataViewExistsPostFindingsNavigation).to.be(true);
+          },
+        });
       });
     });
 
@@ -129,14 +147,19 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
 
         const cspDashboard = pageObjects.cloudPostureDashboard;
         await cspDashboard.navigateToComplianceDashboardPage();
-        await pageObjects.header.waitUntilLoadingHasFinished();
+        await waitForDataViews({
+          timeout: fetchingOfDataViewsTimeout,
+          action: async () => {
+            await pageObjects.header.waitUntilLoadingHasFinished();
 
-        const idDataViewExistsPostFindingsNavigation = await getDataViewSafe(
-          kibanaServer.savedObjects,
-          expectedDataViewId,
-          'default'
-        );
-        expect(idDataViewExistsPostFindingsNavigation).to.be(true);
+            const idDataViewExistsPostFindingsNavigation = await getDataViewSafe(
+              kibanaServer.savedObjects,
+              expectedDataViewId,
+              'default'
+            );
+            expect(idDataViewExistsPostFindingsNavigation).to.be(true);
+          },
+        });
       });
     });
 
@@ -164,14 +187,18 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
         }
 
         await findings.navigateToLatestFindingsPage(TEST_SPACE);
-        await pageObjects.header.waitUntilLoadingHasFinished();
-        const idDataViewExistsPostFindingsNavigation = await getDataViewSafe(
-          kibanaServer.savedObjects,
-          expectedDataViewId,
-          TEST_SPACE
-        );
-
-        expect(idDataViewExistsPostFindingsNavigation).to.be(true);
+        await waitForDataViews({
+          timeout: fetchingOfDataViewsTimeout,
+          action: async () => {
+            await pageObjects.header.waitUntilLoadingHasFinished();
+            const idDataViewExistsPostFindingsNavigation = await getDataViewSafe(
+              kibanaServer.savedObjects,
+              expectedDataViewId,
+              TEST_SPACE
+            );
+            expect(idDataViewExistsPostFindingsNavigation).to.be(true);
+          },
+        });
       });
     });
 
@@ -200,14 +227,18 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
 
         const cspDashboard = pageObjects.cloudPostureDashboard;
         await cspDashboard.navigateToComplianceDashboardPage(TEST_SPACE);
-        await pageObjects.header.waitUntilLoadingHasFinished();
-        const idDataViewExistsPostFindingsNavigation = await getDataViewSafe(
-          kibanaServer.savedObjects,
-          expectedDataViewId,
-          TEST_SPACE
-        );
-
-        expect(idDataViewExistsPostFindingsNavigation).to.be(true);
+        await waitForDataViews({
+          timeout: fetchingOfDataViewsTimeout,
+          action: async () => {
+            await pageObjects.header.waitUntilLoadingHasFinished();
+            const idDataViewExistsPostFindingsNavigation = await getDataViewSafe(
+              kibanaServer.savedObjects,
+              expectedDataViewId,
+              TEST_SPACE
+            );
+            expect(idDataViewExistsPostFindingsNavigation).to.be(true);
+          },
+        });
       });
     });
 
@@ -234,14 +265,18 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
 
         const cspDashboard = pageObjects.cloudPostureDashboard;
         await cspDashboard.navigateToComplianceDashboardPage();
-        await pageObjects.header.waitUntilLoadingHasFinished();
-        const idDataViewExistsPostFindingsNavigation = await getDataViewSafe(
-          kibanaServer.savedObjects,
-          expectedDataViewId,
-          'default'
-        );
-
-        expect(idDataViewExistsPostFindingsNavigation).to.be(true);
+        await waitForDataViews({
+          timeout: fetchingOfDataViewsTimeout,
+          action: async () => {
+            await pageObjects.header.waitUntilLoadingHasFinished();
+            const idDataViewExistsPostFindingsNavigation = await getDataViewSafe(
+              kibanaServer.savedObjects,
+              expectedDataViewId,
+              'default'
+            );
+            expect(idDataViewExistsPostFindingsNavigation).to.be(true);
+          },
+        });
       });
     });
   });

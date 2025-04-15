@@ -43,11 +43,13 @@ export function registerRoutes<TDependencies extends Record<string, any>>({
   repository,
   logger,
   dependencies,
+  runDevModeChecks,
 }: {
   core: CoreSetup;
   repository: Record<string, ServerRoute<string, RouteParamsRT | undefined, any, any, any>>;
   logger: Logger;
   dependencies: TDependencies;
+  runDevModeChecks: boolean;
 }) {
   const routes = Object.values(repository);
 
@@ -62,7 +64,7 @@ export function registerRoutes<TDependencies extends Record<string, any>>({
 
     const { method, pathname, version } = parseEndpoint(endpoint);
 
-    if (isZod(params)) {
+    if (runDevModeChecks && isZod(params)) {
       const dangerousSchemas = assertAllParsableSchemas(params);
       if (dangerousSchemas.size > 0) {
         for (const { key, schema } of dangerousSchemas) {
@@ -74,7 +76,7 @@ export function registerRoutes<TDependencies extends Record<string, any>>({
             );
           } else {
             logger.warn(
-              `Warning for ${endpoint}: schema ${typeName} at ${key} is not inspectable and could lead to runtime exceptions, convert it to a support schema`
+              `Warning for ${endpoint}: schema ${typeName} at ${key} is not inspectable and could lead to runtime exceptions, convert it to a supported schema`
             );
           }
         }
@@ -116,6 +118,12 @@ export function registerRoutes<TDependencies extends Record<string, any>>({
         }
 
         if (isKibanaResponse(result)) {
+          if (result.status >= 500) {
+            logger.error(() => `HTTP ${result.status}: ${JSON.stringify(result.payload)}`);
+          } else if (result.status >= 400) {
+            logger.debug(() => `HTTP ${result.status}: ${JSON.stringify(result.payload)}`);
+          }
+
           return result;
         } else if (isObservable(result)) {
           const controller = new AbortController();
@@ -133,8 +141,6 @@ export function registerRoutes<TDependencies extends Record<string, any>>({
           return response.ok({ body });
         }
       } catch (error) {
-        logger.error(error);
-
         const opts = {
           statusCode: 500,
           body: {
@@ -152,6 +158,12 @@ export function registerRoutes<TDependencies extends Record<string, any>>({
         if (isBoom(error)) {
           opts.statusCode = error.output.statusCode;
           opts.body.attributes.data = error?.data;
+        }
+
+        if (opts.statusCode >= 500) {
+          logger.error(() => error);
+        } else {
+          logger.debug(() => error);
         }
 
         return response.custom(opts);
@@ -189,7 +201,8 @@ export function registerRoutes<TDependencies extends Record<string, any>>({
       router.versioned[method]({
         path: pathname,
         access,
-        // @ts-expect-error we are essentially calling multiple methods at the same type so TS gets confused
+        summary: options.summary,
+        description: options.description,
         options: omit(options, 'access', 'description', 'summary', 'deprecated', 'discontinued'),
         security,
       }).addVersion(

@@ -8,6 +8,7 @@
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { testSubjectIds } from '../../../constants/test_subject_ids';
+import { policiesSavedObjects } from '../constants';
 
 const {
   CIS_AZURE_OPTION_TEST_ID,
@@ -25,18 +26,24 @@ const clientCertificatePassword = 'clientCertificatePasswordTest';
 
 // eslint-disable-next-line import/no-default-export
 export default function (providerContext: FtrProviderContext) {
-  const { getPageObjects } = providerContext;
+  const { getPageObjects, getService } = providerContext;
+  const retry = getService('retry');
   const pageObjects = getPageObjects(['cloudPostureDashboard', 'cisAddIntegration', 'header']);
+  const kibanaServer = getService('kibanaServer');
+  const saveIntegrationPolicyTimeout = 1000 * 30; // 30 seconds
 
   describe('Test adding Cloud Security Posture Integrations CSPM AZURE', function () {
     this.tags(['cloud_security_posture_cis_integration_cspm_azure']);
     let cisIntegration: typeof pageObjects.cisAddIntegration;
     let cisIntegrationAzure: typeof pageObjects.cisAddIntegration.cisAzure;
 
+    before(async () => {
+      await kibanaServer.savedObjects.clean({ types: policiesSavedObjects });
+    });
+
     beforeEach(async () => {
       cisIntegration = pageObjects.cisAddIntegration;
       cisIntegrationAzure = pageObjects.cisAddIntegration.cisAzure;
-
       await cisIntegration.navigateToAddIntegrationCspmPage();
     });
 
@@ -44,15 +51,18 @@ export default function (providerContext: FtrProviderContext) {
       it('Azure Organization ARM Template Workflow', async () => {
         await cisIntegration.clickOptionButton(CIS_AZURE_OPTION_TEST_ID);
         await cisIntegration.clickOptionButton(CIS_AZURE_SETUP_FORMAT_TEST_SUBJECTS.ARM_TEMPLATE);
+        await cisIntegration.inputUniqueIntegrationName();
         await cisIntegration.clickSaveButton();
-        await pageObjects.header.waitUntilLoadingHasFinished();
-        expect((await cisIntegrationAzure.getPostInstallArmTemplateModal()) !== undefined).to.be(
-          true
-        );
-        expect(
-          (await cisIntegration.getUrlOnPostInstallModal()) ===
-            'https://azure.microsoft.com/en-us/get-started/azure-portal/resource-manager'
-        );
+        await retry.tryForTime(saveIntegrationPolicyTimeout, async () => {
+          await pageObjects.header.waitUntilLoadingHasFinished();
+          expect((await cisIntegrationAzure.getPostInstallArmTemplateModal()) !== undefined).to.be(
+            true
+          );
+          expect(
+            (await cisIntegration.getUrlOnPostInstallModal()) ===
+              'https://azure.microsoft.com/en-us/get-started/azure-portal/resource-manager'
+          );
+        });
       });
     });
 
@@ -61,9 +71,13 @@ export default function (providerContext: FtrProviderContext) {
         await cisIntegration.clickOptionButton(CIS_AZURE_OPTION_TEST_ID);
         await cisIntegration.clickOptionButton(CIS_AZURE_SETUP_FORMAT_TEST_SUBJECTS.MANUAL);
         await cisIntegration.selectValue(AZURE_CREDENTIAL_SELECTOR, 'managed_identity');
+        await cisIntegration.inputUniqueIntegrationName();
+
         await cisIntegration.clickSaveButton();
-        await pageObjects.header.waitUntilLoadingHasFinished();
-        expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);
+        await retry.tryForTime(saveIntegrationPolicyTimeout, async () => {
+          await pageObjects.header.waitUntilLoadingHasFinished();
+          expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);
+        });
       });
     });
 
@@ -88,22 +102,26 @@ export default function (providerContext: FtrProviderContext) {
           CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_SECRET,
           clientSecret
         );
+        await cisIntegration.inputUniqueIntegrationName();
+
         await cisIntegration.clickSaveButton();
-        await pageObjects.header.waitUntilLoadingHasFinished();
-        expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);
-        await cisIntegration.navigateToIntegrationCspList();
-        await cisIntegration.clickFirstElementOnIntegrationTable();
-        expect(
-          (await cisIntegration.getValueInEditPage(
-            CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_ID
-          )) === clientId
-        ).to.be(true);
-        expect(
-          (await cisIntegration.getValueInEditPage(
-            CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS.TENANT_ID
-          )) === tenantId
-        ).to.be(true);
-        expect(await cisIntegration.getReplaceSecretButton('client-secret')).to.not.be(null);
+        await retry.tryForTime(saveIntegrationPolicyTimeout, async () => {
+          await pageObjects.header.waitUntilLoadingHasFinished();
+          expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);
+          await cisIntegration.navigateToIntegrationCspList();
+          await cisIntegration.clickFirstElementOnIntegrationTable();
+          expect(
+            (await cisIntegration.getValueInEditPage(
+              CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_ID
+            )) === clientId
+          ).to.be(true);
+          expect(
+            (await cisIntegration.getValueInEditPage(
+              CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS.TENANT_ID
+            )) === tenantId
+          ).to.be(true);
+          expect(await cisIntegration.getReplaceSecretButton('client-secret')).to.not.be(null);
+        });
       });
     });
 
@@ -133,27 +151,30 @@ export default function (providerContext: FtrProviderContext) {
           CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_CERTIFICATE_PASSWORD,
           clientCertificatePassword
         );
+        await cisIntegration.inputUniqueIntegrationName();
 
         await cisIntegration.clickSaveButton();
-        await pageObjects.header.waitUntilLoadingHasFinished();
-        expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);
-        await cisIntegration.navigateToIntegrationCspList();
-        await cisIntegration.clickFirstElementOnIntegrationTable();
-        expect(
-          (await cisIntegration.getValueInEditPage(
-            CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_ID
-          )) === clientId
-        ).to.be(true);
-        expect(
-          (await cisIntegration.getValueInEditPage(
-            CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS.TENANT_ID
-          )) === tenantId
-        ).to.be(true);
-        expect(
-          (await cisIntegration.getValueInEditPage(
-            CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_CERTIFICATE_PATH
-          )) === clientCertificatePath
-        ).to.be(true);
+        await retry.tryForTime(saveIntegrationPolicyTimeout, async () => {
+          await pageObjects.header.waitUntilLoadingHasFinished();
+          expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);
+          await cisIntegration.navigateToIntegrationCspList();
+          await cisIntegration.clickFirstElementOnIntegrationTable();
+          expect(
+            (await cisIntegration.getValueInEditPage(
+              CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_ID
+            )) === clientId
+          ).to.be(true);
+          expect(
+            (await cisIntegration.getValueInEditPage(
+              CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS.TENANT_ID
+            )) === tenantId
+          ).to.be(true);
+          expect(
+            (await cisIntegration.getValueInEditPage(
+              CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_CERTIFICATE_PATH
+            )) === clientCertificatePath
+          ).to.be(true);
+        });
       });
     });
 
@@ -161,15 +182,18 @@ export default function (providerContext: FtrProviderContext) {
       it('Azure Single ARM Template Workflow', async () => {
         await cisIntegration.clickOptionButton(CIS_AZURE_OPTION_TEST_ID);
         await cisIntegration.clickOptionButton(CIS_AZURE_SINGLE_SUB_TEST_ID);
+        await cisIntegration.inputUniqueIntegrationName();
         await cisIntegration.clickSaveButton();
-        await pageObjects.header.waitUntilLoadingHasFinished();
-        expect((await cisIntegrationAzure.getPostInstallArmTemplateModal()) !== undefined).to.be(
-          true
-        );
-        expect(
-          (await cisIntegration.getUrlOnPostInstallModal()) ===
-            'https://azure.microsoft.com/en-us/get-started/azure-portal/resource-manager'
-        );
+        await retry.tryForTime(saveIntegrationPolicyTimeout, async () => {
+          await pageObjects.header.waitUntilLoadingHasFinished();
+          expect((await cisIntegrationAzure.getPostInstallArmTemplateModal()) !== undefined).to.be(
+            true
+          );
+          expect(
+            (await cisIntegration.getUrlOnPostInstallModal()) ===
+              'https://azure.microsoft.com/en-us/get-started/azure-portal/resource-manager'
+          );
+        });
       });
     });
 
@@ -179,9 +203,12 @@ export default function (providerContext: FtrProviderContext) {
         await cisIntegration.clickOptionButton(CIS_AZURE_SINGLE_SUB_TEST_ID);
         await cisIntegration.clickOptionButton(CIS_AZURE_SETUP_FORMAT_TEST_SUBJECTS.MANUAL);
         await cisIntegration.selectValue(AZURE_CREDENTIAL_SELECTOR, 'managed_identity');
+        await cisIntegration.inputUniqueIntegrationName();
         await cisIntegration.clickSaveButton();
-        await pageObjects.header.waitUntilLoadingHasFinished();
-        expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);
+        await retry.tryForTime(saveIntegrationPolicyTimeout, async () => {
+          await pageObjects.header.waitUntilLoadingHasFinished();
+          expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);
+        });
       });
     });
 
@@ -206,22 +233,25 @@ export default function (providerContext: FtrProviderContext) {
           CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_SECRET,
           clientSecret
         );
+        await cisIntegration.inputUniqueIntegrationName();
         await cisIntegration.clickSaveButton();
-        await pageObjects.header.waitUntilLoadingHasFinished();
-        expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);
-        await cisIntegration.navigateToIntegrationCspList();
-        await cisIntegration.clickFirstElementOnIntegrationTable();
-        expect(
-          (await cisIntegration.getValueInEditPage(
-            CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_ID
-          )) === clientId
-        ).to.be(true);
-        expect(
-          (await cisIntegration.getValueInEditPage(
-            CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS.TENANT_ID
-          )) === tenantId
-        ).to.be(true);
-        expect(await cisIntegration.getReplaceSecretButton('client-secret')).to.not.be(null);
+        await retry.tryForTime(saveIntegrationPolicyTimeout, async () => {
+          await pageObjects.header.waitUntilLoadingHasFinished();
+          expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);
+          await cisIntegration.navigateToIntegrationCspList();
+          await cisIntegration.clickFirstElementOnIntegrationTable();
+          expect(
+            (await cisIntegration.getValueInEditPage(
+              CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_ID
+            )) === clientId
+          ).to.be(true);
+          expect(
+            (await cisIntegration.getValueInEditPage(
+              CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS.TENANT_ID
+            )) === tenantId
+          ).to.be(true);
+          expect(await cisIntegration.getReplaceSecretButton('client-secret')).to.not.be(null);
+        });
       });
     });
 
@@ -251,27 +281,29 @@ export default function (providerContext: FtrProviderContext) {
           CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_CERTIFICATE_PASSWORD,
           clientCertificatePassword
         );
-
+        await cisIntegration.inputUniqueIntegrationName();
         await cisIntegration.clickSaveButton();
-        await pageObjects.header.waitUntilLoadingHasFinished();
-        expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);
-        await cisIntegration.navigateToIntegrationCspList();
-        await cisIntegration.clickFirstElementOnIntegrationTable();
-        expect(
-          (await cisIntegration.getValueInEditPage(
-            CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_ID
-          )) === clientId
-        ).to.be(true);
-        expect(
-          (await cisIntegration.getValueInEditPage(
-            CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS.TENANT_ID
-          )) === tenantId
-        ).to.be(true);
-        expect(
-          (await cisIntegration.getValueInEditPage(
-            CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_CERTIFICATE_PATH
-          )) === clientCertificatePath
-        ).to.be(true);
+        await retry.tryForTime(saveIntegrationPolicyTimeout, async () => {
+          await pageObjects.header.waitUntilLoadingHasFinished();
+          expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);
+          await cisIntegration.navigateToIntegrationCspList();
+          await cisIntegration.clickFirstElementOnIntegrationTable();
+          expect(
+            (await cisIntegration.getValueInEditPage(
+              CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_ID
+            )) === clientId
+          ).to.be(true);
+          expect(
+            (await cisIntegration.getValueInEditPage(
+              CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS.TENANT_ID
+            )) === tenantId
+          ).to.be(true);
+          expect(
+            (await cisIntegration.getValueInEditPage(
+              CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_CERTIFICATE_PATH
+            )) === clientCertificatePath
+          ).to.be(true);
+        });
       });
     });
   });

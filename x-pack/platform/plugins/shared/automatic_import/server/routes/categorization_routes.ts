@@ -39,19 +39,19 @@ export function registerCategorizationRoutes(router: IRouter<AutomaticImportRout
           idleSocket: ROUTE_HANDLER_TIMEOUT,
         },
       },
+      security: {
+        authz: {
+          requiredPrivileges: [
+            FLEET_ALL_ROLE,
+            INTEGRATIONS_ALL_ROLE,
+            ACTIONS_AND_CONNECTORS_ALL_ROLE,
+          ],
+        },
+      },
     })
     .addVersion(
       {
         version: '1',
-        security: {
-          authz: {
-            requiredPrivileges: [
-              FLEET_ALL_ROLE,
-              INTEGRATIONS_ALL_ROLE,
-              ACTIONS_AND_CONNECTORS_ALL_ROLE,
-            ],
-          },
-        },
         validate: {
           request: {
             body: buildRouteValidationWithZod(CategorizationRequestBody),
@@ -93,6 +93,9 @@ export function registerCategorizationRoutes(router: IRouter<AutomaticImportRout
               maxTokens: 4096,
               signal: abortSignal,
               streaming: false,
+              telemetryMetadata: {
+                pluginId: 'automatic_import',
+              },
             });
 
             const parameters = {

@@ -40,24 +40,24 @@ const i18nText = {
     }
   ),
   nameAscSort: i18n.translate('contentManagement.tableList.listing.tableSortSelect.nameAscLabel', {
-    defaultMessage: 'Name A-Z',
+    defaultMessage: 'A-Z',
   }),
   nameDescSort: i18n.translate(
     'contentManagement.tableList.listing.tableSortSelect.nameDescLabel',
     {
-      defaultMessage: 'Name Z-A',
+      defaultMessage: 'Z-A',
     }
   ),
   updatedAtAscSort: i18n.translate(
     'contentManagement.tableList.listing.tableSortSelect.updatedAtAscLabel',
     {
-      defaultMessage: 'Least recently updated',
+      defaultMessage: 'Old-Recent',
     }
   ),
   updatedAtDescSort: i18n.translate(
     'contentManagement.tableList.listing.tableSortSelect.updatedAtDescLabel',
     {
-      defaultMessage: 'Recently updated',
+      defaultMessage: 'Recent-Old',
     }
   ),
   headerSort: i18n.translate('contentManagement.tableList.listing.tableSortSelect.headerLabel', {

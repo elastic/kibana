@@ -10,10 +10,10 @@ import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { apiIsPresentationContainer } from '@kbn/presentation-containers';
 import { ADD_PANEL_VISUALIZATION_GROUP } from '@kbn/embeddable-plugin/public';
-import type { LensPluginStartDependencies } from '../../plugin';
-import type { EditorFrameService } from '../../editor_frame_service';
+import { ENABLE_ESQL } from '@kbn/esql-utils';
 import { ACTION_CREATE_ESQL_CHART } from './constants';
-import { executeCreateAction, isCreateActionCompatible } from '../../async_services';
+import { generateId } from '../../id_generator';
+import type { LensApi } from '../../react_embeddable/types';
 
 export class AddESQLPanelAction implements Action<EmbeddableApiContext> {
   public type = ACTION_CREATE_ESQL_CHART;
@@ -22,11 +22,7 @@ export class AddESQLPanelAction implements Action<EmbeddableApiContext> {
 
   public grouping = [ADD_PANEL_VISUALIZATION_GROUP];
 
-  constructor(
-    protected readonly startDependencies: LensPluginStartDependencies,
-    protected readonly core: CoreStart,
-    protected readonly getEditorFrameService: () => Promise<EditorFrameService>
-  ) {}
+  constructor(protected readonly core: CoreStart) {}
 
   public getDisplayName(): string {
     return i18n.translate('xpack.lens.app.createVisualizationLabel', {
@@ -40,18 +36,22 @@ export class AddESQLPanelAction implements Action<EmbeddableApiContext> {
   }
 
   public async isCompatible({ embeddable }: EmbeddableApiContext) {
-    return apiIsPresentationContainer(embeddable) && isCreateActionCompatible(this.core);
+    return apiIsPresentationContainer(embeddable) && this.core.uiSettings.get(ENABLE_ESQL);
   }
 
-  public async execute({ embeddable }: EmbeddableApiContext) {
-    if (!apiIsPresentationContainer(embeddable)) throw new IncompatibleActionError();
-    const editorFrameService = await this.getEditorFrameService();
-
-    executeCreateAction({
-      deps: this.startDependencies,
-      core: this.core,
-      api: embeddable,
-      editorFrameService,
+  public async execute({ embeddable: api }: EmbeddableApiContext) {
+    if (!apiIsPresentationContainer(api)) throw new IncompatibleActionError();
+    const embeddable = await api.addNewPanel<object, LensApi>({
+      panelType: 'lens',
+      serializedState: {
+        rawState: {
+          id: generateId(),
+          isNewPanel: true,
+          attributes: { references: [] },
+        },
+      },
     });
+    // open the flyout if embeddable has been created successfully
+    embeddable?.onEdit?.();
   }
 }

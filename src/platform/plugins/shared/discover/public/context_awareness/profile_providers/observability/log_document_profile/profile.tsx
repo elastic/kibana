@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DataTableRecord } from '@kbn/discover-utils';
-import { DocumentProfileProvider, DocumentType } from '../../../profiles';
-import { ProfileProviderServices } from '../../profile_provider_services';
+import type { DataTableRecord } from '@kbn/discover-utils';
+import type { DocumentProfileProvider } from '../../../profiles';
+import { DocumentType } from '../../../profiles';
+import type { ProfileProviderServices } from '../../profile_provider_services';
 import { createGetDocViewer } from './accessors';
 import { OBSERVABILITY_ROOT_PROFILE_ID } from '../consts';
 

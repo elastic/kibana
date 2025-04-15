@@ -6,7 +6,7 @@
  */
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { errors as EsErrors } from '@elastic/elasticsearch';
-import { IndicesGetDataStreamResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { IndicesGetDataStreamResponse } from '@elastic/elasticsearch/lib/api/types';
 import { createConcreteWriteIndex, setConcreteWriteIndex } from './create_concrete_write_index';
 import { getDataStreamAdapter } from './data_stream_adapter';
 
@@ -69,7 +69,9 @@ const IndexPatterns = {
 describe('createConcreteWriteIndex', () => {
   for (const useDataStream of [false, true]) {
     const label = useDataStream ? 'data streams' : 'aliases';
-    const dataStreamAdapter = getDataStreamAdapter({ useDataStreamForAlerts: useDataStream });
+    const dataStreamAdapter = getDataStreamAdapter({
+      useDataStreamForAlerts: useDataStream,
+    });
 
     beforeEach(() => {
       jest.resetAllMocks();
@@ -79,7 +81,9 @@ describe('createConcreteWriteIndex', () => {
     describe(`using ${label} for alert indices`, () => {
       it(`should call esClient to put index template`, async () => {
         clusterClient.indices.getAlias.mockImplementation(async () => ({}));
-        clusterClient.indices.getDataStream.mockImplementation(async () => ({ data_streams: [] }));
+        clusterClient.indices.getDataStream.mockImplementation(async () => ({
+          data_streams: [],
+        }));
         await createConcreteWriteIndex({
           logger,
           esClient: clusterClient,
@@ -95,11 +99,9 @@ describe('createConcreteWriteIndex', () => {
         } else {
           expect(clusterClient.indices.create).toHaveBeenCalledWith({
             index: '.internal.alerts-test.alerts-default-000001',
-            body: {
-              aliases: {
-                '.alerts-test.alerts-default': {
-                  is_write_index: true,
-                },
+            aliases: {
+              '.alerts-test.alerts-default': {
+                is_write_index: true,
               },
             },
           });
@@ -108,7 +110,9 @@ describe('createConcreteWriteIndex', () => {
 
       it(`should retry on transient ES errors`, async () => {
         clusterClient.indices.getAlias.mockImplementation(async () => ({}));
-        clusterClient.indices.getDataStream.mockImplementation(async () => ({ data_streams: [] }));
+        clusterClient.indices.getDataStream.mockImplementation(async () => ({
+          data_streams: [],
+        }));
         clusterClient.indices.create
           .mockRejectedValueOnce(new EsErrors.ConnectionError('foo'))
           .mockRejectedValueOnce(new EsErrors.TimeoutError('timeout'))
@@ -140,7 +144,9 @@ describe('createConcreteWriteIndex', () => {
 
       it(`should log and throw error if max retries exceeded`, async () => {
         clusterClient.indices.getAlias.mockImplementation(async () => ({}));
-        clusterClient.indices.getDataStream.mockImplementation(async () => ({ data_streams: [] }));
+        clusterClient.indices.getDataStream.mockImplementation(async () => ({
+          data_streams: [],
+        }));
         clusterClient.indices.create.mockRejectedValue(new EsErrors.ConnectionError('foo'));
         clusterClient.indices.createDataStream.mockRejectedValue(
           new EsErrors.ConnectionError('foo')
@@ -170,7 +176,9 @@ describe('createConcreteWriteIndex', () => {
 
       it(`should log and throw error if ES throws error`, async () => {
         clusterClient.indices.getAlias.mockImplementation(async () => ({}));
-        clusterClient.indices.getDataStream.mockImplementation(async () => ({ data_streams: [] }));
+        clusterClient.indices.getDataStream.mockImplementation(async () => ({
+          data_streams: [],
+        }));
         clusterClient.indices.create.mockRejectedValueOnce(new Error('generic error'));
         clusterClient.indices.createDataStream.mockRejectedValueOnce(new Error('generic error'));
 
@@ -206,7 +214,9 @@ describe('createConcreteWriteIndex', () => {
         clusterClient.indices.create.mockRejectedValueOnce(error);
         clusterClient.indices.get.mockImplementationOnce(async () => ({
           '.internal.alerts-test.alerts-default-000001': {
-            aliases: { '.alerts-test.alerts-default': { is_write_index: true } },
+            aliases: {
+              '.alerts-test.alerts-default': { is_write_index: true },
+            },
           },
         }));
 
@@ -239,7 +249,9 @@ describe('createConcreteWriteIndex', () => {
           .mockRejectedValueOnce(new EsErrors.TimeoutError('timeout'))
           .mockImplementationOnce(async () => ({
             '.internal.alerts-test.alerts-default-000001': {
-              aliases: { '.alerts-test.alerts-default': { is_write_index: true } },
+              aliases: {
+                '.alerts-test.alerts-default': { is_write_index: true },
+              },
             },
           }));
 
@@ -270,7 +282,9 @@ describe('createConcreteWriteIndex', () => {
         clusterClient.indices.create.mockRejectedValueOnce(error);
         clusterClient.indices.get.mockImplementationOnce(async () => ({
           '.internal.alerts-test.alerts-default-000001': {
-            aliases: { '.alerts-test.alerts-default': { is_write_index: false } },
+            aliases: {
+              '.alerts-test.alerts-default': { is_write_index: false },
+            },
           },
         }));
 
@@ -309,11 +323,9 @@ describe('createConcreteWriteIndex', () => {
         } else {
           expect(clusterClient.indices.create).toHaveBeenCalledWith({
             index: '.internal.alerts-test.alerts-default-000001',
-            body: {
-              aliases: {
-                '.alerts-test.alerts-default': {
-                  is_write_index: true,
-                },
+            aliases: {
+              '.alerts-test.alerts-default': {
+                is_write_index: true,
               },
             },
           });
@@ -359,11 +371,9 @@ describe('createConcreteWriteIndex', () => {
         if (!useDataStream) {
           expect(clusterClient.indices.create).toHaveBeenCalledWith({
             index: '.internal.alerts-test.alerts-default-000001',
-            body: {
-              aliases: {
-                '.alerts-test.alerts-default': {
-                  is_write_index: true,
-                },
+            aliases: {
+              '.alerts-test.alerts-default': {
+                is_write_index: true,
               },
             },
           });
@@ -399,11 +409,9 @@ describe('createConcreteWriteIndex', () => {
         if (!useDataStream) {
           expect(clusterClient.indices.create).toHaveBeenCalledWith({
             index: '.internal.alerts-test.alerts-default-000001',
-            body: {
-              aliases: {
-                '.alerts-test.alerts-default': {
-                  is_write_index: true,
-                },
+            aliases: {
+              '.alerts-test.alerts-default': {
+                is_write_index: true,
               },
             },
           });
@@ -607,6 +615,386 @@ describe('createConcreteWriteIndex', () => {
         );
       });
 
+      it(`should increase the limit and retry if ES throws an exceeded limit error`, async () => {
+        const existingIndexTemplate = {
+          name: 'test-template',
+          index_template: {
+            index_patterns: ['test*'],
+            composed_of: ['test-mappings'],
+            template: {
+              settings: {
+                auto_expand_replicas: '0-1',
+                hidden: true,
+                'index.lifecycle': {
+                  name: '.alerts-ilm-policy',
+                  rollover_alias: `.alerts-empty-default`,
+                },
+                'index.mapping.total_fields.limit': 1800,
+              },
+              mappings: {
+                dynamic: false,
+              },
+            },
+          },
+        };
+
+        clusterClient.indices.getIndexTemplate.mockResolvedValue({
+          index_templates: [existingIndexTemplate],
+        });
+        clusterClient.indices.getAlias.mockImplementation(async () => GetAliasResponse);
+        clusterClient.indices.getDataStream.mockImplementation(async () => GetDataStreamResponse);
+        clusterClient.indices.simulateIndexTemplate.mockImplementation(
+          async () => SimulateTemplateResponse
+        );
+
+        if (useDataStream) {
+          clusterClient.indices.putMapping
+            .mockRejectedValueOnce(new Error('Limit of total fields [2500] has been exceeded'))
+            .mockRejectedValueOnce(new Error('Limit of total fields [2501] has been exceeded'))
+            .mockRejectedValueOnce(new Error('Limit of total fields [2503] has been exceeded'))
+            .mockResolvedValue({ acknowledged: true });
+
+          await createConcreteWriteIndex({
+            logger,
+            esClient: clusterClient,
+            indexPatterns: IndexPatterns,
+            totalFieldsLimit: 2500,
+            dataStreamAdapter,
+          });
+
+          expect(clusterClient.indices.putSettings).toBeCalledTimes(4);
+          expect(clusterClient.indices.putIndexTemplate).toBeCalledTimes(3);
+          expect(logger.info).toBeCalledTimes(3);
+
+          expect(clusterClient.indices.putSettings).toHaveBeenNthCalledWith(1, {
+            index: '.alerts-test.alerts-default',
+            settings: {
+              'index.mapping.total_fields.limit': 2500,
+              'index.mapping.total_fields.ignore_dynamic_beyond_limit': true,
+            },
+          });
+          expect(clusterClient.indices.putSettings).toHaveBeenNthCalledWith(2, {
+            index: '.alerts-test.alerts-default',
+            settings: {
+              'index.mapping.total_fields.limit': 2501,
+              'index.mapping.total_fields.ignore_dynamic_beyond_limit': true,
+            },
+          });
+          expect(clusterClient.indices.putSettings).toHaveBeenNthCalledWith(3, {
+            index: '.alerts-test.alerts-default',
+            settings: {
+              'index.mapping.total_fields.limit': 2503,
+              'index.mapping.total_fields.ignore_dynamic_beyond_limit': true,
+            },
+          });
+          expect(clusterClient.indices.putSettings).toHaveBeenNthCalledWith(4, {
+            index: '.alerts-test.alerts-default',
+            settings: {
+              'index.mapping.total_fields.limit': 2506,
+              'index.mapping.total_fields.ignore_dynamic_beyond_limit': true,
+            },
+          });
+
+          expect(clusterClient.indices.putIndexTemplate).toHaveBeenNthCalledWith(1, {
+            composed_of: ['test-mappings'],
+            index_patterns: ['test*'],
+            template: {
+              mappings: {
+                dynamic: false,
+              },
+              settings: {
+                auto_expand_replicas: '0-1',
+                hidden: true,
+                'index.lifecycle': {
+                  name: '.alerts-ilm-policy',
+                  rollover_alias: '.alerts-empty-default',
+                },
+                'index.mapping.total_fields.limit': 2501,
+                'index.mapping.total_fields.ignore_dynamic_beyond_limit': true,
+              },
+            },
+            name: 'test-template',
+          });
+
+          expect(logger.info).toHaveBeenNthCalledWith(
+            1,
+            'total_fields.limit of .alerts-test.alerts-default has been increased from 2500 to 2501'
+          );
+          expect(logger.info).toHaveBeenNthCalledWith(
+            2,
+            'total_fields.limit of .alerts-test.alerts-default has been increased from 2501 to 2503'
+          );
+          expect(logger.info).toHaveBeenNthCalledWith(
+            3,
+            'total_fields.limit of .alerts-test.alerts-default has been increased from 2503 to 2506'
+          );
+          expect(logger.debug).toHaveBeenNthCalledWith(
+            3,
+            `Retrying PUT mapping for .alerts-test.alerts-default with increased total_fields.limit of 2501. Attempt: 1`
+          );
+          expect(logger.debug).toHaveBeenNthCalledWith(
+            4,
+            `Retrying PUT mapping for .alerts-test.alerts-default with increased total_fields.limit of 2503. Attempt: 2`
+          );
+          expect(logger.debug).toHaveBeenNthCalledWith(
+            5,
+            `Retrying PUT mapping for .alerts-test.alerts-default with increased total_fields.limit of 2506. Attempt: 3`
+          );
+        } else {
+          clusterClient.indices.putMapping
+            .mockResolvedValueOnce({ acknowledged: true })
+            .mockRejectedValueOnce(new Error('Limit of total fields [2500] has been exceeded'))
+            .mockRejectedValueOnce(new Error('Limit of total fields [2501] has been exceeded'))
+            .mockRejectedValueOnce(new Error('Limit of total fields [2503] has been exceeded'))
+            .mockResolvedValue({ acknowledged: true });
+
+          await createConcreteWriteIndex({
+            logger,
+            esClient: clusterClient,
+            indexPatterns: IndexPatterns,
+            totalFieldsLimit: 2500,
+            dataStreamAdapter,
+          });
+
+          expect(clusterClient.indices.putSettings).toBeCalledTimes(5);
+          expect(clusterClient.indices.putIndexTemplate).toBeCalledTimes(3);
+          expect(logger.info).toBeCalledTimes(4);
+
+          expect(clusterClient.indices.putIndexTemplate).toHaveBeenNthCalledWith(1, {
+            composed_of: ['test-mappings'],
+            index_patterns: ['test*'],
+            template: {
+              mappings: {
+                dynamic: false,
+              },
+              settings: {
+                auto_expand_replicas: '0-1',
+                hidden: true,
+                'index.lifecycle': {
+                  name: '.alerts-ilm-policy',
+                  rollover_alias: '.alerts-empty-default',
+                },
+                'index.mapping.total_fields.limit': 2501,
+                'index.mapping.total_fields.ignore_dynamic_beyond_limit': true,
+              },
+            },
+            name: 'test-template',
+          });
+
+          expect(clusterClient.indices.putSettings).toHaveBeenNthCalledWith(2, {
+            index: '.internal.alerts-test.alerts-default-000001',
+            settings: {
+              'index.mapping.total_fields.limit': 2500,
+              'index.mapping.total_fields.ignore_dynamic_beyond_limit': true,
+            },
+          });
+          expect(clusterClient.indices.putSettings).toHaveBeenNthCalledWith(3, {
+            index: '.internal.alerts-test.alerts-default-000001',
+            settings: {
+              'index.mapping.total_fields.limit': 2501,
+              'index.mapping.total_fields.ignore_dynamic_beyond_limit': true,
+            },
+          });
+          expect(clusterClient.indices.putSettings).toHaveBeenNthCalledWith(4, {
+            index: '.internal.alerts-test.alerts-default-000001',
+            settings: {
+              'index.mapping.total_fields.limit': 2503,
+              'index.mapping.total_fields.ignore_dynamic_beyond_limit': true,
+            },
+          });
+          expect(clusterClient.indices.putSettings).toHaveBeenNthCalledWith(5, {
+            index: '.internal.alerts-test.alerts-default-000001',
+            settings: {
+              'index.mapping.total_fields.limit': 2506,
+              'index.mapping.total_fields.ignore_dynamic_beyond_limit': true,
+            },
+          });
+
+          // The first call to logger.info is in createAliasStream, therefore we start testing from 2nd
+          expect(logger.info).toHaveBeenNthCalledWith(
+            2,
+            'total_fields.limit of alias_2 has been increased from 2500 to 2501'
+          );
+          expect(logger.info).toHaveBeenNthCalledWith(
+            3,
+            'total_fields.limit of alias_2 has been increased from 2501 to 2503'
+          );
+          expect(logger.info).toHaveBeenNthCalledWith(
+            4,
+            'total_fields.limit of alias_2 has been increased from 2503 to 2506'
+          );
+        }
+      });
+
+      it(`should stop increasing the limit after 100 attemps`, async () => {
+        const existingIndexTemplate = {
+          name: 'test-template',
+          index_template: {
+            index_patterns: ['test*'],
+            composed_of: ['test-mappings'],
+            template: {
+              settings: {
+                auto_expand_replicas: '0-1',
+                hidden: true,
+                'index.lifecycle': {
+                  name: '.alerts-ilm-policy',
+                  rollover_alias: `.alerts-empty-default`,
+                },
+                'index.mapping.total_fields.limit': 1800,
+              },
+              mappings: {
+                dynamic: false,
+              },
+            },
+          },
+        };
+
+        clusterClient.indices.getIndexTemplate.mockResolvedValue({
+          index_templates: [existingIndexTemplate],
+        });
+        clusterClient.indices.getAlias.mockImplementation(async () => GetAliasResponse);
+        clusterClient.indices.getDataStream.mockImplementation(async () => GetDataStreamResponse);
+        clusterClient.indices.simulateIndexTemplate.mockImplementation(
+          async () => SimulateTemplateResponse
+        );
+
+        if (useDataStream) {
+          clusterClient.indices.putMapping.mockRejectedValue(
+            new Error('Limit of total fields [2501] has been exceeded')
+          );
+
+          await expect(
+            createConcreteWriteIndex({
+              logger,
+              esClient: clusterClient,
+              indexPatterns: IndexPatterns,
+              totalFieldsLimit: 2500,
+              dataStreamAdapter,
+            })
+          ).rejects.toThrowErrorMatchingInlineSnapshot(
+            '"Limit of total fields [2501] has been exceeded"'
+          );
+
+          expect(logger.info).toHaveBeenCalledTimes(100);
+        }
+      });
+
+      it(`should not increase the limit when the index template is not found`, async () => {
+        clusterClient.indices.getIndexTemplate.mockResolvedValue({
+          index_templates: [],
+        });
+        clusterClient.indices.getAlias.mockImplementation(async () => GetAliasResponse);
+        clusterClient.indices.getDataStream.mockImplementation(async () => GetDataStreamResponse);
+        clusterClient.indices.simulateIndexTemplate.mockImplementation(
+          async () => SimulateTemplateResponse
+        );
+
+        if (useDataStream) {
+          clusterClient.indices.putMapping
+            .mockRejectedValueOnce(new Error('Limit of total fields [2500] has been exceeded'))
+            .mockResolvedValue({ acknowledged: true });
+
+          await expect(
+            createConcreteWriteIndex({
+              logger,
+              esClient: clusterClient,
+              indexPatterns: IndexPatterns,
+              totalFieldsLimit: 2500,
+              dataStreamAdapter,
+            })
+          ).rejects.toThrowErrorMatchingInlineSnapshot(
+            '"Limit of total fields [2500] has been exceeded"'
+          );
+
+          expect(clusterClient.indices.putIndexTemplate).not.toHaveBeenCalled();
+          expect(clusterClient.indices.putMapping).toHaveBeenCalledTimes(1);
+          expect(logger.info).not.toHaveBeenCalled();
+        }
+      });
+
+      it(`should log an error when there is an error while increasing the fields limit`, async () => {
+        const error = new Error('generic error');
+        const existingIndexTemplate = {
+          name: 'test-template',
+          index_template: {
+            index_patterns: ['test*'],
+            composed_of: ['test-mappings'],
+            template: {
+              settings: {
+                auto_expand_replicas: '0-1',
+                hidden: true,
+                'index.lifecycle': {
+                  name: '.alerts-ilm-policy',
+                  rollover_alias: `.alerts-empty-default`,
+                },
+                'index.mapping.total_fields.limit': 1800,
+              },
+              mappings: {
+                dynamic: false,
+              },
+            },
+          },
+        };
+
+        clusterClient.indices.getIndexTemplate.mockResolvedValue({
+          index_templates: [existingIndexTemplate],
+        });
+        clusterClient.indices.getAlias.mockImplementation(async () => GetAliasResponse);
+        clusterClient.indices.getDataStream.mockImplementation(async () => GetDataStreamResponse);
+        clusterClient.indices.simulateIndexTemplate.mockImplementation(
+          async () => SimulateTemplateResponse
+        );
+        clusterClient.indices.putSettings.mockResolvedValueOnce({
+          acknowledged: true,
+        });
+        clusterClient.indices.putIndexTemplate.mockRejectedValueOnce(error);
+
+        if (useDataStream) {
+          clusterClient.indices.putMapping
+            .mockRejectedValueOnce(new Error('Limit of total fields [2500] has been exceeded'))
+            .mockResolvedValueOnce({ acknowledged: true });
+
+          await expect(
+            createConcreteWriteIndex({
+              logger,
+              esClient: clusterClient,
+              indexPatterns: IndexPatterns,
+              totalFieldsLimit: 2500,
+              dataStreamAdapter,
+            })
+          ).rejects.toThrowErrorMatchingInlineSnapshot(
+            `"Limit of total fields [2500] has been exceeded"`
+          );
+
+          expect(logger.info).not.toHaveBeenCalled();
+          expect(logger.error).toHaveBeenCalledWith(
+            'An error occured while increasing total_fields.limit of .alerts-test.alerts-default - generic error',
+            error
+          );
+        } else {
+          clusterClient.indices.putMapping
+            .mockRejectedValueOnce(new Error('Limit of total fields [2500] has been exceeded'))
+            .mockResolvedValueOnce({ acknowledged: true });
+
+          await expect(
+            createConcreteWriteIndex({
+              logger,
+              esClient: clusterClient,
+              indexPatterns: IndexPatterns,
+              totalFieldsLimit: 2500,
+              dataStreamAdapter,
+            })
+          ).rejects.toThrowErrorMatchingInlineSnapshot(
+            `"Limit of total fields [2500] has been exceeded"`
+          );
+
+          expect(logger.error).toHaveBeenCalledWith(
+            'An error occured while increasing total_fields.limit of alias_1 - generic error',
+            error
+          );
+        }
+      });
+
       it(`should log and return when simulating updated mappings throws error`, async () => {
         clusterClient.indices.getAlias.mockImplementation(async () => GetAliasResponse);
         clusterClient.indices.getDataStream.mockImplementation(async () => GetDataStreamResponse);
@@ -631,11 +1019,9 @@ describe('createConcreteWriteIndex', () => {
         } else {
           expect(clusterClient.indices.create).toHaveBeenCalledWith({
             index: '.internal.alerts-test.alerts-default-000001',
-            body: {
-              aliases: {
-                '.alerts-test.alerts-default': {
-                  is_write_index: true,
-                },
+            aliases: {
+              '.alerts-test.alerts-default': {
+                is_write_index: true,
               },
             },
           });
@@ -670,11 +1056,9 @@ describe('createConcreteWriteIndex', () => {
         } else {
           expect(clusterClient.indices.create).toHaveBeenCalledWith({
             index: '.internal.alerts-test.alerts-default-000001',
-            body: {
-              aliases: {
-                '.alerts-test.alerts-default': {
-                  is_write_index: true,
-                },
+            aliases: {
+              '.alerts-test.alerts-default': {
+                is_write_index: true,
               },
             },
           });
@@ -756,23 +1140,21 @@ describe('setConcreteWriteIndex', () => {
       'Attempting to set index: .internal.alerts-test.alerts-default-000004 as the write index for alias: .alerts-test.alerts-default.'
     );
     expect(clusterClient.indices.updateAliases).toHaveBeenCalledWith({
-      body: {
-        actions: [
-          {
-            remove: {
-              alias: '.alerts-test.alerts-default',
-              index: '.internal.alerts-test.alerts-default-000004',
-            },
+      actions: [
+        {
+          remove: {
+            alias: '.alerts-test.alerts-default',
+            index: '.internal.alerts-test.alerts-default-000004',
           },
-          {
-            add: {
-              alias: '.alerts-test.alerts-default',
-              index: '.internal.alerts-test.alerts-default-000004',
-              is_write_index: true,
-            },
+        },
+        {
+          add: {
+            alias: '.alerts-test.alerts-default',
+            index: '.internal.alerts-test.alerts-default-000004',
+            is_write_index: true,
           },
-        ],
-      },
+        },
+      ],
     });
     expect(logger.info).toHaveBeenCalledWith(
       'Successfully set index: .internal.alerts-test.alerts-default-000004 as the write index for alias: .alerts-test.alerts-default.'

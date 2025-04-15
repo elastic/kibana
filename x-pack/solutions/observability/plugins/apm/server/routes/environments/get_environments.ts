@@ -42,21 +42,20 @@ export async function getEnvironments({
         ProcessorEvent.error,
       ],
     },
-    body: {
-      track_total_hits: false,
-      size: 0,
-      query: {
-        bool: {
-          filter: [...rangeQuery(start, end), ...termQuery(SERVICE_NAME, serviceName)],
-        },
+    track_total_hits: false,
+    size: 0,
+    query: {
+      bool: {
+        filter: [...rangeQuery(start, end), ...termQuery(SERVICE_NAME, serviceName)],
       },
-      aggs: {
-        environments: {
-          terms: {
-            field: SERVICE_ENVIRONMENT,
-            missing: ENVIRONMENT_NOT_DEFINED.value,
-            size,
-          },
+    },
+    aggs: {
+      environments: {
+        terms: {
+          field: SERVICE_ENVIRONMENT,
+          missing: ENVIRONMENT_NOT_DEFINED.value,
+          order: { _key: 'asc' as const },
+          size,
         },
       },
     },

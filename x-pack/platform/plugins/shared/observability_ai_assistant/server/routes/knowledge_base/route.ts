@@ -11,13 +11,16 @@ import { nonEmptyStringRt, toBooleanRt } from '@kbn/io-ts-utils';
 import * as t from 'io-ts';
 import {
   InferenceInferenceEndpointInfo,
-  MlDeploymentAllocationState,
-  MlDeploymentAssignmentState,
-  MlTrainedModelDeploymentAllocationStatus,
+  MlTrainedModelStats,
 } from '@elastic/elasticsearch/lib/api/types';
 import moment from 'moment';
 import { createObservabilityAIAssistantServerRoute } from '../create_observability_ai_assistant_server_route';
-import { Instruction, KnowledgeBaseEntry, KnowledgeBaseEntryRole } from '../../../common/types';
+import {
+  Instruction,
+  KnowledgeBaseEntry,
+  KnowledgeBaseEntryRole,
+  KnowledgeBaseState,
+} from '../../../common/types';
 
 const getKnowledgeBaseStatus = createObservabilityAIAssistantServerRoute({
   endpoint: 'GET /internal/observability_ai_assistant/kb/status',
@@ -31,14 +34,10 @@ const getKnowledgeBaseStatus = createObservabilityAIAssistantServerRoute({
     request,
   }): Promise<{
     errorMessage?: string;
-    ready: boolean;
     enabled: boolean;
     endpoint?: Partial<InferenceInferenceEndpointInfo>;
-    model_stats?: {
-      deployment_state?: MlDeploymentAssignmentState;
-      allocation_state?: MlDeploymentAllocationState;
-      allocation_count?: MlTrainedModelDeploymentAllocationStatus['allocation_count'];
-    };
+    modelStats?: Partial<MlTrainedModelStats>;
+    kbState: KnowledgeBaseState;
   }> => {
     const client = await service.getClient({ request });
 
@@ -100,8 +99,23 @@ const resetKnowledgeBase = createObservabilityAIAssistantServerRoute({
   },
 });
 
+const reIndexKnowledgeBase = createObservabilityAIAssistantServerRoute({
+  endpoint: 'POST /internal/observability_ai_assistant/kb/reindex',
+  security: {
+    authz: {
+      requiredPrivileges: ['ai_assistant'],
+    },
+  },
+  handler: async (resources): Promise<{ result: boolean }> => {
+    const client = await resources.service.getClient({ request: resources.request });
+    const result = await client.reIndexKnowledgeBaseWithLock();
+    return { result };
+  },
+});
+
 const semanticTextMigrationKnowledgeBase = createObservabilityAIAssistantServerRoute({
-  endpoint: 'POST /internal/observability_ai_assistant/kb/semantic_text_migration',
+  endpoint:
+    'POST /internal/observability_ai_assistant/kb/migrations/populate_missing_semantic_text_field',
   security: {
     authz: {
       requiredPrivileges: ['ai_assistant'],
@@ -114,7 +128,7 @@ const semanticTextMigrationKnowledgeBase = createObservabilityAIAssistantServerR
       throw notImplemented();
     }
 
-    return client.migrateKnowledgeBaseToSemanticText();
+    return client.reIndexKnowledgeBaseAndPopulateSemanticTextField();
   },
 });
 
@@ -293,8 +307,9 @@ const importKnowledgeBaseEntries = createObservabilityAIAssistantServerRoute({
       throw notImplemented();
     }
 
-    const { ready } = await client.getKnowledgeBaseStatus();
-    if (!ready) {
+    const { kbState } = await client.getKnowledgeBaseStatus();
+
+    if (kbState !== KnowledgeBaseState.READY) {
       throw new Error('Knowledge base is not ready');
     }
 
@@ -320,6 +335,7 @@ const importKnowledgeBaseEntries = createObservabilityAIAssistantServerRoute({
 });
 
 export const knowledgeBaseRoutes = {
+  ...reIndexKnowledgeBase,
   ...semanticTextMigrationKnowledgeBase,
   ...setupKnowledgeBase,
   ...resetKnowledgeBase,

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { estypes } from '@elastic/elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 import type { SavedObjectsFindOptions } from '@kbn/core-saved-objects-api-server';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 
@@ -38,7 +38,7 @@ export const getSavedObjectCounts = async ({
     (body.aggregations?.types?.buckets as estypes.AggregationsStringTermsBucketKeys[]) || [];
 
   const counts = buckets.reduce((memo, bucket) => {
-    memo[bucket.key] = bucket.doc_count;
+    memo[`${bucket.key}`] = bucket.doc_count;
     return memo;
   }, {} as Record<string, number>);
 

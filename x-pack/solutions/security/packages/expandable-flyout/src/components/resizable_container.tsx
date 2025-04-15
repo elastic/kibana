@@ -41,10 +41,6 @@ interface ResizableContainerProps {
    * If the left section is not shown we disable the resize button and hide the left size of the resizable panel
    */
   showLeft: boolean;
-  /**
-   * If the preview section is shown we disable the resize button
-   */
-  showPreview: boolean;
 }
 
 /**
@@ -52,7 +48,7 @@ interface ResizableContainerProps {
  * It allows the resizing of the sections, saving the percentages in local storage.
  */
 export const ResizableContainer: React.FC<ResizableContainerProps> = memo(
-  ({ leftComponent, rightComponent, showLeft, showPreview }: ResizableContainerProps) => {
+  ({ leftComponent, rightComponent, showLeft }: ResizableContainerProps) => {
     const dispatch = useDispatch();
 
     const { leftPercentage, rightPercentage } = useSelector(selectUserSectionWidths);
@@ -97,10 +93,7 @@ export const ResizableContainer: React.FC<ResizableContainerProps> = memo(
             >
               <LeftSection component={leftComponent} />
             </EuiResizablePanel>
-            <EuiResizableButton
-              disabled={showPreview || !showLeft}
-              data-test-subj={RESIZABLE_BUTTON_TEST_ID}
-            />
+            <EuiResizableButton disabled={!showLeft} data-test-subj={RESIZABLE_BUTTON_TEST_ID} />
             <EuiResizablePanel
               id={RIGHT_PANEL_ID}
               initialSize={initialRightPercentage}

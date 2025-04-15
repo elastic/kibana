@@ -67,10 +67,11 @@ export const useSourcererDataView = (
     if (selectedDataView == null || missingPatterns.length > 0) {
       // old way of fetching indices, legacy timeline
       setLegacyPatterns(selectedPatterns);
-    } else {
+    } else if (legacyPatterns.length > 0) {
+      // Only create a new array reference if legacyPatterns is not empty
       setLegacyPatterns([]);
     }
-  }, [missingPatterns, selectedDataView, selectedPatterns]);
+  }, [legacyPatterns.length, missingPatterns, selectedDataView, selectedPatterns]);
 
   const sourcererDataView = useMemo(() => {
     const _dv =

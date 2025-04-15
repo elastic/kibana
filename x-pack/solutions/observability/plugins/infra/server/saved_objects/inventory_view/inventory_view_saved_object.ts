@@ -59,9 +59,9 @@ export const inventoryViewSavedObjectType: SavedObjectsType = {
         {
           type: 'unsafe_transform',
           transformFn: (document) => {
-            if (document.attributes.legend.steps > 18) {
+            if (document.attributes.legend?.steps > 18) {
               document.attributes.legend.steps = 18;
-            } else if (document.attributes.legend.steps < 2) {
+            } else if (document.attributes.legend?.steps < 2) {
               document.attributes.legend.steps = 2;
             }
             return { document };

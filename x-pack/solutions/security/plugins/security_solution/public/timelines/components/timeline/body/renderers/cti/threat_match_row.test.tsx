@@ -21,6 +21,7 @@ describe('ThreatMatchRowView', () => {
   it('renders an indicator match row', () => {
     const wrapper = shallow(
       <ThreatMatchRowView
+        scopeId="some_scope"
         contextId="contextId"
         eventId="eventId"
         feedName="feedName"
@@ -37,6 +38,7 @@ describe('ThreatMatchRowView', () => {
   it('matches the registered snapshot', () => {
     const wrapper = shallow(
       <ThreatMatchRowView
+        scopeId="some_scope"
         contextId="contextId"
         eventId="eventId"
         feedName="feedName"
@@ -61,6 +63,7 @@ describe('ThreatMatchRowView', () => {
 
     beforeEach(() => {
       baseProps = {
+        scopeId: 'some_scope',
         contextId: 'contextId',
         eventId: 'eventId',
         feedName: 'feedName',
