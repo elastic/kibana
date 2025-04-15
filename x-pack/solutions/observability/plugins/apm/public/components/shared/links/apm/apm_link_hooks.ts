@@ -44,7 +44,7 @@ export function useAPMHref({
   path,
   persistedFilters,
   query,
-  pathParams = undefined,
+  pathParams,
 }: {
   path: string;
   persistedFilters?: Array<keyof APMQueryParams>;

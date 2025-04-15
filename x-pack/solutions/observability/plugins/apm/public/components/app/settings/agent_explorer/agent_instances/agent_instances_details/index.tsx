@@ -44,12 +44,19 @@ enum AgentExplorerInstanceFieldName {
   LastReport = 'lastReport',
 }
 
-export function getInstanceColumns(
-  serviceName: string,
-  agentName: AgentName,
-  query: Omit<TypeOf<ApmRoutes, '/services/{serviceName}/metrics'>['query'], 'kuery'>,
-  agentDocsPageUrl?: string
-): Array<EuiBasicTableColumn<AgentExplorerInstance>> {
+interface GetInstanceColumnsProps {
+  serviceName: string;
+  agentName: AgentName;
+  query: Omit<TypeOf<ApmRoutes, '/services/{serviceName}/metrics'>['query'], 'kuery'>;
+  agentDocsPageUrl?: string;
+}
+
+export function getInstanceColumns({
+  serviceName,
+  agentName,
+  query,
+  agentDocsPageUrl,
+}: GetInstanceColumnsProps): Array<EuiBasicTableColumn<AgentExplorerInstance>> {
   return [
     {
       field: AgentExplorerInstanceFieldName.InstanceName,
@@ -200,10 +207,10 @@ export function AgentInstancesDetails({
     <>
       <EuiInMemoryTable
         items={items}
-        columns={getInstanceColumns(
+        columns={getInstanceColumns({
           serviceName,
           agentName,
-          {
+          query: {
             ...query,
             environment: environment ?? ENVIRONMENT_NOT_DEFINED.value,
             rangeFrom,
@@ -211,8 +218,8 @@ export function AgentInstancesDetails({
             serviceGroup,
             comparisonEnabled: defaultComparisonEnabled,
           },
-          agentDocsPageUrl
-        )}
+          agentDocsPageUrl,
+        })}
         pagination={true}
         sorting={{
           sort: {

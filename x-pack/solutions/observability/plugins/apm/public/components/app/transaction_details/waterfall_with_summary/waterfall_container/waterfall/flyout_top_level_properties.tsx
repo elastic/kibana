@@ -78,7 +78,7 @@ export function FlyoutTopLevelProperties({ transaction }: Props) {
         <TransactionDetailLink
           transactionName={transaction.transaction.name}
           href={link('/services/{serviceName}/transactions/view', {
-            path: { serviceName: transaction?.service.name },
+            path: { serviceName: transaction.service.name },
             query: {
               ...query,
               serviceGroup,
