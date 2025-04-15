@@ -12,6 +12,12 @@ import { BaseDataGenerator } from '../../../common/endpoint/data_generators/base
 
 interface ApplyEsClientSearchMockOptions<TDocument = unknown> {
   esClientMock: ElasticsearchClientMock;
+  /**
+   * The index to intercept and return the response provided. If providing an index value that
+   * ends with `*` (an index pattern), the search request will be checked to see if any of the
+   * defined indexes "start with" the index pattern defined (note: only supports a `*` at the
+   * end of the index name)
+   */
   index: string;
   response: SearchResponse<TDocument>;
   /**
@@ -19,6 +25,16 @@ interface ApplyEsClientSearchMockOptions<TDocument = unknown> {
    */
   pitUsage?: boolean;
 }
+
+const indexListHasMatchForIndex = (indexList: string[], indexNameOrPattern: string): boolean => {
+  const startsWithValue: string | undefined = indexNameOrPattern.endsWith('*')
+    ? indexNameOrPattern.substring(0, indexNameOrPattern.length - 1)
+    : '';
+
+  return indexList.some((index) => {
+    return index === indexNameOrPattern || (startsWithValue && index.startsWith(startsWithValue));
+  });
+};
 
 /**
  * Generic utility for applying mocks to ES Client mock search method. Any existing mock implementation
@@ -76,10 +92,10 @@ export const applyEsClientSearchMock = <TDocument = unknown>({
 
   esClientMock.search.mockImplementation(async (...args) => {
     const params = args[0] ?? {};
-    const searchReqIndexes = Array.isArray(params.index) ? params.index : [params.index];
+    const searchReqIndexes = Array.isArray(params.index) ? params.index : [params.index!];
     const pit = 'pit' in params ? params.pit : undefined;
 
-    if (params.index && !pitUsage && searchReqIndexes.includes(index)) {
+    if (params.index && !pitUsage && indexListHasMatchForIndex(searchReqIndexes, index)) {
       return response;
     } else if (pit && pitUsage && openedPitIds.has(pit.id)) {
       return response;
