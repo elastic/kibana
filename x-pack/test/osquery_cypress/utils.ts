@@ -9,6 +9,8 @@ import axios from 'axios';
 import semver from 'semver';
 import { map } from 'lodash';
 import { PackagePolicy, CreatePackagePolicyResponse, API_VERSIONS } from '@kbn/fleet-plugin/common';
+// @ts-expect-error we have to check types with "allowJs: false" for now, causing this import to fail
+import { kibanaPackageJson } from '@kbn/repo-info';
 import { KbnClient } from '@kbn/test';
 import {
   GetEnrollmentAPIKeysResponse,
@@ -17,7 +19,6 @@ import {
 import { ToolingLog } from '@kbn/tooling-log';
 import chalk from 'chalk';
 import pRetry from 'p-retry';
-import { kibanaPackageJson as pkg } from '@kbn/repo-info';
 
 export const DEFAULT_HEADERS = Object.freeze({
   'x-elastic-internal-product': 'security-solution',
@@ -155,7 +156,7 @@ export const getLatestAvailableAgentVersion = async (
     currentVersion = kbnStatus.version.number;
   } catch {
     log.warning(chalk.bold('Failed to get Kibana version, using package.json version'));
-    currentVersion = pkg.version;
+    currentVersion = kibanaPackageJson.version;
   }
 
   const agentVersions = await pRetry(
