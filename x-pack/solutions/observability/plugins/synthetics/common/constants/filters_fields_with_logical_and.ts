@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export const useLogicalAndFields = ['tags'] as const;
+export const useLogicalAndFields = ['tags', 'locations'] as const;
 
 export type UseLogicalAndField = (typeof useLogicalAndFields)[number];
 

@@ -167,7 +167,11 @@ export const parseArrayFilters = (
     }),
     getSavedObjectKqlFilter({ field: 'project_id', values: projects }),
     getSavedObjectKqlFilter({ field: 'type', values: monitorTypes }),
-    getSavedObjectKqlFilter({ field: 'locations.id', values: locations }),
+    getSavedObjectKqlFilter({
+      field: 'locations.id',
+      values: locations,
+      operator: useLogicalAndFor.includes('locations') ? 'AND' : 'OR',
+    }),
     getSavedObjectKqlFilter({ field: 'schedule.number', values: schedules }),
     getSavedObjectKqlFilter({ field: 'id', values: monitorQueryIds }),
     getSavedObjectKqlFilter({ field: 'config_id', values: configIds }),

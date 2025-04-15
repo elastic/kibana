@@ -16,11 +16,13 @@ export default function ({ getService }: FtrProviderContext) {
     const common = {
       type: 'http',
       url: 'https://www.elastic.co',
-      locations: ['dev'],
     };
 
     const FIRST_TAG = 'a';
     const SECOND_TAG = 'b';
+
+    const FIRST_LOCATION = 'dev';
+    const SECOND_LOCATION = 'dev2';
 
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
@@ -30,6 +32,7 @@ export default function ({ getService }: FtrProviderContext) {
         ...common,
         name: 'Monitor A',
         tags: [FIRST_TAG, SECOND_TAG],
+        locations: [FIRST_LOCATION, SECOND_LOCATION],
       };
 
       const monitorB = {
@@ -37,6 +40,7 @@ export default function ({ getService }: FtrProviderContext) {
         name: 'Monitor B',
         url: 'https://www.elastic.co',
         tags: [SECOND_TAG],
+        locations: [FIRST_LOCATION],
       };
 
       // Create the test monitors
@@ -72,6 +76,28 @@ export default function ({ getService }: FtrProviderContext) {
           .query({
             tags: [FIRST_TAG, SECOND_TAG],
             useLogicalAndFor: ['tags'],
+          })
+          .set('kbn-xsrf', 'true');
+
+        expect(response.status).to.be(200);
+        expect(response.body.monitors.length).to.be(1);
+      });
+      it('should return 2 monitors when not using the useLogicalAndFor query parameter and searching for both locations', async () => {
+        const response = await supertestAPI
+          .get(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS)
+          .query({ locations: [FIRST_LOCATION, SECOND_LOCATION] })
+          .set('kbn-xsrf', 'true');
+
+        expect(response.status).to.be(200);
+        expect(response.body.monitors.length).to.be(2);
+      });
+
+      it('should return only 1 monitor when useLogicalAndFor includes tags and searching for both locations', async () => {
+        const response = await supertestAPI
+          .get(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS)
+          .query({
+            locations: [FIRST_LOCATION, SECOND_LOCATION],
+            useLogicalAndFor: ['locations'],
           })
           .set('kbn-xsrf', 'true');
 
