@@ -48,8 +48,7 @@ export const editSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
     },
   },
   handler: async (routeContext) => {
-    const { savedObjectsClient, request, response, spaceId, server, syntheticsMonitorClient } =
-      routeContext;
+    const { savedObjectsClient, request, response, spaceId, server } = routeContext;
     const { invalidResponse } = await validateRouteSpaceName(routeContext);
     if (invalidResponse) return invalidResponse;
 

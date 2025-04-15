@@ -56,6 +56,7 @@ export const registerSyncGlobalParamsTask = ({
                 soClient: savedObjectsClient,
                 encryptedSavedObjects,
               });
+              logger.debug(`Sync of global parameters for space with id ${spaceId} succeeded`);
             } catch (error) {
               logger.error(
                 `Sync of global parameters for space with id ${spaceId} failed: ${error.message}`

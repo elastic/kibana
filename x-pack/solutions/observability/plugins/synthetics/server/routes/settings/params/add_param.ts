@@ -42,7 +42,7 @@ export const addSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
       body: schema.oneOf([ParamsObjectSchema, schema.arrayOf(ParamsObjectSchema)]),
     },
   },
-  handler: async ({ request, response, server, savedObjectsClient, syntheticsMonitorClient }) => {
+  handler: async ({ request, response, server, savedObjectsClient }) => {
     try {
       const { id: spaceId } = (await server.spaces?.spacesService.getActiveSpace(request)) ?? {
         id: DEFAULT_SPACE_ID,
