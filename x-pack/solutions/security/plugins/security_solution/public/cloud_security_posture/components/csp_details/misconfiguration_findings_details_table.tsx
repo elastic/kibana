@@ -221,7 +221,7 @@ export const MisconfigurationFindingsDetailsTable = memo(
                   scopeId,
                   banner: {
                     title: i18n.translate(
-                      'xpack.securitySolution.flyout.right.user.userPreviewTitle',
+                      'xpack.securitySolution.flyout.right.misconfigurationFinding.PreviewTitle',
                       {
                         defaultMessage: 'Preview finding details',
                       }
