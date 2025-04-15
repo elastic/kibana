@@ -39,6 +39,7 @@ describe('Monitor Detail Flyout', () => {
         docId: 'docId',
         timestamp: '2013-03-01 12:54:23',
         monitor: {
+          name: 'test monitor',
           id: 'test-id',
           status: 'up',
           type: 'http',
@@ -52,7 +53,13 @@ describe('Monitor Detail Flyout', () => {
           full: 'https://www.elastic.co',
         },
         tags: ['tag1', 'tag2'],
-        observer: {},
+        observer: {
+          name: 'us-east-1',
+          geo: {
+            name: 'US East',
+          },
+        },
+        '@timestamp': '2013-03-01 12:54:23',
       },
     });
     jest.spyOn(statusByLocation, 'useStatusByLocation').mockReturnValue({
