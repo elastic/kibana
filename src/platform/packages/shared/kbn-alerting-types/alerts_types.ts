@@ -13,6 +13,7 @@ import type { JsonValue } from '@kbn/utility-types';
 export interface MetaAlertFields {
   _id: string;
   _index: string;
+  _score?: number;
 }
 
 export interface LegacyField {
@@ -29,7 +30,7 @@ export type KnownAlertFields = {
   [Property in TechnicalRuleDataFieldName]?: JsonValue[];
 };
 
-export type UnknownAlertFields = Record<string, string | JsonValue[]>;
+export type UnknownAlertFields = Record<string, string | number | JsonValue[]>;
 
 /**
  * Alert document type as returned by alerts search requests

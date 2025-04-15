@@ -1141,6 +1141,20 @@
             "path": "src/platform/packages/shared/kbn-alerting-types/alerts_types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerting-types",
+            "id": "def-common.MetaAlertFields._score",
+            "type": "number",
+            "tags": [],
+            "label": "_score",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-alerting-types/alerts_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -4504,7 +4518,7 @@
           },
           " | undefined; runtimeMappings?: ",
           "MappingRuntimeFields",
-          " | undefined; }"
+          " | undefined; minScore?: number | undefined; trackScores?: boolean | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-alerting-types/search_strategy_types.ts",
         "deprecated": false,
@@ -4731,7 +4745,7 @@
         "label": "UnknownAlertFields",
         "description": [],
         "signature": [
-          "{ [x: string]: string | ",
+          "{ [x: string]: string | number | ",
           {
             "pluginId": "@kbn/utility-types",
             "scope": "common",
