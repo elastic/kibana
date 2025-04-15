@@ -65,8 +65,8 @@ export function createPlaywrightConfig(options: ScoutPlaywrightOptions): Playwri
     workers: options.workers ?? 1,
     /* Reporter to use. See https://playwright.dev/docs/test-reporters */
     reporter: [
-      ['html', { outputFolder: './output/reports', open: 'never' }], // HTML report configuration
-      ['json', { outputFile: './output/reports/test-results.json' }], // JSON report
+      ['html', { outputFolder: './.scout/output/reports', open: 'never' }], // HTML report configuration
+      ['json', { outputFile: './.scout/output/reports/test-results.json' }], // JSON report
       scoutPlaywrightReporter({ name: 'scout-playwright', runId }), // Scout events report
       scoutFailedTestsReporter({ name: 'scout-playwright-failed-tests', runId }), // Scout failed test report
     ],
@@ -96,7 +96,7 @@ export function createPlaywrightConfig(options: ScoutPlaywrightOptions): Playwri
       timeout: 10000,
     },
 
-    outputDir: './output/test-artifacts', // For other test artifacts (screenshots, videos, traces)
+    outputDir: './.scout/output/test-artifacts', // For other test artifacts (screenshots, videos, traces)
 
     projects: scoutProjects,
   });
