@@ -154,7 +154,8 @@ export async function suggest(
     controlSuggestions = getControlSuggestionIfSupported(
       Boolean(supportsControls),
       ESQLVariableType.VALUES,
-      getVariables
+      getVariables,
+      false
     );
 
     return controlSuggestions;
