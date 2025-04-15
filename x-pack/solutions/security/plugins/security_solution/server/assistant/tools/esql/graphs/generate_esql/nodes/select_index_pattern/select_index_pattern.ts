@@ -23,7 +23,7 @@ export const getSelectIndexPattern = ({
 
     if (!childGraphOutput.selectedIndexPattern) {
       return new Command({
-        goto: NL_TO_ESQL_AGENT_WITHOUT_VALIDATION_NODE
+        goto: NL_TO_ESQL_AGENT_WITHOUT_VALIDATION_NODE,
       });
     }
 

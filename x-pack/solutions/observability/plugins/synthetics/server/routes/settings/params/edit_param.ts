@@ -8,6 +8,7 @@
 import { schema, TypeOf } from '@kbn/config-schema';
 import { SavedObject, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { isEmpty } from 'lodash';
+import { syncSpaceGlobalParams } from '../../../synthetics_service/sync_global_params';
 import { validateRouteSpaceName } from '../../common';
 import { SyntheticsRestApiRouteFactory } from '../../types';
 import { SyntheticsParamRequest, SyntheticsParams } from '../../../../common/runtime_types';
@@ -47,7 +48,8 @@ export const editSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
     },
   },
   handler: async (routeContext) => {
-    const { savedObjectsClient, request, response, spaceId, server } = routeContext;
+    const { savedObjectsClient, request, response, spaceId, server, syntheticsMonitorClient } =
+      routeContext;
     const { invalidResponse } = await validateRouteSpaceName(routeContext);
     if (invalidResponse) return invalidResponse;
 
@@ -82,6 +84,14 @@ export const editSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
         paramId,
         newParam
       )) as SavedObject<SyntheticsParams>;
+
+      void syncSpaceGlobalParams({
+        spaceId,
+        logger: server.logger,
+        encryptedSavedObjects: server.encryptedSavedObjects,
+        savedObjects: server.coreStart.savedObjects,
+        syntheticsMonitorClient,
+      });
 
       return { id: responseId, key, tags, description, namespaces, value };
     } catch (getErr) {
