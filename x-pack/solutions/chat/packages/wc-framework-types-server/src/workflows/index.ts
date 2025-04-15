@@ -20,3 +20,4 @@ export type {
   RunWorkflowParams,
   RunWorkflowOutput,
 } from './runner';
+export type { WorkflowProvider } from './provider';

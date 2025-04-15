@@ -15,19 +15,25 @@ import type {
   NodeFactoryBaseServices,
   WorkflowRunner,
   NodeFactoryContext,
+  NodeDefinition,
   NodeEventReporter,
+  ModelProvider,
+  ToolProvider,
 } from '@kbn/wc-framework-types-server';
-import type { Logger } from '@kbn/core/server';
+import type { Logger, KibanaRequest, IScopedClusterClient, CoreStart } from '@kbn/core/server';
 import type { createModelProviderFactory, ModelProviderFactory } from '../model_provider';
 import type { ToolRegistry } from '../tools';
 import type { NodeTypeRegistry } from '../nodes';
 import type { WorkflowRegistry } from './registry';
+import type { WorkflowRunnerInternalContext } from './types';
 import {
   createNoopNodeEventReporter,
   createNodeEventReporter,
   createInitialState,
   interpolateNodeConfig,
 } from './utils';
+import { createStepRunner } from './step_runner';
+import { createWorkflowRunner } from './workflow_runner';
 
 export interface GetWorkflowRunnerParams {
   logger: Logger;
@@ -35,10 +41,18 @@ export interface GetWorkflowRunnerParams {
   nodeRegistry: NodeTypeRegistry;
   modelProviderFactory: ModelProviderFactory;
   toolRegistry: ToolRegistry;
+  core: CoreStart;
 }
 
 export const getWorkflowRunner = (params: GetWorkflowRunnerParams): WorkflowRunner => {
-  const { workflowRegistry, nodeRegistry, modelProviderFactory, toolRegistry, logger } = params;
+  const {
+    workflowRegistry,
+    nodeRegistry,
+    modelProviderFactory,
+    toolRegistry,
+    logger,
+    core: { elasticsearch },
+  } = params;
 
   const getWorkflowDefinition = async (
     workflowId: string
@@ -61,10 +75,15 @@ export const getWorkflowRunner = (params: GetWorkflowRunnerParams): WorkflowRunn
 
     const modelProvider = await modelProviderFactory({ request, defaultConnectorId });
 
-    const baseNodeServices: NodeFactoryBaseServices = {
-      logger: logger.get('workflow-runner'),
+    const internalContext: WorkflowRunnerInternalContext = {
+      logger,
+      request,
       modelProvider,
+      workflowRegistry, // TODO: allow override?
+      nodeRegistry,
       toolProvider: customToolProvider ?? toolRegistry.asToolProvider(),
+      esClusterClient: elasticsearch.client.asScoped(request),
+      eventHandler: onEvent, // TODO: we probably want to always have a default one, dispatching..
     };
 
     const workflowDefinition = await getWorkflowDefinition(workflowId);
@@ -74,59 +93,10 @@ export const getWorkflowRunner = (params: GetWorkflowRunnerParams): WorkflowRunn
       throw new Error('workflow not found');
     }
 
-    // TODO: validate input shape.
+    const stepRunner = createStepRunner({ internalContext });
+    const workflowRunner = createWorkflowRunner({ internalContext });
 
-    // creating initial state
-    const state = createInitialState({ inputs });
-
-    const executeStep = async (stepId: number) => {
-      const stepDefinition = (workflowDefinition as GraphWorkflowDefinition).steps[stepId];
-
-      // TODO: check if node type is registered
-
-      const nodeType = nodeRegistry.get(stepDefinition.type);
-
-      // TODO: check / call nodeType.customServicesProvider if present
-      const nodeServices = { ...baseNodeServices };
-
-      const context: NodeFactoryContext = {
-        nodeConfiguration: stepDefinition,
-        services: nodeServices,
-      };
-
-      const nodeRunner = nodeType.factory(context);
-
-      // interpolating the node config with the state
-      const nodeInput = interpolateNodeConfig({
-        config: stepDefinition.typeConfig,
-        state,
-      });
-
-      // creating the event reporter
-      const eventReporter = onEvent
-        ? createNodeEventReporter({
-            onEvent,
-            meta: {
-              workflowId,
-              nodeId: stepDefinition.id,
-              nodeType: stepDefinition.type,
-            },
-          })
-        : createNoopNodeEventReporter();
-
-      // executing the node
-      const output = await nodeRunner.run({
-        input: nodeInput,
-        state,
-        eventReporter,
-      });
-
-      // writing output to state
-      const stateOutputField = stepDefinition.output;
-      state.set(stateOutputField, output);
-
-      // end of node execution
-    };
+    return workflowRunner({ workflowDefinition, inputs });
   };
 
   return { run };

@@ -36,3 +36,9 @@ export type {
   RunWorkflowOutput,
 } from './src/workflows';
 export type { Registry, Provider, AsyncProvider } from './src/utils';
+export {
+  WorkflowExecutionError,
+  WorkflowExecutionErrorType,
+  isWorkflowExecutionError,
+  type WorkflowExecutionErrorMeta,
+} from './src/errors';
