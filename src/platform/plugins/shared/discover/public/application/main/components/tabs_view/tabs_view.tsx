@@ -35,7 +35,10 @@ export const TabsView = (props: DiscoverSessionViewProps) => {
     <UnifiedTabs
       services={services}
       initialItems={initialItems}
-      onChanged={(updateState) => dispatch(internalStateActions.updateTabs(updateState))}
+      onChanged={(updateState) => {
+        const updateTabsAction = internalStateActions.updateTabs(updateState);
+        return dispatch(updateTabsAction);
+      }}
       createItem={() => createTabItem(allTabs)}
       getPreviewData={(item) => {
         const defaultQuery = { language: 'kuery', query: '(Empty query)' };
