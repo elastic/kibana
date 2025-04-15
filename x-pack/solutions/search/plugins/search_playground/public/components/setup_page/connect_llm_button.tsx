@@ -16,9 +16,9 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useEffect, useState } from 'react';
 import { GenerativeAIForSearchPlaygroundConnectorFeatureId } from '@kbn/actions-plugin/common';
+import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../hooks/use_kibana';
 import { useLoadConnectors } from '../../hooks/use_load_connectors';
-import { i18n } from '@kbn/i18n';
 import { useUsageTracker } from '../../hooks/use_usage_tracker';
 import { AnalyticsEvents } from '../../analytics/constants';
 import { LLMs } from '../../../common/types';
