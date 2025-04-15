@@ -19,7 +19,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'console', 'header']);
   const toasts = getService('toasts');
 
-  describe('misc console behavior', function testMiscConsoleBehavior() {
+  // Failing: See https://github.com/elastic/kibana/issues/218255
+  describe.skip('misc console behavior', function testMiscConsoleBehavior() {
     before(async () => {
       await browser.setWindowSize(1200, 800);
       await PageObjects.common.navigateToApp('console');
