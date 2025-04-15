@@ -62494,6 +62494,13 @@ components:
         - indexPattern
         - status
         - fieldHistoryLength
+    Security_Entity_Analytics_API_EngineMetadata:
+      type: object
+      properties:
+        Type:
+          type: string
+      required:
+        - Type
     Security_Entity_Analytics_API_EngineStatus:
       enum:
         - installing
@@ -62507,6 +62514,7 @@ components:
         - $ref: '#/components/schemas/Security_Entity_Analytics_API_UserEntity'
         - $ref: '#/components/schemas/Security_Entity_Analytics_API_HostEntity'
         - $ref: '#/components/schemas/Security_Entity_Analytics_API_ServiceEntity'
+        - $ref: '#/components/schemas/Security_Entity_Analytics_API_GenericEntity'
     Security_Entity_Analytics_API_EntityRiskLevels:
       enum:
         - Unknown
@@ -62589,7 +62597,42 @@ components:
         - user
         - host
         - service
+        - generic
       type: string
+    Security_Entity_Analytics_API_GenericEntity:
+      type: object
+      properties:
+        '@timestamp':
+          format: date-time
+          type: string
+        asset:
+          type: object
+          properties:
+            criticality:
+              $ref: '#/components/schemas/Security_Entity_Analytics_API_AssetCriticalityLevel'
+          required:
+            - criticality
+        entity:
+          type: object
+          properties:
+            category:
+              type: string
+            EngineMetadata:
+              $ref: '#/components/schemas/Security_Entity_Analytics_API_EngineMetadata'
+            id:
+              type: string
+            name:
+              type: string
+            source:
+              type: string
+            type:
+              type: string
+          required:
+            - id
+            - name
+            - type
+      required:
+        - entity
     Security_Entity_Analytics_API_HostEntity:
       type: object
       properties:
@@ -62606,13 +62649,18 @@ components:
         entity:
           type: object
           properties:
+            EngineMetadata:
+              $ref: '#/components/schemas/Security_Entity_Analytics_API_EngineMetadata'
             name:
               type: string
             source:
               type: string
+            type:
+              type: string
           required:
             - name
             - source
+            - type
         event:
           type: object
           properties:
@@ -62664,6 +62712,7 @@ components:
         - host.name
         - user.name
         - service.name
+        - entity.id
       type: string
     Security_Entity_Analytics_API_IndexPattern:
       type: string
@@ -62765,13 +62814,18 @@ components:
         entity:
           type: object
           properties:
+            EngineMetadata:
+              $ref: '#/components/schemas/Security_Entity_Analytics_API_EngineMetadata'
             name:
               type: string
             source:
               type: string
+            type:
+              type: string
           required:
             - name
             - source
+            - type
         event:
           type: object
           properties:
@@ -62879,13 +62933,18 @@ components:
         entity:
           type: object
           properties:
+            EngineMetadata:
+              $ref: '#/components/schemas/Security_Entity_Analytics_API_EngineMetadata'
             name:
               type: string
             source:
               type: string
+            type:
+              type: string
           required:
             - name
             - source
+            - type
         event:
           type: object
           properties:
