@@ -40,7 +40,7 @@ export type ManagementId =
   | 'dataViews'
   | 'data_quality'
   | 'data_usage'
-  | 'search_connectors'
+  | 'content_connectors'
   | 'filesManagement'
   | 'license_management'
   | 'index_lifecycle_management'

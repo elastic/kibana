@@ -529,7 +529,7 @@ Object {
                 },
                 Object {
                   "breadcrumbStatus": "hidden",
-                  "link": "management:search_connectors",
+                  "link": "management:content_connectors",
                 },
               ],
               "title": "Data",
@@ -784,7 +784,7 @@ Object {
                 },
                 Object {
                   "breadcrumbStatus": "hidden",
-                  "link": "management:search_connectors",
+                  "link": "management:content_connectors",
                 },
               ],
               "title": "Data",

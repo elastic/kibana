@@ -82,7 +82,7 @@ export const appDefinitions: Record<AppId, AppDefinition> = {
     icon: 'stats',
   },
 
-  [AppIds.SEARCH_CONNECTORS]: {
+  [AppIds.CONTENT_CONNECTORS]: {
     category: appCategories.DATA,
     description: i18n.translate(
       'management.landing.withCardNavigation.searchConnectorsDescription',
