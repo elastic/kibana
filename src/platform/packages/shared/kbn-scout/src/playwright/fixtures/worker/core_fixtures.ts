@@ -40,6 +40,15 @@ export interface SamlAuth {
   setCustomRole(role: KibanaRole | ElasticsearchRoleDescriptor): Promise<void>;
 }
 
+export interface CoreWorkerFixtures {
+  log: ScoutLogger;
+  config: ScoutTestConfig;
+  kbnUrl: KibanaUrl;
+  esClient: Client;
+  kbnClient: KbnClient;
+  samlAuth: SamlAuth;
+}
+
 /**
  * The coreWorkerFixtures setup defines foundational fixtures that are essential
  * for running tests in the "kbn-scout" framework. These fixtures provide reusable,
@@ -47,17 +56,7 @@ export interface SamlAuth {
  * and isolated access to critical services such as logging, configuration, and
  * clients for interacting with Kibana and Elasticsearch.
  */
-export const coreWorkerFixtures = base.extend<
-  {},
-  {
-    log: ScoutLogger;
-    config: ScoutTestConfig;
-    kbnUrl: KibanaUrl;
-    esClient: Client;
-    kbnClient: KbnClient;
-    samlAuth: SamlAuth;
-  }
->({
+export const coreWorkerFixtures = base.extend<{}, CoreWorkerFixtures>({
   // Provides a scoped logger instance for each worker to use in fixtures and tests.
   // For parallel workers logger context is matching worker index+1, e.g. '[scout-worker-1]', '[scout-worker-2]', etc.
   log: [
