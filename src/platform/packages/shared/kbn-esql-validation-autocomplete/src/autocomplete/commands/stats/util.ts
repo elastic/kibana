@@ -66,7 +66,7 @@ export const getPosition = (innerText: string, command: ESQLCommand): CaretPosit
     return 'expression_after_assignment';
   }
 
-  if (getLastNonWhitespaceChar(innerText) === ',' || /stats\s+$/i.test(innerText)) {
+  if (getLastNonWhitespaceChar(innerText) === ',' || /stats\s+\S*$/i.test(innerText)) {
     return 'expression_without_assignment';
   }
 
