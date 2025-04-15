@@ -1,6 +1,6 @@
 ## Creating Frozen Data On Cloud
 
-The following instructions assume you have a cluster set up on ECH with at least one frozen tier node. To test frozen locally, follow instructions in https://docs.elastic.dev/security-soution/analyst-experience-team/eng-prod/how-to/configure-local-frozen-tier instead. Note that results may differ locally since ECH puts frozen shards on logically separate nodes whereas locally everything is running on your machine.
+The following instructions assume you have a cluster set up on ECH with at least one frozen tier node. To test frozen locally, follow instructions in https://docs.elastic.dev/security-soution/analyst-experience-team/eng-prod/how-to/configure-local-frozen-tier instead. Be sure to add `-E xpack.searchable.snapshot.shared_cache.size=20GB`, e.g. `yarn es snapshot --license trial -E path.repo=~/es_frozen -E xpack.searchable.snapshot.shared_cache.size=20GB`, when starting Elasticsearch locally or else frozen shards won't be able to mount (see https://www.elastic.co/docs/deploy-manage/tools/snapshot-and-restore/searchable-snapshots for details on this option). Note that results may differ locally since ECH puts frozen shards on logically separate nodes whereas locally everything is running on your machine.
 
 This module provides utilities to quickly move data to the frozen tier for testing. The main API call that accomplishes this is `ilm.moveToStep`, however, there's setup that must be done first to make the index ready. The basic process to go from nothing to having data in frozen is:
 
