@@ -40,6 +40,7 @@ import { getLensInspectorService } from '../../lens_inspector_service';
 import { createIndexPatternServiceMock } from '../../mocks/data_views_service_mock';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
+import { EuiThemeProvider } from '@elastic/eui';
 
 function generateSuggestion(state = {}): DatasourceSuggestion {
   return {
@@ -144,12 +145,14 @@ describe('editor_frame', () => {
     }
   ) => {
     const { store, ...rtlRender } = renderWithReduxStore(
-      <EditorFrame
-        {...getDefaultProps()}
-        visualizationMap={visualizationMap}
-        datasourceMap={datasourceMap}
-        {...propsOverrides}
-      />,
+      <EuiThemeProvider>
+        <EditorFrame
+          {...getDefaultProps()}
+          visualizationMap={visualizationMap}
+          datasourceMap={datasourceMap}
+          {...propsOverrides}
+        />
+      </EuiThemeProvider>,
       {},
       {
         preloadedState: {
