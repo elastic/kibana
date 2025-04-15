@@ -27,7 +27,7 @@ export const syncSpaceGlobalParams = async ({
 }) => {
   try {
     await pRetry(async () => {
-      logger.debug(`Synching global parameters of space with id ${spaceId}`);
+      logger.debug(`Syncing global parameters of space with id ${spaceId}`);
       const savedObjectsClient = savedObjects.createInternalRepository();
       const allPrivateLocations = await getPrivateLocations(savedObjectsClient);
       await syntheticsMonitorClient.syncGlobalParams({
@@ -36,7 +36,7 @@ export const syncSpaceGlobalParams = async ({
         soClient: savedObjectsClient,
         encryptedSavedObjects,
       });
-      logger.debug(`Synch of global parameters for space with id ${spaceId} succeeded`);
+      logger.debug(`Sync of global parameters for space with id ${spaceId} succeeded`);
     });
   } catch (error) {
     logger.error(`Sync of global parameters for space with id ${spaceId} failed: ${error.message}`);
