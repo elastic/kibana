@@ -159,4 +159,59 @@ describe('getDefendInsightsRoute', () => {
       status_code: 500,
     });
   });
+  describe('runExternalCallbacks', () => {
+    it('should call runExternalCallbacks if defendInsights are returned', async () => {
+      const runExternalCallbacks = jest.requireMock('./helpers').runExternalCallbacks as jest.Mock;
+      runExternalCallbacks.mockResolvedValue(undefined);
+
+      const response = await server.inject(
+        getDefendInsightsRequest({ connector_id: 'connector-id1' }),
+        requestContextMock.convertContext(context)
+      );
+
+      expect(response.status).toEqual(200);
+
+      const expectedAgentIds = Array.from(
+        new Set(mockCurrentInsights.flatMap((insight: any) => insight.endpointIds))
+      );
+
+      expect(runExternalCallbacks).toHaveBeenCalledWith(
+        expect.any(String), // CallbackIds.DefendInsightsPostFetch
+        expect.anything(), // request
+        expectedAgentIds
+      );
+    });
+
+    it('should handle error thrown by runExternalCallbacks', async () => {
+      const runExternalCallbacks = jest.requireMock('./helpers').runExternalCallbacks as jest.Mock;
+      runExternalCallbacks.mockRejectedValueOnce(new Error('External callback failed'));
+
+      const response = await server.inject(
+        getDefendInsightsRequest({ connector_id: 'connector-id1' }),
+        requestContextMock.convertContext(context)
+      );
+
+      expect(response.status).toEqual(500);
+      expect(response.body).toEqual({
+        message: {
+          error: 'External callback failed',
+          success: false,
+        },
+        status_code: 500,
+      });
+    });
+
+    it('should not call runExternalCallbacks if no defendInsights are returned', async () => {
+      const runExternalCallbacks = jest.requireMock('./helpers').runExternalCallbacks as jest.Mock;
+      (updateDefendInsightsLastViewedAt as jest.Mock).mockResolvedValueOnce([]);
+
+      const response = await server.inject(
+        getDefendInsightsRequest({ connector_id: 'connector-id1' }),
+        requestContextMock.convertContext(context)
+      );
+
+      expect(response.status).toEqual(200);
+      expect(runExternalCallbacks).not.toHaveBeenCalled();
+    });
+  });
 });

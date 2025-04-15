@@ -28,7 +28,15 @@ import {
   handleToolError,
   updateDefendInsights,
   updateDefendInsightLastViewedAt,
+  runExternalCallbacks,
 } from './helpers';
+import { appContextService } from '../../services/app_context';
+
+jest.mock('../../services/app_context', () => ({
+  appContextService: {
+    getRegisteredCallbacks: jest.fn(),
+  },
+}));
 
 describe('defend insights route helpers', () => {
   afterEach(() => {
@@ -222,6 +230,46 @@ describe('defend insights route helpers', () => {
         authenticatedUser: params.authenticatedUser,
       });
       expect(result).toBeUndefined();
+    });
+  });
+
+  describe('runExternalCallbacks', () => {
+    it('should call all registered callbacks with provided arguments', async () => {
+      const mockCallback1 = jest.fn();
+      const mockCallback2 = jest.fn();
+      const mockRequest = {} as any;
+
+      (appContextService.getRegisteredCallbacks as jest.Mock).mockReturnValue([
+        mockCallback1,
+        mockCallback2,
+      ]);
+
+      await runExternalCallbacks('some-callback-id' as any, mockRequest);
+
+      expect(mockCallback1).toHaveBeenCalledWith(mockRequest);
+      expect(mockCallback2).toHaveBeenCalledWith(mockRequest);
+    });
+
+    it('should support callbacks with two arguments', async () => {
+      const mockCallback = jest.fn();
+      const mockRequest = {} as any;
+      const mockArg = { extra: true };
+
+      (appContextService.getRegisteredCallbacks as jest.Mock).mockReturnValue([mockCallback]);
+
+      await runExternalCallbacks('some-callback-id' as any, mockRequest, mockArg);
+
+      expect(mockCallback).toHaveBeenCalledWith(mockRequest, mockArg);
+    });
+
+    it('should handle empty callback list gracefully', async () => {
+      const mockRequest = {} as any;
+
+      (appContextService.getRegisteredCallbacks as jest.Mock).mockReturnValue([]);
+
+      await expect(
+        runExternalCallbacks('some-callback-id' as any, mockRequest)
+      ).resolves.not.toThrow();
     });
   });
 });

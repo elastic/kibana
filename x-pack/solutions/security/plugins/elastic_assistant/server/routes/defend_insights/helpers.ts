@@ -13,6 +13,7 @@ import {
   Logger,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
+
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import {
   ApiConfig,
@@ -37,7 +38,8 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 
 import { getDefendInsightsPrompt } from '../../lib/defend_insights/graphs/default_defend_insights_graph/nodes/helpers/prompts';
 import type { GraphState } from '../../lib/defend_insights/graphs/default_defend_insights_graph/types';
-import type { GetRegisteredTools } from '../../services/app_context';
+import { CallbackIds, GetRegisteredTools, appContextService } from '../../services/app_context';
+
 import type { AssistantTool, ElasticAssistantApiRequestHandlerContext } from '../../types';
 import { DefendInsightsDataClient } from '../../lib/defend_insights/persistence';
 import {
@@ -590,6 +592,14 @@ export const handleGraphError = async ({
       provider: apiConfig.provider,
     });
   }
+};
+
+export const runExternalCallbacks = async (
+  callback: CallbackIds,
+  ...args: [KibanaRequest] | [KibanaRequest, unknown]
+) => {
+  const callbacks = appContextService.getRegisteredCallbacks(callback);
+  await Promise.all(callbacks.map((cb) => Promise.resolve(cb(...args))));
 };
 
 export const throwIfErrorCountsExceeded = ({

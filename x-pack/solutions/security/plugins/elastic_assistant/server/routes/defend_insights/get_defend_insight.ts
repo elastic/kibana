@@ -6,20 +6,23 @@
  */
 
 import type { IKibanaResponse } from '@kbn/core/server';
-
 import { IRouter, Logger } from '@kbn/core/server';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import {
-  DEFEND_INSIGHTS_BY_ID,
-  DefendInsightGetResponse,
-  DefendInsightGetRequestParams,
   API_VERSIONS,
+  DEFEND_INSIGHTS_BY_ID,
+  DefendInsightGetRequestParams,
+  DefendInsightGetResponse,
 } from '@kbn/elastic-assistant-common';
 import { transformError } from '@kbn/securitysolution-es-utils';
 
 import { buildResponse } from '../../lib/build_response';
-import { ElasticAssistantRequestHandlerContext } from '../../types';
-import { isDefendInsightsEnabled, updateDefendInsightLastViewedAt } from './helpers';
+import { CallbackIds, ElasticAssistantRequestHandlerContext } from '../../types';
+import {
+  isDefendInsightsEnabled,
+  runExternalCallbacks,
+  updateDefendInsightLastViewedAt,
+} from './helpers';
 
 export const getDefendInsightRoute = (router: IRouter<ElasticAssistantRequestHandlerContext>) => {
   router.versioned
@@ -91,6 +94,14 @@ export const getDefendInsightRoute = (router: IRouter<ElasticAssistantRequestHan
             id: request.params.id,
             authenticatedUser,
           });
+
+          if (defendInsight) {
+            await runExternalCallbacks(
+              CallbackIds.DefendInsightsPostFetch,
+              request,
+              defendInsight.endpointIds
+            );
+          }
 
           return response.ok({
             body: { data: defendInsight },

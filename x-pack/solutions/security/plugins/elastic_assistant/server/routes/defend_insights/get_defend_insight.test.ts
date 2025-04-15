@@ -159,4 +159,56 @@ describe('getDefendInsightRoute', () => {
       status_code: 500,
     });
   });
+
+  describe('runExternalCallbacks', () => {
+    it('should call runExternalCallbacks if defendInsight is returned', async () => {
+      const runExternalCallbacks = jest.requireMock('./helpers').runExternalCallbacks as jest.Mock;
+      runExternalCallbacks.mockResolvedValue(undefined);
+
+      const response = await server.inject(
+        getDefendInsightRequest('insight-id1'),
+        requestContextMock.convertContext(context)
+      );
+
+      expect(response.status).toEqual(200);
+      expect(runExternalCallbacks).toHaveBeenCalledWith(
+        expect.any(String), // CallbackIds.DefendInsightsPostFetch
+        expect.anything(), // request
+        mockCurrentInsight.endpointIds
+      );
+    });
+
+    it('should handle error thrown by runExternalCallbacks', async () => {
+      const runExternalCallbacks = jest.requireMock('./helpers').runExternalCallbacks as jest.Mock;
+      runExternalCallbacks.mockRejectedValueOnce(new Error('External callback failed'));
+
+      const response = await server.inject(
+        getDefendInsightRequest('insight-id1'),
+        requestContextMock.convertContext(context)
+      );
+
+      expect(response.status).toEqual(500);
+      expect(response.body).toEqual({
+        message: {
+          error: 'External callback failed',
+          success: false,
+        },
+        status_code: 500,
+      });
+    });
+
+    it('should not call runExternalCallbacks if updateDefendInsightLastViewedAt returns null', async () => {
+      const runExternalCallbacks = jest.requireMock('./helpers').runExternalCallbacks as jest.Mock;
+      (updateDefendInsightLastViewedAt as jest.Mock).mockResolvedValueOnce(null);
+
+      const response = await server.inject(
+        getDefendInsightRequest('insight-id1'),
+        requestContextMock.convertContext(context)
+      );
+
+      expect(response.status).toEqual(200);
+      expect(response.body).toEqual({ data: null });
+      expect(runExternalCallbacks).not.toHaveBeenCalled();
+    });
+  });
 });
