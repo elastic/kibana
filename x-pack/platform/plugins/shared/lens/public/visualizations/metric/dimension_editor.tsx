@@ -223,6 +223,9 @@ function TrendEditor({
       [],
   }));
 
+  const isPrimaryMetricOptionSelected =
+    state.secondaryTrend?.baselineValue === 'primary' && primaryMetricCanTrend;
+
   return (
     <>
       <EuiFormRow
@@ -321,6 +324,13 @@ function TrendEditor({
         label={i18n.translate('xpack.lens.metric.secondaryMetric.compareTo', {
           defaultMessage: 'Compare to',
         })}
+        helpText={
+          isPrimaryMetricOptionSelected
+            ? i18n.translate('xpack.lens.metric.secondaryMetric.compareTo.primaryHelpText', {
+                defaultMessage: '',
+              })
+            : undefined
+        }
       >
         <>
           <EuiButtonGroup
@@ -361,11 +371,7 @@ function TrendEditor({
                     ),
               },
             ]}
-            idSelected={`${idPrefix}${
-              state.secondaryTrend?.baselineValue === 'primary' && primaryMetricCanTrend
-                ? 'primary'
-                : 'static'
-            }`}
+            idSelected={`${idPrefix}${isPrimaryMetricOptionSelected ? 'primary' : 'static'}`}
             onChange={(id) => {
               const baselineMode = id.replace(idPrefix, '') as 'static' | 'primary';
 
