@@ -17,6 +17,7 @@ import {
 import { ToolingLog } from '@kbn/tooling-log';
 import chalk from 'chalk';
 import pRetry from 'p-retry';
+import { kibanaPackageJson as pkg } from '@kbn/repo-info';
 
 export const DEFAULT_HEADERS = Object.freeze({
   'x-elastic-internal-product': 'security-solution',
@@ -140,10 +141,23 @@ const isValidArtifactVersion = (version: string) => !!version.match(/^\d+\.\d+\.
  * Returns the Agent version that is available for install (will check `artifacts-api.elastic.co/v1/versions`)
  * that is equal to or less than `maxVersion`.
  * @param kbnClient
+ * @param log
  */
 
-export const getLatestAvailableAgentVersion = async (kbnClient: KbnClient): Promise<string> => {
-  const kbnStatus = await kbnClient.status.get();
+export const getLatestAvailableAgentVersion = async (
+  kbnClient: KbnClient,
+  log: ToolingLog
+): Promise<string> => {
+  let currentVersion: string;
+
+  try {
+    const kbnStatus = await kbnClient.status.get();
+    currentVersion = kbnStatus.version.number;
+  } catch {
+    log.warning(chalk.bold('Failed to get Kibana version, using package.json version'));
+    currentVersion = pkg.version;
+  }
+
   const agentVersions = await pRetry(
     async () => {
       const response = await axios.get('https://artifacts-api.elastic.co/v1/versions');
@@ -157,9 +171,15 @@ export const getLatestAvailableAgentVersion = async (kbnClient: KbnClient): Prom
     }
   ).catch(() => null);
 
+  if (!agentVersions) {
+    log.warning(
+      chalk.bold('Failed to get agent versions from artifacts-api, using package.json version')
+    );
+  }
+
   const version = agentVersions
-    ? semver.maxSatisfying(agentVersions, `<=${kbnStatus.version.number}`)
-    : kbnStatus.version.number;
+    ? semver.maxSatisfying(agentVersions, `<=${currentVersion}`)
+    : currentVersion;
 
   return `${version}-SNAPSHOT`;
 };
