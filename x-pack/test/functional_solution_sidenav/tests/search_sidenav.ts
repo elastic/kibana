@@ -60,7 +60,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         });
 
         // navigate to a different section
-        await solutionNavigation.sidenav.openSection('project_settings_project_nav');
+        await solutionNavigation.sidenav.openSection(
+          'search_project_nav_footer.project_settings_project_nav'
+        );
         await solutionNavigation.sidenav.clickLink({ navId: 'stack_management' });
         await solutionNavigation.sidenav.expectLinkActive({ navId: 'stack_management' });
         await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Data' });
