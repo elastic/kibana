@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { Fragment, useEffect } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import {
   EuiButton,
@@ -17,19 +17,16 @@ import {
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
-  EuiSelect,
   EuiSpacer,
+  EuiSuperSelect,
+  EuiText,
   EuiTextArea,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useAgentEdition } from '../../../hooks/use_agent_edition';
 import { assistantLabels } from '../i18n';
-
-const USE_CASES = [
-  { value: 'customerSupport', text: 'Customer Support' },
-  { value: 'dataAnalysis', text: 'Data Analysis' },
-];
+import { ASSISTANT_USE_CASES } from '../constants';
 
 export interface EditPromptProps {
   onClose: () => void;
@@ -55,9 +52,29 @@ export const EditPrompt: React.FC<EditPromptProps> = ({ onClose, onSaveSuccess, 
     },
   });
 
-  const { control, handleSubmit } = useForm({
+  const { control, handleSubmit, watch, setValue } = useForm({
     values: state,
   });
+
+  const useCase = watch('useCase');
+
+  useEffect(() => {
+    if (useCase && useCase !== 'custom') {
+      const selectedUseCase = ASSISTANT_USE_CASES.find((uc) => uc.value === useCase);
+      if (selectedUseCase && selectedUseCase.prompt) {
+        setValue('systemPrompt', selectedUseCase.prompt);
+      }
+    }
+  }, [useCase, setValue]);
+
+  const handlePromptChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const newPrompt = e.target.value;
+    setValue('systemPrompt', newPrompt);
+
+    if (useCase !== 'custom') {
+      setValue('useCase', 'custom');
+    }
+  };
 
   return (
     <EuiModal onClose={onClose} style={{ width: 800 }}>
@@ -81,10 +98,25 @@ export const EditPrompt: React.FC<EditPromptProps> = ({ onClose, onSaveSuccess, 
                 })}
                 fullWidth
               >
-                <EuiSelect
+                <EuiSuperSelect
                   data-test-subj="assistantUseCaseSelect"
-                  options={USE_CASES}
+                  options={ASSISTANT_USE_CASES.map(({ label, value, description }) => ({
+                    inputDisplay: label,
+                    value,
+                    dropdownDisplay: (
+                      <Fragment>
+                        <strong>{label}</strong>
+                        {!!description && (
+                          <EuiText size="s" color="subdued">
+                            {description}
+                          </EuiText>
+                        )}
+                      </Fragment>
+                    ),
+                  }))}
                   {...field}
+                  valueOfSelected={field.value}
+                  hasDividers
                   fullWidth
                 />
               </EuiFormRow>
@@ -107,6 +139,7 @@ export const EditPrompt: React.FC<EditPromptProps> = ({ onClose, onSaveSuccess, 
                 <EuiTextArea
                   data-test-subj="assistantPromptTextArea"
                   {...field}
+                  onChange={handlePromptChange}
                   fullWidth
                   rows={8}
                 />

@@ -50,18 +50,4 @@ export const assistantLabels = {
       defaultMessage: 'Edit',
     }),
   },
-  useCase: {
-    customerSupportLabel: i18n.translate(
-      'workchatApp.assistants.editView.useCase.customerSupportLabel',
-      {
-        defaultMessage: 'Customer Support',
-      }
-    ),
-    dataAnalysisLabel: i18n.translate('workchatApp.assistants.editView.useCase.dataAnalysisLabel', {
-      defaultMessage: 'Data Analysis',
-    }),
-    customLabel: i18n.translate('workchatApp.assistants.editView.useCase.customLabel', {
-      defaultMessage: 'Custom',
-    }),
-  },
 };

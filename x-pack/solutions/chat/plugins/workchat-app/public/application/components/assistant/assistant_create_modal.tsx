@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { Fragment, useCallback, useEffect } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -17,6 +17,8 @@ import {
   EuiModalHeader,
   EuiModalHeaderTitle,
   EuiFieldText,
+  EuiSuperSelect,
+  EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormProvider, useForm, Controller } from 'react-hook-form';
@@ -26,6 +28,7 @@ import type { Agent } from '../../../../common/agents';
 import { appPaths } from '../../app_paths';
 import { useNavigation } from '../../hooks/use_navigation';
 import { assistantLabels } from './i18n';
+import { ASSISTANT_USE_CASES } from './constants';
 
 export interface CreateNewAssistantModalProps {
   onClose: () => void;
@@ -69,7 +72,18 @@ export const CreateNewAssistantModal: React.FC<CreateNewAssistantModalProps> = (
     values: state,
   });
 
-  const { handleSubmit, control } = formMethods;
+  const { handleSubmit, control, watch, setValue } = formMethods;
+
+  const useCase = watch('useCase');
+
+  useEffect(() => {
+    if (useCase) {
+      const selectedUseCase = ASSISTANT_USE_CASES.find((uc) => uc.value === useCase);
+      if (selectedUseCase) {
+        setValue('systemPrompt', selectedUseCase.prompt);
+      }
+    }
+  }, [useCase, setValue]);
 
   return (
     <EuiModal onClose={onClose} style={{ width: 640 }}>
@@ -99,6 +113,40 @@ export const CreateNewAssistantModal: React.FC<CreateNewAssistantModalProps> = (
                 )}
               />
             </EuiFormRow>
+            <Controller
+              name="useCase"
+              control={control}
+              render={({ field }) => (
+                <EuiFormRow
+                  label={i18n.translate('workchatApp.assistants.editPromptModal.useCaseLabel', {
+                    defaultMessage: 'Use case',
+                  })}
+                  fullWidth
+                >
+                  <EuiSuperSelect
+                    data-test-subj="assistantUseCaseSelect"
+                    options={ASSISTANT_USE_CASES.map(({ label, value, description }) => ({
+                      inputDisplay: label,
+                      value,
+                      dropdownDisplay: (
+                        <Fragment>
+                          <strong>{label}</strong>
+                          {!!description && (
+                            <EuiText size="s" color="subdued">
+                              {description}
+                            </EuiText>
+                          )}
+                        </Fragment>
+                      ),
+                    }))}
+                    {...field}
+                    valueOfSelected={field.value}
+                    hasDividers
+                    fullWidth
+                  />
+                </EuiFormRow>
+              )}
+            />
           </EuiForm>
         </FormProvider>
       </EuiModalBody>
