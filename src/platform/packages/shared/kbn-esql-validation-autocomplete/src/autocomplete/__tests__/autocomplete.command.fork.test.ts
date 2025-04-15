@@ -7,13 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { Location } from '../../definitions/types';
 import { ESQL_STRING_TYPES } from '../../shared/esql_types';
 import { EXPECTED_FIELD_AND_FUNCTION_SUGGESTIONS } from './autocomplete.command.sort.test';
+import { AVG_TYPES, EXPECTED_FOR_EMPTY_EXPRESSION } from './autocomplete.command.stats.test';
 import {
   EMPTY_WHERE_SUGGESTIONS,
   EXPECTED_COMPARISON_WITH_TEXT_FIELD_SUGGESTIONS,
 } from './autocomplete.command.where.test';
-import { AssertSuggestionsFn, SuggestFn, getFieldNamesByType, setup } from './helpers';
+import {
+  AssertSuggestionsFn,
+  SuggestFn,
+  getFieldNamesByType,
+  getFunctionSignaturesByReturnType,
+  setup,
+} from './helpers';
 
 describe('autocomplete.suggest', () => {
   describe('FORK (COMMAND ... [| COMMAND ...]) [(COMMAND ... [| COMMAND ...])]', () => {
@@ -40,7 +48,7 @@ describe('autocomplete.suggest', () => {
       });
 
       describe('(COMMAND ... | COMMAND ...)', () => {
-        const FORK_SUBCOMMANDS = ['WHERE ', 'SORT ', 'LIMIT ', 'DISSECT '];
+        const FORK_SUBCOMMANDS = ['WHERE ', 'SORT ', 'LIMIT ', 'DISSECT ', 'STATS '];
 
         it('suggests FORK sub commands in an open branch', async () => {
           await assertSuggestions('FROM a | FORK (/)', FORK_SUBCOMMANDS);
@@ -90,6 +98,51 @@ describe('autocomplete.suggest', () => {
               'APPEND_SEPARATOR = ',
               '| ',
             ]);
+          });
+
+          describe('stats', () => {
+            it('suggests for empty expression', async () => {
+              await assertSuggestions('FROM a | FORK (STATS /)', EXPECTED_FOR_EMPTY_EXPRESSION);
+              await assertSuggestions(
+                'FROM a | FORK (STATS AVG(integerField), /)',
+                EXPECTED_FOR_EMPTY_EXPRESSION
+              );
+            });
+
+            it('suggest within a function', async () => {
+              await assertSuggestions('FROM a | FORK (STATS AVG(/))', [
+                ...getFieldNamesByType(AVG_TYPES),
+                ...getFunctionSignaturesByReturnType(Location.STATS, AVG_TYPES, { scalar: true }),
+              ]);
+              await assertSuggestions('FROM a | FORK (STATS AVG(integerField) BY ACOS(/))', [
+                ...getFieldNamesByType([...AVG_TYPES, 'unsigned_long']),
+                ...getFunctionSignaturesByReturnType(
+                  Location.STATS,
+                  [...AVG_TYPES, 'unsigned_long'],
+                  {
+                    scalar: true,
+                    // grouping functions are a bug: https://github.com/elastic/kibana/issues/218319
+                    grouping: true,
+                  },
+                  undefined,
+                  ['acos']
+                ),
+              ]);
+            });
+
+            it('supports STATS ... WHERE', async () => {
+              await assertSuggestions(
+                'FROM a | FORK (STATS AVG(integerField) WHERE integerField /)',
+                [
+                  ...getFunctionSignaturesByReturnType(
+                    Location.STATS_WHERE,
+                    'any',
+                    { operators: true },
+                    ['integer']
+                  ),
+                ]
+              );
+            });
           });
         });
 

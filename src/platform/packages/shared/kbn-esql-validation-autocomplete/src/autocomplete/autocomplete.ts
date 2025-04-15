@@ -15,6 +15,7 @@ import {
   type ESQLCommandOption,
   type ESQLFunction,
   type ESQLSingleAstItem,
+  Walker,
 } from '@kbn/esql-ast';
 import { type ESQLControlVariable, ESQLVariableType } from '@kbn/esql-types';
 import { isNumericType } from '../shared/esql_types';
@@ -178,10 +179,38 @@ export async function suggest(
     return commandsSpecificSuggestions;
   }
   if (astContext.type === 'function') {
+    const getCommandAndOptionWithinFORK = (
+      command: ESQLCommand<'fork'>
+    ): {
+      command: ESQLCommand;
+      option: ESQLCommandOption | undefined;
+    } => {
+      let option;
+      let subCommand;
+      Walker.walk(command, {
+        visitCommandOption: (_node) => {
+          option = _node;
+        },
+        visitCommand: (_node) => {
+          subCommand = _node;
+        },
+      });
+
+      return {
+        option,
+        command: subCommand ?? command,
+      };
+    };
+
     const functionsSpecificSuggestions = await getFunctionArgsSuggestions(
       innerText,
       ast,
-      astContext,
+      {
+        ...astContext,
+        ...(astContext.command.name === 'fork'
+          ? getCommandAndOptionWithinFORK(astContext.command as ESQLCommand<'fork'>)
+          : {}),
+      },
       getFieldsByType,
       getFieldsMap,
       fullText,
