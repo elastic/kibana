@@ -7,7 +7,7 @@
 
 import { login } from '../../../tasks/login';
 import { visit } from '../../../tasks/navigation';
-import { ALERTS_SUMMARY_PROMPT, GET_STARTED_PAGE } from '../constants';
+import { ALERTS_SUMMARY_PROMPT, GET_STARTED_PAGE, MANAGEMENT_PAGE_DESCRIPTION } from '../constants';
 import {
   ALERT_SUMMARY_URL,
   ALERTS_URL,
