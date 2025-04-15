@@ -28,6 +28,7 @@ export function registerQueryFunction({
   functions,
   resources,
   pluginsStart,
+  signal,
 }: FunctionRegistrationParameters) {
   functions.registerInstruction(({ availableFunctionNames }) => {
     if (!availableFunctionNames.includes(QUERY_FUNCTION_NAME)) {
@@ -83,6 +84,7 @@ export function registerQueryFunction({
       const { error, errorMessages, rows, columns } = await runAndValidateEsqlQuery({
         query: correctedQuery,
         client,
+        signal,
       });
 
       if (!!error) {
@@ -114,7 +116,7 @@ export function registerQueryFunction({
       function takes no input.`,
       visibility: FunctionVisibility.AssistantOnly,
     },
-    async ({ messages, connectorId, simulateFunctionCalling }, signal) => {
+    async ({ messages, connectorId, simulateFunctionCalling }) => {
       const esqlFunctions = functions
         .getFunctions()
         .filter(

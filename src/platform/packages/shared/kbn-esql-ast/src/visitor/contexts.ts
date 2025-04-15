@@ -14,10 +14,12 @@
 import { type GlobalVisitorContext, SharedData } from './global_visitor_context';
 import { children, firstItem, singleItems } from './utils';
 import type {
+  ESQLAstChangePointCommand,
   ESQLAstCommand,
   ESQLAstExpression,
   ESQLAstItem,
   ESQLAstJoinCommand,
+  ESQLAstQueryExpression,
   ESQLAstRenameExpression,
   ESQLColumn,
   ESQLCommandOption,
@@ -29,6 +31,7 @@ import type {
   ESQLList,
   ESQLLiteral,
   ESQLOrderExpression,
+  ESQLProperNode,
   ESQLSource,
   ESQLTimeInterval,
 } from '../types';
@@ -45,6 +48,18 @@ import type {
 } from './types';
 import { Builder } from '../builder';
 import { isProperNode } from '../ast/helpers';
+
+const isRenameExpression = (
+  parent: ESQLProperNode,
+  node: ESQLAstExpression
+): node is ESQLAstRenameExpression => {
+  return (
+    parent.type === 'command' &&
+    parent.name === 'rename' &&
+    node.type === 'option' &&
+    node.name === 'as'
+  );
+};
 
 export class VisitorContext<
   Methods extends VisitorMethods = VisitorMethods,
@@ -78,7 +93,7 @@ export class VisitorContext<
 
     for (const arg of this.arguments()) {
       if (!arg) continue;
-      if (arg.type === 'option' && arg.name !== 'as') {
+      if (arg.type === 'option' && !isRenameExpression(this.node as ESQLProperNode, arg)) {
         continue;
       }
       yield this.visitExpression(
@@ -177,14 +192,19 @@ export class CommandVisitorContext<
     return this.node.name.toUpperCase();
   }
 
+  public visitSubQuery(queryNode: ESQLAstQueryExpression) {
+    this.ctx.assertMethodExists('visitQuery');
+    return this.ctx.visitQuery(this, queryNode, undefined as any);
+  }
+
   public *options(): Iterable<ESQLCommandOption> {
     for (const arg of this.node.args) {
       if (!arg || Array.isArray(arg)) {
         continue;
       }
+      // We treat "AS" options as rename expressions, not as command options.
+      if (isRenameExpression(this.node, arg)) continue;
       if (arg.type === 'option') {
-        // We treat "AS" options as rename expressions, not as command options.
-        if (arg.name === 'as') continue;
         yield arg;
       }
     }
@@ -217,7 +237,7 @@ export class CommandVisitorContext<
         }
         if (arg.type !== 'option') {
           yield arg;
-        } else if (arg.name === 'as') {
+        } else if (isRenameExpression(this.node, arg)) {
           // We treat "AS" options as rename expressions, not as command options.
           yield arg;
         }
@@ -362,8 +382,8 @@ export class RowCommandVisitorContext<
   Data extends SharedData = SharedData
 > extends CommandVisitorContext<Methods, Data, ESQLAstCommand> {}
 
-// METRICS
-export class MetricsCommandVisitorContext<
+// TS
+export class TimeseriesCommandVisitorContext<
   Methods extends VisitorMethods = VisitorMethods,
   Data extends SharedData = SharedData
 > extends CommandVisitorContext<Methods, Data, ESQLAstCommand> {}
@@ -463,6 +483,18 @@ export class JoinCommandVisitorContext<
   Methods extends VisitorMethods = VisitorMethods,
   Data extends SharedData = SharedData
 > extends CommandVisitorContext<Methods, Data, ESQLAstJoinCommand> {}
+
+// CHANGE_POINT <value> [ ON <key> ] [ AS <targetType>, <targetPvalue> ]
+export class ChangePointCommandVisitorContext<
+  Methods extends VisitorMethods = VisitorMethods,
+  Data extends SharedData = SharedData
+> extends CommandVisitorContext<Methods, Data, ESQLAstChangePointCommand> {}
+
+// FORK (COMMAND ... [| COMMAND ...]) [(COMMAND ... [| COMMAND ...])]
+export class ForkCommandVisitorContext<
+  Methods extends VisitorMethods = VisitorMethods,
+  Data extends SharedData = SharedData
+> extends CommandVisitorContext<Methods, Data, ESQLAstCommand> {}
 
 // Expressions -----------------------------------------------------------------
 

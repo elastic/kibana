@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Client } from '@elastic/elasticsearch';
+import type { Client } from '@elastic/elasticsearch';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { createWrappedScopedClusterClientFactory } from './wrap_scoped_cluster_client';
@@ -741,7 +741,7 @@ describe('wrapScopedClusterClient', () => {
   });
 });
 
-function getMockClusterClients(asCurrentUser: boolean = false) {
+function getMockClusterClients(asCurrentUser = false) {
   const abortController = new AbortController();
   const scopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
   const childClient = elasticsearchServiceMock.createElasticsearchClient();

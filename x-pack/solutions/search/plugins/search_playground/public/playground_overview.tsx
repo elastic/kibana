@@ -7,19 +7,13 @@
 
 import React, { useMemo } from 'react';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import { PlaygroundProvider } from './providers/playground_provider';
+import { UnsavedFormProvider } from './providers/unsaved_form_provider';
 
 import { useKibana } from './hooks/use_kibana';
-import { PlaygroundPageMode } from './types';
-import { App } from './components/app';
+import { Playground } from './components/playgorund';
 import { usePlaygroundBreadcrumbs } from './hooks/use_playground_breadcrumbs';
 
-interface PlaygroundOverviewProps {
-  pageMode?: PlaygroundPageMode;
-}
-export const PlaygroundOverview: React.FC<PlaygroundOverviewProps> = ({
-  pageMode = PlaygroundPageMode.chat,
-}) => {
+export const PlaygroundOverview = () => {
   const {
     services: { history, console: consolePlugin, searchNavigation },
   } = useKibana();
@@ -31,18 +25,18 @@ export const PlaygroundOverview: React.FC<PlaygroundOverviewProps> = ({
   );
 
   return (
-    <PlaygroundProvider>
-      <KibanaPageTemplate
-        offset={0}
-        restrictWidth={false}
-        data-test-subj="svlPlaygroundPage"
-        grow={false}
-        panelled={false}
-        solutionNav={searchNavigation?.useClassicNavigation(history)}
-      >
-        <App showDocs pageMode={pageMode} />
-        {embeddableConsole}
-      </KibanaPageTemplate>
-    </PlaygroundProvider>
+    <KibanaPageTemplate
+      offset={0}
+      restrictWidth={false}
+      data-test-subj="svlPlaygroundPage"
+      grow={false}
+      panelled={false}
+      solutionNav={searchNavigation?.useClassicNavigation(history)}
+    >
+      <UnsavedFormProvider>
+        <Playground showDocs />
+      </UnsavedFormProvider>
+      {embeddableConsole}
+    </KibanaPageTemplate>
   );
 };

@@ -5,24 +5,31 @@
  * 2.0.
  */
 
-import { EnrichedDeprecationInfo } from '../../../common/types';
+import type { CorrectiveAction } from '../../../common/types';
+import type { BaseDeprecation } from './migrations';
 
 interface Action {
   action_type: 'remove_settings';
   objects: string[];
 }
 
-interface Actions {
+interface CommonActionMetadata {
   actions?: Action[];
 }
 
-interface MlActionMetadata {
-  actions?: Action[];
+interface MlActionMetadata extends CommonActionMetadata {
   snapshot_id: string;
   job_id: string;
 }
-interface DataStreamActionMetadata {
-  actions?: Action[];
+
+interface IndexActionMetadata extends CommonActionMetadata {
+  reindex_required: boolean;
+  transform_ids: string[];
+  is_in_data_stream?: boolean;
+}
+
+interface DataStreamActionMetadata extends CommonActionMetadata {
+  excludedActions?: Array<'readOnly' | 'reindex'>;
   total_backing_indices: number;
   reindex_required: boolean;
 
@@ -35,33 +42,28 @@ interface DataStreamActionMetadata {
   ignored_indices_requiring_upgrade_count?: number;
 }
 
-export type EsMetadata = Actions | MlActionMetadata | DataStreamActionMetadata;
+export type EsMetadata = IndexActionMetadata | MlActionMetadata | DataStreamActionMetadata;
 
-// TODO(jloleysens): Replace these regexes once this issue is addressed https://github.com/elastic/elasticsearch/issues/118062
-const ES_INDEX_MESSAGES_REQIURING_REINDEX = [
-  /Index created before/,
-  /index with a compatibility version \</,
-];
+export const isFrozenDeprecation = (message: string, indexName?: string): boolean =>
+  Boolean(indexName) && message.includes(`Index [${indexName}] is a frozen index`);
 
-export const getCorrectiveAction = (
-  deprecationType: EnrichedDeprecationInfo['type'],
-  message: string,
-  metadata: EsMetadata,
-  indexName?: string
-): EnrichedDeprecationInfo['correctiveAction'] => {
+export const getCorrectiveAction = (deprecation: BaseDeprecation): CorrectiveAction | undefined => {
+  const { index, type, message, metadata } = deprecation;
+
   const indexSettingDeprecation = metadata?.actions?.find(
-    (action) => action.action_type === 'remove_settings' && indexName
+    (action) => action.action_type === 'remove_settings' && index
   );
   const clusterSettingDeprecation = metadata?.actions?.find(
-    (action) => action.action_type === 'remove_settings' && typeof indexName === 'undefined'
+    (action) => action.action_type === 'remove_settings' && typeof index === 'undefined'
   );
-  const requiresReindexAction = ES_INDEX_MESSAGES_REQIURING_REINDEX.some((regexp) =>
-    regexp.test(message)
-  );
+  const requiresReindexAction =
+    (type === 'index_settings' || type === 'node_settings') &&
+    (deprecation.metadata as IndexActionMetadata)?.reindex_required === true;
+  const requiresUnfreezeAction = isFrozenDeprecation(message, index);
   const requiresIndexSettingsAction = Boolean(indexSettingDeprecation);
   const requiresClusterSettingsAction = Boolean(clusterSettingDeprecation);
   const requiresMlAction = /[Mm]odel snapshot/.test(message);
-  const requiresDataStreamsAction = deprecationType === 'data_streams';
+  const requiresDataStreamsAction = type === 'data_streams';
 
   if (requiresDataStreamsAction) {
     const {
@@ -97,8 +99,26 @@ export const getCorrectiveAction = (
   }
 
   if (requiresReindexAction) {
+    const transformIds = (metadata as IndexActionMetadata)?.transform_ids;
     return {
       type: 'reindex',
+      ...(transformIds?.length ? { transformIds } : {}),
+      metadata: {
+        isClosedIndex: Boolean(deprecation.isClosedIndex),
+        isFrozenIndex: Boolean(deprecation.isFrozenIndex),
+        isInDataStream: Boolean((deprecation.metadata as IndexActionMetadata)?.is_in_data_stream),
+      },
+    };
+  }
+
+  if (requiresUnfreezeAction) {
+    return {
+      type: 'unfreeze',
+      metadata: {
+        isClosedIndex: Boolean(deprecation.isClosedIndex),
+        isFrozenIndex: Boolean(deprecation.isFrozenIndex),
+        isInDataStream: Boolean((deprecation.metadata as IndexActionMetadata)?.is_in_data_stream),
+      },
     };
   }
 

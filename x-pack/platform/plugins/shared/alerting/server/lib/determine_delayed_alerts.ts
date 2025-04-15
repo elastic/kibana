@@ -6,9 +6,9 @@
  */
 
 import { keys } from 'lodash';
-import { Alert } from '../alert';
-import { AlertInstanceState, AlertInstanceContext } from '../types';
-import { RuleRunMetricsStore } from './rule_run_metrics_store';
+import type { Alert } from '../alert';
+import type { AlertInstanceState, AlertInstanceContext } from '../types';
+import type { RuleRunMetricsStore } from './rule_run_metrics_store';
 
 interface DetermineDelayedAlertsOpts<
   State extends AlertInstanceState,

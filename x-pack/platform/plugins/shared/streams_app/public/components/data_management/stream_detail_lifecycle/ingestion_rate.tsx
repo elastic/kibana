@@ -17,18 +17,11 @@ import {
   EuiLoadingChart,
   EuiPanel,
   EuiSpacer,
+  EuiIconTip,
   EuiText,
-  useEuiTheme,
 } from '@elastic/eui';
-import {
-  AreaSeries,
-  Axis,
-  BarSeries,
-  Chart,
-  DARK_THEME,
-  LIGHT_THEME,
-  Settings,
-} from '@elastic/charts';
+import { AreaSeries, Axis, BarSeries, Chart, Settings } from '@elastic/charts';
+import { useElasticChartsTheme } from '@kbn/charts-theme';
 import { useKibana } from '../../../hooks/use_kibana';
 import { DataStreamStats } from './hooks/use_data_stream_stats';
 import { formatBytes } from './helpers/format_bytes';
@@ -42,7 +35,7 @@ export function IngestionRate({
   isLoadingStats,
   refreshStats,
 }: {
-  definition?: IngestStreamGetResponse;
+  definition: IngestStreamGetResponse;
   stats?: DataStreamStats;
   isLoadingStats: boolean;
   refreshStats: () => void;
@@ -59,13 +52,25 @@ export function IngestionRate({
       <EuiPanel hasShadow={false} hasBorder={false} paddingSize="s">
         <EuiFlexGroup alignItems="center">
           <EuiFlexItem grow={3}>
-            <EuiText>
-              <h5>
-                {i18n.translate('xpack.streams.streamDetailLifecycle.ingestionRatePanel', {
-                  defaultMessage: 'Ingestion rate',
-                })}
-              </h5>
-            </EuiText>
+            <EuiFlexGroup gutterSize="xs" alignItems="center">
+              <EuiText>
+                <h5>
+                  {i18n.translate('xpack.streams.streamDetailLifecycle.ingestionRatePanel', {
+                    defaultMessage: 'Ingestion rate',
+                  })}
+                </h5>
+              </EuiText>
+              <EuiIconTip
+                content={i18n.translate(
+                  'xpack.streams.streamDetailLifecycle.ingestionRatePanelTooltip',
+                  {
+                    defaultMessage:
+                      'Approximate average. Interval adjusts dynamically based on the time range. Calculated using the average document size in the stream, multiplied with the number of documents in the time bucket.',
+                  }
+                )}
+                position="right"
+              />
+            </EuiFlexGroup>
           </EuiFlexItem>
 
           <EuiFlexItem grow={false}>
@@ -100,7 +105,7 @@ export function IngestionRate({
         direction="column"
         gutterSize="xs"
       >
-        {!definition ? null : isIlmLifecycle(definition?.effective_lifecycle) ? (
+        {isIlmLifecycle(definition.effective_lifecycle) ? (
           <ChartBarSeries
             definition={definition}
             stats={stats}
@@ -126,7 +131,7 @@ function ChartAreaSeries({
   timeRange,
   isLoadingStats,
 }: {
-  definition?: IngestStreamGetResponse;
+  definition: IngestStreamGetResponse;
   stats?: DataStreamStats;
   timeRange: TimeRange;
   isLoadingStats: boolean;
@@ -136,16 +141,16 @@ function ChartAreaSeries({
     isLoading: isLoadingIngestionRate,
     error: ingestionRateError,
   } = useIngestionRate({ definition, stats, timeRange });
-  const { colorMode } = useEuiTheme();
+  const chartBaseTheme = useElasticChartsTheme();
 
   return ingestionRateError ? (
     'Failed to load ingestion rate'
-  ) : !definition || isLoadingStats || isLoadingIngestionRate || !ingestionRate ? (
+  ) : isLoadingStats || isLoadingIngestionRate || !ingestionRate ? (
     <EuiLoadingChart />
   ) : (
     <>
       <Chart size={{ height: 250 }}>
-        <Settings showLegend={false} baseTheme={colorMode === 'LIGHT' ? LIGHT_THEME : DARK_THEME} />
+        <Settings showLegend={false} baseTheme={chartBaseTheme} />
 
         <AreaSeries
           id="ingestionRate"
@@ -191,7 +196,7 @@ function ChartBarSeries({
   timeRange,
   isLoadingStats,
 }: {
-  definition?: IngestStreamGetResponse;
+  definition: IngestStreamGetResponse;
   stats?: DataStreamStats;
   timeRange: TimeRange;
   isLoadingStats: boolean;
@@ -202,16 +207,16 @@ function ChartBarSeries({
     error: ingestionRateError,
   } = useIngestionRatePerTier({ definition, stats, timeRange });
   const { ilmPhases } = useIlmPhasesColorAndDescription();
-  const { colorMode } = useEuiTheme();
+  const chartBaseTheme = useElasticChartsTheme();
 
   return ingestionRateError ? (
     'Failed to load ingestion rate'
-  ) : !definition || isLoadingStats || isLoadingIngestionRate || !ingestionRate ? (
+  ) : isLoadingStats || isLoadingIngestionRate || !ingestionRate ? (
     <EuiLoadingChart />
   ) : (
     <>
       <Chart size={{ height: 250 }}>
-        <Settings showLegend={false} baseTheme={colorMode === 'LIGHT' ? LIGHT_THEME : DARK_THEME} />
+        <Settings showLegend={false} baseTheme={chartBaseTheme} />
         {Object.entries(ingestionRate.buckets).map(([tier, buckets]) => (
           <BarSeries
             id={`ingestionRate-${tier}`}

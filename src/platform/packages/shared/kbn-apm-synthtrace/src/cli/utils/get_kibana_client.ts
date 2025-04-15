@@ -7,12 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ApmSynthtraceKibanaClient } from '../../lib/apm/client/apm_synthtrace_kibana_client';
+import { KibanaClient } from '../../lib/shared/base_kibana_client';
 import { Logger } from '../../lib/utils/create_logger';
 
 export function getKibanaClient({ target, logger }: { target: string; logger: Logger }) {
-  const kibanaClient = new ApmSynthtraceKibanaClient({
-    logger,
+  const kibanaClient = new KibanaClient({
     target,
   });
 

@@ -20,8 +20,8 @@ test.describe(
       await customLogs.goto();
     });
 
-    test.afterEach(async ({ fleetApi }) => {
-      await fleetApi.integration.delete(integrationName);
+    test.afterEach(async ({ apiServices }) => {
+      await apiServices.fleet.integration.delete(integrationName);
     });
 
     test('should be installed, show API Key and correct instructions', async ({

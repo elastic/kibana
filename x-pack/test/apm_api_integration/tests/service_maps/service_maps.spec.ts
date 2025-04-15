@@ -8,6 +8,7 @@
 import expect from '@kbn/expect';
 import { first, isEmpty, last, orderBy, uniq } from 'lodash';
 import { ServiceConnectionNode } from '@kbn/apm-plugin/common/service_map';
+import { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 import { ApmApiError, SupertestReturnType } from '../../common/apm_api_supertest';
 import archives_metadata from '../../common/fixtures/es_archiver/archives_metadata';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
@@ -23,6 +24,14 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
 
   const archiveName = 'apm_8.0.0';
   const metadata = archives_metadata[archiveName];
+
+  const getElements = ({ body }: { body: APIReturnType<'GET /internal/apm/service-map'> }) => {
+    if ('elements' in body) {
+      return body.elements;
+    }
+
+    return [];
+  };
 
   registry.when('Service Map with a basic license', { config: 'basic', archives: [] }, () => {
     describe('basic license', function () {
@@ -70,11 +79,11 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
 
       it('returns service map elements', () => {
         expect(response.status).to.be(200);
-        expect(response.body.elements.length).to.be.greaterThan(0);
+        expect(getElements(response).length).to.be.greaterThan(0);
       });
 
       it('returns the correct data', () => {
-        const elements: Array<{ data: Record<string, any> }> = response.body.elements;
+        const elements: Array<{ data: Record<string, any> }> = getElements(response);
         const serviceNames = uniq(
           elements
             .filter((element) => element.data['service.name'] !== undefined)
@@ -125,7 +134,7 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
           });
           it('returns service map elements with anomaly stats', () => {
             expect(response.status).to.be(200);
-            const dataWithAnomalies = response.body.elements.filter(
+            const dataWithAnomalies = getElements(response).filter(
               (el) => !isEmpty((el.data as ServiceConnectionNode).serviceAnomalyStats)
             );
             expect(dataWithAnomalies).not.to.be.empty();
@@ -136,7 +145,7 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
             });
           });
           it('returns the correct anomaly stats', () => {
-            const dataWithAnomalies = response.body.elements.filter(
+            const dataWithAnomalies = getElements(response).filter(
               (el) => !isEmpty((el.data as ServiceConnectionNode).serviceAnomalyStats)
             );
             expect(dataWithAnomalies).not.to.be.empty();
@@ -210,7 +219,7 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
           });
           it('returns service map elements without anomaly stats', () => {
             expect(response.status).to.be(200);
-            const dataWithAnomalies = response.body.elements.filter(
+            const dataWithAnomalies = getElements(response).filter(
               (el) => !isEmpty((el.data as ServiceConnectionNode).serviceAnomalyStats)
             );
             expect(dataWithAnomalies).to.be.empty();
@@ -239,7 +248,7 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
           });
 
           it('returns some elements', () => {
-            expect(response.body.elements.length).to.be.greaterThan(1);
+            expect(getElements(response).length).to.be.greaterThan(1);
           });
         });
       });

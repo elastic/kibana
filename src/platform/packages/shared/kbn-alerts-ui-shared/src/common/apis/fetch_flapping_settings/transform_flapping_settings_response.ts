@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { AsApiContract } from '@kbn/actions-types';
-import { RulesSettingsFlapping } from '@kbn/alerting-types';
+import type { AsApiContract } from '@kbn/actions-types';
+import type { RulesSettingsFlapping } from '@kbn/alerting-types';
 
 export const transformFlappingSettingsResponse = ({
   look_back_window: lookBackWindow,

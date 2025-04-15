@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { HttpSetup } from '@kbn/core/public';
-import { AsApiContract } from '@kbn/actions-plugin/common';
+import type { HttpSetup } from '@kbn/core/public';
+import type { AsApiContract } from '@kbn/actions-plugin/common';
 import { BASE_ALERTING_API_PATH, INTERNAL_BASE_ALERTING_API_PATH } from '../../common';
 import type { Rule, RuleType } from '../../common';
-import { transformRule, transformRuleType, ApiRule } from '../lib/common_transformations';
+import type { ApiRule } from '../lib/common_transformations';
+import { transformRule, transformRuleType } from '../lib/common_transformations';
 
 export async function loadRuleTypes({ http }: { http: HttpSetup }): Promise<RuleType[]> {
   const res = await http.get<Array<AsApiContract<RuleType>>>(

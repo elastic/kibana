@@ -16,16 +16,12 @@ export type DataStreamStats = DataStreamStatServiceResponse['dataStreamsStats'][
   bytesPerDay: number;
 };
 
-export const useDataStreamStats = ({ definition }: { definition?: IngestStreamGetResponse }) => {
+export const useDataStreamStats = ({ definition }: { definition: IngestStreamGetResponse }) => {
   const {
     services: { dataStreamsClient },
   } = useKibana();
 
   const statsFetch = useStreamsAppFetch(async () => {
-    if (!definition) {
-      return;
-    }
-
     const client = await dataStreamsClient;
     const {
       dataStreamsStats: [dsStats],

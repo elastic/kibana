@@ -9,7 +9,7 @@ import { isNativeFunctionCallingSupportedMock } from './inference_adapter.test.m
 import OpenAI from 'openai';
 import { v4 } from 'uuid';
 import { PassThrough } from 'stream';
-import { lastValueFrom, Subject, toArray, filter } from 'rxjs';
+import { lastValueFrom, toArray, filter, noop, of } from 'rxjs';
 import { loggerMock } from '@kbn/logging-mocks';
 import {
   ToolChoiceType,
@@ -89,7 +89,18 @@ describe('inferenceAdapter', () => {
     });
 
     it('emits chunk events', async () => {
-      const source$ = new Subject<Record<string, any>>();
+      const source$ = of(
+        createOpenAIChunk({
+          delta: {
+            content: 'First',
+          },
+        }),
+        createOpenAIChunk({
+          delta: {
+            content: ', second',
+          },
+        })
+      );
 
       executorMock.invoke.mockImplementation(async () => {
         return {
@@ -108,24 +119,6 @@ describe('inferenceAdapter', () => {
           },
         ],
       });
-
-      source$.next(
-        createOpenAIChunk({
-          delta: {
-            content: 'First',
-          },
-        })
-      );
-
-      source$.next(
-        createOpenAIChunk({
-          delta: {
-            content: ', second',
-          },
-        })
-      );
-
-      source$.complete();
 
       const allChunks = await lastValueFrom(
         response$.pipe(filter(isChatCompletionChunkEvent), toArray())
@@ -146,7 +139,18 @@ describe('inferenceAdapter', () => {
     });
 
     it('emits token count event when provided by the response', async () => {
-      const source$ = new Subject<Record<string, any>>();
+      const source$ = of(
+        createOpenAIChunk({
+          delta: {
+            content: 'First',
+          },
+          usage: {
+            completion_tokens: 5,
+            prompt_tokens: 10,
+            total_tokens: 15,
+          },
+        })
+      );
 
       executorMock.invoke.mockImplementation(async () => {
         return {
@@ -165,21 +169,6 @@ describe('inferenceAdapter', () => {
           },
         ],
       });
-
-      source$.next(
-        createOpenAIChunk({
-          delta: {
-            content: 'First',
-          },
-          usage: {
-            completion_tokens: 5,
-            prompt_tokens: 10,
-            total_tokens: 15,
-          },
-        })
-      );
-
-      source$.complete();
 
       const tokenChunks = await lastValueFrom(
         response$.pipe(filter(isChatCompletionTokenCountEvent), toArray())
@@ -198,7 +187,13 @@ describe('inferenceAdapter', () => {
     });
 
     it('emits token count event when not provided by the response', async () => {
-      const source$ = new Subject<Record<string, any>>();
+      const source$ = of(
+        createOpenAIChunk({
+          delta: {
+            content: 'First',
+          },
+        })
+      );
 
       executorMock.invoke.mockImplementation(async () => {
         return {
@@ -218,16 +213,6 @@ describe('inferenceAdapter', () => {
         ],
       });
 
-      source$.next(
-        createOpenAIChunk({
-          delta: {
-            content: 'First',
-          },
-        })
-      );
-
-      source$.complete();
-
       const tokenChunks = await lastValueFrom(
         response$.pipe(filter(isChatCompletionTokenCountEvent), toArray())
       );
@@ -245,12 +230,14 @@ describe('inferenceAdapter', () => {
     });
 
     it('propagates the temperature parameter', () => {
-      inferenceAdapter.chatComplete({
-        logger,
-        executor: executorMock,
-        messages: [{ role: MessageRole.User, content: 'question' }],
-        temperature: 0.4,
-      });
+      inferenceAdapter
+        .chatComplete({
+          logger,
+          executor: executorMock,
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          temperature: 0.4,
+        })
+        .subscribe(noop);
 
       expect(executorMock.invoke).toHaveBeenCalledTimes(1);
       expect(executorMock.invoke).toHaveBeenCalledWith({
@@ -266,12 +253,14 @@ describe('inferenceAdapter', () => {
     it('propagates the abort signal when provided', () => {
       const abortController = new AbortController();
 
-      inferenceAdapter.chatComplete({
-        logger,
-        executor: executorMock,
-        messages: [{ role: MessageRole.User, content: 'question' }],
-        abortSignal: abortController.signal,
-      });
+      inferenceAdapter
+        .chatComplete({
+          logger,
+          executor: executorMock,
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          abortSignal: abortController.signal,
+        })
+        .subscribe(noop);
 
       expect(executorMock.invoke).toHaveBeenCalledTimes(1);
       expect(executorMock.invoke).toHaveBeenCalledWith({
@@ -285,16 +274,18 @@ describe('inferenceAdapter', () => {
     it('uses the right value for functionCalling=auto', () => {
       isNativeFunctionCallingSupportedMock.mockReturnValue(false);
 
-      inferenceAdapter.chatComplete({
-        logger,
-        executor: executorMock,
-        messages: [{ role: MessageRole.User, content: 'question' }],
-        tools: {
-          foo: { description: 'my tool' },
-        },
-        toolChoice: ToolChoiceType.auto,
-        functionCalling: 'auto',
-      });
+      inferenceAdapter
+        .chatComplete({
+          logger,
+          executor: executorMock,
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          tools: {
+            foo: { description: 'my tool' },
+          },
+          toolChoice: ToolChoiceType.auto,
+          functionCalling: 'auto',
+        })
+        .subscribe(noop);
 
       expect(executorMock.invoke).toHaveBeenCalledTimes(1);
       expect(executorMock.invoke).toHaveBeenCalledWith({
@@ -308,12 +299,14 @@ describe('inferenceAdapter', () => {
     });
 
     it('propagates the modelName parameter', () => {
-      inferenceAdapter.chatComplete({
-        logger,
-        executor: executorMock,
-        messages: [{ role: MessageRole.User, content: 'question' }],
-        modelName: 'gpt-4o',
-      });
+      inferenceAdapter
+        .chatComplete({
+          logger,
+          executor: executorMock,
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          modelName: 'gpt-4o',
+        })
+        .subscribe(noop);
 
       expect(executorMock.invoke).toHaveBeenCalledTimes(1);
       expect(executorMock.invoke).toHaveBeenCalledWith({

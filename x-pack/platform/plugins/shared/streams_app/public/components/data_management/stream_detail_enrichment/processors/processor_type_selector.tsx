@@ -14,9 +14,10 @@ import { ProcessorType } from '@kbn/streams-schema';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { getDefaultFormStateByType } from '../utils';
 import { ProcessorFormState } from '../types';
+import { configDrivenProcessors } from './config_driven';
 
 interface TAvailableProcessor {
-  value: ProcessorType;
+  type: ProcessorType;
   inputDisplay: string;
   getDocUrl: (esDocUrl: string) => React.ReactNode;
 }
@@ -68,8 +69,18 @@ export const ProcessorTypeSelector = ({
 };
 
 const availableProcessors: TAvailableProcessors = {
+  date: {
+    type: 'date',
+    inputDisplay: 'Date',
+    getDocUrl: () => (
+      <FormattedMessage
+        id="xpack.streams.streamDetailView.managementTab.enrichment.processor.dateHelpText"
+        defaultMessage="Converts a date to a document timestamp."
+      />
+    ),
+  },
   dissect: {
-    value: 'dissect',
+    type: 'dissect',
     inputDisplay: 'Dissect',
     getDocUrl: (esDocUrl: string) => (
       <FormattedMessage
@@ -93,7 +104,7 @@ const availableProcessors: TAvailableProcessors = {
     ),
   },
   grok: {
-    value: 'grok',
+    type: 'grok',
     inputDisplay: 'Grok',
     getDocUrl: (esDocUrl: string) => (
       <FormattedMessage
@@ -116,11 +127,12 @@ const availableProcessors: TAvailableProcessors = {
       />
     ),
   },
+  ...configDrivenProcessors,
 };
 
 const getProcessorDescription = (esDocUrl: string) => (type: ProcessorType) =>
   availableProcessors[type].getDocUrl(esDocUrl);
 
 const processorTypeSelectorOptions = Object.values(availableProcessors).map(
-  ({ value, inputDisplay }) => ({ value, inputDisplay })
+  ({ type, inputDisplay }) => ({ value: type, inputDisplay })
 );

@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { RuleCreationValidConsumer } from '@kbn/rule-data-utils';
-import { RuleTypeWithDescription } from '../common/types';
+import type { RuleCreationValidConsumer } from '@kbn/rule-data-utils';
+import type { RuleTypeWithDescription } from '../common/types';
 
 export const getAuthorizedConsumers = ({
   ruleType,

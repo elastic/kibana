@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { TypeOf } from '@kbn/config-schema';
+import type { TypeOf } from '@kbn/config-schema';
 import type { ConfigProperties } from '@kbn/inference-endpoint-ui-common';
-import {
+import type {
   ConfigSchema,
   SecretsSchema,
   StreamingResponseSchema,

@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { AsApiContract, RewriteRequestCase } from '@kbn/actions-types';
-import { RuleExecutionStatus, RuleLastRun } from '@kbn/alerting-types';
+import type { AsApiContract, RewriteRequestCase } from '@kbn/actions-types';
+import type { RuleExecutionStatus, RuleLastRun } from '@kbn/alerting-types';
 import { transformAction } from '@kbn/alerts-ui-shared/src/common/transformations';
 import type { ResolvedRule, Rule, RuleUiAction } from '..';
 

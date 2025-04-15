@@ -122,7 +122,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.discover.clickNewSearchButton();
         await PageObjects.discover.saveSearch('my search - no data - expectReportCanBeCreated');
 
-        const res = await getReport();
+        const res = await getReport({ timeout: 180_000 }); // 3 minutes
         expect(res.text).to.be(`\n`);
       });
 

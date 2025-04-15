@@ -9,8 +9,7 @@ import React from 'react';
 import userEvent from '@testing-library/user-event';
 import { waitFor, screen } from '@testing-library/react';
 
-import type { AppMockRenderer } from '../../../common/mock';
-import { createAppMockRenderer } from '../../../common/mock';
+import { renderWithTestingProviders } from '../../../common/mock';
 import { basicCase, tags } from '../../../containers/mock';
 import { useGetTags } from '../../../containers/use_get_tags';
 import { EditTagsFlyout } from './edit_tags_flyout';
@@ -20,8 +19,6 @@ jest.mock('../../../containers/use_get_tags');
 const useGetTagsMock = useGetTags as jest.Mock;
 
 describe('EditTagsFlyout', () => {
-  let appMock: AppMockRenderer;
-
   /**
    * Case one has the following tags: coke, pepsi, one
    * Case two has the following tags: one, three
@@ -37,11 +34,10 @@ describe('EditTagsFlyout', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    appMock = createAppMockRenderer();
   });
 
   it('renders correctly', async () => {
-    appMock.render(<EditTagsFlyout {...props} />);
+    renderWithTestingProviders(<EditTagsFlyout {...props} />);
 
     expect(await screen.findByTestId('cases-edit-tags-flyout')).toBeInTheDocument();
     expect(await screen.findByTestId('cases-edit-tags-flyout-title')).toBeInTheDocument();
@@ -50,7 +46,7 @@ describe('EditTagsFlyout', () => {
   });
 
   it('calls onClose when pressing the cancel button', async () => {
-    appMock.render(<EditTagsFlyout {...props} />);
+    renderWithTestingProviders(<EditTagsFlyout {...props} />);
 
     await userEvent.click(await screen.findByTestId('cases-edit-tags-flyout-cancel'));
 
@@ -60,7 +56,7 @@ describe('EditTagsFlyout', () => {
   });
 
   it('calls onSaveTags when pressing the save selection button', async () => {
-    appMock.render(<EditTagsFlyout {...props} />);
+    renderWithTestingProviders(<EditTagsFlyout {...props} />);
 
     expect(await screen.findByText('coke')).toBeInTheDocument();
 
@@ -76,13 +72,15 @@ describe('EditTagsFlyout', () => {
   });
 
   it('shows the case title when selecting one case', async () => {
-    appMock.render(<EditTagsFlyout {...props} />);
+    renderWithTestingProviders(<EditTagsFlyout {...props} />);
 
     expect(await screen.findByText(basicCase.title)).toBeInTheDocument();
   });
 
   it('shows the number of total selected cases in the title  when selecting multiple cases', async () => {
-    appMock.render(<EditTagsFlyout {...props} selectedCases={[basicCase, basicCase]} />);
+    renderWithTestingProviders(
+      <EditTagsFlyout {...props} selectedCases={[basicCase, basicCase]} />
+    );
 
     expect(await screen.findByText('Selected cases: 2')).toBeInTheDocument();
   });

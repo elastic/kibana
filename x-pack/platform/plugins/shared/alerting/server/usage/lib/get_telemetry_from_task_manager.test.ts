@@ -7,7 +7,8 @@
 
 import { errors } from '@elastic/elasticsearch';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
-import { MockedLogger, loggerMock } from '@kbn/logging-mocks';
+import type { MockedLogger } from '@kbn/logging-mocks';
+import { loggerMock } from '@kbn/logging-mocks';
 import {
   getFailedAndUnrecognizedTasksPerDay,
   parseBucket,

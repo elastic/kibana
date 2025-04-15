@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { ComponentType } from 'react';
+import type { ComponentType } from 'react';
+import type React from 'react';
 import type { Moment } from 'moment';
 import type { EuiSuperSelectOption } from '@elastic/eui';
 import type { PublicMethodsOf } from '@kbn/utility-types';
@@ -15,18 +16,17 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { RuleCreationValidConsumer } from '@kbn/rule-data-utils';
-import { HttpSetup } from '@kbn/core/public';
-import { KueryNode } from '@kbn/es-query';
+import type { HttpSetup } from '@kbn/core/public';
+import type { KueryNode } from '@kbn/es-query';
+import type { ActionType, AsApiContract } from '@kbn/actions-plugin/common';
 import {
   ALERT_HISTORY_PREFIX,
-  ActionType,
   AlertHistoryDefaultIndexName,
   AlertHistoryDocumentTemplate,
   AlertHistoryEsIndexConnectorId,
-  AsApiContract,
 } from '@kbn/actions-plugin/common';
-import { ActionsPublicPluginSetup } from '@kbn/actions-plugin/public';
-import {
+import type { ActionsPublicPluginSetup } from '@kbn/actions-plugin/public';
+import type {
   ActionGroup,
   AlertStatus,
   SanitizedRule as AlertingSanitizedRule,
@@ -44,13 +44,13 @@ import {
 } from '@kbn/alerting-plugin/common';
 import type { BulkOperationError } from '@kbn/alerting-plugin/server';
 import type { RuleType, RuleTypeIndex } from '@kbn/triggers-actions-ui-types';
-import {
+import type {
   ValidationResult,
   UserConfiguredActionConnector,
   ActionConnector,
   ActionTypeRegistryContract,
 } from '@kbn/alerts-ui-shared/src/common/types';
-import { TypeRegistry } from '@kbn/alerts-ui-shared/src/common/type_registry';
+import type { TypeRegistry } from '@kbn/alerts-ui-shared/src/common/type_registry';
 import type { ComponentOpts as RuleStatusDropdownProps } from './application/sections/rules_list/components/rule_status_dropdown';
 import type { RuleTagFilterProps } from './application/sections/rules_list/components/rule_tag_filter';
 import type { RuleStatusFilterProps } from './application/sections/rules_list/components/rule_status_filter';
@@ -67,7 +67,7 @@ import type { GlobalRuleEventLogListProps } from './application/sections/rule_de
 import type { AlertSummaryTimeRange } from './application/sections/alert_summary_widget/types';
 import type { CreateConnectorFlyoutProps } from './application/sections/action_connector_form/create_connector_flyout';
 import type { EditConnectorFlyoutProps } from './application/sections/action_connector_form/edit_connector_flyout';
-import { RulesListVisibleColumns } from './application/sections/rules_list/components/rules_list_column_selector';
+import type { RulesListVisibleColumns } from './application/sections/rules_list/components/rules_list_column_selector';
 import type { RulesListNotifyBadgePropsWithApi } from './application/sections/rules_list/components/notify_badge';
 
 export type {

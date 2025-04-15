@@ -6,13 +6,8 @@
  */
 
 import { getRulesSchemaMock } from '../../../../../../common/api/detection_engine/model/rule_schema/rule_response_schema.mock';
-import type { PrebuiltRulesCustomizationStatus } from '../../../../../../common/detection_engine/prebuilt_rules/prebuilt_rule_customization_status';
 import { getPrebuiltRuleMock } from '../../../prebuilt_rules/mocks';
 import { calculateRuleSourceForImport } from './calculate_rule_source_for_import';
-
-const ruleCustomizationStatus: PrebuiltRulesCustomizationStatus = {
-  isRulesCustomizationEnabled: true,
-};
 
 describe('calculateRuleSourceForImport', () => {
   it('calculates as internal if no asset is found', () => {
@@ -21,7 +16,6 @@ describe('calculateRuleSourceForImport', () => {
       currentRule: undefined,
       prebuiltRuleAssetsByRuleId: {},
       isKnownPrebuiltRule: false,
-      ruleCustomizationStatus,
     });
 
     expect(result).toEqual({
@@ -41,7 +35,6 @@ describe('calculateRuleSourceForImport', () => {
       currentRule: undefined,
       prebuiltRuleAssetsByRuleId: {},
       isKnownPrebuiltRule: true,
-      ruleCustomizationStatus,
     });
 
     expect(result).toEqual({
@@ -62,7 +55,6 @@ describe('calculateRuleSourceForImport', () => {
       currentRule: rule,
       prebuiltRuleAssetsByRuleId: {},
       isKnownPrebuiltRule: true,
-      ruleCustomizationStatus,
     });
 
     expect(result).toEqual({
@@ -86,7 +78,6 @@ describe('calculateRuleSourceForImport', () => {
       },
       prebuiltRuleAssetsByRuleId: {},
       isKnownPrebuiltRule: true,
-      ruleCustomizationStatus,
     });
 
     expect(result).toEqual({
@@ -108,7 +99,6 @@ describe('calculateRuleSourceForImport', () => {
       currentRule: undefined,
       prebuiltRuleAssetsByRuleId,
       isKnownPrebuiltRule: true,
-      ruleCustomizationStatus,
     });
 
     expect(result).toEqual({
@@ -130,7 +120,6 @@ describe('calculateRuleSourceForImport', () => {
       currentRule: undefined,
       prebuiltRuleAssetsByRuleId,
       isKnownPrebuiltRule: true,
-      ruleCustomizationStatus,
     });
 
     expect(result).toEqual({

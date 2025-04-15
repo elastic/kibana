@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { HttpSetup } from '@kbn/core/public';
+import type { HttpStart } from '@kbn/core-http-browser';
 import { BASE_ALERTING_API_PATH } from '../constants';
 
 export interface MuteAlertInstanceParams {
   id: string;
   instanceId: string;
-  http: HttpSetup;
+  http: HttpStart;
 }
 
 export const muteAlertInstance = ({ id, instanceId, http }: MuteAlertInstanceParams) => {

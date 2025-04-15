@@ -8,6 +8,7 @@
 import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { Document } from '@langchain/core/documents';
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 
@@ -24,6 +25,7 @@ export interface SearchPlaygroundPluginSetupDependencies {
 
 export interface SearchPlaygroundPluginStartDependencies {
   actions: ActionsPluginStartContract;
+  inference: InferenceServerStart;
   cloud?: CloudStart;
 }
 

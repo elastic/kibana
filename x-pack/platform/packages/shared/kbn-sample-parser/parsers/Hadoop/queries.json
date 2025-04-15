@@ -1,0 +1,308 @@
+{
+  "queries": [
+    {
+      "id": "failures_on_node",
+      "title": "Failures on node MININT",
+      "description": "Finds log messages indicating failures on node MININT.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "failures on node MININT",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "added_attempt_failed_maps",
+      "title": "Added attempt to list of failed maps",
+      "description": "Finds log messages indicating an attempt was added to the list of failed maps.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "Added attempt to list of failed maps",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "taskattempt_fail_container_cleanup_to_fail_task_cleanup",
+      "title": "TaskAttempt Transitioned from FAIL_CONTAINER_CLEANUP to FAIL_TASK_CLEANUP",
+      "description": "Finds log messages indicating a TaskAttempt transitioned from FAIL_CONTAINER_CLEANUP to FAIL_TASK_CLEANUP.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "TaskAttempt Transitioned from FAIL_CONTAINER_CLEANUP to FAIL_TASK_CLEANUP",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "taskattempt_fail_task_cleanup_to_failed",
+      "title": "TaskAttempt Transitioned from FAIL_TASK_CLEANUP to FAILED",
+      "description": "Finds log messages indicating a TaskAttempt transitioned from FAIL_TASK_CLEANUP to FAILED.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "TaskAttempt Transitioned from FAIL_TASK_CLEANUP to FAILED",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "taskattempt_running_to_fail_container_cleanup",
+      "title": "TaskAttempt Transitioned from RUNNING to FAIL_CONTAINER_CLEANUP",
+      "description": "Finds log messages indicating a TaskAttempt transitioned from RUNNING to FAIL_CONTAINER_CLEANUP.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "TaskAttempt Transitioned from RUNNING to FAIL_CONTAINER_CLEANUP",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "datastreamer_exception",
+      "title": "DataStreamer Exception",
+      "description": "Finds log messages indicating a DataStreamer Exception.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "DataStreamer Exception",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "dfsoutputstream_responseprocessor_exception",
+      "title": "DFSOutputStream ResponseProcessor exception for block",
+      "description": "Finds log messages indicating a DFSOutputStream ResponseProcessor exception for a block.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "DFSOutputStream ResponseProcessor exception for block",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "diagnostics_report_no_route_to_host",
+      "title": "Diagnostics report from attempt: No Route to Host",
+      "description": "Finds log messages indicating a diagnostics report from an attempt with a No Route to Host error.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "Diagnostics report from attempt Error java.net.NoRouteToHostException No Route to Host",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "error_contacting_rm",
+      "title": "ERROR IN CONTACTING RM",
+      "description": "Finds log messages indicating an error in contacting the Resource Manager (RM).",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "ERROR IN CONTACTING RM",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "error_recovery_bad_datanode",
+      "title": "Error Recovery for block in pipeline: bad datanode",
+      "description": "Finds log messages indicating an error recovery for a block in the pipeline due to a bad datanode.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "Error Recovery for block in pipeline bad datanode",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "error_writing_history_event",
+      "title": "Error writing History Event",
+      "description": "Finds log messages indicating an error writing a History Event.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "Error writing History Event",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "failed_to_renew_lease",
+      "title": "Failed to renew lease for DFSClient_NONMAPREDUCE",
+      "description": "Finds log messages indicating a failure to renew a lease for DFSClient_NONMAPREDUCE.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "Failed to renew lease for DFSClient_NONMAPREDUCE",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "killing_attempt",
+      "title": "KILLING attempt",
+      "description": "Finds log messages indicating an attempt is being killed.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "KILLING attempt",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "task_cleanup_failed",
+      "title": "Task cleanup failed for attempt",
+      "description": "Finds log messages indicating a task cleanup failed for an attempt.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "Task cleanup failed for attempt",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "task_exited_no_route_to_host",
+      "title": "Task attempt exited: No Route to Host",
+      "description": "Finds log messages indicating a task attempt exited due to a No Route to Host error.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "Task attempt exited java.net.NoRouteToHostException No Route to Host",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "thread_threw_exception",
+      "title": "Thread threw an Exception",
+      "description": "Finds log messages indicating a thread threw an exception.",
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "match": {
+                "message": {
+                  "query": "Thread Thread threw an Exception",
+                  "operator": "AND"
+                }
+              }
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

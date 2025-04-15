@@ -22,7 +22,8 @@
       "discover",
       "share",
       "fleet",
-      "customIntegrations"
+      "customIntegrations",
+      "apm"
     ],
     "optionalPlugins": [
       "cloud",

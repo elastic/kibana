@@ -19,7 +19,7 @@ export const useWiredStreams = () => {
   } = useKibana();
 
   const result = useStreamsAppFetch(
-    async ({ signal }) => streamsRepositoryClient.fetch('GET /api/streams', { signal }),
+    async ({ signal }) => streamsRepositoryClient.fetch('GET /api/streams 2023-10-31', { signal }),
     [streamsRepositoryClient]
   );
 

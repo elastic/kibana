@@ -7,7 +7,7 @@
 
 import { sha256 } from 'js-sha256';
 import { i18n } from '@kbn/i18n';
-import { CoreSetup } from '@kbn/core/server';
+import type { CoreSetup } from '@kbn/core/server';
 import { getEcsGroups } from '@kbn/alerting-rule-utils';
 import { isGroupAggregation, UngroupedGroupId } from '@kbn/triggers-actions-ui-plugin/common';
 import {
@@ -18,15 +18,12 @@ import {
 } from '@kbn/rule-data-utils';
 
 import { AlertsClientError } from '@kbn/alerting-plugin/server';
-import { EsQueryRuleParams } from '@kbn/response-ops-rule-params/es_query';
+import type { EsQueryRuleParams } from '@kbn/response-ops-rule-params/es_query';
 
 import { ComparatorFns } from '@kbn/response-ops-rule-params/common';
-import {
-  addMessages,
-  EsQueryRuleActionContext,
-  getContextConditionsDescription,
-} from './action_context';
-import {
+import type { EsQueryRuleActionContext } from './action_context';
+import { addMessages, getContextConditionsDescription } from './action_context';
+import type {
   ExecutorOptions,
   OnlyEsQueryRuleParams,
   OnlySearchSourceRuleParams,
@@ -57,8 +54,7 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
     throw new AlertsClientError();
   }
   const currentTimestamp = new Date().toISOString();
-  const publicBaseUrl = core.http.basePath.publicBaseUrl ?? '';
-  const spacePrefix = spaceId !== 'default' ? `/s/${spaceId}` : '';
+  const spacePrefix = spaceId !== 'default' ? spaceId : '';
   const alertLimit = alertsClient.getAlertLimitValue();
   const compareFn = ComparatorFns.get(params.thresholdComparator);
   if (compareFn == null) {
@@ -98,7 +94,6 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
         alertLimit,
         params: params as OnlyEsqlQueryRuleParams,
         spacePrefix,
-        publicBaseUrl,
         services: {
           share,
           scopedClusterClient,
@@ -113,9 +108,9 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
         alertLimit,
         params: params as OnlyEsQueryRuleParams,
         timestamp: latestTimestamp,
-        publicBaseUrl,
         spacePrefix,
         services: {
+          share,
           scopedClusterClient,
           logger,
           ruleResultService,
@@ -186,6 +181,7 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
     if (!isGroupAgg) {
       // update the timestamp based on the current search results
       const firstValidTimefieldSort = getValidTimefieldSort(
+        // @ts-expect-error `sort` now depends on `FieldValue` that is too broad
         result.hits.find((hit) => getValidTimefieldSort(hit.sort))?.sort
       );
       if (firstValidTimefieldSort) {

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { SavedObjectAttributes } from '@kbn/core-saved-objects-server';
-import { SavedObjectUnsanitizedDoc } from '@kbn/core-saved-objects-server';
-import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
-import { RawRule, RawRuleAction } from '../../../types';
+import type { SavedObjectAttributes } from '@kbn/core-saved-objects-server';
+import type { SavedObjectUnsanitizedDoc } from '@kbn/core-saved-objects-server';
+import type { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
+import type { RawRule, RawRuleAction } from '../../../types';
 import { createEsoMigration, pipeMigrations } from '../utils';
 
 const SUPPORT_INCIDENTS_ACTION_TYPES = ['.servicenow', '.jira', '.resilient'];

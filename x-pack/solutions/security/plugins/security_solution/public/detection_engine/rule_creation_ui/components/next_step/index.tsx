@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { EuiHorizontalRule, EuiFlexGroup, EuiFlexItem, EuiButton } from '@elastic/eui';
-import * as RuleI18n from '../../../../detections/pages/detection_engine/rules/translations';
+import * as RuleI18n from '../../../common/translations';
 
 interface NextStepProps {
   onClick: () => void;

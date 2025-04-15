@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 
 export function parseAndLogError(err: Error, errType: string, logger: Logger): string {
   const errorMessage = err && err.message ? err.message : err.toString();

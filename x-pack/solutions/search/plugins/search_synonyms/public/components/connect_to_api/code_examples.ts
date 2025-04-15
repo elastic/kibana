@@ -36,3 +36,40 @@ PUT my-index
     }
   }
 }`;
+
+export const getExistingIndexExampleCode = (rulesetId: string) => `
+POST my-index/_close
+
+PUT my-index/_settings
+{
+  "analysis": {
+    "analyzer": {
+      "my_analyzer": {
+        "tokenizer": "whitespace",
+        "filter": [
+          "synonyms_filter"
+        ]
+      }
+    },
+    "filter": {
+      "synonyms_filter": {
+        "type": "synonym",
+        "synonyms_set": "${rulesetId}",
+        "updateable": true
+      }
+    }
+  }
+}
+
+PUT my-index/_mapping
+{
+  "properties": {
+    "title": {
+      "type": "text",
+      "search_analyzer": "my_analyzer"
+    }
+  }
+}
+
+POST my-index/_open
+`;

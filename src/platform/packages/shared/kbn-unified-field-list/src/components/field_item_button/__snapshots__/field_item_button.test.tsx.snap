@@ -436,10 +436,33 @@ exports[`UnifiedFieldList FieldItemButton renders properly with a drag icon 1`] 
 `;
 
 exports[`UnifiedFieldList FieldItemButton renders properly with an action when deselected 1`] = `
-<div>
-  <div
-    class="kbnFieldButton unifiedFieldListItemButton unifiedFieldListItemButton--number unifiedFieldListItemButton--exists css-10h723i-field_button--FieldButton-field_item_button--removeEuiFocusRing-field_item_button--removeEuiFocusRing-field_item_button--passDownFocusRing-field_item_button--fieldButtonCss"
-  >
+<FieldButton
+  buttonProps={
+    Object {
+      "aria-label": "Preview bytes: number",
+    }
+  }
+  className="unifiedFieldListItemButton unifiedFieldListItemButton--number unifiedFieldListItemButton--exists"
+  dataTestSubj="field-bytes-showDetails"
+  fieldAction={
+    <EuiToolTip
+      content="Add \\"bytes\\" field"
+      delay="regular"
+      disableScreenReaderOutput={false}
+      display="inlineBlock"
+      position="top"
+    >
+      <EuiButtonIcon
+        aria-label="Add \\"bytes\\" field"
+        className="unifiedFieldListItemButton__action unifiedFieldListItemButton__action--always"
+        color="text"
+        data-test-subj="fieldToggle-bytes"
+        iconType="plusInCircle"
+        onClick={[Function]}
+      />
+    </EuiToolTip>
+  }
+  fieldIcon={
     <div
       class="kbn-resetFocusState kbnFieldButton__button css-ckz4vb-field_button--fieldButtonContentCss"
       data-test-subj="field-bytes-showDetails"
@@ -507,14 +530,21 @@ exports[`UnifiedFieldList FieldItemButton renders properly with an action when d
 `;
 
 exports[`UnifiedFieldList FieldItemButton renders properly with an action when selected 1`] = `
-<div>
-  <div
-    class="kbnFieldButton unifiedFieldListItemButton unifiedFieldListItemButton--number unifiedFieldListItemButton--exists css-10h723i-field_button--FieldButton-field_item_button--removeEuiFocusRing-field_item_button--removeEuiFocusRing-field_item_button--passDownFocusRing-field_item_button--fieldButtonCss"
-  >
-    <button
-      aria-label="Preview bytes: number"
-      class="kbn-resetFocusState kbnFieldButton__button css-ckz4vb-field_button--fieldButtonContentCss"
-      data-test-subj="field-bytes-showDetails"
+<FieldButton
+  buttonProps={
+    Object {
+      "aria-label": "Preview bytes: number",
+    }
+  }
+  className="unifiedFieldListItemButton unifiedFieldListItemButton--number unifiedFieldListItemButton--exists"
+  dataTestSubj="field-bytes-showDetails"
+  fieldAction={
+    <EuiToolTip
+      content="Remove \\"bytes\\" field"
+      delay="regular"
+      disableScreenReaderOutput={false}
+      display="inlineBlock"
+      position="top"
     >
       <span
         class="css-ptr1f1-field_button--fieldIconCss"

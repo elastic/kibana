@@ -66,7 +66,12 @@ const ThreatMatchRowWrapper: FC<ThreatMatchRowProps> = ({ data, scopeId }) => {
               const contextId = `threat-match-row-${scopeId}-${eventId}-${index}`;
               return (
                 <Fragment key={contextId}>
-                  <ThreatMatchRow contextId={contextId} data={indicator} eventId={eventId} />
+                  <ThreatMatchRow
+                    scopeId={scopeId}
+                    contextId={contextId}
+                    data={indicator}
+                    eventId={eventId}
+                  />
                   {index < indicators.length - 1 && <EuiHorizontalRule margin="s" />}
                 </Fragment>
               );

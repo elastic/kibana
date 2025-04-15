@@ -17,11 +17,10 @@ import {
   ALERT_STATUS,
   ALERT_INSTANCE_ID,
   TAGS,
-  ALERT_STATUS_ACTIVE,
 } from '@kbn/rule-data-utils';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
-export default ({ getService, getPageObject }: FtrProviderContext) => {
+export default ({ getService }: FtrProviderContext) => {
   describe('Observability alerts table configuration', function () {
     this.tags('includeFirefox');
 
@@ -56,6 +55,7 @@ export default ({ getService, getPageObject }: FtrProviderContext) => {
 
     it('renders the correct columns', async () => {
       await observability.alerts.common.navigateToTimeWithData();
+      await observability.alerts.common.waitForAlertTableToLoad();
       for (const colId of [
         ALERT_STATUS,
         ALERT_START,
@@ -73,12 +73,13 @@ export default ({ getService, getPageObject }: FtrProviderContext) => {
 
     it('renders the group selector', async () => {
       await observability.alerts.common.navigateToTimeWithData();
+      await observability.alerts.common.waitForAlertTableToLoad();
       expect(await testSubjects.exists('group-selector-dropdown')).to.be(true);
     });
 
     it('renders the correct alert actions', async () => {
       await observability.alerts.common.navigateToTimeWithData();
-      await observability.alerts.common.setAlertStatusFilter(ALERT_STATUS_ACTIVE);
+      await observability.alerts.common.waitForAlertTableToLoad();
       await testSubjects.click('alertsTableRowActionMore');
       await retry.waitFor('alert actions popover visible', () =>
         testSubjects.exists('alertsTableActionsMenu')
@@ -97,6 +98,7 @@ export default ({ getService, getPageObject }: FtrProviderContext) => {
 
     it('remembers column changes', async () => {
       await observability.alerts.common.navigateToTimeWithData();
+      await observability.alerts.common.waitForAlertTableToLoad();
       await dataGrid.clickHideColumn('kibana.alert.duration.us');
 
       await observability.alerts.common.navigateToTimeWithData();
@@ -109,6 +111,7 @@ export default ({ getService, getPageObject }: FtrProviderContext) => {
 
     it('remembers sorting changes', async () => {
       await observability.alerts.common.navigateToTimeWithData();
+      await observability.alerts.common.waitForAlertTableToLoad();
       await dataGrid.clickDocSortAsc('kibana.alert.start');
 
       await observability.alerts.common.navigateToTimeWithData();

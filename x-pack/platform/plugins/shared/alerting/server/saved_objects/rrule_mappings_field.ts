@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObjectsFieldMapping } from '@kbn/core/server';
+import type { SavedObjectsFieldMapping } from '@kbn/core/server';
 
 export const rRuleMappingsField: SavedObjectsFieldMapping = {
   type: 'nested',

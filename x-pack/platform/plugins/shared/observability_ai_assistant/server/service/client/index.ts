@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
-import { notFound } from '@hapi/boom';
+import { notFound, forbidden } from '@hapi/boom';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { CoreSetup, ElasticsearchClient, IUiSettingsClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
@@ -67,14 +67,12 @@ import { continueConversation } from './operators/continue_conversation';
 import { convertInferenceEventsToStreamingEvents } from './operators/convert_inference_events_to_streaming_events';
 import { extractMessages } from './operators/extract_messages';
 import { getGeneratedTitle } from './operators/get_generated_title';
-import {
-  reIndexKnowledgeBaseAndPopulateSemanticTextField,
-  scheduleKbSemanticTextMigrationTask,
-} from '../task_manager_definitions/register_kb_semantic_text_migration_task';
+import { populateMissingSemanticTextFieldMigration } from '../startup_migrations/populate_missing_semantic_text_field_migration';
 import { ObservabilityAIAssistantPluginStartDependencies } from '../../types';
 import { ObservabilityAIAssistantConfig } from '../../config';
 import { getElserModelId } from '../knowledge_base_service/get_elser_model_id';
 import { apmInstrumentation } from './operators/apm_instrumentation';
+import { reIndexKnowledgeBaseWithLock } from '../knowledge_base_service/reindex_knowledge_base';
 
 const MAX_FUNCTION_CALLS = 8;
 
@@ -140,7 +138,7 @@ export class ObservabilityAIAssistantClient {
       return false;
     }
 
-    return conversation.user.id
+    return conversation.user.id && user.id
       ? conversation.user.id === user.id
       : conversation.user.name === user.name;
   };
@@ -159,6 +157,10 @@ export class ObservabilityAIAssistantClient {
 
     if (!conversation) {
       throw notFound();
+    }
+
+    if (!this.isConversationOwnedByUser(conversation._source!)) {
+      throw forbidden('Deleting a conversation is only allowed for the owner of the conversation.');
     }
 
     await this.dependencies.esClient.asInternalUser.delete({
@@ -386,6 +388,7 @@ export class ObservabilityAIAssistantClient {
                       numeric_labels: {},
                       systemMessage,
                       messages: initialMessagesWithAddedMessages,
+                      archived: false,
                     })
                   ).pipe(
                     map((conversationCreated): ConversationCreateEvent => {
@@ -408,26 +411,24 @@ export class ObservabilityAIAssistantClient {
             return throwError(() => error);
           }),
           tap((event) => {
-            if (this.dependencies.logger.isLevelEnabled('debug')) {
-              switch (event.type) {
-                case StreamingChatResponseEventType.MessageAdd:
-                  this.dependencies.logger.debug(
-                    () => `Added message: ${JSON.stringify(event.message)}`
-                  );
-                  break;
+            switch (event.type) {
+              case StreamingChatResponseEventType.MessageAdd:
+                this.dependencies.logger.debug(
+                  () => `Added message: ${JSON.stringify(event.message)}`
+                );
+                break;
 
-                case StreamingChatResponseEventType.ConversationCreate:
-                  this.dependencies.logger.debug(
-                    () => `Created conversation: ${JSON.stringify(event.conversation)}`
-                  );
-                  break;
+              case StreamingChatResponseEventType.ConversationCreate:
+                this.dependencies.logger.debug(
+                  () => `Created conversation: ${JSON.stringify(event.conversation)}`
+                );
+                break;
 
-                case StreamingChatResponseEventType.ConversationUpdate:
-                  this.dependencies.logger.debug(
-                    () => `Updated conversation: ${JSON.stringify(event.conversation)}`
-                  );
-                  break;
-              }
+              case StreamingChatResponseEventType.ConversationUpdate:
+                this.dependencies.logger.debug(
+                  () => `Updated conversation: ${JSON.stringify(event.conversation)}`
+                );
+                break;
             }
           }),
           shareReplay()
@@ -488,6 +489,11 @@ export class ObservabilityAIAssistantClient {
       toolChoice,
       tools,
       functionCalling: (simulateFunctionCalling ? 'simulated' : 'auto') as FunctionCallingMode,
+      metadata: {
+        connectorTelemetry: {
+          pluginId: 'observability_ai_assistant',
+        },
+      },
     };
 
     this.dependencies.logger.debug(
@@ -505,10 +511,7 @@ export class ObservabilityAIAssistantClient {
         apmInstrumentation(name),
         failOnNonExistingFunctionCall({ functions }),
         tap((event) => {
-          if (
-            event.type === StreamingChatResponseEventType.ChatCompletionChunk &&
-            this.dependencies.logger.isLevelEnabled('trace')
-          ) {
+          if (event.type === StreamingChatResponseEventType.ChatCompletionChunk) {
             this.dependencies.logger.trace(`Received chunk: ${JSON.stringify(event.message)}`);
           }
         }),
@@ -558,7 +561,7 @@ export class ObservabilityAIAssistantClient {
     }
 
     if (!this.isConversationOwnedByUser(persistedConversation._source!)) {
-      throw new Error('Cannot update conversation that is not owned by the user');
+      throw forbidden('Updating a conversation is only allowed for the owner of the conversation.');
     }
 
     const updatedConversation: Conversation = merge(
@@ -571,35 +574,6 @@ export class ObservabilityAIAssistantClient {
       id: persistedConversation._id!,
       index: persistedConversation._index,
       doc: updatedConversation,
-      refresh: true,
-    });
-
-    return updatedConversation;
-  };
-
-  setTitle = async ({ conversationId, title }: { conversationId: string; title: string }) => {
-    const document = await this.getConversationWithMetaFields(conversationId);
-    if (!document) {
-      throw notFound();
-    }
-
-    const conversation = await this.get(conversationId);
-
-    if (!conversation) {
-      throw notFound();
-    }
-
-    const updatedConversation: Conversation = merge(
-      {},
-      conversation,
-      { conversation: { title } },
-      this.getConversationUpdateValues(new Date().toISOString())
-    );
-
-    await this.dependencies.esClient.asInternalUser.update({
-      id: document._id!,
-      index: document._index,
-      doc: { conversation: { title } },
       refresh: true,
     });
 
@@ -628,6 +602,26 @@ export class ObservabilityAIAssistantClient {
     return createdConversation;
   };
 
+  updatePartial = async ({
+    conversationId,
+    updates,
+  }: {
+    conversationId: string;
+    updates: Partial<{ public: boolean; archived: boolean }>;
+  }): Promise<Conversation> => {
+    const conversation = await this.get(conversationId);
+    if (!conversation) {
+      throw notFound();
+    }
+
+    const updatedConversation: Conversation = merge({}, conversation, {
+      ...(updates.public !== undefined && { public: updates.public }),
+      ...(updates.archived !== undefined && { archived: updates.archived }),
+    });
+
+    return this.update(conversationId, updatedConversation);
+  };
+
   duplicateConversation = async (conversationId: string): Promise<Conversation> => {
     const conversation = await this.getConversationWithMetaFields(conversationId);
 
@@ -642,6 +636,7 @@ export class ObservabilityAIAssistantClient {
         id: v4(),
       },
       public: false,
+      archived: false,
     });
   };
 
@@ -681,14 +676,15 @@ export class ObservabilityAIAssistantClient {
     // setup the knowledge base
     const res = await knowledgeBaseService.setup(esClient, modelId);
 
-    core
-      .getStartServices()
-      .then(([_, pluginsStart]) =>
-        scheduleKbSemanticTextMigrationTask({ taskManager: pluginsStart.taskManager, logger })
-      )
-      .catch((error) => {
-        logger.error(`Failed to schedule semantic text migration task: ${error}`);
-      });
+    populateMissingSemanticTextFieldMigration({
+      core,
+      logger,
+      config: this.dependencies.config,
+    }).catch((e) => {
+      this.dependencies.logger.error(
+        `Failed to populate missing semantic text fields: ${e.message}`
+      );
+    });
 
     return res;
   };
@@ -698,14 +694,21 @@ export class ObservabilityAIAssistantClient {
     return this.dependencies.knowledgeBaseService.reset(esClient);
   };
 
-  reIndexKnowledgeBaseAndPopulateSemanticTextField = () => {
-    return reIndexKnowledgeBaseAndPopulateSemanticTextField({
+  reIndexKnowledgeBaseWithLock = () => {
+    return reIndexKnowledgeBaseWithLock({
+      core: this.dependencies.core,
       esClient: this.dependencies.esClient,
+      logger: this.dependencies.logger,
+    });
+  };
+
+  reIndexKnowledgeBaseAndPopulateSemanticTextField = () => {
+    return populateMissingSemanticTextFieldMigration({
+      core: this.dependencies.core,
       logger: this.dependencies.logger,
       config: this.dependencies.config,
     });
   };
-
   addUserInstruction = async ({
     entry,
   }: {
@@ -766,7 +769,12 @@ export class ObservabilityAIAssistantClient {
     sortBy: string;
     sortDirection: 'asc' | 'desc';
   }) => {
-    return this.dependencies.knowledgeBaseService.getEntries({ query, sortBy, sortDirection });
+    return this.dependencies.knowledgeBaseService.getEntries({
+      query,
+      sortBy,
+      sortDirection,
+      namespace: this.dependencies.namespace,
+    });
   };
 
   deleteKnowledgeBaseEntry = async (id: string) => {

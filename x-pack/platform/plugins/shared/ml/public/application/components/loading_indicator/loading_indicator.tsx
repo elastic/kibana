@@ -16,7 +16,7 @@ export const LoadingIndicator: FC<{ height?: number; label?: string }> = ({ heig
     <EuiFlexGroup justifyContent="spaceEvenly">
       <EuiFlexItem grow={false}>
         <div style={{ height: `${height}px` }} data-test-subj="mlLoadingIndicator">
-          <EuiLoadingChart size="xl" mono />
+          <EuiLoadingChart size="xl" />
           {label && (
             <>
               <EuiSpacer size="s" />

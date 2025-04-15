@@ -265,8 +265,7 @@
                 "docId": "kibKbnElasticAssistantCommonPluginApi",
                 "section": "def-common.ContentReferencesStore",
                 "text": "ContentReferencesStore"
-              },
-              " | undefined"
+              }
             ],
             "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
             "deprecated": false,
@@ -1511,6 +1510,26 @@
           },
           {
             "parentPluginId": "elasticAssistant",
+            "id": "def-server.ElasticAssistantPluginSetupDependencies.alerting",
+            "type": "Object",
+            "tags": [],
+            "label": "alerting",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "alerting",
+                "scope": "server",
+                "docId": "kibAlertingPluginApi",
+                "section": "def-server.AlertingServerSetup",
+                "text": "AlertingServerSetup"
+              }
+            ],
+            "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "elasticAssistant",
             "id": "def-server.ElasticAssistantPluginSetupDependencies.ml",
             "type": "CompoundType",
             "tags": [],
@@ -1530,7 +1549,7 @@
               "SavedObjectsClientContract",
               ", request: ",
               "KibanaRequest",
-              "<unknown, unknown, unknown, any>): { preview: (args_0: Readonly<{} & { timeRange: string; sampleSize: number; alertParams: Readonly<{} & { severity: number; jobSelection: Readonly<{} & { groupIds: string[]; jobIds: string[]; }>; resultType: \"bucket\" | \"record\" | \"influencer\"; includeInterim: boolean; lookbackInterval: string | null; topNBuckets: number | null; }>; }>) => Promise<any>; execute: (params: Readonly<{} & { severity: number; jobSelection: Readonly<{} & { groupIds: string[]; jobIds: string[]; }>; resultType: \"bucket\" | \"record\" | \"influencer\"; includeInterim: boolean; lookbackInterval: string | null; topNBuckets: number | null; }>, spaceId: string, state?: ",
+              "<unknown, unknown, unknown, any>): { preview: (args_0: Readonly<{} & { timeRange: string; sampleSize: number; alertParams: Readonly<{} & { severity: number; jobSelection: Readonly<{} & { groupIds: string[]; jobIds: string[]; }>; resultType: \"record\" | \"bucket\" | \"influencer\"; includeInterim: boolean; lookbackInterval: string | null; topNBuckets: number | null; }>; }>) => Promise<any>; execute: (params: Readonly<{} & { severity: number; jobSelection: Readonly<{} & { groupIds: string[]; jobIds: string[]; }>; resultType: \"record\" | \"bucket\" | \"influencer\"; includeInterim: boolean; lookbackInterval: string | null; topNBuckets: number | null; }>, spaceId: string, state?: ",
               "AnomalyDetectionRuleState",
               " | undefined) => Promise<{ payload: ",
               "AnomalyDetectionAlertPayload",
@@ -1614,6 +1633,26 @@
                 "docId": "kibActionsPluginApi",
                 "section": "def-server.PluginStartContract",
                 "text": "PluginStartContract"
+              }
+            ],
+            "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "elasticAssistant",
+            "id": "def-server.ElasticAssistantPluginStartDependencies.alerting",
+            "type": "Object",
+            "tags": [],
+            "label": "alerting",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "alerting",
+                "scope": "server",
+                "docId": "kibAlertingPluginApi",
+                "section": "def-server.AlertingServerStart",
+                "text": "AlertingServerStart"
               }
             ],
             "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",

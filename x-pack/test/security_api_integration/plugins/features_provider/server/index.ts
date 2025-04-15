@@ -323,6 +323,7 @@ function case2FeatureSplit(deps: PluginSetupDependencies) {
       actionGroups: [{ id: 'default', name: 'Default' }],
       category: 'kibana',
       producer,
+      solution: 'stack',
       defaultActionGroupId: 'default',
       minimumLicenseRequired: 'basic',
       isExportable: true,

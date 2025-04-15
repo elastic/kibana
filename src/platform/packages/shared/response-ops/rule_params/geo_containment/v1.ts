@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 
 export const trackingContainmentRuleParamsSchema = schema.object({
   index: schema.string({ minLength: 1 }),

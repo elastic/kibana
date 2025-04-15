@@ -10,7 +10,7 @@ import { Aggregators } from '@kbn/observability-plugin/common/custom_threshold_r
 import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 
 import { COMPARATORS } from '@kbn/alerting-comparators';
-import { FtrProviderContext } from '../common/ftr_provider_context';
+import type { FtrProviderContext } from '../common/ftr_provider_context';
 import { getUrlPrefix, ObjectRemover } from '../common/lib';
 import { createRule } from './helpers/alerting_api_helper';
 import { createDataView, deleteDataView } from './helpers/data_view';

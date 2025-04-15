@@ -18,6 +18,7 @@ import {
   getSLOSummaryPipelineId,
   getSLOSummaryTransformId,
   getSLOTransformId,
+  getWildcardPipelineId,
 } from '../../common/constants';
 import { getSLIPipelineTemplate } from '../assets/ingest_templates/sli_pipeline_template';
 import { getSummaryPipelineTemplate } from '../assets/ingest_templates/summary_pipeline_template';
@@ -111,7 +112,7 @@ export class UpdateSLO {
       await retryTransientEsErrors(
         () =>
           this.scopedClusterClient.asSecondaryAuthUser.ingest.putPipeline(
-            getSLIPipelineTemplate(updatedSlo)
+            getSLIPipelineTemplate(updatedSlo, this.spaceId)
           ),
         { logger: this.logger }
       );
@@ -208,23 +209,16 @@ export class UpdateSLO {
   private async deleteOriginalSLO(originalSlo: SLODefinition) {
     try {
       const originalRollupTransformId = getSLOTransformId(originalSlo.id, originalSlo.revision);
-      await this.transformManager.stop(originalRollupTransformId);
       await this.transformManager.uninstall(originalRollupTransformId);
 
       const originalSummaryTransformId = getSLOSummaryTransformId(
         originalSlo.id,
         originalSlo.revision
       );
-      await this.summaryTransformManager.stop(originalSummaryTransformId);
       await this.summaryTransformManager.uninstall(originalSummaryTransformId);
 
       await this.scopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline(
-        { id: getSLOSummaryPipelineId(originalSlo.id, originalSlo.revision) },
-        { ignore: [404] }
-      );
-
-      await this.scopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline(
-        { id: getSLOPipelineId(originalSlo.id, originalSlo.revision) },
+        { id: getWildcardPipelineId(originalSlo.id, originalSlo.revision) },
         { ignore: [404] }
       );
     } catch (err) {
@@ -232,14 +226,18 @@ export class UpdateSLO {
       // Worst case we keep rolling up data for the previous revision number.
     }
 
-    await this.deleteRollupData(originalSlo.id, originalSlo.revision);
-    await this.deleteSummaryData(originalSlo.id, originalSlo.revision);
+    await Promise.all([
+      this.deleteRollupData(originalSlo.id, originalSlo.revision),
+      this.deleteSummaryData(originalSlo.id, originalSlo.revision),
+    ]);
   }
 
   private async deleteRollupData(sloId: string, sloRevision: number): Promise<void> {
     await this.esClient.deleteByQuery({
       index: SLI_DESTINATION_INDEX_PATTERN,
       wait_for_completion: false,
+      conflicts: 'proceed',
+      slices: 'auto',
       query: {
         bool: {
           filter: [{ term: { 'slo.id': sloId } }, { term: { 'slo.revision': sloRevision } }],
@@ -252,6 +250,9 @@ export class UpdateSLO {
     await this.esClient.deleteByQuery({
       index: SUMMARY_DESTINATION_INDEX_PATTERN,
       refresh: true,
+      wait_for_completion: false,
+      conflicts: 'proceed',
+      slices: 'auto',
       query: {
         bool: {
           filter: [{ term: { 'slo.id': sloId } }, { term: { 'slo.revision': sloRevision } }],

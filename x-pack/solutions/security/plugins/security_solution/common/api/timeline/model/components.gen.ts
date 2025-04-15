@@ -17,7 +17,7 @@
 import { z } from '@kbn/zod';
 
 /**
- * The type of timeline to create. Valid values are `default` and `template`.
+ * The type of Timeline.
  */
 export type TimelineType = z.infer<typeof TimelineType>;
 export const TimelineType = z.enum(['default', 'template']);
@@ -25,7 +25,7 @@ export type TimelineTypeEnum = typeof TimelineType.enum;
 export const TimelineTypeEnum = TimelineType.enum;
 
 /**
- * The type of data provider to create. Valid values are `default` and `template`.
+ * The type of data provider.
  */
 export type DataProviderType = z.infer<typeof DataProviderType>;
 export const DataProviderType = z.enum(['default', 'template']);
@@ -87,6 +87,9 @@ export const DataProviderResult = z.object({
   type: DataProviderType.nullable().optional(),
 });
 
+/**
+ * Identifies the available row renderers
+ */
 export type RowRendererId = z.infer<typeof RowRendererId>;
 export const RowRendererId = z.enum([
   'alert',
@@ -111,6 +114,9 @@ export const RowRendererId = z.enum([
 export type RowRendererIdEnum = typeof RowRendererId.enum;
 export const RowRendererIdEnum = RowRendererId.enum;
 
+/**
+ * Indicates when and who marked a Timeline as a favorite.
+ */
 export type FavoriteTimelineResult = z.infer<typeof FavoriteTimelineResult>;
 export const FavoriteTimelineResult = z.object({
   fullName: z.string().nullable().optional(),
@@ -144,6 +150,9 @@ export const FilterTimelineResult = z.object({
   script: z.string().nullable().optional(),
 });
 
+/**
+ * KQL bar query.
+ */
 export type SerializedFilterQueryResult = z.infer<typeof SerializedFilterQueryResult>;
 export const SerializedFilterQueryResult = z.object({
   filterQuery: z
@@ -161,6 +170,9 @@ export const SerializedFilterQueryResult = z.object({
     .optional(),
 });
 
+/**
+ * Object indicating how rows are sorted in the Timeline's grid
+ */
 export type SortObject = z.infer<typeof SortObject>;
 export const SortObject = z.object({
   columnId: z.string().nullable().optional(),
@@ -171,13 +183,39 @@ export const SortObject = z.object({
 export type Sort = z.infer<typeof Sort>;
 export const Sort = z.union([SortObject, z.array(SortObject)]);
 
+/**
+ * The status of the Timeline.
+ */
+export type TimelineStatus = z.infer<typeof TimelineStatus>;
+export const TimelineStatus = z.enum(['active', 'draft', 'immutable']);
+export type TimelineStatusEnum = typeof TimelineStatus.enum;
+export const TimelineStatusEnum = TimelineStatus.enum;
+
 export type SavedTimeline = z.infer<typeof SavedTimeline>;
 export const SavedTimeline = z.object({
+  /**
+   * The Timeline's columns
+   */
   columns: z.array(ColumnHeaderResult).nullable().optional(),
+  /**
+   * The time the Timeline was created, using a 13-digit Epoch timestamp.
+   */
   created: z.number().nullable().optional(),
+  /**
+   * The user who created the Timeline.
+   */
   createdBy: z.string().nullable().optional(),
+  /**
+   * Object containing query clauses
+   */
   dataProviders: z.array(DataProviderResult).nullable().optional(),
+  /**
+   * ID of the Timeline's Data View
+   */
   dataViewId: z.string().nullable().optional(),
+  /**
+   * The Timeline's search period.
+   */
   dateRange: z
     .object({
       end: z.union([z.string().nullable(), z.number().nullable()]).optional(),
@@ -185,7 +223,13 @@ export const SavedTimeline = z.object({
     })
     .nullable()
     .optional(),
+  /**
+   * The Timeline's description
+   */
   description: z.string().nullable().optional(),
+  /**
+   * EQL query that is used in the correlation tab
+   */
   eqlOptions: z
     .object({
       eventCategoryField: z.string().nullable().optional(),
@@ -196,66 +240,175 @@ export const SavedTimeline = z.object({
     })
     .nullable()
     .optional(),
+  /**
+   * Event types displayed in the Timeline
+   */
   eventType: z.string().nullable().optional(),
+  /**
+   * A list of row renderers that should not be used when in `Event renderers` mode
+   */
   excludedRowRendererIds: z.array(RowRendererId).nullable().optional(),
   favorite: z.array(FavoriteTimelineResult).nullable().optional(),
+  /**
+   * A list of filters that should be applied to the query
+   */
   filters: z.array(FilterTimelineResult).nullable().optional(),
+  /**
+   * Indicates whether the KQL bar filters the query results or searches for additional results, where:
+   * `filter`: filters query results
+   * `search`: displays additional search results
+   */
   kqlMode: z.string().nullable().optional(),
   kqlQuery: SerializedFilterQueryResult.nullable().optional(),
+  /**
+   * A list of index names to use in the query (e.g. when the default data view has been modified)
+   */
   indexNames: z.array(z.string()).nullable().optional(),
+  /**
+   * The ID of the saved search that is used in the ES|QL tab
+   */
   savedSearchId: z.string().nullable().optional(),
+  /**
+   * The ID of the saved query that might be used in the Query tab
+   */
   savedQueryId: z.string().nullable().optional(),
   sort: Sort.nullable().optional(),
-  status: z.enum(['active', 'draft', 'immutable']).nullable().optional(),
+  status: TimelineStatus.nullable().optional(),
+  /**
+   * The Timeline's title.
+   */
   title: z.string().nullable().optional(),
+  /**
+   * A unique ID (UUID) for Timeline templates. For Timelines, the value is `null`.
+   */
   templateTimelineId: z.string().nullable().optional(),
+  /**
+   * Timeline template version number. For Timelines, the value is `null`.
+   */
   templateTimelineVersion: z.number().nullable().optional(),
   timelineType: TimelineType.nullable().optional(),
+  /**
+   * The last time the Timeline was updated, using a 13-digit Epoch timestamp
+   */
   updated: z.number().nullable().optional(),
+  /**
+   * The user who last updated the Timeline
+   */
   updatedBy: z.string().nullable().optional(),
 });
 
 export type SavedTimelineWithSavedObjectId = z.infer<typeof SavedTimelineWithSavedObjectId>;
 export const SavedTimelineWithSavedObjectId = SavedTimeline.merge(
   z.object({
+    /**
+     * The `savedObjectId` of the Timeline or Timeline template
+     */
     savedObjectId: z.string(),
+    /**
+     * The version of the Timeline or Timeline template
+     */
     version: z.string(),
   })
 );
 
-export type BareNote = z.infer<typeof BareNote>;
-export const BareNote = z.object({
-  eventId: z.string().nullable().optional(),
-  note: z.string().nullable().optional(),
-  timelineId: z.string(),
+export type NoteCreatedAndUpdatedMetadata = z.infer<typeof NoteCreatedAndUpdatedMetadata>;
+export const NoteCreatedAndUpdatedMetadata = z.object({
+  /**
+   * The time the note was created, using a 13-digit Epoch timestamp.
+   */
   created: z.number().nullable().optional(),
+  /**
+   * The user who created the note.
+   */
   createdBy: z.string().nullable().optional(),
+  /**
+   * The last time the note was updated, using a 13-digit Epoch timestamp
+   */
   updated: z.number().nullable().optional(),
+  /**
+   * The user who last updated the note
+   */
   updatedBy: z.string().nullable().optional(),
 });
+
+export type BareNote = z.infer<typeof BareNote>;
+export const BareNote = NoteCreatedAndUpdatedMetadata.merge(
+  z.object({
+    /**
+     * The `_id` of the associated event for this note.
+     */
+    eventId: z.string().nullable().optional(),
+    /**
+     * The text of the note
+     */
+    note: z.string().nullable().optional(),
+    /**
+     * The `savedObjectId` of the Timeline that this note is associated with
+     */
+    timelineId: z.string(),
+  })
+);
 
 export type Note = z.infer<typeof Note>;
 export const Note = BareNote.merge(
   z.object({
+    /**
+     * The `savedObjectId` of the note
+     */
     noteId: z.string(),
+    /**
+     * The version of the note
+     */
     version: z.string(),
   })
 );
 
-export type BarePinnedEvent = z.infer<typeof BarePinnedEvent>;
-export const BarePinnedEvent = z.object({
-  eventId: z.string(),
-  timelineId: z.string(),
+export type PinnedEventCreatedAndUpdatedMetadata = z.infer<
+  typeof PinnedEventCreatedAndUpdatedMetadata
+>;
+export const PinnedEventCreatedAndUpdatedMetadata = z.object({
+  /**
+   * The time the pinned event was created, using a 13-digit Epoch timestamp.
+   */
   created: z.number().nullable().optional(),
+  /**
+   * The user who created the pinned event.
+   */
   createdBy: z.string().nullable().optional(),
+  /**
+   * The last time the pinned event was updated, using a 13-digit Epoch timestamp
+   */
   updated: z.number().nullable().optional(),
+  /**
+   * The user who last updated the pinned event
+   */
   updatedBy: z.string().nullable().optional(),
 });
+
+export type BarePinnedEvent = z.infer<typeof BarePinnedEvent>;
+export const BarePinnedEvent = PinnedEventCreatedAndUpdatedMetadata.merge(
+  z.object({
+    /**
+     * The `_id` of the associated event for this pinned event.
+     */
+    eventId: z.string(),
+    /**
+     * The `savedObjectId` of the timeline that this pinned event is associated with
+     */
+    timelineId: z.string(),
+  })
+);
 
 export type PinnedEvent = z.infer<typeof PinnedEvent>;
 export const PinnedEvent = BarePinnedEvent.merge(
   z.object({
+    /**
+     * The `savedObjectId` of this pinned event
+     */
     pinnedEventId: z.string(),
+    /**
+     * The version of this pinned event
+     */
     version: z.string(),
   })
 );
@@ -263,10 +416,25 @@ export const PinnedEvent = BarePinnedEvent.merge(
 export type TimelineResponse = z.infer<typeof TimelineResponse>;
 export const TimelineResponse = SavedTimeline.merge(SavedTimelineWithSavedObjectId).merge(
   z.object({
+    /**
+     * A list of all the notes that are associated to this Timeline.
+     */
     eventIdToNoteIds: z.array(Note).nullable().optional(),
+    /**
+     * A list of all the notes that are associated to this Timeline.
+     */
     notes: z.array(Note).nullable().optional(),
+    /**
+     * A list of all the ids of notes that are associated to this Timeline.
+     */
     noteIds: z.array(z.string()).nullable().optional(),
+    /**
+     * A list of all the ids of pinned events that are associated to this Timeline.
+     */
     pinnedEventIds: z.array(z.string()).nullable().optional(),
+    /**
+     * A list of all the pinned events that are associated to this Timeline.
+     */
     pinnedEventsSaveObject: z.array(PinnedEvent).nullable().optional(),
   })
 );
@@ -319,27 +487,22 @@ export type PersistTimelineResponse = z.infer<typeof PersistTimelineResponse>;
 export const PersistTimelineResponse = TimelineResponse;
 
 export type BareNoteWithoutExternalRefs = z.infer<typeof BareNoteWithoutExternalRefs>;
-export const BareNoteWithoutExternalRefs = z.object({
-  eventId: z.string().nullable().optional(),
-  note: z.string().nullable().optional(),
-  timelineId: z.string().nullable().optional(),
-  created: z.number().nullable().optional(),
-  createdBy: z.string().nullable().optional(),
-  updated: z.number().nullable().optional(),
-  updatedBy: z.string().nullable().optional(),
-});
-
-export type GlobalNote = z.infer<typeof GlobalNote>;
-export const GlobalNote = z.object({
-  noteId: z.string().optional(),
-  version: z.string().optional(),
-  note: z.string().optional(),
-  timelineId: z.string().optional(),
-  created: z.number().optional(),
-  createdBy: z.string().optional(),
-  updated: z.number().optional(),
-  updatedBy: z.string().optional(),
-});
+export const BareNoteWithoutExternalRefs = NoteCreatedAndUpdatedMetadata.merge(
+  z.object({
+    /**
+     * The `_id` of the associated event for this note.
+     */
+    eventId: z.string().nullable().optional(),
+    /**
+     * The text of the note
+     */
+    note: z.string().nullable().optional(),
+    /**
+     * The `savedObjectId` of the timeline that this note is associated with
+     */
+    timelineId: z.string().optional(),
+  })
+);
 
 /**
  * The field to sort the timelines by.
@@ -354,14 +517,6 @@ export const SortDirection = z.enum(['asc', 'desc']);
 export type SortDirectionEnum = typeof SortDirection.enum;
 export const SortDirectionEnum = SortDirection.enum;
 
-/**
- * The status of the timeline. Valid values are `active`, `draft`, and `immutable`.
- */
-export type TimelineStatus = z.infer<typeof TimelineStatus>;
-export const TimelineStatus = z.enum(['active', 'draft', 'immutable']);
-export type TimelineStatusEnum = typeof TimelineStatus.enum;
-export const TimelineStatusEnum = TimelineStatus.enum;
-
 export type ImportTimelines = z.infer<typeof ImportTimelines>;
 export const ImportTimelines = SavedTimeline.merge(
   z.object({
@@ -375,17 +530,44 @@ export const ImportTimelines = SavedTimeline.merge(
 
 export type ImportTimelineResult = z.infer<typeof ImportTimelineResult>;
 export const ImportTimelineResult = z.object({
+  /**
+   * Indicates whether any of the Timelines were successfully imports
+   */
   success: z.boolean().optional(),
+  /**
+   * The amount of successfully imported/updated Timelines
+   */
   success_count: z.number().optional(),
+  /**
+   * The amount of successfully installed Timelines
+   */
   timelines_installed: z.number().optional(),
+  /**
+   * The amount of successfully updated Timelines
+   */
   timelines_updated: z.number().optional(),
+  /**
+   * The list of failed Timeline imports
+   */
   errors: z
     .array(
       z.object({
+        /**
+         * The ID of the timeline that failed to import
+         */
         id: z.string().optional(),
+        /**
+         * The error containing the reason why the timeline could not be imported
+         */
         error: z
           .object({
+            /**
+             * The reason why the timeline could not be imported
+             */
             message: z.string().optional(),
+            /**
+             * The HTTP status code of the error
+             */
             status_code: z.number().optional(),
           })
           .optional(),

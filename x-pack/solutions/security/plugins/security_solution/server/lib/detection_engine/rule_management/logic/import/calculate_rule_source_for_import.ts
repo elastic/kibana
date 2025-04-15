@@ -10,7 +10,6 @@ import type {
   RuleSource,
   ValidatedRuleToImport,
 } from '../../../../../../common/api/detection_engine';
-import type { PrebuiltRulesCustomizationStatus } from '../../../../../../common/detection_engine/prebuilt_rules/prebuilt_rule_customization_status';
 import type { PrebuiltRuleAsset } from '../../../prebuilt_rules';
 import { calculateIsCustomized } from '../detection_rules_client/mergers/rule_source/calculate_is_customized';
 import { convertRuleToImportToRuleResponse } from './converters/convert_rule_to_import_to_rule_response';
@@ -31,13 +30,11 @@ export const calculateRuleSourceForImport = ({
   currentRule,
   prebuiltRuleAssetsByRuleId,
   isKnownPrebuiltRule,
-  ruleCustomizationStatus,
 }: {
   importedRule: ValidatedRuleToImport;
   currentRule: RuleResponse | undefined;
   prebuiltRuleAssetsByRuleId: Record<string, PrebuiltRuleAsset>;
   isKnownPrebuiltRule: boolean;
-  ruleCustomizationStatus: PrebuiltRulesCustomizationStatus;
 }): { ruleSource: RuleSource; immutable: boolean } => {
   if (!isKnownPrebuiltRule) {
     return {
@@ -57,7 +54,6 @@ export const calculateRuleSourceForImport = ({
     baseRule,
     nextRule,
     currentRule,
-    ruleCustomizationStatus,
   });
 
   return {

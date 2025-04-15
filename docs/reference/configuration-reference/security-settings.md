@@ -2,6 +2,10 @@
 navigation_title: "Security settings"
 mapped_pages:
   - https://www.elastic.co/guide/en/kibana/current/security-settings-kb.html
+applies_to:
+  deployment:
+    ess: all
+    self: all
 ---
 
 # Security settings in {{kib}} [security-settings-kb]
@@ -10,14 +14,16 @@ mapped_pages:
 You do not need to configure any additional settings to use the {{security-features}} in {{kib}}. They are enabled by default.
 
 ::::{important}
-In high-availability deployments, make sure you use the same security settings for all instances of {{kib}}. Also consider storing sensitive security settings, such as encryption and decryption keys, securely in the Kibana Keystore, instead of keeping them in clear text in the kibana.yml file.
+In high-availability deployments, make sure you use the same security settings for all instances of {{kib}}. Also consider storing sensitive security settings, such as encryption and decryption keys, securely in the Kibana keystore, instead of keeping them in clear text in the `kibana.yml` file.
 ::::
 
-
+:::{note}
+If a setting is applicable to {{ecloud}} Hosted environments, its name is followed by this icon: ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on Elastic Cloud Hosted")
+:::
 
 ### Authentication security settings [authentication-security-settings]
 
-You configure authentication settings in the `xpack.security.authc` namespace in `kibana.yml`.
+You configure authentication settings in the `xpack.security.authc` namespace.
 
 For example:
 
@@ -75,7 +81,6 @@ xpack.security.authc.providers.<provider-type>.<provider-name>.showInSelector ![
     You are unable to set this setting to `false` for `basic` and `token` authentication providers.
     ::::
 
-
 xpack.security.authc.providers.<provider-type>.<provider-name>.accessAgreement.message ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ess}}")
 :   Access agreement text in Markdown format. For more information, refer to [Access agreement](docs-content://deploy-manage/users-roles/cluster-or-deployment-auth/access-agreement.md).
 
@@ -87,7 +92,7 @@ $$$xpack-security-provider-session-idleTimeout$$$ xpack.security.authc.providers
     ::::
 
 
-$$$xpack-security-provider-session-lifespan$$$ xpack.security.authc.providers.<provider-type>.<provider-name>.session.lifespan ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ess}}")
+$$$xpack-security-provider-session-lifespan$$$ `xpack.security.authc.providers.<provider-type>.<provider-name>.session.lifespan` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ess}}")
 :   Ensures that user sessions will expire after the defined time period. This behavior is also known as an "absolute timeout". If this is set to `0`, user sessions could stay active indefinitely. By default, this setting is equal to [`xpack.security.session.lifespan`](#xpack-session-lifespan).
 
     ::::{note}
@@ -100,12 +105,49 @@ $$$xpack-security-provider-session-lifespan$$$ xpack.security.authc.providers.<p
 
 In addition to [the settings that are valid for all providers](#authentication-provider-settings), you can specify the following settings:
 
-xpack.security.authc.providers.saml.<provider-name>.realm ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ess}}")
+`xpack.security.authc.providers.saml.<provider-name>.realm` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ess}}")
 :   SAML realm in {{es}} that provider should use.
+
+`xpack.security.authc.providers.saml.<provider-name>.maxRedirectURLSize` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ess}}")
+:   Specifies the maximum size of the URL that Kibana is allowed to store during the SAML handshake.
+% TBD: Available only on Elastic Cloud?
 
 xpack.security.authc.providers.saml.<provider-name>.useRelayStateDeepLink ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ess}}")
 :   Determines if the provider should treat the `RelayState` parameter as a deep link in {{kib}} during Identity Provider initiated log in. By default, this setting is set to `false`. The link specified in `RelayState` should be a relative, URL-encoded {{kib}} URL. For example, the `/app/dashboards#/list` link in `RelayState` parameter would look like this: `RelayState=%2Fapp%2Fdashboards%23%2Flist`.
 
+`xpack.security.authc.saml.maxRedirectURLSize` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ess}}")
+:   Specifies the maximum size of the URL that Kibana is allowed to store during the SAML handshake.
+% TBD: Available only on Elastic Cloud?
+
+#### Discontinued SAML settings
+```{applies_to}
+ess: discontinued 8.0
+```
+The following settings are available in {{ecloud}} for all supported versions before 8.0:
+
+`xpack.security.authProviders` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ess}}")
+:   Set to `saml` to instruct Kibana to use SAML SSO as the authentication method.
+% TBD: Available only on Elastic Cloud?
+
+`xpack.security.public.protocol` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ess}}")
+:   Set to HTTP or HTTPS. To access Kibana, HTTPS protocol is recommended.
+% TBD: Available only on Elastic Cloud?
+
+`xpack.security.public.hostname` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ess}}")
+:   Set to a fully qualified hostname to connect your users to the proxy server.
+% TBD: Available only on Elastic Cloud?
+
+`xpack.security.public.port` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ess}}")
+:   The port number that connects your users to the proxy server (for example, 80 for HTTP or 443 for HTTPS).
+% TBD: Available only on Elastic Cloud?
+
+`xpack.security.authc.saml.useRelayStateDeepLink` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ess}}")
+:   Specifies if Kibana should treat the `RelayState` parameter as a deep link when Identity Provider Initiated login flow is used.
+% TBD: Available only on Elastic Cloud?
+
+`server.xsrf.whitelist` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ess}}")
+:   Explicitly allows the SAML authentication URL within Kibana, so that the Kibana server doesn't reject external authentication messages that originate from your Identity Provider. This setting is renamed to `server.xsrf.allowlist` in version 8.0.0.
+% TBD: Available only on Elastic Cloud?
 
 ### OpenID Connect authentication provider settings [oidc-authentication-provider-settings]
 
@@ -137,12 +179,12 @@ xpack.security.authc.providers.anonymous.<provider-name>.credentials ![logo clou
     ```
 
 
-For more information, refer to [Anonymous authentication](docs-content://deploy-manage/users-roles/cluster-or-deployment-auth/user-authentication.md#anonymous-authentication).
+For more information, refer to [Anonymous authentication](docs-content://deploy-manage/users-roles/cluster-or-deployment-auth/kibana-authentication.md#anonymous-authentication).
 
 
 ### HTTP authentication settings [http-authentication-settings]
 
-There is a very limited set of cases when you’d want to change these settings. For more information, refer to [HTTP authentication](docs-content://deploy-manage/users-roles/cluster-or-deployment-auth/user-authentication.md#http-authentication).
+There is a very limited set of cases when you’d want to change these settings. For more information, refer to [HTTP authentication](docs-content://deploy-manage/users-roles/cluster-or-deployment-auth/kibana-authentication.md#http-authentication).
 
 xpack.security.authc.http.enabled
 :   Determines if HTTP authentication should be enabled. By default, this setting is set to `true`.
@@ -151,12 +193,10 @@ xpack.security.authc.http.autoSchemesEnabled
 :   Determines if HTTP authentication schemes used by the enabled authentication providers should be automatically supported during HTTP authentication. By default, this setting is set to `true`.
 
 xpack.security.authc.http.schemes[]
-:   List of HTTP authentication schemes that {{kib}} HTTP authentication should support. By default, this setting is set to `['apikey', 'bearer']` to support HTTP authentication with the [`ApiKey`](docs-content://deploy-manage/api-keys/elasticsearch-api-keys.md) and [`Bearer`](docs-content://deploy-manage/users-roles/cluster-or-deployment-auth/user-authentication.md#http-authentication) schemes.
+:   List of HTTP authentication schemes that {{kib}} HTTP authentication should support. By default, this setting is set to `['apikey', 'bearer']` to support HTTP authentication with the [`ApiKey`](docs-content://deploy-manage/api-keys/elasticsearch-api-keys.md) and [`Bearer`](docs-content://deploy-manage/users-roles/cluster-or-deployment-auth/kibana-authentication.md#http-authentication) schemes.
 
 
 ### Login user interface settings [login-ui-settings]
-
-You can configure the following settings in the `kibana.yml` file.
 
 xpack.security.loginAssistanceMessage ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ess}}")
 :   Adds a message to the login UI. Useful for displaying information about maintenance windows, links to corporate sign up pages, and so on.
@@ -170,15 +210,11 @@ xpack.security.authc.selector.enabled ![logo cloud](https://doc-icons.s3.us-east
 
 ### Configure a default access agreement [authentication-access-agreement-settings]
 
-You can configure the following settings in the `kibana.yml` file.
-
 xpack.security.accessAgreement.message ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ess}}")
 :   This setting specifies the access agreement text in Markdown format that will be used as the default access agreement for all providers that do not specify a value for `xpack.security.authc.providers.<provider-type>.<provider-name>.accessAgreement.message`. For more information, refer to [Access agreement](docs-content://deploy-manage/users-roles/cluster-or-deployment-auth/access-agreement.md).
 
 
 ### Session and cookie security settings [security-session-and-cookie-settings]
-
-You can configure the following settings in the `kibana.yml` file.
 
 xpack.security.cookieName
 :   Sets the name of the cookie used for the session. The default value is `"sid"`.
@@ -218,6 +254,7 @@ xpack.security.session.cleanupInterval ![logo cloud](https://doc-icons.s3.us-eas
 
 xpack.security.session.concurrentSessions.maxSessions ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ess}}")
 :   Set the maximum number of sessions each user is allowed to have active at any given time. By default, no limit is applied. If set, the value of this option should be an integer between `1` and `1000`. When the limit is exceeded, the oldest session is automatically invalidated.
+    It is available in {{ecloud}} 8.7.0 and later versions.
 
 ## Encrypted saved objects settings [security-encrypted-saved-objects-settings]
 

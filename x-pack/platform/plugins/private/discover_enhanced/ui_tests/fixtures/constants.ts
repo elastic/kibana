@@ -40,15 +40,18 @@ export const LOGSTASH_IN_RANGE_DATES = {
 
 export const ES_ARCHIVES = {
   LOGSTASH: 'x-pack/test/functional/es_archives/logstash_functional',
-  NO_TIME_FIELD: 'test/functional/fixtures/es_archiver/index_pattern_without_timefield',
+  NO_TIME_FIELD:
+    'src/platform/test/functional/fixtures/es_archiver/index_pattern_without_timefield',
   ECOMMERCE: 'x-pack/test/functional/es_archives/reporting/ecommerce',
 };
 
 export const KBN_ARCHIVES = {
-  INVALID_SCRIPTED_FIELD: 'test/functional/fixtures/kbn_archiver/invalid_scripted_field',
-  NO_TIME_FIELD: 'test/functional/fixtures/kbn_archiver/index_pattern_without_timefield',
+  INVALID_SCRIPTED_FIELD:
+    'src/platform/test/functional/fixtures/kbn_archiver/invalid_scripted_field',
+  NO_TIME_FIELD:
+    'src/platform/test/functional/fixtures/kbn_archiver/index_pattern_without_timefield',
   DASHBOARD_DRILLDOWNS:
     'x-pack/test/functional/fixtures/kbn_archiver/dashboard_drilldowns/drilldowns',
-  DISCOVER: 'test/functional/fixtures/kbn_archiver/discover',
+  DISCOVER: 'src/platform/test/functional/fixtures/kbn_archiver/discover',
   ECOMMERCE: 'x-pack/test/functional/fixtures/kbn_archiver/reporting/ecommerce.json',
 };

@@ -9,6 +9,7 @@ exports[`SystemGenericDetails rendering it renders the default SystemGenericDeta
     message={null}
     outcome="failure"
     processPid={6278}
+    scopeId="test"
     text="[generic-text-123]"
     userName="Braden"
   />

@@ -1,0 +1,7 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/kibana-api-cli",
+  "owner": "@elastic/appex-ai-infra",
+  "group": "platform",
+  "visibility": "shared"
+}

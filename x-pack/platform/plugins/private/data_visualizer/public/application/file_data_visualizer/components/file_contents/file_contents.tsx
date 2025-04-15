@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import React, { useEffect, useState, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -16,6 +16,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSwitch,
+  EuiCallOut,
 } from '@elastic/eui';
 
 import { TIKA_PREVIEW_CHARS, type FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
@@ -150,25 +151,25 @@ export const FileContents: FC<Props> = ({
         ) : null}
       </EuiFlexGroup>
 
-      <EuiSpacer size="s" />
-
-      {format === FILE_FORMATS.TIKA ? (
-        <FormattedMessage
-          id="xpack.dataVisualizer.file.fileContents.characterCount"
-          defaultMessage="Preview limited to the first {numberOfChars} characters"
-          values={{
-            numberOfChars: TIKA_PREVIEW_CHARS,
-          }}
-        />
-      ) : (
-        <FormattedMessage
-          id="xpack.dataVisualizer.file.fileContents.firstLinesDescription"
-          defaultMessage="First {numberOfLines, plural, zero {# line} one {# line} other {# lines}}"
-          values={{
-            numberOfLines: showHighlights ? LINE_LIMIT : numberOfLines,
-          }}
-        />
-      )}
+      <PreviewLimitMessage wrapInCallout={showTitle === false}>
+        {format === FILE_FORMATS.TIKA ? (
+          <FormattedMessage
+            id="xpack.dataVisualizer.file.fileContents.characterCount"
+            defaultMessage="Preview limited to the first {numberOfChars} characters"
+            values={{
+              numberOfChars: TIKA_PREVIEW_CHARS,
+            }}
+          />
+        ) : (
+          <FormattedMessage
+            id="xpack.dataVisualizer.file.fileContents.firstLinesDescription"
+            defaultMessage="First {numberOfLines, plural, zero {# line} one {# line} other {# lines}}"
+            values={{
+              numberOfLines: showHighlights ? LINE_LIMIT : numberOfLines,
+            }}
+          />
+        )}
+      </PreviewLimitMessage>
 
       <EuiSpacer size="s" />
 
@@ -184,6 +185,20 @@ export const FileContents: FC<Props> = ({
           ))}
         </>
       )}
+    </>
+  );
+};
+
+const PreviewLimitMessage: FC<PropsWithChildren<{ wrapInCallout?: boolean }>> = ({
+  wrapInCallout = false,
+  children,
+}) => {
+  return wrapInCallout ? (
+    <EuiCallOut size="s" color="primary" title={children} />
+  ) : (
+    <>
+      <EuiSpacer size="s" />
+      {children}
     </>
   );
 };
