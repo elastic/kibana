@@ -21,10 +21,8 @@ To learn how to interact with the assistant through this connector, refer to the
 
 To use this connector, you must have been granted access to use the Observability AI Assistant feature. You cannot manage this connector in **{{stack-manage-app}} > {{connectors-ui}}** or by using APIs. You also cannot create an Observability AI Assistant [preconfigured connector](/reference/connectors-kibana/pre-configured-connectors.md). It is available only when you’re creating a rule in {{kib}}. For example:
 
-:::{image} /reference/images/obs-ai-assistant-action.png
-:alt: Add an Observability AI Assistant action while creating a rule in the Observability UI
-:class: screenshot
-:::
+% TO DO: Use `:class: screenshot`
+![Add an Observability AI Assistant action while creating a rule in the Observability UI](../images/obs-ai-assistant-action.png)
 
 ::::{note}
 You can have only one Observability AI Assistant action in each rule.
