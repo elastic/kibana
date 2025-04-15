@@ -104,7 +104,7 @@ export const internalStateSlice = createSlice({
         allTabs: TabState[];
         selectedTabId: string;
         recentlyClosedTabs: RecentlyClosedTabState[];
-        groupId?: string;
+        groupId: string;
       }>
     ) => {
       state.tabs.byId = [...action.payload.recentlyClosedTabs, ...action.payload.allTabs].reduce<
@@ -119,7 +119,7 @@ export const internalStateSlice = createSlice({
       state.tabs.allIds = action.payload.allTabs.map((tab) => tab.id);
       state.tabs.unsafeCurrentId = action.payload.selectedTabId;
       state.tabs.recentlyClosedTabs = action.payload.recentlyClosedTabs;
-      state.tabs.groupId = action.payload.groupId ?? state.tabs.groupId;
+      state.tabs.groupId = action.payload.groupId;
     },
 
     setDataViewId: (state, action: TabAction<{ dataViewId: string | undefined }>) =>
@@ -260,13 +260,12 @@ export const createInternalStateStore = (options: InternalStateThunkDependencies
       ),
   });
 
-  const initialTabsState = options.tabsStorageManager.loadLocally({ defaultTabState });
-  store.dispatch(
-    setTabs({
-      ...initialTabsState,
-      groupId: uuidv4(),
-    })
-  );
+  const defaultGroupId = uuidv4();
+  const initialTabsState = options.tabsStorageManager.loadLocally({
+    defaultTabState,
+    defaultGroupId,
+  });
+  store.dispatch(setTabs(initialTabsState));
 
   return store;
 };

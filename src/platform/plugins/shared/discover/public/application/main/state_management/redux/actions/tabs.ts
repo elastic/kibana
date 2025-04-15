@@ -22,6 +22,8 @@ import { createTabRuntimeState, selectTabRuntimeState } from '../runtime_state';
 import { APP_STATE_URL_KEY, GLOBAL_STATE_URL_KEY } from '../../../../../../common/constants';
 import { createTabItem } from '../utils';
 
+const RECENTLY_CLOSED_TABS_LIMIT = 50;
+
 export const setTabs: InternalStateThunkActionCreator<
   [Parameters<typeof internalStateSlice.actions.setTabs>[0]]
 > =
@@ -48,19 +50,31 @@ export const setTabs: InternalStateThunkActionCreator<
       runtimeStateManager.tabs.byId[tab.id] = createTabRuntimeState();
     }
 
+    const newRecentlyClosedTabs = orderBy(
+      [...params.recentlyClosedTabs, ...recentlyClosedTabs],
+      'closedAt',
+      'desc'
+    );
+
+    const latestNRecentlyClosedTabs = newRecentlyClosedTabs.slice(0, RECENTLY_CLOSED_TABS_LIMIT);
+    const recentClosedAt =
+      latestNRecentlyClosedTabs[latestNRecentlyClosedTabs.length - 1]?.closedAt;
+
+    if (recentClosedAt) {
+      // keep other recently closed tabs from the same time point when they were closed
+      for (let i = RECENTLY_CLOSED_TABS_LIMIT; i < newRecentlyClosedTabs.length; i++) {
+        if (newRecentlyClosedTabs[i].closedAt === recentClosedAt) {
+          latestNRecentlyClosedTabs.push(newRecentlyClosedTabs[i]);
+        } else {
+          break;
+        }
+      }
+    }
+
     dispatch(
       internalStateSlice.actions.setTabs({
         ...params,
-        // TODO: keep only the last N closed tabs
-        recentlyClosedTabs: orderBy(
-          differenceBy(
-            [...params.recentlyClosedTabs, ...recentlyClosedTabs],
-            params.allTabs,
-            differenceIterateeByTabId // excluding the tabs that are still open or became open
-          ),
-          'closedAt',
-          'desc'
-        ),
+        recentlyClosedTabs: latestNRecentlyClosedTabs,
       })
     );
   };
@@ -135,7 +149,7 @@ export const updateTabs: InternalStateThunkActionCreator<
         allTabs: updatedTabs,
         selectedTabId: selectedItem?.id ?? currentTab.id,
         recentlyClosedTabs: currentState.tabs.recentlyClosedTabs,
-        groupId,
+        groupId: groupId ?? currentState.tabs.groupId,
       })
     );
   };
@@ -158,7 +172,10 @@ export const clearAllTabs: InternalStateThunkActionCreator = () => (dispatch) =>
     ...createTabItem([]),
   };
 
-  return dispatch(updateTabs({ items: [defaultTab], selectedItem: defaultTab, groupId: uuidv4() }));
+  const newTabsGroupId = uuidv4();
+  return dispatch(
+    updateTabs({ items: [defaultTab], selectedItem: defaultTab, groupId: newTabsGroupId })
+  );
 };
 
 export const disconnectTab: InternalStateThunkActionCreator<[TabActionPayload]> =
