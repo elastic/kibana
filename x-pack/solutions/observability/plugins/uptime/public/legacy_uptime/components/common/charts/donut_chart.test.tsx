@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import 'jest-styled-components';
 import { DonutChart } from './donut_chart';
 import { renderWithIntl, shallowWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';

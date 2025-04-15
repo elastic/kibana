@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import 'jest-styled-components';
 import { renderWithIntl, shallowWithIntl } from '@kbn/test-jest-helpers';
 import { TagLabel } from './tag_label';
 

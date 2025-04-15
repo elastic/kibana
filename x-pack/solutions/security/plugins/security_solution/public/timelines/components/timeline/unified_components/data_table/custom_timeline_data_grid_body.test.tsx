@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import 'jest-styled-components';
 import { render } from '@testing-library/react';
 import type { CustomTimelineDataGridBodyProps } from './custom_timeline_data_grid_body';
 import { CustomTimelineDataGridBody } from './custom_timeline_data_grid_body';

@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
+import 'jest-styled-components';
 
 import * as i18n from './translations';
 import { AuthenticationsHostTable } from './authentications_host_table';

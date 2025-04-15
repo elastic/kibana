@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import 'jest-styled-components';
 import { render, screen } from '@testing-library/react';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { getMockNetflowData, TestProviders } from '../../../../../../common/mock';

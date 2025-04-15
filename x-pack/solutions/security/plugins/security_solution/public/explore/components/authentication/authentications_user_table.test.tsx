@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
+import 'jest-styled-components';
 
 import { TestProviders } from '../../../common/mock';
 import { useAuthentications } from '../../containers/authentications';

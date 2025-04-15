@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
+import 'jest-styled-components';
 import { ThemeProvider } from 'styled-components';
 
 import { ValueWithSpaceWarning } from '..';

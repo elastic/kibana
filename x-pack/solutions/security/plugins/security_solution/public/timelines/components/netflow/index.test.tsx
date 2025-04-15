@@ -7,6 +7,7 @@
 
 import { get } from 'lodash/fp';
 import React from 'react';
+import 'jest-styled-components';
 import { render, screen, within } from '@testing-library/react';
 import { asArrayIfExists } from '../../../common/lib/helpers';
 import { TestProviders } from '../../../common/mock/test_providers';

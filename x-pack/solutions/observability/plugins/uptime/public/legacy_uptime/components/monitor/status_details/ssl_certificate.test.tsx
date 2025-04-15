@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import 'jest-styled-components';
 import moment from 'moment';
 import { EuiIcon } from '@elastic/eui';
 import { Tls } from '../../../../../common/runtime_types';

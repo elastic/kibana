@@ -1021,10 +1021,6 @@ exports[`arrows ArrowBody renders correctly against snapshot 1`] = `
       cursor: grab;
      }  
             </style>
-            <style
-              data-styled="active"
-              data-styled-version="5.3.11"
-            />
           </head>,
           "ctr": 2,
           "insertionPoint": undefined,
