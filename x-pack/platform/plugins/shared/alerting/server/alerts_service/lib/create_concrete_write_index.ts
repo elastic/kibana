@@ -115,7 +115,7 @@ const updateUnderlyingMapping = async ({
         });
         if (newLimit) {
           logger.debug(
-            `Retrying PUT mapping for ${alias} with increased total_fields.limit of ${newLimit}`
+            `Retrying PUT mapping for ${alias} with increased total_fields.limit of ${newLimit}. Attempt: ${attempt}`
           );
           await updateUnderlyingMapping({
             logger,

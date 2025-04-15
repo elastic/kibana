@@ -730,15 +730,15 @@ describe('createConcreteWriteIndex', () => {
           );
           expect(logger.debug).toHaveBeenNthCalledWith(
             3,
-            `Retrying PUT mapping for .alerts-test.alerts-default with increased total_fields.limit of 2501`
+            `Retrying PUT mapping for .alerts-test.alerts-default with increased total_fields.limit of 2501. Attempt: 1`
           );
           expect(logger.debug).toHaveBeenNthCalledWith(
             4,
-            `Retrying PUT mapping for .alerts-test.alerts-default with increased total_fields.limit of 2503`
+            `Retrying PUT mapping for .alerts-test.alerts-default with increased total_fields.limit of 2503. Attempt: 2`
           );
           expect(logger.debug).toHaveBeenNthCalledWith(
             5,
-            `Retrying PUT mapping for .alerts-test.alerts-default with increased total_fields.limit of 2506`
+            `Retrying PUT mapping for .alerts-test.alerts-default with increased total_fields.limit of 2506. Attempt: 3`
           );
         } else {
           clusterClient.indices.putMapping
