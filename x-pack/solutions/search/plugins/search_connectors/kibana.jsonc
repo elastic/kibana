@@ -14,8 +14,7 @@
     "browser": true,
     "configPath": [
       "xpack",
-      "search",
-      "connectors"
+      "searchConnectors"
     ],
     "requiredPlugins": [
       "licensing",

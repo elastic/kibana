@@ -13,14 +13,14 @@ exports[`conditions_table ConditionsTable should render multi item table with an
       ]
     }
   >
-    <conditions_table--AndOrBadgeContainer
+    <AndOrBadgeContainer
       grow={false}
     >
       <AndOrBadge
         includeAntennas={true}
         type="and"
       />
-    </conditions_table--AndOrBadgeContainer>
+    </AndOrBadgeContainer>
   </EuiHideFor>
   <EuiFlexItem
     grow={1}
@@ -83,14 +83,14 @@ exports[`conditions_table ConditionsTable should render multi item table with or
       ]
     }
   >
-    <conditions_table--AndOrBadgeContainer
+    <AndOrBadgeContainer
       grow={false}
     >
       <AndOrBadge
         includeAntennas={true}
         type="or"
       />
-    </conditions_table--AndOrBadgeContainer>
+    </AndOrBadgeContainer>
   </EuiHideFor>
   <EuiFlexItem
     grow={1}

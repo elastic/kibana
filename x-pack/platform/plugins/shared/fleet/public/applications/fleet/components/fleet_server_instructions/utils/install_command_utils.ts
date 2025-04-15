@@ -11,6 +11,7 @@ import {
   getDownloadSourceProxyArgs,
 } from '../../../../../components/enrollment_instructions/manual';
 import type { PLATFORM_TYPE } from '../../../hooks';
+import { PLATFORM_WITH_INSTALL_SERVERS } from '../../../hooks';
 
 export type CommandsByPlatform = {
   [key in PLATFORM_TYPE]: string;
@@ -70,28 +71,34 @@ function getArtifact(
         `cd elastic-agent-${kibanaVersion}-windows-x86_64`,
       ].join(`\n`),
     },
+    windows_msi: {
+      downloadCommand: [
+        `$ProgressPreference = 'SilentlyContinue'`,
+        `Invoke-WebRequest -Uri ${ARTIFACT_BASE_URL}/elastic-agent-${kibanaVersion}-windows-x86_64.msi -OutFile elastic-agent-${kibanaVersion}-windows-x86_64.msi${appendWindowsDownloadSourceProxyArgs}`,
+      ].join(`\n`),
+    },
     deb_aarch64: {
       downloadCommand: [
         `curl -L -O ${ARTIFACT_BASE_URL}/elastic-agent-${kibanaVersion}-arm64.deb${appendCurlDownloadSourceProxyArgs}`,
-        `sudo dpkg -i elastic-agent-${kibanaVersion}-arm64.deb`,
+        `sudo ELASTIC_AGENT_FLAVOR=servers dpkg -i elastic-agent-${kibanaVersion}-arm64.deb`,
       ].join(`\n`),
     },
     deb_x86_64: {
       downloadCommand: [
         `curl -L -O ${ARTIFACT_BASE_URL}/elastic-agent-${kibanaVersion}-amd64.deb${appendCurlDownloadSourceProxyArgs}`,
-        `sudo dpkg -i elastic-agent-${kibanaVersion}-amd64.deb`,
+        `sudo ELASTIC_AGENT_FLAVOR=servers dpkg -i elastic-agent-${kibanaVersion}-amd64.deb`,
       ].join(`\n`),
     },
     rpm_aarch64: {
       downloadCommand: [
         `curl -L -O ${ARTIFACT_BASE_URL}/elastic-agent-${kibanaVersion}-aarch64.rpm${appendCurlDownloadSourceProxyArgs}`,
-        `sudo rpm -vi elastic-agent-${kibanaVersion}-aarch64.rpm`,
+        `sudo ELASTIC_AGENT_FLAVOR=servers rpm -vi elastic-agent-${kibanaVersion}-aarch64.rpm`,
       ].join(`\n`),
     },
     rpm_x86_64: {
       downloadCommand: [
         `curl -L -O ${ARTIFACT_BASE_URL}/elastic-agent-${kibanaVersion}-x86_64.rpm${appendCurlDownloadSourceProxyArgs}`,
-        `sudo rpm -vi elastic-agent-${kibanaVersion}-x86_64.rpm`,
+        `sudo ELASTIC_AGENT_FLAVOR=servers rpm -vi elastic-agent-${kibanaVersion}-x86_64.rpm`,
       ].join(`\n`),
     },
     kubernetes: {
@@ -127,7 +134,7 @@ export function getInstallCommandForPlatform({
   downloadSource?: DownloadSource;
   downloadSourceProxy?: FleetProxy;
 }): string {
-  const newLineSeparator = platform === 'windows' ? '`\n' : '\\\n';
+  const newLineSeparator = platform === 'windows' || platform === 'windows_msi' ? '`\n' : '\\\n';
 
   const artifact = getArtifact(platform, kibanaVersion ?? '', downloadSource, downloadSourceProxy);
 
@@ -169,7 +176,9 @@ export function getInstallCommandForPlatform({
 
   commandArguments.push(['fleet-server-port', '8220']);
 
-  commandArguments.push(['install-servers']);
+  if (PLATFORM_WITH_INSTALL_SERVERS.includes(platform)) {
+    commandArguments.push(['install-servers']);
+  }
 
   const enrollmentProxyArgs = [];
   if (esOutputProxy) {
@@ -195,6 +204,7 @@ export function getInstallCommandForPlatform({
     mac_aarch64: `${artifact.downloadCommand}\nsudo ./elastic-agent install ${commandArgumentsStr}`,
     mac_x86_64: `${artifact.downloadCommand}\nsudo ./elastic-agent install ${commandArgumentsStr}`,
     windows: `${artifact.downloadCommand}\n.\\elastic-agent.exe install ${commandArgumentsStr}`,
+    windows_msi: `${artifact.downloadCommand}\n.\\elastic-agent.msi --% INSTALLARGS="${commandArgumentsStr}"`,
     deb_aarch64: `${artifact.downloadCommand}\nsudo systemctl enable elastic-agent\nsudo systemctl start elastic-agent\nsudo elastic-agent enroll ${commandArgumentsStr}`,
     deb_x86_64: `${artifact.downloadCommand}\nsudo systemctl enable elastic-agent\nsudo systemctl start elastic-agent\nsudo elastic-agent enroll ${commandArgumentsStr}`,
     rpm_aarch64: `${artifact.downloadCommand}\nsudo systemctl enable elastic-agent\nsudo systemctl start elastic-agent\nsudo elastic-agent enroll ${commandArgumentsStr}`,
