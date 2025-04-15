@@ -8,7 +8,7 @@
 import { Command } from '@langchain/langgraph';
 import type { getAnalyzeIndexPatternGraph } from '../../../analyse_index_pattern/analyse_index_pattern';
 
-export const getAnalyseIndexPattern = ({
+export const getAnalyzeIndexPattern = ({
   analyzeIndexPatternGraph,
 }: {
   analyzeIndexPatternGraph: ReturnType<typeof getAnalyzeIndexPatternGraph>;

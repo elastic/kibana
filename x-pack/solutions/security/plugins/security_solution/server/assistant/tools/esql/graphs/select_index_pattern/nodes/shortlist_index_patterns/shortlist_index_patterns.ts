@@ -10,7 +10,7 @@ import type {
   ActionsClientChatVertexAI,
   ActionsClientChatOpenAI,
 } from '@kbn/langchain/server';
-import { AIMessage, HumanMessage, SystemMessage } from '@langchain/core/messages';
+import { HumanMessage, SystemMessage } from '@langchain/core/messages';
 import { Command } from '@langchain/langgraph';
 import { z } from '@kbn/zod';
 import type { SelectIndexPatternAnnotation } from '../../state';
@@ -33,7 +33,7 @@ export const getShortlistIndexPatterns = ({
 }) => {
   const llm = createLlmInstance();
 
-  return async (state: typeof SelectIndexPatternAnnotation.State) => {
+  return async (state: typeof SelectIndexPatternAnnotation.State, config: any) => {
     const systemMessage = new SystemMessage({
       content: `You are a security analyst who is an expert in Elasticsearch and particularly writing Elastic Search queries. You have been given a list of index patterns and an explanation of the query we would like to generate. 
 To generate the query we first need to identify which index pattern should be used. To do this you short list a maximum of 3 index patterns that are the most likely to contain the fields required to write the query. Select a variety index patterns.`,
@@ -41,27 +41,25 @@ To generate the query we first need to identify which index pattern should be us
     const humanMessage = new HumanMessage({
       content: `Available index patterns:\n ${state.indexPatterns.join(
         '\n'
-      )} \n\n Explanation of the query: \n\n ${
-        state.input?.question
-      } \n\n Based on this information, please shortlist a maximum of 3 index patterns that are the most likely to contain the fields required to write the query.`,
+      )} \n\n Explanation of the query: \n\n ${state.input?.question
+        } \n\n Based on this information, please shortlist a maximum of 3 index patterns that are the most likely to contain the fields required to write the query.`,
     });
 
-    const result = await llm
-      .withStructuredOutput(ShortlistedIndexPatterns, { name: 'shortlistedIndexPatterns' })
-      .invoke([systemMessage, humanMessage]);
+    try {
+      const result = await llm
+        .withStructuredOutput(ShortlistedIndexPatterns, { name: 'shortlistedIndexPatterns' })
+        .withRetry({
+          stopAfterAttempt: 3
+        })
+        .invoke([systemMessage, humanMessage]);
 
-    return new Command({
-      update: {
-        shortlistedIndexPatterns: result.shortlistedIndexPatterns,
-        hypothesisMessages: [
-          humanMessage,
-          new AIMessage({
-            content: `The shortlisted index patterns are: ${result.shortlistedIndexPatterns.join(
-              ', '
-            )}`,
-          }),
-        ],
-      },
-    });
+      return new Command({
+        update: {
+          shortlistedIndexPatterns: result.shortlistedIndexPatterns,
+        },
+      });
+    } catch (error) {
+      return new Command({});
+    }
   };
 };

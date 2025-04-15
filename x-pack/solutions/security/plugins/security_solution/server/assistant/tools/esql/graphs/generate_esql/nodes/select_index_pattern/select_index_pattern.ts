@@ -9,6 +9,7 @@ import { Command } from '@langchain/langgraph';
 import { HumanMessage } from '@langchain/core/messages';
 import type { getSelectIndexPatternGraph } from '../../../select_index_pattern/select_index_pattern';
 import type { GenerateEsqlAnnotation } from '../../state';
+import { NL_TO_ESQL_AGENT_WITHOUT_VALIDATION_NODE } from '../../constants';
 
 export const getSelectIndexPattern = ({
   identifyIndexGraph,
@@ -22,16 +23,7 @@ export const getSelectIndexPattern = ({
 
     if (!childGraphOutput.selectedIndexPattern) {
       return new Command({
-        update: {
-          selectedIndexPattern: null,
-          messages: [
-            new HumanMessage({
-              content: `We were unable to find an index pattern that is suitable for this query. Please provide a specific index pattern and the fields you want to query. These are some index patterns that could be used: \n\n${childGraphOutput.indexPatterns
-                .map((i) => `**${i}**`)
-                .join('\n')}`,
-            }),
-          ],
-        },
+        goto: NL_TO_ESQL_AGENT_WITHOUT_VALIDATION_NODE
       });
     }
 

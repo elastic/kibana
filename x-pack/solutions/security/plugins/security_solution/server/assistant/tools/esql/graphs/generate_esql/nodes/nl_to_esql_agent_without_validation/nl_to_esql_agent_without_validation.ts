@@ -28,12 +28,16 @@ export const getNlToEsqlAgentWithoutValidation = ({
   return async (state: typeof GenerateEsqlAnnotation.State) => {
     const { input } = state;
 
+    if (!input) {
+      throw new Error('Input is required');
+    }
+
     const result = (await lastValueFrom(
       naturalLanguageToEsql({
         client: inference.getClient({ request }),
         connectorId,
         logger,
-        input: `${input}`,
+        input: input.question,
         system: "Just produce the query fenced by the esql tag. Don't explain it.",
       })
     )) as ChatCompletionMessageEvent;
