@@ -9,7 +9,14 @@
 
 import React, { Fragment, memo, useEffect, useRef, useMemo, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiText, EuiPage, EuiPageBody, EuiSpacer, useEuiPaddingSize, useEuiTheme } from '@elastic/eui';
+import {
+  EuiText,
+  EuiPage,
+  EuiPageBody,
+  EuiSpacer,
+  useEuiPaddingSize,
+  useEuiTheme,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import { cloneDeep } from 'lodash';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
@@ -43,7 +50,7 @@ export interface ContextAppProps {
 }
 
 export const ContextApp = ({ dataView, anchorId, referrer }: ContextAppProps) => {
-  const {euiTheme} = useEuiTheme();
+  const { euiTheme } = useEuiTheme();
   const services = useDiscoverServices();
   const {
     analytics,
@@ -264,7 +271,7 @@ export const ContextApp = ({ dataView, anchorId, referrer }: ContextAppProps) =>
               paddingSize="none"
               css={dscDocsContentCss}
               panelProps={{ role: 'main' }}
-            >	
+            >
               <EuiText
                 data-test-subj="contextDocumentSurroundingHeader"
                 css={css`
@@ -272,17 +279,19 @@ export const ContextApp = ({ dataView, anchorId, referrer }: ContextAppProps) =>
                   font-weight: ${euiTheme.font.weight.bold};
                 `}
               >
-                  <FormattedMessage
-                    id="discover.context.contextOfTitle"
-                    defaultMessage="Documents surrounding "
-                  />
-                  <span css={css`
+                <FormattedMessage
+                  id="discover.context.contextOfTitle"
+                  defaultMessage="Documents surrounding "
+                />
+                <span
+                  css={css`
                     background-color: ${euiTheme.colors.backgroundBaseWarning};
                     color: ${euiTheme.colors.textWarning};
                     padding: 0 ${euiTheme.size.xs};
-                  `}>
-                    {anchorId}
-                  </span>
+                  `}
+                >
+                  {anchorId}
+                </span>
               </EuiText>
               <EuiSpacer size="s" />
               <ContextAppContentMemoized
