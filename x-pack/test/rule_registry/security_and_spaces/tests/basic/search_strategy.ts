@@ -732,7 +732,7 @@ export default ({ getService }: FtrProviderContext) => {
             must_not: [],
           },
         };
-        const resultWithoutMinScore = await secureSearch.send<RuleRegistrySearchResponse>({
+        const resultWithoutMinScore = await secureBsearch.send<RuleRegistrySearchResponse>({
           supertestWithoutAuth,
           auth: {
             username: obsOnlySpacesAll.username,
@@ -753,7 +753,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         validateRuleTypeIds(resultWithoutMinScore, apmRuleTypeIds);
 
-        const resultWithMinScore = await secureSearch.send<RuleRegistrySearchResponse>({
+        const resultWithMinScore = await secureBsearch.send<RuleRegistrySearchResponse>({
           supertestWithoutAuth,
           auth: {
             username: obsOnlySpacesAll.username,
@@ -815,7 +815,7 @@ export default ({ getService }: FtrProviderContext) => {
             must_not: [],
           },
         };
-        const resultWithoutTrackScore = await secureSearch.send<RuleRegistrySearchResponse>({
+        const resultWithoutTrackScore = await secureBsearch.send<RuleRegistrySearchResponse>({
           supertestWithoutAuth,
           auth: {
             username: obsOnlySpacesAll.username,
@@ -846,7 +846,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         validateRuleTypeIds(resultWithoutTrackScore, apmRuleTypeIds);
 
-        const resultWithTrackScore = await secureSearch.send<RuleRegistrySearchResponse>({
+        const resultWithTrackScore = await secureBsearch.send<RuleRegistrySearchResponse>({
           supertestWithoutAuth,
           auth: {
             username: obsOnlySpacesAll.username,
