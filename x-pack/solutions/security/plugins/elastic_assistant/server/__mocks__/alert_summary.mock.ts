@@ -13,7 +13,24 @@ import {
   AlertSummaryResponse,
   AlertSummaryUpdateProps,
 } from '@kbn/elastic-assistant-common/impl/schemas/alert_summary/bulk_crud_alert_summary_route.gen';
-
+export const mockEsAlertSummarySchema = {
+  '@timestamp': '2019-12-13T16:40:33.400Z',
+  created_at: '2019-12-13T16:40:33.400Z',
+  updated_at: '2019-12-13T16:40:33.400Z',
+  namespace: 'default',
+  id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
+  summary: 'test content',
+  recommended_actions: 'do something',
+  alert_id: '1234',
+  replacements: [],
+  created_by: 'elastic',
+  updated_by: 'elastic',
+  users: [
+    {
+      name: 'elastic',
+    },
+  ],
+};
 export const getAlertSummarySearchEsMock = () => {
   const searchResponse: estypes.SearchResponse<EsAlertSummarySchema> = {
     took: 3,
@@ -34,23 +51,7 @@ export const getAlertSummarySearchEsMock = () => {
         {
           _index: 'foo',
           _id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
-          _source: {
-            '@timestamp': '2019-12-13T16:40:33.400Z',
-            created_at: '2019-12-13T16:40:33.400Z',
-            updated_at: '2019-12-13T16:40:33.400Z',
-            namespace: 'default',
-            id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
-            summary: 'test content',
-            recommended_actions: 'do something',
-            alert_id: '1234',
-            replacements: [],
-            created_by: 'elastic',
-            users: [
-              {
-                name: 'elastic',
-              },
-            ],
-          },
+          _source: mockEsAlertSummarySchema,
         },
       ],
     },
