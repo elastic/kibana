@@ -4,14 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { apmOtel, timerange } from '@kbn/apm-synthtrace-client';
+import { apm, timerange } from '@kbn/apm-synthtrace-client';
 
 export function adserviceEdot({ from, to }: { from: number; to: number }) {
   const range = timerange(from, to);
   const transactionName = 'oteldemo.AdServiceEdotSynth/GetAds';
 
-  const edotInstance = apmOtel
-    .service({
+  const edotInstance = apm
+    .otelService({
       name: 'adservice-edot-synth',
       namespace: 'opentelemetry-demo',
       sdkLanguage: 'java',
@@ -25,15 +25,15 @@ export function adserviceEdot({ from, to }: { from: number; to: number }) {
     .rate(1)
     .generator((timestamp) => [
       edotInstance
-        .transaction({
-          transactionName,
+        .span({
+          name: transactionName,
+          kind: 'Server',
         })
         .overrides({
           'attributes.server.address': 'otel-demo-blue-adservice-edot-synth',
           'attributes.server.port': 8080,
           'attributes.url.path': '/some/path',
           'attributes.url.scheme': 'https',
-          'attributes.url.full': undefined,
         })
         .timestamp(timestamp)
         .duration(551)

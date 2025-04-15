@@ -24,6 +24,7 @@ export type ApmAlertsRequiredParams = ESSearchRequest & {
   query?: estypes.QueryDslQueryContainer;
   sort?: estypes.SortOptions[];
   _source?: string[] | false;
+  search_after?: Array<string | number>;
 };
 
 export async function getApmAlertsClient({

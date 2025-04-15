@@ -70,7 +70,7 @@ export class StreamsPlugin
     this.telemtryService.setup(core.analytics);
 
     const assetService = new AssetService(core, this.logger);
-    const streamsService = new StreamsService(core, this.logger);
+    const streamsService = new StreamsService(core, this.logger, this.isDev);
 
     registerRoutes({
       repository: streamsRouteRepository,

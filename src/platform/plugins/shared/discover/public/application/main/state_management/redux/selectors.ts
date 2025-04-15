@@ -9,7 +9,7 @@
 
 import type { DiscoverInternalState } from './types';
 
-export const selectAllTabs = (state: DiscoverInternalState) =>
-  state.tabs.allIds.map((id) => state.tabs.byId[id]);
-
 export const selectTab = (state: DiscoverInternalState, tabId: string) => state.tabs.byId[tabId];
+
+export const selectAllTabs = (state: DiscoverInternalState) =>
+  state.tabs.allIds.map((id) => selectTab(state, id));

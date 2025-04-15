@@ -7,7 +7,7 @@
 
 import { useCallback, useState, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import type { ConversationCreatedEvent } from '../../../common/chat_events';
+import type { ConversationCreatedEvent, ProgressionEvent } from '../../../common/chat_events';
 import type { ChatError } from '../../../common/errors';
 import {
   type ConversationEvent,
@@ -41,6 +41,7 @@ export const useChat = ({
   } = useKibana();
   const [conversationEvents, setConversationEvents] = useState<ConversationEvent[]>([]);
   const [pendingMessages, setPendingMessages] = useState<ConversationEvent[]>([]);
+  const [progressionEvents, setProgressionEvents] = useState<ProgressionEvent[]>([]);
   const [status, setStatus] = useState<ChatStatus>('ready');
 
   const sendMessage = useCallback(
@@ -74,14 +75,11 @@ export const useChat = ({
 
       events$.subscribe({
         next: (event) => {
-          // if (event.type !== 'message_chunk') {
-          //   console.log('*** event', event);
-          // }
-
           // chunk received, we append it to the chunk buffer
           if (event.type === 'message_chunk') {
             concatenatedChunks += event.content_chunk;
             setPendingMessages(getAllStreamMessages());
+            setProgressionEvents([]);
           }
 
           // full message received - we purge the chunk buffer
@@ -106,15 +104,21 @@ export const useChat = ({
           if (event.type === 'conversation_created') {
             onConversationUpdate(event.conversation);
           }
+
+          if (event.type === 'progression') {
+            setProgressionEvents((previous) => [...previous, event]);
+          }
         },
         complete: () => {
-          setConversationEvents((prevEvents) => [...prevEvents, ...streamMessages]);
           setPendingMessages([]);
+          setProgressionEvents([]);
+          setConversationEvents((prevEvents) => [...prevEvents, ...streamMessages]);
           setStatus('ready');
         },
         error: (err) => {
-          setConversationEvents((prevEvents) => [...prevEvents, ...streamMessages]);
           setPendingMessages([]);
+          setProgressionEvents([]);
+          setConversationEvents((prevEvents) => [...prevEvents, ...streamMessages]);
           setStatus('error');
           onError?.(err);
 
@@ -140,7 +144,9 @@ export const useChat = ({
   );
 
   const setConversationEventsExternal = useCallback((newEvents: ConversationEvent[]) => {
+    // TODO: unsub from observable + set status ready
     setConversationEvents(newEvents);
+    setProgressionEvents([]);
     setPendingMessages([]);
   }, []);
 
@@ -152,6 +158,7 @@ export const useChat = ({
     status,
     sendMessage,
     conversationEvents: allEvents,
+    progressionEvents,
     setConversationEvents: setConversationEventsExternal,
   };
 };

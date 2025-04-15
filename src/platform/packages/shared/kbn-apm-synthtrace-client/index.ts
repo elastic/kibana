@@ -11,7 +11,11 @@ export { observer } from './src/lib/agent_config';
 export type { AgentConfigFields } from './src/lib/agent_config/agent_config_fields';
 export { apm, apmOtel } from './src/lib/apm';
 export type { ApmFields } from './src/lib/apm/apm_fields';
-export type { ApmOtelFields } from './src/lib/apm/otel/apm_otel_fields';
+export type {
+  ApmOtelFields,
+  ApmOtelAttributes,
+  SpanKind,
+} from './src/lib/apm/otel/apm_otel_fields';
 export type { Instance } from './src/lib/apm/instance';
 export type { OtelInstance } from './src/lib/apm/otel/otel_instance';
 export { MobileDevice } from './src/lib/apm/mobile_device';

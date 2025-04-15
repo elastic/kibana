@@ -236,9 +236,8 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
       <EuiLink
         href={
           locator?.getRedirectUrl({
-            page: 'index_list',
-            filter: `data_stream="${dataStreamName}"`,
-            includeHiddenIndices: true,
+            page: 'data_stream_index_list',
+            dataStreamName,
           }) || ''
         }
       >

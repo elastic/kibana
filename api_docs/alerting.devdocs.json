@@ -4192,20 +4192,6 @@
             "path": "x-pack/platform/plugins/shared/alerting/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
-          },
-          {
-            "parentPluginId": "alerting",
-            "id": "def-server.RuleType.fieldsForAAD",
-            "type": "Array",
-            "tags": [],
-            "label": "fieldsForAAD",
-            "description": [],
-            "signature": [
-              "string[] | undefined"
-            ],
-            "path": "x-pack/platform/plugins/shared/alerting/server/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -4769,7 +4755,7 @@
           },
           "<Params>>; getAlertState: (params: ",
           "GetAlertStateParams",
-          ") => Promise<void | Readonly<{ alertTypeState?: Record<string, any> | undefined; alertInstances?: Record<string, Readonly<{ meta?: Readonly<{ flapping?: boolean | undefined; uuid?: string | undefined; lastScheduledActions?: Readonly<{ actions?: Record<string, Readonly<{} & { date: string; }>> | undefined; subgroup?: string | undefined; } & { date: string; group: string; }> | undefined; flappingHistory?: boolean[] | undefined; maintenanceWindowIds?: string[] | undefined; pendingRecoveredCount?: number | undefined; activeCount?: number | undefined; } & {}> | undefined; state?: Record<string, any> | undefined; } & {}>> | undefined; alertRecoveredInstances?: Record<string, Readonly<{ meta?: Readonly<{ flapping?: boolean | undefined; uuid?: string | undefined; lastScheduledActions?: Readonly<{ actions?: Record<string, Readonly<{} & { date: string; }>> | undefined; subgroup?: string | undefined; } & { date: string; group: string; }> | undefined; flappingHistory?: boolean[] | undefined; maintenanceWindowIds?: string[] | undefined; pendingRecoveredCount?: number | undefined; activeCount?: number | undefined; } & {}> | undefined; state?: Record<string, any> | undefined; } & {}>> | undefined; previousStartedAt?: string | null | undefined; summaryActions?: Record<string, Readonly<{} & { date: string; }>> | undefined; } & {}>>; getAlertSummary: (params: ",
+          ") => Promise<void | Readonly<{ alertTypeState?: Record<string, any> | undefined; alertInstances?: Record<string, Readonly<{ meta?: Readonly<{ flapping?: boolean | undefined; uuid?: string | undefined; lastScheduledActions?: Readonly<{ actions?: Record<string, Readonly<{} & { date: string; }>> | undefined; subgroup?: string | undefined; } & { date: string; group: string; }> | undefined; flappingHistory?: boolean[] | undefined; maintenanceWindowIds?: string[] | undefined; pendingRecoveredCount?: number | undefined; activeCount?: number | undefined; } & {}> | undefined; state?: Record<string, any> | undefined; } & {}>> | undefined; alertRecoveredInstances?: Record<string, Readonly<{ meta?: Readonly<{ flapping?: boolean | undefined; uuid?: string | undefined; lastScheduledActions?: Readonly<{ actions?: Record<string, Readonly<{} & { date: string; }>> | undefined; subgroup?: string | undefined; } & { date: string; group: string; }> | undefined; flappingHistory?: boolean[] | undefined; maintenanceWindowIds?: string[] | undefined; pendingRecoveredCount?: number | undefined; activeCount?: number | undefined; } & {}> | undefined; state?: Record<string, any> | undefined; } & {}>> | undefined; previousStartedAt?: string | null | undefined; summaryActions?: Record<string, Readonly<{} & { date: string; }>> | undefined; trackedExecutions?: string[] | undefined; } & {}>>; getAlertSummary: (params: ",
           "GetAlertSummaryParams",
           ") => Promise<",
           {
@@ -10526,7 +10512,7 @@
         "label": "LatestTaskStateSchema",
         "description": [],
         "signature": [
-          "{ readonly alertTypeState?: Record<string, any> | undefined; readonly alertInstances?: Record<string, Readonly<{ meta?: Readonly<{ flapping?: boolean | undefined; uuid?: string | undefined; lastScheduledActions?: Readonly<{ actions?: Record<string, Readonly<{} & { date: string; }>> | undefined; subgroup?: string | undefined; } & { date: string; group: string; }> | undefined; flappingHistory?: boolean[] | undefined; maintenanceWindowIds?: string[] | undefined; pendingRecoveredCount?: number | undefined; activeCount?: number | undefined; } & {}> | undefined; state?: Record<string, any> | undefined; } & {}>> | undefined; readonly alertRecoveredInstances?: Record<string, Readonly<{ meta?: Readonly<{ flapping?: boolean | undefined; uuid?: string | undefined; lastScheduledActions?: Readonly<{ actions?: Record<string, Readonly<{} & { date: string; }>> | undefined; subgroup?: string | undefined; } & { date: string; group: string; }> | undefined; flappingHistory?: boolean[] | undefined; maintenanceWindowIds?: string[] | undefined; pendingRecoveredCount?: number | undefined; activeCount?: number | undefined; } & {}> | undefined; state?: Record<string, any> | undefined; } & {}>> | undefined; readonly previousStartedAt?: string | null | undefined; readonly summaryActions?: Record<string, Readonly<{} & { date: string; }>> | undefined; }"
+          "{ readonly alertTypeState?: Record<string, any> | undefined; readonly alertInstances?: Record<string, Readonly<{ meta?: Readonly<{ flapping?: boolean | undefined; uuid?: string | undefined; lastScheduledActions?: Readonly<{ actions?: Record<string, Readonly<{} & { date: string; }>> | undefined; subgroup?: string | undefined; } & { date: string; group: string; }> | undefined; flappingHistory?: boolean[] | undefined; maintenanceWindowIds?: string[] | undefined; pendingRecoveredCount?: number | undefined; activeCount?: number | undefined; } & {}> | undefined; state?: Record<string, any> | undefined; } & {}>> | undefined; readonly alertRecoveredInstances?: Record<string, Readonly<{ meta?: Readonly<{ flapping?: boolean | undefined; uuid?: string | undefined; lastScheduledActions?: Readonly<{ actions?: Record<string, Readonly<{} & { date: string; }>> | undefined; subgroup?: string | undefined; } & { date: string; group: string; }> | undefined; flappingHistory?: boolean[] | undefined; maintenanceWindowIds?: string[] | undefined; pendingRecoveredCount?: number | undefined; activeCount?: number | undefined; } & {}> | undefined; state?: Record<string, any> | undefined; } & {}>> | undefined; readonly previousStartedAt?: string | null | undefined; readonly summaryActions?: Record<string, Readonly<{} & { date: string; }>> | undefined; readonly trackedExecutions?: string[] | undefined; }"
         ],
         "path": "x-pack/platform/packages/private/kbn-alerting-state-types/src/task_state/index.ts",
         "deprecated": false,
