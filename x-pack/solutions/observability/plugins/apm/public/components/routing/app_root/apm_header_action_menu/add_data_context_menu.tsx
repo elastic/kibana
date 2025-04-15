@@ -29,9 +29,6 @@ export function AddDataContextMenu() {
   const [popoverOpen, setPopoverOpen] = useState(false);
   const { services } = useKibana<ApmPluginStartDeps & ApmServices>();
   const {
-    core: {
-      http: { basePath },
-    },
     share: {
       url: { locators },
     },
