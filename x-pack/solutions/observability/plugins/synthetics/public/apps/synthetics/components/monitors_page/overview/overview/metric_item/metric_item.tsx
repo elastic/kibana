@@ -81,6 +81,7 @@ export const MetricItem = ({
   });
 
   const { charts } = useKibana<ClientPluginsStart>().services;
+  const chartBaseTheme = charts.theme.useChartsBaseTheme();
   const testInProgress = useSelector(manualTestRunInProgressSelector(monitor.configId));
 
   const dispatch = useDispatch();
@@ -138,7 +139,7 @@ export const MetricItem = ({
                 });
               }
             }}
-            baseTheme={charts.theme.useChartsBaseTheme()}
+            baseTheme={chartBaseTheme}
             locale={i18n.getLocale()}
           />
           <Metric

@@ -59,6 +59,8 @@
     "@kbn/alerts-as-data-utils",
     "@kbn/alerting-plugin",
     "@kbn/rule-data-utils",
+    "@kbn/alerting-types",
+    "@kbn/zod-helpers",
   ],
   "exclude": [
     "target/**/*",
