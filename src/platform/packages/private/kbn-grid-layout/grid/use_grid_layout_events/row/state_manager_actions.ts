@@ -110,7 +110,7 @@ export const moveAction = (
 
   // if the drop target row is collapsible, we only switch order of the rows
   if (dropTargetRow.isCollapsible && currentActiveRowEvent.id !== dropTargetRowId) {
-    console.log('runs?!!>');
+    // console.log('runs?!!>');
     const updatedRowOrder = sortRowsByRefs(gridLayoutStateManager);
     if (!deepEqual(currentRowOrder, updatedRowOrder)) {
       const updatedLayout = cloneDeep(currentLayout);
@@ -129,7 +129,7 @@ export const moveAction = (
       rowPanels,
       gridLayoutStateManager
     );
-    console.log('rowBelow', rowBelow)
+    // console.log('rowBelow', rowBelow)
     if (panelsBelowCursor.length && rowBelow && currentLayout[rowBelow].isCollapsible) {
       // create a new row
       const newRow = createNewRow({});
