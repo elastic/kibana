@@ -32,9 +32,6 @@ import {
   setTheme,
 } from './services';
 import {
-  createFiltersFromValueClickAction,
-  createFiltersFromRangeSelectAction,
-  createFiltersFromMultiValueClickAction,
   createMultiValueClickActionDefinition,
   createValueClickActionDefinition,
   createSelectRangeActionDefinition,
@@ -143,33 +140,40 @@ export class DataPublicPlugin
     });
     setSearchService(search);
 
+    const rangeSelectAction = createSelectRangeActionDefinition(() => ({
+      uiActions,
+    }));
     uiActions.addTriggerAction(
       'SELECT_RANGE_TRIGGER',
-      createSelectRangeActionDefinition(() => ({
-        uiActions,
-      }))
+      rangeSelectAction
     );
+
+    const valueClickAction = createValueClickActionDefinition(() => ({
+      uiActions,
+    }));
 
     uiActions.addTriggerAction(
       'VALUE_CLICK_TRIGGER',
-      createValueClickActionDefinition(() => ({
-        uiActions,
-      }))
+      valueClickAction
     );
 
+    const multiValueClickAction = createMultiValueClickActionDefinition(() => ({
+      query,
+    }));
     uiActions.addTriggerAction(
       'MULTI_VALUE_CLICK_TRIGGER',
-      createMultiValueClickActionDefinition(() => ({
-        query,
-      }))
+      multiValueClickAction
     );
 
     const datatableUtilities = new DatatableUtilitiesService(search.aggs, dataViews, fieldFormats);
     const dataServices = {
       actions: {
-        createFiltersFromValueClickAction,
-        createFiltersFromRangeSelectAction,
-        createFiltersFromMultiValueClickAction,
+        createFiltersFromValueClickAction: valueClickAction.execute,
+        canCreateFiltersFromValueClickAction: valueClickAction.isCompatible,
+        createFiltersFromRangeSelectAction: rangeSelectAction.execute,
+        canCreateFiltersFromRangeSelectAction: rangeSelectAction.isCompatible,
+        createFiltersFromMultiValueClickAction: multiValueClickAction.execute,
+        canCreateFiltersFromMultiValueClickAction: multiValueClickAction.isCompatible,
       },
       datatableUtilities,
       fieldFormats,

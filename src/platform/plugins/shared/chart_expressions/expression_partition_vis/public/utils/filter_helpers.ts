@@ -23,8 +23,8 @@ export const canFilter = async (
   if (!event) {
     return false;
   }
-  const filters = await actions.createFiltersFromValueClickAction(event.data);
-  return Boolean(filters.length);
+  const canFilter = actions.canCreateFiltersFromValueClickAction !== undefined ? await actions.canCreateFiltersFromValueClickAction(event.data) : false;
+  return canFilter;
 };
 
 export const getMultiFilterCells = (
