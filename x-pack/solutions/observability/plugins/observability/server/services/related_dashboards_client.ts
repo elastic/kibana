@@ -227,11 +227,14 @@ export class RelatedDashboardsClient {
     }
   }
 
-  async getRuleQueryIndex(): Promise<string> {
+  async getRuleQueryIndex(): Promise<string | null> {
     if (!this.alert) {
       throw new Error('Alert not found. Could not get the rule query index.');
     }
     const index = this.alert.getRuleQueryIndex();
+    if (!index) {
+      return null;
+    }
     return typeof index === 'string' ? index : index.id || '';
   }
 
