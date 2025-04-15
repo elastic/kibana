@@ -13,6 +13,20 @@ export const RULE_TAGS_FILTER_LABEL = i18n.translate('alertsFiltersForm.ruleTags
   defaultMessage: 'Rule tags',
 });
 
+export const RULE_TAGS_FILTER_PLACEHOLDER = i18n.translate(
+  'alertsFiltersForm.ruleTags.placeholder',
+  {
+    defaultMessage: 'Select rule tags',
+  }
+);
+
+export const RULE_TAGS_FILTER_NO_OPTIONS_PLACEHOLDER = i18n.translate(
+  'alertsFiltersForm.ruleTags.noOptionsPlaceholder',
+  {
+    defaultMessage: 'No tags available',
+  }
+);
+
 export const RULE_TAGS_LOAD_ERROR_MESSAGE = i18n.translate(
   'alertsFiltersForm.ruleTags.errorMessage',
   {
@@ -23,6 +37,20 @@ export const RULE_TAGS_LOAD_ERROR_MESSAGE = i18n.translate(
 export const RULE_TYPES_FILTER_LABEL = i18n.translate('alertsFiltersForm.ruleTypes.label', {
   defaultMessage: 'Rule types',
 });
+
+export const RULE_TYPES_FILTER_PLACEHOLDER = i18n.translate(
+  'alertsFiltersForm.ruleTypes.placeholder',
+  {
+    defaultMessage: 'Select rule types',
+  }
+);
+
+export const RULE_TYPES_FILTER_NO_OPTIONS_PLACEHOLDER = i18n.translate(
+  'alertsFiltersForm.ruleTypes.noOptionsPlaceHolder',
+  {
+    defaultMessage: 'No rule types available',
+  }
+);
 
 export const RULE_TYPES_LOAD_ERROR_MESSAGE = i18n.translate(
   'alertsFiltersForm.ruleTypes.errorMessage',
@@ -46,6 +74,13 @@ export const FORM_ITEM_FILTER_BY_LABEL = i18n.translate(
   'alertsFiltersForm.formItem.filterByLabel',
   {
     defaultMessage: 'Filter by',
+  }
+);
+
+export const FORM_ITEM_FILTER_BY_PLACEHOLDER = i18n.translate(
+  'alertsFiltersForm.formItem.filterByPlaceholder',
+  {
+    defaultMessage: 'Select filter type',
   }
 );
 

@@ -10,9 +10,14 @@
 import React, { useMemo } from 'react';
 import { EuiFormRow, EuiSuperSelect, EuiText } from '@elastic/eui';
 import type { EuiSuperSelectOption } from '@elastic/eui/src/components/form/super_select/super_select_item';
+import { FORM_ITEM_SUBJ } from '../constants';
 import { alertsFiltersMetadata } from '../filters';
 import { AlertsFilterComponentType, AlertsFiltersFormItemType } from '../types';
-import { FORM_ITEM_FILTER_BY_LABEL, FORM_ITEM_OPTIONAL_CAPTION } from '../translations';
+import {
+  FORM_ITEM_FILTER_BY_LABEL,
+  FORM_ITEM_FILTER_BY_PLACEHOLDER,
+  FORM_ITEM_OPTIONAL_CAPTION,
+} from '../translations';
 
 export interface AlertsFiltersFormItemProps<T> {
   type?: AlertsFiltersFormItemType;
@@ -56,13 +61,19 @@ export const AlertsFiltersFormItem = <T,>({
         }
         fullWidth
         isDisabled={isDisabled}
+        data-test-subj={FORM_ITEM_SUBJ}
       >
         <EuiSuperSelect
           options={options}
           valueOfSelected={type}
           onChange={onTypeChange}
           disabled={isDisabled}
+          placeholder={FORM_ITEM_FILTER_BY_PLACEHOLDER}
           fullWidth
+          popoverProps={{
+            repositionOnScroll: true,
+            ownFocus: true,
+          }}
         />
       </EuiFormRow>
       {filter}

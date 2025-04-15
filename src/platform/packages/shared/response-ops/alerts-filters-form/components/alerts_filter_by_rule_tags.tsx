@@ -12,7 +12,12 @@ import { useGetRuleTagsQuery } from '@kbn/response-ops-rules-apis/hooks/use_get_
 import React, { useCallback, useMemo } from 'react';
 import { EuiComboBoxProps } from '@elastic/eui/src/components/combo_box/combo_box';
 import { ALERT_RULE_TAGS } from '@kbn/rule-data-utils';
-import { RULE_TAGS_FILTER_LABEL, RULE_TAGS_LOAD_ERROR_MESSAGE } from '../translations';
+import {
+  RULE_TAGS_FILTER_LABEL,
+  RULE_TAGS_FILTER_NO_OPTIONS_PLACEHOLDER,
+  RULE_TAGS_FILTER_PLACEHOLDER,
+  RULE_TAGS_LOAD_ERROR_MESSAGE,
+} from '../translations';
 import { useAlertsFiltersFormContext } from '../contexts/alerts_filters_form_context';
 import { AlertsFilterComponentType, AlertsFilterMetadata } from '../types';
 
@@ -69,18 +74,21 @@ export const AlertsFilterByRuleTags: AlertsFilterComponentType<string[]> = ({
       <EuiComboBox
         isClearable
         isLoading={isLoading}
-        isDisabled={isDisabled || isError}
+        isDisabled={isDisabled || isError || !options.length}
         isInvalid={isError}
         options={options}
         selectedOptions={selectedOptions}
         onChange={onSelectedOptionsChange}
+        placeholder={
+          !options.length ? RULE_TAGS_FILTER_NO_OPTIONS_PLACEHOLDER : RULE_TAGS_FILTER_PLACEHOLDER
+        }
         fullWidth
       />
     </EuiFormRow>
   );
 };
 
-export const filterMetadata: AlertsFilterMetadata<string[]> = {
+export const filterMetadata = {
   id: 'ruleTags',
   displayName: RULE_TAGS_FILTER_LABEL,
   component: AlertsFilterByRuleTags,
@@ -92,4 +100,4 @@ export const filterMetadata: AlertsFilterMetadata<string[]> = {
       },
     };
   },
-};
+} as const satisfies AlertsFilterMetadata<string[]>;

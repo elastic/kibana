@@ -15,7 +15,12 @@ import { SetRequired } from 'type-fest';
 import { ALERT_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { AlertsFilterComponentType, AlertsFilterMetadata } from '../types';
 import { useAlertsFiltersFormContext } from '../contexts/alerts_filters_form_context';
-import { RULE_TYPES_FILTER_LABEL, RULE_TYPES_LOAD_ERROR_MESSAGE } from '../translations';
+import {
+  RULE_TYPES_FILTER_LABEL,
+  RULE_TYPES_FILTER_NO_OPTIONS_PLACEHOLDER,
+  RULE_TYPES_FILTER_PLACEHOLDER,
+  RULE_TYPES_LOAD_ERROR_MESSAGE,
+} from '../translations';
 
 export const AlertsFilterByRuleTypes: AlertsFilterComponentType<string[]> = ({
   value,
@@ -69,18 +74,21 @@ export const AlertsFilterByRuleTypes: AlertsFilterComponentType<string[]> = ({
       <EuiComboBox
         isClearable
         isLoading={isLoading}
-        isDisabled={isDisabled || isError}
+        isDisabled={isDisabled || isError || !options.length}
         isInvalid={isError}
         options={options}
         selectedOptions={selectedOptions}
         onChange={onSelectedOptionsChange}
+        placeholder={
+          !options.length ? RULE_TYPES_FILTER_NO_OPTIONS_PLACEHOLDER : RULE_TYPES_FILTER_PLACEHOLDER
+        }
         fullWidth
       />
     </EuiFormRow>
   );
 };
 
-export const filterMetadata: AlertsFilterMetadata<string[]> = {
+export const filterMetadata = {
   id: 'ruleTypes',
   displayName: RULE_TYPES_FILTER_LABEL,
   component: AlertsFilterByRuleTypes,
@@ -92,4 +100,4 @@ export const filterMetadata: AlertsFilterMetadata<string[]> = {
       },
     };
   },
-};
+} as const satisfies AlertsFilterMetadata<string[]>;
