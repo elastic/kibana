@@ -77,4 +77,4 @@ export const INVOKE_LLM_SERVER_TIMEOUT = 4 * 60 * 1000; // 4 minutes
  * the `core-http-browser` from retrying the request.
  *
  */
-export const INVOKE_LL_CLIENT_TIMEOUT = INVOKE_LLM_SERVER_TIMEOUT - 3000; // 4 minutes - 1 second
+export const INVOKE_LL_CLIENT_TIMEOUT = INVOKE_LLM_SERVER_TIMEOUT - 3000; // 4 minutes - 3 second
