@@ -39,12 +39,11 @@ export const getDataTableFactory = (
   type: DATA_TABLE_ID,
   buildEmbeddable: async ({ initialState, finalizeApi, parentApi, uuid }) => {
     const state = initialState.rawState;
-
-    const storage = new Storage(localStorage);
-
     const timeRangeManager = initializeTimeRangeManager(state);
     const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
     const titleManager = initializeTitleManager(state);
+
+    const storage = new Storage(localStorage);
     const allServices: UnifiedDataTableProps['services'] = {
       ...services,
       storage,
@@ -85,11 +84,7 @@ export const getDataTableFactory = (
       ...titleManager.api,
       ...unsavedChangesApi,
       dataLoading$,
-      serializeState: () => {
-        return {
-          rawState: { ...titleManager.getLatestState(), ...timeRangeManager.getLatestState() },
-        };
-      },
+      serializeState,
     });
 
     const queryService = await initializeDataTableQueries(services, api, dataLoading$);
