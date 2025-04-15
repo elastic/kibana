@@ -86,4 +86,5 @@ export interface LensStoreDeps {
   initialContext?: VisualizeFieldContext | VisualizeEditorContext;
   initialStateFromLocator?: MainHistoryLocationState['payload'];
   embeddableEditorIncomingState?: EmbeddableEditorState;
+  visualizationType?: string;
 }

@@ -58,7 +58,6 @@ export function LensEditConfigurationFlyout({
   hidesSuggestions,
   onApply: onApplyCallback,
   onCancel: onCancelCallback,
-  hideTimeFilterInfo,
   isReadOnly,
   parentApi,
   panelId,
@@ -71,7 +70,6 @@ export function LensEditConfigurationFlyout({
 
   const { datasourceStates, visualization, isLoading, annotationGroups, searchSessionId } =
     useLensSelector((state) => state.lens);
-  // use the latest activeId, but fallback to attributes
   const activeVisualization =
     visualizationMap[visualization.activeId ?? attributes.visualizationType];
   const previousAttributes = useRef<TypedLensSerializedState['attributes']>(

@@ -24,6 +24,7 @@ import {
   loadInitial,
   initExisting,
   initEmpty,
+  LensStoreDeps,
 } from '../../../state_management';
 import { generateId } from '../../../id_generator';
 import type { DatasourceMap, VisualizationMap } from '../../../types';
@@ -180,7 +181,7 @@ export async function getEditLensConfiguration(
       [savedObjectId]
     );
     const datasourceState = currentAttributes.state.datasourceStates[datasourceId];
-    const storeDeps = {
+    const storeDeps: LensStoreDeps = {
       lensServices,
       datasourceMap,
       visualizationMap,
@@ -188,6 +189,7 @@ export async function getEditLensConfiguration(
         datasourceState && 'initialContext' in datasourceState
           ? datasourceState.initialContext
           : undefined,
+      visualizationType: attributes.visualizationType,
     };
     const lensStore: LensRootStore = makeConfigureStore(
       storeDeps,
