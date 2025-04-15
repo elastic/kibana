@@ -11,6 +11,11 @@ import type { EuiSwitchEvent } from '@elastic/eui';
 import { EuiSwitch } from '@elastic/eui';
 import { useAlertsContext } from '../../../detections/components/alerts_table/alerts_context';
 
+/**
+ * render a toggle switch that allows users to enable or
+ * disable the display of anonymized values in alert summary
+ * @constructor
+ */
 export const AnonymizationSwitch: React.FC = () => {
   const { setShowAnonymizedValues, showAnonymizedValues } = useAlertsContext();
 

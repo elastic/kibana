@@ -49,7 +49,6 @@ export const HeaderTitle = memo(() => {
         <EuiFlexGroup direction="row" gutterSize="s" responsive={false}>
           <EuiFlexItem>
             <AlertHeaderBlock
-              hasBorder={false}
               data-test-subj={HEADER_SEVERITY_TITLE_TEST_ID}
               title={
                 <FormattedMessage
@@ -63,7 +62,6 @@ export const HeaderTitle = memo(() => {
           </EuiFlexItem>
           <EuiFlexItem>
             <AlertHeaderBlock
-              hasBorder={false}
               data-test-subj={HEADER_RISK_SCORE_TITLE_TEST_ID}
               title={
                 <FormattedMessage
@@ -77,7 +75,6 @@ export const HeaderTitle = memo(() => {
           </EuiFlexItem>
           <EuiFlexItem>
             <AlertHeaderBlock
-              hasBorder={false}
               data-test-subj={HEADER_INTEGRATION_TITLE_TEST_ID}
               title={
                 <FormattedMessage

@@ -33,7 +33,7 @@ import { useAlertsContext } from '../../detections/components/alerts_table/alert
 
 export const FLYOUT_BODY_TEST_ID = 'ai-for-soc-alert-flyout-body';
 /**
- * Panel to be displayed in the document details expandable flyout right section
+ * Panel to be displayed in AI for SOC alert summary flyout
  */
 export const AIForSOCPanel: React.FC<Partial<AIForSOCDetailsProps>> = memo(() => {
   const { eventId, getFieldsData, indexName, dataFormattedForFieldBrowser } =

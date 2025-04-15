@@ -132,7 +132,7 @@ export interface FlyoutCustomProps {
 
 export interface SettingsMenuProps {
   /**
-   * Custom props to populate the content of the settings meny
+   * Allows adding custom settings items below the default ones
    */
   extraSettings?: Panel['contextSettingsMenuItems'];
   /**
@@ -145,6 +145,9 @@ export interface SettingsMenuProps {
  * Renders a menu to allow the user to customize the flyout.
  * Current customization are:
  * - Flyout type: overlay or push
+ * To customize the default items in the settings menu:
+ * - enable/disable push vs overlay
+ * - enable/disable reset size
  */
 export const SettingsMenu: React.FC<SettingsMenuProps> = memo(
   ({ flyoutCustomProps, extraSettings }: SettingsMenuProps) => {
