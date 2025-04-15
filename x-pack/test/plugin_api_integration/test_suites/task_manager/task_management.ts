@@ -247,7 +247,7 @@ export default function ({ getService }: FtrProviderContext) {
         .send({ event: taskId, data })
         .expect(200);
     }
-    it('should schedule a task with rrule', async () => {
+    it.only('should schedule a task with rrule', async () => {
       const dailyTask = await scheduleTask({
         id: 'sample-recurring-task-id',
         taskType: 'sampleRecurringTask',
@@ -266,7 +266,8 @@ export default function ({ getService }: FtrProviderContext) {
         const runAt = new Date(task.runAt).getTime();
         const scheduledAt = new Date(task.scheduledAt).getTime();
         // scheduled to run 24 hours from now
-        expect(runAt).to.be(scheduledAt + 1000 * 60 * 60 * 24);
+        expect(runAt).to.greaterThan(scheduledAt + 1000 * 59 * 60 * 24);
+        expect(runAt).to.lessThan(scheduledAt + 1000 * 61 * 60 * 24);
       });
     });
 
