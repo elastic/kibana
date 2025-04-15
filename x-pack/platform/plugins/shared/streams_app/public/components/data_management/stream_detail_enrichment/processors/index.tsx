@@ -207,7 +207,7 @@ export interface EditProcessorPanelProps {
 export function EditProcessorPanel({ processorRef, processorMetrics }: EditProcessorPanelProps) {
   const { euiTheme } = useEuiTheme();
   const state = useSelector(processorRef, (s) => s);
-  const canEdit = useStreamsEnrichmentSelector((s) => s.context.definition.privileges.manage);
+  const canEdit = useStreamsEnrichmentSelector((s) => s.context.definition.privileges.simulate);
   const previousProcessor = state.context.previousProcessor;
   const processor = state.context.processor;
 

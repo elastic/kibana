@@ -1972,15 +1972,7 @@
             "label": "getFields",
             "description": [],
             "signature": [
-              "({ mapped, scripted, runtime, fieldName, forceRefresh, unmapped, indexFilter, metaFields, }: GetFieldsParams) => Promise<{ getFieldMap: () => { [x: string]: ",
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.DataViewField",
-                "text": "DataViewField"
-              },
-              "; }; getFieldMapSorted: () => Record<string, ",
+              "({ mapped, scripted, runtime, fieldName, forceRefresh, unmapped, indexFilter, metaFields, }: GetFieldsParams) => Promise<{ getFieldMap: () => DataViewFieldMap; getFieldMapSorted: () => Record<string, ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -18055,15 +18047,7 @@
             "label": "getFields",
             "description": [],
             "signature": [
-              "({ mapped, scripted, runtime, fieldName, forceRefresh, unmapped, indexFilter, metaFields, }: GetFieldsParams) => Promise<{ getFieldMap: () => { [x: string]: ",
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.DataViewField",
-                "text": "DataViewField"
-              },
-              "; }; getFieldMapSorted: () => Record<string, ",
+              "({ mapped, scripted, runtime, fieldName, forceRefresh, unmapped, indexFilter, metaFields, }: GetFieldsParams) => Promise<{ getFieldMap: () => DataViewFieldMap; getFieldMapSorted: () => Record<string, ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
