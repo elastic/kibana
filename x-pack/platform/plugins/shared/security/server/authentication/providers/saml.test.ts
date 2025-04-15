@@ -69,7 +69,6 @@ describe('SAMLAuthenticationProvider', () => {
                 redirectURL: '/test-base-path/some-path#some-app',
               },
             },
-            redirectURL: '/test-base-path/some-path#some-app',
             realm: 'test-realm',
           }
         )
@@ -121,7 +120,6 @@ describe('SAMLAuthenticationProvider', () => {
             requestIdMap: {
               [mockSAMLSet1.requestId]: { redirectURL: '/test-base-path/some-path#some-app' },
             },
-            redirectURL: '/test-base-path/some-path#some-app',
             realm: 'test-realm',
           }
         )
@@ -215,7 +213,6 @@ describe('SAMLAuthenticationProvider', () => {
           },
           {
             requestIdMap: { [mockSAMLSet1.requestId]: { redirectURL: '' } },
-            redirectURL: '',
             realm: 'test-realm',
           }
         )
@@ -265,7 +262,6 @@ describe('SAMLAuthenticationProvider', () => {
           },
           {
             requestIdMap: { [mockSAMLSet1.requestId]: { redirectURL: '' } },
-            redirectURL: '',
             realm: 'test-realm',
           }
         )
@@ -345,7 +341,6 @@ describe('SAMLAuthenticationProvider', () => {
             requestIdMap: {
               [mockSAMLSet1.requestId]: { redirectURL: '/test-base-path/some-path' },
             },
-            redirectURL: '/test-base-path/some-path',
             realm: 'test-realm',
           }
         )
