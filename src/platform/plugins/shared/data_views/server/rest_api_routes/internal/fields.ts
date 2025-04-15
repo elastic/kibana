@@ -138,10 +138,7 @@ export const createHandler: (
     }
   };
 
-export const registerFields = (
-  router: IRouter,
-  isRollupsEnabled: () => boolean
-) => {
+export const registerFields = (router: IRouter, isRollupsEnabled: () => boolean) => {
   router.versioned.get({ path, access: 'internal', enableQueryVersion: true }).addVersion(
     {
       version: '1',
