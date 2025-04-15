@@ -151,54 +151,53 @@ const getIndexTemplatePutBody = (opts?: GetIndexTemplatePutBodyOpts) => {
       ];
   return {
     name: `.alerts-${context ? context : 'test'}.alerts-${namespace}-index-template`,
-    body: {
-      index_patterns: indexPatterns,
-      composed_of: [
-        ...(useEcs ? ['.alerts-ecs-mappings'] : []),
-        `.alerts-${context ? `${context}.alerts` : 'test.alerts'}-mappings`,
-        ...(useLegacyAlerts ? ['.alerts-legacy-alert-mappings'] : []),
-        '.alerts-framework-mappings',
-      ],
-      ...(useDataStream ? { data_stream: { hidden: true } } : {}),
-      priority: namespace.length,
-      template: {
-        settings: {
-          auto_expand_replicas: '0-1',
-          hidden: true,
-          ...(useDataStream
-            ? {}
-            : {
-                'index.lifecycle': {
-                  name: '.alerts-ilm-policy',
-                  rollover_alias: `.alerts-${context ? context : 'test'}.alerts-${namespace}`,
-                },
-              }),
-          'index.mapping.ignore_malformed': true,
-          'index.mapping.total_fields.limit': 2500,
-        },
-        mappings: {
-          dynamic: false,
-          _meta: {
-            kibana: { version: '8.8.0' },
-            managed: true,
-            namespace,
-          },
-        },
-        ...(secondaryAlias
-          ? {
-              aliases: {
-                [`${secondaryAlias}-default`]: {
-                  is_write_index: false,
-                },
+    index_patterns: indexPatterns,
+    composed_of: [
+      ...(useEcs ? ['.alerts-ecs-mappings'] : []),
+      `.alerts-${context ? `${context}.alerts` : 'test.alerts'}-mappings`,
+      ...(useLegacyAlerts ? ['.alerts-legacy-alert-mappings'] : []),
+      '.alerts-framework-mappings',
+    ],
+    ...(useDataStream ? { data_stream: { hidden: true } } : {}),
+    priority: namespace.length,
+    template: {
+      settings: {
+        auto_expand_replicas: '0-1',
+        hidden: true,
+        ...(useDataStream
+          ? {}
+          : {
+              'index.lifecycle': {
+                name: '.alerts-ilm-policy',
+                rollover_alias: `.alerts-${context ? context : 'test'}.alerts-${namespace}`,
               },
-            }
-          : {}),
+            }),
+        'index.mapping.ignore_malformed': true,
+        'index.mapping.total_fields.limit': 2500,
+        'index.mapping.total_fields.ignore_dynamic_beyond_limit': true,
       },
-      _meta: {
-        kibana: { version: '8.8.0' },
-        managed: true,
-        namespace,
+      mappings: {
+        dynamic: false,
+        _meta: {
+          kibana: { version: '8.8.0' },
+          managed: true,
+          namespace,
+        },
       },
+      ...(secondaryAlias
+        ? {
+            aliases: {
+              [`${secondaryAlias}-default`]: {
+                is_write_index: false,
+              },
+            },
+          }
+        : {}),
+    },
+    _meta: {
+      kibana: { version: '8.8.0' },
+      managed: true,
+      namespace,
     },
   };
 };
@@ -475,14 +474,13 @@ describe('Alerts Service', () => {
           expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalledTimes(1);
           expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalledWith({
             name: existingIndexTemplate.name,
-            body: {
-              ...existingIndexTemplate.index_template,
-              template: {
-                ...existingIndexTemplate.index_template.template,
-                settings: {
-                  ...existingIndexTemplate.index_template.template?.settings,
-                  'index.mapping.total_fields.limit': 2500,
-                },
+            ...existingIndexTemplate.index_template,
+            template: {
+              ...existingIndexTemplate.index_template.template,
+              settings: {
+                ...existingIndexTemplate.index_template.template?.settings,
+                'index.mapping.total_fields.limit': 2500,
+                'index.mapping.total_fields.ignore_dynamic_beyond_limit': true,
               },
             },
           });
@@ -893,45 +891,44 @@ describe('Alerts Service', () => {
 
           const template = {
             name: `.alerts-empty.alerts-default-index-template`,
-            body: {
-              index_patterns: useDataStreamForAlerts
-                ? [`.alerts-empty.alerts-default`]
-                : [
-                    `.internal.alerts-empty.alerts-default-*`,
-                    `.reindexed-v8-internal.alerts-empty.alerts-default-*`,
-                  ],
-              composed_of: ['.alerts-framework-mappings'],
-              ...(useDataStreamForAlerts ? { data_stream: { hidden: true } } : {}),
-              priority: 7,
-              template: {
-                settings: {
-                  auto_expand_replicas: '0-1',
-                  hidden: true,
-                  ...(useDataStreamForAlerts
-                    ? {}
-                    : {
-                        'index.lifecycle': {
-                          name: '.alerts-ilm-policy',
-                          rollover_alias: `.alerts-empty.alerts-default`,
-                        },
-                      }),
-                  'index.mapping.ignore_malformed': true,
-                  'index.mapping.total_fields.limit': 2500,
-                },
-                mappings: {
-                  _meta: {
-                    kibana: { version: '8.8.0' },
-                    managed: true,
-                    namespace: 'default',
-                  },
-                  dynamic: false,
-                },
+            index_patterns: useDataStreamForAlerts
+              ? [`.alerts-empty.alerts-default`]
+              : [
+                  `.internal.alerts-empty.alerts-default-*`,
+                  `.reindexed-v8-internal.alerts-empty.alerts-default-*`,
+                ],
+            composed_of: ['.alerts-framework-mappings'],
+            ...(useDataStreamForAlerts ? { data_stream: { hidden: true } } : {}),
+            priority: 7,
+            template: {
+              settings: {
+                auto_expand_replicas: '0-1',
+                hidden: true,
+                ...(useDataStreamForAlerts
+                  ? {}
+                  : {
+                      'index.lifecycle': {
+                        name: '.alerts-ilm-policy',
+                        rollover_alias: `.alerts-empty.alerts-default`,
+                      },
+                    }),
+                'index.mapping.ignore_malformed': true,
+                'index.mapping.total_fields.ignore_dynamic_beyond_limit': true,
+                'index.mapping.total_fields.limit': 2500,
               },
-              _meta: {
-                kibana: { version: '8.8.0' },
-                managed: true,
-                namespace: 'default',
+              mappings: {
+                _meta: {
+                  kibana: { version: '8.8.0' },
+                  managed: true,
+                  namespace: 'default',
+                },
+                dynamic: false,
               },
+            },
+            _meta: {
+              kibana: { version: '8.8.0' },
+              managed: true,
+              namespace: 'default',
             },
           };
 
