@@ -134,6 +134,7 @@ export const moveAction = (
       // create a new row
       const newRow = createNewRow({});
       const { moved, kept } = partitionRowPanels(rowPanels, panelsBelowCursor);
+      console.log(moved, kept)
 
       const updatedLayout = cloneDeep(currentLayout);
       updatedLayout[newRow.id] = {

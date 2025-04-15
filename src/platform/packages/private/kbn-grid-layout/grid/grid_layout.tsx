@@ -42,8 +42,8 @@ const getGridsElementData = (layout: GridLayoutData) => {
   const flattenedGridElements: GridElementData[] = rowIdsInOrder.flatMap((rowId) => {
     const row = layout[rowId];
     const panelIdsInOrder = getPanelKeysInOrder(row.panels);
-    const startMark: GridElementData = [
-      row.isCollapsible ? 'header' : 'row-start-mark',
+    const header: GridElementData = [
+      row.isCollapsible ? 'header' : 'header-empty',
       rowId,
       row.isCollapsed,
     ];
@@ -54,7 +54,7 @@ const getGridsElementData = (layout: GridLayoutData) => {
       ? []
       : [['row-ghost', rowId, row.isCollapsed]];
 
-    return [...rowGhost, startMark, ...panelElements];
+    return [...rowGhost, header, ...panelElements];
   });
   return flattenedGridElements;
 };
@@ -209,7 +209,7 @@ export const GridLayout = ({
                       isCollapsed={!!isCollapsed}
                     />
                   );
-                case 'row-start-mark':
+                case 'header-empty':
                   return <GridRowHeaderEmpty key={`${rowId}-${typeId}`} rowId={rowId} />;
                 case 'row-ghost':
                   return <GridRowVisualContainer rowId={rowId} key={`${rowId}-${typeId}`} />;
