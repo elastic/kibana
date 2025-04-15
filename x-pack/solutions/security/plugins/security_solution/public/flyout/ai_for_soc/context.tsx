@@ -7,6 +7,7 @@
 
 import React, { createContext, memo, useContext, useMemo } from 'react';
 import type { BrowserFields, TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import type { SearchHit } from '../../../common/search_strategy';
 import type { GetFieldsData } from '../document_details/shared/hooks/use_get_fields_data';
 import { FlyoutLoading } from '../shared/components/flyout_loading';
@@ -32,6 +33,10 @@ export interface AIForSOCDetailsContext {
    */
   browserFields: BrowserFields;
   /**
+   * An object with top level fields from the ECS object
+   */
+  dataAsNestedObject: Ecs;
+  /**
    * Retrieves searchHit values for the provided field
    */
   getFieldsData: GetFieldsData;
@@ -55,24 +60,39 @@ export type AIForSOCDetailsProviderProps = {
 
 export const AIForSOCDetailsProvider = memo(
   ({ id, indexName, children }: AIForSOCDetailsProviderProps) => {
-    const { browserFields, dataFormattedForFieldBrowser, getFieldsData, loading, searchHit } =
-      useEventDetails({
-        eventId: id,
-        indexName,
-      });
+    const {
+      browserFields,
+      dataAsNestedObject,
+      dataFormattedForFieldBrowser,
+      getFieldsData,
+      loading,
+      searchHit,
+    } = useEventDetails({
+      eventId: id,
+      indexName,
+    });
     const contextValue = useMemo(
       () =>
-        dataFormattedForFieldBrowser && id && indexName && searchHit
+        dataFormattedForFieldBrowser && dataAsNestedObject && id && indexName && searchHit
           ? {
               browserFields,
               dataFormattedForFieldBrowser,
+              dataAsNestedObject,
               eventId: id,
               getFieldsData,
               indexName,
               searchHit,
             }
           : undefined,
-      [browserFields, dataFormattedForFieldBrowser, getFieldsData, id, indexName, searchHit]
+      [
+        browserFields,
+        dataAsNestedObject,
+        dataFormattedForFieldBrowser,
+        getFieldsData,
+        id,
+        indexName,
+        searchHit,
+      ]
     );
 
     if (loading) {
