@@ -6,13 +6,13 @@
  */
 
 import { omit } from 'lodash';
-import { CustomThresholdParams } from '@kbn/response-ops-rule-params/custom_threshold';
 import {
   ALERT_RULE_PARAMETERS,
   ALERT_RULE_TYPE_ID,
   OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
   fields as TECHNICAL_ALERT_FIELDS,
 } from '@kbn/rule-data-utils';
+import { ThresholdParams } from '../../common/custom_threshold_rule/types';
 
 export class AlertData {
   constructor(private alert: any) {}
@@ -29,10 +29,12 @@ export class AlertData {
     }
     switch (this.getRuleTypeId()) {
       case OBSERVABILITY_THRESHOLD_RULE_TYPE_ID:
-        const customThresholdParams = ruleParameters as CustomThresholdParams;
+        const customThresholdParams = ruleParameters as ThresholdParams;
         const metrics = customThresholdParams.criteria[0].metrics;
         metrics.forEach((metric) => {
-          relevantFields.add(metric.field);
+          if (metric.field) {
+            relevantFields.add(metric.field);
+          }
         });
         return relevantFields;
       default:
@@ -63,7 +65,7 @@ export class AlertData {
     }
     switch (ruleTypeId) {
       case OBSERVABILITY_THRESHOLD_RULE_TYPE_ID:
-        const customThresholdParams = ruleParameters as CustomThresholdParams;
+        const customThresholdParams = ruleParameters as ThresholdParams;
         return customThresholdParams.searchConfiguration.index;
       default:
         return '';
