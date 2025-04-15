@@ -38,12 +38,19 @@ export const getTopOffsetForRow = (rowId: string, layout: GridLayoutData) => {
 };
 
 export const getRowRect = (rowId: string, gridLayoutStateManager: GridLayoutStateManager) => {
-  const headerRef = gridLayoutStateManager.headerRefs.current[rowId];
-  if (!headerRef) {
-    throw new Error('header ref should be defined for all rows');
-  }
   const rowRef = gridLayoutStateManager.rowDimensionsRefs.current[rowId];
-  if (!rowRef) {
+  if (rowRef) {
+    const { top, bottom, left, right } = rowRef.getBoundingClientRect();
+    return {
+      top,
+      bottom,
+      left,
+      right,
+    };
+  }
+
+  const headerRef = gridLayoutStateManager.headerRefs.current[rowId];
+  if (headerRef) {
     const { top, bottom, left, right } = headerRef.getBoundingClientRect();
     return {
       top,
@@ -52,12 +59,37 @@ export const getRowRect = (rowId: string, gridLayoutStateManager: GridLayoutStat
       right,
     };
   }
-  const top = headerRef.getBoundingClientRect().top;
-  const { bottom, left, right } = rowRef.getBoundingClientRect();
+  const currentLayout =
+    gridLayoutStateManager.proposedGridLayout$.getValue() ??
+    gridLayoutStateManager.gridLayout$.getValue();
+  const row = currentLayout[rowId].order;
+  const previousRowId = Object.values(currentLayout).find((value) => {
+    return value.order === row - 1;
+  })?.id;
+  if (!previousRowId) {
+    return {
+      top: 0,
+      bottom: 0,
+      left: 0,
+      right: 0,
+    };
+  }
+  const previousRowHeaderRef = gridLayoutStateManager.headerRefs.current[previousRowId];
+  if (!previousRowHeaderRef) {
+    return {
+      top: 0,
+      bottom: 0,
+      left: 0,
+      right: 0,
+    };
+  }
+  const { bottom, left, right } = previousRowHeaderRef.getBoundingClientRect();
   return {
-    top,
+    top: bottom,
     bottom,
     left,
     right,
   };
+
+  // const top = headerRef.getBoundingClientRect().top;
 };

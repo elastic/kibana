@@ -136,14 +136,13 @@ export const moveAction = (
   // const targetedGridLeft = targetedRowRef?.getBoundingClientRect().left ?? 0;
   // const targetedGridTop = targetedRowRef?.getBoundingClientRect().top ?? 0;
 
-
-
-  const {left: targetedGridLeft, top: targetedGridTop} = getRowRect(
+  const { left: targetedGridLeft, top: targetedGridTop } = getRowRect(
     targetRowId,
     gridLayoutStateManager
   );
 
-    console.log(
+  console.log(
+    gridRowHeaders,
     targetedRowRef,
     gridRowHeaders[targetRowId],
     'targetedGridLeft',
