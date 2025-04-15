@@ -32,7 +32,7 @@ const getActionsOrError = async ({
       bulkError: undefined,
     };
   } catch (exc) {
-    if (isBoom(exc)) {
+    if (isBoom(exc) && exc.output.statusCode === 403) {
       return {
         allActions: undefined,
         bulkError: createBulkErrorObject({

@@ -46,7 +46,7 @@ export const importRuleActionConnectors = async ({
       warnings: (warnings as WarningSchema[]) || [],
     };
   } catch (exc) {
-    if (isBoom(exc)) {
+    if (isBoom(exc) && exc.output.statusCode === 403) {
       return {
         success: false,
         successCount: 0,
