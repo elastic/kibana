@@ -10,6 +10,7 @@ import { ALERT_STATUS, ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED } from '@kbn/
 import { render } from '../../../utils/test_helper';
 import { AlertsTableCellValue } from './cell_value';
 import { Alert } from '@kbn/alerting-types';
+import { coreMock } from '@kbn/core/public/mocks';
 
 interface AlertsTableRow {
   alertStatus: typeof ALERT_STATUS_ACTIVE | typeof ALERT_STATUS_RECOVERED;
@@ -66,4 +67,5 @@ const requiredProperties = {
   isDraggable: false,
   linkValues: [],
   scopeId: '',
+  services: coreMock.createStart(),
 } as unknown as ComponentProps<typeof AlertsTableCellValue>;
