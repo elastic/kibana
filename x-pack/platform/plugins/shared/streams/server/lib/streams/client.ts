@@ -28,6 +28,7 @@ import {
   streamDefinitionSchema,
   asWiredStreamDefinition,
 } from '@kbn/streams-schema';
+import { StorageClientGetResponse } from '@kbn/storage-adapter';
 import { AssetClient } from './assets/asset_client';
 import { LOGS_ROOT_STREAM_NAME, rootStreamDefinition } from './root_stream_definition';
 import { StreamsStorageClient } from './service';
@@ -40,7 +41,6 @@ import { SecurityError } from './errors/security_error';
 import { State } from './state_management/state';
 import { StatusError } from './errors/status_error';
 import { ASSET_ID, ASSET_TYPE } from './assets/fields';
-import { StorageClientGetResponse } from '../../../../../../../../src/platform/packages/shared/kbn-storage-adapter';
 
 interface AcknowledgeResponse<TResult extends Result> {
   acknowledged: true;
