@@ -21,7 +21,7 @@ describe('replaceESQLQueryIndexPattern', () => {
     const query = replaceESQLQueryIndexPattern('FROM one, one | STATS COUNT(*) BY host.name', {
       one: 'updated',
     });
-    expect(query).toEqual('FROM updated, updated | STATS COUNT(*) BY host.name');
+    expect(query).toEqual('FROM updated | STATS COUNT(*) BY host.name');
   });
 
   it('replaces remote index pattern', () => {
@@ -41,7 +41,7 @@ describe('replaceESQLQueryIndexPattern', () => {
         one: 'remote_three:one',
       }
     );
-    expect(query).toEqual('FROM remote_three:one, remote_three:one | STATS COUNT(*) BY host.name');
+    expect(query).toEqual('FROM remote_three:one | STATS COUNT(*) BY host.name');
   });
 
   it('is a noop if no matching replacements', () => {
