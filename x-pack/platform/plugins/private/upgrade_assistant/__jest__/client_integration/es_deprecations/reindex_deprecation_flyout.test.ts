@@ -265,4 +265,33 @@ describe('Reindex deprecation flyout', () => {
       );
     });
   });
+
+  describe('readonly', () => {
+    it('shows succed state when marking as readonly an index that has failed to reindex', async () => {
+      httpRequestsMockHelpers.setReindexStatusResponse(MOCK_REINDEX_DEPRECATION.index!, {
+        reindexOp: {
+          status: ReindexStatus.failed,
+          lastCompletedStep: ReindexStep.reindexCompleted,
+          reindexTaskPercComplete: 1,
+        },
+        warnings: [],
+        hasRequiredPrivileges: true,
+        meta: defaultReindexStatusMeta,
+      });
+
+      const { actions, find, exists } = testBed;
+
+      await actions.table.clickDeprecationRowAt('reindex', 0);
+      await actions.reindexDeprecationFlyout.clickReadOnlyButton();
+      await actions.reindexDeprecationFlyout.clickReadOnlyButton();
+
+      expect(exists('resolvedDeprecationBadge')).toBe(true);
+
+      expect(exists('updateIndexFlyoutTitle')).toBe(true);
+      expect(find('updateIndexFlyoutTitle').text()).toBe('Operation completed');
+
+      expect(exists('stepProgressStep')).toBe(true);
+      expect(find('stepProgressStep').text()).toBe('Setting foo index to read-only.');
+    });
+  });
 });
