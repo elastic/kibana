@@ -77,6 +77,12 @@ export const moveAction = (
   const currentPanelData = currentLayout?.[interactionEvent.targetRow].panels[interactionEvent.id];
 
   if (!currentPanelData) {
+    console.log(
+      'early?',
+      proposedGridLayout$.value,
+      interactionEvent.targetRow,
+      currentLayout?.[interactionEvent.targetRow]
+    );
     return;
   }
 
