@@ -141,7 +141,7 @@ export function StreamChartPanel({ definition }: StreamChartPanelProps) {
   };
 
   const docCount = docCountFetch?.value?.details.count;
-  const formattedDocCount = docCount ? formatNumber(docCount, 'decimal0') : '-';
+  const formattedDocCount = docCount ? formatNumber(docCount, 'decimal0') : '0';
 
   return (
     <EuiPanel hasShadow={false} hasBorder>

@@ -61,11 +61,11 @@ export function ChildStreamList({ availableStreams }: { availableStreams: string
               defaultMessage: 'Routing rules',
             })}
           </EuiText>
-          {(definition.privileges.simulate || definition.privileges.manage) && (
+          {definition.privileges.simulate && (
             <EuiFlexItem grow={false}>
               <EuiToolTip
                 content={
-                  definition.privileges.simulate
+                  !definition.privileges.manage
                     ? i18n.translate('xpack.streams.streamDetailRouting.rules.onlySimulate', {
                         defaultMessage:
                           "You don't have sufficient privileges to create new streams, only simulate.",

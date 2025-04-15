@@ -127,6 +127,13 @@ actions:
         * [Short URLs](https://www.elastic.co/guide/en/kibana/current/short-urls-api.html)
 
         Warning: Do not write documents directly to the `.kibana` index. When you write directly to the `.kibana` index, the data becomes corrupted and permanently breaks future Kibana versions
+  - target: '$.tags[?(@.name=="synthetics")]'
+    description: Add tag info
+    update:
+        x-displayName: Synthetics
+        externalDocs:
+          description: Synthetic monitoring
+          url: https://www.elastic.co/guide/en/observability/current/monitor-uptime-synthetics.html
 # Remove extra tags from operations
   - target: "$.paths[*][*].tags[1:]"
     description: Remove all but first tag from operations
