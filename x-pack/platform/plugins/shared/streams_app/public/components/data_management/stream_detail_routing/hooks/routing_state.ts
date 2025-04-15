@@ -16,6 +16,23 @@ export interface ChildUnderEdit {
   child: RoutingDefinition;
 }
 
+export const RoutingStateContext = React.createContext<
+  | {
+      routingAppState: ReturnType<typeof useRoutingState>;
+      definition: WiredStreamGetResponse;
+      refreshDefinition: () => void;
+    }
+  | undefined
+>(undefined);
+
+export function useRoutingStateContext() {
+  const context = React.useContext(RoutingStateContext);
+  if (!context) {
+    throw new Error('useRoutingStateContext must be used within a RoutingStateContextProvider');
+  }
+  return context;
+}
+
 export function useRoutingState({
   definition,
   toasts,

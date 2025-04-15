@@ -14,7 +14,12 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const kibanaServer = getService('kibanaServer');
-  const { dashboard, timePicker, common } = getPageObjects(['dashboard', 'timePicker', 'common']);
+  const { dashboard, timePicker, common, header } = getPageObjects([
+    'dashboard',
+    'timePicker',
+    'common',
+    'header',
+  ]);
   const testSubjects = getService('testSubjects');
   const esql = getService('esql');
   const dashboardAddPanel = getService('dashboardAddPanel');
@@ -85,6 +90,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // Check Lens editor has been updated accordingly
       const editorValue = await esql.getEsqlEditorQuery();
       expect(editorValue).to.contain('FROM logstash* | STATS COUNT(*) BY ??field');
+
+      // run the query to make sure the chart is updated
+      await testSubjects.click('ESQLEditor-run-query-button');
+      await dashboard.waitForRenderComplete();
+      await header.waitUntilLoadingHasFinished();
     });
 
     it('should update the Lens chart accordingly', async () => {

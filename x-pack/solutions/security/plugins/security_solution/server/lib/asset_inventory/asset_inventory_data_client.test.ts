@@ -4,10 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { AssetInventoryDataClient } from './asset_inventory_data_client';
+
+import {
+  loggingSystemMock,
+  elasticsearchServiceMock,
+  uiSettingsServiceMock,
+} from '@kbn/core/server/mocks';
+import type { InitEntityStoreRequestBody } from '../../../common/api/entity_analytics/entity_store/enable.gen';
 import type { SecuritySolutionApiRequestHandlerContext } from '../..';
-import { loggingSystemMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
-import { mockGlobalState } from '../../../public/common/mock';
+import { AssetInventoryDataClient } from './asset_inventory_data_client';
 
 const mockSecSolutionContext = {
   getEntityStoreDataClient: jest.fn(),
@@ -26,16 +31,26 @@ const mockEntityStorePrivileges = {
 describe('AssetInventoryDataClient', () => {
   const loggerMock = loggingSystemMock.createLogger();
   const clusterClientMock = elasticsearchServiceMock.createScopedClusterClient();
+  const uiSettingsClientMock = uiSettingsServiceMock.createClient();
 
   const client: AssetInventoryDataClient = new AssetInventoryDataClient({
     logger: loggerMock,
     clusterClient: clusterClientMock,
-    experimentalFeatures: mockGlobalState.app.enableExperimental,
+    uiSettingsClient: uiSettingsClientMock,
   });
 
   describe('status function', () => {
     beforeEach(() => {
       jest.clearAllMocks();
+      uiSettingsClientMock.get.mockResolvedValue(true);
+    });
+
+    it('returns INACTIVE_FEATURE when uisetting is disabled', async () => {
+      uiSettingsClientMock.get.mockResolvedValue(false);
+
+      const result = await client.status(mockSecSolutionContext, mockEntityStorePrivileges);
+
+      expect(result).toEqual({ status: 'inactive_feature' });
     });
 
     it('returns INSUFFICIENT_PRIVILEGES with missing privileges when user lacks required privileges', async () => {
@@ -149,6 +164,34 @@ describe('AssetInventoryDataClient', () => {
       const result = await client.status(mockSecSolutionContext, mockEntityStorePrivileges);
 
       expect(result).toEqual({ status: 'initializing' });
+    });
+  });
+
+  describe('enable function', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+      uiSettingsClientMock.get.mockResolvedValue(true);
+    });
+
+    it('throws error when uisetting is disabled', async () => {
+      uiSettingsClientMock.get.mockResolvedValue(false);
+
+      await expect(
+        client.enable(mockSecSolutionContext, {} as InitEntityStoreRequestBody)
+      ).rejects.toThrowError('uiSetting');
+    });
+  });
+
+  describe('delete function', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+      uiSettingsClientMock.get.mockResolvedValue(true);
+    });
+
+    it('throws error when uisetting is disabled', async () => {
+      uiSettingsClientMock.get.mockResolvedValue(false);
+
+      await expect(client.delete()).rejects.toThrowError('uiSetting');
     });
   });
 });

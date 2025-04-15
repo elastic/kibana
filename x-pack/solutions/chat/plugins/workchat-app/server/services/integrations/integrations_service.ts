@@ -12,7 +12,7 @@ import type {
   SavedObjectsServiceStart,
   SecurityServiceStart,
 } from '@kbn/core/server';
-import type { McpProvider } from '@kbn/wci-server';
+import type { McpClientProvider } from '@kbn/wci-server';
 import type { Integration } from '../../../common/integrations';
 import { integrationTypeName } from '../../saved_objects/integrations';
 import type { IntegrationRegistry } from './integration_registry';
@@ -41,7 +41,7 @@ export interface IntegrationsService {
   }: {
     integrationIds: string[] | '*';
     request: KibanaRequest;
-  }): Promise<McpProvider[]>;
+  }): Promise<McpClientProvider[]>;
 }
 
 export class IntegrationsServiceImpl implements IntegrationsService {
@@ -79,7 +79,7 @@ export class IntegrationsServiceImpl implements IntegrationsService {
   }: {
     integrationIds: string[] | '*';
     request: KibanaRequest;
-  }): Promise<McpProvider[]> {
+  }): Promise<McpClientProvider[]> {
     const client = await this.getScopedClient({ request });
 
     let integrations: Integration[] = [];
@@ -93,7 +93,7 @@ export class IntegrationsServiceImpl implements IntegrationsService {
     }
 
     return await Promise.all(
-      integrations.map<Promise<McpProvider>>(async (source) => {
+      integrations.map<Promise<McpClientProvider>>(async (source) => {
         return integrationToProvider({
           integration: source,
           request,
@@ -112,7 +112,7 @@ const integrationToProvider = async ({
   integration: Integration;
   registry: IntegrationRegistry;
   request: KibanaRequest;
-}): Promise<McpProvider> => {
+}): Promise<McpClientProvider> => {
   const definition = registry.get(integration.type);
   const instance = await definition.createIntegration({
     request,

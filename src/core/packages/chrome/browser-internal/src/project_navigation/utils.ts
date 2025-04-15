@@ -321,8 +321,8 @@ const initNavNode = <
 
   const id = getNavigationNodeId(node, () => `node-${index}`) as Id;
   const title = getTitleForNode(node, { deepLink, cloudLinks });
-  const isElasticInternalLink = cloudLink != null;
-  const href = isElasticInternalLink ? cloudLinks[cloudLink]?.href : node.href;
+  const isExternalLink = cloudLink != null;
+  const href = isExternalLink ? cloudLinks[cloudLink]?.href : node.href;
   const path = parentNodePath ? `${parentNodePath}.${id}` : id;
 
   if (href && !isAbsoluteLink(href) && !onClick) {
@@ -337,7 +337,7 @@ const initNavNode = <
     path,
     title,
     deepLink,
-    isElasticInternalLink,
+    isExternalLink,
     sideNavStatus,
   };
 

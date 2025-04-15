@@ -26,6 +26,9 @@ post:
         application/json:
           schema:
             $ref: '../components/schemas/create_annotation_response.yaml'
+          examples:
+            createAnnotationResponse1:
+              $ref: '../components/examples/annotation_object_post_200_response1.yaml'
     '400':
       description: Bad Request response
       content:
@@ -50,3 +53,5 @@ post:
         application/json:
           schema:
             $ref: '../components/schemas/404_response.yaml'
+  x-codeSamples:
+    - $ref: "../components/examples/annotation_object_post_curl_request1.yaml"

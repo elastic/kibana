@@ -339,13 +339,10 @@ export class ClusterClientAdapter<
       const esClient = await this.elasticsearchClientPromise;
       await esClient.indices.putTemplate({
         name: indexTemplateName,
-        body: {
-          ...currentIndexTemplate,
-          // @ts-expect-error elasticsearch@9.0.0 https://github.com/elastic/elasticsearch-js/issues/2584
-          settings: {
-            ...currentIndexTemplate.settings,
-            'index.hidden': true,
-          },
+        ...currentIndexTemplate,
+        settings: {
+          ...currentIndexTemplate.settings,
+          'index.hidden': true,
         },
       });
     } catch (err) {
@@ -461,8 +458,7 @@ export class ClusterClientAdapter<
       const simulatedMapping = get(simulatedIndexMapping, ['template', 'mappings']);
 
       if (simulatedMapping != null) {
-        // @ts-expect-error elasticsearch@9.0.0 https://github.com/elastic/elasticsearch-js/issues/2584
-        await esClient.indices.putMapping({ index: name, body: simulatedMapping });
+        await esClient.indices.putMapping({ index: name, ...simulatedMapping });
         this.logger.debug(`Successfully updated concrete index mappings for ${name}`);
       }
     } catch (err) {
@@ -935,7 +931,7 @@ export function getQueryBodyWithAuthFilter(
   };
 }
 
-function getNamespaceQuery(namespace?: string) {
+function getNamespaceQuery(namespace?: string): estypes.QueryDslQueryContainer {
   const defaultNamespaceQuery = {
     bool: {
       must_not: {
@@ -948,7 +944,7 @@ function getNamespaceQuery(namespace?: string) {
   const namedNamespaceQuery = {
     term: {
       'kibana.saved_objects.namespace': {
-        value: namespace,
+        value: namespace!,
       },
     },
   };
