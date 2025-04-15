@@ -7,10 +7,10 @@
 
 import React, { useMemo } from 'react';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import { PlaygroundProvider } from './providers/playground_provider';
+import { UnsavedFormProvider } from './providers/unsaved_form_provider';
 
 import { useKibana } from './hooks/use_kibana';
-import { App } from './components/app';
+import { Playground } from './components/playgorund';
 import { usePlaygroundBreadcrumbs } from './hooks/use_playground_breadcrumbs';
 
 export const PlaygroundOverview = () => {
@@ -25,18 +25,18 @@ export const PlaygroundOverview = () => {
   );
 
   return (
-    <PlaygroundProvider>
-      <KibanaPageTemplate
-        offset={0}
-        restrictWidth={false}
-        data-test-subj="svlPlaygroundPage"
-        grow={false}
-        panelled={false}
-        solutionNav={searchNavigation?.useClassicNavigation(history)}
-      >
-        <App showDocs />
-        {embeddableConsole}
-      </KibanaPageTemplate>
-    </PlaygroundProvider>
+    <KibanaPageTemplate
+      offset={0}
+      restrictWidth={false}
+      data-test-subj="svlPlaygroundPage"
+      grow={false}
+      panelled={false}
+      solutionNav={searchNavigation?.useClassicNavigation(history)}
+    >
+      <UnsavedFormProvider>
+        <Playground showDocs />
+      </UnsavedFormProvider>
+      {embeddableConsole}
+    </KibanaPageTemplate>
   );
 };
