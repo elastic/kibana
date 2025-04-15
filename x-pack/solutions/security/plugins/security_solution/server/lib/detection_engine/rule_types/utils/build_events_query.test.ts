@@ -25,43 +25,41 @@ describe('create_signals', () => {
       allow_no_indices: true,
       index: ['auditbeat-*'],
       ignore_unavailable: true,
-      body: {
-        size: 100,
-        query: {
-          bool: {
-            filter: [
-              {},
-              {
-                range: {
-                  '@timestamp': {
-                    gte: 'now-5m',
-                    lte: 'today',
-                    format: 'strict_date_optional_time',
-                  },
+      size: 100,
+      query: {
+        bool: {
+          filter: [
+            {},
+            {
+              range: {
+                '@timestamp': {
+                  gte: 'now-5m',
+                  lte: 'today',
+                  format: 'strict_date_optional_time',
                 },
               },
-            ],
+            },
+          ],
+        },
+      },
+      fields: [
+        {
+          field: '*',
+          include_unmapped: true,
+        },
+        {
+          field: '@timestamp',
+          format: 'strict_date_optional_time',
+        },
+      ],
+      sort: [
+        {
+          '@timestamp': {
+            order: 'asc',
+            unmapped_type: 'date',
           },
         },
-        fields: [
-          {
-            field: '*',
-            include_unmapped: true,
-          },
-          {
-            field: '@timestamp',
-            format: 'strict_date_optional_time',
-          },
-        ],
-        sort: [
-          {
-            '@timestamp': {
-              order: 'asc',
-              unmapped_type: 'date',
-            },
-          },
-        ],
-      },
+      ],
     });
   });
 
@@ -82,84 +80,82 @@ describe('create_signals', () => {
       allow_no_indices: true,
       index: ['auditbeat-*'],
       ignore_unavailable: true,
-      body: {
-        size: 100,
-        query: {
-          bool: {
-            filter: [
-              {},
-              {
-                bool: {
-                  should: [
-                    {
-                      range: {
-                        'event.ingested': {
-                          gte: 'now-5m',
-                          lte: 'today',
-                          format: 'strict_date_optional_time',
+      size: 100,
+      query: {
+        bool: {
+          filter: [
+            {},
+            {
+              bool: {
+                should: [
+                  {
+                    range: {
+                      'event.ingested': {
+                        gte: 'now-5m',
+                        lte: 'today',
+                        format: 'strict_date_optional_time',
+                      },
+                    },
+                  },
+                  {
+                    bool: {
+                      filter: [
+                        {
+                          range: {
+                            '@timestamp': {
+                              gte: 'now-5m',
+                              lte: 'today',
+                              format: 'strict_date_optional_time',
+                            },
+                          },
                         },
-                      },
-                    },
-                    {
-                      bool: {
-                        filter: [
-                          {
-                            range: {
-                              '@timestamp': {
-                                gte: 'now-5m',
-                                lte: 'today',
-                                format: 'strict_date_optional_time',
+                        {
+                          bool: {
+                            must_not: {
+                              exists: {
+                                field: 'event.ingested',
                               },
                             },
                           },
-                          {
-                            bool: {
-                              must_not: {
-                                exists: {
-                                  field: 'event.ingested',
-                                },
-                              },
-                            },
-                          },
-                        ],
-                      },
+                        },
+                      ],
                     },
-                  ],
-                  minimum_should_match: 1,
-                },
+                  },
+                ],
+                minimum_should_match: 1,
               },
-            ],
+            },
+          ],
+        },
+      },
+      fields: [
+        {
+          field: '*',
+          include_unmapped: true,
+        },
+        {
+          field: 'event.ingested',
+          format: 'strict_date_optional_time',
+        },
+        {
+          field: '@timestamp',
+          format: 'strict_date_optional_time',
+        },
+      ],
+      sort: [
+        {
+          'event.ingested': {
+            order: 'asc',
+            unmapped_type: 'date',
           },
         },
-        fields: [
-          {
-            field: '*',
-            include_unmapped: true,
+        {
+          '@timestamp': {
+            order: 'asc',
+            unmapped_type: 'date',
           },
-          {
-            field: 'event.ingested',
-            format: 'strict_date_optional_time',
-          },
-          {
-            field: '@timestamp',
-            format: 'strict_date_optional_time',
-          },
-        ],
-        sort: [
-          {
-            'event.ingested': {
-              order: 'asc',
-              unmapped_type: 'date',
-            },
-          },
-          {
-            '@timestamp': {
-              order: 'asc',
-              unmapped_type: 'date',
-            },
-          },
-        ],
-      },
+        },
+      ],
     });
   });
 
@@ -180,43 +176,41 @@ describe('create_signals', () => {
       allow_no_indices: true,
       index: ['auditbeat-*'],
       ignore_unavailable: true,
-      body: {
-        size: 100,
-        query: {
-          bool: {
-            filter: [
-              {},
-              {
-                range: {
-                  'event.ingested': {
-                    gte: 'now-5m',
-                    lte: 'today',
-                    format: 'strict_date_optional_time',
-                  },
+      size: 100,
+      query: {
+        bool: {
+          filter: [
+            {},
+            {
+              range: {
+                'event.ingested': {
+                  gte: 'now-5m',
+                  lte: 'today',
+                  format: 'strict_date_optional_time',
                 },
               },
-            ],
+            },
+          ],
+        },
+      },
+      fields: [
+        {
+          field: '*',
+          include_unmapped: true,
+        },
+        {
+          field: 'event.ingested',
+          format: 'strict_date_optional_time',
+        },
+      ],
+      sort: [
+        {
+          'event.ingested': {
+            order: 'asc',
+            unmapped_type: 'date',
           },
         },
-        fields: [
-          {
-            field: '*',
-            include_unmapped: true,
-          },
-          {
-            field: 'event.ingested',
-            format: 'strict_date_optional_time',
-          },
-        ],
-        sort: [
-          {
-            'event.ingested': {
-              order: 'asc',
-              unmapped_type: 'date',
-            },
-          },
-        ],
-      },
+      ],
     });
   });
 
@@ -238,44 +232,42 @@ describe('create_signals', () => {
       allow_no_indices: true,
       index: ['auditbeat-*'],
       ignore_unavailable: true,
-      body: {
-        size: 100,
-        query: {
-          bool: {
-            filter: [
-              {},
-              {
-                range: {
-                  '@timestamp': {
-                    gte: 'now-5m',
-                    lte: 'today',
-                    format: 'strict_date_optional_time',
-                  },
+      size: 100,
+      query: {
+        bool: {
+          filter: [
+            {},
+            {
+              range: {
+                '@timestamp': {
+                  gte: 'now-5m',
+                  lte: 'today',
+                  format: 'strict_date_optional_time',
                 },
               },
-            ],
+            },
+          ],
+        },
+      },
+      fields: [
+        {
+          field: '*',
+          include_unmapped: true,
+        },
+        {
+          field: '@timestamp',
+          format: 'strict_date_optional_time',
+        },
+      ],
+      search_after: [fakeSortId],
+      sort: [
+        {
+          '@timestamp': {
+            order: 'asc',
+            unmapped_type: 'date',
           },
         },
-        fields: [
-          {
-            field: '*',
-            include_unmapped: true,
-          },
-          {
-            field: '@timestamp',
-            format: 'strict_date_optional_time',
-          },
-        ],
-        search_after: [fakeSortId],
-        sort: [
-          {
-            '@timestamp': {
-              order: 'asc',
-              unmapped_type: 'date',
-            },
-          },
-        ],
-      },
+      ],
     });
   });
   test('if searchAfterSortIds is a valid sortId number', () => {
@@ -296,44 +288,42 @@ describe('create_signals', () => {
       allow_no_indices: true,
       index: ['auditbeat-*'],
       ignore_unavailable: true,
-      body: {
-        size: 100,
-        query: {
-          bool: {
-            filter: [
-              {},
-              {
-                range: {
-                  '@timestamp': {
-                    gte: 'now-5m',
-                    lte: 'today',
-                    format: 'strict_date_optional_time',
-                  },
+      size: 100,
+      query: {
+        bool: {
+          filter: [
+            {},
+            {
+              range: {
+                '@timestamp': {
+                  gte: 'now-5m',
+                  lte: 'today',
+                  format: 'strict_date_optional_time',
                 },
               },
-            ],
+            },
+          ],
+        },
+      },
+      fields: [
+        {
+          field: '*',
+          include_unmapped: true,
+        },
+        {
+          field: '@timestamp',
+          format: 'strict_date_optional_time',
+        },
+      ],
+      search_after: [fakeSortIdNumber],
+      sort: [
+        {
+          '@timestamp': {
+            order: 'asc',
+            unmapped_type: 'date',
           },
         },
-        fields: [
-          {
-            field: '*',
-            include_unmapped: true,
-          },
-          {
-            field: '@timestamp',
-            format: 'strict_date_optional_time',
-          },
-        ],
-        search_after: [fakeSortIdNumber],
-        sort: [
-          {
-            '@timestamp': {
-              order: 'asc',
-              unmapped_type: 'date',
-            },
-          },
-        ],
-      },
+      ],
     });
   });
   test('if aggregations is not provided it should not be included', () => {
@@ -353,43 +343,41 @@ describe('create_signals', () => {
       allow_no_indices: true,
       index: ['auditbeat-*'],
       ignore_unavailable: true,
-      body: {
-        size: 100,
-        query: {
-          bool: {
-            filter: [
-              {},
-              {
-                range: {
-                  '@timestamp': {
-                    gte: 'now-5m',
-                    lte: 'today',
-                    format: 'strict_date_optional_time',
-                  },
+      size: 100,
+      query: {
+        bool: {
+          filter: [
+            {},
+            {
+              range: {
+                '@timestamp': {
+                  gte: 'now-5m',
+                  lte: 'today',
+                  format: 'strict_date_optional_time',
                 },
               },
-            ],
+            },
+          ],
+        },
+      },
+      fields: [
+        {
+          field: '*',
+          include_unmapped: true,
+        },
+        {
+          field: '@timestamp',
+          format: 'strict_date_optional_time',
+        },
+      ],
+      sort: [
+        {
+          '@timestamp': {
+            order: 'asc',
+            unmapped_type: 'date',
           },
         },
-        fields: [
-          {
-            field: '*',
-            include_unmapped: true,
-          },
-          {
-            field: '@timestamp',
-            format: 'strict_date_optional_time',
-          },
-        ],
-        sort: [
-          {
-            '@timestamp': {
-              order: 'asc',
-              unmapped_type: 'date',
-            },
-          },
-        ],
-      },
+      ],
     });
   });
 
@@ -416,50 +404,48 @@ describe('create_signals', () => {
       allow_no_indices: true,
       index: ['auditbeat-*'],
       ignore_unavailable: true,
-      body: {
-        size: 100,
-        query: {
-          bool: {
-            filter: [
-              {},
-              {
-                range: {
-                  '@timestamp': {
-                    gte: 'now-5m',
-                    lte: 'today',
-                    format: 'strict_date_optional_time',
-                  },
+      size: 100,
+      query: {
+        bool: {
+          filter: [
+            {},
+            {
+              range: {
+                '@timestamp': {
+                  gte: 'now-5m',
+                  lte: 'today',
+                  format: 'strict_date_optional_time',
                 },
               },
-            ],
-          },
-        },
-        fields: [
-          {
-            field: '*',
-            include_unmapped: true,
-          },
-          {
-            field: '@timestamp',
-            format: 'strict_date_optional_time',
-          },
-        ],
-        aggregations: {
-          tags: {
-            terms: {
-              field: 'tag',
             },
-          },
+          ],
         },
-        sort: [
-          {
-            '@timestamp': {
-              order: 'asc',
-              unmapped_type: 'date',
-            },
-          },
-        ],
       },
+      fields: [
+        {
+          field: '*',
+          include_unmapped: true,
+        },
+        {
+          field: '@timestamp',
+          format: 'strict_date_optional_time',
+        },
+      ],
+      aggregations: {
+        tags: {
+          terms: {
+            field: 'tag',
+          },
+        },
+      },
+      sort: [
+        {
+          '@timestamp': {
+            order: 'asc',
+            unmapped_type: 'date',
+          },
+        },
+      ],
     });
   });
 
@@ -558,36 +544,33 @@ describe('create_signals', () => {
       runtime_mappings: undefined,
       track_total_hits: undefined,
       ignore_unavailable: true,
-      body: {
-        size: 100,
-        query: {
-          bool: {
-            filter: [
-              {},
-              {
-                range: {
-                  '@timestamp': {
-                    gte: 'now-5m',
-                    lte: 'today',
-                    format: 'strict_date_optional_time',
-                  },
+      size: 100,
+      query: {
+        bool: {
+          filter: [
+            {},
+            {
+              range: {
+                '@timestamp': {
+                  gte: 'now-5m',
+                  lte: 'today',
+                  format: 'strict_date_optional_time',
                 },
               },
-            ],
+            },
+          ],
+        },
+      },
+      _source: false,
+      fields: ['@timestamp'],
+      sort: [
+        {
+          '@timestamp': {
+            order: 'asc',
+            unmapped_type: 'date',
           },
         },
-        _source: false,
-        fields: ['@timestamp'],
-        runtime_mappings: undefined,
-        sort: [
-          {
-            '@timestamp': {
-              order: 'asc',
-              unmapped_type: 'date',
-            },
-          },
-        ],
-      },
+      ],
     });
   });
 });
