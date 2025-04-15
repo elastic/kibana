@@ -30,7 +30,7 @@ export const addConnector = async (
   client: IScopedClusterClient,
   input: {
     deleteExistingConnector?: boolean;
-    indexName: string | null;
+    indexName: string;
     isNative: boolean;
     language: string | null;
     name: string | null;
@@ -47,10 +47,10 @@ export const addConnector = async (
       }
     }
 
-    const connector = await fetchConnectorByIndexName(client.asCurrentUser, index);
-    if (connector) {
+    const existingConnector = await fetchConnectorByIndexName(client.asCurrentUser, index);
+    if (existingConnector) {
       if (input.deleteExistingConnector) {
-        await deleteConnectorById(client.asCurrentUser, connector.id);
+        await deleteConnectorById(client.asCurrentUser, existingConnector.id);
       } else {
         throw new Error(ErrorCode.CONNECTOR_DOCUMENT_ALREADY_EXISTS);
       }

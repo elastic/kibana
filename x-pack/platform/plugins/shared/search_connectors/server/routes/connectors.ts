@@ -89,11 +89,21 @@ export function registerConnectorRoutes({
       const [_core, start] = await getStartServices();
       const isAgentlessEnabled = start.fleet?.agentless?.enabled === true;
       try {
+        let indexName = request.body.index_name;
+        if (!indexName) {
+          const generatedNames = await generateConnectorName(
+            client,
+            request.body.service_type ?? 'custom',
+            request.body.name,
+            request.body.is_native ?? false
+          );
+          indexName = generatedNames.indexName;
+        }
         const body = await addConnector(
           client,
           {
             deleteExistingConnector: request.body.delete_existing_connector,
-            indexName: request.body.index_name ?? null,
+            indexName,
             isNative: request.body.is_native,
             language: request.body.language,
             name: request.body.name ?? null,
