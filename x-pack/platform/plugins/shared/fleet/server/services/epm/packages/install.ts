@@ -67,8 +67,10 @@ import {
   PACKAGES_SAVED_OBJECT_TYPE,
   MAX_TIME_COMPLETE_INSTALL,
   MAX_REINSTALL_RETRIES,
+  SO_SEARCH_LIMIT,
+  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
 } from '../../../constants';
-import { dataStreamService, licenseService } from '../..';
+import { dataStreamService, licenseService, packagePolicyService } from '../..';
 import { appContextService } from '../../app_context';
 import * as Registry from '../registry';
 import {
@@ -1113,7 +1115,7 @@ export async function updateCustomPackage(
     packageInfo,
     archiveIterator,
   };
-  return await installPackageWithStateMachine({
+  await installPackageWithStateMachine({
     packageInstallContext,
     pkgName,
     pkgVersion: data.version,
@@ -1125,9 +1127,22 @@ export async function updateCustomPackage(
     force: true,
     paths: packageInstallContext.paths,
     authorizationHeader: null,
+    keepFailedInstallation: true,
   });
 
   // TODO update related package policies
+  const policyIdsToUpgrade = await packagePolicyService.listIds(
+    appContextService.getInternalUserSOClientWithoutSpaceExtension(),
+    {
+      page: 1,
+      perPage: SO_SEARCH_LIMIT,
+      kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${pkgName}`,
+    }
+  );
+
+  if (policyIdsToUpgrade.items.length) {
+    await packagePolicyService.bulkUpgrade(savedObjectsClient, esClient, policyIdsToUpgrade.items);
+  }
 }
 
 export const updateVersion = async (
