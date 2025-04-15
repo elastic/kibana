@@ -74,17 +74,9 @@ describe(
       submitQuery();
       checkResults();
       cy.contains('Add to Timeline investigation');
-      // cy.contains('Save for later').click();
-      // cy.contains('Save query');
-      // cy.get('[data-test-subj="osquery-save-query-flyout"]').within(() => {
-      //   cy.get('.euiButtonEmpty').contains('Cancel').click();
-      // });
       cy.getBySel('add-to-timeline').first().click();
       cy.getBySel('globalToastList').contains('Added');
       closeToastIfVisible();
-      // cy.getBySel(RESULTS_TABLE).within(() => {
-      //   cy.getBySel(RESULTS_TABLE_BUTTON).should('not.exist');
-      // });
       cy.contains('Cancel').click();
       cy.getBySel('timeline-bottom-bar').within(() => {
         cy.contains(TIMELINE_NAME).click();
