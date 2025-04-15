@@ -11,10 +11,11 @@ import deepEqual from 'fast-deep-equal';
 import { cloneDeep, pick } from 'lodash';
 
 import { GridLayoutStateManager, GridRowData } from '../../types';
-import { getRowKeysInOrder } from '../../utils/resolve_grid_row';
+import { getRowKeysInOrder, resolveGridRow } from '../../utils/resolve_grid_row';
 import { getSensorType } from '../sensors';
 import { PointerPosition, UserInteractionEvent } from '../types';
 import { getRowRect } from '../../utils/calculations';
+import { createNewRow } from '../state_manager_selectors';
 
 export const startAction = (
   e: UserInteractionEvent,
@@ -100,7 +101,7 @@ export const moveAction = (
   const currentLayout =
     gridLayoutStateManager.proposedGridLayout$.getValue() ??
     gridLayoutStateManager.gridLayout$.getValue();
-  const currentRowOrder = getRowKeysInOrder(currentLayout);
+  const currentRowOrder = getRowKeysInOrder(currentLayout); // todo - use it in panel move action
 
   const dropTargetRowId = getDropTarget(currentPointer, gridLayoutStateManager);
   if (!dropTargetRowId) return;
@@ -120,12 +121,53 @@ export const moveAction = (
     // if the drop target row is non collapsible, we might need to move panels
   } else if (!dropTargetRow.isCollapsible) {
     const rowPanels = dropTargetRow.panels;
+    const rowBelow = currentRowOrder.at(currentRowOrder.indexOf(dropTargetRowId) + 1);
+
     const panelsBelowCursor = getPanelsBelowCursor(
       currentPointer,
       rowPanels,
       gridLayoutStateManager
-    )
-    console.log('panelsBelowCursor', panelsBelowCursor);
+    );
+    // console.log(currentLayout, rowBelow, rowBelow && currentLayout[rowBelow].isCollapsible)
+    if (panelsBelowCursor.length && rowBelow && currentLayout[rowBelow].isCollapsible) {
+      // create a new row
+      const newRow = createNewRow({});
+      const { moved, kept } = partitionRowPanels(rowPanels, panelsBelowCursor);
+      // console.log('moved', moved);
+      // console.log('kept', kept);
+      const updatedLayout = cloneDeep(currentLayout);
+      updatedLayout[newRow.id] = {
+        ...newRow,
+        panels: moved,
+      };
+      updatedLayout[newRow.id] = resolveGridRow(updatedLayout[newRow.id]);
+      updatedLayout[dropTargetRowId] = {
+        ...dropTargetRow,
+        panels: kept,
+      };
+      let updatedRowOrder = sortRowsByRefs(gridLayoutStateManager);
+      console.log('updatedRowOrder', updatedRowOrder, dropTargetRowId);
+      updatedRowOrder = insertAfter(currentRowOrder, currentActiveRowEvent.id, newRow.id);
+      console.log('updatedRowOrder', updatedRowOrder);
+      if (!deepEqual(currentRowOrder, updatedRowOrder)) {
+        updatedRowOrder.forEach((id, index) => {
+          updatedLayout[id].order = index + 1;
+        });
+      }
+      console.log(updatedLayout);
+      gridLayoutStateManager.proposedGridLayout$.next(updatedLayout);
+    }
+
+    // GO UP CASE!
+    // if all panels from the row are below the cursor AND the row below is not collapsible, move the panels to the below row
+
+    // if some panels from the row are below the cursor AND the row below is not collapsible, move the panels to the below row
+    // if none of the panels from the row are below the cursor AND the row below is not collapsible (?)
+
+    // if all panels from the row are below the cursor AND the row below is collapsible, change the order of the rows
+
+    // if some panels from the row are below the cursor AND the row below is collapsible, create a new row and move the panels there
+    // GO DOWN CASE!
   }
 };
 
@@ -160,19 +202,19 @@ function getDropTarget(
 function partitionRowPanels(
   obj: GridRowData['panels'],
   keysToKeep: Array<keyof GridRowData['panels']>
-): { kept: GridRowData['panels']; omitted: GridRowData['panels'] } {
+): { moved: GridRowData['panels']; kept: GridRowData['panels'] } {
+  const moved = {} as GridRowData['panels'];
   const kept = {} as GridRowData['panels'];
-  const omitted = {} as GridRowData['panels'];
 
   for (const key in obj) {
     if (keysToKeep.includes(key)) {
-      kept[key] = obj[key];
+      moved[key] = obj[key];
     } else {
-      omitted[key] = obj[key];
+      kept[key] = obj[key];
     }
   }
 
-  return { kept, omitted };
+  return { moved, kept };
 }
 
 function insertAfter(array: string[], target: string, newElement: string): string[] {
