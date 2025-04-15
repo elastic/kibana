@@ -17,12 +17,13 @@ import { useGridLayoutPanelEvents } from '../use_grid_layout_events';
 import { UserInteractionEvent } from '../use_grid_layout_events/types';
 
 export const ResizeHandle = React.memo(({ rowId, panelId }: { rowId: string; panelId: string }) => {
-  
   const startDrag = useGridLayoutPanelEvents();
   const startInteraction = useCallback(
     (ev: UserInteractionEvent) => {
-      return startDrag(ev, {interactionType: 'resize', rowId, panelId});
-    }, [rowId, panelId])
+      return startDrag(ev, { interactionType: 'resize', rowId, panelId });
+    },
+    [rowId, panelId]
+  );
 
   return (
     <button

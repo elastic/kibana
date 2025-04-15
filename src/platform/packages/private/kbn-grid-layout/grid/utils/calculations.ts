@@ -39,21 +39,25 @@ export const getTopOffsetForRow = (rowId: string, layout: GridLayoutData) => {
 
 export const getRowRect = (rowId: string, gridLayoutStateManager: GridLayoutStateManager) => {
   const headerRef = gridLayoutStateManager.headerRefs.current[rowId];
-  const rowRef = gridLayoutStateManager.rowDimensionsRefs.current[rowId];
   if (!headerRef) {
     throw new Error('header ref should be defined for all rows');
   }
+  const rowRef = gridLayoutStateManager.rowDimensionsRefs.current[rowId];
   if (!rowRef) {
-    const { top, bottom } = headerRef.getBoundingClientRect();
+    const { top, bottom, left, right } = headerRef.getBoundingClientRect();
     return {
       top,
       bottom,
+      left,
+      right,
     };
   }
   const top = headerRef.getBoundingClientRect().top;
-  const bottom = rowRef.getBoundingClientRect().bottom;
+  const { bottom, left, right } = rowRef.getBoundingClientRect();
   return {
     top,
     bottom,
+    left,
+    right,
   };
 };

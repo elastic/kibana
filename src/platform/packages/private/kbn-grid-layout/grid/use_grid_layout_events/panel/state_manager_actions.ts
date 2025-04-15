@@ -26,23 +26,19 @@ export const startAction = (
   rowId: string,
   panelId: string
 ) => {
-
   const panelRef = gridLayoutStateManager.panelRefs.current[panelId];
   if (!panelRef) return;
 
   const panelRect = panelRef.getBoundingClientRect();
-  
-  console.log(
-    'startAction',
-   {
+
+  console.log('startAction', {
     type,
     id: panelId,
     targetRow: rowId,
     panelDiv: panelRef,
     sensorType: getSensorType(e),
     sensorOffsets: getSensorOffsets(e, panelRect),
-  }
-  );
+  });
 
   gridLayoutStateManager.interactionEvent$.next({
     type,
@@ -137,8 +133,25 @@ export const moveAction = (
 
   // calculate the requested grid position
   const targetedRowRef = gridRowRefs[targetRowId];
-  const targetedGridLeft = targetedRowRef?.getBoundingClientRect().left ?? 0;
-  const targetedGridTop = targetedRowRef?.getBoundingClientRect().top ?? 0;
+  // const targetedGridLeft = targetedRowRef?.getBoundingClientRect().left ?? 0;
+  // const targetedGridTop = targetedRowRef?.getBoundingClientRect().top ?? 0;
+
+
+
+  const {left: targetedGridLeft, top: targetedGridTop} = getRowRect(
+    targetRowId,
+    gridLayoutStateManager
+  );
+
+    console.log(
+    targetedRowRef,
+    gridRowHeaders[targetRowId],
+    'targetedGridLeft',
+    targetedGridLeft,
+    'targetedGridTop',
+    targetedGridTop,
+    getRowRect(targetRowId, gridLayoutStateManager)
+  );
 
   const maxColumn = isResize ? columnCount : columnCount - currentPanelData.width;
 
@@ -260,14 +273,13 @@ export const commitAction = ({
   gridLayout$,
   proposedGridLayout$,
 }: GridLayoutStateManager) => {
- 
   activePanel$.next(undefined);
   interactionEvent$.next(undefined);
   if (proposedGridLayout$.value && !deepEqual(proposedGridLayout$.value, gridLayout$.getValue())) {
     gridLayout$.next(cloneDeep(proposedGridLayout$.value));
   }
   proposedGridLayout$.next(undefined);
-   console.log(
+  console.log(
     'commitAction',
     activePanel$.value,
     interactionEvent$.value,

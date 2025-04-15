@@ -83,12 +83,10 @@ export const GridPanel = React.memo(({ panelId, rowId }: GridPanelProps) => {
           const activeLayout = proposedGridLayout ?? gridLayout;
           const currentInteractionEvent = gridLayoutStateManager.interactionEvent$.getValue();
           const isPanelActive = activePanel?.id === panelId;
-          let row =
-            isPanelActive && currentInteractionEvent?.targetRow
-              ? currentInteractionEvent.targetRow
-              : rowId;
+          let row = currentInteractionEvent?.targetRow ? currentInteractionEvent.targetRow : rowId;
 
           let panel = activeLayout[row]?.panels[panelId];
+          // TODO: this is a workaround for the case when the panel is moved to another row and dropped
           if (!panel) {
             Object.entries(activeLayout).forEach(([rId, rowData]) => {
               if (rowData.panels[panelId]) {
@@ -97,12 +95,14 @@ export const GridPanel = React.memo(({ panelId, rowId }: GridPanelProps) => {
               }
             });
           }
+          console.log('row', row);
           if (!ref) {
             console.log('panel', panel);
           }
           if (!ref || !panel) return;
 
           const gridRowOffset = getTopOffsetForRow(row, activeLayout);
+          console.log(gridRowOffset);
 
           if (isPanelActive) {
             ref.classList.add('kbnGridPanel--active');
