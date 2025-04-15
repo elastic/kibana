@@ -16,26 +16,26 @@ import { PublishesWritableTitle } from './publishes_title';
 export interface SerializedTitles {
   title?: string;
   description?: string;
-  hidePanelTitles?: boolean;
+  hideTitle?: boolean;
 }
 
 const defaultTitlesState: WithAllKeys<SerializedTitles> = {
   title: undefined,
   description: undefined,
-  hidePanelTitles: undefined,
+  hideTitle: undefined,
 };
 
 export const titleComparators: StateComparators<SerializedTitles> = {
   title: 'referenceEquality',
   description: 'referenceEquality',
-  hidePanelTitles: (a, b) => Boolean(a) === Boolean(b),
+  hideTitle: (a, b) => Boolean(a) === Boolean(b),
 };
 
 export const stateHasTitles = (state: unknown): state is SerializedTitles => {
   return (
     (state as SerializedTitles)?.title !== undefined ||
     (state as SerializedTitles)?.description !== undefined ||
-    (state as SerializedTitles)?.hidePanelTitles !== undefined
+    (state as SerializedTitles)?.hideTitle !== undefined
   );
 };
 
