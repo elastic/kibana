@@ -106,7 +106,6 @@ export function getAlertsEmbeddableFactory({
 
       const api = finalizeApi({
         ...titleManager.api,
-        ...sloAlertsStateManager.api,
         ...unsavedChangesApi,
         defaultTitle$,
         hideTitle$: titleManager.api.hidePanelTitles$,
