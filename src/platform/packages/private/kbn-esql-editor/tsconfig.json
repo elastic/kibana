@@ -36,6 +36,7 @@
     "@kbn/shared-ux-table-persist",
     "@kbn/esql-types",
     "@kbn/field-types"
+    "@kbn/licensing-plugin"
   ],
   "exclude": [
     "target/**/*",
