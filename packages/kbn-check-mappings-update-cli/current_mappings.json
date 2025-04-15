@@ -3051,63 +3051,12 @@
   "search_playground": {
     "dynamic": false,
     "properties": {
-      "citations": {
-        "index": false,
-        "type": "boolean"
-      },
-      "context": {
-        "properties": {
-          "docSize": {
-            "null_value": 1,
-            "type": "integer"
-          },
-          "sourceFields": {
-            "enabled": true,
-            "type": "object"
-          }
-        }
-      },
-      "elasticsearchQueryJSON": {
-        "index": false,
-        "type": "text"
-      },
-      "indices": {
-        "fields": {
-          "keyword": {
-            "type": "keyword"
-          }
-        },
-        "index": true,
-        "type": "keyword"
-      },
       "name": {
         "fields": {
           "keyword": {
             "type": "keyword"
           }
         },
-        "type": "text"
-      },
-      "prompt": {
-        "index": false,
-        "type": "text"
-      },
-      "queryFields": {
-        "enabled": true,
-        "type": "object"
-      },
-      "summarizationModel": {
-        "properties": {
-          "connectorId": {
-            "type": "keyword"
-          },
-          "value": {
-            "type": "text"
-          }
-        }
-      },
-      "userElasticsearchQueryJSON": {
-        "index": false,
         "type": "text"
       }
     }

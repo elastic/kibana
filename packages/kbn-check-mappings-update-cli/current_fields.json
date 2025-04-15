@@ -921,19 +921,7 @@
   ],
   "search-telemetry": [],
   "search_playground": [
-    "citations",
-    "context",
-    "context.docSize",
-    "context.sourceFields",
-    "elasticsearchQueryJSON",
-    "indices",
-    "name",
-    "prompt",
-    "queryFields",
-    "summarizationModel",
-    "summarizationModel.connectorId",
-    "summarizationModel.value",
-    "userElasticsearchQueryJSON"
+    "name"
   ],
   "security-ai-prompt": [
     "description",
