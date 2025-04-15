@@ -14,7 +14,6 @@ import type {
   SavedObjectsBulkUpdateObject,
   StartServicesAccessor,
 } from 'src/core/server';
-import { ALL_NAMESPACES_STRING } from 'src/core/server/saved_objects/service/lib/utils';
 
 import type { AuthenticatedUser, SecurityPluginSetup } from '../../../security/server';
 import { getDescriptorNamespace } from '../saved_objects/get_descriptor_namespace';
