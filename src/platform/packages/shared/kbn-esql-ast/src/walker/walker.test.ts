@@ -21,6 +21,8 @@ import {
   ESQLInlineCast,
   ESQLUnknownItem,
   ESQLIdentifier,
+  ESQLMap,
+  ESQLMapEntry,
 } from '../types';
 import { walk, Walker } from './walker';
 
@@ -804,6 +806,48 @@ describe('structurally can walk all nodes', () => {
           ]);
         });
       });
+    });
+  });
+
+  describe('expressions', () => {
+    test('can visit a "map" expression', () => {
+      const src = 'ROW f(0, {"a": 0})';
+      const { ast } = parse(src);
+      const nodes: ESQLMap[] = [];
+
+      walk(ast, {
+        visitMap: (node) => nodes.push(node),
+      });
+
+      expect(nodes).toMatchObject([
+        {
+          type: 'map',
+        },
+      ]);
+      expect(src.slice(nodes[0].location!.min, nodes[0].location!.max + 1)).toBe('{"a": 0}');
+    });
+
+    test('can visit a "map-entry" expression', () => {
+      const src = 'ROW f(0, {"a":0, "foo" : /* 1 */ "bar"})';
+      const { ast } = parse(src);
+      const nodes: ESQLMapEntry[] = [];
+
+      walk(ast, {
+        visitMapEntry: (node) => nodes.push(node),
+      });
+
+      expect(nodes).toMatchObject([
+        {
+          type: 'map-entry',
+        },
+        {
+          type: 'map-entry',
+        },
+      ]);
+      expect(src.slice(nodes[0].location!.min, nodes[0].location!.max + 1)).toBe('"a":0');
+      expect(src.slice(nodes[1].location!.min, nodes[1].location!.max + 1)).toBe(
+        '"foo" : /* 1 */ "bar"'
+      );
     });
   });
 
