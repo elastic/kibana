@@ -55,6 +55,8 @@ export const SchemaEditorFlyout = ({
     field
   );
 
+  const hasValidFieldType = nextField.type !== undefined;
+
   const [{ loading: isSaving }, saveChanges] = useAsyncFn(async () => {
     await onSave(nextField);
     if (onClose) onClose();
@@ -110,7 +112,12 @@ export const SchemaEditorFlyout = ({
             </EuiButtonEmpty>
             <EuiButton
               data-test-subj="streamsAppSchemaEditorFieldSaveButton"
-              disabled={isSaving || !isValidAdvancedFieldMappings || !isValidSimulation}
+              disabled={
+                isSaving ||
+                !hasValidFieldType ||
+                !isValidAdvancedFieldMappings ||
+                !isValidSimulation
+              }
               isLoading={isSaving}
               onClick={saveChanges}
             >
