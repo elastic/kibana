@@ -189,9 +189,9 @@ const importContentRoute = createServerRoute({
 });
 
 const previewContentRoute = createServerRoute({
-  endpoint: 'POST /api/streams/{name}/content/preview 2023-10-31',
+  endpoint: 'POST /internal/streams/{name}/content/preview',
   options: {
-    access: 'public',
+    access: 'internal',
     summary: 'Preview a content pack',
     description: 'Returns a json representation of a content pack.',
     body: {

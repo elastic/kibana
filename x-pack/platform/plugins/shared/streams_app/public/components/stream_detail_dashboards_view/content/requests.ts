@@ -48,7 +48,7 @@ export async function previewContent({
   body.append('content', file);
 
   const contentPack = await http.post<ContentPack>(
-    `/api/streams/${definition.stream.name}/content/preview`,
+    `/internal/streams/${definition.stream.name}/content/preview`,
     {
       body,
       headers: {
