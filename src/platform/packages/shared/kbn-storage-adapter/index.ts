@@ -83,7 +83,7 @@ export type StorageClientIndexRequest<TDocument = unknown> = Omit<
 export type StorageClientIndexResponse = IndexResponse;
 
 export type StorageClientGetRequest = Omit<GetRequest & SearchRequest, 'index'>;
-export type StorageClientGetResponse<TDocument extends { _id?: string }> = GetResponse<TDocument>;
+export type StorageClientGetResponse<TDocument> = GetResponse<TDocument>;
 
 export type StorageClientSearch<TDocumentType = never> = <
   TSearchRequest extends StorageClientSearchRequest

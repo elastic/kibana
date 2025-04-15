@@ -11,14 +11,16 @@ import {
   QueryDslQueryContainer,
   Result,
 } from '@elastic/elasticsearch/lib/api/types';
-import type { IScopedClusterClient, Logger, KibanaRequest } from '@kbn/core/server';
+import type { IScopedClusterClient, KibanaRequest, Logger } from '@kbn/core/server';
 import { isNotFoundError } from '@kbn/es-errors';
+import { StorageClientGetResponse } from '@kbn/storage-adapter';
 import {
   Condition,
   StreamDefinition,
   StreamUpsertRequest,
   UnwiredStreamDefinition,
   WiredStreamDefinition,
+  asWiredStreamDefinition,
   assertsSchema,
   getAncestors,
   getParentId,
@@ -26,21 +28,19 @@ import {
   isIngestStreamDefinition,
   isWiredStreamDefinition,
   streamDefinitionSchema,
-  asWiredStreamDefinition,
 } from '@kbn/streams-schema';
-import { StorageClientGetResponse } from '@kbn/storage-adapter';
 import { AssetClient } from './assets/asset_client';
-import { LOGS_ROOT_STREAM_NAME, rootStreamDefinition } from './root_stream_definition';
-import { StreamsStorageClient } from './service';
-import { checkAccess, checkAccessBulk } from './stream_crud';
+import { ASSET_ID, ASSET_TYPE } from './assets/fields';
 import {
   DefinitionNotFoundError,
   isDefinitionNotFoundError,
 } from './errors/definition_not_found_error';
 import { SecurityError } from './errors/security_error';
-import { State } from './state_management/state';
 import { StatusError } from './errors/status_error';
-import { ASSET_ID, ASSET_TYPE } from './assets/fields';
+import { LOGS_ROOT_STREAM_NAME, rootStreamDefinition } from './root_stream_definition';
+import { StreamsStorageClient } from './service';
+import { State } from './state_management/state';
+import { checkAccess, checkAccessBulk } from './stream_crud';
 
 interface AcknowledgeResponse<TResult extends Result> {
   acknowledged: true;
