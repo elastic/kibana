@@ -51,7 +51,11 @@ export async function getSuggestionsWithTermsAggregation({
     },
     aggs: {
       items: {
-        terms: { field: fieldName, size },
+        terms: {
+          field: fieldName,
+          size,
+          order: { _key: 'asc' as const },
+        },
       },
     },
   });
