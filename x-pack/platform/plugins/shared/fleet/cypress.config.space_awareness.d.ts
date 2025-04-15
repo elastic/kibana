@@ -7,4 +7,5 @@
 
 // / <reference types="cypress" />
 declare const _default: Cypress.ConfigOptions<any>;
+// eslint-disable-next-line import/no-default-export
 export default _default;
