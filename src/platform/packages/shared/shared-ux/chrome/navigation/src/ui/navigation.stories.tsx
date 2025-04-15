@@ -112,6 +112,7 @@ const generalLayoutNavTree: NavigationTreeDefinitionUI = {
           href: '/app/kibana',
           icon: 'iInCircle',
           isExternalLink: true,
+          withBadge: true,
         },
         {
           id: 'item02',
@@ -228,6 +229,7 @@ const generalLayoutNavTree: NavigationTreeDefinitionUI = {
                   title: 'Item 19',
                   icon: 'iInCircle',
                   renderAs: 'accordion',
+                  withBadge: true,
                   children: [
                     {
                       id: 'sub1',
@@ -293,6 +295,7 @@ const generalLayoutNavTree: NavigationTreeDefinitionUI = {
               path: '',
               icon: 'iInCircle',
               renderAs: 'panelOpener',
+              withBadge: true,
               children: [
                 {
                   id: 'sub1',
@@ -410,6 +413,7 @@ const generalLayoutNavTree: NavigationTreeDefinitionUI = {
           path: '',
           renderAs: 'accordion',
           icon: 'iInCircle',
+          withBadge: true,
           children: [
             {
               id: 'item-beta',

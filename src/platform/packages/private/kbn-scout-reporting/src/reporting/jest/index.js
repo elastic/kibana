@@ -7,5 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { exportDashboards } from './export_dashboards';
-export { importDashboards } from './import_dashboards';
+require('@kbn/babel-register').install();
+module.exports = require('./reporter').ScoutJestReporter;

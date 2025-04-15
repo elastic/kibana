@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
 import { FtrConfigProviderContext } from '@kbn/test';
 import { services } from './services';
 
@@ -15,6 +16,7 @@ export async function getApiIntegrationConfig({ readConfigFile }: FtrConfigProvi
 
   return {
     services,
+    testConfigCategory: ScoutTestRunConfigCategory.API_TEST,
     servers: xPackFunctionalTestsConfig.get('servers'),
     security: xPackFunctionalTestsConfig.get('security'),
     junit: {
