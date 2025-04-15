@@ -23,7 +23,7 @@ describe('injectReferencesIntoArtifacts', () => {
     };
     const refs: SavedObjectReference[] = [];
     expect(() => injectReferencesIntoArtifacts('test-id', artifacts, refs)).toThrow(
-      'Artifact reference "dashboard_1" not found in rule id: test-id'
+      'Artifacts reference "dashboard_1" not found in rule id: test-id'
     );
   });
 

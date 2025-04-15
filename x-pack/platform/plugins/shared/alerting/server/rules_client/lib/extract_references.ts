@@ -6,7 +6,7 @@
  */
 
 import type { SavedObjectReference } from '@kbn/core/server';
-import type { RuleTypeParams, Artifact } from '../../types';
+import type { RuleTypeParams, Artifacts } from '../../types';
 import type { UntypedNormalizedRuleType } from '../../rule_type_registry';
 import type { DenormalizedAction, NormalizedAlertActionWithGeneratedValues } from '../types';
 import { extractedSavedObjectParamReferenceNamePrefix } from '../common/constants';
@@ -22,7 +22,7 @@ export async function extractReferences<
   ruleType: UntypedNormalizedRuleType,
   ruleActions: NormalizedAlertActionWithGeneratedValues[],
   ruleParams: Params,
-  ruleArtifacts?: Artifact
+  ruleArtifacts?: Artifacts
 ): Promise<{
   actions: DenormalizedAction[];
   artifacts: DenormalizedArtifacts;

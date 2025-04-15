@@ -18,7 +18,6 @@ import { dateSchema } from './date_schema';
 import { notifyWhenSchema } from './notify_when_schema';
 import { actionSchema, systemActionSchema } from './action_schemas';
 import { flappingSchema } from './flapping_schema';
-import { artifactSchema } from './artifact_schema';
 
 export const mappedParamsSchema = schema.recordOf(schema.string(), schema.maybe(schema.any()));
 
@@ -150,6 +149,13 @@ export const alertDelaySchema = schema.object({
   active: schema.number(),
 });
 
+export const dashboardsSchema = schema.arrayOf(schema.object({ id: schema.string() }));
+
+export const artifactsSchema = schema.object({
+  dashboards: schema.maybe(dashboardsSchema),
+  investigation_guide: schema.maybe(schema.object({ blob: schema.string() })),
+});
+
 /**
  * Unsanitized (domain) rule schema, used by internal rules clients
  */
@@ -190,7 +196,7 @@ export const ruleDomainSchema = schema.object({
   alertDelay: schema.maybe(alertDelaySchema),
   legacyId: schema.maybe(schema.nullable(schema.string())),
   flapping: schema.maybe(schema.nullable(flappingSchema)),
-  artifacts: schema.maybe(artifactSchema),
+  artifacts: schema.maybe(artifactsSchema),
 });
 
 /**
@@ -232,5 +238,5 @@ export const ruleSchema = schema.object({
   alertDelay: schema.maybe(alertDelaySchema),
   legacyId: schema.maybe(schema.nullable(schema.string())),
   flapping: schema.maybe(schema.nullable(flappingSchema)),
-  artifacts: schema.maybe(artifactSchema),
+  artifacts: schema.maybe(artifactsSchema),
 });

@@ -5,10 +5,10 @@
  * 2.0.
  */
 import type { SavedObjectReference } from '@kbn/core/server';
-import type { Artifact } from '../../types';
+import type { Artifacts } from '../../types';
 import type { DenormalizedArtifacts } from '../types';
 
-export function denormalizeArtifacts(ruleArtifacts: Artifact | undefined): {
+export function denormalizeArtifacts(ruleArtifacts: Artifacts | undefined): {
   artifacts: DenormalizedArtifacts;
   references: SavedObjectReference[];
 } {
