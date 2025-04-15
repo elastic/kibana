@@ -4281,10 +4281,10 @@ describe('update()', () => {
     test('updates the artifacts', async () => {
       const existingDashboards = [
         {
-          id: 'dashboard-1',
+          refId: 'dashboard_0',
         },
         {
-          id: 'dashboard-2',
+          refId: 'dashboard_1',
         },
       ];
 
@@ -4323,6 +4323,11 @@ describe('update()', () => {
             name: 'dashboard_0',
             type: 'dashboard',
             id: 'dashboard-1',
+          },
+          {
+            name: 'dashboard_1',
+            type: 'dashboard',
+            id: 'dashboard-2',
           },
         ],
         version: '123',
