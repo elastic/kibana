@@ -9,15 +9,15 @@ import React, { useState } from 'react';
 import { EuiButton } from '@elastic/eui';
 import { useFormContext } from 'react-hook-form';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ChatForm, ChatFormFields, PlaygroundPageMode } from '../../types';
+import { PlaygroundForm, PlaygroundFormFields, PlaygroundPageMode } from '../../types';
 import { ViewCodeFlyout } from './view_code_flyout';
 
 export const ViewCodeAction: React.FC<{ selectedPageMode: PlaygroundPageMode }> = ({
   selectedPageMode = PlaygroundPageMode.chat,
 }) => {
-  const { watch } = useFormContext<ChatForm>();
+  const { watch } = useFormContext<PlaygroundForm>();
   const [showFlyout, setShowFlyout] = useState(false);
-  const selectedIndices = watch(ChatFormFields.indices);
+  const selectedIndices = watch(PlaygroundFormFields.indices);
 
   return (
     <>
