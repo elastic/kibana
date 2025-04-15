@@ -26,6 +26,7 @@ export function getFirstRunAt({
     try {
       const rrule = new RRule({
         ...taskInstance.schedule.rrule,
+        bysecond: [0],
         dtstart: now,
       });
       return rrule.after(now)?.toISOString() || nowString;

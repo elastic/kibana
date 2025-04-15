@@ -13,7 +13,7 @@ describe('getFirstRunAt', () => {
 
   beforeEach(() => {
     jest.useFakeTimers();
-    jest.setSystemTime(new Date('2025-04-15T13:00:00Z'));
+    jest.setSystemTime(new Date('2025-04-15T13:01:02Z'));
   });
 
   afterEach(() => {
@@ -105,7 +105,50 @@ describe('getFirstRunAt', () => {
     expect(firstRunAtDate).toEqual(new Date('2025-04-16T12:15:00Z'));
   });
 
-  test('should return the calculated runAt when an rrule with weekly interval time is provided', () => {
+  test('should return the calculated runAt when an rrule only with byhour is provided', () => {
+    const taskInstance = {
+      id: 'id',
+      params: {},
+      state: {},
+      taskType: 'report',
+      schedule: {
+        rrule: {
+          freq: 3,
+          interval: 1,
+          tzid: 'UTC',
+          byhour: [12],
+        },
+      },
+    };
+    const firstRunAt = getFirstRunAt({ taskInstance, logger });
+    const firstRunAtDate = new Date(firstRunAt);
+    // The next day from 2025-04-15 is 2025-04-16
+    // The hour is set to 12, default minute and second becomes 0
+    expect(firstRunAtDate).toEqual(new Date('2025-04-16T12:00:00Z'));
+  });
+
+  test('should return the calculated runAt when an rrule byminute with byminute is provided', () => {
+    const taskInstance = {
+      id: 'id',
+      params: {},
+      state: {},
+      taskType: 'report',
+      schedule: {
+        rrule: {
+          freq: 3,
+          interval: 1,
+          tzid: 'UTC',
+          byminute: [17],
+        },
+      },
+    };
+    const firstRunAt = getFirstRunAt({ taskInstance, logger });
+    const firstRunAtDate = new Date(firstRunAt);
+    // The minute is set to 17, default second is 0, hour becomes the current hour
+    expect(firstRunAtDate).toEqual(new Date('2025-04-15T13:17:00Z'));
+  });
+
+  test('should return the calculated runAt when an rrule only with weekly interval time is provided', () => {
     const taskInstance = {
       id: 'id',
       params: {},
@@ -124,8 +167,8 @@ describe('getFirstRunAt', () => {
     const firstRunAt = getFirstRunAt({ taskInstance, logger });
     const firstRunAtDate = new Date(firstRunAt);
     // The next Monday from 2025-04-15 is 2025-04-21
-    // The time is set to now
-    expect(firstRunAtDate).toEqual(new Date('2025-04-21T13:00:00.000Z'));
+    // The time is set to midnight
+    expect(firstRunAtDate).toEqual(new Date('2025-04-21T00:00:00.000Z'));
   });
 
   test('should return the calculated runAt when an rrule with weekly fixed time interval time is provided', () => {
@@ -153,12 +196,7 @@ describe('getFirstRunAt', () => {
     expect(firstRunAtDate).toEqual(new Date('2025-04-21T12:15:00.000Z'));
   });
 
-  // bymonthday?: number[];
-  // byhour?: number[];
-  // byminute?: number[];
-  // byweekday?: never;
-
-  test('should return the calculated runAt when an rrule with monthly interval is provided', () => {
+  test('should return the calculated runAt when an rrule only with monthly interval is provided', () => {
     const taskInstance = {
       id: 'id',
       params: {},
@@ -178,8 +216,8 @@ describe('getFirstRunAt', () => {
     const firstRunAtDate = new Date(firstRunAt);
     // The next month from 2025-04 is 2025-05
     // The day is set to 3
-    // The time is set to now
-    expect(firstRunAtDate).toEqual(new Date('2025-05-03T13:00:00.000Z'));
+    // The time is set to midnight
+    expect(firstRunAtDate).toEqual(new Date('2025-05-03T00:00:00.000Z'));
   });
 
   test('should return the calculated runAt when an rrule with monthly interval with fixed time is provided', () => {
@@ -204,7 +242,7 @@ describe('getFirstRunAt', () => {
     const firstRunAtDate = new Date(firstRunAt);
     // The next month from 2025-04 is 2025-05
     // The day is set to 3
-    // The time is set to 12:17
+    // The time is set to 12:17:00
     expect(firstRunAtDate).toEqual(new Date('2025-05-03T12:17:00.000Z'));
   });
 
