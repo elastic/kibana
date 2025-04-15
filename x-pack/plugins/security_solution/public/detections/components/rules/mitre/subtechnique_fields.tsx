@@ -13,7 +13,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
-import { camelCase } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
@@ -110,9 +109,9 @@ export const MitreAttackSubtechniqueFields: React.FC<AddSubtechniqueProps> = ({
   }, [field, onFieldChange, techniqueIndex, technique, threatIndex]);
 
   const updateSubtechnique = useCallback(
-    (index: number, value: string) => {
+    (index: number, optionId: string) => {
       const threats = [...(field.value as Threats)];
-      const { id, reference, name } = subtechniquesOptions.find((t) => t.value === value) || {
+      const { id, reference, name } = subtechniquesOptions.find((t) => t.id === optionId) ?? {
         id: '',
         name: '',
         reference: '',
@@ -170,7 +169,7 @@ export const MitreAttackSubtechniqueFields: React.FC<AddSubtechniqueProps> = ({
                 : []),
               ...options.map((option) => ({
                 inputDisplay: <>{option.label}</>,
-                value: option.value,
+                value: option.id,
                 disabled,
               })),
             ]}
@@ -178,7 +177,7 @@ export const MitreAttackSubtechniqueFields: React.FC<AddSubtechniqueProps> = ({
             aria-label=""
             onChange={updateSubtechnique.bind(null, index)}
             fullWidth={true}
-            valueOfSelected={camelCase(subtechnique.name)}
+            valueOfSelected={subtechnique.id}
             data-test-subj="mitreAttackSubtechnique"
             disabled={disabled}
             placeholder={i18n.SUBTECHNIQUE_PLACEHOLDER}
