@@ -18,6 +18,7 @@ import {
   EuiDescriptionListTitle,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLoadingSpinner,
   EuiSelect,
   EuiSpacer,
   EuiText,
@@ -175,6 +176,7 @@ export function Detail() {
   // edit readme state
 
   const [isEditOpen, setIsEditOpen] = useState(false);
+  const [savingEdits, setSavingEdits] = useState(false);
   const [shouldAllowEdit, setShouldAllowEdit] = useState(false);
   const [readMeContent, setReadMeContent] = useState<string>('');
   // Package info state
@@ -408,26 +410,48 @@ export function Detail() {
     [integrationInfo, isLoading, packageInfo, fromIntegrationsPath, queryParams]
   );
 
-  const saveIntegrationEdits = (updatedReadMe: string | undefined) => {
+  const saveIntegrationEdits = async (updatedReadMe: string | undefined) => {
     setIsEditOpen(false);
+    setSavingEdits(true);
 
-    updateCustomIntegration(packageInfo?.name || '', { readMeData: updatedReadMe, categories: [] });
-
-    services.notifications.toasts.addSuccess({
-      title: i18n.translate('xpack.fleet.epm.editReadMeSuccessToastTitle', {
-        defaultMessage: 'Read me updated',
-      }),
-      text: i18n.translate('xpack.fleet.epm.editReadMeSuccessToastText', {
-        defaultMessage: 'The read me content has been updated successfully.',
-      }),
+    const res = await updateCustomIntegration(packageInfo?.name || '', {
+      readMeData: updatedReadMe,
+      categories: [],
     });
 
-    // TODO: reload the content of the integration but we need the cached headers to be fixed first
-    refetchPackageInfo();
+    setSavingEdits(false);
+    // if everything is okay, then show success and redirect to new page
+    if (!res.error) {
+      services.notifications.toasts.addSuccess({
+        title: i18n.translate('xpack.fleet.epm.editReadMeSuccessToastTitle', {
+          defaultMessage: 'Read me updated',
+        }),
+        text: i18n.translate('xpack.fleet.epm.editReadMeSuccessToastText', {
+          defaultMessage:
+            'The read me content has been updated successfully. Redirecting you to the updated integration!',
+        }),
+      });
+      setTimeout(() => {
+        // navigate to new page
+        const path = getPath('integration_details_overview', {
+          pkgkey: `${packageInfo?.name}-${res.data.result.version}`,
+          ...(integration ? { integration } : {}),
+        });
+        history.push(path);
+      }, 2000);
+    } else {
+      services.notifications.toasts.addError(res.error, {
+        title: i18n.translate('xpack.fleet.epm.editReadMeErrorToastTitle', {
+          defaultMessage: 'Error updating read me',
+        }),
+        toastMessage: i18n.translate('xpack.fleet.epm.editReadMeErrorToastText', {
+          defaultMessage: 'There was an error updating the read me content.',
+        }),
+      });
+    }
   };
   const handleEditIntegrationClick = useCallback<ReactEventHandler>(
     (ev) => {
-      // edit button clicked so need to open the modal to edit the read me
       const readmePath = packageInfo?.readme;
       if (!readmePath) {
         return;
@@ -601,12 +625,18 @@ export function Detail() {
                           isTourVisible={isOverviewPage && isGuidedOnboardingActive}
                           tourOffset={10}
                         >
-                          <EuiFlexGroup justifyContent="center">
-                            {shouldAllowEdit && (
-                              <EuiFlexItem>
-                                <EditIntegrationButton onClick={handleEditIntegrationClick} />
-                              </EuiFlexItem>
-                            )}
+                          <EuiFlexGroup justifyContent="center" alignItems="center" gutterSize="s">
+                            {shouldAllowEdit ? (
+                              savingEdits ? (
+                                <EuiFlexItem>
+                                  <EuiLoadingSpinner />
+                                </EuiFlexItem>
+                              ) : (
+                                <EuiFlexItem>
+                                  <EditIntegrationButton onClick={handleEditIntegrationClick} />
+                                </EuiFlexItem>
+                              )
+                            ) : null}
                             <EuiFlexItem>
                               <AddIntegrationButton
                                 userCanInstallPackages={userCanInstallPackages}

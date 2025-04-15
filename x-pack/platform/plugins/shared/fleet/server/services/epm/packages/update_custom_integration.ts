@@ -5,18 +5,28 @@
  * 2.0.
  */
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
+import { load, dump } from 'js-yaml';
 
-import { PACKAGES_SAVED_OBJECT_TYPE, ASSETS_SAVED_OBJECT_TYPE } from '../../../../common/constants';
+import { auditLoggingService } from '../../audit_logging';
 
-/**
- * Updates a custom integration in Elasticsearch
- *
- * Custom integrations are stored as package saved objects in Elasticsearch
- * @param esClient The Elasticsearch client
- * @param soClient The SavedObjects client
- * @param id The ID of the integration to update
- * @param fields The fields to update
- */
+import {
+  PACKAGES_SAVED_OBJECT_TYPE,
+  ASSETS_SAVED_OBJECT_TYPE,
+  SO_SEARCH_LIMIT,
+} from '../../../../common/constants';
+
+import { packagePolicyService } from '../../package_policy';
+
+import { createArchiveIteratorFromMap } from '../archive/archive_iterator';
+
+import { appContextService } from '../../app_context';
+
+import type { PackageInstallContext } from '../../../../common/types';
+
+import { getInstalledPackageWithAssets } from './get';
+
+import { installPackageWithStateMachine } from './install';
+
 export async function updateCustomIntegration(
   esClient: ElasticsearchClient,
   soClient: SavedObjectsClientContract,
@@ -30,29 +40,134 @@ export async function updateCustomIntegration(
     // Get the current integration using the id
     const integration = await soClient.get(PACKAGES_SAVED_OBJECT_TYPE, id);
 
-    // then get the package assets if theres an integration
     if (!integration) {
       throw new Error(`Integration with ID ${id} not found`);
     } else {
-      // get the asset with the path ending in README.md and save the id to use later
-      const matchingAssetItem = integration.attributes.package_assets.find(
-        (asset: any) => asset.path === `${id}-${integration.attributes?.version}/docs/README.md`
-      );
-      const readMeAsset = await soClient.get(ASSETS_SAVED_OBJECT_TYPE, matchingAssetItem.id);
+      // add one to the patch version in the semver
+      const newVersion = integration.attributes.version.split('.');
+      newVersion[2] = (parseInt(newVersion[2]) + 1).toString();
+      const newVersionString = newVersion.join('.');
 
-      // if the readme asset is found, update the data_utf8 field with the new readme content
-      if (readMeAsset) {
-        const res = await soClient.update(ASSETS_SAVED_OBJECT_TYPE, readMeAsset.id, {
-          data_utf8: fields.readMeData,
+      // Increment the version of everything and create a new package
+      const res = await incrementVersion(soClient, esClient, id, {
+        version: newVersionString,
+        readme: fields.readMeData,
+      })
+        .then((response) => {
+          return response;
+        })
+        .catch((e) => {
+          return e;
         });
-        // TODO: increment the version by 1, waiting for clarification here on how?
-
-        return {
-          readMeAsset: res,
-        };
-      }
+      return {
+        version: newVersionString,
+        package: res,
+      };
     }
   } catch (error) {
     throw new Error(error.message);
   }
+}
+// Increments the version of everything, then creates a new package with the new version, readme, etc.
+export async function incrementVersion(
+  soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient,
+  pkgName: string,
+  data: {
+    version: string;
+    readme: string | undefined;
+  }
+) {
+  const installedPkg = await getInstalledPackageWithAssets({
+    savedObjectsClient: soClient,
+    pkgName,
+  });
+
+  const assetsMap = [...installedPkg!.assetsMap.entries()].reduce((acc, [path, content]) => {
+    if (path === `${pkgName}-${installedPkg!.installation.install_version}/manifest.yml`) {
+      const yaml = load(content!.toString());
+      yaml.version = data.version;
+
+      content = Buffer.from(dump(yaml));
+    }
+
+    acc.set(
+      path.replace(`-${installedPkg!.installation.install_version}`, `-${data.version}`),
+      content
+    );
+    return acc;
+  }, new Map<string, Buffer | undefined>());
+
+  assetsMap.set(
+    `${pkgName}-${data.version}/docs/README.md`,
+    data.readme ? Buffer.from(data.readme) : undefined
+  );
+
+  // update the changelog asset as well by adding an entry
+  const changelogPath = `${pkgName}-${data.version}/changelog.yml`;
+  const changelog = assetsMap.get(changelogPath);
+  if (changelog) {
+    const yaml = load(changelog?.toString());
+    if (yaml) {
+      // console.log('found changelog', yaml[0].changes[0]);
+      const newChangelogItem = {
+        version: data.version,
+        date: new Date().toISOString(),
+        changes: [
+          {
+            type: 'update',
+            description: `Edited integration and updated to version ${data.version}`,
+            link: 'N/A',
+          },
+        ],
+      };
+      yaml.push(newChangelogItem);
+      assetsMap.set(changelogPath, Buffer.from(dump(yaml)));
+    }
+  }
+
+  const paths = [...assetsMap.keys()];
+
+  const packageInfo = {
+    ...installedPkg!.packageInfo,
+    version: data.version,
+  };
+
+  const archiveIterator = createArchiveIteratorFromMap(assetsMap);
+
+  const packageInstallContext: PackageInstallContext = {
+    paths,
+    packageInfo,
+    archiveIterator,
+  };
+  const res = await installPackageWithStateMachine({
+    packageInstallContext,
+    pkgName,
+    pkgVersion: data.version,
+    installSource: 'custom',
+    installType: 'install',
+    savedObjectsClient: soClient,
+    esClient,
+    spaceId: 'default',
+    force: true,
+    paths: packageInstallContext.paths,
+    authorizationHeader: null,
+    keepFailedInstallation: true,
+  });
+
+  return res;
+
+  // TODO update related package policies
+  // const policyIdsToUpgrade = await packagePolicyService.listIds(
+  //   appContextService.getInternalUserSOClientWithoutSpaceExtension(),
+  //   {
+  //     page: 1,
+  //     perPage: SO_SEARCH_LIMIT,
+  //     kuery: `${PACKAGES_SAVED_OBJECT_TYPE}.package.name:${pkgName}`,
+  //   }
+  // );
+
+  // if (policyIdsToUpgrade.items.length) {
+  //   await packagePolicyService.bulkUpgrade(soClient, esClient, policyIdsToUpgrade.items);
+  // }
 }

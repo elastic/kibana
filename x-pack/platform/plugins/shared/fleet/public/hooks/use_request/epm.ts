@@ -129,7 +129,7 @@ export const useGetLimitedPackages = () => {
     version: API_VERSIONS.public.v1,
   });
 };
-export const useUpdateCustomIntegration = (
+export const useUpdateCustomIntegration = async (
   id: string,
   fields: { readMeData: string | undefined; categories: string[] }
 ) => {

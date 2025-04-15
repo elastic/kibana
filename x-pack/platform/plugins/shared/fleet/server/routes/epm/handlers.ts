@@ -622,7 +622,7 @@ export const updateCustomIntegrationHandler: FleetRequestHandler<
     return response.ok({
       body: {
         id,
-        ...result,
+        result,
       },
     });
   } catch (error) {
