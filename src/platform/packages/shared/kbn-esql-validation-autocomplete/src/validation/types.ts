@@ -24,6 +24,7 @@ export interface ESQLRealField {
   name: string;
   type: FieldType;
   isEcs?: boolean;
+  hasConflict?: boolean;
   metadata?: {
     description?: string;
   };
@@ -210,6 +211,10 @@ export interface ValidationErrors {
   invalidJoinIndex: {
     message: string;
     type: { identifier: string };
+  };
+  tooManyForks: {
+    message: string;
+    type: {};
   };
 }
 

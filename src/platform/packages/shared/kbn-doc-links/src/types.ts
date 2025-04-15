@@ -434,7 +434,6 @@ export interface DocLinks {
     slackApiAction: string;
     teamsAction: string;
     connectors: string;
-    legacyRuleApiDeprecations: string;
   }>;
   readonly taskManager: Readonly<{
     healthMonitoring: string;
@@ -449,7 +448,6 @@ export interface DocLinks {
   readonly monitoring: Record<string, string>;
   readonly reporting: Readonly<{
     cloudMinimumRequirements: string;
-    grantUserAccess: string;
     browserSystemDependencies: string;
     browserSandboxDependencies: string;
   }>;
@@ -641,9 +639,6 @@ export interface DocLinks {
   };
   readonly inferenceManagement: {
     readonly inferenceAPIDocumentation: string;
-  };
-  readonly cases: {
-    readonly legacyApiDeprecations: string;
   };
   readonly synonyms: {
     readonly synonymsAPIDocumentation: string;

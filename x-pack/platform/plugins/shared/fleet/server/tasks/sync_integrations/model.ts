@@ -9,6 +9,7 @@ export interface IntegrationsData {
   package_name: string;
   package_version: string;
   updated_at: string;
+  install_status: string;
 }
 
 export interface BaseCustomAssetsData {
