@@ -2,19 +2,13 @@
 
 exports[`SolutionsSection renders a single solution 1`] = `
 <_EuiPageSection
-  aria-labelledby="homSolutions__title"
+  aria-labelledby="homeSolutions__title"
   bottomBorder={true}
-  className="homSolutions"
-  contentProps={
-    Object {
-      "className": "homSolutions__content",
-    }
-  }
   paddingSize="xl"
 >
   <EuiScreenReaderOnly>
     <h2
-      id="homSolutions__title"
+      id="homeSolutions__title"
     >
       <MemoizedFormattedMessage
         defaultMessage="Pick your solution"
@@ -22,9 +16,7 @@ exports[`SolutionsSection renders a single solution 1`] = `
       />
     </h2>
   </EuiScreenReaderOnly>
-  <EuiFlexGroup
-    className="homSolutions__content"
-  >
+  <EuiFlexGroup>
     <SolutionPanel
       addBasePath={[Function]}
       key="kibana"
@@ -45,19 +37,13 @@ exports[`SolutionsSection renders a single solution 1`] = `
 
 exports[`SolutionsSection renders multiple solutions 1`] = `
 <_EuiPageSection
-  aria-labelledby="homSolutions__title"
+  aria-labelledby="homeSolutions__title"
   bottomBorder={true}
-  className="homSolutions"
-  contentProps={
-    Object {
-      "className": "homSolutions__content",
-    }
-  }
   paddingSize="xl"
 >
   <EuiScreenReaderOnly>
     <h2
-      id="homSolutions__title"
+      id="homeSolutions__title"
     >
       <MemoizedFormattedMessage
         defaultMessage="Pick your solution"
@@ -65,9 +51,7 @@ exports[`SolutionsSection renders multiple solutions 1`] = `
       />
     </h2>
   </EuiScreenReaderOnly>
-  <EuiFlexGroup
-    className="homSolutions__content"
-  >
+  <EuiFlexGroup>
     <SolutionPanel
       addBasePath={[Function]}
       key="kibana"

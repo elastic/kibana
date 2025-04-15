@@ -521,6 +521,23 @@
       },
       {
         "parentPluginId": "observabilityShared",
+        "id": "def-public.ExternalResourceLinks",
+        "type": "Function",
+        "tags": [],
+        "label": "ExternalResourceLinks",
+        "description": [],
+        "signature": [
+          "() => React.JSX.Element"
+        ],
+        "path": "x-pack/solutions/observability/plugins/observability_shared/public/components/external_resource_links/index.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
         "id": "def-public.FeatureFeedbackButton",
         "type": "Function",
         "tags": [],

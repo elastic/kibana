@@ -21,7 +21,7 @@ Clicking the link next to the check in the conversation tab of a pull request wi
 
 To view the results of a job execution in Buildkite, either click the link in the comment left by `@elasticmachine` or search for the `kibana-ci` check in the list at the bottom of the PR. This link will take you to the top-level page for the specific job execution that failed.
 
-:::{image} ../images/job_view.png
+:::{image} images/job_view.png
 :alt: Buildkite pipeline view showing a few test failures
 :::
 
@@ -34,7 +34,7 @@ To view the results of a job execution in Buildkite, either click the link in th
 
 The logs in Pipeline Steps contain `Info` level logging. To debug Functional UI tests it’s usually helpful to see the debug logging. You can go to the test failure details by clicking on the **logs** (1).
 
-:::{image} ../images/test_results.png
+:::{image} images/test_results.png
 :alt: Buildkite build screenshot
 :::
 
@@ -69,13 +69,13 @@ Just above the `✖ fail:` line, there is a line `info Taking screenshot ...` wh
 
 Clicking the `[Download]` link for that png shows this image:
 
-:::{image} ../images/a11y_screenshot.png
+:::{image} images/a11y_screenshot.png
 :alt: Kibana spaces page meets a11y validations a11y test for click on create space page.png
 :::
 
 If we use a running Kibana instance and inspect elements, we find that the `createSpace` data-test-subj attribute is on this button in the Spaces page in Stack Management:
 
-:::{image} ../images/inspect_element.png
+:::{image} images/inspect_element.png
 :alt: Kibana screenshot of Spaces page with developer tools open
 :::
 

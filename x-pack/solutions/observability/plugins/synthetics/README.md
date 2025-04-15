@@ -1,4 +1,4 @@
-# Uptime Monitoring
+# Synthetics
 
 ## Purpose
 
@@ -25,8 +25,6 @@ The `lib` directory controls bootstrapping code and adapter types.
 
 There is a `pages` directory; each view gets its own page component.
 
-The principal structure of the app is stored in `uptime_app.tsx`.
-
 ### server
 
 The `lib` directory contains `adapters`, which are connections to external resources like Kibana
@@ -48,20 +46,15 @@ Documentation: https://www.elastic.co/guide/en/kibana/current/development-tests.
 yarn test:jest x-pack/solutions/observability/plugins/synthetics
 ```
 
-### Functional tests
+### Functional tests server
 
 In one shell, from **~/kibana/x-pack**:
-`node scripts/functional_tests_server.js`
-
-In another shell, from **~kibana/x-pack**:
-`node ../scripts/functional_test_runner.js --grep="{TEST_NAME}"`.
+`node scripts/functional_tests_server.js --config {PATH_TO_TEST_SUITE_CONFIG}`
 
 #### API tests
 
 If instead you need to run API tests, start up the test server and then in another shell, from **~kibana/x-pack**:
-`node ../scripts/functional_test_runner.js --config test/api_integration/config.ts --grep="{TEST_NAME}"`.
-
-You can update snapshots by prefixing the runner command with `env UPDATE_UPTIME_FIXTURES=1`
+`node ../scripts/functional_test_runner.js --config test/api_integration/apis/synthetics/config.ts --grep="{TEST_NAME}"`.
 
 You can access the functional test server's Kibana at `http://localhost:5620/`.
 
@@ -79,23 +72,6 @@ We can run these tests like described above, but with some special config.
 `node scripts/functional_tests_server.js --config=test/functional_with_es_ssl/config.ts`
 
 `node scripts/functional_test_runner.js --config=test/functional_with_es_ssl/config.ts`
-
-#### Running accessibility tests
-
-We maintain a suite of Accessibility tests (you may see them referred to elsewhere as `a11y` tests).
-
-These tests render each of our pages and ensure that the inputs and other elements contain the
-attributes necessary to ensure all users are able to make use of Kibana (for example, users relying
-on screen readers).
-
-The commands for running these tests are very similar to the other functional tests described above.
-
-From the `~/x-pack` directory:
-
-Start the server: `node scripts/functional_tests_server --config src/platform/test/accessibility/config.ts`
-
-Run the uptime `a11y` tests: `node scripts/functional_test_runner.js --config src/platform/test/accessibility/config.ts --grep=uptime`
-
 
 ## Deployment agnostic API Integration Tests
 The Synthetics tests are located under `x-pack/test/api_integration/deployment_agnostic/apis/observability/synthetics` folder. In order to run the SLO tests of your interest, you can grep accordingly. Use the commands below to run all SLO tests (`grep=SyntheticsAPITests`) on stateful or serverless.

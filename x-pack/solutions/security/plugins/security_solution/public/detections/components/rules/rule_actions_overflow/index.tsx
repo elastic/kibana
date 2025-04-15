@@ -32,7 +32,7 @@ import {
   useExecuteBulkAction,
 } from '../../../../detection_engine/rule_management/logic/bulk_actions/use_execute_bulk_action';
 import { useDownloadExportedRules } from '../../../../detection_engine/rule_management/logic/bulk_actions/use_download_exported_rules';
-import * as i18nActions from '../../../pages/detection_engine/rules/translations';
+import * as i18nActions from '../../../../detection_engine/common/translations';
 import * as i18n from './translations';
 import { ManualRuleRunEventTypes } from '../../../../common/lib/telemetry';
 
@@ -41,6 +41,7 @@ const MyEuiButtonIcon = styled(EuiButtonIcon)`
     svg {
       transform: rotate(90deg);
     }
+
     border: 1px solid ${({ theme }) => theme.euiColorPrimary};
     width: 40px;
     height: 40px;

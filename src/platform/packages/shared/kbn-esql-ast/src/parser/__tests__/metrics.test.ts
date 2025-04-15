@@ -9,17 +9,17 @@
 
 import { parse } from '..';
 
-describe('METRICS', () => {
+describe('Timeseries', () => {
   describe('correctly formatted', () => {
     it('can parse a basic query', () => {
-      const text = 'METRICS foo';
+      const text = 'TS foo';
       const { ast, errors } = parse(text);
 
       expect(errors.length).toBe(0);
       expect(ast).toMatchObject([
         {
           type: 'command',
-          name: 'metrics',
+          name: 'ts',
           sources: [
             {
               type: 'source',
@@ -32,14 +32,14 @@ describe('METRICS', () => {
     });
 
     it('can parse multiple "sources"', () => {
-      const text = 'METRICS foo ,\nbar\t,\t\nbaz \n';
+      const text = 'TS foo ,\nbar\t,\t\nbaz \n';
       const { ast, errors } = parse(text);
 
       expect(errors.length).toBe(0);
       expect(ast).toMatchObject([
         {
           type: 'command',
-          name: 'metrics',
+          name: 'ts',
           sources: [
             {
               type: 'source',
@@ -60,84 +60,18 @@ describe('METRICS', () => {
         },
       ]);
     });
-
-    it('can parse "aggregates"', () => {
-      const text = 'metrics foo agg1, agg2';
-      const { ast, errors } = parse(text);
-
-      expect(errors.length).toBe(0);
-      expect(ast).toMatchObject([
-        {
-          type: 'command',
-          name: 'metrics',
-          sources: [
-            {
-              type: 'source',
-              name: 'foo',
-              sourceType: 'index',
-            },
-          ],
-          aggregates: [
-            {
-              type: 'column',
-              text: 'agg1',
-            },
-            {
-              type: 'column',
-              text: 'agg2',
-            },
-          ],
-        },
-      ]);
-    });
-
-    it('can parse "grouping"', () => {
-      const text = 'mEtRiCs foo agg BY grp1, grp2';
-      const { ast, errors } = parse(text);
-
-      expect(errors.length).toBe(0);
-      expect(ast).toMatchObject([
-        {
-          type: 'command',
-          name: 'metrics',
-          sources: [
-            {
-              type: 'source',
-              name: 'foo',
-              sourceType: 'index',
-            },
-          ],
-          aggregates: [
-            {
-              type: 'column',
-              text: 'agg',
-            },
-          ],
-          grouping: [
-            {
-              type: 'column',
-              text: 'grp1',
-            },
-            {
-              type: 'column',
-              text: 'grp2',
-            },
-          ],
-        },
-      ]);
-    });
   });
 
   describe('when incorrectly formatted, returns errors', () => {
     it('when no index identifier specified', () => {
-      const text = 'METRICS \n\t';
+      const text = 'TS \n\t';
       const { errors } = parse(text);
 
       expect(errors.length > 0).toBe(true);
     });
 
     it('when comma follows index identifier', () => {
-      const text = 'METRICS foo, ';
+      const text = 'TS foo, ';
       const { errors } = parse(text);
 
       expect(errors.length > 0).toBe(true);

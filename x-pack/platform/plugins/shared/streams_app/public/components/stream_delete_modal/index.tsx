@@ -83,11 +83,10 @@ export function StreamDeleteModal({
                   <li key={stream}>
                     <EuiListGroupItem
                       target="_blank"
-                      href={router.link('/{key}/{tab}/{subtab}', {
+                      href={router.link('/{key}/management/{tab}', {
                         path: {
                           key: stream,
-                          tab: 'management',
-                          subtab: 'route',
+                          tab: 'route',
                         },
                       })}
                       label={stream}

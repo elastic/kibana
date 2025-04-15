@@ -2,10 +2,12 @@
 navigation_title: "AI Assistant settings"
 mapped_pages:
   - https://www.elastic.co/guide/en/kibana/current/ai-assistant-settings-kb.html
+applies_to:
+  deployment:
+    self: all
 ---
 
 # AI Assistant settings in {{kib}} [ai-assistant-settings-kb]
-
 
 `xpack.productDocBase.artifactRepositoryUrl`
 :   Url of the repository to use to download and install the Elastic product documentation artifacts for the AI assistants. Defaults to `https://kibana-knowledge-base-artifacts.elastic.co`

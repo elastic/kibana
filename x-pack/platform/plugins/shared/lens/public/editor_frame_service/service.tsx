@@ -24,6 +24,7 @@ import {
   DataViewsPublicPluginStart,
 } from '@kbn/data-views-plugin/public';
 import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
+import { css } from '@emotion/react';
 import { LensDocument } from '../persistence/saved_object_store';
 import {
   Datasource,
@@ -97,12 +98,12 @@ export class EditorFrameService {
     doc: LensDocument,
     services: EditorFramePlugins & { forceDSL?: boolean }
   ) => {
-    const [resolvedDatasources, resolvedVisualizations] = await Promise.all([
-      this.loadDatasources(),
-      this.loadVisualizations(),
-    ]);
-
-    const { persistedStateToExpression } = await import('../async_services');
+    const [resolvedDatasources, resolvedVisualizations, { persistedStateToExpression }] =
+      await Promise.all([
+        this.loadDatasources(),
+        this.loadVisualizations(),
+        import('../async_services'),
+      ]);
 
     return persistedStateToExpression(resolvedDatasources, resolvedVisualizations, doc, services);
   };
@@ -120,12 +121,11 @@ export class EditorFrameService {
 
   public start(core: CoreStart, plugins: EditorFrameStartPlugins): EditorFrameStart {
     const createInstance = async (): Promise<EditorFrameInstance> => {
-      const [resolvedDatasources, resolvedVisualizations] = await Promise.all([
+      const [resolvedDatasources, resolvedVisualizations, { EditorFrame }] = await Promise.all([
         this.loadDatasources(),
         this.loadVisualizations(),
+        import('../async_services'),
       ]);
-
-      const { EditorFrame } = await import('../async_services');
 
       return {
         EditorFrameContainer: ({
@@ -136,7 +136,14 @@ export class EditorFrameService {
           addUserMessages,
         }) => {
           return (
-            <div className="lnsApp__frame">
+            <div
+              css={css`
+                position: relative;
+                display: flex;
+                flex-direction: column;
+                flex-grow: 1;
+              `}
+            >
               <EditorFrame
                 data-test-subj="lnsEditorFrame"
                 core={core}

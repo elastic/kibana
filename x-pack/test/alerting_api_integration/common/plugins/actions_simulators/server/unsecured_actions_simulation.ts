@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import {
+import type {
   CoreSetup,
   RequestHandlerContext,
   KibanaRequest,
@@ -14,12 +14,18 @@ import {
   IKibanaResponse,
   IRouter,
 } from '@kbn/core/server';
-import { FixtureStartDeps } from './plugin';
+import type { FixtureStartDeps } from './plugin';
 
 export function initPlugin(router: IRouter, coreSetup: CoreSetup<FixtureStartDeps>) {
   router.post(
     {
       path: `/api/sample_unsecured_action`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: schema.object({
           requesterId: schema.string(),
@@ -51,6 +57,12 @@ export function initPlugin(router: IRouter, coreSetup: CoreSetup<FixtureStartDep
   router.post(
     {
       path: `/api/execute_unsecured_action`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: schema.object({
           requesterId: schema.string(),
@@ -98,6 +110,12 @@ export function initPlugin(router: IRouter, coreSetup: CoreSetup<FixtureStartDep
   router.post(
     {
       path: `/api/get_all_unsecured_actions`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: schema.object({
           spaceId: schema.string(),

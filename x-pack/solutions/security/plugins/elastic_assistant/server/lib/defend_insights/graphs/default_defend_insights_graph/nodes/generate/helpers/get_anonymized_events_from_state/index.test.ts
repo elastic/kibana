@@ -26,6 +26,7 @@ const graphState: GraphState = {
   refinePrompt: 'refinePrompt',
   replacements: {},
   unrefinedResults: null,
+  continuePrompt: 'continuePrompt',
 };
 
 describe('getAnonymizedEventsFromState', () => {

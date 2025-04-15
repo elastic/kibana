@@ -17,9 +17,10 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import { getConnectorCompatibility } from '@kbn/actions-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { getConnectorCompatibility } from '@kbn/actions-plugin/common';
+import { CreateConnectorFilter } from './create_connector_filter';
 import {
   ActionConnector,
   ActionType,
@@ -63,6 +64,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
   const [hasActionsUpgradeableByTrial, setHasActionsUpgradeableByTrial] = useState<boolean>(false);
   const canSave = hasSaveActionsCapability(capabilities);
   const [showFormErrors, setShowFormErrors] = useState<boolean>(false);
+  const [searchValue, setSearchValue] = useState<string>('');
 
   const [preSubmitValidationErrorMessage, setPreSubmitValidationErrorMessage] =
     useState<ReactNode>(null);
@@ -88,6 +90,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
   const hasErrors = isFormValid === false;
   const isSaving = isSavingConnector || isSubmitting;
   const hasConnectorTypeSelected = actionType != null;
+
   const actionTypeModel: ActionTypeModel | null =
     actionType != null ? actionTypeRegistry.get(actionType.id) : null;
 
@@ -198,6 +201,10 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
     }
   }, [validateAndCreateConnector, onClose, onConnectorCreated]);
 
+  const handleSearchValueChange = useCallback((newValue: string) => {
+    setSearchValue(newValue);
+  }, []);
+
   useEffect(() => {
     isMounted.current = true;
 
@@ -218,6 +225,16 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
       <EuiFlyoutBody
         banner={!actionType && hasActionsUpgradeableByTrial ? <UpgradeLicenseCallOut /> : null}
       >
+        {!hasConnectorTypeSelected && (
+          <>
+            <CreateConnectorFilter
+              searchValue={searchValue}
+              onSearchValueChange={handleSearchValueChange}
+            />
+            <EuiSpacer size="m" />
+          </>
+        )}
+
         {hasConnectorTypeSelected ? (
           <>
             {groupActionTypeModel && (
@@ -308,6 +325,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
             setHasActionsUpgradeableByTrial={setHasActionsUpgradeableByTrial}
             setAllActionTypes={setAllActionTypes}
             actionTypeRegistry={actionTypeRegistry}
+            searchValue={searchValue}
           />
         )}
       </EuiFlyoutBody>

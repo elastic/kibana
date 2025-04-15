@@ -6,17 +6,31 @@
  */
 
 import { useDispatch, useSelector } from 'react-redux';
-import React, { useEffect } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
 import type { TLSRuleParams } from '@kbn/response-ops-rule-params/synthetics_tls';
-import { AlertTlsComponent } from './alert_tls';
+import { EuiSpacer } from '@elastic/eui';
+import { buildPhrasesFilter } from '@kbn/es-query';
+import { AlertTlsCondition } from './alert_tls';
 import { getDynamicSettingsAction, selectDynamicSettings } from '../../state/settings';
 import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../../common/constants';
+import { AlertSearchBar } from './query_bar';
+import { TLSRuleViz } from './tls_rule_viz';
+import { useSyntheticsDataView } from '../../contexts/synthetics_data_view_context';
+import { FieldFilters } from './common/field_filters';
+import { MonitorTypeEnum } from '../monitor_add_edit/types';
+
+export type TLSRuleParamsProps = RuleTypeParamsExpressionProps<TLSRuleParams>;
+
+const tlsMonitorTypes = [MonitorTypeEnum.HTTP, MonitorTypeEnum.TCP];
 
 export const TLSRuleComponent: React.FC<{
-  ruleParams: RuleTypeParamsExpressionProps<TLSRuleParams>['ruleParams'];
-  setRuleParams: RuleTypeParamsExpressionProps<TLSRuleParams>['setRuleParams'];
-}> = ({ ruleParams, setRuleParams }) => {
+  ruleParams: TLSRuleParamsProps['ruleParams'];
+  setRuleParams: TLSRuleParamsProps['setRuleParams'];
+  // This is needed for the intermediate release process -> https://docs.google.com/document/d/1mU5jlIfCKyXdDPtEzAz1xTpFXFCWxqdO5ldYRVO_hgM/edit?tab=t.0#heading=h.2b1v1tr0ep8m
+  // After the next serverless release the commit containing these changes can be reverted
+  showMonitorFilters?: boolean;
+}> = ({ ruleParams, setRuleParams, showMonitorFilters = false }) => {
   const dispatch = useDispatch();
 
   const { settings } = useSelector(selectDynamicSettings);
@@ -27,20 +41,55 @@ export const TLSRuleComponent: React.FC<{
     }
   }, [dispatch, settings]);
 
+  const onFiltersChange = useCallback(
+    (val: { kqlQuery?: string }) => {
+      setRuleParams('kqlQuery', val.kqlQuery);
+    },
+    [setRuleParams]
+  );
+
+  const dataView = useSyntheticsDataView();
+  const monitorTypeField = dataView?.getFieldByName('monitor.type');
+
+  // filtersForSuggestions can be applied only if dataView and monitorTypeField are available
+  const filtersForSuggestions =
+    dataView && monitorTypeField
+      ? [buildPhrasesFilter(monitorTypeField, tlsMonitorTypes, dataView)]
+      : undefined;
+
   return (
-    <AlertTlsComponent
-      ageThreshold={
-        ruleParams.certAgeThreshold ??
-        settings?.certAgeThreshold ??
-        DYNAMIC_SETTINGS_DEFAULTS.certAgeThreshold
-      }
-      expirationThreshold={
-        ruleParams.certExpirationThreshold ??
-        settings?.certExpirationThreshold ??
-        DYNAMIC_SETTINGS_DEFAULTS.certExpirationThreshold
-      }
-      setAgeThreshold={(value) => setRuleParams('certAgeThreshold', Number(value))}
-      setExpirationThreshold={(value) => setRuleParams('certExpirationThreshold', Number(value))}
-    />
+    <>
+      {showMonitorFilters ? (
+        <>
+          <AlertSearchBar
+            kqlQuery={ruleParams.kqlQuery ?? ''}
+            onChange={onFiltersChange}
+            filtersForSuggestions={filtersForSuggestions}
+          />
+          <EuiSpacer size="m" />
+          <FieldFilters
+            ruleParams={ruleParams}
+            setRuleParams={setRuleParams}
+            filters={{ monitorTypes: tlsMonitorTypes }}
+          />
+          <TLSRuleViz ruleParams={ruleParams} />
+          <EuiSpacer size="m" />
+        </>
+      ) : null}
+      <AlertTlsCondition
+        ageThreshold={
+          ruleParams.certAgeThreshold ??
+          settings?.certAgeThreshold ??
+          DYNAMIC_SETTINGS_DEFAULTS.certAgeThreshold
+        }
+        expirationThreshold={
+          ruleParams.certExpirationThreshold ??
+          settings?.certExpirationThreshold ??
+          DYNAMIC_SETTINGS_DEFAULTS.certExpirationThreshold
+        }
+        setAgeThreshold={(value) => setRuleParams('certAgeThreshold', Number(value))}
+        setExpirationThreshold={(value) => setRuleParams('certExpirationThreshold', Number(value))}
+      />
+    </>
   );
 };

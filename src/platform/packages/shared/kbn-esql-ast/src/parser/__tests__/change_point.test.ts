@@ -220,4 +220,33 @@ describe('CHANGE_POINT command', () => {
       });
     });
   });
+
+  describe('incorrectly formatted', () => {
+    it('throws on missing ON arguments', () => {
+      const text = `FROM index | CHANGE_POINT value ON`;
+      const { errors, ast } = EsqlQuery.fromSrc(text);
+      const option = Walker.match(ast, { type: 'option', name: 'on' });
+
+      expect(errors.length).toBe(1);
+      expect(option).toBe(undefined);
+    });
+
+    it('throws on missing AS arguments', () => {
+      const text = `FROM index | CHANGE_POINT value AS`;
+      const { errors, ast } = EsqlQuery.fromSrc(text);
+      const option = Walker.match(ast, { type: 'option', name: 'as' });
+
+      expect(errors.length).toBe(1);
+      expect(option).toBe(undefined);
+    });
+
+    it('throws on missing AS arguments (ON present)', () => {
+      const text = `FROM index | CHANGE_POINT value ON a AS`;
+      const { errors, ast } = EsqlQuery.fromSrc(text);
+      const option = Walker.match(ast, { type: 'option', name: 'as' });
+
+      expect(errors.length).toBe(1);
+      expect(option).toBe(undefined);
+    });
+  });
 });

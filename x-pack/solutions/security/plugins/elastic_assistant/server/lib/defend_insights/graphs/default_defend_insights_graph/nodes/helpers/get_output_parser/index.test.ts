@@ -5,10 +5,18 @@
  * 2.0.
  */
 import { getOutputParser } from '.';
+import { DEFEND_INSIGHTS } from '../../../../../../prompt/prompts';
 
+const prompts = {
+  group: DEFEND_INSIGHTS.INCOMPATIBLE_ANTIVIRUS.GROUP,
+  events: DEFEND_INSIGHTS.INCOMPATIBLE_ANTIVIRUS.EVENTS,
+  eventsId: DEFEND_INSIGHTS.INCOMPATIBLE_ANTIVIRUS.EVENTS_ID,
+  eventsEndpointId: DEFEND_INSIGHTS.INCOMPATIBLE_ANTIVIRUS.EVENTS_ENDPOINT_ID,
+  eventsValue: DEFEND_INSIGHTS.INCOMPATIBLE_ANTIVIRUS.EVENTS_VALUE,
+};
 describe('getOutputParser', () => {
   it('returns a structured output parser with the expected format instructions', () => {
-    const outputParser = getOutputParser({ type: 'incompatible_antivirus' });
+    const outputParser = getOutputParser({ type: 'incompatible_antivirus', prompts });
 
     const expected = `You must format your output as a JSON value that adheres to a given \"JSON Schema\" instance.
 

@@ -2,6 +2,27 @@
 
 exports[`MarkdownOptions should match snapshot 1`] = `
 <EuiPanel
+  css={
+    Object {
+      "map": undefined,
+      "name": "18sw4aj",
+      "next": undefined,
+      "styles": "
+        flex-grow: 1 !important;
+        .visEditor--markdown__textarea {
+          flex-grow: 1;
+        }
+
+        .mkdEditor,
+        .euiFormControlLayout__childrenWrapper,
+        .euiFormControlLayout--euiTextArea,
+        .visEditor--markdown__textarea {
+          height: 100%;
+        }
+      ",
+      "toString": [Function],
+    }
+  }
   paddingSize="s"
 >
   <EuiFlexGroup

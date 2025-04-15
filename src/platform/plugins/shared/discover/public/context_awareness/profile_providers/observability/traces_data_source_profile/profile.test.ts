@@ -8,13 +8,22 @@
  */
 
 import type { DataView } from '@kbn/data-views-plugin/common';
-import type { DataSourceProfileProviderParams } from '../../../profiles';
-import { DataSourceCategory } from '../../../profiles';
+import {
+  DataSourceCategory,
+  type DataSourceProfileProviderParams,
+  SolutionType,
+  type RootContext,
+} from '../../../profiles';
 import { DataSourceType, createDataViewDataSource } from '../../../../../common/data_sources';
 import { createTracesDataSourceProfileProvider } from './profile';
+import { createContextAwarenessMocks } from '../../../__mocks__';
+import type { ContextWithProfileId } from '../../../profile_service';
+import { OBSERVABILITY_ROOT_PROFILE_ID } from '../consts';
+
+const mockServices = createContextAwarenessMocks().profileProviderServices;
 
 describe('tracesDataSourceProfileProvider', () => {
-  const tracesDataSourceProfileProvider = createTracesDataSourceProfileProvider();
+  const tracesDataSourceProfileProvider = createTracesDataSourceProfileProvider(mockServices);
 
   const RESOLUTION_MATCH = {
     isMatch: true,
@@ -25,9 +34,15 @@ describe('tracesDataSourceProfileProvider', () => {
     isMatch: false,
   };
 
-  it('should match when the data source type is a data view for APM', () => {
+  const ROOT_CONTEXT: ContextWithProfileId<RootContext> = {
+    profileId: OBSERVABILITY_ROOT_PROFILE_ID,
+    solutionType: SolutionType.Observability,
+  };
+
+  it('should match when the index is for traces', () => {
     expect(
       tracesDataSourceProfileProvider.resolve({
+        rootContext: ROOT_CONTEXT,
         dataSource: createDataViewDataSource({ dataViewId: 'apm_static_data_view_id_default' }),
         dataView: {
           getIndexPattern: () => 'traces-*',
@@ -37,24 +52,35 @@ describe('tracesDataSourceProfileProvider', () => {
 
     expect(
       tracesDataSourceProfileProvider.resolve({
+        rootContext: ROOT_CONTEXT,
         dataSource: createDataViewDataSource({ dataViewId: 'apm_static_data_view_id_custom_view' }),
         dataView: {
           getIndexPattern: () => 'traces-*',
         } as unknown as DataView,
       } as DataSourceProfileProviderParams)
     ).toEqual(RESOLUTION_MATCH);
-  });
 
-  it('should NOT match when the data source is not the APM data view', () => {
     expect(
       tracesDataSourceProfileProvider.resolve({
+        rootContext: ROOT_CONTEXT,
+        dataSource: createDataViewDataSource({ dataViewId: 'other_view_id' }),
+        dataView: { getIndexPattern: () => 'traces-*' } as unknown as DataView,
+      } as DataSourceProfileProviderParams)
+    ).toEqual(RESOLUTION_MATCH);
+
+    expect(
+      tracesDataSourceProfileProvider.resolve({
+        rootContext: ROOT_CONTEXT,
         dataSource: { type: DataSourceType.Esql },
         query: { esql: 'FROM traces' },
       } as DataSourceProfileProviderParams)
-    ).toEqual(RESOLUTION_MISMATCH);
+    ).toEqual(RESOLUTION_MATCH);
+  });
 
+  it('should NOT match when the index is not for traces', () => {
     expect(
       tracesDataSourceProfileProvider.resolve({
+        rootContext: ROOT_CONTEXT,
         dataSource: { type: DataSourceType.Esql },
         query: { esql: 'FROM logs' },
       } as DataSourceProfileProviderParams)
@@ -62,8 +88,22 @@ describe('tracesDataSourceProfileProvider', () => {
 
     expect(
       tracesDataSourceProfileProvider.resolve({
-        dataSource: createDataViewDataSource({ dataViewId: 'other_view_id' }),
+        rootContext: ROOT_CONTEXT,
+        dataSource: createDataViewDataSource({ dataViewId: 'other_logs_view_id' }),
         dataView: { getIndexPattern: () => 'logs-*' } as unknown as DataView,
+      } as DataSourceProfileProviderParams)
+    ).toEqual(RESOLUTION_MISMATCH);
+  });
+
+  it("should NOT match when the root context isn't Observability", () => {
+    expect(
+      tracesDataSourceProfileProvider.resolve({
+        rootContext: {
+          profileId: 'security-root-profile',
+          solutionType: SolutionType.Security,
+        },
+        dataSource: createDataViewDataSource({ dataViewId: 'other_view_id' }),
+        dataView: { getIndexPattern: () => 'traces-*' } as unknown as DataView,
       } as DataSourceProfileProviderParams)
     ).toEqual(RESOLUTION_MISMATCH);
   });

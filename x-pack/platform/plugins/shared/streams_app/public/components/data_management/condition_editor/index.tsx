@@ -6,23 +6,19 @@
  */
 
 import {
-  EuiBadge,
-  EuiButton,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPanel,
   EuiSelect,
   EuiSwitch,
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
 import {
-  AndCondition,
   BinaryFilterCondition,
   Condition,
   FilterCondition,
-  OrCondition,
+  isNeverCondition,
 } from '@kbn/streams-schema';
 import React, { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
@@ -36,8 +32,8 @@ import {
 
 export function ConditionEditor(props: {
   condition: Condition;
-  readonly?: boolean;
   onConditionChange?: (condition: Condition) => void;
+  isNew?: boolean;
 }) {
   const normalizedCondition = alwaysToEmptyEquals(props.condition);
 
@@ -45,21 +41,19 @@ export function ConditionEditor(props: {
     props.onConditionChange?.(emptyEqualsToAlways(condition));
   };
 
-  if (props.readonly) {
-    return (
-      <EuiPanel color="subdued" borderRadius="none" hasShadow={false} paddingSize="xs">
-        <ConditionDisplay condition={normalizedCondition} />
-      </EuiPanel>
-    );
-  }
   return (
-    <ConditionForm condition={normalizedCondition} onConditionChange={handleConditionChange} />
+    <ConditionForm
+      condition={normalizedCondition}
+      onConditionChange={handleConditionChange}
+      isNew={props.isNew}
+    />
   );
 }
 
 export function ConditionForm(props: {
   condition: Condition;
   onConditionChange: (condition: Condition) => void;
+  isNew?: boolean;
 }) {
   const [syntaxEditor, setSyntaxEditor] = React.useState(() =>
     Boolean(props.condition && !('operator' in props.condition))
@@ -73,66 +67,89 @@ export function ConditionForm(props: {
     }
   }, [syntaxEditor, props.condition]);
   return (
-    <EuiFlexGroup direction="column" gutterSize="xs">
-      <EuiFlexGroup alignItems="center" gutterSize="xs">
-        <EuiFlexItem grow>
-          <EuiText
-            className={css`
-              font-weight: bold;
-            `}
-            size="xs"
-          >
-            {i18n.translate('xpack.streams.conditionEditor.title', { defaultMessage: 'Condition' })}
-          </EuiText>
-        </EuiFlexItem>
-        <EuiToolTip
-          content={i18n.translate('xpack.streams.conditionEditor.disableTooltip', {
-            defaultMessage: 'Route no documents to this stream without deleting existing data',
-          })}
-        >
-          <EuiButton
-            data-test-subj="streamsAppConditionFormDisableRoutingButton"
-            size={'xs' as 's'} // TODO: remove this cast when EUI is updated - EuiButton takes xs, but the type is wrong
-            onClick={() => props.onConditionChange({ never: {} })}
-            disabled={props.condition === undefined}
-          >
-            {i18n.translate('xpack.streams.conditionEditor.disable', {
-              defaultMessage: 'Disable routing',
+    <EuiFlexGroup direction="column" gutterSize="s">
+      {!props.isNew && (
+        <>
+          <EuiFlexItem grow>
+            <EuiText
+              className={css`
+                font-weight: bold;
+              `}
+              size="xs"
+            >
+              {i18n.translate('xpack.streams.conditionEditor.title', { defaultMessage: 'Status' })}
+            </EuiText>
+          </EuiFlexItem>
+          <EuiToolTip
+            content={i18n.translate('xpack.streams.conditionEditor.disableTooltip', {
+              defaultMessage: 'Route no documents to this stream without deleting existing data',
             })}
-          </EuiButton>
-        </EuiToolTip>
+          >
+            <EuiSwitch
+              label={i18n.translate('xpack.streams.conditionEditor.switch', {
+                defaultMessage: 'Enabled',
+              })}
+              compressed
+              checked={!isNeverCondition(props.condition)}
+              onChange={() => {
+                props.onConditionChange(
+                  isNeverCondition(props.condition) ? EMPTY_EQUALS_CONDITION : { never: {} }
+                );
+                setSyntaxEditor(false);
+              }}
+            />
+          </EuiToolTip>
+        </>
+      )}
+      {(props.isNew || !isNeverCondition(props.condition)) && (
+        <>
+          <EuiFlexGroup alignItems="center" gutterSize="xs">
+            <EuiFlexItem grow>
+              <EuiText
+                className={css`
+                  font-weight: bold;
+                `}
+                size="xs"
+              >
+                {i18n.translate('xpack.streams.conditionEditor.title', {
+                  defaultMessage: 'Condition',
+                })}
+              </EuiText>
+            </EuiFlexItem>
 
-        <EuiSwitch
-          label={i18n.translate('xpack.streams.conditionEditor.switch', {
-            defaultMessage: 'Syntax editor',
-          })}
-          compressed
-          checked={syntaxEditor}
-          onChange={() => setSyntaxEditor(!syntaxEditor)}
-        />
-      </EuiFlexGroup>
-      {syntaxEditor ? (
-        <CodeEditor
-          height={200}
-          languageId="json"
-          value={jsonCondition || ''}
-          onChange={(e) => {
-            setJsonCondition(e);
-            try {
-              const condition = JSON.parse(e);
-              props.onConditionChange(condition);
-            } catch (error: unknown) {
-              // do nothing
-            }
-          }}
-        />
-      ) : !props.condition || 'operator' in props.condition ? (
-        <FilterForm
-          condition={(props.condition as FilterCondition) || EMPTY_EQUALS_CONDITION}
-          onConditionChange={props.onConditionChange}
-        />
-      ) : (
-        <pre>{JSON.stringify(props.condition, null, 2)}</pre>
+            <EuiSwitch
+              label={i18n.translate('xpack.streams.conditionEditor.switch', {
+                defaultMessage: 'Syntax editor',
+              })}
+              compressed
+              checked={syntaxEditor}
+              onChange={() => setSyntaxEditor(!syntaxEditor)}
+            />
+          </EuiFlexGroup>
+          {syntaxEditor ? (
+            <CodeEditor
+              height={200}
+              languageId="json"
+              value={jsonCondition || ''}
+              onChange={(e) => {
+                setJsonCondition(e);
+                try {
+                  const condition = JSON.parse(e);
+                  props.onConditionChange(condition);
+                } catch (error: unknown) {
+                  // do nothing
+                }
+              }}
+            />
+          ) : !props.condition || 'operator' in props.condition ? (
+            <FilterForm
+              condition={(props.condition as FilterCondition) || EMPTY_EQUALS_CONDITION}
+              onConditionChange={props.onConditionChange}
+            />
+          ) : (
+            <pre>{JSON.stringify(props.condition, null, 2)}</pre>
+          )}
+        </>
       )}
     </EuiFlexGroup>
   );
@@ -227,94 +244,6 @@ function FilterForm(props: {
             }}
           />
         </EuiFlexItem>
-      )}
-    </EuiFlexGroup>
-  );
-}
-
-export function ConditionDisplay(props: { condition: Condition }) {
-  if (!props.condition) {
-    return (
-      <>
-        {i18n.translate('xpack.streams.streamDetailRouting.noCondition', {
-          defaultMessage: 'No condition, no documents will be routed',
-        })}
-      </>
-    );
-  }
-  return (
-    <>
-      {'or' in props.condition ? (
-        <OrDisplay condition={props.condition as OrCondition} />
-      ) : 'and' in props.condition ? (
-        <AndDisplay condition={props.condition as AndCondition} />
-      ) : (
-        <FilterDisplay condition={props.condition as FilterCondition} />
-      )}
-    </>
-  );
-}
-
-function OrDisplay(props: { condition: OrCondition }) {
-  return (
-    <div>
-      {i18n.translate('xpack.streams.orDisplay.orLabel', { defaultMessage: 'Or' })}
-      <div
-        className={css`
-          margin-left: 10px;
-        `}
-      >
-        {props.condition.or.map((condition, index) => (
-          <ConditionEditor key={index} condition={condition} readonly />
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function AndDisplay(props: { condition: AndCondition }) {
-  return (
-    <div>
-      {i18n.translate('xpack.streams.andDisplay.andLabel', { defaultMessage: 'And' })}
-      <div
-        className={css`
-          margin-left: 10px;
-        `}
-      >
-        {props.condition.and.map((condition, index) => (
-          <ConditionEditor key={index} condition={condition} readonly />
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function FilterDisplay(props: { condition: FilterCondition }) {
-  return (
-    <EuiFlexGroup
-      gutterSize="xs"
-      alignItems="center"
-      className={css`
-        // don't try to wrap the condition, render it as one line
-        overflow-x: scroll;
-        white-space: nowrap;
-      `}
-    >
-      <EuiBadge>
-        {i18n.translate('xpack.streams.filter.field', { defaultMessage: 'Field' })}
-      </EuiBadge>
-      {props.condition.field}
-      <EuiBadge>
-        {i18n.translate('xpack.streams.filter.operator', { defaultMessage: 'Operator' })}
-      </EuiBadge>
-      {props.condition.operator}
-      {'value' in props.condition && (
-        <>
-          <EuiBadge>
-            {i18n.translate('xpack.streams.filter.value', { defaultMessage: 'Value' })}
-          </EuiBadge>
-          {props.condition.value}
-        </>
       )}
     </EuiFlexGroup>
   );

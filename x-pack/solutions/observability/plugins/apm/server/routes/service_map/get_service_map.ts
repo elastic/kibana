@@ -149,8 +149,7 @@ export function getServiceMap(
 
       // always catch error to avoid breaking service maps if there is a problem with ML
     ).catch((error) => {
-      logger.warn(`Unable to retrieve anomalies for service maps.`);
-      logger.error(error);
+      logger.debug(`Unable to retrieve anomalies for service maps.`, { error });
       return DEFAULT_ANOMALIES;
     });
 

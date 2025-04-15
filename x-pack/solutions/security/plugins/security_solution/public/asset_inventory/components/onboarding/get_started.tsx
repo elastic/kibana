@@ -10,8 +10,6 @@ import {
   EuiImage,
   EuiEmptyPrompt,
   EuiButton,
-  EuiLink,
-  EuiTitle,
   EuiFlexGroup,
   EuiFlexItem,
   EuiCallOut,
@@ -19,14 +17,13 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import illustration from '../../../common/images/information_light.png';
-import { InventoryTitle } from '../inventory_title';
+import { AssetInventoryTitle } from '../asset_inventory_title';
 import { CenteredWrapper } from './centered_wrapper';
 import { HoverForExplanationTooltip } from './hover_for_explanation_tooltip';
 import { EmptyStateIllustrationContainer } from '../empty_state_illustration_container';
 import { useEnableAssetInventory } from './hooks/use_enable_asset_inventory';
 import { TEST_SUBJ_ONBOARDING_GET_STARTED } from '../../constants';
-
-const ASSET_INVENTORY_DOCS_URL = 'https://ela.st/asset-inventory';
+import { NeedHelp } from './need_help';
 
 export const GetStarted = () => {
   const { isEnabling, error, reset, enableAssetInventory } = useEnableAssetInventory();
@@ -34,7 +31,7 @@ export const GetStarted = () => {
   return (
     <EuiFlexGroup>
       <EuiFlexItem>
-        <InventoryTitle />
+        <AssetInventoryTitle />
         <CenteredWrapper>
           <EuiEmptyPrompt
             data-test-subj={TEST_SUBJ_ONBOARDING_GET_STARTED}
@@ -67,7 +64,7 @@ export const GetStarted = () => {
                 <p>
                   <FormattedMessage
                     id="xpack.securitySolution.assetInventory.onboarding.getStarted.description"
-                    defaultMessage="Asset Inventory gives you a unified view of all assets detected by Elastic Security, including those observed in logs, events, or discovered through integrations with sources like {identity_providers}, {cloud_services}, {mdms}, and configuration management {databases}."
+                    defaultMessage="Asset Inventory provides a unified view of all your organizations assets in one place. See everything detected by Elastic Security — whether from logs, {identity_providers}, {cloud_services}, {mdms} or configuration {databases} — all in a structured, searchable inventory. Enable Asset Inventory to gain complete visibility across your environment."
                     values={{
                       identity_providers: (
                         <HoverForExplanationTooltip
@@ -167,24 +164,7 @@ export const GetStarted = () => {
                 )}
               </EuiButton>,
             ]}
-            footer={
-              <>
-                <EuiTitle size="xxs">
-                  <strong>
-                    <FormattedMessage
-                      id="xpack.securitySolution.assetInventory.emptyState.needHelp"
-                      defaultMessage="Need help?"
-                    />
-                  </strong>
-                </EuiTitle>{' '}
-                <EuiLink href={ASSET_INVENTORY_DOCS_URL} target="_blank">
-                  <FormattedMessage
-                    id="xpack.securitySolution.assetInventory.emptyState.readDocumentation"
-                    defaultMessage="Read documentation"
-                  />
-                </EuiLink>
-              </>
-            }
+            footer={<NeedHelp />}
           />
         </CenteredWrapper>
       </EuiFlexItem>

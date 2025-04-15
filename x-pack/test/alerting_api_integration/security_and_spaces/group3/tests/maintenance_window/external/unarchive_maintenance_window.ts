@@ -36,7 +36,7 @@ export default function unarchiveMaintenanceWindowTests({ getService }: FtrProvi
       describe(scenario.id, () => {
         it('should handle unarchive maintenance window request appropriately', async () => {
           const { body: createdMaintenanceWindow } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/alerting/maintenance_window`)
+            .post(`${getUrlPrefix(space.id)}/api/maintenance_window`)
             .set('kbn-xsrf', 'foo')
             .send(createRequestBody);
 
@@ -48,9 +48,17 @@ export default function unarchiveMaintenanceWindowTests({ getService }: FtrProvi
             true
           );
 
+          await supertest
+            .post(
+              `${getUrlPrefix(space.id)}/api/maintenance_window/${
+                createdMaintenanceWindow.id
+              }/_archive`
+            )
+            .set('kbn-xsrf', 'foo');
+
           const response = await supertestWithoutAuth
             .post(
-              `${getUrlPrefix(space.id)}/api/alerting/maintenance_window/${
+              `${getUrlPrefix(space.id)}/api/maintenance_window/${
                 createdMaintenanceWindow.id
               }/_unarchive`
             )
@@ -66,13 +74,14 @@ export default function unarchiveMaintenanceWindowTests({ getService }: FtrProvi
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: `API [POST /api/alerting/maintenance_window/${createdMaintenanceWindow.id}/_unarchive] is unauthorized for user, this action is granted by the Kibana privileges [write-maintenance-window]`,
+                message: `API [POST /api/maintenance_window/${createdMaintenanceWindow.id}/_unarchive] is unauthorized for user, this action is granted by the Kibana privileges [write-maintenance-window]`,
                 statusCode: 403,
               });
               break;
             case 'superuser at space1':
             case 'space_1_all at space1':
               expect(response.statusCode).to.eql(200);
+              expect(response.body.status).eql('running');
               expect(
                 moment
                   .utc(createdMaintenanceWindow.expirationDate)
@@ -90,7 +99,7 @@ export default function unarchiveMaintenanceWindowTests({ getService }: FtrProvi
       const space1 = UserAtSpaceScenarios[1].space.id;
 
       await supertest
-        .post(`${getUrlPrefix(space1)}/api/alerting/maintenance_window/foobar-id/_unarchive`)
+        .post(`${getUrlPrefix(space1)}/api/maintenance_window/foobar-id/_unarchive`)
         .set('kbn-xsrf', 'foo')
         .send({ archive: true })
         .expect(404);

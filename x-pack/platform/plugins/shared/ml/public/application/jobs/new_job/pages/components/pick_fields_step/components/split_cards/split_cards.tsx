@@ -15,6 +15,7 @@ import {
   EuiHorizontalRule,
   EuiSpacer,
   useEuiTheme,
+  COLOR_MODES_STANDARD,
 } from '@elastic/eui';
 import type { SplitField } from '@kbn/ml-anomaly-utils';
 import { JOB_TYPE } from '../../../../../../../../../common/constants/new_job';
@@ -34,11 +35,13 @@ interface Panel {
 
 export const SplitCards: FC<PropsWithChildren<Props>> = memo(
   ({ fieldValues, splitField, children, numberOfDetectors, jobType, animate = false }) => {
-    const { euiTheme } = useEuiTheme();
+    const { euiTheme, colorMode } = useEuiTheme();
     const panels: Panel[] = [];
 
+    const isLightTheme = colorMode === COLOR_MODES_STANDARD.light;
+
     const splitCardStyle = {
-      border: euiTheme.border.thin,
+      ...(isLightTheme ? { border: euiTheme.border.thin } : {}),
       paddingTop: euiTheme.size.xs,
     };
 

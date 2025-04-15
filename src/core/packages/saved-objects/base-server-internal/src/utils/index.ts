@@ -14,3 +14,4 @@ export {
   getFieldListMapFromMappingDefinitions,
   type FieldListMap,
 } from './get_field_list';
+export { pickValuesBasedOnStructure } from './pick_values_based_on_structure';

@@ -33,15 +33,15 @@ export const registerAlertsRoute = (
     .get({
       access: 'internal',
       path: ALERTS_ROUTE,
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
+      },
     })
     .addVersion(
       {
         version: '1',
-        security: {
-          authz: {
-            requiredPrivileges: ['securitySolution'],
-          },
-        },
         validate: {
           request: {
             query: schema.object({
