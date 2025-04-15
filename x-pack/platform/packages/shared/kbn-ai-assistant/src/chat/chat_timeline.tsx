@@ -43,7 +43,7 @@ export interface ChatTimelineItem
   error?: any;
   message: Message;
   functionCall?: Message['message']['function_call'];
-  displayContent?: React.ReactNode;
+  piiHighlightedContent?: React.ReactNode;
 }
 
 export interface ChatTimelineProps {
@@ -105,39 +105,6 @@ function transformUserContent(
   return parts;
 }
 
-// processes a string and replaces each occurrence of a hash (key)
-// with a <span> wrapping the corresponding original text from the redactedEntitiesMap.
-function transformAssistantContent(
-  content: string,
-  redactedEntitiesMap: Record<string, string>
-): React.ReactNode {
-  let parts: Array<string | React.ReactNode> = [content];
-  Object.keys(redactedEntitiesMap).forEach((hash) => {
-    const newParts: Array<string | React.ReactNode> = [];
-    parts.forEach((part) => {
-      if (typeof part === 'string') {
-        // Split the string on the current hash
-        const segments = part.split(hash);
-        segments.forEach((segment, index) => {
-          newParts.push(segment);
-          // Insert the highlighted replacement if not at the end
-          if (index < segments.length - 1) {
-            newParts.push(
-              <span key={hash + '-' + index} className={highlightPIIClassName}>
-                {redactedEntitiesMap[hash]}
-              </span>
-            );
-          }
-        });
-      } else {
-        newParts.push(part);
-      }
-    });
-    parts = newParts;
-  });
-  return parts;
-}
-
 export function ChatTimeline({
   conversationId,
   messages,
@@ -174,8 +141,6 @@ export function ChatTimeline({
     for (const item of timelineItems) {
       if (item.display.hide || !item) continue;
 
-      let displayContent: React.ReactNode;
-
       // build redactedEntitiesMap with user messages using entity positions.
       if (item.message.message.role === 'user' && item.message.message.content) {
         if (
@@ -186,34 +151,32 @@ export function ChatTimeline({
             redactedEntitiesMap[entity.hash] = entity.entity;
           });
           // transform user messages to react nodes to highlight the sensitive portions in the user message.
-          displayContent = transformUserContent(
+          item.piiHighlightedContent = transformUserContent(
             item.message.message.content,
             item.message.message.detectedEntities
           );
-        } else {
-          displayContent = item.message.message.content;
         }
       }
       // Process assistant messages: transform the content using the cumulative redactedEntitiesMap.
+      // Here we don't add highlighting because it conflicts with markdown elements.
       else if (item.message.message.role === 'assistant' && item.message.message.content) {
-        displayContent = transformAssistantContent(
-          item.message.message.content,
-          redactedEntitiesMap
-        );
+        Object.entries(redactedEntitiesMap).forEach(([hash, originalText]) => {
+          item.message.message.content = item.message.message.content?.replace(
+            new RegExp(hash, 'g'),
+            originalText
+          );
+        });
       }
-
-      // Create a new item that includes the computed displayContent.
-      const newItem = { ...item, displayContent };
 
       if (item.display.collapsed) {
         if (currentGroup) {
-          currentGroup.push(newItem);
+          currentGroup.push(item);
         } else {
-          currentGroup = [newItem];
+          currentGroup = [item];
           consolidatedChatItems.push(currentGroup);
         }
       } else {
-        consolidatedChatItems.push(newItem);
+        consolidatedChatItems.push(item);
         currentGroup = null;
       }
     }
@@ -254,7 +217,6 @@ export function ChatTimeline({
           <ChatItem
             // use index, not id to prevent unmounting of component when message is persisted
             key={index}
-            displayContent={item.displayContent}
             {...omit(item, 'message')}
             onActionClick={(payload) => {
               onActionClick({ message: item.message, payload });

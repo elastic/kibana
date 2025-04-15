@@ -108,7 +108,7 @@ export function ChatItem({
   onRegenerateClick,
   onSendTelemetry,
   onStopGeneratingClick,
-  displayContent,
+  piiHighlightedContent,
 }: ChatItemProps) {
   const accordionId = useGeneratedHtmlId({ prefix: 'chat' });
 
@@ -156,23 +156,20 @@ export function ChatItem({
   };
 
   let contentElement: React.ReactNode;
-  if (typeof displayContent !== 'undefined') {
-    contentElement = displayContent;
-  } else {
-    contentElement =
-      content || loading || error ? (
-        <ChatItemContentInlinePromptEditor
-          editing={editing}
-          loading={loading}
-          functionCall={functionCall}
-          content={content}
-          role={role}
-          onSubmit={handleInlineEditSubmit}
-          onActionClick={onActionClick}
-          onSendTelemetry={onSendTelemetry}
-        />
-      ) : null;
-  }
+  contentElement =
+    content || loading || error ? (
+      <ChatItemContentInlinePromptEditor
+        editing={editing}
+        loading={loading}
+        functionCall={functionCall}
+        content={content}
+        piiHighlightedContent={piiHighlightedContent}
+        role={role}
+        onSubmit={handleInlineEditSubmit}
+        onActionClick={onActionClick}
+        onSendTelemetry={onSendTelemetry}
+      />
+    ) : null;
 
   if (collapsed) {
     contentElement = (

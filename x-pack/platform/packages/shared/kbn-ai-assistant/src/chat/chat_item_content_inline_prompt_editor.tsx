@@ -26,6 +26,7 @@ interface Props {
   onActionClick: ChatActionClickHandler;
   onSendTelemetry: (eventWithPayload: TelemetryEventTypeWithPayload) => void;
   onSubmit: (message: Message) => void;
+  piiHighlightedContent?: React.ReactNode;
 }
 
 const textContainerClassName = css`
@@ -48,6 +49,7 @@ export function ChatItemContentInlinePromptEditor({
   onActionClick,
   onSendTelemetry,
   onSubmit,
+  piiHighlightedContent,
 }: Props) {
   return !editing ? (
     <EuiPanel
@@ -56,7 +58,12 @@ export function ChatItemContentInlinePromptEditor({
       hasShadow={false}
       className={textContainerClassName}
     >
-      <MessageText content={content || ''} loading={loading} onActionClick={onActionClick} />
+      <MessageText
+        content={content || ''}
+        piiHighlightedContent={piiHighlightedContent}
+        loading={loading}
+        onActionClick={onActionClick}
+      />
     </EuiPanel>
   ) : (
     <EuiPanel
