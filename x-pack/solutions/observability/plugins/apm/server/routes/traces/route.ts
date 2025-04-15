@@ -117,7 +117,7 @@ const tracesByIdRoute = createApmServerRoute({
   },
 });
 
-const tracesByIdSummaryRoute = createApmServerRoute({
+const focusedTraceRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/traces/{traceId}/{docId}',
   params: t.type({
     path: t.type({
@@ -365,5 +365,5 @@ export const traceRouteRepository = {
   ...transactionFromTraceByIdRoute,
   ...spanFromTraceByIdRoute,
   ...transactionByNameRoute,
-  ...tracesByIdSummaryRoute,
+  ...focusedTraceRoute,
 };
