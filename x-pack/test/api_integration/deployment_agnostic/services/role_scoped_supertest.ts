@@ -130,7 +130,7 @@ export function RoleScopedSupertestProvider({ getService }: DeploymentAgnosticFt
 
   return {
     async getSupertestWithRoleScope(
-      role: string,
+      role: 'customRole' | string,
       options: RequestHeadersOptions = {
         useCookieHeader: false,
         withCommonHeaders: false,
@@ -139,12 +139,23 @@ export function RoleScopedSupertestProvider({ getService }: DeploymentAgnosticFt
     ) {
       // if 'useCookieHeader' set to 'true', HTTP requests will be called with cookie Header (like in browser)
       if (options.useCookieHeader) {
-        const cookieHeader = await samlAuth.getM2MApiCookieCredentialsWithRoleScope(role);
+        let cookieHeader;
+        if (role === 'customRole') {
+          cookieHeader = await samlAuth.getM2MApiCookieCredentialsWithCustomRoleScope();
+        } else {
+          cookieHeader = await samlAuth.getM2MApiCookieCredentialsWithRoleScope(role);
+        }
         return new SupertestWithRoleScope(cookieHeader, supertestWithoutAuth, samlAuth, options);
       }
 
       // HTTP requests will be called with API key in header by default
-      const roleAuthc = await samlAuth.createM2mApiKeyWithRoleScope(role);
+      let roleAuthc;
+      if (role === 'customRole') {
+        roleAuthc = await samlAuth.createM2mApiKeyWithCustomRoleScope();
+      } else {
+        roleAuthc = await samlAuth.createM2mApiKeyWithRoleScope(role);
+      }
+
       return new SupertestWithRoleScope(roleAuthc, supertestWithoutAuth, samlAuth, options);
     },
   };
