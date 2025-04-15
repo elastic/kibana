@@ -363,6 +363,20 @@ Object {
         Object {
           "children": Array [
             Object {
+              "id": "entity_analytics-privileged_user_monitoring",
+              "link": "securitySolutionUI:entity_analytics-privileged_user_monitoring",
+              "renderAs": "item",
+            },
+          ],
+          "id": "entity_analytics-landing",
+          "link": "securitySolutionUI:entity_analytics-landing",
+          "renderAs": "panelOpener",
+          "spaceBefore": null,
+          "title": "Entity Analytics",
+        },
+        Object {
+          "children": Array [
+            Object {
               "breadcrumbStatus": "hidden",
               "children": Array [
                 Object {

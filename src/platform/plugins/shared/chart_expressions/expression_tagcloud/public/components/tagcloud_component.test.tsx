@@ -8,6 +8,7 @@
  */
 
 import React from 'react';
+import { EuiProvider } from '@elastic/eui';
 import { Wordcloud, Settings, WordcloudSpec, Chart } from '@elastic/charts';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import type { Datatable } from '@kbn/expressions-plugin/public';
@@ -98,6 +99,10 @@ describe('TagCloudChart', function () {
   let wrapperPropsWithIndexes: TagCloudChartProps;
   let wrapperPropsWithColumnNames: TagCloudChartProps;
 
+  const WrappingComponent = ({ children }: { children: React.ReactNode }) => (
+    <EuiProvider>{children}</EuiProvider>
+  );
+
   beforeAll(() => {
     wrapperPropsWithIndexes = {
       visData,
@@ -143,12 +148,16 @@ describe('TagCloudChart', function () {
   });
 
   it('renders the Wordcloud component with', async () => {
-    const component = mount(<TagCloudChart {...wrapperPropsWithIndexes} />);
+    const component = mount(<TagCloudChart {...wrapperPropsWithIndexes} />, {
+      wrappingComponent: WrappingComponent,
+    });
     expect(component.find(Wordcloud).length).toBe(1);
   });
 
   it('renders the label correctly', async () => {
-    const component = mount(<TagCloudChart {...wrapperPropsWithIndexes} />);
+    const component = mount(<TagCloudChart {...wrapperPropsWithIndexes} />, {
+      wrappingComponent: WrappingComponent,
+    });
     const label = findTestSubject(component, 'tagCloudLabel');
     expect(label.text()).toEqual('geo.dest: Descending - Count');
   });
@@ -156,18 +165,24 @@ describe('TagCloudChart', function () {
   it('not renders the label if showLabel setting is off', async () => {
     const newVisParams = { ...visParams, showLabel: false };
     const newProps = { ...wrapperPropsWithIndexes, visParams: newVisParams };
-    const component = mount(<TagCloudChart {...newProps} />);
+    const component = mount(<TagCloudChart {...newProps} />, {
+      wrappingComponent: WrappingComponent,
+    });
     const label = findTestSubject(component, 'tagCloudLabel');
     expect(label.length).toBe(0);
   });
 
   it('receives the data in the correct format for bucket and metric accessors of type number', () => {
-    const component = mount(<TagCloudChart {...wrapperPropsWithIndexes} />);
+    const component = mount(<TagCloudChart {...wrapperPropsWithIndexes} />, {
+      wrappingComponent: WrappingComponent,
+    });
     expect(component.find(Wordcloud).prop('data')).toStrictEqual(formattedData);
   });
 
   it('receives the data in the correct format for bucket and metric accessors of type DatatableColumn', () => {
-    const component = mount(<TagCloudChart {...wrapperPropsWithColumnNames} />);
+    const component = mount(<TagCloudChart {...wrapperPropsWithColumnNames} />, {
+      wrappingComponent: WrappingComponent,
+    });
     expect(component.find(Wordcloud).prop('data')).toStrictEqual(formattedData);
   });
 
@@ -177,13 +192,17 @@ describe('TagCloudChart', function () {
       orientation: Orientation.RIGHT_ANGLED,
     };
     const newProps = { ...wrapperPropsWithIndexes, visParams: newVisParams };
-    const component = mount(<TagCloudChart {...newProps} />);
+    const component = mount(<TagCloudChart {...newProps} />, {
+      wrappingComponent: WrappingComponent,
+    });
     expect(component.find(Wordcloud).prop('endAngle')).toBe(90);
     expect(component.find(Wordcloud).prop('angleCount')).toBe(2);
   });
 
   it('calls filter callback', () => {
-    const component = mount(<TagCloudChart {...wrapperPropsWithIndexes} />);
+    const component = mount(<TagCloudChart {...wrapperPropsWithIndexes} />, {
+      wrappingComponent: WrappingComponent,
+    });
     component.find(Settings).prop('onElementClick')!([
       [
         {
@@ -205,7 +224,10 @@ describe('TagCloudChart', function () {
       <TagCloudChart
         {...wrapperPropsWithIndexes}
         overrides={{ settings: { rotation: -90 }, chart: { title: 'Hello' } }}
-      />
+      />,
+      {
+        wrappingComponent: WrappingComponent,
+      }
     );
     expect(component.find(Chart).props().title).toBe('Hello');
     expect(component.find(Settings).props().rotation).toBe(-90);
