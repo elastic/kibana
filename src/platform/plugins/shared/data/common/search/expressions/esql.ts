@@ -364,7 +364,7 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
                         },
                 },
                 isNull: hasEmptyColumns ? !lookup.has(name) : false,
-              }
+              };
             }) ?? [];
 
           const fixedQuery = fixESQLQueryWithVariables(query, input?.esqlVariables ?? []);
