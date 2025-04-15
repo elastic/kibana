@@ -106,6 +106,8 @@ export const moveAction = (
     return Object.values(currentLayout).find((r) => r.order === layout[rowId].order + 1);
   };
 
+  let shouldCreateNewRow = false;
+
   // find the grid that the preview rect is over
   const lastRowId = interactionEvent.targetRow;
   const targetRowId = (() => {
@@ -130,6 +132,8 @@ export const moveAction = (
       const rowBelow = findRowBelow(highestOverlapRowId, currentLayout);
       if (rowBelow && !rowBelow?.isCollapsible) {
         highestOverlapRowId = rowBelow.id;
+      } else {
+        shouldCreateNewRow = true;
       }
     }
     return highestOverlapRowId;
@@ -217,13 +221,21 @@ export const moveAction = (
     if (!deepEqual(currentLayout, nextLayout)) {
       proposedGridLayout$.next(nextLayout);
     }
-
+// re-render when the target row changes
+  if (hasChangedGridRow) {
+    interactionEvent$.next({
+      ...interactionEvent,
+      targetRow: targetRowId,
+    });
+  }
+  return;
     // console.log('nextLayout', gridLayoutStateManager.proposedGridLayout$.getValue());
     // return;
   } else if (
-    hasChangedGridRow ||
-    (!isGridDataEqual(requestedPanelData, lastRequestedPanelPosition.current) &&
-      currentLayout[targetRowId].isCollapsed)
+    (hasChangedGridRow ||
+    (!isGridDataEqual(requestedPanelData, lastRequestedPanelPosition.current)) &&
+     shouldCreateNewRow
+    )
   ) {
     lastRequestedPanelPosition.current = { ...requestedPanelData };
     const targetRowOrder = currentLayout[targetRowId].order;
@@ -252,12 +264,9 @@ export const moveAction = (
     if (!deepEqual(currentLayout, nextLayout)) {
       proposedGridLayout$.next(nextLayout);
     }
-  }
-  // re-render when the target row changes
-  if (hasChangedGridRow) {
     interactionEvent$.next({
       ...interactionEvent,
-      targetRow: targetRowId,
+      targetRow: newRow.id,
     });
   }
 };
