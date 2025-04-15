@@ -68,6 +68,7 @@ export function DocViewer({ docViews, ...renderProps }: DocViewerProps) {
         tabs={tabs}
         initialSelectedTab={initialSelectedTab}
         onTabClick={onTabClick}
+        onKeyDown={(evt) => evt.stopPropagation()}
       />
     </div>
   );
