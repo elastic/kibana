@@ -50,8 +50,6 @@ const UseTextField = getUseField({ component: Field });
 const UseComboBoxField = getUseField({ component: ComboBoxField });
 const { emptyField, urlField } = fieldValidators;
 
-// console.log('simple connector form, allowDomainWithoutDots: ', allowDomainWithoutDots);
-
 const getFieldConfig = ({
   label,
   isRequired = true,
