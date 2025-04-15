@@ -18,6 +18,7 @@ import {
   getPerformanceTrackersGroupedById,
   PERFORMANCE_TRACKER_MARKS,
   PERFORMANCE_TRACKER_MEASURES,
+  PERFORMANCE_TRACKER_TYPES,
 } from '@kbn/ebt-tools';
 
 import { coreServices } from '../../services/kibana_services';
@@ -133,8 +134,15 @@ function reportPerformanceMetrics({
 
   const groupedPerformanceMarkers = getPerformanceTrackersGroupedById('Lens');
 
-  const measurements = Object.entries(groupedPerformanceMarkers).map(([id, group]) => {
-    const markerName = group[0].name.split(':').slice(0, -1).join(':');
+  // `groupedPerformanceMarkers` is a map of performance markers grouped by id.
+  // Each group contains the performance markers for a single Lens embeddable.
+  // We need to extract the start and end times of the preRender, renderStart
+  // and renderComplete markers and calculate the duration of each phase.
+  const measurements = Object.values(groupedPerformanceMarkers).map((group) => {
+    const markerName =
+      Array.isArray(group) && group.length > 0
+        ? group[0].name.split(':').slice(0, -1).join(':')
+        : undefined;
 
     const preRenderStart = group.find((marker) =>
       marker.name.endsWith(`:${PERFORMANCE_TRACKER_MARKS.PRE_RENDER}`)
@@ -146,14 +154,14 @@ function reportPerformanceMetrics({
       marker.name.endsWith(`:${PERFORMANCE_TRACKER_MARKS.RENDER_COMPLETE}`)
     )?.startTime;
 
-    if (preRenderStart && renderStart) {
+    if (markerName && preRenderStart && renderStart) {
       performance.measure(`${markerName}:${PERFORMANCE_TRACKER_MEASURES.PRE_RENDER_DURATION}`, {
         start: preRenderStart,
         end: renderStart,
       });
     }
 
-    if (renderComplete && renderStart) {
+    if (markerName && renderComplete && renderStart) {
       performance.measure(`${markerName}:${PERFORMANCE_TRACKER_MEASURES.RENDER_DURATION}`, {
         start: renderStart,
         end: renderComplete,
@@ -166,7 +174,7 @@ function reportPerformanceMetrics({
     };
   });
 
-  const e = {
+  const performanceMetricEvent = {
     eventName: DASHBOARD_LOADED_EVENT,
     duration,
     key1: 'time_to_data',
@@ -183,6 +191,6 @@ function reportPerformanceMetrics({
     value9: round(meanBy(measurements, PERFORMANCE_TRACKER_MEASURES.RENDER_DURATION), 2),
   };
 
-  reportPerformanceMetricEvent(coreServices.analytics, e);
-  clearPerformanceTrackersByType('Lens');
+  reportPerformanceMetricEvent(coreServices.analytics, performanceMetricEvent);
+  clearPerformanceTrackersByType(PERFORMANCE_TRACKER_TYPES.LENS);
 }
