@@ -16,19 +16,21 @@ import type { NodeRunnerFactory } from './factory';
  */
 export interface NodeTypeDefinition<CustomServices = {}> {
   /**
-   * The type of node - must be unique
+   * The unique identifier for this node type (it's type)
    */
-  nodeType: string;
+  id: string;
+  /**
+   * Human-readable name for this node type
+   */
+  name: string;
   /**
    * Short human-readable description for this node type.
    */
   description: string;
-
   /**
    * The {@link NodeRunnerFactory} for this node type.
    */
   factory: NodeRunnerFactory<CustomServices>;
-
   /**
    * Allows defining a handler to return arbitrary services that will be exposed to
    * the {@link NodeRunnerFactory} via it's context, {@link NodeFactoryContext}.

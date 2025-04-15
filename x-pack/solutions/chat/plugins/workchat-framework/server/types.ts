@@ -7,10 +7,27 @@
 
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
-import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import type { WorkflowRegistry } from './services/workflows';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface WorkChatFrameworkPluginSetup {}
+/**
+ * Setup contract for the workchatFramework plugin.
+ */
+export interface WorkChatFrameworkPluginSetup {
+  /**
+   * APIs to interact with workflow registration.
+   */
+  workflows: {
+    /**
+     * Registers a 'builtin' workflow to be runnable or usable in other workflows
+     */
+    register: WorkflowRegistry['register'];
+  };
+}
+
+/**
+ * Start contract for the workchatFramework plugin.
+ */
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface WorkChatFrameworkPluginStart {}
 

@@ -13,7 +13,7 @@ import type {
   LoggerFactory,
 } from '@kbn/core/server';
 import type { InternalServices } from './services/types';
-import { createServices } from './services/create_services';
+import { createServices, setupServices, type SetupServices } from './services';
 import type { WorkChatFrameworkConfig } from './config';
 import type {
   WorkChatFrameworkPluginSetup,
@@ -33,6 +33,8 @@ export class WorkChatAppPlugin
 {
   private readonly logger: LoggerFactory;
   private readonly config: WorkChatFrameworkConfig;
+
+  private servicesSetup?: SetupServices;
   private services?: InternalServices;
 
   constructor(context: PluginInitializerContext) {
@@ -44,7 +46,15 @@ export class WorkChatAppPlugin
     core: CoreSetup<WorkChatFrameworkPluginStartDependencies>,
     setupDeps: WorkChatFrameworkPluginSetupDependencies
   ): WorkChatFrameworkPluginSetup {
-    return {};
+    this.servicesSetup = setupServices();
+
+    return {
+      workflows: {
+        register: (definition) => {
+          return this.servicesSetup!.workflowRegistry.register(definition);
+        },
+      },
+    };
   }
 
   public start(

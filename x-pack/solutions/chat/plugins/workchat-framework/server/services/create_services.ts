@@ -10,6 +10,23 @@ import type { LoggerFactory } from '@kbn/core/server';
 import type { WorkChatFrameworkPluginStartDependencies } from '../types';
 import type { WorkChatFrameworkConfig } from '../config';
 import type { InternalServices } from './types';
+import { WorkflowRegistry, createWorkflowRegistry } from './workflows';
+import { NodeTypeRegistry, createNodeTypeRegistry } from './nodes';
+
+export interface SetupServices {
+  workflowRegistry: WorkflowRegistry;
+  nodeRegistry: NodeTypeRegistry;
+}
+
+export const setupServices = (): SetupServices => {
+  const workflowRegistry = createWorkflowRegistry();
+  const nodeRegistry = createNodeTypeRegistry();
+
+  return {
+    workflowRegistry,
+    nodeRegistry,
+  };
+};
 
 interface CreateServicesParams {
   core: CoreStart;

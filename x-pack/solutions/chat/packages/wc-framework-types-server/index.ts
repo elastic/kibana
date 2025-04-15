@@ -33,3 +33,4 @@ export type {
   WorkflowRunEventHandler,
   WorkflowRunner,
 } from './src/workflows';
+export type { Registry, Provider } from './src/utils';
