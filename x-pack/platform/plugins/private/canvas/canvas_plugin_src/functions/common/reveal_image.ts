@@ -66,7 +66,7 @@ export function revealImage(): ExpressionFunctionDefinition<
       }
 
       const { resolveWithMissingImage, elasticOutline, isValidUrl } = await import(
-        '@kbn/expression-utils'
+        '../../../public/lib'
       );
 
       if (args.image && !isValidUrl(args.image)) {

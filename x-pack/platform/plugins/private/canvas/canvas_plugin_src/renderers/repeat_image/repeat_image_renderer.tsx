@@ -42,7 +42,7 @@ export const getRepeatImageRenderer =
       handlers: IInterpreterRenderHandlers
     ) => {
       const [{ elasticOutline, isValidUrl }, { RepeatImageComponent }] = await Promise.all([
-        import('@kbn/expression-utils'),
+        import('../../../public/lib'),
         import('./repeat_image_component'),
       ]);
       const settings = {

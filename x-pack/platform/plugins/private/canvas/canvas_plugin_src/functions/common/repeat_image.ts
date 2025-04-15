@@ -53,7 +53,7 @@ export function repeatImage(): ExpressionFunctionDefinition<
     },
     fn: async (count, args) => {
       const { elasticOutline, isValidUrl, resolveWithMissingImage } = await import(
-        '@kbn/expression-utils'
+        '../../../public/lib'
       );
       if (args.emptyImage !== null && isValidUrl(args.emptyImage) && args.max === null) {
         throw new Error(errors.getMissingMaxArgumentErrorMessage());

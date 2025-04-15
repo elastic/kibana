@@ -9,7 +9,7 @@ import React from 'react';
 import { coreMock } from '@kbn/core/public/mocks';
 import { Render } from '@kbn/presentation-util-plugin/public/__stories__';
 import type { Meta } from '@storybook/react';
-import { elasticLogo } from '@kbn/expression-utils';
+import { elasticLogo } from '../../../../public/lib';
 import { getImageRenderer } from '../image_renderer';
 import { ImageMode } from '../../../../i18n/functions/dict/image';
 

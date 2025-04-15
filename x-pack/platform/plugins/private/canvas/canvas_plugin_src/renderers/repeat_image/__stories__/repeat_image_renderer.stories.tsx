@@ -9,7 +9,7 @@ import React from 'react';
 import { coreMock } from '@kbn/core/public/mocks';
 import { Render } from '@kbn/presentation-util-plugin/public/__stories__';
 import type { Meta } from '@storybook/react';
-import { elasticLogo, elasticOutline } from '@kbn/expression-utils';
+import { elasticLogo, elasticOutline } from '../../../../public/lib';
 import { getRepeatImageRenderer } from '..';
 
 const Renderer = () => {

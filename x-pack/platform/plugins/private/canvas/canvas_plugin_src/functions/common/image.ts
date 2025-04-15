@@ -55,7 +55,7 @@ export const image: ExpressionImageFunction = () => {
         throw new Error(errors.invalidImageMode());
       }
 
-      const { elasticLogo, resolveWithMissingImage } = await import('@kbn/expression-utils');
+      const { elasticLogo, resolveWithMissingImage } = await import('../../../public/lib');
       const modeStyle = mode === 'stretch' ? '100% 100%' : mode;
       return {
         type: 'image',

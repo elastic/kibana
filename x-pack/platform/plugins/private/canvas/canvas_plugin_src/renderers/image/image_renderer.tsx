@@ -40,7 +40,7 @@ export const getImageRenderer =
       config: ImageRendererConfig,
       handlers: IInterpreterRenderHandlers
     ) => {
-      const { elasticLogo, isValidUrl } = await import('@kbn/expression-utils');
+      const { elasticLogo, isValidUrl } = await import('../../../public/lib');
       const dataurl = isValidUrl(config.dataurl ?? '') ? config.dataurl : elasticLogo;
 
       const style = {

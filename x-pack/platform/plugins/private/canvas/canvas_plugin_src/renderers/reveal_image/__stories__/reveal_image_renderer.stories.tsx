@@ -9,7 +9,7 @@ import React from 'react';
 import { coreMock } from '@kbn/core/public/mocks';
 import { Render } from '@kbn/presentation-util-plugin/public/__stories__';
 import type { Meta } from '@storybook/react';
-import { elasticOutline, elasticLogo } from '@kbn/expression-utils';
+import { elasticOutline, elasticLogo } from '../../../../public/lib';
 import { getRevealImageRenderer } from '..';
 
 enum Origin {
