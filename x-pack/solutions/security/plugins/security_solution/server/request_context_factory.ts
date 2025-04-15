@@ -289,6 +289,7 @@ export class RequestContextFactory implements IRequestContextFactory {
           apiKeyManager: getEntityStoreApiKeyManager(),
           security: startPlugins.security,
           request,
+          uiSettingsClient: coreContext.uiSettings.client,
         });
       }),
       getAssetInventoryClient: memoize(
