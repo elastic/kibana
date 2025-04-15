@@ -88,11 +88,9 @@ export const getIndexTemplate = ({
         : {}),
     },
     _meta: indexMetadata,
-
-      // By setting the priority to namespace.length, we ensure that if one namespace is a prefix of another namespace
-      // then newly created indices will use the matching template with the *longest* namespace
-      priority: namespace.length,
-    },
+    // By setting the priority to namespace.length, we ensure that if one namespace is a prefix of another namespace
+    // then newly created indices will use the matching template with the *longest* namespace
+    priority: namespace.length,
   };
 };
 
