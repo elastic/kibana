@@ -43,7 +43,7 @@ import { removeIdFromExceptionItemsEntries } from '@kbn/securitysolution-list-ho
 
 import type { EcsSecurityExtension as Ecs, CodeSignature } from '@kbn/securitysolution-ecs';
 import type { EventSummaryField } from '../../../common/components/event_details/types';
-import { getEventFieldsToDisplay } from '../../../common/components/event_details/get_alert_summary_rows';
+import { getHighlightedFieldsToDisplay } from '../../../common/components/event_details/get_alert_summary_rows';
 import * as i18n from './translations';
 import type { AlertData, Flattened } from './types';
 
@@ -987,11 +987,11 @@ export const getAlertHighlightedFields = (
     allEventCategories: Array.isArray(eventCategory) ? eventCategory : [eventCategory],
   };
 
-  const fieldsToDisplay = getEventFieldsToDisplay({
+  const fieldsToDisplay = getHighlightedFieldsToDisplay({
     eventCategories,
     eventCode,
     eventRuleType,
-    highlightedFieldsOverride: ruleCustomHighlightedFields,
+    ruleCustomHighlightedFields,
   });
   return filterHighlightedFields(fieldsToDisplay, highlightedFieldsPrefixToExclude, alertData);
 };
