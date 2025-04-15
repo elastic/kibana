@@ -19,8 +19,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'console', 'header']);
   const toasts = getService('toasts');
 
-  // Failing: See https://github.com/elastic/kibana/issues/218255
-  describe.skip('misc console behavior', function testMiscConsoleBehavior() {
+  describe('misc console behavior', function testMiscConsoleBehavior() {
     before(async () => {
       await browser.setWindowSize(1200, 800);
       await PageObjects.common.navigateToApp('console');
@@ -129,7 +128,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             // Retry until the documentation is loaded
             await retry.try(async () => {
               const url = await browser.getCurrentUrl();
-              expect(url).to.contain('search-search.html');
+              expect(url).to.contain('operation-search');
             });
           });
         });
