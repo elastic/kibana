@@ -40,6 +40,7 @@ import { SecurityError } from './errors/security_error';
 import { State } from './state_management/state';
 import { StatusError } from './errors/status_error';
 import { ASSET_ID, ASSET_TYPE } from './assets/fields';
+import { StorageClientGetResponse } from '../../../../../../../../src/platform/packages/shared/kbn-storage-adapter';
 
 interface AcknowledgeResponse<TResult extends Result> {
   acknowledged: true;
@@ -347,9 +348,7 @@ export class StreamsClient {
   async getStream(name: string): Promise<StreamDefinition> {
     try {
       const response = await this.dependencies.storageClient.get({ id: name });
-
-      const streamDefinition = response._source;
-      assertsSchema(streamDefinitionSchema, streamDefinition);
+      const streamDefinition = this.toStreamDefinition(response);
 
       if (isIngestStreamDefinition(streamDefinition)) {
         const privileges = await checkAccess({
@@ -379,11 +378,7 @@ export class StreamsClient {
 
   private async getStoredStreamDefinition(name: string): Promise<StreamDefinition> {
     return await Promise.all([
-      this.dependencies.storageClient.get({ id: name }).then((response) => {
-        const source = response._source;
-        assertsSchema(streamDefinitionSchema, source);
-        return source;
-      }),
+      this.dependencies.storageClient.get({ id: name }).then(this.toStreamDefinition),
       checkAccess({ name, scopedClusterClient: this.dependencies.scopedClusterClient }).then(
         (privileges) => {
           if (!privileges.read) {
@@ -674,5 +669,17 @@ export class StreamsClient {
         },
       },
     }).then((streams) => streams.filter(isWiredStreamDefinition));
+  }
+
+  private toStreamDefinition(
+    storedStreamDefinition: StorageClientGetResponse<StreamDefinition>
+  ): StreamDefinition {
+    const streamDefinition = {
+      ...storedStreamDefinition._source,
+      description: storedStreamDefinition._source?.description ?? '',
+    };
+
+    assertsSchema(streamDefinitionSchema, streamDefinition);
+    return streamDefinition;
   }
 }
