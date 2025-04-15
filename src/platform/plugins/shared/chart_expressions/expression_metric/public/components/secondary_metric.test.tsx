@@ -241,7 +241,7 @@ describe('Secondary metric', () => {
           expect(screen.getByText(finalResult)).toBeInTheDocument();
           // unfortuantely the icon is not rendered, so check for the wrapper for now
           expect(el.firstChild?.firstChild).toHaveAttribute('data-euiicon-type', icon);
-          screen.debug();
+
           expect(
             screen.queryByLabelText(`Value: ${finalResult} - Changed to ${trendLabel}`)
           ).not.toBeInTheDocument();
