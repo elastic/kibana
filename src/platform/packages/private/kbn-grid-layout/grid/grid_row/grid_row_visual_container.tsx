@@ -26,6 +26,25 @@ const collapsableStyles = {
 export const GridRowVisualContainer = ({ rowId }: { rowId: string }) => {
   const { gridLayoutStateManager } = useGridLayoutContext();
 
+    useEffect(() => {
+    const interactionStyleSubscription = combineLatest([
+      gridLayoutStateManager.interactionEvent$,
+    ]).subscribe(([interactionEvent]) => {
+      const rowRef = gridLayoutStateManager.rowDimensionsRefs.current[rowId];
+      if (!rowRef|| gridLayoutStateManager.expandedPanelId$.getValue()) return;
+      if (interactionEvent?.targetRow !== rowId) {
+        rowRef.classList.remove('kbnGridRow--targeted');
+        return;
+      }
+      rowRef.classList.add('kbnGridRow--targeted');
+    });
+
+    return () => {
+      interactionStyleSubscription.unsubscribe();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   useEffect(() => {
     return () => {
       // remove reference on unmount
@@ -54,7 +73,7 @@ export const GridRowVisualContainer = ({ rowId }: { rowId: string }) => {
         elRef.style.gridRowEnd = `${bottomPosition + 1}`;
         // TODO: this should be stable and have a stable subscription (or be a prop)
         if (currentGridLayout[rowId]?.isCollapsible) {
-          elRef.style.background = collapsableStyles.backgroundColor;
+
           elRef.style.outline = collapsableStyles.outline;
           elRef.style.borderRadius = collapsableStyles.borderRadius;
         }

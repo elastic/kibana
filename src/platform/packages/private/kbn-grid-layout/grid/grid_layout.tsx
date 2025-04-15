@@ -176,28 +176,7 @@ export const GridLayout = ({
     [renderPanelContents, useCustomDragHandle, gridLayoutStateManager]
   );
 
-  useEffect(() => {
-    /**
-     * When the user is interacting with an element, the page can grow, but it cannot
-     * shrink. This is to stop a behaviour where the page would scroll up automatically
-     * making the panel shrink or grow unpredictably.
-     */
-    const interactionStyleSubscription = combineLatest([
-      gridLayoutStateManager.interactionEvent$,
-    ]).subscribe(([interactionEvent]) => {
-      if (!layoutRef.current || gridLayoutStateManager.expandedPanelId$.getValue()) return;
-      if (!interactionEvent) {
-        layoutRef.current.classList.remove('kbnGridLayout--active');
-        return;
-      }
-      layoutRef.current.classList.add('kbnGridLayout--active');
-    });
 
-    return () => {
-      interactionStyleSubscription.unsubscribe();
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   const toggleIsCollapsed = useCallback(
     (rId: string) => {
