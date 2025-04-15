@@ -50,6 +50,15 @@ describe('validateParams', () => {
         })
       ).toBe('[threshold]: is required to be 0');
     });
+
+    it('if groupBy is "top" should not return error message', () => {
+      expect(
+        validateParams({
+          ...params,
+          groupBy: 'top',
+        })
+      ).toBeUndefined();
+    });
   });
 
   const esQuery = [
