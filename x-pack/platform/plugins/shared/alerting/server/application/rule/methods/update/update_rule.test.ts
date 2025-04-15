@@ -4278,7 +4278,7 @@ describe('update()', () => {
   });
 
   describe('artifacts', () => {
-    test('updates the artifacts', async () => {
+    test('remove an existing dashboard', async () => {
       const existingDashboards = [
         {
           refId: 'dashboard_0',
@@ -4429,6 +4429,226 @@ describe('update()', () => {
             "dashboards": Array [
               Object {
                 "id": "dashboard-1",
+              },
+            ],
+          },
+          "createdAt": 2019-02-12T21:01:22.479Z,
+          "enabled": true,
+          "executionStatus": Object {
+            "lastExecutionDate": 2019-02-12T21:01:22.479Z,
+            "status": "pending",
+          },
+          "id": "1",
+          "notifyWhen": "onActiveAlert",
+          "params": Object {
+            "bar": true,
+          },
+          "revision": 1,
+          "schedule": Object {
+            "interval": "1m",
+          },
+          "scheduledTaskId": "task-123",
+          "systemActions": Array [],
+          "updatedAt": 2019-02-12T21:01:22.479Z,
+        }
+      `);
+    });
+
+    test('adds a new linked dashboard', async () => {
+      const existingDashboards = [
+        {
+          refId: 'dashboard_0',
+        },
+        {
+          refId: 'dashboard_1',
+        },
+      ];
+
+      const existingRule = {
+        id: '1',
+        type: RULE_SAVED_OBJECT_TYPE,
+        attributes: {
+          name: 'fakeRuleName',
+          enabled: true,
+          tags: ['foo'],
+          alertTypeId: 'myType',
+          schedule: { interval: '1m' },
+          consumer: 'myApp',
+          revision: 0,
+          scheduledTaskId: 'task-123',
+          params: {},
+          executionStatus: {
+            lastExecutionDate: '2019-02-12T21:01:22.479Z',
+            status: 'pending',
+          },
+          muteAll: false,
+          legacyId: null,
+          snoozeSchedule: [],
+          mutedInstanceIds: [],
+          createdBy: 'elastic',
+          createdAt: '2019-02-12T21:01:22.479Z',
+          updatedBy: 'elastic',
+          updatedAt: '2019-02-12T21:01:22.479Z',
+          actions: [],
+          artifacts: {
+            dashboards: existingDashboards,
+          },
+        },
+        references: [
+          {
+            name: 'dashboard_0',
+            type: 'dashboard',
+            id: 'dashboard-1',
+          },
+          {
+            name: 'dashboard_1',
+            type: 'dashboard',
+            id: 'dashboard-2',
+          },
+        ],
+        version: '123',
+      };
+
+      unsecuredSavedObjectsClient.get.mockResolvedValue(existingRule);
+
+      unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+        id: '1',
+        type: RULE_SAVED_OBJECT_TYPE,
+        attributes: {
+          enabled: true,
+          schedule: { interval: '1m' },
+          params: {
+            bar: true,
+          },
+          actions: [],
+          artifacts: {
+            dashboards: [
+              {
+                refId: 'dashboard_0',
+              },
+              {
+                refId: 'dashboard_1',
+              },
+              {
+                refId: 'dashboard_2',
+              },
+            ],
+          },
+          executionStatus: {
+            lastExecutionDate: '2019-02-12T21:01:22.479Z',
+            status: 'pending',
+          },
+          notifyWhen: 'onActiveAlert',
+          revision: 1,
+          scheduledTaskId: 'task-123',
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        },
+        references: [
+          {
+            name: 'dashboard_0',
+            type: 'dashboard',
+            id: 'dashboard-1',
+          },
+          {
+            name: 'dashboard_1',
+            type: 'dashboard',
+            id: 'dashboard-2',
+          },
+          {
+            name: 'dashboard_2',
+            type: 'dashboard',
+            id: 'dashboard-3',
+          },
+        ],
+      });
+
+      const result = await rulesClient.update({
+        id: '1',
+        data: {
+          schedule: { interval: '1m' },
+          name: 'abc',
+          tags: ['foo'],
+          params: {
+            bar: true,
+          },
+          throttle: null,
+          notifyWhen: 'onActiveAlert',
+          actions: [],
+          systemActions: [],
+          artifacts: {
+            dashboards: [
+              {
+                id: 'dashboard-1',
+              },
+              {
+                id: 'dashboard-2',
+              },
+              {
+                id: 'dashboard-3',
+              },
+            ],
+          },
+        },
+      });
+
+      expect(unsecuredSavedObjectsClient.create).toHaveBeenNthCalledWith(
+        1,
+        RULE_SAVED_OBJECT_TYPE,
+        expect.objectContaining({
+          artifacts: {
+            dashboards: [
+              {
+                refId: 'dashboard_0',
+              },
+              {
+                refId: 'dashboard_1',
+              },
+              {
+                refId: 'dashboard_2',
+              },
+            ],
+          },
+        }),
+        {
+          id: '1',
+          overwrite: true,
+          references: [
+            { id: 'dashboard-1', name: 'dashboard_0', type: 'dashboard' },
+            { id: 'dashboard-2', name: 'dashboard_1', type: 'dashboard' },
+            { id: 'dashboard-3', name: 'dashboard_2', type: 'dashboard' },
+          ],
+          version: '123',
+        }
+      );
+
+      expect(result?.artifacts).toEqual({
+        dashboards: [
+          {
+            id: 'dashboard-1',
+          },
+          {
+            id: 'dashboard-2',
+          },
+          {
+            id: 'dashboard-3',
+          },
+        ],
+      });
+
+      expect(result).toMatchInlineSnapshot(`
+        Object {
+          "actions": Array [],
+          "artifacts": Object {
+            "dashboards": Array [
+              Object {
+                "id": "dashboard-1",
+              },
+              Object {
+                "id": "dashboard-2",
+              },
+              Object {
+                "id": "dashboard-3",
               },
             ],
           },
