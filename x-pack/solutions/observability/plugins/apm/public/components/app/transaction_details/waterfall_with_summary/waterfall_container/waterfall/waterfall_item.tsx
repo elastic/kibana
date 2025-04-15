@@ -230,7 +230,6 @@ export function WaterfallItem({
   segments,
   isEmbeddable = false,
 }: IWaterfallItemProps) {
-  const theme = useEuiTheme();
   const [widthFactor, setWidthFactor] = useState(1);
   const waterfallItemRef: React.RefObject<any> = useRef(null);
   useEffect(() => {
@@ -321,6 +320,7 @@ export function WaterfallItem({
 }
 
 function EmbeddableErrorIcon({ errorCount }: { errorCount: number }) {
+  const theme = useEuiTheme();
   if (errorCount <= 0) {
     return null;
   }
