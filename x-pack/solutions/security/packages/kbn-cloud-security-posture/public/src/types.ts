@@ -85,6 +85,7 @@ export interface FindingMisconfigurationFlyoutProps extends Record<string, unkno
   ruleId: string;
   resourceId: string;
   isPreviewMode?: boolean;
+  scopeId?: string;
 }
 export interface FindingsMisconfigurationPanelExpandableFlyoutProps extends FlyoutPanelProps {
   key: 'findings-misconfiguration-panel';
@@ -96,6 +97,7 @@ export interface FindingsMisconfigurationFlyoutHeaderProps {
 
 export interface FindingsMisconfigurationFlyoutContentProps {
   finding: CspFinding;
+  isPreviewMode?: boolean;
 }
 
 export interface FindingMisconfigurationFlyoutFooterProps {

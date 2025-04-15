@@ -7,14 +7,7 @@
 
 import React from 'react';
 import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiText,
-  EuiSpacer,
-  EuiFlyoutFooter,
-  EuiFlyoutBody,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiText, EuiSpacer, EuiFlyoutFooter } from '@elastic/eui';
 import type {
   FindingMisconfigurationFlyoutContentProps,
   FindingMisconfigurationFlyoutProps,
@@ -27,6 +20,7 @@ import { useKibana } from '../../../../common/lib/kibana';
 import { PreferenceFormattedDate } from '../../../../common/components/formatted_date';
 import { FlyoutTitle } from '../../../shared/components/flyout_title';
 import { FlyoutBody } from '../../../shared/components/flyout_body';
+import { FindingMisconfigurationPreviewFooter } from '../findings_preview/footer';
 export interface FindingsMisconfigurationPanelExpandableFlyoutProps extends FlyoutPanelProps {
   key: 'findings-misconfiguration-panel';
   params: FindingMisconfigurationFlyoutProps;
@@ -36,6 +30,7 @@ export const FindingsMisconfigurationPanel = ({
   resourceId,
   ruleId,
   isPreviewMode,
+  scopeId,
 }: FindingMisconfigurationFlyoutProps) => {
   const { cloudSecurityPosture } = useKibana().services;
   const CspFlyout = cloudSecurityPosture.getCloudSecurityPostureMisconfigurationFlyout();
@@ -71,15 +66,16 @@ export const FindingsMisconfigurationPanel = ({
                 </EuiFlexGroup>
                 <CspFlyout.Header finding={finding} />
               </FlyoutHeader>
-              <EuiFlyoutBody>
+              <FlyoutBody>
                 <CspFlyout.Body finding={finding} />
-              </EuiFlyoutBody>
-              {/* <FlyoutBody>
-                <CspFlyout.Body finding={finding} />
-              </FlyoutBody> */}
-              <EuiFlyoutFooter>
-                <CspFlyout.Footer createRuleFn={createRuleFn} />
-              </EuiFlyoutFooter>
+              </FlyoutBody>
+              {!isPreviewMode ? (
+                <EuiFlyoutFooter>
+                  <CspFlyout.Footer createRuleFn={createRuleFn} />
+                </EuiFlyoutFooter>
+              ) : (
+                <FindingMisconfigurationPreviewFooter finding={finding} scopeId={scopeId} />
+              )}
             </>
           );
         }}

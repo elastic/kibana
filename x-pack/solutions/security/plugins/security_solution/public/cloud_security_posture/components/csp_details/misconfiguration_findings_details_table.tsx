@@ -184,10 +184,6 @@ export const MisconfigurationFindingsDetailsTable = memo(
 
     const getNavUrlParams = useGetNavigationUrlParams();
 
-    const getFindingsPageUrlFilteredByRuleAndResourceId = (ruleId: string, resourceId: string) => {
-      return getNavUrlParams({ 'rule.id': ruleId, 'resource.id': resourceId }, 'configurations');
-    };
-
     const getFindingsPageUrl = (name: string, queryField: CloudPostureEntityIdentifier) => {
       return getNavUrlParams({ [queryField]: name }, 'configurations', ['rule.name']);
     };
@@ -222,6 +218,7 @@ export const MisconfigurationFindingsDetailsTable = memo(
                 params: {
                   resourceId: finding.resource.id,
                   ruleId: finding.rule.id,
+                  scopeId,
                   banner: {
                     title: i18n.translate(
                       'xpack.securitySolution.flyout.right.user.userPreviewTitle',
@@ -236,31 +233,6 @@ export const MisconfigurationFindingsDetailsTable = memo(
               });
             }}
           />
-          // <SecuritySolutionLinkAnchor
-          //   deepLinkId={SecurityPageName.cloudSecurityPostureFindings}
-          //   path={`${getFindingsPageUrlFilteredByRuleAndResourceId(
-          //     rule?.id,
-          //     finding?.resource?.id
-          //   )}`}
-          //   target={'_blank'}
-          //   external={false}
-          //   onClick={() => {
-          //     uiMetricService.trackUiMetric(
-          //       METRIC_TYPE.CLICK,
-          //       NAV_TO_FINDINGS_BY_RULE_NAME_FRPOM_ENTITY_FLYOUT
-          //     );
-          //     openPreviewPanel({
-          //       id: 'findings-misconfiguration-panel-preview',
-          //       params: {
-          //         resourceId: finding.resource.id,
-          //         ruleId: finding.rule.id,
-          //         banner: 'HAHAHAHAHAHHAHA',
-          //       },
-          //     });
-          //   }}
-          // >
-          //   <EuiIcon type={'popout'} />
-          // </SecuritySolutionLinkAnchor>
         ),
       },
       {
