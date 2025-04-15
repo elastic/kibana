@@ -115,6 +115,27 @@ describe('config schema', () => {
     `);
   });
 
+  it('can override `description` when it is `null`', () => {
+    expect(
+      ConfigSchema.validate(
+        {
+          overrides: {
+            featureA: { description: null },
+          },
+        },
+        { serverless: true }
+      )
+    ).toMatchInlineSnapshot(`
+      Object {
+        "overrides": Object {
+          "featureA": Object {
+            "description": null,
+          },
+        },
+      }
+    `);
+  });
+
   it('properly validates category override', () => {
     for (const category of Object.keys(DEFAULT_APP_CATEGORIES)) {
       expect(
