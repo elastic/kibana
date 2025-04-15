@@ -41,7 +41,6 @@ function serializeChildren(node: PanelSelectedNode): ChromeProjectNavigationNode
     return [
       {
         id: 'root',
-        title: '',
         path: `${node.path}.root`,
         children: [...node.children],
       },
