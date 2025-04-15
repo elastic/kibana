@@ -10,7 +10,7 @@
  *
  * This is the **persistence** shape: what will be stored in the workflow definition.
  */
-export interface NodeDefinition<NodeTypeConfigType = unknown> {
+export interface NodeDefinition<NodeTypeConfigType = Record<string, unknown>> {
   /**
    * Unique ID for this node, within the workflow definition
    */

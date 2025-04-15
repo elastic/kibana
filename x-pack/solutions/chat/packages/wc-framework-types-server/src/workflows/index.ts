@@ -14,4 +14,9 @@ export type {
   WorkflowDefinitionInput,
   WorkflowInputType,
 } from './definition';
-export type { WorkflowRunEventHandler, WorkflowRunner } from './runner';
+export type {
+  WorkflowRunEventHandler,
+  WorkflowRunner,
+  RunWorkflowParams,
+  RunWorkflowOutput,
+} from './runner';

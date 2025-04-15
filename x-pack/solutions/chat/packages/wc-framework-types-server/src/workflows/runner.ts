@@ -5,11 +5,12 @@
  * 2.0.
  */
 
+import type { KibanaRequest } from '@kbn/core/server';
 import type { WorkflowRunEvent } from '@kbn/wc-framework-types-common';
 
 export type WorkflowRunEventHandler = (event: WorkflowRunEvent) => void;
 
-interface RunWorkflowParams<Input = unknown> {
+export interface RunWorkflowParams<Input = Record<string, unknown>> {
   /**
    * The ID of the workflow to run.
    */
@@ -20,16 +21,25 @@ interface RunWorkflowParams<Input = unknown> {
    */
   inputs: Input;
   /**
+   * The request that initiative that run.
+   */
+  request: KibanaRequest;
+  /**
    * Optional event handler to handle workflow execution events.
    *
    * Can be used to handle progression events in real time.
    */
   onEvent?: WorkflowRunEventHandler;
+  /**
+   * If specified, will use that connector as the default connector
+   * instead of picking the default one automatically.
+   */
+  defaultConnectorId?: string;
 
   // TODO: tool provider
 }
 
-interface RunWorkflowOutput<Output = unknown> {
+export interface RunWorkflowOutput<Output = Record<string, unknown>> {
   /**
    * The runId that was bound to this run. Can be used to find events in
    * tracing / telemetry or so on.
@@ -43,6 +53,6 @@ interface RunWorkflowOutput<Output = unknown> {
 
 // TODO: structured errors thrown containing runId too...
 
-export interface WorkflowRunner {
-  run(options: RunWorkflowParams): Promise<RunWorkflowOutput>;
+export interface WorkflowRunner<Input = Record<string, unknown>, Output = Record<string, unknown>> {
+  run(options: RunWorkflowParams<Input>): Promise<RunWorkflowOutput<Output>>;
 }

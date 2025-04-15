@@ -6,5 +6,5 @@
  */
 
 export type { ToolDescriptor } from './src/tools';
-export type { NodeProgressionEvent, NodeEvent } from './src/nodes';
+export type { NodeProgressionEvent, NodeEvent, NodeProgressionEventMeta } from './src/nodes';
 export type { WorkflowEvent, WorkflowProgressionEvent, WorkflowRunEvent } from './src/workflows';

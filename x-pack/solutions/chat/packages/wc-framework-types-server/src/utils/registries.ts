@@ -21,3 +21,13 @@ export interface Provider<T extends { id: string }> {
 export interface Registry<T extends { id: string }> extends Provider<T> {
   register(definition: T): void;
 }
+
+/**
+ * Generic async provider interface
+ */
+export interface AsyncProvider<T extends { id: string }> {
+  has(id: string): Promise<boolean>;
+  get(id: string): Promise<T>;
+  getAllKeys(): Promise<string[]>;
+  getAll(): Promise<T[]>;
+}

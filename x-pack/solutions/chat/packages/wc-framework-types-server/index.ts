@@ -32,5 +32,7 @@ export type {
   WorkflowInputType,
   WorkflowRunEventHandler,
   WorkflowRunner,
+  RunWorkflowParams,
+  RunWorkflowOutput,
 } from './src/workflows';
-export type { Registry, Provider } from './src/utils';
+export type { Registry, Provider, AsyncProvider } from './src/utils';

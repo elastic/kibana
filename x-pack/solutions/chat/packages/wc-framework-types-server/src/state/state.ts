@@ -12,4 +12,5 @@ export interface WorkflowState {
   has(key: string): boolean;
   get<T = unknown>(key: string): T;
   getKeys(): string[];
+  set<T>(key: string, value: T): void;
 }

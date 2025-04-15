@@ -18,20 +18,7 @@ export interface NodeProgressionEvent {
   /**
    * Meta bound to this event
    */
-  meta: {
-    /**
-     * The id of the node this event was fired from.
-     */
-    nodeId: string;
-    /**
-     * The type of the node this event was fired from.
-     */
-    nodeType: string;
-    /**
-     * The id of the workflow this event was fired from
-     */
-    workflowId: string;
-  };
+  meta: NodeProgressionEventMeta;
   /**
    * A human-readable label to display for this progression event.
    */
@@ -40,6 +27,21 @@ export interface NodeProgressionEvent {
    * Optional, arbitrary data associated with this event.
    */
   data?: Record<string, string>;
+}
+
+export interface NodeProgressionEventMeta {
+  /**
+   * The id of the node this event was fired from.
+   */
+  nodeId: string;
+  /**
+   * The type of the node this event was fired from.
+   */
+  nodeType: string;
+  /**
+   * The id of the workflow this event was fired from
+   */
+  workflowId: string;
 }
 
 export type NodeEvent = NodeProgressionEvent;

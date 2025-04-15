@@ -31,9 +31,11 @@ export interface NodeFactoryBaseServices {
    */
   toolProvider: ToolProvider;
 
+  // TODO: add esClient
+
   // TODO: need definitions for those
-  workflowRegistry: unknown;
-  nodeRegistry: unknown;
+  // workflowRegistry: unknown;
+  // nodeRegistry: unknown;
 }
 
 /**

@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export type { NodeEvent, NodeProgressionEvent } from './node_events';
+export type { NodeEvent, NodeProgressionEvent, NodeProgressionEventMeta } from './node_events';
