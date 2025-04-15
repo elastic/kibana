@@ -148,6 +148,12 @@ export const DecorateWithKibanaContext: Decorator = (story) => {
               getRedirectUrl: (args: any) => {
                 action('share.url.locators.getRedirectUrl')(args);
               },
+              useUrl: () =>
+                ({
+                  getRedirectUrl: (args: any) => {
+                    action('share.url.locators.useUrl.getRedirectUrl')(args);
+                  },
+                } as unknown as LocatorPublic<any>),
             } as unknown as LocatorPublic<any>),
         },
       },
