@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
-
 import { allowedExperimentalValues } from '../../../../../common/experimental_features';
 import { createQueryAlertType } from './create_query_alert_type';
 import { createRuleTypeMocks } from '../__mocks__/rule_type';
@@ -83,27 +81,23 @@ describe('Custom Query Alerts', () => {
 
     alerting.registerType(queryAlertType);
 
-    services.scopedClusterClient.asCurrentUser.search.mockReturnValue(
-      elasticsearchClientMock.createSuccessTransportRequestPromise({
-        hits: {
-          hits: [],
-          sequences: [],
-          events: [],
-          total: {
-            relation: 'eq',
-            value: 0,
-          },
+    services.scopedClusterClient.asCurrentUser.search.mockResolvedValue({
+      hits: {
+        hits: [],
+        total: {
+          relation: 'eq',
+          value: 0,
         },
-        took: 0,
-        timed_out: false,
-        _shards: {
-          failed: 0,
-          skipped: 0,
-          successful: 1,
-          total: 1,
-        },
-      })
-    );
+      },
+      took: 0,
+      timed_out: false,
+      _shards: {
+        failed: 0,
+        skipped: 0,
+        successful: 1,
+        total: 1,
+      },
+    });
 
     const params = getQueryRuleParams();
 
@@ -126,27 +120,23 @@ describe('Custom Query Alerts', () => {
 
     alerting.registerType(queryAlertType);
 
-    services.scopedClusterClient.asCurrentUser.search.mockReturnValue(
-      elasticsearchClientMock.createSuccessTransportRequestPromise({
-        hits: {
-          hits: [sampleDocNoSortId()],
-          sequences: [],
-          events: [],
-          total: {
-            relation: 'eq',
-            value: 1,
-          },
+    services.scopedClusterClient.asCurrentUser.search.mockResolvedValue({
+      hits: {
+        hits: [sampleDocNoSortId()],
+        total: {
+          relation: 'eq',
+          value: 1,
         },
-        took: 0,
-        timed_out: false,
-        _shards: {
-          failed: 0,
-          skipped: 0,
-          successful: 1,
-          total: 1,
-        },
-      })
-    );
+      },
+      took: 0,
+      timed_out: false,
+      _shards: {
+        failed: 0,
+        skipped: 0,
+        successful: 1,
+        total: 1,
+      },
+    });
 
     const params = getQueryRuleParams();
 
@@ -193,27 +183,23 @@ describe('Custom Query Alerts', () => {
       },
     });
 
-    services.scopedClusterClient.asCurrentUser.search.mockReturnValue(
-      elasticsearchClientMock.createSuccessTransportRequestPromise({
-        hits: {
-          hits: [sampleDocNoSortId()],
-          sequences: [],
-          events: [],
-          total: {
-            relation: 'eq',
-            value: 1,
-          },
+    services.scopedClusterClient.asCurrentUser.search.mockResolvedValue({
+      hits: {
+        hits: [sampleDocNoSortId()],
+        total: {
+          relation: 'eq',
+          value: 1,
         },
-        took: 0,
-        timed_out: false,
-        _shards: {
-          failed: 0,
-          skipped: 0,
-          successful: 1,
-          total: 1,
-        },
-      })
-    );
+      },
+      took: 0,
+      timed_out: false,
+      _shards: {
+        failed: 0,
+        skipped: 0,
+        successful: 1,
+        total: 1,
+      },
+    });
 
     await executor({ params });
 
@@ -234,27 +220,23 @@ describe('Custom Query Alerts', () => {
 
     alerting.registerType(queryAlertType);
 
-    services.scopedClusterClient.asCurrentUser.search.mockReturnValue(
-      elasticsearchClientMock.createSuccessTransportRequestPromise({
-        hits: {
-          hits: [sampleDocNoSortId()],
-          sequences: [],
-          events: [],
-          total: {
-            relation: 'eq',
-            value: 1,
-          },
+    services.scopedClusterClient.asCurrentUser.search.mockResolvedValue({
+      hits: {
+        hits: [sampleDocNoSortId()],
+        total: {
+          relation: 'eq',
+          value: 1,
         },
-        took: 0,
-        timed_out: false,
-        _shards: {
-          failed: 0,
-          skipped: 0,
-          successful: 1,
-          total: 1,
-        },
-      })
-    );
+      },
+      took: 0,
+      timed_out: false,
+      _shards: {
+        failed: 0,
+        skipped: 0,
+        successful: 1,
+        total: 1,
+      },
+    });
 
     const params = getQueryRuleParams();
 
