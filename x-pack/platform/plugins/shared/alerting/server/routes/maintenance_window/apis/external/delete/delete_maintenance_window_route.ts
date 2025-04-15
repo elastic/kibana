@@ -48,7 +48,7 @@ export const deleteMaintenanceWindowRoute = (
       },
       options: {
         access: 'public',
-        summary: 'Deletes a maintenance window by ID.',
+        summary: 'Delete a maintenance window.',
         tags: ['oas-tag:maintenance-window'],
       },
     },

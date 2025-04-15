@@ -54,7 +54,7 @@ export const archiveMaintenanceWindowRoute = (
       },
       options: {
         access: 'public',
-        summary: 'Archives a maintenance window by ID.',
+        summary: 'Archive a maintenance window.',
         tags: ['oas-tag:maintenance-window'],
       },
     },

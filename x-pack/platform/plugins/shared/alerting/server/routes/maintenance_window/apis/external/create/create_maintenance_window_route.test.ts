@@ -72,6 +72,9 @@ describe('createMaintenanceWindowRoute', () => {
       Object {
         "access": "public",
         "summary": "Create a maintenance window.",
+        "tags": Array [
+          "oas-tag:maintenance-window",
+        ],
       }
     `);
 

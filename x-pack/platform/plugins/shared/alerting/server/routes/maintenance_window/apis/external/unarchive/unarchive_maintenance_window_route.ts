@@ -54,7 +54,7 @@ export const unarchiveMaintenanceWindowRoute = (
       },
       options: {
         access: 'public',
-        summary: 'Unarchives a maintenance window by ID.',
+        summary: 'Unarchive a maintenance window.',
         tags: ['oas-tag:maintenance-window'],
       },
     },

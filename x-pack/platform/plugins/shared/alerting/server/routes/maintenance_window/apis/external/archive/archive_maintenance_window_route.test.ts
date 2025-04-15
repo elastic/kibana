@@ -54,7 +54,10 @@ describe('archiveMaintenanceWindowRoute', () => {
     expect(config.options).toMatchInlineSnapshot(`
       Object {
         "access": "public",
-        "summary": "Archives a maintenance window by ID.",
+        "summary": "Archive a maintenance window.",
+        "tags": Array [
+          "oas-tag:maintenance-window",
+        ],
       }
     `);
 

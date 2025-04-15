@@ -79,6 +79,9 @@ describe('updateMaintenanceWindowRoute', () => {
       Object {
         "access": "public",
         "summary": "Update a maintenance window.",
+        "tags": Array [
+          "oas-tag:maintenance-window",
+        ],
       }
     `);
 

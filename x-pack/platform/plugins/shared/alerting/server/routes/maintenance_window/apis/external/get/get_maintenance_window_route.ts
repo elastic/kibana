@@ -54,7 +54,7 @@ export const getMaintenanceWindowRoute = (
       },
       options: {
         access: 'public',
-        summary: 'Gets a maintenance window by ID.',
+        summary: 'Get maintenance window details.',
         tags: ['oas-tag:maintenance-window'],
       },
     },
