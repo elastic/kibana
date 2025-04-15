@@ -91,16 +91,7 @@ export const getNavigationTreeDefinition = ({
                   },
                   link: 'enterpriseSearch',
                 },
-                {
-                  getIsActive: ({ pathNameSerialized, prepend }) => {
-                    return pathNameSerialized.startsWith(prepend('/app/dev_tools'));
-                  },
-                  id: 'dev_tools',
-                  link: 'dev_tools',
-                  title: i18n.translate('xpack.enterpriseSearch.searchNav.devTools', {
-                    defaultMessage: 'Dev Tools',
-                  }),
-                },
+
                 {
                   children: [
                     {
@@ -140,6 +131,16 @@ export const getNavigationTreeDefinition = ({
                 },
                 {
                   children: [
+                    {
+                      getIsActive: ({ pathNameSerialized, prepend }) => {
+                        return pathNameSerialized.startsWith(prepend('/app/dev_tools'));
+                      },
+                      id: 'dev_tools',
+                      link: 'dev_tools',
+                      title: i18n.translate('xpack.enterpriseSearch.searchNav.devTools', {
+                        defaultMessage: 'Dev Tools',
+                      }),
+                    },
                     {
                       link: 'searchPlayground',
                     },
