@@ -12,7 +12,6 @@ import React from 'react';
 import { TestProviders } from '../../../../common/mock';
 import { hostsModel } from '../../store';
 import { getEmptyValue } from '../../../../common/components/empty_value';
-import { useMountAppended } from '../../../../common/utils/use_mount_appended';
 
 import { UncommonProcessTable } from '.';
 import { mockData } from './mock';
@@ -31,7 +30,6 @@ jest.mock('../../../../common/components/link_to');
 
 describe('Uncommon Process Table Component', () => {
   const loadPage = jest.fn();
-  const mount = useMountAppended();
 
   const defaultProps = {
     data: mockData.edges,

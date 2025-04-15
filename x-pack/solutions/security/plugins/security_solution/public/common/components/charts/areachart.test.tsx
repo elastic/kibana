@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import type { RenderResult } from '@testing-library/react';
 import { screen, render } from '@testing-library/react';
 import { ScaleType, AreaSeries, Axis } from '@elastic/charts';
 
@@ -202,9 +201,8 @@ describe('AreaChartBaseComponent', () => {
       },
     };
 
-    let wrapper: RenderResult;
     beforeEach(() => {
-      wrapper = render(
+      render(
         <AreaChartBaseComponent
           height={customHeight}
           width={customWidth}
@@ -237,9 +235,8 @@ describe('AreaChartBaseComponent', () => {
   });
 
   describe('render with default configs if no customized configs given', () => {
-    let wrapper: RenderResult;
     beforeEach(() => {
-      wrapper = render(
+      render(
         <AreaChartBaseComponent
           height={customHeight}
           width={customWidth}
@@ -297,9 +294,8 @@ describe('AreaChartComponent', () => {
   };
 
   describe.each(chartDataSets as Array<[ChartSeriesData[]]>)('with valid data [%o]', (data) => {
-    let wrapper: RenderResult;
     beforeEach(() => {
-      wrapper = render(<AreaChartComponent configs={mockConfig} areaChart={data} />);
+      render(<AreaChartComponent configs={mockConfig} areaChart={data} />);
     });
 
     it(`should render area chart`, () => {
@@ -311,9 +307,8 @@ describe('AreaChartComponent', () => {
   describe.each(chartHolderDataSets as Array<[ChartSeriesData[] | null | undefined]>)(
     'with invalid data [%o]',
     (data) => {
-      let wrapper: RenderResult;
       beforeEach(() => {
-        wrapper = render(<AreaChartComponent configs={mockConfig} areaChart={data} />);
+        render(<AreaChartComponent configs={mockConfig} areaChart={data} />);
       });
 
       it(`should render a chart place holder`, () => {

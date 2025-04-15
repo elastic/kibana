@@ -158,7 +158,6 @@ beforeEach(() => {
 });
 
 describe('BarChartBaseComponent', () => {
-  let wrapper: RenderResult;
   const mockBarChartData: ChartSeriesData[] = [
     {
       key: 'uniqueSourceIps',
@@ -227,7 +226,7 @@ describe('BarChartBaseComponent', () => {
     };
 
     beforeEach(() => {
-      wrapper = render(
+      render(
         <BarChartBaseComponent
           height={customHeight}
           width={customWidth}
@@ -270,13 +269,13 @@ describe('BarChartBaseComponent', () => {
 
   describe('render with default configs if no customized configs given', () => {
     beforeEach(() => {
-      wrapper = render(
+      render(
         <BarChartBaseComponent height={customHeight} width={customWidth} data={mockBarChartData} />
       );
     });
 
     it(`should ${mockBarChartData.length} render BarSeries`, () => {
-      expect(screen.getByTestId('chart-mock')).toMatchSnapshot();
+      expect(screen.getByTestId('chart')).toMatchSnapshot();
       expect(screen.getAllByTestId('bar-series-mock')).toHaveLength(mockBarChartData.length);
     });
 
@@ -299,9 +298,7 @@ describe('BarChartBaseComponent', () => {
 
   describe('no render', () => {
     beforeEach(() => {
-      wrapper = render(
-        <BarChartBaseComponent height={null} width={null} data={mockBarChartData} />
-      );
+      render(<BarChartBaseComponent height={null} width={null} data={mockBarChartData} />);
     });
 
     it('should not render Chart without height and width', () => {
@@ -311,10 +308,8 @@ describe('BarChartBaseComponent', () => {
 });
 
 describe.each(chartDataSets)('BarChart with valid data [%o]', (data) => {
-  let wrapper: RenderResult;
-
   beforeEach(() => {
-    wrapper = render(<BarChartComponent configs={mockConfig} barChart={data} />);
+    render(<BarChartComponent configs={mockConfig} barChart={data} />);
   });
 
   it(`should render chart`, () => {
