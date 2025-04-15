@@ -12,6 +12,8 @@ import { useKibana } from '../../../../common/lib/kibana';
 import { useSourcererDataView } from '../../../../sourcerer/containers';
 import { useTabsView } from './use_tabs_view';
 import { TestProviders } from '../../../../common/mock';
+import { useFindAttackDiscoverySchedules } from '../schedule/logic/use_find_schedules';
+import { mockFindAttackDiscoverySchedules } from '../../mock/mock_find_attack_discovery_schedules';
 
 jest.mock('react-router', () => ({
   matchPath: jest.fn(),
@@ -22,6 +24,7 @@ jest.mock('react-router', () => ({
 }));
 jest.mock('../../../../common/lib/kibana');
 jest.mock('../../../../sourcerer/containers');
+jest.mock('../schedule/logic/use_find_schedules');
 
 const defaultProps = {
   onSettingsReset: jest.fn(),
@@ -39,6 +42,9 @@ const defaultProps = {
 const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
 const mockUseSourcererDataView = useSourcererDataView as jest.MockedFunction<
   typeof useSourcererDataView
+>;
+const mockUseFindAttackDiscoverySchedules = useFindAttackDiscoverySchedules as jest.MockedFunction<
+  typeof useFindAttackDiscoverySchedules
 >;
 
 describe('useTabsView', () => {
@@ -65,6 +71,11 @@ describe('useTabsView', () => {
       sourcererDataView: {},
       loading: false,
     } as unknown as jest.Mocked<ReturnType<typeof useSourcererDataView>>);
+
+    mockUseFindAttackDiscoverySchedules.mockReturnValue({
+      data: { schedules: [], total: 0 },
+      isLoading: false,
+    } as unknown as jest.Mocked<ReturnType<typeof useFindAttackDiscoverySchedules>>);
   });
 
   it('should return the alert selection component with `AlertSelectionQuery` when settings tab is selected', () => {
@@ -140,7 +151,29 @@ describe('useTabsView', () => {
     });
     render(<TestProviders>{result.current.tabsContainer}</TestProviders>);
     await waitFor(() => {
-      expect(result.current.actionButtons).toBeUndefined();
+      expect(result.current.actionButtons).toBeNull();
+    });
+  });
+
+  it('should not return `create new schedule` action button when schedule tab is selected and there are existing schedules', async () => {
+    mockUseFindAttackDiscoverySchedules.mockReturnValue({
+      data: mockFindAttackDiscoverySchedules,
+      isLoading: false,
+    } as unknown as jest.Mocked<ReturnType<typeof useFindAttackDiscoverySchedules>>);
+
+    const { result } = renderHook(() => useTabsView(defaultProps));
+
+    render(<TestProviders>{result.current.tabsContainer}</TestProviders>);
+
+    const scheduleTabButton = screen.getByRole('tab', { name: 'Schedule' });
+    act(() => {
+      fireEvent.click(scheduleTabButton); // clicking invokes tab switching
+    });
+
+    // Render action buttons of the Schedule tab
+    render(<TestProviders>{result.current.actionButtons}</TestProviders>);
+    await waitFor(() => {
+      expect(screen.getByTestId('createNewSchedule')).toBeInTheDocument();
     });
   });
 });
