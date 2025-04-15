@@ -17,7 +17,6 @@ import { AlertsFiltersFormContextProvider } from '../contexts/alerts_filters_for
 import { AlertsFilterByRuleTypes } from './alerts_filter_by_rule_types';
 import { InternalRuleType } from '@kbn/response-ops-rules-apis/apis/get_internal_rule_types';
 import { filterMetadata } from './alerts_filter_by_rule_types';
-import { ALERT_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 
 const http = httpServiceMock.createStartContract();
 const notifications = notificationServiceMock.createStartContract();
@@ -131,16 +130,6 @@ describe('AlertsFilterByRuleTypes', () => {
 
       it('should return true for non-empty values', () => {
         expect(filterMetadata.isEmpty(['test-type'])).toEqual(false);
-      });
-    });
-
-    describe('toEsQuery', () => {
-      it('should convert the filter value to an es query', () => {
-        expect(filterMetadata.toEsQuery(['test-type'])).toEqual({
-          terms: {
-            [ALERT_RULE_TYPE_ID]: ['test-type'],
-          },
-        });
       });
     });
   });

@@ -12,7 +12,6 @@ import React, { useCallback, useMemo } from 'react';
 import { useGetInternalRuleTypesQuery } from '@kbn/response-ops-rules-apis/hooks/use_get_internal_rule_types_query';
 import { EuiComboBoxProps } from '@elastic/eui/src/components/combo_box/combo_box';
 import { SetRequired } from 'type-fest';
-import { ALERT_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { AlertsFilterComponentType, AlertsFilterMetadata } from '../types';
 import { useAlertsFiltersFormContext } from '../contexts/alerts_filters_form_context';
 import {
@@ -93,11 +92,4 @@ export const filterMetadata = {
   displayName: RULE_TYPES_FILTER_LABEL,
   component: AlertsFilterByRuleTypes,
   isEmpty: (value?: string[]) => !Boolean(value?.length),
-  toEsQuery: (value: string[]) => {
-    return {
-      terms: {
-        [ALERT_RULE_TYPE_ID]: value,
-      },
-    };
-  },
 } as const satisfies AlertsFilterMetadata<string[]>;

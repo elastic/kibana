@@ -7,13 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { ReactNode, useState } from 'react';
+import React, { useState } from 'react';
 import { render, screen } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { AlertsFiltersForm, AlertsFiltersFormProps } from './alerts_filters_form';
-import { AlertsFiltersFormItem } from './alerts_filters_form_item';
-import { AlertsFiltersExpression } from '../types';
+import { AlertsFilter, AlertsFiltersExpression } from '../types';
 import {
   ADD_OR_OPERATION_BUTTON_SUBJ,
   DELETE_OPERAND_BUTTON_SUBJ,
@@ -21,22 +20,50 @@ import {
 } from '../constants';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
+import {
+  FORM_ITEM_FILTER_BY_LABEL,
+  FORM_ITEM_FILTER_BY_PLACEHOLDER,
+  RULE_TAGS_FILTER_LABEL,
+  RULE_TYPES_FILTER_LABEL,
+} from '../translations';
+import { alertsFiltersMetadata } from '../filters';
 
 const http = httpServiceMock.createStartContract();
 const notifications = notificationServiceMock.createStartContract();
-jest.mock('./alerts_filters_form_item');
-jest
-  .mocked(AlertsFiltersFormItem)
-  .mockImplementation(({ value }) => (
-    <div data-test-subj={FORM_ITEM_SUBJ}>{value as ReactNode}</div>
-  ));
+
+const TAG_1 = 'tag1';
+const TAG_2 = 'tag2';
+const TAG_3 = 'tag3';
+
+jest.mock('@kbn/response-ops-rules-apis/hooks/use_get_rule_tags_query');
+const { useGetRuleTagsQuery: mockUseGetRuleTagsQuery } = jest.requireMock(
+  '@kbn/response-ops-rules-apis/hooks/use_get_rule_tags_query'
+);
+mockUseGetRuleTagsQuery.mockReturnValue({
+  tags: [TAG_1, TAG_2, TAG_3],
+  isLoading: false,
+  isError: false,
+  hasNextPage: false,
+  fetchNextPage: jest.fn(),
+  refetch: jest.fn(),
+});
+
+jest.mock('@kbn/response-ops-rules-apis/hooks/use_get_internal_rule_types_query');
+const { useGetInternalRuleTypesQuery: mockUseGetInternalRuleTypesQuery } = jest.requireMock(
+  '@kbn/response-ops-rules-apis/hooks/use_get_internal_rule_types_query'
+);
+mockUseGetInternalRuleTypesQuery.mockReturnValue({
+  data: [{ id: 'testType', name: 'Test Type', solution: 'stack' }],
+  isLoading: false,
+  isError: false,
+});
 
 const testExpression: AlertsFiltersExpression = [
-  { filter: { type: 'ruleTypes', value: 'filter1' } },
+  { filter: { type: alertsFiltersMetadata.ruleTags.id, value: [TAG_1] } },
   { operator: 'and' },
-  { filter: { type: 'ruleTypes', value: 'filter2' } },
+  { filter: { type: alertsFiltersMetadata.ruleTags.id, value: [TAG_2] } },
   { operator: 'or' },
-  { filter: { type: 'ruleTypes', value: 'filter3' } },
+  { filter: { type: alertsFiltersMetadata.ruleTags.id, value: [TAG_3] } },
 ];
 
 const mockOnChange = jest.fn();
@@ -63,7 +90,7 @@ describe('AlertsFiltersForm', () => {
   it('should render boolean expressions', () => {
     render(<TestComponent />);
 
-    ['filter1', 'filter2', 'filter3'].forEach((filter) => {
+    [TAG_1, TAG_2, TAG_3].forEach((filter) => {
       expect(screen.getByText(filter)).toBeInTheDocument();
     });
   });
@@ -71,16 +98,16 @@ describe('AlertsFiltersForm', () => {
   it('should delete the correct operand when clicking on the trash icon', async () => {
     render(<TestComponent />);
 
-    ['filter1', 'filter2', 'filter3'].forEach((filter) => {
+    [TAG_1, TAG_2, TAG_3].forEach((filter) => {
       expect(screen.getByText(filter)).toBeInTheDocument();
     });
 
     await userEvent.click(screen.getAllByTestId(DELETE_OPERAND_BUTTON_SUBJ)[0]);
 
-    ['filter1', 'filter3'].forEach((filter) => {
+    [TAG_1, TAG_3].forEach((filter) => {
       expect(screen.getByText(filter)).toBeInTheDocument();
     });
-    expect(screen.queryByText('filter2')).not.toBeInTheDocument();
+    expect(screen.queryByText(TAG_2)).not.toBeInTheDocument();
     expect(mockOnChange).toHaveBeenCalledWith([
       ...testExpression.slice(0, 1),
       ...testExpression.slice(3),
@@ -97,7 +124,7 @@ describe('AlertsFiltersForm', () => {
     const formItems = screen.getAllByTestId(FORM_ITEM_SUBJ);
     expect(formItems).toHaveLength(4);
     // New operands should be empty
-    expect(formItems[3]).toHaveTextContent('');
+    expect(formItems[3]).toHaveTextContent(FORM_ITEM_FILTER_BY_PLACEHOLDER);
     expect(mockOnChange).toHaveBeenCalledWith([
       ...testExpression,
       { operator: 'or' },
@@ -105,37 +132,36 @@ describe('AlertsFiltersForm', () => {
     ]);
   });
 
-  it('should pass the correct props to AlertsFiltersFormItem', () => {
+  it('should correctly change filter types', async () => {
     render(<TestComponent />);
-    const commonProps = {
-      type: 'ruleTypes',
-      isDisabled: false,
-      onTypeChange: expect.any(Function),
-      onValueChange: expect.any(Function),
-    };
-    expect(AlertsFiltersFormItem).toHaveBeenNthCalledWith(
-      1,
+
+    const filterTypeSelectors = screen.getAllByRole('button', {
+      name: `${RULE_TAGS_FILTER_LABEL} , ${FORM_ITEM_FILTER_BY_LABEL}`,
+    });
+    await userEvent.click(filterTypeSelectors[0]);
+    await userEvent.click(screen.getByRole('option', { name: RULE_TYPES_FILTER_LABEL }));
+    expect(mockOnChange).toHaveBeenCalledWith([
+      { filter: { type: alertsFiltersMetadata.ruleTypes.id } },
+      ...testExpression.slice(1),
+    ]);
+  });
+
+  it('should correctly change filter values', async () => {
+    render(<TestComponent />);
+
+    const filterValueDropdownToggles = screen.getAllByRole('button', {
+      name: 'Open list of options',
+    });
+    await userEvent.click(filterValueDropdownToggles[0]);
+    await userEvent.click(screen.getByRole('option', { name: TAG_2 }));
+    expect(mockOnChange).toHaveBeenCalledWith([
       {
-        ...commonProps,
-        value: 'filter1',
+        filter: {
+          ...(testExpression[0] as { filter: AlertsFilter }).filter,
+          value: [TAG_1, TAG_2],
+        },
       },
-      {}
-    );
-    expect(AlertsFiltersFormItem).toHaveBeenNthCalledWith(
-      2,
-      {
-        ...commonProps,
-        value: 'filter2',
-      },
-      {}
-    );
-    expect(AlertsFiltersFormItem).toHaveBeenNthCalledWith(
-      3,
-      {
-        ...commonProps,
-        value: 'filter3',
-      },
-      {}
-    );
+      ...testExpression.slice(1),
+    ]);
   });
 });

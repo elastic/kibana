@@ -10,7 +10,6 @@
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { NotificationsStart } from '@kbn/core-notifications-browser';
 import type { ComponentType } from 'react';
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { alertsFiltersMetadata } from './filters';
 
 export type AlertsFilterComponentType<T> = ComponentType<{
@@ -29,7 +28,6 @@ export interface AlertsFilterMetadata<T> {
   displayName: string;
   component: AlertsFilterComponentType<T>;
   isEmpty: (value?: T) => boolean;
-  toEsQuery: (value: T) => QueryDslQueryContainer;
 }
 
 export interface AlertsFiltersFormContextValue {

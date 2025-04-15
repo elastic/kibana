@@ -11,7 +11,6 @@ import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';
 import { useGetRuleTagsQuery } from '@kbn/response-ops-rules-apis/hooks/use_get_rule_tags_query';
 import React, { useCallback, useMemo } from 'react';
 import { EuiComboBoxProps } from '@elastic/eui/src/components/combo_box/combo_box';
-import { ALERT_RULE_TAGS } from '@kbn/rule-data-utils';
 import {
   RULE_TAGS_FILTER_LABEL,
   RULE_TAGS_FILTER_NO_OPTIONS_PLACEHOLDER,
@@ -93,11 +92,4 @@ export const filterMetadata = {
   displayName: RULE_TAGS_FILTER_LABEL,
   component: AlertsFilterByRuleTags,
   isEmpty: (value?: string[]) => !Boolean(value?.length),
-  toEsQuery: (value: string[]) => {
-    return {
-      terms: {
-        [ALERT_RULE_TAGS]: value,
-      },
-    };
-  },
 } as const satisfies AlertsFilterMetadata<string[]>;

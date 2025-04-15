@@ -15,7 +15,6 @@ import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import { useGetRuleTagsQuery } from '@kbn/response-ops-rules-apis/hooks/use_get_rule_tags_query';
 import { AlertsFiltersFormContextProvider } from '../contexts/alerts_filters_form_context';
 import { AlertsFilterByRuleTags, filterMetadata } from './alerts_filter_by_rule_tags';
-import { ALERT_RULE_TAGS } from '@kbn/rule-data-utils';
 
 const http = httpServiceMock.createStartContract();
 const notifications = notificationServiceMock.createStartContract();
@@ -118,16 +117,6 @@ describe('AlertsFilterByRuleTags', () => {
 
       it('should return true for non-empty values', () => {
         expect(filterMetadata.isEmpty(['test-tag'])).toEqual(false);
-      });
-    });
-
-    describe('toEsQuery', () => {
-      it('should convert the filter value to an es query', () => {
-        expect(filterMetadata.toEsQuery(['test-tag'])).toEqual({
-          terms: {
-            [ALERT_RULE_TAGS]: ['test-tag'],
-          },
-        });
       });
     });
   });
