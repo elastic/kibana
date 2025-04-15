@@ -139,32 +139,24 @@ export function ChatTimeline({
     let currentGroup: ChatTimelineItem[] | null = null;
 
     for (const item of timelineItems) {
+      const { role, content, sanitized, detectedEntities } = item.message.message;
       if (item.display.hide || !item) continue;
 
       // build redactedEntitiesMap with user messages using entity positions.
-      if (item.message.message.role === 'user' && item.message.message.content) {
-        if (
-          item.message.message.sanitized &&
-          Array.isArray(item.message.message.detectedEntities)
-        ) {
-          item.message.message.detectedEntities.forEach((entity) => {
+      if (role === 'user' && content) {
+        if (sanitized && Array.isArray(detectedEntities)) {
+          detectedEntities.forEach((entity) => {
             redactedEntitiesMap[entity.hash] = entity.entity;
           });
           // transform user messages to react nodes to highlight the sensitive portions in the user message.
-          item.piiHighlightedContent = transformUserContent(
-            item.message.message.content,
-            item.message.message.detectedEntities
-          );
+          item.piiHighlightedContent = transformUserContent(content, detectedEntities);
         }
       }
       // Process assistant messages: transform the content using the cumulative redactedEntitiesMap.
       // Here we don't add highlighting because it conflicts with markdown elements.
-      else if (item.message.message.role === 'assistant' && item.message.message.content) {
+      else if (role === 'assistant' && content) {
         Object.entries(redactedEntitiesMap).forEach(([hash, originalText]) => {
-          item.message.message.content = item.message.message.content?.replace(
-            new RegExp(hash, 'g'),
-            originalText
-          );
+          item.message.message.content = content.replace(new RegExp(hash, 'g'), originalText);
         });
       }
 
