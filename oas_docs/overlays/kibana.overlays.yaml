@@ -112,6 +112,28 @@ actions:
     description: Change displayName
     update:
       x-displayName: "User session management"
+  - target: '$.tags[?(@.name=="saved objects")]'
+    description: Change displayName and description
+    update:
+      x-displayName: "Saved objects"
+      description: |
+        Export sets of saved objects that you want to import into Kibana, resolve import errors, and rotate an encryption key for encrypted saved objects with the saved objects APIs.
+
+        To manage a specific type of saved object, use the corresponding APIs.
+        For example, use:
+
+        * [Data views](../group/endpoint-data-views)
+        * [Spaces](https://www.elastic.co/guide/en/kibana/current/spaces-api.html)
+        * [Short URLs](https://www.elastic.co/guide/en/kibana/current/short-urls-api.html)
+
+        Warning: Do not write documents directly to the `.kibana` index. When you write directly to the `.kibana` index, the data becomes corrupted and permanently breaks future Kibana versions
+  - target: '$.tags[?(@.name=="synthetics")]'
+    description: Add tag info
+    update:
+        x-displayName: Synthetics
+        externalDocs:
+          description: Synthetic monitoring
+          url: https://www.elastic.co/guide/en/observability/current/monitor-uptime-synthetics.html
 # Remove extra tags from operations
   - target: "$.paths[*][*].tags[1:]"
     description: Remove all but first tag from operations

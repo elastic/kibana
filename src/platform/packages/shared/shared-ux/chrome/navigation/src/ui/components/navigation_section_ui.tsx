@@ -8,7 +8,7 @@
  */
 
 import React, { type FC, useMemo, useEffect, useState, useCallback } from 'react';
-import { css } from '@emotion/css';
+import { css } from '@emotion/react';
 import {
   EuiTitle,
   EuiCollapsibleNavItem,
@@ -20,6 +20,7 @@ import type { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
 import classnames from 'classnames';
 import type { EuiThemeSize, RenderAs } from '@kbn/core-chrome-browser/src/project_navigation';
 
+import { SubItemTitle } from './subitem_title';
 import { useNavigation as useServices } from '../../services';
 import { isAbsoluteLink, isActiveFromUrl, isAccordionNode } from '../../utils';
 import type { BasePathService, NavigateToUrlFn } from '../../types';
@@ -152,7 +153,7 @@ const renderBlockTitle: (
       size="xxxs"
       className="eui-textTruncate"
       data-test-subj={dataTestSubj}
-      css={({ euiTheme }: any) => {
+      css={({ euiTheme }) => {
         return {
           marginTop: spaceBefore ? euiTheme.size[spaceBefore] : undefined,
           paddingBlock: euiTheme.size.xs,
@@ -395,7 +396,9 @@ function nodeToEuiCollapsibleNavProps(
     };
   }
 
-  if (renderAs === 'panelOpener') {
+  const hasVisibleSubItems = subItems && subItems.length > 0;
+
+  if (renderAs === 'panelOpener' && hasVisibleSubItems) {
     // Render as a panel opener (button to open a panel as a second navigation)
     return {
       items: [...renderPanelOpener(navNode, deps)],
@@ -403,7 +406,7 @@ function nodeToEuiCollapsibleNavProps(
     };
   }
 
-  if (renderAs === 'block' && deps.treeDepth > 0 && subItems) {
+  if (renderAs === 'block' && deps.treeDepth > 0 && hasVisibleSubItems) {
     // Render as a group block (bold title + list of links underneath)
     return {
       items: [...renderGroup(navNode, subItems)],
@@ -419,14 +422,15 @@ function nodeToEuiCollapsibleNavProps(
       isSelected,
       onClick,
       icon: navNode.icon,
-      title: navNode.title,
+      // @ts-expect-error title accepts JSX elements and they render correctly but the type definition expects a string
+      title: navNode.withBadge ? <SubItemTitle item={navNode} /> : navNode.title,
       ['data-test-subj']: dataTestSubj,
       iconProps: { size: deps.treeDepth === 0 ? 'm' : 's' },
 
-      // Render as an accordion or a link (handled by EUI) depending if
-      // "items" is undefined or not. If it is undefined --> a link, otherwise an
-      // accordion is rendered.
-      ...(subItems
+      // If navNode has subItems, render as an accordion.
+      // Otherwise render as a link.
+      // NavItemProp declarations are handled by us, rendering is handled by EUI.
+      ...(hasVisibleSubItems
         ? { items: subItems, isCollapsible }
         : { href, ...linkProps, external: isExternalLink }),
     },
@@ -443,12 +447,6 @@ function nodeToEuiCollapsibleNavProps(
 
   return { items, isVisible };
 }
-
-const className = css`
-  .euiAccordion__childWrapper {
-    transition: none; // Remove the transition as it does not play well with dynamic links added to the accordion
-  }
-`;
 
 interface Props {
   navNode: ChromeProjectNavigationNode;
@@ -560,8 +558,14 @@ export const NavigationSectionUI: FC<Props> = React.memo(({ navNode: _navNode })
     return null;
   }
 
+  const navItemStyles = css`
+    .euiAccordion__childWrapper {
+      transition: none; // Remove the transition as it does not play well with dynamic links added to the accordion
+    }
+  `;
+
   if (!items) {
-    return <EuiCollapsibleNavItem {...props} className={className} />;
+    return <EuiCollapsibleNavItem {...props} css={navItemStyles} />;
   }
 
   // Item type ExclusiveUnion - accordions should not contain links
@@ -570,7 +574,7 @@ export const NavigationSectionUI: FC<Props> = React.memo(({ navNode: _navNode })
   return (
     <EuiCollapsibleNavItem
       {...rest}
-      className={className}
+      css={navItemStyles}
       items={items}
       accordionProps={getAccordionProps(navNode.path)}
     />
