@@ -15,12 +15,12 @@ import type { PersistedState } from '@kbn/visualizations-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common/expression_renderers';
 import { StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
+import { METRIC_TYPE } from '@kbn/analytics';
 import {
   createPerformanceTracker,
-  METRIC_TYPE,
   PERFORMANCE_TRACKER_MARKS,
   PERFORMANCE_TRACKER_TYPES,
-} from '@kbn/analytics';
+} from '@kbn/ebt-tools';
 import {
   ChartSizeEvent,
   extractContainerType,

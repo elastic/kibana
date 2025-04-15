@@ -10,3 +10,13 @@
 export * from './src/performance_metrics';
 
 export * from './src/performance_metric_events';
+
+export {
+  clearPerformanceTrackersByType,
+  createPerformanceTracker,
+  getPerformanceTrackersByType,
+  getPerformanceTrackersGroupedById,
+  PERFORMANCE_TRACKER_TYPES,
+  PERFORMANCE_TRACKER_MARKS,
+  PERFORMANCE_TRACKER_MEASURES,
+} from './src/performance_tracker';

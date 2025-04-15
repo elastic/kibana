@@ -23,7 +23,7 @@ import {
   createPerformanceTracker,
   PERFORMANCE_TRACKER_MARKS,
   PERFORMANCE_TRACKER_TYPES,
-} from '@kbn/analytics';
+} from '@kbn/ebt-tools';
 import { trackUiCounterEvents } from '../../lens_ui_telemetry';
 import { DatatableComponent } from './components/table_basic';
 

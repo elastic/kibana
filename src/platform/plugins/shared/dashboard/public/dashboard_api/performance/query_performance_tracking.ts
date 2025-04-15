@@ -18,7 +18,7 @@ import {
   getPerformanceTrackersGroupedById,
   PERFORMANCE_TRACKER_MARKS,
   PERFORMANCE_TRACKER_MEASURES,
-} from '@kbn/analytics';
+} from '@kbn/ebt-tools';
 
 import { coreServices } from '../../services/kibana_services';
 import { DASHBOARD_LOADED_EVENT } from '../../utils/telemetry_constants';

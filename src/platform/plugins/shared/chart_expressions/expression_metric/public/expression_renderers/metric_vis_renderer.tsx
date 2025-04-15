@@ -14,12 +14,12 @@ import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common/expression_renderers';
 import { css } from '@emotion/react';
 import { StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
+import { METRIC_TYPE } from '@kbn/analytics';
 import {
   createPerformanceTracker,
-  METRIC_TYPE,
   PERFORMANCE_TRACKER_MARKS,
   PERFORMANCE_TRACKER_TYPES,
-} from '@kbn/analytics';
+} from '@kbn/ebt-tools';
 import type { IInterpreterRenderHandlers, Datatable } from '@kbn/expressions-plugin/common';
 import { getColumnByAccessor } from '@kbn/visualizations-plugin/common/utils';
 import { extractContainerType, extractVisualizationType } from '@kbn/chart-expressions-common';

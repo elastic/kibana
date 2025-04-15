@@ -11,12 +11,12 @@ import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { METRIC_TYPE } from '@kbn/analytics';
 import {
   createPerformanceTracker,
-  METRIC_TYPE,
   PERFORMANCE_TRACKER_MARKS,
   PERFORMANCE_TRACKER_TYPES,
-} from '@kbn/analytics';
+} from '@kbn/ebt-tools';
 import type { PaletteRegistry } from '@kbn/coloring';
 import { PersistedState } from '@kbn/visualizations-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
