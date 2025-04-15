@@ -44,9 +44,12 @@ export const FindingMisconfigurationPreviewFooter = ({
             target="_blank"
             data-test-subj={'open-finding-misconfiguration-flyout'}
           >
-            {i18n.translate('xpack.securitySolution.flyout.host.preview.viewDetailsLabel', {
-              defaultMessage: 'Show full finding details',
-            })}
+            {i18n.translate(
+              'xpack.securitySolution.flyout.misconfigurationFindings.preview.viewDetailsLabel',
+              {
+                defaultMessage: 'Show full finding details',
+              }
+            )}
           </EuiLink>
         </EuiFlexItem>
       </EuiFlexGroup>
