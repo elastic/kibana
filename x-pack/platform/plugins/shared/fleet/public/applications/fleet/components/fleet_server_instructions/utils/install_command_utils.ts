@@ -11,6 +11,7 @@ import {
   getDownloadSourceProxyArgs,
 } from '../../../../../components/enrollment_instructions/manual';
 import type { PLATFORM_TYPE } from '../../../hooks';
+import { PLATFORM_WITH_INSTALL_SERVERS } from '../../../hooks';
 
 export type CommandsByPlatform = {
   [key in PLATFORM_TYPE]: string;
@@ -59,13 +60,13 @@ function getArtifact(
     deb: {
       downloadCommand: [
         `curl -L -O ${ARTIFACT_BASE_URL}/elastic-agent-${kibanaVersion}-amd64.deb${appendCurlDownloadSourceProxyArgs}`,
-        `sudo dpkg -i elastic-agent-${kibanaVersion}-amd64.deb`,
+        `sudo ELASTIC_AGENT_FLAVOR=servers dpkg -i elastic-agent-${kibanaVersion}-amd64.deb`,
       ].join(`\n`),
     },
     rpm: {
       downloadCommand: [
         `curl -L -O ${ARTIFACT_BASE_URL}/elastic-agent-${kibanaVersion}-x86_64.rpm${appendCurlDownloadSourceProxyArgs}`,
-        `sudo rpm -vi elastic-agent-${kibanaVersion}-x86_64.rpm`,
+        `sudo ELASTIC_AGENT_FLAVOR=servers rpm -vi elastic-agent-${kibanaVersion}-x86_64.rpm`,
       ].join(`\n`),
     },
     kubernetes: {
@@ -132,7 +133,9 @@ export function getInstallCommandForPlatform({
 
   commandArguments.push(['fleet-server-port', '8220']);
 
-  commandArguments.push(['install-servers']);
+  if (PLATFORM_WITH_INSTALL_SERVERS.includes(platform)) {
+    commandArguments.push(['install-servers']);
+  }
 
   const enrollmentProxyArgs = [];
   if (esOutputProxy) {
