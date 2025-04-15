@@ -1,0 +1,17 @@
+{
+  "type": "plugin",
+  "id": "@kbn/workchat-framework",
+  "owner": "@elastic/search-kibana",
+  "group": "chat",
+  "visibility": "private",
+  "description": "WorkChat framework",
+  "plugin": {
+    "id": "workchatFramework",
+    "server": true,
+    "browser": true,
+    "configPath": ["xpack", "workchatApp"],
+    "requiredPlugins": ["inference", "actions", "features"],
+    "optionalPlugins": [],
+    "requiredBundles": []
+  }
+}
