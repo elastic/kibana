@@ -54,7 +54,7 @@ const getFieldsFromType = (type: string, spaceId: string) => {
   throw new Error(`Invalid type ${type}`);
 };
 
-const getRecoveredAlert = (
+export const getRecoveredAlert = (
   id: string,
   type: string,
   recoveredTime: string,
@@ -231,7 +231,7 @@ const getAcknowledgedOrClosedDetectionAlert = (
   };
 };
 
-const getActiveAlert = (
+export const getActiveAlert = (
   id: string,
   type: string,
   activeTime: string,

@@ -12,6 +12,7 @@ import type {
   ESQLAstChangePointCommand,
   ESQLAstCommand,
   ESQLAstJoinCommand,
+  ESQLAstQueryExpression,
   ESQLAstRenameExpression,
   ESQLColumn,
   ESQLFunction,
@@ -66,7 +67,7 @@ export class GlobalVisitorContext<
     return this.methods[method]!(context as any, input);
   }
 
-  // Command visiting ----------------------------------------------------------
+  // #region Command visiting ----------------------------------------------------------
 
   public visitCommandGeneric(
     parent: contexts.VisitorContext | null,
@@ -104,9 +105,9 @@ export class GlobalVisitorContext<
         return this.visitRowCommand(parent, commandNode, input as any);
       }
       // TODO: uncomment this when the command is implemented
-      // case 'metrics': {
-      //   if (!this.methods.visitMetricsCommand) break;
-      //   return this.visitMetricsCommand(parent, commandNode, input as any);
+      // case 'ts': {
+      //   if (!this.methods.visitTimeseriesCommand) break;
+      //   return this.visitTimeseriesCommand(parent, commandNode, input as any);
       // }
       case 'show': {
         if (!this.methods.visitShowCommand) break;
@@ -180,6 +181,10 @@ export class GlobalVisitorContext<
           input as any
         );
       }
+      case 'fork': {
+        if (!this.methods.visitForkCommand) break;
+        return this.visitForkCommand(parent, commandNode, input as any);
+      }
     }
     return this.visitCommandGeneric(parent, commandNode, input as any);
   }
@@ -220,13 +225,13 @@ export class GlobalVisitorContext<
     return this.visitWithSpecificContext('visitRowCommand', context, input);
   }
 
-  public visitMetricsCommand(
+  public visitTimeseriesCommand(
     parent: contexts.VisitorContext | null,
     node: ESQLAstCommand,
-    input: types.VisitorInput<Methods, 'visitMetricsCommand'>
-  ): types.VisitorOutput<Methods, 'visitMetricsCommand'> {
-    const context = new contexts.MetricsCommandVisitorContext(this, node, parent);
-    return this.visitWithSpecificContext('visitMetricsCommand', context, input);
+    input: types.VisitorInput<Methods, 'visitTimeseriesCommand'>
+  ): types.VisitorOutput<Methods, 'visitTimeseriesCommand'> {
+    const context = new contexts.TimeseriesCommandVisitorContext(this, node, parent);
+    return this.visitWithSpecificContext('visitTimeseriesCommand', context, input);
   }
 
   public visitShowCommand(
@@ -382,7 +387,18 @@ export class GlobalVisitorContext<
     return this.visitWithSpecificContext('visitChangePointCommand', context, input);
   }
 
-  // Expression visiting -------------------------------------------------------
+  public visitForkCommand(
+    parent: contexts.VisitorContext | null,
+    node: ESQLAstCommand,
+    input: types.VisitorInput<Methods, 'visitForkCommand'>
+  ): types.VisitorOutput<Methods, 'visitForkCommand'> {
+    const context = new contexts.ForkCommandVisitorContext(this, node, parent);
+    return this.visitWithSpecificContext('visitForkCommand', context, input);
+  }
+
+  // #endregion
+
+  // #region Expression visiting -------------------------------------------------------
 
   public visitExpressionGeneric(
     parent: contexts.VisitorContext | null,
@@ -454,8 +470,21 @@ export class GlobalVisitorContext<
           }
         }
       }
+      case 'query': {
+        if (!this.methods.visitQuery || expressionNode.type !== 'query') break;
+        return this.visitQuery(parent, expressionNode, input as any);
+      }
     }
     return this.visitExpressionGeneric(parent, expressionNode, input as any);
+  }
+
+  public visitQuery(
+    parent: contexts.VisitorContext | null,
+    node: ESQLAstQueryExpression,
+    input: types.VisitorInput<Methods, 'visitQuery'>
+  ): types.ExpressionVisitorOutput<Methods> {
+    const context = new contexts.QueryVisitorContext(this, node, parent);
+    return this.visitWithSpecificContext('visitQuery', context, input);
   }
 
   public visitColumnExpression(
@@ -548,3 +577,5 @@ export class GlobalVisitorContext<
     return this.visitWithSpecificContext('visitIdentifierExpression', context, input);
   }
 }
+
+// #endregion

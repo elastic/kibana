@@ -205,7 +205,7 @@ export function validateFunction({
           forceConstantOnly: allMatchingArgDefinitionsAreConstantOnly || forceConstantOnly,
           // use the nesting flag for now just for stats and metrics
           // TODO: revisit this part later on to make it more generic
-          isNested: ['stats', 'inlinestats', 'metrics'].includes(parentCommand)
+          isNested: ['stats', 'inlinestats', 'ts'].includes(parentCommand)
             ? isNested || !isAssignment(fn)
             : false,
           parentAst,

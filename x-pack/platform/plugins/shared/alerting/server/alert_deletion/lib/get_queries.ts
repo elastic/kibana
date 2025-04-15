@@ -13,10 +13,15 @@ export const getActiveAlertsQuery = (
   threshold: number,
   spaceId: string
 ): QueryDslQueryContainer => {
-  const filter = `kibana.alert.status: "active" AND kibana.alert.start < "now-${threshold}d" AND NOT kibana.alert.end:* AND NOT kibana.alert.workflow_status_updated_at:* AND ${[
-    SPACE_IDS,
-  ]}: ${spaceId}`;
-  const filterKueryNode = fromKueryExpression(filter);
+  const filterClauses = [
+    `kibana.alert.status: "active"`,
+    `kibana.alert.start < "now-${threshold}d"`,
+    `NOT kibana.alert.end:*`,
+    `NOT kibana.alert.workflow_status_updated_at:*`,
+    `NOT kibana.alert.case_ids:*`,
+    `${[SPACE_IDS]}: ${spaceId}`,
+  ];
+  const filterKueryNode = fromKueryExpression(filterClauses.join(' AND '));
   return toElasticsearchQuery(filterKueryNode);
 };
 
@@ -24,9 +29,17 @@ export const getInactiveAlertsQuery = (
   threshold: number,
   spaceId: string
 ): QueryDslQueryContainer => {
-  const filter = `((kibana.alert.workflow_status: "closed" OR kibana.alert.workflow_status: "acknowledged") AND kibana.alert.workflow_status_updated_at < "now-${threshold}d") OR ((kibana.alert.status: "untracked" OR kibana.alert.status: "recovered") AND kibana.alert.end < "now-${threshold}d") AND ${[
-    SPACE_IDS,
-  ]}: ${spaceId}`;
-  const filterKueryNode = fromKueryExpression(filter);
+  const closedFilter = `(kibana.alert.workflow_status: "closed" OR kibana.alert.workflow_status: "acknowledged")`;
+  const closedThreshold = `kibana.alert.workflow_status_updated_at < "now-${threshold}d"`;
+  const inactiveFilter = `(kibana.alert.status: "untracked" OR kibana.alert.status: "recovered")`;
+  const inactiveThreshold = `kibana.alert.end < "now-${threshold}d"`;
+
+  const filterClauses = [
+    `((${closedFilter} AND ${closedThreshold}) OR (${inactiveFilter} AND ${inactiveThreshold}))`,
+    `NOT kibana.alert.case_ids:*`,
+    `${[SPACE_IDS]}: ${spaceId}`,
+  ];
+
+  const filterKueryNode = fromKueryExpression(filterClauses.join(' AND '));
   return toElasticsearchQuery(filterKueryNode);
 };

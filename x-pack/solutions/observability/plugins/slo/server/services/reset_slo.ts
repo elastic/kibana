@@ -12,10 +12,9 @@ import {
   SLO_MODEL_VERSION,
   SUMMARY_DESTINATION_INDEX_PATTERN,
   SUMMARY_TEMP_INDEX_NAME,
-  getSLOPipelineId,
-  getSLOSummaryPipelineId,
   getSLOSummaryTransformId,
   getSLOTransformId,
+  getWildcardPipelineId,
 } from '../../common/constants';
 import { getSLIPipelineTemplate } from '../assets/ingest_templates/sli_pipeline_template';
 import { getSummaryPipelineTemplate } from '../assets/ingest_templates/summary_pipeline_template';
@@ -43,11 +42,9 @@ export class ResetSLO {
     await assertExpectedIndicatorSourceIndexPrivileges(slo, this.esClient);
 
     const summaryTransformId = getSLOSummaryTransformId(slo.id, slo.revision);
-    await this.summaryTransformManager.stop(summaryTransformId);
     await this.summaryTransformManager.uninstall(summaryTransformId);
 
     const rollupTransformId = getSLOTransformId(slo.id, slo.revision);
-    await this.transformManager.stop(rollupTransformId);
     await this.transformManager.uninstall(rollupTransformId);
 
     await Promise.all([this.deleteRollupData(slo.id), this.deleteSummaryData(slo.id)]);
@@ -90,17 +87,10 @@ export class ResetSLO {
         `Cannot reset the SLO [id: ${slo.id}, revision: ${slo.revision}]. Rolling back. ${err}`
       );
 
-      await this.summaryTransformManager.stop(summaryTransformId);
       await this.summaryTransformManager.uninstall(summaryTransformId);
-      await this.transformManager.stop(rollupTransformId);
       await this.transformManager.uninstall(rollupTransformId);
       await this.scopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline(
-        { id: getSLOSummaryPipelineId(slo.id, slo.revision) },
-        { ignore: [404] }
-      );
-
-      await this.scopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline(
-        { id: getSLOPipelineId(slo.id, slo.revision) },
+        { id: getWildcardPipelineId(slo.id, slo.revision) },
         { ignore: [404] }
       );
 
