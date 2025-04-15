@@ -9,6 +9,7 @@
 
 import { OtelInstance, ApmOtelFields } from '@kbn/apm-synthtrace-client';
 import { apm } from '@kbn/apm-synthtrace-client/src/lib/apm';
+import { ApmSynthtracePipelineTypes } from '../..';
 import { Scenario } from '../cli/scenario';
 import { withClient } from '../lib/utils/with_client';
 import { getSynthtraceEnvironment } from '../lib/utils/get_synthtrace_environment';
@@ -18,7 +19,7 @@ const ENVIRONMENT = getSynthtraceEnvironment(__filename);
 const scenario: Scenario<ApmOtelFields> = async (runOptions) => {
   return {
     bootstrap: async ({ apmEsClient }) => {
-      apmEsClient.pipeline(apmEsClient.getPipeline('otelToApm'));
+      apmEsClient.pipeline(apmEsClient.getPipeline(ApmSynthtracePipelineTypes.OtelToApm));
     },
     generate: ({ range, clients: { apmEsClient } }) => {
       const transactionName = 'oteldemo.AdServiceSynth/GetAds';

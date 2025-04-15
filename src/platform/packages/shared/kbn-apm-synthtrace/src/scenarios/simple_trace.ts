@@ -8,6 +8,7 @@
  */
 
 import { ApmFields, apm, Instance } from '@kbn/apm-synthtrace-client';
+import { ApmSynthtracePipelineTypes } from '../..';
 import { Scenario } from '../cli/scenario';
 import { getSynthtraceEnvironment } from '../lib/utils/get_synthtrace_environment';
 import { withClient } from '../lib/utils/with_client';
@@ -18,7 +19,9 @@ const ENVIRONMENT = getSynthtraceEnvironment(__filename);
 
 const scenario: Scenario<ApmFields> = async (runOptions) => {
   const { logger } = runOptions;
-  const { numServices = 3, pipeline = 'default' } = parseApmScenarioOpts(runOptions.scenarioOpts);
+  const { numServices = 3, pipeline = ApmSynthtracePipelineTypes.Default } = parseApmScenarioOpts(
+    runOptions.scenarioOpts
+  );
 
   return {
     bootstrap: async ({ apmEsClient }) => {

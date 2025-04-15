@@ -10,6 +10,7 @@
 import { ApmFields, apm } from '@kbn/apm-synthtrace-client';
 import { random } from 'lodash';
 import semver from 'semver';
+import { ApmSynthtracePipelineTypes } from '../..';
 import { Scenario } from '../cli/scenario';
 import { withClient } from '../lib/utils/with_client';
 import { RunOptions } from '../cli/utils/parse_run_cli_flags';
@@ -25,7 +26,7 @@ const scenario: Scenario<ApmFields> = async ({
     bootstrap: async ({ apmEsClient }) => {
       if (isLegacy) {
         apmEsClient.pipeline(
-          apmEsClient.getPipeline('default', {
+          apmEsClient.getPipeline(ApmSynthtracePipelineTypes.Default, {
             versionOverride: version,
           })
         );
