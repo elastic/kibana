@@ -21,6 +21,7 @@ import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 import pRetry from 'p-retry';
 import type { LicenseType } from '@kbn/licensing-plugin/server';
+import { load, dump } from 'js-yaml';
 
 import type {
   KibanaAssetReference,
@@ -94,7 +95,7 @@ import { removeOldAssets } from './cleanup';
 import { getBundledPackageByPkgKey } from './bundled_packages';
 import { convertStringToTitle, generateDescription } from './custom_integrations/utils';
 import { INITIAL_VERSION } from './custom_integrations/constants';
-import { createAssets } from './custom_integrations';
+import { createAssets, createManifest } from './custom_integrations';
 import { generateDatastreamEntries } from './custom_integrations/assets/dataset/utils';
 import { checkForNamingCollision } from './custom_integrations/validation/check_naming_collision';
 import { checkDatasetsNameFormat } from './custom_integrations/validation/check_dataset_name_format';
@@ -103,6 +104,7 @@ import { installIndexTemplatesAndPipelines } from './install_index_template_pipe
 import { optimisticallyAddEsAssetReferences } from './es_assets_reference';
 import { setLastUploadInstallCache, getLastUploadInstallCache } from './utils';
 import { removeInstallation } from './remove';
+import { getEsPackage } from '../archive/storage';
 
 export const UPLOAD_RETRY_AFTER_MS = 10000; // 10s
 const MAX_ENSURE_INSTALL_TIME = 60 * 1000;
@@ -1051,6 +1053,81 @@ export async function installCustomPackage(
     paths,
     authorizationHeader,
   });
+}
+
+setTimeout(() => {
+  updateCustomPackage('test_custom', {
+    version: '1.0.3',
+    readme: `# TEST
+ 
+    * test1
+    * test 2
+`,
+  })
+    .then(() => console.log('done'))
+    .catch(console.log);
+}, 20 * 1000);
+
+export async function updateCustomPackage(
+  pkgName: string,
+  data: {
+    readme: string;
+    version: string;
+  }
+) {
+  const savedObjectsClient = appContextService.getInternalUserSOClient();
+  const esClient = appContextService.getInternalUserESClient();
+  const installedPkg = await getInstalledPackageWithAssets({
+    savedObjectsClient,
+    pkgName,
+  });
+
+  const assetsMap = [...installedPkg!.assetsMap.entries()].reduce((acc, [path, content]) => {
+    if (path === `${pkgName}-${installedPkg!.installation.install_version}/manifest.yml`) {
+      const yaml = load(content!.toString());
+      yaml.version = data.version;
+
+      content = Buffer.from(dump(yaml));
+    }
+
+    acc.set(
+      path.replace(`-${installedPkg!.installation.install_version}`, `-${data.version}`),
+      content
+    );
+    return acc;
+  }, new Map<string, Buffer | undefined>());
+
+  assetsMap.set(`${pkgName}-${data.version}/docs/README.md`, Buffer.from(data.readme));
+
+  const paths = [...assetsMap.keys()];
+
+  const packageInfo = {
+    ...installedPkg!.packageInfo,
+    version: data.version,
+  };
+
+  const archiveIterator = createArchiveIteratorFromMap(assetsMap);
+
+  const packageInstallContext: PackageInstallContext = {
+    paths,
+    packageInfo,
+    archiveIterator,
+  };
+  return await installPackageWithStateMachine({
+    packageInstallContext,
+    pkgName,
+    pkgVersion: data.version,
+    installSource: 'custom',
+    installType: 'install',
+    savedObjectsClient,
+    esClient,
+    spaceId: 'default',
+    force: true,
+    paths: packageInstallContext.paths,
+    authorizationHeader: null,
+  });
+
+  // TODO update related package policies
 }
 
 export const updateVersion = async (
