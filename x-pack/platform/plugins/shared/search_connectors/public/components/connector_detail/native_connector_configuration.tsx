@@ -26,7 +26,6 @@ import { ConvertConnector } from '../search_index/connector/native_connector_con
 import { NativeConnectorConfigurationConfig } from '../search_index/connector/native_connector_configuration/native_connector_configuration_config';
 import { ResearchConfiguration } from '../search_index/connector/native_connector_configuration/research_configuration';
 
-import { AttachIndexBox } from './attach_index_box';
 import { WhatsNextBox } from './components/whats_next_box';
 import { ConnectorViewLogic } from './connector_view_logic';
 import { BetaConnectorCallout } from '../shared/beta/beta_connector_callout';
@@ -107,7 +106,6 @@ export const NativeConnectorConfiguration: React.FC = () => {
             </EuiFlexItem>
           </EuiFlexGroup>
           <EuiSpacer />
-          <AttachIndexBox connector={connector} />
           {connector.index_name && (
             <>
               <EuiSpacer />
