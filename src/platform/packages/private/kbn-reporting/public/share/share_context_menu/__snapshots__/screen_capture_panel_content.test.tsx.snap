@@ -2,7 +2,7 @@
 
 exports[`ScreenCapturePanelContent properly renders a view with "canvas" layout option 1`] = `
 <div
-  class="euiForm css-19midj6"
+  class="euiForm css-rr4sop-ReportingPanelContentUi"
   data-test-subj="shareReportingForm"
 >
   <div
@@ -185,7 +185,7 @@ exports[`ScreenCapturePanelContent properly renders a view with "canvas" layout 
 
 exports[`ScreenCapturePanelContent properly renders a view with "print" layout option 1`] = `
 <div
-  class="euiForm css-19midj6"
+  class="euiForm css-rr4sop-ReportingPanelContentUi"
   data-test-subj="shareReportingForm"
 >
   <div
@@ -368,7 +368,7 @@ exports[`ScreenCapturePanelContent properly renders a view with "print" layout o
 
 exports[`ScreenCapturePanelContent renders the default view properly 1`] = `
 <div
-  class="euiForm css-19midj6"
+  class="euiForm css-rr4sop-ReportingPanelContentUi"
   data-test-subj="shareReportingForm"
 >
   <div
