@@ -22,7 +22,7 @@ export const ResizeHandle = React.memo(({ rowId, panelId }: { rowId: string; pan
     (ev: UserInteractionEvent) => {
       return startDrag(ev, { interactionType: 'resize', rowId, panelId });
     },
-    [rowId, panelId]
+    [rowId, panelId, startDrag]
   );
 
   return (

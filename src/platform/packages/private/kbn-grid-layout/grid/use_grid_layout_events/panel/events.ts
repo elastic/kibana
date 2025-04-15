@@ -90,17 +90,18 @@ export const useGridLayoutPanelEvents = () => {
   const startDrag = useCallback(
     (e: UserInteractionEvent, { interactionType, rowId, panelId }: StartDragParams) => {
       if (!isLayoutInteractive(gridLayoutStateManager)) return;
+      // todo: we can refactor this to not duplicate
       if (isMouseEvent(e)) {
         startMouseInteraction({
           e,
-          onStart: (e) => onStart(e, { interactionType, rowId, panelId }),
+          onStart: (ev) => onStart(ev, { interactionType, rowId, panelId }),
           onMove,
           onEnd,
         });
       } else if (isTouchEvent(e)) {
         startTouchInteraction({
           e,
-          onStart: (e) => onStart(e, { interactionType, rowId, panelId }),
+          onStart: (ev) => onStart(ev, { interactionType, rowId, panelId }),
           onMove,
           onEnd,
         });
@@ -109,7 +110,7 @@ export const useGridLayoutPanelEvents = () => {
         startKeyboardInteraction({
           e,
           isEventActive,
-          onStart: (e) => onStart(e, { interactionType, rowId, panelId }),
+          onStart: (ev) => onStart(ev, { interactionType, rowId, panelId }),
           onMove,
           onEnd,
           onBlur,

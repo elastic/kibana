@@ -36,11 +36,12 @@ export const useDragHandleApi = ({
     rowIdRef.current = rowId;
   }, [rowId]);
 
+  // todo: refactor
   const startInteraction = useCallback(
     (ev: UserInteractionEvent) => {
       return startDrag(ev, { interactionType: 'drag', rowId: rowIdRef.current, panelId });
     },
-    [panelId]
+    [panelId, startDrag]
   );
 
   const removeEventListenersRef = useRef<(() => void) | null>(null);

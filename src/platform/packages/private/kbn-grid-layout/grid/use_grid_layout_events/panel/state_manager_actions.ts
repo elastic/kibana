@@ -10,14 +10,14 @@
 import { cloneDeep, isEmpty } from 'lodash';
 import deepEqual from 'fast-deep-equal';
 import { MutableRefObject } from 'react';
-import { v4 as uuidv4 } from 'uuid';
-import { GridLayoutData, GridLayoutStateManager, GridPanelData, GridRowData } from '../../types';
+import { GridLayoutData, GridLayoutStateManager, GridPanelData } from '../../types';
 import { getDragPreviewRect, getSensorOffsets, getResizePreviewRect } from './utils';
 import { resolveGridRow } from '../../utils/resolve_grid_row';
 import { isGridDataEqual } from '../../utils/equality_checks';
 import { PointerPosition, UserInteractionEvent } from '../types';
 import { getSensorType } from '../sensors';
 import { getRowRect } from '../../utils/calculations';
+import { createNewRow, normalizeOrder } from '../state_manager_selectors';
 
 export const startAction = (
   e: UserInteractionEvent,
@@ -30,7 +30,6 @@ export const startAction = (
   if (!panelRef) return;
 
   const panelRect = panelRef.getBoundingClientRect();
-
 
   gridLayoutStateManager.interactionEvent$.next({
     type,
@@ -128,10 +127,6 @@ export const moveAction = (
   const hasChangedGridRow = targetRowId !== lastRowId;
 
   // calculate the requested grid position
-  const targetedRowRef = gridRowRefs[targetRowId];
-  // const targetedGridLeft = targetedRowRef?.getBoundingClientRect().left ?? 0;
-  // const targetedGridTop = targetedRowRef?.getBoundingClientRect().top ?? 0;
-
   const { left: targetedGridLeft, top: targetedGridTop } = getRowRect(
     targetRowId,
     gridLayoutStateManager
@@ -150,9 +145,9 @@ export const moveAction = (
     Math.max(Math.round(localXCoordinate / (columnPixelWidth + gutterSize)), 0),
     maxColumn
   );
-  const targetRow = Math.max(Math.round(localYCoordinate / (rowHeight + gutterSize)), 0);
 
   const requestedPanelData = { ...currentPanelData };
+  const targetRow = Math.max(Math.round(localYCoordinate / (rowHeight + gutterSize)), 0);
   if (isResize) {
     requestedPanelData.width = Math.max(targetColumn - requestedPanelData.column, 1);
     requestedPanelData.height = Math.max(targetRow - requestedPanelData.row, 1);
@@ -176,7 +171,6 @@ export const moveAction = (
     });
 
     // resolve destination grid
-    nextLayout = normalizeOrder(nextLayout);
     const destinationGrid = nextLayout[targetRowId];
 
     const resolvedDestinationGrid = resolveGridRow(destinationGrid, requestedPanelData);
@@ -187,28 +181,28 @@ export const moveAction = (
       const originGrid = nextLayout[lastRowId];
       if (!originGrid.isCollapsible && isEmpty(originGrid.panels)) {
         delete nextLayout[lastRowId];
-        nextLayout = normalizeOrder(nextLayout);
       } else {
         const resolvedOriginGrid = resolveGridRow(originGrid);
         nextLayout[lastRowId] = resolvedOriginGrid;
       }
     }
+    nextLayout = normalizeOrder(nextLayout);
+
     if (!deepEqual(currentLayout, nextLayout)) {
       proposedGridLayout$.next(nextLayout);
     }
-// re-render when the target row changes
-  if (hasChangedGridRow) {
-    interactionEvent$.next({
-      ...interactionEvent,
-      targetRow: targetRowId,
-    });
-  }
-  return;
+    // re-render when the target row changes
+    if (hasChangedGridRow) {
+      interactionEvent$.next({
+        ...interactionEvent,
+        targetRow: targetRowId,
+      });
+    }
+    return;
   } else if (
-    (hasChangedGridRow ||
-    (!isGridDataEqual(requestedPanelData, lastRequestedPanelPosition.current)) &&
-     shouldCreateNewRow
-    )
+    // TODO: heavy duplication with the above
+    !isGridDataEqual(requestedPanelData, lastRequestedPanelPosition.current) &&
+    shouldCreateNewRow
   ) {
     lastRequestedPanelPosition.current = { ...requestedPanelData };
     const targetRowOrder = currentLayout[targetRowId].order;
@@ -243,16 +237,6 @@ export const moveAction = (
   }
 };
 
-const createNewRow = ({ id = uuidv4(), ...rest }: Partial<GridRowData>): GridRowData => ({
-  id,
-  order: -1,
-  isCollapsible: false,
-  isCollapsed: false,
-  panels: {},
-  title: ' ',
-  ...rest,
-});
-
 export const commitAction = ({
   activePanel$,
   interactionEvent$,
@@ -276,17 +260,3 @@ export const cancelAction = ({
   interactionEvent$.next(undefined);
   proposedGridLayout$.next(undefined);
 };
-
-function normalizeOrder(obj: GridLayoutData) {
-  const entries = Object.entries(obj);
-
-  // Sort by current order
-  entries.sort(([, a], [, b]) => a.order - b.order);
-
-  // Reassign order incrementally
-  entries.forEach(([, section], index) => {
-    section.order = index;
-  });
-
-  return Object.fromEntries(entries);
-}

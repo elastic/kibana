@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { GridLayoutStateManager } from '../types';
+import { v4 as uuidv4 } from 'uuid';
+import { GridLayoutData, GridLayoutStateManager, GridRowData } from '../types';
 
 export const isLayoutInteractive = (gridLayoutStateManager: GridLayoutStateManager) => {
   return (
@@ -21,3 +22,30 @@ export const hasPanelInteractionStartedWithKeyboard = (manager: GridLayoutStateM
 
 export const hasRowInteractionStartedWithKeyboard = (manager: GridLayoutStateManager) =>
   manager.activeRowEvent$.value?.sensorType === 'keyboard';
+
+export const createNewRow = ({
+  id = uuidv4(),
+  ...overrides
+}: Partial<GridRowData>): GridRowData => ({
+  id,
+  order: -1,
+  isCollapsible: false,
+  isCollapsed: false,
+  panels: {},
+  title: ' ',
+  ...overrides,
+});
+
+export function normalizeOrder(obj: GridLayoutData) {
+  const entries = Object.entries(obj);
+
+  // Sort by current order
+  entries.sort(([, a], [, b]) => a.order - b.order);
+
+  // Reassign order incrementally
+  entries.forEach(([, section], index) => {
+    section.order = index;
+  });
+
+  return Object.fromEntries(entries);
+}
