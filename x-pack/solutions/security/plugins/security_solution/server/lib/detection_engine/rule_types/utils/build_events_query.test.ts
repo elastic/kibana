@@ -10,6 +10,7 @@ import { buildEventsSearchQuery } from './build_events_query';
 describe('create_signals', () => {
   test('it builds a now-5m up to today filter', () => {
     const query = buildEventsSearchQuery({
+      aggregations: undefined,
       index: ['auditbeat-*'],
       from: 'now-5m',
       to: 'today',
@@ -66,6 +67,7 @@ describe('create_signals', () => {
 
   test('it builds a now-5m up to today filter with timestampOverride', () => {
     const query = buildEventsSearchQuery({
+      aggregations: undefined,
       index: ['auditbeat-*'],
       from: 'now-5m',
       to: 'today',
@@ -163,6 +165,7 @@ describe('create_signals', () => {
 
   test('it builds a filter without @timestamp fallback if `secondaryTimestamp` is undefined', () => {
     const query = buildEventsSearchQuery({
+      aggregations: undefined,
       index: ['auditbeat-*'],
       from: 'now-5m',
       to: 'today',
@@ -220,6 +223,7 @@ describe('create_signals', () => {
   test('if searchAfterSortIds is a valid sortId string', () => {
     const fakeSortId = '123456789012';
     const query = buildEventsSearchQuery({
+      aggregations: undefined,
       index: ['auditbeat-*'],
       from: 'now-5m',
       to: 'today',
@@ -277,6 +281,7 @@ describe('create_signals', () => {
   test('if searchAfterSortIds is a valid sortId number', () => {
     const fakeSortIdNumber = 123456789012;
     const query = buildEventsSearchQuery({
+      aggregations: undefined,
       index: ['auditbeat-*'],
       from: 'now-5m',
       to: 'today',
@@ -333,6 +338,7 @@ describe('create_signals', () => {
   });
   test('if aggregations is not provided it should not be included', () => {
     const query = buildEventsSearchQuery({
+      aggregations: undefined,
       index: ['auditbeat-*'],
       from: 'now-5m',
       to: 'today',
@@ -459,6 +465,7 @@ describe('create_signals', () => {
 
   test('if trackTotalHits is provided it should be included', () => {
     const query = buildEventsSearchQuery({
+      aggregations: undefined,
       index: ['auditbeat-*'],
       from: 'now-5m',
       to: 'today',
@@ -475,6 +482,7 @@ describe('create_signals', () => {
 
   test('if sortOrder is provided it should be included', () => {
     const query = buildEventsSearchQuery({
+      aggregations: undefined,
       index: ['auditbeat-*'],
       from: 'now-5m',
       to: 'today',
@@ -499,6 +507,7 @@ describe('create_signals', () => {
 
   test('it respects sort order for timestampOverride', () => {
     const query = buildEventsSearchQuery({
+      aggregations: undefined,
       index: ['auditbeat-*'],
       from: 'now-5m',
       to: 'today',
@@ -528,6 +537,7 @@ describe('create_signals', () => {
 
   test('it respects overriderBody params', () => {
     const query = buildEventsSearchQuery({
+      aggregations: undefined,
       index: ['auditbeat-*'],
       from: 'now-5m',
       to: 'today',

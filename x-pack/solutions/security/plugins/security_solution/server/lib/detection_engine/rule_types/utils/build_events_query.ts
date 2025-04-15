@@ -9,8 +9,10 @@ import { isEmpty } from 'lodash';
 import type { OverrideBodyQuery } from '../types';
 import type { TimestampOverride } from '../../../../../common/api/detection_engine/model/rule_schema';
 
-interface BuildEventsSearchQuery {
-  aggregations?: Record<string, estypes.AggregationsAggregationContainer>;
+interface BuildEventsSearchQuery<
+  TAggs extends Record<string, estypes.AggregationsAggregationContainer> | undefined = undefined
+> {
+  aggregations: TAggs;
   index: string[];
   from: string;
   to: string;
@@ -99,7 +101,9 @@ export const buildTimeRangeFilter = ({
       };
 };
 
-export const buildEventsSearchQuery = ({
+export const buildEventsSearchQuery = <
+  TAggs extends Record<string, estypes.AggregationsAggregationContainer> | undefined
+>({
   aggregations,
   index,
   from,
@@ -114,7 +118,7 @@ export const buildEventsSearchQuery = ({
   trackTotalHits,
   additionalFilters,
   overrideBody,
-}: BuildEventsSearchQuery): estypes.SearchRequest => {
+}: BuildEventsSearchQuery<TAggs>) => {
   const timestamps = secondaryTimestamp
     ? [primaryTimestamp, secondaryTimestamp]
     : [primaryTimestamp];
@@ -152,30 +156,28 @@ export const buildEventsSearchQuery = ({
     });
   }
 
-  const searchQuery: estypes.SearchRequest = {
+  const searchQuery = {
     allow_no_indices: true,
     index,
     ignore_unavailable: true,
-    body: {
-      track_total_hits: trackTotalHits,
-      size,
-      query: {
-        bool: {
-          filter: filterWithTime,
-        },
+    track_total_hits: trackTotalHits,
+    size,
+    query: {
+      bool: {
+        filter: filterWithTime,
       },
-      fields: [
-        {
-          field: '*',
-          include_unmapped: true,
-        },
-        ...docFields,
-      ],
-      ...(aggregations ? { aggregations } : {}),
-      runtime_mappings: runtimeMappings,
-      sort,
-      ...overrideBody,
     },
+    fields: [
+      {
+        field: '*',
+        include_unmapped: true,
+      },
+      ...docFields,
+    ],
+    aggregations,
+    runtime_mappings: runtimeMappings,
+    sort,
+    ...overrideBody,
   };
 
   if (searchAfterSortIds != null && !isEmpty(searchAfterSortIds)) {
