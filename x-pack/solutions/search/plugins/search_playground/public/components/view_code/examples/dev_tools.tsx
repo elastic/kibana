@@ -9,17 +9,17 @@ import React from 'react';
 
 import { EuiCodeBlock } from '@elastic/eui';
 import { useFormContext } from 'react-hook-form';
-import { ChatForm, ChatFormFields } from '../../../types';
+import { PlaygroundForm, PlaygroundFormFields } from '../../../types';
 import { elasticsearchQueryObject } from '../../../utils/user_query';
 
 export const DevToolsCode: React.FC = () => {
-  const { getValues } = useFormContext<ChatForm>();
+  const { getValues } = useFormContext<PlaygroundForm>();
   const {
-    [ChatFormFields.indices]: indices,
-    [ChatFormFields.elasticsearchQuery]: esQuery,
-    [ChatFormFields.searchQuery]: searchQuery,
-    [ChatFormFields.userElasticsearchQuery]: userElasticsearchQuery,
-    [ChatFormFields.userElasticsearchQueryValidations]: userElasticsearchQueryValidations,
+    [PlaygroundFormFields.indices]: indices,
+    [PlaygroundFormFields.elasticsearchQuery]: esQuery,
+    [PlaygroundFormFields.searchQuery]: searchQuery,
+    [PlaygroundFormFields.userElasticsearchQuery]: userElasticsearchQuery,
+    [PlaygroundFormFields.userElasticsearchQueryValidations]: userElasticsearchQueryValidations,
   } = getValues();
   const query = elasticsearchQueryObject(
     esQuery,

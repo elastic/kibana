@@ -802,7 +802,9 @@
             "label": "getBrowserFields",
             "description": [],
             "signature": [
-              "({ ruleTypeIds, indices, metaFields, allowNoIndex, }: { ruleTypeIds: string[]; indices: string[]; metaFields: string[]; allowNoIndex: boolean; }) => Promise<{ browserFields: ",
+              "({ ruleTypeIds, indices, metaFields, allowNoIndex, includeEmptyFields, indexFilter, }: { ruleTypeIds: string[]; indices: string[]; metaFields: string[]; allowNoIndex: boolean; includeEmptyFields: boolean; indexFilter?: ",
+              "QueryDslQueryContainer",
+              " | undefined; }) => Promise<{ browserFields: ",
               {
                 "pluginId": "@kbn/alerting-types",
                 "scope": "common",
@@ -829,7 +831,7 @@
                 "id": "def-server.AlertsClient.getBrowserFields.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{\n    ruleTypeIds,\n    indices,\n    metaFields,\n    allowNoIndex,\n  }",
+                "label": "{\n    ruleTypeIds,\n    indices,\n    metaFields,\n    allowNoIndex,\n    includeEmptyFields,\n    indexFilter,\n  }",
                 "description": [],
                 "path": "x-pack/platform/plugins/shared/rule_registry/server/alert_data_client/alerts_client.ts",
                 "deprecated": false,
@@ -887,52 +889,29 @@
                     "path": "x-pack/platform/plugins/shared/rule_registry/server/alert_data_client/alerts_client.ts",
                     "deprecated": false,
                     "trackAdoption": false
-                  }
-                ]
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "ruleRegistry",
-            "id": "def-server.AlertsClient.getAADFields",
-            "type": "Function",
-            "tags": [],
-            "label": "getAADFields",
-            "description": [],
-            "signature": [
-              "({ ruleTypeId }: { ruleTypeId: string; }) => Promise<",
-              {
-                "pluginId": "dataViews",
-                "scope": "server",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-server.FieldDescriptor",
-                "text": "FieldDescriptor"
-              },
-              "[]>"
-            ],
-            "path": "x-pack/platform/plugins/shared/rule_registry/server/alert_data_client/alerts_client.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "ruleRegistry",
-                "id": "def-server.AlertsClient.getAADFields.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "{ ruleTypeId }",
-                "description": [],
-                "path": "x-pack/platform/plugins/shared/rule_registry/server/alert_data_client/alerts_client.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "children": [
+                  },
                   {
                     "parentPluginId": "ruleRegistry",
-                    "id": "def-server.AlertsClient.getAADFields.$1.ruleTypeId",
-                    "type": "string",
+                    "id": "def-server.AlertsClient.getBrowserFields.$1.includeEmptyFields",
+                    "type": "boolean",
                     "tags": [],
-                    "label": "ruleTypeId",
+                    "label": "includeEmptyFields",
                     "description": [],
+                    "path": "x-pack/platform/plugins/shared/rule_registry/server/alert_data_client/alerts_client.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "ruleRegistry",
+                    "id": "def-server.AlertsClient.getBrowserFields.$1.indexFilter",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "indexFilter",
+                    "description": [],
+                    "signature": [
+                      "QueryDslQueryContainer",
+                      " | undefined"
+                    ],
                     "path": "x-pack/platform/plugins/shared/rule_registry/server/alert_data_client/alerts_client.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -1973,7 +1952,7 @@
           "SavedObjectReference",
           "[]) => TParams; } | undefined; isExportable: boolean; defaultScheduleInterval?: string | undefined; ruleTaskTimeout?: string | undefined; doesSetRecoveryContext?: boolean | undefined; autoRecoverAlerts?: boolean | undefined; getViewInAppRelativeUrl?: ",
           "GetViewInAppRelativeUrlFn",
-          "<TParams> | undefined; fieldsForAAD?: string[] | undefined; }"
+          "<TParams> | undefined; }"
         ],
         "path": "x-pack/platform/plugins/shared/rule_registry/server/utils/create_persistence_rule_type_wrapper.ts",
         "deprecated": false,
@@ -4840,7 +4819,7 @@
           },
           " | undefined; runtimeMappings?: ",
           "MappingRuntimeFields",
-          " | undefined; }"
+          " | undefined; minScore?: number | undefined; trackScores?: boolean | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-alerting-types/search_strategy_types.ts",
         "deprecated": false,
