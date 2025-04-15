@@ -136,7 +136,9 @@ export const esqlExecutor = async ({
           loggedRequests[0].duration = Math.round(esqlSearchDuration);
         }
 
-        ruleExecutionLogger.debug(`ES|QL query request took: ${esqlSearchDuration}ms`);
+        ruleExecutionLogger.debug(
+          `ES|QL query request for ${iteration} iteration took: ${esqlSearchDuration}ms`
+        );
 
         const isRuleAggregating = computeIsESQLQueryAggregating(completeRule.ruleParams.query);
 
