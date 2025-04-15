@@ -19,7 +19,7 @@ import {
 } from '../../../../../common/search_strategy';
 import { useGlobalFilterQuery } from '../../../../common/hooks/use_global_filter_query';
 import { EntitySourceTag } from '../types';
-import { useStoreEntityTypes } from '../../../hooks/use_enabled_entity_types';
+import { useEntityStoreTypes } from '../../../hooks/use_enabled_entity_types';
 
 interface UseEntitiesListFiltersParams {
   selectedSeverities: RiskSeverity[];
@@ -33,7 +33,7 @@ export const useEntitiesListFilters = ({
   selectedSources,
 }: UseEntitiesListFiltersParams) => {
   const { filterQuery: globalQuery } = useGlobalFilterQuery();
-  const enabledEntityTypes = useStoreEntityTypes();
+  const enabledEntityTypes = useEntityStoreTypes();
 
   return useMemo(() => {
     const criticalityFilter: QueryDslQueryContainer[] = selectedCriticalities.length

@@ -13,7 +13,7 @@ import {
   getEnabledEntityTypes,
 } from '../../../common/entity_analytics/utils';
 
-export const useStoreEntityTypes = () => {
+export const useEntityStoreTypes = () => {
   const [genericEntityStoreEnabled] = useUiSetting$<boolean>(
     SECURITY_SOLUTION_ENABLE_ASSET_INVENTORY_SETTING
   );
@@ -24,10 +24,6 @@ export const useStoreEntityTypes = () => {
   );
 };
 
-export const useRiskEngineEntityTypes = () => {
-  return useMemo(() => getEntityAnalyticsEntityTypes(), []);
-};
-
-export const useAssetCriticalityEntityTypes = () => {
+export const useEntityAnalyticsTypes = () => {
   return useMemo(() => getEntityAnalyticsEntityTypes(), []);
 };
