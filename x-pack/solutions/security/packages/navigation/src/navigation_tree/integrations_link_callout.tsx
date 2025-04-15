@@ -9,8 +9,8 @@ import React from 'react';
 import type { CoreStart } from '@kbn/core/public';
 import { EuiSpacer, EuiCallOut, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { NavigationProvider } from './context';
-import { LinkButton } from '../links';
+import { NavigationProvider } from '../context';
+import { LinkButton } from '../../links';
 
 export const renderIntegrationsLinkCallout = (core: CoreStart) => {
   return (

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { GroupDefinition } from '@kbn/core-chrome-browser';
-import { SecurityGroupName } from '@kbn/security-solution-navigation';
-import { SecurityLinkGroup, i18nStrings } from '@kbn/security-solution-navigation/links';
+import type { NodeDefinition } from '@kbn/core-chrome-browser';
+import { SecurityGroupName } from '../constants';
+import { SecurityLinkGroup } from '../link_groups';
+import { i18nStrings } from '../i18n_strings';
 
-export const createMachineLearningNavigationTree = (): GroupDefinition => ({
-  type: 'navGroup',
+export const createMachineLearningNavigationTree = (): NodeDefinition => ({
   id: SecurityGroupName.machineLearning,
   title: SecurityLinkGroup[SecurityGroupName.machineLearning].title,
   renderAs: 'panelOpener',
@@ -19,68 +19,56 @@ export const createMachineLearningNavigationTree = (): GroupDefinition => ({
       breadcrumbStatus: 'hidden',
       children: [
         {
-          id: 'ml:overview',
           link: 'ml:overview',
           title: i18nStrings.ml.overview,
         },
         {
-          id: 'ml:data_visualizer',
           link: 'ml:dataVisualizer',
           title: i18nStrings.ml.dataVisualizer,
         },
       ],
     },
     {
-      id: 'category-anomaly_detection',
       title: i18nStrings.ml.anomalyDetection.title,
       breadcrumbStatus: 'hidden',
       children: [
         {
-          id: 'ml:anomalyExplorer',
           link: 'ml:anomalyExplorer',
           title: i18nStrings.ml.anomalyDetection.anomalyExplorer,
         },
         {
-          id: 'ml:singleMetricViewer',
           link: 'ml:singleMetricViewer',
           title: i18nStrings.ml.anomalyDetection.singleMetricViewer,
         },
       ],
     },
     {
-      id: 'category-data_frame analytics',
       title: i18nStrings.ml.dataFrameAnalytics.title,
       breadcrumbStatus: 'hidden',
       children: [
         {
-          id: 'ml:resultExplorer',
           link: 'ml:resultExplorer',
           title: i18nStrings.ml.dataFrameAnalytics.resultExplorer,
         },
         {
-          id: 'ml:analyticsMap',
           link: 'ml:analyticsMap',
           title: i18nStrings.ml.dataFrameAnalytics.analyticsMap,
         },
       ],
     },
     {
-      id: 'category-aiops_labs',
       title: i18nStrings.ml.aiopsLabs.title,
       breadcrumbStatus: 'hidden',
       children: [
         {
-          id: 'ml:logRateAnalysis',
           link: 'ml:logRateAnalysis',
           title: i18nStrings.ml.aiopsLabs.logRateAnalysis,
         },
         {
-          id: 'ml:logPatternAnalysis',
           link: 'ml:logPatternAnalysis',
           title: i18nStrings.ml.aiopsLabs.logPatternAnalysis,
         },
         {
-          id: 'ml:changePointDetections',
           link: 'ml:changePointDetections',
           title: i18nStrings.ml.aiopsLabs.changePointDetection,
         },

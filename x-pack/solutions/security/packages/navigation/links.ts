@@ -6,7 +6,6 @@
  */
 
 export { i18nStrings } from './src/i18n_strings';
-export { renderIntegrationsLinkCallout } from './src/integrations_link_callout';
 export {
   useGetLinkUrl,
   useGetLinkProps,
