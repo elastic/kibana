@@ -79,13 +79,7 @@ export const FileUploadView: FC<Props> = ({ reset }) => {
         {uploadStatus.overallImportStatus === STATUS.NOT_STARTED ? (
           <>
             {filesStatus.map((status, i) => (
-              <FileStatus
-                fileStatus={status}
-                key={i}
-                index={i}
-                lite={false}
-                showOverrideButton={true}
-              />
+              <FileStatus key={i} index={i} lite={false} showOverrideButton={true} />
             ))}
 
             {fileClashes ? <FileClashWarning /> : null}

@@ -57,13 +57,13 @@ export const IndexSelection: FC<Props> = ({ allowExistingIndices = true }) => {
             options={[
               {
                 id: UPLOAD_TYPE.NEW,
-                label: i18n.translate('xpack.ml.timeSeriesExplorer.newOptionsOrderLabel', {
+                label: i18n.translate('xpack.dataVisualizer.file.indexSelection.newLabel', {
                   defaultMessage: 'Create new index',
                 }),
               },
               {
                 id: UPLOAD_TYPE.EXISTING,
-                label: i18n.translate('xpack.ml.timeSeriesExplorer.existingOptionsOrderLabel', {
+                label: i18n.translate('xpack.', {
                   defaultMessage: 'Upload to existing index',
                 }),
               },

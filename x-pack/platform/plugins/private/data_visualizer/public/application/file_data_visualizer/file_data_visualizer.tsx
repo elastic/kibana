@@ -12,8 +12,6 @@ import type { FileUploadResults } from '@kbn/file-upload-common';
 import type { ResultLinks } from '../../../common/app';
 import { getCoreStart, getPluginsStart } from '../../kibana_services';
 
-// @ts-ignore
-import { FileDataVisualizerView } from './components/file_data_visualizer_view';
 import type { GetAdditionalLinks } from '../common/components/results_links';
 import { FileUploadManager } from './new/file_manager';
 import { FileUploadContext, useFileUpload } from './new/use_file_upload';
@@ -26,11 +24,6 @@ export interface Props {
 }
 
 export type FileDataVisualizerSpec = typeof FileDataVisualizer;
-
-enum TEST_MODE {
-  OLD,
-  NEW,
-}
 
 export const FileDataVisualizer: FC<Props> = ({
   getAdditionalLinks,
@@ -48,8 +41,6 @@ export const FileDataVisualizer: FC<Props> = ({
     fileUpload,
     fieldFormats,
   };
-  const [mode /* , setMode*/] = useState<TEST_MODE>(TEST_MODE.NEW);
-
   const EmptyContext: FC<PropsWithChildren<unknown>> = ({ children }) => <>{children}</>;
   const CloudContext = cloud?.CloudContextProvider || EmptyContext;
 
@@ -100,27 +91,15 @@ export const FileDataVisualizer: FC<Props> = ({
       <KibanaContextProvider services={{ ...services }}>
         <CloudContext>
           <FileUploadContext.Provider value={fileUploadContextValue}>
-            {mode === TEST_MODE.NEW ? (
-              <FileUploadView
-                getAdditionalLinks={getAdditionalLinks}
-                resultLinks={resultLinks}
-                setUploadResults={setUploadResults}
-                reset={() => {
-                  reset();
-                }}
-                onClose={() => {}}
-              />
-            ) : (
-              <FileDataVisualizerView
-                dataStart={data}
-                http={coreStart.http}
-                fileUpload={fileUpload}
-                getAdditionalLinks={getAdditionalLinks}
-                resultLinks={resultLinks}
-                capabilities={coreStart.application.capabilities}
-                setUploadResults={setUploadResults}
-              />
-            )}
+            <FileUploadView
+              getAdditionalLinks={getAdditionalLinks}
+              resultLinks={resultLinks}
+              setUploadResults={setUploadResults}
+              reset={() => {
+                reset();
+              }}
+              onClose={() => {}}
+            />
           </FileUploadContext.Provider>
         </CloudContext>
       </KibanaContextProvider>

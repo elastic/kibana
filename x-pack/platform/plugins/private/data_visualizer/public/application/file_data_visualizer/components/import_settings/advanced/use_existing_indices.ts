@@ -34,6 +34,7 @@ export function useExistingIndices() {
   }, [http]);
 
   const loadPipelines = useCallback(() => {
+    // should we still do this?!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     http.get<Pipeline[]>('/api/ingest_pipelines').then((resp) => {
       setPipelines(resp.sort((a, b) => a.name.localeCompare(b.name)));
     });

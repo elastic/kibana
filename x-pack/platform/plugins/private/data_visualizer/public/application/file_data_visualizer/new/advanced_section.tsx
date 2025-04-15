@@ -25,7 +25,7 @@ import { Settings } from './file_status/settings';
 import { UPLOAD_TYPE, useFileUploadContext } from './use_file_upload';
 import type { CombinedField } from '../../common/components/combined_fields';
 import { CombinedFieldsForm } from '../../common/components/combined_fields';
-import { CreateDataViewToolTip } from '../components/import_settings/create_data_view_tooltip';
+import { CreateDataViewToolTip } from './create_data_view_tooltip';
 
 interface Props {
   canCreateDataView?: boolean;

@@ -11,7 +11,7 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { InputOverrides } from '@kbn/file-upload-plugin/common';
 import type { FileAnalysis } from '../file_manager/file_wrapper';
-import { EditFlyout } from '../../components/edit_flyout';
+import { EditFlyout } from './edit_flyout';
 
 interface Props {
   fileStatus: FileAnalysis;

@@ -10,7 +10,7 @@ import type { FC } from 'react';
 import React from 'react';
 
 import { EuiFormRow } from '@elastic/eui';
-import { JsonEditor, EDITOR_MODE } from '../../json_editor';
+import { EDITOR_MODE, JsonEditor } from './json_editor';
 
 const EDITOR_HEIGHT = '300px';
 
@@ -21,7 +21,7 @@ interface JsonEditorProps {
   indexName?: string;
   showTitle?: boolean;
 }
-
+// move these into each input file, e.g. mappings.tsx !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 export const IndexSettings: FC<JsonEditorProps> = ({
   initialized,
   data,

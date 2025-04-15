@@ -36,8 +36,7 @@ import {
   getMappingClashInfo,
 } from './merge_tools';
 import { createUrlOverrides } from '../../../common/components/utils';
-import { AutoDeploy } from '../../components/import_view/auto_deploy';
-import { getInferenceId, createKibanaDataView } from '../../components/import_view/import';
+import { AutoDeploy } from './auto_deploy';
 
 export enum STATUS {
   NA,
@@ -698,4 +697,38 @@ export class FileUploadManager {
       this.existingIndexMappings$.next(null);
     }
   }
+}
+
+export async function createKibanaDataView(
+  dataViewName: string,
+  dataViewsContract: DataViewsServicePublic,
+  timeFieldName?: string
+) {
+  try {
+    const emptyPattern = await dataViewsContract.createAndSave({
+      title: dataViewName,
+      timeFieldName,
+    });
+
+    return {
+      success: true,
+      id: emptyPattern.id,
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error,
+      id: undefined,
+      title: undefined,
+    };
+  }
+}
+
+export function getInferenceId(mappings: MappingTypeMapping) {
+  for (const value of Object.values(mappings.properties ?? {})) {
+    if (value.type === 'semantic_text') {
+      return value.inference_id;
+    }
+  }
+  return null;
 }

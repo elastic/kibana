@@ -21,7 +21,6 @@ import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { IngestPipeline as IngestPipelineType } from '@kbn/file-upload-plugin/common';
-import type { FileAnalysis } from '../file_manager/file_wrapper';
 import { STATUS } from '../file_manager/file_manager';
 import { FileClashResult } from './file_clash';
 import { Mappings } from './mappings';
@@ -31,9 +30,10 @@ import { AnalysisExplanation } from './analysis_explanation';
 import { AnalysisOverrides } from './analysis_overrides';
 import { useFileUploadContext } from '../use_file_upload';
 import { FieldsStatsGrid } from '../../../common/components/fields_stats_grid';
-import { AnalysisSummary } from '../../components/analysis_summary';
-import { FileContents } from '../../components/file_contents';
-import { FileCouldNotBeRead } from '../../components/file_data_visualizer_view/file_error_callouts';
+import { FileContents } from './file_contents';
+import { FileCouldNotBeRead } from './file_error_callouts';
+import { AnalysisSummary } from './analysis_summary';
+import { Failures } from './failures';
 
 enum TAB {
   SUMMARY,
@@ -45,7 +45,6 @@ enum TAB {
 }
 
 interface Props {
-  fileStatus: FileAnalysis;
   index: number;
   showFileContentPreview?: boolean;
   showFileSummary?: boolean;
@@ -55,7 +54,6 @@ interface Props {
 
 export const FileStatus: FC<Props> = ({
   lite,
-  fileStatus,
   index,
   showFileContentPreview,
   showFileSummary,
@@ -64,8 +62,8 @@ export const FileStatus: FC<Props> = ({
   const { deleteFile, uploadStatus, filesStatus, fileUploadManager, pipelines } =
     useFileUploadContext();
 
+  const fileStatus = filesStatus[index];
   const autoExpand = filesStatus.length === 1;
-
   const fileClash = uploadStatus.fileClashes[index] ?? {
     clash: false,
   };
@@ -94,7 +92,15 @@ export const FileStatus: FC<Props> = ({
     <>
       <EuiPanel hasShadow={false} hasBorder paddingSize="s">
         {importStarted ? (
-          <UploadProgress fileStatus={fileStatus} />
+          <>
+            <UploadProgress fileStatus={fileStatus} />
+            {fileStatus.failures.length > 0 ? (
+              <>
+                <EuiSpacer size="s" />
+                <Failures docCount={fileStatus.docCount} failedDocs={fileStatus.failures} />
+              </>
+            ) : null}
+          </>
         ) : (
           <>
             <EuiAccordion

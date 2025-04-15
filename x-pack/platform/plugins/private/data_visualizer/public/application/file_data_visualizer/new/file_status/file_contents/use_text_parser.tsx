@@ -8,8 +8,8 @@
 import React, { useMemo } from 'react';
 import { useEuiTheme, EuiText } from '@elastic/eui';
 import type { FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
+import { useDataVisualizerKibana } from '../../../../kibana_context';
 import { FieldBadge } from './field_badge';
-import { useDataVisualizerKibana } from '../../../kibana_context';
 import { GrokHighlighter } from './grok_highlighter';
 
 export function useGrokHighlighter() {

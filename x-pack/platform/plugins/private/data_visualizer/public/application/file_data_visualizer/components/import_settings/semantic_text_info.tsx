@@ -18,6 +18,7 @@ interface Props {
 }
 
 export const SemanticTextInfo: FC<Props> = ({ results }) => {
+  // should we still use this?!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   return results.format === FILE_FORMATS.TIKA ? (
     <>
       <EuiSpacer size="m" />

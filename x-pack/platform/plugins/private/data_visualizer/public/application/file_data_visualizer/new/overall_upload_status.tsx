@@ -62,7 +62,7 @@ export const OverallUploadStatus: FC = () => {
       children: (
         <>
           {filesStatus.map((status, i) => (
-            <FileStatus fileStatus={status} key={i} index={i} lite={false} />
+            <FileStatus key={i} index={i} lite={false} />
           ))}
           <EuiSpacer />
         </>

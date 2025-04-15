@@ -21,7 +21,7 @@ import {
 } from '@elastic/eui';
 
 import { Overrides } from './overrides';
-
+// convert to FC !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 export class EditFlyout extends Component {
   constructor(props) {
     super(props);

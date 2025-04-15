@@ -11,10 +11,33 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { IImporter } from '@kbn/file-upload-plugin/public';
 import moment, { type Moment } from 'moment';
 import { useTimeBuckets } from '@kbn/ml-time-buckets';
-import { IMPORT_STATUS, type Statuses } from '../import_progress';
 import { EventRateChart, type LineChartPoint } from './event_rate_chart';
 import { runDocCountSearch } from './doc_count_search';
 import { useDataVisualizerKibana } from '../../../kibana_context';
+
+// IMPORT_STATUS and Statuses are copied over from old code.
+// this file should use new status code
+export enum IMPORT_STATUS {
+  INCOMPLETE = 'incomplete',
+  COMPLETE = 'complete',
+  FAILED = 'danger',
+}
+
+export interface Statuses {
+  reading: boolean;
+  readStatus: IMPORT_STATUS;
+  parseJSONStatus: IMPORT_STATUS;
+  indexCreatedStatus: IMPORT_STATUS;
+  ingestPipelineCreatedStatus: IMPORT_STATUS;
+  dataViewCreatedStatus: IMPORT_STATUS;
+  uploadProgress: number;
+  uploadStatus: IMPORT_STATUS;
+  createDataView: boolean;
+  createPipeline: boolean;
+  permissionCheckStatus: IMPORT_STATUS;
+  initializeDeployment: boolean;
+  initializeDeploymentStatus: IMPORT_STATUS;
+}
 
 const BAR_TARGET = 150;
 const PROGRESS_INCREMENT = 5;

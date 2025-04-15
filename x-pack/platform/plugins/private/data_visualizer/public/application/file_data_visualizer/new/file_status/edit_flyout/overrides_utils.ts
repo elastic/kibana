@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getFieldsFromGrokPattern } from '../../../common/util/grok_pattern';
+import { getFieldsFromGrokPattern } from '../../../../common/util/grok_pattern';
 import { CUSTOM_DROPDOWN_OPTION } from './options/option_lists';
 
 export const LINES_TO_SAMPLE_VALUE_MIN = 3;

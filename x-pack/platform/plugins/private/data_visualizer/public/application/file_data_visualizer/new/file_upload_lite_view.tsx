@@ -133,7 +133,6 @@ export const FileUploadLiteView: FC<Props> = ({ props, onClose }) => {
             <>
               {filesStatus.map((status, i) => (
                 <FileStatus
-                  fileStatus={status}
                   key={i}
                   index={i}
                   lite={true}

@@ -12,13 +12,14 @@ import React from 'react';
 import { EuiCallOut, EuiSpacer, EuiButtonEmpty, EuiHorizontalRule } from '@elastic/eui';
 
 import type { FindFileStructureErrorResponse } from '@kbn/file-upload-plugin/common';
-import type { FileSizeChecker } from './file_size_check';
+import type { FileSizeChecker } from '../file_manager/file_size_check';
 
 interface FileTooLargeProps {
   fileSizeChecker: FileSizeChecker;
 }
 
 export const FileTooLarge: FC<FileTooLargeProps> = ({ fileSizeChecker }) => {
+  // is this used??!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   const fileSizeFormatted = fileSizeChecker.fileSizeFormatted();
   const maxFileSizeFormatted = fileSizeChecker.maxFileSizeFormatted();
 

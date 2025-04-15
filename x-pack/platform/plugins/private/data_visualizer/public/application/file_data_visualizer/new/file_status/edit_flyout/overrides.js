@@ -23,7 +23,7 @@ import {
   EuiTextArea,
 } from '@elastic/eui';
 
-import { FILE_FORMATS, NO_TIME_FORMAT } from '../../../../../common/constants';
+import { FILE_FORMATS, NO_TIME_FORMAT } from '../../../../common/constants';
 
 import {
   getFormatOptions,
@@ -34,7 +34,7 @@ import {
 } from './options';
 import { isTimestampFormatValid } from './overrides_validation';
 import { withKibana } from '@kbn/kibana-react-plugin/public';
-import { replaceFieldInGrokPattern } from '../../../common/util/grok_pattern';
+import { replaceFieldInGrokPattern } from '../../../../common/util/grok_pattern';
 import {
   convertDelimiter,
   convertDelimiterBack,

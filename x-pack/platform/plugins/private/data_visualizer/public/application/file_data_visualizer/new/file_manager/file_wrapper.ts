@@ -10,6 +10,7 @@ import type { FileUploadStartApi } from '@kbn/file-upload-plugin/public/api';
 import type {
   FindFileStructureResponse,
   FormattedOverrides,
+  ImportFailure,
   IngestPipeline,
   InputOverrides,
 } from '@kbn/file-upload-plugin/common/types';
@@ -17,9 +18,10 @@ import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import { isSupportedFormat } from '../../../../../common/constants';
 import { isTikaType } from '../../../../../common/utils/tika_utils';
 import { processResults, readFile } from '../../../common/components/utils';
-import { FileSizeChecker } from '../../components/file_data_visualizer_view/file_size_check';
-import { analyzeTikaFile } from '../../components/file_data_visualizer_view/tika_analyzer';
+
 import { STATUS } from './file_manager';
+import { analyzeTikaFile } from './tika_analyzer';
+import { FileSizeChecker } from './file_size_check';
 
 interface AnalysisResults {
   analysisStatus: STATUS;
@@ -47,6 +49,7 @@ export type FileAnalysis = AnalysisResults & {
   importProgress: number;
   docCount: number;
   supportedFormat: boolean;
+  failures: ImportFailure[];
 };
 
 export class FileWrapper {
@@ -69,6 +72,7 @@ export class FileWrapper {
     importProgress: 0,
     docCount: 0,
     supportedFormat: true,
+    failures: [],
   });
 
   private pipeline$ = new BehaviorSubject<IngestPipeline | undefined>(undefined);
@@ -251,7 +255,12 @@ export class FileWrapper {
       const resp = await importer.import(index, pipelineId, (p) => {
         this.setStatus({ importProgress: p });
       });
-      this.setStatus({ docCount: resp.docCount, importStatus: STATUS.COMPLETED });
+
+      this.setStatus({
+        docCount: resp.docCount,
+        failures: resp.failures ?? [],
+        importStatus: STATUS.COMPLETED,
+      });
       return resp;
     } catch (error) {
       this.setStatus({ importStatus: STATUS.FAILED });

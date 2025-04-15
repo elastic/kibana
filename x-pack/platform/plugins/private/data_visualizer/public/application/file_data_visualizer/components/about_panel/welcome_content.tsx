@@ -27,6 +27,7 @@ interface Props {
 }
 
 export const WelcomeContent: FC<Props> = ({ hasPermissionToImport }) => {
+  // is this still needed???!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   const { euiTheme } = useEuiTheme();
   const {
     services: {
