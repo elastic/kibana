@@ -24,7 +24,7 @@ interface Props {
   defaultConnectorId: string;
   isContextReady: boolean;
   promptContext: PromptContext;
-  showAnonymizedValues: boolean;
+  showAnonymizedValues?: boolean;
 }
 interface UseAlertSummary {
   alertSummary: string;
@@ -41,7 +41,7 @@ export const useAlertSummary = ({
   defaultConnectorId,
   isContextReady,
   promptContext,
-  showAnonymizedValues,
+  showAnonymizedValues = false,
 }: Props): UseAlertSummary => {
   const { abortStream, sendMessage } = useChatComplete({
     connectorId: defaultConnectorId,

@@ -30,7 +30,7 @@ interface Props {
   defaultConnectorId: string;
   isContextReady: boolean;
   promptContext: PromptContext;
-  showAnonymizedValues: boolean;
+  showAnonymizedValues?: boolean;
 }
 
 export const AlertSummary: FunctionComponent<Props> = ({

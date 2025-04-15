@@ -26,18 +26,20 @@ import { useSpaceId } from '../../../common/hooks/use_space_id';
 const AlertsContext = createContext<{
   alertsTableRef: RefObject<AlertsTableImperativeApi>;
   /**
-   * anonymization switch state in local storage
+   * anonymization switch state in local storage\
+   * if undefined, the spaceId is not retrievable and the switch is not shown
    */
-  showAnonymizedValues: boolean;
+  showAnonymizedValues?: boolean;
   setShowAnonymizedValues: React.Dispatch<React.SetStateAction<boolean | undefined>>;
 } | null>(null);
 
 const AlertsContextProviderComponent = ({ children }: PropsWithChildren) => {
   const alertsTableRef = useRef<AlertsTableImperativeApi>(null);
   const spaceId = useSpaceId();
-  const [showAnonymizedValues = false, setShowAnonymizedValues] = useLocalStorage<boolean>(
-    `securitySolution.aiAlertFlyout.showAnonymization.${spaceId ?? 'default'}`
-  );
+  const [showAnonymizedValues = spaceId ? false : undefined, setShowAnonymizedValues] =
+    useLocalStorage<boolean | undefined>(
+      `securitySolution.aiAlertFlyout.showAnonymization.${spaceId}`
+    );
 
   return (
     <AlertsContext.Provider

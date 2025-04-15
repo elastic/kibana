@@ -22,13 +22,17 @@ export const AnonymizationSwitch: React.FC = () => {
   );
 
   return (
-    <EuiSwitch
-      label={i18n.translate('xpack.securitySolution.flyout.settings.anonymizeValues', {
-        defaultMessage: 'Show anonymized values',
-      })}
-      checked={showAnonymizedValues}
-      onChange={onChangeShowAnonymizedValues}
-      compressed
-    />
+    <>
+      {showAnonymizedValues !== undefined && (
+        <EuiSwitch
+          label={i18n.translate('xpack.securitySolution.flyout.settings.anonymizeValues', {
+            defaultMessage: 'Show anonymized values',
+          })}
+          checked={showAnonymizedValues ?? false}
+          onChange={onChangeShowAnonymizedValues}
+          compressed
+        />
+      )}
+    </>
   );
 };
