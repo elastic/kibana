@@ -85,11 +85,11 @@ export interface Panel {
    * Component to be rendered
    */
   component: (props: FlyoutPanelProps) => React.ReactElement;
-
   /**
-   * Optional settings menu items to be displayed in the context menu
+   * Optional additional settings menu items to be displayed in the settings menu.
+   * This option only makes sense for panels that will be used as right panel, as this is where the settings menu icon is being displayed.
    */
-  contextSettingsMenuItems?: React.ReactNode[];
+  additionalSettingsMenuItems?: React.ReactNode[];
 }
 
 export interface FlyoutPanelHistory {

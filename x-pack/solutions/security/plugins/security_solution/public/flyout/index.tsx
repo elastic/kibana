@@ -210,7 +210,7 @@ const expandableFlyoutDocumentsPanels: ExpandableFlyoutProps['registeredPanels']
         <AIForSOCPanel />
       </AIForSOCDetailsProvider>
     ),
-    contextSettingsMenuItems: [<AnonymizationSwitch />],
+    additionalSettingsMenuItems: [<AnonymizationSwitch />],
   },
 ];
 

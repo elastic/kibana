@@ -23,11 +23,11 @@ import {
 import { TestProvider } from '../test/provider';
 import { localStorageMock } from '../../__mocks__';
 import {
-  USER_COLLAPSED_WIDTH_LOCAL_STORAGE,
   EXPANDABLE_FLYOUT_LOCAL_STORAGE,
+  PUSH_VS_OVERLAY_LOCAL_STORAGE,
+  USER_COLLAPSED_WIDTH_LOCAL_STORAGE,
   USER_EXPANDED_WIDTH_LOCAL_STORAGE,
   USER_SECTION_WIDTHS_LOCAL_STORAGE,
-  PUSH_VS_OVERLAY_LOCAL_STORAGE,
 } from '../constants';
 import { initialPanelsState, initialUiState } from '../store/state';
 
@@ -286,27 +286,37 @@ describe('SettingsMenu', () => {
     });
   });
 
-  describe('extraSettings', () => {
-    it('should render extra settings when provided', () => {
-      const extraSettings = [
-        <div key="setting1" data-test-subj="extra-setting-1">
-          Extra Setting 1
+  describe('additionalSettingsMenuItems', () => {
+    it('should render additional options', () => {
+      const flyoutCustomProps = {
+        hideSettings: false,
+        resize: {
+          disabled: false,
+          tooltip: '',
+        },
+      };
+      const additionalSettingsMenuItems = [
+        <div key="setting1" data-test-subj="additional-setting-1">
+          Additional Setting 1
         </div>,
-        <div key="setting2" data-test-subj="extra-setting-2">
-          Extra Setting 2
+        <div key="setting2" data-test-subj="additional-setting-2">
+          Additional Setting 2
         </div>,
       ];
 
       const { getByTestId } = render(
         <TestProvider>
-          <SettingsMenu extraSettings={extraSettings} />
+          <SettingsMenu
+            additionalSettingsMenuItems={additionalSettingsMenuItems}
+            flyoutCustomProps={flyoutCustomProps}
+          />
         </TestProvider>
       );
 
       getByTestId(SETTINGS_MENU_BUTTON_TEST_ID).click();
 
-      expect(getByTestId('extra-setting-1')).toBeInTheDocument();
-      expect(getByTestId('extra-setting-2')).toBeInTheDocument();
+      expect(getByTestId('additional-setting-1')).toBeInTheDocument();
+      expect(getByTestId('additional-setting-2')).toBeInTheDocument();
     });
   });
 });

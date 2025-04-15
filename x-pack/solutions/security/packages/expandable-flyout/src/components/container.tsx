@@ -9,6 +9,7 @@ import React, { memo, useCallback, useMemo } from 'react';
 import { Interpolation, Theme } from '@emotion/react';
 import { EuiFlyoutProps, EuiFlyoutResizable } from '@elastic/eui';
 import { EuiFlyoutResizableProps } from '@elastic/eui/src/components/flyout/flyout_resizable';
+import { useAdditionalSettingsMenuItems } from '../hooks/use_additional_settings_menu_items';
 import { changeUserCollapsedWidthAction, changeUserExpandedWidthAction } from '../store/actions';
 import {
   selectDefaultWidths,
@@ -105,7 +106,6 @@ export const Container: React.FC<ContainerProps> = memo(
 
     // retrieves the sections to be displayed
     const {
-      contextMenuSettings,
       leftSection,
       rightSection,
       previewSection,
@@ -114,6 +114,8 @@ export const Container: React.FC<ContainerProps> = memo(
     } = useSections({
       registeredPanels,
     });
+
+    const { additionalSettingsMenuItems } = useAdditionalSettingsMenuItems({ registeredPanels });
 
     // calculates what needs to be rendered
     const showLeft = useMemo(() => leftSection != null && left != null, [leftSection, left]);
@@ -230,7 +232,10 @@ export const Container: React.FC<ContainerProps> = memo(
         )}
 
         {!flyoutCustomProps?.hideSettings && (
-          <SettingsMenu flyoutCustomProps={flyoutCustomProps} extraSettings={contextMenuSettings} />
+          <SettingsMenu
+            flyoutCustomProps={flyoutCustomProps}
+            additionalSettingsMenuItems={additionalSettingsMenuItems}
+          />
         )}
       </EuiFlyoutResizable>
     );

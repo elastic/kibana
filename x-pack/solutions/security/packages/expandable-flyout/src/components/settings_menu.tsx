@@ -132,11 +132,13 @@ export interface FlyoutCustomProps {
 
 export interface SettingsMenuProps {
   /**
-   * Custom props to populate the content of the settings meny
+   * Allows adding custom settings items below the default ones
    */
-  extraSettings?: Panel['contextSettingsMenuItems'];
+  additionalSettingsMenuItems?: Panel['additionalSettingsMenuItems'];
   /**
-   * Custom props to populate the content of the settings meny
+   * To customize the default items in the settings menu:
+   * - enable/disable push vs overlay
+   * - enable/disable reset size
    */
   flyoutCustomProps?: FlyoutCustomProps;
 }
@@ -145,9 +147,11 @@ export interface SettingsMenuProps {
  * Renders a menu to allow the user to customize the flyout.
  * Current customization are:
  * - Flyout type: overlay or push
+ * - Reset flyout size
+ * Additional settings can be passed from the application.
  */
 export const SettingsMenu: React.FC<SettingsMenuProps> = memo(
-  ({ flyoutCustomProps, extraSettings }: SettingsMenuProps) => {
+  ({ flyoutCustomProps, additionalSettingsMenuItems }: SettingsMenuProps) => {
     const dispatch = useDispatch();
 
     // for flyout where the push vs overlay option is disable in the UI we fall back to overlay mode
@@ -240,10 +244,10 @@ export const SettingsMenu: React.FC<SettingsMenuProps> = memo(
             >
               {FLYOUT_RESIZE_BUTTON}
             </EuiButtonEmpty>
-            {extraSettings?.map((setting, index) => (
+            {additionalSettingsMenuItems?.map((settingMenuItem, index) => (
               <React.Fragment key={index}>
                 <EuiSpacer size="s" />
-                {setting}
+                {settingMenuItem}
               </React.Fragment>
             ))}
           </EuiPanel>
