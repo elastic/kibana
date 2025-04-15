@@ -82,6 +82,7 @@ export function initializeAlertRules(
           toMountPoint(
             <KibanaContextProvider services={ruleFormPlugins}>
               <RuleFormFlyout
+                data-test-subj="lensEmbeddableRuleForm"
                 plugins={{ ...ruleFormPlugins, ruleTypeRegistry, actionTypeRegistry }}
                 ruleTypeId={ES_QUERY_ID}
                 initialValues={{
