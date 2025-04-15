@@ -19,7 +19,7 @@ export interface SerializedTitles {
   hidePanelTitles?: boolean;
 }
 
-const defaultTitlesState: WithAllKeys<SerializedTitles> = {
+export const defaultTitlesState: WithAllKeys<SerializedTitles> = {
   title: undefined,
   description: undefined,
   hidePanelTitles: undefined,

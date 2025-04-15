@@ -12,9 +12,7 @@ import {
   HasEditCapabilities,
   HasLibraryTransforms,
   SerializedTitles,
-  StateComparators,
 } from '@kbn/presentation-publishing';
-import { BehaviorSubject } from 'rxjs';
 
 export interface BookAttributes {
   bookTitle: string;
@@ -22,10 +20,6 @@ export interface BookAttributes {
   numberOfPages: number;
   bookSynopsis?: string;
 }
-
-export type BookAttributesManager = {
-  [key in keyof Required<BookAttributes>]: BehaviorSubject<BookAttributes[key]>;
-} & { comparators: StateComparators<BookAttributes> };
 
 export interface BookByValueSerializedState {
   attributes: BookAttributes;
@@ -50,7 +44,7 @@ export interface BookRuntimeState
     Partial<BookByReferenceSerializedState>,
     SerializedTitles {}
 
-export type BookApi = DefaultEmbeddableApi<BookSerializedState, BookRuntimeState> &
+export type BookApi = DefaultEmbeddableApi<BookSerializedState> &
   HasEditCapabilities &
   HasLibraryTransforms<BookByReferenceSerializedState, BookByValueSerializedState> &
   HasSavedBookId;
