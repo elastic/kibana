@@ -53925,53 +53925,6 @@
         ]
       }
     },
-    "/api/streams/{name}/content/preview": {
-      "post": {
-        "description": "Returns a json representation of a content pack.",
-        "operationId": "post-streams-name-content-preview",
-        "parameters": [
-          {
-            "description": "A required header to protect against CSRF attacks",
-            "in": "header",
-            "name": "kbn-xsrf",
-            "required": true,
-            "schema": {
-              "example": "true",
-              "type": "string"
-            }
-          },
-          {
-            "in": "path",
-            "name": "name",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "multipart/form-data": {
-              "schema": {
-                "additionalProperties": false,
-                "properties": {
-                  "content": {}
-                },
-                "required": [
-                  "content"
-                ],
-                "type": "object"
-              }
-            }
-          }
-        },
-        "responses": {},
-        "summary": "Preview a content pack",
-        "tags": [
-          "streams"
-        ]
-      }
-    },
     "/api/streams/{name}/dashboards": {
       "get": {
         "description": "Fetches all dashboards linked to a stream that are visible to the current user in the current space.",
