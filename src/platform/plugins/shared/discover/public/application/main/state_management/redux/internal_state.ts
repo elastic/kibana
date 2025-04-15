@@ -68,7 +68,7 @@ const initialState: DiscoverInternalState = {
   savedDataViews: [],
   expandedDoc: undefined,
   isESQLToDataViewTransitionModalVisible: false,
-  tabs: { resetId: uuidv4(), byId: {}, allIds: [], unsafeCurrentId: '', recentlyClosedTabs: [] },
+  tabs: { groupId: uuidv4(), byId: {}, allIds: [], unsafeCurrentId: '', recentlyClosedTabs: [] },
 };
 
 export type TabActionPayload<T extends { [key: string]: unknown } = {}> = { tabId: string } & T;
@@ -104,7 +104,7 @@ export const internalStateSlice = createSlice({
         allTabs: TabState[];
         selectedTabId: string;
         recentlyClosedTabs: RecentlyClosedTabState[];
-        resetId?: string;
+        groupId?: string;
       }>
     ) => {
       state.tabs.byId = [...action.payload.recentlyClosedTabs, ...action.payload.allTabs].reduce<
@@ -119,7 +119,7 @@ export const internalStateSlice = createSlice({
       state.tabs.allIds = action.payload.allTabs.map((tab) => tab.id);
       state.tabs.unsafeCurrentId = action.payload.selectedTabId;
       state.tabs.recentlyClosedTabs = action.payload.recentlyClosedTabs;
-      state.tabs.resetId = action.payload.resetId ?? state.tabs.resetId;
+      state.tabs.groupId = action.payload.groupId ?? state.tabs.groupId;
     },
 
     setDataViewId: (state, action: TabAction<{ dataViewId: string | undefined }>) =>
@@ -264,7 +264,7 @@ export const createInternalStateStore = (options: InternalStateThunkDependencies
   store.dispatch(
     setTabs({
       ...initialTabsState,
-      resetId: uuidv4(),
+      groupId: uuidv4(),
     })
   );
 

@@ -27,15 +27,15 @@ export const TabsView = (props: DiscoverSessionViewProps) => {
   const services = useDiscoverServices();
   const dispatch = useInternalStateDispatch();
   const allTabs = useInternalStateSelector(selectAllTabs);
-  const { currentTabId, recentlyClosedItems, resetId } = useInternalStateSelector((state) => ({
+  const { currentTabId, recentlyClosedItems, groupId } = useInternalStateSelector((state) => ({
     currentTabId: state.tabs.unsafeCurrentId,
     recentlyClosedItems: state.tabs.recentlyClosedTabs,
-    resetId: state.tabs.resetId,
+    groupId: state.tabs.groupId,
   }));
 
   return (
     <UnifiedTabs
-      key={resetId}
+      key={groupId}
       services={services}
       initialItems={allTabs}
       initialSelectedItemId={currentTabId}

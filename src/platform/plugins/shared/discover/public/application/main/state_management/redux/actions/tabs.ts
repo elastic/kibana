@@ -66,10 +66,10 @@ export const setTabs: InternalStateThunkActionCreator<
   };
 
 export const updateTabs: InternalStateThunkActionCreator<
-  [TabbedContentState & { resetId?: string }],
+  [TabbedContentState & { groupId?: string }],
   Promise<void>
 > =
-  ({ items, selectedItem, resetId }) =>
+  ({ items, selectedItem, groupId }) =>
   async (dispatch, getState, { services, runtimeStateManager, urlStateStorage }) => {
     const currentState = getState();
     const currentTab = selectTab(currentState, currentState.tabs.unsafeCurrentId);
@@ -135,7 +135,7 @@ export const updateTabs: InternalStateThunkActionCreator<
         allTabs: updatedTabs,
         selectedTabId: selectedItem?.id ?? currentTab.id,
         recentlyClosedTabs: currentState.tabs.recentlyClosedTabs,
-        resetId,
+        groupId,
       })
     );
   };
@@ -158,7 +158,7 @@ export const clearAllTabs: InternalStateThunkActionCreator = () => (dispatch) =>
     ...createTabItem([]),
   };
 
-  return dispatch(updateTabs({ items: [defaultTab], selectedItem: defaultTab, resetId: uuidv4() }));
+  return dispatch(updateTabs({ items: [defaultTab], selectedItem: defaultTab, groupId: uuidv4() }));
 };
 
 export const disconnectTab: InternalStateThunkActionCreator<[TabActionPayload]> =

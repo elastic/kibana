@@ -72,7 +72,7 @@ export interface DiscoverInternalState {
   expandedDoc: DataTableRecord | undefined;
   isESQLToDataViewTransitionModalVisible: boolean;
   tabs: {
-    resetId: string;
+    groupId: string;
     byId: Record<string, TabState>;
     allIds: string[];
     recentlyClosedTabs: RecentlyClosedTabState[];
