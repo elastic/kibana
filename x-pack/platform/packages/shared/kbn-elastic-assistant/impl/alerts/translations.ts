@@ -39,21 +39,21 @@ export const REGENERATE = i18n.translate('xpack.elasticAssistant.alertSummary.re
 });
 
 export const MISSING_CONNECTOR = i18n.translate(
-  'xpack.securitySolution.alertSummary.missingConnector',
+  'xpack.elasticAssistant.alertSummary.missingConnector',
   {
     defaultMessage: 'Missing connector',
   }
 );
 
 export const CONNECTOR_MISSING_MESSAGE = i18n.translate(
-  'xpack.securitySolution.alertSummary.noConnectorMessage',
+  'xpack.elasticAssistant.alertSummary.noConnectorMessage',
   {
     defaultMessage: 'Your default AI connector is invalid and may have been deleted.',
   }
 );
 
 export const CONNECTOR_MISSING_MESSAGE_ADMIN = i18n.translate(
-  'xpack.securitySolution.alertSummary.noConnectorMessageForAdmin',
+  'xpack.elasticAssistant.alertSummary.noConnectorMessageForAdmin',
   {
     defaultMessage:
       'Your default AI connector is invalid and may have been deleted. You may update the default AI connector via',
@@ -61,7 +61,7 @@ export const CONNECTOR_MISSING_MESSAGE_ADMIN = i18n.translate(
 );
 
 export const ADVANCED_SETTINGS_LINK_TITLE = i18n.translate(
-  'xpack.securitySolution.alertSummary.advancedSettingsLinkTitle',
+  'xpack.elasticAssistant.alertSummary.advancedSettingsLinkTitle',
   {
     defaultMessage: 'Security Solution advanced settings',
   }
