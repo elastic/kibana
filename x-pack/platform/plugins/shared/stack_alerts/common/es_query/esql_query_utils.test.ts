@@ -37,7 +37,7 @@ describe('ESQL query utils', () => {
 
   describe('toEsqlQueryHits', () => {
     it('correctly converts ESQL table to ES query hits', () => {
-      const { results, rows, cols, duplicateAlertIds } = toEsqlQueryHits({
+      const { results, rows, cols } = toEsqlQueryHits({
         columns,
         values: [value1, value2],
       });
@@ -96,7 +96,6 @@ describe('ESQL query utils', () => {
         { actions: false, id: 'ecs.version' },
         { actions: false, id: 'error.code' },
       ]);
-      expect(duplicateAlertIds?.size).toBe(0);
     });
   });
 
