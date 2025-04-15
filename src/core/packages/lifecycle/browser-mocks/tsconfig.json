@@ -29,7 +29,8 @@
     "@kbn/core-custom-branding-browser-mocks",
     "@kbn/core-security-browser-mocks",
     "@kbn/core-user-profile-browser-mocks",
-    "@kbn/core-feature-flags-browser-mocks"
+    "@kbn/core-feature-flags-browser-mocks",
+    "@kbn/core-rendering-browser-mocks"
   ],
   "exclude": [
     "target/**/*",

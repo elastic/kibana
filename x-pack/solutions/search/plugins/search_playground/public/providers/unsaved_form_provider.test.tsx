@@ -7,11 +7,11 @@
 
 import React from 'react';
 import { render, waitFor, act } from '@testing-library/react';
-import { FormProvider, LOCAL_STORAGE_KEY } from './form_provider';
+import { UnsavedFormProvider, LOCAL_STORAGE_KEY } from './unsaved_form_provider';
 import { useLoadFieldsByIndices } from '../hooks/use_load_fields_by_indices';
 import { useLLMsModels } from '../hooks/use_llms_models';
 import * as ReactHookForm from 'react-hook-form';
-import { ChatForm, ChatFormFields } from '../types';
+import { PlaygroundForm, PlaygroundFormFields } from '../types';
 import { useSearchParams } from 'react-router-dom-v5-compat';
 
 jest.mock('../hooks/use_load_fields_by_indices');
@@ -46,7 +46,7 @@ const localStorageMock = (() => {
   };
 })() as Storage;
 
-const DEFAULT_FORM_STATE: Partial<ChatForm> = {
+const DEFAULT_FORM_STATE: Partial<PlaygroundForm> = {
   doc_size: 3,
   prompt: 'You are an assistant for question-answering tasks.',
   source_fields: {},
@@ -60,7 +60,7 @@ const DEFAULT_FORM_STATE: Partial<ChatForm> = {
   },
 };
 
-describe('FormProvider', () => {
+describe('UnsavedFormProvider', () => {
   beforeEach(() => {
     formHookSpy = jest.spyOn(ReactHookForm, 'useForm');
     mockUseLLMsModels.mockReturnValue([]);
@@ -74,9 +74,9 @@ describe('FormProvider', () => {
 
   it('renders the form provider with initial values, no default model', async () => {
     render(
-      <FormProvider storage={localStorageMock}>
+      <UnsavedFormProvider storage={localStorageMock}>
         <div>Test Child Component</div>
-      </FormProvider>
+      </UnsavedFormProvider>
     );
 
     const { getValues } = formHookSpy.mock.results[0].value;
@@ -95,9 +95,9 @@ describe('FormProvider', () => {
     mockUseLLMsModels.mockReturnValueOnce(mockModels);
 
     render(
-      <FormProvider storage={localStorageMock}>
+      <UnsavedFormProvider storage={localStorageMock}>
         <div>Test Child Component</div>
-      </FormProvider>
+      </UnsavedFormProvider>
     );
 
     await waitFor(() => {
@@ -105,7 +105,7 @@ describe('FormProvider', () => {
       const defaultModel = mockModels.find((model) => !model.disabled);
       const { getValues } = formHookSpy.mock.results[0].value;
 
-      expect(getValues(ChatFormFields.summarizationModel)).toEqual(defaultModel);
+      expect(getValues(PlaygroundFormFields.summarizationModel)).toEqual(defaultModel);
     });
   });
 
@@ -118,9 +118,9 @@ describe('FormProvider', () => {
     mockUseLLMsModels.mockReturnValueOnce(modelsWithAllDisabled);
 
     render(
-      <FormProvider storage={localStorageMock}>
+      <UnsavedFormProvider storage={localStorageMock}>
         <div>Test Child Component</div>
-      </FormProvider>
+      </UnsavedFormProvider>
     );
 
     await waitFor(() => {
@@ -128,23 +128,23 @@ describe('FormProvider', () => {
     });
 
     expect(
-      formHookSpy.mock.results[0].value.getValues(ChatFormFields.summarizationModel)
+      formHookSpy.mock.results[0].value.getValues(PlaygroundFormFields.summarizationModel)
     ).toBeUndefined();
   });
 
   it('saves form state to localStorage', async () => {
     render(
-      <FormProvider storage={localStorageMock}>
+      <UnsavedFormProvider storage={localStorageMock}>
         <div>Test Child Component</div>
-      </FormProvider>
+      </UnsavedFormProvider>
     );
 
     const { setValue } = formHookSpy.mock.results[0].value;
 
     act(() => {
-      setValue(ChatFormFields.prompt, 'New prompt');
+      setValue(PlaygroundFormFields.prompt, 'New prompt');
       // omit question from the session state
-      setValue(ChatFormFields.question, 'dont save me');
+      setValue(PlaygroundFormFields.question, 'dont save me');
     });
 
     await waitFor(() => {
@@ -174,9 +174,9 @@ describe('FormProvider', () => {
     );
 
     render(
-      <FormProvider storage={localStorageMock}>
+      <UnsavedFormProvider storage={localStorageMock}>
         <div>Test Child Component</div>
-      </FormProvider>
+      </UnsavedFormProvider>
     );
 
     const { getValues } = formHookSpy.mock.results[0].value;
@@ -209,9 +209,9 @@ describe('FormProvider', () => {
     );
 
     render(
-      <FormProvider storage={localStorageMock}>
+      <UnsavedFormProvider storage={localStorageMock}>
         <div>Test Child Component</div>
-      </FormProvider>
+      </UnsavedFormProvider>
     );
 
     const { getValues } = formHookSpy.mock.results[0].value;
@@ -243,16 +243,16 @@ describe('FormProvider', () => {
     );
 
     render(
-      <FormProvider storage={localStorageMock}>
+      <UnsavedFormProvider storage={localStorageMock}>
         <div>Test Child Component</div>
-      </FormProvider>
+      </UnsavedFormProvider>
     );
 
     await act(async () => {
       const { getValues } = formHookSpy.mock.results[0].value;
 
       await waitFor(() => {
-        expect(getValues(ChatFormFields.indices)).toEqual(['new-index']);
+        expect(getValues(PlaygroundFormFields.indices)).toEqual(['new-index']);
       });
     });
   });

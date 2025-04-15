@@ -11,24 +11,24 @@ import { useDebounceFn } from '@kbn/react-hooks';
 import { useIndicesValidation } from '../hooks/use_indices_validation';
 import { useLoadFieldsByIndices } from '../hooks/use_load_fields_by_indices';
 import { useUserQueryValidations } from '../hooks/use_user_query_validations';
-import { ChatForm, ChatFormFields } from '../types';
+import { PlaygroundForm, PlaygroundFormFields } from '../types';
 import { useLLMsModels } from '../hooks/use_llms_models';
 
-type PartialChatForm = Partial<ChatForm>;
+type PartialPlaygroundForm = Partial<PlaygroundForm>;
 export const LOCAL_STORAGE_KEY = 'search_playground_session';
 export const LOCAL_STORAGE_DEBOUNCE_OPTIONS = { wait: 100 };
 
-const DEFAULT_FORM_VALUES: PartialChatForm = {
+const DEFAULT_FORM_VALUES: PartialPlaygroundForm = {
   prompt: 'You are an assistant for question-answering tasks.',
   doc_size: 3,
   source_fields: {},
   indices: [],
   summarization_model: undefined,
-  [ChatFormFields.userElasticsearchQuery]: null,
-  [ChatFormFields.userElasticsearchQueryValidations]: undefined,
+  [PlaygroundFormFields.userElasticsearchQuery]: null,
+  [PlaygroundFormFields.userElasticsearchQueryValidations]: undefined,
 };
 
-const getLocalSession = (storage: Storage): PartialChatForm => {
+const getLocalSession = (storage: Storage): PartialPlaygroundForm => {
   try {
     const localSessionJSON = storage.getItem(LOCAL_STORAGE_KEY);
     const sessionState = localSessionJSON ? JSON.parse(localSessionJSON) : {};
@@ -42,23 +42,23 @@ const getLocalSession = (storage: Storage): PartialChatForm => {
   }
 };
 
-const setLocalSession = (formState: PartialChatForm, storage: Storage) => {
+const setLocalSession = (formState: PartialPlaygroundForm, storage: Storage) => {
   // omit question and search_query from the session state
   const {
     question,
     search_query: _searchQuery,
-    [ChatFormFields.userElasticsearchQueryValidations]: _queryValidations,
+    [PlaygroundFormFields.userElasticsearchQueryValidations]: _queryValidations,
     ...state
   } = formState;
 
   storage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(state));
 };
 
-interface FormProviderProps {
+interface UnsavedFormProviderProps {
   storage?: Storage;
 }
 
-export const FormProvider: React.FC<React.PropsWithChildren<FormProviderProps>> = ({
+export const UnsavedFormProvider: React.FC<React.PropsWithChildren<UnsavedFormProviderProps>> = ({
   children,
   storage = localStorage,
 }) => {
@@ -69,8 +69,8 @@ export const FormProvider: React.FC<React.PropsWithChildren<FormProviderProps>> 
 
     return index ? [index] : null;
   }, [searchParams]);
-  const sessionState: PartialChatForm = useMemo(() => getLocalSession(storage), [storage]);
-  const form = useForm<ChatForm>({
+  const sessionState: PartialPlaygroundForm = useMemo(() => getLocalSession(storage), [storage]);
+  const form = useForm<PlaygroundForm>({
     defaultValues: {
       ...sessionState,
       indices: [],
@@ -94,23 +94,23 @@ export const FormProvider: React.FC<React.PropsWithChildren<FormProviderProps>> 
   const setLocalSessionDebounce = useDebounceFn(setLocalSession, LOCAL_STORAGE_DEBOUNCE_OPTIONS);
   useEffect(() => {
     const subscription = form.watch((values) =>
-      setLocalSessionDebounce.run(values as PartialChatForm, storage)
+      setLocalSessionDebounce.run(values as PartialPlaygroundForm, storage)
     );
     return () => subscription.unsubscribe();
   }, [form, storage, setLocalSessionDebounce]);
 
   useEffect(() => {
     const defaultModel = models.find((model) => !model.disabled);
-    const currentModel = form.getValues(ChatFormFields.summarizationModel);
+    const currentModel = form.getValues(PlaygroundFormFields.summarizationModel);
 
     if (defaultModel && (!currentModel || !models.find((model) => currentModel.id === model.id))) {
-      form.setValue(ChatFormFields.summarizationModel, defaultModel);
+      form.setValue(PlaygroundFormFields.summarizationModel, defaultModel);
     }
   }, [form, models]);
 
   useEffect(() => {
     if (isValidatedIndices) {
-      form.setValue(ChatFormFields.indices, validIndices);
+      form.setValue(PlaygroundFormFields.indices, validIndices);
     }
   }, [form, isValidatedIndices, validIndices]);
 
