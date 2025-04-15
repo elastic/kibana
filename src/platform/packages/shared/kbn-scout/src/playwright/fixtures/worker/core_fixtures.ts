@@ -131,9 +131,18 @@ export const coreWorkerFixtures = base.extend<
    */
   samlAuth: [
     ({ log, config, esClient, kbnClient }, use, workerInfo) => {
-      let customRoleHash = '';
-      const customRoleName = `custom_role_worker_${workerInfo.parallelIndex}`;
+      /**
+       * When running tests against Cloud, ensure the `.ftr/role_users.json` file is populated with the required roles
+       * and credentials. Each worker uses a unique custom role named `custom_role_worker_<index>`.
+       * If running tests in parallel, make sure the file contains enough entries to accommodate all workers.
+       * The file should be structured as follows:
+       * {
+       *   "custom_role_worker_1": { "username": ..., "password": ... },
+       *   "custom_role_worker_2": { "username": ..., "password": ... },
+       */
+      const customRoleName = `custom_role_worker_${workerInfo.parallelIndex + 1}`;
       const session = createSamlSessionManager(config, log, customRoleName);
+      let customRoleHash = '';
 
       const isCustomRoleSet = (roleHash: string) => roleHash === customRoleHash;
 
