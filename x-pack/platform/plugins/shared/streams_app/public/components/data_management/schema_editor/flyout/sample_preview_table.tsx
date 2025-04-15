@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { EuiCallOut } from '@elastic/eui';
@@ -21,6 +21,7 @@ import { convertToFieldDefinitionConfig } from '../utils';
 interface SamplePreviewTableProps {
   stream: IngestStreamDefinition;
   nextField: SchemaField;
+  onValidate?: (isValid: boolean) => void;
 }
 
 export const SamplePreviewTable = (props: SamplePreviewTableProps) => {
@@ -37,6 +38,7 @@ const SAMPLE_DOCUMENTS_TO_SHOW = 20;
 const SamplePreviewTableContent = ({
   stream,
   nextField,
+  onValidate,
 }: SamplePreviewTableProps & { nextField: MappedSchemaField }) => {
   const { streamsRepositoryClient } = useKibana().dependencies.start.streams;
 
@@ -62,6 +64,12 @@ const SamplePreviewTableContent = ({
     [stream.name, nextField, streamsRepositoryClient],
     { disableToastOnError: true }
   );
+
+  useEffect(() => {
+    if (onValidate) {
+      onValidate(value?.status === 'failure' || error ? false : true);
+    }
+  }, [value, error, onValidate]);
 
   const columns = useMemo(() => {
     return [nextField.name];
