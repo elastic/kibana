@@ -17,11 +17,13 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import ScheduleIconSVG from './icons/schedule.svg';
-import * as i18n from './translations';
-import { CreateFlyout } from './create_flyout';
 
-export const EmptySchedule: React.FC = React.memo(() => {
+import * as i18n from './translations';
+
+import ScheduleIconSVG from '../icons/schedule.svg';
+import { CreateFlyout } from '../create_flyout';
+
+export const EmptyPage: React.FC = React.memo(() => {
   // showing / hiding the flyout:
   const [showFlyout, setShowFlyout] = useState<boolean>(false);
   const openFlyout = useCallback(() => setShowFlyout(true), []);
@@ -80,4 +82,4 @@ export const EmptySchedule: React.FC = React.memo(() => {
     </>
   );
 });
-EmptySchedule.displayName = 'EmptySchedule';
+EmptyPage.displayName = 'EmptyPage';

@@ -12,6 +12,7 @@ import {
   ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID,
   AttackDiscoveryScheduleParams,
 } from '@kbn/elastic-assistant-common';
+import { AttackDiscoveryScheduleFindOptions } from '../types';
 
 /**
  * Params for when creating AttackDiscoveryScheduleDataClient in Request Context Factory. Useful if needing to modify
@@ -28,13 +29,19 @@ export interface AttackDiscoveryScheduleDataClientParams {
 export class AttackDiscoveryScheduleDataClient {
   constructor(public readonly options: AttackDiscoveryScheduleDataClientParams) {}
 
-  public findSchedules = async () => {
+  public findSchedules = async ({
+    page = 0,
+    perPage,
+    sort: sortParam = {},
+  }: AttackDiscoveryScheduleFindOptions = {}) => {
     // TODO: add filtering
-    // TODO: add sorting
-    // TODO: add pagination
     const rules = await this.options.rulesClient.find<AttackDiscoveryScheduleParams>({
       options: {
-        filter: `alert.attributes.alertTypeId: ${ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID}`,
+        page: page + 1,
+        perPage,
+        sortField: sortParam.sortField,
+        sortOrder: sortParam.sortDirection,
+        ruleTypeIds: [ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID],
       },
     });
     return rules;
