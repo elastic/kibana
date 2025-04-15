@@ -47,7 +47,7 @@ export const singleSearchAfter = async <
       const start = performance.now();
       const nextSearchAfterResult = (await services.scopedClusterClient.asCurrentUser.search(
         searchRequest
-      )) as ESSearchResponse<SignalSource, TSearchRequest>;
+      )) as unknown as ESSearchResponse<SignalSource, TSearchRequest>;
 
       const end = performance.now();
 

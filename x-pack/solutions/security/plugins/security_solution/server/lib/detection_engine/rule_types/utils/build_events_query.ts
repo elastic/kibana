@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+
+import type { estypes } from '@elastic/elasticsearch';
 import { isEmpty } from 'lodash';
 import type { OverrideBodyQuery } from '../types';
 import type { TimestampOverride } from '../../../../../common/api/detection_engine/model/rule_schema';
@@ -183,10 +184,7 @@ export const buildEventsSearchQuery = <
   if (searchAfterSortIds != null && !isEmpty(searchAfterSortIds)) {
     return {
       ...searchQuery,
-      body: {
-        ...searchQuery.body,
-        search_after: searchAfterSortIds,
-      },
+      search_after: searchAfterSortIds,
     };
   }
   return searchQuery;

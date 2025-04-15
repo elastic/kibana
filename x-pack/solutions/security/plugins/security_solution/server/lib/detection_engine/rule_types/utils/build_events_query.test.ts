@@ -477,7 +477,7 @@ describe('create_signals', () => {
       trackTotalHits: false,
       runtimeMappings: undefined,
     });
-    expect(query.body?.track_total_hits).toEqual(false);
+    expect(query.track_total_hits).toEqual(false);
   });
 
   test('if sortOrder is provided it should be included', () => {
@@ -495,7 +495,7 @@ describe('create_signals', () => {
       trackTotalHits: false,
       runtimeMappings: undefined,
     });
-    expect(query?.body?.sort).toEqual([
+    expect(query.sort).toEqual([
       {
         '@timestamp': {
           order: 'desc',
@@ -519,7 +519,7 @@ describe('create_signals', () => {
       sortOrder: 'desc',
       runtimeMappings: undefined,
     });
-    expect(query?.body?.sort).toEqual([
+    expect(query.sort).toEqual([
       {
         'event.ingested': {
           order: 'desc',

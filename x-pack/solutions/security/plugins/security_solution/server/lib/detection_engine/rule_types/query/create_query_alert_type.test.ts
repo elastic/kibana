@@ -118,11 +118,9 @@ describe('Custom Query Alerts', () => {
 
     alerting.registerType(queryAlertType);
 
-    services.scopedClusterClient.asCurrentUser.search.mockReturnValue({
+    services.scopedClusterClient.asCurrentUser.search.mockResolvedValue({
       hits: {
         hits: [sampleDocNoSortId()],
-        sequences: [],
-        events: [],
         total: {
           relation: 'eq',
           value: 1,
