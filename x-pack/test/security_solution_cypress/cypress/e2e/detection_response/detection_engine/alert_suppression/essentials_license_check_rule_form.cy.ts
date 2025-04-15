@@ -21,7 +21,7 @@ import {
 import { CREATE_RULE_URL } from '../../../../urls/navigation';
 
 describe(
-  'Detection rules, Alert Suppression for Essentials tier',
+  'Alert Suppression - Essentials tier license check',
   {
     tags: ['@serverless'],
     env: {
