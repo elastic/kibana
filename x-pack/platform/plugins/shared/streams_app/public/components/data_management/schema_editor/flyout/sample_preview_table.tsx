@@ -67,11 +67,7 @@ const SamplePreviewTableContent = ({
 
   useEffect(() => {
     if (onValidate) {
-      if (value?.status === 'failure' || error) {
-        onValidate(false);
-      } else {
-        onValidate(true);
-      }
+      onValidate(value?.status === 'failure' || error ? false : true);
     }
   }, [value, error, onValidate]);
 
