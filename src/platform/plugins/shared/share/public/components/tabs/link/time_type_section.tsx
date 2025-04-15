@@ -31,19 +31,23 @@ const BoldText = ({ children }: { children: ReactNode }) => {
   );
 };
 
-const AbsoluteTimeText = ({ date }: { date: Date }) => (
-  <BoldText>
-    <FormattedDate
-      value={date}
-      year="numeric"
-      month="long"
-      day="2-digit"
-      hour="numeric"
-      minute="numeric"
-      hour12
-    />
-  </BoldText>
-);
+const AbsoluteTimeText = ({ date }: { date: string }) => {
+  const absoluteDate = convertRelativeToAbsoluteDate(date);
+
+  return (
+    <BoldText>
+      <FormattedDate
+        value={absoluteDate}
+        year="numeric"
+        month="long"
+        day="2-digit"
+        hour="numeric"
+        minute="numeric"
+        hour12
+      />
+    </BoldText>
+  );
+};
 
 const RelativeTimeText = ({ date }: { date: string }) => {
   const result = getRelativeValueAndUnit(date);
@@ -96,8 +100,8 @@ export const TimeTypeSection = ({ timeRange, isAbsoluteTime, changeTimeType }: P
             id="share.link.timeRange.absoluteTimeInfoText"
             defaultMessage="The users will see all data from {from} to {to}."
             values={{
-              from: <AbsoluteTimeText date={convertRelativeToAbsoluteDate(timeRange?.from)} />,
-              to: <AbsoluteTimeText date={convertRelativeToAbsoluteDate(timeRange?.to)} />,
+              from: <AbsoluteTimeText date={timeRange?.from} />,
+              to: <AbsoluteTimeText date={timeRange?.to} />,
             }}
           />
         ) : (
