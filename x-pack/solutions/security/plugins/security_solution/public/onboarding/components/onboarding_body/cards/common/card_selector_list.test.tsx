@@ -14,7 +14,7 @@ import { RulesCardItemId } from '../rules/types';
 import { OnboardingCardId } from '../../../../constants';
 import { OnboardingContextProvider } from '../../../onboarding_context';
 import { ExperimentalFeaturesService } from '../../../../../common/experimental_features_service';
-import { TestProviders } from '@kbn/security-solution-plugin/public/common/mock';
+import { TestProviders } from '../../../../../common/mock';
 
 const mockOnSelect = jest.fn();
 
