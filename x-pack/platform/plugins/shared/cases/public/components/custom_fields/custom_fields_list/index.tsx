@@ -36,6 +36,14 @@ const CustomFieldsListComponent: React.FC<Props> = (props) => {
   const renderTypeLabel = (type?: CustomFieldTypes) => {
     const createdBuilder = type && builderMap[type];
 
+    if (type === 'cf-solution-1') {
+      return 'Solution custom field type 1';
+    }
+
+    if (type === 'cf-solution-2') {
+      return 'Solution custom field type 2';
+    }
+
     return createdBuilder && createdBuilder().label;
   };
 
@@ -52,6 +60,18 @@ const CustomFieldsListComponent: React.FC<Props> = (props) => {
   }, []);
 
   const showModal = Boolean(selectedItem);
+
+  customFields.push({
+    key: 'cf-solution-1',
+    label: 'Solution custom field 1',
+    type: 'cf-solution-1',
+  });
+
+  customFields.push({
+    key: 'cf-solution-1',
+    label: 'Solution custom field 2',
+    type: 'cf-solution-2',
+  });
 
   return customFields.length ? (
     <>

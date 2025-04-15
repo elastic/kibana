@@ -13,7 +13,7 @@ export const PlaceHolderActionItem: React.FC = () => {
     <EuiPanel color="primary" paddingSize="s" grow={false}>
       <EuiFlexGroup alignItems="center" justifyContent="spaceAround" css={{ height: '100%' }}>
         <EuiFlexItem grow={false}>
-          <EuiText size="xs">{'an action'}</EuiText>
+          <EuiText size="xs">{'Action'}</EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPanel>

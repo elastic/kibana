@@ -249,7 +249,7 @@ export const AddComment = React.memo(
                           <EuiFlexGroup alignItems="flexStart" direction="column" gutterSize="none">
                             <EuiFlexItem grow={false}>
                               <EuiButtonEmpty iconSide="left" iconType={'gear'} onClick={() => {}}>
-                                {'Action 1'}
+                                {'Core Action 1'}
                               </EuiButtonEmpty>
                             </EuiFlexItem>
                             <EuiFlexItem grow={false}>

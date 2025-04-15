@@ -9,7 +9,7 @@ import React from 'react';
 import { EuiButton } from '@elastic/eui';
 
 export const PlaceHolderButton: React.FC = () => {
-  return <EuiButton>{'solution action'}</EuiButton>;
+  return <EuiButton>{'Solution button'}</EuiButton>;
 };
 
 PlaceHolderButton.displayName = 'PlaceHolderButton';
