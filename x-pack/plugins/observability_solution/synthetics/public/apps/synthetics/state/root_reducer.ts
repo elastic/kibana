@@ -17,8 +17,6 @@ import { manualTestRunsReducer, ManualTestRunsState } from './manual_test_runs';
 import {
   dynamicSettingsReducer,
   DynamicSettingsState,
-  settingsReducer,
-  SettingsState,
 } from './settings';
 import { elasticsearchReducer, QueriesState } from './elasticsearch';
 import { agentPoliciesReducer, AgentPoliciesState } from './private_locations';
@@ -34,7 +32,6 @@ import { monitorStatusHeatmapReducer, MonitorStatusHeatmap } from './status_heat
 
 export interface SyntheticsAppState {
   ui: UiState;
-  settings: SettingsState;
   elasticsearch: QueriesState;
   monitorList: MonitorListState;
   overview: MonitorOverviewState;
@@ -56,7 +53,6 @@ export interface SyntheticsAppState {
 
 export const rootReducer = combineReducers<SyntheticsAppState>({
   ui: uiReducer,
-  settings: settingsReducer,
   monitorList: monitorListReducer,
   overview: monitorOverviewReducer,
   globalParams: globalParamsReducer,
