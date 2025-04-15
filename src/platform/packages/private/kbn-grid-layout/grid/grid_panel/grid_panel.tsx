@@ -97,6 +97,9 @@ export const GridPanel = React.memo(({ panelId, rowId }: GridPanelProps) => {
               }
             });
           }
+          if (!ref) {
+            console.log('panel', panel);
+          }
           if (!ref || !panel) return;
 
           const gridRowOffset = getTopOffsetForRow(row, activeLayout);

@@ -7,27 +7,30 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 
 import type { UseEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 
 import { useGridLayoutPanelEvents } from '../use_grid_layout_events';
+import { UserInteractionEvent } from '../use_grid_layout_events/types';
 
 export const ResizeHandle = React.memo(({ rowId, panelId }: { rowId: string; panelId: string }) => {
-  const { startDrag } = useGridLayoutPanelEvents({
-    interactionType: 'resize',
-    panelId,
-    rowId,
-  });
+  const startDrag = useGridLayoutPanelEvents();
+  const startInteraction = useCallback(
+    (ev: UserInteractionEvent) => {
+      return startDrag(ev, { interactionType: 'resize', rowId, panelId });
+    },
+    [rowId, panelId]
+  );
 
   return (
     <button
       css={styles}
-      onMouseDown={startDrag}
-      onTouchStart={startDrag}
-      onKeyDown={startDrag}
+      onMouseDown={startInteraction}
+      onTouchStart={startInteraction}
+      onKeyDown={startInteraction}
       className="kbnGridPanel--resizeHandle"
       aria-label={i18n.translate('kbnGridLayout.resizeHandle.ariaLabel', {
         defaultMessage: 'Resize panel',

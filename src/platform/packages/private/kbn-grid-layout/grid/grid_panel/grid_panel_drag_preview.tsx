@@ -40,7 +40,7 @@ export const GridPanelDragPreview = React.memo(() => {
 
           const offset = getTopOffsetForRow(rowId, proposedGridLayout);
 
-          if (!activePanel || !row.panels[activePanel.id]) {
+          if (!activePanel || !row?.panels[activePanel.id]) {
             dragPreviewRef.current.style.display = 'none';
           } else {
             const panel = row.panels[activePanel.id];

@@ -26,6 +26,13 @@ export const startAction = (
   rowId: string,
   panelId: string
 ) => {
+  console.log(
+    'startAction',
+    gridLayoutStateManager.activePanel$.value,
+    gridLayoutStateManager.interactionEvent$.value,
+    gridLayoutStateManager.gridLayout$.value,
+    gridLayoutStateManager.proposedGridLayout$.value
+  );
   const panelRef = gridLayoutStateManager.panelRefs.current[panelId];
   if (!panelRef) return;
 
@@ -34,8 +41,8 @@ export const startAction = (
   gridLayoutStateManager.interactionEvent$.next({
     type,
     id: panelId,
-    panelDiv: panelRef,
     targetRow: rowId,
+    panelDiv: panelRef,
     sensorType: getSensorType(e),
     sensorOffsets: getSensorOffsets(e, panelRect),
   });
@@ -187,7 +194,7 @@ export const moveAction = (
       proposedGridLayout$.next(nextLayout);
     }
 
-    console.log('nextLayout', gridLayoutStateManager.proposedGridLayout$.getValue());
+    // console.log('nextLayout', gridLayoutStateManager.proposedGridLayout$.getValue());
     // return;
   } else if (
     hasChangedGridRow ||
@@ -216,7 +223,7 @@ export const moveAction = (
       const originGrid = nextLayout[lastRowId];
       const resolvedOriginGrid = resolveGridRow(originGrid);
       nextLayout[lastRowId] = resolvedOriginGrid;
-      console.log('originGrid', originGrid);
+      // console.log('originGrid', originGrid);
     }
     if (!deepEqual(currentLayout, nextLayout)) {
       proposedGridLayout$.next(nextLayout);
@@ -247,6 +254,13 @@ export const commitAction = ({
   gridLayout$,
   proposedGridLayout$,
 }: GridLayoutStateManager) => {
+  console.log(
+    'commitAction',
+    activePanel$.value,
+    interactionEvent$.value,
+    gridLayout$.value,
+    proposedGridLayout$.value
+  );
   activePanel$.next(undefined);
   interactionEvent$.next(undefined);
   if (proposedGridLayout$.value && !deepEqual(proposedGridLayout$.value, gridLayout$.getValue())) {

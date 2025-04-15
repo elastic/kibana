@@ -11,9 +11,10 @@ import { GridLayoutData, GridLayoutStateManager, GridRowData } from '../types';
 
 export const COLLAPSIBLE_HEADER_HEIGHT = 2;
 
-const getHeaderHeight = (row: GridRowData) => (row.isCollapsible ? COLLAPSIBLE_HEADER_HEIGHT : 0);
+const getHeaderHeight = (row: GridRowData) => (row?.isCollapsible ? COLLAPSIBLE_HEADER_HEIGHT : 0);
 
-export const getRowHeight = (row: GridRowData) => {
+export const getRowHeight = (row?: GridRowData) => {
+  if (!row) return 0;
   if (row.isCollapsed) return 0;
   return Object.values(row.panels).reduce(
     (acc, panel) => Math.max(acc, panel.row + panel.height),

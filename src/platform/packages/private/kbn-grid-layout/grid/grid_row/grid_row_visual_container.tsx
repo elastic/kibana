@@ -52,7 +52,7 @@ export const GridRowVisualContainer = ({ rowId }: { rowId: string }) => {
         elRef.style.gridRowStart = `${topOffset + 1}`;
         elRef.style.gridRowEnd = `${bottomPosition + 1}`;
         // TODO: this should be stable and have a stable subscription (or be a prop)
-        if (currentGridLayout[rowId].isCollapsible) {
+        if (currentGridLayout[rowId]?.isCollapsible) {
           elRef.style.background = collapsableStyles.backgroundColor;
           elRef.style.outline = collapsableStyles.outline;
         }

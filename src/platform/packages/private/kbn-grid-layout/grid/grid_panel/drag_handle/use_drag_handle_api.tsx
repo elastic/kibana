@@ -27,11 +27,24 @@ export const useDragHandleApi = ({
 }): DragHandleApi => {
   const { useCustomDragHandle } = useGridLayoutContext();
 
-  const { startDrag } = useGridLayoutPanelEvents({
-    interactionType: 'drag',
-    panelId,
-    rowId,
-  });
+  const startDrag = useGridLayoutPanelEvents();
+
+  
+  // we use ref because subscription is inside of the stable useEffect so the state would be stale
+  const rowIdRef = useRef(rowId);
+  // Keep ref in sync with state
+  useEffect(() => {
+    rowIdRef.current = rowId;
+  }, [rowId]);
+
+
+  const startInteraction = useCallback(
+    (ev: UserInteractionEvent) => {
+      console.log('row & panel',rowIdRef.current, panelId);
+      return startDrag(ev, { interactionType: 'drag', rowId: rowIdRef.current, panelId });
+    },
+    [panelId]
+  );
 
   const removeEventListenersRef = useRef<(() => void) | null>(null);
 
@@ -39,25 +52,27 @@ export const useDragHandleApi = ({
     (dragHandles: Array<HTMLElement | null>) => {
       for (const handle of dragHandles) {
         if (handle === null) return;
-        handle.addEventListener('mousedown', startDrag, { passive: true });
-        handle.addEventListener('touchstart', startDrag, { passive: true });
-        handle.addEventListener('keydown', startDrag);
+        console.log('Adding drag handle event listeners');
+        handle.addEventListener('mousedown', startInteraction, { passive: true });
+        handle.addEventListener('touchstart', startInteraction, { passive: true });
+        handle.addEventListener('keydown', startInteraction);
         handle.classList.add('kbnGridPanel--dragHandle');
       }
       removeEventListenersRef.current = () => {
         for (const handle of dragHandles) {
           if (handle === null) return;
-          handle.removeEventListener('mousedown', startDrag);
-          handle.removeEventListener('touchstart', startDrag);
-          handle.removeEventListener('keydown', startDrag);
+          handle.removeEventListener('mousedown', startInteraction);
+          handle.removeEventListener('touchstart', startInteraction);
+          handle.removeEventListener('keydown', startInteraction);
         }
       };
     },
-    [startDrag]
+    [startInteraction]
   );
 
   useEffect(
     () => () => {
+      console.log('Cleaning up drag handle event listeners');
       // on unmount, remove all drag handle event listeners
       removeEventListenersRef.current?.();
     },
@@ -65,7 +80,7 @@ export const useDragHandleApi = ({
   );
 
   return {
-    startDrag,
+    startDrag: startInteraction,
     setDragHandles: useCustomDragHandle ? setDragHandles : undefined,
   };
 };

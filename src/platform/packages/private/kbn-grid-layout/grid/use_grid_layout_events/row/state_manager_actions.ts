@@ -99,7 +99,7 @@ export const moveAction = (
   const currentRowOrder = getRowKeysInOrder(currentLayout);
 
   const dropTargetRowId = getDropTarget(currentPointer, gridLayoutStateManager);
-  console.log('dropTargetRowId', dropTargetRowId);
+  // console.log('dropTargetRowId', dropTargetRowId);
 
   gridLayoutStateManager.activeRowEvent$.next({
     ...currentActiveRowEvent,
