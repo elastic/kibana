@@ -215,11 +215,11 @@ export interface Flapping extends SavedObjectAttributes {
   statusChangeThreshold: number;
 }
 
-export interface Dashboard extends SavedObjectAttributes {
+export interface Dashboard {
   id: string;
 }
 
-export interface Artifacts extends SavedObjectAttributes {
+export interface Artifacts {
   dashboards?: Dashboard[];
   investigation_guide?: {
     blob: string;
