@@ -3427,14 +3427,14 @@
           "RecursivePartial",
           "<",
           "Theme",
-          ">[] | undefined>; showLegend?: boolean | undefined; legendPosition?: ",
+          ">[] | undefined>; rendering?: ",
+          "Rendering",
+          " | undefined; showLegend?: boolean | undefined; legendPosition?: ",
           "Position",
           " | ",
           "LegendPositionConfig",
           " | undefined; rotation?: ",
           "Rotation",
-          " | undefined; rendering?: ",
-          "Rendering",
           " | undefined; animateData?: boolean | undefined; externalPointerEvents?: ",
           "MakeOverridesSerializable",
           "<",
@@ -3458,21 +3458,6 @@
           " | undefined; onLegendItemOver?: \"ignore\" | undefined; onLegendItemOut?: \"ignore\" | undefined; onLegendItemClick?: \"ignore\" | undefined; onLegendItemPlusClick?: \"ignore\" | undefined; onLegendItemMinusClick?: \"ignore\" | undefined; legendAction?: \"ignore\" | undefined; legendSort?: \"ignore\" | undefined; customLegend?: \"ignore\" | undefined; legendTitle?: string | undefined; } | undefined; }"
         ],
         "path": "src/platform/plugins/shared/charts/common/static/overrides/settings.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "charts",
-        "id": "def-common.COLOR_MAPPING_SETTING",
-        "type": "string",
-        "tags": [],
-        "label": "COLOR_MAPPING_SETTING",
-        "description": [],
-        "signature": [
-          "\"visualization:colorMapping\""
-        ],
-        "path": "src/platform/plugins/shared/charts/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

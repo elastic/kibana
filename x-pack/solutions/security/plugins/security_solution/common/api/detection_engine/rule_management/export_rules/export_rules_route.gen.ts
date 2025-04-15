@@ -25,9 +25,12 @@ export const ExportRulesRequestQuery = z.object({
    * Determines whether a summary of the exported rules is returned.
    */
   exclude_export_details: BooleanFromString.optional().default(false),
-  /**
-   * File name for saving the exported rules.
-   */
+  /** 
+      * File name for saving the exported rules.
+> info
+> When using cURL to export rules to a file, use the -O and -J options to save the rules to the file name specified in the URL.
+ 
+      */
   file_name: z.string().optional().default('export.ndjson'),
 });
 export type ExportRulesRequestQueryInput = z.input<typeof ExportRulesRequestQuery>;

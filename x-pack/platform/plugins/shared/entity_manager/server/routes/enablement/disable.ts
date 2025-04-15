@@ -74,7 +74,7 @@ export const disableEntityDiscoveryRoute = createEntityManagerServerRoute({
         includedHiddenTypes: [EntityDiscoveryApiKeyType.name],
       });
 
-      logger.info('Disabling managed entity discovery');
+      logger.debug('Disabling managed entity discovery');
       await uninstallBuiltInEntityDefinitions({
         entityClient,
         deleteData: params.query.deleteData,
@@ -90,7 +90,7 @@ export const disableEntityDiscoveryRoute = createEntityManagerServerRoute({
           ids: [apiKey.id],
         });
       }
-      logger.info('Managed entity discovery is disabled');
+      logger.debug('Managed entity discovery is disabled');
 
       return response.ok({ body: { success: true } });
     } catch (err) {

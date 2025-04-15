@@ -22,7 +22,6 @@ export {
   apiCanAccessViewMode,
   getInheritedViewMode,
   getViewModeSubject,
-  useInheritedViewMode,
   type CanAccessViewMode,
 } from './interfaces/can_access_view_mode';
 export {

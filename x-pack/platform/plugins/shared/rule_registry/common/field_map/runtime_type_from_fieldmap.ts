@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { Optional } from 'utility-types';
+import type { Optional } from 'utility-types';
 import { mapValues, pickBy } from 'lodash';
 import { either } from 'fp-ts/lib/Either';
 import * as t from 'io-ts';

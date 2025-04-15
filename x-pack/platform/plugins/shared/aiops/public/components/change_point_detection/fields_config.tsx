@@ -541,7 +541,7 @@ const FieldPanel: FC<FieldPanelProps> = ({
         </EuiFlexItem>
 
         <EuiFlexItem>
-          <FieldsControls fieldConfig={fieldConfig} onChange={onChange} data-test-subj="blablabla">
+          <FieldsControls fieldConfig={fieldConfig} onChange={onChange}>
             <EuiFlexItem {...(progress === null && { css: { display: 'none' } })} grow={true}>
               <EuiProgress
                 label={

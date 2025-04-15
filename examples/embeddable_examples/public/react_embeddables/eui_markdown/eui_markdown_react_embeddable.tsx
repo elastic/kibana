@@ -15,14 +15,14 @@ import { initializeUnsavedChanges } from '@kbn/presentation-containers';
 import {
   StateComparators,
   WithAllKeys,
+  getViewModeSubject,
   initializeStateManager,
   initializeTitleManager,
   titleComparators,
-  useInheritedViewMode,
   useStateFromPublishingSubject,
 } from '@kbn/presentation-publishing';
 import React from 'react';
-import { merge } from 'rxjs';
+import { BehaviorSubject, map, merge } from 'rxjs';
 import { EUI_MARKDOWN_ID } from './constants';
 import { MarkdownEditorApi, MarkdownEditorSerializedState, MarkdownEditorState } from './types';
 
@@ -67,7 +67,10 @@ export const markdownEmbeddableFactory: EmbeddableFactory<
       uuid,
       parentApi,
       serializeState,
-      anyStateChange$: merge(titleManager.anyStateChange$, markdownStateManager.anyStateChange$),
+      anyStateChange$: merge(
+        titleManager.anyStateChange$,
+        markdownStateManager.anyStateChange$
+      ).pipe(map(() => undefined)),
       getComparators: () => {
         /**
          * comparators are provided in a callback to allow embeddables to change how their state is compared based
@@ -98,7 +101,9 @@ export const markdownEmbeddableFactory: EmbeddableFactory<
       Component: () => {
         // get state for rendering
         const content = useStateFromPublishingSubject(markdownStateManager.api.content$);
-        const viewMode = useInheritedViewMode(api) ?? 'view';
+        const viewMode = useStateFromPublishingSubject(
+          getViewModeSubject(api) ?? new BehaviorSubject('view')
+        );
         const { euiTheme } = useEuiTheme();
 
         return viewMode === 'edit' ? (

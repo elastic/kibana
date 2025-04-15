@@ -98,12 +98,12 @@ export class EditorFrameService {
     doc: LensDocument,
     services: EditorFramePlugins & { forceDSL?: boolean }
   ) => {
-    const [resolvedDatasources, resolvedVisualizations] = await Promise.all([
-      this.loadDatasources(),
-      this.loadVisualizations(),
-    ]);
-
-    const { persistedStateToExpression } = await import('../async_services');
+    const [resolvedDatasources, resolvedVisualizations, { persistedStateToExpression }] =
+      await Promise.all([
+        this.loadDatasources(),
+        this.loadVisualizations(),
+        import('../async_services'),
+      ]);
 
     return persistedStateToExpression(resolvedDatasources, resolvedVisualizations, doc, services);
   };
@@ -121,12 +121,11 @@ export class EditorFrameService {
 
   public start(core: CoreStart, plugins: EditorFrameStartPlugins): EditorFrameStart {
     const createInstance = async (): Promise<EditorFrameInstance> => {
-      const [resolvedDatasources, resolvedVisualizations] = await Promise.all([
+      const [resolvedDatasources, resolvedVisualizations, { EditorFrame }] = await Promise.all([
         this.loadDatasources(),
         this.loadVisualizations(),
+        import('../async_services'),
       ]);
-
-      const { EditorFrame } = await import('../async_services');
 
       return {
         EditorFrameContainer: ({

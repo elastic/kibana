@@ -29,11 +29,14 @@ export interface UserProfileAvatarData {
 
 export type DarkModeValue = 'system' | 'dark' | 'light' | 'space_default';
 
+export type ContrastModeValue = 'system' | 'standard' | 'high';
+
 /**
  * User settings stored in the data object of the User Profile
  */
 export interface UserSettingsData {
   darkMode?: DarkModeValue;
+  contrastMode?: ContrastModeValue;
   solutionNavOptOut?: boolean;
 }
 

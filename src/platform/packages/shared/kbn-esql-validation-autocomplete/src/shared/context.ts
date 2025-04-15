@@ -81,7 +81,11 @@ function findCommandSubType<T extends ESQLCommandMode | ESQLCommandOption>(
   }
 }
 
-export function isMarkerNode(node: ESQLSingleAstItem | undefined): boolean {
+export function isMarkerNode(node: ESQLAstItem | undefined): boolean {
+  if (Array.isArray(node)) {
+    return false;
+  }
+
   return Boolean(
     node &&
       (isColumnItem(node) || isIdentifier(node) || isSourceItem(node)) &&
@@ -173,12 +177,22 @@ export function getAstContext(queryString: string, ast: ESQLAst, offset: number)
     };
   }
 
+  let withinStatsWhereClause = false;
+  Walker.walk(ast, {
+    visitFunction: (fn) => {
+      if (fn.name === 'where' && fn.location.min <= offset) {
+        withinStatsWhereClause = true;
+      }
+    },
+  });
+
   const { command, option, node, containingFunction } = findAstPosition(ast, offset);
   if (node) {
     if (node.type === 'literal' && node.literalType === 'keyword') {
       // command ... "<here>"
       return { type: 'value' as const, command, node, option, containingFunction };
     }
+
     if (node.type === 'function') {
       if (['in', 'not_in'].includes(node.name) && Array.isArray(node.args[1])) {
         // command ... a in ( <here> )
@@ -186,18 +200,19 @@ export function getAstContext(queryString: string, ast: ESQLAst, offset: number)
       }
       if (
         isNotEnrichClauseAssigment(node, command) &&
-        // Temporarily mangling the logic here to let operators
-        // be handled as functions for the stats command.
-        // I expect this to simplify once https://github.com/elastic/kibana/issues/195418
-        // is complete
-        !(isOperator(node) && command.name !== 'stats')
+        (!isOperator(node) || (command.name === 'stats' && !withinStatsWhereClause))
       ) {
         // command ... fn( <here> )
         return { type: 'function' as const, command, node, option, containingFunction };
       }
     }
   }
-  if (!command || (queryString.length <= offset && pipePrecedesCurrentWord(queryString))) {
+  if (
+    !command ||
+    (queryString.length <= offset &&
+      pipePrecedesCurrentWord(queryString) &&
+      command.location.max < queryString.length)
+  ) {
     //   // ... | <here>
     return { type: 'newCommand' as const, command: undefined, node, option, containingFunction };
   }

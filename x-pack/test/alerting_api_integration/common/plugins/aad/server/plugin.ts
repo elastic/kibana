@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import {
+import type {
   Plugin,
   CoreSetup,
   RequestHandlerContext,
@@ -14,8 +14,8 @@ import {
   IKibanaResponse,
 } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
-import { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
-import { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
+import type { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
+import type { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
 import { RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
 import { AD_HOC_RUN_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server/saved_objects';
 
@@ -37,6 +37,13 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
             type: schema.string(),
             id: schema.string(),
           }),
+        },
+        security: {
+          authz: {
+            enabled: false,
+            reason:
+              'This route is opted out from authorization because permissions will be checked by elasticsearch.',
+          },
         },
       },
       async function (

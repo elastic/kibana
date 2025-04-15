@@ -6,13 +6,14 @@
  */
 import type { Client } from '@elastic/elasticsearch';
 import expect from '@kbn/expect';
-import { IValidatedEvent, nanosToMillis } from '@kbn/event-log-plugin/server';
+import type { IValidatedEvent } from '@kbn/event-log-plugin/server';
+import { nanosToMillis } from '@kbn/event-log-plugin/server';
 import { ESTestIndexTool, ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
 import { ActionExecutionSourceType } from '@kbn/actions-plugin/server/lib/action_execution_source';
 import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
 import { Spaces } from '../../scenarios';
 import { getUrlPrefix, ObjectRemover, getEventLog } from '../../../common/lib';
-import { FtrProviderContext } from '../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService }: FtrProviderContext) {
@@ -142,7 +143,7 @@ export default function ({ getService }: FtrProviderContext) {
         actionTypeId: 'test.failing',
         outcome: 'failure',
         message: `action execution failure: test.failing:${createdConnector.id}: failing connector`,
-        errorMessage: `an error occurred while running the action: expected failure for .kibana-alerting-test-data actions-failure-1:space1; retry: true`,
+        errorMessage: `an error occurred while running the action: expected failure for kibana-alerting-test-data actions-failure-1:space1; retry: true`,
         source: ActionExecutionSourceType.HTTP_REQUEST,
       });
     });

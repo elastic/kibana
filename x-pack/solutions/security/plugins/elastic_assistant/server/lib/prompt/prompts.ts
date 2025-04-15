@@ -95,7 +95,7 @@ Analysis Process:
 Output Requirements:
 - Provide a narrative summary for each identified attack chain
 - Explain connections between events with concrete evidence
-- Use the special {{ field.name fieldValue }} syntax to reference source data fields`;
+- Use the special {{ field.name fieldValue }} syntax to reference source data fields. IMPORTANT - LIMIT the details markdown to 2750 characters and summary to 200 characters! This is to prevent hitting output context limits.`;
 
 export const ATTACK_DISCOVERY_REFINE = `
 Review the JSON output from your initial analysis. Your task is to refine the attack chains by:

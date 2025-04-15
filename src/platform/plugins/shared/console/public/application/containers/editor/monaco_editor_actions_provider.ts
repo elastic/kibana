@@ -13,6 +13,7 @@ import { ConsoleParsedRequestsProvider, getParsedRequestsProvider, monaco } from
 import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { XJson } from '@kbn/es-ui-shared-plugin/public';
+import { ErrorAnnotation } from '@kbn/monaco/src/languages/console/types';
 import { isQuotaExceededError } from '../../../services/history';
 import { DEFAULT_VARIABLES, KIBANA_API_PREFIX } from '../../../../common/constants';
 import { getStorage, StorageKeys } from '../../../services';
@@ -37,6 +38,7 @@ import {
   shouldTriggerSuggestions,
   trackSentRequests,
   getRequestFromEditor,
+  isInsideTripleQuotes,
 } from './utils';
 
 import type { AdjustedParsedRequest } from './types';
@@ -233,6 +235,30 @@ export class MonacoEditorActionsProvider {
     return selectedRequests;
   }
 
+  private async getErrorsBetweenLines(
+    startLineNumber: number,
+    endLineNumber: number
+  ): Promise<ErrorAnnotation[]> {
+    const model = this.editor.getModel();
+    if (!model) {
+      return [];
+    }
+    const parsedErrors = await this.parsedRequestsProvider.getErrors();
+    const selectedErrors: ErrorAnnotation[] = [];
+    for (const parsedError of parsedErrors) {
+      const errorLine = model.getPositionAt(parsedError.offset).lineNumber;
+      if (errorLine > endLineNumber) {
+        // error is past the selection, no need to check further errors
+        break;
+      }
+      if (errorLine >= startLineNumber) {
+        // error is selected
+        selectedErrors.push(parsedError);
+      }
+    }
+    return selectedErrors;
+  }
+
   public async getRequests() {
     const model = this.editor.getModel();
     if (!model) {
@@ -276,6 +302,25 @@ export class MonacoEditorActionsProvider {
     try {
       const allRequests = await this.getRequests();
       const selectedRequests = await this.getSelectedParsedRequests();
+      if (selectedRequests.length) {
+        const selectedErrors = await this.getErrorsBetweenLines(
+          selectedRequests.at(0)!.startLineNumber,
+          selectedRequests.at(-1)!.endLineNumber
+        );
+        if (selectedErrors.length) {
+          toasts.addDanger(
+            i18n.translate('console.notification.monaco.error.errorInSelection', {
+              defaultMessage:
+                'The selected {requestCount, plural, one {request contains} other {requests contain}} {errorCount, plural, one {an error} other {errors}}. Please resolve {errorCount, plural, one {it} other {them}} and try again.',
+              values: {
+                requestCount: selectedRequests.length,
+                errorCount: selectedErrors.length,
+              },
+            })
+          );
+          return;
+        }
+      }
 
       const requests = allRequests
         // if any request doesnt have a method then we gonna treat it as a non-valid
@@ -739,22 +784,61 @@ export class MonacoEditorActionsProvider {
     return this.editor.getPosition() ?? { lineNumber: 1, column: 1 };
   }
 
+  private async isPositionInsideScript(
+    model: monaco.editor.ITextModel,
+    position: monaco.Position
+  ): Promise<boolean> {
+    const selectedRequests = await this.getSelectedParsedRequests();
+
+    for (const request of selectedRequests) {
+      if (
+        request.startLineNumber <= position.lineNumber &&
+        request.endLineNumber >= position.lineNumber
+      ) {
+        const requestContentBefore = model.getValueInRange({
+          startLineNumber: request.startLineNumber,
+          startColumn: 1,
+          endLineNumber: position.lineNumber,
+          endColumn: position.column,
+        });
+
+        if (isInsideTripleQuotes(requestContentBefore)) {
+          return true;
+        }
+      }
+      if (request.startLineNumber > position.lineNumber) {
+        // Stop iteration once we pass the cursor position
+        return false;
+      }
+    }
+
+    // Return false if no match
+    return false;
+  }
+
   private triggerSuggestions() {
     const model = this.editor.getModel();
     const position = this.editor.getPosition();
     if (!model || !position) {
       return;
     }
-    const lineContentBefore = model.getValueInRange({
-      startLineNumber: position.lineNumber,
-      startColumn: 1,
-      endLineNumber: position.lineNumber,
-      endColumn: position.column,
+    this.isPositionInsideScript(model, position).then((isCursorInsideScript) => {
+      if (isCursorInsideScript) {
+        // Don't trigger autocomplete suggestions inside scripts
+        return;
+      }
+
+      const lineContentBefore = model.getValueInRange({
+        startLineNumber: position.lineNumber,
+        startColumn: 1,
+        endLineNumber: position.lineNumber,
+        endColumn: position.column,
+      });
+      // if the line is empty or it matches specified regex, trigger suggestions
+      if (!lineContentBefore.trim() || shouldTriggerSuggestions(lineContentBefore)) {
+        this.editor.trigger(TRIGGER_SUGGESTIONS_ACTION_LABEL, TRIGGER_SUGGESTIONS_HANDLER_ID, {});
+      }
     });
-    // if the line is empty or it matches specified regex, trigger suggestions
-    if (!lineContentBefore.trim() || shouldTriggerSuggestions(lineContentBefore)) {
-      this.editor.trigger(TRIGGER_SUGGESTIONS_ACTION_LABEL, TRIGGER_SUGGESTIONS_HANDLER_ID, {});
-    }
   }
 
   /*

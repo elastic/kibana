@@ -16,6 +16,7 @@ import type { IKibanaSearchResponse, IKibanaSearchRequest } from '@kbn/search-ty
 import type { BaseEsQuery } from '@kbn/cloud-security-posture';
 import { useKibana } from '../../common/lib/kibana';
 import {
+  ASSET_FIELDS,
   MAX_ASSETS_TO_LOAD,
   ASSET_INVENTORY_INDEX_PATTERN,
   QUERY_KEY_GRID_DATA,
@@ -28,7 +29,10 @@ interface UseAssetsOptions extends BaseEsQuery {
   pageSize: number;
 }
 
-const ASSET_INVENTORY_TABLE_RUNTIME_MAPPING_FIELDS: string[] = ['entity.id', 'entity.name'];
+const ASSET_INVENTORY_TABLE_RUNTIME_MAPPING_FIELDS: string[] = [
+  ASSET_FIELDS.ENTITY_ID,
+  ASSET_FIELDS.ENTITY_NAME,
+];
 
 const getAssetsQuery = ({ query, sort }: UseAssetsOptions, pageParam: unknown) => {
   return {

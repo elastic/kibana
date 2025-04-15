@@ -153,6 +153,7 @@ export const AnalyticsCollectionTable: React.FC<AnalyticsCollectionTableProps> =
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
             <EuiButtonGroup
+              data-test-subj="enterpriseSearchAnalyticsCollectionTableButtonGroup"
               css={analyticsCollectionTableStyles.buttonGroup}
               onChange={(newFilterId) => setFilterId(newFilterId as FilterBy)}
               color="primary"
