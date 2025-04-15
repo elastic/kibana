@@ -275,7 +275,7 @@ describe('BarChartBaseComponent', () => {
     });
 
     it(`should ${mockBarChartData.length} render BarSeries`, () => {
-      expect(screen.getByTestId('chart')).toMatchSnapshot();
+      expect(screen.getByTestId('chart-mock')).toMatchSnapshot();
       expect(screen.getAllByTestId('bar-series-mock')).toHaveLength(mockBarChartData.length);
     });
 

@@ -14,9 +14,9 @@ jest.mock('../../lib/kibana');
 
 describe('Title', () => {
   test('it renders title', () => {
-    render(<Title title="Test title" />);
+    const { container } = render(<Title title="Test title" />);
 
-    expect(screen.getByTestId('header-page-title-wrapper')).toMatchSnapshot();
+    expect(container.children[0]).toMatchSnapshot();
   });
 
   describe('given badgeOptions', () => {
