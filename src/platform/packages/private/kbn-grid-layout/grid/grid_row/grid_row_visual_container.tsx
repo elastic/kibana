@@ -18,8 +18,9 @@ const styles = {
 };
 
 const collapsableStyles = {
-  outline: '4px solid #0b64dd4d',
-  backgroundColor: '#0b64dd4d',
+  outline: '4px solid #ff6d5a29',
+  backgroundColor: '#ff6d5a29',
+  borderRadius: '4px',
 };
 
 export const GridRowVisualContainer = ({ rowId }: { rowId: string }) => {
@@ -55,6 +56,7 @@ export const GridRowVisualContainer = ({ rowId }: { rowId: string }) => {
         if (currentGridLayout[rowId]?.isCollapsible) {
           elRef.style.background = collapsableStyles.backgroundColor;
           elRef.style.outline = collapsableStyles.outline;
+          elRef.style.borderRadius = collapsableStyles.borderRadius;
         }
       });
 

@@ -31,14 +31,6 @@ export const startAction = (
 
   const panelRect = panelRef.getBoundingClientRect();
 
-  console.log('startAction', {
-    type,
-    id: panelId,
-    targetRow: rowId,
-    panelDiv: panelRef,
-    sensorType: getSensorType(e),
-    sensorOffsets: getSensorOffsets(e, panelRect),
-  });
 
   gridLayoutStateManager.interactionEvent$.next({
     type,
@@ -77,12 +69,6 @@ export const moveAction = (
   const currentPanelData = currentLayout?.[interactionEvent.targetRow].panels[interactionEvent.id];
 
   if (!currentPanelData) {
-    console.log(
-      'early?',
-      proposedGridLayout$.value,
-      interactionEvent.targetRow,
-      currentLayout?.[interactionEvent.targetRow]
-    );
     return;
   }
 
@@ -149,17 +135,6 @@ export const moveAction = (
   const { left: targetedGridLeft, top: targetedGridTop } = getRowRect(
     targetRowId,
     gridLayoutStateManager
-  );
-
-  console.log(
-    gridRowHeaders,
-    targetedRowRef,
-    gridRowHeaders[targetRowId],
-    'targetedGridLeft',
-    targetedGridLeft,
-    'targetedGridTop',
-    targetedGridTop,
-    getRowRect(targetRowId, gridLayoutStateManager)
   );
 
   const maxColumn = isResize ? columnCount : columnCount - currentPanelData.width;
@@ -229,8 +204,6 @@ export const moveAction = (
     });
   }
   return;
-    // console.log('nextLayout', gridLayoutStateManager.proposedGridLayout$.getValue());
-    // return;
   } else if (
     (hasChangedGridRow ||
     (!isGridDataEqual(requestedPanelData, lastRequestedPanelPosition.current)) &&
@@ -259,7 +232,6 @@ export const moveAction = (
       const originGrid = nextLayout[lastRowId];
       const resolvedOriginGrid = resolveGridRow(originGrid);
       nextLayout[lastRowId] = resolvedOriginGrid;
-      // console.log('originGrid', originGrid);
     }
     if (!deepEqual(currentLayout, nextLayout)) {
       proposedGridLayout$.next(nextLayout);
@@ -293,13 +265,6 @@ export const commitAction = ({
     gridLayout$.next(cloneDeep(proposedGridLayout$.value));
   }
   proposedGridLayout$.next(undefined);
-  console.log(
-    'commitAction',
-    activePanel$.value,
-    interactionEvent$.value,
-    gridLayout$.value,
-    proposedGridLayout$.value
-  );
 };
 
 export const cancelAction = ({

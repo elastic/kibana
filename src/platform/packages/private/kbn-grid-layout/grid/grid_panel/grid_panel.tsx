@@ -95,14 +95,9 @@ export const GridPanel = React.memo(({ panelId, rowId }: GridPanelProps) => {
               }
             });
           }
-          console.log('row', row);
-          if (!ref) {
-            console.log('panel', panel);
-          }
           if (!ref || !panel) return;
 
           const gridRowOffset = getTopOffsetForRow(row, activeLayout);
-          console.log(gridRowOffset);
 
           if (isPanelActive) {
             ref.classList.add('kbnGridPanel--active');

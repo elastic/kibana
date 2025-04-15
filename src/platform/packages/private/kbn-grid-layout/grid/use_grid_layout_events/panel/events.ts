@@ -45,7 +45,6 @@ export const useGridLayoutPanelEvents = () => {
 
   const onStart = useCallback(
     (ev: UserInteractionEvent, { interactionType, rowId, panelId }: StartDragParams) => {
-      console.log('what');
       startAction(ev, gridLayoutStateManager, interactionType, rowId, panelId);
     },
     [gridLayoutStateManager]

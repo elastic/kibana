@@ -49,7 +49,6 @@ export const useDragHandleApi = ({
     (dragHandles: Array<HTMLElement | null>) => {
       for (const handle of dragHandles) {
         if (handle === null) return;
-        console.log('Adding drag handle event listeners');
         handle.addEventListener('mousedown', startInteraction, { passive: true });
         handle.addEventListener('touchstart', startInteraction, { passive: true });
         handle.addEventListener('keydown', startInteraction);
@@ -69,7 +68,6 @@ export const useDragHandleApi = ({
 
   useEffect(
     () => () => {
-      console.log('Cleaning up drag handle event listeners');
       // on unmount, remove all drag handle event listeners
       removeEventListenersRef.current?.();
     },
