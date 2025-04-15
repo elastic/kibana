@@ -15,6 +15,7 @@ import { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
+import { initializeUnsavedChanges } from '@kbn/presentation-containers';
 import {
   initializeTimeRangeManager,
   initializeTitleManager,
@@ -30,7 +31,6 @@ import { StartDeps } from '../../plugin';
 import { DATA_TABLE_ID } from './constants';
 import { initializeDataTableQueries } from './data_table_queries';
 import { DataTableApi, DataTableSerializedState } from './types';
-import { initializeUnsavedChanges } from '@kbn/presentation-containers';
 
 export const getDataTableFactory = (
   core: CoreStart,
@@ -38,7 +38,6 @@ export const getDataTableFactory = (
 ): EmbeddableFactory<DataTableSerializedState, DataTableApi> => ({
   type: DATA_TABLE_ID,
   buildEmbeddable: async ({ initialState, finalizeApi, parentApi, uuid }) => {
-    console.log(initialState);
     const state = initialState.rawState;
 
     const storage = new Storage(localStorage);
@@ -72,8 +71,6 @@ export const getDataTableFactory = (
         return {
           ...titleComparators,
           ...timeRangeComparators,
-          mapSettings: 'deepEquality',
-          savedObjectId: 'skip',
         };
       },
       onReset: (lastSaved) => {
