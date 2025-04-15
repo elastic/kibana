@@ -529,6 +529,10 @@ export function getDiscoverStateContainer({
     isUpdate?: boolean
   ) => {
     if (isUpdate === false) {
+      services.data.query.timefilter.timefilter.setTime(payload.dateRange);
+      if (payload.query) {
+        services.data.query.queryString.setQuery(payload.query);
+      }
       // remove the search session if the given query is not just updated
       searchSessionManager.removeSearchSessionIdFromURL({ replace: false });
       addLog('[getDiscoverStateContainer] onUpdateQuery triggers data fetching');
