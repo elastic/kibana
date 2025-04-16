@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
-import { DatasourceDimensionDropHandlerProps } from '../../../types';
+import { DatasourceDimensionDropHandlerProps } from '../../../../types';
 import { getDropProps } from './get_drop_props';
 import {
   column1,

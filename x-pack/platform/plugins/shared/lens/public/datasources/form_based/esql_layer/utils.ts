@@ -11,8 +11,8 @@ import { getESQLAdHocDataview } from '@kbn/esql-utils';
 import type { AggregateQuery } from '@kbn/es-query';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import type { DatatableColumn } from '@kbn/expressions-plugin/public';
-import { ValueFormatConfig } from '../form_based/operations/definitions/column_types';
-import { generateId } from '../../id_generator';
+import { ValueFormatConfig } from '../operations/definitions/column_types';
+import { generateId } from '../../../id_generator';
 import { fetchDataFromAggregateQuery } from './fetch_data_from_aggregate_query';
 import type {
   IndexPatternRef,
@@ -20,7 +20,7 @@ import type {
   TextBasedLayerColumn,
   TextBasedLayer,
 } from './types';
-import type { DataViewsState } from '../../state_management';
+import type { DataViewsState } from '../../../state_management';
 import { addColumnsToCache } from './fieldlist_cache';
 
 export const MAX_NUM_OF_COLUMNS = 5;

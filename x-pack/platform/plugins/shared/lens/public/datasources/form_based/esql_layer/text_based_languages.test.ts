@@ -12,8 +12,8 @@ import { TextBasedPersistedState, TextBasedPrivateState } from './types';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { getTextBasedDatasource } from './text_based_languages';
-import { generateId } from '../../id_generator';
-import { DatasourcePublicAPI, Datasource, FramePublicAPI } from '../../types';
+import { generateId } from '../../../id_generator';
+import { DatasourcePublicAPI, Datasource, FramePublicAPI } from '../../../types';
 jest.mock('../../id_generator');
 
 const fieldsOne = [
