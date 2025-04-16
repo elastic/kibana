@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { uniq } from 'lodash';
+import { uniqBy } from 'lodash';
 import {
   Walker,
   walk,
@@ -959,7 +959,7 @@ async function getEcsMetadata(resourceRetriever?: ESQLCallbacks) {
   }
 }
 
-export async function getSourceFields(query: string, resourceRetriever?: ESQLCallbacks) {
+export async function getFieldsFromES(query: string, resourceRetriever?: ESQLCallbacks) {
   const metadata = await getEcsMetadata();
   const fieldsOfType = await resourceRetriever?.getColumnsFor?.({ query });
   const fieldsWithMetadata = enrichFieldsWithECSInfo(fieldsOfType || [], metadata);
@@ -967,31 +967,39 @@ export async function getSourceFields(query: string, resourceRetriever?: ESQLCal
 }
 
 const TRANSFORMATIONAL_COMMANDS = ['stats', 'keep'];
+const DROP_COMMAND = 'drop';
 
 export async function getCurrentQueryAvailableFields(
   query: string,
   commands: ESQLAstCommand[],
-  sourceFields?: ESQLRealField[]
+  availableFields?: ESQLRealField[]
 ) {
   const cacheCopy = new Map<string, ESQLRealField>();
-  sourceFields?.forEach((field) => cacheCopy.set(field.name, field));
+  availableFields?.forEach((field) => cacheCopy.set(field.name, field));
   const userDefinedColumns = collectVariables(commands, cacheCopy, query);
   const arrayOfUserDefinedColumns: ESQLRealField[] = transformMapToRealFields(
     userDefinedColumns ?? new Map<string, ESQLVariable[]>()
   );
-  const allFields = uniq([...(sourceFields ?? []), ...arrayOfUserDefinedColumns]);
+  const allFields = uniqBy([...(availableFields ?? []), ...arrayOfUserDefinedColumns], 'name');
 
   const lastCommand = commands[commands.length - 1];
   const isTransformationalCommand = TRANSFORMATIONAL_COMMANDS.includes(lastCommand.name);
-  if (isTransformationalCommand) {
-    // If the last command is transformational, we need to set only the available fields
-    const columns: ESQLColumn[] = [];
 
-    walk(lastCommand, {
-      visitColumn: (node) => columns.push(node),
-    });
-    return allFields.filter((field) => {
+  const columns: ESQLColumn[] = [];
+
+  walk(lastCommand, {
+    visitColumn: (node) => columns.push(node),
+  });
+  if (isTransformationalCommand) {
+    const columnsToKeep = (availableFields ?? []).filter((field) => {
       return columns.some((column) => column.name === field.name);
+    });
+
+    return uniqBy([...columnsToKeep, ...arrayOfUserDefinedColumns], 'name');
+  } else if (lastCommand.name === DROP_COMMAND) {
+    const columnsToDrop = columns.map((column) => column.name);
+    return allFields.filter((field) => {
+      return !columnsToDrop.some((column) => column === field.name);
     });
   } else {
     return allFields;

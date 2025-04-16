@@ -10,7 +10,7 @@ import { type ESQLAst, parse } from '@kbn/esql-ast';
 import type { ESQLCallbacks } from './types';
 import type { ESQLRealField } from '../validation/types';
 import { buildQueryForFieldsFromSource } from '../validation/helpers';
-import { getSourceFields, getCurrentQueryAvailableFields } from './helpers';
+import { getFieldsFromES, getCurrentQueryAvailableFields } from './helpers';
 
 export const NOT_SUGGESTED_TYPES = ['unsupported'];
 
@@ -21,24 +21,70 @@ export function buildQueryUntilPreviousCommand(ast: ESQLAst, queryString: string
 
 const cache = new Map<string, ESQLRealField[]>();
 
-export function getFieldsByTypeHelper(queryText: string, resourceRetriever?: ESQLCallbacks) {
-  const { root } = parse(queryText);
-  const queryForIndexFields = buildQueryForFieldsFromSource(queryText, root.commands);
+function removeLastPipe(inputString: string): string {
+  const lastPipeIndex = inputString.lastIndexOf('|');
+  if (lastPipeIndex !== -1) {
+    return inputString.substring(0, lastPipeIndex).trimEnd();
+  }
+  return inputString.trimEnd();
+}
 
+function processPipes(inputString: string) {
+  const parts = inputString.split('|');
+  const results = [];
+  let currentString = '';
+
+  for (let i = 0; i < parts.length; i++) {
+    const part = parts[i].trim();
+    if (i === 0) {
+      currentString = part;
+    } else {
+      currentString += ' | ' + part;
+    }
+    results.push(currentString.trim());
+  }
+  return results;
+}
+
+async function setFieldsToCache(queryText: string) {
+  if (cache.has(queryText)) {
+    // this is already in the cache
+    return;
+  }
+  const queryTextWithoutLastPipe = removeLastPipe(queryText);
+  // retrieve the user defined fields from the query without an extra call
+  const previousPipeFields = cache.get(queryTextWithoutLastPipe);
+  if (previousPipeFields && previousPipeFields?.length) {
+    const { root } = parse(queryText);
+    const availableFields = await getCurrentQueryAvailableFields(
+      queryText,
+      root.commands,
+      previousPipeFields
+    );
+    cache.set(queryText, availableFields);
+  }
+}
+
+export function getFieldsByTypeHelper(queryText: string, resourceRetriever?: ESQLCallbacks) {
   const getFields = async () => {
+    // console.dir(cache);
     // make the _query call only when the from <source> is not present in the cache
+    const { root } = parse(queryText);
+    const queryForIndexFields = buildQueryForFieldsFromSource(queryText, root.commands);
+    if (queryForIndexFields === queryText && cache.has(queryForIndexFields)) {
+      // this is already in the cache
+      return;
+    }
+    // if the query is not in the cache, we need to make the _query call
     if (queryForIndexFields && !cache.has(queryForIndexFields)) {
-      const fieldsWithMetadata = await getSourceFields(queryText, resourceRetriever);
+      const fieldsWithMetadata = await getFieldsFromES(queryForIndexFields, resourceRetriever);
       cache.set(queryForIndexFields, fieldsWithMetadata);
     } else {
-      // retrieve the user defined fields from the query without an extra call
-      const indexFields = cache.get(queryForIndexFields);
-      const availableFields = await getCurrentQueryAvailableFields(
-        queryText,
-        root.commands,
-        indexFields
-      );
-      cache.set(queryText, availableFields);
+      // Cache hit for queryText
+      const output = processPipes(queryText);
+      for (const line of output) {
+        await setFieldsToCache(line);
+      }
     }
   };
 
@@ -63,7 +109,7 @@ export function getFieldsByTypeHelper(queryText: string, resourceRetriever?: ESQ
     },
     getFieldsMap: async () => {
       await getFields();
-      const cachedFields = cache.get(queryForIndexFields);
+      const cachedFields = cache.get(queryText);
       const cacheCopy = new Map<string, ESQLRealField>();
       cachedFields?.forEach((field) => cacheCopy.set(field.name, field));
       return cacheCopy;
