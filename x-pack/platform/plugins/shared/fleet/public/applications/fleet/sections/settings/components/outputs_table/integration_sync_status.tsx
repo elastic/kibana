@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { memo, useMemo, useState } from 'react';
 
 import { type Output } from '../../../../../../../common/types';
 
@@ -18,26 +18,23 @@ interface Props {
   output: Output;
 }
 
-export const IntegrationSyncStatus: React.FunctionComponent<Props> = ({ output }) => {
+export const IntegrationSyncStatus: React.FunctionComponent<Props> = memo(({ output }) => {
   const { data: syncedIntegrationsStatus, error } = useGetRemoteSyncedIntegrationsStatusQuery(
     output.id,
     { enabled: output.type === 'remote_elasticsearch' && output.sync_integrations }
   );
 
   const [showStatusFlyout, setShowStatusFlyout] = useState(false);
-  const [status, setStatus] = useState('SYNCHRONIZING');
 
-  useEffect(() => {
+  const status = useMemo(() => {
     if (output.type !== 'remote_elasticsearch') {
-      setStatus('NA');
-      return;
+      return 'NA';
     }
     if (!output.sync_integrations) {
-      setStatus('DISABLED');
-      return;
+      return 'DISABLED';
     }
     if (!error && !syncedIntegrationsStatus) {
-      return;
+      return 'SYNCHRONIZING';
     }
 
     const syncCompleted =
@@ -54,7 +51,7 @@ export const IntegrationSyncStatus: React.FunctionComponent<Props> = ({ output }
         : syncCompleted
         ? 'COMPLETED'
         : 'SYNCHRONIZING';
-    setStatus(newStatus);
+    return newStatus;
   }, [output, syncedIntegrationsStatus, error]);
 
   const onClick = () => {
@@ -86,4 +83,4 @@ export const IntegrationSyncStatus: React.FunctionComponent<Props> = ({ output }
       )}
     </>
   );
-};
+});
