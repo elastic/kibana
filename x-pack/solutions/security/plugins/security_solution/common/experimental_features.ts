@@ -221,6 +221,11 @@ export const allowedExperimentalValues = Object.freeze({
   serviceEntityStoreEnabled: true,
 
   /**
+   * Enables Privilege Monitoring
+   */
+  privilegeMonitoringEnabled: false,
+
+  /**
    * Disables the siem migrations feature
    */
   siemMigrationsDisabled: false,
@@ -234,6 +239,11 @@ export const allowedExperimentalValues = Object.freeze({
    * Disables flyout history and new preview navigation
    */
   newExpandableFlyoutNavigationDisabled: false,
+
+  /**
+   * Enables the ability to edit highlighted fields in the alertflyout
+   */
+  editHighlightedFieldsEnabled: false,
 
   /**
    * Enables CrowdStrike's RunScript RTR command
