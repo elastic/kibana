@@ -8,8 +8,8 @@
  */
 
 import { TimeRange } from '@kbn/es-query';
-import { StateComparators, WithAllKeys, initializeStateManager } from '@kbn/presentation-publishing/state_manager';
-import { StateManager } from '@kbn/presentation-publishing/state_manager/types';
+import { StateComparators, WithAllKeys, initializeStateManager } from '../../state_manager';
+import { StateManager } from '../../state_manager/types';
 
 export interface SerializedTimeRange {
   timeRange?: TimeRange | undefined;
@@ -25,4 +25,5 @@ export const timeRangeComparators: StateComparators<SerializedTimeRange> = {
 
 export const initializeTimeRangeManager = (
   initialTimeRangeState: SerializedTimeRange
-): StateManager<SerializedTimeRange> => initializeStateManager(initialTimeRangeState, defaultTimeRangeState);
+): StateManager<SerializedTimeRange> =>
+  initializeStateManager(initialTimeRangeState, defaultTimeRangeState);

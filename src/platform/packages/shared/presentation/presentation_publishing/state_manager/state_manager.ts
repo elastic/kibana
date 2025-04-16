@@ -84,8 +84,6 @@ export const initializeStateManager = <StateType extends object>(
     api,
     getLatestState,
     reinitializeState,
-    anyStateChange$: merge(...allSubjects).pipe(
-      map(() => undefined)
-    ),
+    anyStateChange$: merge(...allSubjects).pipe(map(() => undefined)),
   };
 };

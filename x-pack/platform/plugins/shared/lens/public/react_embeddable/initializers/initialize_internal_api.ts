@@ -105,7 +105,8 @@ export function initializeInternalApi(
     updateAttributes: (attributes: LensRuntimeState['attributes']) => attributes$.next(attributes),
     updateAbortController: (abortController: AbortController | undefined) =>
       expressionAbortController$.next(abortController),
-    updateDisabledTriggers: (disableTriggers: LensPanelProps['disableTriggers']) => disableTriggers$.next(disableTriggers),
+    updateDisabledTriggers: (disableTriggers: LensPanelProps['disableTriggers']) =>
+      disableTriggers$.next(disableTriggers),
     updateDataViews: (dataViews: DataView[] | undefined) => dataViews$.next(dataViews),
     updateMessages: (newMessages: UserMessage[]) => messages$.next(newMessages),
     updateValidationMessages: (newMessages: UserMessage[]) => validationMessages$.next(newMessages),
