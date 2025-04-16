@@ -46,7 +46,6 @@
     "@kbn/features-plugin",
     "@kbn/core-http-server",
     "@kbn/core-http-router-server-mocks",
-    "@kbn/deeplinks-search",
     "@kbn/search-api-panels",
     "@kbn/try-in-console",
     "@kbn/unsaved-changes-prompt",
