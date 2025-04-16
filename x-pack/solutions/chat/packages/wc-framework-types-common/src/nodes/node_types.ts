@@ -9,4 +9,5 @@ export enum BuiltInNodeTypes {
   parallelSequences = 'parallelSequences',
   toolExecution = 'toolExecution',
   workflowExecution = 'workflowExecution',
+  prompt = 'prompt',
 }
