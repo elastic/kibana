@@ -58,11 +58,12 @@ describe('Test discover app state container', () => {
       internalState,
     });
     getCurrentTab = () =>
-      selectTab(internalState.getState(), internalState.getState().tabs.allIds[0]);
+      selectTab(internalState.getState(), internalState.getState().tabs.unsafeCurrentId);
   });
 
   const getStateContainer = () =>
     getDiscoverAppStateContainer({
+      tabId: getCurrentTab().id,
       stateStorage,
       internalState,
       savedSearchContainer: savedSearchState,
