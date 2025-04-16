@@ -34,16 +34,16 @@ export const ENTERPRISE_SEARCH_PRODUCT_NAME = i18n.translate('xpack.enterpriseSe
 
 export { SEARCH_INDICES_START, SEARCH_INDICES };
 
-export const ENTERPRISE_SEARCH_OVERVIEW_PLUGIN = {
+export const ENTERPRISE_SEARCH_HOME_PLUGIN = {
   ID: ENTERPRISE_SEARCH_APP_ID,
   NAME: SEARCH_PRODUCT_NAME,
-  NAV_TITLE: i18n.translate('xpack.enterpriseSearch.overview.navTitle', {
-    defaultMessage: 'Overview',
+  NAV_TITLE: i18n.translate('xpack.enterpriseSearch.home.navTitle', {
+    defaultMessage: 'Home',
   }),
-  DESCRIPTION: i18n.translate('xpack.enterpriseSearch.overview.description', {
+  DESCRIPTION: i18n.translate('xpack.enterpriseSearch.home.description', {
     defaultMessage: 'Create search experiences with a refined set of APIs and tools.',
   }),
-  URL: '/app/elasticsearch/overview',
+  URL: '/app/elasticsearch/home',
   LOGO: 'logoElasticsearch',
 };
 

@@ -18,7 +18,7 @@ import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import { i18n } from '@kbn/i18n';
 
 import {
-  ENTERPRISE_SEARCH_OVERVIEW_PLUGIN,
+  ENTERPRISE_SEARCH_HOME_PLUGIN,
   ENTERPRISE_SEARCH_CONTENT_PLUGIN,
   ELASTICSEARCH_PLUGIN,
   ANALYTICS_PLUGIN,
@@ -107,7 +107,7 @@ export class EnterpriseSearchPlugin implements Plugin<void, void, PluginsSetup, 
     const config = this.config;
     const log = this.logger;
     const PLUGIN_IDS = [
-      ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.ID,
+      ENTERPRISE_SEARCH_HOME_PLUGIN.ID,
       ENTERPRISE_SEARCH_CONTENT_PLUGIN.ID,
       ELASTICSEARCH_PLUGIN.ID,
       SEARCH_EXPERIENCES_PLUGIN.ID,
