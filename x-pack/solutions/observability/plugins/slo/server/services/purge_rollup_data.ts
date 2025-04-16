@@ -8,6 +8,7 @@
 import { ElasticsearchClient } from '@kbn/core/server';
 import { PurgeRollupSchemaType } from '@kbn/slo-schema/src/rest_specs/routes/bulk_purge_rollup';
 import { DeleteByQueryResponse } from '@elastic/elasticsearch/lib/api/types';
+import moment from 'moment';
 import { SLI_DESTINATION_INDEX_PATTERN } from '../../common/constants';
 import { KibanaSavedObjectsSLORepository } from './slo_repository';
 import { IllegalArgumentError } from '../errors';
@@ -30,7 +31,13 @@ export class PurgeRollupData {
       if (params.query?.force !== 'true') {
         if (
           slos.some((slo) => {
-            return thisComparisonStamp.isShorterThan(slo.timeWindow.duration);
+            if (slo.timeWindow.type === 'calendarAligned') {
+              return moment(Date.now())
+                .subtract(thisComparisonStamp.asSeconds(), 's')
+                .isAfter(moment(Date.now()).startOf(slo.timeWindow.duration.unit));
+            } else {
+              return thisComparisonStamp.isShorterThan(slo.timeWindow.duration);
+            }
           })
         ) {
           throw new IllegalArgumentError(
@@ -44,10 +51,15 @@ export class PurgeRollupData {
       if (params.query?.force !== 'true') {
         if (
           slos.some((slo) => {
-            return (
-              thisComparisonStamp.getTime() >
-              Date.now() - slo.timeWindow.duration.asSeconds() * 1000
-            );
+            if (slo.timeWindow.type === 'calendarAligned') {
+              return moment(thisComparisonStamp).isAfter(
+                moment(Date.now()).startOf(slo.timeWindow.duration.unit)
+              );
+            } else {
+              return moment(thisComparisonStamp).isAfter(
+                moment(Date.now()).subtract(slo.timeWindow.duration.asSeconds(), 's')
+              );
+            }
           })
         ) {
           throw new IllegalArgumentError(
@@ -57,7 +69,6 @@ export class PurgeRollupData {
       }
     }
 
-    console.log('TIMESTAMP**:', comparisonStamp);
     return this.esClient.deleteByQuery({
       index: SLI_DESTINATION_INDEX_PATTERN,
       refresh: false,
