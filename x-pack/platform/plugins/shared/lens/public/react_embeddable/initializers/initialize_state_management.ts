@@ -14,7 +14,12 @@ import {
 } from '@kbn/presentation-publishing';
 import { noop } from 'lodash';
 import { BehaviorSubject, Observable, map, merge } from 'rxjs';
-import type { IntegrationCallbacks, LensInternalApi, LensRuntimeState, LensSerializedState } from '../types';
+import type {
+  IntegrationCallbacks,
+  LensInternalApi,
+  LensRuntimeState,
+  LensSerializedState,
+} from '../types';
 
 export interface StateManagementConfig {
   api: Pick<IntegrationCallbacks, 'updateAttributes' | 'updateSavedObjectId'> &
@@ -24,7 +29,7 @@ export interface StateManagementConfig {
     PublishesRendered &
     PublishesBlockingError;
   anyStateChange$: Observable<void>;
-  getComparators: () => StateComparators<Pick<LensSerializedState, 'attributes' | 'savedObjectId'>>
+  getComparators: () => StateComparators<Pick<LensSerializedState, 'attributes' | 'savedObjectId'>>;
   reinitializeRuntimeState: (lastSavedRuntimeState: LensRuntimeState) => void;
   getLatestState: () => Pick<LensSerializedState, 'attributes' | 'savedObjectId'>;
   cleanup: () => void;
@@ -38,8 +43,10 @@ export function initializeStateManagement(
   initialState: LensRuntimeState,
   internalApi: LensInternalApi
 ): StateManagementConfig {
-  const savedObjectId$ = new BehaviorSubject<LensRuntimeState['savedObjectId']>(initialState.savedObjectId)
-  
+  const savedObjectId$ = new BehaviorSubject<LensRuntimeState['savedObjectId']>(
+    initialState.savedObjectId
+  );
+
   return {
     api: {
       updateAttributes: internalApi.updateAttributes,
@@ -51,16 +58,12 @@ export function initializeStateManagement(
       blockingError$: internalApi.blockingError$,
       rendered$: internalApi.hasRenderCompleted$,
     },
-    anyStateChange$: merge(
-      internalApi.attributes$,
-    ).pipe(map(() => undefined)),
+    anyStateChange$: merge(internalApi.attributes$).pipe(map(() => undefined)),
     getComparators: () => {
       return {
-        attributes: initialState.savedObjectId === undefined
-          ? 'deepEquality'
-          : 'skip',
+        attributes: initialState.savedObjectId === undefined ? 'deepEquality' : 'skip',
         savedObjectId: 'skip',
-      }
+      };
     },
     getLatestState: () => {
       return {
@@ -70,7 +73,6 @@ export function initializeStateManagement(
     },
     reinitializeRuntimeState: (lastSavedRuntimeState: LensRuntimeState) => {
       internalApi.updateAttributes(lastSavedRuntimeState.attributes);
-
     },
     cleanup: noop,
   };

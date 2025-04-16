@@ -24,6 +24,7 @@ import {
 import { HasDynamicActions } from '@kbn/embeddable-enhanced-plugin/public';
 import { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public/plugin';
 import { partition } from 'lodash';
+import { BehaviorSubject, Observable } from 'rxjs';
 import { Visualization } from '../..';
 import { combineQueryAndFilters, getLayerMetaInfo } from '../../app_plugin/show_underlying_data';
 import { TableInspectorAdapter } from '../../editor_frame_service/types';
@@ -41,7 +42,6 @@ import type {
   ViewUnderlyingDataArgs,
 } from '../types';
 import { getActiveDatasourceIdFromDoc, getActiveVisualizationIdFromDoc } from '../../utils';
-import { BehaviorSubject, Observable } from 'rxjs';
 
 function getViewUnderlyingDataArgs({
   activeDatasource,
