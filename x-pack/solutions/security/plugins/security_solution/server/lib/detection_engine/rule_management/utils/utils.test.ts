@@ -358,7 +358,6 @@ describe('utils', () => {
     test('outputs message about both being not defined when both are undefined', () => {
       const error = getIdBulkError({ id: undefined, ruleId: undefined });
       const expected: BulkError = {
-        rule_id: '(unknown id)',
         error: { message: 'id or rule_id should have been defined', status_code: 404 },
       };
       expect(error).toEqual(expected);
@@ -367,7 +366,6 @@ describe('utils', () => {
     test('outputs message about both being not defined when both are null', () => {
       const error = getIdBulkError({ id: null, ruleId: null });
       const expected: BulkError = {
-        rule_id: '(unknown id)',
         error: { message: 'id or rule_id should have been defined', status_code: 404 },
       };
       expect(error).toEqual(expected);
@@ -376,7 +374,6 @@ describe('utils', () => {
     test('outputs message about both being not defined when id is null and ruleId is undefined', () => {
       const error = getIdBulkError({ id: null, ruleId: undefined });
       const expected: BulkError = {
-        rule_id: '(unknown id)',
         error: { message: 'id or rule_id should have been defined', status_code: 404 },
       };
       expect(error).toEqual(expected);
@@ -385,7 +382,6 @@ describe('utils', () => {
     test('outputs message about both being not defined when id is undefined and ruleId is null', () => {
       const error = getIdBulkError({ id: undefined, ruleId: null });
       const expected: BulkError = {
-        rule_id: '(unknown id)',
         error: { message: 'id or rule_id should have been defined', status_code: 404 },
       };
       expect(error).toEqual(expected);
