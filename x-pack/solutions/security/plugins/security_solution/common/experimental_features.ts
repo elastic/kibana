@@ -270,7 +270,8 @@ const disableExperimentalPrefix = 'disable:' as const;
 
 /**
  * Parses the string value used in `xpack.securitySolution.enableExperimental` kibana configuration,
- * which should be an array of strings.
+ * which should be an array of strings corresponding to allowedExperimentalValues keys.
+ * Use the `disable:` prefix to disable a feature.
  *
  * @param configValue
  * @throws SecuritySolutionInvalidExperimentalValue
