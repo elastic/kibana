@@ -330,7 +330,7 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
                       >
                         <RedirectAppLinks className="kbnRedirectAppLinkImage">
                           <EuiCard
-                            className={`${id}`}
+                            className={`kbnOverviewSolution ${id}`}
                             description={description ? description : ''}
                             href={addBasePath(path)}
                             icon={<KibanaSolutionAvatar name={title} iconType={icon} size="xl" />}

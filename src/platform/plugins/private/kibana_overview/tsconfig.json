@@ -1,9 +1,13 @@
 {
   "extends": "../../../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "target/types"
+    "outDir": "target/types",
   },
-  "include": ["public/**/*", "common/**/*", "../../../../../typings/emotion.d.ts"],
+  "include": [
+    "public/**/*",
+    "common/**/*",
+    "../../../../../typings/emotion.d.ts"
+  ],
   "kbn_references": [
     "@kbn/core",
     "@kbn/navigation-plugin",
@@ -26,7 +30,9 @@
     "@kbn/shared-ux-utility",
     "@kbn/react-kibana-context-render",
     "@kbn/core-application-browser-mocks",
-    "@kbn/core-http-browser-mocks"
+    "@kbn/core-http-browser-mocks",
   ],
-  "exclude": ["target/**/*"]
+  "exclude": [
+    "target/**/*"
+  ]
 }
