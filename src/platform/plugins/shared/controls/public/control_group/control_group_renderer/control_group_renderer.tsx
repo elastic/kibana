@@ -80,9 +80,7 @@ export const ControlGroupRenderer = ({
 }: ControlGroupRendererProps) => {
   const lastState$Ref = useRef(new BehaviorSubject(toSerializedState(defaultRuntimeState)));
   const id = useMemo(() => uuidv4(), []);
-  const [serializedState, setSerializedState] = useState<
-    SerializedPanelState<ControlGroupSerializedState> | undefined
-  >(() => (getCreationOptions ? undefined : lastState$Ref.current.value));
+  const [isStateLoaded, setIsStateLoaded] = useState(false);
   const [controlGroup, setControlGroup] = useState<ControlGroupRendererApi | undefined>();
 
   /**
@@ -130,7 +128,10 @@ export const ControlGroupRenderer = ({
    * On mount
    */
   useEffect(() => {
-    if (!getCreationOptions) return;
+    if (!getCreationOptions) {
+      setIsStateLoaded(true);
+      return;
+    }
 
     let cancelled = false;
 
@@ -141,9 +142,8 @@ export const ControlGroupRenderer = ({
           ...(initialState ?? defaultRuntimeState),
           editorConfig,
         } as ControlGroupRuntimeState;
-        const initialSerializedState = toSerializedState(initialRuntimeState);
-        lastState$Ref.current.next(initialSerializedState);
-        setSerializedState(initialSerializedState);
+        lastState$Ref.current.next(toSerializedState(initialRuntimeState));
+        setIsStateLoaded(true);
       })
       .catch();
 
@@ -154,7 +154,7 @@ export const ControlGroupRenderer = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  return !serializedState ? null : (
+  return !isStateLoaded ? null : (
     <EmbeddableRenderer<ControlGroupSerializedState, ControlGroupApi>
       maybeId={id}
       type={CONTROL_GROUP_TYPE}
@@ -165,7 +165,7 @@ export const ControlGroupRenderer = ({
         query$: searchApi.query$,
         timeRange$: searchApi.timeRange$,
         unifiedSearchFilters$: searchApi.filters$,
-        getSerializedStateForChild: () => serializedState,
+        getSerializedStateForChild: () => lastState$Ref.current.value,
         lastSavedStateForChild$: () => lastState$Ref.current,
         getLastSavedStateForChild: () => lastState$Ref.current.value,
         compressed: compressed ?? true,
