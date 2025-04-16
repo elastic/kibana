@@ -17,7 +17,7 @@ import type { Settings } from '../types';
 import { DeleteUnenrolledAgentsPreconfiguredError } from '../errors';
 
 import { appContextService } from './app_context';
-import { getSettings, saveSettings, settingsSetup } from './settings';
+import { createDefaultSettings, getSettings, saveSettings, settingsSetup } from './settings';
 import { auditLoggingService } from './audit_logging';
 import { fleetServerHostService } from './fleet_server_host';
 
@@ -377,5 +377,56 @@ describe('saveSettings', () => {
     } catch (e) {
       expect(e).toBeInstanceOf(DeleteUnenrolledAgentsPreconfiguredError);
     }
+  });
+});
+describe('createDefaultSettings', () => {
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
+
+  it('should return default settings with prerelease_integrations_enabled set to true if config.prereleaseEnabledByDefault is true', () => {
+    mockedAppContextService.getConfig.mockReturnValue({
+      prereleaseEnabledByDefault: true,
+      enabled: true,
+      agents: {
+        enabled: false,
+        elasticsearch: {
+          hosts: undefined,
+          ca_sha256: undefined,
+          ca_trusted_fingerprint: undefined,
+        },
+      },
+    });
+
+    const result = createDefaultSettings();
+
+    expect(result).toEqual({ prerelease_integrations_enabled: true });
+  });
+
+  it('should return default settings with prerelease_integrations_enabled set to false if config.prereleaseEnabledByDefault is false', () => {
+    mockedAppContextService.getConfig.mockReturnValue({
+      prereleaseEnabledByDefault: false,
+      enabled: true,
+      agents: {
+        enabled: false,
+        elasticsearch: {
+          hosts: undefined,
+          ca_sha256: undefined,
+          ca_trusted_fingerprint: undefined,
+        },
+      },
+    });
+
+    const result = createDefaultSettings();
+
+    expect(result).toEqual({ prerelease_integrations_enabled: false });
+  });
+
+  it('should return default settings with prerelease_integrations_enabled as undefined if config is not defined', () => {
+    mockedAppContextService.getConfig.mockReturnValue(undefined);
+
+    const result = createDefaultSettings();
+
+    expect(result).toEqual({ prerelease_integrations_enabled: undefined });
   });
 });
