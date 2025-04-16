@@ -10,9 +10,15 @@
 import { v4 as uuidv4 } from 'uuid';
 import { groupBy } from 'lodash';
 
+/**
+ * PERFORMANCE_TRACKER_TYPES defines top-level categories to be use as
+ * the mark name. They are used to group marks and measures by type.
+ */
 export const PERFORMANCE_TRACKER_TYPES = {
   LENS: 'Lens',
-};
+} as const;
+export type PerformanceTrackerTypes =
+  (typeof PERFORMANCE_TRACKER_TYPES)[keyof typeof PERFORMANCE_TRACKER_TYPES];
 
 /**
  * PerformanceTrackerMarks are the marks that can be used to track performance
@@ -45,11 +51,29 @@ export const PERFORMANCE_TRACKER_MEASURES = {
 export type PerformanceTrackerMeasures =
   (typeof PERFORMANCE_TRACKER_MEASURES)[keyof typeof PERFORMANCE_TRACKER_MEASURES];
 
+/**
+ * Options to create a performance tracker.
+ */
 interface PerformanceTrackerOptions {
-  type: string;
+  /**
+   * High-level type of the performance tracker, for example "Lens".
+   */
+  type: PerformanceTrackerTypes;
+  /**
+   * Instance of the performance tracker type, for example "xyVis".
+   * This is used to group marks and measures by instance.
+   */
   instance: string;
 }
 
+/**
+ * Creates a performance tracker for a specific type and instance.
+ * This is used to mark specific points in time during
+ * the chart's lifecycle.
+ * @param type - High-level type of the performance tracker, for example "Lens".
+ * @param instance - Instance of the performance tracker type, for example "xyVis".
+ * @returns A performance tracker object with a mark method.
+ */
 export const createPerformanceTracker = ({ type, instance }: PerformanceTrackerOptions) => {
   const id = uuidv4();
   const createMarkName = (name: string) => `${type}:${instance}:${name}`;
@@ -60,14 +84,27 @@ export const createPerformanceTracker = ({ type, instance }: PerformanceTrackerO
   };
 };
 
+/**
+ * Get all performance trackers by type.
+ * @param type - High-level type of the performance tracker, for example "Lens".
+ */
 export const getPerformanceTrackersByType = (type: string) =>
   performance
     .getEntriesByType('mark')
     .filter((marker) => marker.name.startsWith(`${type}:`)) as PerformanceMark[];
 
+/**
+ * Get all performance trackers grouped by id.
+ * @param type - High-level type of the performance tracker, for example "Lens".
+ * @returns A map of performance trackers grouped by id.
+ */
 export const getPerformanceTrackersGroupedById = (type: string) =>
   groupBy(getPerformanceTrackersByType(type), (marker) => marker.detail.id);
 
+/**
+ * Clear all performance trackers by type.
+ * @param type - High-level type of the performance tracker, for example "Lens".
+ */
 export const clearPerformanceTrackersByType = (type: string) => {
   getPerformanceTrackersByType(type).forEach((marker) => performance.clearMarks(marker.name));
 };
