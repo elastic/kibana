@@ -5466,10 +5466,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/expression-error-plugin@link:src/platform/plugins/shared/expression_error":
-  version "0.0.0"
-  uid ""
-
 "@kbn/expression-gauge-plugin@link:src/platform/plugins/shared/chart_expressions/expression_gauge":
   version "0.0.0"
   uid ""
@@ -5478,15 +5474,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/expression-image-plugin@link:src/platform/plugins/shared/expression_image":
-  version "0.0.0"
-  uid ""
-
 "@kbn/expression-legacy-metric-vis-plugin@link:src/platform/plugins/shared/chart_expressions/expression_legacy_metric":
-  version "0.0.0"
-  uid ""
-
-"@kbn/expression-metric-plugin@link:src/platform/plugins/shared/expression_metric":
   version "0.0.0"
   uid ""
 
@@ -5498,23 +5486,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/expression-repeat-image-plugin@link:src/platform/plugins/shared/expression_repeat_image":
-  version "0.0.0"
-  uid ""
-
-"@kbn/expression-reveal-image-plugin@link:src/platform/plugins/shared/expression_reveal_image":
-  version "0.0.0"
-  uid ""
-
-"@kbn/expression-shape-plugin@link:src/platform/plugins/shared/expression_shape":
-  version "0.0.0"
-  uid ""
-
 "@kbn/expression-tagcloud-plugin@link:src/platform/plugins/shared/chart_expressions/expression_tagcloud":
-  version "0.0.0"
-  uid ""
-
-"@kbn/expression-utils@link:src/platform/packages/private/kbn-expression-utils":
   version "0.0.0"
   uid ""
 
