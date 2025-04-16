@@ -27,9 +27,3 @@ export enum ROUTE_VERSIONS {
 }
 
 export const PLAYGROUND_SAVED_OBJECT_TYPE = 'search_playground';
-export const PLAYGROUND_PRIVILEGES = {
-  create: `create_${PLAYGROUND_SAVED_OBJECT_TYPE}`,
-  read: `read_${PLAYGROUND_SAVED_OBJECT_TYPE}`,
-  update: `update_${PLAYGROUND_SAVED_OBJECT_TYPE}`,
-  delete: `delete_${PLAYGROUND_SAVED_OBJECT_TYPE}`,
-};

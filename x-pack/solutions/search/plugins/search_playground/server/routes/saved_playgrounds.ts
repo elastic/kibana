@@ -7,12 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
-import {
-  PLUGIN_ID,
-  ROUTE_VERSIONS,
-  PLAYGROUND_SAVED_OBJECT_TYPE,
-  PLAYGROUND_PRIVILEGES,
-} from '../../common';
+import { PLUGIN_ID, ROUTE_VERSIONS, PLAYGROUND_SAVED_OBJECT_TYPE } from '../../common';
 
 import {
   APIRoutes,
@@ -31,7 +26,7 @@ export const defineSavedPlaygroundRoutes = ({ logger, router }: DefineRoutesOpti
       path: APIRoutes.GET_PLAYGROUNDS,
       security: {
         authz: {
-          requiredPrivileges: [PLUGIN_ID, PLAYGROUND_PRIVILEGES.read],
+          requiredPrivileges: [PLUGIN_ID],
         },
       },
     })
@@ -39,7 +34,7 @@ export const defineSavedPlaygroundRoutes = ({ logger, router }: DefineRoutesOpti
       {
         security: {
           authz: {
-            requiredPrivileges: [PLUGIN_ID, PLAYGROUND_PRIVILEGES.read],
+            requiredPrivileges: [PLUGIN_ID],
           },
         },
         validate: {
@@ -89,7 +84,7 @@ export const defineSavedPlaygroundRoutes = ({ logger, router }: DefineRoutesOpti
       path: APIRoutes.GET_PLAYGROUND,
       security: {
         authz: {
-          requiredPrivileges: [PLUGIN_ID, PLAYGROUND_PRIVILEGES.read],
+          requiredPrivileges: [PLUGIN_ID],
         },
       },
     })
@@ -97,7 +92,7 @@ export const defineSavedPlaygroundRoutes = ({ logger, router }: DefineRoutesOpti
       {
         security: {
           authz: {
-            requiredPrivileges: [PLUGIN_ID, PLAYGROUND_PRIVILEGES.read],
+            requiredPrivileges: [PLUGIN_ID],
           },
         },
         validate: {
@@ -186,7 +181,7 @@ export const defineSavedPlaygroundRoutes = ({ logger, router }: DefineRoutesOpti
       path: APIRoutes.PUT_PLAYGROUND_CREATE,
       security: {
         authz: {
-          requiredPrivileges: [PLUGIN_ID, PLAYGROUND_PRIVILEGES.create],
+          requiredPrivileges: [PLUGIN_ID],
         },
       },
     })
@@ -194,7 +189,7 @@ export const defineSavedPlaygroundRoutes = ({ logger, router }: DefineRoutesOpti
       {
         security: {
           authz: {
-            requiredPrivileges: [PLUGIN_ID, PLAYGROUND_PRIVILEGES.create],
+            requiredPrivileges: [PLUGIN_ID],
           },
         },
         version: ROUTE_VERSIONS.v1,
@@ -240,13 +235,30 @@ export const defineSavedPlaygroundRoutes = ({ logger, router }: DefineRoutesOpti
             });
           }
           responseBody = parsePlaygroundSO(soPlayground);
-        } catch (error) {
+        } catch (e) {
+          if (e.output?.statusCode && typeof e.output.statusCode === 'number') {
+            if (e.output.statusCode >= 500) {
+              // We don't want to log 400s
+              logger.error(
+                i18n.translate('xpack.searchPlayground.savedPlaygrounds.createError', {
+                  defaultMessage: 'Error creating search playground',
+                })
+              );
+              logger.error(e);
+            }
+            return response.customError({
+              statusCode: e.output.statusCode,
+              body: {
+                message: e?.message ?? errorMsg,
+              },
+            });
+          }
           logger.error(
             i18n.translate('xpack.searchPlayground.savedPlaygrounds.createError', {
               defaultMessage: 'Error creating search playground',
             })
           );
-          throw error;
+          throw e;
         }
 
         return response.ok({
@@ -263,7 +275,7 @@ export const defineSavedPlaygroundRoutes = ({ logger, router }: DefineRoutesOpti
       path: APIRoutes.PUT_PLAYGROUND_UPDATE,
       security: {
         authz: {
-          requiredPrivileges: [PLUGIN_ID, PLAYGROUND_PRIVILEGES.update],
+          requiredPrivileges: [PLUGIN_ID],
         },
       },
     })
@@ -271,7 +283,7 @@ export const defineSavedPlaygroundRoutes = ({ logger, router }: DefineRoutesOpti
       {
         security: {
           authz: {
-            requiredPrivileges: [PLUGIN_ID, PLAYGROUND_PRIVILEGES.update],
+            requiredPrivileges: [PLUGIN_ID],
           },
         },
         version: ROUTE_VERSIONS.v1,
@@ -333,9 +345,13 @@ export const defineSavedPlaygroundRoutes = ({ logger, router }: DefineRoutesOpti
             defaultMessage: 'Error updating search playground {id}',
             values: { id: request.params.id },
           });
-          logger.error(errorMsg);
           if (e.output?.statusCode && typeof e.output.statusCode === 'number') {
-            logger.error(e);
+            if (e.output.statusCode >= 500) {
+              // We don't want to log 400s
+              logger.error(errorMsg);
+              logger.error(e);
+            }
+
             return response.customError({
               statusCode: e.output.statusCode,
               body: {
@@ -343,6 +359,7 @@ export const defineSavedPlaygroundRoutes = ({ logger, router }: DefineRoutesOpti
               },
             });
           }
+          logger.error(errorMsg);
           throw e;
         }
 
@@ -357,7 +374,7 @@ export const defineSavedPlaygroundRoutes = ({ logger, router }: DefineRoutesOpti
       path: APIRoutes.DELETE_PLAYGROUND,
       security: {
         authz: {
-          requiredPrivileges: [PLUGIN_ID, PLAYGROUND_PRIVILEGES.delete],
+          requiredPrivileges: [PLUGIN_ID],
         },
       },
     })
@@ -365,7 +382,7 @@ export const defineSavedPlaygroundRoutes = ({ logger, router }: DefineRoutesOpti
       {
         security: {
           authz: {
-            requiredPrivileges: [PLUGIN_ID, PLAYGROUND_PRIVILEGES.delete],
+            requiredPrivileges: [PLUGIN_ID],
           },
         },
         version: ROUTE_VERSIONS.v1,
