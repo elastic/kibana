@@ -206,15 +206,6 @@ export interface DiscoverStateContainer {
       isUpdate?: boolean
     ) => void;
     /**
-     * Triggered when the unified search bar query is updated
-     * @param payload
-     * @param isUpdate
-     */
-    onChangeQuery: (
-      payload: { dateRange: TimeRange; query?: Query | AggregateQuery },
-      isUpdate?: boolean
-    ) => void;
-    /**
      * Triggered when the user selects a different data view in the data view picker
      * @param id - id of the data view
      */
@@ -529,22 +520,11 @@ export function getDiscoverStateContainer({
     isUpdate?: boolean
   ) => {
     if (isUpdate === false) {
-      services.data.query.timefilter.timefilter.setTime(payload.dateRange);
-      if (payload.query) {
-        services.data.query.queryString.setQuery(payload.query);
-      }
       // remove the search session if the given query is not just updated
       searchSessionManager.removeSearchSessionIdFromURL({ replace: false });
       addLog('[getDiscoverStateContainer] onUpdateQuery triggers data fetching');
       dataStateContainer.fetch();
     }
-  };
-
-  /**
-   * Triggered when a user submits a query in the search bar
-   */
-  const onChangeQuery = (payload: { dateRange: TimeRange; query?: Query | AggregateQuery }) => {
-    internalState.dispatch(injectCurrentTab(internalStateActions.setQueryChanged)(payload));
   };
 
   /**
@@ -640,7 +620,6 @@ export function getDiscoverStateContainer({
       transitionFromESQLToDataView,
       transitionFromDataViewToESQL,
       onUpdateQuery,
-      onChangeQuery,
       setDataView,
       undoSavedSearchChanges,
       updateAdHocDataViewId,

@@ -12,6 +12,7 @@ import { DataViewType } from '@kbn/data-views-plugin/public';
 import type { DataViewPickerProps } from '@kbn/unified-search-plugin/public';
 import { DiscoverFlyouts, dismissAllFlyoutsExceptFor } from '@kbn/discover-utils';
 import type { EuiHeaderLinksProps } from '@elastic/eui';
+import type { AggregateQuery, Query } from '@kbn/es-query';
 import { useSavedSearchInitial } from '../../state_management/discover_state_provider';
 import { ESQL_TRANSITION_MODAL_KEY } from '../../../../../common/constants';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
@@ -53,7 +54,7 @@ export const DiscoverTopNav = ({
   const services = useDiscoverServices();
   const { dataViewEditor, navigation, dataViewFieldEditor, data, setHeaderActionMenu } = services;
   const query = useAppStateSelector((state) => state.query);
-  const [actualQuery, setActualQuery] = useState(query);
+  const [actualQuery, setActualQuery] = useState<Query | AggregateQuery | undefined>(query);
   const { savedDataViews, managedDataViews, adHocDataViews } = useDataViewsForPicker();
   const dataView = useCurrentDataView();
   const isESQLToDataViewTransitionModalVisible = useInternalStateSelector(
@@ -113,6 +114,16 @@ export const DiscoverTopNav = ({
   const addField = useMemo(
     () => (canEditDataView && editField ? () => editField() : undefined),
     [editField, canEditDataView]
+  );
+
+  const onQueryChange = useCallback(
+    (payload: {
+      dateRange: { from: string; to: string; mode?: 'absolute' | 'relative' };
+      query?: Query | AggregateQuery;
+    }) => {
+      setActualQuery(payload.query);
+    },
+    [setActualQuery]
   );
 
   const createNewDataView = useCallback(() => {
@@ -225,12 +236,7 @@ export const DiscoverTopNav = ({
         appName="discover"
         indexPatterns={[dataView]}
         onQuerySubmit={stateContainer.actions.onUpdateQuery}
-        onQueryChange={(payload) => {
-          if (payload.query) {
-            setActualQuery(payload.query);
-          }
-          stateContainer.actions.onChangeQuery(payload);
-        }}
+        onQueryChange={onQueryChange}
         onCancel={onCancelClick}
         isLoading={isLoading}
         onSavedQueryIdChange={updateSavedQueryId}
