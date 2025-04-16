@@ -169,6 +169,7 @@ export const RulesSettingsFlyout = memo((props: RulesSettingsFlyoutProps) => {
   const canShowFlappingSettings = readFlappingSettingsUI;
   const canWriteQueryDelaySettings = writeQueryDelaySettingsUI && !hasQueryDelayError;
   const canShowQueryDelaySettings = readQueryDelaySettingsUI;
+  const canShowAlertDeleteSettings = readAlertDeleteSettingsUI;
 
   const handleSettingsChange = (
     setting: keyof RulesSettingsProperties,
@@ -222,7 +223,7 @@ export const RulesSettingsFlyout = memo((props: RulesSettingsFlyoutProps) => {
   }
 
   const maybeRenderForm = () => {
-    if (!canShowFlappingSettings && !canShowQueryDelaySettings) {
+    if (!canShowFlappingSettings && !canShowQueryDelaySettings && !canShowAlertDeleteSettings) {
       return <RulesSettingsErrorPrompt />;
     }
     if (isFlappingLoading || isQueryDelayLoading) {
