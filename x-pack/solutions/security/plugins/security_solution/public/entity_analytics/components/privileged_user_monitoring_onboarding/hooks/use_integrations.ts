@@ -36,7 +36,7 @@ export const useEntityAnalyticsIntegrations = () => {
     }
   );
 
-  const integrations = [okta, ad, entra]
+  const integrations = [okta, entra, ad]
     .filter<GetInfoResponse>(
       (integration): integration is GetInfoResponse => integration !== undefined
     )
