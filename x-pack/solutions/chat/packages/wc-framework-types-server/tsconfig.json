@@ -21,5 +21,6 @@
     "@kbn/logging",
     "@kbn/utility-types",
     "@kbn/zod",
+    "@kbn/core",
   ]
 }
