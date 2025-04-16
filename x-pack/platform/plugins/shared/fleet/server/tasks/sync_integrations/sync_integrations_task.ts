@@ -28,7 +28,7 @@ import { getCustomAssets } from './custom_assets';
 import type { SyncIntegrationsData } from './model';
 
 export const TYPE = 'fleet:sync-integrations-task';
-export const VERSION = '1.0.3';
+export const VERSION = '1.0.4';
 const TITLE = 'Fleet Sync Integrations Task';
 const SCOPE = ['fleet'];
 const INTERVAL = '5m';
@@ -240,12 +240,29 @@ export class SyncIntegrationsTask {
         package_name: item.attributes.name,
         package_version: item.attributes.version,
         updated_at: item.updated_at ?? new Date().toISOString(),
+        install_status: item.attributes.install_status,
       };
     });
+
+    const isSyncUninstalledEnabled = remoteESOutputs.some(
+      (output) => (output as NewRemoteElasticsearchOutput).sync_uninstalled_integrations
+    );
+    if (isSyncUninstalledEnabled && previousSyncIntegrationsData) {
+      const removedIntegrations = previousSyncIntegrationsData.integrations.filter(
+        (item) =>
+          !packageSavedObjects.saved_objects
+            .map((data) => data.attributes.name)
+            .includes(item.package_name)
+      );
+      newDoc.integrations.push(
+        ...removedIntegrations.map((item) => ({ ...item, install_status: 'not_installed' }))
+      );
+    }
 
     try {
       const customAssets = await getCustomAssets(
         esClient,
+        soClient,
         newDoc.integrations,
         this.abortController,
         previousSyncIntegrationsData

@@ -340,7 +340,7 @@ describe('Session index', () => {
       expect(mockElasticsearchClient.indices.putMapping).toHaveBeenCalledTimes(1);
       expect(mockElasticsearchClient.indices.putMapping).toHaveBeenCalledWith({
         index: aliasName,
-        body: getSessionIndexSettings({ indexName, aliasName }).mappings,
+        ...getSessionIndexSettings({ indexName, aliasName }).mappings,
       });
     });
 
@@ -367,7 +367,7 @@ describe('Session index', () => {
       expect(mockElasticsearchClient.indices.putMapping).toHaveBeenCalledTimes(1);
       expect(mockElasticsearchClient.indices.putMapping).toHaveBeenCalledWith({
         index: aliasName,
-        body: getSessionIndexSettings({ indexName, aliasName }).mappings,
+        ...getSessionIndexSettings({ indexName, aliasName }).mappings,
       });
     });
 
@@ -1580,7 +1580,7 @@ describe('Session index', () => {
           index: aliasName,
           document: sessionValue,
           refresh: false,
-          require_alias: true,
+          querystring: { require_alias: true },
         },
         { ignore: [404], meta: true }
       );
@@ -1591,7 +1591,7 @@ describe('Session index', () => {
           index: aliasName,
           document: sessionValue,
           refresh: false,
-          require_alias: true,
+          querystring: { require_alias: true },
         },
         { ignore: [], meta: true }
       );
@@ -1635,7 +1635,7 @@ describe('Session index', () => {
           index: aliasName,
           document: sessionValue,
           refresh: false,
-          require_alias: true,
+          querystring: { require_alias: true },
         },
         { meta: true, ignore: [404] }
       );

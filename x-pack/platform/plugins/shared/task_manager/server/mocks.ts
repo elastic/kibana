@@ -15,6 +15,7 @@ const createSetupMock = () => {
     index: '.kibana_task_manager',
     addMiddleware: jest.fn(),
     registerTaskDefinitions: jest.fn(),
+    registerCanEncryptedSavedObjects: jest.fn(),
   };
   return mock;
 };
@@ -36,6 +37,7 @@ const createStartMock = () => {
     bulkEnable: jest.fn(),
     getRegisteredTypes: jest.fn(),
     bulkUpdateState: jest.fn(),
+    registerEncryptedSavedObjectsClient: jest.fn(),
   };
   return mock;
 };

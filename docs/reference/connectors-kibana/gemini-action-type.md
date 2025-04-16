@@ -14,10 +14,8 @@ The {{gemini}} connector uses [axios](https://github.com/axios/axios) to send a 
 
 You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**.  For example:
 
-:::{image} ../images/gemini-connector.png
-:alt: {{gemini}} connector
-:class: screenshot
-:::
+% TO DO: Use `:class: screenshot`
+![{{gemini}} connector](../images/gemini-connector.png)
 
 
 ### Connector configuration [gemini-connector-configuration]
@@ -47,10 +45,8 @@ Credentials JSON
 
 You can test connectors as you’re creating or editing the connector in {{kib}}. For example:
 
-:::{image} ../images/gemini-params.png
-:alt: {{gemini}} params test
-:class: screenshot
-:::
+% TO DO: Use `:class: screenshot`
+![{{gemini}} params test](../images/gemini-params.png)
 
 The {{gemini}} actions have the following configuration properties.
 

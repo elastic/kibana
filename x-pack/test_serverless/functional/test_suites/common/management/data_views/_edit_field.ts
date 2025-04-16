@@ -13,6 +13,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
 
   describe('edit field', function () {
+    // see details: https://github.com/elastic/kibana/issues/200869#issuecomment-2511234473
+    this.tags(['failsOnMKI']);
     before(async function () {
       await kibanaServer.importExport.load(
         'src/platform/test/functional/fixtures/kbn_archiver/discover'
