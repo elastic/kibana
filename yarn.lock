@@ -5534,10 +5534,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/expression-error-plugin@link:src/platform/plugins/shared/expression_error":
-  version "0.0.0"
-  uid ""
-
 "@kbn/expression-gauge-plugin@link:src/platform/plugins/shared/chart_expressions/expression_gauge":
   version "0.0.0"
   uid ""
@@ -5546,15 +5542,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/expression-image-plugin@link:src/platform/plugins/shared/expression_image":
-  version "0.0.0"
-  uid ""
-
 "@kbn/expression-legacy-metric-vis-plugin@link:src/platform/plugins/shared/chart_expressions/expression_legacy_metric":
-  version "0.0.0"
-  uid ""
-
-"@kbn/expression-metric-plugin@link:src/platform/plugins/shared/expression_metric":
   version "0.0.0"
   uid ""
 
@@ -5566,23 +5554,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/expression-repeat-image-plugin@link:src/platform/plugins/shared/expression_repeat_image":
-  version "0.0.0"
-  uid ""
-
-"@kbn/expression-reveal-image-plugin@link:src/platform/plugins/shared/expression_reveal_image":
-  version "0.0.0"
-  uid ""
-
-"@kbn/expression-shape-plugin@link:src/platform/plugins/shared/expression_shape":
-  version "0.0.0"
-  uid ""
-
 "@kbn/expression-tagcloud-plugin@link:src/platform/plugins/shared/chart_expressions/expression_tagcloud":
-  version "0.0.0"
-  uid ""
-
-"@kbn/expression-utils@link:src/platform/packages/private/kbn-expression-utils":
   version "0.0.0"
   uid ""
 
@@ -32551,9 +32523,9 @@ zip-stream@^6.0.1:
     readable-stream "^4.0.0"
 
 zod-to-json-schema@^3.22.3, zod-to-json-schema@^3.22.4, zod-to-json-schema@^3.22.5, zod-to-json-schema@^3.23.0, zod-to-json-schema@^3.23.5, zod-to-json-schema@^3.24.1:
-  version "3.24.3"
-  resolved "https://registry.yarnpkg.com/zod-to-json-schema/-/zod-to-json-schema-3.24.3.tgz#5958ba111d681f8d01c5b6b647425c9b8a6059e7"
-  integrity sha512-HIAfWdYIt1sssHfYZFCXp4rU1w2r8hVVXYIlmoa0r0gABLs5di3RCqPU5DDROogVz1pAdYBaz7HK5n9pSUNs3A==
+  version "3.24.5"
+  resolved "https://registry.yarnpkg.com/zod-to-json-schema/-/zod-to-json-schema-3.24.5.tgz#d1095440b147fb7c2093812a53c54df8d5df50a3"
+  integrity sha512-/AuWwMP+YqiPbsJx5D6TfgRTc4kTLjsh5SOcd4bLsfUg2RcEXrFMJl1DGgdHy2aCfsIA/cr/1JM0xcB2GZji8g==
 
 zod@^3.22.3, zod@^3.22.4, zod@^3.23.8:
   version "3.23.8"
