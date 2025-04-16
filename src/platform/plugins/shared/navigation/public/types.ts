@@ -14,7 +14,6 @@ import type { SolutionNavigationDefinition } from '@kbn/core-chrome-browser';
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import type { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/public';
 
-import { PanelContentProvider } from '@kbn/shared-ux-chrome-navigation';
 import { TopNavMenuProps, TopNavMenuExtensionsRegistrySetup, createTopNav } from './top_nav_menu';
 import type { RegisteredTopNavMenuData } from './top_nav_menu/top_nav_menu_data';
 
@@ -26,8 +25,6 @@ export type SolutionNavigation = Omit<SolutionNavigationDefinition, 'sideNavComp
 export type AddSolutionNavigationArg = Omit<SolutionNavigation, 'sideNavComponent'> & {
   /** Data test subj for the side navigation */
   dataTestSubj?: string;
-  /** Panel content provider for the side navigation */
-  panelContentProvider?: PanelContentProvider;
 };
 
 export interface NavigationPublicStart {
