@@ -41,6 +41,7 @@ export type ChartRequest = RequestState<{}>;
 export interface InternalStateDataRequestParams {
   timeRangeAbsolute?: TimeRange;
   timeRangeRelative?: TimeRange;
+  searchSessionId?: string;
 }
 
 export interface TabState extends TabItem {
