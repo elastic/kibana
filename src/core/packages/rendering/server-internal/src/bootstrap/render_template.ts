@@ -20,10 +20,10 @@ export const renderTemplate = ({
   jsDependencyPaths,
   publicPathMap,
 }: BootstrapTemplateData) => {
-
-  const kbnThemeTagTemplate = colorMode === 'system'
-  ? `window.__kbnThemeTag__ = window.matchMedia('(prefers-color-scheme: dark)').matches ? '${themeTagName}dark' : '${themeTagName}light';`
-  : `window.__kbnThemeTag__ = '${themeTagName}${colorMode}';`;
+  const kbnThemeTagTemplate =
+    colorMode === 'system'
+      ? `window.__kbnThemeTag__ = window.matchMedia('(prefers-color-scheme: dark)').matches ? '${themeTagName}dark' : '${themeTagName}light';`
+      : `window.__kbnThemeTag__ = '${themeTagName}${colorMode}';`;
 
   return `
 function kbnBundlesLoader() {
