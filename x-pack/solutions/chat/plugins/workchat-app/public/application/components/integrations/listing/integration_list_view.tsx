@@ -21,10 +21,7 @@ import {
   EuiHealth,
   EuiHorizontalRule,
   EuiIcon,
-  EuiPanel,
-  EuiScreenReaderOnly,
   EuiSpacer,
-  EuiTableSelectionType,
   EuiTableSortingType,
   EuiText,
   IconType,
@@ -55,20 +52,20 @@ export const IntegrationListView: React.FC<IntegrationListViewProps> = ({ integr
   const { navigateToWorkchatUrl } = useNavigation();
   const columns: Array<EuiBasicTableColumn<Integration>> = [
     {
+      field: 'icon',
+      name: '',
+      width: '30px',
+      render: (_, item: Integration) => (
+        <EuiFlexItem grow={false}>
+          <EuiIcon type={getIntegrationIcon(item.type) as IconType} size="m" />
+        </EuiFlexItem>
+      ),
+    },
+    {
       field: 'name',
       name: 'Name',
       sortable: true,
-      render: (_, item: Integration) => (
-        <EuiFlexGroup alignItems="center" gutterSize="xs">
-          <EuiFlexItem grow={false}>
-            <EuiIcon
-              type={getIntegrationIcon(item.type) as IconType}
-              size='m'
-            />
-          </EuiFlexItem>
-          <EuiFlexItem>{item.name}</EuiFlexItem>
-        </EuiFlexGroup>
-      ),
+      render: (_, item: Integration) => <EuiFlexItem>{item.name}</EuiFlexItem>,
     },
     {
       field: 'type',
@@ -98,7 +95,7 @@ export const IntegrationListView: React.FC<IntegrationListViewProps> = ({ integr
           name: 'Edit',
           description: 'Edit this integration',
           isPrimary: true,
-          icon: 'documentEdit',
+          icon: 'boxesHorizontal',
           type: 'icon',
           onClick: ({ id }) => {
             navigateToWorkchatUrl(appPaths.integrations.edit({ integrationId: id }));
@@ -138,7 +135,7 @@ export const IntegrationListView: React.FC<IntegrationListViewProps> = ({ integr
       const { index: pageIndex, size: pageSize } = page;
       setPageIndex(pageIndex);
       setPageSize(pageSize);
-    } 
+    }
     if (sort) {
       const { field: sortField, direction: sortDirection } = sort;
       setSortField(sortField);
@@ -146,7 +143,13 @@ export const IntegrationListView: React.FC<IntegrationListViewProps> = ({ integr
     }
   };
 
-  const findIntegrations = (integrations: Integration[], pageIndex: number, pageSize: number, sortField: keyof Integration, sortDirection: 'asc' | 'desc') => {
+  const findIntegrations = (
+    integrations: Integration[],
+    pageIndex: number,
+    pageSize: number,
+    sortField: keyof Integration,
+    sortDirection: 'asc' | 'desc'
+  ) => {
     let pageOfItems;
 
     if (!pageIndex && !pageSize) {
@@ -162,9 +165,7 @@ export const IntegrationListView: React.FC<IntegrationListViewProps> = ({ integr
     if (sortField) {
       pageOfItems = integrations
         .slice(0)
-        .sort(
-          Comparators.property(sortField, Comparators.default(sortDirection))
-        );
+        .sort(Comparators.property(sortField, Comparators.default(sortDirection)));
     } else {
       pageOfItems = integrations;
     }
@@ -175,7 +176,13 @@ export const IntegrationListView: React.FC<IntegrationListViewProps> = ({ integr
     };
   };
 
-  const { pageOfItems, totalItemCount } = findIntegrations(integrations, pageIndex, pageSize, sortField, sortDirection);
+  const { pageOfItems, totalItemCount } = findIntegrations(
+    integrations,
+    pageIndex,
+    pageSize,
+    sortField,
+    sortDirection
+  );
 
   const resultsCount =
     pageSize === 0 ? (
@@ -188,56 +195,61 @@ export const IntegrationListView: React.FC<IntegrationListViewProps> = ({ integr
         of {totalItemCount}
       </>
     );
-  
-    const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<
-      Record<string, ReactNode>
-    >({});
+
+  const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<Record<string, ReactNode>>(
+    {}
+  );
+  const [toggledItem, setToggledItem] = useState<string>('');
 
   const toggleDetails = (item: Integration) => {
-    const itemIdToExpandedRowMapValues = { ...itemIdToExpandedRowMap };
-
-    if (itemIdToExpandedRowMapValues[item.id]) {
-      delete itemIdToExpandedRowMapValues[item.id];
+    if (itemIdToExpandedRowMap[item.id]) {
+      setItemIdToExpandedRowMap({});
+      setToggledItem('');
     } else {
-      
-      itemIdToExpandedRowMapValues[item.id] = (
-        //TODO: set component for expand rows
-        <EuiDescriptionList />
-      );
+      setToggledItem(item.id);
+      setItemIdToExpandedRowMap({
+        [item.id]: (
+          <EuiDescriptionList
+            listItems={[
+              {
+                title: 'ID',
+                description: item.id,
+              },
+              {
+                title: 'Name',
+                description: item.name,
+              },
+            ]}
+          />
+        ),
+      });
     }
-    setItemIdToExpandedRowMap(itemIdToExpandedRowMapValues);
   };
 
   const selectionColumn: EuiBasicTableColumn<Integration> = {
     field: 'selection',
     width: '40px',
-    color:'black',
+    color: 'black',
     name: (
       <EuiCheckbox
         id="selectAllCheckbox"
-        color='text'
-        checked={pageOfItems.length > 0 && pageOfItems.every(item => 
-          selectedItems.some(selected => selected.id === item.id)
+        color="text"
+        checked={pageOfItems.every((item) =>
+          selectedItems.some((selected) => selected.id === item.id)
         )}
-        indeterminate={
-          pageOfItems.some(item => 
-            selectedItems.some(selected => selected.id === item.id)
-          ) && 
-          !pageOfItems.every(item => 
-            selectedItems.some(selected => selected.id === item.id)
-          )
-        }
         onChange={() => {
-          if (pageOfItems.every(item => 
-            selectedItems.some(selected => selected.id === item.id)
-          )) {
-            setSelectedItems(selectedItems.filter(selected => 
-              !pageOfItems.some(pageItem => pageItem.id === selected.id)
-            ));
+          if (
+            pageOfItems.every((item) => selectedItems.some((selected) => selected.id === item.id))
+          ) {
+            setSelectedItems(
+              selectedItems.filter(
+                (selected) => !pageOfItems.some((pageItem) => pageItem.id === selected.id)
+              )
+            );
           } else {
             const newSelectedItems = [...selectedItems];
-            pageOfItems.forEach(item => {
-              if (!selectedItems.some(selected => selected.id === item.id)) {
+            pageOfItems.forEach((item) => {
+              if (!selectedItems.some((selected) => selected.id === item.id)) {
                 newSelectedItems.push(item);
               }
             });
@@ -250,11 +262,11 @@ export const IntegrationListView: React.FC<IntegrationListViewProps> = ({ integr
     render: (_, item: Integration) => (
       <EuiCheckbox
         id={`select-${item.id}`}
-        color='text'
-        checked={selectedItems.some(selected => selected.id === item.id)}
+        color="text"
+        checked={selectedItems.some((selected) => selected.id === item.id)}
         onChange={() => {
-          if (selectedItems.some(selected => selected.id === item.id)) {
-            setSelectedItems(selectedItems.filter(selected => selected.id !== item.id));
+          if (selectedItems.some((selected) => selected.id === item.id)) {
+            setSelectedItems(selectedItems.filter((selected) => selected.id !== item.id));
           } else {
             setSelectedItems([...selectedItems, item]);
           }
@@ -269,23 +281,17 @@ export const IntegrationListView: React.FC<IntegrationListViewProps> = ({ integr
       align: 'left',
       width: '40px',
       isExpander: true,
-      name: (
-        <EuiIcon size='m' type='fold'/>
-      ),
+      name: <EuiIcon size="m" type="fold" />,
       mobileOptions: { header: false },
       render: (item: Integration) => {
         const itemIdToExpandedRowMapValues = { ...itemIdToExpandedRowMap };
 
         return (
           <EuiButtonIcon
-            color='text'
+            color="text"
             onClick={() => toggleDetails(item)}
-            aria-label={
-              itemIdToExpandedRowMapValues[item.id] ? 'Collapse' : 'Expand'
-            }
-            iconType={
-              itemIdToExpandedRowMapValues[item.id] ? 'arrowDown' : 'arrowRight'
-            }
+            aria-label={itemIdToExpandedRowMapValues[item.id] ? 'Collapse' : 'Expand'}
+            iconType={itemIdToExpandedRowMapValues[item.id] ? 'arrowDown' : 'arrowRight'}
           />
         );
       },
@@ -322,7 +328,6 @@ export const IntegrationListView: React.FC<IntegrationListViewProps> = ({ integr
             columns={columnsWithExpandingRowToggle}
             items={pageOfItems}
             itemId="id"
-            itemIdToExpandedRowMap={itemIdToExpandedRowMap}
             pagination={{
               pageIndex,
               pageSize,
@@ -333,9 +338,15 @@ export const IntegrationListView: React.FC<IntegrationListViewProps> = ({ integr
             sorting={sorting}
             onChange={onTableChange}
           />
+          {toggledItem && (
+            <KibanaPageTemplate.Section>
+              <EuiSpacer size="m" />
+
+              {itemIdToExpandedRowMap[toggledItem]}
+            </KibanaPageTemplate.Section>
+          )}
         </KibanaPageTemplate.Section>
       )}
-      
     </KibanaPageTemplate>
   );
 };
