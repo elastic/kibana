@@ -1387,6 +1387,7 @@ export async function installAssetsForInputPackagePolicy(opts: {
     await installIndexTemplatesAndPipelines({
       installedPkg: installedPkgWithAssets.installation,
       packageInstallContext,
+      packagePolicy,
       esReferences: installedPkgWithAssets.installation.installed_es || [],
       savedObjectsClient: soClient,
       esClient,

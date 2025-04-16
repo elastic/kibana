@@ -26,6 +26,7 @@ import { optimisticallyAddEsAssetReferences, updateEsAssetReferences } from './e
 export async function installIndexTemplatesAndPipelines({
   installedPkg,
   packageInstallContext,
+  packagePolicy,
   esReferences,
   savedObjectsClient,
   esClient,
@@ -34,6 +35,7 @@ export async function installIndexTemplatesAndPipelines({
 }: {
   installedPkg?: Installation;
   packageInstallContext: PackageInstallContext;
+  packagePolicy: NewPackagePolicy;
   esReferences: EsAssetReference[];
   savedObjectsClient: SavedObjectsClientContract;
   esClient: ElasticsearchClient;
@@ -57,6 +59,7 @@ export async function installIndexTemplatesAndPipelines({
   );
   const preparedIndexTemplates = await prepareToInstallTemplates(
     packageInstallContext,
+    packagePolicy,
     esReferences,
     experimentalDataStreamFeatures,
     onlyForDataStreams
