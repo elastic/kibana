@@ -8,7 +8,7 @@
  */
 
 import React, { useCallback } from 'react';
-import { EuiTabbedContent, EuiTabbedContentTab } from '@elastic/eui';
+import { EuiTabbedContent, EuiTabbedContentTab, keys } from '@elastic/eui';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { DocViewerTab } from './doc_viewer_tab';
 import type { DocView, DocViewRenderProps } from '../../types';
@@ -68,7 +68,12 @@ export function DocViewer({ docViews, ...renderProps }: DocViewerProps) {
         tabs={tabs}
         initialSelectedTab={initialSelectedTab}
         onTabClick={onTabClick}
-        onKeyDown={(evt) => evt.stopPropagation()}
+        onKeyDown={(evt) => {
+          if (evt.key === keys.ARROW_LEFT || evt.key === keys.ARROW_RIGHT) {
+            evt.preventDefault();
+            evt.stopPropagation();
+          }
+        }}
       />
     </div>
   );
