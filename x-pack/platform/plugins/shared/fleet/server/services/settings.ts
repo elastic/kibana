@@ -166,5 +166,6 @@ function getConfigFleetServerHosts() {
 }
 
 export function createDefaultSettings(): BaseSettings {
-  return { prerelease_integrations_enabled: false };
+  const config = appContextService.getConfig();
+  return { prerelease_integrations_enabled: config?.prereleaseEnabledByDefault };
 }
