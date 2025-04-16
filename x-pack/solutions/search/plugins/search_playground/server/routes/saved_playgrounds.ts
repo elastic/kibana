@@ -12,6 +12,7 @@ import { PLUGIN_ID, ROUTE_VERSIONS, PLAYGROUND_SAVED_OBJECT_TYPE } from '../../c
 import {
   APIRoutes,
   DefineRoutesOptions,
+  PlaygroundListResponse,
   PlaygroundResponse,
   PlaygroundSavedObject,
 } from '../types';
@@ -54,28 +55,19 @@ export const defineSavedPlaygroundRoutes = ({ logger, router }: DefineRoutesOpti
         version: ROUTE_VERSIONS.v1,
       },
       errorHandler(logger)(async (context, request, response) => {
-        try {
-          const soClient = (await context.core).savedObjects.client;
-          const soPlaygrounds = await soClient.find<PlaygroundSavedObject>({
-            type: PLAYGROUND_SAVED_OBJECT_TYPE,
-            perPage: request.query.size,
-            page: request.query.page,
-            sortField: request.query.sortField,
-            sortOrder: request.query.sortOrder,
-          });
-          const body = parsePlaygroundSOList(soPlaygrounds);
-          return response.ok({
-            body,
-            headers: { 'content-type': 'application/json' },
-          });
-        } catch (error) {
-          logger.error(
-            i18n.translate('xpack.searchPlayground.savedPlaygrounds.listError', {
-              defaultMessage: 'Error listing saved playgrounds',
-            })
-          );
-          throw error;
-        }
+        const soClient = (await context.core).savedObjects.client;
+        const soPlaygrounds = await soClient.find<PlaygroundSavedObject>({
+          type: PLAYGROUND_SAVED_OBJECT_TYPE,
+          perPage: request.query.size,
+          page: request.query.page,
+          sortField: request.query.sortField,
+          sortOrder: request.query.sortOrder,
+        });
+        const body: PlaygroundListResponse = parsePlaygroundSOList(soPlaygrounds);
+        return response.ok({
+          body,
+          headers: { 'content-type': 'application/json' },
+        });
       })
     );
   router.versioned
@@ -105,48 +97,13 @@ export const defineSavedPlaygroundRoutes = ({ logger, router }: DefineRoutesOpti
         version: ROUTE_VERSIONS.v1,
       },
       errorHandler(logger)(async (context, request, response) => {
-        let responseBody: PlaygroundResponse;
-        try {
-          const soClient = (await context.core).savedObjects.client;
-          const soPlayground = await soClient.get<PlaygroundSavedObject>(
-            PLAYGROUND_SAVED_OBJECT_TYPE,
-            request.params.id
-          );
-          if (soPlayground.error) {
-            if (soPlayground.error.statusCode === 404) {
-              return response.notFound({
-                body: {
-                  message: i18n.translate('xpack.searchPlayground.savedPlaygrounds.notFoundError', {
-                    defaultMessage: '{id} playground not found',
-                    values: { id: request.params.id },
-                  }),
-                },
-              });
-            }
-            logger.error(
-              i18n.translate('xpack.searchPlayground.savedPlaygrounds.getSOError', {
-                defaultMessage: 'SavedObject error getting search playground {id}',
-                values: { id: request.params.id },
-              })
-            );
-            return response.customError({
-              statusCode: soPlayground.error.statusCode,
-              body: {
-                message: soPlayground.error.message,
-                attributes: {
-                  error: soPlayground.error.error,
-                  ...(soPlayground.error.metadata ?? {}),
-                },
-              },
-            });
-          }
-          responseBody = parsePlaygroundSO(soPlayground);
-          return response.ok({
-            body: responseBody,
-            headers: { 'content-type': 'application/json' },
-          });
-        } catch (e) {
-          if (e?.output?.statusCode === 404) {
+        const soClient = (await context.core).savedObjects.client;
+        const soPlayground = await soClient.get<PlaygroundSavedObject>(
+          PLAYGROUND_SAVED_OBJECT_TYPE,
+          request.params.id
+        );
+        if (soPlayground.error) {
+          if (soPlayground.error.statusCode === 404) {
             return response.notFound({
               body: {
                 message: i18n.translate('xpack.searchPlayground.savedPlaygrounds.notFoundError', {
@@ -156,22 +113,28 @@ export const defineSavedPlaygroundRoutes = ({ logger, router }: DefineRoutesOpti
               },
             });
           }
-          const errorMsg = i18n.translate('xpack.searchPlayground.savedPlaygrounds.getError', {
-            defaultMessage: 'Error getting search playground {id}',
-            values: { id: request.params.id },
-          });
-          logger.error(errorMsg);
-          if (e.output?.statusCode && typeof e.output.statusCode === 'number') {
-            logger.error(e);
-            return response.customError({
-              statusCode: e.output.statusCode,
-              body: {
-                message: e?.message ?? errorMsg,
+          logger.error(
+            i18n.translate('xpack.searchPlayground.savedPlaygrounds.getSOError', {
+              defaultMessage: 'SavedObject error getting search playground {id}',
+              values: { id: request.params.id },
+            })
+          );
+          return response.customError({
+            statusCode: soPlayground.error.statusCode,
+            body: {
+              message: soPlayground.error.message,
+              attributes: {
+                error: soPlayground.error.error,
+                ...(soPlayground.error.metadata ?? {}),
               },
-            });
-          }
-          throw e;
+            },
+          });
         }
+        const responseBody: PlaygroundResponse = parsePlaygroundSO(soPlayground);
+        return response.ok({
+          body: responseBody,
+          headers: { 'content-type': 'application/json' },
+        });
       })
     );
   // Create
@@ -215,51 +178,24 @@ export const defineSavedPlaygroundRoutes = ({ logger, router }: DefineRoutesOpti
             },
           });
         }
-        let responseBody: PlaygroundResponse;
-        try {
-          const soClient = (await context.core).savedObjects.client;
-          const soPlayground = await soClient.create<PlaygroundSavedObject>(
-            PLAYGROUND_SAVED_OBJECT_TYPE,
-            playground
-          );
-          if (soPlayground.error) {
-            return response.customError({
-              statusCode: soPlayground.error.statusCode,
-              body: {
-                message: soPlayground.error.message,
-                attributes: {
-                  error: soPlayground.error.error,
-                  ...(soPlayground.error.metadata ?? {}),
-                },
+        const soClient = (await context.core).savedObjects.client;
+        const soPlayground = await soClient.create<PlaygroundSavedObject>(
+          PLAYGROUND_SAVED_OBJECT_TYPE,
+          playground
+        );
+        if (soPlayground.error) {
+          return response.customError({
+            statusCode: soPlayground.error.statusCode,
+            body: {
+              message: soPlayground.error.message,
+              attributes: {
+                error: soPlayground.error.error,
+                ...(soPlayground.error.metadata ?? {}),
               },
-            });
-          }
-          responseBody = parsePlaygroundSO(soPlayground);
-        } catch (e) {
-          if (e.output?.statusCode && typeof e.output.statusCode === 'number') {
-            if (e.output.statusCode >= 500) {
-              // We don't want to log 400s
-              logger.error(
-                i18n.translate('xpack.searchPlayground.savedPlaygrounds.createError', {
-                  defaultMessage: 'Error creating search playground',
-                })
-              );
-              logger.error(e);
-            }
-            return response.customError({
-              statusCode: e.output.statusCode,
-              body: {
-                message: e?.message ?? errorMsg,
-              },
-            });
-          }
-          logger.error(
-            i18n.translate('xpack.searchPlayground.savedPlaygrounds.createError', {
-              defaultMessage: 'Error creating search playground',
-            })
-          );
-          throw e;
+            },
+          });
         }
+        const responseBody: PlaygroundResponse = parsePlaygroundSO(soPlayground);
 
         return response.ok({
           body: responseBody,
@@ -311,58 +247,24 @@ export const defineSavedPlaygroundRoutes = ({ logger, router }: DefineRoutesOpti
             },
           });
         }
-        try {
-          const soClient = (await context.core).savedObjects.client;
-          const soPlayground = await soClient.update<PlaygroundSavedObject>(
-            PLAYGROUND_SAVED_OBJECT_TYPE,
-            request.params.id,
-            playground
-          );
-          if (soPlayground.error) {
-            return response.customError({
-              statusCode: soPlayground.error.statusCode,
-              body: {
-                message: soPlayground.error.message,
-                attributes: {
-                  error: soPlayground.error.error,
-                  ...(soPlayground.error.metadata ?? {}),
-                },
+        const soClient = (await context.core).savedObjects.client;
+        const soPlayground = await soClient.update<PlaygroundSavedObject>(
+          PLAYGROUND_SAVED_OBJECT_TYPE,
+          request.params.id,
+          playground
+        );
+        if (soPlayground.error) {
+          return response.customError({
+            statusCode: soPlayground.error.statusCode,
+            body: {
+              message: soPlayground.error.message,
+              attributes: {
+                error: soPlayground.error.error,
+                ...(soPlayground.error.metadata ?? {}),
               },
-            });
-          }
-        } catch (e) {
-          if (e?.output?.statusCode === 404) {
-            return response.notFound({
-              body: {
-                message: i18n.translate('xpack.searchPlayground.savedPlaygrounds.notFoundError', {
-                  defaultMessage: '{id} playground not found',
-                  values: { id: request.params.id },
-                }),
-              },
-            });
-          }
-          const errorMsg = i18n.translate('xpack.searchPlayground.savedPlaygrounds.updateError', {
-            defaultMessage: 'Error updating search playground {id}',
-            values: { id: request.params.id },
+            },
           });
-          if (e.output?.statusCode && typeof e.output.statusCode === 'number') {
-            if (e.output.statusCode >= 500) {
-              // We don't want to log 400s
-              logger.error(errorMsg);
-              logger.error(e);
-            }
-
-            return response.customError({
-              statusCode: e.output.statusCode,
-              body: {
-                message: e?.message ?? errorMsg,
-              },
-            });
-          }
-          logger.error(errorMsg);
-          throw e;
         }
-
         return response.ok();
       })
     );
@@ -395,41 +297,8 @@ export const defineSavedPlaygroundRoutes = ({ logger, router }: DefineRoutesOpti
         },
       },
       errorHandler(logger)(async (context, request, response) => {
-        try {
-          const soClient = (await context.core).savedObjects.client;
-          await soClient.delete(PLAYGROUND_SAVED_OBJECT_TYPE, request.params.id);
-        } catch (e) {
-          if (e?.output?.statusCode === 404) {
-            return response.notFound({
-              body: {
-                message: i18n.translate('xpack.searchPlayground.savedPlaygrounds.notFoundError', {
-                  defaultMessage: '{id} playground not found',
-                  values: { id: request.params.id },
-                }),
-              },
-            });
-          }
-          const errorMsg = i18n.translate('xpack.searchPlayground.savedPlaygrounds.deleteError', {
-            defaultMessage: 'Error deleting search playground {id}',
-            values: { id: request.params.id },
-          });
-          logger.error(errorMsg);
-          logger.error(e);
-          if (e.output?.statusCode && typeof e.output.statusCode === 'number') {
-            return response.customError({
-              statusCode: e.output.statusCode,
-              body: {
-                message: e?.message ?? errorMsg,
-              },
-            });
-          }
-          return response.customError({
-            statusCode: 500,
-            body: {
-              message: e?.message ?? errorMsg,
-            },
-          });
-        }
+        const soClient = (await context.core).savedObjects.client;
+        await soClient.delete(PLAYGROUND_SAVED_OBJECT_TYPE, request.params.id);
         return response.ok();
       })
     );
