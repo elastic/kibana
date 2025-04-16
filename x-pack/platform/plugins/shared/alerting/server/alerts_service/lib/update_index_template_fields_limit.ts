@@ -18,18 +18,20 @@ export const updateIndexTemplateFieldsLimit = ({
 }) => {
   return esClient.indices.putIndexTemplate({
     name: template.name,
-    ...template.index_template,
-    template: {
-      ...template.index_template.template,
-      settings: {
-        ...template.index_template.template?.settings,
-        'index.mapping.total_fields.limit': limit,
-        'index.mapping.total_fields.ignore_dynamic_beyond_limit': true,
+    body: {
+      ...template.index_template,
+      template: {
+        ...template.index_template.template,
+        settings: {
+          ...template.index_template.template?.settings,
+          'index.mapping.total_fields.limit': limit,
+          'index.mapping.total_fields.ignore_dynamic_beyond_limit': true,
+        },
       },
+      // GET brings string | string[] | undefined but this PUT expects string[]
+      ignore_missing_component_templates: template.index_template.ignore_missing_component_templates
+        ? [template.index_template.ignore_missing_component_templates].flat()
+        : undefined,
     },
-    // GET brings string | string[] | undefined but this PUT expects string[]
-    ignore_missing_component_templates: template.index_template.ignore_missing_component_templates
-      ? [template.index_template.ignore_missing_component_templates].flat()
-      : undefined,
   });
 };

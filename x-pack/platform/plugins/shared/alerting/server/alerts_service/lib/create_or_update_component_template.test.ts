@@ -176,13 +176,15 @@ describe('createOrUpdateComponentTemplate', () => {
     expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalledTimes(1);
     expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalledWith({
       name: existingIndexTemplate.name,
-      ...existingIndexTemplate.index_template,
-      template: {
-        ...existingIndexTemplate.index_template.template,
-        settings: {
-          ...existingIndexTemplate.index_template.template?.settings,
-          'index.mapping.total_fields.limit': 2500,
-          'index.mapping.total_fields.ignore_dynamic_beyond_limit': true,
+      body: {
+        ...existingIndexTemplate.index_template,
+        template: {
+          ...existingIndexTemplate.index_template.template,
+          settings: {
+            ...existingIndexTemplate.index_template.template?.settings,
+            'index.mapping.total_fields.limit': 2500,
+            'index.mapping.total_fields.ignore_dynamic_beyond_limit': true,
+          },
         },
       },
     });
@@ -260,16 +262,18 @@ describe('createOrUpdateComponentTemplate', () => {
 
     expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalledWith({
       name: existingIndexTemplate.name,
-      ...existingIndexTemplate.index_template,
-      template: {
-        ...existingIndexTemplate.index_template.template,
-        settings: {
-          ...existingIndexTemplate.index_template.template?.settings,
-          'index.mapping.total_fields.limit': 2500,
-          'index.mapping.total_fields.ignore_dynamic_beyond_limit': true,
+      body: {
+        ...existingIndexTemplate.index_template,
+        template: {
+          ...existingIndexTemplate.index_template.template,
+          settings: {
+            ...existingIndexTemplate.index_template.template?.settings,
+            'index.mapping.total_fields.limit': 2500,
+            'index.mapping.total_fields.ignore_dynamic_beyond_limit': true,
+          },
         },
+        ignore_missing_component_templates: ['test-mappings', 'test-mappings-2'],
       },
-      ignore_missing_component_templates: ['test-mappings', 'test-mappings-2'],
     });
 
     expect(logger.info).toHaveBeenCalledWith(
@@ -370,13 +374,15 @@ describe('createOrUpdateComponentTemplate', () => {
     expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalledTimes(1);
     expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalledWith({
       name: existingIndexTemplate.name,
-      ...existingIndexTemplate.index_template,
-      template: {
-        ...existingIndexTemplate.index_template.template,
-        settings: {
-          ...existingIndexTemplate.index_template.template?.settings,
-          'index.mapping.total_fields.limit': 2500,
-          'index.mapping.total_fields.ignore_dynamic_beyond_limit': true,
+      body: {
+        ...existingIndexTemplate.index_template,
+        template: {
+          ...existingIndexTemplate.index_template.template,
+          settings: {
+            ...existingIndexTemplate.index_template.template?.settings,
+            'index.mapping.total_fields.limit': 2500,
+            'index.mapping.total_fields.ignore_dynamic_beyond_limit': true,
+          },
         },
       },
     });
