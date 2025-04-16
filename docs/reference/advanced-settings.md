@@ -19,10 +19,8 @@ The `Advanced Settings` {{kib}} privilege is required to access **Advanced Setti
 
 When you have insufficient privileges to edit advanced settings, the edit options are not visible, and the following indicator is displayed:
 
-:::{image} images/settings-read-only-badge.png
-:alt: Example of Advanced Settings Management's read only access indicator in Kibana's header
-:class: screenshot
-:::
+% TO DO: Use `:class: screenshot`
+![Example of Advanced Settings Management's read only access indicator in Kibana's header](images/settings-read-only-badge.png)
 
 To add the privilege, go to the **Roles** management page using the navigation menu or the [global search field](docs-content://get-started/the-stack.md#kibana-navigation-search).
 
