@@ -9,11 +9,11 @@ import { useQuery } from '@tanstack/react-query';
 import type { HttpSetup } from '@kbn/core-http-browser';
 import { IndicesGetMappingResponse } from '@elastic/elasticsearch/lib/api/types';
 import { useFormContext } from 'react-hook-form';
-import { APIRoutes, ChatForm, ChatFormFields } from '../types';
+import { APIRoutes, PlaygroundForm, PlaygroundFormFields } from '../types';
 import { useKibana } from './use_kibana';
 
 export interface FetchIndexMappingsArgs {
-  indices: ChatForm[ChatFormFields.indices];
+  indices: PlaygroundForm[PlaygroundFormFields.indices];
   http: HttpSetup;
 }
 
@@ -32,7 +32,7 @@ export const useIndexMappings = () => {
     services: { http },
   } = useKibana();
   const { getValues } = useFormContext();
-  const indices = getValues(ChatFormFields.indices);
+  const indices = getValues(PlaygroundFormFields.indices);
   const { data } = useQuery({
     queryKey: ['search-playground-index-mappings'],
     queryFn: () => fetchIndexMappings({ indices, http }),

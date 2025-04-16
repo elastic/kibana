@@ -8,15 +8,16 @@
  */
 
 import type { TabbedContentState } from '@kbn/unified-tabs/src/components/tabbed_content/tabbed_content';
-import { differenceBy } from 'lodash';
+import { cloneDeep, differenceBy } from 'lodash';
 import type { TabState } from '../types';
 import { selectAllTabs, selectTab } from '../selectors';
 import {
   defaultTabState,
   internalStateSlice,
+  type TabActionPayload,
   type InternalStateThunkActionCreator,
 } from '../internal_state';
-import { createTabRuntimeState } from '../runtime_state';
+import { createTabRuntimeState, selectTabRuntimeState } from '../runtime_state';
 
 export const setTabs: InternalStateThunkActionCreator<
   [Parameters<typeof internalStateSlice.actions.setTabs>[0]]
@@ -28,6 +29,7 @@ export const setTabs: InternalStateThunkActionCreator<
     const addedTabs = differenceBy(params.allTabs, previousTabs, (tab) => tab.id);
 
     for (const tab of removedTabs) {
+      dispatch(disconnectTab({ tabId: tab.id }));
       delete runtimeStateManager.tabs.byId[tab.id];
     }
 
@@ -38,24 +40,20 @@ export const setTabs: InternalStateThunkActionCreator<
     dispatch(internalStateSlice.actions.setTabs(params));
   };
 
-export interface UpdateTabsParams {
-  currentTabId: string;
-  updateState: TabbedContentState;
-  stopSyncing?: () => void;
-}
-
-export const updateTabs: InternalStateThunkActionCreator<[UpdateTabsParams], Promise<void>> =
-  ({ currentTabId, updateState: { items, selectedItem }, stopSyncing }) =>
-  async (dispatch, getState, { urlStateStorage }) => {
+export const updateTabs: InternalStateThunkActionCreator<[TabbedContentState], Promise<void>> =
+  ({ items, selectedItem }) =>
+  async (dispatch, getState, { services, runtimeStateManager, urlStateStorage }) => {
     const currentState = getState();
-    const currentTab = selectTab(currentState, currentTabId);
+    const currentTab = selectTab(currentState, currentState.tabs.unsafeCurrentId);
     let updatedTabs = items.map<TabState>((item) => {
-      const existingTab = currentState.tabs.byId[item.id];
+      const existingTab = selectTab(currentState, item.id);
       return existingTab ? { ...existingTab, ...item } : { ...defaultTabState, ...item };
     });
 
     if (selectedItem?.id !== currentTab.id) {
-      stopSyncing?.();
+      const previousTabRuntimeState = selectTabRuntimeState(runtimeStateManager, currentTab.id);
+
+      previousTabRuntimeState.stateContainer$.getValue()?.actions.stopSyncing();
 
       updatedTabs = updatedTabs.map((tab) =>
         tab.id === currentTab.id
@@ -67,16 +65,57 @@ export const updateTabs: InternalStateThunkActionCreator<[UpdateTabsParams], Pro
           : tab
       );
 
-      const existingTab = selectedItem ? currentState.tabs.byId[selectedItem.id] : undefined;
+      const nextTab = selectedItem ? selectTab(currentState, selectedItem.id) : undefined;
 
-      if (existingTab) {
-        await urlStateStorage.set('_g', existingTab.globalState);
-        await urlStateStorage.set('_a', existingTab.appState);
+      if (nextTab) {
+        await urlStateStorage.set('_g', nextTab.globalState);
+        await urlStateStorage.set('_a', nextTab.appState);
       } else {
-        await urlStateStorage.set('_g', {});
-        await urlStateStorage.set('_a', {});
+        await urlStateStorage.set('_g', null);
+        await urlStateStorage.set('_a', null);
+      }
+
+      const nextTabRuntimeState = selectedItem
+        ? selectTabRuntimeState(runtimeStateManager, selectedItem.id)
+        : undefined;
+      const nextTabStateContainer = nextTabRuntimeState?.stateContainer$.getValue();
+
+      if (nextTabStateContainer) {
+        const {
+          time,
+          refreshInterval,
+          filters: globalFilters,
+        } = nextTabStateContainer.globalState.get() ?? {};
+        const { filters: appFilters, query } = nextTabStateContainer.appState.getState();
+
+        services.timefilter.setTime(time ?? services.timefilter.getTimeDefaults());
+        services.timefilter.setRefreshInterval(
+          refreshInterval ?? services.timefilter.getRefreshIntervalDefaults()
+        );
+        services.filterManager.setGlobalFilters(globalFilters ?? []);
+        services.filterManager.setAppFilters(cloneDeep(appFilters ?? []));
+        services.data.query.queryString.setQuery(
+          query ?? services.data.query.queryString.getDefaultQuery()
+        );
+
+        nextTabStateContainer.actions.initializeAndSync();
       }
     }
 
-    dispatch(setTabs({ allTabs: updatedTabs }));
+    dispatch(
+      setTabs({
+        allTabs: updatedTabs,
+        selectedTabId: selectedItem?.id ?? currentTab.id,
+      })
+    );
+  };
+
+export const disconnectTab: InternalStateThunkActionCreator<[TabActionPayload]> =
+  ({ tabId }) =>
+  (_, __, { runtimeStateManager }) => {
+    const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tabId);
+    const stateContainer = tabRuntimeState.stateContainer$.getValue();
+    stateContainer?.dataState.cancel();
+    stateContainer?.actions.stopSyncing();
+    tabRuntimeState.customizationService$.getValue()?.cleanup();
   };

@@ -54,42 +54,34 @@ export const defaultGroupStatsAggregations = (field: string): NamedAggregation[]
   switch (field) {
     case 'kibana.alert.rule.name':
       aggMetrics.push(
-        ...[
-          {
-            description: {
-              terms: {
-                field: 'kibana.alert.rule.description',
-                size: 1,
-              },
+        {
+          description: {
+            terms: {
+              field: 'kibana.alert.rule.description',
+              size: 1,
             },
           },
-          SEVERITY_SUB_AGGREGATION,
-          USER_COUNT_AGGREGATION,
-          HOST_COUNT_AGGREGATION,
-          {
-            ruleTags: {
-              terms: {
-                field: 'kibana.alert.rule.tags',
-              },
+        },
+        SEVERITY_SUB_AGGREGATION,
+        USER_COUNT_AGGREGATION,
+        HOST_COUNT_AGGREGATION,
+        {
+          ruleTags: {
+            terms: {
+              field: 'kibana.alert.rule.tags',
             },
           },
-        ]
+        }
       );
       break;
     case 'host.name':
-      aggMetrics.push(
-        ...[RULE_COUNT_AGGREGATION, SEVERITY_SUB_AGGREGATION, USER_COUNT_AGGREGATION]
-      );
+      aggMetrics.push(RULE_COUNT_AGGREGATION, SEVERITY_SUB_AGGREGATION, USER_COUNT_AGGREGATION);
       break;
     case 'user.name':
-      aggMetrics.push(
-        ...[RULE_COUNT_AGGREGATION, SEVERITY_SUB_AGGREGATION, HOST_COUNT_AGGREGATION]
-      );
+      aggMetrics.push(RULE_COUNT_AGGREGATION, SEVERITY_SUB_AGGREGATION, HOST_COUNT_AGGREGATION);
       break;
     case 'source.ip':
-      aggMetrics.push(
-        ...[RULE_COUNT_AGGREGATION, SEVERITY_SUB_AGGREGATION, HOST_COUNT_AGGREGATION]
-      );
+      aggMetrics.push(RULE_COUNT_AGGREGATION, SEVERITY_SUB_AGGREGATION, HOST_COUNT_AGGREGATION);
       break;
     default:
       aggMetrics.push(RULE_COUNT_AGGREGATION);

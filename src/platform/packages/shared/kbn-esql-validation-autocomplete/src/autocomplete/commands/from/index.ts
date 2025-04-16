@@ -75,11 +75,7 @@ export async function suggest({
     suggestions.push(...(await getRecommendedQueriesSuggestions()));
   }
   // FROM something MET/
-  else if (
-    indexes.length > 0 &&
-    /^FROM\s+\S+\s+/i.test(innerText) &&
-    metadataOverlap.start !== metadataOverlap.end
-  ) {
+  else if (indexes.length > 0 && /^FROM\s+\S+\s+/i.test(innerText) && metadataOverlap) {
     suggestions.push(metadataSuggestion);
   }
   // FROM someth/

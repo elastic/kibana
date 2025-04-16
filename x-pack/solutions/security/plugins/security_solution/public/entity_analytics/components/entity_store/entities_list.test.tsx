@@ -36,6 +36,7 @@ const responseData: ListEntitiesResponse = {
       entity: {
         name: `Entity Name ${index}`,
         source: 'test-index',
+        type: 'user',
       },
     }),
     10

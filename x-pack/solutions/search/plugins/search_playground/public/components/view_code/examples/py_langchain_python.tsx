@@ -7,12 +7,12 @@
 
 import { EuiCodeBlock } from '@elastic/eui';
 import React, { useMemo } from 'react';
-import { ChatForm } from '../../../types';
+import { PlaygroundForm } from '../../../types';
 import { Prompt } from '../../../../common/prompt';
 import { elasticsearchQueryObject } from '../../../utils/user_query';
 import { getESQuery } from './utils';
 
-export const getSourceFields = (sourceFields: ChatForm['source_fields']) => {
+export const getSourceFields = (sourceFields: PlaygroundForm['source_fields']) => {
   let hasContentFieldsArray = false;
   const fields: Record<string, string | string[]> = {};
   for (const indexName of Object.keys(sourceFields)) {
@@ -33,7 +33,7 @@ export const LangchainPythonExmaple = ({
   formValues,
   clientDetails,
 }: {
-  formValues: ChatForm;
+  formValues: PlaygroundForm;
   clientDetails: string;
 }) => {
   const { esQuery, hasContentFieldsArray, indices, prompt, sourceFields } = useMemo(() => {
