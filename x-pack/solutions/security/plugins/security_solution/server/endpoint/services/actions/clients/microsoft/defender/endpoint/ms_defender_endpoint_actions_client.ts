@@ -171,7 +171,7 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
 
     if (elasticAgentIds.length === 0) {
       throw new ResponseActionsClientError(
-        `Unable to find elastic agent IDs for Microsoft agent ids: [${agentIds.join(', ')}]`
+        `Unable to find Elastic agent IDs for Microsoft agent ids: [${agentIds.join(', ')}]`
       );
     }
 

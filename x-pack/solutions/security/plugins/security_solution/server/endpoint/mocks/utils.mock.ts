@@ -5,10 +5,16 @@
  * 2.0.
  */
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import type { ElasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import type { OpenPointInTimeResponse, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { v4 as uuidV4 } from 'uuid';
 import { BaseDataGenerator } from '../../../common/endpoint/data_generators/base_data_generator';
+import { fromKueryExpression } from '@kbn/es-query';
+import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
+import { getFlattenedObject } from '@kbn/std';
+import { isObject, merge, reduce } from 'lodash';
 
 interface ApplyEsClientSearchMockOptions<TDocument = unknown> {
   esClientMock: ElasticsearchClientMock;
@@ -107,4 +113,71 @@ export const applyEsClientSearchMock = <TDocument = unknown>({
 
     return BaseDataGenerator.toEsSearchResponse([]);
   });
+};
+
+interface FleetKueryInfo {
+  packageNames: string[];
+  agentPolicyIds: string[];
+}
+
+/**
+ * Parses a Fleet `kuery` string pass to the Package Policy service methods and returns info. about that kuery.
+ * Helpful to create more reusable mocks for testing.
+ * @param kuery
+ */
+export const getPackagePolicyInfoFromFleetKuery = (kuery: string): FleetKueryInfo => {
+  const response: FleetKueryInfo = {
+    packageNames: [],
+    agentPolicyIds: [],
+  };
+
+  const kueryAst = fromKueryExpression(kuery);
+  const kueryFlatten = flattenKeys(kueryAst);
+
+  getFlattenedObject(kueryAst);
+
+  const getNextKueryAstArgumentPath = (keyPath: string): string => {
+    const lastIndexOfPackageNameArguments =
+      keyPath.lastIndexOf('.arguments.') + '.arguments.'.length - 1;
+    const nextArgumentNumber = Number(keyPath.charAt(lastIndexOfPackageNameArguments + 1)) + 1;
+
+    return `${keyPath.substring(0, lastIndexOfPackageNameArguments)}.${nextArgumentNumber}.value`;
+  };
+
+  for (const [key, value] of Object.entries(kueryFlatten)) {
+    if (value && typeof value === 'string') {
+      if (value.includes(`${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name`)) {
+        const packageName = kueryFlatten[getNextKueryAstArgumentPath(key)];
+
+        if (packageName) {
+          response.packageNames.push(packageName);
+        }
+      } else if (value.includes(`${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.policy_ids`)) {
+        const policyId = kueryFlatten[getNextKueryAstArgumentPath(key)];
+
+        if (policyId) {
+          response.agentPolicyIds.push(policyId);
+        }
+      }
+    }
+  }
+
+  return response;
+};
+
+export const flattenKeys = (obj: any, keyPath: any[] = []): any => {
+  // Copy taken from:
+  // https://github.com/elastic/kibana/blob/6a7c904f921434fe21dfa00eceabfb5e64e915dc/src/platform/packages/private/kbn-telemetry-tools/src/tools/utils.ts#L252-L264
+  // Because it is not exposed from that library
+  if (isObject(obj)) {
+    return reduce(
+      obj,
+      (cum, next, key) => {
+        const keys = [...keyPath, key];
+        return merge(cum, flattenKeys(next, keys));
+      },
+      {}
+    );
+  }
+  return { [keyPath.join('.')]: obj };
 };

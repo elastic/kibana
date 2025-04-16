@@ -23,6 +23,7 @@ import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { getPackagePolicyInfoFromFleetKuery } from '../../../mocks/utils.mock';
 import { FleetPackagePolicyGenerator } from '../../../../../common/endpoint/data_generators/fleet_package_policy_generator';
 import { FleetAgentGenerator } from '../../../../../common/endpoint/data_generators/fleet_agent_generator';
 import type { ResponseActionsClient } from '../..';
@@ -125,8 +126,26 @@ const createConstructorOptionsMock = (): Required<ResponseActionsClientOptionsMo
     );
   });
   fleetStartServices.packagePolicyService.list.mockImplementation(async (_, options) => {
+    const kueryInfo = getPackagePolicyInfoFromFleetKuery(options.kuery ?? '');
+
+    const packagePolicyOverrides: Parameters<FleetPackagePolicyGenerator['generate']>[0] = {
+      id: packagePolicy.id,
+    };
+
+    if (kueryInfo.packageNames.length > 0) {
+      packagePolicyOverrides.package = {
+        name: kueryInfo.packageNames[0],
+        version: '1.0.0',
+        title: kueryInfo.packageNames[0],
+      };
+    }
+
+    if (kueryInfo.agentPolicyIds) {
+      packagePolicyOverrides.policy_ids = [kueryInfo.agentPolicyIds[0]];
+    }
+
     return {
-      items: [packagePolicy],
+      items: [new FleetPackagePolicyGenerator('seed').generate(packagePolicyOverrides)],
       size: 1,
       page: 1,
       perPage: 20,
