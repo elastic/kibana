@@ -19,7 +19,7 @@ const ENVIRONMENT = getSynthtraceEnvironment(__filename);
 const scenario: Scenario<ApmOtelFields> = async (runOptions) => {
   return {
     bootstrap: async ({ apmEsClient }) => {
-      apmEsClient.pipeline(apmEsClient.getPipeline(ApmSynthtracePipelineTypes.OtelToApm));
+      apmEsClient.pipeline(apmEsClient.getPipeline(ApmSynthtracePipelineTypes.Otel));
     },
     generate: ({ range, clients: { apmEsClient } }) => {
       const transactionName = 'oteldemo.AdServiceSynth/GetAds';

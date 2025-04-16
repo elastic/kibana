@@ -26,13 +26,13 @@ export enum ComponentTemplateName {
   TracesApmSampled = 'traces-apm.sampled@custom',
 }
 export enum ApmSynthtracePipelineTypes {
-  Default = 'default',
-  OtelToApm = 'otelToApm',
-  ApmToOtel = 'apmToOtel',
+  Default = 'default', // classic APM
+  Otel = 'otel', // OTel native through APM server
+  ApmToOtel = 'apmToOtel', // convert classic APM synthtrace scenario into OTel native (useful to run existing scenarios as OTel)
 }
 export type ApmSynthtracePipelines =
   | ApmSynthtracePipelineTypes.Default
-  | ApmSynthtracePipelineTypes.OtelToApm
+  | ApmSynthtracePipelineTypes.Otel
   | ApmSynthtracePipelineTypes.ApmToOtel;
 
 export interface ApmSynthtraceEsClientOptions extends Omit<SynthtraceEsClientOptions, 'pipeline'> {
@@ -104,7 +104,7 @@ export class ApmSynthtraceEsClient extends SynthtraceEsClient<ApmFields | ApmOte
     } = { includeSerialization: true }
   ) {
     switch (pipeline) {
-      case 'otelToApm': {
+      case 'otel': {
         return otelToApmPipeline(this.logger, options.includeSerialization);
       }
       case 'apmToOtel': {

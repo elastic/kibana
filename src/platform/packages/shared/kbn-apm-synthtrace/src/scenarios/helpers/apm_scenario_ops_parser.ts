@@ -14,7 +14,7 @@ import {
 
 const validPipelines: ApmSynthtracePipelines[] = [
   ApmSynthtracePipelineTypes.ApmToOtel,
-  ApmSynthtracePipelineTypes.OtelToApm,
+  ApmSynthtracePipelineTypes.Otel,
   ApmSynthtracePipelineTypes.Default,
 ];
 const parseApmPipeline = (value: ApmSynthtracePipelines): ApmSynthtracePipelines => {

@@ -34,7 +34,7 @@ describe('Service Overview', () => {
         from: new Date(start).getTime(),
         to: new Date(end).getTime(),
       }),
-      ApmSynthtracePipelineTypes.OtelToApm
+      ApmSynthtracePipelineTypes.Otel
     );
   });
 
