@@ -253,6 +253,7 @@ export type AssistantToolLlm =
 
 export interface AssistantToolParams {
   alertsIndexPattern?: string;
+  assistantContext?: ElasticAssistantApiRequestHandlerContext;
   anonymizationFields?: AnonymizationFieldResponse[];
   inference?: InferenceServerStart;
   isEnabledKnowledgeBase: boolean;
@@ -275,4 +276,8 @@ export interface AssistantToolParams {
   >;
   size?: number;
   telemetry?: AnalyticsServiceSetup;
+  createLlmInstance?: () =>
+    | ActionsClientChatBedrockConverse
+    | ActionsClientChatVertexAI
+    | ActionsClientChatOpenAI;
 }
