@@ -84,7 +84,6 @@ const buildHit = (fields?: Record<string, unknown>) =>
           dataset: DATASET_NAME,
           namespace: NAMESPACE,
         },
-        'error.stack_trace': STACKTRACE,
         'service.name': DATASET_NAME,
         'host.name': 'gke-edge-oblt-pool',
         'trace.id': 'abcdef',
@@ -251,6 +250,7 @@ describe('LogsOverview', () => {
 describe('LogsOverview with accordion state', () => {
   it('should open the stacktrace section when the prop is passed', async () => {
     renderLogsOverview({
+      hit: buildHit({ 'error.stack_trace': STACKTRACE }),
       docViewerAccordionState: { stacktrace: true },
     });
     expect(
@@ -274,6 +274,7 @@ describe('LogsOverview with accordion state', () => {
 
   it('should open the quality_issues section when the prop is passed', async () => {
     renderLogsOverview({
+      hit: buildHit({ 'error.stack_trace': STACKTRACE }),
       docViewerAccordionState: { quality_issues: true },
     });
     expect(
