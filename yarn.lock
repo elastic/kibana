@@ -7650,6 +7650,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/test-suites-xpack-platform@link:x-pack/platform/test":
+  version "0.0.0"
+  uid ""
+
 "@kbn/test-suites-xpack@link:x-pack/test":
   version "0.0.0"
   uid ""
