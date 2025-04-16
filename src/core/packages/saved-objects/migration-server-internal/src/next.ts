@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { pipe } from 'fp-ts/lib/pipeable';
-import * as Option from 'fp-ts/lib/Option';
-import * as TaskEither from 'fp-ts/lib/TaskEither';
+import { pipe } from 'fp-ts/pipeable';
+import * as Option from 'fp-ts/Option';
+import * as TaskEither from 'fp-ts/TaskEither';
 import { omit } from 'lodash';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { WaitGroup } from './kibana_migrator_utils';

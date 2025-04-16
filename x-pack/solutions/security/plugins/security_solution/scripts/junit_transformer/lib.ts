@@ -13,7 +13,7 @@ import { Builder, parseStringPromise } from 'xml2js';
 import { promises as fs } from 'fs';
 import { relative } from 'path';
 import * as t from 'io-ts';
-import { isLeft } from 'fp-ts/lib/Either';
+import { isLeft } from 'fp-ts/Either';
 import { PathReporter } from 'io-ts/lib/PathReporter';
 import globby from 'globby';
 import del from 'del';

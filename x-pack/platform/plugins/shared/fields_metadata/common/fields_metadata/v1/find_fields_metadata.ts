@@ -6,7 +6,7 @@
  */
 
 import { arrayToStringRt } from '@kbn/io-ts-utils';
-import { either } from 'fp-ts/lib/Either';
+import { either } from 'fp-ts/Either';
 import * as rt from 'io-ts';
 import { ANY_DATASET } from '../common';
 import { FetchFieldsMetadataError } from '../errors';

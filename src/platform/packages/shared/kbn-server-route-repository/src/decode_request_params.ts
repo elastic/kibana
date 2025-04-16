@@ -10,7 +10,7 @@
 import Boom from '@hapi/boom';
 import { formatErrors, strictKeysRt } from '@kbn/io-ts-utils';
 import { IoTsParamsObject } from '@kbn/server-route-repository-utils';
-import { isLeft } from 'fp-ts/lib/Either';
+import { isLeft } from 'fp-ts/Either';
 import * as t from 'io-ts';
 
 export function decodeRequestParams<T extends IoTsParamsObject>(
