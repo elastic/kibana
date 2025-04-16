@@ -33,7 +33,7 @@ export function WelcomeMessageKnowledgeBaseSetupErrorPanel({
   onRetryInstall,
 }: {
   knowledgeBase: UseKnowledgeBaseResult;
-  onRetryInstall: () => void;
+  onRetryInstall: (inferenceId: string) => void;
 }) {
   const { http } = useKibana().services;
 
@@ -130,7 +130,7 @@ export function WelcomeMessageKnowledgeBaseSetupErrorPanel({
               retryInstallingLink: (
                 <EuiLink
                   data-test-subj="observabilityAiAssistantWelcomeMessageKnowledgeBaseSetupErrorPanelRetryInstallingLink"
-                  onClick={onRetryInstall}
+                  onClick={() => onRetryInstall(modelId)} // TODO: change
                 >
                   {i18n.translate(
                     'xpack.aiAssistant.welcomeMessageKnowledgeBaseSetupErrorPanel.retryInstallingLinkLabel',

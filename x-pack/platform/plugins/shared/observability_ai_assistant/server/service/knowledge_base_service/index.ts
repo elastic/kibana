@@ -492,9 +492,11 @@ export class KnowledgeBaseService {
   };
 
   getPreconfiguredInferenceEndpoints = async () => {
-    return getPreconfiguredInferenceEndpointsForEmbedding({
+    const { inferenceEndpoints } = await getPreconfiguredInferenceEndpointsForEmbedding({
       esClient: this.dependencies.esClient,
       logger: this.dependencies.logger,
     });
+
+    return inferenceEndpoints;
   };
 }

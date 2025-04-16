@@ -13,6 +13,7 @@ import {
   InferenceInferenceEndpointInfo,
   MlTrainedModelStats,
 } from '@elastic/elasticsearch/lib/api/types';
+import { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 import { createObservabilityAIAssistantServerRoute } from '../create_observability_ai_assistant_server_route';
 import {
   Instruction,
@@ -131,6 +132,30 @@ const getKnowledgeBaseUserInstructions = createObservabilityAIAssistantServerRou
 
     return {
       userInstructions: await client.getKnowledgeBaseUserInstructions(),
+    };
+  },
+});
+
+const getKnowledgeBaseInferenceEndpoints = createObservabilityAIAssistantServerRoute({
+  endpoint: 'GET /internal/observability_ai_assistant/kb/inference_endpoints',
+  security: {
+    authz: {
+      requiredPrivileges: ['ai_assistant'],
+    },
+  },
+  handler: async (
+    resources
+  ): Promise<{
+    endpoints: InferenceAPIConfigResponse[];
+  }> => {
+    const client = await resources.service.getClient({ request: resources.request });
+
+    if (!client) {
+      throw notImplemented();
+    }
+
+    return {
+      endpoints: await client.getPreconfiguredInferenceEndpoints(),
     };
   },
 });
@@ -325,4 +350,5 @@ export const knowledgeBaseRoutes = {
   ...getKnowledgeBaseUserInstructions,
   ...saveKnowledgeBaseEntry,
   ...deleteKnowledgeBaseEntry,
+  ...getKnowledgeBaseInferenceEndpoints,
 };
