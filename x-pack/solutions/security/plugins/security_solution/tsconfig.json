@@ -246,6 +246,6 @@
     "@kbn/security-plugin-types-common",
     "@kbn/management-settings-ids",
     "@kbn/inference-endpoint-ui-common",
-    "@kbn/core-chrome-browser"
+    "@kbn/core-chrome-browser",
   ]
 }
