@@ -8014,6 +8014,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/workchat-framework@link:x-pack/solutions/chat/plugins/workchat-framework":
+  version "0.0.0"
+  uid ""
+
 "@kbn/xstate-utils@link:src/platform/packages/shared/kbn-xstate-utils":
   version "0.0.0"
   uid ""
