@@ -7,7 +7,6 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import { DocumentDetailsContext } from '../../shared/context';
 import {
   HIGHLIGHTED_FIELDS_DETAILS_TEST_ID,
   HIGHLIGHTED_FIELDS_EDIT_BUTTON_TEST_ID,
@@ -36,12 +35,15 @@ jest.mock('../../../../common/hooks/use_app_toasts', () => ({
   }),
 }));
 
-const renderHighlightedFields = (contextValue: DocumentDetailsContext) =>
+const renderHighlightedFields = () =>
   render(
     <TestProviders>
-      <DocumentDetailsContext.Provider value={contextValue}>
-        <HighlightedFields />
-      </DocumentDetailsContext.Provider>
+      <HighlightedFields
+        dataFormattedForFieldBrowser={mockContextValue.dataFormattedForFieldBrowser}
+        investigationFields={mockContextValue.investigationFields}
+        isPreview={mockContextValue.isPreview}
+        scopeId={mockContextValue.scopeId}
+      />
     </TestProviders>
   );
 
@@ -74,7 +76,7 @@ describe('<HighlightedFields />', () => {
         },
       });
 
-      const { getByTestId, queryByTestId } = renderHighlightedFields(mockContextValue);
+      const { getByTestId, queryByTestId } = renderHighlightedFields();
 
       expect(getByTestId(HIGHLIGHTED_FIELDS_TITLE_TEST_ID)).toBeInTheDocument();
       expect(getByTestId(HIGHLIGHTED_FIELDS_DETAILS_TEST_ID)).toBeInTheDocument();
@@ -84,7 +86,7 @@ describe('<HighlightedFields />', () => {
     it(`should render no data message if there aren't any highlighted fields`, () => {
       (useHighlightedFields as jest.Mock).mockReturnValue({});
 
-      const { getByText, queryByTestId } = renderHighlightedFields(mockContextValue);
+      const { getByText, queryByTestId } = renderHighlightedFields();
       expect(getByText(NO_DATA_MESSAGE)).toBeInTheDocument();
       expect(queryByTestId(HIGHLIGHTED_FIELDS_EDIT_BUTTON_TEST_ID)).not.toBeInTheDocument();
     });
@@ -116,7 +118,7 @@ describe('<HighlightedFields />', () => {
         },
       });
 
-      const { getByTestId } = renderHighlightedFields(mockContextValue);
+      const { getByTestId } = renderHighlightedFields();
 
       expect(getByTestId(HIGHLIGHTED_FIELDS_TITLE_TEST_ID)).toBeInTheDocument();
       expect(getByTestId(HIGHLIGHTED_FIELDS_DETAILS_TEST_ID)).toBeInTheDocument();
@@ -126,7 +128,7 @@ describe('<HighlightedFields />', () => {
     it(`should render no data message if there aren't any highlighted fields`, () => {
       (useHighlightedFields as jest.Mock).mockReturnValue({});
 
-      const { getByText, getByTestId } = renderHighlightedFields(mockContextValue);
+      const { getByText, getByTestId } = renderHighlightedFields();
       expect(getByText(NO_DATA_MESSAGE)).toBeInTheDocument();
       expect(getByTestId(HIGHLIGHTED_FIELDS_EDIT_BUTTON_TEST_ID)).toBeInTheDocument();
     });
@@ -137,7 +139,7 @@ describe('<HighlightedFields />', () => {
         isExistingRule: true,
         loading: false,
       });
-      const { queryByTestId } = renderHighlightedFields(mockContextValue);
+      const { queryByTestId } = renderHighlightedFields();
       expect(queryByTestId(HIGHLIGHTED_FIELDS_EDIT_BUTTON_TEST_ID)).not.toBeInTheDocument();
     });
   });
