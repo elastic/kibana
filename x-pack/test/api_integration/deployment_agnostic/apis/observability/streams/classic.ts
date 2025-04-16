@@ -583,14 +583,15 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(isUnwiredStreamDefinition(classicStream!.stream)).to.be(true);
       });
 
-      after(async () => {
-        await apiClient.fetch('DELETE /api/streams/{name} 2023-10-31', {
+      it('should allow deleting', async () => {
+        const response = await apiClient.fetch('DELETE /api/streams/{name} 2023-10-31', {
           params: {
             path: {
               name: ORPHANED_STREAM_NAME,
             },
           },
         });
+        expect(response.status).to.eql(200);
       });
     });
   });

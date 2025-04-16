@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ComponentType, MouseEventHandler, ReactNode } from 'react';
+import type { ComponentType, MouseEventHandler } from 'react';
 import type { Location } from 'history';
 import type { EuiSideNavItemType, EuiThemeSizes, IconType } from '@elastic/eui';
 import type { Observable } from 'rxjs';
@@ -232,7 +232,7 @@ export interface ChromeProjectNavigationNode extends NodeDefinitionBase {
   /** Optional id, if not passed a "link" must be provided. */
   id: string;
   /** Optional title. If not provided and a "link" is provided the title will be the Deep link title */
-  title: string;
+  title?: string;
   /** Path in the tree of the node */
   path: string;
   /** App id or deeplink id */
@@ -255,10 +255,8 @@ export interface ChromeProjectNavigationNode extends NodeDefinitionBase {
 
 export type PanelSelectedNode = Pick<
   ChromeProjectNavigationNode,
-  'id' | 'children' | 'path' | 'sideNavStatus' | 'deepLink'
-> & {
-  title: string | ReactNode;
-};
+  'id' | 'children' | 'path' | 'sideNavStatus' | 'deepLink' | 'title'
+>;
 
 /** @public */
 export interface SideNavCompProps {
