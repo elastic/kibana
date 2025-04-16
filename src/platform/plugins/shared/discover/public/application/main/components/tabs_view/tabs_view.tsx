@@ -37,7 +37,7 @@ export const TabsView = (props: DiscoverSessionViewProps) => {
     <UnifiedTabs
       key={groupId}
       services={services}
-      initialItems={initialItems}
+      initialItems={allTabs}
       initialSelectedItemId={currentTabId}
       recentlyClosedItems={recentlyClosedItems}
       onChanged={(updateState) => {
