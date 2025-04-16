@@ -902,7 +902,7 @@
         "label": "getComponentTemplate",
         "description": [],
         "signature": [
-          "({ fieldMap, context, name, dynamic, includeSettings, }: GetComponentTemplateOpts) => ",
+          "({ fieldMap, context, name, dynamic, includeSettings, dynamicTemplates, }: GetComponentTemplateOpts) => ",
           "ClusterPutComponentTemplateRequest"
         ],
         "path": "x-pack/platform/plugins/shared/alerting/server/alerts_service/resource_installer_utils.ts",
@@ -914,7 +914,7 @@
             "id": "def-server.getComponentTemplate.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{\n  fieldMap,\n  context,\n  name,\n  dynamic,\n  includeSettings,\n}",
+            "label": "{\n  fieldMap,\n  context,\n  name,\n  dynamic,\n  includeSettings,\n  dynamicTemplates,\n}",
             "description": [],
             "signature": [
               "GetComponentTemplateOpts"
@@ -5395,7 +5395,7 @@
         "label": "getComponentTemplateFromFieldMap",
         "description": [],
         "signature": [
-          "({ name, fieldMap, dynamic, includeSettings, }: ",
+          "({ name, fieldMap, dynamic, includeSettings, dynamicTemplates, }: ",
           "GetComponentTemplateFromFieldMapOpts",
           ") => ",
           "ClusterPutComponentTemplateRequest"
@@ -5409,7 +5409,7 @@
             "id": "def-common.getComponentTemplateFromFieldMap.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  name,\n  fieldMap,\n  dynamic,\n  includeSettings,\n}",
+            "label": "{\n  name,\n  fieldMap,\n  dynamic,\n  includeSettings,\n  dynamicTemplates,\n}",
             "description": [],
             "signature": [
               "GetComponentTemplateFromFieldMapOpts"
