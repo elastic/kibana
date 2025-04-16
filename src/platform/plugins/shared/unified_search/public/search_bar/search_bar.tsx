@@ -267,13 +267,14 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
     dateRangeTo: get(this.props, 'dateRangeTo', 'now'),
   } as State<QT>;
 
-  public isDirty = () => {
-    if (!this.props.showDatePicker && this.state.query && this.props.query) {
-      return !isEqual(this.state.query, this.props.query);
+  public isDirty = (query: Query | AggregateQuery | undefined) => {
+    const actualQuery = query ?? this.state.query;
+    if (!this.props.showDatePicker && actualQuery && this.props.query) {
+      return !isEqual(actualQuery, this.props.query);
     }
 
     return (
-      (this.state.query && this.props.query && !isEqual(this.state.query, this.props.query)) ||
+      (actualQuery && this.props.query && !isEqual(actualQuery, this.props.query)) ||
       this.state.dateRangeFrom !== this.props.dateRangeFrom ||
       this.state.dateRangeTo !== this.props.dateRangeTo
     );
@@ -433,7 +434,7 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
                 to: this.state.dateRangeTo,
               },
             },
-            this.isDirty()
+            this.isDirty(query)
           );
         }
       }
@@ -441,26 +442,28 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
   };
 
   public onQueryBarSubmit = (queryAndDateRange: { dateRange?: TimeRange; query?: QT | Query }) => {
+    const query = queryAndDateRange.query;
+    const dateRangeFrom =
+      (queryAndDateRange.dateRange && queryAndDateRange.dateRange.from) || this.state.dateRangeFrom;
+    const dateRangeTo =
+      (queryAndDateRange.dateRange && queryAndDateRange.dateRange.to) || this.state.dateRangeTo;
     this.setState(
       {
-        query: queryAndDateRange.query,
-        dateRangeFrom:
-          (queryAndDateRange.dateRange && queryAndDateRange.dateRange.from) ||
-          this.state.dateRangeFrom,
-        dateRangeTo:
-          (queryAndDateRange.dateRange && queryAndDateRange.dateRange.to) || this.state.dateRangeTo,
+        query,
+        dateRangeFrom,
+        dateRangeTo,
       },
       () => {
         if (this.props.onQuerySubmit) {
           this.props.onQuerySubmit(
             {
-              query: this.state.query,
+              query,
               dateRange: {
-                from: this.state.dateRangeFrom,
-                to: this.state.dateRangeTo,
+                from: dateRangeFrom,
+                to: dateRangeTo,
               },
             },
-            this.isDirty()
+            this.isDirty(query)
           );
         }
         this.services.usageCollection?.reportUiCounter(
@@ -634,7 +637,7 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
           onRefreshChange={this.props.onRefreshChange}
           onCancel={this.props.onCancel}
           onChange={this.onQueryBarChange}
-          isDirty={this.isDirty()}
+          isDirty={this.isDirty(this.state.query)}
           customSubmitButton={
             this.props.customSubmitButton ? this.props.customSubmitButton : undefined
           }

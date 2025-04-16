@@ -340,9 +340,9 @@ export function useQueryBarMenuPanels({
     }
   };
 
-  const onQueryStringChange = (value: string) => {
+  const onQueryStringChange = (value: string, nextLang: string | undefined) => {
     onQueryChange({
-      query: { query: value, language },
+      query: { query: value, language: nextLang ?? language },
       dateRange: getDateRange(),
     });
   };
@@ -357,7 +357,7 @@ export function useQueryBarMenuPanels({
     storage.set(storageKey!, lang);
 
     const newQuery = { query: '', language: lang };
-    onQueryStringChange(newQuery.query);
+    onQueryStringChange(newQuery.query, lang);
     onQueryBarSubmit({
       query: { query: fromUser(newQuery.query), language: newQuery.language },
       dateRange: getDateRange(),
