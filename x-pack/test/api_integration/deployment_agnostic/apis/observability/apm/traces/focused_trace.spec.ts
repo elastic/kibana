@@ -10,6 +10,7 @@ import type { Environment } from '@kbn/apm-plugin/common/environment_rt';
 import { ENVIRONMENT_ALL } from '@kbn/apm-plugin/common/environment_filter_values';
 import { TraceSearchType } from '@kbn/apm-plugin/common/trace_explorer';
 import type { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
+import { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 import { generateTrace } from './generate_trace';
 
@@ -18,10 +19,8 @@ type FocusedTraceResponseType = APIReturnType<'GET /internal/apm/traces/{traceId
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const apmApiClient = getService('apmApi');
   const synthtrace = getService('synthtrace');
-
   const start = new Date('2022-01-01T00:00:00.000Z').getTime();
   const end = new Date('2022-01-01T00:15:00.000Z').getTime() - 1;
-
   const endWithOffset = end + 100000;
 
   describe('traces', () => {
@@ -43,26 +42,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
             start: new Date(start).toISOString(),
             end: new Date(endWithOffset).toISOString(),
             environment,
-          },
-        },
-      });
-    }
-
-    async function fetchTrace({
-      traceId,
-      entryTransactionId,
-    }: {
-      traceId: string;
-      entryTransactionId: string;
-    }) {
-      return apmApiClient.readUser({
-        endpoint: `GET /internal/apm/traces/{traceId}`,
-        params: {
-          path: { traceId },
-          query: {
-            start: new Date(start).toISOString(),
-            end: new Date(endWithOffset).toISOString(),
-            entryTransactionId,
           },
         },
       });
@@ -114,7 +93,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
       describe('focused trace', () => {
         let traceId: string;
-        let focusedTrace: FocusedTraceResponseType = {};
+        let focusedTrace: FocusedTraceResponseType | undefined;
         let rootTransactionId: string;
         before(async () => {
           const response = await fetchTraceSamples({
@@ -131,27 +110,27 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           });
           expect(focusedTraceResponse.status).to.be(200);
           focusedTrace = focusedTraceResponse.body;
-          rootTransactionId = focusedTrace.traceItems.rootTransaction.transaction.id;
+          rootTransactionId = focusedTrace?.traceItems.rootTransaction.transaction.id;
         });
 
         describe('focus on root transaction', () => {
           it('returns same root transaction and focused item', async () => {
-            expect(focusedTrace.traceItems.rootTransaction.transaction.id).to.eql(
-              focusedTrace.traceItems.focusedTraceDoc.transaction.id
+            expect(focusedTrace?.traceItems.rootTransaction.transaction.id).to.eql(
+              focusedTrace?.traceItems.focusedTraceDoc.transaction.id
             );
           });
 
           it('does not have parent item', () => {
-            expect(focusedTrace.traceItems.parentDoc).to.be(undefined);
+            expect(focusedTrace?.traceItems.parentDoc).to.be(undefined);
           });
 
           it('has 2 children', () => {
-            expect(focusedTrace.traceItems.focusedTraceTree.length).to.eql(1);
-            expect(focusedTrace.traceItems.focusedTraceTree?.[0].children.length).to.eql(1);
+            expect(focusedTrace?.traceItems.focusedTraceTree.length).to.eql(1);
+            expect(focusedTrace?.traceItems.focusedTraceTree?.[0].children.length).to.eql(1);
           });
 
           it('returns trace summary', () => {
-            expect(focusedTrace.summary).to.eql({
+            expect(focusedTrace?.summary).to.eql({
               services: 3,
               traceEvents: 6,
               errors: 0,
