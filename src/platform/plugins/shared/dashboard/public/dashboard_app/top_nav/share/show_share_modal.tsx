@@ -19,6 +19,7 @@ import { i18n } from '@kbn/i18n';
 import { getStateFromKbnUrl, setStateToKbnUrl, unhashUrl } from '@kbn/kibana-utils-plugin/public';
 
 import { FormattedMessage } from '@kbn/i18n-react';
+import { LocatorPublic } from '@kbn/share-plugin/common';
 import { convertPanelMapToPanelsArray, DashboardPanelMap } from '../../../../common';
 import {
   getDashboardBackupService,
@@ -271,5 +272,11 @@ export function ShowShareModal({
       ? shareModalStrings.getSnapshotShareWarning()
       : undefined,
     toasts: coreServices.notifications.toasts,
+    shareableUrlLocatorParams: {
+      locator: shareService.url.locators.get(
+        DASHBOARD_APP_LOCATOR
+      ) as LocatorPublic<DashboardLocatorParams>,
+      params: locatorParams,
+    },
   });
 }
