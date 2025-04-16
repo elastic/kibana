@@ -37,3 +37,6 @@ export { UnifiedDocViewerObservabilityTracesSpanOverview } from './components/ob
 export { UnifiedDocViewerObservabilityTracesTransactionOverview } from './components/observability/traces/doc_viewer_transaction_overview/lazy_doc_viewer_obs_traces_transaction_overview';
 
 export const plugin = () => new UnifiedDocViewerPublicPlugin();
+
+export { Attributes } from './components/observability/traces/components/attributes';
+export { Links } from './components/observability/traces/components/links';

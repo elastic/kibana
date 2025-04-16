@@ -9,7 +9,11 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { UnifiedDocViewerObservabilityTracesSpanOverview } from '@kbn/unified-doc-viewer-plugin/public';
+import {
+  Attributes,
+  Links,
+  UnifiedDocViewerObservabilityTracesSpanOverview,
+} from '@kbn/unified-doc-viewer-plugin/public';
 import type { DocViewsRegistry } from '@kbn/unified-doc-viewer';
 import type { DocumentProfileProvider } from '../../../../../profiles';
 import type { DocViewerExtensionParams, DocViewerExtension } from '../../../../../types';
@@ -38,7 +42,26 @@ export const createGetDocViewer =
             );
           },
         });
-
+        registry.add({
+          id: 'doc_view_obs_traces_span_attributes',
+          title: i18n.translate('discover.docViews.observability.traces.spanAttributes.title', {
+            defaultMessage: 'Attributes',
+          }),
+          order: 1,
+          component: (props) => {
+            return <Attributes />;
+          },
+        });
+        registry.add({
+          id: 'doc_view_obs_traces_span_links',
+          title: i18n.translate('discover.docViews.observability.traces.spanLinks.title', {
+            defaultMessage: 'Links',
+          }),
+          order: 1,
+          component: (props) => {
+            return <Links />;
+          },
+        });
         return prevDocViewer.docViewsRegistry(registry);
       },
     };

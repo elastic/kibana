@@ -9,6 +9,7 @@
 
 import React from 'react';
 import {
+  EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
@@ -30,14 +31,14 @@ export function SpanDurationSummary({ duration }: SpanDurationSummaryProps) {
   return (
     <>
       <EuiTitle size="s">
-        <h2>
+        <h3>
           {i18n.translate(
             'unifiedDocViewer.observability.traces.docViewerSpanOverview.spanDurationSummary.title',
             {
               defaultMessage: 'Duration',
             }
           )}
-        </h2>
+        </h3>
       </EuiTitle>
       <EuiSpacer size="m" />
       <EuiText color="subdued" size="xs">
@@ -50,7 +51,10 @@ export function SpanDurationSummary({ duration }: SpanDurationSummaryProps) {
       </EuiText>
       <EuiSpacer size="m" />
 
-      <>
+      <div css={{ border: '1px dotted lightGray' }}>
+        <EuiBadge css={{ float: 'right' }}>
+          <code>duration</code>
+        </EuiBadge>
         <EuiFlexGroup>
           <EuiFlexItem grow={1}>
             <EuiFlexGroup alignItems="center" gutterSize="xs">
@@ -79,7 +83,7 @@ export function SpanDurationSummary({ duration }: SpanDurationSummaryProps) {
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiHorizontalRule margin="xs" />
-      </>
+      </div>
     </>
   );
 }
