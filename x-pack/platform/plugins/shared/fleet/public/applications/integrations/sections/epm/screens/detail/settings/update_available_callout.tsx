@@ -142,7 +142,6 @@ export const UpdateAvailableCallout = ({
 const BreakingChangesButton = ({ href, onClick }: { href?: string; onClick: () => void }) => {
   const { euiTheme } = useEuiTheme();
 
-  const buttonText = 'Review breaking changes';
   const buttonCSS = css`
     background-color: ${euiTheme.colors.backgroundFilledWarning};
   `;
@@ -152,7 +151,7 @@ const BreakingChangesButton = ({ href, onClick }: { href?: string; onClick: () =
       <EuiButton color="warning" css={buttonCSS} href={href} target="_blank">
         <FormattedMessage
           id="xpack.fleet.integrations.settings.versionInfo.reviewBreakingChangesButton"
-          defaultMessage={buttonText}
+          defaultMessage="Review breaking changes"
         />
         <EuiIcon type="popout" />
       </EuiButton>
@@ -163,7 +162,7 @@ const BreakingChangesButton = ({ href, onClick }: { href?: string; onClick: () =
     <EuiButton color="warning" css={buttonCSS} onClick={onClick}>
       <FormattedMessage
         id="xpack.fleet.integrations.settings.versionInfo.reviewBreakingChangesButton"
-        defaultMessage={buttonText}
+        defaultMessage="Review breaking changes"
       />
     </EuiButton>
   );
