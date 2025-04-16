@@ -19,11 +19,18 @@ const OPTIONS_MENU = i18n.translate('xpack.securitySolution.flyout.alertSummary.
   defaultMessage: 'Options',
 });
 
+export interface AlertSummaryOptionsMenu {
+  /**
+   * To pass down to the anonymization component rendered in the popover
+   */
+  hasAlertSummary: boolean;
+}
+
 /**
  * Options menu displayed to the right of the AI summary section in the alert summary flyout.
  * It currently contains a single option to allows anonymizing values.
  */
-export const AlertSummaryOptionsMenu = memo(({ hasAlertSummary }: { hasAlertSummary: boolean }) => {
+export const AlertSummaryOptionsMenu = memo(({ hasAlertSummary }: AlertSummaryOptionsMenu) => {
   const [isPopoverOpen, setPopover] = useState(false);
   const togglePopover = useCallback(() => setPopover(!isPopoverOpen), [isPopoverOpen]);
 

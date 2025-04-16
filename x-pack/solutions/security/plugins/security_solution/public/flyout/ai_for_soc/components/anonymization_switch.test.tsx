@@ -11,31 +11,34 @@ import {
   ALERT_SUMMARY_ANONYMIZE_TOGGLE_TEST_ID,
   AnonymizationSwitch,
 } from './anonymization_switch';
-import { useAIForSOCDetailsContext } from '../context';
+import { AIForSOCDetailsContext } from '../context';
 
-jest.mock('../context', () => ({
-  useAIForSOCDetailsContext: jest.fn(),
-}));
+const mockSetShowAnonymizedValues = jest.fn();
+const mockContextValue = {
+  showAnonymizedValues: false,
+  setShowAnonymizedValues: mockSetShowAnonymizedValues,
+} as unknown as AIForSOCDetailsContext;
+
+const renderAnonymizedSwitch = (contextValue: AIForSOCDetailsContext, hasAlertSummary: boolean) =>
+  render(
+    <AIForSOCDetailsContext.Provider value={contextValue}>
+      <AnonymizationSwitch hasAlertSummary={hasAlertSummary} />
+    </AIForSOCDetailsContext.Provider>
+  );
 
 describe('AnonymizationSwitch', () => {
-  const mockSetShowAnonymizedValues = jest.fn();
-
   beforeEach(() => {
     jest.clearAllMocks();
-    (useAIForSOCDetailsContext as jest.Mock).mockReturnValue({
-      setShowAnonymizedValues: mockSetShowAnonymizedValues,
-      showAnonymizedValues: false,
-    });
   });
 
   it('should render the switch in the unchecked state by default', () => {
-    const { getByTestId } = render(<AnonymizationSwitch hasAlertSummary />);
+    const { getByTestId } = renderAnonymizedSwitch(mockContextValue, true);
 
     expect(getByTestId(ALERT_SUMMARY_ANONYMIZE_TOGGLE_TEST_ID)).not.toBeChecked();
   });
 
   it('should call setShowAnonymizedValues with true when the switch is toggled on', () => {
-    const { getByTestId } = render(<AnonymizationSwitch hasAlertSummary />);
+    const { getByTestId } = renderAnonymizedSwitch(mockContextValue, true);
 
     fireEvent.click(getByTestId(ALERT_SUMMARY_ANONYMIZE_TOGGLE_TEST_ID));
 
@@ -43,12 +46,12 @@ describe('AnonymizationSwitch', () => {
   });
 
   it('should call setShowAnonymizedValues with false when the switch is toggled off', () => {
-    (useAIForSOCDetailsContext as jest.Mock).mockReturnValue({
-      setShowAnonymizedValues: mockSetShowAnonymizedValues,
+    const contextValue = {
+      ...mockContextValue,
       showAnonymizedValues: true,
-    });
+    };
 
-    const { getByTestId } = render(<AnonymizationSwitch hasAlertSummary />);
+    const { getByTestId } = renderAnonymizedSwitch(contextValue, true);
 
     fireEvent.click(getByTestId(ALERT_SUMMARY_ANONYMIZE_TOGGLE_TEST_ID));
 
@@ -56,24 +59,24 @@ describe('AnonymizationSwitch', () => {
   });
 
   it('should not render the switch if showAnonymizedValues is undefined', () => {
-    (useAIForSOCDetailsContext as jest.Mock).mockReturnValue({
-      setShowAnonymizedValues: mockSetShowAnonymizedValues,
+    const contextValue = {
+      ...mockContextValue,
       showAnonymizedValues: undefined,
-    });
+    };
 
-    const { queryByTestId } = render(<AnonymizationSwitch hasAlertSummary />);
+    const { queryByTestId } = renderAnonymizedSwitch(contextValue, true);
 
     expect(queryByTestId(ALERT_SUMMARY_ANONYMIZE_TOGGLE_TEST_ID)).not.toBeInTheDocument();
   });
 
   it('should enable the switch when hasAlertSummary is true', () => {
-    const { getByTestId } = render(<AnonymizationSwitch hasAlertSummary={true} />);
+    const { getByTestId } = renderAnonymizedSwitch(mockContextValue, true);
 
     expect(getByTestId(ALERT_SUMMARY_ANONYMIZE_TOGGLE_TEST_ID)).not.toBeDisabled();
   });
 
   it('should disable the switch when hasAlertSummary is false', () => {
-    const { getByTestId } = render(<AnonymizationSwitch hasAlertSummary={false} />);
+    const { getByTestId } = renderAnonymizedSwitch(mockContextValue, false);
 
     expect(getByTestId(ALERT_SUMMARY_ANONYMIZE_TOGGLE_TEST_ID)).toBeDisabled();
   });

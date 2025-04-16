@@ -7,32 +7,27 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import {
-  AI_ASSISTANT_SECTION_TEST_ID,
-  AIForSOCPanel,
-  ALERT_SUMMARY_SECTION_TEST_ID,
-  ATTACK_DISCOVERY_SECTION_TEST_ID,
-  FLYOUT_BODY_TEST_ID,
-  SUGGESTED_PROMPTS_SECTION_TEST_ID,
-} from '.';
+import { AIForSOCPanel, FLYOUT_BODY_TEST_ID } from '.';
 import { useKibana as mockUseKibana } from '../../common/lib/kibana/__mocks__';
-import { rawEventData, TestProviders } from '../../common/mock';
-import { AIForSOCDetailsContext } from './context';
-import { useAlertsContext } from '../../detections/components/alerts_table/alerts_context';
+import { TestProviders } from '../../common/mock';
 import { mockDataFormattedForFieldBrowser } from '../document_details/shared/mocks/mock_data_formatted_for_field_browser';
-import { mockGetFieldsData } from '../document_details/shared/mocks/mock_get_fields_data';
-import { useEventDetails } from '../document_details/shared/hooks/use_event_details';
 import { type FlyoutPanelHistory, useExpandableFlyoutHistory } from '@kbn/expandable-flyout';
+import {
+  COLLAPSE_DETAILS_BUTTON_TEST_ID,
+  EXPAND_DETAILS_BUTTON_TEST_ID,
+  FLYOUT_HISTORY_BUTTON_TEST_ID,
+} from '../shared/components/test_ids';
+import { useAIForSOCDetailsContext } from './context';
+import { TAKE_ACTION_BUTTON_TEST_ID } from './components/take_action_button';
+import { mockDataAsNestedObject } from '../document_details/shared/mocks/mock_data_as_nested_object';
 
 jest.mock('@kbn/expandable-flyout', () => ({
   useExpandableFlyoutApi: jest.fn().mockReturnValue({ closeLeftPanel: jest.fn() }),
   useExpandableFlyoutHistory: jest.fn(),
   useExpandableFlyoutState: jest.fn().mockReturnValue({ left: {} }),
 }));
-jest.mock('../document_details/shared/hooks/use_event_details');
-jest.mock('../../detections/components/alerts_table/alerts_context', () => ({
-  useAlertsContext: jest.fn(),
-}));
+
+jest.mock('./context');
 
 const mockedUseKibana = {
   ...mockUseKibana(),
@@ -53,37 +48,17 @@ const mockedUseKibana = {
     },
   },
 };
-
 jest.mock('../../common/lib/kibana', () => {
   return {
     ...jest.requireActual('../../common/lib/kibana'),
     useKibana: () => mockedUseKibana,
   };
 });
-const mockContextValue = {
-  dataFormattedForFieldBrowser: mockDataFormattedForFieldBrowser,
-  getFieldsData: jest.fn().mockImplementation(mockGetFieldsData),
-  eventId: 'test-event-id',
-  indexName: 'test-index',
-  dataAsNestedObject: {
-    _id: '123',
-  },
-} as unknown as AIForSOCDetailsContext;
+
 describe('AIForSOCPanel', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    (useAlertsContext as jest.Mock).mockReturnValue({
-      showAnonymizedValues: true,
-    });
-    (useEventDetails as jest.Mock).mockReturnValue({
-      dataFormattedForFieldBrowser: mockDataFormattedForFieldBrowser,
-      dataAsNestedObject: {
-        _id: '123',
-      },
-      getFieldsData: jest.fn(),
-      loading: false,
-      searchHit: rawEventData,
-    });
+
     const flyoutHistory: FlyoutPanelHistory[] = [
       { lastOpen: Date.now(), panel: { id: 'id1', params: {} } },
     ];
@@ -91,38 +66,29 @@ describe('AIForSOCPanel', () => {
   });
 
   it('renders the AIForSOCPanel component', () => {
-    const { getByTestId } = render(
+    (useAIForSOCDetailsContext as jest.Mock).mockReturnValue({
+      dataAsNestedObject: mockDataAsNestedObject,
+      dataFormattedForFieldBrowser: mockDataFormattedForFieldBrowser,
+      getFieldsData: jest.fn(),
+      investigationFields: [],
+    });
+
+    const { getByTestId, queryByTestId } = render(
       <TestProviders>
-        <AIForSOCDetailsContext.Provider value={mockContextValue}>
-          <AIForSOCPanel />
-        </AIForSOCDetailsContext.Provider>
+        <AIForSOCPanel />
       </TestProviders>
     );
 
-    expect(getByTestId(FLYOUT_BODY_TEST_ID)).toBeInTheDocument();
-    expect(getByTestId(ALERT_SUMMARY_SECTION_TEST_ID)).toHaveTextContent('AI summary');
-    expect(getByTestId(ATTACK_DISCOVERY_SECTION_TEST_ID)).toHaveTextContent('Attack Discovery');
-    expect(getByTestId(AI_ASSISTANT_SECTION_TEST_ID)).toHaveTextContent('AI Assistant');
-    expect(getByTestId(SUGGESTED_PROMPTS_SECTION_TEST_ID)).toHaveTextContent('Suggested prompts');
-  });
+    expect(queryByTestId(EXPAND_DETAILS_BUTTON_TEST_ID)).not.toBeInTheDocument();
+    expect(queryByTestId(COLLAPSE_DETAILS_BUTTON_TEST_ID)).not.toBeInTheDocument();
 
-  it('does not render the flyout body if dataFormattedForFieldBrowser is empty', () => {
-    const { queryByTestId } = render(
-      <TestProviders>
-        <AIForSOCDetailsContext.Provider
-          value={{
-            ...mockContextValue,
-            eventId: 'test-event-id',
-            getFieldsData: jest.fn(),
-            indexName: 'test-index',
-            dataFormattedForFieldBrowser: [],
-          }}
-        >
-          <AIForSOCPanel />
-        </AIForSOCDetailsContext.Provider>
-      </TestProviders>
-    );
+    expect(getByTestId(FLYOUT_HISTORY_BUTTON_TEST_ID)).toBeInTheDocument();
 
-    expect(queryByTestId(FLYOUT_BODY_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(FLYOUT_BODY_TEST_ID)).toHaveTextContent('AI summary');
+    expect(getByTestId(FLYOUT_BODY_TEST_ID)).toHaveTextContent('Attack Discovery');
+    expect(getByTestId(FLYOUT_BODY_TEST_ID)).toHaveTextContent('AI Assistant');
+    expect(getByTestId(FLYOUT_BODY_TEST_ID)).toHaveTextContent('Suggested prompts');
+
+    expect(getByTestId(TAKE_ACTION_BUTTON_TEST_ID)).toBeInTheDocument();
   });
 });

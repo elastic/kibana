@@ -8,7 +8,7 @@
 import React, { memo, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { EuiSwitchEvent } from '@elastic/eui';
-import { EuiFlexItem, EuiFlexGroup, EuiIcon, EuiToolTip, EuiSwitch } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSwitch, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useAIForSOCDetailsContext } from '../context';
 
@@ -16,8 +16,7 @@ export const ALERT_SUMMARY_ANONYMIZE_TOGGLE_TEST_ID =
   'ai-for-soc-alert-flyout-alert-summary-anonymize-toggle';
 
 /**
- * Renders a toggle switch that allows users to enable or
- * disable the display of anonymized values in alert summary
+ * Conditionally wrap a component
  */
 const ConditionalWrap = ({
   condition,
@@ -29,7 +28,18 @@ const ConditionalWrap = ({
   children: React.ReactElement;
 }) => (condition ? wrap(children) : children);
 
-export const AnonymizationSwitch = memo(({ hasAlertSummary }: { hasAlertSummary: boolean }) => {
+export interface AnonymizationSwitchProps {
+  /**
+   * If true, the component will wrap the toggle with a tooltip
+   */
+  hasAlertSummary: boolean;
+}
+
+/**
+ * Renders a toggle switch used in the AI for SOC alert summary flyout in the AI summary section.
+ * This enables/disables anonymized values.
+ */
+export const AnonymizationSwitch = memo(({ hasAlertSummary }: AnonymizationSwitchProps) => {
   const { showAnonymizedValues, setShowAnonymizedValues } = useAIForSOCDetailsContext();
 
   const onChangeShowAnonymizedValues = useCallback(
