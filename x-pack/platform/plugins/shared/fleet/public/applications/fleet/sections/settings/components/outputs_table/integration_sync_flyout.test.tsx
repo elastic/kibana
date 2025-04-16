@@ -17,7 +17,7 @@ import {
   SyncStatus,
   type GetRemoteSyncedIntegrationsStatusResponse,
 } from '../../../../../../../common/types';
-import { sendGetPackageInfoByKey, sendGetPackageInfoByKeyForRq } from '../../../../hooks';
+import { sendGetPackageInfoByKeyForRq } from '../../../../hooks';
 
 import { IntegrationSyncFlyout } from './integration_sync_flyout';
 
@@ -27,7 +27,6 @@ jest.mock('../../../../../../components', () => ({
 }));
 
 const mockSendGetPackageInfoByKeyForRq = sendGetPackageInfoByKeyForRq as jest.Mock;
-const mockSendGetPackageInfoByKey = sendGetPackageInfoByKey as jest.Mock;
 
 describe('IntegrationSyncFlyout', () => {
   const mockOnClose = jest.fn();
@@ -104,19 +103,13 @@ describe('IntegrationSyncFlyout', () => {
         title: startCase(packageName),
       })
     );
-    mockSendGetPackageInfoByKey.mockImplementation((packageName) =>
-      Promise.resolve({
-        data: {
-          item: {
-            icons: [],
-          },
-        },
-      })
-    );
   });
 
   it('render accordion per integration', async () => {
     const component = renderComponent();
+    expect(component.getByTestId('integrationSyncFlyoutHeaderText').textContent).toContain(
+      `You're viewing sync activity for output1.`
+    );
     expect(component.getByTestId('integrationSyncFlyoutTopErrorCallout').textContent).toEqual(
       'ErrorTop level error message'
     );

@@ -46,7 +46,7 @@ export const IntegrationSyncFlyout: React.FunctionComponent<Props> = memo(
             </h2>
           </EuiTitle>
           <EuiSpacer size="s" />
-          <EuiText color="subdued" size="s">
+          <EuiText color="subdued" size="s" data-test-subj="integrationSyncFlyoutHeaderText">
             <FormattedMessage
               id="xpack.fleet.integrationSyncFlyout.headerText"
               defaultMessage="You're viewing sync activity for {outputName}. Check overall progress and view individual sync statuses from custom assets."
