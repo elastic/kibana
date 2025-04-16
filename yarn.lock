@@ -2753,10 +2753,10 @@
     base64-js "1.3.1"
     unicode-trie "^2.0.0"
 
-"@foliojs-fork/pdfkit@^0.15.1":
-  version "0.15.1"
-  resolved "https://registry.yarnpkg.com/@foliojs-fork/pdfkit/-/pdfkit-0.15.1.tgz#ecae3bcb7aad46b58e50493de593317f9b738074"
-  integrity sha512-4Cq2onHZAhThIfzv3/AFTPALqHzbmV8uNvgRELULWNbsZATgVeqEL4zHOzCyblLfX6tMXVO2BVaPcXboIxGjiw==
+"@foliojs-fork/pdfkit@^0.15.3":
+  version "0.15.3"
+  resolved "https://registry.yarnpkg.com/@foliojs-fork/pdfkit/-/pdfkit-0.15.3.tgz#590b31e770a98e2af62ce44f268a0d06b41ff32f"
+  integrity sha512-Obc0Wmy3bm7BINFVvPhcl2rnSSK61DQrlHU8aXnAqDk9LCjWdUOPwhgD8Ywz5VtuFjRxmVOM/kQ/XLIBjDvltw==
   dependencies:
     "@foliojs-fork/fontkit" "^1.9.2"
     "@foliojs-fork/linebreak" "^1.1.1"
@@ -9261,6 +9261,19 @@
   resolved "https://registry.yarnpkg.com/@protobufjs/utf8/-/utf8-1.1.0.tgz#a777360b5b39a1a2e5106f8e858f2fd2d060c570"
   integrity sha1-p3c2C1s5oaLlEG+OhY8v0tBgxXA=
 
+"@puppeteer/browsers@2.10.0":
+  version "2.10.0"
+  resolved "https://registry.yarnpkg.com/@puppeteer/browsers/-/browsers-2.10.0.tgz#a6e55bf85bfcc819e5e8c79f6122cccaa52515a4"
+  integrity sha512-HdHF4rny4JCvIcm7V1dpvpctIGqM3/Me255CB44vW7hDG1zYMmcBMjpNqZEDxdCfXGLkx5kP0+Jz5DUS+ukqtA==
+  dependencies:
+    debug "^4.4.0"
+    extract-zip "^2.0.1"
+    progress "^2.0.3"
+    proxy-agent "^6.5.0"
+    semver "^7.7.1"
+    tar-fs "^3.0.8"
+    yargs "^17.7.2"
+
 "@puppeteer/browsers@2.8.0":
   version "2.8.0"
   resolved "https://registry.yarnpkg.com/@puppeteer/browsers/-/browsers-2.8.0.tgz#9d592933cbefc66c37823770844b8cbac52607dd"
@@ -11224,10 +11237,12 @@
     "@types/qs" "*"
     "@types/serve-static" "*"
 
-"@types/extract-zip@^1.6.2":
-  version "1.6.2"
-  resolved "https://registry.yarnpkg.com/@types/extract-zip/-/extract-zip-1.6.2.tgz#5c7eb441c41136167a42b88b64051e6260c29e86"
-  integrity sha1-XH60QcQRNhZ6QriLZAUeYmDCnoY=
+"@types/extract-zip@^2.0.3":
+  version "2.0.3"
+  resolved "https://registry.yarnpkg.com/@types/extract-zip/-/extract-zip-2.0.3.tgz#5872005fd818767734c3528ba0bf57fc80a8c848"
+  integrity sha512-yrO7h+0qOIGxHCmBeL5fKFzR+PBafh9LG6sOLBFFi2JuN+Hj663TAxfnqJh5vkQn963VimrhBF1GZzea3A+4Ig==
+  dependencies:
+    extract-zip "*"
 
 "@types/fetch-mock@^7.3.1":
   version "7.3.1"
@@ -11776,10 +11791,10 @@
   dependencies:
     "@types/node" "*"
 
-"@types/pdfmake@^0.2.2":
-  version "0.2.2"
-  resolved "https://registry.yarnpkg.com/@types/pdfmake/-/pdfmake-0.2.2.tgz#5683262e97e9b0189745a8572c49c51ba87c1573"
-  integrity sha512-CBtkugrgklpXsZ9Wj/+cw+zYoeDnJxVev62ahwpdPCz/O405Wxr+iq76JgUiZc/QAo3P2lWbI2nYA5GrrSL8VQ==
+"@types/pdfmake@^0.2.11":
+  version "0.2.11"
+  resolved "https://registry.yarnpkg.com/@types/pdfmake/-/pdfmake-0.2.11.tgz#ca5475efe44c966e88aed90040670f562ac1eebc"
+  integrity sha512-gglgMQhnG6C2kco13DJlvokqTxL+XKxHwCejElH8fSCNF9ZCkRK6Mzo011jQ0zuug+YlIgn6BpcpZrARyWdW3Q==
   dependencies:
     "@types/node" "*"
     "@types/pdfkit" "*"
@@ -14715,6 +14730,14 @@ chromium-bidi@2.1.2:
     mitt "^3.0.1"
     zod "^3.24.1"
 
+chromium-bidi@3.0.0:
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/chromium-bidi/-/chromium-bidi-3.0.0.tgz#bfb0549db96552d42377401aadc0198a1bbb3e9f"
+  integrity sha512-ZOGRDAhBMX1uxL2Cm2TDuhImbrsEz5A/tTcVU6RpXEWaTNUNwsHW6njUXizh51Ir6iqHbKAfhA2XK33uBcLo5A==
+  dependencies:
+    mitt "^3.0.1"
+    zod "^3.24.1"
+
 ci-info@^3.2.0:
   version "3.8.0"
   resolved "https://registry.yarnpkg.com/ci-info/-/ci-info-3.8.0.tgz#81408265a5380c929f0bc665d62256628ce9ef91"
@@ -16820,6 +16843,11 @@ devtools-protocol@0.0.1423531:
   resolved "https://registry.yarnpkg.com/devtools-protocol/-/devtools-protocol-0.0.1423531.tgz#43ba906340fb8ffbda566711ead31f139b2a150a"
   integrity sha512-z6cOcajZWxk80zvFnkTGa7tj3oqF+C5SnOF1KSMeAr5/WW/nLNHlEpKr7voSzMz8IaUoq5rjdI0Mqv5k/BUkhg==
 
+devtools-protocol@0.0.1425554:
+  version "0.0.1425554"
+  resolved "https://registry.yarnpkg.com/devtools-protocol/-/devtools-protocol-0.0.1425554.tgz#51ed2fed1405f56783d24a393f7c75b6bbb58029"
+  integrity sha512-uRfxR6Nlzdzt0ihVIkV+sLztKgs7rgquY/Mhcv1YNCWDh5IZgl5mnn2aeEnW5stYTE0wwiF4RYVz8eMEpV1SEw==
+
 devtools-protocol@0.0.927104:
   version "0.0.927104"
   resolved "https://registry.yarnpkg.com/devtools-protocol/-/devtools-protocol-0.0.927104.tgz#3bba0fca644bcdce1bcebb10ae392ab13428a7a0"
@@ -18324,7 +18352,7 @@ extglob@^2.0.4:
     snapdragon "^0.8.1"
     to-regex "^3.0.1"
 
-extract-zip@2.0.1, extract-zip@^2.0.1:
+extract-zip@*, extract-zip@2.0.1, extract-zip@^2.0.1:
   version "2.0.1"
   resolved "https://registry.yarnpkg.com/extract-zip/-/extract-zip-2.0.1.tgz#663dca56fe46df890d5f131ef4a06d22bb8ba13a"
   integrity sha512-GDhU9ntwuKyGXdZBUgTIe+vXnWj0fppUEtMDL0+idd5Sta8TGpHssn/eusA9mrPr9qNDym6SxAYZjNvCn/9RBg==
@@ -25378,13 +25406,13 @@ pbkdf2@^3.0.3:
     safe-buffer "^5.0.1"
     sha.js "^2.4.8"
 
-pdfmake@^0.2.15:
-  version "0.2.15"
-  resolved "https://registry.yarnpkg.com/pdfmake/-/pdfmake-0.2.15.tgz#86bbc2c854e8a1cc98d4d6394b39dae00cc3a3b0"
-  integrity sha512-Ryef9mjxo6q8dthhbssAK0zwCsPZ6Pl7kCHnIEXOvQdd79LUGZD6SHGi21YryFXczPjvw6V009uxQwp5iritcA==
+pdfmake@^0.2.18:
+  version "0.2.18"
+  resolved "https://registry.yarnpkg.com/pdfmake/-/pdfmake-0.2.18.tgz#0be32a9274466494a69285193b64f61f3198ea4e"
+  integrity sha512-Fe+GnMS8EVZu5rci/CDaQ+xmUoHvx8P+rvIlrwSYM6A5c7Aik8G6lpJbddhjBE2jXGjv6WcUCFCB06uZbjxkMw==
   dependencies:
     "@foliojs-fork/linebreak" "^1.1.2"
-    "@foliojs-fork/pdfkit" "^0.15.1"
+    "@foliojs-fork/pdfkit" "^0.15.3"
     iconv-lite "^0.6.3"
     xmldoc "^1.3.0"
 
@@ -26282,7 +26310,19 @@ punycode@^2.1.0, punycode@^2.1.1:
   resolved "https://registry.yarnpkg.com/punycode/-/punycode-2.1.1.tgz#b58b010ac40c22c5657616c8d2c2c02c7bf479ec"
   integrity sha512-XRsRjdf+j5ml+y/6GKHPZbrF/8p2Yga0JPtdqTIY2Xe5ohJPD9saDJJLPvp9+NSBprVvevdXZybnj2cv8OEd0A==
 
-puppeteer-core@24.4.0, puppeteer-core@^24.3.0:
+puppeteer-core@24.6.1:
+  version "24.6.1"
+  resolved "https://registry.yarnpkg.com/puppeteer-core/-/puppeteer-core-24.6.1.tgz#fc2ea21a49d6d8240cc959b729a12ba976ac140a"
+  integrity sha512-sMCxsY+OPWO2fecBrhIeCeJbWWXJ6UaN997sTid6whY0YT9XM0RnxEwLeUibluIS5/fRmuxe1efjb5RMBsky7g==
+  dependencies:
+    "@puppeteer/browsers" "2.10.0"
+    chromium-bidi "3.0.0"
+    debug "^4.4.0"
+    devtools-protocol "0.0.1425554"
+    typed-query-selector "^2.12.0"
+    ws "^8.18.1"
+
+puppeteer-core@^24.3.0:
   version "24.4.0"
   resolved "https://registry.yarnpkg.com/puppeteer-core/-/puppeteer-core-24.4.0.tgz#a301c58344fe939b487704593681ea9f913fe6f8"
   integrity sha512-eFw66gCnWo0X8Hyf9KxxJtms7a61NJVMiSaWfItsFPzFBsjsWdmcNlBdsA1WVwln6neoHhsG+uTVesKmTREn/g==
@@ -26294,16 +26334,16 @@ puppeteer-core@24.4.0, puppeteer-core@^24.3.0:
     typed-query-selector "^2.12.0"
     ws "^8.18.1"
 
-puppeteer@24.4.0:
-  version "24.4.0"
-  resolved "https://registry.yarnpkg.com/puppeteer/-/puppeteer-24.4.0.tgz#fb45a67e72f4e6e34db8f404ef61cdd42099e6e6"
-  integrity sha512-E4JhJzjS8AAI+6N/b+Utwarhz6zWl3+MR725fal+s3UlOlX2eWdsvYYU+Q5bXMjs9eZEGkNQroLkn7j11s2k1Q==
+puppeteer@24.6.1:
+  version "24.6.1"
+  resolved "https://registry.yarnpkg.com/puppeteer/-/puppeteer-24.6.1.tgz#828308e1e05654c4ca87399e677d10e3eeb32702"
+  integrity sha512-/4ocGfu8LNvDbWUqJZV2VmwEWpbOdJa69y2Jivd213tV0ekAtUh/bgT1hhW63SDN/CtrEucOPwoomZ+9M+eBEg==
   dependencies:
-    "@puppeteer/browsers" "2.8.0"
-    chromium-bidi "2.1.2"
+    "@puppeteer/browsers" "2.10.0"
+    chromium-bidi "3.0.0"
     cosmiconfig "^9.0.0"
-    devtools-protocol "0.0.1413902"
-    puppeteer-core "24.4.0"
+    devtools-protocol "0.0.1425554"
+    puppeteer-core "24.6.1"
     typed-query-selector "^2.12.0"
 
 pure-rand@^6.0.0:
