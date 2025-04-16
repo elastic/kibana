@@ -14,6 +14,7 @@ import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MemoryRouter } from 'react-router-dom';
 import type { ISearchStart } from '@kbn/data-plugin/public';
+import moment from 'moment';
 import { IndicatorsFiltersContext } from '../modules/indicators/hooks/use_filters_context';
 import { mockIndicatorsFiltersContext } from './mock_indicators_filters_context';
 import { FieldTypesContext } from '../containers/field_types_provider';
@@ -44,7 +45,17 @@ export const mockedSearchService = {
   search: jest.fn(),
 } as unknown as ISearchStart;
 
-export const mockedQueryService = {};
+const fixedMoment = moment(new Date('2025-05-16 00:00:00'));
+
+export const mockedTimefilterService = {
+  timefilter: {
+    calculateBounds: jest.fn().mockReturnValue({ min: fixedMoment, max: fixedMoment }),
+  },
+};
+
+export const mockedQueryService = {
+  timefilter: mockedTimefilterService,
+};
 
 export const createTiStorageMock = () => {
   const localStorage = localStorageMock();
@@ -56,12 +67,6 @@ export const createTiStorageMock = () => {
 
 export const mockedServices = {
   ...createTiStorageMock(),
-};
-
-export const mockedTimefilterService = {
-  timefilter: {
-    calculateBounds: jest.fn(),
-  },
 };
 
 export const unifiedSearch = unifiedSearchPluginMock.createStartContract();
