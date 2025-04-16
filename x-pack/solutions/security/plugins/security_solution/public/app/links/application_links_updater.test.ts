@@ -5,8 +5,11 @@
  * 2.0.
  */
 
-import { applicationLinksUpdater as appLinksInstance } from './application_links_updater';
-import type { AppLinkItems, LinkItem, LinksPermissions } from '../../common/links/types';
+import {
+  applicationLinksUpdater,
+  type ApplicationLinksUpdateParams,
+} from './application_links_updater';
+import type { AppLinkItems, LinkItem } from '../../common/links/types';
 import { hasCapabilities as mockHasCapabilities } from '../../common/lib/capabilities';
 import type { Capabilities, IUiSettingsClient } from '@kbn/core/public';
 import type { ExperimentalFeatures, SecurityPageName } from '../../../common';
@@ -18,8 +21,8 @@ jest.mock('../../common/lib/capabilities', () => ({
 }));
 
 // Allow access to private method just for testing
-const appLinks = appLinksInstance as unknown as {
-  filterAppLinks: (links: AppLinkItems, permissions: LinksPermissions) => LinkItem[];
+const appLinks = applicationLinksUpdater as unknown as {
+  filterAppLinks: (links: AppLinkItems, params: ApplicationLinksUpdateParams) => LinkItem[];
 };
 
 const link: LinkItem = {
@@ -29,7 +32,9 @@ const link: LinkItem = {
 };
 
 describe('ApplicationLinks - filterAppLinks', () => {
-  const createMockPermissions = (overrides: Partial<LinksPermissions> = {}): LinksPermissions => ({
+  const createMockParams = (
+    overrides: Partial<ApplicationLinksUpdateParams> = {}
+  ): ApplicationLinksUpdateParams => ({
     capabilities: {} as Capabilities,
     experimentalFeatures: {} as ExperimentalFeatures,
     uiSettingsClient: {
@@ -48,11 +53,11 @@ describe('ApplicationLinks - filterAppLinks', () => {
     jest.clearAllMocks();
   });
 
-  it('should include a link when all permissions pass', () => {
+  it('should include a link when all links are allowed', () => {
     (mockHasCapabilities as jest.Mock).mockReturnValue(true);
 
-    const permissions = createMockPermissions();
-    const result = appLinks.filterAppLinks([link], permissions);
+    const params = createMockParams();
+    const result = appLinks.filterAppLinks([link], params);
 
     expect(result).toEqual([link]);
   });
@@ -62,8 +67,8 @@ describe('ApplicationLinks - filterAppLinks', () => {
 
     const links: AppLinkItems = [{ ...link, capabilities: ['admin'] }];
 
-    const permissions = createMockPermissions();
-    const result = appLinks.filterAppLinks(links, permissions);
+    const params = createMockParams();
+    const result = appLinks.filterAppLinks(links, params);
 
     expect(result).toEqual([]);
   });
@@ -73,13 +78,13 @@ describe('ApplicationLinks - filterAppLinks', () => {
 
     const links: AppLinkItems = [{ ...link, capabilities: ['advanced_access'] }];
 
-    const permissions = createMockPermissions({
+    const params = createMockParams({
       upselling: {
         isPageUpsellable: jest.fn((id: string) => id === 'test'),
       } as unknown as UpsellingService,
     });
 
-    const result = appLinks.filterAppLinks(links, permissions);
+    const result = appLinks.filterAppLinks(links, params);
 
     expect(result).toEqual([expect.objectContaining({ ...link, unauthorized: true })]);
   });
@@ -89,13 +94,13 @@ describe('ApplicationLinks - filterAppLinks', () => {
 
     const links: AppLinkItems = [{ ...link, uiSettingRequired: 'showBeta' }];
 
-    const permissions = createMockPermissions({
+    const params = createMockParams({
       uiSettingsClient: {
         get: jest.fn().mockImplementation((key: string) => key !== 'showBeta'),
       } as unknown as IUiSettingsClient,
     });
 
-    const result = appLinks.filterAppLinks(links, permissions);
+    const result = appLinks.filterAppLinks(links, params);
 
     expect(result).toEqual([]);
   });
@@ -107,13 +112,13 @@ describe('ApplicationLinks - filterAppLinks', () => {
       { ...link, experimentalKey: 'labsEnabled' as keyof ExperimentalFeatures },
     ];
 
-    const permissions = createMockPermissions({
+    const params = createMockParams({
       experimentalFeatures: {
         labsEnabled: false,
       } as unknown as ExperimentalFeatures,
     });
 
-    const result = appLinks.filterAppLinks(links, permissions);
+    const result = appLinks.filterAppLinks(links, params);
 
     expect(result).toEqual([]);
   });
@@ -146,13 +151,13 @@ describe('ApplicationLinks - filterAppLinks', () => {
       },
     ];
 
-    const permissions = createMockPermissions({
+    const params = createMockParams({
       upselling: {
         isPageUpsellable: jest.fn().mockReturnValue(false),
       } as unknown as UpsellingService,
     });
 
-    const result = appLinks.filterAppLinks(links, permissions);
+    const result = appLinks.filterAppLinks(links, params);
 
     expect(result).toEqual([
       expect.objectContaining({
