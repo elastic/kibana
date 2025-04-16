@@ -44,7 +44,7 @@ export async function populateMissingSemanticTextFieldMigration({
       });
 
       if (!hasKbIndex) {
-        logger.debug('Knowledge base index does not exist. Aborting updating index assets');
+        logger.warn('Knowledge base index does not exist. Aborting updating index assets');
         return;
       }
 
