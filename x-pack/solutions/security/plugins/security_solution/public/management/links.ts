@@ -17,6 +17,7 @@ import {
   BLOCKLIST_PATH,
   ENDPOINTS_PATH,
   ENTITY_ANALYTICS_ENTITY_STORE_MANAGEMENT_PATH,
+  ENTITY_ANALYTICS_ASSET_CRITICALITY_PATH,
   ENTITY_ANALYTICS_MANAGEMENT_PATH,
   EVENT_FILTERS_PATH,
   HOST_ISOLATION_EXCEPTIONS_PATH,
@@ -63,6 +64,7 @@ const categories = [
     linkIds: [
       SecurityPageName.entityAnalyticsManagement,
       SecurityPageName.entityAnalyticsEntityStoreManagement,
+      SecurityPageName.entityAnalyticsAssetClassification,
     ],
   },
   {

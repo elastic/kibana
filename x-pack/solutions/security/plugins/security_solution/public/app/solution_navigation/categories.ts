@@ -59,6 +59,7 @@ export const CATEGORIES: Array<SeparatorLinkCategory<SolutionPageName>> = [
     linkIds: [
       SecurityPageName.entityAnalyticsManagement,
       SecurityPageName.entityAnalyticsEntityStoreManagement,
+      SecurityPageName.entityAnalyticsAssetClassification,
     ], // Linked from the management cards landing.
   },
 ];
