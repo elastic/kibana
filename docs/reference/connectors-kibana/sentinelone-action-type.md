@@ -21,10 +21,8 @@ To use this connector, you must have authority to run {{endpoint-sec}} connector
 
 You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**. For example:
 
-:::{image} /reference/images/sentinelone-connector.png
-:alt: SentinelOne connector
-:class: screenshot
-:::
+% TO DO: Use `:class: screenshot`
+![SentinelOne connector](../images/sentinelone-connector.png)
 
 
 ### Connector configuration [sentinelone-connector-configuration]
