@@ -60,4 +60,5 @@ export interface MetricOptions {
   lightText: boolean;
   colIndex: number;
   rowIndex: number;
+  description?: string;
 }
