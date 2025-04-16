@@ -33,6 +33,7 @@ const TabbedContentTemplate: StoryFn<TabbedContentProps> = (args) => {
   return (
     <TabbedContent
       {...args}
+      recentlyClosedItems={[]}
       createItem={getNewTabDefaultProps}
       getPreviewData={getPreviewDataMock}
       services={servicesMock}

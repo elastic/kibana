@@ -26,12 +26,14 @@ const tabsBarMenuButtonTestId = 'unifiedTabs_tabsBarMenuButton';
 
 describe('TabsBarMenu', () => {
   const mockOnSelectOpenedTab = jest.fn();
+  const mockOnSelectClosedTab = jest.fn();
 
   const defaultProps = {
-    openedItems: mockTabs,
+    items: mockTabs,
     selectedItem: mockTabs[0],
-    onSelectOpenedTab: mockOnSelectOpenedTab,
     recentlyClosedItems: mockRecentlyClosedTabs,
+    onSelect: mockOnSelectOpenedTab,
+    onSelectRecentlyClosed: mockOnSelectClosedTab,
   };
 
   beforeEach(() => {
@@ -94,6 +96,19 @@ describe('TabsBarMenu', () => {
     mockRecentlyClosedTabs.forEach((tab) => {
       expect(screen.getByText(tab.label)).toBeInTheDocument();
     });
+  });
+
+  it('selects a closed tab when clicked', () => {
+    render(<TabsBarMenu {...defaultProps} />);
+
+    const menuButton = screen.getByTestId(tabsBarMenuButtonTestId);
+
+    fireEvent.click(menuButton);
+
+    const closedTabOption = screen.getByText(mockRecentlyClosedTabs[0].label);
+    fireEvent.click(closedTabOption);
+
+    expect(mockOnSelectClosedTab).toHaveBeenCalledWith(mockRecentlyClosedTabs[0]);
   });
 
   it('does not show recently closed section when array is empty', () => {

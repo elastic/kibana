@@ -28,6 +28,7 @@ describe('TabbedContent', () => {
       <TabbedContent
         initialItems={initialItems}
         initialSelectedItemId={initialSelectedItemId}
+        recentlyClosedItems={[]}
         createItem={() => NEW_TAB}
         getPreviewData={getPreviewDataMock}
         services={servicesMock}
