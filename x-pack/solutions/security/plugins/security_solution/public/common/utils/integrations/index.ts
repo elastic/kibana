@@ -5,17 +5,24 @@
  * 2.0.
  */
 
+import { stringifyUrl } from 'query-string';
 import { APP_UI_ID } from '../../../../common';
 
 export const RETURN_APP_ID = 'returnAppId';
 export const RETURN_PATH = 'returnPath';
 
-export const addPathParamToUrl = (url: string, onboardingLink: string) => {
-  const encoded = encodeURIComponent(onboardingLink);
-  const paramsString = `${RETURN_PATH}=${encoded}&${RETURN_APP_ID}=${APP_UI_ID}`;
-
-  if (url.indexOf('?') >= 0) {
-    return `${url}&${paramsString}`;
-  }
-  return `${url}?${paramsString}`;
+export const addPathParamToUrl = (url: string, onboardingLink: string): string => {
+  return stringifyUrl(
+    {
+      url,
+      query: {
+        [RETURN_APP_ID]: APP_UI_ID,
+        [RETURN_PATH]: onboardingLink,
+      },
+    },
+    {
+      encode: true,
+      sort: false,
+    }
+  );
 };

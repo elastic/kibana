@@ -15,7 +15,7 @@ export const useFetchPrivilegedUserIndices = (query: string | undefined) => {
     ({ signal }) => searchPrivMonIndices({ signal, query }),
     {
       keepPreviousData: true,
-      cacheTime: 0,
+      cacheTime: 0, // Do not cache the data because it is used by an autocomplete query
       refetchOnWindowFocus: false,
     }
   );
