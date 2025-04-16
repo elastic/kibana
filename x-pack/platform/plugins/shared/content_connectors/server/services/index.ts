@@ -226,6 +226,7 @@ export class AgentlessConnectorsInfraService {
       inputs: [
         {
           type: connectorsInputName,
+          policy_template: connector.service_type,
           enabled: true,
           vars: {
             connector_id: { type: 'string', value: connector.id },
