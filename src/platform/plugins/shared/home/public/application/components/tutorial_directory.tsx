@@ -173,7 +173,11 @@ class TutorialDirectoryUi extends React.Component<
       });
     }
 
-    getServices().chrome.setBreadcrumbs(breadcrumbs);
+    getServices().chrome.setBreadcrumbs(breadcrumbs, {
+      project: {
+        value: breadcrumbs,
+      },
+    });
   };
 
   onSelectedTabChanged = (id: string) => {

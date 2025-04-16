@@ -11,6 +11,7 @@ import { useEuiTheme } from '@elastic/eui';
 import moment from 'moment';
 import { useFormContext } from 'react-hook-form';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { cloneDeep } from 'lodash';
 import { AnnotationTooltip } from './annotation_tooltip';
 import type { Annotation, CreateAnnotationParams } from '../../../../common/annotations';
 
@@ -35,7 +36,7 @@ export function NewRectAnnotation({
 
   return (
     <ObsRectAnnotation
-      annotation={{
+      annotation={cloneDeep({
         ...values,
         annotation: {
           ...values.annotation,
@@ -43,7 +44,7 @@ export function NewRectAnnotation({
           type: annotationType,
         },
         ...(slo ? { slo: { id: slo.id, instanceId: slo.instanceId } } : {}),
-      }}
+      })}
     />
   );
 }

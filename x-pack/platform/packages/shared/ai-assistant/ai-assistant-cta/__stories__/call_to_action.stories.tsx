@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { ComponentMeta, ComponentStory } from '@storybook/react';
+import { Meta, StoryFn } from '@storybook/react';
 import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { AssistantCallToAction as Component } from '../call_to_action';
@@ -14,6 +14,12 @@ import { AssistantCallToAction as Component } from '../call_to_action';
 export default {
   title: 'Layout/Call to Action',
   component: Component,
+  parameters: {
+    layout: 'fullscreen',
+  },
+  args: {
+    centered: true,
+  },
   argTypes: {
     description: {
       control: 'text',
@@ -21,20 +27,38 @@ export default {
     title: {
       control: 'text',
     },
+    centered: {
+      control: 'boolean',
+    },
   },
-} as ComponentMeta<typeof Component>;
+} as Meta<typeof Component>;
 
-export const CallToAction: ComponentStory<typeof Component> = (args) => (
-  <Component {...args}>
-    <EuiFlexGroup direction="row" gutterSize="m">
-      <EuiFlexItem>
-        <EuiButton color="primary" fill>
-          Some action to take.
-        </EuiButton>
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <EuiButton color="primary">Another action to take.</EuiButton>
+export const CallToAction: StoryFn<typeof Component> = (args) => {
+  const component = (
+    <Component {...args}>
+      <EuiFlexGroup direction="row" gutterSize="m">
+        <EuiFlexItem>
+          <EuiButton color="primary" fill>
+            Some action to take.
+          </EuiButton>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiButton color="primary">Another action to take.</EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </Component>
+  );
+
+  return (
+    <EuiFlexGroup
+      justifyContent="center"
+      direction="row"
+      alignItems="center"
+      style={{ height: '100vh' }}
+    >
+      <EuiFlexItem grow={true}>
+        <div>{component}</div>
       </EuiFlexItem>
     </EuiFlexGroup>
-  </Component>
-);
+  );
+};

@@ -25,3 +25,8 @@ export const getDefaultRowsPerPage = (uiSettings: IUiSettingsClient): number => 
 
 // local storage key for the ES|QL to Dataviews transition modal
 export const ESQL_TRANSITION_MODAL_KEY = 'data.textLangTransitionModal';
+
+/**
+ * The query param key used to store the Discover app state in the URL
+ */
+export const APP_STATE_URL_KEY = '_a';

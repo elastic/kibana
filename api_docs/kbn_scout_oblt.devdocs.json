@@ -1071,18 +1071,24 @@
           },
           "; samlAuth: ",
           {
-            "pluginId": "@kbn/test",
+            "pluginId": "@kbn/scout",
             "scope": "common",
-            "docId": "kibKbnTestPluginApi",
-            "section": "def-common.SamlSessionManager",
-            "text": "SamlSessionManager"
+            "docId": "kibKbnScoutPluginApi",
+            "section": "def-common.SamlAuth",
+            "text": "SamlAuth"
           },
           "; } & { esArchiver: ",
           "EsArchiverFixture",
           "; } & ",
           "SynthtraceFixture",
-          " & { fleetApi: ",
-          "FleetApiFixture",
+          " & { apiServices: ",
+          {
+            "pluginId": "@kbn/scout",
+            "scope": "common",
+            "docId": "kibKbnScoutPluginApi",
+            "section": "def-common.ApiServicesFixture",
+            "text": "ApiServicesFixture"
+          },
           "; }>"
         ],
         "path": "src/platform/packages/shared/kbn-scout/src/playwright/index.ts",
@@ -1106,7 +1112,13 @@
           " & ",
           "PlaywrightTestOptions",
           " & { browserAuth: ",
-          "BrowserAuthFixture",
+          {
+            "pluginId": "@kbn/scout",
+            "scope": "common",
+            "docId": "kibKbnScoutPluginApi",
+            "section": "def-common.BrowserAuthFixture",
+            "text": "BrowserAuthFixture"
+          },
           "; } & { page: ",
           {
             "pluginId": "@kbn/scout",
@@ -1171,16 +1183,22 @@
           },
           "; samlAuth: ",
           {
-            "pluginId": "@kbn/test",
+            "pluginId": "@kbn/scout",
             "scope": "common",
-            "docId": "kibKbnTestPluginApi",
-            "section": "def-common.SamlSessionManager",
-            "text": "SamlSessionManager"
+            "docId": "kibKbnScoutPluginApi",
+            "section": "def-common.SamlAuth",
+            "text": "SamlAuth"
           },
           "; } & { scoutSpace: ",
           "ScoutSpaceParallelFixture",
-          "; } & { fleetApi: ",
-          "FleetApiFixture",
+          "; } & { apiServices: ",
+          {
+            "pluginId": "@kbn/scout",
+            "scope": "common",
+            "docId": "kibKbnScoutPluginApi",
+            "section": "def-common.ApiServicesFixture",
+            "text": "ApiServicesFixture"
+          },
           "; } & { log: ",
           {
             "pluginId": "@kbn/scout",
@@ -1201,13 +1219,21 @@
           "ScoutSpaceParallelFixture",
           "; } & { scoutSpace: ",
           "ScoutSpaceParallelFixture",
-          "; } & ",
+          "; config: ",
           {
             "pluginId": "@kbn/scout",
             "scope": "common",
             "docId": "kibKbnScoutPluginApi",
-            "section": "def-common.ScoutParallelWorkerFixtures",
-            "text": "ScoutParallelWorkerFixtures"
+            "section": "def-common.ScoutTestConfig",
+            "text": "ScoutTestConfig"
+          },
+          "; } & ",
+          {
+            "pluginId": "@kbn/scout-oblt",
+            "scope": "common",
+            "docId": "kibKbnScoutObltPluginApi",
+            "section": "def-common.ObltParallelWorkerFixtures",
+            "text": "ObltParallelWorkerFixtures"
           },
           ">"
         ],
@@ -1232,7 +1258,13 @@
           " & ",
           "PlaywrightTestOptions",
           " & { browserAuth: ",
-          "BrowserAuthFixture",
+          {
+            "pluginId": "@kbn/scout",
+            "scope": "common",
+            "docId": "kibKbnScoutPluginApi",
+            "section": "def-common.BrowserAuthFixture",
+            "text": "BrowserAuthFixture"
+          },
           "; } & { page: ",
           {
             "pluginId": "@kbn/scout",
@@ -1257,7 +1289,9 @@
             "section": "def-common.PageObjects",
             "text": "PageObjects"
           },
-          "; } & { validateTags: void; } & ",
+          "; } & { validateTags: void; } & { perfTracker: ",
+          "PerformanceTracker",
+          "; } & ",
           {
             "pluginId": "@kbn/scout-oblt",
             "scope": "common",
@@ -1305,11 +1339,11 @@
           },
           "; samlAuth: ",
           {
-            "pluginId": "@kbn/test",
+            "pluginId": "@kbn/scout",
             "scope": "common",
-            "docId": "kibKbnTestPluginApi",
-            "section": "def-common.SamlSessionManager",
-            "text": "SamlSessionManager"
+            "docId": "kibKbnScoutPluginApi",
+            "section": "def-common.SamlAuth",
+            "text": "SamlAuth"
           },
           "; } & { esArchiver: ",
           "EsArchiverFixture",
@@ -1317,8 +1351,14 @@
           "UiSettingsFixture",
           "; } & ",
           "SynthtraceFixture",
-          " & { fleetApi: ",
-          "FleetApiFixture",
+          " & { apiServices: ",
+          {
+            "pluginId": "@kbn/scout",
+            "scope": "common",
+            "docId": "kibKbnScoutPluginApi",
+            "section": "def-common.ApiServicesFixture",
+            "text": "ApiServicesFixture"
+          },
           "; } & { kbnUrl: ",
           {
             "pluginId": "@kbn/scout",
@@ -1327,13 +1367,21 @@
             "section": "def-common.KibanaUrl",
             "text": "KibanaUrl"
           },
-          "; } & ",
+          "; } & { config: ",
           {
             "pluginId": "@kbn/scout",
             "scope": "common",
             "docId": "kibKbnScoutPluginApi",
-            "section": "def-common.ScoutWorkerFixtures",
-            "text": "ScoutWorkerFixtures"
+            "section": "def-common.ScoutTestConfig",
+            "text": "ScoutTestConfig"
+          },
+          "; } & ",
+          {
+            "pluginId": "@kbn/scout-oblt",
+            "scope": "common",
+            "docId": "kibKbnScoutObltPluginApi",
+            "section": "def-common.ObltWorkerFixtures",
+            "text": "ObltWorkerFixtures"
           },
           ">"
         ],
@@ -5836,6 +5884,57 @@
       },
       {
         "parentPluginId": "@kbn/scout-oblt",
+        "id": "def-common.ObltParallelWorkerFixtures",
+        "type": "Interface",
+        "tags": [],
+        "label": "ObltParallelWorkerFixtures",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/scout-oblt",
+            "scope": "common",
+            "docId": "kibKbnScoutObltPluginApi",
+            "section": "def-common.ObltParallelWorkerFixtures",
+            "text": "ObltParallelWorkerFixtures"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/scout",
+            "scope": "common",
+            "docId": "kibKbnScoutPluginApi",
+            "section": "def-common.ScoutParallelWorkerFixtures",
+            "text": "ScoutParallelWorkerFixtures"
+          }
+        ],
+        "path": "x-pack/solutions/observability/packages/kbn-scout-oblt/src/playwright/fixtures/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/scout-oblt",
+            "id": "def-common.ObltParallelWorkerFixtures.apiServices",
+            "type": "Object",
+            "tags": [],
+            "label": "apiServices",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/scout",
+                "scope": "common",
+                "docId": "kibKbnScoutPluginApi",
+                "section": "def-common.ApiServicesFixture",
+                "text": "ApiServicesFixture"
+              }
+            ],
+            "path": "x-pack/solutions/observability/packages/kbn-scout-oblt/src/playwright/fixtures/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/scout-oblt",
         "id": "def-common.ObltTestFixtures",
         "type": "Interface",
         "tags": [],
@@ -5876,6 +5975,57 @@
                 "docId": "kibKbnScoutObltPluginApi",
                 "section": "def-common.ObltPageObjects",
                 "text": "ObltPageObjects"
+              }
+            ],
+            "path": "x-pack/solutions/observability/packages/kbn-scout-oblt/src/playwright/fixtures/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/scout-oblt",
+        "id": "def-common.ObltWorkerFixtures",
+        "type": "Interface",
+        "tags": [],
+        "label": "ObltWorkerFixtures",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/scout-oblt",
+            "scope": "common",
+            "docId": "kibKbnScoutObltPluginApi",
+            "section": "def-common.ObltWorkerFixtures",
+            "text": "ObltWorkerFixtures"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/scout",
+            "scope": "common",
+            "docId": "kibKbnScoutPluginApi",
+            "section": "def-common.ScoutWorkerFixtures",
+            "text": "ScoutWorkerFixtures"
+          }
+        ],
+        "path": "x-pack/solutions/observability/packages/kbn-scout-oblt/src/playwright/fixtures/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/scout-oblt",
+            "id": "def-common.ObltWorkerFixtures.apiServices",
+            "type": "Object",
+            "tags": [],
+            "label": "apiServices",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/scout",
+                "scope": "common",
+                "docId": "kibKbnScoutPluginApi",
+                "section": "def-common.ApiServicesFixture",
+                "text": "ApiServicesFixture"
               }
             ],
             "path": "x-pack/solutions/observability/packages/kbn-scout-oblt/src/playwright/fixtures/types.ts",
@@ -6100,11 +6250,14 @@
           },
           {
             "parentPluginId": "@kbn/scout-oblt",
-            "id": "def-common.ScoutTestConfig.license",
+            "id": "def-common.ScoutTestConfig.cloudHostName",
             "type": "string",
             "tags": [],
-            "label": "license",
+            "label": "cloudHostName",
             "description": [],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/platform/packages/shared/kbn-scout/src/types/test_config.d.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6115,6 +6268,17 @@
             "type": "string",
             "tags": [],
             "label": "cloudUsersFilePath",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-scout/src/types/test_config.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout-oblt",
+            "id": "def-common.ScoutTestConfig.license",
+            "type": "string",
+            "tags": [],
+            "label": "license",
             "description": [],
             "path": "src/platform/packages/shared/kbn-scout/src/types/test_config.d.ts",
             "deprecated": false,
@@ -6201,12 +6365,12 @@
           {
             "parentPluginId": "@kbn/scout-oblt",
             "id": "def-common.ScoutTestOptions.configName",
-            "type": "string",
+            "type": "CompoundType",
             "tags": [],
             "label": "configName",
             "description": [],
             "signature": [
-              "\"local\""
+              "\"local\" | \"cloud_ech\" | \"cloud_mki\""
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/types/index.ts",
             "deprecated": false,
@@ -6231,39 +6395,18 @@
     "misc": [
       {
         "parentPluginId": "@kbn/scout-oblt",
-        "id": "def-common.ObltParallelWorkerFixtures",
+        "id": "def-common.ObltApiServicesFixture",
         "type": "Type",
         "tags": [],
-        "label": "ObltParallelWorkerFixtures",
+        "label": "ObltApiServicesFixture",
         "description": [],
         "signature": [
           {
             "pluginId": "@kbn/scout",
             "scope": "common",
             "docId": "kibKbnScoutPluginApi",
-            "section": "def-common.ScoutParallelWorkerFixtures",
-            "text": "ScoutParallelWorkerFixtures"
-          }
-        ],
-        "path": "x-pack/solutions/observability/packages/kbn-scout-oblt/src/playwright/fixtures/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/scout-oblt",
-        "id": "def-common.ObltWorkerFixtures",
-        "type": "Type",
-        "tags": [],
-        "label": "ObltWorkerFixtures",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "@kbn/scout",
-            "scope": "common",
-            "docId": "kibKbnScoutPluginApi",
-            "section": "def-common.ScoutWorkerFixtures",
-            "text": "ScoutWorkerFixtures"
+            "section": "def-common.ApiServicesFixture",
+            "text": "ApiServicesFixture"
           }
         ],
         "path": "x-pack/solutions/observability/packages/kbn-scout-oblt/src/playwright/fixtures/types.ts",
@@ -6350,6 +6493,20 @@
             "type": "Array",
             "tags": [],
             "label": "DEPLOYMENT_AGNOSTIC",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "src/platform/packages/shared/kbn-scout/src/playwright/tags.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout-oblt",
+            "id": "def-common.tags.PERFORMANCE",
+            "type": "Array",
+            "tags": [],
+            "label": "PERFORMANCE",
             "description": [],
             "signature": [
               "string[]"

@@ -8,10 +8,10 @@
  */
 
 import React from 'react';
-import { storiesOf } from '@storybook/react';
 import { coreMock } from '@kbn/core/public/mocks';
-import { elasticOutline, elasticLogo } from '@kbn/expression-utils';
 import { Render } from '@kbn/presentation-util-plugin/public/__stories__';
+import type { Meta } from '@storybook/react';
+import { elasticOutline, elasticLogo } from '@kbn/expression-utils';
 import { getRevealImageRenderer } from '..';
 import { Origin } from '../../../common/types/expression_functions';
 
@@ -26,6 +26,12 @@ const Renderer = () => {
   return <Render renderer={getRevealImageRenderer(coreMock.createStart())} config={config} />;
 };
 
-storiesOf('renderers/revealImage', module).add('default', (_, props) => <Renderer />, {
-  decorators: [],
-});
+export default {
+  title: 'renderers/revealImage',
+};
+
+export const Default = {
+  render: (_, props) => <Renderer />,
+
+  name: 'default',
+} as Meta;

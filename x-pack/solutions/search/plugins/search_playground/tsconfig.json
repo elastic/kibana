@@ -54,6 +54,9 @@
     "@kbn/deeplinks-search",
     "@kbn/logging-mocks",
     "@kbn/inference-plugin",
+    "@kbn/code-editor",
+    "@kbn/monaco",
+    "@kbn/react-hooks",
   ],
   "exclude": [
     "target/**/*",

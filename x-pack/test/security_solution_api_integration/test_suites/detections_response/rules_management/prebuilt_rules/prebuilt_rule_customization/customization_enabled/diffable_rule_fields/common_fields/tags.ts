@@ -297,11 +297,11 @@ export function tagsField({ getService }: FtrProviderContext): void {
             ruleUpgradeAssets,
             diffableRuleFieldName: 'tags',
             expectedDiffOutcome: ThreeWayDiffOutcome.MissingBaseCanUpdate,
-            isMergableField: true,
+            isMergableField: false,
             expectedFieldDiffValues: {
               current: ['tagB'],
               target: ['tagC'],
-              merged: ['tagB', 'tagC'],
+              merged: ['tagC'],
             },
           },
           getService

@@ -7,10 +7,9 @@
 
 import { waitFor, renderHook } from '@testing-library/react';
 import { useToasts } from '../common/lib/kibana';
-import type { AppMockRenderer } from '../common/mock';
-import { createAppMockRenderer } from '../common/mock';
 import { useGetFeatureIds } from './use_get_feature_ids';
 import * as api from './api';
+import { TestProviders } from '../common/mock';
 
 jest.mock('./api');
 jest.mock('../common/lib/kibana');
@@ -21,10 +20,7 @@ describe('useGetFeaturesIds', () => {
 
   (useToasts as jest.Mock).mockReturnValue({ addSuccess, addError });
 
-  let appMockRender: AppMockRenderer;
-
   beforeEach(() => {
-    appMockRender = createAppMockRenderer();
     jest.clearAllMocks();
   });
 
@@ -32,7 +28,7 @@ describe('useGetFeaturesIds', () => {
     const spy = jest.spyOn(api, 'getFeatureIds').mockRejectedValue([]);
 
     renderHook(() => useGetFeatureIds(['alert-id-1'], true), {
-      wrapper: appMockRender.AppWrapper,
+      wrapper: TestProviders,
     });
 
     await waitFor(() => {
@@ -51,7 +47,7 @@ describe('useGetFeaturesIds', () => {
     const spyMock = jest.spyOn(api, 'getFeatureIds');
 
     renderHook(() => useGetFeatureIds(['alert-id-1'], false), {
-      wrapper: appMockRender.AppWrapper,
+      wrapper: TestProviders,
     });
 
     expect(spyMock).toHaveBeenCalledTimes(0);
@@ -65,7 +61,7 @@ describe('useGetFeaturesIds', () => {
       .mockRejectedValue(new Error('Something went wrong'));
 
     renderHook(() => useGetFeatureIds(['alert-id-1'], true), {
-      wrapper: appMockRender.AppWrapper,
+      wrapper: TestProviders,
     });
 
     await waitFor(() => {
@@ -77,7 +73,8 @@ describe('useGetFeaturesIds', () => {
         },
         signal: expect.any(AbortSignal),
       });
-      expect(addError).toHaveBeenCalled();
     });
+
+    expect(addError).toHaveBeenCalled();
   });
 });

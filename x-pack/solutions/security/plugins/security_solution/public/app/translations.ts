@@ -54,6 +54,13 @@ export const ENTITY_ANALYTICS = i18n.translate(
   }
 );
 
+export const ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING = i18n.translate(
+  'xpack.securitySolution.navigation.privilegedUserMonitoring',
+  {
+    defaultMessage: 'Privileged User Monitoring',
+  }
+);
+
 export const HOSTS = i18n.translate('xpack.securitySolution.navigation.hosts', {
   defaultMessage: 'Hosts',
 });
@@ -112,6 +119,10 @@ export const ALERTS = i18n.translate('xpack.securitySolution.navigation.alerts',
   defaultMessage: 'Alerts',
 });
 
+export const ALERT_SUMMARY = i18n.translate('xpack.securitySolution.navigation.alertSummary', {
+  defaultMessage: 'Alert summary',
+});
+
 export const ATTACK_DISCOVERY = i18n.translate(
   'xpack.securitySolution.navigation.attackDiscovery',
   {
@@ -129,6 +140,10 @@ export const TIMELINES = i18n.translate('xpack.securitySolution.navigation.timel
 
 export const CASE = i18n.translate('xpack.securitySolution.navigation.case', {
   defaultMessage: 'Cases',
+});
+
+export const CONFIGURATIONS = i18n.translate('xpack.securitySolution.navigation.configurations', {
+  defaultMessage: 'Configurations',
 });
 
 export const ADMINISTRATION = i18n.translate('xpack.securitySolution.navigation.administration', {

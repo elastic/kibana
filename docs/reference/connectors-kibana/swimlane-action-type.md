@@ -14,10 +14,8 @@ The Swimlane connector uses the [Swimlane REST API](https://swimlane.com/knowled
 
 You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}** or as needed when you’re creating a rule. For example:
 
-:::{image} ../../images/swimlane-connector.png
-:alt: Swimlane connector
-:class: screenshot
-:::
+% TO DO: Use `:class: screenshot`
+![Swimlane connector](../images/swimlane-connector.png)
 
 
 ### Connector configuration [swimlane-connector-configuration]
@@ -41,10 +39,8 @@ API token
 
 You can test connectors as you’re creating or editing the connector in {{kib}}. For example:
 
-:::{image} ../../images/swimlane-params-test.png
-:alt: Swimlane params test
-:class: screenshot
-:::
+% TO DO: Use `:class: screenshot`
+![Swimlane params test](../images/swimlane-params-test.png)
 
 Swimlane actions have the following configuration properties.
 

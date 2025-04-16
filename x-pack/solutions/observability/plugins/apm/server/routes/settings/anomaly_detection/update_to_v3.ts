@@ -9,7 +9,7 @@ import { uniq } from 'lodash';
 import pLimit from 'p-limit';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { JOB_STATE } from '@kbn/ml-plugin/common';
-import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
+import type { APMIndices } from '@kbn/apm-sources-access-plugin/server';
 import type { ElasticsearchCapabilities } from '@kbn/core-elasticsearch-server';
 import { createAnomalyDetectionJobs } from '../../../lib/anomaly_detection/create_anomaly_detection_jobs';
 import { getAnomalyDetectionJobs } from '../../../lib/anomaly_detection/get_anomaly_detection_jobs';

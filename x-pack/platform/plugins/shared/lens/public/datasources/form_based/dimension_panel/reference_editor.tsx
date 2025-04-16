@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import './dimension_editor.scss';
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRowProps, EuiSpacer, EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
@@ -32,6 +31,7 @@ import type { FormBasedLayer } from '../types';
 import type { IndexPattern, IndexPatternField, ParamEditorCustomProps } from '../../../types';
 import type { FormBasedDimensionEditorProps } from './dimension_panel';
 import { FormRow } from '../operations/definitions/shared_components';
+import { operationsButtonStyles } from './shared_styles';
 
 const operationDisplay = getOperationDisplay();
 
@@ -56,7 +56,7 @@ const getFunctionOptions = (
     return {
       label,
       value: operationType,
-      className: 'lnsIndexPatternDimensionEditor__operation',
+      css: operationsButtonStyles,
       'data-test-subj': `lns-indexPatternDimension-${operationType}${
         isCompatible ? '' : ' incompatible'
       }`,
@@ -204,7 +204,7 @@ export const ReferenceEditor = (props: ReferenceEditorProps) => {
     const brokenFunctionOption = {
       label: selectedOperationType && operationDisplay[selectedOperationType].displayName,
       value: selectedOperationType,
-      className: 'lnsIndexPatternDimensionEditor__operation',
+      css: operationsButtonStyles,
       'data-test-subj': `lns-indexPatternDimension-${selectedOperationType} incompatible`,
     } as EuiComboBoxOptionOption<string>;
     functionOptions?.push(brokenFunctionOption);

@@ -158,51 +158,51 @@ export const CREATE_FORM_TIMEFRAME_DESCRIPTION = i18n.translate(
   }
 );
 
-export const CREATE_FORM_CATEGORY_IDS_REQUIRED = i18n.translate(
-  'xpack.alerting.maintenanceWindows.createForm.categoryIds.required',
+export const CREATE_FORM_SOLUTION_IDS_REQUIRED = i18n.translate(
+  'xpack.alerting.maintenanceWindows.createForm.solutionIds.required',
   {
-    defaultMessage: 'A category is required.',
+    defaultMessage: 'A solution is required.',
   }
 );
 
-export const CREATE_FORM_CATEGORY_SELECTION_TITLE = i18n.translate(
-  'xpack.alerting.maintenanceWindows.createForm.categoriesSelection.title',
+export const CREATE_FORM_SOLUTION_SELECTION_TITLE = i18n.translate(
+  'xpack.alerting.maintenanceWindows.createForm.solutionSelection.title',
   {
-    defaultMessage: 'Category specific maintenance window',
+    defaultMessage: 'Solution specific maintenance window',
   }
 );
 
-export const CREATE_FORM_CATEGORY_SELECTION_DESCRIPTION = i18n.translate(
-  'xpack.alerting.maintenanceWindows.createForm.categoriesSelection.description',
+export const CREATE_FORM_SOLUTION_SELECTION_DESCRIPTION = i18n.translate(
+  'xpack.alerting.maintenanceWindows.createForm.solutionSelection.description',
   {
     defaultMessage:
-      'Only rules associated with the selected categories are affected by the maintenance window.',
+      'Only rules associated with the selected solution are affected by the maintenance window.',
   }
 );
 
-export const CREATE_FORM_CATEGORIES_SELECTION_CHECKBOX_GROUP_TITLE = i18n.translate(
-  'xpack.alerting.maintenanceWindows.createForm.categorySelection.checkboxGroupTitle',
+export const CREATE_FORM_SOLUTION_SELECTION_CHECKBOX_GROUP_TITLE = i18n.translate(
+  'xpack.alerting.maintenanceWindows.createForm.solutionSelection.checkboxGroupTitle',
   {
-    defaultMessage: 'Select the categories this should affect',
+    defaultMessage: 'Select the solution this should affect',
   }
 );
 
-export const CREATE_FORM_CATEGORY_OBSERVABILITY_RULES = i18n.translate(
-  'xpack.alerting.maintenanceWindows.createForm.categoryIds.observabilityRules',
+export const CREATE_FORM_SOLUTION_OBSERVABILITY_RULES = i18n.translate(
+  'xpack.alerting.maintenanceWindows.createForm.solutionIds.observabilityRules',
   {
     defaultMessage: 'Observability rules',
   }
 );
 
-export const CREATE_FORM_CATEGORY_SECURITY_RULES = i18n.translate(
-  'xpack.alerting.maintenanceWindows.createForm.categoryIds.securityRules',
+export const CREATE_FORM_SOLUTION_SECURITY_RULES = i18n.translate(
+  'xpack.alerting.maintenanceWindows.createForm.solutionIds.securityRules',
   {
     defaultMessage: 'Security rules',
   }
 );
 
-export const CREATE_FORM_CATEGORY_STACK_RULES = i18n.translate(
-  'xpack.alerting.maintenanceWindows.createForm.categoryIds.stackRules',
+export const CREATE_FORM_SOLUTION_STACK_RULES = i18n.translate(
+  'xpack.alerting.maintenanceWindows.createForm.solutionIds.stackRules',
   {
     defaultMessage: 'Stack rules',
   }
@@ -219,7 +219,7 @@ export const CREATE_FORM_SCOPED_QUERY_DESCRIPTION = i18n.translate(
   'xpack.alerting.maintenanceWindows.createForm.scopedQuery.description',
   {
     defaultMessage:
-      'Add filters that refine the scope of the maintenance window. You can select only one category when filters are enabled.',
+      'Add filters that refine the scope of the maintenance window. You can select only one solution when filters are enabled.',
   }
 );
 
@@ -667,6 +667,21 @@ export const ARCHIVE_SUBTITLE = i18n.translate(
   }
 );
 
+export const SOLUTION_CONFIG_REMOVAL_WARNING_TITLE = i18n.translate(
+  'xpack.alerting.maintenanceWindows.solutionConfigRemovalWarning.title',
+  {
+    defaultMessage: 'Support for multiple solution categories is removed.',
+  }
+);
+
+export const SOLUTION_CONFIG_REMOVAL_WARNING_SUBTITLE = i18n.translate(
+  'xpack.alerting.maintenanceWindows.solutionConfigRemovalWarning.subtitle',
+  {
+    defaultMessage:
+      'When you save the changes, the maintenance window will affect rules in all solutions.',
+  }
+);
+
 export const TABLE_ACTION_UNARCHIVE = i18n.translate(
   'xpack.alerting.maintenanceWindows.table.unarchive',
   {
@@ -757,4 +772,17 @@ export const REFRESH = i18n.translate('xpack.alerting.maintenanceWindows.refresh
 export const SEARCH_PLACEHOLDER = i18n.translate(
   'xpack.alerting.maintenanceWindows.searchPlaceholder',
   { defaultMessage: 'Search' }
+);
+
+export const NO_AVAILABLE_SOLUTIONS_WARNING_TITLE = i18n.translate(
+  'xpack.alerting.maintenanceWindows.noAvailableSolutionsWarning.title',
+  { defaultMessage: 'Limited permissions detected.' }
+);
+
+export const NO_AVAILABLE_SOLUTIONS_WARNING_SUBTITLE = i18n.translate(
+  'xpack.alerting.maintenanceWindows.noAvailableSolutionsWarning.subtitle',
+  {
+    defaultMessage:
+      "You don't have access to all solution types required for alert filtering. If you save, your alert filter settings will be reset.",
+  }
 );

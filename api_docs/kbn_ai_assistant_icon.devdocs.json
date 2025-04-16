@@ -149,6 +149,39 @@
         ],
         "returnComment": [],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ai-assistant-icon",
+        "id": "def-public.useBeaconSize",
+        "type": "Function",
+        "tags": [],
+        "label": "useBeaconSize",
+        "description": [],
+        "signature": [
+          "(iconSize?: \"m\" | \"s\" | \"l\" | \"xl\" | \"xxl\" | undefined) => { rootSize: number; ringSize: number; maskPoint: number; }"
+        ],
+        "path": "x-pack/platform/packages/shared/ai-assistant/icon/beacon.styles.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ai-assistant-icon",
+            "id": "def-public.useBeaconSize.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "iconSize",
+            "description": [],
+            "signature": [
+              "\"m\" | \"s\" | \"l\" | \"xl\" | \"xxl\" | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-assistant/icon/beacon.styles.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
       }
     ],
     "interfaces": [

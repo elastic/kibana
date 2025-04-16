@@ -57,8 +57,9 @@ import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
 import {
   internalStateActions,
   useCurrentDataView,
+  useCurrentTabAction,
+  useCurrentTabSelector,
   useInternalStateDispatch,
-  useInternalStateSelector,
 } from '../../state_management/redux';
 
 const EMPTY_ESQL_COLUMNS: DatatableColumn[] = [];
@@ -227,8 +228,12 @@ export const useDiscoverHistogram = ({
    * Request params
    */
   const { query, filters } = useQuerySubscriber({ data: services.data });
-  const requestParams = useInternalStateSelector((state) => state.dataRequestParams);
-  const { timeRangeRelative: relativeTimeRange, timeRangeAbsolute: timeRange } = requestParams;
+  const requestParams = useCurrentTabSelector((state) => state.dataRequestParams);
+  const {
+    timeRangeRelative: relativeTimeRange,
+    timeRangeAbsolute: timeRange,
+    searchSessionId,
+  } = requestParams;
   // When in ES|QL mode, update the data view, query, and
   // columns only when documents are done fetching so the Lens suggestions
   // don't frequently change, such as when the user modifies the table
@@ -305,11 +310,6 @@ export const useDiscoverHistogram = ({
       unifiedHistogram.fetch();
     });
 
-    // triggering the initial chart request
-    if (!isEsqlMode) {
-      unifiedHistogram.fetch();
-    }
-
     return () => {
       subscription.unsubscribe();
     };
@@ -326,6 +326,9 @@ export const useDiscoverHistogram = ({
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const timeRangeMemoized = useMemo(() => timeRange, [timeRange?.from, timeRange?.to]);
+  const setOverriddenVisContextAfterInvalidation = useCurrentTabAction(
+    internalStateActions.setOverriddenVisContextAfterInvalidation
+  );
   const dispatch = useInternalStateDispatch();
 
   const onVisContextChanged = useCallback(
@@ -340,25 +343,41 @@ export const useDiscoverHistogram = ({
           stateContainer.savedSearchState.updateVisContext({
             nextVisContext,
           });
-          dispatch(internalStateActions.setOverriddenVisContextAfterInvalidation(undefined));
+          dispatch(
+            setOverriddenVisContextAfterInvalidation({
+              overriddenVisContextAfterInvalidation: undefined,
+            })
+          );
           break;
         case UnifiedHistogramExternalVisContextStatus.automaticallyOverridden:
           // if the visualization was invalidated as incompatible and rebuilt
           // (it will be used later for saving the visualization via Save button)
-          dispatch(internalStateActions.setOverriddenVisContextAfterInvalidation(nextVisContext));
+          dispatch(
+            setOverriddenVisContextAfterInvalidation({
+              overriddenVisContextAfterInvalidation: nextVisContext,
+            })
+          );
           break;
         case UnifiedHistogramExternalVisContextStatus.automaticallyCreated:
         case UnifiedHistogramExternalVisContextStatus.applied:
           // clearing the value in the internal state so we don't use it during saved search saving
-          dispatch(internalStateActions.setOverriddenVisContextAfterInvalidation(undefined));
+          dispatch(
+            setOverriddenVisContextAfterInvalidation({
+              overriddenVisContextAfterInvalidation: undefined,
+            })
+          );
           break;
         case UnifiedHistogramExternalVisContextStatus.unknown:
           // using `{}` to overwrite the value inside the saved search SO during saving
-          dispatch(internalStateActions.setOverriddenVisContextAfterInvalidation({}));
+          dispatch(
+            setOverriddenVisContextAfterInvalidation({
+              overriddenVisContextAfterInvalidation: {},
+            })
+          );
           break;
       }
     },
-    [dispatch, stateContainer.savedSearchState]
+    [dispatch, setOverriddenVisContextAfterInvalidation, stateContainer.savedSearchState]
   );
 
   const breakdownField = useAppStateSelector((state) => state.breakdownField);
@@ -398,6 +417,7 @@ export const useDiscoverHistogram = ({
     onVisContextChanged: isEsqlMode ? onVisContextChanged : undefined,
     breakdownField,
     onBreakdownFieldChange,
+    searchSessionId,
   };
 };
 

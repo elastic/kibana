@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { HttpSetup } from '@kbn/core/public';
+import type { HttpStart } from '@kbn/core-http-browser';
 import { BASE_ALERTING_API_PATH } from '../constants';
 
 export interface UnmuteAlertInstanceParams {
   id: string;
   instanceId: string;
-  http: HttpSetup;
+  http: HttpStart;
 }
 
 export const unmuteAlertInstance = ({ id, instanceId, http }: UnmuteAlertInstanceParams) => {

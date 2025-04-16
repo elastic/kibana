@@ -35,6 +35,8 @@
     "@kbn/ui-actions-plugin",
     "@kbn/shared-ux-table-persist",
     "@kbn/esql-types",
+    "@kbn/field-types",
+    "@kbn/licensing-plugin",
     "@kbn/i18n-react",
     "@kbn/file-upload-common"
   ],

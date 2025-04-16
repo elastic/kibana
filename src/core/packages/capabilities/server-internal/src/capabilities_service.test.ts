@@ -51,7 +51,15 @@ describe('CapabilitiesService', () => {
       expect(router.post).toHaveBeenCalledWith(
         expect.objectContaining({
           path: '/api/core/capabilities',
-          options: { authRequired: 'optional' },
+          security: {
+            authz: {
+              enabled: false,
+              reason: expect.any(String),
+            },
+            authc: {
+              enabled: 'optional',
+            },
+          },
         }),
         expect.any(Function)
       );

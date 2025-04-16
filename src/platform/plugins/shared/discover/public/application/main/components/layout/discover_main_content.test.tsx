@@ -39,6 +39,7 @@ import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock'
 import { PanelsToggle } from '../../../../components/panels_toggle';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import { createDataViewDataSource } from '../../../../../common/data_sources';
+import { CurrentTabProvider } from '../../state_management/redux';
 
 const mountComponent = async ({
   hideChart = false,
@@ -130,9 +131,11 @@ const mountComponent = async ({
   const component = mountWithIntl(
     <KibanaRenderContextProvider {...services.core}>
       <KibanaContextProvider services={services}>
-        <DiscoverMainProvider value={stateContainer}>
-          <DiscoverMainContent {...props} />
-        </DiscoverMainProvider>
+        <CurrentTabProvider currentTabId={stateContainer.getCurrentTab().id}>
+          <DiscoverMainProvider value={stateContainer}>
+            <DiscoverMainContent {...props} />
+          </DiscoverMainProvider>
+        </CurrentTabProvider>
       </KibanaContextProvider>
     </KibanaRenderContextProvider>
   );

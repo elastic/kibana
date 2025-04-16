@@ -22,6 +22,7 @@ import {
 import { css } from '@emotion/css';
 
 import type { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
+import { SubItemTitle } from '../subitem_title';
 import { PanelNavItem } from './panel_nav_item';
 
 const accordionButtonClassName = 'sideNavPanelAccordion__button';
@@ -64,7 +65,7 @@ interface Props {
 
 export const PanelGroup: FC<Props> = ({ navNode, isFirstInList, hasHorizontalRuleBefore }) => {
   const { euiTheme } = useEuiTheme();
-  const { id, title, appendHorizontalRule, spaceBefore: _spaceBefore } = navNode;
+  const { id, title, appendHorizontalRule, spaceBefore: _spaceBefore, withBadge } = navNode;
   const filteredChildren = navNode.children?.filter((child) => child.sideNavStatus !== 'hidden');
   const classNames = getClassnames(euiTheme);
   const hasTitle = !!title && title !== '';
@@ -106,10 +107,11 @@ export const PanelGroup: FC<Props> = ({ navNode, isFirstInList, hasHorizontalRul
         {spaceBefore !== null && <EuiSpacer size={spaceBefore} />}
         <EuiAccordion
           id={id}
-          buttonContent={title}
+          buttonContent={withBadge ? <SubItemTitle item={navNode} /> : title}
           className={classNames.accordion}
           buttonClassName={accordionButtonClassName}
           data-test-subj={groupTestSubj}
+          initialIsOpen={navNode.defaultIsCollapsed === false}
           buttonProps={{
             'data-test-subj': `panelAccordionBtnId-${navNode.id}`,
           }}

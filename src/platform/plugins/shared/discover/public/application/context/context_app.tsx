@@ -8,7 +8,6 @@
  */
 
 import React, { Fragment, memo, useEffect, useRef, useMemo, useCallback } from 'react';
-import './context_app.scss';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiText, EuiPage, EuiPageBody, EuiSpacer, useEuiPaddingSize } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -23,6 +22,7 @@ import type { UseColumnsProps } from '@kbn/unified-data-table';
 import { popularizeField, useColumns } from '@kbn/unified-data-table';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import type { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
+import { kibanaFullBodyHeightCss } from '@kbn/core/public';
 import { ContextErrorMessage } from './components/context_error_message';
 import { LoadingStatus } from './services/context_query_state';
 import type { AppState, GlobalState } from './services/context_state';
@@ -257,11 +257,11 @@ export const ContextApp = ({ dataView, anchorId, referrer }: ContextAppProps) =>
             })}
           </h1>
           <TopNavMenu {...getNavBarProps()} />
-          <EuiPage className="dscDocsPage">
+          <EuiPage css={dscDocsPageCss}>
             <EuiPageBody
               panelled
               paddingSize="none"
-              className="dscDocsContent"
+              css={dscDocsContentCss}
               panelProps={{ role: 'main' }}
             >
               <EuiText
@@ -305,3 +305,13 @@ export const ContextApp = ({ dataView, anchorId, referrer }: ContextAppProps) =>
     </Fragment>
   );
 };
+
+const dscDocsPageCss = css`
+  ${kibanaFullBodyHeightCss(54)}; // 54px is the action bar height
+`;
+
+const dscDocsContentCss = css`
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+`;

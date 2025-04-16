@@ -10,7 +10,7 @@
 import { AgentName } from '../../types/agent_names';
 import { apm } from '../apm';
 import { Instance } from '../apm/instance';
-import { elasticsearchSpan, redisSpan, sqliteSpan, Span } from '../apm/span';
+import { elasticsearchSpan, redisSpan, sqliteSpan, Span, kafkaSpan } from '../apm/span';
 import { Transaction } from '../apm/transaction';
 import { generateShortId } from '../utils/generate_id';
 
@@ -22,28 +22,49 @@ function service(serviceName: string, agentName: AgentName, environment?: string
     .instance(serviceName);
 }
 
-type DbSpan = 'elasticsearch' | 'redis' | 'sqlite';
-type ServiceMapNode = Instance | DbSpan;
+type SpanTypes = 'db' | 'app' | 'messaging' | 'external';
+type SpanSubtypes = 'elasticsearch' | 'redis' | 'sqlite' | 'kafka';
+
+type ServiceMapNode = Instance | SpanSubtypes;
 type TransactionName = string;
-type TraceItem = ServiceMapNode | [ServiceMapNode, TransactionName];
+type TraceItem = ServiceMapNode | [ServiceMapNode, TransactionName, SpanTypes?];
 type TracePath = TraceItem[];
 
 function getTraceItem(traceItem: TraceItem) {
   if (Array.isArray(traceItem)) {
-    const transactionName = traceItem[1];
-    if (typeof traceItem[0] === 'string') {
-      const dbSpan = traceItem[0];
-      return { dbSpan, transactionName, serviceInstance: undefined };
+    const [spanSubTypeOrservice, transactionName, spanType] = traceItem;
+
+    if (typeof spanSubTypeOrservice === 'string') {
+      return {
+        spanSubtype: spanSubTypeOrservice,
+        transactionName,
+        serviceInstance: undefined,
+        spanType,
+      };
     } else {
-      const serviceInstance = traceItem[0];
-      return { dbSpan: undefined, transactionName, serviceInstance };
+      return {
+        spanSubtype: undefined,
+        transactionName,
+        serviceInstance: spanSubTypeOrservice,
+        spanType,
+      };
     }
   } else if (typeof traceItem === 'string') {
-    const dbSpan = traceItem;
-    return { dbSpan, transactionName: undefined, serviceInstance: undefined };
+    const spanSubtype = traceItem;
+    return {
+      spanSubtype,
+      transactionName: undefined,
+      serviceInstance: undefined,
+      spanType: undefined,
+    };
   } else {
     const serviceInstance = traceItem;
-    return { dbSpan: undefined, transactionName: undefined, serviceInstance };
+    return {
+      spanSubtype: undefined,
+      transactionName: undefined,
+      serviceInstance,
+      spanType: undefined,
+    };
   }
 }
 
@@ -65,9 +86,9 @@ function getChildren(
     return [];
   }
   const [first, ...rest] = childTraceItems;
-  const { dbSpan, serviceInstance, transactionName } = getTraceItem(first);
-  if (dbSpan) {
-    switch (dbSpan) {
+  const { spanSubtype, serviceInstance, transactionName, spanType } = getTraceItem(first);
+  if (spanSubtype) {
+    switch (spanSubtype) {
       case 'elasticsearch':
         return [
           parentServiceInstance
@@ -89,6 +110,13 @@ function getChildren(
             .timestamp(timestamp)
             .duration(1000),
         ];
+      case 'kafka':
+        return [
+          parentServiceInstance
+            .span(kafkaSpan(transactionName || 'received'))
+            .timestamp(timestamp)
+            .duration(1000),
+        ];
     }
   }
 
@@ -106,7 +134,7 @@ function getChildren(
     if (next.serviceInstance) {
       return [
         childSpan
-          .overrides({ 'span.type': 'external' })
+          .overrides({ 'span.type': spanType ?? 'external' })
           .destination(next.serviceInstance.fields['service.name']!)
           .children(
             next.serviceInstance

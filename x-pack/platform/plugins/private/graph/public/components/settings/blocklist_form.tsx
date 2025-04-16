@@ -16,11 +16,13 @@ import {
   EuiText,
   EuiCallOut,
   EuiIcon,
+  useEuiTheme,
 } from '@elastic/eui';
 
 import { SettingsWorkspaceProps } from './settings';
 import { useListKeys } from './use_list_keys';
 import { IconRenderer } from '../icon_renderer';
+import { legacyIconStyles } from './legacy_icon.styles';
 
 export function BlocklistForm({
   blocklistedNodes,
@@ -28,6 +30,7 @@ export function BlocklistForm({
   unblockAll,
 }: Pick<SettingsWorkspaceProps, 'blocklistedNodes' | 'unblockNode' | 'unblockAll'>) {
   const getListKey = useListKeys(blocklistedNodes || []);
+  const euiThemeContext = useEuiTheme();
   return (
     <>
       {blocklistedNodes && blocklistedNodes.length > 0 ? (
@@ -56,7 +59,13 @@ export function BlocklistForm({
             {blocklistedNodes.map((node) => (
               <EuiListGroupItem
                 icon={
-                  <IconRenderer icon={node.icon} className="gphLegacyIcon gphLegacyIcon--list" />
+                  <IconRenderer
+                    icon={node.icon}
+                    css={[
+                      legacyIconStyles.base(euiThemeContext),
+                      legacyIconStyles.list(euiThemeContext),
+                    ]}
+                  />
                 }
                 key={getListKey(node)}
                 label={node.label}

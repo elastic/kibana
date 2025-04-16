@@ -94,6 +94,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         roleAuthc: adminRoleAuthc,
         pkg,
       });
+      await esClient.cluster.deleteComponentTemplate({
+        name: `${type}-${integrationsDataset}@custom`,
+      });
       await samlAuth.invalidateM2mApiKeyWithRoleScope(adminRoleAuthc);
     });
 

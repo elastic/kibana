@@ -8,6 +8,7 @@
  */
 
 import { Client, HttpConnection } from '@elastic/elasticsearch';
+import { setIdGeneratorStrategy } from '@kbn/apm-synthtrace-client';
 import { createLogger } from '../../lib/utils/create_logger';
 import { getClients } from './get_clients';
 import { getKibanaClient } from './get_kibana_client';
@@ -20,6 +21,7 @@ export async function bootstrap({
   ...runOptions
 }: RunOptions & { skipClientBootstrap?: boolean }) {
   const logger = createLogger(runOptions.logLevel);
+  setIdGeneratorStrategy(runOptions.uniqueIds ? 'random' : 'sequential');
 
   const { kibanaUrl, esUrl } = await getServiceUrls({ ...runOptions, logger });
 

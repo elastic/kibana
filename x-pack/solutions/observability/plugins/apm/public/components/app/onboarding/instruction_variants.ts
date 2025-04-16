@@ -20,14 +20,10 @@ export enum INSTRUCTION_VARIANT {
   OPEN_TELEMETRY = 'openTelemetry',
 }
 
-export interface InstructionVariant {
+export interface Instruction {
+  title?: string;
   id: INSTRUCTION_VARIANT;
   instructions: EuiStepProps[];
-}
-
-export interface InstructionSet {
-  title: string;
-  instructionVariants: InstructionVariant[];
 }
 
 const DISPLAY_MAP = {
@@ -64,6 +60,7 @@ export type AgentApiDetails = AgentApiKey & {
 export interface AgentInstructions {
   baseUrl: string;
   apmServerUrl: string;
+  otlpManagedServiceUrl: string;
   apiKeyDetails?: AgentApiDetails;
   secretToken?: string;
   checkAgentStatus: () => void;

@@ -6,11 +6,12 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { Logger } from '@kbn/logging';
-import { CoreSetup, ElasticsearchClient } from '@kbn/core/server';
-import { schema, TypeOf } from '@kbn/config-schema';
+import type { Logger } from '@kbn/logging';
+import type { CoreSetup, ElasticsearchClient } from '@kbn/core/server';
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 import { curry, range, times } from 'lodash';
-import {
+import type {
   RuleType,
   AlertInstanceState,
   AlertInstanceContext,
@@ -18,7 +19,7 @@ import {
   RuleTypeParams,
 } from '@kbn/alerting-plugin/server';
 import { ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
-import { FixtureStartDeps, FixtureSetupDeps } from './plugin';
+import type { FixtureStartDeps, FixtureSetupDeps } from './plugin';
 
 export const EscapableStrings = {
   escapableBold: '*bold*',
@@ -48,6 +49,7 @@ export const DeepContextVariables = {
   nullJ: null,
   undefinedK: undefined,
   dateL: '2023-04-20T04:13:17.858Z',
+  encodeableUrl: 'https://www.elastic.co?foo=bar&baz= qux',
 };
 
 function getAlwaysFiringRuleType() {
@@ -952,6 +954,79 @@ function getAlwaysFiringAlertAsDataRuleType() {
   return result;
 }
 
+function getAlwaysFiringAlertAsDataWithDynamicTemplatesRuleType() {
+  const paramsSchema = schema.object({
+    dynamic_fields: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
+  });
+  type ParamsType = TypeOf<typeof paramsSchema>;
+
+  const result: RuleType<
+    ParamsType,
+    never,
+    RuleTypeState,
+    {},
+    {},
+    'default',
+    'recovered',
+    { 'kibana.alert.dynamic': { [key: string]: any } }
+  > = {
+    id: 'test.always-firing-alert-as-data-with-dynamic-templates',
+    name: 'Test: Rule with dynamicTemplates and writing Alerts as Data',
+    actionGroups: [{ id: 'default', name: 'Default' }],
+    category: 'management',
+    producer: 'alertsFixture',
+    solution: 'stack',
+    defaultActionGroupId: 'default',
+    minimumLicenseRequired: 'basic',
+    isExportable: true,
+    doesSetRecoveryContext: true,
+    validate: {
+      params: paramsSchema,
+    },
+    async executor(ruleExecutorOptions) {
+      const { services, params } = ruleExecutorOptions;
+
+      services.alertsClient?.report({
+        id: '1',
+        actionGroup: 'default',
+        payload: { 'kibana.alert.dynamic': params.dynamic_fields },
+      });
+
+      return { state: {} };
+    },
+    alerts: {
+      context: 'observability.test.alerts.dynamic.templates',
+      mappings: {
+        dynamic: false,
+        fieldMap: {
+          ['kibana.alert.dynamic']: {
+            type: 'object',
+            dynamic: true,
+            array: false,
+            required: false,
+          },
+        },
+        dynamicTemplates: [
+          {
+            strings_as_keywords: {
+              path_match: 'kibana.alert.dynamic.*',
+              match_mapping_type: 'string',
+              mapping: {
+                type: 'keyword',
+                ignore_above: 1024,
+              },
+            },
+          },
+        ],
+      },
+      useLegacyAlerts: false,
+      useEcs: false,
+      shouldWrite: true,
+    },
+  };
+  return result;
+}
+
 function getWaitingRuleType(logger: Logger) {
   const ParamsType = schema.object({
     source: schema.string(),
@@ -1392,6 +1467,7 @@ export function defineRuleTypes(
   alerting.registerType(getPatternSuccessOrFailureRuleType());
   alerting.registerType(getExceedsAlertLimitRuleType());
   alerting.registerType(getAlwaysFiringAlertAsDataRuleType());
+  alerting.registerType(getAlwaysFiringAlertAsDataWithDynamicTemplatesRuleType());
   alerting.registerType(getPatternFiringAutoRecoverFalseRuleType());
   alerting.registerType(getPatternFiringAlertsAsDataRuleType());
   alerting.registerType(getWaitingRuleType(logger));

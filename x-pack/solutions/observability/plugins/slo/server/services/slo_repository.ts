@@ -16,7 +16,6 @@ import { SLONotFound } from '../errors';
 import { SO_SLO_TYPE } from '../saved_objects';
 
 export interface SLORepository {
-  exists(id: string): Promise<boolean>;
   create(slo: SLODefinition): Promise<SLODefinition>;
   update(slo: SLODefinition): Promise<SLODefinition>;
   findAllByIds(ids: string[]): Promise<SLODefinition[]>;
@@ -25,22 +24,15 @@ export interface SLORepository {
   search(
     search: string,
     pagination: Pagination,
-    options?: { includeOutdatedOnly?: boolean }
+    options?: {
+      includeOutdatedOnly: boolean;
+      tags: string[];
+    }
   ): Promise<Paginated<SLODefinition>>;
 }
 
 export class KibanaSavedObjectsSLORepository implements SLORepository {
   constructor(private soClient: SavedObjectsClientContract, private logger: Logger) {}
-
-  async exists(id: string) {
-    const findResponse = await this.soClient.find<StoredSLODefinition>({
-      type: SO_SLO_TYPE,
-      perPage: 0,
-      filter: `slo.attributes.id:(${id})`,
-    });
-
-    return findResponse.total > 0;
-  }
 
   async create(slo: SLODefinition): Promise<SLODefinition> {
     await this.soClient.create<StoredSLODefinition>(SO_SLO_TYPE, toStoredSLO(slo));
@@ -123,17 +115,30 @@ export class KibanaSavedObjectsSLORepository implements SLORepository {
   async search(
     search: string,
     pagination: Pagination,
-    options: { includeOutdatedOnly?: boolean } = { includeOutdatedOnly: false }
+    options: {
+      includeOutdatedOnly?: boolean;
+      tags: string[];
+    } = { tags: [] }
   ): Promise<Paginated<SLODefinition>> {
+    const { includeOutdatedOnly, tags } = options;
+    const filter = [];
+    if (tags.length > 0) {
+      filter.push(`slo.attributes.tags: (${tags.join(' OR ')})`);
+    }
+
+    if (!!includeOutdatedOnly) {
+      filter.push(`slo.attributes.version < ${SLO_MODEL_VERSION}`);
+    }
+
     const response = await this.soClient.find<StoredSLODefinition>({
       type: SO_SLO_TYPE,
       page: pagination.page,
       perPage: pagination.perPage,
       search,
       searchFields: ['name'],
-      ...(!!options.includeOutdatedOnly && {
-        filter: `slo.attributes.version < ${SLO_MODEL_VERSION}`,
-      }),
+      ...(filter.length && { filter: filter.join(' AND ') }),
+      sortField: 'id',
+      sortOrder: 'asc',
     });
 
     return {

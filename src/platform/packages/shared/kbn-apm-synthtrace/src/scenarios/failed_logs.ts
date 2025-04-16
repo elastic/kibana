@@ -91,7 +91,7 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
         const cloudRegion = getCloudRegion(index);
 
         const commonLongEntryFields: LogDocument = {
-          'trace.id': generateShortId(),
+          'trace.id': generateLongId(),
           'agent.name': 'synth-agent',
           'orchestrator.cluster.name': clusterName,
           'orchestrator.cluster.id': clusterId,

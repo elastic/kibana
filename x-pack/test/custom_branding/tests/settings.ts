@@ -44,7 +44,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     };
 
     before(async function () {
-      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
+      await esArchiver.loadIfNeeded(
+        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
+      );
       await kibanaServer.uiSettings.replace({});
       await PageObjects.settings.navigateTo();
       await PageObjects.settings.clickKibanaGlobalSettings();
@@ -53,7 +55,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     after(async function () {
-      await esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
+      await esArchiver.unload(
+        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
+      );
       await PageObjects.settings.navigateTo();
       await PageObjects.settings.clickKibanaGlobalSettings();
       await resetSettings();
