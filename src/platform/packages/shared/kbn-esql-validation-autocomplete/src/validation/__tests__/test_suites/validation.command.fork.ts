@@ -120,6 +120,18 @@ export const validationForkCommandTestSuite = (setup: helpers.Setup) => {
               ]
             );
           });
+
+          it('allows user-defined columns within sub-commands', async () => {
+            const { expectErrors } = await setup();
+
+            await expectErrors(
+              `FROM index 
+| FORK
+    (EVAL foo = TO_UPPER(keywordField) | LIMIT 100)
+    (EVAL bar = 1)`,
+              []
+            );
+          });
         });
       });
     });

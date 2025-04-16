@@ -149,6 +149,9 @@ export function collectVariables(
         // BY and WITH can contain variables
         ret.push(...ctx.visitOptions());
       }
+      if (ctx.node.name === 'fork') {
+        ret.push(...ctx.visitSubQueries());
+      }
       return ret;
     })
     .on('visitQuery', (ctx) => [...ctx.visitCommands()]);

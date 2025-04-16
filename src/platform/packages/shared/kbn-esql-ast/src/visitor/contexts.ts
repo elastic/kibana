@@ -197,6 +197,20 @@ export class CommandVisitorContext<
     return this.ctx.visitQuery(this, queryNode, undefined as any);
   }
 
+  public *visitSubQueries() {
+    this.ctx.assertMethodExists('visitQuery');
+    for (const arg of this.node.args) {
+      if (!arg || Array.isArray(arg)) {
+        continue;
+      }
+
+      if (arg.type === 'query') {
+        const result = this.visitSubQuery(arg);
+        yield result;
+      }
+    }
+  }
+
   public *options(): Iterable<ESQLCommandOption> {
     for (const arg of this.node.args) {
       if (!arg || Array.isArray(arg)) {
