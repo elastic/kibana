@@ -30,9 +30,9 @@ export class PainlessLab {
     await this.page.testSubj.locator('painless_lab').waitFor({ state: 'visible' });
   }
 
-  async setCodeEditorValue(value: string, nthIndex?: number): Promise<void> {
+  async setCodeEditorValue(value: any, nthIndex?: any) {
     await this.page.evaluate(
-      ({ editorIndex, codeEditorValue }) => {
+      ([editorIndex, codeEditorValue]) => {
         const editor = window.MonacoEnvironment!.monaco!.editor;
         const textModels = editor.getModels();
 
@@ -42,7 +42,7 @@ export class PainlessLab {
           textModels.forEach((model) => model.setValue(codeEditorValue));
         }
       },
-      { editorIndex: nthIndex, codeEditorValue: value }
+      [nthIndex, value]
     );
   }
 
