@@ -17,8 +17,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const dashboardSettings = getService('dashboardSettings');
   const PageObjects = getPageObjects(['dashboard', 'tagManagement', 'common']);
 
-  // Failing: See https://github.com/elastic/kibana/issues/144057
-  describe.only('dashboard integration', () => {
+  describe('dashboard integration', () => {
     before(async () => {
       await kibanaServer.importExport.load(
         'x-pack/test/saved_object_tagging/common/fixtures/es_archiver/dashboard/data.json'
@@ -37,7 +36,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       );
     });
 
-    describe.only('listing', () => {
+    describe('listing', () => {
       beforeEach(async () => {
         await PageObjects.common.navigateToApp('dashboard');
         await PageObjects.dashboard.gotoDashboardLandingPage();
