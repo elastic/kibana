@@ -158,17 +158,20 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ()
     FilterGroupHandler | undefined
   >();
 
-  const { sourcererDataView: oldSourcererDataView, loading: oldIsLoadingIndexPattern } = useSourcererDataView(
-    SourcererScopeName.detections
-  );
+  const { sourcererDataView: oldSourcererDataView, loading: oldIsLoadingIndexPattern } =
+    useSourcererDataView(SourcererScopeName.detections);
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
   const { dataViewSpec: experimentalDataViewSpec, status: dataViewSpecStatus } = useDataViewSpec(
     SourcererScopeName.detections
   );
 
-  const sourcererDataView = newDataViewPickerEnabled ? experimentalDataViewSpec : oldSourcererDataView;
-  const isLoadingIndexPattern = newDataViewPickerEnabled ? dataViewSpecStatus !== 'ready' : oldIsLoadingIndexPattern;
+  const sourcererDataView = newDataViewPickerEnabled
+    ? experimentalDataViewSpec
+    : oldSourcererDataView;
+  const isLoadingIndexPattern = newDataViewPickerEnabled
+    ? dataViewSpecStatus !== 'ready'
+    : oldIsLoadingIndexPattern;
 
   const { formatUrl } = useFormatUrl(SecurityPageName.rules);
 

@@ -45,10 +45,14 @@ export function useTimelineDataFilters(isActiveTimelines: boolean) {
   });
 
   const { newDataViewPickerEnabled } = useEnableExperimental();
-  const { selectedPatterns: oldAnalyzerPatterns } = useSourcererDataView(SourcererScopeName.analyzer);
+  const { selectedPatterns: oldAnalyzerPatterns } = useSourcererDataView(
+    SourcererScopeName.analyzer
+  );
   const experimentalAnalyzerPatterns = useSelectedPatterns(SourcererScopeName.analyzer);
-  
-  const analyzerPatterns = newDataViewPickerEnabled ? experimentalAnalyzerPatterns : oldAnalyzerPatterns;
+
+  const analyzerPatterns = newDataViewPickerEnabled
+    ? experimentalAnalyzerPatterns
+    : oldAnalyzerPatterns;
 
   return useMemo(() => {
     return {

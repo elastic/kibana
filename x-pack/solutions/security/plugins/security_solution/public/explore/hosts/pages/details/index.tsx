@@ -134,7 +134,11 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
     [dispatch]
   );
 
-  const { indicesExist: oldIndicesExist, selectedPatterns: oldSelectedPatterns, sourcererDataView: oldSourcererDataView } = useSourcererDataView();
+  const {
+    indicesExist: oldIndicesExist,
+    selectedPatterns: oldSelectedPatterns,
+    sourcererDataView: oldSourcererDataView,
+  } = useSourcererDataView();
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
 
@@ -143,8 +147,12 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
   const experimentalSelectedPatterns = useSelectedPatterns();
 
   const sourcererDataView = newDataViewPickerEnabled ? dataViewSpec : oldSourcererDataView;
-  const indicesExist = newDataViewPickerEnabled ? !!dataView?.matchedIndices?.length : oldIndicesExist;
-  const selectedPatterns = newDataViewPickerEnabled ? experimentalSelectedPatterns : oldSelectedPatterns;
+  const indicesExist = newDataViewPickerEnabled
+    ? !!dataView?.matchedIndices?.length
+    : oldIndicesExist;
+  const selectedPatterns = newDataViewPickerEnabled
+    ? experimentalSelectedPatterns
+    : oldSelectedPatterns;
 
   const [loading, { inspect, hostDetails: hostOverview, id, refetch }] = useHostDetails({
     endDate: to,

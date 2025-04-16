@@ -43,8 +43,10 @@ const VisualizationEmbeddableComponent: React.FC<VisualizationEmbeddableProps> =
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
   const { dataView } = useDataView(lensProps.scopeId);
-  
-  const indicesExist = newDataViewPickerEnabled ? !!dataView?.matchedIndices?.length : oldIndicesExist;
+
+  const indicesExist = newDataViewPickerEnabled
+    ? !!dataView?.matchedIndices?.length
+    : oldIndicesExist;
 
   const memorizedTimerange = useRef(lensProps.timerange);
   const getGlobalQuery = useMemo(() => inputsSelectors.globalQueryByIdSelector(), []);

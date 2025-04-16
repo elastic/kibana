@@ -61,9 +61,11 @@ export const useCreateTimeline = ({
   const { newDataViewPickerEnabled } = useEnableExperimental();
   const { dataViewSpec: experimentalDataView } = useDataViewSpec(DataViewManagerScopeName.default);
   const experimentalSelectedPatterns = useSelectedPatterns(DataViewManagerScopeName.default);
-  
-  const dataViewId = newDataViewPickerEnabled ? (experimentalDataView.id ?? '') : oldDataViewId;
-  const selectedPatterns = newDataViewPickerEnabled ? experimentalSelectedPatterns : oldSelectedPatterns;
+
+  const dataViewId = newDataViewPickerEnabled ? experimentalDataView.id ?? '' : oldDataViewId;
+  const selectedPatterns = newDataViewPickerEnabled
+    ? experimentalSelectedPatterns
+    : oldSelectedPatterns;
 
   const { timelineFullScreen, setTimelineFullScreen } = useTimelineFullScreen();
   const globalTimeRange = useDeepEqualSelector(inputsSelectors.globalTimeRangeSelector);

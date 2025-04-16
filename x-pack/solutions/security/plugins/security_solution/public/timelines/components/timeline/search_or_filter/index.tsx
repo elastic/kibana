@@ -75,12 +75,16 @@ const StatefulSearchOrFilterComponent = React.memo<Props>(
       services: { data },
     } = useKibana();
 
-    const { sourcererDataView: oldSourcererDataView } = useSourcererDataView(SourcererScopeName.timeline);
+    const { sourcererDataView: oldSourcererDataView } = useSourcererDataView(
+      SourcererScopeName.timeline
+    );
 
     const { dataViewSpec: experimentalDataView } = useDataViewSpec(SourcererScopeName.timeline);
     const { newDataViewPickerEnabled } = useEnableExperimental();
-    
-    const sourcererDataView = newDataViewPickerEnabled ? experimentalDataView : oldSourcererDataView;
+
+    const sourcererDataView = newDataViewPickerEnabled
+      ? experimentalDataView
+      : oldSourcererDataView;
 
     const getIsDataProviderVisible = useMemo(
       () => timelineSelectors.dataProviderVisibilitySelector(),

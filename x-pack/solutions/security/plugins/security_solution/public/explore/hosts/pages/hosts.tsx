@@ -109,7 +109,11 @@ const HostsComponent = () => {
     return globalFilters;
   }, [globalFilters, severitySelection, tabName]);
 
-  const { indicesExist: oldIndicesExist, selectedPatterns: oldSelectedPatterns, sourcererDataView: oldSourcererDataView } = useSourcererDataView();
+  const {
+    indicesExist: oldIndicesExist,
+    selectedPatterns: oldSelectedPatterns,
+    sourcererDataView: oldSourcererDataView,
+  } = useSourcererDataView();
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
 
@@ -118,8 +122,12 @@ const HostsComponent = () => {
   const experimentalSelectedPatterns = useSelectedPatterns();
 
   const sourcererDataView = newDataViewPickerEnabled ? dataViewSpec : oldSourcererDataView;
-  const indicesExist = newDataViewPickerEnabled ? !!dataView?.matchedIndices?.length : oldIndicesExist;
-  const selectedPatterns = newDataViewPickerEnabled ? experimentalSelectedPatterns : oldSelectedPatterns;
+  const indicesExist = newDataViewPickerEnabled
+    ? !!dataView?.matchedIndices?.length
+    : oldIndicesExist;
+  const selectedPatterns = newDataViewPickerEnabled
+    ? experimentalSelectedPatterns
+    : oldSelectedPatterns;
 
   const [globalFilterQuery, kqlError] = useMemo(
     () =>

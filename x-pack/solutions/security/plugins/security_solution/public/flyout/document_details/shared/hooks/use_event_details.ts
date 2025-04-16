@@ -106,7 +106,9 @@ export const useEventDetails = ({
   const { dataView } = useDataView(sourcererScope);
   const experimentalBrowserFields = useBrowserFields(sourcererScope);
 
-  const runtimeMappings = newDataViewPickerEnabled ? (dataView?.getRuntimeMappings() as RunTimeMappings) : oldRuntimeMappings;
+  const runtimeMappings = newDataViewPickerEnabled
+    ? (dataView?.getRuntimeMappings() as RunTimeMappings)
+    : oldRuntimeMappings;
   const browserFields = newDataViewPickerEnabled ? experimentalBrowserFields : oldBrowserFields;
 
   const [loading, dataFormattedForFieldBrowser, searchHit, dataAsNestedObject, refetchFlyoutData] =

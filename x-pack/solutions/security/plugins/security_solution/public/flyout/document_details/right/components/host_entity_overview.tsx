@@ -97,8 +97,10 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({ hostName
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
   const experimentalSelectedPatterns = useSelectedPatterns();
-  
-  const selectedPatterns = newDataViewPickerEnabled ? experimentalSelectedPatterns : oldSelectedPatterns;
+
+  const selectedPatterns = newDataViewPickerEnabled
+    ? experimentalSelectedPatterns
+    : oldSelectedPatterns;
 
   const timerange = useMemo(
     () => ({

@@ -150,7 +150,9 @@ const RiskEnginePreview: React.FC<{ includeClosedAlerts: boolean; from: string; 
     bool: { must: [], filter: [], should: [], must_not: [] },
   });
 
-  const { sourcererDataView: oldSourcererDataView } = useSourcererDataView(SourcererScopeName.detections);
+  const { sourcererDataView: oldSourcererDataView } = useSourcererDataView(
+    SourcererScopeName.detections
+  );
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
   const { dataViewSpec } = useDataViewSpec(SourcererScopeName.detections);

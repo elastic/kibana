@@ -37,16 +37,24 @@ export const useLensAttributes = ({
   title,
 }: UseLensAttributesProps): LensAttributes | null => {
   const { euiTheme } = useEuiTheme();
-  const { selectedPatterns: oldSelectedPatterns, dataViewId: oldDataViewId, indicesExist: oldIndicesExist } = useSourcererDataView(scopeId);
+  const {
+    selectedPatterns: oldSelectedPatterns,
+    dataViewId: oldDataViewId,
+    indicesExist: oldIndicesExist,
+  } = useSourcererDataView(scopeId);
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
 
   const { dataView } = useDataView(scopeId);
   const experimentalSelectedPatterns = useSelectedPatterns(scopeId);
-  
-  const dataViewId = newDataViewPickerEnabled ? (dataView?.id ?? '') : oldDataViewId;
-  const indicesExist = newDataViewPickerEnabled ? !!dataView?.matchedIndices?.length : oldIndicesExist;
-  const selectedPatterns = newDataViewPickerEnabled ? experimentalSelectedPatterns : oldSelectedPatterns;
+
+  const dataViewId = newDataViewPickerEnabled ? dataView?.id ?? '' : oldDataViewId;
+  const indicesExist = newDataViewPickerEnabled
+    ? !!dataView?.matchedIndices?.length
+    : oldIndicesExist;
+  const selectedPatterns = newDataViewPickerEnabled
+    ? experimentalSelectedPatterns
+    : oldSelectedPatterns;
 
   const getGlobalQuerySelector = useMemo(() => inputsSelectors.globalQuerySelector(), []);
   const getGlobalFiltersQuerySelector = useMemo(

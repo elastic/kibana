@@ -55,11 +55,15 @@ const ToggleEventDetailsButtonComponent: React.FC<ToggleEventDetailsButtonProps>
   timelineId,
 }) => {
   const experimentalSelectedPatterns = useSelectedPatterns(SourcererScopeName.timeline);
-  const { selectedPatterns: oldSelectedPatterns } = useSourcererDataView(SourcererScopeName.timeline);
+  const { selectedPatterns: oldSelectedPatterns } = useSourcererDataView(
+    SourcererScopeName.timeline
+  );
 
   const { newDataViewPickerEnabled } = useEnableExperimental();
-  
-  const selectedPatterns = newDataViewPickerEnabled ? experimentalSelectedPatterns : oldSelectedPatterns;
+
+  const selectedPatterns = newDataViewPickerEnabled
+    ? experimentalSelectedPatterns
+    : oldSelectedPatterns;
 
   const { telemetry } = useKibana().services;
   const { openFlyout } = useExpandableFlyoutApi();

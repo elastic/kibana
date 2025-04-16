@@ -68,8 +68,10 @@ export const SendToTimelineButton: FC<PropsWithChildren<SendToTimelineButtonProp
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
 
   const { dataViewSpec } = useDataViewSpec(SourcererScopeName.timeline);
-  
-  const timelineDataViewId = newDataViewPickerEnabled ? (dataViewSpec?.id ?? null) : oldTimelineDataViewId;
+
+  const timelineDataViewId = newDataViewPickerEnabled
+    ? dataViewSpec?.id ?? null
+    : oldTimelineDataViewId;
 
   const { setDiscoverAppState } = useDiscoverState();
   const {

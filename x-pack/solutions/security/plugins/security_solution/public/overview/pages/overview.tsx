@@ -54,7 +54,11 @@ const OverviewComponent = () => {
   const filters = useDeepEqualSelector(getGlobalFiltersQuerySelector);
 
   const { from, deleteQuery, setQuery, to } = useGlobalTime();
-  const { indicesExist: oldIndicesExist, sourcererDataView: oldSourcererDataView, selectedPatterns: oldSelectedPatterns } = useSourcererDataView();
+  const {
+    indicesExist: oldIndicesExist,
+    sourcererDataView: oldSourcererDataView,
+    selectedPatterns: oldSelectedPatterns,
+  } = useSourcererDataView();
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
 
@@ -63,8 +67,12 @@ const OverviewComponent = () => {
   const experimentalSelectedPatterns = useSelectedPatterns();
 
   const sourcererDataView = newDataViewPickerEnabled ? dataViewSpec : oldSourcererDataView;
-  const indicesExist = newDataViewPickerEnabled ? !!dataView?.matchedIndices?.length : oldIndicesExist;
-  const selectedPatterns = newDataViewPickerEnabled ? experimentalSelectedPatterns : oldSelectedPatterns;
+  const indicesExist = newDataViewPickerEnabled
+    ? !!dataView?.matchedIndices?.length
+    : oldIndicesExist;
+  const selectedPatterns = newDataViewPickerEnabled
+    ? experimentalSelectedPatterns
+    : oldSelectedPatterns;
 
   const endpointMetadataIndex = useMemo<string[]>(() => {
     return [ENDPOINT_METADATA_INDEX];

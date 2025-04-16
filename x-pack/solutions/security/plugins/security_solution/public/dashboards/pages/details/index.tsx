@@ -55,7 +55,7 @@ const DashboardViewComponent: React.FC<DashboardViewProps> = ({
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
   const { dataViewSpec } = useDataViewSpec();
-  
+
   const sourcererDataView = newDataViewPickerEnabled ? dataViewSpec : oldSourcererDataView;
 
   const { show: canReadDashboard } = useCapabilities<DashboardCapabilities>('dashboard_v2');

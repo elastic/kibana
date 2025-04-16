@@ -136,14 +136,19 @@ const useStorage = (storage: Storage, tableId: string) =>
 const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = (props) => {
   const dispatch = useDispatch();
 
-  const { sourcererDataView: oldSourcererDataView, selectedPatterns: oldSelectedPatterns } = useSourcererDataView(SourcererScopeName.detections);
+  const { sourcererDataView: oldSourcererDataView, selectedPatterns: oldSelectedPatterns } =
+    useSourcererDataView(SourcererScopeName.detections);
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
   const { dataViewSpec: experimentalDataViewSpec } = useDataViewSpec(SourcererScopeName.detections);
   const experimentalSelectedPatterns = useSelectedPatterns(SourcererScopeName.detections);
 
-  const sourcererDataView = newDataViewPickerEnabled ? experimentalDataViewSpec : oldSourcererDataView;
-  const selectedPatterns = newDataViewPickerEnabled ? experimentalSelectedPatterns : oldSelectedPatterns;
+  const sourcererDataView = newDataViewPickerEnabled
+    ? experimentalDataViewSpec
+    : oldSourcererDataView;
+  const selectedPatterns = newDataViewPickerEnabled
+    ? experimentalSelectedPatterns
+    : oldSelectedPatterns;
 
   const {
     services: { storage, telemetry },

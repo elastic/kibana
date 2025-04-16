@@ -113,13 +113,16 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
     const [dateRangeTo, setDateRangTo] = useState<string>(
       toStr != null ? toStr : new Date(to).toISOString()
     );
-    const { browserFields: oldBrowserFields, sourcererDataView: oldSourcererDataView } = useSourcererDataView(SourcererScopeName.timeline);
+    const { browserFields: oldBrowserFields, sourcererDataView: oldSourcererDataView } =
+      useSourcererDataView(SourcererScopeName.timeline);
 
     const { newDataViewPickerEnabled } = useEnableExperimental();
     const { dataViewSpec: experimentalDataView } = useDataViewSpec(SourcererScopeName.timeline);
     const experimentalBrowserFields = useBrowserFields(SourcererScopeName.timeline);
-    
-    const sourcererDataView = newDataViewPickerEnabled ? experimentalDataView : oldSourcererDataView;
+
+    const sourcererDataView = newDataViewPickerEnabled
+      ? experimentalDataView
+      : oldSourcererDataView;
     const browserFields = newDataViewPickerEnabled ? experimentalBrowserFields : oldBrowserFields;
 
     const [savedQuery, setSavedQuery] = useState<SavedQuery | undefined>(undefined);

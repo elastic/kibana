@@ -39,14 +39,20 @@ const DetectionResponseComponent = () => {
   const { cases } = useKibana().services;
   const { filterQuery } = useGlobalFilterQuery();
 
-  const { indicesExist: oldIndicesExist, loading: oldIsSourcererLoading, sourcererDataView: oldSourcererDataView } = useSourcererDataView();
+  const {
+    indicesExist: oldIndicesExist,
+    loading: oldIsSourcererLoading,
+    sourcererDataView: oldSourcererDataView,
+  } = useSourcererDataView();
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
   const { dataView, status } = useDataView();
   const { dataViewSpec } = useDataViewSpec();
 
   const sourcererDataView = newDataViewPickerEnabled ? dataViewSpec : oldSourcererDataView;
-  const indicesExist = newDataViewPickerEnabled ? !!dataView?.matchedIndices?.length : oldIndicesExist;
+  const indicesExist = newDataViewPickerEnabled
+    ? !!dataView?.matchedIndices?.length
+    : oldIndicesExist;
   const isSourcererLoading = newDataViewPickerEnabled ? status !== 'ready' : oldIsSourcererLoading;
 
   const { signalIndexName } = useSignalIndex();

@@ -107,11 +107,15 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     sourcererDataView: oldSourcererDataView,
   } = useSourcererDataView(SourcererScopeName.timeline);
 
-  const loadingSourcerer = newDataViewPickerEnabled ? (sourcererStatus !== 'ready') : oldLoadingSourcerer;
+  const loadingSourcerer = newDataViewPickerEnabled
+    ? sourcererStatus !== 'ready'
+    : oldLoadingSourcerer;
   const sourcererDataView = newDataViewPickerEnabled ? experimentalDataView : oldSourcererDataView;
   const browserFields = newDataViewPickerEnabled ? experimentalBrowserFields : oldBrowserFields;
-  const selectedPatterns = newDataViewPickerEnabled ? experimentalSelectedPatterns : oldSelectedPatterns;
-  const dataViewId = newDataViewPickerEnabled ? (experimentalDataView.id ?? '') : oldDataViewId;
+  const selectedPatterns = newDataViewPickerEnabled
+    ? experimentalSelectedPatterns
+    : oldSelectedPatterns;
+  const dataViewId = newDataViewPickerEnabled ? experimentalDataView.id ?? '' : oldDataViewId;
 
   /*
    * `pageIndex` needs to be maintained for each table in each tab independently

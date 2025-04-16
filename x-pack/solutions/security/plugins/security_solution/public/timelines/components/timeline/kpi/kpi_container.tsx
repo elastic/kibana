@@ -41,13 +41,17 @@ export const TimelineKpisContainer = ({ timelineId }: KpiExpandedProps) => {
   const { dataViewSpec: experimentalDataView } = useDataViewSpec(SourcererScopeName.timeline);
   const experimentalSelectedPatterns = useSelectedPatterns(SourcererScopeName.timeline);
 
-  const { browserFields: oldBrowserFields, sourcererDataView: oldSourcererDataView, selectedPatterns: oldSelectedPatterns } = useSourcererDataView(
-    SourcererScopeName.timeline
-  );
-  
+  const {
+    browserFields: oldBrowserFields,
+    sourcererDataView: oldSourcererDataView,
+    selectedPatterns: oldSelectedPatterns,
+  } = useSourcererDataView(SourcererScopeName.timeline);
+
   const browserFields = newDataViewPickerEnabled ? experimentalBrowserFields : oldBrowserFields;
   const sourcererDataView = newDataViewPickerEnabled ? experimentalDataView : oldSourcererDataView;
-  const selectedPatterns = newDataViewPickerEnabled ? experimentalSelectedPatterns : oldSelectedPatterns;
+  const selectedPatterns = newDataViewPickerEnabled
+    ? experimentalSelectedPatterns
+    : oldSelectedPatterns;
 
   const { uiSettings } = useKibana().services;
   const esQueryConfig = useMemo(() => getEsQueryConfig(uiSettings), [uiSettings]);

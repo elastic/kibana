@@ -160,14 +160,17 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
       (state) => getTimeline(state, TimelineId.active)?.savedObjectId ?? ''
     );
 
-    const { dataViewId: oldDataViewId, selectedPatterns: oldSelectedPatterns } = useSourcererDataView(SourcererScopeName.timeline);
+    const { dataViewId: oldDataViewId, selectedPatterns: oldSelectedPatterns } =
+      useSourcererDataView(SourcererScopeName.timeline);
     const { newDataViewPickerEnabled } = useEnableExperimental();
 
     const { dataViewSpec: experimentalDataView } = useDataViewSpec(SourcererScopeName.timeline);
     const experimentalSelectedPatterns = useSelectedPatterns(SourcererScopeName.timeline);
 
-    const dataViewId = newDataViewPickerEnabled ? (experimentalDataView?.id || '') : oldDataViewId;
-    const selectedPatterns = newDataViewPickerEnabled ? experimentalSelectedPatterns : oldSelectedPatterns;
+    const dataViewId = newDataViewPickerEnabled ? experimentalDataView?.id || '' : oldDataViewId;
+    const selectedPatterns = newDataViewPickerEnabled
+      ? experimentalSelectedPatterns
+      : oldSelectedPatterns;
 
     const {
       customTemplateTimelineCount,

@@ -261,16 +261,17 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
   const { loading: listsConfigLoading, needsConfiguration: needsListsConfiguration } =
     useListsConfig();
 
-  const { sourcererDataView: oldSourcererDataView, loading: oldIsLoadingIndexPattern } = useSourcererDataView(
-    SourcererScopeName.detections
-  );
+  const { sourcererDataView: oldSourcererDataView, loading: oldIsLoadingIndexPattern } =
+    useSourcererDataView(SourcererScopeName.detections);
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
 
   const { dataViewSpec, status } = useDataViewSpec(SourcererScopeName.detections);
 
   const sourcererDataView = newDataViewPickerEnabled ? dataViewSpec : oldSourcererDataView;
-  const isLoadingIndexPattern = newDataViewPickerEnabled ? status !== 'ready' : oldIsLoadingIndexPattern;
+  const isLoadingIndexPattern = newDataViewPickerEnabled
+    ? status !== 'ready'
+    : oldIsLoadingIndexPattern;
 
   const loading = userInfoLoading || listsConfigLoading;
   const { detailName: ruleId } = useParams<{

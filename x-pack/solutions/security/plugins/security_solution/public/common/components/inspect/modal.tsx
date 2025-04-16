@@ -127,8 +127,10 @@ export const ModalInspectQuery = ({
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
   const experimentalSelectedPatterns = useSelectedPatterns(sourcererScope);
-  
-  const selectedPatterns = newDataViewPickerEnabled ? experimentalSelectedPatterns : oldSelectedPatterns;
+
+  const selectedPatterns = newDataViewPickerEnabled
+    ? experimentalSelectedPatterns
+    : oldSelectedPatterns;
 
   const requests: string[] = useMemo(
     () => [request, ...(additionalRequests != null ? additionalRequests : [])],

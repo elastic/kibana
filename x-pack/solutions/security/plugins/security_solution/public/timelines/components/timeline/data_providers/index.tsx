@@ -113,7 +113,7 @@ export const DataProviders = React.memo<Props>(({ timelineId }) => {
   const { browserFields: oldBrowserFields } = useSourcererDataView(SourcererScopeName.timeline);
 
   const experimentalBrowserFields = useBrowserFields(SourcererScopeName.timeline);
-  
+
   const browserFields = newDataViewPickerEnabled ? experimentalBrowserFields : oldBrowserFields;
 
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);

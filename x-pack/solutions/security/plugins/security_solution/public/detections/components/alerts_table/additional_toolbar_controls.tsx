@@ -45,7 +45,9 @@ const AdditionalToolbarControlsComponent = ({
     services: { telemetry },
   } = useKibana();
 
-  const { sourcererDataView: oldSourcererDataView } = useSourcererDataView(SourcererScopeName.detections);
+  const { sourcererDataView: oldSourcererDataView } = useSourcererDataView(
+    SourcererScopeName.detections
+  );
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
   const { dataViewSpec } = useDataViewSpec(SourcererScopeName.detections);

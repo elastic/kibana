@@ -74,10 +74,14 @@ export const EqlQueryBarTimeline = memo(({ timelineId }: { timelineId: string })
     SourcererScopeName.timeline
   );
   const experimentalSelectedPatterns = useSelectedPatterns(SourcererScopeName.timeline);
-  
-  const indexPatternsLoading = newDataViewPickerEnabled ? (status !== 'ready') : oldIndexPatternsLoading;
+
+  const indexPatternsLoading = newDataViewPickerEnabled
+    ? status !== 'ready'
+    : oldIndexPatternsLoading;
   const sourcererDataView = newDataViewPickerEnabled ? experimentalDataView : oldSourcererDataView;
-  const selectedPatterns = newDataViewPickerEnabled ? experimentalSelectedPatterns : oldSelectedPatterns;
+  const selectedPatterns = newDataViewPickerEnabled
+    ? experimentalSelectedPatterns
+    : oldSelectedPatterns;
 
   const initialState = useMemo(
     () => ({

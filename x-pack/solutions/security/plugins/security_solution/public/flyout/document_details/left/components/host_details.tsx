@@ -115,7 +115,9 @@ export const HostDetails: React.FC<HostDetailsProps> = ({ hostName, timestamp, s
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
   const experimentalSelectedPatterns = useSelectedPatterns();
 
-  const selectedPatterns = newDataViewPickerEnabled ? experimentalSelectedPatterns : oldSelectedPatterns;
+  const selectedPatterns = newDataViewPickerEnabled
+    ? experimentalSelectedPatterns
+    : oldSelectedPatterns;
 
   const dispatch = useDispatch();
   const { telemetry } = useKibana().services;

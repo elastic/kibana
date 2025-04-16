@@ -86,16 +86,20 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
 
   const { newDataViewPickerEnabled } = useEnableExperimental();
 
-  const { dataViewId: oldDataViewId, sourcererDataView: oldSourcererDataView, selectedPatterns: oldSelectedPatterns } = useSourcererDataView(
-    SourcererScopeName.timeline
-  );
+  const {
+    dataViewId: oldDataViewId,
+    sourcererDataView: oldSourcererDataView,
+    selectedPatterns: oldSelectedPatterns,
+  } = useSourcererDataView(SourcererScopeName.timeline);
 
   const experimentalSelectedPatterns = useSelectedPatterns(SourcererScopeName.timeline);
   const { dataViewSpec: experimentalDataView } = useDataViewSpec(SourcererScopeName.timeline);
-  
-  const selectedPatterns = newDataViewPickerEnabled ? experimentalSelectedPatterns : oldSelectedPatterns;
+
+  const selectedPatterns = newDataViewPickerEnabled
+    ? experimentalSelectedPatterns
+    : oldSelectedPatterns;
   const sourcererDataView = newDataViewPickerEnabled ? experimentalDataView : oldSourcererDataView;
-  const dataViewId = newDataViewPickerEnabled ? (experimentalDataView.id ?? '') : oldDataViewId;
+  const dataViewId = newDataViewPickerEnabled ? experimentalDataView.id ?? '' : oldDataViewId;
 
   const filterQuery = useMemo(() => {
     if (isEmpty(pinnedEventIds)) {

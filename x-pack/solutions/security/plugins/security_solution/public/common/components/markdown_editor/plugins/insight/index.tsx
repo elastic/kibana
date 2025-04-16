@@ -284,7 +284,9 @@ const InsightEditorComponent = ({
 }: EuiMarkdownEditorUiPluginEditorProps<InsightComponentProps & { relativeTimerange: string }>) => {
   const isEditMode = node != null;
 
-  const { sourcererDataView: oldSourcererDataView } = useSourcererDataView(SourcererScopeName.default);
+  const { sourcererDataView: oldSourcererDataView } = useSourcererDataView(
+    SourcererScopeName.default
+  );
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
 

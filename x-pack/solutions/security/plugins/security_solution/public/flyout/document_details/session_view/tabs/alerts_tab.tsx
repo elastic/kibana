@@ -36,11 +36,15 @@ export const AlertsTab = memo(() => {
     hasNextPage: hasNextPageAlerts,
   } = useFetchSessionViewAlerts(sessionEntityId, sessionStartTime, investigatedAlertId);
 
-  const { selectedPatterns: oldSelectedPatterns } = useSourcererDataView(SourcererScopeName.detections);
+  const { selectedPatterns: oldSelectedPatterns } = useSourcererDataView(
+    SourcererScopeName.detections
+  );
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
   const experimentalSelectedPatterns = useSelectedPatterns(SourcererScopeName.detections);
 
-  const selectedPatterns = newDataViewPickerEnabled ? experimentalSelectedPatterns : oldSelectedPatterns;
+  const selectedPatterns = newDataViewPickerEnabled
+    ? experimentalSelectedPatterns
+    : oldSelectedPatterns;
 
   const alertsIndex = useMemo(() => selectedPatterns.join(','), [selectedPatterns]);
 

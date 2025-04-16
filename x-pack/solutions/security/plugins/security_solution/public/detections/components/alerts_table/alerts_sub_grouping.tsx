@@ -101,7 +101,8 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
   const {
     services: { uiSettings },
   } = useKibana();
-  const { browserFields: oldBrowserFields, sourcererDataView: oldSourcererDataView } = useSourcererDataView(SourcererScopeName.detections);
+  const { browserFields: oldBrowserFields, sourcererDataView: oldSourcererDataView } =
+    useSourcererDataView(SourcererScopeName.detections);
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
 

@@ -45,20 +45,25 @@ export const useInsightQuery = ({
 }: UseInsightQuery): UseInsightQueryResult => {
   const { uiSettings } = useKibana().services;
   const esQueryConfig = useMemo(() => getEsQueryConfig(uiSettings), [uiSettings]);
-  const { browserFields: oldBrowserFields, selectedPatterns: oldSelectedPatterns, sourcererDataView: oldSourcererDataView, dataViewId: oldDataViewId } = useSourcererDataView(
-    SourcererScopeName.timeline
-  );
+  const {
+    browserFields: oldBrowserFields,
+    selectedPatterns: oldSelectedPatterns,
+    sourcererDataView: oldSourcererDataView,
+    dataViewId: oldDataViewId,
+  } = useSourcererDataView(SourcererScopeName.timeline);
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
 
   const { dataViewSpec } = useDataViewSpec(SourcererScopeName.timeline);
   const experimentalSelectedPatterns = useSelectedPatterns(SourcererScopeName.timeline);
   const experimentalBrowserFields = useBrowserFields(SourcererScopeName.timeline);
-  
+
   const sourcererDataView = newDataViewPickerEnabled ? dataViewSpec : oldSourcererDataView;
-  const selectedPatterns = newDataViewPickerEnabled ? experimentalSelectedPatterns : oldSelectedPatterns;
+  const selectedPatterns = newDataViewPickerEnabled
+    ? experimentalSelectedPatterns
+    : oldSelectedPatterns;
   const browserFields = newDataViewPickerEnabled ? experimentalBrowserFields : oldBrowserFields;
-  const dataViewId = newDataViewPickerEnabled ? (dataViewSpec?.id ?? '') : oldDataViewId;
+  const dataViewId = newDataViewPickerEnabled ? dataViewSpec?.id ?? '' : oldDataViewId;
 
   const [hasError, setHasError] = useState(false);
   const combinedQueries = useMemo(() => {

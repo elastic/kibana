@@ -19,7 +19,7 @@ export const useTimelineColumns = (columns: ColumnHeaderOptions[]) => {
   const { newDataViewPickerEnabled } = useEnableExperimental();
   const { browserFields: oldBrowserFields } = useSourcererDataView(SourcererScopeName.timeline);
   const experimentalBrowserFields = useBrowserFields(SourcererScopeName.timeline);
-  
+
   const browserFields = newDataViewPickerEnabled ? experimentalBrowserFields : oldBrowserFields;
 
   const localColumns = useMemo(() => columns ?? defaultUdtHeaders, [columns]);
