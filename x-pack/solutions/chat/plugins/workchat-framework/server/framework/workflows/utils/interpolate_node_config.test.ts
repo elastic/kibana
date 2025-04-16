@@ -180,7 +180,7 @@ describe('interpolateNodeConfig', () => {
       customInstanceField: customInstance,
       nested: {
         date: now,
-        regex: regex,
+        regex,
         custom: customInstance,
       },
       arrayWithNonBasic: [now, regex, customInstance, { dateInside: now }],
