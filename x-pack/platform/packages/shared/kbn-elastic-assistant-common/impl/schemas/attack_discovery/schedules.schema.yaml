@@ -72,7 +72,15 @@ components:
           type: string
         apiConfig:
           description: LLM API configuration.
-          $ref: '../conversations/common_attributes.schema.yaml#/components/schemas/ApiConfig'
+          allOf:
+            - $ref: '../conversations/common_attributes.schema.yaml#/components/schemas/ApiConfig'
+            - type: object
+              required:
+                - name
+              properties:
+                name:
+                  description: The name of the connector
+                  type: string
         end:
           type: string
         filter:
