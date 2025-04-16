@@ -42,6 +42,7 @@ export const GridLayout = ({
   className,
   useCustomDragHandle = false,
 }: GridLayoutProps) => {
+  console.log(layout);
   const layoutRef = useRef<HTMLDivElement | null>(null);
   const { gridLayoutStateManager, setDimensionsRef } = useGridLayoutState({
     layout,
@@ -137,9 +138,44 @@ export const GridLayout = ({
       }
     });
 
+    const mainSectionGridStyleSubscription = combineLatest([
+      gridLayoutStateManager.proposedGridLayout$,
+      gridLayoutStateManager.gridLayout$,
+    ])
+      .pipe(
+        map(([proposedGridLayout, gridLayout]) => proposedGridLayout ?? gridLayout),
+        distinctUntilChanged(isLayoutEqual)
+      )
+      .subscribe((currentLayout) => {
+        if (!layoutRef.current) return;
+        console.log('HERE!!');
+        const rowIds = getRowKeysInOrder(currentLayout);
+        let gridRowTemplateString = '';
+        rowIds.forEach((rowId) => {
+          const currentRow = currentLayout[rowId];
+          gridRowTemplateString += `[${rowId}-start] `;
+          if (currentRow.isCollapsible) {
+            gridRowTemplateString += `repeat(2, calc(var(--kbnGridRowHeight) * 1px))`;
+          }
+          if (!currentRow.isCollapsible || (currentRow.isCollapsible && !currentRow.isCollapsed)) {
+            const panels = Object.values(currentRow.panels);
+            const maxRow =
+              panels.length > 0 ? Math.max(...panels.map(({ row, height }) => row + height)) : 0;
+            gridRowTemplateString += `repeat(${maxRow}, [${rowId}-gridRow] calc(var(--kbnGridRowHeight) * 1px))`;
+          }
+          // gridRowTemplateString += `[${rowId}-end] `;
+        });
+        // gridRowTemplateString = gridRowTemplateString.replaceAll('] [', ' ');
+
+        layoutRef.current.style.gridTemplateRows = gridRowTemplateString;
+
+        console.log(gridRowTemplateString);
+      });
+
     return () => {
       rowOrderSubscription.unsubscribe();
       gridLayoutClassSubscription.unsubscribe();
+      mainSectionGridStyleSubscription.unsubscribe();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -164,6 +200,7 @@ export const GridLayout = ({
           }}
           className={classNames('kbnGrid', className)}
           css={[
+            styles.grid,
             styles.layoutPadding,
             styles.hasActivePanel,
             styles.singleColumn,
@@ -182,6 +219,20 @@ export const GridLayout = ({
 const styles = {
   layoutPadding: css({
     padding: 'calc(var(--kbnGridGutterSize) * 1px)',
+  }),
+  grid: css({
+    position: 'relative',
+    justifyItems: 'stretch',
+    display: 'grid',
+    gap: 'calc(var(--kbnGridGutterSize) * 1px)',
+    gridAutoRows: 'calc(var(--kbnGridRowHeight) * 1px)',
+    gridTemplateColumns: `repeat(
+          var(--kbnGridColumnCount),
+          calc(
+            (100% - (var(--kbnGridGutterSize) * (var(--kbnGridColumnCount) - 1) * 1px)) /
+              var(--kbnGridColumnCount)
+          )
+        )`,
   }),
   hasActivePanel: css({
     '&:has(.kbnGridPanel--active), &:has(.kbnGridRowHeader--active)': {

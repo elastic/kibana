@@ -23,15 +23,13 @@ export interface GridPanelData extends GridRect {
   id: string;
 }
 
-export interface GridRowData {
+export type GridRowData = {
   id: string;
   order: number;
-  title: string;
-  isCollapsed: boolean;
   panels: {
     [key: string]: GridPanelData;
   };
-}
+} & ({ isCollapsible: true; isCollapsed: boolean; title: string } | { isCollapsible: false });
 
 export interface GridLayoutData {
   [rowId: string]: GridRowData;

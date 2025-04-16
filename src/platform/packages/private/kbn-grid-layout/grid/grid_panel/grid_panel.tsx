@@ -45,8 +45,8 @@ export const GridPanel = React.memo(({ panelId, rowId }: GridPanelProps) => {
       );
       grid-column-start: ${initialPanel.column + 1};
       grid-column-end: ${initialPanel.column + 1 + initialPanel.width};
-      grid-row-start: ${initialPanel.row + 1};
-      grid-row-end: ${initialPanel.row + 1 + initialPanel.height};
+      grid-row-start: ${rowId}-gridRow ${initialPanel.row + 1};
+      grid-row-end: span ${initialPanel.height};
       .kbnGridPanel--dragHandle,
       .kbnGridPanel--resizeHandle {
         touch-action: none; // prevent scrolling on touch devices
@@ -131,8 +131,8 @@ export const GridPanel = React.memo(({ panelId, rowId }: GridPanelProps) => {
             // and render the panel locked to the grid
             ref.style.gridColumnStart = `${panel.column + 1}`;
             ref.style.gridColumnEnd = `${panel.column + 1 + panel.width}`;
-            ref.style.gridRowStart = `${panel.row + 1}`;
-            ref.style.gridRowEnd = `${panel.row + 1 + panel.height}`;
+            ref.style.gridRowStart = `${rowId}-gridRow ${panel.row + 1}`;
+            ref.style.gridRowEnd = `span ${panel.height}`;
           }
         });
 

@@ -114,7 +114,8 @@ export const GridRow = React.memo(({ rowId }: GridRowProps) => {
 
   const toggleIsCollapsed = useCallback(() => {
     const newLayout = cloneDeep(gridLayoutStateManager.gridLayout$.value);
-    newLayout[rowId].isCollapsed = !newLayout[rowId].isCollapsed;
+    const row = newLayout[rowId];
+    if (row.isCollapsible) row.isCollapsed = !row.isCollapsed;
     gridLayoutStateManager.gridLayout$.next(newLayout);
   }, [rowId, gridLayoutStateManager.gridLayout$]);
 
@@ -128,13 +129,8 @@ export const GridRow = React.memo(({ rowId }: GridRowProps) => {
   }, [isCollapsed]);
 
   return (
-    <div
-      css={styles.fullHeight}
-      className={classNames('kbnGridRowContainer', {
-        'kbnGridRowContainer--collapsed': isCollapsed,
-      })}
-    >
-      {currentRow.order !== 0 && (
+    <>
+      {currentRow.order !== 0 && currentRow.isCollapsible && (
         <GridRowHeader
           rowId={rowId}
           toggleIsCollapsed={toggleIsCollapsed}
@@ -142,45 +138,16 @@ export const GridRow = React.memo(({ rowId }: GridRowProps) => {
         />
       )}
       {!isCollapsed && (
-        <div
-          id={`kbnGridRow-${rowId}`}
-          className={'kbnGridRow'}
-          ref={(element: HTMLDivElement | null) =>
-            (gridLayoutStateManager.rowRefs.current[rowId] = element)
-          }
-          css={[styles.fullHeight, styles.grid]}
-          role="region"
-          aria-labelledby={`kbnGridRowTitle-${rowId}`}
-        >
+        <>
           {/* render the panels **in order** for accessibility, using the memoized panel components */}
           {panelIdsInOrder.map((panelId) => (
             <GridPanel key={panelId} panelId={panelId} rowId={rowId} />
           ))}
-          <GridPanelDragPreview rowId={rowId} />
-        </div>
+          {/* <GridPanelDragPreview rowId={rowId} /> */}
+        </>
       )}
-    </div>
+    </>
   );
 });
-
-const styles = {
-  fullHeight: css({
-    height: '100%',
-  }),
-  grid: css({
-    position: 'relative',
-    justifyItems: 'stretch',
-    display: 'grid',
-    gap: 'calc(var(--kbnGridGutterSize) * 1px)',
-    gridAutoRows: 'calc(var(--kbnGridRowHeight) * 1px)',
-    gridTemplateColumns: `repeat(
-          var(--kbnGridColumnCount),
-          calc(
-            (100% - (var(--kbnGridGutterSize) * (var(--kbnGridColumnCount) - 1) * 1px)) /
-              var(--kbnGridColumnCount)
-          )
-        )`,
-  }),
-};
 
 GridRow.displayName = 'KbnGridLayoutRow';

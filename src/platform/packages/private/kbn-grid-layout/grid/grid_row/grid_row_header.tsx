@@ -147,7 +147,7 @@ export const GridRowHeader = React.memo(
           gutterSize="xs"
           responsive={false}
           alignItems="center"
-          css={styles.headerStyles}
+          css={(theme) => styles.headerStyles(theme, rowId)}
           className={classNames('kbnGridRowHeader', { 'kbnGridRowHeader--active': isActive })}
           data-test-subj={`kbnGridRowHeader-${rowId}`}
           ref={(element: HTMLDivElement | null) =>
@@ -243,10 +243,13 @@ const styles = {
   floatToRight: css({
     marginLeft: 'auto',
   }),
-  headerStyles: ({ euiTheme }: UseEuiTheme) =>
+  headerStyles: ({ euiTheme }: UseEuiTheme, rowId: string) =>
     css({
+      gridColumnStart: 1,
+      gridColumnEnd: -1,
+      gridRowStart: `${rowId}-start`,
+      gridRowEnd: `span 2`,
       height: `calc(${euiTheme.size.xl} + (2 * ${euiTheme.size.s}))`,
-      padding: `${euiTheme.size.s} 0px`,
       border: '1px solid transparent', // prevents layout shift
       '.kbnGridRowContainer--collapsed &:not(.kbnGridRowHeader--active)': {
         borderBottom: euiTheme.border.thin,

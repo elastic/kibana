@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { GridLayoutData } from '@kbn/grid-layout';
+import { GridLayoutData, GridRowData } from '@kbn/grid-layout';
 import { MockedDashboardPanelMap, MockedDashboardRowMap } from './types';
 
 export const gridLayoutToDashboardPanelMap = (
@@ -17,8 +17,10 @@ export const gridLayoutToDashboardPanelMap = (
   const panels: MockedDashboardPanelMap = {};
   const rows: MockedDashboardRowMap = {};
   Object.entries(layout).forEach(([rowId, row]) => {
-    const { panels: rowPanels, isCollapsed, ...rest } = row; // drop panels
-    rows[rowId] = { ...rest, collapsed: isCollapsed };
+    const { panels: rowPanels, ...rest } = row; // drop panels
+    if (row.isCollapsible) {
+      rows[rowId] = { ...rest, collapsed: row.isCollapsed };
+    }
     Object.values(rowPanels).forEach((panelGridData) => {
       panels[panelGridData.id] = {
         ...panelState[panelGridData.id],
@@ -45,12 +47,14 @@ export const dashboardInputToGridLayout = ({
 }): GridLayoutData => {
   const layout: GridLayoutData = {};
   Object.values(rows).forEach((row) => {
-    const { collapsed, ...rest } = row;
+    const { id, order, isCollapsible } = row;
     layout[row.id] = {
-      ...rest,
+      id,
+      order,
       panels: {},
-      isCollapsed: collapsed,
-    };
+      isCollapsible,
+      ...(isCollapsible ? { isCollapsed: row.collapsed, title: row.title } : {}),
+    } as GridRowData;
   });
 
   Object.keys(panels).forEach((panelId) => {
