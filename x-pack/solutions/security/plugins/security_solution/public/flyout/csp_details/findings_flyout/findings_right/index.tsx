@@ -20,7 +20,7 @@ import { useKibana } from '../../../../common/lib/kibana';
 import { PreferenceFormattedDate } from '../../../../common/components/formatted_date';
 import { FlyoutTitle } from '../../../shared/components/flyout_title';
 import { FlyoutBody } from '../../../shared/components/flyout_body';
-import { FindingMisconfigurationPreviewFooter } from '../findings_preview/footer';
+
 export interface FindingsMisconfigurationPanelExpandableFlyoutProps extends FlyoutPanelProps {
   key: 'findings-misconfiguration-panel';
   params: FindingMisconfigurationFlyoutProps;
@@ -29,7 +29,6 @@ export interface FindingsMisconfigurationPanelExpandableFlyoutProps extends Flyo
 export const FindingsMisconfigurationPanel = ({
   resourceId,
   ruleId,
-  isPreviewMode,
   scopeId,
 }: FindingMisconfigurationFlyoutProps) => {
   const { cloudSecurityPosture } = useKibana().services;
@@ -69,13 +68,9 @@ export const FindingsMisconfigurationPanel = ({
               <FlyoutBody>
                 <CspFlyout.Body finding={finding} />
               </FlyoutBody>
-              {!isPreviewMode ? (
-                <EuiFlyoutFooter>
-                  <CspFlyout.Footer createRuleFn={createRuleFn} />
-                </EuiFlyoutFooter>
-              ) : (
-                <FindingMisconfigurationPreviewFooter finding={finding} scopeId={scopeId} />
-              )}
+              <EuiFlyoutFooter>
+                <CspFlyout.Footer createRuleFn={createRuleFn} />
+              </EuiFlyoutFooter>
             </>
           );
         }}

@@ -198,7 +198,7 @@ export const MisconfigurationFindingsDetailsTable = memo(
       currentFilter
     );
 
-    const { openPreviewPanel } = useExpandableFlyoutApi();
+    const { openFlyout } = useExpandableFlyoutApi();
 
     const columns: Array<EuiBasicTableColumn<MisconfigurationFindingDetailFields>> = [
       {
@@ -213,21 +213,13 @@ export const MisconfigurationFindingsDetailsTable = memo(
                 METRIC_TYPE.CLICK,
                 NAV_TO_FINDINGS_BY_RULE_NAME_FRPOM_ENTITY_FLYOUT
               );
-              openPreviewPanel({
-                id: 'findings-misconfiguration-panel-preview',
-                params: {
-                  resourceId: finding.resource.id,
-                  ruleId: finding.rule.id,
-                  scopeId,
-                  banner: {
-                    title: i18n.translate(
-                      'xpack.securitySolution.flyout.right.misconfigurationFinding.PreviewTitle',
-                      {
-                        defaultMessage: 'Preview finding details',
-                      }
-                    ),
-                    backgroundColor: 'warning',
-                    textColor: 'warning',
+              openFlyout({
+                right: {
+                  id: 'findings-misconfiguration-panel',
+                  params: {
+                    resourceId: finding.resource.id,
+                    ruleId: finding.rule.id,
+                    scopeId,
                   },
                 },
               });
