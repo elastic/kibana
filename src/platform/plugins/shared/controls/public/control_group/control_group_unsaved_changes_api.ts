@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { combineLatest, map, of } from 'rxjs';
+import fastIsEqual from 'fast-deep-equal';
+import { combineLatest, combineLatestWith, debounceTime, map, merge, of } from 'rxjs';
 
 import {
   apiHasLastSavedChildState,
@@ -15,32 +16,29 @@ import {
   initializeUnsavedChanges,
   type PresentationContainer,
 } from '@kbn/presentation-containers';
-import { apiPublishesUnsavedChanges, SerializedPanelState } from '@kbn/presentation-publishing';
+import {
+  apiPublishesUnsavedChanges,
+  PublishingSubject,
+  SerializedPanelState,
+} from '@kbn/presentation-publishing';
 
 import { StateManager } from '@kbn/presentation-publishing/state_manager/types';
 import {
   DEFAULT_CONTROL_CHAINING,
-  type ControlGroupRuntimeState,
   type ControlGroupSerializedState,
   type ControlPanelsState,
 } from '../../common';
 import { apiPublishesAsyncFilters } from '../controls/data_controls/publishes_async_filters';
-import type { ControlsInOrder } from './init_controls_manager';
+import { getControlsInOrder, type ControlsInOrder } from './init_controls_manager';
 import { deserializeControlGroup } from './utils/serialization_utils';
 import { ControlGroupEditorState } from './types';
-
-export type ControlGroupComparatorState = Pick<
-  ControlGroupRuntimeState,
-  'autoApplySelections' | 'chainingSystem' | 'ignoreParentSettings' | 'labelPosition'
-> & {
-  controlsInOrder: ControlsInOrder;
-};
 
 export function initializeControlGroupUnsavedChanges({
   applySelections,
   children$,
   controlGroupId,
   editorStateManager,
+  layout$,
   parentApi,
   resetControlsUnsavedChanges,
   serializeControlGroupState,
@@ -49,6 +47,7 @@ export function initializeControlGroupUnsavedChanges({
   children$: PresentationContainer['children$'];
   controlGroupId: string;
   editorStateManager: StateManager<ControlGroupEditorState>;
+  layout$: PublishingSubject<ControlsInOrder>;
   parentApi: unknown;
   resetControlsUnsavedChanges: (lastSavedControlsState: ControlPanelsState) => void;
   serializeControlGroupState: () => SerializedPanelState<ControlGroupSerializedState>;
@@ -76,7 +75,7 @@ export function initializeControlGroupUnsavedChanges({
     uuid: controlGroupId,
     parentApi,
     serializeState: serializeControlGroupState,
-    anyStateChange$: editorStateManager.anyStateChange$,
+    anyStateChange$: merge(editorStateManager.anyStateChange$),
     getComparators: () => {
       return {
         autoApplySelections: 'referenceEquality',
@@ -90,6 +89,17 @@ export function initializeControlGroupUnsavedChanges({
       editorStateManager.reinitializeState(lastSaved?.rawState);
     },
   });
+
+  const hasLayoutChanges$ = layout$.pipe(
+    combineLatestWith(
+      lastSavedControlsState$.pipe(map((controlsState) => getControlsInOrder(controlsState)))
+    ),
+    debounceTime(100),
+    map(([, lastSavedLayout]) => {
+      const currentLayout = layout$.value;
+      return !fastIsEqual(currentLayout, lastSavedLayout);
+    })
+  );
 
   const hasControlChanges$ = childrenUnsavedChanges$(children$).pipe(
     map((childrenWithChanges) => {
@@ -105,14 +115,13 @@ export function initializeControlGroupUnsavedChanges({
       hasUnsavedChanges$: combineLatest([
         controlGroupEditorUnsavedChangesApi.hasUnsavedChanges$,
         hasControlChanges$,
+        hasLayoutChanges$,
       ]).pipe(
-        map(([hasUnsavedControlGroupChanges, hasControlChanges]) => {
-          return hasUnsavedControlGroupChanges || hasControlChanges;
+        map(([hasUnsavedControlGroupChanges, hasControlChanges, hasLayoutChanges]) => {
+          return hasUnsavedControlGroupChanges || hasControlChanges || hasLayoutChanges;
         })
       ),
       resetUnsavedChanges: async () => {
-        const lastSavedControlsState = getLastSavedControlsState();
-        console.log('lastSavedControlsState', lastSavedControlsState);
         controlGroupEditorUnsavedChangesApi.resetUnsavedChanges();
         resetControlsUnsavedChanges(getLastSavedControlsState());
 

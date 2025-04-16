@@ -75,6 +75,7 @@ export const getControlGroupEmbeddableFactory = () => {
         children$: controlsManager.api.children$,
         controlGroupId: uuid,
         editorStateManager,
+        layout$: controlsManager.controlsInOrder$,
         parentApi,
         resetControlsUnsavedChanges: controlsManager.resetControlsUnsavedChanges,
         serializeControlGroupState: serializeState,
