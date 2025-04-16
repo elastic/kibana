@@ -196,13 +196,13 @@ describe('Network Details', () => {
       detailName: ip,
       flowTarget: FlowTargetSourceDest.source,
     });
-    const wrapper = mount(
+    render(
       <TestProviders>
         <Router history={getMockHistory(ip)}>
           <NetworkDetails />
         </Router>
       </TestProviders>
     );
-    expect(wrapper.find('[data-test-subj="empty-prompt"]').exists()).toBe(true);
+    expect(screen.getByTestId('empty-prompt')).toBeInTheDocument();
   });
 });
