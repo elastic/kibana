@@ -10,6 +10,31 @@ import expect from '@kbn/expect';
 import { testSubjectIds } from '../constants/test_subject_ids';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
+const TEST_IDS = {
+  POST_INSTALL_AZURE_ARM_TEMPLATE_MODAL: 'postInstallAzureArmTemplateModal',
+  EXTERNAL_LINK: 'externalLink',
+  POST_INSTALL_CLOUD_FORMATION_MODAL: 'postInstallCloudFormationModal',
+  LAUNCH_CLOUD_FORMATION_AGENTLESS_BUTTON: 'launchCloudFormationAgentlessButton',
+  POST_INSTALL_GOOGLE_CLOUD_SHELL_MODAL: 'postInstallGoogleCloudShellModal',
+  DATA_COLLECTION_SETUP_STEP: 'dataCollectionSetupStep',
+  INTEGRATION_NAME_LINK: 'integrationNameLink',
+  AGENT_ENROLLMENT_FLYOUT: 'agentEnrollmentFlyout',
+  AGENTLESS_INTEGRATION_NAME_LINK: 'agentlessIntegrationNameLink',
+  INTEGRATION_POLICY_TABLE: 'integrationPolicyTable',
+  EDIT_PACKAGE_POLICY_PAGE: 'editPackagePolicy_page',
+  CREATE_PACKAGE_POLICY_PAGE: 'createPackagePolicy_page',
+  CREATE_PACKAGE_POLICY_SAVE_BUTTON: 'createPackagePolicySaveButton',
+  CONFIRM_CLOUD_FORMATION_MODAL_CONFIRM_BUTTON: 'confirmCloudFormationModalConfirmButton',
+  SAVE_INTEGRATION: 'saveIntegration',
+  CONFIRM_MODAL_TITLE_TEXT: 'confirmModalTitleText',
+  CLOUD_SECURITY_POSTURE_PLI_AUTH_BLOCK: 'cloud-security-posture-integration-pli-auth-block',
+  ADD_AGENT_BUTTON: 'addAgentButton',
+  POLICY_UPDATE_SUCCESS_TOAST: 'policyUpdateSuccessToast',
+  AGENT_POLICY_NAME_LINK: 'agentPolicyNameLink',
+  AGENTLESS_STATUS_BADGE: 'agentlessStatusBadge',
+  CREATE_AGENT_POLICY_NAME_FIELD: 'createAgentPolicyNameField',
+} as const;
+
 export function AddCisIntegrationFormPageProvider({
   getService,
   getPageObjects,
@@ -24,31 +49,35 @@ export function AddCisIntegrationFormPageProvider({
 
   const cisAzure = {
     getPostInstallArmTemplateModal: async () => {
-      return await testSubjects.find('postInstallAzureArmTemplateModal');
+      return await testSubjects.find(TEST_IDS.POST_INSTALL_AZURE_ARM_TEMPLATE_MODAL);
     },
   };
 
   const cisAws = {
     getUrlValueInEditPage: async () => {
       /* Newly added/edited integration always shows up on top by default as such we can just always click the most top if we want to check for the latest one  */
-      const fieldValue = await (await testSubjects.find('externalLink')).getAttribute('href');
+      const fieldValue = await (
+        await testSubjects.find(TEST_IDS.EXTERNAL_LINK)
+      ).getAttribute('href');
       return fieldValue;
     },
 
     getPostInstallCloudFormationModal: async () => {
-      return await testSubjects.find('postInstallCloudFormationModal');
+      return await testSubjects.find(TEST_IDS.POST_INSTALL_CLOUD_FORMATION_MODAL);
     },
     showPostInstallCloudFormationModal: async () => {
-      return await testSubjects.exists('postInstallCloudFormationModal');
+      return await testSubjects.exists(TEST_IDS.POST_INSTALL_CLOUD_FORMATION_MODAL);
     },
     showLaunchCloudFormationAgentlessButton: async () => {
-      return await testSubjects.exists('launchCloudFormationAgentlessButton');
+      return await testSubjects.exists(TEST_IDS.LAUNCH_CLOUD_FORMATION_AGENTLESS_BUTTON);
     },
   };
 
   const cisGcp = {
     isPostInstallGoogleCloudShellModal: async (isOrg: boolean, orgID?: string, prjID?: string) => {
-      const googleCloudShellModal = await testSubjects.find('postInstallGoogleCloudShellModal');
+      const googleCloudShellModal = await testSubjects.find(
+        TEST_IDS.POST_INSTALL_GOOGLE_CLOUD_SHELL_MODAL
+      );
       const googleCloudShellModalVisibleText = await googleCloudShellModal.getVisibleText();
       const stringProjectId = prjID ? prjID : '<PROJECT_ID>';
       const stringOrganizationId = orgID ? `ORG_ID=${orgID}` : 'ORG_ID=<ORGANIZATION_ID>';
@@ -81,14 +110,14 @@ export function AddCisIntegrationFormPageProvider({
 
     getFieldValueInEditPage: async (field: string) => {
       /* Newly added/edited integration always shows up on top by default as such we can just always click the most top if we want to check for the latest one  */
-      const integrationList = await testSubjects.findAll('integrationNameLink');
+      const integrationList = await testSubjects.findAll(TEST_IDS.INTEGRATION_NAME_LINK);
       await integrationList[0].click();
       const fieldValue = await (await testSubjects.find(field)).getAttribute('value');
       return fieldValue;
     },
 
     doesStringExistInCodeBlock: async (str: string) => {
-      const flyout = await testSubjects.find('agentEnrollmentFlyout');
+      const flyout = await testSubjects.find(TEST_IDS.AGENT_ENROLLMENT_FLYOUT);
       const codeBlock = await flyout.findByXpath('//code');
       const commandsToBeCopied = await codeBlock.getVisibleText();
       return commandsToBeCopied.includes(str);
@@ -96,7 +125,7 @@ export function AddCisIntegrationFormPageProvider({
 
     getFieldValueInAddAgentFlyout: async (field: string, value: string) => {
       /* Newly added/edited integration always shows up on top by default as such we can just always click the most top if we want to check for the latest one  */
-      const integrationList = await testSubjects.findAll('agentEnrollmentFlyout');
+      const integrationList = await testSubjects.findAll(TEST_IDS.AGENT_ENROLLMENT_FLYOUT);
       await integrationList[0].click();
       await PageObjects.header.waitUntilLoadingHasFinished();
       const fieldValue = (await (await testSubjects.find(field)).getAttribute(value)) ?? '';
@@ -108,7 +137,7 @@ export function AddCisIntegrationFormPageProvider({
   };
 
   const isRadioButtonChecked = async (selector: string) => {
-    const page = await testSubjects.find('dataCollectionSetupStep');
+    const page = await testSubjects.find(TEST_IDS.DATA_COLLECTION_SETUP_STEP);
     const findCheckedButton = await page.findAllByCssSelector(`input[id="${selector}"]:checked`);
     if (findCheckedButton.length === 0) return false;
     return true;
@@ -116,7 +145,7 @@ export function AddCisIntegrationFormPageProvider({
 
   const getUrlOnPostInstallModal = async () => {
     /* Newly added/edited integration always shows up on top by default as such we can just always click the most top if we want to check for the latest one  */
-    const fieldValue = await (await testSubjects.find('externalLink')).getAttribute('href');
+    const fieldValue = await (await testSubjects.find(TEST_IDS.EXTERNAL_LINK)).getAttribute('href');
     return fieldValue;
   };
 
@@ -199,11 +228,11 @@ export function AddCisIntegrationFormPageProvider({
   };
 
   const navigateToEditIntegrationPage = async () => {
-    await testSubjects.click('integrationNameLink');
+    await testSubjects.click(TEST_IDS.INTEGRATION_NAME_LINK);
   };
 
   const navigateToEditAgentlessIntegrationPage = async () => {
-    await testSubjects.click('agentlessIntegrationNameLink');
+    await testSubjects.click(TEST_IDS.AGENTLESS_INTEGRATION_NAME_LINK);
   };
 
   const navigateToAddIntegrationKspmPage = async (space?: string) => {
@@ -237,18 +266,18 @@ export function AddCisIntegrationFormPageProvider({
   };
 
   const clickPolicyToBeEdited = async (name: string) => {
-    const table = await testSubjects.find('integrationPolicyTable');
+    const table = await testSubjects.find(TEST_IDS.INTEGRATION_POLICY_TABLE);
     const integrationToBeEdited = await table.findByXpath(`//text()="${name}"`);
     await integrationToBeEdited.click();
   };
 
   const clickFirstElementOnIntegrationTable = async () => {
-    const integrationList = await testSubjects.findAll('integrationNameLink');
+    const integrationList = await testSubjects.findAll(TEST_IDS.INTEGRATION_NAME_LINK);
     await integrationList[0].click();
   };
 
   const clickFirstElementOnIntegrationTableAddAgent = async () => {
-    const integrationList = await testSubjects.findAll('addAgentButton');
+    const integrationList = await testSubjects.findAll(TEST_IDS.ADD_AGENT_BUTTON);
     await integrationList[0].click();
   };
 
@@ -265,11 +294,11 @@ export function AddCisIntegrationFormPageProvider({
     return currentUrl;
   };
 
-  const getIntegrationFormEntirePage = () => testSubjects.find('dataCollectionSetupStep');
+  const getIntegrationFormEntirePage = () => testSubjects.find(TEST_IDS.DATA_COLLECTION_SETUP_STEP);
 
-  const getIntegrationPolicyTable = () => testSubjects.find('integrationPolicyTable');
+  const getIntegrationPolicyTable = () => testSubjects.find(TEST_IDS.INTEGRATION_POLICY_TABLE);
 
-  const getIntegrationFormEditPage = () => testSubjects.find('editPackagePolicy_page');
+  const getIntegrationFormEditPage = () => testSubjects.find(TEST_IDS.EDIT_PACKAGE_POLICY_PAGE);
 
   const findOptionInPage = async (text: string) => {
     await PageObjects.header.waitUntilLoadingHasFinished();
@@ -313,21 +342,24 @@ export function AddCisIntegrationFormPageProvider({
   };
 
   const clickSaveButton = async () => {
-    const optionToBeClicked = await findOptionInPage('createPackagePolicySaveButton');
+    const optionToBeClicked = await findOptionInPage(TEST_IDS.CREATE_PACKAGE_POLICY_SAVE_BUTTON);
     await optionToBeClicked.click();
   };
 
+  const waitUntilLaunchCloudFormationButtonAppears = async () =>
+    await testSubjects.exists(TEST_IDS.CONFIRM_CLOUD_FORMATION_MODAL_CONFIRM_BUTTON);
+
   const clickSaveIntegrationButton = async () => {
-    const optionToBeClicked = await findOptionInPage('saveIntegration');
+    const optionToBeClicked = await findOptionInPage(TEST_IDS.SAVE_INTEGRATION);
     await optionToBeClicked.click();
   };
 
   const getPostInstallModal = async () => {
-    return await testSubjects.find('confirmModalTitleText');
+    return await testSubjects.find(TEST_IDS.CONFIRM_MODAL_TITLE_TEXT);
   };
 
   const checkIntegrationPliAuthBlockExists = async () => {
-    return await testSubjects.exists('cloud-security-posture-integration-pli-auth-block');
+    return await testSubjects.exists(TEST_IDS.CLOUD_SECURITY_POSTURE_PLI_AUTH_BLOCK);
   };
 
   const fillInTextField = async (selector: string, text: string) => {
@@ -344,7 +376,7 @@ export function AddCisIntegrationFormPageProvider({
   };
 
   const doesStringExistInCodeBlock = async (str: string) => {
-    const flyout = await testSubjects.find('agentEnrollmentFlyout');
+    const flyout = await testSubjects.find(TEST_IDS.AGENT_ENROLLMENT_FLYOUT);
     const codeBlock = await flyout.findByXpath('//code');
     const commandsToBeCopied = await codeBlock.getVisibleText();
     return commandsToBeCopied.includes(str);
@@ -352,7 +384,7 @@ export function AddCisIntegrationFormPageProvider({
 
   const getFieldValueInAddAgentFlyout = async (field: string, value: string) => {
     /* Newly added/edited integration always shows up on top by default as such we can just always click the most top if we want to check for the latest one  */
-    const integrationList = await testSubjects.findAll('agentEnrollmentFlyout');
+    const integrationList = await testSubjects.findAll(TEST_IDS.AGENT_ENROLLMENT_FLYOUT);
     await integrationList[0].click();
     await PageObjects.header.waitUntilLoadingHasFinished();
     const fieldValue = await (await testSubjects.find(field)).getAttribute(value);
@@ -379,13 +411,13 @@ export function AddCisIntegrationFormPageProvider({
   };
 
   const inputUniqueIntegrationName = async () => {
-    const flyout = await testSubjects.find('createPackagePolicy_page');
+    const flyout = await testSubjects.find(TEST_IDS.CREATE_PACKAGE_POLICY_PAGE);
     const nameField = await flyout.findAllByCssSelector('input[id="name"]');
     await nameField[0].type(uuidv4());
   };
 
   const inputIntegrationName = async (text: string) => {
-    const page = await testSubjects.find('createPackagePolicy_page');
+    const page = await testSubjects.find(TEST_IDS.CREATE_PACKAGE_POLICY_PAGE);
     const nameField = await page.findAllByCssSelector('input[id="name"]');
     await nameField[0].clearValueWithKeyboard();
     await nameField[0].type(text);
@@ -487,7 +519,7 @@ export function AddCisIntegrationFormPageProvider({
     await PageObjects.header.waitUntilLoadingHasFinished();
 
     // Check if the Direct Access Key is updated package policy api with successful toast
-    expect(await testSubjects.exists('policyUpdateSuccessToast')).to.be(true);
+    expect(await testSubjects.exists(TEST_IDS.POLICY_UPDATE_SUCCESS_TOAST)).to.be(true);
 
     await navigateToEditAgentlessIntegrationPage();
     await PageObjects.header.waitUntilLoadingHasFinished();
@@ -498,29 +530,29 @@ export function AddCisIntegrationFormPageProvider({
   };
 
   const getFirstCspmIntegrationPageIntegration = async () => {
-    const integration = await testSubjects.find('integrationNameLink');
+    const integration = await testSubjects.find(TEST_IDS.INTEGRATION_NAME_LINK);
     return await integration.getVisibleText();
   };
 
   const getFirstCspmIntegrationPageAgentlessIntegration = async () => {
-    const integration = await testSubjects.find('agentlessIntegrationNameLink');
+    const integration = await testSubjects.find(TEST_IDS.AGENTLESS_INTEGRATION_NAME_LINK);
     return await integration.getVisibleText();
   };
 
   const getFirstCspmIntegrationPageAgent = async () => {
-    const agent = await testSubjects.find('agentPolicyNameLink');
+    const agent = await testSubjects.find(TEST_IDS.AGENT_POLICY_NAME_LINK);
     // this is assuming that the agent was just created therefor should be the first element
     return await agent.getVisibleText();
   };
 
   const getFirstCspmIntegrationPageAgentlessStatus = async () => {
-    const agent = await testSubjects.find('agentlessStatusBadge');
+    const agent = await testSubjects.find(TEST_IDS.AGENTLESS_STATUS_BADGE);
     // this is assuming that the agent was just created therefor should be the first element
     return await agent.getVisibleText();
   };
 
   const getAgentBasedPolicyValue = async () => {
-    const agentName = await testSubjects.find('createAgentPolicyNameField');
+    const agentName = await testSubjects.find(TEST_IDS.CREATE_AGENT_POLICY_NAME_FIELD);
     return await agentName.getAttribute('value');
   };
 
@@ -605,5 +637,6 @@ export function AddCisIntegrationFormPageProvider({
     navigateToEditIntegrationPage,
     navigateToEditAgentlessIntegrationPage,
     closeAllOpenTabs,
+    waitUntilLaunchCloudFormationButtonAppears,
   };
 }

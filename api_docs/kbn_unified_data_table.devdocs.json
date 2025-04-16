@@ -2313,6 +2313,10 @@
                 "path": "x-pack/solutions/security/plugins/cloud_security_posture/public/components/cloud_security_data_table/cloud_security_data_table.tsx"
               },
               {
+                "plugin": "cloudSecurityPosture",
+                "path": "x-pack/solutions/security/plugins/cloud_security_posture/public/components/cloud_security_data_table/vulnerability_security_data_table.tsx"
+              },
+              {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/components/timeline/unified_components/data_table/index.tsx"
               }

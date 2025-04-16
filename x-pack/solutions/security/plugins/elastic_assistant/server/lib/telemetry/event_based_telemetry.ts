@@ -456,6 +456,8 @@ export const DEFEND_INSIGHT_SUCCESS_EVENT: EventTypeOpts<{
   durationMs: number;
   model?: string;
   provider?: string;
+  insightType: string;
+  insightsDetails: string[];
 }> = {
   eventType: 'defend_insight_success',
   schema: {
@@ -499,6 +501,25 @@ export const DEFEND_INSIGHT_SUCCESS_EVENT: EventTypeOpts<{
       _meta: {
         description: 'OpenAI provider',
         optional: true,
+      },
+    },
+    insightType: {
+      type: 'keyword',
+      _meta: {
+        description: 'Defend insight type',
+        optional: false,
+      },
+    },
+    insightsDetails: {
+      type: 'array',
+      items: {
+        type: 'keyword',
+        _meta: {
+          description: 'Details of the generated Defend insights',
+        },
+      },
+      _meta: {
+        description: 'Details of the generated Defend insights',
       },
     },
   },

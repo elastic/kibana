@@ -12,7 +12,6 @@ import { i18n } from '@kbn/i18n';
 import { Redirect } from 'react-router-dom';
 import { dynamic } from '@kbn/shared-ux-utility';
 import { DataSourceContextProvider } from '../../../contexts/ml/data_source_context';
-import type { NavigateToPath } from '../../../contexts/kibana';
 import { useMlKibana } from '../../../contexts/kibana';
 import { basicResolvers } from '../../resolvers';
 import type { MlRoute, PageProps } from '../../router';
@@ -24,7 +23,11 @@ import {
   ANOMALY_DETECTOR,
 } from '../../../services/new_job_capabilities/load_new_job_capabilities';
 import { checkCreateJobsCapabilitiesResolver } from '../../../capabilities/check_capabilities';
-import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
+import {
+  type NavigateToApp,
+  getStackManagementBreadcrumb,
+  getMlManagementBreadcrumb,
+} from '../../breadcrumbs';
 import { useCreateAndNavigateToMlLink } from '../../../contexts/kibana/use_create_url';
 import { ML_PAGES } from '../../../../../common/constants/locator';
 
@@ -36,14 +39,14 @@ const Page = dynamic(async () => ({
   default: (await import('../../../jobs/new_job/pages/new_job')).Page,
 }));
 
-const getBaseBreadcrumbs = (navigateToPath: NavigateToPath, basePath: string) => [
-  getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
-  getBreadcrumbWithUrlForApp('ANOMALY_DETECTION_BREADCRUMB', navigateToPath, basePath),
-  getBreadcrumbWithUrlForApp('CREATE_JOB_BREADCRUMB', navigateToPath, basePath),
+const getBaseBreadcrumbs = (navigateToApp: NavigateToApp) => [
+  getStackManagementBreadcrumb(navigateToApp),
+  getMlManagementBreadcrumb('ANOMALY_DETECTION_MANAGEMENT_BREADCRUMB', navigateToApp),
+  getMlManagementBreadcrumb('CREATE_JOB_MANAGEMENT_BREADCRUMB', navigateToApp),
 ];
 
-const getSingleMetricBreadcrumbs = (navigateToPath: NavigateToPath, basePath: string) => [
-  ...getBaseBreadcrumbs(navigateToPath, basePath),
+const getSingleMetricBreadcrumbs = (navigateToApp: NavigateToApp) => [
+  ...getBaseBreadcrumbs(navigateToApp),
   {
     text: i18n.translate('xpack.ml.jobsBreadcrumbs.singleMetricLabel', {
       defaultMessage: 'Single metric',
@@ -52,8 +55,8 @@ const getSingleMetricBreadcrumbs = (navigateToPath: NavigateToPath, basePath: st
   },
 ];
 
-const getMultiMetricBreadcrumbs = (navigateToPath: NavigateToPath, basePath: string) => [
-  ...getBaseBreadcrumbs(navigateToPath, basePath),
+const getMultiMetricBreadcrumbs = (navigateToApp: NavigateToApp) => [
+  ...getBaseBreadcrumbs(navigateToApp),
   {
     text: i18n.translate('xpack.ml.jobsBreadcrumbs.multiMetricLabel', {
       defaultMessage: 'Multi-metric',
@@ -62,8 +65,8 @@ const getMultiMetricBreadcrumbs = (navigateToPath: NavigateToPath, basePath: str
   },
 ];
 
-const getPopulationBreadcrumbs = (navigateToPath: NavigateToPath, basePath: string) => [
-  ...getBaseBreadcrumbs(navigateToPath, basePath),
+const getPopulationBreadcrumbs = (navigateToApp: NavigateToApp) => [
+  ...getBaseBreadcrumbs(navigateToApp),
   {
     text: i18n.translate('xpack.ml.jobsBreadcrumbs.populationLabel', {
       defaultMessage: 'Population',
@@ -72,8 +75,8 @@ const getPopulationBreadcrumbs = (navigateToPath: NavigateToPath, basePath: stri
   },
 ];
 
-const getAdvancedBreadcrumbs = (navigateToPath: NavigateToPath, basePath: string) => [
-  ...getBaseBreadcrumbs(navigateToPath, basePath),
+const getAdvancedBreadcrumbs = (navigateToApp: NavigateToApp) => [
+  ...getBaseBreadcrumbs(navigateToApp),
   {
     text: i18n.translate('xpack.ml.jobsBreadcrumbs.advancedConfigurationLabel', {
       defaultMessage: 'Advanced configuration',
@@ -82,8 +85,8 @@ const getAdvancedBreadcrumbs = (navigateToPath: NavigateToPath, basePath: string
   },
 ];
 
-const getCategorizationBreadcrumbs = (navigateToPath: NavigateToPath, basePath: string) => [
-  ...getBaseBreadcrumbs(navigateToPath, basePath),
+const getCategorizationBreadcrumbs = (navigateToApp: NavigateToApp) => [
+  ...getBaseBreadcrumbs(navigateToApp),
   {
     text: i18n.translate('xpack.ml.jobsBreadcrumbs.categorizationLabel', {
       defaultMessage: 'Categorization',
@@ -92,8 +95,8 @@ const getCategorizationBreadcrumbs = (navigateToPath: NavigateToPath, basePath: 
   },
 ];
 
-const getRareBreadcrumbs = (navigateToPath: NavigateToPath, basePath: string) => [
-  ...getBaseBreadcrumbs(navigateToPath, basePath),
+const getRareBreadcrumbs = (navigateToApp: NavigateToApp) => [
+  ...getBaseBreadcrumbs(navigateToApp),
   {
     text: i18n.translate('xpack.ml.jobsBreadcrumbs.rareLabel', {
       defaultMessage: 'Rare',
@@ -102,8 +105,8 @@ const getRareBreadcrumbs = (navigateToPath: NavigateToPath, basePath: string) =>
   },
 ];
 
-const getGeoBreadcrumbs = (navigateToPath: NavigateToPath, basePath: string) => [
-  ...getBaseBreadcrumbs(navigateToPath, basePath),
+const getGeoBreadcrumbs = (navigateToApp: NavigateToApp) => [
+  ...getBaseBreadcrumbs(navigateToApp),
   {
     text: i18n.translate('xpack.ml.jobsBreadcrumbs.geoLabel', {
       defaultMessage: 'Geo',
@@ -112,22 +115,20 @@ const getGeoBreadcrumbs = (navigateToPath: NavigateToPath, basePath: string) => 
   },
 ];
 
-export const singleMetricRouteFactory = (
-  navigateToPath: NavigateToPath,
-  basePath: string
-): MlRoute => ({
-  path: createPath(ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_SINGLE_METRIC),
-  render: (props, deps) => <PageWrapper {...props} jobType={JOB_TYPE.SINGLE_METRIC} deps={deps} />,
-  breadcrumbs: getSingleMetricBreadcrumbs(navigateToPath, basePath),
-});
+export const singleMetricRouteFactory = (navigateToApp: NavigateToApp): MlRoute => {
+  return {
+    path: createPath(ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_SINGLE_METRIC),
+    render: (props, deps) => (
+      <PageWrapper {...props} jobType={JOB_TYPE.SINGLE_METRIC} deps={deps} />
+    ),
+    breadcrumbs: getSingleMetricBreadcrumbs(navigateToApp),
+  };
+};
 
-export const multiMetricRouteFactory = (
-  navigateToPath: NavigateToPath,
-  basePath: string
-): MlRoute => ({
+export const multiMetricRouteFactory = (navigateToApp: NavigateToApp): MlRoute => ({
   path: createPath(ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_MULTI_METRIC),
   render: (props, deps) => <PageWrapper {...props} jobType={JOB_TYPE.MULTI_METRIC} deps={deps} />,
-  breadcrumbs: getMultiMetricBreadcrumbs(navigateToPath, basePath),
+  breadcrumbs: getMultiMetricBreadcrumbs(navigateToApp),
 });
 
 // redirect route to reset the job wizard when converting to multi metric job
@@ -144,22 +145,16 @@ export const multiMetricRouteFactoryRedirect = (): MlRoute => ({
   breadcrumbs: [],
 });
 
-export const populationRouteFactory = (
-  navigateToPath: NavigateToPath,
-  basePath: string
-): MlRoute => ({
+export const populationRouteFactory = (navigateToApp: NavigateToApp): MlRoute => ({
   path: createPath(ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_POPULATION),
   render: (props, deps) => <PageWrapper {...props} jobType={JOB_TYPE.POPULATION} deps={deps} />,
-  breadcrumbs: getPopulationBreadcrumbs(navigateToPath, basePath),
+  breadcrumbs: getPopulationBreadcrumbs(navigateToApp),
 });
 
-export const advancedRouteFactory = (
-  navigateToPath: NavigateToPath,
-  basePath: string
-): MlRoute => ({
+export const advancedRouteFactory = (navigateToApp: NavigateToApp): MlRoute => ({
   path: createPath(ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_ADVANCED),
   render: (props, deps) => <PageWrapper {...props} jobType={JOB_TYPE.ADVANCED} deps={deps} />,
-  breadcrumbs: getAdvancedBreadcrumbs(navigateToPath, basePath),
+  breadcrumbs: getAdvancedBreadcrumbs(navigateToApp),
 });
 
 // redirect route to reset the job wizard when converting to advanced job
@@ -173,25 +168,22 @@ export const advancedRouteFactoryRedirect = (): MlRoute => ({
   breadcrumbs: [],
 });
 
-export const categorizationRouteFactory = (
-  navigateToPath: NavigateToPath,
-  basePath: string
-): MlRoute => ({
+export const categorizationRouteFactory = (navigateToApp: NavigateToApp): MlRoute => ({
   path: createPath(ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_CATEGORIZATION),
   render: (props, deps) => <PageWrapper {...props} jobType={JOB_TYPE.CATEGORIZATION} deps={deps} />,
-  breadcrumbs: getCategorizationBreadcrumbs(navigateToPath, basePath),
+  breadcrumbs: getCategorizationBreadcrumbs(navigateToApp),
 });
 
-export const rareRouteFactory = (navigateToPath: NavigateToPath, basePath: string): MlRoute => ({
+export const rareRouteFactory = (navigateToApp: NavigateToApp): MlRoute => ({
   path: createPath(ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_RARE),
   render: (props, deps) => <PageWrapper {...props} jobType={JOB_TYPE.RARE} deps={deps} />,
-  breadcrumbs: getRareBreadcrumbs(navigateToPath, basePath),
+  breadcrumbs: getRareBreadcrumbs(navigateToApp),
 });
 
-export const geoRouteFactory = (navigateToPath: NavigateToPath, basePath: string): MlRoute => ({
+export const geoRouteFactory = (navigateToApp: NavigateToApp): MlRoute => ({
   path: createPath(ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_GEO),
   render: (props, deps) => <PageWrapper {...props} jobType={JOB_TYPE.GEO} deps={deps} />,
-  breadcrumbs: getGeoBreadcrumbs(navigateToPath, basePath),
+  breadcrumbs: getGeoBreadcrumbs(navigateToApp),
 });
 
 const PageWrapper: FC<WizardPageProps> = ({ location, jobType }) => {

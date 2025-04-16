@@ -11,17 +11,14 @@ import { EuiComboBox, EuiComboBoxOptionOption, EuiText } from '@elastic/eui';
 import { observabilityAppId } from '@kbn/observability-shared-plugin/common';
 import { useFetchSLOSuggestions } from '../../slo_edit/hooks/use_fetch_suggestions';
 import { useKibana } from '../../../hooks/use_kibana';
+import { useUrlSearchState } from './hooks/use_url_search_state';
 
 interface Props {
-  filters: {
-    search: string;
-    tags: string[];
-  };
-  setFilters: Function;
   onRefresh: () => void;
 }
 
-export function SloManagementSearchBar({ filters, setFilters, onRefresh }: Props) {
+export function SloManagementSearchBar({ onRefresh }: Props) {
+  const { state, onStateChange } = useUrlSearchState();
   const {
     unifiedSearch: {
       ui: { SearchBar },
@@ -46,25 +43,30 @@ export function SloManagementSearchBar({ filters, setFilters, onRefresh }: Props
       showDatePicker={false}
       showSavedQueryControls={false}
       showFilterBar={false}
-      query={{ query: filters.search, language: 'text' }}
+      query={{ query: state.search, language: 'text' }}
       onQuerySubmit={({ query: value }) => {
-        setFilters({ search: value?.query, tags: filters.tags });
+        onStateChange({ ...state, search: value?.query ? (value?.query as string) : '' });
       }}
       onRefresh={onRefresh}
       renderQueryInputAppend={() => (
-        <EuiComboBox
-          aria-label={filterTagsLabel}
-          placeholder={filterTagsLabel}
-          delimiter=","
-          options={suggestions?.tags ? [existOption, ...suggestions?.tags] : []}
-          selectedOptions={selectedOptions}
-          onChange={(newOptions) => {
-            setSelectedOptions(newOptions);
-            setFilters({ search: filters.search, tags: newOptions.map((option) => option.value) });
-          }}
-          isClearable={true}
-          data-test-subj="filter-slos-by-tag"
-        />
+        <>
+          <EuiComboBox
+            aria-label={filterTagsLabel}
+            placeholder={filterTagsLabel}
+            delimiter=","
+            options={suggestions?.tags ? [existOption, ...suggestions?.tags] : []}
+            selectedOptions={selectedOptions}
+            onChange={(newOptions) => {
+              setSelectedOptions(newOptions);
+              onStateChange({
+                ...state,
+                tags: newOptions.map((option) => String(option.value)),
+              });
+            }}
+            isClearable={true}
+            data-test-subj="filter-slos-by-tag"
+          />
+        </>
       )}
     />
   );

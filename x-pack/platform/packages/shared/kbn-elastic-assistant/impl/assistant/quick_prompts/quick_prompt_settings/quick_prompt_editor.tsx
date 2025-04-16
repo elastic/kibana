@@ -44,8 +44,8 @@ const QuickPromptSettingsEditorComponent = ({
   // Prompt
   const promptContent = useMemo(
     // Fixing Cursor Jump in text area
-    () => quickPromptSettings.find((p) => p.id === selectedQuickPrompt?.id)?.content ?? '',
-    [selectedQuickPrompt?.id, quickPromptSettings]
+    () => selectedQuickPrompt?.content ?? '',
+    [selectedQuickPrompt?.content]
   );
 
   const setDefaultPromptColor = useCallback((): string => {

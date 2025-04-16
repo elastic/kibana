@@ -6,31 +6,12 @@
  */
 
 import { set } from '@kbn/safer-lodash-set';
+import { createTestSubjGenerator } from '../../../../mocks/utils';
 import type { PolicyConfig } from '../../../../../../common/endpoint/types';
 import {
   AntivirusRegistrationModes,
   ProtectionModes,
 } from '../../../../../../common/endpoint/types';
-
-interface TestSubjGenerator {
-  (suffix?: string): string;
-  withPrefix: (prefix: string) => TestSubjGenerator;
-}
-
-export const createTestSubjGenerator = (testSubjPrefix: string): TestSubjGenerator => {
-  const testSubjGenerator: TestSubjGenerator = (suffix) => {
-    if (suffix) {
-      return `${testSubjPrefix}-${suffix}`;
-    }
-    return testSubjPrefix;
-  };
-
-  testSubjGenerator.withPrefix = (prefix: string): TestSubjGenerator => {
-    return createTestSubjGenerator(testSubjGenerator(prefix));
-  };
-
-  return testSubjGenerator;
-};
 
 export const getPolicySettingsFormTestSubjects = (
   formTopLevelTestSubj: string = 'endpointPolicyForm'

@@ -97,7 +97,7 @@ export const TimelineKpisContainer = ({ timelineId }: KpiExpandedProps) => {
       combineQueries({
         config: esQueryConfig,
         dataProviders,
-        indexPattern: sourcererDataView,
+        dataViewSpec: sourcererDataView,
         browserFields,
         filters: filters ? filters : [],
         kqlQuery,
