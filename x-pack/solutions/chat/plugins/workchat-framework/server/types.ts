@@ -8,7 +8,7 @@
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
-import type { WorkflowRegistry } from './services/workflows';
+import type { WorkflowRegistry } from './framework';
 
 /**
  * Setup contract for the workchatFramework plugin.

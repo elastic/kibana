@@ -12,8 +12,8 @@ import type {
   PluginInitializerContext,
   LoggerFactory,
 } from '@kbn/core/server';
-import type { InternalServices } from './services/types';
-import { createServices, setupServices, type SetupServices } from './services';
+import type { InternalServices } from './framework/types';
+import { createServices, setupServices, type SetupServices } from './framework';
 import type { WorkChatFrameworkConfig } from './config';
 import type {
   WorkChatFrameworkPluginSetup,
