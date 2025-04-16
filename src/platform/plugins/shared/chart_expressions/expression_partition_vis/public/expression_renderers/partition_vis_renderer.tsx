@@ -140,7 +140,7 @@ export const getPartitionVisRenderer: (
             visType={visConfig.isDonut ? ChartTypes.DONUT : visType}
             renderComplete={renderComplete}
             fireEvent={handlers.event}
-            hasCompatibleAction={handlers.hasCompatibleActions}
+            hasCompatibleActions={handlers.hasCompatibleActions}
             interactive={handlers.isInteractive()}
             uiState={handlers.uiState as PersistedState}
             services={{ data: plugins.data, fieldFormats: plugins.fieldFormats }}

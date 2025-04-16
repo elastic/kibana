@@ -231,6 +231,7 @@ export const appendFilterToESQLQueryFromValueClickAction = ({
 
   let queryString = query.esql;
   for (const point in dataPoints) {
+    if (!dataPoints[point]) return;
     const { table, column: columnIndex, row: rowIndex } = dataPoints[point];
 
     if (table?.columns?.[columnIndex]) {

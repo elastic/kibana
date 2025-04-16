@@ -358,6 +358,7 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
       services.fieldFormats,
       visData,
       visParams,
+      props.hasCompatibleActions,
     ]
   );
 

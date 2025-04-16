@@ -68,6 +68,7 @@ describe('PartitionVisComponent', function () {
       uiState,
       syncColors: false,
       fireEvent: jest.fn(),
+      hasCompatibleActions: jest.fn(),
       renderComplete: jest.fn(),
       interactive: true,
       columnCellValueActions: [],
