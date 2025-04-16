@@ -433,8 +433,13 @@ export class TestSubjects extends FtrService {
     const container = await this.find(selector);
     const buttons = await container.findAllByCssSelector('button');
 
-    const firstButton = buttons[0];
-
-    return await firstButton.getAttribute('aria-expanded');
+    if (buttons.length > 0) {
+      const firstButton = buttons[0];
+      return await firstButton.getAttribute('aria-expanded');
+    } else {
+      throw new Error(
+        `Container '${selector}' has no 'button' child elements, check for EUI upgrades`
+      );
+    }
   }
 }

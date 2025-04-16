@@ -426,21 +426,25 @@ export class DataGridService extends FtrService {
 
   public async clickQualityIssueLeadingControl(rowIndex: number) {
     const buttons = await this.testSubjects.findAll('docTableDegradedDocExist');
-    const selectedButton = buttons[rowIndex];
+    const selectedButton = rowIndex < buttons.length ? buttons[rowIndex] : undefined;
 
     if (selectedButton) {
       await selectedButton.moveMouseTo();
       await selectedButton.click();
+    } else {
+      throw new Error(`Unable to find quality issue leading control for row index ${rowIndex}`);
     }
   }
 
   public async clickStacktraceLeadingControl(rowIndex: number) {
     const buttons = await this.testSubjects.findAll('docTableStacktraceExist');
-    const selectedButton = buttons[rowIndex];
+    const selectedButton = rowIndex < buttons.length ? buttons[rowIndex] : undefined;
 
     if (selectedButton) {
       await selectedButton.moveMouseTo();
       await selectedButton.click();
+    } else {
+      throw new Error(`Unable to find stacktrace leading control for row index ${rowIndex}`);
     }
   }
 
