@@ -108,12 +108,12 @@ class AgentlessAgentService {
       } and TLS key: ${agentlessConfig?.api?.tls?.key ? '[REDACTED]' : 'undefined'}
       and TLS ca: ${agentlessConfig?.api?.tls?.ca ? '[REDACTED]' : 'undefined'}`
     );
-    const tlsConfig = {}; // this.createTlsConfig(agentlessConfig);
+    const tlsConfig = this.createTlsConfig(agentlessConfig);
 
     const labels = this.getAgentlessTags(agentlessAgentPolicy);
 
     const requestConfig: AxiosRequestConfig = {
-      url: 'https://run.mocky.io/v3/0ec97b74-b732-4917-9f52-e6b8d07cf679', // prependAgentlessApiBasePathToEndpoint(agentlessConfig, '/deployments'),
+      url: prependAgentlessApiBasePathToEndpoint(agentlessConfig, '/deployments'),
       data: {
         policy_id: policyId,
         fleet_url: fleetUrl,
@@ -490,13 +490,12 @@ class AgentlessAgentService {
       }
     );
 
-    // TODO
-    const extra = {
+    const responseData = {
       code: response?.data?.code,
       error: response?.data?.error,
     };
 
-    throw this.getAgentlessAgentError(action, userMessage, traceId, extra);
+    throw this.getAgentlessAgentError(action, userMessage, traceId, responseData);
   }
 
   private convertCauseErrorsToString = (error: AxiosError) => {
@@ -510,14 +509,14 @@ class AgentlessAgentService {
     action: string,
     userMessage: string,
     traceId: string | undefined,
-    extra?: {
+    responseData?: {
       code?: string;
       error?: string;
     }
   ) {
     if (action === 'create') {
-      if (extra?.code === AGENTLESS_API_ERROR_CODES.OVER_PROVISIONED) {
-        const limitMatches = extra?.error?.match(/limit: ([0-9]+)/);
+      if (responseData?.code === AGENTLESS_API_ERROR_CODES.OVER_PROVISIONED) {
+        const limitMatches = responseData?.error?.match(/limit: ([0-9]+)/);
         const limit = limitMatches ? parseInt(limitMatches[1], 10) : undefined;
 
         return new AgentlessAgentCreateOverProvisionnedError(
