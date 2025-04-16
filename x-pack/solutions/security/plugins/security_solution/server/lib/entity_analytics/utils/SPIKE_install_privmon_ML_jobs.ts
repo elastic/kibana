@@ -3,7 +3,7 @@
  * Licensed under the Elastic License 2.0.
  */
 
-import type { ElasticsearchClient } from '@kbn/core/server';
+// import type { ElasticsearchClient } from '@kbn/core/server';
 import { Client } from '@elastic/elasticsearch';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 // import { request } from 'http';
@@ -13,9 +13,9 @@ import { PRIVMON_ML_JOBS } from './SPIKE_privmon_ml_jobs';
 
 
 
-let client: ElasticsearchClient;
+let client: Client;
 
-export function setElasticsearchClient(esClient: ElasticsearchClient) {
+export function setElasticsearchClient(esClient: Client) {
   client = esClient;
 }
 
@@ -39,7 +39,7 @@ async function kibanaFetch(path: string, method = 'GET', body?: any) {
   return data;
 }
 
-export async function installPADIntegration(): Promise<boolean> {
+export async function installPADIntegration (): Promise<boolean> {
   try {
     const response = await fetch('http://localhost:5601/api/fleet/epm/packages?category=beta', {
     method: 'GET',
@@ -89,7 +89,7 @@ async function upsertCustomIngestPipeline(version: string) {
 
   try {
     const getResp = await client.ingest.getPipeline({ id: pipelineId });
-    const existingPipeline = (getResp.body as Record<string, any>)[pipelineId];
+    const existingPipeline = (getResp as Record<string, any>)[pipelineId];
     existingProcessors = existingPipeline?.processors || [];
   } catch (err) {
     if (err.statusCode === 404) {
@@ -130,41 +130,8 @@ async function upsertCustomIngestPipeline(version: string) {
   }
 }
 
-
-async function setupPADMlModule() {
-  console.log('⚙️ Setting up PAD ML module...');
-  const response = await fetch('http://localhost:5601/api/ml/modules/setup/logs-privileged_access_detection', {
-    method: 'POST',
-    headers: {
-      'kbn-xsrf': 'true',
-      'Content-Type': 'application/json',
-      'Authorization': 'Basic ' + Buffer.from('elastic_ml:changeme').toString('base64'),
-    },
-    body: JSON.stringify({
-      prefix: 'pad',
-      groups: [],
-      indexPatternName: 'logs-*',
-      useDedicatedIndex: false,
-      startDatafeed: true,
-      start: Date.parse("2024-12-01T00:00:00Z"),
-      end: Date.now()
-    })
-  });
-
-  const json = await response.json();
-  if (!response.ok) {
-    console.error('❌ Failed to set up PAD ML Module:', json);
-    return;
-  }
-
-  console.log('✅ PAD ML Module setup complete:', json);
-}
-
 async function verifyDataViewHasTimeField() {
   const dataViews = await kibanaFetch('/api/data_views');
-  // console.log('Data Views:', dataViews);
-  // const { dataViews } = await res.json();
-  // console.log(dataViews);
   const dataView = dataViews.data_view.find((dv: any) => dv.name === DATA_VIEW_NAME);
 
   if (!dataView) {
@@ -323,12 +290,13 @@ export async function checkPADTransformHealth(version: string): Promise<void> {
 
 const checkMLNodeMemory = async () => {
   const stats = await client.ml.getMemoryStats();
-  
   // Find nodes and memory usage
-  Object.values(stats.nodes).forEach((node: any) => {
-    console.log(`Node: ${node.node_id}`);
-    console.log(`  Available ML Memory: ${node.ml.machine_memory}`);
-    console.log(`  Used by existing jobs: ${node.ml.allocated_processors}`);
+  Object.entries(stats.nodes).forEach(([nodeId, node]: [string, any]) => {
+    console.log(`  Node: ${nodeId}`);
+    console.log(`  Name: ${node.name}`);
+    console.log(`  Roles: ${node.roles?.join(', ')}`);
+    console.log(`  Machine Memory: ${node.mem?.total_in_bytes}`);
+    console.log(`  JVM Heap: ${node.jvm?.mem?.heap_max_in_bytes}`);
   });
 };
 
@@ -336,14 +304,16 @@ const checkAndCloseIdleJobs = async () => {
   const jobStats = await client.ml.getJobStats({});
   
   jobStats.jobs.forEach((job: any) => {
+    console.log(`Job ID: ${job.job_id}`);
+    console.log(`State: ${job.state}`);
+    console.log(`Model Size: ${job.model_size_stats.model_bytes}`);
+    console.log(`Memory Status: ${job.model_size_stats.memory_status}`);
     if (job.state === 'opened' && job.model_size_stats.model_bytes > 5000000000) { // You can define the threshold
       console.log(`Closing job ${job.job_id} to free memory`);
       client.ml.closeJob({ job_id: job.job_id });
     }
   });
 };
-
-
 
 
 export async function createPADMLJobs(): Promise<void> {
@@ -418,29 +388,41 @@ export async function createPADMLDataFeed(): Promise<void> {
 
 export async function startPADMLJobs(): Promise<void> {
   try {
-    const jobsResponse = await client.ml.getJobs();
-    const padJobs = jobsResponse.jobs.filter((job) =>
-      job.job_id.includes('privileged_access') || job.job_id.includes('pad') // or your PAD integration prefix
-    );
+    const jobsStatsResponse = await client.ml.getJobStats();
+    
+    const padJobs = jobsStatsResponse.jobs.filter((job) =>
+  job.job_id.includes('privileged_access') || job.job_id.includes('pad')
+);
 
-    for (const job of padJobs) {
-      try {
-        await client.ml.openJob({ job_id: job.job_id });
-        console.log(`✅ Started PAD ML job: ${job.job_id}`);
-      } catch (err: any) {
-        if (err.meta?.body?.error?.type === 'resource_already_exists_exception') {
-          console.warn(`ℹ️ Job already exists: ${job.job_id}`);
-        } else if (err.meta?.body?.error?.type === 'job_already_opened') {
-          console.warn(`ℹ️ Job already open: ${job.job_id}`);
-        } else {
-          console.error(`❌ Failed to open PAD job ${job.job_id}`, err);
-        }
+  for (const job of padJobs) {
+    const jobId = job.job_id;
+    const jobState = job.state;
+
+    if (jobState === 'opened') {
+      console.log(`ℹ️ Job already open: ${jobId}`);
+      continue;
+    }
+
+    try {
+      await client.ml.openJob({ job_id: jobId });
+      console.log(`✅ Started PAD ML job: ${jobId}`);
+    } catch (err: any) {
+      const errType = err.meta?.body?.error?.type;
+
+      if (errType === 'resource_already_exists_exception') {
+        console.warn(`ℹ️ Task already exists for job: ${jobId} (possibly still opening)`);
+      } else if (errType === 'job_already_opened') {
+        console.warn(`ℹ️ Job already open: ${jobId}`);
+      } else {
+        console.error(`❌ Failed to open PAD job ${jobId}`, err);
       }
     }
-  } catch (err) {
+  }
+} catch (err) {
     console.error('❌ Failed to fetch or start PAD ML jobs:', err);
   }
 }
+
 
 export async function createPADDataView(): Promise<boolean> {
   const dataViewId = 'pad-anomaly-detection-dataview';
@@ -594,7 +576,6 @@ export async function setupPrivilegedMonitoringEngine(): Promise<void> {
     await checkPADTransformHealth('0.0.1');
     await checkMLNodeMemory();
     await checkAndCloseIdleJobs();
-    await setupPADMlModule();
     await createPADComponentTemplates('0.0.1');
     await createPADIndexTemplate();
     await createPADIndex();
