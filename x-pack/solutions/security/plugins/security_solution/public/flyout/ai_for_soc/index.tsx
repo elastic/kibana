@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useMemo } from 'react';
+import React, { memo, useCallback, useMemo, useState } from 'react';
 
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
 import type { PromptContext } from '@kbn/elastic-assistant';
@@ -32,7 +32,6 @@ import { FlyoutHeader } from '../shared/components/flyout_header';
 import { HeaderTitle } from './components/header_title';
 import { DEFAULT_AI_CONNECTOR } from '../../../common/constants';
 import { UserAssetTableType } from '../../explore/users/store/model';
-import { useAlertsContext } from '../../detections/components/alerts_table/alerts_context';
 
 export const FLYOUT_BODY_TEST_ID = 'ai-for-soc-alert-flyout-body';
 export const ALERT_SUMMARY_SECTION_TEST_ID = 'ai-for-soc-alert-flyout-alert-summary-section';
@@ -64,12 +63,11 @@ const SUGGESTED_PROMPTS = i18n.translate(
  * Panel to be displayed in AI for SOC alert summary flyout
  */
 export const AIForSOCPanel: React.FC<Partial<AIForSOCDetailsProps>> = memo(() => {
-  const { eventId, getFieldsData, indexName, dataFormattedForFieldBrowser } =
+  const { eventId, getFieldsData, indexName, dataFormattedForFieldBrowser, showAnonymizedValues } =
     useAIForSOCDetailsContext();
 
   const { capabilities } = useKibana().services.application;
   const canSeeAdvancedSettings = capabilities.management.kibana.settings ?? false;
-  const { showAnonymizedValues } = useAlertsContext();
   const getPromptContext = useCallback(
     async () => getRawData(dataFormattedForFieldBrowser ?? []),
     [dataFormattedForFieldBrowser]
@@ -87,7 +85,7 @@ export const AIForSOCPanel: React.FC<Partial<AIForSOCDetailsProps>> = memo(() =>
   const { uiSettings } = useKibana().services;
   const defaultConnectorId = uiSettings.get<string>(DEFAULT_AI_CONNECTOR);
   const timestamp = useMemo(() => getField(getFieldsData(TIMESTAMP)) || '', [getFieldsData]);
-
+  const [hasAlertSummary, setHasAlertSummary] = useState(false);
   return (
     <>
       <DocumentDetailsProvider
@@ -109,7 +107,7 @@ export const AIForSOCPanel: React.FC<Partial<AIForSOCDetailsProps>> = memo(() =>
                   </EuiTitle>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <AlertSummaryOptionsMenu />
+                  <AlertSummaryOptionsMenu hasAlertSummary={hasAlertSummary} />
                 </EuiFlexItem>
               </EuiFlexGroup>
               <EuiSpacer size="s" />
@@ -119,6 +117,7 @@ export const AIForSOCPanel: React.FC<Partial<AIForSOCDetailsProps>> = memo(() =>
                 defaultConnectorId={defaultConnectorId}
                 isContextReady={(dataFormattedForFieldBrowser ?? []).length > 0}
                 promptContext={promptContext}
+                setHasAlertSummary={setHasAlertSummary}
                 showAnonymizedValues={showAnonymizedValues}
               />
             </EuiFlexItem>

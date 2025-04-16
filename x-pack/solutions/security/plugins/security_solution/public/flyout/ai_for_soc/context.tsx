@@ -8,6 +8,8 @@
 import React, { createContext, memo, useContext, useMemo } from 'react';
 import type { BrowserFields, TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
+import { useSpaceId } from '../../common/hooks/use_space_id';
 import type { SearchHit } from '../../../common/search_strategy';
 import type { GetFieldsData } from '../document_details/shared/hooks/use_get_fields_data';
 import { FlyoutLoading } from '../shared/components/flyout_loading';
@@ -44,6 +46,12 @@ export interface AIForSOCDetailsContext {
    * The actual raw document object
    */
   searchHit: SearchHit;
+  /**
+   * anonymization switch state in local storage
+   * if undefined, the spaceId is not retrievable and the switch is not shown
+   */
+  showAnonymizedValues?: boolean;
+  setShowAnonymizedValues: React.Dispatch<React.SetStateAction<boolean | undefined>>;
 }
 
 /**
@@ -71,6 +79,12 @@ export const AIForSOCDetailsProvider = memo(
       eventId: id,
       indexName,
     });
+    const spaceId = useSpaceId();
+    const [showAnonymizedValues = spaceId ? false : undefined, setShowAnonymizedValues] =
+      useLocalStorage<boolean | undefined>(
+        `securitySolution.aiAlertFlyout.showAnonymization.${spaceId}`
+      );
+
     const contextValue = useMemo(
       () =>
         dataFormattedForFieldBrowser && dataAsNestedObject && id && indexName && searchHit
@@ -82,6 +96,8 @@ export const AIForSOCDetailsProvider = memo(
               getFieldsData,
               indexName,
               searchHit,
+              setShowAnonymizedValues,
+              showAnonymizedValues,
             }
           : undefined,
       [
@@ -92,6 +108,8 @@ export const AIForSOCDetailsProvider = memo(
         id,
         indexName,
         searchHit,
+        setShowAnonymizedValues,
+        showAnonymizedValues,
       ]
     );
 

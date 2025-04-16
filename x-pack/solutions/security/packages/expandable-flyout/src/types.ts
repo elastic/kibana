@@ -85,11 +85,6 @@ export interface Panel {
    * Component to be rendered
    */
   component: (props: FlyoutPanelProps) => React.ReactElement;
-
-  /**
-   * Optional settings menu items to be displayed in the context menu
-   */
-  contextSettingsMenuItems?: React.ReactNode[];
 }
 
 export interface FlyoutPanelHistory {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import React, { useEffect, FunctionComponent } from 'react';
 import {
   EuiButton,
   EuiFlexGroup,
@@ -29,6 +29,7 @@ interface Props {
   defaultConnectorId: string;
   isContextReady: boolean;
   promptContext: PromptContext;
+  setHasAlertSummary: React.Dispatch<React.SetStateAction<boolean>>;
   showAnonymizedValues?: boolean;
 }
 
@@ -38,6 +39,7 @@ export const AlertSummary: FunctionComponent<Props> = ({
   defaultConnectorId,
   isContextReady,
   promptContext,
+  setHasAlertSummary,
   showAnonymizedValues,
 }) => {
   const {
@@ -55,6 +57,9 @@ export const AlertSummary: FunctionComponent<Props> = ({
     promptContext,
     showAnonymizedValues,
   });
+  useEffect(() => {
+    setHasAlertSummary(hasAlertSummary);
+  }, [hasAlertSummary, setHasAlertSummary]);
   return (
     <>
       {hasAlertSummary ? (

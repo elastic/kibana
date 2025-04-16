@@ -8,8 +8,9 @@
 import React, { memo, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { EuiSwitchEvent } from '@elastic/eui';
-import { EuiSwitch } from '@elastic/eui';
-import { useAlertsContext } from '../../../detections/components/alerts_table/alerts_context';
+import { EuiFlexItem, EuiFlexGroup, EuiIcon, EuiToolTip, EuiSwitch } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { useAIForSOCDetailsContext } from '../context';
 
 export const ALERT_SUMMARY_ANONYMIZE_TOGGLE_TEST_ID =
   'ai-for-soc-alert-flyout-alert-summary-anonymize-toggle';
@@ -18,8 +19,18 @@ export const ALERT_SUMMARY_ANONYMIZE_TOGGLE_TEST_ID =
  * Renders a toggle switch that allows users to enable or
  * disable the display of anonymized values in alert summary
  */
-export const AnonymizationSwitch = memo(() => {
-  const { setShowAnonymizedValues, showAnonymizedValues } = useAlertsContext();
+const ConditionalWrap = ({
+  condition,
+  wrap,
+  children,
+}: {
+  condition: boolean;
+  wrap: (children: React.ReactElement) => React.ReactElement;
+  children: React.ReactElement;
+}) => (condition ? wrap(children) : children);
+
+export const AnonymizationSwitch = memo(({ hasAlertSummary }: { hasAlertSummary: boolean }) => {
+  const { showAnonymizedValues, setShowAnonymizedValues } = useAIForSOCDetailsContext();
 
   const onChangeShowAnonymizedValues = useCallback(
     (e: EuiSwitchEvent) => {
@@ -31,15 +42,52 @@ export const AnonymizationSwitch = memo(() => {
   return (
     <>
       {showAnonymizedValues !== undefined && (
-        <EuiSwitch
-          data-test-subj={ALERT_SUMMARY_ANONYMIZE_TOGGLE_TEST_ID}
-          checked={showAnonymizedValues ?? false}
-          compressed
-          label={i18n.translate('xpack.securitySolution.flyout.settings.anonymizeValues', {
-            defaultMessage: 'Show anonymized values',
-          })}
-          onChange={onChangeShowAnonymizedValues}
-        />
+        <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
+          <EuiFlexItem grow={false}>
+            <ConditionalWrap
+              condition={!hasAlertSummary}
+              wrap={(children) => (
+                <EuiToolTip
+                  position="top"
+                  key={'disabled-anonymize-values-tooltip'}
+                  content={
+                    <FormattedMessage
+                      id="xpack.securitySolution.flyout.settings.anonymizeValues.disabled.tooltip"
+                      defaultMessage="The alert summary has not generated, and does not contain anonymized fields."
+                    />
+                  }
+                >
+                  {children}
+                </EuiToolTip>
+              )}
+            >
+              <EuiSwitch
+                data-test-subj={ALERT_SUMMARY_ANONYMIZE_TOGGLE_TEST_ID}
+                checked={showAnonymizedValues ?? false}
+                compressed
+                disabled={!hasAlertSummary}
+                label={i18n.translate('xpack.securitySolution.flyout.settings.anonymizeValues', {
+                  defaultMessage: 'Show anonymized values',
+                })}
+                onChange={onChangeShowAnonymizedValues}
+              />
+            </ConditionalWrap>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiToolTip
+              position="top"
+              key={'anonymize-values-tooltip'}
+              content={
+                <FormattedMessage
+                  id="xpack.securitySolution.flyout.settings.anonymizeValues.tooltip"
+                  defaultMessage="Toggle to reveal or obfuscate field values in your alert summary. The data sent to the LLM is still anonymized based on settings in Configurations > AI Settings > Anonymization."
+                />
+              }
+            >
+              <EuiIcon tabIndex={0} type="iInCircle" />
+            </EuiToolTip>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       )}
     </>
   );

@@ -65,7 +65,6 @@ import { ServiceDetailsPanel, ServiceDetailsPanelKey } from './entity_details/se
 import { MisconfigurationFindingsPanelKey } from './csp_details/findings_flyout/constants';
 import { FindingsMisconfigurationPanel } from './csp_details/findings_flyout/findings_right';
 import { IOCPanelKey } from './ai_for_soc/constants/panel_keys';
-import { AnonymizationSwitch } from './ai_for_soc/components/anonymization_switch';
 
 /**
  * List of all panels that will be used within the document details expandable flyout.
@@ -210,7 +209,6 @@ const expandableFlyoutDocumentsPanels: ExpandableFlyoutProps['registeredPanels']
         <AIForSOCPanel />
       </AIForSOCDetailsProvider>
     ),
-    contextSettingsMenuItems: [<AnonymizationSwitch />],
   },
 ];
 

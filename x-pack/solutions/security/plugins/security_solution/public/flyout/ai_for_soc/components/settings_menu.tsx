@@ -23,7 +23,7 @@ const OPTIONS_MENU = i18n.translate('xpack.securitySolution.flyout.alertSummary.
  * Options menu displayed to the right of the AI summary section in the alert summary flyout.
  * It currently contains a single option to allows anonymizing values.
  */
-export const AlertSummaryOptionsMenu = memo(() => {
+export const AlertSummaryOptionsMenu = memo(({ hasAlertSummary }: { hasAlertSummary: boolean }) => {
   const [isPopoverOpen, setPopover] = useState(false);
   const togglePopover = useCallback(() => setPopover(!isPopoverOpen), [isPopoverOpen]);
 
@@ -46,12 +46,12 @@ export const AlertSummaryOptionsMenu = memo(() => {
         title: OPTIONS_MENU,
         content: (
           <EuiPanel paddingSize="s">
-            <AnonymizationSwitch />
+            <AnonymizationSwitch hasAlertSummary={hasAlertSummary} />
           </EuiPanel>
         ),
       },
     ],
-    []
+    [hasAlertSummary]
   );
   return (
     <EuiPopover

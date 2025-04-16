@@ -105,7 +105,6 @@ export const Container: React.FC<ContainerProps> = memo(
 
     // retrieves the sections to be displayed
     const {
-      contextMenuSettings,
       leftSection,
       rightSection,
       previewSection,
@@ -229,9 +228,7 @@ export const Container: React.FC<ContainerProps> = memo(
           />
         )}
 
-        {!flyoutCustomProps?.hideSettings && (
-          <SettingsMenu flyoutCustomProps={flyoutCustomProps} extraSettings={contextMenuSettings} />
-        )}
+        {!flyoutCustomProps?.hideSettings && <SettingsMenu flyoutCustomProps={flyoutCustomProps} />}
       </EuiFlyoutResizable>
     );
   }

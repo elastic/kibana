@@ -10,12 +10,11 @@ import React, {
   memo,
   useContext,
   useRef,
+  useMemo,
   type RefObject,
   type PropsWithChildren,
 } from 'react';
 import type { AlertsTableImperativeApi } from '@kbn/response-ops-alerts-table/types';
-import useLocalStorage from 'react-use/lib/useLocalStorage';
-import { useSpaceId } from '../../../common/hooks/use_space_id';
 
 /**
  * Temporary context to share imperative APIs between the alerts table and other higher level
@@ -25,29 +24,12 @@ import { useSpaceId } from '../../../common/hooks/use_space_id';
  */
 const AlertsContext = createContext<{
   alertsTableRef: RefObject<AlertsTableImperativeApi>;
-  /**
-   * anonymization switch state in local storage\
-   * if undefined, the spaceId is not retrievable and the switch is not shown
-   */
-  showAnonymizedValues?: boolean;
-  setShowAnonymizedValues: React.Dispatch<React.SetStateAction<boolean | undefined>>;
 } | null>(null);
 
 const AlertsContextProviderComponent = ({ children }: PropsWithChildren) => {
   const alertsTableRef = useRef<AlertsTableImperativeApi>(null);
-  const spaceId = useSpaceId();
-  const [showAnonymizedValues = spaceId ? false : undefined, setShowAnonymizedValues] =
-    useLocalStorage<boolean | undefined>(
-      `securitySolution.aiAlertFlyout.showAnonymization.${spaceId}`
-    );
-
-  return (
-    <AlertsContext.Provider
-      value={{ alertsTableRef, showAnonymizedValues, setShowAnonymizedValues }}
-    >
-      {children}
-    </AlertsContext.Provider>
-  );
+  const contextValue = useMemo(() => ({ alertsTableRef }), []);
+  return <AlertsContext.Provider value={contextValue}>{children}</AlertsContext.Provider>;
 };
 
 export const AlertsContextProvider = memo(AlertsContextProviderComponent);
@@ -59,8 +41,6 @@ export const useAlertsContext = () => {
   if (!value) {
     return {
       alertsTableRef: fallbackRef,
-      showAnonymizedValues: false,
-      setShowAnonymizedValues: (v: boolean) => {},
     };
   }
   return value;
