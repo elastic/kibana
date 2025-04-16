@@ -8,7 +8,6 @@
  */
 
 import kbnDatemath from '@kbn/datemath';
-import moment from 'moment';
 
 const unitMap = new Map([
   ['s', 'second'],
@@ -36,7 +35,7 @@ export const getRelativeValueAndUnit = (date?: string) => {
 export const convertRelativeToAbsoluteDate = (date?: string) => {
   const valueParsed = kbnDatemath.parse(date || '');
 
-  return valueParsed?.isValid() ? valueParsed.toDate() : moment(date).toDate();
+  return valueParsed?.isValid() ? valueParsed.toDate() : undefined;
 };
 
 export const isTimeRangeAbsoluteTime = (timeRange?: { from: string; to: string }) =>
