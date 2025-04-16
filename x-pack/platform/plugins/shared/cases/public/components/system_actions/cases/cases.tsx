@@ -42,22 +42,25 @@ export function getConnectorType(): ConnectorTypeModel<{}, {}, CasesActionParams
       };
 
       const timeWindowRegex = new RegExp(CASES_CONNECTOR_TIME_WINDOW_REGEX, 'g');
-      if (
-        actionParams.subActionParams &&
-        (!actionParams.subActionParams.timeWindow ||
-          !actionParams.subActionParams.timeWindow.length ||
-          !timeWindowRegex.test(actionParams.subActionParams.timeWindow))
-      ) {
-        errors.timeWindow.push(i18n.TIME_WINDOW_SIZE_ERROR);
-        return validationResult;
-      }
 
-      const timeWindow = actionParams.subActionParams.timeWindow;
-      const timeSize = timeWindow.slice(0, -1);
-      const timeUnit = timeWindow.slice(-1);
-      const timeSizeAsNumber = Number(timeSize);
-      if (timeUnit === 'm' && timeSizeAsNumber < 5) {
-        errors.timeWindow.push(i18n.MIN_TIME_WINDOW_SIZE_ERROR);
+      if (actionParams.subActionParams) {
+        if (
+          !actionParams.subActionParams.timeWindow ||
+          !actionParams.subActionParams.timeWindow.length ||
+          !timeWindowRegex.test(actionParams.subActionParams.timeWindow)
+        ) {
+          errors.timeWindow.push(i18n.TIME_WINDOW_SIZE_ERROR);
+          return validationResult;
+        }
+        if (actionParams.subActionParams.timeWindow) {
+          const timeWindow = actionParams.subActionParams.timeWindow;
+          const timeSize = timeWindow.slice(0, -1);
+          const timeUnit = timeWindow.slice(-1);
+          const timeSizeAsNumber = Number(timeSize);
+          if (timeUnit === 'm' && timeSizeAsNumber < 5) {
+            errors.timeWindow.push(i18n.MIN_TIME_WINDOW_SIZE_ERROR);
+          }
+        }
       }
 
       return validationResult;
