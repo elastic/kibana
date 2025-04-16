@@ -307,6 +307,7 @@ export const postEvaluateRoute = (router: IRouter<ElasticAssistantRequestHandler
                   telemetryMetadata: {
                     pluginId: 'security_ai_assistant',
                   },
+                  timeout: 6000000,
                 });
 
               const llm = createLlmInstance();
