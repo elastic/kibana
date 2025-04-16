@@ -27,7 +27,7 @@ describe('useChatComplete', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    global.AbortController = jest.fn(() => mockAbortController) as any;
+    global.AbortController = jest.fn(() => mockAbortController);
 
     (useAssistantContext as jest.Mock).mockReturnValue({
       alertsIndexPattern: 'mock-alerts-index-pattern',

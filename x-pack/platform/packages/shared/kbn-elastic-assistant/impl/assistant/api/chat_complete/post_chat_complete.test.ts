@@ -129,6 +129,7 @@ describe('postChatComplete', () => {
       traceOptions: {
         langSmithProject: 'mock-project',
         langSmithApiKey: 'mock-api-key',
+        apmUrl: 'mock-apm-url',
       },
     };
 

@@ -290,10 +290,10 @@ describe('SettingsMenu', () => {
     it('should render extra settings when provided', () => {
       const extraSettings = [
         <div key="setting1" data-test-subj="extra-setting-1">
-          Extra Setting 1
+          {'Extra Setting 1'}
         </div>,
         <div key="setting2" data-test-subj="extra-setting-2">
-          Extra Setting 2
+          {'Extra Setting 2'}
         </div>,
       ];
 
