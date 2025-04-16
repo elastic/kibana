@@ -9,6 +9,7 @@ import React from 'react';
 import { EuiPanel, EuiSpacer, EuiTextColor, EuiTitle, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { PrivilegedUserMonitoringSampleDashboard } from './components/sample_dashboard/sample_dashboard';
 
 export const PrivilegedUserMonitoringSampleDashboardsPanel = () => {
   const { euiTheme } = useEuiTheme();
@@ -54,6 +55,8 @@ const DashboardsSectionHeader = () => {
           </EuiTextColor>
         </h3>
       </EuiTitle>
+
+      <PrivilegedUserMonitoringSampleDashboard />
     </EuiPanel>
   );
 };

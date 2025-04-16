@@ -107,14 +107,14 @@ export const getLensAttributes: GetLensAttributes = ({ esql, extraOptions = {} }
                 },
                 {
                   columnId: columnUserId,
-                  fieldName: 'user.name',
+                  fieldName: 'privileged_user',
                   meta: {
                     type: 'string',
                     esType: 'keyword',
                   },
                 },
               ],
-              timeField: '@timestamp',
+              timeField: 'timestamp',
             },
           },
         },
