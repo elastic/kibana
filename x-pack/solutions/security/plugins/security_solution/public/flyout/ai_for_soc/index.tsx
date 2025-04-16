@@ -41,21 +41,24 @@ export const AI_ASSISTANT_SECTION_TEST_ID = 'ai-for-soc-alert-flyout-ai-assistan
 export const SUGGESTED_PROMPTS_SECTION_TEST_ID =
   'ai-for-soc-alert-flyout-suggested-prompts-section';
 
-const AI_SUMMARY = i18n.translate('xpack.elasticAssistant.alertSummary.aiSummaryTitle', {
+const AI_SUMMARY = i18n.translate('xpack.securitySolution.alertSummary.aiSummarySection.title', {
   defaultMessage: 'AI summary',
 });
 const ATTACK_DISCOVERY = i18n.translate(
-  'xpack.elasticAssistant.alertSummary.attackDiscovery.title',
+  'xpack.securitySolution.alertSummary.attackDiscoverySection.title',
   {
     defaultMessage: 'Attack Discovery',
   }
 );
-const AI_ASSISTANT = i18n.translate('xpack.elasticAssistant.aiAssistant.title', {
+const AI_ASSISTANT = i18n.translate('xpack.securitySolution.aiAssistantSection.title', {
   defaultMessage: 'AI Assistant',
 });
-const SUGGESTED_PROMPTS = i18n.translate('xpack.elasticAssistant.alertSummary.suggestedPrompts', {
-  defaultMessage: 'Suggested prompts',
-});
+const SUGGESTED_PROMPTS = i18n.translate(
+  'xpack.securitySolution.alertSummary.suggestedPromptsSection.title',
+  {
+    defaultMessage: 'Suggested prompts',
+  }
+);
 
 /**
  * Panel to be displayed in AI for SOC alert summary flyout
