@@ -24,6 +24,7 @@ import {
   PublishesFilters,
   PublishesTimeslice,
   PublishesUnifiedSearch,
+  PublishesUnsavedChanges,
   PublishingSubject,
 } from '@kbn/presentation-publishing';
 import { PublishesReload } from '@kbn/presentation-publishing/interfaces/fetch/publishes_reload';
@@ -57,6 +58,7 @@ export type ControlGroupApi = PresentationContainer &
   HasLastSavedChildState &
   PublishesTimeslice &
   PublishesDisabledActionIds &
+  PublishesUnsavedChanges &
   Partial<HasParentApi<PublishesUnifiedSearch> & PublishesReload> & {
     allowExpensiveQueries$: PublishingSubject<boolean>;
     autoApplySelections$: PublishingSubject<boolean>;

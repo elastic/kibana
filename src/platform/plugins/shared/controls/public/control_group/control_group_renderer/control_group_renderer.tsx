@@ -8,13 +8,13 @@
  */
 
 import { omit } from 'lodash';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { BehaviorSubject, Subject } from 'rxjs';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { BehaviorSubject, Subject, map } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
 
 import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
-import { useSearchApi, type ViewMode } from '@kbn/presentation-publishing';
+import { SerializedPanelState, useSearchApi, type ViewMode } from '@kbn/presentation-publishing';
 
 import type { ControlGroupApi } from '../..';
 import {
@@ -24,13 +24,35 @@ import {
   type ControlGroupSerializedState,
   DEFAULT_CONTROL_CHAINING,
   DEFAULT_AUTO_APPLY_SELECTIONS,
+  DEFAULT_IGNORE_PARENT_SETTINGS,
 } from '../../../common';
 import {
   type ControlGroupStateBuilder,
   controlGroupStateBuilder,
 } from '../utils/control_group_state_builder';
-import { getDefaultControlGroupRuntimeState } from '../utils/initialization_utils';
 import type { ControlGroupCreationOptions, ControlGroupRendererApi } from './types';
+import { deserializeControlGroup } from '../utils/serialization_utils';
+
+const defaultRuntimeState = {
+  labelPosition: DEFAULT_CONTROL_LABEL_POSITION,
+  chainingSystem: DEFAULT_CONTROL_CHAINING,
+  autoApplySelections: DEFAULT_AUTO_APPLY_SELECTIONS,
+  ignoreParentSettings: DEFAULT_IGNORE_PARENT_SETTINGS,
+};
+
+function toSerializedState(
+  runtimeState: Partial<ControlGroupRuntimeState>
+): SerializedPanelState<ControlGroupSerializedState> {
+  return {
+    rawState: {
+      ...defaultRuntimeState,
+      ...omit(runtimeState, ['initialChildControlState']),
+      controls: Object.entries(runtimeState?.initialChildControlState ?? {}).map(
+        ([controlId, value]) => ({ ...value, id: controlId })
+      ),
+    },
+  };
+}
 
 export interface ControlGroupRendererProps {
   onApiAvailable: (api: ControlGroupRendererApi) => void;
@@ -56,8 +78,11 @@ export const ControlGroupRenderer = ({
   dataLoading,
   compressed,
 }: ControlGroupRendererProps) => {
+  const lastState$Ref = useRef(new BehaviorSubject(toSerializedState(defaultRuntimeState)));
   const id = useMemo(() => uuidv4(), []);
-  const [regenerateId, setRegenerateId] = useState(uuidv4());
+  const [serializedState, setSerializedState] = useState<
+    SerializedPanelState<ControlGroupSerializedState> | undefined
+  >(() => (getCreationOptions ? undefined : lastState$Ref.current.value));
   const [controlGroup, setControlGroup] = useState<ControlGroupRendererApi | undefined>();
 
   /**
@@ -91,69 +116,37 @@ export const ControlGroupRenderer = ({
 
   const reload$ = useMemo(() => new Subject<void>(), []);
 
-  /**
-   * Control group API set up
-   */
-  const runtimeState$ = useMemo(
-    () => new BehaviorSubject<ControlGroupRuntimeState>(getDefaultControlGroupRuntimeState()),
-    []
-  );
-  const [serializedState, setSerializedState] = useState<ControlGroupSerializedState | undefined>();
-
-  const updateInput = useCallback(
-    (newState: Partial<ControlGroupRuntimeState>) => {
-      runtimeState$.next({
-        ...runtimeState$.getValue(),
-        ...newState,
-      });
-    },
-    [runtimeState$]
-  );
-
-  /**
-   * To mimic `input$`, subscribe to unsaved changes and snapshot the runtime state whenever
-   * something change
-   */
   useEffect(() => {
     if (!controlGroup) return;
-    const stateChangeSubscription = controlGroup.unsavedChanges$.subscribe((changes) => {
-      runtimeState$.next({ ...runtimeState$.getValue(), ...changes });
+    const subscription = controlGroup.hasUnsavedChanges$.subscribe((hasUnsavedChanges) => {
+      if (hasUnsavedChanges) lastState$Ref.current.next(controlGroup.serializeState());
     });
     return () => {
-      stateChangeSubscription.unsubscribe();
+      subscription.unsubscribe();
     };
-  }, [controlGroup, runtimeState$]);
+  }, [controlGroup]);
 
   /**
    * On mount
    */
   useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      const { initialState, editorConfig } =
-        (await getCreationOptions?.(
-          getDefaultControlGroupRuntimeState(),
-          controlGroupStateBuilder
-        )) ?? {};
-      updateInput({
-        ...initialState,
-        editorConfig,
-      });
-      const state: ControlGroupSerializedState = {
-        ...omit(initialState, ['initialChildControlState']),
-        editorConfig,
-        autoApplySelections: initialState?.autoApplySelections ?? DEFAULT_AUTO_APPLY_SELECTIONS,
-        labelPosition: initialState?.labelPosition ?? DEFAULT_CONTROL_LABEL_POSITION,
-        chainingSystem: initialState?.chainingSystem ?? DEFAULT_CONTROL_CHAINING,
-        controls: Object.entries(initialState?.initialChildControlState ?? {}).map(
-          ([controlId, value]) => ({ ...value, id: controlId })
-        ),
-      };
+    if (!getCreationOptions) return;
 
-      if (!cancelled) {
-        setSerializedState(state);
-      }
-    })();
+    let cancelled = false;
+
+    getCreationOptions(defaultRuntimeState, controlGroupStateBuilder)
+      .then(({ initialState, editorConfig }) => {
+        if (cancelled) return;
+        const initialRuntimeState = {
+          ...(initialState ?? defaultRuntimeState),
+          editorConfig,
+        } as ControlGroupRuntimeState;
+        const initialSerializedState = toSerializedState(initialRuntimeState);
+        lastState$Ref.current.next(initialSerializedState);
+        setSerializedState(initialSerializedState);
+      })
+      .catch();
+
     return () => {
       cancelled = true;
     };
@@ -163,7 +156,6 @@ export const ControlGroupRenderer = ({
 
   return !serializedState ? null : (
     <EmbeddableRenderer<ControlGroupSerializedState, ControlGroupApi>
-      key={regenerateId} // this key forces a re-mount when `updateInput` is called
       maybeId={id}
       type={CONTROL_GROUP_TYPE}
       getParentApi={() => ({
@@ -173,23 +165,25 @@ export const ControlGroupRenderer = ({
         query$: searchApi.query$,
         timeRange$: searchApi.timeRange$,
         unifiedSearchFilters$: searchApi.filters$,
-        getSerializedStateForChild: () => ({
-          rawState: serializedState,
-        }),
-        getRuntimeStateForChild: () => {
-          return runtimeState$.getValue();
-        },
+        getSerializedStateForChild: () => serializedState,
+        lastSavedStateForChild$: () => lastState$Ref.current,
+        getLastSavedStateForChild: () => lastState$Ref.current.value,
         compressed: compressed ?? true,
       })}
       onApiAvailable={(controlGroupApi) => {
         const controlGroupRendererApi: ControlGroupRendererApi = {
           ...controlGroupApi,
           reload: () => reload$.next(),
-          updateInput: (newInput) => {
-            updateInput(newInput);
-            setRegenerateId(uuidv4()); // force remount
+          updateInput: (newInput: Partial<ControlGroupRuntimeState>) => {
+            lastState$Ref.current.next(
+              toSerializedState({
+                ...lastState$Ref.current.value,
+                ...newInput,
+              })
+            );
+            controlGroupApi.resetUnsavedChanges();
           },
-          getInput$: () => runtimeState$,
+          getInput$: () => lastState$Ref.current.pipe(map(deserializeControlGroup)),
         };
         setControlGroup(controlGroupRendererApi);
         onApiAvailable(controlGroupRendererApi);
