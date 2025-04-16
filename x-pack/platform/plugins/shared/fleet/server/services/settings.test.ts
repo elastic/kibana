@@ -422,11 +422,11 @@ describe('createDefaultSettings', () => {
     expect(result).toEqual({ prerelease_integrations_enabled: false });
   });
 
-  it('should return default settings with prerelease_integrations_enabled as undefined if config is not defined', () => {
+  it('should return default settings with prerelease_integrations_enabled as false if config is not defined', () => {
     mockedAppContextService.getConfig.mockReturnValue(undefined);
 
     const result = createDefaultSettings();
 
-    expect(result).toEqual({ prerelease_integrations_enabled: undefined });
+    expect(result).toEqual({ prerelease_integrations_enabled: false });
   });
 });
