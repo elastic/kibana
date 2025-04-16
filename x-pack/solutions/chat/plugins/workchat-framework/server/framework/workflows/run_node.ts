@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import type {
-  NodeFactoryBaseServices,
-  NodeFactoryContext,
-  ScopedRunnerRunNodeParams,
-  ScopedRunnerRunNodeOutput,
+import {
+  WorkflowExecutionError,
+  type NodeFactoryBaseServices,
+  type NodeFactoryContext,
+  type ScopedRunnerRunNodeParams,
+  type ScopedRunnerRunNodeOutput,
 } from '@kbn/wc-framework-types-server';
 import type { WorkflowRunnerInternalContext, ScopedNodeRunnerFn } from './types';
 import {
@@ -48,7 +49,14 @@ const runNode = async ({
     nodeId: nodeDefinition.id,
   });
   const { nodeRegistry, eventHandler } = internalContext;
-  // TODO: check if node type is registered
+
+  if (!nodeRegistry.has(nodeDefinition.type)) {
+    throw new WorkflowExecutionError(
+      `Node type [${nodeDefinition.type}] not found in registry`,
+      'nodeTypeNotFound',
+      { state: internalContext.executionState }
+    );
+  }
 
   const nodeType = nodeRegistry.get(nodeDefinition.type);
 

@@ -65,10 +65,11 @@ export const createWorkflowRunner = (params: CreateWorkflowRunnerParams): Workfl
 
     const workflowDefinition = await getWorkflowDefinition(workflowId);
     if (!workflowDefinition) {
-      // TODO: error creation helper, later
-      throw new WorkflowExecutionError('workflow not found', 'workflowNotFound', {
-        state: executionState,
-      });
+      throw new WorkflowExecutionError(
+        `Workflow with id [${workflowId}] not found in registry`,
+        'workflowNotFound',
+        { state: executionState }
+      );
     }
 
     const modelProvider = await modelProviderFactory({ request, defaultConnectorId });
