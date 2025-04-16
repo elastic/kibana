@@ -69,7 +69,9 @@ export function DocViewer({ docViews, ...renderProps }: DocViewerProps) {
         initialSelectedTab={initialSelectedTab}
         onTabClick={onTabClick}
         onKeyDown={(evt) => {
-          if (evt.key === keys.ARROW_LEFT || evt.key === keys.ARROW_RIGHT) {
+          // When the tabs are focused we want to use the right and left keys to move between them instead of the documents.
+          const isTabButton = (evt.target as HTMLElement).getAttribute('role') === 'tab';
+          if (isTabButton && (evt.key === keys.ARROW_LEFT || evt.key === keys.ARROW_RIGHT)) {
             evt.preventDefault();
             evt.stopPropagation();
           }
