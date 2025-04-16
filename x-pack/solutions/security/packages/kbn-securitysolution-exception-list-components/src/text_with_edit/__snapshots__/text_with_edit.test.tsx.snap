@@ -6,38 +6,40 @@ Object {
   "baseElement": <body>
     <div>
       <div
-        class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
+        class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row-textWithEditContainerCss"
       >
         <div
           class="euiFlexItem emotion-euiFlexItem-grow-10"
         >
           <span
+            class="css-0"
             data-test-subj="TextWithEditTestText"
           >
             Test
           </span>
         </div>
         <div
-          class="euiFlexItem emotion-euiFlexItem-growZero"
+          class="euiFlexItem emotion-euiFlexItem-growZero-editIconCss"
         />
       </div>
     </div>
   </body>,
   "container": <div>
     <div
-      class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
+      class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row-textWithEditContainerCss"
     >
       <div
         class="euiFlexItem emotion-euiFlexItem-grow-10"
       >
         <span
+          class="css-0"
           data-test-subj="TextWithEditTestText"
         >
           Test
         </span>
       </div>
       <div
-        class="euiFlexItem emotion-euiFlexItem-growZero"
+        class="euiFlexItem emotion-euiFlexItem-growZero-editIconCss"
       />
     </div>
   </div>,
@@ -101,19 +103,20 @@ Object {
   "baseElement": <body>
     <div>
       <div
-        class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
+        class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row-textWithEditContainerCss"
       >
         <div
           class="euiFlexItem emotion-euiFlexItem-grow-10"
         >
           <span
+            class="css-0"
             data-test-subj="TextWithEditTestText"
           >
             Test
           </span>
         </div>
         <div
-          class="euiFlexItem emotion-euiFlexItem-growZero"
+          class="euiFlexItem emotion-euiFlexItem-growZero-editIconCss"
         >
           <button
             aria-label="Edit Text List Header"
@@ -134,19 +137,20 @@ Object {
   </body>,
   "container": <div>
     <div
-      class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
+      class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row-textWithEditContainerCss"
     >
       <div
         class="euiFlexItem emotion-euiFlexItem-grow-10"
       >
         <span
+          class="css-0"
           data-test-subj="TextWithEditTestText"
         >
           Test
         </span>
       </div>
       <div
-        class="euiFlexItem emotion-euiFlexItem-growZero"
+        class="euiFlexItem emotion-euiFlexItem-growZero-editIconCss"
       >
         <button
           aria-label="Edit Text List Header"

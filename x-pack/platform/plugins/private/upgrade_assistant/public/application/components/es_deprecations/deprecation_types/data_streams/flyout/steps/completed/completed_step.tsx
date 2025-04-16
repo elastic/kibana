@@ -37,7 +37,7 @@ export const MigrationCompletedFlyoutStep: React.FunctionComponent<Props> = ({
     <>
       <EuiFlyoutBody>
         <EuiTitle size="s">
-          <h3>
+          <h3 data-test-subj="dataStreamMigrationCompletedTitle">
             <FormattedMessage
               id="xpack.upgradeAssistant.dataStream.migration.flyout.warningsStep.acceptChangesTitle"
               defaultMessage="Data Stream Migration Complete"
@@ -45,7 +45,7 @@ export const MigrationCompletedFlyoutStep: React.FunctionComponent<Props> = ({
           </h3>
         </EuiTitle>
         <EuiSpacer size="m" />
-        <p>
+        <p data-test-subj="dataStreamMigrationCompletedDescription">
           <FormattedMessage
             id="xpack.upgradeAssistant.dataStream.migration.flyout.warningsStep.acceptChangesTitle"
             defaultMessage="Success! {count, plural, =0 {backing indices} =1 {# backing index} other {# backing indices}} successfully {resolutionType, select, reindex {reindexed} readonly {marked as read-only} other {migrated}}."
@@ -56,7 +56,12 @@ export const MigrationCompletedFlyoutStep: React.FunctionComponent<Props> = ({
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty iconType="cross" onClick={closeFlyout} flush="left">
+            <EuiButtonEmpty
+              iconType="cross"
+              onClick={closeFlyout}
+              flush="left"
+              data-test-subj="closeDataStreamReindexingButton"
+            >
               <FormattedMessage
                 id="xpack.upgradeAssistant.dataStream.migration.flyout.completedStep.closeButtonLabel"
                 defaultMessage="Close"

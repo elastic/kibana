@@ -22,6 +22,7 @@ import {
 import { css } from '@emotion/css';
 
 import type { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
+import { SubItemTitle } from '../subitem_title';
 import { PanelNavItem } from './panel_nav_item';
 
 const accordionButtonClassName = 'sideNavPanelAccordion__button';
@@ -64,7 +65,7 @@ interface Props {
 
 export const PanelGroup: FC<Props> = ({ navNode, isFirstInList, hasHorizontalRuleBefore }) => {
   const { euiTheme } = useEuiTheme();
-  const { id, title, appendHorizontalRule, spaceBefore: _spaceBefore } = navNode;
+  const { id, title, appendHorizontalRule, spaceBefore: _spaceBefore, withBadge } = navNode;
   const filteredChildren = navNode.children?.filter((child) => child.sideNavStatus !== 'hidden');
   const classNames = getClassnames(euiTheme);
   const hasTitle = !!title && title !== '';
@@ -83,21 +84,18 @@ export const PanelGroup: FC<Props> = ({ navNode, isFirstInList, hasHorizontalRul
     }
   }
 
-  const renderChildren = useCallback(
-    ({ parentIsAccordion } = { parentIsAccordion: false }) => {
-      if (!filteredChildren) return null;
+  const renderChildren = useCallback(() => {
+    if (!filteredChildren) return null;
 
-      return filteredChildren.map((item, i) => {
-        const isItem = item.renderAs === 'item' || !item.children;
-        return isItem ? (
-          <PanelNavItem key={item.id} item={item} parentIsAccordion={parentIsAccordion} />
-        ) : (
-          <PanelGroup navNode={item} key={item.id} />
-        );
-      });
-    },
-    [filteredChildren]
-  );
+    return filteredChildren.map((item, i) => {
+      const isItem = item.renderAs === 'item' || !item.children;
+      return isItem ? (
+        <PanelNavItem key={item.id} item={item} />
+      ) : (
+        <PanelGroup navNode={item} key={item.id} />
+      );
+    });
+  }, [filteredChildren]);
 
   if (!filteredChildren?.length || !someChildIsVisible(filteredChildren)) {
     return null;
@@ -109,7 +107,7 @@ export const PanelGroup: FC<Props> = ({ navNode, isFirstInList, hasHorizontalRul
         {spaceBefore !== null && <EuiSpacer size={spaceBefore} />}
         <EuiAccordion
           id={id}
-          buttonContent={title}
+          buttonContent={withBadge ? <SubItemTitle item={navNode} /> : title}
           className={classNames.accordion}
           buttonClassName={accordionButtonClassName}
           data-test-subj={groupTestSubj}
@@ -120,7 +118,7 @@ export const PanelGroup: FC<Props> = ({ navNode, isFirstInList, hasHorizontalRul
         >
           <>
             {!firstChildIsGroup && <EuiSpacer size="s" />}
-            {renderChildren({ parentIsAccordion: true })}
+            {renderChildren()}
           </>
         </EuiAccordion>
         {appendHorizontalRule && <EuiHorizontalRule margin="xs" />}

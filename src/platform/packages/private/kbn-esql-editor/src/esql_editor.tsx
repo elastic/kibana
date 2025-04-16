@@ -21,6 +21,7 @@ import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import { isEqual } from 'lodash';
 import { CodeEditor, CodeEditorProps } from '@kbn/code-editor';
+import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import type { CoreStart } from '@kbn/core/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { AggregateQuery, TimeRange } from '@kbn/es-query';
@@ -34,6 +35,7 @@ import {
   monaco,
   type ESQLCallbacks,
 } from '@kbn/monaco';
+import type { ILicense } from '@kbn/licensing-plugin/public';
 import memoize from 'lodash/memoize';
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { fixESQLQueryWithVariables } from '@kbn/esql-utils';
@@ -161,6 +163,7 @@ export const ESQLEditor = memo(function ESQLEditor({
   const [isCodeEditorExpandedFocused, setIsCodeEditorExpandedFocused] = useState(false);
   const [isQueryLoading, setIsQueryLoading] = useState(true);
   const [abortController, setAbortController] = useState(new AbortController());
+  const [license, setLicense] = useState<ILicense | undefined>(undefined);
 
   // contains both client side validation and server messages
   const [editorMessages, setEditorMessages] = useState<{
@@ -443,7 +446,7 @@ export const ESQLEditor = memo(function ESQLEditor({
   }, []);
 
   const { cache: dataSourcesCache, memoizedSources } = useMemo(() => {
-    const fn = memoize((...args: [DataViewsPublicPluginStart, CoreStart]) => ({
+    const fn = memoize((...args: [DataViewsPublicPluginStart, CoreStart, boolean]) => ({
       timestamp: Date.now(),
       result: getESQLSources(...args),
     }));
@@ -455,7 +458,9 @@ export const ESQLEditor = memo(function ESQLEditor({
     const callbacks: ESQLCallbacks = {
       getSources: async () => {
         clearCacheWhenOld(dataSourcesCache, fixedQuery);
-        const sources = await memoizedSources(dataViews, core).result;
+        const ccrFeature = license?.getFeature('ccr');
+        const areRemoteIndicesAvailable = ccrFeature?.isAvailable ?? false;
+        const sources = await memoizedSources(dataViews, core, areRemoteIndicesAvailable).result;
         return sources;
       },
       getColumnsFor: async ({ query: queryToExecute }: { query?: string } | undefined = {}) => {
@@ -481,6 +486,7 @@ export const ESQLEditor = memo(function ESQLEditor({
                 return {
                   name: c.name,
                   type: c.meta.esType as FieldType,
+                  hasConflict: c.meta.type === KBN_FIELD_TYPES.CONFLICT,
                 };
               }) || [];
 
@@ -517,6 +523,7 @@ export const ESQLEditor = memo(function ESQLEditor({
     return callbacks;
   }, [
     fieldsMetadata,
+    license,
     kibana.services?.esql?.getJoinIndicesAutocomplete,
     dataSourcesCache,
     fixedQuery,
@@ -592,6 +599,20 @@ export const ESQLEditor = memo(function ESQLEditor({
       setQueryToTheCache();
     }
   }, [isLoading, isQueryLoading, parseMessages, code]);
+
+  useEffect(() => {
+    async function fetchLicense() {
+      try {
+        const ls = await kibana.services?.esql?.getLicense();
+        if (!isEqual(license, ls)) {
+          setLicense(ls);
+        }
+      } catch (error) {
+        // failed to fetch
+      }
+    }
+    fetchLicense();
+  }, [kibana.services?.esql, license]);
 
   const queryValidation = useCallback(
     async ({ active }: { active: boolean }) => {
@@ -763,7 +784,15 @@ export const ESQLEditor = memo(function ESQLEditor({
           </EuiFlexItem>
         </EuiFlexGroup>
       )}
-      <EuiFlexGroup gutterSize="none" responsive={false} ref={containerRef}>
+      <EuiFlexGroup
+        gutterSize="none"
+        css={{
+          zIndex: theme.euiTheme.levels.flyout,
+          position: 'relative',
+        }}
+        responsive={false}
+        ref={containerRef}
+      >
         <EuiOutsideClickDetector
           onOutsideClick={() => {
             setIsCodeEditorExpandedFocused(false);

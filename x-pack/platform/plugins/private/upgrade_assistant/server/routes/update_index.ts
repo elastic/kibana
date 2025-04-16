@@ -15,8 +15,8 @@ import { updateIndex } from '../lib/update_index';
 
 export function registerUpdateIndexRoute({
   router,
-  lib: { handleEsError },
   log,
+  lib: { handleEsError },
 }: RouteDependencies) {
   const BASE_PATH = `${API_BASE_PATH}/update_index`;
   router.post(
