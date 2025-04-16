@@ -15,8 +15,8 @@ import { TABS_STATE_URL_KEY } from '../../../../common/constants';
 import type { TabState, RecentlyClosedTabState } from './redux/types';
 import { createTabItem } from './redux/utils';
 
-const TABS_LOCAL_STORAGE_KEY = 'discover.tabs';
-const RECENTLY_CLOSED_TABS_LIMIT = 50;
+export const TABS_LOCAL_STORAGE_KEY = 'discover.tabs';
+export const RECENTLY_CLOSED_TABS_LIMIT = 50;
 
 type TabStateInLocalStorage = Pick<
   TabState,
@@ -31,7 +31,7 @@ interface TabsStateInLocalStorage {
   closedTabs: RecentlyClosedTabStateInLocalStorage[];
 }
 
-interface TabsInternalStatePayload {
+export interface TabsInternalStatePayload {
   groupId: string;
   allTabs: TabState[];
   selectedTabId: string;
@@ -126,7 +126,7 @@ export const createTabsStorageManager = ({
     }));
 
     const newSortedRecentlyClosedTabs = orderBy(
-      [...newRecentlyClosedTabs.reverse(), ...previousRecentlyClosedTabs],
+      [...newRecentlyClosedTabs, ...previousRecentlyClosedTabs],
       'closedAt',
       'desc'
     );

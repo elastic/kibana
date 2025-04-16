@@ -30,7 +30,8 @@ import {
   type TabState,
   type RecentlyClosedTabState,
 } from './types';
-import { loadDataViewList, setTabs } from './actions';
+import { loadDataViewList } from './actions/data_views';
+import { setTabs } from './actions/tabs';
 import { selectTab } from './selectors';
 import type { TabsStorageManager } from '../tabs_storage_manager';
 
