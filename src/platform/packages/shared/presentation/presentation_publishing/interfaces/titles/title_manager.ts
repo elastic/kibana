@@ -11,7 +11,7 @@ import { WithAllKeys } from '../../state_manager';
 import { initializeStateManager } from '../../state_manager/state_manager';
 import { StateComparators, StateManager } from '../../state_manager/types';
 import { PublishesWritableDescription } from './publishes_description';
-import { PublishesWritableTitle } from './publishes_title';
+import { PublishesTitle, PublishesWritableTitle } from './publishes_title';
 
 export interface SerializedTitles {
   title?: string;
@@ -41,7 +41,24 @@ export const stateHasTitles = (state: unknown): state is SerializedTitles => {
 
 export interface TitlesApi extends PublishesWritableTitle, PublishesWritableDescription {}
 
-// SERIALIZED STATE ONLY TODO: Convert this to an instance of src/platform/packages/shared/presentation/presentation_publishing/state_manager/state_manager.ts
 export const initializeTitleManager = (
   initialTitlesState: SerializedTitles
-): StateManager<SerializedTitles> => initializeStateManager(initialTitlesState, defaultTitlesState);
+): StateManager<SerializedTitles> & {
+  api: {
+    hideTitle$: PublishesTitle['hideTitle$'];
+    setHideTitle: PublishesWritableTitle['setHideTitle'];
+  };
+} => {
+  const stateManager = initializeStateManager(initialTitlesState, defaultTitlesState);
+  return {
+    ...stateManager,
+    api: {
+      ...stateManager.api,
+      // SerializedTitles defines hideTitles as hidePanelTitles
+      // This state is persisted and this naming conflict will be resolved TBD
+      // add named APIs that match interface names as a work-around
+      hideTitle$: stateManager.api.hidePanelTitles$,
+      setHideTitle: stateManager.api.setHidePanelTitles,
+    },
+  };
+};

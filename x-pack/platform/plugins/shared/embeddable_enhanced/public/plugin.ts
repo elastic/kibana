@@ -111,11 +111,9 @@ export class EmbeddableEnhancedPlugin
       comparators: {
         enhancements: (a, b) => {
           return deepEqual(getDynamicActionsState(a), getDynamicActionsState(b));
-        }
+        },
       } as StateComparators<DynamicActionsSerializedState>,
-      anyStateChange$: dynamicActionsState$.pipe(
-        map(() => undefined)
-      ),
+      anyStateChange$: dynamicActionsState$.pipe(map(() => undefined)),
       getLatestState: () => {
         return { enhancements: dynamicActionsState$.getValue() };
       },

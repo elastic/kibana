@@ -54,11 +54,11 @@ export function getControlledBy(id: string) {
 
 function injectReferences(serializedState?: SerializedPanelState<MapSerializedState>) {
   return serializedState?.rawState
-  ? (inject(
-      serializedState.rawState as EmbeddableStateWithType,
-      serializedState.references ?? []
-    ) as unknown as MapSerializedState)
-  : {};
+    ? (inject(
+        serializedState.rawState as EmbeddableStateWithType,
+        serializedState.references ?? []
+      ) as unknown as MapSerializedState)
+    : {};
 }
 
 export const mapEmbeddableFactory: EmbeddableFactory<MapSerializedState, MapApi> = {
@@ -157,7 +157,7 @@ export const mapEmbeddableFactory: EmbeddableFactory<MapSerializedState, MapApi>
         crossPanelActions.anyStateChange$,
         reduxSync.anyStateChange$,
         titleManager.anyStateChange$,
-        timeRangeManager.anyStateChange$,
+        timeRangeManager.anyStateChange$
       ),
       getComparators: () => {
         return {
@@ -166,11 +166,12 @@ export const mapEmbeddableFactory: EmbeddableFactory<MapSerializedState, MapApi>
           ...reduxSyncComparators,
           ...titleComparators,
           ...timeRangeComparators,
-          attributes: savedMap.getSavedObjectId() !== undefined
-            ? 'skip'
-            : (a, b) => {
-              return a?.layerListJSON === b?.layerListJSON;
-            },
+          attributes:
+            savedMap.getSavedObjectId() !== undefined
+              ? 'skip'
+              : (a, b) => {
+                  return a?.layerListJSON === b?.layerListJSON;
+                },
           mapSettings: 'deepEquality',
           savedObjectId: 'skip',
         };
