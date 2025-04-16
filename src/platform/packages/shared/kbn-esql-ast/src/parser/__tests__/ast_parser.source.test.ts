@@ -22,14 +22,21 @@ describe('source nodes', () => {
           {
             type: 'source',
             name: 'cluster:index',
-            cluster: 'cluster',
-            index: 'index',
+            index: {
+              valueUnquoted: 'index',
+            },
+            cluster: {
+              type: 'literal',
+              literalType: 'keyword',
+              valueUnquoted: 'cluster',
+            },
           },
           {
             type: 'source',
             name: 'cluster:index',
-            cluster: '',
-            index: 'cluster:index',
+            index: {
+              valueUnquoted: 'cluster:index',
+            },
           },
         ],
       },
@@ -48,8 +55,11 @@ describe('source nodes', () => {
           {
             type: 'source',
             name: '<logs-{now/d}>',
-            cluster: '',
-            index: '<logs-{now/d}>',
+            cluster: undefined,
+            index: {
+              valueUnquoted: '<logs-{now/d}>',
+            },
+            selector: undefined,
           },
         ],
       },
@@ -69,8 +79,11 @@ describe('source nodes', () => {
             {
               type: 'source',
               name: 'a',
-              cluster: '',
-              index: 'a',
+              cluster: undefined,
+              index: {
+                valueUnquoted: 'a',
+              },
+              selector: undefined,
             },
           ],
         },
@@ -89,8 +102,11 @@ describe('source nodes', () => {
             {
               type: 'source',
               name: 'a/b',
-              cluster: '',
-              index: 'a/b',
+              cluster: undefined,
+              index: {
+                valueUnquoted: 'a/b',
+              },
+              selector: undefined,
             },
           ],
         },
@@ -109,8 +125,11 @@ describe('source nodes', () => {
             {
               type: 'source',
               name: 'a.b-*',
-              cluster: '',
-              index: 'a.b-*',
+              cluster: undefined,
+              index: {
+                valueUnquoted: 'a.b-*',
+              },
+              selector: undefined,
             },
           ],
         },
@@ -131,8 +150,11 @@ describe('source nodes', () => {
             {
               type: 'source',
               name: 'a',
-              cluster: '',
-              index: 'a',
+              cluster: undefined,
+              index: {
+                valueUnquoted: 'a',
+              },
+              selector: undefined,
             },
           ],
         },
@@ -151,8 +173,11 @@ describe('source nodes', () => {
             {
               type: 'source',
               name: expect.any(String),
-              cluster: '',
-              index: 'a " \r \n \t \\ b',
+              cluster: undefined,
+              index: {
+                valueUnquoted: 'a " \r \n \t \\ b',
+              },
+              selector: undefined,
             },
           ],
         },
@@ -173,8 +198,11 @@ describe('source nodes', () => {
             {
               type: 'source',
               name: 'a',
-              cluster: '',
-              index: 'a',
+              cluster: undefined,
+              index: {
+                valueUnquoted: 'a',
+              },
+              selector: undefined,
             },
           ],
         },
@@ -193,8 +221,11 @@ describe('source nodes', () => {
             {
               type: 'source',
               name: 'a"b',
-              cluster: '',
-              index: 'a"b',
+              cluster: undefined,
+              index: {
+                valueUnquoted: 'a"b',
+              },
+              selector: undefined,
             },
           ],
         },
@@ -213,8 +244,10 @@ describe('source nodes', () => {
             {
               type: 'source',
               name: 'a:\\/b',
-              cluster: '',
-              index: 'a:\\/b',
+              cluster: undefined,
+              index: {
+                valueUnquoted: 'a:\\/b',
+              },
             },
           ],
         },
@@ -233,8 +266,10 @@ describe('source nodes', () => {
             {
               type: 'source',
               name: 'a👍b',
-              cluster: '',
-              index: 'a👍b',
+              cluster: undefined,
+              index: {
+                valueUnquoted: 'a👍b',
+              },
             },
           ],
         },
@@ -255,8 +290,14 @@ describe('source nodes', () => {
             {
               type: 'source',
               name: 'cluster:a',
-              cluster: 'cluster',
-              index: 'a',
+              index: {
+                valueUnquoted: 'a',
+              },
+              cluster: {
+                type: 'literal',
+                literalType: 'keyword',
+                valueUnquoted: 'cluster',
+              },
             },
           ],
         },

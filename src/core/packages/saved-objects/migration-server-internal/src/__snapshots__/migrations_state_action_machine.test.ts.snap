@@ -90,6 +90,11 @@ Object {
                     },
                     Object {
                       "term": Object {
+                        "type": "investigation",
+                      },
+                    },
+                    Object {
+                      "term": Object {
                         "type": "maps-telemetry",
                       },
                     },
@@ -309,6 +314,11 @@ Object {
                     Object {
                       "term": Object {
                         "type": "guided-setup-state",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "investigation",
                       },
                     },
                     Object {
@@ -540,6 +550,11 @@ Object {
                     },
                     Object {
                       "term": Object {
+                        "type": "investigation",
+                      },
+                    },
+                    Object {
+                      "term": Object {
                         "type": "maps-telemetry",
                       },
                     },
@@ -767,6 +782,11 @@ Object {
                     Object {
                       "term": Object {
                         "type": "guided-setup-state",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "investigation",
                       },
                     },
                     Object {
@@ -1038,6 +1058,11 @@ Object {
                     },
                     Object {
                       "term": Object {
+                        "type": "investigation",
+                      },
+                    },
+                    Object {
+                      "term": Object {
                         "type": "maps-telemetry",
                       },
                     },
@@ -1268,6 +1293,11 @@ Object {
                     Object {
                       "term": Object {
                         "type": "guided-setup-state",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "investigation",
                       },
                     },
                     Object {

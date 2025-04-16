@@ -13,7 +13,6 @@ import { Rule } from '../../../..';
 
 export interface RuleActionsPopoverProps {
   rule: Rule;
-  canSaveRule: boolean;
   onDelete: (ruleId: string) => void;
   onApiKeyUpdate: (ruleId: string) => void;
   onEnableDisable: (enable: boolean) => void;
@@ -22,7 +21,6 @@ export interface RuleActionsPopoverProps {
 
 export const RuleActionsPopover: React.FunctionComponent<RuleActionsPopoverProps> = ({
   rule,
-  canSaveRule,
   onDelete,
   onApiKeyUpdate,
   onEnableDisable,
@@ -63,7 +61,6 @@ export const RuleActionsPopover: React.FunctionComponent<RuleActionsPopoverProps
             id: 0,
             items: [
               {
-                disabled: !canSaveRule,
                 'data-test-subj': 'disableButton',
                 onClick: async () => {
                   setIsPopoverOpen(false);
@@ -80,7 +77,6 @@ export const RuleActionsPopover: React.FunctionComponent<RuleActionsPopoverProps
                     ),
               },
               {
-                disabled: !canSaveRule,
                 'data-test-subj': 'updateAPIKeyButton',
                 onClick: () => {
                   setIsPopoverOpen(false);
@@ -92,7 +88,6 @@ export const RuleActionsPopover: React.FunctionComponent<RuleActionsPopoverProps
                 ),
               },
               {
-                disabled: !canSaveRule,
                 'data-test-subj': 'runRuleButton',
                 onClick: () => {
                   setIsPopoverOpen(false);
@@ -104,7 +99,6 @@ export const RuleActionsPopover: React.FunctionComponent<RuleActionsPopoverProps
                 ),
               },
               {
-                disabled: !canSaveRule,
                 className: 'ruleActionsPopover__deleteButton',
                 'data-test-subj': 'deleteRuleButton',
                 onClick: () => {

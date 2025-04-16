@@ -81,7 +81,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       const response = await putStream(apiClient, 'logs', body, 400);
       expect(response).to.have.property(
         'message',
-        'Root stream processing rules cannot be changed'
+        'Desired stream state is invalid: Root stream processing rules cannot be changed'
       );
     });
 
@@ -105,7 +105,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         },
       };
       const response = await putStream(apiClient, 'logs', body, 400);
-      expect(response).to.have.property('message', 'Root stream fields cannot be changed');
+      expect(response).to.have.property(
+        'message',
+        'Desired stream state is invalid: Root stream fields cannot be changed'
+      );
     });
 
     it('Should allow routing changes', async () => {
