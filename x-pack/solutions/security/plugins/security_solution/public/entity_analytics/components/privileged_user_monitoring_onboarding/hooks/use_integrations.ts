@@ -9,16 +9,30 @@ import { useGetPackageInfoByKeyQuery } from '@kbn/fleet-plugin/public';
 import type { GetInfoResponse } from '@kbn/fleet-plugin/common';
 
 export const useEntityAnalyticsIntegrations = () => {
-  const { data: okta, isLoading: isLoadingOkta } =
-    useGetPackageInfoByKeyQuery('entityanalytics_okta');
-  const { data: entra, isLoading: isLoadingEntra } = useGetPackageInfoByKeyQuery(
-    'entityanalytics_entra_id'
+  const { data: okta } = useGetPackageInfoByKeyQuery(
+    'entityanalytics_okta',
+    undefined, // When package version is undefined it gets the latest version
+    undefined, // No options required
+    {
+      suspense: true, // Make query suspend, it needs tu be wrapped by <Suspense />
+    }
   );
-  const { data: ad, isLoading: isLoadingAd } = useGetPackageInfoByKeyQuery(
+  const { data: entra } = useGetPackageInfoByKeyQuery(
+    'entityanalytics_entra_id',
+    undefined, // When package version is undefined it gets the latest version
+    undefined, // No options required
+    {
+      suspense: true,
+    }
+  );
+  const { data: ad } = useGetPackageInfoByKeyQuery(
     'entityanalytics_ad',
     undefined, // When package version is undefined it gets the latest version
     {
       prerelease: true, // This is a technical preview package, delete this line when it is GA
+    },
+    {
+      suspense: true,
     }
   );
 
@@ -28,5 +42,5 @@ export const useEntityAnalyticsIntegrations = () => {
     )
     .map(({ item }) => item);
 
-  return { integrations, isLoading: isLoadingOkta || isLoadingAd || isLoadingEntra };
+  return integrations;
 };

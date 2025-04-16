@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useCallback, useState } from 'react';
+
+import React, { Suspense, useState } from 'react';
 import {
   EuiCard,
   EuiFlexGrid,
@@ -19,34 +20,11 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { PackageCard } from '@kbn/fleet-plugin/public';
-import { useIntegrationLinkState } from '../../../common/hooks/integrations/use_integration_link_state';
-import { addPathParamToUrl } from '../../../common/utils/integrations';
-import { ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_PATH } from '../../../../common/constants';
-import { useNavigation } from '../../../common/lib/kibana';
-import { INTEGRATION_APP_ID } from '../../../onboarding/components/onboarding_body/cards/integrations/constants';
 import { IndexSelectorModal } from './select_index_modal';
-import { useEntityAnalyticsIntegrations } from './hooks/use_integrations';
+import { IntegrationCards } from './integrations_cards';
 
 export const AddDataSourcePanel = () => {
-  const { navigateTo } = useNavigation();
-  const state = useIntegrationLinkState(ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_PATH);
   const [isIndexModalOpen, setIsIndexModalOpen] = useState(false);
-  const { integrations, isLoading } = useEntityAnalyticsIntegrations();
-
-  const navigateToIntegration = useCallback(
-    (id: string, version: string) => {
-      navigateTo({
-        appId: INTEGRATION_APP_ID,
-        path: addPathParamToUrl(
-          `/detail/${id}-${version}/overview`,
-          ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_PATH
-        ),
-        state,
-      });
-    },
-    [navigateTo, state]
-  );
 
   return (
     <EuiPanel paddingSize="xl" hasShadow={false} hasBorder={false}>
@@ -69,37 +47,19 @@ export const AddDataSourcePanel = () => {
       </EuiText>
 
       <EuiSpacer size="xl" />
-      {isLoading ? (
-        <EuiFlexGrid gutterSize="l" columns={3}>
-          {Array.from({ length: 3 }).map((_, index) => (
-            <EuiFlexItem grow={1} key={index}>
-              <EuiSkeletonRectangle height="136px" width="100%" />
-            </EuiFlexItem>
-          ))}
-        </EuiFlexGrid>
-      ) : (
-        <EuiFlexGroup direction="row" justifyContent="spaceBetween">
-          {integrations.map(({ name, title, icons, description, version }) => (
-            <EuiFlexItem grow={1} key={name}>
-              <PackageCard
-                description={description ?? ''}
-                icons={icons ?? []}
-                id={name}
-                name={name}
-                title={title}
-                version={version}
-                onCardClick={() => {
-                  navigateToIntegration(name, version);
-                }}
-                // Required values that don't make sense for this scenario
-                categories={[]}
-                integration={''}
-                url={''}
-              />
-            </EuiFlexItem>
-          ))}
-        </EuiFlexGroup>
-      )}
+      <Suspense
+        fallback={
+          <EuiFlexGrid gutterSize="l" columns={3}>
+            {Array.from({ length: 3 }).map((_, index) => (
+              <EuiFlexItem grow={1} key={index}>
+                <EuiSkeletonRectangle height="127px" width="100%" />
+              </EuiFlexItem>
+            ))}
+          </EuiFlexGrid>
+        }
+      >
+        <IntegrationCards />
+      </Suspense>
       <EuiSpacer size="m" />
       <EuiFlexGroup alignItems="center" justifyContent="spaceAround" responsive={false}>
         <EuiFlexItem grow={true}>
