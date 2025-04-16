@@ -43,11 +43,12 @@ export class UpgradeAssistantFlyoutObject extends FtrService {
   }
 
   async clickOpenEsDeprecationsFlyoutButton() {
-    return await this.retry.try(async () => {
+    // / Wait for the button to be visible and click it
+    return await this.retry.tryForTime(20000, async () => {
       if (await this.testSubjects.exists('enableLogsLink')) {
-        await this.clickEnableLoggingButton();
+        await this.testSubjects.click('enableLogsLink');
       } else if (await this.testSubjects.exists('viewDetailsLink')) {
-        await this.clickVerifyLoggingButton();
+        await this.testSubjects.click('viewDetailsLink');
       } else {
         this.log.debug('No relevant button found to open ES Deprecations Flyout');
       }
