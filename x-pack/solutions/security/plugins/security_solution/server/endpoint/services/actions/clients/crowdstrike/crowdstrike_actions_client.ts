@@ -121,11 +121,12 @@ export class CrowdstrikeActionsClient extends ResponseActionsClientImpl {
         inner_hits: {
           name: 'most_recent',
           size: 1,
-          _source: ['agent', 'device.id'],
+          _source: ['agent', 'device.id', 'event.created'],
           sort: [{ 'event.created': 'desc' }],
         },
       },
       _source: false,
+      ignore_unavailable: true,
     };
 
     if (!esSearchRequest.index || esSearchRequest.index.length === 0) {
