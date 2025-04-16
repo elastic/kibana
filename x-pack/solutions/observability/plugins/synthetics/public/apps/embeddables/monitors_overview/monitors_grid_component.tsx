@@ -5,17 +5,27 @@
  * 2.0.
  */
 
-import React, { useEffect, useRef } from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 import { Subject } from 'rxjs';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
+import { OverviewStatusMetaData } from '../../../../common/runtime_types';
 import { areFiltersEmpty } from '../common/utils';
 import { getOverviewStore } from './redux_store';
 import { ShowSelectedFilters } from '../common/show_selected_filters';
-import { setOverviewPageStateAction } from '../../synthetics/state';
+import {
+  selectOverviewTrends,
+  setFlyoutConfig,
+  setOverviewPageStateAction,
+  trendStatsBatch,
+} from '../../synthetics/state';
 import { MonitorFilters } from './types';
 import { EmbeddablePanelWrapper } from '../../synthetics/components/common/components/embeddable_panel_wrapper';
 import { SyntheticsEmbeddableContext } from '../synthetics_embeddable_context';
 import { OverviewGrid } from '../../synthetics/components/monitors_page/overview/overview/overview_grid';
+import { useMonitorsSortedByStatus } from '../../synthetics/hooks/use_monitors_sorted_by_status';
+import { MetricItem } from '../../synthetics/components/monitors_page/overview/overview/metric_item/metric_item';
+import { FlyoutParamProps } from '../../synthetics/components/monitors_page/overview/overview/types';
+import { MaybeMonitorDetailsFlyout } from '../../synthetics/components/monitors_page/overview/overview/monitor_detail_flyout';
 
 export const StatusGridComponent = ({
   reload$,
@@ -39,6 +49,39 @@ export const StatusGridComponent = ({
   );
 };
 
+const SingleMonitorView = ({ monitor }: { monitor: OverviewStatusMetaData }) => {
+  const trendData = useSelector(selectOverviewTrends);
+  const dispatch = useDispatch();
+
+  const setFlyoutConfigCallback = useCallback(
+    (params: FlyoutParamProps) => {
+      dispatch(setFlyoutConfig(params));
+    },
+    [dispatch]
+  );
+
+  useEffect(() => {
+    if (!trendData[monitor.configId + monitor.locationId]) {
+      dispatch(
+        trendStatsBatch.get([
+          {
+            configId: monitor.configId,
+            locationId: monitor.locationId,
+            schedule: monitor.schedule,
+          },
+        ])
+      );
+    }
+  }, [dispatch, monitor, trendData]);
+
+  return (
+    <>
+      <MetricItem monitor={monitor} onClick={setFlyoutConfigCallback} />
+      <MaybeMonitorDetailsFlyout setFlyoutConfigCallback={setFlyoutConfigCallback} />
+    </>
+  );
+};
+
 const MonitorsOverviewList = ({ filters }: { filters: MonitorFilters }) => {
   const dispatch = useDispatch();
   useEffect(() => {
@@ -54,5 +97,11 @@ const MonitorsOverviewList = ({ filters }: { filters: MonitorFilters }) => {
     );
   }, [dispatch, filters]);
 
-  return <OverviewGrid />;
+  const monitorsSortedByStatus: OverviewStatusMetaData[] = useMonitorsSortedByStatus();
+
+  return monitorsSortedByStatus.length === 1 ? (
+    <SingleMonitorView monitor={monitorsSortedByStatus[0]} />
+  ) : (
+    <OverviewGrid />
+  );
 };
