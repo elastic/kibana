@@ -39,6 +39,7 @@ export const AuthConfiguration = {
   accessTokenUrl: schema.maybe(schema.string()),
   clientId: schema.maybe(schema.string()),
   scope: schema.maybe(schema.string()),
+  additionalFields: schema.maybe(schema.string()), // Assuming it's stored as a JSON string
 };
 
 export const SecretConfiguration = {

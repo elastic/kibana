@@ -11,7 +11,7 @@ import axios from 'axios';
 import type { Logger } from '@kbn/core/server';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { map, getOrElse } from 'fp-ts/lib/Option';
-
+import Boom from '@hapi/boom';
 import type {
   ActionTypeExecutorResult as ConnectorTypeExecutorResult,
   ValidatorServices,
@@ -155,7 +155,23 @@ export async function executor(
     clientId,
     scope,
     verificationMode,
+    additionalFields,
   } = config;
+
+  let parsedAdditionalFields: Record<string, unknown> | undefined;
+  if (additionalFields) {
+    try {
+      parsedAdditionalFields = JSON.parse(additionalFields);
+
+      if (typeof parsedAdditionalFields !== 'object' || Array.isArray(parsedAdditionalFields)) {
+        throw new Error(`additionalFields must be a valid JSON object in connector ${actionId}.`);
+      }
+    } catch (e) {
+      const errorMessage = `Invalid JSON format provided for additionalFields in connector ${actionId}.`;
+      logger.error(errorMessage, e);
+      throw Boom.badRequest(errorMessage);
+    }
+  }
 
   const { body: data } = params;
 
@@ -170,7 +186,6 @@ export async function executor(
   const clientSecret = secrets.clientSecret;
   const axiosInstance = axios.create();
 
-  // Handle OAuth 2.0 authentication
   if (authType === AuthType.OAuth2) {
     if (!connectorTokenClient) {
       const serviceMessage = 'ConnectorTokenClient is not available for OAuth2 flow.';
@@ -199,6 +214,7 @@ export async function executor(
             secrets: { clientSecret },
             config: {
               clientId,
+              ...(parsedAdditionalFields ? { additionalFields: parsedAdditionalFields } : {}),
             },
           },
           tokenUrl: accessTokenUrl,

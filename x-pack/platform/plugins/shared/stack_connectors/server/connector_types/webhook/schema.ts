@@ -25,6 +25,7 @@ const configSchemaProps = {
   accessTokenUrl: AuthConfiguration.accessTokenUrl,
   clientId: AuthConfiguration.clientId,
   scope: AuthConfiguration.scope,
+  additionalFields: AuthConfiguration.additionalFields,
 };
 
 export const ConfigSchema = schema.object(configSchemaProps);

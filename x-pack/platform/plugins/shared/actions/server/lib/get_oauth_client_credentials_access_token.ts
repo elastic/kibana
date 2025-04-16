@@ -11,6 +11,7 @@ import { requestOAuthClientCredentialsToken } from './request_oauth_client_crede
 
 export interface GetOAuthClientCredentialsConfig {
   clientId: string;
+  additionalFields?: Record<string, unknown>;
 }
 
 export interface GetOAuthClientCredentialsSecrets {
@@ -39,7 +40,7 @@ export const getOAuthClientCredentialsAccessToken = async ({
   credentials,
   connectorTokenClient,
 }: GetOAuthClientCredentialsAccessTokenOpts) => {
-  const { clientId } = credentials.config;
+  const { clientId, additionalFields } = credentials.config;
   const { clientSecret } = credentials.secrets;
 
   if (!clientId || !clientSecret) {
@@ -64,7 +65,6 @@ export const getOAuthClientCredentialsAccessToken = async ({
     // Save the time before requesting token so we can use it to calculate expiration
     const requestTokenStart = Date.now();
 
-    // request access token with jwt assertion
     const tokenResult = await requestOAuthClientCredentialsToken(
       tokenUrl,
       logger,
@@ -72,6 +72,7 @@ export const getOAuthClientCredentialsAccessToken = async ({
         scope: oAuthScope,
         clientId,
         clientSecret,
+        ...additionalFields,
       },
       configurationUtilities
     );

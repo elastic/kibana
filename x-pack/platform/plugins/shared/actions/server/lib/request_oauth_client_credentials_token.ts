@@ -16,6 +16,7 @@ export interface ClientCredentialsOAuthRequestParams {
   scope?: string;
   clientId?: string;
   clientSecret?: string;
+  [key: string]: unknown;
 }
 
 const rewriteBodyRequest: RewriteResponseCase<ClientCredentialsOAuthRequestParams> = ({
