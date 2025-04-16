@@ -32,7 +32,7 @@ export function InvestigationGuideEditor({ setRuleParams, value }: Props) {
           <EuiText>
             <strong>
               <FormattedMessage
-                id="xpack.observability.investigationManager.title"
+                id="xpack.observability.investigationGuide.editor.title"
                 defaultMessage="Investigation Guide"
               />
             </strong>
@@ -44,12 +44,18 @@ export function InvestigationGuideEditor({ setRuleParams, value }: Props) {
       </EuiFlexGroup>
       <EuiSpacer size="xs" />
       <EuiMarkdownEditor
-        aria-label={i18n.translate('xpack.observability.investigationManager.editor.ariaLabel', {
-          defaultMessage: 'Add guidelines for addressing alerts created by this rule',
-        })}
-        placeholder={i18n.translate('xpack.observability.investigationManager.editor.placeholder', {
-          defaultMessage: 'Add guidelines for addressing alerts created by this rule',
-        })}
+        aria-label={i18n.translate(
+          'xpack.responseOpsAlertsApis.investigationGuide.editor.ariaLabel',
+          {
+            defaultMessage: 'Add guidelines for addressing alerts created by this rule',
+          }
+        )}
+        placeholder={i18n.translate(
+          'xpack.responseOpsAlertsApis.investigationGuide.editor.placeholder',
+          {
+            defaultMessage: 'Add guidelines for addressing alerts created by this rule',
+          }
+        )}
         value={value}
         onChange={(blob) => setRuleParams({ investigation_guide: { blob } })}
         height={400}
