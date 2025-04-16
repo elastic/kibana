@@ -12,7 +12,6 @@ import {
   PublishesDisabledActionIds,
   PublishesViewMode,
   PublishingSubject,
-  StateComparators,
   ViewMode,
   apiHasAppContext,
   apiPublishesDisabledActionIds,
@@ -22,7 +21,7 @@ import { noop } from 'lodash';
 import { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
 import { tracksOverlays } from '@kbn/presentation-containers';
 import { i18n } from '@kbn/i18n';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import { APP_ID, getEditPath } from '../../../common/constants';
 import {
   GetStateType,
@@ -30,11 +29,8 @@ import {
   LensInspectorAdapters,
   LensInternalApi,
   LensRuntimeState,
-  LensSerializedState,
 } from '../types';
-import {
-  extractInheritedViewModeObservable,
-} from '../helper';
+import { extractInheritedViewModeObservable } from '../helper';
 import { prepareInlineEditPanel } from '../inline_editing/setup_inline_editing';
 import { setupPanelManagement } from '../inline_editing/panel_management';
 import { mountInlineEditPanel } from '../inline_editing/mount';

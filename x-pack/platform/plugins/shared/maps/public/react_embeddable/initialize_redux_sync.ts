@@ -222,12 +222,9 @@ export function initializeReduxSync({
         store.dispatch(setEventHandlers(eventHandlers));
       },
     },
-    anyStateChange$: merge(
-      hiddenLayers$,
-      isLayerTOCOpen$,
-      mapCenterAndZoom$,
-      openTOCDetails$,
-    ).pipe(map(() => undefined)),
+    anyStateChange$: merge(hiddenLayers$, isLayerTOCOpen$, mapCenterAndZoom$, openTOCDetails$).pipe(
+      map(() => undefined)
+    ),
     reinitializeState: (lastSaved?: MapSerializedState) => {
       if (lastSaved?.savedObjectId === undefined && lastSaved?.attributes?.layerListJSON) {
         try {

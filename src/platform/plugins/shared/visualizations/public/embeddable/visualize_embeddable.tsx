@@ -49,11 +49,7 @@ import { createVisInstance } from './create_vis_instance';
 import { getExpressionRendererProps } from './get_expression_renderer_props';
 import { saveToLibrary } from './save_to_library';
 import { deserializeState, serializeState } from './state';
-import {
-  VisualizeApi,
-  VisualizeOutputState,
-  VisualizeSerializedState,
-} from './types';
+import { VisualizeApi, VisualizeOutputState, VisualizeSerializedState } from './types';
 import { initializeEditApi } from './initialize_edit_api';
 import { VisParams } from '../types';
 
@@ -164,7 +160,9 @@ export const getVisualizeEmbeddableFactory: (deps: {
         titles: titleManager.getLatestState(),
         id: savedObjectId,
         linkedToLibrary,
-        ...(runtimeState.savedObjectProperties ? { savedObjectProperties: runtimeState.savedObjectProperties } : {}),
+        ...(runtimeState.savedObjectProperties
+          ? { savedObjectProperties: runtimeState.savedObjectProperties }
+          : {}),
         ...(dynamicActionsManager?.getLatestState() ?? {}),
         ...timeRangeManager.getLatestState(),
       });
@@ -181,8 +179,8 @@ export const getVisualizeEmbeddableFactory: (deps: {
         savedObjectId$,
         serializedVis$,
         titleManager.anyStateChange$,
-        timeRangeManager.anyStateChange$,
-      ).pipe(map(() =>  undefined)),
+        timeRangeManager.anyStateChange$
+      ).pipe(map(() => undefined)),
       getComparators: () => {
         return {
           ...(dynamicActionsManager?.comparators ?? { enhancements: 'skip' }),
@@ -192,22 +190,22 @@ export const getVisualizeEmbeddableFactory: (deps: {
           savedVis: linkedToLibrary
             ? 'skip'
             : (a, b) => {
-              function cleanSavedVis(savedVis?: SerializedVis<VisParams>) {
-                return savedVis
-                  ? {
-                      ...omitBy(savedVis, isEmpty),
-                      data: {
-                        ...omitBy(savedVis.data, isNil),
-                        searchSource: {
-                          ...omitBy(savedVis.data.searchSource, isNil),
-                        }
-                      },
-                      params: omitBy(savedVis.params, isNil),
-                    }
-                  : {};
-              }
-              return isEqual(cleanSavedVis(a), cleanSavedVis(b));
-            }
+                function cleanSavedVis(savedVis?: SerializedVis<VisParams>) {
+                  return savedVis
+                    ? {
+                        ...omitBy(savedVis, isEmpty),
+                        data: {
+                          ...omitBy(savedVis.data, isNil),
+                          searchSource: {
+                            ...omitBy(savedVis.data.searchSource, isNil),
+                          },
+                        },
+                        params: omitBy(savedVis.params, isNil),
+                      }
+                    : {};
+                }
+                return isEqual(cleanSavedVis(a), cleanSavedVis(b));
+              },
         };
       },
       onReset: async (lastSaved) => {
@@ -230,11 +228,7 @@ export const getVisualizeEmbeddableFactory: (deps: {
       dataLoading$,
       dataViews$: new BehaviorSubject<DataView[] | undefined>(initialDataViews),
       rendered$: hasRendered$,
-      supportedTriggers: () => [
-        ACTION_CONVERT_TO_LENS,
-        APPLY_FILTER_TRIGGER,
-        SELECT_RANGE_TRIGGER,
-      ],
+      supportedTriggers: () => [ACTION_CONVERT_TO_LENS, APPLY_FILTER_TRIGGER, SELECT_RANGE_TRIGGER],
       serializeState: () => {
         // In the visualize editor, linkedToLibrary should always be false to force the full state to be serialized,
         // instead of just passing a reference to the linked saved object. Other contexts like dashboards should
