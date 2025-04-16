@@ -32,6 +32,9 @@ export function openSourceModal(
         onSelected(indexPattern);
         modalRef.close();
       }}
-    />
+    />,
+    {
+      'aria-labelledby': 'source-modal-title',
+    }
   );
 }
