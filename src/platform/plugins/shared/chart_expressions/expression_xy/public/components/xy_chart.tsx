@@ -36,6 +36,7 @@ import {
 import { partition } from 'lodash';
 import { IconType } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { isOfAggregateQueryType } from '@kbn/es-query';
 import { PaletteRegistry } from '@kbn/coloring';
 import { RenderMode } from '@kbn/expressions-plugin/common';
 import { useKbnPalettes } from '@kbn/palettes';
@@ -747,6 +748,11 @@ export function XYChart({
     formatFactory
   );
 
+  // ES|QL charts are allowed to create filters only when the unified search bar query is ES|QL (e.g. in Discover)
+  const applicationQuery = data.query.queryString.getQuery();
+  const canCreateFilters =
+    !isEsqlMode || (isEsqlMode && applicationQuery && isOfAggregateQueryType(applicationQuery));
+
   return (
     <>
       <GlobalXYChartStyles />
@@ -873,7 +879,7 @@ export function XYChart({
               onBrushEnd={interactive ? (brushHandler as BrushEndListener) : undefined}
               onElementClick={interactive ? clickHandler : undefined}
               legendAction={
-                interactive
+                interactive && canCreateFilters
                   ? getLegendAction(
                       dataLayers,
                       onClickValue,
