@@ -25,17 +25,23 @@ import { createSearchSourceMock } from '@kbn/data-plugin/common/search/search_so
 import { createInternalStateStore, createRuntimeStateManager, internalStateActions } from './redux';
 import { mockCustomizationContext } from '../../../customizations/__mocks__/customization_context';
 import { omit } from 'lodash';
+import { createTabsStorageManager } from './tabs_storage_manager';
 
 describe('DiscoverSavedSearchContainer', () => {
   const savedSearch = savedSearchMock;
   const services = discoverServiceMock;
   const urlStateStorage = createKbnUrlStateStorage();
   const globalStateContainer = getDiscoverGlobalStateContainer(urlStateStorage);
+  const tabsStorageManager = createTabsStorageManager({
+    urlStateStorage,
+    storage: services.storage,
+  });
   const internalState = createInternalStateStore({
     services,
     customizationContext: mockCustomizationContext,
     runtimeStateManager: createRuntimeStateManager(),
     urlStateStorage,
+    tabsStorageManager,
   });
 
   describe('getTitle', () => {

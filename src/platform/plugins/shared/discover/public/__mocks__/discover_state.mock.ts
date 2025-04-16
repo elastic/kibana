@@ -23,6 +23,7 @@ import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { createKbnUrlStateStorage, withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
 import type { History } from 'history';
 import type { DiscoverCustomizationContext } from '../customizations';
+import { createTabsStorageManager } from '../application/main/state_management/tabs_storage_manager';
 
 export function getDiscoverStateMock({
   isTimeBased = true,
@@ -57,11 +58,16 @@ export function getDiscoverStateMock({
       ...(toasts && withNotifyOnErrors(toasts)),
     });
   runtimeStateManager = runtimeStateManager ?? createRuntimeStateManager();
+  const tabsStorageManager = createTabsStorageManager({
+    urlStateStorage: stateStorageContainer,
+    storage: services.storage,
+  });
   const internalState = createInternalStateStore({
     services,
     customizationContext,
     runtimeStateManager,
     urlStateStorage: stateStorageContainer,
+    tabsStorageManager,
   });
   const container = getDiscoverStateContainer({
     tabId: internalState.getState().tabs.unsafeCurrentId,

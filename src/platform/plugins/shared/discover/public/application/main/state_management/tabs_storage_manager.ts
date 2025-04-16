@@ -58,15 +58,15 @@ export interface TabsStorageManager {
   ) => RecentlyClosedTabState[];
 }
 
-export const getTabsStorageManager = ({
+export const createTabsStorageManager = ({
   urlStateStorage,
   storage,
 }: {
   urlStateStorage: IKbnUrlStateStorage;
   storage: Storage;
 }): TabsStorageManager => {
-  const getTabsInfoFromUrl = () => {
-    return urlStateStorage.get(TABS_STATE_URL_KEY) as TabsStorageState;
+  const getSelectedTabIdFromURL = () => {
+    return (urlStateStorage.get(TABS_STATE_URL_KEY) as TabsStorageState)?.tabId;
   };
 
   const pushSelectedTabIdToUrl = async (selectedTabId: string) => {
@@ -219,8 +219,7 @@ export const getTabsStorageManager = ({
       ...toTabState(tabStateInStorage),
       closedAt: tabStateInStorage.closedAt,
     });
-    const tabsInfoFromUrl = getTabsInfoFromUrl();
-    const { tabId: selectedTabId } = tabsInfoFromUrl || {};
+    const selectedTabId = getSelectedTabIdFromURL();
     const storedTabsState = readFromLocalStorage();
     const openTabs = storedTabsState.openTabs.map(toTabState);
     const closedTabs = storedTabsState.closedTabs.map(toRecentlyClosedTabState);

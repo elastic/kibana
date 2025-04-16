@@ -30,11 +30,13 @@ import {
   selectTab,
 } from './redux';
 import { mockCustomizationContext } from '../../../customizations/__mocks__/customization_context';
+import { createTabsStorageManager, type TabsStorageManager } from './tabs_storage_manager';
 
 let history: History;
 let stateStorage: IKbnUrlStateStorage;
 let internalState: InternalStateStore;
 let savedSearchState: DiscoverSavedSearchContainer;
+let tabsStorageManager: TabsStorageManager;
 let getCurrentTab: () => TabState;
 
 describe('Test discover app state container', () => {
@@ -46,11 +48,16 @@ describe('Test discover app state container', () => {
       history,
       ...(toasts && withNotifyOnErrors(toasts)),
     });
+    tabsStorageManager = createTabsStorageManager({
+      urlStateStorage: stateStorage,
+      storage: discoverServiceMock.storage,
+    });
     internalState = createInternalStateStore({
       services: discoverServiceMock,
       customizationContext: mockCustomizationContext,
       runtimeStateManager: createRuntimeStateManager(),
       urlStateStorage: stateStorage,
+      tabsStorageManager,
     });
     savedSearchState = getSavedSearchContainer({
       services: discoverServiceMock,
