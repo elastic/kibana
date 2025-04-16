@@ -49,9 +49,11 @@ export class StreamsPlugin
   public config: StreamsConfig;
   public logger: Logger;
   public server?: StreamsServer;
+  private isDev: boolean;
   private telemtryService = new StreamsTelemetryService();
 
   constructor(context: PluginInitializerContext<StreamsConfig>) {
+    this.isDev = context.env.mode.dev;
     this.config = context.config.get();
     this.logger = context.logger.get();
   }
@@ -68,7 +70,7 @@ export class StreamsPlugin
     this.telemtryService.setup(core.analytics);
 
     const assetService = new AssetService(core, this.logger);
-    const streamsService = new StreamsService(core, this.logger);
+    const streamsService = new StreamsService(core, this.logger, this.isDev);
 
     registerRoutes({
       repository: streamsRouteRepository,

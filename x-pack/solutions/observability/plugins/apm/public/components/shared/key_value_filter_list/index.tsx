@@ -20,6 +20,7 @@ import { i18n } from '@kbn/i18n';
 import React, { Fragment } from 'react';
 import styled from 'styled-components';
 import { isEmpty } from 'lodash';
+import { css } from '@emotion/react';
 
 interface KeyValue {
   key: string;
@@ -78,23 +79,41 @@ export function KeyValueFilterList({
             <Fragment key={key}>
               <EuiDescriptionListTitle
                 className="descriptionList__title"
-                style={{ height: '40px' }}
+                css={css`
+                  height: 40px;
+                `}
               >
-                <EuiText size="s" style={{ fontWeight: 'bold' }}>
+                <EuiText
+                  size="s"
+                  css={css`
+                    font-weight: bold;
+                  `}
+                >
                   {key}
                 </EuiText>
               </EuiDescriptionListTitle>
               <EuiDescriptionListDescription
                 className="descriptionList__description"
-                style={{ height: '40px' }}
+                css={css`
+                  height: 40px;
+                `}
               >
                 <EuiFlexGroup alignItems="baseline" responsive={false} gutterSize="none">
-                  <EuiFlexItem style={{ minWidth: '32px' }} grow={false}>
+                  <EuiFlexItem
+                    css={css`
+                      min-width: 32px;
+                    `}
+                    grow={false}
+                  >
                     {isFilterable && (
                       <EuiButtonEmpty
                         onClick={() => {
                           onClickFilter({ key, value });
                         }}
+                        aria-label={i18n.translate(
+                          'xpack.apm.keyValueFilterList.actionFilterLabel',
+                          { defaultMessage: 'Filter by value' }
+                        )}
                         data-test-subj={`filter_by_${key}`}
                       >
                         <EuiToolTip

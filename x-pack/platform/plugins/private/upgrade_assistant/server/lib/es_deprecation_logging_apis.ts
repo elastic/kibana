@@ -6,8 +6,16 @@
  */
 
 import { get } from 'lodash';
+import moment from 'moment-timezone';
 import { IScopedClusterClient } from '@kbn/core/server';
+import type { SearchTotalHits } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { DeprecationLoggingStatus } from '../../common/types';
+import {
+  DEPRECATION_LOGS_INDEX,
+  DEPRECATION_LOGS_ORIGIN_FIELD,
+  APPS_WITH_DEPRECATION_LOGS,
+  RECENT_DURATION_MS,
+} from '../../common/constants';
 
 export async function getDeprecationLoggingStatus(
   dataClient: IScopedClusterClient
@@ -48,6 +56,58 @@ export async function setDeprecationLogging(
     isDeprecationLogIndexingEnabled: isEnabled,
     isDeprecationLoggingEnabled: isDeprecationLoggingEnabled(response),
   };
+}
+
+export async function getRecentEsDeprecationLogs(
+  dataClient: IScopedClusterClient,
+  timeframeMsec: number = RECENT_DURATION_MS
+) {
+  const indexExists = await dataClient.asCurrentUser.indices.exists({
+    index: DEPRECATION_LOGS_INDEX,
+  });
+
+  if (!indexExists) {
+    return { logs: [], count: 0 };
+  }
+
+  const now = moment();
+  const from = moment().subtract(timeframeMsec, 'milliseconds');
+
+  try {
+    const searchResponse = await dataClient.asCurrentUser.search({
+      index: DEPRECATION_LOGS_INDEX,
+      body: {
+        query: {
+          bool: {
+            must: {
+              range: {
+                '@timestamp': {
+                  gte: from.toISOString(),
+                  lte: now.toISOString(),
+                },
+              },
+            },
+            must_not: {
+              terms: {
+                [DEPRECATION_LOGS_ORIGIN_FIELD]: [...APPS_WITH_DEPRECATION_LOGS],
+              },
+            },
+          },
+        },
+        sort: [{ '@timestamp': { order: 'desc' } }],
+      },
+    });
+
+    const logs = searchResponse.hits.hits.map((hit) => hit._source);
+
+    return {
+      logs,
+      count: (searchResponse.hits.total as SearchTotalHits)?.value,
+    };
+  } catch (error) {
+    // If search fails, return empty results to avoid blocking the overall status
+    return { logs: [], count: 0 };
+  }
 }
 
 export function isDeprecationLogIndexingEnabled(settings: any) {

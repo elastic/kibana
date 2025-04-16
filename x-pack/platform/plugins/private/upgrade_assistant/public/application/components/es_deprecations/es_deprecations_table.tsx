@@ -70,7 +70,7 @@ const i18nTexts = {
 };
 
 const cellToLabelMap = {
-  isCritical: {
+  level: {
     label: i18n.translate('xpack.upgradeAssistant.esDeprecations.table.statusColumnTitle', {
       defaultMessage: 'Status',
     }),
@@ -172,9 +172,9 @@ const getSortedItems = (deprecations: EnrichedDeprecationInfo[], sortConfig: Sor
   const { isSortAscending, sortField } = sortConfig;
   const sorted = sortBy(deprecations, [
     (deprecation) => {
-      if (sortField === 'isCritical') {
-        // Critical deprecations should take precendence in ascending order
-        return deprecation.isCritical !== true;
+      if (sortField === 'level') {
+        // Critical deprecations should take precedence in ascending order
+        return deprecation.level === 'critical' ? 0 : 1;
       }
       return deprecation[sortField];
     },
@@ -185,13 +185,13 @@ const getSortedItems = (deprecations: EnrichedDeprecationInfo[], sortConfig: Sor
 
 const statusFilterOptions = [
   {
-    value: true,
+    value: 'critical',
     name: i18n.translate('xpack.upgradeAssistant.esDeprecations.table.filter.critical', {
       defaultMessage: 'Critical',
     }),
   },
   {
-    value: false,
+    value: 'warning',
     name: i18n.translate('xpack.upgradeAssistant.esDeprecations.table.filter.warning', {
       defaultMessage: 'Warning',
     }),
@@ -210,7 +210,7 @@ export const EsDeprecationsTable: React.FunctionComponent<Props> = ({
 
   const [sortConfig, setSortConfig] = useState<SortConfig>({
     isSortAscending: true,
-    sortField: 'isCritical',
+    sortField: 'level',
   });
 
   const [itemsPerPage, setItemsPerPage] = useState(PAGINATION_CONFIG.initialPageSize);
@@ -278,7 +278,7 @@ export const EsDeprecationsTable: React.FunctionComponent<Props> = ({
             filters={[
               {
                 type: 'field_value_selection',
-                field: 'isCritical',
+                field: 'level',
                 name: i18nTexts.statusFilterLabel,
                 multiSelect: false,
                 options: statusFilterOptions,

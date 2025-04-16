@@ -378,7 +378,7 @@ async function tryGettingPipeline({ scopedClusterClient, id }: ReadStreamParams)
   }
 }
 
-async function getDataStream({
+export async function getDataStream({
   name,
   scopedClusterClient,
 }: {

@@ -57,7 +57,9 @@
     "@kbn/core-application-browser",
     "@kbn/field-utils",
     "@kbn/logging",
-    "@kbn/ui-theme"
+    "@kbn/ui-theme",
+    "@kbn/react-hooks",
+    "@kbn/charts-theme"
   ],
   "exclude": [
     "target/**/*"

@@ -81,6 +81,8 @@ enabled:
   - src/platform/test/functional/apps/discover/group6/config.ts
   - src/platform/test/functional/apps/discover/group7/config.ts
   - src/platform/test/functional/apps/discover/group8/config.ts
+  - src/platform/test/functional/apps/discover/group9/config.ts
+  - src/platform/test/functional/apps/discover/group10/config.ts
   - src/platform/test/functional/apps/discover/context_awareness/config.ts
   - src/platform/test/functional/apps/discover/observability/config.ts
   - src/platform/test/functional/apps/getting_started/config.ts

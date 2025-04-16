@@ -43,7 +43,6 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
         `kibana_sample_data_flights`,
         `[Flights] Airport Connections (Hover Over Airport)`,
         `[Flights] Departures Count Map`,
-        `[Flights] Global Flight Dashboard`,
         `[Flights] Origin Time Delayed`,
         `[Flights] Flight Log`,
       ];

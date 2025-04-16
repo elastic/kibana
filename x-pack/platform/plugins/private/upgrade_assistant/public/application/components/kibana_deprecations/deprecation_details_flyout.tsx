@@ -172,7 +172,7 @@ export const DeprecationDetailsFlyout = ({
   return (
     <>
       <EuiFlyoutHeader hasBorder>
-        <DeprecationBadge isCritical={deprecation.level === 'critical'} isResolved={isResolved} />
+        <DeprecationBadge level={deprecation.level} isResolved={isResolved} />
         <EuiSpacer size="s" />
         <EuiTitle size="s" data-test-subj="flyoutTitle">
           <h2 id="kibanaDeprecationDetailsFlyoutTitle" className="eui-textBreakWord">

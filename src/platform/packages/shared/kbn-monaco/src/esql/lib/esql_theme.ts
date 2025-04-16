@@ -94,6 +94,7 @@ export const buildESQLTheme = ({
           'dev_change_point',
           'dev_insist',
           'dev_rrf',
+          'dev_completion',
         ],
         euiThemeVars.euiColorAccentText,
         true // isBold
