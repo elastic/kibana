@@ -56,7 +56,14 @@ export async function getDataStreamTypes({
 
   if (latestEntity) {
     castArray(latestEntity.sourceDataStreamType).forEach((item) => {
-      sourceDataStreams.add(item as EntityDataStreamType);
+      if (
+        item !== null &&
+        [EntityDataStreamType.LOGS, EntityDataStreamType.METRICS].includes(
+          item as EntityDataStreamType
+        )
+      ) {
+        sourceDataStreams.add(item as EntityDataStreamType);
+      }
     });
   }
 
