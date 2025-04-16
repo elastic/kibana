@@ -51,7 +51,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         await samlAuth.invalidateM2mApiKeyWithRoleScope(adminRoleAuthc);
       });
 
-      it('should accept a valid purge policy - duration', async () => {
+      it('should accept a valid purge policy for rolling window based SLI - duration', async () => {
         const response = await sloApi.create(DEFAULT_SLO, adminRoleAuthc);
         expect(response).property('id');
         const id = response.id;
@@ -85,7 +85,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
       });
 
-      it('should reject an invalid purge policy - duration', async () => {
+      it('should reject an invalid purge policy for rolling window based SLI - duration', async () => {
         const response = await sloApi.create(DEFAULT_SLO, adminRoleAuthc);
         expect(response).property('id');
         const id = response.id;
@@ -98,7 +98,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         );
       });
 
-      it('should accept a valid purge policy - timestamp', async () => {
+      it('should accept a valid purge policy for rolling window based SLI - timestamp', async () => {
         const response = await sloApi.create(DEFAULT_SLO, adminRoleAuthc);
         expect(response).property('id');
         const id = response.id;
@@ -129,7 +129,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
       });
 
-      it('should reject an invalid purge policy - timestamp', async () => {
+      it('should reject an invalid purge policy for rolling window based SLI - timestamp', async () => {
         const response = await sloApi.create(DEFAULT_SLO, adminRoleAuthc);
         expect(response).property('id');
         const id = response.id;
@@ -182,7 +182,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         await samlAuth.invalidateM2mApiKeyWithRoleScope(adminRoleAuthc);
       });
 
-      it('should accept a valid purge policy - duration', async () => {
+      it('should accept a valid purge policy for calendar based SLI - duration', async () => {
         const response = await sloApi.create(CALENDAR_SLO, adminRoleAuthc);
         expect(response).property('id');
         const id = response.id;
@@ -216,7 +216,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
       });
 
-      it('should reject an invalid purge policy - duration', async () => {
+      it('should reject an invalid purge policy for calendar based SLI - duration', async () => {
         const response = await sloApi.create(LONG_CALENDAR_SLO, adminRoleAuthc);
         expect(response).property('id');
         const id = response.id;
@@ -229,7 +229,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         );
       });
 
-      it('should accept a valid purge policy - timestamp', async () => {
+      it('should accept a valid purge policy for calendar based SLI - timestamp', async () => {
         const response = await sloApi.create(LONG_CALENDAR_SLO, adminRoleAuthc);
         expect(response).property('id');
         const id = response.id;
@@ -260,7 +260,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
       });
 
-      it('should reject an invalid purge policy - timestamp', async () => {
+      it('should reject an invalid purge policy for calendar based SLI - timestamp', async () => {
         const response = await sloApi.create(CALENDAR_SLO, adminRoleAuthc);
         expect(response).property('id');
         const id = response.id;
@@ -270,6 +270,19 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           { purgeType: 'fixed_time', timestamp: new Date() },
           adminRoleAuthc,
           400
+        );
+      });
+
+      it('should accept an invalid purge policy for calendar based SLI - forced', async () => {
+        const response = await sloApi.create(CALENDAR_SLO, adminRoleAuthc);
+        expect(response).property('id');
+        const id = response.id;
+
+        await sloApi.purgeRollupData(
+          [id],
+          { purgeType: 'fixed_time', timestamp: new Date() },
+          adminRoleAuthc,
+          204
         );
       });
     });

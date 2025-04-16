@@ -163,10 +163,11 @@ export function SloApiProvider({ getService }: DeploymentAgnosticFtrProviderCont
       ids: string[],
       purgePolicy: { purgeType: 'fixed_age' | 'fixed_time'; age?: string; timestamp?: Date },
       roleAuthc: RoleCredentials,
-      expectedStatus: number
+      expectedStatus: number,
+      force: boolean = false
     ) {
       const { body } = await supertestWithoutAuth
-        .post(`/api/observability/slos/_purge_rollup`)
+        .post(`/api/observability/slos/_purge_rollup${force ? '?force=true' : ''}`)
         .set(roleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
         .send({

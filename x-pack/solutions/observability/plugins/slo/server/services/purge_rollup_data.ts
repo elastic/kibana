@@ -10,33 +10,30 @@ import { PurgeRollupSchemaType } from '@kbn/slo-schema/src/rest_specs/routes/bul
 import { DeleteByQueryResponse } from '@elastic/elasticsearch/lib/api/types';
 import moment from 'moment';
 import { SLI_DESTINATION_INDEX_PATTERN } from '../../common/constants';
-import { KibanaSavedObjectsSLORepository } from './slo_repository';
+import { SLORepository } from './slo_repository';
 import { IllegalArgumentError } from '../errors';
 
 export class PurgeRollupData {
-  constructor(
-    private esClient: ElasticsearchClient,
-    private repository: KibanaSavedObjectsSLORepository
-  ) {}
+  constructor(private esClient: ElasticsearchClient, private repository: SLORepository) {}
 
   public async execute(params: PurgeRollupSchemaType): Promise<DeleteByQueryResponse> {
     const { purgeType } = params.body.purgePolicy;
     const slos = await this.repository.findAllByIds(params.body.ids);
 
-    let comparisonStamp: string | Date;
+    let lookback: string | Date;
 
     if (purgeType === 'fixed_age') {
-      const thisComparisonStamp = params.body.purgePolicy.age;
-      comparisonStamp = thisComparisonStamp.format();
+      const thisLookback = params.body.purgePolicy.age;
+      lookback = `now-${thisLookback.format()}`;
       if (params.query?.force !== 'true') {
         if (
           slos.some((slo) => {
             if (slo.timeWindow.type === 'calendarAligned') {
               return moment(Date.now())
-                .subtract(thisComparisonStamp.asSeconds(), 's')
+                .subtract(thisLookback.asSeconds(), 's')
                 .isAfter(moment(Date.now()).startOf(slo.timeWindow.duration.unit));
             } else {
-              return thisComparisonStamp.isShorterThan(slo.timeWindow.duration);
+              return thisLookback.isShorterThan(slo.timeWindow.duration);
             }
           })
         ) {
@@ -46,17 +43,16 @@ export class PurgeRollupData {
         }
       }
     } else {
-      const thisComparisonStamp = params.body.purgePolicy.timestamp;
-      comparisonStamp = thisComparisonStamp;
+      lookback = params.body.purgePolicy.timestamp;
       if (params.query?.force !== 'true') {
         if (
           slos.some((slo) => {
             if (slo.timeWindow.type === 'calendarAligned') {
-              return moment(thisComparisonStamp).isAfter(
+              return moment(lookback).isAfter(
                 moment(Date.now()).startOf(slo.timeWindow.duration.unit)
               );
             } else {
-              return moment(thisComparisonStamp).isAfter(
+              return moment(lookback).isAfter(
                 moment(Date.now()).subtract(slo.timeWindow.duration.asSeconds(), 's')
               );
             }
@@ -84,7 +80,7 @@ export class PurgeRollupData {
             {
               range: {
                 '@timestamp': {
-                  lte: comparisonStamp,
+                  lte: lookback,
                 },
               },
             },
