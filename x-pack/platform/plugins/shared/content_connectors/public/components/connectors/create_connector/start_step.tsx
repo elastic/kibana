@@ -85,7 +85,7 @@ const StartStep: React.FC<StartStepProps> = ({
   const formError = isValidIndexName(rawName)
     ? error
     : i18n.translate(
-        'xpack.searchConnectorscreateConnector.startStep.euiFormRow.nameInputHelpText.lineOne',
+        'xpack.contentConnectors.createConnector.startStep.euiFormRow.nameInputHelpText.lineOne',
         {
           defaultMessage: '{connectorName} is an invalid index name',
           values: {
@@ -108,7 +108,7 @@ const StartStep: React.FC<StartStepProps> = ({
                 <EuiFormRow
                   fullWidth
                   label={i18n.translate(
-                    'xpack.searchConnectorscreateConnector.startStep.euiFormRow.connectorLabel',
+                    'xpack.contentConnectors.createConnector.startStep.euiFormRow.connectorLabel',
                     { defaultMessage: 'Connector' }
                   )}
                 >
@@ -120,7 +120,7 @@ const StartStep: React.FC<StartStepProps> = ({
                   fullWidth
                   isInvalid={!!error}
                   label={i18n.translate(
-                    'xpack.searchConnectorscreateConnector.startStep.euiFormRow.connectorNameLabel',
+                    'xpack.contentConnectors.createConnector.startStep.euiFormRow.connectorNameLabel',
                     { defaultMessage: 'Connector name' }
                   )}
                   helpText={
@@ -168,7 +168,7 @@ const StartStep: React.FC<StartStepProps> = ({
           <EuiPanel hasShadow={false} hasBorder paddingSize="l">
             <EuiTitle size="s">
               <h4>
-                {i18n.translate('xpack.searchConnectorscreateConnector.startStep.h4.setUpLabel', {
+                {i18n.translate('xpack.contentConnectors.createConnector.startStep.h4.setUpLabel', {
                   defaultMessage: 'Setup',
                 })}
               </h4>
@@ -177,7 +177,7 @@ const StartStep: React.FC<StartStepProps> = ({
             <EuiText size="s">
               <p>
                 {i18n.translate(
-                  'xpack.searchConnectorscreateConnector.startStep.p.whereDoYouWantLabel',
+                  'xpack.contentConnectors.createConnector.startStep.p.whereDoYouWantLabel',
                   {
                     defaultMessage: 'Choose how to deploy and manage your connector:',
                   }
@@ -190,7 +190,7 @@ const StartStep: React.FC<StartStepProps> = ({
                 <EuiRadio
                   id={elasticManagedRadioButtonId}
                   label={i18n.translate(
-                    'xpack.searchConnectorscreateConnector.startStep.euiRadio.elasticManagedLabel',
+                    'xpack.contentConnectors.createConnector.startStep.euiRadio.elasticManagedLabel',
                     { defaultMessage: 'Elastic managed' }
                   )}
                   checked={selfManagePreference === 'native'}
@@ -212,7 +212,7 @@ const StartStep: React.FC<StartStepProps> = ({
                 <EuiRadio
                   id={selfManagedRadioButtonId}
                   label={i18n.translate(
-                    'xpack.searchConnectorscreateConnector.startStep.euiRadio.selfManagedLabel',
+                    'xpack.contentConnectors.createConnector.startStep.euiRadio.selfManagedLabel',
                     { defaultMessage: 'Self-managed' }
                   )}
                   checked={selfManagePreference === 'selfManaged'}
@@ -246,7 +246,7 @@ const StartStep: React.FC<StartStepProps> = ({
               >
                 <h3>
                   {i18n.translate(
-                    'xpack.searchConnectorscreateConnector.startStep.h4.deploymentLabel',
+                    'xpack.contentConnectors.createConnector.startStep.h4.deploymentLabel',
                     {
                       defaultMessage: 'Deployment',
                     }
@@ -260,7 +260,7 @@ const StartStep: React.FC<StartStepProps> = ({
               >
                 <p>
                   {i18n.translate(
-                    'xpack.searchConnectorscreateConnector.startStep.p.youWillStartTheLabel',
+                    'xpack.contentConnectors.createConnector.startStep.p.youWillStartTheLabel',
                     {
                       defaultMessage:
                         "We'll automatically configure your index, API key, and connector ID. Alternatively, create these manually and use a custom configuration.",
@@ -307,7 +307,7 @@ const StartStep: React.FC<StartStepProps> = ({
               >
                 <h3>
                   {i18n.translate(
-                    'xpack.searchConnectorscreateConnector.startStep.h4.configureIndexAndAPILabel',
+                    'xpack.contentConnectors.createConnector.startStep.h4.configureIndexAndAPILabel',
                     {
                       defaultMessage: 'Configure index and API key',
                     }
@@ -325,7 +325,7 @@ const StartStep: React.FC<StartStepProps> = ({
               >
                 <p>
                   {i18n.translate(
-                    'xpack.searchConnectorscreateConnector.startStep.p.thisProcessWillCreateLabel',
+                    'xpack.contentConnectors.createConnector.startStep.p.thisProcessWillCreateLabel',
                     {
                       defaultMessage:
                         'This process will create a new index, API key, and a Connector ID. Optionally you can bring your own configuration as well.',

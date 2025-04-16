@@ -32,7 +32,7 @@ const StatusPanel: React.FC<{ ingestionStatus: IngestionStatus }> = ({ ingestion
   <EuiPanel color={ingestionStatusToColor(ingestionStatus)} hasShadow={false} paddingSize="l">
     <EuiStat
       titleSize="s"
-      description={i18n.translate('xpack.searchConnectorsconnector.ingestionStatus.title', {
+      description={i18n.translate('xpack.contentConnectors.connector.ingestionStatus.title', {
         defaultMessage: 'Ingestion status',
       })}
       title={ingestionStatusToText(ingestionStatus)}
@@ -54,7 +54,7 @@ export const ConnectorOverviewPanels: React.FC = () => {
             data-test-subj="entSearchContent-indexOverview-totalStats-documentCount"
             titleSize="s"
             description={i18n.translate(
-              'xpack.searchConnectorscontent.searchIndex.totalStats.documentCountCardLabel',
+              'xpack.contentConnectors.content.searchIndex.totalStats.documentCountCardLabel',
               {
                 defaultMessage: 'Document count',
               }

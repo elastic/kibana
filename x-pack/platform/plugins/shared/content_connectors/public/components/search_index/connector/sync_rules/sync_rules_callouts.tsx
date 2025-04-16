@@ -36,7 +36,7 @@ export const SyncRulesStateCallouts: React.FC<FilteringStatusCalloutsProps> = ({
               </EuiFlexItem>
               <EuiFlexItem>
                 {i18n.translate(
-                  'xpack.searchConnectors.index.connector.syncRules.validatingTitle',
+                  'xpack.contentConnectors.index.connector.syncRules.validatingTitle',
                   {
                     defaultMessage: 'Draft sync rules are validating',
                   }
@@ -48,7 +48,7 @@ export const SyncRulesStateCallouts: React.FC<FilteringStatusCalloutsProps> = ({
           <EuiFlexGroup direction="column">
             <EuiFlexItem>
               {i18n.translate(
-                'xpack.searchConnectorsindex.connector.syncRules.validatingDescription',
+                'xpack.contentConnectors.index.connector.syncRules.validatingDescription',
                 {
                   defaultMessage:
                     'Draft rules need to be validated before they can be activated. This may take a few minutes.',
@@ -64,7 +64,7 @@ export const SyncRulesStateCallouts: React.FC<FilteringStatusCalloutsProps> = ({
                   fill
                 >
                   {i18n.translate(
-                    'xpack.searchConnectorsindex.connector.syncRules.validatingCallout.editDraftRulesTitle',
+                    'xpack.contentConnectors.index.connector.syncRules.validatingCallout.editDraftRulesTitle',
                     {
                       defaultMessage: 'Edit draft rules',
                     }
@@ -80,14 +80,14 @@ export const SyncRulesStateCallouts: React.FC<FilteringStatusCalloutsProps> = ({
         <EuiCallOut
           color="danger"
           iconType="cross"
-          title={i18n.translate('xpack.searchConnectorsindex.connector.syncRules.invalidTitle', {
+          title={i18n.translate('xpack.contentConnectors.index.connector.syncRules.invalidTitle', {
             defaultMessage: 'Draft sync rules are invalid',
           })}
         >
           <EuiFlexGroup direction="column">
             <EuiFlexItem>
               {i18n.translate(
-                'xpack.searchConnectorsindex.connector.syncRules.invalidDescription',
+                'xpack.contentConnectors.index.connector.syncRules.invalidDescription',
                 {
                   defaultMessage:
                     'Draft rules did not validate. Edit the draft rules before they can be activated.',
@@ -103,7 +103,7 @@ export const SyncRulesStateCallouts: React.FC<FilteringStatusCalloutsProps> = ({
                   fill
                 >
                   {i18n.translate(
-                    'xpack.searchConnectorsindex.connector.syncRules.errorCallout.editDraftRulesTitle',
+                    'xpack.contentConnectors.index.connector.syncRules.errorCallout.editDraftRulesTitle',
                     {
                       defaultMessage: 'Edit draft rules',
                     }
@@ -119,14 +119,17 @@ export const SyncRulesStateCallouts: React.FC<FilteringStatusCalloutsProps> = ({
         <EuiCallOut
           color="success"
           iconType="check"
-          title={i18n.translate('xpack.searchConnectorsindex.connector.syncRules.validatedTitle', {
-            defaultMessage: 'Draft sync rules validated',
-          })}
+          title={i18n.translate(
+            'xpack.contentConnectors.index.connector.syncRules.validatedTitle',
+            {
+              defaultMessage: 'Draft sync rules validated',
+            }
+          )}
         >
           <EuiFlexGroup direction="column">
             <EuiFlexItem>
               {i18n.translate(
-                'xpack.searchConnectorsindex.connector.syncRules.validatedDescription',
+                'xpack.contentConnectors.index.connector.syncRules.validatedDescription',
                 {
                   defaultMessage: 'Activate draft rules to take effect on the next sync.',
                 }
@@ -143,7 +146,7 @@ export const SyncRulesStateCallouts: React.FC<FilteringStatusCalloutsProps> = ({
                       fill
                     >
                       {i18n.translate(
-                        'xpack.searchConnectorsindex.connector.syncRules.successCallout.applyDraftRulesTitle',
+                        'xpack.contentConnectors.index.connector.syncRules.successCallout.applyDraftRulesTitle',
                         {
                           defaultMessage: 'Activate draft rules',
                         }
@@ -159,7 +162,7 @@ export const SyncRulesStateCallouts: React.FC<FilteringStatusCalloutsProps> = ({
                       color="success"
                     >
                       {i18n.translate(
-                        'xpack.searchConnectorsindex.connector.syncRules.errorCallout.successEditDraftRulesTitle',
+                        'xpack.contentConnectors.index.connector.syncRules.errorCallout.successEditDraftRulesTitle',
                         {
                           defaultMessage: 'Edit draft rules',
                         }

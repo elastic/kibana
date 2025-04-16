@@ -28,13 +28,13 @@ export const ConvertConnectorModal: React.FC = () => {
       onCancel={() => hideModal()}
       onConfirm={() => convertConnector()}
       title={i18n.translate(
-        'xpack.searchConnectors.searchApplications.searchApplication.indices.convertInfexConfirm.title',
+        'xpack.contentConnectors.searchApplications.searchApplication.indices.convertInfexConfirm.title',
         { defaultMessage: 'Sure you want to convert your connector?' }
       )}
       buttonColor="danger"
       cancelButtonText={CANCEL_BUTTON_LABEL}
       confirmButtonText={i18n.translate(
-        'xpack.searchConnectors.searchApplications.searchApplication.indices.convertIndexConfirm.text',
+        'xpack.contentConnectors.searchApplications.searchApplication.indices.convertIndexConfirm.text',
         {
           defaultMessage: 'Yes',
         }
@@ -46,7 +46,7 @@ export const ConvertConnectorModal: React.FC = () => {
       <EuiText>
         <p>
           {i18n.translate(
-            'xpack.searchConnectors.searchApplications.searchApplication.indices.convertIndexConfirm.description',
+            'xpack.contentConnectors.searchApplications.searchApplication.indices.convertIndexConfirm.description',
             {
               defaultMessage:
                 "Converting an Elastic managed connector to a self-managed connector can't be undone.",

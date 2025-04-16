@@ -99,13 +99,13 @@ export const SearchIndexDocuments: React.FC = () => {
             <EuiCallOut
               size="m"
               title={i18n.translate(
-                'xpack.searchConnectorscontent.searchIndex.documents.noIndex.title',
+                'xpack.contentConnectors.content.searchIndex.documents.noIndex.title',
                 { defaultMessage: 'Access Control Index not found' }
               )}
               iconType="iInCircle"
             >
               <p>
-                {i18n.translate('xpack.searchConnectorscontent.searchIndex.documents.noIndex', {
+                {i18n.translate('xpack.contentConnectors.content.searchIndex.documents.noIndex', {
                   defaultMessage:
                     "An Access Control Index won't be created until you enable document-level security and run your first access control sync.",
                 })}
@@ -114,7 +114,7 @@ export const SearchIndexDocuments: React.FC = () => {
           )}
           {!isAccessControlIndexNotFound &&
             docs.length === 0 &&
-            i18n.translate('xpack.searchConnectorscontent.searchIndex.documents.noMappings', {
+            i18n.translate('xpack.contentConnectors.content.searchIndex.documents.noMappings', {
               defaultMessage: 'No documents found for index',
             })}
           {!isAccessControlIndexNotFound && docs.length > 0 && (

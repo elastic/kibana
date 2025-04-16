@@ -43,7 +43,7 @@ export const ConvertConnector: React.FC = () => {
           <EuiTitle size="s">
             <h3>
               {i18n.translate(
-                'xpack.searchConnectorscontent.indices.configurationConnector.nativeConnector.convertConnector.title',
+                'xpack.contentConnectors.content.indices.configurationConnector.nativeConnector.convertConnector.title',
                 {
                   defaultMessage: 'Self-manage this connector',
                 }
@@ -65,7 +65,7 @@ export const ConvertConnector: React.FC = () => {
                 target="_blank"
               >
                 {i18n.translate(
-                  'xpack.searchConnectorscontent.indices.configurationConnector.nativeConnector.convertConnector.linkTitle',
+                  'xpack.contentConnectors.content.indices.configurationConnector.nativeConnector.convertConnector.linkTitle',
                   { defaultMessage: 'self-managed connector' }
                 )}
               </EuiLink>
@@ -78,7 +78,7 @@ export const ConvertConnector: React.FC = () => {
           onClick={() => showModal()}
         >
           {i18n.translate(
-            'xpack.searchConnectorscontent.indices.configurationConnector.nativeConnector.convertConnector.buttonTitle',
+            'xpack.contentConnectors.content.indices.configurationConnector.nativeConnector.convertConnector.buttonTitle',
             { defaultMessage: 'Convert connector' }
           )}
         </EuiButton>

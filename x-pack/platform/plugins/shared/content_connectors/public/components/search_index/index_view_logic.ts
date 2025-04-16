@@ -183,9 +183,12 @@ export const IndexViewLogic = kea<
       if (values.recheckIndexLoading) {
         actions.resetRecheckIndexLoading();
         flashSuccessToast(
-          i18n.translate('xpack.searchConnectorsContent.searchIndex.index.recheckSuccess.message', {
-            defaultMessage: 'Your connector has been rechecked.',
-          })
+          i18n.translate(
+            'xpack.contentConnectors.content.searchIndex.index.recheckSuccess.message',
+            {
+              defaultMessage: 'Your connector has been rechecked.',
+            }
+          )
         );
       }
     },

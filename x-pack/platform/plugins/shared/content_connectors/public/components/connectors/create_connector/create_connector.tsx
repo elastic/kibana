@@ -86,7 +86,7 @@ const CreateConnector: React.FC = () => {
       {
         children: null,
         status: stepStates.start,
-        title: i18n.translate('xpack.searchConnectorscreateConnector.startStep.startLabel', {
+        title: i18n.translate('xpack.contentConnectors.createConnector.startStep.startLabel', {
           defaultMessage: 'Start',
         }),
       },
@@ -96,7 +96,7 @@ const CreateConnector: React.FC = () => {
               children: null,
               status: stepStates.deployment,
               title: i18n.translate(
-                'xpack.searchConnectorscreateConnector.deploymentStep.deploymentLabel',
+                'xpack.contentConnectors.createConnector.deploymentStep.deploymentLabel',
                 { defaultMessage: 'Deployment' }
               ),
             },
@@ -106,7 +106,7 @@ const CreateConnector: React.FC = () => {
         children: null,
         status: stepStates.configure,
         title: i18n.translate(
-          'xpack.searchConnectorscreateConnector.configurationStep.configurationLabel',
+          'xpack.contentConnectors.createConnector.configurationStep.configurationLabel',
           { defaultMessage: 'Configuration' }
         ),
       },
@@ -114,9 +114,12 @@ const CreateConnector: React.FC = () => {
       {
         children: null,
         status: stepStates.finish,
-        title: i18n.translate('xpack.searchConnectorscreateConnector.finishUpStep.finishUpLabel', {
-          defaultMessage: 'Finish up',
-        }),
+        title: i18n.translate(
+          'xpack.contentConnectors.createConnector.finishUpStep.finishUpLabel',
+          {
+            defaultMessage: 'Finish up',
+          }
+        ),
       },
     ];
   };
@@ -125,7 +128,7 @@ const CreateConnector: React.FC = () => {
     configure: (
       <ConfigurationStep
         title={i18n.translate(
-          'xpack.searchConnectorscreateConnector.configurationStep.configurationLabel',
+          'xpack.contentConnectors.createConnector.configurationStep.configurationLabel',
           { defaultMessage: 'Configuration' }
         )}
         setCurrentStep={setCurrentStep}
@@ -134,15 +137,18 @@ const CreateConnector: React.FC = () => {
     deployment: <DeploymentStep setCurrentStep={setCurrentStep} />,
     finish: (
       <FinishUpStep
-        title={i18n.translate('xpack.searchConnectorscreateConnector.finishUpStep.finishUpLabel', {
-          defaultMessage: 'Finish up',
-        })}
+        title={i18n.translate(
+          'xpack.contentConnectors.createConnector.finishUpStep.finishUpLabel',
+          {
+            defaultMessage: 'Finish up',
+          }
+        )}
       />
     ),
     start: (
       <Suspense fallback={<EuiLoadingSpinner />}>
         <StartStep
-          title={i18n.translate('xpack.searchConnectorscreateConnector.startStep.startLabel', {
+          title={i18n.translate('xpack.contentConnectors.createConnector.startStep.startLabel', {
             defaultMessage: 'Start',
           })}
           selfManagePreference={selfManagePreference}
@@ -157,11 +163,14 @@ const CreateConnector: React.FC = () => {
   };
 
   useUnsavedChangesPrompt({
-    cancelButtonText: i18n.translate('xpack.searchConnectorscreateConnector.unsavedPrompt.cancel', {
-      defaultMessage: 'Continue setup',
-    }),
+    cancelButtonText: i18n.translate(
+      'xpack.contentConnectors.createConnector.unsavedPrompt.cancel',
+      {
+        defaultMessage: 'Continue setup',
+      }
+    ),
     confirmButtonText: i18n.translate(
-      'xpack.searchConnectorscreateConnector.unsavedPrompt.confirm',
+      'xpack.contentConnectors.createConnector.unsavedPrompt.confirm',
       {
         defaultMessage: 'Leave the page',
       }
@@ -169,13 +178,13 @@ const CreateConnector: React.FC = () => {
     hasUnsavedChanges: isFormDirty,
     history: history as ScopedHistory,
     http: http!,
-    messageText: i18n.translate('xpack.searchConnectorscreateConnector.unsavedPrompt.body', {
+    messageText: i18n.translate('xpack.contentConnectors.createConnector.unsavedPrompt.body', {
       defaultMessage:
         'Your connector is created but missing some details. You can complete the setup later in the connector configuration page, but this guided flow offers more help.',
     }),
     navigateToUrl: application!.navigateToUrl,
     openConfirm: overlays?.openConfirm ?? (() => Promise.resolve(false)),
-    titleText: i18n.translate('xpack.searchConnectorscreateConnector.unsavedPrompt.title', {
+    titleText: i18n.translate('xpack.contentConnectors.createConnector.unsavedPrompt.title', {
       defaultMessage: 'Your connector is not fully configured',
     }),
   });
@@ -183,10 +192,10 @@ const CreateConnector: React.FC = () => {
   return (
     <SearchConnectorsPageTemplateWrapper
       pageHeader={{
-        description: i18n.translate('xpack.searchConnectorscreateConnector.description', {
+        description: i18n.translate('xpack.contentConnectors.createConnector.description', {
           defaultMessage: 'Extract, transform, index and sync data from a third-party data source.',
         }),
-        pageTitle: i18n.translate('xpack.searchConnectorscreateConnector..title', {
+        pageTitle: i18n.translate('xpack.contentConnectors.createConnector..title', {
           defaultMessage: 'Create a connector',
         }),
       }}
@@ -233,7 +242,7 @@ const CreateConnector: React.FC = () => {
                       {'Elastic '}
                       {selectedConnector?.name}
                       {i18n.translate(
-                        'xpack.searchConnectorscreateConnector.connectorDocsLinkLabel',
+                        'xpack.contentConnectors.createConnector.connectorDocsLinkLabel',
                         { defaultMessage: ' connector reference' }
                       )}
                     </EuiLink>
@@ -246,7 +255,7 @@ const CreateConnector: React.FC = () => {
               <>
                 <EuiFormRow
                   label={i18n.translate(
-                    'xpack.searchConnectorscreateConnector.euiFormRow.connectorLabel',
+                    'xpack.contentConnectors.createConnector.euiFormRow.connectorLabel',
                     { defaultMessage: 'Connector' }
                   )}
                 >
@@ -276,13 +285,13 @@ const CreateConnector: React.FC = () => {
                 <EuiBadge color="hollow">
                   {selfManagePreference === 'selfManaged'
                     ? i18n.translate(
-                        'xpack.searchConnectorscreateConnector.badgeType.selfManaged',
+                        'xpack.contentConnectors.createConnector.badgeType.selfManaged',
                         {
                           defaultMessage: 'Self-managed',
                         }
                       )
                     : i18n.translate(
-                        'xpack.searchConnectorscreateConnector.badgeType.ElasticManaged',
+                        'xpack.contentConnectors.createConnector.badgeType.ElasticManaged',
                         {
                           defaultMessage: 'Elastic managed',
                         }

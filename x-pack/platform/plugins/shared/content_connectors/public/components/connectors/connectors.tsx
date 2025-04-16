@@ -50,7 +50,7 @@ const CreateConnector = lazy(() => import('./create_connector/create_connector')
 
 export const connectorsBreadcrumbs = [
   {
-    text: i18n.translate('xpack.searchConnectorscontent.connectors.breadcrumb', {
+    text: i18n.translate('xpack.contentConnectors.content.connectors.breadcrumb', {
       defaultMessage: 'Content Connectors',
     }),
   },
@@ -58,7 +58,7 @@ export const connectorsBreadcrumbs = [
 
 export const crawlersBreadcrumbs = [
   {
-    text: i18n.translate('xpack.searchConnectorscontent.crawlers.breadcrumb', {
+    text: i18n.translate('xpack.contentConnectors.content.crawlers.breadcrumb', {
       defaultMessage: 'Web Crawlers',
     }),
   },
@@ -237,7 +237,7 @@ const Connectors: React.FC<ConnectorsProps> = ({ isCrawler, isCrawlerSelfManaged
                   data-test-subj="entSearchContent-searchIndices-defaultSettings"
                   onClick={() => setShowDefaultSettingsFlyout(true)}
                 >
-                  {i18n.translate('xpack.searchConnectorscontent.searchIndices.defaultSettings', {
+                  {i18n.translate('xpack.contentConnectors.content.searchIndices.defaultSettings', {
                     defaultMessage: 'Default settings',
                   })}
                 </EuiButton>,

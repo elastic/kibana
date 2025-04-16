@@ -175,7 +175,7 @@ GET connector-${rawName}/_search
       }}
     >
       {i18n.translate(
-        'xpack.searchConnectorscreateConnector.finishUpStep.manageAttachedIndexContextMenuItemLabel',
+        'xpack.contentConnectors.createConnector.finishUpStep.manageAttachedIndexContextMenuItemLabel',
         { defaultMessage: 'Manual configuration' }
       )}
     </EuiContextMenuItem>,
@@ -197,7 +197,7 @@ GET connector-${rawName}/_search
         sharePlugin={share}
         consolePlugin={console}
         content={i18n.translate(
-          'xpack.searchConnectorscreateConnector.flyoutManualConfigContent.TryInConsoleLabel',
+          'xpack.contentConnectors.createConnector.flyoutManualConfigContent.TryInConsoleLabel',
           {
             defaultMessage: 'Run in Console',
           }
@@ -215,7 +215,7 @@ GET connector-${rawName}/_search
       }}
     >
       {i18n.translate(
-        'xpack.searchConnectorscreateConnector.finishUpStep.scheduleASyncContextMenuItemLabel',
+        'xpack.contentConnectors.createConnector.finishUpStep.scheduleASyncContextMenuItemLabel',
         {
           defaultMessage: 'Try with CLI',
         }
@@ -235,7 +235,7 @@ GET connector-${rawName}/_search
             size="m"
             iconType="boxesVertical"
             aria-label={i18n.translate(
-              'xpack.searchConnectorscreateConnector.finishUpStep.euiButtonIcon.moreLabel',
+              'xpack.contentConnectors.createConnector.finishUpStep.euiButtonIcon.moreLabel',
               { defaultMessage: 'More' }
             )}
             onClick={onButtonClick}

@@ -278,7 +278,7 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({
                     {/* TODO: Are we not getting the real Index health status?  */}
                     <EuiHealth color="success">
                       <EuiText size="s">
-                        {i18n.translate('xpack.searchConnectorscontent.conectors.indexHealth', {
+                        {i18n.translate('xpack.contentConnectors.conectors.indexHealth', {
                           defaultMessage: 'Healthy',
                         })}
                       </EuiText>

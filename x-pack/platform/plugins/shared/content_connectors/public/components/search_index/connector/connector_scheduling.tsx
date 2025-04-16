@@ -89,7 +89,7 @@ export const ConnectorScheduling: React.FC = () => {
       <UnsavedChangesPrompt
         hasUnsavedChanges={hasChanges}
         messageText={i18n.translate(
-          'xpack.searchConnectorscontent.indices.connectorScheduling.unsaved.title',
+          'xpack.contentConnectors.content.indices.connectorScheduling.unsaved.title',
           { defaultMessage: 'You have not saved your changes, are you sure you want to leave?' }
         )}
       />
@@ -100,13 +100,13 @@ export const ConnectorScheduling: React.FC = () => {
             <EuiText size="s">
               <p>
                 <FormattedMessage
-                  id="xpack.searchConnectors.content.indices.connectorScheduling.page.description"
+                  id="xpack.contentConnectors.content.indices.connectorScheduling.page.description"
                   defaultMessage="Your connector is now deployed. Schedule recurring content and access control syncs here. If you want to run a quick test, launch a one-time sync using the {sync} button."
                   values={{
                     sync: (
                       <b>
                         {i18n.translate(
-                          'xpack.searchConnectorscontent.indices.connectorScheduling.page.sync.label',
+                          'xpack.contentConnectors.content.indices.connectorScheduling.page.sync.label',
                           {
                             defaultMessage: 'Sync',
                           }

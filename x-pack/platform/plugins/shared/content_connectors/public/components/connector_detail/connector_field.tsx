@@ -78,13 +78,13 @@ export const ConnectorField: React.FC<ConnectorFieldProps> = ({ connector, field
     <EuiFlexItem grow={false}>
       <Component
         inputAriaLabel={i18n.translate(
-          `xpack.searchConnectorscontent.connectors.nameAndDescription.${field}.ariaLabel`,
+          `xpack.contentConnectors.connectors.nameAndDescription.${field}.ariaLabel`,
           {
             defaultMessage: `Edit connector ${field}`,
           }
         )}
         placeholder={i18n.translate(
-          `xpack.searchConnectorscontent.connectors.nameAndDescription.${field}.placeholder`,
+          `xpack.contentConnectors.connectors.nameAndDescription.${field}.placeholder`,
           {
             defaultMessage: field === 'name' ? 'Add a name to your connector' : 'Add a description',
           }
@@ -100,10 +100,9 @@ export const ConnectorField: React.FC<ConnectorFieldProps> = ({ connector, field
             field === 'name' && !value?.trim()
               ? {
                   error: [
-                    i18n.translate(
-                      'xpack.searchConnectorscontent.nameAndDescription.name.error.empty',
-                      { defaultMessage: 'Connector name cannot be empty' }
-                    ),
+                    i18n.translate('xpack.contentConnectors.nameAndDescription.name.error.empty', {
+                      defaultMessage: 'Connector name cannot be empty',
+                    }),
                   ],
                 }
               : undefined,

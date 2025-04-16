@@ -48,7 +48,7 @@ export const ConnectorNameAndDescription: React.FC = () => {
       <EuiFlexItem>
         <EuiText size="s">
           {i18n.translate(
-            'xpack.searchConnectorscontent.indices.configurationConnector.nameAndDescriptionForm.description',
+            'xpack.contentConnectors.content.indices.configurationConnector.nameAndDescriptionForm.description',
             {
               defaultMessage:
                 'By naming and describing this connector your colleagues and wider team will know what this connector is meant for.',

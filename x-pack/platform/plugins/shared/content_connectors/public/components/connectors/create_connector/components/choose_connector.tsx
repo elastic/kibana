@@ -153,14 +153,14 @@ export const ChooseConnector: React.FC<ChooseConnectorSelectableProps> = ({
     <EuiComboBox
       isDisabled={disabled}
       aria-label={i18n.translate(
-        'xpack.searchConnectorscreateConnector.chooseConnectorSelectable.euiComboBox.accessibleScreenReaderLabelLabel',
+        'xpack.contentConnectors.createConnector.chooseConnectorSelectable.euiComboBox.accessibleScreenReaderLabelLabel',
         { defaultMessage: 'Select a data source for your connector to use.' }
       )}
       prepend={<EuiIcon type={selectedConnector?.iconPath ?? 'plugs'} size="l" />}
       singleSelection
       fullWidth
       placeholder={i18n.translate(
-        'xpack.searchConnectorscreateConnector.chooseConnectorSelectable.placeholder.text',
+        'xpack.contentConnectors.createConnector.chooseConnectorSelectable.placeholder.text',
         { defaultMessage: 'Choose a data source' }
       )}
       options={selectableOptions}

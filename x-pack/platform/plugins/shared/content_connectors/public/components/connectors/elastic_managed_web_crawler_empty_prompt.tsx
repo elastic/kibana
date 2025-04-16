@@ -26,13 +26,13 @@ export const ElasticManagedWebCrawlerEmptyPrompt: React.FC = () => {
         onClickBack: () => application?.navigateToUrl(CRAWLERS_PATH),
       }}
       icon="web"
-      title={i18n.translate('xpack.searchConnectorselasticManagedWebCrawlerEmpty.title', {
+      title={i18n.translate('xpack.contentConnectors.elasticManagedWebCrawlerEmpty.title', {
         defaultMessage: 'Elastic managed web crawlers',
       })}
       isComingSoon
       comingSoonLabel={COMING_SOON_LABEL}
       description={i18n.translate(
-        'xpack.searchConnectorselasticManagedWebCrawlerEmpty.description',
+        'xpack.contentConnectors.elasticManagedWebCrawlerEmpty.description',
         {
           defaultMessage:
             "We're actively developing Elastic managed web crawlers, that won't require any self-managed infrastructure. You'll be able to handle all configuration in the UI. This will simplify syncing your data into a serverless Elasticsearch project. This new workflow will have two steps:",
@@ -69,7 +69,7 @@ export const ElasticManagedWebCrawlerEmptyPrompt: React.FC = () => {
                       <EuiText>
                         <p>
                           {i18n.translate(
-                            'xpack.searchConnectorselasticManagedWebCrawlerEmpty.guideOneDescription',
+                            'xpack.contentConnectors.elasticManagedWebCrawlerEmpty.guideOneDescription',
                             {
                               defaultMessage: 'Set one or more domain URLs you want to crawl',
                             }
@@ -100,7 +100,7 @@ export const ElasticManagedWebCrawlerEmptyPrompt: React.FC = () => {
                       <EuiText>
                         <p>
                           {i18n.translate(
-                            'xpack.searchConnectorselasticManagedWebCrawlerEmpty.guideThreeDescription',
+                            'xpack.contentConnectors.elasticManagedWebCrawlerEmpty.guideThreeDescription',
                             {
                               defaultMessage: 'Configure all the web crawler process using Kibana',
                             }

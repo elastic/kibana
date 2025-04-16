@@ -7,10 +7,10 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const TECH_PREVIEW_LABEL: string = i18n.translate('xpack.serverlessSearch.techPreview', {
+export const TECH_PREVIEW_LABEL: string = i18n.translate('xpack.contentConnectors.techPreview', {
   defaultMessage: 'Tech preview',
 });
 
-export const BETA_LABEL: string = i18n.translate('xpack.serverlessSearch.beta', {
+export const BETA_LABEL: string = i18n.translate('xpack.contentConnectors.beta', {
   defaultMessage: 'Beta',
 });

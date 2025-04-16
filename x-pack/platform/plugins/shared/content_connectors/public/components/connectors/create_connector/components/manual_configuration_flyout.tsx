@@ -41,14 +41,14 @@ import { NewConnectorLogic } from '../../../new_index/method_connector/new_conne
 import { SelfManagePreference } from '../create_connector';
 
 const CLI_LABEL = i18n.translate(
-  'xpack.searchConnectorscreateConnector.manualConfiguration.cliLabel',
+  'xpack.contentConnectors.createConnector.manualConfiguration.cliLabel',
   {
     defaultMessage: 'Command-line interface',
   }
 );
 
 const CLI_LINK_TEXT = i18n.translate(
-  'xpack.searchConnectorscreateConnector.manualConfiguration.cliLinkText',
+  'xpack.contentConnectors.createConnector.manualConfiguration.cliLinkText',
   {
     defaultMessage: 'Connectors CLI',
   }
@@ -94,7 +94,7 @@ export const ManualConfigurationFlyout: React.FC<ManualConfigurationFlyoutProps>
             <EuiTitle size="m">
               <h2 id={simpleFlyoutTitleId}>
                 {i18n.translate(
-                  'xpack.searchConnectorscreateConnector.manualConfiguration.h2.cliLabel',
+                  'xpack.contentConnectors.createConnector.manualConfiguration.h2.cliLabel',
                   {
                     defaultMessage: 'Manual configuration',
                   }
@@ -105,13 +105,13 @@ export const ManualConfigurationFlyout: React.FC<ManualConfigurationFlyoutProps>
             <EuiText color="subdued" size="s">
               <p>
                 <FormattedMessage
-                  id="xpack.searchConnectors.createConnector.flyoutManualConfigContent.p.thisManualOptionIsLabel"
+                  id="xpack.contentConnectors..createConnector.flyoutManualConfigContent.p.thisManualOptionIsLabel"
                   defaultMessage="This manual option enables you to use an existing index and/or API key. It's an alternative to the automated {generateConfig} process."
                   values={{
                     generateConfig: (
                       <b>
                         {i18n.translate(
-                          'xpack.searchConnectorscreateConnector.manualConfiguration.generateConfigLinkLabel',
+                          'xpack.contentConnectors.createConnector.manualConfiguration.generateConfigLinkLabel',
                           {
                             defaultMessage: 'Generate configuration',
                           }
@@ -129,7 +129,7 @@ export const ManualConfigurationFlyout: React.FC<ManualConfigurationFlyoutProps>
                 <EuiTitle size="s">
                   <h3>
                     {i18n.translate(
-                      'xpack.searchConnectorscreateConnector.manualConfiguration.connectorName',
+                      'xpack.contentConnectors.createConnector.manualConfiguration.connectorName',
                       {
                         defaultMessage: 'Connector',
                       }
@@ -140,7 +140,7 @@ export const ManualConfigurationFlyout: React.FC<ManualConfigurationFlyoutProps>
                 <EuiFormRow
                   fullWidth
                   label={i18n.translate(
-                    'xpack.searchConnectorscreateConnector.startStep.euiFormRow.connectorNameLabel',
+                    'xpack.contentConnectors.createConnector.startStep.euiFormRow.connectorNameLabel',
                     { defaultMessage: 'Connector name' }
                   )}
                 >
@@ -158,7 +158,7 @@ export const ManualConfigurationFlyout: React.FC<ManualConfigurationFlyoutProps>
                 <EuiText size="xs">
                   <p>
                     {i18n.translate(
-                      'xpack.searchConnectorscreateConnector.manualConfiguration.p.connectorNameDescription',
+                      'xpack.contentConnectors.createConnector.manualConfiguration.p.connectorNameDescription',
                       {
                         defaultMessage:
                           "You'll be redirected to the connector page to complete your configuration.",
@@ -179,7 +179,7 @@ export const ManualConfigurationFlyout: React.FC<ManualConfigurationFlyoutProps>
                   flush="left"
                 >
                   {i18n.translate(
-                    'xpack.searchConnectorscreateConnector.flyoutManualConfigContent.closeButtonEmptyLabel',
+                    'xpack.contentConnectors.createConnector.flyoutManualConfigContent.closeButtonEmptyLabel',
                     { defaultMessage: 'Close' }
                   )}
                 </EuiButtonEmpty>
@@ -197,7 +197,7 @@ export const ManualConfigurationFlyout: React.FC<ManualConfigurationFlyoutProps>
                   fill
                 >
                   {i18n.translate(
-                    'xpack.searchConnectorscreateConnector.flyoutManualConfigContent.saveConfigurationButtonLabel',
+                    'xpack.contentConnectors.createConnector.flyoutManualConfigContent.saveConfigurationButtonLabel',
                     { defaultMessage: 'Save configuration' }
                   )}
                 </EuiButton>
@@ -217,7 +217,7 @@ export const ManualConfigurationFlyout: React.FC<ManualConfigurationFlyoutProps>
             <EuiText size="s">
               <p>
                 <FormattedMessage
-                  id="xpack.searchConnectors.createConnector.manualConfiguration.p.youCanAlsoUseLabel"
+                  id="xpack.contentConnectors.createConnector.manualConfiguration.p.youCanAlsoUseLabel"
                   defaultMessage="You can also use the {cliLink} to create and manage connectors. The following command creates a new connector using the {myIndex} index. Configuration is defined in your {configFile} file."
                   values={{
                     cliLink: (

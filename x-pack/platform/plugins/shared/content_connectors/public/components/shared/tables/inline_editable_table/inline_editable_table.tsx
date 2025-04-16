@@ -142,7 +142,7 @@ export const InlineEditableTableContents = <Item extends ItemWithAnID>({
             data-test-subj="inlineEditableTableActionButton"
           >
             {addButtonText ||
-              i18n.translate('xpack.searchConnectorsinlineEditableTable.newRowButtonLabel', {
+              i18n.translate('xpack.contentConnectors.inlineEditableTable.newRowButtonLabel', {
                 defaultMessage: 'New row',
               })}
           </EuiButton>,

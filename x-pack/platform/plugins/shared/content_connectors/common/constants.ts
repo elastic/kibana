@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { SEARCH_ELASTICSEARCH } from '@kbn/deeplinks-search';
 import { i18n } from '@kbn/i18n';
 import type { IngestPipelineParams } from '@kbn/search-connectors';
 import dedent from 'dedent';
@@ -53,14 +52,14 @@ export const CREATE_CONNECTOR_PLUGIN = {
 };
 
 export const ELASTICSEARCH_PLUGIN = {
-  ID: SEARCH_ELASTICSEARCH,
-  NAME: i18n.translate('xpack.searchConnectorselasticsearch.productName', {
-    defaultMessage: 'Elasticsearch',
+  ID: PLUGIN_ID,
+  NAME: i18n.translate('xpack.contentConnectors.productName', {
+    defaultMessage: 'Content connectors',
   }),
-  DESCRIPTION: i18n.translate('xpack.searchConnectorselasticsearch.productDescription', {
+  DESCRIPTION: i18n.translate('xpack.contentConnectors.productDescription', {
     defaultMessage: 'Low-level tools for creating performant and relevant search experiences.',
   }),
-  URL: '/app/elasticsearch/elasticsearch',
+  URL: '/app/management/data/search_connectors/connectors',
   SUPPORT_URL: 'https://discuss.elastic.co/c/elastic-stack/elasticsearch/',
 };
 

@@ -37,7 +37,7 @@ export const AdvancedSyncRules: React.FC = () => {
     <>
       <EuiFormRow
         label={i18n.translate(
-          'xpack.searchConnectorscontent.indices.connector.syncRules.advancedRules.title',
+          'xpack.contentConnectors.content.indices.connector.syncRules.advancedRules.title',
           {
             defaultMessage: 'Advanced rules',
           }
@@ -46,7 +46,7 @@ export const AdvancedSyncRules: React.FC = () => {
         error={
           hasError
             ? i18n.translate(
-                'xpack.searchConnectorscontent.indices.connector.syncRules.advancedRules.error',
+                'xpack.contentConnectors.content.indices.connector.syncRules.advancedRules.error',
                 {
                   defaultMessage: 'JSON format is invalid',
                 }
@@ -75,14 +75,14 @@ export const AdvancedSyncRules: React.FC = () => {
       {(!isAdvancedSnippetEmpty || !isLocalSnippetEmpty) && (
         <EuiCallOut
           title={i18n.translate(
-            'xpack.searchConnectorscontent.index.connector.syncRules.advancedTabCallout.title',
+            'xpack.contentConnectors.content.index.connector.syncRules.advancedTabCallout.title',
             { defaultMessage: 'Configuration warning' }
           )}
           color="warning"
         >
           <p>
             <FormattedMessage
-              id="xpack.searchConnectors.editSyncRulesFlyout.advancedTablCallout.description"
+              id="xpack.contentConnectors..editSyncRulesFlyout.advancedTablCallout.description"
               defaultMessage="This advanced sync rule might override some configuration fields."
             />
           </p>

@@ -68,7 +68,7 @@ export const ConnectorDetailOverview: React.FC = () => {
                 </EuiFlexItem>
                 <EuiFlexItem>
                   {i18n.translate(
-                    'xpack.searchConnectors.content.connectors.overview.agentlessDeploymentNotReadyCallOut.title',
+                    'xpack.contentConnectors.content.connectors.overview.agentlessDeploymentNotReadyCallOut.title',
                     {
                       defaultMessage: 'Provisioning infrastructure',
                     }
@@ -80,7 +80,7 @@ export const ConnectorDetailOverview: React.FC = () => {
             <EuiSpacer size="s" />
             <EuiText size="s">
               {i18n.translate(
-                'xpack.searchConnectors.content.connectors.overview.agentlessDeploymentNotReadyCallOut.description',
+                'xpack.contentConnectors.content.connectors.overview.agentlessDeploymentNotReadyCallOut.description',
                 {
                   defaultMessage: 'Setting up the agentless infrastructure to run the connector.',
                 }
@@ -96,7 +96,7 @@ export const ConnectorDetailOverview: React.FC = () => {
             iconType="warning"
             color="danger"
             title={i18n.translate(
-              'xpack.searchConnectors.content.connectors.overview.connectorErrorCallOut.title',
+              'xpack.contentConnectors.content.connectors.overview.connectorErrorCallOut.title',
               {
                 defaultMessage: 'Your connector has reported an error',
               }
@@ -114,7 +114,7 @@ export const ConnectorDetailOverview: React.FC = () => {
             iconType="iInCircle"
             color="warning"
             title={i18n.translate(
-              'xpack.searchConnectors.content.connectors.overview.connectorNoIndexCallOut.title',
+              'xpack.contentConnectors.content.connectors.overview.connectorNoIndexCallOut.title',
               {
                 defaultMessage: 'Connector has no attached index',
               }
@@ -123,7 +123,7 @@ export const ConnectorDetailOverview: React.FC = () => {
             <EuiSpacer size="s" />
             <EuiText size="s">
               {i18n.translate(
-                'xpack.searchConnectors.content.connectors.overview.connectorNoIndexCallOut.description',
+                'xpack.contentConnectors.content.connectors.overview.connectorNoIndexCallOut.description',
                 {
                   defaultMessage:
                     "You won't be able to start syncing content until your connector is attached to an index.",
@@ -140,7 +140,7 @@ export const ConnectorDetailOverview: React.FC = () => {
               })}#attachIndexBox`}
             >
               {i18n.translate(
-                'xpack.searchConnectors.content.connectors.overview.connectorNoIndexCallOut.buttonLabel',
+                'xpack.contentConnectors.content.connectors.overview.connectorNoIndexCallOut.buttonLabel',
                 {
                   defaultMessage: 'Attach index',
                 }
@@ -155,7 +155,7 @@ export const ConnectorDetailOverview: React.FC = () => {
           <EuiCallOut
             iconType="iInCircle"
             title={i18n.translate(
-              'xpack.searchConnectors.content.connectors.overview.connectorIndexDoesntExistCallOut.title',
+              'xpack.contentConnectors.content.connectors.overview.connectorIndexDoesntExistCallOut.title',
               {
                 defaultMessage: "Attached index doesn't exist",
               }
@@ -164,7 +164,7 @@ export const ConnectorDetailOverview: React.FC = () => {
             <EuiSpacer size="s" />
             <EuiText size="s">
               <FormattedMessage
-                id="xpack.searchConnectors.content.connectors.overview.connectorIndexDoesntExistCallOut.description"
+                id="xpack.contentConnectors.content.connectors.overview.connectorIndexDoesntExistCallOut.description"
                 defaultMessage="The connector will create the index on its next sync, or you can manually create the index {indexName} with your desired settings and mappings."
                 values={{
                   indexName: <EuiCode>{connector.index_name}</EuiCode>,

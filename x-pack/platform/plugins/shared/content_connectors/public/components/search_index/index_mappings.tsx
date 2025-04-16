@@ -88,16 +88,19 @@ export const SearchIndexIndexMappings: React.FC = () => {
                 <EuiCallOut
                   size="m"
                   title={i18n.translate(
-                    'xpack.searchConnectors.content.searchIndex.mappings.noIndex.title',
+                    'xpack.contentConnectors.content.searchIndex.mappings.noIndex.title',
                     { defaultMessage: 'Access Control Index not found' }
                   )}
                   iconType="iInCircle"
                 >
                   <p>
-                    {i18n.translate('xpack.searchConnectors.content.searchIndex.mappings.noIndex', {
-                      defaultMessage:
-                        "An Access Control Index won't be created until you enable document-level security and run your first access control sync.",
-                    })}
+                    {i18n.translate(
+                      'xpack.contentConnectors.content.searchIndex.mappings.noIndex',
+                      {
+                        defaultMessage:
+                          "An Access Control Index won't be created until you enable document-level security and run your first access control sync.",
+                      }
+                    )}
                   </p>
                 </EuiCallOut>
               ) : (
@@ -117,7 +120,7 @@ export const SearchIndexIndexMappings: React.FC = () => {
                       color="danger"
                       iconType="warn"
                       title={i18n.translate(
-                        'xpack.searchConnectors.content.searchIndex.mappings.noMappingsComponent',
+                        'xpack.contentConnectors.content.searchIndex.mappings.noMappingsComponent',
                         { defaultMessage: 'Mappings component not found' }
                       )}
                     />
@@ -136,7 +139,7 @@ export const SearchIndexIndexMappings: React.FC = () => {
               <EuiFlexItem>
                 <EuiTitle size="xs">
                   <h3>
-                    {i18n.translate('xpack.searchConnectors.content.searchIndex.mappings.title', {
+                    {i18n.translate('xpack.contentConnectors.content.searchIndex.mappings.title', {
                       defaultMessage: 'About index mappings',
                     })}
                   </h3>
@@ -147,7 +150,7 @@ export const SearchIndexIndexMappings: React.FC = () => {
             <EuiText size="s">
               <p>
                 <FormattedMessage
-                  id="xpack.searchConnectors.content.searchIndex.mappings.description"
+                  id="xpack.contentConnectors.content.searchIndex.mappings.description"
                   defaultMessage="Your documents are made up of a set of fields. Index mappings give each field a type (such as {keyword}, {number}, or {date}) and additional subfields. By default, search optimized mappings are used which can be customized as needed to best fit your search use case."
                   values={{
                     date: <EuiCode>date</EuiCode>,
@@ -164,7 +167,7 @@ export const SearchIndexIndexMappings: React.FC = () => {
               target="_blank"
               external
             >
-              {i18n.translate('xpack.searchConnectors.content.searchIndex.mappings.docLink', {
+              {i18n.translate('xpack.contentConnectors.content.searchIndex.mappings.docLink', {
                 defaultMessage: 'Learn how to customize index mappings and settings',
               })}
             </EuiLink>
@@ -178,7 +181,7 @@ export const SearchIndexIndexMappings: React.FC = () => {
               <EuiFlexItem>
                 <EuiTitle size="xs">
                   <h3>
-                    {i18n.translate('xpack.searchConnectors.content.searchIndex.transform.title', {
+                    {i18n.translate('xpack.contentConnectors.content.searchIndex.transform.title', {
                       defaultMessage: 'Transform your searchable content',
                     })}
                   </h3>
@@ -190,7 +193,7 @@ export const SearchIndexIndexMappings: React.FC = () => {
             <EuiText size="s">
               <p>
                 <FormattedMessage
-                  id="xpack.searchConnectors.content.searchIndex.transform.description"
+                  id="xpack.contentConnectors.content.searchIndex.transform.description"
                   defaultMessage="Want to add custom fields, or use trained ML models to analyze and enrich your indexed documents? Use index-specific ingest pipelines to customize documents to your needs."
                 />
               </p>
@@ -202,7 +205,7 @@ export const SearchIndexIndexMappings: React.FC = () => {
               target="_blank"
               external
             >
-              {i18n.translate('xpack.searchConnectors.content.searchIndex.transform.docLink', {
+              {i18n.translate('xpack.contentConnectors.content.searchIndex.transform.docLink', {
                 defaultMessage: 'Learn more',
               })}
             </EuiLink>

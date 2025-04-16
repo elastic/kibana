@@ -25,10 +25,10 @@ export const SelfManagedWebCrawlerEmptyPrompt: React.FC = () => {
   return (
     <SearchEmptyPrompt
       icon="web"
-      title={i18n.translate('xpack.searchConnectorswebCrawlersEmpty.title', {
+      title={i18n.translate('xpack.contentConnectors.webCrawlersEmpty.title', {
         defaultMessage: 'Set up a web crawler',
       })}
-      description={i18n.translate('xpack.searchConnectorswebCrawlersEmpty.description', {
+      description={i18n.translate('xpack.contentConnectors.webCrawlersEmpty.description', {
         defaultMessage:
           "To set up and deploy a web crawler you'll be working between data source, your terminal, and the Kibana UI. The high level process looks like this:",
       })}
@@ -67,7 +67,7 @@ export const SelfManagedWebCrawlerEmptyPrompt: React.FC = () => {
                       <EuiText>
                         <p>
                           <FormattedMessage
-                            id="xpack.searchConnectors.webCrawlersEmpty.guideTwoDescription"
+                            id="xpack.contentConnectors..webCrawlersEmpty.guideTwoDescription"
                             defaultMessage="Deploy web crawler code on your own infrastructure by running from {source}, or using {docker}"
                             values={{
                               source: (
@@ -77,7 +77,7 @@ export const SelfManagedWebCrawlerEmptyPrompt: React.FC = () => {
                                   href={'https://github.com/elastic/crawler'}
                                 >
                                   {i18n.translate(
-                                    'xpack.searchConnectorswebCrawlersEmpty.sourceLabel',
+                                    'xpack.contentConnectors.webCrawlersEmpty.sourceLabel',
                                     { defaultMessage: 'source' }
                                   )}
                                 </EuiLink>
@@ -91,7 +91,7 @@ export const SelfManagedWebCrawlerEmptyPrompt: React.FC = () => {
                                   }
                                 >
                                   {i18n.translate(
-                                    'xpack.searchConnectorswebCrawlersEmpty.dockerLabel',
+                                    'xpack.contentConnectors.webCrawlersEmpty.dockerLabel',
                                     { defaultMessage: 'Docker' }
                                   )}
                                 </EuiLink>
@@ -121,7 +121,7 @@ export const SelfManagedWebCrawlerEmptyPrompt: React.FC = () => {
                       <EuiText>
                         <p>
                           {i18n.translate(
-                            'xpack.searchConnectorswebCrawlersEmpty.guideOneDescription',
+                            'xpack.contentConnectors.webCrawlersEmpty.guideOneDescription',
                             {
                               defaultMessage: 'Set one or more domain URLs you want to crawl',
                             }
@@ -162,7 +162,7 @@ export const SelfManagedWebCrawlerEmptyPrompt: React.FC = () => {
                       <EuiText>
                         <p>
                           {i18n.translate(
-                            'xpack.searchConnectorswebCrawlersEmpty.guideThreeDescription',
+                            'xpack.contentConnectors.webCrawlersEmpty.guideThreeDescription',
                             {
                               defaultMessage:
                                 'Configure your web crawler and connect it to Elasticsearch',
@@ -188,7 +188,7 @@ export const SelfManagedWebCrawlerEmptyPrompt: React.FC = () => {
               href={'https://github.com/elastic/crawler'}
               target="_blank"
             >
-              {i18n.translate('xpack.searchConnectorswebCrawlersEmpty.selfManagedButton', {
+              {i18n.translate('xpack.contentConnectors.webCrawlersEmpty.selfManagedButton', {
                 defaultMessage: 'Self-managed web crawler',
               })}
             </EuiButton>

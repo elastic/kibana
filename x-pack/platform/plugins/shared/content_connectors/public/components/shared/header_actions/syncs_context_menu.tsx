@@ -60,16 +60,19 @@ export const SyncsContextMenu: React.FC<SyncsContextMenuProps> = ({ disabled = f
 
   const getSyncButtonText = () => {
     if (isWaitingForSync) {
-      return i18n.translate('xpack.searchConnectorscontent.index.syncButton.waitingForSync.label', {
-        defaultMessage: 'Waiting for sync',
-      });
+      return i18n.translate(
+        'xpack.contentConnectors.content.index.syncButton.waitingForSync.label',
+        {
+          defaultMessage: 'Waiting for sync',
+        }
+      );
     }
     if (isSyncing && connector?.status !== ConnectorStatus.ERROR) {
-      return i18n.translate('xpack.searchConnectorscontent.index.syncButton.syncing.label', {
+      return i18n.translate('xpack.contentConnectors.content.index.syncButton.syncing.label', {
         defaultMessage: 'Syncing',
       });
     }
-    return i18n.translate('xpack.searchConnectorscontent.index.syncButton.label', {
+    return i18n.translate('xpack.contentConnectors.content.index.syncButton.label', {
       defaultMessage: 'Sync',
     });
   };
@@ -99,7 +102,7 @@ export const SyncsContextMenu: React.FC<SyncsContextMenuProps> = ({ disabled = f
                 'data-test-subj': `entSearchContent-connector-header-sync-startSync`,
                 disabled: isSyncsDisabled,
                 icon: 'play',
-                name: i18n.translate('xpack.searchConnectorsindex.header.more.fullSync', {
+                name: i18n.translate('xpack.contentConnectors.index.header.more.fullSync', {
                   defaultMessage: 'Full Content',
                 }),
                 onClick: () => {
@@ -116,7 +119,7 @@ export const SyncsContextMenu: React.FC<SyncsContextMenuProps> = ({ disabled = f
                 'data-test-subj': `entSearchContent-connector-header-sync-more-incrementalSync`,
                 disabled: isSyncsDisabled,
                 icon: 'play',
-                name: i18n.translate('xpack.searchConnectorsindex.header.more.incrementalSync', {
+                name: i18n.translate('xpack.contentConnectors.index.header.more.incrementalSync', {
                   defaultMessage: 'Incremental Content',
                 }),
                 onClick: () => {
@@ -136,9 +139,12 @@ export const SyncsContextMenu: React.FC<SyncsContextMenuProps> = ({ disabled = f
                   isSyncsDisabled || !connector?.configuration.use_document_level_security?.value
                 ),
                 icon: 'play',
-                name: i18n.translate('xpack.searchConnectorsindex.header.more.accessControlSync', {
-                  defaultMessage: 'Access Control',
-                }),
+                name: i18n.translate(
+                  'xpack.contentConnectors.index.header.more.accessControlSync',
+                  {
+                    defaultMessage: 'Access Control',
+                  }
+                ),
                 onClick: () => {
                   closePopover();
                   startAccessControlSync(connector);
@@ -155,7 +161,7 @@ export const SyncsContextMenu: React.FC<SyncsContextMenuProps> = ({ disabled = f
           name: (
             <EuiText color="danger" size="s">
               <p>
-                {i18n.translate('xpack.searchConnectorsindex.header.cancelSyncsTitle', {
+                {i18n.translate('xpack.contentConnectors.index.header.cancelSyncsTitle', {
                   defaultMessage: 'Cancel Syncs',
                 })}
               </p>

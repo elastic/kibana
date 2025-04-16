@@ -31,7 +31,7 @@ export const ConnectorSyncRulesForm: FC<PropsWithChildren<unknown>> = ({ childre
       <UnsavedChangesPrompt
         hasUnsavedChanges={isEditing}
         messageText={i18n.translate(
-          'xpack.searchConnectorsindex.connector.syncRules.unsavedChanges',
+          'xpack.contentConnectors.index.connector.syncRules.unsavedChanges',
           {
             defaultMessage: 'Your changes have not been saved. Are you sure you want to leave?',
           }
@@ -51,7 +51,7 @@ export const ConnectorSyncRulesForm: FC<PropsWithChildren<unknown>> = ({ childre
                 }}
               >
                 {i18n.translate(
-                  'xpack.searchConnectorsindex.connector.syncRules.cancelEditingFilteringDraft',
+                  'xpack.contentConnectors.index.connector.syncRules.cancelEditingFilteringDraft',
                   {
                     defaultMessage: 'Cancel',
                   }
@@ -67,7 +67,7 @@ export const ConnectorSyncRulesForm: FC<PropsWithChildren<unknown>> = ({ childre
               onClick={saveDraftFilteringRules}
             >
               {i18n.translate(
-                'xpack.searchConnectorsindex.connector.syncRules.validateDraftTitle',
+                'xpack.contentConnectors.index.connector.syncRules.validateDraftTitle',
                 {
                   defaultMessage: 'Save and validate draft',
                 }

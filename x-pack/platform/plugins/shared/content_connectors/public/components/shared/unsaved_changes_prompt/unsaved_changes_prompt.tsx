@@ -10,9 +10,12 @@ import { Prompt } from 'react-router-dom';
 
 import { i18n } from '@kbn/i18n';
 
-const DEFAULT_MESSAGE_TEXT = i18n.translate('xpack.searchConnectorsshared.unsavedChangesMessage', {
-  defaultMessage: 'Your changes have not been saved. Are you sure you want to leave?',
-});
+const DEFAULT_MESSAGE_TEXT = i18n.translate(
+  'xpack.contentConnectors.shared.unsavedChangesMessage',
+  {
+    defaultMessage: 'Your changes have not been saved. Are you sure you want to leave?',
+  }
+);
 interface Props {
   hasUnsavedChanges: boolean;
   messageText?: string;

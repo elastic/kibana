@@ -82,12 +82,9 @@ export const ConnectorDetail: React.FC = () => {
       content: <ConnectorDetailOverview />,
       id: ConnectorDetailTabId.OVERVIEW,
       isSelected: tabId === ConnectorDetailTabId.OVERVIEW,
-      label: i18n.translate(
-        'xpack.searchConnectorscontent.connectors.connectorDetail.overviewTabLabel',
-        {
-          defaultMessage: 'Overview',
-        }
-      ),
+      label: i18n.translate('xpack.contentConnectors.connectors.connectorDetail.overviewTabLabel', {
+        defaultMessage: 'Overview',
+      }),
       onClick: () => {
         application?.navigateToUrl(
           `${generateEncodedPath(
@@ -106,7 +103,7 @@ export const ConnectorDetail: React.FC = () => {
       id: ConnectorDetailTabId.DOCUMENTS,
       isSelected: tabId === ConnectorDetailTabId.DOCUMENTS,
       label: i18n.translate(
-        'xpack.searchConnectorscontent.connectors.connectorDetail.documentsTabLabel',
+        'xpack.contentConnectors.connectors.connectorDetail.documentsTabLabel',
         {
           defaultMessage: 'Documents',
         }
@@ -129,7 +126,7 @@ export const ConnectorDetail: React.FC = () => {
       id: ConnectorDetailTabId.INDEX_MAPPINGS,
       isSelected: tabId === ConnectorDetailTabId.INDEX_MAPPINGS,
       label: i18n.translate(
-        'xpack.searchConnectorscontent.connectors.connectorDetail.indexMappingsTabLabel',
+        'xpack.contentConnectors.connectors.connectorDetail.indexMappingsTabLabel',
         {
           defaultMessage: 'Mappings',
         }
@@ -156,7 +153,7 @@ export const ConnectorDetail: React.FC = () => {
             id: ConnectorDetailTabId.SYNC_RULES,
             isSelected: tabId === ConnectorDetailTabId.SYNC_RULES,
             label: i18n.translate(
-              'xpack.searchConnectorscontent.connectors.connectorDetail.syncRulesTabLabel',
+              'xpack.contentConnectors.connectors.connectorDetail.syncRulesTabLabel',
               {
                 defaultMessage: 'Sync rules',
               }
@@ -180,7 +177,7 @@ export const ConnectorDetail: React.FC = () => {
       id: ConnectorDetailTabId.SCHEDULING,
       isSelected: tabId === ConnectorDetailTabId.SCHEDULING,
       label: i18n.translate(
-        'xpack.searchConnectorscontent.connectors.connectorDetail.schedulingTabLabel',
+        'xpack.contentConnectors.connectors.connectorDetail.schedulingTabLabel',
         {
           defaultMessage: 'Scheduling',
         }
@@ -204,7 +201,7 @@ export const ConnectorDetail: React.FC = () => {
       id: ConnectorDetailTabId.CONFIGURATION,
       isSelected: tabId === ConnectorDetailTabId.CONFIGURATION,
       label: i18n.translate(
-        'xpack.searchConnectorscontent.connectors.connectorDetail.configurationTabLabel',
+        'xpack.contentConnectors.connectors.connectorDetail.configurationTabLabel',
         {
           defaultMessage: 'Configuration',
         }
@@ -228,7 +225,7 @@ export const ConnectorDetail: React.FC = () => {
     id: ConnectorDetailTabId.PIPELINES,
     isSelected: tabId === ConnectorDetailTabId.PIPELINES,
     label: i18n.translate(
-      'xpack.searchConnectorscontent.connectors.connectorDetail.pipelinesTabLabel',
+      'xpack.contentConnectors.connectors.connectorDetail.pipelinesTabLabel',
       {
         defaultMessage: 'Pipelines',
       }

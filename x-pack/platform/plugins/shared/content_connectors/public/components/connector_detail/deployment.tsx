@@ -109,7 +109,7 @@ export const ConnectorDeployment: React.FC = () => {
             <EuiTitle size="s">
               <h3>
                 {i18n.translate(
-                  'xpack.searchConnectorscontent.connector_detail.configurationConnector.DeploymentTitle',
+                  'xpack.contentConnectors.connector_detail.configurationConnector.DeploymentTitle',
                   {
                     defaultMessage: 'Deployment',
                   }
@@ -128,7 +128,7 @@ export const ConnectorDeployment: React.FC = () => {
                   ),
                   status: selectedDeploymentMethod === null ? 'incomplete' : 'complete',
                   title: i18n.translate(
-                    'xpack.searchConnectorscontent.connector_detail.configurationConnector.steps.chooseDeployment.title',
+                    'xpack.contentConnectors.connector_detail.configurationConnector.steps.chooseDeployment.title',
                     {
                       defaultMessage: 'Choose your deployment method',
                     }
@@ -141,13 +141,13 @@ export const ConnectorDeployment: React.FC = () => {
                       <EuiSpacer size="s" />
                       <EuiText size="s">
                         <FormattedMessage
-                          id="xpack.searchConnectors.content.connector_detail.configurationConnector.steps.configureIndexAndApiKey.description.source"
+                          id="xpack.contentConnectors.content.connector_detail.configurationConnector.steps.configureIndexAndApiKey.description.source"
                           defaultMessage="We automatically generate a connector configuration, an API key, and create a new Elasticsearch index. Connector information and API key will be added to the {configYaml} file of your connector. You can also use an existing API key."
                           values={{
                             configYaml: (
                               <EuiCode>
                                 {i18n.translate(
-                                  'xpack.searchConnectorsconnectorConfiguration.configymlCodeBlockLabel',
+                                  'xpack.contentConnectors.connectorConfiguration.configymlCodeBlockLabel',
                                   { defaultMessage: 'config.yml' }
                                 )}
                               </EuiCode>
@@ -183,7 +183,7 @@ export const ConnectorDeployment: React.FC = () => {
                   ),
                   status: hasApiKey ? 'complete' : 'incomplete',
                   title: i18n.translate(
-                    'xpack.searchConnectorscontent.connector_detail.configurationConnector.steps.generateApiKey.title',
+                    'xpack.contentConnectors.connector_detail.configurationConnector.steps.generateApiKey.title',
                     {
                       defaultMessage: 'Create index and generate API key',
                     }
@@ -219,7 +219,7 @@ export const ConnectorDeployment: React.FC = () => {
                       ? 'incomplete'
                       : 'complete',
                   title: i18n.translate(
-                    'xpack.searchConnectorscontent.connector_detail.configurationConnector.steps.runConnector.title',
+                    'xpack.contentConnectors.connector_detail.configurationConnector.steps.runConnector.title',
                     {
                       defaultMessage: 'Run connector service',
                     }
@@ -238,7 +238,7 @@ export const ConnectorDeployment: React.FC = () => {
                   ),
                   status: isWaitingForConnector ? 'loading' : 'complete',
                   title: i18n.translate(
-                    'xpack.searchConnectorscontent.connector_detail.configurationConnector.steps.waitingForConnector.title',
+                    'xpack.contentConnectors.connector_detail.configurationConnector.steps.waitingForConnector.title',
                     {
                       defaultMessage: 'Waiting for your connector to check in',
                     }

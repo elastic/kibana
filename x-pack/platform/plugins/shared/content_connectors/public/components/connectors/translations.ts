@@ -8,83 +8,92 @@
 import { i18n } from '@kbn/i18n';
 
 export const MANAGE_BUTTON_LABEL = i18n.translate(
-  'xpack.searchConnectorsactions.manageButtonLabel',
+  'xpack.contentConnectors.actions.manageButtonLabel',
   { defaultMessage: 'Manage' }
 );
 
-export const EDIT_BUTTON_LABEL = i18n.translate('xpack.searchConnectorsactions.editButtonLabel', {
+export const EDIT_BUTTON_LABEL = i18n.translate('xpack.contentConnectors.actions.editButtonLabel', {
   defaultMessage: 'Edit',
 });
 
 export const DELETE_BUTTON_LABEL = i18n.translate(
-  'xpack.searchConnectorsactions.deleteButtonLabel',
+  'xpack.contentConnectors.actions.deleteButtonLabel',
   { defaultMessage: 'Delete' }
 );
 
-export const COMING_SOON_LABEL = i18n.translate('xpack.searchConnectorscomingSoonLabel', {
+export const COMING_SOON_LABEL = i18n.translate('xpack.contentConnectors.comingSoonLabel', {
   defaultMessage: 'Coming soon',
 });
 
-export const LEARN_MORE_LINK = i18n.translate('xpack.searchConnectorslearnMore.link', {
+export const LEARN_MORE_LINK = i18n.translate('xpack.contentConnectors.learnMore.link', {
   defaultMessage: 'Learn more',
 });
 
 export const UPDATE_BUTTON_LABEL = i18n.translate(
-  'xpack.searchConnectorsactions.updateButtonLabel',
+  'xpack.contentConnectors.actions.updateButtonLabel',
   { defaultMessage: 'Update' }
 );
 
-export const SAVE_BUTTON_LABEL = i18n.translate('xpack.searchConnectorsactions.saveButtonLabel', {
+export const SAVE_BUTTON_LABEL = i18n.translate('xpack.contentConnectors.actions.saveButtonLabel', {
   defaultMessage: 'Save',
 });
 
 export const CANCEL_BUTTON_LABEL = i18n.translate(
-  'xpack.searchConnectorsactions.cancelButtonLabel',
+  'xpack.contentConnectors.actions.cancelButtonLabel',
   { defaultMessage: 'Cancel' }
 );
 
-export const START_BUTTON_LABEL = i18n.translate('xpack.searchConnectorsactions.startButtonLabel', {
-  defaultMessage: 'Start',
-});
+export const START_BUTTON_LABEL = i18n.translate(
+  'xpack.contentConnectors.actions.startButtonLabel',
+  {
+    defaultMessage: 'Start',
+  }
+);
 
 export const CONTINUE_BUTTON_LABEL = i18n.translate(
-  'xpack.searchConnectorsactions.continueButtonLabel',
+  'xpack.contentConnectors.actions.continueButtonLabel',
   { defaultMessage: 'Continue' }
 );
 
-export const BACK_BUTTON_LABEL = i18n.translate('xpack.searchConnectorsactions.backButtonLabel', {
+export const BACK_BUTTON_LABEL = i18n.translate('xpack.contentConnectors.actions.backButtonLabel', {
   defaultMessage: 'Back',
 });
 
-export const NEXT_BUTTON_LABEL = i18n.translate('xpack.searchConnectorsactions.nextButtonLabel', {
+export const NEXT_BUTTON_LABEL = i18n.translate('xpack.contentConnectors.actions.nextButtonLabel', {
   defaultMessage: 'Next',
 });
 
-export const CLOSE_BUTTON_LABEL = i18n.translate('xpack.searchConnectorsactions.closeButtonLabel', {
-  defaultMessage: 'Close',
-});
+export const CLOSE_BUTTON_LABEL = i18n.translate(
+  'xpack.contentConnectors.actions.closeButtonLabel',
+  {
+    defaultMessage: 'Close',
+  }
+);
 
 export const RESET_DEFAULT_BUTTON_LABEL = i18n.translate(
-  'xpack.searchConnectorsactions.resetDefaultButtonLabel',
+  'xpack.contentConnectors.actions.resetDefaultButtonLabel',
   { defaultMessage: 'Reset to default' }
 );
 
-export const VIEW_BUTTON_LABEL = i18n.translate('xpack.searchConnectorsactions.viewButtonLabel', {
+export const VIEW_BUTTON_LABEL = i18n.translate('xpack.contentConnectors.actions.viewButtonLabel', {
   defaultMessage: 'View',
 });
 
-export const CONNECTOR_CLIENT_LABEL = i18n.translate('xpack.searchConnectorsconnectorClientLabel', {
-  defaultMessage: 'Self-managed',
-});
+export const CONNECTOR_CLIENT_LABEL = i18n.translate(
+  'xpack.contentConnectors.connectorClientLabel',
+  {
+    defaultMessage: 'Self-managed',
+  }
+);
 
-export const NAME_LABEL = i18n.translate('xpack.searchConnectorsnameLabel', {
+export const NAME_LABEL = i18n.translate('xpack.contentConnectors.nameLabel', {
   defaultMessage: 'Name',
 });
 
-export const DESCRIPTION_LABEL = i18n.translate('xpack.searchConnectorsdescriptionLabel', {
+export const DESCRIPTION_LABEL = i18n.translate('xpack.contentConnectors.descriptionLabel', {
   defaultMessage: 'Description',
 });
 
-export const OPTIONAL_LABEL = i18n.translate('xpack.searchConnectorsoptionalLabel', {
+export const OPTIONAL_LABEL = i18n.translate('xpack.contentConnectors.optionalLabel', {
   defaultMessage: 'Optional',
 });

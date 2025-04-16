@@ -30,7 +30,7 @@ export const NativeConnectorAdvancedConfiguration: React.FC = () => {
       <EuiFlexItem>
         <EuiText size="s">
           <FormattedMessage
-            id="xpack.searchConnectors.content.indices.configurationConnector.nativeConnectorAdvancedConfiguration.description"
+            id="xpack.contentConnectors.content.indices.configurationConnector.nativeConnectorAdvancedConfiguration.description"
             defaultMessage="Finalize your connector by triggering a one time sync, or setting a recurring sync schedule."
           />
         </EuiText>
@@ -47,7 +47,7 @@ export const NativeConnectorAdvancedConfiguration: React.FC = () => {
               })}`}
             >
               {i18n.translate(
-                'xpack.searchConnectorscontent.indices.configurationConnector.nativeConnectorAdvancedConfiguration.schedulingButtonLabel',
+                'xpack.contentConnectorscontent.indices.configurationConnector.nativeConnectorAdvancedConfiguration.schedulingButtonLabel',
                 {
                   defaultMessage: 'Set schedule and sync',
                 }

@@ -87,10 +87,10 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({ isCrawler }) => 
                 <EuiTitle size="xxxs">
                   <h4>
                     {!isCrawler
-                      ? i18n.translate('xpack.searchConnectorstats.h4.connectorSummaryLabel', {
+                      ? i18n.translate('xpack.contentConnectors.stats.h4.connectorSummaryLabel', {
                           defaultMessage: 'Connector summary',
                         })
-                      : i18n.translate('xpack.searchConnectorstats.h4.crawlerSummaryLabel', {
+                      : i18n.translate('xpack.contentConnectors.stats.h4.crawlerSummaryLabel', {
                           defaultMessage: 'Web crawler summary',
                         })}
                   </h4>
@@ -100,20 +100,20 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({ isCrawler }) => 
                 <EuiText>
                   {!isCrawler
                     ? hasMultipleConnectors
-                      ? i18n.translate('xpack.searchConnectorstats.multipleConnectorsText', {
+                      ? i18n.translate('xpack.contentConnectors.stats.multipleConnectorsText', {
                           defaultMessage: '{count} connectors',
                           values: { count: connectorCount },
                         })
-                      : i18n.translate('xpack.searchConnectorstats.singleConnectorText', {
+                      : i18n.translate('xpack.contentConnectors.stats.singleConnectorText', {
                           defaultMessage: '{count} connector',
                           values: { count: connectorCount },
                         })
                     : hasMultipleConnectors
-                    ? i18n.translate('xpack.searchConnectorstats.multipleCrawlersText', {
+                    ? i18n.translate('xpack.contentConnectors.stats.multipleCrawlersText', {
                         defaultMessage: '{count} web crawlers',
                         values: { count: connectorCount },
                       })
-                    : i18n.translate('xpack.searchConnectorstats.singleCrawlerText', {
+                    : i18n.translate('xpack.contentConnectors.stats.singleCrawlerText', {
                         defaultMessage: '{count} web crawler',
                         values: { count: connectorCount },
                       })}
@@ -158,7 +158,7 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({ isCrawler }) => 
               <EuiFlexItem>
                 <EuiTitle size="xxxs">
                   <h4>
-                    {i18n.translate('xpack.searchConnectorstats.h4.syncsStatusLabel', {
+                    {i18n.translate('xpack.contentConnectors.stats.h4.syncsStatusLabel', {
                       defaultMessage: 'Syncs status',
                     })}
                   </h4>

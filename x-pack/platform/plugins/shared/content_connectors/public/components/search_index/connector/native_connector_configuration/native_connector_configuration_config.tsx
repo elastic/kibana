@@ -74,7 +74,7 @@ export const NativeConnectorConfigurationConfig: React.FC<
               target="_blank"
             >
               {i18n.translate(
-                'xpack.searchConnectorscontent.indices.configurationConnector.nativeConnector.config.sourceSecurityDocumentationLinkLabel',
+                'xpack.contentConnectors.content.indices.configurationConnector.nativeConnector.config.sourceSecurityDocumentationLinkLabel',
                 {
                   defaultMessage: '{name} authentication',
                   values: {
@@ -92,14 +92,14 @@ export const NativeConnectorConfigurationConfig: React.FC<
           <EuiSpacer size="l" />
           <EuiCallOut
             title={i18n.translate(
-              'xpack.searchConnectorscontent.connector_detail.configurationConnector.connectorPackage.advancedRulesCallout',
+              'xpack.contentConnectors.content.connector_detail.configurationConnector.connectorPackage.advancedRulesCallout',
               { defaultMessage: 'Configuration warning' }
             )}
             iconType="iInCircle"
             color="warning"
           >
             <FormattedMessage
-              id="xpack.searchConnectors.content.connector_detail.configurationConnector.connectorPackage.advancedRulesCallout.description"
+              id="xpack.contentConnectors..content.connector_detail.configurationConnector.connectorPackage.advancedRulesCallout.description"
               defaultMessage="{advancedSyncRulesDocs} can override some configuration fields."
               values={{
                 advancedSyncRulesDocs: (
@@ -110,7 +110,7 @@ export const NativeConnectorConfigurationConfig: React.FC<
                     target="_blank"
                   >
                     {i18n.translate(
-                      'xpack.searchConnectorscontent.connector_detail.configurationConnector.connectorPackage.advancedSyncRulesDocs',
+                      'xpack.contentConnectors.content.connector_detail.configurationConnector.connectorPackage.advancedSyncRulesDocs',
                       { defaultMessage: 'Advanced Sync Rules' }
                     )}
                   </EuiLink>
