@@ -7,17 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ESQLAst } from '@kbn/esql-ast';
 import type { ESQLCallbacks } from './types';
 import type { ESQLRealField } from '../validation/types';
 import { enrichFieldsWithECSInfo } from '../autocomplete/utils/ecs_metadata_helper';
 
 export const NOT_SUGGESTED_TYPES = ['unsupported'];
-
-export function buildQueryUntilPreviousCommand(ast: ESQLAst, queryString: string) {
-  const prevCommand = ast[Math.max(ast.length - 2, 0)];
-  return prevCommand ? queryString.substring(0, prevCommand.location.max + 1) : queryString;
-}
 
 export function getFieldsByTypeHelper(queryText: string, resourceRetriever?: ESQLCallbacks) {
   const cacheFields = new Map<string, ESQLRealField>();

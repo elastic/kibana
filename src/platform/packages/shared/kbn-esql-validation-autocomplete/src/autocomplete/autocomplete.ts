@@ -55,7 +55,6 @@ import {
 import { EDITOR_MARKER, FULL_TEXT_SEARCH_FUNCTIONS } from '../shared/constants';
 import { getAstContext } from '../shared/context';
 import {
-  buildQueryUntilPreviousCommand,
   getFieldsByTypeHelper,
   getPolicyHelper,
   getSourcesHelper,
@@ -102,10 +101,7 @@ export async function suggest(
   }
 
   // build the correct query to fetch the list of fields
-  const queryForFields = getQueryForFields(
-    buildQueryUntilPreviousCommand(ast, correctedQuery),
-    ast
-  );
+  const queryForFields = getQueryForFields(correctedQuery, ast);
 
   const { getFieldsByType, getFieldsMap } = getFieldsByTypeRetriever(
     queryForFields.replace(EDITOR_MARKER, ''),

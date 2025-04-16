@@ -25,7 +25,6 @@ import {
   getQueryForFields,
   getValidSignaturesAndTypesToSuggestNext,
 } from '@kbn/esql-validation-autocomplete/src/autocomplete/helper';
-import { buildQueryUntilPreviousCommand } from '@kbn/esql-validation-autocomplete/src/shared/resources_helpers';
 import { getFieldsByTypeRetriever } from '@kbn/esql-validation-autocomplete/src/autocomplete/autocomplete';
 import {
   TIME_SYSTEM_DESCRIPTIONS,
@@ -66,10 +65,7 @@ async function getHoverItemForFunction(
   const commands = ast;
 
   if (isESQLFunction(node) && astContext.type === 'function') {
-    const queryForFields = getQueryForFields(
-      buildQueryUntilPreviousCommand(ast, correctedQuery),
-      ast
-    );
+    const queryForFields = getQueryForFields(correctedQuery, ast);
     const { getFieldsMap } = getFieldsByTypeRetriever(queryForFields, resourceRetriever, innerText);
 
     const fnDefinition = getFunctionDefinition(node.name);
