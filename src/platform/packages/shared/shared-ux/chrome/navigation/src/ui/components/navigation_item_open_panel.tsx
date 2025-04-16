@@ -10,7 +10,7 @@
 import React, { useCallback, type FC } from 'react';
 import classNames from 'classnames';
 import { css } from '@emotion/react';
-import { transparentize, EuiButton } from '@elastic/eui';
+import { EuiButton } from '@elastic/eui';
 import type { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
 import { SubItemTitle } from './subitem_title';
 import { isActiveFromUrl } from '../../utils';
@@ -62,33 +62,23 @@ export const NavigationItemOpenPanel: FC<Props> = ({ item, activeNodes }: Props)
       iconType="arrowRight"
       size="s"
       fullWidth
-      css={({ euiTheme }) => css`
-        background-color: ${isActive
-          ? transparentize(euiTheme.colors.lightShade, 0.5)
-          : 'transparent'};
-        transform: none !important; /* don't translateY 1px */
-        color: inherit;
-        font-weight: inherit;
-        padding-inline: ${euiTheme.size.s};
-        & > span {
-          justify-content: flex-start;
-          position: relative;
-        }
-        ${!withBadge
-          ? `
-    & .euiIcon {
-      position: absolute;
-      right: 0;
-      top: 0;
-      transform: translateY(50%);
-    }
-  `
-          : `
-    & .euiBetaBadge {
-      margin-left: -${euiTheme.size.m};
-    }
-    `}
-      `}
+      css={({ euiTheme }) =>
+        css`
+          &:hover {
+            background-color: ${isActive
+              ? euiTheme.colors.backgroundLightPrimary
+              : euiTheme.colors.backgroundBaseInteractiveHover};
+          }
+          background-color: ${
+            isActive
+            ? euiTheme.colors.backgroundLightPrimary
+            : 'transparent' /* prettier-ignore */
+          };
+          color: inherit;
+          font-weight: inherit;
+          padding-inline: calc(${euiTheme.size.xs} * 1.5);
+        `
+      }
       data-test-subj={dataTestSubj}
     >
       {withBadge ? <SubItemTitle item={item} /> : title}

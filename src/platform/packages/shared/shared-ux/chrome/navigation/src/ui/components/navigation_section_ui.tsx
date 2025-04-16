@@ -429,6 +429,18 @@ function nodeToEuiCollapsibleNavProps(
       path,
       isSelected,
       onClick,
+      css: ({ euiTheme }) => css`
+        &:hover {
+          background-color: ${isSelected
+            ? euiTheme.colors.backgroundLightPrimary
+            : euiTheme.colors.backgroundBaseInteractiveHover};
+        }
+        background-color: ${
+          isSelected
+            ? euiTheme.colors.backgroundLightPrimary
+            : 'transparent' /* prettier-ignore */
+        };
+      `,
       icon: navNode.icon,
       // @ts-expect-error title accepts JSX elements and they render correctly but the type definition expects a string
       title: navNode.withBadge ? <SubItemTitle item={navNode} /> : navNode.title,

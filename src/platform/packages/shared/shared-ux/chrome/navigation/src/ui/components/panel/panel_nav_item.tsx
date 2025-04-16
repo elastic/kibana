@@ -9,9 +9,8 @@
 
 import React, { FC, useCallback } from 'react';
 import type { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
-import { EuiListGroupItem, transparentize, useEuiTheme } from '@elastic/eui';
-import classNames from 'classnames';
-import { css } from '@emotion/css';
+import { EuiListGroupItem } from '@elastic/eui';
+import { css } from '@emotion/react';
 
 import { useNavigation as useServices } from '../../../services';
 import { SubItemTitle } from '../subitem_title';
@@ -27,7 +26,6 @@ export const PanelNavItem: FC<Props> = ({ item }) => {
   const { id, icon, deepLink, openInNewTab, isExternalLink, renderItem } = item;
 
   const href = deepLink?.url ?? item.href;
-  const { euiTheme } = useEuiTheme();
 
   const onClick = useCallback<React.MouseEventHandler>(
     (e) => {
@@ -47,17 +45,18 @@ export const PanelNavItem: FC<Props> = ({ item }) => {
       key={id}
       label={<SubItemTitle item={item} />}
       wrapText
-      className={classNames(
-        'sideNavPanelLink',
-        css`
-          &.sideNavPanelLink:hover {
-            background-color: ${transparentize(euiTheme.colors.lightShade, 0.5)};
-          }
-          & svg[class*='EuiExternalLinkIcon'] {
-            margin-left: auto;
-          }
-        `
-      )}
+      css={({ euiTheme }) => css`
+        background-color: ${euiTheme.colors.backgroundBaseSubdued};
+        &:focus-within {
+          background-color: transparent;
+        }
+        &:hover {
+          background-color: ${euiTheme.colors.backgroundBaseInteractiveHover};
+        }
+        & svg[class*='EuiExternalLinkIcon'] {
+          margin-left: auto;
+        }
+      `}
       size="s"
       data-test-subj={`panelNavItem panelNavItem-id-${item.id}`}
       href={href}
