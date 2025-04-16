@@ -161,7 +161,7 @@ describe('useSearchBreadcrumbs', () => {
     expect(useSearchBreadcrumbs(breadcrumbs)).toEqual([
       {
         text: 'Elasticsearch',
-        href: '/app/elasticsearch/home',
+        href: '/app/elasticsearch/overview',
         onClick: expect.any(Function),
       },
       {
@@ -204,7 +204,7 @@ describe('useEnterpriseSearchBreadcrumbs', () => {
     expect(useEnterpriseSearchBreadcrumbs(breadcrumbs)).toEqual([
       {
         text: 'Enterprise Search',
-        href: '/app/elasticsearch/home',
+        href: '/app/elasticsearch/overview',
         onClick: expect.any(Function),
       },
       {

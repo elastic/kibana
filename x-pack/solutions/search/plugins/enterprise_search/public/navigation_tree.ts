@@ -85,7 +85,7 @@ export const getNavigationTreeDefinition = ({
                 {
                   getIsActive: ({ pathNameSerialized, prepend }) => {
                     return (
-                      pathNameSerialized.startsWith(prepend('/app/elasticsearch/home')) ||
+                      pathNameSerialized.startsWith(prepend('/app/elasticsearch/overview')) ||
                       pathNameSerialized.startsWith(prepend('/app/elasticsearch/start'))
                     );
                   },

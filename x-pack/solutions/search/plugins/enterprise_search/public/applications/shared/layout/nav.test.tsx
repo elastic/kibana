@@ -24,7 +24,7 @@ import {
 const baseNavItems = [
   expect.objectContaining({
     'data-test-subj': 'searchSideNav-Home',
-    href: '/app/elasticsearch/home',
+    href: '/app/elasticsearch/overview',
     id: 'home',
     items: undefined,
   }),
@@ -131,7 +131,7 @@ const baseNavItems = [
 const mockNavLinks = [
   {
     id: 'enterpriseSearch',
-    url: '/app/elasticsearch/home',
+    url: '/app/elasticsearch/overview',
   },
   {
     id: 'elasticsearchIndexManagement',
