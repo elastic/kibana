@@ -8,17 +8,12 @@
 import type { StoryObj } from '@storybook/react';
 import type { ComponentType } from 'react';
 import React, { useState } from 'react';
-import type { CoreStart } from '@kbn/core/public';
-import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
+import { MockApmPluginStorybook } from '../../../../context/apm_plugin/mock_apm_plugin_storybook';
 import type { TransactionDurationRuleParams } from '.';
 import { TransactionDurationRuleType } from '.';
 import { AggregationType } from '../../../../../common/rules/apm_rule_types';
 import type { AlertMetadata } from '../../utils/helper';
 import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
-
-const KibanaReactContext = createKibanaReactContext({
-  notifications: { toasts: { add: () => {} } },
-} as unknown as Partial<CoreStart>);
 
 interface Args {
   ruleParams: TransactionDurationRuleParams;
@@ -31,11 +26,11 @@ export default {
   decorators: [
     (StoryComponent: ComponentType) => {
       return (
-        <KibanaReactContext.Provider>
+        <MockApmPluginStorybook>
           <div style={{ width: 400 }}>
             <StoryComponent />
           </div>
-        </KibanaReactContext.Provider>
+        </MockApmPluginStorybook>
       );
     },
   ],
