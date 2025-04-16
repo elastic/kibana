@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { WorkflowRunner } from '@kbn/wc-framework-types-server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
@@ -28,8 +29,17 @@ export interface WorkChatFrameworkPluginSetup {
 /**
  * Start contract for the workchatFramework plugin.
  */
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface WorkChatFrameworkPluginStart {}
+export interface WorkChatFrameworkPluginStart {
+  /**
+   * APIs to interact with workflow execution
+   */
+  workflows: {
+    /**
+     * Execute a workflow and return the result.
+     */
+    run: WorkflowRunner['run'];
+  };
+}
 
 export interface WorkChatFrameworkPluginSetupDependencies {
   features: FeaturesPluginSetup;

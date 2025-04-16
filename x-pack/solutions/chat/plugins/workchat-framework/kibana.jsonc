@@ -9,7 +9,7 @@
     "id": "workchatFramework",
     "server": true,
     "browser": true,
-    "configPath": ["xpack", "workchatApp"],
+    "configPath": ["xpack", "workchatFramework"],
     "requiredPlugins": ["inference", "actions", "features"],
     "optionalPlugins": [],
     "requiredBundles": []

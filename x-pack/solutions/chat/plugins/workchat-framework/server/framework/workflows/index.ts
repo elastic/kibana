@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export { type WorkflowRegistry, createWorkflowRegistry } from './registry';
+export { createWorkflowRegistry, type WorkflowRegistry } from './registry';
+export { createWorkflowRunner, type CreateWorkflowRunnerParams } from './workflow_runner';

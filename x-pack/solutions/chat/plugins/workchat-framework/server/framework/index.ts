@@ -5,6 +5,10 @@
  * 2.0.
  */
 
-export type { InternalServices } from './types';
-export { createServices, setupServices, type SetupServices } from './create_services';
+export {
+  createStartServices,
+  createSetupServices,
+  type InternalSetupServices,
+  type InternalStartServices,
+} from './create_services';
 export { createWorkflowRegistry, type WorkflowRegistry } from './workflows';

@@ -12,8 +12,12 @@ import type {
   PluginInitializerContext,
   LoggerFactory,
 } from '@kbn/core/server';
-import type { InternalServices } from './framework/types';
-import { createServices, setupServices, type SetupServices } from './framework';
+import {
+  createStartServices,
+  createSetupServices,
+  type InternalSetupServices,
+  type InternalStartServices,
+} from './framework';
 import type { WorkChatFrameworkConfig } from './config';
 import type {
   WorkChatFrameworkPluginSetup,
@@ -34,8 +38,8 @@ export class WorkChatAppPlugin
   private readonly logger: LoggerFactory;
   private readonly config: WorkChatFrameworkConfig;
 
-  private servicesSetup?: SetupServices;
-  private services?: InternalServices;
+  private setupServices?: InternalSetupServices;
+  private startServices?: InternalStartServices;
 
   constructor(context: PluginInitializerContext) {
     this.logger = context.logger;
@@ -46,12 +50,12 @@ export class WorkChatAppPlugin
     core: CoreSetup<WorkChatFrameworkPluginStartDependencies>,
     setupDeps: WorkChatFrameworkPluginSetupDependencies
   ): WorkChatFrameworkPluginSetup {
-    this.servicesSetup = setupServices();
+    this.setupServices = createSetupServices();
 
     return {
       workflows: {
         register: (definition) => {
-          return this.servicesSetup!.workflowRegistry.register(definition);
+          return this.setupServices!.workflowRegistry.register(definition);
         },
       },
     };
@@ -61,13 +65,20 @@ export class WorkChatAppPlugin
     core: CoreStart,
     pluginsDependencies: WorkChatFrameworkPluginStartDependencies
   ): WorkChatFrameworkPluginStart {
-    this.services = createServices({
+    this.startServices = createStartServices({
       core,
       config: this.config,
       logger: this.logger,
       pluginsDependencies,
+      setupServices: this.setupServices!,
     });
 
-    return {};
+    return {
+      workflows: {
+        run: (args) => {
+          return this.startServices!.workflowRunner.run(args);
+        },
+      },
+    };
   }
 }

@@ -56,8 +56,6 @@ export interface RunWorkflowOutput<Output = Record<string, unknown>> {
   output: Output;
 }
 
-// TODO: structured errors thrown containing runId too...
-
 export interface WorkflowRunner<Input = Record<string, unknown>, Output = Record<string, unknown>> {
   run(options: RunWorkflowParams<Input>): Promise<RunWorkflowOutput<Output>>;
 }

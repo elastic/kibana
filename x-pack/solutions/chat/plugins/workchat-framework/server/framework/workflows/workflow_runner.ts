@@ -22,16 +22,16 @@ import {
 } from './scoped_runner';
 import { createInitialExecutionState } from './utils';
 
-export interface GetWorkflowRunnerParams {
+export interface CreateWorkflowRunnerParams {
   logger: Logger;
+  core: CoreStart;
   workflowRegistry: WorkflowRegistry;
   nodeRegistry: NodeTypeRegistry;
   modelProviderFactory: ModelProviderFactory;
   toolRegistry: ToolRegistry;
-  core: CoreStart;
 }
 
-export const getWorkflowRunner = (params: GetWorkflowRunnerParams): WorkflowRunner => {
+export const createWorkflowRunner = (params: CreateWorkflowRunnerParams): WorkflowRunner => {
   const {
     workflowRegistry,
     nodeRegistry,
