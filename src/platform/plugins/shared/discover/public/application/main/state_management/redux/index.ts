@@ -52,6 +52,7 @@ export {
   CurrentTabProvider,
   useCurrentTabSelector,
   useCurrentTabAction,
+  useCurrentTabLensEmbeddableOverride,
   useDataViewsForPicker,
 } from './hooks';
 

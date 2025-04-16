@@ -17,6 +17,7 @@ import type {
   EmbeddableComponentProps,
   LensEmbeddableInput,
   LensEmbeddableOutput,
+  LensPublicStart,
 } from '@kbn/lens-plugin/public';
 import type {
   Datatable,
@@ -89,8 +90,9 @@ export interface ChartProps {
   onChartLoad?: (event: UnifiedHistogramChartLoadEvent) => void;
   onFilter?: LensEmbeddableInput['onFilter'];
   onBrushEnd?: LensEmbeddableInput['onBrushEnd'];
-  withDefaultActions: EmbeddableComponentProps['withDefaultActions'];
+  withDefaultActions?: EmbeddableComponentProps['withDefaultActions'];
   columns?: DatatableColumn[];
+  LensEmbeddableOverride?: LensPublicStart['EmbeddableComponent'];
 }
 
 const HistogramMemoized = memo(Histogram);
@@ -110,8 +112,6 @@ export function Chart({
   isPlainRecord,
   renderCustomChartToggleActions,
   appendHistogram,
-  disableTriggers,
-  disabledActions,
   input$: originalInput$,
   lensAdapters,
   dataLoading$,
@@ -121,11 +121,8 @@ export function Chart({
   onBreakdownFieldChange,
   onTotalHitsChange,
   onChartLoad,
-  onFilter,
-  onBrushEnd,
-  withDefaultActions,
-  abortController,
   columns,
+  ...histogramProps
 }: ChartProps) {
   const lensVisServiceCurrentSuggestionContext = useObservable(
     lensVisService.currentSuggestionContext$
@@ -413,7 +410,6 @@ export function Chart({
             )}
             {lensPropsContext && (
               <HistogramMemoized
-                abortController={abortController}
                 services={services}
                 dataView={dataView}
                 chart={chart}
@@ -421,11 +417,7 @@ export function Chart({
                 getTimeRange={getTimeRange}
                 visContext={visContext}
                 isPlainRecord={isPlainRecord}
-                disableTriggers={disableTriggers}
-                disabledActions={disabledActions}
-                onFilter={onFilter}
-                onBrushEnd={onBrushEnd}
-                withDefaultActions={withDefaultActions}
+                {...histogramProps}
                 {...lensPropsContext}
               />
             )}

@@ -74,6 +74,7 @@ export type UnifiedHistogramContainerProps = {
   | 'withDefaultActions'
   | 'disabledActions'
   | 'abortController'
+  | 'LensEmbeddableOverride'
 >;
 
 /**

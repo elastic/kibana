@@ -16,6 +16,8 @@ import {
   createSelectorHook,
 } from 'react-redux';
 import React, { type PropsWithChildren, useMemo, createContext } from 'react';
+import { type HtmlPortalNode, OutPortal } from 'react-reverse-portal';
+import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import { useAdHocDataViews } from './runtime_state';
 import type { DiscoverInternalState, TabState } from './types';
 import {
@@ -49,6 +51,7 @@ export const useInternalStateSelector: TypedUseSelectorHook<DiscoverInternalStat
 
 interface CurrentTabContextValue {
   currentTabId: string;
+  LensEmbeddableOverride: LensPublicStart['EmbeddableComponent'];
   injectCurrentTab: TabActionInjector;
 }
 
@@ -56,11 +59,18 @@ const currentTabContext = createContext<CurrentTabContextValue | undefined>(unde
 
 export const CurrentTabProvider = ({
   currentTabId,
+  chartPortalNode,
   children,
-}: PropsWithChildren<{ currentTabId: string }>) => {
+}: PropsWithChildren<{ currentTabId: string; chartPortalNode?: HtmlPortalNode }>) => {
   const contextValue = useMemo<CurrentTabContextValue>(
-    () => ({ currentTabId, injectCurrentTab: createTabActionInjector(currentTabId) }),
-    [currentTabId]
+    () => ({
+      currentTabId,
+      LensEmbeddableOverride: chartPortalNode
+        ? (props) => <OutPortal node={chartPortalNode} isSelected={true} {...props} />
+        : () => <></>,
+      injectCurrentTab: createTabActionInjector(currentTabId),
+    }),
+    [chartPortalNode, currentTabId]
   );
 
   return <currentTabContext.Provider value={contextValue}>{children}</currentTabContext.Provider>;
@@ -86,6 +96,11 @@ export const useCurrentTabAction = <TPayload extends TabActionPayload, TReturn>(
 ) => {
   const { injectCurrentTab } = useCurrentTabContext();
   return useMemo(() => injectCurrentTab(actionCreator), [actionCreator, injectCurrentTab]);
+};
+
+export const useCurrentTabLensEmbeddableOverride = () => {
+  const { LensEmbeddableOverride } = useCurrentTabContext();
+  return LensEmbeddableOverride;
 };
 
 export const useDataViewsForPicker = () => {

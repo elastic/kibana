@@ -18,6 +18,7 @@ import type {
   EmbeddableComponentProps,
   LensEmbeddableInput,
   LensEmbeddableOutput,
+  LensPublicStart,
   LensSuggestionsApi,
 } from '@kbn/lens-plugin/public';
 import { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
@@ -192,6 +193,7 @@ export interface UnifiedHistogramLayoutProps extends PropsWithChildren<unknown> 
 
   table?: Datatable;
   abortController?: AbortController;
+  LensEmbeddableOverride?: LensPublicStart['EmbeddableComponent'];
 }
 
 export const UnifiedHistogramLayout = ({
@@ -204,35 +206,19 @@ export const UnifiedHistogramLayout = ({
   isChartLoading,
   isPlainRecord,
   timeRange: originalTimeRange,
-  relativeTimeRange,
   columns,
-  request,
   hits,
-  lensAdapters,
-  dataLoading$,
   chart: originalChart,
   breakdown,
   container,
   topPanelHeight,
-  renderCustomChartToggleActions,
-  disableTriggers,
-  disabledActions,
   lensSuggestionsApi,
-  input$,
   table,
   onTopPanelHeightChange,
-  onChartHiddenChange,
-  onTimeIntervalChange,
-  onBreakdownFieldChange,
   onSuggestionContextChange,
   onVisContextChanged,
-  onTotalHitsChange,
-  onChartLoad,
-  onFilter,
-  onBrushEnd,
   children,
-  withDefaultActions,
-  abortController,
+  ...chartProps
 }: UnifiedHistogramLayoutProps) => {
   const columnsMap = useMemo(() => {
     if (!columns?.length) {
@@ -338,36 +324,20 @@ export const UnifiedHistogramLayout = ({
     <>
       <InPortal node={topPanelNode}>
         <ChartMemoized
-          abortController={abortController}
           isChartAvailable={isChartAvailable}
           className={chartClassName}
           services={services}
           dataView={dataView}
           requestParams={requestParams}
-          relativeTimeRange={relativeTimeRange}
-          request={request}
           hits={hits}
           lensVisService={lensVisService}
           isChartLoading={isChartLoading}
           isPlainRecord={isPlainRecord}
           chart={chart}
           breakdown={breakdown}
-          renderCustomChartToggleActions={renderCustomChartToggleActions}
           appendHistogram={chartSpacer}
-          disableTriggers={disableTriggers}
-          disabledActions={disabledActions}
-          input$={input$}
-          onChartHiddenChange={onChartHiddenChange}
-          onTimeIntervalChange={onTimeIntervalChange}
-          onBreakdownFieldChange={onBreakdownFieldChange}
-          onTotalHitsChange={onTotalHitsChange}
-          onChartLoad={onChartLoad}
-          onFilter={onFilter}
-          onBrushEnd={onBrushEnd}
-          lensAdapters={lensAdapters}
-          dataLoading$={dataLoading$}
-          withDefaultActions={withDefaultActions}
           columns={columns}
+          {...chartProps}
         />
       </InPortal>
       <InPortal node={mainPanelNode}>

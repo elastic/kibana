@@ -8,8 +8,10 @@
  */
 
 import { type TabItem, UnifiedTabs } from '@kbn/unified-tabs';
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { pick } from 'lodash';
+import { type HtmlPortalNode, createHtmlPortalNode, InPortal } from 'react-reverse-portal';
+import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import { DiscoverSessionView, type DiscoverSessionViewProps } from '../session_view';
 import {
   CurrentTabProvider,
@@ -29,22 +31,68 @@ export const TabsView = (props: DiscoverSessionViewProps) => {
   const currentTabId = useInternalStateSelector((state) => state.tabs.unsafeCurrentId);
   const [initialItems] = useState<TabItem[]>(() => allTabs.map((tab) => pick(tab, 'id', 'label')));
   const { getPreviewData } = usePreviewData(props.runtimeStateManager);
+  const chartPortalsInitialized = useRef(false);
+  const chartPortalNodes = useRef<Record<string, HtmlPortalNode>>({});
+
+  if (!chartPortalsInitialized.current) {
+    chartPortalsInitialized.current = true;
+    chartPortalNodes.current = updatePortals(chartPortalNodes.current, allTabs);
+  }
 
   return (
-    <UnifiedTabs
-      services={services}
-      initialItems={initialItems}
-      onChanged={(updateState) => {
-        const updateTabsAction = internalStateActions.updateTabs(updateState);
-        return dispatch(updateTabsAction);
-      }}
-      createItem={() => createTabItem(allTabs)}
-      getPreviewData={getPreviewData}
-      renderContent={() => (
-        <CurrentTabProvider currentTabId={currentTabId}>
-          <DiscoverSessionView key={currentTabId} {...props} />
-        </CurrentTabProvider>
-      )}
-    />
+    <>
+      {Object.keys(chartPortalNodes.current).map((tabId) => {
+        return (
+          <InPortal key={tabId} node={chartPortalNodes.current[tabId]}>
+            <LensWrapper isSelected={false} />
+          </InPortal>
+        );
+      })}
+      <UnifiedTabs
+        services={services}
+        initialItems={initialItems}
+        onChanged={(updateState) => {
+          chartPortalNodes.current = updatePortals(chartPortalNodes.current, updateState.items);
+          dispatch(internalStateActions.updateTabs(updateState));
+        }}
+        createItem={() => createTabItem(allTabs)}
+        getPreviewData={getPreviewData}
+        renderContent={() => (
+          <CurrentTabProvider
+            currentTabId={currentTabId}
+            chartPortalNode={chartPortalNodes.current[currentTabId]}
+          >
+            <DiscoverSessionView key={currentTabId} {...props} />
+          </CurrentTabProvider>
+        )}
+      />
+    </>
   );
+};
+
+const updatePortals = (portals: Record<string, HtmlPortalNode>, tabs: Array<{ id: string }>) =>
+  tabs.reduce<Record<string, HtmlPortalNode>>(
+    (acc, tab) => ({
+      ...acc,
+      [tab.id]: portals[tab.id] || createHtmlPortalNode(),
+    }),
+    {}
+  );
+
+type LensProps = Parameters<LensPublicStart['EmbeddableComponent']>[0];
+type LensWrapperProps = { isSelected: false } | ({ isSelected: true } & LensProps);
+
+const LensWrapper = ({ isSelected, ...lensProps }: LensWrapperProps) => {
+  const { lens } = useDiscoverServices();
+  const latestLensProps = useRef<LensProps>();
+
+  if (!isSelected && !latestLensProps.current) {
+    return null;
+  }
+
+  if (isSelected) {
+    latestLensProps.current = lensProps as LensProps;
+  }
+
+  return <lens.EmbeddableComponent {...latestLensProps.current!} />;
 };
