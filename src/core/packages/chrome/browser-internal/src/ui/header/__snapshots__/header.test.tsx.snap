@@ -182,7 +182,7 @@ Array [
         </div>
         <nav
           aria-label="Breadcrumbs"
-          class="euiBreadcrumbs euiHeaderBreadcrumbs emotion-euiHeaderBreadcrumbs"
+          class="euiBreadcrumbs euiHeaderBreadcrumbs emotion-euiHeaderBreadcrumbs-HeaderBreadcrumbs"
           data-test-subj="breadcrumbs"
         >
           <ol
