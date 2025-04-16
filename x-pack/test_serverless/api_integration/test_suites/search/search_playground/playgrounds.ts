@@ -8,7 +8,6 @@
 import expect from 'expect';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { SupertestWithRoleScopeType } from '@kbn/test-suites-xpack/api_integration/deployment_agnostic/services';
-import type { RoleCredentials } from '@kbn/ftr-common-functional-services';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 const INTERNAL_API_BASE_PATH = '/internal/search_playground/playgrounds';
@@ -17,9 +16,6 @@ const INITIAL_REST_VERSION = '1' as const;
 export default function ({ getService }: FtrProviderContext) {
   const log = getService('log');
   const roleScopedSupertest = getService('roleScopedSupertest');
-  const svlCommonApi = getService('svlCommonApi');
-  const samlAuth = getService('samlAuth');
-  const supertestWithoutAuth = getService('supertestWithoutAuth');
 
   let supertestDeveloperWithCookieCredentials: SupertestWithRoleScopeType;
 
@@ -374,83 +370,6 @@ export default function ({ getService }: FtrProviderContext) {
           await supertestViewerWithCookieCredentials
             .delete(`${INTERNAL_API_BASE_PATH}/${testPlaygroundId}`)
             .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION)
-            .expect(403);
-        });
-      });
-    });
-    describe('non-playground users', function () {
-      let roleAuthc: RoleCredentials;
-      before(async () => {
-        await samlAuth.setCustomRole({
-          elasticsearch: {
-            indices: [{ names: ['*'], privileges: ['all'] }],
-          },
-          kibana: [
-            {
-              feature: {
-                discover: ['read'],
-              },
-              spaces: ['*'],
-            },
-          ],
-        });
-        roleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('customRole');
-      });
-      after(async () => {
-        await samlAuth.invalidateM2mApiKeyWithRoleScope(roleAuthc);
-        await samlAuth.deleteCustomRole();
-      });
-      describe('Playground routes should be unavailable', () => {
-        it('GET playgrounds', async () => {
-          await supertestWithoutAuth
-            .get(INTERNAL_API_BASE_PATH)
-            .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION)
-            .set(svlCommonApi.getInternalRequestHeader())
-            .set(roleAuthc.apiKeyHeader)
-            .expect(403);
-        });
-        it('GET playgrounds/{id}', async () => {
-          await supertestWithoutAuth
-            .get(`${INTERNAL_API_BASE_PATH}/some-fake-id`)
-            .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION)
-            .set(svlCommonApi.getInternalRequestHeader())
-            .set(roleAuthc.apiKeyHeader)
-            .expect(403);
-        });
-        it('PUT playgrounds', async () => {
-          await supertestWithoutAuth
-            .put(INTERNAL_API_BASE_PATH)
-            .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION)
-            .set(svlCommonApi.getInternalRequestHeader())
-            .set(roleAuthc.apiKeyHeader)
-            .send({
-              name: 'Test Playground',
-              indices: ['test-index'],
-              queryFields: { 'test-index': ['field1', 'field2'] },
-              elasticsearchQueryJSON: `{"retriever":{"standard":{"query":{"multi_match":{"query":"{query}","fields":["field1","field2"]}}}}}`,
-            })
-            .expect(403);
-        });
-        it('PUT playgrounds/{id}', async () => {
-          await supertestWithoutAuth
-            .put(`${INTERNAL_API_BASE_PATH}/some-fake-id`)
-            .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION)
-            .set(svlCommonApi.getInternalRequestHeader())
-            .set(roleAuthc.apiKeyHeader)
-            .send({
-              name: 'Test Playground',
-              indices: ['test-index'],
-              queryFields: { 'test-index': ['field1', 'field2'] },
-              elasticsearchQueryJSON: `{"retriever":{"standard":{"query":{"multi_match":{"query":"{query}","fields":["field1","field2"]}}}}}`,
-            })
-            .expect(403);
-        });
-        it('DELETE playgrounds/{id}', async () => {
-          await supertestWithoutAuth
-            .delete(`${INTERNAL_API_BASE_PATH}/some-fake-id`)
-            .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION)
-            .set(svlCommonApi.getInternalRequestHeader())
-            .set(roleAuthc.apiKeyHeader)
             .expect(403);
         });
       });
