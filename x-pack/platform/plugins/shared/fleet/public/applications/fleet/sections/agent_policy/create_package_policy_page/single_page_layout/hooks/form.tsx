@@ -5,12 +5,16 @@
  * 2.0.
  */
 
+import React from 'react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { load } from 'js-yaml';
 import { isEqual } from 'lodash';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiLink } from '@elastic/eui';
 
+import { AgentlessAgentCreateOverProvisionnedError } from '../../../../../../../../common/errors';
 import { useSpaceSettingsContext } from '../../../../../../../hooks/use_space_settings_context';
 import {
   type AgentPolicy,
@@ -54,6 +58,8 @@ import { AGENTLESS_DISABLED_INPUTS } from '../../../../../../../../common/consta
 import { ensurePackageKibanaAssetsInstalled } from '../../../../../services/ensure_kibana_assets_installed';
 
 import { useAgentless, useSetupTechnology } from './setup_technology';
+
+const DEFAULT_AGENTLESS_LIMIT = 5;
 
 export async function createAgentPolicy({
   packagePolicy,
@@ -160,7 +166,7 @@ export function useOnSubmit({
   setNewAgentPolicy: (policy: NewAgentPolicy) => void;
   setSelectedPolicyTab: (tab: SelectedPolicyTab) => void;
 }) {
-  const { notifications } = useStartServices();
+  const { notifications, docLinks } = useStartServices();
   const { spaceId } = useFleetStatus();
   const confirmForceInstall = useConfirmForceInstall();
   const spaceSettings = useSpaceSettingsContext();
@@ -385,15 +391,43 @@ export function useOnSubmit({
             (policy) => policy?.supports_agentless === true
           );
 
-          notifications.toasts.addError(e, {
-            title: agentlessPolicy?.supports_agentless
-              ? i18n.translate('xpack.fleet.createAgentlessPolicy.errorNotificationTitle', {
-                  defaultMessage: 'Unable to create integration',
-                })
-              : i18n.translate('xpack.fleet.createAgentPolicy.errorNotificationTitle', {
-                  defaultMessage: 'Unable to create agent policy',
-                }),
-          });
+          if (e?.attributes?.type === AgentlessAgentCreateOverProvisionnedError.name) {
+            notifications.toasts.addError(e, {
+              title: i18n.translate('xpack.fleet.createAgentlessPolicy.errorNotificationTitle', {
+                defaultMessage: 'Unable to create integration',
+              }),
+              // @ts-expect-error
+              toastMessage: (
+                <>
+                  <FormattedMessage
+                    id="xpack.fleet.createAgentlessPolicy.overProvisionErrorMessage"
+                    defaultMessage="You reached the limit of {limit} agentless deployments. Please remove some or switch to agent-based integration. {docLink}"
+                    values={{
+                      limit: <b>{e?.attributes?.limit ?? DEFAULT_AGENTLESS_LIMIT}</b>,
+                      docLink: (
+                        <EuiLink href={docLinks.links.fleet.agentlessIntegrations} target="_blank">
+                          <FormattedMessage
+                            id="xpack.fleet.createAgentlessPolicy.seeDocLink"
+                            defaultMessage="See agentless documentation."
+                          />
+                        </EuiLink>
+                      ),
+                    }}
+                  />
+                </>
+              ),
+            });
+          } else {
+            notifications.toasts.addError(e, {
+              title: agentlessPolicy?.supports_agentless
+                ? i18n.translate('xpack.fleet.createAgentlessPolicy.errorNotificationTitle', {
+                    defaultMessage: 'Unable to create integration',
+                  })
+                : i18n.translate('xpack.fleet.createAgentPolicy.errorNotificationTitle', {
+                    defaultMessage: 'Unable to create agent policy',
+                  }),
+            });
+          }
           return;
         }
       }
@@ -537,6 +571,7 @@ export function useOnSubmit({
       agentPolicies,
       onSaveNavigate,
       confirmForceInstall,
+      docLinks.links.fleet.agentlessIntegrations,
     ]
   );
 
