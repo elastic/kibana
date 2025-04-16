@@ -64,7 +64,7 @@ describe('UpdateAvailableCallout', () => {
       <UpdateAvailableCallout
         version="1.2.3"
         toggleChangelogModal={mockToggleChangelogModal}
-        breakingChanges={{ ...breakingChangesBaseMock }}
+        breakingChanges={null}
       />
     );
 
