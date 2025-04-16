@@ -79,7 +79,7 @@ export class ErrorBoundaryExamplePlugin implements Plugin<void, void, SetupDeps>
         // Using the "EuiProvider" here rather than KibanaRenderContextProvider, because KibanaRenderContextProvider
         // wraps KibanaErrorBoundaryProvider and KibanaErrorBoundary and we want to test it directly, not a wrapper.
         ReactDOM.render(
-          <EuiProvider>
+          <EuiProvider highContrastMode={false}>
             <KibanaErrorBoundaryProvider analytics={core.analytics}>
               <KibanaErrorBoundary>
                 <KibanaPageTemplate>

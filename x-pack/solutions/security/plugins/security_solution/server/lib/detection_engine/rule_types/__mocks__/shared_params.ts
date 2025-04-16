@@ -13,6 +13,9 @@ import type { SecuritySharedParams } from '../types';
 import { getListClientMock } from '@kbn/lists-plugin/server/services/lists/list_client.mock';
 import { createRuleDataClientMock } from '@kbn/rule-registry-plugin/server/rule_data_client/rule_data_client.mock';
 import { getCompleteRuleMock } from '../../rule_schema/mocks';
+import { allowedExperimentalValues } from '../../../../../common/experimental_features';
+import { createMockTelemetryEventsSender } from '../../../telemetry/__mocks__';
+import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 
 export const getSharedParamsMock = <T extends RuleParams = QueryRuleParams>({
   ruleParams,
@@ -28,6 +31,7 @@ export const getSharedParamsMock = <T extends RuleParams = QueryRuleParams>({
   inputIndex: DEFAULT_INDEX_PATTERN,
   alertTimestampOverride: undefined,
   publicBaseUrl: 'http://testkibanabaseurl.com',
+  experimentalFeatures: allowedExperimentalValues,
   intendedTimestamp: undefined,
   primaryTimestamp: '@timestamp',
   listClient: getListClientMock(),
@@ -45,5 +49,8 @@ export const getSharedParamsMock = <T extends RuleParams = QueryRuleParams>({
   refreshOnIndexingAlerts: false,
   ignoreFields: {},
   ignoreFieldsRegexes: [],
+  eventsTelemetry: createMockTelemetryEventsSender(true),
+  licensing: licensingMock.createSetup(),
+  scheduleNotificationResponseActionsService: () => null,
   ...rewrites,
 });

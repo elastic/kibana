@@ -22,7 +22,7 @@ export interface DiscoverStreamsLinkProps {
   locator: StreamsAppLocator;
 }
 
-function DiscoverStreamsLink(props: DiscoverStreamsLinkProps) {
+export function DiscoverStreamsLink(props: DiscoverStreamsLinkProps) {
   return (
     <RedirectAppLinks coreStart={{ application: props.coreApplication }}>
       <EuiFlexGroup direction="column" gutterSize="xs" responsive={false}>
@@ -75,12 +75,13 @@ function DiscoverStreamsLinkContent({
   doc,
   locator,
 }: DiscoverStreamsLinkProps) {
-  const index = doc.raw._index;
   const flattenedDoc = doc.flattened;
+  const index = doc.raw._index;
+  const fallbackStreamName = getFallbackStreamName(flattenedDoc);
   const { value, loading, error } = useStreamsAppFetch(
     async ({ signal }) => {
       if (!index) {
-        return getFallbackStreamName(flattenedDoc);
+        return fallbackStreamName;
       }
       const definition = await streamsRepositoryClient.fetch(
         'GET /internal/streams/_resolve_index',
@@ -95,7 +96,7 @@ function DiscoverStreamsLinkContent({
       );
       return definition?.stream?.name;
     },
-    [streamsRepositoryClient, index],
+    [streamsRepositoryClient, index, fallbackStreamName],
     { disableToastOnError: true }
   );
   const params = useMemo(() => ({ name: value }), [value]);
@@ -113,6 +114,3 @@ function DiscoverStreamsLinkContent({
 
   return <EuiLink href={redirectUrl}>{value}</EuiLink>;
 }
-
-// eslint-disable-next-line import/no-default-export
-export default DiscoverStreamsLink;

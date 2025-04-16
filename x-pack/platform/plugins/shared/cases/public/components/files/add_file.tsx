@@ -119,7 +119,11 @@ const AddFileComponent: React.FC<AddFileProps> = ({ caseId }) => {
         {i18n.ADD_FILE}
       </EuiButton>
       {isModalVisible && (
-        <EuiModal data-test-subj="cases-files-add-modal" onClose={closeModal}>
+        <EuiModal
+          data-test-subj="cases-files-add-modal"
+          onClose={closeModal}
+          aria-label={i18n.ADD_FILE}
+        >
           <EuiModalHeader>
             <EuiModalHeaderTitle>{i18n.ADD_FILE}</EuiModalHeaderTitle>
           </EuiModalHeader>

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { FindPromptsResponse, PromptResponse, PromptTypeEnum } from '@kbn/elastic-assistant-common';
 import { PerformPromptsBulkActionRequestBody as PromptsPerformBulkActionRequestBody } from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
 import { HttpSetup } from '@kbn/core-http-browser';
@@ -43,35 +43,24 @@ export const useQuickPromptUpdater = ({
   const [promptsBulkActions, setPromptsBulkActions] = useState<PromptsPerformBulkActionRequestBody>(
     {}
   );
-  const [selectedQuickPromptId, setSelectedQuickPromptId] = useState<string | undefined>();
+  const [selectedQuickPrompt, setSelectedQuickPrompt] = useState<PromptResponse | undefined>();
   const [quickPromptSettings, setUpdatedQuickPromptSettings] = useState<PromptResponse[]>(
     allPrompts.data.filter((p) => p.promptType === PromptTypeEnum.quick)
-  );
-
-  const selectedQuickPrompt: PromptResponse | undefined = useMemo(
-    () => quickPromptSettings.find((qp) => qp.id === selectedQuickPromptId),
-    [quickPromptSettings, selectedQuickPromptId]
   );
 
   useEffect(() => {
     // Update quick prompts settings when prompts are loaded
     if (promptsLoaded) {
-      setUpdatedQuickPromptSettings((prev) => {
-        const prevIds = prev.map((p) => p.id);
-        return [
-          ...prev,
-          ...allPrompts.data.filter(
-            (p) => p.promptType === PromptTypeEnum.quick && !prevIds.includes(p.id)
-          ),
-        ];
-      });
+      setUpdatedQuickPromptSettings([
+        ...allPrompts.data.filter((p) => p.promptType === PromptTypeEnum.quick),
+      ]);
     }
   }, [allPrompts.data, promptsLoaded]);
 
   const onQuickPromptSelect = useCallback(
     (quickPrompt?: PromptResponse | string, color?: string) => {
       if (quickPrompt == null) {
-        return setSelectedQuickPromptId(undefined);
+        return setSelectedQuickPrompt(undefined);
       }
       const isNew = typeof quickPrompt === 'string';
       const qpColor = color ? color : isNew ? getRandomEuiColor() : quickPrompt.color;
@@ -87,12 +76,6 @@ export const useQuickPromptUpdater = ({
           }
         : quickPrompt;
 
-      setUpdatedQuickPromptSettings((prev) =>
-        !prev.some((sp) => sp.id === newSelectedQuickPrompt.id)
-          ? [...prev, newSelectedQuickPrompt]
-          : prev
-      );
-
       if (isNew) {
         setPromptsBulkActions((prev) => ({
           ...prev,
@@ -105,7 +88,7 @@ export const useQuickPromptUpdater = ({
         }));
       }
 
-      setSelectedQuickPromptId(newSelectedQuickPrompt.id);
+      setSelectedQuickPrompt(newSelectedQuickPrompt);
     },
     [currentAppId, promptsBulkActions.create]
   );
@@ -113,115 +96,82 @@ export const useQuickPromptUpdater = ({
   const onPromptContentChange = useCallback(
     (newValue: string) => {
       if (selectedQuickPrompt != null) {
-        setUpdatedQuickPromptSettings((prev): PromptResponse[] =>
-          prev.map((sp): PromptResponse => {
-            if (sp.id === selectedQuickPrompt.id) {
-              return {
-                ...sp,
-                content: newValue,
-              };
-            }
-            return sp;
-          })
-        );
-        const existingPrompt = quickPromptSettings.find((qp) => qp.id === selectedQuickPrompt.id);
-        if (existingPrompt) {
-          const newBulkActions = {
-            ...promptsBulkActions,
-            ...(selectedQuickPrompt.id !== ''
-              ? {
-                  update: [
-                    ...(promptsBulkActions.update ?? []).filter(
-                      (p) => p.id !== selectedQuickPrompt.id
-                    ),
-                    {
-                      ...selectedQuickPrompt,
-                      content: newValue,
-                    },
-                  ],
-                }
-              : {
-                  create: [
-                    ...(promptsBulkActions.create ?? []).filter(
-                      (p) => p.name !== selectedQuickPrompt.name
-                    ),
-                    {
-                      ...selectedQuickPrompt,
-                      content: newValue,
-                    },
-                  ],
-                }),
-          };
-          setPromptsBulkActions(newBulkActions);
-        }
+        setSelectedQuickPrompt({
+          ...selectedQuickPrompt,
+          content: newValue,
+        });
+        const newBulkActions = {
+          ...promptsBulkActions,
+          ...(selectedQuickPrompt.id !== ''
+            ? {
+                update: [
+                  ...(promptsBulkActions.update ?? []).filter(
+                    (p) => p.id !== selectedQuickPrompt.id
+                  ),
+                  {
+                    ...selectedQuickPrompt,
+                    content: newValue,
+                  },
+                ],
+              }
+            : {
+                create: [
+                  ...(promptsBulkActions.create ?? []).filter(
+                    (p) => p.name !== selectedQuickPrompt.name
+                  ),
+                  {
+                    ...selectedQuickPrompt,
+                    content: newValue,
+                  },
+                ],
+              }),
+        };
+        setPromptsBulkActions(newBulkActions);
       }
     },
-    [promptsBulkActions, selectedQuickPrompt, quickPromptSettings]
+    [promptsBulkActions, selectedQuickPrompt]
   );
 
   const onQuickPromptContextChange = useCallback(
     (pc: PromptContextTemplate[]) => {
       if (selectedQuickPrompt != null) {
-        setUpdatedQuickPromptSettings((prev) => {
-          const alreadyExists = prev.some((qp) => qp.name === selectedQuickPrompt.name);
-
-          if (alreadyExists) {
-            return prev.map((qp) => {
-              if (qp.name === selectedQuickPrompt.name) {
-                return {
-                  ...qp,
-                  categories: pc.map((p) => p.category),
-                };
-              }
-              return qp;
-            });
-          }
-          return prev;
+        setSelectedQuickPrompt({
+          ...selectedQuickPrompt,
+          categories: pc.map((p) => p.category),
         });
-
-        const existingPrompt = quickPromptSettings.find((sp) => sp.id === selectedQuickPrompt.id);
-        if (existingPrompt) {
-          setPromptsBulkActions({
-            ...promptsBulkActions,
-            ...(selectedQuickPrompt.id !== ''
-              ? {
-                  update: [
-                    ...(promptsBulkActions.update ?? []).filter(
-                      (p) => p.id !== selectedQuickPrompt.id
-                    ),
-                    {
-                      ...selectedQuickPrompt,
-                      categories: pc.map((p) => p.category),
-                    },
-                  ],
-                }
-              : {
-                  create: [
-                    ...(promptsBulkActions.create ?? []).filter(
-                      (p) => p.name !== selectedQuickPrompt.name
-                    ),
-                    {
-                      ...selectedQuickPrompt,
-                      categories: pc.map((p) => p.category),
-                    },
-                  ],
-                }),
-          });
-        }
+        setPromptsBulkActions({
+          ...promptsBulkActions,
+          ...(selectedQuickPrompt.id !== ''
+            ? {
+                update: [
+                  ...(promptsBulkActions.update ?? []).filter(
+                    (p) => p.id !== selectedQuickPrompt.id
+                  ),
+                  {
+                    ...selectedQuickPrompt,
+                    categories: pc.map((p) => p.category),
+                  },
+                ],
+              }
+            : {
+                create: [
+                  ...(promptsBulkActions.create ?? []).filter(
+                    (p) => p.name !== selectedQuickPrompt.name
+                  ),
+                  {
+                    ...selectedQuickPrompt,
+                    categories: pc.map((p) => p.category),
+                  },
+                ],
+              }),
+        });
       }
     },
-    [
-      promptsBulkActions,
-      quickPromptSettings,
-      selectedQuickPrompt,
-      setPromptsBulkActions,
-      setUpdatedQuickPromptSettings,
-    ]
+    [promptsBulkActions, selectedQuickPrompt, setPromptsBulkActions]
   );
 
   const onQuickPromptDelete = useCallback(
     (id: string) => {
-      setUpdatedQuickPromptSettings((prev) => prev.filter((qp) => qp.id !== id));
       setPromptsBulkActions({
         ...promptsBulkActions,
         delete: {
@@ -235,68 +185,45 @@ export const useQuickPromptUpdater = ({
   const onQuickPromptColorChange = useCallback<EuiSetColorMethod>(
     (color) => {
       if (selectedQuickPrompt != null) {
-        setUpdatedQuickPromptSettings((prev) => {
-          const alreadyExists = prev.some((qp) => qp.name === selectedQuickPrompt.name);
-
-          if (alreadyExists) {
-            return prev.map((qp) => {
-              if (qp.name === selectedQuickPrompt.name) {
-                return {
-                  ...qp,
-                  color,
-                };
-              }
-              return qp;
-            });
-          }
-          return prev;
+        setSelectedQuickPrompt({
+          ...selectedQuickPrompt,
+          color,
         });
-        const existingPrompt = quickPromptSettings.find((sp) => sp.id === selectedQuickPrompt.id);
-        if (existingPrompt) {
-          setPromptsBulkActions({
-            ...promptsBulkActions,
-            ...(selectedQuickPrompt.id !== ''
-              ? {
-                  update: [
-                    ...(promptsBulkActions.update ?? []).filter(
-                      (p) => p.id !== selectedQuickPrompt.id
-                    ),
-                    {
-                      ...selectedQuickPrompt,
-                      color,
-                    },
-                  ],
-                }
-              : {
-                  create: [
-                    ...(promptsBulkActions.create ?? []).filter(
-                      (p) => p.name !== selectedQuickPrompt.name
-                    ),
-                    {
-                      ...selectedQuickPrompt,
-                      color,
-                    },
-                  ],
-                }),
-          });
-        }
+        setPromptsBulkActions({
+          ...promptsBulkActions,
+          ...(selectedQuickPrompt.id !== ''
+            ? {
+                update: [
+                  ...(promptsBulkActions.update ?? []).filter(
+                    (p) => p.id !== selectedQuickPrompt.id
+                  ),
+                  {
+                    ...selectedQuickPrompt,
+                    color,
+                  },
+                ],
+              }
+            : {
+                create: [
+                  ...(promptsBulkActions.create ?? []).filter(
+                    (p) => p.name !== selectedQuickPrompt.name
+                  ),
+                  {
+                    ...selectedQuickPrompt,
+                    color,
+                  },
+                ],
+              }),
+        });
       }
     },
-    [
-      promptsBulkActions,
-      quickPromptSettings,
-      selectedQuickPrompt,
-      setPromptsBulkActions,
-      setUpdatedQuickPromptSettings,
-    ]
+    [promptsBulkActions, selectedQuickPrompt, setPromptsBulkActions]
   );
 
   const resetQuickPromptSettings = useCallback((): void => {
     setPromptsBulkActions({});
-    setUpdatedQuickPromptSettings(
-      allPrompts.data.filter((p) => p.promptType === PromptTypeEnum.quick)
-    );
-  }, [allPrompts]);
+    setSelectedQuickPrompt(undefined);
+  }, []);
 
   const saveQuickPromptSettings = useCallback(async (): Promise<boolean> => {
     const hasBulkPrompts =
@@ -304,8 +231,9 @@ export const useQuickPromptUpdater = ({
     const bulkPromptsResult = hasBulkPrompts
       ? await bulkUpdatePrompts(http, promptsBulkActions, toasts)
       : undefined;
+    resetQuickPromptSettings();
     return bulkPromptsResult?.success ?? false;
-  }, [http, promptsBulkActions, toasts]);
+  }, [http, promptsBulkActions, resetQuickPromptSettings, toasts]);
 
   return {
     onPromptContentChange,

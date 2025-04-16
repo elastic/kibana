@@ -21,6 +21,7 @@ export interface UseFetchSloDefinitionsResponse {
 interface SLODefinitionParams {
   name?: string;
   includeOutdatedOnly?: boolean;
+  tags?: string[];
   page?: number;
   perPage?: number;
 }
@@ -28,21 +29,24 @@ interface SLODefinitionParams {
 export function useFetchSloDefinitions({
   name = '',
   includeOutdatedOnly = false,
+  tags = [],
   page = 1,
   perPage = 100,
 }: SLODefinitionParams): UseFetchSloDefinitionsResponse {
   const { sloClient } = usePluginContext();
   const search = name.endsWith('*') ? name : `${name}*`;
+  const validTags = tags.filter((tag) => !!tag).join();
 
   const { isLoading, isError, isSuccess, data, refetch } = useQuery({
-    queryKey: sloKeys.definitions({ search, page, perPage, includeOutdatedOnly }),
+    queryKey: sloKeys.definitions({ search, page, perPage, includeOutdatedOnly, validTags }),
     queryFn: async ({ signal }) => {
       try {
         return await sloClient.fetch('GET /api/observability/slos/_definitions 2023-10-31', {
           params: {
             query: {
               ...(search !== undefined && { search }),
-              ...(includeOutdatedOnly !== undefined && { includeOutdatedOnly }),
+              ...(!!includeOutdatedOnly && { includeOutdatedOnly }),
+              ...(validTags?.length && { tags: validTags }),
               ...(page !== undefined && { page: String(page) }),
               ...(perPage !== undefined && { perPage: String(perPage) }),
             },

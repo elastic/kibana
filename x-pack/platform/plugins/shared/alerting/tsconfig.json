@@ -76,7 +76,8 @@
     "@kbn/core-security-server-mocks",
     "@kbn/core-http-server-utils",
     "@kbn/response-ops-rule-params",
-    "@kbn/datemath"
+    "@kbn/datemath",
+    "@kbn/elastic-assistant-common"
   ],
   "exclude": [
     "target/**/*"

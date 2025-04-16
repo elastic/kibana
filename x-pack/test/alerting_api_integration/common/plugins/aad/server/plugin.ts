@@ -38,6 +38,13 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
             id: schema.string(),
           }),
         },
+        security: {
+          authz: {
+            enabled: false,
+            reason:
+              'This route is opted out from authorization because permissions will be checked by elasticsearch.',
+          },
+        },
       },
       async function (
         context: RequestHandlerContext,

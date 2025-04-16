@@ -18,9 +18,9 @@ If a setting is applicable to {{ecloud}} Hosted environments, its name is follow
 
 By default, {{fleet}} is enabled. To use {{fleet}}, you also need to configure {{kib}} and {{es}} hosts.
 
-Many {{fleet}} settings can also be configured directly through the {{fleet}} UI. See [Fleet UI settings](docs-content://reference/ingestion-tools/fleet/fleet-settings.md) for details.
+Many {{fleet}} settings can also be configured directly through the {{fleet}} UI. See [Fleet UI settings](docs-content://reference/fleet/fleet-settings.md) for details.
 
-Go to the [{{fleet}}](docs-content://reference/ingestion-tools/fleet/index.md) docs for more information about {{fleet}}.
+Go to the [{{fleet}}](docs-content://reference/fleet/index.md) docs for more information about {{fleet}}.
 
 ## General {{fleet}} settings [general-fleet-settings-kb]
 
@@ -28,7 +28,7 @@ Go to the [{{fleet}}](docs-content://reference/ingestion-tools/fleet/index.md) d
 :   Set to `true` (default) to enable {{fleet}}.
 
 `xpack.fleet.isAirGapped`
-:   Set to `true` to indicate {{fleet}} is running in an air-gapped environment. Refer to [Air-gapped environments](docs-content://reference/ingestion-tools/fleet/air-gapped.md) for details. Enabling this flag helps Fleet skip needless requests and improve the user experience for air-gapped environments.
+:   Set to `true` to indicate {{fleet}} is running in an air-gapped environment. Refer to [Air-gapped environments](docs-content://reference/fleet/air-gapped.md) for details. Enabling this flag helps Fleet skip needless requests and improve the user experience for air-gapped environments.
 
 `xpack.fleet.createArtifactsBulkBatchSize` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ess}}")
 :   Allow to configure batch size for creating and updating Fleet user artifacts.  Examples include creation of Trusted Applications and Endpoint Exceptions in Security. It is available in {{ecloud}} 8.9.0 and later versions.
@@ -40,7 +40,7 @@ Go to the [{{fleet}}](docs-content://reference/ingestion-tools/fleet/index.md) d
 :   The address to use to reach the {{package-manager}} registry.
 
 `xpack.fleet.registryProxyUrl`
-:   The proxy address to use to reach the {{package-manager}} registry if an internet connection is not directly available. Refer to [Air-gapped environments](docs-content://reference/ingestion-tools/fleet/air-gapped.md) for details.
+:   The proxy address to use to reach the {{package-manager}} registry if an internet connection is not directly available. Refer to [Air-gapped environments](docs-content://reference/fleet/air-gapped.md) for details.
 
 `xpack.fleet.packageVerification.gpgKeyPath`
 :   The path on disk to the GPG key used to verify {{package-manager}} packages. If the Elastic public key is ever reissued as a security precaution, you can use this setting to specify the new key.
@@ -197,7 +197,7 @@ These settings are not supported to pre-configure the Endpoint and Cloud Securit
 `xpack.fleet.outputs`
 :   List of outputs that are configured when the {{fleet}} app starts.
 
-    Certain types of outputs have additional required and optional settings. Refer to [Output settings](docs-content://reference/ingestion-tools/fleet/fleet-settings.md#output-settings) in the {{fleet}} and {{agent}} Guide for the full list of settings for each output type.
+    Certain types of outputs have additional required and optional settings. Refer to [Output settings](docs-content://reference/fleet/fleet-settings.md#output-settings) in the {{fleet}} and {{agent}} Guide for the full list of settings for each output type.
 
     If configured in your `kibana.yml`, output settings are grayed out and unavailable in the {{fleet}} UI. To make these settings editable in the UI, do not configure them in the configuration file.
 

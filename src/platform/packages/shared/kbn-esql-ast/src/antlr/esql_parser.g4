@@ -40,7 +40,7 @@ sourceCommand
     | rowCommand
     | showCommand
     // in development
-    | {this.isDevVersion()}? metricsCommand
+    | {this.isDevVersion()}? timeSeriesCommand
     ;
 
 processingCommand
@@ -61,8 +61,10 @@ processingCommand
     | {this.isDevVersion()}? inlinestatsCommand
     | {this.isDevVersion()}? lookupCommand
     | {this.isDevVersion()}? changePointCommand
+    | {this.isDevVersion()}? completionCommand
     | {this.isDevVersion()}? insistCommand
     | {this.isDevVersion()}? forkCommand
+    | {this.isDevVersion()}? rerankCommand
     | {this.isDevVersion()}? rrfCommand
     ;
 
@@ -90,8 +92,8 @@ fromCommand
     : FROM indexPatternAndMetadataFields
     ;
 
-metricsCommand
-    : DEV_METRICS indexPatternAndMetadataFields
+timeSeriesCommand
+    : DEV_TIME_SERIES indexPatternAndMetadataFields
     ;
 
 indexPatternAndMetadataFields:
@@ -100,9 +102,15 @@ indexPatternAndMetadataFields:
 
 indexPattern
     : (clusterString COLON)? indexString
+    | {this.isDevVersion()}? indexString (CAST_OP selectorString)?
     ;
 
 clusterString
+    : UNQUOTED_SOURCE
+    | QUOTED_STRING
+    ;
+
+selectorString
     : UNQUOTED_SOURCE
     | QUOTED_STRING
     ;
@@ -152,7 +160,7 @@ identifier
 identifierPattern
     : ID_PATTERN
     | parameter
-    | {this.isDevVersion()}? doubleParameter
+    | doubleParameter
     ;
 
 parameter
@@ -168,7 +176,7 @@ doubleParameter
 identifierOrParameter
     : identifier
     | parameter
-    | {this.isDevVersion()}? doubleParameter
+    | doubleParameter
     ;
 
 limitCommand
@@ -276,11 +284,22 @@ forkSubQueryCommand
     ;
 
 forkSubQueryProcessingCommand
-    : whereCommand
-    | sortCommand
+    : evalCommand
+    | whereCommand
     | limitCommand
+    | statsCommand
+    | sortCommand
+    | dissectCommand
     ;
 
 rrfCommand
    : DEV_RRF
    ;
+
+rerankCommand
+    : DEV_RERANK queryText=constant ON fields WITH inferenceId=identifierOrParameter
+    ;
+
+completionCommand
+    : DEV_COMPLETION prompt=primaryExpression WITH inferenceId=identifierOrParameter (AS targetField=qualifiedName)?
+    ;

@@ -1991,21 +1991,6 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-ids",
-        "id": "def-common.VISUALIZATION_COLOR_MAPPING_ID",
-        "type": "string",
-        "tags": [],
-        "label": "VISUALIZATION_COLOR_MAPPING_ID",
-        "description": [],
-        "signature": [
-          "\"visualization:colorMapping\""
-        ],
-        "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/management-settings-ids",
         "id": "def-common.VISUALIZATION_ENABLE_LABS_ID",
         "type": "string",
         "tags": [],

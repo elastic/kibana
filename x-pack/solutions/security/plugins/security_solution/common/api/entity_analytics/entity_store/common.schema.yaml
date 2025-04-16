@@ -12,6 +12,7 @@ components:
         - user
         - host
         - service
+        - generic
 
     EngineDescriptor:
       type: object
@@ -53,6 +54,16 @@ components:
           type: integer
         error:
           type: object
+          required:
+            - message
+            - action
+          properties:
+            message:
+              type: string
+            action:
+              type: string
+              enum:
+                - init
 
     EngineStatus:
       type: string
