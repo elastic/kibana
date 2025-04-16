@@ -7,10 +7,11 @@
 
 module.exports = {
   preset: '@kbn/test/jest_integration',
-  rootDir: '../../../../../../..',
-  roots: ['<rootDir>/x-pack/solutions/security/plugins/security_solution/public/detection_engine'],
-  testMatch: ['**/__integration_tests__/**/*.test.[jt]s?(x)'],
-  modulePathIgnorePatterns: ['__mocks__', 'mock'],
+  rootDir: '../../../../../../../../../../../../../..',
+  roots: [
+    '<rootDir>/x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_management_ui/pages/rule_management',
+  ],
+  testMatch: ['**/common_fields/*.test.[jt]s?(x)'],
   openHandlesTimeout: 0,
   forceExit: true,
 };
