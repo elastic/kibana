@@ -10,7 +10,7 @@ import { injectReferencesIntoArtifacts } from './inject_references';
 
 describe('injectReferencesIntoArtifacts', () => {
   it('returns default value if no artifacts are provided', () => {
-    expect(injectReferencesIntoArtifacts('test-id', undefined, [])).toEqual({ dashboards: [] });
+    expect(injectReferencesIntoArtifacts('test-id', [], undefined)).toEqual({ dashboards: [] });
   });
 
   it('throws an error if the dashboard reference is not found', () => {
@@ -22,7 +22,7 @@ describe('injectReferencesIntoArtifacts', () => {
       ],
     };
     const refs: SavedObjectReference[] = [];
-    expect(() => injectReferencesIntoArtifacts('test-id', artifacts, refs)).toThrow(
+    expect(() => injectReferencesIntoArtifacts('test-id', refs, artifacts)).toThrow(
       'Artifacts reference "dashboard_1" not found in rule id: test-id'
     );
   });
@@ -37,6 +37,9 @@ describe('injectReferencesIntoArtifacts', () => {
           refId: 'dashboard_2',
         },
       ],
+      investigation_guide: {
+        blob: 'test',
+      },
     };
     const refs: SavedObjectReference[] = [
       {
@@ -50,7 +53,7 @@ describe('injectReferencesIntoArtifacts', () => {
         type: 'dashboard',
       },
     ];
-    const result = injectReferencesIntoArtifacts('test-id', artifacts, refs);
+    const result = injectReferencesIntoArtifacts('test-id', refs, artifacts);
     expect(result).toEqual({
       dashboards: [
         {
@@ -60,6 +63,9 @@ describe('injectReferencesIntoArtifacts', () => {
           id: '456',
         },
       ],
+      investigation_guide: {
+        blob: 'test',
+      },
     });
   });
 });

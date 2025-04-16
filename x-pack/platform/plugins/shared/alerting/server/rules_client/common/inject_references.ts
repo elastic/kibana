@@ -10,6 +10,7 @@ import { omit } from 'lodash';
 import type { SavedObjectReference, SavedObjectAttributes } from '@kbn/core/server';
 import type { UntypedNormalizedRuleType } from '../../rule_type_registry';
 import type { RawRule, RuleTypeParams } from '../../types';
+import type { RuleDomain } from '../../application/rule/types';
 import {
   preconfiguredConnectorActionRefPrefix,
   extractedSavedObjectParamReferenceNamePrefix,
@@ -82,7 +83,7 @@ export function injectReferencesIntoArtifacts(
   ruleId: string,
   artifacts?: RawRule['artifacts'],
   references?: SavedObjectReference[]
-) {
+): RuleDomain['artifacts'] {
   if (!artifacts) {
     return { dashboards: [] };
   }

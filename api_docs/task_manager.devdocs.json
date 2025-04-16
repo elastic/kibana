@@ -189,7 +189,7 @@
             "label": "start",
             "description": [],
             "signature": [
-              "({ savedObjects, elasticsearch, executionContext, security }: ",
+              "({ http, savedObjects, elasticsearch, executionContext, security }: ",
               "CoreStart",
               ", { cloud, spaces }: ",
               "TaskManagerPluginsStart",
@@ -211,7 +211,7 @@
                 "id": "def-server.TaskManagerPlugin.start.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{ savedObjects, elasticsearch, executionContext, security }",
+                "label": "{ http, savedObjects, elasticsearch, executionContext, security }",
                 "description": [],
                 "signature": [
                   "CoreStart"
@@ -959,6 +959,23 @@
                 "section": "def-server.ConcreteTaskInstance",
                 "text": "ConcreteTaskInstance"
               }
+            ],
+            "path": "x-pack/platform/plugins/shared/task_manager/server/task.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "taskManager",
+            "id": "def-server.RunContext.fakeRequest",
+            "type": "Object",
+            "tags": [],
+            "label": "fakeRequest",
+            "description": [
+              "\nIf an API key is associated with the task, a fake KibanaRequest object\nis generated using the API key and passed as part of the run context."
+            ],
+            "signature": [
+              "KibanaRequest",
+              "<unknown, unknown, unknown, any> | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/task_manager/server/task.ts",
             "deprecated": false,

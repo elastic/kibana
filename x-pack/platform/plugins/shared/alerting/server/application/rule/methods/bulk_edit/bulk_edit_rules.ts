@@ -470,8 +470,8 @@ async function updateRuleAttributesAndParamsInMemory<Params extends RuleParams>(
 
     const ruleArtifacts = injectReferencesIntoArtifacts(
       rule.id,
-      rule.attributes.artifacts,
-      rule.references || []
+      rule.references || [],
+      rule.attributes.artifacts
     );
 
     if (migratedActions.hasLegacyActions) {
