@@ -2745,6 +2745,9 @@ src/platform/testfunctional/page_objects/solution_navigation.ts @elastic/appex-s
 /x-pack/test_serverless/functional/page_objects/svl_sec_landing_page.ts @elastic/appex-sharedux
 /x-pack/test_serverless/functional/test_suites/security/ftr/navigation.ts @elastic/appex-sharedux
 
+# Root package.json file
+/package.json @elastic/kibana-security
+
 # OpenAPI spec files
 oas_docs/.spectral.yaml                       @elastic/platform-docs
 oas_docs/kibana.info.serverless.yaml          @elastic/platform-docs
@@ -2760,9 +2763,15 @@ docs/settings-gen                             @elastic/platform-docs
 /x-pack/plugins/**/kibana.jsonc @elastic/kibana-core
 /x-pack/platform/plugins/shared/**/kibana.jsonc @elastic/kibana-core
 /x-pack/platform/plugins/private/**/kibana.jsonc @elastic/kibana-core
+/x-pack//solutions/observability/plugins/**/kibana.jsonc @elastic/kibana-core
+/x-pack//solutions/search/plugins/**/kibana.jsonc @elastic/kibana-core
+/x-pack//solutions/security/plugins/**/kibana.jsonc @elastic/kibana-core
+
 /x-pack/solutions/observability/plugins/**/kibana.jsonc @elastic/kibana-core
 /x-pack/solutions/search/plugins/**/kibana.jsonc @elastic/kibana-core
 /x-pack/solutions/security/plugins/**/kibana.jsonc @elastic/kibana-core
+
+/x-pack/test_serverless/functional/test_suites/common/strip_unknown_config_workaround @elastic/kibana-core
 
 # Plugin manifests for test plugins
 /src/platform/test/**/kibana.jsonc @elastic/appex-qa @elastic/kibana-core
