@@ -7,5 +7,5 @@
 
 export interface Server {
   address?: string;
-  port?: string;
+  port?: number;
 }

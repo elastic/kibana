@@ -115,9 +115,7 @@ export const validationForkCommandTestSuite = (setup: helpers.Setup) => {
     (EVAL TO_UPPER(keywordField) | LIMIT 100)
     (FORK (WHERE 1))`,
               [
-                "SyntaxError: mismatched input ')' expecting <EOF>",
-                "SyntaxError: mismatched input 'EVAL' expecting {'limit', 'sort', 'where'}",
-                "SyntaxError: mismatched input 'keywordField' expecting {'limit', 'sort', 'where'}",
+                "SyntaxError: mismatched input 'FORK' expecting {'dissect', 'eval', 'limit', 'sort', 'stats', 'where'}",
                 "SyntaxError: token recognition error at: ')'",
               ]
             );
