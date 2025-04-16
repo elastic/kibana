@@ -86,25 +86,11 @@ describe('getRemoteSyncedIntegrationsInfoByOutputId', () => {
     jest
       .spyOn(mockedAppContextService, 'getExperimentalFeatures')
       .mockReturnValue({ enableSyncIntegrationsOnRemote: true } as any);
-    mockedOutputService.get.mockImplementation(() => {
-      throw new FleetNotFoundError(
-        'Saved object [ingest-outputs/remote-es-not-existent] not found'
-      );
-    });
+    mockedOutputService.get.mockRejectedValue({ isBoom: true, output: { statusCode: 404 } } as any);
 
     await expect(
       getRemoteSyncedIntegrationsInfoByOutputId(soClientMock, 'remote-es-not-existent')
-    ).rejects.toThrowError();
-  });
-
-  it('should throw error if the output returns undefined', async () => {
-    jest
-      .spyOn(mockedAppContextService, 'getExperimentalFeatures')
-      .mockReturnValue({ enableSyncIntegrationsOnRemote: true } as any);
-    mockedOutputService.get.mockResolvedValue(undefined as any);
-    await expect(
-      getRemoteSyncedIntegrationsInfoByOutputId(soClientMock, 'remote2')
-    ).rejects.toThrowError('No output found with id remote2');
+    ).rejects.toThrowError('No output found with id remote-es-not-existent');
   });
 
   it('should throw error if the passed outputId is not of type remote_elasticsearch', async () => {
@@ -222,8 +208,9 @@ describe('getRemoteSyncedIntegrationsInfoByOutputId', () => {
       kibana_api_key: 'APIKEY',
     } as any);
     const statusWithErrorRes = {
-      error: 'No integrations found on fleet-synced-integrations-ccr-*',
-      integrations: [],
+      statusCode: 404,
+      error: 'Not Found',
+      message: 'No integrations found on fleet-synced-integrations-ccr-*',
     };
 
     mockedFetch.mockResolvedValueOnce({
@@ -232,9 +219,10 @@ describe('getRemoteSyncedIntegrationsInfoByOutputId', () => {
       ok: true,
     } as any);
 
-    expect(await getRemoteSyncedIntegrationsInfoByOutputId(soClientMock, 'remote1')).toEqual(
-      statusWithErrorRes
-    );
+    expect(await getRemoteSyncedIntegrationsInfoByOutputId(soClientMock, 'remote1')).toEqual({
+      integrations: [],
+      error: 'No integrations found on fleet-synced-integrations-ccr-*',
+    });
   });
 
   it('should throw if the remote api returns error', async () => {
