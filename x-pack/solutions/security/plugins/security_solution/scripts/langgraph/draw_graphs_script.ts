@@ -7,6 +7,7 @@
 
 import type {
   ActionsClientChatOpenAI,
+  ActionsClientChatVertexAI,
   ActionsClientSimpleChatModel,
 } from '@kbn/langchain/server/language_models';
 import type { Logger } from '@kbn/logging';
@@ -14,6 +15,10 @@ import { ToolingLog } from '@kbn/tooling-log';
 import { FakeLLM } from '@langchain/core/utils/testing';
 import fs from 'fs/promises';
 import path from 'path';
+import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
+import type { InferenceServerStart } from '@kbn/inference-plugin/server';
+import type { ActionsClientChatBedrockConverse } from '@kbn/langchain/server';
+import { getGenerateEsqlGraph as getGenerateEsqlAgent } from '../../server/assistant/tools/esql/graphs/generate_esql/generate_esql';
 import { getRuleMigrationAgent } from '../../server/lib/siem_migrations/rules/task/agent';
 import type { RuleMigrationsRetriever } from '../../server/lib/siem_migrations/rules/task/retrievers';
 import type { EsqlKnowledgeBase } from '../../server/lib/siem_migrations/rules/task/util/esql_knowledge_base';
@@ -34,7 +39,7 @@ const createLlmInstance = () => {
   return mockLlm;
 };
 
-async function getAgentGraph(logger: Logger): Promise<Drawable> {
+async function getSiemMigrationGraph(logger: Logger): Promise<Drawable> {
   const model = createLlmInstance();
   const telemetryClient = {} as SiemMigrationTelemetryClient;
   const graph = getRuleMigrationAgent({
@@ -43,6 +48,22 @@ async function getAgentGraph(logger: Logger): Promise<Drawable> {
     ruleMigrationsRetriever,
     logger,
     telemetryClient,
+  });
+  return graph.getGraphAsync({ xray: true });
+}
+
+async function getGenerateEsqlGraph(logger: Logger): Promise<Drawable> {
+  const graph = getGenerateEsqlAgent({
+    esClient: {} as unknown as ElasticsearchClient,
+    connectorId: 'test-connector-id',
+    inference: {} as unknown as InferenceServerStart,
+    logger,
+    request: {} as unknown as KibanaRequest,
+    createLlmInstance: () =>
+      ({ bindTools: () => null } as unknown as
+        | ActionsClientChatBedrockConverse
+        | ActionsClientChatVertexAI
+        | ActionsClientChatOpenAI),
   });
   return graph.getGraphAsync({ xray: true });
 }
@@ -61,6 +82,7 @@ export const drawGraph = async ({
   logger.info('Compiling graph');
   const outputPath = path.join(__dirname, outputFilename);
   const graph = await getGraphAsync(logger);
+  logger.info('Drawing graph');
   const output = await graph.drawMermaidPng();
   const buffer = Buffer.from(await output.arrayBuffer());
   logger.info(`Writing graph to ${outputPath}`);
@@ -69,7 +91,11 @@ export const drawGraph = async ({
 
 export const draw = async () => {
   await drawGraph({
-    getGraphAsync: getAgentGraph,
+    getGraphAsync: getGenerateEsqlGraph,
+    outputFilename: '../../docs/generate_esql/img/generate_esql_graph.png',
+  });
+  await drawGraph({
+    getGraphAsync: getSiemMigrationGraph,
     outputFilename: '../../docs/siem_migration/img/agent_graph.png',
   });
 };

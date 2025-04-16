@@ -18,6 +18,7 @@ import {
   Replacements,
   pruneContentReferences,
   ExecuteConnectorRequestQuery,
+  INVOKE_LLM_SERVER_TIMEOUT,
   POST_ACTIONS_CONNECTOR_EXECUTE,
 } from '@kbn/elastic-assistant-common';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
@@ -44,6 +45,11 @@ export const postActionsConnectorExecuteRoute = (
       security: {
         authz: {
           requiredPrivileges: ['elasticAssistant'],
+        },
+      },
+      options: {
+        timeout: {
+          idleSocket: INVOKE_LLM_SERVER_TIMEOUT,
         },
       },
     })
