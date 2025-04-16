@@ -56,7 +56,14 @@ export const LinkCard: React.FC<LinkCardProps> = React.memo(
         <EuiSpacer size="s" />
         <EuiText size="xs" className="headerCardLink">
           {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
-          <EuiLink data-test-subj="headerCardLink" href={href} onClick={onClick} target={target}>
+          <EuiLink
+            data-test-subj="headerCardLink"
+            href={href}
+            onClick={onClick}
+            target={target}
+            aria-hidden="true"
+            tabIndex={-1}
+          >
             {linkText}
           </EuiLink>
         </EuiText>
