@@ -34,6 +34,7 @@ export interface DownloadSnapshotOptions {
 export interface InstallSnapshotOptions extends DownloadSnapshotOptions {
   password?: string;
   esArgs?: string[];
+  useExisting?: boolean;
 }
 
 export interface InstallArchiveOptions {
@@ -46,4 +47,5 @@ export interface InstallArchiveOptions {
   /** Disable creating a temp directory, allowing ES to write to OS's /tmp directory */
   disableEsTmpDir?: boolean;
   resources?: string[];
+  useExisting?: boolean;
 }

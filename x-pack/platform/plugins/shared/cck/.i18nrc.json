@@ -1,0 +1,7 @@
+{
+  "prefix": "cck",
+  "paths": {
+    "cck": "."
+  },
+  "translations": ["translations/ja-JP.json"]
+}

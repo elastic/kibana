@@ -140,6 +140,8 @@
       "@kbn/cases-plugin/*": ["x-pack/platform/plugins/shared/cases/*"],
       "@kbn/cbor": ["src/platform/packages/shared/kbn-cbor"],
       "@kbn/cbor/*": ["src/platform/packages/shared/kbn-cbor/*"],
+      "@kbn/cck-plugin": ["x-pack/platform/plugins/shared/cck"],
+      "@kbn/cck-plugin/*": ["x-pack/platform/plugins/shared/cck/*"],
       "@kbn/cell-actions": ["src/platform/packages/shared/kbn-cell-actions"],
       "@kbn/cell-actions/*": ["src/platform/packages/shared/kbn-cell-actions/*"],
       "@kbn/chart-expressions-common": ["src/platform/packages/shared/chart-expressions-common"],
