@@ -186,9 +186,10 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
 
     if (!esSearchRequest.index || esSearchRequest.index.length === 0) {
       throw new ResponseActionsClientError(
-        `Unable to build list of indexes while retrieve policy information for SentinelOne agents [${agentIds.join(
+        `Unable to build list of indexes while retrieving policy information for SentinelOne agents [${agentIds.join(
           ', '
-        )}]`
+        )}]. Check to ensure at least one integration policy exits.`,
+        400
       );
     }
 

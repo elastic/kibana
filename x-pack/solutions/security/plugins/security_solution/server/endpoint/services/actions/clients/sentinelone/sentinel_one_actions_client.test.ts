@@ -2015,7 +2015,7 @@ describe('SentinelOneActionsClient class', () => {
       ).mockResolvedValue({ items: [] });
 
       await expect(s1ActionsClient.isolate(createS1IsolationOptions())).rejects.toThrow(
-        'Unable to build list of indexes while retrieve policy information for SentinelOne agents [1-2-3]'
+        'Unable to build list of indexes while retrieving policy information for SentinelOne agents [1-2-3]. Check to ensure at least one integration policy exits.'
       );
     });
 
