@@ -10,6 +10,7 @@ import { BehaviorSubject, firstValueFrom, type Subscription } from 'rxjs';
 import { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import { ConsolePluginStart } from '@kbn/console-plugin/public';
+import { SearchConnectorsPluginStart } from '@kbn/content-connectors-plugin/public';
 import {
   AppMountParameters,
   CoreStart,
@@ -33,7 +34,6 @@ import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { MlPluginStart } from '@kbn/ml-plugin/public';
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 import { ELASTICSEARCH_URL_PLACEHOLDER } from '@kbn/search-api-panels/constants';
-import { SearchConnectorsPluginStart } from '@kbn/search-connectors-plugin/public';
 import type { SearchNavigationPluginStart } from '@kbn/search-navigation/public';
 import { SearchPlaygroundPluginStart } from '@kbn/search-playground/public';
 import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';

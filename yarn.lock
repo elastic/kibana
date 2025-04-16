@@ -6930,7 +6930,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/search-connectors-plugin@link:x-pack/platform/plugins/shared/content_connectors":
+"@kbn/content-connectors-plugin@link:x-pack/platform/plugins/shared/content_connectors":
   version "0.0.0"
   uid ""
 
