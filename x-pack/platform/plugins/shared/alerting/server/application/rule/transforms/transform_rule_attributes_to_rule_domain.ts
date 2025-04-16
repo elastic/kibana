@@ -174,8 +174,8 @@ export const transformRuleAttributesToRuleDomain = <Params extends RuleParams = 
 
   const artifactsWithInjectedRefs = injectReferencesIntoArtifacts(
     id,
-    esRule.artifacts,
-    references || []
+    references || [],
+    esRule.artifacts
   );
   const params = injectReferencesIntoParams<Params, RuleParams>(
     id,

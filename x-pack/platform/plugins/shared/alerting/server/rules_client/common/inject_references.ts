@@ -80,8 +80,8 @@ export function injectReferencesIntoParams<
 
 export function injectReferencesIntoArtifacts(
   ruleId: string,
-  artifacts: RawRule['artifacts'],
-  references: SavedObjectReference[]
+  references: SavedObjectReference[],
+  artifacts?: RawRule['artifacts']
 ) {
   if (!artifacts) {
     return { dashboards: [] };

@@ -170,7 +170,7 @@ function getPartialRuleFromRaw<Params extends RuleTypeParams>(
           omitGeneratedValues,
         })
       : [],
-    artifacts: injectReferencesIntoArtifacts(opts.id, artifacts, opts.references || []),
+    artifacts: injectReferencesIntoArtifacts(opts.id, opts.references || [], artifacts),
     params: injectReferencesIntoParams(
       opts.id,
       opts.ruleType,
