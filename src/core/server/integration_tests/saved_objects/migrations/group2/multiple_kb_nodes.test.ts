@@ -27,7 +27,7 @@ import {
   BASELINE_TEST_ARCHIVE_500K,
 } from '../kibana_migrator_archive_utils';
 import {
-  DEPRECATED_TYPES,
+  EXCLUDED_TYPES,
   getRelocatingMigratorTestKit,
   kibanaSplitIndex,
 } from '../kibana_migrator_test_kit.fixtures';
@@ -260,7 +260,7 @@ async function createMigratorJobs(nodes: number): Promise<Array<Job<MigrationRes
     const kit = await getRelocatingMigratorTestKit({
       logFilePath: getLogFile(i),
       filterDeprecated: true,
-      deprecatedTypes: DEPRECATED_TYPES,
+      excludedTypes: EXCLUDED_TYPES,
     });
     jobs.push(kit.runMigrations);
   }

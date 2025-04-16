@@ -50,7 +50,7 @@ describe('when upgrading to a new stack version', () => {
         // remove the 'deprecated' type from the mappings, so that it is considered unknown
         const { client, runMigrations } = await getUpToDateMigratorTestKit({
           filterDeprecated: true,
-          deprecatedTypes: ['deprecated'],
+          excludedTypes: ['deprecated'],
           settings: {
             migrations: {
               discardUnknownObjects: nextMinor,
@@ -174,7 +174,7 @@ describe('when upgrading to a new stack version', () => {
         await clearLog();
         const { client, runMigrations } = await getCompatibleMigratorTestKit({
           filterDeprecated: true, // remove the 'deprecated' type from the mappings, so that it is considered unknown
-          deprecatedTypes: ['deprecated'],
+          excludedTypes: ['deprecated'],
           settings: {
             migrations: {
               discardUnknownObjects: nextMinor,
@@ -307,7 +307,7 @@ describe('when upgrading to a new stack version', () => {
     it('the migrator does not skip reindexing', async () => {
       const { client, runMigrations } = await getReindexingMigratorTestKit({
         filterDeprecated: true,
-        deprecatedTypes: ['server'],
+        excludedTypes: ['server'],
       });
 
       await runMigrations();

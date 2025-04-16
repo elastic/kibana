@@ -21,7 +21,7 @@ import {
 } from '../kibana_migrator_test_kit';
 import { BASELINE_TEST_ARCHIVE_1K } from '../kibana_migrator_archive_utils';
 import {
-  DEPRECATED_TYPES,
+  EXCLUDED_TYPES,
   getRelocatingMigratorTestKit,
   kibanaSplitIndex,
 } from '../kibana_migrator_test_kit.fixtures';
@@ -67,7 +67,7 @@ describe('when splitting .kibana into multiple indices and one clone fails', () 
       getRelocatingMigratorTestKit({
         logFilePath,
         filterDeprecated: true,
-        deprecatedTypes: DEPRECATED_TYPES,
+        excludedTypes: EXCLUDED_TYPES,
         relocateTypes: {
           // move 'basic' to a new index
           basic: kibanaSplitIndex,

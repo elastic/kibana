@@ -18,7 +18,7 @@ import {
   nextMinor,
   startElasticsearch,
 } from '../kibana_migrator_test_kit';
-import { DEPRECATED_TYPES, getUpToDateMigratorTestKit } from '../kibana_migrator_test_kit.fixtures';
+import { EXCLUDED_TYPES, getUpToDateMigratorTestKit } from '../kibana_migrator_test_kit.fixtures';
 import {
   BASELINE_TEST_ARCHIVE_500K,
   BASELINE_DOCUMENTS_PER_TYPE_500K,
@@ -55,7 +55,7 @@ describe('multiple migrator instances running in parallel', () => {
         new Array(PARALLEL_MIGRATORS)
           .fill({
             filterDeprecated: true,
-            deprecatedTypes: DEPRECATED_TYPES,
+            excludedTypes: EXCLUDED_TYPES,
             settings: {
               migrations: {
                 discardUnknownObjects: nextMinor,

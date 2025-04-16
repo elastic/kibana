@@ -30,6 +30,7 @@ import {
   BASELINE_TEST_ARCHIVE_500K,
 } from '../kibana_migrator_archive_utils';
 import {
+  EXCLUDED_TYPES,
   getReindexingBaselineTypes,
   getReindexingMigratorTestKit,
   getUpToDateMigratorTestKit,
@@ -129,7 +130,7 @@ describe('v2 migration', () => {
         unknownTypesKit = await getReindexingMigratorTestKit({
           logFilePath,
           // filter out 'task' objects in order to not spawn that migrator for this test
-          types: getReindexingBaselineTypes(true, ['deprecated', 'server']).filter(
+          types: getReindexingBaselineTypes(true, EXCLUDED_TYPES).filter(
             ({ name }) => name !== 'task'
           ),
           settings: {
@@ -166,7 +167,7 @@ describe('v2 migration', () => {
         transformErrorsKit = await getReindexingMigratorTestKit({
           logFilePath,
           // filter out 'task' objects in order to not spawn that migrator for this test
-          types: getReindexingBaselineTypes(true, ['deprecated', 'server']).filter(
+          types: getReindexingBaselineTypes(true, EXCLUDED_TYPES).filter(
             ({ name }) => name !== 'task'
           ),
           settings: {
@@ -228,7 +229,7 @@ describe('v2 migration', () => {
         kit = await getReindexingMigratorTestKit({
           logFilePath,
           filterDeprecated: true,
-          deprecatedTypes: ['deprecated', 'server'],
+          excludedTypes: EXCLUDED_TYPES,
         });
         migrationResults = await kit.runMigrations();
         logs = await readLog(logFilePath);
