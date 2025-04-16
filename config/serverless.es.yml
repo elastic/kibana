@@ -139,4 +139,4 @@ xpack.searchSynonyms.enabled: true
 xpack.searchQueryRules.enabled: false
 
 ## Search Connectors in stack management
-xpack.searchConnectors.enabled: false
+xpack.contentConnectors.enabled: false
