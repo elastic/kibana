@@ -108,8 +108,6 @@ export function getAlertsEmbeddableFactory({
         ...titleManager.api,
         ...unsavedChangesApi,
         defaultTitle$,
-        hideTitle$: titleManager.api.hidePanelTitles$,
-        setHideTitle: titleManager.api.setHidePanelTitles,
         getTypeDisplayName: () =>
           i18n.translate('xpack.slo.editSloAlertswEmbeddable.typeDisplayName', {
             defaultMessage: 'configuration',
