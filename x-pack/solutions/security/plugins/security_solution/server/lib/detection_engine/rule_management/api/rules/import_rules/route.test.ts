@@ -202,7 +202,6 @@ describe.skip('Import rules route', () => {
               message: `Unexpected token 'h', "this is not"... is not valid JSON`,
               status_code: 400,
             },
-            rule_id: '(unknown id)',
           },
         ],
         success: false,
@@ -350,14 +349,12 @@ describe.skip('Import rules route', () => {
               message: 'rule_id: Required',
               status_code: 400,
             },
-            rule_id: '(unknown id)',
           },
           {
             error: {
               message: 'rule_id: Required',
               status_code: 400,
             },
-            rule_id: '(unknown id)',
           },
         ],
         success: false,
