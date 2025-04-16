@@ -20,8 +20,7 @@ const UiSharedDepsNpm = require('@kbn/ui-shared-deps-npm');
 const { distDir: UiSharedDepsSrcDistDir } = require('./src/definitions');
 
 const MOMENT_SRC = require.resolve('moment/min/moment-with-locales.js');
-
-const REPO_ROOT = Path.resolve(__dirname, '..', '..', '..', '..', '..');
+const { REPO_ROOT } = require('@kbn/repo-info');
 
 /** @returns {import('webpack').Configuration} */
 module.exports = {
