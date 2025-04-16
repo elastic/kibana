@@ -183,6 +183,8 @@ const LogsStep = ({ setIsComplete, hasPrivileges, privilegesMissing }: LogStepPr
         },
         flyoutProps: {
           onClose: closeFlyout,
+          'data-test-subj': 'esDeprecationLogsFlyout',
+          'aria-labelledby': 'esDeprecationLogsFlyoutTitle',
         },
       });
     }
