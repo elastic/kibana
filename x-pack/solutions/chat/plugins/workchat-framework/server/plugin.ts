@@ -12,19 +12,20 @@ import type {
   PluginInitializerContext,
   LoggerFactory,
 } from '@kbn/core/server';
-import {
-  createStartServices,
-  createSetupServices,
-  type InternalSetupServices,
-  type InternalStartServices,
-} from './framework';
-import type { WorkChatFrameworkConfig } from './config';
 import type {
   WorkChatFrameworkPluginSetup,
   WorkChatFrameworkPluginStart,
   WorkChatFrameworkPluginSetupDependencies,
   WorkChatFrameworkPluginStartDependencies,
 } from './types';
+import type { WorkChatFrameworkConfig } from './config';
+import {
+  createStartServices,
+  createSetupServices,
+  type InternalSetupServices,
+  type InternalStartServices,
+} from './framework';
+import { registerBuiltInNodeTypes } from './builtin/node_types';
 
 export class WorkChatAppPlugin
   implements
@@ -51,6 +52,10 @@ export class WorkChatAppPlugin
     setupDeps: WorkChatFrameworkPluginSetupDependencies
   ): WorkChatFrameworkPluginSetup {
     this.setupServices = createSetupServices();
+
+    registerBuiltInNodeTypes({
+      registry: this.setupServices.nodeRegistry,
+    });
 
     return {
       workflows: {

@@ -16,7 +16,6 @@ export type {
   NodeFactoryServices,
   NodeFactoryBaseServices,
   NodeRunner,
-  RunNodeResult,
   RunNodeParams,
   NodeEventReporter,
   NodeProgressionReporterEvent,

@@ -7,6 +7,7 @@
 
 import type { MaybePromise } from '@kbn/utility-types';
 import type { NodeRunnerFactory } from './factory';
+import type { DefaultNodeRunnerInput } from './runner';
 
 /**
  * Represents the definition for a given node type.
@@ -14,7 +15,7 @@ import type { NodeRunnerFactory } from './factory';
  * Similar to SOs, vis types and so on, this defines all the properties
  * and handlers that are going to be used to manage the lifecycle of a node type.
  */
-export interface NodeTypeDefinition<CustomServices = {}> {
+export interface NodeTypeDefinition<NodeInput = DefaultNodeRunnerInput, CustomServices = {}> {
   /**
    * The unique identifier for this node type (it's type)
    */
@@ -30,7 +31,7 @@ export interface NodeTypeDefinition<CustomServices = {}> {
   /**
    * The {@link NodeRunnerFactory} for this node type.
    */
-  factory: NodeRunnerFactory<CustomServices>;
+  factory: NodeRunnerFactory<NodeInput, CustomServices>;
   /**
    * Allows defining a handler to return arbitrary services that will be exposed to
    * the {@link NodeRunnerFactory} via it's context, {@link NodeFactoryContext}.

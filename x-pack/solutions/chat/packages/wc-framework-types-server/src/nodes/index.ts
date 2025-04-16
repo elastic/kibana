@@ -13,6 +13,6 @@ export type {
   NodeFactoryServices,
   NodeFactoryBaseServices,
 } from './factory';
-export type { NodeRunner, RunNodeParams, RunNodeResult } from './runner';
+export type { NodeRunner, RunNodeParams } from './runner';
 export type { NodeTypeDefinition, CustomServicesProvider } from './type_definition';
 export type { ScopedNodeProvider } from './internal_services';

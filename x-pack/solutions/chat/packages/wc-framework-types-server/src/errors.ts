@@ -7,7 +7,11 @@
 
 import type { WorkflowExecutionState } from './execution_state';
 
-export type WorkflowExecutionErrorType = 'internalError' | 'workflowNotFound' | 'nodeTypeNotFound';
+export type WorkflowExecutionErrorType =
+  | 'internalError'
+  | 'workflowNotFound'
+  | 'nodeTypeNotFound'
+  | 'toolNotFound';
 
 export interface WorkflowExecutionErrorMeta {
   state?: WorkflowExecutionState;

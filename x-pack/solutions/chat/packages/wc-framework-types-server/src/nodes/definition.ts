@@ -24,11 +24,7 @@ export interface NodeDefinition<NodeTypeConfigType = Record<string, unknown>> {
    */
   description?: string;
   /**
-   * Configure in which context field the output of the node would be written in.
-   */
-  output: string;
-  /**
    * Specific configuration for this node's type.
    */
-  typeConfig: NodeTypeConfigType;
+  configuration: NodeTypeConfigType;
 }

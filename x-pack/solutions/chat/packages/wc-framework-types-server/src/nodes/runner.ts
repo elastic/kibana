@@ -6,14 +6,15 @@
  */
 
 import type { WorkflowState } from '../state';
+import type { WorkflowExecutionState } from '../execution_state';
 import type { NodeEventReporter } from './event_reporter';
 
-type BaseNodeRunnerInput = Record<string, unknown>;
+export type DefaultNodeRunnerInput = Record<string, unknown>;
 
 /**
  * Param type for {@link NodeRunner.run}
  */
-export interface RunNodeParams<Input extends BaseNodeRunnerInput = BaseNodeRunnerInput> {
+export interface RunNodeParams<Input = DefaultNodeRunnerInput> {
   /**
    * Interpolated input for this node, as described in the configuration
    */
@@ -32,29 +33,20 @@ export interface RunNodeParams<Input extends BaseNodeRunnerInput = BaseNodeRunne
    * Event reporter for this run.
    */
   eventReporter: NodeEventReporter;
-}
 
-type BaseNodeRunnerOutput = Record<string, unknown>;
-
-/**
- * Result type for {@link NodeRunner.run}
- */
-export interface RunNodeResult<Output extends BaseNodeRunnerOutput = BaseNodeRunnerOutput> {
   /**
-   * The output from the node run.
+   * The current workflow execute state.
+   * Can be used when manually throwing errors from the node run handler.
    */
-  output: Output;
+  executionState: WorkflowExecutionState;
 }
 
 /**
  * Represents an instance of a node runner.
  */
-export interface NodeRunner<
-  Input extends BaseNodeRunnerInput = BaseNodeRunnerInput,
-  Output extends BaseNodeRunnerOutput = BaseNodeRunnerOutput
-> {
+export interface NodeRunner<Input = DefaultNodeRunnerInput> {
   /**
    * Run the node with the provided inputs.
    */
-  run: (params: RunNodeParams<Input>) => Promise<RunNodeResult<Output>>;
+  run: (params: RunNodeParams<Input>) => Promise<void>;
 }

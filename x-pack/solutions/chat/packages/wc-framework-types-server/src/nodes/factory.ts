@@ -10,7 +10,7 @@ import type { IScopedClusterClient } from '@kbn/core/server';
 import type { ModelProvider } from '../models/model_provider';
 import type { ToolProvider } from '../tools/registry';
 import type { ScopedWorkflowProvider, ScopedRunner } from '../workflows';
-import type { NodeRunner } from './runner';
+import type { NodeRunner, DefaultNodeRunnerInput } from './runner';
 import type { NodeDefinition } from './definition';
 import type { ScopedNodeProvider } from './internal_services';
 
@@ -63,7 +63,7 @@ export type NodeFactoryServices<CustomServices = {}> = CustomServices & NodeFact
  */
 export interface NodeFactoryContext<CustomServices = {}> {
   /**
-   * The configuration bound to this node.
+   * The (non-interpolated) configuration bound to this node.
    */
   nodeConfiguration: NodeDefinition;
   /**
@@ -77,6 +77,6 @@ export interface NodeFactoryContext<CustomServices = {}> {
 /**
  * Represents a factory that can return a runner for a given node type.
  */
-export type NodeRunnerFactory<CustomServices = {}> = (
+export type NodeRunnerFactory<InputShape = DefaultNodeRunnerInput, CustomServices = {}> = (
   context: NodeFactoryContext<CustomServices>
-) => NodeRunner;
+) => NodeRunner<InputShape>;

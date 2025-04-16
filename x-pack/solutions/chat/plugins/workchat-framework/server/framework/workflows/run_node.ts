@@ -72,7 +72,7 @@ const runNode = async ({
 
   // interpolating the node config with the state
   const nodeInput = interpolateNodeConfig({
-    config: nodeDefinition.typeConfig,
+    config: nodeDefinition.configuration,
     state,
   });
 
@@ -89,18 +89,12 @@ const runNode = async ({
     : createNoopNodeEventReporter();
 
   // executing the node
-  const output = await nodeRunner.run({
+  await nodeRunner.run({
     input: nodeInput,
     state,
     eventReporter,
+    executionState: { ...internalContext.executionState },
   });
-
-  // writing output to state
-  const stateOutputField = nodeDefinition.output;
-  state.set(stateOutputField, output);
-
-  // end of node execution
-  return output;
 };
 
 const createBaseNodeServices = ({
