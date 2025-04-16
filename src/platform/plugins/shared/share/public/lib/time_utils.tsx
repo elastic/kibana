@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import kbnDatemath from '@kbn/datemath';
+import dateMath from '@kbn/datemath';
 
 const unitMap = new Map([
   ['s', 'second'],
@@ -19,9 +19,9 @@ const unitMap = new Map([
   ['y', 'year'],
 ]);
 
-export const getRelativeValueAndUnit = (date?: string) => {
-  if (!date) return;
-  const match = date.match(/^now([+-]\d+)([smhdwMy])$/);
+export const getRelativeTimeValueAndUnitFromTimeString = (dateString?: string) => {
+  if (!dateString) return;
+  const match = dateString.match(/^now([+-]\d+)([smhdwMy])$/);
   if (!match) return;
 
   const [, signAndNumber, unit] = match;
@@ -32,10 +32,18 @@ export const getRelativeValueAndUnit = (date?: string) => {
   };
 };
 
-export const convertRelativeToAbsoluteDate = (date?: string) => {
-  const valueParsed = kbnDatemath.parse(date || '');
+export const convertRelativeTimeStringToAbsoluteTimeDate = (dateString?: string) => {
+  if (!dateString) return;
+  const valueParsed = dateMath.parse(dateString);
 
   return valueParsed?.isValid() ? valueParsed.toDate() : undefined;
+};
+
+export const convertRelativeTimeStringToAbsoluteTimeString = (dateString?: string) => {
+  if (!dateString) return dateString;
+  const valueParsed = dateMath.parse(dateString);
+
+  return valueParsed && valueParsed.isValid() ? valueParsed.toISOString() : dateString;
 };
 
 export const isTimeRangeAbsoluteTime = (timeRange?: { from: string; to: string }) =>

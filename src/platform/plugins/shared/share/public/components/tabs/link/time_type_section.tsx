@@ -13,10 +13,10 @@ import { FormattedMessage, FormattedRelativeTime, FormattedDate } from '@kbn/i18
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import {
-  convertRelativeToAbsoluteDate,
-  getRelativeValueAndUnit,
+  convertRelativeTimeStringToAbsoluteTimeDate,
+  getRelativeTimeValueAndUnitFromTimeString,
   isTimeRangeAbsoluteTime,
-} from './time_utils';
+} from '../../../lib/time_utils';
 
 const BoldText = ({ children }: { children: ReactNode }) => {
   const { euiTheme } = useEuiTheme();
@@ -32,7 +32,7 @@ const BoldText = ({ children }: { children: ReactNode }) => {
 };
 
 const AbsoluteTimeText = ({ date }: { date: string }) => {
-  const absoluteDate = convertRelativeToAbsoluteDate(date);
+  const absoluteDate = convertRelativeTimeStringToAbsoluteTimeDate(date);
 
   return (
     <BoldText>
@@ -50,7 +50,7 @@ const AbsoluteTimeText = ({ date }: { date: string }) => {
 };
 
 const RelativeTimeText = ({ date }: { date: string }) => {
-  const result = getRelativeValueAndUnit(date);
+  const result = getRelativeTimeValueAndUnitFromTimeString(date);
 
   return (
     <BoldText>

@@ -9,7 +9,7 @@
 
 import { parse as parseUrl } from 'url';
 import type { SerializableRecord } from '@kbn/utility-types';
-import dateMath from '@kbn/datemath';
+import { convertRelativeTimeStringToAbsoluteTimeString } from '../../lib/time_utils';
 import {
   LegacyShortUrlLocatorParams,
   LEGACY_SHORT_URL_LOCATOR_ID,
@@ -54,19 +54,6 @@ export interface BrowserShortUrlClientDependencies {
   http: BrowserShortUrlClientHttp;
 }
 
-const getAbsoluteTimeRange = (timeRange: { from?: string; to?: string }) => {
-  const parseTime = (value?: string) => {
-    if (!value) return;
-    const parsed = dateMath.parse(value);
-    return parsed && parsed.isValid() ? parsed.toISOString() : value;
-  };
-
-  return {
-    from: parseTime(timeRange.from),
-    to: parseTime(timeRange.to),
-  };
-};
-
 export class BrowserShortUrlClient implements IShortUrlClient {
   constructor(private readonly dependencies: BrowserShortUrlClientDependencies) {}
 
@@ -92,16 +79,24 @@ export class BrowserShortUrlClient implements IShortUrlClient {
     params: ShortUrlCreateParams<P>,
     isAbsoluteTime?: boolean
   ): Promise<ShortUrlCreateResponse<P>> {
-    const getUpdatedParams = (input: ShortUrlCreateParams<P>) => {
+    const getUpdatedParams = (inputParams: ShortUrlCreateParams<P>) => {
+      const timeRange = inputParams.params?.timeRange as SerializableRecord;
       if (isAbsoluteTime)
         return {
-          ...input,
+          ...inputParams,
           params: {
-            ...input.params,
-            timeRange: getAbsoluteTimeRange(input.params?.timeRange as SerializableRecord),
+            ...inputParams.params,
+            timeRange: {
+              from: convertRelativeTimeStringToAbsoluteTimeString(
+                timeRange?.from as string | undefined
+              ),
+              to: convertRelativeTimeStringToAbsoluteTimeString(
+                timeRange?.to as string | undefined
+              ),
+            },
           },
         };
-      return input;
+      return inputParams;
     };
 
     const result = await this.create(getUpdatedParams(params));
