@@ -46,6 +46,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                   },
                 },
                 dashboards: [],
+                queries: [],
               },
             },
           })
@@ -65,6 +66,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                   },
                 },
                 dashboards: [],
+                queries: [],
               },
             },
           })
@@ -84,10 +86,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                   },
                 },
                 dashboards: [],
+                queries: [],
               },
             },
           })
-          .expect(404);
+          .expect(400);
       });
 
       it('unsuccessfully updates a GroupStream with an itself as a member', async () => {
@@ -102,6 +105,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                   },
                 },
                 dashboards: [],
+                queries: [],
               },
             },
           })
@@ -120,6 +124,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                   },
                 },
                 dashboards: [],
+                queries: [],
               },
             },
           })
@@ -152,6 +157,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             },
           },
           dashboards: [],
+          queries: [],
         });
       });
 
@@ -208,6 +214,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                   },
                 },
                 dashboards: [],
+                queries: [],
               },
             },
           })
@@ -226,6 +233,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                   },
                 },
                 dashboards: [],
+                queries: [],
               },
             },
           })

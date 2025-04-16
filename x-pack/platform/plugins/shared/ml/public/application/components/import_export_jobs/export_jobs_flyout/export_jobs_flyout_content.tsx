@@ -9,7 +9,6 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiCheckbox,
-  EuiConfirmModal,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
@@ -18,12 +17,10 @@ import {
   EuiFlyoutHeader,
   EuiLoadingSpinner,
   EuiSpacer,
-  EuiTab,
-  EuiTabs,
   EuiTitle,
 } from '@elastic/eui';
 import type { FC } from 'react';
-import { useEffect, useMemo, useCallback } from 'react';
+import { useEffect, useMemo } from 'react';
 import React, { useState } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -45,39 +42,6 @@ const LoadingSpinner: FC = () => (
       </EuiFlexItem>
     </EuiFlexGroup>
   </>
-);
-
-const SwitchTabsConfirm: FC<{ onCancel: () => void; onConfirm: () => void }> = ({
-  onCancel,
-  onConfirm,
-}) => (
-  <EuiConfirmModal
-    title={i18n.translate('xpack.ml.importExport.exportFlyout.switchTabsConfirm.title', {
-      defaultMessage: 'Change tabs?',
-    })}
-    onCancel={onCancel}
-    onConfirm={onConfirm}
-    cancelButtonText={i18n.translate(
-      'xpack.ml.importExport.exportFlyout.switchTabsConfirm.cancelButton',
-      {
-        defaultMessage: 'Cancel',
-      }
-    )}
-    confirmButtonText={i18n.translate(
-      'xpack.ml.importExport.exportFlyout.switchTabsConfirm.confirmButton',
-      {
-        defaultMessage: 'Confirm',
-      }
-    )}
-    defaultFocusedButton="confirm"
-  >
-    <p>
-      <FormattedMessage
-        id="xpack.ml.importExport.exportFlyout.switchTabsConfirm.text"
-        defaultMessage="Changing tabs will clear currently selected jobs"
-      />
-    </p>
-  </EuiConfirmModal>
 );
 
 export interface ExportJobsFlyoutContentProps {
@@ -119,8 +83,6 @@ export const ExportJobsFlyoutContent = ({
   const [loadingDFAJobs, setLoadingDFAJobs] = useState(true);
 
   const [exporting, setExporting] = useState(false);
-  const [switchTabConfirmVisible, setSwitchTabConfirmVisible] = useState(false);
-  const [switchTabNextTab, setSwitchTabNextTab] = useState<JobType>(currentTab);
   const [selectedJobDependencies, setSelectedJobDependencies] = useState<JobDependencies>([]);
 
   async function onExport() {
@@ -164,12 +126,6 @@ export const ExportJobsFlyoutContent = ({
     }
   }
 
-  function switchTab(jobType: JobType) {
-    setSwitchTabConfirmVisible(false);
-    setSelectedJobIds([]);
-    setSelectedJobType(jobType);
-  }
-
   function onSelectAll() {
     const ids = selectedJobType === 'anomaly-detector' ? adJobIds : dfaJobIds;
     if (selectedJobIds.length === ids.length) {
@@ -178,25 +134,6 @@ export const ExportJobsFlyoutContent = ({
       setSelectedJobIds([...ids]);
     }
   }
-
-  const attemptTabSwitch = useCallback(
-    (jobType: JobType) => {
-      if (jobType === selectedJobType) {
-        return;
-      }
-      // if the user has already selected some jobs, open a confirm modal
-      // rather than changing tabs
-      if (selectedJobIds.length > 0) {
-        setSwitchTabNextTab(jobType);
-        setSwitchTabConfirmVisible(true);
-        return;
-      }
-
-      switchTab(jobType);
-    },
-
-    [selectedJobIds, selectedJobType]
-  );
 
   useEffect(() => {
     setSelectedJobDependencies(
@@ -209,7 +146,6 @@ export const ExportJobsFlyoutContent = ({
       setLoadingADJobs(true);
       setLoadingDFAJobs(true);
       setExporting(false);
-      setSwitchTabConfirmVisible(false);
       setAdJobIds([]);
       setSelectedJobIds([]);
       setSelectedJobType(currentTab);
@@ -282,41 +218,27 @@ export const ExportJobsFlyoutContent = ({
             <h2>
               <FormattedMessage
                 id="xpack.ml.importExport.exportFlyout.flyoutHeader"
-                defaultMessage="Export jobs"
+                defaultMessage="Export {selectedMLType} jobs"
+                values={{
+                  selectedMLType:
+                    currentTab === 'anomaly-detector' ? (
+                      <FormattedMessage
+                        id="xpack.ml.importExport.exportFlyout.adTab"
+                        defaultMessage="Anomaly detection"
+                      />
+                    ) : (
+                      <FormattedMessage
+                        id="xpack.ml.importExport.exportFlyout.dfaTab"
+                        defaultMessage="Analytics"
+                      />
+                    ),
+                }}
               />
             </h2>
           </EuiTitle>
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
           <ExportJobDependenciesWarningCallout jobs={selectedJobDependencies} />
-          <EuiTabs size="s">
-            {isADEnabled === true ? (
-              <EuiTab
-                isSelected={selectedJobType === 'anomaly-detector'}
-                onClick={() => attemptTabSwitch('anomaly-detector')}
-                disabled={exporting}
-                data-test-subj="mlJobMgmtExportJobsADTab"
-              >
-                <FormattedMessage
-                  id="xpack.ml.importExport.exportFlyout.adTab"
-                  defaultMessage="Anomaly detection"
-                />
-              </EuiTab>
-            ) : null}
-            {isDFAEnabled === true ? (
-              <EuiTab
-                isSelected={selectedJobType === 'data-frame-analytics'}
-                onClick={() => attemptTabSwitch('data-frame-analytics')}
-                disabled={exporting}
-                data-test-subj="mlJobMgmtExportJobsDFATab"
-              >
-                <FormattedMessage
-                  id="xpack.ml.importExport.exportFlyout.dfaTab"
-                  defaultMessage="Analytics"
-                />
-              </EuiTab>
-            ) : null}
-          </EuiTabs>
           <EuiSpacer size="s" />
           <>
             {isADEnabled === true && selectedJobType === 'anomaly-detector' && (
@@ -432,13 +354,6 @@ export const ExportJobsFlyoutContent = ({
           </EuiFlexGroup>
         </EuiFlyoutFooter>
       </EuiFlyout>
-
-      {switchTabConfirmVisible === true ? (
-        <SwitchTabsConfirm
-          onCancel={setSwitchTabConfirmVisible.bind(null, false)}
-          onConfirm={() => switchTab(switchTabNextTab)}
-        />
-      ) : null}
     </>
   );
 };

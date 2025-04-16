@@ -6,6 +6,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
+import { ContentRef } from '@kbn/wci-common';
 
 export enum ConversationEventType {
   userMessage = 'user_message',
@@ -53,9 +54,13 @@ export interface AssistantMessage
    */
   content: string;
   /**
-   *
+   * list of tool calls done by the assistant.
    */
   toolCalls: ToolCall[];
+  /**
+   * list of citations that were used by the assistant to generate the message.
+   */
+  citations: ContentRef[];
 }
 
 /**
@@ -99,6 +104,7 @@ export const createAssistantMessage = (
     id: parts.id ?? uuidv4(),
     content: parts.content ?? '',
     toolCalls: parts.toolCalls ?? [],
+    citations: parts.citations ?? [],
     createdAt: parts.createdAt ?? new Date().toISOString(),
   };
 };

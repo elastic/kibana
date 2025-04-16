@@ -15,15 +15,17 @@ import {
   EuiContextMenuPanel,
   EuiHorizontalRule,
   EuiPopover,
+  EuiToolTip,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import type { TabItem, GetTabMenuItems } from '../../types';
+import { GetTabMenuItems, TabItem, TabMenuItemName } from '../../types';
 
 export interface TabMenuProps {
   item: TabItem;
   getTabMenuItems: GetTabMenuItems;
   isPopoverOpen: boolean;
-  setPopover: React.Dispatch<React.SetStateAction<boolean>>;
+  setPopover: (isOpen: boolean) => void;
+  onEnterRenaming: () => void;
 }
 
 export const TabMenu: React.FC<TabMenuProps> = ({
@@ -31,6 +33,7 @@ export const TabMenu: React.FC<TabMenuProps> = ({
   getTabMenuItems,
   isPopoverOpen,
   setPopover,
+  onEnterRenaming,
 }) => {
   const contextMenuPopoverId = useGeneratedHtmlId();
 
@@ -45,25 +48,39 @@ export const TabMenu: React.FC<TabMenuProps> = ({
   const panelItems = useMemo(() => {
     const itemConfigs = getTabMenuItems(item);
 
-    return itemConfigs.map((itemConfig, index) => {
+    const menuItems: React.JSX.Element[] = [];
+
+    itemConfigs.forEach((itemConfig, index) => {
       if (itemConfig === 'divider') {
-        return <EuiHorizontalRule key={`${index}-divider`} margin="none" />;
+        menuItems.push(<EuiHorizontalRule key={`${index}-divider`} margin="none" />);
+        return;
       }
 
-      return (
+      const onClick =
+        itemConfig.name === TabMenuItemName.enterRenamingMode
+          ? onEnterRenaming
+          : itemConfig.onClick;
+
+      if (!onClick) {
+        return;
+      }
+
+      menuItems.push(
         <EuiContextMenuItem
           key={`${index}-${itemConfig.name}`}
           data-test-subj={itemConfig['data-test-subj']}
           onClick={() => {
-            itemConfig.onClick();
             closePopover();
+            setTimeout(onClick, 100); // run it after Eui handles closing the popover so our changes to focus work correctly
           }}
         >
           {itemConfig.label}
         </EuiContextMenuItem>
       );
     });
-  }, [item, getTabMenuItems, closePopover]);
+
+    return menuItems;
+  }, [item, getTabMenuItems, closePopover, onEnterRenaming]);
 
   return (
     <EuiPopover
@@ -74,14 +91,17 @@ export const TabMenu: React.FC<TabMenuProps> = ({
       anchorPosition="downLeft"
       closePopover={closePopover}
       button={
-        <EuiButtonIcon
-          aria-label={menuButtonLabel}
-          title={menuButtonLabel}
-          color="text"
-          data-test-subj={`unifiedTabs_tabMenuBtn_${item.id}`}
-          iconType="boxesVertical"
-          onClick={() => setPopover((prev) => !prev)}
-        />
+        <EuiToolTip content={menuButtonLabel}>
+          <EuiButtonIcon
+            // semantically role="tablist" does not allow other buttons in tabs
+            aria-hidden={true}
+            tabIndex={-1}
+            color="text"
+            data-test-subj={`unifiedTabs_tabMenuBtn_${item.id}`}
+            iconType="boxesVertical"
+            onClick={() => setPopover(!isPopoverOpen)}
+          />
+        </EuiToolTip>
       }
     >
       <EuiContextMenuPanel items={panelItems} />

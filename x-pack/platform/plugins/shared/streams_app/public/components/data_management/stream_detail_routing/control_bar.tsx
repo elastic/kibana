@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiButton, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
+import { EuiFlexGroup, EuiButton, EuiFlexItem, EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { IngestUpsertRequest } from '@kbn/streams-schema';
+import { IngestUpsertRequest, isCondition } from '@kbn/streams-schema';
 import React from 'react';
 import { useAbortController } from '@kbn/react-hooks';
 import { useKibana } from '../../../hooks/use_kibana';
@@ -123,29 +123,30 @@ export function ControlBar() {
         title: i18n.translate('xpack.streams.streamDetailRouting.saved', {
           defaultMessage: 'Stream saved',
         }),
-        text: toMountPoint(
-          <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                data-test-subj="streamsAppSaveOrUpdateChildrenOpenStreamInNewTabButton"
-                size="s"
-                target="_blank"
-                href={router.link('/{key}/{tab}/{subtab}', {
-                  path: {
-                    key: routingAppState.childUnderEdit?.child.destination!,
-                    tab: 'management',
-                    subtab: 'route',
-                  },
-                })}
-              >
-                {i18n.translate('xpack.streams.streamDetailRouting.view', {
-                  defaultMessage: 'Open stream in new tab',
-                })}
-              </EuiButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>,
-          core
-        ),
+        text: routingAppState.childUnderEdit?.child.destination
+          ? toMountPoint(
+              <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    data-test-subj="streamsAppSaveOrUpdateChildrenOpenStreamInNewTabButton"
+                    size="s"
+                    target="_blank"
+                    href={router.link('/{key}/management/{tab}', {
+                      path: {
+                        key: routingAppState.childUnderEdit.child.destination,
+                        tab: 'route',
+                      },
+                    })}
+                  >
+                    {i18n.translate('xpack.streams.streamDetailRouting.view', {
+                      defaultMessage: 'Open stream in new tab',
+                    })}
+                  </EuiButton>
+                </EuiFlexItem>
+              </EuiFlexGroup>,
+              core
+            )
+          : undefined,
       });
       routingAppState.setLastDisplayedToast(toast);
       routingAppState.selectChildUnderEdit(undefined);
@@ -169,7 +170,7 @@ export function ControlBar() {
           <EuiButtonEmpty
             color="danger"
             size="s"
-            disabled={routingAppState.saveInProgress}
+            disabled={routingAppState.saveInProgress || !definition.privileges.manage}
             data-test-subj="streamsAppRoutingStreamEntryRemoveButton"
             onClick={() => {
               routingAppState.setShowDeleteModal(true);
@@ -194,19 +195,35 @@ export function ControlBar() {
             defaultMessage: 'Cancel',
           })}
         </EuiButtonEmpty>
-        <EuiButton
-          isLoading={routingAppState.saveInProgress}
-          onClick={saveOrUpdateChildren}
-          data-test-subj="streamsAppStreamDetailRoutingSaveButton"
+        <EuiToolTip
+          content={
+            !definition.privileges.manage
+              ? i18n.translate('xpack.streams.streamDetailRouting.onlySimulate', {
+                  defaultMessage: "You don't have sufficient privileges to save changes.",
+                })
+              : undefined
+          }
         >
-          {routingAppState.childUnderEdit && routingAppState.childUnderEdit.isNew
-            ? i18n.translate('xpack.streams.streamDetailRouting.add', {
-                defaultMessage: 'Save',
-              })
-            : i18n.translate('xpack.streams.streamDetailRouting.change', {
-                defaultMessage: 'Change routing',
-              })}
-        </EuiButton>
+          <EuiButton
+            isLoading={routingAppState.saveInProgress}
+            disabled={
+              routingAppState.saveInProgress ||
+              !definition.privileges.manage ||
+              (routingAppState.childUnderEdit &&
+                !isCondition(routingAppState.childUnderEdit.child.if))
+            }
+            onClick={saveOrUpdateChildren}
+            data-test-subj="streamsAppStreamDetailRoutingSaveButton"
+          >
+            {routingAppState.childUnderEdit && routingAppState.childUnderEdit.isNew
+              ? i18n.translate('xpack.streams.streamDetailRouting.add', {
+                  defaultMessage: 'Save',
+                })
+              : i18n.translate('xpack.streams.streamDetailRouting.change', {
+                  defaultMessage: 'Change routing',
+                })}
+          </EuiButton>
+        </EuiToolTip>
       </EuiFlexGroup>
     </EuiFlexGroup>
   );
