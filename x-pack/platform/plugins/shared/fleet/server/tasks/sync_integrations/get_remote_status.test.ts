@@ -6,7 +6,7 @@
  */
 
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
-import fetch from 'node-fetch';
+import fetch, { FetchError } from 'node-fetch';
 
 import { loggerMock } from '@kbn/logging-mocks';
 import type { Logger } from '@kbn/core/server';
@@ -243,5 +243,33 @@ describe('getRemoteSyncedIntegrationsInfoByOutputId', () => {
     await expect(
       getRemoteSyncedIntegrationsInfoByOutputId(soClientMock, 'remote1')
     ).rejects.toThrowError('some error');
+  });
+
+  it('should return error if the fetch returns invalid-json error', async () => {
+    jest
+      .spyOn(mockedAppContextService, 'getExperimentalFeatures')
+      .mockReturnValue({ enableSyncIntegrationsOnRemote: true } as any);
+    mockedOutputService.get.mockResolvedValue({
+      ...output,
+      sync_integrations: true,
+      kibana_url: 'http://remote-kibana-host/invalid',
+      kibana_api_key: 'APIKEY',
+    } as any);
+
+    mockedFetch.mockResolvedValueOnce({
+      json: () => {
+        const err = new FetchError(`some error`, 'invalid-json');
+        err.type = 'invalid-json';
+        err.message = `some error`;
+        throw err;
+      },
+      status: 404,
+      statusText: 'Not Found',
+    } as any);
+    expect(await getRemoteSyncedIntegrationsInfoByOutputId(soClientMock, 'remote1')).toEqual({
+      integrations: [],
+      error:
+        'GET http://remote-kibana-host/invalid/api/fleet/remote_synced_integrations/status failed with status 404. some error',
+    });
   });
 });
