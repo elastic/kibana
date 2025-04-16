@@ -6,7 +6,7 @@
  */
 
 import type { Provider } from '../utils';
-import type { NodeDefinition, RunNodeResult } from '../nodes';
+import type { NodeDefinition } from '../nodes';
 import type { WorkflowState } from '../state';
 import type { WorkflowDefinition } from './definition';
 import type { RunWorkflowParams, RunWorkflowOutput } from './runner';
@@ -40,7 +40,6 @@ export interface ScopedRunnerRunNodeParams {
 }
 
 export type ScopedRunnerRunWorkflowOutput = RunWorkflowOutput;
-export type ScopedRunnerRunNodeOutput = RunNodeResult;
 
 /**
  * An internal runner scoped to the current workflow execution context.
@@ -57,7 +56,7 @@ export interface ScopedRunner {
   /**
    * Run a node definition, using a context bound to the current execution flow.
    */
-  runNode(params: ScopedRunnerRunNodeParams): Promise<ScopedRunnerRunNodeOutput>;
+  runNode(params: ScopedRunnerRunNodeParams): Promise<void>;
 }
 
 export type ScopedWorkflowProvider = Provider<WorkflowDefinition>;
