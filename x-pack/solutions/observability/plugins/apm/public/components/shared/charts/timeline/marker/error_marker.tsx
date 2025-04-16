@@ -54,7 +54,8 @@ export function ErrorMarker({ mark }: Props) {
   const [isPopoverOpen, showPopover] = useState(false);
   const { query } = useAnyOfApmParams(
     '/services/{serviceName}/overview',
-    '/services/{serviceName}/errors'
+    '/services/{serviceName}/errors',
+    '/services/{serviceName}/transactions/view'
   );
 
   const togglePopover = () => showPopover(!isPopoverOpen);
