@@ -11,7 +11,7 @@ import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 
 import { SpyRoute } from '../common/utils/route/spy_routes';
 import { NotFoundPage } from '../app/404';
-
+import { withSecurityRoutePageWrapper } from '../common/components/security_route_page_wrapper';
 import {
   ENTITY_ANALYTICS_ASSET_CRITICALITY_PATH,
   ENTITY_ANALYTICS_ENTITY_STORE_MANAGEMENT_PATH,
@@ -150,22 +150,52 @@ EntityAnalyticsPrivilegedUserMonitoringContainer.displayName =
 export const routes = [
   {
     path: ENTITY_ANALYTICS_MANAGEMENT_PATH,
-    component: EntityAnalyticsManagementContainer,
+    component: withSecurityRoutePageWrapper(
+      EntityAnalyticsManagementContainer,
+      SecurityPageName.entityAnalyticsManagement,
+      {
+        redirectOnMissing: true,
+      }
+    ),
   },
   {
     path: ENTITY_ANALYTICS_ASSET_CRITICALITY_PATH,
-    component: EntityAnalyticsAssetClassificationContainer,
+    component: withSecurityRoutePageWrapper(
+      EntityAnalyticsAssetClassificationContainer,
+      SecurityPageName.entityAnalyticsAssetClassification,
+      {
+        redirectOnMissing: true,
+      }
+    ),
   },
   {
     path: ENTITY_ANALYTICS_ENTITY_STORE_MANAGEMENT_PATH,
-    component: EntityAnalyticsEntityStoreContainer,
+    component: withSecurityRoutePageWrapper(
+      EntityAnalyticsEntityStoreContainer,
+      SecurityPageName.entityAnalyticsEntityStoreManagement,
+      {
+        redirectOnMissing: true,
+      }
+    ),
   },
   {
     path: ENTITY_ANALYTICS_LANDING_PATH,
-    component: EntityAnalyticsLandingContainer,
+    component: withSecurityRoutePageWrapper(
+      EntityAnalyticsLandingContainer,
+      SecurityPageName.entityAnalyticsLanding,
+      {
+        redirectOnMissing: true,
+      }
+    ),
   },
   {
     path: ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_PATH,
-    component: EntityAnalyticsPrivilegedUserMonitoringContainer,
+    component: withSecurityRoutePageWrapper(
+      EntityAnalyticsPrivilegedUserMonitoringContainer,
+      SecurityPageName.privilegedUserMonitoring,
+      {
+        redirectOnMissing: true,
+      }
+    ),
   },
 ];
