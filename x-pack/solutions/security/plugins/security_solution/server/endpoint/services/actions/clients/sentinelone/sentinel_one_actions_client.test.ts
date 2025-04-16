@@ -2019,7 +2019,7 @@ describe('SentinelOneActionsClient class', () => {
       );
     });
 
-    it('should search sentinelone agent index with expected query', async () => {
+    it('should search sentinelone agent index with correct index name', async () => {
       await expect(s1ActionsClient.isolate(createS1IsolationOptions())).resolves.toBeTruthy();
 
       expect(classConstructorOptions.esClient.search).toHaveBeenCalledWith({
@@ -2034,7 +2034,7 @@ describe('SentinelOneActionsClient class', () => {
           },
         },
         ignore_unavailable: true,
-        index: ['logs-sentinel_one.agent-foo'],
+        index: ['logs-sentinel_one.agent-foo'], // << Important: should NOT contain a index pattern
         query: {
           bool: { filter: [{ terms: { 'sentinel_one.agent.agent.id': ['1-2-3'] } }] },
         },

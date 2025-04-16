@@ -322,6 +322,30 @@ describe('MS Defender response actions client', () => {
       );
     });
 
+    it('should search for MS defender agent using correct index names', async () => {
+      await expect(
+        msClientMock.isolate(responseActionsClientMock.createIsolateOptions())
+      ).resolves.toBeTruthy();
+
+      expect(clientConstructorOptionsMock.esClient.search).toHaveBeenCalledWith({
+        _source: false,
+        collapse: {
+          field: 'cloud.instance.id',
+          inner_hits: {
+            _source: ['agent', 'cloud.instance.id', 'event.created'],
+            name: 'most_recent',
+            size: 1,
+            sort: [{ 'event.created': 'desc' }],
+          },
+        },
+        ignore_unavailable: true,
+        index: ['logs-microsoft_defender_endpoint.log-default'], // << Important: should NOT contain a index pattern
+        query: {
+          bool: { filter: [{ terms: { 'cloud.instance.id': ['1-2-3'] } }] },
+        },
+      });
+    });
+
     it('should error is unable to find MS agent in ingested data', async () => {
       applyEsClientSearchMock({
         esClientMock: clientConstructorOptionsMock.esClient,
