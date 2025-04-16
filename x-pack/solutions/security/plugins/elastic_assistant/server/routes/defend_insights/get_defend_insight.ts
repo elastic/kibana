@@ -89,22 +89,27 @@ export const getDefendInsightRoute = (router: IRouter<ElasticAssistantRequestHan
             });
           }
 
-          const defendInsight = await updateDefendInsightLastViewedAt({
-            dataClient,
-            id: request.params.id,
+          const defendInsights = await dataClient.findDefendInsightsByParams({
+            params: { ids: [request.params.id] },
             authenticatedUser,
           });
 
-          if (defendInsight) {
+          if (defendInsights.length) {
             await runExternalCallbacks(
               CallbackIds.DefendInsightsPostFetch,
               request,
-              defendInsight.endpointIds
+              defendInsights[0].endpointIds
             );
           }
 
+          const updatedDefendInsight = await updateDefendInsightLastViewedAt({
+            dataClient,
+            defendInsights,
+            authenticatedUser,
+          });
+
           return response.ok({
-            body: { data: defendInsight },
+            body: { data: updatedDefendInsight },
           });
         } catch (err) {
           logger.error(err);

@@ -172,63 +172,59 @@ describe('defend insights route helpers', () => {
   });
 
   describe('updateDefendInsightLastViewedAt', () => {
-    it('should update lastViewedAt time', async () => {
+    it('should update lastViewedAt time for a single insight', async () => {
       // ensure difference regardless of processing speed
       const startTime = new Date().getTime() - 1;
       const insightId = 'defend-insight-id1';
       const backingIndex = 'backing-index';
-      const params = {
+
+      const insight: any = {
         id: insightId,
+        backingIndex,
+      };
+
+      const params = {
+        defendInsights: [insight],
         authenticatedUser: {} as any,
         dataClient: {
-          findDefendInsightsByParams: jest
-            .fn()
-            .mockResolvedValueOnce([{ id: insightId, backingIndex }]),
           updateDefendInsights: jest.fn().mockResolvedValueOnce([{ id: insightId }]),
         } as any,
       };
+
       const result = await updateDefendInsightLastViewedAt(params);
 
-      expect(params.dataClient.findDefendInsightsByParams).toHaveBeenCalledTimes(1);
-      expect(params.dataClient.findDefendInsightsByParams).toHaveBeenCalledWith({
-        params: { ids: [insightId] },
-        authenticatedUser: params.authenticatedUser,
-      });
       expect(params.dataClient.updateDefendInsights).toHaveBeenCalledTimes(1);
       expect(params.dataClient.updateDefendInsights).toHaveBeenCalledWith({
         defendInsightsUpdateProps: [
           expect.objectContaining({
             id: insightId,
             backingIndex,
+            lastViewedAt: expect.any(String),
           }),
         ],
         authenticatedUser: params.authenticatedUser,
       });
-      expect(
-        new Date(
-          params.dataClient.updateDefendInsights.mock.calls[0][0].defendInsightsUpdateProps[0].lastViewedAt
-        ).getTime()
-      ).toBeGreaterThan(startTime);
+
+      const updatedAt = new Date(
+        params.dataClient.updateDefendInsights.mock.calls[0][0].defendInsightsUpdateProps[0].lastViewedAt
+      ).getTime();
+      expect(updatedAt).toBeGreaterThan(startTime);
+
       expect(result).toEqual({ id: insightId });
     });
 
-    it('should return undefined if defend insight not found', async () => {
-      const insightId = 'defend-insight-id1';
+    it('should return undefined if no insights were provided', async () => {
       const params = {
-        id: insightId,
+        defendInsights: [],
         authenticatedUser: {} as any,
         dataClient: {
-          findDefendInsightsByParams: jest.fn().mockResolvedValueOnce([]),
-          updateDefendInsight: jest.fn(),
+          updateDefendInsights: jest.fn(),
         } as any,
       };
+
       const result = await updateDefendInsightLastViewedAt(params);
 
-      expect(params.dataClient.findDefendInsightsByParams).toHaveBeenCalledTimes(1);
-      expect(params.dataClient.findDefendInsightsByParams).toHaveBeenCalledWith({
-        params: { ids: [insightId] },
-        authenticatedUser: params.authenticatedUser,
-      });
+      expect(params.dataClient.updateDefendInsights).not.toHaveBeenCalled();
       expect(result).toBeUndefined();
     });
   });

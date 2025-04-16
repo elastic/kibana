@@ -26,7 +26,6 @@ import {
   DEFEND_INSIGHTS_ID,
   DefendInsightStatus,
   DefendInsightType,
-  DefendInsightsGetRequestQuery,
 } from '@kbn/elastic-assistant-common';
 import type { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
@@ -365,18 +364,14 @@ export async function updateDefendInsights({
 }
 
 export async function updateDefendInsightsLastViewedAt({
-  params,
+  defendInsights,
   authenticatedUser,
   dataClient,
 }: {
-  params: DefendInsightsGetRequestQuery;
+  defendInsights: DefendInsightsResponse[];
   authenticatedUser: AuthenticatedUser;
   dataClient: DefendInsightsDataClient;
 }): Promise<DefendInsightsResponse[]> {
-  const defendInsights = await dataClient.findDefendInsightsByParams({
-    params,
-    authenticatedUser,
-  });
   if (!defendInsights.length) {
     return [];
   }
@@ -396,16 +391,20 @@ export async function updateDefendInsightsLastViewedAt({
 }
 
 export async function updateDefendInsightLastViewedAt({
-  id,
+  defendInsights,
   authenticatedUser,
   dataClient,
 }: {
-  id: string;
+  defendInsights: DefendInsightsResponse[];
   authenticatedUser: AuthenticatedUser;
   dataClient: DefendInsightsDataClient;
 }): Promise<DefendInsightsResponse | undefined> {
   return (
-    await updateDefendInsightsLastViewedAt({ params: { ids: [id] }, authenticatedUser, dataClient })
+    await updateDefendInsightsLastViewedAt({
+      defendInsights,
+      authenticatedUser,
+      dataClient,
+    })
   )[0];
 }
 

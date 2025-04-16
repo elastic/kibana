@@ -45,12 +45,13 @@ describe('getDefendInsightRoute', () => {
   function getDefaultDataClient(): DefendInsightsDataClient {
     return {
       findDefendInsightByConnectorId: jest.fn(),
+      findDefendInsightsByParams: jest.fn().mockResolvedValue([mockCurrentInsight]),
       updateDefendInsight: jest.fn(),
       createDefendInsight: jest.fn(),
       getDefendInsight: jest.fn(),
+      updateDefendInsights: jest.fn(),
     } as unknown as DefendInsightsDataClient;
   }
-
   beforeEach(() => {
     const tools = requestContextMock.createTools();
     context = tools.context;
@@ -64,7 +65,9 @@ describe('getDefendInsightRoute', () => {
     context.elasticAssistant.getCurrentUser.mockResolvedValue(mockUser);
     context.elasticAssistant.getDefendInsightsDataClient.mockResolvedValue(mockDataClient);
     getDefendInsightRoute(server.router);
-    (updateDefendInsightLastViewedAt as jest.Mock).mockResolvedValue(mockCurrentInsight);
+    (updateDefendInsightLastViewedAt as jest.Mock).mockImplementation(
+      async ({ defendInsights }) => defendInsights?.[0]
+    );
     (isDefendInsightsEnabled as jest.Mock).mockReturnValue(true);
   });
 
@@ -160,6 +163,30 @@ describe('getDefendInsightRoute', () => {
     });
   });
 
+  it('should call findDefendInsightsByParams with correct id and user', async () => {
+    const request = getDefendInsightRequest('insight-id1');
+
+    await server.inject(request, requestContextMock.convertContext(context));
+
+    expect(mockDataClient.findDefendInsightsByParams).toHaveBeenCalledWith({
+      params: { ids: ['insight-id1'] },
+      authenticatedUser: mockUser,
+    });
+  });
+
+  it('should call updateDefendInsightLastViewedAt with defendInsights and user', async () => {
+    await server.inject(
+      getDefendInsightRequest('insight-id1'),
+      requestContextMock.convertContext(context)
+    );
+
+    expect(updateDefendInsightLastViewedAt).toHaveBeenCalledWith({
+      dataClient: mockDataClient,
+      defendInsights: [mockCurrentInsight],
+      authenticatedUser: mockUser,
+    });
+  });
+
   describe('runExternalCallbacks', () => {
     it('should call runExternalCallbacks if defendInsight is returned', async () => {
       const runExternalCallbacks = jest.requireMock('./helpers').runExternalCallbacks as jest.Mock;
@@ -197,8 +224,9 @@ describe('getDefendInsightRoute', () => {
       });
     });
 
-    it('should not call runExternalCallbacks if updateDefendInsightLastViewedAt returns null', async () => {
+    it('should still call runExternalCallbacks even if updateDefendInsightLastViewedAt returns null', async () => {
       const runExternalCallbacks = jest.requireMock('./helpers').runExternalCallbacks as jest.Mock;
+
       (updateDefendInsightLastViewedAt as jest.Mock).mockResolvedValueOnce(null);
 
       const response = await server.inject(
@@ -208,7 +236,7 @@ describe('getDefendInsightRoute', () => {
 
       expect(response.status).toEqual(200);
       expect(response.body).toEqual({ data: null });
-      expect(runExternalCallbacks).not.toHaveBeenCalled();
+      expect(runExternalCallbacks).toHaveBeenCalled();
     });
   });
 });

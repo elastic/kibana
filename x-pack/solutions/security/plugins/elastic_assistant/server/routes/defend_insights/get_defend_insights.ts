@@ -93,8 +93,7 @@ export const getDefendInsightsRoute = (router: IRouter<ElasticAssistantRequestHa
             });
           }
 
-          const defendInsights = await updateDefendInsightsLastViewedAt({
-            dataClient,
+          const defendInsights = await dataClient.findDefendInsightsByParams({
             params: request.query,
             authenticatedUser,
           });
@@ -106,9 +105,15 @@ export const getDefendInsightsRoute = (router: IRouter<ElasticAssistantRequestHa
             await runExternalCallbacks(CallbackIds.DefendInsightsPostFetch, request, agentIds);
           }
 
+          const updatedDefendInsights = await updateDefendInsightsLastViewedAt({
+            dataClient,
+            defendInsights,
+            authenticatedUser,
+          });
+
           return response.ok({
             body: {
-              data: defendInsights,
+              data: updatedDefendInsights,
             },
           });
         } catch (err) {
