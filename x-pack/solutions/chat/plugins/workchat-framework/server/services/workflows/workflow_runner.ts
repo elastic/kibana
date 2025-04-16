@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import type { WorkflowDefinition, WorkflowRunner } from '@kbn/wc-framework-types-server';
+import { v4 as uuidv4 } from 'uuid';
+import {
+  type WorkflowDefinition,
+  type WorkflowRunner,
+  WorkflowExecutionError,
+} from '@kbn/wc-framework-types-server';
 import type { Logger, CoreStart } from '@kbn/core/server';
 import type { ModelProviderFactory } from '../model_provider';
 import type { ToolRegistry } from '../tools';
@@ -15,6 +20,7 @@ import {
   createInternalRunner,
   type WorkflowRunnerInternalContextWithoutRunner,
 } from './scoped_runner';
+import { createInitialExecutionState } from './utils';
 
 export interface GetWorkflowRunnerParams {
   logger: Logger;
@@ -54,10 +60,15 @@ export const getWorkflowRunner = (params: GetWorkflowRunnerParams): WorkflowRunn
       toolProvider: customToolProvider,
     } = options;
 
+    const runId = uuidv4();
+    const executionState = createInitialExecutionState({ runId, workflowId });
+
     const workflowDefinition = await getWorkflowDefinition(workflowId);
     if (!workflowDefinition) {
-      // TODO: structured error, see comment on WorkflowRunner
-      throw new Error('workflow not found');
+      // TODO: error creation helper, later
+      throw new WorkflowExecutionError('workflow not found', 'workflowNotFound', {
+        state: executionState,
+      });
     }
 
     const modelProvider = await modelProviderFactory({ request, defaultConnectorId });
@@ -71,6 +82,7 @@ export const getWorkflowRunner = (params: GetWorkflowRunnerParams): WorkflowRunn
       toolProvider: customToolProvider ?? toolRegistry.asToolProvider(),
       esClusterClient: elasticsearch.client.asScoped(request),
       eventHandler: onEvent, // TODO: we want to always have a default one, dispatching to telemetry or something
+      executionState,
     };
 
     const scopedRunner = createInternalRunner({ internalContext });

@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-export enum WorkflowExecutionErrorType {
-  internalError = 'internalError',
-}
+import type { WorkflowExecutionState } from './execution_state';
+
+export type WorkflowExecutionErrorType = 'internalError' | 'workflowNotFound';
 
 export interface WorkflowExecutionErrorMeta {
-  workflowId: string;
-  stepId?: string;
+  state?: WorkflowExecutionState;
 }
 
 export class WorkflowExecutionError extends Error {

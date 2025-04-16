@@ -45,7 +45,9 @@ export type {
 export type { Registry, Provider, AsyncProvider } from './src/utils';
 export {
   WorkflowExecutionError,
-  WorkflowExecutionErrorType,
   isWorkflowExecutionError,
+  type WorkflowExecutionErrorType,
   type WorkflowExecutionErrorMeta,
 } from './src/errors';
+export type { NodeRef, WorkflowRef, CallChainRef, CallChain } from './src/call_chain';
+export type { WorkflowExecutionState } from './src/execution_state';

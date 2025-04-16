@@ -10,6 +10,7 @@ import type {
   WorkflowRunEventHandler,
   ModelProvider,
   ToolProvider,
+  WorkflowExecutionState,
 } from '@kbn/wc-framework-types-server';
 import type { Logger, KibanaRequest, IScopedClusterClient } from '@kbn/core/server';
 import type { NodeTypeRegistry } from '../nodes';
@@ -27,8 +28,9 @@ export interface WorkflowRunnerInternalContext {
   nodeRegistry: NodeTypeRegistry;
   eventHandler?: WorkflowRunEventHandler;
   toolProvider: ToolProvider;
-  scopedRunner: InternalScopedRunner;
   esClusterClient: IScopedClusterClient;
+  executionState: WorkflowExecutionState;
+  getRunner: () => InternalScopedRunner;
 }
 
 export type ScopedNodeRunnerFn = ScopedRunner['runNode'];

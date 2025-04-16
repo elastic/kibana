@@ -11,7 +11,7 @@ import { createWorkflowRunner } from './run_workflow';
 
 export type WorkflowRunnerInternalContextWithoutRunner = Omit<
   WorkflowRunnerInternalContext,
-  'scopedRunner'
+  'getRunner'
 >;
 
 export const createInternalRunner = ({
@@ -19,10 +19,17 @@ export const createInternalRunner = ({
 }: {
   internalContext: WorkflowRunnerInternalContextWithoutRunner;
 }): InternalScopedRunner => {
+  // let runner: InternalScopedRunner | undefined;
+
   const contextWithInjectedRunner: WorkflowRunnerInternalContext = {
     ...internalContext,
     // using a stub implementation, will replace once the runner is created
-    scopedRunner: createStubRunner(),
+    getRunner: () => {
+      if (!runner) {
+        throw new Error('accessing runner before end of init phase');
+      }
+      return runner;
+    },
   };
 
   const runNode = createNodeRunner({ internalContext: contextWithInjectedRunner });
@@ -33,19 +40,5 @@ export const createInternalRunner = ({
     runWorkflow,
   };
 
-  // inject the created runner into the context so that runNode and runWorkflow can access it.
-  contextWithInjectedRunner.scopedRunner = runner;
-
   return runner;
-};
-
-const createStubRunner = (): InternalScopedRunner => {
-  return {
-    runNode: () => {
-      throw new Error('stubRunner');
-    },
-    runWorkflow: () => {
-      throw new Error('stubRunner');
-    },
-  };
 };

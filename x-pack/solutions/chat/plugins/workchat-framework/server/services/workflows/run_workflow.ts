@@ -11,7 +11,7 @@ import type {
   ScopedRunnerRunWorkflowOutput,
 } from '@kbn/wc-framework-types-server';
 import type { WorkflowRunnerInternalContext, ScopedWorkflowRunnerFn } from './types';
-import { createInitialState } from './utils';
+import { createInitialState, enterWorkflow } from './utils';
 
 export type RunWorkflowParams = ScopedRunnerRunWorkflowParams & {
   internalContext: WorkflowRunnerInternalContext;
@@ -36,23 +36,32 @@ export const runWorkflow = async ({
   inputs,
   internalContext,
 }: RunWorkflowParams): Promise<ScopedRunnerRunWorkflowOutput> => {
+  // update the execution state - context is already a copy, it's safe to reference
+  internalContext.executionState = enterWorkflow({
+    parent: internalContext.executionState,
+    workflowId: workflowDefinition.id,
+  });
+
+  const internalRunner = internalContext.getRunner();
+
   // TODO: validate input shape.
 
   const state = createInitialState({ inputs });
 
   // TODO: check for function workflows and handle them...
 
-  // TODO: execute steps...
   const stepDefinitions = (workflowDefinition as GraphWorkflowDefinition).steps;
   for (let i = 0; i < stepDefinitions.length; i++) {
-    const stepDefinition = stepDefinitions[i];
+    const nodeDefinition = stepDefinitions[i];
 
-    const output = stepRunner({ stepDefinition, state, workflowId: workflowDefinition.id });
+    await internalRunner.runNode({
+      nodeDefinition,
+      state,
+    });
   }
 
-  // TODO: return type
   return {
-    runId: 'foo',
-    output: 'something',
+    runId: internalContext.executionState.runId,
+    output: {}, // TODO: extract from state
   };
 };

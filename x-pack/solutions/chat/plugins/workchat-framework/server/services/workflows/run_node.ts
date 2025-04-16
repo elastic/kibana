@@ -16,6 +16,7 @@ import {
   createNoopNodeEventReporter,
   createNodeEventReporter,
   interpolateNodeConfig,
+  enterNode,
 } from './utils';
 
 /**
@@ -41,6 +42,11 @@ const runNode = async ({
   state,
   internalContext,
 }: RunStepParams): Promise<ScopedRunnerRunNodeOutput> => {
+  // update the execution state - context is already a copy, it's safe to reference
+  internalContext.executionState = enterNode({
+    parent: internalContext.executionState,
+    nodeId: nodeDefinition.id,
+  });
   const { nodeRegistry, eventHandler } = internalContext;
   // TODO: check if node type is registered
 
@@ -67,7 +73,7 @@ const runNode = async ({
     ? createNodeEventReporter({
         onEvent: eventHandler,
         meta: {
-          workflowId: internalContext.workflowId,
+          workflowId: internalContext.executionState.workflowId,
           nodeId: nodeDefinition.id,
           nodeType: nodeDefinition.type,
         },
@@ -97,7 +103,7 @@ const createBaseNodeServices = ({
     esClusterClient,
     nodeRegistry,
     workflowRegistry,
-    scopedRunner,
+    getRunner,
   },
 }: {
   internalContext: WorkflowRunnerInternalContext;
@@ -109,6 +115,6 @@ const createBaseNodeServices = ({
     esClusterClient,
     nodeRegistry,
     workflowRegistry,
-    workflowRunner: scopedRunner,
+    workflowRunner: getRunner(),
   };
 };
