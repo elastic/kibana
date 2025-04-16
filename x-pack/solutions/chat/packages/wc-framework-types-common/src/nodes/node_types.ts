@@ -5,5 +5,8 @@
  * 2.0.
  */
 
-export type { NodeEvent, NodeProgressionEvent, NodeProgressionEventMeta } from './node_events';
-export { BuiltInNodeTypes } from './node_types';
+export enum BuiltInNodeTypes {
+  parallelSequences = 'parallelSequences',
+  toolExecution = 'toolExecution',
+  workflowExecution = 'workflowExecution',
+}
