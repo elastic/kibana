@@ -18,11 +18,11 @@ import {
   Settings,
   Wordcloud,
   RenderChangeListener,
-  LEGACY_LIGHT_THEME,
   ElementClickListener,
   WordCloudElementEvent,
 } from '@elastic/charts';
 import { EmptyPlaceholder } from '@kbn/charts-plugin/public';
+import { useElasticChartsTheme } from '@kbn/charts-theme';
 import {
   PaletteRegistry,
   PaletteOutput,
@@ -106,6 +106,7 @@ export const TagCloudChart = ({
   isDarkMode,
 }: TagCloudChartProps) => {
   const [warning, setWarning] = useState(false);
+  const chartBaseTheme = useElasticChartsTheme();
   const { bucket, metric, scale, palette, showLabel, orientation, colorMapping } = visParams;
 
   const bucketFormatter = useMemo(() => {
@@ -243,8 +244,7 @@ export const TagCloudChart = ({
         <div className="tgcChart__wrapper" ref={resizeRef} data-test-subj="tagCloudVisualization">
           <Chart size="100%" {...getOverridesFor(overrides, 'chart')}>
             <Settings
-              // TODO connect to charts.theme service see src/plugins/charts/public/services/theme/README.md
-              baseTheme={LEGACY_LIGHT_THEME}
+              baseTheme={chartBaseTheme}
               onElementClick={handleWordClick}
               onRenderChange={onRenderChange}
               ariaLabel={visParams.ariaLabel}

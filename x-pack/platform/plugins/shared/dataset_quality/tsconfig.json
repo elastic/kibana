@@ -58,7 +58,8 @@
     "@kbn/field-utils",
     "@kbn/logging",
     "@kbn/ui-theme",
-    "@kbn/react-hooks"
+    "@kbn/react-hooks",
+    "@kbn/charts-theme"
   ],
   "exclude": [
     "target/**/*"

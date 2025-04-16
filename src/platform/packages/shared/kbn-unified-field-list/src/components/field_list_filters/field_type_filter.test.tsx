@@ -35,7 +35,10 @@ describe('UnifiedFieldList <FieldTypeFilter />', () => {
 
   async function toggleType(wrapper: ReactWrapper, fieldType: string) {
     act(() => {
-      wrapper.find(`[data-test-subj="typeFilter-${fieldType}"]`).first().simulate('click');
+      wrapper
+        .find(`EuiContextMenuItem[data-test-subj="typeFilter-${fieldType}"]`)
+        .first()
+        .simulate('click');
     });
 
     await wrapper.update();
