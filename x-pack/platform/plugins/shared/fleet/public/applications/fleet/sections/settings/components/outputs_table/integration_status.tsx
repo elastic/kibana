@@ -169,17 +169,20 @@ export const IntegrationStatus: React.FunctionComponent<{
               color="danger"
               iconType="error"
               size="s"
+              data-test-subj="integrationSyncIntegrationErrorCallout"
             >
               <EuiText size="s">{integration.error}</EuiText>
             </EuiCallOut>
             <EuiSpacer size="m" />
           </>
         )}
-        {customAssets.map((customAsset, index) => {
+        {customAssets.map((customAsset) => {
           return (
             <EuiAccordion
               id={`${customAsset.type}:${customAsset.name}`}
+              key={`${customAsset.type}:${customAsset.name}`}
               buttonContent={customAsset.name}
+              data-test-subj={`${customAsset.type}:${customAsset.name}-accordion`}
               extraAction={
                 customAsset.sync_status === SyncStatus.SYNCHRONIZING ? (
                   <EuiLoadingSpinner size="m" />
@@ -210,6 +213,7 @@ export const IntegrationStatus: React.FunctionComponent<{
                     color="danger"
                     iconType="error"
                     size="s"
+                    data-test-subj="integrationSyncAssetErrorCallout"
                   >
                     <EuiText size="s">{customAsset.error}</EuiText>
                   </EuiCallOut>

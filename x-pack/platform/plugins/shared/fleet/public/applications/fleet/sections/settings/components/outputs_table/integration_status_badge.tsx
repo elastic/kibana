@@ -23,15 +23,21 @@ export const IntegrationStatusBadge: React.FunctionComponent<{
   status: string;
   onClick?: () => void;
   onClickAriaLabel?: string;
-}> = ({ status, onClick = () => {}, onClickAriaLabel = '' }) => {
+}> = ({ status, onClick, onClickAriaLabel }) => {
+  const onClickProps: any =
+    onClick && onClickAriaLabel
+      ? {
+          onClick,
+          onClickAriaLabel,
+        }
+      : {};
   const IntegrationSyncStatusBadge: { [status: string]: JSX.Element | null } = {
     FAILED: (
       <EuiBadge
         color="danger"
         data-test-subj="integrationSyncFailedBadge"
         iconType="errorFilled"
-        onClick={onClick}
-        onClickAriaLabel={onClickAriaLabel}
+        {...onClickProps}
       >
         <FormattedMessage
           id="xpack.fleet.integrationSyncStatus.failedText"
@@ -44,8 +50,7 @@ export const IntegrationStatusBadge: React.FunctionComponent<{
         color="success"
         data-test-subj="integrationSyncCompletedBadge"
         iconType="check"
-        onClick={onClick}
-        onClickAriaLabel={onClickAriaLabel}
+        {...onClickProps}
       >
         <FormattedMessage
           id="xpack.fleet.integrationSyncStatus.completedText"
@@ -54,12 +59,7 @@ export const IntegrationStatusBadge: React.FunctionComponent<{
       </EuiBadge>
     ),
     SYNCHRONIZING: (
-      <EuiBadge
-        color="hollow"
-        data-test-subj="integrationSyncSyncingBadge"
-        onClick={onClick}
-        onClickAriaLabel={onClickAriaLabel}
-      >
+      <EuiBadge color="hollow" data-test-subj="integrationSyncSyncingBadge" {...onClickProps}>
         <EuiFlexGroup alignItems="center" justifyContent="flexStart" gutterSize="xs">
           <EuiFlexItem grow={false}>
             <EuiLoadingSpinner size="s" />

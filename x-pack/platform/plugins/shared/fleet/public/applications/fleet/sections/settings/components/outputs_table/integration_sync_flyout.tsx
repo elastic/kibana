@@ -68,20 +68,20 @@ export const IntegrationSyncFlyout: React.FunctionComponent<Props> = memo(
               color="danger"
               iconType="error"
               size="s"
+              data-test-subj="integrationSyncFlyoutTopErrorCallout"
             >
               <EuiText size="s">{syncedIntegrationsStatus?.error}</EuiText>
             </EuiCallOut>
           )}
           <EuiFlexGroup direction="column" gutterSize="m">
-            {(syncedIntegrationsStatus?.integrations ?? []).map((integration, index) => {
-              const testSubj = (integration.package_name ?? 'integration') + '-' + index;
+            {(syncedIntegrationsStatus?.integrations ?? []).map((integration) => {
               const customAssets = Object.values(
                 syncedIntegrationsStatus?.custom_assets ?? {}
               ).filter((asset) => asset.package_name === integration.package_name);
               return (
-                <EuiFlexItem grow={false} key={integration.package_name} data-test-subj={testSubj}>
+                <EuiFlexItem grow={false} key={integration.package_name}>
                   <IntegrationStatus
-                    data-test-subj={`${testSubj}-accordion`}
+                    data-test-subj={`${integration.package_name}-accordion`}
                     integration={integration}
                     customAssets={customAssets}
                   />
