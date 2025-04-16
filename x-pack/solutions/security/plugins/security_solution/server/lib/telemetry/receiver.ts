@@ -1373,11 +1373,11 @@ export class TelemetryReceiver implements ITelemetryReceiver {
       name: '*',
       expand_wildcards: ['open', 'hidden'],
       filter_path: [
+        'data_streams.ilm_policy',
         'data_streams.indices.ilm_policy',
         'data_streams.indices.index_name',
         'data_streams.name',
-        'ilm_policy',
-        'template',
+        'data_streams.template',
       ],
     };
 

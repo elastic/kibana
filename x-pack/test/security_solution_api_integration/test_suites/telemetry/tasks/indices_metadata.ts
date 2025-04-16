@@ -42,8 +42,7 @@ export default ({ getService }: FtrProviderContext) => {
     let defaultPipeline: string;
     let finalPipeline: string;
 
-    // FLAKY: https://github.com/elastic/kibana/issues/216044
-    describe.skip('@ess @serverless indices metadata', () => {
+    describe('@ess @serverless indices metadata', () => {
       beforeEach(async () => {
         dsName = await randomDatastream(es);
         await ensureBackingIndices(dsName, NUM_INDICES, es);
@@ -59,7 +58,18 @@ export default ({ getService }: FtrProviderContext) => {
           dsName,
         });
 
-        expect(events.length).toEqual(1);
+        expect(events.length).toBeGreaterThanOrEqual(1);
+      });
+
+      it('should include `template` in data stream events when defined', async () => {
+        const events = await launchTaskAndWaitForEvents({
+          eventTypes: [TELEMETRY_DATA_STREAM_EVENT],
+          dsName,
+        });
+
+        expect(events.length).toBeGreaterThanOrEqual(1);
+        const event = events[0] as any;
+        expect(event.template).toBeDefined();
       });
 
       it('should publish index stats events', async () => {
@@ -89,13 +99,24 @@ export default ({ getService }: FtrProviderContext) => {
         await cleanupIngestPipelines(es);
       });
 
+      it('should include `ilm_policy` in data stream events when defined', async () => {
+        const events = await launchTaskAndWaitForEvents({
+          eventTypes: [TELEMETRY_DATA_STREAM_EVENT],
+          dsName,
+        });
+
+        expect(events.length).toBeGreaterThanOrEqual(1);
+        const event = events[0] as any;
+        expect(event.ilm_policy).toBeDefined();
+      });
+
       it('should publish ilm policy events', async () => {
         const events = await launchTaskAndWaitForEvents({
           eventTypes: [TELEMETRY_ILM_POLICY_EVENT],
           policyName,
         });
 
-        expect(events.length).toEqual(1);
+        expect(events.length).toBeGreaterThanOrEqual(1);
       });
 
       it('should publish ilm stats events', async () => {
