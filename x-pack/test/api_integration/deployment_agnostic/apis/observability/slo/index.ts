@@ -12,7 +12,6 @@ export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext)
     loadTestFile(require.resolve('./create_slo'));
     loadTestFile(require.resolve('./delete_slo'));
     loadTestFile(require.resolve('./get_slo'));
-    loadTestFile(require.resolve('./purge_sli_data'));
     loadTestFile(require.resolve('./find_slo'));
     loadTestFile(require.resolve('./find_slo_definition'));
     loadTestFile(require.resolve('./reset_slo'));
