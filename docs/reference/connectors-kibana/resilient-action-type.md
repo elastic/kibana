@@ -14,10 +14,8 @@ The {{ibm-r}} connector uses the [RESILIENT REST v2](https://developer.ibm.com/s
 
 You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}** or as needed when you’re creating a rule. For example:
 
-:::{image} /reference/images/resilient-connector.png
-:alt: {{ibm-r}} connector
-:class: screenshot
-:::
+% TO DO: Use `:class: screenshot`
+![{{ibm-r}} connector](../images/resilient-connector.png)
 
 
 ### Connector configuration [resilient-connector-configuration]
@@ -41,10 +39,8 @@ URL
 
 You can test connectors as you’re creating or editing the connector in {{kib}}. For example:
 
-:::{image} /reference/images/resilient-params-test.png
-:alt: IBM Resilient connector test options
-:class: screenshot
-:::
+% TO DO: Use `:class: screenshot`
+![IBM Resilient connector test options](../images/resilient-params-test.png)
 
 {{ibm-r}} actions have the following configuration properties.
 
