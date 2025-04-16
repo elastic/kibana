@@ -158,7 +158,7 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ()
     FilterGroupHandler | undefined
   >();
 
-  let { sourcererDataView, loading: isLoadingIndexPattern } = useSourcererDataView(
+  const { sourcererDataView: oldSourcererDataView, loading: oldIsLoadingIndexPattern } = useSourcererDataView(
     SourcererScopeName.detections
   );
 
@@ -167,10 +167,8 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ()
     SourcererScopeName.detections
   );
 
-  if (newDataViewPickerEnabled) {
-    sourcererDataView = experimentalDataViewSpec;
-    isLoadingIndexPattern = dataViewSpecStatus !== 'ready';
-  }
+  const sourcererDataView = newDataViewPickerEnabled ? experimentalDataViewSpec : oldSourcererDataView;
+  const isLoadingIndexPattern = newDataViewPickerEnabled ? dataViewSpecStatus !== 'ready' : oldIsLoadingIndexPattern;
 
   const { formatUrl } = useFormatUrl(SecurityPageName.rules);
 

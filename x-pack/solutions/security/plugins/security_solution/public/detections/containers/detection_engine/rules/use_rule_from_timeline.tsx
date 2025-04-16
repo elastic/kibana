@@ -47,9 +47,11 @@ export type SetRuleQuery = ({
 export const useRuleFromTimeline = (setRuleQuery: SetRuleQuery): RuleFromTimeline => {
   const dispatch = useDispatch();
   const { addError } = useAppToasts();
-  let { browserFields, dataViewId, selectedPatterns } = useSourcererDataView(
-    SourcererScopeName.timeline
-  );
+  const {
+    browserFields: oldBrowserFields,
+    dataViewId: oldDataViewId,
+    selectedPatterns: oldSelectedPatterns,
+  } = useSourcererDataView(SourcererScopeName.timeline);
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
 
@@ -57,11 +59,11 @@ export const useRuleFromTimeline = (setRuleQuery: SetRuleQuery): RuleFromTimelin
   const experimentalBrowserFields = useBrowserFields(SourcererScopeName.timeline);
   const { dataView } = useDataView(SourcererScopeName.timeline);
 
-  if (newDataViewPickerEnabled) {
-    selectedPatterns = experimentalSelectedPatterns;
-    browserFields = experimentalBrowserFields;
-    dataViewId = dataView?.id ?? '';
-  }
+  const selectedPatterns = newDataViewPickerEnabled
+    ? experimentalSelectedPatterns
+    : oldSelectedPatterns;
+  const browserFields = newDataViewPickerEnabled ? experimentalBrowserFields : oldBrowserFields;
+  const dataViewId = newDataViewPickerEnabled ? dataView?.id ?? '' : oldDataViewId;
 
   const isEql = useRef(false);
 

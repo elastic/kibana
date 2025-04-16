@@ -17,14 +17,12 @@ import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experime
 import { useSelectedPatterns } from '../../data_view_manager/hooks/use_selected_patterns';
 
 export const useFetchAlertData = (alertIds: string[]): [boolean, Record<string, unknown>] => {
-  let { selectedPatterns } = useSourcererDataView(SourcererScopeName.detections);
+  const { selectedPatterns: oldSelectedPatterns } = useSourcererDataView(SourcererScopeName.detections);
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
 
   const experimentalSelectedPatterns = useSelectedPatterns(SourcererScopeName.detections);
-  if (newDataViewPickerEnabled) {
-    selectedPatterns = experimentalSelectedPatterns;
-  }
+  const selectedPatterns = newDataViewPickerEnabled ? experimentalSelectedPatterns : oldSelectedPatterns;
 
   const alertsQuery = useMemo(() => buildAlertsQuery(alertIds), [alertIds]);
 

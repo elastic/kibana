@@ -37,15 +37,11 @@ export const AlertTableCellContextProvider = ({
   sourcererScope: SourcererScopeName;
   children: React.ReactNode;
 }) => {
-  let { browserFields } = useSourcererDataView(sourcererScope);
-
+  const { browserFields: oldBrowserFields } = useSourcererDataView(sourcererScope);
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-
   const experimentalBrowserFields = useBrowserFields(sourcererScope);
 
-  if (newDataViewPickerEnabled) {
-    browserFields = experimentalBrowserFields;
-  }
+  const browserFields = newDataViewPickerEnabled ? experimentalBrowserFields : oldBrowserFields;
 
   const browserFieldsByName = useMemo(() => getAllFieldsByName(browserFields), [browserFields]);
   const license = useLicense();

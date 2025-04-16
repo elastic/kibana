@@ -55,14 +55,14 @@ export const TopRiskScoreContributorsAlerts = <T extends EntityType>({
   const { to, from } = useGlobalTime();
   const [{ loading: userInfoLoading, signalIndexName, hasIndexWrite, hasIndexMaintenance }] =
     useUserData();
-  let { sourcererDataView } = useSourcererDataView(SourcererScopeName.detections);
+  const { sourcererDataView: oldSourcererDataView } = useSourcererDataView(
+    SourcererScopeName.detections
+  );
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
   const { dataViewSpec } = useDataViewSpec(SourcererScopeName.detections);
 
-  if (newDataViewPickerEnabled) {
-    sourcererDataView = dataViewSpec;
-  }
+  const sourcererDataView = newDataViewPickerEnabled ? dataViewSpec : oldSourcererDataView;
 
   const getGlobalFiltersQuerySelector = useMemo(
     () => inputsSelectors.globalFiltersQuerySelector(),

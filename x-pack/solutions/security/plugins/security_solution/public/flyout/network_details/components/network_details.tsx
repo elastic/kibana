@@ -77,7 +77,7 @@ export const NetworkDetails = ({ ip, flowTarget }: NetworkDetailsProps) => {
     services: { uiSettings },
   } = useKibana();
 
-  let { indicesExist, sourcererDataView, selectedPatterns } = useSourcererDataView();
+  const { indicesExist: oldIndicesExist, sourcererDataView: oldSourcererDataView, selectedPatterns: oldSelectedPatterns } = useSourcererDataView();
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
 
@@ -85,11 +85,9 @@ export const NetworkDetails = ({ ip, flowTarget }: NetworkDetailsProps) => {
   const { dataViewSpec } = useDataViewSpec();
   const experimentalSelectedPatterns = useSelectedPatterns();
 
-  if (newDataViewPickerEnabled) {
-    sourcererDataView = dataViewSpec;
-    indicesExist = !!dataView?.matchedIndices?.length;
-    selectedPatterns = experimentalSelectedPatterns;
-  }
+  const sourcererDataView = newDataViewPickerEnabled ? dataViewSpec : oldSourcererDataView;
+  const indicesExist = newDataViewPickerEnabled ? !!dataView?.matchedIndices?.length : oldIndicesExist;
+  const selectedPatterns = newDataViewPickerEnabled ? experimentalSelectedPatterns : oldSelectedPatterns;
 
   const [filterQuery, kqlError] = convertToBuildEsQuery({
     config: getEsQueryConfig(uiSettings),

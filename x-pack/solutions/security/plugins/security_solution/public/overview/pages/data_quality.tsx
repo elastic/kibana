@@ -51,18 +51,16 @@ const DataQualityComponent: React.FC = () => {
   const [defaultBytesFormat] = useUiSetting$<string>(DEFAULT_BYTES_FORMAT);
   const [defaultNumberFormat] = useUiSetting$<string>(DEFAULT_NUMBER_FORMAT);
 
-  let { indicesExist, loading: isSourcererLoading, selectedPatterns } = useSourcererDataView();
+  const { indicesExist: oldIndicesExist, loading: oldIsSourcererLoading, selectedPatterns: oldSelectedPatterns } = useSourcererDataView();
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
 
   const { dataView, status } = useDataView();
   const experimentalSelectedPatterns = useSelectedPatterns();
 
-  if (newDataViewPickerEnabled) {
-    indicesExist = !!dataView?.matchedIndices?.length;
-    selectedPatterns = experimentalSelectedPatterns;
-    isSourcererLoading = status !== 'ready';
-  }
+  const indicesExist = newDataViewPickerEnabled ? !!dataView?.matchedIndices?.length : oldIndicesExist;
+  const selectedPatterns = newDataViewPickerEnabled ? experimentalSelectedPatterns : oldSelectedPatterns;
+  const isSourcererLoading = newDataViewPickerEnabled ? status !== 'ready' : oldIsSourcererLoading;
 
   const { signalIndexName, loading: isSignalIndexNameLoading } = useSignalIndex();
   const { configSettings, cases, telemetry } = useKibana().services;

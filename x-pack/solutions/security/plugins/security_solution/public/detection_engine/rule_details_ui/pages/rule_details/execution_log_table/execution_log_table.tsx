@@ -163,14 +163,13 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
   } = useRuleDetailsContext();
 
   // Index for `add filter` action and toasts for errors
-  let { sourcererDataView } = useSourcererDataView(SourcererScopeName.detections);
+  const { sourcererDataView: oldSourcererDataView } = useSourcererDataView(
+    SourcererScopeName.detections
+  );
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
   const { dataViewSpec } = useDataViewSpec(SourcererScopeName.detections);
-
-  if (newDataViewPickerEnabled) {
-    sourcererDataView = dataViewSpec;
-  }
+  const sourcererDataView = newDataViewPickerEnabled ? dataViewSpec : oldSourcererDataView;
 
   const { addError, addSuccess, remove } = useAppToasts();
 

@@ -64,14 +64,12 @@ export const SendToTimelineButton: FC<PropsWithChildren<SendToTimelineButtonProp
   const [isTimelineBottomBarVisible] = useShowTimeline();
   const { discoverStateContainer, defaultDiscoverAppState } = useDiscoverInTimelineContext();
 
-  let { dataViewId: timelineDataViewId } = useSourcererDataView(SourcererScopeName.timeline);
+  const { dataViewId: oldTimelineDataViewId } = useSourcererDataView(SourcererScopeName.timeline);
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
 
   const { dataViewSpec } = useDataViewSpec(SourcererScopeName.timeline);
-
-  if (newDataViewPickerEnabled) {
-    timelineDataViewId = dataViewSpec?.id ?? null;
-  }
+  
+  const timelineDataViewId = newDataViewPickerEnabled ? (dataViewSpec?.id ?? null) : oldTimelineDataViewId;
 
   const { setDiscoverAppState } = useDiscoverState();
   const {

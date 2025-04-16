@@ -101,17 +101,15 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
   const {
     services: { uiSettings },
   } = useKibana();
-  let { browserFields, sourcererDataView } = useSourcererDataView(SourcererScopeName.detections);
+  const { browserFields: oldBrowserFields, sourcererDataView: oldSourcererDataView } = useSourcererDataView(SourcererScopeName.detections);
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
 
   const { dataViewSpec } = useDataViewSpec(SourcererScopeName.detections);
   const experimentalBrowserFields = useBrowserFields(SourcererScopeName.detections);
 
-  if (newDataViewPickerEnabled) {
-    sourcererDataView = dataViewSpec;
-    browserFields = experimentalBrowserFields;
-  }
+  const sourcererDataView = newDataViewPickerEnabled ? dataViewSpec : oldSourcererDataView;
+  const browserFields = newDataViewPickerEnabled ? experimentalBrowserFields : oldBrowserFields;
 
   const getGlobalQuery = useCallback(
     (customFilters: Filter[]) => {

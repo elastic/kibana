@@ -29,18 +29,16 @@ import { useEntityAnalyticsTypes } from '../hooks/use_enabled_entity_types';
 const EntityAnalyticsComponent = () => {
   const [skipEmptyPrompt, setSkipEmptyPrompt] = React.useState(false);
   const onSkip = React.useCallback(() => setSkipEmptyPrompt(true), [setSkipEmptyPrompt]);
-  let { indicesExist, loading: isSourcererLoading, sourcererDataView } = useSourcererDataView();
+  const { indicesExist: oldIndicesExist, loading: oldIsSourcererLoading, sourcererDataView: oldSourcererDataView } = useSourcererDataView();
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
 
   const { dataView, status } = useDataView();
   const { dataViewSpec } = useDataViewSpec();
-
-  if (newDataViewPickerEnabled) {
-    sourcererDataView = dataViewSpec;
-    indicesExist = !!dataView?.matchedIndices?.length;
-    isSourcererLoading = status !== 'ready';
-  }
+  
+  const sourcererDataView = newDataViewPickerEnabled ? dataViewSpec : oldSourcererDataView;
+  const indicesExist = newDataViewPickerEnabled ? !!dataView?.matchedIndices?.length : oldIndicesExist;
+  const isSourcererLoading = newDataViewPickerEnabled ? (status !== 'ready') : oldIsSourcererLoading;
 
   const isEntityStoreFeatureFlagDisabled = useIsExperimentalFeatureEnabled('entityStoreDisabled');
   const showEmptyPrompt = !indicesExist && !skipEmptyPrompt;

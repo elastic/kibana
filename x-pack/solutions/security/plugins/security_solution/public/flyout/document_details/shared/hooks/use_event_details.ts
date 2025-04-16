@@ -98,18 +98,16 @@ export const useEventDetails = ({
 
   const sourcererDataView = useSourcererDataView(sourcererScope);
 
-  let runtimeMappings: RunTimeMappings = sourcererDataView.sourcererDataView
+  const oldRuntimeMappings: RunTimeMappings = sourcererDataView.sourcererDataView
     .runtimeFieldMap as RunTimeMappings;
-  let browserFields = sourcererDataView.browserFields;
+  const oldBrowserFields = sourcererDataView.browserFields;
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
   const { dataView } = useDataView(sourcererScope);
   const experimentalBrowserFields = useBrowserFields(sourcererScope);
 
-  if (newDataViewPickerEnabled) {
-    runtimeMappings = dataView?.getRuntimeMappings() as RunTimeMappings;
-    browserFields = experimentalBrowserFields;
-  }
+  const runtimeMappings = newDataViewPickerEnabled ? (dataView?.getRuntimeMappings() as RunTimeMappings) : oldRuntimeMappings;
+  const browserFields = newDataViewPickerEnabled ? experimentalBrowserFields : oldBrowserFields;
 
   const [loading, dataFormattedForFieldBrowser, searchHit, dataAsNestedObject, refetchFlyoutData] =
     useTimelineEventsDetails({

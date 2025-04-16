@@ -93,14 +93,12 @@ export const HOST_PREVIEW_BANNER = {
 export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({ hostName }) => {
   const { scopeId } = useDocumentDetailsContext();
   const { from, to } = useGlobalTime();
-  let { selectedPatterns } = useSourcererDataView();
+  const { selectedPatterns: oldSelectedPatterns } = useSourcererDataView();
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
   const experimentalSelectedPatterns = useSelectedPatterns();
-
-  if (newDataViewPickerEnabled) {
-    selectedPatterns = experimentalSelectedPatterns;
-  }
+  
+  const selectedPatterns = newDataViewPickerEnabled ? experimentalSelectedPatterns : oldSelectedPatterns;
 
   const timerange = useMemo(
     () => ({

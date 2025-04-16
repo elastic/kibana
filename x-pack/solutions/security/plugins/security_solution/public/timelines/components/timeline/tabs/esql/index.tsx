@@ -68,11 +68,9 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
   const { dataViewId } = useSourcererDataView(SourcererScopeName.detections);
 
   // eslint-disable-next-line prefer-const
-  let [dataView, setDataView] = useState<DataViewSpec | undefined>();
-
-  if (newDataViewPickerEnabled) {
-    dataView = experimentalDataView;
-  }
+  const [oldDataView, setDataView] = useState<DataViewSpec | undefined>();
+  
+  const dataView = newDataViewPickerEnabled ? experimentalDataView : oldDataView;
 
   const [discoverTimerange, setDiscoverTimerange] = useState<TimeRange>();
 

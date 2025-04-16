@@ -87,14 +87,12 @@ export const USER_PREVIEW_BANNER = {
 export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({ userName }) => {
   const { scopeId } = useDocumentDetailsContext();
   const { from, to } = useGlobalTime();
-  let { selectedPatterns } = useSourcererDataView();
+  const { selectedPatterns: oldSelectedPatterns } = useSourcererDataView();
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-
   const experimentalSelectedPatterns = useSelectedPatterns();
-  if (newDataViewPickerEnabled) {
-    selectedPatterns = experimentalSelectedPatterns;
-  }
+  
+  const selectedPatterns = newDataViewPickerEnabled ? experimentalSelectedPatterns : oldSelectedPatterns;
 
   const timerange = useMemo(
     () => ({

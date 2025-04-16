@@ -284,14 +284,12 @@ const InsightEditorComponent = ({
 }: EuiMarkdownEditorUiPluginEditorProps<InsightComponentProps & { relativeTimerange: string }>) => {
   const isEditMode = node != null;
 
-  let { sourcererDataView } = useSourcererDataView(SourcererScopeName.default);
+  const { sourcererDataView: oldSourcererDataView } = useSourcererDataView(SourcererScopeName.default);
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
 
   const { dataViewSpec } = useDataViewSpec();
-  if (newDataViewPickerEnabled) {
-    sourcererDataView = dataViewSpec;
-  }
+  const sourcererDataView = newDataViewPickerEnabled ? dataViewSpec : oldSourcererDataView;
 
   const {
     unifiedSearch: {

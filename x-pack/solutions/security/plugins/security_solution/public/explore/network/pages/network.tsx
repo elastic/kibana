@@ -92,19 +92,17 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
       return globalFilters;
     }, [tabName, globalFilters]);
 
-    let { indicesExist, selectedPatterns, sourcererDataView } = useSourcererDataView();
+    const { indicesExist: oldIndicesExist, selectedPatterns: oldSelectedPatterns, sourcererDataView: oldSourcererDataView } = useSourcererDataView();
 
     const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
 
     const { dataView } = useDataView();
     const { dataViewSpec } = useDataViewSpec();
     const experimentalSelectedPatterns = useSelectedPatterns();
-
-    if (newDataViewPickerEnabled) {
-      sourcererDataView = dataViewSpec;
-      indicesExist = !!dataView?.matchedIndices?.length;
-      selectedPatterns = experimentalSelectedPatterns;
-    }
+    
+    const sourcererDataView = newDataViewPickerEnabled ? dataViewSpec : oldSourcererDataView;
+    const indicesExist = newDataViewPickerEnabled ? !!dataView?.matchedIndices?.length : oldIndicesExist;
+    const selectedPatterns = newDataViewPickerEnabled ? experimentalSelectedPatterns : oldSelectedPatterns;
 
     const onSkipFocusBeforeEventsTable = useCallback(() => {
       containerElement.current

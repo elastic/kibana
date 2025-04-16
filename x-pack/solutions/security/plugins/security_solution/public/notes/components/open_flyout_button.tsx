@@ -48,14 +48,12 @@ export interface OpenFlyoutButtonIconProps {
  */
 export const OpenFlyoutButtonIcon = memo(
   ({ eventId, timelineId, iconType }: OpenFlyoutButtonIconProps) => {
-    let { selectedPatterns } = useSourcererDataView(SourcererScopeName.timeline);
+    const { selectedPatterns: oldSelectedPatterns } = useSourcererDataView(SourcererScopeName.timeline);
 
     const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
     const experimentalSelectedPatterns = useSelectedPatterns(SourcererScopeName.timeline);
 
-    if (newDataViewPickerEnabled) {
-      selectedPatterns = experimentalSelectedPatterns;
-    }
+    const selectedPatterns = newDataViewPickerEnabled ? experimentalSelectedPatterns : oldSelectedPatterns;
 
     const { telemetry } = useKibana().services;
     const { openFlyout } = useExpandableFlyoutApi();

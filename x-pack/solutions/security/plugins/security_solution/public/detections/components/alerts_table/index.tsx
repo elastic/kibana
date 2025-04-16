@@ -187,16 +187,14 @@ const DetectionEngineAlertsTableComponent: FC<Omit<DetectionEngineAlertTableProp
     enableIpDetailsFlyout: true,
     onRuleChange,
   });
-  let { browserFields, sourcererDataView } = useSourcererDataView(sourcererScope);
+  const { browserFields: oldBrowserFields, sourcererDataView: oldSourcererDataView } = useSourcererDataView(sourcererScope);
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
   const { dataViewSpec: experimentalDataViewSpec } = useDataViewSpec(sourcererScope);
   const experimentalBrowserFields = useBrowserFields(sourcererScope);
 
-  if (newDataViewPickerEnabled) {
-    sourcererDataView = experimentalDataViewSpec;
-    browserFields = experimentalBrowserFields;
-  }
+  const sourcererDataView = newDataViewPickerEnabled ? experimentalDataViewSpec : oldSourcererDataView;
+  const browserFields = newDataViewPickerEnabled ? experimentalBrowserFields : oldBrowserFields;
 
   const license = useLicense();
   const isEnterprisePlus = license.isEnterprise();

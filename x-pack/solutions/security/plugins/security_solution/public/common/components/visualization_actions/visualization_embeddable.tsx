@@ -39,14 +39,12 @@ const VisualizationEmbeddableComponent: React.FC<VisualizationEmbeddableProps> =
       queryId: id,
     });
 
-  let { indicesExist } = useSourcererDataView(lensProps.scopeId);
+  const { indicesExist: oldIndicesExist } = useSourcererDataView(lensProps.scopeId);
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
   const { dataView } = useDataView(lensProps.scopeId);
-
-  if (newDataViewPickerEnabled) {
-    indicesExist = !!dataView?.matchedIndices?.length;
-  }
+  
+  const indicesExist = newDataViewPickerEnabled ? !!dataView?.matchedIndices?.length : oldIndicesExist;
 
   const memorizedTimerange = useRef(lensProps.timerange);
   const getGlobalQuery = useMemo(() => inputsSelectors.globalQueryByIdSelector(), []);

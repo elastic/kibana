@@ -123,14 +123,12 @@ export const ModalInspectQuery = ({
   const sourcererScope =
     inputId === 'timeline' ? SourcererScopeName.timeline : getScopeFromPath(pathname);
 
-  let { selectedPatterns } = useSourcererDataView(sourcererScope);
+  const { selectedPatterns: oldSelectedPatterns } = useSourcererDataView(sourcererScope);
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
   const experimentalSelectedPatterns = useSelectedPatterns(sourcererScope);
-
-  if (newDataViewPickerEnabled) {
-    selectedPatterns = experimentalSelectedPatterns;
-  }
+  
+  const selectedPatterns = newDataViewPickerEnabled ? experimentalSelectedPatterns : oldSelectedPatterns;
 
   const requests: string[] = useMemo(
     () => [request, ...(additionalRequests != null ? additionalRequests : [])],

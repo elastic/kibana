@@ -46,17 +46,16 @@ const AlertSelectionQueryComponent: React.FC<Props> = ({
   } = useKibana().services;
 
   // get the sourcerer `DataViewSpec` for alerts:
-  let { sourcererDataView, loading: isLoadingIndexPattern } = useSourcererDataView(
-    SourcererScopeName.detections
-  );
+  const { sourcererDataView: oldSourcererDataView, loading: oldIsLoadingIndexPattern } =
+    useSourcererDataView(SourcererScopeName.detections);
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
   const { dataViewSpec, status } = useDataViewSpec(SourcererScopeName.detections);
 
-  if (newDataViewPickerEnabled) {
-    sourcererDataView = dataViewSpec;
-    isLoadingIndexPattern = status !== 'ready';
-  }
+  const sourcererDataView = newDataViewPickerEnabled ? dataViewSpec : oldSourcererDataView;
+  const isLoadingIndexPattern = newDataViewPickerEnabled
+    ? status !== 'ready'
+    : oldIsLoadingIndexPattern;
 
   // create a `DataView` from the `DataViewSpec`:
   const alertsDataView = useDataView({

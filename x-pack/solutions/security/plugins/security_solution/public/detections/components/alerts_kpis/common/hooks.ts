@@ -103,14 +103,12 @@ export const useStackByFields = (useLensCompatibleFields?: boolean) => {
   const { addError } = useAppToasts();
   const sourcererScope = getScopeFromPath(pathname);
 
-  let { browserFields } = useSourcererDataView(sourcererScope);
+  const { browserFields: oldBrowserFields } = useSourcererDataView(sourcererScope);
 
   const experimentalBrowserFields = useBrowserFields(sourcererScope);
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-  if (newDataViewPickerEnabled) {
-    browserFields = experimentalBrowserFields;
-  }
+  const browserFields = newDataViewPickerEnabled ? experimentalBrowserFields : oldBrowserFields;
 
   return useCallback(() => {
     try {
