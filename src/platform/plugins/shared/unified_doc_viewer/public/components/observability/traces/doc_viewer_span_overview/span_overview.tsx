@@ -41,7 +41,7 @@ export function SpanOverview({
   const parsedDoc = useMemo(() => getTraceDocumentOverview(hit), [hit]);
   const spanDuration = parsedDoc[SPAN_DURATION_FIELD];
   const transactionId = parsedDoc[TRANSACTION_ID_FIELD];
-  const fieldConfigurations = getSpanFieldConfiguration(parsedDoc);
+  const fieldConfigurations = useMemo(() => getSpanFieldConfiguration(parsedDoc), [parsedDoc]);
 
   return (
     <TransactionProvider transactionId={transactionId} indexPattern={transactionIndexPattern}>
@@ -61,17 +61,13 @@ export function SpanOverview({
             </h2>
           </EuiTitle>
           <EuiSpacer size="m" />
-          {spanFields.map((fieldId) => {
-            const fieldConfiguration = fieldConfigurations[fieldId];
-
-            return (
-              <SpanSummaryField
-                key={fieldId}
-                fieldId={fieldId}
-                fieldConfiguration={fieldConfiguration}
-              />
-            );
-          })}
+          {spanFields.map((fieldId) => (
+            <SpanSummaryField
+              key={fieldId}
+              fieldId={fieldId}
+              fieldConfiguration={fieldConfigurations[fieldId]}
+            />
+          ))}
 
           {spanDuration && (
             <>

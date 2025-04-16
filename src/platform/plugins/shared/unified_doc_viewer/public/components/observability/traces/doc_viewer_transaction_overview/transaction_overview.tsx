@@ -67,17 +67,13 @@ export function TransactionOverview({
             <h2>{detailTitle}</h2>
           </EuiTitle>
           <EuiSpacer size="m" />
-          {transactionFields.map((fieldId) => {
-            const fieldConfiguration = fieldConfigurations[fieldId];
-
-            return (
-              <TransactionSummaryField
-                key={fieldId}
-                fieldId={fieldId}
-                fieldConfiguration={fieldConfiguration}
-              />
-            );
-          })}
+          {transactionFields.map((fieldId) => (
+            <TransactionSummaryField
+              key={fieldId}
+              fieldId={fieldId}
+              fieldConfiguration={fieldConfigurations[fieldId]}
+            />
+          ))}
 
           {transactionDuration && (
             <>
