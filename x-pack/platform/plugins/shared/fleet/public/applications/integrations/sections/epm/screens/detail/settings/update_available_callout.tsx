@@ -76,11 +76,13 @@ export const UpdateAvailableCallout = ({
               version,
             }}
           />
-          <EuiSpacer size="m" />
-          <i style={{ paddingLeft: euiTheme.size.m }}>
-            {breakingChanges.changelog?.[0]?.changes[0]?.description}
-          </i>
-          <EuiSpacer size="m" />
+          <EuiSpacer size="l" />
+          <i
+            css={css`
+              font-weight: ${euiTheme.font.weight.medium};
+            `}
+          >{`"${breakingChanges.changelog?.[0]?.changes[0]?.description}"`}</i>
+          <EuiSpacer size="l" />
           <FormattedMessage
             id="xpack.fleet.integration.settings.versionInfo.updatesAvailableWithSingleBreakingChangesBodyEnd"
             defaultMessage="Please review the changes carefully before upgrading."
