@@ -14,7 +14,6 @@ import {
   EuiSkeletonText,
   EuiSpacer,
   EuiText,
-  EuiTitle,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { AssistantIcon } from '@kbn/ai-assistant-icon';
@@ -58,10 +57,6 @@ export const AlertSummary: FunctionComponent<Props> = ({
   });
   return (
     <>
-      <EuiTitle size={'s'}>
-        <h2 data-test-subj="ai-summary-title">{i18n.AI_SUMMARY}</h2>
-      </EuiTitle>
-      <EuiSpacer size="s" />
       {hasAlertSummary ? (
         isLoading ? (
           <>

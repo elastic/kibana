@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useEffect, useState } from 'react';
-import { EuiButtonEmpty, EuiPanel, EuiSpacer, EuiTitle, useEuiTheme } from '@elastic/eui';
+import { EuiButtonEmpty, EuiPanel, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useAssistantContext } from '../assistant_context';
 import { useAssistantOverlay } from '../assistant/use_assistant_overlay';
@@ -18,6 +18,7 @@ interface Props {
   ruleName: string;
   timestamp: string;
 }
+
 interface Prompt {
   icon: string;
   prompt: string;
@@ -83,10 +84,6 @@ export const SuggestedPrompts: React.FC<Props> = ({ getPromptContext, ruleName, 
 
   return (
     <>
-      <EuiTitle size="xxs">
-        <h4 data-test-subj="suggested-prompts">{i18n.SUGGESTED_PROMPTS}</h4>
-      </EuiTitle>
-      <EuiSpacer size="xs" />
       {prompts.map((prompt, index) => (
         <EuiPanel
           css={css`

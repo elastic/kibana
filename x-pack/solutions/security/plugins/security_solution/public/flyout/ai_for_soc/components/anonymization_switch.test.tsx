@@ -6,8 +6,11 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
-import { AnonymizationSwitch } from './anonymization_switch';
+import { fireEvent, render } from '@testing-library/react';
+import {
+  ALERT_SUMMARY_ANONYMIZE_TOGGLE_TEST_ID,
+  AnonymizationSwitch,
+} from './anonymization_switch';
 import { useAlertsContext } from '../../../detections/components/alerts_table/alerts_context';
 
 jest.mock('../../../detections/components/alerts_table/alerts_context', () => ({
@@ -25,44 +28,41 @@ describe('AnonymizationSwitch', () => {
     });
   });
 
-  it('renders the switch in the unchecked state by default', () => {
-    render(<AnonymizationSwitch />);
+  it('should render the switch in the unchecked state by default', () => {
+    const { getByTestId } = render(<AnonymizationSwitch />);
 
-    const switchElement = screen.getByRole('switch');
-    expect(switchElement).not.toBeChecked();
+    expect(getByTestId(ALERT_SUMMARY_ANONYMIZE_TOGGLE_TEST_ID)).not.toBeChecked();
   });
 
-  it('calls setShowAnonymizedValues with true when the switch is toggled on', () => {
-    render(<AnonymizationSwitch />);
+  it('should call setShowAnonymizedValues with true when the switch is toggled on', () => {
+    const { getByTestId } = render(<AnonymizationSwitch />);
 
-    const switchElement = screen.getByRole('switch');
-    fireEvent.click(switchElement);
+    fireEvent.click(getByTestId(ALERT_SUMMARY_ANONYMIZE_TOGGLE_TEST_ID));
 
     expect(mockSetShowAnonymizedValues).toHaveBeenCalledWith(true);
   });
 
-  it('calls setShowAnonymizedValues with false when the switch is toggled off', () => {
+  it('should call setShowAnonymizedValues with false when the switch is toggled off', () => {
     (useAlertsContext as jest.Mock).mockReturnValue({
       setShowAnonymizedValues: mockSetShowAnonymizedValues,
       showAnonymizedValues: true,
     });
 
-    render(<AnonymizationSwitch />);
+    const { getByTestId } = render(<AnonymizationSwitch />);
 
-    const switchElement = screen.getByRole('switch');
-    fireEvent.click(switchElement);
+    fireEvent.click(getByTestId(ALERT_SUMMARY_ANONYMIZE_TOGGLE_TEST_ID));
 
     expect(mockSetShowAnonymizedValues).toHaveBeenCalledWith(false);
   });
 
-  it('does not render the switch if showAnonymizedValues is undefined', () => {
+  it('should not render the switch if showAnonymizedValues is undefined', () => {
     (useAlertsContext as jest.Mock).mockReturnValue({
       setShowAnonymizedValues: mockSetShowAnonymizedValues,
       showAnonymizedValues: undefined,
     });
 
-    render(<AnonymizationSwitch />);
+    const { queryByTestId } = render(<AnonymizationSwitch />);
 
-    expect(screen.queryByRole('switch')).not.toBeInTheDocument();
+    expect(queryByTestId(ALERT_SUMMARY_ANONYMIZE_TOGGLE_TEST_ID)).not.toBeInTheDocument();
   });
 });

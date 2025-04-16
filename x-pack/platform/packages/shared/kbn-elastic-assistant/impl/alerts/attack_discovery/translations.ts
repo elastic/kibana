@@ -7,13 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const ATTACK_DISCOVERY = i18n.translate(
-  'xpack.elasticAssistant.alertSummary.attackDiscovery.title',
-  {
-    defaultMessage: 'Attack Discovery',
-  }
-);
-
 export const ALERT_PART = i18n.translate(
   'xpack.elasticAssistant.alertSummary.attackDiscovery.alertPart',
   {

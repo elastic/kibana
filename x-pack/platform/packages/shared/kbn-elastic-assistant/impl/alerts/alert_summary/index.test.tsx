@@ -6,11 +6,11 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { AlertSummary } from '.';
 import type { PromptContext } from '../../..';
-import { TestProviders } from '../../mock/test_providers/test_providers';
 import { useAlertSummary } from './use_alert_summary';
+
 jest.mock('./use_alert_summary');
 const promptContext: PromptContext = {
   category: 'alert',
@@ -46,14 +46,6 @@ describe('AlertSummary', () => {
         replacements: {},
       },
     });
-  });
-  it('renders the title', () => {
-    render(
-      <TestProviders>
-        <AlertSummary {...defaultProps} />
-      </TestProviders>
-    );
-    expect(screen.getByTestId('ai-summary-title')).toBeInTheDocument();
   });
 
   it('renders the loading state when `isLoading` is true', () => {

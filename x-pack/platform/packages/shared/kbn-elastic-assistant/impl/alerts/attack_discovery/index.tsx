@@ -26,6 +26,7 @@ interface Props {
   // TODO use alert id for attack discovery
   id?: string;
 }
+
 export const AttackDiscoveryWidget: React.FC<Props> = ({ id }) => {
   const { http, toasts, navigateToApp } = useAssistantContext();
   const { euiTheme } = useEuiTheme();
@@ -48,10 +49,6 @@ export const AttackDiscoveryWidget: React.FC<Props> = ({ id }) => {
 
   return (
     <>
-      <EuiTitle size={'s'}>
-        <h2>{i18n.ATTACK_DISCOVERY}</h2>
-      </EuiTitle>
-      <EuiSpacer size="s" />
       {isFetching ? (
         <EuiLoadingSpinner />
       ) : attackDiscovery ? (

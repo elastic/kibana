@@ -8,9 +8,6 @@
 import { i18n } from '@kbn/i18n';
 
 // START SUMMARY
-export const AI_SUMMARY = i18n.translate('xpack.elasticAssistant.alertSummary.aiSummaryTitle', {
-  defaultMessage: 'AI summary',
-});
 
 export const NO_SUMMARY_AVAILABLE = i18n.translate(
   'xpack.elasticAssistant.alertSummary.noSummaryAvailable',
@@ -70,13 +67,6 @@ export const ADVANCED_SETTINGS_LINK_TITLE = i18n.translate(
 // END SUMMARY
 
 // START SUGGESTED PROMPTS
-
-export const SUGGESTED_PROMPTS = i18n.translate(
-  'xpack.elasticAssistant.alertSummary.suggestedPrompts',
-  {
-    defaultMessage: 'Suggested prompts',
-  }
-);
 
 export const ALERT_FROM_FLYOUT = i18n.translate(
   'xpack.elasticAssistant.alertSummary.alertFromFlyout',
@@ -141,9 +131,6 @@ export const SUGGESTED_PROMPTS_CONTEXT_TOOLTIP = i18n.translate(
 // END SUGGESTED PROMPTS
 
 // START AI ASSISTANT
-export const AI_ASSISTANT = i18n.translate('xpack.elasticAssistant.aiAssistant.title', {
-  defaultMessage: 'AI Assistant',
-});
 
 export const YOUR_CONVERSATIONS = i18n.translate(
   'xpack.elasticAssistant.aiAssistant.yourConversations',

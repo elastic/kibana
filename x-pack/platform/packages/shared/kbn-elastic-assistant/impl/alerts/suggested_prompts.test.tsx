@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { SuggestedPrompts } from './suggested_prompts';
 import { useAssistantContext } from '../assistant_context';
 import { useAssistantOverlay } from '../assistant/use_assistant_overlay';
@@ -42,7 +42,6 @@ describe('SuggestedPrompts', () => {
       />
     );
 
-    expect(screen.getByTestId('suggested-prompts')).toBeInTheDocument();
     expect(screen.getAllByRole('button')).toHaveLength(3); // Assuming there are 3 prompts
   });
 

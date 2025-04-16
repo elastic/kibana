@@ -6,8 +6,15 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
-import { AIForSOCPanel } from '.';
+import { render } from '@testing-library/react';
+import {
+  AI_ASSISTANT_SECTION_TEST_ID,
+  AIForSOCPanel,
+  ALERT_SUMMARY_SECTION_TEST_ID,
+  ATTACK_DISCOVERY_SECTION_TEST_ID,
+  FLYOUT_BODY_TEST_ID,
+  SUGGESTED_PROMPTS_SECTION_TEST_ID,
+} from '.';
 import { useKibana as mockUseKibana } from '../../common/lib/kibana/__mocks__';
 import { rawEventData, TestProviders } from '../../common/mock';
 import { AIForSOCDetailsContext } from './context';
@@ -84,7 +91,7 @@ describe('AIForSOCPanel', () => {
   });
 
   it('renders the AIForSOCPanel component', () => {
-    render(
+    const { getByTestId } = render(
       <TestProviders>
         <AIForSOCDetailsContext.Provider value={mockContextValue}>
           <AIForSOCPanel />
@@ -92,11 +99,15 @@ describe('AIForSOCPanel', () => {
       </TestProviders>
     );
 
-    expect(screen.getByTestId('ai-for-soc-alert-flyout-body')).toBeInTheDocument();
+    expect(getByTestId(FLYOUT_BODY_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(ALERT_SUMMARY_SECTION_TEST_ID)).toHaveTextContent('AI summary');
+    expect(getByTestId(ATTACK_DISCOVERY_SECTION_TEST_ID)).toHaveTextContent('Attack Discovery');
+    expect(getByTestId(AI_ASSISTANT_SECTION_TEST_ID)).toHaveTextContent('AI Assistant');
+    expect(getByTestId(SUGGESTED_PROMPTS_SECTION_TEST_ID)).toHaveTextContent('Suggested prompts');
   });
 
   it('does not render the flyout body if dataFormattedForFieldBrowser is empty', () => {
-    render(
+    const { queryByTestId } = render(
       <TestProviders>
         <AIForSOCDetailsContext.Provider
           value={{
@@ -112,6 +123,6 @@ describe('AIForSOCPanel', () => {
       </TestProviders>
     );
 
-    expect(screen.queryByTestId('ai-for-soc-alert-flyout-body')).toBeInTheDocument();
+    expect(queryByTestId(FLYOUT_BODY_TEST_ID)).toBeInTheDocument();
   });
 });

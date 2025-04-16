@@ -16,9 +16,7 @@ import {
   EuiPanel,
   EuiPopover,
   EuiSkeletonText,
-  EuiSpacer,
   EuiText,
-  EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -57,10 +55,6 @@ export const Conversations: React.FC<Props> = ({ id }) => {
 
   return (
     <>
-      <EuiTitle size={'s'}>
-        <h2>{i18n.AI_ASSISTANT}</h2>
-      </EuiTitle>
-      <EuiSpacer size="s" />
       <EuiPanel paddingSize="s" color="subdued" hasBorder={true}>
         {conversationsLoaded ? (
           <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
