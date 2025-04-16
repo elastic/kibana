@@ -34,7 +34,12 @@ export const QuerySearchBar = memo(
     range: TimeRange;
     setRange: (range: TimeRange) => void;
   }) => {
-    const { SearchBar } = useKibana().services.unifiedSearch.ui;
+    const {
+      unifiedSearch: {
+        ui: { SearchBar },
+      },
+      data: dataService,
+    } = useKibana().services;
 
     const { control } = useFormContext<CreateSLOForm>();
 
@@ -128,6 +133,8 @@ export const QuerySearchBar = memo(
                         query,
                       };
                     });
+
+                    dataService.query.filterManager.setFilters(updatedFilters);
 
                     if (kqlQuerySchema.is(field.value)) {
                       field.onChange({
