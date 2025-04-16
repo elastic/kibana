@@ -26,7 +26,6 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
   const ELASTIC_GITHUB = meta.elasticGithubUrl;
   const SEARCH_LABS_URL = meta.searchLabsUrl;
   const API_DOCS = meta.apiDocsUrl;
-  const ELASTIC_DOCS = meta.docsWebsiteUrl;
 
   const ELASTICSEARCH_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/${DOC_LINK_VERSION}/`;
   const ELASTICSEARCH_APIS = `${API_DOCS}doc/elasticsearch/v8/`;
@@ -855,7 +854,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       tasks: isServerless
         ? `${ELASTICSEARCH_SERVERLESS_APIS}group/endpoint-tasks`
         : `${ELASTICSEARCH_APIS}group/endpoint-tasks`,
-      timeUnits: `${ELASTIC_DOCS}reference/elasticsearch/rest-apis/api-conventions#time-units`,
+      timeUnits: `${ELASTICSEARCH_DOCS}api-conventions.html#time-units`,
       updateTransform: isServerless
         ? `${ELASTICSEARCH_SERVERLESS_APIS}operation/operation-transform-update-transform`
         : `${ELASTICSEARCH_APIS}operation/operation-transform-update-transform`,
