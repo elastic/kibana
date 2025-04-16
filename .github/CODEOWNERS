@@ -317,7 +317,6 @@ src/platform/packages/private/kbn-ci-stats-reporter @elastic/kibana-operations
 src/platform/packages/private/kbn-code-owners @elastic/appex-qa
 src/platform/packages/private/kbn-config-mocks @elastic/kibana-core
 src/platform/packages/private/kbn-esql-editor @elastic/kibana-esql
-src/platform/packages/private/kbn-expression-utils @elastic/kibana-presentation
 src/platform/packages/private/kbn-ftr-screenshot-filename @elastic/kibana-operations @elastic/appex-qa
 src/platform/packages/private/kbn-gen-ai-functional-testing @elastic/appex-ai-infra
 src/platform/packages/private/kbn-generate-csv @elastic/response-ops
@@ -677,12 +676,6 @@ src/platform/plugins/shared/embeddable @elastic/kibana-presentation
 src/platform/plugins/shared/es_ui_shared @elastic/kibana-management
 src/platform/plugins/shared/esql @elastic/kibana-esql
 src/platform/plugins/shared/esql_datagrid @elastic/kibana-esql
-src/platform/plugins/shared/expression_error @elastic/kibana-presentation
-src/platform/plugins/shared/expression_image @elastic/kibana-presentation
-src/platform/plugins/shared/expression_metric @elastic/kibana-presentation
-src/platform/plugins/shared/expression_repeat_image @elastic/kibana-presentation
-src/platform/plugins/shared/expression_reveal_image @elastic/kibana-presentation
-src/platform/plugins/shared/expression_shape @elastic/kibana-presentation
 src/platform/plugins/shared/expressions @elastic/kibana-visualizations
 src/platform/plugins/shared/field_formats @elastic/kibana-data-discovery
 src/platform/plugins/shared/files @elastic/appex-sharedux
