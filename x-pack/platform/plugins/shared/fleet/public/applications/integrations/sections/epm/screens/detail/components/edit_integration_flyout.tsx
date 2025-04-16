@@ -19,7 +19,6 @@ import {
   EuiButton,
   EuiButtonEmpty,
 } from '@elastic/eui';
-// import { FormattedMessage } from '@kbn/i18n-react';
 
 export const EditIntegrationFlyout: React.FunctionComponent<{
   readMeContent: string | undefined;
@@ -41,10 +40,7 @@ export const EditIntegrationFlyout: React.FunctionComponent<{
     <EuiFlyout ownFocus onClose={onClose} aria-labelledby="editIntegrationFlyoutTitle">
       <EuiFlyoutHeader hasBorder>
         <EuiFlexGroup alignItems="center" gutterSize="s">
-          <EuiFlexItem grow={false}>
-            {/* TODO: need to get the icon from the integration and use it here */}
-            {miniIcon}
-          </EuiFlexItem>
+          <EuiFlexItem grow={false}>{miniIcon}</EuiFlexItem>
           <EuiFlexItem>
             <EuiTitle>
               <h2 id="editIntegrationFlyoutTitle">Editing {integrationName}</h2>
