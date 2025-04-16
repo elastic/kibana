@@ -43,6 +43,7 @@ import {
   getDisabledActionsWarningText,
   calculateFromValue,
   stringifyAfterKey,
+  checkForFrozenIndices,
 } from './utils';
 import type { SearchAfterAndBulkCreateReturnType } from '../types';
 import {
@@ -59,6 +60,17 @@ import { ruleExecutionLogMock } from '../../rule_monitoring/mocks';
 import type { GenericBulkCreateResponse } from '../factories';
 import type { BaseFieldsLatest } from '../../../../../common/api/detection_engine/model/alerts';
 import type { AlertingServerSetup } from '@kbn/alerting-plugin/server';
+import type {
+  FieldCapsResponse,
+  IndicesGetSettingsResponse,
+} from '@elastic/elasticsearch/lib/api/types';
+import type { ElasticsearchClient } from '@kbn/core/server';
+import { buildTimeRangeFilter } from './build_events_query';
+import { pick } from 'lodash';
+
+jest.mock('./build_events_query', () => ({
+  buildTimeRangeFilter: jest.fn(),
+}));
 
 describe('utils', () => {
   const anchor = '2020-01-01T06:06:06.666Z';
@@ -460,8 +472,7 @@ describe('utils', () => {
   describe('hasTimestampFields', () => {
     test('returns true when missing timestamp override field', async () => {
       const timestampField = 'event.ingested';
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const timestampFieldCapsResponse: Partial<TransportResult<Record<string, any>, unknown>> = {
+      const timestampFieldCapsResponse: Partial<TransportResult<FieldCapsResponse, unknown>> = {
         body: {
           indices: ['myfakeindex-1', 'myfakeindex-2', 'myfakeindex-3', 'myfakeindex-4'],
           fields: {
@@ -486,8 +497,8 @@ describe('utils', () => {
       const { foundNoIndices } = await hasTimestampFields({
         timestampField,
         timestampFieldCapsResponse: timestampFieldCapsResponse as TransportResult<
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          Record<string, any>
+          FieldCapsResponse,
+          unknown
         >,
         inputIndices: ['myfa*'],
         ruleExecutionLogger,
@@ -503,8 +514,7 @@ describe('utils', () => {
 
     test('returns true when missing timestamp field', async () => {
       const timestampField = '@timestamp';
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const timestampFieldCapsResponse: Partial<TransportResult<Record<string, any>, unknown>> = {
+      const timestampFieldCapsResponse: Partial<TransportResult<FieldCapsResponse, unknown>> = {
         body: {
           indices: ['myfakeindex-1', 'myfakeindex-2', 'myfakeindex-3', 'myfakeindex-4'],
           fields: {
@@ -529,8 +539,8 @@ describe('utils', () => {
       const { foundNoIndices } = await hasTimestampFields({
         timestampField,
         timestampFieldCapsResponse: timestampFieldCapsResponse as TransportResult<
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          Record<string, any>
+          FieldCapsResponse,
+          unknown
         >,
         inputIndices: ['myfa*'],
         ruleExecutionLogger,
@@ -546,8 +556,7 @@ describe('utils', () => {
 
     test('returns true when missing logs-endpoint.alerts-* index and rule name is Endpoint Security', async () => {
       const timestampField = '@timestamp';
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const timestampFieldCapsResponse: Partial<TransportResult<Record<string, any>, unknown>> = {
+      const timestampFieldCapsResponse: Partial<TransportResult<FieldCapsResponse, unknown>> = {
         body: {
           indices: [],
           fields: {},
@@ -561,8 +570,8 @@ describe('utils', () => {
       const { foundNoIndices } = await hasTimestampFields({
         timestampField,
         timestampFieldCapsResponse: timestampFieldCapsResponse as TransportResult<
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          Record<string, any>
+          FieldCapsResponse,
+          unknown
         >,
         inputIndices: ['logs-endpoint.alerts-*'],
         ruleExecutionLogger,
@@ -578,8 +587,7 @@ describe('utils', () => {
 
     test('returns true when missing logs-endpoint.alerts-* index and rule name is NOT Endpoint Security', async () => {
       const timestampField = '@timestamp';
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const timestampFieldCapsResponse: Partial<TransportResult<Record<string, any>, unknown>> = {
+      const timestampFieldCapsResponse: Partial<TransportResult<FieldCapsResponse, unknown>> = {
         body: {
           indices: [],
           fields: {},
@@ -594,8 +602,8 @@ describe('utils', () => {
       const { foundNoIndices } = await hasTimestampFields({
         timestampField,
         timestampFieldCapsResponse: timestampFieldCapsResponse as TransportResult<
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          Record<string, any>
+          FieldCapsResponse,
+          unknown
         >,
         inputIndices: ['logs-endpoint.alerts-*'],
         ruleExecutionLogger,
@@ -1380,6 +1388,293 @@ describe('utils', () => {
       expect(warning).toEqual(
         'Rule action connector .webhook is not enabled. To send notifications, you need a higher Security Analytics license / tier'
       );
+    });
+  });
+
+  describe('checkForFrozenIndices', () => {
+    let currentUserEsClient: ElasticsearchClient;
+    let internalEsClient: ElasticsearchClient;
+    let fieldCapsMock: jest.MockedFunction<ElasticsearchClient['fieldCaps']>;
+    let indicesGetSettingsMock: jest.MockedFunction<ElasticsearchClient['indices']['getSettings']>;
+    const buildTimeRangeFilterMock = buildTimeRangeFilter as jest.MockedFunction<
+      typeof buildTimeRangeFilter
+    >;
+    const returnedTimeRangeFilterRef = {};
+
+    beforeEach(() => {
+      fieldCapsMock = jest.fn();
+      indicesGetSettingsMock = jest.fn();
+
+      currentUserEsClient = {
+        fieldCaps: fieldCapsMock,
+      } as unknown as ElasticsearchClient;
+
+      internalEsClient = {
+        indices: {
+          getSettings: indicesGetSettingsMock,
+        },
+      } as unknown as ElasticsearchClient;
+
+      buildTimeRangeFilterMock.mockReturnValue(returnedTimeRangeFilterRef);
+      jest.clearAllMocks();
+    });
+
+    it('should return frozen indices when partial indices are confirmed as frozen', async () => {
+      const inputIndices = ['partial-index-1', 'partial-index-2', 'regular-index'];
+      const fieldCapsResponse = {
+        indices: ['partial-index-1', 'partial-index-2', 'regular-index'],
+      };
+      const getSettingsResponse = {
+        'partial-index-1': {
+          settings: {
+            index: {
+              routing: {
+                allocation: {
+                  include: {
+                    _tier_preference: 'data_frozen',
+                  },
+                },
+              },
+            },
+          },
+        },
+        'partial-index-2': {
+          settings: {
+            index: {
+              routing: {
+                allocation: {
+                  include: {
+                    _tier_preference: 'data_frozen',
+                  },
+                },
+              },
+            },
+          },
+        },
+      };
+
+      fieldCapsMock.mockResolvedValue(fieldCapsResponse as FieldCapsResponse);
+      indicesGetSettingsMock.mockResolvedValue(getSettingsResponse as IndicesGetSettingsResponse);
+
+      const params = {
+        inputIndices,
+        internalEsClient,
+        currentUserEsClient,
+        to: 'now',
+        from: 'now-1d',
+        primaryTimestamp: '@timestamp',
+        secondaryTimestamp: undefined,
+      };
+
+      const frozenIndices = await checkForFrozenIndices(params);
+
+      expect(frozenIndices).toEqual(['partial-index-1', 'partial-index-2']);
+      expect(fieldCapsMock).toHaveBeenNthCalledWith(1, {
+        index: inputIndices,
+        fields: ['_id'],
+        ignore_unavailable: true,
+        index_filter: expect.any(Object),
+      });
+      expect(buildTimeRangeFilter).toHaveBeenNthCalledWith(
+        1,
+        pick(params, ['to', 'from', 'primaryTimestamp', 'secondaryTimestamp'])
+      );
+      expect(fieldCapsMock.mock.calls[0][0]?.index_filter).toBe(returnedTimeRangeFilterRef);
+      expect(indicesGetSettingsMock).toHaveBeenNthCalledWith(1, {
+        index: ['partial-index-1', 'partial-index-2'],
+        filter_path: '*.settings.index.routing.allocation.include._tier_preference',
+      });
+    });
+
+    it('should return an empty array when no frozen indices are found', async () => {
+      const inputIndices = ['regular-index-1', 'regular-index-2'];
+      const fieldCapsResponse = {
+        indices: ['regular-index-1', 'regular-index-2'],
+      };
+
+      const getSettingsResponse = {
+        'regular-index-1': {
+          settings: {
+            index: {
+              routing: {
+                allocation: {
+                  include: {
+                    _tier_preference: 'data_content',
+                  },
+                },
+              },
+            },
+          },
+        },
+        'regular-index-2': {
+          settings: {
+            index: {
+              routing: {
+                allocation: {
+                  include: {
+                    _tier_preference: 'data_content',
+                  },
+                },
+              },
+            },
+          },
+        },
+      };
+
+      fieldCapsMock.mockResolvedValue(fieldCapsResponse as FieldCapsResponse);
+      indicesGetSettingsMock.mockResolvedValue(getSettingsResponse as IndicesGetSettingsResponse);
+
+      const params = {
+        inputIndices,
+        internalEsClient,
+        currentUserEsClient,
+        to: 'now',
+        from: 'now-1d',
+        primaryTimestamp: '@timestamp',
+        secondaryTimestamp: undefined,
+      };
+
+      const frozenIndices = await checkForFrozenIndices(params);
+
+      expect(frozenIndices).toEqual([]);
+      expect(buildTimeRangeFilterMock).toHaveBeenNthCalledWith(
+        1,
+        pick(params, ['to', 'from', 'primaryTimestamp', 'secondaryTimestamp'])
+      );
+      expect(fieldCapsMock).toHaveBeenCalledWith({
+        index: inputIndices,
+        fields: ['_id'],
+        ignore_unavailable: true,
+        index_filter: expect.any(Object),
+      });
+      expect(fieldCapsMock.mock.calls[0][0]?.index_filter).toBe(returnedTimeRangeFilterRef);
+      expect(indicesGetSettingsMock).not.toHaveBeenCalled();
+    });
+
+    it('should return an empty array when there are indices whose name begins with "partial-", but they are not frozen', async () => {
+      const inputIndices = ['partial-regular-index-1', 'regular-index-2'];
+      const fieldCapsResponse = {
+        indices: ['partial-regular-index-1', 'regular-index-2'],
+      };
+
+      const getSettingsResponse = {
+        'partial-regular-index-1': {
+          settings: {
+            index: {
+              routing: {
+                allocation: {
+                  include: {
+                    _tier_preference: 'data_content',
+                  },
+                },
+              },
+            },
+          },
+        },
+        'regular-index-2': {
+          settings: {
+            index: {
+              routing: {
+                allocation: {
+                  include: {
+                    _tier_preference: 'data_content',
+                  },
+                },
+              },
+            },
+          },
+        },
+      };
+
+      fieldCapsMock.mockResolvedValue(fieldCapsResponse as FieldCapsResponse);
+      indicesGetSettingsMock.mockResolvedValue(getSettingsResponse as IndicesGetSettingsResponse);
+
+      const params = {
+        inputIndices,
+        internalEsClient,
+        currentUserEsClient,
+        to: 'now',
+        from: 'now-1d',
+        primaryTimestamp: '@timestamp',
+        secondaryTimestamp: undefined,
+      };
+
+      const frozenIndices = await checkForFrozenIndices(params);
+
+      expect(frozenIndices).toEqual([]);
+      expect(buildTimeRangeFilterMock).toHaveBeenNthCalledWith(
+        1,
+        pick(params, ['to', 'from', 'primaryTimestamp', 'secondaryTimestamp'])
+      );
+      expect(fieldCapsMock).toHaveBeenCalledWith({
+        index: inputIndices,
+        fields: ['_id'],
+        ignore_unavailable: true,
+        index_filter: expect.any(Object),
+      });
+      expect(fieldCapsMock.mock.calls[0][0]?.index_filter).toBe(returnedTimeRangeFilterRef);
+      expect(indicesGetSettingsMock).toHaveBeenCalledWith({
+        index: ['partial-regular-index-1'],
+        filter_path: '*.settings.index.routing.allocation.include._tier_preference',
+      });
+    });
+
+    it('should handle errors from fieldCaps gracefully', async () => {
+      const inputIndices = ['partial-index-1', 'partial-index-2'];
+
+      fieldCapsMock.mockRejectedValue(new Error('fieldCaps error'));
+
+      await expect(
+        checkForFrozenIndices({
+          inputIndices,
+          internalEsClient,
+          currentUserEsClient,
+          to: 'now',
+          from: 'now-1d',
+          primaryTimestamp: '@timestamp',
+          secondaryTimestamp: undefined,
+        })
+      ).rejects.toThrow('fieldCaps error');
+
+      expect(fieldCapsMock).toHaveBeenCalledWith({
+        index: inputIndices,
+        fields: ['_id'],
+        ignore_unavailable: true,
+        index_filter: expect.any(Object),
+      });
+    });
+
+    it('should handle errors from getSettings gracefully', async () => {
+      const inputIndices = ['partial-index-1', 'partial-index-2'];
+      const fieldCapsResponse = {
+        indices: ['partial-index-1', 'partial-index-2'],
+      };
+
+      fieldCapsMock.mockResolvedValue(fieldCapsResponse as FieldCapsResponse);
+      indicesGetSettingsMock.mockRejectedValue(new Error('getSettings error'));
+
+      await expect(
+        checkForFrozenIndices({
+          inputIndices,
+          internalEsClient,
+          currentUserEsClient,
+          to: 'now',
+          from: 'now-1d',
+          primaryTimestamp: '@timestamp',
+          secondaryTimestamp: undefined,
+        })
+      ).rejects.toThrow('getSettings error');
+
+      expect(fieldCapsMock).toHaveBeenCalledWith({
+        index: inputIndices,
+        fields: ['_id'],
+        ignore_unavailable: true,
+        index_filter: expect.any(Object),
+      });
+      expect(indicesGetSettingsMock).toHaveBeenCalledWith({
+        index: inputIndices,
+        filter_path: '*.settings.index.routing.allocation.include._tier_preference',
+      });
     });
   });
 });

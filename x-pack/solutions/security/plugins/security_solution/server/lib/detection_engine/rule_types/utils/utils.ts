@@ -7,7 +7,7 @@
 
 import agent from 'elastic-apm-node';
 import { createHash } from 'crypto';
-import { get, invert, isEmpty, merge, partition } from 'lodash';
+import { get, invert, isArray, isEmpty, merge, partition } from 'lodash';
 import moment from 'moment';
 import objectHash from 'object-hash';
 
@@ -88,6 +88,7 @@ import {
   SECURITY_NUM_INDICES_MATCHING_PATTERN,
   SECURITY_QUERY_SPAN_S,
 } from './apm_field_names';
+import { buildTimeRangeFilter } from './build_events_query';
 
 export const MAX_RULE_GAP_RATIO = 4;
 
@@ -188,6 +189,68 @@ export const hasTimestampFields = async (args: {
   }
 
   return { foundNoIndices: false, warningMessage: undefined };
+};
+
+export const checkForFrozenIndices = async ({
+  inputIndices,
+  internalEsClient,
+  currentUserEsClient,
+  to,
+  from,
+  primaryTimestamp,
+  secondaryTimestamp,
+}: {
+  inputIndices: string[];
+  internalEsClient: ElasticsearchClient;
+  currentUserEsClient: ElasticsearchClient;
+  to: string;
+  from: string;
+  primaryTimestamp: string;
+  secondaryTimestamp: string | undefined;
+}): Promise<string[]> => {
+  const fieldCapsResponse = await currentUserEsClient.fieldCaps({
+    index: inputIndices,
+    fields: ['_id'],
+    ignore_unavailable: true,
+    index_filter: buildTimeRangeFilter({
+      to,
+      from,
+      primaryTimestamp,
+      secondaryTimestamp,
+    }),
+  });
+
+  const responseIndices = isArray(fieldCapsResponse.indices)
+    ? fieldCapsResponse.indices
+    : [fieldCapsResponse.indices];
+  // Frozen indices start with `partial-`, but it's possible
+  // for some regular hot/warm index to start with that prefix as well by coincidence. If we find indices with that naming pattern,
+  // we fetch the index settings to verify that they are actually frozen indices.
+  const partialIndices = responseIndices.filter((index) => index.startsWith('partial-'));
+  if (partialIndices.length <= 0) {
+    return [];
+  }
+
+  // See https://www.elastic.co/guide/en/elasticsearch/reference/current/data-tiers.html#data-tier-allocation for
+  // details on _tier_preference
+  const tierPreferencesResp = await internalEsClient.indices.getSettings({
+    // Use the original index patterns again instead of just the concrete names of the partial indices:
+    // the list of concrete indices could be huge and make the request URL too large, but we know the list of index patterns works
+    index: partialIndices,
+    filter_path: '*.settings.index.routing.allocation.include._tier_preference',
+  });
+
+  return partialIndices.filter((partialIdx) => {
+    let isFrozen = false;
+    const tiers =
+      tierPreferencesResp[partialIdx].settings?.index?.routing?.allocation?.include
+        ?._tier_preference;
+    if (tiers) {
+      const preferredTier = tiers.split(',')[0];
+      isFrozen = preferredTier === 'data_frozen';
+    }
+    return isFrozen;
+  });
 };
 
 export const checkPrivilegesFromEsClient = async (

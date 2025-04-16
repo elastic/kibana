@@ -35,6 +35,10 @@ export const RuleExecutionMetrics = z.object({
    */
   execution_gap_duration_s: z.number().int().min(0).optional(),
   /**
+   * Count of frozen indices queried during the rule execution
+   */
+  frozen_indices_queried_count: z.number().int().min(0).optional(),
+  /**
    * Range of the execution gap
    */
   gap_range: z
