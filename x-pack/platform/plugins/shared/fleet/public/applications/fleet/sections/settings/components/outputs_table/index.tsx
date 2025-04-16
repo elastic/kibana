@@ -17,6 +17,7 @@ import type { Output } from '../../../../types';
 import { OutputHealth } from '../edit_output_flyout/output_health';
 
 import { DefaultBadges } from './badges';
+import { IntegrationSyncStatus } from './integration_sync_status';
 
 export interface OutputsTableProps {
   outputs: Output[];
@@ -115,6 +116,12 @@ export const OutputsTable: React.FunctionComponent<OutputsTableProps> = ({
         },
         name: i18n.translate('xpack.fleet.settings.outputsTable.statusColumnTitle', {
           defaultMessage: 'Status',
+        }),
+      },
+      {
+        render: (output: Output) => <IntegrationSyncStatus output={output} />,
+        name: i18n.translate('xpack.fleet.settings.outputsTable.integrationSyncColumnTitle', {
+          defaultMessage: 'Integration syncing',
         }),
       },
       {

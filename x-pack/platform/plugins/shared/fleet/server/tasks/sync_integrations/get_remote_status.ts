@@ -30,9 +30,6 @@ export const getRemoteSyncedIntegrationsInfoByOutputId = async (
   }
   try {
     const output = await outputService.get(soClient, outputId);
-    if (!output) {
-      throw new FleetNotFoundError(`No output found with id ${outputId}`);
-    }
     if (output?.type !== 'remote_elasticsearch') {
       throw new FleetError(`Output ${outputId} is not a remote elasticsearch output`);
     }
@@ -63,14 +60,21 @@ export const getRemoteSyncedIntegrationsInfoByOutputId = async (
       method: 'GET',
     };
     const url = `${kibanaUrl}/api/fleet/remote_synced_integrations/status`;
-    logger.info(`Fetching ${kibanaUrl}/api/fleet/remote_synced_integrations/status`);
+    logger.debug(`Fetching ${kibanaUrl}/api/fleet/remote_synced_integrations/status`);
 
     const res = await fetch(url, options);
 
     const body = await res.json();
 
-    return body as GetRemoteSyncedIntegrationsStatusResponse;
+    return {
+      integrations: body.integrations ?? [],
+      custom_assets: body.custom_assets,
+      error: body.error ? body.message : undefined,
+    };
   } catch (error) {
+    if (error.isBoom && error.output.statusCode === 404) {
+      throw new FleetNotFoundError(`No output found with id ${outputId}`);
+    }
     logger.error(`${error}`);
     throw error;
   }
