@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import Handlebars from 'handlebars';
+import Handlebars from '@kbn/handlebars';
 import { resolve } from 'path';
 import { BundleGenerationContext, GenerationContext } from '../parser/get_generation_context';
 import { registerHelpers } from './register_helpers';
@@ -34,10 +34,10 @@ export const initTemplateService = async (): Promise<ITemplateService> => {
 
   return {
     compileTemplate: (templateName: TemplateName, context: GenerationContext) => {
-      return handlebars.compile(templates[templateName])(context);
+      return handlebars.compileAST(templates[templateName])(context);
     },
     compileBundleTemplate: (templateName: TemplateName, context: BundleGenerationContext) => {
-      return handlebars.compile(templates[templateName])(context);
+      return handlebars.compileAST(templates[templateName])(context);
     },
   };
 };
