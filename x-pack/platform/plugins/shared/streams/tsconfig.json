@@ -44,6 +44,10 @@
     "@kbn/core-saved-objects-server-internal",
     "@kbn/core-analytics-server",
     "@kbn/cloud-plugin",
-    "@kbn/es-types"
+    "@kbn/es-types",
+    "@kbn/alerts-as-data-utils",
+    "@kbn/rule-registry-plugin",
+    "@kbn/kibana-utils-plugin",
+    "@kbn/rule-data-utils"
   ]
 }
