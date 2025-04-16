@@ -101,7 +101,6 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
     parseInt(timeWindowSize, 10) >= 5 &&
     parseInt(timeWindowSize, 10) <= 20;
 
-  const [showTimeWindowWarning, setShowTimeWindowWarning] = useState(showWarning);
 
   useEffect(() => {
     if (!actionParams.subAction) {
