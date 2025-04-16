@@ -90,6 +90,10 @@ export const securityDefaultProductFeaturesConfig: DefaultSecurityProductFeature
     },
   },
 
+  [ProductFeatureSecurityKey.endpointHostIsolation]: {
+    subFeatureIds: [SecuritySubFeatureId.hostIsolation],
+  },
+
   [ProductFeatureSecurityKey.endpointHostManagement]: {
     subFeatureIds: [SecuritySubFeatureId.endpointList],
   },
