@@ -112,13 +112,14 @@ export const IntegrationStatus: React.FunctionComponent<{
   'data-test-subj'?: string;
 }> = memo(({ integration, customAssets, 'data-test-subj': dataTestSubj }) => {
   const [packageInfo, setPackageInfo] = useState<PackageInfo | undefined>(undefined);
+
   useEffect(() => {
     sendGetPackageInfoByKeyForRq(integration.package_name, integration.package_version, {
       prerelease: true,
     }).then((result: GetInfoResponse) => {
       setPackageInfo(result.item);
     });
-  }, [integration]);
+  }, [integration.package_name, integration.package_version]);
 
   return (
     <CollapsablePanel
