@@ -49,19 +49,20 @@ const AbsoluteTimeText = ({ date }: { date: string }) => {
   );
 };
 
-const RelativeTimeText = ({ date }: { date: string }) => {
-  const result = getRelativeTimeValueAndUnitFromTimeString(date);
+const RelativeTimeText = ({ value, unit }: { value?: number; unit?: string }) => (
+  <BoldText>
+    <FormattedRelativeTime
+      value={value}
+      // @ts-expect-error - RelativeTimeFormatSingularUnit expected here is not exported so a cast from string is not possible
+      unit={unit}
+    />
+  </BoldText>
+);
 
-  return (
-    <BoldText>
-      <FormattedRelativeTime
-        value={result?.value}
-        // @ts-expect-error - RelativeTimeFormatSingularUnit expected here is not exported so a cast from string is not possible
-        unit={result?.unit}
-      />
-    </BoldText>
-  );
-};
+interface TimeRange {
+  from: string;
+  to: string;
+}
 
 interface Props {
   timeRange?: {
@@ -71,6 +72,49 @@ interface Props {
   isAbsoluteTime: boolean;
   changeTimeType: (e: EuiSwitchEvent) => void;
 }
+
+const getRelativeTimeText = (timeRange: TimeRange) => {
+  // FormattedRelativeTime doesn't support "now" as a value, it will render "0 seconds" instead
+  const from = getRelativeTimeValueAndUnitFromTimeString(timeRange.from);
+  const to = getRelativeTimeValueAndUnitFromTimeString(timeRange.to);
+
+  if (!from?.value) {
+    return (
+      <FormattedMessage
+        id="share.link.timeRange.relativeTimeInfoText.fromNow"
+        defaultMessage="The users will see all data from <bold>now</bold> to {to}, based on when they view it."
+        values={{
+          to: <RelativeTimeText value={to?.value} unit={to?.unit} />,
+          bold: (chunks) => <BoldText>{chunks}</BoldText>,
+        }}
+      />
+    );
+  }
+
+  if (!to?.value) {
+    return (
+      <FormattedMessage
+        id="share.link.timeRange.relativeTimeInfoText"
+        defaultMessage="The users will see all data from {from} to <bold>now</bold>, based on when they view it."
+        values={{
+          from: <RelativeTimeText value={from?.value} unit={from?.unit} />,
+          bold: (chunks) => <BoldText>{chunks}</BoldText>,
+        }}
+      />
+    );
+  }
+
+  return (
+    <FormattedMessage
+      id="share.link.timeRange.relativeTimeInfoText.default"
+      defaultMessage="The users will see all data from {from} to {to}, based on when they view it."
+      values={{
+        from: <RelativeTimeText value={from?.value} unit={from?.unit} />,
+        to: <RelativeTimeText value={to?.value} unit={to?.unit} />,
+      }}
+    />
+  );
+};
 
 export const TimeTypeSection = ({ timeRange, isAbsoluteTime, changeTimeType }: Props) => {
   const [isAbsoluteTimeByDefault, setIsAbsoluteTimeByDefault] = useState(false);
@@ -105,14 +149,7 @@ export const TimeTypeSection = ({ timeRange, isAbsoluteTime, changeTimeType }: P
             }}
           />
         ) : (
-          <FormattedMessage
-            id="share.link.timeRange.relativeTimeInfoText"
-            defaultMessage="The users will see all data from {from} to {to}, based on when they view it."
-            values={{
-              from: <RelativeTimeText date={timeRange?.from} />,
-              to: <RelativeTimeText date={timeRange?.to} />,
-            }}
-          />
+          getRelativeTimeText(timeRange)
         )}
       </EuiText>
       <EuiSpacer size="m" />
