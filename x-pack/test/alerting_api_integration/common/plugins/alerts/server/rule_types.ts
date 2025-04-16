@@ -960,7 +960,6 @@ function getAlwaysFiringAlertAsDataWithDynamicTemplatesRuleType() {
     actionGroups: [{ id: 'default', name: 'Default' }],
     category: 'management',
     producer: 'alertsFixture',
-    solution: 'stack',
     defaultActionGroupId: 'default',
     minimumLicenseRequired: 'basic',
     isExportable: true,

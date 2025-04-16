@@ -8,7 +8,6 @@
 import {
   ClusterPutComponentTemplateRequest,
   IndicesGetIndexTemplateIndexTemplateItem,
-  type IndicesPutIndexTemplateRequest,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { Logger, ElasticsearchClient } from '@kbn/core/server';
 import { asyncForEach } from '@kbn/std';

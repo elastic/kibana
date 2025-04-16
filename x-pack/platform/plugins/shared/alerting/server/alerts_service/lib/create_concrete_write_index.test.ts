@@ -676,49 +676,51 @@ describe('createConcreteWriteIndex', () => {
 
           expect(clusterClient.indices.putSettings).toHaveBeenNthCalledWith(1, {
             index: '.alerts-test.alerts-default',
-            settings: {
+            body: {
               'index.mapping.total_fields.limit': 2500,
               'index.mapping.total_fields.ignore_dynamic_beyond_limit': true,
             },
           });
           expect(clusterClient.indices.putSettings).toHaveBeenNthCalledWith(2, {
             index: '.alerts-test.alerts-default',
-            settings: {
+            body: {
               'index.mapping.total_fields.limit': 2501,
               'index.mapping.total_fields.ignore_dynamic_beyond_limit': true,
             },
           });
           expect(clusterClient.indices.putSettings).toHaveBeenNthCalledWith(3, {
             index: '.alerts-test.alerts-default',
-            settings: {
+            body: {
               'index.mapping.total_fields.limit': 2503,
               'index.mapping.total_fields.ignore_dynamic_beyond_limit': true,
             },
           });
           expect(clusterClient.indices.putSettings).toHaveBeenNthCalledWith(4, {
             index: '.alerts-test.alerts-default',
-            settings: {
+            body: {
               'index.mapping.total_fields.limit': 2506,
               'index.mapping.total_fields.ignore_dynamic_beyond_limit': true,
             },
           });
 
           expect(clusterClient.indices.putIndexTemplate).toHaveBeenNthCalledWith(1, {
-            composed_of: ['test-mappings'],
-            index_patterns: ['test*'],
-            template: {
-              mappings: {
-                dynamic: false,
-              },
-              settings: {
-                auto_expand_replicas: '0-1',
-                hidden: true,
-                'index.lifecycle': {
-                  name: '.alerts-ilm-policy',
-                  rollover_alias: '.alerts-empty-default',
+            body: {
+              composed_of: ['test-mappings'],
+              index_patterns: ['test*'],
+              template: {
+                mappings: {
+                  dynamic: false,
                 },
-                'index.mapping.total_fields.limit': 2501,
-                'index.mapping.total_fields.ignore_dynamic_beyond_limit': true,
+                settings: {
+                  auto_expand_replicas: '0-1',
+                  hidden: true,
+                  'index.lifecycle': {
+                    name: '.alerts-ilm-policy',
+                    rollover_alias: '.alerts-empty-default',
+                  },
+                  'index.mapping.total_fields.limit': 2501,
+                  'index.mapping.total_fields.ignore_dynamic_beyond_limit': true,
+                },
               },
             },
             name: 'test-template',
@@ -769,21 +771,23 @@ describe('createConcreteWriteIndex', () => {
           expect(logger.info).toBeCalledTimes(4);
 
           expect(clusterClient.indices.putIndexTemplate).toHaveBeenNthCalledWith(1, {
-            composed_of: ['test-mappings'],
-            index_patterns: ['test*'],
-            template: {
-              mappings: {
-                dynamic: false,
-              },
-              settings: {
-                auto_expand_replicas: '0-1',
-                hidden: true,
-                'index.lifecycle': {
-                  name: '.alerts-ilm-policy',
-                  rollover_alias: '.alerts-empty-default',
+            body: {
+              composed_of: ['test-mappings'],
+              index_patterns: ['test*'],
+              template: {
+                mappings: {
+                  dynamic: false,
                 },
-                'index.mapping.total_fields.limit': 2501,
-                'index.mapping.total_fields.ignore_dynamic_beyond_limit': true,
+                settings: {
+                  auto_expand_replicas: '0-1',
+                  hidden: true,
+                  'index.lifecycle': {
+                    name: '.alerts-ilm-policy',
+                    rollover_alias: '.alerts-empty-default',
+                  },
+                  'index.mapping.total_fields.limit': 2501,
+                  'index.mapping.total_fields.ignore_dynamic_beyond_limit': true,
+                },
               },
             },
             name: 'test-template',
@@ -791,28 +795,28 @@ describe('createConcreteWriteIndex', () => {
 
           expect(clusterClient.indices.putSettings).toHaveBeenNthCalledWith(2, {
             index: '.internal.alerts-test.alerts-default-000001',
-            settings: {
+            body: {
               'index.mapping.total_fields.limit': 2500,
               'index.mapping.total_fields.ignore_dynamic_beyond_limit': true,
             },
           });
           expect(clusterClient.indices.putSettings).toHaveBeenNthCalledWith(3, {
             index: '.internal.alerts-test.alerts-default-000001',
-            settings: {
+            body: {
               'index.mapping.total_fields.limit': 2501,
               'index.mapping.total_fields.ignore_dynamic_beyond_limit': true,
             },
           });
           expect(clusterClient.indices.putSettings).toHaveBeenNthCalledWith(4, {
             index: '.internal.alerts-test.alerts-default-000001',
-            settings: {
+            body: {
               'index.mapping.total_fields.limit': 2503,
               'index.mapping.total_fields.ignore_dynamic_beyond_limit': true,
             },
           });
           expect(clusterClient.indices.putSettings).toHaveBeenNthCalledWith(5, {
             index: '.internal.alerts-test.alerts-default-000001',
-            settings: {
+            body: {
               'index.mapping.total_fields.limit': 2506,
               'index.mapping.total_fields.ignore_dynamic_beyond_limit': true,
             },
