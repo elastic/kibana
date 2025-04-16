@@ -29,7 +29,7 @@ import {
   IconType,
 } from '@elastic/eui';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import { IntegrationType, Status } from '@kbn/wci-common';
+import { IntegrationType } from '@kbn/wci-common';
 import type { Integration } from '../../../../../common/integrations';
 import { useNavigation } from '../../../hooks/use_navigation';
 import { appPaths } from '../../../app_paths';
@@ -70,7 +70,7 @@ export const IntegrationListView: React.FC<IntegrationListViewProps> = ({ integr
     {
       field: 'status',
       name: 'Status',
-      render: (status: Status) => <EuiHealth color="green">Healthy</EuiHealth>,
+      render: () => <EuiHealth color="green">Healthy</EuiHealth>,
     },
     {
       field: 'used_in',
@@ -329,14 +329,21 @@ export const IntegrationListView: React.FC<IntegrationListViewProps> = ({ integr
       {selectedTabId === 'active' && (
         <KibanaPageTemplate.Section>
           {integrations.length === 0 ? (
-            <EuiFlexGroup alignItems='center' style={{ 
-              width: '500px', 
-              height: '500px', 
-              margin: '0 auto' 
-            }}>
+            <EuiFlexGroup
+              alignItems="center"
+              css={{
+                width: '500px',
+                height: '500px',
+                margin: '0 auto',
+              }}
+            >
               <EuiPanel>
-              <EuiFlexItem grow={false}>
-                  <span role="img" aria-label="plug emoji" style={{  margin: '0 auto' , fontSize: '50px' }}>
+                <EuiFlexItem grow={false}>
+                  <span
+                    role="img"
+                    aria-label="plug emoji"
+                    style={{ margin: '0 auto', fontSize: '50px' }}
+                  >
                     🔌
                   </span>
                 </EuiFlexItem>
@@ -346,7 +353,7 @@ export const IntegrationListView: React.FC<IntegrationListViewProps> = ({ integr
                   actions={
                     <EuiButton
                       onClick={() => {
-                        setSelectedTabId('catalog')
+                        setSelectedTabId('catalog');
                       }}
                       color="primary"
                       fill

@@ -10,8 +10,3 @@ export enum IntegrationType {
   index_source = 'index_source',
   external_server = 'external_server',
 }
-
-export enum Status {
-  Connected = 'connected',
-  Error = 'error'
-}
