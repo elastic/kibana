@@ -17,6 +17,7 @@ import {
   EuiText,
   EuiCallOut,
   EuiIcon,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 
 import type { EuiAccordionProps } from '@elastic/eui/src/components/accordion';
@@ -180,15 +181,19 @@ export const IntegrationStatus: React.FunctionComponent<{
               id={`${customAsset.type}:${customAsset.name}`}
               buttonContent={customAsset.name}
               extraAction={
-                <EuiIcon
-                  size="m"
-                  color={customAsset.sync_status === SyncStatus.FAILED ? 'danger' : 'success'}
-                  type={
-                    customAsset.sync_status === SyncStatus.FAILED
-                      ? 'errorFilled'
-                      : 'checkInCircleFilled'
-                  }
-                />
+                customAsset.sync_status === SyncStatus.SYNCHRONIZING ? (
+                  <EuiLoadingSpinner size="m" />
+                ) : (
+                  <EuiIcon
+                    size="m"
+                    color={customAsset.sync_status === SyncStatus.FAILED ? 'danger' : 'success'}
+                    type={
+                      customAsset.sync_status === SyncStatus.FAILED
+                        ? 'errorFilled'
+                        : 'checkInCircleFilled'
+                    }
+                  />
+                )
               }
               paddingSize="none"
             >
