@@ -23,7 +23,10 @@ export const canFilter = async (
   if (!event) {
     return false;
   }
-  const canFilter = actions.canCreateFiltersFromValueClickAction !== undefined ? await actions.canCreateFiltersFromValueClickAction(event.data) : false;
+  const canFilter =
+    actions.canCreateFiltersFromValueClickAction !== undefined
+      ? await actions.canCreateFiltersFromValueClickAction(event.data)
+      : false;
   return canFilter;
 };
 

@@ -19,12 +19,12 @@ import {
 import { ScreenshotModePluginStart } from '@kbn/screenshot-mode-plugin/public';
 import { SharePluginStart } from '@kbn/share-plugin/public';
 import { ManagementSetup } from '@kbn/management-plugin/public';
+import { ActionDefinition } from '@kbn/ui-actions-plugin/public/actions';
 import { DatatableUtilitiesService } from '../common';
 import type { ISearchSetup, ISearchStart } from './search';
 import { QuerySetup, QueryStart } from './query';
 import { DataViewsContract } from './data_views';
 import { NowProviderPublicContract } from './now_provider';
-import { ActionDefinition } from '@kbn/ui-actions-plugin/public/actions';
 
 export interface DataSetupDependencies {
   expressions: ExpressionsSetup;

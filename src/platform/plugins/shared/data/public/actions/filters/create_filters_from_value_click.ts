@@ -254,5 +254,4 @@ export const appendFilterToESQLQueryFromValueClickAction = ({
   }
 
   return queryString;
-  
 };
