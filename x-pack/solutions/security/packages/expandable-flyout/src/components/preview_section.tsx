@@ -15,9 +15,10 @@ import {
   transparentize,
   useEuiTheme,
 } from '@elastic/eui';
-import React, { memo, useMemo } from 'react';
+import React, { memo, useCallback, useMemo } from 'react';
 import { css } from '@emotion/react';
 import { has } from 'lodash';
+import { i18n } from '@kbn/i18n';
 import {
   selectDefaultWidths,
   selectPushVsOverlay,
@@ -31,7 +32,19 @@ import {
   PREVIEW_SECTION_TEST_ID,
 } from './test_ids';
 import { useExpandableFlyoutApi } from '../..';
-import { BACK_BUTTON, CLOSE_BUTTON } from './translations';
+
+const BACK_BUTTON = i18n.translate(
+  'securitySolutionPackages.expandableFlyout.previewSection.backButton',
+  {
+    defaultMessage: 'Back',
+  }
+);
+const CLOSE_BUTTON = i18n.translate(
+  'securitySolutionPackages.expandableFlyout.previewSection.closeButton',
+  {
+    defaultMessage: 'Close',
+  }
+);
 
 export interface PreviewBanner {
   /**
@@ -104,11 +117,14 @@ export const PreviewSection: React.FC<PreviewSectionProps> = memo(
       return showExpanded ? `calc(${percentage}% - 1px)` : `calc(100% - 1px)`;
     }, [defaultPercentages, rightPercentage, showExpanded, type]);
 
+    const closePreview = useCallback(() => closePreviewPanel(), [closePreviewPanel]);
+    const previousPreview = useCallback(() => previousPreviewPanel(), [previousPreviewPanel]);
+
     const closeButton = (
       <EuiFlexItem grow={false}>
         <EuiButtonIcon
           iconType="cross"
-          onClick={() => closePreviewPanel()}
+          onClick={closePreview}
           data-test-subj={PREVIEW_SECTION_CLOSE_BUTTON_TEST_ID}
           aria-label={CLOSE_BUTTON}
         />
@@ -121,7 +137,7 @@ export const PreviewSection: React.FC<PreviewSectionProps> = memo(
             size="xs"
             iconType="arrowLeft"
             iconSide="left"
-            onClick={() => previousPreviewPanel()}
+            onClick={previousPreview}
             data-test-subj={PREVIEW_SECTION_BACK_BUTTON_TEST_ID}
             aria-label={BACK_BUTTON}
           >
