@@ -774,23 +774,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
         });
 
         it('should store references correctly for dashboard artifacts', async () => {
-          const { body: createdDashboard } = await supertest
-            .post(`${getUrlPrefix(Spaces.space1.id)}/api/content_management/rpc/create`)
-            .set('kbn-xsrf', 'foo')
-            .send({
-              contentTypeId: 'dashboard',
-              data: {
-                kibanaSavedObjectMeta: {},
-                title: 'Sample dashboard',
-              },
-              options: {
-                references: [],
-                overwrite: true,
-              },
-              version: 2,
-            })
-            .expect(200);
-          const dashboardId = createdDashboard.result.result.item.id;
+          const dashboardId = 'dashboard-1';
           const response = await supertest
             .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')

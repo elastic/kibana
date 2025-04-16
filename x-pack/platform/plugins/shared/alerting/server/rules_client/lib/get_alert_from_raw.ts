@@ -24,12 +24,13 @@ import {
 } from '../../lib';
 import type { UntypedNormalizedRuleType } from '../../rule_type_registry';
 import { getActiveScheduledSnoozes } from '../../lib/is_rule_snoozed';
-import { injectReferencesIntoArtifacts, injectReferencesIntoParams } from '../common';
+import { injectReferencesIntoParams } from '../common';
 import {
   transformRawActionsToDomainActions,
   transformRawActionsToDomainSystemActions,
 } from '../../application/rule/transforms/transform_raw_actions_to_domain_actions';
 import { fieldsToExcludeFromPublicApi } from '../rules_client';
+import { transformRawArtifactsToDomainArtifacts } from '../../application/rule/transforms/transform_raw_artifacts_to_domain_artifacts';
 
 export interface GetAlertFromRawParams {
   id: string;
@@ -170,7 +171,7 @@ function getPartialRuleFromRaw<Params extends RuleTypeParams>(
           omitGeneratedValues,
         })
       : [],
-    artifacts: injectReferencesIntoArtifacts(opts.id, artifacts, opts.references || []),
+    artifacts: transformRawArtifactsToDomainArtifacts(opts.id, artifacts, opts.references),
     params: injectReferencesIntoParams(
       opts.id,
       opts.ruleType,
