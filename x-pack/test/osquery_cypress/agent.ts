@@ -41,7 +41,8 @@ export class AgentManager extends Manager {
     this.log.info(chalk.bold('Setting up Agent'));
 
     const artifact = `docker.elastic.co/elastic-agent/elastic-agent:${await getLatestAvailableAgentVersion(
-      this.kbnClient
+      this.kbnClient,
+      this.log
     )}`;
     this.log.indent(4, () => this.log.info(`Image: ${artifact}`));
     const containerName = generateRandomString(12);
