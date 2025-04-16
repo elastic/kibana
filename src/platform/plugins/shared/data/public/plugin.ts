@@ -146,27 +146,18 @@ export class DataPublicPlugin
     const rangeSelectAction = createSelectRangeActionDefinition(() => ({
       uiActions,
     }));
-    uiActions.addTriggerAction(
-      'SELECT_RANGE_TRIGGER',
-      rangeSelectAction
-    );
+    uiActions.addTriggerAction('SELECT_RANGE_TRIGGER', rangeSelectAction);
 
     const valueClickAction = createValueClickActionDefinition(() => ({
       uiActions,
     }));
 
-    uiActions.addTriggerAction(
-      'VALUE_CLICK_TRIGGER',
-      valueClickAction
-    );
+    uiActions.addTriggerAction('VALUE_CLICK_TRIGGER', valueClickAction);
 
     const multiValueClickAction = createMultiValueClickActionDefinition(() => ({
       query,
     }));
-    uiActions.addTriggerAction(
-      'MULTI_VALUE_CLICK_TRIGGER',
-      multiValueClickAction
-    );
+    uiActions.addTriggerAction('MULTI_VALUE_CLICK_TRIGGER', multiValueClickAction);
 
     const datatableUtilities = new DatatableUtilitiesService(search.aggs, dataViews, fieldFormats);
     const dataServices = {
