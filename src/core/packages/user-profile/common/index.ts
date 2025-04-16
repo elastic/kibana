@@ -9,7 +9,6 @@
 
 export type {
   UserProfileData,
-  UserSettingsData,
   UserProfileLabels,
   UserProfileWithSecurity,
   UserProfile,

@@ -15,7 +15,7 @@ import useObservable from 'react-use/lib/useObservable';
 import { i18n } from '@kbn/i18n';
 
 import { useUserProfiles } from '../services';
-import type { ProfileData as UserProfileData } from '../types';
+import type { UserProfileData } from '../types';
 
 interface Props {
   notificationSuccess?: {
