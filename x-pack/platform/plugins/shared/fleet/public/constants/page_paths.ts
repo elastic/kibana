@@ -45,6 +45,7 @@ export type DynamicPage =
   | 'agent_list'
   | 'agent_details'
   | 'agent_details_logs'
+  | 'agent_details_settings'
   | 'agent_details_diagnostics'
   | 'settings_edit_outputs'
   | 'settings_edit_download_sources'
@@ -68,6 +69,7 @@ export const FLEET_ROUTING_PATHS = {
   agent_details: '/agents/:agentId/:tabId?',
   agent_details_logs: '/agents/:agentId/logs',
   agent_details_diagnostics: '/agents/:agentId/diagnostics',
+  agent_details_settings: '/agents/:agentId/settings',
   policies: '/policies',
   policies_list: '/policies',
   policy_details: '/policies/:policyId/:tabId?',
@@ -247,6 +249,7 @@ export const pagePathGetters: {
   ],
   agent_details_logs: ({ agentId }) => [FLEET_BASE_PATH, `/agents/${agentId}/logs`],
   agent_details_diagnostics: ({ agentId }) => [FLEET_BASE_PATH, `/agents/${agentId}/diagnostics`],
+  agent_details_settings: ({ agentId }) => [FLEET_BASE_PATH, `/agents/${agentId}/settings`],
   enrollment_tokens: () => [FLEET_BASE_PATH, '/enrollment-tokens'],
   uninstall_tokens: () => [FLEET_BASE_PATH, FLEET_ROUTING_PATHS.uninstall_tokens],
   data_streams: () => [FLEET_BASE_PATH, '/data-streams'],
