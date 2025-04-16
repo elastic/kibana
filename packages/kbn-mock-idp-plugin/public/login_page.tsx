@@ -42,7 +42,6 @@ export const LoginPage = () => {
       if (!values.role) {
         return;
       }
-
       await switchCurrentUser({
         username: sanitizeUsername(values.full_name),
         full_name: values.full_name,
