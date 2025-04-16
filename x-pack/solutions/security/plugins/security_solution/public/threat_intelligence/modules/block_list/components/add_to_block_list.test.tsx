@@ -10,6 +10,7 @@ import { render } from '@testing-library/react';
 import { AddToBlockListContextMenu } from './add_to_block_list';
 import { BlockListProvider } from '../../indicators/containers/block_list_provider';
 import { I18nProvider } from '@kbn/i18n-react';
+import { TestProvidersComponent } from '../../../mocks/test_providers';
 const TEST_ID = 'test';
 
 describe('<AddToBlockListContextMenu />', () => {
@@ -18,15 +19,17 @@ describe('<AddToBlockListContextMenu />', () => {
     const mockOnClick: () => void = () => window.alert('clicked!');
 
     const { getByTestId, getAllByText } = render(
-      <I18nProvider>
-        <BlockListProvider>
-          <AddToBlockListContextMenu
-            data={mockIndicatorFileHashValue}
-            onClick={mockOnClick}
-            data-test-subj={TEST_ID}
-          />
-        </BlockListProvider>
-      </I18nProvider>
+      <TestProvidersComponent>
+        <I18nProvider>
+          <BlockListProvider>
+            <AddToBlockListContextMenu
+              data={mockIndicatorFileHashValue}
+              onClick={mockOnClick}
+              data-test-subj={TEST_ID}
+            />
+          </BlockListProvider>
+        </I18nProvider>
+      </TestProvidersComponent>
     );
 
     expect(getByTestId(TEST_ID)).toBeInTheDocument();
@@ -38,15 +41,17 @@ describe('<AddToBlockListContextMenu />', () => {
     const mockOnClick: () => void = () => window.alert('clicked!');
 
     const { getByTestId } = render(
-      <I18nProvider>
-        <BlockListProvider>
-          <AddToBlockListContextMenu
-            data={mockIndicatorFileHashValue}
-            onClick={mockOnClick}
-            data-test-subj={TEST_ID}
-          />
-        </BlockListProvider>
-      </I18nProvider>
+      <TestProvidersComponent>
+        <I18nProvider>
+          <BlockListProvider>
+            <AddToBlockListContextMenu
+              data={mockIndicatorFileHashValue}
+              onClick={mockOnClick}
+              data-test-subj={TEST_ID}
+            />
+          </BlockListProvider>
+        </I18nProvider>
+      </TestProvidersComponent>
     );
 
     expect(getByTestId(TEST_ID)).toHaveAttribute('disabled');
@@ -57,15 +62,17 @@ describe('<AddToBlockListContextMenu />', () => {
     const mockOnClick: () => void = () => window.alert('clicked!');
 
     const { getByTestId } = render(
-      <I18nProvider>
-        <BlockListProvider>
-          <AddToBlockListContextMenu
-            data={mockIndicatorFileHashValue}
-            onClick={mockOnClick}
-            data-test-subj={TEST_ID}
-          />
-        </BlockListProvider>
-      </I18nProvider>
+      <TestProvidersComponent>
+        <I18nProvider>
+          <BlockListProvider>
+            <AddToBlockListContextMenu
+              data={mockIndicatorFileHashValue}
+              onClick={mockOnClick}
+              data-test-subj={TEST_ID}
+            />
+          </BlockListProvider>
+        </I18nProvider>
+      </TestProvidersComponent>
     );
 
     expect(getByTestId(TEST_ID)).toHaveAttribute('disabled');
