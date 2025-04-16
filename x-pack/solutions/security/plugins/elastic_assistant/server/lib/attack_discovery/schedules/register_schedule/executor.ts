@@ -9,7 +9,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { Logger } from '@kbn/core/server';
 import { Alert } from '@kbn/alerts-as-data-utils';
 import { AlertsClientError } from '@kbn/alerting-plugin/server';
-import { replaceOriginalValuesWithUuidValues } from '@kbn/elastic-assistant-common';
+import { replaceAnonymizedValuesWithOriginalValues } from '@kbn/elastic-assistant-common';
 
 import { ANONYMIZATION_FIELDS_RESOURCE } from '../../../../ai_assistant_service/constants';
 import { transformESSearchToAnonymizationFields } from '../../../../ai_assistant_data_clients/anonymization_fields/helpers';
@@ -93,14 +93,14 @@ export const attackDiscoveryScheduleExecutor = async ({
       },
       [ALERT_ATTACK_DISCOVERY_DETAILS_MARKDOWN]: attack.detailsMarkdown,
       [ALERT_ATTACK_DISCOVERY_DETAILS_MARKDOWN_WITH_REPLACEMENTS]:
-        replaceOriginalValuesWithUuidValues({
+        replaceAnonymizedValuesWithOriginalValues({
           messageContent: attack.detailsMarkdown,
           replacements,
         }),
       [ALERT_ATTACK_DISCOVERY_ENTITY_SUMMARY_MARKDOWN]: attack.entitySummaryMarkdown,
       [ALERT_ATTACK_DISCOVERY_ENTITY_SUMMARY_MARKDOWN_WITH_REPLACEMENTS]:
         attack.entitySummaryMarkdown
-          ? replaceOriginalValuesWithUuidValues({
+          ? replaceAnonymizedValuesWithOriginalValues({
               messageContent: attack.entitySummaryMarkdown,
               replacements,
             })
@@ -114,12 +114,12 @@ export const attackDiscoveryScheduleExecutor = async ({
         : undefined,
       [ALERT_ATTACK_DISCOVERY_SUMMARY_MARKDOWN]: attack.summaryMarkdown,
       [ALERT_ATTACK_DISCOVERY_SUMMARY_MARKDOWN_WITH_REPLACEMENTS]:
-        replaceOriginalValuesWithUuidValues({
+        replaceAnonymizedValuesWithOriginalValues({
           messageContent: attack.summaryMarkdown,
           replacements,
         }),
       [ALERT_ATTACK_DISCOVERY_TITLE]: attack.title,
-      [ALERT_ATTACK_DISCOVERY_TITLE_WITH_REPLACEMENTS]: replaceOriginalValuesWithUuidValues({
+      [ALERT_ATTACK_DISCOVERY_TITLE_WITH_REPLACEMENTS]: replaceAnonymizedValuesWithOriginalValues({
         messageContent: attack.title,
         replacements,
       }),
