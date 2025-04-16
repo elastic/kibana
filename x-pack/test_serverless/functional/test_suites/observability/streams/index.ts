@@ -5,13 +5,10 @@
  * 2.0.
  */
 
-export enum ConfigurationTabs {
-  integrations = 'integrations',
-  basicRules = 'basic_rules',
-  aiSettings = 'ai_settings',
-}
+import { FtrProviderContext } from '../../../ftr_provider_context';
 
-export enum IntegrationsFacets {
-  available = 'browse',
-  installed = 'installed',
+export default function ({ loadTestFile }: FtrProviderContext) {
+  describe('Observability Streams', function () {
+    loadTestFile(require.resolve('./read_privilege'));
+  });
 }

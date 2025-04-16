@@ -4,14 +4,4 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-export enum ConfigurationTabs {
-  integrations = 'integrations',
-  basicRules = 'basic_rules',
-  aiSettings = 'ai_settings',
-}
-
-export enum IntegrationsFacets {
-  available = 'browse',
-  installed = 'installed',
-}
+export { useEnhancedIntegrationCards } from './integrations/use_enhanced_integration_cards';

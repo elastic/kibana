@@ -5,13 +5,5 @@
  * 2.0.
  */
 
-export enum ConfigurationTabs {
-  integrations = 'integrations',
-  basicRules = 'basic_rules',
-  aiSettings = 'ai_settings',
-}
-
-export enum IntegrationsFacets {
-  available = 'browse',
-  installed = 'installed',
-}
+export const FACETS_MAX_WIDTH_PX = 216;
+export const INTEGRATIONS_GRID_MAX_WIDTH_PX = 1200;
