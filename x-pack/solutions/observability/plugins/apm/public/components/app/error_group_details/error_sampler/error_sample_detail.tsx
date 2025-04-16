@@ -56,6 +56,7 @@ import { ErrorTabKey, getTabs } from './error_tabs';
 import { ErrorUiActionsContextMenu } from './error_ui_actions_context_menu';
 import { SampleSummary } from './sample_summary';
 import { ErrorSampleContextualInsight } from './error_sample_contextual_insight';
+import { getComparisonEnabled } from '../../../shared/time_comparison/get_comparison_enabled';
 import { buildUrl } from '../../../../utils/build_url';
 
 const TransactionLinkName = styled.div`
@@ -92,7 +93,7 @@ export function ErrorSampleDetails({
     urlParams: { detailTab, offset, comparisonEnabled },
   } = useLegacyUrlParams();
 
-  const { uiActions } = useApmPluginContext();
+  const { uiActions, core } = useApmPluginContext();
 
   const router = useApmRouter();
 
@@ -114,6 +115,11 @@ export function ErrorSampleDetails({
   const isLoading = loadingErrorSamplesData || loadingErrorData;
 
   const isSucceeded = isSuccess(errorSamplesFetchStatus) && isSuccess(errorFetchStatus);
+
+  const defaultComparisonEnabled = getComparisonEnabled({
+    core,
+    urlComparisonEnabled: comparisonEnabled,
+  });
 
   useEffect(() => {
     setSampleActivePage(0);
@@ -270,13 +276,21 @@ export function ErrorSampleDetails({
                 })}
               >
                 <TransactionDetailLink
-                  traceId={transaction.trace.id}
-                  transactionId={transaction.transaction.id}
                   transactionName={transaction.transaction.name}
-                  transactionType={transaction.transaction.type}
-                  serviceName={transaction.service.name}
-                  offset={offset}
-                  comparisonEnabled={comparisonEnabled}
+                  href={router.link('/services/{serviceName}/transactions/view', {
+                    path: { serviceName: transaction.service.name },
+                    query: {
+                      ...query,
+                      traceId: transaction.trace.id,
+                      transactionId: transaction.transaction.id,
+                      transactionName: transaction.transaction.name,
+                      transactionType: transaction.transaction.type,
+                      comparisonEnabled: defaultComparisonEnabled,
+                      showCriticalPath: false,
+                      offset,
+                      kuery,
+                    },
+                  })}
                 >
                   <EuiIcon type="merge" />
                   <TransactionLinkName>{transaction.transaction.name}</TransactionLinkName>

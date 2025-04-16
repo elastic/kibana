@@ -159,7 +159,6 @@ describe('Service Overview', () => {
       cy.getByTestSubj('apmHttpInfoRequestMethod').contains('GET');
       cy.getByTestSubj('apmHttpInfoUrl').should('exist');
       cy.getByTestSubj('apmHttpInfoUrl').contains('https://elastic.co/');
-      cy.getByTestSubj('apmHttpInfoRequestMethod').should('exist');
       cy.getByTestSubj('apmHttpStatusBadge').should('exist');
       cy.getByTestSubj('apmHttpStatusBadge').contains('OK');
     });
