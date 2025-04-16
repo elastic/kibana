@@ -5,11 +5,12 @@
  * 2.0.
  */
 import * as Rx from 'rxjs';
-import type { UserProfileData } from '@kbn/core-user-profile-common';
+import React from 'react';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
-import { userProfileServiceMock } from '@kbn/core-user-profile-browser-mocks';
 import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
+import { renderingServiceMock } from '@kbn/core-rendering-browser-mocks';
+import { InterceptDialogService } from './service';
 import { InterceptPrompter } from './prompter';
 import { TRIGGER_INFO_API_ROUTE } from '../../common/constants';
 
@@ -24,261 +25,308 @@ describe('ProductInterceptPrompter', () => {
     expect(prompter).toHaveProperty('start', expect.any(Function));
   });
 
-  describe('start behaviour', () => {
+  describe('#start', () => {
     const http = httpServiceMock.createStartContract();
-    const userProfile = userProfileServiceMock.createStart();
-    const notifications = notificationServiceMock.createStartContract();
+    const rendering = renderingServiceMock.create();
     const analytics = analyticsServiceMock.createAnalyticsServiceStart();
 
-    let enabled$: Rx.BehaviorSubject<boolean>;
-    let userProfile$: Rx.BehaviorSubject<UserProfileData | null>;
+    const interceptDialogServiceStartFnSpy = jest.spyOn(InterceptDialogService.prototype, 'start');
 
-    let productInterceptAddSpy: jest.SpyInstance;
-    let getUserProfileEnabled$Spy: jest.SpyInstance;
-    let getUserProfile$Spy: jest.SpyInstance;
+    let prompter: InterceptPrompter;
 
     beforeAll(() => {
-      productInterceptAddSpy = jest.spyOn(notifications.intercepts, 'add');
-      getUserProfileEnabled$Spy = jest.spyOn(userProfile, 'getEnabled$');
-      getUserProfile$Spy = jest.spyOn(userProfile, 'getUserProfile$');
+      prompter = new InterceptPrompter();
     });
 
     beforeEach(() => {
-      jest.useFakeTimers();
-
-      // create user profile observables with default values
-      enabled$ = new Rx.BehaviorSubject<boolean>(false);
-      userProfile$ = new Rx.BehaviorSubject<UserProfileData | null>(null);
-
-      getUserProfileEnabled$Spy.mockImplementation(() => enabled$.asObservable());
-      getUserProfile$Spy.mockImplementation(() => userProfile$.asObservable());
+      prompter.setup({
+        analytics: analyticsServiceMock.createAnalyticsServiceSetup(),
+        notifications: notificationServiceMock.createSetupContract(),
+      });
     });
 
-    afterEach(() => {
-      jest.useRealTimers();
-      jest.clearAllMocks();
-    });
-
-    it('makes a request to the trigger info api endpoint', async () => {
-      const prompter = new InterceptPrompter();
-
-      jest.spyOn(http, 'get').mockResolvedValue(null);
-
-      prompter.start({
-        http,
-        notifications,
-        analytics,
-      });
-
-      jest.runAllTimers();
-
-      expect(http.get).toHaveBeenCalledWith(TRIGGER_INFO_API_ROUTE);
-
-      prompter.stop();
-    });
-
-    it('does not add an intercept if the user profile is not enabled', async () => {
-      const prompter = new InterceptPrompter();
-
-      const triggerInfo = {
-        registeredAt: new Date(
-          '26 March 2025 19:08 GMT+0100 (Central European Standard Time)'
-        ).toISOString(),
-        triggerIntervalInMs: 30000,
-      };
-
-      jest.spyOn(http, 'get').mockResolvedValue(triggerInfo);
-
-      const triggerRuns = 30;
-      const timeInMsTillNextRun = triggerInfo.triggerIntervalInMs / 3;
-
-      // set system time to time in the future, where there would have been 30 runs of the received trigger,
-      // with just about 1/3 of the time before the next trigger
-      jest.setSystemTime(
-        new Date(
-          Date.parse(triggerInfo.registeredAt) +
-            triggerInfo.triggerIntervalInMs * triggerRuns +
-            triggerInfo.triggerIntervalInMs -
-            timeInMsTillNextRun
-        )
-      );
-
-      prompter.start({
-        http,
-        notifications,
-        analytics,
-      });
-
-      await jest.runOnlyPendingTimersAsync();
-
-      expect(http.get).toHaveBeenCalled();
-
-      jest.advanceTimersByTime(timeInMsTillNextRun);
-
-      expect(productInterceptAddSpy).not.toHaveBeenCalled();
-
-      prompter.stop();
-    });
-
-    it('adds an intercept if the user profile is enabled, and the user has not already encountered the next scheduled run', async () => {
-      const prompter = new InterceptPrompter();
-
-      const triggerInfo = {
-        registeredAt: new Date(
-          '26 March 2025 19:08 GMT+0100 (Central European Standard Time)'
-        ).toISOString(),
-        triggerIntervalInMs: 30000,
-      };
-
-      const triggerRuns = 30;
-      const timeInMsTillNextRun = triggerInfo.triggerIntervalInMs / 3;
-
-      // set system time to time in the future, where there would have been 30 runs of the received trigger,
-      // with just about 1/3 of the time before the next trigger
-      jest.setSystemTime(
-        new Date(
-          Date.parse(triggerInfo.registeredAt) +
-            triggerInfo.triggerIntervalInMs * triggerRuns +
-            triggerInfo.triggerIntervalInMs -
-            timeInMsTillNextRun
-        )
-      );
-
-      // return the configured trigger info
-      jest.spyOn(http, 'get').mockResolvedValue(triggerInfo);
-
-      enabled$.next(true);
-      userProfile$.next({
-        userSettings: {
-          lastInteractedInterceptId: triggerRuns - 1,
-        },
-      });
-
-      prompter.start({
-        http,
-        notifications,
-        analytics,
-      });
-
-      await jest.runOnlyPendingTimersAsync();
-
-      expect(http.get).toHaveBeenCalled();
-
-      jest.advanceTimersByTime(timeInMsTillNextRun);
-
-      expect(productInterceptAddSpy).toHaveBeenCalledWith(
-        expect.objectContaining({
-          id: 'kibana_product_intercept',
+    it('returns an object with a specific shape', () => {
+      expect(
+        prompter.start({
+          http,
+          rendering,
+          analytics,
+          targetDomElement: document.createElement('div'),
         })
-      );
-
-      prompter.stop();
+      ).toEqual({
+        registerIntercept: expect.any(Function),
+      });
     });
 
-    it('does not add an intercept if the user profile is enabled, and the user has already encountered the currently scheduled run', async () => {
-      const prompter = new InterceptPrompter();
+    describe('registerIntercept', () => {
+      let registerIntercept: ReturnType<InterceptPrompter['start']>['registerIntercept'];
 
-      const triggerInfo = {
-        registeredAt: new Date(
-          '26 March 2025 19:08 GMT+0100 (Central European Standard Time)'
-        ).toISOString(),
-        triggerIntervalInMs: 30000,
-      };
+      const mockQueueInterceptFn = jest.fn();
 
-      const triggerRuns = 30;
-      const timeInMsTillNextRun = triggerInfo.triggerIntervalInMs / 3;
-
-      // set system time to time in the future, where there would have been 30 runs of the received trigger,
-      // with just about 1/3 of the time before the next trigger
-      jest.setSystemTime(
-        new Date(
-          Date.parse(triggerInfo.registeredAt) +
-            triggerInfo.triggerIntervalInMs * triggerRuns +
-            triggerInfo.triggerIntervalInMs -
-            timeInMsTillNextRun
-        )
-      );
-
-      // return the configured trigger info
-      jest.spyOn(http, 'get').mockResolvedValue(triggerInfo);
-
-      enabled$.next(true);
-      userProfile$.next({
-        userSettings: {
-          lastInteractedInterceptId: triggerRuns,
+      const interceptSteps: Parameters<
+        ReturnType<InterceptPrompter['start']>['registerIntercept']
+      >[0]['steps'] = [
+        {
+          id: 'start' as const,
+          title: 'Hello',
+          content: () => React.createElement('p', null, 'Couple of questions for you sir'),
         },
-      });
-
-      prompter.start({
-        http,
-        notifications,
-        analytics,
-      });
-
-      await jest.runOnlyPendingTimersAsync();
-
-      expect(http.get).toHaveBeenCalled();
-
-      jest.advanceTimersByTime(timeInMsTillNextRun);
-
-      expect(productInterceptAddSpy).not.toHaveBeenCalled();
-
-      prompter.stop();
-    });
-
-    it('queue another intercept automatically after the configured trigger interval when the time for displaying the intercept for the initial run has elapsed', async () => {
-      const prompter = new InterceptPrompter();
-
-      const triggerInfo = {
-        registeredAt: new Date(
-          '26 March 2025 19:08 GMT+0100 (Central European Standard Time)'
-        ).toISOString(),
-        triggerIntervalInMs: 30000,
-      };
-
-      const triggerRuns = 30;
-      const timeInMsTillNextRun = triggerInfo.triggerIntervalInMs / 3;
-
-      // set system time to time in the future, where there would have been 30 runs of the received trigger,
-      // with just about 1/3 of the time before the next trigger
-      jest.setSystemTime(
-        new Date(
-          Date.parse(triggerInfo.registeredAt) +
-            triggerInfo.triggerIntervalInMs * triggerRuns +
-            triggerInfo.triggerIntervalInMs -
-            timeInMsTillNextRun
-        )
-      );
-
-      // return the configured trigger info
-      jest.spyOn(http, 'get').mockResolvedValue(triggerInfo);
-
-      enabled$.next(true);
-      userProfile$.next({
-        userSettings: {
-          lastInteractedInterceptId: triggerRuns - 1,
+        {
+          id: 'interest',
+          title: 'Are you interested?',
+          content: () => React.createElement('p', null, '...'),
         },
+        {
+          id: 'completion' as const,
+          title: 'Goodbye',
+          content: () => React.createElement('p', null, 'Goodbye sir'),
+        },
+      ];
+
+      const intercept: Parameters<ReturnType<InterceptPrompter['start']>['registerIntercept']>[0] =
+        {
+          id: 'test-intercept',
+          steps: interceptSteps,
+          onFinish: jest.fn(),
+          onDismiss: jest.fn(),
+          onProgress: jest.fn(),
+        };
+
+      beforeEach(() => {
+        jest.useFakeTimers();
+
+        interceptDialogServiceStartFnSpy.mockImplementation(() => {
+          return {
+            add: mockQueueInterceptFn,
+          };
+        });
+
+        ({ registerIntercept } = prompter.start({
+          http,
+          rendering,
+          analytics,
+          targetDomElement: document.createElement('div'),
+        }));
       });
 
-      prompter.start({
-        http,
-        notifications,
-        analytics,
+      afterEach(() => {
+        jest.useRealTimers();
+        jest.clearAllMocks();
       });
 
-      await jest.runOnlyPendingTimersAsync();
+      it('invoking the registerIntercept method returns an observable', () => {
+        jest.spyOn(http, 'post').mockResolvedValue({
+          registeredAt: new Date().toISOString(),
+          triggerIntervalInMs: 1000,
+        });
 
-      expect(http.get).toHaveBeenCalled();
+        const intercept$ = registerIntercept(intercept);
 
-      jest.advanceTimersByTime(timeInMsTillNextRun);
+        expect(intercept$).toBeInstanceOf(Rx.Observable);
+      });
 
-      expect(productInterceptAddSpy).toHaveBeenCalled();
+      it('subscribing to the returned observable makes a request to the trigger info api endpoint', async () => {
+        jest.spyOn(http, 'post').mockResolvedValue({
+          registeredAt: new Date().toISOString(),
+          triggerIntervalInMs: 1000,
+        });
 
-      jest.advanceTimersByTime(triggerInfo.triggerIntervalInMs);
+        const intercept$ = registerIntercept(intercept);
 
-      expect(productInterceptAddSpy).toHaveBeenCalledTimes(2);
+        expect(intercept$).toBeInstanceOf(Rx.Observable);
 
-      prompter.stop();
+        const subscriptionHandler = jest.fn();
+
+        const subscription = intercept$.subscribe(subscriptionHandler);
+
+        jest.runAllTimers();
+
+        expect(http.post).toHaveBeenCalledWith(TRIGGER_INFO_API_ROUTE, {
+          body: JSON.stringify({ triggerId: intercept.id }),
+        });
+
+        expect(subscriptionHandler).not.toHaveBeenCalled();
+        expect(mockQueueInterceptFn).not.toHaveBeenCalled();
+
+        subscription.unsubscribe();
+      });
+
+      it('adds an intercept if the user has not already encountered the next scheduled run', async () => {
+        const triggerInfo = {
+          registeredAt: new Date(
+            '26 March 2025 19:08 GMT+0100 (Central European Standard Time)'
+          ).toISOString(),
+          triggerIntervalInMs: 30000,
+        };
+
+        const triggerRuns = 30;
+        const timeInMsTillNextRun = triggerInfo.triggerIntervalInMs / 3;
+
+        // return the configured trigger info
+        jest.spyOn(http, 'post').mockResolvedValue(triggerInfo);
+        jest.spyOn(http, 'get').mockResolvedValue({ lastInteractedInterceptId: triggerRuns });
+
+        // set system time to time in the future, where there would have been 30 runs of the received trigger,
+        // with just about 1/3 of the time before the next trigger
+        jest.setSystemTime(
+          new Date(
+            Date.parse(triggerInfo.registeredAt) +
+              triggerInfo.triggerIntervalInMs * triggerRuns +
+              triggerInfo.triggerIntervalInMs -
+              timeInMsTillNextRun
+          )
+        );
+
+        const subscriptionHandler = jest.fn();
+
+        const intercept$ = registerIntercept(intercept);
+
+        const subscription = intercept$.subscribe(subscriptionHandler);
+
+        await jest.runOnlyPendingTimersAsync();
+
+        expect(http.post).toHaveBeenCalledWith(TRIGGER_INFO_API_ROUTE, {
+          body: JSON.stringify({ triggerId: intercept.id }),
+        });
+
+        jest.advanceTimersByTime(timeInMsTillNextRun);
+
+        expect(mockQueueInterceptFn).toHaveBeenCalledWith(
+          expect.objectContaining({
+            id: intercept.id,
+            runId: triggerRuns + 1,
+          })
+        );
+
+        subscription.unsubscribe();
+      });
+
+      it('does not add an intercept if the user has already encountered the currently scheduled run', async () => {
+        const triggerInfo = {
+          registeredAt: new Date(
+            '26 March 2025 19:08 GMT+0100 (Central European Standard Time)'
+          ).toISOString(),
+          triggerIntervalInMs: 30000,
+        };
+
+        const triggerRuns = 30;
+        const timeInMsTillNextRun = triggerInfo.triggerIntervalInMs / 3;
+
+        // return the configured trigger info
+        jest.spyOn(http, 'post').mockResolvedValue(triggerInfo);
+        jest.spyOn(http, 'get').mockResolvedValue({ lastInteractedInterceptId: triggerRuns + 1 });
+
+        // set system time to time in the future, where there would have been 30 runs of the received trigger,
+        // with just about 1/3 of the time before the next trigger
+        jest.setSystemTime(
+          new Date(
+            Date.parse(triggerInfo.registeredAt) +
+              triggerInfo.triggerIntervalInMs * triggerRuns +
+              triggerInfo.triggerIntervalInMs -
+              timeInMsTillNextRun
+          )
+        );
+
+        const subscriptionHandler = jest.fn();
+
+        const intercept$ = registerIntercept(intercept);
+
+        const subscription = intercept$.subscribe(subscriptionHandler);
+
+        await jest.runOnlyPendingTimersAsync();
+
+        expect(http.post).toHaveBeenCalledWith(TRIGGER_INFO_API_ROUTE, {
+          body: JSON.stringify({ triggerId: intercept.id }),
+        });
+
+        jest.advanceTimersByTime(timeInMsTillNextRun);
+
+        expect(mockQueueInterceptFn).not.toHaveBeenCalled();
+
+        subscription.unsubscribe();
+      });
+
+      it('queue another intercept automatically after the configured trigger interval when the time for displaying the intercept for the initial run has elapsed', async () => {
+        const triggerInfo = {
+          registeredAt: new Date(
+            '26 March 2025 19:08 GMT+0100 (Central European Standard Time)'
+          ).toISOString(),
+          triggerIntervalInMs: 30000,
+        };
+
+        const triggerRuns = 30;
+        const timeInMsTillNextRun = triggerInfo.triggerIntervalInMs / 3;
+
+        // return the configured trigger info
+        jest.spyOn(http, 'post').mockResolvedValue(triggerInfo);
+        jest.spyOn(http, 'get').mockResolvedValue({ lastInteractedInterceptId: triggerRuns });
+
+        // set system time to time in the future, where there would have been 30 runs of the received trigger,
+        // with just about 1/3 of the time before the next trigger
+        jest.setSystemTime(
+          new Date(
+            Date.parse(triggerInfo.registeredAt) +
+              triggerInfo.triggerIntervalInMs * triggerRuns +
+              triggerInfo.triggerIntervalInMs -
+              timeInMsTillNextRun
+          )
+        );
+
+        const _intercept = {
+          ...intercept,
+          id: 'test-repeat-intercept',
+        };
+
+        const subscriptionHandler = jest.fn(({ lastInteractedInterceptId }) => {
+          // simulate persistence of the user interaction with the intercept
+          jest
+            .spyOn(http, 'get')
+            .mockResolvedValue({ lastInteractedInterceptId: lastInteractedInterceptId + 1 });
+        });
+
+        const intercept$ = registerIntercept(_intercept);
+
+        const subscription = intercept$.subscribe(subscriptionHandler);
+
+        await jest.runOnlyPendingTimersAsync();
+
+        expect(http.post).toHaveBeenCalledWith(TRIGGER_INFO_API_ROUTE, {
+          body: JSON.stringify({ triggerId: _intercept.id }),
+        });
+
+        jest.advanceTimersByTime(timeInMsTillNextRun);
+
+        expect(mockQueueInterceptFn).toHaveBeenCalledWith(
+          expect.objectContaining({
+            id: _intercept.id,
+            runId: triggerRuns + 1,
+          })
+        );
+
+        expect(subscriptionHandler).toHaveBeenCalledWith(
+          expect.objectContaining({
+            lastInteractedInterceptId: triggerRuns,
+          })
+        );
+
+        // advance to next run and wait for all promises to resolve
+        await jest.advanceTimersByTimeAsync(triggerInfo.triggerIntervalInMs);
+
+        expect(mockQueueInterceptFn).toHaveBeenLastCalledWith(
+          expect.objectContaining({
+            id: _intercept.id,
+            runId: triggerRuns + 2,
+          })
+        );
+
+        expect(subscriptionHandler).toHaveBeenCalledWith(
+          expect.objectContaining({
+            lastInteractedInterceptId: triggerRuns + 1,
+          })
+        );
+
+        subscription.unsubscribe();
+      });
     });
   });
 });

@@ -48,7 +48,7 @@ export class InterceptPrompter {
     >['getUserTriggerData$'],
     intercept: Intercept
   ) {
-    let runCount: number;
+    let nextRunId: number;
 
     return Rx.from(
       http.post<{
@@ -71,10 +71,10 @@ export class InterceptPrompter {
             (diff = now - Date.parse(response.registeredAt)) / response.triggerIntervalInMs
           );
 
-          // Calculate the time until the next run
-          const nextRun = (runs + 1) * response.triggerIntervalInMs - diff;
+          nextRunId = runs + 1;
 
-          runCount = runs;
+          // Calculate the time until the next run
+          const nextRun = nextRunId * response.triggerIntervalInMs - diff;
 
           return Rx.timer(nextRun, response.triggerIntervalInMs).pipe(
             Rx.switchMap(() => getUserTriggerData$(intercept.id)),
@@ -85,9 +85,9 @@ export class InterceptPrompter {
       )
       .pipe(
         Rx.tap((triggerData) => {
-          if (runCount !== triggerData.lastInteractedInterceptId) {
-            this.queueIntercept?.({ ...intercept, runId: runCount });
-            runCount++;
+          if (nextRunId !== triggerData.lastInteractedInterceptId) {
+            this.queueIntercept?.({ ...intercept, runId: nextRunId });
+            nextRunId++;
           }
         })
       );
