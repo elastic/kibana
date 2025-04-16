@@ -21,7 +21,7 @@ interface Change<T extends ChangeType = ChangeType> {
   type: T;
 }
 
-interface ChangelogEntry<T extends ChangeType = ChangeType> {
+export interface ChangelogEntry<T extends ChangeType = ChangeType> {
   version: string;
   changes: Array<Change<T>>;
 }
