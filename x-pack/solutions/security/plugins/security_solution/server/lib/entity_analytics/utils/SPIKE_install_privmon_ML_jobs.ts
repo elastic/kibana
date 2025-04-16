@@ -5,8 +5,12 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { Client } from '@elastic/elasticsearch';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 // import { request } from 'http';
 import fetch from 'node-fetch';
+import { PRIVMON_ALL_DATA_FEED } from './SPIKE_privmon_ml_data_feeds';
+import { PRIVMON_ML_JOBS } from './SPIKE_privmon_ml_jobs';
+
 
 
 let client: ElasticsearchClient;
@@ -77,11 +81,58 @@ export async function installPADIntegration(): Promise<boolean> {
   }
 }
 
+async function upsertCustomIngestPipeline(version: string) {
+  const pipelineId = 'logs-endpoint.events.process@custom';
+  const mlPipelineName = `${version}-ml_pad_ingest_pipeline`;
+
+  let existingProcessors = [];
+
+  try {
+    const getResp = await client.ingest.getPipeline({ id: pipelineId });
+    const existingPipeline = (getResp.body as Record<string, any>)[pipelineId];
+    existingProcessors = existingPipeline?.processors || [];
+  } catch (err) {
+    if (err.statusCode === 404) {
+      console.log(`⚠️ Pipeline '${pipelineId}' not found. Creating new one.`);
+    } else {
+      console.error(`Error checking pipeline '${pipelineId}':`, err);
+      return;
+    }
+  }
+
+  // Filter out any old ML PAD processors if they exist
+  const filteredProcessors = existingProcessors.filter(
+    (p: { pipeline?: { name?: string } }) => 
+      !('pipeline' in p && p.pipeline?.name?.includes('ml_pad_ingest_pipeline'))
+  );
+
+  const mlProcessor = {
+    pipeline: {
+      name: mlPipelineName,
+      ignore_missing_pipeline: true,
+      ignore_failure: true,
+    },
+  };
+
+  const updatedPipeline = {
+    description: 'Custom endpoint pipeline with ML PAD processor',
+    processors: [...filteredProcessors, mlProcessor],
+  };
+
+  try {
+    await client.ingest.putPipeline({
+      id: pipelineId,
+      body: updatedPipeline as Record<string, any>,
+    });
+    console.log(`✅ Pipeline '${pipelineId}' upserted successfully.`);
+  } catch (err) {
+    console.error(`❌ Failed to upsert pipeline '${pipelineId}':`, err);
+  }
+}
+
+
 async function setupPADMlModule() {
   console.log('⚙️ Setting up PAD ML module...');
-  // const availableModules = await kibanaFetch('/api/ml/modules');
-  // const modulesJson = await availableModules.json();
-  // console.log('Available ML modules:', modulesJson);
   const response = await fetch('http://localhost:5601/api/ml/modules/setup/logs-privileged_access_detection', {
     method: 'POST',
     headers: {
@@ -130,20 +181,65 @@ async function verifyDataViewHasTimeField() {
 }
 
 
-export async function createPADComponentTemplates(): Promise<void> {
+export async function createPADComponentTemplates(version: string): Promise<void> {
+  const templateName = 'pad-component-template@custom';
+
   try {
-    await client.cluster.putComponentTemplate({
-      name: 'pad-component-template',
-      template: {
-        settings: {
-          number_of_shards: 1,
-          number_of_replicas: 1,
+    let existingTemplate: any = null;
+
+    try {
+      const getResp = await client.cluster.getComponentTemplate({ name: templateName });
+      existingTemplate = getResp.component_templates?.[0]?.component_template;
+      console.log(`ℹ️ Component template '${templateName}' already exists.`);
+    } catch (err) {
+      if (err.statusCode === 404) {
+        console.log(`ℹ️ Component template '${templateName}' does not exist. Will create new one.`);
+      } else {
+        throw err;
+      }
+    }
+
+    // Start with settings
+    const settings = {
+      index: {
+        default_pipeline: `${version}-ml_pad_ingest_pipeline`,
+      },
+      number_of_shards: 1,
+      number_of_replicas: 1,
+    };
+
+    // Get existing mappings or initialize
+    const existingMappings = existingTemplate?.template?.mappings || {};
+
+    // Ensure the 'process' object and 'command_line_entropy' field
+    const updatedMappings = {
+      ...existingMappings,
+      properties: {
+        ...existingMappings.properties,
+        process: {
+          type: 'object',
+          properties: {
+            ...(existingMappings.properties?.process?.properties || {}),
+            command_line_entropy: {
+              type: 'double',
+            },
+          },
         },
       },
+    };
+
+    // Put (create or update) the component template
+    await client.cluster.putComponentTemplate({
+      name: templateName,
+      template: {
+        settings,
+        mappings: updatedMappings,
+      },
     });
-    console.log('✅ PAD component template created successfully.');
+
+    console.log(`✅ PAD component template '${templateName}' created/updated successfully.`);
   } catch (error) {
-    console.error('❌ Failed to create PAD component template:', error);
+    console.error('❌ Failed to create or update PAD component template:', error);
   }
 }
 
@@ -188,66 +284,143 @@ export async function createPADIndex(): Promise<void> {
   }
 }
 
-export async function setupRollupJob(jobId: string): Promise<void> {
+export async function rolloverIndex(aliasName: string = 'logs-endpoint.events.process-default'): Promise<void> {
   try {
-    await client.transform.putTransform({
-      transform_id: 'pad-daily-transform',
-      source: {
-        index: ['privileged_access_detection-*'],
-      },
-      dest: {
-        index: 'pad-daily-summary',
-      },
-      pivot: {
-        group_by: {
-          day: {
-            date_histogram: {
-              field: '@timestamp',
-              calendar_interval: '1d',
-            },
-          },
-          user: {
-            terms: {
-              field: 'user',
-            },
-          },
-        },
-        aggregations: {
-          action_count: {
-            value_count: {
-              field: 'action',
-            },
-          },
-        },
-      },
-      frequency: '1h',
-      sync: {
-        time: {
-          field: '@timestamp',
-          delay: '60s',
-        },
-      },
-    });
-    console.log('✅ PAD rollup job set up successfully.');
-    await client.transform.startTransform({
-        transform_id: 'pad-daily-transform',
-    });
-  } catch (error) {
-    if (error.meta?.body?.error?.type === 'resource_already_exists_exception') {
-      console.warn('ℹ️ PAD rollup job already exists.');
+    const response = await client.indices.rollover({ alias: aliasName });
+
+    if (response.rolled_over) {
+      console.log(`✅ Successfully rolled over index for alias: ${aliasName}`);
     } else {
-      console.error('❌ Failed to set up PAD rollup job:', error);
+      console.log(`ℹ️ No rollover performed. Reason:`, response);
     }
+  } catch (error) {
+    console.error(`❌ Failed to rollover index for alias ${aliasName}:`, error);
   }
 }
 
+export async function checkPADTransformHealth(version: string): Promise<void> {
+  const transforms = [
+    `logs-pad.pivot_transform_okta_multiple_sessions-default-${version}`,
+    `logs-pad.pivot_transform_windows_privilege_list-default-${version}`,
+  ];
+
+  try {
+    const response = await client.transform.getTransformStats({ transform_id: transforms.join(',') });
+
+    response.transforms.forEach((transform: any) => {
+      const { id, state, stats, checkpointing } = transform;
+
+      console.log(`🔍 Transform: ${id}`);
+      console.log(`   🟢 State: ${state}`);
+      console.log(`   ✅ Last checkpoint: ${checkpointing.last.checkpoint}, Time: ${checkpointing.last.timestamp}`);
+      console.log(`   📊 Documents Processed: ${stats.documents_processed}, Pages Processed: ${stats.pages_processed}`);
+      console.log('---');
+    });
+  } catch (error) {
+    console.error('❌ Failed to fetch PAD transform health:', error.meta?.body?.error || error);
+  }
+}
+
+const checkMLNodeMemory = async () => {
+  const stats = await client.ml.getMemoryStats();
+  
+  // Find nodes and memory usage
+  Object.values(stats.nodes).forEach((node: any) => {
+    console.log(`Node: ${node.node_id}`);
+    console.log(`  Available ML Memory: ${node.ml.machine_memory}`);
+    console.log(`  Used by existing jobs: ${node.ml.allocated_processors}`);
+  });
+};
+
+const checkAndCloseIdleJobs = async () => {
+  const jobStats = await client.ml.getJobStats({});
+  
+  jobStats.jobs.forEach((job: any) => {
+    if (job.state === 'opened' && job.model_size_stats.model_bytes > 5000000000) { // You can define the threshold
+      console.log(`Closing job ${job.job_id} to free memory`);
+      client.ml.closeJob({ job_id: job.job_id });
+    }
+  });
+};
+
+
+
+
+export async function createPADMLJobs(): Promise<void> {
+  const jobs = PRIVMON_ML_JOBS;
+  try {
+    for (const job of jobs) {
+      try {
+        await client.ml.putJob({
+          job_id: job.id,
+          ...job.config,
+        });
+        console.log(`✅ Created PAD ML job: ${job.id}`);
+      } catch (err: any) {
+        if (err.meta?.body?.error?.type === 'resource_already_exists_exception') {
+          console.warn(`ℹ️ Job already exists: ${job.id}`);
+        } else {
+          console.error(`❌ Failed to create PAD job ${job.id}`, err);
+        }
+      }
+    }
+  } catch (err) {
+    console.error('❌ Failed to create PAD ML jobs:', err);
+  }
+}
+
+export async function createPADMLDataFeed(): Promise<void> {
+  
+  const dataFeeds = PRIVMON_ALL_DATA_FEED
+  try {
+    for (const dataFeed of dataFeeds) {
+      const cleanedQuery = {
+  ...dataFeed.config.query,
+  bool: {
+    ...dataFeed.config.query.bool,
+    filter: (dataFeed.config.query.bool.filter ?? []).map((f) => {
+      if ('terms' in f) {
+        const termKey = f.terms ? Object.keys(f.terms).find((key) => (f.terms as Record<string, any>)[key] !== undefined) : undefined;
+        if (termKey) {
+          return {
+            terms: {
+              [termKey]: (f.terms as Record<string, any>)[termKey]
+            }
+          };
+        }
+      }
+      return f;
+    }).filter((f) => f !== undefined)
+  }
+};
+
+      try {
+        await client.ml.putDatafeed({
+        datafeed_id: dataFeed.id,
+        indices: dataFeed.config.indices,
+        job_id: dataFeed.config.job_id,
+        query: cleanedQuery as QueryDslQueryContainer,
+});
+        console.log(`✅ Created data feed: ${dataFeed.id}`);
+      } catch (err: any) {
+        if (err.meta?.body?.error?.type === "resource_already_exists_exception") {
+          console.warn(`ℹ️ Data feed already exists: ${dataFeed.id}`);
+        } else {
+          console.error(`❌ Failed to create data feed ${dataFeed.id}`, err);
+        }
+      }
+    }
+  } catch (err) {
+    console.error("❌ Failed to create data feeds:", err);
+  }
+}
 
 
 export async function startPADMLJobs(): Promise<void> {
   try {
     const jobsResponse = await client.ml.getJobs();
     const padJobs = jobsResponse.jobs.filter((job) =>
-      job.job_id.includes('privileged_access') // or your PAD integration prefix
+      job.job_id.includes('privileged_access') || job.job_id.includes('pad') // or your PAD integration prefix
     );
 
     for (const job of padJobs) {
@@ -270,8 +443,27 @@ export async function startPADMLJobs(): Promise<void> {
 }
 
 export async function createPADDataView(): Promise<boolean> {
+  const dataViewId = 'pad-anomaly-detection-dataview';
+  const title = 'logs-*,ml_okta_multiple_user_sessions_pad.all,ml_windows_privilege_type_pad.all';
+  
   try {
-    const response = await fetch('http://localhost:5601/api/data_views/data_view', {
+    // Step 1: Check if data view already exists
+    const checkResp = await fetch(`http://localhost:5601/api/data_views/data_view/${dataViewId}`, {
+      method: 'GET',
+      headers: {
+        'kbn-xsrf': 'true',
+        'Content-Type': 'application/json',
+        'Authorization': 'Basic ' + Buffer.from('elastic_ml:changeme').toString('base64'),
+      }
+    });
+
+    if (checkResp.ok) {
+      console.warn('⚠️ PAD Data View already exists.');
+      return true;
+    }
+
+    // Step 2: Create the data view
+    const createResp = await fetch('http://localhost:5601/api/data_views/data_view', {
       method: 'POST',
       headers: {
         'kbn-xsrf': 'true',
@@ -280,23 +472,16 @@ export async function createPADDataView(): Promise<boolean> {
       },
       body: JSON.stringify({
         data_view: {
-          title: 'logs-*,ml_okta_multiple_user_sessions_pad.all,ml_windows_privilege_type_pad.all',
-          name: 'PAD Anomaly Detection Data View',
+          id: dataViewId,
+          title: title,
+          name: title,
           timeFieldName: '@timestamp',
         }
       })
     });
 
-    const json = await response.json();
-    if (!response.ok) {
-      if (
-        response.status === 400 &&
-        json.message &&
-        json.message.toLowerCase().includes('duplicate data view')
-      ) {
-        console.warn('⚠️ PAD Data View already exists.');
-        return true;
-      }
+    const json = await createResp.json();
+    if (!createResp.ok) {
       console.error('❌ Failed to create PAD Data View:', json);
       return false;
     }
@@ -404,11 +589,16 @@ export async function setupPrivilegedMonitoringEngine(): Promise<void> {
     const installed = await installPADIntegration();
     if (!installed) return;
     await createPADDataView();
+    await createPADMLJobs();
+    await upsertCustomIngestPipeline('0.0.1'); 
+    await checkPADTransformHealth('0.0.1');
+    await checkMLNodeMemory();
+    await checkAndCloseIdleJobs();
     await setupPADMlModule();
-    await createPADComponentTemplates();
+    await createPADComponentTemplates('0.0.1');
     await createPADIndexTemplate();
     await createPADIndex();
-    await setupRollupJob('pad-rollup-job');
+    // await setupRollupJob('pad-rollup-job');
     await startPADMLJobs();
     await enablePADDetectionRules();
     await verifyPADInstallation();
