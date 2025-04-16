@@ -55,7 +55,8 @@ export function ErrorMarker({ mark }: Props) {
   const { query } = useAnyOfApmParams(
     '/services/{serviceName}/overview',
     '/services/{serviceName}/errors',
-    '/services/{serviceName}/transactions/view'
+    '/services/{serviceName}/transactions/view',
+    '/traces/explorer/waterfall'
   );
 
   const togglePopover = () => showPopover(!isPopoverOpen);
@@ -71,9 +72,11 @@ export function ErrorMarker({ mark }: Props) {
   );
 
   const { error } = mark;
+  const serviceGroup = 'serviceGroup' in query ? query.serviceGroup : '';
 
   const queryParam = {
     ...query,
+    serviceGroup,
     kuery: [
       ...(error.trace?.id ? [`${TRACE_ID} : "${error.trace?.id}"`] : []),
       ...(error.transaction?.id ? [`${TRANSACTION_ID} : "${error.transaction?.id}"`] : []),
