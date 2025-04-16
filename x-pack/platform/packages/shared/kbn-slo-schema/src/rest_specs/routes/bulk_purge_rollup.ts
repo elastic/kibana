@@ -22,22 +22,20 @@ const fixedTimePurge = t.type({
 
 const purgePolicy = t.union([fixedAgePurge, fixedTimePurge]);
 
-const bulkPurgeRollupSchema = t.intersection([
-  t.partial({
-    query: t.partial({
-      force: t.string,
-    }),
-  }),
-  t.type({
-    body: t.type({
+const bulkPurgeRollupSchema = t.type({
+  body: t.intersection([
+    t.type({
       ids: t.array(t.string),
       purgePolicy,
     }),
-  }),
-]);
+    t.partial({
+      force: t.boolean,
+    }),
+  ]),
+});
 
 type PurgePolicyType = t.TypeOf<typeof purgePolicy>;
-type PurgeRollupSchemaType = t.TypeOf<typeof bulkPurgeRollupSchema>;
+type PurgeRollupSchemaType = t.TypeOf<typeof bulkPurgeRollupSchema.props.body>;
 
 export type { PurgePolicyType, PurgeRollupSchemaType };
 export { bulkPurgeRollupSchema };

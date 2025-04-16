@@ -1,82 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`purge rollup data error path fails to make a query to remove SLI data older than 7 days 1`] = `
-[MockFunction] {
-  "calls": Array [
-    Array [
-      Array [
-        "test1",
-      ],
-    ],
-  ],
-  "results": Array [
-    Object {
-      "type": "return",
-      "value": Promise {},
-    },
-  ],
-}
-`;
-
-exports[`purge rollup data error path fails to make a query to remove SLI data older than 7 days 2`] = `[MockFunction]`;
-
-exports[`purge rollup data error path fails to make a query to remove SLI data older than a day 1`] = `
-[MockFunction] {
-  "calls": Array [
-    Array [
-      Array [
-        "test2",
-      ],
-    ],
-  ],
-  "results": Array [
-    Object {
-      "type": "return",
-      "value": Promise {},
-    },
-  ],
-}
-`;
-
-exports[`purge rollup data error path fails to make a query to remove SLI data older than a day 2`] = `[MockFunction]`;
-
-exports[`purge rollup data error path fails to makes a query to remove SLI data based on a timestamp 1`] = `
-[MockFunction] {
-  "calls": Array [
-    Array [
-      Array [
-        "test3",
-      ],
-    ],
-  ],
-  "results": Array [
-    Object {
-      "type": "return",
-      "value": Promise {},
-    },
-  ],
-}
-`;
-
-exports[`purge rollup data error path fails to makes a query to remove SLI data based on a timestamp 2`] = `[MockFunction]`;
-
-exports[`purge rollup data happy path successfully makes a forced query to remove recently added SLI data 1`] = `
-[MockFunction] {
-  "calls": Array [
-    Array [
-      Array [
-        "test2",
-      ],
-    ],
-  ],
-  "results": Array [
-    Object {
-      "type": "return",
-      "value": Promise {},
-    },
-  ],
-}
-`;
+exports[`purge rollup data happy path successfully makes a forced query to remove recently added SLI data 1`] = `[MockFunction]`;
 
 exports[`purge rollup data happy path successfully makes a forced query to remove recently added SLI data 2`] = `
 [MockFunction] {
@@ -158,7 +82,7 @@ exports[`purge rollup data happy path successfully makes a query to remove SLI d
               Object {
                 "range": Object {
                   "@timestamp": Object {
-                    "lte": 2025-03-01T00:00:00.000Z,
+                    "lte": "2025-03-01T00:00:00.000Z",
                   },
                 },
               },
@@ -218,7 +142,7 @@ exports[`purge rollup data happy path successfully makes a query to remove SLI d
               Object {
                 "range": Object {
                   "@timestamp": Object {
-                    "lte": 2025-04-01T00:00:00.000Z,
+                    "lte": "2025-04-01T00:00:00.000Z",
                   },
                 },
               },

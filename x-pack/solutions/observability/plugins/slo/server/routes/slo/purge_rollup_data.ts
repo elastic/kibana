@@ -28,7 +28,6 @@ export const purgeRollupDataRoute = createSloServerRoute({
     const repository = new KibanaSavedObjectsSLORepository(soClient, logger);
     const purgeRollupData = new PurgeRollupData(esClient, repository);
 
-    await purgeRollupData.execute(params);
-    return response.noContent();
+    return purgeRollupData.execute(params.body);
   },
 });

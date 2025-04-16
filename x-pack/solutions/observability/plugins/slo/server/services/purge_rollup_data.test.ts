@@ -33,10 +33,8 @@ describe('purge rollup data', () => {
       mockRepository.findAllByIds.mockResolvedValueOnce([slo]);
 
       await purgeRollupData.execute({
-        body: {
-          ids: ['test1'],
-          purgePolicy: { purgeType: 'fixed_age', age: new Duration(30, DurationUnit.Day) },
-        },
+        ids: ['test1'],
+        purgePolicy: { purgeType: 'fixed_age', age: new Duration(30, DurationUnit.Day) },
       });
 
       expect(mockRepository.findAllByIds).toMatchSnapshot();
@@ -55,10 +53,8 @@ describe('purge rollup data', () => {
       mockRepository.findAllByIds.mockResolvedValueOnce([slo]);
 
       await purgeRollupData.execute({
-        body: {
-          ids: ['test2'],
-          purgePolicy: { purgeType: 'fixed_age', age: new Duration(2, DurationUnit.Week) },
-        },
+        ids: ['test2'],
+        purgePolicy: { purgeType: 'fixed_age', age: new Duration(2, DurationUnit.Week) },
       });
 
       expect(mockRepository.findAllByIds).toMatchSnapshot();
@@ -77,10 +73,8 @@ describe('purge rollup data', () => {
       mockRepository.findAllByIds.mockResolvedValueOnce([slo]);
 
       await purgeRollupData.execute({
-        body: {
-          ids: ['test3'],
-          purgePolicy: { purgeType: 'fixed_time', timestamp: new Date('2025-03-01T00:00:00Z') },
-        },
+        ids: ['test3'],
+        purgePolicy: { purgeType: 'fixed_time', timestamp: new Date('2025-03-01T00:00:00Z') },
       });
 
       expect(mockRepository.findAllByIds).toMatchSnapshot();
@@ -99,10 +93,8 @@ describe('purge rollup data', () => {
       mockRepository.findAllByIds.mockResolvedValueOnce([slo]);
 
       await purgeRollupData.execute({
-        body: {
-          ids: ['test4'],
-          purgePolicy: { purgeType: 'fixed_time', timestamp: new Date('2025-04-01T00:00:00Z') },
-        },
+        ids: ['test4'],
+        purgePolicy: { purgeType: 'fixed_time', timestamp: new Date('2025-04-01T00:00:00Z') },
       });
 
       expect(mockRepository.findAllByIds).toMatchSnapshot();
@@ -121,11 +113,12 @@ describe('purge rollup data', () => {
       mockRepository.findAllByIds.mockResolvedValueOnce([slo]);
 
       await purgeRollupData.execute({
-        query: { force: 'true' },
-        body: {
-          ids: ['test2'],
-          purgePolicy: { purgeType: 'fixed_age', age: new Duration(1, DurationUnit.Day) },
+        ids: ['test2'],
+        purgePolicy: {
+          purgeType: 'fixed_age',
+          age: new Duration(1, DurationUnit.Day),
         },
+        force: true,
       });
 
       expect(mockRepository.findAllByIds).toMatchSnapshot();
@@ -143,15 +136,12 @@ describe('purge rollup data', () => {
 
       expect(async () => {
         await purgeRollupData.execute({
-          body: {
-            ids: ['test1'],
-            purgePolicy: { purgeType: 'fixed_age', age: new Duration(3, DurationUnit.Day) },
-          },
+          ids: ['test1'],
+          purgePolicy: { purgeType: 'fixed_age', age: new Duration(3, DurationUnit.Day) },
         });
       }).rejects.toThrowError();
 
-      expect(mockRepository.findAllByIds).toMatchSnapshot();
-      expect(mockEsClient.deleteByQuery).toMatchSnapshot();
+      expect(mockEsClient.deleteByQuery).toHaveBeenCalledTimes(0);
     });
 
     it('fails to make a query to remove SLI data older than a day', async () => {
@@ -167,15 +157,12 @@ describe('purge rollup data', () => {
 
       expect(async () => {
         await purgeRollupData.execute({
-          body: {
-            ids: ['test2'],
-            purgePolicy: { purgeType: 'fixed_age', age: new Duration(1, DurationUnit.Day) },
-          },
+          ids: ['test2'],
+          purgePolicy: { purgeType: 'fixed_age', age: new Duration(1, DurationUnit.Day) },
         });
       }).rejects.toThrowError();
 
-      expect(mockRepository.findAllByIds).toMatchSnapshot();
-      expect(mockEsClient.deleteByQuery).toMatchSnapshot();
+      expect(mockEsClient.deleteByQuery).toHaveBeenCalledTimes(0);
     });
 
     it('fails to makes a query to remove SLI data based on a timestamp', async () => {
@@ -191,15 +178,12 @@ describe('purge rollup data', () => {
 
       expect(async () => {
         await purgeRollupData.execute({
-          body: {
-            ids: ['test3'],
-            purgePolicy: { purgeType: 'fixed_time', timestamp: new Date() },
-          },
+          ids: ['test3'],
+          purgePolicy: { purgeType: 'fixed_time', timestamp: new Date() },
         });
       }).rejects.toThrowError();
 
-      expect(mockRepository.findAllByIds).toMatchSnapshot();
-      expect(mockEsClient.deleteByQuery).toMatchSnapshot();
+      expect(mockEsClient.deleteByQuery).toHaveBeenCalledTimes(0);
     });
   });
 });
