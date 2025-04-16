@@ -150,7 +150,7 @@ export function collapseTripleQuoteStrings(data: string) {
 /**
  * This function replaces all {@link TRIPLE_QUOTE_STRINGS_MARKER}s in the provided text with the corresponding provided triple-quote strings.
  */
-export function expandTripleQuoteStrings(data: string, tripleQuoteStrings) {
+export function expandTripleQuoteStrings(data: string, tripleQuoteStrings: string[]) {
   const splitData = data.split(TRIPLE_QUOTE_STRINGS_MARKER);
   const allData = [];
   for (let i = 0; i < splitData.length; i++) {
