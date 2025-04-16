@@ -57,7 +57,6 @@ import {
   LegendColorPickerWrapperContext,
   getLayers,
   getLegendActions,
-  canFilter,
   getFilterClickData,
   getFilterEventData,
   getPartitionTheme,
