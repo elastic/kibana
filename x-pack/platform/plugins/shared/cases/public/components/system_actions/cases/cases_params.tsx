@@ -96,10 +96,11 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
     ? parsedTimeWindowUnit
     : DEFAULT_TIME_WINDOW[1];
 
+ const timeWindowSizeAsNumber = parseInt(timeWindowSize, 10);
   const showWarning =
     timeWindowUnit === 'm' &&
-    parseInt(timeWindowSize, 10) >= 5 &&
-    parseInt(timeWindowSize, 10) <= 20;
+   timeWindowSizeAsNumber >= 5 &&
+    timeWindowSizeAsNumber <= 20;
 
 
   useEffect(() => {
