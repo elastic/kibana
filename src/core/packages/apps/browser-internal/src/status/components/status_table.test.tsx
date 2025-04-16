@@ -19,6 +19,12 @@ const state = {
   message: 'Ready',
   title: 'green',
 };
+const state2 = {
+  id: 'degraded' as const,
+  uiColor: 'warning',
+  message: 'Not ready',
+  title: 'yellow',
+};
 
 const createServiceStatus = (parts: Partial<ServiceStatus> = {}): ServiceStatus => ({
   level: 'available',
@@ -29,7 +35,16 @@ const createServiceStatus = (parts: Partial<ServiceStatus> = {}): ServiceStatus 
 describe('StatusTable', () => {
   it('renders when statuses is provided', () => {
     const { getByTestId, getByText } = renderReactTestingLibraryWithI18n(
-      <StatusTable statuses={[{ id: 'plugin:1', state, original: createServiceStatus() }]} />
+      <StatusTable
+        statuses={[
+          { id: 'plugin:1', state, original: createServiceStatus() },
+          {
+            id: 'plugin:2',
+            state: state2,
+            original: createServiceStatus({ level: 'degraded', summary: 'Not ready' }),
+          },
+        ]}
+      />
     );
 
     const table = getByTestId('statusBreakdown');
@@ -46,10 +61,24 @@ describe('StatusTable', () => {
     expect(getByText('plugin:1')).toBeInTheDocument();
     expect(getByText('Ready')).toBeInTheDocument();
 
+    // Verify header row contents
+    const headerRow = table.querySelector('thead tr');
+    expect(headerRow).toBeInTheDocument();
+    expect(headerRow).toHaveTextContent('Status');
+    expect(headerRow).toHaveTextContent('ID');
+    expect(headerRow).toHaveTextContent('Status summary');
+    expect(headerRow).toHaveTextContent('Expand row');
+
     // Verify sorting by checking row order
     const rows = table.querySelectorAll('tr');
-    expect(rows[1]).toHaveTextContent('plugin:1');
-    expect(rows[1]).toHaveTextContent('Ready');
+    expect(rows).toHaveLength(3); // 1 header row + 2 data rows
+    expect(rows[1]).toHaveTextContent('plugin:2');
+    expect(rows[1]).toHaveTextContent('Not ready');
+    expect(rows[1].className).toContain('status-table-row-warning');
+
+    expect(rows[2]).toHaveTextContent('plugin:1');
+    expect(rows[2]).toHaveTextContent('Ready');
+    expect(rows[2].className).toContain('status-table-row-success');
   });
 
   it('renders empty when statuses is not provided', () => {
