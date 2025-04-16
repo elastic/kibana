@@ -30,7 +30,6 @@ import type {
   TemplateMap,
   EsAssetReference,
   ExperimentalDataStreamFeature,
-  NewPackagePolicy,
 } from '../../../../types';
 import type { Fields } from '../../fields/field';
 import { isFields, loadDatastreamsFieldsFromYaml, processFields } from '../../fields/field';
@@ -65,7 +64,6 @@ const FLEET_COMPONENT_TEMPLATE_NAMES = FLEET_COMPONENT_TEMPLATES.map((tmpl) => t
 
 export const prepareToInstallTemplates = async (
   packageInstallContext: PackageInstallContext,
-  packagePolicy: NewPackagePolicy,
   esReferences: EsAssetReference[],
   experimentalDataStreamFeatures: ExperimentalDataStreamFeature[] = [],
   onlyForDataStreams?: RegistryDataStream[]
@@ -101,7 +99,6 @@ export const prepareToInstallTemplates = async (
 
     return prepareTemplate({
       packageInstallContext,
-      packagePolicy,
       fieldAssetsMap,
       dataStream,
       experimentalDataStreamFeature,
@@ -615,13 +612,11 @@ function countFields(fields: Fields): number {
 
 export function prepareTemplate({
   packageInstallContext,
-  packagePolicy,
   fieldAssetsMap,
   dataStream,
   experimentalDataStreamFeature,
 }: {
   packageInstallContext: PackageInstallContext;
-  packagePolicy: NewPackagePolicy;
   fieldAssetsMap: AssetsMap;
   dataStream: RegistryDataStream;
   experimentalDataStreamFeature?: ExperimentalDataStreamFeature;
@@ -632,11 +627,6 @@ export function prepareTemplate({
     fieldAssetsMap,
     dataStream.path
   );
-
-  if (packageInstallContext.packageInfo.type === "input") {
-    // FIXME: What input and stream to use?
-    dataStream.type = packagePolicy.inputs[0].streams[0].data_stream.type;
-  }
 
   const isIndexModeTimeSeries =
     dataStream.elasticsearch?.index_mode === 'time_series' ||

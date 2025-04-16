@@ -1298,7 +1298,8 @@ export async function installAssetsForInputPackagePolicy(opts: {
   if (pkgInfo.type !== 'input') return;
 
   const datasetName = packagePolicy.inputs[0].streams[0].vars?.[DATASET_VAR_NAME]?.value;
-  const [dataStream] = getNormalizedDataStreams(pkgInfo, datasetName);
+  const dataStreamType = packagePolicy.inputs[0].streams[0].data_stream.type;
+  const [dataStream] = getNormalizedDataStreams(pkgInfo, datasetName, dataStreamType);
   const existingDataStreams = await dataStreamService.getMatchingDataStreams(esClient, {
     type: dataStream.type,
     dataset: datasetName,
@@ -1387,7 +1388,6 @@ export async function installAssetsForInputPackagePolicy(opts: {
     await installIndexTemplatesAndPipelines({
       installedPkg: installedPkgWithAssets.installation,
       packageInstallContext,
-      packagePolicy,
       esReferences: installedPkgWithAssets.installation.installed_es || [],
       savedObjectsClient: soClient,
       esClient,
