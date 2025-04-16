@@ -260,7 +260,7 @@ export class DefaultAlertService {
     try {
       actionConnectors = await actionsClient.getAll();
     } catch (e) {
-      this.server.logger.error(e);
+      this.server.logger.error('Error getting connectors', { error: e });
     }
     return { actionConnectors, settings: this.settings };
   }

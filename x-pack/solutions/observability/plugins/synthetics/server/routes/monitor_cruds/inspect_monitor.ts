@@ -91,14 +91,14 @@ export const inspectSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () =
       }
 
       return response.ok({ body: { result, decodedCode: formatCode(decodedCode) } });
-    } catch (getErr) {
+    } catch (e) {
       server.logger.error(
-        `Unable to inspect Synthetics monitor ${monitorWithDefaults[ConfigKey.NAME]}`
+        `Unable to inspect Synthetics monitor ${monitorWithDefaults[ConfigKey.NAME]}`,
+        { error: e }
       );
-      server.logger.error(getErr);
 
       return response.customError({
-        body: { message: getErr.message },
+        body: { message: e.message },
         statusCode: 500,
       });
     }

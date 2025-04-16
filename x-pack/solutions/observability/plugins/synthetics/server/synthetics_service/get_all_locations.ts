@@ -45,7 +45,7 @@ export async function getAllLocations({
       allLocations: [...publicLocations, ...pvtLocations],
     };
   } catch (e) {
-    server.logger.error(e);
+    server.logger.error(`Error getting Synthetics locations`, { error: e });
     return { publicLocations: [], privateLocations: [], allLocations: [] };
   }
 }

@@ -112,7 +112,7 @@ export class ServiceAPIClient {
           const { allowed, signupUrl } = data;
           return { allowed, signupUrl };
         } catch (e) {
-          this.logger.error(e);
+          this.logger.error(`Error getting isAllowed status`, { error: e });
         }
       }
     } else {
@@ -178,7 +178,7 @@ export class ServiceAPIClient {
     try {
       return (await this.callAPI('PUT', { ...data, endpoint: 'sync' })).pushErrors;
     } catch (e) {
-      this.logger.error(e);
+      this.logger.error(`Error syncing Synthetics monitors`, { error: e });
     }
   }
 

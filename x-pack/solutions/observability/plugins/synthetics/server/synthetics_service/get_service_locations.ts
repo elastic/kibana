@@ -78,7 +78,7 @@ export async function getServiceLocations(server: SyntheticsServerSetup) {
 
     return { throttling, locations };
   } catch (e) {
-    server.logger.error(e);
+    server.logger.error(`Error getting available Synthetics locations`, { error: e });
     return { locations: [] };
   }
 }

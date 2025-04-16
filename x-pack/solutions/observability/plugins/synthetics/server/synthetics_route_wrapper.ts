@@ -116,6 +116,7 @@ export const syntheticsRouteWrapper: SyntheticsRouteWrapper = (
             });
           }
         }
+        // TODO: check if we log bad request
         server.logger.error(e);
         throw e;
       }

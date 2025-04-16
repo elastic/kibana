@@ -85,10 +85,7 @@ export class AddEditMonitorAPI {
       const [monitorSavedObjectN, [packagePolicyResult, syncErrors]] = await Promise.all([
         newMonitorPromise,
         syncErrorsPromise,
-      ]).catch((e) => {
-        server.logger.error(e);
-        throw e;
-      });
+      ]);
 
       if (packagePolicyResult && (packagePolicyResult?.failed?.length ?? []) > 0) {
         const failed = packagePolicyResult.failed.map((f) => f.error);
@@ -117,13 +114,12 @@ export class AddEditMonitorAPI {
       };
     } catch (e) {
       server.logger.error(
-        `Unable to create Synthetics monitor ${monitorWithNamespace[ConfigKey.NAME]}`
+        `Unable to create Synthetics monitor ${monitorWithNamespace[ConfigKey.NAME]}`,
+        { error: e }
       );
       await this.revertMonitorIfCreated({
         newMonitorId,
       });
-
-      server.logger.error(e);
 
       throw e;
     }
@@ -254,12 +250,15 @@ export class AddEditMonitorAPI {
             server.logger.debug(`Successfully triggered test for monitor: ${configId}`);
           })
           .catch((e) => {
-            server.logger.error(`Error triggering test for monitor: ${configId}: ${e}`);
+            server.logger.error(`Error triggering test for monitor: ${configId}: ${e}`, {
+              error: e,
+            });
           });
       }
     } catch (e) {
-      server.logger.info(`Error triggering test for getting started monitor: ${configId}`);
-      server.logger.error(e);
+      server.logger.error(`Error triggering test for getting started monitor: ${configId}`, {
+        error: e,
+      });
     }
   };
 
@@ -313,6 +312,7 @@ export class AddEditMonitorAPI {
       }
     } catch (e) {
       // ignore errors here
+      // TODO: Who is this log for?
       server.logger.error(e);
     }
   }

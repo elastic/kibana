@@ -59,7 +59,7 @@ export const getSyntheticsEnablementRoute: SyntheticsRestApiRouteFactory = () =>
 
       return { ...res, isServiceAllowed };
     } catch (e) {
-      server.logger.error(e);
+      server.logger.error(`Unable to get Synthetics enablement`, { error: e });
       throw e;
     }
   },
@@ -90,7 +90,7 @@ export const disableSyntheticsRoute: SyntheticsRestApiRouteFactory = () => ({
       await security.authc.apiKeys?.invalidateAsInternalUser({ ids: [apiKey?.id || ''] });
       return response.ok({});
     } catch (e) {
-      server.logger.error(e);
+      server.logger.error(`Unable to disable Synthetics`, { error: e });
       throw e;
     }
   },

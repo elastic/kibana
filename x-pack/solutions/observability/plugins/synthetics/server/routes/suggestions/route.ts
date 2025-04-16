@@ -114,7 +114,7 @@ export const getSyntheticsSuggestionsRoute: SyntheticsRestApiRouteFactory<
           })) ?? [],
       };
     } catch (error) {
-      logger.error(`Failed to fetch synthetics suggestions: ${error}`);
+      logger.error(`Failed to fetch Synthetics suggestions: ${error}`, { error });
     }
   },
 });

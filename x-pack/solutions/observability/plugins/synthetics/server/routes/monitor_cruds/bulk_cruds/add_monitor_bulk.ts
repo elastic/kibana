@@ -127,7 +127,7 @@ const rollBackNewMonitorBulk = async (
     });
   } catch (e) {
     // ignore errors here
-    server.logger.error(e);
+    server.logger.error('Unable to rollback new monitors', { error: e });
   }
 };
 
@@ -169,6 +169,6 @@ export const deleteMonitorIfCreated = async ({
     }
   } catch (e) {
     // ignore errors here
-    server.logger.error(e);
+    server.logger.error(`Unable to delete monitor with id ${newMonitorId}`, { error: e });
   }
 };

@@ -184,21 +184,21 @@ export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => (
           created_at: previousMonitor.created_at,
         },
       });
-    } catch (updateErr) {
-      if (SavedObjectsErrorHelpers.isNotFoundError(updateErr)) {
+    } catch (e) {
+      if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
         return getMonitorNotFoundResponse(response, monitorId);
       }
-      if (updateErr instanceof InvalidLocationError || updateErr instanceof InvalidScheduleError) {
-        return response.badRequest({ body: { message: updateErr.message } });
+      if (e instanceof InvalidLocationError || e instanceof InvalidScheduleError) {
+        return response.badRequest({ body: { message: e.message } });
       }
-      if (updateErr instanceof MonitorValidationError) {
-        const { reason: message, details, payload } = updateErr.result;
+      if (e instanceof MonitorValidationError) {
+        const { reason: message, details, payload } = e.result;
         return response.badRequest({ body: { message, attributes: { details, ...payload } } });
       }
-      logger.error(updateErr);
 
+      logger.error(`Unable to update Synthetics monitor with id ${monitorId}`, { error: e });
       return response.customError({
-        body: { message: updateErr.message },
+        body: { message: e.message },
         statusCode: 500,
       });
     }
@@ -218,7 +218,9 @@ const rollbackUpdate = async ({
   try {
     await savedObjectsClient.update<MonitorFields>(syntheticsMonitorType, configId, attributes);
   } catch (e) {
-    server.logger.error(`Unable to rollback Synthetics monitors edit ${e.message} `);
+    server.logger.error(`Unable to rollback edit for Synthetics monitor with id ${configId}`, {
+      error: e,
+    });
   }
 };
 
@@ -265,10 +267,7 @@ export const syncEditedMonitor = async ({
 
     const [editedMonitorSavedObject, { publicSyncErrors, failedPolicyUpdates }] = await Promise.all(
       [editedSOPromise, editSyncPromise]
-    ).catch((e) => {
-      server.logger.error(e);
-      throw e;
-    });
+    );
 
     sendTelemetryEvents(
       server.logger,
@@ -294,9 +293,6 @@ export const syncEditedMonitor = async ({
       },
     };
   } catch (e) {
-    server.logger.error(
-      `Unable to update Synthetics monitor ${decryptedPreviousMonitor.attributes[ConfigKey.NAME]}`
-    );
     await rollbackUpdate({
       routeContext,
       configId: decryptedPreviousMonitor.id,
