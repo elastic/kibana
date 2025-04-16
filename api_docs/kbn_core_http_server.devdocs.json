@@ -3889,6 +3889,10 @@
                 "path": "x-pack/solutions/chat/plugins/workchat-app/server/routes/agents.ts"
               },
               {
+                "plugin": "wciIndexSource",
+                "path": "x-pack/solutions/chat/plugins/wci-index-source/server/routes/configuration.ts"
+              },
+              {
                 "plugin": "visTypeTimeseries",
                 "path": "src/platform/plugins/shared/vis_types/timeseries/server/routes/fields.ts"
               },
@@ -13889,6 +13893,10 @@
               },
               {
                 "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/privilege_monitoring/routes/health.ts"
+              },
+              {
+                "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/lib/siem_migrations/rules/api/get.ts"
               },
               {
@@ -15460,6 +15468,10 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/entity_store/routes/enablement.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/privilege_monitoring/routes/init.ts"
               },
               {
                 "plugin": "securitySolution",

@@ -49,19 +49,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       beforeEach(async () => {
         const createFlowResponse = await adminClient
-          .post('/internal/observability_onboarding/logs/flow')
+          .post('/internal/observability_onboarding/flow')
           .send({
-            type: 'logFiles',
-            name: 'name',
-            state: {
-              datasetName: 'my-dataset',
-              serviceName: 'my-service',
-              namespace: 'my-namespace',
-              logFilePaths: ['my-service.log'],
-            },
+            name: 'test-onboarding',
           });
 
-        onboardingId = createFlowResponse.body.onboardingId;
+        onboardingId = createFlowResponse.body.onboardingFlow.id;
 
         const savedState = await kibanaServer.savedObjects.get({
           type: OBSERVABILITY_ONBOARDING_STATE_SAVED_OBJECT_TYPE,
