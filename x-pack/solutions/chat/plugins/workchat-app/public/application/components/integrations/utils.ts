@@ -25,9 +25,9 @@ export const getIntegrationIcon = (integrationType: string): string | { type: st
     case 'salesforce':
       return 'https://upload.wikimedia.org/wikipedia/commons/f/f9/Salesforce.com_logo.svg';
     case 'index_source':
-      return 'index'
+      return 'index';
     case 'external_server':
-      return 'database'
+      return 'database';
     default:
       return '';
   }

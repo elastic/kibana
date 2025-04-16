@@ -60,5 +60,5 @@ export const integrationLabels = {
     browseIntegrationLabel: i18n.translate('workchatApp.integrations.listView.addIntegration', {
       defaultMessage: 'Browse integrations',
     }),
-  }
+  },
 };
