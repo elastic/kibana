@@ -56,7 +56,7 @@ const getFilteredCards = ({
   };
 };
 
-const addSecuritySpecificProps = ({
+export const addSecuritySpecificProps = ({
   navigateTo,
   getAppUrl,
   card,

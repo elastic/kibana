@@ -7,34 +7,39 @@
 import React, { useCallback, useState } from 'react';
 import {
   EuiCard,
+  EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
   EuiIcon,
   EuiPanel,
+  EuiSkeletonRectangle,
   EuiSpacer,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { PackageCard } from '@kbn/fleet-plugin/public';
 import { useIntegrationLinkState } from '../../../common/hooks/integrations/use_integration_link_state';
 import { addPathParamToUrl } from '../../../common/utils/integrations';
 import { ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_PATH } from '../../../../common/constants';
 import { useNavigation } from '../../../common/lib/kibana';
 import { INTEGRATION_APP_ID } from '../../../onboarding/components/onboarding_body/cards/integrations/constants';
 import { IndexSelectorModal } from './select_index_modal';
-import { PRIVILEGED_USER_MONITORING_INTEGRATIONS } from './constants';
+import { useEntityAnalyticsIntegrations } from './hooks/use_integrations';
 
 export const AddDataSourcePanel = () => {
   const { navigateTo } = useNavigation();
   const state = useIntegrationLinkState(ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_PATH);
+  const [isIndexModalOpen, setIsIndexModalOpen] = useState(false);
+  const { integrations, isLoading } = useEntityAnalyticsIntegrations();
 
   const navigateToIntegration = useCallback(
-    (id: string) => {
+    (id: string, version: string) => {
       navigateTo({
         appId: INTEGRATION_APP_ID,
         path: addPathParamToUrl(
-          `/detail/${id}/overview`,
+          `/detail/${id}-${version}/overview`,
           ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_PATH
         ),
         state,
@@ -42,8 +47,6 @@ export const AddDataSourcePanel = () => {
     },
     [navigateTo, state]
   );
-
-  const [isIndexModalOpen, setIsIndexModalOpen] = useState(false);
 
   return (
     <EuiPanel paddingSize="xl" hasShadow={false} hasBorder={false}>
@@ -66,23 +69,37 @@ export const AddDataSourcePanel = () => {
       </EuiText>
 
       <EuiSpacer size="xl" />
-
-      <EuiFlexGroup direction="row" justifyContent="spaceBetween">
-        {PRIVILEGED_USER_MONITORING_INTEGRATIONS.map((integration) => (
-          <EuiFlexItem grow={1} key={integration.id}>
-            <EuiCard
-              data-test-subj="entity_analytics-integration-card"
-              layout="horizontal"
-              icon={<EuiIcon size="xl" type={integration.icon} />}
-              title={integration.title}
-              description={integration.description}
-              onClick={() => {
-                navigateToIntegration(integration.id);
-              }}
-            />
-          </EuiFlexItem>
-        ))}
-      </EuiFlexGroup>
+      {isLoading ? (
+        <EuiFlexGrid gutterSize="l" columns={3}>
+          {Array.from({ length: 3 }).map((_, index) => (
+            <EuiFlexItem grow={1} key={index}>
+              <EuiSkeletonRectangle height="136px" width="100%" />
+            </EuiFlexItem>
+          ))}
+        </EuiFlexGrid>
+      ) : (
+        <EuiFlexGroup direction="row" justifyContent="spaceBetween">
+          {integrations.map(({ name, title, icons, description, version }) => (
+            <EuiFlexItem grow={1} key={name}>
+              <PackageCard
+                description={description ?? ''}
+                icons={icons ?? []}
+                id={name}
+                name={name}
+                title={title}
+                version={version}
+                onCardClick={() => {
+                  navigateToIntegration(name, version);
+                }}
+                // Required values that don't make sense for this scenario
+                categories={[]}
+                integration={''}
+                url={''}
+              />
+            </EuiFlexItem>
+          ))}
+        </EuiFlexGroup>
+      )}
       <EuiSpacer size="m" />
       <EuiFlexGroup alignItems="center" justifyContent="spaceAround" responsive={false}>
         <EuiFlexItem grow={true}>
@@ -102,6 +119,7 @@ export const AddDataSourcePanel = () => {
       <EuiFlexGroup direction="row" justifyContent="spaceBetween">
         <EuiFlexItem grow={1}>
           <EuiCard
+            hasBorder
             layout="horizontal"
             icon={<EuiIcon size="l" type="indexOpen" />}
             titleSize="xs"
@@ -130,6 +148,7 @@ export const AddDataSourcePanel = () => {
         </EuiFlexItem>
         <EuiFlexItem grow={1}>
           <EuiCard
+            hasBorder
             layout="horizontal"
             icon={<EuiIcon size="l" type="importAction" />}
             titleSize="xs"
