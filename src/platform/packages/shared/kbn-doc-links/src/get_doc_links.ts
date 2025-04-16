@@ -26,7 +26,6 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
   const ELASTIC_GITHUB = meta.elasticGithubUrl;
   const SEARCH_LABS_URL = meta.searchLabsUrl;
   const API_DOCS = meta.apiDocsUrl;
-  const ELASTIC_DOCS = meta.docsWebsiteUrl;
 
   const ELASTICSEARCH_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/${DOC_LINK_VERSION}/`;
   const ELASTICSEARCH_APIS = `${API_DOCS}doc/elasticsearch/v8/`;
@@ -795,7 +794,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       indexStats: isServerless
         ? `${ELASTICSEARCH_SERVERLESS_APIS}operation/operation-indices-update-aliases`
         : `${ELASTICSEARCH_APIS}operation/operation-indices-stats`,
-      byteSizeUnits: `${ELASTIC_DOCS}reference/elasticsearch/rest-apis/api-conventions#byte-units`,
+      byteSizeUnits: `${ELASTICSEARCH_DOCS}api-conventions.html#byte-units`,
       createAutoFollowPattern: `${ELASTICSEARCH_APIS}operation/operation-ccr-put-auto-follow-pattern`,
       createFollower: `${ELASTICSEARCH_APIS}operation/operation-ccr-follow`,
       createIndex: isServerless
@@ -814,7 +813,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       createTransformRequest: isServerless
         ? `${ELASTICSEARCH_SERVERLESS_APIS}operation/operation-transform-put-transform`
         : `${ELASTICSEARCH_APIS}operation/operation-transform-put-transform`,
-      cronExpressions: `${ELASTIC_DOCS}reference/elasticsearch/rest-apis/api-conventions#api-cron-expressions`,
+      cronExpressions: `${ELASTICSEARCH_DOCS}cron-expressions.html`,,
       executeWatchActionModes: `${ELASTICSEARCH_APIS}operation/operation-watcher-execute-watch#operation-watcher-execute-watch-body-application-json`,
       indexExists: isServerless
         ? `${ELASTICSEARCH_SERVERLESS_APIS}operation/operation-indices-exists`
@@ -857,7 +856,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       tasks: isServerless
         ? `${ELASTICSEARCH_SERVERLESS_APIS}group/endpoint-tasks`
         : `${ELASTICSEARCH_APIS}group/endpoint-tasks`,
-      timeUnits: `${ELASTIC_DOCS}reference/elasticsearch/rest-apis/api-conventions#time-units`,
+      timeUnits: `${ELASTICSEARCH_DOCS}api-conventions.html#time-units`,
       updateTransform: isServerless
         ? `${ELASTICSEARCH_SERVERLESS_APIS}operation/operation-transform-update-transform`
         : `${ELASTICSEARCH_APIS}operation/operation-transform-update-transform`,
