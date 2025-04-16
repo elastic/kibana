@@ -18,3 +18,6 @@ export const routingDefinitionSchema: z.Schema<RoutingDefinition> = z.object({
   destination: NonEmptyString,
   if: conditionSchema,
 });
+
+export const routingDefinitionListSchema: z.Schema<RoutingDefinition[]> =
+  z.array(routingDefinitionSchema);

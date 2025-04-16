@@ -44,11 +44,10 @@ export function StreamDetailRouting({
 
   const streamsListFetch = useStreamsAppFetch(
     ({ signal }) => {
-      return streamsRepositoryClient.fetch('GET /api/streams 2023-10-31', {
-        signal,
-      });
+      return streamsRepositoryClient.fetch('GET /api/streams 2023-10-31', { signal });
     },
-    [streamsRepositoryClient]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [streamsRepositoryClient, definition] // Refetch streams when the definition changes
   );
 
   const availableStreams = streamsListFetch.value?.streams.map((stream) => stream.name) ?? [];
