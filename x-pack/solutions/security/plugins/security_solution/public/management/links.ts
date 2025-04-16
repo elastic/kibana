@@ -38,6 +38,7 @@ import {
   TRUSTED_APPLICATIONS,
   ENTITY_ANALYTICS_RISK_SCORE,
   ENTITY_STORE,
+  ASSET_CRITICALITY,
 } from '../app/translations';
 import { licenseService } from '../common/hooks/use_license';
 import type { LinkItem } from '../common/links/types';
@@ -194,6 +195,18 @@ export const links: LinkItem = {
       }),
       landingIcon: IconAssetCriticality,
       path: ENTITY_ANALYTICS_ENTITY_STORE_MANAGEMENT_PATH,
+      skipUrlState: true,
+      hideTimeline: true,
+      capabilities: [`${SECURITY_FEATURE_ID}.entity-analytics`],
+    },
+    {
+      id: SecurityPageName.entityAnalyticsAssetClassification,
+      title: ASSET_CRITICALITY,
+      description: i18n.translate('xpack.securitySolution.appLinks.entityStoreDescription', {
+        defaultMessage: 'Store data for entities observed in events.',
+      }),
+      landingIcon: IconAssetCriticality,
+      path: ENTITY_ANALYTICS_ASSET_CRITICALITY_PATH,
       skipUrlState: true,
       hideTimeline: true,
       capabilities: [`${SECURITY_FEATURE_ID}.entity-analytics`],
