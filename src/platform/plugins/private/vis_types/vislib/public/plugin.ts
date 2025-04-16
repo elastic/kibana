@@ -17,6 +17,7 @@ import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 
 import { LEGACY_HEATMAP_CHARTS_LIBRARY } from '@kbn/vis-type-heatmap-plugin/common';
 import { LEGACY_GAUGE_CHARTS_LIBRARY } from '@kbn/vis-type-gauge-plugin/common';
+import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { VislibPublicConfig } from '../server/config';
 import {
   setFormatService,
@@ -31,7 +32,6 @@ import { createVisTypeVislibVisFn } from './vis_type_vislib_vis_fn';
 import { getVislibVisRenderer } from './vis_renderer';
 import { gaugeVisTypeDefinition } from './gauge';
 import { goalVisTypeDefinition } from './goal';
-import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 
 /** @internal */
 export interface VisTypeVislibPluginSetupDependencies {

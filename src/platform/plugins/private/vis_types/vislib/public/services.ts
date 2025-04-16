@@ -25,5 +25,6 @@ export const [getFormatService, setFormatService] =
 export const [getUsageCollectionStart, setUsageCollectionStart] =
   createGetterSetter<UsageCollectionStart>('UsageCollection', false);
 
-  export const [getUiActions, setUiActions] =
-  createGetterSetter<VisTypeVislibPluginStartDependencies['uiActions']>('UiActions', false);
+export const [getUiActions, setUiActions] = createGetterSetter<
+  VisTypeVislibPluginStartDependencies['uiActions']
+>('UiActions', false);

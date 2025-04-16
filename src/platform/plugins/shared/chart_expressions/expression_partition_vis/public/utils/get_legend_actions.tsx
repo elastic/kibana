@@ -15,19 +15,17 @@ import { LegendAction, SeriesIdentifier, useLegendAction } from '@elastic/charts
 import { Datatable } from '@kbn/expressions-plugin/public';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { FILTER_CELL_ACTION_TYPE } from '@kbn/cell-actions/constants';
+import { IInterpreterRenderEvent } from '@kbn/expressions-plugin/common';
 import { PartitionVisParams } from '../../common/types';
 import { CellValueAction, ColumnCellValueActions, FilterEvent } from '../types';
 import { getSeriesValueColumnIndex, getFilterPopoverTitle } from './filter_helpers';
-import { IInterpreterRenderEvent } from '@kbn/expressions-plugin/common';
 
 const hasFilterCellAction = (actions: CellValueAction[]) => {
   return actions.some(({ type }) => type === FILTER_CELL_ACTION_TYPE);
 };
 
 export const getLegendActions = (
-  canFilter: ((
-    data: IInterpreterRenderEvent<unknown>,
-  ) => Promise<boolean>) | undefined,
+  canFilter: ((data: IInterpreterRenderEvent<unknown>) => Promise<boolean>) | undefined,
   getFilterEventData: (series: SeriesIdentifier) => FilterEvent | null,
   onFilter: (data: FilterEvent, negate?: any) => void,
   columnCellValueActions: ColumnCellValueActions,
@@ -50,7 +48,7 @@ export const getLegendActions = (
         setIsFilterable(false);
         return;
       }
-      
+
       (async () => setIsFilterable(await canFilter(filterData)))();
     }, [filterData]);
 
