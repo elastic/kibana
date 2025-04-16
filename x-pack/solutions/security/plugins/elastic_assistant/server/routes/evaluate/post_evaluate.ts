@@ -350,6 +350,7 @@ export const postEvaluateRoute = (router: IRouter<ElasticAssistantRequestHandler
               // Fetch any applicable tools that the source plugin may have registered
               const assistantToolParams: AssistantToolParams = {
                 anonymizationFields,
+                assistantContext,
                 esClient,
                 isEnabledKnowledgeBase,
                 kbDataClient: dataClients?.kbDataClient,
@@ -366,6 +367,7 @@ export const postEvaluateRoute = (router: IRouter<ElasticAssistantRequestHandler
                 size,
                 telemetry: ctx.elasticAssistant.telemetry,
                 ...(productDocsAvailable ? { llmTasks: ctx.elasticAssistant.llmTasks } : {}),
+                createLlmInstance,
               };
 
               const tools: StructuredTool[] = (
@@ -480,7 +482,7 @@ export const postEvaluateRoute = (router: IRouter<ElasticAssistantRequestHandler
               experimentPrefix: name,
               client: new Client({ apiKey: langSmithApiKey }),
               // prevent rate limiting and unexpected multiple experiment runs
-              maxConcurrency: 5,
+              maxConcurrency: 3,
             })
               .then((output) => {
                 logger.debug(`runResp:\n ${JSON.stringify(output, null, 2)}`);
