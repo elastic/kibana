@@ -43,10 +43,6 @@ export async function parseTestFlags(flags: FlagsReader) {
   const headed = flags.boolean('headed');
   const testTarget = flags.enum('testTarget', ['local', 'cloud']) || 'local';
 
-  if (testTarget === 'cloud') {
-    throw createFlagError(`Running tests against Cloud / MKI is not supported yet`);
-  }
-
   if (!configPath) {
     throw createFlagError(`Path to playwright config is required: --config <file path>`);
   }
