@@ -23,7 +23,7 @@ export type PerformanceTrackerTypes =
 /**
  * PerformanceTrackerMarks are the marks that can be used to track performance
  * of lens charts. They are used to mark specific points in time during
- * the cahrt's lifecycle.
+ * the chart's lifecycle.
  */
 export const PERFORMANCE_TRACKER_MARKS = {
   /**
@@ -67,11 +67,9 @@ interface PerformanceTrackerOptions {
 }
 
 /**
- * Creates a performance tracker for a specific type and instance.
- * This is used to mark specific points in time during
- * the chart's lifecycle.
- * @param type - High-level type of the performance tracker, for example "Lens".
- * @param instance - Instance of the performance tracker type, for example "xyVis".
+ * Creates a performance tracker to mark and measure performance events.
+ * @param options.type - High-level type of the performance tracker, for example "Lens".
+ * @param options.instance - Instance of the performance tracker type, for example "xyVis".
  * @returns A performance tracker object with a mark method.
  */
 export const createPerformanceTracker = ({ type, instance }: PerformanceTrackerOptions) => {
@@ -79,6 +77,11 @@ export const createPerformanceTracker = ({ type, instance }: PerformanceTrackerO
   const createMarkName = (name: string) => `${type}:${instance}:${name}`;
 
   return {
+    /**
+     * Creates a performance mark with the given name.
+     * @param name - The name of the mark to create, will be postfixed.
+     * @returns The created performance mark
+     */
     mark: (name: PerformanceTrackerMarks) =>
       performance.mark(createMarkName(name), { detail: { id } }),
   };

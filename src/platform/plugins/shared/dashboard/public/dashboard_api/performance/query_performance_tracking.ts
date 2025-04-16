@@ -139,6 +139,7 @@ function reportPerformanceMetrics({
   // We need to extract the start and end times of the preRender, renderStart
   // and renderComplete markers and calculate the duration of each phase.
   const measurements = Object.values(groupedPerformanceMarkers).map((group) => {
+    // Get the marker name from the first group.
     const markerName =
       Array.isArray(group) && group.length > 0
         ? group[0].name.split(':').slice(0, -1).join(':')
