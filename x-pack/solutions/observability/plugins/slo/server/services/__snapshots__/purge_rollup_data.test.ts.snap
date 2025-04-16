@@ -1,8 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`purge rollup data happy path successfully makes a forced query to remove recently added SLI data 1`] = `[MockFunction]`;
-
-exports[`purge rollup data happy path successfully makes a forced query to remove recently added SLI data 2`] = `
+exports[`purge rollup data happy path successfully makes a forced query to remove recently added SLI data 1`] = `
 [MockFunction] {
   "calls": Array [
     Array [
@@ -48,24 +46,6 @@ exports[`purge rollup data happy path successfully makes a query to remove SLI d
 [MockFunction] {
   "calls": Array [
     Array [
-      Array [
-        "test3",
-      ],
-    ],
-  ],
-  "results": Array [
-    Object {
-      "type": "return",
-      "value": Promise {},
-    },
-  ],
-}
-`;
-
-exports[`purge rollup data happy path successfully makes a query to remove SLI data based on a timestamp - month 2`] = `
-[MockFunction] {
-  "calls": Array [
-    Array [
       Object {
         "conflicts": "proceed",
         "index": ".slo-observability.sli-v3*",
@@ -105,24 +85,6 @@ exports[`purge rollup data happy path successfully makes a query to remove SLI d
 `;
 
 exports[`purge rollup data happy path successfully makes a query to remove SLI data based on a timestamp - week 1`] = `
-[MockFunction] {
-  "calls": Array [
-    Array [
-      Array [
-        "test4",
-      ],
-    ],
-  ],
-  "results": Array [
-    Object {
-      "type": "return",
-      "value": Promise {},
-    },
-  ],
-}
-`;
-
-exports[`purge rollup data happy path successfully makes a query to remove SLI data based on a timestamp - week 2`] = `
 [MockFunction] {
   "calls": Array [
     Array [

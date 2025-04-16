@@ -19,7 +19,7 @@ export const purgeRollupDataRoute = createSloServerRoute({
     },
   },
   params: bulkPurgeRollupSchema,
-  handler: async ({ response, context, params, logger, plugins }) => {
+  handler: async ({ context, params, logger, plugins }) => {
     await assertPlatinumLicense(plugins);
 
     const core = await context.core;

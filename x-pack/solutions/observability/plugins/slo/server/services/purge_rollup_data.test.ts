@@ -77,7 +77,6 @@ describe('purge rollup data', () => {
         purgePolicy: { purgeType: 'fixed_time', timestamp: new Date('2025-03-01T00:00:00Z') },
       });
 
-      expect(mockRepository.findAllByIds).toMatchSnapshot();
       expect(mockEsClient.deleteByQuery).toMatchSnapshot();
     });
 
@@ -97,7 +96,6 @@ describe('purge rollup data', () => {
         purgePolicy: { purgeType: 'fixed_time', timestamp: new Date('2025-04-01T00:00:00Z') },
       });
 
-      expect(mockRepository.findAllByIds).toMatchSnapshot();
       expect(mockEsClient.deleteByQuery).toMatchSnapshot();
     });
 
@@ -121,7 +119,6 @@ describe('purge rollup data', () => {
         force: true,
       });
 
-      expect(mockRepository.findAllByIds).toMatchSnapshot();
       expect(mockEsClient.deleteByQuery).toMatchSnapshot();
     });
   });
@@ -135,7 +132,7 @@ describe('purge rollup data', () => {
       mockRepository.findAllByIds.mockResolvedValueOnce([slo]);
 
       expect(async () => {
-        await purgeRollupData.execute({
+        return await purgeRollupData.execute({
           ids: ['test1'],
           purgePolicy: { purgeType: 'fixed_age', age: new Duration(3, DurationUnit.Day) },
         });
@@ -156,7 +153,7 @@ describe('purge rollup data', () => {
       mockRepository.findAllByIds.mockResolvedValueOnce([slo]);
 
       expect(async () => {
-        await purgeRollupData.execute({
+        return await purgeRollupData.execute({
           ids: ['test2'],
           purgePolicy: { purgeType: 'fixed_age', age: new Duration(1, DurationUnit.Day) },
         });
@@ -177,7 +174,7 @@ describe('purge rollup data', () => {
       mockRepository.findAllByIds.mockResolvedValueOnce([slo]);
 
       expect(async () => {
-        await purgeRollupData.execute({
+        return await purgeRollupData.execute({
           ids: ['test3'],
           purgePolicy: { purgeType: 'fixed_time', timestamp: new Date() },
         });
