@@ -37,7 +37,6 @@ export const AddDataSources: React.FC = () => {
         </EuiButtonEmpty>
       ) : (
         <EuiButton
-          fill
           iconType="plusInCircle"
           onClick={() => setShowFlyout(true)}
           data-test-subj="addDataSourcesButton"

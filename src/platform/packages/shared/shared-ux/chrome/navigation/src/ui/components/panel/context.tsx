@@ -14,14 +14,12 @@ import React, {
   useContext,
   useMemo,
   useState,
-  ReactNode,
   useEffect,
   useRef,
 } from 'react';
 import type { ChromeProjectNavigationNode, PanelSelectedNode } from '@kbn/core-chrome-browser';
 
 import { DefaultContent } from './default_content';
-import { ContentProvider } from './types';
 
 export interface PanelContext {
   isOpen: boolean;
@@ -39,7 +37,6 @@ export interface PanelContext {
 const Context = React.createContext<PanelContext | null>(null);
 
 interface Props {
-  contentProvider?: ContentProvider;
   activeNodes: ChromeProjectNavigationNode[][];
   selectedNode?: PanelSelectedNode | null;
   setSelectedNode?: (node: PanelSelectedNode | null) => void;
@@ -47,8 +44,6 @@ interface Props {
 
 export const PanelProvider: FC<PropsWithChildren<Props>> = ({
   children,
-  contentProvider,
-  activeNodes,
   selectedNode: selectedNodeProp = null,
   setSelectedNode,
 }) => {
@@ -99,20 +94,8 @@ export const PanelProvider: FC<PropsWithChildren<Props>> = ({
       return null;
     }
 
-    const provided = contentProvider?.(selectedNode.path);
-
-    if (!provided) {
-      return <DefaultContent selectedNode={selectedNode} />;
-    }
-
-    if (provided.content) {
-      const Component = provided.content;
-      return <Component closePanel={close} selectedNode={selectedNode} activeNodes={activeNodes} />;
-    }
-
-    const title: string | ReactNode = provided.title ?? selectedNode.title;
-    return <DefaultContent selectedNode={{ ...selectedNode, title }} />;
-  }, [selectedNode, contentProvider, close, activeNodes]);
+    return <DefaultContent selectedNode={selectedNode} />;
+  }, [selectedNode]);
 
   const ctx: PanelContext = useMemo(
     () => ({
