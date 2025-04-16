@@ -86,6 +86,7 @@ import { NamingCollisionError } from '../../services/epm/packages/custom_integra
 import { DatasetNamePrefixError } from '../../services/epm/packages/custom_integrations/validation/check_dataset_name_format';
 import { UPLOAD_RETRY_AFTER_MS } from '../../services/epm/packages/install';
 import { getPackagePoliciesCountByPackageName } from '../../services/package_policies/package_policies_aggregation';
+import { CustomIntegrationNotFoundError } from '../../services/epm/packages/custom_integrations/validation/check_custom_integration';
 
 const CACHE_CONTROL_10_MINUTES_HEADER: HttpResponseOptions['headers'] = {
   'cache-control': 'max-age=600',
@@ -391,6 +392,44 @@ export const createCustomIntegrationHandler: FleetRequestHandler<
     throw error;
   }
 };
+export const updateCustomIntegrationHandler: FleetRequestHandler<
+  TypeOf<typeof CustomIntegrationRequestSchema.body>
+> = async (context, request, response) => {
+  const [coreContext] = await Promise.all([context.core, context.fleet]);
+  const esClient = coreContext.elasticsearch.client.asInternalUser;
+  const soClient = coreContext.savedObjects.client;
+
+  try {
+    const { fields } = request.body as TypeOf<typeof CustomIntegrationRequestSchema.body>;
+    const { pkgName } = request.params as unknown as TypeOf<
+      typeof CustomIntegrationRequestSchema.params
+    >;
+    const result = await updateCustomIntegration(esClient, soClient, pkgName, fields);
+
+    return response.ok({
+      body: {
+        id: pkgName,
+        result,
+      },
+    });
+  } catch (error) {
+    if (error instanceof CustomIntegrationNotFoundError) {
+      return response.customError({
+        statusCode: 403,
+        body: {
+          message: error.message,
+        },
+      });
+    } else {
+      return response.customError({
+        statusCode: 400,
+        body: {
+          message: `Failed to update integration: ${error.message}`,
+        },
+      });
+    }
+  }
+};
 
 const bulkInstallServiceResponseToHttpEntry = (
   result: BulkInstallResponse
@@ -605,36 +644,6 @@ export const getInputsHandler: FleetRequestHandler<
     );
   }
   return response.ok({ body });
-};
-
-export const updateCustomIntegrationHandler: FleetRequestHandler<
-  TypeOf<typeof CustomIntegrationRequestSchema.body>
-> = async (context, request, response) => {
-  const [coreContext] = await Promise.all([context.core, context.fleet]);
-  const esClient = coreContext.elasticsearch.client.asInternalUser;
-  const soClient = coreContext.savedObjects.client;
-
-  try {
-    const { fields } = request.body as TypeOf<typeof CustomIntegrationRequestSchema.body>;
-    const { pkgName } = request.params as unknown as TypeOf<
-      typeof CustomIntegrationRequestSchema.params
-    >;
-    const result = await updateCustomIntegration(esClient, soClient, pkgName, fields);
-
-    return response.ok({
-      body: {
-        id: pkgName,
-        result,
-      },
-    });
-  } catch (error) {
-    return response.customError({
-      statusCode: 500,
-      body: {
-        message: `Failed to update integration: ${error.message}`,
-      },
-    });
-  }
 };
 
 // Don't expose the whole SO in the API response, only selected fields

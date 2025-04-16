@@ -825,9 +825,9 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
           ],
         },
       },
-      summary: `Updates a custom integration`,
+      summary: `Update a custom integration`,
       options: {
-        tags: ['oas-tag:Custom Integrations'],
+        tags: ['oas-tag:Elastic Package Manager (EPM)'],
       },
     })
     .addVersion(

@@ -28,12 +28,14 @@ import type { PackageInstallContext } from '../../../../common/types';
 // Define a type for the integration attributes
 interface IntegrationAttributes {
   version: string;
+  install_source: string;
   [key: string]: any;
 }
 
 import { getInstalledPackageWithAssets } from './get';
 
 import { installPackageWithStateMachine } from './install';
+import { CustomIntegrationNotFoundError } from './custom_integrations/validation/check_custom_integration';
 
 export async function updateCustomIntegration(
   esClient: ElasticsearchClient,
@@ -50,15 +52,20 @@ export async function updateCustomIntegration(
       PACKAGES_SAVED_OBJECT_TYPE,
       id
     );
-
     if (!integration) {
       throw new Error(`Integration with ID ${id} not found`);
+    } else if (
+      integration.attributes.install_source !== 'custom' &&
+      integration.attributes.install_source !== 'upload'
+    ) {
+      throw new CustomIntegrationNotFoundError(
+        `Integration with ID ${id} is not a custom integration`
+      );
     } else {
       // add one to the patch version in the semver
       const newVersion = integration.attributes.version.split('.');
       newVersion[2] = (parseInt(newVersion[2], 10) + 1).toString();
       const newVersionString = newVersion.join('.');
-
       // Increment the version of everything and create a new package
       const res = await incrementVersionAndUpdate(soClient, esClient, id, {
         version: newVersionString,
