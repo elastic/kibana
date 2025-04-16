@@ -55,7 +55,7 @@ export const ConvertConnector: React.FC = () => {
       <EuiSpacer size="l" />
       <EuiText size="s">
         <FormattedMessage
-          id="xpack.searchConnectors.content.indices.configurationConnector.nativeConnector.convertConnector.description"
+          id="xpack.contentConnectors.content.indices.configurationConnector.nativeConnector.convertConnector.description"
           defaultMessage="Want to self-host this connector? Convert it to a {link}, to be managed on your own infrastructure. You'll need to convert this connector if you want to customize the code using our Python framework."
           values={{
             link: (

@@ -37,7 +37,7 @@ export const UpdateConnectorSchedulingApiLogic = createApiLogic(
   {
     showSuccessFlashFn: () =>
       i18n.translate(
-        'xpack.searchConnectorscontent.indices.configurationConnector.scheduling.successToast.title',
+        'xpack.contentConnectors.content.indices.configurationConnector.scheduling.successToast.title',
         { defaultMessage: 'Scheduling successfully updated' }
       ),
   }

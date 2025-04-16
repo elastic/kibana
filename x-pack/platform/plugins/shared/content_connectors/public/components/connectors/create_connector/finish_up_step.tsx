@@ -184,7 +184,7 @@ export const FinishUpStep: React.FC<FinishUpStepProps> = ({ title }) => {
                         <EuiButton
                           data-test-subj="enterpriseSearchFinishUpStepViewInDiscoverButton"
                           aria-label={i18n.translate(
-                            'xpack.searchConnectorsfinishUpStep.euiButton.viewInDiscoverLabel',
+                            'xpack.contentConnectors.finishUpStep.euiButton.viewInDiscoverLabel',
                             { defaultMessage: 'View in Discover' }
                           )}
                           onClick={() => {

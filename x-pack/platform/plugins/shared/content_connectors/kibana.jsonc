@@ -1,17 +1,17 @@
 {
   "type": "plugin",
-  "id": "@kbn/search-connectors-plugin",
+  "id": "@kbn/content-connectors-plugin",
   "owner": "@elastic/search-kibana",
   "group": "platform",
   "visibility": "shared",
   "description": "Plugin hosting shared features for connectors",
   "plugin": {
-    "id": "searchConnectors",
+    "id": "contentConnectors",
     "server": true,
     "browser": true,
     "configPath": [
       "xpack",
-      "searchConnectors"
+      "contentConnectors"
     ],
     "requiredPlugins": [
       "home",

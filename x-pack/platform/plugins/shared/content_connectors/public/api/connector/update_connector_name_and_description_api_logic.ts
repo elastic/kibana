@@ -41,7 +41,7 @@ export const ConnectorNameAndDescriptionApiLogic = createApiLogic(
   {
     showSuccessFlashFn: () =>
       i18n.translate(
-        'xpack.searchConnectorscontent.indices.configurationConnector.nameAndDescription.successToast.title',
+        'xpack.contentConnectors.content.indices.configurationConnector.nameAndDescription.successToast.title',
         { defaultMessage: 'Connector name and description updated' }
       ),
   }

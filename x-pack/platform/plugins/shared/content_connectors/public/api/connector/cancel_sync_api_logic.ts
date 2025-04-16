@@ -26,7 +26,7 @@ export const cancelSync = async ({ syncJobId, http }: CancelSyncApiArgs) => {
 export const CancelSyncApiLogic = createApiLogic(['cancel_sync_api_logic'], cancelSync, {
   showErrorFlash: true,
   showSuccessFlashFn: () =>
-    i18n.translate('xpack.searchConnectorscontent.searchIndex.cancelSync.successMessage', {
+    i18n.translate('xpack.contentConnectors.content.searchIndex.cancelSync.successMessage', {
       defaultMessage: 'Successfully canceled sync',
     }),
 });

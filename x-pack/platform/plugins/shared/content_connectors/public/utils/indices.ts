@@ -122,20 +122,20 @@ export function ingestionMethodToText(ingestionMethod: IngestionMethod) {
   switch (ingestionMethod) {
     case IngestionMethod.CONNECTOR:
       return i18n.translate(
-        'xpack.searchConnectorscontent.searchIndices.ingestionMethod.connector',
+        'xpack.contentConnectors.content.searchIndices.ingestionMethod.connector',
         {
           defaultMessage: 'Connector',
         }
       );
     case IngestionMethod.CRAWLER:
       return i18n.translate(
-        'xpack.searchConnectors.content.searchIndices.ingestionMethod.crawler',
+        'xpack.contentConnectors.content.searchIndices.ingestionMethod.crawler',
         {
           defaultMessage: 'Crawler',
         }
       );
     case IngestionMethod.API:
-      return i18n.translate('xpack.searchConnectorscontent.searchIndices.ingestionMethod.api', {
+      return i18n.translate('xpack.contentConnectors.content.searchIndices.ingestionMethod.api', {
         defaultMessage: 'API',
       });
     default:

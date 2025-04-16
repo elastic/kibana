@@ -41,7 +41,7 @@ export const ConnectorConfigurationApiLogic = createApiLogic(
   {
     showSuccessFlashFn: () =>
       i18n.translate(
-        'xpack.searchConnectorscontent.indices.configurationConnector.configuration.successToast.title',
+        'xpack.contentConnectors.content.indices.configurationConnector.configuration.successToast.title',
         { defaultMessage: 'Configuration updated' }
       ),
   }

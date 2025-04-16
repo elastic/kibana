@@ -130,7 +130,7 @@ export const DeleteConnectorModal: React.FC<DeleteConnectorModalProps> = ({ isCr
         <ul>
           <li>
             <FormattedMessage
-              id="xpack.searchConnectors.deleteConnectorModal.li.myconnectornameRelatedIndexLabel"
+              id="xpack.contentConnectors.deleteConnectorModal.li.myconnectornameRelatedIndexLabel"
               defaultMessage="{connectorName} (Related index: {deleteModalIndexName} )"
               values={{
                 connectorName,
@@ -144,7 +144,7 @@ export const DeleteConnectorModal: React.FC<DeleteConnectorModalProps> = ({ isCr
         {isCrawler && (
           <EuiText>
             <FormattedMessage
-              id="xpack.searchConnectors.deleteConnectorModal.crawler.warning"
+              id="xpack.contentConnectors.deleteConnectorModal.crawler.warning"
               defaultMessage="Deleting this crawler will also delete its related index with all of its data and its Crawler configuration. Any associated search applications will no longer be able to access any data stored in this index. This action cannot be undone. Please type {connectorName} to confirm."
               values={{
                 connectorName: (
@@ -159,7 +159,7 @@ export const DeleteConnectorModal: React.FC<DeleteConnectorModalProps> = ({ isCr
         {!isCrawler && (
           <EuiText>
             <FormattedMessage
-              id="xpack.searchConnectors.content.connectors.deleteModal.syncsWarning.indexNameDescription"
+              id="xpack.contentConnectors.content.connectors.deleteModal.syncsWarning.indexNameDescription"
               defaultMessage="This action cannot be undone. Please type {connectorName} to confirm."
               values={{
                 connectorName: (
@@ -177,7 +177,7 @@ export const DeleteConnectorModal: React.FC<DeleteConnectorModalProps> = ({ isCr
           <EuiCheckbox
             id="delete-related-index"
             label={i18n.translate(
-              'xpack.searchConnectorsdeleteConnectorModal.euiCheckbox.deleteAlsoRelatedIndexLabel',
+              'xpack.contentConnectorsdeleteConnectorModal.euiCheckbox.deleteAlsoRelatedIndexLabel',
               { defaultMessage: 'Also delete related index' }
             )}
             checked={shouldDeleteIndex}

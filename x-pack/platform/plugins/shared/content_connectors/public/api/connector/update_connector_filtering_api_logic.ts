@@ -31,7 +31,7 @@ export const ConnectorFilteringApiLogic = createApiLogic(
   {
     showSuccessFlashFn: () =>
       i18n.translate(
-        'xpack.searchConnectorscontent.index.connector.filtering.successToastRules.title',
+        'xpack.contentConnectors.content.index.connector.filtering.successToastRules.title',
         { defaultMessage: 'Sync rules updated' }
       ),
   }

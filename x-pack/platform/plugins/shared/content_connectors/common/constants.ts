@@ -53,10 +53,10 @@ export const CREATE_CONNECTOR_PLUGIN = {
 
 export const ELASTICSEARCH_PLUGIN = {
   ID: PLUGIN_ID,
-  NAME: i18n.translate('xpack.contentConnectors.productName', {
+  NAME: i18n.translate('xpack.contentConnectors.common.productName', {
     defaultMessage: 'Content connectors',
   }),
-  DESCRIPTION: i18n.translate('xpack.contentConnectors.productDescription', {
+  DESCRIPTION: i18n.translate('xpack.contentConnectors.common.productDescription', {
     defaultMessage: 'Low-level tools for creating performant and relevant search experiences.',
   }),
   URL: '/app/management/data/search_connectors/connectors',

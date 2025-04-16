@@ -63,7 +63,7 @@ export const RunFromSourceStep: React.FC<RunFromSourceStepProps> = ({
         buttonContent={
           <EuiText size="m">
             <h5>
-              {i18n.translate('xpack.searchConnectorsconnectorDeployment.runFromSourceTitle', {
+              {i18n.translate('xpack.contentConnectors.connectorDeployment.runFromSourceTitle', {
                 defaultMessage: 'Run connector service from source',
               })}
             </h5>
@@ -73,13 +73,13 @@ export const RunFromSourceStep: React.FC<RunFromSourceStepProps> = ({
         <EuiSpacer size="s" />
         <EuiText size="s">
           <h5>
-            {i18n.translate('xpack.searchConnectorsconnectorDeployment.p.cloneRepositoryLabel', {
+            {i18n.translate('xpack.contentConnectors.connectorDeployment.p.cloneRepositoryLabel', {
               defaultMessage: 'Clone the repository',
             })}
           </h5>
           <p>
             {i18n.translate(
-              'xpack.searchConnectorsconnectorDeployment.p.addTheFollowingConfigurationLabel',
+              'xpack.contentConnectors.connectorDeployment.p.addTheFollowingConfigurationLabel',
               {
                 defaultMessage: 'First, you need to clone or download the repo:',
               }
@@ -88,7 +88,7 @@ export const RunFromSourceStep: React.FC<RunFromSourceStepProps> = ({
         </EuiText>
         <EuiSpacer size="s" />
         <EuiCode>git clone https://github.com/elastic/connectors</EuiCode>&nbsp;&nbsp;&nbsp;
-        {i18n.translate('xpack.searchConnectorsconnectorDeployment.orLabel', {
+        {i18n.translate('xpack.contentConnectors.connectorDeployment.orLabel', {
           defaultMessage: 'or',
         })}
         &nbsp;&nbsp;&nbsp;
@@ -100,7 +100,7 @@ export const RunFromSourceStep: React.FC<RunFromSourceStepProps> = ({
         >
           <EuiFlexGroup responsive={false} gutterSize="xs">
             <EuiFlexItem>
-              {i18n.translate('xpack.searchConnectorsconnectorDeployment.goToSourceButtonLabel', {
+              {i18n.translate('xpack.contentConnectors.connectorDeployment.goToSourceButtonLabel', {
                 defaultMessage: 'Download source',
               })}
             </EuiFlexItem>
@@ -111,12 +111,12 @@ export const RunFromSourceStep: React.FC<RunFromSourceStepProps> = ({
         </EuiButton>
         <EuiText size="s">
           <h5>
-            {i18n.translate('xpack.searchConnectorsconnectorDeployment.p.createConfigFileLabel', {
+            {i18n.translate('xpack.contentConnectors.connectorDeployment.p.createConfigFileLabel', {
               defaultMessage: 'Create configuration file',
             })}
           </h5>
           <p>
-            {i18n.translate('xpack.searchConnectorsconnectorDeployment.p.navigateToRootLabel', {
+            {i18n.translate('xpack.contentConnectors.connectorDeployment.p.navigateToRootLabel', {
               defaultMessage:
                 'Navigate to the root of your cloned repository and create a configuration file:',
             })}
@@ -131,19 +131,19 @@ export const RunFromSourceStep: React.FC<RunFromSourceStepProps> = ({
         <EuiSpacer size="s" />
         <EuiText size="s">
           <h5>
-            {i18n.translate('xpack.searchConnectorsconnectorDeployment.p.populateConfigLabel', {
+            {i18n.translate('xpack.contentConnectors.connectorDeployment.p.populateConfigLabel', {
               defaultMessage: 'Populate configuration file',
             })}
           </h5>
           <p>
             <FormattedMessage
-              id="xpack.searchConnectors.connectorDeployment.p.createConfigLabel"
+              id="xpack.contentConnectors..connectorDeployment.p.createConfigLabel"
               defaultMessage="The previous command creates a {configYaml} file. Copy and paste the following configuration into that file:"
               values={{
                 configYaml: (
                   <EuiCode>
                     {i18n.translate(
-                      'xpack.searchConnectorsconnectorDeployment.configYamlCodeBlockLabel',
+                      'xpack.contentConnectors.connectorDeployment.configYamlCodeBlockLabel',
                       { defaultMessage: 'config.yml' }
                     )}
                   </EuiCode>
@@ -169,7 +169,7 @@ export const RunFromSourceStep: React.FC<RunFromSourceStepProps> = ({
         <EuiText size="s">
           <p>
             <FormattedMessage
-              id="xpack.searchConnectors.connectorDeployment.customizeSettingsLabel"
+              id="xpack.contentConnectors..connectorDeployment.customizeSettingsLabel"
               defaultMessage="If you want to customize settings later, refer to this {exampleFile}."
               values={{
                 exampleFile: (
@@ -180,7 +180,7 @@ export const RunFromSourceStep: React.FC<RunFromSourceStepProps> = ({
                     external
                   >
                     {i18n.translate(
-                      'xpack.searchConnectorsconnectorDeployment.exampleConfigFileLinkLabel',
+                      'xpack.contentConnectors.connectorDeployment.exampleConfigFileLinkLabel',
                       { defaultMessage: 'example file' }
                     )}
                   </EuiLink>
@@ -192,13 +192,13 @@ export const RunFromSourceStep: React.FC<RunFromSourceStepProps> = ({
         <EuiSpacer size="m" />
         <EuiText size="s">
           <h5>
-            {i18n.translate('xpack.searchConnectorsconnectorDeployment.p.compileAndRunTitle', {
+            {i18n.translate('xpack.contentConnectors.connectorDeployment.p.compileAndRunTitle', {
               defaultMessage: 'Run the connector service',
             })}
           </h5>
           <p>
             {i18n.translate(
-              'xpack.searchConnectorsconnectorDeployment.p.compileAndRunInstructions',
+              'xpack.contentConnectors.connectorDeployment.p.compileAndRunInstructions',
               {
                 defaultMessage: 'Finally, compile and run the connector service source code:',
               }

@@ -120,7 +120,7 @@ export function registerConnectorRoutes({
           return createError({
             errorCode: (error as Error).message as ErrorCode,
             message: i18n.translate(
-              'xpack.searchConnectors.routes.addConnector.connectorExistsError',
+              'xpack.contentConnectors.routes.addConnector.connectorExistsError',
               {
                 defaultMessage: 'Connector or index already exists',
               }
@@ -181,7 +181,7 @@ export function registerConnectorRoutes({
           return createError({
             errorCode: ErrorCode.STATUS_TRANSITION_ERROR,
             message: i18n.translate(
-              'xpack.searchConnectors.routes.connectors.statusTransitionError',
+              'xpack.contentConnectors.routes.connectors.statusTransitionError',
               {
                 defaultMessage:
                   'Connector sync job cannot be cancelled. Connector is already cancelled or not in a cancelable state.',
@@ -327,7 +327,7 @@ export function registerConnectorRoutes({
           return createError({
             errorCode: ErrorCode.ACCESS_CONTROL_DISABLED,
             message: i18n.translate(
-              'xpack.searchConnectors.connectors.accessControlSync.accessControlDisabledError',
+              'xpack.contentConnectors.connectors.accessControlSync.accessControlDisabledError',
               {
                 defaultMessage:
                   'Access control sync cannot be created. You must first enable Document Level Security.',
@@ -702,7 +702,7 @@ export function registerConnectorRoutes({
           return createError({
             errorCode: ErrorCode.EXPENSIVE_QUERY_NOT_ALLOWED_ERROR,
             message: i18n.translate(
-              'xpack.searchConnectors.routes.connectors.expensive_query_not_allowed_error',
+              'xpack.contentConnectors.routes.connectors.expensive_query_not_allowed_error',
               {
                 defaultMessage:
                   'Expensive search queries not allowed. "search.allow_expensive_queries" is set to false ',
@@ -813,7 +813,7 @@ export function registerConnectorRoutes({
           return createError({
             errorCode: ErrorCode.RESOURCE_NOT_FOUND,
             message: i18n.translate(
-              'xpack.searchConnectors.routes.connectors.resource_not_found_error',
+              'xpack.contentConnectors.routes.connectors.resource_not_found_error',
               {
                 defaultMessage: 'Connector with id {connectorId} is not found.',
                 values: { connectorId },
@@ -960,7 +960,7 @@ export function registerConnectorRoutes({
           return createError({
             errorCode: ErrorCode.RESOURCE_NOT_FOUND,
             message: i18n.translate(
-              'xpack.searchConnectors.routes.connectors.resource_not_found_error',
+              'xpack.contentConnectors.routes.connectors.resource_not_found_error',
               {
                 defaultMessage: 'Connector with id {connectorId} is not found.',
                 values: { connectorId },
@@ -981,7 +981,7 @@ export function registerConnectorRoutes({
           createError({
             errorCode: ErrorCode.GENERATE_INDEX_NAME_ERROR,
             message: i18n.translate(
-              'xpack.searchConnectors.routes.connectors.generateConfiguration.indexAlreadyExistsError',
+              'xpack.contentConnectors.routes.connectors.generateConfiguration.indexAlreadyExistsError',
               {
                 defaultMessage: 'Cannot find a unique index name to generate configuration',
               }
@@ -1039,7 +1039,7 @@ export function registerConnectorRoutes({
           return createError({
             errorCode: ErrorCode.GENERATE_INDEX_NAME_ERROR,
             message: i18n.translate(
-              'xpack.searchConnectors.routes.connectors.generateConfiguration.indexAlreadyExistsError',
+              'xpack.contentConnectors.routes.connectors.generateConfiguration.indexAlreadyExistsError',
               {
                 defaultMessage: 'Cannot find a unique connector name',
               }
@@ -1080,7 +1080,7 @@ export function registerConnectorRoutes({
           return createError({
             errorCode: ErrorCode.RESOURCE_NOT_FOUND,
             message: i18n.translate(
-              'xpack.searchConnectors.routes.connectors.resource_not_found_error',
+              'xpack.contentConnectors.routes.connectors.resource_not_found_error',
               {
                 defaultMessage: 'Connector with id {connectorId} is not found.',
                 values: { connectorId },
@@ -1095,7 +1095,7 @@ export function registerConnectorRoutes({
           return createError({
             errorCode: ErrorCode.CONNECTOR_UNSUPPORTED_OPERATION,
             message: i18n.translate(
-              'xpack.searchConnectors.routes.connectors.generateConfiguration.indexAlreadyExistsError',
+              'xpack.contentConnectors.routes.connectors.generateConfiguration.indexAlreadyExistsError',
               {
                 defaultMessage:
                   'Failed to fetch agentless deployment details: This action is only supported for Elastic-managed connectors.',
@@ -1150,9 +1150,12 @@ export function registerConnectorRoutes({
       } catch (error) {
         return createError({
           errorCode: ErrorCode.CONNECTOR_UNSUPPORTED_OPERATION,
-          message: i18n.translate('xpack.searchConnectors.routes.connectors.agentlessPolicyError', {
-            defaultMessage: 'Failed to fetch agentless deployment details',
-          }),
+          message: i18n.translate(
+            'xpack.contentConnectors.routes.connectors.agentlessPolicyError',
+            {
+              defaultMessage: 'Failed to fetch agentless deployment details',
+            }
+          ),
           response,
           statusCode: 500,
         });

@@ -107,17 +107,17 @@ const Connectors: React.FC<ConnectorsProps> = ({ isCrawler, isCrawlerSelfManaged
       isLoading={isLoading}
       pageHeader={{
         pageTitle: !isCrawler
-          ? i18n.translate('xpack.searchConnectors.title', {
+          ? i18n.translate('xpack.contentConnectors.title', {
               defaultMessage: 'Content connectors',
             })
-          : i18n.translate('xpack.searchConnectorscrawlers.title', {
+          : i18n.translate('xpack.contentConnectors.crawlers.title', {
               defaultMessage: 'Elastic Web Crawler',
             }),
         description: [
           <EuiText>
             <p>
               <FormattedMessage
-                id="xpack.searchConnectors.webcrawlers.headerContent"
+                id="xpack.contentConnectors.webcrawlers.headerContent"
                 defaultMessage="Discover extract and index searchable content from websites and knowledge bases {learnMoreLink}"
                 values={{
                   learnMoreLink: (
@@ -160,7 +160,7 @@ const Connectors: React.FC<ConnectorsProps> = ({ isCrawler, isCrawlerSelfManaged
                     }}
                   >
                     <FormattedMessage
-                      id="xpack.searchConnectors.connectors.newConnectorButtonLabel"
+                      id="xpack.contentConnectors.connectors.newConnectorButtonLabel"
                       defaultMessage="New Connector"
                     />
                   </EuiButton>
@@ -272,12 +272,12 @@ const Connectors: React.FC<ConnectorsProps> = ({ isCrawler, isCrawlerSelfManaged
                   <h2>
                     {!isCrawler ? (
                       <FormattedMessage
-                        id="xpack.searchConnectors.connectorsTable.h2.availableConnectorsLabel"
+                        id="xpack.contentConnectors.connectorsTable.h2.availableConnectorsLabel"
                         defaultMessage="Available connectors"
                       />
                     ) : (
                       <FormattedMessage
-                        id="xpack.searchConnectors.connectorsTable.h2.availableCrawlersLabel"
+                        id="xpack.contentConnectors.connectorsTable.h2.availableCrawlersLabel"
                         defaultMessage="Available web crawlers"
                       />
                     )}
@@ -291,22 +291,22 @@ const Connectors: React.FC<ConnectorsProps> = ({ isCrawler, isCrawlerSelfManaged
                     incremental: true,
                     placeholder: !isCrawler
                       ? i18n.translate(
-                          'xpack.searchConnectorsTable.euiSearchBar.filterConnectorsPlaceholder',
+                          'xpack.contentConnectorsTable.euiSearchBar.filterConnectorsPlaceholder',
                           { defaultMessage: 'Filter connectors' }
                         )
                       : i18n.translate(
-                          'xpack.searchConnectorsTable.euiSearchBar.filterCrawlersPlaceholder',
+                          'xpack.contentConnectorsTable.euiSearchBar.filterCrawlersPlaceholder',
                           { defaultMessage: 'Filter web crawlers' }
                         ),
                   }}
                   aria-label={
                     !isCrawler
                       ? i18n.translate(
-                          'xpack.searchConnectorsTable.euiSearchBar.filterConnectorsLabel',
+                          'xpack.contentConnectorsTable.euiSearchBar.filterConnectorsLabel',
                           { defaultMessage: 'Filter connectors' }
                         )
                       : i18n.translate(
-                          'xpack.searchConnectorsTable.euiSearchBar.filterCrawlersLabel',
+                          'xpack.contentConnectorsTable.euiSearchBar.filterCrawlersLabel',
                           { defaultMessage: 'Filter web crawlers' }
                         )
                   }

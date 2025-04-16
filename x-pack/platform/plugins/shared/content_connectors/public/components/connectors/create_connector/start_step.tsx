@@ -130,7 +130,7 @@ const StartStep: React.FC<StartStepProps> = ({
                       </EuiText>
                       <EuiText size="xs" grow={false}>
                         {i18n.translate(
-                          'xpack.searchConnectorsstartStep.namesShouldBeLowercaseTextLabel',
+                          'xpack.contentConnectors.startStep.namesShouldBeLowercaseTextLabel',
                           {
                             defaultMessage:
                               'The connector name should be lowercase and cannot contain spaces or special characters.',
@@ -377,7 +377,7 @@ const StartStep: React.FC<StartStepProps> = ({
                       }}
                     >
                       {i18n.translate(
-                        'xpack.searchConnectorscontent.connector_detail.configurationConnector.steps.generateApiKey.button.label',
+                        'xpack.contentConnectors.content.connector_detail.configurationConnector.steps.generateApiKey.button.label',
                         {
                           defaultMessage: 'Generate configuration',
                         }

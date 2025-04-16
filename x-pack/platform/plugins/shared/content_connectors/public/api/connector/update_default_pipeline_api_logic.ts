@@ -34,8 +34,11 @@ export const UpdateDefaultPipelineApiLogic = createApiLogic(
   updateDefaultPipeline,
   {
     showSuccessFlashFn: () =>
-      i18n.translate('xpack.searchConnectorscontent.indices.defaultPipelines.successToast.title', {
-        defaultMessage: 'Default pipeline successfully updated',
-      }),
+      i18n.translate(
+        'xpack.contentConnectors.content.indices.defaultPipelines.successToast.title',
+        {
+          defaultMessage: 'Default pipeline successfully updated',
+        }
+      ),
   }
 );

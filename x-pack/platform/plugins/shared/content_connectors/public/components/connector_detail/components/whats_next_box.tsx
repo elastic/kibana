@@ -53,7 +53,7 @@ export const WhatsNextBox: React.FC<WhatsNextBoxProps> = ({
       {isSyncing && <EuiProgress size="xs" position="absolute" />}
       <EuiTitle size="s">
         <h3>
-          {i18n.translate('xpack.searchConnectorswhatsNextBox.whatsNextPanelLabel', {
+          {i18n.translate('xpack.contentConnectors.whatsNextBox.whatsNextPanelLabel', {
             defaultMessage: "What's next?",
           })}
         </h3>
@@ -61,7 +61,7 @@ export const WhatsNextBox: React.FC<WhatsNextBoxProps> = ({
       <EuiSpacer />
       <EuiText>
         <p>
-          {i18n.translate('xpack.searchConnectorswhatsNextBox.whatsNextPanelDescription', {
+          {i18n.translate('xpack.contentConnectors.whatsNextBox.whatsNextPanelDescription', {
             defaultMessage:
               'You can manually sync your data, schedule a recurring sync or see your documents.',
           })}
@@ -80,7 +80,7 @@ export const WhatsNextBox: React.FC<WhatsNextBoxProps> = ({
             })}`}
           >
             {i18n.translate(
-              'xpack.searchConnectorscontent.connector_detail.configurationConnector.steps.schedule.button.label',
+              'xpack.contentConnectors.content.connector_detail.configurationConnector.steps.schedule.button.label',
               {
                 defaultMessage: 'Set schedule and sync',
               }

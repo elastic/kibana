@@ -32,7 +32,7 @@ export const RunOptionsButtons: React.FC<RunOptionsButtonsProps> = ({
       <EuiSpacer size="s" />
       <EuiText size="s">
         <FormattedMessage
-          id="xpack.searchConnectors.content.connector_detail.configurationConnector.steps.description"
+          id="xpack.contentConnectors.content.connector_detail.configurationConnector.steps.description"
           defaultMessage="The connector service is a Python package that you host on your own infrastructure. You can deploy with Docker or, optionally, run from source."
         />
         <EuiSpacer />
@@ -40,10 +40,10 @@ export const RunOptionsButtons: React.FC<RunOptionsButtonsProps> = ({
           <EuiFlexItem>
             <EuiCheckableCard
               onChange={() => selectDeploymentMethod('docker')}
-              id="xpack.searchConnectors.content.connector_detail.configurationConnector.steps.runConnectorService.docker"
+              id="xpack.contentConnectors.content.connector_detail.configurationConnector.steps.runConnectorService.docker"
               checked={selectedDeploymentMethod === 'docker'}
               aria-label={i18n.translate(
-                'xpack.searchConnectorsconnectorConfiguration.dockerTextLabel.ariaLabel',
+                'xpack.contentConnectors.connectorConfiguration.dockerTextLabel.ariaLabel',
                 { defaultMessage: 'Run with Docker' }
               )}
               name="deployment-method-run-connector"
@@ -55,7 +55,7 @@ export const RunOptionsButtons: React.FC<RunOptionsButtonsProps> = ({
                   <EuiFlexItem grow={false}>
                     <EuiText>
                       {i18n.translate(
-                        'xpack.searchConnectorsconnectorConfiguration.dockerTextLabel',
+                        'xpack.contentConnectors.connectorConfiguration.dockerTextLabel',
                         { defaultMessage: 'Run with Docker' }
                       )}
                     </EuiText>
@@ -67,10 +67,10 @@ export const RunOptionsButtons: React.FC<RunOptionsButtonsProps> = ({
           <EuiFlexItem>
             <EuiCheckableCard
               onChange={() => selectDeploymentMethod('source')}
-              id="xpack.searchConnectors.content.connector_detail.configurationConnector.steps.runConnectorService.source"
+              id="xpack.contentConnectors.content.connector_detail.configurationConnector.steps.runConnectorService.source"
               checked={selectedDeploymentMethod === 'source'}
               aria-label={i18n.translate(
-                'xpack.searchConnectorsconnectorConfiguration.sourceTextLabel.ariaLabel',
+                'xpack.contentConnectorsconnectorConfiguration.sourceTextLabel.ariaLabel',
                 { defaultMessage: 'Run from source' }
               )}
               name="deployment-method-run-connector"
@@ -82,7 +82,7 @@ export const RunOptionsButtons: React.FC<RunOptionsButtonsProps> = ({
                   <EuiFlexItem grow={false}>
                     <EuiText>
                       {i18n.translate(
-                        'xpack.searchConnectorsconnectorConfiguration.sourceTextLabel',
+                        'xpack.contentConnectorsconnectorConfiguration.sourceTextLabel',
                         { defaultMessage: 'Run from source' }
                       )}
                     </EuiText>

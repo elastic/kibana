@@ -28,7 +28,7 @@ export function elasticsearchErrorHandler<ContextType, RequestType, ResponseType
       if (isUnauthorizedException(error)) {
         enterpriseSearchError = {
           errorCode: ErrorCode.UNAUTHORIZED,
-          message: i18n.translate('xpack.searchConnectorsserver.routes.unauthorizedError', {
+          message: i18n.translate('xpack.contentConnectors.server.routes.unauthorizedError', {
             defaultMessage: 'You do not have sufficient permissions.',
           }),
           statusCode: 403,
@@ -36,7 +36,7 @@ export function elasticsearchErrorHandler<ContextType, RequestType, ResponseType
       } else {
         enterpriseSearchError = {
           errorCode: ErrorCode.UNCAUGHT_EXCEPTION,
-          message: i18n.translate('xpack.searchConnectorsserver.routes.uncaughtExceptionError', {
+          message: i18n.translate('xpack.contentConnectors.server.routes.uncaughtExceptionError', {
             defaultMessage: 'Search encountered an error.',
           }),
           statusCode: 502,
@@ -45,7 +45,7 @@ export function elasticsearchErrorHandler<ContextType, RequestType, ResponseType
 
       if (enterpriseSearchError !== undefined) {
         log.error(
-          i18n.translate('xpack.searchConnectorsserver.routes.errorLogMessage', {
+          i18n.translate('xpack.contentConnectors.server.routes.errorLogMessage', {
             defaultMessage:
               'An error occurred while resolving request to {requestUrl}: {errorMessage}',
             values: {
@@ -57,7 +57,7 @@ export function elasticsearchErrorHandler<ContextType, RequestType, ResponseType
         log.error(error);
         return createError({
           ...enterpriseSearchError,
-          message: i18n.translate('xpack.searchConnectorsserver.routes.checkKibanaLogsMessage', {
+          message: i18n.translate('xpack.contentConnectors.server.routes.checkKibanaLogsMessage', {
             defaultMessage: '{errorMessage} Check Kibana Server logs for details.',
             values: {
               errorMessage: enterpriseSearchError.message,

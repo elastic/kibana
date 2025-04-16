@@ -98,14 +98,14 @@ export const SyncJobs: React.FC<SyncJobsProps> = ({ connector }) => {
                 indexSelectorOptions={[
                   {
                     description: i18n.translate(
-                      'xpack.searchConnectorscontent.searchIndex.documents.selector.contentIndexSync.description',
+                      'xpack.contentConnectors.content.searchIndex.documents.selector.contentIndexSync.description',
                       {
                         defaultMessage: 'Browse content sync history',
                       }
                     ),
                     error: errorOnContentSync,
                     title: i18n.translate(
-                      'xpack.searchConnectorscontent.searchIndex.documents.selector.contentIndexSync.title',
+                      'xpack.contentConnectors.content.searchIndex.documents.selector.contentIndexSync.title',
                       {
                         defaultMessage: 'Content syncs',
                       }
@@ -114,14 +114,14 @@ export const SyncJobs: React.FC<SyncJobsProps> = ({ connector }) => {
                   },
                   {
                     description: i18n.translate(
-                      'xpack.searchConnectorscontent.searchIndex.documents.selector.accessControlSync.description',
+                      'xpack.contentConnectors.content.searchIndex.documents.selector.accessControlSync.description',
                       {
                         defaultMessage: 'Browse access control sync history',
                       }
                     ),
                     error: errorOnAccessSync,
                     title: i18n.translate(
-                      'xpack.searchConnectorscontent.searchIndex.documents.selectorSync.accessControl.title',
+                      'xpack.contentConnectors.content.searchIndex.documents.selectorSync.accessControl.title',
                       {
                         defaultMessage: 'Access control syncs',
                       }
@@ -136,7 +136,7 @@ export const SyncJobs: React.FC<SyncJobsProps> = ({ connector }) => {
                 content={
                   <p>
                     {i18n.translate(
-                      'xpack.searchConnectorsaccessControlIndexSelector.p.accessControlSyncsAreLabel',
+                      'xpack.contentConnectors.accessControlIndexSelector.p.accessControlSyncsAreLabel',
                       {
                         defaultMessage:
                           'Access control syncs keep permissions information up to date for document level security (DLS)',

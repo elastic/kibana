@@ -74,7 +74,7 @@ export const DockerInstructionsStep: React.FC<DockerInstructionsStepProps> = ({
           <EuiText size="s">
             <h4>
               {i18n.translate(
-                'xpack.searchConnectorsconnectorDeployment.dockerInstructionsHeading',
+                'xpack.contentConnectors.connectorDeployment.dockerInstructionsHeading',
                 {
                   defaultMessage: 'Docker instructions',
                 }
@@ -86,21 +86,24 @@ export const DockerInstructionsStep: React.FC<DockerInstructionsStepProps> = ({
         <EuiSpacer />
         <EuiText size="s">
           <p>
-            {i18n.translate('xpack.searchConnectorsconnectorDeployment.p.dockerInstallationNote', {
-              defaultMessage: 'Make sure you have Docker installed on your machine.',
-            })}
+            {i18n.translate(
+              'xpack.contentConnectors.connectorDeployment.p.dockerInstallationNote',
+              {
+                defaultMessage: 'Make sure you have Docker installed on your machine.',
+              }
+            )}
           </p>
         </EuiText>
         <EuiSpacer />
         <EuiText size="s">
           <h5>
-            {i18n.translate('xpack.searchConnectorsconnectorDeployment.p.createConfigFileLabel', {
+            {i18n.translate('xpack.contentConnectors.connectorDeployment.p.createConfigFileLabel', {
               defaultMessage: 'Create configuration file',
             })}
           </h5>
           <p>
             {i18n.translate(
-              'xpack.searchConnectorsconnectorDeployment.p.createConfigFileInstructions',
+              'xpack.contentConnectors.connectorDeployment.p.createConfigFileInstructions',
               {
                 defaultMessage:
                   'You need a configuration file with your Elasticsearch and connector details. In your terminal, run the following command to create the config.yml file:',
@@ -114,7 +117,7 @@ export const DockerInstructionsStep: React.FC<DockerInstructionsStepProps> = ({
         <EuiText size="s">
           <p>
             <FormattedMessage
-              id="xpack.searchConnectors.connectorDeployment.p.configFileExplanation"
+              id="xpack.contentConnectors..connectorDeployment.p.configFileExplanation"
               defaultMessage="This command creates a {configFile} file in the {directory} directory with your specific connector and Elasticsearch details."
               values={{
                 configFile: <EuiCode>config.yml</EuiCode>,
@@ -124,7 +127,7 @@ export const DockerInstructionsStep: React.FC<DockerInstructionsStepProps> = ({
           </p>
           <p>
             <FormattedMessage
-              id="xpack.searchConnectors.connectorDeployment.p.exampleConfigFile"
+              id="xpack.contentConnectors..connectorDeployment.p.exampleConfigFile"
               defaultMessage="If you want to customize settings later, refer to this {exampleConfigLink}."
               values={{
                 exampleConfigLink: (
@@ -135,7 +138,7 @@ export const DockerInstructionsStep: React.FC<DockerInstructionsStepProps> = ({
                     external
                   >
                     {i18n.translate(
-                      'xpack.searchConnectorsconnectorDeployment.exampleConfigLinkText',
+                      'xpack.contentConnectors.connectorDeployment.exampleConfigLinkText',
                       {
                         defaultMessage: 'example config file',
                       }
@@ -149,13 +152,13 @@ export const DockerInstructionsStep: React.FC<DockerInstructionsStepProps> = ({
         <EuiSpacer />
         <EuiText size="s">
           <h5>
-            {i18n.translate('xpack.searchConnectorsconnectorDeployment.p.runContainerLabel', {
+            {i18n.translate('xpack.contentConnectors.connectorDeployment.p.runContainerLabel', {
               defaultMessage: 'Run container',
             })}
           </h5>
           <p>
             {i18n.translate(
-              'xpack.searchConnectorsconnectorDeployment.p.runTheFollowingCommandLabel',
+              'xpack.contentConnectors.connectorDeployment.p.runTheFollowingCommandLabel',
               {
                 defaultMessage: 'Run the following command to start the container:',
               }

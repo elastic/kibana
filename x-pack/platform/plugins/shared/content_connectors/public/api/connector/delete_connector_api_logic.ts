@@ -41,7 +41,7 @@ export const DeleteConnectorApiLogic = createApiLogic(
   {
     showSuccessFlashFn: ({ connectorName }) =>
       i18n.translate(
-        'xpack.searchConnectorscontent.connectors.deleteConnector.successToast.title',
+        'xpack.contentConnectors.content.connectors.deleteConnector.successToast.title',
         {
           defaultMessage: 'The connector {connectorName} was successfully deleted',
           values: {

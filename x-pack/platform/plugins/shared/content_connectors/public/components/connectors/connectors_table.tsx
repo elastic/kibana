@@ -227,13 +227,13 @@ export const ConnectorsTable: React.FC<ConnectorsTableProps> = ({
           onChange={onChange}
           tableLayout="fixed"
           tableCaption={i18n.translate(
-            'xpack.searchConnectorsTable.table.availableConnectorsTableCaption',
+            'xpack.contentConnectorsTable.table.availableConnectorsTableCaption',
             { defaultMessage: 'Available connectors table' }
           )}
           loading={isLoading}
           noItemsMessage={
             <EuiText aria-live="polite" size="s">
-              {i18n.translate('xpack.searchConnectorsTable.table.noResultsMessage', {
+              {i18n.translate('xpack.contentConnectorsTable.table.noResultsMessage', {
                 defaultMessage: 'No connectors found',
               })}
             </EuiText>

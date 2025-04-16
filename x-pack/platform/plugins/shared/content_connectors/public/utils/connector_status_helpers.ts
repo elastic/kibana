@@ -17,7 +17,7 @@ export const isLastSeenOld = (connector: Connector): boolean =>
 
 export const getConnectorLastSeenError = (connector: Connector): string => {
   return i18n.translate(
-    'xpack.searchConnectorscontent.searchIndices.connectorStatus.lastSeenError.label',
+    'xpack.contentConnectors.content.searchIndices.connectorStatus.lastSeenError.label',
     {
       defaultMessage:
         'Your connector has not checked in for over 30 minutes. (last_seen: {lastSeen})',
@@ -27,7 +27,7 @@ export const getConnectorLastSeenError = (connector: Connector): string => {
 };
 
 const incompleteText = i18n.translate(
-  'xpack.searchConnectorscontent.searchIndices.ingestionStatus.incomplete.label',
+  'xpack.contentConnectors.content.searchIndices.ingestionStatus.incomplete.label',
   { defaultMessage: 'Incomplete' }
 );
 
@@ -39,7 +39,7 @@ export function connectorStatusToText(connector: Connector): string {
     connectorStatus === ConnectorStatus.NEEDS_CONFIGURATION
   ) {
     return i18n.translate(
-      'xpack.searchConnectorscontent.searchIndices.connectorStatus.needsConfig.label',
+      'xpack.contentConnectors.content.searchIndices.connectorStatus.needsConfig.label',
       { defaultMessage: 'Needs Configuration' }
     );
   }
@@ -50,13 +50,13 @@ export function connectorStatusToText(connector: Connector): string {
     connector.last_access_control_sync_error != null
   ) {
     return i18n.translate(
-      'xpack.searchConnectorscontent.searchIndices.connectorStatus.syncFailure.label',
+      'xpack.contentConnectors.content.searchIndices.connectorStatus.syncFailure.label',
       { defaultMessage: 'Sync Failure' }
     );
   }
   if (isLastSeenOld(connector) || connectorStatus === ConnectorStatus.ERROR) {
     return i18n.translate(
-      'xpack.searchConnectorscontent.searchIndices.connectorStatus.connectorFailure.label',
+      'xpack.contentConnectors.content.searchIndices.connectorStatus.connectorFailure.label',
       { defaultMessage: 'Connector Failure' }
     );
   }
@@ -65,13 +65,13 @@ export function connectorStatusToText(connector: Connector): string {
   }
   if (connectorStatus === ConnectorStatus.CONFIGURED) {
     return i18n.translate(
-      'xpack.searchConnectorscontent.searchIndices.ingestionStatus.configured.label',
+      'xpack.contentConnectors.content.searchIndices.ingestionStatus.configured.label',
       { defaultMessage: 'Configured' }
     );
   }
   if (connectorStatus === ConnectorStatus.CONNECTED) {
     return i18n.translate(
-      'xpack.searchConnectorscontent.searchIndices.ingestionStatus.connected.label',
+      'xpack.contentConnectors.content.searchIndices.ingestionStatus.connected.label',
       { defaultMessage: 'Connected' }
     );
   }

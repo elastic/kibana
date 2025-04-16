@@ -26,7 +26,7 @@ export const StartAccessControlSyncApiLogic = createApiLogic(
   {
     showSuccessFlashFn: () =>
       i18n.translate(
-        'xpack.searchConnectorscontent.searchIndex.index.accessControlSyncSuccess.message',
+        'xpack.contentConnectors.content.searchIndex.index.accessControlSyncSuccess.message',
         {
           defaultMessage:
             'Successfully scheduled an access control sync, waiting for a connector to pick it up',
