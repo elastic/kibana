@@ -23,6 +23,7 @@ import {
   setDataActions,
   setCoreStart,
   setUsageCollectionStart,
+  setUiActions,
 } from './services';
 import { heatmapVisTypeDefinition } from './heatmap';
 
@@ -30,6 +31,7 @@ import { createVisTypeVislibVisFn } from './vis_type_vislib_vis_fn';
 import { getVislibVisRenderer } from './vis_renderer';
 import { gaugeVisTypeDefinition } from './gauge';
 import { goalVisTypeDefinition } from './goal';
+import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 
 /** @internal */
 export interface VisTypeVislibPluginSetupDependencies {
@@ -43,6 +45,7 @@ export interface VisTypeVislibPluginStartDependencies {
   data: DataPublicPluginStart;
   fieldFormats: FieldFormatsStart;
   usageCollection?: UsageCollectionStart;
+  uiActions: UiActionsStart;
 }
 
 export type VisTypeVislibCoreSetup = CoreSetup<VisTypeVislibPluginStartDependencies, void>;
@@ -89,11 +92,12 @@ export class VisTypeVislibPlugin
 
   public start(
     core: CoreStart,
-    { data, usageCollection, fieldFormats }: VisTypeVislibPluginStartDependencies
+    { data, usageCollection, fieldFormats, uiActions }: VisTypeVislibPluginStartDependencies
   ) {
     setCoreStart(core);
     setFormatService(fieldFormats);
     setDataActions(data.actions);
+    setUiActions(uiActions);
     if (usageCollection) {
       setUsageCollectionStart(usageCollection);
     }

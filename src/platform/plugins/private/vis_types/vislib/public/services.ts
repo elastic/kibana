@@ -12,6 +12,7 @@ import { createGetterSetter } from '@kbn/kibana-utils-plugin/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
+import { VisTypeVislibPluginStartDependencies } from './plugin';
 
 export const [getCoreStart, setCoreStart] = createGetterSetter<CoreStart>('CoreStart');
 
@@ -23,3 +24,6 @@ export const [getFormatService, setFormatService] =
 
 export const [getUsageCollectionStart, setUsageCollectionStart] =
   createGetterSetter<UsageCollectionStart>('UsageCollection', false);
+
+  export const [getUiActions, setUiActions] =
+  createGetterSetter<VisTypeVislibPluginStartDependencies['uiActions']>('UiActions', false);

@@ -18,10 +18,11 @@ import { EuiPopoverProps, EuiIcon, keys, htmlIdGenerator } from '@elastic/eui';
 import { PersistedState } from '@kbn/visualizations-plugin/public';
 import { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/public';
 
-import { getDataActions } from '../../../services';
 import { CUSTOM_LEGEND_VIS_TYPES, LegendItem } from './models';
 import { VisLegendItem } from './legend_item';
 import { BasicVislibParams } from '../../../types';
+import { getUiActions } from '@kbn/visualizations-plugin/public/services';
+import { VALUE_CLICK_TRIGGER } from '@kbn/embeddable-plugin/public';
 
 export interface VisLegendProps {
   vislibVis: any;
@@ -104,10 +105,10 @@ export class VisLegend extends PureComponent<VisLegendProps, VisLegendState> {
       return false;
     }
 
-    const filters = await getDataActions().canCreateFiltersFromValueClickAction!({
+    const filters = await getUiActions().getTriggerCompatibleActions(VALUE_CLICK_TRIGGER, {
       data: item.values,
     });
-    return filters;
+    return filters.length > 0;
   };
 
   toggleDetails = (label: string | null) => (event?: BaseSyntheticEvent) => {

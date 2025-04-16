@@ -32,6 +32,9 @@ import {
   setTheme,
 } from './services';
 import {
+  createFiltersFromValueClickAction,
+  createFiltersFromRangeSelectAction,
+  createFiltersFromMultiValueClickAction,
   createMultiValueClickActionDefinition,
   createValueClickActionDefinition,
   createSelectRangeActionDefinition,
@@ -143,28 +146,34 @@ export class DataPublicPlugin
     const rangeSelectAction = createSelectRangeActionDefinition(() => ({
       uiActions,
     }));
-    uiActions.addTriggerAction('SELECT_RANGE_TRIGGER', rangeSelectAction);
+    uiActions.addTriggerAction(
+      'SELECT_RANGE_TRIGGER',
+      rangeSelectAction
+    );
 
     const valueClickAction = createValueClickActionDefinition(() => ({
       uiActions,
     }));
 
-    uiActions.addTriggerAction('VALUE_CLICK_TRIGGER', valueClickAction);
+    uiActions.addTriggerAction(
+      'VALUE_CLICK_TRIGGER',
+      valueClickAction
+    );
 
     const multiValueClickAction = createMultiValueClickActionDefinition(() => ({
       query,
     }));
-    uiActions.addTriggerAction('MULTI_VALUE_CLICK_TRIGGER', multiValueClickAction);
+    uiActions.addTriggerAction(
+      'MULTI_VALUE_CLICK_TRIGGER',
+      multiValueClickAction
+    );
 
     const datatableUtilities = new DatatableUtilitiesService(search.aggs, dataViews, fieldFormats);
     const dataServices = {
       actions: {
-        createFiltersFromValueClickAction: valueClickAction.execute,
-        canCreateFiltersFromValueClickAction: valueClickAction.isCompatible,
-        createFiltersFromRangeSelectAction: rangeSelectAction.execute,
-        canCreateFiltersFromRangeSelectAction: rangeSelectAction.isCompatible,
-        createFiltersFromMultiValueClickAction: multiValueClickAction.execute,
-        canCreateFiltersFromMultiValueClickAction: multiValueClickAction.isCompatible,
+        createFiltersFromValueClickAction,
+        createFiltersFromRangeSelectAction,
+        createFiltersFromMultiValueClickAction,
       },
       datatableUtilities,
       fieldFormats,

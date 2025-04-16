@@ -19,8 +19,12 @@ import {
 import { ScreenshotModePluginStart } from '@kbn/screenshot-mode-plugin/public';
 import { SharePluginStart } from '@kbn/share-plugin/public';
 import { ManagementSetup } from '@kbn/management-plugin/public';
-import { ActionDefinition } from '@kbn/ui-actions-plugin/public/actions';
 import { DatatableUtilitiesService } from '../common';
+import {
+  createFiltersFromMultiValueClickAction,
+  createFiltersFromRangeSelectAction,
+  createFiltersFromValueClickAction,
+} from './actions';
 import type { ISearchSetup, ISearchStart } from './search';
 import { QuerySetup, QueryStart } from './query';
 import { DataViewsContract } from './data_views';
@@ -56,12 +60,9 @@ export interface DataPublicPluginSetup {
  * utilities to generate filters from action context
  */
 export interface DataPublicPluginStartActions {
-  createFiltersFromValueClickAction: ActionDefinition['execute'];
-  createFiltersFromRangeSelectAction: ActionDefinition['execute'];
-  createFiltersFromMultiValueClickAction: ActionDefinition['execute'];
-  canCreateFiltersFromValueClickAction: ActionDefinition['isCompatible'];
-  canCreateFiltersFromRangeSelectAction: ActionDefinition['isCompatible'];
-  canCreateFiltersFromMultiValueClickAction: ActionDefinition['isCompatible'];
+  createFiltersFromValueClickAction: typeof createFiltersFromValueClickAction;
+  createFiltersFromRangeSelectAction: typeof createFiltersFromRangeSelectAction;
+  createFiltersFromMultiValueClickAction: typeof createFiltersFromMultiValueClickAction;
 }
 
 /**
