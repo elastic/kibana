@@ -489,18 +489,34 @@ export class StreamsClient {
    * Lists both managed and unmanaged streams
    */
   async listStreams(): Promise<Streams.all.Definition[]> {
+    const streams = await this.listStreamsWithDataStreamExistence();
+    return streams.map((stream) => {
+      const { data_stream_exists: _, ...rest } = stream;
+      return rest;
+    });
+  }
+
+  async listStreamsWithDataStreamExistence(): Promise<
+    Array<Streams.all.Definition & { data_stream_exists: boolean }>
+  > {
     const [managedStreams, unmanagedStreams] = await Promise.all([
       this.getManagedStreams(),
       this.getUnmanagedDataStreams(),
     ]);
 
-    const allDefinitionsById = new Map<string, Streams.all.Definition>(
-      managedStreams.map((stream) => [stream.name, stream])
-    );
+    const allDefinitionsById = new Map<
+      string,
+      Streams.all.Definition & { data_stream_exists: boolean }
+    >(managedStreams.map((stream) => [stream.name, { ...stream, data_stream_exists: false }]));
 
     unmanagedStreams.forEach((stream) => {
       if (!allDefinitionsById.get(stream.name)) {
-        allDefinitionsById.set(stream.name, stream);
+        allDefinitionsById.set(stream.name, { ...stream, data_stream_exists: true });
+      } else {
+        allDefinitionsById.set(stream.name, {
+          ...allDefinitionsById.get(stream.name)!,
+          data_stream_exists: true,
+        });
       }
     });
 

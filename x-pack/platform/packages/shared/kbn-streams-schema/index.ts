@@ -111,6 +111,7 @@ export {
   isUnaryFilterCondition,
   isBinaryFilterCondition,
   conditionSchema,
+  isCondition,
 } from './src/conditions';
 
 export { conditionToQueryDsl } from './src/helpers/condition_to_query_dsl';

@@ -17,19 +17,11 @@ import {
   EuiLoadingChart,
   EuiPanel,
   EuiSpacer,
-  useEuiTheme,
   EuiIconTip,
   EuiText,
 } from '@elastic/eui';
-import {
-  AreaSeries,
-  Axis,
-  BarSeries,
-  Chart,
-  DARK_THEME,
-  LIGHT_THEME,
-  Settings,
-} from '@elastic/charts';
+import { AreaSeries, Axis, BarSeries, Chart, Settings } from '@elastic/charts';
+import { useElasticChartsTheme } from '@kbn/charts-theme';
 import { useKibana } from '../../../hooks/use_kibana';
 import { DataStreamStats } from './hooks/use_data_stream_stats';
 import { formatBytes } from './helpers/format_bytes';
@@ -149,7 +141,7 @@ function ChartAreaSeries({
     isLoading: isLoadingIngestionRate,
     error: ingestionRateError,
   } = useIngestionRate({ definition, stats, timeRange });
-  const { colorMode } = useEuiTheme();
+  const chartBaseTheme = useElasticChartsTheme();
 
   return ingestionRateError ? (
     'Failed to load ingestion rate'
@@ -158,7 +150,7 @@ function ChartAreaSeries({
   ) : (
     <>
       <Chart size={{ height: 250 }}>
-        <Settings showLegend={false} baseTheme={colorMode === 'LIGHT' ? LIGHT_THEME : DARK_THEME} />
+        <Settings showLegend={false} baseTheme={chartBaseTheme} />
 
         <AreaSeries
           id="ingestionRate"
@@ -215,7 +207,7 @@ function ChartBarSeries({
     error: ingestionRateError,
   } = useIngestionRatePerTier({ definition, stats, timeRange });
   const { ilmPhases } = useIlmPhasesColorAndDescription();
-  const { colorMode } = useEuiTheme();
+  const chartBaseTheme = useElasticChartsTheme();
 
   return ingestionRateError ? (
     'Failed to load ingestion rate'
@@ -224,7 +216,7 @@ function ChartBarSeries({
   ) : (
     <>
       <Chart size={{ height: 250 }}>
-        <Settings showLegend={false} baseTheme={colorMode === 'LIGHT' ? LIGHT_THEME : DARK_THEME} />
+        <Settings showLegend={false} baseTheme={chartBaseTheme} />
         {Object.entries(ingestionRate.buckets).map(([tier, buckets]) => (
           <BarSeries
             id={`ingestionRate-${tier}`}
