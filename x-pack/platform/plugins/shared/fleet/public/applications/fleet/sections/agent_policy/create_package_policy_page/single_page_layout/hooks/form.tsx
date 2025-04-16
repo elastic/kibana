@@ -401,7 +401,7 @@ export function useOnSubmit({
                 <>
                   <FormattedMessage
                     id="xpack.fleet.createAgentlessPolicy.overProvisionErrorMessage"
-                    defaultMessage="You reached the limit of {limit} agentless deployments. Please remove some or switch to agent-based integration. {docLink}"
+                    defaultMessage="You've reached the maximum number of {limit} agentless deployments. To add more, either remove or change some to Elastic Agent-based integrations. {docLink}"
                     values={{
                       limit: <b>{e?.attributes?.limit ?? DEFAULT_AGENTLESS_LIMIT}</b>,
                       docLink: (
