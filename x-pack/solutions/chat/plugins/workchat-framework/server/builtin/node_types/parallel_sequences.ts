@@ -28,6 +28,8 @@ export const getParallelSequencesNodeTypeDefinition =
             const {
               services: { workflowRunner },
             } = context;
+
+            // no interpolation - we let the underlying nodes do it on their own
             const { branches } = input;
 
             const runBranch = async (branch: SequenceBranch) => {

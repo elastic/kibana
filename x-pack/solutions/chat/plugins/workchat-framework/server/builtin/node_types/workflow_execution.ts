@@ -7,6 +7,7 @@
 
 import { BuiltInNodeTypes } from '@kbn/wc-framework-types-common';
 import { WorkflowExecutionError, type NodeTypeDefinition } from '@kbn/wc-framework-types-server';
+import { interpolateValue } from '../../framework/config';
 
 export interface WorkflowExecutionNodeConfigType {
   workflowId: string;
@@ -26,7 +27,12 @@ export const getWorkflowExecutionNodeTypeDefinition =
             const {
               services: { workflowRegistry, workflowRunner },
             } = context;
-            const { workflowId, inputs, output } = input;
+
+            const interpolatedInput = interpolateValue<WorkflowExecutionNodeConfigType>(
+              input,
+              state
+            );
+            const { workflowId, inputs, output } = interpolatedInput;
 
             if (workflowRegistry.has(workflowId)) {
               throw new WorkflowExecutionError(

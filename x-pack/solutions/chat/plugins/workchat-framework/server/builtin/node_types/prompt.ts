@@ -7,6 +7,7 @@
 
 import { BuiltInNodeTypes } from '@kbn/wc-framework-types-common';
 import { type NodeTypeDefinition } from '@kbn/wc-framework-types-server';
+import { interpolateValue } from '../../framework/config';
 
 export interface PromptNodeConfigType {
   prompt: string;
@@ -26,7 +27,9 @@ export const getPromptNodeTypeDefinition = (): NodeTypeDefinition<PromptNodeConf
           const {
             services: { modelProvider },
           } = context;
-          const { prompt, output } = input;
+
+          const interpolatedInput = interpolateValue<PromptNodeConfigType>(input, state);
+          const { prompt, output } = interpolatedInput;
 
           const model = modelProvider.getDefaultModel();
 

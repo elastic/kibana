@@ -7,6 +7,7 @@
 
 import { BuiltInNodeTypes } from '@kbn/wc-framework-types-common';
 import { WorkflowExecutionError, type NodeTypeDefinition } from '@kbn/wc-framework-types-server';
+import { interpolateValue } from '../../framework/config';
 
 export interface ToolExecutionNodeConfigType {
   toolId: string;
@@ -27,7 +28,9 @@ export const getToolExecutionNodeTypeDefinition =
             const {
               services: { toolProvider },
             } = context;
-            const { toolId, toolArguments, parseResponse = false, output } = input;
+
+            const interpolatedInput = interpolateValue<ToolExecutionNodeConfigType>(input, state);
+            const { toolId, toolArguments, parseResponse, output } = interpolatedInput;
 
             if (!(await toolProvider.has(toolId))) {
               throw new WorkflowExecutionError(

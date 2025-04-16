@@ -16,7 +16,7 @@ export type DefaultNodeRunnerInput = Record<string, unknown>;
  */
 export interface RunNodeParams<Input = DefaultNodeRunnerInput> {
   /**
-   * Interpolated input for this node, as described in the configuration
+   * raw input (configuration for this node, as described in the configuration
    */
   input: Input;
 

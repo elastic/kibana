@@ -13,12 +13,7 @@ import {
   type ScopedRunnerRunNodeOutput,
 } from '@kbn/wc-framework-types-server';
 import type { WorkflowRunnerInternalContext, ScopedNodeRunnerFn } from './types';
-import {
-  createNoopNodeEventReporter,
-  createNodeEventReporter,
-  interpolateNodeConfig,
-  enterNode,
-} from './utils';
+import { createNoopNodeEventReporter, createNodeEventReporter, enterNode } from './utils';
 
 /**
  * Returns a step runner already scoped to the given context.
@@ -70,12 +65,6 @@ const runNode = async ({
 
   const nodeRunner = nodeType.factory(context);
 
-  // interpolating the node config with the state
-  const nodeInput = interpolateNodeConfig({
-    config: nodeDefinition.configuration,
-    state,
-  });
-
   // creating the event reporter
   const eventReporter = eventHandler
     ? createNodeEventReporter({
@@ -90,7 +79,7 @@ const runNode = async ({
 
   // executing the node
   await nodeRunner.run({
-    input: nodeInput,
+    input: nodeDefinition.configuration,
     state,
     eventReporter,
     executionState: { ...internalContext.executionState },

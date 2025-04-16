@@ -7,35 +7,27 @@
 
 import type { WorkflowState } from '@kbn/wc-framework-types-server';
 
-export const interpolateNodeConfig = <T extends Record<string, unknown>>({
-  config,
-  state,
-}: {
-  config: T;
-  state: WorkflowState;
-}): T => {
-  return interpolateValue(config, state);
-};
-
-// Recursive helper function to perform the interpolation
-function interpolateValue(value: any, state: WorkflowState): any {
+/**
+ * Interpolate the given value against the provided state.
+ */
+export function interpolateValue<T = any>(value: any, state: WorkflowState): T {
   if (typeof value === 'string') {
     // Check for exact match: "{key}"
     const exactMatch = value.match(/^\{([^}]+)\}$/);
     if (exactMatch) {
       const key = exactMatch[1];
-      return state.has(key) ? state.get(key) : value;
+      return (state.has(key) ? state.get(key) : value) as T;
     }
 
     // Check for interpolation within a string: "string with {key}"
     return value.replace(/\{([^}]+)\}/g, (match, key) => {
       return state.has(key) ? String(state.get(key)) : match;
-    });
+    }) as T;
   }
 
   if (Array.isArray(value)) {
     // Recursively interpolate each element in the array
-    return value.map((item) => interpolateValue(item, state));
+    return value.map((item) => interpolateValue(item, state)) as T;
   }
 
   // Check if it's a plain object (created via {} or new Object()) before recursing
@@ -51,7 +43,7 @@ function interpolateValue(value: any, state: WorkflowState): any {
         newObj[key] = interpolateValue(value[key], state);
       }
     }
-    return newObj;
+    return newObj as T;
   }
 
   // Return primitives and null/undefined as is

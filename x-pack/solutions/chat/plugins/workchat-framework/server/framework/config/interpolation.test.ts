@@ -6,10 +6,10 @@
  */
 
 import type { WorkflowState } from '@kbn/wc-framework-types-server';
-import { interpolateNodeConfig } from './interpolate_node_config';
-import { createEmptyState } from './workflow_state';
+import { interpolateValue } from './interpolation';
+import { createEmptyState } from '../workflows/utils/workflow_state';
 
-describe('interpolateNodeConfig', () => {
+describe('interpolateValue', () => {
   let state: WorkflowState;
 
   beforeEach(() => {
@@ -31,7 +31,7 @@ describe('interpolateNodeConfig', () => {
       field5: undefined,
     };
     const originalConfig = JSON.parse(JSON.stringify(config));
-    const result = interpolateNodeConfig({ config, state });
+    const result = interpolateValue(config, state);
     expect(result).toEqual(config);
     expect(config).toEqual(originalConfig); // Ensure original config is unchanged
   });
@@ -45,7 +45,7 @@ describe('interpolateNodeConfig', () => {
       arr: '{arrayValue}',
     };
     const originalConfig = JSON.parse(JSON.stringify(config));
-    const result = interpolateNodeConfig({ config, state });
+    const result = interpolateValue(config, state);
     expect(result).toEqual({
       query: 'What is ELSER?',
       size: 10,
@@ -62,7 +62,7 @@ describe('interpolateNodeConfig', () => {
       info: 'Search size is {searchSize} and validity is {isValid}.',
     };
     const originalConfig = JSON.parse(JSON.stringify(config));
-    const result = interpolateNodeConfig({ config, state });
+    const result = interpolateValue(config, state);
     expect(result).toEqual({
       prompt: 'User asked: What is ELSER?. Respond as: You are a helpful assistant.',
       info: 'Search size is 10 and validity is true.',
@@ -77,7 +77,7 @@ describe('interpolateNodeConfig', () => {
       mixed: 'This {userQuery} exists, but {thisKeyDoesNotExist} does not.',
     };
     const originalConfig = JSON.parse(JSON.stringify(config));
-    const result = interpolateNodeConfig({ config, state });
+    const result = interpolateValue(config, state);
     expect(result).toEqual({
       exactMiss: '{missingKey}',
       templateMiss: 'Value is {anotherMissingKey}.',
@@ -98,7 +98,7 @@ describe('interpolateNodeConfig', () => {
       },
     };
     const originalConfig = JSON.parse(JSON.stringify(config));
-    const result = interpolateNodeConfig({ config, state });
+    const result = interpolateValue(config, state);
     expect(result).toEqual({
       level1: {
         level2: {
@@ -123,7 +123,7 @@ describe('interpolateNodeConfig', () => {
       primitiveArray: [1, '{searchSize}', true, '{isValid}', null],
     };
     const originalConfig = JSON.parse(JSON.stringify(config));
-    const result = interpolateNodeConfig({ config, state });
+    const result = interpolateValue(config, state);
     expect(result).toEqual({
       queries: ['What is ELSER?', 'Another query', '{missingKey}'],
       details: [
@@ -150,7 +150,7 @@ describe('interpolateNodeConfig', () => {
       missing: '{notFound}',
     };
     const originalConfig = JSON.parse(JSON.stringify(config));
-    const result = interpolateNodeConfig({ config, state });
+    const result = interpolateValue(config, state);
     expect(result).toEqual({
       exact: 'What is ELSER?',
       template: 'Prompt: You are a helpful assistant.',
@@ -187,7 +187,7 @@ describe('interpolateNodeConfig', () => {
     };
 
     const originalConfig = JSON.parse(JSON.stringify(config)); // Note: This won't preserve Date, Regex, CustomClass correctly, used for simple structure check
-    const result = interpolateNodeConfig({ config, state });
+    const result = interpolateValue(config, state);
 
     // Expect the non-basic objects to be identical (same instance)
     expect(result.dateField).toBe(now);
