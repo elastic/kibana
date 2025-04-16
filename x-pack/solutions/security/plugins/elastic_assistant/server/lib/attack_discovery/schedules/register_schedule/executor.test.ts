@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { EcsVersion } from '@elastic/ecs';
 import { loggerMock } from '@kbn/logging-mocks';
 import { actionsClientMock } from '@kbn/actions-plugin/server/mocks';
 import { AlertsClientError, RuleExecutorOptions } from '@kbn/alerting-plugin/server';
@@ -142,6 +143,7 @@ describe('attackDiscoveryScheduleExecutor', () => {
       id: expect.anything(),
       actionGroup: 'default',
       payload: {
+        'ecs.version': EcsVersion,
         'kibana.alert.attack_discovery.alerts_context_count': 2,
         'kibana.alert.attack_discovery.alert_ids': [
           '4af5689eb58c2420efc0f7fad53c5bf9b8b6797e516d6ea87d6044ce25d54e16',

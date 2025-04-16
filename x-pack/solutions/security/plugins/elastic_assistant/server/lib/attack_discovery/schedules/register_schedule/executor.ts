@@ -6,10 +6,12 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
+import { EcsVersion } from '@elastic/ecs';
 import { Logger } from '@kbn/core/server';
 import { Alert } from '@kbn/alerts-as-data-utils';
 import { AlertsClientError } from '@kbn/alerting-plugin/server';
 import { replaceAnonymizedValuesWithOriginalValues } from '@kbn/elastic-assistant-common';
+import { ECS_VERSION } from '@kbn/rule-data-utils';
 
 import { ANONYMIZATION_FIELDS_RESOURCE } from '../../../../ai_assistant_service/constants';
 import { transformESSearchToAnonymizationFields } from '../../../../ai_assistant_data_clients/anonymization_fields/helpers';
@@ -35,10 +37,7 @@ import {
 } from '../fields';
 import { getIndexTemplateAndPattern } from '../../../data_stream/helpers';
 
-type AttackDiscoveryAlertDocumentBase = Omit<
-  AttackDiscoveryAlertDocument,
-  keyof Alert | 'ecs.version'
->;
+type AttackDiscoveryAlertDocumentBase = Omit<AttackDiscoveryAlertDocument, keyof Alert>;
 
 export interface AttackDiscoveryScheduleExecutorParams {
   options: AttackDiscoveryExecutorOptions;
@@ -81,6 +80,7 @@ export const attackDiscoveryScheduleExecutor = async ({
 
   attackDiscoveries?.forEach((attack) => {
     const payload: AttackDiscoveryAlertDocumentBase = {
+      [ECS_VERSION]: EcsVersion,
       // TODO: ALERT_RISK_SCORE
       [ALERT_ATTACK_DISCOVERY_ALERTS_CONTEXT_COUNT]: anonymizedAlerts.length,
       [ALERT_ATTACK_DISCOVERY_ALERT_IDS]: attack.alertIds,
