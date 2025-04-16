@@ -6,7 +6,12 @@
  */
 
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { Agent, PACKAGE_POLICY_SAVED_OBJECT_TYPE, PackagePolicy } from '@kbn/fleet-plugin/common';
+import {
+  Agent,
+  NewPackagePolicy,
+  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+  PackagePolicy,
+} from '@kbn/fleet-plugin/common';
 import {
   AgentPolicyServiceInterface,
   AgentService,
@@ -212,7 +217,8 @@ export class AgentlessConnectorsInfraService {
       `Successfully created agent policy ${createdPolicy.id} for agentless connector ${connector.id}`
     );
     this.logger.debug(`Creating a package policy for agentless connector ${connector.id}`);
-    const packagePolicy = await this.packagePolicyService.create(this.soClient, this.esClient, {
+
+    const newPolicy = {
       policy_ids: [createdPolicy.id],
       package: {
         title: pkgTitle,
@@ -237,7 +243,17 @@ export class AgentlessConnectorsInfraService {
         },
       ],
       supports_agentless: true,
-    });
+    };
+    const newPackagePolicy = await this.packagePolicyService.enrichPolicyWithDefaultsFromPackage(
+      this.soClient,
+      newPolicy as NewPackagePolicy
+    );
+    const packagePolicy = await this.packagePolicyService.create(
+      this.soClient,
+      this.esClient,
+      newPackagePolicy,
+      { force: true }
+    );
 
     this.logger.info(
       `Successfully created package policy ${packagePolicy.id} for agentless connector ${connector.id}`

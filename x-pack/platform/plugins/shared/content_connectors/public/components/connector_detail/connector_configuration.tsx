@@ -31,6 +31,7 @@ import { ConnectorFilteringLogic } from '../search_index/connector/sync_rules/co
 
 import { IndexViewLogic } from '../search_index/index_view_logic';
 
+import { AttachIndexBox } from './attach_index_box';
 import { AdvancedConfigOverrideCallout } from './components/advanced_config_override_callout';
 import { ConfigurationSkeleton } from './components/configuration_skeleton';
 import { WhatsNextBox } from './components/whats_next_box';
@@ -110,6 +111,7 @@ export const ConnectorConfiguration: React.FC = () => {
             </EuiFlexItem>
           </EuiFlexGroup>
           <EuiSpacer size="l" />
+          <AttachIndexBox connector={connector} />
           <EuiSpacer />
           {connector.index_name && (
             <>
