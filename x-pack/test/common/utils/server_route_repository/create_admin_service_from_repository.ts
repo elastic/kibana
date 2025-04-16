@@ -15,7 +15,11 @@ import {
 import { Subtract, RequiredKeys } from 'utility-types';
 import { format } from 'url';
 import supertest from 'supertest';
-import { RoleScopedSupertestProvider } from '../../../api_integration/deployment_agnostic/services/role_scoped_supertest';
+import {
+  RoleScopedSupertestProvider,
+  SupertestWithRoleScope,
+} from '../../../api_integration/deployment_agnostic/services/role_scoped_supertest';
+import { CustomRoleScopedSupertestProvider } from '../../../api_integration/deployment_agnostic/services/custom_role_scoped_supertest';
 
 type MaybeOptional<TArgs extends Record<string, any>> = RequiredKeys<TArgs> extends never
   ? [TArgs] | []
@@ -45,13 +49,8 @@ type RepositorySupertestReturnOf<
 >;
 
 async function getApiClient<TServerRouteRepository extends ServerRouteRepository>(
-  st: ReturnType<typeof RoleScopedSupertestProvider>,
-  role: string
+  supertestWithRoleScoped: SupertestWithRoleScope
 ): Promise<RepositorySupertestClient<TServerRouteRepository>> {
-  const supertestWithRoleScoped = await st.getSupertestWithRoleScope(role, {
-    useCookieHeader: true,
-    withInternalHeaders: true,
-  });
   return {
     fetch: (endpoint, ...rest) => {
       const options = rest.length ? rest[0] : { type: undefined };
@@ -99,15 +98,23 @@ async function getApiClient<TServerRouteRepository extends ServerRouteRepository
 }
 
 export async function getCustomRoleApiClient<TServerRouteRepository extends ServerRouteRepository>(
-  st: ReturnType<typeof RoleScopedSupertestProvider>
+  st: ReturnType<typeof CustomRoleScopedSupertestProvider>
 ): Promise<RepositorySupertestClient<TServerRouteRepository>> {
-  return await getApiClient(st, 'customRole');
+  const supertestWithCustomRoleScoped = await st.getSupertestWithCustomRoleScope({
+    useCookieHeader: true,
+    withInternalHeaders: true,
+  });
+  return await getApiClient(supertestWithCustomRoleScoped);
 }
 
 export async function getAdminApiClient<TServerRouteRepository extends ServerRouteRepository>(
   st: ReturnType<typeof RoleScopedSupertestProvider>
 ): Promise<RepositorySupertestClient<TServerRouteRepository>> {
-  return await getApiClient(st, 'admin');
+  const supertestWithRoleScoped = await st.getSupertestWithRoleScope('admin', {
+    useCookieHeader: true,
+    withInternalHeaders: true,
+  });
+  return await getApiClient(supertestWithRoleScoped);
 }
 
 type WithoutPromise<T extends Promise<any>> = Subtract<T, Promise<any>>;

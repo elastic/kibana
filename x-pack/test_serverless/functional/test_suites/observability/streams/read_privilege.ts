@@ -36,6 +36,7 @@ const stream: WiredIngestUpsertRequest = {
 };
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');
+  const customRoleScopedSupertest = getService('customRoleScopedSupertest');
   const samlAuth = getService('samlAuth');
 
   let adminApiClient: StreamsSupertestRepositoryClient;
@@ -61,7 +62,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       adminApiClient = await createStreamsRepositoryAdminClient(roleScopedSupertest);
-      customRoleApiClient = await createStreamsRepositoryCustomRoleClient(roleScopedSupertest);
+      customRoleApiClient = await createStreamsRepositoryCustomRoleClient(
+        customRoleScopedSupertest
+      );
       await enableStreams(adminApiClient);
     });
 
