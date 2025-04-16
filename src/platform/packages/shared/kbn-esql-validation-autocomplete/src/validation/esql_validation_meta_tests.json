@@ -9663,6 +9663,31 @@
       "warning": []
     },
     {
+      "query": "FROM index, missingIndex*",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "FROM index, lol*catz",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "FROM index*, lol*catz",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "FROM missingIndex*, index",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "FROM missingIndex*, missingIndex2*, index",
+      "error": [],
+      "warning": []
+    },
+    {
       "query": "from index,",
       "error": [
         "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, UNQUOTED_SOURCE}"
@@ -9738,6 +9763,42 @@
       "query": "FROM policy",
       "error": [
         "Unknown index [policy]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "FROM index, missingIndex",
+      "error": [
+        "Unknown index [missingIndex]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "FROM missingIndex, index",
+      "error": [
+        "Unknown index [missingIndex]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "FROM *missingIndex, missingIndex2, index",
+      "error": [
+        "Unknown index [missingIndex2]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "FROM missingIndex*",
+      "error": [
+        "Unknown index [missingIndex*]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "FROM *missingIndex, missing*Index2",
+      "error": [
+        "Unknown index [*missingIndex]",
+        "Unknown index [missing*Index2]"
       ],
       "warning": []
     },
