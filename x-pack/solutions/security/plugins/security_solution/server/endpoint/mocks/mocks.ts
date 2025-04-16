@@ -187,6 +187,14 @@ export const createMockEndpointAppContextServiceStartContract =
       securityServiceMock.createStart() as unknown as DeeplyMockedKeys<SecurityServiceStart>;
     const fleetStartServices = createFleetStartContractMock();
 
+    // Ensure the agent service always returns the same agent service instance
+    fleetStartServices.agentService.asInternalScopedUser.mockReturnValue(
+      fleetStartServices.agentService.asInternalUser
+    );
+    fleetStartServices.agentService.asScoped.mockReturnValue(
+      fleetStartServices.agentService.asInternalUser
+    );
+
     fleetStartServices.packagePolicyService.list.mockImplementation(async (_, options) => {
       return {
         items: [],
