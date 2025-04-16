@@ -18,7 +18,6 @@ import {
   EuiDescriptionListTitle,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLoadingSpinner,
   EuiSelect,
   EuiSpacer,
   EuiText,
