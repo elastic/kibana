@@ -168,3 +168,5 @@ x-pack/test/security_solution_playwright/.auth/
 x-pack/test/security_solution_playwright/.env
 .codeql
 .dependency-graph-log.json
+# from https://gist.github.com/Laci21/9dd074f3a5a461ab04adb7db678534d3
+patch-mcp-sdk.js

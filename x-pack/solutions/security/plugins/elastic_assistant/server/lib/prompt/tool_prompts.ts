@@ -79,4 +79,11 @@ export const localToolPrompts: Prompt[] = [
       default: 'Call this for Elastic Defend insights.',
     },
   },
+  {
+    promptId: 'MCPTool',
+    promptGroupId,
+    prompt: {
+      default: 'Call this for MCP server access.',
+    },
+  },
 ];
