@@ -231,25 +231,26 @@ export const appendFilterToESQLQueryFromValueClickAction = ({
 
   let queryString = query.esql;
   for (const point in dataPoints) {
-    if (!dataPoints[point]) return;
-    const { table, column: columnIndex, row: rowIndex } = dataPoints[point];
+    if (dataPoints[point]) {
+      const { table, column: columnIndex, row: rowIndex } = dataPoints[point];
 
-    if (table?.columns?.[columnIndex]) {
-      const column = table.columns[columnIndex];
-      const value: unknown = rowIndex > -1 ? table.rows[rowIndex][column.id] : null;
-      if (value == null) {
-        return;
-      }
-      const queryWithWhere = appendWhereClauseToESQLQuery(
-        queryString,
-        column.name,
-        value,
-        negate ? '-' : '+',
-        column.meta?.type
-      );
+      if (table?.columns?.[columnIndex]) {
+        const column = table.columns[columnIndex];
+        const value: unknown = rowIndex > -1 ? table.rows[rowIndex][column.id] : null;
+        if (value == null) {
+          return;
+        }
+        const queryWithWhere = appendWhereClauseToESQLQuery(
+          queryString,
+          column.name,
+          value,
+          negate ? '-' : '+',
+          column.meta?.type
+        );
 
-      if (queryWithWhere) {
-        queryString = queryWithWhere;
+        if (queryWithWhere) {
+          queryString = queryWithWhere;
+        }
       }
     }
   }
