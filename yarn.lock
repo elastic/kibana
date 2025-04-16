@@ -4098,6 +4098,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/content-connectors-plugin@link:x-pack/platform/plugins/shared/content_connectors":
+  version "0.0.0"
+  uid ""
+
 "@kbn/content-management-content-editor@link:src/platform/packages/shared/content-management/content_editor":
   version "0.0.0"
   uid ""
@@ -6927,10 +6931,6 @@
   uid ""
 
 "@kbn/search-assistant@link:x-pack/solutions/search/plugins/search_assistant":
-  version "0.0.0"
-  uid ""
-
-"@kbn/content-connectors-plugin@link:x-pack/platform/plugins/shared/content_connectors":
   version "0.0.0"
   uid ""
 
