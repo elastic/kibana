@@ -30,6 +30,11 @@ export type ControlGroupRendererApi = ControlGroupApi & {
    * publishing subjects of the control group API.
    */
   getInput$: () => Observable<ControlGroupRuntimeState>;
+
+  /**
+   * @deprecated
+   */
+  getInput: () => ControlGroupRuntimeState;
 };
 
 export interface ControlGroupCreationOptions {

@@ -59,7 +59,7 @@ export function initializeControlGroupUnsavedChanges({
     }
     const lastSavedControlGroupState = parentApi.getLastSavedStateForChild(controlGroupId);
     return lastSavedControlGroupState
-      ? deserializeControlGroup(serializeControlGroupState()).initialChildControlState
+      ? deserializeControlGroup(lastSavedControlGroupState).initialChildControlState
       : {};
   }
 
@@ -111,6 +111,8 @@ export function initializeControlGroupUnsavedChanges({
         })
       ),
       resetUnsavedChanges: async () => {
+        const lastSavedControlsState = getLastSavedControlsState();
+        console.log('lastSavedControlsState', lastSavedControlsState);
         controlGroupEditorUnsavedChangesApi.resetUnsavedChanges();
         resetControlsUnsavedChanges(getLastSavedControlsState());
 

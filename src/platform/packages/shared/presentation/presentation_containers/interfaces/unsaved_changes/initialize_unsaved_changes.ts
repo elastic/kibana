@@ -40,6 +40,7 @@ export const initializeUnsavedChanges = <SerializedStateType extends object = ob
       resetUnsavedChanges: () => Promise.resolve(),
     };
   }
+
   const hasUnsavedChanges$ = anyStateChange$.pipe(
     combineLatestWith(
       parentApi.lastSavedStateForChild$(uuid).pipe(map((panelState) => panelState?.rawState))

@@ -66,8 +66,8 @@ export function initTimeRangePercentage(
       timesliceStartAsPercentageOfTimeRange$.next(lastSaved?.timesliceStartAsPercentageOfTimeRange);
       timesliceEndAsPercentageOfTimeRange$.next(lastSaved?.timesliceEndAsPercentageOfTimeRange);
       onReset(
-        timesliceStartAsPercentageOfTimeRange$.value,
-        timesliceEndAsPercentageOfTimeRange$.value
+        lastSaved?.timesliceStartAsPercentageOfTimeRange,
+        lastSaved?.timesliceEndAsPercentageOfTimeRange
       );
     },
   };

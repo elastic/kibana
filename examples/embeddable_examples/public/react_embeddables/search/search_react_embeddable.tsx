@@ -20,14 +20,14 @@ import {
 } from '@kbn/presentation-publishing';
 import React, { useEffect } from 'react';
 import { BehaviorSubject, switchMap, tap } from 'rxjs';
-import { SEARCH_EMBEDDABLE_ID } from './constants';
+import { initializeUnsavedChanges } from '@kbn/presentation-containers';
+import { SEARCH_EMBEDDABLE_TYPE } from './constants';
 import { getCount } from './get_count';
 import { SearchApi, Services, SearchSerializedState } from './types';
-import { initializeUnsavedChanges } from '@kbn/presentation-containers';
 
 export const getSearchEmbeddableFactory = (services: Services) => {
   const factory: EmbeddableFactory<SearchSerializedState, SearchApi> = {
-    type: SEARCH_EMBEDDABLE_ID,
+    type: SEARCH_EMBEDDABLE_TYPE,
     buildEmbeddable: async ({ initialState, finalizeApi, parentApi, uuid }) => {
       const timeRangeManager = initializeTimeRangeManager(initialState.rawState);
       const defaultDataView = await services.dataViews.getDefaultDataView();
@@ -74,11 +74,11 @@ export const getSearchEmbeddableFactory = (services: Services) => {
            * if this embeddable had a difference between its runtime and serialized state, we could run the 'deserializeState'
            * function here before resetting. onReset can be async so to support a potential async deserialize function.
            */
-  
+
           timeRangeManager.reinitializeState(lastSaved?.rawState);
         },
       });
-  
+
       const api = finalizeApi({
         blockingError$,
         dataViews$,

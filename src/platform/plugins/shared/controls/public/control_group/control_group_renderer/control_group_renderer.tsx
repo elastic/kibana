@@ -184,6 +184,7 @@ export const ControlGroupRenderer = ({
             controlGroupApi.resetUnsavedChanges();
           },
           getInput$: () => lastState$Ref.current.pipe(map(deserializeControlGroup)),
+          getInput: () => deserializeControlGroup(lastState$Ref.current.value)
         };
         setControlGroup(controlGroupRendererApi);
         onApiAvailable(controlGroupRendererApi);
