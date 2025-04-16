@@ -57,20 +57,20 @@ export const ManageData: FC<Props> = ({ addBasePath, features }) => {
 
           <EuiSpacer size="m" />
 
-          <EuiFlexGroup
-            wrap
-            css={({ euiTheme }: UseEuiTheme) =>
-              css({
-                '.kbnOverviewDataManage__item:not(:only-child)': {
-                  [minBreakpointM]: {
-                    flex: `0 0 calc(50% - ${euiTheme.size.l})`,
-                  },
-                },
-              })
-            }
-          >
+          <EuiFlexGroup wrap>
             {features.map((feature) => (
-              <EuiFlexItem className="kbnOverviewDataManage__item" key={feature.id}>
+              <EuiFlexItem
+                key={feature.id}
+                css={({ euiTheme }: UseEuiTheme) =>
+                  css({
+                    ':not(:only-child)': {
+                      [minBreakpointM]: {
+                        flex: `0 0 calc(50% - ${euiTheme.size.l})`,
+                      },
+                    },
+                  })
+                }
+              >
                 <RedirectAppLinks
                   coreStart={{
                     application,

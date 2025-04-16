@@ -20,7 +20,7 @@ exports[`FeedItem render 1`] = `
     size="m"
   />
   <div
-    css={[Function]}
+    css="unknown styles"
   >
     <article
       aria-labelledby="kbnOverviewNews__title0"
