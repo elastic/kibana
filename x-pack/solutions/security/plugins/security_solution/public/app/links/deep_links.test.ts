@@ -7,7 +7,7 @@
 
 import { solutionFormatter } from './deep_links';
 import type { NavigationTreeDefinition } from '@kbn/core-chrome-browser';
-import type { NormalizedLinks, LinkItem } from './types';
+import type { NormalizedLinks, LinkItem } from '../../common/links/types';
 import type { SecurityGroupName, SecurityPageName } from '@kbn/security-solution-navigation';
 import { SecurityLinkGroup } from '@kbn/security-solution-navigation/links';
 

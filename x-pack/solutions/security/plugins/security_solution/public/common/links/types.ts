@@ -5,30 +5,16 @@
  * 2.0.
  */
 
-import type { Capabilities } from '@kbn/core/types';
-import type { ILicense, LicenseType } from '@kbn/licensing-plugin/common/types';
+import type { LicenseType } from '@kbn/licensing-plugin/common/types';
 import type { IconType } from '@elastic/eui';
 import type {
   NavigationLink as GenericNavigationLink,
   LinkCategories as GenericLinkCategories,
   SecurityPageName,
 } from '@kbn/security-solution-navigation';
-import type { UpsellingService } from '@kbn/security-solution-upselling/service';
 import type { AppDeepLinkLocations } from '@kbn/core-application-browser';
-import type { IUiSettingsClient } from '@kbn/core/public';
 import type { ExperimentalFeatures } from '../../../common/experimental_features';
 import type { RequiredCapabilities } from '../lib/capabilities';
-
-/**
- * Permissions related parameters needed for the links to be filtered
- */
-export interface LinksPermissions {
-  capabilities: Capabilities;
-  experimentalFeatures: Readonly<ExperimentalFeatures>;
-  uiSettingsClient: IUiSettingsClient;
-  upselling: UpsellingService;
-  license?: ILicense;
-}
 
 export interface LinkItem {
   /**

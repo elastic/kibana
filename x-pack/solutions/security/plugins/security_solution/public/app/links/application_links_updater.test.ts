@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { applicationLinks as appLinksInstance } from './application_links';
-import type { AppLinkItems, LinkItem, LinksPermissions } from './types';
-import { hasCapabilities as mockHasCapabilities } from '../lib/capabilities';
+import { applicationLinksUpdater as appLinksInstance } from './application_links_updater';
+import type { AppLinkItems, LinkItem, LinksPermissions } from '../../common/links/types';
+import { hasCapabilities as mockHasCapabilities } from '../../common/lib/capabilities';
 import type { Capabilities, IUiSettingsClient } from '@kbn/core/public';
 import type { ExperimentalFeatures, SecurityPageName } from '../../../common';
 import type { ILicense } from '@kbn/licensing-plugin/public';
 import type { UpsellingService } from '@kbn/security-solution-upselling/service';
 
-jest.mock('../lib/capabilities', () => ({
+jest.mock('../../common/lib/capabilities', () => ({
   hasCapabilities: jest.fn(),
 }));
 

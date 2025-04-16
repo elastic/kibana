@@ -7,7 +7,7 @@
 
 import useObservable from 'react-use/lib/useObservable';
 import { map } from 'rxjs';
-import { applicationLinks } from './application_links';
+import { applicationLinksUpdater } from '../../app/links/application_links_updater';
 import type { SecurityPageName } from '../../app/types';
 import type { AppLinkItems, NavigationLink } from './types';
 
@@ -34,7 +34,7 @@ export const formatNavigationLinks = (appLinks: AppLinkItems): NavigationLink[] 
     }),
   }));
 
-const navLinks$ = applicationLinks.links$.pipe(map(formatNavigationLinks));
+const navLinks$ = applicationLinksUpdater.links$.pipe(map(formatNavigationLinks));
 
 /**
  * @deprecated use `applicationLinks` instead

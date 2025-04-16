@@ -12,8 +12,8 @@ import type { SecurityPageName } from '@kbn/deeplinks-security';
 import type { NavigationTreeDefinition, NodeDefinition } from '@kbn/core-chrome-browser';
 import { SecurityLinkGroup } from '@kbn/security-solution-navigation/links';
 import type { SecurityGroupName } from '@kbn/security-solution-navigation';
-import type { AppLinkItems, LinkItem, NormalizedLinks } from './types';
-import { applicationLinks } from './application_links';
+import type { AppLinkItems, LinkItem, NormalizedLinks } from '../../common/links/types';
+import { applicationLinksUpdater } from './application_links_updater';
 
 // TODO: remove after rollout https://github.com/elastic/kibana/issues/179572
 const classicFormatter: (appLinks: AppLinkItems) => AppDeepLink[] = (appLinks) =>
@@ -135,7 +135,7 @@ export const registerDeepLinksUpdater = (
 ): Subscription => {
   return navigationTree$
     .pipe(
-      combineLatestWith(applicationLinks.links$, applicationLinks.normalizedLinks$),
+      combineLatestWith(applicationLinksUpdater.links$, applicationLinksUpdater.normalizedLinks$),
       debounceTime(100) // avoid multiple calls in a short period of time
     )
     .subscribe(([navigationTree, appLinks, normalizedLinks]) => {

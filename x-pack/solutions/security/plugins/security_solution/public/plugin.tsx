@@ -41,8 +41,11 @@ import { SOLUTION_NAME, ASSISTANT_MANAGEMENT_TITLE } from './common/translations
 
 import { APP_ID, APP_UI_ID, APP_PATH, APP_ICON_SOLUTION } from '../common/constants';
 
-import type { AppLinkItems, LinksPermissions } from './common/links';
-import { registerDeepLinksUpdater } from './common/links/deep_links';
+import type { AppLinkItems } from './common/links';
+import {
+  applicationLinksUpdater,
+  type ApplicationLinksUpdateParams,
+} from './app/links/application_links_updater';
 import type { FleetUiExtensionGetterOptions, SecuritySolutionUiConfigType } from './common/types';
 
 import { getLazyEndpointPolicyEditExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_policy_edit_extension';
@@ -61,7 +64,6 @@ import { PluginContract } from './plugin_contract';
 import { PluginServices } from './plugin_services';
 import { getExternalReferenceAttachmentEndpointRegular } from './cases/attachments/external_reference';
 import { hasAccessToSecuritySolution } from './helpers_access';
-import { applicationLinks } from './common/links/application_links';
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   private config: SecuritySolutionUiConfigType;
@@ -440,7 +442,11 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     }
 
     // Configuration of AppLinks updater registration based on license and capabilities
-    const { appLinks: initialAppLinks, getFilteredLinks } = await this.lazyApplicationLinks();
+    const {
+      appLinks: initialAppLinks,
+      getFilteredLinks,
+      registerDeepLinksUpdater,
+    } = await this.lazyApplicationLinks();
 
     registerDeepLinksUpdater(this.appUpdater$, solutionNavigationTree$);
 
@@ -448,14 +454,14 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     appLinksToUpdate$.next(initialAppLinks);
 
     appLinksToUpdate$.pipe(combineLatestWith(license$)).subscribe(([appLinks, license]) => {
-      const linksPermissions: LinksPermissions = {
+      const params: ApplicationLinksUpdateParams = {
         experimentalFeatures: this.experimentalFeatures,
         upselling: upsellingService,
         capabilities,
         uiSettingsClient: core.uiSettings,
         ...(license.type != null && { license }),
       };
-      applicationLinks.update(appLinks, linksPermissions);
+      applicationLinksUpdater.update(appLinks, params);
     });
 
     const filteredLinks = await getFilteredLinks(core, plugins);
@@ -587,7 +593,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
      */
     return import(
       /* webpackChunkName: "lazy_app_links" */
-      './app_links'
+      './app/links'
     );
   }
 

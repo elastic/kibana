@@ -6,20 +6,36 @@
  */
 import type { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
-import type { SecurityPageName } from '../../../common/constants';
-import { hasCapabilities } from '../lib/capabilities';
-import type { AppLinkItems, LinkItem, NormalizedLinks, LinksPermissions } from './types';
+import type { SecurityPageName } from '@kbn/security-solution-navigation';
+import type { Capabilities } from '@kbn/core/types';
+import type { ILicense } from '@kbn/licensing-plugin/common/types';
+import type { UpsellingService } from '@kbn/security-solution-upselling/service';
+import type { IUiSettingsClient } from '@kbn/core/public';
+import type { ExperimentalFeatures } from '../../../common';
+import type { AppLinkItems, LinkItem, NormalizedLinks } from '../../common/links/types';
+import { hasCapabilities } from '../../common/lib/capabilities';
 
 /**
- * Application links class, it stores the links recursive hierarchy and keeps
+ * Dependencies to update the application links
+ */
+export interface ApplicationLinksUpdateParams {
+  capabilities: Capabilities;
+  experimentalFeatures: Readonly<ExperimentalFeatures>;
+  uiSettingsClient: IUiSettingsClient;
+  upselling: UpsellingService;
+  license?: ILicense;
+}
+
+/**
+ * The ApplicationLinksUpdater class stores the links recursive hierarchy and keeps
  * the value of the app links in sync with all the application components.
  * It can be updated using the `update` method.
  *
  * It's meant to be used as a singleton instance.
  */
-class ApplicationLinks {
-  private readonly linksUpdater$ = new BehaviorSubject<AppLinkItems>([]);
-  private readonly normalizedLinksUpdater$ = new BehaviorSubject<NormalizedLinks>({});
+class ApplicationLinksUpdater {
+  private readonly linksSubject$ = new BehaviorSubject<AppLinkItems>([]);
+  private readonly normalizedLinksSubject$ = new BehaviorSubject<NormalizedLinks>({});
 
   /** Observable that stores the links recursive hierarchy */
   public readonly links$: Observable<AppLinkItems>;
@@ -27,31 +43,31 @@ class ApplicationLinks {
   public readonly normalizedLinks$: Observable<NormalizedLinks>;
 
   constructor() {
-    this.links$ = this.linksUpdater$.asObservable();
-    this.normalizedLinks$ = this.normalizedLinksUpdater$.asObservable();
+    this.links$ = this.linksSubject$.asObservable();
+    this.normalizedLinks$ = this.normalizedLinksSubject$.asObservable();
   }
 
   /**
    * Updates the internal app links applying the filter by permissions
    */
-  public update(appLinksToUpdate: AppLinkItems, linksPermissions: LinksPermissions) {
-    const filteredAppLinks = this.filterAppLinks(appLinksToUpdate, linksPermissions);
-    this.linksUpdater$.next(Object.freeze(filteredAppLinks));
-    this.normalizedLinksUpdater$.next(Object.freeze(this.getNormalizedLinks(filteredAppLinks)));
+  public update(appLinksToUpdate: AppLinkItems, params: ApplicationLinksUpdateParams) {
+    const filteredAppLinks = this.filterAppLinks(appLinksToUpdate, params);
+    this.linksSubject$.next(Object.freeze(filteredAppLinks));
+    this.normalizedLinksSubject$.next(Object.freeze(this.getNormalizedLinks(filteredAppLinks)));
   }
 
   /**
    * Returns the current links value
    */
   public getLinksValue(): AppLinkItems {
-    return this.linksUpdater$.getValue();
+    return this.linksSubject$.getValue();
   }
 
   /**
    * Returns the current normalized links value
    */
   public getNormalizedLinksValue(): NormalizedLinks {
-    return this.normalizedLinksUpdater$.getValue();
+    return this.normalizedLinksSubject$.getValue();
   }
 
   /**
@@ -76,20 +92,22 @@ class ApplicationLinks {
   /**
    * Filters the app links based on the links configuration
    */
-  private filterAppLinks(appLinks: AppLinkItems, linksPermissions: LinksPermissions): LinkItem[] {
+  private filterAppLinks(appLinks: AppLinkItems, params: ApplicationLinksUpdateParams): LinkItem[] {
+    const { experimentalFeatures, uiSettingsClient, capabilities, license, upselling } = params;
+
     return appLinks.reduce<LinkItem[]>((acc, { links, ...appLinkInfo }) => {
       if (
-        !this.isLinkExperimentalKeyAllowed(appLinkInfo, linksPermissions) ||
-        !this.isLinkUiSettingsAllowed(appLinkInfo, linksPermissions)
+        !this.isLinkExperimentalKeyAllowed(appLinkInfo, experimentalFeatures) ||
+        !this.isLinkUiSettingsAllowed(appLinkInfo, uiSettingsClient)
       ) {
         return acc;
       }
 
       if (
-        !hasCapabilities(linksPermissions.capabilities, appLinkInfo.capabilities) ||
-        !this.isLinkLicenseAllowed(appLinkInfo, linksPermissions)
+        !hasCapabilities(capabilities, appLinkInfo.capabilities) ||
+        !this.isLinkLicenseAllowed(appLinkInfo, license)
       ) {
-        if (linksPermissions.upselling.isPageUpsellable(appLinkInfo.id)) {
+        if (upselling.isPageUpsellable(appLinkInfo.id)) {
           acc.push({ ...appLinkInfo, unauthorized: true });
         }
         return acc; // not adding sub-links for links that are not authorized
@@ -97,7 +115,7 @@ class ApplicationLinks {
 
       const resultAppLink: LinkItem = appLinkInfo;
       if (links) {
-        const childrenLinks = this.filterAppLinks(links, linksPermissions);
+        const childrenLinks = this.filterAppLinks(links, params);
         if (childrenLinks.length > 0) {
           resultAppLink.links = childrenLinks;
         }
@@ -111,7 +129,7 @@ class ApplicationLinks {
   /**
    * Check if the link is allowed based on the uiSettingsClient
    */
-  private isLinkUiSettingsAllowed(link: LinkItem, { uiSettingsClient }: LinksPermissions) {
+  private isLinkUiSettingsAllowed(link: LinkItem, uiSettingsClient: IUiSettingsClient) {
     if (!link.uiSettingRequired) {
       return true;
     }
@@ -131,7 +149,7 @@ class ApplicationLinks {
   /**
    * Check if the link is allowed based on the experimental features
    */
-  private isLinkExperimentalKeyAllowed(link: LinkItem, { experimentalFeatures }: LinksPermissions) {
+  private isLinkExperimentalKeyAllowed(link: LinkItem, experimentalFeatures: ExperimentalFeatures) {
     if (link.hideWhenExperimentalKey && experimentalFeatures[link.hideWhenExperimentalKey]) {
       return false;
     }
@@ -145,7 +163,7 @@ class ApplicationLinks {
   /**
    * Check if the link is allowed based on the license
    */
-  private isLinkLicenseAllowed(link: LinkItem, { license }: LinksPermissions) {
+  private isLinkLicenseAllowed(link: LinkItem, license: ILicense | undefined) {
     const linkLicenseType = link.licenseType ?? 'basic';
     if (license) {
       if (!license.hasAtLeast(linkLicenseType)) {
@@ -158,5 +176,5 @@ class ApplicationLinks {
   }
 }
 
-// Create singleton instance of ApplicationLinks
-export const applicationLinks = new ApplicationLinks();
+// Create singleton instance of ApplicationLinksUpdater
+export const applicationLinksUpdater = new ApplicationLinksUpdater();
