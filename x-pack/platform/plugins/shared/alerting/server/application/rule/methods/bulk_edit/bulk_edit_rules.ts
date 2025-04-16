@@ -470,8 +470,8 @@ async function updateRuleAttributesAndParamsInMemory<Params extends RuleParams>(
 
     const ruleArtifacts = injectReferencesIntoArtifacts(
       rule.id,
-      rule.references || [],
-      rule.attributes.artifacts
+      rule.attributes.artifacts,
+      rule.references
     );
 
     if (migratedActions.hasLegacyActions) {
@@ -557,7 +557,7 @@ async function updateRuleAttributesAndParamsInMemory<Params extends RuleParams>(
       ruleType,
       updatedRuleActions as NormalizedAlertActionWithGeneratedValues[],
       validatedMutatedAlertTypeParams,
-      ruleArtifacts
+      ruleArtifacts!
     );
 
     const ruleAttributes = transformRuleDomainToRuleAttributes({

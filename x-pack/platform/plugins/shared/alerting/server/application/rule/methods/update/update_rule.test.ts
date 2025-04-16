@@ -4393,6 +4393,9 @@ describe('update()', () => {
               {
                 id: 'dashboard-1',
               },
+              {
+                id: 'dashboard-3',
+              },
             ],
           },
         },
@@ -4407,13 +4410,19 @@ describe('update()', () => {
               {
                 refId: 'dashboard_0',
               },
+              {
+                refId: 'dashboard_1',
+              },
             ],
           },
         }),
         {
           id: '1',
           overwrite: true,
-          references: [{ id: 'dashboard-1', name: 'dashboard_0', type: 'dashboard' }],
+          references: [
+            { id: 'dashboard-1', name: 'dashboard_0', type: 'dashboard' },
+            { id: 'dashboard-3', name: 'dashboard_1', type: 'dashboard' },
+          ],
           version: '123',
         }
       );

@@ -28,10 +28,9 @@ export function denormalizeArtifacts(ruleArtifacts: Artifacts | undefined): {
         type: 'dashboard',
       };
       references.push(dashboardRef);
-      if (!artifacts.dashboards) {
-        artifacts.dashboards = [];
-      }
-      artifacts.dashboards.push({
+
+      // `artifacts.dashboards` is always defined
+      artifacts.dashboards!.push({
         refId: refName,
       });
     });
