@@ -80,8 +80,8 @@ export class AlertRuleFromVisAction implements Action<Context> {
     const [firstLayer] = Object.values(layers ?? {});
     const { timeField = 'timestamp' } = firstLayer ?? { timeField: dataView?.timeFieldName };
 
-    // Set up a helper function to evaluate field names that need to be escaped
-    let evalQuery = '';
+    // Set up a helper function to rename fields that need to be escaped
+    let renameQuery = '';
     const escapeFieldName = (fieldName: string) => {
       if (!fieldName || fieldName === 'undefined') return missingSourceFieldPlaceholder;
       // Detect if the passed column name is actually an ES|QL function call instead of a field name
@@ -97,8 +97,8 @@ export class AlertRuleFromVisAction implements Action<Context> {
           .replace(/[^a-z0-9_]/g, '')
           // If last escaped character is an underscore, remove it
           .replace(/_$/, '');
-        // Add this to the evalQuery as a side effect
-        evalQuery += `| EVAL ${colName} = \`${fieldName}\` `;
+        // Add this to the renameQuery as a side effect
+        renameQuery += `| RENAME \`${fieldName}\` as ${colName} `;
         return colName;
       }
       return fieldName;
@@ -145,14 +145,14 @@ export class AlertRuleFromVisAction implements Action<Context> {
     const conditionsQuery = [...splitValueQueries, thresholdQuery].join(' AND ');
 
     // Generate ES|QL to escape function columns
-    if (evalQuery.length)
-      evalQuery = `// ${i18n.translate('xpack.triggersActionsUI.alertRuleFromVis.evalComment', {
+    if (renameQuery.length)
+      renameQuery = `// ${i18n.translate('xpack.triggersActionsUI.alertRuleFromVis.renameComment', {
         defaultMessage:
-          'Evaluate the following columns so they can be used as part of the alerting threshold:',
-      })}\n${evalQuery}\n`;
+          'Rename the following columns so they can be used as part of the alerting threshold:',
+      })}\n${renameQuery}\n`;
 
     // Combine the escaped columns with the threshold conditions query
-    const additionalQuery = `${evalQuery}// ${thresholdQueryComment}\n| WHERE ${conditionsQuery}`;
+    const additionalQuery = `${renameQuery}// ${thresholdQueryComment}\n| WHERE ${conditionsQuery}`;
 
     // Generate the full ES|QL code
     let initialValues;
