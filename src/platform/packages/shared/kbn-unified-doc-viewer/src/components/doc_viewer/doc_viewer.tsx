@@ -8,7 +8,7 @@
  */
 
 import React, { useCallback } from 'react';
-import { EuiTabbedContent, EuiTabbedContentTab, keys } from '@elastic/eui';
+import { EuiTabbedContent, EuiTabbedContentTab } from '@elastic/eui';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { DocViewerTab } from './doc_viewer_tab';
 import type { DocView, DocViewRenderProps } from '../../types';
@@ -68,14 +68,6 @@ export function DocViewer({ docViews, ...renderProps }: DocViewerProps) {
         tabs={tabs}
         initialSelectedTab={initialSelectedTab}
         onTabClick={onTabClick}
-        onKeyDown={(evt) => {
-          // When the tabs are focused we want to use the right and left keys to move between them instead of the documents.
-          const isTabButton = (evt.target as HTMLElement).getAttribute('role') === 'tab';
-          if (isTabButton && (evt.key === keys.ARROW_LEFT || evt.key === keys.ARROW_RIGHT)) {
-            evt.preventDefault();
-            evt.stopPropagation();
-          }
-        }}
       />
     </div>
   );
