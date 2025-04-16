@@ -29,7 +29,7 @@ describe('titles api', () => {
 
     api.setTitle('even cooler title');
     api.setDescription('super uncool description');
-    api.sethidePanelTitles(true);
+    api.setHidePanelTitles(true);
 
     expect(api.title$.value).toEqual('even cooler title');
     expect(api.description$.value).toEqual('super uncool description');

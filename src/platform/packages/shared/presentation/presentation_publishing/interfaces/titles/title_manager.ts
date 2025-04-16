@@ -45,8 +45,8 @@ export const initializeTitleManager = (
   initialTitlesState: SerializedTitles
 ): StateManager<SerializedTitles> & {
   api: {
-    hidePanelTitles$: PublishesTitle['hidePanelTitles$'];
-    sethidePanelTitles: PublishesWritableTitle['sethidePanelTitles'];
+    hideTitle$: PublishesTitle['hideTitle$'];
+    setHideTitle: PublishesWritableTitle['setHideTitle'];
   };
 } => {
   const stateManager = initializeStateManager(initialTitlesState, defaultTitlesState);
@@ -54,11 +54,11 @@ export const initializeTitleManager = (
     ...stateManager,
     api: {
       ...stateManager.api,
-      // SerializedTitles defines hidePanelTitless as hidePanelTitles
+      // SerializedTitles defines hideTitles as hidePanelTitles
       // This state is persisted and this naming conflict will be resolved TBD
       // add named APIs that match interface names as a work-around
-      hidePanelTitles$: stateManager.api.hidePanelTitles$,
-      sethidePanelTitles: stateManager.api.setHidePanelTitles,
+      hideTitle$: stateManager.api.hidePanelTitles$,
+      setHideTitle: stateManager.api.setHidePanelTitles,
     },
   };
 };
