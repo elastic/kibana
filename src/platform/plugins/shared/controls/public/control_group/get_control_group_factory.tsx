@@ -16,20 +16,13 @@ import { combineCompatibleChildrenApis } from '@kbn/presentation-containers';
 import {
   PublishesDataViews,
   apiPublishesDataViews,
-  initializeStateManager,
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
 import { apiPublishesReload } from '@kbn/presentation-publishing/interfaces/fetch/publishes_reload';
 import React, { useEffect } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import type { ControlGroupSerializedState } from '../../common';
-import {
-  CONTROL_GROUP_TYPE,
-  DEFAULT_AUTO_APPLY_SELECTIONS,
-  DEFAULT_CONTROL_CHAINING,
-  DEFAULT_CONTROL_LABEL_POSITION,
-  DEFAULT_IGNORE_PARENT_SETTINGS,
-} from '../../common';
+import { CONTROL_GROUP_TYPE } from '../../common';
 import { openDataControlEditor } from '../controls/data_controls/open_data_control_editor';
 import { coreServices, dataViewsService } from '../services/kibana_services';
 import { ControlGroup } from './components/control_group';
@@ -38,8 +31,9 @@ import { initializeControlGroupUnsavedChanges } from './control_group_unsaved_ch
 import { initControlsManager } from './init_controls_manager';
 import { openEditControlGroupFlyout } from './open_edit_control_group_flyout';
 import { initSelectionsManager } from './selections_manager';
-import type { ControlGroupApi, ControlGroupEditorState } from './types';
+import type { ControlGroupApi } from './types';
 import { deserializeControlGroup } from './utils/serialization_utils';
+import { initializeEditorStateManager } from './initialize_editor_state_manager';
 
 export const getControlGroupEmbeddableFactory = () => {
   const controlGroupEmbeddableFactory: EmbeddableFactory<
@@ -50,22 +44,14 @@ export const getControlGroupEmbeddableFactory = () => {
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
       const initialRuntimeState = deserializeControlGroup(initialState);
 
-      const controlGroupStateManager = initializeStateManager<ControlGroupEditorState>(
-        initialState?.rawState,
-        {
-          autoApplySelections: DEFAULT_AUTO_APPLY_SELECTIONS,
-          chainingSystem: DEFAULT_CONTROL_CHAINING,
-          ignoreParentSettings: DEFAULT_IGNORE_PARENT_SETTINGS,
-          labelPosition: DEFAULT_CONTROL_LABEL_POSITION,
-        }
-      );
+      const editorStateManager = initializeEditorStateManager(initialState?.rawState);
 
       const defaultDataViewId = await dataViewsService.getDefaultId();
 
       const controlsManager = initControlsManager(initialRuntimeState.initialChildControlState);
       const selectionsManager = initSelectionsManager({
         ...controlsManager.api,
-        autoApplySelections$: controlGroupStateManager.api.autoApplySelections$,
+        autoApplySelections$: editorStateManager.api.autoApplySelections$,
       });
       const esqlVariables$ = new BehaviorSubject<ESQLControlVariable[]>([]);
       const dataViews$ = new BehaviorSubject<DataView[] | undefined>(undefined);
@@ -77,7 +63,7 @@ export const getControlGroupEmbeddableFactory = () => {
         const { controls, references } = controlsManager.serializeControls();
         return {
           rawState: {
-            ...controlGroupStateManager.getLatestState(),
+            ...editorStateManager.getLatestState(),
             controls,
           },
           references,
@@ -88,7 +74,7 @@ export const getControlGroupEmbeddableFactory = () => {
         applySelections: selectionsManager.applySelections,
         children$: controlsManager.api.children$,
         controlGroupId: uuid,
-        controlGroupStateManager,
+        editorStateManager,
         parentApi,
         resetControlsUnsavedChanges: controlsManager.resetControlsUnsavedChanges,
         serializeControlGroupState: serializeState,
@@ -104,20 +90,20 @@ export const getControlGroupEmbeddableFactory = () => {
           controlFetch$(
             chaining$(
               controlUuid,
-              controlGroupStateManager.api.chainingSystem$,
+              editorStateManager.api.chainingSystem$,
               controlsManager.controlsInOrder$,
               controlsManager.api.children$
             ),
             controlGroupFetch$(
-              controlGroupStateManager.api.ignoreParentSettings$,
+              editorStateManager.api.ignoreParentSettings$,
               parentApi ? parentApi : {}
             )
           ),
-        ignoreParentSettings$: controlGroupStateManager.api.ignoreParentSettings$,
-        autoApplySelections$: controlGroupStateManager.api.autoApplySelections$,
+        ignoreParentSettings$: editorStateManager.api.ignoreParentSettings$,
+        autoApplySelections$: editorStateManager.api.autoApplySelections$,
         allowExpensiveQueries$,
         onEdit: async () => {
-          openEditControlGroupFlyout(api, controlGroupStateManager);
+          openEditControlGroupFlyout(api, editorStateManager);
         },
         isEditingEnabled: () => true,
         openAddDataControlFlyout: (settings) => {
@@ -132,12 +118,14 @@ export const getControlGroupEmbeddableFactory = () => {
               dataViewId:
                 newControlState.dataViewId ?? parentDataViewId ?? defaultDataViewId ?? undefined,
             },
-            onSave: ({ type: controlType, state: initialState }) => {
+            onSave: ({ type: controlType, state: onSaveState }) => {
               controlsManager.api.addNewPanel({
                 panelType: controlType,
-                initialState: settings?.controlStateTransform
-                  ? settings.controlStateTransform(initialState, controlType)
-                  : initialState,
+                serializedState: {
+                  rawState: settings?.controlStateTransform
+                    ? settings.controlStateTransform(onSaveState, controlType)
+                    : onSaveState,
+                },
               });
               settings?.onSave?.();
             },
@@ -146,7 +134,7 @@ export const getControlGroupEmbeddableFactory = () => {
         },
         serializeState,
         dataViews$,
-        labelPosition: controlGroupStateManager.api.labelPosition$,
+        labelPosition: editorStateManager.api.labelPosition$,
         reload$: apiPublishesReload(parentApi) ? parentApi.reload$ : undefined,
 
         /** Public getters */
@@ -158,7 +146,7 @@ export const getControlGroupEmbeddableFactory = () => {
 
         /** Public setters */
         setDisabledActionIds: (ids) => disabledActionIds$.next(ids),
-        setChainingSystem: controlGroupStateManager.api.setChainingSystem,
+        setChainingSystem: editorStateManager.api.setChainingSystem,
       });
 
       /** Subscribe to all children's output data views, combine them, and output them */
@@ -182,7 +170,7 @@ export const getControlGroupEmbeddableFactory = () => {
         Component: () => {
           const [hasUnappliedSelections, labelPosition] = useBatchedPublishingSubjects(
             selectionsManager.hasUnappliedSelections$,
-            controlGroupStateManager.api.labelPosition$
+            editorStateManager.api.labelPosition$
           );
 
           useEffect(() => {

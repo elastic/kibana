@@ -40,7 +40,7 @@ export function initializeControlGroupUnsavedChanges({
   applySelections,
   children$,
   controlGroupId,
-  controlGroupStateManager,
+  editorStateManager,
   parentApi,
   resetControlsUnsavedChanges,
   serializeControlGroupState,
@@ -48,7 +48,7 @@ export function initializeControlGroupUnsavedChanges({
   applySelections: () => void;
   children$: PresentationContainer['children$'];
   controlGroupId: string;
-  controlGroupStateManager: StateManager<ControlGroupEditorState>;
+  editorStateManager: StateManager<ControlGroupEditorState>;
   parentApi: unknown;
   resetControlsUnsavedChanges: (lastSavedControlsState: ControlPanelsState) => void;
   serializeControlGroupState: () => SerializedPanelState<ControlGroupSerializedState>;
@@ -76,7 +76,7 @@ export function initializeControlGroupUnsavedChanges({
     uuid: controlGroupId,
     parentApi,
     serializeState: serializeControlGroupState,
-    anyStateChange$: controlGroupStateManager.anyStateChange$,
+    anyStateChange$: editorStateManager.anyStateChange$,
     getComparators: () => {
       return {
         autoApplySelections: 'referenceEquality',
@@ -87,9 +87,15 @@ export function initializeControlGroupUnsavedChanges({
       };
     },
     onReset: (lastSaved) => {
-      controlGroupStateManager.reinitializeState(lastSaved?.rawState);
+      editorStateManager.reinitializeState(lastSaved?.rawState);
     },
   });
+
+  const hasControlChanges$ = childrenUnsavedChanges$(children$).pipe(
+    map((childrenWithChanges) => {
+      return childrenWithChanges.some(({ hasUnsavedChanges }) => hasUnsavedChanges);
+    })
+  );
 
   return {
     api: {
@@ -98,10 +104,10 @@ export function initializeControlGroupUnsavedChanges({
       getLastSavedStateForChild: getLastSavedStateForControl,
       hasUnsavedChanges$: combineLatest([
         controlGroupEditorUnsavedChangesApi.hasUnsavedChanges$,
-        childrenUnsavedChanges$(children$),
+        hasControlChanges$,
       ]).pipe(
-        map(([hasUnsavedControlGroupChanges, unsavedControlsState]) => {
-          return hasUnsavedControlGroupChanges || unsavedControlsState !== undefined;
+        map(([hasUnsavedControlGroupChanges, hasControlChanges]) => {
+          return hasUnsavedControlGroupChanges || hasControlChanges;
         })
       ),
       resetUnsavedChanges: async () => {
@@ -118,7 +124,7 @@ export function initializeControlGroupUnsavedChanges({
 
         await Promise.all(filtersReadyPromises);
 
-        if (!controlGroupStateManager.api.autoApplySelections$.value) {
+        if (!editorStateManager.api.autoApplySelections$.value) {
           applySelections();
         }
       },

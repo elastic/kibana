@@ -16,7 +16,7 @@ import {
   apiHasSerializableState,
 } from '@kbn/presentation-publishing';
 import { omit } from 'lodash';
-import { BehaviorSubject, Observable, combineLatest, debounceTime, map, of, tap } from 'rxjs';
+import { BehaviorSubject, Observable, combineLatest, debounceTime, map, of, skipWhile, switchMap, tap } from 'rxjs';
 import { getDashboardBackupService } from '../services/dashboard_backup_service';
 import { initializePanelsManager } from './panels_manager';
 import { initializeSettingsManager } from './settings_manager';
@@ -89,7 +89,12 @@ export function initializeUnsavedChangesManager({
     viewModeManager.api.viewMode$,
     dashboardStateChanges$,
     hasPanelChanges$,
-    of(false), // SERIALIZED STATE ONLY TODO reinstate Dashboard diff checking of Controls state
+    controlGroupApi$.pipe(
+      skipWhile((controlGroupApi) => !controlGroupApi),
+      switchMap((controlGroupApi) => {
+        return controlGroupApi!.hasUnsavedChanges$;
+      })
+    ),
   ])
     .pipe(debounceTime(DEBOUNCE_TIME))
     .subscribe(([viewMode, dashboardChanges, hasPanelChanges, hasControlGroupChanges]) => {
@@ -138,8 +143,7 @@ export function initializeUnsavedChangesManager({
         unifiedSearchManager.internalApi.reset(lastSavedState$.value);
         settingsManager.internalApi.reset(lastSavedState$.value);
 
-        // SERIALIZED STATE ONLY TODO: Remove asyncResetUnsavedChanges because the reset function can now be async.
-        await controlGroupApi$.value?.asyncResetUnsavedChanges();
+        await controlGroupApi$.value?.resetUnsavedChanges();
       },
       hasUnsavedChanges$,
       lastSavedStateForChild$: (panelId: string) =>

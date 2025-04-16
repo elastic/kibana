@@ -10,7 +10,7 @@ import deepEqual from 'react-fast-compare';
 import { BehaviorSubject, combineLatest, map, merge } from 'rxjs';
 import { ESQLVariableType, type ESQLControlVariable } from '@kbn/esql-types';
 import { PublishingSubject, StateComparators } from '@kbn/presentation-publishing';
-import type { ESQLControlState } from '@kbn/esql/public';
+import type { ESQLControlState, EsqlControlType } from '@kbn/esql/public';
 
 function selectedOptionsComparatorFunction(a?: string[], b?: string[]) {
   return deepEqual(a ?? [], b ?? []);
@@ -45,7 +45,7 @@ export function initializeESQLControlSelections(initialState: ESQLControlState) 
   const variableType$ = new BehaviorSubject<ESQLVariableType>(
     initialState.variableType ?? ESQLVariableType.VALUES
   );
-  const controlType$ = new BehaviorSubject<string>(initialState.controlType ?? '');
+  const controlType$ = new BehaviorSubject<EsqlControlType>(initialState.controlType ?? '');
   const esqlQuery$ = new BehaviorSubject<string>(initialState.esqlQuery ?? '');
   const title$ = new BehaviorSubject<string | undefined>(initialState.title);
 
@@ -88,19 +88,19 @@ export function initializeESQLControlSelections(initialState: ESQLControlState) 
       availableOptions$.next(lastSaved?.availableOptions ?? []);
       variableName$.next(lastSaved?.variableName ?? '');
       variableType$.next(lastSaved?.variableType ?? ESQLVariableType.VALUES);
-      controlType$.next(lastSaved?.controlType ?? '');
+      if (lastSaved?.controlType) controlType$.next(lastSaved?.controlType);
       esqlQuery$.next(lastSaved?.esqlQuery ?? '');
       title$.next(lastSaved?.title);
     },
     getLatestState: () => {
       return {
-        selectedOptions: selectedOptions$.getValue(),
-        availableOptions: availableOptions$.getValue(),
-        variableName: variableName$.getValue(),
-        variableType: variableType$.getValue(),
+        selectedOptions: selectedOptions$.getValue() ?? [],
+        availableOptions: availableOptions$.getValue() ?? [],
+        variableName: variableName$.getValue() ?? '',
+        variableType: variableType$.getValue() ?? ESQLVariableType.VALUES,
         controlType: controlType$.getValue(),
-        esqlQuery: esqlQuery$.getValue(),
-        title: title$.getValue(),
+        esqlQuery: esqlQuery$.getValue() ?? '',
+        title: title$.getValue() ?? '',
       };
     },
     internalApi: {
