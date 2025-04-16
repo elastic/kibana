@@ -16,6 +16,15 @@
 
 import { z } from '@kbn/zod';
 
+export type GetEvaluateRequestQuery = z.infer<typeof GetEvaluateRequestQuery>;
+export const GetEvaluateRequestQuery = z.object({
+  /**
+   * API key for LangSmith integration
+   */
+  langSmithApiKey: z.string().optional(),
+});
+export type GetEvaluateRequestQueryInput = z.input<typeof GetEvaluateRequestQuery>;
+
 export type GetEvaluateResponse = z.infer<typeof GetEvaluateResponse>;
 export const GetEvaluateResponse = z.object({
   datasets: z.array(z.string()),
