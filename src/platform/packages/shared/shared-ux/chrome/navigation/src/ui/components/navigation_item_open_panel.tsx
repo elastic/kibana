@@ -7,15 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, type FC } from 'react';
-import classNames from 'classnames';
 import { css } from '@emotion/react';
-import { EuiButton } from '@elastic/eui';
+import classNames from 'classnames';
+import React, { useCallback, type FC } from 'react';
+
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
 import type { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
-import { SubItemTitle } from './subitem_title';
-import { isActiveFromUrl } from '../../utils';
 import type { NavigateToUrlFn } from '../../types';
+import { isActiveFromUrl } from '../../utils';
 import { usePanel } from './panel';
+import { SubItemBadge } from './subitem_badge';
 
 interface Props {
   item: ChromeProjectNavigationNode;
@@ -25,7 +26,7 @@ interface Props {
 
 export const NavigationItemOpenPanel: FC<Props> = ({ item, activeNodes }: Props) => {
   const { open: openPanel, close: closePanel, selectedNode } = usePanel();
-  const { title, deepLink, withBadge } = item;
+  const { title, deepLink, icon, withBadge, badgeOptions } = item;
   const { id, path } = item;
   const isExpanded = selectedNode?.path === path;
   const isActive = isActiveFromUrl(item.path, activeNodes) || isExpanded;
@@ -59,7 +60,8 @@ export const NavigationItemOpenPanel: FC<Props> = ({ item, activeNodes }: Props)
     <EuiButton
       onClick={onLinkClick}
       iconSide="right"
-      iconType="arrowRight"
+      iconSize="s"
+      iconType={isExpanded ? 'arrowLeft' : 'arrowRight'}
       size="s"
       fullWidth
       css={({ euiTheme }) =>
@@ -81,7 +83,25 @@ export const NavigationItemOpenPanel: FC<Props> = ({ item, activeNodes }: Props)
       }
       data-test-subj={dataTestSubj}
     >
-      {withBadge ? <SubItemTitle item={item} /> : title}
+      <EuiFlexGroup
+        gutterSize="none"
+        alignItems="center"
+        css={({ euiTheme }) => css`
+          gap: calc(${euiTheme.size.xs} * 1.5);
+        `}
+      >
+        {icon && (
+          <EuiFlexItem grow={false}>
+            <EuiIcon type={icon} />
+          </EuiFlexItem>
+        )}
+        <EuiFlexItem grow={false}>{title}</EuiFlexItem>
+        {withBadge && (
+          <EuiFlexItem grow={false}>
+            <SubItemBadge icon={badgeOptions?.icon} tooltip={badgeOptions?.tooltip} />
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
     </EuiButton>
   );
 };
