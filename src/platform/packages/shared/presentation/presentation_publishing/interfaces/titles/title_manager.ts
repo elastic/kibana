@@ -16,26 +16,26 @@ import { PublishesTitle, PublishesWritableTitle } from './publishes_title';
 export interface SerializedTitles {
   title?: string;
   description?: string;
-  hideTitle?: boolean;
+  hidePanelTitles?: boolean;
 }
 
 const defaultTitlesState: WithAllKeys<SerializedTitles> = {
   title: undefined,
   description: undefined,
-  hideTitle: undefined,
+  hidePanelTitles: undefined,
 };
 
 export const titleComparators: StateComparators<SerializedTitles> = {
   title: 'referenceEquality',
   description: 'referenceEquality',
-  hideTitle: (a, b) => Boolean(a) === Boolean(b),
+  hidePanelTitles: (a, b) => Boolean(a) === Boolean(b),
 };
 
 export const stateHasTitles = (state: unknown): state is SerializedTitles => {
   return (
     (state as SerializedTitles)?.title !== undefined ||
     (state as SerializedTitles)?.description !== undefined ||
-    (state as SerializedTitles)?.hideTitle !== undefined
+    (state as SerializedTitles)?.hidePanelTitles !== undefined
   );
 };
 
@@ -45,8 +45,8 @@ export const initializeTitleManager = (
   initialTitlesState: SerializedTitles
 ): StateManager<SerializedTitles> & {
   api: {
-    hideTitle$: PublishesTitle['hideTitle$'];
-    setHideTitle: PublishesWritableTitle['setHideTitle'];
+    hidePanelTitles$: PublishesTitle['hidePanelTitles$'];
+    sethidePanelTitles: PublishesWritableTitle['sethidePanelTitles'];
   };
 } => {
   const stateManager = initializeStateManager(initialTitlesState, defaultTitlesState);
@@ -54,11 +54,11 @@ export const initializeTitleManager = (
     ...stateManager,
     api: {
       ...stateManager.api,
-      // SerializedTitles defines hideTitles as hidePanelTitles
+      // SerializedTitles defines hidePanelTitless as hidePanelTitles
       // This state is persisted and this naming conflict will be resolved TBD
       // add named APIs that match interface names as a work-around
-      hideTitle$: stateManager.api.hidePanelTitles$,
-      setHideTitle: stateManager.api.setHidePanelTitles,
+      hidePanelTitles$: stateManager.api.hidePanelTitles$,
+      sethidePanelTitles: stateManager.api.setHidePanelTitles,
     },
   };
 };
