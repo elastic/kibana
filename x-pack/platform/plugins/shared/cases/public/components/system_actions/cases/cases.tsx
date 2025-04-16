@@ -40,22 +40,26 @@ export function getConnectorType(): ConnectorTypeModel<{}, {}, CasesActionParams
       const validationResult = {
         errors,
       };
+
       const timeWindowRegex = new RegExp(CASES_CONNECTOR_TIME_WINDOW_REGEX, 'g');
-      const timeWindow = actionParams.subActionParams?.timeWindow;
-
-      if (!timeWindow || !timeWindow.length || !timeWindowRegex.test(timeWindow)) {
+      if (
+        actionParams.subActionParams &&
+        (!actionParams.subActionParams.timeWindow ||
+          !actionParams.subActionParams.timeWindow.length ||
+          !timeWindowRegex.test(actionParams.subActionParams.timeWindow))
+      ) {
         errors.timeWindow.push(i18n.TIME_WINDOW_SIZE_ERROR);
-      } else {
-        const match = timeWindow.match(/^(\d+)([mhdw])$/);
-        if (match) {
-          const timeSize = parseInt(match[1], 10);
-          const timeUnit = match[2];
-
-          if (timeUnit === 'm' && timeSize < 5) {
-            errors.timeWindow.push(i18n.MIN_TIME_WINDOW_SIZE_ERROR);
-          }
-        }
+        return validationResult;
       }
+
+      const timeWindow = actionParams.subActionParams.timeWindow;
+      const timeSize = timeWindow.slice(0, -1);
+      const timeUnit = timeWindow.slice(-1);
+      const timeSizeAsNumber = Number(timeSize);
+      if (timeUnit === 'm' && timeSizeAsNumber < 5) {
+        errors.timeWindow.push(i18n.MIN_TIME_WINDOW_SIZE_ERROR);
+      }
+
       return validationResult;
     },
     actionParamsFields: lazy(() => import('./cases_params')),

@@ -57,11 +57,10 @@ const TimeWindowSchema = schema.string({
 
     const timeSize = value.slice(0, -1);
     const timeUnit = value.slice(-1);
-    const timeSizeAsNumber = Number(timeSize); // the regex validation above ensures that the timeSize is an integer
+    const timeSizeAsNumber = Number(timeSize);
 
-      if (timeUnit === 'm' && timeSizeAsNumber < 5) {
-        return 'Time window should be at least 5 minutes';
-      }
+    if (timeUnit === 'm' && timeSizeAsNumber < 5) {
+      return 'Time window should be at least 5 minutes';
     }
   },
 });
