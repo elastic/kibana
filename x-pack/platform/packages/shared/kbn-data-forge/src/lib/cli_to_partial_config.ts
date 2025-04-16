@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isLeft } from 'fp-ts/lib/Either';
+import { isLeft } from 'fp-ts/Either';
 import { PathReporter } from 'io-ts/lib/PathReporter';
 import { DEFAULTS } from '../constants';
 import { DatasetRT, PartialConfig, Schedule, CliOptions } from '../types';

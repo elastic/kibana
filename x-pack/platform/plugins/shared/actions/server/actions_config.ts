@@ -6,10 +6,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { tryCatch, map, mapNullable, getOrElse } from 'fp-ts/lib/Option';
+import { tryCatch, map, mapNullable, getOrElse } from 'fp-ts/Option';
 import url from 'url';
 import { curry } from 'lodash';
-import { pipe } from 'fp-ts/lib/pipeable';
+import { pipe } from 'fp-ts/pipeable';
 
 import type { ActionsConfig, CustomHostSettings } from './config';
 import { AllowedHosts, EnabledActionTypes, DEFAULT_QUEUED_MAX } from './config';

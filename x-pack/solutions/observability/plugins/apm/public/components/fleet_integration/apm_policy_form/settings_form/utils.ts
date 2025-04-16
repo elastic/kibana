@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { isRight } from 'fp-ts/lib/Either';
+import { isRight } from 'fp-ts/Either';
 import { PathReporter } from 'io-ts/lib/PathReporter';
 import { isEmpty, isFinite } from 'lodash';
 import type { PackagePolicyVars, SettingsRow, BasicSettingRow } from '../typings';

@@ -7,10 +7,10 @@
 
 import { useCallback, useState, useEffect } from 'react';
 import * as rt from 'io-ts';
-import { pipe } from 'fp-ts/lib/pipeable';
-import { fold } from 'fp-ts/lib/Either';
+import { pipe } from 'fp-ts/pipeable';
+import { fold } from 'fp-ts/Either';
 import DateMath from '@kbn/datemath';
-import { constant, identity } from 'fp-ts/lib/function';
+import { constant, identity } from 'fp-ts/function';
 import createContainer from 'constate';
 import { useUrlState } from '@kbn/observability-shared-plugin/public';
 import { useKibanaTimefilterTime } from '../../../../hooks/use_kibana_timefilter_time';

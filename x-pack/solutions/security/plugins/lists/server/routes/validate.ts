@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { pipe } from 'fp-ts/lib/pipeable';
+import { pipe } from 'fp-ts/pipeable';
 import * as t from 'io-ts';
-import { fold } from 'fp-ts/lib/Either';
+import { fold } from 'fp-ts/Either';
 import { exactCheck, formatErrors, validate } from '@kbn/securitysolution-io-ts-utils';
 import {
   NamespaceType,

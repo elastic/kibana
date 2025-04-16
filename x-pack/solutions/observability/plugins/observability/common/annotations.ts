@@ -6,7 +6,7 @@
  */
 
 import * as t from 'io-ts';
-import { either } from 'fp-ts/lib/Either';
+import { either } from 'fp-ts/Either';
 
 export const DEFAULT_ANNOTATION_INDEX = 'observability-annotations';
 
