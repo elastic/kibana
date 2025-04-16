@@ -6,7 +6,6 @@
  */
 
 export interface UpdateCustomIntegrationRequest {
-  id: string;
   fields: {
     readMeData?: string;
     categories?: string[];

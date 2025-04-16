@@ -134,11 +134,10 @@ export const useUpdateCustomIntegration = async (
   fields: { readMeData: string | undefined; categories: string[] }
 ) => {
   return sendRequest({
-    path: epmRouteService.getUpdateCustomIntegrationsPath(),
+    path: epmRouteService.getUpdateCustomIntegrationsPath(id),
     method: 'put',
     version: API_VERSIONS.public.v1,
     body: {
-      id,
       fields,
     },
   });

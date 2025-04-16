@@ -615,13 +615,15 @@ export const updateCustomIntegrationHandler: FleetRequestHandler<
   const soClient = coreContext.savedObjects.client;
 
   try {
-    const { id, fields } = request.body as TypeOf<typeof CustomIntegrationRequestSchema.body>;
-
-    const result = await updateCustomIntegration(esClient, soClient, id, fields);
+    const { fields } = request.body as TypeOf<typeof CustomIntegrationRequestSchema.body>;
+    const { pkgName } = request.params as unknown as TypeOf<
+      typeof CustomIntegrationRequestSchema.params
+    >;
+    const result = await updateCustomIntegration(esClient, soClient, pkgName, fields);
 
     return response.ok({
       body: {
-        id,
+        id: pkgName,
         result,
       },
     });

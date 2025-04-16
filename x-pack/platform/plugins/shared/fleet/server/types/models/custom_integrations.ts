@@ -14,7 +14,9 @@ const CustomIntegrationFieldsSchema = schema.object({
 
 export const CustomIntegrationRequestSchema = {
   body: schema.object({
-    id: schema.string(),
     fields: CustomIntegrationFieldsSchema,
+  }),
+  params: schema.object({
+    pkgName: schema.string(),
   }),
 };

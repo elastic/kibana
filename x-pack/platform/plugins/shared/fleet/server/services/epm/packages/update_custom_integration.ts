@@ -4,7 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
+import type {
+  ElasticsearchClient,
+  SavedObject,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
 import { load, dump } from 'js-yaml';
 
 import {
@@ -21,6 +25,12 @@ import { appContextService } from '../../app_context';
 
 import type { PackageInstallContext } from '../../../../common/types';
 
+// Define a type for the integration attributes
+interface IntegrationAttributes {
+  version: string;
+  [key: string]: any;
+}
+
 import { getInstalledPackageWithAssets } from './get';
 
 import { installPackageWithStateMachine } from './install';
@@ -36,14 +46,17 @@ export async function updateCustomIntegration(
 ) {
   try {
     // Get the current integration using the id
-    const integration = await soClient.get(PACKAGES_SAVED_OBJECT_TYPE, id);
+    const integration: SavedObject<IntegrationAttributes> = await soClient.get(
+      PACKAGES_SAVED_OBJECT_TYPE,
+      id
+    );
 
     if (!integration) {
       throw new Error(`Integration with ID ${id} not found`);
     } else {
       // add one to the patch version in the semver
       const newVersion = integration.attributes.version.split('.');
-      newVersion[2] = (parseInt(newVersion[2]) + 1).toString();
+      newVersion[2] = (parseInt(newVersion[2], 10) + 1).toString();
       const newVersionString = newVersion.join('.');
 
       // Increment the version of everything and create a new package
@@ -162,12 +175,7 @@ async function incrementVersionAndUpdate(
   );
 
   if (policyIdsToUpgrade.items.length) {
-    try {
-      await packagePolicyService.bulkUpgrade(soClient, esClient, policyIdsToUpgrade.items);
-      console.log('upgraded policies', policyIdsToUpgrade.items);
-    } catch (error) {
-      console.log('error upgrading policies', error);
-    }
+    await packagePolicyService.bulkUpgrade(soClient, esClient, policyIdsToUpgrade.items);
   }
   return res;
 }
