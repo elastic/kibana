@@ -8,6 +8,8 @@
 import React from 'react';
 import { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { initializeTitleManager } from '@kbn/presentation-publishing';
+import { initializeUnsavedChanges } from '@kbn/presentation-containers';
+import { merge } from 'rxjs';
 import { DOC_TYPE } from '../../common/constants';
 import {
   LensApi,
@@ -20,15 +22,19 @@ import { loadEmbeddableData } from './data_loader';
 import { isTextBasedLanguage, deserializeState } from './helper';
 import { initializeEditApi } from './initializers/initialize_edit';
 import { initializeInspector } from './initializers/initialize_inspector';
-import { dashboardServicesComparators, initializeDashboardServices } from './initializers/initialize_dashboard_services';
+import {
+  dashboardServicesComparators,
+  initializeDashboardServices,
+} from './initializers/initialize_dashboard_services';
 import { initializeInternalApi } from './initializers/initialize_internal_api';
-import { initializeSearchContext, searchContextComparators } from './initializers/initialize_search_context';
+import {
+  initializeSearchContext,
+  searchContextComparators,
+} from './initializers/initialize_search_context';
 import { initializeActionApi } from './initializers/initialize_actions';
 import { initializeIntegrations } from './initializers/initialize_integrations';
 import { initializeStateManagement } from './initializers/initialize_state_management';
 import { LensEmbeddableComponent } from './renderer/lens_embeddable_component';
-import { initializeUnsavedChanges } from '@kbn/presentation-containers';
-import { merge } from 'rxjs';
 
 export const createLensEmbeddableFactory = (
   services: LensEmbeddableStartServices
@@ -53,7 +59,11 @@ export const createLensEmbeddableFactory = (
     buildEmbeddable: async ({ initialState, finalizeApi, parentApi, uuid }) => {
       const titleManager = initializeTitleManager(initialState.rawState);
 
-      const runtimeState = await deserializeState(services, initialState.rawState, initialState.references);
+      const runtimeState = await deserializeState(
+        services,
+        initialState.rawState,
+        initialState.references
+      );
 
       /**
        * Observables and functions declared here are used internally to store mutating state values
@@ -131,7 +141,7 @@ export const createLensEmbeddableFactory = (
           actionsConfig.anyStateChange$,
           dashboardConfig.anyStateChange$,
           stateConfig.anyStateChange$,
-          searchContextConfig.anyStateChange$,
+          searchContextConfig.anyStateChange$
         ),
         getComparators: () => {
           return {
@@ -148,7 +158,11 @@ export const createLensEmbeddableFactory = (
           dashboardConfig.reinitializeState(lastSaved?.rawState);
           searchContextConfig.reinitializeState(lastSaved?.rawState);
           if (!lastSaved) return;
-          const lastSavedRuntimeState = await deserializeState(services, lastSaved.rawState, lastSaved.references);
+          const lastSavedRuntimeState = await deserializeState(
+            services,
+            lastSaved.rawState,
+            lastSaved.references
+          );
           stateConfig.reinitializeRuntimeState(lastSavedRuntimeState);
         },
       });
@@ -170,7 +184,8 @@ export const createLensEmbeddableFactory = (
           ...integrationsConfig.api,
           ...stateConfig.api,
           ...dashboardConfig.api,
-        });
+        }
+      );
 
       // Compute the expression using the provided parameters
       // Inside a subscription will be updated based on each unifiedSearch change

@@ -16,6 +16,7 @@ import {
   PublishesSearchSession,
   apiPublishesSearchSession,
 } from '@kbn/presentation-publishing/interfaces/fetch/publishes_search_session';
+import { BehaviorSubject, Observable, merge } from 'rxjs';
 import {
   LensEmbeddableStartServices,
   LensInternalApi,
@@ -23,7 +24,6 @@ import {
   LensSerializedState,
   LensUnifiedSearchContext,
 } from '../types';
-import { BehaviorSubject, Observable, merge } from 'rxjs';
 
 export const searchContextComparators: StateComparators<LensUnifiedSearchContext> = {
   ...timeRangeComparators,
@@ -60,9 +60,7 @@ export function initializeSearchContext(
     injectFilterReferences(attributes.state.filters, attributes.references)
   );
 
-  const query$ = new BehaviorSubject<Query | AggregateQuery | undefined>(
-    attributes.state.query
-  );
+  const query$ = new BehaviorSubject<Query | AggregateQuery | undefined>(attributes.state.query);
 
   const timeslice$ = new BehaviorSubject<[number, number] | undefined>(undefined);
 
@@ -76,9 +74,7 @@ export function initializeSearchContext(
       isCompatibleWithUnifiedSearch: () => true,
       ...timeRangeManager.api,
     },
-    anyStateChange$: merge(
-      timeRangeManager.anyStateChange$,
-    ),
+    anyStateChange$: merge(timeRangeManager.anyStateChange$),
     getLatestState: () => ({
       searchSessionId: searchSessionId$.getValue(),
       filters: filters$.getValue(),

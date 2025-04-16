@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ComparatorFunction } from '@kbn/presentation-publishing/state_manager';
+import { ComparatorFunction } from '../../state_manager';
 import { initializeTitleManager, SerializedTitles, titleComparators } from './title_manager';
 
 describe('titles api', () => {
@@ -51,7 +51,10 @@ describe('titles api', () => {
   });
 
   it('should correctly compare hidePanelTitles with custom comparator', () => {
-    const comparator = titleComparators.hidePanelTitles as ComparatorFunction<SerializedTitles, 'hidePanelTitles'>;
+    const comparator = titleComparators.hidePanelTitles as ComparatorFunction<
+      SerializedTitles,
+      'hidePanelTitles'
+    >;
     expect(comparator(true, false)).toBe(false);
     expect(comparator(undefined, false)).toBe(true);
     expect(comparator(true, undefined)).toBe(false);
