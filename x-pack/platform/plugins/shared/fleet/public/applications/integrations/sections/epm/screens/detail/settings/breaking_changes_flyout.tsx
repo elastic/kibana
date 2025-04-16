@@ -8,7 +8,6 @@
 import React from 'react';
 
 import {
-  EuiDescriptionList,
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutHeader,
@@ -16,8 +15,10 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  useEuiTheme,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { css } from '@emotion/css';
 
 import { type BreakingChangesLog } from '../utils';
 
@@ -26,57 +27,92 @@ interface BreakingChangesFlyoutProps {
   onClose: () => void;
 }
 
-const BreakingChangesList = ({ changelog }: { changelog: BreakingChangesLog }) => {
-  return changelog.map(({ version, changes }) => {
-    const changeItems = changes.map(({ link, description }) => ({
-      description,
-      title: (
-        <EuiLink href={link} target="_blank" color="primary" data-test-subj="breakingChangeLink">
-          {link}
-        </EuiLink>
-      ),
-    }));
-
+const BreakingChangeListItems = ({ changes }: { changes: BreakingChangesLog[0]['changes'] }) => {
+  return changes.map(({ link, description }) => {
     return (
-      <>
-        <EuiTitle size="xxxs">
-          <h3>
+      <li key={link}>
+        <EuiText color="subdued">{description}</EuiText>
+        <EuiSpacer size="xs" />
+        <EuiLink href={link} target="_blank" color="primary" data-test-subj="breakingChangeLink">
+          <EuiText component="span">
             <FormattedMessage
-              id="xpack.fleet.integrations.settings.breakingChangesFlyout.changeVersionHeader"
-              defaultMessage="Version {version}"
-              values={{ version }}
+              id="xpack.fleet.integrations.settings.breakingChangesFlyout.prLinkText"
+              defaultMessage="Review changes"
             />
-          </h3>
-        </EuiTitle>
-        <EuiSpacer size="s" />
-        <EuiDescriptionList listItems={changeItems} />
-        <EuiSpacer size="m" />
-      </>
+          </EuiText>
+        </EuiLink>
+      </li>
     );
   });
 };
 
-export const BreakingChangesFlyout = ({ onClose, breakingChanges }: BreakingChangesFlyoutProps) => {
+const BreakingChangesList = ({ changelog }: { changelog: BreakingChangesLog }) => {
+  const { euiTheme } = useEuiTheme();
   return (
-    <EuiFlyout onClose={onClose} size="m">
+    <ul
+      className={css`
+        li:nth-child(even) {
+          background-color: ${euiTheme.colors.backgroundBaseSubdued};
+        }
+      `}
+    >
+      {changelog.map(({ version, changes }) => {
+        return (
+          <li
+            key={version}
+            className={css`
+              padding: ${euiTheme.size.l};
+            `}
+          >
+            <EuiTitle size="xs">
+              <h3>
+                <FormattedMessage
+                  id="xpack.fleet.integrations.settings.breakingChangesFlyout.changeVersionHeader"
+                  defaultMessage="Version {version}"
+                  values={{ version }}
+                />
+              </h3>
+            </EuiTitle>
+            <EuiSpacer size="xs" />
+            <ul>
+              <BreakingChangeListItems changes={changes} />
+            </ul>
+          </li>
+        );
+      })}
+    </ul>
+  );
+};
+
+export const BreakingChangesFlyout = ({ onClose, breakingChanges }: BreakingChangesFlyoutProps) => {
+  const { euiTheme } = useEuiTheme();
+
+  return (
+    <EuiFlyout onClose={onClose} size="m" paddingSize="none">
       <EuiFlyoutHeader hasBorder>
-        <EuiTitle>
-          <h2>
-            <FormattedMessage
-              id="xpack.fleet.integrations.settings.breakingChangesFlyout.headerTitle"
-              defaultMessage="Review breaking changes"
-            />
-          </h2>
-        </EuiTitle>
-        <EuiSpacer size="s" />
-        <EuiText size="s" color="subdued">
-          <p>
-            <FormattedMessage
-              id="xpack.fleet.integrations.settings.breakingChangesFlyout.headerDescription"
-              defaultMessage="Please review the changes carefully before upgrading."
-            />
-          </p>
-        </EuiText>
+        <div
+          className={css`
+            padding: ${euiTheme.size.l};
+          `}
+        >
+          <EuiTitle>
+            <h2>
+              <FormattedMessage
+                id="xpack.fleet.integrations.settings.breakingChangesFlyout.headerTitle"
+                defaultMessage="Review breaking changes"
+              />
+            </h2>
+          </EuiTitle>
+          <EuiSpacer size="s" />
+          <EuiText size="s" color="subdued">
+            <p>
+              <FormattedMessage
+                id="xpack.fleet.integrations.settings.breakingChangesFlyout.headerDescription"
+                defaultMessage="Please review the changes carefully before upgrading."
+              />
+            </p>
+          </EuiText>
+        </div>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         <BreakingChangesList changelog={breakingChanges} />
