@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { AlertDeleteModal } from './modal';
 import * as i18n from '../translations';
 import { httpServiceMock } from '@kbn/core/public/mocks';
@@ -19,7 +19,15 @@ const http = httpServiceMock.createStartContract();
 
 describe('AlertDelete Modal', () => {
   const closeModalMock = jest.fn();
-  const queryClient = new QueryClient();
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: {
+        retry: false,
+        refetchOnWindowFocus: false,
+        refetchOnReconnect: false,
+      },
+    },
+  });
 
   const wrapper = ({ children }: { children: React.ReactNode }) => (
     <IntlProvider locale="en">
@@ -51,6 +59,9 @@ describe('AlertDelete Modal', () => {
     expect(screen.getByTestId('alert-delete-active-threshold-unit')).toBeDisabled();
     expect(screen.getByTestId('alert-delete-inactive-threshold')).toBeDisabled();
     expect(screen.getByTestId('alert-delete-inactive-threshold-unit')).toBeDisabled();
+    expect(screen.getByTestId('alert-delete-preview-message').textContent).toEqual(
+      'Select the type of alerts you wish to delete'
+    );
   });
 
   it('enables the active alerts threshold when the checkbox is checked', () => {
@@ -107,12 +118,10 @@ describe('AlertDelete Modal', () => {
       { wrapper }
     );
 
-    // Activates the delete confirmation input
     const activeCheckbox = screen.getByTestId('alert-delete-active-checkbox');
     fireEvent.click(activeCheckbox);
 
-    const deleteInput = await screen.findByTestId('alert-delete-delete-confirmation');
-
+    const deleteInput = screen.getByTestId('alert-delete-delete-confirmation');
     fireEvent.change(deleteInput, { target: { value: 'wrong-passkey' } });
 
     expect(deleteInput).toHaveValue('wrong-passkey');
@@ -120,6 +129,10 @@ describe('AlertDelete Modal', () => {
 
     fireEvent.change(deleteInput, { target: { value: i18n.DELETE_PASSKEY } });
     expect(deleteInput).toHaveValue(i18n.DELETE_PASSKEY);
+
+    await waitFor(() =>
+      expect(screen.getByTestId('alert-delete-preview-message').textContent).toContain('100 alerts')
+    );
 
     expect(screen.getByTestId('alert-delete-submit')).not.toBeDisabled();
   });
@@ -157,7 +170,6 @@ describe('AlertDelete Modal', () => {
       { wrapper }
     );
 
-    // Activates the delete confirmation input
     const activeCheckbox = screen.getByTestId('alert-delete-active-checkbox');
     fireEvent.click(activeCheckbox);
 
@@ -167,7 +179,7 @@ describe('AlertDelete Modal', () => {
     const submitButton = screen.getByTestId('alert-delete-submit');
     fireEvent.click(submitButton);
 
-    expect(submitButton).not.toBeDisabled();
+    await waitFor(() => expect(submitButton).not.toBeDisabled());
   });
 
   it('disables the submit button when no alert would be deleted with current settings', async () => {
@@ -186,16 +198,17 @@ describe('AlertDelete Modal', () => {
       { wrapper }
     );
 
-    // Would activate the delete confirmation input if at least one alert would be deleted
     const activeCheckbox = screen.getByTestId('alert-delete-active-checkbox');
     fireEvent.click(activeCheckbox);
-
-    const deleteInput = screen.queryByTestId('alert-delete-delete-confirmation');
-    expect(deleteInput).not.toBeInTheDocument();
 
     const submitButton = screen.getByTestId('alert-delete-submit');
     fireEvent.click(submitButton);
 
+    await waitFor(() =>
+      expect(screen.getByTestId('alert-delete-preview-message').textContent).toContain(
+        'No alerts match the selected criteria.'
+      )
+    );
     expect(submitButton).toBeDisabled();
   });
 });

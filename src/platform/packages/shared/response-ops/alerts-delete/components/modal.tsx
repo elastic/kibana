@@ -314,7 +314,7 @@ export const AlertDeleteModal = ({
 
           <EuiHorizontalRule />
 
-          <p>
+          <p data-test-subj="alert-delete-preview-message">
             <PreviewMessage
               activeStateChecked={activeState.checked}
               inactiveStateChecked={inactiveState.checked}

@@ -13,13 +13,16 @@ import { AlertDeleteDescriptiveFormGroup } from './descriptive_form_group';
 import * as i18n from '../translations';
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 
 const http = httpServiceMock.createStartContract();
 
 describe('AlertDeleteRuleSettingsSection', () => {
   const queryClient = new QueryClient();
   const wrapper = ({ children }: { children: React.ReactNode }) => (
-    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+    <IntlProvider locale="en">
+      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+    </IntlProvider>
   );
 
   it('renders the described form group with the correct title and description', () => {
