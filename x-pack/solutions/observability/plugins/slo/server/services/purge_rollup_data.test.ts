@@ -1,0 +1,205 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { ElasticsearchClient } from '@kbn/core/server';
+import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { Duration, DurationUnit } from '@kbn/slo-schema';
+import { createAPMTransactionErrorRateIndicator, createSLO } from './fixtures/slo';
+import { createSLORepositoryMock } from './mocks';
+import { SLORepository } from './slo_repository';
+import { PurgeRollupData } from './purge_rollup_data';
+
+describe('purge rollup data', () => {
+  let mockRepository: jest.Mocked<SLORepository>;
+  let mockEsClient: jest.Mocked<ElasticsearchClient>;
+  let purgeRollupData: PurgeRollupData;
+
+  beforeEach(() => {
+    mockRepository = createSLORepositoryMock();
+    mockEsClient = elasticsearchServiceMock.createElasticsearchClient();
+    purgeRollupData = new PurgeRollupData(mockEsClient, mockRepository);
+  });
+
+  describe('happy path', () => {
+    it('successfully makes a query to remove SLI data older than 30 days', async () => {
+      const slo = createSLO({
+        id: 'test1',
+        indicator: createAPMTransactionErrorRateIndicator(),
+      });
+      mockRepository.findAllByIds.mockResolvedValueOnce([slo]);
+
+      await purgeRollupData.execute({
+        body: {
+          ids: ['test1'],
+          purgePolicy: { purgeType: 'fixed_age', age: new Duration(30, DurationUnit.Day) },
+        },
+      });
+
+      expect(mockRepository.findAllByIds).toMatchSnapshot();
+      expect(mockEsClient.deleteByQuery).toMatchSnapshot();
+    });
+
+    it('successfully makes a query to remove SLI data older than a week', async () => {
+      const slo = createSLO({
+        id: 'test2',
+        indicator: createAPMTransactionErrorRateIndicator(),
+        timeWindow: {
+          type: 'calendarAligned',
+          duration: new Duration(1, DurationUnit.Week),
+        },
+      });
+      mockRepository.findAllByIds.mockResolvedValueOnce([slo]);
+
+      await purgeRollupData.execute({
+        body: {
+          ids: ['test2'],
+          purgePolicy: { purgeType: 'fixed_age', age: new Duration(2, DurationUnit.Week) },
+        },
+      });
+
+      expect(mockRepository.findAllByIds).toMatchSnapshot();
+      expect(mockEsClient.deleteByQuery).toMatchSnapshot();
+    });
+
+    it('successfully makes a query to remove SLI data based on a timestamp - month', async () => {
+      const slo = createSLO({
+        id: 'test3',
+        indicator: createAPMTransactionErrorRateIndicator(),
+        timeWindow: {
+          type: 'calendarAligned',
+          duration: new Duration(1, DurationUnit.Month),
+        },
+      });
+      mockRepository.findAllByIds.mockResolvedValueOnce([slo]);
+
+      await purgeRollupData.execute({
+        body: {
+          ids: ['test3'],
+          purgePolicy: { purgeType: 'fixed_time', timestamp: new Date('2025-03-01T00:00:00Z') },
+        },
+      });
+
+      expect(mockRepository.findAllByIds).toMatchSnapshot();
+      expect(mockEsClient.deleteByQuery).toMatchSnapshot();
+    });
+
+    it('successfully makes a query to remove SLI data based on a timestamp - week', async () => {
+      const slo = createSLO({
+        id: 'test4',
+        indicator: createAPMTransactionErrorRateIndicator(),
+        timeWindow: {
+          type: 'calendarAligned',
+          duration: new Duration(1, DurationUnit.Week),
+        },
+      });
+      mockRepository.findAllByIds.mockResolvedValueOnce([slo]);
+
+      await purgeRollupData.execute({
+        body: {
+          ids: ['test4'],
+          purgePolicy: { purgeType: 'fixed_time', timestamp: new Date('2025-04-01T00:00:00Z') },
+        },
+      });
+
+      expect(mockRepository.findAllByIds).toMatchSnapshot();
+      expect(mockEsClient.deleteByQuery).toMatchSnapshot();
+    });
+
+    it('successfully makes a forced query to remove recently added SLI data', async () => {
+      const slo = createSLO({
+        id: 'test2',
+        indicator: createAPMTransactionErrorRateIndicator(),
+        timeWindow: {
+          type: 'calendarAligned',
+          duration: new Duration(1, DurationUnit.Week),
+        },
+      });
+      mockRepository.findAllByIds.mockResolvedValueOnce([slo]);
+
+      await purgeRollupData.execute({
+        query: { force: 'true' },
+        body: {
+          ids: ['test2'],
+          purgePolicy: { purgeType: 'fixed_age', age: new Duration(1, DurationUnit.Day) },
+        },
+      });
+
+      expect(mockRepository.findAllByIds).toMatchSnapshot();
+      expect(mockEsClient.deleteByQuery).toMatchSnapshot();
+    });
+  });
+
+  describe('error path', () => {
+    it('fails to make a query to remove SLI data older than 7 days', async () => {
+      const slo = createSLO({
+        id: 'test1',
+        indicator: createAPMTransactionErrorRateIndicator(),
+      });
+      mockRepository.findAllByIds.mockResolvedValueOnce([slo]);
+
+      expect(async () => {
+        await purgeRollupData.execute({
+          body: {
+            ids: ['test1'],
+            purgePolicy: { purgeType: 'fixed_age', age: new Duration(3, DurationUnit.Day) },
+          },
+        });
+      }).rejects.toThrowError();
+
+      expect(mockRepository.findAllByIds).toMatchSnapshot();
+      expect(mockEsClient.deleteByQuery).toMatchSnapshot();
+    });
+
+    it('fails to make a query to remove SLI data older than a day', async () => {
+      const slo = createSLO({
+        id: 'test2',
+        indicator: createAPMTransactionErrorRateIndicator(),
+        timeWindow: {
+          type: 'calendarAligned',
+          duration: new Duration(1, DurationUnit.Week),
+        },
+      });
+      mockRepository.findAllByIds.mockResolvedValueOnce([slo]);
+
+      expect(async () => {
+        await purgeRollupData.execute({
+          body: {
+            ids: ['test2'],
+            purgePolicy: { purgeType: 'fixed_age', age: new Duration(1, DurationUnit.Day) },
+          },
+        });
+      }).rejects.toThrowError();
+
+      expect(mockRepository.findAllByIds).toMatchSnapshot();
+      expect(mockEsClient.deleteByQuery).toMatchSnapshot();
+    });
+
+    it('fails to makes a query to remove SLI data based on a timestamp', async () => {
+      const slo = createSLO({
+        id: 'test3',
+        indicator: createAPMTransactionErrorRateIndicator(),
+        timeWindow: {
+          type: 'calendarAligned',
+          duration: new Duration(7, DurationUnit.Day),
+        },
+      });
+      mockRepository.findAllByIds.mockResolvedValueOnce([slo]);
+
+      expect(async () => {
+        await purgeRollupData.execute({
+          body: {
+            ids: ['test3'],
+            purgePolicy: { purgeType: 'fixed_time', timestamp: new Date() },
+          },
+        });
+      }).rejects.toThrowError();
+
+      expect(mockRepository.findAllByIds).toMatchSnapshot();
+      expect(mockEsClient.deleteByQuery).toMatchSnapshot();
+    });
+  });
+});
