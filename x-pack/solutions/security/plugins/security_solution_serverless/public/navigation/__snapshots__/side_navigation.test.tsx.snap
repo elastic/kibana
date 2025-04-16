@@ -698,13 +698,13 @@ Object {
         Object {
           "children": Array [
             Object {
-              "link": "securitySolutionUI:configurations-ai_settings",
+              "link": "securitySolutionUI:configurations-integrations",
             },
             Object {
               "link": "securitySolutionUI:configurations-basic_rules",
             },
             Object {
-              "link": "securitySolutionUI:configurations-integrations",
+              "link": "securitySolutionUI:configurations-ai_settings",
             },
           ],
           "id": "configurations",

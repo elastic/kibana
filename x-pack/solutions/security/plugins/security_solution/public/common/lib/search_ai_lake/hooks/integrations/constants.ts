@@ -5,13 +5,5 @@
  * 2.0.
  */
 
-export enum ConfigurationTabs {
-  integrations = 'integrations',
-  basicRules = 'basic_rules',
-  aiSettings = 'ai_settings',
-}
-
-export enum IntegrationsFacets {
-  available = 'browse',
-  installed = 'installed',
-}
+export const RETURN_APP_ID = 'returnAppId';
+export const RETURN_PATH = 'returnPath';

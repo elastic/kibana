@@ -73,13 +73,13 @@ export const createAiSocNavigationTree$ = (): Rx.Observable<NavigationTreeDefini
             renderAs: 'panelOpener',
             children: [
               {
-                link: securityLink(SecurityPageName.configurationsAiSettings),
+                link: securityLink(SecurityPageName.configurationsIntegrations),
               },
               {
                 link: securityLink(SecurityPageName.configurationsBasicRules),
               },
               {
-                link: securityLink(SecurityPageName.configurationsIntegrations),
+                link: securityLink(SecurityPageName.configurationsAiSettings),
               },
             ],
           },

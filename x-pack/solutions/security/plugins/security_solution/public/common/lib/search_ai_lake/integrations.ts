@@ -5,13 +5,11 @@
  * 2.0.
  */
 
-export enum ConfigurationTabs {
-  integrations = 'integrations',
-  basicRules = 'basic_rules',
-  aiSettings = 'ai_settings',
-}
-
-export enum IntegrationsFacets {
-  available = 'browse',
-  installed = 'installed',
-}
+/** Allow list of integrations to be available in the AI4DSOC integrations page */
+export const SEARCH_AI_LAKE_ALLOWED_INTEGRATIONS: string[] = [
+  'crowdstrike',
+  'google_secops',
+  'microsoft_sentinel',
+  'sentinel_one',
+  'splunk',
+];
