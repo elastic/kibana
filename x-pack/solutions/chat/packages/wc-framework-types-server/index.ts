@@ -21,6 +21,7 @@ export type {
   NodeEventReporter,
   NodeProgressionReporterEvent,
   CustomServicesProvider,
+  ScopedNodeProvider,
 } from './src/nodes';
 export type {
   BaseWorkflowDefinition,
@@ -34,6 +35,12 @@ export type {
   WorkflowRunner,
   RunWorkflowParams,
   RunWorkflowOutput,
+  ScopedWorkflowProvider,
+  ScopedRunner,
+  ScopedRunnerRunNodeParams,
+  ScopedRunnerRunWorkflowParams,
+  ScopedRunnerRunNodeOutput,
+  ScopedRunnerRunWorkflowOutput,
 } from './src/workflows';
 export type { Registry, Provider, AsyncProvider } from './src/utils';
 export {

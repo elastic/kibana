@@ -9,10 +9,10 @@ import type { Logger } from '@kbn/logging';
 import type { IScopedClusterClient } from '@kbn/core/server';
 import type { ModelProvider } from '../models/model_provider';
 import type { ToolProvider } from '../tools/registry';
-import type { WorkflowProvider } from '../workflows/provider';
+import type { ScopedWorkflowProvider, ScopedRunner } from '../workflows';
 import type { NodeRunner } from './runner';
 import type { NodeDefinition } from './definition';
-import type { NodeProvider } from './provider';
+import type { ScopedNodeProvider } from './internal_services';
 
 /**
  * Base set of (pre-scoped) services that will always be exposed to the node factory.
@@ -40,13 +40,16 @@ export interface NodeFactoryBaseServices {
   /**
    * Registry exposing the workflows accessible in the node's context.
    */
-  workflowRegistry: WorkflowProvider;
+  workflowRegistry: ScopedWorkflowProvider;
   /**
    * Registry exposing node types, can be used to access node type definitions.
    */
-  nodeRegistry: NodeProvider;
-
-  // TODO: add runner
+  nodeRegistry: ScopedNodeProvider;
+  /**
+   * Scoped node runner, can be used to run nodes as part of a node's execution flow,
+   * e.g. for conditional nodes.
+   */
+  workflowRunner: ScopedRunner;
 }
 
 /**

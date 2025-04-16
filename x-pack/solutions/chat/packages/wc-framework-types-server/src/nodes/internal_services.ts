@@ -8,4 +8,4 @@
 import type { Provider } from '../utils';
 import type { NodeTypeDefinition } from './type_definition';
 
-export type NodeProvider = Provider<NodeTypeDefinition>;
+export type ScopedNodeProvider = Provider<NodeTypeDefinition>;

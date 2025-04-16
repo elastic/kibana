@@ -20,4 +20,11 @@ export type {
   RunWorkflowParams,
   RunWorkflowOutput,
 } from './runner';
-export type { WorkflowProvider } from './provider';
+export type {
+  ScopedWorkflowProvider,
+  ScopedRunner,
+  ScopedRunnerRunWorkflowParams,
+  ScopedRunnerRunWorkflowOutput,
+  ScopedRunnerRunNodeParams,
+  ScopedRunnerRunNodeOutput,
+} from './internal_services';

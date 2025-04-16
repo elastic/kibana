@@ -15,4 +15,4 @@ export type {
 } from './factory';
 export type { NodeRunner, RunNodeParams, RunNodeResult } from './runner';
 export type { NodeTypeDefinition, CustomServicesProvider } from './type_definition';
-export type { NodeProvider } from './providers';
+export type { ScopedNodeProvider } from './internal_services';

@@ -6,6 +6,7 @@
  */
 
 import type {
+  ScopedRunner,
   WorkflowRunEventHandler,
   ModelProvider,
   ToolProvider,
@@ -19,15 +20,19 @@ import type { WorkflowRegistry } from './registry';
  * Necessary to be able to perform internal / nested step / workflow execution.
  */
 export interface WorkflowRunnerInternalContext {
+  request: KibanaRequest;
   logger: Logger;
   modelProvider: ModelProvider;
   workflowRegistry: WorkflowRegistry;
   nodeRegistry: NodeTypeRegistry;
   eventHandler?: WorkflowRunEventHandler;
-  /**
-   * Either the tool provider passed as parameter from the run call, or the default tool provider otherwise.
-   */
   toolProvider: ToolProvider;
+  scopedRunner: InternalScopedRunner;
   esClusterClient: IScopedClusterClient;
-  request: KibanaRequest;
 }
+
+export type ScopedNodeRunnerFn = ScopedRunner['runNode'];
+export type ScopedWorkflowRunnerFn = ScopedRunner['runWorkflow'];
+
+// TODO: later we'll probably need more internal APIs to re-scope
+export type InternalScopedRunner = ScopedRunner;

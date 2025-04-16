@@ -5,84 +5,78 @@
  * 2.0.
  */
 
-import type {
-  WorkflowDefinition,
-  GraphWorkflowDefinition,
-  WorkflowState,
-  WorkflowRunEventHandler,
-  RunWorkflowParams,
-  RunWorkflowOutput,
-  NodeFactoryBaseServices,
-  WorkflowRunner,
-  NodeFactoryContext,
-  NodeDefinition,
-  NodeEventReporter,
-  ModelProvider,
-  ToolProvider,
-  RunNodeResult,
-} from '@kbn/wc-framework-types-server';
-import type { Logger, KibanaRequest } from '@kbn/core/server';
-import type { createModelProviderFactory, ModelProviderFactory } from '../model_provider';
+import type { WorkflowDefinition, WorkflowRunner } from '@kbn/wc-framework-types-server';
+import type { Logger, CoreStart } from '@kbn/core/server';
+import type { ModelProviderFactory } from '../model_provider';
 import type { ToolRegistry } from '../tools';
 import type { NodeTypeRegistry } from '../nodes';
 import type { WorkflowRegistry } from './registry';
-import type { WorkflowRunnerInternalContext } from './types';
 import {
-  createNoopNodeEventReporter,
-  createNodeEventReporter,
-  createInitialState,
-  interpolateNodeConfig,
-} from './utils';
+  createInternalRunner,
+  type WorkflowRunnerInternalContextWithoutRunner,
+} from './scoped_runner';
 
-export interface WorkflowRunnerParams {
-  /**
-   * The definition of the step to run.
-   */
-  workflowDefinition: WorkflowDefinition;
-  /**
-   * The input passed to the workflow.
-   */
-  inputs: RunWorkflowParams['inputs'];
-  /**
-   * Internal context necessary to recurse into the workflow execution.
-   */
-  internalContext: WorkflowRunnerInternalContext;
+export interface GetWorkflowRunnerParams {
+  logger: Logger;
+  workflowRegistry: WorkflowRegistry;
+  nodeRegistry: NodeTypeRegistry;
+  modelProviderFactory: ModelProviderFactory;
+  toolRegistry: ToolRegistry;
+  core: CoreStart;
 }
 
-type ScopedWorkflowRunner = (
-  params: Pick<WorkflowRunnerParams, 'workflowDefinition' | 'inputs'>
-) => Promise<RunWorkflowOutput>;
+export const getWorkflowRunner = (params: GetWorkflowRunnerParams): WorkflowRunner => {
+  const {
+    workflowRegistry,
+    nodeRegistry,
+    modelProviderFactory,
+    toolRegistry,
+    logger,
+    core: { elasticsearch },
+  } = params;
 
-/**
- * Returns a step runner already scoped to the given context.
- */
-export const createWorkflowRunner = (
-  params: Pick<WorkflowRunnerParams, 'internalContext'>
-): ScopedWorkflowRunner => {
-  return (args) => {
-    return runWorkflow({
-      ...params,
-      ...args,
-    });
+  const getWorkflowDefinition = async (
+    workflowId: string
+  ): Promise<WorkflowDefinition | undefined> => {
+    if (workflowRegistry.has(workflowId)) {
+      return workflowRegistry.get(workflowId);
+    }
+    return undefined;
   };
-};
 
-export const runWorkflow = ({
-  workflowDefinition,
-  inputs,
-  internalContext,
-}: WorkflowRunnerParams) => {
-  // TODO: validate input shape.
+  const run: WorkflowRunner['run'] = async (options) => {
+    const {
+      id: workflowId,
+      request,
+      inputs,
+      onEvent,
+      defaultConnectorId,
+      toolProvider: customToolProvider,
+    } = options;
 
-  const state = createInitialState({ inputs });
+    const workflowDefinition = await getWorkflowDefinition(workflowId);
+    if (!workflowDefinition) {
+      // TODO: structured error, see comment on WorkflowRunner
+      throw new Error('workflow not found');
+    }
 
-  // TODO: check for function workflows and handle them...
+    const modelProvider = await modelProviderFactory({ request, defaultConnectorId });
 
-  // TODO: execute steps...
-  const stepDefinitions = (workflowDefinition as GraphWorkflowDefinition).steps;
-  for (let i = 0; i < stepDefinitions.length; i++) {
-    const stepDefinition = stepDefinitions[i];
+    const internalContext: WorkflowRunnerInternalContextWithoutRunner = {
+      logger,
+      request,
+      modelProvider,
+      workflowRegistry,
+      nodeRegistry,
+      toolProvider: customToolProvider ?? toolRegistry.asToolProvider(),
+      esClusterClient: elasticsearch.client.asScoped(request),
+      eventHandler: onEvent, // TODO: we want to always have a default one, dispatching to telemetry or something
+    };
 
-    const output = stepRunner({ stepDefinition, state, workflowId: workflowDefinition.id });
-  }
+    const scopedRunner = createInternalRunner({ internalContext });
+
+    return scopedRunner.runWorkflow({ workflowDefinition, inputs });
+  };
+
+  return { run };
 };

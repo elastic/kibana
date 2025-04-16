@@ -6,82 +6,51 @@
  */
 
 import type {
-  WorkflowDefinition,
-  GraphWorkflowDefinition,
-  WorkflowState,
-  WorkflowRunEventHandler,
-  RunWorkflowParams,
-  RunWorkflowOutput,
   NodeFactoryBaseServices,
-  WorkflowRunner,
   NodeFactoryContext,
-  NodeDefinition,
-  NodeEventReporter,
-  ModelProvider,
-  ToolProvider,
-  RunNodeResult,
+  ScopedRunnerRunNodeParams,
+  ScopedRunnerRunNodeOutput,
 } from '@kbn/wc-framework-types-server';
-import type { Logger, KibanaRequest } from '@kbn/core/server';
-import type { createModelProviderFactory, ModelProviderFactory } from '../model_provider';
-import type { ToolRegistry } from '../tools';
-import type { NodeTypeRegistry } from '../nodes';
-import type { WorkflowRegistry } from './registry';
-import type { WorkflowRunnerInternalContext } from './types';
+import type { WorkflowRunnerInternalContext, ScopedNodeRunnerFn } from './types';
 import {
   createNoopNodeEventReporter,
   createNodeEventReporter,
-  createInitialState,
   interpolateNodeConfig,
 } from './utils';
-
-export interface RunStepParams {
-  /**
-   * The definition of the step to run
-   */
-  stepDefinition: NodeDefinition;
-  /**
-   * The input state to pass to the step.
-   */
-  state: WorkflowState;
-  /**
-   * ID of the workflow this step was executed from, used for tracing.
-   */
-  workflowId: string;
-  /**
-   * Internal context necessary to recurse into the workflow execution.
-   */
-  internalContext: WorkflowRunnerInternalContext;
-}
-
-type ScopedStepRunner = (
-  params: Pick<RunStepParams, 'stepDefinition' | 'state' | 'workflowId'>
-) => Promise<RunNodeResult>;
 
 /**
  * Returns a step runner already scoped to the given context.
  */
-export const createStepRunner = (
-  params: Pick<RunStepParams, 'internalContext'>
-): ScopedStepRunner => {
+export const createNodeRunner = (params: {
+  internalContext: WorkflowRunnerInternalContext;
+}): ScopedNodeRunnerFn => {
   return (args) => {
-    return runStep({
+    return runNode({
       ...params,
       ...args,
     });
   };
 };
 
-const runStep = async ({ stepDefinition, state, workflowId, internalContext }: RunStepParams) => {
+type RunStepParams = ScopedRunnerRunNodeParams & {
+  internalContext: WorkflowRunnerInternalContext;
+};
+
+const runNode = async ({
+  nodeDefinition,
+  state,
+  internalContext,
+}: RunStepParams): Promise<ScopedRunnerRunNodeOutput> => {
   const { nodeRegistry, eventHandler } = internalContext;
   // TODO: check if node type is registered
 
-  const nodeType = nodeRegistry.get(stepDefinition.type);
+  const nodeType = nodeRegistry.get(nodeDefinition.type);
 
   const nodeServices = createBaseNodeServices({ internalContext });
   // TODO: check / call nodeType.customServicesProvider if present
 
   const context: NodeFactoryContext = {
-    nodeConfiguration: stepDefinition,
+    nodeConfiguration: nodeDefinition,
     services: nodeServices,
   };
 
@@ -89,7 +58,7 @@ const runStep = async ({ stepDefinition, state, workflowId, internalContext }: R
 
   // interpolating the node config with the state
   const nodeInput = interpolateNodeConfig({
-    config: stepDefinition.typeConfig,
+    config: nodeDefinition.typeConfig,
     state,
   });
 
@@ -98,9 +67,9 @@ const runStep = async ({ stepDefinition, state, workflowId, internalContext }: R
     ? createNodeEventReporter({
         onEvent: eventHandler,
         meta: {
-          workflowId,
-          nodeId: stepDefinition.id,
-          nodeType: stepDefinition.type,
+          workflowId: internalContext.workflowId,
+          nodeId: nodeDefinition.id,
+          nodeType: nodeDefinition.type,
         },
       })
     : createNoopNodeEventReporter();
@@ -113,7 +82,7 @@ const runStep = async ({ stepDefinition, state, workflowId, internalContext }: R
   });
 
   // writing output to state
-  const stateOutputField = stepDefinition.output;
+  const stateOutputField = nodeDefinition.output;
   state.set(stateOutputField, output);
 
   // end of node execution
@@ -128,6 +97,7 @@ const createBaseNodeServices = ({
     esClusterClient,
     nodeRegistry,
     workflowRegistry,
+    scopedRunner,
   },
 }: {
   internalContext: WorkflowRunnerInternalContext;
@@ -139,5 +109,6 @@ const createBaseNodeServices = ({
     esClusterClient,
     nodeRegistry,
     workflowRegistry,
+    workflowRunner: scopedRunner,
   };
 };
