@@ -66,10 +66,14 @@ export const getRemoteSyncedIntegrationsInfoByOutputId = async (
 
     const body = await res.json();
 
+    const errorMessage = body.error
+      ? `GET ${url} failed with status ${body.statusCode}. ${body.message}`
+      : undefined;
+
     return {
       integrations: body.integrations ?? [],
       custom_assets: body.custom_assets,
-      error: body.error ? body.message : undefined,
+      error: errorMessage,
     };
   } catch (error) {
     if (error.isBoom && error.output.statusCode === 404) {

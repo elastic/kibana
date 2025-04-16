@@ -221,7 +221,8 @@ describe('getRemoteSyncedIntegrationsInfoByOutputId', () => {
 
     expect(await getRemoteSyncedIntegrationsInfoByOutputId(soClientMock, 'remote1')).toEqual({
       integrations: [],
-      error: 'No integrations found on fleet-synced-integrations-ccr-*',
+      error:
+        'GET http://remote-kibana-host/api/fleet/remote_synced_integrations/status failed with status 404. No integrations found on fleet-synced-integrations-ccr-*',
     });
   });
 
