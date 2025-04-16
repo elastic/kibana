@@ -40,16 +40,9 @@ interface IntegrationListViewProps {
 }
 
 export const IntegrationListView: React.FC<IntegrationListViewProps> = ({ integrations }) => {
-  const [selectedTabId, setSelectedTabId] = useState('active');
-
   const { agents } = useAgentList();
-
-  const [selectedItems, setSelectedItems] = useState<Integration[]>([]);
-
-  const [sortField, setSortField] = useState<keyof Integration>('name');
-  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
-
   const { navigateToWorkchatUrl } = useNavigation();
+
   const columns: Array<EuiBasicTableColumn<Integration>> = [
     {
       field: 'icon',
@@ -106,6 +99,9 @@ export const IntegrationListView: React.FC<IntegrationListViewProps> = ({ integr
     },
   ];
 
+  // Create Tabs
+  const [selectedTabId, setSelectedTabId] = useState('active');
+
   const renderTabs = () => [
     {
       id: 'active',
@@ -120,8 +116,12 @@ export const IntegrationListView: React.FC<IntegrationListViewProps> = ({ integr
       onClick: () => setSelectedTabId('catalog'),
     },
   ];
+
+  // Pagination and Sorting
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
+  const [sortField, setSortField] = useState<keyof Integration>('name');
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
 
   const sorting: EuiTableSortingType<Integration> = {
     sort: {
@@ -132,47 +132,47 @@ export const IntegrationListView: React.FC<IntegrationListViewProps> = ({ integr
 
   const onTableChange = ({ page, sort }: Criteria<Integration>) => {
     if (page) {
-      const { index: pageIndex, size: pageSize } = page;
-      setPageIndex(pageIndex);
-      setPageSize(pageSize);
+      const { index: index, size: size } = page;
+      setPageIndex(index);
+      setPageSize(size);
     }
     if (sort) {
-      const { field: sortField, direction: sortDirection } = sort;
-      setSortField(sortField);
-      setSortDirection(sortDirection);
+      const { field: field, direction: direction } = sort;
+      setSortField(field);
+      setSortDirection(direction);
     }
   };
 
   const findIntegrations = (
-    integrations: Integration[],
-    pageIndex: number,
-    pageSize: number,
-    sortField: keyof Integration,
-    sortDirection: 'asc' | 'desc'
+    integrationItems: Integration[],
+    index: number,
+    size: number,
+    field: keyof Integration,
+    direction: 'asc' | 'desc'
   ) => {
     let pageOfItems;
 
-    if (!pageIndex && !pageSize) {
-      pageOfItems = integrations;
+    if (!index && !size) {
+      pageOfItems = integrationItems;
     } else {
-      const startIndex = pageIndex * pageSize;
-      pageOfItems = integrations.slice(
+      const startIndex = index * size;
+      pageOfItems = integrationItems.slice(
         startIndex,
-        Math.min(startIndex + pageSize, integrations.length)
+        Math.min(startIndex + size, integrationItems.length)
       );
     }
 
-    if (sortField) {
-      pageOfItems = integrations
+    if (field) {
+      pageOfItems = integrationItems
         .slice(0)
-        .sort(Comparators.property(sortField, Comparators.default(sortDirection)));
+        .sort(Comparators.property(field, Comparators.default(direction)));
     } else {
-      pageOfItems = integrations;
+      pageOfItems = integrationItems;
     }
 
     return {
       pageOfItems,
-      totalItemCount: integrations.length,
+      totalItemCount: integrationItems.length,
     };
   };
 
@@ -196,35 +196,8 @@ export const IntegrationListView: React.FC<IntegrationListViewProps> = ({ integr
       </>
     );
 
-  const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<Record<string, ReactNode>>(
-    {}
-  );
-  const [toggledItem, setToggledItem] = useState<string>('');
-
-  const toggleDetails = (item: Integration) => {
-    if (itemIdToExpandedRowMap[item.id]) {
-      setItemIdToExpandedRowMap({});
-      setToggledItem('');
-    } else {
-      setToggledItem(item.id);
-      setItemIdToExpandedRowMap({
-        [item.id]: (
-          <EuiDescriptionList
-            listItems={[
-              {
-                title: 'ID',
-                description: item.id,
-              },
-              {
-                title: 'Name',
-                description: item.name,
-              },
-            ]}
-          />
-        ),
-      });
-    }
-  };
+  // Selection
+  const [selectedItems, setSelectedItems] = useState<Integration[]>([]);
 
   const selectionColumn: EuiBasicTableColumn<Integration> = {
     field: 'selection',
@@ -276,12 +249,43 @@ export const IntegrationListView: React.FC<IntegrationListViewProps> = ({ integr
     ),
   };
 
+  // Expandable Rows
+  const [toggledItem, setToggledItem] = useState<string>('');
+  const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<Record<string, ReactNode>>(
+    {}
+  );
+
+  const toggleDetails = (item: Integration) => {
+    if (itemIdToExpandedRowMap[item.id]) {
+      setItemIdToExpandedRowMap({});
+      setToggledItem('');
+    } else {
+      setToggledItem(item.id);
+      setItemIdToExpandedRowMap({
+        [item.id]: (
+          <EuiDescriptionList
+            listItems={[
+              {
+                title: 'ID',
+                description: item.id,
+              },
+              {
+                title: 'Name',
+                description: item.name,
+              },
+            ]}
+          />
+        ),
+      });
+    }
+  };
+
   const columnsWithExpandingRowToggle: Array<EuiBasicTableColumn<Integration>> = [
     {
       align: 'left',
       width: '40px',
       isExpander: true,
-      name: <EuiIcon size="m" type="fold" />,
+      name: <EuiIcon size="m" type="unfold" />,
       mobileOptions: { header: false },
       render: (item: Integration) => {
         const itemIdToExpandedRowMapValues = { ...itemIdToExpandedRowMap };
