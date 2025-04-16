@@ -98,10 +98,11 @@ const updateInsightsRouteHandler = (
         await securityWorkflowInsightsService.fetch({ ids: [insightId] })
       )[0];
 
-      const backingIndex = retrievedInsight?._index;
-      if (!backingIndex) {
-        throw new Error('invalid backing index for updating workflow insight');
+      if (!retrievedInsight) {
+        throw new Error('Failed to retrieve insight');
       }
+
+      const backingIndex = retrievedInsight._index;
 
       // If the endpoint management space awareness feature is enabled, we need to ensure that the agent IDs are in the current space
       if (endpointManagementSpaceAwarenessEnabled) {
@@ -110,13 +111,14 @@ const updateInsightsRouteHandler = (
 
         // We need to make sure the agent IDs, both existing and injected through the request body, are in the current space
         const existingAgentIds = retrievedInsight?._source?.target?.ids;
-        const rawAgentIds = request.body.target?.ids ?? existingAgentIds;
+        const newAgentIds = request.body.target?.ids;
 
-        if (rawAgentIds) {
-          const agentIds = Array.from(new Set(rawAgentIds));
-          await fleetServices.ensureInCurrentSpace({ agentIds });
-        } else {
-          throw new Error('retrievedInsight._source or target.ids is undefined');
+        const combinedAgentIds = Array.from(
+          new Set([...(existingAgentIds ?? []), ...(newAgentIds ?? [])])
+        );
+
+        if (combinedAgentIds.length > 0) {
+          await fleetServices.ensureInCurrentSpace({ agentIds: combinedAgentIds });
         }
       }
 

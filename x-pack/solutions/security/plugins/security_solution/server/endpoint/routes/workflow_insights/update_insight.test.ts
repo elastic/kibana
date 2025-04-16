@@ -188,7 +188,7 @@ describe('Update Insights Route Handler', () => {
         throw new Error('Expected to throw'); // failsafe, if it doesn't throw no assertions will be made
       } catch (err) {
         expect(err).toBeInstanceOf(Error);
-        expect(err.message).toMatch(/invalid backing index/i);
+        expect(err.message).toMatch(/Failed to retrieve insight/i);
       }
     });
   });
@@ -256,6 +256,28 @@ describe('Update Insights Route Handler', () => {
       return localMockResponse;
     };
 
+    it('combines agent IDs from request body and retrieved insight for ensureInCurrentSpace', async () => {
+      const context = setupTest();
+      const mockEnsure = jest.fn();
+      context.service.getInternalFleetServices = jest
+        .fn()
+        .mockReturnValue({ ensureInCurrentSpace: mockEnsure });
+
+      fetchMock.mockResolvedValue([
+        { _id: '1', _index: 'index-1', _source: { target: { ids: ['b', 'c'] } } },
+      ]);
+      updateMock.mockResolvedValue({ id: 1 });
+
+      const response = await callWithCustomContext(context, {
+        target: { ids: ['a', 'b'] },
+      });
+
+      expect(mockEnsure).toHaveBeenCalledWith({
+        agentIds: expect.arrayContaining(['a', 'b', 'c']),
+      });
+      expect(response.ok).toHaveBeenCalled();
+    });
+
     it('calls ensureInCurrentSpace with deduplicated agent IDs from request body', async () => {
       const context = setupTest();
       const mockEnsure = jest.fn();
@@ -309,29 +331,20 @@ describe('Update Insights Route Handler', () => {
       );
     });
 
-    it('throws if no backingIndex found in fetched doc', async () => {
+    it('skips ensureInCurrentSpace if agent IDs are missing from both body and retrieved insight', async () => {
       const context = setupTest();
-      fetchMock.mockResolvedValue([{ _id: '1', _source: {} }]);
+      const mockEnsure = jest.fn();
+      context.service.getInternalFleetServices = jest
+        .fn()
+        .mockReturnValue({ ensureInCurrentSpace: mockEnsure });
 
-      try {
-        await callWithCustomContext(context, { name: 'fail' });
-        throw new Error('Expected to throw'); // failsafe, if it doesn't throw no assertions will be made
-      } catch (err) {
-        expect(err).toBeInstanceOf(Error);
-        expect(err.message).toMatch(/invalid backing index/i);
-      }
-    });
-
-    it('throws if agent IDs are missing from both body and fetched insight', async () => {
-      const context = setupTest();
       fetchMock.mockResolvedValue([{ _id: '1', _index: 'index-1', _source: {} }]);
-      try {
-        await callWithCustomContext(context, { name: 'no agents' });
-        throw new Error('Expected to throw'); // failsafe, if it doesn't throw no assertions will be made
-      } catch (err) {
-        expect(err).toBeInstanceOf(Error);
-        expect(err.message).toContain('retrievedInsight._source or target.ids is undefined');
-      }
+      updateMock.mockResolvedValue({ id: 1 });
+
+      const response = await callWithCustomContext(context, { name: 'noop update' });
+
+      expect(mockEnsure).not.toHaveBeenCalled();
+      expect(response.ok).toHaveBeenCalled();
     });
 
     it('skips ensureInCurrentSpace if space awareness is disabled', async () => {
