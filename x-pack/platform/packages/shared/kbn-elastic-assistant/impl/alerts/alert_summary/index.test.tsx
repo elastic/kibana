@@ -30,6 +30,7 @@ const defaultProps = {
   isContextReady: true,
   promptContext,
   showAnonymizedValues: false,
+  setHasAlertSummary: jest.fn(),
 };
 
 describe('AlertSummary', () => {
