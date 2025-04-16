@@ -104,7 +104,9 @@ export class VisLegend extends PureComponent<VisLegendProps, VisLegendState> {
       return false;
     }
 
-    const filters = await getDataActions().canCreateFiltersFromValueClickAction!({ data: item.values });
+    const filters = await getDataActions().canCreateFiltersFromValueClickAction!({
+      data: item.values,
+    });
     return filters;
   };
 
