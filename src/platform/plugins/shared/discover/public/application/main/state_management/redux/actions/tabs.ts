@@ -9,8 +9,8 @@
 
 import type { TabbedContentState } from '@kbn/unified-tabs/src/components/tabbed_content/tabbed_content';
 import { v4 as uuidv4 } from 'uuid';
-import { cloneDeep, differenceBy, orderBy } from 'lodash';
-import type { RecentlyClosedTabState, TabState } from '../types';
+import { cloneDeep, differenceBy } from 'lodash';
+import type { TabState } from '../types';
 import { selectAllTabs, selectTab } from '../selectors';
 import {
   defaultTabState,
@@ -22,59 +22,32 @@ import { createTabRuntimeState, selectTabRuntimeState } from '../runtime_state';
 import { APP_STATE_URL_KEY, GLOBAL_STATE_URL_KEY } from '../../../../../../common/constants';
 import { createTabItem } from '../utils';
 
-const RECENTLY_CLOSED_TABS_LIMIT = 50;
-
 export const setTabs: InternalStateThunkActionCreator<
   [Parameters<typeof internalStateSlice.actions.setTabs>[0]]
 > =
   (params) =>
-  (dispatch, getState, { runtimeStateManager }) => {
+  (dispatch, getState, { runtimeStateManager, tabsStorageManager }) => {
     const previousState = getState();
     const previousTabs = selectAllTabs(previousState);
-    const removedTabs = differenceBy(previousTabs, params.allTabs, differenceIterateeByTabId);
-    const addedTabs = differenceBy(params.allTabs, previousTabs, differenceIterateeByTabId);
-
-    const closedAt = Date.now();
-    const recentlyClosedTabs: RecentlyClosedTabState[] = [];
+    const removedTabs = differenceBy(previousTabs, params.allTabs, (tab) => tab.id);
+    const addedTabs = differenceBy(params.allTabs, previousTabs, (tab) => tab.id);
 
     for (const tab of removedTabs) {
       dispatch(disconnectTab({ tabId: tab.id }));
       delete runtimeStateManager.tabs.byId[tab.id];
-      recentlyClosedTabs.push({
-        ...tab,
-        closedAt,
-      });
     }
 
     for (const tab of addedTabs) {
       runtimeStateManager.tabs.byId[tab.id] = createTabRuntimeState();
     }
 
-    const newRecentlyClosedTabs = orderBy(
-      [...params.recentlyClosedTabs, ...recentlyClosedTabs],
-      'closedAt',
-      'desc'
-    );
-
-    const latestNRecentlyClosedTabs = newRecentlyClosedTabs.slice(0, RECENTLY_CLOSED_TABS_LIMIT);
-    const recentClosedAt =
-      latestNRecentlyClosedTabs[latestNRecentlyClosedTabs.length - 1]?.closedAt;
-
-    if (recentClosedAt) {
-      // keep other recently closed tabs from the same time point when they were closed
-      for (let i = RECENTLY_CLOSED_TABS_LIMIT; i < newRecentlyClosedTabs.length; i++) {
-        if (newRecentlyClosedTabs[i].closedAt === recentClosedAt) {
-          latestNRecentlyClosedTabs.push(newRecentlyClosedTabs[i]);
-        } else {
-          break;
-        }
-      }
-    }
-
     dispatch(
       internalStateSlice.actions.setTabs({
         ...params,
-        recentlyClosedTabs: latestNRecentlyClosedTabs,
+        recentlyClosedTabs: tabsStorageManager.getNRecentlyClosedTabs(
+          params.recentlyClosedTabs,
+          removedTabs
+        ),
       })
     );
   };
@@ -187,7 +160,3 @@ export const disconnectTab: InternalStateThunkActionCreator<[TabActionPayload]> 
     stateContainer?.actions.stopSyncing();
     tabRuntimeState.customizationService$.getValue()?.cleanup();
   };
-
-function differenceIterateeByTabId(tab: TabState) {
-  return tab.id;
-}

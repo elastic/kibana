@@ -222,6 +222,7 @@ const createMiddleware = ({ tabsStorageManager }: { tabsStorageManager: TabsStor
     actionCreator: internalStateSlice.actions.setTabs,
     effect: throttle(
       (action) => {
+        // console.log('persistLocally', action.payload);
         void tabsStorageManager.persistLocally(action.payload);
       },
       MIDDLEWARE_THROTTLE_MS,
@@ -233,6 +234,7 @@ const createMiddleware = ({ tabsStorageManager }: { tabsStorageManager: TabsStor
     actionCreator: internalStateSlice.actions.setTabAppStateAndGlobalState,
     effect: throttle(
       (action) => {
+        // console.log('updateTabStateLocally', action.payload);
         tabsStorageManager.updateTabStateLocally(action.payload.tabId, action.payload);
       },
       MIDDLEWARE_THROTTLE_MS,

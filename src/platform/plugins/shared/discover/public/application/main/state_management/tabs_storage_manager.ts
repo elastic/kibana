@@ -7,12 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  // createStateContainer,
-  type IKbnUrlStateStorage,
-  // type ReduxLikeStateContainer,
-  // syncState,
-} from '@kbn/kibana-utils-plugin/public';
+import { orderBy } from 'lodash';
+import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import type { TabItem } from '@kbn/unified-tabs';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import { TABS_STATE_URL_KEY } from '../../../../common/constants';
@@ -20,6 +16,7 @@ import type { TabState, RecentlyClosedTabState } from './redux/types';
 import { createTabItem } from './redux/utils';
 
 const TABS_LOCAL_STORAGE_KEY = 'discover.tabs';
+const RECENTLY_CLOSED_TABS_LIMIT = 50;
 
 type TabStateInLocalStorage = Pick<
   TabState,
@@ -55,6 +52,10 @@ export interface TabsStorageManager {
     defaultTabState: Omit<TabState, keyof TabItem>;
     defaultGroupId: string;
   }) => TabsInternalStatePayload;
+  getNRecentlyClosedTabs: (
+    previousRecentlyClosedTabs: RecentlyClosedTabState[],
+    newClosedTabs: TabState[]
+  ) => RecentlyClosedTabState[];
 }
 
 export const getTabsStorageManager = ({
@@ -112,6 +113,44 @@ export const getTabsStorageManager = ({
       openTabs: parsedTabsState?.openTabs || [],
       closedTabs: parsedTabsState?.closedTabs || [],
     };
+  };
+
+  const getNRecentlyClosedTabs: TabsStorageManager['getNRecentlyClosedTabs'] = (
+    previousRecentlyClosedTabs,
+    newClosedTabs
+  ) => {
+    const closedAt = Date.now();
+    const newRecentlyClosedTabs: RecentlyClosedTabState[] = newClosedTabs.map((tab) => ({
+      ...tab,
+      closedAt,
+    }));
+
+    const newSortedRecentlyClosedTabs = orderBy(
+      [...newRecentlyClosedTabs.reverse(), ...previousRecentlyClosedTabs],
+      'closedAt',
+      'desc'
+    );
+
+    const latestNRecentlyClosedTabs = newSortedRecentlyClosedTabs.slice(
+      0,
+      RECENTLY_CLOSED_TABS_LIMIT
+    );
+
+    const recentClosedAt =
+      latestNRecentlyClosedTabs[latestNRecentlyClosedTabs.length - 1]?.closedAt;
+
+    if (recentClosedAt) {
+      // keep other recently closed tabs from the same time point when they were closed
+      for (let i = RECENTLY_CLOSED_TABS_LIMIT; i < newSortedRecentlyClosedTabs.length; i++) {
+        if (newSortedRecentlyClosedTabs[i].closedAt === recentClosedAt) {
+          latestNRecentlyClosedTabs.push(newSortedRecentlyClosedTabs[i]);
+        } else {
+          break;
+        }
+      }
+    }
+
+    return latestNRecentlyClosedTabs;
   };
 
   const persistLocally: TabsStorageManager['persistLocally'] = async ({
@@ -207,7 +246,7 @@ export const getTabsStorageManager = ({
             .filter((tab) => tab.closedAt === storedClosedTab.closedAt)
             .map(toTabState),
           selectedTabId,
-          recentlyClosedTabs: closedTabs,
+          recentlyClosedTabs: getNRecentlyClosedTabs(closedTabs, openTabs),
         };
       }
     }
@@ -221,7 +260,7 @@ export const getTabsStorageManager = ({
       groupId: defaultGroupId,
       allTabs: [defaultTab],
       selectedTabId: defaultTab.id,
-      recentlyClosedTabs: closedTabs,
+      recentlyClosedTabs: getNRecentlyClosedTabs(closedTabs, openTabs),
     };
   };
 
@@ -229,5 +268,6 @@ export const getTabsStorageManager = ({
     persistLocally,
     updateTabStateLocally,
     loadLocally,
+    getNRecentlyClosedTabs,
   };
 };
