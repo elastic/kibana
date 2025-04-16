@@ -2318,55 +2318,6 @@
           },
           {
             "parentPluginId": "@kbn/monaco",
-            "id": "def-common.ESQLLang.getSignatureProvider",
-            "type": "Function",
-            "tags": [],
-            "label": "getSignatureProvider",
-            "description": [],
-            "signature": [
-              "(callbacks?: ",
-              {
-                "pluginId": "@kbn/esql-validation-autocomplete",
-                "scope": "common",
-                "docId": "kibKbnEsqlValidationAutocompletePluginApi",
-                "section": "def-common.ESQLCallbacks",
-                "text": "ESQLCallbacks"
-              },
-              " | undefined) => ",
-              "languages",
-              ".SignatureHelpProvider"
-            ],
-            "path": "src/platform/packages/shared/kbn-monaco/src/languages/esql/language.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/monaco",
-                "id": "def-common.ESQLLang.getSignatureProvider.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "callbacks",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "@kbn/esql-validation-autocomplete",
-                    "scope": "common",
-                    "docId": "kibKbnEsqlValidationAutocompletePluginApi",
-                    "section": "def-common.ESQLCallbacks",
-                    "text": "ESQLCallbacks"
-                  },
-                  " | undefined"
-                ],
-                "path": "src/platform/packages/shared/kbn-monaco/src/languages/esql/language.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": false
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/monaco",
             "id": "def-common.ESQLLang.getHoverProvider",
             "type": "Function",
             "tags": [],

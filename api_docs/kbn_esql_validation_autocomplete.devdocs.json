@@ -1905,14 +1905,6 @@
         "signature": [
           "(fullText: string, offset: number, context: ",
           "EditorContext",
-          ", astProvider: ",
-          {
-            "pluginId": "@kbn/esql-ast",
-            "scope": "common",
-            "docId": "kibKbnEsqlAstPluginApi",
-            "section": "def-common.AstProviderFn",
-            "text": "AstProviderFn"
-          },
           ", resourceRetriever: ",
           {
             "pluginId": "@kbn/esql-validation-autocomplete",
@@ -1983,27 +1975,6 @@
           {
             "parentPluginId": "@kbn/esql-validation-autocomplete",
             "id": "def-common.suggest.$4",
-            "type": "Function",
-            "tags": [],
-            "label": "astProvider",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/esql-ast",
-                "scope": "common",
-                "docId": "kibKbnEsqlAstPluginApi",
-                "section": "def-common.AstProviderFn",
-                "text": "AstProviderFn"
-              }
-            ],
-            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/autocomplete/autocomplete.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "@kbn/esql-validation-autocomplete",
-            "id": "def-common.suggest.$5",
             "type": "Object",
             "tags": [],
             "label": "resourceRetriever",
@@ -2037,15 +2008,7 @@
           "\nES|QL validation public API\nIt takes a query string and returns a list of messages (errors and warnings) after validate\nThe astProvider is optional, but if not provided the default one from '@kbn/esql-validation-autocomplete' will be used.\nThis is useful for async loading the ES|QL parser and reduce the bundle size, or to swap grammar version.\nAs for the callbacks, while optional, the validation function will selectively ignore some errors types based on each callback missing."
         ],
         "signature": [
-          "(queryString: string, astProvider: ",
-          {
-            "pluginId": "@kbn/esql-ast",
-            "scope": "common",
-            "docId": "kibKbnEsqlAstPluginApi",
-            "section": "def-common.AstProviderFn",
-            "text": "AstProviderFn"
-          },
-          ", options: ",
+          "(queryString: string, options: ",
           "ValidationOptions",
           ", callbacks: ",
           {
@@ -2081,27 +2044,6 @@
           {
             "parentPluginId": "@kbn/esql-validation-autocomplete",
             "id": "def-common.validateQuery.$2",
-            "type": "Function",
-            "tags": [],
-            "label": "astProvider",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/esql-ast",
-                "scope": "common",
-                "docId": "kibKbnEsqlAstPluginApi",
-                "section": "def-common.AstProviderFn",
-                "text": "AstProviderFn"
-              }
-            ],
-            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/validation/validation.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "@kbn/esql-validation-autocomplete",
-            "id": "def-common.validateQuery.$3",
             "type": "Object",
             "tags": [],
             "label": "options",
@@ -2116,7 +2058,7 @@
           },
           {
             "parentPluginId": "@kbn/esql-validation-autocomplete",
-            "id": "def-common.validateQuery.$4",
+            "id": "def-common.validateQuery.$3",
             "type": "Object",
             "tags": [],
             "label": "callbacks",
@@ -2659,6 +2601,20 @@
             "type": "CompoundType",
             "tags": [],
             "label": "isEcs",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/validation/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-validation-autocomplete",
+            "id": "def-common.ESQLRealField.hasConflict",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "hasConflict",
             "description": [],
             "signature": [
               "boolean | undefined"

@@ -3661,6 +3661,21 @@
       },
       {
         "parentPluginId": "@kbn/apm-synthtrace-client",
+        "id": "def-common.OtelLogDocument",
+        "type": "Type",
+        "tags": [],
+        "label": "OtelLogDocument",
+        "description": [],
+        "signature": [
+          "{ '@timestamp'?: number | undefined; } & Partial<{ _index?: string | undefined; trace_id?: string | undefined; attributes?: Record<string, unknown> | undefined; severity_text?: string | undefined; resource?: { attributes?: Record<string, unknown> | undefined; } | undefined; body?: { text?: string | undefined; structured?: Record<string, unknown> | undefined; } | undefined; }>"
+        ],
+        "path": "src/platform/packages/shared/kbn-apm-synthtrace-client/src/lib/otel_logs/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/apm-synthtrace-client",
         "id": "def-common.SpanKind",
         "type": "Type",
         "tags": [],
@@ -4960,6 +4975,64 @@
                 "label": "index",
                 "description": [],
                 "path": "src/platform/packages/shared/kbn-apm-synthtrace-client/src/lib/monitoring/kibana.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/apm-synthtrace-client",
+        "id": "def-common.otelLog",
+        "type": "Object",
+        "tags": [],
+        "label": "otelLog",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-apm-synthtrace-client/src/lib/otel_logs/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/apm-synthtrace-client",
+            "id": "def-common.otelLog.create",
+            "type": "Function",
+            "tags": [],
+            "label": "create",
+            "description": [],
+            "signature": [
+              "() => OtelLog"
+            ],
+            "path": "src/platform/packages/shared/kbn-apm-synthtrace-client/src/lib/otel_logs/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "@kbn/apm-synthtrace-client",
+            "id": "def-common.otelLog.createForIndex",
+            "type": "Function",
+            "tags": [],
+            "label": "createForIndex",
+            "description": [],
+            "signature": [
+              "(index: string) => OtelLog"
+            ],
+            "path": "src/platform/packages/shared/kbn-apm-synthtrace-client/src/lib/otel_logs/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/apm-synthtrace-client",
+                "id": "def-common.otelLog.createForIndex.$1",
+                "type": "string",
+                "tags": [],
+                "label": "index",
+                "description": [],
+                "path": "src/platform/packages/shared/kbn-apm-synthtrace-client/src/lib/otel_logs/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }

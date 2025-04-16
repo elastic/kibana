@@ -1333,6 +1333,9 @@
             "description": [
               "Optional title. If not provided and a \"link\" is provided the title will be the Deep link title"
             ],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3416,9 +3419,13 @@
         "label": "PanelSelectedNode",
         "description": [],
         "signature": [
-          "Pick<",
+          "{ id: string; title?: string | undefined; children?: ",
           "ChromeProjectNavigationNode",
-          ", \"id\" | \"children\" | \"path\" | \"sideNavStatus\" | \"deepLink\"> & { title: React.ReactNode; }"
+          "[] | undefined; path: string; sideNavStatus?: ",
+          "SideNavNodeStatus",
+          " | undefined; deepLink?: ",
+          "ChromeNavLink",
+          " | undefined; }"
         ],
         "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
         "deprecated": false,
