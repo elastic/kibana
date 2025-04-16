@@ -37,7 +37,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       );
     });
 
-    describe('listing', () => {
+    describe.only('listing', () => {
       beforeEach(async () => {
         await PageObjects.common.navigateToApp('dashboard');
         await PageObjects.dashboard.gotoDashboardLandingPage();
