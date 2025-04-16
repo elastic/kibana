@@ -7,44 +7,43 @@ Object {
       "breadcrumbStatus": "hidden",
       "children": Array [
         Object {
-          "link": "discover",
-        },
-        Object {
+          "breadcrumbStatus": "hidden",
           "children": Array [
             Object {
-              "id": "overview",
-              "link": "securitySolutionUI:overview",
-              "sideNavStatus": "hidden",
+              "link": "discover",
             },
             Object {
-              "id": "detection_response",
-              "link": "securitySolutionUI:detection_response",
-              "sideNavStatus": "hidden",
-            },
-            Object {
-              "id": "cloud_security_posture-dashboard",
-              "link": "securitySolutionUI:cloud_security_posture-dashboard",
-              "sideNavStatus": "hidden",
-            },
-            Object {
-              "id": "cloud_security_posture-vulnerability_dashboard",
-              "link": "securitySolutionUI:cloud_security_posture-vulnerability_dashboard",
-              "sideNavStatus": "hidden",
-            },
-            Object {
-              "id": "entity_analytics",
-              "link": "securitySolutionUI:entity_analytics",
-              "sideNavStatus": "hidden",
-            },
-            Object {
-              "id": "data_quality",
-              "link": "securitySolutionUI:data_quality",
-              "sideNavStatus": "hidden",
+              "children": Array [
+                Object {
+                  "id": "overview",
+                  "link": "securitySolutionUI:overview",
+                },
+                Object {
+                  "id": "detection_response",
+                  "link": "securitySolutionUI:detection_response",
+                },
+                Object {
+                  "id": "cloud_security_posture-dashboard",
+                  "link": "securitySolutionUI:cloud_security_posture-dashboard",
+                },
+                Object {
+                  "id": "cloud_security_posture-vulnerability_dashboard",
+                  "link": "securitySolutionUI:cloud_security_posture-vulnerability_dashboard",
+                },
+                Object {
+                  "id": "entity_analytics",
+                  "link": "securitySolutionUI:entity_analytics",
+                },
+                Object {
+                  "id": "data_quality",
+                  "link": "securitySolutionUI:data_quality",
+                },
+              ],
+              "id": "dashboards",
+              "link": "securitySolutionUI:dashboards",
+              "renderAs": "item",
             },
           ],
-          "id": "dashboards",
-          "link": "securitySolutionUI:dashboards",
-          "renderAs": "item",
         },
         Object {
           "breadcrumbStatus": "hidden",
@@ -82,7 +81,6 @@ Object {
                       "link": "securitySolutionUI:siem_migrations-rules",
                     },
                   ],
-                  "id": "category-management",
                   "title": "Management",
                 },
                 Object {
@@ -93,11 +91,10 @@ Object {
                       "link": "securitySolutionUI:coverage-overview",
                     },
                   ],
-                  "id": "category-discover",
                   "title": "Discover",
                 },
               ],
-              "id": "rules-landing",
+              "id": "securityGroup:rules",
               "renderAs": "panelOpener",
               "title": "Rules",
             },
@@ -118,17 +115,15 @@ Object {
                 Object {
                   "id": "cases_create",
                   "link": "securitySolutionUI:cases_create",
-                  "sideNavStatus": "hidden",
                 },
                 Object {
                   "id": "cases_configure",
                   "link": "securitySolutionUI:cases_configure",
-                  "sideNavStatus": "hidden",
                 },
               ],
               "id": "cases",
               "link": "securitySolutionUI:cases",
-              "renderAs": "panelOpener",
+              "renderAs": "item",
             },
           ],
         },
@@ -142,7 +137,6 @@ Object {
                     Object {
                       "id": "timelines-templates",
                       "link": "securitySolutionUI:timelines-templates",
-                      "sideNavStatus": "hidden",
                     },
                   ],
                   "id": "timelines",
@@ -152,15 +146,12 @@ Object {
                 Object {
                   "id": "notes",
                   "link": "securitySolutionUI:notes",
-                  "renderAs": "item",
                 },
                 Object {
-                  "id": "osquery:",
                   "link": "osquery",
-                  "renderAs": "item",
                 },
               ],
-              "id": "investigations",
+              "id": "securityGroup:investigations",
               "renderAs": "panelOpener",
               "title": "Investigations",
             },
@@ -277,7 +268,7 @@ Object {
                   "renderAs": "item",
                 },
               ],
-              "id": "explore",
+              "id": "securityGroup:explore",
               "renderAs": "panelOpener",
               "title": "Explore",
             },
@@ -291,32 +282,25 @@ Object {
                 Object {
                   "children": Array [
                     Object {
-                      "id": "fleet:agents",
                       "link": "fleet:agents",
                     },
                     Object {
-                      "id": "fleet:policies",
                       "link": "fleet:policies",
                       "title": "Policies",
                     },
                     Object {
-                      "id": "fleet:enrollment_tokens",
                       "link": "fleet:enrollment_tokens",
                     },
                     Object {
-                      "id": "fleet:uninstall_tokens",
                       "link": "fleet:uninstall_tokens",
                     },
                     Object {
-                      "id": "fleet:data_streams",
                       "link": "fleet:data_streams",
                     },
                     Object {
-                      "id": "fleet:settings",
                       "link": "fleet:settings",
                     },
                   ],
-                  "id": "fleet:",
                   "link": "fleet",
                   "title": "Fleet",
                 },
@@ -357,180 +341,92 @@ Object {
                   "title": "Endpoints",
                 },
                 Object {
-                  "id": "assets_custom",
                   "renderItem": [Function],
                   "title": "",
                 },
               ],
-              "id": "assets",
+              "id": "securityGroup:assets",
               "renderAs": "panelOpener",
               "title": "Assets",
             },
-          ],
-        },
-        Object {
-          "breadcrumbStatus": "hidden",
-          "children": Array [
             Object {
               "children": Array [
                 Object {
-                  "breadcrumbStatus": "hidden",
-                  "children": Array [
-                    Object {
-                      "id": "ml:overview",
-                      "link": "ml:overview",
-                      "title": "Overview",
-                    },
-                    Object {
-                      "id": "ml:notifications",
-                      "link": "ml:notifications",
-                      "title": "Notifications",
-                    },
-                    Object {
-                      "id": "ml:memoryUsage",
-                      "link": "ml:memoryUsage",
-                      "title": "Memory usage",
-                    },
-                  ],
-                },
-                Object {
-                  "breadcrumbStatus": "hidden",
-                  "children": Array [
-                    Object {
-                      "id": "ml:anomalyDetection",
-                      "link": "ml:anomalyDetection",
-                      "title": "Jobs",
-                    },
-                    Object {
-                      "id": "ml:anomalyExplorer",
-                      "link": "ml:anomalyExplorer",
-                      "title": "Anomaly explorer",
-                    },
-                    Object {
-                      "id": "ml:singleMetricViewer",
-                      "link": "ml:singleMetricViewer",
-                      "title": "Single metric viewer",
-                    },
-                    Object {
-                      "id": "ml:suppliedConfigurations",
-                      "link": "ml:suppliedConfigurations",
-                      "title": "Supplied configurations",
-                    },
-                    Object {
-                      "id": "ml:settings",
-                      "link": "ml:settings",
-                      "title": "Settings",
-                    },
-                  ],
-                  "id": "category-anomaly_detection",
-                  "title": "Anomaly detection",
-                },
-                Object {
-                  "breadcrumbStatus": "hidden",
-                  "children": Array [
-                    Object {
-                      "id": "ml:dataFrameAnalytics",
-                      "link": "ml:dataFrameAnalytics",
-                      "title": "Jobs",
-                    },
-                    Object {
-                      "id": "ml:resultExplorer",
-                      "link": "ml:resultExplorer",
-                      "title": "Result explorer",
-                    },
-                    Object {
-                      "id": "ml:analyticsMap",
-                      "link": "ml:analyticsMap",
-                      "title": "Analytics map",
-                    },
-                  ],
-                  "id": "category-data_frame analytics",
-                  "title": "Data frame analytics",
-                },
-                Object {
-                  "breadcrumbStatus": "hidden",
-                  "children": Array [
-                    Object {
-                      "id": "ml:nodesOverview",
-                      "link": "ml:nodesOverview",
-                      "title": "Trained models",
-                    },
-                  ],
-                  "id": "category-model_management",
-                  "title": "Model management",
-                },
-                Object {
-                  "breadcrumbStatus": "hidden",
-                  "children": Array [
-                    Object {
-                      "id": "ml:fileUpload",
-                      "link": "ml:fileUpload",
-                      "title": "File data visualizer",
-                    },
-                    Object {
-                      "id": "ml:indexDataVisualizer",
-                      "link": "ml:indexDataVisualizer",
-                      "title": "Data view data visualizer",
-                    },
-                    Object {
-                      "id": "ml:esqlDataVisualizer",
-                      "link": "ml:esqlDataVisualizer",
-                      "title": "ES|QL data visualizer",
-                    },
-                    Object {
-                      "id": "ml:dataDrift",
-                      "link": "ml:dataDrift",
-                      "title": "Data drift",
-                    },
-                  ],
-                  "id": "category-data_visualizer",
-                  "title": "Data visualizer",
-                },
-                Object {
-                  "breadcrumbStatus": "hidden",
-                  "children": Array [
-                    Object {
-                      "id": "ml:logRateAnalysis",
-                      "link": "ml:logRateAnalysis",
-                      "title": "Log rate analysis",
-                    },
-                    Object {
-                      "id": "ml:logPatternAnalysis",
-                      "link": "ml:logPatternAnalysis",
-                      "title": "Log pattern analysis",
-                    },
-                    Object {
-                      "id": "ml:changePointDetections",
-                      "link": "ml:changePointDetections",
-                      "title": "Change point detection",
-                    },
-                  ],
-                  "id": "category-aiops_labs",
-                  "title": "Aiops labs",
+                  "id": "entity_analytics-privileged_user_monitoring",
+                  "link": "securitySolutionUI:entity_analytics-privileged_user_monitoring",
                 },
               ],
-              "id": "machine_learning-landing",
+              "id": "securityGroup:entityAnalytics",
               "renderAs": "panelOpener",
-              "title": "Machine learning",
+              "title": "Entity Analytics",
             },
           ],
         },
         Object {
-          "breadcrumbStatus": "hidden",
           "children": Array [
             Object {
-              "id": "entity_analytics-management",
-              "link": "securitySolutionUI:entity_analytics-management",
-              "sideNavStatus": "hidden",
-              "title": "Entity Risk Score",
+              "breadcrumbStatus": "hidden",
+              "children": Array [
+                Object {
+                  "link": "ml:overview",
+                  "title": "Overview",
+                },
+                Object {
+                  "link": "ml:dataVisualizer",
+                  "title": "Data visualizer",
+                },
+              ],
             },
             Object {
-              "id": "entity_analytics-entity_store_management",
-              "link": "securitySolutionUI:entity_analytics-entity_store_management",
-              "sideNavStatus": "hidden",
-              "title": "Entity Store",
+              "breadcrumbStatus": "hidden",
+              "children": Array [
+                Object {
+                  "link": "ml:anomalyExplorer",
+                  "title": "Anomaly explorer",
+                },
+                Object {
+                  "link": "ml:singleMetricViewer",
+                  "title": "Single metric viewer",
+                },
+              ],
+              "title": "Anomaly detection",
+            },
+            Object {
+              "breadcrumbStatus": "hidden",
+              "children": Array [
+                Object {
+                  "link": "ml:resultExplorer",
+                  "title": "Result explorer",
+                },
+                Object {
+                  "link": "ml:analyticsMap",
+                  "title": "Analytics map",
+                },
+              ],
+              "title": "Data frame analytics",
+            },
+            Object {
+              "breadcrumbStatus": "hidden",
+              "children": Array [
+                Object {
+                  "link": "ml:logRateAnalysis",
+                  "title": "Log rate analysis",
+                },
+                Object {
+                  "link": "ml:logPatternAnalysis",
+                  "title": "Log pattern analysis",
+                },
+                Object {
+                  "link": "ml:changePointDetections",
+                  "title": "Change point detection",
+                },
+              ],
+              "title": "Aiops labs",
             },
           ],
+          "id": "securityGroup:machineLearning",
+          "renderAs": "panelOpener",
+          "title": "Machine learning",
         },
       ],
       "defaultIsCollapsed": false,
@@ -636,6 +532,26 @@ Object {
             Object {
               "children": Array [
                 Object {
+                  "link": "management:overview",
+                },
+                Object {
+                  "link": "management:anomaly_detection",
+                },
+                Object {
+                  "link": "management:analytics",
+                },
+                Object {
+                  "link": "management:trained_models",
+                },
+                Object {
+                  "link": "management:supplied_configurations",
+                },
+              ],
+              "title": "Machine learning",
+            },
+            Object {
+              "children": Array [
+                Object {
                   "link": "management:users",
                 },
                 Object {
@@ -703,7 +619,6 @@ Object {
               "title": "Stack",
             },
           ],
-          "id": "stack_management",
           "renderAs": "panelOpener",
           "spaceBefore": null,
           "title": "Stack Management",
@@ -716,7 +631,6 @@ Object {
         },
       ],
       "icon": "gear",
-      "id": "category-management",
       "title": "Management",
       "type": "navGroup",
     },

@@ -1,51 +1,49 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`ESS Security Side Nav registers the navigation tree definition 1`] = `
+exports[`Security Side Nav registers the navigation tree definition for serverless security 1`] = `
 Object {
   "body": Array [
     Object {
       "breadcrumbStatus": "hidden",
       "children": Array [
         Object {
-          "id": "discover:",
-          "link": "discover",
-        },
-        Object {
+          "breadcrumbStatus": "hidden",
           "children": Array [
             Object {
-              "id": "overview",
-              "link": "securitySolutionUI:overview",
-              "sideNavStatus": "hidden",
+              "link": "discover",
             },
             Object {
-              "id": "detection_response",
-              "link": "securitySolutionUI:detection_response",
-              "sideNavStatus": "hidden",
-            },
-            Object {
-              "id": "cloud_security_posture-dashboard",
-              "link": "securitySolutionUI:cloud_security_posture-dashboard",
-              "sideNavStatus": "hidden",
-            },
-            Object {
-              "id": "cloud_security_posture-vulnerability_dashboard",
-              "link": "securitySolutionUI:cloud_security_posture-vulnerability_dashboard",
-              "sideNavStatus": "hidden",
-            },
-            Object {
-              "id": "entity_analytics",
-              "link": "securitySolutionUI:entity_analytics",
-              "sideNavStatus": "hidden",
-            },
-            Object {
-              "id": "data_quality",
-              "link": "securitySolutionUI:data_quality",
-              "sideNavStatus": "hidden",
+              "children": Array [
+                Object {
+                  "id": "overview",
+                  "link": "securitySolutionUI:overview",
+                },
+                Object {
+                  "id": "detection_response",
+                  "link": "securitySolutionUI:detection_response",
+                },
+                Object {
+                  "id": "cloud_security_posture-dashboard",
+                  "link": "securitySolutionUI:cloud_security_posture-dashboard",
+                },
+                Object {
+                  "id": "cloud_security_posture-vulnerability_dashboard",
+                  "link": "securitySolutionUI:cloud_security_posture-vulnerability_dashboard",
+                },
+                Object {
+                  "id": "entity_analytics",
+                  "link": "securitySolutionUI:entity_analytics",
+                },
+                Object {
+                  "id": "data_quality",
+                  "link": "securitySolutionUI:data_quality",
+                },
+              ],
+              "id": "dashboards",
+              "link": "securitySolutionUI:dashboards",
+              "renderAs": "item",
             },
           ],
-          "id": "dashboards",
-          "link": "securitySolutionUI:dashboards",
-          "renderAs": "item",
         },
         Object {
           "breadcrumbStatus": "hidden",
@@ -81,10 +79,8 @@ Object {
                     Object {
                       "id": "siem_migrations-rules",
                       "link": "securitySolutionUI:siem_migrations-rules",
-                      "title": "SIEM rule migrations",
                     },
                   ],
-                  "id": "category-management",
                   "title": "Management",
                 },
                 Object {
@@ -95,12 +91,10 @@ Object {
                       "link": "securitySolutionUI:coverage-overview",
                     },
                   ],
-                  "id": "category-discover",
                   "title": "Discover",
                 },
               ],
-              "id": "rules-landing",
-              "link": "securitySolutionUI:rules-landing",
+              "id": "securityGroup:rules",
               "renderAs": "panelOpener",
               "title": "Rules",
             },
@@ -121,17 +115,15 @@ Object {
                 Object {
                   "id": "cases_create",
                   "link": "securitySolutionUI:cases_create",
-                  "sideNavStatus": "hidden",
                 },
                 Object {
                   "id": "cases_configure",
                   "link": "securitySolutionUI:cases_configure",
-                  "sideNavStatus": "hidden",
                 },
               ],
               "id": "cases",
               "link": "securitySolutionUI:cases",
-              "renderAs": "panelOpener",
+              "renderAs": "item",
             },
           ],
         },
@@ -145,7 +137,6 @@ Object {
                     Object {
                       "id": "timelines-templates",
                       "link": "securitySolutionUI:timelines-templates",
-                      "sideNavStatus": "hidden",
                     },
                   ],
                   "id": "timelines",
@@ -155,16 +146,12 @@ Object {
                 Object {
                   "id": "notes",
                   "link": "securitySolutionUI:notes",
-                  "renderAs": "item",
                 },
                 Object {
-                  "id": "osquery:",
                   "link": "osquery",
-                  "renderAs": "item",
                 },
               ],
-              "id": "investigations",
-              "link": "securitySolutionUI:investigations",
+              "id": "securityGroup:investigations",
               "renderAs": "panelOpener",
               "title": "Investigations",
             },
@@ -281,8 +268,7 @@ Object {
                   "renderAs": "item",
                 },
               ],
-              "id": "explore",
-              "link": "securitySolutionUI:explore",
+              "id": "securityGroup:explore",
               "renderAs": "panelOpener",
               "title": "Explore",
             },
@@ -296,32 +282,25 @@ Object {
                 Object {
                   "children": Array [
                     Object {
-                      "id": "fleet:agents",
                       "link": "fleet:agents",
                     },
                     Object {
-                      "id": "fleet:policies",
                       "link": "fleet:policies",
                       "title": "Policies",
                     },
                     Object {
-                      "id": "fleet:enrollment_tokens",
                       "link": "fleet:enrollment_tokens",
                     },
                     Object {
-                      "id": "fleet:uninstall_tokens",
                       "link": "fleet:uninstall_tokens",
                     },
                     Object {
-                      "id": "fleet:data_streams",
                       "link": "fleet:data_streams",
                     },
                     Object {
-                      "id": "fleet:settings",
                       "link": "fleet:settings",
                     },
                   ],
-                  "id": "fleet:",
                   "link": "fleet",
                   "title": "Fleet",
                 },
@@ -362,132 +341,92 @@ Object {
                   "title": "Endpoints",
                 },
                 Object {
-                  "id": "assets_custom",
                   "renderItem": [Function],
                   "title": "",
                 },
               ],
-              "id": "assets",
-              "link": "securitySolutionUI:assets",
+              "id": "securityGroup:assets",
               "renderAs": "panelOpener",
               "title": "Assets",
             },
-          ],
-        },
-        Object {
-          "children": Array [
-            Object {
-              "id": "entity_analytics-privileged_user_monitoring",
-              "link": "securitySolutionUI:entity_analytics-privileged_user_monitoring",
-              "renderAs": "item",
-            },
-          ],
-          "id": "entity_analytics-landing",
-          "link": "securitySolutionUI:entity_analytics-landing",
-          "renderAs": "panelOpener",
-          "spaceBefore": null,
-          "title": "Entity Analytics",
-        },
-        Object {
-          "breadcrumbStatus": "hidden",
-          "children": Array [
             Object {
               "children": Array [
                 Object {
-                  "breadcrumbStatus": "hidden",
-                  "children": Array [
-                    Object {
-                      "id": "ml:overview",
-                      "link": "ml:overview",
-                      "title": "Overview",
-                    },
-                    Object {
-                      "id": "ml:data_visualizer",
-                      "link": "ml:dataVisualizer",
-                      "title": "Data visualizer",
-                    },
-                  ],
-                },
-                Object {
-                  "breadcrumbStatus": "hidden",
-                  "children": Array [
-                    Object {
-                      "id": "ml:anomalyExplorer",
-                      "link": "ml:anomalyExplorer",
-                      "title": "Anomaly explorer",
-                    },
-                    Object {
-                      "id": "ml:singleMetricViewer",
-                      "link": "ml:singleMetricViewer",
-                      "title": "Single metric viewer",
-                    },
-                  ],
-                  "id": "category-anomaly_detection",
-                  "title": "Anomaly detection",
-                },
-                Object {
-                  "breadcrumbStatus": "hidden",
-                  "children": Array [
-                    Object {
-                      "id": "ml:resultExplorer",
-                      "link": "ml:resultExplorer",
-                      "title": "Result explorer",
-                    },
-                    Object {
-                      "id": "ml:analyticsMap",
-                      "link": "ml:analyticsMap",
-                      "title": "Analytics map",
-                    },
-                  ],
-                  "id": "category-data_frame analytics",
-                  "title": "Data frame analytics",
-                },
-                Object {
-                  "breadcrumbStatus": "hidden",
-                  "children": Array [
-                    Object {
-                      "id": "ml:logRateAnalysis",
-                      "link": "ml:logRateAnalysis",
-                      "title": "Log rate analysis",
-                    },
-                    Object {
-                      "id": "ml:logPatternAnalysis",
-                      "link": "ml:logPatternAnalysis",
-                      "title": "Log pattern analysis",
-                    },
-                    Object {
-                      "id": "ml:changePointDetections",
-                      "link": "ml:changePointDetections",
-                      "title": "Change point detection",
-                    },
-                  ],
-                  "id": "category-aiops_labs",
-                  "title": "Aiops labs",
+                  "id": "entity_analytics-privileged_user_monitoring",
+                  "link": "securitySolutionUI:entity_analytics-privileged_user_monitoring",
                 },
               ],
-              "id": "machine_learning-landing",
-              "link": "securitySolutionUI:machine_learning-landing",
+              "id": "securityGroup:entityAnalytics",
               "renderAs": "panelOpener",
-              "title": "Machine learning",
+              "title": "Entity Analytics",
             },
           ],
         },
         Object {
-          "breadcrumbStatus": "hidden",
           "children": Array [
             Object {
-              "id": "entity_analytics-management",
-              "link": "securitySolutionUI:entity_analytics-management",
-              "sideNavStatus": "hidden",
-              "title": "Entity Risk Score",
+              "breadcrumbStatus": "hidden",
+              "children": Array [
+                Object {
+                  "link": "ml:overview",
+                  "title": "Overview",
+                },
+                Object {
+                  "link": "ml:dataVisualizer",
+                  "title": "Data visualizer",
+                },
+              ],
             },
             Object {
-              "id": "entity_analytics-entity_store_management",
-              "link": "securitySolutionUI:entity_analytics-entity_store_management",
-              "sideNavStatus": "hidden",
-              "title": "Entity Store",
+              "breadcrumbStatus": "hidden",
+              "children": Array [
+                Object {
+                  "link": "ml:anomalyExplorer",
+                  "title": "Anomaly explorer",
+                },
+                Object {
+                  "link": "ml:singleMetricViewer",
+                  "title": "Single metric viewer",
+                },
+              ],
+              "title": "Anomaly detection",
+            },
+            Object {
+              "breadcrumbStatus": "hidden",
+              "children": Array [
+                Object {
+                  "link": "ml:resultExplorer",
+                  "title": "Result explorer",
+                },
+                Object {
+                  "link": "ml:analyticsMap",
+                  "title": "Analytics map",
+                },
+              ],
+              "title": "Data frame analytics",
+            },
+            Object {
+              "breadcrumbStatus": "hidden",
+              "children": Array [
+                Object {
+                  "link": "ml:logRateAnalysis",
+                  "title": "Log rate analysis",
+                },
+                Object {
+                  "link": "ml:logPatternAnalysis",
+                  "title": "Log pattern analysis",
+                },
+                Object {
+                  "link": "ml:changePointDetections",
+                  "title": "Change point detection",
+                },
+              ],
+              "title": "Aiops labs",
             },
           ],
+          "id": "securityGroup:machineLearning",
+          "renderAs": "panelOpener",
+          "title": "Machine learning",
         },
       ],
       "defaultIsCollapsed": false,
@@ -501,6 +440,7 @@ Object {
   "footer": Array [
     Object {
       "icon": "launch",
+      "id": "get_started",
       "link": "securitySolutionUI:get_started",
       "type": "navItem",
     },
@@ -516,72 +456,84 @@ Object {
         Object {
           "children": Array [
             Object {
+              "breadcrumbStatus": "hidden",
               "children": Array [
                 Object {
-                  "link": "management:ingest_pipelines",
-                },
-                Object {
-                  "link": "management:pipelines",
-                },
-              ],
-              "title": "Ingest",
-            },
-            Object {
-              "children": Array [
-                Object {
+                  "breadcrumbStatus": "hidden",
                   "link": "management:index_management",
                 },
                 Object {
-                  "link": "management:index_lifecycle_management",
-                },
-                Object {
-                  "link": "management:snapshot_restore",
-                },
-                Object {
-                  "link": "management:rollup_jobs",
-                },
-                Object {
+                  "breadcrumbStatus": "hidden",
                   "link": "management:transform",
                 },
                 Object {
-                  "link": "management:cross_cluster_replication",
+                  "breadcrumbStatus": "hidden",
+                  "link": "management:ingest_pipelines",
                 },
                 Object {
-                  "link": "management:remote_clusters",
+                  "breadcrumbStatus": "hidden",
+                  "link": "management:dataViews",
                 },
                 Object {
-                  "link": "management:migrate_data",
+                  "breadcrumbStatus": "hidden",
+                  "link": "management:jobsListLink",
+                },
+                Object {
+                  "breadcrumbStatus": "hidden",
+                  "link": "management:pipelines",
+                },
+                Object {
+                  "breadcrumbStatus": "hidden",
+                  "link": "management:data_quality",
+                },
+                Object {
+                  "breadcrumbStatus": "hidden",
+                  "link": "management:data_usage",
                 },
               ],
               "title": "Data",
             },
             Object {
+              "breadcrumbStatus": "hidden",
               "children": Array [
                 Object {
+                  "breadcrumbStatus": "hidden",
+                  "link": "management:api_keys",
+                },
+                Object {
+                  "breadcrumbStatus": "hidden",
+                  "link": "management:roles",
+                },
+                Object {
+                  "cloudLink": "userAndRoles",
+                  "title": "Manage organization members",
+                },
+              ],
+              "title": "Access",
+            },
+            Object {
+              "breadcrumbStatus": "hidden",
+              "children": Array [
+                Object {
+                  "breadcrumbStatus": "hidden",
                   "link": "management:triggersActions",
                 },
                 Object {
-                  "link": "management:cases",
-                },
-                Object {
+                  "breadcrumbStatus": "hidden",
                   "link": "management:triggersActionsConnectors",
                 },
                 Object {
-                  "link": "management:reporting",
-                },
-                Object {
-                  "link": "management:jobsListLink",
-                },
-                Object {
-                  "link": "management:watcher",
-                },
-                Object {
+                  "breadcrumbStatus": "hidden",
                   "link": "management:maintenanceWindows",
                 },
                 Object {
+                  "breadcrumbStatus": "hidden",
+                  "id": "entity_analytics-management",
                   "link": "securitySolutionUI:entity_analytics-management",
                 },
                 Object {
+                  "breadcrumbStatus": "hidden",
+                  "id": "entity_analytics-entity_store_management",
                   "link": "securitySolutionUI:entity_analytics-entity_store_management",
                 },
               ],
@@ -608,44 +560,27 @@ Object {
               "title": "Machine learning",
             },
             Object {
+              "breadcrumbStatus": "hidden",
               "children": Array [
                 Object {
-                  "link": "management:users",
+                  "breadcrumbStatus": "hidden",
+                  "link": "management:spaces",
                 },
                 Object {
-                  "link": "management:roles",
-                },
-                Object {
-                  "link": "management:api_keys",
-                },
-                Object {
-                  "link": "management:role_mappings",
-                },
-              ],
-              "title": "Security",
-            },
-            Object {
-              "children": Array [
-                Object {
-                  "link": "management:dataViews",
-                },
-                Object {
-                  "link": "management:filesManagement",
-                },
-                Object {
+                  "breadcrumbStatus": "hidden",
                   "link": "management:objects",
                 },
                 Object {
+                  "breadcrumbStatus": "hidden",
+                  "link": "management:filesManagement",
+                },
+                Object {
+                  "breadcrumbStatus": "hidden",
+                  "link": "management:reporting",
+                },
+                Object {
+                  "breadcrumbStatus": "hidden",
                   "link": "management:tags",
-                },
-                Object {
-                  "link": "management:search_sessions",
-                },
-                Object {
-                  "link": "management:aiAssistantManagementSelection",
-                },
-                Object {
-                  "link": "management:spaces",
                 },
                 Object {
                   "link": "maps",
@@ -653,28 +588,22 @@ Object {
                 Object {
                   "link": "visualize",
                 },
-                Object {
-                  "link": "graph",
-                },
-                Object {
-                  "link": "canvas",
-                },
-                Object {
-                  "link": "management:settings",
-                },
               ],
-              "title": "Kibana",
+              "title": "Content",
             },
             Object {
+              "breadcrumbStatus": "hidden",
               "children": Array [
                 Object {
-                  "link": "management:license_management",
+                  "breadcrumbStatus": "hidden",
+                  "link": "management:settings",
                 },
                 Object {
-                  "link": "management:upgrade_assistant",
+                  "breadcrumbStatus": "hidden",
+                  "link": "management:securityAiAssistantManagement",
                 },
               ],
-              "title": "Stack",
+              "title": "Other",
             },
           ],
           "id": "stack_management",
@@ -683,15 +612,280 @@ Object {
           "title": "Stack Management",
         },
         Object {
-          "link": "monitoring",
+          "link": "integrations",
         },
         Object {
-          "link": "integrations",
+          "cloudLink": "billingAndSub",
         },
       ],
       "icon": "gear",
       "id": "category-management",
-      "title": "Management",
+      "title": "Project Settings",
+      "type": "navGroup",
+    },
+  ],
+}
+`;
+
+exports[`Security Side Nav registers the navigation tree definition for serverless security with AI SOC 1`] = `
+Object {
+  "body": Array [
+    Object {
+      "breadcrumbStatus": "hidden",
+      "children": Array [
+        Object {
+          "breadcrumbStatus": "hidden",
+          "children": Array [
+            Object {
+              "id": "alert_summary",
+              "link": "securitySolutionUI:alert_summary",
+            },
+            Object {
+              "id": "attack_discovery",
+              "link": "securitySolutionUI:attack_discovery",
+            },
+          ],
+        },
+        Object {
+          "breadcrumbStatus": "hidden",
+          "children": Array [
+            Object {
+              "children": Array [
+                Object {
+                  "id": "cases_create",
+                  "link": "securitySolutionUI:cases_create",
+                },
+                Object {
+                  "id": "cases_configure",
+                  "link": "securitySolutionUI:cases_configure",
+                },
+              ],
+              "id": "cases",
+              "link": "securitySolutionUI:cases",
+              "renderAs": "item",
+            },
+            Object {
+              "children": Array [
+                Object {
+                  "id": "configurations-ai_settings",
+                  "link": "securitySolutionUI:configurations-ai_settings",
+                },
+                Object {
+                  "id": "configurations-basic_rules",
+                  "link": "securitySolutionUI:configurations-basic_rules",
+                },
+                Object {
+                  "id": "configurations-integrations",
+                  "link": "securitySolutionUI:configurations-integrations",
+                },
+              ],
+              "id": "configurations",
+              "link": "securitySolutionUI:configurations",
+              "renderAs": "item",
+            },
+          ],
+        },
+        Object {
+          "breadcrumbStatus": "hidden",
+          "children": Array [
+            Object {
+              "link": "discover",
+            },
+          ],
+        },
+      ],
+      "defaultIsCollapsed": false,
+      "icon": [Function],
+      "id": "security_solution_ai_nav",
+      "isCollapsible": false,
+      "title": "AI for SOC",
+      "type": "navGroup",
+    },
+  ],
+  "footer": Array [
+    Object {
+      "icon": "launch",
+      "id": "get_started",
+      "link": "securitySolutionUI:get_started",
+      "type": "navItem",
+    },
+    Object {
+      "icon": "editorCodeBlock",
+      "link": "dev_tools",
+      "title": "Developer tools",
+      "type": "navItem",
+    },
+    Object {
+      "breadcrumbStatus": "hidden",
+      "children": Array [
+        Object {
+          "children": Array [
+            Object {
+              "breadcrumbStatus": "hidden",
+              "children": Array [
+                Object {
+                  "breadcrumbStatus": "hidden",
+                  "link": "management:index_management",
+                },
+                Object {
+                  "breadcrumbStatus": "hidden",
+                  "link": "management:transform",
+                },
+                Object {
+                  "breadcrumbStatus": "hidden",
+                  "link": "management:ingest_pipelines",
+                },
+                Object {
+                  "breadcrumbStatus": "hidden",
+                  "link": "management:dataViews",
+                },
+                Object {
+                  "breadcrumbStatus": "hidden",
+                  "link": "management:jobsListLink",
+                },
+                Object {
+                  "breadcrumbStatus": "hidden",
+                  "link": "management:pipelines",
+                },
+                Object {
+                  "breadcrumbStatus": "hidden",
+                  "link": "management:data_quality",
+                },
+                Object {
+                  "breadcrumbStatus": "hidden",
+                  "link": "management:data_usage",
+                },
+              ],
+              "title": "Data",
+            },
+            Object {
+              "breadcrumbStatus": "hidden",
+              "children": Array [
+                Object {
+                  "breadcrumbStatus": "hidden",
+                  "link": "management:api_keys",
+                },
+                Object {
+                  "breadcrumbStatus": "hidden",
+                  "link": "management:roles",
+                },
+                Object {
+                  "cloudLink": "userAndRoles",
+                  "title": "Manage organization members",
+                },
+              ],
+              "title": "Access",
+            },
+            Object {
+              "breadcrumbStatus": "hidden",
+              "children": Array [
+                Object {
+                  "breadcrumbStatus": "hidden",
+                  "link": "management:triggersActions",
+                },
+                Object {
+                  "breadcrumbStatus": "hidden",
+                  "link": "management:triggersActionsConnectors",
+                },
+                Object {
+                  "breadcrumbStatus": "hidden",
+                  "link": "management:maintenanceWindows",
+                },
+                Object {
+                  "breadcrumbStatus": "hidden",
+                  "id": "entity_analytics-management",
+                  "link": "securitySolutionUI:entity_analytics-management",
+                },
+                Object {
+                  "breadcrumbStatus": "hidden",
+                  "id": "entity_analytics-entity_store_management",
+                  "link": "securitySolutionUI:entity_analytics-entity_store_management",
+                },
+              ],
+              "title": "Alerts and Insights",
+            },
+            Object {
+              "children": Array [
+                Object {
+                  "link": "management:overview",
+                },
+                Object {
+                  "link": "management:anomaly_detection",
+                },
+                Object {
+                  "link": "management:analytics",
+                },
+                Object {
+                  "link": "management:trained_models",
+                },
+                Object {
+                  "link": "management:supplied_configurations",
+                },
+              ],
+              "title": "Machine learning",
+            },
+            Object {
+              "breadcrumbStatus": "hidden",
+              "children": Array [
+                Object {
+                  "breadcrumbStatus": "hidden",
+                  "link": "management:spaces",
+                },
+                Object {
+                  "breadcrumbStatus": "hidden",
+                  "link": "management:objects",
+                },
+                Object {
+                  "breadcrumbStatus": "hidden",
+                  "link": "management:filesManagement",
+                },
+                Object {
+                  "breadcrumbStatus": "hidden",
+                  "link": "management:reporting",
+                },
+                Object {
+                  "breadcrumbStatus": "hidden",
+                  "link": "management:tags",
+                },
+                Object {
+                  "link": "maps",
+                },
+                Object {
+                  "link": "visualize",
+                },
+              ],
+              "title": "Content",
+            },
+            Object {
+              "breadcrumbStatus": "hidden",
+              "children": Array [
+                Object {
+                  "breadcrumbStatus": "hidden",
+                  "link": "management:settings",
+                },
+                Object {
+                  "breadcrumbStatus": "hidden",
+                  "link": "management:securityAiAssistantManagement",
+                },
+              ],
+              "title": "Other",
+            },
+          ],
+          "id": "stack_management",
+          "renderAs": "panelOpener",
+          "spaceBefore": null,
+          "title": "Stack Management",
+        },
+        Object {
+          "link": "integrations",
+        },
+        Object {
+          "cloudLink": "billingAndSub",
+        },
+      ],
+      "icon": "gear",
+      "id": "category-management",
+      "title": "Project Settings",
       "type": "navGroup",
     },
   ],

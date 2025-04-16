@@ -118,7 +118,7 @@ export const useSyncGlobalQueryString = () => {
   const linkInfo = useLinkInfo(pageName);
 
   useEffect(() => {
-    const { skipUrlState = true } = linkInfo ?? {};
+    const { skipUrlState } = linkInfo ?? { skipUrlState: true };
     const paramsToUpdate = { ...globalUrlParam };
 
     if (skipUrlState) {
