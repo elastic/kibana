@@ -31,18 +31,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       const createFlowResponse = await adminClient
-        .post('/internal/observability_onboarding/logs/flow')
+        .post('/internal/observability_onboarding/flow')
         .send({
-          type: 'logFiles',
-          name: 'name',
-          state: {
-            datasetName,
-            namespace,
-            logFilePaths: ['my-service.log'],
-          },
+          name: 'test-onboarding',
         });
 
-      onboardingId = createFlowResponse.body.onboardingId;
+      onboardingId = createFlowResponse.body.onboardingFlow.id;
     });
 
     it(`fails with a 404 error when onboardingId doesn't exists`, async () => {
@@ -52,17 +46,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       expect(response.status).to.be(404);
       expect(response.body.message).to.contain('onboarding session not found');
-    });
-
-    it('should skip log verification and return log-ingest as incomplete when ea-status is not complete', async () => {
-      const response = await adminClient.get(
-        `/internal/observability_onboarding/flow/${onboardingId}/progress`
-      );
-
-      expect(response.status).to.be(200);
-
-      const logsIngestProgress = response.body.progress['logs-ingest'];
-      expect(logsIngestProgress).to.have.property('status', 'incomplete');
     });
 
     describe('when ea-status is complete', () => {
