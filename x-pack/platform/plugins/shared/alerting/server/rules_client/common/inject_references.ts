@@ -80,8 +80,8 @@ export function injectReferencesIntoParams<
 
 export function injectReferencesIntoArtifacts(
   ruleId: string,
-  artifacts: RawRule['artifacts'],
-  references: SavedObjectReference[]
+  artifacts?: RawRule['artifacts'],
+  references?: SavedObjectReference[]
 ) {
   if (!artifacts) {
     return { dashboards: [] };
@@ -89,7 +89,7 @@ export function injectReferencesIntoArtifacts(
   return {
     ...artifacts,
     dashboards: artifacts.dashboards?.map((dashboard) => {
-      const reference = references.find(
+      const reference = references?.find(
         (ref) => ref.name === dashboard.refId && ref.type === 'dashboard'
       );
       if (!reference) {

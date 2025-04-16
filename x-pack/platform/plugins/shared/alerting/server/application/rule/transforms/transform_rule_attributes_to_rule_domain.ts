@@ -12,15 +12,13 @@ import { getRuleSnoozeEndTime } from '../../../lib';
 import type { RuleDomain, Monitoring, RuleParams } from '../types';
 import type { PartialRule, RawRule, RawRuleExecutionStatus, SanitizedRule } from '../../../types';
 import type { UntypedNormalizedRuleType } from '../../../rule_type_registry';
-import {
-  injectReferencesIntoParams,
-  injectReferencesIntoArtifacts,
-} from '../../../rules_client/common';
+import { injectReferencesIntoParams } from '../../../rules_client/common';
 import { getActiveScheduledSnoozes } from '../../../lib/is_rule_snoozed';
 import {
   transformRawActionsToDomainActions,
   transformRawActionsToDomainSystemActions,
 } from './transform_raw_actions_to_domain_actions';
+import { transformRawArtifactsToDomainArtifacts } from './transform_raw_artifacts_to_domain_artifacts';
 
 const INITIAL_LAST_RUN_METRICS = {
   duration: 0,
@@ -172,10 +170,10 @@ export const transformRuleAttributesToRuleDomain = <Params extends RuleParams = 
       omitGeneratedValues,
     });
 
-  const artifactsWithInjectedRefs = injectReferencesIntoArtifacts(
+  const ruleDomainArtifacts = transformRawArtifactsToDomainArtifacts(
     id,
     esRule.artifacts,
-    references || []
+    references
   );
   const params = injectReferencesIntoParams<Params, RuleParams>(
     id,
@@ -242,7 +240,7 @@ export const transformRuleAttributesToRuleDomain = <Params extends RuleParams = 
     ...(esRule.alertDelay ? { alertDelay: esRule.alertDelay } : {}),
     ...(esRule.legacyId !== undefined ? { legacyId: esRule.legacyId } : {}),
     ...(esRule.flapping !== undefined ? { flapping: esRule.flapping } : {}),
-    artifacts: artifactsWithInjectedRefs,
+    artifacts: ruleDomainArtifacts,
   };
 
   // Bad casts, but will fix once we fix all rule types
