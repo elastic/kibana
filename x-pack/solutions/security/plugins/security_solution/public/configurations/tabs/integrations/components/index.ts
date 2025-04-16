@@ -5,13 +5,5 @@
  * 2.0.
  */
 
-export enum ConfigurationTabs {
-  integrations = 'integrations',
-  basicRules = 'basic_rules',
-  aiSettings = 'ai_settings',
-}
-
-export enum IntegrationsFacets {
-  available = 'browse',
-  installed = 'installed',
-}
+export { IntegrationsPage } from './integrations_page';
+export { IntegrationsSkeleton } from './integrations_skeleton';
