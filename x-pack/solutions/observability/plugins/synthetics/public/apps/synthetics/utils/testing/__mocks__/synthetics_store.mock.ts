@@ -120,11 +120,6 @@ export const mockState: SyntheticsAppState = {
     error: null,
     data: [],
   },
-  settings: {
-    loading: false,
-    error: null,
-    success: null,
-  },
   dynamicSettings: {
     loading: false,
     locationMonitors: [],
