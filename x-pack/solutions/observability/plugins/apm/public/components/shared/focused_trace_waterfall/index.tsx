@@ -14,7 +14,7 @@ import type {
   IWaterfallTransaction,
 } from '../../app/transaction_details/waterfall_with_summary/waterfall_container/waterfall/waterfall_helpers/waterfall_helpers';
 import {
-  assignColorsAndGenerateLegends,
+  generateLegendsAndAssignColorsToWaterfall,
   getSpanItem,
   getTransactionItem,
 } from '../../app/transaction_details/waterfall_with_summary/waterfall_container/waterfall/waterfall_helpers/waterfall_helpers';
@@ -121,8 +121,7 @@ export function FocusedTraceWaterfall({ items, isEmbeddable = false }: Props) {
     );
 
     waterfallItems.push(...focusedItemChildren);
-
-    assignColorsAndGenerateLegends(waterfallItems);
+    generateLegendsAndAssignColorsToWaterfall(waterfallItems);
 
     return {
       items: waterfallItems,

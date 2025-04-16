@@ -265,7 +265,7 @@ function getRootWaterfallTransaction(
   }
 }
 
-export function assignColorsAndGenerateLegends(waterfallItems: IWaterfallItem[]) {
+export function generateLegendsAndAssignColorsToWaterfall(waterfallItems: IWaterfallItem[]) {
   const onlyBaseSpanItems = waterfallItems.filter(
     (item) => item.docType === 'span' || item.docType === 'transaction'
   ) as IWaterfallSpanOrTransaction[];
@@ -544,7 +544,7 @@ export function getWaterfall(apiResponse: TraceAPIResponse): IWaterfall {
   const rootWaterfallTransaction = getRootWaterfallTransaction(childrenByParentId);
 
   const duration = getWaterfallDuration(items);
-  const { legends, colorBy } = assignColorsAndGenerateLegends(items);
+  const { legends, colorBy } = generateLegendsAndAssignColorsToWaterfall(items);
 
   return {
     entryWaterfallTransaction,
