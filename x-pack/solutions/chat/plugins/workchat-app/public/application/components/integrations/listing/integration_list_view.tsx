@@ -16,11 +16,13 @@ import {
   EuiButtonIcon,
   EuiCheckbox,
   EuiDescriptionList,
+  EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHealth,
   EuiHorizontalRule,
   EuiIcon,
+  EuiPanel,
   EuiSpacer,
   EuiTableSortingType,
   EuiText,
@@ -326,28 +328,60 @@ export const IntegrationListView: React.FC<IntegrationListViewProps> = ({ integr
       <EuiHorizontalRule margin="none" css={{ height: 2 }} />
       {selectedTabId === 'active' && (
         <KibanaPageTemplate.Section>
-          <EuiText size="xs">Showing {resultsCount}</EuiText>
-          <EuiSpacer size="s" />
-          <EuiBasicTable
-            columns={columnsWithExpandingRowToggle}
-            items={pageOfItems}
-            itemId="id"
-            pagination={{
-              pageIndex,
-              pageSize,
-              totalItemCount,
-              pageSizeOptions: [5, 10, 20, 50],
-              showPerPageOptions: true,
-            }}
-            sorting={sorting}
-            onChange={onTableChange}
-          />
-          {toggledItem && (
-            <KibanaPageTemplate.Section>
-              <EuiSpacer size="m" />
-
-              {itemIdToExpandedRowMap[toggledItem]}
-            </KibanaPageTemplate.Section>
+          {integrations.length === 0 ? (
+            <EuiFlexGroup alignItems='center' style={{ 
+              width: '500px', 
+              height: '500px', 
+              margin: '0 auto' 
+            }}>
+              <EuiPanel>
+              <EuiFlexItem grow={false}>
+                  <span role="img" aria-label="plug emoji" style={{  margin: '0 auto' , fontSize: '50px' }}>
+                    🔌
+                  </span>
+                </EuiFlexItem>
+                <EuiEmptyPrompt
+                  title={<h2>You haven't connected anything</h2>}
+                  body="Your connected tools will show up here once you've set up an integration. Until then, nothing for me to work with!"
+                  actions={
+                    <EuiButton
+                      onClick={() => {
+                        setSelectedTabId('catalog')
+                      }}
+                      color="primary"
+                      fill
+                    >
+                      {integrationLabels.listView.browseIntegrationLabel}
+                    </EuiButton>
+                  }
+                />
+              </EuiPanel>
+            </EuiFlexGroup>
+          ) : (
+            <>
+              <EuiText size="xs">Showing {resultsCount}</EuiText>
+              <EuiSpacer size="s" />
+              <EuiBasicTable
+                columns={columnsWithExpandingRowToggle}
+                items={pageOfItems}
+                itemId="id"
+                pagination={{
+                  pageIndex,
+                  pageSize,
+                  totalItemCount,
+                  pageSizeOptions: [5, 10, 20, 50],
+                  showPerPageOptions: true,
+                }}
+                sorting={sorting}
+                onChange={onTableChange}
+              />
+              {toggledItem && (
+                <KibanaPageTemplate.Section>
+                  <EuiSpacer size="m" />
+                  {itemIdToExpandedRowMap[toggledItem]}
+                </KibanaPageTemplate.Section>
+              )}
+            </>
           )}
         </KibanaPageTemplate.Section>
       )}
