@@ -16,10 +16,14 @@ import { AlertDeleteDescriptiveFormGroup } from './components/descriptive_form_g
 import { AlertDeleteModal } from './components/modal';
 
 const http = {
-  get: async (path: string) => {
+  get: async (path: string, { query }: { query?: Record<string, string> }) => {
     if (path.includes('_alert_delete_preview')) {
       return {
-        affected_alert_count: Math.floor(Math.random() * 100) > 50 ? 0 : 33,
+        // Returns the threshold set - 1 to simulate 0 alerts affected. Divide
+        // by 30 to work with the monthly threshold
+        affected_alert_count: query?.active_alert_delete_threshold
+          ? parseInt(query.active_alert_delete_threshold, 10) / 30 - 1
+          : 0,
       };
     }
     throw new Error('Not implemented');
@@ -48,13 +52,19 @@ const DefaultStory = ({ isDisabled = false }: { isDisabled?: boolean }) => {
       </EuiFlyoutBody>
     </EuiFlyout>
   ) : (
-    <EuiButton onClick={showFlyout}>Click Me!</EuiButton>
+    <>
+      <EuiButton onClick={showFlyout}>Click Me!</EuiButton>
+      <p style={{ marginTop: '20px' }}>
+        <strong>Warning:</strong> The preview API is mocked. It will return the number of months
+        chosen in active alerts threshold - 1
+      </p>
+    </>
   );
 };
 
 export const RuleSettingsFlyout: StoryObj<typeof DefaultStory> = {
   args: {
-    isDisabled: true,
+    isDisabled: false,
   },
   argTypes: {
     isDisabled: {
@@ -79,13 +89,19 @@ const ModalOnlyStory = ({ isDisabled = false }: { isDisabled?: boolean }) => {
       categoryIds={['observability']}
     />
   ) : (
-    <EuiButton onClick={showModal}>Open Modal</EuiButton>
+    <>
+      <EuiButton onClick={showModal}>Open Modal</EuiButton>
+      <p style={{ marginTop: '20px' }}>
+        <strong>Warning:</strong> The preview API is mocked. It will return the number of months
+        chosen in active alerts threshold - 1
+      </p>
+    </>
   );
 };
 
 export const ModalOnly: StoryObj<typeof AlertDeleteModal> = {
   args: {
-    isDisabled: true,
+    isDisabled: false,
   },
   argTypes: {
     isDisabled: {

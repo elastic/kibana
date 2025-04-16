@@ -28,7 +28,7 @@ export const ACTIVE_ALERTS = i18n.translate('responseOpsAlertDelete.activeAlerts
 export const ACTIVE_ALERTS_DESCRIPTION = i18n.translate(
   'responseOpsAlertDelete.activeAlertsDescription',
   {
-    defaultMessage: 'Active alert was created more than N days ago',
+    defaultMessage: 'Remove alerts that are active and older than the threshold',
   }
 );
 
@@ -39,7 +39,8 @@ export const INACTIVE_ALERTS = i18n.translate('responseOpsAlertDelete.inactiveAl
 export const INACTIVE_ALERTS_DESCRIPTION = i18n.translate(
   'responseOpsAlertDelete.inactiveAlertsDescription',
   {
-    defaultMessage: 'Recovered, closed or untracked more than N days ago',
+    defaultMessage:
+      'Remove alerts that were recovered, closed, or untracked longer than the threshold',
   }
 );
 

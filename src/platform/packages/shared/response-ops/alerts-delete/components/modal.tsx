@@ -56,6 +56,46 @@ const getThresholdInDays = (threshold: number, thresholdUnit: EuiSelectOption) =
   }
 };
 
+interface PreviewMessageProps {
+  activeStateChecked: boolean;
+  inactiveStateChecked: boolean;
+  previewAffectedAlertsCount: number | undefined;
+}
+const PreviewMessage = ({
+  activeStateChecked,
+  inactiveStateChecked,
+  previewAffectedAlertsCount,
+}: PreviewMessageProps) => {
+  if ((!activeStateChecked && !inactiveStateChecked) || previewAffectedAlertsCount === undefined) {
+    return (
+      <FormattedMessage
+        id="responseOpsAlertDelete.previewInitial"
+        defaultMessage="Select the type of alerts you wish to delete"
+      />
+    );
+  }
+
+  if (previewAffectedAlertsCount === 0) {
+    return (
+      <FormattedMessage
+        id="responseOpsAlertDelete.previewEmpty"
+        defaultMessage="No alerts match the selected criteria."
+      />
+    );
+  }
+
+  return (
+    <FormattedMessage
+      id="responseOpsAlertDelete.preview"
+      defaultMessage="This action will permanently delete a total of <strong>{count} {count, plural, one {alert} other {alerts}}</strong> and you won't be able to restore them."
+      values={{
+        strong: (chunks) => <strong>{chunks}</strong>,
+        count: previewAffectedAlertsCount,
+      }}
+    />
+  );
+};
+
 const getThresholdErrorMessages = (threshold: number, thresholdUnit: EuiSelectOption) => {
   const thresholdInDays = getThresholdInDays(threshold, thresholdUnit);
   const errorMessages = [];
@@ -95,13 +135,6 @@ export const AlertDeleteModal = ({
   });
 
   const [deleteConfirmation, setDeleteConfirmation] = useState('');
-  const [hasInteracted, setHasInteracted] = useState(false);
-
-  const handleInteraction = () => {
-    if (!hasInteracted) {
-      setHasInteracted(true);
-    }
-  };
 
   const { affectedAlertsCount: previewAffectedAlertsCount } = useAlertDeletePreview({
     services: {
@@ -146,7 +179,6 @@ export const AlertDeleteModal = ({
 
   const activeAlertsCallbacks = {
     onChangeEnabled: (e: React.ChangeEvent<HTMLInputElement>) => {
-      handleInteraction();
       setActiveState((prev) => ({ ...prev, checked: e.target.checked }));
     },
     onChangeThreshold: (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -162,7 +194,6 @@ export const AlertDeleteModal = ({
 
   const inactiveAlertsCallbacks = {
     onChangeEnabled: (e: React.ChangeEvent<HTMLInputElement>) => {
-      handleInteraction();
       setInactiveState((prev) => ({ ...prev, checked: e.target.checked }));
     },
     onChangeThreshold: (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -209,7 +240,6 @@ export const AlertDeleteModal = ({
     });
 
     setDeleteConfirmation('');
-    setHasInteracted(false);
 
     onCloseModal();
   };
@@ -282,46 +312,33 @@ export const AlertDeleteModal = ({
             />
           </EuiPanel>
 
-          {hasInteracted && previewAffectedAlertsCount !== undefined && (
-            <>
-              <EuiHorizontalRule />
-              {previewAffectedAlertsCount === 0 ? (
-                <p>
-                  <FormattedMessage
-                    id="responseOpsAlertDelete.previewEmpty"
-                    defaultMessage="No alerts match the selected criteria."
-                  />
-                </p>
-              ) : (
-                <>
-                  <p>
-                    <FormattedMessage
-                      id="responseOpsAlertDelete.preview"
-                      defaultMessage="This action will permanently delete a total of <strong>{count} {count, plural, one {alert} other {alerts}}</strong> and you won't be able to restore them."
-                      values={{
-                        strong: (chunks) => <strong>{chunks}</strong>,
-                        count: previewAffectedAlertsCount,
-                      }}
-                    />
-                  </p>
-                  <EuiSpacer size="m" />
+          <EuiHorizontalRule />
 
-                  <EuiFormRow
-                    label={i18n.DELETE_CONFIRMATION}
-                    fullWidth
-                    isInvalid={!validations.isDeleteConfirmationValid}
-                  >
-                    <EuiFieldText
-                      value={deleteConfirmation}
-                      disabled={isDisabled}
-                      onChange={onChangeDeleteConfirmation}
-                      data-test-subj="alert-delete-delete-confirmation"
-                    />
-                  </EuiFormRow>
-                </>
-              )}
-            </>
-          )}
+          <p>
+            <PreviewMessage
+              activeStateChecked={activeState.checked}
+              inactiveStateChecked={inactiveState.checked}
+              previewAffectedAlertsCount={previewAffectedAlertsCount}
+            />
+          </p>
+          <EuiSpacer size="m" />
+
+          <EuiFormRow
+            label={i18n.DELETE_CONFIRMATION}
+            fullWidth
+            isInvalid={!validations.isDeleteConfirmationValid}
+          >
+            <EuiFieldText
+              value={deleteConfirmation}
+              disabled={
+                isDisabled ||
+                (!activeState.checked && !inactiveState.checked) ||
+                previewAffectedAlertsCount === 0
+              }
+              onChange={onChangeDeleteConfirmation}
+              data-test-subj="alert-delete-delete-confirmation"
+            />
+          </EuiFormRow>
         </EuiModalBody>
 
         <EuiModalFooter>
