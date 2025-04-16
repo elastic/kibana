@@ -146,11 +146,11 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
       async expectSuccessButtonAfterCreatingConnector(createConnector: () => Promise<void>) {
         await createConnector();
         await browser.refresh();
-        await testSubjects.existOrFail('successConnectLLMButton');
+        await testSubjects.existOrFail('successConnectLLMText');
       },
 
-      async expectShowSuccessLLMButton() {
-        await testSubjects.existOrFail('successConnectLLMButton');
+      async expectShowSuccessLLMText() {
+        await testSubjects.existOrFail('successConnectLLMText');
       },
     },
     PlaygroundChatPage: {
