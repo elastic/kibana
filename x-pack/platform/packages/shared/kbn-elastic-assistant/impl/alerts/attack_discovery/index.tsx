@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { memo, useCallback, useEffect, useState } from 'react';
 import {
   EuiButtonEmpty,
   EuiLoadingSpinner,
@@ -27,7 +27,7 @@ interface Props {
   id?: string;
 }
 
-export const AttackDiscoveryWidget: React.FC<Props> = ({ id }) => {
+export const AttackDiscoveryWidget = memo(({ id }: Props) => {
   const { http, toasts, navigateToApp } = useAssistantContext();
   const { euiTheme } = useEuiTheme();
   // TODO fetch by alert id, not connector id. Waiting for Andrew's API updates
@@ -96,4 +96,6 @@ export const AttackDiscoveryWidget: React.FC<Props> = ({ id }) => {
       )}
     </>
   );
-};
+});
+
+AttackDiscoveryWidget.displayName = 'AttackDiscoveryWidget';

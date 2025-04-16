@@ -8,17 +8,15 @@
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiText, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { AttackDiscovery } from '@kbn/elastic-assistant-common';
-import React from 'react';
-
+import React, { memo } from 'react';
 import { MiniAttackChain } from './mini_attack_chain';
-
 import * as i18n from './translations';
 
 interface Props {
   attackDiscovery: AttackDiscovery;
 }
 
-export const AttackDiscoveryDetails: React.FC<Props> = ({ attackDiscovery }) => {
+export const AttackDiscoveryDetails = memo(({ attackDiscovery }: Props) => {
   const { euiTheme } = useEuiTheme();
 
   return (
@@ -72,4 +70,6 @@ export const AttackDiscoveryDetails: React.FC<Props> = ({ attackDiscovery }) => 
       </EuiFlexItem>
     </EuiFlexGroup>
   );
-};
+});
+
+AttackDiscoveryDetails.displayName = 'AttackDiscoveryDetails';

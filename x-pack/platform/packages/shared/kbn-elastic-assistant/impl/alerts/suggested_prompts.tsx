@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { memo, useCallback, useEffect, useState } from 'react';
 import { EuiButtonEmpty, EuiPanel, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useAssistantContext } from '../assistant_context';
@@ -47,7 +47,7 @@ const prompts: Prompt[] = [
     description: i18n.PROMPT_3_DESCRIPTION,
   },
 ];
-export const SuggestedPrompts: React.FC<Props> = ({ getPromptContext, ruleName, timestamp }) => {
+export const SuggestedPrompts = memo(({ getPromptContext, ruleName, timestamp }: Props) => {
   const {
     assistantAvailability: { isAssistantEnabled },
   } = useAssistantContext();
@@ -114,4 +114,6 @@ export const SuggestedPrompts: React.FC<Props> = ({ getPromptContext, ruleName, 
       ))}
     </>
   );
-};
+});
+
+SuggestedPrompts.displayName = 'SuggestedPrompt';

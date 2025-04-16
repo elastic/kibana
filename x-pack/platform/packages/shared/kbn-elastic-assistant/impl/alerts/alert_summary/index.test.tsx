@@ -29,6 +29,7 @@ const defaultProps = {
   defaultConnectorId: 'test-connector-id',
   isContextReady: true,
   promptContext,
+  setHasAlertSummary: jest.fn(),
   showAnonymizedValues: false,
   setHasAlertSummary: jest.fn(),
 };

@@ -7,8 +7,7 @@
 
 import { css } from '@emotion/react';
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip, useEuiTheme } from '@elastic/eui';
-import React, { useMemo } from 'react';
-
+import React, { memo, useMemo } from 'react';
 import type { AttackDiscovery } from '@kbn/elastic-assistant-common';
 import { getTacticMetadata } from '@kbn/elastic-assistant-common';
 import { ATTACK_CHAIN_TOOLTIP } from './translations';
@@ -17,7 +16,7 @@ interface Props {
   attackDiscovery: AttackDiscovery;
 }
 
-const MiniAttackChainComponent: React.FC<Props> = ({ attackDiscovery }) => {
+export const MiniAttackChain = memo(({ attackDiscovery }: Props) => {
   const { euiTheme } = useEuiTheme();
   const tactics = useMemo(() => getTacticMetadata(attackDiscovery), [attackDiscovery]);
   const detectedTactics = useMemo(() => tactics.filter((tactic) => tactic.detected), [tactics]);
@@ -64,8 +63,6 @@ const MiniAttackChainComponent: React.FC<Props> = ({ attackDiscovery }) => {
       </EuiFlexGroup>
     </EuiToolTip>
   );
-};
+});
 
-MiniAttackChainComponent.displayName = 'MiniAttackChain';
-
-export const MiniAttackChain = React.memo(MiniAttackChainComponent);
+MiniAttackChain.displayName = 'MiniAttackChain';

@@ -5,14 +5,16 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { memo, useCallback } from 'react';
 import { EuiCallOut, EuiLink } from '@elastic/eui';
 import { useAssistantContext } from '../../..';
 import * as i18n from '../translations';
+
 interface Props {
   canSeeAdvancedSettings: boolean;
 }
-export const ConnectorMissingCallout: React.FC<Props> = ({ canSeeAdvancedSettings }) => {
+
+export const ConnectorMissingCallout = memo(({ canSeeAdvancedSettings }: Props) => {
   const { navigateToApp } = useAssistantContext();
   const goToKibanaSettings = useCallback(
     () => navigateToApp('management', { path: '/kibana/settings?query=defaultAIConnector' }),
@@ -35,4 +37,6 @@ export const ConnectorMissingCallout: React.FC<Props> = ({ canSeeAdvancedSetting
       </p>
     </EuiCallOut>
   );
-};
+});
+
+ConnectorMissingCallout.displayName = 'ConnectorMissingCallout';

@@ -6,9 +6,9 @@
  */
 import { EuiCodeBlock, EuiFlexGroup, EuiFlexItem, EuiPanel, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/css';
-import React from 'react';
+import React, { memo } from 'react';
 
-export const CustomCodeBlock = ({ value, lang }: { value: string; lang: string }) => {
+export const CustomCodeBlock = memo(({ value, lang }: { value: string; lang: string }) => {
   const theme = useEuiTheme();
 
   return (
@@ -18,11 +18,13 @@ export const CustomCodeBlock = ({ value, lang }: { value: string; lang: string }
       paddingSize="s"
       className={css`
         background-color: ${theme.euiTheme.colors.lightestShade};
+
         .euiCodeBlock__pre {
           margin-bottom: 0;
           padding: ${theme.euiTheme.size.m};
           min-block-size: 48px;
         }
+
         .euiCodeBlock__controls {
           inset-block-start: ${theme.euiTheme.size.m};
           inset-inline-end: ${theme.euiTheme.size.m};
@@ -38,4 +40,6 @@ export const CustomCodeBlock = ({ value, lang }: { value: string; lang: string }
       </EuiFlexGroup>
     </EuiPanel>
   );
-};
+});
+
+CustomCodeBlock.displayName = 'CustomCodeBlock';

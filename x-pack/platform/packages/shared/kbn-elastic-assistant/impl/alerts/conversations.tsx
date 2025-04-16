@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { memo, useCallback, useMemo, useState } from 'react';
 import {
   EuiBadge,
   EuiButtonEmpty,
@@ -28,7 +28,7 @@ interface Props {
   id?: string;
 }
 
-export const Conversations: React.FC<Props> = ({ id }) => {
+export const Conversations = memo(({ id }: Props) => {
   const { euiTheme } = useEuiTheme();
   const {
     http,
@@ -116,4 +116,6 @@ export const Conversations: React.FC<Props> = ({ id }) => {
       </EuiPanel>
     </>
   );
-};
+});
+
+Conversations.displayName = 'Conversations';
