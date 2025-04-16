@@ -7,11 +7,9 @@
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import { load, dump } from 'js-yaml';
 
-import { auditLoggingService } from '../../audit_logging';
-
 import {
   PACKAGES_SAVED_OBJECT_TYPE,
-  ASSETS_SAVED_OBJECT_TYPE,
+  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   SO_SEARCH_LIMIT,
 } from '../../../../common/constants';
 
@@ -49,7 +47,7 @@ export async function updateCustomIntegration(
       const newVersionString = newVersion.join('.');
 
       // Increment the version of everything and create a new package
-      const res = await incrementVersion(soClient, esClient, id, {
+      const res = await incrementVersionAndUpdate(soClient, esClient, id, {
         version: newVersionString,
         readme: fields.readMeData,
       })
@@ -61,7 +59,7 @@ export async function updateCustomIntegration(
         });
       return {
         version: newVersionString,
-        package: res,
+        status: res.status,
       };
     }
   } catch (error) {
@@ -69,7 +67,7 @@ export async function updateCustomIntegration(
   }
 }
 // Increments the version of everything, then creates a new package with the new version, readme, etc.
-export async function incrementVersion(
+async function incrementVersionAndUpdate(
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
   pkgName: string,
@@ -109,7 +107,6 @@ export async function incrementVersion(
   if (changelog) {
     const yaml = load(changelog?.toString());
     if (yaml) {
-      // console.log('found changelog', yaml[0].changes[0]);
       const newChangelogItem = {
         version: data.version,
         date: new Date().toISOString(),
@@ -155,19 +152,22 @@ export async function incrementVersion(
     keepFailedInstallation: true,
   });
 
+  const policyIdsToUpgrade = await packagePolicyService.listIds(
+    appContextService.getInternalUserSOClientWithoutSpaceExtension(),
+    {
+      page: 1,
+      perPage: SO_SEARCH_LIMIT,
+      kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${pkgName}`,
+    }
+  );
+
+  if (policyIdsToUpgrade.items.length) {
+    try {
+      await packagePolicyService.bulkUpgrade(soClient, esClient, policyIdsToUpgrade.items);
+      console.log('upgraded policies', policyIdsToUpgrade.items);
+    } catch (error) {
+      console.log('error upgrading policies', error);
+    }
+  }
   return res;
-
-  // TODO update related package policies
-  // const policyIdsToUpgrade = await packagePolicyService.listIds(
-  //   appContextService.getInternalUserSOClientWithoutSpaceExtension(),
-  //   {
-  //     page: 1,
-  //     perPage: SO_SEARCH_LIMIT,
-  //     kuery: `${PACKAGES_SAVED_OBJECT_TYPE}.package.name:${pkgName}`,
-  //   }
-  // );
-
-  // if (policyIdsToUpgrade.items.length) {
-  //   await packagePolicyService.bulkUpgrade(soClient, esClient, policyIdsToUpgrade.items);
-  // }
 }

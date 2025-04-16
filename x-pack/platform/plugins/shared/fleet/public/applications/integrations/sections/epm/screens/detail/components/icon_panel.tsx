@@ -50,3 +50,30 @@ export function LoadingIconPanel() {
     </Panel>
   );
 }
+
+// Icon without panel wrapper
+const StyledIconWrapper = styled.div`
+  svg,
+  img {
+    height: ${(props) => parseFloat(props.theme.eui.euiSize) * 6}px;
+    width: ${(props) => parseFloat(props.theme.eui.euiSize) * 6}px;
+  }
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`;
+
+export interface MiniIconProps
+  extends Pick<UsePackageIconType, 'packageName' | 'integrationName' | 'version' | 'icons'> {
+  size?: number; // Optional size multiplier
+}
+
+export function MiniIcon({ packageName, integrationName, version, icons }: MiniIconProps) {
+  const iconType = usePackageIconType({ packageName, integrationName, version, icons });
+
+  return <EuiIcon type={iconType} size="l" />;
+}
+
+export function LoadingMiniIcon({}) {
+  return <Loading />;
+}

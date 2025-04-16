@@ -83,6 +83,8 @@ import {
   UpdateIcon,
   IconPanel,
   LoadingIconPanel,
+  MiniIcon,
+  LoadingMiniIcon,
   AddIntegrationButton,
   EditIntegrationButton,
 } from './components';
@@ -411,7 +413,6 @@ export function Detail() {
   );
 
   const saveIntegrationEdits = async (updatedReadMe: string | undefined) => {
-    setIsEditOpen(false);
     setSavingEdits(true);
 
     const res = await updateCustomIntegration(packageInfo?.name || '', {
@@ -420,6 +421,7 @@ export function Detail() {
     });
 
     setSavingEdits(false);
+    setIsEditOpen(false);
     // if everything is okay, then show success and redirect to new page
     if (!res.error) {
       services.notifications.toasts.addSuccess({
@@ -626,17 +628,11 @@ export function Detail() {
                           tourOffset={10}
                         >
                           <EuiFlexGroup justifyContent="center" alignItems="center" gutterSize="s">
-                            {shouldAllowEdit ? (
-                              savingEdits ? (
-                                <EuiFlexItem>
-                                  <EuiLoadingSpinner />
-                                </EuiFlexItem>
-                              ) : (
-                                <EuiFlexItem>
-                                  <EditIntegrationButton onClick={handleEditIntegrationClick} />
-                                </EuiFlexItem>
-                              )
-                            ) : null}
+                            {shouldAllowEdit && (
+                              <EuiFlexItem>
+                                <EditIntegrationButton onClick={handleEditIntegrationClick} />
+                              </EuiFlexItem>
+                            )}
                             <EuiFlexItem>
                               <AddIntegrationButton
                                 userCanInstallPackages={userCanInstallPackages}
@@ -945,6 +941,19 @@ export function Detail() {
           integrationName={packageInfo?.title || 'UNDEFINED'}
           onClose={() => setIsEditOpen(false)}
           onSave={saveIntegrationEdits}
+          savingEdits={savingEdits}
+          miniIcon={
+            isLoading || !packageInfo ? (
+              <LoadingMiniIcon />
+            ) : (
+              <MiniIcon
+                packageName={packageInfo?.name}
+                integrationName={integrationInfo?.name}
+                version={packageInfo?.version}
+                icons={integrationInfo?.icons || packageInfo?.icons}
+              />
+            )
+          }
         />
       )}
     </WithHeaderLayout>

@@ -13,7 +13,6 @@ import {
   EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiTitle,
-  EuiIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiMarkdownEditor,
@@ -27,7 +26,9 @@ export const EditIntegrationFlyout: React.FunctionComponent<{
   onClose: () => void;
   integrationName: string;
   onSave: (updatedReadMe: string | undefined) => void;
-}> = ({ onClose, integrationName, readMeContent, onSave }) => {
+  savingEdits: boolean;
+  miniIcon: React.ReactNode;
+}> = ({ onClose, integrationName, readMeContent, onSave, savingEdits, miniIcon }) => {
   const [editedContent, setEditedContent] = useState(readMeContent);
   const onParse = useCallback((err: any, {}) => {
     if (err) {
@@ -39,14 +40,14 @@ export const EditIntegrationFlyout: React.FunctionComponent<{
   return (
     <EuiFlyout ownFocus onClose={onClose} aria-labelledby="editIntegrationFlyoutTitle">
       <EuiFlyoutHeader hasBorder>
-        <EuiFlexGroup>
+        <EuiFlexGroup alignItems="center" gutterSize="s">
           <EuiFlexItem grow={false}>
             {/* TODO: need to get the icon from the integration and use it here */}
-            <EuiIcon type="pencil" />
+            {miniIcon}
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiTitle>
-              <h2 id="editIntegrationFlyoutTitle">Editing {integrationName} overview</h2>
+              <h2 id="editIntegrationFlyoutTitle">Editing {integrationName}</h2>
             </EuiTitle>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -68,7 +69,12 @@ export const EditIntegrationFlyout: React.FunctionComponent<{
             <EuiButtonEmpty onClick={onClose}>Cancel</EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton fill color="primary" onClick={() => onSave(editedContent)}>
+            <EuiButton
+              isLoading={savingEdits}
+              fill
+              color="primary"
+              onClick={() => onSave(editedContent)}
+            >
               Save Changes
             </EuiButton>
           </EuiFlexItem>
