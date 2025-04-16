@@ -254,5 +254,7 @@
     "@kbn/security-plugin-types-common",
     "@kbn/actions-types",
     "@kbn/triggers-actions-ui-types",
+    "@kbn/management-settings-ids",
+    "@kbn/inference-endpoint-ui-common",
   ]
 }
