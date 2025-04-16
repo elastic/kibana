@@ -8,8 +8,8 @@
  */
 
 import { TimeRange } from '@kbn/es-query';
-import { StateComparators, WithAllKeys, initializeStateManager } from '../../state_manager';
 import { StateManager } from '../../state_manager/types';
+import { StateComparators, WithAllKeys, initializeStateManager } from '../../state_manager';
 
 export interface SerializedTimeRange {
   timeRange?: TimeRange | undefined;
