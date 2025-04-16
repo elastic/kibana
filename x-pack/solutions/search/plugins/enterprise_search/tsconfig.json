@@ -66,7 +66,6 @@
     "@kbn/console-plugin",
     "@kbn/core-notifications-browser",
     "@kbn/es-errors",
-    "@kbn/search-connectors-plugin",
     "@kbn/search-playground",
     "@kbn/utility-types",
     "@kbn/index-management-shared-types",
