@@ -57,7 +57,7 @@ export const useTabs = (
     }
 
     if (hasMisconfigurationFindings || hasNonClosedAlerts) {
-      tabs.push(getInsightsInputTab({ name, fieldName: EntityIdentifierFields.userName, scopeId }));
+      tabs.push(getInsightsInputTab({ name, fieldName: EntityIdentifierFields.userName }));
     }
 
     return tabs;

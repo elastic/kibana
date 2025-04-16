@@ -46,11 +46,9 @@ export const InsightsTabCsp = memo(
   ({
     value,
     field,
-    scopeId,
   }: {
     value: string;
     field: CloudPostureEntityIdentifier;
-    scopeId: string;
   }) => {
     const panels = useExpandableFlyoutState();
 
@@ -159,7 +157,7 @@ export const InsightsTabCsp = memo(
         />
         <EuiSpacer size="xl" />
         {activeInsightsId === CspInsightLeftPanelSubTab.MISCONFIGURATIONS ? (
-          <MisconfigurationFindingsDetailsTable field={field} value={value} scopeId={scopeId} />
+          <MisconfigurationFindingsDetailsTable field={field} value={value} />
         ) : activeInsightsId === CspInsightLeftPanelSubTab.VULNERABILITIES ? (
           <VulnerabilitiesFindingsDetailsTable value={value} />
         ) : (

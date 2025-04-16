@@ -84,7 +84,6 @@ export interface FindingsAggs {
 export interface FindingMisconfigurationFlyoutProps extends Record<string, unknown> {
   ruleId: string;
   resourceId: string;
-  scopeId?: string;
 }
 export interface FindingsMisconfigurationPanelExpandableFlyoutProps extends FlyoutPanelProps {
   key: 'findings-misconfiguration-panel';

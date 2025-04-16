@@ -97,11 +97,9 @@ export const MisconfigurationFindingsDetailsTable = memo(
   ({
     field,
     value,
-    scopeId,
   }: {
     field: CloudPostureEntityIdentifier;
     value: string;
-    scopeId: string;
   }) => {
     useEffect(() => {
       uiMetricService.trackUiMetric(
@@ -219,7 +217,6 @@ export const MisconfigurationFindingsDetailsTable = memo(
                   params: {
                     resourceId: finding.resource.id,
                     ruleId: finding.rule.id,
-                    scopeId,
                   },
                 },
               });

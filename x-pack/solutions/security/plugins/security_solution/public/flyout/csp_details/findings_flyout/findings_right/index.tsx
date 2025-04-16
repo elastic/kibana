@@ -29,7 +29,6 @@ export interface FindingsMisconfigurationPanelExpandableFlyoutProps extends Flyo
 export const FindingsMisconfigurationPanel = ({
   resourceId,
   ruleId,
-  scopeId,
 }: FindingMisconfigurationFlyoutProps) => {
   const { cloudSecurityPosture } = useKibana().services;
   const CspFlyout = cloudSecurityPosture.getCloudSecurityPostureMisconfigurationFlyout();

@@ -63,7 +63,7 @@ export const useTabs = ({
     // Determine if the Insights tab should be included
     const insightsTab =
       hasMisconfigurationFindings || hasVulnerabilitiesFindings || hasNonClosedAlerts
-        ? [getInsightsInputTab({ name, fieldName: EntityIdentifierFields.hostName, scopeId })]
+        ? [getInsightsInputTab({ name, fieldName: EntityIdentifierFields.hostName })]
         : [];
 
     return [...riskScoreTab, ...insightsTab];
