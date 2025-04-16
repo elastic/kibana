@@ -7,15 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './src/create_router';
-export * from './src/encode_path';
-export * from './src/types';
-export * from './src/outlet';
-export * from './src/route_renderer';
-export * from './src/router_provider';
-export * from './src/use_current_route';
-export * from './src/use_match_routes';
-export * from './src/use_params';
-export * from './src/use_router';
-export * from './src/use_route_path';
-export * from './src/breadcrumbs';
+export const encodePath = (path: string, pathParams?: Record<string, string>) =>
+  pathParams && Object.keys(pathParams).length > 0
+    ? path
+        .split('/')
+        .map((part) => {
+          const match = part.match(/(?:{([a-zA-Z]+)})/);
+          return match && pathParams[match[1]] ? encodeURIComponent(pathParams[match[1]]) : part;
+        })
+        .join('/')
+    : path;
