@@ -94,13 +94,7 @@ const getFindingsStats = (
  * Insights view displayed in the document details expandable flyout left section
  */
 export const MisconfigurationFindingsDetailsTable = memo(
-  ({
-    field,
-    value,
-  }: {
-    field: CloudPostureEntityIdentifier;
-    value: string;
-  }) => {
+  ({ field, value }: { field: CloudPostureEntityIdentifier; value: string }) => {
     useEffect(() => {
       uiMetricService.trackUiMetric(
         METRIC_TYPE.COUNT,

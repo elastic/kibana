@@ -43,13 +43,7 @@ function isCspFlyoutPanelProps(
 }
 
 export const InsightsTabCsp = memo(
-  ({
-    value,
-    field,
-  }: {
-    value: string;
-    field: CloudPostureEntityIdentifier;
-  }) => {
+  ({ value, field }: { value: string; field: CloudPostureEntityIdentifier }) => {
     const panels = useExpandableFlyoutState();
 
     let hasMisconfigurationFindings = false;
