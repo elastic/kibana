@@ -7,7 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type { DashboardCapabilities } from './types';
+export type {
+  DashboardCapabilities,
+  DashboardLocatorParams,
+  DashboardSettings,
+  DashboardState,
+} from './types';
 
 export type { DashboardPanelMap, DashboardPanelState } from './dashboard_container/types';
 
@@ -30,6 +35,18 @@ export {
   generateNewPanelIds,
 } from './lib/dashboard_panel_converters';
 
-export const UI_SETTINGS = {
-  ENABLE_LABS_UI: 'labs:dashboard:enable_ui',
-};
+export {
+  LANDING_PAGE_PATH,
+  DASHBOARD_APP_ID,
+  LEGACY_DASHBOARD_APP_ID,
+  SEARCH_SESSION_ID,
+  UI_SETTINGS,
+} from './constants';
+
+export { CONTENT_ID, LATEST_VERSION } from './content_management';
+export {
+  cleanEmptyKeys,
+  getDashboardLocatorParamsFromEmbeddable,
+  loadDashboardHistoryLocationState,
+  DashboardAppLocatorDefinition,
+} from './locator';

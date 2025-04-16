@@ -60,15 +60,17 @@ import type {
   UsageCollectionStart,
 } from '@kbn/usage-collection-plugin/public';
 
-import { CONTENT_ID, LATEST_VERSION } from '../common/content_management';
-import { DashboardAppLocatorDefinition } from './dashboard_app/locator/locator';
-import { DashboardMountContextProps } from './dashboard_app/types';
 import {
+  CONTENT_ID,
   DASHBOARD_APP_ID,
   LANDING_PAGE_PATH,
+  LATEST_VERSION,
   LEGACY_DASHBOARD_APP_ID,
   SEARCH_SESSION_ID,
-} from './plugin_constants';
+  DashboardAppLocatorDefinition,
+} from '../common';
+import { DashboardMountContextProps } from './dashboard_app/types';
+
 import {
   GetPanelPlacementSettings,
   registerDashboardPanelPlacementSetting,

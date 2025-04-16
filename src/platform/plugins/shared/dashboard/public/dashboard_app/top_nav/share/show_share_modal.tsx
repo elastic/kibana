@@ -28,7 +28,7 @@ import { coreServices, dataService, shareService } from '../../../services/kiban
 import { getDashboardCapabilities } from '../../../utils/get_dashboard_capabilities';
 import { shareModalStrings } from '../../_dashboard_app_strings';
 import { dashboardUrlParams } from '../../dashboard_router';
-import { DashboardLocatorParams } from '../../../dashboard_api/types';
+import { DashboardLocatorParams } from '../../../../common';
 
 const showFilterBarId = 'showFilterBar';
 

@@ -18,7 +18,7 @@ import {
   getReferencesForControls,
   getReferencesForPanelId,
 } from '../../common/dashboard_container/persistable_state/dashboard_container_references';
-import { DASHBOARD_APP_ID } from '../plugin_constants';
+import { DASHBOARD_APP_ID, type DashboardState } from '../../common';
 import { PANELS_CONTROL_GROUP_KEY } from '../services/dashboard_backup_service';
 import { getDashboardContentManagementService } from '../services/dashboard_content_management_service';
 import { LoadDashboardReturn } from '../services/dashboard_content_management_service/types';
@@ -38,7 +38,6 @@ import {
   DashboardApi,
   DashboardCreationOptions,
   DashboardInternalApi,
-  DashboardState,
   UnsavedPanelState,
 } from './types';
 import { initializeUnifiedSearchManager } from './unified_search_manager';

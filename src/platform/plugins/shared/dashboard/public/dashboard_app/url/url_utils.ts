@@ -15,10 +15,14 @@ import semverSatisfies from 'semver/functions/satisfies';
 import { replaceUrlHashQuery } from '@kbn/kibana-utils-plugin/common';
 import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 
-import { DashboardPanelMap, convertPanelsArrayToPanelMap } from '../../../common';
+import {
+  convertPanelsArrayToPanelMap,
+  type DashboardPanelMap,
+  type DashboardState,
+} from '../../../common';
 import type { DashboardPanel } from '../../../server/content_management';
 import type { SavedDashboardPanel } from '../../../server/dashboard_saved_object';
-import { DashboardApi, DashboardState } from '../../dashboard_api/types';
+import { DashboardApi } from '../../dashboard_api/types';
 import { DASHBOARD_STATE_STORAGE_KEY, createDashboardEditUrl } from '../../utils/urls';
 import { migrateLegacyQuery } from '../../services/dashboard_content_management_service/lib/load_dashboard_state';
 import { coreServices } from '../../services/kibana_services';

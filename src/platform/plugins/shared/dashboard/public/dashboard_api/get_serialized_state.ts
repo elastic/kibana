@@ -21,8 +21,7 @@ import {
   embeddableService,
   savedObjectsTaggingService,
 } from '../services/kibana_services';
-import { DashboardState } from './types';
-import { LATEST_VERSION } from '../../common/content_management';
+import { type DashboardState, LATEST_VERSION } from '../../common';
 import { convertNumberToDashboardVersion } from '../services/dashboard_content_management_service/lib/dashboard_versioning';
 
 const LATEST_DASHBOARD_CONTAINER_VERSION = convertNumberToDashboardVersion(LATEST_VERSION);

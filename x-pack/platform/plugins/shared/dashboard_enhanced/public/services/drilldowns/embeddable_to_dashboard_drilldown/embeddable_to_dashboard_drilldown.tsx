@@ -11,7 +11,7 @@ import {
   cleanEmptyKeys,
   DashboardLocatorParams,
   getDashboardLocatorParamsFromEmbeddable,
-} from '@kbn/dashboard-plugin/public';
+} from '@kbn/dashboard-plugin/common';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import { APPLY_FILTER_TRIGGER } from '@kbn/data-plugin/public';
 import { ApplyGlobalFilterActionContext } from '@kbn/unified-search-plugin/public';

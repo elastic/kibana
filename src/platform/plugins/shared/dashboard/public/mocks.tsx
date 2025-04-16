@@ -10,7 +10,7 @@
 import { ControlGroupApi } from '@kbn/controls-plugin/public';
 import { BehaviorSubject } from 'rxjs';
 import { DashboardStart } from './plugin';
-import { DashboardState } from './dashboard_api/types';
+import { DashboardState } from '../common';
 import { getDashboardApi } from './dashboard_api/get_dashboard_api';
 import { DashboardPanelState } from '../common';
 

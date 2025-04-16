@@ -7,9 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export enum PanelPlacementStrategy {
-  /** Place on the very top of the Dashboard, add the height of this panel to all other panels. */
-  placeAtTop = 'placeAtTop',
-  /** Look for the smallest y and x value where the default panel will fit. */
-  findTopLeftMostOpenSpace = 'findTopLeftMostOpenSpace',
-}
+export type {
+  DashboardAppLocator,
+  DashboardAppLocatorDependencies,
+  ForwardedDashboardState,
+} from './locator';
+
+export { cleanEmptyKeys, DashboardAppLocatorDefinition } from './locator';
+export { getDashboardLocatorParamsFromEmbeddable } from './get_dashboard_locator_params';
+export { loadDashboardHistoryLocationState } from './load_dashboard_history_location_state';
