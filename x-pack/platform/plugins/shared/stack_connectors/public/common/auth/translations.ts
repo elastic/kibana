@@ -210,3 +210,18 @@ export const AUTHENTICATION_OAUTH2 = i18n.translate(
     defaultMessage: 'OAuth 2.0',
   }
 );
+
+export const INVALID_JSON_FORMAT = i18n.translate(
+  'xpack.stackConnectors.components.otherFieldsFormatErrorMessage',
+  {
+    defaultMessage: 'Invalid JSON',
+  }
+);
+
+export const ADDITIONAL_FIELDS = i18n.translate(
+  'xpack.stackConnectors.components.additionalFieldsTitle',
+  {
+    defaultMessage: 'Additional fields',
+    description: 'Title for the additional fields section',
+  }
+);

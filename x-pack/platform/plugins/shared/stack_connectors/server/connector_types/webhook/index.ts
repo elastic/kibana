@@ -11,7 +11,6 @@ import axios from 'axios';
 import type { Logger } from '@kbn/core/server';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { map, getOrElse } from 'fp-ts/lib/Option';
-import { AxiosHeaders } from 'axios';
 
 import type {
   ActionTypeExecutorResult as ConnectorTypeExecutorResult,
@@ -168,9 +167,7 @@ export async function executor(
     verificationMode,
     ca,
   });
-
-  console.log('secrets', secrets);
-
+  const clientSecret = secrets.clientSecret;
   const axiosInstance = axios.create();
 
   // Handle OAuth 2.0 authentication
@@ -180,47 +177,45 @@ export async function executor(
       logger.error(`Error executing webhook action "${actionId}": ${serviceMessage}`);
       throw new Error('ERROR');
     }
-    if (!accessTokenUrl || !clientId || !secrets.clientSecret) {
-      // do we need it? Maybe validation is enough?
+    if (!accessTokenUrl || !clientId || !clientSecret) {
       const missingItems = [];
       if (!accessTokenUrl) missingItems.push('Access Token URL');
       if (!clientId) missingItems.push('Client ID');
-      if (!secrets.clientSecret) missingItems.push('Client Secret');
+      if (!clientSecret) missingItems.push('Client Secret');
 
       const serviceMessage = `Missing required OAuth2 configuration: ${missingItems.join(', ')}`;
       logger.error(`Error executing webhook action "${actionId}": ${serviceMessage}`);
       throw new Error('ERROR');
     }
-    console.log('before axiosInstance.interceptors');
+
     axiosInstance.interceptors.request.use(
       async (axiosConfig) => {
         const accessToken = await getOAuthClientCredentialsAccessToken({
           connectorId: actionId,
           logger,
           configurationUtilities,
+          oAuthScope: scope ?? '',
           credentials: {
-            secrets: {
-              // <-- Fixed: Put clientSecret in secrets
-              clientSecret: secrets.clientSecret,
-            },
+            secrets: { clientSecret },
             config: {
-              clientId: config.clientId,
-              scope: config.scope,
+              clientId,
             },
           },
-          tokenUrl: config.accessTokenUrl,
+          tokenUrl: accessTokenUrl,
           connectorTokenClient,
         });
-        console.log('after', accessToken);
 
         if (!accessToken) {
           throw new Error(`Unable to retrieve access token for connectorId: ${actionId}`);
         }
 
-        axiosConfig.headers = new AxiosHeaders({
-          ...axiosConfig.headers,
-          Authorization: accessToken,
-        });
+        // Log the access token for debugging
+        logger.debug(`Obtained access token: ${accessToken}`);
+
+        // Add token to headers with "Bearer"
+        axiosConfig.headers.Authorization = `Bearer ${accessToken}`;
+        logger.debug(`Successfully obtained OAuth2 token for connector "${actionId}"`);
+
         return axiosConfig;
       },
       (error) => {
@@ -228,11 +223,10 @@ export async function executor(
       }
     );
   }
-  console.log('after axiosInstance.interceptors');
-  const headersWithBasicAuth = combineHeadersWithBasicAuthHeader({
+  const headersWithAuth = combineHeadersWithBasicAuthHeader({
     username: basicAuth.auth?.username,
     password: basicAuth.auth?.password,
-    headers,
+    ...headers,
   });
 
   const result: Result<AxiosResponse, AxiosError<{ message: string }>> = await promiseResult(
@@ -241,14 +235,14 @@ export async function executor(
       method,
       url,
       logger,
-      headers: headersWithBasicAuth,
+      headers: headersWithAuth,
       data,
       configurationUtilities,
       sslOverrides,
       connectorUsageCollector,
     })
   );
-  console.log('RESULT', result);
+
   if (result == null) {
     return errorResultUnexpectedNullResponse(actionId);
   }

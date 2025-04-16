@@ -11,7 +11,6 @@ import { requestOAuthClientCredentialsToken } from './request_oauth_client_crede
 
 export interface GetOAuthClientCredentialsConfig {
   clientId: string;
-  tenantId: string;
 }
 
 export interface GetOAuthClientCredentialsSecrets {
@@ -40,10 +39,10 @@ export const getOAuthClientCredentialsAccessToken = async ({
   credentials,
   connectorTokenClient,
 }: GetOAuthClientCredentialsAccessTokenOpts) => {
-  const { clientId, tenantId } = credentials.config;
+  const { clientId } = credentials.config;
   const { clientSecret } = credentials.secrets;
 
-  if (!clientId || !clientSecret || !tenantId) {
+  if (!clientId || !clientSecret) {
     logger.warn(`Missing required fields for requesting OAuth Client Credentials access token`);
     return null;
   }

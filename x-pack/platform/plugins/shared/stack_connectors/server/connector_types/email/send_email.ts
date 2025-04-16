@@ -116,7 +116,6 @@ export async function sendEmailWithExchange(
     credentials: {
       config: {
         clientId: clientId as string,
-        tenantId: tenantId as string,
       },
       secrets: {
         clientSecret: clientSecret as string,

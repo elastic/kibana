@@ -35,7 +35,7 @@ import {
 } from '../lib/servicenow/helpers';
 
 import * as i18n from '../lib/servicenow/translations';
-import { AdditionalFields } from '../lib/servicenow/additional_fields';
+import { AdditionalFields } from '../../common/components/additional_fields';
 
 const useGetChoicesFields = ['urgency', 'severity', 'impact', 'category', 'subcategory'];
 const defaultFields: Fields = {

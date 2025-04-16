@@ -4,17 +4,61 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
+import React, { useCallback } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { UseField, ValidationFuncArg } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { Field } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
+import { AdditionalFields } from '../components/additional_fields';
 
 import * as i18n from './translations';
 
 interface OAuth2FieldsProps {
   readOnly: boolean;
 }
+
+const jsonValidator = ({ value }: ValidationFuncArg<any, string | null | undefined>) => {
+  if (!value) {
+    return undefined;
+  }
+  try {
+    JSON.parse(value);
+    return undefined;
+  } catch (e) {
+    return { message: i18n.INVALID_JSON_FORMAT };
+  }
+};
+
+interface AdditionalFieldsWrapperProps {
+  field: {
+    value: string | null | undefined;
+    setValue: (value: string | null) => void;
+    errors?: Array<{ message: string; [key: string]: any }>;
+  };
+
+  isOptionalField?: boolean;
+}
+
+const AdditionalFieldsWrapper: React.FC<AdditionalFieldsWrapperProps> = React.memo(
+  ({ field: { value, setValue, errors }, isOptionalField }) => {
+    const handleAdditionalFieldsChange = useCallback(
+      (json: string | null) => {
+        setValue(json);
+      },
+      [setValue]
+    );
+
+    const errorsProp = errors && errors.length > 0 ? [errors[0].message] : [];
+    return (
+      <AdditionalFields
+        value={value}
+        onChange={handleAdditionalFieldsChange}
+        errors={errorsProp}
+        isOptionalField={isOptionalField}
+      />
+    );
+  }
+);
 
 export const OAuth2Fields: React.FC<OAuth2FieldsProps> = ({ readOnly }) => {
   const { emptyField, urlField } = fieldValidators;
@@ -80,7 +124,7 @@ export const OAuth2Fields: React.FC<OAuth2FieldsProps> = ({ readOnly }) => {
         />
         <EuiSpacer size="s" />
         <UseField
-          path="secret.clientSecret"
+          path="config.scope"
           config={{
             label: i18n.SCOPE,
           }}
@@ -92,6 +136,26 @@ export const OAuth2Fields: React.FC<OAuth2FieldsProps> = ({ readOnly }) => {
             },
           }}
         />
+        <EuiSpacer size="s" />
+        <UseField
+          path="config.additionalFields"
+          config={{
+            label: i18n.ADDITIONAL_FIELDS,
+            validations: [
+              {
+                validator: jsonValidator,
+              },
+            ],
+          }}
+          component={AdditionalFieldsWrapper}
+          componentProps={{
+            euiFieldProps: {
+              'data-test-subj': 'AdditionalFieldsOAuth2',
+            },
+            isOptionalField: true,
+          }}
+        />
+        <EuiSpacer size="s" />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

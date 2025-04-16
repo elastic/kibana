@@ -29,7 +29,7 @@ import { ServiceNowSIRActionParams } from './types';
 import { Fields, Choice } from '../lib/servicenow/types';
 import { choicesToEuiOptions, DEFAULT_CORRELATION_ID } from '../lib/servicenow/helpers';
 import { DeprecatedCallout } from '../lib/servicenow/deprecated_callout';
-import { AdditionalFields } from '../lib/servicenow/additional_fields';
+import { AdditionalFields } from '../../common/components/additional_fields';
 import { OptionalFieldLabel } from '../../common/optional_field_label';
 
 const useGetChoicesFields = ['category', 'subcategory', 'priority'];
