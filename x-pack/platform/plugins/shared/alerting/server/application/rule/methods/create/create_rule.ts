@@ -191,6 +191,7 @@ export async function createRule<Params extends RuleParams = never>(
   }
 
   const allActions = [...data.actions, ...(data.systemActions ?? [])];
+  const artifacts = data.artifacts ?? {};
   // Extract saved object references for this rule
   const {
     references,
@@ -198,7 +199,7 @@ export async function createRule<Params extends RuleParams = never>(
     actions: actionsWithRefs,
     artifacts: artifactsWithRefs,
   } = await withSpan({ name: 'extractReferences', type: 'rules' }, () =>
-    extractReferences(context, ruleType, allActions, validatedRuleTypeParams, initialData.artifacts)
+    extractReferences(context, ruleType, allActions, validatedRuleTypeParams, artifacts)
   );
 
   const createTime = Date.now();

@@ -22,7 +22,7 @@ export async function extractReferences<
   ruleType: UntypedNormalizedRuleType,
   ruleActions: NormalizedAlertActionWithGeneratedValues[],
   ruleParams: Params,
-  ruleArtifacts?: Artifacts
+  ruleArtifacts: Artifacts
 ): Promise<{
   actions: DenormalizedAction[];
   artifacts: DenormalizedArtifacts;
