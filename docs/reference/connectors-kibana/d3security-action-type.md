@@ -16,10 +16,8 @@ To create this connector, you must first configure a webhook key in your D3 SOAR
 
 You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**.  For example:
 
-:::{image} /reference/images/d3security-connector.png
-:alt: D3 Security connector
-:class: screenshot
-:::
+% TO DO: Use `:class: screenshot`
+![D3 Security connector](../images/d3security-connector.png)
 
 
 ### Connector configuration [d3security-connector-configuration]
@@ -40,10 +38,8 @@ Token
 
 You can test connectors as you’re creating or editing the connector in {{kib}}. For example:
 
-:::{image} /reference/images/d3security-params-test.png
-:alt: D3 Security params test
-:class: screenshot
-:::
+% TO DO: Use `:class: screenshot`
+![D3 Security params test](../images/d3security-params-test.png)
 
 The D3 Security actions have the following configuration properties.
 
