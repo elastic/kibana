@@ -24,9 +24,10 @@ export const bulkDeleteSLORoute = createSloServerRoute({
     await assertPlatinumLicense(plugins);
     const taskManager = await plugins.taskManager.start();
 
-    const task = await taskManager.ensureScheduled(
+    const taskId = v4();
+    await taskManager.ensureScheduled(
       {
-        id: `${TYPE}:${v4()}`,
+        id: taskId,
         taskType: TYPE,
         scope: ['observability', 'slo'],
         state: {},
@@ -36,16 +37,16 @@ export const bulkDeleteSLORoute = createSloServerRoute({
       { request }
     );
 
-    return { taskId: task.id };
+    return { taskId };
   },
 });
 
 export const getBulkDeleteStatusRoute = createSloServerRoute({
-  endpoint: 'GET /api/observability/slos/_bulk_delete/{id} 2023-10-31',
+  endpoint: 'GET /api/observability/slos/_bulk_delete/{taskId} 2023-10-31',
   options: { access: 'public' },
   security: {
     authz: {
-      requiredPrivileges: ['slo_read'],
+      requiredPrivileges: ['slo_write'],
     },
   },
   params: bulkDeleteStatusParamsSchema,
@@ -53,10 +54,14 @@ export const getBulkDeleteStatusRoute = createSloServerRoute({
     await assertPlatinumLicense(plugins);
 
     const taskManager = await plugins.taskManager.start();
+    const task = await taskManager.get(params.path.taskId).catch(() => undefined);
 
-    const task = await taskManager.get(params.path.id).catch(() => undefined);
     if (!task) {
       return { isDone: true, results: [], error: 'Task not found' };
+    }
+
+    if (!task.state.isDone) {
+      return { isDone: false, results: [] };
     }
 
     return { isDone: task.state.isDone, results: task.state.results, error: task.state.error };

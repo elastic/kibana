@@ -15,7 +15,7 @@ const bulkDeleteParamsSchema = t.type({
 
 const bulkDeleteStatusParamsSchema = t.type({
   path: t.type({
-    id: t.string,
+    taskId: t.string,
   }),
 });
 

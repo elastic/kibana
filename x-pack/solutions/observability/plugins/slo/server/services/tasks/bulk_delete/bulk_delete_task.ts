@@ -12,6 +12,7 @@ import { addSpaceIdToPath } from '@kbn/spaces-plugin/server';
 import { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import { IndicatorTypes } from '../../../domain/models';
 import { SLOPluginSetupDependencies, SLOPluginStartDependencies } from '../../../types';
+import { DeleteSLO } from '../../delete_slo';
 import { KibanaSavedObjectsSLORepository } from '../../slo_repository';
 import { DefaultSummaryTransformGenerator } from '../../summary_transform_generator/summary_transform_generator';
 import { DefaultSummaryTransformManager } from '../../summay_transform_manager';
@@ -54,7 +55,7 @@ export class BulkDeleteTask {
     plugins.taskManager.setup.registerTaskDefinitions({
       [TYPE]: {
         title: 'SLO bulk delete',
-        timeout: '10m',
+        timeout: '20m',
         maxAttempts: 1,
         createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
           return {
@@ -96,15 +97,21 @@ export class BulkDeleteTask {
                 this.logger
               );
 
+              const deleteSLO = new DeleteSLO(
+                repository,
+                transformManager,
+                summaryTransformManager,
+                scopedClusterClient,
+                rulesClient
+              );
+
               try {
                 const params = taskInstance.params as BulkDeleteParams;
 
                 const results = await runBulkDelete(params, {
+                  deleteSLO,
                   scopedClusterClient,
                   rulesClient,
-                  repository,
-                  transformManager,
-                  summaryTransformManager,
                   logger: this.logger,
                 });
 

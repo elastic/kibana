@@ -14,15 +14,11 @@ import {
   SUMMARY_DESTINATION_INDEX_PATTERN,
 } from '../../../../common/constants';
 import { DeleteSLO } from '../../delete_slo';
-import { SLORepository } from '../../slo_repository';
-import { TransformManager } from '../../transform_manager';
 
 interface Dependencies {
   scopedClusterClient: IScopedClusterClient;
   rulesClient: RulesClientApi;
-  repository: SLORepository;
-  transformManager: TransformManager;
-  summaryTransformManager: TransformManager;
+  deleteSLO: DeleteSLO;
   logger: Logger;
 }
 
@@ -36,31 +32,16 @@ export async function runBulkDelete(
   params: BulkDeleteParams,
   dependencies: Dependencies
 ): Promise<BulkDeleteResult[]> {
-  const {
-    scopedClusterClient,
-    rulesClient,
-    repository,
-    transformManager,
-    summaryTransformManager,
-    logger,
-  } = dependencies;
+  const { scopedClusterClient, rulesClient, deleteSLO, logger } = dependencies;
 
   logger.debug(`Starting bulk deletion for SLO [${params.list.join(', ')}]`);
-
-  const deleteSlo = new DeleteSLO(
-    repository,
-    transformManager,
-    summaryTransformManager,
-    scopedClusterClient,
-    rulesClient
-  );
 
   const limiter = pLimit(3);
 
   const promises = params.list.map(async (sloId) => {
     return limiter(async () => {
       try {
-        await deleteSlo.execute(sloId, { skipRuleDeletion: true, skipDataDeletion: true });
+        await deleteSLO.execute(sloId, { skipRuleDeletion: true, skipDataDeletion: true });
       } catch (err) {
         return {
           id: sloId,
