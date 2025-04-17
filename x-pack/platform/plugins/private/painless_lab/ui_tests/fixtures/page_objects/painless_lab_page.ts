@@ -15,7 +15,7 @@ export class PainlessLab {
   public flyoutResponseTab: Locator;
 
   constructor(private readonly page: ScoutPage) {
-    this.outputValueElement = this.page.testSubj.locator('painlessTabs');
+    this.outputValueElement = this.page.testSubj.locator('painlessTabs-loaded');
     this.requestFlyoutHeader = this.page.testSubj.locator('painlessLabRequestFlyoutHeader');
     this.viewRequestButton = this.page.testSubj.locator('btnViewRequest');
     this.flyoutResponseTab = this.page.locator('#response');

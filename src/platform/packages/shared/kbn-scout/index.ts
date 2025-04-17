@@ -50,4 +50,4 @@ export { mergeTests, test as playwrightTest } from 'playwright/test';
 
 export { measurePerformance, measurePerformanceAsync } from './src/common';
 
-export const tempString = 'temp string1';
+export const tempString = 'temp string';
