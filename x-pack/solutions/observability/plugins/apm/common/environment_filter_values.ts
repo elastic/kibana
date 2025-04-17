@@ -19,8 +19,8 @@ export const allOptionText = i18n.translate('xpack.apm.filter.environment.allLab
 
 export function getEnvironmentLabel(environment: string): string {
   if (!environment || environment === ENVIRONMENT_NOT_DEFINED_VALUE) {
-    return i18n.translate('xpack.apm.filter.environment.unsetLabel', {
-      defaultMessage: 'Unset',
+    return i18n.translate('xpack.apm.filter.environment.notDefinedLabel', {
+      defaultMessage: 'Not defined',
     });
   }
 
