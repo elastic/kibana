@@ -179,7 +179,7 @@ export class KnowledgeBaseService {
         core: this.dependencies.core,
         logger: this.dependencies.logger,
       }).catch((error) => {
-        this.dependencies.logger.debug('Error getting data from search indices');
+        this.dependencies.logger.error('Error getting data from search indices');
         this.dependencies.logger.debug(error);
         return [];
       }),
@@ -438,7 +438,7 @@ export class KnowledgeBaseService {
 
       this.dependencies.logger.debug(`Entry added to knowledge base`);
     } catch (error) {
-      this.dependencies.logger.debug(`Failed to add entry to knowledge base ${error}`);
+      this.dependencies.logger.error(`Failed to add entry to knowledge base ${error}`);
       if (isInferenceEndpointMissingOrUnavailable(error)) {
         throwKnowledgeBaseNotReady(error.body);
       }

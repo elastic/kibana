@@ -193,6 +193,21 @@
           },
           {
             "parentPluginId": "elasticAssistant",
+            "id": "def-server.AssistantToolParams.assistantContext",
+            "type": "Object",
+            "tags": [],
+            "label": "assistantContext",
+            "description": [],
+            "signature": [
+              "ElasticAssistantApiRequestHandlerContext",
+              " | undefined"
+            ],
+            "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "elasticAssistant",
             "id": "def-server.AssistantToolParams.anonymizationFields",
             "type": "Array",
             "tags": [],
@@ -1473,6 +1488,28 @@
             "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "elasticAssistant",
+            "id": "def-server.AssistantToolParams.createLlmInstance",
+            "type": "Function",
+            "tags": [],
+            "label": "createLlmInstance",
+            "description": [],
+            "signature": [
+              "(() => ",
+              "ActionsClientChatBedrockConverse",
+              " | ",
+              "ActionsClientChatOpenAI",
+              " | ",
+              "ActionsClientChatVertexAI",
+              ") | undefined"
+            ],
+            "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
