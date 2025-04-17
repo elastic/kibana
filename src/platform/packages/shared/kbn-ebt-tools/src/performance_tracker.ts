@@ -91,7 +91,7 @@ export const createPerformanceTracker = ({ type, instance }: PerformanceTrackerO
  * Get all performance trackers by type.
  * @param type - High-level type of the performance tracker, for example "Lens".
  */
-export const getPerformanceTrackersByType = (type: string) =>
+export const getPerformanceTrackersByType = (type: PerformanceTrackerTypes) =>
   performance
     .getEntriesByType('mark')
     .filter((marker) => marker.name.startsWith(`${type}:`)) as PerformanceMark[];
@@ -101,13 +101,13 @@ export const getPerformanceTrackersByType = (type: string) =>
  * @param type - High-level type of the performance tracker, for example "Lens".
  * @returns A map of performance trackers grouped by id.
  */
-export const getPerformanceTrackersGroupedById = (type: string) =>
+export const getPerformanceTrackersGroupedById = (type: PerformanceTrackerTypes) =>
   groupBy(getPerformanceTrackersByType(type), (marker) => marker.detail.id);
 
 /**
  * Clear all performance trackers by type.
  * @param type - High-level type of the performance tracker, for example "Lens".
  */
-export const clearPerformanceTrackersByType = (type: string) => {
+export const clearPerformanceTrackersByType = (type: PerformanceTrackerTypes) => {
   getPerformanceTrackersByType(type).forEach((marker) => performance.clearMarks(marker.name));
 };
