@@ -8,12 +8,26 @@
 import type { ProductLine, ProductTier } from '../../common/product';
 import { mockServices } from '../common/services/__mocks__/services.mock';
 import { registerSolutionNavigation } from './navigation';
+import { createNavigationTree } from './navigation_tree';
+import { createAiNavigationTree } from './ai_navigation_tree';
+
+jest.mock('./navigation_tree');
+jest.mock('./ai_navigation_tree');
+
+const mockedCreateNavigationTree = createNavigationTree as jest.Mock;
+const mockedCreateAiNavigationTree = createAiNavigationTree as jest.Mock;
+
+const mockedNavTree = {};
+mockedCreateNavigationTree.mockReturnValue(mockedNavTree);
+const mockedAiNavTree = {};
+mockedCreateAiNavigationTree.mockReturnValue(mockedAiNavTree);
 
 describe('Security Side Nav', () => {
   const services = mockServices;
   const initNavigationSpy = jest.spyOn(services.serverless, 'initNavigation');
 
-  afterEach(() => {
+  beforeEach(() => {
+    jest.clearAllMocks();
     initNavigationSpy.mockReset();
   });
 
@@ -28,7 +42,9 @@ describe('Security Side Nav', () => {
 
     navigationTree$.subscribe({
       next: (value) => {
-        expect(value).toMatchSnapshot();
+        expect(value).toBe(mockedNavTree);
+        expect(mockedCreateNavigationTree).toHaveBeenCalledWith(services);
+        expect(mockedCreateAiNavigationTree).not.toHaveBeenCalled();
       },
       error: (err) => done(err),
       complete: () => done(),
@@ -51,7 +67,9 @@ describe('Security Side Nav', () => {
 
     navigationTree$.subscribe({
       next: (value) => {
-        expect(value).toMatchSnapshot();
+        expect(value).toBe(mockedAiNavTree);
+        expect(mockedCreateAiNavigationTree).toHaveBeenCalled();
+        expect(mockedCreateNavigationTree).not.toHaveBeenCalled();
       },
       error: (err) => done(err),
       complete: () => done(),

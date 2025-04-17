@@ -54,16 +54,16 @@ export const createAiNavigationTree = (): NavigationTreeDefinition => ({
               renderAs: 'item',
               children: [
                 {
-                  id: SecurityPageName.configurationsAiSettings,
-                  link: securityLink(SecurityPageName.configurationsAiSettings),
+                  id: SecurityPageName.configurationsIntegrations,
+                  link: securityLink(SecurityPageName.configurationsIntegrations),
                 },
                 {
                   id: SecurityPageName.configurationsBasicRules,
                   link: securityLink(SecurityPageName.configurationsBasicRules),
                 },
                 {
-                  id: SecurityPageName.configurationsIntegrations,
-                  link: securityLink(SecurityPageName.configurationsIntegrations),
+                  id: SecurityPageName.configurationsAiSettings,
+                  link: securityLink(SecurityPageName.configurationsAiSettings),
                 },
               ],
             },
