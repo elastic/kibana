@@ -14,6 +14,9 @@ import type {
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
+import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
+import { CROWDSTRIKE_INDEX_PATTERNS_BY_INTEGRATION } from '../../../../../common/endpoint/service/response_actions/crowdstrike';
+import type { EndpointInternalFleetServicesInterface } from '../../fleet';
 import { stringify } from '../../../utils/stringify';
 import { getDateFilters } from '../..';
 import { ENDPOINT_ACTIONS_INDEX } from '../../../../../common/endpoint/constants';
@@ -24,10 +27,12 @@ import type {
   ResponseActionsApiCommandNames,
   ResponseActionType,
 } from '../../../../../common/endpoint/service/response_actions/constants';
+import { MICROSOFT_DEFENDER_INDEX_PATTERNS_BY_INTEGRATION } from '../../../../../common/endpoint/service/response_actions/microsoft_defender';
 
 export interface FetchActionRequestsOptions {
   esClient: ElasticsearchClient;
   logger: Logger;
+  fleetServices: EndpointInternalFleetServicesInterface;
   from?: number;
   size?: number;
   startDate?: string;
@@ -65,6 +70,7 @@ interface FetchActionRequestsResponse {
 export const fetchActionRequests = async ({
   logger,
   esClient,
+  fleetServices,
   from = 0,
   size = 10,
   agentTypes,
@@ -94,13 +100,28 @@ export const fetchActionRequests = async ({
     additionalFilters.push({ range: { expiration: { gte: 'now' } } });
   }
 
-  const must: QueryDslQueryContainer[] = [
-    {
+  const must: QueryDslQueryContainer[] = [];
+
+  // if space awareness is enabled, then add filter for integration policy ids
+  if (true) {
+    // FIXME:PT REMINDER: DO NOT MERGE THIS TO MAIN--- add ability to get feature enable values
+    must.push({
       bool: {
-        filter: [...getDateFilters({ startDate, endDate }), ...additionalFilters],
+        filter: {
+          terms: {
+            'agent.policy.integrationPolicyId': await fetchIntegrationPolicyIds(fleetServices),
+          },
+        },
       },
+    });
+  }
+
+  // Add the date filters
+  must.push({
+    bool: {
+      filter: [...getDateFilters({ startDate, endDate }), ...additionalFilters],
     },
-  ];
+  });
 
   if (userIds?.length) {
     const userIdsKql = userIds.map((userId) => `user_id:${userId}`).join(' or ');
@@ -173,4 +194,35 @@ const getActionTypeFilter = (actionType: string): QueryDslBoolQuery => {
         },
       }
     : {};
+};
+
+/**
+ * Retrieves a list of all integration policy IDs in the active space for integrations that
+ * support responses actions.
+ * @private
+ * @param fleetServices
+ */
+const fetchIntegrationPolicyIds = async (
+  fleetServices: EndpointInternalFleetServicesInterface
+): Promise<string[]> => {
+  const packageNames: string[] = [
+    'endpoint',
+    'sentinel_one',
+    ...Object.keys(CROWDSTRIKE_INDEX_PATTERNS_BY_INTEGRATION),
+    ...Object.keys(MICROSOFT_DEFENDER_INDEX_PATTERNS_BY_INTEGRATION),
+  ];
+  const kuery = `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: (${packageNames.join(' OR ')})`;
+  const packagePolicyIterable = await fleetServices.packagePolicy.fetchAllItemIds(
+    fleetServices.getSoClient(),
+    { kuery }
+  );
+  const response: string[] = [];
+
+  for await (const idList of packagePolicyIterable) {
+    response.push(...idList);
+  }
+
+  fleetServices.logger.debug(() => `fetchIntegrationPolicyIds() found:\n${stringify(response)}`);
+
+  return response;
 };

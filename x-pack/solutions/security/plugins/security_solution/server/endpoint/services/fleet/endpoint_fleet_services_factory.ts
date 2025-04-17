@@ -20,6 +20,7 @@ import {
   AgentPolicyNotFoundError,
   PackagePolicyNotFoundError,
 } from '@kbn/fleet-plugin/server/errors';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { catchAndWrapError } from '../../utils';
 import { stringify } from '../../utils/stringify';
 import { NotFoundError } from '../../errors';
@@ -29,12 +30,15 @@ import type { SavedObjectsClientFactory } from '../saved_objects';
  * The set of Fleet services used by Endpoint
  */
 export interface EndpointFleetServicesInterface {
+  /** The space id used to initialize the current `EndpointFleetServicesInterface` instance */
+  spaceId: string;
   agent: AgentClient;
   agentPolicy: AgentPolicyServiceInterface;
   packages: PackageClient;
   packagePolicy: PackagePolicyClient;
   /** The `kuery` that can be used to filter for Endpoint integration policies */
   endpointPolicyKuery: string;
+  logger: Logger;
 
   /**
    * Will check the data provided to ensure it is visible for the current space. Supports
@@ -46,6 +50,11 @@ export interface EndpointFleetServicesInterface {
       'agentIds' | 'integrationPolicyIds' | 'agentPolicyIds'
     >
   ): Promise<void>;
+
+  /**
+   * Returns the SO client that is scoped to the current `EndpointFleetServicesInterface` instance.
+   */
+  getSoClient(): SavedObjectsClientContract;
 
   /**
    * Retrieves the `namespace` assigned to Integration Policies
@@ -92,18 +101,22 @@ export class EndpointFleetServicesFactory implements EndpointFleetServicesFactor
       : agentService.asInternalUser;
 
     // Lazily Initialized at the time it is needed
-    let soClient: SavedObjectsClientContract;
+    let _soClient: SavedObjectsClientContract;
+    const getSoClient = (): SavedObjectsClientContract => {
+      if (!_soClient) {
+        _soClient = this.savedObjects.createInternalScopedSoClient({ spaceId });
+      }
+
+      return _soClient;
+    };
 
     const ensureInCurrentSpace: EndpointFleetServicesInterface['ensureInCurrentSpace'] = async ({
       integrationPolicyIds = [],
       agentPolicyIds = [],
       agentIds = [],
     }): Promise<void> => {
-      if (!soClient) {
-        soClient = this.savedObjects.createInternalScopedSoClient({ spaceId });
-      }
       return checkInCurrentSpace({
-        soClient,
+        soClient: getSoClient(),
         agentService: agent,
         agentPolicyService: agentPolicy,
         packagePolicyService: packagePolicy,
@@ -116,13 +129,9 @@ export class EndpointFleetServicesFactory implements EndpointFleetServicesFactor
     const getPolicyNamespace: EndpointFleetServicesInterface['getPolicyNamespace'] = async (
       options
     ) => {
-      if (!soClient) {
-        soClient = this.savedObjects.createInternalScopedSoClient({ spaceId });
-      }
-
       return fetchIntegrationPolicyNamespace({
         ...options,
-        soClient,
+        soClient: getSoClient(),
         logger: this.logger,
         packagePolicyService: packagePolicy,
         agentPolicyService: agentPolicy,
@@ -131,12 +140,8 @@ export class EndpointFleetServicesFactory implements EndpointFleetServicesFactor
 
     const getIntegrationNamespaces: EndpointFleetServicesInterface['getIntegrationNamespaces'] =
       async (integrationNames) => {
-        if (!soClient) {
-          soClient = this.savedObjects.createInternalScopedSoClient({ spaceId });
-        }
-
         return fetchIntegrationNamespaces({
-          soClient,
+          soClient: getSoClient(),
           logger: this.logger,
           packagePolicyService: packagePolicy,
           agentPolicyService: agentPolicy,
@@ -145,6 +150,9 @@ export class EndpointFleetServicesFactory implements EndpointFleetServicesFactor
       };
 
     return {
+      spaceId: spaceId || DEFAULT_SPACE_ID,
+      logger: this.logger,
+
       agent,
       agentPolicy,
 
@@ -157,6 +165,7 @@ export class EndpointFleetServicesFactory implements EndpointFleetServicesFactor
       ensureInCurrentSpace,
       getPolicyNamespace,
       getIntegrationNamespaces,
+      getSoClient,
     };
   }
 }

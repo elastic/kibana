@@ -6,6 +6,7 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { EndpointInternalFleetServicesInterface } from '../fleet';
 import { fetchActionRequests } from './utils/fetch_action_requests';
 import type { FetchActionResponsesResult } from './utils/fetch_action_responses';
 import { fetchActionResponses } from './utils/fetch_action_responses';
@@ -58,6 +59,7 @@ export const getActionListByStatus = async ({
   endDate,
   logger,
   metadataService,
+  fleetServices,
   page: _page,
   pageSize,
   startDate,
@@ -71,6 +73,7 @@ export const getActionListByStatus = async ({
   esClient: ElasticsearchClient;
   logger: Logger;
   metadataService: EndpointMetadataService;
+  fleetServices: EndpointInternalFleetServicesInterface;
 }): Promise<ActionListApiResponse> => {
   const size = pageSize ?? ENDPOINT_DEFAULT_PAGE_SIZE;
   const page = _page ?? 1;
@@ -80,6 +83,7 @@ export const getActionListByStatus = async ({
     commands,
     elasticAgentIds,
     esClient,
+    fleetServices,
     endDate,
     from: 0,
     logger,
@@ -124,6 +128,7 @@ export const getActionList = async ({
   endDate,
   logger,
   metadataService,
+  fleetServices,
   page: _page,
   pageSize,
   startDate,
@@ -135,6 +140,7 @@ export const getActionList = async ({
   esClient: ElasticsearchClient;
   logger: Logger;
   metadataService: EndpointMetadataService;
+  fleetServices: EndpointInternalFleetServicesInterface;
 }): Promise<ActionListApiResponse> => {
   const size = pageSize ?? ENDPOINT_DEFAULT_PAGE_SIZE;
   const page = _page ?? 1;
@@ -150,6 +156,7 @@ export const getActionList = async ({
     from,
     logger,
     metadataService,
+    fleetServices,
     size,
     startDate,
     userIds,
@@ -188,6 +195,7 @@ const getActionDetailsList = async ({
   from,
   logger,
   metadataService,
+  fleetServices,
   size,
   startDate,
   userIds,
@@ -196,6 +204,7 @@ const getActionDetailsList = async ({
   types,
 }: GetActionDetailsListParam & {
   metadataService: EndpointMetadataService;
+  fleetServices: EndpointInternalFleetServicesInterface;
 }): Promise<{
   actionDetails: ActionListApiResponse['data'];
   totalRecords: number;
@@ -208,6 +217,7 @@ const getActionDetailsList = async ({
       agentTypes,
       commands: commands as ResponseActionsApiCommandNames[],
       esClient,
+      fleetServices,
       elasticAgentIds,
       startDate,
       endDate,
