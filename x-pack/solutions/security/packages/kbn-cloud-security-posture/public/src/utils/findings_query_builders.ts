@@ -240,3 +240,37 @@ export const createMisconfigurationFindingsQuery = (resourceId?: string, ruleId?
     },
   };
 };
+
+export const createGetVulnerabilityFindingsQuery = (
+  vulnerabilityId?: string | string[],
+  resourceId?: string,
+  packageName?: string | string[],
+  packageVersion?: string | string[]
+) => {
+  return {
+    bool: {
+      filter: [
+        {
+          term: {
+            'vulnerability.id': vulnerabilityId,
+          },
+        },
+        {
+          term: {
+            'resource.id': resourceId,
+          },
+        },
+        {
+          term: {
+            'package.name': packageName,
+          },
+        },
+        {
+          term: {
+            'package.version': packageVersion,
+          },
+        },
+      ],
+    },
+  };
+};

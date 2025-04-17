@@ -80,14 +80,18 @@ const CspVulnerabilityFindingRenderer = ({
   return children({ finding });
 };
 
-const flyoutComponent = (row: DataTableRecord, onCloseFlyout: () => void): JSX.Element => {
-  return (
-    <CspVulnerabilityFindingRenderer row={row}>
-      {({ finding }) => (
-        <VulnerabilityFindingFlyout vulnerabilityRecord={finding} closeFlyout={onCloseFlyout} />
-      )}
-    </CspVulnerabilityFindingRenderer>
-  );
+// const flyoutComponent = (row: DataTableRecord, onCloseFlyout: () => void): JSX.Element => {
+//   return (
+//     <CspVulnerabilityFindingRenderer row={row}>
+//       {({ finding }) => (
+//         <VulnerabilityFindingFlyout vulnerabilityRecord={finding} closeFlyout={onCloseFlyout} />
+//       )}
+//     </CspVulnerabilityFindingRenderer>
+//   );
+// };
+
+const onOpenFlyoutCallback = (row: DataTableRecord, onCloseFlyout: () => void): JSX.Element => {
+  return <></>;
 };
 
 const title = i18n.translate('xpack.csp.findings.latestVulnerabilities.tableRowTypeLabel', {
@@ -259,7 +263,7 @@ export const LatestVulnerabilitiesTable = ({
           defaultColumns={defaultColumns}
           rows={rows}
           total={total}
-          flyoutComponent={flyoutComponent}
+          onOpenFlyoutCallback={onOpenFlyoutCallback}
           createRuleFn={createVulnerabilityRuleFn}
           cloudPostureDataTable={cloudPostureDataTable}
           loadMore={fetchNextPage}

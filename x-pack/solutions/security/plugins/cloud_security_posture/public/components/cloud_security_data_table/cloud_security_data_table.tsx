@@ -364,3 +364,4 @@ export const CloudSecurityDataTable = ({
     </CellActionsProvider>
   );
 };
+

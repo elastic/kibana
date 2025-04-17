@@ -8,7 +8,7 @@
 import React, { memo, useCallback } from 'react';
 import { ExpandableFlyout, type ExpandableFlyoutProps } from '@kbn/expandable-flyout';
 import { useEuiTheme } from '@elastic/eui';
-import type { FindingsMisconfigurationPanelExpandableFlyoutProps } from '@kbn/cloud-security-posture';
+import type { FindingVulnerabilityPanelExpandableFlyoutProps, FindingsMisconfigurationPanelExpandableFlyoutProps } from '@kbn/cloud-security-posture';
 import type { AIForSOCDetailsProps } from './ai_for_soc/types';
 import { AIForSOCDetailsProvider } from './ai_for_soc/context';
 import { AIForSOCPanel } from './ai_for_soc';
@@ -65,6 +65,8 @@ import { ServiceDetailsPanel, ServiceDetailsPanelKey } from './entity_details/se
 import { MisconfigurationFindingsPanelKey } from './csp_details/findings_flyout/constants';
 import { FindingsMisconfigurationPanel } from './csp_details/findings_flyout/findings_right';
 import { IOCPanelKey } from './ai_for_soc/constants/panel_keys';
+import { VulnerabilityFindingsPanelKey } from './csp_details/vulnerabilities_flyout/constants';
+import { FindingsVulnerabilityPanel } from './csp_details/vulnerabilities_flyout/vulnerabilities_right';
 
 /**
  * List of all panels that will be used within the document details expandable flyout.
@@ -208,6 +210,14 @@ const expandableFlyoutDocumentsPanels: ExpandableFlyoutProps['registeredPanels']
       <AIForSOCDetailsProvider {...(props as AIForSOCDetailsProps).params}>
         <AIForSOCPanel />
       </AIForSOCDetailsProvider>
+    ),
+  },
+  {
+    key: VulnerabilityFindingsPanelKey,
+    component: (props) => (
+      <FindingsVulnerabilityPanel
+        {...(props as FindingVulnerabilityPanelExpandableFlyoutProps).params}
+      />
     ),
   },
 ];
