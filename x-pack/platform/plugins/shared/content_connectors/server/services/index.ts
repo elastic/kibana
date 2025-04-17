@@ -249,15 +249,13 @@ export class AgentlessConnectorsInfraService {
       `Successfully created package policy ${packagePolicy.id} for agentless connector ${connector.id}`
     );
 
-    this.logger.info(
-      `Creating an agentless agent for agentless connector ${connector.id}`
-    )
+    this.logger.info(`Creating an agentless agent for agentless connector ${connector.id}`);
 
     await agentlessAgentService.createAgentlessAgent(this.esClient, this.soClient, createdPolicy);
 
     this.logger.info(
       `Successfully created an agentless agent for agentless connector ${connector.id}`
-    )
+    );
 
     return packagePolicy;
   };

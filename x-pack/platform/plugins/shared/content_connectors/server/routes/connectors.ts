@@ -1202,4 +1202,48 @@ export function registerConnectorRoutes({
       }
     })
   );
+
+  router.get(
+    {
+      path: '/internal/content_connectors/indices/{indexName}/exists',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the scoped ES client',
+        },
+      },
+      validate: {
+        params: schema.object({
+          indexName: schema.string(),
+        }),
+      },
+    },
+    elasticsearchErrorHandler(log, async (context, request, response) => {
+      const indexName = decodeURIComponent(request.params.indexName);
+      const { client } = (await context.core).elasticsearch;
+      let indexExists: boolean;
+
+      try {
+        indexExists = await client.asCurrentUser.indices.exists({ index: indexName });
+      } catch (e) {
+        log.warn(
+          i18n.translate('xpack.enterpriseSearch.server.routes.indices.existsErrorLogMessage', {
+            defaultMessage: 'An error occurred while resolving request to {requestUrl}',
+            values: {
+              requestUrl: request.url.toString(),
+            },
+          })
+        );
+        log.warn(e);
+        indexExists = false;
+      }
+
+      return response.ok({
+        body: {
+          exists: indexExists,
+        },
+        headers: { 'content-type': 'application/json' },
+      });
+    })
+  );
 }
