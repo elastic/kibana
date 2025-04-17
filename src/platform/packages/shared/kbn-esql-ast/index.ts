@@ -30,6 +30,8 @@ export type {
   EditorError,
   ESQLAstNode,
   ESQLInlineCast,
+  ESQLAstRenameExpression,
+  ESQLAstBaseItem,
 } from './src/types';
 
 export {

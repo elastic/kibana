@@ -67,15 +67,13 @@ async function setFieldsToCache(queryText: string) {
 
 export function getFieldsByTypeHelper(queryText: string, resourceRetriever?: ESQLCallbacks) {
   const getFields = async () => {
-    // console.dir(cache);
-    // make the _query call only when the from <source> is not present in the cache
     const { root } = parse(queryText);
     const queryForIndexFields = buildQueryForFieldsFromSource(queryText, root.commands);
     if (queryForIndexFields === queryText && cache.has(queryForIndexFields)) {
       // this is already in the cache
       return;
     }
-    // if the query is not in the cache, we need to make the _query call
+    // make the _query call only when the from <source> is not present in the cache
     if (queryForIndexFields && !cache.has(queryForIndexFields)) {
       const fieldsWithMetadata = await getFieldsFromES(queryForIndexFields, resourceRetriever);
       cache.set(queryForIndexFields, fieldsWithMetadata);

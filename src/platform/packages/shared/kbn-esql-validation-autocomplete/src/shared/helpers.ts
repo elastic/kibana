@@ -9,7 +9,6 @@
 import { uniqBy } from 'lodash';
 import {
   Walker,
-  walk,
   type ESQLAstItem,
   type ESQLColumn,
   type ESQLCommandOption,
@@ -934,10 +933,10 @@ export function transformMapToRealFields(inputMap: Map<string, ESQLVariable[]>):
   for (const [, variables] of inputMap) {
     for (const variable of variables) {
       // Only include variables that have a known type
-      if (variable.type !== 'unknown') {
+      if (variable.type) {
         realFields.push({
           name: variable.name,
-          type: variable.type as FieldType, // Type assertion since we've filtered out 'unknown'
+          type: variable.type as FieldType,
         });
       }
     }
@@ -966,42 +965,33 @@ export async function getFieldsFromES(query: string, resourceRetriever?: ESQLCal
   return fieldsWithMetadata;
 }
 
-const TRANSFORMATIONAL_COMMANDS = ['stats', 'keep'];
-const DROP_COMMAND = 'drop';
-
 export async function getCurrentQueryAvailableFields(
   query: string,
   commands: ESQLAstCommand[],
-  availableFields?: ESQLRealField[]
+  previousPipeFields: ESQLRealField[]
 ) {
   const cacheCopy = new Map<string, ESQLRealField>();
-  availableFields?.forEach((field) => cacheCopy.set(field.name, field));
-  const userDefinedColumns = collectVariables(commands, cacheCopy, query);
-  const arrayOfUserDefinedColumns: ESQLRealField[] = transformMapToRealFields(
-    userDefinedColumns ?? new Map<string, ESQLVariable[]>()
-  );
-  const allFields = uniqBy([...(availableFields ?? []), ...arrayOfUserDefinedColumns], 'name');
-
+  previousPipeFields?.forEach((field) => cacheCopy.set(field.name, field));
   const lastCommand = commands[commands.length - 1];
-  const isTransformationalCommand = TRANSFORMATIONAL_COMMANDS.includes(lastCommand.name);
+  const commandDef = getCommandDefinition(lastCommand.name);
 
-  const columns: ESQLColumn[] = [];
+  if (commandDef.fieldsSuggestionsAfter) {
+    const userDefinedColumns = collectVariables([lastCommand], cacheCopy, query);
+    const arrayOfUserDefinedColumns: ESQLRealField[] = transformMapToRealFields(
+      userDefinedColumns ?? new Map<string, ESQLVariable[]>()
+    );
 
-  walk(lastCommand, {
-    visitColumn: (node) => columns.push(node),
-  });
-  if (isTransformationalCommand) {
-    const columnsToKeep = (availableFields ?? []).filter((field) => {
-      return columns.some((column) => column.name === field.name);
-    });
-
-    return uniqBy([...columnsToKeep, ...arrayOfUserDefinedColumns], 'name');
-  } else if (lastCommand.name === DROP_COMMAND) {
-    const columnsToDrop = columns.map((column) => column.name);
-    return allFields.filter((field) => {
-      return !columnsToDrop.some((column) => column === field.name);
-    });
+    return commandDef.fieldsSuggestionsAfter(
+      lastCommand,
+      previousPipeFields,
+      arrayOfUserDefinedColumns
+    );
   } else {
+    const userDefinedColumns = collectVariables(commands, cacheCopy, query);
+    const arrayOfUserDefinedColumns: ESQLRealField[] = transformMapToRealFields(
+      userDefinedColumns ?? new Map<string, ESQLVariable[]>()
+    );
+    const allFields = uniqBy([...(previousPipeFields ?? []), ...arrayOfUserDefinedColumns], 'name');
     return allFields;
   }
 }

@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
+import { uniqBy } from 'lodash';
 import {
   ESQLCommandMode,
   ESQLCommandOption,
@@ -16,10 +16,13 @@ import {
   type ESQLCommand,
   type ESQLFunction,
   type ESQLMessage,
+  type ESQLAstCommand,
+  type ESQLAstRenameExpression,
+  type ESQLAstBaseItem,
   Walker,
+  walk,
 } from '@kbn/esql-ast';
 import { i18n } from '@kbn/i18n';
-import { ESQLAstRenameExpression } from '@kbn/esql-ast/src/types';
 import {
   hasWildcard,
   isAssignment,
@@ -62,6 +65,7 @@ import { suggest as suggestForChangePoint } from '../autocomplete/commands/chang
 
 import { METADATA_FIELDS } from '../shared/constants';
 import { getMessageFromId } from '../validation/errors';
+import type { ESQLRealField } from '../validation/types';
 import { isNumericType } from '../shared/esql_types';
 
 const statsValidator = (command: ESQLCommand) => {
@@ -236,6 +240,27 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
     examples: ['… | stats avg = avg(a)', '… | stats sum(b) by b', '… | stats sum(b) by b % 2'],
     validate: statsValidator,
     suggest: suggestForStats,
+    fieldsSuggestionsAfter: (
+      command: ESQLAstCommand,
+      previousCommandFields: ESQLRealField[],
+      userDefinedColumns: ESQLRealField[]
+    ) => {
+      const columns: string[] = [];
+
+      walk(command, {
+        visitCommandOption: (node) => {
+          const args = node.args.filter(isColumnItem);
+          const breakdownColumns = args.map((arg) => arg.name);
+          columns.push(...breakdownColumns);
+        },
+      });
+
+      const columnsToKeep = previousCommandFields.filter((field) => {
+        return columns.some((column) => column === field.name);
+      });
+
+      return uniqBy([...columnsToKeep, ...userDefinedColumns], 'name');
+    },
   },
   {
     name: 'inlinestats',
@@ -306,6 +331,41 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
 
       return messages;
     },
+    fieldsSuggestionsAfter: (
+      command: ESQLAstCommand,
+      previousCommandFields: ESQLRealField[],
+      userDefinedColumns: ESQLRealField[]
+    ) => {
+      const currentColumns: string[] = [];
+      const renamePairs: ESQLAstRenameExpression[] = [];
+
+      walk(command, {
+        visitColumn: (node) => {
+          currentColumns.push(node.name);
+        },
+      });
+
+      walk(command, {
+        visitCommand: (node) => {
+          const args = node.args.filter((arg) => isOptionItem(arg) && arg.name === 'as');
+          renamePairs.push(...(args as ESQLAstRenameExpression[]));
+        },
+      });
+
+      // rename the columns with the user defined name
+      return previousCommandFields.map((oldColumn) => {
+        const renamePair = renamePairs.find(
+          (pair) =>
+            pair.args && pair.args[0] && (pair.args[0] as ESQLAstBaseItem).name === oldColumn.name
+        );
+
+        if (renamePair && renamePair.args && renamePair.args[1]) {
+          return { name: (renamePair.args[1] as ESQLAstBaseItem).name, type: oldColumn.type };
+        } else {
+          return oldColumn; // No rename found, keep the old name
+        }
+      });
+    },
   },
   {
     name: 'limit',
@@ -326,6 +386,23 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
     declaration: 'KEEP column1[, ..., columnN]',
     examples: ['… | KEEP a', '… | KEEP a, b'],
     suggest: suggestForKeep,
+    fieldsSuggestionsAfter: (
+      command: ESQLAstCommand,
+      previousCommandFields: ESQLRealField[],
+      userDefinedColumns: ESQLRealField[]
+    ) => {
+      const columnsToKeep: string[] = [];
+
+      walk(command, {
+        visitColumn: (node) => {
+          columnsToKeep.push(node.name);
+        },
+      });
+
+      return previousCommandFields.filter((field) => {
+        return columnsToKeep.some((column) => column === field.name);
+      });
+    },
   },
   {
     name: 'drop',
@@ -371,6 +448,24 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
         });
       }
       return messages;
+    },
+    fieldsSuggestionsAfter: (
+      command: ESQLAstCommand,
+      previousCommandFields: ESQLRealField[],
+      userDefinedColumns: ESQLRealField[]
+    ) => {
+      const columnsToDrop: string[] = [];
+
+      walk(command, {
+        visitColumn: (node) => {
+          columnsToDrop.push(node.name);
+        },
+      });
+
+      return previousCommandFields.filter((field) => {
+        // if the field is not in the columnsToDrop, keep it
+        return !columnsToDrop.some((column) => column === field.name);
+      });
     },
   },
   {

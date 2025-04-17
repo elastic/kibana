@@ -67,6 +67,7 @@ function addVariableFromAssignment(
 ) {
   if (isColumnItem(assignOperation.args[0])) {
     const rightHandSideArgType = getExpressionType(assignOperation.args[1], fields, variables);
+
     addToVariableOccurrences(variables, {
       name: assignOperation.args[0].parts.join('.'),
       type: rightHandSideArgType /* fallback to number */,
