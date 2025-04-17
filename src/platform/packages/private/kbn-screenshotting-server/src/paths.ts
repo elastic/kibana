@@ -17,8 +17,7 @@ export interface PackageInfo {
   binaryChecksum: string;
   binaryRelativePath: string;
   isPreInstalled: boolean;
-  location: 'custom' | 'CfT';
-  revision: number;
+  location: 'custom' | 'chromeForTesting';
 }
 
 enum BaseUrl {
@@ -26,7 +25,7 @@ enum BaseUrl {
   custom = 'https://storage.googleapis.com/headless_shell',
   // GCS bucket for headless chrome provided by the chrome team, see
   // https://github.com/GoogleChromeLabs/chrome-for-testing#json-api-endpoints
-  CfT = 'https://storage.googleapis.com/chrome-for-testing-public',
+  chromeForTesting = 'https://storage.googleapis.com/chrome-for-testing-public',
 }
 
 interface CustomPackageInfo extends PackageInfo {
@@ -35,12 +34,12 @@ interface CustomPackageInfo extends PackageInfo {
 
 interface ChromeForTestingPackageInfo extends PackageInfo {
   version: string;
-  location: 'CfT';
+  location: 'chromeForTesting';
   archivePath: string;
 }
 
 function isChromeForTestingPackage(p: PackageInfo): p is ChromeForTestingPackageInfo {
-  return p.location === 'CfT';
+  return p.location === 'chromeForTesting';
 }
 
 export class ChromiumArchivePaths {
@@ -52,9 +51,8 @@ export class ChromiumArchivePaths {
       archiveChecksum: 'e09bd8cc7b381a20d7738c3026a359e5ddd6a587ecb33f8326c0818f243f50e2',
       binaryChecksum: '7bef5a84fe90d2a243e1e9c45e86f53525b1a3adec598c0b6ce009792abd5f34',
       binaryRelativePath: 'chrome-headless-shell-mac-x64/chrome-headless-shell',
-      revision: 1415337,
       version: '134.0.6998.35',
-      location: 'CfT',
+      location: 'chromeForTesting',
       archivePath: 'mac-x64',
       isPreInstalled: false,
     },
@@ -65,9 +63,8 @@ export class ChromiumArchivePaths {
       archiveChecksum: 'ead60a22ae13e93a74b88fe43df3aa547ca599d9f9b7fd4b060e5c595fd890cb',
       binaryChecksum: '8f60afb3cabee80b3e7efa6898d589997d5f6e3669b1bdc1bca4b8685e500e7f',
       binaryRelativePath: 'chrome-headless-shell-mac-arm64/chrome-headless-shell',
-      revision: 1415337,
       version: '134.0.6998.35',
-      location: 'CfT',
+      location: 'chromeForTesting',
       archivePath: 'mac-arm64',
       isPreInstalled: false,
     },
@@ -78,7 +75,6 @@ export class ChromiumArchivePaths {
       archiveChecksum: '98db5f4ae704a0cf4d1612721334b0466908bf642ac547798aa303d17105e782',
       binaryChecksum: '2ed0cbce8358e86b5c44719d1ccd50f711b879088946b6ffdeed22b4ce2e47ea',
       binaryRelativePath: 'headless_shell-linux_x64/headless_shell',
-      revision: 1415337,
       location: 'custom',
       isPreInstalled: true,
     },
@@ -89,7 +85,6 @@ export class ChromiumArchivePaths {
       archiveChecksum: '9b3bf295794f0d4fe5e52813aa31a5ed4ca4389384f7fff2a8465777709174ea',
       binaryChecksum: '382c7f30a57b1096c7567d3a2cba0353aae80ec11790cd271601fb1b2ebb85cd',
       binaryRelativePath: 'headless_shell-linux_arm64/headless_shell',
-      revision: 1415337,
       location: 'custom',
       isPreInstalled: true,
     },
@@ -100,9 +95,8 @@ export class ChromiumArchivePaths {
       archiveChecksum: '3bda1b7b1dc59fe4d79d68c5ca2384f8e7a743253e041eb731664b05a1e73343',
       binaryChecksum: 'fffdc5e77fae67391e154d92f2084f84fec410632a48211ae0ab652dc64aeacf',
       binaryRelativePath: path.join('chrome-headless-shell-win64', 'chrome-headless-shell.exe'),
-      revision: 1415337,
       version: '134.0.6998.35',
-      location: 'CfT',
+      location: 'chromeForTesting',
       archivePath: 'win64',
       isPreInstalled: true,
     },
@@ -126,11 +120,11 @@ export class ChromiumArchivePaths {
 
   public getDownloadUrl(p: PackageInfo) {
     if (isChromeForTestingPackage(p)) {
-      const { CfT } = BaseUrl;
+      const { chromeForTesting } = BaseUrl;
       const { archivePath, version, archiveFilename } = p;
       // returned string matches download value found at the following endpoint;
       // https://googlechromelabs.github.io/chrome-for-testing/known-good-versions-with-downloads.json
-      return `${CfT}/${version}/${archivePath}/${archiveFilename}`;
+      return `${chromeForTesting}/${version}/${archivePath}/${archiveFilename}`;
     }
 
     return BaseUrl.custom + '/' + p.archiveFilename; // revision is not used for URL if package is a custom build
