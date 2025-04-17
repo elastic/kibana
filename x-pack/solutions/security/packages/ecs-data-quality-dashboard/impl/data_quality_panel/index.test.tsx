@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DARK_THEME } from '@elastic/charts';
+import { AMSTERDAM_DARK_THEME } from '@elastic/charts';
 import { render, screen } from '@testing-library/react';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import React from 'react';
@@ -65,7 +65,7 @@ describe('DataQualityPanel', () => {
           reportDataQualityIndexChecked={jest.fn()}
           reportDataQualityCheckAllCompleted={jest.fn()}
           setLastChecked={jest.fn()}
-          baseTheme={DARK_THEME}
+          baseTheme={AMSTERDAM_DARK_THEME}
           toasts={toasts}
           defaultStartTime={'now-7d'}
           defaultEndTime={'now'}

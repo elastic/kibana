@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DARK_THEME, Settings } from '@elastic/charts';
+import { AMSTERDAM_DARK_THEME, Settings } from '@elastic/charts';
 import numeral from '@elastic/numeral';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -77,7 +77,7 @@ describe('StorageTreemap', () => {
 
       render(
         <TestExternalProviders>
-          <TestDataQualityProviders dataQualityContextProps={{ patterns, baseTheme: DARK_THEME }}>
+          <TestDataQualityProviders dataQualityContextProps={{ patterns, baseTheme: AMSTERDAM_DARK_THEME }}>
             <StorageTreemap {...defaultProps} />
           </TestDataQualityProviders>
         </TestExternalProviders>
@@ -148,7 +148,7 @@ describe('StorageTreemap', () => {
     beforeEach(() => {
       render(
         <TestExternalProviders>
-          <TestDataQualityProviders dataQualityContextProps={{ patterns, baseTheme: DARK_THEME }}>
+          <TestDataQualityProviders dataQualityContextProps={{ patterns, baseTheme: AMSTERDAM_DARK_THEME }}>
             <StorageTreemap {...defaultProps} flattenedBuckets={emptyFlattenedBuckets} />
           </TestDataQualityProviders>
         </TestExternalProviders>

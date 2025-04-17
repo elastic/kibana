@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { LIGHT_THEME } from '@elastic/charts';
+import { AMSTERDAM_LIGHT_THEME } from '@elastic/charts';
 import { action } from '@storybook/addon-actions';
 import { AlertSummaryWidgetFullSize as Component } from './alert_summary_widget_full_size';
 import { mockedAlertSummaryResponse, mockedChartProps } from '../../../mock/alert_summary_widget';
@@ -25,7 +25,7 @@ export const FullSize = {
       onBrushEnd: action('brushEvent'),
     },
     dependencyProps: {
-      baseTheme: LIGHT_THEME,
+      baseTheme: AMSTERDAM_LIGHT_THEME,
     },
   },
 };

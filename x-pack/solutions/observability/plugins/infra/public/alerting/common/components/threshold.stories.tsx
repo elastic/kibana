@@ -7,7 +7,7 @@
 
 import React from 'react';
 import type { Meta } from '@storybook/react';
-import { LIGHT_THEME } from '@elastic/charts';
+import { AMSTERDAM_LIGHT_THEME } from '@elastic/charts';
 import { COMPARATORS } from '@kbn/alerting-comparators';
 import type { Props } from './threshold';
 import { Threshold as Component } from './threshold';
@@ -30,7 +30,7 @@ export default {
 } as Meta<typeof Component>;
 
 const defaultProps: Props = {
-  chartProps: { baseTheme: LIGHT_THEME },
+  chartProps: { baseTheme: AMSTERDAM_LIGHT_THEME },
   comparator: COMPARATORS.GREATER_THAN,
   id: 'componentId',
   thresholds: [90],
