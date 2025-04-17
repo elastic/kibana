@@ -15,9 +15,9 @@ export function replaceESQLQueryIndexPattern(esql: string, replacements: Record<
 
   for (const [source, target] of Object.entries(replacements)) {
     const { index: sourceIndex, cluster: sourceCluster } = parseIndex(source);
+    const { index: targetIndex, cluster: targetCluster } = parseIndex(target);
 
     while (mutate.commands.from.sources.remove(inputQuery.ast, sourceIndex, sourceCluster)) {
-      const { index: targetIndex, cluster: targetCluster } = parseIndex(target);
       mutate.commands.from.sources.remove(outputQuery.ast, sourceIndex, sourceCluster);
       mutate.commands.from.sources.upsert(outputQuery.ast, targetIndex, targetCluster);
     }
