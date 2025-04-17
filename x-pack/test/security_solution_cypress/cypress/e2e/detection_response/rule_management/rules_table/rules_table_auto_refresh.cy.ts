@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { navigateUsingGlobalSearch, visitGetStartedPage } from '../../../../tasks/navigation';
 import { visitRulesManagementTable } from '../../../../tasks/rules_management';
 import {
   REFRESH_RULES_STATUS,
@@ -68,8 +69,9 @@ describe(
 
     describe('when enabled', () => {
       beforeEach(() => {
-        mockGlobalClock();
-        visitRulesManagementTable();
+        visitGetStartedPage(); // load the page without mocking timers. Deep links need timers unmocked
+        mockGlobalClock(); // mock timers
+        navigateUsingGlobalSearch('rules'); // navigate to rules page
 
         expectNumberOfRules(RULES_MANAGEMENT_TABLE, 1);
       });
@@ -94,8 +96,10 @@ describe(
 
     describe('when disabled', () => {
       beforeEach(() => {
-        mockGlobalClock();
-        visitRulesManagementTable();
+        visitGetStartedPage(); // load the page without mocking timers. Deep links need timers unmocked
+        mockGlobalClock(); // mock timers
+        navigateUsingGlobalSearch('rules'); // navigate to rules page
+
         expectNumberOfRules(RULES_MANAGEMENT_TABLE, 1);
       });
 
@@ -141,8 +145,9 @@ describe(
 
     describe('when one rule is selected', () => {
       it('does NOT refresh after refresh interval has passed', () => {
-        mockGlobalClock();
-        visitRulesManagementTable();
+        visitGetStartedPage(); // load the page without mocking timers. Deep links need timers unmocked
+        mockGlobalClock(); // mock timers
+        navigateUsingGlobalSearch('rules'); // navigate to rules page
 
         expectNumberOfRules(RULES_MANAGEMENT_TABLE, 1);
 

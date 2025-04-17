@@ -102,3 +102,16 @@ const disableNewFeaturesTours = (window: Window) => {
     window.localStorage.setItem(key, JSON.stringify(tourConfig));
   });
 };
+
+// This should work on both classic and serverless navigation
+const navSearchText = {
+  onboarding: 'Security / Get started',
+  hosts: 'Security / Explore / Hosts',
+  rules: 'Security / Rules / Detection rules (SIEM)',
+} as const;
+
+export const navigateUsingGlobalSearch = (page: keyof typeof navSearchText) => {
+  cy.get('[data-test-subj="nav-search-reveal"]').click();
+  cy.get('[data-test-subj="nav-search-input"]').type(navSearchText[page]);
+  cy.get('[data-test-subj="nav-search-option"]').first().click();
+};

@@ -6,7 +6,7 @@
  */
 
 import type { Subject, Subscription } from 'rxjs';
-import { combineLatestWith } from 'rxjs';
+import { combineLatestWith, debounceTime } from 'rxjs';
 import type { AppDeepLink, AppUpdater, AppDeepLinkLocations } from '@kbn/core/public';
 import type { SecurityPageName } from '@kbn/deeplinks-security';
 import type { NavigationTreeDefinition, NodeDefinition } from '@kbn/core-chrome-browser';
@@ -135,7 +135,8 @@ export const registerDeepLinksUpdater = (
 ): Subscription => {
   return navigationTree$
     .pipe(
-      combineLatestWith(applicationLinksUpdater.links$, applicationLinksUpdater.normalizedLinks$)
+      combineLatestWith(applicationLinksUpdater.links$, applicationLinksUpdater.normalizedLinks$),
+      debounceTime(100) // Debounce to avoid too many updates
     )
     .subscribe(([navigationTree, appLinks, normalizedLinks]) => {
       const deepLinks =
