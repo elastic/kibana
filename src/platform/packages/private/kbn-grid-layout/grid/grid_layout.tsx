@@ -42,7 +42,6 @@ export const GridLayout = ({
   className,
   useCustomDragHandle = false,
 }: GridLayoutProps) => {
-  console.log(layout);
   const layoutRef = useRef<HTMLDivElement | null>(null);
   const { gridLayoutStateManager, setDimensionsRef } = useGridLayoutState({
     layout,
@@ -148,7 +147,6 @@ export const GridLayout = ({
       )
       .subscribe((currentLayout) => {
         if (!layoutRef.current) return;
-        console.log('HERE!!');
         const rowIds = getRowKeysInOrder(currentLayout);
         let gridRowTemplateString = '';
         rowIds.forEach((rowId) => {
@@ -168,8 +166,6 @@ export const GridLayout = ({
         gridRowTemplateString = gridRowTemplateString.replaceAll('] [', ' ');
 
         layoutRef.current.style.gridTemplateRows = gridRowTemplateString;
-
-        console.log(gridRowTemplateString);
       });
 
     return () => {

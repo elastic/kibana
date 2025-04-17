@@ -45,7 +45,14 @@ export const dashboardInputToGridLayout = ({
   panels: MockedDashboardPanelMap;
   rows: MockedDashboardRowMap;
 }): GridLayoutData => {
-  const layout: GridLayoutData = {};
+  const layout: GridLayoutData = {
+    first: {
+      id: 'first',
+      order: 0,
+      panels: {},
+      isCollapsible: false,
+    },
+  };
   Object.values(rows).forEach((row) => {
     const { id, order, isCollapsible } = row;
     layout[row.id] = {
@@ -56,7 +63,6 @@ export const dashboardInputToGridLayout = ({
       ...(isCollapsible ? { isCollapsed: row.collapsed, title: row.title } : {}),
     } as GridRowData;
   });
-
   Object.keys(panels).forEach((panelId) => {
     const gridData = panels[panelId].gridData;
     layout[gridData.row ?? 'first'].panels[panelId] = {
