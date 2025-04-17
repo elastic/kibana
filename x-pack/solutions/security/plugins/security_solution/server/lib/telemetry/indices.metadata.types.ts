@@ -48,8 +48,7 @@ export interface IndexTemplatesStats {
 export interface IndexTemplateInfo {
   template_name: string;
   index_mode: Nullable<string>;
-  datastream_dataset: Nullable<string>;
-  datastream_type: Nullable<string>;
+  datastream: boolean;
   package_name: Nullable<string>;
   managed_by: Nullable<string>;
   beat: Nullable<string>;

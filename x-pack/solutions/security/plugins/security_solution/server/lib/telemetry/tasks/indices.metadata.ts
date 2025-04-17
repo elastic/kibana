@@ -87,13 +87,12 @@ export function createTelemetryIndicesMetadataTaskConfig() {
       const publishIndexTemplatesStats = async (
         indexTemplates: IndexTemplateInfo[]
       ): Promise<number> => {
-        const templateNames = new Set<string>();
         const templateStats: IndexTemplatesStats = {
           items: indexTemplates,
         };
 
         sender.reportEBT(TELEMETRY_INDEX_TEMPLATES_EVENT, templateStats);
-        log.info(`Sent index templates`, { count: templateNames.size } as LogMeta);
+        log.info(`Sent index templates`, { count: indexTemplates.length } as LogMeta);
 
         return templateStats.items.length;
       };

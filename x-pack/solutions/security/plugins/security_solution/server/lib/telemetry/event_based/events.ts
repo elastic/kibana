@@ -669,18 +669,10 @@ export const TELEMETRY_INDEX_TEMPLATES_EVENT: EventTypeOpts<IndexTemplatesStats>
               description: 'The index mode.',
             },
           },
-          datastream_dataset: {
-            type: 'keyword',
+          datastream: {
+            type: 'boolean',
             _meta: {
-              optional: true,
               description: 'Datastream dataset',
-            },
-          },
-          datastream_type: {
-            type: 'keyword',
-            _meta: {
-              optional: true,
-              description: 'Datastream type',
             },
           },
           package_name: {
@@ -725,7 +717,8 @@ export const TELEMETRY_INDEX_TEMPLATES_EVENT: EventTypeOpts<IndexTemplatesStats>
             type: 'boolean',
             _meta: {
               optional: true,
-              description: 'Whether the source is enabled',
+              description:
+                'The _source field contains the original JSON document body that was provided at index time',
             },
           },
           source_includes: {
@@ -733,7 +726,7 @@ export const TELEMETRY_INDEX_TEMPLATES_EVENT: EventTypeOpts<IndexTemplatesStats>
             items: {
               type: 'keyword',
               _meta: {
-                description: 'Fields included in _source',
+                description: 'Fields included in _source, if enabled',
               },
             },
             _meta: { description: '' },
@@ -746,7 +739,7 @@ export const TELEMETRY_INDEX_TEMPLATES_EVENT: EventTypeOpts<IndexTemplatesStats>
                 description: '',
               },
             },
-            _meta: { description: 'Fields excludes from source' },
+            _meta: { description: 'Fields excludes from _source, if enabled' },
           },
         },
       },

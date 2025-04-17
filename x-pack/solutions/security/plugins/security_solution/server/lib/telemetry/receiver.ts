@@ -1522,8 +1522,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
       filter_path: [
         'index_templates.name',
         'index_templates.index_template.template.settings.index.mode',
-        'index_templates.index_template.template.mappings.properties.data_stream.properties.type.value',
-        'index_templates.index_template.template.mappings.properties.data_stream.properties.dataset.value',
+        'index_templates.index_template.data_stream',
         'index_templates.index_template._meta.package.name',
         'index_templates.index_template._meta.managed_by',
         'index_templates.index_template._meta.beat',
@@ -1539,18 +1538,12 @@ export class TelemetryReceiver implements ITelemetryReceiver {
       .getIndexTemplate(request)
       .then((response) =>
         response.index_templates.map((props) => {
+          const datastream = props.index_template?.data_stream !== undefined;
           return {
             template_name: props.name,
             index_mode: props.index_template.template?.settings?.index?.mode,
-            // @ts-expect-error @elastic/elasticsearch PropertyBase doesn't decalre value
-            datastream_dataset:
-              props.index_template.template?.mappings?.properties?.data_stream?.properties?.dataset
-                ?.value,
-            // @ts-expect-error @elastic/elasticsearch PropertyBase doesn't decalre value
-            datastream_type:
-              props.index_template.template?.mappings?.properties?.data_stream?.properties?.type
-                ?.value,
             package_name: props.index_template._meta?.package?.name,
+            datastream,
             managed_by: props.index_template._meta?.managed_by,
             beat: props.index_template._meta?.beat,
             is_managed: props.index_template._meta?.managed,
