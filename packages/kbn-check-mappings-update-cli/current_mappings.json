@@ -3886,7 +3886,7 @@
     }
   },
   "workchat_agent": {
-    "dynamic": "strict",
+    "dynamic": false,
     "properties": {
       "access_control": {
         "properties": {
