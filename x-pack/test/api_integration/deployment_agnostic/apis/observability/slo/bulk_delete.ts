@@ -10,7 +10,6 @@ import expect from '@kbn/expect';
 import { RoleCredentials } from '@kbn/ftr-common-functional-services';
 import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import { DATA_FORGE_CONFIG } from './helpers/dataforge';
-import { TransformHelper, createTransformHelper } from './helpers/transform';
 import { DEFAULT_SLO } from './fixtures/slo';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
@@ -25,12 +24,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const DATA_VIEW_ID = 'data-view-id';
 
   let adminRoleAuthc: RoleCredentials;
-  let transformHelper: TransformHelper;
 
   describe('Bulk Delete SLO', function () {
     before(async () => {
       adminRoleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('admin');
-      transformHelper = createTransformHelper(getService);
 
       await generate({ client: esClient, config: DATA_FORGE_CONFIG, logger });
 
