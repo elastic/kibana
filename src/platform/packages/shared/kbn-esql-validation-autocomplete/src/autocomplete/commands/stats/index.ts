@@ -25,6 +25,7 @@ import {
   getPosition,
   whereCompleteItem,
 } from './util';
+import { ESQL_VARIABLES_PREFIX } from '../../../shared/constants';
 import { isMarkerNode } from '../../../shared/context';
 
 export async function suggest({
@@ -48,7 +49,7 @@ export async function suggest({
     Boolean(supportsControls),
     ESQLVariableType.FUNCTIONS,
     getVariables,
-    lastCharacterTyped !== '?'
+    lastCharacterTyped !== ESQL_VARIABLES_PREFIX
   );
 
   switch (pos) {
