@@ -496,14 +496,24 @@ export class ObservabilityAIAssistantClient {
                 systemMessage$,
               ]).pipe(
                 switchMap(([addedMessages, title, systemMessage]) => {
-                  // sanitize the history and the new messages
+                  // ─────────────────────────────────────────────────────────────────
+                  // Call sanitizeMessages on history + new messages:
+                  //   • Internally builds the entity map from all detectedEntities
+                  //     (from previous turns and new user lines) for un‑hashing.
+                  //   • Skips already‑sanitized messages (sanitized:true).
+                  //   • Runs NER/regex on new user messages and un‑hashes new assistant
+                  //     placeholders, attaching new entities.
+                  // ─────────────────────────────────────────────────────────────────
                   return from(this.sanitizeMessages(initialMessages.concat(addedMessages))).pipe(
-                    switchMap(({ sanitizedMessages: allClean }) => {
-                      const sanitizedAddedMessages = allClean.slice(initialMessages.length);
+                    switchMap(({ sanitizedMessages: allSanitizedMessages }) => {
+                      // Extract only the newly sanitised messages (the tail of allSanitizedMessages):
+                      const newSanitizedMessages = allSanitizedMessages.slice(
+                        initialMessages.length
+                      );
 
                       // merge back for downstream processing
                       const initialMessagesWithAddedMessages =
-                        initialMessages.concat(sanitizedAddedMessages);
+                        initialMessages.concat(newSanitizedMessages);
 
                       const lastMessage = last(initialMessagesWithAddedMessages);
 
