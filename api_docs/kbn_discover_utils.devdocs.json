@@ -4348,7 +4348,7 @@
             "label": "getAllTracesIndexPattern",
             "description": [],
             "signature": [
-              "() => string | undefined"
+              "() => string"
             ],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/data_types/traces/traces_context_service.ts",
             "deprecated": false,

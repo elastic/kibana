@@ -1048,10 +1048,6 @@
               },
               {
                 "plugin": "observabilityOnboarding",
-                "path": "x-pack/solutions/observability/plugins/observability_onboarding/public/application/quickstart_flows/custom_logs/install_elastic_agent.tsx"
-              },
-              {
-                "plugin": "observabilityOnboarding",
                 "path": "x-pack/solutions/observability/plugins/observability_onboarding/public/application/quickstart_flows/kubernetes/data_ingest_status.tsx"
               },
               {

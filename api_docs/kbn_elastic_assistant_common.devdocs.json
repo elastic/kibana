@@ -1579,7 +1579,7 @@
           "\nInterface for features available to the elastic assistant"
         ],
         "signature": [
-          "{ readonly assistantModelEvaluation: boolean; readonly defendInsights: boolean; }"
+          "{ readonly assistantModelEvaluation: boolean; readonly defendInsights: boolean; readonly advancedEsqlGeneration: boolean; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/impl/capabilities/index.ts",
         "deprecated": false,
@@ -4785,6 +4785,34 @@
       },
       {
         "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.INVOKE_LL_CLIENT_TIMEOUT",
+        "type": "number",
+        "tags": [],
+        "label": "INVOKE_LL_CLIENT_TIMEOUT",
+        "description": [
+          "\nThe client timeout is set to 3 seconds less than the server timeout to prevent\nthe `core-http-browser` from retrying the request.\n"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.INVOKE_LLM_SERVER_TIMEOUT",
+        "type": "number",
+        "tags": [],
+        "label": "INVOKE_LLM_SERVER_TIMEOUT",
+        "description": [
+          "\nThe server timeout is set to 4 minutes to allow for long-running requests.\nThe allows slower LLMs (like Llama 3.1 70B) and complex tasks such as ESQL generation to complete\nwithout being interrupted."
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
         "id": "def-common.KnowledgeBaseEntryBulkActionBase",
         "type": "Type",
         "tags": [],
@@ -7250,7 +7278,7 @@
           "\nDefault features available to the elastic assistant"
         ],
         "signature": [
-          "{ readonly assistantModelEvaluation: false; readonly defendInsights: true; }"
+          "{ readonly assistantModelEvaluation: false; readonly defendInsights: true; readonly advancedEsqlGeneration: false; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/impl/capabilities/index.ts",
         "deprecated": false,

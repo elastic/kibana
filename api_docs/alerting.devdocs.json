@@ -10086,6 +10086,18 @@
       },
       {
         "parentPluginId": "alerting",
+        "id": "def-common.ARCHIVE_MAINTENANCE_WINDOW_API_PATH",
+        "type": "string",
+        "tags": [],
+        "label": "ARCHIVE_MAINTENANCE_WINDOW_API_PATH",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/alerting/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
         "id": "def-common.BASE_ALERTING_API_PATH",
         "type": "string",
         "tags": [],
@@ -10093,6 +10105,21 @@
         "description": [],
         "signature": [
           "\"/api/alerting\""
+        ],
+        "path": "x-pack/platform/plugins/shared/alerting/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
+        "id": "def-common.BASE_MAINTENANCE_WINDOW_API_PATH",
+        "type": "string",
+        "tags": [],
+        "label": "BASE_MAINTENANCE_WINDOW_API_PATH",
+        "description": [],
+        "signature": [
+          "\"/api/maintenance_window\""
         ],
         "path": "x-pack/platform/plugins/shared/alerting/common/index.ts",
         "deprecated": false,
@@ -10110,6 +10137,21 @@
           "\"RULE_NOT_MODIFIED\""
         ],
         "path": "x-pack/platform/plugins/shared/alerting/common/bulk_edit.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
+        "id": "def-common.CREATE_MAINTENANCE_WINDOW_API_PATH",
+        "type": "string",
+        "tags": [],
+        "label": "CREATE_MAINTENANCE_WINDOW_API_PATH",
+        "description": [],
+        "signature": [
+          "\"/api/maintenance_window\""
+        ],
+        "path": "x-pack/platform/plugins/shared/alerting/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -10191,6 +10233,18 @@
       },
       {
         "parentPluginId": "alerting",
+        "id": "def-common.DELETE_MAINTENANCE_WINDOW_API_PATH",
+        "type": "string",
+        "tags": [],
+        "label": "DELETE_MAINTENANCE_WINDOW_API_PATH",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/alerting/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
         "id": "def-common.ENABLE_MAINTENANCE_WINDOWS",
         "type": "boolean",
         "tags": [],
@@ -10215,6 +10269,18 @@
           "\"timestamp\" | \"execution_duration\" | \"schedule_delay\" | \"total_search_duration\" | \"es_search_duration\" | \"num_triggered_actions\" | \"num_generated_actions\" | \"num_active_alerts\" | \"num_recovered_alerts\" | \"num_new_alerts\""
         ],
         "path": "x-pack/platform/plugins/shared/alerting/common/execution_log_types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
+        "id": "def-common.GET_MAINTENANCE_WINDOW_API_PATH",
+        "type": "string",
+        "tags": [],
+        "label": "GET_MAINTENANCE_WINDOW_API_PATH",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/alerting/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -11669,6 +11735,30 @@
           "{ alertId: string; alertUuid: string; started: string; flappingHistory: boolean[]; flapping: boolean; pendingRecoveredCount: number; activeCount: number; }"
         ],
         "path": "x-pack/platform/packages/private/kbn-alerting-state-types/src/lifecycle_state.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
+        "id": "def-common.UNARCHIVE_MAINTENANCE_WINDOW_API_PATH",
+        "type": "string",
+        "tags": [],
+        "label": "UNARCHIVE_MAINTENANCE_WINDOW_API_PATH",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/alerting/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
+        "id": "def-common.UPDATE_MAINTENANCE_WINDOW_API_PATH",
+        "type": "string",
+        "tags": [],
+        "label": "UPDATE_MAINTENANCE_WINDOW_API_PATH",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/alerting/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
