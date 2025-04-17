@@ -28,7 +28,7 @@ import { rowToDocument, mergeEsqlResultInSource } from './utils';
 import { fetchSourceDocuments } from './fetch_source_documents';
 import { buildReasonMessageForEsqlAlert } from '../utils/reason_formatters';
 import type { RulePreviewLoggedRequest } from '../../../../../common/api/detection_engine/rule_preview/rule_preview.gen';
-import type { CreateRuleOptions, SecuritySharedParams, SignalSource } from '../types';
+import type { CreateRuleOptions, SignalSource } from '../types';
 import { getDataTierFilter } from '../utils/get_data_tier_filter';
 import { checkErrorDetails } from '../utils/check_error_details';
 
