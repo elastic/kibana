@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { EuiSelectableOption } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 
-export interface OptionData {
-  description?: string;
+export interface ModelOptionsData {
+  key: string;
+  label: string;
+  description: string;
 }
 
 const elserTitle = i18n.translate(
@@ -79,22 +80,20 @@ const INFERENCE_ENDPOINT_METADATA: Record<string, { title: string; description: 
 
 export const getModelOptionsForInferenceEndpoints = ({
   endpoints,
-  selectedInferenceId,
 }: {
   endpoints: InferenceAPIConfigResponse[];
-  selectedInferenceId: string;
-}) => {
+}): ModelOptionsData[] => {
   // TODO: add logic to show the EIS models if EIS is enabled, if not show the other models
-  const options: Array<EuiSelectableOption<OptionData>> = endpoints?.map((endpoint) => {
-    const metadata = INFERENCE_ENDPOINT_METADATA[endpoint.inference_id];
+  return endpoints.map((endpoint) => {
+    const meta = INFERENCE_ENDPOINT_METADATA[endpoint.inference_id] || {
+      title: endpoint.inference_id,
+      description: '',
+    };
 
     return {
       key: endpoint.inference_id,
-      label: metadata?.title,
-      description: metadata?.description || '',
-      checked: selectedInferenceId === endpoint.inference_id ? 'on' : undefined,
+      label: meta.title,
+      description: meta.description,
     };
   });
-
-  return options;
 };

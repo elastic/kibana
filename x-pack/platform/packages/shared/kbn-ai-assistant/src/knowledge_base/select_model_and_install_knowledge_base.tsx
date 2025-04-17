@@ -5,24 +5,20 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   EuiButton,
-  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPopover,
-  EuiSelectable,
-  EuiSelectableOption,
+  EuiLink,
   EuiSpacer,
+  EuiSuperSelect,
   EuiText,
-  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { css } from '@emotion/css';
 import { useInferenceEndpoints } from '../hooks/use_inference_endpoints';
 import {
-  OptionData,
+  ModelOptionsData,
   getModelOptionsForInferenceEndpoints,
 } from '../utils/get_model_options_for_inference_endpoints';
 
@@ -31,23 +27,13 @@ interface SelectModelAndInstallKnowledgeBaseProps {
   isInstalling: boolean;
 }
 
-const kbModelSelectionClassName = css`
-  width: 400px;
-  .euiSelectableListItem__text {
-    text-decoration: none !important;
-  }
-`;
-
 export function SelectModelAndInstallKnowledgeBase({
   onInstall,
   isInstalling,
 }: SelectModelAndInstallKnowledgeBaseProps) {
-  const { euiTheme } = useEuiTheme();
-
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [selectedInferenceId, setSelectedInferenceId] = useState<string>('');
 
-  const { inferenceEndpoints, isLoading } = useInferenceEndpoints();
+  const { inferenceEndpoints, isLoading: isLoadingEndpoints } = useInferenceEndpoints();
 
   useEffect(() => {
     if (!selectedInferenceId && inferenceEndpoints.length) {
@@ -61,106 +47,84 @@ export function SelectModelAndInstallKnowledgeBase({
     }
   };
 
-  const modelOptions = getModelOptionsForInferenceEndpoints({
+  const modelOptions: ModelOptionsData[] = getModelOptionsForInferenceEndpoints({
     endpoints: inferenceEndpoints,
-    selectedInferenceId,
   });
 
-  const renderOption = useCallback(
-    (option: EuiSelectableOption<OptionData>) => (
-      <EuiFlexGroup gutterSize="xs" direction="column" css={{ paddingBlock: euiTheme.size.xs }}>
-        <EuiFlexItem grow={false}>
-          <EuiText size="s">
-            <strong>{option.label}</strong>
-          </EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiText size="xs">{option.description}</EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+  const superSelectOptions = modelOptions.map((option: ModelOptionsData) => ({
+    value: option.key,
+    inputDisplay: option.label,
+    dropdownDisplay: (
+      <div>
+        <strong>{option.label}</strong>
+        <EuiText size="xs" color="subdued" css={{ marginTop: 4 }}>
+          {option.description}
+        </EuiText>
+      </div>
     ),
-    [euiTheme.size.xs]
-  );
-
-  const handleChange = async (newOptions: EuiSelectableOption[]) => {
-    const selectedOption = newOptions.find((option) => option.checked === 'on');
-
-    if (selectedOption && selectedOption.key !== selectedInferenceId) {
-      setSelectedInferenceId(selectedOption.key as string);
-      setIsPopoverOpen(false);
-    }
-  };
+  }));
 
   return (
     <>
-      <EuiSpacer size="m" />
-
-      <EuiText color="subdued" size="s">
-        {i18n.translate(
-          'xpack.aiAssistant.welcomeMessage.knowledgeBase.model.selection.description',
-          { defaultMessage: "Choose the default language model for the Assistant's responses." }
-        )}
+      <EuiText textAlign="center">
+        <h3>
+          {i18n.translate('xpack.observabilityAiAssistantManagement.knowledgeBaseTab.getStarted', {
+            defaultMessage: 'Get started by setting up the Knowledge Base',
+          })}
+        </h3>
       </EuiText>
 
-      <EuiSpacer size="m" />
+      <EuiSpacer size="s" />
 
-      <EuiPopover
-        button={
-          <EuiButtonEmpty
-            onClick={() => setIsPopoverOpen(!isPopoverOpen)}
-            iconType="arrowDown"
-            iconSide="right"
-          >
-            {modelOptions.find((option) => option.key === selectedInferenceId)?.label ||
-              'Select a model'}
-          </EuiButtonEmpty>
-        }
-        isOpen={isPopoverOpen}
-        closePopover={() => setIsPopoverOpen(false)}
-        panelPaddingSize="none"
-        anchorPosition="downCenter"
-      >
-        <EuiSelectable
-          aria-label={i18n.translate(
-            'xpack.aiAssistant.welcomeMessage.knowledgeBase.model.selection',
-            {
-              defaultMessage: 'Select Model',
-            }
-          )}
-          options={modelOptions}
-          singleSelection="always"
-          onChange={handleChange}
-          renderOption={renderOption}
-          isLoading={isLoading}
-          listProps={{
-            isVirtualized: false,
-            onFocusBadge: false,
-            textWrap: 'wrap',
-          }}
+      <EuiText size="s" color="subdued" textAlign="center">
+        {i18n.translate(
+          'xpack.observabilityAiAssistantManagement.knowledgeBaseTab.chooseModelSubtitle',
+          {
+            defaultMessage: "Choose the default language model for the Assistant's responses.",
+          }
+        )}{' '}
+        <EuiLink
+          href="https://www.elastic.co/docs/explore-analyze/machine-learning/nlp/ml-nlp-built-in-models"
+          target="_blank"
         >
-          {(list) => <div className={kbModelSelectionClassName}>{list}</div>}
-        </EuiSelectable>
-      </EuiPopover>
+          {i18n.translate(
+            'xpack.observabilityAiAssistantManagement.knowledgeBaseTab.subtitleLearnMore',
+            { defaultMessage: 'Learn more' }
+          )}
+        </EuiLink>
+      </EuiText>
+
+      <EuiSpacer size="l" />
+
+      <EuiFlexGroup justifyContent="center">
+        <EuiFlexItem grow={false} css={{ width: 320 }}>
+          <EuiSuperSelect
+            fullWidth
+            hasDividers
+            isLoading={isLoadingEndpoints}
+            options={superSelectOptions}
+            valueOfSelected={selectedInferenceId}
+            onChange={(value) => setSelectedInferenceId(value)}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
 
       <EuiSpacer size="m" />
 
       <EuiFlexGroup justifyContent="center">
         <EuiFlexItem grow={false}>
-          <div>
-            <EuiButton
-              color="primary"
-              fill
-              isLoading={isInstalling}
-              iconType="importAction"
-              data-test-subj="observabilityAiAssistantWelcomeMessageSetUpKnowledgeBaseButton"
-              onClick={handleInstall}
-              minWidth={false}
-            >
-              {i18n.translate('xpack.aiAssistant.welcomeMessage.knowledgeBase.installButtonLabel', {
-                defaultMessage: 'Install Knowledge base',
-              })}
-            </EuiButton>
-          </div>
+          <EuiButton
+            color="primary"
+            fill
+            isLoading={isInstalling}
+            iconType="importAction"
+            data-test-subj="observabilityAiAssistantWelcomeMessageSetUpKnowledgeBaseButton"
+            onClick={handleInstall}
+          >
+            {i18n.translate('xpack.aiAssistant.welcomeMessage.knowledgeBase.installButtonLabel', {
+              defaultMessage: 'Install Knowledge Base',
+            })}
+          </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>
     </>

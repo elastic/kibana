@@ -111,12 +111,14 @@ export function WelcomeMessageKnowledgeBase({
               { defaultMessage: `Your Knowledge base hasn't been set up.` }
             )}
           </EuiText>
-          <SelectModelAndInstallKnowledgeBase
-            onInstall={knowledgeBase.install}
-            isInstalling={knowledgeBase.isInstalling}
-          />
-
-          <EuiSpacer size="m" />
+          <EuiSpacer size="l" />
+          <EuiSpacer size="l" />
+          <EuiFlexItem grow={false}>
+            <SelectModelAndInstallKnowledgeBase
+              onInstall={knowledgeBase.install}
+              isInstalling={knowledgeBase.isInstalling}
+            />
+          </EuiFlexItem>
         </>
       );
     case KnowledgeBaseState.DEPLOYING_MODEL:
