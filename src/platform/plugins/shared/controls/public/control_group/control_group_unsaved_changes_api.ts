@@ -23,15 +23,15 @@ import {
 } from '@kbn/presentation-publishing';
 
 import { StateManager } from '@kbn/presentation-publishing/state_manager/types';
-import {
-  DEFAULT_CONTROL_CHAINING,
-  type ControlGroupSerializedState,
-  type ControlPanelsState,
+import type {
+  ControlGroupSerializedState,
+  ControlPanelsState,
 } from '../../common';
 import { apiPublishesAsyncFilters } from '../controls/data_controls/publishes_async_filters';
 import { getControlsInOrder, type ControlsInOrder } from './init_controls_manager';
 import { deserializeControlGroup } from './utils/serialization_utils';
 import { ControlGroupEditorState } from './types';
+import { defaultEditorState, editorStateComparators } from './initialize_editor_state_manager';
 
 export function initializeControlGroupUnsavedChanges({
   applySelections,
@@ -76,15 +76,8 @@ export function initializeControlGroupUnsavedChanges({
     parentApi,
     serializeState: serializeControlGroupState,
     anyStateChange$: merge(editorStateManager.anyStateChange$),
-    getComparators: () => {
-      return {
-        autoApplySelections: 'referenceEquality',
-        chainingSystem: (a, b) =>
-          (a ?? DEFAULT_CONTROL_CHAINING) === (b ?? DEFAULT_CONTROL_CHAINING),
-        ignoreParentSettings: 'deepEquality',
-        labelPosition: 'referenceEquality',
-      };
-    },
+    getComparators: () => editorStateComparators,
+    defaultState: defaultEditorState,
     onReset: (lastSaved) => {
       editorStateManager.reinitializeState(lastSaved?.rawState);
     },

@@ -19,22 +19,24 @@ import { apiHasLastSavedChildState } from '../last_saved_child_state';
 
 const UNSAVED_CHANGES_DEBOUNCE = 100;
 
-export const initializeUnsavedChanges = <SerializedStateType extends object = object>({
+export const initializeUnsavedChanges = <StateType extends object = object>({
   uuid,
   onReset,
   parentApi,
   getComparators,
+  defaultState,
   serializeState,
   anyStateChange$,
 }: {
   uuid: string;
   parentApi: unknown;
   anyStateChange$: Observable<void>;
-  serializeState: () => SerializedPanelState<SerializedStateType>;
-  getComparators: () => StateComparators<SerializedStateType>;
-  onReset: (lastSavedPanelState?: SerializedPanelState<SerializedStateType>) => MaybePromise<void>;
+  serializeState: () => SerializedPanelState<StateType>;
+  getComparators: () => StateComparators<StateType>;
+  defaultState?: Partial<StateType>;
+  onReset: (lastSavedPanelState?: SerializedPanelState<StateType>) => MaybePromise<void>;
 }): PublishesUnsavedChanges => {
-  if (!apiHasLastSavedChildState<SerializedStateType>(parentApi)) {
+  if (!apiHasLastSavedChildState<StateType>(parentApi)) {
     return {
       hasUnsavedChanges$: of(false),
       resetUnsavedChanges: () => Promise.resolve(),
@@ -48,7 +50,7 @@ export const initializeUnsavedChanges = <SerializedStateType extends object = ob
     debounceTime(UNSAVED_CHANGES_DEBOUNCE),
     map(([, lastSavedState]) => {
       const currentState = serializeState().rawState;
-      return !areComparatorsEqual(getComparators(), lastSavedState, currentState);
+      return !areComparatorsEqual(getComparators(), lastSavedState, currentState, defaultState);
     })
   );
 

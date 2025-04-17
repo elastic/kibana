@@ -16,13 +16,23 @@ import {
   apiHasSerializableState,
 } from '@kbn/presentation-publishing';
 import { omit } from 'lodash';
-import { BehaviorSubject, Observable, combineLatest, debounceTime, map, of, skipWhile, switchMap, tap } from 'rxjs';
+import {
+  BehaviorSubject,
+  Observable,
+  combineLatest,
+  debounceTime,
+  map,
+  skipWhile,
+  switchMap,
+  tap,
+} from 'rxjs';
 import { getDashboardBackupService } from '../services/dashboard_backup_service';
 import { initializePanelsManager } from './panels_manager';
 import { initializeSettingsManager } from './settings_manager';
 import { DashboardCreationOptions, DashboardState } from './types';
 import { initializeUnifiedSearchManager } from './unified_search_manager';
 import { initializeViewModeManager } from './view_mode_manager';
+import { CONTROL_GROUP_EMBEDDABLE_ID } from './control_group_manager';
 
 const DEBOUNCE_TIME = 100;
 
@@ -34,12 +44,12 @@ export function initializeUnsavedChangesManager({
   viewModeManager,
   creationOptions,
   controlGroupApi$,
-  getPanelReferences,
+  getReferences,
   unifiedSearchManager,
 }: {
   lastSavedState: DashboardState;
   creationOptions?: DashboardCreationOptions;
-  getPanelReferences: (id: string) => Reference[];
+  getReferences: (id: string) => Reference[];
   savedObjectId$: PublishesSavedObjectId['savedObjectId$'];
   controlGroupApi$: PublishingSubject<ControlGroupApi | undefined>;
   panelsManager: ReturnType<typeof initializePanelsManager>;
@@ -127,12 +137,22 @@ export function initializeUnsavedChangesManager({
       }
     });
 
-  const getLastSavedStateForChild = (panelId: string) => {
+  const getLastSavedStateForChild = (childId: string) => {
     const lastSavedDashboardState = lastSavedState$.value;
-    if (!lastSavedDashboardState.panels[panelId]) return;
+
+    if (childId === CONTROL_GROUP_EMBEDDABLE_ID) {
+      return lastSavedDashboardState.controlGroupInput
+        ? {
+            rawState: lastSavedDashboardState.controlGroupInput,
+            references: getReferences(CONTROL_GROUP_EMBEDDABLE_ID),
+          }
+        : undefined;
+    }
+
+    if (!lastSavedDashboardState.panels[childId]) return;
     return {
-      rawState: lastSavedDashboardState.panels[panelId].explicitInput,
-      references: getPanelReferences(panelId),
+      rawState: lastSavedDashboardState.panels[childId].explicitInput,
+      references: getReferences(childId),
     };
   };
 
