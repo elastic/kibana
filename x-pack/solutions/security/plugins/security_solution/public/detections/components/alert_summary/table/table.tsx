@@ -13,7 +13,13 @@ import { i18n } from '@kbn/i18n';
 import { TableId } from '@kbn/securitysolution-data-table';
 import { AlertsTable } from '@kbn/response-ops-alerts-table';
 import type { AlertsTableProps } from '@kbn/response-ops-alerts-table/types';
-import { AlertConsumers } from '@kbn/rule-data-utils';
+import {
+  ALERT_RULE_NAME,
+  ALERT_RULE_PARAMETERS,
+  ALERT_SEVERITY,
+  AlertConsumers,
+  TIMESTAMP,
+} from '@kbn/rule-data-utils';
 import { ESQL_RULE_TYPE_ID, QUERY_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
 import type {
   EuiDataGridProps,
@@ -48,26 +54,21 @@ const RULE_NAME_COLUMN = i18n.translate(
   { defaultMessage: 'Rule' }
 );
 
-const TIMESTAMP = '@timestamp';
-const RELATED_INTEGRATION = 'kibana.alert.rule.parameters';
-const SEVERITY = 'kibana.alert.severity';
-const RULE_NAME = 'kibana.alert.rule.name';
-
 const columns: EuiDataGridProps['columns'] = [
   {
     id: TIMESTAMP,
     displayAsText: TIMESTAMP_COLUMN,
   },
   {
-    id: RELATED_INTEGRATION,
+    id: ALERT_RULE_PARAMETERS,
     displayAsText: RELATION_INTEGRATION_COLUMN,
   },
   {
-    id: SEVERITY,
+    id: ALERT_SEVERITY,
     displayAsText: SEVERITY_COLUMN,
   },
   {
-    id: RULE_NAME,
+    id: ALERT_RULE_NAME,
     displayAsText: RULE_NAME_COLUMN,
   },
 ];
