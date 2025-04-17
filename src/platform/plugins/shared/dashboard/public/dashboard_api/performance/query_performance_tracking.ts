@@ -188,6 +188,7 @@ function reportPerformanceMetrics({
     value4: loadTypesMapping[loadType],
     key7: 'mean_lens_prerender',
     value7: round(meanBy(measurements, PERFORMANCE_TRACKER_MEASURES.PRE_RENDER_DURATION), 2),
+    // TODO : add this to the performance tracker
     key8: 'mean_lens_data_request',
     value8: 0,
     key9: 'mean_lens_rendering',
