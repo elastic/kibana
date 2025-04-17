@@ -27,7 +27,7 @@ import { HttpSetup } from '@kbn/core/public';
 import { useLatestVulnerabilitiesTable } from './hooks/use_latest_vulnerabilities_table';
 import { LATEST_VULNERABILITIES_TABLE } from './test_subjects';
 import { getDefaultQuery, defaultColumns } from './constants';
-import { VulnerabilityFindingFlyout } from './vulnerabilities_finding_flyout/vulnerability_finding_flyout';
+// import { VulnerabilityFindingFlyout } from './vulnerabilities_finding_flyout/vulnerability_finding_flyout';
 import { ErrorCallout } from '../configurations/layout/error_callout';
 import { createDetectionRuleFromVulnerabilityFinding } from './utils/create_detection_rule_from_vulnerability';
 import { vulnerabilitiesTableFieldLabels } from './vulnerabilities_table_field_labels';
@@ -90,7 +90,7 @@ const CspVulnerabilityFindingRenderer = ({
 //   );
 // };
 
-const onOpenFlyoutCallback = (row: DataTableRecord, onCloseFlyout: () => void): JSX.Element => {
+const onOpenFlyoutCallback = (): JSX.Element => {
   return <></>;
 };
 

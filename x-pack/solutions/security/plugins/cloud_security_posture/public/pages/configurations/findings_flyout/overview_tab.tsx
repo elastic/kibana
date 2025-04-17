@@ -39,7 +39,7 @@ import { FindingsDetectionRuleCounter } from './findings_detection_rule_counter'
 type Accordion = Pick<EuiAccordionProps, 'title' | 'id' | 'initialIsOpen'> &
   Pick<EuiDescriptionListProps, 'listItems'>;
 
-const columns: Array<EuiBasicTableColumn<any>> = [
+export const columns: Array<EuiBasicTableColumn<any>> = [
   {
     field: 'field',
     name: 'Field',
@@ -52,7 +52,7 @@ const columns: Array<EuiBasicTableColumn<any>> = [
   },
 ];
 
-const convertObjectToArray = (obj: { [key: string]: any }) => {
+export const convertObjectToArray = (obj: { [key: string]: any }) => {
   if (obj === undefined) return null;
   return Object.keys(obj)
     .filter((key) => key !== 'raw')

@@ -19,6 +19,7 @@ import { PreferenceFormattedDate } from '../../../../common/components/formatted
 import { FlyoutNavigation } from '../../../shared/components/flyout_navigation';
 import { useKibana } from '../../../../common/lib/kibana';
 import { FlyoutHeader } from '../../../shared/components/flyout_header';
+import { FlyoutBody } from '../../../shared/components/flyout_body';
 
 export const FindingsVulnerabilityPanel = ({
   vulnerabilityId,
@@ -42,7 +43,7 @@ export const FindingsVulnerabilityPanel = ({
           return (
             <>
               <FlyoutHeader>
-                {/* {console.log(finding)} */}
+                {console.log(finding)}
                 <EuiFlexGroup gutterSize="xs" responsive={false} direction="column">
                   <EuiFlexItem>
                     <SeverityStatusBadge
@@ -79,6 +80,9 @@ export const FindingsVulnerabilityPanel = ({
                 </EuiFlexGroup>
                 <CspVulnerabilityFlyout.Header finding={finding} />
               </FlyoutHeader>
+              <FlyoutBody>
+                <CspVulnerabilityFlyout.Body finding={finding} />
+              </FlyoutBody>
               <EuiFlyoutFooter>
                 <CspVulnerabilityFlyout.Footer createRuleFn={createRuleFn} />
               </EuiFlyoutFooter>
