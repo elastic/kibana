@@ -93,6 +93,9 @@ export const fetchAndCompareSyncedIntegrations = async (
     }
     const ccrIndex = searchRes.hits.hits[0]?._source;
     const { integrations: ccrIntegrations, custom_assets: ccrCustomAssets } = ccrIndex;
+    const installedCCRIntegrations = ccrIntegrations?.filter(
+      (integration) => integration.install_status !== 'not_installed'
+    );
 
     // find integrations installed on remote
     const installedIntegrations = await getPackageSavedObjects(savedObjectsClient);
@@ -107,7 +110,10 @@ export const fetchAndCompareSyncedIntegrations = async (
       {} as Record<string, SavedObjectsFindResult<Installation>>
     );
     const customAssetsStatus = await fetchAndCompareCustomAssets(esClient, logger, ccrCustomAssets);
-    const integrationsStatus = compareIntegrations(ccrIntegrations, installedIntegrationsByName);
+    const integrationsStatus = compareIntegrations(
+      installedCCRIntegrations,
+      installedIntegrationsByName
+    );
     const result = {
       ...integrationsStatus,
       ...(customAssetsStatus && { custom_assets: customAssetsStatus }),

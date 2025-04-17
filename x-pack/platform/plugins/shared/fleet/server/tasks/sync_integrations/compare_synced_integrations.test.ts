@@ -196,11 +196,19 @@ describe('fetchAndCompareSyncedIntegrations', () => {
                   package_name: 'elastic_agent',
                   package_version: '2.2.0',
                   updated_at: '2025-03-20T14:18:40.076Z',
+                  install_status: 'installed',
                 },
                 {
                   package_name: 'system',
                   package_version: '1.67.3',
                   updated_at: '2025-03-20T14:18:40.111Z',
+                  install_status: 'installed',
+                },
+                {
+                  package_name: 'fleet_server',
+                  package_version: '1.67.3',
+                  updated_at: '2025-03-20T14:18:40.111Z',
+                  install_status: 'not_installed',
                 },
               ],
             },
@@ -242,11 +250,13 @@ describe('fetchAndCompareSyncedIntegrations', () => {
                   package_name: 'elastic_agent',
                   package_version: '2.2.0',
                   updated_at: '2025-03-20T14:18:40.076Z',
+                  install_status: 'installed',
                 },
                 {
                   package_name: 'system',
                   package_version: '1.67.3',
                   updated_at: '2025-03-20T14:18:40.111Z',
+                  install_status: 'installed',
                 },
               ],
             },
@@ -316,16 +326,19 @@ describe('fetchAndCompareSyncedIntegrations', () => {
                   package_name: 'elastic_agent',
                   package_version: '2.2.0',
                   updated_at: '2025-03-20T14:18:40.076Z',
+                  install_status: 'installed',
                 },
                 {
                   package_name: 'system',
                   package_version: '1.67.3',
                   updated_at: '2025-03-20T14:18:40.111Z',
+                  install_status: 'installed',
                 },
                 {
                   package_name: 'synthetics',
                   package_version: '1.4.1',
                   updated_at: '2025-03-17T15:21:14.092Z',
+                  install_status: 'installed',
                 },
               ],
             },
@@ -468,6 +481,7 @@ describe('fetchAndCompareSyncedIntegrations', () => {
                     package_name: 'system',
                     package_version: '1.67.3',
                     updated_at: '2025-03-20T14:18:40.076Z',
+                    install_status: 'installed',
                   },
                 ],
                 custom_assets: {
@@ -685,6 +699,7 @@ describe('fetchAndCompareSyncedIntegrations', () => {
                     package_name: 'system',
                     package_version: '1.67.3',
                     updated_at: '2025-03-20T14:18:40.076Z',
+                    install_status: 'installed',
                   },
                 ],
                 custom_assets: {
@@ -885,6 +900,7 @@ describe('fetchAndCompareSyncedIntegrations', () => {
                     package_name: 'system',
                     package_version: '1.67.3',
                     updated_at: '2025-03-20T14:18:40.076Z',
+                    install_status: 'installed',
                   },
                 ],
                 custom_assets: {
@@ -967,6 +983,7 @@ describe('fetchAndCompareSyncedIntegrations', () => {
                     package_name: 'system',
                     package_version: '1.67.3',
                     updated_at: '2025-03-20T14:18:40.076Z',
+                    install_status: 'installed',
                   },
                 ],
                 custom_assets: {
@@ -1080,6 +1097,7 @@ describe('fetchAndCompareSyncedIntegrations', () => {
                     package_name: 'system',
                     package_version: '1.67.3',
                     updated_at: '2025-03-20T14:18:40.076Z',
+                    install_status: 'installed',
                   },
                 ],
                 custom_assets: {
