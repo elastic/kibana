@@ -7,6 +7,7 @@
 
 const returnValue = {
   licenseService: { isEnterprise: jest.fn().mockReturnValue(false) },
+  sourcererDataView: { id: 'security-solution-default' },
 };
 
 export const useSecurityContext = () => returnValue;

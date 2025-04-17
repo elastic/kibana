@@ -18,6 +18,11 @@ import { useFilterInOut } from './use_filter_in_out';
 import { FilterIn, updateFiltersArray } from '../utils/filter';
 
 jest.mock('../utils/filter', () => ({ updateFiltersArray: jest.fn() }));
+jest.mock('../../indicators/hooks/use_sourcerer_data_view', () => ({
+  useSourcererDataView: jest
+    .fn()
+    .mockReturnValue({ sourcererDataView: { id: 'security-solution-default' } }),
+}));
 
 describe('useFilterInOut()', () => {
   let hookResult: RenderHookResult<UseFilterInValue, unknown>;
