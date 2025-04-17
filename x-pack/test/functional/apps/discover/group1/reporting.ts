@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import moment, { DurationInputArg2 } from 'moment';
 import { Key } from 'selenium-webdriver';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const reportingAPI = getService('reporting');
