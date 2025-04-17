@@ -29,6 +29,7 @@ export type {
   PromptNodeConfigType,
   WorkflowExecutionNodeConfigType,
   ToolExecutionNodeConfigType,
+  LoopNodeConfigType,
 } from './src/nodes';
 export type {
   BaseWorkflowDefinition,

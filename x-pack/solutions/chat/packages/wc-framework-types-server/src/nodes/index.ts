@@ -24,4 +24,5 @@ export type {
   PromptNodeConfigType,
   WorkflowExecutionNodeConfigType,
   ToolExecutionNodeConfigType,
+  LoopNodeConfigType,
 } from './node_type_configs';

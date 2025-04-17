@@ -9,8 +9,8 @@ import { NodeType } from '@kbn/wc-framework-types-common';
 import type {
   NodeTypeDefinition,
   ParallelSequencesNodeConfigType,
-  SequenceBranch,
 } from '@kbn/wc-framework-types-server';
+import { runNodeSequence } from '../utils';
 
 export const getParallelSequencesNodeTypeDefinition =
   (): NodeTypeDefinition<ParallelSequencesNodeConfigType> => {
@@ -28,17 +28,15 @@ export const getParallelSequencesNodeTypeDefinition =
             // no interpolation - we let the underlying nodes do it on their own
             const { branches } = input;
 
-            const runBranch = async (branch: SequenceBranch) => {
-              const { steps } = branch;
-              for (let i = 0; i < steps.length; i++) {
-                await workflowRunner.runNode({
-                  nodeDefinition: steps[i],
+            await Promise.all(
+              branches.map((branch) => {
+                return runNodeSequence({
+                  sequence: branch.steps,
+                  runner: workflowRunner,
                   state,
                 });
-              }
-            };
-
-            await Promise.all(branches.map(runBranch));
+              })
+            );
           },
         };
       },

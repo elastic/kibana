@@ -11,6 +11,7 @@ import { getToolExecutionNodeTypeDefinition } from './tool_execution';
 import { getWorkflowExecutionNodeTypeDefinition } from './workflow_execution';
 import { getParallelSequencesNodeTypeDefinition } from './parallel_sequences';
 import { getPromptNodeTypeDefinition } from './prompt';
+import { getLoopNodeTypeDefinition } from './loop';
 
 export const registerBuiltInNodeTypes = ({ registry }: { registry: NodeTypeRegistry }) => {
   const definitions: Array<NodeTypeDefinition<any>> = [
@@ -18,14 +19,10 @@ export const registerBuiltInNodeTypes = ({ registry }: { registry: NodeTypeRegis
     getWorkflowExecutionNodeTypeDefinition(),
     getParallelSequencesNodeTypeDefinition(),
     getPromptNodeTypeDefinition(),
+    getLoopNodeTypeDefinition(),
   ];
 
   definitions.forEach((definition) => {
     registry.register(definition);
   });
 };
-
-export type { ToolExecutionNodeConfigType } from './tool_execution';
-export type { WorkflowExecutionNodeConfigType } from './workflow_execution';
-export type { ParallelSequencesNodeConfigType } from './parallel_sequences';
-export type { PromptNodeConfigType } from './prompt';

@@ -1,0 +1,63 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { NodeType } from '@kbn/wc-framework-types-common';
+import type { NodeTypeDefinition, LoopNodeConfigType } from '@kbn/wc-framework-types-server';
+import { interpolateValue } from '../../framework/config';
+import { runNodeSequence } from '../utils';
+
+export const getLoopNodeTypeDefinition = (): NodeTypeDefinition<LoopNodeConfigType> => {
+  return {
+    id: NodeType.loop,
+    name: 'Loop',
+    description: 'Executes a sequence for each element in a list',
+    factory: (context) => {
+      return {
+        run: async ({ input, state }) => {
+          const {
+            services: { workflowRunner },
+          } = context;
+
+          // no interpolation for nested steps - we let the underlying nodes do it on their own
+          const { steps, output } = input;
+
+          let inputList = interpolateValue(input.inputList, state);
+          // TODO: assert inputList is a list or string
+          if (typeof inputList === 'string') {
+            inputList = state.get(inputList);
+          }
+
+          const itemVar = interpolateValue(input.itemVar, state);
+          // TODO: assert is a string
+
+          // TODO: need to figure out if we clone the state or not
+          const loopState = state;
+          const resultList: unknown[] = [];
+          for (let i = 0; i < inputList.length; i++) {
+            const currentItem = inputList[i];
+            loopState.set(itemVar, currentItem);
+
+            await runNodeSequence({
+              sequence: steps,
+              runner: workflowRunner,
+              state: loopState,
+            });
+
+            if (output) {
+              const result = loopState.get(output.source);
+              resultList.push(result);
+            }
+          }
+
+          if (output) {
+            state.set(output.destination, resultList);
+          }
+        },
+      };
+    },
+  };
+};

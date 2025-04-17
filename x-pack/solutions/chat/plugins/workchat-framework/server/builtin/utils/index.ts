@@ -5,13 +5,4 @@
  * 2.0.
  */
 
-export enum NodeType {
-  // flow nodes
-  parallelSequences = 'parallelSequences',
-  loop = 'loop',
-  // action nodes
-  toolExecution = 'toolExecution',
-  workflowExecution = 'workflowExecution',
-  // LLM nodes
-  prompt = 'prompt',
-}
+export { runNodeSequence } from './run_node_sequence';

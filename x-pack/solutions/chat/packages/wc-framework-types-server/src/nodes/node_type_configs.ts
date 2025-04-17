@@ -13,6 +13,7 @@ export interface NodeTypeToNodeConfigMap {
   [NodeType.toolExecution]: ToolExecutionNodeConfigType;
   [NodeType.prompt]: PromptNodeConfigType;
   [NodeType.parallelSequences]: ParallelSequencesNodeConfigType;
+  [NodeType.loop]: LoopNodeConfigType;
 }
 
 export type NodeSequence = NodeDefinition[];
@@ -54,4 +55,35 @@ export interface WorkflowExecutionNodeConfigType {
   workflowId: string;
   inputs: Record<string, unknown>;
   output: string;
+}
+
+/**
+ * Represents the configuration for a `loop` node.
+ */
+export interface LoopNodeConfigType {
+  /**
+   * Reference of the context variable to loop over.
+   * Supports interpolation. If interpolated value is a list,
+   * will use it directly. If interpolated value is a string,
+   * will retrieve the corresponding entry in the current state.
+   */
+  inputList: string;
+  /**
+   * Name of the state property to inject the current loop element into.
+   * Supports interpolation, but final value must be a string.
+   */
+  itemVar: string;
+  /**
+   * The sequence of steps to execute for each element in the list.
+   */
+  steps: NodeSequence;
+  /**
+   * If defined, will accumulate results from each loop iteration,
+   * by reading the `output.source` context property in the loop's state,
+   * and creating a `output.destination` array in the parent's state.
+   */
+  output?: {
+    source: string;
+    destination: string;
+  };
 }

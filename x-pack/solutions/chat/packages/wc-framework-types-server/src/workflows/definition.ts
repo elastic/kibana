@@ -77,7 +77,7 @@ export interface WorkflowDefinitionInput {
   required?: boolean;
 }
 
-export type WorkflowInputType = 'string' | 'number';
+export type WorkflowInputType = 'string' | 'number' | 'array';
 
 export interface WorkflowDefinitionOutput {
   name: string;
