@@ -43,7 +43,7 @@ const defaultType: SavedObjectsType<any> = {
   migrations: {},
 };
 
-export const EXCLUDED_TYPES = ['deprecated', 'server'];
+export const REMOVED_TYPES = ['deprecated', 'server'];
 
 export const baselineTypes: Array<SavedObjectsType<any>> = [
   {
@@ -281,7 +281,7 @@ interface GetMutatedMigratorParams {
 
 export const getUpToDateMigratorTestKit = async ({
   logFilePath = defaultLogFilePath,
-  removedTypes = EXCLUDED_TYPES,
+  removedTypes = REMOVED_TYPES,
   types = getUpToDateBaselineTypes(removedTypes),
   kibanaVersion = nextMinor,
   settings = {},
@@ -297,7 +297,7 @@ export const getUpToDateMigratorTestKit = async ({
 
 export const getCompatibleMigratorTestKit = async ({
   logFilePath = defaultLogFilePath,
-  removedTypes = EXCLUDED_TYPES,
+  removedTypes = REMOVED_TYPES,
   types = getCompatibleBaselineTypes(removedTypes),
   kibanaVersion = nextMinor,
   settings = {},
@@ -313,7 +313,7 @@ export const getCompatibleMigratorTestKit = async ({
 
 export const getReindexingMigratorTestKit = async ({
   logFilePath = defaultLogFilePath,
-  removedTypes = EXCLUDED_TYPES,
+  removedTypes = REMOVED_TYPES,
   types = getReindexingBaselineTypes(removedTypes),
   kibanaVersion = nextMinor,
   clientWrapperFactory,
@@ -339,7 +339,7 @@ export const getReindexingMigratorTestKit = async ({
 export const kibanaSplitIndex = `${defaultKibanaIndex}_split`;
 export const getRelocatingMigratorTestKit = async ({
   logFilePath = defaultLogFilePath,
-  removedTypes = EXCLUDED_TYPES,
+  removedTypes = REMOVED_TYPES,
   // relocate 'task' and 'basic' objects to a new SO index
   relocateTypes = {
     task: kibanaSplitIndex,
