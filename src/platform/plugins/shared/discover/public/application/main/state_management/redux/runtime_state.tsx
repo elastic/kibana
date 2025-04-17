@@ -12,12 +12,16 @@ import React, { type PropsWithChildren, createContext, useContext, useMemo } fro
 import useObservable from 'react-use/lib/useObservable';
 import { BehaviorSubject } from 'rxjs';
 import { useCurrentTabContext } from './hooks';
+import type { DiscoverStateContainer } from '../discover_state';
+import type { ConnectedCustomizationService } from '../../../../customizations';
 
 interface DiscoverRuntimeState {
   adHocDataViews: DataView[];
 }
 
 interface TabRuntimeState {
+  stateContainer?: DiscoverStateContainer;
+  customizationService?: ConnectedCustomizationService;
   currentDataView: DataView;
 }
 
@@ -39,6 +43,8 @@ export const createRuntimeStateManager = (): RuntimeStateManager => ({
 });
 
 export const createTabRuntimeState = (): ReactiveTabRuntimeState => ({
+  stateContainer$: new BehaviorSubject<DiscoverStateContainer | undefined>(undefined),
+  customizationService$: new BehaviorSubject<ConnectedCustomizationService | undefined>(undefined),
   currentDataView$: new BehaviorSubject<DataView | undefined>(undefined),
 });
 

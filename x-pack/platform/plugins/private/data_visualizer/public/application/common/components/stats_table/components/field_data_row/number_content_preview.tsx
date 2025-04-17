@@ -11,6 +11,7 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { MetricDistributionChart, buildChartDataFromStats } from '../metric_distribution_chart';
 import type { FieldVisConfig } from '../../types';
 import { kibanaFieldFormat, formatSingleValue } from '../../../utils';
+import { useColumnChartStyles } from './column_chart_styles';
 
 const METRIC_DISTRIBUTION_CHART_WIDTH = 100;
 const METRIC_DISTRIBUTION_CHART_HEIGHT = 10;
@@ -20,6 +21,7 @@ export interface NumberContentPreviewProps {
 }
 
 export const IndexBasedNumberContentPreview: FC<NumberContentPreviewProps> = ({ config }) => {
+  const styles = useColumnChartStyles();
   const { stats, fieldFormat, fieldName } = config;
   const dataTestSubj = `dataVisualizerDataGridChart-${fieldName}`;
 
@@ -43,7 +45,7 @@ export const IndexBasedNumberContentPreview: FC<NumberContentPreviewProps> = ({ 
 
   return (
     <div data-test-subj={dataTestSubj} style={{ width: '100%' }}>
-      <div className="dataGridChart__histogram" data-test-subj={`${dataTestSubj}-histogram`}>
+      <div css={styles.histogram} data-test-subj={`${dataTestSubj}-histogram`}>
         <MetricDistributionChart
           width={METRIC_DISTRIBUTION_CHART_WIDTH}
           height={METRIC_DISTRIBUTION_CHART_HEIGHT}
@@ -52,7 +54,7 @@ export const IndexBasedNumberContentPreview: FC<NumberContentPreviewProps> = ({ 
           hideXAxis={true}
         />
       </div>
-      <div className={'dataGridChart__legend'} data-test-subj={`${dataTestSubj}-legend`}>
+      <div css={styles.legend} data-test-subj={`${dataTestSubj}-legend`}>
         {legendText && (
           <>
             <EuiFlexGroup
@@ -61,15 +63,10 @@ export const IndexBasedNumberContentPreview: FC<NumberContentPreviewProps> = ({ 
               responsive={false}
               gutterSize="m"
             >
-              <EuiFlexItem
-                className={'dataGridChart__legend'}
-                style={{ maxWidth: METRIC_DISTRIBUTION_CHART_WIDTH * 0.75 }}
-              >
+              <EuiFlexItem style={{ maxWidth: METRIC_DISTRIBUTION_CHART_WIDTH * 0.75 }}>
                 {kibanaFieldFormat(legendText.min, fieldFormat)}
               </EuiFlexItem>
-              <EuiFlexItem className={'dataGridChart__legend'}>
-                {kibanaFieldFormat(legendText.max, fieldFormat)}
-              </EuiFlexItem>
+              <EuiFlexItem>{kibanaFieldFormat(legendText.max, fieldFormat)}</EuiFlexItem>
             </EuiFlexGroup>
           </>
         )}

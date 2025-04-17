@@ -12,8 +12,8 @@ import { TestProviders } from '../../common/mock';
 import { DashboardRenderer } from './dashboard_renderer';
 
 jest.mock('@kbn/dashboard-plugin/public', () => ({
-  DashboardRenderer: jest.fn().mockReturnValue(<div data-test-subj="dashboardRenderer" />),
-  DashboardTopNav: jest.fn().mockReturnValue(<span data-test-subj="dashboardTopNav" />),
+  DashboardRenderer: jest.fn(() => <div data-test-subj="dashboardRenderer" />),
+  DashboardTopNav: jest.fn(() => <span data-test-subj="dashboardTopNav" />),
 }));
 
 jest.mock('react-router-dom', () => {

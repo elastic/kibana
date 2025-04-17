@@ -18,10 +18,11 @@ import {
   Replacements,
   pruneContentReferences,
   ExecuteConnectorRequestQuery,
+  INVOKE_LLM_SERVER_TIMEOUT,
+  POST_ACTIONS_CONNECTOR_EXECUTE,
 } from '@kbn/elastic-assistant-common';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { INVOKE_ASSISTANT_ERROR_EVENT } from '../lib/telemetry/event_based_telemetry';
-import { POST_ACTIONS_CONNECTOR_EXECUTE } from '../../common/constants';
 import { buildResponse } from '../lib/build_response';
 import { ElasticAssistantRequestHandlerContext, GetElser } from '../types';
 import {
@@ -44,6 +45,11 @@ export const postActionsConnectorExecuteRoute = (
       security: {
         authz: {
           requiredPrivileges: ['elasticAssistant'],
+        },
+      },
+      options: {
+        timeout: {
+          idleSocket: INVOKE_LLM_SERVER_TIMEOUT,
         },
       },
     })
@@ -126,16 +132,19 @@ export const postActionsConnectorExecuteRoute = (
             isError = false
           ): Promise<void> => {
             if (conversationsDataClient && conversationId) {
-              const contentReferences = pruneContentReferences(content, contentReferencesStore);
+              const { prunedContent, prunedContentReferencesStore } = pruneContentReferences(
+                content,
+                contentReferencesStore
+              );
 
               await appendAssistantMessageToConversation({
                 conversationId,
                 conversationsDataClient,
-                messageContent: content,
+                messageContent: prunedContent,
                 replacements: latestReplacements,
                 isError,
                 traceData,
-                contentReferences,
+                contentReferences: prunedContentReferencesStore,
               });
             }
           };
