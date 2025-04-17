@@ -41,21 +41,19 @@ export const StatusGridComponent = ({
   const singleMonitor =
     filters && filters.locations.length === 1 && filters.monitorIds.length === 1;
 
-  if (singleMonitor) {
-    return (
-      <SyntheticsEmbeddableContext reload$={reload$} reduxStore={overviewStore.current}>
-        <MonitorsOverviewList filters={filters} singleMonitor={singleMonitor} />
-      </SyntheticsEmbeddableContext>
-    );
-  }
+  const monitorOverviewListComponent = (
+    <SyntheticsEmbeddableContext reload$={reload$} reduxStore={overviewStore.current}>
+      <MonitorsOverviewList filters={filters} singleMonitor={singleMonitor} />
+    </SyntheticsEmbeddableContext>
+  );
 
-  return (
+  return singleMonitor ? (
+    monitorOverviewListComponent
+  ) : (
     <EmbeddablePanelWrapper
       titleAppend={hasFilters ? <ShowSelectedFilters filters={filters ?? {}} /> : null}
     >
-      <SyntheticsEmbeddableContext reload$={reload$} reduxStore={overviewStore.current}>
-        <MonitorsOverviewList filters={filters} singleMonitor={singleMonitor} />
-      </SyntheticsEmbeddableContext>
+      {monitorOverviewListComponent}
     </EmbeddablePanelWrapper>
   );
 };
@@ -98,11 +96,13 @@ const SingleMonitorView = () => {
     }
   }, [dispatch, monitor, trendData]);
 
-  if (!monitor) return <OverviewLoader rows={1} columns={1} />;
+  const style = { height: '100%' };
+
+  if (!monitor) return <OverviewLoader rows={1} columns={1} style={style} />;
 
   return (
     <>
-      <MetricItem monitor={monitor} onClick={setFlyoutConfigCallback} />
+      <MetricItem monitor={monitor} onClick={setFlyoutConfigCallback} style={style} />
       <MaybeMonitorDetailsFlyout setFlyoutConfigCallback={setFlyoutConfigCallback} />
     </>
   );
