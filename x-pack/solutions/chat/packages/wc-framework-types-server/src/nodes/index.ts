@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export type { NodeDefinition } from './definition';
+export type { NodeDefinition, BuiltInNodeDefinition } from './definition';
 export type { NodeEventReporter, NodeProgressionReporterEvent } from './event_reporter';
 export type {
   NodeRunnerFactory,

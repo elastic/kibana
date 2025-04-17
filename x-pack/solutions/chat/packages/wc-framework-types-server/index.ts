@@ -10,6 +10,7 @@ export type { ModelProvider } from './src/models';
 export type { WorkflowState } from './src/state';
 export type {
   NodeDefinition,
+  BuiltInNodeDefinition,
   NodeTypeDefinition,
   NodeRunnerFactory,
   NodeFactoryContext,
