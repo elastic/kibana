@@ -8,7 +8,6 @@
 import React, { useCallback, useEffect, useRef } from 'react';
 import { Subject } from 'rxjs';
 import { useDispatch, useSelector } from 'react-redux';
-import { OverviewStatusMetaData } from '../../../../common/runtime_types';
 import { areFiltersEmpty } from '../common/utils';
 import { getOverviewStore } from './redux_store';
 import { ShowSelectedFilters } from '../common/show_selected_filters';
@@ -26,6 +25,8 @@ import { useMonitorsSortedByStatus } from '../../synthetics/hooks/use_monitors_s
 import { MetricItem } from '../../synthetics/components/monitors_page/overview/overview/metric_item/metric_item';
 import { FlyoutParamProps } from '../../synthetics/components/monitors_page/overview/overview/types';
 import { MaybeMonitorDetailsFlyout } from '../../synthetics/components/monitors_page/overview/overview/monitor_detail_flyout';
+import { useOverviewStatus } from '../../synthetics/components/monitors_page/hooks/use_overview_status';
+import { OverviewLoader } from '../../synthetics/components/monitors_page/overview/overview/overview_loader';
 
 export const StatusGridComponent = ({
   reload$,
@@ -49,7 +50,7 @@ export const StatusGridComponent = ({
   );
 };
 
-const SingleMonitorView = ({ monitor }: { monitor: OverviewStatusMetaData }) => {
+const SingleMonitorView = () => {
   const trendData = useSelector(selectOverviewTrends);
   const dispatch = useDispatch();
 
@@ -60,8 +61,21 @@ const SingleMonitorView = ({ monitor }: { monitor: OverviewStatusMetaData }) => 
     [dispatch]
   );
 
+  const { loaded } = useOverviewStatus({
+    scopeStatusByLocation: true,
+  });
+  const monitorsSortedByStatus = useMonitorsSortedByStatus();
+
+  if (loaded && monitorsSortedByStatus.length !== 1) {
+    throw new Error(
+      'One and only one monitor should always be returned by useMonitorsSortedByStatus in this component, this should never happen'
+    );
+  }
+
+  const monitor = monitorsSortedByStatus.length === 1 ? monitorsSortedByStatus[0] : undefined;
+
   useEffect(() => {
-    if (!trendData[monitor.configId + monitor.locationId]) {
+    if (monitor && !trendData[monitor.configId + monitor.locationId]) {
       dispatch(
         trendStatsBatch.get([
           {
@@ -73,6 +87,8 @@ const SingleMonitorView = ({ monitor }: { monitor: OverviewStatusMetaData }) => 
       );
     }
   }, [dispatch, monitor, trendData]);
+
+  if (!monitor) return <OverviewLoader rows={1} columns={1} />;
 
   return (
     <>
@@ -97,11 +113,9 @@ const MonitorsOverviewList = ({ filters }: { filters: MonitorFilters }) => {
     );
   }, [dispatch, filters]);
 
-  const monitorsSortedByStatus: OverviewStatusMetaData[] = useMonitorsSortedByStatus();
+  if (filters && filters.locations.length === 1 && filters.monitorIds.length === 1) {
+    return <SingleMonitorView />;
+  }
 
-  return monitorsSortedByStatus.length === 1 ? (
-    <SingleMonitorView monitor={monitorsSortedByStatus[0]} />
-  ) : (
-    <OverviewGrid />
-  );
+  return <OverviewGrid />;
 };
