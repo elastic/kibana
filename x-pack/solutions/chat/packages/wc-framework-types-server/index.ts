@@ -46,7 +46,6 @@ export type {
   ScopedRunner,
   ScopedRunnerRunNodeParams,
   ScopedRunnerRunWorkflowParams,
-  ScopedRunnerRunNodeOutput,
   ScopedRunnerRunWorkflowOutput,
 } from './src/workflows';
 export type { Registry, Provider, AsyncProvider } from './src/utils';
