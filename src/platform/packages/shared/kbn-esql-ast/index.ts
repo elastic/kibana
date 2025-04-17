@@ -26,7 +26,6 @@ export type {
   ESQLColumn,
   ESQLLiteral,
   ESQLParamLiteral,
-  AstProviderFn,
   EditorError,
   ESQLAstNode,
   ESQLInlineCast,
@@ -59,7 +58,6 @@ export {
   parseErrors,
   type ParseOptions,
   type ParseResult,
-  getAstAndSyntaxErrors,
   ESQLErrorListener,
 } from './src/parser';
 
