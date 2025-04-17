@@ -13,6 +13,7 @@ import { i18n } from '@kbn/i18n';
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { EuiButton, EuiPageTemplate, EuiTabProps } from '@elastic/eui';
+import { ChromeBreadcrumb } from '@kbn/core/public';
 import { CONNECTOR_DETAIL_TAB_PATH } from '../routes';
 import { ConnectorScheduling } from '../search_index/connector/connector_scheduling';
 import { ConnectorSyncRules } from '../search_index/connector/sync_rules/connector_rules';
@@ -27,6 +28,9 @@ import { SearchIndexIndexMappings } from '../search_index/index_mappings';
 import { ConnectorName } from './connector_name';
 import { ConnectorDescription } from './connector_description';
 import { SearchConnectorsPageTemplateWrapper } from '../shared/page_template';
+import { connectorsBreadcrumbs } from '../connectors/connectors';
+import { useBreadcrumbs } from '../../utils/use_breadcrumbs';
+import { useKibanaContextForPlugin } from '../../utils/use_kibana';
 
 export enum ConnectorDetailTabId {
   // all indices
@@ -40,8 +44,21 @@ export enum ConnectorDetailTabId {
   SCHEDULING = 'scheduling',
 }
 
+export const detailsConnectorBreadcrumbs: ChromeBreadcrumb[] = [
+  ...connectorsBreadcrumbs,
+  {
+    text: i18n.translate('xpack.contentConnectors.content.connectors.detailsBreadcrumb', {
+      defaultMessage: 'Connector Details',
+    }),
+  },
+];
+
 export const ConnectorDetail: React.FC = () => {
   const connectorId = decodeURIComponent(useParams<{ connectorId: string }>().connectorId);
+  const {
+    services: { chrome, appParams },
+  } = useKibanaContextForPlugin();
+  useBreadcrumbs(detailsConnectorBreadcrumbs, appParams, chrome);
   const {
     services: { application, http },
   } = useKibana();

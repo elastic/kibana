@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React, { lazy, Suspense, useEffect, useState } from 'react';
+import React, { lazy, Suspense, useEffect, useMemo, useState } from 'react';
 
 import { css } from '@emotion/react';
 
-import { useHistory } from 'react-router-dom';
+import { useHistory, useLocation } from 'react-router-dom';
 
 import {
   EuiBadge,
@@ -32,7 +32,7 @@ import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 
-import { ScopedHistory } from '@kbn/core/public';
+import { ChromeBreadcrumb, ScopedHistory } from '@kbn/core/public';
 import { useActions, useValues } from 'kea';
 import { useAppContext } from '../../../app_context';
 import { AddConnectorApiLogic } from '../../../api/connector/add_connector_api_logic';
@@ -50,9 +50,25 @@ import { errorToText } from '../utils/error_to_text';
 export type ConnectorCreationSteps = 'start' | 'deployment' | 'configure' | 'finish';
 export type SelfManagePreference = 'native' | 'selfManaged';
 import { SearchConnectorsPageTemplateWrapper } from '../../shared/page_template';
+import { useBreadcrumbs } from '../../../utils/use_breadcrumbs';
+import { useKibanaContextForPlugin } from '../../../utils/use_kibana';
+import { connectorsBreadcrumbs } from '../connectors';
 const StartStep = lazy(() => import('./start_step'));
 
+export const createConnectorBreadcrumbs: ChromeBreadcrumb[] = [
+  ...connectorsBreadcrumbs,
+  {
+    text: i18n.translate('xpack.contentConnectors.content.connectors.createBreadcrumb', {
+      defaultMessage: 'Create Connector',
+    }),
+    href: '/select_connector',
+  },
+];
+
 const CreateConnector: React.FC = () => {
+  const { search } = useLocation();
+  const query = useMemo(() => new URLSearchParams(search), [search]);
+  const filter = query.get('filter');
   const {
     services: { overlays, http, application },
   } = useKibana();
@@ -60,11 +76,16 @@ const CreateConnector: React.FC = () => {
   const history = useHistory();
   const { isAgentlessEnabled } = useAppContext();
 
+  const {
+    services: { chrome, appParams },
+  } = useKibanaContextForPlugin();
+
   const { error } = useValues(AddConnectorApiLogic);
   const { euiTheme } = useEuiTheme();
   const [selfManagePreference, setSelfManagePreference] = useState<SelfManagePreference>('native');
+  useBreadcrumbs(createConnectorBreadcrumbs, appParams, chrome);
 
-  const { selectedConnector, currentStep, isFormDirty } = useValues(
+  const { selectedConnector, currentStep, isFormDirty, connectorId } = useValues(
     NewConnectorLogic({ http, navigateToUrl: application?.navigateToUrl })
   );
   const { setCurrentStep } = useActions(
@@ -74,7 +95,8 @@ const CreateConnector: React.FC = () => {
   useEffect(() => {
     if (
       (selectedConnector && !selectedConnector.isNative && selfManagePreference === 'native') ||
-      !isAgentlessEnabled
+      !isAgentlessEnabled ||
+      filter === 'connector_clients'
     ) {
       setSelfManagePreference('selfManaged');
     }
@@ -132,6 +154,7 @@ const CreateConnector: React.FC = () => {
           { defaultMessage: 'Configuration' }
         )}
         setCurrentStep={setCurrentStep}
+        connectorId={connectorId}
       />
     ),
     deployment: <DeploymentStep setCurrentStep={setCurrentStep} />,

@@ -36,9 +36,14 @@ import { NEXT_BUTTON_LABEL } from '../translations';
 interface ConfigurationStepProps {
   setCurrentStep: Function;
   title: string;
+  connectorId: string;
 }
 
-export const ConfigurationStep: React.FC<ConfigurationStepProps> = ({ title, setCurrentStep }) => {
+export const ConfigurationStep: React.FC<ConfigurationStepProps> = ({
+  title,
+  setCurrentStep,
+  connectorId,
+}) => {
   const { overlays, http, application } = useKibana().services;
 
   const { connector, isWaitingOnAgentlessDeployment } = useValues(ConnectorViewLogic({ http }));
@@ -55,6 +60,17 @@ export const ConfigurationStep: React.FC<ConfigurationStepProps> = ({ title, set
     connector?.status === ConnectorStatus.CONFIGURED;
 
   const isNextStepEnabled = !isWaitingOnAgentlessDeployment && isConnectorConfigured;
+
+  const { fetchConnectorApiReset, startConnectorPoll, stopConnectorPoll } = useActions(
+    ConnectorViewLogic({ http })
+  );
+
+  useEffect(() => {
+    stopConnectorPoll();
+    fetchConnectorApiReset();
+    startConnectorPoll(connectorId);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [connectorId]);
 
   useEffect(() => {
     setTimeout(() => {

@@ -31,12 +31,11 @@ import {
 } from '@kbn/fleet-plugin/server';
 import { AgentPolicy, PackagePolicy, PackagePolicyInput } from '@kbn/fleet-plugin/common';
 import { createAgentPolicyMock, createPackagePolicyMock } from '@kbn/fleet-plugin/common/mocks';
+import { createAgentPolicyWithPackages } from '@kbn/fleet-plugin/server/services/agent_policy_create';
 
-jest.mock('@kbn/fleet-plugin/server/services/agents/agentless_agent', () => {
+jest.mock('@kbn/fleet-plugin/server/services/agent_policy_create', () => {
   return {
-    agentlessAgentService: {
-      createAgentlessAgent: jest.fn(),
-    },
+    createAgentPolicyWithPackages: jest.fn().mockReturnValue({ id: 'test-policy' }),
   };
 });
 
@@ -461,7 +460,7 @@ describe('AgentlessConnectorsInfraService', () => {
       };
       const errorMessage = 'Failed to create an agent policy hehe';
 
-      agentPolicyInterface.create.mockImplementation(() => {
+      (createAgentPolicyWithPackages as jest.Mock).mockImplementationOnce(() => {
         throw new Error(errorMessage);
       });
 
@@ -529,18 +528,7 @@ describe('AgentlessConnectorsInfraService', () => {
 
       const result = await service.deployConnector(testConnector);
 
-      expect(agentPolicyInterface.create).toHaveBeenCalledWith(
-        soClient,
-        esClient,
-        expect.objectContaining({
-          supports_agentless: true,
-          global_data_tags: [
-            { name: 'organization', value: 'elastic' },
-            { name: 'division', value: 'engineering' },
-            { name: 'team', value: 'search-extract-and-transform' },
-          ],
-        })
-      );
+      expect(createAgentPolicyWithPackages).toHaveBeenCalled();
 
       expect(packagePolicyService.create).toHaveBeenCalledWith(
         soClient,

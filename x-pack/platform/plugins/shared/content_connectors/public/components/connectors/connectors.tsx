@@ -53,6 +53,7 @@ export const connectorsBreadcrumbs = [
     text: i18n.translate('xpack.contentConnectors.content.connectors.breadcrumb', {
       defaultMessage: 'Content Connectors',
     }),
+    href: '/connectors',
   },
 ];
 

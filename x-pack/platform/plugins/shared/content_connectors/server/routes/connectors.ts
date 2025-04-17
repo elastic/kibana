@@ -32,6 +32,8 @@ import {
   cancelSyncs,
   isResourceNotFoundException,
   isStatusTransitionException,
+  Connector,
+  fetchConnectorByIndexName,
 } from '@kbn/search-connectors';
 
 import { addConnector } from '../lib/connectors/add_connector';
@@ -58,6 +60,7 @@ import {
 import { ErrorCode } from '../../common/types/error_codes';
 import { AgentlessConnectorsInfraService } from '../services';
 import { fetchIndex } from '../lib/indices/fetch_index';
+import { createIndex } from '../lib/indices/create_index';
 
 export function registerConnectorRoutes({
   router,
@@ -1242,6 +1245,74 @@ export function registerConnectorRoutes({
         body: {
           exists: indexExists,
         },
+        headers: { 'content-type': 'application/json' },
+      });
+    })
+  );
+
+  router.post(
+    {
+      path: '/internal/content_connectors/indices',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the scoped ES client',
+        },
+      },
+      validate: {
+        body: schema.object({
+          index_name: schema.string(),
+          language: schema.maybe(schema.nullable(schema.string())),
+        }),
+      },
+    },
+    elasticsearchErrorHandler(log, async (context, request, response) => {
+      const { ['index_name']: indexName, language } = request.body;
+      const { client } = (await context.core).elasticsearch;
+
+      const indexExists = await client.asCurrentUser.indices.exists({
+        index: request.body.index_name,
+      });
+
+      if (indexExists) {
+        return createError({
+          errorCode: ErrorCode.INDEX_ALREADY_EXISTS,
+          message: i18n.translate(
+            'xpack.enterpriseSearch.server.routes.createApiIndex.indexExistsError',
+            {
+              defaultMessage: 'This index already exists',
+            }
+          ),
+          response,
+          statusCode: 409,
+        });
+      }
+      let connector: Connector | undefined;
+      // users without permissions to fetch connectors should still be able to create an index
+      try {
+        connector = await fetchConnectorByIndexName(client.asCurrentUser, indexName);
+      } catch (error) {
+        log.error(`Error fetching connector for index ${indexName}: ${error}`);
+      }
+
+      if (connector) {
+        return createError({
+          errorCode: ErrorCode.CONNECTOR_DOCUMENT_ALREADY_EXISTS,
+          message: i18n.translate(
+            'xpack.enterpriseSearch.server.routes.createApiIndex.connectorExistsError',
+            {
+              defaultMessage: 'A connector for this index already exists',
+            }
+          ),
+          response,
+          statusCode: 409,
+        });
+      }
+
+      const createIndexResponse = await createIndex(client, indexName, language, true);
+
+      return response.ok({
+        body: createIndexResponse,
         headers: { 'content-type': 'application/json' },
       });
     })

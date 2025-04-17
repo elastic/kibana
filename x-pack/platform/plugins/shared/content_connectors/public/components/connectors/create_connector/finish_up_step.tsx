@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { css } from '@emotion/react';
 
@@ -59,15 +59,8 @@ export const FinishUpStep: React.FC<FinishUpStepProps> = ({ title }) => {
   const isSyncing = isWaitingForSync || isSyncingProp;
 
   const {
-    plugins: { share, discover },
+    plugins: { discover },
   } = useAppContext();
-  const onStartPlaygroundClick = useCallback(() => {
-    if (!share) return;
-    const playgroundLocator = share.url.locators.get('PLAYGROUND_LOCATOR_ID');
-    if (playgroundLocator) {
-      playgroundLocator.navigate({ 'default-index': connector?.index_name });
-    }
-  }, [connector, share]);
   useEffect(() => {
     setTimeout(() => {
       window.scrollTo({
@@ -112,58 +105,6 @@ export const FinishUpStep: React.FC<FinishUpStepProps> = ({ title }) => {
             )}
             <EuiFlexItem>
               <EuiFlexGroup gutterSize="m">
-                <EuiFlexItem>
-                  <EuiCard
-                    icon={<EuiIcon size="xxl" type="machineLearningApp" />}
-                    titleSize="s"
-                    title={i18n.translate(
-                      'xpack.contentConnectors.createConnector.finishUpStep.euiCard.chatWithYourDataLabel',
-                      { defaultMessage: 'Chat with your data' }
-                    )}
-                    description={i18n.translate(
-                      'xpack.contentConnectors.createConnector.finishUpStep.euiCard.chatWithYourDataDescriptionl',
-                      {
-                        defaultMessage:
-                          'Combine your data with the power of LLMs for retrieval augmented generation (RAG)',
-                      }
-                    )}
-                    footer={
-                      showNext ? (
-                        <EuiButton
-                          data-test-subj="enterpriseSearchFinishUpStepStartSearchPlaygroundButton"
-                          aria-label={i18n.translate(
-                            'xpack.contentConnectors.createConnector.finishUpStep.euiButton.startSearchPlaygroundLabel',
-                            { defaultMessage: 'Start Search Playground' }
-                          )}
-                          onClick={onStartPlaygroundClick}
-                        >
-                          {i18n.translate(
-                            'xpack.contentConnectors.createConnector.finishUpStep.startSearchPlaygroundButtonLabel',
-                            { defaultMessage: 'Start Search Playground' }
-                          )}
-                        </EuiButton>
-                      ) : (
-                        <EuiButton
-                          data-test-subj="enterpriseSearchFinishUpStepButton"
-                          color="warning"
-                          iconSide="left"
-                          iconType="refresh"
-                          isLoading={isSyncing}
-                          aria-label={i18n.translate(
-                            'xpack.contentConnectors.createConnector.finishUpStep.euiButton.firstSyncDataLabel',
-                            { defaultMessage: 'First sync data' }
-                          )}
-                          onClick={() => {
-                            startSync(connector);
-                            setShowNext(true);
-                          }}
-                        >
-                          {isSyncing ? 'Syncing data' : 'First sync data'}
-                        </EuiButton>
-                      )
-                    }
-                  />
-                </EuiFlexItem>
                 <EuiFlexItem>
                   <EuiCard
                     icon={<EuiIcon size="xxl" type="discoverApp" />}
@@ -250,7 +191,7 @@ export const FinishUpStep: React.FC<FinishUpStepProps> = ({ title }) => {
                               if (connector) {
                                 application?.navigateToUrl(
                                   generateEncodedPath(
-                                    `app/management/data/content_connectors${CONNECTOR_DETAIL_TAB_PATH}`,
+                                    `/app/management/data/content_connectors${CONNECTOR_DETAIL_TAB_PATH}`,
                                     {
                                       connectorId: connector.id,
                                       tabId: ConnectorDetailTabId.CONFIGURATION,

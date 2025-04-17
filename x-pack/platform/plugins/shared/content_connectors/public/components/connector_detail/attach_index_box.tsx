@@ -123,11 +123,13 @@ export const AttachIndexBox: React.FC<AttachIndexBoxProps> = ({ connector }) => 
       createIndex({
         indexName: prefixedIndex,
         language: null,
+        http,
       });
     } else if (connector.index_name !== prefixedIndex) {
       attachIndex({
         connectorId: connector.id,
         indexName: prefixedIndex,
+        http,
       });
     }
   };
