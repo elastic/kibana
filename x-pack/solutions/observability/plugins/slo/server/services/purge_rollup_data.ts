@@ -57,7 +57,7 @@ export class PurgeRollupData {
   }
 
   private async validatePurgePolicy(
-    slos: Array<SLODefinition>,
+    slos: SLODefinition[],
     purgePolicy: PurgeRollupSchemaType['purgePolicy']
   ) {
     const purgeType = purgePolicy.purgeType;
