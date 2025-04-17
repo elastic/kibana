@@ -8,10 +8,10 @@
 import React from 'react';
 import { useBreadcrumb } from '../hooks/use_breadcrumbs';
 import { useAgentList } from '../hooks/use_agent_list';
-import { AgentListView } from '../components/agents/listing/agent_list_view';
+import { AssistantListView } from '../components/assistant/list/assistant_list_view';
 
-export const WorkChatAgentsPage: React.FC<{}> = () => {
-  useBreadcrumb([{ text: 'Agents' }]);
+export const WorkChatAssistantsPage: React.FC<{}> = () => {
+  useBreadcrumb([{ text: 'Assistants' }]);
   const { agents } = useAgentList();
-  return <AgentListView agents={agents} />;
+  return <AssistantListView agents={agents} />;
 };
