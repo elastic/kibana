@@ -18,6 +18,10 @@ export function getDockerComposeYaml({
     };
   };
 }) {
+  const credentials = Object.entries(config.eisGateway.credentials).map(([key, value]) => {
+    return `${key.toUpperCase()}: "${value}"`;
+  });
+
   return dedent(`
     services:
       eis-gateway:
@@ -31,11 +35,12 @@ export function getDockerComposeYaml({
           - "${config.eisGateway.mount.tls.key}:/certs/tls/tls.key:ro"
           - "${config.eisGateway.mount.ca.cert}:/certs/ca/ca.crt:ro"
         environment:
-          AWS_BEDROCK_API_ENDPOINT: "${config.eisGateway.aws.apiEndpoint}"
-          AWS_BEDROCK_MODEL_ID: "${config.eisGateway.aws.modelId}"
-          AWS_BEDROCK_REGION: "${config.eisGateway.aws.region}"
-          AWS_BEDROCK_AWS_ACCESS_KEY_ID: "${config.eisGateway.aws.accessKeyId}"
-          AWS_BEDROCK_AWS_SECRET_ACCESS_KEY: "${config.eisGateway.aws.secretAccessKey}"
+${credentials
+  .map((line) => {
+    // white-space is important here 😀
+    return `          ${line}`;
+  })
+  .join('\n')}
           ACL_FILE_PATH: "/app/acl/acl.yaml"
           ENTITLEMENTS_SKIP_CHECK: "true"
           TELEMETRY_EXPORTER_TYPE: "none"
@@ -44,7 +49,9 @@ export function getDockerComposeYaml({
         healthcheck:
           test: [
             'CMD-SHELL',
-            'echo ''package main; import ("net/http";"os");func main(){resp,err:=http.Get("http://localhost:${config.eisGateway.ports[1]}/health");if err!=nil||resp.StatusCode!=200{os.Exit(1)}}'' > /tmp/health.go; go run /tmp/health.go',
+            'echo ''package main; import ("net/http";"os");func main(){resp,err:=http.Get("http://localhost:${
+              config.eisGateway.ports[1]
+            }/health");if err!=nil||resp.StatusCode!=200{os.Exit(1)}}'' > /tmp/health.go; go run /tmp/health.go',
           ]
           interval: 1s
           timeout: 2s

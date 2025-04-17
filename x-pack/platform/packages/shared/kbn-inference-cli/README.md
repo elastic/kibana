@@ -46,6 +46,4 @@ This starts the EIS Gateway in a Docker container, and handles certificates and 
 
 ### Prerequisites
 
-EIS connects to external LLM providers, so you need to supply authentication. By default, the setup script will try to get credentials from Vault. Make sure you have configured Vault to point at Elastic's Vault server (you need to be connected to the VPN), and that you're logged in. If you want to, you can run Vault locally and set VAULT_ADDR and VAULT_SECRET_PATH. By default the script will try to get credentials from `kibana-eis-bedrock-config` which is broadly accessible.
-
-You can also configure your own credentials. Make sure you supply at least `AWS_BEDROCK_ACCESS_KEY_ID`, `AWS_BEDROCK_SECRET_ACCESS_KEY`, and `AWS_BEDROCK_REGION`.
+EIS connects to external LLM providers, so you need to supply authentication. By default, the setup script will try to get credentials from Vault. Make sure you have configured Vault to point at Elastic's Infra Vault server, and that you're logged in. If you want to, you can run Vault locally and set VAULT_ADDR and VAULT_SECRET_PATH. By default the script will try to get credentials from the [Infra Vault](https://docs.elastic.dev/vault/infra-vault/home) cluster, at `secrets/kibana-issues/dev/inference/eis`, which is accessible for all employees.

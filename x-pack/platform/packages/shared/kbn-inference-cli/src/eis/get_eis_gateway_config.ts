@@ -9,7 +9,7 @@ import { dump } from 'js-yaml';
 import { writeTempfile } from './file_utils';
 import { generateCertificates } from './generate_certificate';
 import { getServiceConfigurationFromYaml } from './get_service_configuration';
-import { AwsBedrockConfig } from './get_bedrock_config';
+import { EisCredentials } from './get_eis_credentials';
 
 export interface EisGatewayConfig {
   image: string;
@@ -24,7 +24,7 @@ export interface EisGatewayConfig {
       cert: string;
     };
   };
-  aws: AwsBedrockConfig;
+  credentials: EisCredentials;
   model: {
     id: string;
   };
@@ -50,11 +50,11 @@ interface AccessControlListConfig {
 export async function getEisGatewayConfig({
   log,
   signal,
-  aws,
+  credentials,
 }: {
   log: ToolingLog;
   signal: AbortSignal;
-  aws: AwsBedrockConfig;
+  credentials: EisCredentials;
 }): Promise<EisGatewayConfig> {
   log.debug(`Getting EIS Gateway config`);
 
@@ -85,7 +85,7 @@ export async function getEisGatewayConfig({
 
   return {
     ports: [8443, 8051],
-    aws,
+    credentials,
     image: `docker.elastic.co/cloud-ci/k8s-arch/eis-gateway:git-${version}`,
     model: {
       id: EIS_CHAT_MODEL_NAME,

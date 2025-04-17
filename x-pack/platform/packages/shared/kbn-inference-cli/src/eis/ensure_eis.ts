@@ -14,8 +14,8 @@ import { getDockerComposeYaml } from './get_docker_compose_yaml';
 import { getEisGatewayConfig } from './get_eis_gateway_config';
 import { DATA_DIR, writeFile } from './file_utils';
 import { getNginxConf } from './get_nginx_conf';
-import { getBedrockConfig } from './get_bedrock_config';
 import { untilGatewayReady } from './until_gateway_ready';
+import { getEisCredentials } from './get_eis_credentials';
 
 const DOCKER_COMPOSE_FILE_PATH = Path.join(DATA_DIR, 'docker-compose.yaml');
 const NGINX_CONF_FILE_PATH = Path.join(DATA_DIR, 'nginx.conf');
@@ -45,14 +45,17 @@ export async function ensureEis({ log, signal }: { log: ToolingLog; signal: Abor
 
   await assertDockerAvailable();
 
-  const aws = await getBedrockConfig({ log, dockerComposeFilePath: DOCKER_COMPOSE_FILE_PATH });
+  const credentials = await getEisCredentials({
+    log,
+    dockerComposeFilePath: DOCKER_COMPOSE_FILE_PATH,
+  });
 
   log.debug(`Stopping existing containers`);
 
   await down();
 
   const eisGatewayConfig = await getEisGatewayConfig({
-    aws,
+    credentials,
     log,
     signal,
   });
