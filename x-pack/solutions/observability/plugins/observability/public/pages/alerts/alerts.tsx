@@ -236,6 +236,7 @@ function InternalAlertsPage() {
     loadRuleStats();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+  throw new Error('Mary: React fatal error');
 
   const manageRulesHref = http.basePath.prepend('/app/observability/alerts/rules');
 
