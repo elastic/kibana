@@ -537,6 +537,16 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
       };
     }
 
+    // if space awareness is enabled, then validate that agents are valid for active space.
+    // We do this validation by just calling `fetchAgentPolicyInfo()` which will throw if agents is not found.
+    if (this.options.endpointService.experimentalFeatures.endpointManagementSpaceAwarenessEnabled) {
+      try {
+        await this.fetchAgentPolicyInfo(actionRequest.endpoint_ids);
+      } catch (err) {
+        return { isValid: false, error: err };
+      }
+    }
+
     return { isValid: true, error: undefined };
   }
 
