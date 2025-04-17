@@ -62,6 +62,9 @@ export const getVisualizeEmbeddableFactory: (deps: {
 }) => ({
   type: VISUALIZE_EMBEDDABLE_TYPE,
   buildEmbeddable: async ({ initialState, finalizeApi, parentApi, uuid }) => {
+    // Runtime state may contain title loaded from saved object
+    // Initialize titleManager with serialized state
+    // to avoid tracking runtime state title as serialized state title
     const titleManager = initializeTitleManager(initialState.rawState);
 
     // Initialize dynamic actions
