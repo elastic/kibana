@@ -134,6 +134,9 @@ export async function getEisCredentials({
   const credentials = await getEisCreditsFromVault()
     .catch((error) => {
       if (envVariables || existingContainerEnv) {
+        log.debug(
+          `Gracefully handling Vault error, as environment variables are found: ${error.message}`
+        );
         return {};
       }
       throw error;
