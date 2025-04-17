@@ -103,9 +103,7 @@ export function getESForward9Dot0PipelineTriggers(): BuildkiteTriggerStep[] {
   const versions = getVersionsFile();
   const KIBANA_8_19 = versions.versions.find((v) => v.branch === '8.19');
   if (!KIBANA_8_19) {
-    throw new Error(
-      'Update ES forward compatibility 9.0 pipeline to 8.19'
-    );
+    throw new Error('Update ES forward compatibility 9.0 pipeline to 8.19');
   }
   const targetESVersions = versions.versions.filter(
     (v) => v.branch.startsWith('9.') || (v.branch.includes('main') && v.version.startsWith('9.0.0'))
