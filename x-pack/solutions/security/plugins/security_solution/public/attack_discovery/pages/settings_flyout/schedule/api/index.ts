@@ -164,11 +164,10 @@ export const findAttackDiscoverySchedule = async ({
 };
 
 /** Retrieves registered rule types. */
-export const fetchRuleTypes = async ({
-  signal,
-}: {
+export const fetchRuleTypes = async (params?: {
   signal?: AbortSignal;
 }): Promise<Array<AsApiContract<RuleType<string, string>>>> => {
+  const { signal } = params ?? {};
   return KibanaServices.get().http.get<Array<AsApiContract<RuleType<string, string>>>>(
     ALERTING_RULE_TYPES_URL,
     { signal }
