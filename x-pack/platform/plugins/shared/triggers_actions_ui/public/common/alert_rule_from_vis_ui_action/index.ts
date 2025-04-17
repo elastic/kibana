@@ -10,8 +10,7 @@ import { i18n } from '@kbn/i18n';
 import type { Action } from '@kbn/ui-actions-plugin/public';
 import { ALERT_RULE_TRIGGER } from '@kbn/ui-actions-browser/src/triggers';
 import { apiIsOfType, hasBlockingError } from '@kbn/presentation-publishing';
-import type { LensApi } from '@kbn/lens-plugin/public';
-import type { TextBasedPersistedState } from '@kbn/lens-plugin/public/datasources/form_based/esql_layer/types';
+import type { LensApi, TextBasedPersistedState } from '@kbn/lens-plugin/public';
 import type { Datatable } from '@kbn/expressions-plugin/common';
 import type {
   ActionTypeRegistryContract,
