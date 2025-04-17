@@ -9,6 +9,7 @@ import type { WorkflowExecutionState } from './execution_state';
 
 export type WorkflowExecutionErrorType =
   | 'internalError'
+  | 'invalidParameter'
   | 'workflowNotFound'
   | 'nodeTypeNotFound'
   | 'toolNotFound';

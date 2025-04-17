@@ -6,7 +6,11 @@
  */
 
 import { NodeType } from '@kbn/wc-framework-types-common';
-import type { NodeTypeDefinition, LoopNodeConfigType } from '@kbn/wc-framework-types-server';
+import {
+  type NodeTypeDefinition,
+  type LoopNodeConfigType,
+  WorkflowExecutionError,
+} from '@kbn/wc-framework-types-server';
 import { interpolateValue } from '../../framework/config';
 import { runNodeSequence } from '../utils';
 
@@ -17,7 +21,7 @@ export const getLoopNodeTypeDefinition = (): NodeTypeDefinition<LoopNodeConfigTy
     description: 'Executes a sequence for each element in a list',
     factory: (context) => {
       return {
-        run: async ({ input, state }) => {
+        run: async ({ input, state, executionState }) => {
           const {
             services: { workflowRunner },
           } = context;
@@ -32,7 +36,13 @@ export const getLoopNodeTypeDefinition = (): NodeTypeDefinition<LoopNodeConfigTy
           }
 
           const itemVar = interpolateValue(input.itemVar, state);
-          // TODO: assert is a string
+          if (typeof itemVar !== 'string') {
+            throw new WorkflowExecutionError(
+              'itemVar interpolated to a non-string value',
+              'invalidParameter',
+              { state: executionState }
+            );
+          }
 
           // TODO: need to figure out if we clone the state or not
           const loopState = state;
