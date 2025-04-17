@@ -5,6 +5,7 @@
  * 2.0.
  */
 import * as t from 'io-ts';
+import { DeleteByQueryResponse } from '@elastic/elasticsearch/lib/api/types';
 import { dateType, durationType } from '../../schema';
 
 const fixedAgePurgeVal = t.literal('fixed_age');
@@ -35,7 +36,7 @@ const bulkPurgeRollupSchema = t.type({
 });
 
 interface BulkPurgeResponse {
-  taskId?: TaskId;
+  taskId?: DeleteByQueryResponse['task'];
 }
 
 type BulkPurgePolicyType = t.TypeOf<typeof bulkPurgePolicy>;
