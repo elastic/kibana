@@ -24,6 +24,7 @@ export const TRANSACTION_ID_FIELD = 'transaction.id';
 export const TRANSACTION_NAME_FIELD = 'transaction.name';
 export const TRANSACTION_DURATION_FIELD = 'transaction.duration.us';
 export const SPAN_NAME_FIELD = 'span.name';
+export const SPAN_ID_FIELD = 'span.id';
 export const SPAN_ACTION_FIELD = 'span.action';
 export const SPAN_DURATION_FIELD = 'span.duration.us';
 export const SPAN_TYPE_FIELD = 'span.type';
