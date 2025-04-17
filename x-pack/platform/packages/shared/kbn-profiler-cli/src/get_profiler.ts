@@ -10,6 +10,14 @@ import Os from 'os';
 import Path from 'path';
 import { ToolingLog } from '@kbn/tooling-log';
 import execa from 'execa';
+import getPort from 'get-port';
+import { getNodeProcesses } from './get_node_processes';
+
+class InspectorSessionConflictError extends Error {
+  constructor() {
+    super(`An inspector session is already running in another process. Close the process first.`);
+  }
+}
 
 async function getHeapProfiler({ client, log }: { client: CDP.Client; log: ToolingLog }) {
   await client.HeapProfiler.enable();
@@ -52,11 +60,28 @@ async function getCpuProfiler({ client, log }: { client: CDP.Client; log: Toolin
 export async function getProfiler({
   log,
   type,
+  pid,
 }: {
   log: ToolingLog;
   type: 'cpu' | 'heap';
+  pid: number;
 }): Promise<() => Promise<void>> {
-  log.debug(`Attaching to remote debugger at 9229`);
+  const port = await getPort({
+    host: '127.0.0.1',
+    port: 9229,
+  });
+
+  if (port !== 9229) {
+    // Inspector is already running, see if it's attached to the selected process
+    await getNodeProcesses()
+      .then((processes) => processes.find((process) => process.pid === pid))
+      .then((candidate) => {
+        if (!candidate?.ports.includes(9229)) {
+          throw new InspectorSessionConflictError();
+        }
+      });
+  }
+
   const client = await CDP({ port: 9229 });
 
   log.info(`Attached to remote debugger at 9229`);

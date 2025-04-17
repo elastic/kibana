@@ -54,7 +54,7 @@ export function DashboardsTable({
         name: i18n.translate('xpack.streams.dashboardTable.dashboardNameColumnTitle', {
           defaultMessage: 'Dashboard name',
         }),
-        render: (_, { label, id }) => (
+        render: (_, { title, id }) => (
           <EuiLink
             data-test-subj="streamsAppColumnsLink"
             onClick={() => {
@@ -71,7 +71,7 @@ export function DashboardsTable({
               }
             }}
           >
-            {label}
+            {title}
           </EuiLink>
         ),
       },

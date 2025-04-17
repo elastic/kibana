@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import * as Option from 'fp-ts/lib/Option';
+import * as Option from 'fp-ts/Option';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { DocLinks } from '@kbn/doc-links';
 import type {
@@ -51,6 +51,7 @@ export interface BaseState extends ControlState {
   readonly preMigrationScript: Option.Option<string>;
   readonly outdatedDocumentsQuery: QueryDslQueryContainer;
   readonly retryCount: number;
+  readonly skipRetryReset: boolean;
   readonly retryDelay: number;
   /**
    * How many times to retry a step that fails with retryable_es_client_error
@@ -403,6 +404,7 @@ export interface UpdateTargetMappingsPropertiesWaitForTaskState extends PostInit
   /** Update the mappings of the target index */
   readonly controlState: 'UPDATE_TARGET_MAPPINGS_PROPERTIES_WAIT_FOR_TASK';
   readonly updateTargetMappingsTaskId: string;
+  readonly updatedTypesQuery: Option.Option<QueryDslQueryContainer>;
 }
 
 export interface UpdateTargetMappingsMeta extends PostInitState {
