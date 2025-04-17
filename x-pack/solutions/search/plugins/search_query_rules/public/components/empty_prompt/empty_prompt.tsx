@@ -23,7 +23,11 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
+import { TryInConsoleButton } from '@kbn/try-in-console';
+import { i18n } from '@kbn/i18n';
 import { docLinks } from '../../../common/doc_links';
+
+import { useKibana } from '../../hooks/use_kibana';
 
 import queryRulesImg from '../../assets/query-rules-context-alt.svg';
 import backgroundPanelImg from '../../assets/query-rule-panel-background.svg';
@@ -32,6 +36,7 @@ interface EmptyPromptProps {
   getStartedAction: () => void;
 }
 export const EmptyPrompt: React.FC<EmptyPromptProps> = ({ getStartedAction }) => {
+  const { application, share, console: consolePlugin } = useKibana().services;
   const { euiTheme } = useEuiTheme();
   const gradientOverlay = css({
     background: `linear-gradient(180deg, ${transparentize(
@@ -202,26 +207,46 @@ export const EmptyPrompt: React.FC<EmptyPromptProps> = ({ getStartedAction }) =>
         </EuiSplitPanel.Inner>
         <EuiHorizontalRule margin="none" />
         <EuiSplitPanel.Inner color="subdued" paddingSize="l">
-          <EuiTitle size="xxs">
-            <span>
-              <FormattedMessage
-                id="xpack.queryRules.emptyPrompt.footer"
-                defaultMessage="Prefer to use the APIs?"
-              />
-            </span>
-          </EuiTitle>
-          &nbsp;
-          <EuiLink
-            data-test-subj="searchQueryRulesEmptyPromptFooterLink"
-            href={docLinks.queryRulesApi}
-            target="_blank"
-            external
-          >
-            <FormattedMessage
-              id="xpack.queryRules.emptyPrompt.footerLink"
-              defaultMessage="Query Rules API documentation"
-            />
-          </EuiLink>
+          <EuiFlexGroup direction="row" alignItems="stretch">
+            <EuiFlexGroup direction="row" gutterSize="s">
+              <EuiFlexItem grow={false}>
+                <EuiTitle size="xxs">
+                  <span>
+                    <FormattedMessage
+                      id="xpack.queryRules.emptyPrompt.footer"
+                      defaultMessage="Prefer to use the APIs?"
+                    />
+                  </span>
+                </EuiTitle>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <TryInConsoleButton
+                  application={application}
+                  sharePlugin={share ?? undefined}
+                  consolePlugin={consolePlugin ?? undefined}
+                  request={`POST _plugins/_query_rules/_rulesets`}
+                  type="link"
+                  content={i18n.translate('xpack.queryRules.emptyPrompt.TryInConsoleLabel', {
+                    defaultMessage: 'Create in Console',
+                  })}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+
+            <EuiFlexItem grow={false}>
+              <EuiLink
+                data-test-subj="searchQueryRulesEmptyPromptFooterLink"
+                href={docLinks.queryRulesApi}
+                target="_blank"
+                external
+              >
+                <FormattedMessage
+                  id="xpack.queryRules.emptyPrompt.footerLink"
+                  defaultMessage="Query Rules API documentation"
+                />
+              </EuiLink>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiSplitPanel.Inner>
       </EuiSplitPanel.Outer>
     </EuiFlexItem>
