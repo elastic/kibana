@@ -496,22 +496,14 @@ export class ObservabilityAIAssistantClient {
                 systemMessage$,
               ]).pipe(
                 switchMap(([addedMessages, title, systemMessage]) => {
-                  // ───────────────────────────────────────────────────────────────
-                  // 1️⃣  Sanitize history + new messages so any hashes in the freshly
-                  //     generated assistant content are reversed *before* we execute
-                  //     functions or persist the conversation.
-                  //     - This calls `unhashAssistantMessage`, attaching spans and
-                  //       setting `sanitized:true`.
-                  //     - The same clean objects are then used for KB writes *and* ES.
-                  // ───────────────────────────────────────────────────────────────
+                  // sanitize the history and the new messages
                   return from(this.sanitizeMessages(initialMessages.concat(addedMessages))).pipe(
                     switchMap(({ sanitizedMessages: allClean }) => {
-                      // allClean = history (already persisted) + freshly sanitised additions
-                      const cleanAddedMessages = allClean.slice(initialMessages.length);
+                      const sanitizedAddedMessages = allClean.slice(initialMessages.length);
 
                       // merge back for downstream processing
                       const initialMessagesWithAddedMessages =
-                        initialMessages.concat(cleanAddedMessages);
+                        initialMessages.concat(sanitizedAddedMessages);
 
                       const lastMessage = last(initialMessagesWithAddedMessages);
 
