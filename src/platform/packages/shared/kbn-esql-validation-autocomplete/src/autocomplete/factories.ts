@@ -487,15 +487,17 @@ export function getDateLiterals(options?: {
 export function getControlSuggestionIfSupported(
   supportsControls: boolean,
   type: ESQLVariableType,
-  getVariables?: () => ESQLControlVariable[] | undefined
+  getVariables?: () => ESQLControlVariable[] | undefined,
+  shouldBePrefixed = true
 ) {
   if (!supportsControls) {
     return [];
   }
+  const prefix = shouldBePrefixed ? getVariablePrefix(type) : '';
   const variables = getVariables?.()?.filter((variable) => variable.type === type) ?? [];
   const controlSuggestion = getControlSuggestion(
     type,
-    variables?.map((v) => `${getVariablePrefix(type)}${v.key}`)
+    variables?.map((v) => `${prefix}${v.key}`)
   );
   return controlSuggestion;
 }

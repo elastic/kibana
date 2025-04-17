@@ -35,6 +35,7 @@ import {
   getAllCommands,
   getExpressionType,
 } from '../shared/helpers';
+import { ESQL_VARIABLES_PREFIX } from '../shared/constants';
 import { collectVariables, excludeVariablesFromCurrentCommand } from '../shared/variables';
 import type { ESQLRealField, ESQLVariable } from '../validation/types';
 import {
@@ -149,11 +150,12 @@ export async function suggest(
   // ToDo: Reconsider where it belongs when this is resolved https://github.com/elastic/kibana/issues/216492
   const lastCharacterTyped = innerText[innerText.length - 1];
   let controlSuggestions: SuggestionRawDefinition[] = [];
-  if (lastCharacterTyped === '?') {
+  if (lastCharacterTyped === ESQL_VARIABLES_PREFIX) {
     controlSuggestions = getControlSuggestionIfSupported(
       Boolean(supportsControls),
       ESQLVariableType.VALUES,
-      getVariables
+      getVariables,
+      false
     );
 
     return controlSuggestions;
@@ -214,7 +216,7 @@ export function getFieldsByTypeRetriever(
 
   const queryString = fullQuery ?? queryForFields;
   const lastCharacterTyped = queryString[queryString.length - 1];
-  const lastCharIsQuestionMark = lastCharacterTyped === '?';
+  const lastCharIsQuestionMark = lastCharacterTyped === ESQL_VARIABLES_PREFIX;
   return {
     getFieldsByType: async (
       expectedType: Readonly<string> | Readonly<string[]> = 'any',
