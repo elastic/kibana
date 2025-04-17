@@ -30,6 +30,7 @@ import { agentRunableFactory } from './agentRunnable';
 
 export const callAssistantGraph: AgentExecutor<true | false> = async ({
   abortSignal,
+  assistantContext,
   actionsClient,
   alertsIndexPattern,
   assistantTools = [],
@@ -113,6 +114,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
   // Fetch any applicable tools that the source plugin may have registered
   const assistantToolParams: AssistantToolParams = {
     alertsIndexPattern,
+    assistantContext,
     anonymizationFields,
     connectorId,
     contentReferencesStore,
@@ -127,6 +129,8 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
     request,
     size,
     telemetry,
+    createLlmInstance,
+    isOssModel,
   };
 
   const tools: StructuredTool[] = (
