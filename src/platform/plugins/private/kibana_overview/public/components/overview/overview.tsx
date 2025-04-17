@@ -82,7 +82,7 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
   const { euiTheme } = useEuiTheme();
   const minBreakpointM = useEuiMinBreakpoint('m');
 
-  const className = classNames({
+  const newsContainerClassName = classNames({
     'kbnOverviewSupplements--noNews': !newsFetchResult?.feedItems?.length,
   });
 
@@ -291,7 +291,7 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
       </KibanaPageTemplate.Section>
 
       <KibanaPageTemplate.Section bottomBorder paddingSize="xl">
-        <EuiFlexGroup alignItems="flexStart" className={className}>
+        <EuiFlexGroup alignItems="flexStart" className={newsContainerClassName}>
           {newsFetchResult && newsFetchResult.feedItems.length ? (
             <EuiFlexItem grow={1}>
               <NewsFeed newsFetchResult={newsFetchResult} />
@@ -404,7 +404,7 @@ const styles = (euiTheme: UseEuiTheme['euiTheme'], minBreakpointM: string) =>
     },
     '.kbnOverviewItemSolution': {
       [minBreakpointM]: {
-        maxWidth: `calc(33,333% - ${euiTheme.size.l})`,
+        maxWidth: `calc(33.333% - ${euiTheme.size.l})`,
       },
     },
     '.kbnOverviewRemainingApps': {
