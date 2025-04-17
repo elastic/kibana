@@ -35,7 +35,6 @@ const assert = require('assert');
 /**
  * @typedef transformOptions
  * @property {string} chromiumVersion
- * @property {string} chromiumRevision
  * @property {ChromiumUpdateConfigMap} updateConfig
  */
 
@@ -50,7 +49,6 @@ module.exports = function transformer(file, api, options) {
 
   assert.ok(Object.values(options).length, 'Expected options to be defined');
   assert.ok(options.chromiumVersion, 'Expected version to be defined');
-  assert.ok(options.chromiumRevision, 'Expected revision to be defined');
   assert.ok(options.updateConfig, 'Expected updateConfig to be defined');
   assert.ok(options.updateConfig.linux_arm64, 'Expected linux_arm64 update config to be defined');
   assert.ok(options.updateConfig.linux_x64, 'Expected linux_x64 update config to be defined');
@@ -99,14 +97,6 @@ module.exports = function transformer(file, api, options) {
         property.key.name === 'version'
       ) {
         property.value = j.literal(options.chromiumVersion);
-      }
-
-      if (
-        property.type === 'ObjectProperty' &&
-        property.key.type === 'Identifier' &&
-        property.key.name === 'revision'
-      ) {
-        property.value = j.literal(options.chromiumRevision);
       }
 
       if (

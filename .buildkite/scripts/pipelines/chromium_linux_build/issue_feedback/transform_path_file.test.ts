@@ -26,8 +26,7 @@ const pathFileContents = readFileSync(
  * @type {import('./transform_path_file').transformOptions}
  */
 const transformOptions = {
-  chromiumRevision: '1402768',
-  chromiumVersion: '13.0.6943.126',
+  chromiumVersion: '130.6943.126',
   updateConfig: {
     mac_x64: {
       archiveChecksum: '2e64a158419165ceee5db0b57703777bf21470f2d9656bbf100f54ebe059f695',
@@ -70,26 +69,11 @@ describe('transform_path_file', () => {
     }).to.throw('Expected options to be defined');
   });
 
-  it('throws an error if chromiumRevision is missing', () => {
-    expect(() => {
-      applyTransform(
-        pathFileTransform,
-        {
-          chromiumVersion: transformOptions.chromiumVersion,
-          updateConfig: transformOptions.updateConfig,
-        },
-        { source: pathFileContents },
-        runnerOptions
-      );
-    }).to.throw('Expected revision to be defined');
-  });
-
   it('throws an error if chromiumVersion is missing', () => {
     expect(() => {
       applyTransform(
         pathFileTransform,
         {
-          chromiumRevision: transformOptions.chromiumRevision,
           updateConfig: transformOptions.updateConfig,
         },
         { source: pathFileContents },
@@ -103,7 +87,6 @@ describe('transform_path_file', () => {
       applyTransform(
         pathFileTransform,
         {
-          chromiumRevision: transformOptions.chromiumRevision,
           chromiumVersion: transformOptions.chromiumVersion,
         },
         { source: pathFileContents },

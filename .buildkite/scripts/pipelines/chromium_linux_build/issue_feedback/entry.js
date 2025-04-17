@@ -259,7 +259,6 @@ const getSha256Hash = async (filePath) => {
       ),
       '../paths.ts',
       `--updateConfig=${JSON.stringify(config)}`,
-      `--chromiumRevision=${chromiumRevision}`,
       `--chromiumVersion=${chromiumVersion}`,
     ],
     { printToScreen: true }
