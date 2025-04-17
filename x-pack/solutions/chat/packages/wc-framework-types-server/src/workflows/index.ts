@@ -26,5 +26,4 @@ export type {
   ScopedRunnerRunWorkflowParams,
   ScopedRunnerRunWorkflowOutput,
   ScopedRunnerRunNodeParams,
-  ScopedRunnerRunNodeOutput,
 } from './internal_services';
