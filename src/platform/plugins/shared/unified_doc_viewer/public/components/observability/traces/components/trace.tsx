@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback } from 'react';
 import { ReactEmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -36,15 +36,11 @@ export const Trace = ({
 }: TraceProps) => {
   const { data } = getUnifiedDocViewerServices();
 
-  const { absoluteTimeRange } = data.query.timefilter.timefilter.useTimefilter();
-
-  const { rangeFrom, rangeTo } = useMemo(
-    () => ({
-      rangeFrom: new Date(absoluteTimeRange.start).toISOString(),
-      rangeTo: new Date(absoluteTimeRange.end).toISOString(),
-    }),
-    [absoluteTimeRange]
-  );
+  const {
+    timeState: {
+      asAbsoluteTimeRange: { from: rangeFrom, to: rangeTo },
+    },
+  } = data.query.timefilter.timefilter.useTimefilter();
 
   const getParentApi = useCallback(
     () => ({
