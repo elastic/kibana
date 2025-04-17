@@ -29,9 +29,16 @@ import { registerServerRoutes } from './routes/register_routes';
 import { SLORoutesDependencies } from './routes/types';
 import { SO_SLO_TYPE, slo } from './saved_objects';
 import { SO_SLO_SETTINGS_TYPE, sloSettings } from './saved_objects/slo_settings';
-import { DefaultResourceInstaller } from './services';
+import {
+  DefaultResourceInstaller,
+  DefaultSummaryTransformManager,
+  DefaultTransformManager,
+  KibanaSavedObjectsSLORepository,
+} from './services';
+import { DefaultSummaryTransformGenerator } from './services/summary_transform_generator/summary_transform_generator';
 import { SloOrphanSummaryCleanupTask } from './services/tasks/orphan_summary_cleanup_task';
 import { TempSummaryCleanupTask } from './services/tasks/temp_summary_cleanup_task';
+import { createTransformGenerators } from './services/transform_generators';
 import type {
   SLOConfig,
   SLOPluginSetupDependencies,
@@ -150,10 +157,53 @@ export class SLOPlugin
       dependencies: {
         corePlugins: core,
         plugins: routeHandlerPlugins,
+        config: {
+          isServerless: this.isServerless,
+        },
+        getScopedClients: async ({ request, logger }) => {
+          const [coreStart, pluginsStart] = await core.getStartServices();
+
+          const internalSoClient = new SavedObjectsClient(
+            coreStart.savedObjects.createInternalRepository()
+          );
+          const soClient = coreStart.savedObjects.getScopedClient(request);
+          const scopedClusterClient = coreStart.elasticsearch.client.asScoped(request);
+
+          const dataViewsService = await pluginsStart.dataViews.dataViewsServiceFactory(
+            soClient,
+            scopedClusterClient.asCurrentUser
+          );
+
+          const spaceId =
+            (await pluginsStart.spaces?.spacesService?.getActiveSpace(request))?.id ?? 'default';
+
+          const repository = new KibanaSavedObjectsSLORepository(soClient, logger);
+
+          const transformManager = new DefaultTransformManager(
+            createTransformGenerators(spaceId, dataViewsService, this.isServerless),
+            scopedClusterClient,
+            logger
+          );
+          const summaryTransformManager = new DefaultSummaryTransformManager(
+            new DefaultSummaryTransformGenerator(),
+            scopedClusterClient,
+            logger
+          );
+
+          return {
+            scopedClusterClient,
+            soClient,
+            internalSoClient,
+            dataViewsService,
+            spaceId,
+            repository,
+            transformManager,
+            summaryTransformManager,
+          };
+        },
       },
       logger: this.logger,
       repository: getSloServerRouteRepository({ isServerless: this.isServerless }),
-      isServerless: this.isServerless,
       isDev: this.isDev,
     });
 
