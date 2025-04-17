@@ -91,4 +91,17 @@ describe('DashboardView', () => {
     expect(queryByTestId(`dashboard-view-mockSavedObjectId`)).not.toBeInTheDocument();
     expect(queryByTestId(`dashboard-view-error-prompt-wrapper`)).toBeInTheDocument();
   });
+
+  test('render dashboard view with height', () => {
+    const { queryByTestId } = render(
+      <Router history={mockHistory}>
+        <DashboardView initialViewMode={'view'} />
+      </Router>,
+      { wrapper: TestProviders }
+    );
+
+    expect(queryByTestId(`dashboard-view-wrapper`)).toHaveStyle({
+      'min-height': `calc(100vh - 140px)`,
+    });
+  });
 });

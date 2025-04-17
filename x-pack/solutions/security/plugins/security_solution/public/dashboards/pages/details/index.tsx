@@ -33,6 +33,8 @@ import { useDashboardRenderer } from '../../hooks/use_dashboard_renderer';
 import { DashboardTitle } from '../../components/dashboard_title';
 import { useDataViewSpec } from '../../../data_view_manager/hooks/use_data_view_spec';
 
+const dashboardViewFlexGroupStyle = { minHeight: `calc(100vh - 140px)` };
+
 interface DashboardViewProps {
   initialViewMode: ViewMode;
 }
@@ -78,7 +80,12 @@ const DashboardViewComponent: React.FC<DashboardViewProps> = ({
         <SiemSearchBar id={InputsModelId.global} sourcererDataView={sourcererDataView} />
       </FiltersGlobal>
       <SecuritySolutionPageWrapper>
-        <EuiFlexGroup direction="column" gutterSize="none" data-test-subj="dashboard-view-wrapper">
+        <EuiFlexGroup
+          direction="column"
+          style={dashboardViewFlexGroupStyle}
+          gutterSize="none"
+          data-test-subj="dashboard-view-wrapper"
+        >
           <EuiFlexItem grow={false}>
             {dashboardContainer && (
               <HeaderPage
