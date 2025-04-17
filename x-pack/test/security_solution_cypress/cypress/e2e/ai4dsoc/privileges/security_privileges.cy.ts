@@ -12,6 +12,7 @@ import {
   MACHINE_LEARNING_FEATURE,
   NOTES_FEATURE,
   SECURITY_FEATURE,
+  SECURITY_FEATURE_DESCRIPTION,
   SIEM_MIGRATIONS_FEATURE,
   TIMELINE_FEATURE,
 } from '../../../screens/custom_roles/assign_to_space_flyout';
@@ -31,6 +32,7 @@ describe('Custom role creation', { tags: '@serverless' }, () => {
       selectAllSpaces();
       // should not have Security sub-privileges
       cy.get(SECURITY_FEATURE).should('exist');
+      cy.get(SECURITY_FEATURE_DESCRIPTION).should('not.exist');
       cy.get(SECURITY_FEATURE).click();
       cy.get(`${SECURITY_FEATURE} button.euiAccordion__arrow`).should('not.exist');
     });
