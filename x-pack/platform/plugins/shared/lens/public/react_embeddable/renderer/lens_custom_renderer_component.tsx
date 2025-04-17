@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { ReactEmbeddableRenderer } from '@kbn/embeddable-plugin/public';
+import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import { useSearchApi } from '@kbn/presentation-publishing';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import type { PresentationPanelProps } from '@kbn/presentation-panel-plugin/public';
-import type { LensApi, LensRendererProps, LensRuntimeState, LensSerializedState } from '../types';
+import type { LensApi, LensRendererProps, LensSerializedState } from '../types';
 import { LENS_EMBEDDABLE_TYPE } from '../../../common/constants';
 import { createEmptyLensState } from '../helper';
 
@@ -137,7 +137,7 @@ export function LensRenderer({
   }, [showInspector, withDefaultActions, extraActions, lensApi]);
 
   return (
-    <ReactEmbeddableRenderer<LensSerializedState, LensRuntimeState, LensApi>
+    <EmbeddableRenderer<LensSerializedState, LensApi>
       type={LENS_EMBEDDABLE_TYPE}
       maybeId={id}
       getParentApi={() => ({
