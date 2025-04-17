@@ -20,6 +20,7 @@
     "@kbn/wc-genai-utils",
     "@kbn/wc-framework-types-server",
     "@kbn/wc-framework-types-common",
+    "@kbn/logging-mocks",
   ],
   "exclude": [
     "target/**/*",
