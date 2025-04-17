@@ -9,7 +9,7 @@
 
 import type { TabbedContentState } from '@kbn/unified-tabs/src/components/tabbed_content/tabbed_content';
 import { v4 as uuidv4 } from 'uuid';
-import { cloneDeep, differenceBy } from 'lodash';
+import { cloneDeep, differenceBy, omit } from 'lodash';
 import type { QueryState } from '@kbn/data-plugin/common';
 import type { TabState } from '../types';
 import { selectAllTabs, selectTab } from '../selectors';
@@ -193,14 +193,27 @@ export const restoreTab: InternalStateThunkActionCreator<[{ restoreTabId: string
     const currentTabs = selectAllTabs(currentState);
     const currentTab = selectTab(currentState, currentState.tabs.unsafeCurrentId);
 
-    // TODO: allow to restore from recently closed tabs too
+    let items = currentTabs;
+    // search among open tabs
+    let selectedItem = items.find((tab) => tab.id === restoreTabId);
+
+    if (!selectedItem) {
+      // search among recently closed tabs
+      const recentlyClosedTabs = currentState.tabs.recentlyClosedTabs;
+      const closedTab = recentlyClosedTabs.find((tab) => tab.id === restoreTabId);
+      if (closedTab) {
+        // reopening one of the closed tabs
+        selectedItem = omit(closedTab, 'closedAt');
+        items = [...items, closedTab];
+      }
+    }
 
     const newTabsGroupId = uuidv4();
     return dispatch(
       updateTabs({
-        items: currentTabs,
-        selectedItem: currentTabs.find((tab) => tab.id === restoreTabId) || currentTab,
         groupId: newTabsGroupId,
+        items,
+        selectedItem: selectedItem || currentTab,
       })
     );
   };
