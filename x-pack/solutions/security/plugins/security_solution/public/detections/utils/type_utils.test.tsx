@@ -6,7 +6,8 @@
  */
 
 import type { Alert } from '@kbn/alerting-types';
-import { getAlertFieldValueAsStringOrNull } from './get_alert_field_value_as_string_or_null';
+import { getAlertFieldValueAsStringOrNull, isJsonObjectValue } from './type_utils';
+import type { JsonValue } from '@kbn/utility-types';
 
 describe('getAlertFieldValueAsStringOrNull', () => {
   it('should handle missing field', () => {
@@ -98,5 +99,55 @@ describe('getAlertFieldValueAsStringOrNull', () => {
     const result = getAlertFieldValueAsStringOrNull(alert, field);
 
     expect(result).toEqual('[object Object]');
+  });
+});
+
+describe('isJsonObjectValue', () => {
+  it('should return true for JsonObject', () => {
+    const value: JsonValue = { test: 'value' };
+
+    const result = isJsonObjectValue(value);
+
+    expect(result).toBe(true);
+  });
+
+  it('should return false for null', () => {
+    const value: JsonValue = null;
+
+    const result = isJsonObjectValue(value);
+
+    expect(result).toBe(false);
+  });
+
+  it('should return false for string', () => {
+    const value: JsonValue = 'test';
+
+    const result = isJsonObjectValue(value);
+
+    expect(result).toBe(false);
+  });
+
+  it('should return false for number', () => {
+    const value: JsonValue = 123;
+
+    const result = isJsonObjectValue(value);
+
+    expect(result).toBe(false);
+  });
+
+  it('should return false for boolean', () => {
+    const value: JsonValue = true;
+
+    const result = isJsonObjectValue(value);
+
+    expect(result).toBe(false);
+  });
+
+  it('should return false for array', () => {
+    const value: JsonValue = ['test', 123, true];
+
+    const result = isJsonObjectValue(value);
+
+    expect(result).toBe(false);
   });
 });

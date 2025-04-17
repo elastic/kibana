@@ -8,7 +8,7 @@
 import React, { memo, useMemo } from 'react';
 import type { Alert } from '@kbn/alerting-types';
 import { getOrEmptyTagFromValue } from '../../../../common/components/empty_value';
-import { getAlertFieldValueAsStringOrNull } from '../../../utils/get_alert_field_value_as_string_or_null';
+import { getAlertFieldValueAsStringOrNull } from '../../../utils/type_utils';
 
 export interface BasicCellRendererProps {
   /**

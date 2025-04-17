@@ -14,6 +14,12 @@ import { getSeverityColor } from '../../alerts_kpis/severity_level_panel/helpers
 
 export const BADGE_TEST_ID = 'alert-summary-table-severity-cell-renderer';
 
+/**
+ * Return the same string with the first letter capitalized
+ */
+const capitalizeFirstLetter = (value: string): string =>
+  String(value).charAt(0).toUpperCase() + String(value).slice(1);
+
 export interface KibanaAlertSeverityCellRendererProps {
   /**
    * Alert data passed from the renderCellValue callback via the AlertWithLegacyFormats interface
@@ -34,9 +40,7 @@ export const KibanaAlertSeverityCellRenderer = memo(
 
       if (Array.isArray(values) && values.length === 1) {
         const value: JsonValue = values[0];
-        return value && typeof value === 'string'
-          ? String(value).charAt(0).toUpperCase() + String(value).slice(1)
-          : null;
+        return value && typeof value === 'string' ? capitalizeFirstLetter(value) : null;
       }
 
       return null;

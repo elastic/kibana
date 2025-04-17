@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { JsonValue } from '@kbn/utility-types';
+import type { JsonObject, JsonValue } from '@kbn/utility-types';
 import type { Alert } from '@kbn/alerting-types';
 
 /**
@@ -38,4 +38,17 @@ export const getAlertFieldValueAsStringOrNull = (alert: Alert, field: string): s
   } else {
     return null;
   }
+};
+
+/**
+ * Guaratees that the value is of type JsonObject
+ */
+export const isJsonObjectValue = (value: JsonValue): value is JsonObject => {
+  return (
+    value != null &&
+    typeof value !== 'string' &&
+    typeof value !== 'number' &&
+    typeof value !== 'boolean' &&
+    !Array.isArray(value)
+  );
 };

@@ -12,12 +12,15 @@ import { EuiSkeletonText } from '@elastic/eui';
 import type { Alert } from '@kbn/alerting-types';
 import { ALERT_RULE_PARAMETERS } from '@kbn/rule-data-utils';
 import { useGetIntegrationFromPackageName } from '../../../hooks/alert_summary/use_get_integration_from_package_name';
+import { getAlertFieldValueAsStringOrNull, isJsonObjectValue } from '../../../utils/type_utils';
 
 export const SKELETON_TEST_ID = 'alert-summary-table-related-integrations-cell-renderer-skeleton';
 export const ICON_TEST_ID = 'alert-summary-table-related-integrations-cell-renderer-icon';
 
 const RELATED_INTEGRATIONS_FIELD = 'related_integrations';
 const PACKAGE_FIELD = 'package';
+
+// function is_string(value: unknown): value is string {}
 
 export interface KibanaAlertRelatedIntegrationsCellRendererProps {
   /**
@@ -38,26 +41,12 @@ export const KibanaAlertRelatedIntegrationsCellRenderer = memo(
 
       if (Array.isArray(values) && values.length === 1) {
         const value: JsonValue = values[0];
-        if (
-          !value ||
-          typeof value === 'string' ||
-          typeof value === 'number' ||
-          typeof value === 'boolean' ||
-          Array.isArray(value)
-        )
-          return null;
+        if (!isJsonObjectValue(value)) return null;
 
         const relatedIntegration = value[RELATED_INTEGRATIONS_FIELD];
-        if (
-          !relatedIntegration ||
-          typeof relatedIntegration === 'string' ||
-          typeof relatedIntegration === 'number' ||
-          typeof relatedIntegration === 'boolean' ||
-          Array.isArray(relatedIntegration)
-        )
-          return 'splunk'; // null;
+        if (!isJsonObjectValue(relatedIntegration)) return null;
 
-        return relatedIntegration[PACKAGE_FIELD] as string;
+        return getAlertFieldValueAsStringOrNull(relatedIntegration as Alert, PACKAGE_FIELD);
       }
 
       return null;
