@@ -6,12 +6,7 @@
  */
 
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import {
-  Agent,
-  NewPackagePolicy,
-  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
-  PackagePolicy,
-} from '@kbn/fleet-plugin/common';
+import { Agent, PACKAGE_POLICY_SAVED_OBJECT_TYPE, PackagePolicy } from '@kbn/fleet-plugin/common';
 import {
   AgentPolicyServiceInterface,
   AgentService,
@@ -217,41 +212,35 @@ export class AgentlessConnectorsInfraService {
       `Successfully created agent policy ${createdPolicy.id} for agentless connector ${connector.id}`
     );
     this.logger.debug(`Creating a package policy for agentless connector ${connector.id}`);
-
-    const newPolicy = {
-      policy_ids: [createdPolicy.id],
-      package: {
-        title: pkgTitle,
-        name: pkgName,
-        version: pkgVersion,
-      },
-      name: `${connector.service_type} connector ${connector.id}`,
-      description: '',
-      namespace: '',
-      enabled: true,
-      inputs: [
-        {
-          type: connectorsInputName,
-          policy_template: connector.service_type,
-          enabled: true,
-          vars: {
-            connector_id: { type: 'string', value: connector.id },
-            connector_name: { type: 'string', value: connector.name },
-            service_type: { type: 'string', value: connector.service_type },
-          },
-          streams: [],
-        },
-      ],
-      supports_agentless: true,
-    };
-    const newPackagePolicy = await this.packagePolicyService.enrichPolicyWithDefaultsFromPackage(
-      this.soClient,
-      newPolicy as NewPackagePolicy
-    );
     const packagePolicy = await this.packagePolicyService.create(
       this.soClient,
       this.esClient,
-      newPackagePolicy,
+      {
+        policy_ids: [createdPolicy.id],
+        package: {
+          title: pkgTitle,
+          name: pkgName,
+          version: pkgVersion,
+        },
+        name: `${connector.service_type} connector ${connector.id}`,
+        description: '',
+        namespace: '',
+        enabled: true,
+        inputs: [
+          {
+            type: connectorsInputName,
+            policy_template: connector.service_type,
+            enabled: true,
+            vars: {
+              connector_id: { type: 'string', value: connector.id },
+              connector_name: { type: 'string', value: connector.name },
+              service_type: { type: 'string', value: connector.service_type },
+            },
+            streams: [],
+          },
+        ],
+        supports_agentless: true,
+      },
       { force: true }
     );
 
