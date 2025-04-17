@@ -243,11 +243,6 @@ export interface ChromeProjectNavigationNode extends NodeDefinitionBase {
    */
   children?: ChromeProjectNavigationNode[];
   /**
-   * Handler to render the node item with custom JSX. This handler is added to render the `children` of
-   * the Navigation.Item component when React components are used to declare the navigation tree.
-   */
-  renderItem?: () => React.ReactNode;
-  /**
    * Flag to indicate if the node is an "external" cloud link
    */
   isExternalLink?: boolean;
