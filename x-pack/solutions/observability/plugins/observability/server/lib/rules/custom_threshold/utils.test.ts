@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { flattenObject, getFormattedGroupBy, getGroupByObject, validateKQLStringFilter } from './utils';
+import {
+  flattenObject,
+  getFormattedGroupBy,
+  getGroupByObject,
+  validateKQLStringFilter,
+} from './utils';
 
 describe('FlattenObject', () => {
   it('flattens multi level item', () => {
