@@ -399,43 +399,18 @@ export const updateCustomIntegrationHandler: FleetRequestHandler<
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const soClient = coreContext.savedObjects.client;
 
-  try {
-    const { fields } = request.body as TypeOf<typeof CustomIntegrationRequestSchema.body>;
-    const { pkgName } = request.params as unknown as TypeOf<
-      typeof CustomIntegrationRequestSchema.params
-    >;
-    const result = await updateCustomIntegration(esClient, soClient, pkgName, fields);
+  const { fields } = request.body as TypeOf<typeof CustomIntegrationRequestSchema.body>;
+  const { pkgName } = request.params as unknown as TypeOf<
+    typeof CustomIntegrationRequestSchema.params
+  >;
+  const result = await updateCustomIntegration(esClient, soClient, pkgName, fields);
 
-    return response.ok({
-      body: {
-        id: pkgName,
-        result,
-      },
-    });
-  } catch (error) {
-    if (error instanceof CustomIntegrationNotFoundError) {
-      return response.customError({
-        statusCode: 404,
-        body: {
-          message: error.message,
-        },
-      });
-    } else if (error instanceof NotACustomIntegrationError) {
-      return response.customError({
-        statusCode: 403,
-        body: {
-          message: `Failed to update integration: ${error.message}`,
-        },
-      });
-    } else {
-      return response.customError({
-        statusCode: 500,
-        body: {
-          message: `Failed to update integration: ${error.message}`,
-        },
-      });
-    }
-  }
+  return response.ok({
+    body: {
+      id: pkgName,
+      result,
+    },
+  });
 };
 
 const bulkInstallServiceResponseToHttpEntry = (
