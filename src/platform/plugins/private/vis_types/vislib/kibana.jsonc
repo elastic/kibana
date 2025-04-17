@@ -24,7 +24,8 @@
     "requiredBundles": [
       "kibanaUtils",
       "visTypeHeatmap",
-      "visTypeGauge"
+      "visTypeGauge",
+      "embeddable"
     ]
   }
 }
