@@ -29,6 +29,7 @@ export const services = {
   svlUserManager: commonFunctionalServices.samlAuth,
   samlAuth: commonFunctionalServices.samlAuth, // <--temp workaround until we can unify naming
   roleScopedSupertest: deploymentAgnosticServices.roleScopedSupertest,
+  customRoleScopedSupertest: deploymentAgnosticServices.customRoleScopedSupertest,
   dataViewApi: DataViewApiProvider,
   platformSecurityUtils: PlatformSecurityUtilsProvider,
 };
