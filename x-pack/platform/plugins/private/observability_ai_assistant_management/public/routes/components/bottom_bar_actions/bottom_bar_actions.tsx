@@ -41,18 +41,21 @@ export const BottomBarActions = ({
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
         <EuiFlexItem
           grow={false}
-          style={{
+          css={{
             flexDirection: 'row',
             alignItems: 'center',
           }}
         >
           <EuiHealth color="warning" />
           <EuiText>
-            {i18n.translate('xpack.observabilityShared.bottomBarActions.unsavedChanges', {
-              defaultMessage:
-                '{unsavedChangesCount, plural, =0{0 unsaved changes} one {1 unsaved change} other {# unsaved changes}} ',
-              values: { unsavedChangesCount },
-            })}
+            {i18n.translate(
+              'xpack.observabilityAiAssistantManagement.bottomBarActions.unsavedChanges',
+              {
+                defaultMessage:
+                  '{unsavedChangesCount, plural, =0{0 unsaved changes} one {1 unsaved change} other {# unsaved changes}} ',
+                values: { unsavedChangesCount },
+              }
+            )}
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
@@ -63,18 +66,24 @@ export const BottomBarActions = ({
                 color="text"
                 onClick={onDiscardChanges}
               >
-                {i18n.translate('xpack.observabilityShared.bottomBarActions.discardChangesButton', {
-                  defaultMessage: 'Discard changes',
-                })}
+                {i18n.translate(
+                  'xpack.observabilityAiAssistantManagement.bottomBarActions.discardChangesButton',
+                  {
+                    defaultMessage: 'Discard changes',
+                  }
+                )}
               </EuiButtonEmpty>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiToolTip
                 content={
                   areChangesInvalid &&
-                  i18n.translate('xpack.observabilityShared.saveButtonTooltipWithInvalidChanges', {
-                    defaultMessage: 'Fix invalid settings before saving.',
-                  })
+                  i18n.translate(
+                    'xpack.observabilityAiAssistantManagement.bottomBarActions.saveButtonTooltipWithInvalidChanges',
+                    {
+                      defaultMessage: 'Fix invalid settings before saving.',
+                    }
+                  )
                 }
               >
                 <EuiButton
