@@ -6,7 +6,7 @@
  */
 
 import type { Subject, Subscription } from 'rxjs';
-import { combineLatestWith, debounceTime } from 'rxjs';
+import { combineLatestWith } from 'rxjs';
 import type { AppDeepLink, AppUpdater, AppDeepLinkLocations } from '@kbn/core/public';
 import type { SecurityPageName } from '@kbn/deeplinks-security';
 import type { NavigationTreeDefinition, NodeDefinition } from '@kbn/core-chrome-browser';
