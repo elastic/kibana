@@ -14,14 +14,15 @@ import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import { TABS_STATE_URL_KEY } from '../../../../common/constants';
 import type { TabState, RecentlyClosedTabState } from './redux/types';
 import { createTabItem } from './redux/utils';
+import type { DiscoverAppState } from './discover_app_state_container';
 
 export const TABS_LOCAL_STORAGE_KEY = 'discover.tabs';
 export const RECENTLY_CLOSED_TABS_LIMIT = 50;
 
-type TabStateInLocalStorage = Pick<
-  TabState,
-  'id' | 'label' | 'dataViewId' | 'appState' | 'globalState'
->;
+type TabStateInLocalStorage = Pick<TabState, 'id' | 'label'> & {
+  appState: DiscoverAppState;
+  globalState: TabState['lastPersistedGlobalState'];
+};
 
 type RecentlyClosedTabStateInLocalStorage = TabStateInLocalStorage &
   Pick<RecentlyClosedTabState, 'closedAt'>;
@@ -46,7 +47,7 @@ export interface TabsStorageManager {
   persistLocally: (props: TabsInternalStatePayload) => Promise<void>;
   updateTabStateLocally: (
     tabId: string,
-    tabState: Pick<TabState, 'globalState' | 'appState'>
+    tabState: Pick<TabState, 'lastPersistedAppState' | 'lastPersistedGlobalState'>
   ) => void;
   loadLocally: (props: {
     defaultTabState: Omit<TabState, keyof TabItem>;
@@ -82,9 +83,10 @@ export const createTabsStorageManager = ({
     return {
       id: tabState.id,
       label: tabState.label,
-      dataViewId: tabState.dataViewId,
-      appState: tabState.appState,
-      globalState: tabState.globalState,
+      appState: ('appState' in tabState ? tabState.appState : tabState.lastPersistedAppState) || {},
+      globalState:
+        ('globalState' in tabState ? tabState.globalState : tabState.lastPersistedGlobalState) ||
+        {},
     };
   };
 
@@ -204,12 +206,12 @@ export const createTabsStorageManager = ({
     const toTabState = (tabStateInStorage: TabStateInLocalStorage): TabState => ({
       ...defaultTabState,
       ...tabStateInStorage,
-      appState: {
-        ...defaultTabState.appState,
+      lastPersistedAppState: {
+        ...defaultTabState.lastPersistedAppState,
         ...tabStateInStorage.appState,
       },
-      globalState: {
-        ...defaultTabState.globalState,
+      lastPersistedGlobalState: {
+        ...defaultTabState.lastPersistedGlobalState,
         ...tabStateInStorage.globalState,
       },
     });

@@ -39,6 +39,7 @@ const MIDDLEWARE_THROTTLE_MS = 300;
 const MIDDLEWARE_THROTTLE_OPTIONS = { leading: false, trailing: true };
 
 export const defaultTabState: Omit<TabState, keyof TabItem> = {
+  lastPersistedAppState: {},
   lastPersistedGlobalState: {},
   dataViewId: undefined,
   isDataViewLoading: false,
@@ -157,13 +158,13 @@ export const internalStateSlice = createSlice({
     setTabAppStateAndGlobalState: (
       state,
       action: TabAction<{
-        appState: TabState['appState'] | undefined;
-        globalState: TabState['globalState'] | undefined;
+        lastPersistedAppState: TabState['lastPersistedAppState'];
+        lastPersistedGlobalState: TabState['lastPersistedGlobalState'];
       }>
     ) =>
       withTab(state, action, (tab) => {
-        tab.appState = action.payload.appState;
-        tab.globalState = action.payload.globalState;
+        tab.lastPersistedAppState = action.payload.lastPersistedAppState;
+        tab.lastPersistedGlobalState = action.payload.lastPersistedGlobalState;
       }),
 
     setOverriddenVisContextAfterInvalidation: (
@@ -270,6 +271,7 @@ export const createInternalStateStore = (options: InternalStateThunkDependencies
     defaultGroupId,
   });
   store.dispatch(setTabs(initialTabsState));
+  // TODO: should we restore appState and globalState from the local storage or we rely on the current URL state
 
   return store;
 };

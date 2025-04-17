@@ -84,7 +84,11 @@ export const updateTabs: InternalStateThunkActionCreator<
           filters,
         } = previousTabStateContainer?.globalState.get() ?? {};
 
-        return { ...tab, lastPersistedGlobalState: { timeRange, refreshInterval, filters } };
+        return {
+          ...tab,
+          lastPersistedAppState: previousTabStateContainer?.appState.getState() ?? {},
+          lastPersistedGlobalState: { timeRange, refreshInterval, filters },
+        };
       });
 
       const nextTab = selectedItem ? selectTab(currentState, selectedItem.id) : undefined;
@@ -138,12 +142,14 @@ export const updateTabs: InternalStateThunkActionCreator<
 
 export const updateTabAppStateAndGlobalState: InternalStateThunkActionCreator<[TabActionPayload]> =
   ({ tabId }) =>
-  (dispatch, _, { urlStateStorage }) => {
+  (dispatch, _, { runtimeStateManager }) => {
+    const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tabId);
+    const stateContainer = tabRuntimeState.stateContainer$.getValue();
     dispatch(
       internalStateSlice.actions.setTabAppStateAndGlobalState({
         tabId,
-        appState: urlStateStorage.get(APP_STATE_URL_KEY) ?? undefined,
-        globalState: urlStateStorage.get(GLOBAL_STATE_URL_KEY) ?? undefined,
+        lastPersistedAppState: stateContainer?.appState.getState() ?? {},
+        lastPersistedGlobalState: stateContainer?.globalState.get() ?? {},
       })
     );
   };

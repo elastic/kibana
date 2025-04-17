@@ -13,6 +13,7 @@ import type { DataTableRecord } from '@kbn/discover-utils';
 import type { Filter, TimeRange } from '@kbn/es-query';
 import type { UnifiedHistogramVisContext } from '@kbn/unified-histogram-plugin/public';
 import type { TabItem } from '@kbn/unified-tabs';
+import type { DiscoverAppState } from '../discover_app_state_container';
 
 export enum LoadingStatus {
   Uninitialized = 'uninitialized',
@@ -46,6 +47,7 @@ export interface InternalStateDataRequestParams {
 }
 
 export interface TabState extends TabItem {
+  lastPersistedAppState: DiscoverAppState | {};
   lastPersistedGlobalState: {
     timeRange?: TimeRange;
     refreshInterval?: RefreshInterval;
