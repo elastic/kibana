@@ -5534,10 +5534,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/expression-error-plugin@link:src/platform/plugins/shared/expression_error":
-  version "0.0.0"
-  uid ""
-
 "@kbn/expression-gauge-plugin@link:src/platform/plugins/shared/chart_expressions/expression_gauge":
   version "0.0.0"
   uid ""
@@ -5546,15 +5542,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/expression-image-plugin@link:src/platform/plugins/shared/expression_image":
-  version "0.0.0"
-  uid ""
-
 "@kbn/expression-legacy-metric-vis-plugin@link:src/platform/plugins/shared/chart_expressions/expression_legacy_metric":
-  version "0.0.0"
-  uid ""
-
-"@kbn/expression-metric-plugin@link:src/platform/plugins/shared/expression_metric":
   version "0.0.0"
   uid ""
 
@@ -5566,23 +5554,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/expression-repeat-image-plugin@link:src/platform/plugins/shared/expression_repeat_image":
-  version "0.0.0"
-  uid ""
-
-"@kbn/expression-reveal-image-plugin@link:src/platform/plugins/shared/expression_reveal_image":
-  version "0.0.0"
-  uid ""
-
-"@kbn/expression-shape-plugin@link:src/platform/plugins/shared/expression_shape":
-  version "0.0.0"
-  uid ""
-
 "@kbn/expression-tagcloud-plugin@link:src/platform/plugins/shared/chart_expressions/expression_tagcloud":
-  version "0.0.0"
-  uid ""
-
-"@kbn/expression-utils@link:src/platform/packages/private/kbn-expression-utils":
   version "0.0.0"
   uid ""
 
@@ -6386,7 +6358,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/observability-ai-assistant-management-plugin@link:x-pack/solutions/observability/plugins/observability_ai_assistant_management":
+"@kbn/observability-ai-assistant-management-plugin@link:x-pack/platform/plugins/private/observability_ai_assistant_management":
   version "0.0.0"
   uid ""
 
@@ -6739,6 +6711,10 @@
   uid ""
 
 "@kbn/response-ops-alerts-fields-browser@link:src/platform/packages/shared/response-ops/alerts-fields-browser":
+  version "0.0.0"
+  uid ""
+
+"@kbn/response-ops-alerts-filters-form@link:src/platform/packages/shared/response-ops/alerts-filters-form":
   version "0.0.0"
   uid ""
 
@@ -9294,10 +9270,10 @@
     require-from-string "^2.0.2"
     uri-js-replace "^1.0.1"
 
-"@redocly/cli@^1.34.1":
-  version "1.34.1"
-  resolved "https://registry.yarnpkg.com/@redocly/cli/-/cli-1.34.1.tgz#e237107f3f9aa9f3290f9651268c4c15c08458aa"
-  integrity sha512-12aTw7A/0n+8T7yKM1E8qlFRFPZnm2i1me0sZ1WOAiGT4I2j4iUcCp+93B0nrjIs1ZdNmrT0TTrMYLhsMJYjaQ==
+"@redocly/cli@^1.34.2":
+  version "1.34.2"
+  resolved "https://registry.yarnpkg.com/@redocly/cli/-/cli-1.34.2.tgz#e67ea4be0a4663ff1ee063cbcacf937ce97d2586"
+  integrity sha512-XnKG7yrr0GUZ7MyqHk9hRt//HGUSnLDwwEXI8HDQdyDFp+YFbddqcQPOWc/sDeDBTEiBXqwPOb3/VKA+8NtSMw==
   dependencies:
     "@opentelemetry/api" "1.9.0"
     "@opentelemetry/exporter-trace-otlp-http" "0.53.0"
@@ -9305,8 +9281,8 @@
     "@opentelemetry/sdk-trace-node" "1.26.0"
     "@opentelemetry/semantic-conventions" "1.27.0"
     "@redocly/config" "^0.22.0"
-    "@redocly/openapi-core" "1.34.1"
-    "@redocly/respect-core" "1.34.1"
+    "@redocly/openapi-core" "1.34.2"
+    "@redocly/respect-core" "1.34.2"
     abort-controller "^3.0.0"
     chokidar "^3.5.1"
     colorette "^1.2.0"
@@ -9331,10 +9307,10 @@
   resolved "https://registry.yarnpkg.com/@redocly/config/-/config-0.22.1.tgz#e14461c009ac53b74f82c9788f9c43fc2c718f24"
   integrity sha512-1CqQfiG456v9ZgYBG9xRQHnpXjt8WoSnDwdkX6gxktuK69v2037hTAR1eh0DGIqpZ1p4k82cGH8yTNwt7/pI9g==
 
-"@redocly/openapi-core@1.34.1", "@redocly/openapi-core@^1.4.0":
-  version "1.34.1"
-  resolved "https://registry.yarnpkg.com/@redocly/openapi-core/-/openapi-core-1.34.1.tgz#d303c0f129c9166e293e7e6ee88de77e29fd6e16"
-  integrity sha512-KI1QOGvDk6oREbTu0JORxZX1NBxraXUbXczv0LYDs9EPp06coq874hQORqSHGEUV/DX2A6gjv4Ax33g/LFJBww==
+"@redocly/openapi-core@1.34.2", "@redocly/openapi-core@^1.4.0":
+  version "1.34.2"
+  resolved "https://registry.yarnpkg.com/@redocly/openapi-core/-/openapi-core-1.34.2.tgz#859de74a3261fb09a3dc695be4a8d9b1f2059d75"
+  integrity sha512-glfkQFJizLdq2fBkNvc2FJW0sxDb5exd0wIXhFk+WHaFLMREBC3CxRo2Zq7uJIdfV9U3YTceMbXJklpDfmmwFQ==
   dependencies:
     "@redocly/ajv" "^8.11.2"
     "@redocly/config" "^0.22.0"
@@ -9346,14 +9322,14 @@
     pluralize "^8.0.0"
     yaml-ast-parser "0.0.43"
 
-"@redocly/respect-core@1.34.1":
-  version "1.34.1"
-  resolved "https://registry.yarnpkg.com/@redocly/respect-core/-/respect-core-1.34.1.tgz#707e31d444c7cb5a44e6463fa266c8ef676226fa"
-  integrity sha512-Lzea25WqwxVK5+aCiq/pr7lUFdsZPYSqNzl05Z4jEtuP1DEIxJNG31ID75dZt30pPtyxjaa/dBuccruYlYflzw==
+"@redocly/respect-core@1.34.2":
+  version "1.34.2"
+  resolved "https://registry.yarnpkg.com/@redocly/respect-core/-/respect-core-1.34.2.tgz#6d83359dceceb39ae2403c90f8cfcc3505931b95"
+  integrity sha512-X6VR9bbHXrI01Wh5t6TIHxFCVHcP4Iy42micKLIk/Cg6EmHVbaSDGOD6mxChXtEIrwnY+bqyUbjlXr9+YM7B9A==
   dependencies:
     "@faker-js/faker" "^7.6.0"
     "@redocly/ajv" "8.11.2"
-    "@redocly/openapi-core" "1.34.1"
+    "@redocly/openapi-core" "1.34.2"
     better-ajv-errors "^1.2.0"
     colorette "^2.0.20"
     concat-stream "^2.0.0"
@@ -26762,10 +26738,10 @@ react-remove-scroll@^2.5.6:
     use-callback-ref "^1.3.0"
     use-sidecar "^1.1.2"
 
-react-reverse-portal@^2.2.0:
-  version "2.2.0"
-  resolved "https://registry.yarnpkg.com/react-reverse-portal/-/react-reverse-portal-2.2.0.tgz#0a119f8ab00885fa8aebc03a9fd2111d0e76303c"
-  integrity sha512-y4odW09uzTtyJWs9E9YbY50FypJeRzEMhEjQUpzLOXZeTHCFE88WfklvRUddTJsizFWTzMOLTE4wNgYdzeQ7uw==
+react-reverse-portal@^2.3.0:
+  version "2.3.0"
+  resolved "https://registry.yarnpkg.com/react-reverse-portal/-/react-reverse-portal-2.3.0.tgz#ab926f551082a1ca3a0e0d7e2ed53cae1b43f23b"
+  integrity sha512-kvbPfLPKg6Y3S6tVq83us2RghvDpOS4GcJxbI7cZ0V0tuzUaSzblRIhVnKLOucfqF4lN/i9oWvEmpEi6bAOYlQ==
 
 react-router-config@^5.1.1:
   version "5.1.1"
@@ -32551,9 +32527,9 @@ zip-stream@^6.0.1:
     readable-stream "^4.0.0"
 
 zod-to-json-schema@^3.22.3, zod-to-json-schema@^3.22.4, zod-to-json-schema@^3.22.5, zod-to-json-schema@^3.23.0, zod-to-json-schema@^3.23.5, zod-to-json-schema@^3.24.1:
-  version "3.24.3"
-  resolved "https://registry.yarnpkg.com/zod-to-json-schema/-/zod-to-json-schema-3.24.3.tgz#5958ba111d681f8d01c5b6b647425c9b8a6059e7"
-  integrity sha512-HIAfWdYIt1sssHfYZFCXp4rU1w2r8hVVXYIlmoa0r0gABLs5di3RCqPU5DDROogVz1pAdYBaz7HK5n9pSUNs3A==
+  version "3.24.5"
+  resolved "https://registry.yarnpkg.com/zod-to-json-schema/-/zod-to-json-schema-3.24.5.tgz#d1095440b147fb7c2093812a53c54df8d5df50a3"
+  integrity sha512-/AuWwMP+YqiPbsJx5D6TfgRTc4kTLjsh5SOcd4bLsfUg2RcEXrFMJl1DGgdHy2aCfsIA/cr/1JM0xcB2GZji8g==
 
 zod@^3.22.3, zod@^3.22.4, zod@^3.23.8:
   version "3.23.8"
