@@ -4,165 +4,69 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useMemo } from 'react';
-import { EuiBasicTable, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
+import React from 'react';
+import { EuiFlexGroup, EuiLoadingSpinner, EuiFlexItem } from '@elastic/eui';
 import { SecurityPageName } from '@kbn/deeplinks-security';
-import { useQuery } from '@tanstack/react-query';
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { getESQLResults } from '@kbn/esql-utils';
-import { useSourcererDataView } from '../../sourcerer/containers';
+import { getESQLAdHocDataview } from '@kbn/esql-utils';
+import type { UnifiedHistogramServices } from '@kbn/unified-histogram-plugin/public';
+import { UnifiedHistogramContainer } from '@kbn/unified-histogram-plugin/public';
+import useAsync from 'react-use/lib/useAsync';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
 import { HeaderPage } from '../../common/components/header_page';
-import { SiemSearchBar } from '../../common/components/search_bar';
-import { InputsModelId } from '../../common/store/inputs/constants';
-import { FiltersGlobal } from '../../common/components/filters_global';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
-import { VisualizationEmbeddable } from '../../common/components/visualization_actions/visualization_embeddable';
-import { useGlobalTime } from '../../common/containers/use_global_time';
-import { getLensAttributes } from './get_lens_attributes';
 import { useKibana } from '../../common/lib/kibana';
-import { buildESQLWithKQLQuery } from '../../common/utils/esql';
-import { useDeepEqualSelector } from '../../common/hooks/use_selector';
-import { inputsSelectors } from '../../common/store';
-import { useGlobalFilterQuery } from '../../common/hooks/use_global_filter_query';
-import { buildTimeRangeFilter } from '../../common/lib/kuery';
 
-const SUDO_COUNT_ESQL_STACKED = `FROM commands-privtest
-| RENAME @timestamp AS event_timestamp
-| LOOKUP JOIN privileged-users ON user.name
-| WHERE MATCH(message, \"sudo su\") 
-| RENAME event_timestamp AS @timestamp
-| EVAL is_privileged = COALESCE(labels.is_privileged, false)
-| EVAL privileged_status = CASE(is_privileged, \"privileged\", \"not_privileged\")
-| EVAL timestamp=DATE_TRUNC(30 second, @timestamp)
-| stats results = COUNT(*) by timestamp, user.name`;
+const DENY_PUSH = `from logs-okta*
+| where @timestamp > NOW() - 7 day
+| eval target_time_window = DATE_TRUNC(10 minutes, @timestamp)
+| where event.action == "user.mfa.okta_verify.deny_push"
+| stats deny_push_count = count(*) by target_time_window, okta.actor.alternate_id
+| where deny_push_count >= 5`;
 
-const PRIVILEGED_USER_LIST_ESQL = `FROM commands-privtest
-| RENAME @timestamp AS event_timestamp
-| LOOKUP JOIN privileged-users ON user.name
-| RENAME event_timestamp AS @timestamp
-| EVAL is_privileged = COALESCE(labels.is_privileged, false)
-| WHERE is_privileged == true
-| STATS
-    name = MAX(user.name),
-    @timestamp = MAX(@timestamp)
-    BY user.name
-| KEEP @timestamp, user.name`;
+function HistogramComponent() {
+  // Get required Kibana services
+  const capabilities = useKibana().services.application.capabilities;
+  const allServices = useKibana().services;
 
-const fetchESQLSimple = async (
-  esqlQuery: string,
-  data: DataPublicPluginStart,
-  signal: AbortSignal | undefined,
-  filter: unknown
-) => {
-  return getESQLResults({
-    esqlQuery,
-    search: data.search.search,
-    signal,
-    filter,
-  });
-};
+  const services: UnifiedHistogramServices = {
+    ...allServices,
+    capabilities,
+  };
 
-// I copied this function from the ESQL helper
-function toRecords(response) {
-  if (!response) return [];
-  const { columns, values } = response;
-  return values.map((row) => {
-    const doc = {};
-    row.forEach((cell, index) => {
-      const { name } = columns[index];
-      // @ts-expect-error
-      doc[name] = cell;
-    });
-    return doc;
-  });
+  const dataViewAsync = useAsync(() => {
+    return getESQLAdHocDataview(DENY_PUSH, allServices.dataViews);
+  }, [DENY_PUSH, allServices.dataViews]);
+
+  if (!dataViewAsync.value) {
+    return <EuiLoadingSpinner size="l" />;
+  }
+
+  const dataParams = {
+    dataView: dataViewAsync.value,
+    query: { query: DENY_PUSH, language: 'esql' },
+    filters: [],
+    timeRange: { from: 'now-48h', to: 'now' },
+    // relativeTimeRange: { from: 900, to: 0 },
+    container: null,
+  };
+
+  return (
+    <EuiFlexItem grow={true}>
+      <UnifiedHistogramContainer services={services} {...dataParams}>
+        <>{'hello'}</>
+      </UnifiedHistogramContainer>
+    </EuiFlexItem>
+  );
 }
 
 const PrivilegedUserMonitoringComponent = () => {
-  const { loading: isSourcererLoading, sourcererDataView } = useSourcererDataView();
-  const { to, from } = useGlobalTime();
-  const timerange = useMemo(() => ({ from, to }), [from, to]);
-  const { data } = useKibana().services;
-  const getGlobalQuerySelector = useMemo(() => inputsSelectors.globalQuerySelector(), []);
-  const globalQuery = useDeepEqualSelector(getGlobalQuerySelector);
-  const { filterQuery } = useGlobalFilterQuery({ extraFilter: buildTimeRangeFilter(from, to) });
-
-  const esqlQuery = useMemo(
-    () => buildESQLWithKQLQuery(PRIVILEGED_USER_LIST_ESQL, globalQuery.query as string),
-    [globalQuery.query]
-  );
-
-  const {
-    isInitialLoading,
-    isLoading,
-    isError,
-    isRefetching,
-    data: result,
-  } = useQuery({
-    queryKey: [filterQuery, esqlQuery],
-    queryFn: async ({ signal }) => {
-      return fetchESQLSimple(esqlQuery, data, signal, filterQuery);
-    },
-    refetchOnWindowFocus: false,
-  });
-
-  const values = toRecords(result?.response);
   return (
     <>
-      <FiltersGlobal>
-        <SiemSearchBar id={InputsModelId.global} sourcererDataView={sourcererDataView} />
-      </FiltersGlobal>
-
       <SecuritySolutionPageWrapper data-test-subj="entityAnalyticsPage">
-        <HeaderPage title={'Privileged User Monitoring'} />
-
-        {isSourcererLoading ? (
-          <EuiLoadingSpinner size="l" data-test-subj="entityAnalyticsLoader" />
-        ) : (
-          <>
-            <EuiFlexGroup direction="column" data-test-subj="entityAnalyticsSections">
-              <VisualizationEmbeddable
-                applyGlobalQueriesAndFilters={true}
-                esql={SUDO_COUNT_ESQL_STACKED}
-                data-test-subj="embeddable-matrix-histogram"
-                getLensAttributes={getLensAttributes}
-                height={155}
-                id={'my-id'}
-                timerange={timerange}
-              />
-            </EuiFlexGroup>
-
-            <EuiFlexGroup direction="column">
-              <EuiFlexItem>
-                {isLoading ? (
-                  <EuiLoadingSpinner size="m" />
-                ) : isError ? (
-                  <div>{'Error loading data'}</div>
-                ) : (
-                  <EuiBasicTable
-                    loading={isInitialLoading || isRefetching}
-                    items={values || []}
-                    columns={[
-                      {
-                        field: 'user.name',
-                        name: 'Username',
-                      },
-                      {
-                        field: '@timestamp',
-                        name: 'Timestamp',
-                        dataType: 'date',
-
-                        render: (timestamp: string) => {
-                          return new Date(timestamp).toLocaleString();
-                        },
-                      },
-                    ]}
-                  />
-                )}
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </>
-        )}
+        <HeaderPage title={'Threat Hunting Queries'} />
+        <EuiFlexGroup>
+          <HistogramComponent />
+        </EuiFlexGroup>
       </SecuritySolutionPageWrapper>
 
       <SpyRoute pageName={SecurityPageName.privilegedUserMonitoring} />
