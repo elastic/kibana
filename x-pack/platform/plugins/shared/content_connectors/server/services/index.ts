@@ -15,7 +15,8 @@ import {
 import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { NATIVE_CONNECTOR_DEFINITIONS, fetchConnectors } from '@kbn/search-connectors';
 import { getPackageInfo } from '@kbn/fleet-plugin/server/services/epm/packages';
-import { agentlessAgentService } from '@kbn/fleet-plugin/server/services/agents/agentless_agent';
+import { createAgentPolicyWithPackages } from '@kbn/fleet-plugin/server/services/agent_policy_create';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 
 export interface ConnectorMetadata {
   id: string;
@@ -185,28 +186,34 @@ export class AgentlessConnectorsInfraService {
     const pkgVersion = await this.getPackageVersion();
     this.logger.debug(`Latest package version for ${pkgName} is ${pkgVersion}`);
 
-    const createdPolicy = await this.agentPolicyService.create(this.soClient, this.esClient, {
-      name: `Agentless policy for ${connector.service_type} connector: ${connector.id}`,
-      description: `Automatically generated on ${new Date(Date.now()).toISOString()}`,
-      global_data_tags: [
-        {
-          name: 'organization',
-          value: 'elastic',
-        },
-        {
-          name: 'division',
-          value: 'engineering',
-        },
-        {
-          name: 'team',
-          value: 'search-extract-and-transform',
-        },
-      ],
-      namespace: 'default',
-      monitoring_enabled: ['logs', 'metrics'],
-      inactivity_timeout: 3600,
-      is_protected: false,
-      supports_agentless: true,
+    const createdPolicy = await createAgentPolicyWithPackages({
+      soClient: this.soClient,
+      esClient: this.esClient,
+      newPolicy: {
+        name: `Agentless policy for ${connector.service_type} connector: ${connector.id}`,
+        description: `Automatically generated on ${new Date(Date.now()).toISOString()}`,
+        global_data_tags: [
+          {
+            name: 'organization',
+            value: 'elastic',
+          },
+          {
+            name: 'division',
+            value: 'engineering',
+          },
+          {
+            name: 'team',
+            value: 'search-extract-and-transform',
+          },
+        ],
+        namespace: 'default',
+        monitoring_enabled: ['logs', 'metrics'],
+        inactivity_timeout: 3600,
+        is_protected: false,
+        supports_agentless: true,
+      },
+      withSysMonitoring: true,
+      spaceId: this.soClient.getCurrentNamespace() ?? DEFAULT_SPACE_ID,
     });
 
     this.logger.info(
@@ -247,14 +254,6 @@ export class AgentlessConnectorsInfraService {
 
     this.logger.info(
       `Successfully created package policy ${packagePolicy.id} for agentless connector ${connector.id}`
-    );
-
-    this.logger.info(`Creating an agentless agent for agentless connector ${connector.id}`);
-
-    await agentlessAgentService.createAgentlessAgent(this.esClient, this.soClient, createdPolicy);
-
-    this.logger.info(
-      `Successfully created an agentless agent for agentless connector ${connector.id}`
     );
 
     return packagePolicy;
