@@ -3198,6 +3198,21 @@
       },
       {
         "parentPluginId": "@kbn/apm-types",
+        "id": "def-common.ELASTIC_PROFILER_STACK_TRACE_IDS",
+        "type": "string",
+        "tags": [],
+        "label": "ELASTIC_PROFILER_STACK_TRACE_IDS",
+        "description": [],
+        "signature": [
+          "\"elastic.profiler_stack_trace_ids\""
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/apm-types",
         "id": "def-common.ElasticAgentName",
         "type": "Type",
         "tags": [],
