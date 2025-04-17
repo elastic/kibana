@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { css } from '@emotion/react';
+import { Theme, css } from '@emotion/react';
 import classNames from 'classnames';
 import React, { useCallback, type FC } from 'react';
 
@@ -56,6 +56,25 @@ export const NavigationItemOpenPanel: FC<Props> = ({ item, activeNodes }: Props)
     [togglePanel]
   );
 
+  const styles = {
+    button: ({ euiTheme }: Theme) =>
+      css`
+        color: inherit;
+        font-weight: inherit;
+        transform: none !important; /* don't translateY 1px */
+        padding-inline: calc(${euiTheme.size.xs} * 1.5);
+        background-color: ${isActive ? euiTheme.colors.backgroundLightPrimary : 'transparent'};
+
+        &:hover {
+          background-color: ${isActive
+            ? undefined
+            : euiTheme.colors.backgroundBaseInteractiveHover};
+        }
+      `,
+    flexGroup: ({ euiTheme }: Theme) => css`
+      gap: calc(${euiTheme.size.xs} * 1.5);
+    `,
+  };
   return (
     <EuiButton
       onClick={onLinkClick}
@@ -64,32 +83,10 @@ export const NavigationItemOpenPanel: FC<Props> = ({ item, activeNodes }: Props)
       iconType={isExpanded ? 'arrowLeft' : 'arrowRight'}
       size="s"
       fullWidth
-      css={({ euiTheme }) =>
-        css`
-          &:hover {
-            background-color: ${isActive
-              ? euiTheme.colors.backgroundLightPrimary
-              : euiTheme.colors.backgroundBaseInteractiveHover};
-          }
-          background-color: ${
-            isActive
-            ? euiTheme.colors.backgroundLightPrimary
-            : 'transparent' /* prettier-ignore */
-          };
-          color: inherit;
-          font-weight: inherit;
-          padding-inline: calc(${euiTheme.size.xs} * 1.5);
-        `
-      }
+      css={styles.button}
       data-test-subj={dataTestSubj}
     >
-      <EuiFlexGroup
-        gutterSize="none"
-        alignItems="center"
-        css={({ euiTheme }) => css`
-          gap: calc(${euiTheme.size.xs} * 1.5);
-        `}
-      >
+      <EuiFlexGroup gutterSize="none" alignItems="center" css={styles.flexGroup}>
         {icon && (
           <EuiFlexItem grow={false}>
             <EuiIcon type={icon} />

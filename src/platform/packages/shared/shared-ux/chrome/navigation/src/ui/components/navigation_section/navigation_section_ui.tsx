@@ -8,7 +8,7 @@
  */
 
 import React, { type FC, useMemo, useEffect, useState, useCallback } from 'react';
-import { css } from '@emotion/react';
+import { Theme, css } from '@emotion/react';
 import {
   EuiTitle,
   EuiCollapsibleNavItem,
@@ -422,6 +422,28 @@ function nodeToEuiCollapsibleNavProps(
     };
   }
 
+  const styles = ({ euiTheme }: Theme) => css`
+    &.euiLink,
+    .euiAccordion__triggerWrapper,
+    .euiAccordion__triggerWrapper:hover,
+    .euiAccordion__triggerWrapper:focus-within,
+    .euiCollapsibleNavLink,
+    .euiCollapsibleNavLink:hover,
+    .euiCollapsibleNavLink:focus-within {
+      background-color: ${isSelected ? euiTheme.colors.backgroundLightPrimary : undefined};
+
+      &:hover {
+        background-color: ${isSelected
+          ? undefined
+          : euiTheme.colors.backgroundBaseInteractiveHover};
+      }
+    }
+
+    .euiAccordion__childWrapper {
+      background-color: ${euiTheme.colors.backgroundBasePlain};
+    }
+  `;
+
   // Render as a link or an accordion
   const items: Array<EuiCollapsibleNavItemProps | EuiCollapsibleNavSubItemPropsEnhanced> = [
     {
@@ -429,18 +451,7 @@ function nodeToEuiCollapsibleNavProps(
       path,
       isSelected,
       onClick,
-      css: ({ euiTheme }) => css`
-        &:hover {
-          background-color: ${isSelected
-            ? euiTheme.colors.backgroundLightPrimary
-            : euiTheme.colors.backgroundBaseInteractiveHover};
-        }
-        background-color: ${
-          isSelected
-            ? euiTheme.colors.backgroundLightPrimary
-            : 'transparent' /* prettier-ignore */
-        };
-      `,
+      css: styles,
       icon: navNode.icon,
       // @ts-expect-error title accepts JSX elements and they render correctly but the type definition expects a string
       title: navNode.withBadge ? <SubItemTitle item={navNode} /> : navNode.title,
@@ -575,7 +586,9 @@ export const NavigationSectionUI: FC<Props> = React.memo(({ navNode: _navNode })
     return null;
   }
 
-  const navItemStyles = css`
+  const navItemStyles = ({ euiTheme }: Theme) => css`
+    background-color: ${props.isSelected ? euiTheme.colors.backgroundLightPrimary : 'inherit'};
+
     .euiAccordion__childWrapper {
       transition: none; // Remove the transition as it does not play well with dynamic links added to the accordion
     }
