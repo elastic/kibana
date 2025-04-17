@@ -64,7 +64,6 @@ const categories = [
     linkIds: [
       SecurityPageName.entityAnalyticsManagement,
       SecurityPageName.entityAnalyticsEntityStoreManagement,
-      SecurityPageName.entityAnalyticsAssetClassification,
     ],
   },
   {
