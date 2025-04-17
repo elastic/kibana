@@ -11,6 +11,12 @@ import type { Alert } from '@kbn/alerting-types';
 import { CellValue } from './render_cell';
 import { TestProviders } from '../../../../common/mock';
 import { getEmptyValue } from '../../../../common/components/empty_value';
+import { ALERT_RULE_PARAMETERS, ALERT_SEVERITY } from '@kbn/rule-data-utils';
+import { ICON_TEST_ID } from './kibana_alert_related_integrations_cell_renderer';
+import { useGetIntegrationFromPackageName } from '../../../hooks/alert_summary/use_get_integration_from_package_name';
+import { BADGE_TEST_ID } from './kibana_alert_severity_cell_renderer';
+
+jest.mock('../../../hooks/alert_summary/use_get_integration_from_package_name');
 
 describe('CellValue', () => {
   it('should handle missing field', () => {
@@ -113,5 +119,43 @@ describe('CellValue', () => {
     );
 
     expect(getByText('[object Object]')).toBeInTheDocument();
+  });
+
+  it('should use related integration renderer', () => {
+    (useGetIntegrationFromPackageName as jest.Mock).mockReturnValue({
+      integration: {},
+      isLoading: false,
+    });
+
+    const alert: Alert = {
+      _id: '_id',
+      _index: '_index',
+    };
+    const columnId = ALERT_RULE_PARAMETERS;
+
+    const { getByTestId } = render(
+      <TestProviders>
+        <CellValue alert={alert} columnId={columnId} />
+      </TestProviders>
+    );
+
+    expect(getByTestId(ICON_TEST_ID)).toBeInTheDocument();
+  });
+
+  it('should use severity renderer', () => {
+    const alert: Alert = {
+      _id: '_id',
+      _index: '_index',
+      [ALERT_SEVERITY]: ['low'],
+    };
+    const columnId = ALERT_SEVERITY;
+
+    const { getByTestId } = render(
+      <TestProviders>
+        <CellValue alert={alert} columnId={columnId} />
+      </TestProviders>
+    );
+
+    expect(getByTestId(BADGE_TEST_ID)).toBeInTheDocument();
   });
 });

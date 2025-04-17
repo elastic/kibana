@@ -5,11 +5,14 @@
  * 2.0.
  */
 
-import React, { memo, useMemo } from 'react';
+import React, { memo } from 'react';
 import type { Alert } from '@kbn/alerting-types';
-import type { JsonValue } from '@kbn/utility-types';
-import { getOrEmptyTagFromValue } from '../../../../common/components/empty_value';
+import { ALERT_RULE_PARAMETERS, ALERT_SEVERITY } from '@kbn/rule-data-utils';
+import { BasicCellRenderer } from './basic_cell_renderer';
+import { KibanaAlertSeverityCellRenderer } from './kibana_alert_severity_cell_renderer';
+import { KibanaAlertRelatedIntegrationsCellRenderer } from './kibana_alert_related_integrations_cell_renderer';
 
+// guarantees that all cells will have their values vertically centered
 const styles = { display: 'flex', alignItems: 'center', height: '100%' };
 
 export interface CellValueProps {
@@ -29,34 +32,23 @@ export interface CellValueProps {
  * It will be soon improved to support custom renders for specific fields (like kibana.alert.rule.parameters and kibana.alert.severity).
  */
 export const CellValue = memo(({ alert, columnId }: CellValueProps) => {
-  const displayValue: string | null = useMemo(() => {
-    const cellValues: string | number | JsonValue[] = alert[columnId];
+  let component;
 
-    // Displays string as is.
-    // Joins values of array with more than one element.
-    // Returns null if the value is null.
-    // Return the string of the value otherwise.
-    if (typeof cellValues === 'string') {
-      return cellValues;
-    } else if (Array.isArray(cellValues)) {
-      if (cellValues.length > 1) {
-        return cellValues.join(', ');
-      } else {
-        const value: JsonValue = cellValues[0];
-        if (typeof value === 'string') {
-          return value;
-        } else if (value == null) {
-          return null;
-        } else {
-          return value.toString();
-        }
-      }
-    } else {
-      return null;
-    }
-  }, [alert, columnId]);
+  switch (columnId) {
+    case ALERT_RULE_PARAMETERS:
+      component = <KibanaAlertRelatedIntegrationsCellRenderer alert={alert} />;
+      break;
 
-  return <div style={styles}>{getOrEmptyTagFromValue(displayValue)}</div>;
+    case ALERT_SEVERITY:
+      component = <KibanaAlertSeverityCellRenderer alert={alert} />;
+      break;
+
+    default:
+      component = <BasicCellRenderer alert={alert} field={columnId} />;
+      break;
+  }
+
+  return <div style={styles}>{component}</div>;
 });
 
 CellValue.displayName = 'CellValue';
