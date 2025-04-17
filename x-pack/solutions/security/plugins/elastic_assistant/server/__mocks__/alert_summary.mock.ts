@@ -27,6 +27,7 @@ export const mockEsAlertSummarySchema = {
   updated_by: 'elastic',
   users: [
     {
+      id: 'user-id-1',
       name: 'elastic',
     },
   ],
@@ -73,18 +74,19 @@ export const getUpdateAlertSummarySchemaMock = (
 });
 
 export const getAlertSummaryMock = (
-  params: AlertSummaryCreateProps | AlertSummaryUpdateProps
+  params?: AlertSummaryCreateProps | AlertSummaryUpdateProps
 ): AlertSummaryResponse => ({
   id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
   summary: 'test content',
   alertId: '1234',
   replacements: {},
-  ...params,
+  ...(params ?? {}),
   createdAt: '2019-12-13T16:40:33.400Z',
   updatedAt: '2019-12-13T16:40:33.400Z',
   namespace: 'default',
   users: [
     {
+      id: 'user-id-1',
       name: 'elastic',
     },
   ],

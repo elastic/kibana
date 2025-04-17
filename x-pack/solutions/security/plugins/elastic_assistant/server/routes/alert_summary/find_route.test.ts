@@ -14,6 +14,7 @@ import { findAlertSummaryRoute } from './find_route';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { AuthenticatedUser } from '@kbn/core-security-common';
 import { actionsClientMock } from '@kbn/actions-plugin/server/actions_client/actions_client.mock';
+import { getAlertSummaryMock } from '../../__mocks__/alert_summary.mock';
 
 jest.mock('../../lib/prompt', () => ({
   ...jest.requireActual('../../lib/prompt'),
@@ -59,17 +60,11 @@ describe('Find user prompts route', () => {
         total: 1,
         data: [
           {
-            timestamp: '2019-12-13T16:40:33.400Z',
-            createdAt: '2019-12-13T16:40:33.400Z',
-            users: [{ name: 'elastic' }],
-            summary: 'test content',
+            ...getAlertSummaryMock(),
+            createdBy: `elastic`,
             recommendedActions: 'do something',
-            updatedAt: '2019-12-13T16:40:33.400Z',
-            namespace: 'default',
-            id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
-            alertId: '1234',
-            createdBy: 'elastic',
-            replacements: {},
+            timestamp: '2019-12-13T16:40:33.400Z',
+            updatedBy: `elastic`,
           },
         ],
         prompt: 'hello world',
