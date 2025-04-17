@@ -187,7 +187,9 @@ const expandableFlyoutDocumentsPanels: ExpandableFlyoutProps['registeredPanels']
   {
     key: GenericEntityPanelKey,
     component: (props) => (
-      <GenericEntityPanel {...(props as GenericEntityPanelExpandableFlyoutProps).params} />
+      <DocumentDetailsProvider {...(props as DocumentDetailsProps).params}>
+        <GenericEntityPanel {...(props as GenericEntityPanelExpandableFlyoutProps).params} />
+      </DocumentDetailsProvider>
     ),
   },
   {

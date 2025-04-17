@@ -79,7 +79,16 @@ export const useDynamicEntityFlyout = ({ onFlyoutClose }: { onFlyoutClose: () =>
 
       default:
         openFlyout({
-          right: { id: GenericEntityPanelKey, params: { entityDocId, scopeId, contextId } },
+          right: {
+            id: GenericEntityPanelKey,
+            params: {
+              entityDocId,
+              scopeId,
+              contextId,
+              id: entityDocId,
+              indexName: 'logs-cloud_asset_inventory.asset_inventory-default',
+            },
+          },
         });
         break;
     }

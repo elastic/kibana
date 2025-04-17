@@ -216,6 +216,6 @@ export const useAlertsByStatus: UseAlertsByStatus = ({
     queryId,
     loading: isLoading,
   });
-
+  debugger;
   return { items, isLoading, updatedAt };
 };
