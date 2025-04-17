@@ -23959,8 +23959,7 @@
                       }
                     },
                     "required": [
-                      "readMeData",
-                      "categories"
+                      "readMeData"
                     ],
                     "type": "object"
                   }
