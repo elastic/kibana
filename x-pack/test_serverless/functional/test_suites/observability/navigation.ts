@@ -32,7 +32,9 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({
         deepLinkId: 'observabilityOnboarding',
       });
-      await svlCommonNavigation.sidenav.expectSectionClosed('project_settings_project_nav');
+      await svlCommonNavigation.sidenav.expectSectionClosed(
+        'observability_project_nav_footer.project_settings_project_nav'
+      );
 
       // navigate to the logs explorer tab by default
       await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'discover' });
