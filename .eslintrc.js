@@ -275,6 +275,14 @@ const RESTRICTED_IMPORTS = [
     name: '@testing-library/react-hooks',
     message: 'Please use @testing-library/react instead',
   },
+  ...['Option', 'pipeable', 'TaskEither', 'Either', 'function', 'Task', 'Set', 'Ord', 'Array'].map(
+    (subset) => {
+      return {
+        name: `fp-ts/lib/${subset}`,
+        message: `Please, use fp-ts/${subset} to avoid duplicating the package import`,
+      };
+    }
+  ),
 ];
 
 module.exports = {
