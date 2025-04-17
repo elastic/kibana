@@ -66,8 +66,9 @@
  *   b) Modern format (configuration object with paths/patterns)
  */
 
-/** @type {import('eslint').Linter.Config} */
-const rootConfig = require('../../../../../.eslintrc'); // eslint-disable-line @kbn/imports/no_boundary_crossing
+// eslint-disable-next-line import/no-nodejs-modules
+const path = require('path');
+const minimatch = require('minimatch');
 
 /** @type {Array.<RestrictedImportPath>} */
 const RESTRICTED_IMPORTS = [
@@ -77,13 +78,20 @@ const RESTRICTED_IMPORTS = [
   },
 ];
 
-const clonedRootConfig = structuredClone(rootConfig);
+// root directory of the project dynamically calculated
+const ROOT_DIR = process.cwd();
+const ROOT_CLIMB_STRING = path.relative(__dirname, ROOT_DIR); // e.g. ../../../../..
+
+/** @type {import('eslint').Linter.Config} */
+const rootConfig = require(`${ROOT_CLIMB_STRING}/.eslintrc`); // eslint-disable-line import/no-dynamic-require
+
+const clonedRootConfig = JSON.parse(JSON.stringify(rootConfig));
 
 const overridesWithNoRestrictedImportRule = clonedRootConfig.overrides.filter(
   (override) => override.rules && 'no-restricted-imports' in override.rules
 );
 
-overridesWithNoRestrictedImportRule.forEach((override) => {
+for (const override of overridesWithNoRestrictedImportRule) {
   /** @type {NoRestrictedImportsRuleConfig} */
   const rule = override.rules['no-restricted-imports'];
 
@@ -94,16 +102,16 @@ overridesWithNoRestrictedImportRule.forEach((override) => {
     const modernConfig = { paths: [], patterns: [] };
 
     // Normalize all inputs into modern config format
-    rawOptions.forEach((opt) => {
+    for (const opt of rawOptions) {
       if (typeof opt === 'string' || 'name' in opt) {
         modernConfig.paths.push(opt);
       } else if ('paths' in opt || 'patterns' in opt) {
         modernConfig.paths.push(...(opt.paths || []));
         modernConfig.patterns.push(...(opt.patterns || []));
       }
-    });
+    }
 
-    // Dynamic duplicate removal for all restricted imports
+    // Dynamic duplicates removal for all restricted imports
     const existingPaths = modernConfig.paths.filter(
       (existing) =>
         !RESTRICTED_IMPORTS.some((restriction) =>
@@ -124,8 +132,63 @@ overridesWithNoRestrictedImportRule.forEach((override) => {
 
     override.rules['no-restricted-imports'] = newRuleConfig;
   }
-});
+}
+
+function getAssignableDifference(inputPath, targetDir) {
+  // Normalize to absolute paths
+  const absoluteTarget = path.resolve(targetDir);
+  const isGlob = inputPath.includes('**');
+
+  // Split into base path and remaining pattern
+  let base;
+  let remaining;
+  if (isGlob) {
+    const globIndex = inputPath.indexOf('**');
+    base = inputPath.slice(0, globIndex).replace(/[\\/]+$/, '');
+    remaining = inputPath.slice(globIndex);
+  } else {
+    base = inputPath;
+    remaining = '';
+  }
+
+  const absoluteBase = path.resolve(base);
+
+  // Check if target is within base path
+  if (!absoluteTarget.startsWith(absoluteBase)) return null;
+
+  if (isGlob) {
+    return remaining || path.normalize('**/*');
+  } else {
+    const relative = path.relative(absoluteBase, absoluteTarget);
+    return relative || '.';
+  }
+}
+
+const absOverrides = overridesWithNoRestrictedImportRule.map((override) => ({
+  ...override,
+  files: override.files.map((fileOrGlob) => {
+    return path.resolve(ROOT_DIR, fileOrGlob);
+  }),
+}));
+
+const inScopeOverrides = absOverrides.map((override) => ({
+  ...override,
+  files: override.files
+    .filter((absPath) => {
+      return minimatch(__dirname, path.dirname(absPath), {
+        matchBase: true,
+        dot: true,
+        nocase: true,
+      });
+    })
+    .map((absPath) => {
+      return getAssignableDifference(absPath, __dirname);
+    })
+    .filter(Boolean),
+}));
+
+const finalOverrides = inScopeOverrides.filter((override) => override.files.length > 0);
 
 module.exports = {
-  overrides: overridesWithNoRestrictedImportRule,
+  overrides: finalOverrides,
 };
