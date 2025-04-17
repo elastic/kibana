@@ -125,8 +125,7 @@ export const GridRowHeader = React.memo(({ rowId }: GridRowHeaderProps) => {
         map((gridLayout) => {
           const row = gridLayout[rowId];
           return row && row.isCollapsible && row.isCollapsed;
-        }),
-        distinctUntilChanged()
+        })
       )
       .subscribe((collapsed) => {
         const headerRef = gridLayoutStateManager.headerRefs.current[rowId];
@@ -143,6 +142,7 @@ export const GridRowHeader = React.memo(({ rowId }: GridRowHeaderProps) => {
       accessModeSubscription.unsubscribe();
       panelCountSubscription.unsubscribe();
       dragRowStyleSubscription.unsubscribe();
+      collapsedStateSubscription.unsubscribe();
     };
   }, [gridLayoutStateManager, rowId]);
 
@@ -158,14 +158,14 @@ export const GridRowHeader = React.memo(({ rowId }: GridRowHeaderProps) => {
     } else {
       setDeleteModalVisible(true);
     }
-  }, [gridLayoutStateManager.gridLayout$, rowId]);
+  }, [gridLayoutStateManager, rowId]);
 
   const toggleIsCollapsed = useCallback(() => {
     const newLayout = cloneDeep(gridLayoutStateManager.gridLayout$.value);
     const row = newLayout[rowId];
     if (row.isCollapsible) row.isCollapsed = !row.isCollapsed;
     gridLayoutStateManager.gridLayout$.next(newLayout);
-  }, [rowId, gridLayoutStateManager.gridLayout$]);
+  }, [gridLayoutStateManager, rowId]);
 
   return (
     <>
@@ -174,7 +174,9 @@ export const GridRowHeader = React.memo(({ rowId }: GridRowHeaderProps) => {
         responsive={false}
         alignItems="center"
         css={(theme) => styles.headerStyles(theme, rowId)}
-        className={classNames('kbnGridRowHeader', { 'kbnGridRowHeader--active': isActive })}
+        className={classNames('kbnGridRowHeader', {
+          'kbnGridRowHeader--active': isActive,
+        })}
         data-test-subj={`kbnGridRowHeader-${rowId}`}
         ref={(element: HTMLDivElement | null) =>
           (gridLayoutStateManager.headerRefs.current[rowId] = element)
