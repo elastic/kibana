@@ -105,12 +105,11 @@ function convertToRawValue(
 ): SerializedValue | symbol {
   if (!column) return NO_VALUE;
 
-  const { dataType } = column;
   const type = getParentFormatId(column);
 
   // all array values are multi-term
   if (type === 'multi_terms' || Array.isArray(value)) {
-    if (typeof value === 'string') return NO_VALUE;
+    if (typeof value === 'string') return NO_VALUE; // cannot assume this as multi-field
     return new MultiFieldKey({ key: value }).serialize();
   }
 
@@ -118,9 +117,14 @@ function convertToRawValue(
     return RangeKey.isRangeKeyString(value) ? RangeKey.fromString(value).serialize() : NO_VALUE;
   }
 
+  const { dataType } = column;
+
   switch (dataType) {
-    case 'number':
     case 'boolean':
+      if (value === '__other__' || value === 'true' || value === 'false') return value; // bool could have __other__ as a string
+      if (value === '0' || value === '1') return Number(value);
+      break;
+    case 'number':
     case 'date':
       if (value === '__other__') return value; // numbers can have __other__ as a string
       const numberValue = Number(value);
@@ -132,6 +136,7 @@ function convertToRawValue(
     default:
       return NO_VALUE; // treat all other other dataType as custom match string values
   }
+  return NO_VALUE;
 }
 
 function isValidColorMappingAssignment<
