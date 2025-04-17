@@ -44,10 +44,15 @@ const useGetAgentStatusMock = useGetAgentStatus as jest.Mock;
 
 const SCOPE_ID = 'scopeId';
 
-const renderHighlightedFieldsCell = (values: string[], field: string, scopeId?: string) =>
+const renderHighlightedFieldsCell = (values: string[], field: string, showPreview = false) =>
   render(
     <TestProviders>
-      <HighlightedFieldsCell values={values} field={field} scopeId={scopeId} />
+      <HighlightedFieldsCell
+        values={values}
+        field={field}
+        scopeId={SCOPE_ID}
+        showPreview={showPreview}
+      />
     </TestProviders>
   );
 
@@ -57,13 +62,13 @@ describe('<HighlightedFieldsCell />', () => {
   });
 
   it('should render a basic cell', () => {
-    const { getByTestId } = renderHighlightedFieldsCell(['value'], 'field');
+    const { getByTestId } = renderHighlightedFieldsCell(['value'], 'field', true);
 
     expect(getByTestId(HIGHLIGHTED_FIELDS_BASIC_CELL_TEST_ID)).toBeInTheDocument();
   });
 
   it('should open host preview when click on host', () => {
-    const { getByTestId } = renderHighlightedFieldsCell(['test host'], 'host.name', SCOPE_ID);
+    const { getByTestId } = renderHighlightedFieldsCell(['test host'], 'host.name', true);
     expect(getByTestId(HIGHLIGHTED_FIELDS_LINKED_CELL_TEST_ID)).toBeInTheDocument();
 
     getByTestId(HIGHLIGHTED_FIELDS_LINKED_CELL_TEST_ID).click();
@@ -78,7 +83,7 @@ describe('<HighlightedFieldsCell />', () => {
   });
 
   it('should open user preview when click on user', () => {
-    const { getByTestId } = renderHighlightedFieldsCell(['test user'], 'user.name', SCOPE_ID);
+    const { getByTestId } = renderHighlightedFieldsCell(['test user'], 'user.name', true);
     expect(getByTestId(HIGHLIGHTED_FIELDS_LINKED_CELL_TEST_ID)).toBeInTheDocument();
 
     getByTestId(HIGHLIGHTED_FIELDS_LINKED_CELL_TEST_ID).click();
@@ -93,7 +98,7 @@ describe('<HighlightedFieldsCell />', () => {
   });
 
   it('should open ip preview when click on ip', () => {
-    const { getByTestId } = renderHighlightedFieldsCell(['100:XXX:XXX'], 'source.ip', SCOPE_ID);
+    const { getByTestId } = renderHighlightedFieldsCell(['100:XXX:XXX'], 'source.ip', true);
     expect(getByTestId(HIGHLIGHTED_FIELDS_LINKED_CELL_TEST_ID)).toBeInTheDocument();
 
     getByTestId(HIGHLIGHTED_FIELDS_LINKED_CELL_TEST_ID).click();
@@ -115,7 +120,7 @@ describe('<HighlightedFieldsCell />', () => {
     });
     const { getByTestId } = render(
       <TestProviders>
-        <HighlightedFieldsCell values={['value']} field={'agent.status'} />
+        <HighlightedFieldsCell values={['value']} field={'agent.status'} scopeId={SCOPE_ID} />
       </TestProviders>
     );
 
@@ -134,6 +139,7 @@ describe('<HighlightedFieldsCell />', () => {
           values={['value']}
           field={'agent.status'}
           originalField="observer.serial_number"
+          scopeId={SCOPE_ID}
         />
       </TestProviders>
     );
@@ -153,6 +159,7 @@ describe('<HighlightedFieldsCell />', () => {
           values={['value']}
           field={'agent.status'}
           originalField="crowdstrike.event.DeviceId"
+          scopeId={SCOPE_ID}
         />
       </TestProviders>
     );
@@ -163,7 +170,7 @@ describe('<HighlightedFieldsCell />', () => {
   it('should not render if values is null', () => {
     const { container } = render(
       <TestProviders>
-        <HighlightedFieldsCell values={null} field={'field'} />
+        <HighlightedFieldsCell values={null} field={'field'} scopeId={SCOPE_ID} />
       </TestProviders>
     );
 

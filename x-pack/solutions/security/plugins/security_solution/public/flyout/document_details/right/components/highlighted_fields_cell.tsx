@@ -38,6 +38,11 @@ export interface HighlightedFieldsCellProps {
    * Only needed if alerts page flyout (which has PreviewLink), NOT in the AI for SOC alert summary flyout.
    */
   scopeId?: string;
+  /**
+   * If true, we show a PreviewLink for some specific fields.
+   * This is false by default (for the AI for SOC alert summary page) and will be true for the alerts page.
+   */
+  showPreview?: boolean;
 }
 
 /**
@@ -47,7 +52,8 @@ export const HighlightedFieldsCell: FC<HighlightedFieldsCellProps> = ({
   values,
   field,
   originalField = '',
-  scopeId,
+  scopeId = '',
+  showPreview = false,
 }) => {
   const agentType: ResponseActionAgentType = useMemo(() => {
     return getAgentTypeForAgentIdField(originalField);
@@ -63,7 +69,7 @@ export const HighlightedFieldsCell: FC<HighlightedFieldsCellProps> = ({
               key={`${i}-${value}`}
               data-test-subj={`${value}-${HIGHLIGHTED_FIELDS_CELL_TEST_ID}`}
             >
-              {scopeId && hasPreview(field) ? (
+              {showPreview && hasPreview(field) ? (
                 <PreviewLink
                   field={field}
                   value={value}

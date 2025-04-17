@@ -16,7 +16,6 @@ import { CellActions } from '../../shared/components/cell_actions';
 import { HIGHLIGHTED_FIELDS_DETAILS_TEST_ID, HIGHLIGHTED_FIELDS_TITLE_TEST_ID } from './test_ids';
 import { useHighlightedFields } from '../../shared/hooks/use_highlighted_fields';
 import { EditHighlightedFieldsButton } from './highlighted_fields_button';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 
 export interface HighlightedFieldsTableRow {
   /**
@@ -40,12 +39,12 @@ export interface HighlightedFieldsTableRow {
      * Maintain backwards compatibility // TODO remove when possible
      * Only needed if alerts page flyout (which uses CellActions), NOT in the AI for SOC alert summary flyout.
      */
-    scopeId?: string;
+    scopeId: string;
     /**
      * Boolean to indicate this field is shown in a preview
      * Only needed if alerts page flyout (which uses CellActions), NOT in the AI for SOC alert summary flyout.
      */
-    isPreview?: boolean;
+    isPreview: boolean;
     /**
      * If true, cell actions will be shown on hover
      */
@@ -91,6 +90,7 @@ const columns: Array<EuiBasicTableColumn<HighlightedFieldsTableRow>> = [
               field={description.field}
               originalField={description.originalField}
               scopeId={description.scopeId}
+              showPreview={true}
             />
           </CellActions>
         ) : (
@@ -128,6 +128,11 @@ export interface HighlightedFieldsProps {
    * This is false by default (for the AI for SOC alert summary page) and will be true for the alerts page.
    */
   showCellActions?: boolean;
+  /**
+   * If true, the edit button will be shown on hover (granted that the editHighlightedFieldsEnabled is also turned on).
+   * This is false by default (for the AI for SOC alert summary page) and will be true for the alerts page.
+   */
+  showEditButton?: boolean;
 }
 
 /**
@@ -141,11 +146,9 @@ export const HighlightedFields = memo(
     isPreview,
     scopeId = '',
     showCellActions = false,
+    showEditButton = false,
   }: HighlightedFieldsProps) => {
     const [isEditLoading, setIsEditLoading] = useState(false);
-    const editHighlightedFieldsEnabled = useIsExperimentalFeatureEnabled(
-      'editHighlightedFieldsEnabled'
-    );
 
     const highlightedFields = useHighlightedFields({
       dataFormattedForFieldBrowser,
@@ -171,7 +174,7 @@ export const HighlightedFields = memo(
                 </h5>
               </EuiTitle>
             </EuiFlexItem>
-            {editHighlightedFieldsEnabled && (
+            {showEditButton && (
               <EuiFlexItem grow={false}>
                 <EditHighlightedFieldsButton
                   customHighlightedFields={investigationFields}
