@@ -11,6 +11,7 @@ xpack.features.overrides:
   securitySolutionNotes.hidden: true
   siem.description: null
   siemV2.description: null
+  securitySolutionSiemMigrations.hidden: true
 
 ## Agentless deployment by default
 xpack.fleet.agentless.isDefault: true
