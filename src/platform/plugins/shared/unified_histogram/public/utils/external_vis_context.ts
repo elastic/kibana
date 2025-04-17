@@ -10,7 +10,7 @@
 import { isEqual, cloneDeep } from 'lodash';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
-import type { TextBasedLayerColumn } from '@kbn/lens-plugin/public/datasources/text_based/types';
+import type { TextBasedLayerColumn } from '@kbn/lens-plugin/public/datasources/form_based/esql_layer/types';
 import { getDatasourceId } from '@kbn/visualization-utils';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { PieVisualizationState, Suggestion, XYState } from '@kbn/lens-plugin/public';

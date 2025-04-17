@@ -24,9 +24,9 @@ import { render, screen, within } from '@testing-library/react';
 import { type TextBasedDataPanelProps, TextBasedDataPanel } from './datapanel';
 import type { TextBasedPrivateState } from '../types';
 
-import { createIndexPatternServiceMock } from '../../../mocks/data_views_service_mock';
-import { createMockFramePublicAPI } from '../../../mocks';
-import { DataViewsState } from '../../../state_management';
+import { createIndexPatternServiceMock } from '../../../../mocks/data_views_service_mock';
+import { createMockFramePublicAPI } from '../../../../mocks';
+import { DataViewsState } from '../../../../state_management';
 import { addColumnsToCache } from '../fieldlist_cache';
 
 const fieldsFromQuery = [

@@ -10,7 +10,7 @@ import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import { EditorFrameSetup } from '../../types';
+import { EditorFrameSetup } from '../../../types';
 
 export interface TextBasedSetupPlugins {
   data: DataPublicPluginSetup;
@@ -29,7 +29,7 @@ export class TextBasedDatasource {
   setup(core: CoreSetup<TextBasedStartPlugins>, { editorFrame }: TextBasedSetupPlugins) {
     editorFrame.registerDatasource(async () => {
       const [{ getTextBasedDatasource }, [coreStart, { data, dataViews, expressions }]] =
-        await Promise.all([import('../../async_services'), core.getStartServices()]);
+        await Promise.all([import('../../../async_services'), core.getStartServices()]);
 
       return getTextBasedDatasource({
         core: coreStart,

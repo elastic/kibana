@@ -31,16 +31,16 @@ import {
   DataSourceInfo,
   UserMessage,
   OperationMetadata,
-} from '../../types';
-import { generateId } from '../../id_generator';
+} from '../../../types';
+import { generateId } from '../../../id_generator';
 import type {
   TextBasedPrivateState,
   TextBasedPersistedState,
   TextBasedLayerColumn,
   TextBasedField,
 } from './types';
-import type { Datasource, DatasourceSuggestion } from '../../types';
-import { getUniqueLabelGenerator, nonNullable } from '../../utils';
+import type { Datasource, DatasourceSuggestion } from '../../../types';
+import { getUniqueLabelGenerator, nonNullable } from '../../../utils';
 import { onDrop, getDropProps } from './dnd';
 import { removeColumn } from './remove_column';
 import {
@@ -54,7 +54,7 @@ import {
   addColumnsToCache,
   retrieveLayerColumnsFromCache,
 } from './fieldlist_cache';
-import { TEXT_BASED_LANGUAGE_ERROR } from '../../user_messages_ids';
+import { TEXT_BASED_LANGUAGE_ERROR } from '../../../user_messages_ids';
 
 function getLayerReferenceName(layerId: string) {
   return `textBasedLanguages-datasource-layer-${layerId}`;
