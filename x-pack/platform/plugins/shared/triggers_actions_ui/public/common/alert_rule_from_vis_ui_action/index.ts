@@ -11,7 +11,7 @@ import type { Action } from '@kbn/ui-actions-plugin/public';
 import { ALERT_RULE_TRIGGER } from '@kbn/ui-actions-browser/src/triggers';
 import { apiIsOfType, hasBlockingError } from '@kbn/presentation-publishing';
 import type { LensApi } from '@kbn/lens-plugin/public';
-import type { TextBasedPersistedState } from '@kbn/lens-plugin/public/datasources/text_based/types';
+import type { TextBasedPersistedState } from '@kbn/lens-plugin/public/datasources/form_based/esql_layer/types';
 import type { Datatable } from '@kbn/expressions-plugin/common';
 import type {
   ActionTypeRegistryContract,
