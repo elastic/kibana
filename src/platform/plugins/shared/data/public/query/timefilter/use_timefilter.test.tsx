@@ -32,10 +32,9 @@ describe('createUseTimefilterHook', () => {
     const {
       result: { current },
     } = renderHook(() => useTimefilter());
-    return await act(async () => {
-      return await waitForNextFetch$(current.timeState$, () => {
-        timefilter.setTime(input);
-      });
+
+    return await waitForNextFetch$(current.timeState$, () => {
+      timefilter.setTime(input);
     });
   }
 
@@ -43,23 +42,28 @@ describe('createUseTimefilterHook', () => {
     const {
       result: { current },
     } = renderHook(() => useTimefilter());
-    return await act(async () => {
-      return await waitForNextFetch$(current.timeState$, () => {
-        current.refresh();
-      });
+
+    return await waitForNextFetch$(current.timeState$, () => {
+      current.refresh();
     });
   }
 
   async function waitForNextFetch$(timeState$: Observable<TimeStateUpdate>, cb: () => void) {
-    return await new Promise<TimeStateUpdate>((resolve) => {
-      const subscription = timeState$.subscribe({
-        next: (val) => {
-          subscription.unsubscribe();
-          resolve(val);
-        },
+    let update: TimeStateUpdate;
+
+    await act(async () => {
+      update = await new Promise<TimeStateUpdate>((resolve) => {
+        const subscription = timeState$.subscribe({
+          next: (val) => {
+            subscription.unsubscribe();
+            resolve(val);
+          },
+        });
+        cb();
       });
-      cb();
     });
+
+    return update!;
   }
 
   beforeEach(() => {
