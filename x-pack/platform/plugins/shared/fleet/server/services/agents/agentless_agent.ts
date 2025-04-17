@@ -16,7 +16,7 @@ import axios from 'axios';
 
 import apm from 'elastic-apm-node';
 
-import { AgentlessAgentCreateOverProvisionnedError } from '../../../common/errors';
+import { AgentlessAgentCreateOverProvisionedError } from '../../../common/errors';
 import { SO_SEARCH_LIMIT } from '../../constants';
 import type { AgentPolicy } from '../../types';
 import type { AgentlessApiResponse } from '../../../common/types';
@@ -519,7 +519,7 @@ class AgentlessAgentService {
         const limitMatches = responseData?.error?.match(/limit: ([0-9]+)/);
         const limit = limitMatches ? parseInt(limitMatches[1], 10) : undefined;
 
-        return new AgentlessAgentCreateOverProvisionnedError(
+        return new AgentlessAgentCreateOverProvisionedError(
           this.withRequestIdMessage(userMessage, traceId),
           limit
         );

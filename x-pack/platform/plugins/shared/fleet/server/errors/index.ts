@@ -20,7 +20,7 @@ export { isESClientError } from './utils';
 export {
   FleetError as FleetError,
   OutputInvalidError as OutputInvalidError,
-  AgentlessAgentCreateOverProvisionnedError,
+  AgentlessAgentCreateOverProvisionedError as AgentlessAgentCreateOverProvisionnedError,
 } from '../../common/errors';
 
 export class RegistryError extends FleetError {}

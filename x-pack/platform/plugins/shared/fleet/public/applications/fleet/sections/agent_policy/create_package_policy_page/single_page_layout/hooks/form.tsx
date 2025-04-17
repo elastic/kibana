@@ -14,7 +14,7 @@ import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiLink } from '@elastic/eui';
 
-import { AgentlessAgentCreateOverProvisionnedError } from '../../../../../../../../common/errors';
+import { AgentlessAgentCreateOverProvisionedError } from '../../../../../../../../common/errors';
 import { useSpaceSettingsContext } from '../../../../../../../hooks/use_space_settings_context';
 import {
   type AgentPolicy,
@@ -391,7 +391,7 @@ export function useOnSubmit({
             (policy) => policy?.supports_agentless === true
           );
 
-          if (e?.attributes?.type === AgentlessAgentCreateOverProvisionnedError.name) {
+          if (e?.attributes?.type === AgentlessAgentCreateOverProvisionedError.name) {
             notifications.toasts.addError(e, {
               title: i18n.translate('xpack.fleet.createAgentlessPolicy.errorNotificationTitle', {
                 defaultMessage: 'Unable to create integration',
