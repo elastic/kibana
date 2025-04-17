@@ -32,7 +32,9 @@ export const GridRow = React.memo(({ rowId }: GridRowProps) => {
   const [panelIdsInOrder, setPanelIdsInOrder] = useState<string[]>(() =>
     getPanelKeysInOrder(currentRow.panels)
   );
-  const [isCollapsed, setIsCollapsed] = useState<boolean>(currentRow.isCollapsed);
+  const [isCollapsed, setIsCollapsed] = useState<boolean>(
+    currentRow.isCollapsible ? currentRow.isCollapsed : false
+  );
 
   useEffect(
     () => {
@@ -126,7 +128,15 @@ export const GridRow = React.memo(({ rowId }: GridRowProps) => {
      */
     if (!collapseButtonRef.current) return;
     collapseButtonRef.current.ariaExpanded = `${!isCollapsed}`;
-  }, [isCollapsed]);
+
+    const headerRef = gridLayoutStateManager.headerRefs.current[rowId];
+    if (!headerRef) return;
+    if (isCollapsed) {
+      headerRef.classList.add('kbnGridRowHeader--collapsed');
+    } else {
+      headerRef.classList.remove('kbnGridRowHeader--collapsed');
+    }
+  }, [isCollapsed, rowId, gridLayoutStateManager.headerRefs]);
 
   return (
     <>
@@ -143,7 +153,18 @@ export const GridRow = React.memo(({ rowId }: GridRowProps) => {
           {panelIdsInOrder.map((panelId) => (
             <GridPanel key={panelId} panelId={panelId} rowId={rowId} />
           ))}
-          {/* <GridPanelDragPreview rowId={rowId} /> */}
+          <span
+            ref={(element: HTMLDivElement | null) =>
+              (gridLayoutStateManager.rowRefs.current[rowId] = element)
+            }
+            className={'kbnGridRowBackground'}
+            css={css`
+              grid-column-start: 1;
+              grid-column-end: -1;
+              grid-row-start: ${rowId}-gridRow; // first grid row in this row of panels
+              grid-row-end: ${rowId}-end;
+            `}
+          />
         </>
       )}
     </>

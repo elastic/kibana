@@ -155,7 +155,7 @@ export const GridLayout = ({
           const currentRow = currentLayout[rowId];
           gridRowTemplateString += `[${rowId}-start] `;
           if (currentRow.isCollapsible) {
-            gridRowTemplateString += `repeat(2, calc(var(--kbnGridRowHeight) * 1px))`;
+            gridRowTemplateString += `auto `;
           }
           if (!currentRow.isCollapsible || (currentRow.isCollapsible && !currentRow.isCollapsed)) {
             const panels = Object.values(currentRow.panels);
@@ -163,9 +163,9 @@ export const GridLayout = ({
               panels.length > 0 ? Math.max(...panels.map(({ row, height }) => row + height)) : 0;
             gridRowTemplateString += `repeat(${maxRow}, [${rowId}-gridRow] calc(var(--kbnGridRowHeight) * 1px))`;
           }
-          // gridRowTemplateString += `[${rowId}-end] `;
+          gridRowTemplateString += `[${rowId}-end] `;
         });
-        // gridRowTemplateString = gridRowTemplateString.replaceAll('] [', ' ');
+        gridRowTemplateString = gridRowTemplateString.replaceAll('] [', ' ');
 
         layoutRef.current.style.gridTemplateRows = gridRowTemplateString;
 

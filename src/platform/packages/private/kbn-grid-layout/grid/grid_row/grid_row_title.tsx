@@ -164,7 +164,7 @@ const styles = {
         svg: {
           transition: `transform ${euiTheme.animation.fast} ease`,
           transform: 'rotate(0deg)',
-          '.kbnGridRowContainer--collapsed &': {
+          '.kbnGridRowHeader--collapsed &': {
             transform: 'rotate(-90deg) !important',
           },
         },

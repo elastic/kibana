@@ -236,7 +236,7 @@ export const GridRowHeader = React.memo(
 const styles = {
   visibleOnlyWhenCollapsed: css({
     display: 'none',
-    '.kbnGridRowContainer--collapsed &': {
+    '.kbnGridRowHeader--collapsed &': {
       display: 'block',
     },
   }),
@@ -248,10 +248,10 @@ const styles = {
       gridColumnStart: 1,
       gridColumnEnd: -1,
       gridRowStart: `${rowId}-start`,
-      gridRowEnd: `span 2`,
+      gridRowEnd: `auto`,
       height: `calc(${euiTheme.size.xl} + (2 * ${euiTheme.size.s}))`,
       border: '1px solid transparent', // prevents layout shift
-      '.kbnGridRowContainer--collapsed &:not(.kbnGridRowHeader--active)': {
+      '&.kbnGridRowHeader--collapsed:not(.kbnGridRowHeader--active)': {
         borderBottom: euiTheme.border.thin,
       },
       '.kbnGridLayout--deleteRowIcon': {
