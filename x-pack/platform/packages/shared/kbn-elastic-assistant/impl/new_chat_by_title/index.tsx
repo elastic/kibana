@@ -19,7 +19,7 @@ export const BUTTON_TEXT_TEST_ID = 'newChatByTitleText';
 export interface NewChatByTitleComponentProps {
   /**
    * Optionally specify color of empty button.
-   * Defaults to primary.
+   * @default 'primary'
    */
   color?: EuiButtonColor;
   /**
@@ -70,7 +70,7 @@ NewChatByTitleComponent.displayName = 'NewChatByTitleComponent';
 
 /**
  * `NewChatByTitle` displays a button by providing only the `promptContextId`
- * of a context that was (already) registered by the `useAssistantOverlay` hook. ou may
+ * of a context that was (already) registered by the `useAssistantOverlay` hook. You may
  * optionally override the default text.
  *
  * USE THIS WHEN: all the data necessary to start a new chat is NOT available
