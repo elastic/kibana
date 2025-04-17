@@ -7,21 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { UnifiedTabs, TabStatus } from '@kbn/unified-tabs';
+import { UnifiedTabs } from '@kbn/unified-tabs';
 import React from 'react';
-import { isOfAggregateQueryType } from '@kbn/es-query';
 import { DiscoverSessionView, type DiscoverSessionViewProps } from '../session_view';
 import {
   CurrentTabProvider,
   createTabItem,
   internalStateActions,
   selectAllTabs,
-  selectTabRuntimeState,
   useInternalStateDispatch,
   useInternalStateSelector,
 } from '../../state_management/redux';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
-import { FetchStatus } from '../../../types';
+import { usePreviewData } from './use_preview_data';
 
 export const TabsView = (props: DiscoverSessionViewProps) => {
   const services = useDiscoverServices();
@@ -32,6 +30,7 @@ export const TabsView = (props: DiscoverSessionViewProps) => {
     recentlyClosedItems: state.tabs.recentlyClosedTabs,
     groupId: state.tabs.groupId,
   }));
+  const { getPreviewData } = usePreviewData(props.runtimeStateManager);
 
   return (
     <UnifiedTabs
@@ -45,36 +44,7 @@ export const TabsView = (props: DiscoverSessionViewProps) => {
         return dispatch(updateTabsAction);
       }}
       createItem={() => createTabItem(allTabs)}
-      getPreviewData={(item) => {
-        const defaultQuery = { language: 'kuery', query: '(Empty query)' };
-        const stateContainer = selectTabRuntimeState(
-          props.runtimeStateManager,
-          item.id
-        ).stateContainer$.getValue();
-
-        if (!stateContainer) {
-          return {
-            query: defaultQuery,
-            status: TabStatus.RUNNING,
-          };
-        }
-
-        const fetchStatus = stateContainer.dataState.data$.main$.getValue().fetchStatus;
-        const query = stateContainer.appState.getState().query;
-
-        return {
-          query: isOfAggregateQueryType(query)
-            ? { esql: query.esql.trim() || defaultQuery.query }
-            : query
-            ? { ...query, query: query.query.trim() || defaultQuery.query }
-            : defaultQuery,
-          status: [FetchStatus.UNINITIALIZED, FetchStatus.COMPLETE].includes(fetchStatus)
-            ? TabStatus.SUCCESS
-            : fetchStatus === FetchStatus.ERROR
-            ? TabStatus.ERROR
-            : TabStatus.RUNNING,
-        };
-      }}
+      getPreviewData={getPreviewData}
       renderContent={() => (
         <CurrentTabProvider currentTabId={currentTabId}>
           <DiscoverSessionView key={currentTabId} {...props} />

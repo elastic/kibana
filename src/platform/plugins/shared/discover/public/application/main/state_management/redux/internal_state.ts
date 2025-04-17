@@ -39,6 +39,7 @@ const MIDDLEWARE_THROTTLE_MS = 300;
 const MIDDLEWARE_THROTTLE_OPTIONS = { leading: false, trailing: true };
 
 export const defaultTabState: Omit<TabState, keyof TabItem> = {
+  lastPersistedGlobalState: {},
   dataViewId: undefined,
   isDataViewLoading: false,
   dataRequestParams: {},
