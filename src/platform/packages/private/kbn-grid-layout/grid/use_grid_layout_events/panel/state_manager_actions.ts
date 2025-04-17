@@ -24,7 +24,7 @@ export const startAction = (
   rowId: string,
   panelId: string
 ) => {
-  const panelRef = gridLayoutStateManager.panelRefs.current[rowId][panelId];
+  const panelRef = gridLayoutStateManager.panelRefs.current[panelId];
   if (!panelRef) return;
 
   const panelRect = panelRef.getBoundingClientRect();

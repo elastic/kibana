@@ -58,7 +58,7 @@ export const GridPanel = React.memo(({ panelId, rowId }: GridPanelProps) => {
   useEffect(() => {
     return () => {
       // remove reference on unmount
-      delete gridLayoutStateManager.panelRefs.current[rowId][panelId];
+      delete gridLayoutStateManager.panelRefs.current[panelId];
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -73,13 +73,25 @@ export const GridPanel = React.memo(({ panelId, rowId }: GridPanelProps) => {
       ])
         .pipe(skip(1)) // skip the first emit because the `initialStyles` will take care of it
         .subscribe(([activePanel, gridLayout, proposedGridLayout]) => {
-          const ref = gridLayoutStateManager.panelRefs.current[rowId][panelId];
-          const panel = (proposedGridLayout ?? gridLayout)[rowId]?.panels[panelId];
+          const ref = gridLayoutStateManager.panelRefs.current[panelId];
+          const activeLayout = proposedGridLayout ?? gridLayout;
+          const currentInteractionEvent = gridLayoutStateManager.interactionEvent$.getValue();
+          const isPanelActive = activePanel?.id === panelId;
+          let row = currentInteractionEvent?.targetRow ? currentInteractionEvent.targetRow : rowId;
+
+          let panel = activeLayout[row]?.panels[panelId];
+          // TODO: this is a workaround for the case when the panel is moved to another row and dropped
+          if (!panel) {
+            Object.entries(activeLayout).forEach(([rId, rowData]) => {
+              if (rowData.panels[panelId]) {
+                panel = rowData.panels[panelId];
+                row = rId;
+              }
+            });
+          }
           if (!ref || !panel) return;
 
-          const currentInteractionEvent = gridLayoutStateManager.interactionEvent$.getValue();
-
-          if (panelId === activePanel?.id) {
+          if (isPanelActive) {
             ref.classList.add('kbnGridPanel--active');
 
             // if the current panel is active, give it fixed positioning depending on the interaction event
@@ -100,7 +112,7 @@ export const GridPanel = React.memo(({ panelId, rowId }: GridPanelProps) => {
 
               // undo any "lock to grid" styles **except** for the top left corner, which stays locked
               ref.style.gridColumnStart = `${panel.column + 1}`;
-              ref.style.gridRowStart = `${panel.row + 1}`;
+              ref.style.gridRowStart = `${row}-gridRow ${panel.row + 1}`;
               ref.style.gridColumnEnd = `auto`;
               ref.style.gridRowEnd = `auto`;
             } else {
@@ -131,7 +143,7 @@ export const GridPanel = React.memo(({ panelId, rowId }: GridPanelProps) => {
             // and render the panel locked to the grid
             ref.style.gridColumnStart = `${panel.column + 1}`;
             ref.style.gridColumnEnd = `${panel.column + 1 + panel.width}`;
-            ref.style.gridRowStart = `${rowId}-gridRow ${panel.row + 1}`;
+            ref.style.gridRowStart = `${row}-gridRow ${panel.row + 1}`;
             ref.style.gridRowEnd = `span ${panel.height}`;
           }
         });
@@ -141,7 +153,7 @@ export const GridPanel = React.memo(({ panelId, rowId }: GridPanelProps) => {
        */
       const expandedPanelSubscription = gridLayoutStateManager.expandedPanelId$.subscribe(
         (expandedPanelId) => {
-          const ref = gridLayoutStateManager.panelRefs.current[rowId][panelId];
+          const ref = gridLayoutStateManager.panelRefs.current[panelId];
           const gridLayout = gridLayoutStateManager.gridLayout$.getValue();
           const panel = gridLayout[rowId].panels[panelId];
           if (!ref || !panel) return;
@@ -173,10 +185,7 @@ export const GridPanel = React.memo(({ panelId, rowId }: GridPanelProps) => {
   return (
     <div
       ref={(element) => {
-        if (!gridLayoutStateManager.panelRefs.current[rowId]) {
-          gridLayoutStateManager.panelRefs.current[rowId] = {};
-        }
-        gridLayoutStateManager.panelRefs.current[rowId][panelId] = element;
+        gridLayoutStateManager.panelRefs.current[panelId] = element;
       }}
       css={initialStyles}
       className="kbnGridPanel"

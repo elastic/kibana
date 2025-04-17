@@ -45,12 +45,12 @@ export const useGridLayoutState = ({
 } => {
   const rowRefs = useRef<{ [rowId: string]: HTMLDivElement | null }>({});
   const headerRefs = useRef<{ [rowId: string]: HTMLDivElement | null }>({});
-  const panelRefs = useRef<{ [rowId: string]: { [panelId: string]: HTMLDivElement | null } }>({});
+  const panelRefs = useRef<{ [panelId: string]: HTMLDivElement | null }>({});
   const { euiTheme } = useEuiTheme();
 
   const expandedPanelId$ = useMemo(
     () => new BehaviorSubject<string | undefined>(expandedPanelId),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-depss
     []
   );
   useEffect(() => {

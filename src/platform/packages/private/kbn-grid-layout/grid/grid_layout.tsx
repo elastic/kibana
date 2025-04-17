@@ -11,7 +11,7 @@ import classNames from 'classnames';
 import deepEqual from 'fast-deep-equal';
 import { cloneDeep } from 'lodash';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { combineLatest, pairwise, map, distinctUntilChanged } from 'rxjs';
+import { combineLatest, pairwise, map, distinctUntilChanged, skip } from 'rxjs';
 
 import { css } from '@emotion/react';
 
@@ -21,7 +21,10 @@ import { GridAccessMode, GridLayoutData, GridSettings, UseCustomDragHandle } fro
 import { GridLayoutContext, GridLayoutContextType } from './use_grid_layout_context';
 import { useGridLayoutState } from './use_grid_layout_state';
 import { isLayoutEqual } from './utils/equality_checks';
-import { getRowKeysInOrder, resolveGridRow } from './utils/resolve_grid_row';
+import { getPanelKeysInOrder, getRowKeysInOrder, resolveGridRow } from './utils/resolve_grid_row';
+import { GridRowHeader } from './grid_row/grid_row_header';
+import { GridPanel } from './grid_panel';
+import { GridRowWrapper } from './grid_row/grid_row_wrapper';
 
 export type GridLayoutProps = {
   layout: GridLayoutData;
@@ -50,8 +53,8 @@ export const GridLayout = ({
     expandedPanelId,
     accessMode,
   });
+  const [elementsInOrder, setElementsInOrder] = useState<unknown[]>([]);
 
-  const [rowIdsInOrder, setRowIdsInOrder] = useState<string[]>(getRowKeysInOrder(layout));
   /**
    * Update the `gridLayout$` behaviour subject in response to the `layout` prop changing
    */
@@ -84,9 +87,9 @@ export const GridLayout = ({
         if (!isLayoutEqual(layoutBefore, layoutAfter)) {
           onLayoutChange(layoutAfter);
 
-          if (!deepEqual(Object.keys(layoutBefore), Object.keys(layoutAfter))) {
-            setRowIdsInOrder(getRowKeysInOrder(layoutAfter));
-          }
+          // if (!deepEqual(Object.keys(layoutBefore), Object.keys(layoutAfter))) {
+          //   setRowIdsInOrder(getRowKeysInOrder(layoutAfter));
+          // }
         }
       });
 
@@ -100,18 +103,31 @@ export const GridLayout = ({
     /**
      * This subscription ensures that rows get re-rendered when their orders change
      */
-    const rowOrderSubscription = combineLatest([
-      gridLayoutStateManager.proposedGridLayout$,
-      gridLayoutStateManager.gridLayout$,
-    ])
+    const elementsInOrderSubscription = gridLayoutStateManager.gridLayout$
       .pipe(
-        map(([proposedGridLayout, gridLayout]) =>
-          getRowKeysInOrder(proposedGridLayout ?? gridLayout)
-        ),
+        map((gridLayout) => {
+          const currentLayout = gridLayout;
+          const rowIdsInOrder = getRowKeysInOrder(currentLayout);
+          const currentElementsInOrder: unknown[] = [];
+          rowIdsInOrder.forEach((rowId) => {
+            const row = currentLayout[rowId];
+            if (row.isCollapsible) {
+              currentElementsInOrder.push({ type: 'header', id: rowId });
+            }
+            if (!row.isCollapsible || !row.isCollapsed) {
+              const panelIdsInOrder = getPanelKeysInOrder(currentLayout[rowId]?.panels);
+              panelIdsInOrder.forEach((panelId) => {
+                currentElementsInOrder.push({ type: 'panel', id: panelId, rowId });
+              });
+            }
+            currentElementsInOrder.push({ type: 'wrapper', id: rowId });
+          });
+          return currentElementsInOrder;
+        }),
         distinctUntilChanged(deepEqual)
       )
-      .subscribe((rowKeys) => {
-        setRowIdsInOrder(rowKeys);
+      .subscribe((currentElementsInOrder) => {
+        setElementsInOrder(currentElementsInOrder);
       });
 
     /**
@@ -168,10 +184,25 @@ export const GridLayout = ({
         layoutRef.current.style.gridTemplateRows = gridRowTemplateString;
       });
 
+    const interactionStyleSubscription = gridLayoutStateManager.interactionEvent$.subscribe(
+      (interactionEvent) => {
+        const targetRowId = interactionEvent?.targetRow;
+
+        Object.entries(gridLayoutStateManager.rowRefs.current).forEach(([rowId, rowRef]) => {
+          if (rowId === targetRowId) {
+            rowRef?.classList.add('kbnGridRow--targeted');
+          } else {
+            rowRef?.classList.remove('kbnGridRow--targeted');
+          }
+        });
+      }
+    );
+
     return () => {
-      rowOrderSubscription.unsubscribe();
+      elementsInOrderSubscription.unsubscribe();
       gridLayoutClassSubscription.unsubscribe();
       mainSectionGridStyleSubscription.unsubscribe();
+      interactionStyleSubscription.unsubscribe();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -203,9 +234,16 @@ export const GridLayout = ({
             styles.hasExpandedPanel,
           ]}
         >
-          {rowIdsInOrder.map((rowId) => (
-            <GridRow key={rowId} rowId={rowId} />
-          ))}
+          {elementsInOrder.map((element) => {
+            switch (element.type) {
+              case 'header':
+                return <GridRowHeader key={element.id} rowId={element.id} />;
+              case 'panel':
+                return <GridPanel key={element.id} panelId={element.id} rowId={element.rowId} />;
+              case 'wrapper':
+                return <GridRowWrapper key={`${element.id}--wrapper`} rowId={element.id} />;
+            }
+          })}
         </div>
       </GridHeightSmoother>
     </GridLayoutContext.Provider>
