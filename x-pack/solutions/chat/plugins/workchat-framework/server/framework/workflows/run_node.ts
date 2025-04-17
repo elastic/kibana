@@ -10,7 +10,6 @@ import {
   type NodeFactoryBaseServices,
   type NodeFactoryContext,
   type ScopedRunnerRunNodeParams,
-  type ScopedRunnerRunNodeOutput,
 } from '@kbn/wc-framework-types-server';
 import type { WorkflowRunnerInternalContext, ScopedNodeRunnerFn } from './types';
 import { createNoopNodeEventReporter, createNodeEventReporter, enterNode } from './utils';
@@ -37,7 +36,7 @@ const runNode = async ({
   nodeDefinition,
   state,
   internalContext,
-}: RunStepParams): Promise<ScopedRunnerRunNodeOutput> => {
+}: RunStepParams): Promise<void> => {
   // update the execution state - context is already a copy, it's safe to reference
   internalContext.executionState = enterNode({
     parent: internalContext.executionState,
@@ -79,7 +78,7 @@ const runNode = async ({
 
   // executing the node
   await nodeRunner.run({
-    input: nodeDefinition.configuration,
+    input: nodeDefinition.configuration as Record<string, any>,
     state,
     eventReporter,
     executionState: { ...internalContext.executionState },
