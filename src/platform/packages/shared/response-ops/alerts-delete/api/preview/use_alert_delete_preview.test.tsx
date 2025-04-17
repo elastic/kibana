@@ -38,11 +38,14 @@ describe('useAlertDeletePreview', () => {
       () =>
         useAlertDeletePreview({
           services: { http },
-          isActiveAlertDeleteEnabled: true,
-          isInactiveAlertDeleteEnabled: false,
-          activeAlertDeleteThreshold: 10,
-          inactiveAlertDeleteThreshold: 0,
-          categoryIds: ['observability'],
+          isEnabled: true,
+          queryParams: {
+            isActiveAlertDeleteEnabled: true,
+            isInactiveAlertDeleteEnabled: false,
+            activeAlertDeleteThreshold: 10,
+            inactiveAlertDeleteThreshold: 0,
+            categoryIds: ['observability'],
+          },
         }),
       { wrapper }
     );
@@ -69,11 +72,14 @@ describe('useAlertDeletePreview', () => {
       () =>
         useAlertDeletePreview({
           services: { http },
-          isActiveAlertDeleteEnabled: true,
-          isInactiveAlertDeleteEnabled: false,
-          activeAlertDeleteThreshold: 1,
-          inactiveAlertDeleteThreshold: 0,
-          categoryIds: ['securitySolution'],
+          isEnabled: true,
+          queryParams: {
+            isActiveAlertDeleteEnabled: true,
+            isInactiveAlertDeleteEnabled: false,
+            activeAlertDeleteThreshold: 1,
+            inactiveAlertDeleteThreshold: 0,
+            categoryIds: ['securitySolution'],
+          },
         }),
       { wrapper }
     );
