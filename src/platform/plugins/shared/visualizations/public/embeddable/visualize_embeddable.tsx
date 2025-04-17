@@ -62,18 +62,18 @@ export const getVisualizeEmbeddableFactory: (deps: {
 }) => ({
   type: VISUALIZE_EMBEDDABLE_TYPE,
   buildEmbeddable: async ({ initialState, finalizeApi, parentApi, uuid }) => {
-    const runtimeState = await deserializeState(initialState);
+    const titleManager = initializeTitleManager(initialState.rawState);
 
     // Initialize dynamic actions
     const dynamicActionsManager = embeddableEnhancedStart?.initializeEmbeddableDynamicActions(
       uuid,
       () => titleManager.api.title$.getValue(),
-      runtimeState
+      initialState.rawState
     );
     // if it is provided, start the dynamic actions manager
     const maybeStopDynamicActions = dynamicActionsManager?.startDynamicActions();
 
-    const titleManager = initializeTitleManager(runtimeState);
+    const runtimeState = await deserializeState(initialState);
 
     // Count renders; mostly used for testing.
     const renderCount$ = new BehaviorSubject<number>(0);
