@@ -27,7 +27,6 @@ import {
   BASELINE_TEST_ARCHIVE_500K,
 } from '../kibana_migrator_archive_utils';
 import {
-  EXCLUDED_TYPES,
   getRelocatingMigratorTestKit,
   kibanaSplitIndex,
 } from '../kibana_migrator_test_kit.fixtures';
@@ -140,7 +139,7 @@ describe('multiple Kibana nodes performing a reindexing migration', () => {
 
     const typesMap =
       indicesInfo[`${defaultKibanaIndex}_${nextMinor}_001`].mappings?._meta?.indexTypesMap;
-    expect(typesMap[defaultKibanaIndex]).toEqual(['complex', 'recent']); // 'deprecated' and 'server' no longer present
+    expect(typesMap[defaultKibanaIndex]).toEqual(['complex', 'recent', 'server']); // 'deprecated' no longer present
     expect(typesMap[kibanaSplitIndex]).toEqual(['basic', 'task']);
   }
 
@@ -260,7 +259,6 @@ async function createMigratorJobs(nodes: number): Promise<Array<Job<MigrationRes
     const kit = await getRelocatingMigratorTestKit({
       logFilePath: getLogFile(i),
       filterDeprecated: true,
-      excludedTypes: EXCLUDED_TYPES,
     });
     jobs.push(kit.runMigrations);
   }

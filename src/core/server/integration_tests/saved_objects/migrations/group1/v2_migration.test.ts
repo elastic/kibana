@@ -30,7 +30,6 @@ import {
   BASELINE_TEST_ARCHIVE_500K,
 } from '../kibana_migrator_archive_utils';
 import {
-  EXCLUDED_TYPES,
   getReindexingBaselineTypes,
   getReindexingMigratorTestKit,
   getUpToDateMigratorTestKit,
@@ -130,9 +129,7 @@ describe('v2 migration', () => {
         unknownTypesKit = await getReindexingMigratorTestKit({
           logFilePath,
           // filter out 'task' objects in order to not spawn that migrator for this test
-          types: getReindexingBaselineTypes(true, EXCLUDED_TYPES).filter(
-            ({ name }) => name !== 'task'
-          ),
+          types: getReindexingBaselineTypes(true).filter(({ name }) => name !== 'task'),
           settings: {
             migrations: {
               discardUnknownObjects: currentVersion, // instead of the actual target, 'nextMinor'
@@ -143,7 +140,7 @@ describe('v2 migration', () => {
 
       it('fails if Kibana is not configured to discard unknown objects', async () => {
         await expect(unknownTypesKit.runMigrations()).rejects.toThrowErrorMatchingInlineSnapshot(`
-          "Unable to complete saved object migrations for the [.kibana_migrator] index: Migration failed because some documents were found which use unknown saved object types: deprecated,server
+          "Unable to complete saved object migrations for the [.kibana_migrator] index: Migration failed because some documents were found which use unknown saved object types: deprecated
           To proceed with the migration you can configure Kibana to discard unknown saved objects for this migration.
           Please refer to https://www.elastic.co/guide/en/kibana/${docVersion}/resolve-migrations-failures.html for more information."
         `);
@@ -152,7 +149,7 @@ describe('v2 migration', () => {
           'The flag `migrations.discardUnknownObjects` is defined but does not match the current kibana version; unknown objects will NOT be discarded.'
         );
         expect(logs).toMatch(
-          `[${defaultKibanaIndex}] Migration failed because some documents were found which use unknown saved object types: deprecated,server`
+          `[${defaultKibanaIndex}] Migration failed because some documents were found which use unknown saved object types: deprecated`
         );
         expect(logs).toMatch(`[${defaultKibanaIndex}] CHECK_UNKNOWN_DOCUMENTS -> FATAL.`);
       });
@@ -167,9 +164,7 @@ describe('v2 migration', () => {
         transformErrorsKit = await getReindexingMigratorTestKit({
           logFilePath,
           // filter out 'task' objects in order to not spawn that migrator for this test
-          types: getReindexingBaselineTypes(true, EXCLUDED_TYPES).filter(
-            ({ name }) => name !== 'task'
-          ),
+          types: getReindexingBaselineTypes(true).filter(({ name }) => name !== 'task'),
           settings: {
             migrations: {
               discardCorruptObjects: currentVersion, // instead of the actual target, 'nextMinor'
@@ -229,7 +224,6 @@ describe('v2 migration', () => {
         kit = await getReindexingMigratorTestKit({
           logFilePath,
           filterDeprecated: true,
-          excludedTypes: EXCLUDED_TYPES,
         });
         migrationResults = await kit.runMigrations();
         logs = await readLog(logFilePath);
