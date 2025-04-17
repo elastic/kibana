@@ -10,6 +10,8 @@ import { BehaviorSubject } from 'rxjs';
 import { useIndicatorsTotalCount } from './use_total_count';
 import { TestProvidersComponent, mockedSearchService } from '../../../mocks/test_providers';
 
+jest.mock('../../../hooks/use_kibana');
+
 const indicatorsResponse = { rawResponse: { hits: { hits: [], total: 0 } } };
 
 describe('useIndicatorsTotalCount()', () => {
