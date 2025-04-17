@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { orderBy } from 'lodash';
+import { orderBy, omit } from 'lodash';
 import {
   createStateContainer,
   type IKbnUrlStateStorage,
@@ -134,15 +134,13 @@ export const createTabsStorageManager = ({
   };
 
   const toTabStateInStorage = (
-    tabState: TabState | TabStateInLocalStorage
+    tabState: Pick<TabState, 'id' | 'label' | 'lastPersistedAppState' | 'lastPersistedGlobalState'>
   ): TabStateInLocalStorage => {
     return {
       id: tabState.id,
       label: tabState.label,
-      appState: ('appState' in tabState ? tabState.appState : tabState.lastPersistedAppState) || {},
-      globalState:
-        ('globalState' in tabState ? tabState.globalState : tabState.lastPersistedGlobalState) ||
-        {},
+      appState: tabState.lastPersistedAppState,
+      globalState: tabState.lastPersistedGlobalState,
     };
   };
 
@@ -252,7 +250,7 @@ export const createTabsStorageManager = ({
         if (tab.id === tabId) {
           hasModifications = true;
           return toTabStateInStorage({
-            ...tab,
+            ...omit(tab, 'appState', 'globalState'),
             ...tabStatePartial,
           });
         }
@@ -273,7 +271,7 @@ export const createTabsStorageManager = ({
   }) => {
     const toTabState = (tabStateInStorage: TabStateInLocalStorage): TabState => ({
       ...defaultTabState,
-      ...tabStateInStorage,
+      ...omit(tabStateInStorage, 'appState', 'globalState'),
       lastPersistedAppState: {
         ...defaultTabState.lastPersistedAppState,
         ...tabStateInStorage.appState,

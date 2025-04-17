@@ -107,6 +107,14 @@ describe('TabsStorageManager', () => {
       tabsStorageManager,
       urlStateStorage,
     } = create();
+
+    tabsStorageManager.loadLocally({
+      userId: mockUserId, // register userId and spaceId in tabsStorageManager
+      spaceId: mockSpaceId,
+      defaultGroupId: 'test',
+      defaultTabState,
+    });
+
     jest.spyOn(urlStateStorage, 'set');
     jest.spyOn(storage, 'set');
 
