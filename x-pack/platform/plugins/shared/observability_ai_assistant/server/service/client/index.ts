@@ -127,45 +127,141 @@ export class ObservabilityAIAssistantClient {
     const settled = await Promise.all(promises);
     return settled.flat();
   }
-
-  async sanitizeMessages(messages: Message[]): Promise<{ sanitizedMessages: Message[] }> {
-    for (const message of messages) {
-      if (message.message.sanitized) {
+  //  detectedEntities hash map for assistant message reversal
+  private buildEntityMap(messages: Message[]) {
+    const entityMap = new Map<
+      string,
+      { value: string; class_name: string; type: DetectedEntity['type'] }
+    >();
+    for (const msg of messages) {
+      // Only collect from user messages; assistant entities are generated and not needed here
+      if (msg.message.role !== 'user') {
         continue;
       }
-      if (message.message.role === 'user' && message.message.content) {
-        // chunk before sending
-        const messageContent = message.message.content;
-        const chunks = chunkTextByChar(messageContent);
-        const nerEntities = await this.inferNER(chunks);
-        const regexEntities = getRegexEntities(messageContent);
-        const combinedEntities = [...nerEntities, ...regexEntities];
-        const dedupedEntities = combinedEntities.filter((ent) => {
-          // Regex entities take precedence over NER entities.
-          if (ent.type === 'regex') return true;
-          // For NER entities, check if there's any regex entity that overlaps.
-          // Here, "overlap" is defined as the ranges intersecting.
-          const overlaps = regexEntities.some(
-            (regexEnt) => ent.start_pos < regexEnt.end_pos && ent.end_pos > regexEnt.start_pos
-          );
-          return !overlaps;
-        });
-        message.message.sanitized = true;
-
-        if (dedupedEntities.length > 0) {
-          message.message.detectedEntities = dedupedEntities.map((ent) => {
-            return {
-              entity: ent.entity,
-              class_name: ent.class_name,
-              start_pos: ent.start_pos,
-              end_pos: ent.end_pos,
-              type: ent.type,
-              hash: ent.hash,
-            };
+      msg.message.detectedEntities?.forEach((ent) => {
+        if (!entityMap.has(ent.hash)) {
+          entityMap.set(ent.hash, {
+            value: ent.entity,
+            class_name: ent.class_name,
+            type: ent.type,
           });
+        }
+      });
+    }
+    return entityMap;
+  }
+  // string redact helper
+  private unhashString(str: string, hashMap: Map<string, { value: string }>): string {
+    return str.replace(/[0-9a-f]{40}/g, (h) => hashMap.get(h)?.value ?? h);
+  }
+
+  /**
+   * Replace every placeholder in message with its real value
+   * (taken from `hashMap`) and generate entities.
+   */
+  private unhashAssistantMessage(
+    contentWithHashes: string,
+    hashMap: Map<string, { value: string; class_name: string; type: DetectedEntity['type'] }>
+  ): { cleanText: string; spans: DetectedEntity[] } {
+    const spans: DetectedEntity[] = [];
+    const pattern = /[0-9a-f]{40}/g; // object‑hash output
+    let clean = '';
+    let cursor = 0;
+
+    let match: RegExpExecArray | null;
+    while ((match = pattern.exec(contentWithHashes)) !== null) {
+      const [hash] = match;
+      const rep = hashMap.get(hash);
+      if (!rep) {
+        continue; // keep unknown hash as‑is
+      }
+
+      // copy segment before the hash
+      clean += contentWithHashes.slice(cursor, match.index);
+
+      // insert real value & capture span
+      const start = clean.length;
+      clean += rep.value;
+      const end = clean.length;
+
+      spans.push({
+        entity: rep.value,
+        class_name: rep.class_name,
+        start_pos: start,
+        end_pos: end,
+        type: rep.type,
+        hash,
+      });
+
+      cursor = match.index + hash.length;
+    }
+
+    clean += contentWithHashes.slice(cursor);
+    return { cleanText: clean, spans };
+  }
+  async sanitizeMessages(messages: Message[]): Promise<{ sanitizedMessages: Message[] }> {
+    const hashMap = this.buildEntityMap(messages);
+
+    for (const message of messages) {
+      if (message.message.sanitized) continue;
+
+      const { role, content } = message.message;
+
+      if (role === 'user' && content) {
+        const chunks = chunkTextByChar(content);
+        const nerEntities = await this.inferNER(chunks);
+        const regexEntities = getRegexEntities(content);
+
+        const combined = [...nerEntities, ...regexEntities];
+        const deduped = combined.filter((ent) =>
+          // Regex entities take precedence over NER entities
+          ent.type === 'regex'
+            ? true
+            : // check for intersecting ranges
+              !regexEntities.some((re) => ent.start_pos < re.end_pos && ent.end_pos > re.start_pos)
+        );
+
+        if (deduped.length) {
+          message.message.detectedEntities = deduped.map((ent) => ({
+            entity: ent.entity,
+            class_name: ent.class_name,
+            start_pos: ent.start_pos,
+            end_pos: ent.end_pos,
+            type: ent.type,
+            hash: ent.hash,
+          }));
+          // cache for assistant message reversal
+          deduped.forEach((ent) =>
+            hashMap.set(ent.hash, {
+              value: ent.entity,
+              class_name: ent.class_name,
+              type: ent.type,
+            })
+          );
+        }
+
+        message.message.sanitized = true;
+        continue;
+      }
+
+      if (role === 'assistant') {
+        if (content) {
+          const { cleanText, spans } = this.unhashAssistantMessage(content, hashMap);
+          message.message.content = cleanText;
+          if (spans.length) message.message.detectedEntities = spans;
+          message.message.sanitized = true;
+        }
+        // TODO: unredact other places where hashes can be but don't store them as we don't
+        // need to persist them for the UI.
+        if (message.message.function_call?.arguments) {
+          message.message.function_call.arguments = this.unhashString(
+            message.message.function_call.arguments,
+            hashMap
+          );
         }
       }
     }
+
     return { sanitizedMessages: messages };
   }
   private getConversationWithMetaFields = async (
@@ -400,71 +496,84 @@ export class ObservabilityAIAssistantClient {
                 systemMessage$,
               ]).pipe(
                 switchMap(([addedMessages, title, systemMessage]) => {
-                  const initialMessagesWithAddedMessages = initialMessages.concat(addedMessages);
+                  // ───────────────────────────────────────────────────────────────
+                  // 1️⃣  Sanitize history + new messages so any hashes in the freshly
+                  //     generated assistant content are reversed *before* we execute
+                  //     functions or persist the conversation.
+                  //     - This calls `unhashAssistantMessage`, attaching spans and
+                  //       setting `sanitized:true`.
+                  //     - The same clean objects are then used for KB writes *and* ES.
+                  // ───────────────────────────────────────────────────────────────
+                  return from(this.sanitizeMessages(initialMessages.concat(addedMessages))).pipe(
+                    switchMap(({ sanitizedMessages: allClean }) => {
+                      // allClean = history (already persisted) + freshly sanitised additions
+                      const cleanAddedMessages = allClean.slice(initialMessages.length);
 
-                  const lastMessage = last(initialMessagesWithAddedMessages);
+                      // merge back for downstream processing
+                      const initialMessagesWithAddedMessages =
+                        initialMessages.concat(cleanAddedMessages);
 
-                  // if a function request is at the very end, close the stream to consumer
-                  // without persisting or updating the conversation. we need to wait
-                  // on the function response to have a valid conversation
-                  const isFunctionRequest = !!lastMessage?.message.function_call?.name;
+                      const lastMessage = last(initialMessagesWithAddedMessages);
 
-                  if (!persist || isFunctionRequest) {
-                    return of();
-                  }
+                      // if a function request is at the very end, close the stream to consumer
+                      // without persisting or updating the conversation. we need to wait
+                      // on the function response to have a valid conversation
+                      const isFunctionRequest = !!lastMessage?.message.function_call?.name;
 
-                  if (isConversationUpdate && conversation) {
-                    return from(
-                      this.update(
-                        conversationId,
+                      if (!persist || isFunctionRequest) {
+                        return of();
+                      }
 
-                        merge(
-                          {},
+                      if (isConversationUpdate && conversation) {
+                        return from(
+                          this.update(
+                            conversationId,
+                            merge(
+                              {},
+                              // base conversation without messages
+                              omit(conversation._source, 'messages'),
+                              // update messages and system message
+                              { messages: initialMessagesWithAddedMessages, systemMessage },
+                              // update title
+                              {
+                                conversation: {
+                                  title: title || conversation._source?.conversation.title,
+                                },
+                              }
+                            )
+                          )
+                        ).pipe(
+                          map((conversationUpdated): ConversationUpdateEvent => {
+                            return {
+                              conversation: conversationUpdated.conversation,
+                              type: StreamingChatResponseEventType.ConversationUpdate,
+                            };
+                          })
+                        );
+                      }
 
-                          // base conversation without messages
-                          omit(conversation._source, 'messages'),
-
-                          // update messages and system message
-                          { messages: initialMessagesWithAddedMessages, systemMessage },
-
-                          // update title
-                          {
-                            conversation: {
-                              title: title || conversation._source?.conversation.title,
-                            },
-                          }
-                        )
-                      )
-                    ).pipe(
-                      map((conversationUpdated): ConversationUpdateEvent => {
-                        return {
-                          conversation: conversationUpdated.conversation,
-                          type: StreamingChatResponseEventType.ConversationUpdate,
-                        };
-                      })
-                    );
-                  }
-
-                  return from(
-                    this.create({
-                      '@timestamp': new Date().toISOString(),
-                      conversation: {
-                        title,
-                        id: conversationId,
-                      },
-                      public: !!isPublic,
-                      labels: {},
-                      numeric_labels: {},
-                      systemMessage,
-                      messages: initialMessagesWithAddedMessages,
-                      archived: false,
-                    })
-                  ).pipe(
-                    map((conversationCreated): ConversationCreateEvent => {
-                      return {
-                        conversation: conversationCreated.conversation,
-                        type: StreamingChatResponseEventType.ConversationCreate,
-                      };
+                      return from(
+                        this.create({
+                          '@timestamp': new Date().toISOString(),
+                          conversation: {
+                            title,
+                            id: conversationId,
+                          },
+                          public: !!isPublic,
+                          labels: {},
+                          numeric_labels: {},
+                          systemMessage,
+                          messages: initialMessagesWithAddedMessages,
+                          archived: false,
+                        })
+                      ).pipe(
+                        map((conversationCreated): ConversationCreateEvent => {
+                          return {
+                            conversation: conversationCreated.conversation,
+                            type: StreamingChatResponseEventType.ConversationCreate,
+                          };
+                        })
+                      );
                     })
                   );
                 })

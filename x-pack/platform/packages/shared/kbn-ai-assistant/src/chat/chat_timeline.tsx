@@ -77,7 +77,7 @@ const highlightPIIClassName = css`
 `;
 
 // helper using detected entity positions to transform user messages into react node to add text highlighting
-function transformUserContent(
+function highlightContent(
   content: string,
   detectedEntities: Array<{ start_pos: number; end_pos: number; entity: string }>
 ): React.ReactNode {
@@ -149,21 +149,16 @@ export function ChatTimeline({
             redactedEntitiesMap[entity.hash] = entity.entity;
           });
           // transform user messages to react nodes to highlight the sensitive portions in the user message.
-          item.piiHighlightedContent = transformUserContent(content, detectedEntities);
+          item.piiHighlightedContent = highlightContent(content, detectedEntities);
         }
       }
       // Process assistant messages: transform the content using the cumulative redactedEntitiesMap.
       // Here we don't add highlighting because it conflicts with markdown elements.
-      else if (role === 'assistant' && content) {
-        let updatedContent = content;
-
-        // Apply all replacements
-        Object.entries(redactedEntitiesMap).forEach(([hash, originalText]) => {
-          updatedContent = updatedContent.replace(new RegExp(hash, 'g'), originalText);
-        });
-
-        item.message.message.content = updatedContent;
-      }
+      // else if (role === 'assistant') {
+      // If we want to highlight assistant PII or "show anonymized",
+      // use message.message.detectedEntities with highlightContent.
+      // removed for now because it conflicts with markdown elements.
+      // }
 
       if (item.display.collapsed) {
         if (currentGroup) {

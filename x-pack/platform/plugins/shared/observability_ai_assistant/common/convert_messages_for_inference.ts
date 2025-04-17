@@ -51,22 +51,39 @@ export function convertMessagesForInference(
 
   messages.forEach((message) => {
     if (message.message.role === MessageRole.Assistant) {
+      // Reapply redaction to stored assistant content
+      let assistantContent = message.message.content ?? null;
+      // Stored assistant content is un‑redacted, so reapply hashes here
+      // before sending the history back to the LLM.
+      if (message.message.detectedEntities?.length && assistantContent) {
+        assistantContent = redactEntities(assistantContent, message.message.detectedEntities);
+      }
+
+      // Reapply redaction inside function_call.arguments JSON, if any
+      let toolCalls;
+      if (message.message.function_call?.name) {
+        const rawArgsString = message.message.function_call.arguments ?? '';
+        // Replace any entity values with their hashes
+        const redactedArgsString = message.message.detectedEntities?.length
+          ? redactEntities(rawArgsString, message.message.detectedEntities)
+          : rawArgsString;
+        const parsedArgs = safeJsonParse(redactedArgsString, logger);
+
+        toolCalls = [
+          {
+            function: {
+              name: message.message.function_call.name,
+              arguments: parsedArgs,
+            },
+            toolCallId: generateFakeToolCallId(),
+          },
+        ];
+      }
+
       inferenceMessages.push({
         role: InferenceMessageRole.Assistant,
-        content: message.message.content ?? null,
-        ...(message.message.function_call?.name
-          ? {
-              toolCalls: [
-                {
-                  function: {
-                    name: message.message.function_call.name,
-                    arguments: safeJsonParse(message.message.function_call.arguments, logger),
-                  },
-                  toolCallId: generateFakeToolCallId(),
-                },
-              ],
-            }
-          : {}),
+        content: assistantContent ?? null,
+        ...(toolCalls ? { toolCalls } : {}),
       });
       return;
     }
