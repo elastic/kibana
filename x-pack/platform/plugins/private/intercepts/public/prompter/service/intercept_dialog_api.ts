@@ -48,7 +48,7 @@ interface InterceptDismissalEvent {
 /**
  * @internal
  */
-interface Intercept {
+export interface Intercept {
   id: string;
   runId: number;
   steps: [StartingInterceptStep, ...InterceptSteps[], CompletionInterceptStep];

@@ -15,7 +15,7 @@ interface InterceptTriggerServiceSetupDeps {
   kibanaVersion: string;
 }
 
-interface InterceptRegistrationCallbackArgs extends InterceptTriggerServiceSetupDeps {
+export interface InterceptRegistrationCallbackArgs extends InterceptTriggerServiceSetupDeps {
   existingTriggerDefinition?: InterceptTriggerRecord | null;
 }
 
