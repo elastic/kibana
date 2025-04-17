@@ -131,7 +131,10 @@ import type {
   RunExternalCallbacksPackagePolicyArgument,
   RunExternalCallbacksPackagePolicyResponse,
 } from './package_policy_service';
-import { installAssetsForInputPackagePolicy } from './epm/packages/install';
+import {
+  installAssetsForInputPackagePolicy,
+  removeAssetsForInputPackagePolicy,
+} from './epm/packages/input_type_packages';
 import { auditLoggingService } from './audit_logging';
 import {
   extractAndUpdateSecrets,
@@ -1658,6 +1661,29 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     if (secretsToDelete.length > 0) {
       await deleteSecrets({ esClient, soClient, ids: secretsToDelete });
     }
+
+    // if the integration it's an 'input' type,
+    // we need to remove the assets that were installed at the policy creation
+    await pMap(
+      packagePolicies,
+      async (packagePolicy) => {
+        const packageInfo = await getPackageInfo({
+          savedObjectsClient: soClient,
+          pkgName: packagePolicy.package?.name || '',
+          pkgVersion: packagePolicy.package?.version || '',
+        });
+
+        if (packageInfo?.type === 'input') {
+          removeAssetsForInputPackagePolicy({
+            packageInfo,
+            logger,
+            esClient,
+            soClient,
+          });
+        }
+      },
+      { concurrency: 20 }
+    );
 
     try {
       await packagePolicyService.runPostDeleteExternalCallbacks(
