@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DASHBOARD_APP_ID } from '@kbn/dashboard-plugin/public';
+import { DASHBOARD_APP_ID } from '@kbn/dashboard-plugin/common';
 import type { Filter } from '@kbn/es-query';
 import { FilterStateStore } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
