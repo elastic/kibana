@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useState } from 'react';
 
 import {
   EuiFlyout,
@@ -19,23 +19,82 @@ import {
   EuiButton,
   EuiButtonEmpty,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+
+import { FormattedMessage } from '@kbn/i18n-react';
+
+import type { FleetStartServices } from '../../../../../../../plugin';
+
+import { useUpdateCustomIntegration } from '../../../../../../../hooks';
+
+import type { PackageInfo } from '../../../../../types';
 
 export const EditIntegrationFlyout: React.FunctionComponent<{
   readMeContent: string | undefined;
   onClose: () => void;
   integrationName: string;
-  onSave: (updatedReadMe: string | undefined) => void;
-  savingEdits: boolean;
   miniIcon: React.ReactNode;
-}> = ({ onClose, integrationName, readMeContent, onSave, savingEdits, miniIcon }) => {
+  packageInfo: PackageInfo | null;
+  setIsEditOpen: (isOpen: boolean) => void;
+  integration: string | null;
+  services: FleetStartServices;
+  onComplete: (arg0: {}) => void;
+}> = ({
+  onClose,
+  integrationName,
+  readMeContent,
+  miniIcon,
+  packageInfo,
+  setIsEditOpen,
+  integration,
+  services,
+  onComplete,
+}) => {
+  const updateCustomIntegration = useUpdateCustomIntegration;
   const [editedContent, setEditedContent] = useState(readMeContent);
-  const onParse = useCallback((err: any, {}) => {
-    if (err) {
-      // handle error
-      return;
+  const [savingEdits, setSavingEdits] = useState(false);
+
+  const saveIntegrationEdits = async (updatedReadMe: string | undefined) => {
+    setSavingEdits(true);
+
+    const res = await updateCustomIntegration(packageInfo?.name || '', {
+      readMeData: updatedReadMe,
+      categories: [],
+    });
+
+    setSavingEdits(false);
+
+    setIsEditOpen(false);
+    // if everything is okay, then show success and redirect to new page
+    if (!res.error) {
+      services.notifications.toasts.addSuccess({
+        title: i18n.translate('xpack.fleet.epm.editReadMeSuccessToastTitle', {
+          defaultMessage: 'README updated',
+        }),
+        text: i18n.translate('xpack.fleet.epm.editReadMeSuccessToastText', {
+          defaultMessage:
+            'The README content has been updated successfully. Redirecting you to the updated integration.',
+        }),
+      });
+      setTimeout(() => {
+        // navigate to new page after 2 seconds
+        const urlParts = {
+          pkgkey: `${packageInfo?.name}-${res.data.result.version}`,
+          ...(integration ? { integration } : {}),
+        };
+        onComplete(urlParts);
+      }, 2000);
+    } else {
+      services.notifications.toasts.addError(res.error, {
+        title: i18n.translate('xpack.fleet.epm.editReadMeErrorToastTitle', {
+          defaultMessage: 'Error updating README file',
+        }),
+        toastMessage: i18n.translate('xpack.fleet.epm.editReadMeErrorToastText', {
+          defaultMessage: 'There was an error updating the README content.',
+        }),
+      });
     }
-    // do something with messages and ast
-  }, []);
+  };
   return (
     <EuiFlyout ownFocus onClose={onClose} aria-labelledby="editIntegrationFlyoutTitle">
       <EuiFlyoutHeader hasBorder>
@@ -51,10 +110,15 @@ export const EditIntegrationFlyout: React.FunctionComponent<{
       <EuiFlyoutBody>
         <EuiMarkdownEditor
           aria-label="Edit"
-          placeholder="Edit the README content here..."
+          placeholder={`${i18n.translate(
+            'xpack.fleet.epm.editIntegrationFlyout.markdownEditorPlaceholder',
+            {
+              defaultMessage: 'Edit the README content for {integrationName}...',
+              values: { integrationName },
+            }
+          )}...`}
           value={editedContent!}
           onChange={setEditedContent}
-          onParse={onParse}
           readOnly={false}
           height={600}
         />
@@ -62,16 +126,24 @@ export const EditIntegrationFlyout: React.FunctionComponent<{
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={onClose}>Cancel</EuiButtonEmpty>
+            <EuiButtonEmpty onClick={onClose}>
+              <FormattedMessage
+                id="xpack.fleet.editIntegrationFlyout.cancelButtonLabel"
+                defaultMessage="Cancel"
+              />
+            </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton
               isLoading={savingEdits}
               fill
               color="primary"
-              onClick={() => onSave(editedContent)}
+              onClick={() => saveIntegrationEdits(editedContent)}
             >
-              Save Changes
+              <FormattedMessage
+                id="xpack.fleet.editIntegrationFlyout.saveButtonLabel"
+                defaultMessage="Save Changes"
+              />
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>

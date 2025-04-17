@@ -61,7 +61,3 @@ export function MiniIcon({ packageName, integrationName, version, icons }: MiniI
 
   return <EuiIcon type={iconType} size="l" />;
 }
-
-export function LoadingMiniIcon({}) {
-  return <Loading />;
-}

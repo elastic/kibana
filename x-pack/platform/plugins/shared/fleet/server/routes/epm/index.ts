@@ -820,8 +820,8 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
       security: {
         authz: {
           requiredPrivileges: [
-            FLEET_API_PRIVILEGES.SETTINGS.READ,
-            FLEET_API_PRIVILEGES.INTEGRATIONS.READ,
+            FLEET_API_PRIVILEGES.SETTINGS.ALL,
+            FLEET_API_PRIVILEGES.INTEGRATIONS.ALL,
           ],
         },
       },

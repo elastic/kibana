@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty } from '@elastic/eui';
+import { EuiButton } from '@elastic/eui';
 import React from 'react';
 
 interface EditIntegrationButtonProps {
-  onClick: Function;
+  handleEditIntegrationClick: Function;
 }
 export function EditIntegrationButton(props: EditIntegrationButtonProps) {
-  const { onClick } = props;
+  const { handleEditIntegrationClick } = props;
   return (
-    <EuiButtonEmpty
-      onClick={(e: React.MouseEvent) => onClick(e)}
+    <EuiButton
+      onClick={(e: React.MouseEvent) => handleEditIntegrationClick(e)}
       iconType="pencil"
       aria-label="Edit"
     />

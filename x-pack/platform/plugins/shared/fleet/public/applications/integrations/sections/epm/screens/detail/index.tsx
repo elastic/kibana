@@ -48,7 +48,6 @@ import {
   useIntegrationsStateContext,
   useGetSettingsQuery,
   sendGetFileByPath,
-  useUpdateCustomIntegration,
 } from '../../../../hooks';
 import { useAgentless } from '../../../../../fleet/sections/agent_policy/create_package_policy_page/single_page_layout/hooks/setup_technology';
 import { INTEGRATIONS_ROUTING_PATHS } from '../../../../constants';
@@ -83,7 +82,6 @@ import {
   IconPanel,
   LoadingIconPanel,
   MiniIcon,
-  LoadingMiniIcon,
   AddIntegrationButton,
   EditIntegrationButton,
 } from './components';
@@ -135,7 +133,6 @@ function Breadcrumbs({ packageTitle }: { packageTitle: string }) {
   useBreadcrumbs('integration_details_overview', { pkgTitle: packageTitle });
   return null;
 }
-const updateCustomIntegration = useUpdateCustomIntegration;
 
 export function Detail() {
   const theme = useEuiTheme();
@@ -177,7 +174,6 @@ export function Detail() {
   // edit readme state
 
   const [isEditOpen, setIsEditOpen] = useState(false);
-  const [savingEdits, setSavingEdits] = useState(false);
   const [shouldAllowEdit, setShouldAllowEdit] = useState(false);
   const [readMeContent, setReadMeContent] = useState<string>('');
   // Package info state
@@ -411,46 +407,6 @@ export function Detail() {
     [integrationInfo, isLoading, packageInfo, fromIntegrationsPath, queryParams]
   );
 
-  const saveIntegrationEdits = async (updatedReadMe: string | undefined) => {
-    setSavingEdits(true);
-
-    const res = await updateCustomIntegration(packageInfo?.name || '', {
-      readMeData: updatedReadMe,
-      categories: [],
-    });
-
-    setSavingEdits(false);
-    setIsEditOpen(false);
-    // if everything is okay, then show success and redirect to new page
-    if (!res.error) {
-      services.notifications.toasts.addSuccess({
-        title: i18n.translate('xpack.fleet.epm.editReadMeSuccessToastTitle', {
-          defaultMessage: 'Read me updated',
-        }),
-        text: i18n.translate('xpack.fleet.epm.editReadMeSuccessToastText', {
-          defaultMessage:
-            'The read me content has been updated successfully. Redirecting you to the updated integration!',
-        }),
-      });
-      setTimeout(() => {
-        // navigate to new page
-        const path = getPath('integration_details_overview', {
-          pkgkey: `${packageInfo?.name}-${res.data.result.version}`,
-          ...(integration ? { integration } : {}),
-        });
-        history.push(path);
-      }, 2000);
-    } else {
-      services.notifications.toasts.addError(res.error, {
-        title: i18n.translate('xpack.fleet.epm.editReadMeErrorToastTitle', {
-          defaultMessage: 'Error updating read me',
-        }),
-        toastMessage: i18n.translate('xpack.fleet.epm.editReadMeErrorToastText', {
-          defaultMessage: 'There was an error updating the read me content.',
-        }),
-      });
-    }
-  };
   const handleEditIntegrationClick = useCallback<ReactEventHandler>(
     (ev) => {
       const readmePath = packageInfo?.readme;
@@ -628,11 +584,13 @@ export function Detail() {
                         >
                           <EuiFlexGroup justifyContent="center" alignItems="center" gutterSize="s">
                             {shouldAllowEdit && (
-                              <EuiFlexItem>
-                                <EditIntegrationButton onClick={handleEditIntegrationClick} />
+                              <EuiFlexItem grow={false}>
+                                <EditIntegrationButton
+                                  handleEditIntegrationClick={handleEditIntegrationClick}
+                                />
                               </EuiFlexItem>
                             )}
-                            <EuiFlexItem>
+                            <EuiFlexItem grow={false}>
                               <AddIntegrationButton
                                 userCanInstallPackages={userCanInstallPackages}
                                 href={getHref('add_integration_to_policy', {
@@ -939,11 +897,17 @@ export function Detail() {
           readMeContent={readMeContent}
           integrationName={packageInfo?.title || 'UNDEFINED'}
           onClose={() => setIsEditOpen(false)}
-          onSave={saveIntegrationEdits}
-          savingEdits={savingEdits}
+          packageInfo={packageInfo}
+          setIsEditOpen={setIsEditOpen}
+          integration={integration}
+          services={services}
+          onComplete={(urlParts) => {
+            const path = getPath('integration_details_overview', urlParts);
+            history.push(path);
+          }}
           miniIcon={
             isLoading || !packageInfo ? (
-              <LoadingMiniIcon />
+              <Loading />
             ) : (
               <MiniIcon
                 packageName={packageInfo?.name}

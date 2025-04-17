@@ -14,10 +14,18 @@ import { appContextService } from '../../app_context';
 
 import { getInstalledPackageWithAssets } from './get';
 import { installPackageWithStateMachine } from './install';
-import { updateCustomIntegration } from './update_custom_integration';
+import { incrementVersionAndUpdate, updateCustomIntegration } from './update_custom_integration';
 
 jest.mock('./get');
 jest.mock('./install');
+jest.mock('../../package_policy', () => {
+  return {
+    packagePolicyService: {
+      listIds: jest.fn().mockResolvedValue({ items: [] }),
+      bulkUpgrade: jest.fn().mockResolvedValue({}),
+    },
+  };
+});
 
 const mockGetInstalledPackageWithAssets = getInstalledPackageWithAssets as jest.MockedFunction<
   typeof getInstalledPackageWithAssets
@@ -45,6 +53,7 @@ describe('updateCustomIntegration', () => {
         version: '1.0.0',
         title: 'Test Integration',
         description: 'Test integration description',
+        install_source: 'custom',
       },
       references: [],
     });
@@ -86,6 +95,7 @@ describe('updateCustomIntegration', () => {
         title: 'Test Integration',
         description: 'Test integration description',
       },
+      status: 'installed',
     } as any);
   });
 
@@ -104,7 +114,6 @@ describe('updateCustomIntegration', () => {
       version: '1.0.1',
       status: 'installed',
     });
-
     // Verify that getInstalledPackageWithAssets was called with correct params
     expect(mockGetInstalledPackageWithAssets).toHaveBeenCalledWith({
       savedObjectsClient,
@@ -124,6 +133,26 @@ describe('updateCustomIntegration', () => {
     );
   });
 
+  it('should increment version and update correctly', async () => {
+    const result = await incrementVersionAndUpdate(
+      savedObjectsClient,
+      esClient,
+      'test-integration',
+      {
+        readme: '# Updated Test Integration',
+        version: '1.0.1',
+      }
+    );
+    expect(result).toEqual({
+      attributes: {
+        name: 'test-integration',
+        version: '1.0.1',
+        title: 'Test Integration',
+        description: 'Test integration description',
+      },
+      status: 'installed',
+    });
+  });
   it('should throw an error when integration is not found', async () => {
     // Instead of returning null, mock the error that would be thrown by SavedObjectsClient
     savedObjectsClient.get.mockImplementationOnce(() => {
@@ -149,5 +178,26 @@ describe('updateCustomIntegration', () => {
         readMeData: '# Updated Test Integration',
       })
     ).rejects.toThrow('Test error during update');
+  });
+
+  it('should throw an error when integration is not a custom integration', async () => {
+    savedObjectsClient.get.mockResolvedValue({
+      id: 'test-integration',
+      type: 'epm-packages',
+      attributes: {
+        name: 'test-integration',
+        version: '1.0.0',
+        title: 'Test Integration',
+        description: 'Test integration description',
+        install_source: 'other',
+      },
+      references: [],
+    });
+
+    await expect(
+      updateCustomIntegration(esClient, savedObjectsClient, 'test-integration', {
+        readMeData: '# Updated Test Integration',
+      })
+    ).rejects.toThrow('Integration with ID test-integration is not a custom integration');
   });
 });

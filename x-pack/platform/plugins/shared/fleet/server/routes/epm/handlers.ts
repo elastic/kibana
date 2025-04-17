@@ -86,7 +86,7 @@ import { NamingCollisionError } from '../../services/epm/packages/custom_integra
 import { DatasetNamePrefixError } from '../../services/epm/packages/custom_integrations/validation/check_dataset_name_format';
 import { UPLOAD_RETRY_AFTER_MS } from '../../services/epm/packages/install';
 import { getPackagePoliciesCountByPackageName } from '../../services/package_policies/package_policies_aggregation';
-import { CustomIntegrationNotFoundError } from '../../services/epm/packages/custom_integrations/validation/check_custom_integration';
+import { CustomIntegrationNotFoundError, NotACustomIntegrationError } from '../../errors';
 
 const CACHE_CONTROL_10_MINUTES_HEADER: HttpResponseOptions['headers'] = {
   'cache-control': 'max-age=600',
@@ -415,14 +415,21 @@ export const updateCustomIntegrationHandler: FleetRequestHandler<
   } catch (error) {
     if (error instanceof CustomIntegrationNotFoundError) {
       return response.customError({
-        statusCode: 403,
+        statusCode: 404,
         body: {
           message: error.message,
         },
       });
+    } else if (error instanceof NotACustomIntegrationError) {
+      return response.customError({
+        statusCode: 403,
+        body: {
+          message: `Failed to update integration: ${error.message}`,
+        },
+      });
     } else {
       return response.customError({
-        statusCode: 400,
+        statusCode: 500,
         body: {
           message: `Failed to update integration: ${error.message}`,
         },

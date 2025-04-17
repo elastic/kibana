@@ -31,11 +31,11 @@ interface IntegrationAttributes {
   install_source: string;
   [key: string]: any;
 }
+import { CustomIntegrationNotFoundError, NotACustomIntegrationError } from '../../../errors';
 
 import { getInstalledPackageWithAssets } from './get';
 
 import { installPackageWithStateMachine } from './install';
-import { CustomIntegrationNotFoundError } from './custom_integrations/validation/check_custom_integration';
 
 export async function updateCustomIntegration(
   esClient: ElasticsearchClient,
@@ -46,48 +46,41 @@ export async function updateCustomIntegration(
     categories?: string[];
   }
 ) {
+  // Get the current integration using the id
+  let integration: SavedObject<IntegrationAttributes> | null = null;
+
   try {
-    // Get the current integration using the id
-    const integration: SavedObject<IntegrationAttributes> = await soClient.get(
-      PACKAGES_SAVED_OBJECT_TYPE,
-      id
-    );
-    if (!integration) {
-      throw new Error(`Integration with ID ${id} not found`);
-    } else if (
-      integration.attributes.install_source !== 'custom' &&
-      integration.attributes.install_source !== 'upload'
-    ) {
-      throw new CustomIntegrationNotFoundError(
-        `Integration with ID ${id} is not a custom integration`
-      );
-    } else {
-      // add one to the patch version in the semver
-      const newVersion = integration.attributes.version.split('.');
-      newVersion[2] = (parseInt(newVersion[2], 10) + 1).toString();
-      const newVersionString = newVersion.join('.');
-      // Increment the version of everything and create a new package
-      const res = await incrementVersionAndUpdate(soClient, esClient, id, {
-        version: newVersionString,
-        readme: fields.readMeData,
-      })
-        .then((response) => {
-          return response;
-        })
-        .catch((e) => {
-          return e;
-        });
-      return {
-        version: newVersionString,
-        status: res.status,
-      };
-    }
+    integration = await soClient.get(PACKAGES_SAVED_OBJECT_TYPE, id);
   } catch (error) {
-    throw new Error(error.message);
+    // Ignore the error and handle the case where integration is null later
+  }
+
+  // if theres no integration, the soClient will throw the error above and we will ignore it so we can handle it with our own here
+  if (!integration) {
+    throw new CustomIntegrationNotFoundError(`Integration with ID ${id} not found`);
+  } else if (
+    integration.attributes.install_source !== 'custom' &&
+    integration.attributes.install_source !== 'upload'
+  ) {
+    throw new NotACustomIntegrationError(`Integration with ID ${id} is not a custom integration`);
+  } else {
+    // add one to the patch version in the semver
+    const newVersion = integration.attributes.version.split('.');
+    newVersion[2] = (parseInt(newVersion[2], 10) + 1).toString();
+    const newVersionString = newVersion.join('.');
+    // Increment the version of everything and create a new package
+    const res = await incrementVersionAndUpdate(soClient, esClient, id, {
+      version: newVersionString,
+      readme: fields.readMeData,
+    });
+    return {
+      version: newVersionString,
+      status: res.status,
+    };
   }
 }
 // Increments the version of everything, then creates a new package with the new version, readme, etc.
-async function incrementVersionAndUpdate(
+export async function incrementVersionAndUpdate(
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
   pkgName: string,
