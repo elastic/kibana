@@ -8,6 +8,7 @@
  */
 
 import React, { useCallback, useMemo, useRef, useState } from 'react';
+import { i18n } from '@kbn/i18n';
 import { htmlIdGenerator, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { TabsBar, type TabsBarProps, type TabsBarApi } from '../tabs_bar';
 import { getTabAttributes } from '../../utils/get_tab_attributes';
@@ -143,7 +144,28 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
       maxItemsCount,
       onDuplicate: (item) => {
         const newItem = createItem();
-        newItem.label = `${item.label} (copy)`;
+        const baseLabel = item.label.replace(/\s*\(copy\)( \d+)?$/, '');
+
+        // Find all existing copies to determine next number
+        const copyRegex = new RegExp(`^${baseLabel}\\s*\\(copy\\)( \\d+)?$`);
+        const copies = state.items
+          .filter((tab) => copyRegex.test(tab.label))
+          .map((tab) => {
+            const match = tab.label.match(/\(copy\) (\d+)$/);
+            return match && match[1] ? Number(match[1]) : 1; // match[1] is the number after (copy)
+          });
+
+        // Determine the next copy number
+        const nextNumber = copies.length > 0 ? Math.max(...copies) + 1 : null;
+
+        newItem.label = i18n.translate('unifiedTabs.duplicatedTabLabel', {
+          defaultMessage: nextNumber ? `{baseLabel} (copy) {number}` : '{baseLabel} (copy)',
+          values: {
+            baseLabel,
+            number: nextNumber,
+          },
+        });
+
         tabsBarApi.current?.moveFocusToNextSelectedItem(newItem);
         changeState((prevState) => insertTabAfter(prevState, newItem, item, maxItemsCount));
       },
