@@ -80,3 +80,16 @@ export const ATTACK_DISCOVERY_SCHEDULES_BY_ID_ENABLE =
 export const ATTACK_DISCOVERY_SCHEDULES_BY_ID_DISABLE =
   `${ATTACK_DISCOVERY_SCHEDULES}/{id}/_disable` as const;
 export const ATTACK_DISCOVERY_SCHEDULES_FIND = `${ATTACK_DISCOVERY_SCHEDULES}/_find` as const;
+
+/**
+ * The server timeout is set to 4 minutes to allow for long-running requests.
+ * The allows slower LLMs (like Llama 3.1 70B) and complex tasks such as ESQL generation to complete
+ * without being interrupted.
+ */
+export const INVOKE_LLM_SERVER_TIMEOUT = 4 * 60 * 1000; // 4 minutes
+/**
+ * The client timeout is set to 3 seconds less than the server timeout to prevent
+ * the `core-http-browser` from retrying the request.
+ *
+ */
+export const INVOKE_LL_CLIENT_TIMEOUT = INVOKE_LLM_SERVER_TIMEOUT - 3000; // 4 minutes - 3 second
