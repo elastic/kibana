@@ -49,9 +49,8 @@ export const mergeExceptionLists = (
   latestPrebuiltRule: PrebuiltRuleAsset,
   installedRules: Map<string, RuleAlertType>
 ): PrebuiltRuleAsset => {
+  const installedRule = installedRules.get(latestPrebuiltRule.rule_id);
   if (latestPrebuiltRule.exceptions_list != null) {
-    const installedRule = installedRules.get(latestPrebuiltRule.rule_id);
-
     if (installedRule != null && installedRule.params.exceptionsList != null) {
       const installedExceptionList = installedRule.params.exceptionsList;
       const fileSystemExceptions = latestPrebuiltRule.exceptions_list.filter((potentialDuplicate) =>
@@ -65,6 +64,8 @@ export const mergeExceptionLists = (
       return latestPrebuiltRule;
     }
   } else {
+    // Carry over the previous version's exception list
+    latestPrebuiltRule.exceptions_list = installedRule?.params.exceptionsList;
     return latestPrebuiltRule;
   }
 };

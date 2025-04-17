@@ -75,6 +75,11 @@ export const upgradePrebuiltRule = async ({
     ruleUpdate: ruleAsset,
   });
 
+  // We want to preserve existing actions from existing rule on upgrade
+  if (existingRule.actions.length) {
+    updatedRule.actions = existingRule.actions;
+  }
+
   const updatedInternalRule = await rulesClient.update({
     id: existingRule.id,
     data: convertRuleResponseToAlertingRule(updatedRule, actionsClient),
