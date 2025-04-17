@@ -93,6 +93,7 @@ export const createNavigationTree = (services: Services): NavigationTreeDefiniti
       breadcrumbStatus: 'hidden',
       children: [
         {
+          id: 'stack_management', // this ID is necessary for the landing page button
           title: i18nStrings.stackManagement.title,
           renderAs: 'panelOpener',
           spaceBefore: null,
