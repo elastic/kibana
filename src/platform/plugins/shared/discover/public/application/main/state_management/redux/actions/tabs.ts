@@ -31,8 +31,8 @@ export const setTabs: InternalStateThunkActionCreator<
   (dispatch, getState, { runtimeStateManager, tabsStorageManager }) => {
     const previousState = getState();
     const previousTabs = selectAllTabs(previousState);
-    const removedTabs = differenceBy(previousTabs, params.allTabs, (tab) => tab.id);
-    const addedTabs = differenceBy(params.allTabs, previousTabs, (tab) => tab.id);
+    const removedTabs = differenceBy(previousTabs, params.allTabs, differenceIterateeByTabId);
+    const addedTabs = differenceBy(params.allTabs, previousTabs, differenceIterateeByTabId);
 
     for (const tab of removedTabs) {
       dispatch(disconnectTab({ tabId: tab.id }));
@@ -47,7 +47,8 @@ export const setTabs: InternalStateThunkActionCreator<
       internalStateSlice.actions.setTabs({
         ...params,
         recentlyClosedTabs: tabsStorageManager.getNRecentlyClosedTabs(
-          params.recentlyClosedTabs,
+          // clean up the recently closed tabs if the same ids are present in next open tabs
+          differenceBy(params.recentlyClosedTabs, params.allTabs, differenceIterateeByTabId),
           removedTabs
         ),
       })
@@ -156,7 +157,7 @@ export const updateTabAppStateAndGlobalState: InternalStateThunkActionCreator<[T
 
 export const initiateTabs: InternalStateThunkActionCreator<[{ userId: string; spaceId: string }]> =
   ({ userId, spaceId }) =>
-  (dispatch, _, { tabsStorageManager, services }) => {
+  (dispatch, _, { tabsStorageManager }) => {
     const defaultGroupId = uuidv4();
     const initialTabsState = tabsStorageManager.loadLocally({
       userId,
@@ -227,3 +228,7 @@ export const disconnectTab: InternalStateThunkActionCreator<[TabActionPayload]> 
     stateContainer?.actions.stopSyncing();
     tabRuntimeState.customizationService$.getValue()?.cleanup();
   };
+
+function differenceIterateeByTabId(tab: TabState) {
+  return tab.id;
+}
