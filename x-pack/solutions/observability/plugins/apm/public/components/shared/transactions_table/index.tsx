@@ -29,6 +29,7 @@ import { OverviewTableContainer } from '../overview_table_container';
 import { isTimeComparison } from '../time_comparison/get_comparison_options';
 import { getColumns } from './get_columns';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
+import { getComparisonEnabled } from '../time_comparison/get_comparison_enabled';
 
 type ApiResponse =
   APIReturnType<'GET /internal/apm/services/{serviceName}/transactions/groups/main_statistics'>;
@@ -73,6 +74,7 @@ export function TransactionsTable({
   showSparkPlots,
 }: Props) {
   const { link } = useApmRouter();
+  const { core, observabilityAIAssistant } = useApmPluginContext();
   const [renderedItemIndices, setRenderedItemIndices] = useState<VisibleItemsStartEnd>([0, 0]);
 
   const {
@@ -82,10 +84,16 @@ export function TransactionsTable({
     '/services/{serviceName}/transactions',
     '/services/{serviceName}/overview',
     '/mobile-services/{serviceName}/transactions',
-    '/mobile-services/{serviceName}/overview'
+    '/mobile-services/{serviceName}/overview',
+    '/services/{serviceName}/transactions/view'
   );
 
   const latencyAggregationType = getLatencyAggregationType(latencyAggregationTypeFromQuery);
+
+  const defaultComparisonEnabled = getComparisonEnabled({
+    core,
+    urlComparisonEnabled: comparisonEnabled,
+  });
 
   const { isLarge } = useBreakpoints();
   const shouldShowSparkPlots = showSparkPlots ?? !isLarge;
@@ -126,7 +134,7 @@ export function TransactionsTable({
       latencyAggregationType: latencyAggregationType as LatencyAggregationType,
       detailedStatisticsLoading: isPending(detailedStatisticsStatus),
       detailedStatistics,
-      comparisonEnabled,
+      comparisonEnabled: defaultComparisonEnabled,
       shouldShowSparkPlots,
       offset,
       transactionOverflowCount: mainStatistics.transactionOverflowCount,
@@ -135,7 +143,7 @@ export function TransactionsTable({
       query,
     });
   }, [
-    comparisonEnabled,
+    defaultComparisonEnabled,
     detailedStatistics,
     detailedStatisticsStatus,
     latencyAggregationType,
@@ -148,7 +156,6 @@ export function TransactionsTable({
     shouldShowSparkPlots,
   ]);
 
-  const { core, observabilityAIAssistant } = useApmPluginContext();
   const setScreenContext = observabilityAIAssistant?.service.setScreenContext;
 
   const isTableSearchBarEnabled = core.uiSettings.get<boolean>(apmEnableTableSearchBar, true);
@@ -202,6 +209,7 @@ export function TransactionsTable({
                   serviceName={serviceName}
                   latencyAggregationType={latencyAggregationType}
                   transactionType={transactionType}
+                  query={query}
                 >
                   {i18n.translate('xpack.apm.transactionsTable.linkText', {
                     defaultMessage: 'View transactions',
