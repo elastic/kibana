@@ -167,7 +167,7 @@ export function SloApiProvider({ getService }: DeploymentAgnosticFtrProviderCont
       force: boolean = false
     ) {
       const { body } = await supertestWithoutAuth
-        .post(`/api/observability/slos/_purge_rollup${force ? '?force=true' : ''}`)
+        .post(`/api/observability/slos/_bulk_purge_rollup${force ? '?force=true' : ''}`)
         .set(roleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
         .send({

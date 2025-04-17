@@ -6,10 +6,7 @@
  */
 
 import { ElasticsearchClient } from '@kbn/core/server';
-import {
-  PurgePolicyType,
-  PurgeRollupSchemaType,
-} from '@kbn/slo-schema/src/rest_specs/routes/bulk_purge_rollup';
+import { PurgeRollupSchemaType } from '@kbn/slo-schema/src/rest_specs/routes/bulk_purge_rollup';
 import { calendarAlignedTimeWindowSchema } from '@kbn/slo-schema';
 import { assertNever } from '@elastic/eui';
 import { DeleteByQueryResponse } from '@elastic/elasticsearch/lib/api/types';
@@ -17,6 +14,7 @@ import moment from 'moment';
 import { SLI_DESTINATION_INDEX_PATTERN } from '../../common/constants';
 import { SLORepository } from './slo_repository';
 import { IllegalArgumentError } from '../errors';
+import { SLODefinition } from '../domain/models';
 
 export class PurgeRollupData {
   constructor(private esClient: ElasticsearchClient, private repository: SLORepository) {}
@@ -25,9 +23,10 @@ export class PurgeRollupData {
     params: PurgeRollupSchemaType
   ): Promise<{ taskId: DeleteByQueryResponse['task'] }> {
     const lookback = this.getTimestamp(params.purgePolicy);
+    const slos = await this.repository.findAllByIds(params.ids);
 
     if (params.force !== true) {
-      await this.validatePurgePolicy(params);
+      await this.validatePurgePolicy(slos, params.purgePolicy);
     }
 
     const response = await this.esClient.deleteByQuery({
@@ -40,7 +39,7 @@ export class PurgeRollupData {
         bool: {
           filter: [
             {
-              terms: { 'slo.id': params.ids },
+              terms: { 'slo.id': slos.map((slo) => slo.id) },
             },
             {
               range: {
@@ -57,9 +56,10 @@ export class PurgeRollupData {
     return { taskId: response.task };
   }
 
-  private async validatePurgePolicy(params: PurgeRollupSchemaType) {
-    const { ids, purgePolicy } = params;
-    const slos = await this.repository.findAllByIds(ids);
+  private async validatePurgePolicy(
+    slos: Array<SLODefinition>,
+    purgePolicy: PurgeRollupSchemaType['purgePolicy']
+  ) {
     const purgeType = purgePolicy.purgeType;
     let inputIsInvalid = false;
 
@@ -77,14 +77,14 @@ export class PurgeRollupData {
         });
         break;
       case 'fixed_time':
-        const timestamp = purgePolicy.timestamp;
+        const timestampMoment = moment(purgePolicy.timestamp);
         inputIsInvalid = slos.some((slo) => {
           if (calendarAlignedTimeWindowSchema.is(slo.timeWindow)) {
-            return moment(timestamp).isAfter(
+            return timestampMoment.isAfter(
               moment(Date.now()).startOf(slo.timeWindow.duration.unit)
             );
           } else {
-            return moment(timestamp).isAfter(
+            return timestampMoment.isAfter(
               moment(Date.now()).subtract(slo.timeWindow.duration.asSeconds(), 's')
             );
           }
@@ -101,11 +101,12 @@ export class PurgeRollupData {
     }
   }
 
-  private getTimestamp(purgePolicy: PurgePolicyType): string {
+  private getTimestamp(purgePolicy: PurgeRollupSchemaType['purgePolicy']): string {
     if (purgePolicy.purgeType === 'fixed_age') {
       return `now-${purgePolicy.age.format()}`;
-    } else {
+    } else if (purgePolicy.purgeType === 'fixed_time') {
       return purgePolicy.timestamp.toISOString();
     }
+    assertNever(purgePolicy);
   }
 }

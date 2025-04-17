@@ -11,7 +11,6 @@ import { allOrAnyStringOrArray, dateType } from './common';
 import { durationType } from './duration';
 import { indicatorSchema } from './indicators';
 import { timeWindowSchema } from './time_window';
-import { bulkPurgeRollupSchema } from '../rest_specs/routes/bulk_purge_rollup';
 
 const occurrencesBudgetingMethodSchema = t.literal('occurrences');
 const timeslicesBudgetingMethodSchema = t.literal('timeslices');
@@ -104,7 +103,6 @@ const sloDefinitionSchema = t.intersection([
 
 export {
   budgetingMethodSchema,
-  bulkPurgeRollupSchema,
   objectiveSchema,
   groupBySchema,
   occurrencesBudgetingMethodSchema,

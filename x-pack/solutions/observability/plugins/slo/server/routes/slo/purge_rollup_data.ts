@@ -12,7 +12,7 @@ import { PurgeRollupData } from '../../services/purge_rollup_data';
 import { KibanaSavedObjectsSLORepository } from '../../services';
 
 export const purgeRollupDataRoute = createSloServerRoute({
-  endpoint: 'POST /api/observability/slos/_purge_rollup 2023-10-31',
+  endpoint: 'POST /api/observability/slos/_bulk_purge_rollup 2023-10-31',
   security: {
     authz: {
       requiredPrivileges: ['slo_write'],

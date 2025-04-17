@@ -131,12 +131,12 @@ describe('purge rollup data', () => {
       });
       mockRepository.findAllByIds.mockResolvedValueOnce([slo]);
 
-      expect(async () => {
-        return await purgeRollupData.execute({
+      expect(
+        purgeRollupData.execute({
           ids: ['test1'],
           purgePolicy: { purgeType: 'fixed_age', age: new Duration(3, DurationUnit.Day) },
-        });
-      }).rejects.toThrowError();
+        })
+      ).rejects.toThrowError();
 
       expect(mockEsClient.deleteByQuery).toHaveBeenCalledTimes(0);
     });
@@ -152,12 +152,12 @@ describe('purge rollup data', () => {
       });
       mockRepository.findAllByIds.mockResolvedValueOnce([slo]);
 
-      expect(async () => {
-        return await purgeRollupData.execute({
+      expect(
+        purgeRollupData.execute({
           ids: ['test2'],
           purgePolicy: { purgeType: 'fixed_age', age: new Duration(1, DurationUnit.Day) },
-        });
-      }).rejects.toThrowError();
+        })
+      ).rejects.toThrowError();
 
       expect(mockEsClient.deleteByQuery).toHaveBeenCalledTimes(0);
     });
@@ -173,12 +173,12 @@ describe('purge rollup data', () => {
       });
       mockRepository.findAllByIds.mockResolvedValueOnce([slo]);
 
-      expect(async () => {
-        return await purgeRollupData.execute({
+      expect(
+        purgeRollupData.execute({
           ids: ['test3'],
           purgePolicy: { purgeType: 'fixed_time', timestamp: new Date() },
-        });
-      }).rejects.toThrowError();
+        })
+      ).rejects.toThrowError();
 
       expect(mockEsClient.deleteByQuery).toHaveBeenCalledTimes(0);
     });
