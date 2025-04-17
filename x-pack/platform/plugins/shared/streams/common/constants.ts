@@ -6,3 +6,7 @@
  */
 
 export const ASSET_VERSION = 1;
+
+export const STREAMS_FEATURE_ID = 'streams';
+
+export const STREAMS_RULE_REGISTRATION_CONTEXT = 'observability.streams';

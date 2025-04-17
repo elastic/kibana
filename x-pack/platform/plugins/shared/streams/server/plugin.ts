@@ -8,14 +8,20 @@
 import {
   CoreSetup,
   CoreStart,
+  DEFAULT_APP_CATEGORIES,
   KibanaRequest,
   Logger,
   Plugin,
   PluginConfigDescriptor,
   PluginInitializerContext,
 } from '@kbn/core/server';
+import { KibanaFeatureScope } from '@kbn/features-plugin/common';
+import { i18n } from '@kbn/i18n';
+import { STREAMS_RULE_TYPE_IDS } from '@kbn/rule-data-utils';
 import { registerRoutes } from '@kbn/server-route-repository';
 import { StreamsConfig, configSchema, exposeToBrowserConfig } from '../common/config';
+import { STREAMS_FEATURE_ID } from '../common/constants';
+import { registerRules } from './lib/rules/register_rules';
 import { AssetService } from './lib/streams/assets/asset_service';
 import { StreamsService } from './lib/streams/service';
 import { StreamsTelemetryService } from './lib/telemetry/service';
@@ -26,7 +32,6 @@ import {
   StreamsPluginStartDependencies,
   StreamsServer,
 } from './types';
-import { registerRules } from './lib/rules/register_rules';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface StreamsPluginSetup {}
@@ -69,6 +74,60 @@ export class StreamsPlugin
     } as StreamsServer;
 
     this.telemtryService.setup(core.analytics);
+
+    const alertingFeatures = STREAMS_RULE_TYPE_IDS.map((ruleTypeId) => ({
+      ruleTypeId,
+      consumers: [STREAMS_FEATURE_ID],
+    }));
+
+    plugins.features.registerKibanaFeature({
+      id: STREAMS_FEATURE_ID,
+      name: i18n.translate('xpack.streams.kibanaFeature', {
+        defaultMessage: 'Streams',
+      }),
+      order: 1300,
+      category: DEFAULT_APP_CATEGORIES.observability,
+      scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
+      app: [STREAMS_FEATURE_ID, 'kibana'],
+      catalogue: [STREAMS_FEATURE_ID, 'observability'],
+      alerting: alertingFeatures,
+      privileges: {
+        all: {
+          app: [STREAMS_FEATURE_ID, 'kibana'],
+          catalogue: [STREAMS_FEATURE_ID, 'observability'],
+          savedObject: {
+            all: [],
+            read: [],
+          },
+          alerting: {
+            rule: {
+              all: alertingFeatures,
+            },
+            alert: {
+              all: alertingFeatures,
+            },
+          },
+          ui: ['read', 'write'],
+        },
+        read: {
+          app: [STREAMS_FEATURE_ID, 'kibana'],
+          catalogue: [STREAMS_FEATURE_ID, 'observability'],
+          savedObject: {
+            all: [],
+            read: [],
+          },
+          alerting: {
+            rule: {
+              read: alertingFeatures,
+            },
+            alert: {
+              read: alertingFeatures,
+            },
+          },
+          ui: ['read'],
+        },
+      },
+    });
 
     const assetService = new AssetService(core, this.logger);
     const streamsService = new StreamsService(core, this.logger, this.isDev);

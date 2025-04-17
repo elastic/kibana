@@ -12,6 +12,7 @@ import { technicalRuleFieldMap } from '@kbn/rule-registry-plugin/common/assets/f
 import { Dataset, createPersistenceRuleTypeWrapper } from '@kbn/rule-registry-plugin/server';
 import { StreamsPluginSetupDependencies } from '../../types';
 import { esqlRuleType } from './esql/register';
+import { STREAMS_FEATURE_ID, STREAMS_RULE_REGISTRATION_CONTEXT } from '../../../common/constants';
 
 interface Props {
   plugins: StreamsPluginSetupDependencies;
@@ -20,8 +21,8 @@ interface Props {
 
 export function registerRules({ plugins, logger }: Props) {
   const ruleDataClient = plugins.ruleRegistry.ruleDataService.initializeIndex({
-    feature: 'observability',
-    registrationContext: 'observability.streams',
+    feature: STREAMS_FEATURE_ID,
+    registrationContext: STREAMS_RULE_REGISTRATION_CONTEXT,
     dataset: Dataset.alerts,
     componentTemplateRefs: [ECS_COMPONENT_TEMPLATE_NAME],
     componentTemplates: [

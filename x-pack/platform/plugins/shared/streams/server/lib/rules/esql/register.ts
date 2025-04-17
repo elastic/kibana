@@ -12,6 +12,10 @@ import { technicalRuleFieldMap } from '@kbn/rule-registry-plugin/common/assets/f
 import { PersistenceAlertType } from '@kbn/rule-registry-plugin/server';
 import { getRuleExecutor } from './executor';
 import { EsqlRuleParams, esqlRuleParams } from './types';
+import {
+  STREAMS_FEATURE_ID,
+  STREAMS_RULE_REGISTRATION_CONTEXT,
+} from '../../../../common/constants';
 
 export function esqlRuleType(): PersistenceAlertType<
   EsqlRuleParams,
@@ -40,7 +44,7 @@ export function esqlRuleType(): PersistenceAlertType<
       },
     ],
     category: DEFAULT_APP_CATEGORIES.observability.id,
-    producer: 'observability',
+    producer: STREAMS_FEATURE_ID,
     solution: 'observability',
     minimumLicenseRequired: 'basic',
     isExportable: false,
@@ -48,7 +52,7 @@ export function esqlRuleType(): PersistenceAlertType<
     executor: getRuleExecutor,
     autoRecoverAlerts: false,
     alerts: {
-      context: 'observability.streams',
+      context: STREAMS_RULE_REGISTRATION_CONTEXT,
       mappings: { dynamic: false, fieldMap: { ...technicalRuleFieldMap } },
       useEcs: true,
       useLegacyAlerts: true,
