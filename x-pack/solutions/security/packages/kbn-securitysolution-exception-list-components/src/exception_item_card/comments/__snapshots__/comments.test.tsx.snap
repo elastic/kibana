@@ -88,7 +88,7 @@ Object {
                 class="euiAccordion__buttonContent"
               >
                 <div
-                  class="euiText emotion-EuiText"
+                  class="euiText emotion-euiText-s-accordionCss"
                   data-test-subj="ExceptionItemCardCommentsContainerTextButton"
                 >
                   Show comments (2)
@@ -225,7 +225,7 @@ Object {
               class="euiAccordion__buttonContent"
             >
               <div
-                class="euiText emotion-EuiText"
+                class="euiText emotion-euiText-s-accordionCss"
                 data-test-subj="ExceptionItemCardCommentsContainerTextButton"
               >
                 Show comments (2)
@@ -419,7 +419,7 @@ Object {
                 class="euiAccordion__buttonContent"
               >
                 <div
-                  class="euiText emotion-EuiText"
+                  class="euiText emotion-euiText-s-accordionCss"
                   data-test-subj="ExceptionItemCardCommentsContainerTextButton"
                 >
                   Show comments (2)
@@ -555,7 +555,7 @@ Object {
               class="euiAccordion__buttonContent"
             >
               <div
-                class="euiText emotion-EuiText"
+                class="euiText emotion-euiText-s-accordionCss"
                 data-test-subj="ExceptionItemCardCommentsContainerTextButton"
               >
                 Show comments (2)
