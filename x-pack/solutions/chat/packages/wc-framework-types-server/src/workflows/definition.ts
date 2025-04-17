@@ -30,7 +30,7 @@ export interface BaseWorkflowDefinition {
    * A short description of what this workflow does.
    * Will be exposed to the LLM in some situations (e.g. assistant orchestrator or intent detection step)
    */
-  description: string;
+  description?: string;
   /**
    * List of inputs for this workflow.
    */
