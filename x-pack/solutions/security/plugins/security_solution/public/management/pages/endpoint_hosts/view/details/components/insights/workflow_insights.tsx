@@ -13,6 +13,7 @@ import {
   EuiFlexItem,
   EuiFlexGroup,
 } from '@elastic/eui';
+import { DefendInsightStatusEnum } from '@kbn/elastic-assistant-common';
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import moment from 'moment';
 import {
@@ -21,7 +22,7 @@ import {
 } from '../../../../../../../common/translations';
 import { useFetchInsights } from '../../../hooks/insights/use_fetch_insights';
 import { useTriggerScan } from '../../../hooks/insights/use_trigger_scan';
-import { useFetchOngoingScans } from '../../../hooks/insights/use_fetch_ongoing_tasks';
+import { useFetchLatestScan } from '../../../hooks/insights/use_fetch_ongoing_tasks';
 import { WorkflowInsightsResults } from './workflow_insights_results';
 import { WorkflowInsightsScanSection } from './workflow_insights_scan';
 import { WORKFLOW_INSIGHTS } from '../../../translations';
@@ -35,6 +36,7 @@ export const WorkflowInsights = React.memo(({ endpointId }: WorkflowInsightsProp
   const [scanCompleted, setIsScanCompleted] = useState(false);
   const [userTriggeredScan, setUserTriggeredScan] = useState(false);
   const [insightGenerationFailures, setInsightGenerationFailures] = useState(false);
+  const [expectedCount, setExpectedCount] = useState<number | null>(null);
 
   const disableScanButton = () => {
     setIsScanButtonDisabled(true);
@@ -49,30 +51,34 @@ export const WorkflowInsights = React.memo(({ endpointId }: WorkflowInsightsProp
     () => setIsScanCompleted(true),
   ];
 
-  const { data: insights, refetch: refetchInsights } = useFetchInsights({
+  // refetch is automatically triggered when expectedCount changes
+  const { data: insights } = useFetchInsights({
     endpointId,
     onSuccess: setScanCompleted,
+    expectedCount,
   });
 
   const {
-    data: ongoingScans,
-    isLoading: isLoadingOngoingScans,
-    refetch: refetchOngoingScans,
-  } = useFetchOngoingScans({
+    data: latestScan,
+    isLoading: isLoadingLatestScan,
+    refetch: refetchLatestScan,
+  } = useFetchLatestScan({
     endpointId,
     isPolling: isScanButtonDisabled,
-    onSuccess: refetchInsights,
+    onSuccess: setExpectedCount,
     onInsightGenerationFailure,
   });
 
   const { mutate: triggerScan } = useTriggerScan({
-    onSuccess: refetchOngoingScans,
+    onSuccess: refetchLatestScan,
     onMutate: disableScanButton,
   });
 
   useEffect(() => {
-    setIsScanButtonDisabled(!!ongoingScans?.length || isLoadingOngoingScans);
-  }, [ongoingScans, isLoadingOngoingScans]);
+    setIsScanButtonDisabled(
+      (latestScan && latestScan.status === DefendInsightStatusEnum.running) || isLoadingLatestScan
+    );
+  }, [latestScan, isLoadingLatestScan]);
 
   const lastResultCaption = useMemo(() => {
     if (!insights?.length) {
@@ -97,12 +103,20 @@ export const WorkflowInsights = React.memo(({ endpointId }: WorkflowInsightsProp
       }
 
       setScanOngoing();
+      setExpectedCount(null);
       if (!userTriggeredScan) {
         setUserTriggeredScan(true);
       }
       triggerScan({ endpointId, actionTypeId, connectorId });
     },
-    [insightGenerationFailures, setScanOngoing, userTriggeredScan, triggerScan, endpointId]
+    [
+      insightGenerationFailures,
+      setScanOngoing,
+      userTriggeredScan,
+      triggerScan,
+      endpointId,
+      setExpectedCount,
+    ]
   );
 
   return (

@@ -16,14 +16,19 @@ import { useKibana, useToasts } from '../../../../../../common/lib/kibana';
 interface UseFetchInsightsConfig {
   endpointId: string;
   onSuccess: () => void;
+  expectedCount: number | null;
 }
 
-export const useFetchInsights = ({ endpointId, onSuccess }: UseFetchInsightsConfig) => {
+export const useFetchInsights = ({
+  endpointId,
+  onSuccess,
+  expectedCount,
+}: UseFetchInsightsConfig) => {
   const { http } = useKibana().services;
   const toasts = useToasts();
 
   return useQuery<SecurityWorkflowInsight[], Error, SecurityWorkflowInsight[]>(
-    [`fetchInsights-${endpointId}`],
+    [`fetchInsights-${endpointId}`, expectedCount],
     async () => {
       try {
         const result = await http.get<SecurityWorkflowInsight[]>(WORKFLOW_INSIGHTS_ROUTE, {
@@ -34,7 +39,9 @@ export const useFetchInsights = ({ endpointId, onSuccess }: UseFetchInsightsConf
             size: 100,
           },
         });
-        onSuccess();
+        if (expectedCount !== null && expectedCount === result.length) {
+          onSuccess();
+        }
         return result;
       } catch (error) {
         toasts.addDanger({
@@ -46,6 +53,13 @@ export const useFetchInsights = ({ endpointId, onSuccess }: UseFetchInsightsConf
     },
     {
       refetchOnWindowFocus: false, // We need full control over when to refetch
+      refetchInterval: (data) => {
+        if (expectedCount !== null && (!data || data.length !== expectedCount)) {
+          return 2000;
+        }
+
+        return false;
+      },
     }
   );
 };

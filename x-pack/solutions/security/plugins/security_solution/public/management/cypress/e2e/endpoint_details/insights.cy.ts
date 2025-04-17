@@ -99,7 +99,6 @@ describe(
 
         loadEndpointDetailsFlyout(endpointId);
 
-        expectWorkflowInsightsApiToBeCalled();
         expectDefendInsightsApiToBeCalled();
 
         chooseConnectorButtonExistsWithLabel('Select a connector');
@@ -158,8 +157,42 @@ describe(
         clickScanButton();
 
         expectPostDefendInsightsApiToBeCalled();
-        expectWorkflowInsightsApiToBeCalled();
         expectDefendInsightsApiToBeCalled();
+        expectWorkflowInsightsApiToBeCalled();
+      });
+
+      it('should requery until all expected insights are received', () => {
+        interceptPostDefendInsightsApiCall();
+        loadEndpointDetailsFlyout(endpointId);
+        clickScanButton();
+        scanButtonShouldBe('disabled');
+
+        // defend insights is 2 but workflow insights is 0
+        stubDefendInsightsApiResponse({
+          status: 'succeeded',
+          insights: [{ id: '1' }, { id: '2' }],
+        });
+        stubWorkflowInsightsApiResponse(endpointId, 0);
+
+        expectPostDefendInsightsApiToBeCalled();
+        expectDefendInsightsApiToBeCalled();
+        expectWorkflowInsightsApiToBeCalled();
+
+        // should be called again since workflow insights is still 0
+        expectWorkflowInsightsApiToBeCalled();
+        insightsEmptyResultsCalloutDoesNotExist();
+
+        // workflow insights is now 2
+        stubWorkflowInsightsApiResponse(endpointId, 2);
+
+        // insights should be displayed now
+        expectWorkflowInsightsApiToBeCalled();
+        insightsResultExists();
+
+        // confirm that workflow insights is not called again
+        cy.get('@getWorkflowInsights.all').should('have.length', 3);
+        cy.wait(3000);
+        cy.get('@getWorkflowInsights.all').should('have.length', 3);
       });
 
       it('should render existing Insights', () => {
