@@ -132,7 +132,9 @@ function reportPerformanceMetrics({
   const duration =
     loadType === 'dashboardSubsequentLoad' ? timeToData : Math.max(timeToData, totalLoadTime);
 
-  const groupedPerformanceMarkers = getPerformanceTrackersGroupedById('Lens');
+  const groupedPerformanceMarkers = getPerformanceTrackersGroupedById(
+    PERFORMANCE_TRACKER_TYPES.LENS
+  );
 
   // `groupedPerformanceMarkers` is a map of performance markers grouped by id.
   // Each group contains the performance markers for a single Lens embeddable.
