@@ -56,7 +56,9 @@ describe('ThemeService', () => {
       const themeService = new ThemeService();
       themeService.init(setUpMockTheme);
 
-      expect(await themeService.chartsBaseTheme$.pipe(take(1)).toPromise()).toEqual(AMSTERDAM_LIGHT_THEME);
+      expect(await themeService.chartsBaseTheme$.pipe(take(1)).toPromise()).toEqual(
+        AMSTERDAM_LIGHT_THEME
+      );
     });
 
     describe('in dark mode', () => {
