@@ -144,6 +144,10 @@ describe('EditOutputFlyout', () => {
       id: 'output123',
       is_default: false,
       is_default_monitoring: false,
+      ssl: {
+        certificate: 'ssl-cert-value',
+        key: 'ssl-key-value',
+      },
     });
     expect(utils.queryByTestId('advancedSSLOptionsButton')).not.toBeNull();
     fireEvent.click(utils.getByTestId('advancedSSLOptionsButton'));
@@ -355,7 +359,6 @@ describe('EditOutputFlyout', () => {
     expect(
       (utils.getByTestId('settingsOutputsFlyout.kibanaURLInput') as HTMLInputElement).value
     ).toEqual('http://localhost');
-    expect(utils.queryByTestId('kibanaAPIKeySecretInput')).not.toBeNull();
 
     expect(utils.queryByTestId('advancedSSLOptionsButton')).not.toBeNull();
     fireEvent.click(utils.getByTestId('advancedSSLOptionsButton'));
@@ -405,13 +408,11 @@ describe('EditOutputFlyout', () => {
     );
 
     expect(utils.queryByTestId('settingsOutputsFlyout.kibanaURLInput')).toBeNull();
-    expect(utils.queryByTestId('kibanaAPIKeySecretInput')).toBeNull();
 
     fireEvent.click(utils.getByTestId('syncIntegrationsSwitch'));
     expect(
       (utils.getByTestId('settingsOutputsFlyout.kibanaURLInput') as HTMLInputElement).value
     ).toEqual('http://localhost:5601');
-    expect((utils.getByTestId('kibanaAPIKeySecretInput') as HTMLInputElement).value).toEqual('key');
 
     fireEvent.click(utils.getByText('Save and apply settings'));
 
@@ -420,9 +421,9 @@ describe('EditOutputFlyout', () => {
         'outputR',
         expect.objectContaining({
           sync_integrations: true,
-          secrets: { service_token: '1234', kibana_api_key: 'key' },
+          secrets: { service_token: '1234' },
           service_token: undefined,
-          kibana_api_key: undefined,
+          kibana_api_key: 'key',
           kibana_url: 'http://localhost:5601',
         })
       );

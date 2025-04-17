@@ -240,7 +240,7 @@ export class DiscoverCustomizationExamplesPlugin implements Plugin {
             ControlGroupRendererApi | undefined
           >();
           const stateStorage = stateContainer.stateStorage;
-          const currentTabId = stateContainer.internalState.getState().tabs.currentId;
+          const currentTabId = stateContainer.getCurrentTab().id;
           const dataView = useObservable(
             stateContainer.runtimeStateManager.tabs.byId[currentTabId].currentDataView$,
             stateContainer.runtimeStateManager.tabs.byId[currentTabId].currentDataView$.getValue()

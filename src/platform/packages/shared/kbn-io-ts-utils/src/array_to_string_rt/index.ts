@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { either } from 'fp-ts/lib/Either';
+import { either } from 'fp-ts/Either';
 import * as rt from 'io-ts';
 
 export const arrayToStringRt = new rt.Type<unknown[], string, unknown>(

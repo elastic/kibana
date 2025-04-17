@@ -12,6 +12,8 @@ import { EuiLoadingLogo } from '@elastic/eui';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 
 import { useKibana } from '../../hooks/use_kibana';
+import { generateRandomIndexName } from '../../utils/indices';
+import { useUserPrivilegesQuery } from '../../hooks/api/use_user_permissions';
 import { useIndicesStatusQuery } from '../../hooks/api/use_indices_status';
 
 import { useIndicesRedirect } from './hooks/use_indices_redirect';
@@ -26,6 +28,8 @@ const PageTitle = i18n.translate('xpack.searchIndices.startPage.docTitle', {
 
 export const ElasticsearchStartPage = () => {
   const { console: consolePlugin, history, searchNavigation } = useKibana().services;
+  const indexName = useMemo(() => generateRandomIndexName(), []);
+  const { data: userPrivileges } = useUserPrivilegesQuery(indexName);
   const {
     data: indicesData,
     isInitialLoading,
@@ -45,7 +49,8 @@ export const ElasticsearchStartPage = () => {
     () => (consolePlugin?.EmbeddableConsole ? <consolePlugin.EmbeddableConsole /> : null),
     [consolePlugin]
   );
-  useIndicesRedirect(indicesData);
+
+  useIndicesRedirect(indicesData, userPrivileges);
 
   return (
     <KibanaPageTemplate

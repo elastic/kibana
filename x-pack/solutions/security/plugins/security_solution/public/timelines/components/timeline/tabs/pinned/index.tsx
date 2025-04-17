@@ -14,7 +14,7 @@ import type { EuiDataGridControlColumn } from '@elastic/eui';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import type { RunTimeMappings } from '@kbn/timelines-plugin/common/search_strategy';
 import { useSourcererDataView } from '../../../../../sourcerer/containers';
-import { useDataView } from '../../../../../data_view_manager/hooks/use_data_view';
+import { useDataViewSpec } from '../../../../../data_view_manager/hooks/use_data_view_spec';
 import { useSelectedPatterns } from '../../../../../data_view_manager/hooks/use_selected_patterns';
 import { useFetchNotes } from '../../../../../notes/hooks/use_fetch_notes';
 import {
@@ -91,7 +91,7 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
   );
 
   const experimentalSelectedPatterns = useSelectedPatterns(SourcererScopeName.timeline);
-  const { dataView: experimentalDataView } = useDataView(SourcererScopeName.timeline);
+  const { dataViewSpec: experimentalDataView } = useDataViewSpec(SourcererScopeName.timeline);
 
   if (newDataViewPickerEnabled) {
     selectedPatterns = experimentalSelectedPatterns;

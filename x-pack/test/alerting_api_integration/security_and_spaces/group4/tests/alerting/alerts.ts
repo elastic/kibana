@@ -1503,7 +1503,7 @@ instanceStateValue: true
                             severity_improving: false,
                             rule: {
                               parameters: {
-                                index: '.kibana-alerting-test-data',
+                                index: 'kibana-alerting-test-data',
                                 reference,
                               },
                               category: 'Test: Always Firing Alert As Data',
@@ -1548,7 +1548,7 @@ instanceStateValue: true
                             severity_improving: false,
                             rule: {
                               parameters: {
-                                index: '.kibana-alerting-test-data',
+                                index: 'kibana-alerting-test-data',
                                 reference,
                               },
                               category: 'Test: Always Firing Alert As Data',
@@ -1609,7 +1609,7 @@ instanceStateValue: true
                             previous_action_group: 'default',
                             rule: {
                               parameters: {
-                                index: '.kibana-alerting-test-data',
+                                index: 'kibana-alerting-test-data',
                                 reference,
                               },
                               category: 'Test: Always Firing Alert As Data',
@@ -1654,7 +1654,7 @@ instanceStateValue: true
                             previous_action_group: 'default',
                             rule: {
                               parameters: {
-                                index: '.kibana-alerting-test-data',
+                                index: 'kibana-alerting-test-data',
                                 reference,
                               },
                               category: 'Test: Always Firing Alert As Data',
@@ -1763,7 +1763,7 @@ instanceStateValue: true
                       severity_improving: false,
                       rule: {
                         parameters: {
-                          index: '.kibana-alerting-test-data',
+                          index: 'kibana-alerting-test-data',
                           reference,
                         },
                         category: 'Test: Always Firing Alert As Data',
@@ -1808,7 +1808,7 @@ instanceStateValue: true
                       severity_improving: false,
                       rule: {
                         parameters: {
-                          index: '.kibana-alerting-test-data',
+                          index: 'kibana-alerting-test-data',
                           reference,
                         },
                         category: 'Test: Always Firing Alert As Data',
@@ -1986,7 +1986,7 @@ instanceStateValue: true
 
         expect(doc.params).to.eql({
           myParam: 'param from rule action',
-          index: '.kibana-alerting-test-data',
+          index: 'kibana-alerting-test-data',
           reference: 'alert-utils-ref:1:superuser',
           /**
            * Param was injected by the connector adapter in
