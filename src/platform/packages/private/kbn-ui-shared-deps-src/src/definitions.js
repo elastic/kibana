@@ -52,6 +52,7 @@ const externals = {
   'react-router': '__kbnSharedDeps__.ReactRouter',
   'react-router-dom': '__kbnSharedDeps__.ReactRouterDom',
   'react-router-dom-v5-compat': '__kbnSharedDeps__.ReactRouterDomV5Compat',
+  'react-use': '__kbnSharedDeps__.ReactUse',
   'styled-components': '__kbnSharedDeps__.StyledComponents',
   '@kbn/monaco': '__kbnSharedDeps__.KbnMonaco',
   // this is how plugins/consumers from npm load monaco
