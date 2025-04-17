@@ -126,7 +126,7 @@ const createConstructorOptionsMock = (): Required<ResponseActionsClientOptionsMo
     );
   });
   fleetStartServices.packagePolicyService.list.mockImplementation(async (_, options) => {
-    const kueryInfo = getPackagePolicyInfoFromFleetKuery(options.kuery ?? '');
+    const kueryInfo = await getPackagePolicyInfoFromFleetKuery(options.kuery ?? '');
 
     const packagePolicyOverrides: Parameters<FleetPackagePolicyGenerator['generate']>[0] = {
       id: packagePolicy.id,

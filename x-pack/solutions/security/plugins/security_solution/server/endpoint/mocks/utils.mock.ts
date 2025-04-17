@@ -11,7 +11,7 @@ import type { ElasticsearchClientMock } from '@kbn/core-elasticsearch-client-ser
 import type { OpenPointInTimeResponse, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { v4 as uuidV4 } from 'uuid';
 import { BaseDataGenerator } from '../../../common/endpoint/data_generators/base_data_generator';
-import { fromKueryExpression } from '@kbn/es-query';
+// import { fromKueryExpression } from '@kbn/es-query';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import { getFlattenedObject } from '@kbn/std';
 import { isObject, merge, reduce } from 'lodash';
@@ -125,13 +125,33 @@ interface FleetKueryInfo {
  * Helpful to create more reusable mocks for testing.
  * @param kuery
  */
-export const getPackagePolicyInfoFromFleetKuery = (kuery: string): FleetKueryInfo => {
+export const getPackagePolicyInfoFromFleetKuery = async (
+  kuery: string
+): Promise<FleetKueryInfo> => {
   const response: FleetKueryInfo = {
     packageNames: [],
     agentPolicyIds: [],
   };
 
-  const kueryAst = fromKueryExpression(kuery);
+  // Why is a dynamic import being used here?
+  // There is a module (`grammar`) used by this ES Query utility that does not load correctly
+  // when cypress is ran (unclear why). The error seen when this occurs is below. The work-around
+  // seems to be to use dynamic import.
+  // Error:
+  // ```
+  // Your configFile is invalid: /opt/buildkite-agent/.../kibana/x-pack/solutions/security/plugins/security_solution/public/management/cypress/cypress_serverless.config.ts
+  // It threw an error when required, check the stack trace below:
+  // /opt/buildkite-agent/.../kibana/src/platform/packages/shared/kbn-es-query/src/kuery/grammar/grammar.peggy:20
+  //   = Space* query:OrQuery? trailing:OptionalSpace {
+  //                 ^
+  // SyntaxError: Unexpected token ':'
+  //     at wrapSafe (node:internal/modules/cjs/loader:1378:20)
+  //     at Module._compile (node:internal/modules/cjs/loader:1428:41)
+  //     at Module._extensions..js (node:internal/modules/cjs/loader:1548:10)
+  //     at Object.require.extensions.<computed> [as .js] (/opt/buildkite-agent/.cache/Cypress/13.17.0/Cypress/resources/app/node_modules/ts-node/dist/index.js:851:20)..
+  // ```
+
+  const kueryAst = (await import('@kbn/es-query')).fromKueryExpression(kuery);
   const kueryFlatten = flattenKeys(kueryAst);
 
   getFlattenedObject(kueryAst);
