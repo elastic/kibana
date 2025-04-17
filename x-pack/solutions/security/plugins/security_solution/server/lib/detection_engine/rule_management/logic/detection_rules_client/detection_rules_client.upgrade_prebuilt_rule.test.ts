@@ -168,6 +168,15 @@ describe('DetectionRulesClient.upgradePrebuiltRule', () => {
     };
     // Installed version is "eql"
     const installedRule = getRulesEqlSchemaMock();
+    installedRule.actions = [
+      {
+        group: 'default',
+        id: 'test_id',
+        action_type_id: '.index',
+        params: {},
+      },
+    ];
+
     beforeEach(() => {
       (getRuleByRuleId as jest.Mock).mockResolvedValue(installedRule);
     });
@@ -181,6 +190,15 @@ describe('DetectionRulesClient.upgradePrebuiltRule', () => {
           data: expect.objectContaining({
             name: ruleAsset.name,
             tags: ruleAsset.tags,
+            // actions are kept from original rule
+            actions: [
+              expect.objectContaining({
+                actionTypeId: '.index',
+                group: 'default',
+                id: 'test_id',
+                params: {},
+              }),
+            ],
             params: expect.objectContaining({
               index: ruleAsset.index,
               description: ruleAsset.description,

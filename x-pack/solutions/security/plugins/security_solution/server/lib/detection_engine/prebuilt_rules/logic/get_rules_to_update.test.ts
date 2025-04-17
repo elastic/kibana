@@ -471,4 +471,26 @@ describe('mergeExceptionLists', () => {
     const update = mergeExceptionLists(ruleAsset1, rulesToMap([installedRule1]));
     expect(update.exceptions_list).toEqual(installedRule1.params.exceptionsList);
   });
+
+  test('should retain existing exceptions list if the rule has no exceptions list', () => {
+    const ruleAsset1 = getPrebuiltRuleMock();
+    ruleAsset1.exceptions_list = undefined;
+    ruleAsset1.rule_id = 'rule-1';
+    ruleAsset1.version = 2;
+
+    const installedRule1 = getRuleMock(getQueryRuleParams());
+    installedRule1.params.ruleId = 'rule-1';
+    installedRule1.params.version = 1;
+    installedRule1.params.exceptionsList = [
+      {
+        id: 'endpoint_list',
+        list_id: 'endpoint_list',
+        namespace_type: 'agnostic',
+        type: 'endpoint',
+      },
+    ];
+
+    const update = mergeExceptionLists(ruleAsset1, rulesToMap([installedRule1]));
+    expect(update.exceptions_list).toEqual(installedRule1.params.exceptionsList);
+  });
 });
