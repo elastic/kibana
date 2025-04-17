@@ -47,13 +47,13 @@ export const ENTERPRISE_SEARCH_HOME_PLUGIN = {
   LOGO: 'logoElasticsearch',
 };
 
-export const ENTERPRISE_SEARCH_CONTENT_PLUGIN = {
+export const ENTERPRISE_SEARCH_DATA_PLUGIN = {
   ID: ENTERPRISE_SEARCH_CONTENT_APP_ID,
   NAME: SEARCH_PRODUCT_NAME,
-  NAV_TITLE: i18n.translate('xpack.enterpriseSearch.content.navTitle', {
-    defaultMessage: 'Content',
+  NAV_TITLE: i18n.translate('xpack.enterpriseSearch.data.navTitle', {
+    defaultMessage: 'Data',
   }),
-  DESCRIPTION: i18n.translate('xpack.enterpriseSearch.content.description', {
+  DESCRIPTION: i18n.translate('xpack.enterpriseSearch.data.description', {
     defaultMessage:
       'Enterprise search offers a number of ways to easily make your data searchable. Choose from the web crawler, Elasticsearch indices, API, direct uploads, or thrid party connectors.', // TODO: Make sure this content is correct.
   }),

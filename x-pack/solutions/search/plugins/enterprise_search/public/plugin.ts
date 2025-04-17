@@ -45,7 +45,7 @@ import {
   APPLICATIONS_PLUGIN,
   ELASTICSEARCH_PLUGIN,
   AI_SEARCH_PLUGIN,
-  ENTERPRISE_SEARCH_CONTENT_PLUGIN,
+  ENTERPRISE_SEARCH_DATA_PLUGIN,
   ENTERPRISE_SEARCH_HOME_PLUGIN,
   SEARCH_EXPERIENCES_PLUGIN,
   SEARCH_PRODUCT_NAME,
@@ -237,15 +237,15 @@ export class EnterpriseSearchPlugin implements Plugin {
     });
 
     core.application.register({
-      appRoute: ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL,
+      appRoute: ENTERPRISE_SEARCH_DATA_PLUGIN.URL,
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
       deepLinks: contentLinks,
-      euiIconType: ENTERPRISE_SEARCH_CONTENT_PLUGIN.LOGO,
-      id: ENTERPRISE_SEARCH_CONTENT_PLUGIN.ID,
+      euiIconType: ENTERPRISE_SEARCH_DATA_PLUGIN.LOGO,
+      id: ENTERPRISE_SEARCH_DATA_PLUGIN.ID,
       mount: async (params: AppMountParameters) => {
         const kibanaDeps = await this.getKibanaDeps(core, params, cloud);
         const { chrome, http } = kibanaDeps.core;
-        chrome.docTitle.change(ENTERPRISE_SEARCH_CONTENT_PLUGIN.NAME);
+        chrome.docTitle.change(ENTERPRISE_SEARCH_DATA_PLUGIN.NAME);
 
         await this.getInitialData(http);
         const pluginData = this.getPluginData();
@@ -258,7 +258,7 @@ export class EnterpriseSearchPlugin implements Plugin {
         return renderApp(EnterpriseSearchContent, kibanaDeps, pluginData);
       },
       order: 1,
-      title: ENTERPRISE_SEARCH_CONTENT_PLUGIN.NAV_TITLE,
+      title: ENTERPRISE_SEARCH_DATA_PLUGIN.NAV_TITLE,
       visibleIn: [],
     });
 
@@ -356,7 +356,7 @@ export class EnterpriseSearchPlugin implements Plugin {
       mount: async (params: AppMountParameters) => {
         const kibanaDeps = await this.getKibanaDeps(core, params, cloud);
         const { chrome, http } = kibanaDeps.core;
-        chrome.docTitle.change(ENTERPRISE_SEARCH_CONTENT_PLUGIN.NAME);
+        chrome.docTitle.change(ENTERPRISE_SEARCH_DATA_PLUGIN.NAME);
 
         await this.getInitialData(http);
         const pluginData = this.getPluginData();
