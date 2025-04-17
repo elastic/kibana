@@ -4,27 +4,41 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useMemo } from 'react';
-import { EuiBasicTable, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import {
+  Criteria,
+  EuiBasicTable,
+  EuiButton,
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLoadingSpinner,
+  EuiPanel,
+  EuiSelect,
+  EuiSpacer,
+} from '@elastic/eui';
 import { useQuery } from '@tanstack/react-query';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { getESQLResults } from '@kbn/esql-utils';
+import { HoverVisibilityContainer } from '@kbn/response-ops-alerts-table/components/hover_visibility_container';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { buildESQLWithKQLQuery } from '../../../../../common/utils/esql';
 import { VisualizationEmbeddable } from '../../../../../common/components/visualization_actions/visualization_embeddable';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { useDeepEqualSelector } from '../../../../../common/hooks/use_selector';
 import { inputsSelectors } from '../../../../../common/store';
 import { getLensAttributes } from './get_lens_attributes';
+import { HeaderSection } from '../../../../../common/components/header_section';
+import { take } from 'lodash/fp';
 
-const FROM_TIME = '2026-03-15T15:17:00.000Z';
-const TO_TIME = '2026-03-16T15:17:00.000Z';
+const TO_TIME = new Date();
+const FROM_TIME = new Date(TO_TIME.getTime() - 24 * 60 * 60 * 1000);
+
 // TODO calculate this?
 const TIMERANGE = {
-  from: FROM_TIME,
-  to: TO_TIME,
+  from: FROM_TIME.toISOString(),
+  to: TO_TIME.toISOString(),
 };
-const FROM_TIME_DATE = new Date(FROM_TIME);
-const TO_TIME_DATE = new Date(TO_TIME);
 
 interface UserRowData {
   quantity: number;
@@ -34,22 +48,33 @@ interface UserRowData {
   ip: string;
 }
 
+export interface VisualizationStackByOption {
+  text: string;
+  value: string;
+}
+
 const generateRandomData = (from: Date, to: Date) => {
   const randomDate = new Date(from.getTime() + Math.random() * (to.getTime() - from.getTime()));
   return randomDate.toISOString();
 };
 
 const generateUserRowData = ({ quantity, user, target, right, ip }: UserRowData) => {
-  // "admin-1,user-12345,Local Administrator,192.125.52.245,Mar 15, 2026 @15:17:23:5346"
-  // loop quantity times and concatenate the string
   const userRowData = [];
   for (let i = 0; i < quantity; i++) {
     userRowData.push(
-      `"${user},${target},${right},${ip},${generateRandomData(FROM_TIME_DATE, TO_TIME_DATE)}"`
+      `"${user},${target},${right},${ip},${generateRandomData(FROM_TIME, TO_TIME)}"`
     );
   }
   return userRowData.join(',');
 };
+
+interface TableItemType {
+  privileged_user: string;
+  target_user: string;
+  right: string;
+  ip: string;
+  '@timestamp': string;
+}
 
 const DATA: UserRowData[] = [
   {
@@ -119,13 +144,21 @@ const generateESQLSource = () => {
           | DROP row`;
 };
 
-const generateListESQLQuery = () => `${generateESQLSource()}
-      | SORT @timestamp DESC
-      | LIMIT 10`;
+const PAGE_SIZE = 10;
 
-const generateVisualizationESQLQuery = () => `${generateESQLSource()}
+const generateListESQLQuery = (
+  sortField: string,
+  sortDirection: string,
+  currentPage: number,
+  esqlSource: string
+) => `${esqlSource}
+      | SORT ${sortField} ${sortDirection}
+      | LIMIT ${1 + currentPage * PAGE_SIZE}`; // Load one extra item for the pagination
+
+const generateVisualizationESQLQuery = (stackByField: string, esqlSource: string) =>
+  `${esqlSource}
   | EVAL timestamp=DATE_TRUNC(1 hour, TO_DATETIME(@timestamp))
-  | STATS results = COUNT(*) by timestamp, privileged_user`;
+  | STATS results = COUNT(*) by timestamp, ${stackByField}`;
 
 const fetchESQLSimple = async (
   esqlQuery: string,
@@ -156,20 +189,67 @@ function toRecords(response) {
   });
 }
 
-const PRIVILEGED_USER_LIST_ESQL = generateListESQLQuery();
-const PRIVILEGED_VISUALIZATION_ESQL = generateVisualizationESQLQuery();
+export const stackByOptions: VisualizationStackByOption[] = [
+  {
+    text: 'Privileged User',
+    value: 'privileged_user',
+  },
+  {
+    text: 'Target user',
+    value: 'target_user',
+  },
+  {
+    text: 'Granted right',
+    value: 'right',
+  },
+  {
+    text: 'Source IP',
+    value: 'ip',
+  },
+];
 
 const PrivilegedUserMonitoringSampleDashboardComponent = () => {
   // const { to, from } = useGlobalTime();
   // const timerange = useMemo(() => ({ from, to }), [from, to]);
   const { data } = useKibana().services;
-  const getGlobalQuerySelector = useMemo(() => inputsSelectors.globalQuerySelector(), []);
-  const globalQuery = useDeepEqualSelector(getGlobalQuerySelector);
+  // const getGlobalQuerySelector = useMemo(() => inputsSelectors.globalQuerySelector(), []);
+  // const globalQuery = useDeepEqualSelector(getGlobalQuerySelector);
   // const { filterQuery } = useGlobalFilterQuery({ extraFilter: buildTimeRangeFilter(from, to) });
 
-  const esqlQuery = useMemo(
-    () => buildESQLWithKQLQuery(PRIVILEGED_USER_LIST_ESQL, globalQuery.query as string),
-    [globalQuery.query]
+  // const PRIVILEGED_USER_LIST_ESQL = ();
+
+  const [selectedStackByOption, setSelectedStackByOption] = useState<VisualizationStackByOption>(
+    stackByOptions[0]
+  );
+
+  useEffect(() => {
+    setSelectedStackByOption(stackByOptions[0]);
+  }, []);
+
+  const esqlSource = useMemo(() => generateESQLSource(), []);
+
+  const privilegedVisualizationEsql = useMemo(
+    () => generateVisualizationESQLQuery(selectedStackByOption.value, esqlSource),
+    [selectedStackByOption, esqlSource]
+  );
+
+  const setSelectedChartOptionCallback = useCallback(
+    (event: React.ChangeEvent<HTMLSelectElement>) => {
+      setSelectedStackByOption(
+        stackByOptions.find((co) => co.value === event.target.value) ?? stackByOptions[0]
+      );
+    },
+    []
+  );
+
+  const [sortField, setSortField] = useState<keyof TableItemType>('@timestamp');
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+
+  const [currentPage, setCurrentPage] = useState<number>(1);
+
+  const tableEsqlQuery = useMemo(
+    () => generateListESQLQuery(sortField, sortDirection, currentPage, esqlSource),
+    [sortField, sortDirection, currentPage, esqlSource]
   );
 
   const {
@@ -179,70 +259,147 @@ const PrivilegedUserMonitoringSampleDashboardComponent = () => {
     isRefetching,
     data: result,
   } = useQuery({
-    queryKey: [esqlQuery], // filterQuery,
+    queryKey: [tableEsqlQuery], // filterQuery,
     queryFn: async ({ signal }) => {
-      return fetchESQLSimple(esqlQuery, data, signal);
+      return fetchESQLSimple(tableEsqlQuery, data, signal);
     },
     refetchOnWindowFocus: false,
+    keepPreviousData: true,
   });
 
-  const values = toRecords(result?.response);
+  const onTableChange = ({ page, sort }: Criteria<TableItemType>) => {
+    if (sort) {
+      const { field, direction } = sort;
+      setSortField(field);
+      setSortDirection(direction);
+    }
+  };
+  const items = toRecords(result?.response);
+
   return (
-    <>
-      <EuiFlexGroup direction="column" data-test-subj="entityAnalyticsSections">
-        <VisualizationEmbeddable
-          applyGlobalQueriesAndFilters={true}
-          esql={PRIVILEGED_VISUALIZATION_ESQL}
-          data-test-subj="embeddable-matrix-histogram"
-          getLensAttributes={getLensAttributes}
-          height={260}
-          id={'my-id'}
-          timerange={TIMERANGE}
-        />
-      </EuiFlexGroup>
-
-      <EuiFlexGroup direction="column">
-        <EuiFlexItem>
-          {isLoading ? (
-            <EuiLoadingSpinner size="m" />
-          ) : isError ? (
-            <div>{'Error loading data'}</div>
-          ) : (
-            <EuiBasicTable
-              loading={isInitialLoading || isRefetching}
-              items={values || []}
-              columns={[
-                {
-                  field: 'privileged_user',
-                  name: 'Privileged user',
-                },
-                {
-                  field: 'target_user',
-                  name: 'Target user',
-                },
-                {
-                  field: 'right',
-                  name: 'Granted right',
-                },
-                {
-                  field: 'ip',
-                  name: 'Source IP',
-                },
-                {
-                  field: '@timestamp',
-                  name: 'Timestamp',
-                  dataType: 'date',
-
-                  render: (timestamp: string) => {
-                    return new Date(timestamp).toLocaleString();
-                  },
-                },
-              ]}
+    <HoverVisibilityContainer
+      // show={!isInitialLoading}
+      targetClassNames={['TODO']}
+    >
+      <EuiPanel hasBorder={true} hasShadow={false}>
+        <HeaderSection
+          // id={DETECTION_RESPONSE_RECENT_CASES_QUERY_ID}
+          title={
+            <FormattedMessage
+              id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.sampleDashboard.grantedRights.title"
+              defaultMessage="Granted rights"
             />
+          }
+          titleSize="s"
+          // toggleStatus={toggleStatus}
+          // toggleQuery={setToggleStatus}
+          // subtitle={<LastUpdatedAt updatedAt={updatedAt} isUpdating={isLoading} />}
+          showInspectButton={false}
+          // tooltip={i18n.CASES_TABLE_SECTION_TOOLTIP}
+        >
+          <EuiFlexGroup alignItems="center" gutterSize="none">
+            <EuiFlexItem grow={false}>
+              {stackByOptions.length > 1 && (
+                <EuiSelect
+                  onChange={setSelectedChartOptionCallback}
+                  options={stackByOptions}
+                  prepend={'Stack by'}
+                  value={selectedStackByOption?.value}
+                  // aria-label={'i18n.STACK_BY'}
+                />
+              )}
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </HeaderSection>
+        <EuiFlexGroup direction="column" data-test-subj="entityAnalyticsSections">
+          <VisualizationEmbeddable
+            stackByField={selectedStackByOption.value}
+            applyGlobalQueriesAndFilters={true}
+            esql={privilegedVisualizationEsql}
+            data-test-subj="embeddable-matrix-histogram"
+            getLensAttributes={getLensAttributes}
+            height={260}
+            id={'my-id'}
+            timerange={TIMERANGE}
+          />
+        </EuiFlexGroup>
+        <EuiSpacer size="l" />
+
+        <EuiFlexGroup direction="column" gutterSize="s">
+          <EuiFlexItem>
+            {isLoading ? (
+              <EuiLoadingSpinner size="m" />
+            ) : isError ? (
+              <div>{'Error loading data'}</div>
+            ) : (
+              <EuiBasicTable
+                loading={isInitialLoading || isRefetching}
+                items={take(currentPage * PAGE_SIZE, items) || []}
+                onChange={onTableChange}
+                sorting={{
+                  sort: {
+                    field: sortField,
+                    direction: sortDirection,
+                  },
+                }}
+                columns={[
+                  {
+                    field: 'privileged_user',
+                    name: 'Privileged user',
+                    sortable: true,
+                  },
+                  {
+                    field: 'target_user',
+                    name: 'Target user',
+                    sortable: true,
+                  },
+                  {
+                    field: 'right',
+                    name: 'Granted right',
+                    sortable: true,
+                  },
+                  {
+                    field: 'ip',
+                    name: 'Source IP',
+                    sortable: true,
+                  },
+                  {
+                    field: '@timestamp',
+                    name: 'Timestamp',
+                    dataType: 'date',
+                    sortable: true,
+                    render: (timestamp: string) => {
+                      return new Date(timestamp).toLocaleString();
+                    },
+                  },
+                ]}
+              />
+            )}
+            <EuiSpacer size="s" />
+          </EuiFlexItem>
+
+          {items.length > currentPage * PAGE_SIZE && (
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                isLoading={isInitialLoading || isRefetching}
+                onClick={() => {
+                  setCurrentPage((page) => page + 1);
+                }}
+                flush="right"
+                color={'primary'}
+                size="s"
+                // fullWidth={false}
+              >
+                <FormattedMessage
+                  id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.sampleDashboard.loadMore"
+                  defaultMessage="Load more"
+                />
+              </EuiButtonEmpty>
+            </EuiFlexItem>
           )}
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </>
+        </EuiFlexGroup>
+      </EuiPanel>
+    </HoverVisibilityContainer>
   );
 };
 

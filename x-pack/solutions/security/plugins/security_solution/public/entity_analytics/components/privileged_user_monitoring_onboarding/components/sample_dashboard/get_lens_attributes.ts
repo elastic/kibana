@@ -14,7 +14,7 @@ export const columnResultId = uuidv4();
 export const dataViewId = uuidv4();
 export const columnUserId = uuidv4();
 
-export const getLensAttributes: GetLensAttributes = ({ esql, extraOptions = {} }) => {
+export const getLensAttributes: GetLensAttributes = ({ esql, stackByField, extraOptions = {} }) => {
   return {
     title: 'Events',
     description: '',
@@ -24,12 +24,23 @@ export const getLensAttributes: GetLensAttributes = ({ esql, extraOptions = {} }
         legend: {
           isVisible: true,
           position: 'right',
+          legendSize: 'xlarge',
+          legendStats: ['total'],
+          maxLines: 1,
+          showSingleSeries: true,
+          layout: 'list',
+          // shouldTruncate: true,
         },
         valueLabels: 'hide',
         fittingFunction: 'Linear',
         axisTitlesVisibilitySettings: {
-          x: true,
-          yLeft: true,
+          x: false,
+          yLeft: false,
+          yRight: true,
+        },
+        gridlinesVisibilitySettings: {
+          x: false,
+          yLeft: false,
           yRight: true,
         },
         tickLabelsVisibilitySettings: {
@@ -42,11 +53,6 @@ export const getLensAttributes: GetLensAttributes = ({ esql, extraOptions = {} }
           yLeft: 0,
           yRight: 0,
         },
-        gridlinesVisibilitySettings: {
-          x: true,
-          yLeft: true,
-          yRight: true,
-        },
         preferredSeriesType: 'bar_stacked',
         layers: [
           {
@@ -56,24 +62,7 @@ export const getLensAttributes: GetLensAttributes = ({ esql, extraOptions = {} }
             accessors: [columnResultId],
             splitAccessor: columnUserId,
             layerType: 'data',
-            colorMapping: {
-              assignments: [],
-              specialAssignments: [
-                {
-                  rule: {
-                    type: 'other',
-                  },
-                  color: {
-                    type: 'loop',
-                  },
-                  touched: false,
-                },
-              ],
-              paletteId: 'default',
-              colorMode: {
-                type: 'categorical',
-              },
-            },
+            showGridlines: false,
           },
         ],
       },
@@ -107,7 +96,7 @@ export const getLensAttributes: GetLensAttributes = ({ esql, extraOptions = {} }
                 },
                 {
                   columnId: columnUserId,
-                  fieldName: 'privileged_user',
+                  fieldName: stackByField ?? '',
                   meta: {
                     type: 'string',
                     esType: 'keyword',

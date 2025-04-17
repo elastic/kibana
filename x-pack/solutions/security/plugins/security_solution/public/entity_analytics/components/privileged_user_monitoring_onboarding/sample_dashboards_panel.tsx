@@ -37,7 +37,7 @@ const DashboardsSectionHeader = () => {
       color="warning"
       hasBorder={false}
       hasShadow={false}
-      paddingSize="s"
+      paddingSize="none"
       css={css`
         position: sticky;
         top: 0;
@@ -45,6 +45,7 @@ const DashboardsSectionHeader = () => {
         top: var(--kbnAppHeadersOffset, var(--euiFixedHeadersOffset, 0));
       `}
     >
+      <EuiSpacer size="s" />
       <EuiTitle size="xxs" className="eui-textCenter" textTransform="uppercase">
         <h3>
           <EuiTextColor color="warning">
@@ -55,6 +56,7 @@ const DashboardsSectionHeader = () => {
           </EuiTextColor>
         </h3>
       </EuiTitle>
+      <EuiSpacer size="s" />
 
       <PrivilegedUserMonitoringSampleDashboard />
     </EuiPanel>
