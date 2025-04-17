@@ -12,7 +12,11 @@ import { isOfAggregateQueryType } from '@kbn/es-query';
 import { getSavedSearchFullPathUrl } from '@kbn/saved-search-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { cloneDeep, isEqual } from 'lodash';
-import { internalStateSlice, type InternalStateThunkActionCreator } from '../internal_state';
+import {
+  internalStateSlice,
+  type TabActionPayload,
+  type InternalStateThunkActionCreator,
+} from '../internal_state';
 import {
   getInitialState,
   type AppStateUrl,
@@ -30,25 +34,39 @@ import { isRefreshIntervalValid, isTimeRangeValid } from '../../../../../utils/v
 import { getValidFilters } from '../../../../../utils/get_valid_filters';
 import { updateSavedSearch } from '../../utils/update_saved_search';
 import { APP_STATE_URL_KEY } from '../../../../../../common';
+import { selectTabRuntimeState } from '../runtime_state';
+import type { ConnectedCustomizationService } from '../../../../../customizations';
+import { disconnectTab } from './tabs';
 
 export interface InitializeSessionParams {
   stateContainer: DiscoverStateContainer;
+  customizationService: ConnectedCustomizationService;
   discoverSessionId: string | undefined;
   dataViewSpec: DataViewSpec | undefined;
   defaultUrlState: DiscoverAppState | undefined;
 }
 
 export const initializeSession: InternalStateThunkActionCreator<
-  [InitializeSessionParams],
+  [TabActionPayload<{ initializeSessionParams: InitializeSessionParams }>],
   Promise<{ showNoDataPage: boolean }>
 > =
-  ({ stateContainer, discoverSessionId, dataViewSpec, defaultUrlState }) =>
+  ({
+    tabId,
+    initializeSessionParams: {
+      stateContainer,
+      customizationService,
+      discoverSessionId,
+      dataViewSpec,
+      defaultUrlState,
+    },
+  }) =>
   async (
     dispatch,
     getState,
     { services, customizationContext, runtimeStateManager, urlStateStorage }
   ) => {
-    dispatch(internalStateSlice.actions.resetOnSavedSearchChange());
+    dispatch(disconnectTab({ tabId }));
+    dispatch(internalStateSlice.actions.resetOnSavedSearchChange({ tabId }));
 
     /**
      * "No data" checks
@@ -90,6 +108,7 @@ export const initializeSession: InternalStateThunkActionCreator<
      * Session initialization
      */
 
+    // TODO: Needs to happen when switching tabs too?
     if (customizationContext.displayMode === 'standalone' && persistedDiscoverSession) {
       if (persistedDiscoverSession.id) {
         services.chrome.recentlyAccessed.add(
@@ -105,13 +124,17 @@ export const initializeSession: InternalStateThunkActionCreator<
       setBreadcrumbs({ services, titleBreadcrumbText: persistedDiscoverSession.title });
     }
 
+    const { currentDataView$, stateContainer$, customizationService$ } = selectTabRuntimeState(
+      runtimeStateManager,
+      tabId
+    );
     let dataView: DataView;
 
     if (isOfAggregateQueryType(initialQuery)) {
       // Regardless of what was requested, we always use ad hoc data views for ES|QL
       dataView = await getEsqlDataView(
         initialQuery,
-        discoverSessionDataView ?? runtimeStateManager.currentDataView$.getValue(),
+        discoverSessionDataView ?? currentDataView$.getValue(),
         services
       );
     } else {
@@ -131,7 +154,7 @@ export const initializeSession: InternalStateThunkActionCreator<
       dataView = result.dataView;
     }
 
-    dispatch(setDataView(dataView));
+    dispatch(setDataView({ tabId, dataView }));
 
     if (!dataView.isPersisted()) {
       dispatch(appendAdHocDataViews(dataView));
@@ -229,6 +252,12 @@ export const initializeSession: InternalStateThunkActionCreator<
     // Make sure app state container is completely reset
     stateContainer.appState.resetToState(initialState);
     stateContainer.appState.resetInitialState();
+    stateContainer$.next(stateContainer);
+    customizationService$.next(customizationService);
+
+    // Begin syncing the state and trigger the initial fetch
+    stateContainer.actions.initializeAndSync();
+    stateContainer.actions.fetchData(true);
     discoverSessionLoadTracker.reportEvent();
 
     return { showNoDataPage: false };

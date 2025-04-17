@@ -8,41 +8,70 @@
  */
 
 import type { DataView } from '@kbn/data-views-plugin/common';
-import React, { type PropsWithChildren, createContext, useContext, useMemo, useState } from 'react';
+import React, { type PropsWithChildren, createContext, useContext, useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
-import { BehaviorSubject, skip } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
+import { useCurrentTabContext } from './hooks';
+import type { DiscoverStateContainer } from '../discover_state';
+import type { ConnectedCustomizationService } from '../../../../customizations';
 
 interface DiscoverRuntimeState {
-  currentDataView: DataView;
   adHocDataViews: DataView[];
 }
 
-type RuntimeStateManagerInternal<TNullable extends keyof DiscoverRuntimeState> = {
-  [key in keyof DiscoverRuntimeState as `${key}$`]: BehaviorSubject<
-    key extends TNullable ? DiscoverRuntimeState[key] | undefined : DiscoverRuntimeState[key]
+interface TabRuntimeState {
+  stateContainer?: DiscoverStateContainer;
+  customizationService?: ConnectedCustomizationService;
+  currentDataView: DataView;
+}
+
+type ReactiveRuntimeState<TState, TNullable extends keyof TState = never> = {
+  [key in keyof TState & string as `${key}$`]: BehaviorSubject<
+    key extends TNullable ? TState[key] | undefined : TState[key]
   >;
 };
 
-export type RuntimeStateManager = RuntimeStateManagerInternal<'currentDataView'>;
+type ReactiveTabRuntimeState = ReactiveRuntimeState<TabRuntimeState, 'currentDataView'>;
 
-export const createRuntimeStateManager = (): RuntimeStateManager => ({
-  currentDataView$: new BehaviorSubject<DataView | undefined>(undefined),
-  adHocDataViews$: new BehaviorSubject<DataView[]>([]),
-});
-
-export const useRuntimeState = <T,>(stateSubject$: BehaviorSubject<T>) => {
-  const [stateObservable$] = useState(() => stateSubject$.pipe(skip(1)));
-  return useObservable(stateObservable$, stateSubject$.getValue());
+export type RuntimeStateManager = ReactiveRuntimeState<DiscoverRuntimeState> & {
+  tabs: { byId: Record<string, ReactiveTabRuntimeState> };
 };
 
-const runtimeStateContext = createContext<DiscoverRuntimeState | undefined>(undefined);
+export const createRuntimeStateManager = (): RuntimeStateManager => ({
+  adHocDataViews$: new BehaviorSubject<DataView[]>([]),
+  tabs: { byId: {} },
+});
+
+export const createTabRuntimeState = (): ReactiveTabRuntimeState => ({
+  stateContainer$: new BehaviorSubject<DiscoverStateContainer | undefined>(undefined),
+  customizationService$: new BehaviorSubject<ConnectedCustomizationService | undefined>(undefined),
+  currentDataView$: new BehaviorSubject<DataView | undefined>(undefined),
+});
+
+export const useRuntimeState = <T,>(stateSubject$: BehaviorSubject<T>) =>
+  useObservable(stateSubject$, stateSubject$.getValue());
+
+export const selectTabRuntimeState = (runtimeStateManager: RuntimeStateManager, tabId: string) =>
+  runtimeStateManager.tabs.byId[tabId];
+
+export const useCurrentTabRuntimeState = <T,>(
+  runtimeStateManager: RuntimeStateManager,
+  selector: (tab: ReactiveTabRuntimeState) => BehaviorSubject<T>
+) => {
+  const { currentTabId } = useCurrentTabContext();
+  return useRuntimeState(selector(selectTabRuntimeState(runtimeStateManager, currentTabId)));
+};
+
+type CombinedRuntimeState = DiscoverRuntimeState & TabRuntimeState;
+
+const runtimeStateContext = createContext<CombinedRuntimeState | undefined>(undefined);
 
 export const RuntimeStateProvider = ({
   currentDataView,
   adHocDataViews,
   children,
-}: PropsWithChildren<DiscoverRuntimeState>) => {
-  const runtimeState = useMemo<DiscoverRuntimeState>(
+}: PropsWithChildren<CombinedRuntimeState>) => {
+  const runtimeState = useMemo<CombinedRuntimeState>(
     () => ({ currentDataView, adHocDataViews }),
     [adHocDataViews, currentDataView]
   );

@@ -109,7 +109,7 @@ function isValid(itemValidation: ItemValidation): boolean {
 
 // eslint-disable-next-line react/display-name
 export const BlockListForm = memo<ArtifactFormComponentProps>(
-  ({ item, policies, policiesIsLoading, onChange, mode, error: submitError }) => {
+  ({ item, onChange, mode, error: submitError }) => {
     const [nameVisited, setNameVisited] = useState(false);
     const [valueVisited, setValueVisited] = useState({ value: false }); // Use object to trigger re-render
     const warningsRef = useRef<ItemValidation>({ name: {}, value: {} });
@@ -669,9 +669,7 @@ export const BlockListForm = memo<ArtifactFormComponentProps>(
             <EuiFormRow fullWidth>
               <EffectedPolicySelect
                 item={item}
-                options={policies}
                 onChange={handleEffectedPolicyOnChange}
-                isLoading={policiesIsLoading}
                 description={POLICY_SELECT_DESCRIPTION}
                 data-test-subj={getTestId('effectedPolicies')}
               />

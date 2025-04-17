@@ -20,7 +20,13 @@
 const { USES_STYLED_COMPONENTS } = require('@kbn/babel-preset/styled_components_files');
 
 module.exports = {
-  extends: ['./javascript.js', './typescript.js', './jest.js', './react.js'],
+  extends: [
+    './javascript.js',
+    './typescript.js',
+    './jest.js',
+    './react.js',
+    'plugin:@elastic/eui/recommended',
+  ],
 
   plugins: [
     '@kbn/eslint-plugin-disable',
@@ -29,7 +35,7 @@ module.exports = {
     '@kbn/eslint-plugin-telemetry',
     '@kbn/eslint-plugin-i18n',
     '@kbn/eslint-plugin-eui-a11y',
-    '@kbn/eslint-plugin-css',
+    '@elastic/eui',
     'eslint-plugin-depend',
     'prettier',
   ],
@@ -129,16 +135,6 @@ module.exports = {
           exclude: USES_STYLED_COMPONENTS,
           disallowedMessage: `Prefer using @emotion/react instead. To use styled-components, ensure you plugin is enabled in packages/kbn-babel-preset/styled_components_files.js.`,
         },
-        ...[
-          '@elastic/eui/dist/eui_theme_amsterdam_light.json',
-          '@elastic/eui/dist/eui_theme_amsterdam_dark.json',
-          '@elastic/eui/dist/eui_theme_borealis_light.json',
-          '@elastic/eui/dist/eui_theme_borealis_dark.json',
-        ].map((from) => ({
-          from,
-          to: false,
-          disallowedMessage: `Use "@kbn/ui-theme" to access theme vars.`,
-        })),
         {
           from: '@kbn/test/jest',
           to: '@kbn/test-jest-helpers',
@@ -335,9 +331,20 @@ module.exports = {
     '@kbn/imports/no_boundary_crossing': 'error',
     '@kbn/imports/no_group_crossing_manifests': 'error',
     '@kbn/imports/no_group_crossing_imports': 'error',
-    '@kbn/css/no_css_color': 'warn',
     'no-new-func': 'error',
     'no-implied-eval': 'error',
     'no-prototype-builtins': 'error',
+
+    /**
+     * EUI Team rules
+     */
+
+    '@elastic/eui/no-restricted-eui-imports': [
+      'warn',
+      {
+        patterns: ['@kbn/ui-theme'],
+        message: 'For client-side, please use `useEuiTheme` instead.',
+      },
+    ],
   },
 };

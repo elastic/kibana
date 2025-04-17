@@ -13,6 +13,8 @@ import { StreamsAppPageTemplate } from '../components/streams_app_page_template'
 import { StreamsAppRouterBreadcrumb } from '../components/streams_app_router_breadcrumb';
 import { RedirectTo } from '../components/redirect_to';
 import { StreamListView } from '../components/stream_list_view';
+import { StreamManagementView } from '../components/stream_management_view';
+import { StreamDetailRoot } from '../components/stream_root';
 
 /**
  * The array of route definitions to be used when the application
@@ -33,8 +35,15 @@ const streamsAppRoutes = {
       </StreamsAppRouterBreadcrumb>
     ),
     children: {
+      '/': {
+        element: <StreamListView />,
+      },
       '/{key}': {
-        element: <Outlet />,
+        element: (
+          <StreamDetailRoot>
+            <Outlet />
+          </StreamDetailRoot>
+        ),
         params: t.type({
           path: t.type({
             key: t.string,
@@ -44,22 +53,6 @@ const streamsAppRoutes = {
           '/{key}': {
             element: <RedirectTo path="/{key}/{tab}" params={{ path: { tab: 'overview' } }} />,
           },
-          '/{key}/management': {
-            element: (
-              <RedirectTo
-                path="/{key}/management/{subtab}"
-                params={{ path: { subtab: 'overview' } }}
-              />
-            ),
-          },
-          '/{key}/management/{subtab}': {
-            element: <StreamDetailView />,
-            params: t.type({
-              path: t.type({
-                subtab: t.string,
-              }),
-            }),
-          },
           '/{key}/{tab}': {
             element: <StreamDetailView />,
             params: t.type({
@@ -68,19 +61,15 @@ const streamsAppRoutes = {
               }),
             }),
           },
-          '/{key}/{tab}/{subtab}': {
-            element: <StreamDetailView />,
+          '/{key}/management/{tab}': {
+            element: <StreamManagementView />,
             params: t.type({
               path: t.type({
                 tab: t.string,
-                subtab: t.string,
               }),
             }),
           },
         },
-      },
-      '/': {
-        element: <StreamListView />,
       },
     },
   },

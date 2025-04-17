@@ -38,6 +38,19 @@ export type BuildkiteStep =
   | BuildkiteTriggerStep
   | BuildkiteWaitStep;
 
+export interface BuildkiteAgentQueue {
+  queue: string;
+}
+
+export interface BuildkiteAgentTargetingRule {
+  provider?: string;
+  image?: string;
+  imageProject?: string;
+  machineType?: string;
+  minCpuPlatform?: string;
+  preemptible?: boolean;
+}
+
 export interface BuildkiteCommandStep {
   command: string;
   label: string;
@@ -45,18 +58,7 @@ export interface BuildkiteCommandStep {
   concurrency?: number;
   concurrency_group?: string;
   concurrency_method?: 'eager' | 'ordered';
-  agents:
-    | {
-        queue: string;
-      }
-    | {
-        provider?: string;
-        image?: string;
-        imageProject?: string;
-        machineType?: string;
-        minCpuPlatform?: string;
-        preemptible?: boolean;
-      };
+  agents: BuildkiteAgentQueue | BuildkiteAgentTargetingRule;
   timeout_in_minutes?: number;
   key?: string;
   cancel_on_build_failing?: boolean;

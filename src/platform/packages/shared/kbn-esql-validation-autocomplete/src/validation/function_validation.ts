@@ -37,6 +37,7 @@ import {
   getParamAtPosition,
   extractSingularType,
   isArrayType,
+  isParametrized,
 } from '../shared/helpers';
 import { getMessageFromId, errors } from './errors';
 import { getMaxMinNumberOfParams, collapseWrongArgumentTypeMessages } from './helpers';
@@ -204,7 +205,7 @@ export function validateFunction({
           forceConstantOnly: allMatchingArgDefinitionsAreConstantOnly || forceConstantOnly,
           // use the nesting flag for now just for stats and metrics
           // TODO: revisit this part later on to make it more generic
-          isNested: ['stats', 'inlinestats', 'metrics'].includes(parentCommand)
+          isNested: ['stats', 'inlinestats', 'ts'].includes(parentCommand)
             ? isNested || !isAssignment(fn)
             : false,
           parentAst,
@@ -487,7 +488,7 @@ function validateFunctionColumnArg(
   parentCommand: string
 ) {
   const messages: ESQLMessage[] = [];
-  if (!(isColumnItem(actualArg) || isIdentifier(actualArg))) {
+  if (!(isColumnItem(actualArg) || isIdentifier(actualArg)) || isParametrized(actualArg)) {
     return messages;
   }
 
@@ -544,18 +545,21 @@ function validateFunctionColumnArg(
     !checkFunctionArgMatchesDefinition(actualArg, parameterDefinition, references, parentCommand)
   ) {
     const columnHit = getColumnForASTNode(actualArg, references);
-    messages.push(
-      getMessageFromId({
-        messageId: 'wrongArgumentType',
-        values: {
-          name: astFunction.name,
-          argType: parameterDefinition.type as string,
-          value: actualArg.name,
-          givenType: columnHit!.type,
-        },
-        locations: actualArg.location,
-      })
-    );
+    const isConflictType = columnHit && 'hasConflict' in columnHit && columnHit.hasConflict;
+    if (!isConflictType) {
+      messages.push(
+        getMessageFromId({
+          messageId: 'wrongArgumentType',
+          values: {
+            name: astFunction.name,
+            argType: parameterDefinition.type as string,
+            value: actualArg.name,
+            givenType: columnHit!.type,
+          },
+          locations: actualArg.location,
+        })
+      );
+    }
   }
 
   return messages;

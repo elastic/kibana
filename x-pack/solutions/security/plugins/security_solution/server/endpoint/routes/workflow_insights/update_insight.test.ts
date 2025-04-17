@@ -41,6 +41,9 @@ describe('Update Insights Route Handler', () => {
       service: {
         ...mockEndpointContext.service,
         getEndpointAuthz: jest.fn().mockResolvedValue(authz),
+        getTelemetryService: jest.fn().mockReturnValue({
+          reportEvent: jest.fn(),
+        }),
       },
       securitySolution: {
         getEndpointAuthz: jest.fn().mockResolvedValue(authz),

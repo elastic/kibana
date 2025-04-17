@@ -755,7 +755,7 @@
             "label": "xScaleType",
             "description": [],
             "signature": [
-              "\"time\" | \"ordinal\" | \"linear\""
+              "\"time\" | \"linear\" | \"ordinal\""
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
@@ -2027,14 +2027,14 @@
               "RecursivePartial",
               "<",
               "Theme",
-              ">[] | undefined>; showLegend?: boolean | undefined; legendPosition?: ",
+              ">[] | undefined>; rendering?: ",
+              "Rendering",
+              " | undefined; showLegend?: boolean | undefined; legendPosition?: ",
               "Position",
               " | ",
               "LegendPositionConfig",
               " | undefined; rotation?: ",
               "Rotation",
-              " | undefined; rendering?: ",
-              "Rendering",
               " | undefined; animateData?: boolean | undefined; externalPointerEvents?: ",
               "MakeOverridesSerializable",
               "<",
@@ -3473,7 +3473,7 @@
         "label": "XScaleType",
         "description": [],
         "signature": [
-          "\"time\" | \"ordinal\" | \"linear\""
+          "\"time\" | \"linear\" | \"ordinal\""
         ],
         "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,

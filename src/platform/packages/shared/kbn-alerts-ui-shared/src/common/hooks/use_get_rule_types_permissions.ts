@@ -9,11 +9,11 @@
 
 import { useMemo } from 'react';
 import { keyBy } from 'lodash';
-import { UseQueryOptions } from '@tanstack/react-query';
+import type { UseQueryOptions } from '@tanstack/react-query';
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { ToastsStart } from '@kbn/core-notifications-browser';
 import type { RuleType } from '@kbn/triggers-actions-ui-types';
-import {
+import type {
   RuleTypeIndexWithDescriptions,
   RuleTypeWithDescription,
 } from '@kbn/triggers-actions-ui-types';

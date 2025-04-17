@@ -58,12 +58,12 @@ import {
   createGridSortingConfig,
   createTransposeColumnFilterHandler,
 } from './table_actions';
-import { getFinalSummaryConfiguration } from '../../../../common/expressions/datatable/summary';
+import { getFinalSummaryConfiguration } from '../../../../common/expressions/impl/datatable/summary';
 import { DEFAULT_HEADER_ROW_HEIGHT, DEFAULT_HEADER_ROW_HEIGHT_LINES } from './constants';
 import {
   getFieldMetaFromDatatable,
   isNumericField,
-} from '../../../../common/expressions/datatable/utils';
+} from '../../../../common/expressions/impl/datatable/utils';
 import { CellColorFn, getCellColorFn } from '../../../shared_components/coloring/get_cell_color_fn';
 import { getColumnAlignment } from '../utils';
 

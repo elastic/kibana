@@ -17,7 +17,7 @@ import { ObservabilityAIAssistantClient } from './client';
 import { KnowledgeBaseService } from './knowledge_base_service';
 import type { RegistrationCallback, RespondFunctionResources } from './types';
 import { ObservabilityAIAssistantConfig } from '../config';
-import { createOrUpdateIndexAssets } from './create_or_update_index_assets';
+import { createOrUpdateIndexAssets } from './startup_migrations/create_or_update_index_assets';
 
 function getResourceName(resource: string) {
   return `.kibana-observability-ai-assistant-${resource}`;
