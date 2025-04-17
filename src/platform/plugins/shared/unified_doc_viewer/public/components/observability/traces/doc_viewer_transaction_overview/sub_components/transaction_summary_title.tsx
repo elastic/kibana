@@ -24,8 +24,6 @@ export const TransactionSummaryTitle = ({
   name,
   id,
 }: TransactionSummaryTitleProps) => {
-  const titleText = name ?? id ?? serviceName;
-
   return (
     <>
       <EuiTitle size="xs">
@@ -37,7 +35,7 @@ export const TransactionSummaryTitle = ({
               renderContent={renderTransactionTitle}
             />
           ) : (
-            titleText
+            serviceName
           )}
         </h2>
       </EuiTitle>
