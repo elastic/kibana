@@ -8,7 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiPopover,
@@ -90,12 +90,12 @@ export function ChangeDataView({
   // Create a reusable id to ensure search input is the first focused item in the popover even though it's not the first item
   const searchListInputId = useGeneratedHtmlId({ prefix: 'dataviewPickerListSearchInput' });
 
-  const closePopover = () => {
+  const closePopover = useCallback(() => {
     setPopoverIsOpen(false);
     if (onClosePopover) {
       onClosePopover();
     }
-  };
+  }, [onClosePopover]);
 
   useEffect(() => {
     const fetchDataViews = async () => {
@@ -148,7 +148,7 @@ export function ChangeDataView({
     );
   };
 
-  const getPanelItems = () => {
+  const items = useMemo(() => {
     const panelItems: EuiContextMenuPanelProps['items'] = [];
     if (onAddField) {
       panelItems.push(
@@ -257,7 +257,22 @@ export function ChangeDataView({
     );
 
     return panelItems;
-  };
+  }, [
+    application,
+    closePopover,
+    currentDataViewId,
+    dataViewEditor,
+    dataViews,
+    dataViewsList,
+    euiTheme.size.s,
+    onAddField,
+    onChangeDataView,
+    onCreateDefaultAdHocDataView,
+    onDataViewCreated,
+    onEditDataView,
+    searchListInputId,
+    selectableProps,
+  ]);
 
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
@@ -293,7 +308,7 @@ export function ChangeDataView({
                 buffer={8}
               >
                 <div css={styles.popoverContent}>
-                  <EuiContextMenuPanel size="s" items={getPanelItems()} />
+                  <EuiContextMenuPanel size="s" items={items} />
                 </div>
               </EuiPopover>
             </EuiFlexItem>
