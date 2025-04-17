@@ -11,7 +11,7 @@ import { assertPlatinumLicense } from './utils/assert_platinum_license';
 import { BulkPurgeRollupData } from '../../services/bulk_purge_rollup_data';
 import { KibanaSavedObjectsSLORepository } from '../../services';
 
-export const purgeRollupDataRoute = createSloServerRoute({
+export const bulkPurgeRollupRoute = createSloServerRoute({
   endpoint: 'POST /api/observability/slos/_bulk_purge_rollup 2023-10-31',
   security: {
     authz: {

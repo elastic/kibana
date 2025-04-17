@@ -6,10 +6,12 @@
  */
 
 import { ElasticsearchClient } from '@kbn/core/server';
-import { BulkPurgeRollupSchemaType } from '@kbn/slo-schema/src/rest_specs/routes/bulk_purge_rollup';
+import {
+  BulkPurgeResponse,
+  BulkPurgeRollupSchemaType,
+} from '@kbn/slo-schema/src/rest_specs/routes/bulk_purge_rollup';
 import { calendarAlignedTimeWindowSchema } from '@kbn/slo-schema';
 import { assertNever } from '@elastic/eui';
-import { DeleteByQueryResponse } from '@elastic/elasticsearch/lib/api/types';
 import moment from 'moment';
 import { SLI_DESTINATION_INDEX_PATTERN } from '../../common/constants';
 import { SLORepository } from './slo_repository';
@@ -19,9 +21,7 @@ import { SLODefinition } from '../domain/models';
 export class BulkPurgeRollupData {
   constructor(private esClient: ElasticsearchClient, private repository: SLORepository) {}
 
-  public async execute(
-    params: BulkPurgeRollupSchemaType
-  ): Promise<{ taskId: DeleteByQueryResponse['task'] }> {
+  public async execute(params: BulkPurgeRollupSchemaType): Promise<BulkPurgeResponse> {
     const lookback = this.getTimestamp(params.purgePolicy);
     const slos = await this.repository.findAllByIds(params.list);
 

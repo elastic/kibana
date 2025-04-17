@@ -27,7 +27,7 @@ import { getSLOSuggestionsRoute } from './get_suggestions';
 import { putSloSettings } from './put_slo_settings';
 import { resetSLORoute } from './reset_slo';
 import { getSLOStatsOverview } from './get_slo_stats_overview';
-import { purgeRollupDataRoute } from './purge_rollup_data';
+import { bulkPurgeRollupRoute } from './purge_rollup_data';
 
 export const getSloRouteRepository = (isServerless?: boolean) => {
   return {
@@ -38,7 +38,7 @@ export const getSloRouteRepository = (isServerless?: boolean) => {
     ...inspectSLORoute,
     ...deleteSLORoute,
     ...deleteSloInstancesRoute,
-    ...purgeRollupDataRoute,
+    ...bulkPurgeRollupRoute,
     ...disableSLORoute,
     ...enableSLORoute,
     ...fetchHistoricalSummary,
