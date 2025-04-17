@@ -34,7 +34,7 @@ import {
 } from './components/session_view';
 import { useAsyncFunction } from './hooks/use_async_function';
 import { TabsView } from './components/tabs_view';
-import { getTabsStorageManager } from './state_management/tabs_storage_manager';
+import { createTabsStorageManager } from './state_management/tabs_storage_manager';
 
 // TEMPORARY: This is a temporary flag to enable/disable tabs in Discover until the feature is fully implemented.
 export const TABS_ENABLED = false;
@@ -72,7 +72,7 @@ export const DiscoverMainRoute = ({
 
   // syncing with the _t part URL
   const [tabsStorageManager] = useState(() =>
-    getTabsStorageManager({
+    createTabsStorageManager({
       urlStateStorage,
       storage: services.storage,
     })
