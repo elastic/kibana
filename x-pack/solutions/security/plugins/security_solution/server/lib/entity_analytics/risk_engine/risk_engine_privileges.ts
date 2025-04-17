@@ -120,7 +120,8 @@ export const withRiskEnginePrivilegeCheck = <P, Q, B>(
     context: SecuritySolutionRequestHandlerContext,
     request: KibanaRequest<P, Q, B>,
     response: KibanaResponseFactory
-  ) => Promise<IKibanaResponse>
+  ) => Promise<IKibanaResponse>,
+  privilegeType: 'run' | 'enable' = 'enable'
 ) => {
   return async (
     context: SecuritySolutionRequestHandlerContext,
@@ -128,9 +129,8 @@ export const withRiskEnginePrivilegeCheck = <P, Q, B>(
     response: KibanaResponseFactory
   ) => {
     const [_, { security }] = await getStartServices();
-    const privilegeCheckFn = request.route.path.includes('/risk_score/engine/schedule_now')
-      ? getRunRiskEnginePrivileges
-      : getEnableRiskEnginePrivileges;
+    const privilegeCheckFn =
+      privilegeType === 'run' ? getRunRiskEnginePrivileges : getEnableRiskEnginePrivileges;
     const privileges = await privilegeCheckFn(request, security);
     if (!privileges.has_all_required) {
       const siemResponse = buildSiemResponse(response);
