@@ -30,7 +30,7 @@ import type {
   IlmPolicies,
   IlmsStats,
   IndexSettings,
-  IndexTemplateStats,
+  IndexTemplateInfo,
   IndexTemplatesStats,
   IndicesSettings,
   IndicesStats,
@@ -85,7 +85,7 @@ export function createTelemetryIndicesMetadataTaskConfig() {
       };
 
       const publishIndexTemplatesStats = async (
-        indexTemplates: IndexTemplateStats[]
+        indexTemplates: IndexTemplateInfo[]
       ): Promise<number> => {
         const templateNames = new Set<string>();
         const templateStats: IndexTemplatesStats = {

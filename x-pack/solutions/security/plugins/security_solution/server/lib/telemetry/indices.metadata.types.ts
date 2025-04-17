@@ -42,10 +42,10 @@ export interface IlmStats {
 }
 
 export interface IndexTemplatesStats {
-  items: IndexTemplateStats[];
+  items: IndexTemplateInfo[];
 }
 
-export interface IndexTemplateStats {
+export interface IndexTemplateInfo {
   template_name: string;
   index_mode: Nullable<string>;
   datastream_dataset: Nullable<string>;

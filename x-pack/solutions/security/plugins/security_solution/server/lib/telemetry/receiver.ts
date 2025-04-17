@@ -102,7 +102,7 @@ import type {
   Index,
   IndexSettings,
   IndexStats,
-  IndexTemplateStats,
+  IndexTemplateInfo,
 } from './indices.metadata.types';
 import { chunkStringsByMaxLength } from './collections_helpers';
 import type {
@@ -267,7 +267,7 @@ export interface ITelemetryReceiver {
   getDataStreams(): Promise<DataStream[]>;
   getIndicesStats(indices: string[], chunkSize: number): AsyncGenerator<IndexStats, void, unknown>;
   getIlmsStats(indices: string[], chunkSize: number): AsyncGenerator<IlmStats, void, unknown>;
-  getIndexTemplatesStats(): Promise<IndexTemplateStats[]>;
+  getIndexTemplatesStats(): Promise<IndexTemplateInfo[]>;
   getIlmsPolicies(ilms: string[], chunkSize: number): AsyncGenerator<IlmPolicy, void, unknown>;
 
   getIngestPipelinesStats(timeout: Duration): Promise<NodeIngestPipelinesStats[]>;
@@ -1512,7 +1512,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     }
   }
 
-  public async getIndexTemplatesStats(): Promise<IndexTemplateStats[]> {
+  public async getIndexTemplatesStats(): Promise<IndexTemplateInfo[]> {
     const es = this.esClient();
 
     this.logger.l('Fetching datstreams');
@@ -1558,7 +1558,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
             source_enabled: props.index_template.template?.mappings?._source?.enabled,
             source_includes: props.index_template.template?.mappings?._source?.includes ?? [],
             source_excludes: props.index_template.template?.mappings?._source?.excludes ?? [],
-          } as IndexTemplateStats;
+          } as IndexTemplateInfo;
         })
       )
       .catch((error) => {
