@@ -19,6 +19,7 @@ import { useKibana } from '../../hooks/use_kibana';
 import { Pagination } from '../../types';
 
 export interface ResultListArgs {
+  executionTime: number;
   searchResults: SearchHit[];
   mappings?: IndicesGetMappingResponse;
   pagination: Pagination;
@@ -26,6 +27,7 @@ export interface ResultListArgs {
 }
 
 export const ResultList: React.FC<ResultListArgs> = ({
+  executionTime,
   searchResults,
   mappings,
   pagination,
@@ -46,6 +48,7 @@ export const ResultList: React.FC<ResultListArgs> = ({
   return (
     <>
       <DocumentList
+        executionTime={executionTime}
         dataTelemetryIdPrefix="result-list"
         docs={searchResults}
         docsPerPage={10}

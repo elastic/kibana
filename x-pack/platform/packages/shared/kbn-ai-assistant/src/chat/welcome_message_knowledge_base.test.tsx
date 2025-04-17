@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { act, render, screen } from '@testing-library/react';
+import { KnowledgeBaseState } from '@kbn/observability-ai-assistant-plugin/public';
 
 import { WelcomeMessageKnowledgeBase } from './welcome_message_knowledge_base';
 import type { UseKnowledgeBaseResult } from '../hooks/use_knowledge_base';
@@ -21,12 +22,13 @@ describe('WelcomeMessageKnowledgeBase', () => {
   ): UseKnowledgeBaseResult {
     return {
       isInstalling: partial.isInstalling ?? false,
+      isPolling: partial.isPolling ?? false,
       install: partial.install ?? jest.fn(),
-      installError: partial.installError,
       status: partial.status ?? {
         value: {
-          ready: false,
           enabled: true,
+          errorMessage: undefined,
+          kbState: KnowledgeBaseState.NOT_INSTALLED,
         },
         loading: false,
         error: undefined,
@@ -40,7 +42,18 @@ describe('WelcomeMessageKnowledgeBase', () => {
   }
 
   it('renders install message if isInstalling', () => {
-    const kb = createMockKnowledgeBase({ isInstalling: true });
+    const kb = createMockKnowledgeBase({
+      isInstalling: true,
+      status: {
+        value: {
+          enabled: true,
+          endpoint: { inference_id: 'inference_id' },
+          kbState: KnowledgeBaseState.PENDING_MODEL_DEPLOYMENT,
+        },
+        loading: false,
+        refresh: jest.fn(),
+      },
+    });
     renderComponent(kb);
 
     expect(screen.getByText(/We are setting up your knowledge base/i)).toBeInTheDocument();
@@ -51,23 +64,32 @@ describe('WelcomeMessageKnowledgeBase', () => {
     // 1) Start in an installing state
     let kb = createMockKnowledgeBase({
       isInstalling: true,
+      isPolling: true,
+      status: {
+        value: { enabled: true, kbState: KnowledgeBaseState.NOT_INSTALLED },
+        loading: false,
+        refresh: jest.fn(),
+      },
     });
     const { rerender } = renderComponent(kb);
 
     // Should not see success banner initially
     expect(screen.queryByText(/Knowledge base successfully installed/i)).toBeNull();
 
-    // 2) Transition to isInstalling = false, no installError
     kb = {
       ...kb,
       isInstalling: false,
+      isPolling: false,
       status: {
         ...kb.status,
         value: {
           ...kb.status.value,
-          ready: true,
           enabled: true,
+          endpoint: { inference_id: 'inference_id' },
+          kbState: KnowledgeBaseState.READY,
         },
+        loading: false,
+        refresh: jest.fn(),
       },
     };
 
@@ -79,16 +101,70 @@ describe('WelcomeMessageKnowledgeBase', () => {
     expect(screen.getByText(/Knowledge base successfully installed/i)).toBeInTheDocument();
   });
 
-  it('renders "not set up" if installError is present', () => {
+  it('renders "We are setting up your knowledge base" with the inspect button', () => {
     const kb = createMockKnowledgeBase({
-      installError: new Error('model deployment failed'),
+      isInstalling: false,
+      isPolling: true,
+      status: {
+        value: {
+          enabled: true,
+          endpoint: { inference_id: 'inference_id' },
+          kbState: KnowledgeBaseState.DEPLOYING_MODEL,
+          modelStats: {
+            deployment_stats: {
+              state: 'starting',
+              deployment_id: 'deployment_id',
+              model_id: 'model_id',
+              nodes: [],
+              peak_throughput_per_minute: 0,
+              priority: 'normal',
+              start_time: 0,
+            },
+          },
+        },
+        loading: false,
+        refresh: jest.fn(),
+      },
     });
     renderComponent(kb);
 
-    expect(screen.getByText(/Your Knowledge base hasn't been set up/i)).toBeInTheDocument();
-    expect(screen.getByText(/Install Knowledge base/i)).toBeInTheDocument();
-    // Because we have an installError, we also see "Inspect issues" button
-    expect(screen.getByText(/Inspect issues/i)).toBeInTheDocument();
+    expect(screen.getByText(/We are setting up your knowledge base/i)).toBeInTheDocument();
+    expect(screen.getByText(/Inspect/i)).toBeInTheDocument();
+  });
+
+  it('renders "Base setup failed" with inspect issues', () => {
+    const kb = createMockKnowledgeBase({
+      isInstalling: false,
+      isPolling: true,
+      status: {
+        value: {
+          enabled: true,
+          endpoint: { inference_id: 'inference_id' },
+          kbState: KnowledgeBaseState.ERROR,
+          modelStats: {
+            deployment_stats: {
+              reason: 'model deployment failed',
+              state: 'failed',
+              deployment_id: 'deployment_id',
+              model_id: 'model_id',
+              nodes: [],
+              peak_throughput_per_minute: 0,
+              priority: 'normal',
+              start_time: 0,
+            },
+          },
+        },
+        loading: false,
+        refresh: jest.fn(),
+      },
+    });
+    renderComponent(kb);
+
+    expect(
+      screen.getByText(/Knowledge Base setup failed. Check 'Inspect' for details./i)
+    ).toBeInTheDocument();
+    // Because we have an reason error, we also see "Inspect" button
+    expect(screen.getAllByText(/Inspect/i)).toHaveLength(2);
   });
 
   it('renders "not set up" if server returns errorMessage (no endpoint exists) but user hasnt started installing', () => {
@@ -97,11 +173,10 @@ describe('WelcomeMessageKnowledgeBase', () => {
     // automatically called
     const kb = createMockKnowledgeBase({
       isInstalling: false,
-      installError: undefined,
       status: {
         value: {
-          ready: false,
           enabled: true,
+          kbState: KnowledgeBaseState.NOT_INSTALLED,
           errorMessage: 'no endpoint',
         },
         loading: false,
@@ -112,7 +187,7 @@ describe('WelcomeMessageKnowledgeBase', () => {
 
     expect(screen.getByText(/Your Knowledge base hasn't been set up/i)).toBeInTheDocument();
     expect(screen.getByText(/Install Knowledge base/i)).toBeInTheDocument();
-    expect(screen.queryByText(/Inspect issues/i)).toBeNull();
+    expect(screen.queryByText(/Inspect/i)).toBeNull();
   });
 
   it('renders "not set up" if model is not ready (but no errorMessage because endpoint exists)', () => {
@@ -120,10 +195,22 @@ describe('WelcomeMessageKnowledgeBase', () => {
     // so we have no install error, but ready = false
     const kb = createMockKnowledgeBase({
       isInstalling: false,
+      isPolling: true,
       status: {
         value: {
-          endpoint: {},
-          ready: false,
+          endpoint: { inference_id: 'inference_id' },
+          kbState: KnowledgeBaseState.DEPLOYING_MODEL,
+          modelStats: {
+            deployment_stats: {
+              reason: 'model deployment failed',
+              deployment_id: 'deployment_id',
+              model_id: 'model_id',
+              nodes: [],
+              peak_throughput_per_minute: 0,
+              priority: 'normal',
+              start_time: 0,
+            },
+          },
           enabled: true,
         },
         loading: false,
@@ -133,16 +220,16 @@ describe('WelcomeMessageKnowledgeBase', () => {
     });
     renderComponent(kb);
 
-    expect(screen.getByText(/Your Knowledge base hasn't been set up/i)).toBeInTheDocument();
-    expect(screen.getByText(/Install Knowledge base/i)).toBeInTheDocument();
-    expect(screen.getByText(/Inspect issues/i)).toBeInTheDocument();
+    expect(screen.getByText(/We are setting up your knowledge base/i)).toBeInTheDocument();
+    expect(screen.getByText(/Inspect/i)).toBeInTheDocument();
   });
 
   it('renders nothing if the knowledge base is already installed', () => {
     const kb = createMockKnowledgeBase({
       status: {
         value: {
-          ready: true,
+          kbState: KnowledgeBaseState.READY,
+          endpoint: { inference_id: 'inference_id' },
           enabled: true,
           errorMessage: undefined,
         },

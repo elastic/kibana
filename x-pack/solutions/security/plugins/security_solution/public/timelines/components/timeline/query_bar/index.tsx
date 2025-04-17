@@ -13,8 +13,9 @@ import type { Filter, Query } from '@kbn/es-query';
 import { FilterStateStore } from '@kbn/es-query';
 import type { FilterManager, SavedQuery, SavedQueryTimeFilter } from '@kbn/data-plugin/public';
 import styled from '@emotion/styled';
+import { useEnableExperimental } from '../../../../common/hooks/use_experimental_features';
+import { useDataViewSpec } from '../../../../data_view_manager/hooks/use_data_view_spec';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
-import { useSourcererDataView } from '../../../../sourcerer/containers';
 import { SourcererScopeName } from '../../../../sourcerer/store/model';
 
 import {
@@ -29,6 +30,8 @@ import type { DataProvider } from '../data_providers/data_provider';
 import { TIMELINE_FILTER_DROP_AREA, buildGlobalQuery, getNonDropAreaFilters } from '../helpers';
 import { timelineActions } from '../../../store';
 import type { KueryFilterQuery, KueryFilterQueryKind } from '../../../../../common/types/timeline';
+import { useBrowserFields } from '../../../../data_view_manager/hooks/use_browser_fields';
+import { useSourcererDataView } from '../../../../sourcerer/containers';
 
 export interface QueryBarTimelineComponentProps {
   dataProviders: DataProvider[];
@@ -110,7 +113,17 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
     const [dateRangeTo, setDateRangTo] = useState<string>(
       toStr != null ? toStr : new Date(to).toISOString()
     );
-    const { browserFields, sourcererDataView } = useSourcererDataView(SourcererScopeName.timeline);
+    let { browserFields, sourcererDataView } = useSourcererDataView(SourcererScopeName.timeline);
+
+    const { newDataViewPickerEnabled } = useEnableExperimental();
+    const { dataViewSpec: experimentalDataView } = useDataViewSpec(SourcererScopeName.timeline);
+    const experimentalBrowserFields = useBrowserFields(SourcererScopeName.timeline);
+
+    if (newDataViewPickerEnabled) {
+      sourcererDataView = experimentalDataView;
+      browserFields = experimentalBrowserFields;
+    }
+
     const [savedQuery, setSavedQuery] = useState<SavedQuery | undefined>(undefined);
     const [filterQueryConverted, setFilterQueryConverted] = useState<Query>({
       query: filterQuery != null ? filterQuery.expression : '',

@@ -12,7 +12,7 @@ import { renderHook, waitFor } from '@testing-library/react';
 import { lastValueFrom } from 'rxjs';
 import { getUnifiedDocViewerServices } from '../../../../../plugin';
 import { TransactionProvider, useTransactionContext } from './use_transaction';
-import { TRANSACTION_NAME_FIELD } from '@kbn/discover-utils';
+import { TRANSACTION_DURATION_FIELD, TRANSACTION_NAME_FIELD } from '@kbn/discover-utils';
 
 jest.mock('../../../../../plugin', () => ({
   getUnifiedDocViewerServices: jest.fn(),
@@ -43,9 +43,11 @@ const mockAddDanger = jest.fn();
   },
 });
 
+const lastValueFromMock = lastValueFrom as jest.Mock;
+
 beforeEach(() => {
   jest.clearAllMocks();
-  (lastValueFrom as jest.Mock).mockReset();
+  lastValueFromMock.mockReset();
 });
 
 describe('useTransaction hook', () => {
@@ -56,7 +58,7 @@ describe('useTransaction hook', () => {
   );
 
   it('should start with loading true and transaction as null', async () => {
-    (lastValueFrom as jest.Mock).mockResolvedValue({});
+    lastValueFromMock.mockResolvedValue({});
 
     const { result } = renderHook(() => useTransactionContext(), { wrapper });
 
@@ -66,10 +68,18 @@ describe('useTransaction hook', () => {
 
   it('should update transaction when data is fetched successfully', async () => {
     const transactionName = 'Test Transaction';
-    (lastValueFrom as jest.Mock).mockResolvedValue({
+    const transactionDuration = 1;
+    lastValueFromMock.mockResolvedValue({
       rawResponse: {
         hits: {
-          hits: [{ fields: { [TRANSACTION_NAME_FIELD]: transactionName } }],
+          hits: [
+            {
+              fields: {
+                [TRANSACTION_NAME_FIELD]: transactionName,
+                [TRANSACTION_DURATION_FIELD]: transactionDuration,
+              },
+            },
+          ],
         },
       },
     });
@@ -80,19 +90,20 @@ describe('useTransaction hook', () => {
 
     expect(result.current.loading).toBe(false);
     expect(result.current.transaction?.name).toBe(transactionName);
+    expect(result.current.transaction?.duration).toBe(transactionDuration);
     expect(lastValueFrom).toHaveBeenCalledTimes(1);
   });
 
-  it('should handle errors and set transaction.name as empty string, and show a toast error', async () => {
+  it('should handle errors and set transaction to null, and show a toast error', async () => {
     const errorMessage = 'Search error';
-    (lastValueFrom as jest.Mock).mockRejectedValue(new Error(errorMessage));
+    lastValueFromMock.mockRejectedValue(new Error(errorMessage));
 
     const { result } = renderHook(() => useTransactionContext(), { wrapper });
 
     await waitFor(() => !result.current.loading);
 
     expect(result.current.loading).toBe(false);
-    expect(result.current.transaction).toEqual({ name: '' });
+    expect(result.current.transaction).toBeNull();
     expect(lastValueFrom).toHaveBeenCalledTimes(1);
     expect(mockAddDanger).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -102,7 +113,7 @@ describe('useTransaction hook', () => {
     );
   });
 
-  it('should set transaction.name as empty string and stop loading when transactionId is not provided', async () => {
+  it('should set transaction to null and stop loading when transactionId is not provided', async () => {
     const wrapperWithoutTransactionId = ({ children }: { children: React.ReactNode }) => (
       <TransactionProvider transactionId={undefined} indexPattern="test-index">
         {children}
@@ -116,7 +127,7 @@ describe('useTransaction hook', () => {
     await waitFor(() => !result.current.loading);
 
     expect(result.current.loading).toBe(false);
-    expect(result.current.transaction).toEqual({ name: '' });
+    expect(result.current.transaction).toBeNull();
     expect(lastValueFrom).not.toHaveBeenCalled();
   });
 });

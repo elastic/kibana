@@ -65,6 +65,10 @@ function stringifyError(error: string | Error, depth: number = 0): string {
     return error;
   }
 
+  if (error instanceof AggregateError) {
+    return [error.stack, ...error.errors.map(stringifyError)].join('\n');
+  }
+
   const msg = error.stack || error.message || String(error);
 
   // log Error.cause if set

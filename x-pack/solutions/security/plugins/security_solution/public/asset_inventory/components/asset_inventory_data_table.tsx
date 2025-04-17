@@ -18,23 +18,17 @@ import {
   type CustomCellRenderer,
 } from '@kbn/unified-data-table';
 import { CellActionsProvider } from '@kbn/cell-actions';
-import {
-  type RowControlColumn,
-  SHOW_MULTIFIELDS,
-  SORT_DEFAULT_ORDER_SETTING,
-} from '@kbn/discover-utils';
+import { SHOW_MULTIFIELDS, SORT_DEFAULT_ORDER_SETTING } from '@kbn/discover-utils';
 import { type DataTableRecord } from '@kbn/discover-utils/types';
 import {
   type EuiDataGridCellValueElementProps,
   type EuiDataGridStyle,
   EuiProgress,
-  EuiButtonIcon,
 } from '@elastic/eui';
 import { type AddFieldFilterHandler } from '@kbn/unified-field-list';
 import { generateFilters } from '@kbn/data-plugin/public';
 import { type DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
-import type { EntityEcs } from '@kbn/securitysolution-ecs/src/entity';
 
 import { EmptyComponent } from '../../common/lib/cell_actions/helpers';
 import { type CriticalityLevelWithUnassigned } from '../../../common/entity_analytics/asset_criticality/types';
@@ -52,6 +46,7 @@ import { useFetchGridData } from '../hooks/use_fetch_grid_data';
 import type { AssetInventoryURLStateResult } from '../hooks/use_asset_inventory_url_state/use_asset_inventory_url_state';
 
 import {
+  ASSET_FIELDS,
   DEFAULT_VISIBLE_ROWS_PER_PAGE,
   MAX_ASSETS_TO_LOAD,
   ASSET_INVENTORY_TABLE_ID,
@@ -59,6 +54,7 @@ import {
   LOCAL_STORAGE_COLUMNS_SETTINGS_KEY,
   LOCAL_STORAGE_COLUMNS_KEY,
 } from '../constants';
+import type { GenericEntityRecord } from '../types/generic_entity_record';
 
 const gridStyle: EuiDataGridStyle = {
   border: 'horizontal',
@@ -71,42 +67,44 @@ const title = i18n.translate('xpack.securitySolution.assetInventory.allAssets.ta
   defaultMessage: 'assets',
 });
 
-const moreActionsLabel = i18n.translate(
-  'xpack.securitySolution.assetInventory.flyout.moreActionsButton',
-  {
-    defaultMessage: 'More actions',
-  }
-);
-
 const columnHeaders: Record<string, string> = {
-  'asset.risk': i18n.translate('xpack.securitySolution.assetInventory.allAssets.risk', {
-    defaultMessage: 'Risk',
-  }),
-  'asset.name': i18n.translate('xpack.securitySolution.assetInventory.allAssets.name', {
-    defaultMessage: 'Name',
-  }),
-  'asset.criticality': i18n.translate(
-    'xpack.securitySolution.assetInventory.allAssets.criticality',
+  [ASSET_FIELDS.ENTITY_NAME]: i18n.translate(
+    'xpack.securitySolution.assetInventory.allAssets.name',
     {
-      defaultMessage: 'Criticality',
+      defaultMessage: 'Name',
     }
   ),
-  'asset.source': i18n.translate('xpack.securitySolution.assetInventory.allAssets.source', {
-    defaultMessage: 'Source',
+  [ASSET_FIELDS.ENTITY_ID]: i18n.translate('xpack.securitySolution.assetInventory.allAssets.id', {
+    defaultMessage: 'ID',
   }),
-  '@timestamp': i18n.translate('xpack.securitySolution.assetInventory.allAssets.lastSeen', {
-    defaultMessage: 'Last Seen',
-  }),
+  [ASSET_FIELDS.ENTITY_TYPE]: i18n.translate(
+    'xpack.securitySolution.assetInventory.allAssets.type',
+    {
+      defaultMessage: 'Type',
+    }
+  ),
+  [ASSET_FIELDS.ENTITY_SOURCE]: i18n.translate(
+    'xpack.securitySolution.assetInventory.allAssets.source',
+    {
+      defaultMessage: 'Source',
+    }
+  ),
+  [ASSET_FIELDS.TIMESTAMP]: i18n.translate(
+    'xpack.securitySolution.assetInventory.allAssets.lastSeen',
+    {
+      defaultMessage: 'Last Seen',
+    }
+  ),
 } as const;
 
 const customCellRenderer = (rows: DataTableRecord[]): CustomCellRenderer => ({
-  'asset.risk': ({ rowIndex }: EuiDataGridCellValueElementProps) => {
-    const risk = rows[rowIndex].flattened['asset.risk'] as number;
+  [ASSET_FIELDS.ENTITY_RISK]: ({ rowIndex }: EuiDataGridCellValueElementProps) => {
+    const risk = rows[rowIndex].flattened[ASSET_FIELDS.ENTITY_RISK] as number;
     return <RiskBadge risk={risk} />;
   },
-  'asset.criticality': ({ rowIndex }: EuiDataGridCellValueElementProps) => {
+  [ASSET_FIELDS.ASSET_CRITICALITY]: ({ rowIndex }: EuiDataGridCellValueElementProps) => {
     const criticality = rows[rowIndex].flattened[
-      'asset.criticality'
+      ASSET_FIELDS.ASSET_CRITICALITY
     ] as CriticalityLevelWithUnassigned;
     return <AssetCriticalityBadge criticalityLevel={criticality} />;
   },
@@ -118,35 +116,24 @@ interface AssetInventoryDefaultColumn {
 }
 
 const defaultColumns: AssetInventoryDefaultColumn[] = [
-  { id: 'asset.risk', width: 50 },
-  { id: 'asset.name', width: 400 },
-  { id: 'asset.criticality' },
-  { id: 'asset.source' },
-  { id: '@timestamp' },
+  { id: ASSET_FIELDS.ENTITY_NAME, width: 400 },
+  { id: ASSET_FIELDS.ENTITY_ID },
+  { id: ASSET_FIELDS.ENTITY_TYPE },
+  { id: ASSET_FIELDS.ENTITY_SOURCE },
+  { id: ASSET_FIELDS.TIMESTAMP },
 ];
-
-// TODO: Asset Inventory - adjust and remove type casting once we have real universal entity data
-const getEntity = (record: DataTableRecord) => {
-  const { _source } = record.raw;
-
-  const entityMock = {
-    tags: ['infrastructure', 'linux', 'admin', 'active'],
-    labels: { Group: 'cloud-sec-dev', Environment: 'Production' },
-    id: 'mock-entity-id',
-    criticality: 'low_impact',
-  } as unknown as EntityEcs;
-
-  return {
-    entity: { ...(_source?.entity || {}), ...entityMock },
-    source: _source || {},
-  };
-};
 
 export interface AssetInventoryDataTableProps {
   state: AssetInventoryURLStateResult;
+  height?: number;
+  groupSelectorComponent?: JSX.Element;
 }
 
-export const AssetInventoryDataTable = ({ state }: AssetInventoryDataTableProps) => {
+export const AssetInventoryDataTable = ({
+  state,
+  height,
+  groupSelectorComponent,
+}: AssetInventoryDataTableProps) => {
   const {
     pageSize,
     sort,
@@ -167,13 +154,14 @@ export const AssetInventoryDataTable = ({ state }: AssetInventoryDataTableProps)
     onFlyoutClose: () => setExpandedDoc(undefined),
   });
 
-  const onExpandDocClick = (record?: DataTableRecord | undefined) => {
-    if (record) {
-      const { entity, source } = getEntity(record);
-      setExpandedDoc(record); // Table is expecting the same doc ref to highlight the selected row
+  const openTableFlyout = (doc?: DataTableRecord | undefined) => {
+    if (doc && doc.raw._source) {
+      const source = doc.raw._source as GenericEntityRecord;
+      setExpandedDoc(doc); // Table is expecting the same doc ref to highlight the selected row
       openDynamicFlyout({
-        entity,
-        source,
+        entityDocId: doc.raw._id,
+        entityType: source.entity?.type,
+        entityName: source.entity?.name,
         scopeId: ASSET_INVENTORY_TABLE_ID,
         contextId: ASSET_INVENTORY_TABLE_ID,
       });
@@ -187,7 +175,6 @@ export const AssetInventoryDataTable = ({ state }: AssetInventoryDataTableProps)
 
   const {
     data: rowsData,
-    // error: fetchError,
     fetchNextPage: loadMore,
     isFetching: isFetchingGridData,
     isLoading: isLoadingGridData,
@@ -233,7 +220,7 @@ export const AssetInventoryDataTable = ({ state }: AssetInventoryDataTableProps)
     };
   }, [persistedSettings]);
 
-  const { dataView } = useDataViewContext();
+  const { dataView, dataViewIsLoading } = useDataViewContext();
 
   const {
     uiActions,
@@ -283,6 +270,8 @@ export const AssetInventoryDataTable = ({ state }: AssetInventoryDataTableProps)
     const isVirtualizationEnabled = pageSize >= 100;
 
     const getWrapperHeight = () => {
+      if (height) return height;
+
       // If virtualization is not needed the table will render unconstrained.
       if (!isVirtualizationEnabled) return 'auto';
 
@@ -294,7 +283,7 @@ export const AssetInventoryDataTable = ({ state }: AssetInventoryDataTableProps)
       wrapperHeight: getWrapperHeight(),
       mode: isVirtualizationEnabled ? 'virtualized' : 'standard',
     };
-  }, [pageSize]);
+  }, [pageSize, height]);
 
   const onAddFilter: AddFieldFilterHandler | undefined = useMemo(
     () =>
@@ -341,27 +330,11 @@ export const AssetInventoryDataTable = ({ state }: AssetInventoryDataTableProps)
       onAddColumn={onAddColumn}
       onRemoveColumn={onRemoveColumn}
       onResetColumns={onResetColumns}
+      groupSelectorComponent={groupSelectorComponent}
     />
   );
 
-  const externalControlColumns: RowControlColumn[] = [
-    {
-      id: 'more-actions',
-      headerAriaLabel: moreActionsLabel,
-      headerCellRender: () => null,
-      renderControl: () => (
-        <EuiButtonIcon
-          aria-label={moreActionsLabel}
-          iconType="boxesHorizontal"
-          color="primary"
-          isLoading={isLoadingGridData}
-        />
-      ),
-    },
-  ];
-
-  const loadingState =
-    isLoadingGridData || !dataView ? DataLoadingState.loading : DataLoadingState.loaded;
+  const loadingState = isLoadingGridData ? DataLoadingState.loading : DataLoadingState.loaded;
 
   return (
     <CellActionsProvider getTriggerCompatibleActions={uiActions.getTriggerCompatibleActions}>
@@ -372,8 +345,13 @@ export const AssetInventoryDataTable = ({ state }: AssetInventoryDataTableProps)
           height: computeDataTableRendering.wrapperHeight,
         }}
       >
-        <EuiProgress size="xs" color="accent" style={{ opacity: isFetchingGridData ? 1 : 0 }} />
-        {!dataView ? null : loadingState === DataLoadingState.loaded && totalHits === 0 ? (
+        <EuiProgress
+          size="xs"
+          color="accent"
+          style={{ opacity: isFetchingGridData ? 1 : 0 }}
+          className={styles.gridProgressBar}
+        />
+        {dataViewIsLoading ? null : loadingState === DataLoadingState.loaded && totalHits === 0 ? (
           <AssetInventoryEmptyState onResetFilters={onResetFilters} />
         ) : (
           <UnifiedDataTable
@@ -390,7 +368,7 @@ export const AssetInventoryDataTable = ({ state }: AssetInventoryDataTableProps)
             rows={rows}
             sampleSizeState={MAX_ASSETS_TO_LOAD}
             expandedDoc={expandedDoc}
-            setExpandedDoc={onExpandDocClick}
+            setExpandedDoc={openTableFlyout}
             renderDocumentView={EmptyComponent}
             sort={sort}
             rowsPerPageState={pageSize}
@@ -402,7 +380,6 @@ export const AssetInventoryDataTable = ({ state }: AssetInventoryDataTableProps)
             showTimeCol={false}
             settings={settings}
             onFetchMoreRecords={loadMore}
-            rowAdditionalLeadingControls={externalControlColumns}
             externalCustomRenderers={externalCustomRenderers}
             externalAdditionalControls={externalAdditionalControls}
             gridStyleOverride={gridStyle}

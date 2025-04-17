@@ -595,10 +595,10 @@ export const categorizeAggregations = (aggregationResponse?: ApiKeyAggregations)
       : [];
 
     typeBuckets.forEach((type) => {
-      typeFilters.push(type.key);
+      typeFilters.push(type.key as CategorizedApiKey['type']);
     });
     usernameBuckets.forEach((username) => {
-      usernameFilters.push(username.key);
+      usernameFilters.push(`${username.key}`);
     });
     const { namePrefixBased, metadataBased } = managed?.buckets || {};
     if (

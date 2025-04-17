@@ -115,7 +115,11 @@ function buildTemplateVariables(logger: Logger, variables: PackagePolicyConfigRe
       varPart[lastKeyPart] = recordEntry.value ? `"${yamlKeyPlaceholder}"` : null;
       yamlValues[yamlKeyPlaceholder] = recordEntry.value ? load(recordEntry.value) : null;
     } else if (recordEntry.value && recordEntry.value.isSecretRef) {
-      varPart[lastKeyPart] = toCompiledSecretRef(recordEntry.value.id);
+      if (recordEntry.value.ids) {
+        varPart[lastKeyPart] = recordEntry.value.ids.map((id: string) => toCompiledSecretRef(id));
+      } else {
+        varPart[lastKeyPart] = toCompiledSecretRef(recordEntry.value.id);
+      }
     } else {
       varPart[lastKeyPart] = recordEntry.value;
     }

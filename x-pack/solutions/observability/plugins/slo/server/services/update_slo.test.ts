@@ -485,11 +485,9 @@ describe('UpdateSLO', () => {
 
   function expectDeletionOfOriginalSLOResources(originalSlo: SLODefinition) {
     const transformId = getSLOTransformId(originalSlo.id, originalSlo.revision);
-    expect(mockTransformManager.stop).toHaveBeenCalledWith(transformId);
     expect(mockTransformManager.uninstall).toHaveBeenCalledWith(transformId);
 
     const summaryTransformId = getSLOSummaryTransformId(originalSlo.id, originalSlo.revision);
-    expect(mockSummaryTransformManager.stop).toHaveBeenCalledWith(summaryTransformId);
     expect(mockSummaryTransformManager.uninstall).toHaveBeenCalledWith(summaryTransformId);
 
     expect(mockScopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline).toHaveBeenCalled();

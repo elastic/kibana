@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import { EuiCode, EuiFlexGroup } from '@elastic/eui';
+import { useTruncateText } from '@kbn/react-hooks';
 import { readLess, readMore } from '../../../../common/translations';
 
 interface TruncatedTextWithToggleProps {
@@ -22,11 +23,11 @@ export const ExpandableTruncatedText = ({
   truncatedTextLength = 35,
   codeLanguage,
 }: TruncatedTextWithToggleProps) => {
-  const [isExpanded, setIsExpanded] = useState(false);
-
-  const shouldTruncate = text.length > maxCharLength;
-  const displayText =
-    shouldTruncate && !isExpanded ? `${text.slice(0, truncatedTextLength)}...` : text;
+  const { displayText, isExpanded, toggleExpanded, shouldTruncate } = useTruncateText(
+    text,
+    maxCharLength,
+    truncatedTextLength
+  );
 
   return (
     <EuiFlexGroup direction="column" gutterSize="none" style={{ width: '100%' }}>
@@ -37,7 +38,7 @@ export const ExpandableTruncatedText = ({
         <EuiCode>
           <button
             data-test-subj="truncatedTextToggle"
-            onClick={() => setIsExpanded(!isExpanded)}
+            onClick={toggleExpanded}
             color="primary"
             css={{ fontWeight: 'bold', textDecoration: 'underline' }}
           >
