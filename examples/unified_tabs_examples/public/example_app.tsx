@@ -122,12 +122,13 @@ export const UnifiedTabsExampleApp: React.FC<UnifiedTabsExampleAppProps> = ({
           <div className="eui-fullHeight">
             <UnifiedTabs
               initialItems={initialItems}
+              recentlyClosedItems={[]}
               maxItemsCount={25}
               services={services}
               onChanged={() => {}}
               createItem={getNewTabDefaultProps}
-              getPreviewData={
-                () => TAB_CONTENT_MOCK[Math.floor(Math.random() * TAB_CONTENT_MOCK.length)] // TODO change mock to real data when ready
+              getPreviewData={() =>
+                TAB_CONTENT_MOCK[Math.floor(Math.random() * TAB_CONTENT_MOCK.length)]
               }
               renderContent={({ label }) => {
                 return (

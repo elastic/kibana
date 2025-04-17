@@ -73,6 +73,7 @@ export const DiscoverMainRoute = ({
     createTabsStorageManager({
       urlStateStorage,
       storage: services.storage,
+      enabled: TABS_ENABLED,
     })
   );
 

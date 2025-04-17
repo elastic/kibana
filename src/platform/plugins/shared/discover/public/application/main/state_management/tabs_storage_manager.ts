@@ -16,7 +16,6 @@ import {
 import type { TabItem } from '@kbn/unified-tabs';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import { TABS_STATE_URL_KEY } from '../../../../common/constants';
-import { TABS_ENABLED } from '../../../constants';
 import type { TabState, RecentlyClosedTabState } from './redux/types';
 import { createTabItem } from './redux/utils';
 import type { DiscoverAppState } from './discover_app_state_container';
@@ -82,9 +81,11 @@ export interface TabsStorageManager {
 export const createTabsStorageManager = ({
   urlStateStorage,
   storage,
+  enabled,
 }: {
   urlStateStorage: IKbnUrlStateStorage;
   storage: Storage;
+  enabled?: boolean;
 }): TabsStorageManager => {
   const urlStateContainer = createStateContainer<TabsStorageState>({});
   const sessionInfo = { userId: '', spaceId: '' };
@@ -106,11 +107,12 @@ export const createTabsStorageManager = ({
       storageKey: TABS_STATE_URL_KEY,
     });
 
-    const listener = onChanged
-      ? urlStateContainer.state$.subscribe((state) => {
-          onChanged(state);
-        })
-      : null;
+    const listener =
+      onChanged && enabled
+        ? urlStateContainer.state$.subscribe((state) => {
+            onChanged(state);
+          })
+        : null;
 
     start();
 
@@ -216,7 +218,7 @@ export const createTabsStorageManager = ({
     selectedTabId,
     recentlyClosedTabs,
   }) => {
-    if (!TABS_ENABLED) {
+    if (!enabled) {
       return;
     }
     await pushSelectedTabIdToUrl(selectedTabId);
@@ -239,7 +241,7 @@ export const createTabsStorageManager = ({
     tabId,
     tabStatePartial
   ) => {
-    if (!TABS_ENABLED) {
+    if (!enabled) {
       return;
     }
     let hasModifications = false;
@@ -289,7 +291,7 @@ export const createTabsStorageManager = ({
     });
 
     const selectedTabId = getSelectedTabIdFromURL();
-    let storedTabsState: TabsStateInLocalStorage = TABS_ENABLED
+    let storedTabsState: TabsStateInLocalStorage = enabled
       ? readFromLocalStorage()
       : defaultTabsStateInLocalStorage;
 
@@ -308,7 +310,7 @@ export const createTabsStorageManager = ({
     const openTabs = storedTabsState.openTabs.map(toTabState);
     const closedTabs = storedTabsState.closedTabs.map(toRecentlyClosedTabState);
 
-    if (TABS_ENABLED) {
+    if (enabled) {
       if (selectedTabId) {
         // restore previously opened tabs
         if (openTabs.find((tab) => tab.id === selectedTabId)) {
