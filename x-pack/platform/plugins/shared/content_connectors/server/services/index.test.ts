@@ -32,6 +32,14 @@ import {
 import { AgentPolicy, PackagePolicy, PackagePolicyInput } from '@kbn/fleet-plugin/common';
 import { createAgentPolicyMock, createPackagePolicyMock } from '@kbn/fleet-plugin/common/mocks';
 
+jest.mock('@kbn/fleet-plugin/server/services/agents/agentless_agent', () => {
+  return {
+    agentlessAgentService: {
+      createAgentlessAgent: jest.fn(),
+    },
+  };
+});
+
 jest.mock('@kbn/fleet-plugin/server/services/epm/packages', () => {
   const mockedGetPackageInfo = ({ pkgName }: { pkgName: string }) => {
     if (pkgName === 'elastic_connectors') {
@@ -539,7 +547,8 @@ describe('AgentlessConnectorsInfraService', () => {
         esClient,
         expect.objectContaining({
           supports_agentless: true,
-        })
+        }),
+        { force: true }
       );
       expect(result).toBe(fakePackagePolicy);
     });

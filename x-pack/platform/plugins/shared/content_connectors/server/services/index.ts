@@ -15,6 +15,7 @@ import {
 import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { NATIVE_CONNECTOR_DEFINITIONS, fetchConnectors } from '@kbn/search-connectors';
 import { getPackageInfo } from '@kbn/fleet-plugin/server/services/epm/packages';
+import { agentlessAgentService } from '@kbn/fleet-plugin/server/services/agents/agentless_agent';
 
 export interface ConnectorMetadata {
   id: string;
@@ -247,6 +248,7 @@ export class AgentlessConnectorsInfraService {
     this.logger.info(
       `Successfully created package policy ${packagePolicy.id} for agentless connector ${connector.id}`
     );
+    await agentlessAgentService.createAgentlessAgent(this.esClient, this.soClient, createdPolicy);
 
     return packagePolicy;
   };
