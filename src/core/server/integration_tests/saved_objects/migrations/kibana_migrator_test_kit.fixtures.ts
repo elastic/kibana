@@ -298,12 +298,13 @@ export const getUpToDateMigratorTestKit = async ({
 export const getCompatibleMigratorTestKit = async ({
   logFilePath = defaultLogFilePath,
   removedTypes = EXCLUDED_TYPES,
+  types = getCompatibleBaselineTypes(removedTypes),
   kibanaVersion = nextMinor,
   settings = {},
 }: GetMutatedMigratorParams = {}) => {
   return await getKibanaMigratorTestKit({
     logFilePath,
-    types: getCompatibleBaselineTypes(removedTypes),
+    types,
     removedTypes,
     kibanaVersion,
     settings,
