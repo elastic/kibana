@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { AttackDiscoverySchedule } from '@kbn/elastic-assistant-common';
 
 import * as i18n from './translations';
@@ -24,17 +24,17 @@ export const Status: React.FC<Props> = React.memo(({ schedule }) => {
 
   const executionDate = schedule.lastExecution.date;
   return (
-    <div data-test-subj="executionStatus">
+    <EuiFlexGroup gutterSize="xs" alignItems="center" data-test-subj="executionStatus">
       <EuiFlexItem grow={false}>
         <StatusBadge schedule={schedule} />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <>{i18n.STATUS_AT}</>
       </EuiFlexItem>
-      <EuiFlexItem grow={true}>
+      <EuiFlexItem grow={false}>
         <FormattedDate value={executionDate} fieldName={i18n.STATUS_DATE} />
       </EuiFlexItem>
-    </div>
+    </EuiFlexGroup>
   );
 });
 Status.displayName = 'Status';
