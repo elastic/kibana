@@ -8,7 +8,11 @@
  */
 
 import { orderBy } from 'lodash';
-import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
+import {
+  createStateContainer,
+  type IKbnUrlStateStorage,
+  syncState,
+} from '@kbn/kibana-utils-plugin/public';
 import type { TabItem } from '@kbn/unified-tabs';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import { TABS_STATE_URL_KEY } from '../../../../common/constants';
@@ -45,6 +49,10 @@ export interface TabsStorageState {
 }
 
 export interface TabsStorageManager {
+  /**
+   * Supports two-way sync of the selected tab id with the URL.
+   */
+  startUrlSync: (props: { onChanged?: (nextState: TabsStorageState) => void }) => () => void;
   persistLocally: (props: TabsInternalStatePayload) => Promise<void>;
   updateTabStateLocally: (
     tabId: string,
@@ -67,6 +75,39 @@ export const createTabsStorageManager = ({
   urlStateStorage: IKbnUrlStateStorage;
   storage: Storage;
 }): TabsStorageManager => {
+  const urlStateContainer = createStateContainer<TabsStorageState>({});
+
+  const startUrlSync: TabsStorageManager['startUrlSync'] = ({
+    onChanged, // can be called when selectedTabId changes in URL to trigger app state change if needed
+  }) => {
+    const { start, stop } = syncState({
+      stateStorage: urlStateStorage,
+      stateContainer: {
+        ...urlStateContainer,
+        set: (state) => {
+          if (state) {
+            // syncState utils requires to handle incoming "null" value
+            urlStateContainer.set(state);
+          }
+        },
+      },
+      storageKey: TABS_STATE_URL_KEY,
+    });
+
+    const listener = onChanged
+      ? urlStateContainer.state$.subscribe((state) => {
+          onChanged(state);
+        })
+      : null;
+
+    start();
+
+    return () => {
+      listener?.unsubscribe();
+      stop();
+    };
+  };
+
   const getSelectedTabIdFromURL = () => {
     return (urlStateStorage.get(TABS_STATE_URL_KEY) as TabsStorageState)?.tabId;
   };
@@ -278,6 +319,7 @@ export const createTabsStorageManager = ({
   };
 
   return {
+    startUrlSync,
     persistLocally,
     updateTabStateLocally,
     loadLocally,
