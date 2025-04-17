@@ -40,7 +40,7 @@ export const buildBaseClassicNavItems = (): ClassicNavItem[] => {
     ),
   });
 
-  // Content
+  // Data
   navItems.push({
     'data-test-subj': 'searchSideNav-Data',
     id: 'data',
