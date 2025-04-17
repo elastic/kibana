@@ -257,6 +257,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
         'otherTools',
         'maps',
         'gettingStarted',
+        'search_project_nav_footer',
         'project_settings_project_nav',
         'management:trained_models',
         'management',
