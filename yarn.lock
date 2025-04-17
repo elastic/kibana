@@ -2167,27 +2167,23 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-0.1.1.tgz#2829b0f3cc750c582baa683c2f503594676ba08a"
   integrity sha512-dCoXcCT8V1djwWrP0XSG0gXN5fYDtAw5aF88BPArVBbuCQSWPEBpR9avaWJ6uVjAsOteQ7tdwLMtzrvMKgKKIA==
 
-"@elastic/eui-theme-borealis@0.1.0":
+"@elastic/eui-theme-borealis@file:./elastic_eui_theme_borealis_0.1.0_severity_colors_03.tgz":
   version "0.1.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui-theme-borealis/-/eui-theme-borealis-0.1.0.tgz#5b7151c9dae093b945060b3f9c1ac9461092fac0"
-  integrity sha512-eoQw+IHK+R1RHjl4VEVyWY6cWovLXddGl/u7XvIyiRZk+oEiM1ksuk0ZkO9nSkTI/j+tA7Z5aRbivhLhvCGjuA==
+  resolved "file:./elastic_eui_theme_borealis_0.1.0_severity_colors_03.tgz#41ec79e390be147a1f59a3b5aa8972b326c37358"
 
-"@elastic/eui-theme-common@0.1.0":
+"@elastic/eui-theme-common@file:./elastic_eui_theme_common_0.1.0_severity_colors_03.tgz":
   version "0.1.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui-theme-common/-/eui-theme-common-0.1.0.tgz#fa74c7f72b4ca69ff1f7a5cf45e55c979064ab73"
-  integrity sha512-2Pm9PeEr4QXjtL/YYM6faXbQ2Fm/mJXzV7QLBxUW8iHov70IHZy1e3xJOio0lI1IbO3S7t79EIS6J3/uNffJfA==
+  resolved "file:./elastic_eui_theme_common_0.1.0_severity_colors_03.tgz#26b5ec9be11d070892ff7dde28080dae6cee07b9"
   dependencies:
     "@types/lodash" "^4.14.202"
     chroma-js "^2.4.2"
     lodash "^4.17.21"
 
-"@elastic/eui@101.3.0":
+"@elastic/eui@file:./elastic_eui_101.3.0_severity_colors_03.tgz":
   version "101.3.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-101.3.0.tgz#17bb2d0ead708f46a0518c97972f742555694417"
-  integrity sha512-59WT6+qTo43qYw7o9phZpD5OhZNicZ3oYRZcYMp6ro+M59asZAbTzaDZMouh+KghnVqKNevCiOIDpu7gMIJoAA==
+  resolved "file:./elastic_eui_101.3.0_severity_colors_03.tgz#4e104cd83b795858b64365ebf6659529421f87ab"
   dependencies:
-    "@elastic/eui-theme-common" "0.1.0"
-    "@elastic/prismjs-esql" "^1.0.0"
+    "@elastic/prismjs-esql" "^1.1.0"
     "@hello-pangea/dnd" "^16.6.0"
     "@types/lodash" "^4.14.202"
     "@types/numeral" "^2.0.5"
@@ -2250,10 +2246,10 @@
   resolved "https://registry.yarnpkg.com/@elastic/numeral/-/numeral-2.5.1.tgz#96acf39c3d599950646ef8ccfd24a3f057cf4932"
   integrity sha512-Tby6TKjixRFY+atVNeYUdGr9m0iaOq8230KTwn8BbUhkh7LwozfgKq0U98HRX7n63ZL62szl+cDKTYzh5WPCFQ==
 
-"@elastic/prismjs-esql@^1.0.0":
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/@elastic/prismjs-esql/-/prismjs-esql-1.0.0.tgz#370c996536dcea8840f2c2288a97aca4982e13c5"
-  integrity sha512-kEQcj9wg7pUaFkW7m7zs0fz4cmg0kWUMQv6SyENXKvLGMecgDjNciEoN3CMg22PYURelbnhM7ii6nFv9hAr2NA==
+"@elastic/prismjs-esql@^1.1.0":
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/@elastic/prismjs-esql/-/prismjs-esql-1.1.0.tgz#c7f84de21bb453831df7e8565be7430b1b078836"
+  integrity sha512-k2zZfCL4l+qCXfmc9jrnDdEWW2jDPFAHlCq1JAh3x7zWN6Eyc6ACn3oj9oy49xsuAO+BAhQ345uueL8K/3UIKg==
 
 "@elastic/react-search-ui-views@1.20.2", "@elastic/react-search-ui-views@^1.20.2":
   version "1.20.2"
@@ -15919,10 +15915,10 @@ cytoscape-dagre@^2.5.0:
   dependencies:
     dagre "^0.8.5"
 
-cytoscape@^3.31.2:
-  version "3.31.2"
-  resolved "https://registry.yarnpkg.com/cytoscape/-/cytoscape-3.31.2.tgz#94d5b86d142599a2d6e750f6b2f3102518c7d48e"
-  integrity sha512-/eOXg2uGdMdpGlEes5Sf6zE+jUG+05f3htFNQIxLxduOH/SsaUZiPBfAwP1btVIVzsnhiNOdi+hvDRLYfMZjGw==
+cytoscape@^3.31.1:
+  version "3.31.1"
+  resolved "https://registry.yarnpkg.com/cytoscape/-/cytoscape-3.31.1.tgz#29b12cac715fbb2aacc50cdf5cf1467aadde9c00"
+  integrity sha512-Hx5Mtb1+hnmAKaZZ/7zL1Y5HTFYOjdDswZy/jD+1WINRU8KVi1B7+vlHdsTwY+VCFucTreoyu1RDzQJ9u0d2Hw==
 
 "d3-array@1 - 3", "d3-array@2 - 3", "d3-array@2.10.0 - 3", "d3-array@2.5.0 - 3", d3-array@3.2.4, d3-array@^3.2.2:
   version "3.2.4"
@@ -26734,10 +26730,10 @@ react-remove-scroll@^2.5.6:
     use-callback-ref "^1.3.0"
     use-sidecar "^1.1.2"
 
-react-reverse-portal@^2.3.0:
-  version "2.3.0"
-  resolved "https://registry.yarnpkg.com/react-reverse-portal/-/react-reverse-portal-2.3.0.tgz#ab926f551082a1ca3a0e0d7e2ed53cae1b43f23b"
-  integrity sha512-kvbPfLPKg6Y3S6tVq83us2RghvDpOS4GcJxbI7cZ0V0tuzUaSzblRIhVnKLOucfqF4lN/i9oWvEmpEi6bAOYlQ==
+react-reverse-portal@^2.2.0:
+  version "2.2.0"
+  resolved "https://registry.yarnpkg.com/react-reverse-portal/-/react-reverse-portal-2.2.0.tgz#0a119f8ab00885fa8aebc03a9fd2111d0e76303c"
+  integrity sha512-y4odW09uzTtyJWs9E9YbY50FypJeRzEMhEjQUpzLOXZeTHCFE88WfklvRUddTJsizFWTzMOLTE4wNgYdzeQ7uw==
 
 react-router-config@^5.1.1:
   version "5.1.1"
