@@ -1261,7 +1261,7 @@
     "react-popper-tooltip": "^4.4.2",
     "react-recompose": "^0.33.0",
     "react-redux": "^7.2.8",
-    "react-reverse-portal": "^2.2.0",
+    "react-reverse-portal": "^2.3.0",
     "react-router": "^5.3.4",
     "react-router-config": "^5.1.1",
     "react-router-dom": "^5.3.4",
