@@ -13,21 +13,17 @@ import type { AlertsFilter, AlertsFiltersExpressionItem } from './types';
 
 /**
  * Filters rule types by solution and returns their ids.
- * When `includeStackInObservability` is true, observability
- * and stack rule types are treated as one.
+ * Stack rules are included under Observability.
  */
 export const getRuleTypeIdsForSolution = (
   ruleTypes: InternalRuleType[],
-  solution: RuleTypeSolution,
-  includeStackInObservability = true
+  solution: RuleTypeSolution
 ) => {
   return ruleTypes
     .filter(
       (ruleType) =>
         ruleType.solution === solution ||
-        (solution === 'observability' &&
-          ruleType.solution === 'stack' &&
-          includeStackInObservability)
+        (solution === 'observability' && ruleType.solution === 'stack')
     )
     .map((ruleType) => ruleType.id);
 };

@@ -19,17 +19,19 @@ const ruleTypes = [
 
 describe('getRuleTypeIdsForSolution', () => {
   it.each(['stack', 'observability', 'security'] as RuleTypeSolution[])(
-    'should return %s rule type ids when `includeStackInObservability` is false',
+    'should include %s rule type ids in the returned array',
     (solution) => {
-      expect(getRuleTypeIdsForSolution(ruleTypes, solution, false)).toEqual(
-        ruleTypes
-          .filter((ruleType) => ruleType.solution === solution)
-          .map((ruleType) => ruleType.id)
-      );
+      const solutionRuleTypeIds = ruleTypes
+        .filter((ruleType) => ruleType.solution === solution)
+        .map((ruleType) => ruleType.id);
+      const ruleTypeIds = getRuleTypeIdsForSolution(ruleTypes, solution);
+      for (const ruleTypeId of solutionRuleTypeIds) {
+        expect(ruleTypeIds).toContain(ruleTypeId);
+      }
     }
   );
 
-  it('should group stack rule type ids under observability when `includeStackInObservability` is true', () => {
+  it('should group stack rule type ids under observability', () => {
     expect(getRuleTypeIdsForSolution(ruleTypes, 'observability')).toEqual([
       'stack-rule-type',
       'observability-rule-type',
@@ -38,7 +40,7 @@ describe('getRuleTypeIdsForSolution', () => {
 
   it('should always return security rule type ids in isolation', () => {
     expect(getRuleTypeIdsForSolution(ruleTypes, 'security')).toEqual(['security-rule-type']);
-    expect(getRuleTypeIdsForSolution(ruleTypes, 'security', false)).toEqual(['security-rule-type']);
+    expect(getRuleTypeIdsForSolution(ruleTypes, 'security')).toEqual(['security-rule-type']);
   });
 });
 
@@ -48,6 +50,7 @@ describe('isFilter', () => {
   });
 
   it.each([null, undefined])('should return false for %s items', (filter) => {
-    expect(isFilter(filter as Parameters<typeof isFilter>[0])).toBeFalsy();
+    // @ts-expect-error: Testing empty values
+    expect(isFilter(filter)).toBeFalsy();
   });
 });

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { EuiFormRow, EuiSuperSelect, EuiText } from '@elastic/eui';
 import type { EuiSuperSelectOption } from '@elastic/eui/src/components/form/super_select/super_select_item';
 import { FORM_ITEM_SUBJ } from '../constants';
@@ -42,13 +42,9 @@ export const AlertsFiltersFormItem = <T,>({
   onValueChange,
   isDisabled = false,
 }: AlertsFiltersFormItemProps<T>) => {
-  const filter = useMemo(() => {
-    if (!type) {
-      return null;
-    }
-    const FilterComponent = alertsFiltersMetadata[type].component as AlertsFilterComponentType<T>;
-    return <FilterComponent value={value} onChange={onValueChange} isDisabled={isDisabled} />;
-  }, [type, value, onValueChange, isDisabled]);
+  const FilterComponent = type
+    ? (alertsFiltersMetadata[type].component as AlertsFilterComponentType<T>)
+    : null;
 
   return (
     <>
@@ -76,7 +72,9 @@ export const AlertsFiltersFormItem = <T,>({
           }}
         />
       </EuiFormRow>
-      {filter}
+      {FilterComponent && (
+        <FilterComponent value={value} onChange={onValueChange} isDisabled={isDisabled} />
+      )}
     </>
   );
 };
