@@ -15,18 +15,9 @@
   "kbn_references": [
     "@kbn/core",
     "@kbn/core-analytics-browser",
-    "@kbn/core-saved-objects-api-server",
     "@kbn/config-schema",
     "@kbn/i18n",
-    "@kbn/task-manager-plugin",
-    "@kbn/core-user-profile-common",
-    "@kbn/core-http-browser-mocks",
-    "@kbn/core-notifications-browser-mocks",
-    "@kbn/core-user-profile-browser-mocks",
-    "@kbn/core-analytics-browser-mocks",
-    "@kbn/cloud-plugin",
     "@kbn/intercepts-plugin"
   ],
   "exclude": ["target/**/*"]
 }
-  

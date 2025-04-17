@@ -19,12 +19,13 @@
     "@kbn/config-schema",
     "@kbn/i18n",
     "@kbn/task-manager-plugin",
-    "@kbn/core-user-profile-common",
     "@kbn/core-http-browser-mocks",
     "@kbn/core-notifications-browser-mocks",
-    "@kbn/core-user-profile-browser-mocks",
     "@kbn/core-analytics-browser-mocks",
-    "@kbn/cloud-plugin"
+    "@kbn/cloud-plugin",
+    "@kbn/core-rendering-browser-mocks",
+    "@kbn/core-rendering-browser",
+    "@kbn/core-notifications-browser"
   ],
   "exclude": ["target/**/*"]
 }
