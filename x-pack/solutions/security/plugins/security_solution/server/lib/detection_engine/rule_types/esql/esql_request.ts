@@ -14,7 +14,7 @@ import type { RulePreviewLoggedRequest } from '../../../../../common/api/detecti
 import { logEsqlRequest } from '../utils/logged_requests';
 import * as i18n from '../translations';
 
-const logDuration = (startTime: number, loggedRequests: RulePreviewLoggedRequest[] | undefined) => {
+const setLatestRequestDuration = (startTime: number, loggedRequests: RulePreviewLoggedRequest[] | undefined) => {
   const duration = performance.now() - startTime;
   if (loggedRequests && loggedRequests?.[loggedRequests.length - 1]) {
     loggedRequests[loggedRequests.length - 1].duration = Math.round(duration);
@@ -74,7 +74,7 @@ export const performEsqlRequest = async ({
       body: requestBody,
       querystring: requestQueryParams,
     });
-    logDuration(asyncSearchStarted, loggedRequests);
+    setLatestRequestDuration(asyncSearchStarted, loggedRequests);
 
     queryId = asyncEsqlResponse.id;
     const isRunning = asyncEsqlResponse.is_running;
@@ -96,7 +96,7 @@ export const performEsqlRequest = async ({
         method: 'GET',
         path: `/_query/async/${queryId}`,
       });
-      logDuration(pollStarted, loggedRequests);
+      setLatestRequestDuration(pollStarted, loggedRequests);
 
       if (!pollResponse.is_running) {
         return pollResponse;
@@ -130,7 +130,7 @@ export const performEsqlRequest = async ({
         method: 'DELETE',
         path: `/_query/async/${queryId}`,
       });
-      logDuration(deleteStarted, loggedRequests);
+      setLatestRequestDuration(deleteStarted, loggedRequests);
     }
   }
 };
