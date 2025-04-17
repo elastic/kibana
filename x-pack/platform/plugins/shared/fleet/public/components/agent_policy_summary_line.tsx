@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiLink, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiIconTip, EuiLink, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { CSSProperties } from 'react';
@@ -27,6 +27,8 @@ export const AgentPolicySummaryLine = memo<{
   const { name, id, is_managed: isManaged, description } = policy;
 
   const revision = agent ? agent.policy_revision : policy.revision;
+  const isOutdated = agent?.policy_revision && policy?.revision > agent.policy_revision;
+
   return (
     <EuiFlexGroup direction="column" gutterSize="xs" wrap={true}>
       <EuiFlexItem>
@@ -78,6 +80,18 @@ export const AgentPolicySummaryLine = memo<{
                   id="xpack.fleet.agentPolicySummaryLine.revisionNumber"
                   defaultMessage="rev. {revNumber}"
                   values={{ revNumber: revision }}
+                />
+              </EuiText>
+            </EuiFlexItem>
+          )}
+          {isOutdated && (
+            <EuiFlexItem grow={false}>
+              <EuiText color="subdued" size="xs" style={NO_WRAP_WHITE_SPACE}>
+                <EuiIcon size="m" type="warning" color="warning" />
+                &nbsp;
+                <FormattedMessage
+                  id="xpack.fleet.agentPolicySummaryLine.outdatedPolicyWarning"
+                  defaultMessage="Outdated policy"
                 />
               </EuiText>
             </EuiFlexItem>
