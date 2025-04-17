@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiSpacer, useEuiTheme, useIsWithinBreakpoints } from '@elastic/eui';
+import { useEuiTheme, useIsWithinBreakpoints } from '@elastic/eui';
 import React, { PropsWithChildren, ReactElement, useEffect, useMemo, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { createHtmlPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
@@ -46,8 +46,6 @@ import { LensVisService } from '../services/lens_vis_service';
 import { useRequestParams } from '../hooks/use_request_params';
 
 const ChartMemoized = React.memo(Chart);
-
-const chartSpacer = <EuiSpacer size="s" />;
 
 export interface UnifiedHistogramLayoutProps extends PropsWithChildren<unknown> {
   /**
@@ -335,7 +333,6 @@ export const UnifiedHistogramLayout = ({
           isPlainRecord={isPlainRecord}
           chart={chart}
           breakdown={breakdown}
-          appendHistogram={chartSpacer}
           columns={columns}
           {...chartProps}
         />

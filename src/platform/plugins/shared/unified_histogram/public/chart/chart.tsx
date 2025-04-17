@@ -11,7 +11,7 @@ import React, { memo, ReactElement, useCallback, useEffect, useMemo, useState } 
 import { Subject } from 'rxjs';
 import useObservable from 'react-use/lib/useObservable';
 import { IconButtonGroup, type IconButtonGroupProps } from '@kbn/shared-ux-button-toolbar';
-import { EuiFlexGroup, EuiFlexItem, EuiProgress, EuiDelayRender } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiProgress, EuiDelayRender, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type {
   EmbeddableComponentProps,
@@ -76,7 +76,6 @@ export interface ChartProps {
   chart?: UnifiedHistogramChartContext;
   breakdown?: UnifiedHistogramBreakdownContext;
   renderCustomChartToggleActions?: () => ReactElement | undefined;
-  appendHistogram?: ReactElement;
   disableTriggers?: LensEmbeddableInput['disableTriggers'];
   disabledActions?: LensEmbeddableInput['disabledActions'];
   input$?: UnifiedHistogramInput$;
@@ -111,7 +110,6 @@ export function Chart({
   lensVisService,
   isPlainRecord,
   renderCustomChartToggleActions,
-  appendHistogram,
   input$: originalInput$,
   lensAdapters,
   dataLoading$,
@@ -422,7 +420,7 @@ export function Chart({
               />
             )}
           </section>
-          {appendHistogram}
+          <EuiSpacer size="s" />
         </EuiFlexItem>
       )}
       {canSaveVisualization && isSaveModalVisible && visContext.attributes && (

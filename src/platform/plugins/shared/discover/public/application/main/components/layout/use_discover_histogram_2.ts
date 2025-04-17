@@ -70,7 +70,7 @@ export interface UseDiscoverHistogramProps {
   inspectorAdapters: InspectorAdapters;
 }
 
-export const useDiscoverHistogram = ({
+export const useDiscoverHistogram2 = ({
   stateContainer,
   inspectorAdapters,
 }: UseDiscoverHistogramProps): Omit<

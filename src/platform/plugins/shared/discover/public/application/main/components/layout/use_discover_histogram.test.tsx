@@ -114,16 +114,13 @@ describe('useDiscoverHistogram', () => {
   const renderUseDiscoverHistogram = async ({
     stateContainer = getStateContainer(),
     inspectorAdapters = { requests: new RequestAdapter() },
-    hideChart = false,
   }: {
     stateContainer?: DiscoverStateContainer;
     inspectorAdapters?: InspectorAdapters;
-    hideChart?: boolean;
   } = {}) => {
     const initialProps = {
       stateContainer,
       inspectorAdapters,
-      hideChart,
     };
 
     const Wrapper = ({ children }: React.PropsWithChildren<unknown>) => (

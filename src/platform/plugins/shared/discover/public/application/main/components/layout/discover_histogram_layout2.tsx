@@ -8,12 +8,16 @@
  */
 
 import React, { useCallback } from 'react';
-import { UnifiedHistogramContainer } from '@kbn/unified-histogram-plugin/public';
+import {
+  UnifiedHistogramContainer,
+  UnifiedHistogramContainer2,
+  UnifiedHistogramLayout2,
+} from '@kbn/unified-histogram-plugin/public';
 import { css } from '@emotion/react';
-import { useDiscoverHistogram } from './use_discover_histogram';
 import { type DiscoverMainContentProps, DiscoverMainContent } from './discover_main_content';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
 import { useCurrentTabLensEmbeddableOverride } from '../../state_management/redux';
+import { useDiscoverHistogram2 } from './use_discover_histogram_2';
 
 export interface DiscoverHistogramLayoutProps extends DiscoverMainContentProps {
   container: HTMLElement | null;
@@ -23,7 +27,7 @@ const histogramLayoutCss = css`
   height: 100%;
 `;
 
-export const DiscoverHistogramLayout = ({
+export const DiscoverHistogramLayout2 = ({
   dataView,
   stateContainer,
   container,
@@ -33,7 +37,7 @@ export const DiscoverHistogramLayout = ({
   const { dataState } = stateContainer;
   const isEsqlMode = useIsEsqlMode();
   const LensEmbeddableOverride = useCurrentTabLensEmbeddableOverride();
-  const unifiedHistogramProps = useDiscoverHistogram({
+  const unifiedHistogramProps = useDiscoverHistogram2({
     stateContainer,
     inspectorAdapters: dataState.inspectorAdapters,
   });
@@ -53,14 +57,18 @@ export const DiscoverHistogramLayout = ({
   }
 
   return (
-    <UnifiedHistogramContainer
-      {...unifiedHistogramProps}
-      requestAdapter={dataState.inspectorAdapters.requests}
+    <UnifiedHistogramLayout2
       container={container}
-      css={histogramLayoutCss}
-      renderCustomChartToggleActions={renderCustomChartToggleActions}
-      abortController={stateContainer.dataState.getAbortController()}
-      LensEmbeddableOverride={LensEmbeddableOverride}
+      chart={
+        <UnifiedHistogramContainer2
+          {...unifiedHistogramProps}
+          requestAdapter={dataState.inspectorAdapters.requests}
+          css={histogramLayoutCss}
+          renderCustomChartToggleActions={renderCustomChartToggleActions}
+          abortController={stateContainer.dataState.getAbortController()}
+          LensEmbeddableOverride={LensEmbeddableOverride}
+        />
+      }
     >
       <DiscoverMainContent
         {...mainContentProps}
@@ -68,6 +76,6 @@ export const DiscoverHistogramLayout = ({
         dataView={dataView}
         panelsToggle={panelsToggle}
       />
-    </UnifiedHistogramContainer>
+    </UnifiedHistogramLayout2>
   );
 };

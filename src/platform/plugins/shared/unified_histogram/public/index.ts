@@ -38,3 +38,6 @@ export { UnifiedHistogramFetchStatus, UnifiedHistogramExternalVisContextStatus }
 export { canImportVisContext } from './utils/external_vis_context';
 
 export const plugin = () => new UnifiedHistogramPublicPlugin();
+
+export { UnifiedHistogramContainer2 } from './container/container2';
+export { UnifiedHistogramLayout2 } from './layout/layout2';
