@@ -83,13 +83,37 @@ components:
                   type: string
         end:
           type: string
-        filter:
+        query:
+          $ref: '#/components/schemas/Query'
+        filters:
+          $ref: '#/components/schemas/Filters'
+        combinedFilter:
           type: object
           additionalProperties: true
         size:
           type: number
         start:
           type: string
+
+    Query:
+      type: object
+      description: An query condition to filter alerts
+      required:
+        - query
+        - language
+      properties:
+        query:
+          oneOf:
+            - type: string
+            - type: object
+              additionalProperties: true # { [key: string]: any }
+        language:
+          type: string
+
+    Filters:
+      description: The filter array used to define the conditions for when alerts are selected as an attack discovery context. Defaults to an empty array.
+      type: array
+      items: {} # unknown
 
     IntervalSchedule:
       type: object

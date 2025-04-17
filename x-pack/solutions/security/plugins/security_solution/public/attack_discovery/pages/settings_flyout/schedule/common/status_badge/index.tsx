@@ -7,50 +7,19 @@
 
 import React from 'react';
 
-import type { EuiThemeComputed } from '@elastic/eui';
 import { EuiHealth, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/css';
-import type {
-  AttackDiscoverySchedule,
-  AttackDiscoveryScheduleExecutionStatus,
-} from '@kbn/elastic-assistant-common';
-import * as i18n from './translations';
+import type { AttackDiscoverySchedule } from '@kbn/elastic-assistant-common';
+
+import {
+  getExecutionStatusHealthColor,
+  getExecutionStatusLabel,
+} from '../../utils/execution_status';
 
 const statusTextWrapperClassName = css`
   width: 100%;
   display: inline-grid;
 `;
-
-const getExecutionStatusHealthColor = (
-  status: AttackDiscoveryScheduleExecutionStatus,
-  euiTheme: EuiThemeComputed
-) => {
-  switch (status) {
-    case 'active':
-    case 'ok':
-      return euiTheme.colors.success;
-    case 'error':
-      return euiTheme.colors.danger;
-    case 'warning':
-      return euiTheme.colors.warning;
-    default:
-      return 'subdued';
-  }
-};
-
-const getExecutionStatusLabel = (status: AttackDiscoveryScheduleExecutionStatus) => {
-  switch (status) {
-    case 'active':
-    case 'ok':
-      return i18n.STATUS_SUCCESS;
-    case 'error':
-      return i18n.STATUS_FAILED;
-    case 'warning':
-      return i18n.STATUS_WARNING;
-    default:
-      return i18n.STATUS_UNKNOWN;
-  }
-};
 
 interface StatusBadgeProps {
   schedule: AttackDiscoverySchedule;

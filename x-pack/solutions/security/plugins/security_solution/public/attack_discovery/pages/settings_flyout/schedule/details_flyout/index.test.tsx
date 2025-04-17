@@ -10,16 +10,18 @@ import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';
 import { useLoadConnectors } from '@kbn/elastic-assistant/impl/connectorland/use_load_connectors';
 
-import { CreateFlyout } from '.';
-import * as i18n from './translations';
+import { DetailsFlyout } from '.';
 
 import { useKibana } from '../../../../../common/lib/kibana';
 import { TestProviders } from '../../../../../common/mock';
 import { useSourcererDataView } from '../../../../../sourcerer/containers';
-import { useCreateAttackDiscoverySchedule } from '../logic/use_create_schedule';
+import { useUpdateAttackDiscoverySchedule } from '../logic/use_update_schedule';
+import { useGetAttackDiscoverySchedule } from '../logic/use_get_schedule';
+import { mockAttackDiscoverySchedule } from '../../../mock/mock_attack_discovery_schedule';
 
 jest.mock('@kbn/elastic-assistant/impl/connectorland/use_load_connectors');
-jest.mock('../logic/use_create_schedule');
+jest.mock('../logic/use_update_schedule');
+jest.mock('../logic/use_get_schedule');
 jest.mock('../../../../../common/lib/kibana');
 jest.mock('../../../../../sourcerer/containers');
 jest.mock('react-router-dom', () => ({
@@ -46,8 +48,10 @@ const mockUseSourcererDataView = useSourcererDataView as jest.MockedFunction<
   typeof useSourcererDataView
 >;
 const getBooleanValueMock = jest.fn();
+const updateAttackDiscoveryScheduleMock = jest.fn();
 
 const defaultProps = {
+  scheduleId: mockAttackDiscoverySchedule.id,
   onClose: jest.fn(),
 };
 
@@ -55,13 +59,13 @@ const renderComponent = async () => {
   await act(() => {
     render(
       <TestProviders>
-        <CreateFlyout {...defaultProps} />
+        <DetailsFlyout {...defaultProps} />
       </TestProviders>
     );
   });
 };
 
-describe('CreateFlyout', () => {
+describe('DetailsFlyout', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
@@ -98,16 +102,37 @@ describe('CreateFlyout', () => {
       isLoading: false,
       data: mockConnectors,
     });
-    (useCreateAttackDiscoverySchedule as jest.Mock).mockReturnValue({
+    (useUpdateAttackDiscoverySchedule as jest.Mock).mockReturnValue({
       isLoading: false,
-      mutateAsync: jest.fn(),
+      mutateAsync: updateAttackDiscoveryScheduleMock,
+    });
+    (useGetAttackDiscoverySchedule as jest.Mock).mockReturnValue({
+      isLoading: false,
+      data: { schedule: mockAttackDiscoverySchedule },
     });
   });
 
   it('should render the flyout title', async () => {
     await renderComponent();
     await waitFor(() => {
-      expect(screen.getAllByTestId('title')[0]).toHaveTextContent(i18n.SCHEDULE_CREATE_TITLE);
+      expect(screen.getByTestId('scheduleDetailsTitle')).toHaveTextContent(
+        mockAttackDiscoverySchedule.name
+      );
+    });
+  });
+
+  it('should render schedule details container', async () => {
+    await renderComponent();
+
+    await waitFor(() => {
+      expect(screen.getByTestId('scheduleDetails')).toBeInTheDocument();
+    });
+  });
+
+  it('should render edit button', async () => {
+    await renderComponent();
+    await waitFor(() => {
+      expect(screen.getByTestId('edit')).toBeInTheDocument();
     });
   });
 
@@ -124,61 +149,29 @@ describe('CreateFlyout', () => {
     });
   });
 
-  describe('schedule form', () => {
-    it('should render schedule form', async () => {
-      await renderComponent();
+  it('should render edit form while editing', async () => {
+    await renderComponent();
 
-      await waitFor(() => {
-        expect(screen.getByTestId('attackDiscoveryScheduleForm')).toBeInTheDocument();
-      });
+    const editButton = screen.getByTestId('edit');
+    act(() => {
+      fireEvent.click(editButton);
     });
 
-    it('should render schedule name field component', async () => {
-      await renderComponent();
+    await waitFor(() => {
+      expect(screen.getByTestId('attackDiscoveryScheduleForm')).toBeInTheDocument();
+    });
+  });
 
-      await waitFor(() => {
-        expect(screen.getByTestId('attackDiscoveryFormNameField')).toBeInTheDocument();
-      });
+  it('should render save button while editing', async () => {
+    await renderComponent();
+
+    const editButton = screen.getByTestId('edit');
+    act(() => {
+      fireEvent.click(editButton);
     });
 
-    it('should render connector selector component', async () => {
-      await renderComponent();
-
-      await waitFor(() => {
-        expect(screen.getByTestId('attackDiscoveryConnectorSelectorField')).toBeInTheDocument();
-      });
-    });
-
-    it('should render `alertSelection` component', async () => {
-      await renderComponent();
-
-      await waitFor(() => {
-        expect(screen.getByTestId('alertSelection')).toBeInTheDocument();
-      });
-    });
-
-    it('should render schedule (`run every`) component', async () => {
-      await renderComponent();
-
-      await waitFor(() => {
-        expect(screen.getByTestId('attackDiscoveryScheduleField')).toBeInTheDocument();
-      });
-    });
-
-    it('should render actions component', async () => {
-      await renderComponent();
-
-      await waitFor(() => {
-        expect(screen.getByText('Select a connector type')).toBeInTheDocument();
-      });
-    });
-
-    it('should render "Create and enable" button', async () => {
-      await renderComponent();
-
-      await waitFor(() => {
-        expect(screen.getByTestId('save')).toHaveTextContent(i18n.SCHEDULE_CREATE_BUTTON_TITLE);
-      });
+    await waitFor(() => {
+      expect(screen.getByTestId('save')).toBeInTheDocument();
     });
   });
 });

@@ -9,8 +9,8 @@ import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 
 import { StatusBadge } from '.';
-import { TestProviders } from '../../../../../../../common/mock';
-import { mockAttackDiscoverySchedule } from '../../../../../mock/mock_attack_discovery_schedule';
+import { TestProviders } from '../../../../../../common/mock';
+import { mockAttackDiscoverySchedule } from '../../../../mock/mock_attack_discovery_schedule';
 import { waitForEuiToolTipVisible } from '@elastic/eui/lib/test/rtl';
 
 const renderScheduleStatus = (
