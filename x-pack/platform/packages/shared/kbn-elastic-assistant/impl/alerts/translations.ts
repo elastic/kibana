@@ -76,19 +76,19 @@ export const ALERT_FROM_FLYOUT = i18n.translate(
 );
 
 export const PROMPT_1_TITLE = i18n.translate('xpack.elasticAssistant.alertSummary.prompt1Title', {
-  defaultMessage: 'Investigation guide',
+  defaultMessage: 'Detailed Alert Analysis',
 });
 
 export const PROMPT_1_DESCRIPTION = i18n.translate(
   'xpack.elasticAssistant.alertSummary.prompt1Description',
   {
-    defaultMessage: 'Guide me through investigating a suspicious activity alert.',
+    defaultMessage: 'Dive deeper into what happened with this alert.',
   }
 );
 
 export const PROMPT_1_PROMPT = i18n.translate('xpack.elasticAssistant.alertSummary.prompt1Prompt', {
   defaultMessage:
-    'Walk me through the steps to investigate the above suspicious activity alert, including key indicators to review and recommended actions.',
+    "Provide a thorough breakdown of this alert, including the attack technique, potential impact, and risk assessment. Explain the technical details in a way that's immediately actionable",
 });
 
 export const PROMPT_2_TITLE = i18n.translate('xpack.elasticAssistant.alertSummary.prompt2Title', {
@@ -98,27 +98,29 @@ export const PROMPT_2_TITLE = i18n.translate('xpack.elasticAssistant.alertSummar
 export const PROMPT_2_DESCRIPTION = i18n.translate(
   'xpack.elasticAssistant.alertSummary.prompt2Description',
   {
-    defaultMessage: 'Learn how to set and manage noisy alerts effectively.',
+    defaultMessage: 'Find Related Threat Intelligence Articles from Elastic Security Labs.',
   }
 );
 
 export const PROMPT_2_PROMPT = i18n.translate('xpack.elasticAssistant.alertSummary.prompt2Prompt', {
-  defaultMessage: 'What are the best practices for setting and managing noisy alerts?',
+  defaultMessage:
+    'Can you provide relevant Elastic Security Labs intelligence about the threat indicators or techniques in this alert? Include any known threat actors, campaigns, or similar attack patterns documented in ESL research.',
 });
 
 export const PROMPT_3_TITLE = i18n.translate('xpack.elasticAssistant.alertSummary.prompt3Title', {
-  defaultMessage: 'Optimize cloud security settings',
+  defaultMessage: 'Alert Remediation Strategy',
 });
 
 export const PROMPT_3_DESCRIPTION = i18n.translate(
   'xpack.elasticAssistant.alertSummary.prompt3Description',
   {
-    defaultMessage: 'Discover ways to enhance your cloud security configurations.',
+    defaultMessage: 'Generate Step-by-Step Remediation Plan.',
   }
 );
 
 export const PROMPT_3_PROMPT = i18n.translate('xpack.elasticAssistant.alertSummary.prompt3Prompt', {
-  defaultMessage: 'How can I optimize my cloud security settings?',
+  defaultMessage:
+    'Based on this alert, please outline a comprehensive remediation plan including immediate containment steps, investigation actions, and long-term mitigation strategies to prevent similar incidents.',
 });
 
 export const SUGGESTED_PROMPTS_CONTEXT_TOOLTIP = i18n.translate(
