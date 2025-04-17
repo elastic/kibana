@@ -57,6 +57,7 @@ export function esqlRuleType(): PersistenceAlertType<
       useEcs: true,
       useLegacyAlerts: true,
       shouldWrite: false,
+      isSpaceAware: true,
     },
   };
 }
