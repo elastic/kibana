@@ -221,9 +221,9 @@ export const FileStatus: FC<Props> = ({
                       {showOverrideButton ? (
                         <AnalysisOverrides
                           fileStatus={fileStatus}
-                          analyzeFileWithOverrides={() =>
-                            fileUploadManager.analyzeFileWithOverrides(index)
-                          }
+                          analyzeFileWithOverrides={fileUploadManager.analyzeFileWithOverrides(
+                            index
+                          )}
                         />
                       ) : null}
                     </>
@@ -273,9 +273,7 @@ export const FileStatus: FC<Props> = ({
                   {showOverrideButton ? (
                     <AnalysisOverrides
                       fileStatus={fileStatus}
-                      analyzeFileWithOverrides={() =>
-                        fileUploadManager.analyzeFileWithOverrides(index)
-                      }
+                      analyzeFileWithOverrides={fileUploadManager.analyzeFileWithOverrides(index)}
                     />
                   ) : null}
                 </>

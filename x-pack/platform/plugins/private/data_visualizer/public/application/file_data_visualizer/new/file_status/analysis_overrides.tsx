@@ -19,11 +19,6 @@ interface Props {
 }
 export const AnalysisOverrides: FC<Props> = ({ fileStatus, analyzeFileWithOverrides }) => {
   const [isEditFlyoutVisible, setIsEditFlyoutVisible] = React.useState(false);
-  const setOverrides = (overrides: InputOverrides) => {
-    // eslint-disable-next-line no-console
-    console.log(overrides);
-    analyzeFileWithOverrides(overrides);
-  };
   const fields = Object.keys(fileStatus.results?.field_stats ?? {});
 
   if (fileStatus.serverSettings === null) {
@@ -41,7 +36,7 @@ export const AnalysisOverrides: FC<Props> = ({ fileStatus, analyzeFileWithOverri
         />
       </EuiButton>
       <EditFlyout
-        setOverrides={setOverrides}
+        setOverrides={analyzeFileWithOverrides}
         closeEditFlyout={() => setIsEditFlyoutVisible(false)}
         isFlyoutVisible={isEditFlyoutVisible}
         originalSettings={fileStatus.serverSettings}

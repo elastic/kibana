@@ -31,12 +31,15 @@ const VALID_LETTER_GROUPS = {
   zzz: true,
 };
 
-function isLetter(str) {
+function isLetter(str: string) {
   return str.length === 1 && str.match(/[a-z]/i);
 }
 
-export function isTimestampFormatValid(timestampFormat) {
-  const result = { isValid: true, errorMessage: null };
+export function isTimestampFormatValid(timestampFormat: string) {
+  const result: {
+    isValid: boolean;
+    errorMessage: string | null;
+  } = { isValid: true, errorMessage: null };
 
   if (timestampFormat.indexOf('?') >= 0) {
     result.isValid = false;
@@ -74,11 +77,12 @@ export function isTimestampFormatValid(timestampFormat) {
 
       const letterGroup = timestampFormat.substring(startPos, endPos);
 
-      if (VALID_LETTER_GROUPS[letterGroup] !== true) {
+      if (VALID_LETTER_GROUPS[letterGroup as keyof typeof VALID_LETTER_GROUPS]) {
         const length = letterGroup.length;
         // Special case of fractional seconds
         if (
           curChar !== 'S' ||
+          // @ts-expect-error null can be passed to indexOf without error
           FRACTIONAL_SECOND_SEPARATORS.indexOf(prevChar) === -1 ||
           !('ss' === prevLetterGroup) ||
           endPos - startPos > 9
