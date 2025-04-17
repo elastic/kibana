@@ -141,7 +141,9 @@ export class DashboardPlugin
         new DashboardAppLocatorDefinition({
           useHashedUrl: false,
           getDashboardFilterFields: async (dashboardId: string) => {
-            return [];
+            throw new Error(
+              'Locator .getLocation() is not supported on the server with the `preserveSavedFilters` parameter.'
+            );
           },
         })
       );
