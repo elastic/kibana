@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { RulesClientApi } from '@kbn/alerting-plugin/server/types';
 import {
   CoreSetup,
   IScopedClusterClient,
@@ -12,10 +13,10 @@ import {
   SavedObjectsClientContract,
 } from '@kbn/core/server';
 import { DataViewsService } from '@kbn/data-views-plugin/common/data_views';
+import { AlertsClient } from '@kbn/rule-registry-plugin/server/alert_data_client/alerts_client';
 import type { DefaultRouteHandlerResources } from '@kbn/server-route-repository';
-import { RulesClientApi } from '@kbn/alerting-plugin/server/types';
-import { SLOPluginSetupDependencies, SLOPluginStartDependencies } from '../types';
 import { SLORepository, TransformManager } from '../services';
+import { SLOPluginSetupDependencies, SLOPluginStartDependencies } from '../types';
 
 export type GetScopedClients = ({
   request,
@@ -32,6 +33,7 @@ export interface RouteHandlerScopedClients {
   spaceId: string;
   dataViewsService: DataViewsService;
   rulesClient: RulesClientApi;
+  racClient: AlertsClient;
   repository: SLORepository;
   transformManager: TransformManager;
   summaryTransformManager: TransformManager;

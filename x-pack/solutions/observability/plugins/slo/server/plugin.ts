@@ -169,13 +169,14 @@ export class SLOPlugin
           const soClient = coreStart.savedObjects.getScopedClient(request);
           const scopedClusterClient = coreStart.elasticsearch.client.asScoped(request);
 
-          const [dataViewsService, rulesClient, { id: spaceId }] = await Promise.all([
+          const [dataViewsService, rulesClient, { id: spaceId }, racClient] = await Promise.all([
             pluginsStart.dataViews.dataViewsServiceFactory(
               soClient,
               scopedClusterClient.asCurrentUser
             ),
             pluginsStart.alerting.getRulesClientWithRequest(request),
             pluginsStart.spaces.spacesService.getActiveSpace(request),
+            pluginsStart.ruleRegistry.getRacClientWithRequest(request),
           ]);
 
           const repository = new KibanaSavedObjectsSLORepository(soClient, logger);
@@ -201,6 +202,7 @@ export class SLOPlugin
             repository,
             transformManager,
             summaryTransformManager,
+            racClient,
           };
         },
       },
