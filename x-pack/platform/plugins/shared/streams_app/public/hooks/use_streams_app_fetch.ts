@@ -4,26 +4,51 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { useEffect, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import { omit } from 'lodash';
 import { isRequestAbortedError } from '@kbn/server-route-repository-client';
-import { UseAbortableAsync, useAbortableAsync } from '@kbn/react-hooks';
+import { AbortableAsyncState, useAbortableAsync } from '@kbn/react-hooks';
+import { TimeState } from '@kbn/es-query';
 import { useKibana } from './use_kibana';
+import { useTimefilter } from './use_timefilter';
 
-export const useStreamsAppFetch: UseAbortableAsync<{}, { disableToastOnError?: boolean }> = (
-  callback,
-  deps,
-  options
-) => {
+interface StreamsAppFetchOptions {
+  withTimeRange?: boolean;
+  withRefresh?: boolean;
+  disableToastOnError?: boolean;
+}
+
+interface DefaultStreamsAppFetchOptions {
+  withTimeRange: false;
+  withRefresh: false;
+  disableToastOnError: false;
+}
+
+type ParametersFromOptions<TOptions extends StreamsAppFetchOptions | undefined> = {
+  signal: AbortSignal;
+} & (TOptions extends { withTimeRange: true } ? { timeState: TimeState } : {});
+
+export function useStreamsAppFetch<
+  T,
+  TOptions extends StreamsAppFetchOptions | undefined = DefaultStreamsAppFetchOptions
+>(
+  callback: ({}: ParametersFromOptions<TOptions>) => T,
+  deps: any[],
+  options?: TOptions
+): AbortableAsyncState<T> {
   const {
     core: { notifications },
   } = useKibana();
 
+  const { disableToastOnError = false, withRefresh = false, withTimeRange = false } = options || {};
+
+  const { timeState, timeState$ } = useTimefilter();
+
   const onError = (error: Error) => {
     let requestUrl: string | undefined;
 
-    if (!options?.disableToastOnError && !isRequestAbortedError(error)) {
+    if (!disableToastOnError && !isRequestAbortedError(error)) {
       if (
         'body' in error &&
         typeof error.body === 'object' &&
@@ -60,16 +85,46 @@ export const useStreamsAppFetch: UseAbortableAsync<{}, { disableToastOnError?: b
   };
 
   const optionsForHook = {
-    ...omit(options, 'disableToastOnError'),
+    ...omit(options, 'disableToastOnError', 'withTimeRange'),
     onError,
   };
 
-  return useAbortableAsync(
+  const timeStateRef = useRef<TimeState>();
+
+  timeStateRef.current = timeState;
+
+  const state = useAbortableAsync<T>(
     ({ signal }) => {
-      return callback({ signal });
+      const parameters = {
+        signal,
+        ...(withTimeRange ? { timeState: timeStateRef.current } : {}),
+      } as ParametersFromOptions<TOptions>;
+
+      return callback(parameters);
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     deps,
     optionsForHook
   );
-};
+
+  const refreshRef = useRef(state.refresh);
+  refreshRef.current = state.refresh;
+
+  useEffect(() => {
+    const subscription = timeState$.subscribe({
+      next: ({ kind }) => {
+        const shouldRefresh =
+          (withTimeRange && kind === 'shift') || (withRefresh && kind !== 'initial');
+
+        if (shouldRefresh) {
+          refreshRef.current();
+        }
+      },
+    });
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [timeState$, withTimeRange, withRefresh]);
+
+  return state;
+}
