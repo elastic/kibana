@@ -35,5 +35,4 @@ export interface TemplateContext {
   revision: string;
   architecture?: string;
   fips?: boolean;
-  dockerHub?: boolean;
 }

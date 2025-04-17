@@ -166,7 +166,6 @@ LABEL org.label-schema.build-date="{{dockerBuildDate}}" \
   org.opencontainers.image.url="https://www.elastic.co/products/kibana" \
   org.opencontainers.image.vendor="Elastic" \
   org.opencontainers.image.version="{{version}}"
-{{^dockerHub}}
 LABEL name="Kibana" \
   maintainer="infra@elastic.co" \
   vendor="Elastic" \
@@ -174,7 +173,6 @@ LABEL name="Kibana" \
   release="1" \
   summary="Kibana" \
   description="Your window into the Elastic Stack."
-{{/dockerHub}}
 
 {{#ubi}}
 RUN mkdir /licenses && ln LICENSE.txt /licenses/LICENSE

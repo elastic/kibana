@@ -194,12 +194,6 @@ export const CreateDockerContexts: Task = {
       image: false,
     });
     await runDockerGenerator(config, log, build, {
-      baseImage: 'ubi',
-      context: true,
-      image: false,
-      dockerHub: true,
-    });
-    await runDockerGenerator(config, log, build, {
       ironbank: true,
       baseImage: 'none',
       context: true,

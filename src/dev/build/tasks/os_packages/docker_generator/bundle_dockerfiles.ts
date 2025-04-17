@@ -20,9 +20,8 @@ import { dockerfileTemplate } from './templates';
 import { TemplateContext } from './template_context';
 
 export async function bundleDockerFiles(config: Config, log: ToolingLog, scope: TemplateContext) {
-  const destination = scope.dockerHub ? 'docker-hub' : 'docker';
-  log.info(`Generating kibana${scope.imageFlavor} ${destination} build context bundle`);
-  const dockerFilesDirName = `kibana${scope.imageFlavor}-${scope.version}-${destination}-build-context`;
+  log.info(`Generating kibana${scope.imageFlavor} docker build context bundle`);
+  const dockerFilesDirName = `kibana${scope.imageFlavor}-${scope.version}-docker-build-context`;
   const dockerFilesBuildDir = resolve(scope.dockerBuildDir, dockerFilesDirName);
   const dockerFilesOutputDir = config.resolveFromTarget(`${dockerFilesDirName}.tar.gz`);
   const dockerContextUseLocalArtifact = config.getDockerContextUseLocalArtifact();
