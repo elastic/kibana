@@ -60,11 +60,13 @@ interface PreviewMessageProps {
   activeStateChecked: boolean;
   inactiveStateChecked: boolean;
   previewAffectedAlertsCount: number | undefined;
+  isValidThreshold: boolean;
 }
 const PreviewMessage = ({
   activeStateChecked,
   inactiveStateChecked,
   previewAffectedAlertsCount,
+  isValidThreshold,
 }: PreviewMessageProps) => {
   if ((!activeStateChecked && !inactiveStateChecked) || previewAffectedAlertsCount === undefined) {
     return (
@@ -80,6 +82,15 @@ const PreviewMessage = ({
       <FormattedMessage
         id="responseOpsAlertDelete.previewEmpty"
         defaultMessage="No alerts match the selected criteria."
+      />
+    );
+  }
+
+  if (!isValidThreshold) {
+    return (
+      <FormattedMessage
+        id="responseOpsAlertDelete.previewDisabled"
+        defaultMessage="Affected alerts preview is disabled because the threshold is invalid."
       />
     );
   }
@@ -136,23 +147,6 @@ export const AlertDeleteModal = ({
 
   const [deleteConfirmation, setDeleteConfirmation] = useState('');
 
-  const { affectedAlertsCount: previewAffectedAlertsCount } = useAlertDeletePreview({
-    services: {
-      http,
-    },
-    isActiveAlertDeleteEnabled: activeState.checked,
-    isInactiveAlertDeleteEnabled: inactiveState.checked,
-    activeAlertDeleteThreshold: getThresholdInDays(
-      activeState.threshold,
-      activeState.thresholdUnit
-    ),
-    inactiveAlertDeleteThreshold: getThresholdInDays(
-      inactiveState.threshold,
-      inactiveState.thresholdUnit
-    ),
-    categoryIds,
-  });
-
   const errorMessages = {
     activeThreshold: getThresholdErrorMessages(activeState.threshold, activeState.thresholdUnit),
     inactiveThreshold: getThresholdErrorMessages(
@@ -167,6 +161,29 @@ export const AlertDeleteModal = ({
     isDeleteConfirmationValid:
       deleteConfirmation === i18n.DELETE_PASSKEY || deleteConfirmation.length === 0,
   };
+
+  const isValidThreshold =
+    validations.isActiveThresholdValid && validations.isInactiveThresholdValid;
+
+  const { affectedAlertsCount: previewAffectedAlertsCount } = useAlertDeletePreview({
+    services: {
+      http,
+    },
+    isEnabled: isValidThreshold,
+    queryParams: {
+      isActiveAlertDeleteEnabled: activeState.checked,
+      isInactiveAlertDeleteEnabled: inactiveState.checked,
+      activeAlertDeleteThreshold: getThresholdInDays(
+        activeState.threshold,
+        activeState.thresholdUnit
+      ),
+      inactiveAlertDeleteThreshold: getThresholdInDays(
+        inactiveState.threshold,
+        inactiveState.thresholdUnit
+      ),
+      categoryIds,
+    },
+  });
 
   const isFormValid =
     validations.isDeleteConfirmationValid &&
@@ -319,6 +336,7 @@ export const AlertDeleteModal = ({
               activeStateChecked={activeState.checked}
               inactiveStateChecked={inactiveState.checked}
               previewAffectedAlertsCount={previewAffectedAlertsCount}
+              isValidThreshold={isValidThreshold}
             />
           </p>
           <EuiSpacer size="m" />

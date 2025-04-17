@@ -18,12 +18,23 @@ import { AlertDeleteModal } from './components/modal';
 const http = {
   get: async (path: string, { query }: { query?: Record<string, string> }) => {
     if (path.includes('_alert_delete_preview')) {
+      if (
+        !query ||
+        (Boolean(query?.is_active_alert_delete_enabled) === true &&
+          parseInt(query?.active_alert_delete_threshold, 10) === 30)
+      ) {
+        return {
+          affected_alert_count: 0,
+        };
+      }
+      if (parseInt(query.active_alert_delete_threshold, 10) > 30) {
+        return {
+          affected_alert_count:
+            Math.floor(parseInt(query.active_alert_delete_threshold, 10) / 30) - 1,
+        };
+      }
       return {
-        // Returns the threshold set - 1 to simulate 0 alerts affected. Divide
-        // by 30 to work with the monthly threshold
-        affected_alert_count: query?.active_alert_delete_threshold
-          ? parseInt(query.active_alert_delete_threshold, 10) / 30 - 1
-          : 0,
+        affected_alert_count: Math.floor(Math.random() * 100),
       };
     }
     throw new Error('Not implemented');

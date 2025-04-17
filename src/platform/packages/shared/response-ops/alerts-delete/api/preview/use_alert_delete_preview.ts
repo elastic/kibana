@@ -14,16 +14,21 @@ import type { RulesSettingsAlertDeleteProperties } from '@kbn/alerting-types/rul
 import useDebounce from 'react-use/lib/useDebounce';
 import { alertDeletePreviewApiCall } from './alert_delete_preview_api_call';
 
-export type UseAlertDeletePreviewParams = RulesSettingsAlertDeleteProperties & {
+export interface UseAlertDeletePreviewParams {
+  isEnabled: boolean;
   services: { http: HttpStart };
-};
+  queryParams: RulesSettingsAlertDeleteProperties;
+}
 export const useAlertDeletePreview = ({
+  isEnabled,
   services: { http },
-  isActiveAlertDeleteEnabled,
-  isInactiveAlertDeleteEnabled,
-  activeAlertDeleteThreshold,
-  inactiveAlertDeleteThreshold,
-  categoryIds,
+  queryParams: {
+    isActiveAlertDeleteEnabled,
+    isInactiveAlertDeleteEnabled,
+    activeAlertDeleteThreshold,
+    inactiveAlertDeleteThreshold,
+    categoryIds,
+  },
 }: UseAlertDeletePreviewParams) => {
   const [params, setParams] = useState({
     isActiveAlertDeleteEnabled,
@@ -64,7 +69,8 @@ export const useAlertDeletePreview = ({
       });
     },
     keepPreviousData: true,
-    enabled: params.isActiveAlertDeleteEnabled || params.isInactiveAlertDeleteEnabled,
+    enabled:
+      isEnabled && (params.isActiveAlertDeleteEnabled || params.isInactiveAlertDeleteEnabled),
   });
 
   return {
