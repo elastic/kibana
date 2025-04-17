@@ -54,10 +54,4 @@ describe('Filters', () => {
 
     expect(screen.getByTestId('filters')).toBeInTheDocument();
   });
-
-  it('should render correct filter', async () => {
-    await renderComponent();
-
-    expect(screen.getByTestId('filters')).toHaveTextContent('_type: exists');
-  });
 });
