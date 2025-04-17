@@ -7,15 +7,29 @@
 import React from 'react';
 import { CDR_MISCONFIGURATIONS_INDEX_PATTERN } from '@kbn/cloud-security-posture-common';
 import userEvent from '@testing-library/user-event';
-import { FindingsRuleFlyout } from './findings_flyout';
 import { render, screen } from '@testing-library/react';
 import { useMisconfigurationFinding } from '@kbn/cloud-security-posture/src/hooks/use_misconfiguration_finding';
 import { TestProvider } from '../../../test/test_provider';
 import { mockFindingsHit, mockWizFinding } from '../__mocks__/findings';
+import { FindingMisconfigurationFlyoutContentProps } from '@kbn/cloud-security-posture';
+import FindingsMisconfigurationFlyoutContent from './findings_right/content';
+import FindingsMisconfigurationFlyoutFooter from './findings_right/footer';
+import FindingsMisconfigurationFlyoutHeader from './findings_right/header';
+import FindingsRuleFlyout from './findings_flyout';
 
 const TestComponent = () => (
   <TestProvider>
-    <FindingsRuleFlyout ruleId={'rule_id_test'} resourceId={'resource_id_test'} />
+    <FindingsRuleFlyout ruleId={'rule_id_test'} resourceId={'resource_id_test'}>
+      {({ finding, createRuleFn }: FindingMisconfigurationFlyoutContentProps) => {
+        return (
+          <>
+            <FindingsMisconfigurationFlyoutHeader finding={finding} />
+            <FindingsMisconfigurationFlyoutContent finding={finding} />
+            <FindingsMisconfigurationFlyoutFooter createRuleFn={createRuleFn} />
+          </>
+        );
+      }}
+    </FindingsRuleFlyout>
   </TestProvider>
 );
 
@@ -32,9 +46,8 @@ describe('<FindingsFlyout/>', () => {
 
       const { getAllByText, getByText } = render(<TestComponent />);
 
-      getAllByText(mockFindingsHit.rule.name);
+      getAllByText(mockFindingsHit.resource.name);
       getByText(mockFindingsHit.resource.id);
-      getByText(mockFindingsHit.resource.name);
       getAllByText(mockFindingsHit.rule.section);
       getByText(CDR_MISCONFIGURATIONS_INDEX_PATTERN);
       mockFindingsHit.rule.tags.forEach((tag) => {
@@ -55,41 +68,6 @@ describe('<FindingsFlyout/>', () => {
         data: { result: { hits: [{ _source: mockFindingsHit }] } },
       });
       const { queryByText } = render(<TestComponent />);
-      const missingInfoCallout = queryByText('Some fields not provided by Wiz');
-      expect(missingInfoCallout).toBeNull();
-    });
-  });
-
-  describe('Rule Tab', () => {
-    it('displays rule text details', async () => {
-      const { getByText, getAllByText } = render(<TestComponent />);
-      await userEvent.click(screen.getByTestId('findings_flyout_tab_rule'));
-
-      getAllByText(mockFindingsHit.rule.name);
-      getByText(mockFindingsHit.rule.benchmark.name);
-      getAllByText(mockFindingsHit.rule.section);
-      mockFindingsHit.rule.tags.forEach((tag) => {
-        getAllByText(tag);
-      });
-    });
-
-    it('displays missing info callout when data source is not CSP', async () => {
-      (useMisconfigurationFinding as jest.Mock).mockReturnValue({
-        data: { result: { hits: [{ _source: mockWizFinding }] } },
-      });
-      const { getByText } = render(<TestComponent />);
-      await userEvent.click(screen.getByTestId('findings_flyout_tab_rule'));
-
-      getByText('Some fields not provided by Wiz');
-    });
-
-    it('does not display missing info callout when data source is CSP', async () => {
-      (useMisconfigurationFinding as jest.Mock).mockReturnValue({
-        data: { result: { hits: [{ _source: mockFindingsHit }] } },
-      });
-      const { queryByText } = render(<TestComponent />);
-      await userEvent.click(screen.getByTestId('findings_flyout_tab_rule'));
-
       const missingInfoCallout = queryByText('Some fields not provided by Wiz');
       expect(missingInfoCallout).toBeNull();
     });

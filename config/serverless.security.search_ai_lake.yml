@@ -2,6 +2,8 @@
 
 ## Disable plugins
 xpack.osquery.enabled: false
+xpack.ml.ad.enabled: false
+xpack.ml.dfa.enabled: false
 
 ## Disable plugin features
 xpack.alerting.maintenanceWindow.enabled: false
@@ -12,6 +14,8 @@ xpack.features.overrides:
   ### The following features are Security features hidden in Role management UI for this specific tier.
   securitySolutionTimeline.hidden: true
   securitySolutionNotes.hidden: true
+  siem.description: null
+  siemV2.description: null
 
 ## Agentless deployment by default
 xpack.fleet.agentless.isDefault: true
