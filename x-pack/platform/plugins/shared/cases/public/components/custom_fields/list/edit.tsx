@@ -18,7 +18,6 @@ import {
   EuiText,
 } from '@elastic/eui';
 import type { FormHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { SelectField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import {
   useForm,
   UseField,
@@ -41,6 +40,7 @@ import {
 } from '../translations';
 import { getListFieldConfig } from './config';
 import { listCustomFieldOptionsToEuiSelectOptions } from './helpers/list_custom_field_options_to_eui_select_options';
+import { ClearableSelectField } from './components/clearable_select_field';
 
 interface FormState {
   value: string;
@@ -96,9 +96,10 @@ const FormWrapperComponent: React.FC<FormWrapper> = ({
       <UseField
         path="value"
         config={formFieldConfig}
-        component={SelectField}
+        component={ClearableSelectField}
         helpText={populatedWithDefault && POPULATED_WITH_DEFAULT}
         componentProps={{
+          isClearable: !customFieldConfiguration.required,
           euiFieldProps: {
             fullWidth: true,
             disabled: isLoading,

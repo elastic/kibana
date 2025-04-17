@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { SelectField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import React, { useMemo } from 'react';
 import type {
@@ -16,6 +15,7 @@ import { OptionalFieldLabel } from '../../optional_field_label';
 import type { CustomFieldType } from '../types';
 import { getListFieldConfig } from './config';
 import { listCustomFieldOptionsToEuiSelectOptions } from './helpers/list_custom_field_options_to_eui_select_options';
+import { ClearableSelectField } from './components/clearable_select_field';
 
 const CreateComponent: CustomFieldType<
   CaseCustomFieldList,
@@ -38,10 +38,11 @@ const CreateComponent: CustomFieldType<
     <UseField
       path={`customFields.${key}`}
       config={config}
-      component={SelectField}
+      component={ClearableSelectField}
       label={label}
       componentProps={{
         labelAppend: setAsOptional ? OptionalFieldLabel : null,
+        isClearable: setAsOptional || !required,
         euiFieldProps: {
           'data-test-subj': `${key}-list-create-custom-field`,
           fullWidth: true,
