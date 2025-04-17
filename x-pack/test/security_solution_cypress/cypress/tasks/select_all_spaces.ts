@@ -19,6 +19,6 @@ export const selectAllSpaces = (): void => {
   cy.get(SPACE_SELECTOR_COMBO_BOX).type('* All Spaces');
   cy.get(SPACE_SELECTOR_COMBO_BOX).type('{enter}');
 
-  // expand security privileges
+  // expand security category
   cy.get(SECURITY_CATEGORY).click();
 };
