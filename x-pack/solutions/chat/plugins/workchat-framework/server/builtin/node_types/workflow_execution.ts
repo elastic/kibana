@@ -5,20 +5,18 @@
  * 2.0.
  */
 
-import { BuiltInNodeTypes } from '@kbn/wc-framework-types-common';
-import { WorkflowExecutionError, type NodeTypeDefinition } from '@kbn/wc-framework-types-server';
+import { NodeType } from '@kbn/wc-framework-types-common';
+import {
+  WorkflowExecutionError,
+  type NodeTypeDefinition,
+  type WorkflowExecutionNodeConfigType,
+} from '@kbn/wc-framework-types-server';
 import { interpolateValue } from '../../framework/config';
-
-export interface WorkflowExecutionNodeConfigType {
-  workflowId: string;
-  inputs: Record<string, unknown>;
-  output: string;
-}
 
 export const getWorkflowExecutionNodeTypeDefinition =
   (): NodeTypeDefinition<WorkflowExecutionNodeConfigType> => {
     return {
-      id: BuiltInNodeTypes.workflowExecution,
+      id: NodeType.workflowExecution,
       name: 'Workflow execution',
       description: 'Execute a workflow with predefined or dynamic parameters',
       factory: (context) => {

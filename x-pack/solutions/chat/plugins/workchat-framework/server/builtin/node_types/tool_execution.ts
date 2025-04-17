@@ -5,21 +5,18 @@
  * 2.0.
  */
 
-import { BuiltInNodeTypes } from '@kbn/wc-framework-types-common';
-import { WorkflowExecutionError, type NodeTypeDefinition } from '@kbn/wc-framework-types-server';
+import { NodeType } from '@kbn/wc-framework-types-common';
+import {
+  WorkflowExecutionError,
+  type NodeTypeDefinition,
+  type ToolExecutionNodeConfigType,
+} from '@kbn/wc-framework-types-server';
 import { interpolateValue } from '../../framework/config';
-
-export interface ToolExecutionNodeConfigType {
-  toolId: string;
-  toolArguments: Record<string, unknown>;
-  parseResponse: boolean;
-  output: string;
-}
 
 export const getToolExecutionNodeTypeDefinition =
   (): NodeTypeDefinition<ToolExecutionNodeConfigType> => {
     return {
-      id: BuiltInNodeTypes.toolExecution,
+      id: NodeType.toolExecution,
       name: 'Tool execution',
       description: 'Execute a tool with predefined or dynamic parameters',
       factory: (context) => {

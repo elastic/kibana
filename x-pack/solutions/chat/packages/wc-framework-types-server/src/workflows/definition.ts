@@ -72,7 +72,7 @@ export type WorkflowDefinition = GraphWorkflowDefinition | FunctionWorkflowDefin
 
 export interface WorkflowDefinitionInput {
   name: string;
-  description: string;
+  description?: string;
   type: WorkflowInputType;
   required?: boolean;
 }
@@ -81,6 +81,6 @@ export type WorkflowInputType = 'string' | 'number';
 
 export interface WorkflowDefinitionOutput {
   name: string;
-  description: string;
+  description?: string;
   ref: string;
 }

@@ -21,6 +21,13 @@ export type {
   NodeProgressionReporterEvent,
   CustomServicesProvider,
   ScopedNodeProvider,
+  NodeSequence,
+  SequenceBranch,
+  NodeTypeToNodeConfigMap,
+  ParallelSequencesNodeConfigType,
+  PromptNodeConfigType,
+  WorkflowExecutionNodeConfigType,
+  ToolExecutionNodeConfigType,
 } from './src/nodes';
 export type {
   BaseWorkflowDefinition,

@@ -16,3 +16,12 @@ export type {
 export type { NodeRunner, RunNodeParams } from './runner';
 export type { NodeTypeDefinition, CustomServicesProvider } from './type_definition';
 export type { ScopedNodeProvider } from './internal_services';
+export type {
+  NodeSequence,
+  SequenceBranch,
+  NodeTypeToNodeConfigMap,
+  ParallelSequencesNodeConfigType,
+  PromptNodeConfigType,
+  WorkflowExecutionNodeConfigType,
+  ToolExecutionNodeConfigType,
+} from './node_type_configs';

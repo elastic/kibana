@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export enum BuiltInNodeTypes {
+export enum NodeType {
   parallelSequences = 'parallelSequences',
   toolExecution = 'toolExecution',
   workflowExecution = 'workflowExecution',

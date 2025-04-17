@@ -60,8 +60,14 @@ export const runWorkflow = async ({
     });
   }
 
+  // TODO: probably need to improve the logic?
+  const output: Record<string, unknown> = {};
+  workflowDefinition.outputs.forEach((outputDef) => {
+    output[outputDef.name] = state.get(outputDef.ref);
+  });
+
   return {
     runId: internalContext.executionState.runId,
-    output: {}, // TODO: extract from state
+    output,
   };
 };

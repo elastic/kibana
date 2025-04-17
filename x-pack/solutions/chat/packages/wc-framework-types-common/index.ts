@@ -7,7 +7,7 @@
 
 export type { ToolDescriptor } from './src/tools';
 export {
-  BuiltInNodeTypes,
+  NodeType,
   type NodeProgressionEvent,
   type NodeEvent,
   type NodeProgressionEventMeta,

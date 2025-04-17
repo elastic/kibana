@@ -17,13 +17,14 @@ export class SimpleRegistry<T extends { id: string }> implements Registry<T> {
     if (this._registry.has(entry.id)) {
       throw new Error(`Trying to register entry with id ${entry.id} multiple times`);
     }
+    this._registry.set(entry.id, entry);
   }
   has(id: string): boolean {
     return this._registry.has(id);
   }
   get(id: string): T {
     if (!this.has(id)) {
-      throw new Error('');
+      throw new Error(`No entry found for id [${id}]`);
     }
     return this._registry.get(id)!;
   }

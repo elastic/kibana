@@ -6,4 +6,4 @@
  */
 
 export type { NodeEvent, NodeProgressionEvent, NodeProgressionEventMeta } from './node_events';
-export { BuiltInNodeTypes } from './node_types';
+export { NodeType } from './node_types';

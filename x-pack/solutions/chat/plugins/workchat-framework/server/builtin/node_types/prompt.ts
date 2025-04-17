@@ -5,20 +5,13 @@
  * 2.0.
  */
 
-import { BuiltInNodeTypes } from '@kbn/wc-framework-types-common';
-import { type NodeTypeDefinition } from '@kbn/wc-framework-types-server';
+import { NodeType } from '@kbn/wc-framework-types-common';
+import { NodeTypeDefinition, PromptNodeConfigType } from '@kbn/wc-framework-types-server';
 import { interpolateValue } from '../../framework/config';
-
-export interface PromptNodeConfigType {
-  prompt: string;
-  output: string;
-
-  // TODO: structuredOutput
-}
 
 export const getPromptNodeTypeDefinition = (): NodeTypeDefinition<PromptNodeConfigType> => {
   return {
-    id: BuiltInNodeTypes.prompt,
+    id: NodeType.prompt,
     name: 'Prompt',
     description: 'Execute a prompt against an LLM and output the result.',
     factory: (context) => {
@@ -27,6 +20,8 @@ export const getPromptNodeTypeDefinition = (): NodeTypeDefinition<PromptNodeConf
           const {
             services: { modelProvider },
           } = context;
+
+          // TODO: structuredOutput option
 
           const interpolatedInput = interpolateValue<PromptNodeConfigType>(input, state);
           const { prompt, output } = interpolatedInput;

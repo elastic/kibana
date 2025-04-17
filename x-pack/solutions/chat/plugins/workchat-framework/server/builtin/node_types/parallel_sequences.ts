@@ -5,21 +5,17 @@
  * 2.0.
  */
 
-import { BuiltInNodeTypes } from '@kbn/wc-framework-types-common';
-import { type NodeTypeDefinition, type NodeDefinition } from '@kbn/wc-framework-types-server';
-
-export interface ParallelSequencesNodeConfigType {
-  branches: SequenceBranch[];
-}
-
-interface SequenceBranch {
-  steps: NodeDefinition[];
-}
+import { NodeType } from '@kbn/wc-framework-types-common';
+import type {
+  NodeTypeDefinition,
+  ParallelSequencesNodeConfigType,
+  SequenceBranch,
+} from '@kbn/wc-framework-types-server';
 
 export const getParallelSequencesNodeTypeDefinition =
   (): NodeTypeDefinition<ParallelSequencesNodeConfigType> => {
     return {
-      id: BuiltInNodeTypes.parallelSequences,
+      id: NodeType.parallelSequences,
       name: 'Parallel sequences',
       description: 'Execute multiple node sequences in parallel',
       factory: (context) => {
