@@ -208,7 +208,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
         const doc = s1AgentEsDoc.inner_hits?.most_recent.hits.hits[0]._source;
 
         if (doc) {
-          agentIdsFound.push(doc.sentinel_one.agent.id);
+          agentIdsFound.push(doc.sentinel_one.agent.agent.id);
           acc[doc.agent.id] = doc.sentinel_one.agent.agent.id;
         }
 
