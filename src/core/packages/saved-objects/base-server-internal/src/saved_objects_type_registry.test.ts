@@ -55,7 +55,7 @@ describe('SavedObjectTypeRegistry', () => {
 
       for (const legacyType of legacyTypes) {
         expect(() => registry.registerType(createType({ name: legacyType }))).toThrow(
-          `Type '${legacyType}' can't be used because it's been added to the removed types`
+          `Type '${legacyType}' can't be used because it's been added to the legacy types`
         );
       }
     });
