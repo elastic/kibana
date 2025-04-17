@@ -106,6 +106,86 @@ describe('settingsSetup', () => {
 
     expect(soClientMock.create).not.toBeCalled();
   });
+
+  it('should update prerelease_integrations_enabled if settings exist and prereleaseEnabledByDefault is true', async () => {
+    const soClientMock = savedObjectsClientMock.create();
+
+    mockedAppContextService.getConfig.mockReturnValue({
+      prereleaseEnabledByDefault: true,
+      enabled: false,
+      agents: {
+        enabled: false,
+        elasticsearch: {
+          hosts: undefined,
+          ca_sha256: undefined,
+          ca_trusted_fingerprint: undefined,
+        },
+        fleet_server: undefined,
+      },
+    });
+
+    soClientMock.find.mockResolvedValue({
+      total: 1,
+      page: 1,
+      per_page: 10,
+      saved_objects: [
+        {
+          id: GLOBAL_SETTINGS_ID,
+          attributes: { prerelease_integrations_enabled: false },
+          references: [],
+          type: GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
+          score: 0,
+        },
+      ],
+    });
+
+    soClientMock.update.mockResolvedValueOnce({
+      id: GLOBAL_SETTINGS_ID,
+      type: GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
+      attributes: { prerelease_integrations_enabled: true },
+      references: [],
+    });
+
+    await settingsSetup(soClientMock);
+
+    expect(soClientMock.update).toHaveBeenCalled();
+  });
+
+  it('should not update settings if prereleaseEnabledByDefault is false', async () => {
+    const soClientMock = savedObjectsClientMock.create();
+    mockedAppContextService.getConfig.mockReturnValue({
+      prereleaseEnabledByDefault: false,
+      enabled: false,
+      agents: {
+        enabled: false,
+        elasticsearch: {
+          hosts: undefined,
+          ca_sha256: undefined,
+          ca_trusted_fingerprint: undefined,
+        },
+        fleet_server: undefined,
+      },
+    });
+
+    soClientMock.find.mockResolvedValueOnce({
+      total: 1,
+      page: 0,
+      per_page: 10,
+      saved_objects: [
+        {
+          id: GLOBAL_SETTINGS_ID,
+          attributes: { prerelease_integrations_enabled: false },
+          references: [],
+          type: GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
+          score: 0,
+        },
+      ],
+    });
+
+    await settingsSetup(soClientMock);
+
+    expect(soClientMock.update).not.toHaveBeenCalled();
+  });
 });
 
 describe('getSettings', () => {
