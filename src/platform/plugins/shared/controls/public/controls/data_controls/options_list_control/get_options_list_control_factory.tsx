@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import fastIsEqual from 'fast-deep-equal';
 import React, { useEffect } from 'react';
 import {
   BehaviorSubject,
@@ -291,18 +290,13 @@ export const getOptionsListControlFactory = (): DataControlFactory<
         };
       }
 
-      /*
-      {
-          ...selections.comparators,
-        }
-        */
-
       const unsavedChangesApi = initializeUnsavedChanges<OptionsListControlState>({
         uuid,
         parentApi: controlGroupApi,
         serializeState,
         anyStateChange$: merge(
           dataControl.anyStateChange$,
+          selections.anyStateChange$,
           runPastTimeout$,
           searchTechnique$,
           singleSelect$,
@@ -313,11 +307,9 @@ export const getOptionsListControlFactory = (): DataControlFactory<
             ...defaultDataControlComparators,
             ...selectionComparators,
             runPastTimeout: 'referenceEquality',
-            searchTechnique: (a, b) =>
-              (a ?? DEFAULT_SEARCH_TECHNIQUE) === (b ?? DEFAULT_SEARCH_TECHNIQUE),
+            searchTechnique: 'referenceEquality',
             singleSelect: 'referenceEquality',
-            sort: (a, b) =>
-              fastIsEqual(a ?? OPTIONS_LIST_DEFAULT_SORT, b ?? OPTIONS_LIST_DEFAULT_SORT),
+            sort: 'deepEquality',
             // This state cannot currently be changed after the control is created
             placeholder: 'skip',
             hideActionBar: 'skip',
@@ -325,6 +317,10 @@ export const getOptionsListControlFactory = (): DataControlFactory<
             hideExists: 'skip',
             hideSort: 'skip',
           };
+        },
+        defaultState: {
+          searchTechnique: DEFAULT_SEARCH_TECHNIQUE,
+          sort: OPTIONS_LIST_DEFAULT_SORT,
         },
         onReset: (lastSaved) => {
           dataControl.reinitializeState(lastSaved?.rawState);

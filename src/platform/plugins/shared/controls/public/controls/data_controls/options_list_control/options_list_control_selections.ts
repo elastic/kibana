@@ -62,7 +62,7 @@ export function initializeOptionsListSelections(
   }
 
   return {
-    anyStateChange: merge(exclude$, existsSelected$, selectedOptions$).pipe(map(() => undefined)),
+    anyStateChange$: merge(exclude$, existsSelected$, selectedOptions$).pipe(map(() => undefined)),
     getLatestState: () => {
       return {
         selectedOptions: selectedOptions$.getValue(),
