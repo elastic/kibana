@@ -382,7 +382,6 @@ export interface DocLinks {
     simulatePipeline: string;
     tasks: string;
     timeUnits: string;
-    unfreezeIndex: string;
     updateTransform: string;
   }>;
   readonly observability: Readonly<{

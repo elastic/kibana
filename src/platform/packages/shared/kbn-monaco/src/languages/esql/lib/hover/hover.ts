@@ -8,7 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { AstProviderFn, ESQLAstItem } from '@kbn/esql-ast';
+import { parse, type ESQLAstItem } from '@kbn/esql-ast';
 import {
   getAstContext,
   getFunctionDefinition,
@@ -45,8 +45,6 @@ const ACCEPTABLE_TYPES_HOVER = i18n.translate('monaco.esql.hover.acceptableTypes
 async function getHoverItemForFunction(
   model: monaco.editor.ITextModel,
   position: monaco.Position,
-  token: monaco.CancellationToken,
-  astProvider: AstProviderFn,
   resourceRetriever?: ESQLCallbacks
 ) {
   const context: EditorContext = {
@@ -59,7 +57,7 @@ async function getHoverItemForFunction(
   const innerText = fullText.substring(0, offset);
 
   const correctedQuery = correctQuerySyntax(innerText, context);
-  const { ast } = await astProvider(correctedQuery);
+  const { ast } = parse(correctedQuery);
   const astContext = getAstContext(innerText, ast, offset);
 
   const { node } = astContext;
@@ -140,14 +138,13 @@ async function getHoverItemForFunction(
 export async function getHoverItem(
   model: monaco.editor.ITextModel,
   position: monaco.Position,
-  token: monaco.CancellationToken,
-  astProvider: AstProviderFn,
+  _token: monaco.CancellationToken,
   resourceRetriever?: ESQLCallbacks
 ) {
   const fullText = model.getValue();
   const offset = monacoPositionToOffset(fullText, position);
 
-  const { ast } = await astProvider(fullText);
+  const { ast } = parse(fullText);
   const astContext = getAstContext(fullText, ast, offset);
   const { getPolicyMetadata } = getPolicyHelper(resourceRetriever);
 
@@ -162,13 +159,7 @@ export async function getHoverItem(
     hoverContent.contents.push(...variablesContent);
   }
 
-  const hoverItemsForFunction = await getHoverItemForFunction(
-    model,
-    position,
-    token,
-    astProvider,
-    resourceRetriever
-  );
+  const hoverItemsForFunction = await getHoverItemForFunction(model, position, resourceRetriever);
   if (hoverItemsForFunction) {
     hoverContent.contents.push(...hoverItemsForFunction.contents);
     hoverContent.range = hoverItemsForFunction.range;
