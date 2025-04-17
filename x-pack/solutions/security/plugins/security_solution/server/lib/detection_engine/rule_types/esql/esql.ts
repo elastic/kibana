@@ -24,10 +24,8 @@ import { fetchSourceDocuments } from './fetch_source_documents';
 import { buildReasonMessageForEsqlAlert } from '../utils/reason_formatters';
 import type { RulePreviewLoggedRequest } from '../../../../../common/api/detection_engine/rule_preview/rule_preview.gen';
 import type { SecurityRuleServices, SecuritySharedParams, SignalSource } from '../types';
-import { logEsqlRequest } from '../utils/logged_requests';
 import { getDataTierFilter } from '../utils/get_data_tier_filter';
 import { checkErrorDetails } from '../utils/check_error_details';
-import * as i18n from '../translations';
 
 import {
   addToSearchAfterReturn,
@@ -52,12 +50,14 @@ export const esqlExecutor = async ({
   state,
   licensing,
   scheduleNotificationResponseActionsService,
+  ruleExecutionTimeout,
 }: {
   sharedParams: SecuritySharedParams<EsqlRuleParams>;
   services: SecurityRuleServices;
   state: Record<string, unknown>;
   licensing: LicensingPluginSetup;
   scheduleNotificationResponseActionsService: ScheduleNotificationResponseActionsService;
+  ruleExecutionTimeout?: string;
 }) => {
   const {
     completeRule,
@@ -101,19 +101,9 @@ export const esqlExecutor = async ({
           secondaryTimestamp,
           exceptionFilter,
           excludedDocumentIds,
+          ruleExecutionTimeout,
         });
         const esqlQueryString = { drop_null_columns: true };
-
-        const hasLoggedRequestsReachedLimit = iteration >= 2;
-        if (isLoggedRequestsEnabled) {
-          loggedRequests.push({
-            request: hasLoggedRequestsReachedLimit
-              ? undefined
-              : logEsqlRequest(esqlRequest, esqlQueryString),
-            description: i18n.ESQL_SEARCH_REQUEST_DESCRIPTION,
-            request_type: 'findMatches',
-          });
-        }
 
         ruleExecutionLogger.debug(`ES|QL query request: ${JSON.stringify(esqlRequest)}`);
         const exceptionsWarning = getUnprocessedExceptionsWarnings(unprocessedExceptions);
@@ -127,14 +117,13 @@ export const esqlExecutor = async ({
           esClient: services.scopedClusterClient.asCurrentUser,
           requestBody: esqlRequest,
           requestQueryParams: esqlQueryString,
+          shouldStopExecution: services.shouldStopExecution,
+          ruleExecutionLogger,
+          loggedRequests: isLoggedRequestsEnabled ? loggedRequests : undefined,
         });
 
         const esqlSearchDuration = performance.now() - esqlSignalSearchStart;
         result.searchAfterTimes.push(makeFloatString(esqlSearchDuration));
-
-        if (isLoggedRequestsEnabled && loggedRequests[0]) {
-          loggedRequests[0].duration = Math.round(esqlSearchDuration);
-        }
 
         ruleExecutionLogger.debug(
           `ES|QL query request for ${iteration} iteration took: ${esqlSearchDuration}ms`

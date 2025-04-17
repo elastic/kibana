@@ -24,6 +24,7 @@ export interface BuildEqlSearchRequestParams {
   secondaryTimestamp: TimestampOverride | undefined;
   exceptionFilter: Filter | undefined;
   excludedDocumentIds: string[];
+  ruleExecutionTimeout: string | undefined;
 }
 
 export const buildEsqlSearchRequest = ({
@@ -36,6 +37,7 @@ export const buildEsqlSearchRequest = ({
   exceptionFilter,
   size,
   excludedDocumentIds,
+  ruleExecutionTimeout,
 }: BuildEqlSearchRequestParams) => {
   const esFilter = getQueryFilter({
     query: '',
@@ -68,5 +70,7 @@ export const buildEsqlSearchRequest = ({
           : {}),
       },
     },
+    wait_for_completion_timeout: '4m', // hard limit request timeout is 5m set by ES proxy and alerting framework. So, we should be fine to wait 4m for async query completion. If rule execution is shorter than 4m and query was not completed, it will be aborted.
+    ...(ruleExecutionTimeout ? { keep_alive: ruleExecutionTimeout } : {}),
   };
 };
