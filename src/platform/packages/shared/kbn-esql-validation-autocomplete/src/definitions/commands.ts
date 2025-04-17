@@ -876,5 +876,19 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
 
       return messages;
     },
+
+    fieldsSuggestionsAfter: (
+      command: ESQLAstCommand,
+      previousCommandFields: ESQLRealField[],
+      userDefinedColumns: ESQLRealField[]
+    ) => {
+      return [
+        ...previousCommandFields,
+        {
+          name: '_fork',
+          type: 'keyword' as const,
+        },
+      ];
+    },
   },
 ];
