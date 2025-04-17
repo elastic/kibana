@@ -6,7 +6,7 @@
  */
 
 import objectHash from 'object-hash';
-import sortBy from 'lodash/sortBy';
+import { sortBy } from 'lodash';
 
 import type { SuppressionFieldsLatest } from '@kbn/rule-registry-plugin/common/schemas';
 import {

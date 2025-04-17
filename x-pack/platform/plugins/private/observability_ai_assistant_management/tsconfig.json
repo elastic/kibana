@@ -20,7 +20,6 @@
     "@kbn/observability-ai-assistant-plugin",
     "@kbn/serverless",
     "@kbn/management-settings-components-field-row",
-    "@kbn/observability-shared-plugin",
     "@kbn/config-schema",
     "@kbn/core-ui-settings-common",
     "@kbn/logs-data-access-plugin",
@@ -29,7 +28,10 @@
     "@kbn/core-plugins-server",
     "@kbn/product-doc-base-plugin",
     "@kbn/ai-assistant-icon",
-    "@kbn/ml-plugin"
+    "@kbn/ml-plugin",
+    "@kbn/management-settings-field-definition",
+    "@kbn/management-settings-types",
+    "@kbn/management-settings-utilities"
   ],
   "exclude": [
     "target/**/*"
