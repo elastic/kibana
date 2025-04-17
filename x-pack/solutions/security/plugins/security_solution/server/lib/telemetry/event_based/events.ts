@@ -15,6 +15,7 @@ import type {
   DataStreams,
   IlmPolicies,
   IlmsStats,
+  IndexTemplatesStats,
   IndicesSettings,
   IndicesStats,
 } from '../indices.metadata.types';
@@ -646,6 +647,110 @@ export const TELEMETRY_ILM_STATS_EVENT: EventTypeOpts<IlmsStats> = {
         },
       },
       _meta: { description: 'ILM stats' },
+    },
+  },
+};
+
+export const TELEMETRY_INDEX_TEMPLATES_EVENT: EventTypeOpts<IndexTemplatesStats> = {
+  eventType: 'telemetry_index_templates_event',
+  schema: {
+    items: {
+      type: 'array',
+      items: {
+        properties: {
+          template_name: {
+            type: 'keyword',
+            _meta: { description: 'The name of the template.' },
+          },
+          index_mode: {
+            type: 'keyword',
+            _meta: {
+              optional: true,
+              description: 'The index mode.',
+            },
+          },
+          datastream_dataset: {
+            type: 'keyword',
+            _meta: {
+              optional: true,
+              description: 'Datastream dataset',
+            },
+          },
+          datastream_type: {
+            type: 'keyword',
+            _meta: {
+              optional: true,
+              description: 'Datastream type',
+            },
+          },
+          package_name: {
+            type: 'keyword',
+            _meta: {
+              optional: true,
+              description: 'The package name',
+            },
+          },
+          managed_by: {
+            type: 'keyword',
+            _meta: {
+              optional: true,
+              description: 'Managed by',
+            },
+          },
+          beat: {
+            type: 'keyword',
+            _meta: {
+              optional: true,
+              description: 'Shipper name',
+            },
+          },
+          is_managed: {
+            type: 'boolean',
+            _meta: {
+              optional: true,
+              description: 'Whether the template is managed',
+            },
+          },
+          composed_of: {
+            type: 'array',
+            items: {
+              type: 'keyword',
+              _meta: {
+                description: 'List of template components',
+              },
+            },
+            _meta: { description: '' },
+          },
+          source_enabled: {
+            type: 'boolean',
+            _meta: {
+              optional: true,
+              description: 'Whether the source is enabled',
+            },
+          },
+          source_includes: {
+            type: 'array',
+            items: {
+              type: 'keyword',
+              _meta: {
+                description: 'Fields included in _source',
+              },
+            },
+            _meta: { description: '' },
+          },
+          source_excludes: {
+            type: 'array',
+            items: {
+              type: 'keyword',
+              _meta: {
+                description: '',
+              },
+            },
+            _meta: { description: 'Fields excludes from source' },
+          },
+        },
+      },
+      _meta: { description: 'Index templates info' },
     },
   },
 };
@@ -1306,6 +1411,7 @@ export const events = [
   TELEMETRY_ILM_STATS_EVENT,
   TELEMETRY_INDEX_SETTINGS_EVENT,
   TELEMETRY_INDEX_STATS_EVENT,
+  TELEMETRY_INDEX_TEMPLATES_EVENT,
   TELEMETRY_NODE_INGEST_PIPELINES_STATS_EVENT,
   SIEM_MIGRATIONS_MIGRATION_SUCCESS,
   SIEM_MIGRATIONS_MIGRATION_FAILURE,

@@ -41,6 +41,25 @@ export interface IlmStats {
   policy_name?: string;
 }
 
+export interface IndexTemplatesStats {
+  items: IndexTemplateStats[];
+}
+
+export interface IndexTemplateStats {
+  template_name: string;
+  index_mode: Nullable<string>;
+  datastream_dataset: Nullable<string>;
+  datastream_type: Nullable<string>;
+  package_name: Nullable<string>;
+  managed_by: Nullable<string>;
+  beat: Nullable<string>;
+  is_managed: Nullable<boolean>;
+  composed_of: string[];
+  source_enabled: Nullable<boolean>;
+  source_includes: string[];
+  source_excludes: string[];
+}
+
 export interface IndicesStats {
   items: IndexStats[];
 }

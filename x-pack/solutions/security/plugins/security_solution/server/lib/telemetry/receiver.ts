@@ -31,6 +31,7 @@ import type {
   IndicesGetRequest,
   NodesStatsRequest,
   Duration,
+  IndicesGetIndexTemplateRequest,
 } from '@elastic/elasticsearch/lib/api/types';
 import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import {
@@ -101,6 +102,7 @@ import type {
   Index,
   IndexSettings,
   IndexStats,
+  IndexTemplateStats,
 } from './indices.metadata.types';
 import { chunkStringsByMaxLength } from './collections_helpers';
 import type {
@@ -265,6 +267,7 @@ export interface ITelemetryReceiver {
   getDataStreams(): Promise<DataStream[]>;
   getIndicesStats(indices: string[], chunkSize: number): AsyncGenerator<IndexStats, void, unknown>;
   getIlmsStats(indices: string[], chunkSize: number): AsyncGenerator<IlmStats, void, unknown>;
+  getIndexTemplatesStats(): Promise<IndexTemplateStats[]>;
   getIlmsPolicies(ilms: string[], chunkSize: number): AsyncGenerator<IlmPolicy, void, unknown>;
 
   getIngestPipelinesStats(timeout: Duration): Promise<NodeIngestPipelinesStats[]>;
@@ -1507,6 +1510,61 @@ export class TelemetryReceiver implements ITelemetryReceiver {
         throw error;
       }
     }
+  }
+
+  public async getIndexTemplatesStats(): Promise<IndexTemplateStats[]> {
+    const es = this.esClient();
+
+    this.logger.l('Fetching datstreams');
+
+    const request: IndicesGetIndexTemplateRequest = {
+      name: '*',
+      filter_path: [
+        'index_templates.name',
+        'index_templates.index_template.template.settings.index.mode',
+        'index_templates.index_template.template.mappings.properties.data_stream.properties.type.value',
+        'index_templates.index_template.template.mappings.properties.data_stream.properties.dataset.value',
+        'index_templates.index_template._meta.package.name',
+        'index_templates.index_template._meta.managed_by',
+        'index_templates.index_template._meta.beat',
+        'index_templates.index_template._meta.managed',
+        'index_templates.index_template.composed_of',
+        'index_templates.index_template.template.mappings._source.enabled',
+        'index_templates.index_template.template.mappings._source.includes',
+        'index_templates.index_template.template.mappings._source.excludes',
+      ],
+    };
+
+    return es.indices
+      .getIndexTemplate(request)
+      .then((response) =>
+        response.index_templates.map((props) => {
+          return {
+            template_name: props.name,
+            index_mode: props.index_template.template?.settings?.index?.mode,
+            // @ts-expect-error @elastic/elasticsearch PropertyBase doesn't decalre value
+            datastream_dataset:
+              props.index_template.template?.mappings?.properties?.data_stream?.properties?.dataset
+                ?.value,
+            // @ts-expect-error @elastic/elasticsearch PropertyBase doesn't decalre value
+            datastream_type:
+              props.index_template.template?.mappings?.properties?.data_stream?.properties?.type
+                ?.value,
+            package_name: props.index_template._meta?.package?.name,
+            managed_by: props.index_template._meta?.managed_by,
+            beat: props.index_template._meta?.beat,
+            is_managed: props.index_template._meta?.managed,
+            composed_of: props.index_template.composed_of,
+            source_enabled: props.index_template.template?.mappings?._source?.enabled,
+            source_includes: props.index_template.template?.mappings?._source?.includes ?? [],
+            source_excludes: props.index_template.template?.mappings?._source?.excludes ?? [],
+          } as IndexTemplateStats;
+        })
+      )
+      .catch((error) => {
+        this.logger.warn('Error fetching index templates', { error_message: error } as LogMeta);
+        throw error;
+      });
   }
 
   public async *getIlmsPolicies(ilms: string[], chunkSize: number) {
