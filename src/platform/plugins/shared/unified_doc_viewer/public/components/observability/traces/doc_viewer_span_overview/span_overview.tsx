@@ -9,12 +9,13 @@
 
 import React, { useMemo } from 'react';
 import { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
-import { EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { EuiPanel, EuiSpacer } from '@elastic/eui';
 import {
   SERVICE_NAME_FIELD,
   SPAN_DURATION_FIELD,
   TRACE_ID_FIELD,
+  SPAN_ID_FIELD,
+  SPAN_NAME_FIELD,
   TRANSACTION_ID_FIELD,
   getTraceDocumentOverview,
 } from '@kbn/discover-utils';
@@ -25,6 +26,7 @@ import { getSpanFieldConfiguration } from './resources/get_span_field_configurat
 import { SpanSummaryField } from './sub_components/span_summary_field';
 import { SpanDurationSummary } from './sub_components/span_duration_summary';
 import { Trace } from '../components/trace';
+import { SpanSummaryTitle } from './sub_components/span_summary_title';
 
 export type SpanOverviewProps = DocViewRenderProps & {
   transactionIndexPattern: string;
@@ -53,13 +55,7 @@ export function SpanOverview({
       >
         <EuiPanel color="transparent" hasShadow={false} paddingSize="none">
           <EuiSpacer size="m" />
-          <EuiTitle size="s">
-            <h2>
-              {i18n.translate('unifiedDocViewer.observability.traces.spanOverview.title', {
-                defaultMessage: 'Span detail',
-              })}
-            </h2>
-          </EuiTitle>
+          <SpanSummaryTitle name={parsedDoc[SPAN_NAME_FIELD]} id={parsedDoc[SPAN_ID_FIELD]} />
           <EuiSpacer size="m" />
           {spanFields.map((fieldId) => (
             <SpanSummaryField
