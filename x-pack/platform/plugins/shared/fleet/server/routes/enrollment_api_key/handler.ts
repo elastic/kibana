@@ -39,6 +39,7 @@ export const getEnrollmentApiKeysHandler: RequestHandler<
     page: request.query.page,
     perPage: request.query.perPage,
     kuery: request.query.kuery,
+    showHidden: request.query.showHidden,
     spaceId: useSpaceAwareness ? getCurrentNamespace(soClient) : undefined,
   });
   const body: GetEnrollmentAPIKeysResponse = {

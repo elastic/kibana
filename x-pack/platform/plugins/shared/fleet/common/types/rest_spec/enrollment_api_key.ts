@@ -10,7 +10,9 @@ import type { EnrollmentAPIKey } from '../models';
 import type { ListResult, ListWithKuery } from './common';
 
 export interface GetEnrollmentAPIKeysRequest {
-  query: ListWithKuery;
+  query: ListWithKuery & {
+    showHidden?: boolean;
+  };
 }
 
 export type GetEnrollmentAPIKeysResponse = ListResult<EnrollmentAPIKey> & {
