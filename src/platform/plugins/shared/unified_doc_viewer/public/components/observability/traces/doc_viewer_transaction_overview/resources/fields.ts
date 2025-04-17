@@ -11,6 +11,7 @@ import {
   HTTP_RESPONSE_STATUS_CODE_FIELD,
   SERVICE_NAME_FIELD,
   TIMESTAMP_FIELD,
+  TRACE_ID_FIELD,
   USER_AGENT_NAME_FIELD,
   USER_AGENT_VERSION_FIELD,
 } from '@kbn/discover-utils';
@@ -22,3 +23,5 @@ export const transactionFields = [
   USER_AGENT_NAME_FIELD,
   USER_AGENT_VERSION_FIELD,
 ];
+
+export const transactionTraceFields = [TRACE_ID_FIELD];

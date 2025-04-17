@@ -28,7 +28,7 @@ export const getAttackDiscoveryScheduleType = ({
     actionGroups: [{ id: 'default', name: 'Default' }],
     defaultActionGroupId: 'default',
     category: DEFAULT_APP_CATEGORIES.security.id,
-    producer: 'assistant',
+    producer: 'siem',
     solution: 'security',
     validate: {
       params: {
