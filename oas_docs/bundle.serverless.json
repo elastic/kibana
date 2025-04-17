@@ -23915,6 +23915,103 @@
         ]
       }
     },
+    "/api/fleet/epm/custom_integrations/{pkgName}": {
+      "put": {
+        "description": "[Required authorization] Route required privileges: fleet-settings-read AND integrations-read.",
+        "operationId": "put-fleet-epm-custom-integrations-pkgname",
+        "parameters": [
+          {
+            "description": "A required header to protect against CSRF attacks",
+            "in": "header",
+            "name": "kbn-xsrf",
+            "required": true,
+            "schema": {
+              "example": "true",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "pkgName",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "fields": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "categories": {
+                        "items": {
+                          "type": "string"
+                        },
+                        "type": "array"
+                      },
+                      "readMeData": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "readMeData",
+                      "categories"
+                    ],
+                    "type": "object"
+                  }
+                },
+                "required": [
+                  "fields"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {},
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": false,
+                  "description": "Generic Error",
+                  "properties": {
+                    "attributes": {},
+                    "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "statusCode": {
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "message",
+                    "attributes"
+                  ],
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Update a custom integration",
+        "tags": [
+          "Elastic Package Manager (EPM)"
+        ]
+      }
+    },
     "/api/fleet/epm/data_streams": {
       "get": {
         "description": "[Required authorization] Route required privileges: integrations-read OR fleet-setup OR fleet-all.",
@@ -25396,99 +25493,6 @@
         "summary": "Get a limited package list",
         "tags": [
           "Elastic Package Manager (EPM)"
-        ]
-      }
-    },
-    "/api/fleet/epm/packages/{pkgName}/_update": {
-      "put": {
-        "description": "[Required authorization] Route required privileges: fleet-settings-read AND integrations-read.",
-        "operationId": "put-fleet-epm-packages-pkgname-update",
-        "parameters": [
-          {
-            "description": "A required header to protect against CSRF attacks",
-            "in": "header",
-            "name": "kbn-xsrf",
-            "required": true,
-            "schema": {
-              "example": "true",
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "additionalProperties": false,
-                "properties": {
-                  "fields": {
-                    "additionalProperties": false,
-                    "properties": {
-                      "categories": {
-                        "items": {
-                          "type": "string"
-                        },
-                        "type": "array"
-                      },
-                      "readMeData": {
-                        "type": "string"
-                      }
-                    },
-                    "required": [
-                      "readMeData",
-                      "categories"
-                    ],
-                    "type": "object"
-                  },
-                  "id": {
-                    "type": "string"
-                  }
-                },
-                "required": [
-                  "id",
-                  "fields"
-                ],
-                "type": "object"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {},
-          "400": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "additionalProperties": false,
-                  "description": "Generic Error",
-                  "properties": {
-                    "attributes": {},
-                    "error": {
-                      "type": "string"
-                    },
-                    "errorType": {
-                      "type": "string"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "statusCode": {
-                      "type": "number"
-                    }
-                  },
-                  "required": [
-                    "message",
-                    "attributes"
-                  ],
-                  "type": "object"
-                }
-              }
-            }
-          }
-        },
-        "summary": "Updates a custom integration",
-        "tags": [
-          "Custom Integrations"
         ]
       }
     },
@@ -54220,9 +54224,6 @@
     },
     {
       "name": "connectors"
-    },
-    {
-      "name": "Custom Integrations"
     },
     {
       "name": "Dashboards"
