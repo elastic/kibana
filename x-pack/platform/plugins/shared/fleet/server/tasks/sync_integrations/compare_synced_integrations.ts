@@ -353,6 +353,6 @@ export const getRemoteSyncedIntegrationsStatus = async (
     );
     return res;
   } catch (error) {
-    return { error, integrations: [] };
+    return { error: error.message, integrations: [] };
   }
 };
