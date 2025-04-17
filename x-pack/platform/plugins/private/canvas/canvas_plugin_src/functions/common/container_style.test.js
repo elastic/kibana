@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { elasticLogo } from '@kbn/expression-utils';
 import { functionWrapper } from '@kbn/presentation-util-plugin/test_helpers';
 import { getFunctionErrors } from '../../../i18n';
+import { elasticLogo } from '../../../public/lib';
 import { containerStyle } from './containerStyle';
 
 const errors = getFunctionErrors().containerStyle;
