@@ -23917,7 +23917,7 @@
     },
     "/api/fleet/epm/custom_integrations/{pkgName}": {
       "put": {
-        "description": "[Required authorization] Route required privileges: fleet-settings-read AND integrations-read.",
+        "description": "[Required authorization] Route required privileges: fleet-settings-all AND integrations-all.",
         "operationId": "put-fleet-epm-custom-integrations-pkgname",
         "parameters": [
           {
