@@ -29,10 +29,10 @@ import type { Installation } from '../../types';
 import type {
   RemoteSyncedIntegrationsStatus,
   GetRemoteSyncedIntegrationsStatusResponse,
-  SyncStatus,
   RemoteSyncedCustomAssetsStatus,
   RemoteSyncedCustomAssetsRecord,
 } from '../../../common/types';
+import { SyncStatus } from '../../../common/types';
 
 import type { IntegrationsData, SyncIntegrationsData, CustomAssetsData } from './model';
 import { getPipeline, getComponentTemplate, CUSTOM_ASSETS_PREFIX } from './custom_assets';
@@ -141,7 +141,7 @@ const compareIntegrations = (
           package_name: ccrIntegration.package_name,
           package_version: ccrIntegration.package_version,
           updated_at: ccrIntegration.updated_at,
-          sync_status: 'synchronizing' as SyncStatus.SYNCHRONIZING,
+          sync_status: SyncStatus.SYNCHRONIZING,
         };
       }
       if (ccrIntegration.package_version !== localIntegrationSO?.attributes.version) {
@@ -149,11 +149,11 @@ const compareIntegrations = (
           package_name: ccrIntegration.package_name,
           package_version: ccrIntegration.package_version,
           updated_at: ccrIntegration.updated_at,
-          sync_status: 'failed' as SyncStatus.FAILED,
+          sync_status: SyncStatus.FAILED,
           error: `Found incorrect installed version ${localIntegrationSO?.attributes.version}`,
         };
       }
-      if (localIntegrationSO?.attributes.install_status !== 'installed') {
+      if (localIntegrationSO?.attributes.install_status === 'install_failed') {
         const latestFailedAttemptTime = localIntegrationSO?.attributes
           ?.latest_install_failed_attempts?.[0].created_at
           ? `at ${new Date(
@@ -168,14 +168,17 @@ const compareIntegrations = (
           package_name: ccrIntegration.package_name,
           package_version: ccrIntegration.package_version,
           updated_at: ccrIntegration.updated_at,
-          sync_status: 'failed' as SyncStatus.FAILED,
+          sync_status: SyncStatus.FAILED,
           error: `Installation status: ${localIntegrationSO?.attributes.install_status} ${latestFailedAttempt} ${latestFailedAttemptTime}`,
         };
       }
       return {
         package_name: ccrIntegration.package_name,
         package_version: ccrIntegration.package_version,
-        sync_status: 'completed' as SyncStatus.COMPLETED,
+        sync_status:
+          localIntegrationSO?.attributes.install_status === 'installed'
+            ? SyncStatus.COMPLETED
+            : SyncStatus.SYNCHRONIZING,
         updated_at: localIntegrationSO?.updated_at,
       };
     }
@@ -260,12 +263,12 @@ const compareCustomAssets = ({
       if (ccrCustomAsset.is_deleted === true) {
         return {
           ...result,
-          sync_status: 'completed' as SyncStatus.COMPLETED,
+          sync_status: SyncStatus.COMPLETED,
         };
       }
       return {
         ...result,
-        sync_status: 'synchronizing' as SyncStatus.SYNCHRONIZING,
+        sync_status: SyncStatus.SYNCHRONIZING,
       };
     }
 
@@ -273,7 +276,7 @@ const compareCustomAssets = ({
     if (ccrCustomAsset.is_deleted === true && installedPipeline) {
       return {
         ...result,
-        sync_status: 'synchronizing' as SyncStatus.SYNCHRONIZING,
+        sync_status: SyncStatus.SYNCHRONIZING,
       };
     } else if (
       installedPipeline?.version &&
@@ -281,17 +284,17 @@ const compareCustomAssets = ({
     ) {
       return {
         ...result,
-        sync_status: 'synchronizing' as SyncStatus.SYNCHRONIZING,
+        sync_status: SyncStatus.SYNCHRONIZING,
       };
     } else if (isEqual(installedPipeline, ccrCustomAsset?.pipeline)) {
       return {
         ...result,
-        sync_status: 'completed' as SyncStatus.COMPLETED,
+        sync_status: SyncStatus.COMPLETED,
       };
     } else {
       return {
         ...result,
-        sync_status: 'synchronizing' as SyncStatus.SYNCHRONIZING,
+        sync_status: SyncStatus.SYNCHRONIZING,
       };
     }
   } else if (ccrCustomAsset.type === 'component_template') {
@@ -299,12 +302,12 @@ const compareCustomAssets = ({
       if (ccrCustomAsset.is_deleted === true) {
         return {
           ...result,
-          sync_status: 'completed' as SyncStatus.COMPLETED,
+          sync_status: SyncStatus.COMPLETED,
         };
       }
       return {
         ...result,
-        sync_status: 'synchronizing' as SyncStatus.SYNCHRONIZING,
+        sync_status: SyncStatus.SYNCHRONIZING,
       };
     }
 
@@ -312,17 +315,17 @@ const compareCustomAssets = ({
     if (ccrCustomAsset.is_deleted === true && installedCompTemplate) {
       return {
         ...result,
-        sync_status: 'synchronizing' as SyncStatus.SYNCHRONIZING,
+        sync_status: SyncStatus.SYNCHRONIZING,
       };
     } else if (isEqual(installedCompTemplate, ccrCustomAsset?.template)) {
       return {
         ...result,
-        sync_status: 'completed' as SyncStatus.COMPLETED,
+        sync_status: SyncStatus.COMPLETED,
       };
     } else {
       return {
         ...result,
-        sync_status: 'synchronizing' as SyncStatus.SYNCHRONIZING,
+        sync_status: SyncStatus.SYNCHRONIZING,
       };
     }
   }
