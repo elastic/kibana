@@ -7,7 +7,9 @@
 
 import type { EuiThemeComputed, EuiThemeShape } from '@elastic/eui';
 import { type euiDarkVars as EuiThemeVariables } from '@kbn/ui-theme';
+import { i18n } from '@kbn/i18n';
 import { MetricVisualizationState, TrendEUIColors } from './types';
+import { VisualizationDimensionEditorProps } from '../../types';
 
 export function getColorMode(
   colorMode: MetricVisualizationState['secondaryColorMode'],
@@ -68,4 +70,30 @@ export function getEuiThemeColors(euiVariables: typeof EuiThemeVariables) {
     }
   }
   return { colors: colorsLookup } as EuiThemeComputed<{}>;
+}
+
+export function getPrefixSelected(
+  state: VisualizationDimensionEditorProps<MetricVisualizationState>['state'],
+  defaultPrefix: string
+): { mode: 'auto' | 'none' } | { mode: 'custom'; label: string } {
+  const isAutoPrefix = state.secondaryPrefix === undefined;
+  const hasPrefixOverride =
+    isAutoPrefix &&
+    state.secondaryColorMode === 'dynamic' &&
+    state.secondaryTrend?.baselineValue === 'primary';
+
+  if (isAutoPrefix) {
+    return hasPrefixOverride
+      ? {
+          mode: 'custom',
+          label: i18n.translate('xpack.lens.metric.prefixText.labelTrendOverride', {
+            defaultMessage: 'Difference',
+          }),
+        }
+      : { mode: 'auto' };
+  }
+  if (state.secondaryPrefix === '') {
+    return { mode: 'none' };
+  }
+  return { mode: 'custom', label: state.secondaryPrefix ?? defaultPrefix };
 }

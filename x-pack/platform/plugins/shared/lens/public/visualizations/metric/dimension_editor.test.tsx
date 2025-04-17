@@ -269,7 +269,7 @@ describe('dimension editor', () => {
       const customPrefixGroup = screen.getByRole('group', { name: 'Prefix' });
       const getCustomPrefixTextbox = () =>
         customPrefixGroup.parentElement?.parentElement
-          ? queryByRole(customPrefixGroup.parentElement.parentElement, 'textbox')
+          ? queryByRole<HTMLInputElement>(customPrefixGroup.parentElement.parentElement, 'textbox')
           : null;
       const typePrefix = async (prefix: string) => {
         const customPrefixTextbox = getCustomPrefixTextbox();
@@ -543,6 +543,77 @@ describe('dimension editor', () => {
         );
         expect(getCustomBaselineTextbox()).not.toBeInTheDocument();
       });
+
+      it('should set a default prefix if auto is set and Primary Metric is chosen', async () => {
+        const setState = jest.fn();
+        const { getCustomPrefixTextbox, getBaselineGroup } = renderSecondaryMetricEditor({
+          setState,
+          state: {
+            ...localState,
+            secondaryPrefix: undefined,
+            secondaryColorMode: 'dynamic',
+            secondaryTrend: { baselineValue: 'primary' },
+          },
+        });
+
+        expect(getByTitle(getBaselineGroup(), 'Primary metric')).toHaveAttribute(
+          'aria-pressed',
+          'true'
+        );
+        const el = getCustomPrefixTextbox();
+        if (el == null) {
+          fail('Prefix textbox not in view');
+        }
+        expect(el.value).toBe('Difference');
+      });
+
+      it.each([
+        // mind that auto gets converted into {name: 'custom', value: 'Difference'}
+        { name: 'auto', value: undefined },
+        { name: 'none', value: '' },
+        { name: 'custom', value: 'customPrefix' },
+      ])(
+        'should preserve the current prefix is set to $name and Primary Metric is chosen',
+        async ({ name, value }) => {
+          const setState = jest.fn();
+          const {
+            getCustomPrefixTextbox,
+            getBaselineGroup,
+            getSettingAuto,
+            getSettingCustom,
+            getSettingNone,
+          } = renderSecondaryMetricEditor({
+            setState,
+            state: {
+              ...localState,
+              secondaryPrefix: value,
+              secondaryColorMode: 'dynamic',
+              secondaryTrend: { baselineValue: 'primary' },
+            },
+          });
+
+          expect(getByTitle(getBaselineGroup(), 'Primary metric')).toHaveAttribute(
+            'aria-pressed',
+            'true'
+          );
+
+          expect(getSettingAuto()).toHaveAttribute('aria-pressed', `false`);
+          expect(getSettingNone()).toHaveAttribute('aria-pressed', `${name === 'none'}`);
+          // When primary is chosen auto gets converted into Custom with the default 'Difference' prefix
+          expect(getSettingCustom()).toHaveAttribute(
+            'aria-pressed',
+            `${name === 'custom' || name === 'auto'}`
+          );
+
+          if (value || name === 'auto') {
+            const el = getCustomPrefixTextbox();
+            if (el == null) {
+              fail('Prefix textbox not in view');
+            }
+            expect(el.value).toBe(value ?? 'Difference');
+          }
+        }
+      );
     });
   });
 

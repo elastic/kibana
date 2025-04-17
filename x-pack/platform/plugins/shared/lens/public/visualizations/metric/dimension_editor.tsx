@@ -31,7 +31,7 @@ import { getDataBoundsForPalette } from '@kbn/expression-metric-vis-plugin/publi
 import { getColumnByAccessor } from '@kbn/visualizations-plugin/common/utils';
 import { css } from '@emotion/react';
 import { DebouncedInput, IconSelect } from '@kbn/visualization-ui-components';
-import { useDebouncedValue, TooltipWrapper } from '@kbn/visualization-utils';
+import { useDebouncedValue } from '@kbn/visualization-utils';
 import { PalettePanelContainer, getAccessorType } from '../../shared_components';
 import type { VisualizationDimensionEditorProps } from '../../types';
 import { defaultNumberPaletteParams, defaultPercentagePaletteParams } from './palette_config';
@@ -39,7 +39,7 @@ import { DEFAULT_MAX_COLUMNS, getDefaultColor, showingBar } from './visualizatio
 import { CollapseSetting } from '../../shared_components/collapse_setting';
 import { EuiColorPalettePickerPaletteFixedProps, MetricVisualizationState } from './types';
 import { metricIconsSet } from '../../shared_components/icon_set';
-import { getColorFromEUI, getColorMode } from './helpers';
+import { getColorFromEUI, getColorMode, getPrefixSelected } from './helpers';
 import { nonNullable } from '../../utils';
 import { SECONDARY_DEFAULT_STATIC_COLOR, GROUP_ID } from './constants';
 
@@ -130,7 +130,7 @@ function getDefaultPalette(): EuiColorPalettePickerPaletteFixedProps {
     title: i18n.translate(
       'xpack.lens.secondaryMetric.compareTo.dynamicColoring.palette.trend.label',
       {
-        defaultMessage: 'Trend Vis',
+        defaultMessage: 'Trend',
       }
     ),
     value: 'default_trend_palette',
@@ -148,7 +148,7 @@ function getAllPalettes(): EuiColorPalettePickerPaletteFixedProps[] {
     title: i18n.translate(
       'xpack.lens.secondaryMetric.compareTo.dynamicColoring.palette.trendReversed.label',
       {
-        defaultMessage: 'Trend Reversed',
+        defaultMessage: 'Trend reversed',
       }
     ),
     value: 'reversed_trend_palette',
@@ -327,7 +327,7 @@ function TrendEditor({
         helpText={
           isPrimaryMetricOptionSelected
             ? i18n.translate('xpack.lens.metric.secondaryMetric.compareTo.primaryHelpText', {
-                defaultMessage: ' ',
+                defaultMessage: 'Displays the trend as the primary metric minus the secondary.',
               })
             : undefined
         }
@@ -445,7 +445,7 @@ function SecondaryMetricEditor({
     [state]
   );
 
-  const isPrefixDisabled = state.secondaryTrend?.baselineValue === 'primary';
+  const prefixConfig = getPrefixSelected(state, defaultPrefix);
 
   return (
     <>
@@ -455,73 +455,56 @@ function SecondaryMetricEditor({
         label={i18n.translate('xpack.lens.metric.prefixText.label', {
           defaultMessage: 'Prefix',
         })}
-        isDisabled={isPrefixDisabled}
       >
         <>
-          <TooltipWrapper
-            tooltipContent={i18n.translate('xpack.lens.metric.prefixText.disabledTooltip', {
-              defaultMessage: 'Primary metric baseline overrides the default prefix.',
+          <EuiButtonGroup
+            isFullWidth
+            buttonSize="compressed"
+            legend={i18n.translate('xpack.lens.metric.prefix.label', {
+              defaultMessage: 'Prefix',
             })}
-            condition={isPrefixDisabled}
-            display="block"
-          >
-            <EuiButtonGroup
-              isFullWidth
-              buttonSize="compressed"
-              legend={i18n.translate('xpack.lens.metric.prefix.label', {
-                defaultMessage: 'Prefix',
-              })}
-              isDisabled={isPrefixDisabled}
-              data-test-subj="lnsMetric_prefix_buttons"
-              options={[
-                {
-                  id: `${idPrefix}auto`,
-                  label: i18n.translate('xpack.lens.metric.prefix.auto', {
-                    defaultMessage: 'Auto',
-                  }),
-                  'data-test-subj': 'lnsMetric_prefix_auto',
-                  value: undefined,
-                },
-                {
-                  id: `${idPrefix}custom`,
-                  label: i18n.translate('xpack.lens.metric.prefix.custom', {
-                    defaultMessage: 'Custom',
-                  }),
-                  'data-test-subj': 'lnsMetric_prefix_custom',
-                  value: defaultPrefix,
-                },
-                {
-                  id: `${idPrefix}none`,
-                  label: i18n.translate('xpack.lens.metric.prefix.none', {
-                    defaultMessage: 'None',
-                  }),
-                  'data-test-subj': 'lnsMetric_prefix_none',
-                  value: '',
-                },
-              ]}
-              idSelected={`${idPrefix}${
-                state.secondaryPrefix === undefined
-                  ? 'auto'
-                  : state.secondaryPrefix === ''
-                  ? 'none'
-                  : 'custom'
-              }`}
-              onChange={(_id, secondaryPrefix) => {
-                setState({
-                  ...state,
-                  secondaryPrefix,
-                });
-              }}
-            />
-          </TooltipWrapper>
-          {state.secondaryPrefix && (
+            data-test-subj="lnsMetric_prefix_buttons"
+            options={[
+              {
+                id: `${idPrefix}auto`,
+                label: i18n.translate('xpack.lens.metric.prefix.auto', {
+                  defaultMessage: 'Auto',
+                }),
+                'data-test-subj': 'lnsMetric_prefix_auto',
+                value: undefined,
+              },
+              {
+                id: `${idPrefix}custom`,
+                label: i18n.translate('xpack.lens.metric.prefix.custom', {
+                  defaultMessage: 'Custom',
+                }),
+                'data-test-subj': 'lnsMetric_prefix_custom',
+                value: defaultPrefix,
+              },
+              {
+                id: `${idPrefix}none`,
+                label: i18n.translate('xpack.lens.metric.prefix.none', {
+                  defaultMessage: 'None',
+                }),
+                'data-test-subj': 'lnsMetric_prefix_none',
+                value: '',
+              },
+            ]}
+            idSelected={`${idPrefix}${prefixConfig.mode}`}
+            onChange={(_id, secondaryPrefix) => {
+              setState({
+                ...state,
+                secondaryPrefix,
+              });
+            }}
+          />
+          {prefixConfig.mode === 'custom' && (
             <>
               <EuiSpacer size="s" />
               <DebouncedInput
                 data-test-subj="lnsMetric_prefix_custom_input"
                 compressed
-                value={state.secondaryPrefix}
-                disabled={isPrefixDisabled}
+                value={prefixConfig.label}
                 onChange={(newPrefix) => {
                   setState({
                     ...state,

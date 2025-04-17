@@ -24,7 +24,11 @@ const column: Datatable['columns'][number] = {
 const formattedValue = faker.string.numeric(3);
 const rawValue = parseInt(formattedValue, 10);
 
-const trendLabels = { sortUp: 'upward direction', sortDown: 'downward direction', grab: 'stable' };
+const trendLabels = {
+  arrowUp: 'upward direction',
+  arrowDown: 'downward direction',
+  grab: 'stable',
+};
 
 function renderSecondaryMetric(props: Partial<SecondaryMetricProps> = {}) {
   render(
@@ -101,8 +105,8 @@ describe('Secondary metric', () => {
       ];
 
       const trendCombinations = [
-        { baseline: rawValue - 1, color: palette[2], icon: 'sortUp' as const },
-        { baseline: rawValue + 1, color: palette[0], icon: 'sortDown' as const },
+        { baseline: rawValue - 1, color: palette[2], icon: 'arrowUp' as const },
+        { baseline: rawValue + 1, color: palette[0], icon: 'arrowDown' as const },
         { baseline: rawValue, color: palette[1], icon: 'grab' as const },
       ];
       describe('with both icon and values', () => {
@@ -216,8 +220,9 @@ describe('Secondary metric', () => {
         });
 
         it('should show the delta when compared to primary', () => {
-          const PRIMARY_VALUE = 100;
-          const RAW_VALUE = 99;
+          const PRIMARY_VALUE = faker.number.int();
+          // note that secondary value should be higher in this case to show a downward trend
+          const RAW_VALUE = PRIMARY_VALUE + 1;
           renderSecondaryMetric({
             row: { [id]: RAW_VALUE },
             getMetricFormatter: jest.fn(() => (v: unknown) => `${v}`),
@@ -230,8 +235,8 @@ describe('Secondary metric', () => {
             },
           });
 
-          const icon = 'sortDown';
-          const finalResult = RAW_VALUE - PRIMARY_VALUE;
+          const icon = 'arrowDown';
+          const finalResult = PRIMARY_VALUE - RAW_VALUE;
 
           const trendLabel = trendLabels[icon];
           const el = screen.getByTitle(finalResult);

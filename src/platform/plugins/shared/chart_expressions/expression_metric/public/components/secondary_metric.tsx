@@ -40,7 +40,7 @@ function getDeltaValue(rawValue: number | undefined, baselineValue: number | und
 function getBadgeConfiguration(trendConfig: TrendConfig, deltaValue: number) {
   if (deltaValue < 0) {
     return {
-      icon: trendConfig.icon ? 'sortDown' : undefined,
+      icon: trendConfig.icon ? 'arrowDown' : undefined,
       iconLabel: i18n.translate('expressionMetricVis.secondaryMetric.trend.decrease', {
         defaultMessage: 'downward direction',
       }),
@@ -49,7 +49,7 @@ function getBadgeConfiguration(trendConfig: TrendConfig, deltaValue: number) {
   }
   if (deltaValue > 0) {
     return {
-      icon: trendConfig.icon ? 'sortUp' : undefined,
+      icon: trendConfig.icon ? 'arrowUp' : undefined,
       iconLabel: i18n.translate('expressionMetricVis.secondaryMetric.trend.increase', {
         defaultMessage: 'upward direction',
       }),
@@ -122,7 +122,9 @@ function SecondaryMetricValue({
   `);
 
   if (trendConfig && (typeof rawValue === 'number' || rawValue == null)) {
-    const deltaValue = getDeltaValue(rawValue, trendConfig.baselineValue);
+    // When comparing with primary metric we want to change the order of the difference (primary - secondary)
+    const deltaFactor = trendConfig.compareToPrimary ? -1 : 1;
+    const deltaValue = deltaFactor * getDeltaValue(rawValue, trendConfig.baselineValue);
     const { icon, color: trendColor, iconLabel } = getBadgeConfiguration(trendConfig, deltaValue);
     const translatedColor = getBadgeColor(trendColor, euiTheme);
     const valueToShow = trendConfig.compareToPrimary

@@ -1064,7 +1064,6 @@ describe('metric visualization', () => {
         "iconAlign": "left",
         "layerId": "first",
         "layerType": "data",
-        "secondaryColorMode": "none",
         "titlesTextAlign": "left",
         "valueFontMode": "default",
         "valuesTextAlign": "right",
@@ -1361,7 +1360,10 @@ describe('metric visualization', () => {
 
       expect(removed).not.toHaveProperty('secondaryMetricAccessor');
       expect(removed).not.toHaveProperty('secondaryPrefix');
+      expect(removed).not.toHaveProperty('secondaryColorMode');
+      expect(removed).not.toHaveProperty('secondaryTrend');
     });
+
     it('removes max dimension', () => {
       const removed = visualization.removeDimension({
         ...removeDimensionParam,
