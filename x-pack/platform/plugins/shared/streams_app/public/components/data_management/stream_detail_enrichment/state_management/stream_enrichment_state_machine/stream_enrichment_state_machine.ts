@@ -322,7 +322,7 @@ export const createStreamEnrichmentMachineImplementations = ({
   refreshDefinition,
   streamsRepositoryClient,
   core,
-  data,
+  timeState$,
 }: StreamEnrichmentServiceDependencies): MachineImplementationsFrom<
   typeof streamEnrichmentMachine
 > => ({
@@ -331,7 +331,7 @@ export const createStreamEnrichmentMachineImplementations = ({
     processorMachine,
     simulationMachine: simulationMachine.provide(
       createSimulationMachineImplementations({
-        data,
+        timeState$,
         streamsRepositoryClient,
         toasts: core.notifications.toasts,
       })
