@@ -135,3 +135,30 @@ export const validateColumnForGrokDissect = (
 
   return [];
 };
+
+export function extractDissectColumnNames(pattern: string): string[] {
+  const regex = /%\{(?:[?+]?)?([^}]+?)(?:->)?\}/g;
+  const matches = pattern.matchAll(regex);
+  const columns: string[] = [];
+  for (const match of matches) {
+    if (match && match[1]) {
+      const columnName = match[1];
+      if (!columns.includes(columnName)) {
+        columns.push(columnName);
+      }
+    }
+  }
+  return columns;
+}
+
+export function extractSemanticsFromGrok(pattern: string): string[] {
+  const regex = /%\{\w+:(?<column>[\w@]+)\}/g;
+  const matches = pattern.matchAll(regex);
+  const columns: string[] = [];
+  for (const match of matches) {
+    if (match?.groups?.column) {
+      columns.push(match.groups.column);
+    }
+  }
+  return columns;
+}

@@ -41,6 +41,8 @@ import {
   checkAggExistence,
   checkFunctionContent,
   validateColumnForGrokDissect,
+  extractDissectColumnNames,
+  extractSemanticsFromGrok,
 } from './commands_helpers';
 import { type CommandDefinition } from './types';
 
@@ -542,6 +544,24 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
       }
       return messages;
     },
+    fieldsSuggestionsAfter: (
+      command: ESQLAstCommand,
+      previousCommandFields: ESQLRealField[],
+      userDefinedColumns: ESQLRealField[]
+    ) => {
+      const columns: string[] = [];
+
+      walk(command, {
+        visitLiteral: (node) => {
+          columns.push(...extractDissectColumnNames(node.valueUnquoted));
+        },
+      });
+
+      return [
+        ...previousCommandFields,
+        ...columns.map((column) => ({ name: column, type: 'keyword' as const })),
+      ];
+    },
   },
   {
     name: 'grok',
@@ -553,6 +573,24 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
     examples: ['… | GROK a "%{IP:b} %{NUMBER:c}"'],
     suggest: suggestForGrok,
     validate: validateColumnForGrokDissect,
+    fieldsSuggestionsAfter: (
+      command: ESQLAstCommand,
+      previousCommandFields: ESQLRealField[],
+      userDefinedColumns: ESQLRealField[]
+    ) => {
+      const columns: string[] = [];
+
+      walk(command, {
+        visitLiteral: (node) => {
+          columns.push(...extractSemanticsFromGrok(node.valueUnquoted));
+        },
+      });
+
+      return [
+        ...previousCommandFields,
+        ...columns.map((column) => ({ name: column, type: 'keyword' as const })),
+      ];
+    },
   },
   {
     name: 'mv_expand',
