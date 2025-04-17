@@ -355,7 +355,9 @@ describe('MS Defender response actions client', () => {
 
       await expect(
         msClientMock.isolate(responseActionsClientMock.createIsolateOptions())
-      ).rejects.toThrow('Unable to find Elastic agent IDs for Microsoft agent ids: [1-2-3]');
+      ).rejects.toThrow(
+        'Unable to find Elastic agent IDs for Microsoft Defender agent ids: [1-2-3]'
+      );
     });
   });
 });
