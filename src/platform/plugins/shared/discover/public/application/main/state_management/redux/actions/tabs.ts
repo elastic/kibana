@@ -166,6 +166,30 @@ export const clearAllTabs: InternalStateThunkActionCreator = () => (dispatch) =>
   );
 };
 
+export const restoreTab: InternalStateThunkActionCreator<[{ restoreTabId: string }]> =
+  ({ restoreTabId }) =>
+  (dispatch, getState) => {
+    const currentState = getState();
+
+    if (restoreTabId === currentState.tabs.unsafeCurrentId) {
+      return;
+    }
+
+    const currentTabs = selectAllTabs(currentState);
+    const currentTab = selectTab(currentState, currentState.tabs.unsafeCurrentId);
+
+    // TODO: allow to restore from recently closed tabs too
+
+    const newTabsGroupId = uuidv4();
+    return dispatch(
+      updateTabs({
+        items: currentTabs,
+        selectedItem: currentTabs.find((tab) => tab.id === restoreTabId) || currentTab,
+        groupId: newTabsGroupId,
+      })
+    );
+  };
+
 export const disconnectTab: InternalStateThunkActionCreator<[TabActionPayload]> =
   ({ tabId }) =>
   (_, __, { runtimeStateManager }) => {

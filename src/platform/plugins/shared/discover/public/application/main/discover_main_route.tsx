@@ -76,13 +76,6 @@ export const DiscoverMainRoute = ({
     })
   );
 
-  useEffect(() => {
-    const stopUrlSync = tabsStorageManager.startUrlSync();
-    return () => {
-      stopUrlSync();
-    };
-  }, [tabsStorageManager]);
-
   const [runtimeStateManager] = useState(() => createRuntimeStateManager());
   const [internalState] = useState(() =>
     createInternalStateStore({
@@ -93,6 +86,26 @@ export const DiscoverMainRoute = ({
       tabsStorageManager,
     })
   );
+
+  useEffect(() => {
+    const stopUrlSync = tabsStorageManager.startUrlSync({
+      // if `_t` in URL changes (for example via browser history), try to restore the previous state
+      onChanged: (urlState) => {
+        const { tabId: restoreTabId } = urlState;
+        // console.log('URL state changed', urlState);
+        if (restoreTabId) {
+          internalState.dispatch(internalStateActions.restoreTab({ restoreTabId }));
+        } else {
+          // if tabId is  not present in `_t`, clear all tabs
+          internalState.dispatch(internalStateActions.clearAllTabs());
+        }
+      },
+    });
+    return () => {
+      stopUrlSync();
+    };
+  }, [tabsStorageManager, internalState]);
+
   const { initializeProfileDataViews } = useDefaultAdHocDataViews({ internalState });
   const [mainRouteInitializationState, initializeMainRoute] = useAsyncFunction<InitializeMainRoute>(
     async (loadedRootProfileState) => {

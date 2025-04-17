@@ -116,7 +116,7 @@ export const createTabsStorageManager = ({
     const nextState: TabsStorageState = {
       tabId: selectedTabId,
     };
-    await urlStateStorage.set(TABS_STATE_URL_KEY, nextState, { replace: true });
+    await urlStateStorage.set(TABS_STATE_URL_KEY, nextState);
   };
 
   const toTabStateInStorage = (
