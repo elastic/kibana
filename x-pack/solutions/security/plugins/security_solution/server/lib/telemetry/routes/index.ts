@@ -22,12 +22,6 @@ export const getTriggerIndicesMetadataTaskRoute = (
   router.get(
     {
       path: '/api/trigger-indices-metadata-task',
-      security: {
-        authz: {
-          enabled: false,
-          reason: 'endpoint to test performance, to be delete before merging',
-        },
-      },
       options: {
         tags: ['api'],
         access: 'public',
