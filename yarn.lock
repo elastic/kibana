@@ -6358,7 +6358,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/observability-ai-assistant-management-plugin@link:x-pack/solutions/observability/plugins/observability_ai_assistant_management":
+"@kbn/observability-ai-assistant-management-plugin@link:x-pack/platform/plugins/private/observability_ai_assistant_management":
   version "0.0.0"
   uid ""
 
