@@ -209,6 +209,7 @@ describe('RuleTypeRunner', () => {
 
       expect(ruleType.executor).toHaveBeenCalledWith({
         executionId: 'abc',
+        ruleExecutionTimeout: '5m',
         services: {
           alertFactory: alertsClient.factory(),
           alertsClient: alertsClient.client(),
@@ -318,6 +319,7 @@ describe('RuleTypeRunner', () => {
 
       expect(ruleType.executor).toHaveBeenCalledWith({
         executionId: 'abc',
+        ruleExecutionTimeout: '5m',
         services: {
           alertFactory: alertsClient.factory(),
           alertsClient: alertsClient.client(),
@@ -493,6 +495,7 @@ describe('RuleTypeRunner', () => {
 
       expect(ruleType.executor).toHaveBeenCalledWith({
         executionId: 'abc',
+        ruleExecutionTimeout: '5m',
         services: {
           alertFactory: alertsClient.factory(),
           alertsClient: alertsClient.client(),
@@ -599,6 +602,7 @@ describe('RuleTypeRunner', () => {
 
       expect(ruleType.executor).toHaveBeenCalledWith({
         executionId: 'abc',
+        ruleExecutionTimeout: '5m',
         services: {
           alertFactory: alertsClient.factory(),
           alertsClient: alertsClient.client(),
@@ -743,6 +747,7 @@ describe('RuleTypeRunner', () => {
 
       expect(ruleType.executor).toHaveBeenCalledWith({
         executionId: 'abc',
+        ruleExecutionTimeout: '5m',
         services: {
           alertFactory: alertsClient.factory(),
           alertsClient: alertsClient.client(),
@@ -859,6 +864,7 @@ describe('RuleTypeRunner', () => {
 
       expect(ruleType.executor).toHaveBeenCalledWith({
         executionId: 'abc',
+        ruleExecutionTimeout: '5m',
         services: {
           alertFactory: alertsClient.factory(),
           alertsClient: alertsClient.client(),
@@ -976,6 +982,7 @@ describe('RuleTypeRunner', () => {
 
       expect(ruleType.executor).toHaveBeenCalledWith({
         executionId: 'abc',
+        ruleExecutionTimeout: '5m',
         services: {
           alertFactory: alertsClient.factory(),
           alertsClient: alertsClient.client(),
@@ -1080,6 +1087,7 @@ describe('RuleTypeRunner', () => {
 
       expect(ruleType.executor).toHaveBeenCalledWith({
         executionId: 'abc',
+        ruleExecutionTimeout: '5m',
         services: {
           alertFactory: alertsClient.factory(),
           alertsClient: alertsClient.client(),
@@ -1187,6 +1195,7 @@ describe('RuleTypeRunner', () => {
 
       expect(ruleType.executor).toHaveBeenCalledWith({
         executionId: 'abc',
+        ruleExecutionTimeout: '5m',
         services: {
           alertFactory: alertsClient.factory(),
           alertsClient: alertsClient.client(),
@@ -1253,6 +1262,47 @@ describe('RuleTypeRunner', () => {
         ruleRunMetricsStore,
         shouldLogAlerts: true,
       });
+    });
+
+    test('should call executor with custom ruleExecutionTimeout', async () => {
+      const mockRuleExecutionTimeout = '15m';
+
+      await ruleTypeRunner.run({
+        context: {
+          alertingEventLogger,
+          flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+          queryDelaySec: 0,
+          request: fakeRequest,
+          maintenanceWindowsService,
+          ruleId: RULE_ID,
+          ruleLogPrefix: `${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}'`,
+          ruleRunMetricsStore,
+          spaceId: 'default',
+          isServerless: false,
+        },
+        alertsClient,
+        executionId: 'abc',
+        executorServices: {
+          getDataViews,
+          ruleMonitoringService: publicRuleMonitoringService,
+          ruleResultService: publicRuleResultService,
+          savedObjectsClient,
+          uiSettingsClient,
+          wrappedScopedClusterClient,
+          getWrappedSearchSourceClient,
+        },
+        rule: mockedRule,
+        ruleType: { ...ruleType, ruleTaskTimeout: mockRuleExecutionTimeout },
+        startedAt: new Date(DATE_1970),
+        state: mockTaskInstance().state,
+        validatedParams: mockedRuleParams,
+      });
+
+      expect(ruleType.executor).toHaveBeenCalledWith(
+        expect.objectContaining({
+          ruleExecutionTimeout: mockRuleExecutionTimeout,
+        })
+      );
     });
   });
 });
