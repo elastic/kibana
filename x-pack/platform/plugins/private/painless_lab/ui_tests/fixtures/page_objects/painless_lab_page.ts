@@ -27,7 +27,8 @@ export class PainlessLab {
 
   async waitForRenderComplete() {
     // wait for page to be rendered
-    await this.page.testSubj.locator('painless_lab').waitFor({ state: 'visible' });
+    await this.page.testSubj.locator('kibanaCodeEditor').waitFor({ state: 'visible' });
+    await this.page.testSubj.locator('painlessTabs-loaded').waitFor({ state: 'visible' });
   }
 
   async setCodeEditorValue(value: any, nthIndex?: any) {
