@@ -13,7 +13,6 @@ import { v4 as uuidV4 } from 'uuid';
 import { BaseDataGenerator } from '../../../common/endpoint/data_generators/base_data_generator';
 // import { fromKueryExpression } from '@kbn/es-query';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
-import { getFlattenedObject } from '@kbn/std';
 import { isObject, merge, reduce } from 'lodash';
 
 interface ApplyEsClientSearchMockOptions<TDocument = unknown> {
@@ -153,9 +152,6 @@ export const getPackagePolicyInfoFromFleetKuery = async (
 
   const kueryAst = (await import('@kbn/es-query')).fromKueryExpression(kuery);
   const kueryFlatten = flattenKeys(kueryAst);
-
-  getFlattenedObject(kueryAst);
-
   const getNextKueryAstArgumentPath = (keyPath: string): string => {
     const lastIndexOfPackageNameArguments =
       keyPath.lastIndexOf('.arguments.') + '.arguments.'.length - 1;
