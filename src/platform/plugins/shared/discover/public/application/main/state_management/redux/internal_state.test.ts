@@ -36,6 +36,9 @@ describe('InternalStateStore', () => {
       urlStateStorage,
       tabsStorageManager,
     });
+    store.dispatch(
+      internalStateActions.initiateTabs({ userId: 'mockUserId', spaceId: 'mockSpaceId' })
+    );
     const tabId = store.getState().tabs.unsafeCurrentId;
     expect(selectTab(store.getState(), tabId).dataViewId).toBeUndefined();
     expect(

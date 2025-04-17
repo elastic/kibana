@@ -43,6 +43,9 @@ describe('DiscoverSavedSearchContainer', () => {
     urlStateStorage,
     tabsStorageManager,
   });
+  internalState.dispatch(
+    internalStateActions.initiateTabs({ userId: 'mockUserId', spaceId: 'mockSpaceId' })
+  );
 
   describe('getTitle', () => {
     it('returns undefined for new saved searches', () => {

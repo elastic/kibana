@@ -225,8 +225,8 @@ describe('Discover state', () => {
 
       await jest.runAllTimersAsync();
 
-      expect(history.createHref(history.location)).toContain(
-        '/#?_a=(columns:!(default_column),dataSource:(dataViewId:modified,type:dataView),interval:auto,sort:!())&_t=(tabId:'
+      expect(history.createHref(history.location)).toMatchInlineSnapshot(
+        `"/#?_a=(columns:!(default_column),dataSource:(dataViewId:modified,type:dataView),interval:auto,sort:!())"`
       );
     });
 

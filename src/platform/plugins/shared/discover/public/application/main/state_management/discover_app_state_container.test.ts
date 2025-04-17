@@ -28,6 +28,7 @@ import {
   createRuntimeStateManager,
   createTabActionInjector,
   selectTab,
+  internalStateActions,
 } from './redux';
 import { mockCustomizationContext } from '../../../customizations/__mocks__/customization_context';
 import { createTabsStorageManager, type TabsStorageManager } from './tabs_storage_manager';
@@ -59,6 +60,9 @@ describe('Test discover app state container', () => {
       urlStateStorage: stateStorage,
       tabsStorageManager,
     });
+    internalState.dispatch(
+      internalStateActions.initiateTabs({ userId: 'mockUserId', spaceId: 'mockSpaceId' })
+    );
     savedSearchState = getSavedSearchContainer({
       services: discoverServiceMock,
       globalStateContainer: getDiscoverGlobalStateContainer(stateStorage),

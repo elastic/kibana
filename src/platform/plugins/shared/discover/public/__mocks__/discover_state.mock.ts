@@ -24,6 +24,7 @@ import { createKbnUrlStateStorage, withNotifyOnErrors } from '@kbn/kibana-utils-
 import type { History } from 'history';
 import type { DiscoverCustomizationContext } from '../customizations';
 import { createTabsStorageManager } from '../application/main/state_management/tabs_storage_manager';
+import { internalStateActions } from '../application/main/state_management/redux';
 
 export function getDiscoverStateMock({
   isTimeBased = true,
@@ -69,6 +70,9 @@ export function getDiscoverStateMock({
     urlStateStorage: stateStorageContainer,
     tabsStorageManager,
   });
+  internalState.dispatch(
+    internalStateActions.initiateTabs({ userId: 'mockUserId', spaceId: 'mockSpaceId' })
+  );
   const container = getDiscoverStateContainer({
     tabId: internalState.getState().tabs.unsafeCurrentId,
     services,

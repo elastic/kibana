@@ -118,6 +118,12 @@ export const DiscoverMainRoute = ({
         internalState.dispatch(internalStateActions.loadDataViewList()).catch(() => {}),
         initializeProfileDataViews(loadedRootProfileState).catch(() => {}),
       ]);
+
+      const userId = (await services.userProfile?.getCurrent())?.uid ?? '';
+      const spaceId = (await services.spaces?.getActiveSpace())?.id ?? '';
+
+      internalState.dispatch(internalStateActions.initiateTabs({ userId, spaceId }));
+
       const initializationState: DiscoverInternalState['initializationState'] = {
         hasESData,
         hasUserDataView: hasUserDataView && defaultDataViewExists,

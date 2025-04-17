@@ -154,12 +154,9 @@ export const updateTabAppStateAndGlobalState: InternalStateThunkActionCreator<[T
     );
   };
 
-export const loadLocallyStoredTabs: InternalStateThunkActionCreator =
-  () =>
-  async (dispatch, _, { tabsStorageManager, services }) => {
-    const userId = (await services.userProfile?.getCurrent())?.uid ?? '';
-    const spaceId = (await services.spaces?.getActiveSpace())?.id ?? '';
-
+export const initiateTabs: InternalStateThunkActionCreator<[{ userId: string; spaceId: string }]> =
+  ({ userId, spaceId }) =>
+  (dispatch, _, { tabsStorageManager, services }) => {
     const defaultGroupId = uuidv4();
     const initialTabsState = tabsStorageManager.loadLocally({
       userId,

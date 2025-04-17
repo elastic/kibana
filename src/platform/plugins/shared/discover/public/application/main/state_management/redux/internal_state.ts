@@ -31,7 +31,6 @@ import {
   type RecentlyClosedTabState,
 } from './types';
 import { loadDataViewList } from './actions/data_views';
-import { loadLocallyStoredTabs } from './actions/tabs';
 import { selectTab } from './selectors';
 import type { TabsStorageManager } from '../tabs_storage_manager';
 
@@ -257,17 +256,13 @@ export interface InternalStateThunkDependencies {
 }
 
 export const createInternalStateStore = (options: InternalStateThunkDependencies) => {
-  const store = configureStore({
+  return configureStore({
     reducer: internalStateSlice.reducer,
     middleware: (getDefaultMiddleware) =>
       getDefaultMiddleware({ thunk: { extraArgument: options } }).prepend(
         createMiddleware(options).middleware
       ),
   });
-
-  store.dispatch(loadLocallyStoredTabs());
-
-  return store;
 };
 
 export type InternalStateStore = ReturnType<typeof createInternalStateStore>;
