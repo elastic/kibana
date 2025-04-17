@@ -66,7 +66,6 @@ export const EntryItem: React.FC<EntryItemProps> = ({
         isDisabled={indexPattern == null}
         onChange={handleFieldChange}
         data-test-subj="entryField"
-        fieldInputWidth={360}
       />
     );
 
@@ -96,7 +95,6 @@ export const EntryItem: React.FC<EntryItemProps> = ({
         isDisabled={threatIndexPatterns == null}
         onChange={handleThreatFieldChange}
         data-test-subj="threatEntryField"
-        fieldInputWidth={360}
       />
     );
 
@@ -123,17 +121,17 @@ export const EntryItem: React.FC<EntryItemProps> = ({
       justifyContent="spaceAround"
       data-test-subj="itemEntryContainer"
     >
-      <EuiFlexItem grow={false}>{renderFieldInput}</EuiFlexItem>
-      <EuiFlexItem grow={true}>
+      <EuiFlexItem grow={2}>{renderFieldInput}</EuiFlexItem>
+      <EuiFlexItem grow={1}>
         <EuiFlexGroup justifyContent="spaceAround" alignItems="center">
           {showLabel ? (
-            <FlexItemWithLabel grow={true}>{i18n.MATCHES}</FlexItemWithLabel>
+            <FlexItemWithLabel grow={false}>{i18n.MATCHES}</FlexItemWithLabel>
           ) : (
-            <FlexItemWithoutLabel grow={true}>{i18n.MATCHES}</FlexItemWithoutLabel>
+            <FlexItemWithoutLabel grow={false}>{i18n.MATCHES}</FlexItemWithoutLabel>
           )}
         </EuiFlexGroup>
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>{renderThreatFieldInput}</EuiFlexItem>
+      <EuiFlexItem grow={2}>{renderThreatFieldInput}</EuiFlexItem>
     </EuiFlexGroup>
   );
 };
