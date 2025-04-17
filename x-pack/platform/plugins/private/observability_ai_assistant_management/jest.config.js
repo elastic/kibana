@@ -8,9 +8,9 @@
 module.exports = {
   preset: '@kbn/test',
   rootDir: '../../../../..',
-  roots: ['<rootDir>/x-pack/solutions/observability/plugins/observability_ai_assistant_management'],
+  roots: ['<rootDir>/x-pack/platform/plugins/private/observability_ai_assistant_management'],
   coverageReporters: ['text', 'html'],
   collectCoverageFrom: [
-    '<rootDir>/x-pack/solutions/observability/plugins/observability_ai_assistant_management/{common,public,server}/**/*.{js,ts,tsx}',
+    '<rootDir>/x-pack/platform/plugins/private/observability_ai_assistant_management/{common,public,server}/**/*.{js,ts,tsx}',
   ],
 };

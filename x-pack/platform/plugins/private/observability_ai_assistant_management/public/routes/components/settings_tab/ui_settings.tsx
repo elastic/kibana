@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { BottomBarActions, useEditableSettings } from '@kbn/observability-shared-plugin/public';
 import {
   aiAssistantLogsIndexPattern,
   aiAssistantSimulatedFunctionCalling,
@@ -19,8 +18,10 @@ import { isEmpty } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { LogSourcesSettingSynchronisationInfo } from '@kbn/logs-data-access-plugin/public';
 import { useKnowledgeBase } from '@kbn/ai-assistant';
+import { useEditableSettings } from '../../../hooks/use_editable_settings';
 import { useAppContext } from '../../../hooks/use_app_context';
 import { useKibana } from '../../../hooks/use_kibana';
+import { BottomBarActions } from '../bottom_bar_actions/bottom_bar_actions';
 
 export function UISettings() {
   const {
