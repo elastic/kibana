@@ -97,15 +97,13 @@ export function getESForwardPipelineTriggers(): BuildkiteTriggerStep[] {
 
 /**
  * This pipeline is testing the forward compatibility of Kibana with different versions of Elasticsearch for 9.0.
- * Should be triggered for combinations of (Kibana@8.18 + ES@9.x {current open branches on the same major})
+ * Should be triggered for combinations of (Kibana@8.19 + ES@9.x {current open branches on the same major})
  */
 export function getESForward9Dot0PipelineTriggers(): BuildkiteTriggerStep[] {
   const versions = getVersionsFile();
-  const KIBANA_8_X = versions.versions.find((v) => v.branch === '8.x');
-  if (!KIBANA_8_X) {
-    throw new Error(
-      'Update ES forward compatibility 9.0 pipeline to remove 8.x and add version 8.18'
-    );
+  const KIBANA_8_19 = versions.versions.find((v) => v.branch === '8.19');
+  if (!KIBANA_8_19) {
+    throw new Error('Update ES forward compatibility 9.0 pipeline to 8.19');
   }
   const targetESVersions = versions.versions.filter(
     (v) => v.branch.startsWith('9.') || (v.branch.includes('main') && v.version.startsWith('9.0.0'))
@@ -115,10 +113,10 @@ export function getESForward9Dot0PipelineTriggers(): BuildkiteTriggerStep[] {
     return {
       trigger: pipelineSets['es-forward-9-dot-0'],
       async: true,
-      label: `Triggering Kibana ${KIBANA_8_X.version} + ES ${version} forward compatibility`,
+      label: `Triggering Kibana ${KIBANA_8_19.version} + ES ${version} forward compatibility`,
       build: {
         message: process.env.MESSAGE || `ES forward-compatibility test for ES ${version}`,
-        branch: KIBANA_8_X.branch,
+        branch: KIBANA_8_19.branch,
         commit: 'HEAD',
         env: {
           ES_SNAPSHOT_MANIFEST: `https://storage.googleapis.com/kibana-ci-es-snapshots-daily/${version}/manifest-latest-verified.json`,
