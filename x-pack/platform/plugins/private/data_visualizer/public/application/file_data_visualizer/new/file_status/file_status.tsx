@@ -257,7 +257,7 @@ export const FileStatus: FC<Props> = ({
                     <IngestPipeline
                       pipeline={pipelines[index] as IngestPipelineType}
                       showTitle={false}
-                      setPipeline={() => fileUploadManager.updatePipeline(index)}
+                      setPipeline={fileUploadManager.updatePipeline(index)}
                     />
                   ) : null}
                 </>
