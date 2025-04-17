@@ -282,11 +282,12 @@ interface GetMutatedMigratorParams {
 export const getUpToDateMigratorTestKit = async ({
   logFilePath = defaultLogFilePath,
   removedTypes = EXCLUDED_TYPES,
+  types = getUpToDateBaselineTypes(removedTypes),
   kibanaVersion = nextMinor,
   settings = {},
 }: GetMutatedMigratorParams = {}) => {
   return await getKibanaMigratorTestKit({
-    types: getUpToDateBaselineTypes(removedTypes),
+    types,
     removedTypes,
     logFilePath,
     kibanaVersion,
