@@ -11,6 +11,7 @@ import { DataViewApiProvider } from './data_view_api';
 import { deploymentAgnosticServices } from './deployment_agnostic_services';
 import { PackageApiProvider } from './package_api';
 import { RoleScopedSupertestProvider, SupertestWithRoleScope } from './role_scoped_supertest';
+import { CustomRoleScopedSupertestProvider } from './custom_role_scoped_supertest';
 import { SloApiProvider } from './slo_api';
 import { SynthtraceProvider } from './synthtrace';
 import { ApmApiProvider } from './apm_api';
@@ -31,6 +32,7 @@ export const services = {
   packageApi: PackageApiProvider,
   sloApi: SloApiProvider,
   roleScopedSupertest: RoleScopedSupertestProvider,
+  customRoleScopedSupertest: CustomRoleScopedSupertestProvider,
   // create a new deployment-agnostic service and load here
   synthtrace: SynthtraceProvider,
   apmApi: ApmApiProvider,

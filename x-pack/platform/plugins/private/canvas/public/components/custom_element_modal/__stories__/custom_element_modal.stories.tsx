@@ -8,7 +8,7 @@
 import React from 'react';
 import { action } from '@storybook/addon-actions';
 import type { Meta, StoryObj } from '@storybook/react';
-import { elasticLogo } from '@kbn/expression-utils';
+import { elasticLogo } from '../../../lib';
 import { CustomElementModal } from '../custom_element_modal';
 
 export default {
