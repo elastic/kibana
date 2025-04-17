@@ -15,6 +15,7 @@ import type {
   DataStreams,
   IlmPolicies,
   IlmsStats,
+  IndexTemplatesStats,
   IndicesSettings,
   IndicesStats,
 } from '../indices.metadata.types';
@@ -600,6 +601,103 @@ export const TELEMETRY_ILM_STATS_EVENT: EventTypeOpts<IlmsStats> = {
   },
 };
 
+export const TELEMETRY_INDEX_TEMPLATES_EVENT: EventTypeOpts<IndexTemplatesStats> = {
+  eventType: 'telemetry_index_templates_event',
+  schema: {
+    items: {
+      type: 'array',
+      items: {
+        properties: {
+          template_name: {
+            type: 'keyword',
+            _meta: { description: 'The name of the template.' },
+          },
+          index_mode: {
+            type: 'keyword',
+            _meta: {
+              optional: true,
+              description: 'The index mode.',
+            },
+          },
+          datastream: {
+            type: 'boolean',
+            _meta: {
+              description: 'Datastream dataset',
+            },
+          },
+          package_name: {
+            type: 'keyword',
+            _meta: {
+              optional: true,
+              description: 'The package name',
+            },
+          },
+          managed_by: {
+            type: 'keyword',
+            _meta: {
+              optional: true,
+              description: 'Managed by',
+            },
+          },
+          beat: {
+            type: 'keyword',
+            _meta: {
+              optional: true,
+              description: 'Shipper name',
+            },
+          },
+          is_managed: {
+            type: 'boolean',
+            _meta: {
+              optional: true,
+              description: 'Whether the template is managed',
+            },
+          },
+          composed_of: {
+            type: 'array',
+            items: {
+              type: 'keyword',
+              _meta: {
+                description: 'List of template components',
+              },
+            },
+            _meta: { description: '' },
+          },
+          source_enabled: {
+            type: 'boolean',
+            _meta: {
+              optional: true,
+              description:
+                'The _source field contains the original JSON document body that was provided at index time',
+            },
+          },
+          source_includes: {
+            type: 'array',
+            items: {
+              type: 'keyword',
+              _meta: {
+                description: 'Fields included in _source, if enabled',
+              },
+            },
+            _meta: { description: '' },
+          },
+          source_excludes: {
+            type: 'array',
+            items: {
+              type: 'keyword',
+              _meta: {
+                description: '',
+              },
+            },
+            _meta: { description: 'Fields excludes from _source, if enabled' },
+          },
+        },
+      },
+      _meta: { description: 'Index templates info' },
+    },
+  },
+};
+
 export const TELEMETRY_NODE_INGEST_PIPELINES_STATS_EVENT: EventTypeOpts<NodeIngestPipelinesStats> =
   {
     eventType: 'telemetry_node_ingest_pipelines_stats_event',
@@ -910,5 +1008,6 @@ export const events = [
   TELEMETRY_ILM_STATS_EVENT,
   TELEMETRY_INDEX_SETTINGS_EVENT,
   TELEMETRY_INDEX_STATS_EVENT,
+  TELEMETRY_INDEX_TEMPLATES_EVENT,
   TELEMETRY_NODE_INGEST_PIPELINES_STATS_EVENT,
 ];
