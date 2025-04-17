@@ -38,13 +38,23 @@ export const StatusGridComponent = ({
   const overviewStore = useRef(getOverviewStore());
 
   const hasFilters = !areFiltersEmpty(filters);
+  const singleMonitor =
+    filters && filters.locations.length === 1 && filters.monitorIds.length === 1;
+
+  if (singleMonitor) {
+    return (
+      <SyntheticsEmbeddableContext reload$={reload$} reduxStore={overviewStore.current}>
+        <MonitorsOverviewList filters={filters} singleMonitor={singleMonitor} />
+      </SyntheticsEmbeddableContext>
+    );
+  }
 
   return (
     <EmbeddablePanelWrapper
       titleAppend={hasFilters ? <ShowSelectedFilters filters={filters ?? {}} /> : null}
     >
       <SyntheticsEmbeddableContext reload$={reload$} reduxStore={overviewStore.current}>
-        <MonitorsOverviewList filters={filters} />
+        <MonitorsOverviewList filters={filters} singleMonitor={singleMonitor} />
       </SyntheticsEmbeddableContext>
     </EmbeddablePanelWrapper>
   );
@@ -98,7 +108,13 @@ const SingleMonitorView = () => {
   );
 };
 
-const MonitorsOverviewList = ({ filters }: { filters: MonitorFilters }) => {
+const MonitorsOverviewList = ({
+  filters,
+  singleMonitor,
+}: {
+  filters: MonitorFilters;
+  singleMonitor?: boolean;
+}) => {
   const dispatch = useDispatch();
   useEffect(() => {
     if (!filters) return;
@@ -113,7 +129,7 @@ const MonitorsOverviewList = ({ filters }: { filters: MonitorFilters }) => {
     );
   }, [dispatch, filters]);
 
-  if (filters && filters.locations.length === 1 && filters.monitorIds.length === 1) {
+  if (singleMonitor) {
     return <SingleMonitorView />;
   }
 
