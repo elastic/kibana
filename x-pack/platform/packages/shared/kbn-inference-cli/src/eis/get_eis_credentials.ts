@@ -73,6 +73,7 @@ function getCredentialCandidatesFromEnv(
   if (!env) {
     return undefined;
   }
+
   const candidates = env.filter(
     (pair): pair is [string, string] => !!pair[1] && pair[0].toLowerCase().startsWith('aws_')
   );
@@ -107,8 +108,6 @@ async function getEnvFromConfig({
       return undefined;
     });
 
-  log.debug(`Env variables: ${JSON.stringify(config)}`);
-
   const envVariables = getCredentialCandidatesFromEnv(
     config?.Config.Env.map((line) => {
       const [key, ...value] = line.split('=');
@@ -130,21 +129,24 @@ export async function getEisCredentials({
 
   const envVariables = getCredentialCandidatesFromEnv(Object.entries(process.env));
 
-  if (envVariables) {
-    log.debug(`Using env variables: ${JSON.stringify(envVariables)}`);
-    return envVariables;
-  }
+  const existingContainerEnv = await getEnvFromConfig({ dockerComposeFilePath, log });
 
-  const existingEnv = await getEnvFromConfig({ dockerComposeFilePath, log });
+  const credentials = await getEisCreditsFromVault()
+    .catch((error) => {
+      if (envVariables || existingContainerEnv) {
+        return {};
+      }
+      throw error;
+    })
+    .then((creds) => {
+      return {
+        ...existingContainerEnv,
+        ...pickBy(creds, (val) => !!val),
+        ...envVariables,
+      };
+    });
 
-  if (existingEnv) {
-    log.debug(`Using existing env variables: ${JSON.stringify(existingEnv)}`);
-    return existingEnv;
-  }
-
-  log.debug(`No EIS credentials found in env, checking Vault`);
-
-  const credentials = pickBy(await getEisCreditsFromVault(), (val) => !!val);
+  log.debug(`Using credentials: ${JSON.stringify(credentials)}`);
 
   return credentials;
 }
