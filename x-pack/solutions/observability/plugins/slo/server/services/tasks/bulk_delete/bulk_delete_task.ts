@@ -7,6 +7,7 @@
 
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 import { FakeRawRequest, type CoreSetup, type Logger, type LoggerFactory } from '@kbn/core/server';
+import { BulkDeleteParams } from '@kbn/slo-schema';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/server';
 import { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import { IndicatorTypes } from '../../../domain/models';
@@ -16,7 +17,7 @@ import { DefaultSummaryTransformGenerator } from '../../summary_transform_genera
 import { DefaultSummaryTransformManager } from '../../summay_transform_manager';
 import { TransformGenerator } from '../../transform_generators';
 import { DefaultTransformManager } from '../../transform_manager';
-import { runBulkDelete } from './run_bulk_delete';
+import { BulkDeleteResult, runBulkDelete } from './run_bulk_delete';
 
 export const TYPE = 'slo:bulk-delete-task';
 
@@ -32,6 +33,12 @@ interface TaskSetupContract {
       start: () => Promise<Required<SLOPluginStartDependencies>[key]>;
     };
   };
+}
+
+interface BulkDeleteTaskState {
+  isDone: boolean;
+  results?: BulkDeleteResult[];
+  error?: string;
 }
 
 export class BulkDeleteTask {
@@ -53,12 +60,11 @@ export class BulkDeleteTask {
           return {
             run: async () => {
               this.logger.debug(`starting bulk delete operation`);
-              if (taskInstance.state.isDone) {
-                // The task was done in the previous, we only rescheduled it once for keeping an ephemeral state for the user
-                return;
-              }
+              const state = taskInstance.state as BulkDeleteTaskState;
 
-              if (!taskInstance.params.list || taskInstance.params.list.length === 0) {
+              if (state.isDone) {
+                // The task was done in the previous run,
+                // we only rescheduled it once for keeping an ephemeral state for the user
                 return;
               }
 
@@ -91,7 +97,7 @@ export class BulkDeleteTask {
               );
 
               try {
-                const params = { list: taskInstance.params.list as string[] };
+                const params = taskInstance.params as BulkDeleteParams;
 
                 const results = await runBulkDelete(params, {
                   scopedClusterClient,
@@ -100,7 +106,6 @@ export class BulkDeleteTask {
                   transformManager,
                   summaryTransformManager,
                   logger: this.logger,
-                  abortController: this.abortController,
                 });
 
                 return {
@@ -108,7 +113,7 @@ export class BulkDeleteTask {
                   state: {
                     isDone: true,
                     results,
-                  },
+                  } satisfies BulkDeleteTaskState,
                 };
               } catch (err) {
                 this.logger.debug(`Error: ${err}`);
@@ -117,7 +122,7 @@ export class BulkDeleteTask {
                   state: {
                     isDone: true,
                     error: err.message,
-                  },
+                  } satisfies BulkDeleteTaskState,
                 };
               }
             },

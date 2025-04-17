@@ -7,7 +7,7 @@
 import * as t from 'io-ts';
 import { sloIdSchema } from '../../schema/slo';
 
-const bulkDeleteSLOParamsSchema = t.type({
+const bulkDeleteParamsSchema = t.type({
   body: t.type({
     list: t.array(sloIdSchema),
   }),
@@ -19,4 +19,7 @@ const bulkDeleteStatusParamsSchema = t.type({
   }),
 });
 
-export { bulkDeleteSLOParamsSchema, bulkDeleteStatusParamsSchema };
+type BulkDeleteParams = t.TypeOf<typeof bulkDeleteParamsSchema.props.body>;
+
+export type { BulkDeleteParams };
+export { bulkDeleteParamsSchema, bulkDeleteStatusParamsSchema };

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { bulkDeleteSLOParamsSchema, bulkDeleteStatusParamsSchema } from '@kbn/slo-schema';
-import { v4 as uuidv4 } from 'uuid';
+import { bulkDeleteParamsSchema, bulkDeleteStatusParamsSchema } from '@kbn/slo-schema';
+import { v4 } from 'uuid';
 import { TYPE } from '../../services/tasks/bulk_delete/bulk_delete_task';
 import { createSloServerRoute } from '../create_slo_server_route';
 import { assertPlatinumLicense } from './utils/assert_platinum_license';
@@ -19,19 +19,19 @@ export const bulkDeleteSLORoute = createSloServerRoute({
       requiredPrivileges: ['slo_write'],
     },
   },
-  params: bulkDeleteSLOParamsSchema,
-  handler: async ({ request, response, context, params, logger, plugins }) => {
+  params: bulkDeleteParamsSchema,
+  handler: async ({ request, params, plugins }) => {
     await assertPlatinumLicense(plugins);
     const taskManager = await plugins.taskManager.start();
 
     const task = await taskManager.ensureScheduled(
       {
-        id: `${TYPE}:${uuidv4()}`,
+        id: `${TYPE}:${v4()}`,
         taskType: TYPE,
         scope: ['observability', 'slo'],
         state: {},
         runAt: new Date(Date.now() + 3 * 1000),
-        params: { ...params.body },
+        params: params.body,
       },
       { request }
     );
@@ -45,17 +45,20 @@ export const getBulkDeleteStatusRoute = createSloServerRoute({
   options: { access: 'public' },
   security: {
     authz: {
-      requiredPrivileges: ['slo_write'],
+      requiredPrivileges: ['slo_read'],
     },
   },
   params: bulkDeleteStatusParamsSchema,
-  handler: async ({ request, response, context, params, logger, plugins }) => {
+  handler: async ({ params, plugins }) => {
     await assertPlatinumLicense(plugins);
 
     const taskManager = await plugins.taskManager.start();
 
-    const task = await taskManager.get(params.path.id);
+    const task = await taskManager.get(params.path.id).catch(() => undefined);
+    if (!task) {
+      return { isDone: true, results: [], error: 'Task not found' };
+    }
 
-    return { task };
+    return { isDone: task.state.isDone, results: task.state.results, error: task.state.error };
   },
 });

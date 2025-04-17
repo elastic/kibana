@@ -7,18 +7,15 @@
 
 import { RulesClientApi } from '@kbn/alerting-plugin/server/types';
 import { IScopedClusterClient, Logger } from '@kbn/core/server';
+import { BulkDeleteParams } from '@kbn/slo-schema';
 import pLimit from 'p-limit';
 import {
   SLI_DESTINATION_INDEX_PATTERN,
   SUMMARY_DESTINATION_INDEX_PATTERN,
-  getSLOSummaryTransformId,
-  getSLOTransformId,
-  getWildcardPipelineId,
 } from '../../../../common/constants';
-import { retryTransientEsErrors } from '../../../utils/retry';
+import { DeleteSLO } from '../../delete_slo';
 import { SLORepository } from '../../slo_repository';
 import { TransformManager } from '../../transform_manager';
-import { SLODefinition } from '../../../domain/models';
 
 interface Dependencies {
   scopedClusterClient: IScopedClusterClient;
@@ -27,51 +24,43 @@ interface Dependencies {
   transformManager: TransformManager;
   summaryTransformManager: TransformManager;
   logger: Logger;
-  abortController: AbortController;
+}
+
+export interface BulkDeleteResult {
+  id: string;
+  success: boolean;
+  error?: string;
 }
 
 export async function runBulkDelete(
-  params: { list: string[] },
-  {
+  params: BulkDeleteParams,
+  dependencies: Dependencies
+): Promise<BulkDeleteResult[]> {
+  const {
     scopedClusterClient,
     rulesClient,
     repository,
     transformManager,
     summaryTransformManager,
     logger,
-  }: Dependencies
-) {
-  logger.debug(`running bulk deletion for SLO [${params.list.join(', ')}]`);
-  const limiter = pLimit(5);
+  } = dependencies;
+
+  logger.debug(`Starting bulk deletion for SLO [${params.list.join(', ')}]`);
+
+  const deleteSlo = new DeleteSLO(
+    repository,
+    transformManager,
+    summaryTransformManager,
+    scopedClusterClient,
+    rulesClient
+  );
+
+  const limiter = pLimit(3);
 
   const promises = params.list.map(async (sloId) => {
     return limiter(async () => {
-      let slo: SLODefinition;
       try {
-        slo = await repository.findById(sloId);
-      } catch (err) {
-        return {
-          id: sloId,
-          success: false,
-          error: err.message,
-        };
-      }
-
-      try {
-        const rollupTransformId = getSLOTransformId(slo.id, slo.revision);
-        const summaryTransformId = getSLOSummaryTransformId(slo.id, slo.revision);
-
-        await Promise.all([
-          transformManager.uninstall(rollupTransformId),
-          summaryTransformManager.uninstall(summaryTransformId),
-          retryTransientEsErrors(() =>
-            scopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline(
-              { id: getWildcardPipelineId(slo.id, slo.revision) },
-              { ignore: [404] }
-            )
-          ),
-          repository.deleteById(slo.id, { ignoreNotFound: true }),
-        ]);
+        await deleteSlo.execute(sloId, { skipRuleDeletion: true, skipDataDeletion: true });
       } catch (err) {
         return {
           id: sloId,
@@ -86,7 +75,7 @@ export async function runBulkDelete(
 
   const results = await Promise.all(promises);
 
-  const itemsDeleted = results
+  const itemsDeletedSuccessfully = results
     .filter((result) => result.success === true)
     .map((result) => result.id);
 
@@ -101,7 +90,7 @@ export async function runBulkDelete(
         bool: {
           filter: {
             terms: {
-              'slo.id': itemsDeleted,
+              'slo.id': itemsDeletedSuccessfully,
             },
           },
         },
@@ -117,7 +106,7 @@ export async function runBulkDelete(
         bool: {
           filter: {
             terms: {
-              'slo.id': itemsDeleted,
+              'slo.id': itemsDeletedSuccessfully,
             },
           },
         },
@@ -127,12 +116,12 @@ export async function runBulkDelete(
 
   try {
     await rulesClient.bulkDeleteRules({
-      filter: `alert.attributes.params.sloId:${itemsDeleted.join(' or ')}`,
+      filter: `alert.attributes.params.sloId:${itemsDeletedSuccessfully.join(' or ')}`,
     });
   } catch (err) {
-    // no-op
+    logger.debug(`Error deleting rules: ${err}`);
   }
 
-  logger.info(`completed bulk deletion: [${itemsDeleted.join(',')}]`);
+  logger.debug(`completed bulk deletion: [${itemsDeletedSuccessfully.join(',')}]`);
   return results;
 }
