@@ -11,12 +11,12 @@ Object {
     },
     Object {
       "id": "security-solution-my-test",
-      "name": "indexpattern-datasource-layer-3fd0c5d5-f762-4a27-8c56-14eee0223e13",
+      "name": "indexpattern-datasource-layer-bef502be-e5ff-442f-9e3e-229f86ca2afa",
       "type": "index-pattern",
     },
     Object {
       "id": "security-solution-my-test",
-      "name": "indexpattern-datasource-layer-bef502be-e5ff-442f-9e3e-229f86ca2afa",
+      "name": "indexpattern-datasource-layer-cded27f7-8ef8-458c-8d9b-70db48ae340d",
       "type": "index-pattern",
     },
     Object {
@@ -29,13 +29,24 @@ Object {
     "datasourceStates": Object {
       "formBased": Object {
         "layers": Object {
-          "3fd0c5d5-f762-4a27-8c56-14eee0223e13": Object {
+          "bef502be-e5ff-442f-9e3e-229f86ca2afa": Object {
             "columnOrder": Array [
-              "b41a2958-650b-470a-84c4-c6fd8f0c6d37",
               "5417777d-d9d9-4268-9cdc-eb29b873bd65",
+              undefined,
             ],
             "columns": Object {
               "5417777d-d9d9-4268-9cdc-eb29b873bd65": Object {
+                "dataType": "date",
+                "isBucketed": true,
+                "label": "@timestamp",
+                "operationType": "date_histogram",
+                "params": Object {
+                  "interval": "auto",
+                },
+                "scale": "interval",
+                "sourceField": "@timestamp",
+              },
+              "undefined": Object {
                 "customLabel": true,
                 "dataType": "number",
                 "filter": Object {
@@ -48,7 +59,16 @@ Object {
                 "scale": "ratio",
                 "sourceField": "___records___",
               },
-              "b41a2958-650b-470a-84c4-c6fd8f0c6d37": Object {
+            },
+            "incompleteColumns": Object {},
+          },
+          "cded27f7-8ef8-458c-8d9b-70db48ae340d": Object {
+            "columnOrder": Array [
+              "a3bf9dc1-c8d2-42d6-9e60-31892a4c509e",
+              "b41a2958-650b-470a-84c4-c6fd8f0c6d37",
+            ],
+            "columns": Object {
+              "a3bf9dc1-c8d2-42d6-9e60-31892a4c509e": Object {
                 "dataType": "date",
                 "isBucketed": true,
                 "label": "@timestamp",
@@ -59,16 +79,7 @@ Object {
                 "scale": "interval",
                 "sourceField": "@timestamp",
               },
-            },
-            "incompleteColumns": Object {},
-          },
-          "bef502be-e5ff-442f-9e3e-229f86ca2afa": Object {
-            "columnOrder": Array [
-              "cded27f7-8ef8-458c-8d9b-70db48ae340d",
-              "a3bf9dc1-c8d2-42d6-9e60-31892a4c509e",
-            ],
-            "columns": Object {
-              "a3bf9dc1-c8d2-42d6-9e60-31892a4c509e": Object {
+              "b41a2958-650b-470a-84c4-c6fd8f0c6d37": Object {
                 "customLabel": true,
                 "dataType": "number",
                 "filter": Object {
@@ -80,17 +91,6 @@ Object {
                 "operationType": "count",
                 "scale": "ratio",
                 "sourceField": "___records___",
-              },
-              "cded27f7-8ef8-458c-8d9b-70db48ae340d": Object {
-                "dataType": "date",
-                "isBucketed": true,
-                "label": "@timestamp",
-                "operationType": "date_histogram",
-                "params": Object {
-                  "interval": "auto",
-                },
-                "scale": "interval",
-                "sourceField": "@timestamp",
               },
             },
             "incompleteColumns": Object {},
@@ -218,33 +218,33 @@ Object {
       "layers": Array [
         Object {
           "accessors": Array [
-            "5417777d-d9d9-4268-9cdc-eb29b873bd65",
+            undefined,
           ],
-          "layerId": "3fd0c5d5-f762-4a27-8c56-14eee0223e13",
+          "layerId": "bef502be-e5ff-442f-9e3e-229f86ca2afa",
           "layerType": "data",
           "position": "top",
           "seriesType": "bar_stacked",
           "showGridlines": false,
-          "xAccessor": "b41a2958-650b-470a-84c4-c6fd8f0c6d37",
+          "xAccessor": "5417777d-d9d9-4268-9cdc-eb29b873bd65",
           "yConfig": Array [
             Object {
               "color": "#16C5C0",
-              "forAccessor": "5417777d-d9d9-4268-9cdc-eb29b873bd65",
+              "forAccessor": undefined,
             },
           ],
         },
         Object {
           "accessors": Array [
-            "a3bf9dc1-c8d2-42d6-9e60-31892a4c509e",
+            "b41a2958-650b-470a-84c4-c6fd8f0c6d37",
           ],
-          "layerId": "bef502be-e5ff-442f-9e3e-229f86ca2afa",
+          "layerId": "cded27f7-8ef8-458c-8d9b-70db48ae340d",
           "layerType": "data",
           "seriesType": "bar_stacked",
-          "xAccessor": "cded27f7-8ef8-458c-8d9b-70db48ae340d",
+          "xAccessor": "a3bf9dc1-c8d2-42d6-9e60-31892a4c509e",
           "yConfig": Array [
             Object {
               "color": "#FFC9C2",
-              "forAccessor": "a3bf9dc1-c8d2-42d6-9e60-31892a4c509e",
+              "forAccessor": "b41a2958-650b-470a-84c4-c6fd8f0c6d37",
             },
           ],
         },

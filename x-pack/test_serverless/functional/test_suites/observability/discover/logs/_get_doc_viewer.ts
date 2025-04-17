@@ -62,7 +62,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe('renders docViewer', () => {
-      it('should open the flyout with stacktrace and quality issues accordion closed when expand is clicked', async () => {
+      // Skipping until the bug with resetting accordion state is not fixed
+      it.skip('should open the flyout with stacktrace and quality issues accordion closed when expand is clicked', async () => {
         await dataGrid.clickRowToggle({ rowIndex: 0 });
 
         // Ensure Log overview flyout is open

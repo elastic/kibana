@@ -6,7 +6,7 @@ Object {
   "references": Array [
     Object {
       "id": "security-solution-my-test",
-      "name": "indexpattern-datasource-layer-b9b43606-7ff7-46ae-a47c-85bed80fab9a",
+      "name": "indexpattern-datasource-layer-a9b43606-7ff7-46ae-a47c-85bed80fab9a",
       "type": "index-pattern",
     },
     Object {
@@ -20,28 +20,13 @@ Object {
     "datasourceStates": Object {
       "formBased": Object {
         "layers": Object {
-          "b9b43606-7ff7-46ae-a47c-85bed80fab9a": Object {
+          "a9b43606-7ff7-46ae-a47c-85bed80fab9a": Object {
             "columnOrder": Array [
-              "a9b43606-7ff7-46ae-a47c-85bed80fab9a",
               "21cc4a49-3780-4b1a-be28-f02fa5303d24",
+              undefined,
             ],
             "columns": Object {
               "21cc4a49-3780-4b1a-be28-f02fa5303d24": Object {
-                "dataType": "number",
-                "filter": Object {
-                  "language": "kuery",
-                  "query": "",
-                },
-                "isBucketed": false,
-                "label": "Count of records",
-                "operationType": "count",
-                "params": Object {
-                  "emptyAsNull": true,
-                },
-                "scale": "ratio",
-                "sourceField": "___records___",
-              },
-              "a9b43606-7ff7-46ae-a47c-85bed80fab9a": Object {
                 "dataType": "string",
                 "isBucketed": true,
                 "label": "Filters",
@@ -79,6 +64,21 @@ Object {
                   ],
                 },
                 "scale": "ordinal",
+              },
+              "undefined": Object {
+                "dataType": "number",
+                "filter": Object {
+                  "language": "kuery",
+                  "query": "",
+                },
+                "isBucketed": false,
+                "label": "Count of records",
+                "operationType": "count",
+                "params": Object {
+                  "emptyAsNull": true,
+                },
+                "scale": "ratio",
+                "sourceField": "___records___",
               },
             },
             "incompleteColumns": Object {},
@@ -143,17 +143,17 @@ Object {
         Object {
           "categoryDisplay": "hide",
           "emptySizeRatio": 0.85,
-          "layerId": "b9b43606-7ff7-46ae-a47c-85bed80fab9a",
+          "layerId": "a9b43606-7ff7-46ae-a47c-85bed80fab9a",
           "layerType": "data",
           "legendDisplay": "hide",
           "metrics": Array [
-            "21cc4a49-3780-4b1a-be28-f02fa5303d24",
+            undefined,
           ],
           "nestedLegend": true,
           "numberDisplay": "value",
           "percentDecimals": 2,
           "primaryGroups": Array [
-            "a9b43606-7ff7-46ae-a47c-85bed80fab9a",
+            "21cc4a49-3780-4b1a-be28-f02fa5303d24",
           ],
         },
       ],

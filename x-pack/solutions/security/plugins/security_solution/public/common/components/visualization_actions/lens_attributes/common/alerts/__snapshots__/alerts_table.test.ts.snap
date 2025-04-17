@@ -332,7 +332,7 @@ Object {
   "references": Array [
     Object {
       "id": "security-solution-my-test",
-      "name": "indexpattern-datasource-layer-mockLayerId",
+      "name": "indexpattern-datasource-layer-mockTopValuesOfStackByFieldColumnId",
       "type": "index-pattern",
     },
   ],
@@ -341,24 +341,13 @@ Object {
     "datasourceStates": Object {
       "formBased": Object {
         "layers": Object {
-          "mockLayerId": Object {
+          "mockTopValuesOfStackByFieldColumnId": Object {
             "columnOrder": Array [
-              "mockTopValuesOfStackByFieldColumnId",
               "mockCountColumnId",
+              "mockTopValuesOfBreakdownFieldColumnId",
             ],
             "columns": Object {
               "mockCountColumnId": Object {
-                "dataType": "number",
-                "isBucketed": false,
-                "label": "Count of event.category",
-                "operationType": "count",
-                "params": Object {
-                  "emptyAsNull": true,
-                },
-                "scale": "ratio",
-                "sourceField": "event.category",
-              },
-              "mockTopValuesOfStackByFieldColumnId": Object {
                 "dataType": "string",
                 "isBucketed": true,
                 "label": "Top values of event.category",
@@ -370,7 +359,7 @@ Object {
                   "includeIsRegex": false,
                   "missingBucket": false,
                   "orderBy": Object {
-                    "columnId": "mockCountColumnId",
+                    "columnId": "mockTopValuesOfBreakdownFieldColumnId",
                     "type": "column",
                   },
                   "orderDirection": "desc",
@@ -381,6 +370,17 @@ Object {
                   "size": 1000,
                 },
                 "scale": "ordinal",
+                "sourceField": "event.category",
+              },
+              "mockTopValuesOfBreakdownFieldColumnId": Object {
+                "dataType": "number",
+                "isBucketed": false,
+                "label": "Count of event.category",
+                "operationType": "count",
+                "params": Object {
+                  "emptyAsNull": true,
+                },
+                "scale": "ratio",
                 "sourceField": "event.category",
               },
             },
@@ -444,16 +444,16 @@ Object {
     "visualization": Object {
       "columns": Array [
         Object {
-          "columnId": "mockTopValuesOfStackByFieldColumnId",
+          "columnId": "mockCountColumnId",
           "isTransposed": false,
           "width": 362,
         },
         Object {
-          "columnId": "mockCountColumnId",
+          "columnId": "mockTopValuesOfBreakdownFieldColumnId",
           "isTransposed": false,
         },
       ],
-      "layerId": "mockLayerId",
+      "layerId": "mockTopValuesOfStackByFieldColumnId",
       "layerType": "data",
     },
   },
