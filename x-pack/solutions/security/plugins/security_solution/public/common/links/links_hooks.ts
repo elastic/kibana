@@ -33,7 +33,9 @@ export const useNormalizedAppLinks = (): NormalizedLinks =>
  * since the deepLinks are only updated during the plugin lifecycle or license changes, which require a page reload.
  */
 export const useNavLinkExists = (id: SecurityPageName): boolean => {
-  return useKibana().services.chrome.navLinks.has(securityLink(id));
+  const { navLinks } = useKibana().services.chrome;
+  const navLinkExists = useMemo(() => navLinks.has(securityLink(id)), [navLinks, id]);
+  return navLinkExists;
 };
 
 /**

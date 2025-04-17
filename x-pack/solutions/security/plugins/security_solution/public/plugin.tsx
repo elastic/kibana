@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { Subject, combineLatestWith } from 'rxjs';
+import { BehaviorSubject, Subject, combineLatestWith } from 'rxjs';
 import type * as H from 'history';
 import type {
   AppMountParameters,
@@ -450,8 +450,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
     registerDeepLinksUpdater(this.appUpdater$, solutionNavigationTree$);
 
-    const appLinksToUpdate$ = new Subject<AppLinkItems>();
-    appLinksToUpdate$.next(initialAppLinks);
+    const appLinksToUpdate$ = new BehaviorSubject<AppLinkItems>(initialAppLinks);
 
     appLinksToUpdate$.pipe(combineLatestWith(license$)).subscribe(([appLinks, license]) => {
       const params: ApplicationLinksUpdateParams = {

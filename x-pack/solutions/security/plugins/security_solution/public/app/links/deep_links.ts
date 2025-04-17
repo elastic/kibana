@@ -135,8 +135,7 @@ export const registerDeepLinksUpdater = (
 ): Subscription => {
   return navigationTree$
     .pipe(
-      combineLatestWith(applicationLinksUpdater.links$, applicationLinksUpdater.normalizedLinks$),
-      debounceTime(100) // avoid multiple calls in a short period of time
+      combineLatestWith(applicationLinksUpdater.links$, applicationLinksUpdater.normalizedLinks$)
     )
     .subscribe(([navigationTree, appLinks, normalizedLinks]) => {
       const deepLinks =
