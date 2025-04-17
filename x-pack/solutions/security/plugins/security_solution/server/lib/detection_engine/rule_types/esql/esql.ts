@@ -104,6 +104,7 @@ export const esqlExecutor = async ({
           ruleExecutionTimeout,
         });
         const esqlQueryString = { drop_null_columns: true };
+        const hasLoggedRequestsReachedLimit = iteration >= 2;
 
         ruleExecutionLogger.debug(`ES|QL query request: ${JSON.stringify(esqlRequest)}`);
         const exceptionsWarning = getUnprocessedExceptionsWarnings(unprocessedExceptions);
