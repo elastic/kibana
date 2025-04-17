@@ -283,7 +283,7 @@ interface GetMutatedMigratorParams {
 export const getUpToDateMigratorTestKit = async ({
   logFilePath = defaultLogFilePath,
   filterDeprecated = false,
-  excludedTypes = [],
+  excludedTypes = EXCLUDED_TYPES,
   kibanaVersion = nextMinor,
   settings = {},
 }: GetMutatedMigratorParams = {}) => {
@@ -299,7 +299,7 @@ export const getUpToDateMigratorTestKit = async ({
 export const getCompatibleMigratorTestKit = async ({
   logFilePath = defaultLogFilePath,
   filterDeprecated = false,
-  excludedTypes = [],
+  excludedTypes = EXCLUDED_TYPES,
   kibanaVersion = nextMinor,
   settings = {},
 }: GetMutatedMigratorParams & {
@@ -317,7 +317,7 @@ export const getCompatibleMigratorTestKit = async ({
 export const getReindexingMigratorTestKit = async ({
   logFilePath = defaultLogFilePath,
   filterDeprecated = false,
-  excludedTypes = [],
+  excludedTypes = EXCLUDED_TYPES,
   types = getReindexingBaselineTypes(filterDeprecated, excludedTypes),
   kibanaVersion = nextMinor,
   clientWrapperFactory,
@@ -344,7 +344,7 @@ export const kibanaSplitIndex = `${defaultKibanaIndex}_split`;
 export const getRelocatingMigratorTestKit = async ({
   logFilePath = defaultLogFilePath,
   filterDeprecated = false,
-  excludedTypes = [],
+  excludedTypes = EXCLUDED_TYPES,
   // relocate 'task' and 'basic' objects to a new SO index
   relocateTypes = {
     task: kibanaSplitIndex,
