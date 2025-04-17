@@ -57,7 +57,7 @@ export const integrationLabels = {
     addIntegrationLabel: i18n.translate('workchatApp.integrations.listView.addIntegration', {
       defaultMessage: 'Add integration',
     }),
-    browseIntegrationLabel: i18n.translate('workchatApp.integrations.listView.addIntegration', {
+    browseIntegrationLabel: i18n.translate('workchatApp.integrations.listView.browseIntegration', {
       defaultMessage: 'Browse integrations',
     }),
   },

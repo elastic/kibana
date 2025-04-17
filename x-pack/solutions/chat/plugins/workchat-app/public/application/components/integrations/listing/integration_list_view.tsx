@@ -348,7 +348,7 @@ export const IntegrationListView: React.FC<IntegrationListViewProps> = ({ integr
                   </span>
                 </EuiFlexItem>
                 <EuiEmptyPrompt
-                  title={<h2>You haven't connected anything</h2>}
+                  title={<h2>You haven&apos;t connected anything</h2>}
                   body="Your connected tools will show up here once you've set up an integration. Until then, nothing for me to work with!"
                   actions={
                     <EuiButton
