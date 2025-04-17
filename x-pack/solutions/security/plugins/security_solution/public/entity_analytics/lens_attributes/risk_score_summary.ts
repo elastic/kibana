@@ -7,7 +7,7 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import type { LensAttributes } from '@kbn/lens-embeddable-utils';
-import capitalize from 'lodash/capitalize';
+import { capitalize } from 'lodash';
 
 import { SEVERITY_UI_SORT_ORDER, RISK_SCORE_RANGES, RISK_SEVERITY_COLOUR } from '../common/utils';
 import type { EntityType } from '../../../common/entity_analytics/types';
