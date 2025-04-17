@@ -154,6 +154,24 @@ export const updateTabAppStateAndGlobalState: InternalStateThunkActionCreator<[T
     );
   };
 
+export const loadLocallyStoredTabs: InternalStateThunkActionCreator =
+  () =>
+  async (dispatch, _, { tabsStorageManager, services }) => {
+    const userId = (await services.userProfile?.getCurrent())?.uid ?? '';
+    const spaceId = (await services.spaces?.getActiveSpace())?.id ?? '';
+
+    const defaultGroupId = uuidv4();
+    const initialTabsState = tabsStorageManager.loadLocally({
+      userId,
+      spaceId,
+      defaultTabState,
+      defaultGroupId,
+    });
+
+    dispatch(setTabs(initialTabsState));
+    // TODO: should we restore appState and globalState from the local storage or we rely on the current URL state
+  };
+
 export const clearAllTabs: InternalStateThunkActionCreator = () => (dispatch) => {
   const defaultTab: TabState = {
     ...defaultTabState,

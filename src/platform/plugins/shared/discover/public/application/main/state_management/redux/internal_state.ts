@@ -31,7 +31,7 @@ import {
   type RecentlyClosedTabState,
 } from './types';
 import { loadDataViewList } from './actions/data_views';
-import { setTabs } from './actions/tabs';
+import { loadLocallyStoredTabs } from './actions/tabs';
 import { selectTab } from './selectors';
 import type { TabsStorageManager } from '../tabs_storage_manager';
 
@@ -265,13 +265,7 @@ export const createInternalStateStore = (options: InternalStateThunkDependencies
       ),
   });
 
-  const defaultGroupId = uuidv4();
-  const initialTabsState = options.tabsStorageManager.loadLocally({
-    defaultTabState,
-    defaultGroupId,
-  });
-  store.dispatch(setTabs(initialTabsState));
-  // TODO: should we restore appState and globalState from the local storage or we rely on the current URL state
+  store.dispatch(loadLocallyStoredTabs());
 
   return store;
 };

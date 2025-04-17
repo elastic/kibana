@@ -33,9 +33,18 @@ type RecentlyClosedTabStateInLocalStorage = TabStateInLocalStorage &
   Pick<RecentlyClosedTabState, 'closedAt'>;
 
 interface TabsStateInLocalStorage {
+  userId: string;
+  spaceId: string;
   openTabs: TabStateInLocalStorage[];
   closedTabs: RecentlyClosedTabStateInLocalStorage[];
 }
+
+const defaultTabsStateInLocalStorage: TabsStateInLocalStorage = {
+  userId: '',
+  spaceId: '',
+  openTabs: [],
+  closedTabs: [],
+};
 
 export interface TabsInternalStatePayload {
   groupId: string;
@@ -59,6 +68,8 @@ export interface TabsStorageManager {
     tabState: Pick<TabState, 'lastPersistedAppState' | 'lastPersistedGlobalState'>
   ) => void;
   loadLocally: (props: {
+    userId: string;
+    spaceId: string;
     defaultTabState: Omit<TabState, keyof TabItem>;
     defaultGroupId: string;
   }) => TabsInternalStatePayload;
@@ -76,6 +87,7 @@ export const createTabsStorageManager = ({
   storage: Storage;
 }): TabsStorageManager => {
   const urlStateContainer = createStateContainer<TabsStorageState>({});
+  const sessionInfo = { userId: '', spaceId: '' };
 
   const startUrlSync: TabsStorageManager['startUrlSync'] = ({
     onChanged, // can be called when selectedTabId changes in URL to trigger app state change if needed
@@ -154,6 +166,8 @@ export const createTabsStorageManager = ({
     }
 
     return {
+      userId: parsedTabsState?.userId || '',
+      spaceId: parsedTabsState?.spaceId || '',
       openTabs: parsedTabsState?.openTabs || [],
       closedTabs: parsedTabsState?.closedTabs || [],
     };
@@ -201,7 +215,7 @@ export const createTabsStorageManager = ({
     allTabs,
     selectedTabId,
     recentlyClosedTabs,
-  }: TabsInternalStatePayload) => {
+  }) => {
     if (!TABS_ENABLED) {
       return;
     }
@@ -212,6 +226,8 @@ export const createTabsStorageManager = ({
     );
 
     const nextTabsInStorage: TabsStateInLocalStorage = {
+      userId: sessionInfo.userId,
+      spaceId: sessionInfo.spaceId,
       openTabs,
       closedTabs, // wil be used for "Recently closed tabs" feature
     };
@@ -248,9 +264,11 @@ export const createTabsStorageManager = ({
   };
 
   const loadLocally: TabsStorageManager['loadLocally'] = ({
+    userId,
+    spaceId,
     defaultTabState,
     defaultGroupId,
-  }): TabsInternalStatePayload => {
+  }) => {
     const toTabState = (tabStateInStorage: TabStateInLocalStorage): TabState => ({
       ...defaultTabState,
       ...tabStateInStorage,
@@ -271,9 +289,22 @@ export const createTabsStorageManager = ({
     });
 
     const selectedTabId = getSelectedTabIdFromURL();
-    const storedTabsState = TABS_ENABLED
+    let storedTabsState: TabsStateInLocalStorage = TABS_ENABLED
       ? readFromLocalStorage()
-      : { openTabs: [], closedTabs: [] };
+      : defaultTabsStateInLocalStorage;
+
+    if (storedTabsState.userId !== userId || storedTabsState.spaceId !== spaceId) {
+      // if the userId or spaceId has changed, don't read from the local storage
+      storedTabsState = {
+        ...defaultTabsStateInLocalStorage,
+        userId,
+        spaceId,
+      };
+    }
+
+    sessionInfo.userId = userId;
+    sessionInfo.spaceId = spaceId;
+
     const openTabs = storedTabsState.openTabs.map(toTabState);
     const closedTabs = storedTabsState.closedTabs.map(toRecentlyClosedTabState);
 
