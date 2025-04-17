@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { bulkDeleteParamsSchema, bulkDeleteStatusParamsSchema } from '@kbn/slo-schema';
+import {
+  BulkDeleteStatusResponse,
+  bulkDeleteParamsSchema,
+  bulkDeleteStatusParamsSchema,
+} from '@kbn/slo-schema';
 import { v4 } from 'uuid';
 import { TYPE } from '../../services/tasks/bulk_delete/bulk_delete_task';
 import { createSloServerRoute } from '../create_slo_server_route';
@@ -57,13 +61,21 @@ export const getBulkDeleteStatusRoute = createSloServerRoute({
     const task = await taskManager.get(params.path.taskId).catch(() => undefined);
 
     if (!task) {
-      return { isDone: true, results: [], error: 'Task not found' };
+      return {
+        isDone: true,
+        results: [],
+        error: 'Task not found',
+      } satisfies BulkDeleteStatusResponse;
     }
 
     if (!task.state.isDone) {
-      return { isDone: false, results: [] };
+      return { isDone: false, results: [] } satisfies BulkDeleteStatusResponse;
     }
 
-    return { isDone: task.state.isDone, results: task.state.results, error: task.state.error };
+    return {
+      isDone: task.state.isDone,
+      results: task.state.results,
+      error: task.state.error,
+    } satisfies BulkDeleteStatusResponse;
   },
 });

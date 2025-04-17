@@ -19,7 +19,20 @@ const bulkDeleteStatusParamsSchema = t.type({
   }),
 });
 
+type BulkDeleteInput = t.OutputOf<typeof bulkDeleteParamsSchema.props.body>;
 type BulkDeleteParams = t.TypeOf<typeof bulkDeleteParamsSchema.props.body>;
 
-export type { BulkDeleteParams };
+interface BulkDeleteResult {
+  id: string;
+  success: boolean;
+  error?: string;
+}
+
+interface BulkDeleteStatusResponse {
+  isDone: boolean;
+  results?: BulkDeleteResult[];
+  error?: string;
+}
+
+export type { BulkDeleteInput, BulkDeleteParams, BulkDeleteResult, BulkDeleteStatusResponse };
 export { bulkDeleteParamsSchema, bulkDeleteStatusParamsSchema };

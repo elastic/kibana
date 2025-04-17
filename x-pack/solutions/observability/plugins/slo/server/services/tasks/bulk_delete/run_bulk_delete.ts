@@ -7,7 +7,7 @@
 
 import { RulesClientApi } from '@kbn/alerting-plugin/server/types';
 import { IScopedClusterClient, Logger } from '@kbn/core/server';
-import { BulkDeleteParams } from '@kbn/slo-schema';
+import { BulkDeleteParams, BulkDeleteResult } from '@kbn/slo-schema';
 import pLimit from 'p-limit';
 import {
   SLI_DESTINATION_INDEX_PATTERN,
@@ -20,12 +20,6 @@ interface Dependencies {
   rulesClient: RulesClientApi;
   deleteSLO: DeleteSLO;
   logger: Logger;
-}
-
-export interface BulkDeleteResult {
-  id: string;
-  success: boolean;
-  error?: string;
 }
 
 export async function runBulkDelete(
