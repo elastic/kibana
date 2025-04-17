@@ -10,6 +10,8 @@
 import { v4 as uuidv4 } from 'uuid';
 import { groupBy } from 'lodash';
 
+import type { Logger } from '@kbn/logging';
+
 /**
  * PERFORMANCE_TRACKER_TYPES defines top-level categories to be use as
  * the mark name. They are used to group marks and measures by type.
@@ -64,6 +66,10 @@ interface PerformanceTrackerOptions {
    * This is used to group marks and measures by instance.
    */
   instance: string;
+  /**
+   * Optional logger.
+   */
+  logger?: Logger;
 }
 
 /**
@@ -72,7 +78,7 @@ interface PerformanceTrackerOptions {
  * @param options.instance - Instance of the performance tracker type, for example "xyVis".
  * @returns A performance tracker object with a mark method.
  */
-export const createPerformanceTracker = ({ type, instance }: PerformanceTrackerOptions) => {
+export const createPerformanceTracker = ({ type, instance, logger }: PerformanceTrackerOptions) => {
   const id = uuidv4();
   const createMarkName = (name: string) => `${type}:${instance}:${name}`;
 
@@ -82,8 +88,13 @@ export const createPerformanceTracker = ({ type, instance }: PerformanceTrackerO
      * @param name - The name of the mark to create, will be postfixed.
      * @returns The created performance mark
      */
-    mark: (name: PerformanceTrackerMarks) =>
-      performance.mark(createMarkName(name), { detail: { id } }),
+    mark: (name: PerformanceTrackerMarks) => {
+      try {
+        performance.mark(createMarkName(name), { detail: { id } });
+      } catch (error) {
+        logger?.error('Error creating performance mark:', error);
+      }
+    },
   };
 };
 
