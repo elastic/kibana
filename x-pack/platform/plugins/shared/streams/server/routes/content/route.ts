@@ -211,8 +211,7 @@ const previewContentRoute = createServerRoute({
   security: {
     authz: {
       enabled: false,
-      reason:
-        'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
+      reason: 'This API does not use any user credentials.',
     },
   },
   async handler({ params }) {
