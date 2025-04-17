@@ -8,7 +8,7 @@
 import { bulkPurgeRollupSchema } from '@kbn/slo-schema';
 import { createSloServerRoute } from '../create_slo_server_route';
 import { assertPlatinumLicense } from './utils/assert_platinum_license';
-import { PurgeRollupData } from '../../services/purge_rollup_data';
+import { BulkPurgeRollupData } from '../../services/bulk_purge_rollup_data';
 import { KibanaSavedObjectsSLORepository } from '../../services';
 
 export const purgeRollupDataRoute = createSloServerRoute({
@@ -26,7 +26,7 @@ export const purgeRollupDataRoute = createSloServerRoute({
     const esClient = core.elasticsearch.client.asCurrentUser;
     const soClient = (await context.core).savedObjects.client;
     const repository = new KibanaSavedObjectsSLORepository(soClient, logger);
-    const purgeRollupData = new PurgeRollupData(esClient, repository);
+    const purgeRollupData = new BulkPurgeRollupData(esClient, repository);
 
     return purgeRollupData.execute(params.body);
   },

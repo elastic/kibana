@@ -6,7 +6,7 @@
  */
 
 import { ElasticsearchClient } from '@kbn/core/server';
-import { PurgeRollupSchemaType } from '@kbn/slo-schema/src/rest_specs/routes/bulk_purge_rollup';
+import { BulkPurgeRollupSchemaType } from '@kbn/slo-schema/src/rest_specs/routes/bulk_purge_rollup';
 import { calendarAlignedTimeWindowSchema } from '@kbn/slo-schema';
 import { assertNever } from '@elastic/eui';
 import { DeleteByQueryResponse } from '@elastic/elasticsearch/lib/api/types';
@@ -16,14 +16,14 @@ import { SLORepository } from './slo_repository';
 import { IllegalArgumentError } from '../errors';
 import { SLODefinition } from '../domain/models';
 
-export class PurgeRollupData {
+export class BulkPurgeRollupData {
   constructor(private esClient: ElasticsearchClient, private repository: SLORepository) {}
 
   public async execute(
-    params: PurgeRollupSchemaType
+    params: BulkPurgeRollupSchemaType
   ): Promise<{ taskId: DeleteByQueryResponse['task'] }> {
     const lookback = this.getTimestamp(params.purgePolicy);
-    const slos = await this.repository.findAllByIds(params.ids);
+    const slos = await this.repository.findAllByIds(params.list);
 
     if (params.force !== true) {
       await this.validatePurgePolicy(slos, params.purgePolicy);
@@ -58,7 +58,7 @@ export class PurgeRollupData {
 
   private async validatePurgePolicy(
     slos: SLODefinition[],
-    purgePolicy: PurgeRollupSchemaType['purgePolicy']
+    purgePolicy: BulkPurgeRollupSchemaType['purgePolicy']
   ) {
     const purgeType = purgePolicy.purgeType;
     let inputIsInvalid = false;
@@ -101,7 +101,7 @@ export class PurgeRollupData {
     }
   }
 
-  private getTimestamp(purgePolicy: PurgeRollupSchemaType['purgePolicy']): string {
+  private getTimestamp(purgePolicy: BulkPurgeRollupSchemaType['purgePolicy']): string {
     if (purgePolicy.purgeType === 'fixed_age') {
       return `now-${purgePolicy.age.format()}`;
     } else if (purgePolicy.purgeType === 'fixed_time') {

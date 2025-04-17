@@ -11,17 +11,17 @@ import { Duration, DurationUnit } from '@kbn/slo-schema';
 import { createAPMTransactionErrorRateIndicator, createSLO } from './fixtures/slo';
 import { createSLORepositoryMock } from './mocks';
 import { SLORepository } from './slo_repository';
-import { PurgeRollupData } from './purge_rollup_data';
+import { BulkPurgeRollupData } from './bulk_purge_rollup_data';
 
 describe('purge rollup data', () => {
   let mockRepository: jest.Mocked<SLORepository>;
   let mockEsClient: jest.Mocked<ElasticsearchClient>;
-  let purgeRollupData: PurgeRollupData;
+  let purgeRollupData: BulkPurgeRollupData;
 
   beforeEach(() => {
     mockRepository = createSLORepositoryMock();
     mockEsClient = elasticsearchServiceMock.createElasticsearchClient();
-    purgeRollupData = new PurgeRollupData(mockEsClient, mockRepository);
+    purgeRollupData = new BulkPurgeRollupData(mockEsClient, mockRepository);
   });
 
   describe('happy path', () => {
@@ -33,7 +33,7 @@ describe('purge rollup data', () => {
       mockRepository.findAllByIds.mockResolvedValueOnce([slo]);
 
       await purgeRollupData.execute({
-        ids: ['test1'],
+        list: ['test1'],
         purgePolicy: { purgeType: 'fixed_age', age: new Duration(30, DurationUnit.Day) },
       });
 
@@ -53,7 +53,7 @@ describe('purge rollup data', () => {
       mockRepository.findAllByIds.mockResolvedValueOnce([slo]);
 
       await purgeRollupData.execute({
-        ids: ['test2'],
+        list: ['test2'],
         purgePolicy: { purgeType: 'fixed_age', age: new Duration(2, DurationUnit.Week) },
       });
 
@@ -73,7 +73,7 @@ describe('purge rollup data', () => {
       mockRepository.findAllByIds.mockResolvedValueOnce([slo]);
 
       await purgeRollupData.execute({
-        ids: ['test3'],
+        list: ['test3'],
         purgePolicy: { purgeType: 'fixed_time', timestamp: new Date('2025-03-01T00:00:00Z') },
       });
 
@@ -92,7 +92,7 @@ describe('purge rollup data', () => {
       mockRepository.findAllByIds.mockResolvedValueOnce([slo]);
 
       await purgeRollupData.execute({
-        ids: ['test4'],
+        list: ['test4'],
         purgePolicy: { purgeType: 'fixed_time', timestamp: new Date('2025-04-01T00:00:00Z') },
       });
 
@@ -111,7 +111,7 @@ describe('purge rollup data', () => {
       mockRepository.findAllByIds.mockResolvedValueOnce([slo]);
 
       await purgeRollupData.execute({
-        ids: ['test2'],
+        list: ['test2'],
         purgePolicy: {
           purgeType: 'fixed_age',
           age: new Duration(1, DurationUnit.Day),
@@ -131,12 +131,14 @@ describe('purge rollup data', () => {
       });
       mockRepository.findAllByIds.mockResolvedValueOnce([slo]);
 
-      expect(
+      await expect(
         purgeRollupData.execute({
-          ids: ['test1'],
+          list: ['test1'],
           purgePolicy: { purgeType: 'fixed_age', age: new Duration(3, DurationUnit.Day) },
         })
-      ).rejects.toThrowError();
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"The provided purge policy is invalid. At least one SLO has a time window that is longer than the provided purge policy."`
+      );
 
       expect(mockEsClient.deleteByQuery).toHaveBeenCalledTimes(0);
     });
@@ -152,12 +154,14 @@ describe('purge rollup data', () => {
       });
       mockRepository.findAllByIds.mockResolvedValueOnce([slo]);
 
-      expect(
+      await expect(
         purgeRollupData.execute({
-          ids: ['test2'],
+          list: ['test2'],
           purgePolicy: { purgeType: 'fixed_age', age: new Duration(1, DurationUnit.Day) },
         })
-      ).rejects.toThrowError();
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"The provided purge policy is invalid. At least one SLO has a time window that is longer than the provided purge policy."`
+      );
 
       expect(mockEsClient.deleteByQuery).toHaveBeenCalledTimes(0);
     });
@@ -173,12 +177,14 @@ describe('purge rollup data', () => {
       });
       mockRepository.findAllByIds.mockResolvedValueOnce([slo]);
 
-      expect(
+      await expect(
         purgeRollupData.execute({
-          ids: ['test3'],
+          list: ['test3'],
           purgePolicy: { purgeType: 'fixed_time', timestamp: new Date() },
         })
-      ).rejects.toThrowError();
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"The provided purge policy is invalid. At least one SLO has a time window that is longer than the provided purge policy."`
+      );
 
       expect(mockEsClient.deleteByQuery).toHaveBeenCalledTimes(0);
     });
