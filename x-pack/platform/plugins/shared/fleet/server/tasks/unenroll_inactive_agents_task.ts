@@ -40,6 +40,7 @@ interface UnenrollInactiveAgentsTaskSetupContract {
   core: CoreSetup;
   taskManager: TaskManagerSetupContract;
   logFactory: LoggerFactory;
+  unenrollBatchSize?: number;
 }
 
 interface UnenrollInactiveAgentsTaskStartContract {
@@ -50,10 +51,13 @@ export class UnenrollInactiveAgentsTask {
   private logger: Logger;
   private wasStarted: boolean = false;
   private abortController = new AbortController();
+  private unenrollBatchSize: number;
 
   constructor(setupContract: UnenrollInactiveAgentsTaskSetupContract) {
-    const { core, taskManager, logFactory } = setupContract;
+    const { core, taskManager, logFactory, unenrollBatchSize } = setupContract;
     this.logger = logFactory.get(this.taskId);
+    this.unenrollBatchSize =
+      unenrollBatchSize !== undefined ? unenrollBatchSize : UNENROLLMENT_BATCHSIZE;
 
     taskManager.registerTaskDefinitions({
       [TYPE]: {
@@ -140,14 +144,16 @@ export class UnenrollInactiveAgentsTask {
         kuery,
         showInactive: true,
         page: 1,
-        perPage: UNENROLLMENT_BATCHSIZE,
+        perPage: this.unenrollBatchSize,
       });
       if (!res.agents.length) {
-        this.endRun('No inactive agents to unenroll');
-        return;
+        this.logger.debug(
+          '[UnenrollInactiveAgentsTask] No inactive agents to unenroll in agent policy batch'
+        );
+        continue;
       }
       agentCounter += res.agents.length;
-      if (agentCounter >= UNENROLLMENT_BATCHSIZE) {
+      if (agentCounter > this.unenrollBatchSize) {
         this.endRun('Reached the maximum amount of agents to unenroll, exiting.');
         return;
       }

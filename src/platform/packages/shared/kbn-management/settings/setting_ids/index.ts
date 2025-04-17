@@ -67,6 +67,7 @@ export const AUTOCOMPLETE_VALUE_SUGGESTION_METHOD_ID = 'autocomplete:valueSugges
 export const BANNERS_PLACEMENT_ID = 'banners:placement';
 export const BANNERS_TEXT_CONTENT_ID = 'banners:textContent';
 export const BANNERS_TEXT_COLOR_ID = 'banners:textColor';
+export const BANNERS_LINK_COLOR_ID = 'banners:linkColor';
 export const BANNERS_BACKGROUND_COLOR_ID = 'banners:backgroundColor';
 
 // Discover settings
@@ -178,6 +179,8 @@ export const SECURITY_SOLUTION_ENABLE_VISUALIZATIONS_IN_FLYOUT_SETTING =
   'securitySolution:enableVisualizationsInFlyout' as const;
 export const SECURITY_SOLUTION_ENABLE_GRAPH_VISUALIZATION_SETTING =
   'securitySolution:enableGraphVisualization' as const;
+export const SECURITY_SOLUTION_ENABLE_ASSET_INVENTORY_SETTING =
+  'securitySolution:enableAssetInventory' as const;
 
 // Timelion settings
 export const TIMELION_ES_DEFAULT_INDEX_ID = 'timelion:es.default_index';
@@ -187,7 +190,6 @@ export const TIMELION_MIN_INTERVAL_ID = 'timelion:min_interval';
 export const TIMELION_TARGET_BUCKETS_ID = 'timelion:target_buckets';
 
 // Visualization settings
-export const VISUALIZATION_COLOR_MAPPING_ID = 'visualization:colorMapping';
 export const VISUALIZATION_HEATMAP_MAX_BUCKETS_ID = 'visualization:heatmap:maxBuckets';
 export const VISUALIZATION_USE_LEGACY_TIME_AXIS_ID = 'visualization:useLegacyTimeAxis';
 export const VISUALIZATION_LEGACY_GAUGE_CHARTS_LIBRARY_ID =

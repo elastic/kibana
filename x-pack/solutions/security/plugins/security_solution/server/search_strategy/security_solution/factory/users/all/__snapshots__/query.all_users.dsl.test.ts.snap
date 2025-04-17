@@ -2,93 +2,91 @@
 
 exports[`buildUsersQuery build query from options correctly 1`] = `
 Object {
-  "allow_no_indices": true,
-  "body": Object {
-    "_source": false,
-    "aggregations": Object {
-      "user_count": Object {
-        "cardinality": Object {
-          "field": "user.name",
-        },
-      },
-      "user_data": Object {
-        "aggs": Object {
-          "domain": Object {
-            "top_hits": Object {
-              "_source": false,
-              "size": 1,
-              "sort": Array [
-                Object {
-                  "@timestamp": Object {
-                    "order": "desc",
-                  },
-                },
-              ],
-            },
-          },
-          "lastSeen": Object {
-            "max": Object {
-              "field": "@timestamp",
-            },
-          },
-        },
-        "terms": Object {
-          "field": "user.name",
-          "order": Object {
-            "_key": "asc",
-          },
-          "size": 10,
-        },
+  "_source": false,
+  "aggregations": Object {
+    "user_count": Object {
+      "cardinality": Object {
+        "field": "user.name",
       },
     },
-    "fields": Array [
-      "user.name",
-      "user.domain",
-      Object {
-        "field": "@timestamp",
-        "format": "strict_date_optional_time",
-      },
-    ],
-    "query": Object {
-      "bool": Object {
-        "filter": Array [
-          Object {
-            "bool": Object {
-              "filter": Array [
-                Object {
-                  "match_all": Object {},
+    "user_data": Object {
+      "aggs": Object {
+        "domain": Object {
+          "top_hits": Object {
+            "_source": false,
+            "size": 1,
+            "sort": Array [
+              Object {
+                "@timestamp": Object {
+                  "order": "desc",
                 },
-                Object {
-                  "match_phrase": Object {
-                    "user.name": Object {
-                      "query": "test_user",
-                    },
-                  },
-                },
-              ],
-              "must": Array [],
-              "must_not": Array [],
-              "should": Array [],
-            },
-          },
-          Object {
-            "range": Object {
-              "@timestamp": Object {
-                "format": "strict_date_optional_time",
-                "gte": "2020-09-02T15:17:13.678Z",
-                "lte": "2020-09-03T15:17:13.678Z",
               },
-            },
+            ],
           },
-        ],
+        },
+        "lastSeen": Object {
+          "max": Object {
+            "field": "@timestamp",
+          },
+        },
+      },
+      "terms": Object {
+        "field": "user.name",
+        "order": Object {
+          "_key": "asc",
+        },
+        "size": 10,
       },
     },
-    "size": 0,
   },
+  "allow_no_indices": true,
+  "fields": Array [
+    "user.name",
+    "user.domain",
+    Object {
+      "field": "@timestamp",
+      "format": "strict_date_optional_time",
+    },
+  ],
   "ignore_unavailable": true,
   "index": Array [
     "test_indices*",
   ],
+  "query": Object {
+    "bool": Object {
+      "filter": Array [
+        Object {
+          "bool": Object {
+            "filter": Array [
+              Object {
+                "match_all": Object {},
+              },
+              Object {
+                "match_phrase": Object {
+                  "user.name": Object {
+                    "query": "test_user",
+                  },
+                },
+              },
+            ],
+            "must": Array [],
+            "must_not": Array [],
+            "should": Array [],
+          },
+        },
+        Object {
+          "range": Object {
+            "@timestamp": Object {
+              "format": "strict_date_optional_time",
+              "gte": "2020-09-02T15:17:13.678Z",
+              "lte": "2020-09-03T15:17:13.678Z",
+            },
+          },
+        },
+      ],
+    },
+  },
+  "size": 0,
   "track_total_hits": false,
 }
 `;

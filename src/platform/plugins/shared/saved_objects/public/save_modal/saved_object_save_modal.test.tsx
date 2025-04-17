@@ -7,71 +7,100 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { shallowWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
 import { SavedObjectSaveModal } from './saved_object_save_modal';
 
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@kbn/i18n-react';
+import { EuiProvider } from '@elastic/eui';
+
+jest.mock('@elastic/eui', () => {
+  const actualEui = jest.requireActual('@elastic/eui');
+  return {
+    ...actualEui,
+    withEuiTheme: (Component: any) => (props: any) =>
+      (
+        <Component
+          {...props}
+          theme={{
+            euiTheme: {
+              size: { xxl: '32px' },
+            },
+          }}
+        />
+      ),
+  };
+});
 
 describe('SavedObjectSaveModal', () => {
-  it('should render matching snapshot', () => {
-    const wrapper = shallowWithIntl(
-      <SavedObjectSaveModal
-        onSave={() => void 0}
-        onClose={() => void 0}
-        title={'Saved Object title'}
-        showCopyOnSave={false}
-        objectType="visualization"
-        showDescription={true}
-      />
+  it('should render', async () => {
+    const { findByTestId, getByText } = render(
+      <I18nProvider>
+        <SavedObjectSaveModal
+          onSave={() => void 0}
+          onClose={() => void 0}
+          title={'Saved Object title'}
+          showCopyOnSave={false}
+          objectType="visualization"
+          showDescription={true}
+        />
+      </I18nProvider>
     );
-    expect(wrapper).toMatchSnapshot();
+    const modal = await findByTestId('savedObjectSaveModal');
+    expect(modal).toBeVisible();
+    expect(getByText('Save visualization')).toBeInTheDocument();
   });
 
-  it('should render matching snapshot when given options', () => {
-    const wrapper = shallowWithIntl(
-      <SavedObjectSaveModal
-        onSave={() => void 0}
-        onClose={() => void 0}
-        title={'Saved Object title'}
-        showCopyOnSave={false}
-        objectType="visualization"
-        showDescription={true}
-        options={<div>Hello! Main options</div>}
-        rightOptions={<div>Hey there! Options on the right</div>}
-      />
+  it('should render when given options', () => {
+    const { getByText } = render(
+      <I18nProvider>
+        <SavedObjectSaveModal
+          onSave={() => void 0}
+          onClose={() => void 0}
+          title={'Saved Object title'}
+          showCopyOnSave={false}
+          objectType="visualization"
+          showDescription={true}
+          options={<div>Hello! Main options</div>}
+          rightOptions={<div>Hey there! Options on the right</div>}
+        />
+      </I18nProvider>
     );
-    expect(wrapper).toMatchSnapshot();
+    expect(getByText('Hello! Main options')).toBeInTheDocument();
+    expect(getByText('Hey there! Options on the right')).toBeInTheDocument();
   });
 
-  it('should render matching snapshot when custom isValid is set', () => {
-    const falseWrapper = shallowWithIntl(
-      <SavedObjectSaveModal
-        onSave={() => void 0}
-        onClose={() => void 0}
-        title={'Saved Object title'}
-        showCopyOnSave={false}
-        objectType="visualization"
-        showDescription={true}
-        isValid={false}
-      />
+  it('should render when custom isValid is set', () => {
+    const { getByText, rerender } = render(
+      <I18nProvider>
+        <SavedObjectSaveModal
+          onSave={() => void 0}
+          onClose={() => void 0}
+          title={'Saved Object title'}
+          showCopyOnSave={false}
+          objectType="visualization"
+          showDescription={true}
+          isValid={false}
+        />
+      </I18nProvider>
     );
-    expect(falseWrapper).toMatchSnapshot();
+    expect(getByText('Save visualization')).toBeInTheDocument();
 
-    const trueWrapper = shallowWithIntl(
-      <SavedObjectSaveModal
-        onSave={() => void 0}
-        onClose={() => void 0}
-        title={'Saved Object title'}
-        showCopyOnSave={false}
-        objectType="visualization"
-        showDescription={true}
-        isValid={true}
-      />
+    rerender(
+      <I18nProvider>
+        <SavedObjectSaveModal
+          onSave={() => void 0}
+          onClose={() => void 0}
+          title={'Saved Object title'}
+          showCopyOnSave={false}
+          objectType="visualization"
+          showDescription={true}
+          isValid={true}
+        />
+      </I18nProvider>
     );
-    expect(trueWrapper).toMatchSnapshot();
+    expect(getByText('Save visualization')).toBeInTheDocument();
   });
 
   it('allows specifying custom save button label', () => {
@@ -98,17 +127,19 @@ describe('SavedObjectSaveModal', () => {
     const onSave = jest.fn();
 
     render(
-      <I18nProvider>
-        <SavedObjectSaveModal
-          onSave={onSave}
-          onClose={() => void 0}
-          title={'Saved Object title'}
-          objectType="visualization"
-          showDescription={true}
-          showCopyOnSave={true}
-          mustCopyOnSaveMessage="You must save a copy of the object."
-        />
-      </I18nProvider>
+      <EuiProvider>
+        <I18nProvider>
+          <SavedObjectSaveModal
+            onSave={onSave}
+            onClose={() => void 0}
+            title={'Saved Object title'}
+            objectType="visualization"
+            showDescription={true}
+            showCopyOnSave={true}
+            mustCopyOnSaveMessage="You must save a copy of the object."
+          />
+        </I18nProvider>
+      </EuiProvider>
     );
 
     expect(onSave).not.toHaveBeenCalled();

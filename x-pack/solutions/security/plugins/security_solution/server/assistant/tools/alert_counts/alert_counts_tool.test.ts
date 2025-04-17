@@ -184,21 +184,6 @@ describe('AlertCountsTool', () => {
       expect(result).toContain('Citation: {reference(exampleContentReferenceId)}');
     });
 
-    it('does not include citations when contentReferencesStore is false', async () => {
-      const tool: DynamicTool = ALERT_COUNTS_TOOL.getTool({
-        alertsIndexPattern,
-        esClient,
-        replacements,
-        request,
-        ...rest,
-        contentReferencesStore: undefined,
-      }) as DynamicTool;
-
-      const result = await tool.func('');
-
-      expect(result).not.toContain('Citation:');
-    });
-
     it('returns null when the alertsIndexPattern is undefined', () => {
       const tool = ALERT_COUNTS_TOOL.getTool({
         // alertsIndexPattern is undefined

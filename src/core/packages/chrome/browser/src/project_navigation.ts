@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ComponentType, MouseEventHandler, ReactNode } from 'react';
+import type { ComponentType, MouseEventHandler } from 'react';
 import type { Location } from 'history';
 import type { EuiSideNavItemType, EuiThemeSizes, IconType } from '@elastic/eui';
 import type { Observable } from 'rxjs';
@@ -36,11 +36,12 @@ import type {
 import type { AppId as SecurityApp, DeepLinkId as SecurityLink } from '@kbn/deeplinks-security';
 import type { AppId as FleetApp, DeepLinkId as FleetLink } from '@kbn/deeplinks-fleet';
 import type { AppId as SharedApp, DeepLinkId as SharedLink } from '@kbn/deeplinks-shared';
+import type { WorkchatApp, DeepLinkId as ChatLink } from '@kbn/deeplinks-chat';
 
 import type { ChromeNavLink } from './nav_links';
 import type { ChromeRecentlyAccessedHistoryItem } from './recently_accessed';
 
-export type SolutionId = 'es' | 'oblt' | 'security';
+export type SolutionId = 'es' | 'oblt' | 'security' | 'chat';
 
 /** @public */
 export type AppId =
@@ -56,7 +57,8 @@ export type AppId =
   | ObservabilityApp
   | SecurityApp
   | FleetApp
-  | SharedApp;
+  | SharedApp
+  | WorkchatApp;
 
 /** @public */
 export type AppDeepLinkId =
@@ -68,7 +70,8 @@ export type AppDeepLinkId =
   | ObservabilityLink
   | SecurityLink
   | FleetLink
-  | SharedLink;
+  | SharedLink
+  | ChatLink;
 
 /** @public */
 export type CloudLinkId =
@@ -197,16 +200,17 @@ interface NodeDefinitionBase {
    */
   openInNewTab?: boolean;
   /**
-   * ["item" nodes only] Optional flag to indicate if a badge should be rendered next to the text.
-   * Note: this property is currently only used in the navigation panel opening on the right of the side nav.
+   * ["subitem" nodes only] Optional flag to indicate if a badge should be rendered next to the text.
    */
   withBadge?: boolean;
   /**
-   * ["item" nodes only] If `withBadge` is true, this object can be used to customize the badge.
+   * ["subitem" nodes only] If `withBadge` is true, this object can be used to customize the badge.
    */
   badgeOptions?: {
-    /** The text of the badge. Default: "Beta" */
-    text?: string;
+    /** The text of the badge. Default: "Beaker" */
+    icon?: string;
+    /** Text shown on tooltip attached to the badge. */
+    tooltip?: string;
   };
 }
 
@@ -223,7 +227,7 @@ export interface ChromeProjectNavigationNode extends NodeDefinitionBase {
   /** Optional id, if not passed a "link" must be provided. */
   id: string;
   /** Optional title. If not provided and a "link" is provided the title will be the Deep link title */
-  title: string;
+  title?: string;
   /** Path in the tree of the node */
   path: string;
   /** App id or deeplink id */
@@ -241,15 +245,13 @@ export interface ChromeProjectNavigationNode extends NodeDefinitionBase {
   /**
    * Flag to indicate if the node is an "external" cloud link
    */
-  isElasticInternalLink?: boolean;
+  isExternalLink?: boolean;
 }
 
 export type PanelSelectedNode = Pick<
   ChromeProjectNavigationNode,
-  'id' | 'children' | 'path' | 'sideNavStatus' | 'deepLink'
-> & {
-  title: string | ReactNode;
-};
+  'id' | 'children' | 'path' | 'sideNavStatus' | 'deepLink' | 'title'
+>;
 
 /** @public */
 export interface SideNavCompProps {

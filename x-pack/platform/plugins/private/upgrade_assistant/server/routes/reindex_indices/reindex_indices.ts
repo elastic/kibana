@@ -91,6 +91,12 @@ export function registerReindexIndicesRoutes(
         access: 'public',
         summary: `Get reindex status`,
       },
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Relies on es and saved object clients for authorization',
+        },
+      },
       validate: {
         params: schema.object({
           indexName: schema.string(),
@@ -119,7 +125,8 @@ export function registerReindexIndicesRoutes(
           ? await reindexService.detectReindexWarnings(indexName)
           : [];
 
-        const indexAliases = await reindexService.getIndexAliases(indexName);
+        const isTruthy = (value?: string | boolean): boolean => value === true || value === 'true';
+        const { aliases, settings, isInDataStream } = await reindexService.getIndexInfo(indexName);
 
         const body: ReindexStatusResponse = {
           reindexOp: reindexOp ? reindexOp.attributes : undefined,
@@ -128,7 +135,10 @@ export function registerReindexIndicesRoutes(
           meta: {
             indexName,
             reindexName: generateNewIndexName(indexName),
-            aliases: Object.keys(indexAliases),
+            aliases: Object.keys(aliases),
+            isFrozen: isTruthy(settings?.frozen),
+            isReadonly: isTruthy(settings?.verified_read_only),
+            isInDataStream,
           },
         };
 
@@ -151,6 +161,12 @@ export function registerReindexIndicesRoutes(
       options: {
         access: 'public',
         summary: `Cancel reindex`,
+      },
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Relies on es and saved object clients for authorization',
+        },
       },
       validate: {
         params: schema.object({

@@ -11,7 +11,7 @@ import type {
   RuleExecutorServices,
 } from '@kbn/alerting-plugin/server';
 import type { DataViewAttributes } from '@kbn/data-views-plugin/common';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import type { Logger } from '@kbn/core/server';
 
 import { DEFAULT_INDEX_KEY, DEFAULT_INDEX_PATTERN } from '../../../../../common/constants';
@@ -47,15 +47,10 @@ export const getInputIndex = async ({
   // If data views defined, use it
   if (dataViewId != null && dataViewId !== '') {
     // Check to see that the selected dataView exists
-    let dataView;
-    try {
-      dataView = await services.savedObjectsClient.get<DataViewAttributes>(
-        'index-pattern',
-        dataViewId
-      );
-    } catch (exc) {
-      throw new DataViewError(exc.message);
-    }
+    const dataView = await services.savedObjectsClient.get<DataViewAttributes>(
+      'index-pattern',
+      dataViewId
+    );
     const indices = dataView.attributes.title.split(',');
     const runtimeMappings =
       dataView.attributes.runtimeFieldMap != null

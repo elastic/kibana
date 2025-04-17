@@ -8,9 +8,9 @@
 import expect from '@kbn/expect';
 
 import { CASES_URL } from '@kbn/cases-plugin/common/constants';
-import { UserCommentAttachmentAttributes } from '@kbn/cases-plugin/common/types/domain';
+import type { UserCommentAttachmentAttributes } from '@kbn/cases-plugin/common/types/domain';
 import { getAllComments } from '../../../../common/lib/api/attachments';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
   postCaseReq,
   getCaseWithoutCommentsResp,

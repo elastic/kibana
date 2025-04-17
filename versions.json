@@ -8,33 +8,28 @@
       "currentMinor": true
     },
     {
-      "version": "9.0.0",
+      "version": "9.0.1",
       "branch": "9.0",
       "currentMajor": true,
       "previousMinor": true
     },
     {
       "version": "8.19.0",
-      "branch": "8.x",
+      "branch": "8.19",
       "previousMajor": true
     },
     {
-      "version": "8.18.0",
+      "version": "8.18.1",
       "branch": "8.18",
       "previousMajor": true
     },
     {
-      "version": "8.17.2",
+      "version": "8.17.6",
       "branch": "8.17",
       "previousMajor": true
     },
     {
-      "version": "8.16.4",
-      "branch": "8.16",
-      "previousMajor": true
-    },
-    {
-      "version": "7.17.28",
+      "version": "7.17.29",
       "branch": "7.17"
     }
   ]

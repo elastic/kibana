@@ -30,28 +30,24 @@ export const deleteList = async ({
     return null;
   } else {
     await esClient.deleteByQuery({
-      body: {
-        query: {
-          term: {
-            list_id: id,
-          },
-        },
-      },
       conflicts: 'proceed',
       index: listItemIndex,
+      query: {
+        term: {
+          list_id: id,
+        },
+      },
       refresh: false,
     });
 
     const response = await esClient.deleteByQuery({
-      body: {
-        query: {
-          ids: {
-            values: [id],
-          },
-        },
-      },
       conflicts: 'proceed',
       index: listIndex,
+      query: {
+        ids: {
+          values: [id],
+        },
+      },
       refresh: false,
     });
 

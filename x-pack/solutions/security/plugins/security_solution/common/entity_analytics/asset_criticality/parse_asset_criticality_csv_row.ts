@@ -7,16 +7,15 @@
 import { i18n } from '@kbn/i18n';
 import type { CriticalityLevels } from './constants';
 import { ValidCriticalityLevels } from './constants';
-import { type AssetCriticalityUpsert, type CriticalityLevel } from './types';
+import { type AssetCriticalityUpsertForBulkUpload, type CriticalityLevel } from './types';
 import { EntityTypeToIdentifierField, type EntityType } from '../types';
-import { getAssetCriticalityEntityTypes } from './utils';
-import type { ExperimentalFeatures } from '../../experimental_features';
+import { getEntityAnalyticsEntityTypes } from '../utils';
 
 const MAX_COLUMN_CHARS = 1000;
 
 interface ValidRecord {
   valid: true;
-  record: AssetCriticalityUpsert;
+  record: AssetCriticalityUpsertForBulkUpload;
 }
 interface InvalidRecord {
   valid: false;
@@ -40,10 +39,7 @@ const trimColumn = (column: string): string => {
   return column.length > MAX_COLUMN_CHARS ? `${column.substring(0, MAX_COLUMN_CHARS)}...` : column;
 };
 
-export const parseAssetCriticalityCsvRow = (
-  row: string[],
-  experimentalFeatures: ExperimentalFeatures
-): ReturnType => {
+export const parseAssetCriticalityCsvRow = (row: string[]): ReturnType => {
   if (row.length !== 3) {
     return validationErrorWithMessage(
       i18n.translate('xpack.securitySolution.assetCriticality.csvUpload.expectedColumnsError', {
@@ -104,7 +100,7 @@ export const parseAssetCriticalityCsvRow = (
     );
   }
 
-  const enabledEntityTypes = getAssetCriticalityEntityTypes(experimentalFeatures);
+  const enabledEntityTypes = getEntityAnalyticsEntityTypes();
   if (!enabledEntityTypes.includes(entityType as EntityType)) {
     return validationErrorWithMessage(
       i18n.translate('xpack.securitySolution.assetCriticality.csvUpload.invalidEntityTypeError', {

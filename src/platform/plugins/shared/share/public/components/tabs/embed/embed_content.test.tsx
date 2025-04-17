@@ -7,46 +7,81 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { mountWithIntl } from '@kbn/test-jest-helpers';
+import React, { type ComponentProps } from 'react';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import userEvent from '@testing-library/user-event';
+import { render, screen, waitFor } from '@testing-library/react';
 import { EmbedContent } from './embed_content';
-import React from 'react';
-import { ReactWrapper } from 'enzyme';
+import type { BrowserUrlService } from '../../../types';
+import { urlServiceTestSetup } from '../../../../common/url_service/__tests__/setup';
+
+let urlService: BrowserUrlService;
+
+// @ts-expect-error there is a type error because we override the shortUrls implementation
+// eslint-disable-next-line prefer-const
+({ service: urlService } = urlServiceTestSetup());
+
+const defaultProps: Pick<
+  ComponentProps<typeof EmbedContent>,
+  'allowShortUrl' | 'isDirty' | 'shareableUrl' | 'urlService' | 'objectType'
+> = {
+  isDirty: false,
+  objectType: 'dashboard',
+  shareableUrl: '/home#/',
+  urlService,
+  allowShortUrl: false,
+};
+
+const renderComponent = (props: ComponentProps<typeof EmbedContent>) => {
+  return render(
+    <IntlProvider locale="en">
+      <EmbedContent {...props} />
+    </IntlProvider>
+  );
+};
 
 describe('Share modal embed content tab', () => {
   describe('share url embedded', () => {
-    let component: ReactWrapper;
-
-    beforeEach(() => {
-      component = mountWithIntl(
-        <EmbedContent isDirty={false} objectType="dashboard" shareableUrl="/home#/" />
-      );
+    beforeAll(() => {
+      Object.defineProperty(document, 'execCommand', {
+        value: jest.fn(() => true),
+      });
     });
 
     it('works for simple url', async () => {
-      component.setProps({ shareableUrl: 'http://localhost:5601/app/home#/' });
-      component.update();
+      const user = userEvent.setup();
 
-      const shareUrl = component
-        .find('button[data-test-subj="copyEmbedUrlButton"]')
-        .prop('data-share-url');
-      expect(shareUrl).toBe(
-        '<iframe src="http://localhost:5601/app/home#/?embed=true&_g=" height="600" width="800"></iframe>'
-      );
+      renderComponent({ ...defaultProps, shareableUrl: 'http://localhost:5601/app/home#/' });
+
+      const copyButton = screen.getByTestId('copyEmbedUrlButton');
+
+      await user.click(copyButton);
+
+      await waitFor(() => {
+        expect(copyButton.getAttribute('data-share-url')).toBe(
+          '<iframe src="http://localhost:5601/app/home#/?embed=true&_g=" height="600" width="800"></iframe>'
+        );
+      });
     });
 
     it('works if the url has a query string', async () => {
-      component.setProps({
+      const user = userEvent.setup();
+
+      renderComponent({
+        ...defaultProps,
         shareableUrl:
           'http://localhost:5601/app/dashboards#/create?_g=(refreshInterval%3A(pause%3A!t%2Cvalue%3A60000)%2Ctime%3A(from%3Anow-15m%2Cto%3Anow))',
       });
-      component.update();
 
-      const shareUrl = component
-        .find('button[data-test-subj="copyEmbedUrlButton"]')
-        .prop('data-share-url');
-      expect(shareUrl).toBe(
-        '<iframe src="http://localhost:5601/app/dashboards#/create?embed=true&_g=(refreshInterval%3A(pause%3A!t%2Cvalue%3A60000)%2Ctime%3A(from%3Anow-15m%2Cto%3Anow))" height="600" width="800"></iframe>'
-      );
+      const copyButton = screen.getByTestId('copyEmbedUrlButton');
+
+      await user.click(copyButton);
+
+      await waitFor(() => {
+        expect(copyButton.getAttribute('data-share-url')).toBe(
+          '<iframe src="http://localhost:5601/app/dashboards#/create?embed=true&_g=(refreshInterval%3A(pause%3A!t%2Cvalue%3A60000)%2Ctime%3A(from%3Anow-15m%2Cto%3Anow))" height="600" width="800"></iframe>'
+        );
+      });
     });
   });
 });

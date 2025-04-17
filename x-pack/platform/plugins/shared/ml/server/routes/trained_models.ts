@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import { schema } from '@kbn/config-schema';
 import type { ErrorType } from '@kbn/ml-error-utils';
@@ -74,17 +74,20 @@ export function trainedModelsRoutes(
         version: '1',
         validate: false,
       },
-      routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, request, response }) => {
-        try {
-          const modelsClient = modelsProvider(client, mlClient, cloud, getEnabledFeatures());
-          const models = await modelsClient.getTrainedModelList();
-          return response.ok({
-            body: models,
-          });
-        } catch (e) {
-          return response.customError(wrapError(e));
+      routeGuard.fullLicenseAPIGuard(
+        async ({ client, mlClient, request, response, mlSavedObjectService }) => {
+          try {
+            const modelsClient = modelsProvider(client, mlClient, cloud, getEnabledFeatures());
+            const models = await modelsClient.getTrainedModelList(mlSavedObjectService);
+
+            return response.ok({
+              body: models,
+            });
+          } catch (e) {
+            return response.customError(wrapError(e));
+          }
         }
-      })
+      )
     );
 
   router.versioned
@@ -610,12 +613,10 @@ export function trainedModelsRoutes(
           const body = await mlClient.inferTrainedModel({
             model_id: modelId,
             deployment_id: deploymentId,
-            body: {
-              docs: request.body.docs,
-              ...(request.body.inference_config
-                ? { inference_config: request.body.inference_config }
-                : {}),
-            },
+            docs: request.body.docs,
+            ...(request.body.inference_config
+              ? { inference_config: request.body.inference_config }
+              : {}),
             ...(request.query.timeout ? { timeout: request.query.timeout } : {}),
           });
           return response.ok({

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RuleTypeParams } from '@kbn/alerting-plugin/common';
+import type { RuleTypeParams } from '@kbn/alerting-plugin/common';
 
 export interface Comparator {
   text: string;

@@ -6,6 +6,7 @@
  */
 
 import { FtrConfigProviderContext } from '@kbn/test';
+import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
 import { resolve } from 'path';
 import { pageObjects } from './page_objects';
 import { services } from './services';
@@ -20,6 +21,7 @@ export function createTestConfig<TServices extends {} = typeof services>(
     return {
       ...svlSharedConfig.getAll(),
 
+      testConfigCategory: ScoutTestRunConfigCategory.UI_TEST,
       pageObjects,
       services: { ...services, ...options.services },
       esTestCluster: {
@@ -38,11 +40,6 @@ export function createTestConfig<TServices extends {} = typeof services>(
         serverArgs: [
           ...svlSharedConfig.get('kbnTestServer.serverArgs'),
           `--serverless=${options.serverlessProject}`,
-          // Ensures the existing E2E tests are backwards compatible with the old rule create flyout
-          // Remove this experiment once all of the migration has been completed
-          `--xpack.trigger_actions_ui.enableExperimental=${JSON.stringify([
-            'isUsingRuleCreateFlyout',
-          ])}`,
           ...(options.kbnServerArgs ?? []),
         ],
       },

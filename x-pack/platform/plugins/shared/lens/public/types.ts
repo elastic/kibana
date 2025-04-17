@@ -38,7 +38,7 @@ import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { FieldFormatParams } from '@kbn/field-formats-plugin/common';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import type { EuiButtonIconProps } from '@elastic/eui';
-import { estypes } from '@elastic/elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 import React from 'react';
 import { CellValueContext } from '@kbn/embeddable-plugin/public';
 import { EventAnnotationGroupConfig } from '@kbn/event-annotation-common';
@@ -480,7 +480,7 @@ export interface Datasource<T = unknown, P = unknown, Q = Query | AggregateQuery
     state: T,
     deps: {
       frame: FramePublicAPI;
-      setState: StateSetter<T>;
+      setState?: StateSetter<T>;
       visualizationInfo?: VisualizationInfo;
     }
   ) => UserMessage[];
@@ -532,6 +532,7 @@ export interface Datasource<T = unknown, P = unknown, Q = Query | AggregateQuery
 
 export interface DatasourceFixAction<T> {
   label: string;
+  isCompatible?: (frame: FramePublicAPI) => boolean;
   newState: (frame: FramePublicAPI) => Promise<T>;
 }
 
@@ -764,6 +765,8 @@ export interface OperationMetadata {
   // document and an aggregated metric which might be handy in some cases. Once we
   // introduce a raw document datasource, this should be considered here.
   isStaticValue?: boolean;
+  // Extra metadata to infer array support in an operation
+  hasArraySupport?: boolean;
 }
 
 /**

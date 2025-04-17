@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import React, { Suspense, useState } from 'react';
+import React, { useState } from 'react';
 import { CasesPermissions } from '@kbn/cases-plugin/common';
+import AlertsFlyout from '../../../components/alerts_flyout/alerts_flyout';
 import { observabilityFeatureId } from '../../../../common';
 import { useKibana } from '../../../utils/kibana_react';
 import { usePluginContext } from '../../../hooks/use_plugin_context';
 import { useFetchAlertDetail } from '../../../hooks/use_fetch_alert_detail';
 import { useFetchAlertData } from '../../../hooks/use_fetch_alert_data';
-import { LazyAlertsFlyout } from '../../..';
+import { ObservabilityAlertsTable } from '../../..';
 import { CASES_PATH, paths } from '../../../../common/locators/paths';
 
 export interface CasesProps {
@@ -63,17 +64,15 @@ export function Cases({ permissions }: CasesProps) {
         }}
         showAlertDetails={handleShowAlertDetails}
         useFetchAlertData={useFetchAlertData}
+        renderAlertsTable={(props) => <ObservabilityAlertsTable {...props} />}
       />
 
       {alertDetail && selectedAlertId !== '' && !alertLoading ? (
-        <Suspense fallback={null}>
-          <LazyAlertsFlyout
-            alert={alertDetail.formatted}
-            rawAlert={alertDetail.raw}
-            observabilityRuleTypeRegistry={observabilityRuleTypeRegistry}
-            onClose={handleFlyoutClose}
-          />
-        </Suspense>
+        <AlertsFlyout
+          alert={alertDetail.raw}
+          observabilityRuleTypeRegistry={observabilityRuleTypeRegistry}
+          onClose={handleFlyoutClose}
+        />
       ) : null}
     </>
   );

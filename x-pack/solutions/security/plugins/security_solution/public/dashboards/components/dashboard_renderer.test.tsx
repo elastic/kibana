@@ -6,15 +6,14 @@
  */
 import { render } from '@testing-library/react';
 import React from 'react';
-import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { DashboardRenderer as DashboardContainerRenderer } from '@kbn/dashboard-plugin/public';
 
 import { TestProviders } from '../../common/mock';
 import { DashboardRenderer } from './dashboard_renderer';
 
 jest.mock('@kbn/dashboard-plugin/public', () => ({
-  DashboardRenderer: jest.fn().mockReturnValue(<div data-test-subj="dashboardRenderer" />),
-  DashboardTopNav: jest.fn().mockReturnValue(<span data-test-subj="dashboardTopNav" />),
+  DashboardRenderer: jest.fn(() => <div data-test-subj="dashboardRenderer" />),
+  DashboardTopNav: jest.fn(() => <span data-test-subj="dashboardTopNav" />),
 }));
 
 jest.mock('react-router-dom', () => {
@@ -57,7 +56,7 @@ describe('DashboardRenderer', () => {
     expect(input).toEqual(
       expect.objectContaining({
         timeRange: props.timeRange,
-        viewMode: ViewMode.VIEW,
+        viewMode: 'view',
         query: undefined,
         filters: undefined,
       })

@@ -98,19 +98,17 @@ export async function getTableData(
     const searches: EsSearchRequest[] = [
       {
         index: panelIndex.indexPatternString,
-        body: {
-          ...(await buildTableRequest({
-            req,
-            panel,
-            esQueryConfig: services.esQueryConfig,
-            seriesIndex: panelIndex,
-            capabilities,
-            uiSettings: services.uiSettings,
-            buildSeriesMetaParams: () =>
-              services.buildSeriesMetaParams(panelIndex, Boolean(panel.use_kibana_indexes)),
-          })),
-          runtime_mappings: panelIndex.indexPattern?.getComputedFields().runtimeFields ?? {},
-        },
+        ...(await buildTableRequest({
+          req,
+          panel,
+          esQueryConfig: services.esQueryConfig,
+          seriesIndex: panelIndex,
+          capabilities,
+          uiSettings: services.uiSettings,
+          buildSeriesMetaParams: () =>
+            services.buildSeriesMetaParams(panelIndex, Boolean(panel.use_kibana_indexes)),
+        })),
+        runtime_mappings: panelIndex.indexPattern?.getComputedFields().runtimeFields ?? {},
         trackingEsSearchMeta: {
           requestId: panel.id,
           requestLabel: i18n.translate('visTypeTimeseries.tableRequest.label', {

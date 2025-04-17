@@ -4,7 +4,7 @@ Documentation about Security Solution OpenAPI bundling workflow and configuratio
 
 ## Workflow
 
-Security Solution uses **specification first approach**. It means we define OpenAPI spec files describing individual API endpoints (also known as source OpenAPI specs) at first. After that we use tooling in particular [`kbn-openapi-bundler`](../../../../../../../packages/kbn-openapi-bundler/README.md) to process source OpenAPI specs to produce domain OpenAPI bundles.
+Security Solution uses **specification first approach**. It means we define OpenAPI spec files describing individual API endpoints (also known as source OpenAPI specs) at first. After that we use tooling in particular [`kbn-openapi-bundler`](../../../../../../../src/platform/packages/shared/kbn-openapi-bundler/README.md) to process source OpenAPI specs to produce domain OpenAPI bundles.
 
 The workflow consists of multiple steps and visualized below
 

@@ -20,14 +20,12 @@ function getSearchRequest(filters: estypes.QueryDslQueryContainer[]): APMEventES
     apm: {
       events: [ProcessorEvent.metric, ProcessorEvent.transaction],
     },
-    body: {
-      track_total_hits: false,
-      terminate_after: 1,
-      size: 1,
-      query: {
-        bool: {
-          filter: filters,
-        },
+    track_total_hits: false,
+    terminate_after: 1,
+    size: 1,
+    query: {
+      bool: {
+        filter: filters,
       },
     },
   };

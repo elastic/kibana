@@ -11,19 +11,6 @@ export const ASSETS_TITLE = i18n.translate('xpack.securitySolution.navLinks.asse
   defaultMessage: 'Assets',
 });
 
-export const CLOUD_DEFEND_TITLE = i18n.translate(
-  'xpack.securitySolution.navLinks.assets.cloud_defend.title',
-  {
-    defaultMessage: 'Cloud',
-  }
-);
-export const CLOUD_DEFEND_DESCRIPTION = i18n.translate(
-  'xpack.securitySolution.navLinks.assets.cloud_defend.description',
-  {
-    defaultMessage: 'Cloud hosts running Elastic Defend',
-  }
-);
-
 export const FLEET_TITLE = i18n.translate('xpack.securitySolution.navLinks.assets.fleet.title', {
   defaultMessage: 'Fleet',
 });

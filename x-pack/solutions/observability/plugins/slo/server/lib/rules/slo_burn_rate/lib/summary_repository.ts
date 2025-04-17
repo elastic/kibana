@@ -18,18 +18,16 @@ export async function getSloSummary(
   try {
     const res = await esClient.search<EsSummaryDocument>({
       index: SUMMARY_DESTINATION_INDEX_PATTERN,
-      body: {
-        query: {
-          bool: {
-            filter: [
-              { term: { 'slo.id': slo.id } },
-              { term: { 'slo.revision': slo.revision } },
-              { term: { 'slo.instanceId': instanceId } },
-            ],
-          },
+      query: {
+        bool: {
+          filter: [
+            { term: { 'slo.id': slo.id } },
+            { term: { 'slo.revision': slo.revision } },
+            { term: { 'slo.instanceId': instanceId } },
+          ],
         },
-        size: 1,
       },
+      size: 1,
     });
 
     if (res.hits.hits.length === 0) {

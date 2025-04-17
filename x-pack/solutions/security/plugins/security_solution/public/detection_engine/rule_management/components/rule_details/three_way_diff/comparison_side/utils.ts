@@ -60,21 +60,13 @@ interface OptionDetails {
 /**
  * Returns the title and description for a given versions picker option.
  */
-export function getOptionDetails(
-  option: VersionsPickerOptionEnum,
-  hasResolvedValueDifferentFromSuggested: boolean
-): OptionDetails {
+export function getOptionDetails(option: VersionsPickerOptionEnum): OptionDetails {
   switch (option) {
     case VersionsPickerOptionEnum.MyChanges:
-      return hasResolvedValueDifferentFromSuggested
-        ? {
-            title: i18n.MY_CHANGES_TITLE,
-            description: i18n.MY_CHANGES_IN_RULE_UPGRADE_WORKFLOW_EXPLANATION,
-          }
-        : {
-            title: i18n.MY_CHANGES_TITLE,
-            description: i18n.MY_CHANGES_EXPLANATION,
-          };
+      return {
+        title: i18n.MY_CHANGES_AND_FINAL_UPDATES_TITLE,
+        description: i18n.MY_CHANGES_AND_FINAL_UPDATES_EXPLANATION,
+      };
     case VersionsPickerOptionEnum.MyOriginalChanges:
       return {
         title: i18n.MY_ORIGINAL_CHANGES_TITLE,
@@ -110,7 +102,7 @@ export function getVersionsForComparison(
     case VersionsPickerOptionEnum.UpdateFromElastic:
       return hasBaseVersion ? [Version.Base, Version.Target] : [Version.Current, Version.Target];
     case VersionsPickerOptionEnum.Merged:
-      return [Version.Base, Version.Target];
+      return [Version.Base, Version.Final];
     default:
       return assertUnreachable(selectedOption);
   }

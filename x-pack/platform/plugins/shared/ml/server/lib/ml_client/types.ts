@@ -9,7 +9,7 @@ import type {
   TransportRequestOptionsWithMeta,
   TransportRequestOptions,
 } from '@elastic/elasticsearch';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { searchProvider } from './search';
 

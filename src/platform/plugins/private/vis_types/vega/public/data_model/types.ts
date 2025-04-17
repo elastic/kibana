@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import { Assign } from '@kbn/utility-types';
 import { Spec } from 'vega';
 import { EsQueryParser } from './es_query_parser';

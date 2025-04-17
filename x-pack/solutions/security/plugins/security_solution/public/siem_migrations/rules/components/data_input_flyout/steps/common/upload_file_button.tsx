@@ -16,7 +16,7 @@ export const DATA_INPUT_FILE_UPLOAD_BUTTON = i18n.translate(
 
 export const UploadFileButton = React.memo<PropsForButton<EuiButtonProps>>((props) => {
   return (
-    <EuiButton color="success" {...props}>
+    <EuiButton data-test-subj="uploadFileButton" color="success" {...props}>
       {DATA_INPUT_FILE_UPLOAD_BUTTON}
     </EuiButton>
   );

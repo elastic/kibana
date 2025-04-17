@@ -73,9 +73,12 @@ export async function reassignAgent(
     );
   }
 
+  const newAgentPolicy = await agentPolicyService.get(soClient, newAgentPolicyId);
+
   await updateAgent(esClient, agentId, {
     policy_id: newAgentPolicyId,
     policy_revision: null,
+    ...(newAgentPolicy?.space_ids ? { namespaces: newAgentPolicy.space_ids } : {}),
   });
 
   const currentSpaceId = getCurrentNamespace(soClient);

@@ -141,6 +141,23 @@
           },
           {
             "parentPluginId": "dataViewEditor",
+            "id": "def-public.DataViewEditorService.rollupCaps$",
+            "type": "Object",
+            "tags": [],
+            "label": "rollupCaps$",
+            "description": [],
+            "signature": [
+              "Observable",
+              "<",
+              "RollupIndiciesCapability",
+              " | undefined>"
+            ],
+            "path": "src/platform/plugins/shared/data_view_editor/public/data_view_editor_service.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "dataViewEditor",
             "id": "def-public.DataViewEditorService.matchedIndices$",
             "type": "Object",
             "tags": [],

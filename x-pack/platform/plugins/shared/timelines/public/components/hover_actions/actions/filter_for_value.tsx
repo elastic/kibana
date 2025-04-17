@@ -15,7 +15,7 @@ import { createFilter, getAdditionalScreenReaderOnlyContext } from '../utils';
 import { HoverActionComponentProps, FilterValueFnArgs } from './types';
 
 export const FILTER_FOR_VALUE = i18n.translate('xpack.timelines.hoverActions.filterIn', {
-  defaultMessage: 'Filter In',
+  defaultMessage: 'Filter for',
 });
 export const FILTER_FOR_VALUE_KEYBOARD_SHORTCUT = 'f';
 

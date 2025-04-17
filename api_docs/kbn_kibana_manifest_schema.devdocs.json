@@ -1003,12 +1003,12 @@
                   {
                     "parentPluginId": "@kbn/kibana-manifest-schema",
                     "id": "def-common.MANIFEST_V2.properties.group.enum",
-                    "type": "Array",
+                    "type": "Object",
                     "tags": [],
                     "label": "enum",
                     "description": [],
                     "signature": [
-                      "string[]"
+                      "readonly [\"platform\", \"observability\", \"security\", \"search\", \"chat\"]"
                     ],
                     "path": "packages/kbn-kibana-manifest-schema/src/kibana_json_v2_schema.ts",
                     "deprecated": false,

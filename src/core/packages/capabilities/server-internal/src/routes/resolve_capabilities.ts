@@ -17,8 +17,14 @@ export function registerCapabilitiesRoutes(router: IRouter, resolver: Capabiliti
   router.post(
     {
       path: '/api/core/capabilities',
-      options: {
-        authRequired: 'optional',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the Capabilities Resolver',
+        },
+        authc: {
+          enabled: 'optional',
+        },
       },
       validate: {
         query: schema.object({

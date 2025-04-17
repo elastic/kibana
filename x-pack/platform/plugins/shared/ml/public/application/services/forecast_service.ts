@@ -8,7 +8,7 @@
 // Service for carrying out requests to run ML forecasts and to obtain
 // data on forecasts that have been performed.
 import { useMemo } from 'react';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import { get, find, each } from 'lodash';
 import { map } from 'rxjs';
 import type { MlApi } from './ml_api_service';

@@ -6,14 +6,16 @@
  */
 
 import sinon from 'sinon';
-import { Client } from '@elastic/elasticsearch';
+import type { Client } from '@elastic/elasticsearch';
 import { elasticsearchServiceMock, savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
-import { SavedObjectsErrorHelpers, Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import { ADJUST_THROUGHPUT_INTERVAL } from '../lib/create_managed_configuration';
-import { TaskManagerPlugin, TaskManagerStartContract } from '../plugin';
+import type { TaskManagerStartContract } from '../plugin';
+import { TaskManagerPlugin } from '../plugin';
 import { coreMock } from '@kbn/core/server/mocks';
-import { TaskManagerConfig } from '../config';
+import type { TaskManagerConfig } from '../config';
 import { BulkUpdateError } from '../lib/bulk_update_error';
 
 const mockTaskTypeRunFn = jest.fn();
@@ -101,6 +103,12 @@ describe('managed configuration', () => {
     auto_calculate_default_ech_capacity: false,
   };
 
+  async function runSetTimeout0() {
+    const promiseResult = new Promise((resolve) => setTimeout(resolve, 0));
+    clock.tick(0);
+    await promiseResult;
+  }
+
   afterEach(() => clock.restore());
 
   describe('managed poll interval with default claim strategy', () => {
@@ -130,8 +138,10 @@ describe('managed configuration', () => {
       taskManagerStart = await taskManager.start(coreStart, {});
 
       // force rxjs timers to fire when they are scheduled for setTimeout(0) as the
-      // sinon fake timers cause them to stall
-      clock.tick(0);
+      // sinon fake timers cause them to stall. We need to do this a few times for the
+      // startup code to start monitoring the poll configuration properly.
+      await runSetTimeout0();
+      await runSetTimeout0();
     });
 
     test('should increase poll interval when Elasticsearch returns 429 error', async () => {
@@ -226,8 +236,10 @@ describe('managed configuration', () => {
       taskManagerStart = taskManager.start(coreStart, {});
 
       // force rxjs timers to fire when they are scheduled for setTimeout(0) as the
-      // sinon fake timers cause them to stall
-      clock.tick(0);
+      // sinon fake timers cause them to stall. We need to do this a few times for the
+      // startup code to start monitoring the poll configuration properly.
+      await runSetTimeout0();
+      await runSetTimeout0();
     });
 
     test('should increase poll interval when Elasticsearch returns 429 error', async () => {
@@ -326,8 +338,10 @@ describe('managed configuration', () => {
       taskManagerStart = await taskManager.start(coreStart, {});
 
       // force rxjs timers to fire when they are scheduled for setTimeout(0) as the
-      // sinon fake timers cause them to stall
-      clock.tick(0);
+      // sinon fake timers cause them to stall. We need to do this a few times for the
+      // startup code to start monitoring the poll configuration properly.
+      await runSetTimeout0();
+      await runSetTimeout0();
     });
 
     test('should lower capacity when Elasticsearch returns 429 error', async () => {

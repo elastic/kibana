@@ -9,5 +9,9 @@
 
 import { getFieldRowStory, getStory } from './common';
 
-export default getStory('Array Row', 'A setting with an array of values.');
+const Story = getStory('Array Row', 'A setting with an array of values.');
 export const ArrayRow = getFieldRowStory('array' as const);
+
+export default {
+  ...Story,
+};

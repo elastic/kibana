@@ -20,10 +20,9 @@ import type { Query } from '@kbn/es-query';
 import { SearchSessionInfoProvider } from '@kbn/data-plugin/public';
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { SEARCH_SESSION_ID } from '../../plugin_constants';
-import { DashboardLocatorParams } from '../../dashboard_container/types';
 import { convertPanelMapToPanelsArray } from '../../../common';
 import { dataService } from '../../services/kibana_services';
-import { DashboardApi } from '../../dashboard_api/types';
+import { DashboardApi, DashboardLocatorParams } from '../../dashboard_api/types';
 
 export const removeSearchSessionIdFromURL = (kbnUrlStateStorage: IKbnUrlStateStorage) => {
   kbnUrlStateStorage.kbnUrlControls.updateAsync((nextUrl) => {

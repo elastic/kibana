@@ -31,12 +31,14 @@ export default {
 
 const mock = new NoDataViewsPromptStorybookMock();
 
-export const CreateDataView = (params: NoDataViewsPromptStorybookParams) => {
-  return (
-    <NoDataViewsPromptProvider {...mock.getServices(params)}>
-      <Component {...mock.getProps()} />
-    </NoDataViewsPromptProvider>
-  );
-};
+export const CreateDataView = {
+  render: (params: NoDataViewsPromptStorybookParams) => {
+    return (
+      <NoDataViewsPromptProvider {...mock.getServices(params)}>
+        <Component {...mock.getProps()} />
+      </NoDataViewsPromptProvider>
+    );
+  },
 
-CreateDataView.argTypes = mock.getArgumentTypes();
+  argTypes: mock.getArgumentTypes(),
+};

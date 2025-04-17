@@ -44,6 +44,10 @@ export const epmRouteService = {
     return EPM_API_ROUTES.LIMITED_LIST_PATTERN;
   },
 
+  getDatastreamsPath: () => {
+    return EPM_API_ROUTES.DATA_STREAMS_PATTERN;
+  },
+
   getInfoPath: (pkgName: string, pkgVersion?: string) => {
     if (pkgVersion) {
       return EPM_API_ROUTES.INFO_PATTERN.replace('{pkgName}', pkgName).replace(
@@ -80,6 +84,22 @@ export const epmRouteService = {
 
   getBulkInstallPath: () => {
     return EPM_API_ROUTES.BULK_INSTALL_PATTERN;
+  },
+
+  getBulkUpgradePath: () => {
+    return EPM_API_ROUTES.BULK_UPGRADE_PATTERN;
+  },
+
+  getBulkUninstallPath: () => {
+    return EPM_API_ROUTES.BULK_UNINSTALL_PATTERN;
+  },
+
+  getOneBulkUpgradePath: (taskId: string) => {
+    return EPM_API_ROUTES.BULK_UPGRADE_INFO_PATTERN.replace('{taskId}', taskId);
+  },
+
+  getOneBulkUninstallPath: (taskId: string) => {
+    return EPM_API_ROUTES.BULK_UNINSTALL_INFO_PATTERN.replace('{taskId}', taskId);
   },
 
   getRemovePath: (pkgName: string, pkgVersion?: string) => {
@@ -155,6 +175,10 @@ export const packagePolicyRouteService = {
   getOrphanedIntegrationPoliciesPath: () => {
     return PACKAGE_POLICY_API_ROUTES.ORPHANED_INTEGRATION_POLICIES;
   },
+
+  getBulkGetPath: (): string => {
+    return PACKAGE_POLICY_API_ROUTES.BULK_GET_PATTERN;
+  },
 };
 
 export const agentPolicyRouteService = {
@@ -168,6 +192,13 @@ export const agentPolicyRouteService = {
 
   getInfoPath: (agentPolicyId: string) => {
     return AGENT_POLICY_API_ROUTES.INFO_PATTERN.replace('{agentPolicyId}', agentPolicyId);
+  },
+
+  getAutoUpgradeAgentsStatusPath: (agentPolicyId: string) => {
+    return AGENT_POLICY_API_ROUTES.AUTO_UPGRADE_AGENTS_STATUS_PATTERN.replace(
+      '{agentPolicyId}',
+      agentPolicyId
+    );
   },
 
   getCreatePath: () => {

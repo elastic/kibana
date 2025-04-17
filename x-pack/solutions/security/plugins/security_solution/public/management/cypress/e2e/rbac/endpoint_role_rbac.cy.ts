@@ -18,13 +18,6 @@ import { login, ROLE } from '../../tasks/login';
 describe(
   'When defining a kibana role for Endpoint security access',
   {
-    env: {
-      ftrConfig: {
-        kbnServerArgs: [
-          `--xpack.securitySolution.enableExperimental=${JSON.stringify(['defendInsights'])}`,
-        ],
-      },
-    },
     tags: '@ess',
   },
   () => {
@@ -58,7 +51,7 @@ describe(
         })
         .should('deep.equal', [
           'Endpoint List Displays all hosts running Elastic Defend and their relevant integration details.Endpoint List sub-feature privilegeAllReadNone',
-          'Endpoint Insights Access the endpoint insights.Endpoint Insights sub-feature privilegeAllReadNone',
+          'Automatic Troubleshooting Access to the automatic troubleshooting.Automatic Troubleshooting sub-feature privilegeAllReadNone',
           'Trusted Applications Helps mitigate conflicts with other software, usually other antivirus or endpoint security applications.Trusted Applications sub-feature privilegeAllReadNone',
           'Host Isolation Exceptions Add specific IP addresses that isolated hosts are still allowed to communicate with, even when isolated from the rest of the network.Host Isolation Exceptions sub-feature privilegeAllReadNone',
           'Blocklist Extend Elastic Defend’s protection against malicious processes and protect against potentially harmful applications.Blocklist sub-feature privilegeAllReadNone',

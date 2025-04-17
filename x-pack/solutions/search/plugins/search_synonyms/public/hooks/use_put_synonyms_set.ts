@@ -9,29 +9,37 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { SynonymsPutSynonymResponse } from '@elastic/elasticsearch/lib/api/types';
 import { i18n } from '@kbn/i18n';
 import { KibanaServerError } from '@kbn/kibana-utils-plugin/common';
+import { SYNONYMS_RULE_FETCH_QUERY_KEY, SYNONYMS_SETS_QUERY_KEY } from '../../common/constants';
 import { PLUGIN_ROUTE_ROOT } from '../../common/api_routes';
 import { useKibana } from './use_kibana';
 
 interface MutationArgs {
   synonymsSetId: string;
+  forceWrite?: boolean;
 }
 
-export const usePutSynonymsSet = (onSuccess?: () => void, onError?: (error: string) => void) => {
+export const usePutSynonymsSet = (
+  onSuccess?: () => void,
+  onConflictError?: (error: KibanaServerError) => void
+) => {
   const queryClient = useQueryClient();
   const {
     services: { http, notifications, application },
   } = useKibana();
 
   return useMutation(
-    async ({ synonymsSetId }: MutationArgs) => {
+    async ({ synonymsSetId, forceWrite }: MutationArgs) => {
       return await http.put<SynonymsPutSynonymResponse>(
-        `/internal/search_synonyms/synonyms/${synonymsSetId}`
+        `/internal/search_synonyms/synonyms/${synonymsSetId}`,
+        {
+          query: { forceWrite },
+        }
       );
     },
     {
       onSuccess: (_, { synonymsSetId }) => {
-        queryClient.invalidateQueries(['synonyms-sets-fetch']);
-        queryClient.invalidateQueries(['synonyms-rule-fetch']);
+        queryClient.invalidateQueries([SYNONYMS_RULE_FETCH_QUERY_KEY]);
+        queryClient.invalidateQueries([SYNONYMS_SETS_QUERY_KEY]);
         notifications?.toasts?.addSuccess({
           title: i18n.translate('xpack.searchSynonyms.putSynonymsSetSuccess', {
             defaultMessage: 'Synonyms set added',
@@ -45,8 +53,8 @@ export const usePutSynonymsSet = (onSuccess?: () => void, onError?: (error: stri
         );
       },
       onError: (error: { body: KibanaServerError }) => {
-        if (onError) {
-          onError(error.body.message);
+        if (onConflictError && error.body.statusCode === 409) {
+          onConflictError(error.body);
         } else {
           notifications?.toasts?.addError(new Error(error.body.message), {
             title: i18n.translate('xpack.searchSynonyms.putSynonymsSetError', {

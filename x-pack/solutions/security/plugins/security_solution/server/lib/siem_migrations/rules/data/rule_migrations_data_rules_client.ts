@@ -21,14 +21,14 @@ import {
   SiemMigrationStatus,
   RuleTranslationResult,
 } from '../../../../../common/siem_migrations/constants';
+import type { RuleMigration } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import {
-  type RuleMigration,
   type RuleMigrationTaskStats,
   type RuleMigrationTranslationStats,
 } from '../../../../../common/siem_migrations/model/rule_migration.gen';
-import { RuleMigrationsDataBaseClient } from './rule_migrations_data_base_client';
 import { getSortingOptions, type RuleMigrationSort } from './sort';
 import { conditions as searchConditions } from './search';
+import { RuleMigrationsDataBaseClient } from './rule_migrations_data_base_client';
 
 export type CreateRuleMigrationInput = Omit<
   RuleMigration,
@@ -151,45 +151,19 @@ export class RuleMigrationsDataRulesClient extends RuleMigrationsDataBaseClient 
     }
   }
 
-  /**
-   * Retrieves `pending` rule migrations with the provided id and updates their status to `processing`.
-   * This operation is not atomic at migration level:
-   * - Multiple tasks can process different migrations simultaneously.
-   * - Multiple tasks should not process the same migration simultaneously.
-   */
-  async takePending(migrationId: string, size: number): Promise<StoredRuleMigration[]> {
+  /** Updates one rule migration status to `processing` */
+  async saveProcessing(id: string): Promise<void> {
     const index = await this.getIndexName();
     const profileId = await this.getProfileUid();
-    const query = this.getFilterQuery(migrationId, { status: SiemMigrationStatus.PENDING });
-
-    const storedRuleMigrations = await this.esClient
-      .search<RuleMigration>({ index, query, sort: '_doc', size })
-      .then((response) =>
-        this.processResponseHits(response, { status: SiemMigrationStatus.PROCESSING })
-      )
-      .catch((error) => {
-        this.logger.error(`Error searching rule migrations: ${error.message}`);
-        throw error;
-      });
-
-    await this.esClient
-      .bulk({
-        refresh: 'wait_for',
-        operations: storedRuleMigrations.flatMap(({ id, status }) => [
-          { update: { _id: id, _index: index } },
-          {
-            doc: { status, updated_by: profileId, updated_at: new Date().toISOString() },
-          },
-        ]),
-      })
-      .catch((error) => {
-        this.logger.error(
-          `Error updating for rule migrations status to processing: ${error.message}`
-        );
-        throw error;
-      });
-
-    return storedRuleMigrations;
+    const doc = {
+      status: SiemMigrationStatus.PROCESSING,
+      updated_by: profileId,
+      updated_at: new Date().toISOString(),
+    };
+    await this.esClient.update({ index, id, doc, refresh: 'wait_for' }).catch((error) => {
+      this.logger.error(`Error updating rule migration status to processing: ${error.message}`);
+      throw error;
+    });
   }
 
   /** Updates one rule migration with the provided data and sets the status to `completed` */
@@ -344,13 +318,15 @@ export class RuleMigrationsDataRulesClient extends RuleMigrationsDataBaseClient 
     const migrationsAgg = result.aggregations?.migrationIds as AggregationsStringTermsAggregate;
     const buckets = (migrationsAgg?.buckets as AggregationsStringTermsBucket[]) ?? [];
     return buckets.map((bucket) => ({
-      id: bucket.key,
+      id: `${bucket.key}`,
       rules: {
         total: bucket.doc_count,
-        ...this.statusAggCounts(bucket.status),
+        ...this.statusAggCounts(bucket.status as AggregationsStringTermsAggregate),
       },
-      created_at: bucket.createdAt?.value_as_string,
-      last_updated_at: bucket.lastUpdatedAt?.value_as_string,
+      created_at: (bucket.createdAt as AggregationsMinAggregate | undefined)
+        ?.value_as_string as string,
+      last_updated_at: (bucket.lastUpdatedAt as AggregationsMaxAggregate | undefined)
+        ?.value_as_string as string,
     }));
   }
 

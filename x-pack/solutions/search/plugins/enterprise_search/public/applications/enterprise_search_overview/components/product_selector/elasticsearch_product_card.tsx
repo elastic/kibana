@@ -13,7 +13,6 @@ import { ELASTICSEARCH_PLUGIN } from '../../../../../common/constants';
 import { docLinks } from '../../../shared/doc_links';
 import { ProductCard } from '../product_card';
 
-import { BehavioralAnalyticsProductCard } from './behavioral_analytics_product_card';
 import { SearchApplicationsProductCard } from './search_applications_product_card';
 
 export const ElasticsearchProductCard = () => {
@@ -32,10 +31,7 @@ export const ElasticsearchProductCard = () => {
         defaultMessage: 'Learn more',
       })}
       url={docLinks.elasticsearchGettingStarted}
-      rightPanelItems={[
-        <SearchApplicationsProductCard hasBorder={false} hasShadow={false} />,
-        <BehavioralAnalyticsProductCard hasBorder={false} hasShadow={false} />,
-      ]}
+      rightPanelItems={[<SearchApplicationsProductCard hasBorder={false} hasShadow={false} />]}
     />
   );
 };

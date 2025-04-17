@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Role } from '../../../../cases_api_integration/common/lib/authentication/types';
+import type { Role } from '../../../../cases_api_integration/common/lib/authentication/types';
 
 /**
  * Roles for Cases in Security Solution
@@ -375,6 +375,30 @@ export const secReadCasesNone: Role = {
       {
         feature: {
           siem: ['read'],
+          actions: ['all'],
+          actionsSimulators: ['all'],
+        },
+        spaces: ['*'],
+      },
+    ],
+  },
+};
+
+export const secNone: Role = {
+  name: 'sec_none_role_api_int',
+  privileges: {
+    elasticsearch: {
+      indices: [
+        {
+          names: ['*'],
+          privileges: ['all'],
+        },
+      ],
+    },
+    kibana: [
+      {
+        feature: {
+          siem: [],
           actions: ['all'],
           actionsSimulators: ['all'],
         },

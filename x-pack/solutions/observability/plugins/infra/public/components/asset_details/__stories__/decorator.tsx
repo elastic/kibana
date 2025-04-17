@@ -14,8 +14,8 @@ import {
 import type { Observable } from 'rxjs';
 import { of } from 'rxjs';
 import { action } from '@storybook/addon-actions';
-import type { DecoratorFn } from '@storybook/react';
-import { useParameter } from '@storybook/addons';
+import type { Decorator } from '@storybook/react';
+import { useParameter } from '@storybook/manager-api';
 import type { DeepPartial } from 'utility-types';
 import type { LocatorPublic } from '@kbn/share-plugin/public';
 import type { IKibanaSearchRequest, ISearchOptions } from '@kbn/search-types';
@@ -45,7 +45,7 @@ const mockDataView = {
   getFieldByName: () => 'hostname' as unknown as DataViewField,
 } as unknown as DataView;
 
-export const DecorateWithKibanaContext: DecoratorFn = (story) => {
+export const DecorateWithKibanaContext: Decorator = (story) => {
   const initialProcesses = useParameter<{ mock: string }>('apiResponse', {
     mock: 'default',
   })!;
@@ -66,7 +66,7 @@ export const DecorateWithKibanaContext: DecoratorFn = (story) => {
         },
       },
       setBreadcrumbs: () => {},
-      setBreadcrumbsAppendExtension: () => {},
+      setBreadcrumbsAppendExtension: () => () => {},
     },
     data: {
       search: {
@@ -99,7 +99,6 @@ export const DecorateWithKibanaContext: DecoratorFn = (story) => {
     },
     triggersActionsUi: {
       getAlertSummaryWidget: () => <></>,
-      getAlertsStateTable: () => <></>,
     },
     charts: {
       theme: {
@@ -217,7 +216,7 @@ export const DecorateWithKibanaContext: DecoratorFn = (story) => {
   );
 };
 
-export const DecorateWithAssetDetailsStateContext: DecoratorFn = (story) => {
+export const DecorateWithAssetDetailsStateContext: Decorator = (story) => {
   return (
     <ContextProviders
       {...assetDetailsProps}

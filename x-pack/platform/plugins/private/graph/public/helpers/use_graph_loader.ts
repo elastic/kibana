@@ -9,7 +9,7 @@ import { useCallback, useMemo, useState } from 'react';
 import type { CoreStart, ToastsStart } from '@kbn/core/public';
 import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
 import { i18n } from '@kbn/i18n';
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import { RequestAdapter } from '@kbn/inspector-plugin/public';
 import type {
   ExploreRequest,

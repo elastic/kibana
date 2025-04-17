@@ -10,13 +10,6 @@ export const PLUGIN_NAME = 'elasticAssistant';
 
 export const BASE_PATH = '/internal/elastic_assistant';
 
-export const POST_ACTIONS_CONNECTOR_EXECUTE = `${BASE_PATH}/actions/connector/{connectorId}/_execute`;
-
-// Attack discovery
-export const ATTACK_DISCOVERY = `${BASE_PATH}/attack_discovery`;
-export const ATTACK_DISCOVERY_BY_CONNECTOR_ID = `${ATTACK_DISCOVERY}/{connectorId}`;
-export const ATTACK_DISCOVERY_CANCEL_BY_CONNECTOR_ID = `${ATTACK_DISCOVERY}/cancel/{connectorId}`;
-
 export const CONVERSATIONS_TABLE_MAX_PAGE_SIZE = 100;
 export const ANONYMIZATION_FIELDS_TABLE_MAX_PAGE_SIZE = 100;
 export const PROMPTS_TABLE_MAX_PAGE_SIZE = 100;
@@ -31,3 +24,5 @@ export const CAPABILITIES = `${BASE_PATH}/capabilities`;
  Licensing requirements
  */
 export const MINIMUM_AI_ASSISTANT_LICENSE = 'enterprise' as const;
+
+export const DEFAULT_DATE_FORMAT_TZ = 'dateFormat:tz' as const;

@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { IngestStreamUpsertRequest, WiredStreamDefinition } from '@kbn/streams-schema';
 import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import {
   StreamsSupertestRepositoryClient,
@@ -16,7 +17,10 @@ import {
   enableStreams,
   fetchDocument,
   forkStream,
+  getStream,
+  indexAndAssertTargetStream,
   indexDocument,
+  putStream,
 } from './helpers/requests';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
@@ -94,10 +98,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
           it('returns a 404 for logs', async () => {
             await apiClient
-              .fetch('GET /api/streams/{id}', {
+              .fetch('GET /api/streams/{name} 2023-10-31', {
                 params: {
                   path: {
-                    id: 'logs',
+                    name: 'logs',
                   },
                 },
               })
@@ -143,6 +147,27 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
       });
 
+      it('Index a doc with a stream field', async () => {
+        const doc = {
+          '@timestamp': '2024-01-01T00:00:00.000Z',
+          message: JSON.stringify({
+            'log.level': 'info',
+            'log.logger': 'nginx',
+            message: 'test',
+            stream: 'somethingelse', // a field named stream should work as well
+          }),
+        };
+        const result = await indexAndAssertTargetStream(esClient, 'logs', doc);
+        expect(result._source).to.eql({
+          '@timestamp': '2024-01-01T00:00:00.000Z',
+          message: 'test',
+          'log.level': 'info',
+          'log.logger': 'nginx',
+          'stream.name': 'logs',
+          stream: 'somethingelse',
+        });
+      });
+
       it('Fork logs to logs.nginx', async () => {
         const body = {
           stream: {
@@ -167,11 +192,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             message: 'test',
           }),
         };
-        const response = await indexDocument(esClient, 'logs', doc);
-        expect(response.result).to.eql('created');
-
-        const result = await fetchDocument(esClient, 'logs.nginx', response._id);
-        expect(result._index).to.match(/^\.ds\-logs.nginx-.*/);
+        const result = await indexAndAssertTargetStream(esClient, 'logs.nginx', doc);
         expect(result._source).to.eql({
           '@timestamp': '2024-01-01T00:00:10.000Z',
           message: 'test',
@@ -201,11 +222,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             message: 'test',
           }),
         };
-        const response = await indexDocument(esClient, 'logs', doc);
-        expect(response.result).to.eql('created');
-
-        const result = await fetchDocument(esClient, 'logs.nginx.access', response._id);
-        expect(result._index).to.match(/^\.ds\-logs.nginx.access-.*/);
+        const result = await indexAndAssertTargetStream(esClient, 'logs.nginx.access', doc);
         expect(result._source).to.eql({
           '@timestamp': '2024-01-01T00:00:20.000Z',
           message: 'test',
@@ -235,11 +252,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             message: 'test',
           }),
         };
-        const response = await indexDocument(esClient, 'logs', doc);
-        expect(response.result).to.eql('created');
-
-        const result = await fetchDocument(esClient, 'logs.nginx', response._id);
-        expect(result._index).to.match(/^\.ds\-logs.nginx-.*/);
+        const result = await indexAndAssertTargetStream(esClient, 'logs.nginx', doc);
         expect(result._source).to.eql({
           '@timestamp': '2024-01-01T00:00:20.000Z',
           message: 'test',
@@ -275,10 +288,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             message: 'test',
           }),
         };
-        const response1 = await indexDocument(esClient, 'logs', doc1);
-        expect(response1.result).to.eql('created');
-        const response2 = await indexDocument(esClient, 'logs', doc2);
-        expect(response2.result).to.eql('created');
+        await indexAndAssertTargetStream(esClient, 'logs.number-test', doc1);
+        await indexAndAssertTargetStream(esClient, 'logs.number-test', doc2);
       });
 
       it('Fork logs to logs.string-test', async () => {
@@ -310,11 +321,162 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             message: 'status_code: 400',
           }),
         };
-        const response1 = await indexDocument(esClient, 'logs', doc1);
-        expect(response1.result).to.eql('created');
+        await indexAndAssertTargetStream(esClient, 'logs.string-test', doc1);
+        await indexAndAssertTargetStream(esClient, 'logs.string-test', doc2);
+      });
 
-        const response2 = await indexDocument(esClient, 'logs', doc2);
-        expect(response2.result).to.eql('created');
+      it('Fork logs to logs.weird-characters', async () => {
+        const body = {
+          stream: {
+            name: 'logs.weird-characters',
+          },
+          if: {
+            or: [
+              { field: '@abc.weird fieldname', operator: 'contains' as const, value: 'route_it' },
+            ],
+          },
+        };
+        const response = await forkStream(apiClient, 'logs', body);
+        expect(response).to.have.property('acknowledged', true);
+      });
+
+      it('Index documents with weird characters in their field names correctly', async () => {
+        const doc1 = {
+          '@timestamp': '2024-01-01T00:00:20.000Z',
+          '@abc': {
+            'weird fieldname': 'Please route_it',
+          },
+        };
+        const doc2 = {
+          '@timestamp': '2024-01-01T00:00:20.000Z',
+          '@abc': {
+            'weird fieldname': 'Keep where it is',
+          },
+        };
+        await indexAndAssertTargetStream(esClient, 'logs.weird-characters', doc1);
+        await indexAndAssertTargetStream(esClient, 'logs', doc2);
+      });
+
+      it('should allow to update field type to incompatible type', async () => {
+        const body: IngestStreamUpsertRequest = {
+          dashboards: [],
+          queries: [],
+          stream: {
+            ingest: {
+              lifecycle: { inherit: {} },
+              processing: [],
+              wired: {
+                fields: {
+                  myfield: {
+                    type: 'boolean',
+                  },
+                },
+                routing: [],
+              },
+            },
+          },
+        };
+        await putStream(apiClient, 'logs.rollovertest', body, 200);
+        await putStream(
+          apiClient,
+          'logs.rollovertest',
+          {
+            ...body,
+            stream: {
+              ingest: {
+                ...body.stream.ingest,
+                wired: {
+                  ...body.stream.ingest.wired,
+                  fields: {
+                    myfield: {
+                      type: 'keyword',
+                    },
+                  },
+                },
+              },
+            },
+          },
+          200
+        );
+      });
+
+      it('should not allow to update field type to system', async () => {
+        const body: IngestStreamUpsertRequest = {
+          dashboards: [],
+          queries: [],
+          stream: {
+            ingest: {
+              lifecycle: { inherit: {} },
+              processing: [],
+              wired: {
+                fields: {
+                  myfield: {
+                    type: 'system',
+                  },
+                },
+                routing: [],
+              },
+            },
+          },
+        };
+        await putStream(apiClient, 'logs.willfail', body, 400);
+      });
+
+      it('should not roll over more often than necessary', async () => {
+        const expectedIndexCounts: Record<string, number> = {
+          logs: 1,
+          'logs.nginx': 1,
+          'logs.nginx.access': 1,
+          'logs.nginx.error': 1,
+          'logs.number-test': 1,
+          'logs.string-test': 1,
+          'logs.weird-characters': 1,
+          'logs.rollovertest': 2,
+        };
+        const dataStreams = await esClient.indices.getDataStream({
+          name: Object.keys(expectedIndexCounts).join(','),
+        });
+        const actualIndexCounts = Object.fromEntries(
+          dataStreams.data_streams.map((stream) => [stream.name, stream.indices.length])
+        );
+        expect(actualIndexCounts).to.eql(expectedIndexCounts);
+      });
+
+      it('removes routing from parent when child is deleted', async () => {
+        const deleteResponse = await apiClient.fetch('DELETE /api/streams/{name} 2023-10-31', {
+          params: {
+            path: {
+              name: 'logs.nginx.access',
+            },
+          },
+        });
+        expect(deleteResponse.status).to.eql(200);
+
+        const streamResponse = await getStream(apiClient, 'logs.nginx');
+        expect((streamResponse.stream as WiredStreamDefinition).ingest.wired.routing).to.eql([
+          {
+            destination: 'logs.nginx.error',
+            if: {
+              field: 'log',
+              operator: 'eq',
+              value: 'error',
+            },
+          },
+        ]);
+      });
+
+      it('deletes children when parent is deleted', async () => {
+        const deleteResponse = await apiClient.fetch('DELETE /api/streams/{name} 2023-10-31', {
+          params: {
+            path: {
+              name: 'logs.nginx',
+            },
+          },
+        });
+        expect(deleteResponse.status).to.eql(200);
+
+        await getStream(apiClient, 'logs.nginx', 404);
+        await getStream(apiClient, 'logs.nginx.error', 404);
       });
     });
   });

@@ -53,18 +53,16 @@ export const getSignalVersionsByIndex = async ({
   const response = await esClient.search({
     index,
     size: 0,
-    body: {
-      aggs: {
-        signals_indices: {
-          terms: {
-            field: '_index',
-          },
-          aggs: {
-            signal_versions: {
-              terms: {
-                field: 'signal._meta.version',
-                missing: 0,
-              },
+    aggs: {
+      signals_indices: {
+        terms: {
+          field: '_index',
+        },
+        aggs: {
+          signal_versions: {
+            terms: {
+              field: 'signal._meta.version',
+              missing: 0,
             },
           },
         },

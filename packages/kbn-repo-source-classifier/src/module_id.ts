@@ -8,7 +8,7 @@
  */
 
 import type { KibanaPackageManifest } from '@kbn/repo-packages';
-import type { ModuleGroup, ModuleVisibility } from '@kbn/repo-info/types';
+import type { ModuleGroup, ModuleVisibility } from '@kbn/projects-solutions-groups';
 import type { ModuleType } from './module_type';
 import type { PkgInfo } from './pkg_info';
 

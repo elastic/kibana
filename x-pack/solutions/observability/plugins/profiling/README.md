@@ -49,7 +49,7 @@ node scripts/jest --config x-pack/solutions/observability/plugins/profiling/jest
 ## E2E Tests (Cypress)
 The E2E tests are located in [`x-pack/solutions/observability/plugins/profiling/e2e`](./e2e).
 
-Universal Profiling uses [FTR](../../../../packages/kbn-test/README.mdx) (functional test runner) and [Cypress](https://www.cypress.io/) to run the e2e tests. The tests are located at `kibana/x-pack/solutions/observability/plugins/profiling/e2e/cypress/e2e`.
+Universal Profiling uses [FTR](../../../../src/platform/packages/shared/kbn-test/README.mdx) (functional test runner) and [Cypress](https://www.cypress.io/) to run the e2e tests. The tests are located at `kibana/x-pack/solutions/observability/plugins/profiling/e2e/cypress/e2e`.
 
 ### Start with Cypress Dashboard
 

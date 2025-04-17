@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useEffect, useState } from 'react';
+import { useMemo } from 'react';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 
 export interface UseAlertsPrivelegesReturn extends AlertsPrivelegesState {
@@ -28,25 +28,21 @@ export interface AlertsPrivelegesState {
  *
  */
 export const useAlertsPrivileges = (): UseAlertsPrivelegesReturn => {
-  const [privileges, setPrivileges] = useState<AlertsPrivelegesState>({
-    isAuthenticated: null,
-    hasEncryptionKey: null,
-    hasIndexManage: null,
-    hasIndexRead: null,
-    hasIndexWrite: null,
-    hasIndexUpdateDelete: null,
-    hasIndexMaintenance: null,
-    hasKibanaCRUD: false,
-    hasKibanaREAD: false,
-  });
   const {
-    detectionEnginePrivileges,
+    detectionEnginePrivileges: { error, result, loading },
     kibanaSecuritySolutionsPrivileges: { crud: hasKibanaCRUD, read: hasKibanaREAD },
   } = useUserPrivileges();
 
-  useEffect(() => {
-    if (detectionEnginePrivileges.error != null) {
-      setPrivileges({
+  const indexName = useMemo(() => {
+    if (result?.index && Object.keys(result.index).length > 0) {
+      return Object.keys(result.index)[0];
+    }
+    return null;
+  }, [result?.index]);
+
+  const privileges = useMemo(() => {
+    if (error != null) {
+      return {
         isAuthenticated: false,
         hasEncryptionKey: false,
         hasIndexManage: false,
@@ -56,34 +52,39 @@ export const useAlertsPrivileges = (): UseAlertsPrivelegesReturn => {
         hasIndexMaintenance: false,
         hasKibanaCRUD,
         hasKibanaREAD,
-      });
+      };
     }
-  }, [detectionEnginePrivileges.error, hasKibanaCRUD, hasKibanaREAD]);
 
-  useEffect(() => {
-    if (detectionEnginePrivileges.result != null) {
-      const privilege = detectionEnginePrivileges.result;
-
-      if (privilege.index != null && Object.keys(privilege.index).length > 0) {
-        const indexName = Object.keys(privilege.index)[0];
-        setPrivileges({
-          isAuthenticated: privilege.is_authenticated,
-          hasEncryptionKey: privilege.has_encryption_key,
-          hasIndexManage: privilege.index[indexName].manage && privilege.cluster.manage,
-          hasIndexMaintenance: privilege.index[indexName].maintenance,
-          hasIndexRead: privilege.index[indexName].read,
-          hasIndexWrite:
-            privilege.index[indexName].create ||
-            privilege.index[indexName].create_doc ||
-            privilege.index[indexName].index ||
-            privilege.index[indexName].write,
-          hasIndexUpdateDelete: privilege.index[indexName].write,
-          hasKibanaCRUD,
-          hasKibanaREAD,
-        });
-      }
+    if (result != null && indexName) {
+      return {
+        isAuthenticated: result.is_authenticated,
+        hasEncryptionKey: result.has_encryption_key,
+        hasIndexManage: result.index[indexName].manage && result.cluster.manage,
+        hasIndexMaintenance: result.index[indexName].maintenance,
+        hasIndexRead: result.index[indexName].read,
+        hasIndexWrite:
+          result.index[indexName].create ||
+          result.index[indexName].create_doc ||
+          result.index[indexName].index ||
+          result.index[indexName].write,
+        hasIndexUpdateDelete: result.index[indexName].write,
+        hasKibanaCRUD,
+        hasKibanaREAD,
+      };
     }
-  }, [detectionEnginePrivileges.result, hasKibanaCRUD, hasKibanaREAD]);
 
-  return { loading: detectionEnginePrivileges.loading, ...privileges };
+    return {
+      isAuthenticated: null,
+      hasEncryptionKey: null,
+      hasIndexManage: null,
+      hasIndexRead: null,
+      hasIndexWrite: null,
+      hasIndexUpdateDelete: null,
+      hasIndexMaintenance: null,
+      hasKibanaCRUD: false,
+      hasKibanaREAD: false,
+    };
+  }, [error, result, indexName, hasKibanaCRUD, hasKibanaREAD]);
+
+  return { loading: loading ?? false, ...privileges };
 };

@@ -64,10 +64,8 @@ export const testSubjectIds = {
   GRAPH_ACTIONS_TOGGLE_SEARCH_ID: 'cloudSecurityGraphGraphInvestigationToggleSearch',
   GRAPH_ACTIONS_INVESTIGATE_IN_TIMELINE_ID:
     'cloudSecurityGraphGraphInvestigationInvestigateInTimeline',
-  ALERT_TABLE_ROW_CSS_SELECTOR: '[data-test-subj="alertsTable"] .euiDataGridRow',
+  ALERT_TABLE_ROW_CSS_SELECTOR: '[data-test-subj="alertsTableIsLoaded"] .euiDataGridRow',
   SETUP_TECHNOLOGY_SELECTOR: 'setup-technology-selector',
-  SETUP_TECHNOLOGY_SELECTOR_ACCORDION_TEST_SUBJ: 'setup-technology-selector-accordion',
-  SETUP_TECHNOLOGY_SELECTOR_AGENTLESS_OPTION: 'setup-technology-agentless-option',
   DIRECT_ACCESS_KEYS: 'direct_access_keys',
   SETUP_TECHNOLOGY_SELECTOR_AGENTLESS_RADIO: 'setup-technology-agentless-radio',
   SETUP_TECHNOLOGY_SELECTOR_AGENT_BASED_RADIO: 'setup-technology-agent-based-radio',

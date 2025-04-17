@@ -34,6 +34,8 @@
     "@kbn/core-test-helpers-kbn-server",
     "@kbn/i18n-react",
     "@kbn/visualization-utils",
+    "@kbn/esql-types",
+    "@kbn/licensing-plugin"
   ],
   "exclude": [
     "target/**/*",

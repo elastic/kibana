@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import axios, { AxiosResponse } from 'axios';
-import { Logger } from '@kbn/core/server';
-import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
+import type { AxiosResponse } from 'axios';
+import axios from 'axios';
+import type { Logger } from '@kbn/core/server';
+import type { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
 import { request } from '@kbn/actions-plugin/server/lib/axios_utils';
 import { combineHeadersWithBasicAuthHeader } from '@kbn/actions-plugin/server/lib';
-import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
+import type { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 
 interface PostXmattersOptions {
   url: string;

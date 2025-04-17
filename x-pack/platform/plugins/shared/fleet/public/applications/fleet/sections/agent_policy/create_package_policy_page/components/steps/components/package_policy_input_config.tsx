@@ -15,6 +15,7 @@ import {
   EuiSpacer,
   EuiButtonEmpty,
   useIsWithinMinBreakpoint,
+  EuiAccordion,
 } from '@elastic/eui';
 
 import type { NewPackagePolicyInput, RegistryVarsEntry } from '../../../../../../types';
@@ -28,7 +29,7 @@ export const PackagePolicyInputConfig: React.FunctionComponent<{
   packageInputVars?: RegistryVarsEntry[];
   packagePolicyInput: NewPackagePolicyInput;
   updatePackagePolicyInput: (updatedInput: Partial<NewPackagePolicyInput>) => void;
-  inputVarsValidationResults: PackagePolicyConfigValidationResults;
+  inputValidationResults: PackagePolicyConfigValidationResults;
   forceShowErrors?: boolean;
   isEditPage?: boolean;
 }> = memo(
@@ -37,36 +38,35 @@ export const PackagePolicyInputConfig: React.FunctionComponent<{
     packageInputVars,
     packagePolicyInput,
     updatePackagePolicyInput,
-    inputVarsValidationResults,
+    inputValidationResults,
     forceShowErrors,
     isEditPage = false,
   }) => {
     // Showing advanced options toggle state
     const [isShowingAdvanced, setIsShowingAdvanced] = useState<boolean>(false);
 
-    // Errors state
-    const hasErrors = forceShowErrors && validationHasErrors(inputVarsValidationResults);
-
-    const requiredVars: RegistryVarsEntry[] = [];
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    const advancedVars: RegistryVarsEntry[] = [];
-
-    if (packageInputVars) {
-      packageInputVars.forEach((varDef) => {
+    // Split vars into required and advanced
+    const [requiredVars, advancedVars] = useMemo(() => {
+      const _advancedVars: RegistryVarsEntry[] = [];
+      const _requiredVars: RegistryVarsEntry[] = [];
+      (packageInputVars || []).forEach((varDef) => {
         if (isAdvancedVar(varDef)) {
-          advancedVars.push(varDef);
+          _advancedVars.push(varDef);
         } else {
-          requiredVars.push(varDef);
+          _requiredVars.push(varDef);
         }
       });
-    }
+      return [_requiredVars, _advancedVars];
+    }, [packageInputVars]);
 
+    // Errors state
+    const hasErrors = forceShowErrors && validationHasErrors(inputValidationResults);
+    const hasRequiredVarGroupErrors = inputValidationResults.required_vars;
     const advancedVarsWithErrorsCount: number = useMemo(
       () =>
-        advancedVars.filter(
-          ({ name: varName }) => inputVarsValidationResults.vars?.[varName]?.length
-        ).length,
-      [advancedVars, inputVarsValidationResults.vars]
+        advancedVars.filter(({ name: varName }) => inputValidationResults.vars?.[varName]?.length)
+          .length,
+      [advancedVars, inputValidationResults.vars]
     );
 
     const isBiggerScreen = useIsWithinMinBreakpoint('xxl');
@@ -99,6 +99,40 @@ export const PackagePolicyInputConfig: React.FunctionComponent<{
                   </EuiText>
                 </>
               ) : null}
+              {hasRequiredVarGroupErrors && (
+                <>
+                  <EuiSpacer size="m" />
+                  <EuiAccordion
+                    id={`${packagePolicyInput.type}-required-vars-group-error`}
+                    paddingSize="s"
+                    buttonContent={
+                      <EuiText color="danger" size="s">
+                        <FormattedMessage
+                          id="xpack.fleet.createPackagePolicy.stepConfigure.requiredVarsGroupErrorText"
+                          defaultMessage="One of these settings groups is required"
+                        />
+                      </EuiText>
+                    }
+                  >
+                    <EuiText size="xs" color="danger">
+                      {Object.entries(inputValidationResults.required_vars || {}).map(
+                        ([groupName, vars]) => {
+                          return (
+                            <>
+                              <strong>{groupName}</strong>
+                              <ul>
+                                {vars.map(({ name }) => (
+                                  <li key={`${groupName}-${name}`}>{name}</li>
+                                ))}
+                              </ul>
+                            </>
+                          );
+                        }
+                      )}
+                    </EuiText>
+                  </EuiAccordion>
+                </>
+              )}
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
@@ -127,7 +161,7 @@ export const PackagePolicyInputConfig: React.FunctionComponent<{
                         },
                       });
                     }}
-                    errors={inputVarsValidationResults.vars?.[varName]}
+                    errors={inputValidationResults.vars?.[varName]}
                     forceShowErrors={forceShowErrors}
                     isEditPage={isEditPage}
                   />
@@ -185,7 +219,7 @@ export const PackagePolicyInputConfig: React.FunctionComponent<{
                                 },
                               });
                             }}
-                            errors={inputVarsValidationResults.vars?.[varName]}
+                            errors={inputValidationResults.vars?.[varName]}
                             forceShowErrors={forceShowErrors}
                             isEditPage={isEditPage}
                           />

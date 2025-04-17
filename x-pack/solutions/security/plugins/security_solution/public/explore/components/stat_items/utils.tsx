@@ -24,14 +24,6 @@ export const FlexItem = styled(EuiFlexItem)`
 
 FlexItem.displayName = 'FlexItem';
 
-export const MetricItem = styled(EuiFlexItem)`
-  &.euiFlexItem {
-    flex-basis: 0;
-    flex-grow: 0;
-  }
-`;
-MetricItem.displayName = 'MetricItem';
-
 export const StatValue = styled(EuiTitle)`
   overflow: hidden;
   text-overflow: ellipsis;

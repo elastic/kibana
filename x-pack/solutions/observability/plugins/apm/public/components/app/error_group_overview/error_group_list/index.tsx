@@ -8,10 +8,10 @@
 import { EuiBadge, EuiIconTip, EuiToolTip, RIGHT_ALIGNMENT } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import styled from '@emotion/styled';
-import React, { useEffect, useMemo, useState, useRef } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { apmEnableTableSearchBar } from '@kbn/observability-plugin/common';
 import { usePerformanceContext } from '@kbn/ebt-tools';
-import { FETCH_STATUS, isPending } from '../../../../hooks/use_fetcher';
+import { isPending, isSuccess } from '../../../../hooks/use_fetcher';
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 import { asBigNumber } from '../../../../../common/utils/formatters';
 import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
@@ -20,7 +20,12 @@ import { ChartType, getTimeSeriesColor } from '../../../shared/charts/helper/get
 import { SparkPlot } from '../../../shared/charts/spark_plot';
 import { ErrorDetailLink } from '../../../shared/links/apm/error_detail_link';
 import { ErrorOverviewLink } from '../../../shared/links/apm/error_overview_link';
-import type { ITableColumn, TableOptions, TableSearchBar } from '../../../shared/managed_table';
+import type {
+  ITableColumn,
+  TableOptions,
+  TableSearchBar,
+  VisibleItemsStartEnd,
+} from '../../../shared/managed_table';
 import { ManagedTable } from '../../../shared/managed_table';
 import { TimestampTooltip } from '../../../shared/timestamp_tooltip';
 import { isTimeComparison } from '../../../shared/time_comparison/get_comparison_options';
@@ -84,9 +89,8 @@ export function ErrorGroupList({
 
   const { offset, rangeFrom, rangeTo } = query;
 
-  const [renderedItems, setRenderedItems] = useState<ErrorGroupItem[]>([]);
-  const hasTableLoaded = useRef(false);
   const [sorting, setSorting] = useState<TableOptions<ErrorGroupItem>['sort']>(defaultSorting);
+  const [renderedItemIndices, setRenderedItemIndices] = useState<VisibleItemsStartEnd>([0, 0]);
 
   const {
     setDebouncedSearchQuery,
@@ -94,7 +98,7 @@ export function ErrorGroupList({
     mainStatisticsStatus,
     detailedStatistics,
     detailedStatisticsStatus,
-  } = useErrorGroupListData({ renderedItems, sorting });
+  } = useErrorGroupListData({ renderedItemIndices, sorting });
 
   const isMainStatsLoading = isPending(mainStatisticsStatus);
   const isDetailedStatsLoading = isPending(detailedStatisticsStatus);
@@ -103,11 +107,7 @@ export function ErrorGroupList({
   useEffect(() => {
     // this component is used both for the service overview tab and the errors tab,
     // onLoadTable will be defined if it's the service overview tab
-    if (
-      mainStatisticsStatus === FETCH_STATUS.SUCCESS &&
-      detailedStatisticsStatus === FETCH_STATUS.SUCCESS &&
-      !hasTableLoaded.current
-    ) {
+    if (isSuccess(mainStatisticsStatus) && isSuccess(detailedStatisticsStatus)) {
       if (onLoadTable) {
         onLoadTable();
       } else {
@@ -118,15 +118,14 @@ export function ErrorGroupList({
           },
         });
       }
-      hasTableLoaded.current = true;
     }
   }, [
     mainStatisticsStatus,
     detailedStatisticsStatus,
-    onLoadTable,
     rangeFrom,
     rangeTo,
     onPageReady,
+    onLoadTable,
   ]);
 
   const columns = useMemo(() => {
@@ -158,6 +157,7 @@ export function ErrorGroupList({
           <GroupIdLink
             serviceName={serviceName}
             errorGroupId={groupId}
+            query={query}
             data-test-subj="errorGroupId"
           >
             {groupId.slice(0, 5) || NOT_AVAILABLE_LABEL}
@@ -201,7 +201,7 @@ export function ErrorGroupList({
           return (
             <MessageAndCulpritCell>
               <EuiToolTip id="error-message-tooltip" content={item.name || NOT_AVAILABLE_LABEL}>
-                <MessageLink serviceName={serviceName} errorGroupId={item.groupId}>
+                <MessageLink serviceName={serviceName} errorGroupId={item.groupId} query={query}>
                   {item.name || NOT_AVAILABLE_LABEL}
                 </MessageLink>
               </EuiToolTip>
@@ -329,10 +329,10 @@ export function ErrorGroupList({
       initialPageSize={initialPageSize}
       isLoading={isMainStatsLoading}
       tableSearchBar={tableSearchBar}
-      onChangeRenderedItems={setRenderedItems}
       onChangeSorting={setSorting}
       saveTableOptionsToUrl={saveTableOptionsToUrl}
       showPerPageOptions={showPerPageOptions}
+      onChangeItemIndices={setRenderedItemIndices}
     />
   );
 }

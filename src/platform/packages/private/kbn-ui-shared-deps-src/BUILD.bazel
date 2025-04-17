@@ -15,10 +15,9 @@ webpack_cli(
     "@npm//moment",
     "@npm//babel-loader",
     "@npm//css-loader",
-    "@npm//url-loader",
     "@npm//@babel/plugin-transform-numeric-separator",
     "//src/platform/packages/private/kbn-ui-shared-deps-npm",
-    "//packages/kbn-babel-register",
+    "//src/platform/packages/shared/kbn-babel-register",
     "//packages/kbn-babel-preset",
     # packages included in the shared deps src bundle
     "//src/platform/packages/shared/kbn-ui-theme",
@@ -35,7 +34,7 @@ webpack_cli(
     "//src/platform/packages/shared/kbn-security-hardening",
     "//src/platform/packages/shared/kbn-std",
     "//src/platform/packages/shared/kbn-safer-lodash-set",
-    "//packages/kbn-peggy",
+    "//src/platform/packages/private/kbn-peggy",
     "//packages/kbn-peggy-loader",
     "//src/platform/packages/shared/shared-ux/error_boundary",
     "//src/platform/packages/shared/kbn-rison",
@@ -57,12 +56,9 @@ webpack_cli(
   env = select({
     "//:dist": {
       "NODE_ENV": "production",
-      "NODE_OPTIONS": "--openssl-legacy-provider",
     },
     "//conditions:default": {
-      "NODE_ENV": "development",
-      "NODE_OPTIONS": "--openssl-legacy-provider",
-      "REACT_18": "$(REACT_18)",
+      "NODE_ENV": "development"
     },
   }),
   visibility = ["//visibility:public"],

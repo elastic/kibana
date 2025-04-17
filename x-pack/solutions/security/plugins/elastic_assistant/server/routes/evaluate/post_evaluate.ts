@@ -22,24 +22,20 @@ import {
   INTERNAL_API_ACCESS,
   PostEvaluateBody,
   PostEvaluateResponse,
+  DefendInsightType,
 } from '@kbn/elastic-assistant-common';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { getDefaultArguments } from '@kbn/langchain/server';
 import { StructuredTool } from '@langchain/core/tools';
-import {
-  createOpenAIToolsAgent,
-  createStructuredChatAgent,
-  createToolCallingAgent,
-} from 'langchain/agents';
+import { AgentFinish } from 'langchain/agents';
 import { omit } from 'lodash/fp';
+import { getDefendInsightsPrompt } from '../../lib/defend_insights/graphs/default_defend_insights_graph/nodes/helpers/prompts';
+import { evaluateDefendInsights } from '../../lib/defend_insights/evaluation';
 import { localToolPrompts, promptGroupId as toolsGroupId } from '../../lib/prompt/tool_prompts';
 import { promptGroupId } from '../../lib/prompt/local_prompt_object';
-import { getModelOrOss } from '../../lib/prompt/helpers';
+import { getFormattedTime, getModelOrOss } from '../../lib/prompt/helpers';
 import { getAttackDiscoveryPrompts } from '../../lib/attack_discovery/graphs/default_attack_discovery_graph/nodes/helpers/prompts';
-import {
-  formatPrompt,
-  formatPromptStructured,
-} from '../../lib/langchain/graphs/default_assistant_graph/prompts';
+import { formatPrompt } from '../../lib/langchain/graphs/default_assistant_graph/prompts';
 import { getPrompt as localGetPrompt, promptDictionary } from '../../lib/prompt';
 import { buildResponse } from '../../lib/build_response';
 import { AssistantDataClients } from '../../lib/langchain/executors/types';
@@ -55,6 +51,9 @@ import {
 } from '../../lib/langchain/graphs/default_assistant_graph/graph';
 import { getLlmClass, getLlmType, isOpenSourceModel } from '../utils';
 import { getGraphsFromNames } from './get_graphs_from_names';
+import { DEFAULT_DATE_FORMAT_TZ } from '../../../common/constants';
+import { agentRunableFactory } from '../../lib/langchain/graphs/default_assistant_graph/agentRunnable';
+import { PrepareIndicesForAssistantGraphEvaluations } from './prepare_indices_for_evaluations/graph_type/assistant';
 
 const DEFAULT_SIZE = 20;
 const ROUTE_HANDLER_TIMEOUT = 10 * 60 * 1000; // 10 * 60 seconds = 10 minutes
@@ -103,7 +102,7 @@ export const postEvaluateRoute = (
         const savedObjectsClient = ctx.elasticAssistant.savedObjectsClient;
 
         // Perform license, authenticated user and evaluation FF checks
-        const checkResponse = performChecks({
+        const checkResponse = await performChecks({
           capability: 'assistantModelEvaluation',
           context: ctx,
           request,
@@ -182,27 +181,80 @@ export const postEvaluateRoute = (
             ids: connectorIds,
             throwIfSystemAction: false,
           });
-          const connectorsWithPrompts = await Promise.all(
-            connectors.map(async (connector) => {
-              const prompts = await getAttackDiscoveryPrompts({
-                actionsClient,
-                connectorId: connector.id,
-                connector,
-                savedObjectsClient,
-              });
-              return {
-                ...connector,
-                prompts,
-              };
-            })
-          );
 
           // Fetch any tools registered to the security assistant
           const assistantTools = assistantContext.getRegisteredTools(DEFAULT_PLUGIN_NAME);
 
-          const { attackDiscoveryGraphs } = getGraphsFromNames(graphNames);
+          const { attackDiscoveryGraphs, defendInsightsGraphs, assistantGraphs } =
+            getGraphsFromNames(graphNames);
+
+          const prepareIndicesForAssistantGraph = new PrepareIndicesForAssistantGraphEvaluations({
+            esClient,
+            logger,
+          });
+
+          if (assistantGraphs?.length) {
+            await prepareIndicesForAssistantGraph.cleanup();
+            await prepareIndicesForAssistantGraph.setup();
+          }
+
+          if (defendInsightsGraphs.length > 0) {
+            const connectorsWithPrompts = await Promise.all(
+              connectors.map(async (connector) => {
+                const prompts = await getDefendInsightsPrompt({
+                  type: DefendInsightType.Enum.incompatible_antivirus,
+                  actionsClient,
+                  connectorId: connector.id,
+                  connector,
+                  savedObjectsClient,
+                });
+                return {
+                  ...connector,
+                  prompts,
+                };
+              })
+            );
+            try {
+              void evaluateDefendInsights({
+                actionsClient,
+                defendInsightsGraphs,
+                connectors: connectorsWithPrompts,
+                connectorTimeout: CONNECTOR_TIMEOUT,
+                datasetName,
+                esClient,
+                evaluationId,
+                evaluatorConnectorId,
+                langSmithApiKey,
+                langSmithProject,
+                logger,
+                runName,
+                size,
+              });
+            } catch (err) {
+              logger.error(() => `Error evaluating defend insights: ${err}`);
+            }
+
+            return response.ok({
+              body: { evaluationId, success: true },
+            });
+          }
 
           if (attackDiscoveryGraphs.length > 0) {
+            const connectorsWithPrompts = await Promise.all(
+              connectors.map(async (connector) => {
+                const prompts = await getAttackDiscoveryPrompts({
+                  actionsClient,
+                  connectorId: connector.id,
+                  connector,
+                  savedObjectsClient,
+                });
+                return {
+                  ...connector,
+                  prompts,
+                };
+              })
+            );
+
             try {
               // NOTE: we don't wait for the evaluation to finish here, because
               // the client will retry / timeout when evaluations take too long
@@ -254,7 +306,12 @@ export const postEvaluateRoute = (
                   signal: abortSignal,
                   streaming: false,
                   maxRetries: 0,
+                  convertSystemMessageToHumanContent: false,
+                  telemetryMetadata: {
+                    pluginId: 'security_ai_assistant',
+                  },
                 });
+
               const llm = createLlmInstance();
               const anonymizationFieldsRes =
                 await dataClients?.anonymizationFieldsDataClient?.findDocuments<EsAnonymizationFieldsSchema>(
@@ -290,17 +347,12 @@ export const postEvaluateRoute = (
                   },
                 };
 
-              const contentReferencesEnabled =
-                assistantContext.getRegisteredFeatures(
-                  DEFAULT_PLUGIN_NAME
-                ).contentReferencesEnabled;
-              const contentReferencesStore = contentReferencesEnabled
-                ? newContentReferencesStore()
-                : undefined;
+              const contentReferencesStore = newContentReferencesStore();
 
               // Fetch any applicable tools that the source plugin may have registered
               const assistantToolParams: AssistantToolParams = {
                 anonymizationFields,
+                assistantContext,
                 esClient,
                 isEnabledKnowledgeBase,
                 kbDataClient: dataClients?.kbDataClient,
@@ -317,6 +369,7 @@ export const postEvaluateRoute = (
                 size,
                 telemetry: ctx.elasticAssistant.telemetry,
                 ...(productDocsAvailable ? { llmTasks: ctx.elasticAssistant.llmTasks } : {}),
+                createLlmInstance,
               };
 
               const tools: StructuredTool[] = (
@@ -359,27 +412,24 @@ export const postEvaluateRoute = (
                 savedObjectsClient,
               });
 
-              const agentRunnable =
-                isOpenAI || llmType === 'inference'
-                  ? await createOpenAIToolsAgent({
-                      llm,
-                      tools,
-                      prompt: formatPrompt(defaultSystemPrompt),
-                      streamRunnable: false,
-                    })
-                  : llmType && ['bedrock', 'gemini'].includes(llmType)
-                  ? createToolCallingAgent({
-                      llm,
-                      tools,
-                      prompt: formatPrompt(defaultSystemPrompt),
-                      streamRunnable: false,
-                    })
-                  : await createStructuredChatAgent({
-                      llm,
-                      tools,
-                      prompt: formatPromptStructured(defaultSystemPrompt),
-                      streamRunnable: false,
-                    });
+              const chatPromptTemplate = formatPrompt({
+                prompt: defaultSystemPrompt,
+                llmType,
+                isOpenAI,
+              });
+
+              const agentRunnable = await agentRunableFactory({
+                llm: createLlmInstance(),
+                isOpenAI,
+                llmType,
+                tools,
+                isStream: false,
+                prompt: chatPromptTemplate,
+              });
+
+              const uiSettingsDateFormatTimezone = await ctx.core.uiSettings.client.get<string>(
+                DEFAULT_DATE_FORMAT_TZ
+              );
 
               return {
                 connectorId: connector.id,
@@ -395,7 +445,11 @@ export const postEvaluateRoute = (
                   savedObjectsClient,
                   tools,
                   replacements: {},
-                  contentReferencesEnabled: Boolean(contentReferencesStore),
+                  getFormattedTime: () =>
+                    getFormattedTime({
+                      screenContextTimezone: request.body.screenContext?.timeZone,
+                      uiSettingsDateFormatTimezone,
+                    }),
                 }),
               };
             })
@@ -407,14 +461,14 @@ export const postEvaluateRoute = (
             const predict = async (input: { input: string }) => {
               logger.debug(`input:\n ${JSON.stringify(input, null, 2)}`);
 
-              const r = await graph.invoke(
+              const result = await graph.invoke(
                 {
                   input: input.input,
                   connectorId,
                   conversationId: undefined,
                   responseLanguage: 'English',
                   llmType,
-                  isStreaming: false,
+                  isStream: false,
                   isOssModel,
                 }, // TODO: Update to use the correct input format per dataset type
                 {
@@ -422,7 +476,7 @@ export const postEvaluateRoute = (
                   tags: ['evaluation'],
                 }
               );
-              const output = r.agentOutcome.returnValues.output;
+              const output = (result.agentOutcome as AgentFinish).returnValues.output;
               return output;
             };
 
@@ -432,7 +486,7 @@ export const postEvaluateRoute = (
               experimentPrefix: name,
               client: new Client({ apiKey: langSmithApiKey }),
               // prevent rate limiting and unexpected multiple experiment runs
-              maxConcurrency: 5,
+              maxConcurrency: 3,
             })
               .then((output) => {
                 logger.debug(`runResp:\n ${JSON.stringify(output, null, 2)}`);

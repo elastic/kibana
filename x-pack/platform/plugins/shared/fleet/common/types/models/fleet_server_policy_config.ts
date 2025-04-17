@@ -4,8 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { ValueOf } from '..';
 
-// SO definition for this type is declared in server/types/interfaces
+import type { SOSecret } from './secret';
+
+export const clientAuth = {
+  Optional: 'optional',
+  Required: 'required',
+  None: 'none',
+} as const;
+
+export type ClientAuth = typeof clientAuth;
 export interface NewFleetServerHost {
   name: string;
   host_urls: string[];
@@ -13,6 +22,21 @@ export interface NewFleetServerHost {
   is_preconfigured: boolean;
   is_internal?: boolean;
   proxy_id?: string | null;
+  ssl?: {
+    certificate_authorities?: string[];
+    certificate?: string;
+    key?: string;
+    es_certificate_authorities?: string[];
+    es_certificate?: string;
+    es_key?: string;
+    client_auth?: ValueOf<ClientAuth>;
+  } | null;
+  secrets?: {
+    ssl?: {
+      key?: SOSecret;
+      es_key?: SOSecret;
+    };
+  };
 }
 
 export interface FleetServerHost extends NewFleetServerHost {

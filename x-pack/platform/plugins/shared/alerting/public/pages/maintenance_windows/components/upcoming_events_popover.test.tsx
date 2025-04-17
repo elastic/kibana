@@ -4,11 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { fireEvent } from '@testing-library/react';
+import { fireEvent, screen } from '@testing-library/react';
 import * as React from 'react';
-import { AppMockRenderer, createAppMockRenderer } from '../../../lib/test_utils';
+import type { AppMockRenderer } from '../../../lib/test_utils';
+import { createAppMockRenderer } from '../../../lib/test_utils';
 import { UpcomingEventsPopover } from './upcoming_events_popover';
 import { MaintenanceWindowStatus } from '../../../../common';
+
+jest.mock('../../../utils/kibana_react');
+
+const { useUiSetting } = jest.requireMock('../../../utils/kibana_react');
+
+useUiSetting.mockReturnValue('YYYY.MM.DD, h:mm:ss');
 
 describe('rule_actions_popover', () => {
   let appMockRenderer: AppMockRenderer;
@@ -18,8 +25,8 @@ describe('rule_actions_popover', () => {
     appMockRenderer = createAppMockRenderer();
   });
 
-  it('renders the top 3 events', () => {
-    const result = appMockRenderer.render(
+  it('renders the top 3 events', async () => {
+    appMockRenderer.render(
       <UpcomingEventsPopover
         maintenanceWindowFindResponse={{
           title: 'test MW',
@@ -53,14 +60,20 @@ describe('rule_actions_popover', () => {
       />
     );
 
-    const popoverButton = result.getByTestId('upcoming-events-icon-button');
+    const popoverButton = await screen.findByTestId('upcoming-events-icon-button');
     expect(popoverButton).toBeInTheDocument();
     fireEvent.click(popoverButton);
 
-    expect(result.getByTestId('upcoming-events-popover-title')).toBeInTheDocument();
-    expect(result.getByTestId('upcoming-events-popover-title')).toHaveTextContent(
+    expect(await screen.findByTestId('upcoming-events-popover-title')).toBeInTheDocument();
+    expect(await screen.findByTestId('upcoming-events-popover-title')).toHaveTextContent(
       'Repeats every Friday'
     );
-    expect(result.getAllByTestId('upcoming-events-popover-item').length).toBe(3);
+
+    // same format as in settings
+    expect(await screen.findByText('2023.04.28, 10:58:40')).toBeInTheDocument();
+    expect(await screen.findByText('2023.05.05, 10:58:40')).toBeInTheDocument();
+    expect(await screen.findByText('2023.05.12, 10:58:40')).toBeInTheDocument();
+
+    expect(screen.getAllByTestId('upcoming-events-popover-item').length).toBe(3);
   });
 });

@@ -35,28 +35,26 @@ export const buildKpiRiskScoreQuery = ({
     allow_no_indices: false,
     ignore_unavailable: true,
     track_total_hits: false,
-    body: {
-      aggs: {
-        risk: {
-          terms: {
-            field: EntityTypeToLevelField[entity],
-          },
-          aggs: {
-            unique_entries: {
-              cardinality: {
-                field: EntityTypeToIdentifierField[entity],
-              },
+    aggs: {
+      risk: {
+        terms: {
+          field: EntityTypeToLevelField[entity],
+        },
+        aggs: {
+          unique_entries: {
+            cardinality: {
+              field: EntityTypeToIdentifierField[entity],
             },
           },
         },
       },
-      query: {
-        bool: {
-          filter,
-        },
-      },
-      size: 0,
     },
+    query: {
+      bool: {
+        filter,
+      },
+    },
+    size: 0,
   };
 
   return dslQuery;

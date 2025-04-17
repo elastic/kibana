@@ -2,26 +2,10 @@
   "id": "@kbn/react-kibana-mount",
   "client": {
     "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "server": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
     "functions": [
       {
         "parentPluginId": "@kbn/react-kibana-mount",
-        "id": "def-common.MountPointPortal",
+        "id": "def-public.MountPointPortal",
         "type": "Function",
         "tags": [],
         "label": "MountPointPortal",
@@ -32,9 +16,9 @@
           "({ children, setMountPoint, }: React.PropsWithChildren<",
           {
             "pluginId": "@kbn/react-kibana-mount",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnReactKibanaMountPluginApi",
-            "section": "def-common.MountPointPortalProps",
+            "section": "def-public.MountPointPortalProps",
             "text": "MountPointPortalProps"
           },
           ">) => React.ReactPortal | null"
@@ -45,7 +29,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/react-kibana-mount",
-            "id": "def-common.MountPointPortal.$1",
+            "id": "def-public.MountPointPortal.$1",
             "type": "CompoundType",
             "tags": [],
             "label": "{\n  children,\n  setMountPoint,\n}",
@@ -54,9 +38,9 @@
               "React.PropsWithChildren<",
               {
                 "pluginId": "@kbn/react-kibana-mount",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnReactKibanaMountPluginApi",
-                "section": "def-common.MountPointPortalProps",
+                "section": "def-public.MountPointPortalProps",
                 "text": "MountPointPortalProps"
               },
               ">"
@@ -72,7 +56,7 @@
       },
       {
         "parentPluginId": "@kbn/react-kibana-mount",
-        "id": "def-common.toMountPoint",
+        "id": "def-public.toMountPoint",
         "type": "Function",
         "tags": [],
         "label": "toMountPoint",
@@ -83,9 +67,9 @@
           "(node: React.ReactNode, params: ",
           {
             "pluginId": "@kbn/react-kibana-mount",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnReactKibanaMountPluginApi",
-            "section": "def-common.ToMountPointParams",
+            "section": "def-public.ToMountPointParams",
             "text": "ToMountPointParams"
           },
           ") => ",
@@ -98,12 +82,12 @@
         "children": [
           {
             "parentPluginId": "@kbn/react-kibana-mount",
-            "id": "def-common.toMountPoint.$1",
+            "id": "def-public.toMountPoint.$1",
             "type": "CompoundType",
             "tags": [],
             "label": "node",
             "description": [
-              "to get a mount point for"
+              "React node to get a mount point for"
             ],
             "signature": [
               "React.ReactNode"
@@ -115,17 +99,19 @@
           },
           {
             "parentPluginId": "@kbn/react-kibana-mount",
-            "id": "def-common.toMountPoint.$2",
-            "type": "Object",
+            "id": "def-public.toMountPoint.$2",
+            "type": "CompoundType",
             "tags": [],
             "label": "params",
-            "description": [],
+            "description": [
+              "services needed for rendering fully-featured React nodes in Kibana"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/react-kibana-mount",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnReactKibanaMountPluginApi",
-                "section": "def-common.ToMountPointParams",
+                "section": "def-public.ToMountPointParams",
                 "text": "ToMountPointParams"
               }
             ],
@@ -140,7 +126,7 @@
       },
       {
         "parentPluginId": "@kbn/react-kibana-mount",
-        "id": "def-common.useIfMounted",
+        "id": "def-public.useIfMounted",
         "type": "Function",
         "tags": [],
         "label": "useIfMounted",
@@ -159,7 +145,7 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/react-kibana-mount",
-        "id": "def-common.MountPointPortalProps",
+        "id": "def-public.MountPointPortalProps",
         "type": "Interface",
         "tags": [],
         "label": "MountPointPortalProps",
@@ -170,7 +156,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/react-kibana-mount",
-            "id": "def-common.MountPointPortalProps.setMountPoint",
+            "id": "def-public.MountPointPortalProps.setMountPoint",
             "type": "Function",
             "tags": [],
             "label": "setMountPoint",
@@ -178,15 +164,16 @@
             "signature": [
               "(mountPoint: ",
               "MountPoint",
-              "<HTMLElement> | undefined) => void"
+              "<HTMLElement> | undefined) => void | UnsetMountPointFn"
             ],
             "path": "src/platform/packages/shared/react/kibana_mount/mount_point_portal.tsx",
             "deprecated": false,
             "trackAdoption": false,
+            "returnComment": [],
             "children": [
               {
                 "parentPluginId": "@kbn/react-kibana-mount",
-                "id": "def-common.MountPointPortalProps.setMountPoint.$1",
+                "id": "def-public.MountPointPortalProps.setMountPoint.$1",
                 "type": "Function",
                 "tags": [],
                 "label": "mountPoint",
@@ -197,15 +184,13 @@
                 ],
                 "path": "src/platform/packages/shared/react/kibana_mount/mount_point_portal.tsx",
                 "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": false
+                "trackAdoption": false
               }
-            ],
-            "returnComment": []
+            ]
           },
           {
             "parentPluginId": "@kbn/react-kibana-mount",
-            "id": "def-common.MountPointPortalProps.children",
+            "id": "def-public.MountPointPortalProps.children",
             "type": "CompoundType",
             "tags": [],
             "label": "children",
@@ -225,27 +210,14 @@
     "misc": [
       {
         "parentPluginId": "@kbn/react-kibana-mount",
-        "id": "def-common.ToMountPointParams",
+        "id": "def-public.ToMountPointParams",
         "type": "Type",
         "tags": [],
         "label": "ToMountPointParams",
         "description": [],
         "signature": [
-          "{ i18n: ",
-          "I18nStart",
-          "; analytics?: Pick<",
-          "AnalyticsServiceStart",
-          ", \"reportEvent\"> | undefined; theme: ",
-          {
-            "pluginId": "@kbn/react-kibana-context-common",
-            "scope": "common",
-            "docId": "kibKbnReactKibanaContextCommonPluginApi",
-            "section": "def-common.ThemeServiceStart",
-            "text": "ThemeServiceStart"
-          },
-          "; userProfile?: Pick<",
-          "UserProfileService",
-          ", \"getUserProfile$\"> | undefined; }"
+          "RenderingService",
+          " | ToMountPointParamsDeprecated"
         ],
         "path": "src/platform/packages/shared/react/kibana_mount/to_mount_point.tsx",
         "deprecated": false,
@@ -253,6 +225,22 @@
         "initialIsOpen": false
       }
     ],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
     "objects": []
   }
 }

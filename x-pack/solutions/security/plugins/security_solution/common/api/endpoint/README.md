@@ -56,7 +56,7 @@ yarn --cwd x-pack/solutions/security/plugins/security_solution openapi:bundle:en
 
 ### References
 
-- [Kibana OpenAPI generator Usage Guide](https://github.com/elastic/kibana/blob/main/packages/kbn-openapi-generator/docs/USAGE_GUIDE.md)
+- [Kibana OpenAPI generator Usage Guide](https://github.com/elastic/kibana/blob/main/src/platform/packages/shared/kbn-openapi-generator/docs/USAGE_GUIDE.md)
 - [Open API documentation](https://spec.openapis.org/oas/v3.0.3#document-structure)
 - [Swagger documentation](https://swagger.io/docs/specification/basic-structure/)
 

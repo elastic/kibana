@@ -41,7 +41,8 @@
       "uiActions",
       "unifiedSearch",
       "presentationUtil",
-      "charts"
+      "charts",
+      "fieldsMetadata"
     ],
     "optionalPlugins": [
       "cloud",
@@ -54,7 +55,8 @@
       "spaces",
       "telemetry",
       "licenseManagement",
-      "observabilityAIAssistant"
+      "observabilityAIAssistant",
+      "embeddableEnhanced",
     ],
     "requiredBundles": [
       "data",

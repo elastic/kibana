@@ -16,7 +16,7 @@ import * as i18n from './translations';
 import { getPromptContextFromDetectionRules } from '../../../../assistant/helpers';
 import { useRulesTableContext } from './rules_table/rules_table_context';
 import { useAssistantAvailability } from '../../../../assistant/use_assistant_availability';
-import * as i18nAssistant from '../../../../detections/pages/detection_engine/rules/translations';
+import * as i18nAssistant from '../../../common/translations';
 
 export enum AllRulesTabs {
   management = 'management',
@@ -33,7 +33,7 @@ export const RulesTableToolbar = React.memo(() => {
   const installedTotal =
     (ruleManagementFilters?.rules_summary.custom_count ?? 0) +
     (ruleManagementFilters?.rules_summary.prebuilt_installed_count ?? 0);
-  const updateTotal = prebuiltRulesStatus?.num_prebuilt_rules_to_upgrade ?? 0;
+  const updateTotal = prebuiltRulesStatus?.stats.num_prebuilt_rules_to_upgrade ?? 0;
 
   const shouldDisplayRuleUpdatesTab = !loading && canUserCRUD && updateTotal > 0;
 
@@ -86,10 +86,16 @@ export const RulesTableToolbar = React.memo(() => {
     () => rules.filter((rule) => selectedRuleIds.includes(rule.id)),
     [rules, selectedRuleIds]
   );
+
+  const selectedRuleNames = useMemo(() => selectedRules.map((rule) => rule.name), [selectedRules]);
   const getPromptContext = useCallback(
     async () => getPromptContextFromDetectionRules(selectedRules),
     [selectedRules]
   );
+
+  const chatTitle = useMemo(() => {
+    return `${i18nAssistant.DETECTION_RULES_CONVERSATION_ID} - ${selectedRuleNames.join(', ')}`;
+  }, [selectedRuleNames]);
 
   return (
     <EuiFlexGroup justifyContent={'spaceBetween'}>
@@ -100,7 +106,7 @@ export const RulesTableToolbar = React.memo(() => {
         {hasAssistantPrivilege && selectedRules.length > 0 && (
           <NewChat
             category="detection-rules"
-            conversationId={i18nAssistant.DETECTION_RULES_CONVERSATION_ID}
+            conversationTitle={chatTitle}
             description={i18nAssistant.RULE_MANAGEMENT_CONTEXT_DESCRIPTION}
             getPromptContext={getPromptContext}
             suggestedUserPrompt={i18nAssistant.EXPLAIN_THEN_SUMMARIZE_RULE_DETAILS}

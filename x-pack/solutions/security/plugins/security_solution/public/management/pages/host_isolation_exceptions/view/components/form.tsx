@@ -19,16 +19,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { useTestIdGenerator } from '../../../../hooks/use_test_id_generator';
 import { isValidIPv4OrCIDR } from '../../../../../../common/endpoint/utils/is_valid_ip';
-import type {
-  EffectedPolicySelection,
-  EffectedPolicySelectProps,
-} from '../../../../components/effected_policy_select';
+import type { EffectedPolicySelectProps } from '../../../../components/effected_policy_select';
 import { EffectedPolicySelect } from '../../../../components/effected_policy_select';
-import {
-  getArtifactTagsByPolicySelection,
-  getEffectedPolicySelectionByTags,
-  isArtifactGlobal,
-} from '../../../../../../common/endpoint/service/artifacts';
 import {
   DESCRIPTION_LABEL,
   DESCRIPTION_PLACEHOLDER,
@@ -52,7 +44,7 @@ interface ExceptionIpEntry {
 }
 
 export const HostIsolationExceptionsForm = memo<ArtifactFormComponentProps>(
-  ({ item: exception, onChange, policies, disabled, mode, error }) => {
+  ({ item: exception, onChange, disabled, mode, error }) => {
     const ipEntry = useMemo(() => {
       return (exception.entries[0] || {
         field: 'destination.ip',
@@ -66,13 +58,7 @@ export const HostIsolationExceptionsForm = memo<ArtifactFormComponentProps>(
     const [hasBeenInputIpVisited, setHasBeenInputIpVisited] = useState(false);
     const [hasNameError, setHasNameError] = useState(!exception.name);
     const [hasIpError, setHasIpError] = useState(!ipEntry.value);
-
     const getTestId = useTestIdGenerator(testIdPrefix);
-
-    const [selectedPolicies, setSelectedPolicies] = useState<EffectedPolicySelection>({
-      isGlobal: isArtifactGlobal(exception),
-      selected: [],
-    });
 
     const isFormContentValid = useMemo(() => {
       return !hasNameError && !hasIpError;
@@ -128,18 +114,9 @@ export const HostIsolationExceptionsForm = memo<ArtifactFormComponentProps>(
       [ipEntry, notifyOfChange]
     );
 
-    const handlePolicySelectChange: EffectedPolicySelectProps['onChange'] = useCallback(
-      (selection) => {
-        // preserve the previous selection between global and not global toggle
-        if (selection.isGlobal) {
-          setSelectedPolicies({ isGlobal: true, selected: selection.selected });
-        } else {
-          setSelectedPolicies(selection);
-        }
-
-        notifyOfChange({
-          tags: getArtifactTagsByPolicySelection(selection),
-        });
+    const handleEffectedPolicyOnChange: EffectedPolicySelectProps['onChange'] = useCallback(
+      (updatedItem) => {
+        notifyOfChange(updatedItem);
       },
       [notifyOfChange]
     );
@@ -231,13 +208,6 @@ export const HostIsolationExceptionsForm = memo<ArtifactFormComponentProps>(
       [disabled, exception.description, handleOnDescriptionChange]
     );
 
-    // set current policies if not previously selected
-    useEffect(() => {
-      if (selectedPolicies.selected.length === 0 && exception.tags) {
-        setSelectedPolicies(getEffectedPolicySelectionByTags(exception.tags, policies));
-      }
-    }, [exception.tags, policies, selectedPolicies.selected.length]);
-
     // Anytime the `notificyOfChange()` is re-defined, call it with current values.
     // This will happen
     useEffect(() => {
@@ -254,7 +224,14 @@ export const HostIsolationExceptionsForm = memo<ArtifactFormComponentProps>(
     return (
       <EuiForm
         component="div"
-        error={error && <FormattedError error={error} />}
+        error={
+          error && (
+            <FormattedError
+              error={error}
+              data-test-subj={'hostIsolationExceptions-form-submitError'}
+            />
+          )
+        }
         isInvalid={!!error}
         data-test-subj="hostIsolationExceptions-form"
       >
@@ -300,11 +277,8 @@ export const HostIsolationExceptionsForm = memo<ArtifactFormComponentProps>(
           isDisabled={disabled}
         >
           <EffectedPolicySelect
-            isGlobal={selectedPolicies.isGlobal}
-            isPlatinumPlus={true}
-            selected={selectedPolicies.selected}
-            options={policies}
-            onChange={handlePolicySelectChange}
+            item={exception}
+            onChange={handleEffectedPolicyOnChange}
             data-test-subj={getTestId('effectedPolicies')}
             disabled={disabled}
           />

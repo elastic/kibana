@@ -5,26 +5,24 @@
  * 2.0.
  */
 
-import {
+import type {
   IRouter,
   RequestHandlerContext,
   KibanaRequest,
   IKibanaResponse,
   KibanaResponseFactory,
 } from '@kbn/core/server';
-import { IClusterClient, DocLinksServiceSetup } from '@kbn/core/server';
-import { Observable, Subject } from 'rxjs';
+import type { IClusterClient, DocLinksServiceSetup } from '@kbn/core/server';
+import type { Observable } from 'rxjs';
+import { Subject } from 'rxjs';
 import { tap, map, filter } from 'rxjs';
 import { throttleTime } from 'rxjs';
-import { UsageCounter } from '@kbn/usage-collection-plugin/server';
-import { Logger, ServiceStatus, ServiceStatusLevels } from '@kbn/core/server';
-import {
-  MonitoringStats,
-  summarizeMonitoringStats,
-  HealthStatus,
-  RawMonitoringStats,
-} from '../monitoring';
-import { TaskManagerConfig } from '../config';
+import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
+import type { Logger, ServiceStatus } from '@kbn/core/server';
+import { ServiceStatusLevels } from '@kbn/core/server';
+import type { MonitoringStats, RawMonitoringStats } from '../monitoring';
+import { summarizeMonitoringStats, HealthStatus } from '../monitoring';
+import type { TaskManagerConfig } from '../config';
 import { logHealthMetrics } from '../lib/log_health_metrics';
 import { calculateHealthStatus } from '../lib/calculate_health_status';
 
@@ -148,7 +146,11 @@ export function healthRoute(params: HealthRouteParams): {
         },
       },
       // Uncomment when we determine that we can restrict API usage to Global admins based on telemetry
-      // options: { tags: ['access:taskManager'] },
+      // security: {
+      //   authz: {
+      //     requiredPrivileges: ['taskManager'],
+      //   },
+      // },
       validate: false,
       options: {
         access: 'public',
@@ -167,15 +169,13 @@ export function healthRoute(params: HealthRouteParams): {
         const hasPrivilegesResponse = await clusterClient
           .asScoped(req)
           .asCurrentUser.security.hasPrivileges({
-            body: {
-              application: [
-                {
-                  application: `kibana-${kibanaIndexName}`,
-                  resources: ['*'],
-                  privileges: [`api:${kibanaVersion}:taskManager`],
-                },
-              ],
-            },
+            application: [
+              {
+                application: `kibana-${kibanaIndexName}`,
+                resources: ['*'],
+                privileges: [`api:${kibanaVersion}:taskManager`],
+              },
+            ],
           });
 
         // Keep track of total access vs admin access

@@ -304,7 +304,7 @@ export class HttpService
             mergeMap(async () => {
               try {
                 // Potentially quite expensive
-                const result = generateOpenApiDocument(
+                const result = await generateOpenApiDocument(
                   this.httpServer.getRouters({ pluginId: query.pluginId }),
                   {
                     baseUrl,

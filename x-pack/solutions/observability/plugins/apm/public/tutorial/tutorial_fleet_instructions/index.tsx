@@ -16,17 +16,10 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { HttpStart } from '@kbn/core/public';
+import type { CustomComponentProps } from '@kbn/home-plugin/public';
 import React, { useEffect, useState } from 'react';
 import styled from '@emotion/styled';
 import type { APIReturnType } from '../../services/rest/create_call_apm_api';
-
-interface Props {
-  http: HttpStart;
-  basePath: string;
-  isDarkTheme: boolean;
-  kibanaVersion: string;
-}
 
 const CentralizedContainer = styled.div`
   display: flex;
@@ -36,7 +29,11 @@ const CentralizedContainer = styled.div`
 
 type APIResponseType = APIReturnType<'GET /internal/apm/fleet/migration_check'>;
 
-function TutorialFleetInstructions({ http, basePath, isDarkTheme, kibanaVersion }: Props) {
+export function TutorialFleetInstructions({
+  http,
+  basePath,
+  isDarkTheme,
+}: Pick<CustomComponentProps, 'http' | 'basePath' | 'isDarkTheme'>) {
   const [data, setData] = useState<APIResponseType | undefined>();
   const [isLoading, setIsLoading] = useState(false);
 
@@ -148,5 +145,3 @@ function TutorialFleetInstructions({ http, basePath, isDarkTheme, kibanaVersion 
     </EuiPanel>
   );
 }
-// eslint-disable-next-line import/no-default-export
-export default TutorialFleetInstructions;

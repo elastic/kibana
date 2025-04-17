@@ -26,8 +26,11 @@ export const getContentReferenceId = (
  * @returns ContentReferenceBlock
  */
 export const contentReferenceBlock = (
-  contentReference: ContentReference
-): ContentReferenceBlock => {
+  contentReference: ContentReference | undefined
+): ContentReferenceBlock | '' => {
+  if (!contentReference) {
+    return '';
+  }
   return `{reference(${contentReference.id})}`;
 };
 
@@ -36,7 +39,10 @@ export const contentReferenceBlock = (
  * @param contentReference A ContentReference
  * @returns the string: `Reference: <contentReferenceBlock>`
  */
-export const contentReferenceString = (contentReference: ContentReference) => {
+export const contentReferenceString = (contentReference: ContentReference | undefined) => {
+  if (!contentReference) {
+    return '';
+  }
   return `Citation: ${contentReferenceBlock(contentReference)}` as const;
 };
 
@@ -46,5 +52,28 @@ export const contentReferenceString = (contentReference: ContentReference) => {
  * @returns content with content references replaced with ''
  */
 export const removeContentReferences = (content: string) => {
-  return content.replaceAll(/\{reference\(.*?\)\}/g, '');
+  let result = '';
+  let i = 0;
+
+  while (i < content.length) {
+    const start = content.indexOf('{reference(', i);
+    if (start === -1) {
+      // No more "{reference(" → append the rest of the string
+      result += content.slice(i);
+      break;
+    }
+
+    const end = content.indexOf(')}', start);
+    if (end === -1) {
+      // If no closing ")}" is found, treat the rest as normal text
+      result += content.slice(i);
+      break;
+    }
+
+    // Append everything before "{reference(" and skip the matched part
+    result += content.slice(i, start);
+    i = end + 2; // Move index past ")}"
+  }
+
+  return result;
 };

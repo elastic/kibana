@@ -47,67 +47,65 @@ export async function getAgentsItems({
     apm: {
       events: [ProcessorEvent.metric],
     },
-    body: {
-      track_total_hits: false,
-      size: 0,
-      query: {
-        bool: {
-          filter: [
-            {
-              exists: {
-                field: AGENT_NAME,
-              },
+    track_total_hits: false,
+    size: 0,
+    query: {
+      bool: {
+        filter: [
+          {
+            exists: {
+              field: AGENT_NAME,
             },
-            {
-              exists: {
-                field: AGENT_VERSION,
-              },
+          },
+          {
+            exists: {
+              field: AGENT_VERSION,
             },
-            ...rangeQuery(start, end),
-            ...environmentQuery(environment),
-            ...kqlQuery(kuery),
-            ...(serviceName ? termQuery(SERVICE_NAME, serviceName) : []),
-            ...(agentLanguage ? termQuery(SERVICE_LANGUAGE_NAME, agentLanguage) : []),
-          ],
-        },
+          },
+          ...rangeQuery(start, end),
+          ...environmentQuery(environment),
+          ...kqlQuery(kuery),
+          ...(serviceName ? termQuery(SERVICE_NAME, serviceName) : []),
+          ...(agentLanguage ? termQuery(SERVICE_LANGUAGE_NAME, agentLanguage) : []),
+        ],
       },
-      aggs: {
-        sample: {
-          random_sampler: randomSampler,
-          aggs: {
-            services: {
-              terms: {
-                field: SERVICE_NAME,
-                size: MAX_NUMBER_OF_SERVICES,
+    },
+    aggs: {
+      sample: {
+        random_sampler: randomSampler,
+        aggs: {
+          services: {
+            terms: {
+              field: SERVICE_NAME,
+              size: MAX_NUMBER_OF_SERVICES,
+            },
+            aggs: {
+              instances: {
+                cardinality: {
+                  field: SERVICE_NODE_NAME,
+                },
               },
-              aggs: {
-                instances: {
-                  cardinality: {
-                    field: SERVICE_NODE_NAME,
+              agentTelemetryAutoVersions: {
+                terms: {
+                  field: LABEL_TELEMETRY_AUTO_VERSION,
+                },
+              },
+              agentVersions: {
+                terms: {
+                  field: AGENT_VERSION,
+                },
+              },
+              sample: {
+                top_metrics: {
+                  metrics: [{ field: AGENT_NAME } as const],
+                  sort: {
+                    '@timestamp': 'desc' as const,
                   },
                 },
-                agentTelemetryAutoVersions: {
-                  terms: {
-                    field: LABEL_TELEMETRY_AUTO_VERSION,
-                  },
-                },
-                agentVersions: {
-                  terms: {
-                    field: AGENT_VERSION,
-                  },
-                },
-                sample: {
-                  top_metrics: {
-                    metrics: [{ field: AGENT_NAME } as const],
-                    sort: {
-                      '@timestamp': 'desc' as const,
-                    },
-                  },
-                },
-                environments: {
-                  terms: {
-                    field: SERVICE_ENVIRONMENT,
-                  },
+              },
+              environments: {
+                terms: {
+                  field: SERVICE_ENVIRONMENT,
                 },
               },
             },

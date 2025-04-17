@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import type { IScopedClusterClient } from '@kbn/core/server';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
 import {
@@ -264,11 +264,9 @@ async function getValidationCheckMessages(
         index,
         size: 0,
         track_total_hits: true,
-        body: {
-          ...(source.runtime_mappings ? { runtime_mappings: source.runtime_mappings } : {}),
-          query,
-          aggs,
-        },
+        ...(source.runtime_mappings ? { runtime_mappings: source.runtime_mappings } : {}),
+        query,
+        aggs,
       },
       { maxRetries: 0 }
     );

@@ -61,16 +61,15 @@ export const getConversationById = async ({
 };
 
 /**
- * API call for getting all user conversations.
+ * API call for determining whether any user conversations exist
  *
- * @param {Object} options - The options object.
  * @param {HttpSetup} options.http - HttpSetup
  * @param {IToasts} [options.toasts] - IToasts
  * @param {AbortSignal} [options.signal] - AbortSignal
  *
- * @returns {Promise<FetchConversationsResponse>}
+ * @returns {Promise<boolean>}
  */
-export const getUserConversations = async ({
+export const getUserConversationsExist = async ({
   http,
   signal,
   toasts,
@@ -78,16 +77,24 @@ export const getUserConversations = async ({
   http: HttpSetup;
   toasts?: IToasts;
   signal?: AbortSignal | undefined;
-}) => {
+}): Promise<boolean> => {
   try {
-    return await http.fetch<FetchConversationsResponse>(
+    const conversation = await http.fetch<FetchConversationsResponse>(
       ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_FIND,
       {
         method: 'GET',
         version: API_VERSIONS.public.v1,
         signal,
+        query: {
+          per_page: 1,
+          page: 1,
+          // one field to keep request as small as possible
+          fields: ['title'],
+        },
       }
     );
+
+    return conversation.total > 0;
   } catch (error) {
     toasts?.addError(error.body && error.body.message ? new Error(error.body.message) : error, {
       title: i18n.translate('xpack.elasticAssistant.conversations.getUserConversationsError', {

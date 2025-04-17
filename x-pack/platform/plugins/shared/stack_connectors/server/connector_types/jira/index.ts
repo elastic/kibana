@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { TypeOf } from '@kbn/config-schema';
+import type { TypeOf } from '@kbn/config-schema';
 
 import type {
   ActionType as ConnectorType,
@@ -26,7 +26,7 @@ import {
 } from './schema';
 import { createExternalService } from './service';
 import { api } from './api';
-import {
+import type {
   ExecutorParams,
   ExecutorSubActionPushParams,
   JiraPublicConfigurationType,

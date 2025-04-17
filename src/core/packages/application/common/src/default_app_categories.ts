@@ -26,7 +26,7 @@ export const DEFAULT_APP_CATEGORIES: Record<string, AppCategory> = Object.freeze
       defaultMessage: 'Elasticsearch',
     }),
     order: 2000,
-    euiIconType: 'logoEnterpriseSearch',
+    euiIconType: 'logoElasticsearch',
   },
   observability: {
     id: 'observability',
@@ -43,6 +43,14 @@ export const DEFAULT_APP_CATEGORIES: Record<string, AppCategory> = Object.freeze
     }),
     order: 4000,
     euiIconType: 'logoSecurity',
+  },
+  chat: {
+    id: 'chat',
+    label: i18n.translate('core.ui.chatNavList.label', {
+      defaultMessage: 'Workchat',
+    }),
+    order: 4500,
+    euiIconType: 'logoElasticsearch',
   },
   management: {
     id: 'management',

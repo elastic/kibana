@@ -52,8 +52,8 @@ export const SessionPreviewContainer: FC = () => {
   const isEnterprisePlus = useLicense().isEnterprise();
   const isEnabled = sessionViewConfig && isEnterprisePlus;
 
-  const isNewNavigationEnabled = useIsExperimentalFeatureEnabled(
-    'newExpandableFlyoutNavigationEnabled'
+  const isNewNavigationEnabled = !useIsExperimentalFeatureEnabled(
+    'newExpandableFlyoutNavigationDisabled'
   );
 
   const dispatch = useDispatch();
@@ -88,6 +88,7 @@ export const SessionPreviewContainer: FC = () => {
     indexName,
     isFlyoutOpen: true,
     scopeId,
+    isPreviewMode,
   });
 
   const iconType = useMemo(() => {

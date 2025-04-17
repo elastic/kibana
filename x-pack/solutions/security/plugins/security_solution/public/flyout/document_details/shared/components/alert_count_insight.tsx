@@ -14,6 +14,8 @@ import {
   EuiText,
   type EuiFlexGroupProps,
   useEuiTheme,
+  EuiLink,
+  EuiToolTip,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { InsightDistributionBar } from './insight_distribution_bar';
@@ -37,7 +39,16 @@ import { useUserPrivileges } from '../../../../common/components/user_privileges
 import {
   INSIGHTS_ALERTS_COUNT_INVESTIGATE_IN_TIMELINE_BUTTON_TEST_ID,
   INSIGHTS_ALERTS_COUNT_TEXT_TEST_ID,
+  INSIGHTS_ALERTS_COUNT_NAVIGATION_BUTTON_TEST_ID,
 } from './test_ids';
+import type { EntityDetailsPath } from '../../../entity_details/shared/components/left_panel/left_panel_header';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import {
+  CspInsightLeftPanelSubTab,
+  EntityDetailsLeftPanelTab,
+} from '../../../entity_details/shared/components/left_panel/left_panel_header';
+
+const ORDER = ['Low', 'Medium', 'High', 'Critical'];
 
 interface AlertCountInsightProps {
   /**
@@ -56,6 +67,10 @@ interface AlertCountInsightProps {
    * The data-test-subj to use for the component.
    */
   ['data-test-subj']?: string;
+  /**
+   * The function to open the details panel.
+   */
+  openDetailsPanel: (path: EntityDetailsPath) => void;
 }
 
 /**
@@ -84,7 +99,12 @@ export const getFormattedAlertStats = (
     key: capitalize(key),
     count,
     color: getSeverityColor(key, euiTheme),
-  }));
+  })).sort((a, b) => {
+    const aIndex = ORDER.indexOf(a.key);
+    const bIndex = ORDER.indexOf(b.key);
+    return aIndex - bIndex;
+  });
+
   return alertStats;
 };
 
@@ -95,6 +115,7 @@ export const AlertCountInsight: React.FC<AlertCountInsightProps> = ({
   name,
   fieldName,
   direction,
+  openDetailsPanel,
   'data-test-subj': dataTestSubj,
 }) => {
   const { euiTheme } = useEuiTheme();
@@ -102,6 +123,9 @@ export const AlertCountInsight: React.FC<AlertCountInsightProps> = ({
     timelinePrivileges: { read: canUseTimeline },
   } = useUserPrivileges();
 
+  const isNewNavigationEnabled = !useIsExperimentalFeatureEnabled(
+    'newExpandableFlyoutNavigationDisabled'
+  );
   const entityFilter = useMemo(() => ({ field: fieldName, value: name }), [fieldName, name]);
   const { to, from } = useGlobalTime();
   const { signalIndexName } = useSignalIndex();
@@ -139,9 +163,35 @@ export const AlertCountInsight: React.FC<AlertCountInsightProps> = ({
     [fieldName, name]
   );
 
-  // renders either a button to open timeline or just plain text depending on the user's timeline privileges
+  // renders either a button to go to host alert details, open timeline or just plain text depending on the user's timeline privileges
   const alertCount = useMemo(() => {
     const formattedAlertCount = <FormattedCount count={totalAlertCount} />;
+
+    if (isNewNavigationEnabled) {
+      return (
+        <EuiToolTip
+          content={
+            <FormattedMessage
+              id="xpack.securitySolution.flyout.insights.alert.alertCountTooltip"
+              defaultMessage="Opens {count, plural, one {this alert} other {these alerts}} in a new flyout"
+              values={{ count: totalAlertCount }}
+            />
+          }
+        >
+          <EuiLink
+            data-test-subj={INSIGHTS_ALERTS_COUNT_NAVIGATION_BUTTON_TEST_ID}
+            onClick={() =>
+              openDetailsPanel({
+                tab: EntityDetailsLeftPanelTab.CSP_INSIGHTS,
+                subTab: CspInsightLeftPanelSubTab.ALERTS,
+              })
+            }
+          >
+            {formattedAlertCount}
+          </EuiLink>
+        </EuiToolTip>
+      );
+    }
 
     if (!canUseTimeline) {
       return (
@@ -160,7 +210,7 @@ export const AlertCountInsight: React.FC<AlertCountInsightProps> = ({
         {formattedAlertCount}
       </InvestigateInTimelineButton>
     );
-  }, [canUseTimeline, dataProviders, totalAlertCount]);
+  }, [canUseTimeline, dataProviders, totalAlertCount, isNewNavigationEnabled, openDetailsPanel]);
 
   if (!isLoading && totalAlertCount === 0) return null;
 

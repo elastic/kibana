@@ -10,7 +10,7 @@
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import { cloneDeep, isPlainObject } from 'lodash';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import { Assign } from 'utility-types';
 import { dateHistogramInterval } from '@kbn/data-plugin/common';
 import { TimeCache } from './time_cache';
@@ -231,7 +231,7 @@ export class EsQueryParser {
    */
   _injectContextVars(
     obj: Assign<
-      Query | estypes.SearchRequest['body']['aggs'],
+      Query | estypes.SearchRequest['aggs'],
       {
         interval?: { '%autointerval%': true | number } | string;
       }

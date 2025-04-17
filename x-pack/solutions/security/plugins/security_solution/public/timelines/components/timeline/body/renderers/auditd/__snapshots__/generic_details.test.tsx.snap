@@ -10,6 +10,7 @@ exports[`GenericDetails rendering it renders the default AuditAcquiredCredsDetai
     processExecutable="/usr/sbin/sshd"
     processPid={21202}
     result="success"
+    scopeId="test"
     secondary="alice"
     session="340"
     text="generic-text-123"

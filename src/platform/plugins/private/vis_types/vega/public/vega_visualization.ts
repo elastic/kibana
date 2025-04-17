@@ -95,7 +95,7 @@ export const createVegaVisualization = (
           const { VegaMapView } = await import('./vega_view/vega_map_view/view');
           this.vegaView = new VegaMapView(vegaViewParams);
         } else {
-          const { VegaView: VegaViewClass } = await import('./vega_view/vega_view');
+          const { VegaView: VegaViewClass } = await import('./async_services');
           this.vegaView = new VegaViewClass(vegaViewParams);
         }
         await this.vegaView?.init();

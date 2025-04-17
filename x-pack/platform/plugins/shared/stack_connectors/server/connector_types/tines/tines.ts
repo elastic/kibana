@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { ServiceParams, SubActionConnector } from '@kbn/actions-plugin/server';
-import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
+import type { ServiceParams } from '@kbn/actions-plugin/server';
+import { SubActionConnector } from '@kbn/actions-plugin/server';
+import type { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 import type { AxiosError } from 'axios';
-import { SubActionRequestParams } from '@kbn/actions-plugin/server/sub_action_framework/types';
+import type { SubActionRequestParams } from '@kbn/actions-plugin/server/sub_action_framework/types';
 import {
   TinesStoriesActionParamsSchema,
   TinesWebhooksActionParamsSchema,

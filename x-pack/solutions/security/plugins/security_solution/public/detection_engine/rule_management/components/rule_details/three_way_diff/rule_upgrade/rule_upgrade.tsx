@@ -18,6 +18,7 @@ import { RuleUpgradeInfoBar } from './rule_upgrade_info_bar';
 import { RuleUpgradeCallout } from './rule_upgrade_callout';
 import { FieldUpgrade } from './field_upgrade';
 import { FieldUpgradeContextProvider } from './field_upgrade_context';
+import { RuleHasMissingBaseVersionCallout } from './missing_base_version_callout';
 
 interface RuleUpgradeProps {
   ruleUpgradeState: RuleUpgradeState;
@@ -45,6 +46,12 @@ export const RuleUpgrade = memo(function RuleUpgrade({
         targetVersionNumber={ruleUpgradeState.target_rule.version}
       />
       <EuiSpacer size="s" />
+      {!ruleUpgradeState.has_base_version && (
+        <>
+          <RuleHasMissingBaseVersionCallout />
+          <EuiSpacer size="s" />
+        </>
+      )}
       <RuleUpgradeCallout
         numOfSolvableConflicts={numOfSolvableConflicts}
         numOfNonSolvableConflicts={numOfNonSolvableConflicts}

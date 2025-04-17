@@ -31,14 +31,16 @@
       "expressions",
       "lens",
       "controls",
-      "embeddable"
+      "embeddable",
+      "fieldsMetadata"
     ],
     "optionalPlugins": [
       "cloud",
       "features",
       "home",
       "spaces",
-      "serverless"
+      "serverless",
+      "share"
     ],
     "requiredBundles": [
       "alerting",

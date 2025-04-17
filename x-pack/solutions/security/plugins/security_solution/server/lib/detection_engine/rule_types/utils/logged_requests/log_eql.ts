@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EqlSearchRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { EqlSearchRequest } from '@elastic/elasticsearch/lib/api/types';
 
 export const logEqlRequest = (request: EqlSearchRequest): string => {
   const allowNoIndices =

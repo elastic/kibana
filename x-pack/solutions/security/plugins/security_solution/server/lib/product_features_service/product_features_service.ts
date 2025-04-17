@@ -4,17 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
- */
 
 import type { AuthzEnabled, HttpServiceSetup, Logger, RouteAuthz } from '@kbn/core/server';
 import { hiddenTypes as filesSavedObjectTypes } from '@kbn/files-plugin/server/saved_objects';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
-import type { ProductFeatureKeyType } from '@kbn/security-solution-features';
+import type {
+  ProductFeatureKeyType,
+  ProductFeaturesConfigurator,
+} from '@kbn/security-solution-features';
 import {
   getAssistantFeature,
   getAttackDiscoveryFeature,
@@ -25,12 +22,13 @@ import {
   getSecurityV2Feature,
   getTimelineFeature,
   getNotesFeature,
+  getSiemMigrationsFeature,
 } from '@kbn/security-solution-features/product_features';
+import { API_ACTION_PREFIX } from '@kbn/security-solution-features/actions';
 import type { RecursiveReadonly } from '@kbn/utility-types';
 import type { ExperimentalFeatures } from '../../../common';
 import { APP_ID } from '../../../common';
 import { ProductFeatures } from './product_features';
-import type { ProductFeaturesConfigurator } from './types';
 import {
   securityDefaultSavedObjects,
   securityNotesSavedObjects,
@@ -38,9 +36,6 @@ import {
   securityV1SavedObjects,
 } from './security_saved_objects';
 import { casesApiTags, casesUiCapabilities } from './cases_privileges';
-
-// The prefix ("securitySolution-") used by all the Security Solution API action privileges.
-export const API_ACTION_PREFIX = `${APP_ID}-`;
 
 export class ProductFeaturesService {
   private securityProductFeatures: ProductFeatures;
@@ -52,6 +47,8 @@ export class ProductFeaturesService {
   private attackDiscoveryProductFeatures: ProductFeatures;
   private timelineProductFeatures: ProductFeatures;
   private notesProductFeatures: ProductFeatures;
+  private siemMigrationsProductFeatures: ProductFeatures;
+
   private productFeatures?: Set<ProductFeatureKeyType>;
 
   constructor(
@@ -155,6 +152,14 @@ export class ProductFeaturesService {
       notesFeature.baseKibanaFeature,
       notesFeature.baseKibanaSubFeatureIds
     );
+
+    const siemMigrationsFeature = getSiemMigrationsFeature();
+    this.siemMigrationsProductFeatures = new ProductFeatures(
+      this.logger,
+      siemMigrationsFeature.subFeaturesMap,
+      siemMigrationsFeature.baseKibanaFeature,
+      siemMigrationsFeature.baseKibanaSubFeatureIds
+    );
   }
 
   public init(featuresSetup: FeaturesPluginSetup) {
@@ -167,6 +172,7 @@ export class ProductFeaturesService {
     this.attackDiscoveryProductFeatures.init(featuresSetup);
     this.timelineProductFeatures.init(featuresSetup);
     this.notesProductFeatures.init(featuresSetup);
+    this.siemMigrationsProductFeatures.init(featuresSetup);
   }
 
   public setProductFeaturesConfigurator(configurator: ProductFeaturesConfigurator) {
@@ -191,6 +197,12 @@ export class ProductFeaturesService {
     const notesProductFeaturesConfig = configurator.notes();
     this.notesProductFeatures.setConfig(notesProductFeaturesConfig);
 
+    let siemMigrationsProductFeaturesConfig = new Map();
+    if (!this.experimentalFeatures.siemMigrationsDisabled) {
+      siemMigrationsProductFeaturesConfig = configurator.siemMigrations();
+      this.siemMigrationsProductFeatures.setConfig(siemMigrationsProductFeaturesConfig);
+    }
+
     this.productFeatures = new Set<ProductFeatureKeyType>(
       Object.freeze([
         ...securityProductFeaturesConfig.keys(),
@@ -199,6 +211,7 @@ export class ProductFeaturesService {
         ...attackDiscoveryProductFeaturesConfig.keys(),
         ...timelineProductFeaturesConfig.keys(),
         ...notesProductFeaturesConfig.keys(),
+        ...siemMigrationsProductFeaturesConfig.keys(),
       ]) as readonly ProductFeatureKeyType[]
     );
   }
@@ -219,7 +232,8 @@ export class ProductFeaturesService {
       this.securityAssistantProductFeatures.isActionRegistered(action) ||
       this.attackDiscoveryProductFeatures.isActionRegistered(action) ||
       this.timelineProductFeatures.isActionRegistered(action) ||
-      this.notesProductFeatures.isActionRegistered(action)
+      this.notesProductFeatures.isActionRegistered(action) ||
+      this.siemMigrationsProductFeatures.isActionRegistered(action)
     );
   }
 
@@ -276,12 +290,24 @@ export class ProductFeaturesService {
         const disabled = authz.requiredPrivileges.some((privilegeEntry) => {
           if (typeof privilegeEntry === 'object') {
             if (privilegeEntry.allRequired) {
-              if (privilegeEntry.allRequired.some(isApiPrivilegeSecurityAndDisabled)) {
+              if (
+                privilegeEntry.allRequired.some((entry) =>
+                  typeof entry === 'string'
+                    ? isApiPrivilegeSecurityAndDisabled(entry)
+                    : entry.anyOf.every(isApiPrivilegeSecurityAndDisabled)
+                )
+              ) {
                 return true;
               }
             }
             if (privilegeEntry.anyRequired) {
-              if (privilegeEntry.anyRequired.every(isApiPrivilegeSecurityAndDisabled)) {
+              if (
+                privilegeEntry.anyRequired.every((entry) =>
+                  typeof entry === 'string'
+                    ? isApiPrivilegeSecurityAndDisabled(entry)
+                    : entry.allOf.some(isApiPrivilegeSecurityAndDisabled)
+                )
+              ) {
                 return true;
               }
             }

@@ -6,12 +6,14 @@
  */
 
 import { v4 as uuidV4 } from 'uuid';
-import { ElasticsearchClient } from '@kbn/core/server';
-import { TaskManagerPlugin, TaskManagerStartContract } from '../plugin';
+import type { ElasticsearchClient } from '@kbn/core/server';
+import type { TaskManagerStartContract } from '../plugin';
+import { TaskManagerPlugin } from '../plugin';
 import { injectTask, retry, setupTestServers } from './lib';
-import { TestElasticsearchUtils, TestKibanaUtils } from '@kbn/core-test-helpers-kbn-server';
-import { ConcreteTaskInstance, TaskStatus } from '../task';
-import { CreateWorkloadAggregatorOpts } from '../monitoring/workload_statistics';
+import type { TestElasticsearchUtils, TestKibanaUtils } from '@kbn/core-test-helpers-kbn-server';
+import type { ConcreteTaskInstance } from '../task';
+import { TaskStatus } from '../task';
+import type { CreateWorkloadAggregatorOpts } from '../monitoring/workload_statistics';
 
 const taskManagerStartSpy = jest.spyOn(TaskManagerPlugin.prototype, 'start');
 
@@ -114,8 +116,16 @@ describe.skip('unrecognized task types', () => {
     taskIdsToRemove.push(notRegisteredTypeId);
 
     // To be sure that the background task that marks removed tasks as unrecognized has run after the tasks were created
-    const runSoonResponse = await taskManagerPlugin.runSoon('mark_removed_tasks_as_unrecognized');
-    expect(runSoonResponse).toEqual({ id: 'mark_removed_tasks_as_unrecognized' });
+    await retry(async () => {
+      try {
+        const runSoonResponse = await taskManagerPlugin.runSoon(
+          'mark_removed_tasks_as_unrecognized'
+        );
+        expect(runSoonResponse).toEqual({ id: 'mark_removed_tasks_as_unrecognized' });
+      } catch (err) {
+        // ignore errors and retry
+      }
+    });
 
     await retry(async () => {
       const task = await getTask(kibanaServer.coreStart.elasticsearch.client.asInternalUser);
@@ -143,17 +153,15 @@ describe.skip('unrecognized task types', () => {
 async function getTask(esClient: ElasticsearchClient) {
   const response = await esClient.search<{ task: ConcreteTaskInstance }>({
     index: '.kibana_task_manager',
-    body: {
-      query: {
-        bool: {
-          filter: [
-            {
-              term: {
-                'task.taskType': 'sampleTaskRemovedType',
-              },
+    query: {
+      bool: {
+        filter: [
+          {
+            term: {
+              'task.taskType': 'sampleTaskRemovedType',
             },
-          ],
-        },
+          },
+        ],
       },
     },
   });

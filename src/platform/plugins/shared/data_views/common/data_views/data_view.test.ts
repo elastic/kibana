@@ -396,6 +396,22 @@ describe('IndexPattern', () => {
       indexPattern.removeRuntimeField(newField);
     });
 
+    test('add and remove a popularity score from a runtime field', () => {
+      const newField = 'new_field_test';
+      indexPattern.addRuntimeField(newField, {
+        ...runtimeWithAttrs,
+        popularity: 10,
+      });
+      expect(indexPattern.getFieldByName(newField)?.count).toEqual(10);
+      indexPattern.setFieldCount(newField, 20);
+      expect(indexPattern.getFieldByName(newField)?.count).toEqual(20);
+      indexPattern.setFieldCount(newField, null);
+      expect(indexPattern.getFieldByName(newField)?.count).toEqual(0);
+      indexPattern.setFieldCount(newField, undefined);
+      expect(indexPattern.getFieldByName(newField)?.count).toEqual(0);
+      indexPattern.removeRuntimeField(newField);
+    });
+
     test('add and remove composite runtime field as new fields', () => {
       const fieldCount = indexPattern.fields.length;
       indexPattern.addRuntimeField('new_field', runtimeCompositeWithAttrs);
@@ -504,6 +520,19 @@ describe('IndexPattern', () => {
       const dataView1 = create('test1', spec);
       const dataView2 = create('test2', spec);
       expect(dataView1.sourceFilters).not.toBe(dataView2.sourceFilters);
+    });
+
+    test('getting spec without fields does not modify fieldAttrs', () => {
+      const fieldAttrs = { bytes: { count: 5, customLabel: 'test_bytes' }, agent: { count: 1 } };
+      const dataView = new DataView({
+        fieldFormats: fieldFormatsMock,
+        spec: {
+          fieldAttrs,
+        },
+      });
+      const spec = dataView.toSpec(false);
+      expect(spec.fieldAttrs).toEqual({ bytes: { customLabel: fieldAttrs.bytes.customLabel } });
+      expect(JSON.parse(dataView.getAsSavedObjectBody().fieldAttrs!)).toEqual(fieldAttrs);
     });
   });
 

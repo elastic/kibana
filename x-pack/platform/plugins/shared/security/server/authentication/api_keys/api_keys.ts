@@ -98,11 +98,7 @@ export class APIKeys implements APIKeysType {
       `Testing if API Keys are enabled by attempting to invalidate a non-existant key: ${id}`
     );
     try {
-      await this.clusterClient.asInternalUser.security.invalidateApiKey({
-        body: {
-          ids: [id],
-        },
-      });
+      await this.clusterClient.asInternalUser.security.invalidateApiKey({ ids: [id] });
       return true;
     } catch (e) {
       if (this.doesErrorIndicateAPIKeysAreDisabled(e)) {
@@ -170,18 +166,16 @@ export class APIKeys implements APIKeysType {
         });
       } else {
         result = await scopedClusterClient.asCurrentUser.security.createApiKey({
-          body: {
-            name,
-            expiration,
-            metadata,
-            role_descriptors: isCreateRestAPIKeyParams(createParams)
-              ? createParams.role_descriptors
-              : this.parseRoleDescriptorsWithKibanaPrivileges(
-                  createParams.kibana_role_descriptors,
-                  this.kibanaFeatures,
-                  false
-                ),
-          },
+          name,
+          expiration,
+          metadata,
+          role_descriptors: isCreateRestAPIKeyParams(createParams)
+            ? createParams.role_descriptors
+            : this.parseRoleDescriptorsWithKibanaPrivileges(
+                createParams.kibana_role_descriptors,
+                this.kibanaFeatures,
+                false
+              ),
         });
       }
 
@@ -296,7 +290,7 @@ export class APIKeys implements APIKeysType {
     // User needs `manage_api_key` or `grant_api_key` privilege to use this API
     let result: GrantAPIKeyResult;
     try {
-      result = await this.clusterClient.asInternalUser.security.grantApiKey({ body: params });
+      result = await this.clusterClient.asInternalUser.security.grantApiKey(params);
       this.logger.debug('API key was granted successfully');
     } catch (e) {
       this.logger.error(`Failed to grant API key: ${e.message}`);
@@ -321,9 +315,7 @@ export class APIKeys implements APIKeysType {
     try {
       // User needs `manage_api_key` privilege to use this API
       result = await this.clusterClient.asScoped(request).asCurrentUser.security.invalidateApiKey({
-        body: {
-          ids: params.ids,
-        },
+        ids: params.ids,
       });
       this.logger.debug(
         `API keys by ids=[${params.ids.join(', ')}] was invalidated successfully as current user`
@@ -356,9 +348,7 @@ export class APIKeys implements APIKeysType {
     try {
       // Internal user needs `cluster:admin/xpack/security/api_key/invalidate` privilege to use this API
       result = await this.clusterClient.asInternalUser.security.invalidateApiKey({
-        body: {
-          ids: params.ids,
-        },
+        ids: params.ids,
       });
       this.logger.debug(`API keys by ids=[${params.ids.join(', ')}] was invalidated successfully`);
     } catch (e) {

@@ -11,12 +11,8 @@ import { buildDataTableRecord } from '@kbn/discover-utils';
 import type { EuiThemeComputed } from '@elastic/eui';
 import { createStubIndexPattern } from '@kbn/data-views-plugin/common/data_view.stub';
 import { createDataViewDataSource, createEsqlDataSource } from '../../../../../common/data_sources';
-import {
-  DataSourceCategory,
-  DataSourceProfileProviderParams,
-  RootContext,
-  SolutionType,
-} from '../../../profiles';
+import type { DataSourceProfileProviderParams, RootContext } from '../../../profiles';
+import { DataSourceCategory, SolutionType } from '../../../profiles';
 import { createContextAwarenessMocks } from '../../../__mocks__';
 import { createLogsDataSourceProfileProvider } from './profile';
 import { DataGridDensity } from '@kbn/unified-data-table';
@@ -172,7 +168,7 @@ describe('logsDataSourceProfileProvider', () => {
       });
 
       expect(getRowIndicator).toBeDefined();
-      expect(getRowIndicator?.(row, euiTheme)).toEqual({ color: '#90b0d1', label: 'Info' });
+      expect(getRowIndicator?.(row, euiTheme)).toEqual({ color: '#90bdff', label: 'Info' });
     });
 
     it('should not return a color for a missing log level in the document', () => {

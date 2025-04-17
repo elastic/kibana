@@ -37,11 +37,9 @@ describe('FetchIndicatorByIdService', () => {
         expect(mockedSearchService.search).toHaveBeenCalledWith(
           expect.objectContaining({
             params: {
-              body: {
-                fields: [{ field: '*', include_unmapped: true }],
-                query: expect.objectContaining({ bool: expect.anything() }),
-                size: 1,
-              },
+              fields: [{ field: '*', include_unmapped: true }],
+              query: expect.objectContaining({ bool: expect.anything() }),
+              size: 1,
             },
           }),
           expect.anything()

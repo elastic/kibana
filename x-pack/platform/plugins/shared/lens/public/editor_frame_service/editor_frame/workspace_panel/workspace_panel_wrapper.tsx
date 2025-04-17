@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import './workspace_panel_wrapper.scss';
-
 import React, { useCallback } from 'react';
-import { EuiPageTemplate, EuiFlexGroup, EuiFlexItem, EuiButton } from '@elastic/eui';
+import { EuiPageTemplate, EuiFlexGroup, EuiFlexItem, EuiButton, useEuiTheme } from '@elastic/eui';
 import classNames from 'classnames';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ChartSizeSpec } from '@kbn/chart-expressions-common';
@@ -74,11 +72,10 @@ const getAspectRatioStyles = ({ x, y }: { x: number; y: number }) => {
 export function VisualizationToolbar(props: {
   activeVisualization: Visualization | null;
   framePublicAPI: FramePublicAPI;
-  isFixedPosition?: boolean;
 }) {
   const dispatchLens = useLensDispatch();
   const visualization = useLensSelector(selectVisualizationState);
-  const { activeVisualization, isFixedPosition } = props;
+  const { activeVisualization } = props;
   const setVisualizationState = useCallback(
     (newState: unknown) => {
       if (!activeVisualization) {
@@ -99,12 +96,7 @@ export function VisualizationToolbar(props: {
   return (
     <>
       {ToolbarComponent && (
-        <EuiFlexItem
-          grow={false}
-          className={classNames({
-            'lnsVisualizationToolbar--fixed': isFixedPosition,
-          })}
-        >
+        <EuiFlexItem grow={false}>
           {ToolbarComponent({
             frame: props.framePublicAPI,
             state: visualization.state,
@@ -127,6 +119,9 @@ export function WorkspacePanelWrapper({
   displayOptions,
 }: WorkspacePanelWrapperProps) {
   const dispatchLens = useLensDispatch();
+
+  const euiThemeContext = useEuiTheme();
+  const { euiTheme } = euiThemeContext;
 
   const changesApplied = useLensSelector(selectChangesApplied);
   const autoApplyEnabled = useLensSelector(selectAutoApplyEnabled);
@@ -180,9 +175,16 @@ export function WorkspacePanelWrapper({
             alignItems="flexEnd"
             gutterSize="s"
             direction="row"
-            className={classNames('lnsWorkspacePanelWrapper__toolbar', {
-              'lnsWorkspacePanelWrapper__toolbar--fullscreen': isFullscreen,
-            })}
+            css={css`
+              margin-bottom: ${euiTheme.size.xs};
+              ${isFullscreen &&
+              `
+                background-color: ${euiTheme.colors.emptyShade};
+                justify-content: flex-end;
+                margin-bottom: 0;
+                padding: ${euiTheme.size.s} ${euiTheme.size.s} 0;
+              `}
+            `}
             responsive={false}
           >
             {!isFullscreen && (
@@ -238,10 +240,30 @@ export function WorkspacePanelWrapper({
         contentProps={{
           className: 'lnsWorkspacePanelWrapper__content',
         }}
-        className={classNames('lnsWorkspacePanelWrapper stretch-for-sharing', {
-          'lnsWorkspacePanelWrapper--fullscreen': isFullscreen,
-        })}
-        css={{ height: '100%' }}
+        className={classNames('lnsWorkspacePanelWrapper stretch-for-sharing')}
+        css={css`
+          height: 100%;
+          margin-bottom: ${euiTheme.size.base};
+          display: flex;
+          flex-direction: column;
+          position: relative; // For positioning the dnd overlay
+          min-height: 400px;
+          overflow: visible;
+          height: 100%;
+
+          .lnsWorkspacePanelWrapper__content {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+          }
+          ${isFullscreen &&
+          `
+            margin-bottom: 0; 
+            .lnsWorkspacePanelWrapper__content {
+              padding: ${euiTheme.size.s}
+            }
+          `}
+        `}
         color="transparent"
       >
         <EuiFlexGroup

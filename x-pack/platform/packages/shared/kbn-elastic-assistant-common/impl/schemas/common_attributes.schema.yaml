@@ -33,3 +33,11 @@ components:
       enum:
         - 'asc'
         - 'desc'
+
+    ScreenContext:
+      description: User screen context
+      type: object
+      properties:
+        timeZone:
+          description: The local timezone of the user
+          type: string

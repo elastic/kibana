@@ -12,7 +12,7 @@ import { type EsDocSearchProps, buildSearchBody, useEsDocSearch } from './use_es
 import { Subject } from 'rxjs';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { ElasticRequestState } from '@kbn/unified-doc-viewer';
-import { buildDataTableRecord } from '@kbn/discover-utils';
+import { buildDataTableRecord, DataTableRecord } from '@kbn/discover-utils';
 import { setUnifiedDocViewerServices } from '../plugin';
 import { UnifiedDocViewerServices } from '../types';
 
@@ -36,39 +36,37 @@ describe('Test of <Doc /> helper / hook', () => {
     const actual = buildSearchBody('1', index, dataView);
     expect(actual).toMatchInlineSnapshot(`
       Object {
-        "body": Object {
-          "_source": true,
-          "fields": Array [
-            Object {
-              "field": "*",
-              "include_unmapped": true,
-            },
-          ],
-          "query": Object {
-            "bool": Object {
-              "filter": Array [
-                Object {
-                  "ids": Object {
-                    "values": Array [
-                      "1",
-                    ],
-                  },
-                },
-                Object {
-                  "term": Object {
-                    "_index": "test-index",
-                  },
-                },
-              ],
-            },
+        "_source": true,
+        "fields": Array [
+          Object {
+            "field": "*",
+            "include_unmapped": true,
           },
-          "runtime_mappings": Object {},
-          "script_fields": Array [],
-          "stored_fields": Array [
-            "*",
-          ],
-          "version": true,
+        ],
+        "query": Object {
+          "bool": Object {
+            "filter": Array [
+              Object {
+                "ids": Object {
+                  "values": Array [
+                    "1",
+                  ],
+                },
+              },
+              Object {
+                "term": Object {
+                  "_index": "test-index",
+                },
+              },
+            ],
+          },
         },
+        "runtime_mappings": Object {},
+        "script_fields": Array [],
+        "stored_fields": Array [
+          "*",
+        ],
+        "version": true,
       }
     `);
   });
@@ -91,46 +89,44 @@ describe('Test of <Doc /> helper / hook', () => {
     const actual = buildSearchBody('1', index, dataView);
     expect(actual).toMatchInlineSnapshot(`
       Object {
-        "body": Object {
-          "_source": true,
-          "fields": Array [
-            Object {
-              "field": "*",
-              "include_unmapped": true,
-            },
-          ],
-          "query": Object {
-            "bool": Object {
-              "filter": Array [
-                Object {
-                  "ids": Object {
-                    "values": Array [
-                      "1",
-                    ],
-                  },
-                },
-                Object {
-                  "term": Object {
-                    "_index": "test-index",
-                  },
-                },
-              ],
-            },
+        "_source": true,
+        "fields": Array [
+          Object {
+            "field": "*",
+            "include_unmapped": true,
           },
-          "runtime_mappings": Object {
-            "myRuntimeField": Object {
-              "script": Object {
-                "source": "emit(10.0)",
+        ],
+        "query": Object {
+          "bool": Object {
+            "filter": Array [
+              Object {
+                "ids": Object {
+                  "values": Array [
+                    "1",
+                  ],
+                },
               },
-              "type": "double",
-            },
+              Object {
+                "term": Object {
+                  "_index": "test-index",
+                },
+              },
+            ],
           },
-          "script_fields": Array [],
-          "stored_fields": Array [
-            "*",
-          ],
-          "version": true,
         },
+        "runtime_mappings": Object {
+          "myRuntimeField": Object {
+            "script": Object {
+              "source": "emit(10.0)",
+            },
+            "type": "double",
+          },
+        },
+        "script_fields": Array [],
+        "stored_fields": Array [
+          "*",
+        ],
+        "version": true,
       }
     `);
   });
@@ -206,18 +202,16 @@ describe('Test of <Doc /> helper / hook', () => {
       getComputedFields: () => [],
       getIndexPattern: () => index,
     };
-    const props = {
+    const props: EsDocSearchProps = {
       id: '1',
       index: 'index1',
-      dataView,
-      textBasedHits: [
-        {
-          id: '1',
-          raw: { field1: 1, field2: 2 },
-          flattened: { field1: 1, field2: 2 },
-        },
-      ],
-    } as unknown as EsDocSearchProps;
+      dataView: dataView as unknown as EsDocSearchProps['dataView'],
+      esqlHit: {
+        id: '1',
+        raw: { field1: 1, field2: 2 },
+        flattened: { field1: 1, field2: 2 },
+      } as DataTableRecord,
+    };
 
     const hook = renderHook((p: EsDocSearchProps) => useEsDocSearch(p), {
       initialProps: props,

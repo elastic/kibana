@@ -71,32 +71,30 @@ function getServiceMapDependencyNodeInfoForTimeRange({
       apm: {
         events: [ProcessorEvent.metric],
       },
-      body: {
-        track_total_hits: false,
-        size: 0,
-        query: {
-          bool: {
-            filter: [
-              ...getDocumentTypeFilterForServiceDestinationStatistics(true),
-              {
-                term: { [SPAN_DESTINATION_SERVICE_RESOURCE]: dependencyName },
-              },
-              ...rangeQuery(startWithOffset, endWithOffset),
-              ...environmentQuery(environment),
-            ],
-          },
-        },
-        aggs: {
-          ...subAggs,
-          timeseries: {
-            date_histogram: {
-              field: '@timestamp',
-              fixed_interval: intervalString,
-              min_doc_count: 0,
-              extended_bounds: { min: startWithOffset, max: endWithOffset },
+      track_total_hits: false,
+      size: 0,
+      query: {
+        bool: {
+          filter: [
+            ...getDocumentTypeFilterForServiceDestinationStatistics(true),
+            {
+              term: { [SPAN_DESTINATION_SERVICE_RESOURCE]: dependencyName },
             },
-            aggs: subAggs,
+            ...rangeQuery(startWithOffset, endWithOffset),
+            ...environmentQuery(environment),
+          ],
+        },
+      },
+      aggs: {
+        ...subAggs,
+        timeseries: {
+          date_histogram: {
+            field: '@timestamp',
+            fixed_interval: intervalString,
+            min_doc_count: 0,
+            extended_bounds: { min: startWithOffset, max: endWithOffset },
           },
+          aggs: subAggs,
         },
       },
     });

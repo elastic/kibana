@@ -5,24 +5,27 @@
  * 2.0.
  */
 
-import React, { Fragment, useMemo, useRef, useState } from 'react';
+import React, { Fragment, useCallback, useMemo, useRef, useState } from 'react';
 import { EuiCallOut, EuiConfirmModal, EuiSpacer, EuiIconTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useHistory } from 'react-router-dom';
 
 import {
   useStartServices,
-  sendDeletePackagePolicy,
   sendDeleteAgentPolicy,
   useConfig,
   sendGetAgents,
   useMultipleAgentPolicies,
+  useLink,
+  useDeletePackagePolicyMutation,
 } from '../hooks';
 import { AGENTS_PREFIX } from '../../common/constants';
 import type { AgentPolicy } from '../types';
 
 interface Props {
   agentPolicies?: AgentPolicy[];
+  from?: 'fleet-policy-list' | undefined;
   children: (deletePackagePoliciesPrompt: DeletePackagePoliciesPrompt) => React.ReactElement;
 }
 
@@ -35,12 +38,15 @@ type OnSuccessCallback = (packagePoliciesDeleted: string[]) => void;
 
 export const PackagePolicyDeleteProvider: React.FunctionComponent<Props> = ({
   agentPolicies,
+  from,
   children,
 }) => {
   const { notifications } = useStartServices();
   const {
     agents: { enabled: isFleetEnabled },
   } = useConfig();
+  const history = useHistory();
+  const { getPath } = useLink();
   const [packagePolicies, setPackagePolicies] = useState<string[]>([]);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [isLoadingAgentsCount, setIsLoadingAgentsCount] = useState<boolean>(false);
@@ -48,6 +54,8 @@ export const PackagePolicyDeleteProvider: React.FunctionComponent<Props> = ({
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const onSuccessCallback = useRef<OnSuccessCallback | null>(null);
   const { canUseMultipleAgentPolicies } = useMultipleAgentPolicies();
+
+  const { mutateAsync: deletePackagePolicyMutationAsync } = useDeletePackagePolicyMutation();
 
   const isShared = useMemo(() => {
     if (agentPolicies?.length !== 1) {
@@ -112,77 +120,84 @@ export const PackagePolicyDeleteProvider: React.FunctionComponent<Props> = ({
     [agentPolicies]
   );
 
-  const deletePackagePolicies = useMemo(
-    () => async () => {
-      setIsLoading(true);
+  const deletePackagePolicies = useCallback(async () => {
+    setIsLoading(true);
 
-      try {
-        const { data } = await sendDeletePackagePolicy({ packagePolicyIds: packagePolicies });
-        const successfulResults = data?.filter((result) => result.success) || [];
-        const failedResults = data?.filter((result) => !result.success) || [];
+    try {
+      const data = await deletePackagePolicyMutationAsync({ packagePolicyIds: packagePolicies });
+      const successfulResults = data?.filter((result) => result.success) || [];
+      const failedResults = data?.filter((result) => !result.success) || [];
 
-        if (successfulResults.length) {
-          const hasMultipleSuccesses = successfulResults.length > 1;
-          const successMessage = hasMultipleSuccesses
-            ? i18n.translate('xpack.fleet.deletePackagePolicy.successMultipleNotificationTitle', {
-                defaultMessage: 'Deleted {count} integrations',
-                values: { count: successfulResults.length },
-              })
-            : i18n.translate('xpack.fleet.deletePackagePolicy.successSingleNotificationTitle', {
-                defaultMessage: "Deleted integration ''{id}''",
-                values: { id: successfulResults[0].name || successfulResults[0].id },
-              });
+      if (successfulResults.length) {
+        const hasMultipleSuccesses = successfulResults.length > 1;
+        const successMessage = hasMultipleSuccesses
+          ? i18n.translate('xpack.fleet.deletePackagePolicy.successMultipleNotificationTitle', {
+              defaultMessage: 'Deleted {count} integrations',
+              values: { count: successfulResults.length },
+            })
+          : i18n.translate('xpack.fleet.deletePackagePolicy.successSingleNotificationTitle', {
+              defaultMessage: "Deleted integration ''{id}''",
+              values: { id: successfulResults[0].name || successfulResults[0].id },
+            });
 
-          const agentlessPolicy = agentPolicies?.find(
-            (policy) => policy.supports_agentless === true
-          );
+        const agentlessPolicy = agentPolicies?.find((policy) => policy.supports_agentless === true);
 
-          if (!!agentlessPolicy) {
-            try {
-              await sendDeleteAgentPolicy({ agentPolicyId: agentlessPolicy.id });
-            } catch (e) {
-              notifications.toasts.addDanger(
-                i18n.translate(
-                  'xpack.fleet.deletePackagePolicy.fatalErrorAgentlessNotificationTitle',
-                  {
-                    defaultMessage: 'Error deleting agentless deployment',
-                  }
-                )
-              );
+        if (!!agentlessPolicy) {
+          try {
+            await sendDeleteAgentPolicy({ agentPolicyId: agentlessPolicy.id });
+            if (from === 'fleet-policy-list') {
+              history.push(getPath('policies_list'));
             }
+          } catch (e) {
+            notifications.toasts.addDanger(
+              i18n.translate(
+                'xpack.fleet.deletePackagePolicy.fatalErrorAgentlessNotificationTitle',
+                {
+                  defaultMessage: 'Error deleting agentless deployment',
+                }
+              )
+            );
           }
-
-          notifications.toasts.addSuccess(successMessage);
         }
 
-        if (failedResults.length) {
-          const hasMultipleFailures = failedResults.length > 1;
-          const failureMessage = hasMultipleFailures
-            ? i18n.translate('xpack.fleet.deletePackagePolicy.failureMultipleNotificationTitle', {
-                defaultMessage: 'Error deleting {count} integrations',
-                values: { count: failedResults.length },
-              })
-            : i18n.translate('xpack.fleet.deletePackagePolicy.failureSingleNotificationTitle', {
-                defaultMessage: "Error deleting integration ''{id}''",
-                values: { id: failedResults[0].id },
-              });
-          notifications.toasts.addDanger(failureMessage);
-        }
-
-        if (onSuccessCallback.current) {
-          onSuccessCallback.current(successfulResults.map((result) => result.id));
-        }
-      } catch (e) {
-        notifications.toasts.addDanger(
-          i18n.translate('xpack.fleet.deletePackagePolicy.fatalErrorNotificationTitle', {
-            defaultMessage: 'Error deleting integration',
-          })
-        );
+        notifications.toasts.addSuccess(successMessage);
       }
-      closeModal();
-    },
-    [closeModal, packagePolicies, notifications.toasts, agentPolicies]
-  );
+
+      if (failedResults.length) {
+        const hasMultipleFailures = failedResults.length > 1;
+        const failureMessage = hasMultipleFailures
+          ? i18n.translate('xpack.fleet.deletePackagePolicy.failureMultipleNotificationTitle', {
+              defaultMessage: 'Error deleting {count} integrations',
+              values: { count: failedResults.length },
+            })
+          : i18n.translate('xpack.fleet.deletePackagePolicy.failureSingleNotificationTitle', {
+              defaultMessage: "Error deleting integration ''{id}''",
+              values: { id: failedResults[0].id },
+            });
+        notifications.toasts.addDanger(failureMessage);
+      }
+
+      if (onSuccessCallback.current) {
+        onSuccessCallback.current(successfulResults.map((result) => result.id));
+      }
+    } catch (e) {
+      notifications.toasts.addDanger(
+        i18n.translate('xpack.fleet.deletePackagePolicy.fatalErrorNotificationTitle', {
+          defaultMessage: 'Error deleting integration',
+        })
+      );
+    }
+    closeModal();
+  }, [
+    closeModal,
+    packagePolicies,
+    notifications.toasts,
+    agentPolicies,
+    deletePackagePolicyMutationAsync,
+    getPath,
+    history,
+    from,
+  ]);
 
   const renderModal = () => {
     const isAgentlessPolicy = agentPolicies?.find((policy) => policy?.supports_agentless === true);

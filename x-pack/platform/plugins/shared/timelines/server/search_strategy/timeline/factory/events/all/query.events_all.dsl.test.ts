@@ -39,53 +39,51 @@ describe('buildTimelineEventsAllQuery', () => {
     });
     expect(query).toMatchInlineSnapshot(`
       Object {
-        "allow_no_indices": true,
-        "body": Object {
-          "_source": false,
-          "aggregations": Object {
-            "producers": Object {
-              "terms": Object {
-                "exclude": Array [
-                  "alerts",
-                ],
-                "field": "kibana.alert.rule.producer",
-              },
-            },
-          },
-          "fields": Array [
-            "signal.*",
-            "kibana.alert.*",
-            Object {
-              "field": "@timestamp",
-              "format": "strict_date_optional_time",
-            },
-          ],
-          "from": 0,
-          "query": Object {
-            "bool": Object {
-              "filter": Array [
-                Object {
-                  "match_all": Object {},
-                },
+        "_source": false,
+        "aggregations": Object {
+          "producers": Object {
+            "terms": Object {
+              "exclude": Array [
+                "alerts",
               ],
+              "field": "kibana.alert.rule.producer",
             },
           },
-          "runtime_mappings": Object {},
-          "size": 100,
-          "sort": Array [
-            Object {
-              "@timestamp": Object {
-                "order": "asc",
-                "unmapped_type": "date",
-              },
-            },
-          ],
-          "track_total_hits": true,
         },
+        "allow_no_indices": true,
+        "fields": Array [
+          "signal.*",
+          "kibana.alert.*",
+          Object {
+            "field": "@timestamp",
+            "format": "strict_date_optional_time",
+          },
+        ],
+        "from": 0,
         "ignore_unavailable": true,
         "index": Array [
           ".siem-signals-default",
         ],
+        "query": Object {
+          "bool": Object {
+            "filter": Array [
+              Object {
+                "match_all": Object {},
+              },
+            ],
+          },
+        },
+        "runtime_mappings": Object {},
+        "size": 100,
+        "sort": Array [
+          Object {
+            "@timestamp": Object {
+              "order": "asc",
+              "unmapped_type": "date",
+            },
+          },
+        ],
+        "track_total_hits": true,
       }
     `);
   });

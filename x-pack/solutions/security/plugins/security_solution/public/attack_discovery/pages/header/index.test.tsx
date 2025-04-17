@@ -6,7 +6,6 @@
  */
 
 import { DEFAULT_ATTACK_DISCOVERY_MAX_ALERTS } from '@kbn/elastic-assistant';
-import { defaultAssistantFeatures } from '@kbn/elastic-assistant-common';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 
@@ -15,18 +14,6 @@ import { TestProviders } from '../../../common/mock';
 import { Header } from '.';
 
 jest.mock('../../../assistant/use_assistant_availability');
-
-jest.mock('@kbn/elastic-assistant-common', () => {
-  const original = jest.requireActual('@kbn/elastic-assistant-common');
-
-  return {
-    ...original,
-    defaultAssistantFeatures: {
-      ...original.defaultAssistantFeatures,
-      attackDiscoveryAlertFiltering: jest.mocked<boolean>(false), // <-- feature flag is off by default
-    },
-  };
-});
 
 const defaultProps = {
   stats: null,
@@ -50,7 +37,6 @@ describe('Actions', () => {
     });
 
     jest.clearAllMocks();
-    (defaultAssistantFeatures.attackDiscoveryAlertFiltering as jest.Mocked<boolean>) = false; // reset feature flag to off
   });
 
   it('renders the connector selector', () => {
@@ -139,8 +125,7 @@ describe('Actions', () => {
     expect(generate).toBeDisabled();
   });
 
-  it('invokes openFlyout when the settings button is clicked, when the attackDiscoveryAlertFiltering feature flag is on', async () => {
-    (defaultAssistantFeatures.attackDiscoveryAlertFiltering as jest.Mocked<boolean>) = true;
+  it('invokes openFlyout when the settings button is clicked', async () => {
     const openFlyout = jest.fn();
 
     render(

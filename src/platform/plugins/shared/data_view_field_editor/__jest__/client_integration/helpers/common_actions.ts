@@ -42,7 +42,7 @@ export const waitForUpdates = async (testBed?: TestBed) => {
 
 export const getCommonActions = (testBed: TestBed) => {
   const toggleFormRow = async (
-    row: 'customLabel' | 'customDescription' | 'value' | 'format',
+    row: 'customLabel' | 'customDescription' | 'value' | 'format' | 'popularity',
     value: 'on' | 'off' = 'on'
   ) => {
     const testSubj = `${row}Row.toggle`;
@@ -102,6 +102,15 @@ export const getCommonActions = (testBed: TestBed) => {
     testBed.component.update();
   };
 
+  const updatePopularity = async (value: string) => {
+    await act(async () => {
+      testBed.form.setInputValue('editorFieldCount', value);
+      jest.advanceTimersByTime(0); // advance timers to allow the form to validate
+    });
+
+    testBed.component.update();
+  };
+
   const getScriptError = () => {
     const scriptError = testBed.component.find('#runtimeFieldScript-error-0');
 
@@ -123,6 +132,7 @@ export const getCommonActions = (testBed: TestBed) => {
       updateType,
       updateScript,
       updateFormat,
+      updatePopularity,
       getScriptError,
     },
   };

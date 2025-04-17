@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { filter, map, Observable, startWith, Subject } from 'rxjs';
-import {
+import type { Observable } from 'rxjs';
+import { filter, map, startWith, Subject } from 'rxjs';
+import type {
   DataTableCustomization,
   FlyoutCustomization,
   SearchBarCustomization,

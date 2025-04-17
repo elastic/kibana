@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { errors } from '@elastic/elasticsearch';
+import { type DiagnosticResult, errors } from '@elastic/elasticsearch';
 
 import { schema } from '@kbn/config-schema';
 import type { CoreSetup, CoreStart, PluginInitializerContext } from '@kbn/core/server';
@@ -32,6 +32,7 @@ export function initRoutes(
     {
       path: '/authentication/app',
       validate: false,
+      security: { authz: { enabled: false, reason: '' } },
     },
     async (context, request, response) => {
       if (authenticationAppOptions.simulateUnauthorized) {
@@ -47,6 +48,12 @@ export function initRoutes(
     router.get(
       {
         path: `/authentication/app/${isAuthFlow ? 'auth_flow' : 'not_auth_flow'}`,
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
         validate: {
           query: schema.object({
             statusCode: schema.maybe(schema.number()),
@@ -71,6 +78,12 @@ export function initRoutes(
   router.post(
     {
       path: '/authentication/app/setup',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: { body: schema.object({ simulateUnauthorized: schema.boolean() }) },
       options: { authRequired: false, xsrfRequired: false },
     },
@@ -83,6 +96,12 @@ export function initRoutes(
   router.post(
     {
       path: '/authentication/slow/me',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: schema.object({
           duration: schema.duration(),
@@ -141,6 +160,12 @@ export function initRoutes(
   router.post(
     {
       path: '/api_keys/_grant',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: { body: restApiKeySchema },
     },
     async (context, request, response) => {
@@ -228,6 +253,12 @@ export function initRoutes(
   router.post(
     {
       path: '/session/_run_cleanup',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: false,
     },
     async (context, request, response) => {
@@ -240,6 +271,12 @@ export function initRoutes(
   router.post(
     {
       path: '/session/toggle_cleanup_task',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: { body: schema.object({ enabled: schema.boolean() }) },
     },
     async (context, request, response) => {
@@ -288,6 +325,72 @@ export function initRoutes(
       );
 
       return response.ok();
+    }
+  );
+
+  router.post(
+    {
+      path: '/simulate_point_in_time_failure',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
+      validate: { body: schema.object({ simulateOpenPointInTimeFailure: schema.boolean() }) },
+      options: { authRequired: false, xsrfRequired: false },
+    },
+    async (context, request, response) => {
+      const esClient = (await context.core).elasticsearch.client.asInternalUser;
+      const originalOpenPointInTime = esClient.openPointInTime;
+
+      if (request.body.simulateOpenPointInTimeFailure) {
+        // @ts-expect-error
+        esClient.openPointInTime = async function (params, options) {
+          const { index } = params;
+          if (index.includes('kibana_security_session')) {
+            return {
+              statusCode: 503,
+              meta: {},
+              body: {
+                error: {
+                  type: 'no_shard_available_action_exception',
+                  reason: 'no shard available for [open]',
+                },
+              },
+            };
+            return {
+              statusCode: 503,
+              message: 'no_shard_available_action_exception',
+            } as unknown as DiagnosticResult;
+          }
+          return originalOpenPointInTime.call(this, params, options);
+        };
+      } else {
+        esClient.openPointInTime = originalOpenPointInTime;
+      }
+
+      return response.ok();
+    }
+  );
+
+  router.get(
+    {
+      path: '/cleanup_task_status',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
+      validate: false,
+      options: { authRequired: false },
+    },
+    async (context, request, response) => {
+      const [, { taskManager }] = await core.getStartServices();
+      const res = await taskManager.get(SESSION_INDEX_CLEANUP_TASK_NAME);
+      const { attempts, state, status } = res;
+      return response.ok({ body: { attempts, state, status } });
     }
   );
 }

@@ -6,15 +6,18 @@
  */
 
 import { action } from '@storybook/addon-actions';
-import { storiesOf } from '@storybook/react';
 import React from 'react';
 import type { QualityWarning } from '../../../../common/log_analysis';
 import { decorateWithGlobalStorybookThemeProviders } from '../../../test_utils/use_global_storybook_theme';
 import { CategoryQualityWarnings } from './quality_warning_notices';
 
-storiesOf('infra/logAnalysis/CategoryQualityWarnings', module)
-  .addDecorator(decorateWithGlobalStorybookThemeProviders)
-  .add('Partitioned warnings', () => {
+export default {
+  title: 'infra/logAnalysis/CategoryQualityWarnings',
+  decorators: [decorateWithGlobalStorybookThemeProviders],
+};
+
+export const PartitionedWarnings = {
+  render: () => {
     return (
       <CategoryQualityWarnings
         hasSetupCapabilities={true}
@@ -22,8 +25,13 @@ storiesOf('infra/logAnalysis/CategoryQualityWarnings', module)
         qualityWarnings={partitionedQualityWarnings}
       />
     );
-  })
-  .add('Unpartitioned warnings', () => {
+  },
+
+  name: 'Partitioned warnings',
+};
+
+export const UnpartitionedWarnings = {
+  render: () => {
     return (
       <CategoryQualityWarnings
         hasSetupCapabilities={true}
@@ -31,7 +39,10 @@ storiesOf('infra/logAnalysis/CategoryQualityWarnings', module)
         qualityWarnings={unpartitionedQualityWarnings}
       />
     );
-  });
+  },
+
+  name: 'Unpartitioned warnings',
+};
 
 const partitionedQualityWarnings: QualityWarning[] = [
   {

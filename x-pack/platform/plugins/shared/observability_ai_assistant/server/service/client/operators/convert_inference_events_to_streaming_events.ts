@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Observable, OperatorFunction, map } from 'rxjs';
+import { Observable, OperatorFunction, filter, map } from 'rxjs';
 import { v4 } from 'uuid';
 import {
   ChatCompletionEvent as InferenceChatCompletionEvent,
@@ -13,17 +13,17 @@ import {
 } from '@kbn/inference-common';
 import {
   ChatCompletionChunkEvent,
-  TokenCountEvent,
   ChatCompletionMessageEvent,
   StreamingChatResponseEventType,
 } from '../../../../common';
 
 export function convertInferenceEventsToStreamingEvents(): OperatorFunction<
   InferenceChatCompletionEvent,
-  ChatCompletionChunkEvent | TokenCountEvent | ChatCompletionMessageEvent
+  ChatCompletionChunkEvent | ChatCompletionMessageEvent
 > {
   return (events$: Observable<InferenceChatCompletionEvent>) => {
     return events$.pipe(
+      filter((event) => event.type !== InferenceChatCompletionEventType.ChatCompletionTokenCount),
       map((event) => {
         switch (event.type) {
           case InferenceChatCompletionEventType.ChatCompletionChunk:
@@ -42,16 +42,6 @@ export function convertInferenceEventsToStreamingEvents(): OperatorFunction<
                     : undefined,
               },
             } as ChatCompletionChunkEvent;
-          case InferenceChatCompletionEventType.ChatCompletionTokenCount:
-            // Convert to TokenCountEvent
-            return {
-              type: StreamingChatResponseEventType.TokenCount,
-              tokens: {
-                completion: event.tokens.completion,
-                prompt: event.tokens.prompt,
-                total: event.tokens.total,
-              },
-            } as TokenCountEvent;
           case InferenceChatCompletionEventType.ChatCompletionMessage:
             // Convert to ChatCompletionMessageEvent
             return {
@@ -68,6 +58,7 @@ export function convertInferenceEventsToStreamingEvents(): OperatorFunction<
                     : undefined,
               },
             } as ChatCompletionMessageEvent;
+
           default:
             throw new Error(`Unknown event type`);
         }

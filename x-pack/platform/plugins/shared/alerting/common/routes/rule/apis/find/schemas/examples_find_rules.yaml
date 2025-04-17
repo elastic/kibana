@@ -1,0 +1,9 @@
+responses:
+  200:
+    content:
+      application/json:
+        examples:
+          findRulesResponse:
+            $ref: './examples_find_rule_response_conditional_action.yaml'
+          findConditionalActionRulesResponse:
+            $ref: './examples_find_rules_response.yaml'

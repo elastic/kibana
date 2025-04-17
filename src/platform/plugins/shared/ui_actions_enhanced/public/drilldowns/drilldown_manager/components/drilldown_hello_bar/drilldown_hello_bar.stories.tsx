@@ -8,7 +8,6 @@
  */
 
 import * as React from 'react';
-import { storiesOf } from '@storybook/react';
 import { DrilldownHelloBar } from '.';
 
 const Demo = () => {
@@ -23,4 +22,11 @@ const Demo = () => {
   ) : null;
 };
 
-storiesOf('components/DrilldownHelloBar', module).add('default', () => <Demo />);
+export default {
+  title: 'components/DrilldownHelloBar',
+};
+
+export const Default = {
+  render: () => <Demo />,
+  name: 'default',
+};

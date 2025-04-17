@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { rangeQuery } from '@kbn/observability-plugin/server';
+import { rangeQuery, termQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { isEmpty } from 'lodash';
 import { unflattenKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
@@ -17,8 +17,10 @@ import {
   SPAN_LINKS_SPAN_ID,
   TRACE_ID,
   TRANSACTION_ID,
+  OTEL_SPAN_LINKS_TRACE_ID,
+  OTEL_SPAN_LINKS_SPAN_ID,
 } from '../../../common/es_fields/apm';
-import { getBufferedTimerange } from './utils';
+import { getBufferedTimerange, mapOtelToSpanLink } from './utils';
 import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 
 async function fetchLinkedChildrenOfSpan({
@@ -40,25 +42,48 @@ async function fetchLinkedChildrenOfSpan({
   });
 
   const requiredFields = asMutableArray([TRACE_ID, PROCESSOR_EVENT] as const);
-  const optionalFields = asMutableArray([SPAN_ID, TRANSACTION_ID] as const);
+  const optionalFields = asMutableArray([
+    SPAN_ID,
+    TRANSACTION_ID,
+    OTEL_SPAN_LINKS_SPAN_ID,
+    OTEL_SPAN_LINKS_TRACE_ID,
+  ] as const);
 
   const response = await apmEventClient.search('fetch_linked_children_of_span', {
     apm: {
       events: [ProcessorEvent.span, ProcessorEvent.transaction],
     },
     _source: [SPAN_LINKS],
-    body: {
-      fields: [...requiredFields, ...optionalFields],
-      track_total_hits: false,
-      size: 1000,
-      query: {
-        bool: {
-          filter: [
-            ...rangeQuery(startWithBuffer, endWithBuffer),
-            { term: { [SPAN_LINKS_TRACE_ID]: traceId } },
-            ...(spanId ? [{ term: { [SPAN_LINKS_SPAN_ID]: spanId } }] : []),
-          ],
-        },
+    fields: [...requiredFields, ...optionalFields],
+    track_total_hits: false,
+    size: 1000,
+    query: {
+      bool: {
+        filter: [
+          ...rangeQuery(startWithBuffer, endWithBuffer),
+          {
+            bool: {
+              minimum_should_match: 1,
+              should: [
+                ...termQuery(SPAN_LINKS_TRACE_ID, traceId),
+                ...termQuery(OTEL_SPAN_LINKS_TRACE_ID, traceId),
+              ],
+            },
+          },
+          ...(spanId
+            ? [
+                {
+                  bool: {
+                    minimum_should_match: 1,
+                    should: [
+                      ...termQuery(SPAN_LINKS_SPAN_ID, spanId),
+                      ...termQuery(OTEL_SPAN_LINKS_SPAN_ID, spanId),
+                    ],
+                  },
+                },
+              ]
+            : []),
+        ],
       },
     },
   });
@@ -71,7 +96,7 @@ async function fetchLinkedChildrenOfSpan({
       ...event,
       span: {
         ...event.span,
-        links: source?.span?.links ?? [],
+        links: source?.span?.links ?? mapOtelToSpanLink(event.links),
       },
     };
   });

@@ -55,9 +55,8 @@ exports[`GenericRowRenderer #createGenericFileRowRenderer renders correctly agai
           },
         }
       }
-      isDraggable={true}
+      scopeId="timeline-test"
       text="some text"
-      timelineId="timeline-test"
     />
   </RowRendererContainer>
 </span>
@@ -118,7 +117,6 @@ exports[`GenericRowRenderer #createGenericSystemRowRenderer renders correctly ag
           },
         }
       }
-      isDraggable={true}
       text="some text"
       timelineId="timeline-test"
     />

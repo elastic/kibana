@@ -40,48 +40,46 @@ export const buildHttpQuery = ({
     allow_no_indices: true,
     index: defaultIndex,
     ignore_unavailable: true,
-    body: {
-      aggregations: {
-        ...getCountAgg(),
-        ...getHttpAggs(sort, querySize),
-      },
-      query: {
-        bool: ip
-          ? {
-              filter,
-              should: [
-                {
-                  term: {
-                    'source.ip': ip,
-                  },
-                },
-                {
-                  term: {
-                    'destination.ip': ip,
-                  },
-                },
-              ],
-              minimum_should_match: 1,
-            }
-          : {
-              filter,
-            },
-      },
-      _source: false,
-      fields: [
-        'host.name',
-        'source.ip',
-        'url.path',
-        'http.request.method',
-        'url.domain',
-        'http.response.status_code',
-        {
-          field: '@timestamp',
-          format: 'strict_date_optional_time',
-        },
-      ],
-      size: 0,
+    aggregations: {
+      ...getCountAgg(),
+      ...getHttpAggs(sort, querySize),
     },
+    query: {
+      bool: ip
+        ? {
+            filter,
+            should: [
+              {
+                term: {
+                  'source.ip': ip,
+                },
+              },
+              {
+                term: {
+                  'destination.ip': ip,
+                },
+              },
+            ],
+            minimum_should_match: 1,
+          }
+        : {
+            filter,
+          },
+    },
+    _source: false,
+    fields: [
+      'host.name',
+      'source.ip',
+      'url.path',
+      'http.request.method',
+      'url.domain',
+      'http.response.status_code',
+      {
+        field: '@timestamp',
+        format: 'strict_date_optional_time',
+      },
+    ],
+    size: 0,
     track_total_hits: false,
   };
 

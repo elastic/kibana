@@ -443,7 +443,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
          */
         await setTimeoutAsync(2000);
 
-        await testSubjects.click('backToCases');
+        await testSubjects.click('breadcrumb');
 
         await cases.casesTable.waitForCasesToBeListed();
         await cases.casesTable.goToFirstListedCase();
@@ -1113,7 +1113,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
       it('should render the alerts table when opening the alerts tab', async () => {
         await testSubjects.click('case-view-tab-title-alerts');
-        await testSubjects.existOrFail('alertsStateTableEmptyState');
+        await testSubjects.existOrFail('alertsTableEmptyState');
       });
     });
 

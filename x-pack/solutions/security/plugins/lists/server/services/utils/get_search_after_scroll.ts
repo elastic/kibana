@@ -47,16 +47,14 @@ export const getSearchAfterScroll = async <T>({
   let newSearchAfter = searchAfter;
   for (let i = 0; i < hops; ++i) {
     const response = await esClient.search<TieBreaker<T>>({
-      body: {
-        _source: getSourceWithTieBreaker({ sortField }),
-        query,
-        runtime_mappings: runtimeMappings,
-        search_after: newSearchAfter,
-        sort: getSortWithTieBreaker({ sortField, sortOrder }),
-      },
+      _source: getSourceWithTieBreaker({ sortField }),
       ignore_unavailable: true,
       index,
+      query,
+      runtime_mappings: runtimeMappings,
+      search_after: newSearchAfter,
       size: hopSize,
+      sort: getSortWithTieBreaker({ sortField, sortOrder }),
     });
     if (response.hits.hits.length > 0) {
       newSearchAfter = getSearchAfterWithTieBreaker({ response, sortField });

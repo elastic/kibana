@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/types';
+import type { estypes } from '@elastic/elasticsearch';
 
 import type {
   ASSETS_SAVED_OBJECT_TYPE,
@@ -126,23 +126,23 @@ export type InstallablePackage = RegistryPackage | ArchivePackage;
 
 export type AssetsMap = Map<string, Buffer | undefined>;
 
+export type PackagePolicyAssetsMap = AssetsMap & { __brand: 'PackagePolicyAssetsMap' };
+
 export interface ArchiveEntry {
   path: string;
   buffer?: Buffer;
 }
 
 export interface ArchiveIterator {
-  traverseEntries: (onEntry: (entry: ArchiveEntry) => Promise<void>) => Promise<void>;
+  traverseEntries: (
+    onEntry: (entry: ArchiveEntry) => Promise<void>,
+    readBuffer?: (path: string) => boolean
+  ) => Promise<void>;
   getPaths: () => Promise<string[]>;
 }
 
 export interface PackageInstallContext {
   packageInfo: InstallablePackage;
-  /**
-   * @deprecated Use `archiveIterator` to access the package archive entries
-   * without loading them all into memory at once.
-   */
-  assetsMap: AssetsMap;
   paths: string[];
   archiveIterator: ArchiveIterator;
 }
@@ -584,6 +584,7 @@ export type PackageListItem = Installable<RegistrySearchResult> & {
   integration?: string;
   savedObject?: InstallableSavedObject;
   installationInfo?: InstallationInfo;
+  packagePoliciesInfo?: { count: number };
 };
 export type PackagesGroupedByStatus = Record<ValueOf<InstallationStatus>, PackageList>;
 export type PackageInfo =
@@ -613,6 +614,15 @@ export interface ExperimentalDataStreamFeature {
 export interface InstallFailedAttempt {
   created_at: string;
   target_version: string;
+  error: {
+    name: string;
+    message: string;
+    stack?: string;
+  };
+}
+
+export interface UninstallFailedAttempt {
+  created_at: string;
   error: {
     name: string;
     message: string;
@@ -671,6 +681,7 @@ export interface Installation {
   internal?: boolean;
   removable?: boolean;
   latest_install_failed_attempts?: InstallFailedAttempt[];
+  latest_uninstall_failed_attempts?: UninstallFailedAttempt[];
   latest_executed_state?: InstallLatestExecutedState;
 }
 
@@ -724,6 +735,7 @@ export interface EsAssetReference {
 
 export interface PackageAssetReference {
   id: string;
+  path?: string; // Package installed prior to 9.1.0 will not have that property
   type: typeof ASSETS_SAVED_OBJECT_TYPE;
 }
 

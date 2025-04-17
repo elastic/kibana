@@ -41,7 +41,7 @@ import { SavedQueryMeta, SaveQueryForm } from '../saved_query_form';
 import { SavedQueryManagementList } from '../saved_query_management';
 import { QueryBarMenu, QueryBarMenuProps } from '../query_string_input/query_bar_menu';
 import type { DataViewPickerProps } from '../dataview_picker';
-import QueryBarTopRow, { QueryBarTopRowProps } from '../query_string_input/query_bar_top_row';
+import { QueryBarTopRow, QueryBarTopRowProps } from '../query_string_input/query_bar_top_row';
 import { FilterBar, FilterItems } from '../filter_bar';
 import type {
   SuggestionsAbstraction,
@@ -57,6 +57,7 @@ export interface SearchBarInjectedDeps {
   onFiltersUpdated?: (filters: Filter[]) => void;
   // Autorefresh
   onRefreshChange?: (options: { isPaused: boolean; refreshInterval: number }) => void;
+  bubbleSubmitEvent?: boolean;
 }
 
 export interface SearchBarOwnProps<QT extends AggregateQuery | Query = Query> {
@@ -87,6 +88,8 @@ export interface SearchBarOwnProps<QT extends AggregateQuery | Query = Query> {
   query?: QT | Query;
   // Show when user has privileges to save. See `canShowSavedQuery(...)` lib.
   showSaveQuery?: boolean;
+  // Show the controls to save and load saved queries
+  showSavedQueryControls?: boolean;
   savedQuery?: SavedQuery;
   onQueryChange?: (payload: { dateRange: TimeRange; query?: QT | Query }) => void;
   onQuerySubmit?: (
@@ -556,6 +559,7 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
         showQueryInput={this.props.showQueryInput}
         showFilterBar={this.props.showFilterBar}
         showSaveQuery={this.props.showSaveQuery}
+        showSavedQueryControls={this.props.showSavedQueryControls}
         isDisabled={this.props.isDisabled}
         buttonProps={{ size: this.shouldShowDatePickerAsBadge() ? 's' : 'm' }}
         indexPatterns={this.props.indexPatterns}
@@ -662,6 +666,7 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
           renderQueryInputAppend={this.props.renderQueryInputAppend}
           disableExternalPadding={this.props.displayStyle === 'withBorders'}
           onESQLDocsFlyoutVisibilityChanged={this.props.onESQLDocsFlyoutVisibilityChanged}
+          bubbleSubmitEvent={this.props.bubbleSubmitEvent}
         />
       </div>
     );

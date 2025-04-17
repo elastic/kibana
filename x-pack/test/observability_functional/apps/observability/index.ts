@@ -11,12 +11,12 @@ export default function ({ loadTestFile }: FtrProviderContext) {
   describe('ObservabilityApp', function () {
     loadTestFile(require.resolve('./pages/alerts'));
     loadTestFile(require.resolve('./pages/alerts/add_to_case'));
-    loadTestFile(require.resolve('./pages/alerts/alert_status'));
+    loadTestFile(require.resolve('./pages/alerts/alert_controls'));
     loadTestFile(require.resolve('./pages/alerts/alert_summary_widget'));
     loadTestFile(require.resolve('./pages/alerts/pagination'));
     loadTestFile(require.resolve('./pages/alerts/rule_stats'));
     loadTestFile(require.resolve('./pages/alerts/state_synchronization'));
-    loadTestFile(require.resolve('./pages/alerts/table_storage'));
+    loadTestFile(require.resolve('./pages/alerts/table_configuration'));
     loadTestFile(require.resolve('./pages/alerts/custom_threshold_preview_chart'));
     loadTestFile(require.resolve('./pages/alerts/custom_threshold'));
     loadTestFile(require.resolve('./pages/cases/case_details'));

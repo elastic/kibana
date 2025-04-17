@@ -44,7 +44,10 @@ export function createOpenFileUploadLiteAction(
     async execute({
       onUploadComplete,
       autoAddInference,
+      autoCreateDataView,
       indexSettings,
+      initialIndexName,
+      flyoutContent,
     }: OpenFileUploadLiteContext) {
       try {
         const { share, data } = plugins;
@@ -52,7 +55,10 @@ export function createOpenFileUploadLiteAction(
         createFlyout(coreStart, share, data, {
           onUploadComplete,
           autoAddInference,
+          autoCreateDataView,
           indexSettings,
+          initialIndexName,
+          flyoutContent,
         });
       } catch (e) {
         return Promise.reject();

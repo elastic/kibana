@@ -7,8 +7,8 @@
 
 import React from 'react';
 import userEvent from '@testing-library/user-event';
-import type { AppMockRenderer } from '../../../common/mock';
-import { createAppMockRenderer } from '../../../common/mock';
+
+import { renderWithTestingProviders } from '../../../common/mock';
 import { basicCase } from '../../../containers/mock';
 import { EditAssigneesFlyout } from './edit_assignees_flyout';
 import { screen, waitFor } from '@testing-library/react';
@@ -23,8 +23,6 @@ const useBulkGetUserProfilesMock = useBulkGetUserProfiles as jest.Mock;
 const useSuggestUserProfilesMock = useSuggestUserProfiles as jest.Mock;
 
 describe('EditAssigneesFlyout', () => {
-  let appMock: AppMockRenderer;
-
   const props = {
     selectedCases: [basicCase],
     onClose: jest.fn(),
@@ -33,14 +31,13 @@ describe('EditAssigneesFlyout', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    appMock = createAppMockRenderer();
 
     useBulkGetUserProfilesMock.mockReturnValue({ data: userProfilesMap, isLoading: false });
     useSuggestUserProfilesMock.mockReturnValue({ data: userProfiles, isLoading: false });
   });
 
   it('renders correctly', async () => {
-    appMock.render(<EditAssigneesFlyout {...props} />);
+    renderWithTestingProviders(<EditAssigneesFlyout {...props} />);
 
     expect(await screen.findByTestId('cases-edit-assignees-flyout')).toBeInTheDocument();
     expect(await screen.findByTestId('cases-edit-assignees-flyout-title')).toBeInTheDocument();
@@ -49,7 +46,7 @@ describe('EditAssigneesFlyout', () => {
   });
 
   it('calls onClose when pressing the cancel button', async () => {
-    appMock.render(<EditAssigneesFlyout {...props} />);
+    renderWithTestingProviders(<EditAssigneesFlyout {...props} />);
 
     await userEvent.click(await screen.findByTestId('cases-edit-assignees-flyout-cancel'));
 
@@ -59,7 +56,7 @@ describe('EditAssigneesFlyout', () => {
   });
 
   it('calls onSaveAssignees when pressing the save selection button', async () => {
-    appMock.render(<EditAssigneesFlyout {...props} />);
+    renderWithTestingProviders(<EditAssigneesFlyout {...props} />);
 
     expect(await screen.findByText('Damaged Raccoon')).toBeInTheDocument();
 
@@ -75,13 +72,15 @@ describe('EditAssigneesFlyout', () => {
   });
 
   it('shows the case title when selecting one case', async () => {
-    appMock.render(<EditAssigneesFlyout {...props} />);
+    renderWithTestingProviders(<EditAssigneesFlyout {...props} />);
 
     expect(await screen.findByText(basicCase.title)).toBeInTheDocument();
   });
 
   it('shows the number of total selected cases in the title  when selecting multiple cases', async () => {
-    appMock.render(<EditAssigneesFlyout {...props} selectedCases={[basicCase, basicCase]} />);
+    renderWithTestingProviders(
+      <EditAssigneesFlyout {...props} selectedCases={[basicCase, basicCase]} />
+    );
 
     expect(await screen.findByText('Selected cases: 2')).toBeInTheDocument();
   });

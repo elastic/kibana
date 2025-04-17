@@ -14,10 +14,8 @@ import {
 
 export async function hasLogMonitoringPrivileges(esClient: ElasticsearchClient, withAPM = false) {
   const res = await esClient.security.hasPrivileges({
-    body: {
-      cluster: [MONITOR_CLUSTER, 'manage_own_api_key'],
-      index: [withAPM ? INDEX_LOGS_METRICS_AND_TRACES : INDEX_LOGS_AND_METRICS],
-    },
+    cluster: [MONITOR_CLUSTER, 'manage_own_api_key'],
+    index: [withAPM ? INDEX_LOGS_METRICS_AND_TRACES : INDEX_LOGS_AND_METRICS],
   });
 
   return res.has_all_requested;

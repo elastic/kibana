@@ -13,9 +13,9 @@ import pRetry from 'p-retry';
 import { uniq } from 'lodash';
 import semverGte from 'semver/functions/gte';
 import semverGt from 'semver/functions/gt';
-import semverRcompare from 'semver/functions/rcompare';
+import semverCompareBuild from 'semver/functions/compare-build';
 import semverLt from 'semver/functions/lt';
-import semverCoerce from 'semver/functions/coerce';
+import semverParse from 'semver/functions/parse';
 
 import { REPO_ROOT } from '@kbn/repo-info';
 
@@ -54,7 +54,7 @@ export const getLatestAvailableAgentVersion = async ({
   let latestCompatibleVersion;
 
   const versions = await getAvailableVersions({ includeCurrentVersion, ignoreCache });
-  versions.sort(semverRcompare);
+  versions.sort(semverCompareBuild).reverse();
 
   if (versions && versions.length > 0 && versions.indexOf(kibanaVersion) !== 0) {
     latestCompatibleVersion =
@@ -114,8 +114,18 @@ export const getAvailableVersions = async ({
   // only want support versions in the final result. We'll also sort by newest version first.
   availableVersions = uniq(
     [...availableVersions, ...apiVersions]
-      .map((item: any) => (item.includes('+build') ? item : semverCoerce(item)?.version || ''))
-      .filter((v: any) => semverGte(v, MINIMUM_SUPPORTED_VERSION))
+      .filter((v: any) => {
+        const parsedVersion = semverParse(v);
+        if (
+          parsedVersion?.prerelease?.length &&
+          !parsedVersion.prerelease.some(
+            (prerelease) => typeof prerelease === 'string' && prerelease.includes('+build')
+          )
+        ) {
+          return false;
+        }
+        return semverGte(v, MINIMUM_SUPPORTED_VERSION);
+      })
       .sort((a: any, b: any) => (semverGt(a, b) ? -1 : 1))
   );
 

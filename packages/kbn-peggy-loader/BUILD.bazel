@@ -2,6 +2,7 @@ load("@build_bazel_rules_nodejs//:index.bzl", "js_library")
 
 SRCS = glob(
   [
+    "**/*.js",
     "**/*.ts",
   ],
   exclude = [
@@ -20,7 +21,7 @@ SRCS = glob(
 )
 
 BUNDLER_DEPS = [
-  "//packages/kbn-peggy",
+  "//src/platform/packages/private/kbn-peggy",
   "@npm//peggy",
   "@npm//webpack",
 ]

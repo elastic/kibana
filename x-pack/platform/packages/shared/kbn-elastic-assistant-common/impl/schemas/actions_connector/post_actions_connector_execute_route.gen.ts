@@ -15,9 +15,19 @@
  */
 
 import { z } from '@kbn/zod';
+import { BooleanFromString } from '@kbn/zod-helpers';
 
-import { NonEmptyString } from '../common_attributes.gen';
+import { NonEmptyString, ScreenContext } from '../common_attributes.gen';
 import { Replacements } from '../conversations/common_attributes.gen';
+
+export type ExecuteConnectorRequestQuery = z.infer<typeof ExecuteConnectorRequestQuery>;
+export const ExecuteConnectorRequestQuery = z.object({
+  /**
+   * If true, the response will not include content references.
+   */
+  content_references_disabled: BooleanFromString.optional().default(false),
+});
+export type ExecuteConnectorRequestQueryInput = z.input<typeof ExecuteConnectorRequestQuery>;
 
 export type ExecuteConnectorRequestParams = z.infer<typeof ExecuteConnectorRequestParams>;
 export const ExecuteConnectorRequestParams = z.object({
@@ -42,6 +52,7 @@ export const ExecuteConnectorRequestBody = z.object({
   size: z.number().optional(),
   langSmithProject: z.string().optional(),
   langSmithApiKey: z.string().optional(),
+  screenContext: ScreenContext.optional(),
 });
 export type ExecuteConnectorRequestBodyInput = z.input<typeof ExecuteConnectorRequestBody>;
 
