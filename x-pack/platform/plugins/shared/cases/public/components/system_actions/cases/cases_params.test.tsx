@@ -370,18 +370,19 @@ describe('CasesParamsFields renders', () => {
     });
 
     it('renders time window warning', async () => {
-      render(<CasesParamsFields {...defaultProps} />);
+      const { rerender } = render(<CasesParamsFields {...defaultProps} />);
 
       expect(screen.queryByTestId('show-time-window-warning')).not.toBeInTheDocument();
 
-      const timeWindowSizeInput = await screen.findByTestId('time-window-size-input');
-      const timeWindowUnitInput = await screen.findByTestId('time-window-unit-select');
+      const updatedProps = {
+        ...defaultProps,
+        actionParams: {
+          ...defaultProps.actionParams,
+          subActionParams: { ...defaultProps.actionParams.subActionParams, timeWindow: '10m' },
+        },
+      };
 
-      expect(timeWindowSizeInput).toBeInTheDocument();
-      expect(timeWindowUnitInput).toBeInTheDocument();
-
-      fireEvent.change(timeWindowSizeInput, { target: { value: '10' } });
-      fireEvent.change(timeWindowUnitInput, { target: { value: 'm' } });
+      rerender(<CasesParamsFields {...updatedProps} />);
 
       expect(await screen.findByTestId('show-time-window-warning')).toBeInTheDocument();
     });

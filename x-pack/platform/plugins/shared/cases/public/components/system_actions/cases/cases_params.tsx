@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { memo, useCallback, useEffect, useMemo } from 'react';
 
 import type { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public/types';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
