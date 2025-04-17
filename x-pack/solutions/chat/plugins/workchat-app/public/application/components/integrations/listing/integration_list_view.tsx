@@ -14,7 +14,6 @@ import {
   EuiBasicTableColumn,
   EuiButton,
   EuiButtonIcon,
-  EuiCheckbox,
   EuiDescriptionList,
   EuiEmptyPrompt,
   EuiFlexGroup,
@@ -90,7 +89,7 @@ export const IntegrationListView: React.FC<IntegrationListViewProps> = ({ integr
           name: 'Edit',
           description: 'Edit this integration',
           isPrimary: true,
-          icon: 'boxesHorizontal',
+          icon: 'documentEdit',
           type: 'icon',
           onClick: ({ id }) => {
             navigateToWorkchatUrl(appPaths.integrations.edit({ integrationId: id }));
@@ -198,59 +197,6 @@ export const IntegrationListView: React.FC<IntegrationListViewProps> = ({ integr
       </>
     );
 
-  // Selection
-  const [selectedItems, setSelectedItems] = useState<Integration[]>([]);
-
-  const selectionColumn: EuiBasicTableColumn<Integration> = {
-    field: 'selection',
-    width: '40px',
-    color: 'black',
-    name: (
-      <EuiCheckbox
-        id="selectAllCheckbox"
-        color="text"
-        checked={pageOfItems.every((item) =>
-          selectedItems.some((selected) => selected.id === item.id)
-        )}
-        onChange={() => {
-          if (
-            pageOfItems.every((item) => selectedItems.some((selected) => selected.id === item.id))
-          ) {
-            setSelectedItems(
-              selectedItems.filter(
-                (selected) => !pageOfItems.some((pageItem) => pageItem.id === selected.id)
-              )
-            );
-          } else {
-            const newSelectedItems = [...selectedItems];
-            pageOfItems.forEach((item) => {
-              if (!selectedItems.some((selected) => selected.id === item.id)) {
-                newSelectedItems.push(item);
-              }
-            });
-            setSelectedItems(newSelectedItems);
-          }
-        }}
-        aria-label="Select all rows"
-      />
-    ),
-    render: (_, item: Integration) => (
-      <EuiCheckbox
-        id={`select-${item.id}`}
-        color="text"
-        checked={selectedItems.some((selected) => selected.id === item.id)}
-        onChange={() => {
-          if (selectedItems.some((selected) => selected.id === item.id)) {
-            setSelectedItems(selectedItems.filter((selected) => selected.id !== item.id));
-          } else {
-            setSelectedItems([...selectedItems, item]);
-          }
-        }}
-        aria-label={`Select ${item.name || 'this row'}`}
-      />
-    ),
-  };
-
   // Expandable Rows
   const [toggledItem, setToggledItem] = useState<string>('');
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<Record<string, ReactNode>>(
@@ -302,7 +248,6 @@ export const IntegrationListView: React.FC<IntegrationListViewProps> = ({ integr
         );
       },
     },
-    selectionColumn,
     ...columns,
   ];
 
