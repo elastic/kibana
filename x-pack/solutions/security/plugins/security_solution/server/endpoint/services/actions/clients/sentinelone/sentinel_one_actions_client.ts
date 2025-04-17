@@ -202,11 +202,13 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
 
     this.log.debug(() => `SentinelOne Agent records found:\n${stringify(s1AgentsEsResults, 20)}`);
 
+    const agentIdsFound: string[] = [];
     const fleetAgentIdToS1AgentIdMap: Record<string, string> = s1AgentsEsResults.hits.hits.reduce(
       (acc, s1AgentEsDoc) => {
         const doc = s1AgentEsDoc.inner_hits?.most_recent.hits.hits[0]._source;
 
         if (doc) {
+          agentIdsFound.push(doc.sentinel_one.agent.id);
           acc[doc.agent.id] = doc.sentinel_one.agent.agent.id;
         }
 
@@ -218,8 +220,16 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
 
     if (elasticAgentIds.length === 0) {
       throw new ResponseActionsClientError(
-        `Unable to find elastic agent IDs for SentinelOne agent ids: [${agentIds.join(', ')}]`
+        `Unable to find elastic agent IDs for SentinelOne agent ids: [${agentIds.join(', ')}]`,
+        400
       );
+    }
+
+    // ensure all MS agent ids were found
+    for (const agentId of agentIds) {
+      if (!agentIdsFound.includes(agentId)) {
+        throw new ResponseActionsClientError(`SentinelOne agent id [${agentId}] not found`, 404);
+      }
     }
 
     return this.fetchFleetInfoForAgents(elasticAgentIds, ['sentinel_one']).then((agentInfoList) => {

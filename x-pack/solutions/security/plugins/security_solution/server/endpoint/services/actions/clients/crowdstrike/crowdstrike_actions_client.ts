@@ -145,11 +145,13 @@ export class CrowdstrikeActionsClient extends ResponseActionsClientImpl {
 
     this.log.debug(() => `Records found:\n${stringify(crowdstrikeEsResults, 20)}`);
 
+    const agentIdsFound: string[] = [];
     const fleetAgentIdToCrowdstrikeAgentIdMap: Record<string, string> =
       crowdstrikeEsResults.hits.hits.reduce((acc, esDoc) => {
         const doc = esDoc.inner_hits?.most_recent.hits.hits[0]._source;
 
         if (doc) {
+          agentIdsFound.push(doc.device.id);
           acc[doc.agent.id] = doc.device.id;
         }
 
@@ -159,8 +161,16 @@ export class CrowdstrikeActionsClient extends ResponseActionsClientImpl {
 
     if (elasticAgentIds.length === 0) {
       throw new ResponseActionsClientError(
-        `Unable to find elastic agent IDs for Crowdstrike agent ids: [${agentIds.join(', ')}]`
+        `Unable to find elastic agent IDs for Crowdstrike agent ids: [${agentIds.join(', ')}]`,
+        400
       );
+    }
+
+    // ensure all agent ids were found
+    for (const agentId of agentIds) {
+      if (!agentIdsFound.includes(agentId)) {
+        throw new ResponseActionsClientError(`Crowdstrike agent id [${agentId}] not found`, 404);
+      }
     }
 
     return this.fetchFleetInfoForAgents(elasticAgentIds, ['crowdstrike']).then((agentInfoList) => {

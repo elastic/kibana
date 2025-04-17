@@ -157,12 +157,14 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
       () => `MS Defender Log records found:\n${stringify(msDefenderLogEsResults, 20)}`
     );
 
+    const agentIdsFound: string[] = [];
     const fleetAgentIdToMsDefenderAgentIdMap: Record<string, string> = (
       msDefenderLogEsResults.hits.hits ?? []
     ).reduce((acc, esDoc) => {
       const doc = esDoc.inner_hits?.most_recent.hits.hits[0]._source;
 
       if (doc) {
+        agentIdsFound.push(doc.cloud.instance.id);
         acc[doc.agent.id] = doc.cloud.instance.id;
       }
 
@@ -172,8 +174,21 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
 
     if (elasticAgentIds.length === 0) {
       throw new ResponseActionsClientError(
-        `Unable to find Elastic agent IDs for Microsoft agent ids: [${agentIds.join(', ')}]`
+        `Unable to find Elastic agent IDs for Microsoft Defender agent ids: [${agentIds.join(
+          ', '
+        )}]`,
+        400
       );
+    }
+
+    // ensure all MS agent ids were found
+    for (const agentId of agentIds) {
+      if (!agentIdsFound.includes(agentId)) {
+        throw new ResponseActionsClientError(
+          `Microsoft Defender agent id [${agentId}] not found`,
+          404
+        );
+      }
     }
 
     return this.fetchFleetInfoForAgents(elasticAgentIds, ['microsoft_defender_endpoint']).then(
