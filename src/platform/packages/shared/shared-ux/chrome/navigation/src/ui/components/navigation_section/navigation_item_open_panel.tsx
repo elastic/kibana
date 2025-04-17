@@ -13,10 +13,10 @@ import React, { useCallback, type FC } from 'react';
 
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
 import type { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
-import type { NavigateToUrlFn } from '../../types';
-import { isActiveFromUrl } from '../../utils';
-import { usePanel } from './panel';
-import { SubItemBadge } from './subitem_badge';
+import type { NavigateToUrlFn } from '../../../types';
+import { isActiveFromUrl } from '../../../utils';
+import { usePanel } from '../panel';
+import { SubItemBadge } from '../subitem_badge';
 
 interface Props {
   item: ChromeProjectNavigationNode;

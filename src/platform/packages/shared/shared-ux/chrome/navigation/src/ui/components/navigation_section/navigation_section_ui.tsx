@@ -20,20 +20,20 @@ import type { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
 import classnames from 'classnames';
 import type { EuiThemeSize, RenderAs } from '@kbn/core-chrome-browser/src/project_navigation';
 
-import { SubItemTitle } from './subitem_title';
-import { useNavigation as useServices } from '../../services';
-import { isAbsoluteLink, isActiveFromUrl, isAccordionNode } from '../../utils';
-import type { BasePathService, NavigateToUrlFn } from '../../types';
-import { useNavigation } from '../navigation';
-import { EventTracker } from '../../analytics';
-import { useAccordionState } from '../hooks';
+import { SubItemTitle } from '../subitem_title';
+import { useNavigation as useServices } from '../../../services';
+import { isAbsoluteLink, isActiveFromUrl, isAccordionNode } from '../../../utils';
+import type { BasePathService, NavigateToUrlFn } from '../../../types';
+import { useNavigation } from '../../navigation';
+import { EventTracker } from '../../../analytics';
+import { useAccordionState } from '../../hooks';
 import {
   DEFAULT_IS_COLLAPSIBLE,
   DEFAULT_RENDER_AS,
   DEFAULT_SPACE_BETWEEN_LEVEL_1_GROUPS,
-} from '../constants';
-import type { EuiCollapsibleNavSubItemPropsEnhanced } from '../types';
-import { PanelContext, usePanel } from './panel';
+} from '../../constants';
+import type { EuiCollapsibleNavSubItemPropsEnhanced } from '../../types';
+import { PanelContext, usePanel } from '../panel';
 import { NavigationItemOpenPanel } from './navigation_item_open_panel';
 
 const nodeHasLink = (navNode: ChromeProjectNavigationNode) =>
