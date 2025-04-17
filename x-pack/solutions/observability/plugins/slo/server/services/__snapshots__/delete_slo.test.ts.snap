@@ -104,7 +104,7 @@ exports[`DeleteSLO happy path removes all resources associatde to the slo 5`] = 
             },
           },
         },
-        "refresh": true,
+        "refresh": false,
         "slices": "auto",
         "wait_for_completion": false,
       },
@@ -146,6 +146,9 @@ exports[`DeleteSLO happy path removes all resources associatde to the slo 7`] = 
   "calls": Array [
     Array [
       "irrelevant",
+      Object {
+        "ignoreNotFound": true,
+      },
     ],
   ],
   "results": Array [
