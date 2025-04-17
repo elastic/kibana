@@ -6,7 +6,6 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import fastIsEqual from 'fast-deep-equal';
 import type { MlEntityField } from '@kbn/ml-anomaly-utils';
 import type { StateComparators, TitlesApi } from '@kbn/presentation-publishing';
 import type { JobId } from '../../../common/types/anomaly_detection_jobs';
@@ -20,8 +19,7 @@ import type {
 
 export const initializeAnomalyChartsControls = (
   rawState: AnomalyChartsEmbeddableState,
-  titlesApi?: TitlesApi,
-  parentApi?: unknown
+  titlesApi?: TitlesApi
 ) => {
   const jobIds$ = new BehaviorSubject<JobId[]>(rawState.jobIds);
   const maxSeriesToPlot$ = new BehaviorSubject<number>(
@@ -57,14 +55,10 @@ export const initializeAnomalyChartsControls = (
   };
 
   const anomalyChartsComparators: StateComparators<AnomalyChartsEmbeddableRuntimeState> = {
-    jobIds: [jobIds$, (arg: JobId[]) => jobIds$.next(arg), fastIsEqual],
-    maxSeriesToPlot: [maxSeriesToPlot$, (arg: number) => maxSeriesToPlot$.next(arg)],
-    severityThreshold: [severityThreshold$, (arg?: number) => severityThreshold$.next(arg)],
-    selectedEntities: [
-      selectedEntities$,
-      (arg?: MlEntityField[]) => selectedEntities$.next(arg),
-      fastIsEqual,
-    ],
+    jobIds: 'deepEquality',
+    maxSeriesToPlot: 'referenceEquality',
+    severityThreshold: 'referenceEquality',
+    selectedEntities: 'deepEquality',
   };
   const onRenderComplete = () => dataLoading$.next(false);
   const onLoading = (v: boolean) => dataLoading$.next(v);
