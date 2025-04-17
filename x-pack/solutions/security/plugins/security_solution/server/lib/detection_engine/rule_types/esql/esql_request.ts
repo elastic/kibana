@@ -14,7 +14,10 @@ import type { RulePreviewLoggedRequest } from '../../../../../common/api/detecti
 import { logEsqlRequest } from '../utils/logged_requests';
 import * as i18n from '../translations';
 
-const setLatestRequestDuration = (startTime: number, loggedRequests: RulePreviewLoggedRequest[] | undefined) => {
+const setLatestRequestDuration = (
+  startTime: number,
+  loggedRequests: RulePreviewLoggedRequest[] | undefined
+) => {
   const duration = performance.now() - startTime;
   if (loggedRequests && loggedRequests?.[loggedRequests.length - 1]) {
     loggedRequests[loggedRequests.length - 1].duration = Math.round(duration);
