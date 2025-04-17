@@ -10,7 +10,7 @@ import { Ast } from '@kbn/interpreter';
 import { textBasedQueryStateToExpressionAst } from '@kbn/data-plugin/common';
 import { ExpressionAstFunction } from '@kbn/expressions-plugin/common';
 import { TextBasedPrivateState, TextBasedLayer, IndexPatternRef } from './types';
-import type { OriginalColumn } from '../../../common/types';
+import type { OriginalColumn } from '../../../../common/types';
 
 function getExpressionForLayer(
   layer: TextBasedLayer,
