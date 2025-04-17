@@ -12,6 +12,7 @@ import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import type { TabItem } from '@kbn/unified-tabs';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import { TABS_STATE_URL_KEY } from '../../../../common/constants';
+import { TABS_ENABLED } from '../../../constants';
 import type { TabState, RecentlyClosedTabState } from './redux/types';
 import { createTabItem } from './redux/utils';
 import type { DiscoverAppState } from './discover_app_state_container';
@@ -160,6 +161,9 @@ export const createTabsStorageManager = ({
     selectedTabId,
     recentlyClosedTabs,
   }: TabsInternalStatePayload) => {
+    if (!TABS_ENABLED) {
+      return;
+    }
     await pushSelectedTabIdToUrl(selectedTabId);
     const openTabs: TabsStateInLocalStorage['openTabs'] = allTabs.map(toTabStateInStorage);
     const closedTabs: TabsStateInLocalStorage['closedTabs'] = recentlyClosedTabs.map(
@@ -178,6 +182,9 @@ export const createTabsStorageManager = ({
     tabId,
     tabStatePartial
   ) => {
+    if (!TABS_ENABLED) {
+      return;
+    }
     let hasModifications = false;
     const storedTabsState = readFromLocalStorage();
     const updatedTabsState = {
@@ -221,34 +228,39 @@ export const createTabsStorageManager = ({
       ...toTabState(tabStateInStorage),
       closedAt: tabStateInStorage.closedAt,
     });
+
     const selectedTabId = getSelectedTabIdFromURL();
-    const storedTabsState = readFromLocalStorage();
+    const storedTabsState = TABS_ENABLED
+      ? readFromLocalStorage()
+      : { openTabs: [], closedTabs: [] };
     const openTabs = storedTabsState.openTabs.map(toTabState);
     const closedTabs = storedTabsState.closedTabs.map(toRecentlyClosedTabState);
 
-    if (selectedTabId) {
-      // restore previously opened tabs
-      if (openTabs.find((tab) => tab.id === selectedTabId)) {
-        return {
-          groupId: defaultGroupId,
-          allTabs: openTabs,
-          selectedTabId,
-          recentlyClosedTabs: closedTabs,
-        };
-      }
+    if (TABS_ENABLED) {
+      if (selectedTabId) {
+        // restore previously opened tabs
+        if (openTabs.find((tab) => tab.id === selectedTabId)) {
+          return {
+            groupId: defaultGroupId,
+            allTabs: openTabs,
+            selectedTabId,
+            recentlyClosedTabs: closedTabs,
+          };
+        }
 
-      const storedClosedTab = storedTabsState.closedTabs.find((tab) => tab.id === selectedTabId);
+        const storedClosedTab = storedTabsState.closedTabs.find((tab) => tab.id === selectedTabId);
 
-      if (storedClosedTab) {
-        // restore previously closed tabs, for example when only the default tab was shown
-        return {
-          groupId: defaultGroupId,
-          allTabs: storedTabsState.closedTabs
-            .filter((tab) => tab.closedAt === storedClosedTab.closedAt)
-            .map(toTabState),
-          selectedTabId,
-          recentlyClosedTabs: getNRecentlyClosedTabs(closedTabs, openTabs),
-        };
+        if (storedClosedTab) {
+          // restore previously closed tabs, for example when only the default tab was shown
+          return {
+            groupId: defaultGroupId,
+            allTabs: storedTabsState.closedTabs
+              .filter((tab) => tab.closedAt === storedClosedTab.closedAt)
+              .map(toTabState),
+            selectedTabId,
+            recentlyClosedTabs: getNRecentlyClosedTabs(closedTabs, openTabs),
+          };
+        }
       }
     }
 
