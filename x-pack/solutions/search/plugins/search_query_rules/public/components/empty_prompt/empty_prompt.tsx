@@ -20,12 +20,15 @@ import {
   useEuiTheme,
   transparentize,
   EuiHorizontalRule,
+  EuiHideFor,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { TryInConsoleButton } from '@kbn/try-in-console';
 import { i18n } from '@kbn/i18n';
 import { docLinks } from '../../../common/doc_links';
+
+import { CREATE_QUERY_RULE_SET_API_SNIPPET } from '../../../common/constants';
 
 import { useKibana } from '../../hooks/use_kibana';
 
@@ -207,8 +210,8 @@ export const EmptyPrompt: React.FC<EmptyPromptProps> = ({ getStartedAction }) =>
         </EuiSplitPanel.Inner>
         <EuiHorizontalRule margin="none" />
         <EuiSplitPanel.Inner color="subdued" paddingSize="l">
-          <EuiFlexGroup direction="row" alignItems="stretch">
-            <EuiFlexGroup direction="row" gutterSize="s">
+          <EuiFlexGroup direction="row" alignItems="center">
+            <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
               <EuiFlexItem grow={false}>
                 <EuiTitle size="xxs">
                   <span>
@@ -219,18 +222,21 @@ export const EmptyPrompt: React.FC<EmptyPromptProps> = ({ getStartedAction }) =>
                   </span>
                 </EuiTitle>
               </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <TryInConsoleButton
-                  application={application}
-                  sharePlugin={share ?? undefined}
-                  consolePlugin={consolePlugin ?? undefined}
-                  request={`POST _plugins/_query_rules/_rulesets`}
-                  type="link"
-                  content={i18n.translate('xpack.queryRules.emptyPrompt.TryInConsoleLabel', {
-                    defaultMessage: 'Create in Console',
-                  })}
-                />
-              </EuiFlexItem>
+              <EuiHideFor sizes={['xs', 's']}>
+                <EuiFlexItem grow={false}>
+                  <TryInConsoleButton
+                    application={application}
+                    sharePlugin={share ?? undefined}
+                    consolePlugin={consolePlugin ?? undefined}
+                    request={CREATE_QUERY_RULE_SET_API_SNIPPET}
+                    type="emptyButton"
+                    content={i18n.translate('xpack.queryRules.emptyPrompt.TryInConsoleLabel', {
+                      defaultMessage: 'Create in Console',
+                    })}
+                    showIcon
+                  />
+                </EuiFlexItem>
+              </EuiHideFor>
             </EuiFlexGroup>
 
             <EuiFlexItem grow={false}>
