@@ -10,9 +10,7 @@ import { CspFinding } from '@kbn/cloud-security-posture-common';
 import { DataTableRecord } from '@kbn/discover-utils';
 import { SecuritySolutionContext } from '../../application/security_solution_context';
 
-export const useExpandableFlyoutCsp = (
-  flyoutType: 'misconfiguration' | 'vulnerability' = 'misconfiguration'
-) => {
+export const useExpandableFlyoutCsp = () => {
   const [expandedDoc, setExpandedDoc] = useState<DataTableRecord | undefined>(undefined);
   const securitySolutionContext = useContext(SecuritySolutionContext);
 
