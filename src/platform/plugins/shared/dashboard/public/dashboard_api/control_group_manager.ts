@@ -43,6 +43,13 @@ export function initializeControlGroupManager(
           references: getReferences(CONTROL_GROUP_EMBEDDABLE_ID),
         };
       },
+      serializeControlGroup: () => {
+        const serializedState = controlGroupApi$.value?.serializeState();
+        return {
+          controlGroupInput: serializedState?.rawState,
+          controlGroupReferences: serializedState?.references,
+        };
+      },
       setControlGroupApi: (controlGroupApi: ControlGroupApi) =>
         controlGroupApi$.next(controlGroupApi),
     },

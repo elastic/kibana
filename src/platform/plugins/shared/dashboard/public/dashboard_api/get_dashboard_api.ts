@@ -105,7 +105,7 @@ export function getDashboardApi({
   const unsavedChangesManager = initializeUnsavedChangesManager({
     viewModeManager,
     creationOptions,
-    controlGroupApi$: controlGroupManager.api.controlGroupApi$,
+    controlGroupManager,
     lastSavedState: savedObjectResult?.dashboardInput ?? DEFAULT_DASHBOARD_STATE,
     panelsManager,
     savedObjectId$,
@@ -125,14 +125,9 @@ export function getDashboardApi({
       viewMode: viewModeManager.api.viewMode$.value,
     };
 
-    const controlGroupApi = controlGroupManager.api.controlGroupApi$.value;
-    let controlGroupReferences: Reference[] | undefined;
-    if (controlGroupApi) {
-      const { rawState: controlGroupSerializedState, references: extractedReferences } =
-        controlGroupApi.serializeState();
-      controlGroupReferences = extractedReferences;
-      dashboardState.controlGroupInput = controlGroupSerializedState;
-    }
+    const { controlGroupInput, controlGroupReferences } =
+      controlGroupManager.internalApi.serializeControlGroup();
+    dashboardState.controlGroupInput = controlGroupInput;
 
     return {
       dashboardState,

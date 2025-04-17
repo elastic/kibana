@@ -8,7 +8,6 @@
  */
 
 import type { Reference } from '@kbn/content-management-utils';
-import { ControlGroupApi } from '@kbn/controls-plugin/public';
 import { HasLastSavedChildState, childrenUnsavedChanges$ } from '@kbn/presentation-containers';
 import {
   PublishesSavedObjectId,
@@ -32,7 +31,10 @@ import { initializeSettingsManager } from './settings_manager';
 import { DashboardCreationOptions, DashboardState } from './types';
 import { initializeUnifiedSearchManager } from './unified_search_manager';
 import { initializeViewModeManager } from './view_mode_manager';
-import { CONTROL_GROUP_EMBEDDABLE_ID } from './control_group_manager';
+import {
+  CONTROL_GROUP_EMBEDDABLE_ID,
+  initializeControlGroupManager,
+} from './control_group_manager';
 
 const DEBOUNCE_TIME = 100;
 
@@ -43,7 +45,7 @@ export function initializeUnsavedChangesManager({
   settingsManager,
   viewModeManager,
   creationOptions,
-  controlGroupApi$,
+  controlGroupManager,
   getReferences,
   unifiedSearchManager,
 }: {
@@ -51,7 +53,7 @@ export function initializeUnsavedChangesManager({
   creationOptions?: DashboardCreationOptions;
   getReferences: (id: string) => Reference[];
   savedObjectId$: PublishesSavedObjectId['savedObjectId$'];
-  controlGroupApi$: PublishingSubject<ControlGroupApi | undefined>;
+  controlGroupManager: ReturnType<typeof initializeControlGroupManager>;
   panelsManager: ReturnType<typeof initializePanelsManager>;
   viewModeManager: ReturnType<typeof initializeViewModeManager>;
   settingsManager: ReturnType<typeof initializeSettingsManager>;
@@ -99,7 +101,7 @@ export function initializeUnsavedChangesManager({
     viewModeManager.api.viewMode$,
     dashboardStateChanges$,
     hasPanelChanges$,
-    controlGroupApi$.pipe(
+    controlGroupManager.api.controlGroupApi$.pipe(
       skipWhile((controlGroupApi) => !controlGroupApi),
       switchMap((controlGroupApi) => {
         return controlGroupApi!.hasUnsavedChanges$;
@@ -132,7 +134,18 @@ export function initializeUnsavedChangesManager({
           dashboardStateToBackup.references = references;
         }
 
-        // SERIALIZED STATE ONLY TODO back up controls state.
+        if (hasControlGroupChanges) {
+          const { controlGroupInput, controlGroupReferences } =
+            controlGroupManager.internalApi.serializeControlGroup();
+          dashboardStateToBackup.controlGroupInput = controlGroupInput;
+          if (controlGroupReferences?.length) {
+            dashboardStateToBackup.references = [
+              ...(dashboardStateToBackup.references ?? []),
+              ...controlGroupReferences,
+            ];
+          }
+        }
+
         getDashboardBackupService().setState(savedObjectId$.value, dashboardStateToBackup);
       }
     });
@@ -163,7 +176,7 @@ export function initializeUnsavedChangesManager({
         unifiedSearchManager.internalApi.reset(lastSavedState$.value);
         settingsManager.internalApi.reset(lastSavedState$.value);
 
-        await controlGroupApi$.value?.resetUnsavedChanges();
+        await controlGroupManager.api.controlGroupApi$.value?.resetUnsavedChanges();
       },
       hasUnsavedChanges$,
       lastSavedStateForChild$: (panelId: string) =>
