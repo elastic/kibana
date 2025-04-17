@@ -4,12 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { z } from '@kbn/zod';
 import { getFlattenedObject } from '@kbn/std';
-import { SampleDocument, Streams, fieldDefinitionConfigSchema } from '@kbn/streams-schema';
+import { SampleDocument, fieldDefinitionConfigSchema, Streams } from '@kbn/streams-schema';
+import { z } from '@kbn/zod';
+import { SecurityError } from '../../../../lib/streams/errors/security_error';
 import { checkAccess } from '../../../../lib/streams/stream_crud';
 import { createServerRoute } from '../../../create_server_route';
-import { DefinitionNotFoundError } from '../../../../lib/streams/errors/definition_not_found_error';
 
 const UNMAPPED_SAMPLE_SIZE = 500;
 
@@ -114,7 +114,7 @@ export const schemaFieldsSimulationRoute = createServerRoute({
     const { read } = await checkAccess({ name: params.path.name, scopedClusterClient });
 
     if (!read) {
-      throw new DefinitionNotFoundError(`Stream definition for ${params.path.name} not found.`);
+      throw new SecurityError(`Cannot read stream ${params.path.name}, insufficient privileges`);
     }
 
     const userFieldDefinitions = params.body.field_definitions.flatMap((field) => {
