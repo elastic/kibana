@@ -85,7 +85,7 @@ export function getDashboardApi({
     getReferences
   );
   const controlGroupManager = initializeControlGroupManager(
-    savedObjectResult?.dashboardInput?.controlGroupInput,
+    initialState.controlGroupInput,
     getReferences
   );
   const dataLoadingManager = initializeDataLoadingManager(panelsManager.api.children$);

@@ -47,7 +47,7 @@ export function initializeControlGroupManager(
         const serializedState = controlGroupApi$.value?.serializeState();
         return {
           controlGroupInput: serializedState?.rawState,
-          controlGroupReferences: serializedState?.references,
+          controlGroupReferences: serializedState?.references ?? [],
         };
       },
       setControlGroupApi: (controlGroupApi: ControlGroupApi) =>

@@ -128,22 +128,16 @@ export function initializeUnsavedChangesManager({
         dashboardStateToBackup.viewMode = viewMode;
 
         // Backup latest state from children that have unsaved changes
-        if (hasPanelChanges) {
+        if (hasPanelChanges || hasControlGroupChanges) {
           const { panels, references } = panelsManager.internalApi.serializePanels();
-          dashboardStateToBackup.panels = panels;
-          dashboardStateToBackup.references = references;
-        }
-
-        if (hasControlGroupChanges) {
           const { controlGroupInput, controlGroupReferences } =
             controlGroupManager.internalApi.serializeControlGroup();
-          dashboardStateToBackup.controlGroupInput = controlGroupInput;
-          if (controlGroupReferences?.length) {
-            dashboardStateToBackup.references = [
-              ...(dashboardStateToBackup.references ?? []),
-              ...controlGroupReferences,
-            ];
-          }
+          // dashboardStateToBackup.references will be used instead of savedObjectResult.references
+          // To avoid missing references, make sure references contains all references
+          // even if panels or control group does not have unsaved changes
+          dashboardStateToBackup.references = [...references, ...controlGroupReferences];
+          if (hasPanelChanges) dashboardStateToBackup.panels = panels;
+          if (hasControlGroupChanges) dashboardStateToBackup.controlGroupInput = controlGroupInput;
         }
 
         getDashboardBackupService().setState(savedObjectId$.value, dashboardStateToBackup);
