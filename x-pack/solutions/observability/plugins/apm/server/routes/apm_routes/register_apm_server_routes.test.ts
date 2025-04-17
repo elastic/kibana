@@ -15,6 +15,13 @@ import type { APMRouteHandlerResources } from './register_apm_server_routes';
 import { registerRoutes } from './register_apm_server_routes';
 import { NEVER } from 'rxjs';
 
+const disabledAuthz = {
+  authz: {
+    enabled: false as const,
+    reason: 'This is a test',
+  },
+};
+
 type RegisterRouteDependencies = Parameters<typeof registerRoutes>[0];
 
 const getRegisterRouteDependencies = () => {
@@ -223,6 +230,7 @@ describe('createApi', () => {
             endpoint: 'GET /foo',
             options: { tags: [] },
             handler: handlerMock,
+            security: disabledAuthz,
           },
         ]);
 
@@ -256,6 +264,7 @@ describe('createApi', () => {
               tags: [],
             },
             handler: handlerMock,
+            security: disabledAuthz,
           },
         ]);
         await simulateRequest({
@@ -282,7 +291,14 @@ describe('createApi', () => {
         const {
           simulateRequest,
           mocks: { response },
-        } = initApi([{ endpoint: 'GET /foo', options: { tags: [] }, handler: handlerMock }]);
+        } = initApi([
+          {
+            endpoint: 'GET /foo',
+            options: { tags: [] },
+            handler: handlerMock,
+            security: disabledAuthz,
+          },
+        ]);
         await simulateRequest({
           method: 'get',
           pathname: '/foo',
@@ -309,6 +325,7 @@ describe('createApi', () => {
           endpoint: 'GET /foo',
           options: { tags: [] },
           handler: jest.fn().mockResolvedValue({}),
+          security: disabledAuthz,
         },
       ]);
 
@@ -354,6 +371,7 @@ describe('createApi', () => {
             }),
           }),
           handler: handlerMock,
+          security: disabledAuthz,
         },
       ]);
 
@@ -428,6 +446,7 @@ describe('createApi', () => {
             body: t.string,
           }),
           handler: handlerMock,
+          security: disabledAuthz,
         },
       ]);
 
@@ -477,6 +496,7 @@ describe('createApi', () => {
             }),
           }),
           handler: handlerMock,
+          security: disabledAuthz,
         },
       ]);
 

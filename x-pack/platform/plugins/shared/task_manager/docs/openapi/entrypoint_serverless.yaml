@@ -10,8 +10,7 @@ tags:
   - name: task manager
     x-displayName: Task manager
     externalDocs:
-      url: >-
-        https://www.elastic.co/guide/en/kibana/current/task-manager-production-considerations.html
+      url: https://www.elastic.co/docs/deploy-manage/distributed-architecture/kibana-tasks-management
       description: Task manager
 servers:
   - url: /

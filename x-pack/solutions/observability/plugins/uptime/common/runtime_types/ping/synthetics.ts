@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isRight } from 'fp-ts/lib/Either';
+import { isRight } from 'fp-ts/Either';
 import * as t from 'io-ts';
 import { ObserverCodec } from './observer';
 import { ErrorStateCodec } from './error_state';
