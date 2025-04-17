@@ -4389,9 +4389,6 @@ describe('update()', () => {
               {
                 id: 'dashboard-1',
               },
-              {
-                id: 'dashboard-3',
-              },
             ],
           },
         },
@@ -4406,19 +4403,13 @@ describe('update()', () => {
               {
                 refId: 'dashboard_0',
               },
-              {
-                refId: 'dashboard_1',
-              },
             ],
           },
         }),
         {
           id: '1',
           overwrite: true,
-          references: [
-            { id: 'dashboard-1', name: 'dashboard_0', type: 'dashboard' },
-            { id: 'dashboard-3', name: 'dashboard_1', type: 'dashboard' },
-          ],
+          references: [{ id: 'dashboard-1', name: 'dashboard_0', type: 'dashboard' }],
           version: '123',
         }
       );
@@ -4461,6 +4452,8 @@ describe('update()', () => {
           "updatedAt": 2019-02-12T21:01:22.479Z,
         }
       `);
+
+      expect(unsecuredSavedObjectsClient.get).not.toHaveBeenCalled();
     });
 
     test('adds a new linked dashboard', async () => {
@@ -4681,6 +4674,8 @@ describe('update()', () => {
           "updatedAt": 2019-02-12T21:01:22.479Z,
         }
       `);
+
+      expect(unsecuredSavedObjectsClient.get).not.toHaveBeenCalled();
     });
   });
 });
