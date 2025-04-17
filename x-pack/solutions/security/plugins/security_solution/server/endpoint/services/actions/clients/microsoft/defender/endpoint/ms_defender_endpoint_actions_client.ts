@@ -118,6 +118,16 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
   protected async fetchAgentPolicyInfo(
     agentIds: string[]
   ): Promise<LogsEndpointAction['agent']['policy']> {
+    const cacheKey = agentIds.sort().join('#');
+    const cacheResponse = this.cache.get<LogsEndpointAction['agent']['policy']>(cacheKey);
+
+    if (cacheResponse) {
+      this.log.debug(
+        () => `Cached agent policy info. found - returning it:\n${stringify(cacheResponse)}`
+      );
+      return cacheResponse;
+    }
+
     const esClient = this.options.esClient;
     const esSearchRequest: SearchRequest = {
       index: await this.fetchIndexNames(),
@@ -191,15 +201,16 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
       }
     }
 
-    return this.fetchFleetInfoForAgents(elasticAgentIds, ['microsoft_defender_endpoint']).then(
-      (agentInfoList) => {
-        for (const agentInfo of agentInfoList) {
-          agentInfo.agentId = fleetAgentIdToMsDefenderAgentIdMap[agentInfo.elasticAgentId];
-        }
+    const agentPolicyInfo = await this.fetchFleetInfoForAgents(elasticAgentIds, [
+      'microsoft_defender_endpoint',
+    ]);
 
-        return agentInfoList;
-      }
-    );
+    for (const agentInfo of agentPolicyInfo) {
+      agentInfo.agentId = fleetAgentIdToMsDefenderAgentIdMap[agentInfo.elasticAgentId];
+    }
+
+    this.cache.set(cacheKey, agentPolicyInfo);
+    return agentPolicyInfo;
   }
 
   protected async handleResponseActionCreation<

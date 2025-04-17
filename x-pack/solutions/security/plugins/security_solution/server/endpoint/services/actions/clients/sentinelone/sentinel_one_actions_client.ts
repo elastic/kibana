@@ -163,6 +163,16 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
   protected async fetchAgentPolicyInfo(
     agentIds: string[]
   ): Promise<LogsEndpointAction['agent']['policy']> {
+    const cacheKey = agentIds.sort().join('#');
+    const cacheResponse = this.cache.get<LogsEndpointAction['agent']['policy']>(cacheKey);
+
+    if (cacheResponse) {
+      this.log.debug(
+        () => `Cached agent policy info. found - returning it:\n${stringify(cacheResponse)}`
+      );
+      return cacheResponse;
+    }
+
     const esClient = this.options.esClient;
     const esSearchRequest: SearchRequest = {
       index: await this.fetchSentinelOneAgentIndexNames(),
@@ -232,13 +242,14 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
       }
     }
 
-    return this.fetchFleetInfoForAgents(elasticAgentIds, ['sentinel_one']).then((agentInfoList) => {
-      for (const agentInfo of agentInfoList) {
-        agentInfo.agentId = fleetAgentIdToS1AgentIdMap[agentInfo.elasticAgentId];
-      }
+    const agentPolicyInfo = await this.fetchFleetInfoForAgents(elasticAgentIds, ['sentinel_one']);
 
-      return agentInfoList;
-    });
+    for (const agentInfo of agentPolicyInfo) {
+      agentInfo.agentId = fleetAgentIdToS1AgentIdMap[agentInfo.elasticAgentId];
+    }
+
+    this.cache.set(cacheKey, agentPolicyInfo);
+    return agentPolicyInfo;
   }
 
   private async handleResponseActionCreation<

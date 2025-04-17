@@ -67,7 +67,20 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
   protected async fetchAgentPolicyInfo(
     agentIds: string[]
   ): Promise<LogsEndpointAction['agent']['policy']> {
-    return this.fetchFleetInfoForAgents(agentIds, ['endpoint']);
+    const cacheKey = agentIds.sort().join('#');
+    const cacheResponse = this.cache.get<LogsEndpointAction['agent']['policy']>(cacheKey);
+
+    if (cacheResponse) {
+      this.log.debug(
+        () => `Cached agent policy info. found - returning it:\n${stringify(cacheResponse)}`
+      );
+      return cacheResponse;
+    }
+
+    const agentPolicyInfo = await this.fetchFleetInfoForAgents(agentIds, ['endpoint']);
+
+    this.cache.set(cacheKey, agentPolicyInfo);
+    return agentPolicyInfo;
   }
 
   private async checkAgentIds(ids: string[]): Promise<{
