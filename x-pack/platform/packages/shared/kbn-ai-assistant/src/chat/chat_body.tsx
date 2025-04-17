@@ -18,7 +18,7 @@ import {
   useEuiTheme,
   UseEuiTheme,
 } from '@elastic/eui';
-import { css, keyframes } from '@emotion/css';
+import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
 import type {
   Conversation,
@@ -39,6 +39,7 @@ import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { findLastIndex } from 'lodash';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { ChatFeedback } from '@kbn/observability-ai-assistant-plugin/public/analytics/schemas/chat_feedback';
+import { AssistantBeacon } from '@kbn/ai-assistant-icon';
 import type { UseKnowledgeBaseResult } from '../hooks/use_knowledge_base';
 import { ASSISTANT_SETUP_TITLE, EMPTY_CONVERSATION_TITLE, UPGRADE_LICENSE_TITLE } from '../i18n';
 import { useAIAssistantChatService } from '../hooks/use_ai_assistant_chat_service';
@@ -72,11 +73,6 @@ const promptEditorClassname = (euiTheme: UseEuiTheme['euiTheme']) => css`
   }
 `;
 
-const incorrectLicenseContainer = (euiTheme: UseEuiTheme['euiTheme']) => css`
-  height: 100%;
-  padding: ${euiTheme.size.base};
-`;
-
 const chatBodyContainerClassNameWithError = css`
   align-self: center;
   margin: 12px;
@@ -87,30 +83,23 @@ const promptEditorContainerClassName = css`
   padding-bottom: 8px;
 `;
 
-const fadeInAnimation = keyframes`
-  from {
-    opacity: 0;
-    transform: scale(0.9);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-`;
-
-const animClassName = (euiTheme: UseEuiTheme['euiTheme']) => css`
+const panelClassName = css`
+  display: flex;
   height: 100%;
-  opacity: 0;
-  ${euiCanAnimate} {
-    animation: ${fadeInAnimation} ${euiTheme.animation.normal} ${euiTheme.animation.bounce}
-      ${euiTheme.animation.normal} forwards;
-  }
 `;
 
 const containerClassName = css`
   min-width: 0;
   max-height: 100%;
 `;
+
+const loadingClassname = css`
+          height: 100%;
+          width: 100%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+}`;
 
 const PADDING_AND_BORDER = 32;
 
@@ -462,33 +451,23 @@ export function ChatBody({
   }
 
   let footer: React.ReactNode;
+
   if (!hasCorrectLicense && !initialConversationId) {
     footer = (
-      <>
-        <EuiFlexItem grow className={incorrectLicenseContainer(euiTheme)}>
-          <IncorrectLicensePanel />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiHorizontalRule margin="none" />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiPanel hasBorder={false} hasShadow={false} paddingSize="m">
-            <PromptEditor
-              hidden={connectors.loading || connectors.connectors?.length === 0}
-              loading={isLoading}
-              disabled
-              onChangeHeight={setPromptEditorHeight}
-              onSubmit={(message) => {
-                next(messages.concat(message));
-              }}
-              onSendTelemetry={(eventWithPayload) =>
-                chatService.sendAnalyticsEvent(eventWithPayload)
-              }
-            />
-            <EuiSpacer size="s" />
-          </EuiPanel>
-        </EuiFlexItem>
-      </>
+      <EuiFlexItem
+        grow
+        css={css`
+          justify-content: center;
+        `}
+      >
+        <IncorrectLicensePanel />
+      </EuiFlexItem>
+    );
+  } else if (connectors.loading) {
+    footer = (
+      <div className={loadingClassname}>
+        <AssistantBeacon size="xxl" backgroundColor="backgroundBasePlain" />
+      </div>
     );
   } else if (!conversation.value && conversation.loading) {
     footer = null;
@@ -502,7 +481,7 @@ export function ChatBody({
               hasBorder={false}
               hasShadow={false}
               paddingSize="m"
-              className={animClassName(euiTheme)}
+              className={panelClassName}
             >
               {connectors.connectors?.length === 0 || messages.length === 0 ? (
                 <WelcomeMessage

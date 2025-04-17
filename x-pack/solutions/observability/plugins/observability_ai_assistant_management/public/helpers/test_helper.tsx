@@ -10,12 +10,12 @@ import { createMemoryHistory } from 'history';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render as testLibRender } from '@testing-library/react';
 import { coreMock } from '@kbn/core/public/mocks';
-import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { observabilityAIAssistantPluginMock } from '@kbn/observability-ai-assistant-plugin/public/mock';
 import { RouterProvider } from '@kbn/typed-react-router-config';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { merge } from 'lodash';
 import { DeepPartial } from 'utility-types';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { AppContextProvider, AppContextValue } from '../context/app_context';
 import { RedirectToHomeIfUnauthorized } from '../routes/components/redirect_to_home_if_unauthorized';
 import { aIAssistantManagementObservabilityRouter } from '../routes/config';
@@ -77,8 +77,7 @@ export const render = (
   };
 
   return testLibRender(
-    // @ts-ignore
-    <IntlProvider locale="en-US">
+    <KibanaRenderContextProvider {...mergedCoreStartMock}>
       <RedirectToHomeIfUnauthorized coreStart={mergedCoreStartMock}>
         <KibanaContextProvider services={{ ...mergedCoreStartMock, ...startDeps }}>
           <AppContextProvider value={appContextValue}>
@@ -93,6 +92,6 @@ export const render = (
           </AppContextProvider>
         </KibanaContextProvider>
       </RedirectToHomeIfUnauthorized>
-    </IntlProvider>
+    </KibanaRenderContextProvider>
   );
 };
