@@ -25447,7 +25447,6 @@ paths:
                       type: string
                   required:
                     - readMeData
-                    - categories
               required:
                 - fields
       responses:
