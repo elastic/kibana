@@ -125,7 +125,7 @@ describe('getDataStreamTypes', () => {
   it('should return entity source_data_stream types when has no metrics', async () => {
     (getHasMetricsData as jest.Mock).mockResolvedValue(false);
     (getLatestEntity as jest.Mock).mockResolvedValue({
-      sourceDataStreamType: ['logs', 'traces'],
+      sourceDataStreamType: ['logs'],
     });
 
     const params = {
@@ -139,6 +139,6 @@ describe('getDataStreamTypes', () => {
     };
 
     const result = await getDataStreamTypes(params);
-    expect(result).toEqual(['logs', 'traces']);
+    expect(result).toEqual(['logs']);
   });
 });
