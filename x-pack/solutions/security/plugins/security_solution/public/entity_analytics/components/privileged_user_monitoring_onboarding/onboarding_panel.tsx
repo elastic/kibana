@@ -22,7 +22,7 @@ import { ONBOARDING_VIDEO_SOURCE } from '../../../common/constants';
 import { AddDataSourcePanel } from './add_data_source';
 
 const VIDEO_TITLE = i18n.translate(
-  'securitySolution.entityAnalytics.privilegedUserMonitoring.videoTitle',
+  'xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.videoTitle',
   {
     defaultMessage: 'Onboarding Video',
   }
