@@ -9,9 +9,10 @@ import type { FC } from 'react';
 import React, { useState, useEffect } from 'react';
 import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import useDebounce from 'react-use/lib/useDebounce';
-import { EuiCallOut } from '@elastic/eui';
+import { EuiCallOut, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Mappings as MappingsEditor } from './inputs';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { JsonEditor, EDITOR_MODE } from './json_editor';
 
 interface Props {
   mappings: MappingTypeMapping;
@@ -41,6 +42,17 @@ export const Mappings: FC<Props> = ({ mappings, setMappings, showTitle, readonly
     [localMappings]
   );
 
+  const editor = (
+    <JsonEditor
+      mode={EDITOR_MODE.JSON}
+      readOnly={readonly}
+      value={localMappings}
+      onChange={(value) => {
+        setLocalMappings(value);
+      }}
+    />
+  );
+
   return (
     <>
       {readonly ? (
@@ -53,15 +65,21 @@ export const Mappings: FC<Props> = ({ mappings, setMappings, showTitle, readonly
           })}
         />
       ) : null}
-      <MappingsEditor
-        initialized={readonly}
-        data={localMappings}
-        onChange={(value) => {
-          setLocalMappings(value);
-        }}
-        indexName={''}
-        showTitle={showTitle}
-      />
+      {showTitle ? (
+        <EuiFormRow
+          label={
+            <FormattedMessage
+              id="xpack.dataVisualizer.file.advancedImportSettings.ingestPipelineLabel"
+              defaultMessage="Ingest pipeline"
+            />
+          }
+          fullWidth
+        >
+          {editor}
+        </EuiFormRow>
+      ) : (
+        editor
+      )}
     </>
   );
 };

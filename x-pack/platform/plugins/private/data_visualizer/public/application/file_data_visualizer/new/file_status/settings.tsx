@@ -9,7 +9,9 @@ import type { FC } from 'react';
 import React, { useEffect, useState } from 'react';
 import type { IndicesIndexSettings } from '@elastic/elasticsearch/lib/api/types';
 import useDebounce from 'react-use/lib/useDebounce';
-import { IndexSettings } from './inputs';
+import { EuiFormRow } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { JsonEditor, EDITOR_MODE } from './json_editor';
 
 interface Props {
   settings: IndicesIndexSettings;
@@ -35,15 +37,30 @@ export const Settings: FC<Props> = ({ settings, setSettings, showTitle, readonly
     [localSettings]
   );
 
-  return (
-    <IndexSettings
-      initialized={readonly}
-      data={localSettings}
+  const editor = (
+    <JsonEditor
+      mode={EDITOR_MODE.JSON}
+      readOnly={readonly}
+      value={localSettings}
       onChange={(value) => {
         setLocalSettings(value);
       }}
-      indexName={''}
-      showTitle={showTitle}
     />
+  );
+
+  return showTitle ? (
+    <EuiFormRow
+      label={
+        <FormattedMessage
+          id="xpack.dataVisualizer.file.advancedImportSettings.indexSettingsLabel"
+          defaultMessage="Index settings"
+        />
+      }
+      fullWidth
+    >
+      {editor}
+    </EuiFormRow>
+  ) : (
+    editor
   );
 };

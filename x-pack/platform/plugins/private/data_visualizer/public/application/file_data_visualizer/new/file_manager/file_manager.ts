@@ -85,12 +85,11 @@ export class FileUploadManager {
       files.length > 0 ? combineLatest(files.map((file) => file.fileStatus$)) : of([])
     )
   );
-  public readonly filePipelines$: Observable<Array<IngestPipeline | undefined>> = // should this be undefined? !!!!!
-    this.files$.pipe(
-      switchMap((files) =>
-        files.length > 0 ? combineLatest(files.map((file) => file.pipelineObvs$)) : of([])
-      )
-    );
+  public readonly filePipelines$: Observable<Array<IngestPipeline | undefined>> = this.files$.pipe(
+    switchMap((files) =>
+      files.length > 0 ? combineLatest(files.map((file) => file.pipelineObvs$)) : of([])
+    )
+  );
   private readonly existingIndexMappings$ = new BehaviorSubject<MappingTypeMapping | null>(null);
 
   private mappingsCheckSubscription: Subscription;

@@ -19,7 +19,7 @@ interface FileTooLargeProps {
 }
 
 export const FileTooLarge: FC<FileTooLargeProps> = ({ fileSizeChecker }) => {
-  // is this used??!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  // this should still be used !!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   const fileSizeFormatted = fileSizeChecker.fileSizeFormatted();
   const maxFileSizeFormatted = fileSizeChecker.maxFileSizeFormatted();
 

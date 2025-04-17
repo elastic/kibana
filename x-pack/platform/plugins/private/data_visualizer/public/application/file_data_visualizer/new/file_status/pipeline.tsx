@@ -9,7 +9,9 @@ import type { FC } from 'react';
 import React, { useEffect, useState } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 import type { IngestPipeline as IngestPipelineType } from '@kbn/file-upload-plugin/common/types';
-import { IngestPipeline as IngestPipelineEditor } from './inputs';
+import { EuiFormRow } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { JsonEditor, EDITOR_MODE } from './json_editor';
 
 interface Props {
   pipeline: IngestPipelineType;
@@ -45,15 +47,31 @@ export const IngestPipeline: FC<Props> = ({
   );
   // add a warning that editing the pipeline when there are more than one file will update the mappings !!!!!!!
   // or somehow stop pipeline editing from triggering observable FileAnalysis
-  return (
-    <IngestPipelineEditor
-      initialized={readonly}
-      data={localPipeline}
+
+  const editor = (
+    <JsonEditor
+      mode={EDITOR_MODE.JSON}
+      readOnly={readonly}
+      value={localPipeline}
       onChange={(value) => {
         setLocalPipeline(value);
       }}
-      indexName={''}
-      showTitle={showTitle}
     />
+  );
+
+  return showTitle ? (
+    <EuiFormRow
+      label={
+        <FormattedMessage
+          id="xpack.dataVisualizer.file.advancedImportSettings.ingestPipelineLabel"
+          defaultMessage="Ingest pipeline"
+        />
+      }
+      fullWidth
+    >
+      {editor}
+    </EuiFormRow>
+  ) : (
+    editor
   );
 };

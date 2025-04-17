@@ -23,6 +23,8 @@ import { STATUS } from './file_manager';
 import { analyzeTikaFile } from './tika_analyzer';
 import { FileSizeChecker } from './file_size_check';
 
+export type ServerSettings = ReturnType<typeof processResults> | null;
+
 interface AnalysisResults {
   analysisStatus: STATUS;
   fileContents: string;

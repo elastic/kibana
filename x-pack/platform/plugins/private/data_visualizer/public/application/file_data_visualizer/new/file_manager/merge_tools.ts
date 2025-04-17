@@ -98,7 +98,7 @@ export function createMergedMappings(
       } else {
         const existingField = acc.get(field.name);
 
-        if (existingField.type !== field.value.type) {
+        if (existingField && existingField.type !== field.value.type) {
           // if either new or existing field is text or keyword, we should allow the clash
           // and replace the existing field with the new field if the existing is keyword =
           if (existingField.type === 'keyword' && field.value.type === 'text') {
@@ -121,7 +121,7 @@ export function createMergedMappings(
       }
     });
     return acc;
-  }, new Map<string, any>()); // remove any !!!!!!!!!!!!!!!!!!!!
+  }, new Map<string, { type: string }>());
 
   if (existingIndexMappings !== null) {
     // remove the existing index mappings from the fields array
@@ -131,7 +131,7 @@ export function createMergedMappings(
 
   const mergedMappings = {
     properties: Object.fromEntries(mergedMappingsMap),
-  };
+  } as MappingTypeMapping;
 
   if (checkExistingIndexMappings === true) {
     const existingIndexChecks: ExistingIndexChecks = {
@@ -170,7 +170,7 @@ export function createMergedMappings(
           const existingType = existingField.type;
           if (existingType !== field.value.type) {
             if (existingType === 'text' && field.value.type === 'keyword') {
-              // do nothing, is this correct?!!!!!!!!!!!!!!!!!
+              // do nothing
             } else {
               existingIndexChecks.mappingClashes.push({
                 fieldName: field.name,
