@@ -22,6 +22,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiPageTemplate,
+  EuiPanel,
   EuiSpacer,
   UseEuiTheme,
   transparentize,
@@ -113,28 +114,20 @@ export const GridExample = ({
     layoutUpdated$.next();
   }, [currentLayout, layoutUpdated$]);
 
-  const renderPanelContents = useCallback(
-    (id: string, setDragHandles?: (refs: Array<HTMLElement | null>) => void) => {
-      const currentPanels = mockDashboardApi.panels$.getValue();
-
-      return (
-        <ReactEmbeddableRenderer
-          key={id}
-          maybeId={id}
-          type={currentPanels[id].type}
-          getParentApi={() => mockDashboardApi}
-          panelProps={{
-            showBadges: true,
-            showBorder: true,
-            showNotifications: true,
-            showShadow: false,
-            setDragHandles,
-          }}
-        />
-      );
-    },
-    [mockDashboardApi]
-  );
+  const renderPanelContents = useCallback((id: string) => {
+    return (
+      <EuiPanel
+        hasBorder={true}
+        hasShadow={false}
+        css={css({
+          height: '100%',
+          backgroundColor: `#${Math.floor(Math.random() * 16777215).toString(16)}`,
+        })}
+      >
+        {id}
+      </EuiPanel>
+    );
+  }, []);
 
   const onLayoutChange = useCallback(
     (newLayout: GridLayoutData) => {
@@ -276,7 +269,6 @@ export const GridExample = ({
             expandedPanelId={expandedPanelId}
             layout={currentLayout}
             gridSettings={gridSettings}
-            useCustomDragHandle={true}
             renderPanelContents={renderPanelContents}
             onLayoutChange={onLayoutChange}
             css={layoutStyles}
