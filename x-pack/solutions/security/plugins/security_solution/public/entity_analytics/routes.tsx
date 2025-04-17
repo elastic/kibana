@@ -25,6 +25,7 @@ import { PluginTemplateWrapper } from '../common/components/plugin_template_wrap
 import { EntityStoreManagementPage } from './pages/entity_store_management_page';
 import { EntityAnalyticsLandingPage } from './pages/entity_analytics_landing';
 import { EntityAnalyticsPrivilegedUserMonitoringPage } from './pages/entity_analytics_privileged_user_monitoring_page';
+import { PrivilegedUserMonitoringPage } from './pages/privileged_user_monitoring_dashboard';
 
 const EntityAnalyticsManagementTelemetry = () => (
   <PluginTemplateWrapper>
@@ -125,7 +126,7 @@ EntityAnalyticsLandingContainer.displayName = 'EntityAnalyticsLandingContainer';
 const EntityAnalyticsPrivilegedUserMonitoringTelemetry = () => (
   <PluginTemplateWrapper>
     <TrackApplicationView viewId={SecurityPageName.privilegedUserMonitoring}>
-      <EntityAnalyticsPrivilegedUserMonitoringPage />
+      <PrivilegedUserMonitoringPage />
       <SpyRoute pageName={SecurityPageName.privilegedUserMonitoring} />
     </TrackApplicationView>
   </PluginTemplateWrapper>

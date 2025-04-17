@@ -1,0 +1,50 @@
+openapi: 3.0.0
+
+info:
+  title: Threat Hunting API
+  version: "2023-10-31"
+paths:
+  /api/entity_analytics/threat_hunting/queries/list:
+    get:
+      x-labels: [ess, serverless]
+      x-codegen-enabled: true
+      operationId: ThreatHuntingList
+      summary: List threat hunting queries
+      parameters:
+        - name: page
+          in: query
+          description: Page number for pagination
+          required: false
+          schema:
+            type: integer
+        - name: perPage
+          in: query
+          description: Number of items per page
+          required: false
+          schema:
+            type: integer
+        - name: sort
+          in: query
+          description: Sort order for the results
+          required: false
+          schema:
+            type: string
+        - name: kuery
+          in: query
+          description: Kuery string for filtering results
+          required: false
+          schema:
+            type: string
+
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  queries:
+                    type: array
+                    items:
+                      $ref: './common.schema.yaml#/components/schemas/ThreatHuntingQuery'

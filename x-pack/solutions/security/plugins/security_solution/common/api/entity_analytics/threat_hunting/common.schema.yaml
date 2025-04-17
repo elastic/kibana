@@ -1,0 +1,77 @@
+openapi: 3.0.0
+info:
+  title: Threat Hunting Common Schema
+  description: Common schema for threat hunting
+  version: '1'
+paths: {}
+components:
+  schemas:
+    ThreatHuntingQuery:
+      type: object
+      required:
+        - author
+        - description
+        - integration
+        - uuid
+        - name
+        - language
+        - license
+        - notes
+        - mitre
+        - references
+        - queries
+      properties:
+        '@timestamp':
+          type: string
+          format: date-time
+        author:
+          type: string
+        description:
+          type: string
+        integration:
+          type: array
+          items:
+            type: string
+        uuid:
+          type: string
+          format: uuid
+        name:
+          type: string
+        language:
+          type: array
+          items:
+            type: string
+        license:
+          type: string
+        notes:
+          type: array
+          items:
+            type: string
+        mitre:
+          type: array
+          items:
+            type: string
+        references:
+          type: array
+          items:
+            type: string
+        queries:
+          type: array
+          items:
+            $ref: '#/components/schemas/ThreatHuntingQueryQuery'
+
+    ThreatHuntingQueryQuery:
+      type: object
+      required:
+        - query
+        - indices
+        - cleanedQuery
+      properties:
+        query:
+          type: string
+        indices:
+          type: array
+          items:
+            type: string
+        cleanedQuery:
+          type: string

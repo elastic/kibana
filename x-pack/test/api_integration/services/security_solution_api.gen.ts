@@ -148,6 +148,7 @@ import {
 import { StopEntityEngineRequestParamsInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/engine/stop.gen';
 import { StopRuleMigrationRequestParamsInput } from '@kbn/security-solution-plugin/common/siem_migrations/model/api/rules/rule_migration.gen';
 import { SuggestUserProfilesRequestQueryInput } from '@kbn/security-solution-plugin/common/api/detection_engine/users/suggest_user_profiles_route.gen';
+import { ThreatHuntingListRequestQueryInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/threat_hunting/list.gen';
 import { TriggerRiskScoreCalculationRequestBodyInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/risk_engine/entity_calculation_route.gen';
 import { UpdateRuleRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/crud/update_rule/update_rule_route.gen';
 import {
@@ -1622,6 +1623,14 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .query(props.query);
     },
+    threatHuntingList(props: ThreatHuntingListProps, kibanaSpace: string = 'default') {
+      return supertest
+        .get(routeWithNamespace('/api/entity_analytics/threat_hunting/queries/list', kibanaSpace))
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .query(props.query);
+    },
     /**
      * Calculates and persists Risk Scores for an entity, returning the calculated risk score.
      */
@@ -1975,6 +1984,9 @@ export interface StopRuleMigrationProps {
 }
 export interface SuggestUserProfilesProps {
   query: SuggestUserProfilesRequestQueryInput;
+}
+export interface ThreatHuntingListProps {
+  query: ThreatHuntingListRequestQueryInput;
 }
 export interface TriggerRiskScoreCalculationProps {
   body: TriggerRiskScoreCalculationRequestBodyInput;

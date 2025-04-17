@@ -38,6 +38,7 @@ import type {
   SecuritySolutionRequestHandlerContext,
 } from './types';
 import { PrivilegeMonitoringDataClient } from './lib/entity_analytics/privilege_monitoring/privilege_monitoring_data_client';
+import { ThreatHuntingQueriesDataClient } from './lib/entity_analytics/threat_hunting/threat_hunting_queries_data_client';
 
 export interface IRequestContextFactory {
   create(
@@ -244,6 +245,15 @@ export class RequestContextFactory implements IRequestContextFactory {
       getAssetCriticalityDataClient: memoize(
         () =>
           new AssetCriticalityDataClient({
+            logger: options.logger,
+            esClient: coreContext.elasticsearch.client.asCurrentUser,
+            namespace: getSpaceId(),
+            auditLogger: getAuditLogger(),
+          })
+      ),
+      getThreatHuntingQueriesDataClient: memoize(
+        () =>
+          new ThreatHuntingQueriesDataClient({
             logger: options.logger,
             esClient: coreContext.elasticsearch.client.asCurrentUser,
             namespace: getSpaceId(),
