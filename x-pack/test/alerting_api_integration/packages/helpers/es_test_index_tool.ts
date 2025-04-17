@@ -8,7 +8,7 @@ import { omit } from 'lodash';
 import type { Client } from '@elastic/elasticsearch';
 import type { DeleteByQueryRequest } from '@elastic/elasticsearch/lib/api/types';
 
-export const ES_TEST_INDEX_NAME = '.kibana-alerting-test-data';
+export const ES_TEST_INDEX_NAME = 'kibana-alerting-test-data';
 
 export class ESTestIndexTool {
   constructor(

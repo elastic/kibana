@@ -113,6 +113,23 @@ describe('RulesListNotifyBadge', () => {
     expect(onRuleChanged).toHaveBeenCalled();
   });
 
+  it('should not allow the user to snooze the rule unless they have edit permissions', async () => {
+    render(
+      <RulesListNotifyBadge
+        snoozeSettings={{
+          name: 'rule 1',
+          muteAll: false,
+          isSnoozedUntil: null,
+        }}
+        onRuleChanged={onRuleChanged}
+        snoozeRule={snoozeRule}
+        unsnoozeRule={unsnoozeRule}
+        isRuleEditable={false}
+      />
+    );
+    expect(screen.queryByTestId('rulesListNotifyBadge')).not.toBeInTheDocument();
+  });
+
   it('should allow the user to unsnooze rules', async () => {
     render(
       <RulesListNotifyBadge
@@ -179,6 +196,26 @@ describe('RulesListNotifyBadge', () => {
     );
 
     expect(screen.getByTestId('rulesListNotifyBadge-invalidSnooze')).toBeInTheDocument();
+  });
+
+  it('should render the existing snooze schedule as disabled when the user does not have edit permissions', async () => {
+    render(
+      <RulesListNotifyBadge
+        snoozeSettings={{
+          name: 'rule 1',
+          muteAll: false,
+          isSnoozedUntil: moment('1990-02-01').toDate(),
+        }}
+        disabled={true}
+        onRuleChanged={onRuleChanged}
+        snoozeRule={snoozeRule}
+        unsnoozeRule={unsnoozeRule}
+        isRuleEditable={false}
+      />
+    );
+
+    expect(screen.getByTestId('rulesListNotifyBadge-snoozed')).toBeInTheDocument();
+    expect(screen.getByTestId('rulesListNotifyBadge-snoozed')).toBeDisabled();
   });
 
   it('should clear an infinitive snooze schedule', async () => {

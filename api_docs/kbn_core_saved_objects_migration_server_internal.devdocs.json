@@ -1916,6 +1916,8 @@
           "RetryableEsClientError",
           " | ",
           "WaitForTaskCompletionTimeout",
+          " | ",
+          "TaskCompletedWithRetriableError",
           ", \"pickup_updated_mappings_succeeded\">"
         ],
         "path": "src/core/packages/saved-objects/migration-server-internal/src/actions/wait_for_pickup_updated_mappings_task.ts",

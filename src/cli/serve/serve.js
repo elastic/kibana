@@ -248,7 +248,7 @@ export default function (program) {
         'Adds plugin paths for all the Kibana example plugins and runs with no base path'
       )
       .option(
-        '--serverless [oblt|security|es]',
+        '--serverless [oblt|security|es|chat]',
         'Start Kibana in a specific serverless project mode. ' +
           'If no mode is provided, it starts Kibana in the most recent serverless project mode (default is es)'
       );
@@ -282,6 +282,10 @@ export default function (program) {
       devConfig: opts.devConfig,
       dev: opts.dev,
       serverless: opts.serverless || unknownOptions.serverless,
+      securityProductTier: _.get(
+        unknownOptions,
+        'xpack.securitySolutionServerless.productTypes[0].product_tier'
+      ),
     });
 
     const configsEvaluated = getConfigFromFiles(configs);

@@ -174,5 +174,6 @@ export function createPluginStartContext<
     plugins: {
       onStart: (...dependencyNames) => runtimeResolver.onStart(plugin.name, dependencyNames),
     },
+    rendering: deps.rendering,
   };
 }
