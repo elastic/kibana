@@ -9,10 +9,12 @@ import { Filter, RangeFilter, FilterStateStore, Query, TimeRange } from '@kbn/es
 import { type Context, EmbeddableToDashboardDrilldown } from './embeddable_to_dashboard_drilldown';
 import { AbstractDashboardDrilldownConfig as Config } from '../abstract_dashboard_drilldown';
 import { savedObjectsServiceMock } from '@kbn/core/public/mocks';
-import { DashboardLocatorParams } from '@kbn/dashboard-plugin/public';
 import { StartDependencies } from '../../../plugin';
 import { StartServicesGetter } from '@kbn/kibana-utils-plugin/public/core';
-import { DashboardAppLocatorDefinition } from '@kbn/dashboard-plugin/public/dashboard_app/locator/locator';
+import {
+  DashboardLocatorParams,
+  DashboardAppLocatorDefinition,
+} from '@kbn/dashboard-plugin/common';
 import { BehaviorSubject } from 'rxjs';
 
 describe('.isConfigValid()', () => {
