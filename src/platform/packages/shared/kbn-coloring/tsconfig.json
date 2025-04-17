@@ -27,7 +27,6 @@
     "@kbn/visualization-utils",
     "@kbn/palettes",
     "@kbn/field-formats-plugin",
-    "@kbn/chart-expressions-common",
     "@kbn/expressions-plugin",
   ],
   "exclude": [

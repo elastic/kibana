@@ -18,7 +18,6 @@ import {
   SerializedValue,
   deserializeField,
 } from '@kbn/data-plugin/common';
-import { getColorCategories } from '@kbn/chart-expressions-common';
 import { IFieldFormat } from '@kbn/field-formats-plugin/common';
 import { CategoricalColorMapping, ColorMappingProps } from '../categorical_color_mapping';
 import { DEFAULT_COLOR_MAPPING_CONFIG } from '../config/default_color_mapping';
@@ -78,7 +77,7 @@ const Template: StoryFn<FC<ColorMappingProps>> = (args) => {
           })}
       </ol>
       <EuiFlyout
-        style={{ width: 350, minInlineSize: 366, padding: '8px', overflow: 'auto' }}
+        css={{ width: 350, minInlineSize: 366, padding: '8px', overflow: 'auto' }}
         onClose={() => {}}
         hideCloseButton
         ownFocus={false}
@@ -120,22 +119,19 @@ export const Default = {
     formatter,
     data: {
       type: 'categories',
-      categories: getColorCategories(
-        [
-          { value: new MultiFieldKey({ key: ['US', 'Canada'] }) },
-          { value: new MultiFieldKey({ key: ['Mexico'] }) },
-          { value: new MultiFieldKey({ key: ['Brasil'] }) },
-          { value: new MultiFieldKey({ key: ['Canada'] }) },
-          { value: new MultiFieldKey({ key: ['Canada', 'US'] }) },
-          { value: new MultiFieldKey({ key: ['Italy', 'Germany'] }) },
-          { value: new MultiFieldKey({ key: ['France'] }) },
-          { value: new MultiFieldKey({ key: ['Spain', 'Portugal'] }) },
-          { value: new MultiFieldKey({ key: ['UK'] }) },
-          { value: new MultiFieldKey({ key: ['Sweden'] }) },
-          { value: new MultiFieldKey({ key: ['Sweden', 'Finland'] }) },
-        ],
-        'value'
-      ),
+      categories: [
+        { type: 'multiFieldKey', keys: ['US', 'Canada'] },
+        { type: 'multiFieldKey', keys: ['Mexico'] },
+        { type: 'multiFieldKey', keys: ['Brasil'] },
+        { type: 'multiFieldKey', keys: ['Canada'] },
+        { type: 'multiFieldKey', keys: ['Canada', 'US'] },
+        { type: 'multiFieldKey', keys: ['Italy', 'Germany'] },
+        { type: 'multiFieldKey', keys: ['France'] },
+        { type: 'multiFieldKey', keys: ['Spain', 'Portugal'] },
+        { type: 'multiFieldKey', keys: ['UK'] },
+        { type: 'multiFieldKey', keys: ['Sweden'] },
+        { type: 'multiFieldKey', keys: ['Sweden', 'Finland'] },
+      ],
     },
 
     specialTokens: new Map(),
