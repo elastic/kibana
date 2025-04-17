@@ -13,6 +13,7 @@ import {
 } from '@kbn/core/server';
 import { DataViewsService } from '@kbn/data-views-plugin/common/data_views';
 import type { DefaultRouteHandlerResources } from '@kbn/server-route-repository';
+import { RulesClientApi } from '@kbn/alerting-plugin/server/types';
 import { SLOPluginSetupDependencies, SLOPluginStartDependencies } from '../types';
 import { SLORepository, TransformManager } from '../services';
 
@@ -30,6 +31,7 @@ export interface RouteHandlerScopedClients {
   internalSoClient: SavedObjectsClientContract;
   spaceId: string;
   dataViewsService: DataViewsService;
+  rulesClient: RulesClientApi;
   repository: SLORepository;
   transformManager: TransformManager;
   summaryTransformManager: TransformManager;
