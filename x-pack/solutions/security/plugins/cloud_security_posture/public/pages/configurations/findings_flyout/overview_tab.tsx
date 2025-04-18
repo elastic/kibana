@@ -8,6 +8,7 @@
 import {
   EuiAccordion,
   EuiBasicTable,
+  EuiCopy,
   EuiDescriptionList,
   EuiFlexGroup,
   EuiFlexItem,
@@ -33,6 +34,7 @@ import { truthy } from '@kbn/cloud-security-posture/src/utils/helpers';
 import type { CoreStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CspClientPluginStartDeps } from '@kbn/cloud-security-posture';
+import { css } from '@emotion/css';
 import { CodeBlock, CspFlyoutMarkdown, EMPTY_VALUE } from './findings_flyout';
 import { FindingsDetectionRuleCounter } from './findings_detection_rule_counter';
 
@@ -49,6 +51,37 @@ export const columns: Array<EuiBasicTableColumn<any>> = [
     field: 'value',
     name: 'Value',
     truncateText: true,
+    render: (value: string) => (
+      <>
+        <EuiFlexGroup direction="row" gutterSize="xs">
+          <EuiFlexItem>
+            <EuiText
+              size="s"
+              css={{
+                paddingTop: `4px`,
+              }}
+            >
+              {value}
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiCopy textToCopy={value}>
+              {(copy) => (
+                <EuiIcon
+                  css={css`
+                    :hover {
+                      cursor: pointer;
+                    }
+                  `}
+                  onClick={copy}
+                  type="copy"
+                />
+              )}
+            </EuiCopy>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </>
+    ),
   },
 ];
 
@@ -95,7 +128,7 @@ const getDetailsList = (
             <b>Rule Description</b>
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiLink href={ruleFlyoutLink} target="_blank" style={{ textAlign: 'right' }}>
+            <EuiLink href={ruleFlyoutLink} target="_blank" css={{ textAlign: 'right' }}>
               <EuiIcon type="expand" />
               {i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.showRuleDetails', {
                 defaultMessage: 'Show rule details',
