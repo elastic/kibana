@@ -687,6 +687,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       apmRulesAnomaly: isServerless
         ? `${SERVERLESS_DOCS}observability-create-anomaly-alert-rule.html`
         : `${KIBANA_DOCS}apm-alerts.html`,
+      authorization: `${KIBANA_DOCS}alerting-setup.html#alerting-authorization`,
       emailAction: `${KIBANA_DOCS}email-action-type.html`,
       emailActionConfig: `${KIBANA_DOCS}email-action-type.html`,
       emailExchangeClientSecretConfig: `${KIBANA_DOCS}email-action-type.html#exchange-client-secret`,
