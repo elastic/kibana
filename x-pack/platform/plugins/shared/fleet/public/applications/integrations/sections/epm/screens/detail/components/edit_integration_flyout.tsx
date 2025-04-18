@@ -149,7 +149,7 @@ export const EditIntegrationFlyout: React.FunctionComponent<{
           <EuiComboBox
             fullWidth
             data-test-subj="editIntegrationFlyoutCategories"
-            aria-label="Accessible screen reader label"
+            aria-label="Select categories"
             placeholder="Select categories"
             selectedOptions={selectedCategories.map((category) => ({
               label: category,
