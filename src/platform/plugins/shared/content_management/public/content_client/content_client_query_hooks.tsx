@@ -15,7 +15,7 @@ import type { GetIn, SearchIn } from '../../common';
 /**
  * Exposed `useQuery` options
  */
-export type QueryOptions = Pick<QueryObserverOptions, 'enabled'>;
+export type QueryOptions = Pick<QueryObserverOptions, 'enabled' | 'initialData'>;
 
 /**
  *
