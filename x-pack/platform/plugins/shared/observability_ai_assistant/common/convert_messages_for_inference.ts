@@ -13,7 +13,7 @@ import {
 import { generateFakeToolCallId } from '@kbn/inference-plugin/common';
 import type { Logger } from '@kbn/logging';
 import { Message, MessageRole } from '.';
-import { DetectedEntity } from './types';
+import { redactEntities } from './utils/redaction';
 
 function safeJsonParse(jsonString: string | undefined, logger: Pick<Logger, 'error'>) {
   try {
@@ -28,19 +28,6 @@ function safeJsonParse(jsonString: string | undefined, logger: Pick<Logger, 'err
     // it's arguments are validated
     return {};
   }
-}
-
-function redactEntities(original: string, entities: DetectedEntity[]): string {
-  const sortedEntities = entities.slice().sort((a, b) => a.start_pos - b.start_pos);
-  let redacted = '';
-  let currentIndex = 0;
-  for (const ent of sortedEntities) {
-    redacted += original.substring(currentIndex, ent.start_pos);
-    redacted += `${ent.hash}`;
-    currentIndex = ent.end_pos;
-  }
-  redacted += original.substring(currentIndex);
-  return redacted;
 }
 
 export function convertMessagesForInference(

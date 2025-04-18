@@ -33,6 +33,7 @@ import type { AssistantScope } from '@kbn/ai-assistant-common';
 import type { InferenceClient } from '@kbn/inference-plugin/server';
 import { ChatCompleteResponse, FunctionCallingMode, ToolChoiceType } from '@kbn/inference-common';
 
+import { HASH_REGEX, unhashString } from '../../../common/utils/redaction';
 import { buildDetectedEntitiesMap } from '../../../common/utils/build_detected_entities_map';
 import { getRegexEntities } from '../../../common/utils/get_regex_entities';
 import { resourceNames } from '..';
@@ -129,26 +130,20 @@ export class ObservabilityAIAssistantClient {
     return settled.flat();
   }
 
-  // string redact helper
-  private unhashString(str: string, hashMap: Map<string, { value: string }>): string {
-    return str.replace(/[0-9a-f]{40}/g, (h) => hashMap.get(h)?.value ?? h);
-  }
-
   /**
    * Replace every placeholder in message with its real value
    * (taken from `hashMap`) and generate entities.
    */
-  private unhashAssistantMessage(
+  private processAssistantMessage(
     contentWithHashes: string,
     hashMap: Map<string, { value: string; class_name: string; type: DetectedEntity['type'] }>
-  ): { cleanText: string; spans: DetectedEntity[] } {
-    const spans: DetectedEntity[] = [];
-    const pattern = /[0-9a-f]{40}/g; // object‑hash output
-    let clean = '';
+  ) {
+    const detectedEntities: DetectedEntity[] = [];
+    let unhashedText = '';
     let cursor = 0;
 
     let match: RegExpExecArray | null;
-    while ((match = pattern.exec(contentWithHashes)) !== null) {
+    while ((match = HASH_REGEX.exec(contentWithHashes)) !== null) {
       const [hash] = match;
       const rep = hashMap.get(hash);
       if (!rep) {
@@ -156,14 +151,14 @@ export class ObservabilityAIAssistantClient {
       }
 
       // copy segment before the hash
-      clean += contentWithHashes.slice(cursor, match.index);
+      unhashedText += contentWithHashes.slice(cursor, match.index);
 
       // insert real value & capture span
-      const start = clean.length;
-      clean += rep.value;
-      const end = clean.length;
+      const start = unhashedText.length;
+      unhashedText += rep.value;
+      const end = unhashedText.length;
 
-      spans.push({
+      detectedEntities.push({
         entity: rep.value,
         class_name: rep.class_name,
         start_pos: start,
@@ -175,8 +170,8 @@ export class ObservabilityAIAssistantClient {
       cursor = match.index + hash.length;
     }
 
-    clean += contentWithHashes.slice(cursor);
-    return { cleanText: clean, spans };
+    unhashedText += contentWithHashes.slice(cursor);
+    return { unhashedText, detectedEntities };
   }
   async sanitizeMessages(messages: Message[]): Promise<{ sanitizedMessages: Message[] }> {
     const hashMap = buildDetectedEntitiesMap(messages);
@@ -225,15 +220,14 @@ export class ObservabilityAIAssistantClient {
 
       if (role === 'assistant') {
         if (content) {
-          const { cleanText, spans } = this.unhashAssistantMessage(content, hashMap);
-          message.message.content = cleanText;
-          if (spans.length) message.message.detectedEntities = spans;
+          const { unhashedText, detectedEntities } = this.processAssistantMessage(content, hashMap);
+          message.message.content = unhashedText;
+          if (detectedEntities.length) message.message.detectedEntities = detectedEntities;
           message.message.sanitized = true;
         }
-        // TODO: unredact other places where hashes can be but don't store them as we don't
-        // need to persist them for the UI.
+        // TODO: unhash other places?
         if (message.message.function_call?.arguments) {
-          message.message.function_call.arguments = this.unhashString(
+          message.message.function_call.arguments = unhashString(
             message.message.function_call.arguments,
             hashMap
           );
