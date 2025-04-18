@@ -10,7 +10,7 @@ import type { RawRule } from '../../../types';
 import { transformRawArtifactsToDomainArtifacts } from './transform_raw_artifacts_to_domain_artifacts';
 
 describe('transformRawArtifactsToDomainArtifacts', () => {
-  it('should return empty artifacts if rawArtifacts is undefined', () => {
+  it('should return default artifacts if rawArtifacts is undefined', () => {
     const result = transformRawArtifactsToDomainArtifacts('1', undefined, []);
     expect(result).toEqual({ dashboards: [] });
   });
