@@ -33,6 +33,7 @@ import type { AssistantScope } from '@kbn/ai-assistant-common';
 import type { InferenceClient } from '@kbn/inference-plugin/server';
 import { ChatCompleteResponse, FunctionCallingMode, ToolChoiceType } from '@kbn/inference-common';
 
+import { buildDetectedEntitiesMap } from '../../../common/utils/build_detected_entities_map';
 import { getRegexEntities } from '../../../common/utils/get_regex_entities';
 import { resourceNames } from '..';
 import {
@@ -127,29 +128,7 @@ export class ObservabilityAIAssistantClient {
     const settled = await Promise.all(promises);
     return settled.flat();
   }
-  //  detectedEntities hash map for assistant message reversal
-  private buildEntityMap(messages: Message[]) {
-    const entityMap = new Map<
-      string,
-      { value: string; class_name: string; type: DetectedEntity['type'] }
-    >();
-    for (const msg of messages) {
-      // Only collect from user messages; assistant entities are generated and not needed here
-      if (msg.message.role !== 'user') {
-        continue;
-      }
-      msg.message.detectedEntities?.forEach((ent) => {
-        if (!entityMap.has(ent.hash)) {
-          entityMap.set(ent.hash, {
-            value: ent.entity,
-            class_name: ent.class_name,
-            type: ent.type,
-          });
-        }
-      });
-    }
-    return entityMap;
-  }
+
   // string redact helper
   private unhashString(str: string, hashMap: Map<string, { value: string }>): string {
     return str.replace(/[0-9a-f]{40}/g, (h) => hashMap.get(h)?.value ?? h);
@@ -200,7 +179,7 @@ export class ObservabilityAIAssistantClient {
     return { cleanText: clean, spans };
   }
   async sanitizeMessages(messages: Message[]): Promise<{ sanitizedMessages: Message[] }> {
-    const hashMap = this.buildEntityMap(messages);
+    const hashMap = buildDetectedEntitiesMap(messages);
 
     for (const message of messages) {
       if (message.message.sanitized) continue;

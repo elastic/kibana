@@ -22,7 +22,6 @@ import type { UseKnowledgeBaseResult } from '../hooks/use_knowledge_base';
 import { ChatItem } from './chat_item';
 import { ChatConsolidatedItems } from './chat_consolidated_items';
 import { getTimelineItemsfromConversation } from '../utils/get_timeline_items_from_conversation';
-
 export interface ChatTimelineItem
   extends Pick<Message['message'], 'role' | 'content' | 'function_call'> {
   id: string;
@@ -134,31 +133,16 @@ export function ChatTimeline({
       isArchived,
     });
 
-    const redactedEntitiesMap: Record<string, string> = {};
     const consolidatedChatItems: Array<ChatTimelineItem | ChatTimelineItem[]> = [];
     let currentGroup: ChatTimelineItem[] | null = null;
 
     for (const item of timelineItems) {
-      const { role, content, sanitized, detectedEntities } = item.message.message;
+      const { role, content, detectedEntities } = item.message.message;
       if (item.display.hide || !item) continue;
 
-      // build redactedEntitiesMap with user messages using entity positions.
-      if (role === 'user' && content) {
-        if (sanitized && Array.isArray(detectedEntities)) {
-          detectedEntities.forEach((entity) => {
-            redactedEntitiesMap[entity.hash] = entity.entity;
-          });
-          // transform user messages to react nodes to highlight the sensitive portions in the user message.
-          item.piiHighlightedContent = highlightContent(content, detectedEntities);
-        }
+      if (role === 'user' && content && detectedEntities) {
+        item.piiHighlightedContent = highlightContent(content, detectedEntities);
       }
-      // Process assistant messages: transform the content using the cumulative redactedEntitiesMap.
-      // Here we don't add highlighting because it conflicts with markdown elements.
-      // else if (role === 'assistant') {
-      // If we want to highlight assistant PII or "show anonymized",
-      // use message.message.detectedEntities with highlightContent.
-      // removed for now because it conflicts with markdown elements.
-      // }
 
       if (item.display.collapsed) {
         if (currentGroup) {
