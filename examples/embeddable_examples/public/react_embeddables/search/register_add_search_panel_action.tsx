@@ -15,7 +15,7 @@ import {
   ADD_PANEL_TRIGGER,
 } from '@kbn/ui-actions-plugin/public';
 import { embeddableExamplesGrouping } from '../embeddable_examples_grouping';
-import { ADD_SEARCH_ACTION_ID, SEARCH_EMBEDDABLE_ID } from './constants';
+import { ADD_SEARCH_ACTION_ID, SEARCH_EMBEDDABLE_TYPE } from './constants';
 import { SearchSerializedState } from './types';
 
 export const registerAddSearchPanelAction = (uiActions: UiActionsStart) => {
@@ -31,8 +31,7 @@ export const registerAddSearchPanelAction = (uiActions: UiActionsStart) => {
       if (!apiCanAddNewPanel(embeddable)) throw new IncompatibleActionError();
       embeddable.addNewPanel<SearchSerializedState>(
         {
-          panelType: SEARCH_EMBEDDABLE_ID,
-          initialState: {},
+          panelType: SEARCH_EMBEDDABLE_TYPE,
         },
         true
       );

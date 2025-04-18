@@ -9,7 +9,7 @@
 
 import React, { useMemo, useState } from 'react';
 
-import { ReactEmbeddableRenderer } from '@kbn/embeddable-plugin/public';
+import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import {
   EuiCodeBlock,
   EuiFlexGroup,
@@ -24,7 +24,7 @@ import { BehaviorSubject, Subject } from 'rxjs';
 import { TimeRange } from '@kbn/es-query';
 import { useBatchedOptionalPublishingSubjects } from '@kbn/presentation-publishing';
 import { SearchEmbeddableRenderer } from '../react_embeddables/search/search_embeddable_renderer';
-import { SEARCH_EMBEDDABLE_ID } from '../react_embeddables/search/constants';
+import { SEARCH_EMBEDDABLE_TYPE } from '../react_embeddables/search/constants';
 import type { SearchApi, SearchSerializedState } from '../react_embeddables/search/types';
 
 export const RenderExamples = () => {
@@ -80,7 +80,7 @@ export const RenderExamples = () => {
 
           <EuiCodeBlock language="jsx" fontSize="m" paddingSize="m">
             {`<ReactEmbeddableRenderer<State, Api>
-  type={SEARCH_EMBEDDABLE_ID}
+  type={SEARCH_EMBEDDABLE_TYPE}
   getParentApi={() => parentApi}
   onApiAvailable={(newApi) => {
     setApi(newApi);
@@ -99,9 +99,9 @@ export const RenderExamples = () => {
 
           <EuiSpacer size="s" />
 
-          <ReactEmbeddableRenderer<SearchSerializedState, SearchSerializedState, SearchApi>
+          <EmbeddableRenderer<SearchSerializedState, SearchApi>
             key={hidePanelChrome ? 'hideChrome' : 'showChrome'}
-            type={SEARCH_EMBEDDABLE_ID}
+            type={SEARCH_EMBEDDABLE_TYPE}
             getParentApi={() => parentApi}
             onApiAvailable={(newApi) => {
               setApi(newApi);

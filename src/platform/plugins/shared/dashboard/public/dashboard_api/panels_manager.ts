@@ -55,19 +55,20 @@ export function initializePanelsManager(
   incomingEmbeddable: EmbeddablePackageState | undefined,
   initialPanels: DashboardPanelMap, // SERIALIZED STATE ONLY TODO Remove the DashboardPanelMap layer. We could take the Saved Dashboard Panels array here directly.
   trackPanel: ReturnType<typeof initializeTrackPanel>,
-  getReferencesForPanelId: (id: string) => Reference[]
+  getReferences: (id: string) => Reference[]
 ): {
   internalApi: {
     startComparing$: (
       lastSavedState$: BehaviorSubject<DashboardState>
     ) => Observable<{ panels?: DashboardPanelMap }>;
+    getSerializedStateForPanel: HasSerializedChildState['getSerializedStateForChild'];
     layout$: BehaviorSubject<DashboardLayout>;
     registerChildApi: (api: DefaultEmbeddableApi) => void;
     resetPanels: (lastSavedPanels: DashboardPanelMap) => void;
     setChildState: (uuid: string, state: SerializedPanelState<object>) => void;
     serializePanels: () => { panels: DashboardPanelMap; references: Reference[] };
   };
-  api: PresentationContainer<DefaultEmbeddableApi> & CanDuplicatePanels & HasSerializedChildState;
+  api: PresentationContainer<DefaultEmbeddableApi> & CanDuplicatePanels;
 } {
   // --------------------------------------------------------------------------------------
   // Set up panel state manager
@@ -85,7 +86,7 @@ export function initializePanelsManager(
       layout[uuid] = { type, gridData };
       childState[uuid] = {
         rawState: explicitInput,
-        references: getReferencesForPanelId(uuid),
+        references: getReferences(uuid),
       };
     });
     return { layout, childState };
@@ -307,6 +308,7 @@ export function initializePanelsManager(
 
   return {
     internalApi: {
+      getSerializedStateForPanel: (uuid: string) => currentChildState[uuid],
       layout$,
       resetPanels,
       serializePanels,
@@ -343,7 +345,6 @@ export function initializePanelsManager(
       replacePanel,
       duplicatePanel,
       getPanelCount: () => Object.keys(layout$.value).length,
-      getSerializedStateForChild: (uuid: string) => currentChildState[uuid],
       canRemovePanels: () => trackPanel.expandedPanelId$.value === undefined,
     },
   };
