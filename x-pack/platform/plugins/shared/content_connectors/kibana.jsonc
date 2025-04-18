@@ -25,6 +25,7 @@
     ],
     "optionalPlugins": [
       "cloud",
+      "discover",
     ],
     "requiredBundles": ["kibanaReact"]
   }

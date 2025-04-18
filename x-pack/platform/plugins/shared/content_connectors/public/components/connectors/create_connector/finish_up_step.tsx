@@ -38,7 +38,6 @@ import { ConnectorViewLogic } from '../../connector_detail/connector_view_logic'
 import connectorLogo from './assets/connector_logo.svg';
 import { useAppContext } from '../../../app_context';
 import { generateEncodedPath } from '../../shared/encode_path_params';
-import { ELASTICSEARCH_PLUGIN } from '../../../../common/constants';
 import { IndexViewLogic } from '../../search_index/index_view_logic';
 import { SyncsLogic } from '../../shared/header_actions/syncs_logic';
 
@@ -226,38 +225,6 @@ export const FinishUpStep: React.FC<FinishUpStepProps> = ({ title }) => {
             </EuiTitle>
             <EuiSpacer size="l" />
             <EuiFlexGroup gutterSize="m">
-              <EuiFlexItem>
-                <EuiCard
-                  layout="horizontal"
-                  icon={
-                    <EuiIcon
-                      css={() => css`
-                        margin-top: ${euiTheme.size.xs};
-                      `}
-                      size="m"
-                      type="visVega"
-                    />
-                  }
-                  title={i18n.translate(
-                    'xpack.contentConnectors.createConnector.finishUpStep.euiCard.queryWithLanguageClientsLabel',
-                    { defaultMessage: 'Query with language clients' }
-                  )}
-                  titleSize="xs"
-                  description={i18n.translate(
-                    'xpack.contentConnectors.createConnector.finishUpStep.euiCard.queryWithLanguageClientsLDescription',
-                    {
-                      defaultMessage:
-                        'Use your favorite language client to query your data in your app',
-                    }
-                  )}
-                  onClick={() => {
-                    application?.navigateToUrl(
-                      http?.basePath.prepend(ELASTICSEARCH_PLUGIN.URL) ?? ''
-                    );
-                  }}
-                  display="subdued"
-                />
-              </EuiFlexItem>
               <EuiFlexItem>
                 <EuiCard
                   layout="horizontal"
