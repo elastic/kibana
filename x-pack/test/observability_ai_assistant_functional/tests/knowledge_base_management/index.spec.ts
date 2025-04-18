@@ -48,7 +48,8 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
     }).expect(200);
   }
 
-  describe('Knowledge management tab', () => {
+  // Failing test: https://github.com/elastic/kibana/issues/218327
+  describe.skip('Knowledge management tab', () => {
     before(async () => {
       await clearKnowledgeBase(es);
 

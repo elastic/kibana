@@ -63,4 +63,16 @@ describe('getLegacyApmHref', () => {
       );
     });
   });
+  describe('with service.name that needs encoding', () => {
+    const serviceNameWithSlashes = 'My/Service/Name';
+    beforeEach(() => {
+      summary.state.service = { name: serviceNameWithSlashes };
+    });
+    it('links to the service with encoding', () => {
+      const result = getLegacyApmHref(summary, 'foo', 'now-15m', 'now');
+      expect(result).toMatchInlineSnapshot(
+        `"foo/app/apm/services/My%2FService%2FName/overview/?rangeFrom=now-15m&rangeTo=now"`
+      );
+    });
+  });
 });
