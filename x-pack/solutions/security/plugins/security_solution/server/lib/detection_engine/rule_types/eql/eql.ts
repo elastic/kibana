@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { performance } from 'perf_hooks';
-import isEmpty from 'lodash/isEmpty';
+import { isEmpty } from 'lodash';
 
 import type { ShardFailure } from '@elastic/elasticsearch/lib/api/types';
 import { buildEqlSearchRequest } from './build_eql_search_request';
