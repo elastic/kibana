@@ -1675,7 +1675,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         });
 
         if (packageInfo?.type === 'input') {
-          removeAssetsForInputPackagePolicy({
+          await removeAssetsForInputPackagePolicy({
             packageInfo,
             logger,
             esClient,
