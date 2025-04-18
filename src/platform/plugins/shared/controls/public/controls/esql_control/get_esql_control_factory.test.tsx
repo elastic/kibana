@@ -10,26 +10,16 @@
 import React from 'react';
 import { fireEvent, render, waitFor } from '@testing-library/react';
 import type { ESQLControlState } from '@kbn/esql/public';
-import { getMockedControlGroupApi } from '../mocks/control_mocks';
-import type { ControlApiRegistration } from '../types';
+import { getMockedControlGroupApi, getMockedFinalizeApi } from '../mocks/control_mocks';
 import { getESQLControlFactory } from './get_esql_control_factory';
-import type { ESQLControlApi } from './types';
 
 describe('ESQLControlApi', () => {
   const uuid = 'myESQLControl';
 
   const dashboardApi = {};
   const controlGroupApi = getMockedControlGroupApi(dashboardApi);
-
   const factory = getESQLControlFactory();
-  function finalizeApi(api: ControlApiRegistration<ESQLControlApi>) {
-    return {
-      ...api,
-      uuid,
-      parentApi: controlGroupApi,
-      type: factory.type,
-    };
-  }
+  const finalizeApi = getMockedFinalizeApi(uuid, factory, controlGroupApi);
 
   test('Should publish ES|QL variable', async () => {
     const initialState = {

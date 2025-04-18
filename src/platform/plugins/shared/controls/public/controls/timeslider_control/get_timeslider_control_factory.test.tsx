@@ -15,10 +15,8 @@ import { TimeRange } from '@kbn/es-query';
 import { fireEvent, render } from '@testing-library/react';
 
 import { dataService } from '../../services/kibana_services';
-import { getMockedControlGroupApi } from '../mocks/control_mocks';
-import { ControlApiRegistration } from '../types';
+import { getMockedControlGroupApi, getMockedFinalizeApi } from '../mocks/control_mocks';
 import { getTimesliderControlFactory } from './get_timeslider_control_factory';
-import { TimesliderControlApi } from './types';
 
 describe('TimesliderControlApi', () => {
   const uuid = 'myControl1';
@@ -27,6 +25,8 @@ describe('TimesliderControlApi', () => {
     timeRange$: new BehaviorSubject<TimeRange | undefined>(undefined),
   };
   const controlGroupApi = getMockedControlGroupApi(dashboardApi);
+  const factory = getTimesliderControlFactory();
+  const finalizeApi = getMockedFinalizeApi(uuid, factory, controlGroupApi);
 
   dataService.query.timefilter.timefilter.calculateBounds = (timeRange: TimeRange) => {
     const now = new Date();
@@ -35,15 +35,6 @@ describe('TimesliderControlApi', () => {
       max: dateMath.parse(timeRange.to, { roundUp: true, forceNow: now }),
     };
   };
-  const factory = getTimesliderControlFactory();
-  function finalizeApi(api: ControlApiRegistration<TimesliderControlApi>) {
-    return {
-      ...api,
-      uuid,
-      parentApi: controlGroupApi,
-      type: factory.type,
-    };
-  }
 
   beforeEach(() => {
     dashboardApi.timeRange$.next({

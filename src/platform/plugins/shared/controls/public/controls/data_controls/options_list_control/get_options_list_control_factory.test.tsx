@@ -15,24 +15,15 @@ import { render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import { coreServices, dataViewsService } from '../../../services/kibana_services';
-import { getMockedControlGroupApi } from '../../mocks/control_mocks';
+import { getMockedControlGroupApi, getMockedFinalizeApi } from '../../mocks/control_mocks';
 import * as initializeControl from '../initialize_data_control';
 import { getOptionsListControlFactory } from './get_options_list_control_factory';
-import { ControlApiRegistration } from '../../types';
-import { OptionsListControlApi } from './types';
 
 describe('Options List Control Api', () => {
   const uuid = 'myControl1';
   const controlGroupApi = getMockedControlGroupApi();
-
-  function finalizeApi(api: ControlApiRegistration<OptionsListControlApi>) {
-    return {
-      ...api,
-      uuid,
-      parentApi: controlGroupApi,
-      type: factory.type,
-    };
-  }
+  const factory = getOptionsListControlFactory();
+  const finalizeApi = getMockedFinalizeApi(uuid, factory, controlGroupApi);
 
   dataViewsService.get = jest.fn().mockImplementation(async (id: string): Promise<DataView> => {
     if (id !== 'myDataViewId') {
@@ -65,8 +56,6 @@ describe('Options List Control Api', () => {
     });
     return stubDataView;
   });
-
-  const factory = getOptionsListControlFactory();
 
   describe('filters$', () => {
     test('should not set filters$ when selectedOptions is not provided', async () => {

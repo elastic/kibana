@@ -23,10 +23,7 @@ import {
 } from '@kbn/presentation-publishing';
 
 import { StateManager } from '@kbn/presentation-publishing/state_manager/types';
-import type {
-  ControlGroupSerializedState,
-  ControlPanelsState,
-} from '../../common';
+import type { ControlGroupSerializedState, ControlPanelsState } from '../../common';
 import { apiPublishesAsyncFilters } from '../controls/data_controls/publishes_async_filters';
 import { getControlsInOrder, type ControlsInOrder } from './init_controls_manager';
 import { deserializeControlGroup } from './utils/serialization_utils';

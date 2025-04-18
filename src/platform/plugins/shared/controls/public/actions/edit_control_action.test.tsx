@@ -15,12 +15,10 @@ import type { ViewMode } from '@kbn/presentation-publishing';
 
 import { getOptionsListControlFactory } from '../controls/data_controls/options_list_control/get_options_list_control_factory';
 import type { OptionsListControlApi } from '../controls/data_controls/options_list_control/types';
-import { getMockedControlGroupApi } from '../controls/mocks/control_mocks';
+import { getMockedControlGroupApi, getMockedFinalizeApi } from '../controls/mocks/control_mocks';
 import { getTimesliderControlFactory } from '../controls/timeslider_control/get_timeslider_control_factory';
 import { dataService } from '../services/kibana_services';
 import { EditControlAction } from './edit_control_action';
-import { ControlApiRegistration } from '../controls/types';
-import { TimesliderControlApi } from '../controls/timeslider_control/types';
 
 dataService.query.timefilter.timefilter.calculateBounds = (timeRange: TimeRange) => {
   const now = new Date();
@@ -54,14 +52,7 @@ beforeAll(async () => {
       width: 'medium',
       grow: false,
     },
-    finalizeApi: (api: ControlApiRegistration<OptionsListControlApi>) => {
-      return {
-        ...api,
-        uuid: optionsListUuid,
-        parentApi: controlGroupApi,
-        type: controlFactory.type,
-      };
-    },
+    finalizeApi: getMockedFinalizeApi(optionsListUuid, controlFactory, controlGroupApi),
     uuid: optionsListUuid,
     controlGroupApi,
   });
@@ -75,14 +66,7 @@ describe('Incompatible embeddables', () => {
     const timeSliderUuid = 'timeSliderControl';
     const timeSliderControl = await timeSliderFactory.buildControl({
       initialState: {},
-      finalizeApi: (api: ControlApiRegistration<TimesliderControlApi>) => {
-        return {
-          ...api,
-          uuid: timeSliderUuid,
-          parentApi: controlGroupApi,
-          type: timeSliderFactory.type,
-        };
-      },
+      finalizeApi: getMockedFinalizeApi(timeSliderUuid, timeSliderFactory, controlGroupApi),
       uuid: timeSliderUuid,
       controlGroupApi,
     });

@@ -14,6 +14,7 @@ import { SerializedPanelState } from '@kbn/presentation-publishing';
 import { CONTROL_GROUP_TYPE } from '../../../common';
 import type { ControlFetchContext } from '../../control_group/control_fetch/control_fetch';
 import type { ControlGroupApi } from '../../control_group/types';
+import { ControlApiRegistration, ControlFactory, DefaultControlApi } from '../types';
 
 export type MockedControlGroupApi = ControlGroupApi & {
   setLastSavedStateForChild: (uuid: string, state: object) => void;
@@ -48,3 +49,18 @@ export const getMockedControlGroupApi = (
     ...overwriteApi,
   } as unknown as MockedControlGroupApi;
 };
+
+export const getMockedFinalizeApi =
+  <StateType extends object = object, ApiType extends DefaultControlApi = DefaultControlApi>(
+    uuid: string,
+    factory: ControlFactory<StateType, ApiType>,
+    controlGroupApi?: ControlGroupApi
+  ) =>
+  (api: ControlApiRegistration<ApiType>) => {
+    return {
+      ...api,
+      uuid,
+      parentApi: controlGroupApi ?? getMockedControlGroupApi(),
+      type: factory.type,
+    };
+  };

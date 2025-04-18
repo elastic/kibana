@@ -16,10 +16,9 @@ import { SerializedPanelState } from '@kbn/presentation-publishing';
 import { fireEvent, render, waitFor } from '@testing-library/react';
 
 import { dataService, dataViewsService } from '../../../services/kibana_services';
-import { getMockedControlGroupApi } from '../../mocks/control_mocks';
+import { getMockedControlGroupApi, getMockedFinalizeApi } from '../../mocks/control_mocks';
 import { getRangesliderControlFactory } from './get_range_slider_control_factory';
-import { RangesliderControlApi, RangesliderControlState } from './types';
-import { ControlApiRegistration } from '../../types';
+import { RangesliderControlState } from './types';
 
 const DEFAULT_TOTAL_RESULTS = 20;
 const DEFAULT_MIN = 0;
@@ -29,15 +28,8 @@ describe('RangesliderControlApi', () => {
   const uuid = 'myControl1';
 
   const controlGroupApi = getMockedControlGroupApi();
-
-  function finalizeApi(api: ControlApiRegistration<RangesliderControlApi>) {
-    return {
-      ...api,
-      uuid,
-      parentApi: controlGroupApi,
-      type: factory.type,
-    };
-  }
+  const factory = getRangesliderControlFactory();
+  const finalizeApi = getMockedFinalizeApi(uuid, factory, controlGroupApi);
 
   let totalResults = DEFAULT_TOTAL_RESULTS;
   let min: estypes.AggregationsSingleMetricAggregateBase['value'] = DEFAULT_MIN;
@@ -87,8 +79,6 @@ describe('RangesliderControlApi', () => {
       },
     } as unknown as DataView;
   });
-
-  const factory = getRangesliderControlFactory();
 
   beforeEach(() => {
     totalResults = DEFAULT_TOTAL_RESULTS;

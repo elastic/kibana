@@ -21,14 +21,14 @@ export const defaultEditorState = {
   chainingSystem: DEFAULT_CONTROL_CHAINING,
   ignoreParentSettings: DEFAULT_IGNORE_PARENT_SETTINGS,
   labelPosition: DEFAULT_CONTROL_LABEL_POSITION,
-}
+};
 
 export const editorStateComparators: StateComparators<ControlGroupEditorState> = {
   autoApplySelections: 'referenceEquality',
   chainingSystem: 'referenceEquality',
   ignoreParentSettings: 'deepEquality',
   labelPosition: 'referenceEquality',
-}
+};
 
 export function initializeEditorStateManager(initialState: ControlGroupEditorState) {
   return initializeStateManager<ControlGroupEditorState>(initialState, defaultEditorState);

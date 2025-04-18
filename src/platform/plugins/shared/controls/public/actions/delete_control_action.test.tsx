@@ -12,10 +12,9 @@ import { BehaviorSubject } from 'rxjs';
 import { ViewMode } from '@kbn/presentation-publishing';
 import { getOptionsListControlFactory } from '../controls/data_controls/options_list_control/get_options_list_control_factory';
 import { OptionsListControlApi } from '../controls/data_controls/options_list_control/types';
-import { getMockedControlGroupApi } from '../controls/mocks/control_mocks';
+import { getMockedControlGroupApi, getMockedFinalizeApi } from '../controls/mocks/control_mocks';
 import { coreServices } from '../services/kibana_services';
 import { DeleteControlAction } from './delete_control_action';
-import { ControlApiRegistration } from '../controls/types';
 
 const dashboardApi = {
   viewMode$: new BehaviorSubject<ViewMode>('view'),
@@ -40,14 +39,7 @@ beforeAll(async () => {
       width: 'medium',
       grow: false,
     },
-    finalizeApi: (api: ControlApiRegistration<OptionsListControlApi>) => {
-      return {
-        ...api,
-        uuid,
-        parentApi: controlGroupApi,
-        type: controlFactory.type,
-      };
-    },
+    finalizeApi: getMockedFinalizeApi(uuid, controlFactory, controlGroupApi),
     uuid,
     controlGroupApi,
   });
