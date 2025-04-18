@@ -100,6 +100,7 @@ import {
   MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS,
   MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS_10,
   MAX_CONCURRENT_PACKAGE_ASSETS,
+  MAX_CONCURRENT_EPM_PACKAGES_INSTALLATIONS,
 } from '../constants';
 
 import { inputNotAllowedInAgentless } from '../../common/services/agentless_policy_helper';
@@ -1682,7 +1683,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           });
         }
       },
-      { concurrency: 20 }
+      { concurrency: MAX_CONCURRENT_EPM_PACKAGES_INSTALLATIONS }
     );
 
     try {
