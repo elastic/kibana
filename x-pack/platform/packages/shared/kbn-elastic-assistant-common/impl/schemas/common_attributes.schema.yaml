@@ -127,3 +127,15 @@ components:
           type: string
         promptGroupId:
           type: string
+
+    PromptIds:
+      description: User screen context
+      type: object
+      required:
+        - promptId
+        - promptGroupId
+      properties:
+        promptId:
+          type: string
+        promptGroupId:
+          type: string

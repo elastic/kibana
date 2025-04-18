@@ -730,6 +730,25 @@ export class AIAssistantService {
     });
   }
 
+  public async createAlertSummaryDataClient(
+    opts: CreateAIAssistantClientParams
+  ): Promise<AIAssistantDataClient | null> {
+    const res = await this.checkResourcesInstallation(opts);
+
+    if (res === null) {
+      return null;
+    }
+
+    return new AIAssistantDataClient({
+      logger: this.options.logger,
+      elasticsearchClientPromise: this.options.elasticsearchClientPromise,
+      spaceId: opts.spaceId,
+      kibanaVersion: this.options.kibanaVersion,
+      indexPatternsResourceName: this.resourceNames.aliases.alertSummary,
+      currentUser: opts.currentUser,
+    });
+  }
+
   public async createAIAssistantAnonymizationFieldsDataClient(
     opts: CreateAIAssistantClientParams
   ): Promise<AIAssistantDataClient | null> {

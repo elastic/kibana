@@ -46,6 +46,13 @@ import { updateKnowledgeBaseEntryRoute } from './knowledge_base/entries/update_r
 import { getAttackDiscoveryGenerationsRoute } from './attack_discovery/get/get_attack_discovery_generations';
 import { postAttackDiscoveryGenerationsDismissRoute } from './attack_discovery/post/post_attack_discovery_generations_dismiss';
 import { getKnowledgeBaseEntryRoute } from './knowledge_base/entries/get_route';
+import { createAttackDiscoverySchedulesRoute } from './attack_discovery/schedules/create';
+import { getAttackDiscoverySchedulesRoute } from './attack_discovery/schedules/get';
+import { updateAttackDiscoverySchedulesRoute } from './attack_discovery/schedules/update';
+import { deleteAttackDiscoverySchedulesRoute } from './attack_discovery/schedules/delete';
+import { findAttackDiscoverySchedulesRoute } from './attack_discovery/schedules/find';
+import { disableAttackDiscoverySchedulesRoute } from './attack_discovery/schedules/disable';
+import { enableAttackDiscoverySchedulesRoute } from './attack_discovery/schedules/enable';
 import { bulkAlertSummaryRoute } from './alert_summary/bulk_actions_route';
 import type { ConfigSchema } from '../config_schema';
 
@@ -111,6 +118,15 @@ export const registerRoutes = (
   getAttackDiscoveryRoute(router);
   postAttackDiscoveryRoute(router);
   cancelAttackDiscoveryRoute(router);
+
+  // Attack Discovery Schedules
+  createAttackDiscoverySchedulesRoute(router);
+  getAttackDiscoverySchedulesRoute(router);
+  findAttackDiscoverySchedulesRoute(router);
+  updateAttackDiscoverySchedulesRoute(router);
+  deleteAttackDiscoverySchedulesRoute(router);
+  disableAttackDiscoverySchedulesRoute(router);
+  enableAttackDiscoverySchedulesRoute(router);
 
   // Alert Summary
   bulkAlertSummaryRoute(router, logger);
