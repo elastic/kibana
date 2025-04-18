@@ -9,8 +9,9 @@ import React, { memo } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { Alert } from '@kbn/alerting-types';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
-import { OpenFlyoutRowControlColumn } from './open_flyout_row_control_column';
+import { AssistantRowControlColumn } from './assistant_row_control_column';
 import { MoreActionsRowControlColumn } from './more_actions_row_control_column';
+import { OpenFlyoutRowControlColumn } from './open_flyout_row_control_column';
 
 export interface ActionsCellProps {
   /**
@@ -28,13 +29,16 @@ export interface ActionsCellProps {
  * It is passed to the renderActionsCell property of the EuiDataGrid.
  * It renders all the icons in the row action icons:
  * - open flyout
- * - assistant (soon)
- * - more actions (soon)
+ * - assistant
+ * - more actions
  */
 export const ActionsCell = memo(({ alert, ecsAlert }: ActionsCellProps) => (
   <EuiFlexGroup alignItems="center" gutterSize="xs">
     <EuiFlexItem>
       <OpenFlyoutRowControlColumn alert={alert} />
+    </EuiFlexItem>
+    <EuiFlexItem>
+      <AssistantRowControlColumn alert={alert} />
     </EuiFlexItem>
     <EuiFlexItem>
       <MoreActionsRowControlColumn ecsAlert={ecsAlert} />
