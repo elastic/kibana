@@ -86,7 +86,7 @@ const EsQueryRuleParamsSchemaProperties = {
     defaultValue: 'all',
     meta: {
       description:
-        'Indicates whether the aggregation is applied over all documents (`all`) or split into groups (`top`) using a grouping field (`termField`). If grouping is used, an alert will be created for each group when it exceeds the threshold; only the top groups (up to `termSize` number of groups) are checked.',
+        'Indicates whether the aggregation is applied over all documents (`all`), grouped by row (`row`), or split into groups (`top`) using a grouping field (`termField`) where only the top groups (up to `termSize` number of groups) are checked. If grouping is used, an alert will be created for each group when it exceeds the threshold.',
     },
   }),
   termField: schema.maybe(
