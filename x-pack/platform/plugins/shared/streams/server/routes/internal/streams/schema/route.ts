@@ -4,16 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { z } from '@kbn/zod';
 import { getFlattenedObject } from '@kbn/std';
 import {
   SampleDocument,
   fieldDefinitionConfigSchema,
   isWiredStreamDefinition,
 } from '@kbn/streams-schema';
+import { z } from '@kbn/zod';
+import { SecurityError } from '../../../../lib/streams/errors/security_error';
 import { checkAccess } from '../../../../lib/streams/stream_crud';
 import { createServerRoute } from '../../../create_server_route';
-import { DefinitionNotFoundError } from '../../../../lib/streams/errors/definition_not_found_error';
 
 const UNMAPPED_SAMPLE_SIZE = 500;
 
@@ -118,7 +118,7 @@ export const schemaFieldsSimulationRoute = createServerRoute({
     const { read } = await checkAccess({ name: params.path.name, scopedClusterClient });
 
     if (!read) {
-      throw new DefinitionNotFoundError(`Stream definition for ${params.path.name} not found.`);
+      throw new SecurityError(`Cannot read stream ${params.path.name}, insufficient privileges`);
     }
 
     const userFieldDefinitions = params.body.field_definitions.flatMap((field) => {
@@ -171,13 +171,7 @@ export const schemaFieldsSimulationRoute = createServerRoute({
     }
 
     const propertiesForSimulation = Object.fromEntries(
-      userFieldDefinitions.map((field) => [
-        field.name,
-        {
-          type: field.type,
-          ...(field.format ? { format: field.format } : {}),
-        },
-      ])
+      userFieldDefinitions.map(({ name, ...field }) => [name, field])
     );
 
     const fieldDefinitionKeys = Object.keys(propertiesForSimulation);

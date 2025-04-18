@@ -23,7 +23,7 @@ import { CodeEditor } from '@kbn/code-editor';
 import { monaco as monacoEditor } from '@kbn/monaco';
 
 import { Controller, useController, useFormContext } from 'react-hook-form';
-import { ChatForm, ChatFormFields } from '../../types';
+import { PlaygroundForm, PlaygroundFormFields } from '../../types';
 import { FullHeight, QueryViewTitlePanel, PanelFillContainer } from './styles';
 import { formatElasticsearchQueryString } from '../../utils/user_query';
 
@@ -37,21 +37,21 @@ export const ElasticsearchQueryViewer = ({
   isLoading: boolean;
 }) => {
   const { euiTheme } = useEuiTheme();
-  const { control } = useFormContext<ChatForm>();
+  const { control } = useFormContext<PlaygroundForm>();
   const {
     field: { value: elasticsearchQuery },
-  } = useController<ChatForm, ChatFormFields.elasticsearchQuery>({
-    name: ChatFormFields.elasticsearchQuery,
+  } = useController<PlaygroundForm, PlaygroundFormFields.elasticsearchQuery>({
+    name: PlaygroundFormFields.elasticsearchQuery,
   });
   const {
     field: { value: userElasticsearchQuery, onChange: onChangeUserQuery },
-  } = useController<ChatForm, ChatFormFields.userElasticsearchQuery>({
-    name: ChatFormFields.userElasticsearchQuery,
+  } = useController<PlaygroundForm, PlaygroundFormFields.userElasticsearchQuery>({
+    name: PlaygroundFormFields.userElasticsearchQuery,
   });
   const {
     field: { value: userElasticsearchQueryValidations },
-  } = useController<ChatForm, ChatFormFields.userElasticsearchQueryValidations>({
-    name: ChatFormFields.userElasticsearchQueryValidations,
+  } = useController<PlaygroundForm, PlaygroundFormFields.userElasticsearchQueryValidations>({
+    name: PlaygroundFormFields.userElasticsearchQueryValidations,
   });
   const generatedEsQuery = useMemo(
     () => formatElasticsearchQueryString(elasticsearchQuery),
@@ -154,7 +154,7 @@ export const ElasticsearchQueryViewer = ({
       <EuiSplitPanel.Inner paddingSize="none" css={PanelFillContainer}>
         <Controller
           control={control}
-          name={ChatFormFields.userElasticsearchQuery}
+          name={PlaygroundFormFields.userElasticsearchQuery}
           render={({ field }) => (
             <CodeEditor
               dataTestSubj="ViewElasticsearchQueryResult"
