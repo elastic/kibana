@@ -26,6 +26,7 @@ import type {
   EuiDataGridStyle,
   EuiDataGridToolBarVisibilityOptions,
 } from '@elastic/eui';
+import type { PackageListItem } from '@kbn/fleet-plugin/common';
 import { ActionsCell } from './actions_cell';
 import { AdditionalToolbarControls } from './additional_toolbar_controls';
 import { getDataViewStateFromIndexFields } from '../../../../common/containers/source/use_data_view';
@@ -36,6 +37,7 @@ import { useKibana } from '../../../../common/lib/kibana';
 import { CellValue } from './render_cell';
 import { buildTimeRangeFilter } from '../../alerts_table/helpers';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
+import type { RuleResponse } from '../../../../../common/api/detection_engine';
 
 const TIMESTAMP_COLUMN = i18n.translate(
   'xpack.securitySolution.alertSummary.table.column.timeStamp',
@@ -84,6 +86,26 @@ const TOOLBAR_VISIBILITY: EuiDataGridToolBarVisibilityOptions = {
 };
 const GRID_STYLE: EuiDataGridStyle = { border: 'horizontal' };
 
+interface AdditionalTableContext {
+  /**
+   * List of installed AI for SOC integrations
+   */
+  packages: PackageListItem[];
+  /**
+   * Result from the useQuery to fetch all rules
+   */
+  ruleResponse: {
+    /**
+     * Result from fetching all rules
+     */
+    rules: RuleResponse[];
+    /**
+     * True while rules are being fetched
+     */
+    isLoading: boolean;
+  };
+}
+
 export interface TableProps {
   /**
    * DataView created for the alert summary page
@@ -93,13 +115,30 @@ export interface TableProps {
    * Groups filters passed from the GroupedAlertsTable component via the renderChildComponent callback
    */
   groupingFilters: Filter[];
+  /**
+   * List of installed AI for SOC integrations
+   */
+  packages: PackageListItem[];
+  /**
+   * Result from the useQuery to fetch all rules
+   */
+  ruleResponse: {
+    /**
+     * Result from fetching all rules
+     */
+    rules: RuleResponse[];
+    /**
+     * True while rules are being fetched
+     */
+    isLoading: boolean;
+  };
 }
 
 /**
  * Renders the table showing all the alerts. This component leverages the ResponseOps AlertsTable in a similar way that the alerts page does.
  * The table is used in combination with the GroupedAlertsTable component.
  */
-export const Table = memo(({ dataView, groupingFilters }: TableProps) => {
+export const Table = memo(({ dataView, groupingFilters, packages, ruleResponse }: TableProps) => {
   const {
     services: {
       application,
@@ -178,9 +217,18 @@ export const Table = memo(({ dataView, groupingFilters }: TableProps) => {
     [dataView]
   );
 
+  const additionalContext: AdditionalTableContext = useMemo(
+    () => ({
+      packages,
+      ruleResponse,
+    }),
+    [packages, ruleResponse]
+  );
+
   return (
     <AlertsTable
       actionsColumnWidth={ACTION_COLUMN_WIDTH}
+      additionalContext={additionalContext}
       browserFields={browserFields}
       columns={columns}
       consumers={ALERT_TABLE_CONSUMERS}

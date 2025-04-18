@@ -9,88 +9,92 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import type { Alert } from '@kbn/alerting-types';
 import {
-  ICON_TEST_ID,
   KibanaAlertRelatedIntegrationsCellRenderer,
-  SKELETON_TEST_ID,
+  TABLE_RELATED_INTEGRATION_CELL_RENDERER_TEST_ID,
 } from './kibana_alert_related_integrations_cell_renderer';
-import { useGetIntegrationFromPackageName } from '../../../hooks/alert_summary/use_get_integration_from_package_name';
 import { ALERT_RULE_PARAMETERS } from '@kbn/rule-data-utils';
+import {
+  INTEGRATION_ICON_TEST_ID,
+  INTEGRATION_LOADING_SKELETON_TEST_ID,
+} from '../common/integration_icon';
+import { installationStatuses } from '@kbn/fleet-plugin/common/constants';
+import type { PackageListItem } from '@kbn/fleet-plugin/common';
+import { usePackageIconType } from '@kbn/fleet-plugin/public/hooks';
 
-jest.mock('../../../hooks/alert_summary/use_get_integration_from_package_name');
+jest.mock('@kbn/fleet-plugin/public/hooks');
+
+const LOADING_SKELETON_TEST_ID = `${TABLE_RELATED_INTEGRATION_CELL_RENDERER_TEST_ID}-${INTEGRATION_LOADING_SKELETON_TEST_ID}`;
+const ICON_TEST_ID = `${TABLE_RELATED_INTEGRATION_CELL_RENDERER_TEST_ID}-${INTEGRATION_ICON_TEST_ID}`;
 
 describe('KibanaAlertRelatedIntegrationsCellRenderer', () => {
-  it('should handle missing field', () => {
-    (useGetIntegrationFromPackageName as jest.Mock).mockReturnValue({
-      integration: null,
-      isLoading: false,
-    });
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
 
+  it('should handle missing field', () => {
     const alert: Alert = {
       _id: '_id',
       _index: '_index',
     };
+    const packages: PackageListItem[] = [];
 
-    const { queryByTestId } = render(<KibanaAlertRelatedIntegrationsCellRenderer alert={alert} />);
+    const { queryByTestId } = render(
+      <KibanaAlertRelatedIntegrationsCellRenderer alert={alert} packages={packages} />
+    );
 
-    expect(queryByTestId(SKELETON_TEST_ID)).not.toBeInTheDocument();
+    expect(queryByTestId(LOADING_SKELETON_TEST_ID)).not.toBeInTheDocument();
     expect(queryByTestId(ICON_TEST_ID)).not.toBeInTheDocument();
   });
 
   it('should handle not finding matching integration', () => {
-    (useGetIntegrationFromPackageName as jest.Mock).mockReturnValue({
-      integration: null,
-      isLoading: false,
-    });
-
     const alert: Alert = {
       _id: '_id',
       _index: '_index',
-      [ALERT_RULE_PARAMETERS]: ['splunk'],
+      [ALERT_RULE_PARAMETERS]: [{ related_integrations: { package: ['splunk'] } }],
     };
+    const packages: PackageListItem[] = [
+      {
+        id: 'other',
+        icons: [{ src: 'icon.svg', path: 'mypath/icon.svg', type: 'image/svg+xml' }],
+        name: 'other',
+        status: installationStatuses.NotInstalled,
+        title: 'Other',
+        version: '0.1.0',
+      },
+    ];
 
-    const { queryByTestId } = render(<KibanaAlertRelatedIntegrationsCellRenderer alert={alert} />);
-
-    expect(queryByTestId(SKELETON_TEST_ID)).not.toBeInTheDocument();
-    expect(queryByTestId(ICON_TEST_ID)).not.toBeInTheDocument();
-  });
-
-  it('should show loading', () => {
-    (useGetIntegrationFromPackageName as jest.Mock).mockReturnValue({
-      integration: null,
-      isLoading: true,
-    });
-
-    const alert: Alert = {
-      _id: '_id',
-      _index: '_index',
-      [ALERT_RULE_PARAMETERS]: ['splunk'],
-    };
-
-    const { getByTestId, queryByTestId } = render(
-      <KibanaAlertRelatedIntegrationsCellRenderer alert={alert} />
+    const { queryByTestId } = render(
+      <KibanaAlertRelatedIntegrationsCellRenderer alert={alert} packages={packages} />
     );
 
-    expect(getByTestId(SKELETON_TEST_ID)).toBeInTheDocument();
+    expect(queryByTestId(LOADING_SKELETON_TEST_ID)).not.toBeInTheDocument();
     expect(queryByTestId(ICON_TEST_ID)).not.toBeInTheDocument();
   });
 
   it('should show integration icon', () => {
-    (useGetIntegrationFromPackageName as jest.Mock).mockReturnValue({
-      integration: { name: 'Splunk', icon: ['icon'] },
-      isLoading: false,
-    });
+    (usePackageIconType as jest.Mock).mockReturnValue('iconType');
 
     const alert: Alert = {
       _id: '_id',
       _index: '_index',
-      [ALERT_RULE_PARAMETERS]: ['splunk'],
+      [ALERT_RULE_PARAMETERS]: [{ related_integrations: { package: ['splunk'] } }],
     };
+    const packages: PackageListItem[] = [
+      {
+        id: 'splunk',
+        icons: [{ src: 'icon.svg', path: 'mypath/icon.svg', type: 'image/svg+xml' }],
+        name: 'splunk',
+        status: installationStatuses.NotInstalled,
+        title: 'Splunk',
+        version: '0.1.0',
+      },
+    ];
 
     const { getByTestId, queryByTestId } = render(
-      <KibanaAlertRelatedIntegrationsCellRenderer alert={alert} />
+      <KibanaAlertRelatedIntegrationsCellRenderer alert={alert} packages={packages} />
     );
 
-    expect(queryByTestId(SKELETON_TEST_ID)).not.toBeInTheDocument();
+    expect(queryByTestId(LOADING_SKELETON_TEST_ID)).not.toBeInTheDocument();
     expect(getByTestId(ICON_TEST_ID)).toBeInTheDocument();
   });
 });
