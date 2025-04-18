@@ -304,11 +304,11 @@ export const ActionsLogExpandedTray = memo<{
         description:
           reduce(
             hosts,
-            (acc, host) => {
+            (acc, host, agentId) => {
               if (host.name.trim().length) {
                 acc.push(host.name);
               } else {
-                acc.push(emptyValue);
+                acc.push(agentId);
               }
               return acc;
             },

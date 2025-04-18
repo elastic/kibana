@@ -62,8 +62,16 @@ const getAgentErrors = (action: MaybeImmutable<ActionDetails>) => {
         agentErrorInfo.errors.push(...errorMessages);
       }
 
-      if (agentErrorInfo.errors.length && action.hosts[agent]?.name) {
-        agentErrorInfo.name = action.hosts[agent].name;
+      if (agentErrorInfo.errors.length) {
+        agentErrorInfo.name =
+          action.hosts[agent]?.name ||
+          i18n.translate(
+            'xpack.securitySolution.endpointActionFailureMessage.hostNameUnavailable',
+            {
+              defaultMessage: '{agentId} (Host name unavailable)',
+              values: { agentId: agent },
+            }
+          );
       }
 
       if (agentErrorInfo.errors.length) {
