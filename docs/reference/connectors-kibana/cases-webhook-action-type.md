@@ -7,8 +7,11 @@ mapped_pages:
 # {{webhook-cm}} connector and action [cases-webhook-action-type]
 
 
-The {{webhook-cm}} connector uses [axios](https://github.com/axios/axios) to send POST, PUT, and GET requests to a case management RESTful API web service. [8.15.0]
+The {{webhook-cm}} connector uses [axios](https://github.com/axios/axios) to send POST, PUT, and GET requests to a case management RESTful API web service.
 
+:::{admonition} Added in 8.15.0
+The {{webhook-cm}} connector was added in 8.15.0.
+:::
 
 ## Create connectors in {{kib}} [define-cases-webhook-ui]
 

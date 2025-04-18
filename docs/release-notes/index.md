@@ -3,8 +3,6 @@ navigation_title: "Kibana"
 mapped_pages:
   - https://www.elastic.co/guide/en/kibana/current/release-notes.html
   - https://www.elastic.co/guide/en/kibana/current/whats-new.html
-  - https://www.elastic.co/guide/en/kibana/master/release-notes-9.0.0.html
-  - https://www.elastic.co/guide/en/kibana/master/enhancements-and-bug-fixes-v9.0.0.html
 ---
 
 # Kibana release notes [kibana-release-notes]

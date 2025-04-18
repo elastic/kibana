@@ -7,7 +7,11 @@ mapped_pages:
 # {{hive}} connector and action [thehive-action-type]
 
 
-{{hive}} connector uses the [{{hive}} (v1) REST API](https://docs.strangebee.com/thehive/api-docs/) to create cases and alerts. [8.16.0]
+{{hive}} connector uses the [{{hive}} (v1) REST API](https://docs.strangebee.com/thehive/api-docs/) to create cases and alerts.
+
+:::{admonition} Added in 8.16.0
+The {{hive}} connector was added in 8.16.0.
+:::
 
 ::::{note}
 If you use this connector with [cases](docs-content://explore-analyze/alerts-cases/cases.md), the status values differ in {{kib}} and {{hive}}. The status values are not synchronized when you update a case.

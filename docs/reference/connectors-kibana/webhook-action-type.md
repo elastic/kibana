@@ -45,7 +45,6 @@ Certificate authority
 
     Verification mode
     :   Controls the certificate verification.
-
         * Use `full` to validate that the certificate has an issue date within the `not_before` and `not_after` dates, chains to a trusted certificate authority, and has a hostname or IP address that matches the names within the certificate.
         * Use `certificate` to validate the certificate and verifies that it is signed by a trusted authority; this option does not check the certificate hostname.
         * Use `none` to skip certificate validation.

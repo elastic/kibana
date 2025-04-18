@@ -523,7 +523,9 @@ Examples:
 
 ### Handling missing base versions
 
-NOTE: These are not edge cases but rather normal cases. In many package upgrade scenarios, hundreds of prebuilt rules (out of ~1300 of them at the time of writing) won't have a base version.
+:::{note}
+These are not edge cases but rather normal cases. In many package upgrade scenarios, hundreds of prebuilt rules (out of ~1300 of them at the time of writing) won't have a base version.
+:::
 
 **When the base version** of a prebuilt rule that is being imported **is missing** among the `security-rule` asset saved objects, and the user imports this rule, the following scenarios apply.
 

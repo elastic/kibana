@@ -235,8 +235,8 @@ This step is required to use OAuth for authentication between Elastic and {{sn}}
     * **Name**: Name the certificate.
     * **PEM Certificate**: Copy the generated public key into this text field.
 
-% TO DO: Use `:class: screenshot`
-![Shows new certificate form in ServiceNow](../images/servicenow-new-certificate.png)
+    % TO DO: Use `:class: screenshot`
+    ![Shows new certificate form in ServiceNow](../images/servicenow-new-certificate.png)
 
 3. Click **Submit** to create the certificate.
 
@@ -248,16 +248,16 @@ This step is required to use OAuth for authentication between Elastic and {{sn}}
 1. In your {{sn}} instance, go to **Application Registry** and select **New**.
 2. Select **Create an OAuth JWT API endpoint for external clients** from the list of options.
 
-% TO DO: Use `:class: screenshot`
-![Shows application type selection](../images/servicenow-jwt-endpoint.png)
+    % TO DO: Use `:class: screenshot`
+    ![Shows application type selection](../images/servicenow-jwt-endpoint.png)
 
 3. Configure the application as follows:
 
     * **Name**: Name the application.
     * **User field**: Select the field to use as the user identifier.
 
-% TO DO: Use `:class: screenshot`
-![Shows new application form in ServiceNow](../images/servicenow-new-application.png)
+    % TO DO: Use `:class: screenshot`
+    ![Shows new application form in ServiceNow](../images/servicenow-new-application.png)
 
     ::::{important}
     Remember the selected user field. You will use this as the **User Identifier Value** when creating the connector. For example, if you selected **Email** for **User field**, you will use the user’s email for the **User Identifier Value**.
@@ -271,14 +271,14 @@ This step is required to use OAuth for authentication between Elastic and {{sn}}
     * **Name**: Name the JWT Verifier Map.
     * **Sys certificate**: Click the search icon and select the name of the certificate created in the previous step.
 
-% TO DO: Use `:class: screenshot`
-![Shows new JWT Verifier Map form in ServiceNow](../images/servicenow-new-jwt-verifier-map.png)
+    % TO DO: Use `:class: screenshot`
+    ![Shows new JWT Verifier Map form in ServiceNow](../images/servicenow-new-jwt-verifier-map.png)
 
 8. Click **Submit** to create the verifier map.
 9. Note the **Client ID**, **Client Secret** and **JWT Key ID**. You will need these values to create your {{sn}} connector.
 
-% TO DO: Use `:class: screenshot`
-![Shows where to find OAuth values in ServiceNow](../images/servicenow-oauth-values.png)
+    % TO DO: Use `:class: screenshot`
+    ![Shows where to find OAuth values in ServiceNow](../images/servicenow-oauth-values.png)
 
 
 

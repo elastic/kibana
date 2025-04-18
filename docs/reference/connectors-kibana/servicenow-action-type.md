@@ -260,8 +260,8 @@ This step is required to use OAuth for authentication between Elastic and {{sn}}
     * **Name**: Name the application.
     * **User field**: Select the field to use as the user identifier.
 
-% TO DO: Use `:class: screenshot`
-![Shows new application form in ServiceNow](../images/servicenow-new-application.png)
+    % TO DO: Use `:class: screenshot`
+    ![Shows new application form in ServiceNow](../images/servicenow-new-application.png)
 
     ::::{important}
     Remember the selected user field. You will use this as the **User Identifier Value** when creating the connector. For example, if you selected **Email** for **User field**, you will use the user’s email for the **User Identifier Value**.

@@ -64,7 +64,7 @@ There is a proof-of-concept (POC) pull request to demonstrate these changes. It 
 
 ### Question 1 [sharing-saved-objects-q1]
 
-[TBC: QUOTE]
+% [TBC: QUOTE]
 If your objects store *any* links to other objects (with an object type/ID), you need to take specific steps to ensure that these links continue functioning after the 8.0 upgrade.
 
 
@@ -72,7 +72,7 @@ If your objects store *any* links to other objects (with an object type/ID), you
 
 ⚠️ This step **must** be completed no later than the 7.16 release. ⚠️
 
-[TBC: QUOTE]
+% [TBC: QUOTE]
 If you answered "Yes" to [Question 1](#sharing-saved-objects-q1), you need to make sure that your object links are *only* stored in the root-level `references` field. When a given object’s ID is changed, this field will be updated accordingly for other objects.
 
 The image below shows two different examples of object links from a "case" object to an "action" object. The top shows the incorrect way to link to another object, and the bottom shows the correct way.
@@ -115,7 +115,7 @@ Reminder, don’t forget to add unit tests and integration tests!
 
 ### Question 2 [sharing-saved-objects-q2]
 
-[TBC: QUOTE]
+% [TBC: QUOTE]
 A deep link is a URL to a page that shows a specific object. End-users may bookmark these URLs or schedule reports with them, so it is critical to ensure that these URLs continue working. The image below shows an example of a deep link to a Canvas workpad object:
 
 ![Sharing Saved Objects deep link example](images/sharing-saved-objects-q2.png)
@@ -127,7 +127,7 @@ Note that some URLs may contain [deep links to multiple objects](#sharing-saved-
 
 ⚠️ This step will preferably be completed in the 7.16 release; it **must** be completed no later than the 8.0 release. ⚠️
 
-[TBC: QUOTE]
+% [TBC: QUOTE]
 If you answered "Yes" to [Question 2](#sharing-saved-objects-q2), you need to make sure that when you use the SavedObjectsClient to fetch an object using its ID, you use a different API to do so. The existing `get()` function will only find an object using its current ID. To make sure your existing deep link URLs don’t break, you should use the new `resolve()` function; [this attempts to find an object using its old ID *and* its current ID](#sharing-saved-objects-faq-legacy-url-alias).
 
 In a nutshell, if your deep link page had something like this before:
@@ -167,7 +167,7 @@ You don’t need to use `resolve()` everywhere, [you should only use it for deep
 
 ⚠️ This step will preferably be completed in the 7.16 release; it **must** be completed no later than the 8.0 release. ⚠️
 
-[TBC: QUOTE]
+% [TBC: QUOTE]
 The Spaces plugin API exposes React components and functions that you should use to render your UI in a consistent manner for end-users. Your UI will need to use the Core HTTP service and the Spaces plugin API to do this.
 
 Your page should change [according to the outcome](#sharing-saved-objects-faq-resolve-outcomes):
@@ -289,7 +289,7 @@ Reminder, don’t forget to add unit tests and functional tests!
 
 ⚠️ This step **must** be completed in the 8.0 release (no earlier and no later). ⚠️
 
-[TBC: QUOTE]
+% [TBC: QUOTE]
 After [Step 3](#sharing-saved-objects-step-3) is complete, you can add the code to convert your objects.
 
 ::::{warning}
@@ -314,7 +314,7 @@ Reminder, don’t forget to add integration tests!
 
 ### Question 3 [sharing-saved-objects-q3]
 
-[TBC: QUOTE]
+% [TBC: QUOTE]
 Saved objects can optionally be [encrypted](docs-content://deploy-manage/security/secure-saved-objects.md) by using the Encrypted Saved Objects plugin. Very few object types are encrypted, so most plugin developers will not be affected.
 
 
@@ -322,7 +322,7 @@ Saved objects can optionally be [encrypted](docs-content://deploy-manage/securit
 
 ⚠️ This step **must** be completed in the 8.0 release (no earlier and no later). ⚠️
 
-[TBC: QUOTE]
+% [TBC: QUOTE]
 If you answered "Yes" to [Question 3](#sharing-saved-objects-q3), you need to take additional steps to make sure that your objects can still be decrypted after the conversion process. Encrypted saved objects use some fields as part of "additionally authenticated data" (AAD) to defend against different types of cryptographic attacks. The object ID is part of this AAD, and so it follows that the after the object’s ID is changed, the object will not be able to be decrypted with the standard process.
 
 To mitigate this, you need to add a "no-op" ESO migration that will be applied immediately after the object is converted during the 8.0 upgrade process. This will decrypt the object using its old ID and then re-encrypt it using its new ID:
@@ -344,7 +344,7 @@ This section covers switching a share-capable object type into a shareable one *
 
 ### Step 6 [sharing-saved-objects-step-6]
 
-[TBC: QUOTE]
+% [TBC: QUOTE]
 When you register your object, you need to set the proper `namespaceType`. If you have an existing object type that is "share-capable", you can simply change it:
 
 ![Sharing Saved Objects registration (shareable)](images/sharing-saved-objects-step-6.png)
@@ -352,7 +352,7 @@ When you register your object, you need to set the proper `namespaceType`. If yo
 
 ### Step 7 [sharing-saved-objects-step-7]
 
-[TBC: QUOTE]
+% [TBC: QUOTE]
 If an object is shared to multiple spaces, it cannot be deleted without using the [`force` delete option](https://github.com/elastic/kibana/blob/master/src/core/packages/saved-objects/api-server/src/apis/delete.ts). You should always be aware when a saved object exists in multiple spaces, and you should warn users in that case.
 
 If your UI allows users to delete your objects, you can define a warning message like this:
@@ -375,7 +375,7 @@ The [Data Views page](docs-content://explore-analyze/find-and-organize/data-view
 
 ### Step 8 [sharing-saved-objects-step-8]
 
-[TBC: QUOTE]
+% [TBC: QUOTE]
 Users will need a way to view what spaces your objects are currently assigned to and share them to additional spaces. You can accomplish this in two ways, and many consumers will want to implement both:
 
 1. (Highly recommended) Add reusable components to your application, making it "space-aware". The space-related components are exported by the spaces plugin, and you can use them in your own application.

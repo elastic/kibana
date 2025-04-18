@@ -140,7 +140,9 @@ You must use your Amazon SES SMTP credentials to send email through Amazon SES. 
 
 ### Microsoft Exchange with basic authentication [exchange-basic-auth]
 
-[7.16.0]
+:::{admonition} Deprecated in 7.16.0
+Microsoft Exchange with basic authentication was deprecated in 7.16.0.
+:::
 
 To prepare for the removal of Basic Auth, you must update all existing Microsoft Exchange connectors with the new configuration based on the [OAuth 2.0 Client Credentials Authentication](https://docs.microsoft.com/en-us/azure/active-directory/develop/v2-oauth2-client-creds-grant-flow).
 
