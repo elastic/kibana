@@ -91,12 +91,12 @@ export const EditIntegrationFlyout: React.FunctionComponent<{
     // if everything is okay, then show success and redirect to new page
     if (!res.error) {
       services.notifications.toasts.addSuccess({
-        title: i18n.translate('xpack.fleet.epm.editReadMeSuccessToastTitle', {
+        title: i18n.translate('xpack.fleet.epm.editIntegrationSuccessToastTitle', {
           defaultMessage: 'README updated',
         }),
-        text: i18n.translate('xpack.fleet.epm.editReadMeSuccessToastText', {
+        text: i18n.translate('xpack.fleet.epm.editIntegrationSuccessToastText', {
           defaultMessage:
-            'The README content has been updated successfully. Redirecting you to the updated integration.',
+            'The integration has been updated successfully. Redirecting you to the updated integration.',
         }),
       });
       setTimeout(() => {
@@ -109,11 +109,11 @@ export const EditIntegrationFlyout: React.FunctionComponent<{
       }, 2000);
     } else {
       services.notifications.toasts.addError(res.error, {
-        title: i18n.translate('xpack.fleet.epm.editReadMeErrorToastTitle', {
-          defaultMessage: 'Error updating README file',
+        title: i18n.translate('xpack.fleet.epm.editIntegrationErrorToastTitle', {
+          defaultMessage: 'Error updating integration',
         }),
-        toastMessage: i18n.translate('xpack.fleet.epm.editReadMeErrorToastText', {
-          defaultMessage: 'There was an error updating the README content.',
+        toastMessage: i18n.translate('xpack.fleet.epm.editIntegrationErrorToastText', {
+          defaultMessage: 'There was an error updating the integration.',
         }),
       });
     }
