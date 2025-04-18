@@ -19,9 +19,14 @@ export class SiemMigrationsService {
   private pluginStop$: Subject<void>;
   private rules: SiemRuleMigrationsService;
 
-  constructor(private config: ConfigType, logger: LoggerFactory, kibanaVersion: string) {
+  constructor(
+    private config: ConfigType,
+    logger: LoggerFactory,
+    kibanaVersion: string,
+    elserInferenceId?: string
+  ) {
     this.pluginStop$ = new ReplaySubject(1);
-    this.rules = new SiemRuleMigrationsService(logger, kibanaVersion);
+    this.rules = new SiemRuleMigrationsService(logger, kibanaVersion, elserInferenceId);
   }
 
   setup(params: SiemMigrationsSetupParams) {

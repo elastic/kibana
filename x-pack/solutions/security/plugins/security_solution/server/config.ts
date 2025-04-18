@@ -183,6 +183,12 @@ export const configSchema = schema.object({
       }),
     }),
   }),
+
+  siemRuleMigrations: schema.maybe(
+    schema.object({
+      elserInferenceId: schema.maybe(schema.string()),
+    })
+  ),
 });
 
 export type ConfigSchema = TypeOf<typeof configSchema>;

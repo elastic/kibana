@@ -66,6 +66,7 @@ export function getResourceName(resource: string) {
 export interface AIAssistantServiceOpts {
   logger: Logger;
   kibanaVersion: string;
+  elserInferenceId?: string;
   elasticsearchClientPromise: Promise<ElasticsearchClient>;
   ml: MlPluginSetup;
   taskManager: TaskManagerSetupContract;
@@ -99,7 +100,6 @@ export class AIAssistantService {
   private initialized: boolean;
   private isInitializing: boolean = false;
   private getElserId: GetElser;
-  private modelIdOverride: boolean = false;
   private conversationsDataStream: DataStreamSpacesAdapter;
   private knowledgeBaseDataStream: DataStreamSpacesAdapter;
   private promptsDataStream: DataStreamSpacesAdapter;
@@ -109,13 +109,14 @@ export class AIAssistantService {
   private resourceInitializationHelper: ResourceInstallationHelper;
   private initPromise: Promise<InitializationPromise>;
   private isKBSetupInProgress: Map<string, boolean> = new Map();
-  private hasInitializedV2KnowledgeBase: boolean = false;
   private productDocManager?: ProductDocBaseStartContract['management'];
   private isProductDocumentationInProgress: boolean = false;
+  private elserInferenceId?: string;
 
   constructor(private readonly options: AIAssistantServiceOpts) {
     this.initialized = false;
     this.getElserId = createGetElserId(options.ml.trainedModelsProvider);
+    this.elserInferenceId = options.elserInferenceId;
     this.conversationsDataStream = this.createDataStream({
       resource: 'conversations',
       kibanaVersion: options.kibanaVersion,
@@ -344,13 +345,7 @@ export class AIAssistantService {
             ?.inference_id === ASSISTANT_ELSER_INFERENCE_ID
       );
 
-      // Used only for testing purposes
-      if (this.modelIdOverride && !isUsingDedicatedInferenceEndpoint) {
-        this.knowledgeBaseDataStream = await this.rolloverDataStream(
-          ELASTICSEARCH_ELSER_INFERENCE_ID,
-          ASSISTANT_ELSER_INFERENCE_ID
-        );
-      } else if (isUsingDedicatedInferenceEndpoint) {
+      if (isUsingDedicatedInferenceEndpoint) {
         this.knowledgeBaseDataStream = await this.rolloverDataStream(
           ASSISTANT_ELSER_INFERENCE_ID,
           ELASTICSEARCH_ELSER_INFERENCE_ID
@@ -383,11 +378,8 @@ export class AIAssistantService {
               type: 'semantic_text',
               array: false,
               required: false,
+              ...(this.elserInferenceId ? { inference_id: this.elserInferenceId } : {}),
             },
-          },
-          settings: {
-            // force new semantic_text field behavior
-            'index.mapping.semantic_text.use_legacy_format': false,
           },
           writeIndexOnly: true,
         });
@@ -554,22 +546,6 @@ export class AIAssistantService {
         getTrainedModelsProvider: () => ReturnType<TrainedModelsProvider['trainedModelsProvider']>;
       }
   ): Promise<AIAssistantKnowledgeBaseDataClient | null> {
-    // If modelIdOverride is set, swap getElserId(), and ensure the pipeline is re-created with the correct model
-    if (opts?.modelIdOverride != null) {
-      const modelIdOverride = opts.modelIdOverride;
-      this.getElserId = async () => modelIdOverride;
-      this.modelIdOverride = true;
-    }
-
-    // If a V2 KnowledgeBase has never been initialized or a modelIdOverride is provided, we need to reinitialize all persistence resources to make sure
-    // they're using the correct model/mappings. Technically all existing KB data is stale since it was created
-    // with a different model/mappings, but modelIdOverride is only intended for testing purposes at this time
-    // Added hasInitializedV2KnowledgeBase to prevent the console noise from re-init on each KB request
-    if (!this.hasInitializedV2KnowledgeBase || opts?.modelIdOverride != null) {
-      await this.initializeResources();
-      this.hasInitializedV2KnowledgeBase = true;
-    }
-
     const res = await this.checkResourcesInstallation(opts);
 
     if (res === null) {
@@ -587,7 +563,7 @@ export class AIAssistantService {
       getProductDocumentationStatus: this.getProductDocumentationStatus.bind(this),
       kibanaVersion: this.options.kibanaVersion,
       ml: this.options.ml,
-      modelIdOverride: !!opts.modelIdOverride,
+      elserInferenceId: this.options.elserInferenceId,
       setIsKBSetupInProgress: this.setIsKBSetupInProgress.bind(this),
       spaceId: opts.spaceId,
       manageGlobalKnowledgeBaseAIAssistant: opts.manageGlobalKnowledgeBaseAIAssistant ?? false,

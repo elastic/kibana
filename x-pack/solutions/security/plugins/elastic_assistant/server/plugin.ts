@@ -64,6 +64,7 @@ export class ElasticAssistantPlugin
       ml: plugins.ml,
       taskManager: plugins.taskManager,
       kibanaVersion: this.kibanaVersion,
+      elserInferenceId: this.config.elserInferenceId,
       elasticsearchClientPromise: core
         .getStartServices()
         .then(([{ elasticsearch }]) => elasticsearch.client.asInternalUser),
