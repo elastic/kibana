@@ -12,6 +12,7 @@ import {
   EuiDescriptionList,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHorizontalRule,
   EuiIcon,
   EuiLink,
   EuiPanel,
@@ -292,7 +293,7 @@ export const OverviewTab = ({
             <EuiSpacer size="m" />
             <EuiDescriptionList listItems={accordion.listItems} />
           </EuiAccordion>
-          <EuiSpacer size="m" />
+          <EuiHorizontalRule />
         </React.Fragment>
       ))}
     </>
