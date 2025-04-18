@@ -65,9 +65,9 @@ export const IntegrationCatalogView: React.FC = () => {
           <strong>Available</strong>
         </EuiText>
         <EuiSpacer size="m" />
-        <EuiFlexGrid columns={3}>
+        <EuiFlexGrid columns={4}>
           {Object.entries(integrationCards).map(([type, cardData]) => (
-            <EuiFlexItem>
+            <EuiFlexItem grow={4}>
               <EuiCard
                 layout="horizontal"
                 icon={
@@ -75,8 +75,8 @@ export const IntegrationCatalogView: React.FC = () => {
                     style={{
                       backgroundColor: '#F5F7FA',
                       borderRadius: '50%',
-                      width: '80px',
-                      height: '80px',
+                      width: '60px',
+                      height: '60px',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
@@ -84,7 +84,7 @@ export const IntegrationCatalogView: React.FC = () => {
                       marginRight: '15px',
                     }}
                   >
-                    <EuiIcon size="xxl" type={cardData.icon} />
+                    <EuiIcon size="xl" type={cardData.icon} />
                   </div>
                 }
                 title={
@@ -93,16 +93,18 @@ export const IntegrationCatalogView: React.FC = () => {
                     <EuiIcon
                       type="iInCircle"
                       size="s"
-                      style={{ marginLeft: '8px', cursor: 'pointer' }}
+                      css={{ marginLeft: '8px', cursor: 'pointer' }}
                     />
                   </div>
                 }
-                titleSize="s"
+                titleSize="xs"
                 description={cardData.description}
                 paddingSize="l"
-                style={{
+                css={{
                   border: '1px solid #D3DAE6',
                   borderRadius: '4px',
+                  width: '400px',
+                  height: '150px',
                 }}
                 onClick={() => {
                   return navigateToWorkchatUrl(`${appPaths.integrations.create}?type=${type}`);

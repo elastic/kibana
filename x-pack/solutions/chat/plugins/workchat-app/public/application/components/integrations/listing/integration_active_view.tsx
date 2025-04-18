@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { ReactNode, useState } from 'react';
+import React, { ReactNode, useEffect, useState } from 'react';
 import {
   Comparators,
   Criteria,
@@ -21,6 +21,7 @@ import {
   EuiHealth,
   EuiHorizontalRule,
   EuiIcon,
+  EuiLoadingSpinner,
   EuiPanel,
   EuiSpacer,
   EuiTableSortingType,
@@ -44,6 +45,17 @@ interface IntegrationListViewProps {
 export const IntegrationActiveView: React.FC<IntegrationListViewProps> = ({ integrations }) => {
   const { agents } = useAgentList();
   const { navigateToWorkchatUrl } = useNavigation();
+
+  const [isLoading, setIsLoading] = useState(true);
+
+  // set timeout
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 100);
+
+    return () => clearTimeout(timer);
+  }, [integrations]);
 
   const columns: Array<EuiBasicTableColumn<Integration>> = [
     {
@@ -239,7 +251,13 @@ export const IntegrationActiveView: React.FC<IntegrationListViewProps> = ({ inte
       <IntegrationListView tab={'active'} />
       <EuiHorizontalRule margin="none" css={{ height: 2 }} />
       <KibanaPageTemplate.Section>
-        {integrations.length === 0 ? (
+        {isLoading ? (
+          <EuiFlexGroup alignItems="center" justifyContent="center" css={{ height: '300px' }}>
+            <EuiFlexItem grow={false}>
+              <EuiLoadingSpinner size="xl" />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        ) : integrations.length === 0 ? (
           <EuiFlexGroup
             alignItems="center"
             css={{
