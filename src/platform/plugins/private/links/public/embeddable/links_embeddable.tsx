@@ -21,6 +21,7 @@ import {
 } from '@kbn/presentation-publishing';
 import { css } from '@emotion/react';
 
+import { PresentationContainer, apiIsPresentationContainer } from '@kbn/presentation-containers';
 import {
   CONTENT_ID,
   DASHBOARD_LINK_TYPE,
@@ -188,7 +189,8 @@ export const getLinksEmbeddableFactory = () => {
               );
               (serializedState.rawState as SerializedTitles).title = newState.title;
 
-              api.parentApi?.replacePanel<LinksSerializedState>(api.uuid, {
+              (api.parentApi as Partial<PresentationContainer>)
+                ?.replacePanel<LinksSerializedState>?.(api.uuid, {
                 serializedState,
                 panelType: api.type,
               });
