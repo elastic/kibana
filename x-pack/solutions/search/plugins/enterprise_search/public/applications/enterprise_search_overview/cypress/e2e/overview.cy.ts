@@ -6,7 +6,7 @@
  */
 
 import { login, checkA11y } from '../../../shared/cypress/commands';
-import { overviewPath } from '../../../shared/cypress/routes';
+import { homePath } from '../../../shared/cypress/routes';
 
 context('Enterprise Search Overview', () => {
   beforeEach(() => {
@@ -14,7 +14,7 @@ context('Enterprise Search Overview', () => {
   });
 
   it('should contain product cards', () => {
-    cy.visit(overviewPath);
+    cy.visit(homePath);
     cy.contains('Welcome to Elastic Enterprise Search');
 
     cy.get('[data-test-subj="appSearchProductCard"]')
@@ -37,7 +37,7 @@ context('Enterprise Search Overview', () => {
       if (err.message.includes('> ResizeObserver loop limit exceeded')) return false;
     });
 
-    cy.visit(`${overviewPath}/setup_guide`);
+    cy.visit(`${homePath}/setup_guide`);
     cy.contains('Setup Guide');
     cy.contains('Add your Enterprise Search host URL to your Kibana configuration');
 
