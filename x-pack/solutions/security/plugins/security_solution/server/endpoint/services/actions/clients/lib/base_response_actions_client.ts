@@ -456,7 +456,8 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
     }
 
     return fetchActionRequestById<TParameters, TOutputContent, TMeta>(
-      this.options.esClient,
+      this.options.endpointService,
+      this.options.spaceId,
       actionId
     ).then((actionRequestDoc) => {
       this.cache.set(cacheKey, actionRequestDoc);
