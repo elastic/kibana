@@ -34,6 +34,7 @@ import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/
 import type { UnifiedDocViewerStart } from '@kbn/unified-doc-viewer-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { NoDataPagePluginStart } from '@kbn/no-data-page-plugin/public';
+import type { CasesPublicSetup } from '@kbn/cases-plugin/public';
 import type {
   ObservabilityAIAssistantPublicSetup,
   ObservabilityAIAssistantPublicStart,
@@ -133,6 +134,7 @@ export interface DiscoverSetupPlugins {
   dataViews: DataViewsServicePublic;
   embeddable: EmbeddableSetup;
   expressions: ExpressionsSetup;
+  cases: CasesPublicSetup;
   globalSearch?: GlobalSearchPluginSetup;
   home?: HomePublicPluginSetup;
   observabilityAIAssistant?: ObservabilityAIAssistantPublicSetup;

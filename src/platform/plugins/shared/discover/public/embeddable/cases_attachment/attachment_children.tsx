@@ -1,0 +1,45 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import React from 'react';
+import { LazySavedSearchComponent } from '@kbn/saved-search-component';
+import type { SavedSearchCasesAttachmentPersistedState } from '@kbn/discover-utils';
+import { useDiscoverServices } from '../../hooks/use_discover_services';
+
+interface SavedSearchPersistableStateAttachmentViewProps {
+  persistableStateAttachmentState: SavedSearchCasesAttachmentPersistedState;
+}
+
+export const CommentChildren: React.FC<SavedSearchPersistableStateAttachmentViewProps> = ({
+  persistableStateAttachmentState,
+}) => {
+  const {
+    embeddable,
+    dataViews,
+    data: {
+      search: { searchSource },
+    },
+  } = useDiscoverServices();
+  const { index, timeRange, query, filters, timestampField } = persistableStateAttachmentState;
+  return (
+    <LazySavedSearchComponent
+      dependencies={{ embeddable, dataViews, searchSource }}
+      index={index}
+      timeRange={timeRange}
+      query={query}
+      filters={filters}
+      timestampField={timestampField}
+      height={'360px'}
+    />
+  );
+};
+
+// Note: This is for lazy loading
+// eslint-disable-next-line import/no-default-export
+export default CommentChildren;

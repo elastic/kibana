@@ -6,6 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+import type { SavedSearchAttributes } from '@kbn/saved-search-plugin/common';
 
 export const CONTEXT_DEFAULT_SIZE_SETTING = 'context:defaultSize';
 export const CONTEXT_STEP_SETTING = 'context:step';
@@ -24,3 +25,15 @@ export const SEARCH_ON_PAGE_LOAD_SETTING = 'discover:searchOnPageLoad';
 export const SHOW_FIELD_STATISTICS = 'discover:showFieldStatistics';
 export const SHOW_MULTIFIELDS = 'discover:showMultiFields';
 export const SORT_DEFAULT_ORDER_SETTING = 'discover:sort:defaultOrder';
+export const SAVED_SEARCH_ATTACHMENT_TYPE = '.search';
+/** This constant refers to the parts of the saved search state that can be edited from a dashboard */
+export const EDITABLE_SAVED_SEARCH_KEYS: Readonly<Array<keyof SavedSearchAttributes>> = [
+  'sort',
+  'columns',
+  'rowHeight',
+  'sampleSize',
+  'rowsPerPage',
+  'headerRowHeight',
+  'density',
+  'grid',
+] as const;

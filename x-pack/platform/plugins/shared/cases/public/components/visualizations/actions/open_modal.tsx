@@ -6,46 +6,88 @@
  */
 
 import React, { useEffect, useMemo } from 'react';
+import type { TimeRange, Query } from '@kbn/es-query';
 import { unmountComponentAtNode } from 'react-dom';
+import { isLensApi } from '@kbn/lens-plugin/public';
+import { isSavedSearchApi } from '@kbn/discover-contextual-components/src/actions/saved_search_compatibility_check';
 import type { LensApi } from '@kbn/lens-plugin/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
+import { type SearchEmbeddableApi } from '@kbn/discover-utils';
 import { apiPublishesTimeRange, useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import { BehaviorSubject } from 'rxjs';
 import { ActionWrapper } from './action_wrapper';
 import type { CasesActionContextProps, Services } from './types';
 import type { CaseUI } from '../../../../common';
-import { getLensCaseAttachment } from './utils';
+import { getLensCaseAttachment, getSavedSearchCaseAttachment } from './utils';
 import { useCasesAddToExistingCaseModal } from '../../all_cases/selector_modal/use_cases_add_to_existing_case_modal';
 import { convertToAbsoluteTimeRange } from './convert_to_absolute_time_range';
-
 interface Props {
-  lensApi: LensApi;
+  api: LensApi | SearchEmbeddableApi;
   onSuccess: () => void;
   onClose: (theCase?: CaseUI) => void;
 }
 
-const AddExistingCaseModalWrapper: React.FC<Props> = ({ lensApi, onClose, onSuccess }) => {
+const getAttachments = ({
+  api,
+  timeRange,
+  parentTimeRange,
+}: {
+  api: LensApi | SearchEmbeddableApi;
+  timeRange?: TimeRange;
+  parentTimeRange?: TimeRange;
+}) => {
+  const absoluteTimeRange = convertToAbsoluteTimeRange(timeRange);
+  const absoluteParentTimeRange = convertToAbsoluteTimeRange(parentTimeRange);
+  const appliedTimeRange = absoluteTimeRange ?? absoluteParentTimeRange;
+
+  if (isLensApi(api)) {
+    const attributes = api.getFullAttributes();
+    return !attributes || !absoluteTimeRange
+      ? []
+      : [getLensCaseAttachment({ attributes, timeRange: appliedTimeRange })];
+  }
+  if (isSavedSearchApi(api)) {
+    const dataView = api.parentApi?.dataViews$.getValue()?.[0] || {};
+    const indexPattern = dataView.getIndexPattern();
+    const timestampField = dataView.timeFieldName;
+    const query = api.query$.getValue() as Query | undefined;
+    const filters = api.filters$.getValue() || [];
+
+    return [
+      getSavedSearchCaseAttachment({
+        index: indexPattern,
+        timeRange: appliedTimeRange,
+        timestampField,
+        filters: filters.length ? filters : undefined,
+        query,
+      }),
+    ];
+  }
+  return [];
+};
+
+const AddExistingCaseModalWrapper: React.FC<Props> = ({ api, onClose, onSuccess }) => {
   const modal = useCasesAddToExistingCaseModal({
     onClose,
     onSuccess,
   });
 
-  const timeRange = useStateFromPublishingSubject(lensApi.timeRange$);
+  const timeRange = useStateFromPublishingSubject(api.timeRange$);
   const parentTimeRange = useStateFromPublishingSubject(
-    apiPublishesTimeRange(lensApi.parentApi)
-      ? lensApi.parentApi?.timeRange$
+    apiPublishesTimeRange(api.parentApi)
+      ? api.parentApi?.timeRange$
       : new BehaviorSubject(undefined)
   );
   const absoluteTimeRange = convertToAbsoluteTimeRange(timeRange);
   const absoluteParentTimeRange = convertToAbsoluteTimeRange(parentTimeRange);
 
   const attachments = useMemo(() => {
-    const appliedTimeRange = absoluteTimeRange ?? absoluteParentTimeRange;
-    const attributes = lensApi.getFullAttributes();
-    return !attributes || !appliedTimeRange
-      ? []
-      : [getLensCaseAttachment({ attributes, timeRange: appliedTimeRange })];
-  }, [lensApi, absoluteTimeRange, absoluteParentTimeRange]);
+    return getAttachments({
+      api,
+      timeRange: absoluteTimeRange,
+      parentTimeRange: absoluteParentTimeRange,
+    });
+  }, [api, absoluteTimeRange, absoluteParentTimeRange]);
 
   useEffect(() => {
     modal.open({ getAttachments: () => attachments });
@@ -56,7 +98,7 @@ const AddExistingCaseModalWrapper: React.FC<Props> = ({ lensApi, onClose, onSucc
 AddExistingCaseModalWrapper.displayName = 'AddExistingCaseModalWrapper';
 
 export function openModal(
-  lensApi: LensApi,
+  api: LensApi | SearchEmbeddableApi,
   currentAppId: string | undefined,
   casesActionContextProps: CasesActionContextProps,
   services: Services
@@ -89,7 +131,7 @@ export function openModal(
       currentAppId={currentAppId}
       services={services}
     >
-      <AddExistingCaseModalWrapper lensApi={lensApi} onClose={onClose} onSuccess={onSuccess} />
+      <AddExistingCaseModalWrapper api={api} onClose={onClose} onSuccess={onSuccess} />
     </ActionWrapper>,
     services.core
   );

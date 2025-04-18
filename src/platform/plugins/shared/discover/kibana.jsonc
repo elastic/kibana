@@ -32,7 +32,8 @@
       "unifiedSearch",
       "unifiedHistogram",
       "contentManagement",
-      "discoverShared"
+      "discoverShared",
+      "cases"
     ],
     "optionalPlugins": [
       "dataVisualizer",

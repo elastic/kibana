@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SEARCH_EMBEDDABLE_TYPE } from '@kbn/discover-utils';
+import { SEARCH_EMBEDDABLE_TYPE, type PublishesSavedSearch } from '@kbn/discover-utils';
 import type {
   CanAccessViewMode,
   EmbeddableApiContext,
@@ -20,12 +20,16 @@ import {
   getInheritedViewMode,
 } from '@kbn/presentation-publishing';
 
-import type { PublishesSavedSearch } from '../types';
-import { apiPublishesSavedSearch } from '../types';
-
 type ViewSavedSearchActionApi = CanAccessViewMode & HasType & PublishesSavedSearch;
 
-export const compatibilityCheck = (
+export const apiPublishesSavedSearch = (
+  api: EmbeddableApiContext['embeddable']
+): api is PublishesSavedSearch => {
+  const embeddable = api as PublishesSavedSearch;
+  return Boolean(embeddable.savedSearch$);
+};
+
+export const isSavedSearchApi = (
   api: EmbeddableApiContext['embeddable']
 ): api is ViewSavedSearchActionApi => {
   return (

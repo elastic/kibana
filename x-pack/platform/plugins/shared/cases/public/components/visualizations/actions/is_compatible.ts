@@ -7,6 +7,7 @@
 
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import { isLensApi } from '@kbn/lens-plugin/public';
+import { isSavedSearchApi } from '@kbn/discover-contextual-components/src/actions/saved_search_compatibility_check';
 import { apiPublishesTimeRange, hasBlockingError } from '@kbn/presentation-publishing';
 import { canUseCases } from '../../../client/helpers/can_use_cases';
 import { getCaseOwnerByAppId } from '../../../../common/utils/owner';
@@ -16,16 +17,18 @@ export function isCompatible(
   currentAppId: string | undefined,
   core: CoreStart
 ) {
-  if (!isLensApi(embeddable) || hasBlockingError(embeddable)) return false;
-  if (!embeddable.getFullAttributes()) {
+  if (!isLensApi(embeddable) && !isSavedSearchApi(embeddable)) {
     return false;
   }
+  if (hasBlockingError(embeddable)) return false;
+
   const timeRange =
     embeddable.timeRange$?.value ??
     (embeddable.parentApi && apiPublishesTimeRange(embeddable.parentApi)
       ? embeddable.parentApi?.timeRange$?.value
       : undefined);
-  if (!timeRange) {
+
+  if (!timeRange && isLensApi(embeddable)) {
     return false;
   }
   const owner = getCaseOwnerByAppId(currentAppId);
