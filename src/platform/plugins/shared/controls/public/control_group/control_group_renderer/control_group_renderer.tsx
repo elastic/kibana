@@ -40,7 +40,7 @@ const defaultRuntimeState = {
   ignoreParentSettings: DEFAULT_IGNORE_PARENT_SETTINGS,
 };
 
-function toSerializedState(
+function serializeState(
   runtimeState: Partial<ControlGroupRuntimeState>
 ): SerializedPanelState<ControlGroupSerializedState> {
   return {
@@ -78,7 +78,7 @@ export const ControlGroupRenderer = ({
   dataLoading,
   compressed,
 }: ControlGroupRendererProps) => {
-  const lastState$Ref = useRef(new BehaviorSubject(toSerializedState(defaultRuntimeState)));
+  const lastState$Ref = useRef(new BehaviorSubject(serializeState(defaultRuntimeState)));
   const id = useMemo(() => uuidv4(), []);
   const [isStateLoaded, setIsStateLoaded] = useState(false);
   const [controlGroup, setControlGroup] = useState<ControlGroupRendererApi | undefined>();
@@ -142,7 +142,7 @@ export const ControlGroupRenderer = ({
           ...(initialState ?? defaultRuntimeState),
           editorConfig,
         } as ControlGroupRuntimeState;
-        lastState$Ref.current.next(toSerializedState(initialRuntimeState));
+        lastState$Ref.current.next(serializeState(initialRuntimeState));
         setIsStateLoaded(true);
       })
       .catch();
@@ -176,7 +176,7 @@ export const ControlGroupRenderer = ({
           reload: () => reload$.next(),
           updateInput: (newInput: Partial<ControlGroupRuntimeState>) => {
             lastState$Ref.current.next(
-              toSerializedState({
+              serializeState({
                 ...lastState$Ref.current.value,
                 ...newInput,
               })
