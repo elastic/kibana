@@ -115,8 +115,8 @@ export const AgentPolicySummaryLine = memo<{
           <EuiToolTip
             content={
               <FormattedMessage
-                id="xpack.fleet.agentPolicySummaryLine.outdatedPolicyWarning"
-                defaultMessage="This agent is not synced to the latest revision of the assigned agent policy. Check the connection of the agent to its assigned fleet server."
+                id="xpack.fleet.agentPolicySummaryLine.outdatedPolicyWarningExpanded"
+                defaultMessage="The agent is not synced to the latest revision of its policy. Check the connection of the agent to its fleet server."
               />
             }
           >
