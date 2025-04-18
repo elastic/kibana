@@ -8,21 +8,31 @@
  */
 
 import { type TabItem, UnifiedTabs } from '@kbn/unified-tabs';
-import React, { useRef, useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import { pick } from 'lodash';
 import { type HtmlPortalNode, createHtmlPortalNode, InPortal } from 'react-reverse-portal';
-import type { LensPublicStart } from '@kbn/lens-plugin/public';
+import { UnifiedHistogramContainer2 } from '@kbn/unified-histogram-plugin/public';
 import { DiscoverSessionView, type DiscoverSessionViewProps } from '../session_view';
+import type { RuntimeStateManager } from '../../state_management/redux';
 import {
   CurrentTabProvider,
+  RuntimeStateProvider,
   createTabItem,
   internalStateActions,
   selectAllTabs,
+  selectTabRuntimeState,
   useInternalStateDispatch,
   useInternalStateSelector,
+  useRuntimeState,
 } from '../../state_management/redux';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { usePreviewData } from './use_preview_data';
+import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
+import { useDiscoverHistogram2 } from '../layout/use_discover_histogram_2';
+import type { DiscoverStateContainer } from '../../state_management/discover_state';
+import { DiscoverCustomizationProvider } from '../../../../customizations';
+import { DiscoverMainProvider } from '../../state_management/discover_state_provider';
+import type { DiscoverMainContentProps } from '../layout/discover_main_content';
 
 export const TabsView = (props: DiscoverSessionViewProps) => {
   const services = useDiscoverServices();
@@ -44,7 +54,11 @@ export const TabsView = (props: DiscoverSessionViewProps) => {
       {Object.keys(chartPortalNodes.current).map((tabId) => {
         return (
           <InPortal key={tabId} node={chartPortalNodes.current[tabId]}>
-            <LensWrapper isSelected={false} />
+            <UnifiedHistogramWrapper
+              tabId={tabId}
+              isSelected={false}
+              runtimeStateManager={props.runtimeStateManager}
+            />
           </InPortal>
         );
       })}
@@ -74,25 +88,84 @@ const updatePortals = (portals: Record<string, HtmlPortalNode>, tabs: Array<{ id
   tabs.reduce<Record<string, HtmlPortalNode>>(
     (acc, tab) => ({
       ...acc,
-      [tab.id]: portals[tab.id] || createHtmlPortalNode(),
+      [tab.id]: portals[tab.id] || createHtmlPortalNode({ attributes: { style: 'height: 100%;' } }),
     }),
     {}
   );
 
-type LensProps = Parameters<LensPublicStart['EmbeddableComponent']>[0];
-type LensWrapperProps = { isSelected: false } | ({ isSelected: true } & LensProps);
+interface UnifiedHistogramWrapperProps {
+  tabId: string;
+  isSelected: boolean;
+  runtimeStateManager: RuntimeStateManager;
+  panelsToggle?: DiscoverMainContentProps['panelsToggle'];
+}
 
-const LensWrapper = ({ isSelected, ...lensProps }: LensWrapperProps) => {
-  const { lens } = useDiscoverServices();
-  const latestLensProps = useRef<LensProps>();
+const UnifiedHistogramWrapper = ({
+  tabId,
+  isSelected,
+  runtimeStateManager,
+  panelsToggle,
+}: UnifiedHistogramWrapperProps) => {
+  const currentTabRuntimeState = selectTabRuntimeState(runtimeStateManager, tabId);
+  const currentCustomizationService = useRuntimeState(currentTabRuntimeState.customizationService$);
+  const currentStateContainer = useRuntimeState(currentTabRuntimeState.stateContainer$);
+  const currentDataView = useRuntimeState(currentTabRuntimeState.currentDataView$);
+  const adHocDataViews = useRuntimeState(runtimeStateManager.adHocDataViews$);
+  const isInitialized = useRef(false);
 
-  if (!isSelected && !latestLensProps.current) {
+  if (
+    (!isSelected && !isInitialized.current) ||
+    !currentCustomizationService ||
+    !currentStateContainer ||
+    !currentDataView ||
+    !currentTabRuntimeState
+  ) {
     return null;
   }
 
-  if (isSelected) {
-    latestLensProps.current = lensProps as LensProps;
+  isInitialized.current = true;
+
+  return (
+    <CurrentTabProvider currentTabId={tabId}>
+      <DiscoverCustomizationProvider value={currentCustomizationService}>
+        <DiscoverMainProvider value={currentStateContainer}>
+          <RuntimeStateProvider currentDataView={currentDataView} adHocDataViews={adHocDataViews}>
+            <UnifiedHistogramChart
+              stateContainer={currentStateContainer}
+              panelsToggle={panelsToggle}
+            />
+          </RuntimeStateProvider>
+        </DiscoverMainProvider>
+      </DiscoverCustomizationProvider>
+    </CurrentTabProvider>
+  );
+};
+
+type UnifiedHistogramChartProps = Pick<UnifiedHistogramWrapperProps, 'panelsToggle'> & {
+  stateContainer: DiscoverStateContainer;
+};
+
+const UnifiedHistogramChart = ({ stateContainer, panelsToggle }: UnifiedHistogramChartProps) => {
+  const isEsqlMode = useIsEsqlMode();
+  const unifiedHistogramProps = useDiscoverHistogram2(stateContainer);
+  const renderCustomChartToggleActions = useCallback(
+    () =>
+      React.isValidElement(panelsToggle)
+        ? React.cloneElement(panelsToggle, { renderedFor: 'histogram' })
+        : panelsToggle,
+    [panelsToggle]
+  );
+
+  // Initialized when the first search has been requested or
+  // when in ES|QL mode since search sessions are not supported
+  if (!unifiedHistogramProps.searchSessionId && !isEsqlMode) {
+    return null;
   }
 
-  return <lens.EmbeddableComponent {...latestLensProps.current!} />;
+  return (
+    <UnifiedHistogramContainer2
+      {...unifiedHistogramProps}
+      renderCustomChartToggleActions={renderCustomChartToggleActions}
+    />
+  );
 };

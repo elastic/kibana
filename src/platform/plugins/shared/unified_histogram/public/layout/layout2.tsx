@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useEuiTheme, useIsWithinBreakpoints } from '@elastic/eui';
+import { euiFullHeight, useEuiTheme, useIsWithinBreakpoints } from '@elastic/eui';
 import React, { PropsWithChildren, ReactNode, useState } from 'react';
 import { createHtmlPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
 import {
@@ -15,12 +15,9 @@ import {
   ResizableLayoutDirection,
   ResizableLayoutMode,
 } from '@kbn/resizable-layout';
+import { css } from '@emotion/react';
 
 export type UnifiedHistogramLayoutProps = PropsWithChildren<{
-  /**
-   * Optional class name to add to the layout container
-   */
-  className?: string;
   /**
    * The parent container element, used to calculate the layout size
    */
@@ -37,16 +34,12 @@ export type UnifiedHistogramLayoutProps = PropsWithChildren<{
 }>;
 
 export const UnifiedHistogramLayout2 = ({
-  className,
   container,
   chart,
   topPanelHeight,
   onTopPanelHeightChange,
   children,
 }: UnifiedHistogramLayoutProps) => {
-  const [topPanelNode] = useState(() =>
-    createHtmlPortalNode({ attributes: { class: 'eui-fullHeight' } })
-  );
   const [mainPanelNode] = useState(() =>
     createHtmlPortalNode({ attributes: { class: 'eui-fullHeight' } })
   );
@@ -58,6 +51,19 @@ export const UnifiedHistogramLayout2 = ({
   const defaultTopPanelHeight = euiTheme.base * 12;
   const minMainPanelHeight = euiTheme.base * 10;
 
+  const chartCss =
+    isMobile && showChart
+      ? css`
+          .unifiedHistogram__chart {
+            height: ${defaultTopPanelHeight}px;
+          }
+        `
+      : css`
+          .unifiedHistogram__chart {
+            ${euiFullHeight()}
+          }
+        `;
+
   const panelsMode = showChart
     ? showFixedPanels
       ? ResizableLayoutMode.Static
@@ -68,22 +74,21 @@ export const UnifiedHistogramLayout2 = ({
 
   return (
     <>
-      <InPortal node={topPanelNode}>{chart}</InPortal>
       <InPortal node={mainPanelNode}>
         {/* @ts-expect-error upgrade typescript v4.9.5 */}
         {showChart ? React.cloneElement(children, { isChartAvailable: true }) : children}
       </InPortal>
       <ResizableLayout
-        className={className}
         mode={panelsMode}
         direction={ResizableLayoutDirection.Vertical}
         container={container}
         fixedPanelSize={currentTopPanelHeight}
         minFixedPanelSize={defaultTopPanelHeight}
         minFlexPanelSize={minMainPanelHeight}
-        fixedPanel={<OutPortal node={topPanelNode} />}
+        fixedPanel={chart}
         flexPanel={<OutPortal node={mainPanelNode} />}
         data-test-subj="unifiedHistogram"
+        css={chartCss}
         onFixedPanelSizeChange={onTopPanelHeightChange}
       />
     </>

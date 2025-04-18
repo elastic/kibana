@@ -9,9 +9,6 @@
 
 import { useQuerySubscriber } from '@kbn/unified-field-list/src/hooks/use_query_subscriber';
 import type {
-  UnifiedHistogramApi,
-  UnifiedHistogramContainerProps,
-  UnifiedHistogramCreationOptions,
   UnifiedHistogramState,
   UnifiedHistogramVisContext,
 } from '@kbn/unified-histogram-plugin/public';
@@ -40,10 +37,13 @@ import type { SavedSearch } from '@kbn/saved-search-plugin/common';
 import type { Filter } from '@kbn/es-query';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { ESQL_TABLE_TYPE } from '@kbn/data-plugin/common';
+import type {
+  UnifiedHistogramApi2,
+  UnifiedHistogramContainerProps2,
+} from '@kbn/unified-histogram-plugin/public/container/container2';
 import { useDiscoverCustomization } from '../../../../customizations';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { FetchStatus } from '../../../types';
-import type { InspectorAdapters } from '../../hooks/use_inspector';
 import { checkHitCount, sendErrorTo } from '../../hooks/use_saved_search_messages';
 import type { DiscoverStateContainer } from '../../state_management/discover_state';
 import { addLog } from '../../../../utils/add_log';
@@ -65,23 +65,17 @@ import {
 const EMPTY_ESQL_COLUMNS: DatatableColumn[] = [];
 const EMPTY_FILTERS: Filter[] = [];
 
-export interface UseDiscoverHistogramProps {
-  stateContainer: DiscoverStateContainer;
-  inspectorAdapters: InspectorAdapters;
-}
-
-export const useDiscoverHistogram2 = ({
-  stateContainer,
-  inspectorAdapters,
-}: UseDiscoverHistogramProps): Omit<
-  UnifiedHistogramContainerProps,
-  'container' | 'getCreationOptions'
-> & {
-  ref: (api: UnifiedHistogramApi | null) => void;
-  getCreationOptions: () => UnifiedHistogramCreationOptions;
+export const useDiscoverHistogram2 = (
+  stateContainer: DiscoverStateContainer
+): UnifiedHistogramContainerProps2 & {
+  ref: (api: UnifiedHistogramApi2 | null) => void;
 } => {
   const services = useDiscoverServices();
-  const { main$, documents$, totalHits$ } = stateContainer.dataState.data$;
+  const {
+    data$: { main$, documents$, totalHits$ },
+    inspectorAdapters,
+    getAbortController,
+  } = stateContainer.dataState;
   const savedSearchState = useSavedSearch();
   const isEsqlMode = useIsEsqlMode();
 
@@ -89,23 +83,8 @@ export const useDiscoverHistogram2 = ({
    * API initialization
    */
 
-  const [unifiedHistogram, ref] = useState<UnifiedHistogramApi | null>();
+  const [unifiedHistogram, ref] = useState<UnifiedHistogramApi2 | null>();
   const [isSuggestionLoading, setIsSuggestionLoading] = useState(false);
-
-  const getCreationOptions = useCallback(() => {
-    const { hideChart: chartHidden, interval: timeInterval } = stateContainer.appState.getState();
-
-    return {
-      localStorageKeyPrefix: 'discover',
-      disableAutoFetching: true,
-      initialState: {
-        chartHidden,
-        timeInterval,
-        totalHitsStatus: UnifiedHistogramFetchStatus.loading,
-        totalHitsResult: undefined,
-      },
-    };
-  }, [stateContainer.appState]);
 
   /**
    * Sync Unified Histogram state with Discover state
@@ -378,10 +357,12 @@ export const useDiscoverHistogram2 = ({
     [dispatch, setOverriddenVisContextAfterInvalidation, stateContainer.savedSearchState]
   );
 
+  const chartHidden = useAppStateSelector((state) => state.hideChart);
+  const timeInterval = useAppStateSelector((state) => state.interval);
   const breakdownField = useAppStateSelector((state) => state.breakdownField);
 
   const onBreakdownFieldChange = useCallback<
-    NonNullable<UnifiedHistogramContainerProps['onBreakdownFieldChange']>
+    NonNullable<UnifiedHistogramContainerProps2['onBreakdownFieldChange']>
   >(
     (nextBreakdownField) => {
       if (nextBreakdownField !== breakdownField) {
@@ -393,8 +374,16 @@ export const useDiscoverHistogram2 = ({
 
   return {
     ref,
-    getCreationOptions,
     services,
+    localStorageKeyPrefix: 'discover',
+    requestAdapter: inspectorAdapters.requests,
+    abortController: getAbortController(),
+    initialState: {
+      chartHidden,
+      timeInterval,
+      totalHitsStatus: UnifiedHistogramFetchStatus.loading,
+      totalHitsResult: undefined,
+    },
     dataView: isEsqlMode ? esqlDataView : dataView,
     query: isEsqlMode ? esqlQuery : query,
     filters: filtersMemoized,

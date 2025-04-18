@@ -323,7 +323,7 @@ export const UnifiedHistogramLayout = ({
       <InPortal node={topPanelNode}>
         <ChartMemoized
           isChartAvailable={isChartAvailable}
-          className={chartClassName}
+          // className={chartClassName}
           services={services}
           dataView={dataView}
           requestParams={requestParams}

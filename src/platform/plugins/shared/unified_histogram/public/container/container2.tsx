@@ -60,7 +60,7 @@ import { Chart, checkChartAvailability } from '../chart';
 /**
  * The props exposed by the container
  */
-export type UnifiedHistogramContainerProps = Omit<UnifiedHistogramStateOptions, 'services'> & {
+export type UnifiedHistogramContainerProps2 = Omit<UnifiedHistogramStateOptions, 'services'> & {
   searchSessionId?: UnifiedHistogramRequestContext['searchSessionId'];
   requestAdapter?: UnifiedHistogramRequestContext['adapter'];
   isChartLoading?: boolean;
@@ -141,10 +141,6 @@ export type UnifiedHistogramContainerProps = Omit<UnifiedHistogramStateOptions, 
    */
   input$?: UnifiedHistogramInput$;
   /**
-   * The Lens suggestions API
-   */
-  lensSuggestionsApi: LensSuggestionsApi;
-  /**
    * Callback to hide or show the chart -- should set {@link UnifiedHistogramChartContext.hidden} to chartHidden
    */
   onChartHiddenChange?: (chartHidden: boolean) => void;
@@ -152,12 +148,6 @@ export type UnifiedHistogramContainerProps = Omit<UnifiedHistogramStateOptions, 
    * Callback to update the time interval -- should set {@link UnifiedHistogramChartContext.timeInterval} to timeInterval
    */
   onTimeIntervalChange?: (timeInterval: string) => void;
-  /**
-   * Callback to update the suggested chart
-   */
-  onSuggestionContextChange: (
-    suggestionContext: UnifiedHistogramSuggestionContext | undefined
-  ) => void;
   /**
    * Callback to update the total hits -- should set {@link UnifiedHistogramHitsContext.status} to status
    * and {@link UnifiedHistogramHitsContext.total} to result
@@ -187,7 +177,7 @@ export type UnifiedHistogramContainerProps = Omit<UnifiedHistogramStateOptions, 
 /**
  * The API exposed by the container
  */
-export type UnifiedHistogramApi = {
+export type UnifiedHistogramApi2 = {
   /**
    * Trigger a fetch of the data
    */
@@ -198,8 +188,8 @@ export type UnifiedHistogramApi = {
 >;
 
 export const UnifiedHistogramContainer2 = forwardRef<
-  UnifiedHistogramApi,
-  UnifiedHistogramContainerProps
+  UnifiedHistogramApi2,
+  UnifiedHistogramContainerProps2
 >(({ onBreakdownFieldChange, onVisContextChanged, ...containerProps }, ref) => {
   const [stateService] = useState(() => {
     const { services, initialState, localStorageKeyPrefix } = containerProps;
@@ -207,7 +197,7 @@ export const UnifiedHistogramContainer2 = forwardRef<
   });
   const [lensSuggestionsApi, setLensSuggestionsApi] = useState<LensSuggestionsApi>();
   const [input$] = useState(() => new Subject<UnifiedHistogramInputMessage>());
-  const [api, setApi] = useState<UnifiedHistogramApi>();
+  const [api, setApi] = useState<UnifiedHistogramApi2>();
 
   // Expose the API to the parent component
   useImperativeHandle(ref, () => api!, [api]);
@@ -295,15 +285,25 @@ export const UnifiedHistogramContainer2 = forwardRef<
 const ChartMemoized = React.memo(Chart);
 
 const ChartWrapper = (
-  props: Omit<UnifiedHistogramContainerProps, 'onBreakdownFieldChange'> & {
+  props: Omit<UnifiedHistogramContainerProps2, 'onBreakdownFieldChange'> & {
     /**
      * Flag indicating that the chart is currently loading
      */
     isChartLoading: boolean;
     /**
+     * The Lens suggestions API
+     */
+    lensSuggestionsApi: LensSuggestionsApi;
+    /**
      * Callback to update the breakdown field -- should set {@link UnifiedHistogramBreakdownContext.field} to breakdownField
      */
     onBreakdownFieldChange?: (breakdownField: DataViewField | undefined) => void;
+    /**
+     * Callback to update the suggested chart
+     */
+    onSuggestionContextChange: (
+      suggestionContext: UnifiedHistogramSuggestionContext | undefined
+    ) => void;
     /**
      * Callback to notify about the change in Lens attributes
      */

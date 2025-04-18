@@ -49,7 +49,6 @@ import type { SidebarToggleState } from '../../../types';
 import { FetchStatus } from '../../../types';
 import { useDataState } from '../../hooks/use_data_state';
 import { SavedSearchURLConflictCallout } from '../../../../components/saved_search_url_conflict_callout/saved_search_url_conflict_callout';
-import { DiscoverHistogramLayout } from './discover_histogram_layout';
 import { ErrorCallout } from '../../../../components/common/error_callout';
 import { addLog } from '../../../../utils/add_log';
 import { DiscoverResizableLayout } from './discover_resizable_layout';
@@ -59,6 +58,7 @@ import { sendErrorMsg } from '../../hooks/use_saved_search_messages';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
 import { useCurrentDataView, useCurrentTabSelector } from '../../state_management/redux';
 import { TABS_ENABLED } from '../../../../constants';
+import { DiscoverHistogramLayout2 } from './discover_histogram_layout2';
 
 const SidebarMemoized = React.memo(DiscoverSidebarResponsive);
 const TopNavMemoized = React.memo(DiscoverTopNav);
@@ -321,7 +321,7 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
 
     return (
       <>
-        <DiscoverHistogramLayout
+        <DiscoverHistogramLayout2
           dataView={dataView}
           stateContainer={stateContainer}
           columns={currentColumns}

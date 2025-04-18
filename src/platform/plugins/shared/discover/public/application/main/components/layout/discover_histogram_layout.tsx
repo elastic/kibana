@@ -13,7 +13,6 @@ import { css } from '@emotion/react';
 import { useDiscoverHistogram } from './use_discover_histogram';
 import { type DiscoverMainContentProps, DiscoverMainContent } from './discover_main_content';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
-import { useCurrentTabLensEmbeddableOverride } from '../../state_management/redux';
 
 export interface DiscoverHistogramLayoutProps extends DiscoverMainContentProps {
   container: HTMLElement | null;
@@ -32,7 +31,6 @@ export const DiscoverHistogramLayout = ({
 }: DiscoverHistogramLayoutProps) => {
   const { dataState } = stateContainer;
   const isEsqlMode = useIsEsqlMode();
-  const LensEmbeddableOverride = useCurrentTabLensEmbeddableOverride();
   const unifiedHistogramProps = useDiscoverHistogram({
     stateContainer,
     inspectorAdapters: dataState.inspectorAdapters,
@@ -60,7 +58,6 @@ export const DiscoverHistogramLayout = ({
       css={histogramLayoutCss}
       renderCustomChartToggleActions={renderCustomChartToggleActions}
       abortController={stateContainer.dataState.getAbortController()}
-      LensEmbeddableOverride={LensEmbeddableOverride}
     >
       <DiscoverMainContent
         {...mainContentProps}

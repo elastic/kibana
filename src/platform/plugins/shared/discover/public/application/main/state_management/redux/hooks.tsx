@@ -15,9 +15,9 @@ import {
   createDispatchHook,
   createSelectorHook,
 } from 'react-redux';
-import React, { type PropsWithChildren, useMemo, createContext } from 'react';
-import { type HtmlPortalNode, OutPortal } from 'react-reverse-portal';
-import type { LensPublicStart } from '@kbn/lens-plugin/public';
+import type { PropsWithChildren } from 'react';
+import React, { useMemo, createContext } from 'react';
+import { type HtmlPortalNode } from 'react-reverse-portal';
 import { useAdHocDataViews } from './runtime_state';
 import type { DiscoverInternalState, TabState } from './types';
 import {
@@ -51,7 +51,7 @@ export const useInternalStateSelector: TypedUseSelectorHook<DiscoverInternalStat
 
 interface CurrentTabContextValue {
   currentTabId: string;
-  LensEmbeddableOverride: LensPublicStart['EmbeddableComponent'];
+  chartPortalNode?: HtmlPortalNode;
   injectCurrentTab: TabActionInjector;
 }
 
@@ -65,9 +65,7 @@ export const CurrentTabProvider = ({
   const contextValue = useMemo<CurrentTabContextValue>(
     () => ({
       currentTabId,
-      LensEmbeddableOverride: chartPortalNode
-        ? (props) => <OutPortal node={chartPortalNode} isSelected={true} {...props} />
-        : () => <></>,
+      chartPortalNode,
       injectCurrentTab: createTabActionInjector(currentTabId),
     }),
     [chartPortalNode, currentTabId]
@@ -98,10 +96,7 @@ export const useCurrentTabAction = <TPayload extends TabActionPayload, TReturn>(
   return useMemo(() => injectCurrentTab(actionCreator), [actionCreator, injectCurrentTab]);
 };
 
-export const useCurrentTabLensEmbeddableOverride = () => {
-  const { LensEmbeddableOverride } = useCurrentTabContext();
-  return LensEmbeddableOverride;
-};
+export const useCurrentTabChartPortalNode = () => useCurrentTabContext().chartPortalNode;
 
 export const useDataViewsForPicker = () => {
   const originalAdHocDataViews = useAdHocDataViews();

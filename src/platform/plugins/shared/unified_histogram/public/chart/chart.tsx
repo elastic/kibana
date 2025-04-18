@@ -64,7 +64,6 @@ export interface ChartProps {
   abortController?: AbortController;
   isChartAvailable: boolean;
   hiddenPanel?: boolean;
-  className?: string;
   services: UnifiedHistogramServices;
   dataView: DataView;
   requestParams: UseRequestParamsResult;
@@ -98,7 +97,6 @@ const HistogramMemoized = memo(Histogram);
 
 export function Chart({
   isChartAvailable,
-  className,
   services,
   dataView,
   requestParams,
@@ -310,7 +308,7 @@ export function Chart({
   return (
     <EuiFlexGroup
       {...a11yCommonProps}
-      className={className}
+      className="unifiedHistogram__chart"
       direction="column"
       alignItems="stretch"
       gutterSize="none"
