@@ -63,14 +63,18 @@ export const deleteTinyElser = async (ml: ReturnType<typeof MachineLearningProvi
 export const setupKnowledgeBase = async (
   supertest: SuperTest.Agent,
   log: ToolingLog,
+  modelId: string = 'pt_tiny_elser',
   resource?: string,
   namespace?: string
 ): Promise<CreateKnowledgeBaseResponse> => {
   const path = ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_URL.replace('{resource?}', resource || '');
-  const route = routeWithNamespace(
-    `${path}?modelId=pt_tiny_elser&ignoreSecurityLabs=true`,
-    namespace
-  );
+  let queryString = 'ignoreSecurityLabs=true';
+
+  if (modelId !== '.elser_model_2') {
+    queryString += `&modelId=${modelId}`;
+  }
+
+  const route = routeWithNamespace(`${path}?${queryString}`, namespace);
   const response = await supertest
     .post(route)
     .set('kbn-xsrf', 'true')

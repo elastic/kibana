@@ -475,7 +475,9 @@ const getPipeline = (filename: string, removeSteps = true) => {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/scout_tests.yml'));
     }
 
-    pipeline.push(getPipeline('.buildkite/pipelines/pull_request/post_build.yml'));
+    if (GITHUB_PR_LABELS.includes('ci:security-genai-run-evals')) {
+      pipeline.push(getPipeline('.buildkite/pipelines/security_solution/gen_ai_evals.yml'));
+    }
 
     emitPipeline(pipeline);
   } catch (ex) {

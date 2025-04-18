@@ -16,15 +16,7 @@ import {
   loadLangSmithKeyFromEnvVar,
 } from '../../../../scripts/genai/vault/manage_secrets';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
-
-import {
-  clearKnowledgeBase,
-  deleteTinyElser,
-  installTinyElser,
-  setupKnowledgeBase,
-} from '../../knowledge_base/entries/utils/helpers';
-
-import { MachineLearningProvider } from '../../../../../functional/services/ml';
+import { clearKnowledgeBase, setupKnowledgeBase } from '../../knowledge_base/entries/utils/helpers';
 import { routeWithNamespace } from '../../../../../common/utils/security_solution';
 import { loadEvalKnowledgeBaseEntries } from '../data/kb_entries';
 
@@ -32,7 +24,6 @@ export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const log = getService('log');
   const es = getService('es');
-  const ml = getService('ml') as ReturnType<typeof MachineLearningProvider>;
   const esArchiver = getService('esArchiver');
 
   /**
@@ -45,15 +36,13 @@ export default ({ getService }: FtrProviderContext) => {
    */
   describe('@ess Basic Security AI Assistant Evaluations', () => {
     before(async () => {
-      await installTinyElser(ml);
-      await setupKnowledgeBase(supertest, log);
+      await setupKnowledgeBase(supertest, log, '.elser_model_2');
       await esArchiver.load(
         'x-pack/test/functional/es_archives/security_solution/attack_discovery_alerts'
       );
     });
 
     after(async () => {
-      await deleteTinyElser(ml);
       await esArchiver.unload(
         'x-pack/test/functional/es_archives/security_solution/attack_discovery_alerts'
       );
@@ -93,6 +82,7 @@ export default ({ getService }: FtrProviderContext) => {
             .set('kbn-xsrf', 'true')
             .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSIONS.internal.v1)
             .send(evalPayload)
+            .timeout(600000)
             .expect(200);
         });
 
