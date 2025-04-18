@@ -5466,10 +5466,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/expression-error-plugin@link:src/platform/plugins/shared/expression_error":
-  version "0.0.0"
-  uid ""
-
 "@kbn/expression-gauge-plugin@link:src/platform/plugins/shared/chart_expressions/expression_gauge":
   version "0.0.0"
   uid ""
@@ -5478,15 +5474,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/expression-image-plugin@link:src/platform/plugins/shared/expression_image":
-  version "0.0.0"
-  uid ""
-
 "@kbn/expression-legacy-metric-vis-plugin@link:src/platform/plugins/shared/chart_expressions/expression_legacy_metric":
-  version "0.0.0"
-  uid ""
-
-"@kbn/expression-metric-plugin@link:src/platform/plugins/shared/expression_metric":
   version "0.0.0"
   uid ""
 
@@ -5498,23 +5486,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/expression-repeat-image-plugin@link:src/platform/plugins/shared/expression_repeat_image":
-  version "0.0.0"
-  uid ""
-
-"@kbn/expression-reveal-image-plugin@link:src/platform/plugins/shared/expression_reveal_image":
-  version "0.0.0"
-  uid ""
-
-"@kbn/expression-shape-plugin@link:src/platform/plugins/shared/expression_shape":
-  version "0.0.0"
-  uid ""
-
 "@kbn/expression-tagcloud-plugin@link:src/platform/plugins/shared/chart_expressions/expression_tagcloud":
-  version "0.0.0"
-  uid ""
-
-"@kbn/expression-utils@link:src/platform/packages/private/kbn-expression-utils":
   version "0.0.0"
   uid ""
 
@@ -9011,6 +8983,13 @@
   integrity sha512-QjDv5qVaUXd5WZzE2ktKvqtGA17v4HFtj6MROCGkK57AZr9n0ZKgcx7dEFho+5EHZ6V6h1upW2eqheo8C4Y4dA==
   dependencies:
     third-party-web latest
+
+"@peggyjs/from-mem@1.3.5":
+  version "1.3.5"
+  resolved "https://registry.yarnpkg.com/@peggyjs/from-mem/-/from-mem-1.3.5.tgz#d6294c588517728f73cc6c091706e147f8824be0"
+  integrity sha512-oRyzXE7nirAn+5yYjCdWQHg3EG2XXcYRoYNOK8Quqnmm+9FyK/2YWVunwudlYl++M3xY+gIAdf0vAYS+p0nKfQ==
+  dependencies:
+    semver "7.6.3"
 
 "@pkgjs/parseargs@^0.11.0":
   version "0.11.0"
@@ -24943,10 +24922,14 @@ pdfmake@^0.2.15:
     iconv-lite "^0.6.3"
     xmldoc "^1.3.0"
 
-peggy@^1.2.0:
-  version "1.2.0"
-  resolved "https://registry.yarnpkg.com/peggy/-/peggy-1.2.0.tgz#657ba45900cbef1dc9f52356704bdbb193c2021c"
-  integrity sha512-PQ+NKpAobImfMprYQtc4Egmyi29bidRGEX0kKjCU5uuW09s0Cthwqhfy7mLkwcB4VcgacE5L/ZjruD/kOPCUUw==
+peggy@^4.2.0:
+  version "4.2.0"
+  resolved "https://registry.yarnpkg.com/peggy/-/peggy-4.2.0.tgz#9ce13fef2710357e881b57c41d426dbe90e9a001"
+  integrity sha512-ZjzyJYY8NqW8JOZr2PbS/J0UH/hnfGALxSDsBUVQg5Y/I+ZaPuGeBJ7EclUX2RvWjhlsi4pnuL1C/K/3u+cDeg==
+  dependencies:
+    "@peggyjs/from-mem" "1.3.5"
+    commander "^12.1.0"
+    source-map-generator "0.8.0"
 
 pend@~1.2.0:
   version "1.2.0"
@@ -26305,10 +26288,10 @@ react-remove-scroll@^2.5.6:
     use-callback-ref "^1.3.0"
     use-sidecar "^1.1.2"
 
-react-reverse-portal@^2.2.0:
-  version "2.2.0"
-  resolved "https://registry.yarnpkg.com/react-reverse-portal/-/react-reverse-portal-2.2.0.tgz#0a119f8ab00885fa8aebc03a9fd2111d0e76303c"
-  integrity sha512-y4odW09uzTtyJWs9E9YbY50FypJeRzEMhEjQUpzLOXZeTHCFE88WfklvRUddTJsizFWTzMOLTE4wNgYdzeQ7uw==
+react-reverse-portal@^2.3.0:
+  version "2.3.0"
+  resolved "https://registry.yarnpkg.com/react-reverse-portal/-/react-reverse-portal-2.3.0.tgz#ab926f551082a1ca3a0e0d7e2ed53cae1b43f23b"
+  integrity sha512-kvbPfLPKg6Y3S6tVq83us2RghvDpOS4GcJxbI7cZ0V0tuzUaSzblRIhVnKLOucfqF4lN/i9oWvEmpEi6bAOYlQ==
 
 react-router-config@^5.1.1:
   version "5.1.1"
@@ -27711,6 +27694,11 @@ semver@7.5.4:
   dependencies:
     lru-cache "^6.0.0"
 
+semver@7.6.3:
+  version "7.6.3"
+  resolved "https://registry.yarnpkg.com/semver/-/semver-7.6.3.tgz#980f7b5550bc175fb4dc09403085627f9eb33143"
+  integrity sha512-oVekP1cKtI+CTDvHWYFUcMtsK/00wmAEfyqKfNdARm8u1wNVhSgaX7A8d4UuIlUI5e84iEwOhs7ZPYRmzU9U6A==
+
 semver@^6.0.0, semver@^6.1.0, semver@^6.3.0, semver@^6.3.1:
   version "6.3.1"
   resolved "https://registry.yarnpkg.com/semver/-/semver-6.3.1.tgz#556d2ef8689146e46dcea4bfdd095f3434dffcb4"
@@ -28244,6 +28232,11 @@ sort-package-json@^1.53.1:
     globby "10.0.0"
     is-plain-obj "2.1.0"
     sort-object-keys "^1.1.3"
+
+source-map-generator@0.8.0:
+  version "0.8.0"
+  resolved "https://registry.yarnpkg.com/source-map-generator/-/source-map-generator-0.8.0.tgz#10d5ca0651e2c9302ea338739cbd4408849c5d00"
+  integrity sha512-psgxdGMwl5MZM9S3FWee4EgsEaIjahYV5AzGnwUvPhWeITz/j6rKpysQHlQ4USdxvINlb8lKfWGIXwfkrgtqkA==
 
 source-map-js@^1.0.2, source-map-js@^1.2.1:
   version "1.2.1"

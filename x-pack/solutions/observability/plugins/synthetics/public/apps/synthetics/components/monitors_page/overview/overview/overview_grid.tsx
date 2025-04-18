@@ -21,7 +21,6 @@ import {
 import { MetricItem } from './metric_item/metric_item';
 import { ShowAllSpaces } from '../../common/show_all_spaces';
 import { OverviewStatusMetaData } from '../../../../../../../common/runtime_types';
-import { quietFetchOverviewStatusAction } from '../../../../state/overview_status';
 import type { TrendRequest } from '../../../../../../../common/types';
 import { SYNTHETICS_MONITORS_EMBEDDABLE } from '../../../../../embeddables/constants';
 import { AddToDashboard } from '../../../common/components/add_to_dashboard';
@@ -39,9 +38,9 @@ import { OverviewLoader } from './overview_loader';
 import { OverviewPaginationInfo } from './overview_pagination_info';
 import { SortFields } from './sort_fields';
 import { NoMonitorsFound } from '../../common/no_monitors_found';
-import { MonitorDetailFlyout } from './monitor_detail_flyout';
 import { useSyntheticsRefreshContext } from '../../../../contexts';
 import { FlyoutParamProps } from './types';
+import { MaybeMonitorDetailsFlyout } from './monitor_detail_flyout';
 
 const ITEM_HEIGHT = 172;
 const ROW_COUNT = 4;
@@ -61,7 +60,6 @@ export const OverviewGrid = memo(() => {
   const monitorsSortedByStatus: OverviewStatusMetaData[] = useMonitorsSortedByStatus();
 
   const {
-    flyoutConfig,
     pageState,
     groupBy: { field: groupField },
   } = useSelector(selectOverviewState);
@@ -77,12 +75,7 @@ export const OverviewGrid = memo(() => {
     (params: FlyoutParamProps) => dispatch(setFlyoutConfig(params)),
     [dispatch]
   );
-  const hideFlyout = useCallback(() => dispatch(setFlyoutConfig(null)), [dispatch]);
   const { lastRefresh } = useSyntheticsRefreshContext();
-  const forceRefreshCallback = useCallback(
-    () => dispatch(quietFetchOverviewStatusAction.get({ pageState })),
-    [dispatch, pageState]
-  );
 
   useEffect(() => {
     if (monitorsSortedByStatus.length) {
@@ -252,18 +245,7 @@ export const OverviewGrid = memo(() => {
             </EuiFlexGroup>
           </>
         )}
-      {flyoutConfig?.configId && flyoutConfig?.location && (
-        <MonitorDetailFlyout
-          configId={flyoutConfig.configId}
-          id={flyoutConfig.id}
-          location={flyoutConfig.location}
-          locationId={flyoutConfig.locationId}
-          spaceId={flyoutConfig.spaceId}
-          onClose={hideFlyout}
-          onEnabledChange={forceRefreshCallback}
-          onLocationChange={setFlyoutConfigCallback}
-        />
-      )}
+      <MaybeMonitorDetailsFlyout setFlyoutConfigCallback={setFlyoutConfigCallback} />
     </>
   );
 });

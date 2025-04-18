@@ -105,6 +105,7 @@ export {
   START_LOCAL_STORAGE_KEY,
 } from './impl/assistant_context/constants';
 
+export type { AIConnector } from './impl/connectorland/connector_selector';
 export { useLoadConnectors } from './impl/connectorland/use_load_connectors';
 
 export type {
