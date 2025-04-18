@@ -7,56 +7,66 @@
 
 import React from 'react';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
-import type { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import {
-  initializeTimeRange,
+  initializeTimeRangeManager,
   initializeTitleManager,
+  timeRangeComparators,
+  titleComparators,
   useFetchContext,
 } from '@kbn/presentation-publishing';
+import { initializeUnsavedChanges } from '@kbn/presentation-containers';
 import { AlertsTable } from '@kbn/response-ops-alerts-table';
 import { AlertActionsCell } from '@kbn/response-ops-alerts-table/components/alert_actions_cell';
 import { getTime } from '@kbn/data-plugin/common';
 import { ALERT_TIME_RANGE, TIMESTAMP } from '@kbn/rule-data-utils';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, map, merge } from 'rxjs';
 import type { EmbeddableAlertsTablePublicStartDependencies } from '../types';
 import { EMBEDDABLE_ALERTS_TABLE_ID, LOCAL_STORAGE_KEY_PREFIX } from '../constants';
-import type {
-  EmbeddableAlertsTableApi,
-  EmbeddableAlertsTableRuntimeState,
-  EmbeddableAlertsTableSerializedState,
-} from '../types';
+import type { EmbeddableAlertsTableApi, EmbeddableAlertsTableSerializedState } from '../types';
 
 export const getAlertsTableEmbeddableFactory = (
   core: CoreStart,
   deps: EmbeddableAlertsTablePublicStartDependencies
-): ReactEmbeddableFactory<
-  EmbeddableAlertsTableSerializedState,
-  EmbeddableAlertsTableRuntimeState,
-  EmbeddableAlertsTableApi
-> => ({
+): EmbeddableFactory<EmbeddableAlertsTableSerializedState, EmbeddableAlertsTableApi> => ({
   type: EMBEDDABLE_ALERTS_TABLE_ID,
-  deserializeState: (state) => {
-    return state.rawState;
-  },
-  buildEmbeddable: async (state, buildApi, uuid) => {
-    const timeRange = initializeTimeRange(state);
-    const titleManager = initializeTitleManager(state);
+  buildEmbeddable: async ({ initialState, finalizeApi, parentApi, uuid }) => {
+    const timeRangeManager = initializeTimeRangeManager(initialState?.rawState);
+    const titleManager = initializeTitleManager(initialState?.rawState ?? {});
     const queryLoading$ = new BehaviorSubject<boolean | undefined>(true);
     const { data, fieldFormats, licensing } = deps;
     const { http, application, notifications, settings } = core;
-    const api = buildApi(
-      {
-        ...timeRange.api,
-        ...titleManager.api,
-        dataLoading$: queryLoading$,
-        serializeState: () => {
-          return {
-            rawState: { ...titleManager.serialize(), ...timeRange.serialize() },
-          };
-        },
+
+    function serializeState() {
+      return {
+        rawState: { ...titleManager.getLatestState(), ...timeRangeManager.getLatestState() },
+      };
+    }
+
+    const unsavedChangesApi = initializeUnsavedChanges({
+      uuid,
+      parentApi,
+      anyStateChange$: merge(timeRangeManager.anyStateChange$, titleManager.anyStateChange$).pipe(
+        map(() => undefined)
+      ),
+      serializeState,
+      getComparators: () => ({
+        ...titleComparators,
+        ...timeRangeComparators,
+      }),
+      onReset: (lastSaved) => {
+        titleManager.reinitializeState(lastSaved?.rawState);
+        timeRangeManager.reinitializeState(lastSaved?.rawState);
       },
-      { ...titleManager.comparators, ...timeRange.comparators }
-    );
+    });
+
+    const api = finalizeApi({
+      ...timeRangeManager.api,
+      ...titleManager.api,
+      ...unsavedChangesApi,
+      dataLoading$: queryLoading$,
+      serializeState,
+    });
 
     return {
       api,

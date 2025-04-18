@@ -209,7 +209,7 @@ export function initializePanelsManager(
     layout$.next(await placeNewPanel(uuid, panelPackage, gridData));
 
     if (displaySuccessMessage) {
-      const title = (serializedState?.rawState as SerializedTitles).title;
+      const title = (serializedState?.rawState as SerializedTitles)?.title;
       coreServices.notifications.toasts.addSuccess({
         title: getPanelAddedSuccessString(title),
         'data-test-subj': 'addEmbeddableToDashboardSuccess',
