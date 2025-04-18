@@ -252,5 +252,7 @@
     "@kbn/scout-security",
     "@kbn/inference-endpoint-ui-common",
     "@kbn/security-plugin-types-common",
+    "@kbn/actions-types",
+    "@kbn/triggers-actions-ui-types",
   ]
 }
