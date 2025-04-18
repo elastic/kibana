@@ -150,7 +150,7 @@ export async function installAssetsForInputPackagePolicy(opts: {
   }
 }
 
-// Remove the assets installed for inputs type packages
+// Remove the assets installed for input-type packages
 export async function removeAssetsForInputPackagePolicy(opts: {
   packageInfo: PackageInfo;
   logger: Logger;
@@ -158,9 +158,8 @@ export async function removeAssetsForInputPackagePolicy(opts: {
   soClient: SavedObjectsClientContract;
 }) {
   const { logger, packageInfo, esClient, soClient } = opts;
-  if (packageInfo.type !== 'input') return;
 
-  if (packageInfo.status === 'installed') {
+  if (packageInfo.type === 'input' && packageInfo.status === 'installed') {
     logger.info(
       `Removing assets for package '${packageInfo.name}-${packageInfo.version}' - package type: 'inputs'`
     );
@@ -168,7 +167,7 @@ export async function removeAssetsForInputPackagePolicy(opts: {
       await removeInstallation({
         savedObjectsClient: soClient,
         pkgName: packageInfo!.name,
-        pkgVersion: packageInfo!.name,
+        pkgVersion: packageInfo!.version,
         esClient,
       });
     } catch (error) {
