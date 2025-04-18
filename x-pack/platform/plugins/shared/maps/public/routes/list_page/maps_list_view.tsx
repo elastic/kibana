@@ -129,6 +129,7 @@ function MapsListViewComp({ history }: Props) {
       createItem={isReadOnly ? undefined : navigateToNewMap}
       findItems={findMaps}
       deleteItems={isReadOnly ? undefined : deleteMaps}
+      listingLimit={listingLimit}
       initialFilter={''}
       initialPageSize={initialPageSize}
       entityName={i18n.translate('xpack.maps.mapListing.entityName', {
