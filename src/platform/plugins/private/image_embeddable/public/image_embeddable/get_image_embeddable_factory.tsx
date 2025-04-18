@@ -14,7 +14,11 @@ import { EmbeddableEnhancedPluginStart } from '@kbn/embeddable-enhanced-plugin/p
 import { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { PresentationContainer, initializeUnsavedChanges } from '@kbn/presentation-containers';
-import { initializeTitleManager, titleComparators } from '@kbn/presentation-publishing';
+import {
+  initializeStateManager,
+  initializeTitleManager,
+  titleComparators,
+} from '@kbn/presentation-publishing';
 
 import { IMAGE_CLICK_TRIGGER } from '../actions';
 import { openImageEditor } from '../components/image_editor/open_image_editor';
@@ -36,24 +40,32 @@ export const getImageEmbeddableFactory = ({
     type: IMAGE_EMBEDDABLE_TYPE,
     buildEmbeddable: async ({ initialState, parentApi, finalizeApi, uuid }) => {
       const titleManager = initializeTitleManager(initialState.rawState);
-
-      const dynamicActionsApi = embeddableEnhanced?.initializeEmbeddableDynamicActions(
+      const imageConfigManager = initializeStateManager<ImageConfig>(
+        initialState.rawState.imageConfig,
+        {
+          src: { type: 'url', url: '' },
+          altText: undefined,
+          sizing: { objectFit: 'contain' },
+          backgroundColor: undefined,
+        }
+      );
+      const dynamicActionsManager = embeddableEnhanced?.initializeEmbeddableDynamicActions(
         uuid,
         () => titleManager.api.title$.getValue(),
         initialState.rawState
       );
       // if it is provided, start the dynamic actions manager
-      const maybeStopDynamicActions = dynamicActionsApi?.startDynamicActions();
+      const maybeStopDynamicActions = dynamicActionsManager?.startDynamicActions();
       const filesClient = filesService.filesClientFactory.asUnscoped<FileImageMetadata>();
-      const imageConfig$ = new BehaviorSubject<ImageConfig>(initialState.rawState.imageConfig);
+
       const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
 
       const serializeState = () => {
         return {
           rawState: {
             ...titleManager.getLatestState(),
-            ...(dynamicActionsApi?.getLatestState() ?? {}),
-            imageConfig: imageConfig$.getValue(),
+            ...(dynamicActionsManager?.getLatestState() ?? {}),
+            imageConfig: imageConfigManager.getLatestState(),
           },
         };
       };
@@ -62,11 +74,14 @@ export const getImageEmbeddableFactory = ({
         uuid,
         parentApi,
         serializeState,
-        anyStateChange$: merge(titleManager.anyStateChange$, dynamicActionsApi?.anyStateChange$),
+        anyStateChange$: merge(
+          titleManager.anyStateChange$,
+          dynamicActionsManager?.anyStateChange$
+        ),
         getComparators: () => {
           return {
             ...titleComparators,
-            ...dynamicActionsApi?.comparators,
+            ...dynamicActionsManager?.comparators,
             imageConfig: 'deepEquality',
             enhancements: 'skip',
           };
@@ -74,23 +89,23 @@ export const getImageEmbeddableFactory = ({
         onReset: async (lastSaved) => {
           const lastRuntimeState = lastSaved ? await lastSaved.rawState : {};
           titleManager.reinitializeState(lastRuntimeState);
-          dynamicActionsApi?.reinitializeState(lastRuntimeState);
+          dynamicActionsManager?.reinitializeState(lastRuntimeState);
         },
       });
 
       const embeddable = finalizeApi({
         ...unsavedChangesApi,
         ...titleManager.api,
-        ...(dynamicActionsApi?.api ?? {}),
+        ...(dynamicActionsManager?.api ?? {}),
         dataLoading$,
         supportedTriggers: () => [IMAGE_CLICK_TRIGGER],
         onEdit: async () => {
           try {
             const newImageConfig = await openImageEditor({
               parentApi: embeddable.parentApi as PresentationContainer,
-              initialImageConfig: imageConfig$.getValue(),
+              initialImageConfig: imageConfigManager.getLatestState(),
             });
-            imageConfig$.next(newImageConfig);
+            imageConfigManager.reinitializeState(newImageConfig);
           } catch {
             // swallow the rejection, since this just means the user closed without saving
           }
@@ -109,7 +124,8 @@ export const getImageEmbeddableFactory = ({
             /** Memoize the API so that the reference stays consistent and it can be used as a dependency */
             return {
               ...embeddable,
-              imageConfig$,
+              imageConfigManager,
+              dynamicActionsManager,
               setDataLoading: (loading: boolean | undefined) => dataLoading$.next(loading),
             };
           }, []);

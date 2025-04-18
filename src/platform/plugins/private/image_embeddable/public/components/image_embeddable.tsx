@@ -7,11 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 
-import { PublishingSubject, useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
-
-import { BehaviorSubject } from 'rxjs';
+import { EmbeddableDynamicActionsManager } from '@kbn/embeddable-enhanced-plugin/public/plugin';
+import { StateManager } from '@kbn/presentation-publishing/state_manager/types';
 import { imageClickTrigger } from '../actions';
 import { ImageEmbeddableApi } from '../image_embeddable/types';
 import { FileImageMetadata, FilesClient, imageEmbeddableFileKind } from '../imports';
@@ -24,30 +23,35 @@ import { ImageViewerContext } from './image_viewer/image_viewer_context';
 interface ImageEmbeddableProps {
   api: ImageEmbeddableApi & {
     setDataLoading: (loading: boolean | undefined) => void;
-    imageConfig$: PublishingSubject<ImageConfig>;
+    imageConfigManager: StateManager<ImageConfig>;
+    dynamicActionsManager?: EmbeddableDynamicActionsManager;
   };
   filesClient: FilesClient<FileImageMetadata>;
 }
 
 export const ImageEmbeddable = ({ api, filesClient }: ImageEmbeddableProps) => {
-  const [imageConfig, dynamicActionsState] = useBatchedPublishingSubjects(
-    api.imageConfig$,
-    api.dynamicActionsState$ ?? new BehaviorSubject<undefined>(undefined)
-  );
+  const imageConfig = api.imageConfigManager.getLatestState;
   const [hasTriggerActions, setHasTriggerActions] = useState(false);
 
-  useEffect(() => {
-    /**
-     * set the loading to `true` any time the image changes; the ImageViewer component
-     * is responsible for setting loading to `false` again once the image loads
-     */
+  api.imageConfigManager.anyStateChange$.subscribe(() => {
     api.setDataLoading(true);
-  }, [api, imageConfig]);
 
-  useEffect(() => {
-    // set `hasTriggerActions` depending on whether or not the image has at least one drilldown
-    setHasTriggerActions((dynamicActionsState?.dynamicActions.events ?? []).length > 0);
-  }, [dynamicActionsState]);
+    return api.setDataLoading(false);
+  });
+
+  if (api.dynamicActionsManager) {
+    api.dynamicActionsManager?.anyStateChange$.subscribe(() => {
+      // set `hasTriggerActions` depending on whether or not the image has at least one drilldown
+      setHasTriggerActions(
+        (api.dynamicActionsManager?.getLatestState().enhancements?.dynamicActions.events ?? [])
+          .length > 0
+      );
+
+      return () => {
+        setHasTriggerActions(false);
+      };
+    });
+  }
 
   return (
     <ImageViewerContext.Provider
