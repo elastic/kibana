@@ -143,6 +143,12 @@ const createSecuritySolutionRequestContextMock = (
     getEndpointAuthz: jest.fn(async () =>
       getEndpointAuthzInitialStateMock(overrides.endpointAuthz)
     ),
+    getEndpointService: jest.fn(() => {
+      // FIXME:PT Test is this is true. We do import from here in the endpoint sercie mock module
+      throw new Error(
+        `getEndpointService() not mocked. Needs to be done from withing testing context (due to circular dependencies)`
+      );
+    }),
     getConfig: jest.fn(() => clients.config),
     getFrameworkRequest: jest.fn(() => {
       return {
