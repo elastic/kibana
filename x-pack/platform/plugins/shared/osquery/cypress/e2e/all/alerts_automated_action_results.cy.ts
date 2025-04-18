@@ -98,7 +98,7 @@ describe(
       'can add to timeline from response action results',
       { tags: ['@ess', '@serverless'] },
       () => {
-        const timelineRegex = new RegExp(`Added ${UUID_REGEX} to Timeline`);
+        const timelineRegex = new RegExp(`Added ${UUID_REGEX} to timeline`);
         const filterRegex = new RegExp(`action_id: "${UUID_REGEX}"`);
         cy.getBySel('expand-event').first().click();
         cy.getBySel('securitySolutionFlyoutResponseSectionHeader').click();
