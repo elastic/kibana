@@ -13,8 +13,8 @@ import { PanelPackage } from './presentation_container';
  * This API can add a new panel as a child.
  */
 export interface CanAddNewPanel {
-  addNewPanel: <SerializedStateType extends object, ApiType extends unknown = unknown>(
-    panel: PanelPackage<SerializedStateType>,
+  addNewPanel: <StateType extends object, ApiType extends unknown = unknown>(
+    panel: PanelPackage<StateType>,
     displaySuccessMessage?: boolean
   ) => Promise<ApiType | undefined>;
 }
