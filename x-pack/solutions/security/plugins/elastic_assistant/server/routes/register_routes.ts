@@ -7,6 +7,7 @@
 
 import type { Logger } from '@kbn/core/server';
 
+import { findAlertSummaryRoute } from './alert_summary/find_route';
 import { cancelAttackDiscoveryRoute } from './attack_discovery/post/cancel/cancel_attack_discovery';
 import { getAttackDiscoveryRoute } from './attack_discovery/get/get_attack_discovery';
 import { postAttackDiscoveryRoute } from './attack_discovery/post/post_attack_discovery';
@@ -41,13 +42,7 @@ import {
 import { deleteKnowledgeBaseEntryRoute } from './knowledge_base/entries/delete_route';
 import { updateKnowledgeBaseEntryRoute } from './knowledge_base/entries/update_route';
 import { getKnowledgeBaseEntryRoute } from './knowledge_base/entries/get_route';
-import { createAttackDiscoverySchedulesRoute } from './attack_discovery/schedules/create';
-import { getAttackDiscoverySchedulesRoute } from './attack_discovery/schedules/get';
-import { updateAttackDiscoverySchedulesRoute } from './attack_discovery/schedules/update';
-import { deleteAttackDiscoverySchedulesRoute } from './attack_discovery/schedules/delete';
-import { findAttackDiscoverySchedulesRoute } from './attack_discovery/schedules/find';
-import { disableAttackDiscoverySchedulesRoute } from './attack_discovery/schedules/disable';
-import { enableAttackDiscoverySchedulesRoute } from './attack_discovery/schedules/enable';
+import { bulkAlertSummaryRoute } from './alert_summary/bulk_actions_route';
 
 export const registerRoutes = (
   router: ElasticAssistantPluginRouter,
@@ -108,14 +103,9 @@ export const registerRoutes = (
   postAttackDiscoveryRoute(router);
   cancelAttackDiscoveryRoute(router);
 
-  // Attack Discovery Schedules
-  createAttackDiscoverySchedulesRoute(router);
-  getAttackDiscoverySchedulesRoute(router);
-  findAttackDiscoverySchedulesRoute(router);
-  updateAttackDiscoverySchedulesRoute(router);
-  deleteAttackDiscoverySchedulesRoute(router);
-  disableAttackDiscoverySchedulesRoute(router);
-  enableAttackDiscoverySchedulesRoute(router);
+  // Alert Summary
+  bulkAlertSummaryRoute(router, logger);
+  findAlertSummaryRoute(router, logger);
 
   // Defend insights
   getDefendInsightRoute(router);
