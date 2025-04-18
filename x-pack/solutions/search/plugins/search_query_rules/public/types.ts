@@ -14,7 +14,7 @@ export * from '../common/types';
 export interface AppPluginStartDependencies {
   history: AppMountParameters['history'];
   console?: ConsolePluginStart;
-  share: SharePluginStart;
+  share?: SharePluginStart;
   searchNavigation?: SearchNavigationPluginStart;
 }
 
