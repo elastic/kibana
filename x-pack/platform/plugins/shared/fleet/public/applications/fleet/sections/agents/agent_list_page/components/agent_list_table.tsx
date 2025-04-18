@@ -198,29 +198,8 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
       width: '185px',
       render: (policyId: string, agent: Agent) => {
         const agentPolicy = agentPoliciesIndexedById[policyId];
-        const showWarning = agent.policy_revision && agentPolicy?.revision > agent.policy_revision;
 
-        return (
-          <EuiFlexGroup gutterSize="m" style={{ minWidth: 0 }} alignItems="center">
-            {agentPolicy && (
-              <EuiFlexItem grow={false}>
-                <AgentPolicySummaryLine direction="column" policy={agentPolicy} agent={agent} />
-              </EuiFlexItem>
-            )}
-            {showWarning && (
-              <EuiFlexItem grow={false}>
-                <EuiText color="subdued" size="xs" className="eui-textNoWrap">
-                  <EuiIcon size="m" type="warning" color="warning" />
-                  &nbsp;
-                  <FormattedMessage
-                    id="xpack.fleet.agentList.outOfDateLabel"
-                    defaultMessage="Outdated policy"
-                  />
-                </EuiText>
-              </EuiFlexItem>
-            )}
-          </EuiFlexGroup>
-        );
+        return <AgentPolicySummaryLine direction="column" policy={agentPolicy} agent={agent} />;
       },
     },
 

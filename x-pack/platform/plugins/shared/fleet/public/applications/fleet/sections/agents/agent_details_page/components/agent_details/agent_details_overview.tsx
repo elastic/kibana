@@ -16,7 +16,6 @@ import {
   EuiPanel,
   EuiIcon,
   EuiSkeletonText,
-  EuiText,
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -164,37 +163,7 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
                 defaultMessage: 'Agent policy',
               }),
               description: agentPolicy ? (
-                <EuiFlexGroup gutterSize="m" style={{ minWidth: 0 }} alignItems="center">
-                  <EuiFlexItem grow={false}>
-                    <AgentPolicySummaryLine policy={agentPolicy} agent={agent} />
-                  </EuiFlexItem>
-                  {isOutdated && (
-                    <EuiToolTip
-                      content={
-                        <FormattedMessage
-                          id="xpack.fleet.agentPolicySummaryLine.outdatedPolicyWarning"
-                          defaultMessage="This agent is not synced to the latest revision of the assigned agent policy. Check the connection of the agent to its assigned fleet server."
-                        />
-                      }
-                    >
-                      <EuiFlexItem grow={false}>
-                        <EuiFlexGroup alignItems="flexStart" gutterSize="s">
-                          <EuiFlexItem>
-                            <EuiIcon size="m" type="warning" color="warning" />
-                          </EuiFlexItem>
-                          <EuiFlexItem>
-                            <EuiText color="subdued" size="xs">
-                              <FormattedMessage
-                                id="xpack.fleet.agentPolicySummaryLine.outdatedPolicyWarning"
-                                defaultMessage="Outdated policy"
-                              />
-                            </EuiText>
-                          </EuiFlexItem>
-                        </EuiFlexGroup>
-                      </EuiFlexItem>
-                    </EuiToolTip>
-                  )}
-                </EuiFlexGroup>
+                <AgentPolicySummaryLine policy={agentPolicy} agent={agent} />
               ) : (
                 <EuiSkeletonText lines={1} />
               ),
