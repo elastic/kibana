@@ -49,6 +49,7 @@ export const config: PluginConfigDescriptor = {
       onlyAllowAgentUpgradeToKnownVersions: true,
     },
     integrationsHomeOverride: true,
+    prereleaseEnabledByDefault: true,
   },
   deprecations: ({ renameFromRoot, unused, unusedFromRoot }) => [
     // Unused settings before Fleet server exists
@@ -300,6 +301,7 @@ export const config: PluginConfigDescriptor = {
         })
       ),
       integrationsHomeOverride: schema.maybe(schema.string()),
+      prereleaseEnabledByDefault: schema.boolean({ defaultValue: false }),
     },
     {
       validate: (configToValidate) => {

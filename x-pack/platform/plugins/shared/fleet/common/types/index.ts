@@ -89,6 +89,7 @@ export interface FleetConfigType {
     retryDelays?: string[];
   };
   integrationsHomeOverride?: string;
+  prereleaseEnabledByDefault?: boolean;
 }
 
 // Calling Object.entries(PackagesGroupedByStatus) gave `status: string`
