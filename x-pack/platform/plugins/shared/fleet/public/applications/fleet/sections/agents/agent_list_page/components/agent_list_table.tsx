@@ -18,6 +18,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
+import { css } from '@emotion/css';
 
 import type { Agent, AgentPolicy } from '../../../../types';
 import { isAgentUpgradeable } from '../../../../services';
@@ -273,7 +274,13 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
         defaultMessage: 'Version',
       }),
       render: (version: string, agent: Agent) => (
-        <EuiFlexGroup gutterSize="none" style={{ minWidth: 0 }} direction="column">
+        <EuiFlexGroup
+          gutterSize="none"
+          css={css`
+            min-width: 0;
+          `}
+          direction="column"
+        >
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="s" alignItems="center" wrap>
               <EuiFlexItem grow={false}>

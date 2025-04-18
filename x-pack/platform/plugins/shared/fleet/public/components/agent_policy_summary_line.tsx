@@ -16,14 +16,21 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { CSSProperties } from 'react';
 import React, { memo } from 'react';
+import { css } from '@emotion/css';
 
 import type { AgentPolicy, Agent } from '../../common/types';
 import { useLink } from '../hooks';
-const MIN_WIDTH: CSSProperties = { minWidth: 0 };
-const NO_WRAP_WHITE_SPACE: CSSProperties = { whiteSpace: 'nowrap' };
-const WRAP_WHITE_SPACE: CSSProperties = { whiteSpace: 'normal' };
+
+const MIN_WIDTH = css`
+  min-width: 0;
+`;
+const NO_WRAP_WHITE_SPACE = css`
+  white-space: 'nowrap';
+`;
+const WRAP_WHITE_SPACE = css`
+  white-space: 'normal';
+`;
 
 export const AgentPolicySummaryLine = memo<{
   policy: AgentPolicy;
@@ -38,7 +45,7 @@ export const AgentPolicySummaryLine = memo<{
   const isOutdated = agent?.policy_revision && policy && policy?.revision > agent.policy_revision;
 
   return (
-    <EuiFlexGroup gutterSize="m" style={{ minWidth: 0 }} alignItems="center">
+    <EuiFlexGroup gutterSize="m" css={MIN_WIDTH} alignItems="center">
       <EuiFlexItem grow={false}>
         <EuiFlexGroup direction="column" gutterSize="xs" wrap={true}>
           <EuiFlexItem>
@@ -46,20 +53,20 @@ export const AgentPolicySummaryLine = memo<{
               direction={direction}
               gutterSize={direction === 'column' ? 'none' : 's'}
               alignItems="baseline"
-              style={MIN_WIDTH}
+              css={MIN_WIDTH}
               responsive={false}
               justifyContent={'flexStart'}
             >
               <EuiFlexItem grow={false}>
                 <EuiFlexGroup
-                  style={MIN_WIDTH}
+                  css={MIN_WIDTH}
                   gutterSize="s"
                   alignItems="baseline"
                   responsive={false}
                 >
                   <EuiFlexItem grow={false}>
                     <EuiLink
-                      style={WRAP_WHITE_SPACE}
+                      css={WRAP_WHITE_SPACE}
                       href={getHref('policy_details', { policyId: id })}
                       title={name || id}
                       data-test-subj="agentPolicyNameLink"
@@ -90,7 +97,7 @@ export const AgentPolicySummaryLine = memo<{
 
               {revision && (
                 <EuiFlexItem grow={false}>
-                  <EuiText color="subdued" size="xs" style={NO_WRAP_WHITE_SPACE}>
+                  <EuiText color="subdued" size="xs" css={NO_WRAP_WHITE_SPACE}>
                     <FormattedMessage
                       id="xpack.fleet.agentPolicySummaryLine.revisionNumber"
                       defaultMessage="rev. {revNumber}"
