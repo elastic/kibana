@@ -253,7 +253,9 @@ describe('Custom Query Alerts', () => {
       expect.objectContaining({
         newStatus: RuleExecutionStatusEnum['partial failure'],
         message:
-          "Check privileges failed to execute Error: hastTimestampFields test error, The rule's max alerts per run setting (10000) is greater than the Kibana alerting limit (1000). The rule will only write a maximum of 1000 alerts per rule run.",
+          'Check privileges failed to execute Error: hastTimestampFields test error\n' +
+          '\n' +
+          "The rule's max alerts per run setting (10000) is greater than the Kibana alerting limit (1000). The rule will only write a maximum of 1000 alerts per rule run.",
       })
     );
   });
