@@ -50,8 +50,8 @@ export const getErrorBudgetEmbeddableFactory = ({
       const sloErrorBudgetManager = initializeStateManager<ErrorBudgetCustomInput>(
         initialState.rawState,
         {
-          sloId: '',
-          sloInstanceId: '',
+          sloId: undefined,
+          sloInstanceId: undefined,
         }
       );
       const reload$ = new Subject<boolean>();
