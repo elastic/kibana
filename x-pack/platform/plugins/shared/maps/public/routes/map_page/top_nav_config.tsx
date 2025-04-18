@@ -190,7 +190,7 @@ export function getTopNavConfig({
               return {};
             }
 
-            await savedMap?.save({
+            await savedMap.save({
               ...props,
               tags,
               saveByReference: props.addToLibrary,
@@ -262,7 +262,7 @@ export function getTopNavConfig({
         emphasize: true,
         iconType: 'checkInCircleFilled',
         run: () => {
-          savedMap?.save({
+          savedMap.save({
             newTitle: savedMap.getTitle(),
             newDescription: mapDescription,
             newCopyOnSave: false,
