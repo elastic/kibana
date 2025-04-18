@@ -62,11 +62,10 @@ export async function createEvents(
       generateAndQueueEvents(config, schedule, queue, timestamps);
     } else if (!canPush) {
       // If we the queue is saturated we need to backoff.
-      if (backOff !== INITIAL_BACK_OFF_INTERVAL) {
-        backOff = Math.max(backOff + INITIAL_BACK_OFF_INTERVAL * 0.5, MAX_BACK_OFF_INTERVAL);
-      }
       logger.info(`Queue saturated, backing off for ${backOff}`);
       await wait(backOff);
+      // Back-off longer the next time.
+      backOff = Math.max(backOff + INITIAL_BACK_OFF_INTERVAL * 0.5, MAX_BACK_OFF_INTERVAL);
       continue;
     } else {
       logger.info({ took: 0, latency: 0, indexed: 0 }, 'Indexing 0 documents.');
