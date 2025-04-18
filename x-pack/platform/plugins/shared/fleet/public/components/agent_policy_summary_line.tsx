@@ -123,11 +123,11 @@ export const AgentPolicySummaryLine = memo<{
             content={
               <FormattedMessage
                 id="xpack.fleet.agentPolicySummaryLine.outdatedPolicyWarningExpanded"
-                defaultMessage="This agent is not synced to the latest revision of its policy. Check its connection to the fleet server."
+                defaultMessage="This agent isn't synced to the latest policy revision. Check its connection to the fleet server."
               />
             }
           >
-            <EuiFlexGroup alignItems="flexStart" gutterSize="s">
+            <EuiFlexGroup alignItems="center" gutterSize="xs">
               <EuiFlexItem>
                 <EuiIcon size="m" type="warning" color="warning" />
               </EuiFlexItem>
