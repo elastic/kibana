@@ -537,11 +537,6 @@ describe('update()', () => {
             "type": "action",
           },
           Object {
-            "id": "1",
-            "name": "action_1",
-            "type": "action",
-          },
-          Object {
             "id": "2",
             "name": "action_2",
             "type": "action",
