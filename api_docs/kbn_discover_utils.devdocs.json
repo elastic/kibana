@@ -4125,6 +4125,17 @@
         "children": [
           {
             "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.SpanTraceFields.span.id",
+            "type": "string",
+            "tags": [],
+            "label": "'span.id'",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
             "id": "def-common.SpanTraceFields.span.name",
             "type": "string",
             "tags": [],
@@ -5991,6 +6002,21 @@
         "description": [],
         "signature": [
           "\"span.duration.us\""
+        ],
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/field_constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.SPAN_ID_FIELD",
+        "type": "string",
+        "tags": [],
+        "label": "SPAN_ID_FIELD",
+        "description": [],
+        "signature": [
+          "\"span.id\""
         ],
         "path": "src/platform/packages/shared/kbn-discover-utils/src/field_constants.ts",
         "deprecated": false,

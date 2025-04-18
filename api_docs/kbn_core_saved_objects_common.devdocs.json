@@ -1880,19 +1880,19 @@
           },
           {
             "plugin": "lens",
-            "path": "x-pack/platform/plugins/shared/lens/public/datasources/text_based/text_based_languages.tsx"
+            "path": "x-pack/platform/plugins/shared/lens/public/datasources/form_based/esql_layer/text_based_languages.tsx"
           },
           {
             "plugin": "lens",
-            "path": "x-pack/platform/plugins/shared/lens/public/datasources/text_based/text_based_languages.tsx"
+            "path": "x-pack/platform/plugins/shared/lens/public/datasources/form_based/esql_layer/text_based_languages.tsx"
           },
           {
             "plugin": "lens",
-            "path": "x-pack/platform/plugins/shared/lens/public/datasources/text_based/text_based_languages.tsx"
+            "path": "x-pack/platform/plugins/shared/lens/public/datasources/form_based/esql_layer/text_based_languages.tsx"
           },
           {
             "plugin": "lens",
-            "path": "x-pack/platform/plugins/shared/lens/public/datasources/text_based/text_based_languages.tsx"
+            "path": "x-pack/platform/plugins/shared/lens/public/datasources/form_based/esql_layer/text_based_languages.tsx"
           },
           {
             "plugin": "lens",
