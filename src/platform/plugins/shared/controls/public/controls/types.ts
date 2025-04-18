@@ -78,6 +78,7 @@ export interface ControlFactory<
   }) => Promise<{ api: ControlApi; Component: React.FC<{ className: string }> }>;
 }
 
+// TODO replace with StateManager from @kbn/presentation-publishing
 export type ControlStateManager<State extends object = object> = {
   [key in keyof Required<State>]: BehaviorSubject<State[key]>;
 };
