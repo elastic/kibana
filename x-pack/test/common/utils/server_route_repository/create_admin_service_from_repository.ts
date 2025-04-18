@@ -117,7 +117,7 @@ async function getApiClient<TServerRouteRepository extends ServerRouteRepository
       }
 
       const fields: Array<[string, any]> = Object.entries(params.body);
-      const formDataRequest = supertestAdmin[method](url)
+      const formDataRequest = supertestWithRoleScoped[method](url)
         .set(headers)
         .set('Content-type', 'multipart/form-data')
         .attach(options.file.key, params.body[options.file.key], {
