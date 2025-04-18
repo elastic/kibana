@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient } from '@kbn/core/server';
 import type { estypes } from '@elastic/elasticsearch';
 import type { EcsError } from '@elastic/ecs';
 import moment from 'moment/moment';
@@ -541,11 +540,9 @@ export const formatEndpointActionResults = (
 };
 
 export const getAgentHostNamesWithIds = async ({
-  esClient,
   agentIds,
   metadataService,
 }: {
-  esClient: ElasticsearchClient;
   agentIds: string[];
   metadataService: EndpointMetadataService;
 }): Promise<{ [id: string]: string }> => {

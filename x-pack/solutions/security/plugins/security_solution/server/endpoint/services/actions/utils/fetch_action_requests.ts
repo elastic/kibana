@@ -12,9 +12,8 @@ import type {
   SearchTotalHits,
 } from '@elastic/elasticsearch/lib/api/types';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
-import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import type { Logger } from '@kbn/logging';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
+import type { EndpointAppContextService } from '../../../endpoint_app_context_services';
 import { CROWDSTRIKE_INDEX_PATTERNS_BY_INTEGRATION } from '../../../../../common/endpoint/service/response_actions/crowdstrike';
 import type { EndpointInternalFleetServicesInterface } from '../../fleet';
 import { stringify } from '../../../utils/stringify';
@@ -30,9 +29,8 @@ import type {
 import { MICROSOFT_DEFENDER_INDEX_PATTERNS_BY_INTEGRATION } from '../../../../../common/endpoint/service/response_actions/microsoft_defender';
 
 export interface FetchActionRequestsOptions {
-  esClient: ElasticsearchClient;
-  logger: Logger;
-  fleetServices: EndpointInternalFleetServicesInterface;
+  spaceId: string;
+  endpointService: EndpointAppContextService;
   from?: number;
   size?: number;
   startDate?: string;
@@ -68,9 +66,8 @@ interface FetchActionRequestsResponse {
  * @param types
  */
 export const fetchActionRequests = async ({
-  logger,
-  esClient,
-  fleetServices,
+  endpointService,
+  spaceId,
   from = 0,
   size = 10,
   agentTypes,
@@ -82,6 +79,9 @@ export const fetchActionRequests = async ({
   unExpiredOnly = false,
   types,
 }: FetchActionRequestsOptions): Promise<FetchActionRequestsResponse> => {
+  const esClient = endpointService.getInternalEsClient();
+  const logger = endpointService.createLogger('FetchActionRequests');
+  const fleetServices = endpointService.getInternalFleetServices(spaceId);
   const additionalFilters = [];
 
   if (commands?.length) {
@@ -103,8 +103,12 @@ export const fetchActionRequests = async ({
   const must: QueryDslQueryContainer[] = [];
 
   // if space awareness is enabled, then add filter for integration policy ids
-  if (true) {
-    // FIXME:PT REMINDER: DO NOT MERGE THIS TO MAIN--- add ability to get feature enable values
+  if (endpointService.experimentalFeatures.endpointManagementSpaceAwarenessEnabled) {
+    logger.debug(
+      () =>
+        `Space awareness is enabled - adding filter to narrow results to only response actions visible in space [${spaceId}]`
+    );
+
     must.push({
       bool: {
         filter: {

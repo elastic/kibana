@@ -77,21 +77,20 @@ export const actionListHandler = (
 
       // verify feature flag for sentinel_one `agentType`
       const agentTypes = formatRequestParams(_agentTypes);
-      const requestParams = {
+      const requestParams: Parameters<typeof getActionList>[0] = {
         agentTypes,
         withOutputs: formatRequestParams(withOutputs),
         types: formatRequestParams(types),
         commands: formatRequestParams(commands),
-        esClient,
         elasticAgentIds: formatRequestParams(elasticAgentIds),
-        metadataService: endpointContext.service.getEndpointMetadataService(activeSpaceId),
-        fleetServices: endpointContext.service.getInternalFleetServices(activeSpaceId),
+        userIds: formatRequestParams(userIds),
         page,
         pageSize,
         startDate,
         endDate,
-        userIds: formatRequestParams(userIds),
-        logger,
+
+        spaceId: activeSpaceId,
+        endpointService: endpointContext.service,
       };
       // wrapper method to branch logic for
       // normal paged search via page, size
