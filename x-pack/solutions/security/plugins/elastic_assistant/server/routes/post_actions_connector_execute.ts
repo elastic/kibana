@@ -21,6 +21,7 @@ import {
   POST_ACTIONS_CONNECTOR_EXECUTE,
 } from '@kbn/elastic-assistant-common';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
+import { getPrompt } from '../lib/prompt';
 import { INVOKE_ASSISTANT_ERROR_EVENT } from '../lib/telemetry/event_based_telemetry';
 import { buildResponse } from '../lib/build_response';
 import { ElasticAssistantRequestHandlerContext } from '../types';
@@ -124,7 +125,6 @@ export const postActionsConnectorExecuteRoute = (
           const conversationsDataClient =
             await assistantContext.getAIAssistantConversationsDataClient();
           const promptsDataClient = await assistantContext.getAIAssistantPromptsDataClient();
-
           const contentReferencesStore = newContentReferencesStore({
             disabled: request.query.content_references_disabled,
           });
@@ -151,6 +151,7 @@ export const postActionsConnectorExecuteRoute = (
               });
             }
           };
+          const promptIds = request.body.promptIds;
           let systemPrompt;
           if (conversationsDataClient && promptsDataClient && conversationId) {
             systemPrompt = await getSystemPromptFromUserConversation({
@@ -159,42 +160,45 @@ export const postActionsConnectorExecuteRoute = (
               promptsDataClient,
             });
           }
-
-          const timeout = new Promise((_, reject) => {
-            setTimeout(() => {
-              reject(
-                new Error('Request timed out, increase xpack.elasticAssistant.responseTimeout')
-              );
-            }, config?.responseTimeout as number);
-          }) as unknown as IKibanaResponse;
-
-          return await Promise.race([
-            langChainExecute({
-              abortSignal,
-              isStream: request.body.subAction !== 'invokeAI',
+          if (promptIds) {
+            const additionalSystemPrompt = await getPrompt({
               actionsClient,
-              actionTypeId,
               connectorId,
-              contentReferencesStore,
-              isOssModel,
-              conversationId,
-              context: ctx,
-              logger,
-              inference,
-              messages: (newMessage ? [newMessage] : messages) ?? [],
-              onLlmResponse,
-              onNewReplacements,
-              replacements: latestReplacements,
-              request,
-              response,
-              telemetry,
+              // promptIds is promptId and promptGroupId
+              ...promptIds,
               savedObjectsClient,
-              screenContext,
-              systemPrompt,
-              ...(productDocsAvailable ? { llmTasks: ctx.elasticAssistant.llmTasks } : {}),
-            }),
-            timeout,
-          ]);
+            });
+
+            systemPrompt =
+              systemPrompt && systemPrompt.length
+                ? `${systemPrompt}\n\n${additionalSystemPrompt}`
+                : additionalSystemPrompt;
+          }
+          return await langChainExecute({
+            abortSignal,
+            isStream: request.body.subAction !== 'invokeAI',
+            actionsClient,
+            actionTypeId,
+            connectorId,
+            contentReferencesStore,
+            isOssModel,
+            conversationId,
+            context: ctx,
+            getElser,
+            logger,
+            inference,
+            messages: (newMessage ? [newMessage] : messages) ?? [],
+            onLlmResponse,
+            onNewReplacements,
+            replacements: latestReplacements,
+            request,
+            response,
+            telemetry,
+            savedObjectsClient,
+            screenContext,
+            systemPrompt,
+            ...(productDocsAvailable ? { llmTasks: ctx.elasticAssistant.llmTasks } : {}),
+          });
         } catch (err) {
           logger.error(err);
           const error = transformError(err);

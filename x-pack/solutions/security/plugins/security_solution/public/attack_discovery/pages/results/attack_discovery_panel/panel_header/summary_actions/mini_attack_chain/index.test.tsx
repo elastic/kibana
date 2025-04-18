@@ -8,8 +8,8 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 
-import { getTacticMetadata } from '../../../../../../helpers';
-import { mockAttackDiscovery } from '../../../../../mock/mock_attack_discovery';
+import { getTacticMetadata } from '../../../../../../../helpers';
+import { mockAttackDiscovery } from '../../../../../../mock/mock_attack_discovery';
 import { MiniAttackChain } from '.';
 
 describe('MiniAttackChain', () => {

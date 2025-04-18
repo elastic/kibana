@@ -115,3 +115,15 @@ components:
           type: string
           description: The unique identifier for a group of prompts.
           example: "aiAssistant"
+
+    PromptIds:
+      description: User screen context
+      type: object
+      required:
+        - promptId
+        - promptGroupId
+      properties:
+        promptId:
+          type: string
+        promptGroupId:
+          type: string

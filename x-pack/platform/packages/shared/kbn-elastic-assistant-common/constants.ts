@@ -59,6 +59,14 @@ export const ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_INDICES_URL =
 export const ELASTIC_AI_ASSISTANT_EVALUATE_URL =
   `${ELASTIC_AI_ASSISTANT_INTERNAL_URL}/evaluate` as const;
 
+// Alert summary
+export const ELASTIC_AI_ASSISTANT_ALERT_SUMMARY_URL =
+  `${ELASTIC_AI_ASSISTANT_INTERNAL_URL}/alert_summary` as const;
+export const ELASTIC_AI_ASSISTANT_ALERT_SUMMARY_URL_BULK_ACTION =
+  `${ELASTIC_AI_ASSISTANT_ALERT_SUMMARY_URL}/_bulk_action` as const;
+export const ELASTIC_AI_ASSISTANT_ALERT_SUMMARY_URL_FIND =
+  `${ELASTIC_AI_ASSISTANT_ALERT_SUMMARY_URL}/_find` as const;
+
 // Defend insights
 export const DEFEND_INSIGHTS_TOOL_ID = 'defend-insights';
 export const DEFEND_INSIGHTS = `${ELASTIC_AI_ASSISTANT_INTERNAL_URL}/defend_insights`;
@@ -115,5 +123,6 @@ export const ATTACK_DISCOVERY_ALERTS_COMMON_INDEX_PREFIX =
 /**
  * The prefix for all ad hoc Attack discovery alerts index resources.
  */
+export const INVOKE_LLM_CLIENT_TIMEOUT = INVOKE_LLM_SERVER_TIMEOUT - 3000; // 4 minutes - 3 second
 export const ATTACK_DISCOVERY_ALERTS_AD_HOC_INDEX_RESOURCE_PREFIX =
   `${ATTACK_DISCOVERY_ALERTS_COMMON_INDEX_PREFIX}-ad-hoc` as const;

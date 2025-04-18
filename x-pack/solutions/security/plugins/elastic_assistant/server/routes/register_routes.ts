@@ -7,6 +7,7 @@
 
 import type { Logger } from '@kbn/core/server';
 
+import { findAlertSummaryRoute } from './alert_summary/find_route';
 import { cancelAttackDiscoveryRoute } from './attack_discovery/post/cancel/cancel_attack_discovery';
 import { findAttackDiscoveriesRoute } from './attack_discovery/get/find_attack_discoveries';
 import { getAttackDiscoveryRoute } from './attack_discovery/get/get_attack_discovery';
@@ -45,6 +46,7 @@ import { updateKnowledgeBaseEntryRoute } from './knowledge_base/entries/update_r
 import { getAttackDiscoveryGenerationsRoute } from './attack_discovery/get/get_attack_discovery_generations';
 import { postAttackDiscoveryGenerationsDismissRoute } from './attack_discovery/post/post_attack_discovery_generations_dismiss';
 import { getKnowledgeBaseEntryRoute } from './knowledge_base/entries/get_route';
+import { bulkAlertSummaryRoute } from './alert_summary/bulk_actions_route';
 import { createAttackDiscoverySchedulesRoute } from './attack_discovery/schedules/create';
 import { getAttackDiscoverySchedulesRoute } from './attack_discovery/schedules/get';
 import { updateAttackDiscoverySchedulesRoute } from './attack_discovery/schedules/update';
@@ -117,14 +119,9 @@ export const registerRoutes = (
   postAttackDiscoveryRoute(router);
   cancelAttackDiscoveryRoute(router);
 
-  // Attack Discovery Schedules
-  createAttackDiscoverySchedulesRoute(router);
-  getAttackDiscoverySchedulesRoute(router);
-  findAttackDiscoverySchedulesRoute(router);
-  updateAttackDiscoverySchedulesRoute(router);
-  deleteAttackDiscoverySchedulesRoute(router);
-  disableAttackDiscoverySchedulesRoute(router);
-  enableAttackDiscoverySchedulesRoute(router);
+  // Alert Summary
+  bulkAlertSummaryRoute(router, logger);
+  findAlertSummaryRoute(router, logger);
 
   // Defend insights
   getDefendInsightRoute(router);

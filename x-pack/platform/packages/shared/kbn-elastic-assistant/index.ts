@@ -175,3 +175,10 @@ export {
   /** Your anonymization settings will apply to these alerts (label) */
   YOUR_ANONYMIZATION_SETTINGS,
 } from './impl/knowledge_base/translations';
+
+export {
+  AlertSummary,
+  Conversations,
+  SuggestedPrompts,
+  AttackDiscoveryWidget,
+} from './impl/alerts';

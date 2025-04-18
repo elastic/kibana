@@ -14,6 +14,9 @@ import type {
 } from '@kbn/core/server';
 
 import { SECURITY_PROJECT_SETTINGS } from '@kbn/serverless-security-settings';
+import { isSupportedConnector } from '@kbn/inference-common';
+import { getDefaultAIConnectorSetting } from '@kbn/security-solution-plugin/server/ui_settings';
+import type { Connector } from '@kbn/actions-plugin/server/application/connector/types';
 import { getEnabledProductFeatures } from '../common/pli/pli_features';
 
 import type { ServerlessSecurityConfig } from './config';
@@ -58,7 +61,10 @@ export class SecuritySolutionServerlessPlugin
     this.logger.info(`Security Solution running with product types:\n${productTypesStr}`);
   }
 
-  public setup(coreSetup: CoreSetup, pluginsSetup: SecuritySolutionServerlessPluginSetupDeps) {
+  public setup(
+    coreSetup: CoreSetup<SecuritySolutionServerlessPluginStartDeps>,
+    pluginsSetup: SecuritySolutionServerlessPluginSetupDeps
+  ) {
     this.config = createConfig(this.initializerContext, pluginsSetup.securitySolution);
 
     // Register product features
@@ -71,6 +77,29 @@ export class SecuritySolutionServerlessPlugin
 
     // Setup project uiSettings whitelisting
     pluginsSetup.serverless.setupProjectSettings(SECURITY_PROJECT_SETTINGS);
+
+    // use metering check which verifies AI4SOC is enabled
+    if (ai4SocMeteringService.shouldMeter(this.config)) {
+      // Serverless Advanced Settings setup
+      coreSetup
+        .getStartServices()
+        .then(async ([_, depsStart]) => {
+          try {
+            const unsecuredActionsClient = depsStart.actions.getUnsecuredActionsClient();
+            // using "default" space actually forces the api to use undefined space (see getAllUnsecured)
+            const aiConnectors = (await unsecuredActionsClient.getAll('default')).filter(
+              (connector: Connector) => isSupportedConnector(connector)
+            );
+            const defaultAIConnectorSetting = getDefaultAIConnectorSetting(aiConnectors);
+            if (defaultAIConnectorSetting !== null) {
+              coreSetup.uiSettings.register(defaultAIConnectorSetting);
+            }
+          } catch (error) {
+            this.logger.error(`Error registering default AI connector: ${error}`);
+          }
+        })
+        .catch(() => {}); // it shouldn't reject, but just in case
+    }
 
     // Tasks
     this.cloudSecurityUsageReportingTask = new SecurityUsageReportingTask({
