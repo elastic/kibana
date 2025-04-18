@@ -14,8 +14,8 @@ import {
   actionRequestSchema,
   systemActionRequestSchema,
   flappingSchema,
-  artifactsSchema,
 } from '../../../schemas';
+import { artifactsSchema } from '../../../schemas/artifacts_schema';
 
 export const createRuleDataSchema = schema.object(
   {
