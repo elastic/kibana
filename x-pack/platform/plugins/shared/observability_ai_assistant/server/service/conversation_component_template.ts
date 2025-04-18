@@ -25,6 +25,14 @@ const dynamic = {
   dynamic: true,
 };
 
+const boolean = {
+  type: 'boolean' as const,
+};
+
+const integer = {
+  type: 'integer' as const,
+};
+
 export const conversationComponentTemplate: ClusterComponentTemplate['component_template']['template'] =
   {
     mappings: {
@@ -68,6 +76,7 @@ export const conversationComponentTemplate: ClusterComponentTemplate['component_
                 content: text,
                 event: text,
                 role: keyword,
+                sanitized: boolean,
                 data: {
                   type: 'object',
                   enabled: false,
@@ -81,6 +90,17 @@ export const conversationComponentTemplate: ClusterComponentTemplate['component_
                       enabled: false,
                     },
                     trigger: keyword,
+                  },
+                },
+                detectedEntities: {
+                  type: 'object',
+                  properties: {
+                    entity: keyword,
+                    class_name: keyword,
+                    start_pos: integer,
+                    end_pos: integer,
+                    type: keyword,
+                    hash: keyword,
                   },
                 },
               },
