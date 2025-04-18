@@ -6,6 +6,7 @@
  */
 
 import type { SavedObjectReference } from '@kbn/core/server';
+import { uniqBy } from 'lodash';
 import type { RuleTypeParams, Artifacts } from '../../types';
 import type { UntypedNormalizedRuleType } from '../../rule_type_registry';
 import type { DenormalizedAction, NormalizedAlertActionWithGeneratedValues } from '../types';
@@ -50,7 +51,7 @@ export async function extractReferences<
     name: `${extractedSavedObjectParamReferenceNamePrefix}${reference.name}`,
   }));
 
-  const references = [...actionReferences, ...paramReferences, ...artifactReferences];
+  const references = uniqBy([...actionReferences, ...paramReferences, ...artifactReferences], 'id');
 
   return {
     actions,

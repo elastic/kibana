@@ -12,12 +12,18 @@ import type { RulesClientContext } from '..';
 import { savedObjectsRepositoryMock } from '@kbn/core-saved-objects-api-server-mocks';
 
 import { denormalizeArtifacts } from './denormalize_artifacts';
+import { denormalizeActions } from './denormalize_actions';
 
 jest.mock('./denormalize_artifacts', () => ({
   denormalizeArtifacts: jest.fn(),
 }));
 
+jest.mock('./denormalize_actions', () => ({
+  denormalizeActions: jest.fn(),
+}));
+
 const mockDenormalizeArtifacts = denormalizeArtifacts as jest.Mock;
+const mockDenormalizeActions = denormalizeActions as jest.Mock;
 
 const loggerErrorMock = jest.fn();
 const getBulkMock = jest.fn();
@@ -69,6 +75,18 @@ jest.mock('./denormalize_artifacts', () => ({
 }));
 
 describe('extractReferences', () => {
+  beforeEach(() => {
+    mockDenormalizeActions.mockReturnValue({
+      actions: [],
+      references: [
+        {
+          id: '123',
+          name: 'dashboard_0',
+          type: 'dashboard',
+        },
+      ],
+    });
+  });
   it('returns dashboard artifacts and references', async () => {
     mockDenormalizeArtifacts.mockReturnValue({
       artifacts: {
@@ -126,6 +144,66 @@ describe('extractReferences', () => {
       {
         id: '456',
         name: 'dashboard_1',
+        type: 'dashboard',
+      },
+    ]);
+  });
+
+  it('deduplicates references before returning', async () => {
+    mockDenormalizeArtifacts.mockReturnValue({
+      artifacts: {
+        dashboards: [
+          {
+            refId: 'dashboard_0',
+          },
+          {
+            refId: 'dashboard_1',
+          },
+        ],
+      },
+      references: [
+        {
+          id: '012',
+          name: 'dashboard_1',
+          type: 'dashboard',
+        },
+        {
+          id: '123',
+          name: 'dashboard_0',
+          type: 'dashboard',
+        },
+        {
+          id: '234',
+          name: 'dashboard_2',
+          type: 'dashboard',
+        },
+      ],
+    });
+
+    const result = await extractReferences(
+      context,
+      ruleType,
+      [],
+      {},
+      {
+        dashboards: [{ id: '123' }],
+      }
+    );
+
+    expect(result.references).toEqual([
+      {
+        id: '123',
+        name: 'dashboard_0',
+        type: 'dashboard',
+      },
+      {
+        id: '012',
+        name: 'dashboard_1',
+        type: 'dashboard',
+      },
+      {
+        id: '234',
+        name: 'dashboard_2',
         type: 'dashboard',
       },
     ]);
