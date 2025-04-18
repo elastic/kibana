@@ -65,7 +65,7 @@ export async function createEvents(
       logger.info(`Queue saturated, backing off for ${backOff}`);
       await wait(backOff);
       // Back-off longer the next time.
-      backOff = Math.max(backOff + INITIAL_BACK_OFF_INTERVAL * 0.5, MAX_BACK_OFF_INTERVAL);
+      backOff = Math.min(backOff + INITIAL_BACK_OFF_INTERVAL * 0.5, MAX_BACK_OFF_INTERVAL);
       continue;
     } else {
       logger.info({ took: 0, latency: 0, indexed: 0 }, 'Indexing 0 documents.');
