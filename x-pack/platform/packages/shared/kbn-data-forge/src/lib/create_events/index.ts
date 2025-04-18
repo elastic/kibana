@@ -46,7 +46,7 @@ export async function createEvents(
   const endTs = endTimestamp === false ? Date.now() : endTimestamp.valueOf();
   let now = startTimestamp.valueOf();
 
-  while (true || now < endTs) {
+  while (true) {
     // This is a non-blocking pause to the queue. We will still generate events
     // but this will simulate a network disruption simular to what we see with
     // when Filebeat loses network connectivity
