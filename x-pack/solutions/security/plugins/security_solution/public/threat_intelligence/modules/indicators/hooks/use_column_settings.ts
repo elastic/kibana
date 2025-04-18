@@ -7,7 +7,7 @@
 
 import type { EuiDataGridColumn, EuiDataGridSorting } from '@elastic/eui';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import negate from 'lodash/negate';
+import { negate } from 'lodash';
 import { RawIndicatorFieldId } from '../../../../../common/threat_intelligence/types/indicator';
 import { useKibana } from '../../../hooks/use_kibana';
 import { translateFieldLabel } from '../components/common/field_label';
