@@ -8,29 +8,68 @@
 import React, { useCallback } from 'react';
 import {
   DefaultEmbeddableApi,
-  ReactEmbeddableFactory,
+  EmbeddableFactory,
   VALUE_CLICK_TRIGGER,
 } from '@kbn/embeddable-plugin/public';
 import { EuiCard, EuiFlexItem, EuiIcon } from '@elastic/eui';
 import { AdvancedUiActionsStart } from '@kbn/ui-actions-enhanced-plugin/public';
+import {
+  initializeTitleManager,
+  initializeStateManager,
+  titleComparators,
+} from '@kbn/presentation-publishing';
+import { map, merge } from 'rxjs';
+import { initializeUnsavedChanges } from '@kbn/presentation-containers';
 import { BUTTON_EMBEDDABLE } from './register_button_embeddable';
 
 export const getButtonEmbeddableFactory = (uiActionsEnhanced: AdvancedUiActionsStart) => {
-  const factory: ReactEmbeddableFactory<{}, {}, DefaultEmbeddableApi<{}>> = {
+  const factory: EmbeddableFactory<{}, DefaultEmbeddableApi<{}>> = {
     type: BUTTON_EMBEDDABLE,
-    deserializeState: (state) => state.rawState,
-    buildEmbeddable: async (state, buildApi, uuid, parentApi) => {
-      const api = buildApi(
-        {
-          serializeState: () => {
-            return {
-              rawState: {},
-              references: [],
-            };
+    buildEmbeddable: async ({ initialState, finalizeApi, parentApi, uuid }) => {
+      const titleManager = initializeTitleManager(initialState.rawState);
+      const buttonStateManager = initializeStateManager(initialState.rawState, {});
+      function serializeState() {
+        return {
+          rawState: {
+            ...titleManager.getLatestState(),
+            ...buttonStateManager.getLatestState(),
           },
+          references: [],
+          // references: if this embeddable had any references - this is where we would extract them.
+        };
+      }
+      const unsavedChangesApi = initializeUnsavedChanges({
+        uuid,
+        parentApi,
+        serializeState,
+        anyStateChange$: merge(
+          titleManager.anyStateChange$,
+          buttonStateManager.anyStateChange$
+        ).pipe(map(() => undefined)),
+        getComparators: () => {
+          /**
+           * comparators are provided in a callback to allow embeddables to change how their state is compared based
+           * on the values of other state. For instance, if a saved object ID is present (by reference), the embeddable
+           * may want to skip comparison of certain state.
+           */
+          return { ...titleComparators };
         },
-        {}
-      );
+        onReset: (lastSaved) => {
+          /**
+           * if this embeddable had a difference between its runtime and serialized state, we could run the 'deserializeState'
+           * function here before resetting. onReset can be async so to support a potential async deserialize function.
+           */
+
+          titleManager.reinitializeState(lastSaved?.rawState);
+          buttonStateManager.reinitializeState(lastSaved?.rawState);
+        },
+      });
+
+      const api = finalizeApi({
+        ...unsavedChangesApi,
+        ...titleManager.api,
+        serializeState,
+      });
       return {
         api,
         Component: () => {
