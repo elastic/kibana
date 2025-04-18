@@ -32,7 +32,6 @@ import { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import { combineCompatibleChildrenApis } from '@kbn/presentation-containers';
 import {
   apiPublishesDataLoading,
-  HasUniqueId,
   PublishesDataLoading,
   SerializedPanelState,
   useBatchedPublishingSubjects,
@@ -105,7 +104,6 @@ export const ReactControlExample = ({
 
   const parentApi = useMemo(() => {
     const query$ = new BehaviorSubject<Query | AggregateQuery | undefined>(undefined);
-    const children$ = new BehaviorSubject<{ [key: string]: unknown }>({});
     const unsavedSavedControlGroupState = unsavedStateManager.get();
     const lastSavedControlGroupState = savedStateManager.get();
     const lastSavedControlGroupState$ = new BehaviorSubject(lastSavedControlGroupState);
@@ -118,10 +116,6 @@ export const ReactControlExample = ({
       query$,
       timeRange$,
       timeslice$,
-      children$,
-      publishFilters: (newFilters: Filter[] | undefined) => filters$.next(newFilters),
-      setChild: (child: HasUniqueId) =>
-        children$.next({ ...children$.getValue(), [child.uuid]: child }),
       reload$,
       getSerializedStateForChild: (childId: string) => {
         if (childId === CONTROL_GROUP_EMBEDDABLE_ID) {
@@ -412,7 +406,6 @@ export const ReactControlExample = ({
         type={CONTROL_GROUP_TYPE}
         maybeId={CONTROL_GROUP_EMBEDDABLE_ID}
         onApiAvailable={(api) => {
-          parentApi?.setChild(api);
           setControlGroupApi(api as ControlGroupApi);
         }}
         hidePanelChrome={true}
@@ -426,9 +419,6 @@ export const ReactControlExample = ({
             type={'search_embeddable'}
             getParentApi={() => parentApi}
             hidePanelChrome={false}
-            onApiAvailable={(api) => {
-              parentApi?.setChild(api);
-            }}
           />
         </div>
       )}
