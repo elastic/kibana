@@ -76,6 +76,29 @@ const externals = {
   immer: '__kbnSharedDeps__.Immer',
   reselect: '__kbnSharedDeps__.Reselect',
   'fastest-levenshtein': '__kbnSharedDeps__.FastestLevenshtein',
+  // cache some used methods of the react-use library
+  ...[
+    'useAsync',
+    'useAsyncFn',
+    'useDebounce',
+    'useDeepCompareEffect',
+    'useEffectOnce',
+    'useEvent',
+    'useLatest',
+    'useList',
+    'useLocalStorage',
+    'useMount',
+    'useMountedState',
+    'usePrevious',
+    'useSessionStorage',
+    'useTimeoutFn',
+    'useToggle',
+    'useUnmount',
+    'useUpdateEffect',
+  ].reduce((memo, subset) => {
+    memo[`react-use/lib/${subset}`] = `__kbnSharedDeps__.ReactUse.${subset}`;
+    return memo;
+  }, {}),
 
   /**
    * big deps which are locked to a single version
