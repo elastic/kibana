@@ -64,7 +64,8 @@ export const getActionDetailsById = async <T extends ActionDetails = ActionDetai
   const agentsHostInfo =
     normalizedActionRequest.agentType === 'endpoint'
       ? await getAgentHostNamesWithIds({
-          metadataService: endpointService.getEndpointMetadataService(spaceId),
+          endpointService,
+          spaceId,
           agentIds: normalizedActionRequest.agents,
         })
       : {};

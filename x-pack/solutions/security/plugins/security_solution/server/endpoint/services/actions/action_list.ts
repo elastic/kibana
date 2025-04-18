@@ -249,7 +249,8 @@ const getActionDetailsList = async ({
       }),
 
       getAgentHostNamesWithIds({
-        metadataService: endpointService.getEndpointMetadataService(spaceId),
+        endpointService,
+        spaceId,
         agentIds,
       }),
     ]);
