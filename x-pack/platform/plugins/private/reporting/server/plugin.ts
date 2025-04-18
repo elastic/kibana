@@ -27,6 +27,7 @@ import type {
 import { ReportingRequestHandlerContext } from './types';
 import { registerReportingEventTypes, registerReportingUsageCollector } from './usage';
 import { registerFeatures } from './features';
+import { EmailNotificationService } from './services/notifications/email_notification_service';
 
 /*
  * @internal
@@ -105,6 +106,10 @@ export class ReportingPlugin
       await reportingCore.pluginSetsUp();
 
       const logger = this.logger;
+      const emailService = new EmailNotificationService({
+        logger,
+        notifications: plugins.notifications,
+      });
       const store = new ReportingStore(reportingCore, logger);
 
       await reportingCore.pluginStart({

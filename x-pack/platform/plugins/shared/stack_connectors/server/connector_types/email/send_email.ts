@@ -38,6 +38,7 @@ export interface SendEmailOptions {
   content: Content;
   hasAuth: boolean;
   configurationUtilities: ActionsConfigurationUtilities;
+  attachments?: Attachment[];
 }
 
 // config validation ensures either service is set or host/port are set
@@ -68,13 +69,20 @@ export interface Content {
   messageHTML?: string | null;
 }
 
+export interface Attachment {
+  content: string;
+  contentType?: string;
+  encoding?: string;
+  filename: string;
+}
+
 export async function sendEmail(
   logger: Logger,
   options: SendEmailOptions,
   connectorTokenClient: ConnectorTokenClientContract,
   connectorUsageCollector: ConnectorUsageCollector
 ): Promise<unknown> {
-  const { transport, content } = options;
+  const { transport, content, attachments } = options;
   const { message, messageHTML } = content;
 
   const renderedMessage = messageHTML ?? htmlFromMarkdown(logger, message);
@@ -88,7 +96,13 @@ export async function sendEmail(
       connectorUsageCollector
     );
   } else {
-    return await sendEmailWithNodemailer(logger, options, renderedMessage, connectorUsageCollector);
+    return await sendEmailWithNodemailer(
+      logger,
+      options,
+      renderedMessage,
+      connectorUsageCollector,
+      attachments
+    );
   }
 }
 
@@ -178,7 +192,8 @@ async function sendEmailWithNodemailer(
   logger: Logger,
   options: SendEmailOptions,
   messageHTML: string,
-  connectorUsageCollector: ConnectorUsageCollector
+  connectorUsageCollector: ConnectorUsageCollector,
+  attachments?: Attachment[]
 ): Promise<unknown> {
   const { transport, routing, content, configurationUtilities, hasAuth } = options;
   const { service } = transport;
@@ -195,6 +210,7 @@ async function sendEmailWithNodemailer(
     subject,
     html: messageHTML,
     text: message,
+    ...(attachments && { attachments }),
   };
 
   // The transport options do not seem to be exposed as a type, and we reference

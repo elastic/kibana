@@ -170,6 +170,16 @@ const ParamsSchemaProps = {
       }),
     }),
   }),
+  attachments: schema.maybe(
+    schema.arrayOf(
+      schema.object({
+        content: schema.string(),
+        contentType: schema.maybe(schema.string()),
+        filename: schema.string(),
+        encoding: schema.maybe(schema.string()),
+      })
+    )
+  ),
 };
 
 export const ParamsSchema = schema.object(ParamsSchemaProps);
@@ -309,6 +319,16 @@ async function executor(
     }
   }
 
+  if (params.attachments != null) {
+    if (execOptions.source?.type !== ActionExecutionSourceType.NOTIFICATION) {
+      return {
+        status: 'error',
+        actionId,
+        message: `Email attachments can only be sent via notifications`,
+      };
+    }
+  }
+
   const transport: Transport = {};
 
   if (secrets.user != null) {
@@ -371,6 +391,7 @@ async function executor(
     },
     hasAuth: config.hasAuth,
     configurationUtilities,
+    attachments: params.attachments,
   };
 
   let result;

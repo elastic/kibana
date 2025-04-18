@@ -11,7 +11,7 @@ import {
   ExecutionResponseType,
 } from '@kbn/actions-plugin/server/create_execute_function';
 import type { Logger } from '@kbn/core/server';
-import type { EmailService, PlainTextEmail, HTMLEmail } from './types';
+import type { EmailService, PlainTextEmail, HTMLEmail, AttachmentEmail } from './types';
 
 export class ConnectorsEmailService implements EmailService {
   constructor(
@@ -53,6 +53,28 @@ export class ConnectorsEmailService implements EmailService {
     const response = await this.actionsClient.bulkEnqueueExecution(this.requesterId, actions);
     if (response.errors) {
       this.logEnqueueExecutionResponse(response.items);
+    }
+  }
+
+  async sendAttachmentEmail(params: AttachmentEmail): Promise<void> {
+    const action = {
+      requesterId: this.requesterId,
+      id: this.connectorId,
+      params: {
+        to: params.to,
+        subject: params.subject,
+        message: params.message,
+        bcc: params.bcc,
+        cc: params.cc,
+        attachments: params.attachments,
+      },
+      relatedSavedObjects: params.context?.relatedObjects,
+      spaceId: params.spaceId,
+    };
+
+    const response = await this.actionsClient.execute(action);
+    if (response.status === 'error') {
+      throw new Error(response.message);
     }
   }
 
