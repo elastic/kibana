@@ -149,7 +149,6 @@ export {
   initializeTitleManager,
   stateHasTitles,
   titleComparators,
-  defaultTitlesState,
   type TitlesApi,
   type SerializedTitles,
 } from './interfaces/titles/title_manager';
