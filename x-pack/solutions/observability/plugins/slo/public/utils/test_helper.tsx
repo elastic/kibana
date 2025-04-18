@@ -16,6 +16,7 @@ import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render as testLibRender } from '@testing-library/react';
 import React from 'react';
+import { EuiThemeProvider } from '@elastic/eui';
 import type { SLORouteRepository } from '../../server/routes/get_slo_server_route_repository';
 import { PluginContext } from '../context/plugin_context';
 
@@ -46,29 +47,31 @@ export const render = (component: React.ReactNode) => {
   return testLibRender(
     // @ts-ignore
     <IntlProvider locale="en-US">
-      <KibanaContextProvider
-        services={{
-          ...core,
-          data,
-          exploratoryView: {
-            createExploratoryViewUrl: jest.fn(),
-            getAppDataView: jest.fn(),
+      <EuiThemeProvider>
+        <KibanaContextProvider
+          services={{
+            ...core,
+            data,
+            exploratoryView: {
+              createExploratoryViewUrl: jest.fn(),
+              getAppDataView: jest.fn(),
 
-            ExploratoryViewEmbeddable: () => <div>Embeddable exploratory view</div>,
-          },
-        }}
-      >
-        <PluginContext.Provider
-          value={{
-            appMountParameters,
-            observabilityRuleTypeRegistry,
-            ObservabilityPageTemplate: KibanaPageTemplate,
-            sloClient,
+              ExploratoryViewEmbeddable: () => <div>Embeddable exploratory view</div>,
+            },
           }}
         >
-          <QueryClientProvider client={queryClient}>{component}</QueryClientProvider>
-        </PluginContext.Provider>
-      </KibanaContextProvider>
+          <PluginContext.Provider
+            value={{
+              appMountParameters,
+              observabilityRuleTypeRegistry,
+              ObservabilityPageTemplate: KibanaPageTemplate,
+              sloClient,
+            }}
+          >
+            <QueryClientProvider client={queryClient}>{component}</QueryClientProvider>
+          </PluginContext.Provider>
+        </KibanaContextProvider>
+      </EuiThemeProvider>
     </IntlProvider>
   );
 };

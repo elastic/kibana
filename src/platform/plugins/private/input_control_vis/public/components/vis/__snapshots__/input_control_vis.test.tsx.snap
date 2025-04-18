@@ -11,11 +11,7 @@ exports[`Apply and Cancel change btns enabled when there are changes 1`] = `
       wrap={true}
     >
       <EuiFlexItem
-        css={
-          Object {
-            "minWidth": "250px",
-          }
-        }
+        css="unknown styles"
         data-test-subj="inputControlItem"
         key="mock-list-control"
       >
@@ -99,11 +95,7 @@ exports[`Clear btns enabled when there are values 1`] = `
       wrap={true}
     >
       <EuiFlexItem
-        css={
-          Object {
-            "minWidth": "250px",
-          }
-        }
+        css="unknown styles"
         data-test-subj="inputControlItem"
         key="mock-list-control"
       >
@@ -187,11 +179,7 @@ exports[`Renders list control 1`] = `
       wrap={true}
     >
       <EuiFlexItem
-        css={
-          Object {
-            "minWidth": "250px",
-          }
-        }
+        css="unknown styles"
         data-test-subj="inputControlItem"
         key="mock-list-control"
       >
@@ -275,11 +263,7 @@ exports[`Renders range control 1`] = `
       wrap={true}
     >
       <EuiFlexItem
-        css={
-          Object {
-            "minWidth": "250px",
-          }
-        }
+        css="unknown styles"
         data-test-subj="inputControlItem"
         key="mock-range-control"
       >
