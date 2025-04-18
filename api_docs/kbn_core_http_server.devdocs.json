@@ -3745,6 +3745,54 @@
                 "path": "x-pack/platform/plugins/private/watcher/server/routes/api/register_load_history_route.ts"
               },
               {
+                "plugin": "contentConnectors",
+                "path": "x-pack/platform/plugins/shared/content_connectors/server/routes/connectors.ts"
+              },
+              {
+                "plugin": "contentConnectors",
+                "path": "x-pack/platform/plugins/shared/content_connectors/server/routes/connectors.ts"
+              },
+              {
+                "plugin": "contentConnectors",
+                "path": "x-pack/platform/plugins/shared/content_connectors/server/routes/connectors.ts"
+              },
+              {
+                "plugin": "contentConnectors",
+                "path": "x-pack/platform/plugins/shared/content_connectors/server/routes/connectors.ts"
+              },
+              {
+                "plugin": "contentConnectors",
+                "path": "x-pack/platform/plugins/shared/content_connectors/server/routes/connectors.ts"
+              },
+              {
+                "plugin": "contentConnectors",
+                "path": "x-pack/platform/plugins/shared/content_connectors/server/routes/connectors.ts"
+              },
+              {
+                "plugin": "contentConnectors",
+                "path": "x-pack/platform/plugins/shared/content_connectors/server/routes/connectors.ts"
+              },
+              {
+                "plugin": "contentConnectors",
+                "path": "x-pack/platform/plugins/shared/content_connectors/server/routes/connectors.ts"
+              },
+              {
+                "plugin": "contentConnectors",
+                "path": "x-pack/platform/plugins/shared/content_connectors/server/routes/stats.ts"
+              },
+              {
+                "plugin": "contentConnectors",
+                "path": "x-pack/platform/plugins/shared/content_connectors/server/routes/mapping.ts"
+              },
+              {
+                "plugin": "contentConnectors",
+                "path": "x-pack/platform/plugins/shared/content_connectors/server/routes/api_keys.ts"
+              },
+              {
+                "plugin": "contentConnectors",
+                "path": "x-pack/platform/plugins/shared/content_connectors/server/routes/api_keys.ts"
+              },
+              {
                 "plugin": "ingestPipelines",
                 "path": "x-pack/platform/plugins/shared/ingest_pipelines/server/routes/api/get.ts"
               },
@@ -6069,6 +6117,54 @@
                 "path": "x-pack/platform/plugins/private/watcher/server/routes/api/register_list_fields_route.ts"
               },
               {
+                "plugin": "contentConnectors",
+                "path": "x-pack/platform/plugins/shared/content_connectors/server/routes/connectors.ts"
+              },
+              {
+                "plugin": "contentConnectors",
+                "path": "x-pack/platform/plugins/shared/content_connectors/server/routes/connectors.ts"
+              },
+              {
+                "plugin": "contentConnectors",
+                "path": "x-pack/platform/plugins/shared/content_connectors/server/routes/connectors.ts"
+              },
+              {
+                "plugin": "contentConnectors",
+                "path": "x-pack/platform/plugins/shared/content_connectors/server/routes/connectors.ts"
+              },
+              {
+                "plugin": "contentConnectors",
+                "path": "x-pack/platform/plugins/shared/content_connectors/server/routes/connectors.ts"
+              },
+              {
+                "plugin": "contentConnectors",
+                "path": "x-pack/platform/plugins/shared/content_connectors/server/routes/connectors.ts"
+              },
+              {
+                "plugin": "contentConnectors",
+                "path": "x-pack/platform/plugins/shared/content_connectors/server/routes/connectors.ts"
+              },
+              {
+                "plugin": "contentConnectors",
+                "path": "x-pack/platform/plugins/shared/content_connectors/server/routes/connectors.ts"
+              },
+              {
+                "plugin": "contentConnectors",
+                "path": "x-pack/platform/plugins/shared/content_connectors/server/routes/connectors.ts"
+              },
+              {
+                "plugin": "contentConnectors",
+                "path": "x-pack/platform/plugins/shared/content_connectors/server/routes/connectors.ts"
+              },
+              {
+                "plugin": "contentConnectors",
+                "path": "x-pack/platform/plugins/shared/content_connectors/server/routes/search.ts"
+              },
+              {
+                "plugin": "contentConnectors",
+                "path": "x-pack/platform/plugins/shared/content_connectors/server/routes/api_keys.ts"
+              },
+              {
                 "plugin": "ingestPipelines",
                 "path": "x-pack/platform/plugins/shared/ingest_pipelines/server/routes/api/create.ts"
               },
@@ -7641,6 +7737,46 @@
                 "path": "x-pack/platform/plugins/private/watcher/server/routes/api/watch/action/register_acknowledge_route.ts"
               },
               {
+                "plugin": "contentConnectors",
+                "path": "x-pack/platform/plugins/shared/content_connectors/server/routes/connectors.ts"
+              },
+              {
+                "plugin": "contentConnectors",
+                "path": "x-pack/platform/plugins/shared/content_connectors/server/routes/connectors.ts"
+              },
+              {
+                "plugin": "contentConnectors",
+                "path": "x-pack/platform/plugins/shared/content_connectors/server/routes/connectors.ts"
+              },
+              {
+                "plugin": "contentConnectors",
+                "path": "x-pack/platform/plugins/shared/content_connectors/server/routes/connectors.ts"
+              },
+              {
+                "plugin": "contentConnectors",
+                "path": "x-pack/platform/plugins/shared/content_connectors/server/routes/connectors.ts"
+              },
+              {
+                "plugin": "contentConnectors",
+                "path": "x-pack/platform/plugins/shared/content_connectors/server/routes/connectors.ts"
+              },
+              {
+                "plugin": "contentConnectors",
+                "path": "x-pack/platform/plugins/shared/content_connectors/server/routes/connectors.ts"
+              },
+              {
+                "plugin": "contentConnectors",
+                "path": "x-pack/platform/plugins/shared/content_connectors/server/routes/connectors.ts"
+              },
+              {
+                "plugin": "contentConnectors",
+                "path": "x-pack/platform/plugins/shared/content_connectors/server/routes/connectors.ts"
+              },
+              {
+                "plugin": "contentConnectors",
+                "path": "x-pack/platform/plugins/shared/content_connectors/server/routes/connectors.ts"
+              },
+              {
                 "plugin": "ingestPipelines",
                 "path": "x-pack/platform/plugins/shared/ingest_pipelines/server/routes/api/update.ts"
               },
@@ -8347,6 +8483,10 @@
               {
                 "plugin": "watcher",
                 "path": "x-pack/platform/plugins/private/watcher/server/routes/api/watch/register_delete_route.ts"
+              },
+              {
+                "plugin": "contentConnectors",
+                "path": "x-pack/platform/plugins/shared/content_connectors/server/routes/connectors.ts"
               },
               {
                 "plugin": "ingestPipelines",
@@ -13396,38 +13536,6 @@
                 "path": "x-pack/platform/plugins/shared/logs_shared/server/lib/adapters/framework/kibana_framework_adapter.ts"
               },
               {
-                "plugin": "inferenceEndpoint",
-                "path": "x-pack/platform/plugins/shared/inference_endpoint/server/routes/index.ts"
-              },
-              {
-                "plugin": "inferenceEndpoint",
-                "path": "x-pack/platform/plugins/shared/inference_endpoint/server/routes/index.ts"
-              },
-              {
-                "plugin": "maps",
-                "path": "x-pack/platform/plugins/shared/maps/server/mvt/mvt_routes.ts"
-              },
-              {
-                "plugin": "maps",
-                "path": "x-pack/platform/plugins/shared/maps/server/mvt/mvt_routes.ts"
-              },
-              {
-                "plugin": "maps",
-                "path": "x-pack/platform/plugins/shared/maps/server/data_indexing/indexing_routes.ts"
-              },
-              {
-                "plugin": "maps",
-                "path": "x-pack/platform/plugins/shared/maps/server/data_indexing/indexing_routes.ts"
-              },
-              {
-                "plugin": "maps",
-                "path": "x-pack/platform/plugins/shared/maps/server/routes.ts"
-              },
-              {
-                "plugin": "maps",
-                "path": "x-pack/platform/plugins/shared/maps/server/routes.ts"
-              },
-              {
                 "plugin": "ml",
                 "path": "x-pack/platform/plugins/shared/ml/server/routes/notifications.ts"
               },
@@ -13672,6 +13780,38 @@
                 "path": "x-pack/platform/plugins/shared/ml/server/routes/inference_models.ts"
               },
               {
+                "plugin": "inferenceEndpoint",
+                "path": "x-pack/platform/plugins/shared/inference_endpoint/server/routes/index.ts"
+              },
+              {
+                "plugin": "inferenceEndpoint",
+                "path": "x-pack/platform/plugins/shared/inference_endpoint/server/routes/index.ts"
+              },
+              {
+                "plugin": "maps",
+                "path": "x-pack/platform/plugins/shared/maps/server/mvt/mvt_routes.ts"
+              },
+              {
+                "plugin": "maps",
+                "path": "x-pack/platform/plugins/shared/maps/server/mvt/mvt_routes.ts"
+              },
+              {
+                "plugin": "maps",
+                "path": "x-pack/platform/plugins/shared/maps/server/data_indexing/indexing_routes.ts"
+              },
+              {
+                "plugin": "maps",
+                "path": "x-pack/platform/plugins/shared/maps/server/data_indexing/indexing_routes.ts"
+              },
+              {
+                "plugin": "maps",
+                "path": "x-pack/platform/plugins/shared/maps/server/routes.ts"
+              },
+              {
+                "plugin": "maps",
+                "path": "x-pack/platform/plugins/shared/maps/server/routes.ts"
+              },
+              {
                 "plugin": "lists",
                 "path": "x-pack/solutions/security/plugins/lists/server/routes/find_endpoint_list_item_route.ts"
               },
@@ -13809,6 +13949,10 @@
               },
               {
                 "plugin": "elasticAssistant",
+                "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/alert_summary/find_route.ts"
+              },
+              {
+                "plugin": "elasticAssistant",
                 "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/attack_discovery/get/get_attack_discovery.ts"
               },
               {
@@ -13858,14 +14002,6 @@
               {
                 "plugin": "elasticAssistant",
                 "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/knowledge_base/entries/get_route.ts"
-              },
-              {
-                "plugin": "elasticAssistant",
-                "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/attack_discovery/schedules/get.ts"
-              },
-              {
-                "plugin": "elasticAssistant",
-                "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/attack_discovery/schedules/find.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -14188,6 +14324,14 @@
                 "path": "x-pack/solutions/security/plugins/session_view/server/routes/get_total_io_bytes_route.ts"
               },
               {
+                "plugin": "elasticAssistant",
+                "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/attack_discovery/schedules/find.ts"
+              },
+              {
+                "plugin": "elasticAssistant",
+                "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/attack_discovery/schedules/get.ts"
+              },
+              {
                 "plugin": "@kbn/test-suites-src",
                 "path": "src/platform/test/plugin_functional/plugins/core_http/server/plugin.ts"
               },
@@ -14467,10 +14611,6 @@
                 "path": "x-pack/platform/plugins/shared/logs_shared/server/lib/adapters/framework/kibana_framework_adapter.ts"
               },
               {
-                "plugin": "inferenceEndpoint",
-                "path": "x-pack/platform/plugins/shared/inference_endpoint/server/routes/index.ts"
-              },
-              {
                 "plugin": "ml",
                 "path": "x-pack/platform/plugins/shared/ml/server/routes/trained_models.ts"
               },
@@ -14511,6 +14651,10 @@
                 "path": "x-pack/platform/plugins/shared/ml/server/routes/anomaly_detectors.ts"
               },
               {
+                "plugin": "inferenceEndpoint",
+                "path": "x-pack/platform/plugins/shared/inference_endpoint/server/routes/index.ts"
+              },
+              {
                 "plugin": "lists",
                 "path": "x-pack/solutions/security/plugins/lists/server/routes/update_endpoint_list_item_route.ts"
               },
@@ -14545,10 +14689,6 @@
               {
                 "plugin": "elasticAssistant",
                 "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/knowledge_base/entries/update_route.ts"
-              },
-              {
-                "plugin": "elasticAssistant",
-                "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/attack_discovery/schedules/update.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -14597,6 +14737,10 @@
               {
                 "plugin": "uptime",
                 "path": "x-pack/solutions/observability/plugins/uptime/server/legacy_uptime/uptime_server.ts"
+              },
+              {
+                "plugin": "elasticAssistant",
+                "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/attack_discovery/schedules/update.ts"
               },
               {
                 "plugin": "@kbn/core",
@@ -14954,18 +15098,6 @@
                 "path": "x-pack/platform/plugins/shared/automatic_import/server/routes/analyze_api_route.ts"
               },
               {
-                "plugin": "inferenceEndpoint",
-                "path": "x-pack/platform/plugins/shared/inference_endpoint/server/routes/index.ts"
-              },
-              {
-                "plugin": "maps",
-                "path": "x-pack/platform/plugins/shared/maps/server/data_indexing/indexing_routes.ts"
-              },
-              {
-                "plugin": "maps",
-                "path": "x-pack/platform/plugins/shared/maps/server/data_indexing/indexing_routes.ts"
-              },
-              {
                 "plugin": "ml",
                 "path": "x-pack/platform/plugins/shared/ml/server/routes/trained_models.ts"
               },
@@ -15262,6 +15394,18 @@
                 "path": "x-pack/platform/plugins/shared/ml/server/routes/alerting.ts"
               },
               {
+                "plugin": "inferenceEndpoint",
+                "path": "x-pack/platform/plugins/shared/inference_endpoint/server/routes/index.ts"
+              },
+              {
+                "plugin": "maps",
+                "path": "x-pack/platform/plugins/shared/maps/server/data_indexing/indexing_routes.ts"
+              },
+              {
+                "plugin": "maps",
+                "path": "x-pack/platform/plugins/shared/maps/server/data_indexing/indexing_routes.ts"
+              },
+              {
                 "plugin": "lists",
                 "path": "x-pack/solutions/security/plugins/lists/server/routes/create_endpoint_list_item_route.ts"
               },
@@ -15407,15 +15551,7 @@
               },
               {
                 "plugin": "elasticAssistant",
-                "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/attack_discovery/schedules/create.ts"
-              },
-              {
-                "plugin": "elasticAssistant",
-                "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/attack_discovery/schedules/disable.ts"
-              },
-              {
-                "plugin": "elasticAssistant",
-                "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/attack_discovery/schedules/enable.ts"
+                "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/alert_summary/bulk_actions_route.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -15692,6 +15828,18 @@
               {
                 "plugin": "ecsDataQualityDashboard",
                 "path": "x-pack/solutions/security/plugins/ecs_data_quality_dashboard/server/routes/results/post_index_results.ts"
+              },
+              {
+                "plugin": "elasticAssistant",
+                "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/attack_discovery/schedules/create.ts"
+              },
+              {
+                "plugin": "elasticAssistant",
+                "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/attack_discovery/schedules/disable.ts"
+              },
+              {
+                "plugin": "elasticAssistant",
+                "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/attack_discovery/schedules/enable.ts"
               },
               {
                 "plugin": "dataViewFieldEditor",
@@ -16008,10 +16156,6 @@
                 "path": "x-pack/platform/plugins/shared/logs_shared/server/lib/adapters/framework/kibana_framework_adapter.ts"
               },
               {
-                "plugin": "maps",
-                "path": "x-pack/platform/plugins/shared/maps/server/data_indexing/indexing_routes.ts"
-              },
-              {
                 "plugin": "ml",
                 "path": "x-pack/platform/plugins/shared/ml/server/routes/trained_models.ts"
               },
@@ -16046,6 +16190,10 @@
               {
                 "plugin": "ml",
                 "path": "x-pack/platform/plugins/shared/ml/server/routes/anomaly_detectors.ts"
+              },
+              {
+                "plugin": "maps",
+                "path": "x-pack/platform/plugins/shared/maps/server/data_indexing/indexing_routes.ts"
               },
               {
                 "plugin": "lists",
@@ -16086,10 +16234,6 @@
               {
                 "plugin": "elasticAssistant",
                 "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/knowledge_base/entries/delete_route.ts"
-              },
-              {
-                "plugin": "elasticAssistant",
-                "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/attack_discovery/schedules/delete.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -16138,6 +16282,10 @@
               {
                 "plugin": "synthetics",
                 "path": "x-pack/solutions/observability/plugins/synthetics/server/server.ts"
+              },
+              {
+                "plugin": "elasticAssistant",
+                "path": "x-pack/solutions/security/plugins/elastic_assistant/server/routes/attack_discovery/schedules/delete.ts"
               },
               {
                 "plugin": "@kbn/core",
