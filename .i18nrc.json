@@ -101,7 +101,6 @@
     "savedObjectsFinder": "src/platform/plugins/shared/saved_objects_finder",
     "savedObjectsManagement": "src/platform/plugins/shared/saved_objects_management",
     "searchConnectors": "src/platform/packages/shared/kbn-search-connectors",
-    "searchConnectorsPlugin": "x-pack/solutions/search/plugins/search_connectors",
     "server": "src/legacy/server",
     "share": ["src/platform/plugins/shared/share", "packages/kbn-reporting-share"],
     "sharedUXPackages": ["packages/shared-ux", "src/platform/packages/shared/shared-ux", "src/platform/packages/private/shared-ux/"],

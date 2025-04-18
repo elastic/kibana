@@ -18,6 +18,7 @@ pageLoadAssetSize:
   cloudLinks: 55984
   cloudSecurityPosture: 34398
   console: 61298
+  contentConnectors: 65000
   contentManagement: 16254
   controls: 12000
   core: 564663
@@ -130,7 +131,6 @@ pageLoadAssetSize:
   screenshotMode: 17856
   screenshotting: 22870
   searchAssistant: 19831
-  searchConnectors: 65000
   searchHomepage: 19831
   searchIndices: 20519
   searchInferenceEndpoints: 20470

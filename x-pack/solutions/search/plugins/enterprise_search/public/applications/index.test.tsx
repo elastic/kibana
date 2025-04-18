@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { searchConnectorsMock } from '@kbn/search-connectors-plugin/public/plugin.mock';
+import { searchConnectorsMock } from '@kbn/content-connectors-plugin/public/plugin.mock';
 
 import React from 'react';
 

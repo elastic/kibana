@@ -58,6 +58,10 @@ export const createStackManagementNavigationTree = (): GroupDefinition => ({
               link: 'management:data_usage',
               breadcrumbStatus: 'hidden',
             },
+            {
+              link: 'management:content_connectors',
+              breadcrumbStatus: 'hidden',
+            },
           ],
         },
         {

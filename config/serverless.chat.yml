@@ -34,7 +34,6 @@ xpack.legacy_uptime.enabled: false
 xpack.ux.enabled: false
 xpack.search.enabled: false
 xpack.searchAssistant.enabled: false
-xpack.searchConnectors.enabled: false
 xpack.searchHomepage.enabled: false
 xpack.searchIndices.enabled: false
 xpack.searchInferenceEndpoints.enabled: false
@@ -46,3 +45,5 @@ xpack.cloudSecurityPosture.enabled: false
 xpack.securitySolution.enabled: false
 xpack.securitySolutionEss.enabled: false
 xpack.securitySolutionServerless.enabled: false
+## Content Connectors in stack management
+xpack.contentConnectors.enabled: false
