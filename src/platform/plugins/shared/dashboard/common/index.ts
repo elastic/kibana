@@ -16,37 +16,4 @@ export type {
 
 export type { DashboardPanelMap, DashboardPanelState } from './dashboard_container/types';
 
-export {
-  type InjectExtractDeps,
-  injectReferences,
-  extractReferences,
-} from './dashboard_saved_object/persistable_state/dashboard_saved_object_references';
-
-export {
-  createInject,
-  createExtract,
-} from './dashboard_container/persistable_state/dashboard_container_references';
-
-export { prefixReferencesFromPanel } from './dashboard_container/persistable_state/dashboard_container_references';
-
-export {
-  convertPanelsArrayToPanelMap,
-  convertPanelMapToPanelsArray,
-  generateNewPanelIds,
-} from './lib/dashboard_panel_converters';
-
-export {
-  LANDING_PAGE_PATH,
-  DASHBOARD_APP_ID,
-  LEGACY_DASHBOARD_APP_ID,
-  SEARCH_SESSION_ID,
-  UI_SETTINGS,
-} from './constants';
-
-export { CONTENT_ID, LATEST_VERSION } from './content_management';
-export {
-  cleanEmptyKeys,
-  getDashboardLocatorParamsFromEmbeddable,
-  loadDashboardHistoryLocationState,
-  DashboardAppLocatorDefinition,
-} from './locator';
+export { type InjectExtractDeps } from './dashboard_saved_object/persistable_state/dashboard_saved_object_references';

@@ -19,7 +19,8 @@ import { i18n } from '@kbn/i18n';
 import { getStateFromKbnUrl, setStateToKbnUrl, unhashUrl } from '@kbn/kibana-utils-plugin/public';
 
 import { FormattedMessage } from '@kbn/i18n-react';
-import { convertPanelMapToPanelsArray, DashboardPanelMap } from '../../../../common';
+import { convertPanelMapToPanelsArray } from '../../../../common/lib/dashboard_panel_converters';
+import { DashboardPanelMap } from '../../../../common';
 import {
   getDashboardBackupService,
   PANELS_CONTROL_GROUP_KEY,

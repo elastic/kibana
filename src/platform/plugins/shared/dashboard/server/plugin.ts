@@ -33,7 +33,7 @@ import { CONTENT_ID, LATEST_VERSION } from '../common/content_management';
 import { registerDashboardUsageCollector } from './usage/register_collector';
 import { dashboardPersistableStateServiceFactory } from './dashboard_container/dashboard_container_embeddable_factory';
 import { registerAPIRoutes } from './api';
-import { DashboardAppLocatorDefinition } from '../common';
+import { DashboardAppLocatorDefinition } from '../common/locator/locator';
 
 interface SetupDeps {
   embeddable: EmbeddableSetup;

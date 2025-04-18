@@ -29,8 +29,8 @@ import {
 } from '@kbn/presentation-publishing';
 import { i18n } from '@kbn/i18n';
 import { coreServices, usageCollectionService } from '../services/kibana_services';
-import { DashboardPanelMap, DashboardPanelState, prefixReferencesFromPanel } from '../../common';
-import type { DashboardState } from '../../common';
+import { prefixReferencesFromPanel } from '../../common/dashboard_container/persistable_state/dashboard_container_references';
+import type { DashboardPanelMap, DashboardPanelState, DashboardState } from '../../common';
 import type { initializeTrackPanel } from './track_panel';
 import { getPanelAddedSuccessString } from '../dashboard_app/_dashboard_app_strings';
 import { runPanelPlacementStrategy } from '../panel_placement/place_new_panel_strategies';
