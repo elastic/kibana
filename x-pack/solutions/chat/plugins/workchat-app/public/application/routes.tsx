@@ -41,7 +41,7 @@ export const WorkchatAppRoutes: React.FC<{}> = () => {
         <WorkChatIntegrationEditOrCreatePage />
       </Route>
       <Route path="/integrations/catalog">
-        <WorkChatCatalogPage/>
+        <WorkChatCatalogPage />
       </Route>
       <Route path="/integrations/:integrationId">
         <WorkChatIntegrationEditOrCreatePage />

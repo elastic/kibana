@@ -6,14 +6,11 @@
  */
 
 import React from 'react';
-import {
-  EuiButton,
-} from '@elastic/eui';
+import { EuiButton } from '@elastic/eui';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { useNavigation } from '../../../hooks/use_navigation';
 import { appPaths } from '../../../app_paths';
 import { integrationLabels } from '../i18n';
-
 
 export const IntegrationListView: React.FC<{ tab?: string }> = ({ tab }) => {
   const { navigateToWorkchatUrl } = useNavigation();
@@ -25,35 +22,35 @@ export const IntegrationListView: React.FC<{ tab?: string }> = ({ tab }) => {
       isSelected: tab === 'active',
       onClick: () => {
         navigateToWorkchatUrl(appPaths.integrations.list);
-      }
+      },
     },
     {
       id: 'catalog',
       label: 'Catalog',
       isSelected: tab === 'catalog',
-      onClick: () =>  {
+      onClick: () => {
         navigateToWorkchatUrl(appPaths.integrations.catalog);
-      }
+      },
     },
   ];
 
   return (
-      <KibanaPageTemplate.Header
-        pageTitle="Integrations"
-        description="Connect to your tools and data so you can easily find, understand, and act on the information that matters."
-        tabs={renderTabs()}
-        rightSideItems={[
-          <EuiButton
-            onClick={() => {
-              return navigateToWorkchatUrl(appPaths.integrations.create);
-            }}
-            iconType="plusInCircle"
-            color="primary"
-            fill
-          >
-            {integrationLabels.listView.addIntegrationLabel}
-          </EuiButton>,
-        ]}
-      />
+    <KibanaPageTemplate.Header
+      pageTitle="Integrations"
+      description="Connect to your tools and data so you can easily find, understand, and act on the information that matters."
+      tabs={renderTabs()}
+      rightSideItems={[
+        <EuiButton
+          onClick={() => {
+            return navigateToWorkchatUrl(appPaths.integrations.create);
+          }}
+          iconType="plusInCircle"
+          color="primary"
+          fill
+        >
+          {integrationLabels.listView.addIntegrationLabel}
+        </EuiButton>,
+      ]}
+    />
   );
 };

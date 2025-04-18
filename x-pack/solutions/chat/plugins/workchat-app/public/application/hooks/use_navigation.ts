@@ -30,6 +30,6 @@ export const useNavigation = () => {
 
   return {
     createWorkchatUrl,
-    navigateToWorkchatUrl
+    navigateToWorkchatUrl,
   };
 };

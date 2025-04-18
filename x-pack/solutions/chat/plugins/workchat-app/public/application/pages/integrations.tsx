@@ -14,10 +14,10 @@ import { IntegrationCatalogView } from '../components/integrations/listing/integ
 export const WorkChatIntegrationsPage: React.FC = () => {
   useBreadcrumb([{ text: 'Integrations' }]);
   const { integrations } = useIntegrationList();
-  return <IntegrationActiveView integrations={integrations}/>;
+  return <IntegrationActiveView integrations={integrations} />;
 };
 
 export const WorkChatCatalogPage: React.FC = () => {
   useBreadcrumb([{ text: 'Integrations' }]);
-  return <IntegrationCatalogView/>;
+  return <IntegrationCatalogView />;
 };

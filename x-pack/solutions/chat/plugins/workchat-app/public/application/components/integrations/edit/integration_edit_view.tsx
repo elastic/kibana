@@ -129,10 +129,10 @@ export const IntegrationEditView: React.FC<IntegrationEditViewProps> = ({ integr
   const type = params.get('type');
 
   const formMethods = useForm<IntegrationEditState>({
-    values: { 
+    values: {
       ...state,
       type: type || state.type,
-    }
+    },
   });
 
   const {
