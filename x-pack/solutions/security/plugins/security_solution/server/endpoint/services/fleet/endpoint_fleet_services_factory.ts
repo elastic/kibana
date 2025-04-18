@@ -45,9 +45,9 @@ export interface EndpointFleetServicesInterface {
    * several types of data (ex. integration policies, agent policies, etc)
    */
   ensureInCurrentSpace(
-    options: Pick<
+    checks: Pick<
       CheckInCurrentSpaceOptions,
-      'agentIds' | 'integrationPolicyIds' | 'agentPolicyIds'
+      'agentIds' | 'integrationPolicyIds' | 'agentPolicyIds' | 'options'
     >
   ): Promise<void>;
 
@@ -114,12 +114,14 @@ export class EndpointFleetServicesFactory implements EndpointFleetServicesFactor
       integrationPolicyIds = [],
       agentPolicyIds = [],
       agentIds = [],
+      options,
     }): Promise<void> => {
       return checkInCurrentSpace({
         soClient: getSoClient(),
         agentService: agent,
         agentPolicyService: agentPolicy,
         packagePolicyService: packagePolicy,
+        options,
         integrationPolicyIds,
         agentPolicyIds,
         agentIds,
@@ -175,6 +177,14 @@ interface CheckInCurrentSpaceOptions {
   agentService: AgentClient;
   agentPolicyService: AgentPolicyServiceInterface;
   packagePolicyService: PackagePolicyClient;
+  options?: {
+    /**
+     * Ensures that all IDs passed on input MUST be accessible in active space. When set to `false`,
+     * at least 1 of the IDs passed on input must be accessible.
+     * Defaults to `true` (all must be accessible)
+     */
+    matchAll?: boolean;
+  };
   agentIds?: string[];
   agentPolicyIds?: string[];
   integrationPolicyIds?: string[];
@@ -191,6 +201,7 @@ interface CheckInCurrentSpaceOptions {
  * @param integrationPolicyIds
  * @param agentPolicyIds
  * @param agentIds
+ * @param options
  *
  * @throws NotFoundError
  */
@@ -202,6 +213,7 @@ const checkInCurrentSpace = async ({
   integrationPolicyIds = [],
   agentPolicyIds = [],
   agentIds = [],
+  options: { matchAll = true } = {},
 }: CheckInCurrentSpaceOptions): Promise<void> => {
   const handlePromiseErrors = (err: Error): never => {
     // We wrap the error with our own Error class so that the API can property return a 404
@@ -217,14 +229,42 @@ const checkInCurrentSpace = async ({
   };
 
   await Promise.all([
-    agentIds.length ? agentService.getByIds(agentIds).catch(handlePromiseErrors) : null,
+    agentIds.length
+      ? agentService
+          .getByIds(agentIds, { ignoreMissing: !matchAll })
+          .catch(handlePromiseErrors)
+          .then((response) => {
+            // When `matchAll` is false, the results must have at least matched 1 id
+            if (!matchAll && response.length === 0) {
+              throw new NotFoundError(`Agent ID(s) not found: [${agentIds.join(', ')}]`);
+            }
+          })
+      : null,
 
     agentPolicyIds.length
-      ? agentPolicyService.getByIds(soClient, agentPolicyIds).catch(handlePromiseErrors)
+      ? agentPolicyService
+          .getByIds(soClient, agentPolicyIds, { ignoreMissing: !matchAll })
+          .catch(handlePromiseErrors)
+          .then((response) => {
+            if (!matchAll && response.length === 0) {
+              throw new NotFoundError(
+                `Agent policy ID(s) not found: [${agentPolicyIds.join(', ')}]`
+              );
+            }
+          })
       : null,
 
     integrationPolicyIds.length
-      ? packagePolicyService.getByIDs(soClient, integrationPolicyIds).catch(handlePromiseErrors)
+      ? packagePolicyService
+          .getByIDs(soClient, integrationPolicyIds, { ignoreMissing: !matchAll })
+          .catch(handlePromiseErrors)
+          .then((response) => {
+            if (!matchAll && response.length === 0) {
+              throw new NotFoundError(
+                `Integration policy ID(s) not found: [${integrationPolicyIds.join(', ')}]`
+              );
+            }
+          })
       : null,
   ]);
 };
