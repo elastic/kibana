@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { memoize } from 'lodash';
 import { GeneratorFunction } from '../../types';
 import { replaceMetricsWithShapes } from '../../lib/replace_metrics_with_shapes';
 
@@ -19,19 +18,17 @@ const randomBetween = (min = 0, max = 1, step = 1) => {
 };
 
 const networkDataCount: Record<string, number> = {};
-const generateNetworkData = memoize(
-  (_timestamp: string, host: string, name: string, value: number) => {
-    const key = `${host}:${name}`;
-    if (networkDataCount[key] == null) {
-      networkDataCount[key] = 0;
-    }
-    if (networkDataCount[key] + value > Number.MAX_SAFE_INTEGER) {
-      networkDataCount[key] = 0;
-    }
-    networkDataCount[key] += value;
-    return networkDataCount[key];
+const generateNetworkData = (host: string, name: string, value: number) => {
+  const key = `${host}:${name}`;
+  if (networkDataCount[key] == null) {
+    networkDataCount[key] = 0;
   }
-);
+  if (networkDataCount[key] + value > Number.MAX_SAFE_INTEGER) {
+    networkDataCount[key] = 0;
+  }
+  networkDataCount[key] += value;
+  return networkDataCount[key];
+};
 
 export const generateEvent: GeneratorFunction = (config, schedule, index, timestamp) => {
   const groupIndex = createGroupIndex(index);
@@ -128,20 +125,10 @@ export const generateEvent: GeneratorFunction = (config, schedule, index, timest
         network: {
           name: 'eth0',
           in: {
-            bytes: generateNetworkData(
-              timestamp.toISOString(),
-              `host-${index}`,
-              'eth0-rx',
-              rxBytes
-            ),
+            bytes: generateNetworkData(`host-${index}`, 'eth0-rx', rxBytes),
           },
           out: {
-            bytes: generateNetworkData(
-              timestamp.toISOString(),
-              `host-${index}`,
-              'eth0-tx',
-              txBytes
-            ),
+            bytes: generateNetworkData(`host-${index}`, 'eth0-tx', txBytes),
           },
         },
         core: {
@@ -187,20 +174,10 @@ export const generateEvent: GeneratorFunction = (config, schedule, index, timest
         network: {
           name: 'eth1',
           in: {
-            bytes: generateNetworkData(
-              timestamp.toISOString(),
-              `host-${index}`,
-              'eth1-rx',
-              rxBytes
-            ),
+            bytes: generateNetworkData(`host-${index}`, 'eth1-rx', rxBytes),
           },
           out: {
-            bytes: generateNetworkData(
-              timestamp.toISOString(),
-              `host-${index}`,
-              'eth1-tx',
-              txBytes
-            ),
+            bytes: generateNetworkData(`host-${index}`, 'eth1-tx', txBytes),
           },
         },
         core: {
