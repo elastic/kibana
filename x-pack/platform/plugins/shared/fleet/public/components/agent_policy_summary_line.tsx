@@ -123,7 +123,7 @@ export const AgentPolicySummaryLine = memo<{
             content={
               <FormattedMessage
                 id="xpack.fleet.agentPolicySummaryLine.outdatedPolicyWarningExpanded"
-                defaultMessage="The agent is not synced to the latest revision of its policy. Check the connection of the agent to its fleet server."
+                defaultMessage="This agent is not synced to the latest revision of its policy. Check its connection to the fleet server."
               />
             }
           >
