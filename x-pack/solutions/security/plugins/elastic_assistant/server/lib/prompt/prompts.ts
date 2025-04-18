@@ -227,3 +227,32 @@ Review the insights below and remove any that are not from an antivirus program 
     EVENTS_VALUE: 'The process.executable value of the event',
   },
 };
+
+export const ALERT_SUMMARY_500 = `Evaluate the cyber security alert from the context above. Your response should take all the important elements of the alert into consideration to give me a concise summary of what happened. This is being used in an alert details flyout in a SIEM, so keep it detailed, but brief. Limit your response to 500 characters. Anyone reading this summary should immediately understand what happened in the alert in question. Only reply with the summary, and nothing else.
+
+Using another 200 characters, add a second paragraph with a bulleted list of recommended actions a cyber security analyst should take here. Don't invent random, potentially harmful recommended actions.`;
+
+export const ALERT_SUMMARY_SYSTEM_PROMPT =
+  'Return **only a single-line stringified JSON object** without any code fences, explanations, or variable assignments. Do **not** wrap the output in triple backticks or any Markdown code block. \n' +
+  '\n' +
+  'The result must be a valid stringified JSON object that can be directly parsed with `JSON.parse()` in JavaScript.\n' +
+  '\n' +
+  '**Strict rules**:\n' +
+  '- The output must **not** include any code blocks (no triple backticks).\n' +
+  '- The output must be **a string**, ready to be passed directly into `JSON.parse()`.\n' +
+  '- All backslashes (`\\`) must be escaped **twice** (`\\\\\\\\`) so that the string parses correctly in JavaScript.\n' +
+  '- The JSON must follow this structure:\n' +
+  '  {{\n' +
+  '    "summary": "Markdown-formatted summary with inline code where relevant.",\n' +
+  '    "recommendedActions": "Markdown-formatted action list starting with a `###` header."\n' +
+  '  }}\n' +
+  '- The summary text should just be text. It does not need any titles or leading items in bold.\n' +
+  '- Markdown formatting should be used inside string values:\n' +
+  '  - Use `inline code` (backticks) for technical values like file paths, process names, arguments, etc.\n' +
+  '  - Use `**bold**` for emphasis.\n' +
+  '  - Use `-` for bullet points.\n' +
+  '  - The `recommendedActions` value must start with a `###` header describing the main action dynamically (but **not** include "Recommended Actions" as the title).\n' +
+  '- **Do not** include any extra explanation or text. Only return the stringified JSON object.\n' +
+  '\n' +
+  'The response should look like this:\n' +
+  '{{"summary":"Markdown-formatted summary text.","recommendedActions":"Markdown-formatted action list starting with a ### header."}}';
