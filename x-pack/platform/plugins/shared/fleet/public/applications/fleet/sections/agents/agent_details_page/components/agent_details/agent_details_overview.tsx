@@ -169,16 +169,30 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
                     <AgentPolicySummaryLine policy={agentPolicy} agent={agent} />
                   </EuiFlexItem>
                   {isOutdated && (
-                    <EuiFlexItem grow={false}>
-                      <EuiText color="subdued" size="xs">
-                        <EuiIcon size="m" type="warning" color="warning" />
-                        &nbsp;
+                    <EuiToolTip
+                      content={
                         <FormattedMessage
                           id="xpack.fleet.agentPolicySummaryLine.outdatedPolicyWarning"
-                          defaultMessage="Outdated policy"
+                          defaultMessage="This agent is not synced to the latest revision of the assigned agent policy. Check the connection of the agent to its assigned fleet server."
                         />
-                      </EuiText>
-                    </EuiFlexItem>
+                      }
+                    >
+                      <EuiFlexItem grow={false}>
+                        <EuiFlexGroup alignItems="flexStart" gutterSize="s">
+                          <EuiFlexItem>
+                            <EuiIcon size="m" type="warning" color="warning" />
+                          </EuiFlexItem>
+                          <EuiFlexItem>
+                            <EuiText color="subdued" size="xs">
+                              <FormattedMessage
+                                id="xpack.fleet.agentPolicySummaryLine.outdatedPolicyWarning"
+                                defaultMessage="Outdated policy"
+                              />
+                            </EuiText>
+                          </EuiFlexItem>
+                        </EuiFlexGroup>
+                      </EuiFlexItem>
+                    </EuiToolTip>
                   )}
                 </EuiFlexGroup>
               ) : (
