@@ -96,7 +96,6 @@ export const transformCreateBody = <Params extends RuleParams = never>({
     ...(createBody.throttle ? { throttle: createBody.throttle } : {}),
     params: createBody.params,
     schedule: createBody.schedule,
-    artifacts: createBody.artifacts,
     actions: transformCreateBodyActions(actions),
     systemActions: transformCreateBodySystemActions(systemActions),
     ...(createBody.notify_when ? { notifyWhen: createBody.notify_when } : {}),
