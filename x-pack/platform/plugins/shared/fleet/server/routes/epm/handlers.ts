@@ -34,6 +34,7 @@ import type {
   GetInstalledPackagesResponse,
   GetEpmDataStreamsResponse,
   AssetSOObject,
+  PackageSpecCategory,
 } from '../../../common/types';
 import type {
   GetCategoriesRequestSchema,
@@ -402,7 +403,11 @@ export const updateCustomIntegrationHandler: FleetRequestHandler<
   const { pkgName } = request.params as unknown as TypeOf<
     typeof CustomIntegrationRequestSchema.params
   >;
-  const result = await updateCustomIntegration(esClient, soClient, pkgName, fields);
+
+  const result = await updateCustomIntegration(esClient, soClient, pkgName, {
+    ...fields,
+    categories: fields.categories?.map((category) => category as PackageSpecCategory),
+  });
 
   return response.ok({
     body: {

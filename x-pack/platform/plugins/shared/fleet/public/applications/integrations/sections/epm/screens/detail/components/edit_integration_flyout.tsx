@@ -18,6 +18,9 @@ import {
   EuiMarkdownEditor,
   EuiButton,
   EuiButtonEmpty,
+  EuiComboBox,
+  EuiFormRow,
+  EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -25,7 +28,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { FleetStartServices } from '../../../../../../../plugin';
 
-import { useUpdateCustomIntegration } from '../../../../../../../hooks';
+import { useGetCategoriesQuery, useUpdateCustomIntegration } from '../../../../../../../hooks';
 
 import type { PackageInfo } from '../../../../../types';
 
@@ -39,6 +42,7 @@ export const EditIntegrationFlyout: React.FunctionComponent<{
   integration: string | null;
   services: FleetStartServices;
   onComplete: (arg0: {}) => void;
+  existingCategories: any[];
 }> = ({
   onClose,
   integrationName,
@@ -49,17 +53,36 @@ export const EditIntegrationFlyout: React.FunctionComponent<{
   integration,
   services,
   onComplete,
+  existingCategories,
 }) => {
   const updateCustomIntegration = useUpdateCustomIntegration;
+
+  const { data: categoriesData } = useGetCategoriesQuery({
+    prerelease: true,
+  });
+  // we only need the parent categories for now, filter out any with parent_id fields to only leave the parents
+  const parentCategories = categoriesData?.items.filter((item) => item.parent_id === undefined);
+
+  // since the existing integration categories are stored as an array of ids, we need to map them to the titles from the parentCategories
+  const initialSelectedCategories = existingCategories.map(
+    (category) => parentCategories?.find((cat) => cat.id === category)?.title
+  );
+
+  // state section
   const [editedContent, setEditedContent] = useState(readMeContent);
   const [savingEdits, setSavingEdits] = useState(false);
+  const [selectedCategories, setSelectedCategories] = useState<string[]>(
+    initialSelectedCategories.filter((category): category is string => category !== undefined)
+  );
 
   const saveIntegrationEdits = async (updatedReadMe: string | undefined) => {
     setSavingEdits(true);
 
     const res = await updateCustomIntegration(packageInfo?.name || '', {
       readMeData: updatedReadMe,
-      categories: [],
+      categories: selectedCategories
+        .map((title) => parentCategories?.find((cat) => cat.title === title)?.id) // map the chosen titles back to ids as we store those
+        .filter((id): id is string => id !== undefined), // filter out any undefined values due to typing
     });
 
     setSavingEdits(false);
@@ -108,6 +131,41 @@ export const EditIntegrationFlyout: React.FunctionComponent<{
         </EuiFlexGroup>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
+        <EuiFormRow
+          fullWidth
+          label={
+            <FormattedMessage
+              id="xpack.fleet.epm.editIntegrationFlyout.categoriesLabel"
+              defaultMessage="Integration Categories"
+            />
+          }
+          helpText={
+            <FormattedMessage
+              id="xpack.fleet.epm.editIntegrationFlyout.categoriesHelpText"
+              defaultMessage="You can assign up to two categories to your integration."
+            />
+          }
+        >
+          <EuiComboBox
+            fullWidth
+            data-test-subj="editIntegrationFlyoutCategories"
+            aria-label="Accessible screen reader label"
+            placeholder="Select categories"
+            selectedOptions={selectedCategories.map((category) => ({
+              label: category,
+            }))}
+            options={parentCategories?.map((category) => ({
+              label: category.title,
+              value: category.id,
+              disabled: selectedCategories.length >= 2,
+            }))}
+            onChange={(selectedOptions) => {
+              const selectedValues = selectedOptions.map((option) => option.label);
+              setSelectedCategories(selectedValues);
+            }}
+          />
+        </EuiFormRow>
+        <EuiSpacer size="m" />
         <EuiMarkdownEditor
           aria-label="Edit"
           placeholder={`${i18n.translate(
