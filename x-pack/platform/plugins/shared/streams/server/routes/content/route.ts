@@ -5,18 +5,21 @@
  * 2.0.
  */
 
-import { Readable } from 'stream';
-import { z } from '@kbn/zod';
+import { createSavedObjectsStreamFromNdJson } from '@kbn/core-saved-objects-server-internal/src/routes/utils';
+import { ContentPack, contentPackSchema } from '@kbn/streams-schema';
 import {
   createConcatStream,
   createListStream,
   createMapStream,
   createPromiseFromStreams,
 } from '@kbn/utils';
-import { createSavedObjectsStreamFromNdJson } from '@kbn/core-saved-objects-server-internal/src/routes/utils';
-import { ContentPack, contentPackSchema } from '@kbn/streams-schema';
-import { createServerRoute } from '../create_server_route';
+import { z } from '@kbn/zod';
+import { Readable } from 'stream';
+import { Asset } from '../../../common';
+import { DashboardAsset, DashboardLink } from '../../../common/assets';
+import { ASSET_ID, ASSET_TYPE } from '../../lib/streams/assets/fields';
 import { StatusError } from '../../lib/streams/errors/status_error';
+import { createServerRoute } from '../create_server_route';
 
 const exportContentRoute = createServerRoute({
   endpoint: 'POST /api/streams/{name}/content/export 2023-10-31',
@@ -42,9 +45,11 @@ const exportContentRoute = createServerRoute({
 
     await streamsClient.ensureStream(params.path.name);
 
-    const dashboards = await assetClient
-      .getAssets({ entityId: params.path.name, entityType: 'stream' })
-      .then((assets) => assets.filter(({ assetType }) => assetType === 'dashboard'));
+    function isDashboard(asset: Asset): asset is DashboardAsset {
+      return asset[ASSET_TYPE] === 'dashboard';
+    }
+
+    const dashboards = (await assetClient.getAssets(params.path.name)).filter(isDashboard);
     if (dashboards.length === 0) {
       throw new StatusError(`No dashboards are linked to [${params.path.name}] stream`, 400);
     }
@@ -52,7 +57,7 @@ const exportContentRoute = createServerRoute({
     const exporter = (await context.core).savedObjects.getExporter(soClient);
     const exportStream = await exporter.exportByObjects({
       request,
-      objects: dashboards.map((dashboard) => ({ id: dashboard.assetId, type: 'dashboard' })),
+      objects: dashboards.map((dashboard) => ({ id: dashboard[ASSET_ID], type: 'dashboard' })),
       includeReferencesDeep: true,
     });
 
@@ -131,19 +136,18 @@ const importContentRoute = createServerRoute({
       overwrite: true,
     });
 
-    const createdAssets = (successResults ?? [])
-      .filter((savedObject) => savedObject.type === 'dashboard')
-      .map((dashboard) => ({
-        assetType: 'dashboard' as const,
-        assetId: dashboard.destinationId ?? dashboard.id,
-      }));
+    const createdAssets: Array<Omit<DashboardLink, 'asset.uuid'>> =
+      successResults
+        ?.filter((savedObject) => savedObject.type === 'dashboard')
+        .map((dashboard) => ({
+          [ASSET_TYPE]: 'dashboard',
+          [ASSET_ID]: dashboard.destinationId ?? dashboard.id,
+        })) ?? [];
 
     if (createdAssets.length > 0) {
       await assetClient.bulk(
-        { entityId: params.path.name, entityType: 'stream' },
-        createdAssets.map((asset) => ({
-          index: { asset },
-        }))
+        params.path.name,
+        createdAssets.map((asset) => ({ index: { asset } }))
       );
     }
 

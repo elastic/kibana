@@ -12,7 +12,7 @@ import React, { useCallback } from 'react';
 import { useController } from 'react-hook-form';
 import { useSourceIndicesFields } from '../../hooks/use_source_indices_field';
 import { useUsageTracker } from '../../hooks/use_usage_tracker';
-import { ChatForm, ChatFormFields } from '../../types';
+import { PlaygroundForm, PlaygroundFormFields } from '../../types';
 import { AnalyticsEvents } from '../../analytics/constants';
 import { ContextFieldsSelect } from './context_fields_select';
 
@@ -23,13 +23,13 @@ export const EditContextPanel: React.FC = () => {
   const {
     field: { onChange: onChangeSize, value: docSize },
   } = useController({
-    name: ChatFormFields.docSize,
+    name: PlaygroundFormFields.docSize,
   });
 
   const {
     field: { onChange: onChangeSourceFields, value: sourceFields },
-  } = useController<ChatForm, ChatFormFields.sourceFields>({
-    name: ChatFormFields.sourceFields,
+  } = useController<PlaygroundForm, PlaygroundFormFields.sourceFields>({
+    name: PlaygroundFormFields.sourceFields,
   });
 
   const updateSourceField = useCallback(

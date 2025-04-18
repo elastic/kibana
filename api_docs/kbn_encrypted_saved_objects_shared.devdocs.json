@@ -1,0 +1,197 @@
+{
+  "id": "@kbn/encrypted-saved-objects-shared",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/encrypted-saved-objects-shared",
+        "id": "def-common.EncryptedSavedObjectsClient",
+        "type": "Interface",
+        "tags": [],
+        "label": "EncryptedSavedObjectsClient",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-encrypted-saved-objects-shared/src/encrypted_saved_objects_client_types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/encrypted-saved-objects-shared",
+            "id": "def-common.EncryptedSavedObjectsClient.getDecryptedAsInternalUser",
+            "type": "Function",
+            "tags": [],
+            "label": "getDecryptedAsInternalUser",
+            "description": [],
+            "signature": [
+              "<T = unknown>(type: string, id: string, options?: ",
+              "SavedObjectsBaseOptions",
+              " | undefined) => Promise<",
+              "SavedObject",
+              "<T>>"
+            ],
+            "path": "src/platform/packages/shared/kbn-encrypted-saved-objects-shared/src/encrypted_saved_objects_client_types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/encrypted-saved-objects-shared",
+                "id": "def-common.EncryptedSavedObjectsClient.getDecryptedAsInternalUser.$1",
+                "type": "string",
+                "tags": [],
+                "label": "type",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/shared/kbn-encrypted-saved-objects-shared/src/encrypted_saved_objects_client_types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/encrypted-saved-objects-shared",
+                "id": "def-common.EncryptedSavedObjectsClient.getDecryptedAsInternalUser.$2",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/shared/kbn-encrypted-saved-objects-shared/src/encrypted_saved_objects_client_types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/encrypted-saved-objects-shared",
+                "id": "def-common.EncryptedSavedObjectsClient.getDecryptedAsInternalUser.$3",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "SavedObjectsBaseOptions",
+                  " | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-encrypted-saved-objects-shared/src/encrypted_saved_objects_client_types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/encrypted-saved-objects-shared",
+            "id": "def-common.EncryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser",
+            "type": "Function",
+            "tags": [],
+            "label": "createPointInTimeFinderDecryptedAsInternalUser",
+            "description": [
+              "\nAPI method, that can be used to help page through large sets of saved objects and returns decrypted properties in result SO.\nIts interface matches interface of the corresponding Saved Objects API `createPointInTimeFinder` method:\n"
+            ],
+            "signature": [
+              "<T = unknown, A = unknown>(findOptions: ",
+              "SavedObjectsCreatePointInTimeFinderOptions",
+              ", dependencies?: ",
+              "SavedObjectsCreatePointInTimeFinderDependencies",
+              " | undefined) => Promise<",
+              "ISavedObjectsPointInTimeFinder",
+              "<T, A>>"
+            ],
+            "path": "src/platform/packages/shared/kbn-encrypted-saved-objects-shared/src/encrypted_saved_objects_client_types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/encrypted-saved-objects-shared",
+                "id": "def-common.EncryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "findOptions",
+                "description": [
+                  "matches interface of corresponding argument of Saved Objects API `createPointInTimeFinder` {@link SavedObjectsCreatePointInTimeFinderOptions }"
+                ],
+                "signature": [
+                  "SavedObjectsCreatePointInTimeFinderOptions"
+                ],
+                "path": "src/platform/packages/shared/kbn-encrypted-saved-objects-shared/src/encrypted_saved_objects_client_types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/encrypted-saved-objects-shared",
+                "id": "def-common.EncryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "dependencies",
+                "description": [
+                  "matches interface of corresponding argument of Saved Objects API `createPointInTimeFinder` {@link SavedObjectsCreatePointInTimeFinderDependencies }"
+                ],
+                "signature": [
+                  "SavedObjectsCreatePointInTimeFinderDependencies",
+                  " | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-encrypted-saved-objects-shared/src/encrypted_saved_objects_client_types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/encrypted-saved-objects-shared",
+        "id": "def-common.EncryptedSavedObjectsClientOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "EncryptedSavedObjectsClientOptions",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-encrypted-saved-objects-shared/src/encrypted_saved_objects_client_types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/encrypted-saved-objects-shared",
+            "id": "def-common.EncryptedSavedObjectsClientOptions.includedHiddenTypes",
+            "type": "Array",
+            "tags": [],
+            "label": "includedHiddenTypes",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-encrypted-saved-objects-shared/src/encrypted_saved_objects_client_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

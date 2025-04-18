@@ -12,10 +12,12 @@ import { Fields } from '../lib/entity';
 import { Serializable } from '../lib/serializable';
 
 export type SynthtraceESAction = { create: BulkCreateOperation } | { index: BulkIndexOperation };
+export type SynthtraceDynamicTemplate = Record<string, string>;
 
 export type ESDocumentWithOperation<TFields extends Fields> = {
   _index?: string;
   _action?: SynthtraceESAction;
+  _dynamicTemplates?: SynthtraceDynamicTemplate;
 } & TFields;
 
 export type SynthtraceGenerator<TFields extends Fields> = Generator<Serializable<TFields>>;

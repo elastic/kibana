@@ -17,7 +17,6 @@ import {
   type ThunkDispatch,
 } from '@reduxjs/toolkit';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
-import { i18n } from '@kbn/i18n';
 import type { TabItem } from '@kbn/unified-tabs';
 import type { DiscoverCustomizationContext } from '../../../../customizations';
 import type { DiscoverServices } from '../../../../build_services';
@@ -29,12 +28,8 @@ import {
   type TabState,
 } from './types';
 import { loadDataViewList, setTabs } from './actions';
-import { selectAllTabs, selectCurrentTab } from './selectors';
-
-const DEFAULT_TAB_LABEL = i18n.translate('discover.defaultTabLabel', {
-  defaultMessage: 'Untitled session',
-});
-const DEFAULT_TAB_REGEX = new RegExp(`^${DEFAULT_TAB_LABEL}( \\d+)?$`);
+import { selectAllTabs, selectTab } from './selectors';
+import { createTabItem } from './utils';
 
 export const defaultTabState: Omit<TabState, keyof TabItem> = {
   dataViewId: undefined,
@@ -67,23 +62,22 @@ const initialState: DiscoverInternalState = {
   savedDataViews: [],
   expandedDoc: undefined,
   isESQLToDataViewTransitionModalVisible: false,
-  tabs: { byId: {}, allIds: [], currentId: '' },
+  tabs: { byId: {}, allIds: [], unsafeCurrentId: '' },
 };
 
-export const createTabItem = (allTabs: TabState[]): TabItem => {
-  const id = uuidv4();
-  const untitledTabCount = allTabs.filter((tab) => DEFAULT_TAB_REGEX.test(tab.label.trim())).length;
-  const label =
-    untitledTabCount > 0 ? `${DEFAULT_TAB_LABEL} ${untitledTabCount}` : DEFAULT_TAB_LABEL;
+export type TabActionPayload<T extends { [key: string]: unknown } = {}> = { tabId: string } & T;
 
-  return { id, label };
-};
+type TabAction<T extends { [key: string]: unknown } = {}> = PayloadAction<TabActionPayload<T>>;
 
-const withCurrentTab = (state: DiscoverInternalState, fn: (tab: TabState) => void) => {
-  const currentTab = selectCurrentTab(state);
+const withTab = <TAction extends TabAction>(
+  state: DiscoverInternalState,
+  action: TAction,
+  fn: (tab: TabState) => void
+) => {
+  const tab = selectTab(state, action.payload.tabId);
 
-  if (currentTab) {
-    fn(currentTab);
+  if (tab) {
+    fn(tab);
   }
 };
 
@@ -107,21 +101,21 @@ export const internalStateSlice = createSlice({
         {}
       );
       state.tabs.allIds = action.payload.allTabs.map((tab) => tab.id);
-      state.tabs.currentId = action.payload.selectedTabId;
+      state.tabs.unsafeCurrentId = action.payload.selectedTabId;
     },
 
-    setDataViewId: (state, action: PayloadAction<string | undefined>) =>
-      withCurrentTab(state, (tab) => {
-        if (action.payload !== tab.dataViewId) {
+    setDataViewId: (state, action: TabAction<{ dataViewId: string | undefined }>) =>
+      withTab(state, action, (tab) => {
+        if (action.payload.dataViewId !== tab.dataViewId) {
           state.expandedDoc = undefined;
         }
 
-        tab.dataViewId = action.payload;
+        tab.dataViewId = action.payload.dataViewId;
       }),
 
-    setIsDataViewLoading: (state, action: PayloadAction<boolean>) =>
-      withCurrentTab(state, (tab) => {
-        tab.isDataViewLoading = action.payload;
+    setIsDataViewLoading: (state, action: TabAction<{ isDataViewLoading: boolean }>) =>
+      withTab(state, action, (tab) => {
+        tab.isDataViewLoading = action.payload.isDataViewLoading;
       }),
 
     setDefaultProfileAdHocDataViewIds: (state, action: PayloadAction<string[]>) => {
@@ -132,17 +126,23 @@ export const internalStateSlice = createSlice({
       state.expandedDoc = action.payload;
     },
 
-    setDataRequestParams: (state, action: PayloadAction<InternalStateDataRequestParams>) =>
-      withCurrentTab(state, (tab) => {
-        tab.dataRequestParams = action.payload;
+    setDataRequestParams: (
+      state,
+      action: TabAction<{ dataRequestParams: InternalStateDataRequestParams }>
+    ) =>
+      withTab(state, action, (tab) => {
+        tab.dataRequestParams = action.payload.dataRequestParams;
       }),
 
     setOverriddenVisContextAfterInvalidation: (
       state,
-      action: PayloadAction<TabState['overriddenVisContextAfterInvalidation']>
+      action: TabAction<{
+        overriddenVisContextAfterInvalidation: TabState['overriddenVisContextAfterInvalidation'];
+      }>
     ) =>
-      withCurrentTab(state, (tab) => {
-        tab.overriddenVisContextAfterInvalidation = action.payload;
+      withTab(state, action, (tab) => {
+        tab.overriddenVisContextAfterInvalidation =
+          action.payload.overriddenVisContextAfterInvalidation;
       }),
 
     setIsESQLToDataViewTransitionModalVisible: (state, action: PayloadAction<boolean>) => {
@@ -151,26 +151,32 @@ export const internalStateSlice = createSlice({
 
     setResetDefaultProfileState: {
       prepare: (
-        resetDefaultProfileState: Omit<TabState['resetDefaultProfileState'], 'resetId'>
+        payload: TabActionPayload<{
+          resetDefaultProfileState: Omit<TabState['resetDefaultProfileState'], 'resetId'>;
+        }>
       ) => ({
         payload: {
-          ...resetDefaultProfileState,
-          resetId: uuidv4(),
+          ...payload,
+          resetDefaultProfileState: {
+            ...payload.resetDefaultProfileState,
+            resetId: uuidv4(),
+          },
         },
       }),
-      reducer: (state, action: PayloadAction<TabState['resetDefaultProfileState']>) =>
-        withCurrentTab(state, (tab) => {
-          tab.resetDefaultProfileState = action.payload;
+      reducer: (
+        state,
+        action: TabAction<{ resetDefaultProfileState: TabState['resetDefaultProfileState'] }>
+      ) =>
+        withTab(state, action, (tab) => {
+          tab.resetDefaultProfileState = action.payload.resetDefaultProfileState;
         }),
     },
 
-    resetOnSavedSearchChange: (state) => {
-      withCurrentTab(state, (tab) => {
+    resetOnSavedSearchChange: (state, action: TabAction) =>
+      withTab(state, action, (tab) => {
         tab.overriddenVisContextAfterInvalidation = undefined;
-      });
-
-      state.expandedDoc = undefined;
-    },
+        state.expandedDoc = undefined;
+      }),
   },
   extraReducers: (builder) => {
     builder.addCase(loadDataViewList.fulfilled, (state, action) => {

@@ -54,6 +54,7 @@ import { useLicense } from '../hooks/use_license';
 import { PromptEditor } from '../prompt_editor/prompt_editor';
 import { useKibana } from '../hooks/use_kibana';
 import { ChatBanner } from './chat_banner';
+import { useConversationContextMenu } from '../hooks';
 
 const fullHeightClassName = css`
   height: 100%;
@@ -229,6 +230,7 @@ export function ChatBody({
         namespace,
         public: isPublic,
         '@timestamp': timestamp,
+        archived,
       } = conversation.value;
 
       const conversationWithoutMessagesAndTitle: ChatFeedback['conversation'] = {
@@ -238,6 +240,7 @@ export function ChatBody({
         numeric_labels: numericLabels,
         namespace,
         public: isPublic,
+        archived,
         conversation: { id, last_updated: lastUpdated },
       };
 
@@ -364,10 +367,30 @@ export function ChatBody({
     refreshConversations();
   };
 
+  const { copyConversationToClipboard, copyUrl, deleteConversation, archiveConversation } =
+    useConversationContextMenu({
+      setIsUpdatingConversationList,
+      refreshConversations,
+    });
+
+  const handleArchiveConversation = async (id: string, isArchived: boolean) => {
+    await archiveConversation(id, isArchived);
+    conversation.refresh();
+  };
+
   const isPublic = conversation.value?.public;
-  const showPromptEditor = !isPublic || isConversationOwnedByCurrentUser;
-  const bannerTitle = i18n.translate('xpack.aiAssistant.shareBanner.title', {
+  const isArchived = !!conversation.value?.archived;
+  const showPromptEditor = !isArchived && (!isPublic || isConversationOwnedByCurrentUser);
+
+  const sharedBannerTitle = i18n.translate('xpack.aiAssistant.shareBanner.title', {
     defaultMessage: 'This conversation is shared with your team.',
+  });
+  const viewerDescription = i18n.translate('xpack.aiAssistant.banner.viewerDescription', {
+    defaultMessage:
+      "You can't edit or continue this conversation, but you can duplicate it into a new private conversation. The original conversation will remain unchanged.",
+  });
+  const duplicateButton = i18n.translate('xpack.aiAssistant.duplicateButton', {
+    defaultMessage: 'Duplicate',
   });
 
   let sharedBanner = null;
@@ -375,16 +398,11 @@ export function ChatBody({
   if (isPublic && !isConversationOwnedByCurrentUser) {
     sharedBanner = (
       <ChatBanner
-        title={bannerTitle}
-        description={i18n.translate('xpack.aiAssistant.shareBanner.viewerDescription', {
-          defaultMessage:
-            "You can't edit or continue this conversation, but you can duplicate it into a new private conversation. The original conversation will remain unchanged.",
-        })}
+        title={sharedBannerTitle}
+        description={viewerDescription}
         button={
           <EuiButton onClick={duplicateConversation} iconType="copy" size="s">
-            {i18n.translate('xpack.aiAssistant.duplicateButton', {
-              defaultMessage: 'Duplicate',
-            })}
+            {duplicateButton}
           </EuiButton>
         }
       />
@@ -392,11 +410,53 @@ export function ChatBody({
   } else if (isConversationOwnedByCurrentUser && isPublic) {
     sharedBanner = (
       <ChatBanner
-        title={bannerTitle}
+        title={sharedBannerTitle}
         description={i18n.translate('xpack.aiAssistant.shareBanner.ownerDescription', {
           defaultMessage:
             'Any further edits you do to this conversation will be shared with the rest of the team.',
         })}
+      />
+    );
+  }
+
+  let archivedBanner = null;
+  const archivedBannerTitle = i18n.translate('xpack.aiAssistant.archivedBanner.title', {
+    defaultMessage: 'This conversation has been archived.',
+  });
+
+  if (isConversationOwnedByCurrentUser) {
+    archivedBanner = (
+      <ChatBanner
+        title={archivedBannerTitle}
+        icon="folderOpen"
+        description={i18n.translate('xpack.aiAssistant.archivedBanner.ownerDescription', {
+          defaultMessage:
+            "You can't edit or continue this conversation as it's been archived, but you can unarchive it.",
+        })}
+        button={
+          <EuiButton
+            onClick={() => handleArchiveConversation(conversationId!, !isArchived)}
+            iconType="folderOpen"
+            size="s"
+          >
+            {i18n.translate('xpack.aiAssistant.unarchiveButton', {
+              defaultMessage: 'Unarchive',
+            })}
+          </EuiButton>
+        }
+      />
+    );
+  } else {
+    archivedBanner = (
+      <ChatBanner
+        title={archivedBannerTitle}
+        icon="folderOpen"
+        description={viewerDescription}
+        button={
+          <EuiButton onClick={duplicateConversation} iconType="copy" size="s">
+            {duplicateButton}
+          </EuiButton>
+        }
       />
     );
   }
@@ -483,6 +543,7 @@ export function ChatBody({
                   }
                   onStopGenerating={stop}
                   onActionClick={handleActionClick}
+                  isArchived={isArchived}
                 />
               )}
             </EuiPanel>
@@ -496,12 +557,13 @@ export function ChatBody({
         ) : null}
 
         <>
-          {conversationId ? sharedBanner : null}
+          {conversationId && !isArchived ? sharedBanner : null}
+          {conversationId && isArchived ? archivedBanner : null}
           {showPromptEditor ? (
             <EuiFlexItem
               grow={false}
               className={promptEditorClassname(euiTheme)}
-              style={{ height: promptEditorHeight }}
+              css={{ height: promptEditorHeight }}
             >
               <EuiHorizontalRule margin="none" />
               <EuiPanel
@@ -605,11 +667,13 @@ export function ChatBody({
           navigateToConversation={
             initialMessages?.length && !initialConversationId ? undefined : navigateToConversation
           }
-          setIsUpdatingConversationList={setIsUpdatingConversationList}
-          refreshConversations={refreshConversations}
           updateDisplayedConversation={updateDisplayedConversation}
           handleConversationAccessUpdate={handleConversationAccessUpdate}
           isConversationOwnedByCurrentUser={isConversationOwnedByCurrentUser}
+          copyConversationToClipboard={copyConversationToClipboard}
+          copyUrl={copyUrl}
+          deleteConversation={deleteConversation}
+          handleArchiveConversation={handleArchiveConversation}
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>

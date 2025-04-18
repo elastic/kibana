@@ -107,7 +107,7 @@ $$$elasticsearch-pingTimeout$$$ `elasticsearch.pingTimeout`
 :   Time in milliseconds to wait for {{es}} to respond to pings. **Default: the value of the [`elasticsearch.requestTimeout`](#elasticsearch-requestTimeout) setting**
 
 $$$elasticsearch-requestHeadersWhitelist$$$ `elasticsearch.requestHeadersWhitelist`
-:   List of {{kib}} client-side headers to send to {{es}}. To send **no** client-side headers, set this value to [] (an empty list). Removing the `authorization` header from being whitelisted means that you cannot use [basic authentication](docs-content://deploy-manage/users-roles/cluster-or-deployment-auth/user-authentication.md#basic-authentication) in {{kib}}. **Default: `[ 'authorization', 'es-client-authentication' ]`**
+:   List of {{kib}} client-side headers to send to {{es}}. To send **no** client-side headers, set this value to [] (an empty list). Removing the `authorization` header from being whitelisted means that you cannot use [basic authentication](docs-content://deploy-manage/users-roles/cluster-or-deployment-auth/kibana-authentication.md#basic-authentication) in {{kib}}. **Default: `[ 'authorization', 'es-client-authentication' ]`**
 
 $$$elasticsearch-requestTimeout$$$ `elasticsearch.requestTimeout`
 :   Time in milliseconds to wait for responses from the back end or {{es}}. This value must be a positive integer. **Default: `30000`**

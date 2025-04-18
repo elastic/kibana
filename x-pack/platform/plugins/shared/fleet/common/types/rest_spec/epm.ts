@@ -164,14 +164,19 @@ export interface BulkUpgradePackagesRequest {
   prerelease?: boolean;
 }
 
-export interface BulkUpgradePackagesResponse {
+export interface BulkUninstallPackagesRequest {
+  packages: Array<{ name: string; version: string }>;
+  force?: boolean;
+}
+
+export interface BulkOperationPackagesResponse {
   taskId: string;
 }
 
-export interface GetOneBulkUpgradePackagesResponse {
+export interface GetOneBulkOperationPackagesResponse {
   status: string;
   error?: { message: string };
-  results?: Array<{ success?: boolean; error?: { message: string } }>;
+  results?: Array<{ name: string; success?: boolean; error?: { message: string } }>;
 }
 
 export interface BulkInstallPackagesRequest {
