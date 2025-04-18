@@ -61,10 +61,7 @@ export const openSavedBookEditor = ({
           attributesManager={attributesManager}
           onCancel={() => {
             // set the state back to the initial state and reject
-            attributesManager.api.setAuthorName(initialState.authorName);
-            attributesManager.api.setBookSynopsis(initialState.bookSynopsis);
-            attributesManager.api.setBookTitle(initialState.bookTitle);
-            attributesManager.api.setNumberOfPages(initialState.numberOfPages);
+            attributesManager.reinitializeState(initialState);
             closeOverlay(overlay);
           }}
           onSubmit={async (addToLibrary: boolean) => {
