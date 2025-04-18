@@ -22,8 +22,9 @@ export const PLI_PRODUCT_FEATURES: PliProductFeatures = {
       ProductFeatureKey.configurations,
       ProductFeatureKey.externalDetections,
     ],
-    essentials: [ProductFeatureKey.attackDiscovery, ProductFeatureKey.assistant],
-    complete: [ProductFeatureKey.attackDiscovery, ProductFeatureKey.assistant],
+    // neither of these tiers are available in ai_soc product line
+    essentials: [],
+    complete: [],
   },
   [ProductLine.security]: {
     search_ai_lake: [],
@@ -33,6 +34,7 @@ export const PLI_PRODUCT_FEATURES: PliProductFeatures = {
       ProductFeatureKey.notes,
       ProductFeatureKey.endpointHostManagement,
       ProductFeatureKey.endpointPolicyManagement,
+      ProductFeatureKey.endpointHostIsolation,
     ],
     complete: [
       ProductFeatureKey.detections,
@@ -40,6 +42,7 @@ export const PLI_PRODUCT_FEATURES: PliProductFeatures = {
       ProductFeatureKey.notes,
       ProductFeatureKey.endpointHostManagement,
       ProductFeatureKey.endpointPolicyManagement,
+      ProductFeatureKey.endpointHostIsolation,
       ProductFeatureKey.advancedInsights,
       ProductFeatureKey.assistant,
       ProductFeatureKey.attackDiscovery,
