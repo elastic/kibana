@@ -11,7 +11,7 @@ import { WorkChatHomePage } from './pages/home';
 import { WorkchatChatPage } from './pages/chat';
 import { WorkChatAssistantsPage } from './pages/assistants';
 import { WorkChatAssistantOverviewPage } from './pages/assistant_details';
-import { WorkChatIntegrationsPage } from './pages/integrations';
+import { WorkChatCatalogPage, WorkChatIntegrationsPage } from './pages/integrations';
 import { WorkChatIntegrationEditOrCreatePage } from './pages/integration_edit_or_create';
 import { WorkChatAssistantWorkflowPage } from './pages/assistant_workflow';
 export const WorkchatAppRoutes: React.FC<{}> = () => {
@@ -39,6 +39,9 @@ export const WorkchatAppRoutes: React.FC<{}> = () => {
 
       <Route path="/integrations/create">
         <WorkChatIntegrationEditOrCreatePage />
+      </Route>
+      <Route path="/integrations/catalog">
+        <WorkChatCatalogPage/>
       </Route>
       <Route path="/integrations/:integrationId">
         <WorkChatIntegrationEditOrCreatePage />
