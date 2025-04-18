@@ -124,9 +124,6 @@ export class MicrosoftDefenderEndpointAgentStatusClient extends AgentStatusClien
   }
 
   public async getAgentStatuses(agentIds: string[]): Promise<AgentStatusRecords> {
-    const esClient = this.options.esClient;
-    const metadataService = this.options.endpointService.getEndpointMetadataService();
-
     try {
       const [{ data: msMachineListResponse }, agentIsolationState, allPendingActions] =
         await Promise.all([
@@ -141,7 +138,7 @@ export class MicrosoftDefenderEndpointAgentStatusClient extends AgentStatusClien
           this.calculateHostIsolatedState(agentIds),
 
           // Fetch pending actions summary
-          getPendingActionsSummary(esClient, metadataService, this.log, agentIds),
+          getPendingActionsSummary(this.options.endpointService, this.options.spaceId, agentIds),
         ]);
 
       const machinesById = keyBy(msMachineListResponse?.value ?? [], 'id');
