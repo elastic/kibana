@@ -15,11 +15,6 @@ describe('transformRawArtifactsToDomainArtifacts', () => {
     expect(result).toEqual({ dashboards: [] });
   });
 
-  it('should return empty object if rawArtifacts is empty', () => {
-    const result = transformRawArtifactsToDomainArtifacts('1', {}, []);
-    expect(result).toEqual({});
-  });
-
   it('should return artifacts with injected references', () => {
     const rawArtifacts: RawRule['artifacts'] = {
       dashboards: [
@@ -60,7 +55,7 @@ describe('transformRawArtifactsToDomainArtifacts', () => {
     const rawArtifacts: RawRule['artifacts'] = {};
     const references: SavedObjectReference[] = [];
     const result = transformRawArtifactsToDomainArtifacts('1', rawArtifacts, references);
-    expect(result).toEqual({});
+    expect(result).toEqual({ dashboards: [] });
   });
 
   it('should return artifacts with injected references and empty dashboards array if no dashboards in rawArtifacts', () => {
@@ -73,7 +68,7 @@ describe('transformRawArtifactsToDomainArtifacts', () => {
       },
     ];
     const result = transformRawArtifactsToDomainArtifacts('1', rawArtifacts, references);
-    expect(result).toEqual({});
+    expect(result).toEqual({ dashboards: [] });
   });
 
   it('throws an error if no references found', () => {
