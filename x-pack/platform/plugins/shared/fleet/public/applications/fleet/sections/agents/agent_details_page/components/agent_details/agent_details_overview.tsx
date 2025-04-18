@@ -16,6 +16,7 @@ import {
   EuiPanel,
   EuiIcon,
   EuiSkeletonText,
+  EuiText,
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -46,6 +47,8 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
 
   const outputRes = useGetInfoOutputsForPolicy(agentPolicy?.id);
   const outputs = outputRes?.data?.item;
+  const isOutdated =
+    agent.policy_revision && agentPolicy && agentPolicy?.revision > agent.policy_revision;
 
   return (
     <EuiPanel>
@@ -161,7 +164,23 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
                 defaultMessage: 'Agent policy',
               }),
               description: agentPolicy ? (
-                <AgentPolicySummaryLine policy={agentPolicy} agent={agent} />
+                <EuiFlexGroup gutterSize="m" style={{ minWidth: 0 }} alignItems="center">
+                  <EuiFlexItem grow={false}>
+                    <AgentPolicySummaryLine policy={agentPolicy} agent={agent} />
+                  </EuiFlexItem>
+                  {isOutdated && (
+                    <EuiFlexItem grow={false}>
+                      <EuiText color="subdued" size="xs">
+                        <EuiIcon size="m" type="warning" color="warning" />
+                        &nbsp;
+                        <FormattedMessage
+                          id="xpack.fleet.agentPolicySummaryLine.outdatedPolicyWarning"
+                          defaultMessage="Outdated policy"
+                        />
+                      </EuiText>
+                    </EuiFlexItem>
+                  )}
+                </EuiFlexGroup>
               ) : (
                 <EuiSkeletonText lines={1} />
               ),
