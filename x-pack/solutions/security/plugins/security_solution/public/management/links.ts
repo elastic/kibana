@@ -210,6 +210,7 @@ export const links: LinkItem = {
       path: ENTITY_ANALYTICS_ASSET_CRITICALITY_PATH,
       skipUrlState: true,
       hideTimeline: true,
+      globalSearchDisabled: true,
       capabilities: [`${SECURITY_FEATURE_ID}.entity-analytics`],
     },
     {
