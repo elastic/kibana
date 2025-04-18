@@ -36,7 +36,7 @@ steps:
       image: family/kibana-ubuntu-2004
       imageProject: elastic-images-prod
       provider: gcp
-      machineType: n2-highmem-4
+      machineType: n2-standard-8
       preemptible: true
     retry:
       automatic:
