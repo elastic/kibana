@@ -17,6 +17,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const browser = getService('browser');
   const PageObjects = getPageObjects(['common', 'console', 'header']);
+  const toasts = getService('toasts');
 
   describe('misc console behavior', function testMiscConsoleBehavior() {
     before(async () => {
@@ -197,17 +198,30 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
 
-      it(`should include an invalid json when sending a request`, async () => {
+      it(`should display an error toast when sending a request with invalid body`, async () => {
         await PageObjects.console.clearEditorText();
         await PageObjects.console.enterText(invalidRequestText);
-        await PageObjects.console.selectCurrentRequest();
-        await PageObjects.console.pressCtrlEnter();
+        await PageObjects.console.clickPlay();
 
-        await retry.try(async () => {
-          const actualResponse = await PageObjects.console.getOutputText();
-          expect(actualResponse).to.contain('parsing_exception');
-          expect(await PageObjects.console.hasSuccessBadge()).to.be(false);
-        });
+        expect(await toasts.getCount()).to.be(1);
+        const resultToast = await toasts.getElementByIndex(1);
+        const toastText = await resultToast.getVisibleText();
+        expect(toastText).to.be(
+          'The selected request contains an error. Please resolve it and try again.'
+        );
+        await toasts.dismissAll();
+      });
+
+      it('should display an error toast to unsupported HTTP verbs', async () => {
+        await PageObjects.console.clearEditorText();
+        await PageObjects.console.enterText('OPTIONS /');
+        await PageObjects.console.clickPlay();
+        expect(await toasts.getCount()).to.be(1);
+        const resultToast = await toasts.getElementByIndex(1);
+        const toastText = await resultToast.getVisibleText();
+        expect(toastText).to.be(
+          'The selected request contains errors. Please resolve them and try again.'
+        );
       });
     });
 

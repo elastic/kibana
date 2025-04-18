@@ -35,7 +35,6 @@ import {
   StorageClientSearchResponse,
   StorageClientClean,
   StorageClientCleanResponse,
-  ApplicationDocument,
   InternalIStorageClient,
 } from '../..';
 import { getSchemaVersion } from '../get_schema_version';
@@ -97,7 +96,10 @@ function wrapEsCall<T>(p: Promise<T>): Promise<T> {
  * - Index Lifecycle Management
  * - Schema upgrades w/ fallbacks
  */
-export class StorageIndexAdapter<TStorageSettings extends IndexStorageSettings, TApplicationType> {
+export class StorageIndexAdapter<
+  TStorageSettings extends IndexStorageSettings,
+  TApplicationType extends Partial<StorageDocumentOf<TStorageSettings>>
+> {
   private readonly logger: Logger;
   constructor(
     private readonly esClient: ElasticsearchClient,
@@ -319,7 +321,7 @@ export class StorageIndexAdapter<TStorageSettings extends IndexStorageSettings, 
     return [];
   }
 
-  private search: StorageClientSearch<ApplicationDocument<TApplicationType>> = async (request) => {
+  private search: StorageClientSearch<TApplicationType> = async (request) => {
     return (await wrapEsCall(
       this.esClient
         .search({
@@ -327,7 +329,7 @@ export class StorageIndexAdapter<TStorageSettings extends IndexStorageSettings, 
           index: this.getSearchIndexPattern(),
           allow_no_indices: true,
         })
-        .catch((error): StorageClientSearchResponse<StorageDocumentOf<TStorageSettings>, any> => {
+        .catch((error): StorageClientSearchResponse<TApplicationType, any> => {
           if (isNotFoundError(error)) {
             return {
               _shards: {
@@ -348,10 +350,10 @@ export class StorageIndexAdapter<TStorageSettings extends IndexStorageSettings, 
           }
           throw error;
         })
-    )) as unknown as ReturnType<StorageClientSearch<ApplicationDocument<TApplicationType>>>;
+    )) as unknown as ReturnType<StorageClientSearch<TApplicationType>>;
   };
 
-  private index: StorageClientIndex<ApplicationDocument<TApplicationType>> = async ({
+  private index: StorageClientIndex<TApplicationType> = async ({
     id,
     refresh = 'wait_for',
     ...request
@@ -390,11 +392,21 @@ export class StorageIndexAdapter<TStorageSettings extends IndexStorageSettings, 
     });
   };
 
-  private bulk: StorageClientBulk<ApplicationDocument<TApplicationType>> = ({
+  private bulk: StorageClientBulk<TApplicationType> = ({
     operations,
     refresh = 'wait_for',
     ...request
   }): Promise<StorageClientBulkResponse> => {
+    if (operations.length === 0) {
+      this.logger.debug(`Bulk request with 0 operations is a noop`);
+      return Promise.resolve({
+        errors: false,
+        items: [],
+        took: 0,
+        ingest_took: 0,
+      });
+    }
+
     this.logger.debug(`Processing ${operations.length} bulk operations`);
 
     const bulkOperations = operations.flatMap((operation): BulkOperationContainer[] => {
@@ -521,10 +533,7 @@ export class StorageIndexAdapter<TStorageSettings extends IndexStorageSettings, 
     return { acknowledged: true, result: 'not_found' };
   };
 
-  private get: StorageClientGet<ApplicationDocument<TApplicationType>> = async ({
-    id,
-    ...request
-  }) => {
+  private get: StorageClientGet<TApplicationType> = async ({ id, ...request }) => {
     const response = await this.search({
       track_total_hits: false,
       size: 1,
@@ -565,7 +574,7 @@ export class StorageIndexAdapter<TStorageSettings extends IndexStorageSettings, 
       _id: hit._id!,
       _index: hit._index,
       found: true,
-      _source: hit._source as ApplicationDocument<TApplicationType>,
+      _source: hit._source as TApplicationType,
       _ignored: hit._ignored,
       _primary_term: hit._primary_term,
       _routing: hit._routing,
@@ -581,7 +590,7 @@ export class StorageIndexAdapter<TStorageSettings extends IndexStorageSettings, 
     });
   };
 
-  getClient(): InternalIStorageClient<ApplicationDocument<TApplicationType>> {
+  getClient(): InternalIStorageClient<TApplicationType> {
     return {
       bulk: this.bulk,
       delete: this.delete,
@@ -595,4 +604,4 @@ export class StorageIndexAdapter<TStorageSettings extends IndexStorageSettings, 
 }
 
 export type SimpleStorageIndexAdapter<TStorageSettings extends IndexStorageSettings> =
-  StorageIndexAdapter<TStorageSettings, Omit<StorageDocumentOf<TStorageSettings>, '_id'>>;
+  StorageIndexAdapter<TStorageSettings, StorageDocumentOf<TStorageSettings>>;

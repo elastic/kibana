@@ -7,6 +7,7 @@
 
 import DateMath from '@kbn/datemath';
 import { useCallback, useEffect } from 'react';
+import { usePerformanceContext } from '@kbn/ebt-tools';
 import type {
   MetricsExplorerChartOptions,
   MetricsExplorerOptions,
@@ -35,6 +36,7 @@ export const useMetricsExplorerState = ({ enabled }: { enabled: boolean } = { en
     timestamps,
     setTimestamps,
   } = useMetricsExplorerOptionsContainerContext();
+  const { onPageRefreshStart } = usePerformanceContext();
 
   const refreshTimestamps = useCallback(() => {
     const fromTimestamp = DateMath.parse(timeRange.from)!.valueOf();
@@ -45,7 +47,8 @@ export const useMetricsExplorerState = ({ enabled }: { enabled: boolean } = { en
       fromTimestamp,
       toTimestamp,
     });
-  }, [setTimestamps, timeRange]);
+    onPageRefreshStart();
+  }, [setTimestamps, timeRange, onPageRefreshStart]);
 
   const { data, error, fetchNextPage, isLoading } = useMetricsExplorerData({
     options,

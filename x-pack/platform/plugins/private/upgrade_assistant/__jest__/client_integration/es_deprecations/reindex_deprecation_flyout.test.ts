@@ -73,7 +73,7 @@ describe('Reindex deprecation flyout', () => {
   it('opens a flyout when clicking in any part of the row', async () => {
     const { actions, exists } = testBed;
 
-    await actions.table.clickReindexColumnAt('isCritical', 0);
+    await actions.table.clickReindexColumnAt('level', 0);
     expect(exists('reindexDetails')).toBe(true);
     await actions.reindexDeprecationFlyout.closeFlyout();
     expect(exists('reindexDetails')).toBe(false);

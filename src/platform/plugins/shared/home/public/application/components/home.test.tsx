@@ -42,8 +42,8 @@ jest.mock('../kibana_services', () => ({
 
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
   overviewPageActions: jest.fn().mockReturnValue([]),
-  OverviewPageFooter: jest.fn().mockReturnValue(<></>),
-  KibanaPageTemplate: jest.fn().mockReturnValue(<></>),
+  OverviewPageFooter: jest.fn(() => <></>),
+  KibanaPageTemplate: jest.fn(() => <></>),
 }));
 
 describe('home', () => {

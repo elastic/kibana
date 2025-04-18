@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import moment from 'moment';
+import moment, { DurationInputArg2 } from 'moment';
 import { Key } from 'selenium-webdriver';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -36,6 +36,72 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await browser.refresh();
   };
 
+  const deleteIndex = async (index: string) => {
+    try {
+      await es.indices.delete({ index });
+    } catch (err) {
+      // ignore 404 error
+    }
+  };
+
+  const createDocs = async ({
+    index,
+    endDate,
+    docCount,
+    dateSubstractUnit,
+    addNumberField,
+  }: {
+    index: string;
+    endDate: string;
+    docCount: number;
+    dateSubstractUnit?: DurationInputArg2;
+    addNumberField?: boolean;
+  }) => {
+    interface TestDoc {
+      timestamp: string;
+      name: string;
+      updated_at?: string;
+      numberValue?: number;
+    }
+
+    const docs = Array<TestDoc>(docCount);
+
+    for (let i = 0; i <= docs.length - 1; i++) {
+      const name = `test-${i + 1}`;
+      const timestamp = moment
+        .utc(endDate)
+        .subtract(docCount - i, dateSubstractUnit ?? 'days')
+        .format();
+
+      const commonFields: Pick<TestDoc, 'timestamp' | 'name' | 'numberValue'> = {
+        timestamp,
+        name,
+      };
+
+      if (addNumberField) {
+        commonFields.numberValue = i;
+      }
+
+      if (i === 0) {
+        // only the oldest document has a value for updated_at
+        docs[i] = {
+          ...commonFields,
+          updated_at: moment.utc(endDate).format(),
+        };
+      } else {
+        // updated_at field does not exist in first 500 documents
+        docs[i] = commonFields;
+      }
+    }
+
+    const res = await es.bulk({
+      index,
+      body: docs.map((d) => `{"index": {}}\n${JSON.stringify(d)}\n`),
+    });
+
+    log.info(`Indexed ${res.items.length} test data docs into ${index}.`);
+  };
+
   const getReport = async ({ timeout } = { timeout: 60 * 1000 }) => {
     // close any open notification toasts
     await toasts.dismissAll();
@@ -49,6 +115,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     expect(res.status).to.equal(200);
     expect(res.get('content-type')).to.equal('text/csv; charset=utf-8');
     return res;
+  };
+
+  const getReportPostUrl = async () => {
+    // click 'Copy POST URL'
+    await share.clickShareTopNavButton();
+    await reporting.openExportTab();
+    const copyButton = await testSubjects.find('shareReportingCopyURL');
+
+    return decodeURIComponent((await copyButton.getAttribute('data-share-url')) ?? '');
   };
 
   describe('Discover CSV Export', () => {
@@ -194,60 +269,61 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const csvFile = res.text;
         expectSnapshot(csvFile).toMatch();
       });
+
+      it('generate a report using ES|QL for relative time range as absolute dates and time params', async () => {
+        const RECENT_DATA_INDEX_NAME = 'test_recent_data';
+        const RECENT_DOC_COUNT = 500;
+        const RECENT_DOC_END_DATE = moment().toISOString();
+
+        await deleteIndex(RECENT_DATA_INDEX_NAME);
+        await createDocs({
+          index: RECENT_DATA_INDEX_NAME,
+          endDate: RECENT_DOC_END_DATE,
+          docCount: RECENT_DOC_COUNT,
+          dateSubstractUnit: 'minutes',
+          addNumberField: true,
+        });
+
+        await timePicker.setCommonlyUsedTime('Last_15 minutes');
+        await discover.selectTextBaseLang();
+        await header.waitUntilLoadingHasFinished();
+        await discover.waitUntilSearchingHasFinished();
+
+        const testQuery = `from ${RECENT_DATA_INDEX_NAME} | sort timestamp | WHERE timestamp >= ?_tstart AND timestamp <= ?_tend | KEEP name, numberValue`;
+        await monacoEditor.setCodeEditorValue(testQuery);
+        await testSubjects.click('querySubmitButton');
+        await header.waitUntilLoadingHasFinished();
+        await discover.waitUntilSearchingHasFinished();
+
+        const reportPostUrl = await getReportPostUrl();
+        expect(reportPostUrl).to.contain(`timeRange:(from:'2`); // not `from:now-15m`
+        expect(reportPostUrl).to.contain(`filters:!()`);
+        expect(reportPostUrl).to.contain(`query:(esql:'${testQuery}')`);
+
+        const res = await getReport();
+        expect(res.status).to.equal(200);
+        expect(res.get('content-type')).to.equal('text/csv; charset=utf-8');
+
+        const csvFile = res.text;
+        expectSnapshot(csvFile).toMatch();
+
+        await deleteIndex(RECENT_DATA_INDEX_NAME);
+      });
     });
 
     describe('Generate CSV: sparse data', () => {
       const TEST_INDEX_NAME = 'sparse_data';
       const TEST_DOC_COUNT = 510;
-
-      const reset = async () => {
-        try {
-          await es.indices.delete({ index: TEST_INDEX_NAME });
-        } catch (err) {
-          // ignore 404 error
-        }
-      };
-
-      const createDocs = async () => {
-        interface TestDoc {
-          timestamp: string;
-          name: string;
-          updated_at?: string;
-        }
-
-        const docs = Array<TestDoc>(TEST_DOC_COUNT);
-
-        for (let i = 0; i <= docs.length - 1; i++) {
-          const name = `test-${i + 1}`;
-          const timestamp = moment
-            .utc('2006-08-14T00:00:00')
-            .subtract(TEST_DOC_COUNT - i, 'days')
-            .format();
-
-          if (i === 0) {
-            // only the oldest document has a value for updated_at
-            docs[i] = {
-              timestamp,
-              name,
-              updated_at: moment.utc('2006-08-14T00:00:00').format(),
-            };
-          } else {
-            // updated_at field does not exist in first 500 documents
-            docs[i] = { timestamp, name };
-          }
-        }
-
-        const res = await es.bulk({
-          index: TEST_INDEX_NAME,
-          body: docs.map((d) => `{"index": {}}\n${JSON.stringify(d)}\n`),
-        });
-
-        log.info(`Indexed ${res.items.length} test data docs.`);
-      };
+      const TEST_DOC_END_DATE = '2006-08-14T00:00:00';
 
       before(async () => {
-        await reset();
-        await createDocs();
+        await deleteIndex(TEST_INDEX_NAME);
+        await createDocs({
+          index: TEST_INDEX_NAME,
+          endDate: TEST_DOC_END_DATE,
+          docCount: TEST_DOC_COUNT,
+          dateSubstractUnit: 'days',
+        });
         await reportingAPI.initLogs();
         await common.navigateToApp('discover');
         await discover.loadSavedSearch('Sparse Columns');
@@ -255,7 +331,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       after(async () => {
         await reportingAPI.teardownLogs();
-        await reset();
+        await deleteIndex(TEST_INDEX_NAME);
       });
 
       beforeEach(async () => {

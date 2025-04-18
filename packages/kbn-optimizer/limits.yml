@@ -50,18 +50,12 @@ pageLoadAssetSize:
   eventAnnotation: 30000
   eventAnnotationListing: 25841
   exploratoryView: 74673
-  expressionError: 22127
   expressionGauge: 25000
   expressionHeatmap: 27505
-  expressionImage: 19288
   expressionLegacyMetricVis: 23121
-  expressionMetric: 22238
   expressionMetricVis: 23121
   expressionPartitionVis: 44888
-  expressionRepeatImage: 22341
-  expressionRevealImage: 25675
   expressions: 140958
-  expressionShape: 34008
   expressionTagcloud: 27505
   expressionXY: 45000
   features: 21723
@@ -153,7 +147,7 @@ pageLoadAssetSize:
   searchSynonyms: 20262
   security: 81771
   securitySolution: 98429
-  securitySolutionEss: 31781
+  securitySolutionEss: 36000
   securitySolutionServerless: 62488
   serverless: 16573
   serverlessObservability: 68747

@@ -52,6 +52,16 @@ import { AttackDiscoveryDataClient } from '../lib/attack_discovery/persistence';
 import { DefendInsightsDataClient } from '../ai_assistant_data_clients/defend_insights';
 import { createGetElserId, ensureProductDocumentationInstalled } from './helpers';
 import { hasAIAssistantLicense } from '../routes/helpers';
+import {
+  AttackDiscoveryScheduleDataClient,
+  CreateAttackDiscoveryScheduleDataClientParams,
+} from '../lib/attack_discovery/schedules/data_client';
+import {
+  ANONYMIZATION_FIELDS_COMPONENT_TEMPLATE,
+  ANONYMIZATION_FIELDS_INDEX_PATTERN,
+  ANONYMIZATION_FIELDS_INDEX_TEMPLATE,
+  ANONYMIZATION_FIELDS_RESOURCE,
+} from './constants';
 
 const TOTAL_FIELDS_LIMIT = 2500;
 
@@ -434,7 +444,7 @@ export class AIAssistantService {
       conversations: getResourceName('component-template-conversations'),
       knowledgeBase: getResourceName('component-template-knowledge-base'),
       prompts: getResourceName('component-template-prompts'),
-      anonymizationFields: getResourceName('component-template-anonymization-fields'),
+      anonymizationFields: getResourceName(ANONYMIZATION_FIELDS_COMPONENT_TEMPLATE),
       attackDiscovery: getResourceName('component-template-attack-discovery'),
       defendInsights: getResourceName('component-template-defend-insights'),
     },
@@ -442,7 +452,7 @@ export class AIAssistantService {
       conversations: getResourceName('conversations'),
       knowledgeBase: getResourceName('knowledge-base'),
       prompts: getResourceName('prompts'),
-      anonymizationFields: getResourceName('anonymization-fields'),
+      anonymizationFields: getResourceName(ANONYMIZATION_FIELDS_RESOURCE),
       attackDiscovery: getResourceName('attack-discovery'),
       defendInsights: getResourceName('defend-insights'),
     },
@@ -450,7 +460,7 @@ export class AIAssistantService {
       conversations: getResourceName('conversations*'),
       knowledgeBase: getResourceName('knowledge-base*'),
       prompts: getResourceName('prompts*'),
-      anonymizationFields: getResourceName('anonymization-fields*'),
+      anonymizationFields: getResourceName(ANONYMIZATION_FIELDS_INDEX_PATTERN),
       attackDiscovery: getResourceName('attack-discovery*'),
       defendInsights: getResourceName('defend-insights*'),
     },
@@ -458,7 +468,7 @@ export class AIAssistantService {
       conversations: getResourceName('index-template-conversations'),
       knowledgeBase: getResourceName('index-template-knowledge-base'),
       prompts: getResourceName('index-template-prompts'),
-      anonymizationFields: getResourceName('index-template-anonymization-fields'),
+      anonymizationFields: getResourceName(ANONYMIZATION_FIELDS_INDEX_TEMPLATE),
       attackDiscovery: getResourceName('index-template-attack-discovery'),
       defendInsights: getResourceName('index-template-defend-insights'),
     },
@@ -607,6 +617,14 @@ export class AIAssistantService {
       indexPatternsResourceName: this.resourceNames.aliases.attackDiscovery,
       kibanaVersion: this.options.kibanaVersion,
       spaceId: opts.spaceId,
+    });
+  }
+
+  public async createAttackDiscoverySchedulingDataClient(
+    opts: CreateAttackDiscoveryScheduleDataClientParams
+  ): Promise<AttackDiscoveryScheduleDataClient | null> {
+    return new AttackDiscoveryScheduleDataClient({
+      rulesClient: opts.rulesClient,
     });
   }
 

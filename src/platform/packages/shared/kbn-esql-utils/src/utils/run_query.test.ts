@@ -150,4 +150,14 @@ describe('run query helpers', () => {
       });
     });
   });
+
+  it('should work correctly with datemath ranges', () => {
+    const time = { from: 'now/d', to: 'now/d' };
+    const query = 'FROM foo | where time < ?_tend amd time > ?_tstart';
+    const params = getStartEndParams(query, time);
+    expect(params).toHaveLength(2);
+    expect(params[0]).toHaveProperty('_tstart');
+    expect(params[1]).toHaveProperty('_tend');
+    expect(params[0]._tstart).not.toEqual(params[1]._tend);
+  });
 });

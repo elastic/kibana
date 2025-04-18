@@ -73,6 +73,7 @@ selenium
 .webpack.babelcache
 *.swp
 *.swo
+*.swn
 *.out
 package-lock.json
 !/.buildkite/package-lock.json

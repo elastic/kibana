@@ -14,7 +14,7 @@ import { ProcessorFormState } from '../types';
 import { useSimulatorSelector } from '../state_management/stream_enrichment_state_machine';
 import { selectUnsupportedDottedFields } from '../state_management/simulation_state_machine/selectors';
 
-export const ProcessorFieldSelector = () => {
+export const ProcessorFieldSelector = ({ helpText }: { helpText?: string }) => {
   const { euiTheme } = useEuiTheme();
 
   const unsupportedFields = useSimulatorSelector((state) =>
@@ -45,10 +45,13 @@ export const ProcessorFieldSelector = () => {
           'xpack.streams.streamDetailView.managementTab.enrichment.processor.fieldSelectorLabel',
           { defaultMessage: 'Field' }
         )}
-        helpText={i18n.translate(
-          'xpack.streams.streamDetailView.managementTab.enrichment.processor.fieldSelectorHelpText',
-          { defaultMessage: 'Field to search for matches.' }
-        )}
+        helpText={
+          helpText ??
+          i18n.translate(
+            'xpack.streams.streamDetailView.managementTab.enrichment.processor.fieldSelectorHelpText',
+            { defaultMessage: 'Field to search for matches.' }
+          )
+        }
         isInvalid={invalid}
         error={error?.message}
       >

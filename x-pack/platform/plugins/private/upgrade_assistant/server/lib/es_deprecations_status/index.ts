@@ -146,13 +146,11 @@ export async function getESUpgradeStatus(
   const { enrichedHealthIndicators, migrationsDeprecations } = await getCombinedDeprecations();
 
   const result = {
-    totalCriticalDeprecations: migrationsDeprecations.filter(
-      ({ isCritical }) => isCritical === true
-    ).length,
+    totalCriticalDeprecations: migrationsDeprecations.filter(({ level }) => level === 'critical')
+      .length,
     migrationsDeprecations,
-    totalCriticalHealthIssues: enrichedHealthIndicators.filter(
-      ({ isCritical }) => isCritical === true
-    ).length,
+    totalCriticalHealthIssues: enrichedHealthIndicators.filter(({ level }) => level === 'critical')
+      .length,
     enrichedHealthIndicators,
   };
   return result;

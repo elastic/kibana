@@ -8,6 +8,7 @@ import { act } from 'react-dom/test-utils';
 
 import { registerTestBed, TestBed, AsyncTestBedConfig } from '@kbn/test-jest-helpers';
 import { HttpSetup } from '@kbn/core/public';
+import { waitFor } from '@testing-library/dom';
 import { EsDeprecations } from '../../../public/application/components';
 import { WithAppDependencies } from '../helpers';
 
@@ -39,7 +40,13 @@ const createActions = (testBed: TestBed) => {
       component.update();
     },
     clickDeprecationRowAt: async (
-      deprecationType: 'mlSnapshot' | 'indexSetting' | 'reindex' | 'default' | 'clusterSetting',
+      deprecationType:
+        | 'mlSnapshot'
+        | 'indexSetting'
+        | 'reindex'
+        | 'default'
+        | 'clusterSetting'
+        | 'dataStream',
       index: number
     ) => {
       await act(async () => {
@@ -49,7 +56,7 @@ const createActions = (testBed: TestBed) => {
       component.update();
     },
     clickReindexColumnAt: async (
-      columnType: 'isCritical' | 'message' | 'type' | 'index' | 'correctiveAction',
+      columnType: 'level' | 'message' | 'type' | 'index' | 'correctiveAction',
       index: number
     ) => {
       await act(async () => {
@@ -95,13 +102,11 @@ const createActions = (testBed: TestBed) => {
     clickFilterByTitle: async (title: string) => {
       // We need to read the document "body" as the filter dropdown (an EuiSelectable)
       // is added in a portalled popover and not inside the component DOM tree.
-      const filterButton: HTMLButtonElement | null = document.body.querySelector(
-        `.euiSelectableListItem[title=${title}]`
-      );
-
-      expect(filterButton).not.toBeNull();
-
-      await act(async () => {
+      await waitFor(() => {
+        const filterButton: HTMLButtonElement | null = document.body.querySelector(
+          `.euiSelectableListItem[title=${title}]`
+        );
+        expect(filterButton).not.toBeNull();
         filterButton!.click();
       });
 
@@ -178,6 +183,46 @@ const createActions = (testBed: TestBed) => {
       component.update();
     },
   };
+  const dataStreamDeprecationFlyout = {
+    clickReindexButton: async () => {
+      await act(async () => {
+        find('startDataStreamReindexingButton').simulate('click');
+      });
+
+      component.update();
+    },
+    clickReadOnlyButton: async () => {
+      await act(async () => {
+        find('startDataStreamReadonlyButton').simulate('click');
+      });
+
+      component.update();
+    },
+    closeFlyout: async () => {
+      await act(async () => {
+        find('closeDataStreamReindexingButton').simulate('click');
+      });
+      component.update();
+    },
+    checkMigrationWarningCheckbox: async () => {
+      await act(async () => {
+        find('migrationWarningCheckbox')
+          .find('input.euiCheckbox__input')
+          .simulate('change', {
+            target: {
+              checked: true,
+            },
+          });
+      });
+      component.update();
+    },
+    clickStartActionButton: async () => {
+      await act(async () => {
+        find('startActionButton').simulate('click');
+      });
+      component.update();
+    },
+  };
 
   return {
     table,
@@ -187,6 +232,7 @@ const createActions = (testBed: TestBed) => {
     reindexDeprecationFlyout,
     indexSettingsDeprecationFlyout,
     clusterSettingsDeprecationFlyout,
+    dataStreamDeprecationFlyout,
   };
 };
 

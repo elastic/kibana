@@ -6,6 +6,8 @@
  */
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
+import type { GetAutoUpgradeAgentsStatusResponse } from '../../../common/types';
+
 import { agentPolicyRouteService } from '../../services';
 import { API_VERSIONS } from '../../../common/constants';
 
@@ -128,6 +130,16 @@ export const sendGetOneAgentPolicy = (agentPolicyId: string) => {
   });
 };
 
+export function useGetAutoUpgradeAgentsStatusQuery(agentPolicyId: string) {
+  return useQuery(['auto_upgrade_agents_status'], () =>
+    sendRequestForRq<GetAutoUpgradeAgentsStatusResponse>({
+      method: 'get',
+      path: agentPolicyRouteService.getAutoUpgradeAgentsStatusPath(agentPolicyId),
+      version: API_VERSIONS.public.v1,
+    })
+  );
+}
+
 export const sendCreateAgentPolicy = (
   body: CreateAgentPolicyRequest['body'],
   { withSysMonitoring }: { withSysMonitoring: boolean } = { withSysMonitoring: false }
@@ -146,6 +158,18 @@ export const sendUpdateAgentPolicy = (
   body: UpdateAgentPolicyRequest['body']
 ) => {
   return sendRequest<UpdateAgentPolicyResponse>({
+    path: agentPolicyRouteService.getUpdatePath(agentPolicyId),
+    method: 'put',
+    body: JSON.stringify(body),
+    version: API_VERSIONS.public.v1,
+  });
+};
+
+export const sendUpdateAgentPolicyForRq = (
+  agentPolicyId: string,
+  body: UpdateAgentPolicyRequest['body']
+) => {
+  return sendRequestForRq<UpdateAgentPolicyResponse>({
     path: agentPolicyRouteService.getUpdatePath(agentPolicyId),
     method: 'put',
     body: JSON.stringify(body),

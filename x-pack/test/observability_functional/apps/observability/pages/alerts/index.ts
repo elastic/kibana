@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { RuleNotifyWhen } from '@kbn/alerting-plugin/common';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 import { asyncForEach } from '../../helpers';
 
@@ -16,29 +17,103 @@ const TOTAL_ALERTS_CELL_COUNT = 440;
 const DISABLED_ALERTS_CHECKBOX = 6;
 const ENABLED_ALERTS_CHECKBOX = 4;
 
-export default ({ getService }: FtrProviderContext) => {
+export default ({ getService, getPageObjects }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const find = getService('find');
+  const PageObjects = getPageObjects(['home', 'common']);
+  const supertest = getService('supertest');
+  const browser = getService('browser');
 
-  describe('Observability alerts >', function () {
+  const customThresholdRule = {
+    tags: [],
+    params: {
+      criteria: [
+        {
+          comparator: '>',
+          metrics: [
+            {
+              name: 'A',
+              aggType: 'count',
+            },
+          ],
+          threshold: [1],
+          timeSize: 15,
+          timeUnit: 'm',
+        },
+      ],
+      alertOnNoData: false,
+      alertOnGroupDisappear: false,
+      searchConfiguration: {
+        query: {
+          query: '',
+          language: 'kuery',
+        },
+        index: '90943e30-9a47-11e8-b64d-95841ca0b247',
+      },
+    },
+    schedule: {
+      interval: '1m',
+    },
+    consumer: 'logs',
+    name: 'Custom threshold rule',
+    rule_type_id: 'observability.rules.custom_threshold',
+    actions: [
+      {
+        group: 'custom_threshold.fired',
+        id: 'my-server-log',
+        params: {
+          message:
+            '{{context.reason}}\n\n{{rule.name}} is active.\n\n[View alert details]({{context.alertDetailsUrl}})\n',
+          level: 'info',
+        },
+        frequency: {
+          summary: false,
+          notify_when: RuleNotifyWhen.THROTTLE,
+          throttle: '1m',
+        },
+      },
+    ],
+    alert_delay: {
+      active: 1,
+    },
+  };
+
+  // Failing: See https://github.com/elastic/kibana/issues/217739
+  describe.skip('Observability alerts >', function () {
     this.tags('includeFirefox');
-
     const testSubjects = getService('testSubjects');
     const retry = getService('retry');
     const observability = getService('observability');
     const security = getService('security');
+    let customThresholdRuleId: string;
 
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/observability/alerts');
       const setup = async () => {
         await observability.alerts.common.setKibanaTimeZoneToUTC();
         await observability.alerts.common.navigateToTimeWithData();
+        await PageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
+          useActualUrl: true,
+        });
+        await PageObjects.home.addSampleDataSet('logs');
+        const { body: createdRule } = await supertest
+          .post('/api/alerting/rule')
+          .set('kbn-xsrf', 'foo')
+          .send(customThresholdRule)
+          .expect(200);
+
+        customThresholdRuleId = createdRule.id;
       };
       await setup();
     });
 
     after(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/observability/alerts');
+      await PageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
+        useActualUrl: true,
+      });
+      await supertest.delete(`/api/alerting/rule/${customThresholdRuleId}`).set('kbn-xsrf', 'foo');
+      await PageObjects.home.removeSampleDataSet('logs');
     });
 
     describe('Alerts table', () => {
@@ -74,6 +149,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         it('Autocompletion works', async () => {
+          await browser.refresh();
           await observability.alerts.common.typeInQueryBar('kibana.alert.s');
           await observability.alerts.common.clickOnQueryBar();
           await testSubjects.existOrFail('autocompleteSuggestion-field-kibana.alert.start-');

@@ -14,7 +14,7 @@ import { i18n } from '@kbn/i18n';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { set } from '@kbn/safer-lodash-set';
 
-import { ViewMode } from '@kbn/presentation-publishing';
+import { SerializedPanelState, ViewMode } from '@kbn/presentation-publishing';
 import { coreServices, spacesService } from './kibana_services';
 import { DashboardState, UnsavedPanelState } from '../dashboard_api/types';
 import { DEFAULT_DASHBOARD_STATE } from '../dashboard_api/default_dashboard_state';
@@ -26,6 +26,9 @@ const DASHBOARD_VIEWMODE_LOCAL_KEY = 'dashboardViewMode';
 
 // this key is named `panels` for BWC reasons, but actually contains the entire dashboard state
 const DASHBOARD_STATE_SESSION_KEY = 'dashboardStateManagerPanels';
+
+// Temporary key for Dashboard to back up serialized state of all its panels
+const DASHBOARD_SERIALIZED_PANEL_BACKUP_KEY = 'dashboardSerializedPanelBackup';
 
 const getPanelsGetError = (message: string) =>
   i18n.translate('dashboard.panelStorageError.getError', {
@@ -108,6 +111,15 @@ class DashboardBackupService implements DashboardBackupServiceType {
           [this.activeSpaceId]: panelsStorage,
         });
       }
+
+      const serializedBackups =
+        this.sessionStorage.get(DASHBOARD_SERIALIZED_PANEL_BACKUP_KEY)?.[this.activeSpaceId] ?? {};
+      if (serializedBackups[id]) {
+        delete serializedBackups[id];
+        this.sessionStorage.set(DASHBOARD_SERIALIZED_PANEL_BACKUP_KEY, {
+          [this.activeSpaceId]: serializedBackups,
+        });
+      }
     } catch (e) {
       coreServices.notifications.toasts.addDanger({
         title: i18n.translate('dashboard.panelStorageError.clearError', {
@@ -115,6 +127,32 @@ class DashboardBackupService implements DashboardBackupServiceType {
           values: { message: e.message },
         }),
         'data-test-subj': 'dashboardPanelsClearFailure',
+      });
+    }
+  }
+
+  public getSerializedPanelBackup(panelId: string, dashboardId = DASHBOARD_PANELS_UNSAVED_ID) {
+    return this.sessionStorage.get(DASHBOARD_SERIALIZED_PANEL_BACKUP_KEY)?.[this.activeSpaceId]?.[
+      dashboardId
+    ]?.[panelId] as SerializedPanelState<object> | undefined;
+  }
+
+  public setSerializedPanelsBackups(
+    serializedPanels: { [key: string]: SerializedPanelState<object> },
+    dashboardId = DASHBOARD_PANELS_UNSAVED_ID
+  ) {
+    try {
+      const serializedPanelsBackup =
+        this.sessionStorage.get(DASHBOARD_SERIALIZED_PANEL_BACKUP_KEY) ?? {};
+      set(serializedPanelsBackup, [this.activeSpaceId, dashboardId], serializedPanels);
+      this.sessionStorage.set(DASHBOARD_SERIALIZED_PANEL_BACKUP_KEY, serializedPanelsBackup);
+    } catch (e) {
+      coreServices.notifications.toasts.addDanger({
+        title: i18n.translate('dashboard.panelStorageError.setError', {
+          defaultMessage: 'Error encountered while setting unsaved changes: {message}',
+          values: { message: e.message },
+        }),
+        'data-test-subj': 'dashboardPanelsSetFailure',
       });
     }
   }
