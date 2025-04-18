@@ -5,8 +5,10 @@ steps:
       image: family/kibana-ubuntu-2004
       imageProject: elastic-images-prod
       provider: gcp
-      machineType: c2-standard-16
+      machineType: c4-standard-16
+      diskType: 'hyperdisk-balanced'
       diskSizeGb: 150
+      zones: us-central1-a,us-central1-b,us-central1-c
     timeout_in_minutes: 120
     retry:
       automatic:
