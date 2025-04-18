@@ -82,6 +82,7 @@ const getRelativeTimeText = (timeRange: TimeRange) => {
     return (
       <FormattedMessage
         id="share.link.timeRange.relativeTimeInfoText.fromNow"
+        data-test-subj="relativeTimeInfoTextFromNow"
         defaultMessage="The users will see all data from <bold>now</bold> to {to}, based on when they view it."
         values={{
           to: <RelativeTimeText value={to?.value} unit={to?.unit} />,
@@ -95,6 +96,7 @@ const getRelativeTimeText = (timeRange: TimeRange) => {
     return (
       <FormattedMessage
         id="share.link.timeRange.relativeTimeInfoText"
+        data-test-subj="relativeTimeInfoTextToNow"
         defaultMessage="The users will see all data from {from} to <bold>now</bold>, based on when they view it."
         values={{
           from: <RelativeTimeText value={from?.value} unit={from?.unit} />,
@@ -107,6 +109,7 @@ const getRelativeTimeText = (timeRange: TimeRange) => {
   return (
     <FormattedMessage
       id="share.link.timeRange.relativeTimeInfoText.default"
+      data-test-subj="relativeTimeInfoTextDefault"
       defaultMessage="The users will see all data from {from} to {to}, based on when they view it."
       values={{
         from: <RelativeTimeText value={from?.value} unit={from?.unit} />,
@@ -142,6 +145,7 @@ export const TimeTypeSection = ({ timeRange, isAbsoluteTime, changeTimeType }: P
         {isAbsoluteTime ? (
           <FormattedMessage
             id="share.link.timeRange.absoluteTimeInfoText"
+            data-test-subj="absoluteTimeInfoText"
             defaultMessage="The users will see all data from {from} to {to}."
             values={{
               from: <AbsoluteTimeText date={timeRange?.from} />,
