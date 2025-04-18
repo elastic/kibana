@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DASHBOARD_APP_ID } from '@kbn/dashboard-plugin/common';
+import { DASHBOARD_APP_ID } from '@kbn/dashboard-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';

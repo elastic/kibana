@@ -22,7 +22,7 @@ import { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/p
 import { HasSerializedChildState, PresentationContainer } from '@kbn/presentation-containers';
 import { LocatorPublic } from '@kbn/share-plugin/common';
 import { DASHBOARD_API_TYPE } from '@kbn/dashboard-plugin/public';
-import { DashboardLocatorParams } from '@kbn/dashboard-plugin/common';
+import type { DashboardLocatorParams } from '@kbn/dashboard-plugin/common';
 import type { DashboardAttributes } from '@kbn/dashboard-plugin/server';
 
 import { CONTENT_ID } from '../common';

@@ -13,7 +13,7 @@ import rison from '@kbn/rison';
 import url from 'url';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
-import { cleanEmptyKeys } from '@kbn/dashboard-plugin/common';
+import { cleanEmptyKeys } from '@kbn/dashboard-plugin/public';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import type { Filter } from '@kbn/es-query';
 import { isFilterPinned } from '@kbn/es-query';

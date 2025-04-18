@@ -11,10 +11,8 @@ import { AbstractDashboardDrilldownConfig as Config } from '../abstract_dashboar
 import { savedObjectsServiceMock } from '@kbn/core/public/mocks';
 import { StartDependencies } from '../../../plugin';
 import { StartServicesGetter } from '@kbn/kibana-utils-plugin/public/core';
-import {
-  DashboardLocatorParams,
-  DashboardAppLocatorDefinition,
-} from '@kbn/dashboard-plugin/common';
+import type { DashboardLocatorParams } from '@kbn/dashboard-plugin/common';
+import { DashboardAppLocatorDefinition } from '@kbn/dashboard-plugin/public';
 import { BehaviorSubject } from 'rxjs';
 
 describe('.isConfigValid()', () => {
