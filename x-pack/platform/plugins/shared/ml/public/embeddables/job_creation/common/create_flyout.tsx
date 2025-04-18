@@ -66,6 +66,7 @@ export function createFlyout(
         ),
         {
           'data-test-subj': 'mlFlyoutLayerSelector',
+          'aria-labelledby': 'ml-flyout-layer-title',
           ownFocus: true,
           onClose: onFlyoutClose,
           size: '35vw',
