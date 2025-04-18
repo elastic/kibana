@@ -12,13 +12,31 @@ import { CellValue } from './render_cell';
 import { TestProviders } from '../../../../common/mock';
 import { getEmptyValue } from '../../../../common/components/empty_value';
 import { ALERT_RULE_PARAMETERS, ALERT_SEVERITY } from '@kbn/rule-data-utils';
-import { ICON_TEST_ID } from './kibana_alert_related_integrations_cell_renderer';
-import { useGetIntegrationFromPackageName } from '../../../hooks/alert_summary/use_get_integration_from_package_name';
 import { BADGE_TEST_ID } from './kibana_alert_severity_cell_renderer';
+import type { PackageListItem } from '@kbn/fleet-plugin/common';
+import { installationStatuses } from '@kbn/fleet-plugin/common/constants';
+import { TABLE_RELATED_INTEGRATION_CELL_RENDERER_TEST_ID } from './kibana_alert_related_integrations_cell_renderer';
+import { INTEGRATION_ICON_TEST_ID } from '../common/integration_icon';
 
-jest.mock('../../../hooks/alert_summary/use_get_integration_from_package_name');
+const packages: PackageListItem[] = [
+  {
+    description: '',
+    download: '',
+    id: 'splunk',
+    icons: [{ src: 'icon.svg', path: 'mypath/icon.svg', type: 'image/svg+xml' }],
+    name: 'splunk',
+    path: '',
+    status: installationStatuses.NotInstalled,
+    title: 'Splunk',
+    version: '0.1.0',
+  },
+];
 
 describe('CellValue', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('should handle missing field', () => {
     const alert: Alert = {
       _id: '_id',
@@ -29,7 +47,7 @@ describe('CellValue', () => {
 
     const { getByText } = render(
       <TestProviders>
-        <CellValue alert={alert} columnId={columnId} />
+        <CellValue alert={alert} columnId={columnId} packages={packages} />
       </TestProviders>
     );
 
@@ -46,11 +64,28 @@ describe('CellValue', () => {
 
     const { getByText } = render(
       <TestProviders>
-        <CellValue alert={alert} columnId={columnId} />
+        <CellValue alert={alert} columnId={columnId} packages={packages} />
       </TestProviders>
     );
 
     expect(getByText('value1')).toBeInTheDocument();
+  });
+
+  it('should handle a number value', () => {
+    const alert: Alert = {
+      _id: '_id',
+      _index: '_index',
+      field1: 123,
+    };
+    const columnId = 'field1';
+
+    const { getByText } = render(
+      <TestProviders>
+        <CellValue alert={alert} columnId={columnId} packages={packages} />
+      </TestProviders>
+    );
+
+    expect(getByText('123')).toBeInTheDocument();
   });
 
   it('should handle array of booleans', () => {
@@ -63,7 +98,7 @@ describe('CellValue', () => {
 
     const { getByText } = render(
       <TestProviders>
-        <CellValue alert={alert} columnId={columnId} />
+        <CellValue alert={alert} columnId={columnId} packages={packages} />
       </TestProviders>
     );
 
@@ -80,7 +115,7 @@ describe('CellValue', () => {
 
     const { getByText } = render(
       <TestProviders>
-        <CellValue alert={alert} columnId={columnId} />
+        <CellValue alert={alert} columnId={columnId} packages={packages} />
       </TestProviders>
     );
 
@@ -97,7 +132,7 @@ describe('CellValue', () => {
 
     const { getByText } = render(
       <TestProviders>
-        <CellValue alert={alert} columnId={columnId} />
+        <CellValue alert={alert} columnId={columnId} packages={packages} />
       </TestProviders>
     );
 
@@ -114,7 +149,7 @@ describe('CellValue', () => {
 
     const { getByText } = render(
       <TestProviders>
-        <CellValue alert={alert} columnId={columnId} />
+        <CellValue alert={alert} columnId={columnId} packages={packages} />
       </TestProviders>
     );
 
@@ -122,24 +157,22 @@ describe('CellValue', () => {
   });
 
   it('should use related integration renderer', () => {
-    (useGetIntegrationFromPackageName as jest.Mock).mockReturnValue({
-      integration: {},
-      isLoading: false,
-    });
-
     const alert: Alert = {
       _id: '_id',
       _index: '_index',
+      [ALERT_RULE_PARAMETERS]: [{ related_integrations: { package: ['splunk'] } }],
     };
     const columnId = ALERT_RULE_PARAMETERS;
 
     const { getByTestId } = render(
       <TestProviders>
-        <CellValue alert={alert} columnId={columnId} />
+        <CellValue alert={alert} columnId={columnId} packages={packages} />
       </TestProviders>
     );
 
-    expect(getByTestId(ICON_TEST_ID)).toBeInTheDocument();
+    expect(
+      getByTestId(`${TABLE_RELATED_INTEGRATION_CELL_RENDERER_TEST_ID}-${INTEGRATION_ICON_TEST_ID}`)
+    ).toBeInTheDocument();
   });
 
   it('should use severity renderer', () => {
@@ -152,7 +185,7 @@ describe('CellValue', () => {
 
     const { getByTestId } = render(
       <TestProviders>
-        <CellValue alert={alert} columnId={columnId} />
+        <CellValue alert={alert} columnId={columnId} packages={packages} />
       </TestProviders>
     );
 

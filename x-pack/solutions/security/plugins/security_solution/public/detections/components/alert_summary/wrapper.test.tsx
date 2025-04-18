@@ -48,6 +48,10 @@ const packages: PackageListItem[] = [
     version: '',
   },
 ];
+const ruleResponse = {
+  rules: [],
+  isLoading: false,
+};
 
 describe('<Wrapper />', () => {
   it('should render a loading skeleton while creating the dataView', async () => {
@@ -64,7 +68,7 @@ describe('<Wrapper />', () => {
     });
 
     await act(async () => {
-      const { getByTestId } = render(<Wrapper packages={packages} />);
+      const { getByTestId } = render(<Wrapper packages={packages} ruleResponse={ruleResponse} />);
 
       expect(getByTestId(DATA_VIEW_LOADING_PROMPT_TEST_ID)).toBeInTheDocument();
       expect(getByTestId(SKELETON_TEST_ID)).toBeInTheDocument();
@@ -89,7 +93,7 @@ describe('<Wrapper />', () => {
     }));
 
     await act(async () => {
-      const { getByTestId } = render(<Wrapper packages={packages} />);
+      const { getByTestId } = render(<Wrapper packages={packages} ruleResponse={ruleResponse} />);
 
       await new Promise(process.nextTick);
 
@@ -126,7 +130,7 @@ describe('<Wrapper />', () => {
     await act(async () => {
       const { getByTestId } = render(
         <TestProviders>
-          <Wrapper packages={packages} />
+          <Wrapper packages={packages} ruleResponse={ruleResponse} />
         </TestProviders>
       );
 
