@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { useCallback } from 'react';
+import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import { isSuppressibleAlertRule } from '../../../../common/detection_engine/utils';
 
 export interface UseAlertSuppressionReturn {
