@@ -56,6 +56,7 @@ jest.mock('../../app_context', () => {
       getSavedObjectsTagging: jest.fn(() => mockedSavedObjectTagging),
       getInternalUserSOClientForSpaceId: jest.fn(),
       getExperimentalFeatures: jest.fn(),
+      getCloud: jest.fn(),
     },
   };
 });
