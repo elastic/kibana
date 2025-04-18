@@ -427,11 +427,7 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
   protected async fetchActionDetails<T extends ActionDetails = ActionDetails>(
     actionId: string
   ): Promise<T> {
-    return getActionDetailsById(
-      this.options.esClient,
-      this.options.endpointService.getEndpointMetadataService(),
-      actionId
-    );
+    return getActionDetailsById(this.options.endpointService, this.options.spaceId, actionId);
   }
 
   /**
