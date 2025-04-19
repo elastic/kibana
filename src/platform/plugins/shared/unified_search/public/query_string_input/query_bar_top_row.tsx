@@ -284,6 +284,8 @@ export const QueryBarTopRow = React.memo(
       dataViews,
     } = kibana.services;
 
+    const quickSelectButtonRef = useRef<HTMLButtonElement>(null);
+
     const isQueryLangSelected = props.query && !isOfQueryType(props.query);
 
     const queryLanguage = props.query && isOfQueryType(props.query) && props.query.language;
@@ -396,6 +398,7 @@ export const QueryBarTopRow = React.memo(
 
     const onChangeQueryInputFocus = useCallback((isFocused: boolean) => {
       setIsQueryInputFocused(isFocused);
+      quickSelectButtonRef?.current?.click();
     }, []);
 
     const onTimeChange = useCallback(
@@ -508,6 +511,9 @@ export const QueryBarTopRow = React.memo(
 
       const datePicker = (
         <SuperDatePicker
+          quickSelectButtonProps={{
+            buttonRef: quickSelectButtonRef,
+          }}
           isDisabled={isDisabled}
           start={props.dateRangeFrom}
           end={props.dateRangeTo}
@@ -729,7 +735,7 @@ export const QueryBarTopRow = React.memo(
       return (
         <EuiFlexItem
           grow={!shouldShowDatePickerAsBadge()}
-          style={{ minWidth: shouldShowDatePickerAsBadge() ? 'auto' : 320, maxWidth: '100%' }}
+          css={{ minWidth: shouldShowDatePickerAsBadge() ? 'auto' : 320, maxWidth: '100%' }}
         >
           <EuiFlexGroup gutterSize="s" responsive={false}>
             {filterButtonGroup}
