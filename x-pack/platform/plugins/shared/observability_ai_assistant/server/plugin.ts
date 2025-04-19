@@ -29,7 +29,6 @@ import {
 } from './types';
 import { registerFunctions } from './functions';
 import { recallRankingEvent } from './analytics/recall_ranking';
-import { initLangtrace } from './service/client/instrumentation/init_langtrace';
 import { aiAssistantCapabilities } from '../common/capabilities';
 import { populateMissingSemanticTextFieldMigration } from './service/startup_migrations/populate_missing_semantic_text_field_migration';
 import { updateExistingIndexAssets } from './service/startup_migrations/create_or_update_index_assets';
@@ -52,7 +51,6 @@ export class ObservabilityAIAssistantPlugin
     this.isDev = context.env.mode.dev;
     this.logger = context.logger.get();
     this.config = context.config.get<ObservabilityAIAssistantConfig>();
-    initLangtrace();
   }
   public setup(
     core: CoreSetup<

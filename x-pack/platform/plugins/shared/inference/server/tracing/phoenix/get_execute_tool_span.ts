@@ -5,11 +5,8 @@
  * 2.0.
  */
 
-export function getLangtraceSpanAttributes() {
-  return {
-    'langtrace.sdk.name': '@langtrase/typescript-sdk',
-    'langtrace.service.type': 'llm',
-    'langtrace.service.version': 'unknown',
-    'langtrace.version': '2.1.0',
-  };
+import { ReadableSpan } from '@opentelemetry/sdk-trace-base';
+
+export function getExecuteToolSpan(span: ReadableSpan) {
+  return span;
 }
