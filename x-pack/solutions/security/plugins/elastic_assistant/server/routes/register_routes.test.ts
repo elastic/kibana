@@ -141,7 +141,7 @@ describe('registerRoutes', () => {
     jest.clearAllMocks();
 
     server = serverMock.create();
-    registerRoutes(server.router, loggerMock, getElserIdMock);
+    registerRoutes(server.router, loggerMock);
   });
 
   it('should call `cancelAttackDiscoveryRouteMock`', () => {

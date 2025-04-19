@@ -55,7 +55,7 @@ import { ConfigSchema } from '../config_schema';
 export const registerRoutes = (
   router: ElasticAssistantPluginRouter,
   logger: Logger,
-  config: ConfigSchema
+  config?: ConfigSchema
 ) => {
   /** PUBLIC */
   // Chat
