@@ -121,7 +121,7 @@ export class RequestContextFactory implements IRequestContextFactory {
           logger: this.logger,
           licensing: context.licensing,
           currentUser,
-          modelIdOverride: params?.modelIdOverride,
+          elserInferenceId: params?.elserInferenceId,
           manageGlobalKnowledgeBaseAIAssistant:
             securitySolutionAssistant.manageGlobalKnowledgeBaseAIAssistant as boolean,
           // uses internal user to interact with ML API

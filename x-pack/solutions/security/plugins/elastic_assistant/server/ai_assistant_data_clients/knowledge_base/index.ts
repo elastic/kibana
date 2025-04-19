@@ -78,6 +78,7 @@ import { AUDIT_OUTCOME, KnowledgeBaseAuditAction, knowledgeBaseAuditEvent } from
  * configuration after initial plugin start
  */
 export interface GetAIAssistantKnowledgeBaseDataClientParams {
+  elserInferenceId?: string;
   manageGlobalKnowledgeBaseAIAssistant?: boolean;
 }
 
@@ -201,8 +202,6 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
         inference_id: inferenceId,
         task_type: 'sparse_embedding',
       });
-
-      console.error('inferenceExists', JSON.stringify(inferenceExists, null, 2));
 
       if (!inferenceExists) {
         return false;
