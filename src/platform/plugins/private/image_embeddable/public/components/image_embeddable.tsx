@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 
 import { EmbeddableDynamicActionsManager } from '@kbn/embeddable-enhanced-plugin/public/plugin';
 import { StateManager } from '@kbn/presentation-publishing/state_manager/types';
@@ -30,29 +30,30 @@ interface ImageEmbeddableProps {
 }
 
 export const ImageEmbeddable = ({ api, filesClient }: ImageEmbeddableProps) => {
-  const imageConfig = api.imageConfigManager.getLatestState;
-  const [hasTriggerActions, setHasTriggerActions] = useState(false);
-
-  api.imageConfigManager.anyStateChange$.subscribe(() => {
+  const [hasTriggerActions, setHasTriggerActions] = React.useState<boolean>(false);
+  const imageConfigSubscription = api.imageConfigManager.anyStateChange$.subscribe((changes) => {
+    console.log({ changes });
     api.setDataLoading(true);
 
-    return api.setDataLoading(false);
+    return () => {
+      api.setDataLoading(false);
+      imageConfigSubscription.unsubscribe();
+    };
   });
 
   if (api.dynamicActionsManager) {
-    api.dynamicActionsManager?.anyStateChange$.subscribe(() => {
-      // set `hasTriggerActions` depending on whether or not the image has at least one drilldown
-      setHasTriggerActions(
-        (api.dynamicActionsManager?.getLatestState().enhancements?.dynamicActions.events ?? [])
-          .length > 0
-      );
-
-      return () => {
-        setHasTriggerActions(false);
-      };
-    });
+    const dynamicActionsSubscription = api.dynamicActionsManager?.anyStateChange$.subscribe(
+      (stateChanges) => {
+        console.log({ stateChanges });
+        if (api.dynamicActionsManager)
+          return () => {
+            dynamicActionsSubscription.unsubscribe();
+          };
+      }
+    );
   }
 
+  console.log({ hasTriggerActions });
   return (
     <ImageViewerContext.Provider
       value={{
@@ -70,7 +71,7 @@ export const ImageEmbeddable = ({ api, filesClient }: ImageEmbeddableProps) => {
         data-shared-item={''}
         data-rendering-count={1}
         className="imageEmbeddableImage"
-        imageConfig={imageConfig}
+        imageConfig={api.imageConfigManager.getLatestState()}
         isScreenshotMode={screenshotModeService?.isScreenshotMode()}
         onLoad={() => {
           api.setDataLoading(false);

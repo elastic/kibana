@@ -18,6 +18,7 @@ import {
   initializeStateManager,
   initializeTitleManager,
   titleComparators,
+  SerializedPanelState,
 } from '@kbn/presentation-publishing';
 
 import { IMAGE_CLICK_TRIGGER } from '../actions';
@@ -60,7 +61,7 @@ export const getImageEmbeddableFactory = ({
 
       const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
 
-      const serializeState = () => {
+      const serializeState = (): SerializedPanelState<ImageEmbeddableSerializedState> => {
         return {
           rawState: {
             ...titleManager.getLatestState(),
@@ -74,10 +75,13 @@ export const getImageEmbeddableFactory = ({
         uuid,
         parentApi,
         serializeState,
-        anyStateChange$: merge(
-          titleManager.anyStateChange$,
-          dynamicActionsManager?.anyStateChange$
-        ),
+        anyStateChange$: dynamicActionsManager
+          ? merge(
+              titleManager.anyStateChange$,
+              imageConfigManager.anyStateChange$,
+              dynamicActionsManager.anyStateChange$
+            )
+          : merge(titleManager.anyStateChange$, imageConfigManager.anyStateChange$),
         getComparators: () => {
           return {
             ...titleComparators,
@@ -87,7 +91,7 @@ export const getImageEmbeddableFactory = ({
           };
         },
         onReset: async (lastSaved) => {
-          const lastRuntimeState = lastSaved ? await lastSaved.rawState : {};
+          const lastRuntimeState = lastSaved ? lastSaved.rawState : {};
           titleManager.reinitializeState(lastRuntimeState);
           dynamicActionsManager?.reinitializeState(lastRuntimeState);
         },
