@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { PureComponent } from 'react';
+import React, { PureComponent, FocusEvent } from 'react';
 import classNames from 'classnames';
 import { METRIC_TYPE } from '@kbn/analytics';
 
@@ -116,7 +116,7 @@ export interface QueryStringInputProps {
   languageSwitcherPopoverAnchorPosition?: PopoverAnchorPosition;
   onBlur?: () => void;
   onChange?: (query: Query) => void;
-  onChangeQueryInputFocus?: (isFocused: boolean) => void;
+  onChangeQueryInputFocus?: (isFocused: boolean, relatedTarget?: HTMLElement | null) => void;
   onSubmit?: (query: Query) => void;
   submitOnBlur?: boolean;
   dataTestSubj?: string;
@@ -163,7 +163,7 @@ interface State {
   selectionStart: number | null;
   selectionEnd: number | null;
   indexPatterns: DataView[];
-
+  onBlurRelatedTarget: HTMLElement | null;
   /**
    * Part of state because passed down to child components
    */
@@ -198,6 +198,7 @@ export class QueryStringInput extends PureComponent<QueryStringInputProps, State
     selectionEnd: null,
     indexPatterns: [],
     queryBarInputDiv: null,
+    onBlurRelatedTarget: null,
   };
 
   public inputRef: HTMLTextAreaElement | null = null;
@@ -637,7 +638,7 @@ export class QueryStringInput extends PureComponent<QueryStringInputProps, State
       if (!this.isFocusWithin && !this.state.isSuggestionsVisible && !this.componentIsUnmounting) {
         this.handleBlurHeight();
         if (this.props.onChangeQueryInputFocus) {
-          this.props.onChangeQueryInputFocus(false);
+          this.props.onChangeQueryInputFocus(false, this.state.onBlurRelatedTarget);
         }
 
         if (this.props.submitOnBlur) {
@@ -647,7 +648,8 @@ export class QueryStringInput extends PureComponent<QueryStringInputProps, State
     }, 50);
   };
 
-  private onInputBlur = () => {
+  private onInputBlur = (e: FocusEvent) => {
+    this.setState({ onBlurRelatedTarget: e?.relatedTarget as HTMLElement });
     if (isFunction(this.props.onBlur)) {
       this.props.onBlur();
     }
@@ -749,7 +751,7 @@ export class QueryStringInput extends PureComponent<QueryStringInputProps, State
 
   handleOnFocus = () => {
     if (this.props.onChangeQueryInputFocus) {
-      this.props.onChangeQueryInputFocus(true);
+      this.props.onChangeQueryInputFocus(true, null);
     }
 
     this.handleAutoHeight();

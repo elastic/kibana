@@ -285,6 +285,7 @@ export const QueryBarTopRow = React.memo(
     } = kibana.services;
 
     const quickSelectButtonRef = useRef<HTMLButtonElement>(null);
+    const datePickerWrapperRef = useRef<HTMLDivElement>(null);
 
     const isQueryLangSelected = props.query && !isOfQueryType(props.query);
 
@@ -396,10 +397,25 @@ export const QueryBarTopRow = React.memo(
       [propsOnChange]
     );
 
-    const onChangeQueryInputFocus = useCallback((isFocused: boolean) => {
-      setIsQueryInputFocused(isFocused);
-      quickSelectButtonRef?.current?.click();
-    }, []);
+    const onChangeQueryInputFocus = useCallback(
+      (isFocused: boolean, target?: HTMLElement | null) => {
+        setIsQueryInputFocused(isFocused);
+
+        // ref.current.contains() is failing when the range is not in commonly used ranges
+        const refContainsTarget =
+          quickSelectButtonRef?.current?.getAttribute('itemid') === target?.getAttribute('itemid');
+
+        // Check if the date range is in the commonly used ranges and prevent programmatic click
+        const isRangeInCommonlyUsed = commonlyUsedRanges.some(({ label }: { label: string }) =>
+          label.includes(datePickerWrapperRef.current?.innerText || '')
+        );
+
+        if (refContainsTarget && !isRangeInCommonlyUsed) {
+          quickSelectButtonRef.current?.click();
+        }
+      },
+      [commonlyUsedRanges]
+    );
 
     const onTimeChange = useCallback(
       ({
@@ -513,6 +529,7 @@ export const QueryBarTopRow = React.memo(
         <SuperDatePicker
           quickSelectButtonProps={{
             buttonRef: quickSelectButtonRef,
+            itemID: 'datePickerquickSelectButton',
           }}
           isDisabled={isDisabled}
           start={props.dateRangeFrom}
@@ -537,7 +554,11 @@ export const QueryBarTopRow = React.memo(
       );
       const component = getWrapperWithTooltip(datePicker, enableTooltip, props.query);
 
-      return <EuiFlexItem className={wrapperClasses}>{component}</EuiFlexItem>;
+      return (
+        <EuiFlexItem ref={datePickerWrapperRef} className={wrapperClasses}>
+          {component}
+        </EuiFlexItem>
+      );
     }
 
     function renderCancelButton() {
@@ -735,7 +756,7 @@ export const QueryBarTopRow = React.memo(
       return (
         <EuiFlexItem
           grow={!shouldShowDatePickerAsBadge()}
-          css={{ minWidth: shouldShowDatePickerAsBadge() ? 'auto' : 320, maxWidth: '100%' }}
+          style={{ minWidth: shouldShowDatePickerAsBadge() ? 'auto' : 320, maxWidth: '100%' }}
         >
           <EuiFlexGroup gutterSize="s" responsive={false}>
             {filterButtonGroup}

@@ -247,7 +247,7 @@ describe('QueryStringInput', () => {
     jest.advanceTimersByTime(100);
 
     expect(mockCallback).toHaveBeenCalledTimes(1);
-    expect(mockCallback).toHaveBeenCalledWith(false);
+    expect(mockCallback).toHaveBeenCalledWith(false, undefined);
   });
 
   it('Should not fire onChangeQueryInputFocus if input is focused back', () => {
@@ -271,7 +271,7 @@ describe('QueryStringInput', () => {
     inputWrapper.simulate('focus');
 
     expect(mockCallback).toHaveBeenCalledTimes(1);
-    expect(mockCallback).toHaveBeenCalledWith(true);
+    expect(mockCallback).toHaveBeenCalledWith(true, null);
 
     jest.advanceTimersByTime(100);
     expect(mockCallback).toHaveBeenCalledTimes(1);
