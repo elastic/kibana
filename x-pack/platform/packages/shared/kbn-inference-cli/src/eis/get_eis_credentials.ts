@@ -8,7 +8,7 @@
 /* eslint-disable max-classes-per-file */
 import execa from 'execa';
 import { ToolingLog } from '@kbn/tooling-log';
-import { pickBy } from 'lodash';
+import { pickBy, mapKeys } from 'lodash';
 
 class VaultUnavailableError extends Error {
   constructor(cause: Error) {
@@ -43,7 +43,8 @@ async function getEisCreditsFromVault() {
     throw new VaultAccessError(error);
   });
 
-  const secretPath = process.env.VAULT_SECRET_PATH || 'secrets/kibana-issues/dev/inference/eis';
+  const secretPath =
+    process.env.VAULT_SECRET_PATH || 'secret/kibana-issues/dev/inference/kibana-eis-bedrock-config';
   const vaultAddress = process.env.VAULT_ADDR || 'https://secrets.elastic.co:8200';
 
   const output = await execa
@@ -54,7 +55,15 @@ async function getEisCreditsFromVault() {
       },
     })
     .then((value) => {
-      return (JSON.parse(value.stdout) as { data: { data: EisCredentials } }).data.data;
+      const creds = (JSON.parse(value.stdout) as { data: EisCredentials }).data;
+
+      return mapKeys(creds, (val, key) => {
+        // temp until secret gets updated
+        return key
+          .replace('_access_key_id', '_aws_access_key_id')
+          .replace('_secret_access_key', '_aws_secret_access_key')
+          .toUpperCase();
+      });
     })
     .catch((error) => {
       throw new VaultAccessError(error);
