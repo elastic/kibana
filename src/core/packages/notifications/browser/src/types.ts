@@ -6,8 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
-import type { Observable } from 'rxjs';
+import type { Observable, filter } from 'rxjs';
 import type { EuiGlobalToastListToast as EuiToast } from '@elastic/eui';
 import type { MountPoint } from '@kbn/core-mount-utils-browser';
 
@@ -77,3 +76,24 @@ export interface IToasts {
   addDanger: (toastOrTitle: ToastInput, options?: any) => Toast;
   addError: (error: Error, options: ErrorToastOptions) => Toast;
 }
+
+interface NotificationCoordinatorState {
+  locked: boolean;
+  controller: string | null;
+}
+
+export interface NotificationCoordinatorPublicApi {
+  optInToCoordination: <
+    T extends Array<{
+      id: string;
+    }>
+  >(
+    $: Observable<T>,
+    cond: Parameters<typeof filter<NotificationCoordinatorState>>[0]
+  ) => Observable<T>;
+  acquireLock: () => void;
+  releaseLock: () => void;
+  lock$: Observable<NotificationCoordinatorState>;
+}
+
+export type NotificationCoordinator = (registrar: string) => NotificationCoordinatorPublicApi;
