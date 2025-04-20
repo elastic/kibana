@@ -64,9 +64,11 @@ import { ApmDocumentType } from '../../../common/document_type';
 import { RollupInterval } from '../../../common/rollup';
 import { mapOtelToSpanLink } from '../span_links/utils';
 
+export type TraceDoc = WaterfallTransaction | WaterfallSpan;
+
 export interface TraceItems {
   exceedsMax: boolean;
-  traceDocs: Array<WaterfallTransaction | WaterfallSpan>;
+  traceDocs: TraceDoc[];
   errorDocs: WaterfallError[];
   spanLinksCountById: Record<string, number>;
   traceDocsTotal: number;
