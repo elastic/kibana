@@ -35,11 +35,13 @@ export function useKnowledgeBase(): UseKnowledgeBaseResult {
   );
 
   const [isInstalling, setIsInstalling] = useState(false);
-  const isPolling =
-    !!statusRequest.value?.endpoint && statusRequest.value?.kbState !== KnowledgeBaseState.READY;
+
+  // poll for status when installing, until install is complete and the KB is ready
+  const isPolling = isInstalling && statusRequest.value?.kbState !== KnowledgeBaseState.READY;
 
   useEffect(() => {
-    if (isInstalling && !!statusRequest.value?.endpoint) {
+    // toggle installing state to false once KB is ready
+    if (isInstalling && statusRequest.value?.kbState === KnowledgeBaseState.READY) {
       setIsInstalling(false);
     }
   }, [isInstalling, statusRequest]);

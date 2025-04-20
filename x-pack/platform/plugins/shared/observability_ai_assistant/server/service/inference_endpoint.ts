@@ -126,6 +126,7 @@ export async function getKbModelStatus({
       logger.debug(`Using existing inference id "${inferenceId}" from write index`);
     } catch (error) {
       logger.debug(`Inference id not found: ${error.message}`);
+
       return {
         enabled,
         errorMessage: error.message,
@@ -145,11 +146,13 @@ export async function getKbModelStatus({
       throw error;
     }
     logger.debug(`Inference endpoint "${inferenceId}" not found or unavailable: ${error.message}`);
+
     return { enabled, errorMessage: error.message, kbState: KnowledgeBaseState.NOT_INSTALLED };
   }
 
   const modelId = endpoint?.service_settings?.model_id;
   let trainedModelStatsResponse: MlGetTrainedModelsStatsResponse;
+
   try {
     trainedModelStatsResponse = await esClient.asInternalUser.ml.getTrainedModelsStats({
       model_id: modelId,
@@ -158,7 +161,13 @@ export async function getKbModelStatus({
     logger.error(
       `Failed to get model stats for model "${modelId}" and inference id ${inferenceId}: ${error.message}`
     );
-    return { enabled, errorMessage: error.message, kbState: KnowledgeBaseState.NOT_INSTALLED };
+
+    return {
+      enabled,
+      endpoint,
+      errorMessage: error.message,
+      kbState: KnowledgeBaseState.NOT_INSTALLED,
+    };
   }
 
   const modelStats = trainedModelStatsResponse.trained_model_stats.find(
