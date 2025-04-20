@@ -45,11 +45,7 @@ interface CreateAdapterParams {
 export class RuleMigrationsDataService {
   private readonly adapters: Adapters;
 
-  constructor(
-    private logger: Logger,
-    private kibanaVersion: string,
-    private elserInferenceId?: string
-  ) {
+  constructor(private logger: Logger, private kibanaVersion: string, elserInferenceId?: string) {
     this.adapters = {
       migrations: this.createIndexPatternAdapter({
         adapterId: 'migrations',
