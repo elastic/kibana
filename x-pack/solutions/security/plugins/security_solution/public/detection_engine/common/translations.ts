@@ -1029,63 +1029,6 @@ export const DELETE = i18n.translate(
   }
 );
 
-export const IMPORT_RULE_BTN_TITLE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.components.importRuleModal.importRuleTitle',
-  {
-    defaultMessage: 'Import',
-  }
-);
-
-export const SELECT_RULE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.components.importRuleModal.selectRuleDescription',
-  {
-    defaultMessage:
-      'Select rules to import. Associated rule actions and exceptions can be included.',
-  }
-);
-
-export const INITIAL_PROMPT_TEXT = i18n.translate(
-  'xpack.securitySolution.detectionEngine.components.importRuleModal.initialPromptTextDescription',
-  {
-    defaultMessage: 'Select or drag and drop a valid rules_export.ndjson file',
-  }
-);
-
-export const OVERWRITE_WITH_SAME_NAME = i18n.translate(
-  'xpack.securitySolution.detectionEngine.components.importRuleModal.overwriteDescription',
-  {
-    defaultMessage: 'Overwrite existing detection rules with conflicting "rule_id"',
-  }
-);
-
-export const SUCCESSFULLY_IMPORTED_RULES = (totalRules: number) =>
-  i18n.translate(
-    'xpack.securitySolution.detectionEngine.components.importRuleModal.successfullyImportedRulesTitle',
-    {
-      values: { totalRules },
-      defaultMessage:
-        'Successfully imported {totalRules} {totalRules, plural, =1 {rule} other {rules}}',
-    }
-  );
-
-export const IMPORT_FAILED = (totalRules: number) =>
-  i18n.translate(
-    'xpack.securitySolution.detectionEngine.components.importRuleModal.importFailedTitle',
-    {
-      values: { totalRules },
-      defaultMessage: 'Failed to import {totalRules} {totalRules, plural, =1 {rule} other {rules}}',
-    }
-  );
-
-export const IMPORT_FAILED_DETAILED = (message: string) =>
-  i18n.translate(
-    'xpack.securitySolution.detectionEngine.components.importRuleModal.importFailedDetailedTitle',
-    {
-      values: { message },
-      defaultMessage: '{message}',
-    }
-  );
-
 export const BULK_DELETE_CONFIRMATION_TITLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.components.allRules.bulkDeleteConfirmationTitle',
   {
