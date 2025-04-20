@@ -105,7 +105,6 @@ export enum KnowledgeBaseType {
 
 export enum KnowledgeBaseState {
   NOT_INSTALLED = 'NOT_INSTALLED',
-  PENDING_MODEL_DEPLOYMENT = 'PENDING_MODEL_DEPLOYMENT',
   DEPLOYING_MODEL = 'DEPLOYING_MODEL',
   READY = 'READY',
   ERROR = 'ERROR',

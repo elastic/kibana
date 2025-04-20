@@ -122,7 +122,6 @@ export function WelcomeMessageKnowledgeBase({
         </>
       );
     case KnowledgeBaseState.DEPLOYING_MODEL:
-    case KnowledgeBaseState.PENDING_MODEL_DEPLOYMENT:
       return (
         <>
           <SettingUpKnowledgeBase />

@@ -177,7 +177,7 @@ export async function getKbModelStatus({
   let kbState: KnowledgeBaseState;
 
   if (!modelStats) {
-    kbState = KnowledgeBaseState.PENDING_MODEL_DEPLOYMENT;
+    kbState = KnowledgeBaseState.NOT_INSTALLED;
   } else if (modelStats.deployment_stats?.state === 'failed') {
     kbState = KnowledgeBaseState.ERROR;
   } else if (
