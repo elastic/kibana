@@ -18,6 +18,7 @@ import type {
   FindingsVulnerabilityFlyoutContentProps,
   FindingsVulnerabilityFlyoutFooterProps,
   FindingsVulnerabilityFlyoutHeaderProps,
+  FindingVulnerabilityFlyoutProps,
 } from '@kbn/cloud-security-posture';
 import { uiMetricService } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import { CspLoadingState } from './components/csp_loading_state';
@@ -56,16 +57,26 @@ export const LazyCspFindingsMisconfigurationFlyoutFooter = lazy(
 
 // Vulnerability Flyout Components
 export const LazyCspFindingsVulnerabilityFlyout = lazy(
-  () => import('./pages/vulnerabilities/vulnerabilities_finding_flyout/vulnerability_finding_flyout_new')
+  () =>
+    import('./pages/vulnerabilities/vulnerabilities_finding_flyout/vulnerability_finding_flyout')
 );
 export const LazyCspFindingsVulnerabilityFlyoutHeader = lazy(
-  () => import('./pages/vulnerabilities/vulnerabilities_finding_flyout/vulnerability_finding_right/header')
+  () =>
+    import(
+      './pages/vulnerabilities/vulnerabilities_finding_flyout/vulnerability_finding_right/header'
+    )
 );
 export const LazyCspFindingsVulnerabilityFlyoutBody = lazy(
-  () => import('./pages/vulnerabilities/vulnerabilities_finding_flyout/vulnerability_finding_right/content')
+  () =>
+    import(
+      './pages/vulnerabilities/vulnerabilities_finding_flyout/vulnerability_finding_right/content'
+    )
 );
 export const LazyCspFindingsVulnerabilityFlyoutFooter = lazy(
-  () => import('./pages/vulnerabilities/vulnerabilities_finding_flyout/vulnerability_finding_right/footer')
+  () =>
+    import(
+      './pages/vulnerabilities/vulnerabilities_finding_flyout/vulnerability_finding_right/footer'
+    )
 );
 
 const CspRouterLazy = lazy(() => import('./application/csp_router'));

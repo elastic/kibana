@@ -43,7 +43,7 @@ export const FindingsVulnerabilityPanel = ({
           return (
             <>
               <FlyoutHeader>
-                {console.log(finding)}
+                {/* {console.log(finding)} */}
                 <EuiFlexGroup gutterSize="xs" responsive={false} direction="column">
                   <EuiFlexItem>
                     <SeverityStatusBadge
