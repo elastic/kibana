@@ -107,6 +107,5 @@
     "@kbn/server-route-repository-utils",
     "@kbn/fields-metadata-plugin",
     "@kbn/apm-sources-access-plugin",
-    "@kbn/core-http-server-utils"
   ]
 }
