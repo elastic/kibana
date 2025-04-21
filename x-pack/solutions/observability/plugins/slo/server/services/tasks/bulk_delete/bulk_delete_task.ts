@@ -49,7 +49,7 @@ export class BulkDeleteTask {
     plugins.taskManager.setup.registerTaskDefinitions({
       [TYPE]: {
         title: 'SLO bulk delete',
-        timeout: '20m',
+        timeout: '10m',
         maxAttempts: 1,
         createTaskRunner: ({ taskInstance, fakeRequest }: RunContext) => {
           return {
@@ -69,8 +69,6 @@ export class BulkDeleteTask {
               }
 
               const [coreStart, pluginStart] = await core.getStartServices();
-              const path = addSpaceIdToPath('/', taskInstance?.userScope?.spaceId ?? 'default');
-              coreStart.http.basePath.set(fakeRequest, path);
 
               const scopedClusterClient = coreStart.elasticsearch.client.asScoped(fakeRequest);
               const scopedSoClient = coreStart.savedObjects.getScopedClient(fakeRequest);
