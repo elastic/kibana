@@ -12,7 +12,6 @@ import { ApmOtelFields, SpanKind } from './apm_otel_fields';
 import { ApmOtelError } from './apm_otel_error';
 import { Entity } from '../../entity';
 import { HttpMethod } from '../span';
-import { LogLevel, OtelLog } from './otel_log';
 export class OtelInstance extends Entity<ApmOtelFields> {
   span({
     name,
@@ -32,26 +31,6 @@ export class OtelInstance extends Entity<ApmOtelFields> {
       ...fields,
       kind,
       name,
-    });
-  }
-
-  log({
-    message,
-    logLevel,
-    observedTimestamp,
-  }: {
-    message: string;
-    logLevel: LogLevel;
-    observedTimestamp?: number;
-  }) {
-    return new OtelLog({
-      ...this.fields,
-      message,
-      'body.text': message,
-      'log.level': LogLevel[logLevel] as string,
-      observed_timestamp: observedTimestamp,
-      severity_number: logLevel,
-      severity_text: LogLevel[logLevel] as string,
     });
   }
 

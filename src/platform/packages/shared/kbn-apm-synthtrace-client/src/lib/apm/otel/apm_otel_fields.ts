@@ -54,16 +54,6 @@ type MetricsKeys = Pick<
   | 'span.destination.service.response_time.sum.us'
 >;
 
-type LogKeys = Pick<
-  ApmFields,
-  | 'observed_timestamp'
-  | 'event_name'
-  | 'severity_text'
-  | 'severity_number'
-  | 'body.text'
-  | 'message'
-  | 'log.level'
->;
 type ResourceAttributesKeys = Pick<
   ApmFields,
   | 'agent.name'
@@ -90,8 +80,7 @@ type ResourceAttributesKeys = Pick<
 
 export type ApmOtelAttributes = {
   [K in keyof AttributesKeys as `attributes.${K}`]: ApmFields[K];
-} & ErrorAttributes &
-  LogKeys & {
+} & ErrorAttributes & {
     'attributes.db.statement': string;
     'attributes.db.system': string;
     'attributes.network.peer.address': string;
