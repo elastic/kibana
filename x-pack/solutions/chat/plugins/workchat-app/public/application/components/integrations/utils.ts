@@ -24,7 +24,7 @@ export const integrationTypeToLabel = (type: IntegrationType) => {
 export const getIntegrationIcon = (type: IntegrationType) => {
   switch (type) {
     case IntegrationType.salesforce:
-      return SalesforceSvg
+      return SalesforceSvg;
     case IntegrationType.index_source:
       return 'index';
     case IntegrationType.external_server:

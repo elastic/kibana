@@ -19,11 +19,11 @@ import {
 } from '@elastic/eui';
 import { IntegrationType } from '@kbn/wci-common';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
+import { i18n } from '@kbn/i18n';
 import { IntegrationListView } from './integration_list_view';
 import { getIntegrationIcon } from '../utils';
 import { useNavigation } from '../../../hooks/use_navigation';
 import { appPaths } from '../../../app_paths';
-import { i18n } from '@kbn/i18n';
 
 interface IntegrationCardData {
   title: string;
@@ -32,39 +32,39 @@ interface IntegrationCardData {
   disabled?: boolean;
 }
 
-
-
 export const IntegrationCatalogView: React.FC = () => {
   const { navigateToWorkchatUrl } = useNavigation();
 
   const integrationCards: Record<IntegrationType, IntegrationCardData> = {
     [IntegrationType.index_source]: {
       title: i18n.translate('workchatApp.integrations.listView.importIndexCard', {
-        defaultMessage: "Import Index",
+        defaultMessage: 'Import Index',
       }),
       icon: getIntegrationIcon(IntegrationType.index_source),
-      description:i18n.translate('workchatApp.integrations.listView.importIndexDescription', {
-        defaultMessage: "Choose an existing index to connect and start using it in your workflows without re-importing your data"
+      description: i18n.translate('workchatApp.integrations.listView.importIndexDescription', {
+        defaultMessage:
+          'Choose an existing index to connect and start using it in your workflows without re-importing your data',
       }),
       disabled: false,
     },
     [IntegrationType.external_server]: {
       title: i18n.translate('workchatApp.integrations.listView.externalServerCard', {
-        defaultMessage: "External Server",
+        defaultMessage: 'External Server',
       }),
       icon: getIntegrationIcon(IntegrationType.external_server) as IconType,
-      description:i18n.translate('workchatApp.integrations.listView.externalServerDescription', {
-        defaultMessage: "Connect to external servers for data processing."
+      description: i18n.translate('workchatApp.integrations.listView.externalServerDescription', {
+        defaultMessage: 'Connect to external servers for data processing.',
       }),
       disabled: false,
     },
     [IntegrationType.salesforce]: {
       title: i18n.translate('workchatApp.integrations.listView.salesforceCard', {
-        defaultMessage: "Salesforce",
+        defaultMessage: 'Salesforce',
       }),
       icon: getIntegrationIcon(IntegrationType.salesforce) as IconType,
-      description:i18n.translate('workchatApp.integrations.listView.salesforceDescription', {
-        defaultMessage: "Connect your Salesforce account to bring in customer records, case data, and account insights for use in workflows"
+      description: i18n.translate('workchatApp.integrations.listView.salesforceDescription', {
+        defaultMessage:
+          'Connect your Salesforce account to bring in customer records, case data, and account insights for use in workflows',
       }),
       disabled: false,
     },
