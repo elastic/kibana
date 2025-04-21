@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import type { ReactWrapper } from 'enzyme';
-import { mount, type ComponentType } from 'enzyme';
 import React from 'react';
+import { render, screen, fireEvent } from '@testing-library/react';
 
 import { MatrixHistogram } from '.';
 import { TestProviders } from '../../mock';
@@ -45,8 +44,6 @@ jest.mock('react-router-dom', () => {
 });
 
 describe('Matrix Histogram Component', () => {
-  let wrapper: ReactWrapper;
-
   const mockMatrixOverTimeHistogramProps = {
     defaultIndex: ['defaultIndex'],
     defaultStackByOption: {
@@ -78,27 +75,38 @@ describe('Matrix Histogram Component', () => {
   });
 
   describe('rendering', () => {
-    beforeEach(() => {
-      wrapper = mount(<MatrixHistogram {...mockMatrixOverTimeHistogramProps} />, {
-        wrappingComponent: TestProviders as ComponentType<{}>,
-      });
-    });
-
     test('it should not render VisualizationActions', () => {
-      expect(wrapper.find(`[data-test-subj="visualizationActions"]`).exists()).toEqual(false);
+      render(
+        <TestProviders>
+          <MatrixHistogram {...mockMatrixOverTimeHistogramProps} />
+        </TestProviders>
+      );
+
+      expect(screen.queryByTestId('visualizationActions')).not.toBeInTheDocument();
     });
 
     test('it should render Lens Visualization', () => {
-      expect(wrapper.find(`[data-test-subj="visualization-embeddable"]`).exists()).toEqual(true);
+      render(
+        <TestProviders>
+          <MatrixHistogram {...mockMatrixOverTimeHistogramProps} />
+        </TestProviders>
+      );
+      expect(screen.getByTestId('visualization-embeddable')).toBeInTheDocument();
     });
 
     test('it should render visualization count as subtitle', () => {
-      wrapper.setProps({ endDate: 100 });
-      wrapper.update();
-
-      expect(wrapper.find(`[data-test-subj="header-section-subtitle"]`).text()).toEqual(
-        'Showing: 999 events'
+      const { rerender } = render(
+        <TestProviders>
+          <MatrixHistogram {...mockMatrixOverTimeHistogramProps} />
+        </TestProviders>
       );
+      rerender(
+        <TestProviders>
+          <MatrixHistogram {...mockMatrixOverTimeHistogramProps} endDate={'100'} />
+        </TestProviders>
+      );
+
+      expect(screen.getByTestId('header-section-subtitle').textContent).toBe('Showing: 999 events');
     });
 
     test('it should render 0 as subtitle when buckets are empty', () => {
@@ -107,40 +115,51 @@ describe('Matrix Histogram Component', () => {
         responses: [{ aggregations: [{ buckets: [] }], hits: { total: 999 } }],
         loading: false,
       });
-      wrapper.setProps({ endDate: 100 });
-      wrapper.update();
 
-      expect(wrapper.find(`[data-test-subj="header-section-subtitle"]`).text()).toEqual(
-        'Showing: 0 events'
+      const { rerender } = render(
+        <TestProviders>
+          <MatrixHistogram {...mockMatrixOverTimeHistogramProps} />
+        </TestProviders>
       );
+
+      rerender(
+        <TestProviders>
+          <MatrixHistogram {...mockMatrixOverTimeHistogramProps} endDate={'100'} />
+        </TestProviders>
+      );
+
+      expect(screen.getByTestId('header-section-subtitle').textContent).toBe('Showing: 0 events');
     });
   });
 
   describe('spacer', () => {
     test('it renders a spacer by default', () => {
-      wrapper = mount(<MatrixHistogram {...mockMatrixOverTimeHistogramProps} />, {
-        wrappingComponent: TestProviders as ComponentType<{}>,
-      });
-      expect(wrapper.find('[data-test-subj="spacer"]').exists()).toEqual(true);
+      render(
+        <TestProviders>
+          <MatrixHistogram {...mockMatrixOverTimeHistogramProps} />
+        </TestProviders>
+      );
+      expect(screen.getByTestId('spacer')).toBeInTheDocument();
     });
 
     test('it does NOT render a spacer when showSpacer is false', () => {
-      wrapper = mount(
-        <MatrixHistogram {...mockMatrixOverTimeHistogramProps} showSpacer={false} />,
-        {
-          wrappingComponent: TestProviders as ComponentType<{}>,
-        }
+      render(
+        <TestProviders>
+          <MatrixHistogram {...mockMatrixOverTimeHistogramProps} showSpacer={false} />
+        </TestProviders>
       );
-      expect(wrapper.find('[data-test-subj="spacer"]').exists()).toEqual(false);
+      expect(screen.queryByTestId('spacer')).not.toBeInTheDocument();
     });
   });
 
   describe('select dropdown', () => {
     test('should be hidden if only one option is provided', () => {
-      wrapper = mount(<MatrixHistogram {...mockMatrixOverTimeHistogramProps} />, {
-        wrappingComponent: TestProviders as ComponentType<{}>,
-      });
-      expect(wrapper.find('EuiSelect').exists()).toEqual(false);
+      render(
+        <TestProviders>
+          <MatrixHistogram {...mockMatrixOverTimeHistogramProps} />
+        </TestProviders>
+      );
+      expect(screen.queryByText('EuiSelect')).not.toBeInTheDocument();
     });
   });
 
@@ -150,10 +169,12 @@ describe('Matrix Histogram Component', () => {
         ...mockMatrixOverTimeHistogramProps,
         getLensAttributes: getDnsTopDomainsLensAttributes,
       };
-      wrapper = mount(<MatrixHistogram {...testProps} />, {
-        wrappingComponent: TestProviders as ComponentType<{}>,
-      });
-      expect(wrapper.find('[data-test-subj="inspect-icon-button"]').exists()).toEqual(false);
+      render(
+        <TestProviders>
+          <MatrixHistogram {...testProps} />
+        </TestProviders>
+      );
+      expect(screen.queryByTestId('inspect-icon-button')).not.toBeInTheDocument();
     });
   });
 
@@ -164,36 +185,44 @@ describe('Matrix Histogram Component', () => {
     };
 
     test('toggleQuery updates toggleStatus', () => {
-      wrapper = mount(<MatrixHistogram {...testProps} />, {
-        wrappingComponent: TestProviders as ComponentType<{}>,
-      });
-      expect(wrapper.find('[data-test-subj="visualization-embeddable"]').exists()).toEqual(true);
-      wrapper.find('[data-test-subj="query-toggle-header"]').first().simulate('click');
-      expect(mockSetToggle).toBeCalledWith(false);
+      render(
+        <TestProviders>
+          <MatrixHistogram {...testProps} />
+        </TestProviders>
+      );
+      expect(screen.getByTestId('visualization-embeddable')).toBeInTheDocument();
+      fireEvent.click(screen.getByTestId('query-toggle-header'));
+      expect(mockSetToggle).toHaveBeenCalledWith(false);
     });
 
     test('toggleStatus=true, render components', () => {
-      wrapper = mount(<MatrixHistogram {...testProps} />, {
-        wrappingComponent: TestProviders as ComponentType<{}>,
-      });
-      expect(wrapper.find('[data-test-subj="visualization-embeddable"]').exists()).toEqual(true);
+      render(
+        <TestProviders>
+          <MatrixHistogram {...testProps} />
+        </TestProviders>
+      );
+      expect(screen.getByTestId('visualization-embeddable')).toBeInTheDocument();
     });
 
     test('toggleStatus=false, do not render components', () => {
       mockUseQueryToggle.mockReturnValue({ toggleStatus: false, setToggleStatus: mockSetToggle });
-      wrapper = mount(<MatrixHistogram {...testProps} />, {
-        wrappingComponent: TestProviders as ComponentType<{}>,
-      });
-      expect(wrapper.find('MatrixLoader').exists()).toBe(false);
+      render(
+        <TestProviders>
+          <MatrixHistogram {...testProps} />
+        </TestProviders>
+      );
+      expect(screen.queryByText('MatrixLoader')).not.toBeInTheDocument();
     });
 
     test('toggleStatus=false, skip', () => {
       mockUseQueryToggle.mockReturnValue({ toggleStatus: false, setToggleStatus: mockSetToggle });
-      wrapper = mount(<MatrixHistogram {...testProps} />, {
-        wrappingComponent: TestProviders as ComponentType<{}>,
-      });
+      render(
+        <TestProviders>
+          <MatrixHistogram {...testProps} />
+        </TestProviders>
+      );
 
-      expect(wrapper.find('[data-test-subj="visualization-embeddable"]').exists()).toEqual(false);
+      expect(screen.queryByTestId('visualization-embeddable')).not.toBeInTheDocument();
     });
   });
 });
