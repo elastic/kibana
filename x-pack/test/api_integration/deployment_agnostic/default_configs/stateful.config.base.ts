@@ -40,6 +40,11 @@ export const AI_ASSISTANT_SNAPSHOT_REPO_PATH = path.resolve(
   'x-pack/test/api_integration/deployment_agnostic/apis/observability/ai_assistant/knowledge_base/snapshots/'
 );
 
+export const LOCAL_PRODUCT_DOC_PATH = path.resolve(
+  REPO_ROOT,
+  'x-pack/test/api_integration/deployment_agnostic/apis/observability/ai_assistant/complete/product_docs'
+);
+
 export function createStatefulTestConfig<T extends DeploymentAgnosticCommonServices>(
   options: CreateTestConfigOptions<T>
 ) {
@@ -161,6 +166,7 @@ export function createStatefulTestConfig<T extends DeploymentAgnosticCommonServi
           '--xpack.uptime.service.devUrl=mockDevUrl',
           '--xpack.uptime.service.manifestUrl=mockDevUrl',
           '--xpack.observabilityAIAssistant.disableKbSemanticTextMigration=true',
+          `--xpack.productDocBase.artifactRepositoryUrl=file:///${LOCAL_PRODUCT_DOC_PATH}`,
         ],
       },
     };
