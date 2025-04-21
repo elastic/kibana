@@ -13,7 +13,7 @@ xpack.features.overrides:
   siemV2.description: null
   securitySolutionSiemMigrations.hidden: true
 
-## Agentless deployment by default
+# Custom integrations/fleet settings
 xpack.fleet.agentless.isDefault: true
-# Override integrations home
 xpack.fleet.integrationsHomeOverride: '/app/security/configurations/integrations'
+xpack.fleet.prereleaseEnabledByDefault: true

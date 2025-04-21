@@ -44,7 +44,7 @@
     "@kbn/core-chrome-browser",
     "@kbn/core-logging-server-mocks",
     "@kbn/discover-plugin",
-    "@kbn/search-connectors-plugin",
+    "@kbn/content-connectors-plugin",
     "@kbn/index-management-shared-types",
     "@kbn/react-kibana-context-render",
     "@kbn/security-api-key-management",
