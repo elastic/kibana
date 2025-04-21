@@ -10,6 +10,7 @@ import { useDispatch } from 'react-redux';
 import type { CaseViewRefreshPropInterface } from '@kbn/cases-plugin/common';
 import { CaseMetricsFeature } from '@kbn/cases-plugin/common';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import type { CaseViewAlertsTableProps } from '@kbn/cases-plugin/public/components/case_view/types';
 import { IOCPanelKey } from '../../flyout/ai_for_soc/constants/panel_keys';
 import { DetectionEngineAlertsTable } from '../../detections/components/alerts_table';
 import { CaseDetailsRefreshContext } from '../../common/components/endpoint';
@@ -17,7 +18,12 @@ import { DocumentDetailsRightPanelKey } from '../../flyout/document_details/shar
 import { RulePanelKey } from '../../flyout/rule_details/right';
 import { TimelineId } from '../../../common/types/timeline';
 import { useKibana, useNavigation } from '../../common/lib/kibana';
-import { APP_ID, CASES_PATH, SECURITY_FEATURE_ID, SecurityPageName } from '../../../common/constants';
+import {
+  APP_ID,
+  CASES_PATH,
+  SECURITY_FEATURE_ID,
+  SecurityPageName,
+} from '../../../common/constants';
 import { timelineActions } from '../../timelines/store';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
 import { getEndpointDetailsPath } from '../../management/common/routing';
@@ -29,7 +35,6 @@ import { useFetchAlertData } from './use_fetch_alert_data';
 import { useUpsellingMessage } from '../../common/hooks/use_upselling';
 import { useFetchNotes } from '../../notes/hooks/use_fetch_notes';
 import { DocumentEventTypes } from '../../common/lib/telemetry';
-import type { CaseViewAlertsTableProps } from '@kbn/cases-plugin/public/components/case_view/types';
 import { AiForSOCAlertsTable } from '../components/ai_for_soc/wrapper';
 
 const CaseContainerComponent: React.FC = () => {

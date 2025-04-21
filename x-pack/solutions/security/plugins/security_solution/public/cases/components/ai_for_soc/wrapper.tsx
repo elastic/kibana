@@ -7,14 +7,19 @@
 
 import React, { memo, useEffect, useMemo, useState } from 'react';
 import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
-import { type EuiDataGridColumn, EuiEmptyPrompt, EuiSkeletonLoading, EuiSkeletonRectangle } from '@elastic/eui';
+import {
+  type EuiDataGridColumn,
+  EuiEmptyPrompt,
+  EuiSkeletonLoading,
+  EuiSkeletonRectangle,
+} from '@elastic/eui';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { i18n } from '@kbn/i18n';
+import type { Alert } from '@kbn/alerting-types';
 import { Table } from './table';
 import { useFetchIntegrations } from '../../../detections/hooks/alert_summary/use_fetch_integrations';
 import { useFindRulesQuery } from '../../../detection_engine/rule_management/api/hooks/use_find_rules_query';
 import { useKibana } from '../../../common/lib/kibana';
-import type { Alert } from '@kbn/alerting-types';
 
 const DATAVIEW_ERROR = i18n.translate(
   'xpack.securitySolution.attackDiscovery.aiForSocTableTab.dataViewError',
