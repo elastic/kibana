@@ -65510,22 +65510,30 @@ components:
           type: array
         purgePolicy:
           description: Policy that dictates which SLI documents to purge based on age
+          oneOf:
+            - type: object
+              properties:
+                age:
+                  description: The duration to determine which documents to purge, formatted as {duration}{unit}. This value should be greater than or equal to the time window of every SLO provided.
+                  example: 7d
+                  type: string
+                purgeType:
+                  description: Specifies whether documents will be purged based on a specific age or on a timestamp
+                  enum:
+                    - fixed-age
+                  type: string
+            - type: object
+              properties:
+                purgeType:
+                  description: Specifies whether documents will be purged based on a specific age or on a timestamp
+                  enum:
+                    - fixed-time
+                  type: string
+                timestamp:
+                  description: The timestamp to determine which documents to purge, formatted in ISO. This value should be older than the applicable time window of every SLO provided.
+                  example: '2024-12-31T00:00:00.000Z'
+                  type: string
           type: object
-          properties:
-            age:
-              description: The duration to determine which documents to purge, formatted as {duration}{unit}. This value should be greater than or equal to the time window of every SLO provided.
-              example: 7d
-              type: string
-            purgeType:
-              description: Specifies whether documents will be purged based on a specific age or on a timestamp
-              enum:
-                - fixed_age
-                - fixed_time
-              type: string
-            timestamp:
-              description: The timestamp to determine which documents to purge, formatted in ISO. This value should be older than the applicable time window of every SLO provided.
-              example: '2024-12-31T00:00:00.000Z'
-              type: string
       required:
         - list
         - purgePolicy
