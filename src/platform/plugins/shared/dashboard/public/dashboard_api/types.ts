@@ -196,6 +196,11 @@ export type DashboardApi = CanExpandPanels &
       attributes: DashboardAttributes;
       references: Reference[];
     };
+    getDashboardPanelFromId: (id: string) => {
+      type: string;
+      gridData: GridData;
+      serializedState: SerializedPanelState;
+    };
     hasOverlays$: PublishingSubject<boolean>;
     hasUnsavedChanges$: PublishingSubject<boolean>;
     highlightPanel: (panelRef: HTMLDivElement) => void;

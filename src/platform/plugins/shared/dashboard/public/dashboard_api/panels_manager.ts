@@ -24,6 +24,7 @@ import {
   SerializedPanelState,
   SerializedTitles,
   apiHasLibraryTransforms,
+  apiHasSerializableState,
   apiPublishesTitle,
   apiPublishesUnsavedChanges,
   getTitle,
@@ -31,6 +32,7 @@ import {
 import { filter, map as lodashMap, max } from 'lodash';
 import { BehaviorSubject, Observable, merge, map, combineLatestWith, debounceTime } from 'rxjs';
 import { v4 } from 'uuid';
+import { asyncForEach } from '@kbn/std';
 import { DashboardPanelMap, prefixReferencesFromPanel } from '../../common';
 import { DEFAULT_PANEL_HEIGHT, DEFAULT_PANEL_WIDTH } from '../../common/content_management';
 import { dashboardClonePanelActionStrings } from '../dashboard_actions/_dashboard_actions_strings';
@@ -44,6 +46,7 @@ import { DASHBOARD_UI_METRIC_ID } from '../utils/telemetry_constants';
 import { arePanelLayoutsEqual } from './are_panel_layouts_equal';
 import type { initializeTrackPanel } from './track_panel';
 import {
+  DashboardApi,
   DashboardChildState,
   DashboardChildren,
   DashboardLayout,
@@ -68,7 +71,8 @@ export function initializePanelsManager(
     setChildState: (uuid: string, state: SerializedPanelState<object>) => void;
     serializePanels: () => { panels: DashboardPanelMap; references: Reference[] };
   };
-  api: PresentationContainer<DefaultEmbeddableApi> & CanDuplicatePanels;
+  api: PresentationContainer<DefaultEmbeddableApi> &
+    CanDuplicatePanels & { getDashboardPanelFromId: DashboardApi['getDashboardPanelFromId'] };
 } {
   // --------------------------------------------------------------------------------------
   // Set up panel state manager
@@ -192,6 +196,29 @@ export function initializePanelsManager(
     trackPanel.setHighlightPanelId(uuid);
   }
 
+  function getDashboardPanelFromId(panelId: string) {
+    const childLayout = layout$.value[panelId];
+    const childApi = children$.value[panelId];
+    if (!childApi || !childLayout) throw new PanelNotFoundError();
+    return {
+      type: childLayout.type,
+      gridData: childLayout.gridData,
+      serializedState: apiHasSerializableState(childApi)
+        ? childApi.serializeState()
+        : { rawState: {} },
+    };
+  }
+
+  async function getPanelTitles(): Promise<string[]> {
+    const titles: string[] = [];
+    await asyncForEach(Object.keys(layout$.value), async (id) => {
+      const childApi = await getChildApi(id);
+      const title = apiPublishesTitle(childApi) ? getTitle(childApi) : '';
+      if (title) titles.push(title);
+    });
+    return titles;
+  }
+
   // --------------------------------------------------------------------------------------
   // API definition
   // --------------------------------------------------------------------------------------
@@ -250,11 +277,7 @@ export function initializePanelsManager(
     const apiToDuplicate = children$.value[uuidToDuplicate];
     if (!apiToDuplicate) throw new PanelNotFoundError();
 
-    const allTitles: string[] = [];
-    for (const uuid of Object.keys(layout$.value)) {
-      const title = (currentChildState[uuid]?.rawState as SerializedTitles).title;
-      if (title) allTitles.push(title);
-    }
+    const allTitles = await getPanelTitles();
     const lastTitle = apiPublishesTitle(apiToDuplicate) ? getTitle(apiToDuplicate) ?? '' : '';
     const newTitle = getClonedPanelTitle(allTitles, lastTitle);
 
@@ -344,6 +367,7 @@ export function initializePanelsManager(
       removePanel,
       replacePanel,
       duplicatePanel,
+      getDashboardPanelFromId,
       getPanelCount: () => Object.keys(layout$.value).length,
       canRemovePanels: () => trackPanel.expandedPanelId$.value === undefined,
     },
