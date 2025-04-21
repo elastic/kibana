@@ -215,7 +215,7 @@ export const ChecklistFlyoutStep: React.FunctionComponent<{
                   >
                     <FormattedMessage
                       id="xpack.upgradeAssistant.dataStream.migration.flyout.checklistStep.initMarkReadOnlyButtonLabel"
-                      defaultMessage="Mark read-only"
+                      defaultMessage="Mark as read-only"
                     />
                   </EuiButton>
                 </EuiFlexItem>
