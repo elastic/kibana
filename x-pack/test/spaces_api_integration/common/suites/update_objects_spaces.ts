@@ -101,7 +101,7 @@ export function updateObjectsSpacesTestSuiteFactory(
               if (!hasRefreshed) {
                 await es.indices.refresh({
                   index: ALL_SAVED_OBJECT_INDICES,
-                  allow_no_indices: true,
+                  ignore_unavailable: true,
                 }); // alias deletion uses refresh: false, so we need to manually refresh the index before searching
                 hasRefreshed = true;
               }
