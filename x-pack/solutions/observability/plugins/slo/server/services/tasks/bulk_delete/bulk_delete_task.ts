@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
-import { FakeRawRequest, type CoreSetup, type Logger, type LoggerFactory } from '@kbn/core/server';
+import { type CoreSetup, type Logger, type LoggerFactory } from '@kbn/core/server';
 import { BulkDeleteParams, BulkDeleteStatusResponse } from '@kbn/slo-schema';
-import { addSpaceIdToPath } from '@kbn/spaces-plugin/server';
 import { RunContext } from '@kbn/task-manager-plugin/server';
 import { IndicatorTypes } from '../../../domain/models';
 import { SLOPluginSetupDependencies, SLOPluginStartDependencies } from '../../../types';
