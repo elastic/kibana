@@ -16,3 +16,4 @@ export { Timefilter } from './timefilter';
 export type { TimeHistoryContract } from './time_history';
 export { TimeHistory } from './time_history';
 export { validateTimeRange } from './lib/validate_timerange';
+export type { TimefilterHook } from './use_timefilter';

@@ -6,6 +6,7 @@
  */
 
 import { AwaitedProperties } from '@kbn/utility-types';
+import { ATTACK_DISCOVERY_SCHEDULES_ENABLED_FEATURE_FLAG } from '@kbn/elastic-assistant-common';
 import { ElasticAssistantRequestHandlerContext } from '../../../../types';
 import { isFeatureAvailable } from './is_feature_available';
 
@@ -27,7 +28,7 @@ describe('isFeatureAvailable', () => {
     void isFeatureAvailable(mockContext);
 
     expect(getBooleanValueMock).toHaveBeenCalledWith(
-      'securitySolution.assistantAttackDiscoverySchedulingEnabled',
+      ATTACK_DISCOVERY_SCHEDULES_ENABLED_FEATURE_FLAG,
       false
     );
   });
