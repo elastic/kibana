@@ -36,8 +36,7 @@
       "unifiedSearch",
       "usageCollection",
       "fieldsMetadata",
-      "apmSourcesAccess",
-      "spaces"
+      "apmSourcesAccess"
     ],
     "optionalPlugins": [
       "cloud",
@@ -45,7 +44,8 @@
       "embeddableEnhanced",
       "observabilityAIAssistant",
       "security",
-      "serverless"
+      "serverless",
+      "spaces"
     ],
     "requiredBundles": [
       "controls",

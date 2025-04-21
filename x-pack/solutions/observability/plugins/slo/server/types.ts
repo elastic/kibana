@@ -40,7 +40,7 @@ export interface SLOPluginSetupDependencies {
   share: SharePluginSetup;
   features: FeaturesPluginSetup;
   taskManager: TaskManagerSetupContract;
-  spaces: SpacesPluginSetup;
+  spaces?: SpacesPluginSetup;
   cloud?: CloudSetup;
   usageCollection: UsageCollectionSetup;
   licensing: LicensingPluginSetup;
@@ -51,7 +51,7 @@ export interface SLOPluginSetupDependencies {
 export interface SLOPluginStartDependencies {
   alerting: AlertingServerStart;
   taskManager: TaskManagerStartContract;
-  spaces: SpacesPluginStart;
+  spaces?: SpacesPluginStart;
   ruleRegistry: RuleRegistryPluginStartContract;
   dataViews: DataViewsServerPluginStart;
   licensing: LicensingPluginStart;

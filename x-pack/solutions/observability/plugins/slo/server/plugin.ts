@@ -175,7 +175,7 @@ export class SLOPlugin
               scopedClusterClient.asCurrentUser
             ),
             pluginsStart.alerting.getRulesClientWithRequest(request),
-            pluginsStart.spaces.spacesService.getActiveSpace(request),
+            pluginsStart.spaces?.spacesService.getActiveSpace(request) ?? { id: 'default' },
             pluginsStart.ruleRegistry.getRacClientWithRequest(request),
           ]);
 
