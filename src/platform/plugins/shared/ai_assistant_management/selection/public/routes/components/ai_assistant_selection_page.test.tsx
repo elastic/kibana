@@ -96,10 +96,7 @@ describe('AiAssistantSelectionPage', () => {
 
         expect(
           screen.getByTestId('pluginsAiAssistantSelectionPageDocumentationLink')
-        ).toHaveAttribute(
-          'href',
-          'https://www.elastic.co/docs/explore-analyze/ai-assistant'
-        );
+        ).toHaveAttribute('href', 'https://www.elastic.co/docs/explore-analyze/ai-assistant');
       });
     });
   });
