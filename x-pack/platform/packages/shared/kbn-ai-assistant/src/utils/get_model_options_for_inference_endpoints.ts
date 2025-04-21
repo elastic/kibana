@@ -14,14 +14,14 @@ export interface ModelOptionsData {
   description: string;
 }
 
-const elserTitle = i18n.translate(
+export const elserTitle = i18n.translate(
   'xpack.aiAssistant.welcomeMessage.knowledgeBase.model.elserTitle',
   {
     defaultMessage: 'ELSER v2 (English-only)',
   }
 );
 
-const elserDescription = i18n.translate(
+export const elserDescription = i18n.translate(
   'xpack.aiAssistant.welcomeMessage.knowledgeBase.model.elserDescription',
   {
     defaultMessage:
@@ -29,14 +29,14 @@ const elserDescription = i18n.translate(
   }
 );
 
-const e5SmallTitle = i18n.translate(
+export const e5SmallTitle = i18n.translate(
   'xpack.aiAssistant.welcomeMessage.knowledgeBase.model.e5smallTitle',
   {
     defaultMessage: 'E5-small (multilingual)',
   }
 );
 
-const e5SmallDescription = i18n.translate(
+export const e5SmallDescription = i18n.translate(
   'xpack.aiAssistant.welcomeMessage.knowledgeBase.model.e5smallDescription',
   {
     defaultMessage:

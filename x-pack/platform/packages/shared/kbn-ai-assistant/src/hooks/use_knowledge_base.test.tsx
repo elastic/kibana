@@ -12,6 +12,9 @@ import { useAIAssistantAppService } from './use_ai_assistant_app_service';
 
 jest.mock('./use_kibana');
 jest.mock('./use_ai_assistant_app_service');
+jest.mock('p-retry', () => {
+  return (fn: () => Promise<any>) => fn(); // disables retry for test
+});
 
 describe('useKnowledgeBase', () => {
   const mockCallApi = jest.fn();
@@ -89,6 +92,22 @@ describe('useKnowledgeBase', () => {
           signal: null,
         }
       );
+    });
+  });
+
+  it('shows an error toast on install failure', async () => {
+    const error = new Error('setup failed');
+
+    mockCallApi.mockResolvedValueOnce({ kbState: 'NOT_INSTALLED' }).mockRejectedValueOnce(error);
+
+    const { result } = renderHook(() => useKnowledgeBase());
+
+    await act(async () => {
+      await result.current.install('failing-id');
+    });
+
+    expect(mockAddError).toHaveBeenCalledWith(expect.any(Error), {
+      title: expect.any(String),
     });
   });
 });

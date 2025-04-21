@@ -6,21 +6,27 @@
  */
 
 import React, { useEffect, useState } from 'react';
+import { css } from '@emotion/css';
 import {
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
   EuiLink,
   EuiSpacer,
   EuiSuperSelect,
   EuiText,
+  euiCanAnimate,
+  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { isHttpFetchError } from '@kbn/core-http-browser';
 import { useInferenceEndpoints } from '../hooks/use_inference_endpoints';
 import {
   ModelOptionsData,
   getModelOptionsForInferenceEndpoints,
 } from '../utils/get_model_options_for_inference_endpoints';
+import { fadeInAnimation } from '../chat/welcome_message_connectors';
 
 interface SelectModelAndInstallKnowledgeBaseProps {
   onInstall: (inferenceId: string) => Promise<void>;
@@ -31,9 +37,17 @@ export function SelectModelAndInstallKnowledgeBase({
   onInstall,
   isInstalling,
 }: SelectModelAndInstallKnowledgeBaseProps) {
+  const { euiTheme } = useEuiTheme();
+
+  const fadeInClassName = css`
+    ${euiCanAnimate} {
+      animation: ${fadeInAnimation} ${euiTheme.animation.normal} ease-in-out;
+    }
+  `;
+
   const [selectedInferenceId, setSelectedInferenceId] = useState<string>('');
 
-  const { inferenceEndpoints, isLoading: isLoadingEndpoints } = useInferenceEndpoints();
+  const { inferenceEndpoints, isLoading: isLoadingEndpoints, error } = useInferenceEndpoints();
 
   useEffect(() => {
     if (!selectedInferenceId && inferenceEndpoints.length) {
@@ -64,11 +78,46 @@ export function SelectModelAndInstallKnowledgeBase({
     ),
   }));
 
+  if (error) {
+    const isForbiddenError =
+      isHttpFetchError(error) && (error.body as { statusCode: number }).statusCode === 403;
+
+    return (
+      <div
+        className={fadeInClassName}
+        data-test-subj="observabilityAiAssistantInferenceEndpointsError"
+      >
+        <EuiFlexGroup direction="row" alignItems="center" justifyContent="center" gutterSize="xs">
+          <EuiFlexItem grow={false}>
+            <EuiIcon type="alert" color="danger" />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiText color="danger">
+              {isForbiddenError
+                ? i18n.translate(
+                    'xpack.aiAssistant.knowledgeBase.inferenceEndpointsForbiddenTextLabel',
+                    {
+                      defaultMessage: 'Required privileges to fetch available models are missing',
+                    }
+                  )
+                : i18n.translate(
+                    'xpack.aiAssistant.knowledgeBase.inferenceEndpointsErrorTextLabel',
+                    {
+                      defaultMessage: 'Could not load models',
+                    }
+                  )}
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </div>
+    );
+  }
+
   return (
     <>
       <EuiText textAlign="center">
         <h3>
-          {i18n.translate('xpack.observabilityAiAssistantManagement.knowledgeBaseTab.getStarted', {
+          {i18n.translate('xpack.aiAssistant.knowledgeBase.getStarted', {
             defaultMessage: 'Get started by setting up the Knowledge Base',
           })}
         </h3>
@@ -77,20 +126,16 @@ export function SelectModelAndInstallKnowledgeBase({
       <EuiSpacer size="s" />
 
       <EuiText size="s" color="subdued" textAlign="center">
-        {i18n.translate(
-          'xpack.observabilityAiAssistantManagement.knowledgeBaseTab.chooseModelSubtitle',
-          {
-            defaultMessage: "Choose the default language model for the Assistant's responses.",
-          }
-        )}{' '}
+        {i18n.translate('xpack.aiAssistant.knowledgeBase.chooseModelSubtitle', {
+          defaultMessage: "Choose the default language model for the Assistant's responses.",
+        })}{' '}
         <EuiLink
           href="https://www.elastic.co/docs/explore-analyze/machine-learning/nlp/ml-nlp-built-in-models"
           target="_blank"
         >
-          {i18n.translate(
-            'xpack.observabilityAiAssistantManagement.knowledgeBaseTab.subtitleLearnMore',
-            { defaultMessage: 'Learn more' }
-          )}
+          {i18n.translate('xpack.aiAssistant.knowledgeBase.subtitleLearnMore', {
+            defaultMessage: 'Learn more',
+          })}
         </EuiLink>
       </EuiText>
 
@@ -121,7 +166,7 @@ export function SelectModelAndInstallKnowledgeBase({
             data-test-subj="observabilityAiAssistantWelcomeMessageSetUpKnowledgeBaseButton"
             onClick={handleInstall}
           >
-            {i18n.translate('xpack.aiAssistant.welcomeMessage.knowledgeBase.installButtonLabel', {
+            {i18n.translate('xpack.aiAssistant.knowledgeBase.installButtonLabel', {
               defaultMessage: 'Install Knowledge Base',
             })}
           </EuiButton>
