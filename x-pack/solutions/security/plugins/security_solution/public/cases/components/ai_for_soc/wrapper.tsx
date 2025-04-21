@@ -80,7 +80,7 @@ export const AiForSOCAlertsTable = memo(({ id, onLoaded, query }: AiForSOCAlerts
     // clearing after leaving the page
     return () => {
       if (dv?.id) {
-        data.dataViews.clearInstanceCache(dv?.id);
+        data.dataViews.clearInstanceCache(dv.id);
       }
     };
   }, [data.dataViews]);

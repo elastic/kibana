@@ -87,7 +87,6 @@ const CaseContainerComponent: React.FC = () => {
 
   const renderAlertsTable = useCallback(
     (props: CaseViewAlertsTableProps) => {
-      console.log('CaseContainerComponent props', props);
       // TODO We shouldn't have to check capabilities here, this should be done at a much higher level.
       //  https://github.com/elastic/kibana/issues/218741
       //  For the AI for SOC we need to show the Alert summary page alerts table.
