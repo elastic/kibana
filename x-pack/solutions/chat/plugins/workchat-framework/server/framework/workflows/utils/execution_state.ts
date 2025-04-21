@@ -7,10 +7,6 @@
 
 import type { WorkflowExecutionState } from '@kbn/wc-framework-types-server';
 
-// TODO: initial
-// TODO: enterNode
-// TODO: enterWorkflow
-
 export const createInitialExecutionState = ({
   runId,
   workflowId,
