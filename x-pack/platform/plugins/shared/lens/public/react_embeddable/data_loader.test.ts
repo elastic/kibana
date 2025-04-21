@@ -120,6 +120,7 @@ async function expectRerenderOnDataLoader(
     removePanel: jest.fn(),
     replacePanel: jest.fn(),
     getPanelCount: jest.fn(),
+    getChildApi: jest.fn(),
     children$: new BehaviorSubject({}),
     addNewPanel: jest.fn(),
     ...parentApiOverrides,

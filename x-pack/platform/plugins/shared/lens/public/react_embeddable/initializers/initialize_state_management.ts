@@ -31,7 +31,7 @@ export interface StateManagementConfig {
   anyStateChange$: Observable<void>;
   getComparators: () => StateComparators<Pick<LensSerializedState, 'attributes' | 'savedObjectId'>>;
   reinitializeRuntimeState: (lastSavedRuntimeState: LensRuntimeState) => void;
-  getLatestState: () => Pick<LensSerializedState, 'attributes' | 'savedObjectId'>;
+  getLatestState: () => Pick<LensRuntimeState, 'attributes' | 'savedObjectId'>;
   cleanup: () => void;
 }
 
