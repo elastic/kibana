@@ -27,6 +27,7 @@ const ruleTypes: string[] = [
   'xpack.ml.anomaly_detection_alert',
   'xpack.ml.anomaly_detection_jobs_health',
   'slo.rules.burnRate',
+  'streams.rules.esql',
   'observability.rules.custom_threshold',
   'xpack.uptime.alerts.monitorStatus',
   'xpack.uptime.alerts.tlsCertificate',
