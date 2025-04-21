@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { type NodeTypeDefinition } from '@kbn/wc-framework-types-server';
+import type { NodeTypeDefinition } from '@kbn/wc-framework-types-server';
 import type { NodeTypeRegistry } from '../../framework/nodes';
 import { getToolExecutionNodeTypeDefinition } from './tool_execution';
 import { getWorkflowExecutionNodeTypeDefinition } from './workflow_execution';
 import { getParallelSequencesNodeTypeDefinition } from './parallel_sequences';
 import { getPromptNodeTypeDefinition } from './prompt';
 import { getLoopNodeTypeDefinition } from './loop';
+import { getIntentRecognitionNodeTypeDefinition } from './intent_recognition';
 
 export const registerBuiltInNodeTypes = ({ registry }: { registry: NodeTypeRegistry }) => {
   const definitions: Array<NodeTypeDefinition<any>> = [
@@ -20,6 +21,7 @@ export const registerBuiltInNodeTypes = ({ registry }: { registry: NodeTypeRegis
     getParallelSequencesNodeTypeDefinition(),
     getPromptNodeTypeDefinition(),
     getLoopNodeTypeDefinition(),
+    getIntentRecognitionNodeTypeDefinition(),
   ];
 
   definitions.forEach((definition) => {

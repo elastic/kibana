@@ -30,6 +30,8 @@ export type {
   WorkflowExecutionNodeConfigType,
   ToolExecutionNodeConfigType,
   LoopNodeConfigType,
+  IntentRecognitionNodeConfigType,
+  IntentRecognitionBranch,
 } from './src/nodes';
 export type {
   BaseWorkflowDefinition,

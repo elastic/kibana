@@ -14,6 +14,7 @@ export interface NodeTypeToNodeConfigMap {
   [NodeType.prompt]: PromptNodeConfigType;
   [NodeType.parallelSequences]: ParallelSequencesNodeConfigType;
   [NodeType.loop]: LoopNodeConfigType;
+  [NodeType.intentRecognition]: IntentRecognitionNodeConfigType;
 }
 
 export type NodeSequence = NodeDefinition[];
@@ -86,4 +87,38 @@ export interface LoopNodeConfigType {
     source: string;
     destination: string;
   };
+}
+
+/**
+ * Config for `intentRecognition` node type.
+ */
+export interface IntentRecognitionNodeConfigType {
+  /**
+   * The prompt explaining the LLM the criteria for its choices
+   */
+  prompt: string;
+  /**
+   *
+   */
+  branches: IntentRecognitionBranch[];
+}
+
+export type IntentRecognitionBranch =
+  | IntentRecognitionConditionBranch
+  | IntentRecognitionDefaultBranch;
+
+export interface IntentRecognitionConditionBranch {
+  id?: string;
+  /**
+   * The condition for this branch.
+   *
+   * Will be interpolated with the intent recognition node's state.
+   */
+  condition: string;
+  steps: NodeSequence;
+}
+
+export interface IntentRecognitionDefaultBranch {
+  default: true;
+  steps: NodeSequence;
 }

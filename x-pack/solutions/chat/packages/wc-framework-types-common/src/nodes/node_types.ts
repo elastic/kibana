@@ -14,4 +14,6 @@ export enum NodeType {
   workflowExecution = 'workflowExecution',
   // LLM nodes
   prompt = 'prompt',
+  // conditional nodes
+  intentRecognition = 'intentRecognition',
 }

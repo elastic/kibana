@@ -25,4 +25,6 @@ export type {
   WorkflowExecutionNodeConfigType,
   ToolExecutionNodeConfigType,
   LoopNodeConfigType,
+  IntentRecognitionNodeConfigType,
+  IntentRecognitionBranch,
 } from './node_type_configs';

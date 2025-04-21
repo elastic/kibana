@@ -8,11 +8,32 @@
 import type { WorkflowExecutionState } from './execution_state';
 
 export type WorkflowExecutionErrorType =
-  | 'internalError'
+  /**
+   * Configuration of the node or the workflow is invalid,
+   * and caused a runtime exception during execution
+   */
+  | 'invalidConfiguration'
+  /**
+   * The input provided to the node (e.g. interpolated values)
+   * is invalid
+   */
   | 'invalidParameter'
+  /**
+   * Workflow for a given ID was not found in the workflow provider.
+   */
   | 'workflowNotFound'
+  /**
+   * A node type used in the workflow definition was not found.
+   */
   | 'nodeTypeNotFound'
-  | 'toolNotFound';
+  /**
+   * No tool was found for the specified tool ID in the tool provider.
+   */
+  | 'toolNotFound'
+  /**
+   * Default, fallback error.
+   */
+  | 'internalError';
 
 export interface WorkflowExecutionErrorMeta {
   state?: WorkflowExecutionState;
