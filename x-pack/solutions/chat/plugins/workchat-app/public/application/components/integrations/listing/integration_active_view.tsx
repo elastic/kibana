@@ -30,6 +30,7 @@ import {
 } from '@elastic/eui';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { IntegrationType } from '@kbn/wci-common';
+import { i18n } from '@kbn/i18n';
 import type { Integration } from '../../../../../common/integrations';
 import { useNavigation } from '../../../hooks/use_navigation';
 import { appPaths } from '../../../app_paths';
@@ -37,7 +38,6 @@ import { integrationTypeToLabel, getIntegrationIcon } from '../utils';
 import { useAgentList } from '../../../hooks/use_agent_list';
 import { integrationLabels } from '../i18n';
 import { IntegrationListView } from './integration_list_view';
-import { i18n } from '@kbn/i18n';
 
 interface IntegrationListViewProps {
   integrations: Integration[];
