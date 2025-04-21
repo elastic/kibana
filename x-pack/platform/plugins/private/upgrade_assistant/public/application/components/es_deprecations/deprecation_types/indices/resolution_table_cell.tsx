@@ -82,7 +82,7 @@ const i18nTexts = {
   reindexFollowerIndexTooltipLabel: i18n.translate(
     'xpack.upgradeAssistant.esDeprecations.indices.reindexFollowerIndexTooltipLabel',
     {
-      defaultMessage: 'Resolve this issue by unfollowing the leader index.',
+      defaultMessage: 'Resolve this issue by terminating replication.',
     }
   ),
   updateText: i18n.translate('xpack.upgradeAssistant.esDeprecations.indices.updateLabel', {
