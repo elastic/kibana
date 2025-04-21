@@ -7,65 +7,55 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { OtelInstance, ApmOtelFields } from '@kbn/apm-synthtrace-client';
-import { apm } from '@kbn/apm-synthtrace-client/src/lib/apm';
-import { LogLevel } from '@kbn/apm-synthtrace-client/src/lib/apm/otel/otel_log';
+import { log, generateShortId } from '@kbn/apm-synthtrace-client';
+import { Readable } from 'stream';
 import { Scenario } from '../cli/scenario';
 import { withClient } from '../lib/utils/with_client';
+
 import { getSynthtraceEnvironment } from '../lib/utils/get_synthtrace_environment';
-import { time } from 'console';
+
+import { IndexTemplateName } from '../lib/logs/custom_logsdb_index_templates';
 
 const ENVIRONMENT = getSynthtraceEnvironment(__filename);
 
-const scenario: Scenario<ApmOtelFields> = async (runOptions) => {
+const MESSAGE_LOG_LEVELS = [
+  { message: 'A simple log with something random <random> in the middle', level: 'info' },
+  { message: 'Yet another debug log', level: 'debug' },
+  { message: 'Error with certificate: "ca_trusted_fingerprint"', level: 'error' },
+];
+
+const scenario: Scenario = async (runOptions) => {
+  const { logger } = runOptions;
   return {
-    bootstrap: async ({ apmEsClient }) => {
-      apmEsClient.pipeline(apmEsClient.getPipeline('otelToApm'));
+    bootstrap: async ({ logsEsClient }) => {
+      await logsEsClient.createIndexTemplate(IndexTemplateName.LogsDb);
     },
-    generate: ({ range, clients: { apmEsClient } }) => {
-
-      const { logger } = runOptions;
-
-      const edotInstance = apm
-        .otelService({
-          name: 'adservice-edot-synth',
-          namespace: ENVIRONMENT,
-          sdkLanguage: 'java',
-          sdkName: 'opentelemetry',
-          distro: 'elastic',
-        })
-        .instance('edot-instance');
-
-      const otelNativeInstance = apm
-        .otelService({
-          name: 'sendotlp-otel-native-synth',
-          namespace: ENVIRONMENT,
-          sdkName: 'otlp',
-          sdkLanguage: 'nodejs',
-        })
-        .instance('otel-native-instance');
-
-      const successfulTimestamps = range.interval('1m').rate(180);
-
-      const instanceSpans = (instance: OtelInstance) => {
-        const successfulTraceEvents = successfulTimestamps.generator((timestamp) =>
-          instance
-            .log({
-              message: 'hello, world',
-              logLevel: LogLevel.DEBUG,
-            })
-            .timestamp(timestamp)
-        );
-
-        return [successfulTraceEvents];
-      };
-
+    generate: ({ range, clients: { logsEsClient } }) => {
+      const SYNTHTRACE_LOGS = 'synthtrace-logs';
+      const apmAndLogsLogsEvents = range
+        .interval('1m')
+        .rate(1)
+        .generator((timestamp) => {
+          return Array(3)
+            .fill(0)
+            .map(() => {
+              const index = Math.floor(Math.random() * 3);
+              const { message, level } = MESSAGE_LOG_LEVELS[index];
+              return log
+                .createMinimal({ dataset: 'generic.otel' })
+                .message(message.replace('<random>', generateShortId()))
+                .logLevel(level)
+                .service(SYNTHTRACE_LOGS)
+                .defaults({
+                  'agent.name': 'nodejs',
+                })
+                .timestamp(timestamp);
+            });
+        });
       return [
         withClient(
-          apmEsClient,
-          logger.perf('generating_otel_logs', () =>
-            [otelNativeInstance, edotInstance].flatMap((instance) => instanceSpans(instance))
-          )
+          logsEsClient,
+          logger.perf('generating_otel_logs', () => Readable.from(Array.from(apmAndLogsLogsEvents)))
         ),
       ];
     },
