@@ -319,6 +319,7 @@ export const langChainExecute = async ({
   // Shared executor params
   const executorParams: AgentExecutorParams<boolean> = {
     abortSignal,
+    assistantContext,
     dataClients,
     alertsIndexPattern: request.body.alertsIndexPattern,
     core: context.core,

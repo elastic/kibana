@@ -11,16 +11,6 @@ import type { SignalSource } from '../types';
 import type { GenericBulkCreateResponse } from '../factories/bulk_create_factory';
 import type { NewTermsFieldsLatest } from '../../../../../common/api/detection_engine/model/alerts';
 
-export type RecentTermsAggResult = ESSearchResponse<
-  SignalSource,
-  { body: { aggregations: ReturnType<typeof buildRecentTermsAgg> } }
->;
-
-export type NewTermsAggResult = ESSearchResponse<
-  SignalSource,
-  { body: { aggregations: ReturnType<typeof buildNewTermsAgg> } }
->;
-
 export type CompositeDocFetchAggResult = ESSearchResponse<
   SignalSource,
   { body: { aggregations: ReturnType<typeof buildCompositeDocFetchAgg> } }
