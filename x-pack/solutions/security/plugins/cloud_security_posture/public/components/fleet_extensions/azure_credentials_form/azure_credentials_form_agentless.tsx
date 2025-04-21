@@ -16,8 +16,8 @@ import {
   AzureCredentialsFormProps,
   AzureSetupInfoContent,
   AzureInputVarFields,
-  ARM_TEMPLATE_EXTERNAL_DOC_URL,
   AZURE_CREDENTIALS_TYPE,
+  AGENTLESS_TEMPLATE_INTERNAL_DOC_URL,
 } from './azure_credentials_form';
 import { getPosturePolicy } from '../utils';
 import {
@@ -57,7 +57,7 @@ export const AzureCredentialsFormAgentless = ({
           values={{
             documentation: (
               <EuiLink
-                href={ARM_TEMPLATE_EXTERNAL_DOC_URL}
+                href={AGENTLESS_TEMPLATE_INTERNAL_DOC_URL}
                 target="_blank"
                 rel="noopener nofollow noreferrer"
                 data-test-subj="externalLink"

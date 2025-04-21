@@ -125,6 +125,20 @@ export interface AzureCredentialsFormProps {
 export const ARM_TEMPLATE_EXTERNAL_DOC_URL =
   'https://learn.microsoft.com/en-us/azure/azure-resource-manager/templates/';
 
+export const TEMPLATE_INTERNAL_DOC_URL =
+  'https://www.elastic.co/docs/solutions/security/cloud/get-started-with-cspm-for-azure';
+
+export const ARM_TEMPLATE_INTERNAL_DOC_URL = `${TEMPLATE_INTERNAL_DOC_URL}#cspm-set-up-arm`;
+
+export const AGENTBASE_TEMPLATE_INTERNAL_DOC_URL =
+  `${TEMPLATE_INTERNAL_DOC_URL}#cspm-azure-agent-based`;
+
+export const AGENTLESS_TEMPLATE_INTERNAL_DOC_URL =
+  `${TEMPLATE_INTERNAL_DOC_URL}#cspm-azure-agentless`;
+
+export const MANUAL_TEMPLATE_INTERNAL_DOC_URL =
+  `${TEMPLATE_INTERNAL_DOC_URL}#cspm-set-up-manual-azure`;
+
 const ArmTemplateSetup = ({
   hasArmTemplateUrl,
   input,
@@ -185,7 +199,7 @@ const ArmTemplateSetup = ({
           values={{
             documentation: (
               <EuiLink
-                href={ARM_TEMPLATE_EXTERNAL_DOC_URL}
+                href={ARM_TEMPLATE_INTERNAL_DOC_URL}
                 target="_blank"
                 rel="noopener nofollow noreferrer"
                 data-test-subj="externalLink"
@@ -254,7 +268,7 @@ const TemporaryManualSetup = ({ documentationLink }: { documentationLink: string
           values={{
             documentation: (
               <EuiLink
-                href={ARM_TEMPLATE_EXTERNAL_DOC_URL}
+                href={MANUAL_TEMPLATE_INTERNAL_DOC_URL}
                 target="_blank"
                 rel="noopener nofollow noreferrer"
                 data-test-subj="externalLink"
@@ -480,7 +494,7 @@ export const AzureCredentialsForm = ({
               values={{
                 documentation: (
                   <EuiLink
-                    href={ARM_TEMPLATE_EXTERNAL_DOC_URL}
+                    href={MANUAL_TEMPLATE_INTERNAL_DOC_URL}
                     target="_blank"
                     rel="noopener nofollow noreferrer"
                     data-test-subj="externalLink"
