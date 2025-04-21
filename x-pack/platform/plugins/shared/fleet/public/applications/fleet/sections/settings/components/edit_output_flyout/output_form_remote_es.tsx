@@ -237,7 +237,7 @@ export const OutputFormRemoteEsSection: React.FunctionComponent<Props> = (props)
                 helpText={
                   <FormattedMessage
                     id="xpack.fleet.settings.editOutputFlyout.syncUninstalledIntegrationsFormRowLabel"
-                    defaultMessage="If enabled, uninstalled integrations will also be installed on the remote Elasticsearch cluster"
+                    defaultMessage="If enabled, uninstalled integrations will also be uninstalled on the remote Elasticsearch cluster"
                   />
                 }
                 {...inputs.syncUninstalledIntegrationsInput.formRowProps}

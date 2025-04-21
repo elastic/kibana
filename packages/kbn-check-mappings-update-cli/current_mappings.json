@@ -2913,6 +2913,14 @@
       }
     }
   },
+  "privilege-monitoring-status": {
+    "dynamic": false,
+    "properties": {
+      "status": {
+        "type": "keyword"
+      }
+    }
+  },
   "product-doc-install-status": {
     "dynamic": false,
     "properties": {
@@ -3865,7 +3873,7 @@
     }
   },
   "workchat_agent": {
-    "dynamic": "strict",
+    "dynamic": false,
     "properties": {
       "access_control": {
         "properties": {
