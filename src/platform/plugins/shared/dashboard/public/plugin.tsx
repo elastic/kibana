@@ -230,8 +230,11 @@ export class DashboardPlugin
       mount: async (params: AppMountParameters) => {
         this.currentHistory = params.history;
         params.element.classList.add(APP_WRAPPER_CLASS);
-        await untilPluginStartServicesReady();
-        const { mountApp } = await import('./dashboard_app/dashboard_router');
+        const [{ mountApp }] = await Promise.all([
+          import('./dashboard_app/dashboard_router'),
+          import('./dashboard_renderer/dashboard_module'),
+          untilPluginStartServicesReady(),
+        ]);
         appMounted();
 
         const [coreStart] = await core.getStartServices();

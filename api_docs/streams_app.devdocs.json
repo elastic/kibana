@@ -77,6 +77,53 @@
           }
         ],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "streamsApp",
+        "id": "def-public.StreamsAppLocatorParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "StreamsAppLocatorParams",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "streamsApp",
+            "scope": "public",
+            "docId": "kibStreamsAppPluginApi",
+            "section": "def-public.StreamsAppLocatorParams",
+            "text": "StreamsAppLocatorParams"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.SerializableRecord",
+            "text": "SerializableRecord"
+          }
+        ],
+        "path": "x-pack/platform/plugins/shared/streams_app/public/app_locator.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "streamsApp",
+            "id": "def-public.StreamsAppLocatorParams.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [
+              "\nOptionally set stream ID, if not given it will link to the listing page."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/streams_app/public/app_locator.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
       }
     ],
     "enums": [],

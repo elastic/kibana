@@ -41,7 +41,7 @@ export async function runDockerGenerator(
   }
 ) {
   let baseImageName = '';
-  if (flags.baseImage === 'ubi') baseImageName = 'docker.elastic.co/ubi9/ubi-minimal:latest';
+  if (flags.baseImage === 'ubi') baseImageName = 'redhat/ubi9-minimal:latest';
   /**
    * Renovate config contains a regex manager to automatically update both Chainguard references
    *
@@ -50,18 +50,17 @@ export async function runDockerGenerator(
    */
   if (flags.baseImage === 'wolfi')
     baseImageName =
-      'docker.elastic.co/wolfi/chainguard-base:latest@sha256:c4e10ecf3d8a21cf4be2fb53a2f522de50e14c80ce1da487e3ffd13f4d48d24d';
+      'docker.elastic.co/wolfi/chainguard-base:latest@sha256:5ffa55ac0a7ec95f1232622f62d5c0953ca931ae64cfd9946629b0e408a85d0e';
 
   let imageFlavor = '';
-  if (flags.baseImage === 'wolfi' && !flags.serverless && !flags.cloud && !flags.fips)
-    imageFlavor += `-wolfi`;
+  if (flags.baseImage === 'wolfi' && !flags.serverless && !flags.cloud) imageFlavor += `-wolfi`;
   if (flags.ironbank) imageFlavor += '-ironbank';
   if (flags.cloud) imageFlavor += '-cloud';
   if (flags.serverless) imageFlavor += '-serverless';
   if (flags.fips) {
     imageFlavor += '-fips';
     baseImageName =
-      'docker.elastic.co/wolfi/chainguard-base-fips:latest@sha256:d70e92385f4faf961d2e5d23664578de44fe536945918e641383af53f0aca544';
+      'docker.elastic.co/wolfi/chainguard-base-fips:latest@sha256:88dc781fcdaaffba577c797800832cf5e2ef5641704e06075f4a983ceb2129d4';
   }
 
   // General docker var config

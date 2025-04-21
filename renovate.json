@@ -18,10 +18,9 @@
   "baseBranches": [
     "main",
     "9.0",
-    "8.x",
+    "8.19",
     "8.18",
     "8.17",
-    "8.16",
     "7.17"
   ],
   "prConcurrentLimit": 0,
@@ -135,8 +134,7 @@
       "matchBaseBranches": [
         "main",
         "/^[9].*/",
-        "8.x",
-        "8.18"
+        "8.19"
       ],
       "labels": [
         "Team:Operations",
@@ -671,6 +669,7 @@
         "getos",
         "joi-to-json",
         "@apidevtools/json-schema-ref-parser",
+        "@fast-check/jest",
         "json5",
         "load-json-file",
         "mock-fs",
@@ -1043,7 +1042,7 @@
       ],
       "allowedVersions": "<9.0.0",
       "matchBaseBranches": [
-        "8.x"
+        "8.19"
       ],
       "labels": [
         "release_note:skip",
@@ -2123,6 +2122,28 @@
       "groupName": "search-ui swr dependency",
       "matchDepNames": [
         "swr"
+      ],
+      "reviewers": [
+        "team:search-kibana"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "release_note:skip",
+        "Team:Search",
+        "Team:Enterprise Search",
+        "backport:all-open"
+      ],
+      "minimumReleaseAge": "7 days",
+      "enabled": true
+    },
+    {
+      "groupName": "workchat gen-ai dependencies",
+      "matchDepNames": [
+        "@modelcontextprotocol/sdk",
+        "@n8n/json-schema-to-zod",
+        "expr-eval"
       ],
       "reviewers": [
         "team:search-kibana"
@@ -3716,9 +3737,9 @@
       "enabled": true
     },
     {
-      "groupName": "native-hdr-histogram",
+      "groupName": "hdr-histogram-js",
       "matchDepNames": [
-        "native-hdr-histogram"
+        "hdr-histogram-js"
       ],
       "reviewers": [
         "team:obs-ux-infra_services-team"
@@ -4363,6 +4384,25 @@
         "Team:Operations",
         "backport:prev-minor",
         "release_note:skip"
+      ],
+      "minimumReleaseAge": "7 days",
+      "enabled": true
+    },
+    {
+      "groupName": "chrome-remote-interface",
+      "matchDepNames": [
+        "chrome-remote-interface",
+        "@types/chrome-remote-interface"
+      ],
+      "reviewers": [
+        "team:obs-knowledge-team"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "release_note:skip",
+        "backport:all-open"
       ],
       "minimumReleaseAge": "7 days",
       "enabled": true

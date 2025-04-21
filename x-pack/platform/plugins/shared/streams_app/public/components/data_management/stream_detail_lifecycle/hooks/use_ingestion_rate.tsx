@@ -4,12 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import datemath from '@elastic/datemath';
-import { TimeRange, getCalculateAutoTimeExpression } from '@kbn/data-plugin/common';
+import moment from 'moment';
+import { getCalculateAutoTimeExpression } from '@kbn/data-plugin/common';
+import { TimeState } from '@kbn/es-query';
+import { IKibanaSearchRequest, IKibanaSearchResponse } from '@kbn/search-types';
 import { IngestStreamGetResponse, PhaseName } from '@kbn/streams-schema';
 import { lastValueFrom } from 'rxjs';
-import { IKibanaSearchRequest, IKibanaSearchResponse } from '@kbn/search-types';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../../../hooks/use_streams_app_fetch';
 import { DataStreamStats } from './use_data_stream_stats';
@@ -18,14 +18,38 @@ import { useIlmPhasesColorAndDescription } from './use_ilm_phases_color_and_desc
 const TIMESTAMP_FIELD = '@timestamp';
 const RANDOM_SAMPLER_PROBABILITY = 0.1;
 
+// some units are not supported for the fixed_interval of the date histogram
+// this function uses the calculateAutoTimeExpression function to determine
+// if the interval should be a calendar_interval or a fixed_interval
+const getIntervalAndType = (
+  timeState: TimeState,
+  core: { uiSettings: { get: (key: string) => any } }
+): { interval: string; intervalType: string } | undefined => {
+  const interval = getCalculateAutoTimeExpression((key) => core.uiSettings.get(key))(
+    timeState.asAbsoluteTimeRange
+  );
+
+  if (!interval) {
+    return undefined;
+  }
+
+  const calendarIntervalUnits = new Set(['w', 'M', 'q', 'y']);
+
+  const intervalType = calendarIntervalUnits.has(interval.replace(/^\d+/, ''))
+    ? 'calendar_interval'
+    : 'fixed_interval';
+
+  return { interval, intervalType };
+};
+
 export const useIngestionRate = ({
   definition,
   stats,
-  timeRange,
+  timeState,
 }: {
-  definition?: IngestStreamGetResponse;
+  definition: IngestStreamGetResponse;
   stats?: DataStreamStats;
-  timeRange: TimeRange;
+  timeState: TimeState;
 }) => {
   const {
     core,
@@ -36,16 +60,15 @@ export const useIngestionRate = ({
 
   const ingestionRateFetch = useStreamsAppFetch(
     async ({ signal }) => {
-      if (!definition || !stats) {
+      if (!stats) {
         return;
       }
 
-      const start = datemath.parse(timeRange.from);
-      const end = datemath.parse(timeRange.to);
-      const interval = getCalculateAutoTimeExpression((key) => core.uiSettings.get(key))(timeRange);
-      if (!start || !end || !interval) {
+      const intervalData = getIntervalAndType(timeState, core);
+      if (!intervalData) {
         return;
       }
+      const { interval, intervalType } = intervalData;
 
       const {
         rawResponse: { aggregations },
@@ -66,20 +89,31 @@ export const useIngestionRate = ({
                 size: 0,
                 query: {
                   bool: {
-                    filter: [{ range: { [TIMESTAMP_FIELD]: { gte: start, lte: end } } }],
+                    filter: [
+                      {
+                        range: {
+                          [TIMESTAMP_FIELD]: {
+                            gte: timeState.start,
+                            lte: timeState.end,
+                          },
+                        },
+                      },
+                    ],
                   },
                 },
                 aggs: {
                   sampler: {
                     random_sampler: {
                       probability: RANDOM_SAMPLER_PROBABILITY,
+                      seed: 42,
                     },
                     aggs: {
                       docs_count: {
                         date_histogram: {
                           field: TIMESTAMP_FIELD,
-                          fixed_interval: interval,
+                          [intervalType]: interval,
                           min_doc_count: 0,
+                          extended_bounds: { min: timeState.start, max: timeState.end },
                         },
                       },
                     },
@@ -93,8 +127,8 @@ export const useIngestionRate = ({
       );
 
       return {
-        start,
-        end,
+        start: moment(timeState.start),
+        end: moment(timeState.end),
         interval,
         buckets: aggregations.sampler.docs_count.buckets.map(({ key, doc_count: docCount }) => ({
           key,
@@ -102,7 +136,7 @@ export const useIngestionRate = ({
         })),
       };
     },
-    [data.search, definition, timeRange, stats]
+    [definition, stats, timeState, core, data.search]
   );
 
   return {
@@ -117,11 +151,11 @@ type PhaseNameWithoutDelete = Exclude<PhaseName, 'delete'>;
 export const useIngestionRatePerTier = ({
   definition,
   stats,
-  timeRange,
+  timeState,
 }: {
-  definition?: IngestStreamGetResponse;
+  definition: IngestStreamGetResponse;
   stats?: DataStreamStats;
-  timeRange: TimeRange;
+  timeState: TimeState;
 }) => {
   const {
     core,
@@ -137,16 +171,20 @@ export const useIngestionRatePerTier = ({
 
   const ingestionRateFetch = useStreamsAppFetch(
     async ({ signal }) => {
-      if (!definition || !stats) {
+      if (!stats) {
         return;
       }
 
-      const start = datemath.parse(timeRange.from);
-      const end = datemath.parse(timeRange.to);
-      const interval = getCalculateAutoTimeExpression((key) => core.uiSettings.get(key))(timeRange);
-      if (!start || !end || !interval) {
+      const intervalData = getIntervalAndType(timeState, core);
+
+      if (!timeState.start || !timeState.end || !intervalData) {
         return;
       }
+
+      const start = moment(timeState.start);
+      const end = moment(timeState.end);
+
+      const { interval, intervalType } = intervalData;
 
       const {
         rawResponse: { aggregations },
@@ -182,13 +220,15 @@ export const useIngestionRatePerTier = ({
                   sampler: {
                     random_sampler: {
                       probability: RANDOM_SAMPLER_PROBABILITY,
+                      seed: 42,
                     },
                     aggs: {
                       docs_count: {
                         date_histogram: {
                           field: TIMESTAMP_FIELD,
-                          fixed_interval: interval,
+                          [intervalType]: interval,
                           min_doc_count: 0,
+                          extended_bounds: { min: start, max: end },
                         },
                         aggs: {
                           indices: {
@@ -250,7 +290,7 @@ export const useIngestionRatePerTier = ({
 
       return { start, end, interval, buckets };
     },
-    [data.search, streamsRepositoryClient, definition, timeRange, stats]
+    [definition, stats, timeState, core, data.search, streamsRepositoryClient, ilmPhases]
   );
 
   return {

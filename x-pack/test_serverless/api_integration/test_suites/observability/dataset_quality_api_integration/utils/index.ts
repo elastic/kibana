@@ -6,4 +6,3 @@
  */
 
 export { expectToReject } from './expect_to_reject';
-export * from './data_stream';

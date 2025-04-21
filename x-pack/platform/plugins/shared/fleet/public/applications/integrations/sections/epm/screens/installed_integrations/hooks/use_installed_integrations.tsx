@@ -19,10 +19,14 @@ import type {
 
 function getIntegrationStatus(
   item: PackageListItem,
-  isUpgrading: boolean
+  isUpgrading: boolean,
+  isUninstalling: boolean
 ): InstalledPackagesUIInstallationStatus {
   if (isUpgrading) {
     return 'upgrading';
+  }
+  if (isUninstalling) {
+    return 'uninstalling';
   }
   if (item.status === 'install_failed') {
     return 'install_failed';
@@ -48,7 +52,8 @@ function getIntegrationStatus(
 export function useInstalledIntegrations(
   filters: InstalledIntegrationsFilter,
   pagination: Pagination,
-  upgradingIntegrations?: InstalledPackageUIPackageListItem[]
+  upgradingIntegrations?: InstalledPackageUIPackageListItem[],
+  uninstallingIntegrations?: InstalledPackageUIPackageListItem[]
 ) {
   const { data, isInitialLoading, isLoading } = useGetPackagesQuery({
     withPackagePoliciesCount: true,
@@ -64,11 +69,12 @@ export function useInstalledIntegrations(
           ui: {
             installation_status: getIntegrationStatus(
               item,
-              upgradingIntegrations?.some((u) => u.name === item.name) ?? false
+              upgradingIntegrations?.some((u) => u.name === item.name) ?? false,
+              uninstallingIntegrations?.some((u) => u.name === item.name) ?? false
             ),
           },
         })),
-    [data, upgradingIntegrations]
+    [data, upgradingIntegrations, uninstallingIntegrations]
   );
 
   const localSearch = useLocalSearch(internalInstalledPackages, isInitialLoading);

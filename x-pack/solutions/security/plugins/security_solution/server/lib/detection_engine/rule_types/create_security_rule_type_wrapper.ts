@@ -97,6 +97,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
   ({
     lists,
     actions,
+    docLinks,
     logger,
     config,
     publicBaseUrl,
@@ -107,6 +108,9 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
     experimentalFeatures,
     alerting,
     analytics,
+    eventsTelemetry,
+    licensing,
+    scheduleNotificationResponseActionsService,
   }) =>
   (type) => {
     const { alertIgnoreFields: ignoreFields, alertMergeStrategy: mergeStrategy } = config;
@@ -303,6 +307,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                   privileges,
                   ruleExecutionLogger,
                   uiSettingsClient,
+                  docLinks,
                 });
 
                 if (readIndexWarningMessage != null) {
@@ -375,7 +380,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
               message: gapErrorMessage,
               metrics: {
                 executionGap: remainingGap,
-                gapRange: experimentalFeatures?.storeGapsInEventLogEnabled ? gap : undefined,
+                gapRange: experimentalFeatures.storeGapsInEventLogEnabled ? gap : undefined,
               },
             });
           }
@@ -454,6 +459,9 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                     spaceId,
                     ignoreFields: ignoreFieldsObject,
                     ignoreFieldsRegexes,
+                    eventsTelemetry,
+                    licensing,
+                    scheduleNotificationResponseActionsService,
                   },
                 });
 
@@ -466,7 +474,6 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                   createdSignalsCount: createdSignals.length,
                   suppressedAlertsCount: runResult.suppressedAlertsCount,
                   errors: result.errors.concat(runResult.errors),
-                  lastLookbackDate: runResult.lastLookBackDate,
                   searchAfterTimes: result.searchAfterTimes.concat(runResult.searchAfterTimes),
                   state: runResult.state,
                   success: result.success && runResult.success,
@@ -515,7 +522,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
               // as the current status of the rule.
               await ruleExecutionLogger.logStatusChange({
                 newStatus: RuleExecutionStatusEnum['partial failure'],
-                message: truncateList(result.warningMessages.concat(wrapperWarnings)).join(', '),
+                message: truncateList(result.warningMessages.concat(wrapperWarnings)).join('\n\n'),
                 metrics: {
                   searchDurations: result.searchAfterTimes,
                   indexingDurations: result.bulkCreateTimes,
@@ -532,7 +539,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                   indexingDurations: result.bulkCreateTimes,
                   enrichmentDurations: result.enrichmentTimes,
                   executionGap: remainingGap,
-                  gapRange: experimentalFeatures?.storeGapsInEventLogEnabled ? gap : undefined,
+                  gapRange: experimentalFeatures.storeGapsInEventLogEnabled ? gap : undefined,
                 },
                 userError: result.userError,
               });

@@ -52,6 +52,7 @@ import {
 import { useAppContext } from '../../../../app_context';
 import { DataStreamsBadges } from '../data_stream_badges';
 import { useIlmLocator } from '../../../../services/use_ilm_locator';
+import { StreamsPromotion } from './streams_promotion';
 import { INDEX_MANAGEMENT_LOCATOR_ID } from '../../../../..';
 
 interface Detail {
@@ -171,6 +172,7 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
       meteringDocsCount,
       lifecycle,
       indexMode,
+      hidden,
     } = dataStream;
 
     const getManagementDetails = () => {
@@ -234,9 +236,8 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
       <EuiLink
         href={
           locator?.getRedirectUrl({
-            page: 'index_list',
-            filter: `data_stream="${dataStreamName}"`,
-            includeHiddenIndices: true,
+            page: 'data_stream_index_list',
+            dataStreamName,
           }) || ''
         }
       >
@@ -468,6 +469,7 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
         )}
 
         <DetailsList details={details} />
+        {!hidden && <StreamsPromotion dataStreamName={dataStreamName} />}
       </>
     );
   }

@@ -76,6 +76,7 @@ import {
 } from '../../../../context_awareness';
 import {
   internalStateActions,
+  useCurrentTabSelector,
   useInternalStateDispatch,
   useInternalStateSelector,
 } from '../../state_management/redux';
@@ -110,7 +111,7 @@ function DiscoverDocumentsComponent({
   const documents$ = stateContainer.dataState.data$.documents$;
   const savedSearch = useSavedSearchInitial();
   const { dataViews, capabilities, uiSettings, uiActions, ebtManager, fieldsMetadata } = services;
-  const requestParams = useInternalStateSelector((state) => state.dataRequestParams);
+  const requestParams = useCurrentTabSelector((state) => state.dataRequestParams);
   const [
     dataSource,
     query,
@@ -153,7 +154,7 @@ function DiscoverDocumentsComponent({
   // 5. this is propagated to Discover's URL and causes an unwanted change of state to an unsorted state
   // This solution switches to the loading state in this component when the URL index doesn't match the dataView.id
   const isDataViewLoading =
-    useInternalStateSelector((state) => state.isDataViewLoading) && !isEsqlMode;
+    useCurrentTabSelector((state) => state.isDataViewLoading) && !isEsqlMode;
   const isEmptyDataResult =
     isEsqlMode || !documentState.result || documentState.result.length === 0;
   const rows = useMemo(() => documentState.result || [], [documentState.result]);
