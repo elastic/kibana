@@ -43,6 +43,7 @@ import type {
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
+import type { NotificationsPluginStart } from '@kbn/notifications-plugin/server';
 
 import { checkLicense } from '@kbn/reporting-server/check_license';
 import { ExportTypesRegistry } from '@kbn/reporting-server/export_types_registry';
@@ -83,6 +84,7 @@ export interface ReportingInternalStart {
   screenshotting?: ScreenshottingStart;
   securityService: SecurityServiceStart;
   taskManager: TaskManagerStartContract;
+  notifications: NotificationsPluginStart;
 }
 
 /**

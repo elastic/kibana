@@ -33,14 +33,6 @@ export class EmailNotificationService implements NotificationService {
     this.notifications = notifications;
   }
 
-  private static getSubject(runAt: string) {
-    return `Scheduled report for ${runAt}`;
-  }
-
-  private static getMessage() {
-    return "Here's your report!";
-  }
-
   private async getAttachments(
     esClient: ElasticsearchClient,
     index: string,
@@ -72,8 +64,8 @@ export class EmailNotificationService implements NotificationService {
         this.logger.warn('Could not send report. Email service is not available.');
         return;
       }
-      const subject = EmailNotificationService.getSubject(runAt);
-      const message = EmailNotificationService.getMessage();
+      const subject = `Scheduled report for ${runAt}`;
+      const message = "Here's your report!";
       const attachments = await this.getAttachments(esClient, index, id);
       await this.notifications.getEmailService().sendAttachmentEmail({
         to,
