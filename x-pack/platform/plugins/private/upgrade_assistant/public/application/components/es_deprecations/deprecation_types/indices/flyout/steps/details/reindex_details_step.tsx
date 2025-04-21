@@ -46,7 +46,7 @@ const FollowerIndexCallout = () => (
       title={
         <FormattedMessage
           id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.followerIndexTitle"
-          defaultMessage="Unfollow leader index is recomended"
+          defaultMessage="Termination of replication is recommended"
         />
       }
       color="primary"
