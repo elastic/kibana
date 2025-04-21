@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import type { Tool } from '@kbn/wc-framework-types-server';
+import type { Tool, ToolProvider } from '@kbn/wc-framework-types-server';
 
 export type MockedTool = Tool & {
   handler: jest.MockedFn<Tool['handler']>;
 };
+
+export type ToolProviderMock = jest.Mocked<ToolProvider>;
 
 export const createMockedTool = (parts: Partial<Tool> = {}): MockedTool => {
   return {
@@ -19,5 +21,13 @@ export const createMockedTool = (parts: Partial<Tool> = {}): MockedTool => {
     schema: {},
     ...parts,
     handler: jest.fn(),
+  };
+};
+
+export const createToolProviderMock = (): ToolProviderMock => {
+  return {
+    has: jest.fn(),
+    get: jest.fn(),
+    getAll: jest.fn(),
   };
 };

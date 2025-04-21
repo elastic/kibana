@@ -10,4 +10,22 @@ export { createMockedState, type MockedState } from './state';
 export { createMockedNodeEventReporter, type NodeEventReporterMock } from './event_reporter';
 export { createExecutionState } from './execution_state';
 export { createMockedTool, type MockedTool } from './tools';
-export { createMockedModel, type MockedModel } from './models';
+export {
+  createMockedModel,
+  createModelProviderMock,
+  type MockedModel,
+  type ModelProviderMock,
+} from './models';
+export { createMockRegistry, type MockRegistry } from './registries';
+export {
+  createInternalScopedRunnerMock,
+  createMockWorkflowRunnerInternalContext,
+  type InternalScopedRunnerMock,
+  type ScopedClusterClientMock,
+  type MockedWorkflowRunnerInternalContext,
+} from './runner_context';
+export {
+  getMockedPromptNodeTypeDefinition,
+  type MockedNodeTypeDefinition,
+  type MockedNodeRunner,
+} from './node_types';

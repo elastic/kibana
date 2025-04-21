@@ -7,15 +7,16 @@
 
 import { loggerMock, MockedLogger } from '@kbn/logging-mocks';
 import {
-  ModelProvider,
-  ToolProvider,
+  NodeFactoryBaseServices,
   ScopedRunner,
   ScopedNodeProvider,
   type ScopedWorkflowProvider,
 } from '@kbn/wc-framework-types-server';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { createToolProviderMock, ToolProviderMock } from './tools';
+import { createModelProviderMock, ModelProviderMock } from './models';
 
-export interface MockedNodeFactoryBaseServices {
+export interface MockedNodeFactoryBaseServices extends NodeFactoryBaseServices {
   logger: MockedLogger;
   modelProvider: ModelProviderMock;
   workflowRunner: ScopedRunnerMock;
@@ -25,35 +26,19 @@ export interface MockedNodeFactoryBaseServices {
   workflowRegistry: WorkflowProviderMock;
 }
 
-export type ModelProviderMock = jest.Mocked<ModelProvider>;
 export type ScopedRunnerMock = jest.Mocked<ScopedRunner>;
-export type ToolProviderMock = jest.Mocked<ToolProvider>;
 export type ScopedClusterClientMock = ReturnType<
   typeof elasticsearchServiceMock.createScopedClusterClient
 >;
 export type NodeProviderMock = jest.Mocked<ScopedNodeProvider>;
 export type WorkflowProviderMock = jest.Mocked<ScopedWorkflowProvider>;
 
-const createMockProvider = () => {
+export const createMockProvider = () => {
   return {
     has: jest.fn(),
     get: jest.fn(),
     getAll: jest.fn(),
     getAllKeys: jest.fn(),
-  };
-};
-
-const createToolProviderMock = (): ToolProviderMock => {
-  return {
-    has: jest.fn(),
-    get: jest.fn(),
-    getAll: jest.fn(),
-  };
-};
-
-const createModelProviderMock = (): ModelProviderMock => {
-  return {
-    getDefaultModel: jest.fn(),
   };
 };
 

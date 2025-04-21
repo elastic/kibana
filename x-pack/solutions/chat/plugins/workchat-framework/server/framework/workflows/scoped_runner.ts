@@ -19,8 +19,6 @@ export const createInternalRunner = ({
 }: {
   internalContext: WorkflowRunnerInternalContextWithoutRunner;
 }): InternalScopedRunner => {
-  // let runner: InternalScopedRunner | undefined;
-
   const contextWithInjectedRunner: WorkflowRunnerInternalContext = {
     ...internalContext,
     // using a stub implementation, will replace once the runner is created

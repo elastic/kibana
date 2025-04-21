@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { NodeType } from '@kbn/wc-framework-types-common';
 import type {
   CoreStart,
   CoreSetup,
@@ -60,6 +61,50 @@ export class WorkChatAppPlugin
         }
         return this.services;
       },
+    });
+
+    setupDeps.workchatFramework.workflows.register({
+      id: 'my_test_workflow',
+      name: 'Just a test workflow',
+      type: 'graph',
+      inputs: [
+        {
+          name: 'input',
+          type: 'array',
+          required: true,
+        },
+      ],
+      steps: [
+        {
+          id: 'mainLoop',
+          type: NodeType.loop,
+          configuration: {
+            inputList: 'input',
+            itemVar: 'prompt',
+            output: {
+              source: 'output',
+              destination: 'results',
+            },
+            steps: [
+              {
+                id: 'step1',
+                type: NodeType.prompt,
+                configuration: {
+                  prompt:
+                    'How much is {prompt}? Please just output the result without anything else',
+                  output: 'output',
+                },
+              },
+            ],
+          },
+        },
+      ],
+      outputs: [
+        {
+          name: 'results',
+          ref: 'results',
+        },
+      ],
     });
 
     registerTypes({ savedObjects: core.savedObjects });

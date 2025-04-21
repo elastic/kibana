@@ -13,7 +13,7 @@ import { apiCapabilities } from '../../common/features';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
 
-export const registerChatRoutes = ({ getServices, router, logger }: RouteDependencies) => {
+export const registerChatRoutes = ({ getServices, router, logger, core }: RouteDependencies) => {
   const wrapHandler = getHandlerWrapper({ logger });
 
   const stubLogger = {
@@ -39,6 +39,19 @@ export const registerChatRoutes = ({ getServices, router, logger }: RouteDepende
       },
     },
     wrapHandler(async (ctx, request, res) => {
+      const [, { workchatFramework }] = await core.getStartServices();
+
+      console.log('**** running workflow');
+      workchatFramework.workflows
+        .run({
+          id: 'my_test_workflow',
+          inputs: { input: ['3 + 3', '7 - 1', '4 * 6'] },
+          request,
+        })
+        .then((result) => {
+          console.log('**** result =', result);
+        });
+
       const { chatService } = getServices();
 
       const { nextMessage, conversationId, agentId, connectorId } = request.body;
