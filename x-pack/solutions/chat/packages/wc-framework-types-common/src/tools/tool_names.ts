@@ -5,5 +5,9 @@
  * 2.0.
  */
 
-export type { ToolDescriptor } from './tool';
-export { BuiltInToolId } from './tool_names';
+/**
+ * List of built-in tool names.
+ */
+export enum BuiltInToolId {
+  calculator = 'calculator',
+}

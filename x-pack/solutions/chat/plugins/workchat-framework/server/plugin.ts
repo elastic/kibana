@@ -25,7 +25,7 @@ import {
   type InternalSetupServices,
   type InternalStartServices,
 } from './framework';
-import { registerBuiltInNodeTypes } from './builtin/node_types';
+import { registerBuiltInNodeTypes, registerBuiltInTools } from './builtin';
 
 export class WorkChatAppPlugin
   implements
@@ -55,6 +55,9 @@ export class WorkChatAppPlugin
 
     registerBuiltInNodeTypes({
       registry: this.setupServices.nodeRegistry,
+    });
+    registerBuiltInTools({
+      registry: this.setupServices.toolRegistry,
     });
 
     return {

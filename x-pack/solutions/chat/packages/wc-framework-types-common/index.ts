@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export type { ToolDescriptor } from './src/tools';
+export { type ToolDescriptor, BuiltInToolId } from './src/tools';
 export {
   NodeType,
   type NodeProgressionEvent,

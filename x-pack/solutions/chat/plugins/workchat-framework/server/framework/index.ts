@@ -12,3 +12,4 @@ export {
   type InternalStartServices,
 } from './create_services';
 export { createWorkflowRegistry, type WorkflowRegistry } from './workflows';
+export type { ToolRegistry } from './tools';

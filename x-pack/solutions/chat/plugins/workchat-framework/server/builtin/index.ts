@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export type { ToolDescriptor } from './tool';
-export { BuiltInToolId } from './tool_names';
+export { registerBuiltInNodeTypes } from './node_types';
+export { registerBuiltInTools } from './tools';
