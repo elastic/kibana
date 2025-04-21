@@ -1,13 +1,12 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Port renders correctly against snapshot 1`] = `
-<Memo(FormattedFieldValueComponent)
-  contextId="test"
-  data-test-subj="formatted-ip"
-  eventId="abcd"
-  fieldName="destination.ip"
-  fieldType="ip"
-  truncate={true}
-  value="10.1.2.3"
-/>
+<a
+  class="euiLink emotion-euiLink-primary"
+  data-test-subj="network-details"
+  href="/ip/10.1.2.3/source/events"
+  rel="noreferrer"
+>
+  10.1.2.3
+</a>
 `;
