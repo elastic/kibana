@@ -14,6 +14,7 @@ import { BaseLanguageModel } from '@langchain/core/language_models/base';
 import type { Connector } from '@kbn/actions-plugin/server/application/connector/types';
 import {
   ActionsClientChatOpenAI,
+  ActionsClientChatVertexAI,
   ActionsClientSimpleChatModel,
   getDefaultArguments,
 } from '@kbn/langchain/server';
@@ -120,12 +121,11 @@ export const getChatParams = async (
       break;
     case GEMINI_CONNECTOR_ID:
       llmType = 'gemini';
-      chatModel = new ActionsClientSimpleChatModel({
+      chatModel = new ActionsClientChatVertexAI({
         actionsClient,
         logger,
         connectorId,
         model,
-        llmType,
         temperature: getDefaultArguments(llmType).temperature,
         streaming: true,
       });
