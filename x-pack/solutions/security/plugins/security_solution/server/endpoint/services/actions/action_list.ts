@@ -230,9 +230,12 @@ const getActionDetailsList = async ({
   }
 
   const normalizedActionRequests = actionRequests.map(mapToNormalizedActionRequest);
-  const agentIds: string[] = [];
+  const agentIds: string[] = []; // Endpoint agent IDs only
   const actionReqIds = normalizedActionRequests.map((actionReq) => {
-    agentIds.push(...actionReq.agents);
+    if (actionReq.agentType === 'endpoint') {
+      agentIds.push(...actionReq.agents);
+    }
+
     return actionReq.id;
   });
   let actionResponses: FetchActionResponsesResult;
@@ -248,6 +251,7 @@ const getActionDetailsList = async ({
         actionIds: actionReqIds,
       }),
 
+      // Get the host names for Elastic Endpoint agents
       getAgentHostNamesWithIds({
         endpointService,
         spaceId,

@@ -557,6 +557,10 @@ export const getAgentHostNamesWithIds = async ({
   endpointService: EndpointAppContextService;
   agentIds: string[];
 }): Promise<{ [agentId: string]: string }> => {
+  if (agentIds.length === 0) {
+    return {};
+  }
+
   const fleetServices = endpointService.getInternalFleetServices(spaceId);
   const agentFound = await fleetServices.agent
     .getByIds(agentIds, { ignoreMissing: true })

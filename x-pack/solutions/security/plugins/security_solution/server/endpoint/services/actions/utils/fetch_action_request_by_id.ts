@@ -60,12 +60,25 @@ export const fetchActionRequestById = async <
       // Validate that action is visible in active space. In order for a user to be able to access
       // this response action, **at least 1** integration policy in the action request must be
       // accessible in active space
-      await endpointService.getInternalFleetServices(spaceId).ensureInCurrentSpace({
-        integrationPolicyIds: actionRequest.agent.policy.map(
-          ({ integrationPolicyId }) => integrationPolicyId
-        ),
-        options: { matchAll: false },
-      });
+      const integrationPolicyIds = actionRequest.agent.policy.map(
+        ({ integrationPolicyId }) => integrationPolicyId
+      );
+
+      try {
+        await endpointService.getInternalFleetServices(spaceId).ensureInCurrentSpace({
+          integrationPolicyIds,
+          options: { matchAll: false },
+        });
+      } catch (err) {
+        logger.debug(
+          () =>
+            `Validation of action '${actionId}' integration policies [${integrationPolicyIds.join(
+              ', '
+            )}] failed with: ${err.message}`
+        );
+
+        throw new NotFoundError(`Action [${actionId}] not found`);
+      }
     }
   }
 
