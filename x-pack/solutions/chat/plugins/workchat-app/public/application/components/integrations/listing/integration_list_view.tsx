@@ -11,6 +11,7 @@ import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { useNavigation } from '../../../hooks/use_navigation';
 import { appPaths } from '../../../app_paths';
 import { integrationLabels } from '../i18n';
+import { i18n } from '@kbn/i18n';
 
 export const IntegrationListView: React.FC<{ tab?: string }> = ({ tab }) => {
   const { navigateToWorkchatUrl } = useNavigation();
@@ -18,7 +19,9 @@ export const IntegrationListView: React.FC<{ tab?: string }> = ({ tab }) => {
   const renderTabs = () => [
     {
       id: 'active',
-      label: 'Active',
+      label: i18n.translate('workchatApp.integrations.listView.activeTab', {
+        defaultMessage: "Active",
+      }),
       isSelected: tab === 'active',
       onClick: () => {
         navigateToWorkchatUrl(appPaths.integrations.list);
@@ -26,7 +29,9 @@ export const IntegrationListView: React.FC<{ tab?: string }> = ({ tab }) => {
     },
     {
       id: 'catalog',
-      label: 'Catalog',
+      label: i18n.translate('workchatApp.integrations.listView.catalogTab', {
+        defaultMessage: "Catalog",
+      }),
       isSelected: tab === 'catalog',
       onClick: () => {
         navigateToWorkchatUrl(appPaths.integrations.catalog);
@@ -36,8 +41,10 @@ export const IntegrationListView: React.FC<{ tab?: string }> = ({ tab }) => {
 
   return (
     <KibanaPageTemplate.Header
-      pageTitle="Integrations"
-      description="Connect to your tools and data so you can easily find, understand, and act on the information that matters."
+      pageTitle={integrationLabels.breadcrumb.integrationsPill}
+      description={i18n.translate('workchatApp.integrations.listView.description', {
+        defaultMessage: "Connect to your tools and data so you can easily find, understand, and act on the information that matters.",
+      })}
       tabs={renderTabs()}
       rightSideItems={[
         <EuiButton

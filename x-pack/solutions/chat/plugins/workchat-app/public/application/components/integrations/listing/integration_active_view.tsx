@@ -289,7 +289,9 @@ export const IntegrationActiveView: React.FC<IntegrationListViewProps> = ({ inte
               </EuiFlexItem>
               <EuiEmptyPrompt
                 title={<h2>You haven&apos;t connected anything</h2>}
-                body="Your connected tools will show up here once you've set up an integration. Until then, nothing for me to work with!"
+                body={i18n.translate('workchatApp.integrations.listView.noIntegrationBody', {
+                  defaultMessage: "Your connected tools will show up here once you've set up an integration. Until then, nothing for me to work with!",
+                })}
                 actions={
                   <EuiButton
                     onClick={() => {

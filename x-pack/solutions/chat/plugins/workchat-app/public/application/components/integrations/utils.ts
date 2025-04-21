@@ -6,6 +6,7 @@
  */
 
 import { IntegrationType } from '@kbn/wci-common';
+import SalesforceSvg from '../icons/assets/salesforce.svg';
 
 export const integrationTypeToLabel = (type: IntegrationType) => {
   switch (type) {
@@ -20,13 +21,13 @@ export const integrationTypeToLabel = (type: IntegrationType) => {
   }
 };
 
-export const getIntegrationIcon = (integrationType: string): string | { type: string } => {
-  switch (integrationType.toLowerCase()) {
-    case 'salesforce':
-      return 'https://upload.wikimedia.org/wikipedia/commons/f/f9/Salesforce.com_logo.svg';
-    case 'index_source':
+export const getIntegrationIcon = (type: IntegrationType) => {
+  switch (type) {
+    case IntegrationType.salesforce:
+      return SalesforceSvg
+    case IntegrationType.index_source:
       return 'index';
-    case 'external_server':
+    case IntegrationType.external_server:
       return 'database';
     default:
       return '';

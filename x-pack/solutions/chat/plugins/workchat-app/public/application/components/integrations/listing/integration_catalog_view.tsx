@@ -15,6 +15,7 @@ import {
   EuiSpacer,
   EuiText,
   IconType,
+  useEuiTheme,
 } from '@elastic/eui';
 import { IntegrationType } from '@kbn/wci-common';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
@@ -22,6 +23,7 @@ import { IntegrationListView } from './integration_list_view';
 import { getIntegrationIcon } from '../utils';
 import { useNavigation } from '../../../hooks/use_navigation';
 import { appPaths } from '../../../app_paths';
+import { i18n } from '@kbn/i18n';
 
 interface IntegrationCardData {
   title: string;
@@ -30,32 +32,45 @@ interface IntegrationCardData {
   disabled?: boolean;
 }
 
+
+
 export const IntegrationCatalogView: React.FC = () => {
   const { navigateToWorkchatUrl } = useNavigation();
 
   const integrationCards: Record<IntegrationType, IntegrationCardData> = {
     [IntegrationType.index_source]: {
-      title: 'Import index',
-      icon: getIntegrationIcon('index_source') as IconType,
-      description:
-        'Choose an existing index to connect and start using it in your workflows without re-importing your data',
+      title: i18n.translate('workchatApp.integrations.listView.importIndexCard', {
+        defaultMessage: "Import Index",
+      }),
+      icon: getIntegrationIcon(IntegrationType.index_source),
+      description:i18n.translate('workchatApp.integrations.listView.importIndexDescription', {
+        defaultMessage: "Choose an existing index to connect and start using it in your workflows without re-importing your data"
+      }),
       disabled: false,
     },
     [IntegrationType.external_server]: {
-      title: 'External Server',
-      icon: getIntegrationIcon('external_server') as IconType,
-      description: 'Connect to external servers for data processing.',
+      title: i18n.translate('workchatApp.integrations.listView.externalServerCard', {
+        defaultMessage: "External Server",
+      }),
+      icon: getIntegrationIcon(IntegrationType.external_server) as IconType,
+      description:i18n.translate('workchatApp.integrations.listView.externalServerDescription', {
+        defaultMessage: "Connect to external servers for data processing."
+      }),
       disabled: false,
     },
     [IntegrationType.salesforce]: {
-      title: 'Salesforce',
-      icon: getIntegrationIcon('salesforce') as IconType,
-      description:
-        'Connect your Salesforce account to bring in customer records, case data, and account insights for use in workflows',
+      title: i18n.translate('workchatApp.integrations.listView.salesforceCard', {
+        defaultMessage: "Salesforce",
+      }),
+      icon: getIntegrationIcon(IntegrationType.salesforce) as IconType,
+      description:i18n.translate('workchatApp.integrations.listView.salesforceDescription', {
+        defaultMessage: "Connect your Salesforce account to bring in customer records, case data, and account insights for use in workflows"
+      }),
       disabled: false,
     },
   };
 
+  const { euiTheme } = useEuiTheme();
   return (
     <KibanaPageTemplate data-test-subj="integrationsCatalogPage">
       <IntegrationListView tab={'catalog'} />
@@ -73,7 +88,7 @@ export const IntegrationCatalogView: React.FC = () => {
                 icon={
                   <div
                     style={{
-                      backgroundColor: '#F5F7FA',
+                      backgroundColor: euiTheme.colors.backgroundBaseSubdued,
                       borderRadius: '50%',
                       width: '60px',
                       height: '60px',
@@ -101,7 +116,7 @@ export const IntegrationCatalogView: React.FC = () => {
                 description={cardData.description}
                 paddingSize="l"
                 css={{
-                  border: '1px solid #D3DAE6',
+                  border: `1px solid ${euiTheme.colors.backgroundBaseHighlighted}`,
                   borderRadius: '4px',
                   width: '400px',
                   height: '150px',
