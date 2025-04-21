@@ -69,7 +69,7 @@ export function initializeInternalApi(
   });
 
   const esqlVariables$ = new BehaviorSubject(
-    apiPublishesESQLVariables(parentApi) ? parentApi.esqlVariables$ : []
+    apiPublishesESQLVariables(parentApi) ? parentApi.esqlVariables$.value : []
   );
 
   // No need to expose anything at public API right now, that would happen later on
