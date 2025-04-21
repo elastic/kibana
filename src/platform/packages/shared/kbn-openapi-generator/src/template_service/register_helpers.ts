@@ -48,7 +48,9 @@ export function registerHelpers(handlebarsInstance: typeof Handlebars) {
    * Check if the OpenAPI schema is unknown
    */
   handlebarsInstance.registerHelper('isUnknown', (val: object) => {
-    return !('type' in val || '$ref' in val || 'anyOf' in val || 'oneOf' in val || 'allOf' in val);
+    return (
+      val && !('type' in val || '$ref' in val || 'anyOf' in val || 'oneOf' in val || 'allOf' in val)
+    );
   });
   handlebarsInstance.registerHelper(
     'replace',
