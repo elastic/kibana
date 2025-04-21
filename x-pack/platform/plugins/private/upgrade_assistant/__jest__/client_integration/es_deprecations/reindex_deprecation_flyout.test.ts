@@ -295,7 +295,7 @@ describe('Reindex deprecation flyout', () => {
       expect(find('stepProgressStep').text()).toBe('Setting foo index to read-only.');
     });
   });
-  
+
   describe('follower index', () => {
     it('displays follower index callout and only shows mark as read-only button when index is a follower index', async () => {
       httpRequestsMockHelpers.setReindexStatusResponse(MOCK_REINDEX_DEPRECATION.index!, {
