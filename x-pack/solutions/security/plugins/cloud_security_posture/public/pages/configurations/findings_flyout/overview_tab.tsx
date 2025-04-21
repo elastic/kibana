@@ -51,36 +51,42 @@ const columns: Array<EuiBasicTableColumn<any>> = [
   {
     field: 'value',
     name: 'Value',
-    truncateText: true,
+    truncateText: false,
     render: (value: string) => (
       <>
-        <EuiFlexGroup direction="row" gutterSize="xs">
-          <EuiFlexItem>
-            <EuiText
-              size="s"
-              css={{
-                paddingTop: `4px`,
-              }}
-            >
-              {value}
-            </EuiText>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiCopy textToCopy={value}>
-              {(copy) => (
-                <EuiIcon
-                  css={css`
-                    :hover {
-                      cursor: pointer;
-                    }
-                  `}
-                  onClick={copy}
-                  type="copy"
-                />
-              )}
-            </EuiCopy>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <EuiText
+          size="s"
+          css={{
+            paddingTop: `4px`,
+            overflow: 'hidden',
+          }}
+        >
+          <div
+            css={{
+              float: 'left',
+              overflow: 'hidden',
+              whiteSpace: 'nowrap',
+              textOverflow: 'ellipsis',
+              maxWidth: 'calc(100% - 20px)',
+              marginRight: '4px',
+            }}
+          >
+            {value}
+          </div>
+          <EuiCopy textToCopy={value}>
+            {(copy) => (
+              <EuiIcon
+                css={css`
+                  :hover {
+                    cursor: pointer;
+                  }
+                `}
+                onClick={copy}
+                type="copy"
+              />
+            )}
+          </EuiCopy>
+        </EuiText>
       </>
     ),
   },

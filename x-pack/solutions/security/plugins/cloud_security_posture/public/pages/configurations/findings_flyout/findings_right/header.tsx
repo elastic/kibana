@@ -16,8 +16,8 @@ import {
   EuiPanel,
   EuiCopy,
   EuiIcon,
-  EuiTextTruncate,
   EuiToolTip,
+  EuiText,
 } from '@elastic/eui';
 import { CspFinding } from '@kbn/cloud-security-posture-common';
 import { BenchmarkIcons } from '../findings_flyout';
@@ -64,13 +64,26 @@ export const FindingsMisconfigurationFlyoutHeader = ({
                       <b>Resource Name</b>
                     </EuiFlexItem>
                     <EuiFlexItem>
-                      <EuiFlexGroup direction="row" gutterSize="none">
-                        <EuiFlexItem>
-                          <EuiToolTip content={resourceName} position="top">
-                            <EuiTextTruncate text={resourceName} />
-                          </EuiToolTip>
-                        </EuiFlexItem>
-                        <EuiFlexItem>
+                      <EuiToolTip content={resourceName} position="top">
+                        <EuiText
+                          size="s"
+                          css={{
+                            paddingTop: `4px`,
+                            overflow: 'hidden',
+                          }}
+                        >
+                          <div
+                            css={{
+                              float: 'left',
+                              overflow: 'hidden',
+                              whiteSpace: 'nowrap',
+                              textOverflow: 'ellipsis',
+                              maxWidth: 'calc(100% - 20px)',
+                              marginRight: '4px',
+                            }}
+                          >
+                            {resourceName}
+                          </div>
                           <EuiCopy textToCopy={resourceName}>
                             {(copy) => (
                               <EuiIcon
@@ -84,8 +97,8 @@ export const FindingsMisconfigurationFlyoutHeader = ({
                               />
                             )}
                           </EuiCopy>
-                        </EuiFlexItem>
-                      </EuiFlexGroup>
+                        </EuiText>
+                      </EuiToolTip>
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 </EuiPanel>
