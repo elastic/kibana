@@ -6,7 +6,6 @@
  */
 
 import type {
-  GraphWorkflowDefinition,
   ScopedRunnerRunWorkflowParams,
   ScopedRunnerRunWorkflowOutput,
 } from '@kbn/wc-framework-types-server';
@@ -42,29 +41,33 @@ export const runWorkflow = async ({
     workflowId: workflowDefinition.id,
   });
 
+  const { eventHandler } = internalContext;
+
   const internalRunner = internalContext.getRunner();
-
-  // TODO: validate input shape.
-
   const state = createInitialState({ inputs });
+  const output: Record<string, unknown> = {};
 
-  // TODO: check for function workflows and handle them...
+  if (workflowDefinition.type === 'function') {
+    const workflowResult = await workflowDefinition.handler({ inputs, eventHandler });
+    Object.entries(workflowResult).forEach(([key, value]) => {
+      output[key] = value;
+    });
+  } else {
+    const stepDefinitions = workflowDefinition.steps;
+    for (let i = 0; i < stepDefinitions.length; i++) {
+      const nodeDefinition = stepDefinitions[i];
 
-  const stepDefinitions = (workflowDefinition as GraphWorkflowDefinition).steps;
-  for (let i = 0; i < stepDefinitions.length; i++) {
-    const nodeDefinition = stepDefinitions[i];
+      await internalRunner.runNode({
+        nodeDefinition,
+        state,
+      });
+    }
 
-    await internalRunner.runNode({
-      nodeDefinition,
-      state,
+    // TODO: maybe need to improve the logic?
+    workflowDefinition.outputs.forEach((outputDef) => {
+      output[outputDef.name] = state.get(outputDef.ref);
     });
   }
-
-  // TODO: probably need to improve the logic?
-  const output: Record<string, unknown> = {};
-  workflowDefinition.outputs.forEach((outputDef) => {
-    output[outputDef.name] = state.get(outputDef.ref);
-  });
 
   return {
     runId: internalContext.executionState.runId,

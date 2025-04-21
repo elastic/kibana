@@ -13,6 +13,7 @@ export type {
   WorkflowDefinitionOutput,
   WorkflowDefinitionInput,
   WorkflowInputType,
+  FunctionWorkflowHandlerParams,
 } from './definition';
 export type {
   WorkflowRunEventHandler,

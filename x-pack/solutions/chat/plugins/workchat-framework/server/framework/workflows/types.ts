@@ -26,7 +26,7 @@ export interface WorkflowRunnerInternalContext {
   modelProvider: ModelProvider;
   workflowRegistry: WorkflowRegistry;
   nodeRegistry: NodeTypeRegistry;
-  eventHandler?: WorkflowRunEventHandler;
+  eventHandler: WorkflowRunEventHandler;
   toolProvider: ToolProvider;
   esClusterClient: IScopedClusterClient;
   executionState: WorkflowExecutionState;

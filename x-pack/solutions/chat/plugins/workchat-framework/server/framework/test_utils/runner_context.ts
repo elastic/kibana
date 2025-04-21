@@ -46,6 +46,7 @@ export const createMockWorkflowRunnerInternalContext = (): MockedWorkflowRunnerI
   const workflowRegistry = createMockRegistry();
   const nodeRegistry = createMockRegistry();
   const runner = createInternalScopedRunnerMock();
+  const eventHandler = jest.fn();
 
   return {
     request,
@@ -57,5 +58,6 @@ export const createMockWorkflowRunnerInternalContext = (): MockedWorkflowRunnerI
     workflowRegistry,
     nodeRegistry,
     getRunner: () => runner,
+    eventHandler,
   };
 };

@@ -7,6 +7,7 @@
 
 import type { MaybePromise } from '@kbn/utility-types';
 import type { NodeDefinition } from '../nodes';
+import type { WorkflowRunEventHandler } from './runner';
 
 /**
  * Describes the definition of a workflow.
@@ -65,7 +66,21 @@ export interface FunctionWorkflowDefinition extends BaseWorkflowDefinition {
   /**
    * The function handler that should be called to execute the workflow.
    */
-  handler: (input: Record<string, unknown>) => MaybePromise<Record<string, unknown>>;
+  handler: (params: FunctionWorkflowHandlerParams) => MaybePromise<Record<string, unknown>>;
+}
+
+/**
+ * Arguments for a function workflow.
+ */
+export interface FunctionWorkflowHandlerParams {
+  /**
+   * The inputs for the workflow
+   */
+  inputs: Record<string, unknown>;
+  /**
+   * Event handler that can be used to send custom workflow events
+   */
+  eventHandler: WorkflowRunEventHandler;
 }
 
 export type WorkflowDefinition = GraphWorkflowDefinition | FunctionWorkflowDefinition;

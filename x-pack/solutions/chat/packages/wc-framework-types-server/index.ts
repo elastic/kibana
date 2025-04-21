@@ -37,6 +37,7 @@ export type {
   BaseWorkflowDefinition,
   GraphWorkflowDefinition,
   FunctionWorkflowDefinition,
+  FunctionWorkflowHandlerParams,
   WorkflowDefinition,
   WorkflowDefinitionInput,
   WorkflowDefinitionOutput,

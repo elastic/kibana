@@ -12,7 +12,7 @@ import {
   type ScopedRunnerRunNodeParams,
 } from '@kbn/wc-framework-types-server';
 import type { WorkflowRunnerInternalContext, ScopedNodeRunnerFn } from './types';
-import { createNoopNodeEventReporter, createNodeEventReporter, enterNode } from './utils';
+import { createNodeEventReporter, enterNode } from './utils';
 
 /**
  * Returns a step runner already scoped to the given context.
@@ -54,7 +54,14 @@ const runNode = async ({
 
   const nodeType = nodeRegistry.get(nodeDefinition.type);
 
-  const nodeServices = createBaseNodeServices({ internalContext });
+  let nodeServices = createBaseNodeServices({ internalContext });
+  if (nodeType.customServicesProvider) {
+    const customServices = await nodeType.customServicesProvider();
+    nodeServices = {
+      ...nodeServices,
+      ...customServices,
+    };
+  }
   // TODO: check / call nodeType.customServicesProvider if present
 
   const context: NodeFactoryContext = {
@@ -65,16 +72,14 @@ const runNode = async ({
   const nodeRunner = nodeType.factory(context);
 
   // creating the event reporter
-  const eventReporter = eventHandler
-    ? createNodeEventReporter({
-        onEvent: eventHandler,
-        meta: {
-          workflowId: internalContext.executionState.workflowId,
-          nodeId: nodeDefinition.id,
-          nodeType: nodeDefinition.type,
-        },
-      })
-    : createNoopNodeEventReporter();
+  const eventReporter = createNodeEventReporter({
+    onEvent: eventHandler,
+    meta: {
+      workflowId: internalContext.executionState.workflowId,
+      nodeId: nodeDefinition.id,
+      nodeType: nodeDefinition.type,
+    },
+  });
 
   // executing the node
   await nodeRunner.run({

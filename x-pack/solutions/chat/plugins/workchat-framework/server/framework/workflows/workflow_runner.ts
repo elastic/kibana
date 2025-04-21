@@ -84,7 +84,8 @@ export const createWorkflowRunner = (params: CreateWorkflowRunnerParams): Workfl
         ? combineToolProviders(customToolProvider, toolRegistry.asToolProvider())
         : toolRegistry.asToolProvider(),
       esClusterClient: elasticsearch.client.asScoped(request),
-      eventHandler: onEvent, // TODO: we want to always have a default one, dispatching to telemetry or something
+      // TODO: we probably need to always have a default one, for internal telemetry, and combine with onEvent if present
+      eventHandler: onEvent ?? (() => undefined),
       executionState,
     };
 
