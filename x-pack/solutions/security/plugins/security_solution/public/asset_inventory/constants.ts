@@ -40,6 +40,14 @@ export const TEST_SUBJ_GROUPING_COUNTER = 'asset-inventory-grouping-counter';
 
 export const DOCS_URL = 'https://ela.st/asset-inventory';
 
+export const assetIntegrationDocsNavigation = {
+  overviewPath: `${DOCS_URL}`,
+  getStartedPath: `${DOCS_URL}-get-started`,
+  awsGetStartedPath: `${DOCS_URL}-get-started`,
+  gcpGetStartedPath: `${DOCS_URL}-get-started-gcp.html`,
+  azureGetStartedPath: `${DOCS_URL}-get-started-azure.html`,
+};
+
 export const DEFAULT_TABLE_SECTION_HEIGHT = 512; // px
 
 export const ASSET_FIELDS = {
