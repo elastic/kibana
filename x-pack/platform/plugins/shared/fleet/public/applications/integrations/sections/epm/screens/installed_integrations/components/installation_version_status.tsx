@@ -22,6 +22,7 @@ import { FormattedDate, FormattedMessage, FormattedTime } from '@kbn/i18n-react'
 import { useAuthz } from '../../../../../../../hooks';
 import type { InstallFailedAttempt } from '../../../../../../../../common/types';
 import type { InstalledPackageUIPackageListItem } from '../types';
+import { useInstalledIntegrationsActions } from '../hooks/use_installed_integrations_actions';
 
 import { DisabledWrapperTooltip } from './disabled_wrapper_tooltip';
 
@@ -43,7 +44,9 @@ const UpgradeAvailableVersionStatus: React.FunctionComponent<{
 }> = React.memo(({ item }) => {
   const authz = useAuthz();
   const isDisabled = !authz.integrations.upgradePackages;
-
+  const {
+    actions: { bulkUpgradeIntegrationsWithConfirmModal },
+  } = useInstalledIntegrationsActions();
   return (
     <DisabledWrapperTooltip
       tooltipContent={
@@ -58,8 +61,9 @@ const UpgradeAvailableVersionStatus: React.FunctionComponent<{
         size="s"
         iconType="gear"
         flush="left"
-        // TODO Implement on click https://github.com/elastic/kibana/issues/209867
-        onClick={() => {}}
+        onClick={() => {
+          bulkUpgradeIntegrationsWithConfirmModal([item]);
+        }}
         disabled={isDisabled}
       >
         <FormattedMessage

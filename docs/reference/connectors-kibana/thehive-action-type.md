@@ -11,19 +11,14 @@ mapped_pages:
 
 ::::{note}
 If you use this connector with [cases](docs-content://explore-analyze/alerts-cases/cases.md), the status values differ in {{kib}} and {{hive}}. The status values are not synchronized when you update a case.
-
 ::::
-
-
 
 ## Create connectors in {{kib}} [define-thehive-ui]
 
 You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}** or as needed when you’re creating a rule. For example:
 
-:::{image} ../images/thehive-connector.png
-:alt: {{hive}} connector
-:class: screenshot
-:::
+% TO DO: Use `:class: screenshot`
+![{{hive}} connector](../images/thehive-connector.png)
 
 
 ### Connector configuration [thehive-connector-configuration]
@@ -47,15 +42,11 @@ API key
 
 You can test connectors for creating a case or an alert with the [run connector API](https://www.elastic.co/docs/api/doc/kibana/v8/group/endpoint-connectors) or as you’re creating or editing the connector in {{kib}}. For example:
 
-:::{image} ../images/thehive-params-case-test.png
-:alt: {{hive}} case params test
-:class: screenshot
-:::
+% TO DO: Use `:class: screenshot`
+![{{hive}} case params test](../images/thehive-params-case-test.png)
 
-:::{image} ../images/thehive-params-alert-test.png
-:alt: {{hive}} alert params test
-:class: screenshot
-:::
+% TO DO: Use `:class: screenshot`
+![{{hive}} alert params test](../images/thehive-params-alert-test.png)
 
 {{hive}} actions have the following configuration properties.
 

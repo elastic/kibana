@@ -15,7 +15,6 @@ import { i18nStrings, securityLink } from '@kbn/security-solution-navigation/lin
 
 import { type SecurityProductTypes } from '../../../common/config';
 import { ProductLine } from '../../../common/product';
-import { createMachineLearningNavigationTree } from '../ml_navigation';
 import { createStackManagementNavigationTree } from '../stack_management_navigation';
 import { AiForTheSocIcon } from './icons';
 
@@ -40,15 +39,18 @@ export const createAiSocNavigationTree$ = (): Rx.Observable<NavigationTreeDefini
         isCollapsible: false,
         children: [
           {
-            id: 'discover:',
-            link: 'discover',
+            id: 'alert_summary',
+            link: securityLink(SecurityPageName.alertSummary),
+            spaceBefore: 's',
           },
+
           {
             id: 'attack_discovery',
             link: securityLink(SecurityPageName.attackDiscovery),
           },
           {
             id: 'cases',
+            spaceBefore: 'm',
             link: securityLink(SecurityPageName.case),
             children: [
               {
@@ -64,26 +66,27 @@ export const createAiSocNavigationTree$ = (): Rx.Observable<NavigationTreeDefini
             ],
             renderAs: 'panelOpener',
           },
-          createMachineLearningNavigationTree(),
-          {
-            id: 'alert_summary',
-            link: securityLink(SecurityPageName.alertSummary),
-          },
           {
             id: 'configurations',
+            spaceBefore: null,
             link: securityLink(SecurityPageName.configurations),
             renderAs: 'panelOpener',
             children: [
               {
-                link: securityLink(SecurityPageName.configurationsAiSettings),
+                link: securityLink(SecurityPageName.configurationsIntegrations),
               },
               {
                 link: securityLink(SecurityPageName.configurationsBasicRules),
               },
               {
-                link: securityLink(SecurityPageName.configurationsIntegrations),
+                link: securityLink(SecurityPageName.configurationsAiSettings),
               },
             ],
+          },
+          {
+            id: 'discover:',
+            link: 'discover',
+            spaceBefore: 'm',
           },
         ],
       },
