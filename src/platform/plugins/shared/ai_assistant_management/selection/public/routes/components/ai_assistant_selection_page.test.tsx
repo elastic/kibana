@@ -98,7 +98,7 @@ describe('AiAssistantSelectionPage', () => {
           screen.getByTestId('pluginsAiAssistantSelectionPageDocumentationLink')
         ).toHaveAttribute(
           'href',
-          'https://www.elastic.co/guide/en/observability/current/obs-ai-assistant.html'
+          'https://www.elastic.co/docs/explore-analyze/ai-assistant'
         );
       });
     });
