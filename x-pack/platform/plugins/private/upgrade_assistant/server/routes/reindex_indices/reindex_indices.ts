@@ -113,7 +113,8 @@ export function registerReindexIndicesRoutes(
       const asCurrentUser = esClient.asCurrentUser;
       const reindexActions = reindexActionsFactory(
         getClient({ includedHiddenTypes: [REINDEX_OP_TYPE] }),
-        asCurrentUser
+        asCurrentUser,
+        log
       );
       const reindexService = reindexServiceFactory(asCurrentUser, reindexActions, log, licensing);
 
@@ -186,7 +187,8 @@ export function registerReindexIndicesRoutes(
       const callAsCurrentUser = esClient.asCurrentUser;
       const reindexActions = reindexActionsFactory(
         getClient({ includedHiddenTypes: [REINDEX_OP_TYPE] }),
-        callAsCurrentUser
+        callAsCurrentUser,
+        log
       );
       const reindexService = reindexServiceFactory(
         callAsCurrentUser,

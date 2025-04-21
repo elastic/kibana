@@ -133,7 +133,7 @@ jest.mock('../../../common/lib/kibana', () => {
           getAlertsStateTable: () => <></>,
         },
         sessionView: {
-          getSessionView: jest.fn().mockReturnValue(<div />),
+          getSessionView: jest.fn(() => <div />),
         },
         notifications: {
           toasts: {
