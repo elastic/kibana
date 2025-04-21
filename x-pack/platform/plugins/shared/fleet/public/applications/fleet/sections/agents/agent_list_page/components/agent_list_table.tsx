@@ -200,7 +200,11 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
       render: (policyId: string, agent: Agent) => {
         const agentPolicy = agentPoliciesIndexedById[policyId];
 
-        return <AgentPolicySummaryLine direction="column" policy={agentPolicy} agent={agent} />;
+        return (
+          agentPolicy && (
+            <AgentPolicySummaryLine direction="column" policy={agentPolicy} agent={agent} />
+          )
+        );
       },
     },
 
