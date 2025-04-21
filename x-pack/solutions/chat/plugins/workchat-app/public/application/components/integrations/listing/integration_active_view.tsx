@@ -37,6 +37,7 @@ import { integrationTypeToLabel, getIntegrationIcon } from '../utils';
 import { useAgentList } from '../../../hooks/use_agent_list';
 import { integrationLabels } from '../i18n';
 import { IntegrationListView } from './integration_list_view';
+import { i18n } from '@kbn/i18n';
 
 interface IntegrationListViewProps {
   integrations: Integration[];
@@ -70,23 +71,31 @@ export const IntegrationActiveView: React.FC<IntegrationListViewProps> = ({ inte
     },
     {
       field: 'name',
-      name: 'Name',
+      name: i18n.translate('workchatApp.integrations.listView.integrationName', {
+        defaultMessage: 'Name',
+      }),
       sortable: true,
       render: (_, item: Integration) => <EuiFlexItem>{item.name}</EuiFlexItem>,
     },
     {
       field: 'type',
-      name: 'Type',
+      name: i18n.translate('workchatApp.integrations.listView.integrationType', {
+        defaultMessage: 'Type',
+      }),
       render: (type: IntegrationType) => integrationTypeToLabel(type),
     },
     {
       field: 'status',
-      name: 'Status',
+      name: i18n.translate('workchatApp.integrations.listView.integrationStatus', {
+        defaultMessage: 'Status',
+      }),
       render: () => <EuiHealth color="green">Healthy</EuiHealth>,
     },
     {
       field: 'used_in',
-      name: 'Used in...',
+      name: i18n.translate('workchatApp.integrations.listView.integrationAgents', {
+        defaultMessage: 'Used in...',
+      }),
       render: () => (
         <EuiFlexGroup gutterSize="none">
           {agents.map((agent) => (
@@ -96,7 +105,9 @@ export const IntegrationActiveView: React.FC<IntegrationListViewProps> = ({ inte
       ),
     },
     {
-      name: 'Actions',
+      name: i18n.translate('workchatApp.integrations.listView.actions', {
+        defaultMessage: 'Actions',
+      }),
       actions: [
         {
           name: 'Edit',
