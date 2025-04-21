@@ -11,7 +11,7 @@ import { GlobalHeader } from '.';
 import {
   ADD_DATA_PATH,
   ADD_THREAT_INTELLIGENCE_DATA_PATH,
-  SecurityPageName,
+  SECURITY_FEATURE_ID,
   THREAT_INTELLIGENCE_PATH,
 } from '../../../../common/constants';
 import {
@@ -22,6 +22,11 @@ import {
 } from '../../../common/mock';
 import { TimelineId } from '../../../../common/types/timeline';
 import { sourcererPaths } from '../../../sourcerer/containers/sourcerer_paths';
+
+import { useKibana as mockUseKibana } from '../../../common/lib/kibana/__mocks__';
+import { useKibana } from '../../../common/lib/kibana';
+
+jest.mock('../../../common/hooks/use_experimental_features');
 
 jest.mock('react-router-dom', () => {
   const actual = jest.requireActual('react-router-dom');
@@ -58,11 +63,23 @@ describe('global header', () => {
     },
   };
   const store = createMockStore(state);
-
+  beforeEach(() => {
+    jest.clearAllMocks();
+    (useKibana as jest.Mock).mockReturnValue({
+      ...mockUseKibana(),
+      services: {
+        ...mockUseKibana().services,
+        application: {
+          capabilities: {
+            [SECURITY_FEATURE_ID]: {
+              configurations: false,
+            },
+          },
+        },
+      },
+    });
+  });
   it('has add data link', () => {
-    (useLocation as jest.Mock).mockReturnValue([
-      { pageName: SecurityPageName.overview, detailName: undefined },
-    ]);
     const { getByText } = render(
       <TestProviders store={store}>
         <GlobalHeader />
@@ -72,9 +89,6 @@ describe('global header', () => {
   });
 
   it('points to the default Add data URL', () => {
-    (useLocation as jest.Mock).mockReturnValue([
-      { pageName: SecurityPageName.overview, detailName: undefined },
-    ]);
     const { queryByTestId } = render(
       <TestProviders store={store}>
         <GlobalHeader />
@@ -82,6 +96,28 @@ describe('global header', () => {
     );
     const link = queryByTestId('add-data');
     expect(link?.getAttribute('href')).toBe(ADD_DATA_PATH);
+  });
+
+  it('does not show the default Add data URL when hasSearchAILakeConfigurations', () => {
+    (useKibana as jest.Mock).mockReturnValue({
+      ...mockUseKibana(),
+      services: {
+        ...mockUseKibana().services,
+        application: {
+          capabilities: {
+            [SECURITY_FEATURE_ID]: {
+              configurations: true,
+            },
+          },
+        },
+      },
+    });
+    const { queryByTestId } = render(
+      <TestProviders store={store}>
+        <GlobalHeader />
+      </TestProviders>
+    );
+    expect(queryByTestId('add-data')).not.toBeInTheDocument();
   });
 
   it('points to the threat_intel Add data URL for threat_intelligence url', () => {
@@ -144,10 +180,6 @@ describe('global header', () => {
   });
 
   it('shows AI Assistant header link', () => {
-    (useLocation as jest.Mock).mockReturnValue([
-      { pageName: SecurityPageName.overview, detailName: undefined },
-    ]);
-
     const { findByTestId } = render(
       <TestProviders store={store}>
         <GlobalHeader />

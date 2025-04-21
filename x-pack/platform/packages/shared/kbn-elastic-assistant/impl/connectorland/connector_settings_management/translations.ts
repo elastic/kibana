@@ -8,9 +8,9 @@
 import { i18n } from '@kbn/i18n';
 
 export const CONNECTOR_SETTINGS_MANAGEMENT_TITLE = i18n.translate(
-  'xpack.elasticAssistant.connectors.connectorSettingsManagement.title',
+  'xpack.elasticAssistant.connectors.connectorSettingsManagement.title.llm',
   {
-    defaultMessage: 'Settings',
+    defaultMessage: 'LLM connectors',
   }
 );
 
