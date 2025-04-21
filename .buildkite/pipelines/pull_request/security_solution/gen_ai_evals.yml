@@ -1,6 +1,6 @@
 steps:
   - group: Security Solution Gen AI
-    key: ai-infra-gen-ai
+    key: security-solution-gen-ai
     depends_on:
       - build
       - quick_checks
@@ -16,7 +16,7 @@ steps:
           FTR_CONFIG_GROUP_KEY: 'ftr-security-solution-gen-ai-evaluations'
           FTR_SECURITY_GEN_AI: "1"
         label: Security Solution Gen AI Evaluations
-        key: ftr-security-solution-gen-ai-evaluations
+        key: security-solution-gen-ai-evaluations
         timeout_in_minutes: 50
         parallelism: 1
         agents:
