@@ -134,7 +134,6 @@ const enableAttackDiscoverySchedulesRouteMock = enableAttackDiscoverySchedulesRo
 
 describe('registerRoutes', () => {
   const loggerMock = loggingSystemMock.createLogger();
-  const getElserIdMock = jest.fn();
   let server: ReturnType<typeof serverMock.create>;
 
   beforeEach(async () => {
