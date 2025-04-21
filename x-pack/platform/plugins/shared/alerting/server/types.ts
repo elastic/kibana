@@ -138,6 +138,7 @@ export interface RuleExecutorOptions<
   flappingSettings: RulesSettingsFlappingProperties;
   getTimeRange: (timeWindow?: string) => GetTimeRangeResult;
   isServerless: boolean;
+  ruleExecutionTimeout?: string;
 }
 
 export interface RuleParamsAndRefs<Params extends RuleTypeParams> {
@@ -335,7 +336,6 @@ export interface RuleType<
    */
   autoRecoverAlerts?: boolean;
   getViewInAppRelativeUrl?: GetViewInAppRelativeUrlFn<Params>;
-  fieldsForAAD?: string[];
 }
 export type UntypedRuleType = RuleType<
   RuleTypeParams,

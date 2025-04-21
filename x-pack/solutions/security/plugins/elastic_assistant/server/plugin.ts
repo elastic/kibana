@@ -29,6 +29,7 @@ import { PLUGIN_ID } from '../common/constants';
 import { registerRoutes } from './routes/register_routes';
 import { appContextService } from './services/app_context';
 import { createGetElserId, removeLegacyQuickPrompt } from './ai_assistant_service/helpers';
+import { getAttackDiscoveryScheduleType } from './lib/attack_discovery/schedules/register_schedule/definition';
 
 export class ElasticAssistantPlugin
   implements
@@ -104,7 +105,14 @@ export class ElasticAssistantPlugin
           featureFlags.getBooleanValue(ATTACK_DISCOVERY_SCHEDULES_ENABLED_FEATURE_FLAG, false),
           // add more feature flags here
         ]).then(([assistantAttackDiscoverySchedulingEnabled]) => {
-          // TODO: use `assistantAttackDiscoverySchedulingEnabled` to conditionally create alerts index
+          if (assistantAttackDiscoverySchedulingEnabled) {
+            // Register Attack Discovery Schedule type
+            plugins.alerting.registerType(
+              getAttackDiscoveryScheduleType({
+                logger: this.logger,
+              })
+            );
+          }
         });
       })
       .catch((error) => {

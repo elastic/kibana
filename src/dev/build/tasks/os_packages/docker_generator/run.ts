@@ -42,7 +42,7 @@ export async function runDockerGenerator(
 ) {
   let baseImageName = '';
   if (flags.baseImage === 'ubuntu') baseImageName = 'ubuntu:20.04';
-  if (flags.baseImage === 'ubi') baseImageName = 'docker.elastic.co/ubi9/ubi-minimal:latest';
+  if (flags.baseImage === 'ubi') baseImageName = 'redhat/ubi9-minimal:latest';
   /**
    * Renovate config contains a regex manager to automatically update both Chainguard references
    *
@@ -51,7 +51,7 @@ export async function runDockerGenerator(
    */
   if (flags.baseImage === 'wolfi')
     baseImageName =
-      'docker.elastic.co/wolfi/chainguard-base:latest@sha256:c56628d8102cc34eeb4aaaf6279e88d2b23775569f9deeacc915b52f28163b8f';
+      'docker.elastic.co/wolfi/chainguard-base:latest@sha256:5ffa55ac0a7ec95f1232622f62d5c0953ca931ae64cfd9946629b0e408a85d0e';
 
   let imageFlavor = '';
   if (flags.baseImage === 'ubi') imageFlavor += `-ubi`;
@@ -62,7 +62,7 @@ export async function runDockerGenerator(
   if (flags.fips) {
     imageFlavor += '-fips';
     baseImageName =
-      'docker.elastic.co/wolfi/chainguard-base-fips:latest@sha256:01350140fe702d4b41c85298c6ab94c788ccfd2f4b5ffe588301977ecb08f004';
+      'docker.elastic.co/wolfi/chainguard-base-fips:latest@sha256:88dc781fcdaaffba577c797800832cf5e2ef5641704e06075f4a983ceb2129d4';
   }
 
   // General docker var config

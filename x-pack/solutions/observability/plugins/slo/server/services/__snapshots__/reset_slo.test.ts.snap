@@ -20,7 +20,7 @@ exports[`ResetSLO happy path resets all associated resources 2`] = `
 [MockFunction] {
   "calls": Array [
     Array [
-      "slo-summary-irrelevant-1",
+      "slo-irrelevant-1",
     ],
   ],
   "results": Array [
@@ -36,39 +36,8 @@ exports[`ResetSLO happy path resets all associated resources 3`] = `
 [MockFunction] {
   "calls": Array [
     Array [
-      "slo-irrelevant-1",
-    ],
-  ],
-  "results": Array [
-    Object {
-      "type": "return",
-      "value": undefined,
-    },
-  ],
-}
-`;
-
-exports[`ResetSLO happy path resets all associated resources 4`] = `
-[MockFunction] {
-  "calls": Array [
-    Array [
-      "slo-irrelevant-1",
-    ],
-  ],
-  "results": Array [
-    Object {
-      "type": "return",
-      "value": undefined,
-    },
-  ],
-}
-`;
-
-exports[`ResetSLO happy path resets all associated resources 5`] = `
-[MockFunction] {
-  "calls": Array [
-    Array [
       Object {
+        "conflicts": "proceed",
         "index": ".slo-observability.sli-v3*",
         "query": Object {
           "bool": Object {
@@ -82,10 +51,12 @@ exports[`ResetSLO happy path resets all associated resources 5`] = `
           },
         },
         "refresh": true,
+        "slices": "auto",
       },
     ],
     Array [
       Object {
+        "conflicts": "proceed",
         "index": ".slo-observability.summary-v3*",
         "query": Object {
           "bool": Object {
@@ -99,6 +70,7 @@ exports[`ResetSLO happy path resets all associated resources 5`] = `
           },
         },
         "refresh": true,
+        "slices": "auto",
       },
     ],
   ],
@@ -115,7 +87,7 @@ exports[`ResetSLO happy path resets all associated resources 5`] = `
 }
 `;
 
-exports[`ResetSLO happy path resets all associated resources 6`] = `
+exports[`ResetSLO happy path resets all associated resources 4`] = `
 [MockFunction] {
   "calls": Array [
     Array [
@@ -180,7 +152,7 @@ exports[`ResetSLO happy path resets all associated resources 6`] = `
 }
 `;
 
-exports[`ResetSLO happy path resets all associated resources 7`] = `
+exports[`ResetSLO happy path resets all associated resources 5`] = `
 [MockFunction] {
   "calls": Array [
     Array [
@@ -196,7 +168,7 @@ exports[`ResetSLO happy path resets all associated resources 7`] = `
 }
 `;
 
-exports[`ResetSLO happy path resets all associated resources 8`] = `
+exports[`ResetSLO happy path resets all associated resources 6`] = `
 [MockFunction] {
   "calls": Array [
     Array [
@@ -558,7 +530,7 @@ exports[`ResetSLO happy path resets all associated resources 8`] = `
 }
 `;
 
-exports[`ResetSLO happy path resets all associated resources 9`] = `
+exports[`ResetSLO happy path resets all associated resources 7`] = `
 [MockFunction] {
   "calls": Array [
     Array [
@@ -623,7 +595,7 @@ exports[`ResetSLO happy path resets all associated resources 9`] = `
 }
 `;
 
-exports[`ResetSLO happy path resets all associated resources 10`] = `
+exports[`ResetSLO happy path resets all associated resources 8`] = `
 [MockFunction] {
   "calls": Array [
     Array [
@@ -639,7 +611,7 @@ exports[`ResetSLO happy path resets all associated resources 10`] = `
 }
 `;
 
-exports[`ResetSLO happy path resets all associated resources 11`] = `
+exports[`ResetSLO happy path resets all associated resources 9`] = `
 [MockFunction] {
   "calls": Array [
     Array [

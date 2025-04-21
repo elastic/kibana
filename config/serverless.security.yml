@@ -157,3 +157,6 @@ xpack.index_management.enableProjectLevelRetentionChecks: true
 # These features are disabled in Serverless until fully tested
 xpack.securitySolution.enableExperimental:
   - entityStoreDisabled
+
+## Enable uiSettings validations
+xpack.securitySolution.enableUiSettingsValidations: true

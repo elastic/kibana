@@ -294,6 +294,7 @@ export const DataStreamReindexFlyout: React.FunctionComponent<Props> = ({
                                 }
                               ),
                               description: oldestIncompatibleDocFormatted,
+                              data-test-subj="dataStreamLastIndexCreationDate"
                             },
                           ]
                         : [
@@ -306,6 +307,7 @@ export const DataStreamReindexFlyout: React.FunctionComponent<Props> = ({
                                 }
                               ),
                               description: lastIndexCreationDateFormatted,
+                              data-test-subj="dataStreamLastIndexCreationDate"
                             },
                           ]
                     }
@@ -326,6 +328,7 @@ export const DataStreamReindexFlyout: React.FunctionComponent<Props> = ({
                           description: docsSizeFormatted,
                         },
                       ]}
+                      data-test-subj="dataStreamSize"
                     />
                   </EuiFlexItem>
                   <EuiFlexItem>
@@ -342,6 +345,7 @@ export const DataStreamReindexFlyout: React.FunctionComponent<Props> = ({
                           description: indicesRequiringUpgradeDocsCount,
                         },
                       ]}
+                      data-test-subj="dataStreamDocumentCount"
                     />
                   </EuiFlexItem>
                 </EuiFlexGroup>

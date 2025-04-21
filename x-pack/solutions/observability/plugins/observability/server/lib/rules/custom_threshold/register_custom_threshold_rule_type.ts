@@ -26,7 +26,8 @@ import {
   alertDetailUrlActionVariableDescription,
   cloudActionVariableDescription,
   containerActionVariableDescription,
-  groupByKeysActionVariableDescription,
+  groupActionVariableDescription,
+  groupingObjectActionVariableDescription,
   hostActionVariableDescription,
   labelsActionVariableDescription,
   orchestratorActionVariableDescription,
@@ -41,7 +42,7 @@ import {
   createCustomThresholdExecutor,
   CustomThresholdLocators,
 } from './custom_threshold_executor';
-import { CUSTOM_THRESHOLD_AAD_FIELDS, FIRED_ACTION, NO_DATA_ACTION } from './constants';
+import { FIRED_ACTION, NO_DATA_ACTION } from './constants';
 import { ObservabilityConfig } from '../../..';
 import { CustomThresholdAlert } from './types';
 
@@ -131,7 +132,6 @@ export function thresholdRuleType(
     name: i18n.translate('xpack.observability.threshold.ruleName', {
       defaultMessage: 'Custom threshold',
     }),
-    fieldsForAAD: CUSTOM_THRESHOLD_AAD_FIELDS,
     validate: {
       params: paramsSchema,
     },
@@ -149,7 +149,8 @@ export function thresholdRuleType(
     doesSetRecoveryContext: true,
     actionVariables: {
       context: [
-        { name: 'group', description: groupByKeysActionVariableDescription },
+        { name: 'group', description: groupActionVariableDescription },
+        { name: 'grouping', description: groupingObjectActionVariableDescription },
         {
           name: 'alertDetailsUrl',
           description: alertDetailUrlActionVariableDescription,
