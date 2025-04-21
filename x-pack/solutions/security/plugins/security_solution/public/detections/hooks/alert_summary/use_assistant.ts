@@ -10,7 +10,7 @@ import { useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { Alert } from '@kbn/alerting-types';
 import { flattenAlertType } from '../../utils/flatten_alert_type';
-import { getAlertFieldValueAsStringOrNull } from '../../utils/get_alert_field_value_as_string_or_null';
+import { getAlertFieldValueAsStringOrNull } from '../../utils/type_utils';
 import {
   PROMPT_CONTEXT_ALERT_CATEGORY,
   PROMPT_CONTEXTS,
