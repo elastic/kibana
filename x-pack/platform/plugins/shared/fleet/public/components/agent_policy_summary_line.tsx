@@ -25,12 +25,6 @@ import { useLink } from '../hooks';
 const MIN_WIDTH = css`
   min-width: 0;
 `;
-const NO_WRAP_WHITE_SPACE = css`
-  white-space: 'nowrap';
-`;
-const WRAP_WHITE_SPACE = css`
-  white-space: 'normal';
-`;
 
 export const AgentPolicySummaryLine = memo<{
   policy: AgentPolicy;
@@ -66,7 +60,7 @@ export const AgentPolicySummaryLine = memo<{
                 >
                   <EuiFlexItem grow={false}>
                     <EuiLink
-                      css={WRAP_WHITE_SPACE}
+                      className="eui-textBreakNormal"
                       href={getHref('policy_details', { policyId: id })}
                       title={name || id}
                       data-test-subj="agentPolicyNameLink"
@@ -97,7 +91,7 @@ export const AgentPolicySummaryLine = memo<{
 
               {revision && (
                 <EuiFlexItem grow={false}>
-                  <EuiText color="subdued" size="xs" css={NO_WRAP_WHITE_SPACE}>
+                  <EuiText color="subdued" size="xs" className="eui-textNoWrap">
                     <FormattedMessage
                       id="xpack.fleet.agentPolicySummaryLine.revisionNumber"
                       defaultMessage="rev. {revNumber}"
