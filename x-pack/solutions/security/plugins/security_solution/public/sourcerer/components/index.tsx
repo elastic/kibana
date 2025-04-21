@@ -87,7 +87,7 @@ const SourcererPopover = React.memo<SourcererPopoverProps>(
     if (!showSourcerer) {
       return null;
     } else if (scopeId === SourcererScopeName.analyzer) {
-      return <>{children}</>;
+      return <div data-test-subj="analyzer-sourcerer">{children}</div>;
     } else {
       return (
         <EuiPopover

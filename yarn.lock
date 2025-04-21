@@ -4098,6 +4098,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/content-connectors-plugin@link:x-pack/platform/plugins/shared/content_connectors":
+  version "0.0.0"
+  uid ""
+
 "@kbn/content-management-content-editor@link:src/platform/packages/shared/content-management/content_editor":
   version "0.0.0"
   uid ""
@@ -6358,7 +6362,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/observability-ai-assistant-management-plugin@link:x-pack/solutions/observability/plugins/observability_ai_assistant_management":
+"@kbn/observability-ai-assistant-management-plugin@link:x-pack/platform/plugins/private/observability_ai_assistant_management":
   version "0.0.0"
   uid ""
 
@@ -6714,6 +6718,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/response-ops-alerts-filters-form@link:src/platform/packages/shared/response-ops/alerts-filters-form":
+  version "0.0.0"
+  uid ""
+
 "@kbn/response-ops-alerts-table@link:src/platform/packages/shared/response-ops/alerts-table":
   version "0.0.0"
   uid ""
@@ -6902,10 +6910,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/search-connectors-plugin@link:x-pack/solutions/search/plugins/search_connectors":
-  version "0.0.0"
-  uid ""
-
 "@kbn/search-connectors@link:src/platform/packages/shared/kbn-search-connectors":
   version "0.0.0"
   uid ""
@@ -6922,7 +6926,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/search-index-documents@link:x-pack/solutions/search/packages/kbn-search-index-documents":
+"@kbn/search-index-documents@link:x-pack/platform/packages/shared/kbn-search-index-documents":
   version "0.0.0"
   uid ""
 
@@ -8138,25 +8142,25 @@
     ncp "^2.0.0"
     typescript "^5.5.3"
 
-"@launchdarkly/js-sdk-common@2.14.0":
-  version "2.14.0"
-  resolved "https://registry.yarnpkg.com/@launchdarkly/js-sdk-common/-/js-sdk-common-2.14.0.tgz#e82dd47b02cf0b77490c4a8a6a8bdf94fda55a49"
-  integrity sha512-nCnhJclokmCDBhyHXalUycv453OLhpBOU6/Ay9z1FUHKS+jAhmTuu3qTtM/Q+WrLksUl8y1vvrBlr4nNMd5BRA==
+"@launchdarkly/js-sdk-common@2.15.0":
+  version "2.15.0"
+  resolved "https://registry.yarnpkg.com/@launchdarkly/js-sdk-common/-/js-sdk-common-2.15.0.tgz#9964895fb3c5d010800edaf4a9ae3939291a4d2d"
+  integrity sha512-M5ZI8CwKrK+snz1liRVPCfB35tu3NAIRI747ENgLZaTbF23pDUHElhISND/mn1wwSwrhoacqcYNKRwASdJDeig==
 
-"@launchdarkly/js-server-sdk-common@2.13.0":
-  version "2.13.0"
-  resolved "https://registry.yarnpkg.com/@launchdarkly/js-server-sdk-common/-/js-server-sdk-common-2.13.0.tgz#19536da19aba76e073e81d5286b7a45fae46e1ee"
-  integrity sha512-3lk52Qc5/5uunaMEEeP5dSduvy6MRihwFDFx60FDj7b5eRixKjx83f/zM3qIJujjghZwLYnMVi8dbp7g2taUyw==
+"@launchdarkly/js-server-sdk-common@2.14.0":
+  version "2.14.0"
+  resolved "https://registry.yarnpkg.com/@launchdarkly/js-server-sdk-common/-/js-server-sdk-common-2.14.0.tgz#2ed3a47e50fff29ed819bf56b95c48d2d48d9314"
+  integrity sha512-ykcRxkLf4poppZxBu9VkJ3+fHY8AbVY2odzCb6ZEHtI7qVG2/TfIOJ/896UqKJt+AryotUBNmKJNWJdQ3JFeog==
   dependencies:
-    "@launchdarkly/js-sdk-common" "2.14.0"
+    "@launchdarkly/js-sdk-common" "2.15.0"
     semver "7.5.4"
 
-"@launchdarkly/node-server-sdk@^9.7.7":
-  version "9.7.7"
-  resolved "https://registry.yarnpkg.com/@launchdarkly/node-server-sdk/-/node-server-sdk-9.7.7.tgz#14920b4a01ed23036f33b4215177dccd63d2567b"
-  integrity sha512-2HbFwCrvYVQ2KakBd4Rqd/WFPODbmAi90BaIkI70wizkEPzOTW9hWG914KLDNsikji+XIuFzz/C6hFHKWB+CRA==
+"@launchdarkly/node-server-sdk@^9.8.0":
+  version "9.8.0"
+  resolved "https://registry.yarnpkg.com/@launchdarkly/node-server-sdk/-/node-server-sdk-9.8.0.tgz#12381683c5c564513a1f525c9aec3cb92c39615e"
+  integrity sha512-GQwXlK3dIY9ZjYL73jz9GKSiWOUjDHIDSGUVpa+XziaomVtG8qQXXbZXTvZvPGy7VkYXmeEyayuRBHNFA3cFrw==
   dependencies:
-    "@launchdarkly/js-server-sdk-common" "2.13.0"
+    "@launchdarkly/js-server-sdk-common" "2.14.0"
     https-proxy-agent "^5.0.1"
     launchdarkly-eventsource "2.0.3"
 
@@ -8814,10 +8818,10 @@
   resolved "https://registry.yarnpkg.com/@open-draft/until/-/until-2.1.0.tgz#0acf32f470af2ceaf47f095cdecd40d68666efda"
   integrity sha512-U69T3ItWHvLwGg5eJ0n3I62nWuE6ilHlmz7zM0npLBRvPRd7e6NYmg54vvRtP5mZG7kZqZCFVdsTWo7BPtBujg==
 
-"@openfeature/core@^1.7.2":
-  version "1.7.2"
-  resolved "https://registry.yarnpkg.com/@openfeature/core/-/core-1.7.2.tgz#b2663f7beb93310dfeef003509cb140e33790fb7"
-  integrity sha512-pbpREdO/8D6ocFYWIzAJ24iJ1td04Anl+TehUzx9r1xR8vKJab+O4TlC/XP7s9JuD5hRPBfmo5gDha/KWVSG4A==
+"@openfeature/core@^1.8.0":
+  version "1.8.0"
+  resolved "https://registry.yarnpkg.com/@openfeature/core/-/core-1.8.0.tgz#2cec01af993f1c298afb4bbd4492b71ed04ef893"
+  integrity sha512-FX/B6yMD2s4BlMKtB0PqSMl94eLaTwh0VK9URcMvjww0hqMOeGZnGv4uv9O5E58krAan7yCOCm4NBCoh2IATqw==
 
 "@openfeature/launchdarkly-client-provider@^0.3.2":
   version "0.3.2"
@@ -8826,10 +8830,10 @@
   dependencies:
     lodash.isempty "^4.4.0"
 
-"@openfeature/server-sdk@^1.17.1":
-  version "1.17.1"
-  resolved "https://registry.yarnpkg.com/@openfeature/server-sdk/-/server-sdk-1.17.1.tgz#d160a3b99100daef95eb3f4f673a2837644ba4d2"
-  integrity sha512-z5MaVvSNnk1SpRSuU02usnoX9rY9BtnLBNp9T08JOitwiuXs4byR8R5Es4WpsGRnnzBSoBQJL1iGIIYEeeEyxw==
+"@openfeature/server-sdk@^1.18.0":
+  version "1.18.0"
+  resolved "https://registry.yarnpkg.com/@openfeature/server-sdk/-/server-sdk-1.18.0.tgz#5fed5f1d0900b2535878db18a78295bbaebb997b"
+  integrity sha512-uP8nqEGBS58s3iWXx6d8vnJ6ZVt3DACJL4PWADOAuwIS4xXpID91783e9f6zQ0i1ijQpj3yx+3ZuCB2LfQMUMA==
 
 "@openfeature/web-sdk@^1.4.1":
   version "1.4.1"
@@ -9266,10 +9270,10 @@
     require-from-string "^2.0.2"
     uri-js-replace "^1.0.1"
 
-"@redocly/cli@^1.34.1":
-  version "1.34.1"
-  resolved "https://registry.yarnpkg.com/@redocly/cli/-/cli-1.34.1.tgz#e237107f3f9aa9f3290f9651268c4c15c08458aa"
-  integrity sha512-12aTw7A/0n+8T7yKM1E8qlFRFPZnm2i1me0sZ1WOAiGT4I2j4iUcCp+93B0nrjIs1ZdNmrT0TTrMYLhsMJYjaQ==
+"@redocly/cli@^1.34.2":
+  version "1.34.2"
+  resolved "https://registry.yarnpkg.com/@redocly/cli/-/cli-1.34.2.tgz#e67ea4be0a4663ff1ee063cbcacf937ce97d2586"
+  integrity sha512-XnKG7yrr0GUZ7MyqHk9hRt//HGUSnLDwwEXI8HDQdyDFp+YFbddqcQPOWc/sDeDBTEiBXqwPOb3/VKA+8NtSMw==
   dependencies:
     "@opentelemetry/api" "1.9.0"
     "@opentelemetry/exporter-trace-otlp-http" "0.53.0"
@@ -9277,8 +9281,8 @@
     "@opentelemetry/sdk-trace-node" "1.26.0"
     "@opentelemetry/semantic-conventions" "1.27.0"
     "@redocly/config" "^0.22.0"
-    "@redocly/openapi-core" "1.34.1"
-    "@redocly/respect-core" "1.34.1"
+    "@redocly/openapi-core" "1.34.2"
+    "@redocly/respect-core" "1.34.2"
     abort-controller "^3.0.0"
     chokidar "^3.5.1"
     colorette "^1.2.0"
@@ -9303,10 +9307,10 @@
   resolved "https://registry.yarnpkg.com/@redocly/config/-/config-0.22.1.tgz#e14461c009ac53b74f82c9788f9c43fc2c718f24"
   integrity sha512-1CqQfiG456v9ZgYBG9xRQHnpXjt8WoSnDwdkX6gxktuK69v2037hTAR1eh0DGIqpZ1p4k82cGH8yTNwt7/pI9g==
 
-"@redocly/openapi-core@1.34.1", "@redocly/openapi-core@^1.4.0":
-  version "1.34.1"
-  resolved "https://registry.yarnpkg.com/@redocly/openapi-core/-/openapi-core-1.34.1.tgz#d303c0f129c9166e293e7e6ee88de77e29fd6e16"
-  integrity sha512-KI1QOGvDk6oREbTu0JORxZX1NBxraXUbXczv0LYDs9EPp06coq874hQORqSHGEUV/DX2A6gjv4Ax33g/LFJBww==
+"@redocly/openapi-core@1.34.2", "@redocly/openapi-core@^1.4.0":
+  version "1.34.2"
+  resolved "https://registry.yarnpkg.com/@redocly/openapi-core/-/openapi-core-1.34.2.tgz#859de74a3261fb09a3dc695be4a8d9b1f2059d75"
+  integrity sha512-glfkQFJizLdq2fBkNvc2FJW0sxDb5exd0wIXhFk+WHaFLMREBC3CxRo2Zq7uJIdfV9U3YTceMbXJklpDfmmwFQ==
   dependencies:
     "@redocly/ajv" "^8.11.2"
     "@redocly/config" "^0.22.0"
@@ -9318,14 +9322,14 @@
     pluralize "^8.0.0"
     yaml-ast-parser "0.0.43"
 
-"@redocly/respect-core@1.34.1":
-  version "1.34.1"
-  resolved "https://registry.yarnpkg.com/@redocly/respect-core/-/respect-core-1.34.1.tgz#707e31d444c7cb5a44e6463fa266c8ef676226fa"
-  integrity sha512-Lzea25WqwxVK5+aCiq/pr7lUFdsZPYSqNzl05Z4jEtuP1DEIxJNG31ID75dZt30pPtyxjaa/dBuccruYlYflzw==
+"@redocly/respect-core@1.34.2":
+  version "1.34.2"
+  resolved "https://registry.yarnpkg.com/@redocly/respect-core/-/respect-core-1.34.2.tgz#6d83359dceceb39ae2403c90f8cfcc3505931b95"
+  integrity sha512-X6VR9bbHXrI01Wh5t6TIHxFCVHcP4Iy42micKLIk/Cg6EmHVbaSDGOD6mxChXtEIrwnY+bqyUbjlXr9+YM7B9A==
   dependencies:
     "@faker-js/faker" "^7.6.0"
     "@redocly/ajv" "8.11.2"
-    "@redocly/openapi-core" "1.34.1"
+    "@redocly/openapi-core" "1.34.2"
     better-ajv-errors "^1.2.0"
     colorette "^2.0.20"
     concat-stream "^2.0.0"
@@ -28117,10 +28121,10 @@ select-hose@^2.0.0:
   resolved "https://registry.yarnpkg.com/select-hose/-/select-hose-2.0.0.tgz#625d8658f865af43ec962bfc376a37359a4994ca"
   integrity sha1-Yl2GWPhlr0Psliv8N2o3NZpJlMo=
 
-selenium-webdriver@^4.29.0:
-  version "4.29.0"
-  resolved "https://registry.yarnpkg.com/selenium-webdriver/-/selenium-webdriver-4.29.0.tgz#32d32fb60df488bbc399b9dd58728a5cd570210e"
-  integrity sha512-8XPGtDoji5xk7ZUCzFT1rqHmCp67DCzESsttId7DzmrJmlTRmRLF6X918rbwclcH89amcBNM4zB3lVPj404I0g==
+selenium-webdriver@^4.31.0:
+  version "4.31.0"
+  resolved "https://registry.yarnpkg.com/selenium-webdriver/-/selenium-webdriver-4.31.0.tgz#3908152b9fcccd41411a58e30a099fc05a04dd2f"
+  integrity sha512-0MWEwypM0+c1NnZ87UEMxZdwphKoaK2UJ2qXzKWrJiM0gazFjgNVimxlHTOO90G2cOhphZqwpqSCJy62NTEzyA==
   dependencies:
     "@bazel/runfiles" "^6.3.1"
     jszip "^3.10.1"

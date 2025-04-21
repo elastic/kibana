@@ -7,9 +7,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-// Prefer importing entire lodash library, e.g. import { get } from "lodash"
-// eslint-disable-next-line no-restricted-imports
-import isEmpty from 'lodash/isEmpty';
+import { isEmpty } from 'lodash';
 
 import { EuiForm, EuiButton, EuiPage, EuiPageBody, EuiPageSection, EuiSpacer } from '@elastic/eui';
 import { EventInput } from '../event_input';
