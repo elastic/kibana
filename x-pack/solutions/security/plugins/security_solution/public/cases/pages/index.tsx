@@ -18,7 +18,12 @@ import { DocumentDetailsRightPanelKey } from '../../flyout/document_details/shar
 import { RulePanelKey } from '../../flyout/rule_details/right';
 import { TimelineId } from '../../../common/types/timeline';
 import { useKibana, useNavigation } from '../../common/lib/kibana';
-import { APP_ID, CASES_PATH, SECURITY_FEATURE_ID, SecurityPageName } from '../../../common/constants';
+import {
+  APP_ID,
+  CASES_PATH,
+  SECURITY_FEATURE_ID,
+  SecurityPageName,
+} from '../../../common/constants';
 import { timelineActions } from '../../timelines/store';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
 import { getEndpointDetailsPath } from '../../management/common/routing';
