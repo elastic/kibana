@@ -10,9 +10,9 @@ import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { Logger } from '@kbn/core/server';
 
-import { getPackageSavedObjects } from '../../services/epm/packages/get';
+import { appContextService } from '../../services/app_context';
 
-import { appContextService } from '../../services';
+import { getPackageSavedObjects } from '../../services/epm/packages/get';
 
 import { installCustomAsset, getPipeline, getComponentTemplate } from './custom_assets';
 import {
@@ -21,13 +21,12 @@ import {
   getRemoteSyncedIntegrationsStatus,
 } from './compare_synced_integrations';
 
-jest.mock('../../services');
+jest.mock('../../services/app_context');
 jest.mock('./custom_assets', () => {
   return { getPipeline: jest.fn(), getComponentTemplate: jest.fn(), installCustomAsset: jest.fn() };
 });
 jest.mock('../../services/epm/packages/get', () => {
   return {
-    ...jest.requireActual('../../services/epm/packages/get'),
     getPackageSavedObjects: jest.fn(),
   };
 });
