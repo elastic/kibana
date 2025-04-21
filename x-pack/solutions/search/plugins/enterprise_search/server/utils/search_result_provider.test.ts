@@ -10,7 +10,7 @@ import { TestScheduler } from 'rxjs/testing';
 
 import type { GlobalSearchProviderContext } from '@kbn/global-search-plugin/server';
 
-import { ENTERPRISE_SEARCH_CONTENT_PLUGIN } from '../../common/constants';
+import { ENTERPRISE_SEARCH_DATA_PLUGIN } from '../../common/constants';
 
 import { getSearchResultProvider } from './search_result_provider';
 
@@ -74,7 +74,7 @@ describe('Search search provider', () => {
     title: 'Customized connector',
     type: 'Elasticsearch',
     url: {
-      path: `${ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL}/connectors/select_connector`,
+      path: `${ENTERPRISE_SEARCH_DATA_PLUGIN.URL}/connectors/select_connector`,
       prependBasePath: true,
     },
   };
@@ -86,7 +86,7 @@ describe('Search search provider', () => {
     title: 'MongoDB',
     type: 'Elasticsearch',
     url: {
-      path: `${ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL}/connectors/select_connector`,
+      path: `${ENTERPRISE_SEARCH_DATA_PLUGIN.URL}/connectors/select_connector`,
       prependBasePath: true,
     },
   };

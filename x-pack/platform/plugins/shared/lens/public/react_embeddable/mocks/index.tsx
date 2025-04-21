@@ -74,7 +74,6 @@ function getDefaultLensApiMock() {
     /** New embeddable api inherited methods */
     resetUnsavedChanges: jest.fn(),
     serializeState: jest.fn(),
-    snapshotRuntimeState: jest.fn(),
     saveToLibrary: jest.fn(async () => 'saved-id'),
     onEdit: jest.fn(),
     isEditingEnabled: jest.fn(() => true),

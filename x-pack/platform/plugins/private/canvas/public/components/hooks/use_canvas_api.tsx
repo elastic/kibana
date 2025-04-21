@@ -7,7 +7,7 @@
 
 import { useCallback, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { BehaviorSubject, Subject } from 'rxjs';
+import { BehaviorSubject, Subject, of } from 'rxjs';
 
 import { SerializedPanelState, ViewMode } from '@kbn/presentation-publishing';
 
@@ -73,7 +73,7 @@ export const useCanvasApi: () => CanvasContainerApi = () => {
       canEditInline: false,
       type: 'canvas',
       getSerializedStateForChild,
-      lastSavedStateForChild$: (childId: string) => panelStateMap[childId],
+      lastSavedStateForChild$: (childId: string) => panelStateMap[childId] ?? of(undefined),
       // Canvas auto saves so lastSavedState is the same as currentState
       getLastSavedStateForChild: getSerializedStateForChild,
       setSerializedStateForChild: (

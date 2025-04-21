@@ -223,7 +223,6 @@ export interface DashboardInternalApi {
   controlGroupReload$: Subject<void>;
   panelsReload$: Subject<void>;
   layout$: BehaviorSubject<DashboardLayout>;
-  getStateForControlGroup: () => SerializedPanelState<ControlGroupSerializedState>;
   registerChildApi: (api: DefaultEmbeddableApi) => void;
   setControlGroupApi: (controlGroupApi: ControlGroupApi) => void;
 }

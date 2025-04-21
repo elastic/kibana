@@ -75,9 +75,7 @@ export {
 export { apiHasParentApi, type HasParentApi } from './interfaces/has_parent_api';
 export {
   apiHasSerializableState,
-  apiHasSnapshottableState,
   type HasSerializableState,
-  type HasSnapshottableState,
   type SerializedPanelState,
 } from './interfaces/has_serializable_state';
 export {
