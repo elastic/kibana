@@ -66,6 +66,7 @@
     "@kbn/core-analytics-browser",
     "@kbn/index-management-shared-types",
     "@kbn/ingest-pipelines-plugin",
-    "@kbn/deeplinks-observability"
+    "@kbn/deeplinks-observability",
+    "@kbn/charts-theme"
   ]
 }
