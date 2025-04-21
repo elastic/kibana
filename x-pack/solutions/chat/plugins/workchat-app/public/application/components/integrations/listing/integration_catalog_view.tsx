@@ -80,7 +80,7 @@ export const IntegrationCatalogView: React.FC = () => {
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      marginLeft: '-10px', // This pushes the icon further left
+                      marginLeft: '-10px', 
                       marginRight: '15px',
                     }}
                   >

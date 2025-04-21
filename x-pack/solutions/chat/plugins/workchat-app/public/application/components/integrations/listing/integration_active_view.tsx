@@ -49,7 +49,7 @@ export const IntegrationActiveView: React.FC<IntegrationListViewProps> = ({ inte
 
   const [isLoading, setIsLoading] = useState(true);
 
-  // set timeout
+  // set timeout for loading
   useEffect(() => {
     const timer = setTimeout(() => {
       setIsLoading(false);
