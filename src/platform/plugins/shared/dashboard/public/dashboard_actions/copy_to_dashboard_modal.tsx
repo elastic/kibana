@@ -20,7 +20,6 @@ import {
 } from '@elastic/eui';
 import { EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
 import { LazyDashboardPicker, withSuspense } from '@kbn/presentation-util-plugin/public';
-import { omit } from 'lodash';
 import React, { useCallback, useMemo, useState } from 'react';
 import { CREATE_NEW_DASHBOARD_URL, createDashboardEditUrl } from '../utils/urls';
 import { embeddableService } from '../services/kibana_services';
@@ -52,14 +51,12 @@ export function CopyToDashboardModal({ api, closeModal }: CopyToDashboardModalPr
 
   const onSubmit = useCallback(() => {
     const dashboard = api.parentApi as DashboardApi;
+    // TODO handle getDashboardPanelFromId throw
     const panelToCopy = dashboard.getDashboardPanelFromId(api.uuid);
 
     const state: EmbeddablePackageState = {
       type: panelToCopy.type,
-      serializedState: {
-        rawState: { ...omit(panelToCopy.explicitInput, 'id') },
-        references: panelToCopy.references ?? [],
-      },
+      serializedState: panelToCopy.serializedState,
       size: {
         width: panelToCopy.gridData.w,
         height: panelToCopy.gridData.h,

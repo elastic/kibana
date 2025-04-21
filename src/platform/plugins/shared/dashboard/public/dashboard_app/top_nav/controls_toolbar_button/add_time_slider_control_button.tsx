@@ -58,7 +58,7 @@ export const AddTimeSliderControlButton = ({ closePopover, controlGroupApi, ...r
               width: 'large',
               id: uuidv4(),
             },
-          }
+          },
         });
         dashboardApi.scrollToTop();
         closePopover();
