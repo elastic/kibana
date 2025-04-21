@@ -503,7 +503,7 @@ describe('Data streams deprecation flyout', () => {
           expect(find('startDataStreamMigrationButton').text()).toBe('Try again');
 
           expect(exists('startDataStreamReadonlyButton')).toBe(true);
-          expect(find('startDataStreamReadonlyButton').text()).toBe('Mark read-only');
+          expect(find('startDataStreamReadonlyButton').text()).toBe('Mark as read-only');
         });
         it('does not offers read-only if reindexing fails and read-only is excluded', async () => {
           httpRequestsMockHelpers.setDataStreamMigrationStatusResponse(
