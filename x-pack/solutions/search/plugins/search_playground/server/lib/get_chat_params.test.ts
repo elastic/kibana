@@ -6,7 +6,11 @@
  */
 
 import { getChatParams } from './get_chat_params';
-import { ActionsClientChatOpenAI, ActionsClientChatVertexAI, ActionsClientSimpleChatModel } from '@kbn/langchain/server';
+import {
+  ActionsClientChatOpenAI,
+  ActionsClientChatVertexAI,
+  ActionsClientSimpleChatModel,
+} from '@kbn/langchain/server';
 import {
   OPENAI_CONNECTOR_ID,
   BEDROCK_CONNECTOR_ID,
