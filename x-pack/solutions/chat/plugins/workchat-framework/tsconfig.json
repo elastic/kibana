@@ -21,6 +21,7 @@
     "@kbn/wc-framework-types-server",
     "@kbn/wc-framework-types-common",
     "@kbn/logging-mocks",
+    "@kbn/zod",
   ],
   "exclude": [
     "target/**/*",
