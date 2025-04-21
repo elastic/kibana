@@ -1779,21 +1779,29 @@ components:
         purgePolicy:
           description: Policy that dictates which SLI documents to purge based on age
           type: object
-          properties:
-            purgeType:
-              type: string
-              description: Specifies whether documents will be purged based on a specific age or on a timestamp
-              enum:
-                - fixed_age
-                - fixed_time
-            age:
-              type: string
-              description: The duration to determine which documents to purge, formatted as {duration}{unit}. This value should be greater than or equal to the time window of every SLO provided.
-              example: 7d
-            timestamp:
-              type: string
-              description: The timestamp to determine which documents to purge, formatted in ISO. This value should be older than the applicable time window of every SLO provided.
-              example: '2024-12-31T00:00:00.000Z'
+          oneOf:
+            - type: object
+              properties:
+                purgeType:
+                  type: string
+                  description: Specifies whether documents will be purged based on a specific age or on a timestamp
+                  enum:
+                    - fixed-age
+                age:
+                  type: string
+                  description: The duration to determine which documents to purge, formatted as {duration}{unit}. This value should be greater than or equal to the time window of every SLO provided.
+                  example: 7d
+            - type: object
+              properties:
+                purgeType:
+                  type: string
+                  description: Specifies whether documents will be purged based on a specific age or on a timestamp
+                  enum:
+                    - fixed-time
+                timestamp:
+                  type: string
+                  description: The timestamp to determine which documents to purge, formatted in ISO. This value should be older than the applicable time window of every SLO provided.
+                  example: '2024-12-31T00:00:00.000Z'
     bulk_purge_rollup_response:
       title: Bulk Purge Rollup data response
       description: |
