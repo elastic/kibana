@@ -27,7 +27,6 @@ export const Ip = React.memo<{
 }>(({ contextId, eventId, fieldName, isDraggable, value }) => (
   <FormattedFieldValue
     contextId={contextId}
-    data-test-subj="formatted-ip"
     eventId={eventId}
     fieldName={fieldName}
     isDraggable={isDraggable}
