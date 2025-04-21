@@ -306,6 +306,7 @@ export const createNavigationTree = ({
                   { link: 'management:pipelines', breadcrumbStatus: 'hidden' },
                   { link: 'management:data_quality', breadcrumbStatus: 'hidden' },
                   { link: 'management:data_usage', breadcrumbStatus: 'hidden' },
+                  { link: 'management:content_connectors', breadcrumbStatus: 'hidden' },
                 ],
               },
               {
