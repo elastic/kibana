@@ -7,14 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { SuggestionRawDefinition } from '@kbn/esql-validation-autocomplete';
+import { MonacoAutocompleteCommandDefinition } from '../types';
+import { offsetRangeToMonacoRange } from '../shared/utils';
 import { monaco } from '../../../monaco_imports';
-import {
-  MonacoAutocompleteCommandDefinition,
-  SuggestionRawDefinitionWithMonacoRange,
-} from '../types';
 
 export function wrapAsMonacoSuggestions(
-  suggestions: SuggestionRawDefinitionWithMonacoRange[]
+  suggestions: SuggestionRawDefinition[],
+  fullText: string
 ): MonacoAutocompleteCommandDefinition[] {
   return suggestions.map<MonacoAutocompleteCommandDefinition>(
     ({
@@ -27,7 +27,7 @@ export function wrapAsMonacoSuggestions(
       sortText,
       filterText,
       command,
-      range,
+      rangeToReplace,
     }) => {
       const monacoSuggestion: MonacoAutocompleteCommandDefinition = {
         label,
@@ -44,7 +44,7 @@ export function wrapAsMonacoSuggestions(
         insertTextRules: asSnippet
           ? monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet
           : undefined,
-        range,
+        range: rangeToReplace ? offsetRangeToMonacoRange(fullText, rangeToReplace) : undefined,
       };
       return monacoSuggestion;
     }

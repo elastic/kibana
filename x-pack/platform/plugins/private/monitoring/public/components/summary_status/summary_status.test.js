@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { EuiThemeProvider } from '@elastic/eui';
 import { renderWithI18nProvider } from '@kbn/test-jest-helpers';
 import { SummaryStatus } from './summary_status';
 
@@ -27,7 +28,13 @@ describe('Summary Status Component', () => {
       status: 'green',
     };
 
-    expect(renderWithI18nProvider(<SummaryStatus {...props} />)).toMatchSnapshot();
+    expect(
+      renderWithI18nProvider(
+        <EuiThemeProvider>
+          <SummaryStatus {...props} />
+        </EuiThemeProvider>
+      )
+    ).toMatchSnapshot();
   });
 
   it('should allow label to be optional', () => {
@@ -46,7 +53,13 @@ describe('Summary Status Component', () => {
       status: 'yellow',
     };
 
-    expect(renderWithI18nProvider(<SummaryStatus {...props} />)).toMatchSnapshot();
+    expect(
+      renderWithI18nProvider(
+        <EuiThemeProvider>
+          <SummaryStatus {...props} />
+        </EuiThemeProvider>
+      )
+    ).toMatchSnapshot();
   });
 
   it('should allow status to be optional', () => {
@@ -65,6 +78,12 @@ describe('Summary Status Component', () => {
       ],
     };
 
-    expect(renderWithI18nProvider(<SummaryStatus {...props} />)).toMatchSnapshot();
+    expect(
+      renderWithI18nProvider(
+        <EuiThemeProvider>
+          <SummaryStatus {...props} />
+        </EuiThemeProvider>
+      )
+    ).toMatchSnapshot();
   });
 });
