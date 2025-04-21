@@ -35,12 +35,12 @@ const bulkPurgeRollupSchema = t.type({
   ]),
 });
 
-interface BulkPurgeResponse {
+interface BulkPurgeRollupResponse {
   taskId?: DeleteByQueryResponse['task'];
 }
 
 type BulkPurgePolicyType = t.TypeOf<typeof bulkPurgePolicy>;
-type BulkPurgeRollupParamsSchema = t.TypeOf<typeof bulkPurgeRollupSchema.props.body>;
+type BulkPurgeRollupParams = t.TypeOf<typeof bulkPurgeRollupSchema.props.body>;
 
-export type { BulkPurgeResponse, BulkPurgePolicyType, BulkPurgeRollupParamsSchema };
+export type { BulkPurgeRollupResponse, BulkPurgePolicyType, BulkPurgeRollupParams };
 export { bulkPurgeRollupSchema };
