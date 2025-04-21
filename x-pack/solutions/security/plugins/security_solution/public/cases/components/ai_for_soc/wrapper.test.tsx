@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { act, render } from '@testing-library/react';
+import { act, render, screen } from '@testing-library/react';
 import {
   AiForSOCAlertsTable,
   CONTENT_TEST_ID,
@@ -84,16 +84,10 @@ describe('<AiForSOCAlertsTab />', () => {
       isLoading: true,
     });
 
-    await act(async () => {
-      const { getByTestId } = render(
-        <AiForSOCAlertsTable id={id} onLoaded={onLoaded} query={query} />
-      );
+    render(<AiForSOCAlertsTable id={id} onLoaded={onLoaded} query={query} />);
 
-      await new Promise(process.nextTick);
-
-      expect(getByTestId(LOADING_PROMPT_TEST_ID)).toBeInTheDocument();
-      expect(getByTestId(SKELETON_TEST_ID)).toBeInTheDocument();
-    });
+    expect(await screen.findByTestId(LOADING_PROMPT_TEST_ID)).toBeInTheDocument();
+    expect(await screen.findByTestId(SKELETON_TEST_ID)).toBeInTheDocument();
   });
 
   it('should render an error if the dataView fail to be created correctly', async () => {
@@ -113,16 +107,12 @@ describe('<AiForSOCAlertsTab />', () => {
       useEffect: jest.fn((f) => f()),
     }));
 
-    await act(async () => {
-      const { getByTestId } = render(
-        <AiForSOCAlertsTable id={id} onLoaded={onLoaded} query={query} />
-      );
+    render(<AiForSOCAlertsTable id={id} onLoaded={onLoaded} query={query} />);
 
-      await new Promise(process.nextTick);
-
-      expect(getByTestId(LOADING_PROMPT_TEST_ID)).toBeInTheDocument();
-      expect(getByTestId(ERROR_TEST_ID)).toHaveTextContent('Unable to create data view');
-    });
+    expect(await screen.findByTestId(LOADING_PROMPT_TEST_ID)).toBeInTheDocument();
+    expect(await screen.findByTestId(ERROR_TEST_ID)).toHaveTextContent(
+      'Unable to create data view'
+    );
   });
 
   it('should render the content', async () => {
@@ -145,17 +135,13 @@ describe('<AiForSOCAlertsTab />', () => {
       useEffect: jest.fn((f) => f()),
     }));
 
-    await act(async () => {
-      const { getByTestId } = render(
-        <TestProviders>
-          <AiForSOCAlertsTable id={id} onLoaded={onLoaded} query={query} />
-        </TestProviders>
-      );
+    render(
+      <TestProviders>
+        <AiForSOCAlertsTable id={id} onLoaded={onLoaded} query={query} />
+      </TestProviders>
+    );
 
-      await new Promise(process.nextTick);
-
-      expect(getByTestId(LOADING_PROMPT_TEST_ID)).toBeInTheDocument();
-      expect(getByTestId(CONTENT_TEST_ID)).toBeInTheDocument();
-    });
+    expect(await screen.findByTestId(LOADING_PROMPT_TEST_ID)).toBeInTheDocument();
+    expect(await screen.findByTestId(CONTENT_TEST_ID)).toBeInTheDocument();
   });
 });

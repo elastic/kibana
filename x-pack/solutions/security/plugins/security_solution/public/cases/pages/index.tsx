@@ -18,12 +18,7 @@ import { DocumentDetailsRightPanelKey } from '../../flyout/document_details/shar
 import { RulePanelKey } from '../../flyout/rule_details/right';
 import { TimelineId } from '../../../common/types/timeline';
 import { useKibana, useNavigation } from '../../common/lib/kibana';
-import {
-  APP_ID,
-  CASES_PATH,
-  SECURITY_FEATURE_ID,
-  SecurityPageName,
-} from '../../../common/constants';
+import { APP_ID, CASES_PATH, SECURITY_FEATURE_ID, SecurityPageName } from '../../../common/constants';
 import { timelineActions } from '../../timelines/store';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
 import { getEndpointDetailsPath } from '../../management/common/routing';
@@ -53,12 +48,12 @@ const CaseContainerComponent: React.FC = () => {
 
   const interactionsUpsellingMessage = useUpsellingMessage('investigation_guide_interactions');
 
+  // TODO We shouldn't have to check capabilities here, this should be done at a much higher level.
+  //  https://github.com/elastic/kibana/issues/218741
   const AIForSOC = capabilities[SECURITY_FEATURE_ID].configurations;
 
   const showAlertDetails = useCallback(
     (alertId: string, index: string) => {
-      // TODO We shouldn't have to check capabilities here, this should be done at a much higher level.
-      //  https://github.com/elastic/kibana/issues/218741
       //  For the AI for SOC we need to show the AI alert flyout.
       if (AIForSOC) {
         openFlyout({
@@ -87,13 +82,11 @@ const CaseContainerComponent: React.FC = () => {
         });
       }
     },
-    [capabilities, openFlyout, telemetry]
+    [AIForSOC, openFlyout, telemetry]
   );
 
   const renderAlertsTable = useCallback(
     (props: CaseViewAlertsTableProps) => {
-      // TODO We shouldn't have to check capabilities here, this should be done at a much higher level.
-      //  https://github.com/elastic/kibana/issues/218741
       //  For the AI for SOC we need to show the Alert summary page alerts table.
       if (AIForSOC) {
         return <AiForSOCAlertsTable id={props.id} onLoaded={props.onLoaded} query={props.query} />;
@@ -101,7 +94,7 @@ const CaseContainerComponent: React.FC = () => {
         return <DetectionEngineAlertsTable {...props} />;
       }
     },
-    [capabilities]
+    [AIForSOC]
   );
 
   const onRuleDetailsClick = useCallback(

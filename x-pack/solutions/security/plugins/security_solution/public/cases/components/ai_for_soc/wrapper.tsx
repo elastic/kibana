@@ -76,9 +76,13 @@ export const AiForSOCAlertsTable = memo(({ id, onLoaded, query }: AiForSOCAlerts
   useEffect(() => {
     let dv: DataView;
     const createDataView = async () => {
-      dv = await data.dataViews.create(dataViewSpec);
-      setDataView(dv);
-      setDataViewLoading(false);
+      try {
+        dv = await data.dataViews.create(dataViewSpec);
+        setDataView(dv);
+        setDataViewLoading(false);
+      } catch (err) {
+        setDataViewLoading(false);
+      }
     };
     createDataView();
 
