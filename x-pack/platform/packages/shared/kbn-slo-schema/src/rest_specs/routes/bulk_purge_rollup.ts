@@ -40,7 +40,7 @@ interface BulkPurgeResponse {
 }
 
 type BulkPurgePolicyType = t.TypeOf<typeof bulkPurgePolicy>;
-type BulkPurgeRollupSchemaType = t.TypeOf<typeof bulkPurgeRollupSchema.props.body>;
+type BulkPurgeRollupParamsSchema = t.TypeOf<typeof bulkPurgeRollupSchema.props.body>;
 
-export type { BulkPurgeResponse, BulkPurgePolicyType, BulkPurgeRollupSchemaType };
+export type { BulkPurgeResponse, BulkPurgePolicyType, BulkPurgeRollupParamsSchema };
 export { bulkPurgeRollupSchema };

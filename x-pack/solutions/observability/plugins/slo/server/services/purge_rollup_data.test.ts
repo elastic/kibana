@@ -8,15 +8,11 @@
 import { ElasticsearchClient } from '@kbn/core/server';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { Duration, DurationUnit } from '@kbn/slo-schema';
-import {
-  createAPMTransactionErrorRateIndicator,
-  createSLO,
-  createSLOWithCalendarTimeWindow,
-} from './fixtures/slo';
+import { createSLO, createSLOWithCalendarTimeWindow } from './fixtures/slo';
 import { createSLORepositoryMock } from './mocks';
 import { SLORepository } from './slo_repository';
 import { BulkPurgeRollupData } from './bulk_purge_rollup_data';
-import { monthlyCalendarAligned, weeklyCalendarAligned } from './fixtures/time_window';
+import { monthlyCalendarAligned } from './fixtures/time_window';
 
 describe('purge rollup data', () => {
   let mockRepository: jest.Mocked<SLORepository>;
