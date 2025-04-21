@@ -65,6 +65,7 @@ export default function ({ getService }: FtrProviderContext) {
         rulesSettings: 0,
         maintenanceWindow: 0,
         stackAlerts: 0,
+        streams: 0,
         generalCases: 0,
         generalCasesV2: 0,
         generalCasesV3: 0,
