@@ -6,23 +6,27 @@
  */
 
 import { useEffect, useRef } from 'react';
-import { NewPackagePolicy, PackageInfo } from '@kbn/fleet-plugin/common';
-import { AZURE_CREDENTIALS_TYPE, AZURE_SETUP_FORMAT, SetupFormat } from './azure_credentials_form';
-import { cspIntegrationDocsNavigation } from '../../../common/navigation/constants';
+import type { NewPackagePolicy, PackageInfo } from '@kbn/fleet-plugin/common';
+import {
+  AZURE_CREDENTIALS_TYPE,
+  AZURE_SETUP_FORMAT,
+  type SetupFormat,
+} from './azure_credentials_form';
+import { assetIntegrationDocsNavigation } from '../../../constants';
 import {
   getArmTemplateUrlFromCspmPackage,
   getAssetPolicy,
-  NewPackagePolicyPostureInput,
+  type NewPackagePolicyAssetInput,
 } from '../utils';
 import {
   getAzureCredentialsFormOptions,
   getInputVarsFields,
 } from './get_azure_credentials_form_options';
-import { CLOUDBEAT_AZURE } from '../../../../common/constants';
-import { AzureCredentialsType } from '../../../../common/types_old';
+import { CLOUDBEAT_AZURE } from '../constants';
+import type { AzureCredentialsType } from '../types';
 
 const getSetupFormatFromInput = (
-  input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_azure' }>,
+  input: Extract<NewPackagePolicyAssetInput, { type: 'cloudbeat/asset_inventory_azure' }>,
   hasArmTemplateUrl: boolean
 ): SetupFormat => {
   const credentialsType = getAzureCredentialsType(input);
@@ -37,7 +41,7 @@ const getSetupFormatFromInput = (
 };
 
 const getAzureCredentialsType = (
-  input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_azure' }>
+  input: Extract<NewPackagePolicyAssetInput, { type: 'cloudbeat/asset_inventory_azure' }>
 ): AzureCredentialsType | undefined => input.streams[0].vars?.['azure.credentials.type']?.value;
 
 const getAzureArmTemplateUrl = (newPolicy: NewPackagePolicy) => {
@@ -81,7 +85,7 @@ const useUpdateAzureArmTemplate = ({
     const azureArmTemplateUrl = getAzureArmTemplateUrl(newPolicy);
 
     if (setupFormat === AZURE_SETUP_FORMAT.MANUAL) {
-      if (!!azureArmTemplateUrl) {
+      if (azureArmTemplateUrl) {
         updateAzureArmTemplateUrlInPolicy(newPolicy, updatePolicy, undefined);
       }
       return;
@@ -106,7 +110,7 @@ export const useAzureCredentialsForm = ({
   updatePolicy,
 }: {
   newPolicy: NewPackagePolicy;
-  input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_azure' }>;
+  input: Extract<NewPackagePolicyAssetInput, { type: 'cloudbeat/asset_inventory_azure' }>;
   packageInfo: PackageInfo;
   onChange: (opts: any) => void;
   setIsValid: (isValid: boolean) => void;
@@ -137,7 +141,7 @@ export const useAzureCredentialsForm = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [setupFormat, input.type]);
 
-  const documentationLink = cspIntegrationDocsNavigation.cspm.azureGetStartedPath;
+  const documentationLink = assetIntegrationDocsNavigation.azureGetStartedPath;
 
   useUpdateAzureArmTemplate({
     packageInfo,

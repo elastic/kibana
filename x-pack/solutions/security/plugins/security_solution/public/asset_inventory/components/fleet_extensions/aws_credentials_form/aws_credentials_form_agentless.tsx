@@ -9,6 +9,7 @@ import React from 'react';
 import { EuiAccordion, EuiButton, EuiCallOut, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+
 import {
   ORGANIZATION_ACCOUNT,
   SINGLE_ACCOUNT,

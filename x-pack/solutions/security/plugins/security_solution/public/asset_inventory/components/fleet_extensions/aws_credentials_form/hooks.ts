@@ -53,7 +53,7 @@ export const useAwsCredentialsForm = ({
   packageInfo: PackageInfo;
   onChange: (opts: {
     /** is current form state is valid */
-    isValid?: boolean;
+    isValid: boolean;
     /** The updated Integration Policy to be merged back and included in the API call */
     updatedPolicy: Partial<NewPackagePolicy>;
     isExtensionLoaded?: boolean;
@@ -83,6 +83,7 @@ export const useAwsCredentialsForm = ({
     // This should ony set the credentials after the initial render
     if (!getAwsCredentialsType(input) && !lastManualCredentialsType.current) {
       onChange({
+        isValid: true,
         updatedPolicy: getAssetPolicy(newPolicy, input.type, {
           'aws.credentials.type': {
             value: awsCredentialsType,

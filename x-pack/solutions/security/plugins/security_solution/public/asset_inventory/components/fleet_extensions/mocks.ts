@@ -302,7 +302,7 @@ export const getPackageInfoMock = () => {
             ],
           },
           {
-            input: 'cloudbeat/cis_azure',
+            input: 'cloudbeat/asset_inventory_azure',
             template_path: 'azure.yml.hbs',
             title: 'CIS Azure Benchmark',
             vars: [
