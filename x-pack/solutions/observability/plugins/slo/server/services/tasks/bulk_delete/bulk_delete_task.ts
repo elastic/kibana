@@ -23,7 +23,7 @@ import { runBulkDelete } from './run_bulk_delete';
 export const TYPE = 'slo:bulk-delete-task';
 
 interface TaskSetupContract {
-  core: CoreSetup;
+  core: CoreSetup<SLOPluginStartDependencies>;
   logFactory: LoggerFactory;
   plugins: {
     [key in keyof SLOPluginSetupDependencies]: {
@@ -51,7 +51,7 @@ export class BulkDeleteTask {
         title: 'SLO bulk delete',
         timeout: '20m',
         maxAttempts: 1,
-        createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
+        createTaskRunner: ({ taskInstance, fakeRequest }: { taskInstance: ConcreteTaskInstance }) => {
           return {
             run: async () => {
               this.logger.debug(`starting bulk delete operation`);
@@ -63,7 +63,7 @@ export class BulkDeleteTask {
                 return;
               }
 
-              const [coreStart] = await core.getStartServices();
+              const [coreStart, pluginStart] = await core.getStartServices();
               const fakeRawRequest: FakeRawRequest = {
                 headers: { authorization: `ApiKey ${taskInstance?.apiKey}` },
                 path: '/',
@@ -76,8 +76,8 @@ export class BulkDeleteTask {
 
               const scopedClusterClient = coreStart.elasticsearch.client.asScoped(fakeRequest);
               const scopedSoClient = coreStart.savedObjects.getScopedClient(fakeRequest);
-              const alerting = await plugins.alerting.start();
-              const rulesClient = await alerting.getRulesClientWithRequest(fakeRequest);
+              const rulesClient = await pluginStart.alerting.getRulesClientWithRequest(fakeRequest);
+              // const rulesClient = await alerting.getRulesClientWithRequest(fakeRequest);
 
               const repository = new KibanaSavedObjectsSLORepository(scopedSoClient, this.logger);
               const transformManager = new DefaultTransformManager(
