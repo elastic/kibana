@@ -6,7 +6,7 @@
  */
 import * as t from 'io-ts';
 import { i18n } from '@kbn/i18n';
-import { isLeft } from 'fp-ts/lib/Either';
+import { isLeft } from 'fp-ts/Either';
 import { formatErrors } from '@kbn/securitysolution-io-ts-utils';
 
 import { omit } from 'lodash';
