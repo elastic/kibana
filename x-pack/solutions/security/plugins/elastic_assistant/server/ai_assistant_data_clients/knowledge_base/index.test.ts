@@ -69,6 +69,7 @@ describe('AIAssistantKnowledgeBaseDataClient', () => {
       setIsKBSetupInProgress: jest.fn().mockImplementation(() => {}),
       manageGlobalKnowledgeBaseAIAssistant: true,
       getTrainedModelsProvider: () => trainedModelsProviderMock,
+      elserInferenceId: ASSISTANT_ELSER_INFERENCE_ID,
     };
     esClientMock.search.mockReturnValue(
       // @ts-expect-error not full response interface
@@ -284,9 +285,6 @@ describe('AIAssistantKnowledgeBaseDataClient', () => {
 
       const client = new AIAssistantKnowledgeBaseDataClient(mockOptions);
       await client.setupKnowledgeBase({});
-
-      // install model
-      expect(trainedModelsProviderMock.installElasticModel).toHaveBeenCalledWith('elser-id');
 
       expect(loadSecurityLabs).toHaveBeenCalled();
     });

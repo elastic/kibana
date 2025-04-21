@@ -65,6 +65,8 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('Run Evaluations', () => {
       const buildNumber = process.env.BUILDKITE_BUILD_NUMBER;
+      log.error('loadLangSmithKeyFromEnvVar ' + loadLangSmithKeyFromEnvVar());
+
       const defaultEvalPayload: PostEvaluateBody = {
         runName: `Eval Automation${buildNumber ? ' - ' + buildNumber : ''}`,
         graphs: ['DefaultAssistantGraph'],

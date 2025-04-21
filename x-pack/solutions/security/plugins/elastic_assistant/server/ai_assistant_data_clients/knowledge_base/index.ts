@@ -207,10 +207,6 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
         return false;
       }
 
-      if (inferenceId !== ELASTICSEARCH_ELSER_INFERENCE_ID) {
-        return true;
-      }
-
       let getResponse;
       try {
         getResponse = await this.options.getTrainedModelsProvider().getTrainedModelsStats({

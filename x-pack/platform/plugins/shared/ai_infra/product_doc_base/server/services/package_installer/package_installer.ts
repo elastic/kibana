@@ -65,7 +65,7 @@ export class PackageInstaller {
     this.artifactRepositoryUrl = artifactRepositoryUrl;
     this.currentVersion = majorMinor(kibanaVersion);
     this.log = logger;
-    this.elserInferenceId = elserInferenceId;
+    this.elserInferenceId = elserInferenceId || defaultInferenceEndpoints.ELSER;
   }
 
   /**
