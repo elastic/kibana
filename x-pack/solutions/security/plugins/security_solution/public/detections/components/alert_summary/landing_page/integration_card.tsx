@@ -10,8 +10,9 @@ import { css } from '@emotion/react';
 import { EuiBadge, EuiCard } from '@elastic/eui';
 import type { PackageListItem } from '@kbn/fleet-plugin/common';
 import { INTEGRATIONS_PLUGIN_ID } from '@kbn/fleet-plugin/common';
-import { CardIcon, useLink } from '@kbn/fleet-plugin/public';
+import { useLink } from '@kbn/fleet-plugin/public';
 import { i18n } from '@kbn/i18n';
+import { IntegrationIcon } from '../common/integration_icon';
 import { useKibana } from '../../../../common/lib/kibana';
 
 const SIEM_BADGE = i18n.translate('xpack.securitySolution.alertSummary.integrations.siemBadge', {
@@ -65,13 +66,7 @@ export const IntegrationCard = memo(
         display="plain"
         hasBorder
         icon={
-          <CardIcon
-            icons={integration.icons}
-            integrationName={integration.title}
-            packageName={integration.name}
-            size="xl"
-            version={integration.version}
-          />
+          <IntegrationIcon data-test-subj={dataTestSubj} iconSize="xl" integration={integration} />
         }
         layout="horizontal"
         onClick={onClick}
