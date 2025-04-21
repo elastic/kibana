@@ -13,7 +13,7 @@ exports[`purge rollup data happy path successfully makes a forced query to remov
               Object {
                 "terms": Object {
                   "slo.id": Array [
-                    "test2",
+                    "test5",
                   ],
                 },
               },

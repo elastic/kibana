@@ -8,10 +8,15 @@
 import { ElasticsearchClient } from '@kbn/core/server';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { Duration, DurationUnit } from '@kbn/slo-schema';
-import { createAPMTransactionErrorRateIndicator, createSLO } from './fixtures/slo';
+import {
+  createAPMTransactionErrorRateIndicator,
+  createSLO,
+  createSLOWithCalendarTimeWindow,
+} from './fixtures/slo';
 import { createSLORepositoryMock } from './mocks';
 import { SLORepository } from './slo_repository';
 import { BulkPurgeRollupData } from './bulk_purge_rollup_data';
+import { monthlyCalendarAligned, weeklyCalendarAligned } from './fixtures/time_window';
 
 describe('purge rollup data', () => {
   let mockRepository: jest.Mocked<SLORepository>;
@@ -28,7 +33,7 @@ describe('purge rollup data', () => {
     it('successfully makes a query to remove SLI data older than 30 days', async () => {
       const slo = createSLO({
         id: 'test1',
-        indicator: createAPMTransactionErrorRateIndicator(),
+        // default includes 7 day rolling window
       });
       mockRepository.findAllByIds.mockResolvedValueOnce([slo]);
 
@@ -42,13 +47,8 @@ describe('purge rollup data', () => {
     });
 
     it('successfully makes a query to remove SLI data older than a week', async () => {
-      const slo = createSLO({
+      const slo = createSLOWithCalendarTimeWindow({
         id: 'test2',
-        indicator: createAPMTransactionErrorRateIndicator(),
-        timeWindow: {
-          type: 'calendarAligned',
-          duration: new Duration(1, DurationUnit.Week),
-        },
       });
       mockRepository.findAllByIds.mockResolvedValueOnce([slo]);
 
@@ -64,11 +64,7 @@ describe('purge rollup data', () => {
     it('successfully makes a query to remove SLI data based on a timestamp - month', async () => {
       const slo = createSLO({
         id: 'test3',
-        indicator: createAPMTransactionErrorRateIndicator(),
-        timeWindow: {
-          type: 'calendarAligned',
-          duration: new Duration(1, DurationUnit.Month),
-        },
+        timeWindow: monthlyCalendarAligned(),
       });
       mockRepository.findAllByIds.mockResolvedValueOnce([slo]);
 
@@ -81,13 +77,8 @@ describe('purge rollup data', () => {
     });
 
     it('successfully makes a query to remove SLI data based on a timestamp - week', async () => {
-      const slo = createSLO({
+      const slo = createSLOWithCalendarTimeWindow({
         id: 'test4',
-        indicator: createAPMTransactionErrorRateIndicator(),
-        timeWindow: {
-          type: 'calendarAligned',
-          duration: new Duration(1, DurationUnit.Week),
-        },
       });
       mockRepository.findAllByIds.mockResolvedValueOnce([slo]);
 
@@ -100,18 +91,13 @@ describe('purge rollup data', () => {
     });
 
     it('successfully makes a forced query to remove recently added SLI data', async () => {
-      const slo = createSLO({
-        id: 'test2',
-        indicator: createAPMTransactionErrorRateIndicator(),
-        timeWindow: {
-          type: 'calendarAligned',
-          duration: new Duration(1, DurationUnit.Week),
-        },
+      const slo = createSLOWithCalendarTimeWindow({
+        id: 'test5',
       });
       mockRepository.findAllByIds.mockResolvedValueOnce([slo]);
 
       await purgeRollupData.execute({
-        list: ['test2'],
+        list: ['test5'],
         purgePolicy: {
           purgeType: 'fixed_age',
           age: new Duration(1, DurationUnit.Day),
@@ -127,7 +113,7 @@ describe('purge rollup data', () => {
     it('fails to make a query to remove SLI data older than 7 days', async () => {
       const slo = createSLO({
         id: 'test1',
-        indicator: createAPMTransactionErrorRateIndicator(),
+        // default includes 7 day rolling window
       });
       mockRepository.findAllByIds.mockResolvedValueOnce([slo]);
 
@@ -144,13 +130,8 @@ describe('purge rollup data', () => {
     });
 
     it('fails to make a query to remove SLI data older than a day', async () => {
-      const slo = createSLO({
+      const slo = createSLOWithCalendarTimeWindow({
         id: 'test2',
-        indicator: createAPMTransactionErrorRateIndicator(),
-        timeWindow: {
-          type: 'calendarAligned',
-          duration: new Duration(1, DurationUnit.Week),
-        },
       });
       mockRepository.findAllByIds.mockResolvedValueOnce([slo]);
 
@@ -167,13 +148,8 @@ describe('purge rollup data', () => {
     });
 
     it('fails to makes a query to remove SLI data based on a timestamp', async () => {
-      const slo = createSLO({
+      const slo = createSLOWithCalendarTimeWindow({
         id: 'test3',
-        indicator: createAPMTransactionErrorRateIndicator(),
-        timeWindow: {
-          type: 'calendarAligned',
-          duration: new Duration(7, DurationUnit.Day),
-        },
       });
       mockRepository.findAllByIds.mockResolvedValueOnce([slo]);
 
