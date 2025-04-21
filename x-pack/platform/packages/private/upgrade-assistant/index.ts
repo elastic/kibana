@@ -5,10 +5,4 @@
  * 2.0.
  */
 
-export const hello = 'world';
-
-export interface KibanaVersionContext {
-  currentMajor: number;
-  prevMajor: number;
-  nextMajor: number;
-}
+export * from './src/components';

@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { DeprecationBadge } from './components/deprecation_badge';
+export { DeprecationBadge } from './deprecation_badge';

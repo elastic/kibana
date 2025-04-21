@@ -12,21 +12,15 @@ import { CoreStart, ScopedHistory } from '@kbn/core/public';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { CloudSetup } from '@kbn/cloud-plugin/public';
 import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
-import type { KibanaVersionContext } from '@kbn/upgrade-assistant';
 import { BreadcrumbService } from './application/lib/breadcrumbs';
 import { ApiService } from './application/lib/api';
 import type { FeatureSet } from '../common/types';
 
-export type { KibanaVersionContext };
-
-/*
 export interface KibanaVersionContext {
   currentMajor: number;
   prevMajor: number;
   nextMajor: number;
 }
-  */
-
 export interface SetupDependencies {
   management: ManagementSetup;
   share: SharePluginSetup;
