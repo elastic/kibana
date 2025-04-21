@@ -40,6 +40,7 @@ export const disableSLORoute = createSloServerRoute({
     const esClient = core.elasticsearch.client.asCurrentUser;
     const dataViewsService = await dataViews.dataViewsServiceFactory(soClient, esClient);
     const repository = new KibanaSavedObjectsSLORepository(soClient, logger);
+    const userId = core.security.authc.getCurrentUser()?.username!;
 
     const transformGenerators = createTransformGenerators(
       spaceId,
@@ -57,7 +58,7 @@ export const disableSLORoute = createSloServerRoute({
       logger
     );
 
-    const manageSLO = new ManageSLO(repository, transformManager, summaryTransformManager);
+    const manageSLO = new ManageSLO(repository, transformManager, summaryTransformManager, userId);
 
     await manageSLO.disable(params.path.id);
     return response.noContent();
