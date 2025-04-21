@@ -21,6 +21,7 @@ export interface KibanaVersionContext {
   prevMajor: number;
   nextMajor: number;
 }
+
 export interface SetupDependencies {
   management: ManagementSetup;
   share: SharePluginSetup;
