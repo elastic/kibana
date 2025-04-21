@@ -201,7 +201,7 @@ describe('registerRoutes', () => {
   });
 
   it('should call `postEvaluateRouteMock`', () => {
-    expect(postEvaluateRouteMock).toHaveBeenCalledWith(server.router, getElserIdMock);
+    expect(postEvaluateRouteMock).toHaveBeenCalledWith(server.router);
   });
 
   it('should call `getCapabilitiesRouteMock`', () => {
@@ -225,14 +225,11 @@ describe('registerRoutes', () => {
   });
 
   it('should call `chatCompleteRouteMock`', () => {
-    expect(chatCompleteRouteMock).toHaveBeenCalledWith(server.router, getElserIdMock);
+    expect(chatCompleteRouteMock).toHaveBeenCalledWith(server.router);
   });
 
   it('should call `postActionsConnectorExecuteRouteMock`', () => {
-    expect(postActionsConnectorExecuteRouteMock).toHaveBeenCalledWith(
-      server.router,
-      getElserIdMock
-    );
+    expect(postActionsConnectorExecuteRouteMock).toHaveBeenCalledWith(server.router);
   });
 
   it('should call `bulkActionKnowledgeBaseEntriesRouteMock`', () => {

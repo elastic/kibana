@@ -145,11 +145,9 @@ EOF
   if [[ "${FTR_SECURITY_GEN_AI:-}" =~ ^(1|true)$ ]]; then
     echo "FTR_SECURITY_GEN_AI was set - exposing LLM connectors"
     export KIBANA_SECURITY_TESTING_AI_CONNECTORS="$(vault_get security-gen-ai/connectors config)"
-    export KIBANA_SECURITY_TESTING_LANGSMITH_KEY="$(vault_get security-gen-ai/langsmith key)"
-    echo "FTR_SECURITY_GEN_AI was set - exposing Langsmith key"
-    echo "$(vault_get security-gen-ai/langsmith key)"
-    export LANGCHAIN_API_KEY="$(vault_get security-gen-ai/langsmith key)"
-    export KIBANA_SECURITY_TESTING_LANGSMITH_KEY="$(vault_get security-gen-ai/langsmith key)"
+    # export KIBANA_SECURITY_TESTING_LANGSMITH_KEY="$(vault_get security-gen-ai/langsmith key)"
+    # TODO: REMOVE AND REVOKE API KEY
+    export KIBANA_SECURITY_TESTING_LANGSMITH_KEY="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"
   fi
 }
 
