@@ -76,6 +76,27 @@ exports[`arrows ArrowBody renders correctly against snapshot 1`] = `
               .css-262k8j-inputDisplayClassName{margin-right:8px;overflow:hidden;text-overflow:ellipsis;}
             </style>
             <style
+              data-emotion="css"
+              data-s=""
+            >
+              
+              .css-147qi2p-MIN_WIDTH{min-width:0;}
+            </style>
+            <style
+              data-emotion="css"
+              data-s=""
+            >
+              
+              .css-1gxonuj-NO_WRAP_WHITE_SPACE{white-space:'nowrap';}
+            </style>
+            <style
+              data-emotion="css"
+              data-s=""
+            >
+              
+              .css-ttolwa-WRAP_WHITE_SPACE{white-space:'normal';}
+            </style>
+            <style
               data-emotion="css-global"
               data-s=""
             >
