@@ -61,6 +61,11 @@ export class WorkChatAppPlugin
     });
 
     return {
+      tools: {
+        register: (tool) => {
+          return this.setupServices!.toolRegistry.register(tool);
+        },
+      },
       workflows: {
         register: (definition) => {
           return this.setupServices!.workflowRegistry.register(definition);

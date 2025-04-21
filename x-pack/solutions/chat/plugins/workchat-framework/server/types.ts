@@ -9,18 +9,28 @@ import type { WorkflowRunner } from '@kbn/wc-framework-types-server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
-import type { WorkflowRegistry } from './framework';
+import type { WorkflowRegistry, ToolRegistry } from './framework';
 
 /**
  * Setup contract for the workchatFramework plugin.
  */
 export interface WorkChatFrameworkPluginSetup {
   /**
+   * APIs to interact with tool registration.
+   */
+  tools: {
+    /**
+     * Register a tool to be available globally and usable in any workflow.
+     */
+    register: ToolRegistry['register'];
+  };
+
+  /**
    * APIs to interact with workflow registration.
    */
   workflows: {
     /**
-     * Registers a 'builtin' workflow to be runnable or usable in other workflows
+     * Register a 'builtin' workflow to be runnable or usable in other workflows
      */
     register: WorkflowRegistry['register'];
   };
