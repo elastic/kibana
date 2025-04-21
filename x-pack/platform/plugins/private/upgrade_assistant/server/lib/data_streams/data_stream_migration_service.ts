@@ -329,6 +329,7 @@ export const dataStreamMigrationServiceFactory = ({
 
         let indicesRequiringUpgradeDocsCount = 0;
         let indicesRequiringUpgradeDocsSize = 0;
+        let oldestIncompatibleDocTimestamp: number | undefined;
 
         const indicesCreationDates = [];
         for (const index of indicesRequiringUpgrade) {
@@ -351,6 +352,37 @@ export const dataStreamMigrationServiceFactory = ({
           if (creationDate) {
             indicesCreationDates.push(creationDate);
           }
+
+          // Check if the index has documents before checking for oldest timestamp
+          if ((indexStats[1] as any).primaries.docs.count > 0) {
+            try {
+              // Find the oldest document timestamp in incompatible index
+              const timestampResponse = await esClient.search({
+                index,
+                size: 0,
+                body: {
+                  aggs: {
+                    oldest_incompatible_doc: { min: { field: '@timestamp' } },
+                  },
+                },
+              });
+
+              const oldestTimestamp =
+                // @ts-ignore - value doesnt exist in the es type yet
+                timestampResponse.aggregations?.oldest_incompatible_doc?.value;
+
+              if (
+                oldestTimestamp &&
+                (!oldestIncompatibleDocTimestamp ||
+                  oldestTimestamp < oldestIncompatibleDocTimestamp)
+              ) {
+                oldestIncompatibleDocTimestamp = oldestTimestamp;
+              }
+            } catch (err) {
+              // If aggregation fails (possibly due to missing @timestamp field), continue without setting timestamp
+              // This prevents a single index without proper timestamps from breaking the entire metadata function
+            }
+          }
         }
 
         const lastIndexRequiringUpgradeCreationDate = Math.max(...indicesCreationDates);
@@ -365,6 +397,7 @@ export const dataStreamMigrationServiceFactory = ({
           lastIndexRequiringUpgradeCreationDate,
           indicesRequiringUpgradeDocsSize,
           indicesRequiringUpgradeDocsCount,
+          oldestIncompatibleDocTimestamp,
         };
       } catch (err) {
         throw error.cannotGrabMetadata(
