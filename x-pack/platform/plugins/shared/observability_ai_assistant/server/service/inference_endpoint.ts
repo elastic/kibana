@@ -121,7 +121,7 @@ export async function getKbModelStatus({
     logger.error(
       `Failed to get model stats for model "${modelId}" and inference id ${inferenceId}: ${error.message}`
     );
-    return { enabled, errorMessage: error.message, kbState: KnowledgeBaseState.ERROR };
+    return { enabled, errorMessage: error.message, kbState: KnowledgeBaseState.NOT_INSTALLED };
   }
 
   const modelStats = trainedModelStatsResponse.trained_model_stats.find(
