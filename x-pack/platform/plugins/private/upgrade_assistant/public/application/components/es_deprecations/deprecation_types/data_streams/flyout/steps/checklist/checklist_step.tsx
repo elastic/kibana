@@ -51,197 +51,197 @@ export const ChecklistFlyoutStep: React.FunctionComponent<{
   startReadonly,
   correctiveAction,
 }) => {
-    const {
-      services: { api },
-    } = useAppContext();
+  const {
+    services: { api },
+  } = useAppContext();
 
-    const { loadingState, status, hasRequiredPrivileges } = migrationState;
-    const loading =
-      loadingState === LoadingState.Loading || status === DataStreamMigrationStatus.inProgress;
-    const isCompleted = status === DataStreamMigrationStatus.completed;
-    const hasFetchFailed = status === DataStreamMigrationStatus.fetchFailed;
-    const hasMigrationFailed = status === DataStreamMigrationStatus.failed;
+  const { loadingState, status, hasRequiredPrivileges } = migrationState;
+  const loading =
+    loadingState === LoadingState.Loading || status === DataStreamMigrationStatus.inProgress;
+  const isCompleted = status === DataStreamMigrationStatus.completed;
+  const hasFetchFailed = status === DataStreamMigrationStatus.fetchFailed;
+  const hasMigrationFailed = status === DataStreamMigrationStatus.failed;
 
-    const { data: nodes } = api.useLoadNodeDiskSpace();
+  const { data: nodes } = api.useLoadNodeDiskSpace();
 
-    const showMainButton = !hasFetchFailed && !isCompleted && hasRequiredPrivileges;
-    const shouldShowCancelButton = showMainButton && status === DataStreamMigrationStatus.inProgress;
-    const readOnlyExcluded = correctiveAction.metadata.excludedActions?.includes('readOnly');
-    const shouldShowReadOnlyButton =
-      !readOnlyExcluded && !loading && status === DataStreamMigrationStatus.failed;
+  const showMainButton = !hasFetchFailed && !isCompleted && hasRequiredPrivileges;
+  const shouldShowCancelButton = showMainButton && status === DataStreamMigrationStatus.inProgress;
+  const readOnlyExcluded = correctiveAction.metadata.excludedActions?.includes('readOnly');
+  const shouldShowReadOnlyButton =
+    !readOnlyExcluded && !loading && status === DataStreamMigrationStatus.failed;
 
-    return (
-      <Fragment>
-        <EuiFlyoutBody data-test-subj="dataStreamMigrationChecklistFlyout">
-          {hasRequiredPrivileges === false && (
-            <Fragment>
-              <EuiSpacer />
-              <EuiCallOut
-                title={
+  return (
+    <Fragment>
+      <EuiFlyoutBody data-test-subj="dataStreamMigrationChecklistFlyout">
+        {hasRequiredPrivileges === false && (
+          <Fragment>
+            <EuiSpacer />
+            <EuiCallOut
+              title={
+                <FormattedMessage
+                  id="xpack.upgradeAssistant.dataStream.migration.flyout.checklistStep.insufficientPrivilegeCallout.calloutTitle"
+                  defaultMessage="You do not have sufficient privileges to migrate this data stream"
+                />
+              }
+              color="danger"
+              iconType="warning"
+              data-test-subj="dsInsufficientPrivilegesCallout"
+            />
+          </Fragment>
+        )}
+
+        {nodes && nodes.length > 0 && (
+          <>
+            <EuiCallOut
+              color="warning"
+              iconType="warning"
+              data-test-subj="lowDiskSpaceCallout"
+              title={
+                <FormattedMessage
+                  id="xpack.upgradeAssistant.dataStream.migration.flyout.checklistStep.lowDiskSpaceCalloutTitle"
+                  defaultMessage="Nodes with low disk space"
+                />
+              }
+            >
+              <>
+                <FormattedMessage
+                  id="xpack.upgradeAssistant.dataStream.migration.flyout.checklistStep.lowDiskSpaceCalloutDescription"
+                  defaultMessage="Disk usage has exceeded the low watermark, which may prevent migration. The following nodes are impacted:"
+                />
+
+                <EuiSpacer size="s" />
+
+                <ul>
+                  {nodes.map(({ nodeName, available, nodeId }) => (
+                    <li key={nodeId} data-test-subj="impactedNodeListItem">
+                      <FormattedMessage
+                        id="xpack.upgradeAssistant.dataStream.migration.flyout.checklistStep.lowDiskSpaceUsedText"
+                        defaultMessage="{nodeName} ({available} available)"
+                        values={{
+                          nodeName,
+                          available,
+                        }}
+                      />
+                    </li>
+                  ))}
+                </ul>
+              </>
+            </EuiCallOut>
+            <EuiSpacer />
+          </>
+        )}
+
+        {(hasFetchFailed || hasMigrationFailed) && (
+          <>
+            <EuiCallOut
+              color="danger"
+              iconType="warning"
+              data-test-subj={
+                hasFetchFailed ? 'fetchFailedCallout' : 'dataStreamMigrationFailedCallout'
+              }
+              title={
+                hasFetchFailed ? (
                   <FormattedMessage
-                    id="xpack.upgradeAssistant.dataStream.migration.flyout.checklistStep.insufficientPrivilegeCallout.calloutTitle"
-                    defaultMessage="You do not have sufficient privileges to migrate this data stream"
+                    id="xpack.upgradeAssistant.dataStream.migration.flyout.checklistStep.fetchFailedCalloutTitle"
+                    defaultMessage="Migration status not available"
                   />
-                }
-                color="danger"
-                iconType="warning"
-                data-test-subj="dsInsufficientPrivilegesCallout"
+                ) : (
+                  <FormattedMessage
+                    id="xpack.upgradeAssistant.dataStream.migration.flyout.checklistStep.migrationFailedCalloutTitle"
+                    defaultMessage="{resolutionType, select, reindex {Reindexing} readonly {Marking as read-only} other {Migration}} error"
+                    values={{ resolutionType }}
+                  />
+                )
+              }
+            >
+              {migrationState.errorMessage}
+            </EuiCallOut>
+            <EuiSpacer />
+          </>
+        )}
+
+        <EuiText>
+          <p>
+            <FormattedMessage
+              defaultMessage="Reindexing is performed in the background. You can return to the Upgrade Assistant to view progress."
+              id="xpack.upgradeAssistant.dataStream.migration.flyout.checklistStep.readonlyCallout.backgroundResumeDetail"
+            />
+          </p>
+        </EuiText>
+        <EuiSpacer />
+        <MigrationProgress migrationState={migrationState} />
+      </EuiFlyoutBody>
+      <EuiFlyoutFooter>
+        <EuiFlexGroup justifyContent="spaceBetween">
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              iconType="cross"
+              onClick={closeFlyout}
+              flush="left"
+              data-test-subj="closeDataStreamReindexingButton"
+            >
+              <FormattedMessage
+                id="xpack.upgradeAssistant.dataStream.migration.flyout.checklistStep.closeButtonLabel"
+                defaultMessage="Close"
               />
-            </Fragment>
-          )}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
 
-          {nodes && nodes.length > 0 && (
-            <>
-              <EuiCallOut
-                color="warning"
-                iconType="warning"
-                data-test-subj="lowDiskSpaceCallout"
-                title={
-                  <FormattedMessage
-                    id="xpack.upgradeAssistant.dataStream.migration.flyout.checklistStep.lowDiskSpaceCalloutTitle"
-                    defaultMessage="Nodes with low disk space"
-                  />
-                }
-              >
-                <>
-                  <FormattedMessage
-                    id="xpack.upgradeAssistant.dataStream.migration.flyout.checklistStep.lowDiskSpaceCalloutDescription"
-                    defaultMessage="Disk usage has exceeded the low watermark, which may prevent migration. The following nodes are impacted:"
-                  />
-
-                  <EuiSpacer size="s" />
-
-                  <ul>
-                    {nodes.map(({ nodeName, available, nodeId }) => (
-                      <li key={nodeId} data-test-subj="impactedNodeListItem">
-                        <FormattedMessage
-                          id="xpack.upgradeAssistant.dataStream.migration.flyout.checklistStep.lowDiskSpaceUsedText"
-                          defaultMessage="{nodeName} ({available} available)"
-                          values={{
-                            nodeName,
-                            available,
-                          }}
-                        />
-                      </li>
-                    ))}
-                  </ul>
-                </>
-              </EuiCallOut>
-              <EuiSpacer />
-            </>
-          )}
-
-          {(hasFetchFailed || hasMigrationFailed) && (
-            <>
-              <EuiCallOut
-                color="danger"
-                iconType="warning"
-                data-test-subj={
-                  hasFetchFailed ? 'fetchFailedCallout' : 'dataStreamMigrationFailedCallout'
-                }
-                title={
-                  hasFetchFailed ? (
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup gutterSize="s">
+              {shouldShowCancelButton && (
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    color={'accent'}
+                    iconType={'pause'}
+                    onClick={cancelAction}
+                    disabled={!hasRequiredPrivileges}
+                    data-test-subj="cancelDataStreamMigrationButton"
+                  >
                     <FormattedMessage
-                      id="xpack.upgradeAssistant.dataStream.migration.flyout.checklistStep.fetchFailedCalloutTitle"
-                      defaultMessage="Migration status not available"
-                    />
-                  ) : (
-                    <FormattedMessage
-                      id="xpack.upgradeAssistant.dataStream.migration.flyout.checklistStep.migrationFailedCalloutTitle"
-                      defaultMessage="{resolutionType, select, reindex {Reindexing} readonly {Marking as read-only} other {Migration}} error"
+                      id="xpack.upgradeAssistant.dataStream.migration.flyout.checklistStep.cancelMigrationButtonLabel"
+                      defaultMessage="Cancel {resolutionType, select, reindex {reindexing} readonly {marking as read-only} other {migration}}"
                       values={{ resolutionType }}
                     />
-                  )
-                }
-              >
-                {migrationState.errorMessage}
-              </EuiCallOut>
-              <EuiSpacer />
-            </>
-          )}
+                  </EuiButton>
+                </EuiFlexItem>
+              )}
+              {shouldShowReadOnlyButton && (
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    color={'primary'}
+                    onClick={startReadonly}
+                    data-test-subj="startDataStreamReadonlyButton"
+                  >
+                    <FormattedMessage
+                      id="xpack.upgradeAssistant.dataStream.migration.flyout.checklistStep.initMarkAsReadOnlyButtonLabel"
+                      defaultMessage="Mark as read-only"
+                    />
+                  </EuiButton>
+                </EuiFlexItem>
+              )}
 
-          <EuiText>
-            <p>
-              <FormattedMessage
-                defaultMessage="Reindexing is performed in the background. You can return to the Upgrade Assistant to view progress."
-                id="xpack.upgradeAssistant.dataStream.migration.flyout.checklistStep.readonlyCallout.backgroundResumeDetail"
-              />
-            </p>
-          </EuiText>
-          <EuiSpacer />
-          <MigrationProgress migrationState={migrationState} />
-        </EuiFlyoutBody>
-        <EuiFlyoutFooter>
-          <EuiFlexGroup justifyContent="spaceBetween">
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                iconType="cross"
-                onClick={closeFlyout}
-                flush="left"
-                data-test-subj="closeDataStreamReindexingButton"
-              >
-                <FormattedMessage
-                  id="xpack.upgradeAssistant.dataStream.migration.flyout.checklistStep.closeButtonLabel"
-                  defaultMessage="Close"
-                />
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-
-            <EuiFlexItem grow={false}>
-              <EuiFlexGroup gutterSize="s">
-                {shouldShowCancelButton && (
-                  <EuiFlexItem grow={false}>
-                    <EuiButton
-                      color={'accent'}
-                      iconType={'pause'}
-                      onClick={cancelAction}
-                      disabled={!hasRequiredPrivileges}
-                      data-test-subj="cancelDataStreamMigrationButton"
-                    >
-                      <FormattedMessage
-                        id="xpack.upgradeAssistant.dataStream.migration.flyout.checklistStep.cancelMigrationButtonLabel"
-                        defaultMessage="Cancel {resolutionType, select, reindex {reindexing} readonly {marking as read-only} other {migration}}"
-                        values={{ resolutionType }}
-                      />
-                    </EuiButton>
-                  </EuiFlexItem>
-                )}
-                {shouldShowReadOnlyButton && (
-                  <EuiFlexItem grow={false}>
-                    <EuiButton
-                      color={'primary'}
-                      onClick={startReadonly}
-                      data-test-subj="startDataStreamReadonlyButton"
-                    >
-                      <FormattedMessage
-                        id="xpack.upgradeAssistant.dataStream.migration.flyout.checklistStep.initMarkAsReadOnlyButtonLabel"
-                        defaultMessage="Mark as read-only"
-                      />
-                    </EuiButton>
-                  </EuiFlexItem>
-                )}
-
-                {showMainButton && (
-                  <EuiFlexItem grow={false}>
-                    <EuiButton
-                      fill
-                      color={'primary'}
-                      iconType={
-                        status === DataStreamMigrationStatus.inProgress ? undefined : 'refresh'
-                      }
-                      onClick={executeAction}
-                      isLoading={loading}
-                      disabled={loading || !hasRequiredPrivileges}
-                      data-test-subj="startDataStreamMigrationButton"
-                    >
-                      {getPrimaryButtonLabel(status)}
-                    </EuiButton>
-                  </EuiFlexItem>
-                )}
-              </EuiFlexGroup>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlyoutFooter>
-      </Fragment>
-    );
-  };
+              {showMainButton && (
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    fill
+                    color={'primary'}
+                    iconType={
+                      status === DataStreamMigrationStatus.inProgress ? undefined : 'refresh'
+                    }
+                    onClick={executeAction}
+                    isLoading={loading}
+                    disabled={loading || !hasRequiredPrivileges}
+                    data-test-subj="startDataStreamMigrationButton"
+                  >
+                    {getPrimaryButtonLabel(status)}
+                  </EuiButton>
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlyoutFooter>
+    </Fragment>
+  );
+};
