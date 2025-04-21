@@ -32,7 +32,7 @@ export const getWorkflowExecutionNodeTypeDefinition =
             );
             const { workflowId, inputs, output } = interpolatedInput;
 
-            if (workflowRegistry.has(workflowId)) {
+            if (!workflowRegistry.has(workflowId)) {
               throw new WorkflowExecutionError(
                 `Workflow with id [${workflowId}] not found`,
                 'workflowNotFound',
