@@ -233,6 +233,8 @@ export const DataStreamReindexFlyout: React.FunctionComponent<Props> = ({
                 onStopReindex();
               }
             }}
+            startReadonly={startReadonly}
+            correctiveAction={correctiveAction as DataStreamsAction}
           />
         );
       }
@@ -261,6 +263,7 @@ export const DataStreamReindexFlyout: React.FunctionComponent<Props> = ({
     resolutionType,
     initMigration,
     correctiveAction,
+    startReadonly,
   ]);
 
   return (
