@@ -10,6 +10,12 @@ export {
   NodeType,
   type NodeProgressionEvent,
   type NodeEvent,
-  type NodeProgressionEventMeta,
+  type NodeEventMeta,
 } from './src/nodes';
-export type { WorkflowEvent, WorkflowProgressionEvent, WorkflowRunEvent } from './src/workflows';
+export {
+  type WorkflowEvent,
+  type WorkflowProgressionEvent,
+  type WorkflowRunEvent,
+  isNodeProgressionEvent,
+  isWorkflowProgressionEvent,
+} from './src/workflows';

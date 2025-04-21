@@ -6,7 +6,7 @@
  */
 
 /**
- * Node progression event
+ * Node progression event.
  *
  * Can be emitted to do real time status update during a workflow execution.
  */
@@ -18,7 +18,7 @@ export interface NodeProgressionEvent {
   /**
    * Meta bound to this event
    */
-  meta: NodeProgressionEventMeta;
+  meta: NodeEventMeta;
   /**
    * A human-readable label to display for this progression event.
    */
@@ -29,7 +29,10 @@ export interface NodeProgressionEvent {
   data?: Record<string, string>;
 }
 
-export interface NodeProgressionEventMeta {
+/**
+ * Meta information attached to a node event.
+ */
+export interface NodeEventMeta {
   /**
    * The id of the node this event was fired from.
    */

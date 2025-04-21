@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { NodeEvent } from '../nodes';
+import type { NodeEvent, NodeProgressionEvent } from '../nodes';
 
 /**
  * Workflow progression event.
@@ -42,3 +42,19 @@ export type WorkflowEvent = WorkflowProgressionEvent;
  * Represent all type of events that can be fired during a workflow run
  */
 export type WorkflowRunEvent = NodeEvent | WorkflowEvent;
+
+/**
+ * Checks if the given workflow run event is a {@link NodeProgressionEvent}
+ */
+export const isNodeProgressionEvent = (event: WorkflowRunEvent): event is NodeProgressionEvent => {
+  return event.eventType === 'node_progression';
+};
+
+/**
+ * Checks if the given workflow run event is a {@link WorkflowProgressionEvent}
+ */
+export const isWorkflowProgressionEvent = (
+  event: WorkflowRunEvent
+): event is WorkflowProgressionEvent => {
+  return event.eventType === 'workflow_progression';
+};

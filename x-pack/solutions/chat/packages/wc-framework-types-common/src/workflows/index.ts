@@ -5,4 +5,10 @@
  * 2.0.
  */
 
-export type { WorkflowProgressionEvent, WorkflowEvent, WorkflowRunEvent } from './workflow_events';
+export {
+  type WorkflowProgressionEvent,
+  type WorkflowEvent,
+  type WorkflowRunEvent,
+  isWorkflowProgressionEvent,
+  isNodeProgressionEvent,
+} from './workflow_events';

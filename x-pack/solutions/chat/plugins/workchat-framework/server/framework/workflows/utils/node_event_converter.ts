@@ -7,7 +7,7 @@
 
 import type {
   NodeProgressionEvent,
-  NodeProgressionEventMeta,
+  NodeEventMeta,
 } from '@kbn/wc-framework-types-common';
 import type {
   WorkflowRunEventHandler,
@@ -26,7 +26,7 @@ export const createNodeEventReporter = ({
   meta,
 }: {
   onEvent: WorkflowRunEventHandler;
-  meta: NodeProgressionEventMeta;
+  meta: NodeEventMeta;
 }): NodeEventReporter => {
   return {
     reportProgress: (event) => {
@@ -40,7 +40,7 @@ export const convertNodeProgressionEvent = ({
   meta,
 }: {
   event: NodeProgressionReporterEvent;
-  meta: NodeProgressionEventMeta;
+  meta: NodeEventMeta;
 }): NodeProgressionEvent => {
   return {
     eventType: 'node_progression',
