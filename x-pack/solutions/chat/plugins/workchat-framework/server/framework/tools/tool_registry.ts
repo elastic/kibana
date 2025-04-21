@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import type { Tool, ToolProvider, Registry } from '@kbn/wc-framework-types-server';
+import {
+  type Tool,
+  type ToolProvider,
+  type Registry,
+  createToolProvider,
+} from '@kbn/wc-framework-types-server';
 import { SimpleRegistry } from '../utils';
 
 export type ToolRegistry = Registry<Tool> & {
@@ -18,16 +23,6 @@ export const createToolRegistry = (): ToolRegistry => {
 
 class ToolRegistryImpl extends SimpleRegistry<Tool> implements ToolRegistry {
   asToolProvider(): ToolProvider {
-    return {
-      get: (id) => {
-        return this.get(id);
-      },
-      getAll: () => {
-        return this.getAll();
-      },
-      has: (id) => {
-        return this.has(id);
-      },
-    };
+    return createToolProvider(this.getAll());
   }
 }

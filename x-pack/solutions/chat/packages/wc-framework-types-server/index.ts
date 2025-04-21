@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export type { Tool, ToolProvider } from './src/tools';
+export { type Tool, type ToolProvider, createToolProvider } from './src/tools';
 export type { ModelProvider } from './src/models';
 export type { WorkflowState } from './src/state';
 export type {

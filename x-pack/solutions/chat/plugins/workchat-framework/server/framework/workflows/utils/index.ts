@@ -8,3 +8,4 @@
 export { createNodeEventReporter, createNoopNodeEventReporter } from './node_event_converter';
 export { createEmptyState, createInitialState } from './workflow_state';
 export { createInitialExecutionState, enterNode, enterWorkflow } from './execution_state';
+export { combineToolProviders } from './combine_tool_providers';

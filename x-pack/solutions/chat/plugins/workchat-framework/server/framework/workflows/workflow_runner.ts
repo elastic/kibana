@@ -20,7 +20,7 @@ import {
   createInternalRunner,
   type WorkflowRunnerInternalContextWithoutRunner,
 } from './scoped_runner';
-import { createInitialExecutionState } from './utils';
+import { createInitialExecutionState, combineToolProviders } from './utils';
 
 export interface CreateWorkflowRunnerParams {
   logger: Logger;
@@ -80,7 +80,9 @@ export const createWorkflowRunner = (params: CreateWorkflowRunnerParams): Workfl
       modelProvider,
       workflowRegistry,
       nodeRegistry,
-      toolProvider: customToolProvider ?? toolRegistry.asToolProvider(),
+      toolProvider: customToolProvider
+        ? combineToolProviders(customToolProvider, toolRegistry.asToolProvider())
+        : toolRegistry.asToolProvider(),
       esClusterClient: elasticsearch.client.asScoped(request),
       eventHandler: onEvent, // TODO: we want to always have a default one, dispatching to telemetry or something
       executionState,

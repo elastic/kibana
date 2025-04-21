@@ -9,7 +9,6 @@ import { z } from '@kbn/zod';
 import { Parser } from 'expr-eval';
 import { BuiltInToolId } from '@kbn/wc-framework-types-common';
 import type { Tool } from '@kbn/wc-framework-types-server';
-import { toolResultFactory } from '@kbn/wci-server';
 
 export const getCalculatorTool = (): Tool => {
   return {
@@ -28,9 +27,9 @@ export const getCalculatorTool = (): Tool => {
     },
     handler: async ({ input }) => {
       try {
-        return toolResultFactory.text(Parser.evaluate(input).toString());
+        return Parser.evaluate(input).toString();
       } catch (e) {
-        return toolResultFactory.error(`Error evaluating expression: ${e.message}`);
+        throw new Error(`Error evaluating expression: ${e.message}`);
       }
     },
   };

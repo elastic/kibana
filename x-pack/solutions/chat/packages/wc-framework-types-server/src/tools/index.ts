@@ -6,4 +6,5 @@
  */
 
 export type { Tool } from './tool';
-export type { ToolProvider } from './registry';
+export type { ToolProvider } from './provider';
+export { createToolProvider } from './utils';
