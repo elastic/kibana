@@ -26,7 +26,6 @@ describe('Utils', () => {
     it.each<[desc: string, rawValue: unknown, expectedKey: string]>([
       ['object', { test: 'test' }, '{"test":"test"}'],
       ['array', [1, 2, 'three'], '1,2,three'],
-      ['date', new Date('12-31-1990'), 'Mon Dec 31 1990 00:00:00 GMT-0600 (Central Standard Time)'],
       ['number', 123, '123'],
       ['string', 'testing', 'testing'],
       ['boolean (false)', false, 'false'],

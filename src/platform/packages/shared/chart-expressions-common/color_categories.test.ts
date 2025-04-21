@@ -123,7 +123,7 @@ describe('Color Categories', () => {
         'undefined',
         '',
         'test-string',
-        '[object Object]',
+        '{"test":"obj"}',
         'array',
       ]);
     });
@@ -140,14 +140,14 @@ describe('Color Categories', () => {
           undefined,
           '',
         ])
-      ).toEqual(['test-string', '[object Object]', 'array']);
+      ).toEqual(['test-string', '{"test":"obj"}', 'array']);
     });
 
     it('should return known serialized categories from datatable', () => {
       expect(getLegacyColorCategories(mockDatatableRows, 'complex', [])).toEqual([
         String(mockRange),
         String(mockMultiField),
-        String(fakeClass),
+        JSON.stringify(fakeClass),
       ]);
     });
   });
