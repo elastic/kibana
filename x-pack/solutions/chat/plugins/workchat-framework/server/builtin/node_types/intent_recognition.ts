@@ -61,14 +61,9 @@ export const getIntentRecognitionNodeTypeDefinition =
             );
             const { intention: selectedIntention } = await model.invoke(prompt);
 
-            const selectedBranch = input.branches.find((branch) => {
-              if (selectedIntention === defaultIntentionId) {
-                return 'default' in branch;
-              } else {
-                return !('default' in branch) && branch.id === selectedIntention;
-              }
+            const selectedBranch = branches.find((branch) => {
+              return branch.id === selectedIntention;
             });
-
             if (!selectedBranch) {
               throw new WorkflowExecutionError(
                 `No branch found for selected intention`,
@@ -106,7 +101,7 @@ const convertBranches = ({
     if ('default' in branch) {
       return {
         id: defaultIntentionId,
-        condition: 'The user message doesn’t match any of the above',
+        condition: "The user message doesn't match any of the above",
         steps: branch.steps,
       };
     } else {
@@ -144,7 +139,7 @@ const getIntentRecognitionPrompt = ({
        Your task is to read the user's message and select **the single most appropriate intention** from the list below.
 
        Reply with the ID of the intention (e.g., \`GET_WEATHER\`).
-       If the message doesn’t clearly match any of the listed intentions, return \`${defaultIntentionId}\`.
+       If the message doesn't clearly match any of the listed intentions, return \`${defaultIntentionId}\`.
 
        ## Example
 
@@ -153,9 +148,9 @@ const getIntentRecognitionPrompt = ({
        1. GET_WEATHER — The user wants to know the weather.
        2. SET_REMINDER — The user wants to create a reminder.
        3. TELL_JOKE — The user wants to hear a joke.
-       4. ${defaultIntentionId} — The user message doesn’t match any of the above.
+       4. ${defaultIntentionId} — The user message doesn't match any of the above.
 
-       **User message:** "What’s the weather like in Paris today?"
+       **User message:** "What's the weather like in Paris today?"
 
        **Expected answer:** GET_WEATHER
 
