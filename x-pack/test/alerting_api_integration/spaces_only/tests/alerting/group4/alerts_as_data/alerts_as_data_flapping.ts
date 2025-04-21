@@ -803,7 +803,7 @@ export default function createAlertsAsDataFlappingTest({ getService }: FtrProvid
       expect(runWhichItFlapped).eql(0);
     });
 
-    it('should droped tracked alerts early when hitting the alert limit', async () => {
+    it('should drop tracked alerts early after hitting the alert limit', async () => {
       await supertest
         .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rules/settings/_flapping`)
         .set('kbn-xsrf', 'foo')
