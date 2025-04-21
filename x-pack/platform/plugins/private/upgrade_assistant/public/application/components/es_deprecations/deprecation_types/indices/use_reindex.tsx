@@ -35,6 +35,7 @@ export interface ReindexState {
     isReadonly: boolean;
     isInDataStream: boolean;
     isClosedIndex: boolean;
+    isFollowerIndex: boolean;
   };
 }
 
@@ -136,6 +137,7 @@ export const useReindex = ({
       isInDataStream,
       isClosedIndex,
       isReadonly: false, // we don't have this information in the deprecation list
+      isFollowerIndex: false, // will be updated after fetching the reindexStatus
     },
   });
 
