@@ -282,6 +282,7 @@ export const DataStreamReindexFlyout: React.FunctionComponent<Props> = ({
                 <EuiFlexItem>
                   <EuiDescriptionList
                     textStyle="reverse"
+                    data-test-subj="dataStreamSize"
                     listItems={
                       oldestIncompatibleDocFormatted
                         ? [
@@ -294,7 +295,6 @@ export const DataStreamReindexFlyout: React.FunctionComponent<Props> = ({
                                 }
                               ),
                               description: oldestIncompatibleDocFormatted,
-                              data-test-subj="dataStreamLastIndexCreationDate"
                             },
                           ]
                         : [
@@ -307,7 +307,6 @@ export const DataStreamReindexFlyout: React.FunctionComponent<Props> = ({
                                 }
                               ),
                               description: lastIndexCreationDateFormatted,
-                              data-test-subj="dataStreamLastIndexCreationDate"
                             },
                           ]
                     }
