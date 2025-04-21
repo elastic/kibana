@@ -45,6 +45,7 @@ export async function executeTools({
       let out;
       try {
         out = await toolExecutor.invoke(action, config);
+        console.log('tool out ==>', out);
       } catch (err) {
         return {
           action,

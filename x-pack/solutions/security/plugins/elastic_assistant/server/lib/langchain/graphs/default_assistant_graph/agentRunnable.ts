@@ -14,7 +14,6 @@ import {
 import type { StructuredToolInterface } from '@langchain/core/tools';
 import {
   AgentRunnableSequence,
-  createOpenAIToolsAgent,
   createStructuredChatAgent,
   createToolCallingAgent,
 } from 'langchain/agents';
@@ -43,14 +42,14 @@ export const agentRunableFactory = async ({
     streamRunnable: isStream,
     prompt,
   } as const;
-
-  if (isOpenAI || llmType === 'inference') {
-    return createOpenAIToolsAgent(params);
-  }
-
-  if (llmType && TOOL_CALLING_LLM_TYPES.has(llmType)) {
-    return createToolCallingAgent(params);
-  }
+  //
+  // if (isOpenAI || llmType === 'inference') {
+  //   return createOpenAIToolsAgent(params);
+  // }
+  //
+  // if (llmType && TOOL_CALLING_LLM_TYPES.has(llmType)) {
+  return createToolCallingAgent(params);
+  // }
 
   return createStructuredChatAgent(params);
 };

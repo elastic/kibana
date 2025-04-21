@@ -296,21 +296,38 @@ export const postEvaluateRoute = (
               const isOssModel = isOpenSourceModel(connector);
               const isOpenAI = llmType === 'openai' && !isOssModel;
               const llmClass = getLlmClass(llmType);
-              const createLlmInstance = () =>
-                new llmClass({
-                  actionsClient,
-                  connectorId: connector.id,
-                  llmType,
-                  logger,
-                  temperature: getDefaultArguments(llmType).temperature,
+              const chatModel = await inference.getChatModel({
+                request,
+                connectorId: connector.id,
+                chatModelOptions: {
+                  // model: request.body.model,
                   signal: abortSignal,
-                  streaming: false,
+                  temperature: getDefaultArguments(llmType).temperature,
+                  // prevents the agent from retrying on failure
+                  // failure could be due to bad connector, we should deliver that result to the client asap
                   maxRetries: 0,
-                  convertSystemMessageToHumanContent: false,
-                  telemetryMetadata: {
-                    pluginId: 'security_ai_assistant',
+                  metadata: {
+                    connectorTelemetry: {
+                      pluginId: 'security_ai_assistant',
+                    },
                   },
-                });
+                },
+              });
+              const createLlmInstance = () => chatModel;
+              // new llmClass({
+              //   actionsClient,
+              //   connectorId: connector.id,
+              //   llmType,
+              //   logger,
+              //   temperature: getDefaultArguments(llmType).temperature,
+              //   signal: abortSignal,
+              //   streaming: false,
+              //   maxRetries: 0,
+              //   convertSystemMessageToHumanContent: false,
+              //   telemetryMetadata: {
+              //     pluginId: 'security_ai_assistant',
+              //   },
+              // });
 
               const llm = createLlmInstance();
               const anonymizationFieldsRes =

@@ -127,6 +127,7 @@ export const fetchConnectorExecuteAction = async ({
       signal,
       version: API_VERSIONS.internal.v1,
     });
+    console.log('response');
 
     if (response.status !== 'ok' || !response.data) {
       if (response.service_message) {

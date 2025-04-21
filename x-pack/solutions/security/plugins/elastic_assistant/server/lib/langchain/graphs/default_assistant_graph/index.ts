@@ -64,6 +64,24 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
   const isOpenAI = llmType === 'openai' && !isOssModel;
   const llmClass = getLlmClass(llmType);
 
+  const chatModel = await inference.getChatModel({
+    request,
+    connectorId,
+    chatModelOptions: {
+      model: request.body.model,
+      signal: abortSignal,
+      temperature: getDefaultArguments(llmType).temperature,
+      // prevents the agent from retrying on failure
+      // failure could be due to bad connector, we should deliver that result to the client asap
+      maxRetries: 0,
+      metadata: {
+        connectorTelemetry: {
+          pluginId: 'security_ai_assistant',
+        },
+      },
+    },
+  });
+
   /**
    * Creates a new instance of llmClass.
    *
@@ -72,28 +90,28 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
    * creating a new instance, we prevent other uses of llm from binding and changing
    * the state unintentionally. For this reason, never assign this value to a variable (ex const llm = createLlmInstance())
    */
-  const createLlmInstance = () =>
-    new llmClass({
-      actionsClient,
-      connectorId,
-      llmType,
-      logger,
-      // possible client model override,
-      // let this be undefined otherwise so the connector handles the model
-      model: request.body.model,
-      // ensure this is defined because we default to it in the language_models
-      // This is where the LangSmith logs (Metadata > Invocation Params) are set
-      temperature: getDefaultArguments(llmType).temperature,
-      signal: abortSignal,
-      streaming: isStream,
-      // prevents the agent from retrying on failure
-      // failure could be due to bad connector, we should deliver that result to the client asap
-      maxRetries: 0,
-      convertSystemMessageToHumanContent: false,
-      telemetryMetadata: {
-        pluginId: 'security_ai_assistant',
-      },
-    });
+  const createLlmInstance = () => chatModel;
+  // new llmClass({
+  //   actionsClient,
+  //   connectorId,
+  //   llmType,
+  //   logger,
+  //   // possible client model override,
+  //   // let this be undefined otherwise so the connector handles the model
+  //   model: request.body.model,
+  //   // ensure this is defined because we default to it in the language_models
+  //   // This is where the LangSmith logs (Metadata > Invocation Params) are set
+  //   temperature: getDefaultArguments(llmType).temperature,
+  //   signal: abortSignal,
+  //   streaming: isStream,
+  //   // prevents the agent from retrying on failure
+  //   // failure could be due to bad connector, we should deliver that result to the client asap
+  //   maxRetries: 0,
+  //   convertSystemMessageToHumanContent: false,
+  //   telemetryMetadata: {
+  //     pluginId: 'security_ai_assistant',
+  //   },
+  // });
 
   const anonymizationFieldsRes =
     await dataClients?.anonymizationFieldsDataClient?.findDocuments<EsAnonymizationFieldsSchema>({
