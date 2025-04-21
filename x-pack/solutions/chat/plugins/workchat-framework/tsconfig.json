@@ -22,6 +22,7 @@
     "@kbn/wc-framework-types-common",
     "@kbn/logging-mocks",
     "@kbn/zod",
+    "@kbn/inference-langchain",
   ],
   "exclude": [
     "target/**/*",
