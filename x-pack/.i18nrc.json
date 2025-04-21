@@ -165,7 +165,7 @@
     "xpack.triggersActionsUI": "platform/plugins/shared/triggers_actions_ui",
     "xpack.upgradeAssistant": [
       "platform/plugins/private/upgrade_assistant",
-      "x-pack/platform/packages/private/upgrade-assistant"
+      "platform/packages/private/upgrade-assistant"
     ],
     "xpack.uptime": [
       "solutions/observability/plugins/uptime"
