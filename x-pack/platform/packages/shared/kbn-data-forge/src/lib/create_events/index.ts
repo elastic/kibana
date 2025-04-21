@@ -11,13 +11,11 @@ import { Client } from '@elastic/elasticsearch';
 import { Config, ParsedSchedule } from '../../types';
 import { createQueue } from '../queue';
 import { wait } from '../wait';
-
 import { computeTotalEvents } from './helpers/compute_total_events';
-import { shouldPauseQueue } from './helpers/should_pause_queue';
-import { pauseQueueFor } from './helpers/pause_queue';
 import { generateTimestamps } from './helpers/generate_timestamps';
 import { getInterval } from './helpers/get_interval';
 import { generateAndQueueEvents } from './helpers/generate_and_queue_events';
+import { tryPausingQueue } from './helpers/try_pausing_queue';
 
 const INITIAL_BACK_OFF_INTERVAL = 1000;
 const MAX_BACK_OFF_INTERVAL = 60_000;
@@ -50,9 +48,7 @@ export async function createEvents(
     // This is a non-blocking pause to the queue. We will still generate events
     // but this will simulate a network disruption simular to what we see with
     // when Filebeat loses network connectivity
-    if (shouldPauseQueue(queue, schedule, startTimestamp.toDate())) {
-      pauseQueueFor(logger, queue, schedule.delayInMinutes || 0);
-    }
+    tryPausingQueue(queue, logger, schedule, now);
 
     const totalEvents = computeTotalEvents(config, schedule, logger, now);
 
@@ -78,15 +74,17 @@ export async function createEvents(
       if (!continueIndexing) {
         break;
       }
-      // Wait to continue indexing.
+      // Figure out how far OR behind the current indexing is and adjust
+      // the wait for the next cycle to fire. This should keep the indexing
+      // from falling behind. This will also catch up as fast as it can.
       const behindBy = Date.now() - now;
       await wait(Math.max(0, interval - behindBy));
-      now = now + interval;
+      now += interval;
       continue;
     }
 
     // Advance timestamp and keep indexing
-    now = now + interval;
+    now += interval;
   }
   logger.info(`Indexing complete for ${schedule.template} events.`);
 }
