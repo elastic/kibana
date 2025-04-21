@@ -22,6 +22,31 @@ export interface ITemplateService {
   compileBundleTemplate: (templateName: TemplateName, context: BundleGenerationContext) => string;
 }
 
+const HBCompileOptions = {
+  knownHelpersOnly: true,
+  knownHelpers: {
+    helperMissing: false,
+    blockHelperMissing: false,
+    each: true,
+    if: true,
+    unless: true,
+    with: false,
+    log: false,
+    lookup: false,
+    eq: true,
+    includes: true,
+    defined: true,
+    toJSON: true,
+    concat: true,
+    isUnknown: true,
+    isCircularRef: true,
+    isSingle: true,
+    isCircularSchema: true,
+    shouldCastExplicitly: true,
+    first: true,
+  },
+};
+
 /**
  * Initialize the template service. This service encapsulates the handlebars
  * initialization logic and provides helper methods for compiling templates.
@@ -34,10 +59,10 @@ export const initTemplateService = async (): Promise<ITemplateService> => {
 
   return {
     compileTemplate: (templateName: TemplateName, context: GenerationContext) => {
-      return handlebars.compileAST(templates[templateName])(context);
+      return handlebars.compileAST(templates[templateName], HBCompileOptions)(context);
     },
     compileBundleTemplate: (templateName: TemplateName, context: BundleGenerationContext) => {
-      return handlebars.compileAST(templates[templateName])(context);
+      return handlebars.compileAST(templates[templateName], HBCompileOptions)(context);
     },
   };
 };
