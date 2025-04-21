@@ -5,19 +5,17 @@
  * 2.0.
  */
 
-import type { ReactWrapper } from 'enzyme';
-import { mount } from 'enzyme';
 import React from 'react';
-import { waitFor } from '@testing-library/react';
+import { render, waitFor } from '@testing-library/react';
+import { TableId } from '@kbn/securitysolution-data-table';
+
+import { TimelineId } from '../../../../common/types/timeline';
 import { mockBrowserFields } from '../../containers/source/mock';
 import { mockGlobalState, TestProviders, createMockStore, mockDataViewSpec } from '../../mock';
 import type { State } from '../../store';
-
-import type { Props } from './top_n';
-import { StatefulTopN } from '.';
-import { TimelineId } from '../../../../common/types/timeline';
-import { TableId } from '@kbn/securitysolution-data-table';
+import { TopN } from './top_n';
 import { detectionAlertsTables } from './helpers';
+import { StatefulTopN } from '.';
 
 jest.mock('react-router-dom', () => {
   const original = jest.requireActual('react-router-dom');
@@ -36,6 +34,16 @@ jest.mock('../../lib/kibana');
 jest.mock('../../../timelines/store/actions');
 jest.mock('../visualization_actions/actions');
 jest.mock('../visualization_actions/lens_embeddable');
+
+jest.mock('./top_n', () => {
+  return {
+    ...jest.requireActual('./top_n'),
+    TopN: jest.fn(() => <div data-test-subj="top-n-mock" />),
+  };
+});
+
+const TopNMocked = TopN as jest.MockedFunction<typeof TopN>;
+
 const field = 'process.name';
 
 const state: State = {
@@ -151,9 +159,12 @@ const testProps = {
   onFilterAdded: jest.fn(),
 };
 
+beforeEach(() => {
+  jest.clearAllMocks();
+});
+
 describe('StatefulTopN', () => {
   describe('rendering globalFilter', () => {
-    let wrapper: ReactWrapper;
     const globalFilters = [
       {
         meta: {
@@ -174,17 +185,15 @@ describe('StatefulTopN', () => {
       },
     ];
     beforeEach(() => {
-      wrapper = mount(
+      render(
         <TestProviders store={store}>
           <StatefulTopN {...testProps} globalFilters={globalFilters} />
         </TestProviders>
       );
     });
 
-    test(`provides filters from  non Redux state when rendering in alerts table`, () => {
-      const props = wrapper.find('[data-test-subj="top-n"]').first().props() as Props;
-
-      expect(props.filters).toEqual([
+    test('provides filters from non Redux state when rendering in alerts table', () => {
+      expect(TopNMocked.mock.calls[0][0].filters).toEqual([
         {
           meta: {
             alias: null,
@@ -207,10 +216,8 @@ describe('StatefulTopN', () => {
   });
 
   describe('rendering in a global NON-timeline context', () => {
-    let wrapper: ReactWrapper;
-
     beforeEach(() => {
-      wrapper = mount(
+      render(
         <TestProviders store={store}>
           <StatefulTopN {...testProps} />
         </TestProviders>
@@ -218,27 +225,19 @@ describe('StatefulTopN', () => {
     });
 
     test('it has undefined combinedQueries when rendering in a global context', () => {
-      const props = wrapper.find('[data-test-subj="top-n"]').first().props() as Props;
-
-      expect(props.filterQuery).toBeUndefined();
+      expect(TopNMocked.mock.calls[0][0].filterQuery).toBeUndefined();
     });
 
     test(`defaults to the 'Raw events' view when rendering in a global context`, () => {
-      const props = wrapper.find('[data-test-subj="top-n"]').first().props() as Props;
-
-      expect(props.defaultView).toEqual('raw');
+      expect(TopNMocked.mock.calls[0][0].defaultView).toEqual('raw');
     });
 
     test(`provides a 'deleteQuery' when rendering in a global context`, () => {
-      const props = wrapper.find('[data-test-subj="top-n"]').first().props() as Props;
-
-      expect(props.deleteQuery).toBeDefined();
+      expect(TopNMocked.mock.calls[0][0].deleteQuery).toBeDefined();
     });
 
     test(`provides filters from Redux state (inputs > global > filters) when rendering in a global context`, () => {
-      const props = wrapper.find('[data-test-subj="top-n"]').first().props() as Props;
-
-      expect(props.filters).toEqual([
+      expect(TopNMocked.mock.calls[0][0].filters).toEqual([
         {
           meta: {
             alias: null,
@@ -254,41 +253,32 @@ describe('StatefulTopN', () => {
     });
 
     test(`provides 'from' via GlobalTime when rendering in a global context`, () => {
-      const props = wrapper.find('[data-test-subj="top-n"]').first().props() as Props;
-
-      expect(props.from).toEqual('2020-07-07T08:20:18.966Z');
+      expect(TopNMocked.mock.calls[0][0].from).toEqual('2020-07-07T08:20:18.966Z');
     });
 
     test('provides the global query from Redux state (inputs > global > query) when rendering in a global context', () => {
-      const props = wrapper.find('[data-test-subj="top-n"]').first().props() as Props;
-
-      expect(props.query).toEqual({ query: 'host.name : end*', language: 'kuery' });
+      expect(TopNMocked.mock.calls[0][0].query).toEqual({
+        query: 'host.name : end*',
+        language: 'kuery',
+      });
     });
 
     test(`provides a 'global' 'setAbsoluteRangeDatePickerTarget' when rendering in a global context`, () => {
-      const props = wrapper.find('[data-test-subj="top-n"]').first().props() as Props;
-
-      expect(props.setAbsoluteRangeDatePickerTarget).toEqual('global');
+      expect(TopNMocked.mock.calls[0][0].setAbsoluteRangeDatePickerTarget).toEqual('global');
     });
 
     test(`provides 'to' via GlobalTime when rendering in a global context`, () => {
-      const props = wrapper.find('[data-test-subj="top-n"]').first().props() as Props;
-
-      expect(props.to).toEqual('2020-07-08T08:20:18.966Z');
+      expect(TopNMocked.mock.calls[0][0].to).toEqual('2020-07-08T08:20:18.966Z');
     });
 
     test(`provides 'applyGlobalQueriesAndFilters' = true`, () => {
-      const props = wrapper.find('[data-test-subj="top-n"]').first().props() as Props;
-
-      expect(props.applyGlobalQueriesAndFilters).toEqual(true);
+      expect(TopNMocked.mock.calls[0][0].applyGlobalQueriesAndFilters).toEqual(true);
     });
   });
 
   describe('rendering in a timeline context', () => {
-    let wrapper: ReactWrapper;
-
     beforeEach(() => {
-      wrapper = mount(
+      render(
         <TestProviders store={store}>
           <StatefulTopN
             {...{
@@ -301,86 +291,65 @@ describe('StatefulTopN', () => {
     });
 
     test('it has a combinedQueries value from Redux state composed of the timeline [data providers + kql + filter-bar-filters] when rendering in a timeline context', () => {
-      const props = wrapper.find('[data-test-subj="top-n"]').first().props() as Props;
-
-      expect(props.filterQuery).toEqual(
+      expect(TopNMocked.mock.calls[0][0].filterQuery).toEqual(
         '{"bool":{"must":[],"filter":[{"bool":{"filter":[{"bool":{"should":[{"match_phrase":{"network.transport":"tcp"}}],"minimum_should_match":1}},{"bool":{"should":[{"exists":{"field":"host.name"}}],"minimum_should_match":1}}]}},{"match_phrase":{"source.port":{"query":"30045"}}}],"should":[],"must_not":[]}}'
       );
     });
 
     test('it provides only one view option that matches the `eventType` from redux when rendering in the context of the active timeline', () => {
-      const props = wrapper.find('[data-test-subj="top-n"]').first().props() as Props;
-
-      expect(props.defaultView).toEqual('all');
+      expect(TopNMocked.mock.calls[0][0].defaultView).toEqual('all');
     });
 
     test(`provides an undefined 'deleteQuery' when rendering in a timeline context`, () => {
-      const props = wrapper.find('[data-test-subj="top-n"]').first().props() as Props;
-
-      expect(props.deleteQuery).toBeUndefined();
+      expect(TopNMocked.mock.calls[0][0].deleteQuery).toBeUndefined();
     });
 
     test(`provides empty filters when rendering in a timeline context`, () => {
-      const props = wrapper.find('[data-test-subj="top-n"]').first().props() as Props;
-
-      expect(props.filters).toEqual([]);
+      expect(TopNMocked.mock.calls[0][0].filters).toEqual([]);
     });
 
     test(`provides 'from' via redux state (inputs > timeline > timerange) when rendering in a timeline context`, () => {
-      const props = wrapper.find('[data-test-subj="top-n"]').first().props() as Props;
-
-      expect(props.from).toEqual('2020-04-14T03:46:09.047Z');
+      expect(TopNMocked.mock.calls[0][0].from).toEqual('2020-04-14T03:46:09.047Z');
     });
 
     test('provides an empty query when rendering in a timeline context', () => {
-      const props = wrapper.find('[data-test-subj="top-n"]').first().props() as Props;
-
-      expect(props.query).toEqual({ query: '', language: 'kuery' });
+      expect(TopNMocked.mock.calls[0][0].query).toEqual({
+        query: '',
+        language: 'kuery',
+      });
     });
 
     test(`provides a 'timeline' 'setAbsoluteRangeDatePickerTarget' when rendering in a timeline context`, () => {
-      const props = wrapper.find('[data-test-subj="top-n"]').first().props() as Props;
-
-      expect(props.setAbsoluteRangeDatePickerTarget).toEqual('timeline');
+      expect(TopNMocked.mock.calls[0][0].setAbsoluteRangeDatePickerTarget).toEqual('timeline');
     });
 
     test(`provides 'to' via redux state (inputs > timeline > timerange) when rendering in a timeline context`, () => {
-      const props = wrapper.find('[data-test-subj="top-n"]').first().props() as Props;
-
-      expect(props.to).toEqual('2020-04-15T03:46:09.047Z');
+      expect(TopNMocked.mock.calls[0][0].to).toEqual('2020-04-15T03:46:09.047Z');
     });
 
     test(`provides 'applyGlobalQueriesAndFilters' = false`, () => {
-      const props = wrapper.find('[data-test-subj="top-n"]').first().props() as Props;
-
-      expect(props.applyGlobalQueriesAndFilters).toEqual(false);
+      expect(TopNMocked.mock.calls[0][0].applyGlobalQueriesAndFilters).toEqual(false);
     });
   });
 
   describe('rendering in alerts context', () => {
     describe.each(detectionAlertsTables)('tableId: %s', (tableId) => {
-      let wrapper: ReactWrapper;
       beforeEach(() => {
-        wrapper = mount(
+        render(
           <TestProviders store={store}>
             <StatefulTopN {...{ ...testProps, scopeId: tableId }} />
           </TestProviders>
         );
       });
-      afterEach(() => {
-        wrapper.unmount();
-      });
 
       test(`defaults to the 'Alert events' option when rendering in Alerts`, async () => {
         await waitFor(() => {
-          const props = wrapper.find('[data-test-subj="top-n"]').first().props() as Props;
-          expect(props.defaultView).toEqual('alert');
+          expect(TopNMocked.mock.calls[0][0].defaultView).toEqual('alert');
         });
       });
 
       test(`provides 'applyGlobalQueriesAndFilters' = true`, () => {
-        const props = wrapper.find('[data-test-subj="top-n"]').first().props() as Props;
-        expect(props.applyGlobalQueriesAndFilters).toEqual(true);
+        expect(TopNMocked.mock.calls[0][0].applyGlobalQueriesAndFilters).toEqual(true);
       });
     });
   });
