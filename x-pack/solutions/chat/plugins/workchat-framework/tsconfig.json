@@ -23,6 +23,7 @@
     "@kbn/logging-mocks",
     "@kbn/zod",
     "@kbn/inference-langchain",
+    "@kbn/wci-server",
   ],
   "exclude": [
     "target/**/*",
