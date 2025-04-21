@@ -42,6 +42,7 @@ export function WelcomeMessageKnowledgeBaseSetupErrorPanel({
   const deploymentReason = knowledgeBase.status.value?.modelStats?.deployment_stats?.reason;
   const allocationState =
     knowledgeBase.status.value?.modelStats?.deployment_stats?.allocation_status?.state;
+  const inferenceId = knowledgeBase.status.value?.modelStats?.deployment_stats?.deployment_id;
 
   return (
     <div
@@ -130,7 +131,7 @@ export function WelcomeMessageKnowledgeBaseSetupErrorPanel({
               retryInstallingLink: (
                 <EuiLink
                   data-test-subj="observabilityAiAssistantWelcomeMessageKnowledgeBaseSetupErrorPanelRetryInstallingLink"
-                  onClick={() => onRetryInstall(modelId)} // TODO: change
+                  onClick={() => onRetryInstall(inferenceId!)} // TODO: check behaviour in error state
                 >
                   {i18n.translate(
                     'xpack.aiAssistant.welcomeMessageKnowledgeBaseSetupErrorPanel.retryInstallingLinkLabel',
