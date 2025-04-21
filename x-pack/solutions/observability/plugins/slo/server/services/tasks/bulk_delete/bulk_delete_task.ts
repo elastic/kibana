@@ -9,7 +9,7 @@ import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 import { FakeRawRequest, type CoreSetup, type Logger, type LoggerFactory } from '@kbn/core/server';
 import { BulkDeleteParams, BulkDeleteStatusResponse } from '@kbn/slo-schema';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/server';
-import { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
+import { RunContext } from '@kbn/task-manager-plugin/server';
 import { IndicatorTypes } from '../../../domain/models';
 import { SLOPluginSetupDependencies, SLOPluginStartDependencies } from '../../../types';
 import { DeleteSLO } from '../../delete_slo';
@@ -51,12 +51,17 @@ export class BulkDeleteTask {
         title: 'SLO bulk delete',
         timeout: '20m',
         maxAttempts: 1,
-        createTaskRunner: ({ taskInstance, fakeRequest }: { taskInstance: ConcreteTaskInstance }) => {
+        createTaskRunner: ({ taskInstance, fakeRequest }: RunContext) => {
           return {
             run: async () => {
               this.logger.debug(`starting bulk delete operation`);
-              const state = taskInstance.state as BulkDeleteStatusResponse;
 
+              if (!fakeRequest) {
+                this.logger.debug('fakeRequest is not defined');
+                return;
+              }
+
+              const state = taskInstance.state as BulkDeleteStatusResponse;
               if (state.isDone) {
                 // The task was done in the previous run,
                 // we only rescheduled it once for keeping an ephemeral state for the user
@@ -64,20 +69,12 @@ export class BulkDeleteTask {
               }
 
               const [coreStart, pluginStart] = await core.getStartServices();
-              const fakeRawRequest: FakeRawRequest = {
-                headers: { authorization: `ApiKey ${taskInstance?.apiKey}` },
-                path: '/',
-              };
               const path = addSpaceIdToPath('/', taskInstance?.userScope?.spaceId ?? 'default');
-
-              // Fake request from the API key
-              const fakeRequest = kibanaRequestFactory(fakeRawRequest);
               coreStart.http.basePath.set(fakeRequest, path);
 
               const scopedClusterClient = coreStart.elasticsearch.client.asScoped(fakeRequest);
               const scopedSoClient = coreStart.savedObjects.getScopedClient(fakeRequest);
               const rulesClient = await pluginStart.alerting.getRulesClientWithRequest(fakeRequest);
-              // const rulesClient = await alerting.getRulesClientWithRequest(fakeRequest);
 
               const repository = new KibanaSavedObjectsSLORepository(scopedSoClient, this.logger);
               const transformManager = new DefaultTransformManager(
