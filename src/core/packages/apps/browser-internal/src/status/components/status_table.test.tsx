@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { renderReactTestingLibraryWithI18n } from '@kbn/test-jest-helpers';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
 import '@testing-library/jest-dom';
 import type { StatusInfoServiceStatus as ServiceStatus } from '@kbn/core-status-common';
 import { StatusTable } from './status_table';
@@ -34,7 +34,7 @@ const createServiceStatus = (parts: Partial<ServiceStatus> = {}): ServiceStatus 
 
 describe('StatusTable', () => {
   it('renders when statuses is provided', () => {
-    const { getByTestId, getByText } = renderReactTestingLibraryWithI18n(
+    const { getByTestId, getByText } = renderWithI18n(
       <StatusTable
         statuses={[
           { id: 'plugin:1', state, original: createServiceStatus() },
@@ -82,7 +82,7 @@ describe('StatusTable', () => {
   });
 
   it('renders empty when statuses is not provided', () => {
-    const { container } = renderReactTestingLibraryWithI18n(<StatusTable />);
+    const { container } = renderWithI18n(<StatusTable />);
     expect(container.firstChild).toBeNull();
   });
 });
