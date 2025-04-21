@@ -54,7 +54,7 @@ exports[`NetworkKpiComponent rendering it renders the default widget 1`] = `
                       class="euiFlexItem emotion-euiFlexItem-grow-1"
                     >
                       <h6
-                        class="euiTitle css-19qbcji-StyledTitle-euiTitle-xxxs ee8xehw0"
+                        class="euiTitle css-7cf02x-StyledTitle-euiTitle-xxxs ee8xehw0"
                       >
                         Network events
                       </h6>
@@ -136,7 +136,7 @@ exports[`NetworkKpiComponent rendering it renders the default widget 1`] = `
                       class="euiFlexItem emotion-euiFlexItem-grow-1"
                     >
                       <h6
-                        class="euiTitle css-19qbcji-StyledTitle-euiTitle-xxxs ee8xehw0"
+                        class="euiTitle css-7cf02x-StyledTitle-euiTitle-xxxs ee8xehw0"
                       >
                         DNS queries
                       </h6>
@@ -225,7 +225,7 @@ exports[`NetworkKpiComponent rendering it renders the default widget 1`] = `
                       class="euiFlexItem emotion-euiFlexItem-grow-1"
                     >
                       <h6
-                        class="euiTitle css-19qbcji-StyledTitle-euiTitle-xxxs ee8xehw0"
+                        class="euiTitle css-7cf02x-StyledTitle-euiTitle-xxxs ee8xehw0"
                       >
                         Unique flow IDs
                       </h6>
@@ -307,7 +307,7 @@ exports[`NetworkKpiComponent rendering it renders the default widget 1`] = `
                       class="euiFlexItem emotion-euiFlexItem-grow-1"
                     >
                       <h6
-                        class="euiTitle css-19qbcji-StyledTitle-euiTitle-xxxs ee8xehw0"
+                        class="euiTitle css-7cf02x-StyledTitle-euiTitle-xxxs ee8xehw0"
                       >
                         TLS handshakes
                       </h6>
@@ -391,7 +391,7 @@ exports[`NetworkKpiComponent rendering it renders the default widget 1`] = `
                   class="euiFlexItem emotion-euiFlexItem-grow-1"
                 >
                   <h6
-                    class="euiTitle css-19qbcji-StyledTitle-euiTitle-xxxs ee8xehw0"
+                    class="euiTitle css-7cf02x-StyledTitle-euiTitle-xxxs ee8xehw0"
                   >
                     Unique private IPs
                   </h6>
@@ -412,7 +412,7 @@ exports[`NetworkKpiComponent rendering it renders the default widget 1`] = `
                   class="euiFlexItem ee8xehw2 emotion-euiFlexItem-growZero-FlexItem"
                 >
                   <span
-                    color="#EE72A6"
+                    color="#d36186"
                     data-euiicon-type="visMapCoordinate"
                     data-test-subj="stat-icon"
                   />
@@ -450,7 +450,7 @@ exports[`NetworkKpiComponent rendering it renders the default widget 1`] = `
                   class="euiFlexItem ee8xehw2 emotion-euiFlexItem-growZero-FlexItem"
                 >
                   <span
-                    color="#61A2FF"
+                    color="#9170b8"
                     data-euiicon-type="visMapCoordinate"
                     data-test-subj="stat-icon"
                   />

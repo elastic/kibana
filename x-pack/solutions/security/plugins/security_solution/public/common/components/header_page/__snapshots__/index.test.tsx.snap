@@ -44,7 +44,7 @@ exports[`HeaderPage it renders 1`] = `
           class="euiPageHeaderSection css-1xndooq-headerSection"
         >
           <h1
-            class="euiTitle css-1tgxtfm-Header-euiTitle-l e1mvi39w1"
+            class="euiTitle css-o0pm57-Header-euiTitle-l e1mvi39w1"
             data-test-subj="header-page-title"
           >
             <span
@@ -116,7 +116,7 @@ exports[`HeaderPage it renders 1`] = `
     class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
   />
   <div
-    class="css-v9atdk-Divider"
+    class="css-nfmwzk-Divider"
   />
   <div
     class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
