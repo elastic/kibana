@@ -78,8 +78,9 @@ import {
   CLOUDBEAT_AWS,
   GCP_SINGLE_ACCOUNT,
   GCP_ORGANIZATION_ACCOUNT,
+  SUPPORTED_CLOUDBEAT_INPUTS,
 } from './constants';
-import { type AssetRadioGroupProps, RadioGroup } from './csp_boxed_radio_group';
+import { type AssetRadioGroupProps, RadioGroup } from './asset_boxed_radio_group';
 import { useKibana } from '../../../common/lib/kibana';
 import { AWS_CREDENTIALS_TYPE } from './aws_credentials_form/aws_credentials_form';
 import { AZURE_CREDENTIALS_TYPE } from './azure_credentials_form/azure_credentials_form';
@@ -172,7 +173,7 @@ const AwsAccountTypeSelect = ({
   packageInfo,
   disabled,
 }: {
-  input: Extract<NewPackagePolicyAssetInput, { type: 'cloudbeat/asset_inventory_aws' }>;
+  input: Extract<NewPackagePolicyAssetInput, { type: typeof CLOUDBEAT_AWS }>;
   newPolicy: NewPackagePolicy;
   updatePolicy: (updatedPolicy: NewPackagePolicy, isExtensionLoaded?: boolean) => void;
   packageInfo: PackageInfo;
@@ -624,6 +625,9 @@ const getSelectedOption = (
 //     // eslint-disable-next-line react-hooks/exhaustive-deps
 //   }, [newPolicy?.vars?.cloud_formation_template_url, newPolicy, packageInfo]);
 // };
+
+const isPostureInput = (input: NewPackagePolicyInput): input is NewPackagePolicyAssetInput =>
+  SUPPORTED_CLOUDBEAT_INPUTS.includes(input.type as AssetInput);
 
 export const CloudAssetInventoryPolicyTemplateForm =
   memo<PackagePolicyReplaceDefineStepExtensionComponentProps>(

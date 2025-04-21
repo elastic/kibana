@@ -6,7 +6,6 @@
  */
 import React, { Suspense, useEffect } from 'react';
 import {
-  EuiCallOut,
   EuiFieldText,
   EuiFormRow,
   EuiHorizontalRule,
@@ -18,7 +17,7 @@ import {
   EuiLoadingSpinner,
 } from '@elastic/eui';
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
-import type { NewPackagePolicyInput, PackageInfo } from '@kbn/fleet-plugin/common';
+import type { PackageInfo } from '@kbn/fleet-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -35,7 +34,7 @@ import {
   getAssetPolicy,
   type NewPackagePolicyAssetInput,
 } from '../utils';
-import { type AssetRadioOption, RadioGroup } from '../csp_boxed_radio_group';
+import { type AssetRadioOption, RadioGroup } from '../asset_boxed_radio_group';
 import {
   CIS_AZURE_SETUP_FORMAT_TEST_SUBJECTS,
   AZURE_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ,
@@ -116,7 +115,6 @@ export interface AzureCredentialsFormProps {
   updatePolicy(updatedPolicy: NewPackagePolicy): void;
   packageInfo: PackageInfo;
   onChange: any;
-  setIsValid: (isValid: boolean) => void;
   disabled: boolean;
   hasInvalidRequiredVars: boolean;
 }
@@ -124,24 +122,7 @@ export interface AzureCredentialsFormProps {
 export const ARM_TEMPLATE_EXTERNAL_DOC_URL =
   'https://learn.microsoft.com/en-us/azure/azure-resource-manager/templates/';
 
-const ArmTemplateSetup = ({
-  hasArmTemplateUrl,
-  input,
-}: {
-  hasArmTemplateUrl: boolean;
-  input: NewPackagePolicyInput;
-}) => {
-  if (!hasArmTemplateUrl) {
-    return (
-      <EuiCallOut color="warning">
-        <FormattedMessage
-          id="xpack.csp.azureIntegration.armTemplateSetupStep.notSupported"
-          defaultMessage="ARM Template is not supported on the current Integration version, please upgrade your integration to the latest version to use ARM Template"
-        />
-      </EuiCallOut>
-    );
-  }
-
+const ArmTemplateSetup = () => {
   return (
     <>
       <EuiText color="subdued" size="s">
@@ -320,7 +301,6 @@ export const AzureCredentialsForm = ({
   updatePolicy,
   packageInfo,
   onChange,
-  setIsValid,
   disabled,
   hasInvalidRequiredVars,
 }: AzureCredentialsFormProps) => {
@@ -331,13 +311,11 @@ export const AzureCredentialsForm = ({
     setupFormat,
     onSetupFormatChange,
     documentationLink,
-    hasArmTemplateUrl,
   } = useAzureCredentialsForm({
     newPolicy,
     input,
     packageInfo,
     onChange,
-    setIsValid,
     updatePolicy,
   });
 
@@ -369,19 +347,19 @@ export const AzureCredentialsForm = ({
         }
       />
       <EuiSpacer size="l" />
-      {setupFormat === AZURE_SETUP_FORMAT.ARM_TEMPLATE && (
-        <ArmTemplateSetup hasArmTemplateUrl={hasArmTemplateUrl} input={input} />
+      {setupFormat === AZURE_SETUP_FORMAT.ARM_TEMPLATE && <ArmTemplateSetup />}
+      {setupFormat === AZURE_SETUP_FORMAT.MANUAL && (
+        <AzureCredentialTypeSelector
+          type={azureCredentialsType}
+          onChange={(optionId) => {
+            updatePolicy(
+              getAssetPolicy(newPolicy, input.type, {
+                'azure.credentials.type': { value: optionId },
+              })
+            );
+          }}
+        />
       )}
-      <AzureCredentialTypeSelector
-        type={azureCredentialsType}
-        onChange={(optionId) => {
-          updatePolicy(
-            getAssetPolicy(newPolicy, input.type, {
-              'azure.credentials.type': { value: optionId },
-            })
-          );
-        }}
-      />
       <EuiSpacer size="m" />
       <AzureInputVarFields
         fields={fields}

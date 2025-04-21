@@ -10,10 +10,3 @@ import { lazy } from 'react';
 export const LazyAssetInventoryReplaceDefineStepExtension = lazy(
   () => import('./policy_template_form')
 );
-
-// export const LazyAssetInventoryReplaceDefineStepExtension = lazy(async () => {
-//   const AssetPolicyTemplateForm = await import('./policy_template_form');
-//   return {
-//     default: AssetPolicyTemplateForm,
-//   };
-// });

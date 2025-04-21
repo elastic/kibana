@@ -22,8 +22,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { getAssetPolicy, type NewPackagePolicyAssetInput } from '../utils';
-import type { AssetRadioOption } from '../csp_boxed_radio_group';
-import { RadioGroup } from '../csp_boxed_radio_group';
+import type { AssetRadioOption } from '../asset_boxed_radio_group';
+import { RadioGroup } from '../asset_boxed_radio_group';
 import {
   AWS_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJ,
   AWS_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ,
@@ -95,9 +95,7 @@ export interface AwsFormProps {
   updatePolicy(updatedPolicy: NewPackagePolicy): void;
   packageInfo: PackageInfo;
   onChange: (opts: {
-    /** is current form state is valid */
     isValid: boolean;
-    /** The updated Integration Policy to be merged back and included in the API call */
     updatedPolicy: Partial<NewPackagePolicy>;
     isExtensionLoaded?: boolean;
   }) => void;

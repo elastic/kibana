@@ -25,8 +25,8 @@ import { i18n } from '@kbn/i18n';
 
 import type { GcpCredentialsType } from '../types';
 import { CLOUDBEAT_GCP, GCP_ORGANIZATION_ACCOUNT } from '../constants';
-import type { AssetRadioOption } from '../csp_boxed_radio_group';
-import { RadioGroup } from '../csp_boxed_radio_group';
+import type { AssetRadioOption } from '../asset_boxed_radio_group';
+import { RadioGroup } from '../asset_boxed_radio_group';
 import {
   fieldIsInvalid,
   findVariableDef,
@@ -313,8 +313,8 @@ export interface GcpFormProps {
   input: Extract<NewPackagePolicyAssetInput, { type: 'cloudbeat/asset_inventory_gcp' }>;
   updatePolicy(updatedPolicy: NewPackagePolicy): void;
   packageInfo: PackageInfo;
-  setIsValid: (isValid: boolean) => void;
-  onChange: (opts: { updatedPolicy: NewPackagePolicy; isValid: boolean }) => void;
+  // setIsValid?: (isValid: boolean) => void;
+  // onChange?: (opts: { updatedPolicy: NewPackagePolicy; isValid: boolean }) => void;
   disabled: boolean;
   isEditPage?: boolean;
   hasInvalidRequiredVars: boolean;
@@ -418,8 +418,6 @@ export const GcpCredentialsForm = ({
   newPolicy,
   updatePolicy,
   packageInfo,
-  setIsValid,
-  onChange,
   disabled,
   isEditPage,
   hasInvalidRequiredVars,

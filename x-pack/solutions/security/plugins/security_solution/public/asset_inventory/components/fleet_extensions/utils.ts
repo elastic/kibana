@@ -42,16 +42,11 @@ import {
 } from './aws_credentials_form/get_aws_credentials_form_options';
 import { GCP_CREDENTIALS_TYPE } from './gcp_credentials_form/gcp_credential_form';
 import { AZURE_CREDENTIALS_TYPE } from './azure_credentials_form/azure_credentials_form';
-import type {
-  CloudAssetInventoryIntegrations,
-  AssetInput,
-  AwsCredentialsType,
-  AssetInventoryPolicyTemplate,
-} from './types';
+import type { CloudAssetInventoryIntegrations, AssetInput, AwsCredentialsType } from './types';
 import googleCloudLogo from './assets/icons/google_cloud_logo.svg';
 
 // Posture policies only support the default namespace
-export const POSTURE_NAMESPACE = 'default';
+export const ASSET_NAMESPACE = 'default';
 
 type AssetPolicyInput =
   | { type: typeof CLOUDBEAT_AZURE; policy_template: typeof ASSET_POLICY_TEMPLATE }
@@ -72,7 +67,7 @@ export const isAssetInput = (
 ): input is NewPackagePolicyAssetInput =>
   SUPPORTED_CLOUDBEAT_INPUTS.includes(input.type as AssetInput);
 
-const getPostureType = (policyTemplateInput: AssetInput) => {
+const getAssetType = (policyTemplateInput: AssetInput) => {
   switch (policyTemplateInput) {
     case CLOUDBEAT_AWS:
     case CLOUDBEAT_AZURE:
@@ -130,13 +125,13 @@ export const getAssetPolicy = (
   inputVars?: Record<string, PackagePolicyConfigRecordEntry>
 ): NewPackagePolicy => ({
   ...newPolicy,
-  namespace: POSTURE_NAMESPACE,
+  namespace: ASSET_NAMESPACE,
   // Enable new policy input and disable all others
   inputs: newPolicy.inputs.map((item) => getPostureInput(item, inputType, inputVars)),
   // Set hidden policy vars
   vars: merge({}, newPolicy.vars, {
     deployment: { value: getDeploymentType(inputType) },
-    posture: { value: getPostureType(inputType) },
+    posture: { value: getAssetType(inputType) },
   }),
 });
 
@@ -171,24 +166,6 @@ export const getCspmCloudFormationDefaultValue = (packageInfo: PackageInfo): str
   return cloudFormationTemplate;
 };
 
-export const getArmTemplateUrlFromCspmPackage = (packageInfo: PackageInfo): string => {
-  if (!packageInfo.policy_templates) return '';
-
-  const policyTemplate = packageInfo.policy_templates.find((p) => p.name === ASSET_POLICY_TEMPLATE);
-  if (!policyTemplate) return '';
-
-  const policyTemplateInputs = hasPolicyTemplateInputs(policyTemplate) && policyTemplate.inputs;
-  if (!policyTemplateInputs) return '';
-
-  const armTemplateUrl = policyTemplateInputs.reduce((acc, input): string => {
-    if (!input.vars) return acc;
-    const template = input.vars.find((v) => v.name === 'arm_template_url')?.default;
-    return template ? String(template) : acc;
-  }, '');
-
-  return armTemplateUrl;
-};
-
 export const getDefaultAwsCredentialsType = (
   packageInfo: PackageInfo,
   setupTechnology?: SetupTechnology
@@ -213,12 +190,25 @@ export const getDefaultAzureCredentialsType = (
     return AZURE_CREDENTIALS_TYPE.SERVICE_PRINCIPAL_WITH_CLIENT_SECRET;
   }
 
-  const hasArmTemplateUrl = !!getArmTemplateUrlFromCspmPackage(packageInfo);
-  if (hasArmTemplateUrl) {
-    return AZURE_CREDENTIALS_TYPE.ARM_TEMPLATE;
-  }
+  return AZURE_CREDENTIALS_TYPE.ARM_TEMPLATE;
+};
 
-  return AZURE_CREDENTIALS_TYPE.MANAGED_IDENTITY;
+export const getArmTemplateUrlFromAssetPackage = (packageInfo: PackageInfo): string => {
+  if (!packageInfo.policy_templates) return '';
+
+  const policyTemplate = packageInfo.policy_templates.find((p) => p.name === ASSET_POLICY_TEMPLATE);
+  if (!policyTemplate) return '';
+
+  const policyTemplateInputs = hasPolicyTemplateInputs(policyTemplate) && policyTemplate.inputs;
+  if (!policyTemplateInputs) return '';
+
+  const armTemplateUrl = policyTemplateInputs.reduce((acc, input): string => {
+    if (!input.vars) return acc;
+    const template = input.vars.find((v) => v.name === 'arm_template_url')?.default;
+    return template ? String(template) : acc;
+  }, '');
+
+  return armTemplateUrl;
 };
 
 export const getDefaultGcpHiddenVars = (
@@ -341,22 +331,25 @@ export const getPolicyTemplateInputOptions = () =>
     testId: o.testId,
   }));
 
-export const getMaxPackageName = (
-  packageName: string,
-  packagePolicies?: Array<{ name: string }>
-) => {
-  // Retrieve the highest number appended to package policy name and increment it by one
-  const pkgPoliciesNamePattern = new RegExp(`${packageName}-(\\d+)`);
+// export const getMaxPackageName = (
+//   packageName: string,
+//   packagePolicies?: Array<{ name: string }>
+// ) => {
+//   // Retrieve the highest number appended to package policy name and increment it by one
+//   const pkgPoliciesNamePattern = new RegExp(`${packageName}-(\\d+)`);
 
-  const maxPkgPolicyName = Math.max(
-    ...(packagePolicies ?? [])
-      .filter((ds) => Boolean(ds.name.match(pkgPoliciesNamePattern)))
-      .map((ds) => parseInt(ds.name.match(pkgPoliciesNamePattern)![1], 10)),
-    0
-  );
+//   const maxPkgPolicyName = Math.max(
+//     ...(packagePolicies ?? [])
+//       .filter((ds) => Boolean(ds.name.match(pkgPoliciesNamePattern)))
+//       .map((ds) => {
+//         const match = ds.name.match(pkgPoliciesNamePattern);
+//         return match ? parseInt(match[1], 10) : 0;
+//       }),
+//     0
+//   );
 
-  return `${packageName}-${maxPkgPolicyName + 1}`;
-};
+//   return `${packageName}-${maxPkgPolicyName + 1}`;
+// };
 
 export const getCspmCloudShellDefaultValue = (packageInfo: PackageInfo): string => {
   if (!packageInfo.policy_templates) return '';

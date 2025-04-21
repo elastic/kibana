@@ -14,7 +14,7 @@ import { SetupTechnology } from '@kbn/fleet-plugin/public';
 import type { PackagePolicyReplaceDefineStepExtensionComponentProps } from '@kbn/fleet-plugin/public/types';
 import type { AssetInput } from './types';
 import { getPolicyTemplateInputOptions, type NewPackagePolicyAssetInput } from './utils';
-import { RadioGroup } from './csp_boxed_radio_group';
+import { RadioGroup } from './asset_boxed_radio_group';
 import { AzureCredentialsForm } from './azure_credentials_form/azure_credentials_form';
 import { AzureCredentialsFormAgentless } from './azure_credentials_form/azure_credentials_form_agentless';
 import { AwsCredentialsForm } from './aws_credentials_form/aws_credentials_form';
@@ -38,27 +38,91 @@ export interface PolicyTemplateVarsFormProps {
 export const PolicyTemplateVarsForm = ({
   input,
   setupTechnology,
-  ...props
+  newPolicy,
+  updatePolicy,
+  packageInfo,
+  onChange,
+  setIsValid,
+  disabled,
+  isEditPage,
+  hasInvalidRequiredVars,
 }: PolicyTemplateVarsFormProps) => {
   const isAgentless = setupTechnology === SetupTechnology.AGENTLESS;
 
   switch (input.type) {
     case 'cloudbeat/asset_inventory_aws':
       if (isAgentless) {
-        return <AwsCredentialsFormAgentless {...props} input={input} />;
+        return (
+          <AwsCredentialsFormAgentless
+            newPolicy={newPolicy}
+            updatePolicy={updatePolicy}
+            packageInfo={packageInfo}
+            onChange={onChange}
+            hasInvalidRequiredVars={hasInvalidRequiredVars}
+            input={input}
+          />
+        );
       }
-      return <AwsCredentialsForm {...props} input={input} />;
+      return (
+        <AwsCredentialsForm
+          newPolicy={newPolicy}
+          updatePolicy={updatePolicy}
+          packageInfo={packageInfo}
+          onChange={onChange}
+          setIsValid={setIsValid}
+          disabled={disabled}
+          hasInvalidRequiredVars={hasInvalidRequiredVars}
+          input={input}
+        />
+      );
     case 'cloudbeat/asset_inventory_gcp':
       if (isAgentless) {
-        return <GcpCredentialsFormAgentless {...props} input={input} />;
+        return (
+          <GcpCredentialsFormAgentless
+            newPolicy={newPolicy}
+            updatePolicy={updatePolicy}
+            packageInfo={packageInfo}
+            disabled={disabled}
+            hasInvalidRequiredVars={hasInvalidRequiredVars}
+            input={input}
+          />
+        );
       }
-      return <GcpCredentialsForm {...props} input={input} />;
+      return (
+        <GcpCredentialsForm
+          input={input}
+          newPolicy={newPolicy}
+          updatePolicy={updatePolicy}
+          packageInfo={packageInfo}
+          disabled={disabled}
+          hasInvalidRequiredVars={hasInvalidRequiredVars}
+          isEditPage={isEditPage}
+        />
+      );
     case 'cloudbeat/asset_inventory_azure':
       if (isAgentless) {
-        return <AzureCredentialsFormAgentless {...props} input={input} />;
+        return (
+          <AzureCredentialsFormAgentless
+            newPolicy={newPolicy}
+            updatePolicy={updatePolicy}
+            packageInfo={packageInfo}
+            hasInvalidRequiredVars={hasInvalidRequiredVars}
+            input={input}
+          />
+        );
       }
 
-      return <AzureCredentialsForm {...props} input={input} />;
+      return (
+        <AzureCredentialsForm
+          input={input}
+          newPolicy={newPolicy}
+          updatePolicy={updatePolicy}
+          packageInfo={packageInfo}
+          onChange={onChange}
+          disabled={disabled}
+          hasInvalidRequiredVars={hasInvalidRequiredVars}
+        />
+      );
     default:
       return null;
   }
