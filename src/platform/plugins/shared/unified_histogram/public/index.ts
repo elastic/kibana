@@ -41,3 +41,5 @@ export const plugin = () => new UnifiedHistogramPublicPlugin();
 
 export { UnifiedHistogramContainer2 } from './container/container2';
 export { UnifiedHistogramLayout2 } from './layout/layout2';
+export { useUnifiedHistogram, type UseUnifiedHistogramProps } from './hooks/use_unified_histogram';
+export { Chart as UnifiedHistogramChart } from './chart';

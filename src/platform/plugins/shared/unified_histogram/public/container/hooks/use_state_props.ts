@@ -16,9 +16,11 @@ import { convertDatatableColumnToDataViewFieldSpec } from '@kbn/data-view-utils'
 import { useCallback, useEffect, useMemo } from 'react';
 import {
   UnifiedHistogramChartLoadEvent,
+  UnifiedHistogramExternalVisContextStatus,
   UnifiedHistogramFetchStatus,
   UnifiedHistogramServices,
   UnifiedHistogramSuggestionContext,
+  UnifiedHistogramVisContext,
 } from '../../types';
 import type { UnifiedHistogramStateService } from '../services/state_service';
 import {
@@ -31,6 +33,8 @@ import {
 } from '../utils/state_selectors';
 import { useStateSelector } from '../utils/use_state_selector';
 import { setBreakdownField } from '../utils/local_storage_utils';
+import { UnifiedHistogramLayoutProps } from '../../layout';
+import { exportVisContext } from '../../utils/external_vis_context';
 
 export const useStateProps = ({
   services,
@@ -43,6 +47,7 @@ export const useStateProps = ({
   columns,
   breakdownField,
   onBreakdownFieldChange: originalOnBreakdownFieldChange,
+  onVisContextChanged: originalOnVisContextChanged,
 }: {
   services: UnifiedHistogramServices;
   localStorageKeyPrefix: string | undefined;
@@ -54,6 +59,12 @@ export const useStateProps = ({
   columns: DatatableColumn[] | undefined;
   breakdownField: string | undefined;
   onBreakdownFieldChange: ((breakdownField: string | undefined) => void) | undefined;
+  onVisContextChanged:
+    | ((
+        nextVisContext: UnifiedHistogramVisContext | undefined,
+        externalVisContextStatus: UnifiedHistogramExternalVisContextStatus
+      ) => void)
+    | undefined;
 }) => {
   const chartHidden = useStateSelector(stateService?.state$, chartHiddenSelector);
   const timeInterval = useStateSelector(stateService?.state$, timeIntervalSelector);
@@ -186,6 +197,18 @@ export const useStateProps = ({
     [stateService]
   );
 
+  const onVisContextChange: UnifiedHistogramLayoutProps['onVisContextChanged'] = useMemo(() => {
+    if (!originalOnVisContextChanged) {
+      return undefined;
+    }
+
+    return (visContext, externalVisContextStatus) => {
+      const minifiedVisContext = exportVisContext(visContext);
+
+      originalOnVisContextChanged(minifiedVisContext, externalVisContextStatus);
+    };
+  }, [originalOnVisContextChanged]);
+
   /**
    * Effects
    */
@@ -219,5 +242,6 @@ export const useStateProps = ({
     onChartLoad,
     onBreakdownFieldChange,
     onSuggestionContextChange,
+    onVisContextChange,
   };
 };

@@ -8,10 +8,10 @@
  */
 
 import { type TabItem, UnifiedTabs } from '@kbn/unified-tabs';
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { pick } from 'lodash';
 import { type HtmlPortalNode, createHtmlPortalNode, InPortal } from 'react-reverse-portal';
-import { UnifiedHistogramContainer2 } from '@kbn/unified-histogram-plugin/public';
+import { UnifiedHistogramChart, useUnifiedHistogram } from '@kbn/unified-histogram-plugin/public';
 import { DiscoverSessionView, type DiscoverSessionViewProps } from '../session_view';
 import type { RuntimeStateManager } from '../../state_management/redux';
 import {
@@ -130,7 +130,7 @@ const UnifiedHistogramWrapper = ({
       <DiscoverCustomizationProvider value={currentCustomizationService}>
         <DiscoverMainProvider value={currentStateContainer}>
           <RuntimeStateProvider currentDataView={currentDataView} adHocDataViews={adHocDataViews}>
-            <UnifiedHistogramChart
+            <UnifiedHistogramChartWrapper
               stateContainer={currentStateContainer}
               panelsToggle={panelsToggle}
             />
@@ -145,9 +145,14 @@ type UnifiedHistogramChartProps = Pick<UnifiedHistogramWrapperProps, 'panelsTogg
   stateContainer: DiscoverStateContainer;
 };
 
-const UnifiedHistogramChart = ({ stateContainer, panelsToggle }: UnifiedHistogramChartProps) => {
+const UnifiedHistogramChartWrapper = ({
+  stateContainer,
+  panelsToggle,
+}: UnifiedHistogramChartProps) => {
   const isEsqlMode = useIsEsqlMode();
-  const unifiedHistogramProps = useDiscoverHistogram2(stateContainer);
+  const { setUnifiedHistogramApi, ...unifiedHistogramProps } =
+    useDiscoverHistogram2(stateContainer);
+  const unifiedHistogram = useUnifiedHistogram(unifiedHistogramProps);
   const renderCustomChartToggleActions = useCallback(
     () =>
       React.isValidElement(panelsToggle)
@@ -156,15 +161,21 @@ const UnifiedHistogramChart = ({ stateContainer, panelsToggle }: UnifiedHistogra
     [panelsToggle]
   );
 
+  useEffect(() => {
+    if (unifiedHistogram.isInitialized) {
+      setUnifiedHistogramApi(unifiedHistogram.api);
+    }
+  }, [setUnifiedHistogramApi, unifiedHistogram.api, unifiedHistogram.isInitialized]);
+
   // Initialized when the first search has been requested or
   // when in ES|QL mode since search sessions are not supported
-  if (!unifiedHistogramProps.searchSessionId && !isEsqlMode) {
+  if (!unifiedHistogram.isInitialized || (!unifiedHistogramProps.searchSessionId && !isEsqlMode)) {
     return null;
   }
 
   return (
-    <UnifiedHistogramContainer2
-      {...unifiedHistogramProps}
+    <UnifiedHistogramChart
+      {...unifiedHistogram.chartProps}
       renderCustomChartToggleActions={renderCustomChartToggleActions}
     />
   );
