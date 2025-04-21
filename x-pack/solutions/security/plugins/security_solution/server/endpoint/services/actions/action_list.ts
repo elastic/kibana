@@ -242,12 +242,10 @@ const getActionDetailsList = async ({
   let agentsHostInfo: { [id: string]: string };
 
   try {
-    // get all responses for given action Ids and agent Ids
-    // and get host metadata info with queried agents
+    // get all responses for the action IDs retrieved
     [actionResponses, agentsHostInfo] = await Promise.all([
       fetchActionResponses({
         esClient: endpointService.getInternalEsClient(),
-        agentIds: elasticAgentIds,
         actionIds: actionReqIds,
       }),
 
