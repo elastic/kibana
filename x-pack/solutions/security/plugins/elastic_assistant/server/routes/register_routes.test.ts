@@ -224,11 +224,11 @@ describe('registerRoutes', () => {
   });
 
   it('should call `chatCompleteRouteMock`', () => {
-    expect(chatCompleteRouteMock).toHaveBeenCalledWith(server.router);
+    expect(chatCompleteRouteMock).toHaveBeenCalledWith(server.router, undefined);
   });
 
   it('should call `postActionsConnectorExecuteRouteMock`', () => {
-    expect(postActionsConnectorExecuteRouteMock).toHaveBeenCalledWith(server.router);
+    expect(postActionsConnectorExecuteRouteMock).toHaveBeenCalledWith(server.router, undefined);
   });
 
   it('should call `bulkActionKnowledgeBaseEntriesRouteMock`', () => {
