@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import type {
-  NodeProgressionEvent,
-  NodeEventMeta,
-} from '@kbn/wc-framework-types-common';
+import type { NodeProgressionEvent, NodeEventMeta } from '@kbn/wc-framework-types-common';
 import type {
   WorkflowRunEventHandler,
   NodeEventReporter,
