@@ -30,6 +30,7 @@ window.scrollTo = jest.fn();
 window.HTMLElement.prototype.scrollIntoView = jest.fn();
 
 export const mockAssistantAvailability: AssistantAvailability = {
+  hasSearchAILakeConfigurations: false,
   hasAssistantPrivilege: false,
   hasConnectorsAllPrivilege: true,
   hasConnectorsReadPrivilege: true,
