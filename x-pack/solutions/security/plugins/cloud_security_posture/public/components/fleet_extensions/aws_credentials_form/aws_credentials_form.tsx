@@ -131,7 +131,7 @@ const CloudFormationSetup = ({
           <li>
             <FormattedMessage
               id="xpack.csp.awsIntegration.cloudFormationSetupStep.hostRequirement"
-              defaultMessage='NIRO TO REMOVE !!! Ensure "New hosts" is selected in the "Where to add this integration?" section below'
+              defaultMessage='Ensure "New hosts" is selected in the "Where to add this integration?" section below'
             />
           </li>
           {accountType === AWS_ORGANIZATION_ACCOUNT ? (
