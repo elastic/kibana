@@ -6,54 +6,60 @@
  */
 
 import { NodeType } from '@kbn/wc-framework-types-common';
-import { NodeDefinition } from '@kbn/wc-framework-types-server';
-import type { ScopedNodeRunnerFn } from './types';
+import { GraphWorkflowDefinition } from '@kbn/wc-framework-types-server';
+import type { ScopedWorkflowRunnerFn } from './types';
 import {
   createMockWorkflowRunnerInternalContext,
-  createMockedState,
   getMockedPromptNodeTypeDefinition,
   MockedWorkflowRunnerInternalContext,
-  MockedState,
   MockedNodeTypeDefinition,
-  MockedNodeRunner,
 } from '../test_utils';
-import { createNodeRunner } from './run_node';
+import { createWorkflowRunner } from './run_workflow';
 
 describe('runNode', () => {
   let context: MockedWorkflowRunnerInternalContext;
-  let state: MockedState;
-  let runner: ScopedNodeRunnerFn;
+  let runner: ScopedWorkflowRunnerFn;
   let mockedPromptTypeDef: MockedNodeTypeDefinition;
-  let promptNodeRunner: MockedNodeRunner;
 
   beforeEach(() => {
-    state = createMockedState();
     context = createMockWorkflowRunnerInternalContext();
-    runner = createNodeRunner({ internalContext: context });
+    runner = createWorkflowRunner({ internalContext: context });
 
     // register node type for tests
     mockedPromptTypeDef = getMockedPromptNodeTypeDefinition();
     context.nodeRegistry.register(mockedPromptTypeDef);
-    promptNodeRunner = mockedPromptTypeDef.factory();
     mockedPromptTypeDef.factory.mockClear();
   });
 
-  it('instantiate the factory and calls the runner', async () => {
-    const nodeDefinition: NodeDefinition = {
+  it('runs the workflow definition', async () => {
+    const workflowDefinition: GraphWorkflowDefinition = {
       id: 'id',
-      type: NodeType.prompt,
-      configuration: {
-        prompt: 'foo',
-        output: 'bar',
-      },
+      name: 'Test workflow',
+      inputs: [],
+      outputs: [],
+      type: 'graph',
+      steps: [
+        {
+          id: 'id',
+          type: NodeType.prompt,
+          configuration: {
+            prompt: 'foo',
+            output: 'bar',
+          },
+        },
+      ],
     };
 
-    await runner({
-      nodeDefinition,
-      state,
+    const result = await runner({
+      workflowDefinition,
+      inputs: {
+        foo: 'bar',
+      },
     });
 
-    expect(mockedPromptTypeDef.factory).toHaveBeenCalledTimes(1);
-    expect(promptNodeRunner.run).toHaveBeenCalledTimes(1);
+    expect(result).toEqual({
+      runId: expect.any(String),
+      output: expect.any(Object),
+    });
   });
 });
