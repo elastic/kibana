@@ -2,7 +2,7 @@ name: Trigger Chromium Build
 
 on:
   issues:
-    types: [labeled, opened, reopened, edited]
+    types: [labeled, opened, reopened, edited, closed]
 
 permissions:
   contents: read
@@ -16,7 +16,7 @@ jobs:
   matches_label:
     if: | 
       github.event.label.name == 'trigger-chromium-build'
-      && github.event.issue.author_association == 'MEMBER'
+      && github.event.issue.author_association == 'MEMBER' && github.event.action != 'closed'
     runs-on: ubuntu-latest
     outputs:
       version_bump_config: ${{ steps.extract_version_bump_config.outputs.result }}
@@ -129,5 +129,5 @@ jobs:
             GITHUB_ISSUE_BASE_REPO=${{ github.event.repository.name }}/
             GITHUB_ISSUE_NUMBER=${{ github.event.issue.number }}
             GITHUB_ISSUE_LABELS=${{ github.event.issue.labels }} | jq -r '. | map(.name) | join(",")'
-            GITHUB_ISSUE_TRIGGER_USER=${{ github.event.issue.user.name }}
+            GITHUB_ISSUE_TRIGGER_USER=${{ github.event.issue.user.login }}
             PUPPETEER_VERSION=$(echo ${{ needs.matches_label.outputs.version_bump_config }} | jq -r '.puppeteer_version')

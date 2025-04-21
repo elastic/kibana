@@ -49,8 +49,8 @@ const $ = async (file, fileArguments, { printToScreen, ...options } = {}) => {
     });
 
     if (printToScreen) {
-      process.stdout.on('data', console.log);
-      process.stderr.on('data', console.error);
+      process.stdout?.on('data', console.log);
+      process.stderr?.on('data', console.error);
     }
   });
 
@@ -68,30 +68,70 @@ const getSha256Hash = async (filePath) => {
 };
 
 (async () => {
+  assert.ok(process.env.PUPPETEER_VERSION, 'PUPPETEER_VERSION is not defined');
+  assert.ok(process.env.KIBANA_MACHINE_USERNAME, 'KIBANA_MACHINE_USERNAME is not defined');
+  assert.ok(process.env.KIBANA_MACHINE_EMAIL, 'KIBANA_MACHINE_EMAIL is not defined');
+  assert.ok(process.env.GITHUB_ISSUE_NUMBER, 'GITHUB_ISSUE_NUMBER is not defined');
+  assert.ok(process.env.GITHUB_ISSUE_BASE_REPO, 'GITHUB_ISSUE_BASE_REPO is not defined');
+  assert.ok(process.env.GITHUB_ISSUE_BASE_OWNER, 'GITHUB_ISSUE_BASE_OWNER is not defined');
+  assert.ok(process.env.GITHUB_ISSUE_TRIGGER_USER, 'GITHUB_ISSUE_TRIGGER_USER is not defined');
+  assert.ok(process.env.BUILDKITE_BUILD_ID, 'BUILDKITE_BUILD_ID is not defined');
+  assert.ok(process.env.BUILDKITE_BUILD_URL, 'BUILDKITE_BUILD_URL is not defined');
+
   const buildRoot = process.cwd();
 
   const prTitle = `[Reporting] Update puppeteer to version ${process.env.PUPPETEER_VERSION}`;
 
-  const prSearchResult = await $('gh', [
-    'pr',
-    'list',
-    '--search',
-    prTitle,
-    '--state',
-    'open',
-    '--author',
-    process.env.KIBANA_MACHINE_USERNAME,
-    '--limit',
-    '1',
-    '--json',
-    'title',
-    '-q',
-    '.[].title',
-  ]);
-
-  assert.notStrictEqual(prSearchResult, prTitle, 'PR already exists');
-
+  // branch name which is unique to the current puppeteer version
   const branchName = `chore/puppeteer_${process.env.PUPPETEER_VERSION}_update`;
+
+  let openPRForVersionUpgrade = await $(
+    'gh',
+    [
+      'pr',
+      'list',
+      '--search',
+      String(`is:open is:pr head:${branchName} base:main`),
+      '--author',
+      process.env.KIBANA_MACHINE_USERNAME,
+      '--limit',
+      '1',
+      '--json',
+      'url',
+      '-q',
+      '.[].url',
+    ],
+    { printToScreen: true }
+  );
+
+  if (openPRForVersionUpgrade) {
+    console.log(
+      '---Found existing PR for version upgrade, skipping PR creation to leave a comment \n'
+    );
+
+    await $(
+      'ts-node',
+      [
+        resolve(buildRoot, '.buildkite/scripts/lifecycle/comment_on_pr.ts'),
+        '--message',
+        String(
+          `An existing PR has already been created to upgrade puppeteer to the requested version at ${openPRForVersionUpgrade}`
+        ),
+        '--issue-number',
+        process.env.GITHUB_ISSUE_NUMBER,
+        '--repository',
+        process.env.GITHUB_ISSUE_BASE_REPO,
+        '--repository-owner',
+        process.env.GITHUB_ISSUE_BASE_OWNER,
+        '--context',
+        'chromium-linux-build-pr-exists',
+        '--clear-previous',
+      ],
+      { printToScreen: true }
+    );
+
+    return;
+  }
 
   // configure git
   await $('git', ['config', '--global', 'user.name', process.env.KIBANA_MACHINE_USERNAME]);
@@ -154,7 +194,7 @@ const getSha256Hash = async (filePath) => {
   const config = {};
 
   await Promise.all(
-    matchedChromeConfig.downloads['chrome-headless-shell'].map(async (download) => {
+    (matchedChromeConfig?.downloads['chrome-headless-shell'] ?? []).map(async (download) => {
       if (
         download.platform === 'win64' ||
         download.platform === 'mac-x64' ||
@@ -193,11 +233,10 @@ const getSha256Hash = async (filePath) => {
     })
   );
 
+  console.log('--Attempting download of persisted artifacts for linux chromium from prior step');
+
   await Promise.all(
     ['arm64', 'x64'].map(async (arch) => {
-      console.log('--Attempting downloading artifacts from prior step');
-
-      // download the chromium build artefact from prior step
       await $(
         'buildkite-agent',
         [
@@ -211,15 +250,18 @@ const getSha256Hash = async (filePath) => {
         { printToScreen: true }
       );
 
-      const linuxBuildArtifact = await fg(`chromium-*_${arch}.*`);
+      const linuxVariantBuildArtifact = await fg(`chromium-*_${arch}.*`);
 
-      assert(linuxBuildArtifact.length, 'No linux build artifacts found');
+      assert(
+        linuxVariantBuildArtifact.length,
+        'linux build artifacts files from prior step not found...'
+      );
 
-      const match = linuxBuildArtifact.find((artifact) =>
+      const match = linuxVariantBuildArtifact.find((artifact) =>
         RegExp(String.raw`${arch}\.zip`).test(artifact)
       );
 
-      assert.ok(match, `No linux build artifacts found for ${arch}`);
+      assert.ok(match, `No artifacts containing linux headless shell binaries found for ${arch}`);
 
       const archiveChecksum = await getSha256Hash(match);
 
@@ -265,17 +307,12 @@ const getSha256Hash = async (filePath) => {
   );
 
   await $('git', ['add', '../paths.ts']);
-
   await $('git', ['commit', '-m', 'chore: update chromium paths']);
 
-  console.log('---Creating pull request \n');
-
   // create clean branch based off of main
-
   await $('git', ['checkout', 'main']);
-
   await $('git', ['checkout', '-b', branchName]);
-
+  // cherry-pick the two commits we made to the temp branch
   await $('git', ['cherry-pick', `${branchName}_temp~1`, `${branchName}_temp~0`], {
     printToScreen: true,
   });
@@ -284,7 +321,7 @@ const getSha256Hash = async (filePath) => {
     printToScreen: true,
   });
 
-  await $(
+  openPRForVersionUpgrade = await $(
     'gh',
     [
       'pr',
@@ -292,7 +329,7 @@ const getSha256Hash = async (filePath) => {
       '--title',
       prTitle,
       '--body',
-      `Closes #${process.env.GITHUB_PR_NUMBER} \n\n This PR updates puppeteer to version ${process.env.PUPPETEER_VERSION} and updates the chromium paths to the latest known good version for windows and mac where the chromium revision is ${chromiumRevision} and version is ${chromiumVersion}, for linux a custom build was triggered to build chromium binaries for both x64 and arm64. \n **NB** This PR should be tested before merging it in as puppeteer might have breaking changes we are not aware of`,
+      `Closes #${process.env.GITHUB_ISSUE_NUMBER} \n\n This PR updates puppeteer to version \`${process.env.PUPPETEER_VERSION}\` and updates the chromium paths to the latest known good version for windows and mac where the chromium revision is \`${chromiumRevision}\` and version is \`${chromiumVersion}\`.\nFor linux a custom build was triggered to build chromium binaries for both x64 and arm64. \n\n\n **NB** This PR should be tested before merging it in as puppeteer might have breaking changes we are not aware of`,
       '--base',
       'main',
       '--head',
@@ -301,6 +338,12 @@ const getSha256Hash = async (filePath) => {
       'release_note:skip',
       '--label',
       'Team:SharedUX',
+      '--label',
+      'backport',
+      '--label',
+      'Feature:Reporting:Framework',
+      '--assignee',
+      process.env.GITHUB_ISSUE_TRIGGER_USER,
     ],
     {
       printToScreen: true,
@@ -309,18 +352,22 @@ const getSha256Hash = async (filePath) => {
 
   console.log('---Providing feedback to issue \n');
 
-  await $('ts-node', [
-    `${resolve(buildRoot, '.buildkite/scripts/lifecycle/comment_on_pr.ts')}`,
-    '--message',
-    `Linux headless chromium build completed at: ${process.env.BUILDKITE_BUILD_URL} ✨💅🏾 \n\n See the PR linked to this issue`,
-    '--issue-number',
-    process.env.GITHUB_ISSUE_NUMBER,
-    '--repository',
-    process.env.GITHUB_ISSUE_BASE_REPO,
-    '--repository-owner',
-    process.env.GITHUB_ISSUE_BASE_OWNER,
-    '--context',
-    'chromium-linux-build-diff',
-    '--clear-previous',
-  ]);
+  await $(
+    'ts-node',
+    [
+      resolve(buildRoot, '.buildkite/scripts/lifecycle/comment_on_pr.ts'),
+      '--message',
+      String.raw`@${process.env.GITHUB_ISSUE_TRIGGER_USER} a PR has been created to upgrade puppeteer to the requested version at ${openPRForVersionUpgrade}`,
+      '--issue-number',
+      process.env.GITHUB_ISSUE_NUMBER,
+      '--repository',
+      process.env.GITHUB_ISSUE_BASE_REPO,
+      '--repository-owner',
+      process.env.GITHUB_ISSUE_BASE_OWNER,
+      '--context',
+      'chromium-linux-build-diff',
+      '--clear-previous',
+    ],
+    { printToScreen: true }
+  );
 })();

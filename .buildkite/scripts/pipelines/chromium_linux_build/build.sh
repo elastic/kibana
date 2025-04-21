@@ -23,22 +23,13 @@ ARTIFACT_QUERY="chromium-${CHROMIUM_COMMIT_HASH:0:7}-.*_$PLATFORM_VARIANT"
 ## impersonate service account that has access to our storage bucket 
 "$KIBANA_CHECKOUT_DIR/.buildkite/scripts/common/activate_service_account.sh" "kibana-ci-access-chromium-blds"
 
-# Try to download build artifact from the storage bucket if it exists
-gsutil ls $ARTIFACT_STAGING_STORAGE_BUCKET | grep "$ARTIFACT_QUERY" | while read -r file; do
-  gsutil cp "$file" .
-done
+# Query to determine if expected build artifact from the storage bucket exists
+artifacts=$(gsutil ls "$ARTIFACT_STAGING_STORAGE_BUCKET" | grep "$ARTIFACT_QUERY" || true)
 
-shopt -s nullglob
-files=("chromium-*")
-shopt -u nullglob
+if [[ -z "$artifacts" ]]; then
+  echo "No files found matching the query: $ARTIFACT_QUERY"
 
-if [ ${#files[@]} -gt 0 ]; then
-    echo "---Chromium build already exists in the bucket, skipping build"
-    # Upload the existing build artifact to buildkite so it can be used in the next steps, 
-    # and accessible without necessarily having access to the storage bucket itself
-    buildkite-agent artifact upload "chromium-*"
-else
-    echo "---Chromium build does not exist in the bucket, proceeding with the build"
+   echo "---Chromium build does not exist in the bucket, proceeding with the build"
 
     # Install the required packages for building chromium
     sudo apt-get update && \
@@ -68,6 +59,22 @@ else
     echo "---Persisting build artefact to buildkite for following steps"
 
     buildkite-agent artifact upload "$BUILD_ROOT_DIR/chromium/src/out/headless/chromium-*"
+
+else
+  echo "$artifacts" | while read -r file; do
+    gsutil cp "$file" .
+  done
+
+  shopt -s nullglob
+  files=("chromium-*")
+  shopt -u nullglob
+  
+  if [ ${#files[@]} -gt 0 ]; then
+    echo "---Chromium build already exists in the bucket, skipping build"
+    # Upload the existing build artifact to buildkite so it can be used in the next steps, 
+    # and accessible without necessarily having access to the storage bucket itself
+    buildkite-agent artifact upload "chromium-*"
+  fi
 fi
 
 echo "---Build completed"

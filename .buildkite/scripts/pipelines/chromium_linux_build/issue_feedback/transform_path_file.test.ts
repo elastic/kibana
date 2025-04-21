@@ -95,6 +95,10 @@ describe('transform_path_file', () => {
     }).to.throw('Expected updateConfig to be defined');
   });
 
+  // This test fails because a change was made to the `kbn-screenshotting-server/src/paths.ts` file that is not reflected
+  // in the transform being tested.
+  // See entry.js for an example on how you might verify that the script creates the right modification in the paths file,
+  // when you've made changes that match the expected output update the test snapshot to match the new output
   it('transform output matches our expectation', () => {
     const output = applyTransform(
       pathFileTransform,
