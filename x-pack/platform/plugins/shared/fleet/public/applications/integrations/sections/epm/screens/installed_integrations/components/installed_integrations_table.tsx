@@ -139,6 +139,12 @@ export const InstalledIntegrationsTable: React.FunctionComponent<{
             ),
           },
           {
+            name: i18n.translate('xpack.fleet.epmInstalledIntegrations.dashboardsColumnTitle', {
+              defaultMessage: 'Dashboards',
+            }),
+            render: () => '-',
+          },
+          {
             name: i18n.translate(
               'xpack.fleet.epmInstalledIntegrations.attachedPoliciesColumnTitle',
               {
