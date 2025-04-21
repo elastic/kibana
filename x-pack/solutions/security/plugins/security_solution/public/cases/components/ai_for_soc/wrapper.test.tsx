@@ -6,14 +6,8 @@
  */
 
 import React from 'react';
-import { act, render, screen } from '@testing-library/react';
-import {
-  AiForSOCAlertsTable,
-  CONTENT_TEST_ID,
-  ERROR_TEST_ID,
-  LOADING_PROMPT_TEST_ID,
-  SKELETON_TEST_ID,
-} from './wrapper';
+import { render, screen, waitFor } from '@testing-library/react';
+import { AiForSOCAlertsTable, CONTENT_TEST_ID, ERROR_TEST_ID, SKELETON_TEST_ID } from './wrapper';
 import { useKibana } from '../../../common/lib/kibana';
 import { TestProviders } from '../../../common/mock';
 import { useFetchIntegrations } from '../../../detections/hooks/alert_summary/use_fetch_integrations';
@@ -57,13 +51,10 @@ describe('<AiForSOCAlertsTab />', () => {
       },
     });
 
-    await act(async () => {
-      const { getByTestId } = render(
-        <AiForSOCAlertsTable id={id} onLoaded={onLoaded} query={query} />
-      );
+    render(<AiForSOCAlertsTable id={id} onLoaded={onLoaded} query={query} />);
 
-      expect(getByTestId(LOADING_PROMPT_TEST_ID)).toBeInTheDocument();
-      expect(getByTestId(SKELETON_TEST_ID)).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByTestId(SKELETON_TEST_ID)).toBeInTheDocument();
     });
   });
 
@@ -86,7 +77,6 @@ describe('<AiForSOCAlertsTab />', () => {
 
     render(<AiForSOCAlertsTable id={id} onLoaded={onLoaded} query={query} />);
 
-    expect(await screen.findByTestId(LOADING_PROMPT_TEST_ID)).toBeInTheDocument();
     expect(await screen.findByTestId(SKELETON_TEST_ID)).toBeInTheDocument();
   });
 
@@ -109,7 +99,6 @@ describe('<AiForSOCAlertsTab />', () => {
 
     render(<AiForSOCAlertsTable id={id} onLoaded={onLoaded} query={query} />);
 
-    expect(await screen.findByTestId(LOADING_PROMPT_TEST_ID)).toBeInTheDocument();
     expect(await screen.findByTestId(ERROR_TEST_ID)).toHaveTextContent(
       'Unable to create data view'
     );
@@ -141,7 +130,6 @@ describe('<AiForSOCAlertsTab />', () => {
       </TestProviders>
     );
 
-    expect(await screen.findByTestId(LOADING_PROMPT_TEST_ID)).toBeInTheDocument();
     expect(await screen.findByTestId(CONTENT_TEST_ID)).toBeInTheDocument();
   });
 });

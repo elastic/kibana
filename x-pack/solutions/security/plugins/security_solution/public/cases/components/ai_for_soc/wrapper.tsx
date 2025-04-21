@@ -7,12 +7,7 @@
 
 import React, { memo, useEffect, useMemo, useState } from 'react';
 import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
-import {
-  type EuiDataGridColumn,
-  EuiEmptyPrompt,
-  EuiSkeletonLoading,
-  EuiSkeletonRectangle,
-} from '@elastic/eui';
+import { type EuiDataGridColumn, EuiEmptyPrompt, EuiSkeletonRectangle } from '@elastic/eui';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { i18n } from '@kbn/i18n';
 import type { Alert } from '@kbn/alerting-types';
@@ -28,7 +23,6 @@ const DATAVIEW_ERROR = i18n.translate(
   }
 );
 
-export const LOADING_PROMPT_TEST_ID = 'cases-alert-loading-prompt';
 export const ERROR_TEST_ID = 'cases-alert-error';
 export const SKELETON_TEST_ID = 'cases-alert-skeleton';
 export const CONTENT_TEST_ID = 'cases-alert-content';
@@ -95,36 +89,34 @@ export const AiForSOCAlertsTable = memo(({ id, onLoaded, query }: AiForSOCAlerts
   }, [data.dataViews]);
 
   return (
-    <EuiSkeletonLoading
-      data-test-subj={LOADING_PROMPT_TEST_ID}
+    <EuiSkeletonRectangle
+      data-test-subj={SKELETON_TEST_ID}
+      height={400}
       isLoading={integrationIsLoading || dataViewLoading}
-      loadingContent={
-        <EuiSkeletonRectangle data-test-subj={SKELETON_TEST_ID} height={400} width="100%" />
-      }
-      loadedContent={
-        <>
-          {!dataView || !dataView.id ? (
-            <EuiEmptyPrompt
-              color="danger"
-              data-test-subj={ERROR_TEST_ID}
-              iconType="error"
-              title={<h2>{DATAVIEW_ERROR}</h2>}
+      width="100%"
+    >
+      <>
+        {!dataView || !dataView.id ? (
+          <EuiEmptyPrompt
+            color="danger"
+            data-test-subj={ERROR_TEST_ID}
+            iconType="error"
+            title={<h2>{DATAVIEW_ERROR}</h2>}
+          />
+        ) : (
+          <div data-test-subj={CONTENT_TEST_ID}>
+            <Table
+              dataView={dataView}
+              id={id}
+              onLoaded={onLoaded}
+              packages={installedPackages}
+              query={query}
+              ruleResponse={ruleResponse}
             />
-          ) : (
-            <div data-test-subj={CONTENT_TEST_ID}>
-              <Table
-                dataView={dataView}
-                id={id}
-                onLoaded={onLoaded}
-                packages={installedPackages}
-                query={query}
-                ruleResponse={ruleResponse}
-              />
-            </div>
-          )}
-        </>
-      }
-    />
+          </div>
+        )}
+      </>
+    </EuiSkeletonRectangle>
   );
 });
 
