@@ -10,3 +10,4 @@ export { createMockedState, type MockedState } from './state';
 export { createMockedNodeEventReporter, type NodeEventReporterMock } from './event_reporter';
 export { createExecutionState } from './execution_state';
 export { createMockedTool, type MockedTool } from './tools';
+export { createMockedModel, type MockedModel } from './models';
