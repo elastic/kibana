@@ -30,9 +30,16 @@ export const getLoopNodeTypeDefinition = (): NodeTypeDefinition<LoopNodeConfigTy
           const { steps, output } = input;
 
           let inputList = interpolateValue(input.inputList, state);
-          // TODO: assert inputList is a list or string
           if (typeof inputList === 'string') {
             inputList = state.get(inputList);
+          }
+
+          if (!Array.isArray(inputList)) {
+            throw new WorkflowExecutionError(
+              `Interpolating inputList parameter (${input.inputList}) resulted on a non-array variable`,
+              'invalidConfiguration',
+              { state: executionState }
+            );
           }
 
           const itemVar = interpolateValue(input.itemVar, state);
