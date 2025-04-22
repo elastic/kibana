@@ -54,7 +54,8 @@ export function getAlertsForNotification<
   for (const id of keys(currentRecoveredAlerts)) {
     const alert = recoveredAlerts[id];
     // if alert has not reached the alertDelay threshold don't recover the alert
-    if (alert.getActiveCount() < alertDelay) {
+    const activeCount = alert.getActiveCount();
+    if (activeCount > 0 && activeCount < alertDelay) {
       // remove from recovered alerts
       delete recoveredAlerts[id];
       delete currentRecoveredAlerts[id];
