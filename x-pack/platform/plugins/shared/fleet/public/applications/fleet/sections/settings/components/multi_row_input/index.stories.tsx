@@ -5,22 +5,19 @@
  * 2.0.
  */
 
-import { useState } from '@storybook/addons';
-import { addParameters } from '@storybook/react';
+import { useState } from '@storybook/preview-api';
+import type { StoryObj } from '@storybook/react';
 import React from 'react';
 
 import { MultiRowInput as Component } from '.';
 
-addParameters({
-  options: {
-    enableShortcuts: false,
-  },
-});
-
 export default {
   component: Component,
   title: 'Sections/Fleet/Settings/MultiRowInput',
-};
+  options: {
+    enableShortcuts: false,
+  },
+} as StoryObj;
 
 interface Args {
   width: number;
@@ -36,7 +33,7 @@ const args: Args = {
   disabled: false,
 };
 
-export const HostsInput = ({ width, label, helpText, disabled }: Args) => {
+const HostsInputComponent = ({ width, label, helpText, disabled }: Args) => {
   const [value, setValue] = useState<string[]>([]);
   return (
     <div style={{ width }}>
@@ -51,31 +48,39 @@ export const HostsInput = ({ width, label, helpText, disabled }: Args) => {
     </div>
   );
 };
-HostsInput.args = args;
 
-export const HostsInputDisabled = ({ value }: { value: string[] }) => {
-  return (
-    <div style={{ maxWidth: '350px' }}>
-      <Component
-        id="test-host-input"
-        helpText={'Host input help text'}
-        value={value}
-        onChange={() => {}}
-        label={'Host input label'}
-        disabled={true}
-      />
-    </div>
-  );
+export const HostsInput = {
+  render: (params: Args) => <HostsInputComponent {...params} />,
+
+  args,
 };
 
-HostsInputDisabled.args = { value: ['http://test1.fr', 'http://test2.fr'] };
-HostsInputDisabled.argTypes = {
-  value: {
-    control: { type: 'object' },
+export const HostsInputDisabled = {
+  render: ({ value }: { value: string[] }) => {
+    return (
+      <div style={{ maxWidth: '350px' }}>
+        <Component
+          id="test-host-input"
+          helpText={'Host input help text'}
+          value={value}
+          onChange={() => {}}
+          label={'Host input label'}
+          disabled={true}
+        />
+      </div>
+    );
+  },
+
+  args: { value: ['http://test1.fr', 'http://test2.fr'] },
+
+  argTypes: {
+    value: {
+      control: { type: 'object' },
+    },
   },
 };
 
-export const HostsInputUrl = () => {
+const HostsInputUrlComponent = () => {
   const [value, setValue] = useState<string[]>([]);
   return (
     <div style={{ maxWidth: '350px' }}>
@@ -92,9 +97,14 @@ export const HostsInputUrl = () => {
   );
 };
 
-HostsInputUrl.args = { value: ['https://test1.com', 'https://test2.com', 'https://test3.com'] };
-HostsInputUrl.argTypes = {
-  value: {
-    control: { type: 'object' },
+export const HostsInputUrl = {
+  render: () => <HostsInputUrlComponent />,
+
+  args: { value: ['https://test1.com', 'https://test2.com', 'https://test3.com'] },
+
+  argTypes: {
+    value: {
+      control: { type: 'object' },
+    },
   },
 };

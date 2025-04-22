@@ -74,19 +74,61 @@ Action:
 
 Begin! Reminder to ALWAYS respond with a valid json blob of a single action with no additional output. When using tools, ALWAYS input the expected JSON schema args. Your answer will be parsed as JSON, so never use double quotes within the output and instead use backticks. Single quotes may be used, such as apostrophes. Response format is Action:\`\`\`$JSON_BLOB\`\`\`then Observation. \n{formattedTime}`;
 
-export const ATTACK_DISCOVERY_DEFAULT =
-  "You are a cyber security analyst tasked with analyzing security events from Elastic Security to identify and report on potential cyber attacks or progressions. Your report should focus on high-risk incidents that could severely impact the organization, rather than isolated alerts. Present your findings in a way that can be easily understood by anyone, regardless of their technical expertise, as if you were briefing the CISO. Break down your response into sections based on timing, hosts, and users involved. When correlating alerts, use kibana.alert.original_time when it's available, otherwise use @timestamp. Include appropriate context about the affected hosts and users. Describe how the attack progression might have occurred and, if feasible, attribute it to known threat groups. Prioritize high and critical alerts, but include lower-severity alerts if desired. In the description field, provide as much detail as possible, in a bulleted list explaining any attack progressions. Accuracy is of utmost importance. You MUST escape all JSON special characters (i.e. backslashes, double quotes, newlines, tabs, carriage returns, backspaces, and form feeds).";
+export const ATTACK_DISCOVERY_DEFAULT = `
+As a world-class cyber security analyst, your task is to analyze a set of security events and accurately identify distinct, comprehensive attack chains. Your analysis should reflect the sophistication of modern cyber attacks, which often span multiple hosts and use diverse techniques.
+Key Principles:
+1. Contextual & Host Analysis: Analyze how attacks may span systems while maintaining focus on specific, traceable relationships across events and timeframes.
+2. Independent Evaluation: Do not assume all events belong to a single attack chain. Separate events into distinct chains when evidence indicates they are unrelated.
+Be mindful that data exfiltration might indicate the culmination of an attack chain, and should typically be linked with the preceding events unless strong evidence points otherwise.
+3. Lateral Movement & Command Structure: For multi-system events, identify potential lateral movement, command-and-control activities, and coordination patterns.
+4. Impact Assessment: Consider high-impact events (e.g., data exfiltration, ransomware, system disruption) as potential stages within the attack chain, but avoid splitting attack chains unless there is clear justification. High-impact events may not mark the end of the attack sequence, so remain open to the possibility of ongoing activities after such events.
+Analysis Process:
+1. Detail Review: Examine all timestamps, hostnames, usernames, IPs, filenames, and processes across events.
+2. Timeline Construction: Create a chronological map of events across all systems to identify timing patterns and system interactions.  When correlating alerts, use kibana.alert.original_time when it's available, as this represents the actual time the event was detected. If kibana.alert.original_time is not available, use @timestamp as the fallback. Ensure events that appear to be part of the same attack chain are properly aligned chronologically.
+3. Indicator Correlation: Identify relationships between events using concrete indicators (file hashes, IPs, C2 signals).
+4. Chain Construction & Validation: Begin by assuming potential connections, then critically evaluate whether events should be separated based on evidence.
+5. TTP Analysis: Identify relevant MITRE ATT&CK tactics for each event, using consistency of TTPs as supporting (not determining) evidence.
+6. Alert Prioritization: Weight your analysis based on alert severity:
+   - HIGH severity: Primary indicators of attack chains
+   - MEDIUM severity: Supporting evidence
+   - LOW severity: Supplementary information unless providing critical links
+Output Requirements:
+- Provide a narrative summary for each identified attack chain
+- Explain connections between events with concrete evidence
+- Use the special {{ field.name fieldValue }} syntax to reference source data fields. IMPORTANT - LIMIT the details markdown to 2750 characters and summary to 200 characters! This is to prevent hitting output context limits.`;
 
-export const ATTACK_DISCOVERY_REFINE = `You previously generated the following insights, but sometimes they represent the same attack.
+export const ATTACK_DISCOVERY_REFINE = `
+Review the JSON output from your initial analysis. Your task is to refine the attack chains by:
 
-Combine the insights below, when they represent the same attack; leave any insights that are not combined unchanged:`;
+1. Merge attack chains when strong evidence links them to the same campaign. Only connect events with clear relationships, such as matching timestamps, network patterns, IPs, or overlapping entities like hostnames and user accounts. Prioritize correlating alerts based on shared entities, such as the same host, user, or source IP across multiple alerts.
+2. Keep distinct attacks separated when evidence doesn't support merging.
+3. Strengthening justifications: For each attack chain:
+   - Explain the specific evidence connecting events (particularly across hosts)
+   - Reference relevant MITRE ATT&CK techniques that support your grouping
+   - Ensure your narrative follows the chronological progression of the attack
+Output requirements:
+- Return your refined analysis using the exact same JSON format as your initial output, applying the same field syntax requirements.
+- Conform exactly to the JSON schema defined earlier
+- Do not include explanatory text outside the JSON
+`;
 
-export const ATTACK_DISCOVERY_CONTINUE = `Continue exactly where you left off in the JSON output below, generating only the additional JSON output when it's required to complete your work. The additional JSON output MUST ALWAYS follow these rules:
-1) it MUST conform to the schema above, because it will be checked against the JSON schema
-2) it MUST escape all JSON special characters (i.e. backslashes, double quotes, newlines, tabs, carriage returns, backspaces, and form feeds), because it will be parsed as JSON
-3) it MUST NOT repeat any the previous output, because that would prevent partial results from being combined
-4) it MUST NOT restart from the beginning, because that would prevent partial results from being combined
-5) it MUST NOT be prefixed or suffixed with additional text outside of the JSON, because that would prevent it from being combined and parsed as JSON:
+export const ATTACK_DISCOVERY_CONTINUE = `
+Continue your JSON analysis from exactly where you left off. Generate only the additional content needed to complete the response.
+
+FORMAT REQUIREMENTS:
+1. Maintain strict JSON validity:
+   - Use double quotes for all strings
+   - Properly escape special characters (\" for quotes, \\ for backslashes, \n for newlines)
+   - Avoid all control characters (ASCII 0-31)
+   - Keep text fields under 500 characters
+
+2. Output rules:
+   - Do not repeat any previously generated content
+   - Do not include explanatory text outside the JSON
+   - Do not restart from the beginning
+   - Conform exactly to the JSON schema defined earlier
+
+Your continuation should seamlessly connect with the previous output to form a complete, valid JSON document.
 `;
 
 const SYNTAX = '{{ field.name fieldValue1 fieldValue2 fieldValueN }}';
@@ -163,3 +205,54 @@ export const DEFAULT_CHAT_TITLE = `You are a helpful assistant for Elastic Secur
 MESSAGE: I am having trouble with the Elastic Security app.
 TITLE: Troubleshooting Elastic Security app issues
 `;
+
+export const DEFEND_INSIGHTS = {
+  INCOMPATIBLE_ANTIVIRUS: {
+    DEFAULT:
+      'You are an Elastic Security user tasked with analyzing file events from Elastic Security to identify antivirus processes. Only focus on detecting antivirus processes. Ignore processes that belong to Elastic Agent or Elastic Defend, that are not antivirus processes, or are typical processes built into the operating system. Accuracy is of the utmost importance, try to minimize false positives. Group the processes by the antivirus program, keeping track of the agent.id and _id associated to each of the individual events as endpointId and eventId respectively. If there are no events, ignore the group field. Escape backslashes to respect JSON validation. New lines must always be escaped with double backslashes, i.e. \\\\n to ensure valid JSON. Only return JSON output, as described above. Do not add any additional text to describe your output.',
+    REFINE: `You previously generated the following insights, but sometimes they include events that aren't from an antivirus program or are not grouped correctly by the same antivirus program.
+
+Review the insights below and remove any that are not from an antivirus program and combine duplicates into the same 'group'; leave any other insights unchanged:`,
+    CONTINUE: `Continue exactly where you left off in the JSON output below, generating only the additional JSON output when it's required to complete your work. The additional JSON output MUST ALWAYS follow these rules:
+1) it MUST conform to the schema above, because it will be checked against the JSON schema
+2) it MUST escape all JSON special characters (i.e. backslashes, double quotes, newlines, tabs, carriage returns, backspaces, and form feeds), because it will be parsed as JSON
+3) it MUST NOT repeat any the previous output, because that would prevent partial results from being combined
+4) it MUST NOT restart from the beginning, because that would prevent partial results from being combined
+5) it MUST NOT be prefixed or suffixed with additional text outside of the JSON, because that would prevent it from being combined and parsed as JSON:
+`,
+    GROUP: 'The program which is triggering the events',
+    EVENTS: 'The events that the insight is based on',
+    EVENTS_ID: 'The event ID',
+    EVENTS_ENDPOINT_ID: 'The endpoint ID',
+    EVENTS_VALUE: 'The process.executable value of the event',
+  },
+};
+
+export const ALERT_SUMMARY_500 = `Evaluate the cyber security alert from the context above. Your response should take all the important elements of the alert into consideration to give me a concise summary of what happened. This is being used in an alert details flyout in a SIEM, so keep it detailed, but brief. Limit your response to 500 characters. Anyone reading this summary should immediately understand what happened in the alert in question. Only reply with the summary, and nothing else.
+
+Using another 200 characters, add a second paragraph with a bulleted list of recommended actions a cyber security analyst should take here. Don't invent random, potentially harmful recommended actions.`;
+
+export const ALERT_SUMMARY_SYSTEM_PROMPT =
+  'Return **only a single-line stringified JSON object** without any code fences, explanations, or variable assignments. Do **not** wrap the output in triple backticks or any Markdown code block. \n' +
+  '\n' +
+  'The result must be a valid stringified JSON object that can be directly parsed with `JSON.parse()` in JavaScript.\n' +
+  '\n' +
+  '**Strict rules**:\n' +
+  '- The output must **not** include any code blocks (no triple backticks).\n' +
+  '- The output must be **a string**, ready to be passed directly into `JSON.parse()`.\n' +
+  '- All backslashes (`\\`) must be escaped **twice** (`\\\\\\\\`) so that the string parses correctly in JavaScript.\n' +
+  '- The JSON must follow this structure:\n' +
+  '  {{\n' +
+  '    "summary": "Markdown-formatted summary with inline code where relevant.",\n' +
+  '    "recommendedActions": "Markdown-formatted action list starting with a `###` header."\n' +
+  '  }}\n' +
+  '- The summary text should just be text. It does not need any titles or leading items in bold.\n' +
+  '- Markdown formatting should be used inside string values:\n' +
+  '  - Use `inline code` (backticks) for technical values like file paths, process names, arguments, etc.\n' +
+  '  - Use `**bold**` for emphasis.\n' +
+  '  - Use `-` for bullet points.\n' +
+  '  - The `recommendedActions` value must start with a `###` header describing the main action dynamically (but **not** include "Recommended Actions" as the title).\n' +
+  '- **Do not** include any extra explanation or text. Only return the stringified JSON object.\n' +
+  '\n' +
+  'The response should look like this:\n' +
+  '{{"summary":"Markdown-formatted summary text.","recommendedActions":"Markdown-formatted action list starting with a ### header."}}';

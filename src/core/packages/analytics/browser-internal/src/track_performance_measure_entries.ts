@@ -83,7 +83,8 @@ export function trackPerformanceMeasureEntries(analytics: AnalyticsClient, isDev
             ...customMetrics,
             meta: {
               query_range_secs: meta?.queryRangeSecs,
-              query_offset_secs: meta?.queryOffsetSecs,
+              query_from_offset_secs: meta?.queryFromOffsetSecs,
+              query_to_offset_secs: meta?.queryToOffsetSecs,
               description: description?.slice(0, MAX_DESCRIPTION_LENGTH),
               is_initial_load: meta?.isInitialLoad,
             },

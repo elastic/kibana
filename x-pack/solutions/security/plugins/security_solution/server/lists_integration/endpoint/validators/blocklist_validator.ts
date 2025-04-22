@@ -298,7 +298,7 @@ export class BlocklistValidator extends BaseValidator {
       }
     }
 
-    await this.validateByPolicyItem(updatedItem);
+    await this.validateByPolicyItem(updatedItem, currentItem);
     await this.validateUpdateOwnerSpaceIds(updatedItem, currentItem);
     await this.validateCanUpdateItemInActiveSpace(_updatedItem, currentItem);
 

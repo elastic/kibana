@@ -7,70 +7,50 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiTab, EuiTabs, EuiText, EuiSpacer } from '@elastic/eui';
 import type { FilterManager } from '@kbn/data-plugin/public';
-import type { Filter, Query } from '@kbn/es-query';
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 
 import { AlertSelectionQuery } from './alert_selection_query';
 import { AlertSelectionRange } from './alert_selection_range';
 import { getTabs } from './helpers/get_tabs';
 import * as i18n from './translations';
+import { getMaxAlerts } from './helpers/get_max_alerts';
+
+import type { AlertsSelectionSettings } from '../types';
 
 interface Props {
   alertsPreviewStackBy0: string;
   alertSummaryStackBy0: string;
-  end: string;
   filterManager: FilterManager;
-  filters: Filter[];
-  maxAlerts: number;
-  query: Query;
+  onSettingsChanged?: (settings: AlertsSelectionSettings) => void;
+  settings: AlertsSelectionSettings;
   setAlertsPreviewStackBy0: React.Dispatch<React.SetStateAction<string>>;
   setAlertSummaryStackBy0: React.Dispatch<React.SetStateAction<string>>;
-  setEnd: React.Dispatch<React.SetStateAction<string>>;
-  setMaxAlerts: React.Dispatch<React.SetStateAction<string>>;
-  setQuery: React.Dispatch<React.SetStateAction<Query>>;
-  setStart: React.Dispatch<React.SetStateAction<string>>;
-  start: string;
 }
 
 const AlertSelectionComponent: React.FC<Props> = ({
   alertsPreviewStackBy0,
   alertSummaryStackBy0,
-  end,
   filterManager,
-  filters,
-  maxAlerts,
-  query,
+  onSettingsChanged,
+  settings,
   setAlertsPreviewStackBy0,
   setAlertSummaryStackBy0,
-  setEnd,
-  setMaxAlerts,
-  setQuery,
-  setStart,
-  start,
 }) => {
   const tabs = useMemo(
     () =>
       getTabs({
         alertsPreviewStackBy0,
         alertSummaryStackBy0,
-        end,
-        filters,
-        maxAlerts,
-        query,
+        settings,
         setAlertsPreviewStackBy0,
         setAlertSummaryStackBy0,
-        start,
       }),
     [
       alertsPreviewStackBy0,
       alertSummaryStackBy0,
-      end,
-      filters,
-      maxAlerts,
-      query,
+      settings,
       setAlertsPreviewStackBy0,
       setAlertSummaryStackBy0,
-      start,
     ]
   );
 
@@ -79,6 +59,17 @@ const AlertSelectionComponent: React.FC<Props> = ({
   const selectedTabContent = useMemo(
     () => tabs.find((obj) => obj.id === selectedTabId)?.content,
     [selectedTabId, tabs]
+  );
+
+  const onMaxAlertsChanged = useCallback(
+    (value: string) => {
+      const maxAlerts = getMaxAlerts(value);
+      onSettingsChanged?.({
+        ...settings,
+        size: maxAlerts,
+      });
+    },
+    [onSettingsChanged, settings]
   );
 
   return (
@@ -95,14 +86,9 @@ const AlertSelectionComponent: React.FC<Props> = ({
 
       <EuiFlexItem grow={false}>
         <AlertSelectionQuery
-          end={end}
           filterManager={filterManager}
-          filters={filters}
-          query={query}
-          setEnd={setEnd}
-          setQuery={setQuery}
-          setStart={setStart}
-          start={start}
+          settings={settings}
+          onSettingsChanged={onSettingsChanged}
         />
       </EuiFlexItem>
 
@@ -111,7 +97,7 @@ const AlertSelectionComponent: React.FC<Props> = ({
       </EuiFlexItem>
 
       <EuiFlexItem grow={false}>
-        <AlertSelectionRange maxAlerts={maxAlerts} setMaxAlerts={setMaxAlerts} />
+        <AlertSelectionRange maxAlerts={settings.size} setMaxAlerts={onMaxAlertsChanged} />
       </EuiFlexItem>
 
       <EuiFlexItem grow={false}>

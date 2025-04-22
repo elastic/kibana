@@ -18,6 +18,7 @@ import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { DashboardLocatorParams } from '@kbn/dashboard-plugin/public';
 import { useKibana } from '../../hooks/use_kibana';
 import { tagListToReferenceList } from './to_reference_list';
+import { useTimefilter } from '../../hooks/use_timefilter';
 
 export function DashboardsTable({
   dashboards,
@@ -25,7 +26,9 @@ export function DashboardsTable({
   selectedDashboards,
   setSelectedDashboards,
   loading,
+  entityId,
 }: {
+  entityId?: string;
   loading: boolean;
   dashboards: SanitizedDashboardAsset[] | undefined;
   compact?: boolean;
@@ -33,15 +36,18 @@ export function DashboardsTable({
   setSelectedDashboards?: (dashboards: SanitizedDashboardAsset[]) => void;
 }) {
   const {
+    core: { application },
+    services: { telemetryClient },
     dependencies: {
       start: {
         savedObjectsTagging: { ui: savedObjectsTaggingUi },
         share,
-        data,
       },
     },
   } = useKibana();
-  const { timeRange } = data.query.timefilter.timefilter.useTimefilter();
+
+  const { timeState } = useTimefilter();
+
   const dashboardLocator = share.url.locators.get<DashboardLocatorParams>(DASHBOARD_APP_LOCATOR);
   const columns = useMemo((): Array<EuiBasicTableColumn<SanitizedDashboardAsset>> => {
     return [
@@ -50,12 +56,26 @@ export function DashboardsTable({
         name: i18n.translate('xpack.streams.dashboardTable.dashboardNameColumnTitle', {
           defaultMessage: 'Dashboard name',
         }),
-        render: (_, { label, id }) => (
+        render: (_, { title, id }) => (
           <EuiLink
             data-test-subj="streamsAppColumnsLink"
-            href={dashboardLocator?.getRedirectUrl({ dashboardId: id, timeRange } || '')}
+            onClick={() => {
+              if (entityId) {
+                telemetryClient.trackAssetClick({
+                  asset_id: id,
+                  asset_type: 'dashboard',
+                  name: entityId,
+                });
+              }
+              const url = dashboardLocator?.getRedirectUrl(
+                { dashboardId: id, timeRange: timeState.timeRange } || ''
+              );
+              if (url) {
+                application.navigateToUrl(url);
+              }
+            }}
           >
-            {label}
+            {title}
           </EuiLink>
         ),
       },
@@ -79,7 +99,15 @@ export function DashboardsTable({
           ] satisfies Array<EuiBasicTableColumn<SanitizedDashboardAsset>>)
         : []),
     ];
-  }, [compact, dashboardLocator, savedObjectsTaggingUi, timeRange]);
+  }, [
+    application,
+    compact,
+    dashboardLocator,
+    entityId,
+    savedObjectsTaggingUi,
+    telemetryClient,
+    timeState,
+  ]);
 
   const items = useMemo(() => {
     return dashboards ?? [];

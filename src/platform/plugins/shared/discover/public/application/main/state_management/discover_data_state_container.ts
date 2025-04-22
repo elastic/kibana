@@ -8,14 +8,22 @@
  */
 
 import type { Observable } from 'rxjs';
-import { BehaviorSubject, filter, map, mergeMap, share, Subject, tap } from 'rxjs';
+import {
+  BehaviorSubject,
+  filter,
+  map,
+  mergeMap,
+  ReplaySubject,
+  share,
+  Subject,
+  switchMap,
+  tap,
+} from 'rxjs';
 import type { AutoRefreshDoneFn } from '@kbn/data-plugin/public';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
-import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import { isOfAggregateQueryType } from '@kbn/es-query';
-import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
@@ -31,8 +39,10 @@ import { fetchAll, fetchMoreDocuments } from '../data_fetching/fetch_all';
 import { sendResetMsg } from '../hooks/use_saved_search_messages';
 import { getFetch$ } from '../data_fetching/get_fetch_observable';
 import { getDefaultProfileState } from './utils/get_default_profile_state';
-import type { InternalStateStore, RuntimeStateManager } from './redux';
-import { internalStateActions } from './redux';
+import type { InternalStateStore, RuntimeStateManager, TabActionInjector, TabState } from './redux';
+import { internalStateActions, selectTabRuntimeState } from './redux';
+import { buildEsqlFetchSubscribe } from './utils/build_esql_fetch_subscribe';
+import type { DiscoverSavedSearchContainer } from './discover_saved_search_container';
 
 export interface SavedSearchData {
   main$: DataMain$;
@@ -67,14 +77,6 @@ export interface DataDocumentsMsg extends DataMsg {
 
 export interface DataTotalHitsMsg extends DataMsg {
   result?: number;
-}
-
-export interface DataChartsMessage extends DataMsg {
-  response?: SearchResponse;
-}
-
-export interface DataAvailableFieldsMsg extends DataMsg {
-  fields?: string[];
 }
 
 export interface DiscoverDataStateContainer {
@@ -132,6 +134,7 @@ export interface DiscoverDataStateContainer {
    */
   getInitialFetchStatus: () => FetchStatus;
 }
+
 /**
  * Container responsible for fetching of data in Discover Main
  * Either by triggering requests to Elasticsearch directly, or by
@@ -143,21 +146,25 @@ export function getDataStateContainer({
   appStateContainer,
   internalState,
   runtimeStateManager,
-  getSavedSearch,
+  savedSearchContainer,
   setDataView,
+  injectCurrentTab,
+  getCurrentTab,
 }: {
   services: DiscoverServices;
   searchSessionManager: DiscoverSearchSessionManager;
   appStateContainer: DiscoverAppStateContainer;
   internalState: InternalStateStore;
   runtimeStateManager: RuntimeStateManager;
-  getSavedSearch: () => SavedSearch;
+  savedSearchContainer: DiscoverSavedSearchContainer;
   setDataView: (dataView: DataView) => void;
+  injectCurrentTab: TabActionInjector;
+  getCurrentTab: () => TabState;
 }): DiscoverDataStateContainer {
   const { data, uiSettings, toastNotifications, profilesManager } = services;
   const { timefilter } = data.query.timefilter;
   const inspectorAdapters = { requests: new RequestAdapter() };
-  const fetchChart$ = new Subject<void>();
+  const fetchChart$ = new ReplaySubject<void>(1);
   const disableNextFetchOnStateChange$ = new BehaviorSubject(false);
 
   /**
@@ -169,7 +176,7 @@ export function getDataStateContainer({
   const getInitialFetchStatus = () => {
     const shouldSearchOnPageLoad =
       uiSettings.get<boolean>(SEARCH_ON_PAGE_LOAD_SETTING) ||
-      getSavedSearch().id !== undefined ||
+      savedSearchContainer.getState().id !== undefined ||
       !timefilter.getRefreshInterval().pause ||
       searchSessionManager.hasSearchSessionIdInURL();
     return shouldSearchOnPageLoad ? FetchStatus.LOADING : FetchStatus.UNINITIALIZED;
@@ -185,6 +192,7 @@ export function getDataStateContainer({
     documents$: new BehaviorSubject<DataDocumentsMsg>(initialState),
     totalHits$: new BehaviorSubject<DataTotalHitsMsg>(initialState),
   };
+
   // This is debugging code, helping you to understand which messages are sent to the data observables
   // Adding a debugger in the functions can be helpful to understand what triggers a message
   // dataSubjects.main$.subscribe((msg) => addLog('dataSubjects.main$', msg));
@@ -192,11 +200,26 @@ export function getDataStateContainer({
   // dataSubjects.totalHits$.subscribe((msg) => addLog('dataSubjects.totalHits$', msg););
   // Add window.ELASTIC_DISCOVER_LOGGER = 'debug' to see messages in console
 
-  let autoRefreshDone: AutoRefreshDoneFn | undefined | null = null;
+  /**
+   * Subscribes to ES|QL fetches to handle state changes when loading or before a fetch completes
+   */
+  const { esqlFetchSubscribe, cleanupEsql } = buildEsqlFetchSubscribe({
+    internalState,
+    appStateContainer,
+    dataSubjects,
+    injectCurrentTab,
+  });
+
+  // The main subscription to handle state changes
+  dataSubjects.documents$.pipe(switchMap(esqlFetchSubscribe)).subscribe();
+  // Make sure to clean up the ES|QL state when the saved search changes
+  savedSearchContainer.getInitial$().subscribe(cleanupEsql);
+
   /**
    * handler emitted by `timefilter.getAutoRefreshFetch$()`
    * to notify when data completed loading and to start a new autorefresh loop
    */
+  let autoRefreshDone: AutoRefreshDoneFn | undefined | null = null;
   const setAutoRefreshDone = (fn: AutoRefreshDoneFn | undefined) => {
     autoRefreshDone = fn;
   };
@@ -205,7 +228,7 @@ export function getDataStateContainer({
     data,
     main$: dataSubjects.main$,
     refetch$,
-    searchSource: getSavedSearch().searchSource,
+    searchSource: savedSearchContainer.getState().searchSource,
     searchSessionManager,
   }).pipe(
     filter(() => validateTimeRange(timefilter.getTime(), toastNotifications)),
@@ -215,9 +238,6 @@ export function getDataStateContainer({
         reset: val === 'reset',
         fetchMore: val === 'fetch_more',
       },
-      searchSessionId:
-        (val === 'fetch_more' && searchSessionManager.getCurrentSearchSessionId()) ||
-        searchSessionManager.getNextSearchSessionId(),
     })),
     share()
   );
@@ -227,7 +247,13 @@ export function getDataStateContainer({
   function subscribe() {
     const subscription = fetch$
       .pipe(
-        mergeMap(async ({ options, searchSessionId }) => {
+        mergeMap(async ({ options }) => {
+          const { id: currentTabId, resetDefaultProfileState, dataRequestParams } = getCurrentTab();
+
+          const searchSessionId =
+            (options.fetchMore && dataRequestParams.searchSessionId) ||
+            searchSessionManager.getNextSearchSessionId();
+
           const commonFetchDeps = {
             initialFetchStatus: getInitialFetchStatus(),
             inspectorAdapters,
@@ -235,7 +261,7 @@ export function getDataStateContainer({
             services,
             getAppState: appStateContainer.getState,
             internalState,
-            savedSearch: getSavedSearch(),
+            savedSearch: savedSearchContainer.getState(),
           };
 
           abortController?.abort();
@@ -260,20 +286,23 @@ export function getDataStateContainer({
           }
 
           internalState.dispatch(
-            internalStateActions.setDataRequestParams({
-              timeRangeAbsolute: timefilter.getAbsoluteTime(),
-              timeRangeRelative: timefilter.getTime(),
+            injectCurrentTab(internalStateActions.setDataRequestParams)({
+              dataRequestParams: {
+                timeRangeAbsolute: timefilter.getAbsoluteTime(),
+                timeRangeRelative: timefilter.getTime(),
+                searchSessionId,
+              },
             })
           );
 
           await profilesManager.resolveDataSourceProfile({
             dataSource: appStateContainer.getState().dataSource,
-            dataView: getSavedSearch().searchSource.getField('index'),
+            dataView: savedSearchContainer.getState().searchSource.getField('index'),
             query: appStateContainer.getState().query,
           });
 
-          const { resetDefaultProfileState } = internalState.getState();
-          const dataView = runtimeStateManager.currentDataView$.getValue();
+          const { currentDataView$ } = selectTabRuntimeState(runtimeStateManager, currentTabId);
+          const dataView = currentDataView$.getValue();
           const defaultProfileState = dataView
             ? getDefaultProfileState({ profilesManager, resetDefaultProfileState, dataView })
             : undefined;
@@ -300,9 +329,9 @@ export function getDataStateContainer({
               abortController,
               ...commonFetchDeps,
             },
+            getCurrentTab,
             async () => {
-              const { resetDefaultProfileState: currentResetDefaultProfileState } =
-                internalState.getState();
+              const { resetDefaultProfileState: currentResetDefaultProfileState } = getCurrentTab();
 
               if (currentResetDefaultProfileState.resetId !== resetDefaultProfileState.resetId) {
                 return;
@@ -322,10 +351,12 @@ export function getDataStateContainer({
               // Clear the default profile state flags after the data fetching
               // is done so refetches don't reset the state again
               internalState.dispatch(
-                internalStateActions.setResetDefaultProfileState({
-                  columns: false,
-                  rowHeight: false,
-                  breakdownField: false,
+                injectCurrentTab(internalStateActions.setResetDefaultProfileState)({
+                  resetDefaultProfileState: {
+                    columns: false,
+                    rowHeight: false,
+                    breakdownField: false,
+                  },
                 })
               );
             }
@@ -350,15 +381,13 @@ export function getDataStateContainer({
       .subscribe();
 
     return () => {
-      abortController?.abort();
-      abortControllerFetchMore?.abort();
       subscription.unsubscribe();
     };
   }
 
-  const fetchQuery = async (resetQuery?: boolean) => {
+  const fetchQuery = async () => {
     const query = appStateContainer.getState().query;
-    const currentDataView = getSavedSearch().searchSource.getField('index');
+    const currentDataView = savedSearchContainer.getState().searchSource.getField('index');
 
     if (isOfAggregateQueryType(query)) {
       const nextDataView = await getEsqlDataView(query, currentDataView, services);
@@ -367,11 +396,7 @@ export function getDataStateContainer({
       }
     }
 
-    if (resetQuery) {
-      refetch$.next('reset');
-    } else {
-      refetch$.next(undefined);
-    }
+    refetch$.next(undefined);
 
     return refetch$;
   };

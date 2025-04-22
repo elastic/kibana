@@ -24,11 +24,33 @@ import type { AppMountParameters } from '@kbn/core-application-browser';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { DataViewField } from '@kbn/data-views-plugin/public';
 import type { DataViewPickerProps } from '@kbn/unified-search-plugin/public';
-import { UnifiedTabs } from '@kbn/unified-tabs';
+import { type TabItem, UnifiedTabs, useNewTabProps } from '@kbn/unified-tabs';
+import { type TabPreviewData, TabStatus } from '@kbn/unified-tabs';
 import { PLUGIN_ID, PLUGIN_NAME } from '../common';
 import { FieldListSidebar, FieldListSidebarProps } from './field_list_sidebar';
 
-let TMP_COUNTER = 0;
+// TODO: replace with real data when ready
+const TAB_CONTENT_MOCK: TabPreviewData[] = [
+  {
+    query: {
+      esql: 'FROM logs-* | FIND ?findText | WHERE host.name == ?hostName AND log.level == ?logLevel',
+    },
+    status: TabStatus.SUCCESS,
+  },
+  {
+    query: {
+      esql: 'FROM logs-* | FIND ?findText | WHERE host.name == ?hostName AND log.level == ?logLevel',
+    },
+    status: TabStatus.RUNNING,
+  },
+  {
+    query: {
+      language: 'kql',
+      query: 'agent.name : "activemq-integrations-5f6677988-hjp58"',
+    },
+    status: TabStatus.ERROR,
+  },
+];
 
 interface UnifiedTabsExampleAppProps {
   services: FieldListSidebarProps['services'];
@@ -44,6 +66,10 @@ export const UnifiedTabsExampleApp: React.FC<UnifiedTabsExampleAppProps> = ({
   const { IndexPatternSelect } = unifiedSearch.ui;
   const [dataView, setDataView] = useState<DataView | null>();
   const [selectedFieldNames, setSelectedFieldNames] = useState<string[]>([]);
+  const { getNewTabDefaultProps } = useNewTabProps({ numberOfInitialItems: 0 });
+  const [initialItems] = useState<TabItem[]>(() =>
+    Array.from({ length: 7 }, () => getNewTabDefaultProps())
+  );
 
   const onAddFieldToWorkspace = useCallback(
     (field: DataViewField) => {
@@ -95,20 +121,14 @@ export const UnifiedTabsExampleApp: React.FC<UnifiedTabsExampleAppProps> = ({
         {dataView ? (
           <div className="eui-fullHeight">
             <UnifiedTabs
-              initialItems={[
-                {
-                  id: 'tab_initial',
-                  label: 'Initial tab',
-                },
-              ]}
+              initialItems={initialItems}
+              maxItemsCount={25}
+              services={services}
               onChanged={() => {}}
-              createItem={() => {
-                TMP_COUNTER += 1;
-                return {
-                  id: `tab_${TMP_COUNTER}`,
-                  label: `Tab ${TMP_COUNTER}`,
-                };
-              }}
+              createItem={getNewTabDefaultProps}
+              getPreviewData={
+                () => TAB_CONTENT_MOCK[Math.floor(Math.random() * TAB_CONTENT_MOCK.length)] // TODO change mock to real data when ready
+              }
               renderContent={({ label }) => {
                 return (
                   <EuiFlexGroup direction="column" gutterSize="none">

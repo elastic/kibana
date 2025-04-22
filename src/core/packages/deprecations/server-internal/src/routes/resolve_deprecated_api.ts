@@ -22,6 +22,12 @@ export const registerMarkAsResolvedRoute = (
       options: {
         access: 'internal',
       },
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the Core Usage Client',
+        },
+      },
       validate: {
         body: schema.object({
           domainId: schema.string(),

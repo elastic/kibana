@@ -9,7 +9,7 @@ import { StreamUpsertRequest } from '@kbn/streams-schema';
 import expect from '@kbn/expect';
 import { StreamsSupertestRepositoryClient } from './repository_client';
 
-type StreamPutItem = Omit<StreamUpsertRequest, 'dashboards'> & { name: string };
+type StreamPutItem = Omit<StreamUpsertRequest, 'dashboards' | 'queries'> & { name: string };
 
 const streams: StreamPutItem[] = [
   {
@@ -130,11 +130,12 @@ const streams: StreamPutItem[] = [
 export async function createStreams(apiClient: StreamsSupertestRepositoryClient) {
   for (const { name, ...stream } of streams) {
     await apiClient
-      .fetch('PUT /api/streams/{name}', {
+      .fetch('PUT /api/streams/{name} 2023-10-31', {
         params: {
           body: {
             ...stream,
             dashboards: [],
+            queries: [],
           } as StreamUpsertRequest,
           path: { name },
         },

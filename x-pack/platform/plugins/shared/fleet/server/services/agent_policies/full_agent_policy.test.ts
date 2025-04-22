@@ -852,6 +852,18 @@ describe('getFullAgentPolicy', () => {
     });
   });
 
+  it('should not populate agent.protection and signed properties for standalone policies', async () => {
+    appContextService.start(createAppContextStartContractMock());
+
+    mockAgentPolicy({});
+    const agentPolicy = await getFullAgentPolicy(savedObjectsClientMock.create(), 'agent-policy', {
+      standalone: true,
+    });
+
+    expect(agentPolicy!.agent!.protection).toBeUndefined();
+    expect(agentPolicy!.signed).toBeUndefined();
+  });
+
   it('should compile full policy with correct namespaces', async () => {
     mockedGetPackageInfo.mockResolvedValue({
       data_streams: [
@@ -1681,6 +1693,9 @@ describe('generateFleetConfig', () => {
           certificate: 'my-cert',
           key: 'my-key',
         },
+        secrets: {
+          service_token: { id: 'my-service-token' },
+        },
       },
       {
         id: 'output-2',
@@ -1707,6 +1722,9 @@ describe('generateFleetConfig', () => {
         certificate: 'my-cert',
         certificate_authorities: ['/tmp/ssl/ca.crt'],
         key: 'my-key',
+      },
+      secrets: {
+        service_token: { id: 'my-service-token' },
       },
     });
   });
@@ -1842,6 +1860,7 @@ describe('generateFleetConfig', () => {
           ssl: {
             key: { id: 'my-secret-key' },
           },
+          service_token: { id: 'my-service-token' },
         },
       },
     ] as any;
@@ -1864,6 +1883,7 @@ describe('generateFleetConfig', () => {
             id: 'my-secret-key',
           },
         },
+        service_token: { id: 'my-service-token' },
       },
       ssl: {
         certificate: 'my-cert',

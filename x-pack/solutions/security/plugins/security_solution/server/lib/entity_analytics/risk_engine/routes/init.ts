@@ -36,7 +36,7 @@ export const riskEngineInitRoute = (
       { version: '1', validate: {} },
       withRiskEnginePrivilegeCheck(
         getStartServices,
-        async (context, request, response): Promise<IKibanaResponse<InitRiskEngineResponse>> => {
+        async (context, _request, response): Promise<IKibanaResponse<InitRiskEngineResponse>> => {
           const securitySolution = await context.securitySolution;
 
           securitySolution.getAuditLogger()?.log({

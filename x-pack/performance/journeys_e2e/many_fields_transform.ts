@@ -9,8 +9,8 @@ import { Journey } from '@kbn/journeys';
 import { subj } from '@kbn/test-subj-selector';
 
 export const journey = new Journey({
-  kbnArchives: ['test/functional/fixtures/kbn_archiver/many_fields_data_view'],
-  esArchives: ['test/functional/fixtures/es_archiver/many_fields'],
+  kbnArchives: ['src/platform/test/functional/fixtures/kbn_archiver/many_fields_data_view'],
+  esArchives: ['src/platform/test/functional/fixtures/es_archiver/many_fields'],
 })
   .step('Go to Transforms', async ({ page, kbnUrl, kibanaPage }) => {
     await page.goto(kbnUrl.get(`app/management/data/transform`));

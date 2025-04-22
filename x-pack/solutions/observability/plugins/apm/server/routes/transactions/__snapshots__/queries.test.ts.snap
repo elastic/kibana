@@ -4,7 +4,7 @@ exports[`transaction queries fetches a transaction 1`] = `
 Object {
   "_source": Array [
     "span.links",
-    "transaction.agent.marks",
+    "transaction.marks.agent",
   ],
   "apm": Object {
     "sources": Array [
@@ -33,6 +33,11 @@ Object {
     "http.response.status_code",
     "http.request.method",
     "user_agent.name",
+    "url.path",
+    "url.scheme",
+    "server.address",
+    "server.port",
+    "user_agent.version",
   ],
   "query": Object {
     "bool": Object {

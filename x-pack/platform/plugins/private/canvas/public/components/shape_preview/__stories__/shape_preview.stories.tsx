@@ -5,11 +5,20 @@
  * 2.0.
  */
 
-import { storiesOf } from '@storybook/react';
 import React from 'react';
-import { Shape } from '@kbn/expression-shape-plugin/public';
+import { Shape } from '../../../../canvas_plugin_src/renderers/shape';
 import { ShapePreview } from '../shape_preview';
 
-storiesOf('components/Shapes/ShapePreview', module)
-  .add('arrow', () => <ShapePreview shape={Shape.ARROW} />)
-  .add('square', () => <ShapePreview shape={Shape.SQUARE} />);
+export default {
+  title: 'components/Shapes/ShapePreview',
+};
+
+export const Arrow = {
+  render: () => <ShapePreview shape={Shape.ARROW} />,
+  name: 'arrow',
+};
+
+export const Square = {
+  render: () => <ShapePreview shape={Shape.SQUARE} />,
+  name: 'square',
+};

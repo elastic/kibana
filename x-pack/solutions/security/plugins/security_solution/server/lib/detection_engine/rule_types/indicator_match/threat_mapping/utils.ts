@@ -95,7 +95,6 @@ export const combineResults = (
     currentResult.searchAfterTimes,
     newResult.searchAfterTimes
   ),
-  lastLookBackDate: newResult.lastLookBackDate,
   createdSignalsCount: currentResult.createdSignalsCount + newResult.createdSignalsCount,
   createdSignals: [...currentResult.createdSignals, ...newResult.createdSignals],
   warningMessages: [...currentResult.warningMessages, ...newResult.warningMessages],
@@ -118,14 +117,12 @@ export const combineConcurrentResults = (
       const maxSearchAfterTime = calculateMax(accum.searchAfterTimes, item.searchAfterTimes);
       const maxEnrichmentTimes = calculateMax(accum.enrichmentTimes, item.enrichmentTimes);
       const maxBulkCreateTimes = calculateMax(accum.bulkCreateTimes, item.bulkCreateTimes);
-      const lastLookBackDate = calculateMaxLookBack(accum.lastLookBackDate, item.lastLookBackDate);
       return {
         success: accum.success && item.success,
         warning: accum.warning || item.warning,
         searchAfterTimes: [maxSearchAfterTime],
         bulkCreateTimes: [maxBulkCreateTimes],
         enrichmentTimes: [maxEnrichmentTimes],
-        lastLookBackDate,
         createdSignalsCount: accum.createdSignalsCount + item.createdSignalsCount,
         createdSignals: [...accum.createdSignals, ...item.createdSignals],
         warningMessages: [...accum.warningMessages, ...item.warningMessages],
@@ -140,7 +137,6 @@ export const combineConcurrentResults = (
       searchAfterTimes: [],
       bulkCreateTimes: [],
       enrichmentTimes: [],
-      lastLookBackDate: undefined,
       createdSignalsCount: 0,
       suppressedAlertsCount: 0,
       createdSignals: [],

@@ -10,7 +10,7 @@ import moment from 'moment';
 import { AD_HOC_RUN_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server/saved_objects';
 import { SuperuserAtSpace1 } from '../../../../scenarios';
 import { getUrlPrefix, ObjectRemover, getTestRuleData } from '../../../../../common/lib';
-import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { getEventLog } from '../../../../../common/lib/get_event_log';
 
 // eslint-disable-next-line import/no-default-export

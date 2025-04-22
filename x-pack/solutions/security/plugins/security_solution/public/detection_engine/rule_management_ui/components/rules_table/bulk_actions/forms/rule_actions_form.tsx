@@ -13,6 +13,7 @@ import type {
   ActionTypeRegistryContract,
 } from '@kbn/triggers-actions-ui-plugin/public';
 
+import { RuleActionsField } from '../../../../../../common/components/rule_actions_field';
 import { transformAlertToNormalizedRuleAction } from '../../../../../../../common/detection_engine/transform_actions';
 import type { FormSchema } from '../../../../../../shared_imports';
 import {
@@ -31,10 +32,9 @@ import { bulkAddRuleActions as i18n } from '../translations';
 
 import { useKibana } from '../../../../../../common/lib/kibana';
 
-import { getAllActionMessageParams } from '../../../../../../detections/pages/detection_engine/rules/helpers';
+import { getAllActionMessageParams } from '../../../../../common/helpers';
 
-import { RuleActionsField } from '../../../../../rule_creation/components/rule_actions_field';
-import { debouncedValidateRuleActionsField } from '../../../../../../detections/containers/detection_engine/rules/validate_rule_actions_field';
+import { debouncedValidateRuleActionsField } from '../../../../../../common/containers/rule_actions/validate_rule_actions_field';
 
 const CommonUseField = getUseField({ component: Field });
 

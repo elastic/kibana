@@ -39,8 +39,6 @@ export const importRules = async ({
   rules: RuleToImport[];
   savedObjectsClient: SavedObjectsClientContract;
 }): Promise<Array<RuleResponse | RuleImportErrorObject>> => {
-  const ruleCustomizationStatus = detectionRulesClient.getRuleCustomizationStatus();
-
   const existingLists = await getReferencedExceptionLists({
     rules,
     savedObjectsClient,
@@ -70,29 +68,13 @@ export const importRules = async ({
           });
         }
 
-        const { immutable, ruleSource } = ruleSourceImporter.calculateRuleSource(rule);
-        const isCustomized = (ruleSource.type === 'external' && ruleSource.is_customized) ?? false;
-
-        if (isCustomized && !ruleCustomizationStatus.isRulesCustomizationEnabled) {
-          return createRuleImportErrorObject({
-            message: i18n.translate(
-              'xpack.securitySolution.detectionEngine.rules.licenseInsufficientToImportCustomizedPrebuiltRule',
-              {
-                defaultMessage:
-                  'Importing prebuilt rules is not supported if the they were modified. Upgrade your license to import modified prebuilt rules [rule_id: {ruleId}].',
-                values: { ruleId: rule.rule_id },
-              }
-            ),
-            ruleId: rule.rule_id,
-          });
-        }
-
         const [exceptionErrors, exceptions] = checkRuleExceptionReferences({
           rule,
           existingLists,
         });
         errors.push(...exceptionErrors);
 
+        const { immutable, ruleSource } = ruleSourceImporter.calculateRuleSource(rule);
         const importedRule = await detectionRulesClient.importRule({
           ruleToImport: {
             ...rule,

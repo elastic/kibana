@@ -6,23 +6,21 @@
  */
 
 import dateMath from '@kbn/datemath';
-import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
-import type { RuleExecutorServicesMock } from '@kbn/alerting-plugin/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
-import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import { thresholdExecutor } from './threshold';
 import { getThresholdRuleParams } from '../../rule_schema/mocks';
 import { sampleEmptyAggsSearchResults } from '../__mocks__/es_results';
 import { getThresholdTermsHash } from './utils';
 import { ruleExecutionLogMock } from '../../rule_monitoring/mocks';
-import type { ExperimentalFeatures } from '../../../../../common';
 import { getSharedParamsMock } from '../__mocks__/shared_params';
+import type { PersistenceExecutorOptionsMock } from '@kbn/rule-registry-plugin/server/utils/create_persistence_rule_type_wrapper.mock';
+import { createPersistenceExecutorOptionsMock } from '@kbn/rule-registry-plugin/server/utils/create_persistence_rule_type_wrapper.mock';
 
 jest.mock('../utils/get_filter', () => ({ getFilter: jest.fn() }));
 
 describe('threshold_executor', () => {
-  let alertServices: RuleExecutorServicesMock;
+  let ruleServices: PersistenceExecutorOptionsMock;
 
   let mockScheduledNotificationResponseAction: jest.Mock;
   const params = getThresholdRuleParams();
@@ -37,13 +35,6 @@ describe('threshold_executor', () => {
     ruleParams: params,
     rewrites: {
       tuple,
-      bulkCreate: jest.fn().mockImplementation((hits) => ({
-        errors: [],
-        success: true,
-        bulkCreateDuration: '0',
-        createdItemsCount: 0,
-        createdItems: [],
-      })),
     },
   });
   const ruleExecutionLogger: ReturnType<typeof ruleExecutionLogMock.forExecutors.create> =
@@ -55,15 +46,13 @@ describe('threshold_executor', () => {
     });
   sharedParams.ruleExecutionLogger = ruleExecutionLogger;
   beforeEach(() => {
-    alertServices = alertsMock.createRuleExecutorServices();
-    alertServices.scopedClusterClient.asCurrentUser.search.mockResolvedValue(
-      elasticsearchClientMock.createSuccessTransportRequestPromise({
-        ...sampleEmptyAggsSearchResults(),
-        aggregations: {
-          thresholdTerms: { buckets: [] },
-        },
-      })
-    );
+    ruleServices = createPersistenceExecutorOptionsMock();
+    ruleServices.scopedClusterClient.asCurrentUser.search.mockResolvedValue({
+      ...sampleEmptyAggsSearchResults(),
+      aggregations: {
+        thresholdTerms: { buckets: [] },
+      },
+    });
     mockScheduledNotificationResponseAction = jest.fn();
   });
 
@@ -98,11 +87,10 @@ describe('threshold_executor', () => {
       };
       const response = await thresholdExecutor({
         sharedParams,
-        services: alertServices,
+        services: ruleServices,
         state,
         startedAt: new Date(),
         licensing,
-        experimentalFeatures: {} as ExperimentalFeatures,
         scheduleNotificationResponseActionsService: mockScheduledNotificationResponseAction,
       });
       expect(response.state).toEqual({
@@ -146,11 +134,10 @@ describe('threshold_executor', () => {
           ...sharedParams,
           unprocessedExceptions: [getExceptionListItemSchemaMock()],
         },
-        services: alertServices,
+        services: ruleServices,
         state,
         startedAt: new Date(),
         licensing,
-        experimentalFeatures: {} as ExperimentalFeatures,
         scheduleNotificationResponseActionsService: mockScheduledNotificationResponseAction,
       });
       expect(result.warningMessages).toEqual([
@@ -166,11 +153,10 @@ describe('threshold_executor', () => {
       };
       const result = await thresholdExecutor({
         sharedParams,
-        services: alertServices,
+        services: ruleServices,
         state,
         startedAt: new Date(),
         licensing,
-        experimentalFeatures: {} as ExperimentalFeatures,
         scheduleNotificationResponseActionsService: mockScheduledNotificationResponseAction,
       });
       expect(mockScheduledNotificationResponseAction).toBeCalledWith({

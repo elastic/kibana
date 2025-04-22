@@ -11,6 +11,7 @@ import React, { ChangeEvent, useCallback, useEffect, useState } from 'react';
 import { EuiFieldText, keys, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { TabItem } from '../../types';
+import { MAX_TAB_LABEL_LENGTH } from '../../constants';
 
 enum SubmitState {
   initial = 'initial',
@@ -59,7 +60,7 @@ export const EditTabLabel: React.FC<EditTabLabelProps> = ({ item, onLabelEdited,
     [item, onLabelEdited, onExit, setSubmitState]
   );
 
-  const onKeyUp = useCallback(
+  const onKeyDown = useCallback(
     async (event: React.KeyboardEvent<HTMLInputElement>) => {
       if (event.key === keys.ESCAPE) {
         onExit();
@@ -85,14 +86,15 @@ export const EditTabLabel: React.FC<EditTabLabelProps> = ({ item, onLabelEdited,
       data-test-subj={`unifiedTabs_editTabLabelInput_${item.id}`}
       css={css`
         block-size: 28px;
-        margin-top: ${euiTheme.size.xs};
+        margin-top: ${euiTheme.size.xxs};
       `}
       compressed
       value={value}
+      maxLength={MAX_TAB_LABEL_LENGTH}
       isLoading={submitState === SubmitState.submitting}
       isInvalid={submitState === SubmitState.error || !value.trim()}
       onChange={onChange}
-      onKeyUp={onKeyUp}
+      onKeyDown={onKeyDown}
       onBlur={submitState !== SubmitState.submitting ? onExit : undefined}
     />
   );

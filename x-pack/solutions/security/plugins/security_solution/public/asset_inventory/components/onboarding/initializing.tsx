@@ -19,7 +19,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { INTEGRATIONS_PLUGIN_ID } from '@kbn/fleet-plugin/common';
 import { useKibana } from '../../../common/lib/kibana';
-import { InventoryTitle } from '../inventory_title';
+import { AssetInventoryTitle } from '../asset_inventory_title';
 import { CenteredWrapper } from './centered_wrapper';
 import { TEST_SUBJ_ONBOARDING_INITIALIZING } from '../../constants';
 
@@ -31,7 +31,7 @@ export const Initializing = () => {
   return (
     <EuiFlexGroup>
       <EuiFlexItem>
-        <InventoryTitle />
+        <AssetInventoryTitle />
         <CenteredWrapper>
           <EuiEmptyPrompt
             data-test-subj={TEST_SUBJ_ONBOARDING_INITIALIZING}
@@ -40,7 +40,7 @@ export const Initializing = () => {
               <h2>
                 <FormattedMessage
                   id="xpack.securitySolution.assetInventory.onboarding.initializing.title"
-                  defaultMessage="Initializing Asset Inventory"
+                  defaultMessage="Discovering Your Assets"
                 />
               </h2>
             }
@@ -48,7 +48,7 @@ export const Initializing = () => {
             body={
               <FormattedMessage
                 id="xpack.securitySolution.assetInventory.onboarding.initializing.description"
-                defaultMessage="Your Asset Inventory is being set up. This may take a few moments as we prepare to provide you with centralized visibility into your assets. Check back shortly to start exploring your assets."
+                defaultMessage="We're currently analyzing your connected data sources to build a comprehensive inventory of your assets. This typically takes just a few minutes to complete. You'll be automatically redirected when your inventory is ready to explore."
               />
             }
             footer={
@@ -63,7 +63,7 @@ export const Initializing = () => {
                         <strong>
                           <FormattedMessage
                             id="xpack.securitySolution.assetInventory.initializing.exploreTitle"
-                            defaultMessage="Explore Asset Integrations"
+                            defaultMessage="Explore Asset Discovery Integrations"
                           />
                         </strong>
                       </EuiTitle>
@@ -72,7 +72,7 @@ export const Initializing = () => {
                       <EuiText size="s">
                         <FormattedMessage
                           id="xpack.securitySolution.assetInventory.initializing.exploreDescription"
-                          defaultMessage="Explore the out-of-the-box integrations we provide to connect your data sources."
+                          defaultMessage="Discover assets across cloud, identity, and other environments for deeper visibility."
                         />
                       </EuiText>
                     </EuiFlexItem>

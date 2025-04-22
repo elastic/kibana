@@ -11,13 +11,10 @@ import { requiredOptional } from '@kbn/zod-helpers';
 import { EVENT_KIND } from '@kbn/rule-data-utils';
 
 import type { BaseHit } from '../../../../../../common/detection_engine/types';
-import type { ConfigType } from '../../../../../config';
 import type { BuildReasonMessage } from '../../utils/reason_formatters';
 import { getMergeStrategy } from '../../utils/source_fields_merging/strategies';
-import type { SignalSource, SignalSourceHit } from '../../types';
+import type { SecuritySharedParams, SignalSource, SignalSourceHit } from '../../types';
 import { buildAlertFields, isThresholdResult } from './build_alert';
-import type { CompleteRule, RuleParams } from '../../../rule_schema';
-import type { IRuleExecutionLogForExecutors } from '../../../rule_monitoring';
 import { buildRuleNameFromMapping } from '../../utils/mappings/build_rule_name_from_mapping';
 import { buildSeverityFromMapping } from '../../utils/mappings/build_severity_from_mapping';
 import { buildRiskScoreFromMapping } from '../../utils/mappings/build_risk_score_from_mapping';
@@ -31,20 +28,11 @@ const isSourceDoc = (hit: SignalSourceHit): hit is BaseHit<SignalSource> => {
 };
 
 export interface TransformHitToAlertProps {
-  spaceId: string | null | undefined;
-  completeRule: CompleteRule<RuleParams>;
+  sharedParams: SecuritySharedParams;
   doc: estypes.SearchHit<SignalSource>;
-  mergeStrategy: ConfigType['alertMergeStrategy'];
-  ignoreFields: Record<string, boolean>;
-  ignoreFieldsRegexes: string[];
   applyOverrides: boolean;
   buildReasonMessage: BuildReasonMessage;
-  indicesToQuery: string[];
-  alertTimestampOverride: Date | undefined;
-  ruleExecutionLogger: IRuleExecutionLogForExecutors;
   alertUuid: string;
-  publicBaseUrl?: string;
-  intendedTimestamp: Date | undefined;
 }
 
 /**
@@ -57,23 +45,27 @@ export interface TransformHitToAlertProps {
  * @returns The body that can be added to a bulk call for inserting the signal.
  */
 export const transformHitToAlert = ({
-  spaceId,
-  completeRule,
+  sharedParams,
   doc,
-  mergeStrategy,
-  ignoreFields,
-  ignoreFieldsRegexes,
   applyOverrides,
   buildReasonMessage,
-  indicesToQuery,
-  alertTimestampOverride,
-  ruleExecutionLogger,
   alertUuid,
-  publicBaseUrl,
-  intendedTimestamp,
 }: TransformHitToAlertProps): BaseFieldsLatest => {
-  const mergedDoc = getMergeStrategy(mergeStrategy)({ doc, ignoreFields, ignoreFieldsRegexes });
+  const mergedDoc = getMergeStrategy(sharedParams.mergeStrategy)({
+    doc,
+    ignoreFields: sharedParams.ignoreFields,
+    ignoreFieldsRegexes: sharedParams.ignoreFieldsRegexes,
+  });
   const thresholdResult = mergedDoc._source?.threshold_result;
+  const {
+    completeRule,
+    spaceId,
+    inputIndex: indicesToQuery,
+    publicBaseUrl,
+    alertTimestampOverride,
+    intendedTimestamp,
+    ruleExecutionLogger,
+  } = sharedParams;
 
   if (isSourceDoc(mergedDoc)) {
     const overrides = applyOverrides

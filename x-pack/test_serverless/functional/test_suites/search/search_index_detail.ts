@@ -118,7 +118,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             indexName
           );
           await pageObjects.svlSearchIndexDetailPage.clickOnIndexManagementBreadcrumb();
-          await pageObjects.indexManagement.expectToBeOnIndicesManagement();
+          await pageObjects.indexManagement.expectToBeOnIndexManagement();
           await svlSearchNavigation.navigateToIndexDetailPage(indexName);
         });
 

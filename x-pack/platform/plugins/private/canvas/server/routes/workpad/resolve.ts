@@ -17,17 +17,17 @@ export function initializeResolveWorkpadRoute(deps: RouteInitializerDeps) {
     .get({
       path: `${API_ROUTE_WORKPAD}/resolve/{id}`,
       access: 'internal',
+      security: {
+        authz: {
+          enabled: false,
+          reason:
+            'This route is opted out from authorization because authorization is provided by saved objects client.',
+        },
+      },
     })
     .addVersion(
       {
         version: '1',
-        security: {
-          authz: {
-            enabled: false,
-            reason:
-              'This route is opted out from authorization because authorization is provided by saved objects client.',
-          },
-        },
         validate: {
           request: {
             params: schema.object({

@@ -6,25 +6,33 @@
  */
 
 import React, { FC } from 'react';
+import { css } from '@emotion/react';
+import { useEuiFontSize } from '@elastic/eui';
 import { Markdown } from '@kbn/shared-ux-markdown';
 import { BannerConfiguration } from '../../common';
-
-import './banner.scss';
 
 interface BannerProps {
   bannerConfig: BannerConfiguration;
 }
 
 export const Banner: FC<BannerProps> = ({ bannerConfig }) => {
-  const { textContent, textColor, backgroundColor } = bannerConfig;
+  const { textContent, textColor, linkColor, backgroundColor } = bannerConfig;
+  const customLinkColor = linkColor || 'inherit';
+  const bannerStyle = css({
+    height: '100%',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    fontSize: useEuiFontSize('s').fontSize,
+    backgroundColor,
+    color: textColor,
+    '& a': {
+      color: customLinkColor,
+    },
+  });
+
   return (
-    <div
-      className="kbnUserBanner__container"
-      style={{
-        backgroundColor,
-        color: textColor,
-      }}
-    >
+    <div css={bannerStyle}>
       <div className="eui-textTruncate" data-test-subj="bannerInnerWrapper">
         <Markdown readOnly>{textContent}</Markdown>
       </div>

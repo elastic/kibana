@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { type Meta, Story } from '@storybook/react';
+import type { StoryFn, Meta, StoryObj } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import { GraphInvestigation, type GraphInvestigationProps } from './graph_investigation';
 import {
@@ -27,20 +27,20 @@ export default {
   description: 'CDR - Graph visualization',
   argTypes: {
     showToggleSearch: {
-      control: { type: 'boolean' },
+      control: { control: 'boolean' },
       defaultValue: false,
     },
     showInvestigateInTimeline: {
-      control: { type: 'boolean' },
+      control: { control: 'boolean' },
       defaultValue: false,
     },
     shouldShowSearchBarTour: {
       description: 'Toggle the button to set the initial state of showing search bar tour',
-      control: { type: 'boolean' },
+      control: { control: 'boolean' },
       defaultValue: true,
     },
     isLoading: {
-      control: { type: 'boolean' },
+      control: { control: 'boolean' },
       defaultValue: false,
     },
   },
@@ -92,8 +92,10 @@ const defaultProps: GraphInvestigationProps = {
   showInvestigateInTimeline: false,
 };
 
-const Template: Story<Partial<GraphInvestigationProps>> = (props) => {
+const Template: StoryFn<Partial<GraphInvestigationProps>> = (props) => {
   return <GraphInvestigation {...defaultProps} {...props} />;
 };
 
-export const Investigation = Template.bind({});
+export const Investigation: StoryObj<Partial<GraphInvestigationProps>> = {
+  render: Template,
+};

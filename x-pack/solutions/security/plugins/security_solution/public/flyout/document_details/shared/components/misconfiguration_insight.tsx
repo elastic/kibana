@@ -119,7 +119,8 @@ export const MisconfigurationsInsight: React.FC<MisconfigurationsInsightProps> =
             content={
               <FormattedMessage
                 id="xpack.securitySolution.flyout.insights.misconfiguration.misconfigurationCountTooltip"
-                defaultMessage="Opens list of misconfigurations in a new flyout"
+                defaultMessage="Opens {count, plural, one {this misconfiguration} other {these misconfigurations}} in a new flyout"
+                values={{ count: totalFindings }}
               />
             }
           >

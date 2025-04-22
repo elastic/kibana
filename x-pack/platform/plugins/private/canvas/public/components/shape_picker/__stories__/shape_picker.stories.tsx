@@ -6,11 +6,16 @@
  */
 
 import { action } from '@storybook/addon-actions';
-import { storiesOf } from '@storybook/react';
 import React from 'react';
-import { getAvailableShapes } from '@kbn/expression-shape-plugin/common';
+import { getAvailableShapes } from '../../../../canvas_plugin_src/renderers/shape';
 import { ShapePicker } from '../shape_picker';
 
-storiesOf('components/Shapes/ShapePicker', module).add('default', () => (
-  <ShapePicker shapes={getAvailableShapes()} onChange={action('onChange')} />
-));
+export default {
+  title: 'components/Shapes/ShapePicker',
+};
+
+export const Default = {
+  render: () => <ShapePicker shapes={getAvailableShapes()} onChange={action('onChange')} />,
+
+  name: 'default',
+};

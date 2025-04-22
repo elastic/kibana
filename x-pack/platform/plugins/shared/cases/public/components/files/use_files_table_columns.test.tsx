@@ -7,14 +7,12 @@
 
 import type { FilesTableColumnsProps } from './use_files_table_columns';
 import { useFilesTableColumns } from './use_files_table_columns';
-import type { AppMockRenderer } from '../../common/mock';
-import { createAppMockRenderer } from '../../common/mock';
+
 import { renderHook } from '@testing-library/react';
 import { basicCase } from '../../containers/mock';
+import { TestProviders } from '../../common/mock';
 
 describe('useFilesTableColumns', () => {
-  let appMockRender: AppMockRenderer;
-
   const useFilesTableColumnsProps: FilesTableColumnsProps = {
     caseId: basicCase.id,
     showPreview: () => {},
@@ -22,12 +20,11 @@ describe('useFilesTableColumns', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    appMockRender = createAppMockRenderer();
   });
 
   it('return all files table columns correctly', async () => {
     const { result } = renderHook(() => useFilesTableColumns(useFilesTableColumnsProps), {
-      wrapper: appMockRender.AppWrapper,
+      wrapper: TestProviders,
     });
 
     expect(result.current).toMatchInlineSnapshot(`

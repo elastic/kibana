@@ -225,8 +225,9 @@ describe('useAllCasesQueryParams', () => {
 
     await waitFor(() => {
       expect(result.current.queryParams).toStrictEqual(defaultStateWithValues.queryParams);
-      expect(result.current.filterOptions).toStrictEqual(defaultStateWithValues.filterOptions);
     });
+
+    expect(result.current.filterOptions).toStrictEqual(defaultStateWithValues.filterOptions);
 
     act(() => {
       result.current.setFilterOptions(DEFAULT_CASES_TABLE_STATE.filterOptions);
@@ -238,8 +239,9 @@ describe('useAllCasesQueryParams', () => {
 
     await waitFor(() => {
       expect(result.current.queryParams).toStrictEqual(DEFAULT_CASES_TABLE_STATE.queryParams);
-      expect(result.current.filterOptions).toStrictEqual(DEFAULT_CASES_TABLE_STATE.filterOptions);
     });
+
+    expect(result.current.filterOptions).toStrictEqual(DEFAULT_CASES_TABLE_STATE.filterOptions);
   });
 
   it('urlParams take precedence over localStorage query params values', () => {

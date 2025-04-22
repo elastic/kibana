@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { ObjectRemover } from '../../../../common/lib';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
   createRule,
   createAction,
