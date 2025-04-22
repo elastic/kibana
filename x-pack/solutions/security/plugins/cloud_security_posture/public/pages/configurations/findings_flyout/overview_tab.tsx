@@ -8,7 +8,6 @@
 import {
   EuiAccordion,
   EuiBasicTable,
-  EuiCopy,
   EuiDescriptionList,
   EuiFlexGroup,
   EuiFlexItem,
@@ -35,9 +34,9 @@ import { truthy } from '@kbn/cloud-security-posture/src/utils/helpers';
 import type { CoreStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CspClientPluginStartDeps } from '@kbn/cloud-security-posture';
-import { css } from '@emotion/css';
 import { CodeBlock, CspFlyoutMarkdown, EMPTY_VALUE } from './findings_flyout';
 import { FindingsDetectionRuleCounter } from './findings_detection_rule_counter';
+import { CopyableText } from './findings_right/header';
 
 type Accordion = Pick<EuiAccordionProps, 'title' | 'id' | 'initialIsOpen'> &
   Pick<EuiDescriptionListProps, 'listItems'>;
@@ -52,43 +51,7 @@ const columns: Array<EuiBasicTableColumn<any>> = [
     field: 'value',
     name: 'Value',
     truncateText: false,
-    render: (value: string) => (
-      <>
-        <EuiText
-          size="s"
-          css={{
-            paddingTop: `4px`,
-            overflow: 'hidden',
-          }}
-        >
-          <div
-            css={{
-              float: 'left',
-              overflow: 'hidden',
-              whiteSpace: 'nowrap',
-              textOverflow: 'ellipsis',
-              maxWidth: 'calc(100% - 20px)',
-              marginRight: '4px',
-            }}
-          >
-            {value}
-          </div>
-          <EuiCopy textToCopy={value}>
-            {(copy) => (
-              <EuiIcon
-                css={css`
-                  :hover {
-                    cursor: pointer;
-                  }
-                `}
-                onClick={copy}
-                type="copy"
-              />
-            )}
-          </EuiCopy>
-        </EuiText>
-      </>
-    ),
+    render: (value: string) => <>{CopyableText(value)}</>,
   },
 ];
 

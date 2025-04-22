@@ -26,6 +26,44 @@ export interface FindingsMisconfigurationFlyoutHeaderProps {
   finding: CspFinding;
 }
 
+export const CopyableText = (textToBeCopied: string) => {
+  return (
+    <EuiText
+      size="s"
+      css={{
+        paddingTop: '4px',
+        overflow: 'hidden',
+      }}
+    >
+      <div
+        css={{
+          float: 'left',
+          overflow: 'hidden',
+          whiteSpace: 'nowrap',
+          textOverflow: 'ellipsis',
+          maxWidth: 'calc(100% - 20px)',
+          marginRight: '4px',
+        }}
+      >
+        {textToBeCopied}
+      </div>
+      <EuiCopy textToCopy={textToBeCopied}>
+        {(copy) => (
+          <EuiIcon
+            css={css`
+              :hover {
+                cursor: pointer;
+              }
+            `}
+            onClick={copy}
+            type="copy"
+          />
+        )}
+      </EuiCopy>
+    </EuiText>
+  );
+};
+
 export const FindingsMisconfigurationFlyoutHeader = ({
   finding,
 }: FindingsMisconfigurationFlyoutHeaderProps) => {
@@ -65,39 +103,7 @@ export const FindingsMisconfigurationFlyoutHeader = ({
                     </EuiFlexItem>
                     <EuiFlexItem>
                       <EuiToolTip content={resourceName} position="top">
-                        <EuiText
-                          size="s"
-                          css={{
-                            paddingTop: `4px`,
-                            overflow: 'hidden',
-                          }}
-                        >
-                          <div
-                            css={{
-                              float: 'left',
-                              overflow: 'hidden',
-                              whiteSpace: 'nowrap',
-                              textOverflow: 'ellipsis',
-                              maxWidth: 'calc(100% - 20px)',
-                              marginRight: '4px',
-                            }}
-                          >
-                            {resourceName}
-                          </div>
-                          <EuiCopy textToCopy={resourceName}>
-                            {(copy) => (
-                              <EuiIcon
-                                css={css`
-                                  :hover {
-                                    cursor: pointer;
-                                  }
-                                `}
-                                onClick={copy}
-                                type="copy"
-                              />
-                            )}
-                          </EuiCopy>
-                        </EuiText>
+                        {CopyableText(resourceName)}
                       </EuiToolTip>
                     </EuiFlexItem>
                   </EuiFlexGroup>
