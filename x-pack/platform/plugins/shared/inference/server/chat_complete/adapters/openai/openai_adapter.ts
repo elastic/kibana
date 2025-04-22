@@ -18,6 +18,14 @@ import { messagesToOpenAI, toolsToOpenAI, toolChoiceToOpenAI } from './to_openai
 import { processOpenAIStream } from './process_openai_stream';
 import { emitTokenCountEstimateIfMissing } from './emit_token_count_if_missing';
 
+const MODELS_WITHOUT_TEMPERATURE = ['o1', 'o3'];
+const shouldExcludeTemperature = (modelName?: string) => {
+  if (!modelName) return false;
+
+  const normalizedModelName = modelName.toLowerCase();
+  return MODELS_WITHOUT_TEMPERATURE.some((model) => normalizedModelName.includes(model));
+};
+
 export const openAIAdapter: InferenceConnectorAdapter = {
   chatComplete: ({
     executor,
@@ -38,6 +46,8 @@ export const openAIAdapter: InferenceConnectorAdapter = {
         : functionCalling === 'simulated';
 
     let request: OpenAIRequest;
+    const excludeTemperature = shouldExcludeTemperature(modelName);
+
     if (useSimulatedFunctionCalling) {
       const wrapped = wrapWithSimulatedFunctionCalling({
         system,
@@ -47,14 +57,14 @@ export const openAIAdapter: InferenceConnectorAdapter = {
       });
       request = {
         stream: true,
-        temperature,
+        ...(excludeTemperature ? {} : { temperature }),
         model: modelName,
         messages: messagesToOpenAI({ system: wrapped.system, messages: wrapped.messages }),
       };
     } else {
       request = {
         stream: true,
-        temperature,
+        ...(excludeTemperature ? {} : { temperature }),
         model: modelName,
         messages: messagesToOpenAI({ system, messages }),
         tool_choice: toolChoiceToOpenAI(toolChoice),
