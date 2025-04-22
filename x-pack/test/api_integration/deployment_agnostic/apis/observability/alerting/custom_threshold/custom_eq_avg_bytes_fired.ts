@@ -257,7 +257,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           `${protocol}://${hostname}${port ? `:${port}` : ''}/app/observability/alerts/${alertId}`
         );
 
-        logger.info(resp.hits.hits[0]._source?.reason);
         expect(resp.hits.hits[0]._source?.reason).eql(
           `Custom equation is 1 B, above the threshold of 0.9 B. (duration: 1 min, data view: ${DATA_VIEW})`
         );
