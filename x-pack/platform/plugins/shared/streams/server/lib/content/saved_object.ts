@@ -91,10 +91,7 @@ export function prepareForImport({
   return updateIds(uniqObjects, links);
 }
 
-export function updateIds(
-  savedObjects: ContentPackSavedObject[],
-  links: ContentPackSavedObjectLinks
-) {
+function updateIds(savedObjects: ContentPackSavedObject[], links: ContentPackSavedObjectLinks) {
   const existingLinks = links.dashboards.flatMap((ref) => [ref, ...ref.references]);
   const targetId = (sourceId: string) => {
     const link = existingLinks.find(({ source_id: id }) => id === sourceId);

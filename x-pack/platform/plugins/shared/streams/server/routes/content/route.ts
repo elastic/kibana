@@ -11,6 +11,7 @@ import { z } from '@kbn/zod';
 import { createConcatStream, createListStream, createPromiseFromStreams } from '@kbn/utils';
 import { installManagedIndexPattern } from '@kbn/fleet-plugin/server/services/epm/kibana/assets/install';
 import {
+  ContentPack,
   ContentPackSavedObject,
   contentPackIncludedObjectsSchema,
   isIncludeAll,
