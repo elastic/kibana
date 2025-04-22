@@ -24,6 +24,11 @@
     "@kbn/zod",
     "@kbn/inference-langchain",
     "@kbn/wc-framework-types-browser",
+    "@kbn/i18n-react",
+    "@kbn/kibana-react-plugin",
+    "@kbn/react-kibana-context-render",
+    "@kbn/shared-ux-link-redirect-app",
+    "@kbn/shared-ux-router",
   ],
   "exclude": [
     "target/**/*",
