@@ -6,6 +6,7 @@
  */
 import React from 'react';
 import { Route, Routes } from '@kbn/shared-ux-router';
+import { Redirect } from 'react-router-dom';
 
 import { NotFoundPage } from '../app/404';
 import { withSecurityRoutePageWrapper } from '../common/components/security_route_page_wrapper';
@@ -43,19 +44,21 @@ const EntityAnalyticsManagementContainer: React.FC = React.memo(() => {
 });
 EntityAnalyticsManagementContainer.displayName = 'EntityAnalyticsManagementContainer';
 
-const EntityAnalyticsAssetClassificationWrapper = () => (
-  <PluginTemplateWrapper>
-    <EntityStoreManagementPage />
-  </PluginTemplateWrapper>
-);
-
 const EntityAnalyticsAssetClassificationContainer: React.FC = React.memo(() => {
   return (
     <Routes>
       <Route
         path={ENTITY_ANALYTICS_ASSET_CRITICALITY_PATH}
         exact
-        component={EntityAnalyticsAssetClassificationWrapper}
+        render={({ location }) => (
+          <Redirect
+            to={{
+              ...location,
+              pathname: ENTITY_ANALYTICS_ENTITY_STORE_MANAGEMENT_PATH,
+              search: location.search,
+            }}
+          />
+        )}
       />
       <Route component={NotFoundPage} />
     </Routes>
@@ -138,13 +141,7 @@ export const routes = [
   },
   {
     path: ENTITY_ANALYTICS_ASSET_CRITICALITY_PATH,
-    component: withSecurityRoutePageWrapper(
-      EntityAnalyticsAssetClassificationContainer,
-      SecurityPageName.entityAnalyticsAssetClassification,
-      {
-        redirectOnMissing: true,
-      }
-    ),
+    component: EntityAnalyticsAssetClassificationContainer,
   },
   {
     path: ENTITY_ANALYTICS_ENTITY_STORE_MANAGEMENT_PATH,
