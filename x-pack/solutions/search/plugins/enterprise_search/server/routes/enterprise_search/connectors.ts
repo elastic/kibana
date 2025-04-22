@@ -6,6 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { AgentlessConnectorsInfraService } from '@kbn/content-connectors-plugin/server/services';
 import { SavedObjectsClient } from '@kbn/core/server';
 import { ElasticsearchErrorDetails } from '@kbn/es-errors';
 
@@ -34,8 +35,6 @@ import {
   isResourceNotFoundException,
   isStatusTransitionException,
 } from '@kbn/search-connectors/utils/identify_exceptions';
-
-import { AgentlessConnectorsInfraService } from '@kbn/search-connectors-plugin/server/services';
 
 import { ErrorCode } from '../../../common/types/error_codes';
 import { addConnector } from '../../lib/connectors/add_connector';

@@ -51,7 +51,7 @@ export const getMonitorsEmbeddableFactory = (
     deserializeState: (state) => {
       return state.rawState as OverviewEmbeddableState;
     },
-    buildEmbeddable: async (state, buildApi, uuid, parentApi) => {
+    buildEmbeddable: async (state, buildApi) => {
       const [coreStart, pluginStart] = await getStartServices();
 
       const titleManager = initializeTitleManager(state);
