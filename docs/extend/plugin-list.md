@@ -237,3 +237,4 @@ mapped_pages:
 | [wciIndexSource](https://github.com/elastic/kibana/blob/main/x-pack/solutions/chat/plugins/wci-index-source/README.md) | WorkChat Index Source integration plugin that provides functionality to search Elasticsearch indices for the WorkChat application. |
 | [wciSalesforce](https://github.com/elastic/kibana/blob/main/x-pack/solutions/chat/plugins/wci-salesforce/README.md) | WorkChat Salesforce integration plugin that provides Salesforce-specific functionality for the WorkChat application. |
 | [workchatApp](https://github.com/elastic/kibana/blob/main/x-pack/solutions/chat/plugins/workchat-app/README.md) | WorkChat application plugin |
+| [workchatFramework](https://github.com/elastic/kibana/blob/main/x-pack/solutions/chat/plugins/workchat-framework/README.md) | WorkChat framework plugin |
