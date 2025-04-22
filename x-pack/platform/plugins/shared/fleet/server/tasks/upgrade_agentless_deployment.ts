@@ -160,7 +160,6 @@ export class UpgradeAgentlessDeploymentsTask {
       const agentPolicyFetcher = await agentPolicyService.fetchAllAgentPolicies(soClient, {
         kuery: policiesKuery,
         perPage: BATCH_SIZE,
-        spaceId: '*',
       });
       this.logger.info(
         `[${LOGGER_SUBJECT}] running task to upgrade agentless deployments with kuery: ${policiesKuery}`
