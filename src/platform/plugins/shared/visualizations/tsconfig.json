@@ -75,7 +75,6 @@
     "@kbn/content-management-utils",
     "@kbn/react-hooks",
     "@kbn/presentation-panel-plugin",
-    "@kbn/alerting-plugin"
   ],
   "exclude": ["target/**/*"]
 }
