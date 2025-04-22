@@ -224,7 +224,7 @@ describe('registerRoutes', () => {
   });
 
   it('should call `chatCompleteRouteMock`', () => {
-    expect(chatCompleteRouteMock).toHaveBeenCalledWith(server.router, undefined);
+    expect(chatCompleteRouteMock).toHaveBeenCalledWith(server.router);
   });
 
   it('should call `postActionsConnectorExecuteRouteMock`', () => {
