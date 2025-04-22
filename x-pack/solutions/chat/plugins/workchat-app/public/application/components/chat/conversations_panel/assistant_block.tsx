@@ -34,7 +34,13 @@ export const AssistantBlock: React.FC<AssistantBlockProps> = ({ agentId }) => {
   return (
     <EuiFlexGroup direction="row" alignItems="center" gutterSize="m">
       <EuiFlexItem grow={false}>
-        <EuiAvatar name={agent?.name ?? 'Assistant'} size="l" type="user" />
+        <EuiAvatar
+          name={agent?.name ?? 'Assistant'}
+          size="l"
+          type="user"
+          initials={agent?.avatar?.text}
+          color={agent?.avatar?.color}
+        />
       </EuiFlexItem>
       <EuiFlexItem grow>
         <EuiFlexGroup
