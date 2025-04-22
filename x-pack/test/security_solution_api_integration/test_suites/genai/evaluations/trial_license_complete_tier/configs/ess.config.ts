@@ -7,6 +7,7 @@
 
 import { FtrConfigProviderContext } from '@kbn/test';
 import { loadConnectorsFromEnvVar } from '../../../../../scripts/genai/vault/manage_secrets';
+import { getTinyElserServerArgs } from '../../../knowledge_base/entries/utils/helpers';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const functionalConfig = await readConfigFile(
@@ -34,6 +35,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         `--xpack.actions.preconfigured=${JSON.stringify(preconfiguredConnectors)}`,
         `--xpack.actions.allowedHosts=["*"]`,
         `--xpack.securitySolution.enableExperimental=["assistantModelEvaluation"]`,
+        ...getTinyElserServerArgs(),
       ],
     },
     testFiles: [require.resolve('..')],

@@ -45,7 +45,7 @@ export default ({ getService }: FtrProviderContext) => {
    */
   describe('@ess Basic Security AI Assistant Evaluations', () => {
     before(async () => {
-      await installTinyElser(ml);
+      await installTinyElser({ ml, es, log });
       await setupKnowledgeBase(supertest, log);
       await esArchiver.load(
         'x-pack/test/functional/es_archives/security_solution/attack_discovery_alerts'
@@ -53,7 +53,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     after(async () => {
-      await deleteTinyElser(ml);
+      await deleteTinyElser({ ml, es, log });
       await esArchiver.unload(
         'x-pack/test/functional/es_archives/security_solution/attack_discovery_alerts'
       );
