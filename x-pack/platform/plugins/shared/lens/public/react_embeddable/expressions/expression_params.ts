@@ -110,6 +110,26 @@ function buildHasCompatibleActions(api: LensApi, { uiActions }: LensEmbeddableSt
   };
 }
 
+function buildGetCompatibleActions(api: LensApi, { uiActions }: LensEmbeddableStartServices) {
+  return async (event: ExpressionRendererEvent): Promise<Array<Action>> => {
+    if (!uiActions?.getTriggerCompatibleActions) {
+      return [];
+    }
+    
+    const actions = await uiActions.getTriggerCompatibleActions(
+      Object.keys(VIS_EVENT_TO_TRIGGER).includes(event.name) ? VIS_EVENT_TO_TRIGGER[event.name] : event.name,
+      {
+        data: event.data,
+        embeddable: api,
+      }
+    ) ?? [];
+
+    return actions
+    
+
+  };
+}
+
 function buildGetCompatibleCellValueActions(
   api: LensApi,
   { uiActions }: LensEmbeddableStartServices
@@ -220,6 +240,7 @@ export async function getExpressionRendererParams(
       },
       abortController,
       hasCompatibleActions: buildHasCompatibleActions(api, services),
+      getCompatibleActions: buildGetCompatibleActions(api, services),
       getCompatibleCellValueActions: buildGetCompatibleCellValueActions(api, services),
       variables: getVariables(api, state),
       style: state.style,

@@ -224,7 +224,7 @@ export const getXyChartRenderer = ({
     const onClickMultiValue = (data: MultiFilterEvent['data']) => {
       handlers.event({ name: 'multiFilter', data });
     };
-    const onCreateAlertRule = (data: AlertRuleFromVisUIActionData) => {
+    const onTooltipAction = (data: TooltipActionEventData) => {
       handlers.event({ name: ALERT_RULE_TRIGGER, data });
     };
     const setChartSize = (data: ChartSizeSpec) => {
@@ -284,6 +284,7 @@ export const getXyChartRenderer = ({
             interactive={handlers.isInteractive()}
             onClickValue={onClickValue}
             onClickMultiValue={onClickMultiValue}
+            handlers={handlers}
             onCreateAlertRule={onCreateAlertRule}
             layerCellValueActions={layerCellValueActions}
             onSelectRange={onSelectRange}

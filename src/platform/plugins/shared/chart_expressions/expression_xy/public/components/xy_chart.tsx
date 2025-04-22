@@ -118,6 +118,7 @@ import { TooltipHeader } from './tooltip';
 import { LegendColorPickerWrapperContext, LegendColorPickerWrapper } from './legend_color_picker';
 import { createSplitPoint, getTooltipActions, getXSeriesPoint } from './tooltip/tooltip_actions';
 import { GlobalXYChartStyles } from './xy_chart.styles';
+import { ExpressionRenderHandlerParams } from '@kbn/expressions-plugin/public/render';
 
 declare global {
   interface Window {
@@ -139,6 +140,7 @@ export type XYChartRenderProps = Omit<XYChartProps, 'canNavigateToLens'> & {
   minInterval: number | undefined;
   interactive?: boolean;
   onClickValue: (data: FilterEvent['data']) => void;
+  handlers: ExpressionRenderHandlerParams;
   onClickMultiValue: (data: MultiFilterEvent['data']) => void;
   onCreateAlertRule: (data: AlertRuleFromVisUIActionData) => void;
   layerCellValueActions: LayerCellValueActions;
@@ -202,6 +204,7 @@ export function XYChart({
   chartsActiveCursorService,
   paletteService,
   minInterval,
+  handlers,
   onClickValue,
   onClickMultiValue,
   onCreateAlertRule,
@@ -788,17 +791,21 @@ export function XYChart({
                     )
                   : undefined
               }
-              actions={getTooltipActions(
-                dataLayers,
-                onClickMultiValue,
-                onCreateAlertRule,
-                fieldFormats,
-                formattedDatatables,
-                xAxisFormatter,
-                formatFactory,
-                isEsqlMode,
-                interactive && !args.detailedTooltip
-              )}
+              actions={(selected) => {
+                return getTooltipActions(
+                  selected,
+                  handlers,
+                  dataLayers,
+                  onClickMultiValue,
+                  onCreateAlertRule,
+                  fieldFormats,
+                  formattedDatatables,
+                  xAxisFormatter,
+                  formatFactory,
+                  isEsqlMode,
+                  interactive && !args.detailedTooltip
+                ) ?? [];
+              }}
               customTooltip={
                 args.detailedTooltip
                   ? ({ header, values }) => (

@@ -53,6 +53,7 @@ export interface IExpressionLoaderParams {
   syncCursor?: boolean;
   syncTooltips?: boolean;
   hasCompatibleActions?: ExpressionRenderHandlerParams['hasCompatibleActions'];
+  getCompatibleActions: ExpressionRenderHandlerParams['getCompatibleActions'];
   getCompatibleCellValueActions?: ExpressionRenderHandlerParams['getCompatibleCellValueActions'];
   executionContext?: KibanaExecutionContext;
   abortController?: AbortController;

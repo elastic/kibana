@@ -45,19 +45,23 @@ export const prepareEventHandler =
       | LensPublicCallbacks['onFilter']
       | LensPublicCallbacks['onTableRowClick'];
     let shouldExecuteDefaultTriggers = true;
-
     if (isLensBrushEvent(event)) {
       eventHandler = callbacks.onBrushEnd;
     } else if (isLensFilterEvent(event) || isLensMultiFilterEvent(event)) {
       eventHandler = callbacks.onFilter;
     } else if (isLensTableRowContextMenuClickEvent(event)) {
       eventHandler = callbacks.onTableRowClick;
-    } else if (isLensAlertRule(event)) {
+    } else if (shouldExecuteDefaultTriggers){
       // TODO: here is where we run the uiActions on the embeddable for the alert rule
       eventHandler = callbacks.onAlertRule;
-      if (shouldExecuteDefaultTriggers) {
-        // this runs the function that we define in addTriggerAction in the plugin.ts file in alertRulesDefinition
-        uiActions.getTrigger(VIS_EVENT_TO_TRIGGER[event.name]).exec(
+      let trigger;
+      try {
+        trigger = uiActions.getTrigger(event.name);
+      } catch (e) {
+        // this is a workaround for the fact that the alert rule trigger is not registered in the uiActions
+      }
+      if (trigger) {
+        trigger.exec(
           {
             data: event.data,
             embeddable: api,
@@ -70,6 +74,7 @@ export const prepareEventHandler =
 
     eventHandler?.({
       ...event.data,
+      embeddable: api,
       preventDefault: () => {
         shouldExecuteDefaultTriggers = false;
       },

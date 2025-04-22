@@ -477,6 +477,7 @@ export interface ExpressionWrapperProps {
   syncTooltips?: boolean;
   syncCursor?: boolean;
   hasCompatibleActions?: ReactExpressionRendererProps['hasCompatibleActions'];
+  getCompatibleActions?: ReactExpressionRendererProps['getCompatibleActions'];
   getCompatibleCellValueActions?: ReactExpressionRendererProps['getCompatibleCellValueActions'];
   style?: React.CSSProperties;
   className?: string;
