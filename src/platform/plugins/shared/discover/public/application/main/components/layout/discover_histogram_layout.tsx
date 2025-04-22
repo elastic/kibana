@@ -25,6 +25,10 @@ export const DiscoverHistogramLayout = ({
   const chartPortalNode = useCurrentTabChartPortalNode();
   const layoutProps = useCurrentTabSelector((tab) => tab.unifiedHistogramLayoutProps);
 
+  if (!layoutProps) {
+    return null;
+  }
+
   return (
     <UnifiedHistogramLayout
       container={container}

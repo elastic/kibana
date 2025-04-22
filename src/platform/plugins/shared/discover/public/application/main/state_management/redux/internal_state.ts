@@ -55,7 +55,7 @@ export const defaultTabState: Omit<TabState, keyof TabItem> = {
     loadingStatus: LoadingStatus.Uninitialized,
     result: {},
   },
-  unifiedHistogramLayoutProps: {},
+  unifiedHistogramLayoutProps: undefined,
 };
 
 const initialState: DiscoverInternalState = {
