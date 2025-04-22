@@ -408,6 +408,7 @@ export interface DocLinks {
     aiAssistant: string;
   }>;
   readonly alerting: Readonly<{
+    authorization: string;
     guide: string;
     actionTypes: string;
     apmRulesErrorCount: string;

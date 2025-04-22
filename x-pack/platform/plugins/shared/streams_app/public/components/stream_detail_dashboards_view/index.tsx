@@ -4,7 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSearchBar } from '@elastic/eui';
+
+import {
+  EuiButton,
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPopover,
+  EuiSearchBar,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo, useState } from 'react';
 import type { SanitizedDashboardAsset } from '@kbn/streams-plugin/server/routes/dashboards/route';
@@ -13,6 +22,10 @@ import { AddDashboardFlyout } from './add_dashboard_flyout';
 import { DashboardsTable } from './dashboard_table';
 import { useDashboardsApi } from '../../hooks/use_dashboards_api';
 import { useDashboardsFetch } from '../../hooks/use_dashboards_fetch';
+import { ImportContentPackFlyout } from './import_content_pack_flyout';
+import { ExportContentPackFlyout } from './export_content_pack_flyout';
+import { FeatureFlagStreamsContentPackUIEnabled } from '../../../common/feature_flags';
+import { useKibana } from '../../hooks/use_kibana';
 
 export function StreamDetailDashboardsView({
   definition,
@@ -22,6 +35,8 @@ export function StreamDetailDashboardsView({
   const [query, setQuery] = useState('');
 
   const [isAddDashboardFlyoutOpen, setIsAddDashboardFlyoutOpen] = useState(false);
+  const [isImportFlyoutOpen, setIsImportFlyoutOpen] = useState(false);
+  const [isExportFlyoutOpen, setIsExportFlyoutOpen] = useState(false);
 
   const dashboardsFetch = useDashboardsFetch(definition?.stream.name);
   const { addDashboards, removeDashboards } = useDashboardsApi(definition?.stream.name);
@@ -38,6 +53,16 @@ export function StreamDetailDashboardsView({
   }, [linkedDashboards, query]);
 
   const [selectedDashboards, setSelectedDashboards] = useState<SanitizedDashboardAsset[]>([]);
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+
+  const {
+    core: { featureFlags },
+  } = useKibana();
+
+  const renderContentPackItems = featureFlags.getBooleanValue(
+    FeatureFlagStreamsContentPackUIEnabled,
+    false
+  );
 
   return (
     <EuiFlexGroup direction="column">
@@ -76,17 +101,96 @@ export function StreamDetailDashboardsView({
               setQuery(nextQuery.queryText);
             }}
           />
-          <EuiButton
-            data-test-subj="streamsAppStreamDetailAddDashboardButton"
-            iconType="plusInCircle"
-            onClick={() => {
-              setIsAddDashboardFlyoutOpen(true);
-            }}
-          >
-            {i18n.translate('xpack.streams.streamDetailDashboardView.addADashboardButtonLabel', {
-              defaultMessage: 'Add a dashboard',
-            })}
-          </EuiButton>
+
+          {renderContentPackItems && (
+            <EuiButton
+              data-test-subj="streamsAppStreamDetailExportContentPackButton"
+              iconType="exportAction"
+              isDisabled={linkedDashboards.length === 0}
+              onClick={() => {
+                setIsExportFlyoutOpen(true);
+              }}
+            >
+              {i18n.translate('xpack.streams.streamDetailDashboardView.exportContentPackButton', {
+                defaultMessage: 'Export content pack',
+              })}
+            </EuiButton>
+          )}
+
+          {renderContentPackItems ? (
+            <EuiPopover
+              button={
+                <EuiButton
+                  iconType="importAction"
+                  iconSide="left"
+                  color="primary"
+                  onClick={() => setIsPopoverOpen(true)}
+                >
+                  {i18n.translate(
+                    'xpack.streams.streamDetailDashboardView.addDashboardsButtonLabel',
+                    {
+                      defaultMessage: 'Add dashboards',
+                    }
+                  )}
+                </EuiButton>
+              }
+              isOpen={isPopoverOpen}
+              closePopover={() => setIsPopoverOpen(false)}
+              panelPaddingSize="none"
+              anchorPosition="downLeft"
+            >
+              <EuiContextMenuPanel
+                size="s"
+                items={[
+                  <EuiContextMenuItem
+                    data-test-subj="streamsAppStreamDetailAddDashboardButton"
+                    key="addDashboard"
+                    icon="plusInCircle"
+                    onClick={() => {
+                      setIsPopoverOpen(false);
+                      setIsAddDashboardFlyoutOpen(true);
+                    }}
+                  >
+                    {i18n.translate(
+                      'xpack.streams.streamDetailDashboardView.addADashboardButtonLabel',
+                      {
+                        defaultMessage: 'Add a dashboard',
+                      }
+                    )}
+                  </EuiContextMenuItem>,
+
+                  <EuiContextMenuItem
+                    data-test-subj="streamsAppStreamDetailImportContentPackButton"
+                    key="importContentPack"
+                    icon="importAction"
+                    onClick={() => {
+                      setIsPopoverOpen(false);
+                      setIsImportFlyoutOpen(true);
+                    }}
+                  >
+                    {i18n.translate(
+                      'xpack.streams.streamDetailDashboardView.importContentPackButtonLabel',
+                      {
+                        defaultMessage: 'Import from content pack',
+                      }
+                    )}
+                  </EuiContextMenuItem>,
+                ]}
+              />
+            </EuiPopover>
+          ) : (
+            <EuiButton
+              data-test-subj="streamsAppStreamDetailAddDashboardButton"
+              iconType="plusInCircle"
+              onClick={() => {
+                setIsAddDashboardFlyoutOpen(true);
+              }}
+            >
+              {i18n.translate('xpack.streams.streamDetailDashboardView.addADashboardButtonLabel', {
+                defaultMessage: 'Add a dashboard',
+              })}
+            </EuiButton>
+          )}
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem>
@@ -108,6 +212,31 @@ export function StreamDetailDashboardsView({
             }}
             onClose={() => {
               setIsAddDashboardFlyoutOpen(false);
+            }}
+          />
+        ) : null}
+
+        {definition && isImportFlyoutOpen ? (
+          <ImportContentPackFlyout
+            definition={definition}
+            onImport={() => {
+              dashboardsFetch.refresh();
+              setIsImportFlyoutOpen(false);
+            }}
+            onClose={() => {
+              setIsImportFlyoutOpen(false);
+            }}
+          />
+        ) : null}
+
+        {definition && isExportFlyoutOpen ? (
+          <ExportContentPackFlyout
+            definition={definition}
+            onExport={() => {
+              setIsExportFlyoutOpen(false);
+            }}
+            onClose={() => {
+              setIsExportFlyoutOpen(false);
             }}
           />
         ) : null}

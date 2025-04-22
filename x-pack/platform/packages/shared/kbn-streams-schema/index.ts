@@ -50,7 +50,12 @@ export { isRootStreamDefinition } from './src/helpers/is_root';
 export { getAdvancedParameters } from './src/helpers/get_advanced_parameters';
 export { getInheritedFieldsFromAncestors } from './src/helpers/get_inherited_fields_from_ancestors';
 
-export { type SampleDocument, type FlattenRecord, flattenRecord } from './src/shared/record_types';
+export {
+  type SampleDocument,
+  type FlattenRecord,
+  flattenRecord,
+  recursiveRecord,
+} from './src/shared/record_types';
 export { isSchema } from './src/shared/type_guards';
 
 export {
@@ -103,6 +108,7 @@ export {
   type UnaryFilterCondition,
   type AlwaysCondition,
   type UnaryOperator,
+  type NeverCondition,
   isAlwaysCondition,
   isAndCondition,
   isFilterCondition,
