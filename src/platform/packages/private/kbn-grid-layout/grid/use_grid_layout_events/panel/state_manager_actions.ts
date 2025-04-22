@@ -212,17 +212,20 @@ export const moveAction = (
     const destinationGrid = nextLayout[newTargetRowId];
     const resolvedDestinationGrid = resolveGridRow(destinationGrid, requestedPanelData);
     nextLayout[newTargetRowId] = resolvedDestinationGrid;
+
     // resolve origin grid
     if (hasChangedGridRow) {
       const originGrid = nextLayout[lastRowId];
-      const resolvedOriginGrid = resolveGridRow(originGrid);
-      nextLayout[lastRowId] = resolvedOriginGrid;
-
+      if (!originGrid.isCollapsible && Object.keys(originGrid.panels).length === 0) {
+        delete nextLayout[lastRowId];
+      } else {
+        const resolvedOriginGrid = resolveGridRow(originGrid);
+        nextLayout[lastRowId] = resolvedOriginGrid;
+      }
       interactionEvent$.next({
         ...interactionEvent,
         targetRow: newTargetRowId,
       });
-      // debugger;
     }
     if (!deepEqual(currentLayout, nextLayout)) {
       console.log({ currentLayout, nextLayout });
