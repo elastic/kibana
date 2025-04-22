@@ -12,6 +12,6 @@
     "configPath": ["xpack", "workchatFramework"],
     "requiredPlugins": ["inference", "actions", "features"],
     "optionalPlugins": [],
-    "requiredBundles": []
+    "requiredBundles": ["kibanaReact"]
   }
 }

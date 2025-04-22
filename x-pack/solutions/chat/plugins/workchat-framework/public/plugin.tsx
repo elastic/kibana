@@ -13,6 +13,7 @@ import type {
   WorkChatFrameworkPluginStartDependencies,
 } from './types';
 import { createServices, type InternalServices } from './services';
+import { registerApp } from './application';
 
 export class WorkChatAppPlugin
   implements
@@ -23,7 +24,6 @@ export class WorkChatAppPlugin
       WorkChatFrameworkPluginStartDependencies
     >
 {
-  // @ts-expect-error unused for now.
   private services?: InternalServices;
 
   constructor(context: PluginInitializerContext) {}
@@ -32,6 +32,16 @@ export class WorkChatAppPlugin
     core: CoreSetup<WorkChatFrameworkPluginStartDependencies, WorkChatFrameworkPluginStart>,
     pluginDeps: WorkChatFrameworkPluginSetupDependencies
   ): WorkChatFrameworkPluginSetup {
+    registerApp({
+      core,
+      getServices: () => {
+        if (!this.services) {
+          throw new Error('getServices called before plugin start');
+        }
+        return this.services;
+      },
+    });
+
     return {};
   }
 
