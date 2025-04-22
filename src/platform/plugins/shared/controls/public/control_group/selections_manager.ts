@@ -22,8 +22,8 @@ import { ControlGroupApi } from './types';
 export function initSelectionsManager(
   controlGroupApi: Pick<ControlGroupApi, 'autoApplySelections$' | 'children$' | 'untilInitialized'>
 ) {
-  const filters$ = new BehaviorSubject<Filter[] | undefined>(undefined);
-  const unpublishedFilters$ = new BehaviorSubject<Filter[] | undefined>(undefined);
+  const filters$ = new BehaviorSubject<Filter[] | undefined>([]);
+  const unpublishedFilters$ = new BehaviorSubject<Filter[] | undefined>([]);
   const timeslice$ = new BehaviorSubject<[number, number] | undefined>(undefined);
   const unpublishedTimeslice$ = new BehaviorSubject<[number, number] | undefined>(undefined);
   const hasUnappliedSelections$ = new BehaviorSubject(false);
@@ -40,10 +40,10 @@ export function initSelectionsManager(
         initialTimeslice = controlApi.timeslice$.value;
       }
     });
-
-    filters$.next(initialFilters);
-    unpublishedFilters$.next(initialFilters);
-
+    if (initialFilters.length) {
+      filters$.next(initialFilters);
+      unpublishedFilters$.next(initialFilters);
+    }
     if (initialTimeslice) {
       timeslice$.next(initialTimeslice);
       unpublishedTimeslice$.next(initialTimeslice);
@@ -55,7 +55,9 @@ export function initSelectionsManager(
         'filters$',
         apiPublishesFilters,
         []
-      ).subscribe((newFilters) => unpublishedFilters$.next(newFilters))
+      ).subscribe((newFilters) => {
+        unpublishedFilters$.next(newFilters);
+      })
     );
 
     subscriptions.push(
@@ -77,8 +79,7 @@ export function initSelectionsManager(
       combineLatest([filters$, unpublishedFilters$, timeslice$, unpublishedTimeslice$]).subscribe(
         ([filters, unpublishedFilters, timeslice, unpublishedTimeslice]) => {
           const next =
-            !deepEqual(timeslice, unpublishedTimeslice) ||
-            hasUnpublishedChange(filters, unpublishedFilters);
+            !deepEqual(timeslice, unpublishedTimeslice) || !deepEqual(filters, unpublishedFilters);
           if (hasUnappliedSelections$.value !== next) {
             hasUnappliedSelections$.next(next);
           }
@@ -100,19 +101,12 @@ export function initSelectionsManager(
   });
 
   function applySelections() {
-    if (hasUnpublishedChange(filters$.value, unpublishedFilters$.value)) {
+    if (!deepEqual(filters$.value, unpublishedFilters$.value)) {
       filters$.next(unpublishedFilters$.value);
     }
     if (!deepEqual(timeslice$.value, unpublishedTimeslice$.value)) {
       timeslice$.next(unpublishedTimeslice$.value);
     }
-  }
-
-  function hasUnpublishedChange(
-    filters: Filter[] | undefined = [],
-    unpublishedFilters: Filter[] | undefined = []
-  ) {
-    return !deepEqual(filters, unpublishedFilters);
   }
 
   return {

@@ -8,6 +8,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { BrushEndListener, XYBrushEvent } from '@elastic/charts';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import type { FilterGroupHandler } from '@kbn/alerts-ui-shared';
 import { BoolQuery, Filter } from '@kbn/es-query';
 import { usePerformanceContext } from '@kbn/ebt-tools';
 import { i18n } from '@kbn/i18n';
@@ -94,12 +95,13 @@ function InternalAlertsPage() {
   } = data;
   const { ObservabilityPageTemplate } = usePluginContext();
   const [filterControls, setFilterControls] = useState<Filter[]>();
+  const [controlApi, setControlApi] = useState<FilterGroupHandler | undefined>();
   const alertSearchBarStateProps = useAlertSearchBarStateContainer(ALERTS_URL_STORAGE_KEY, {
     replace: false,
   });
   const hasInitialControlLoadingFinished = useMemo(
-    () => Array.isArray(filterControls),
-    [filterControls]
+    () => controlApi && Array.isArray(filterControls),
+    [controlApi, filterControls]
   );
   const filteredRuleTypes = useGetFilteredRuleTypes();
   const themeOverrides = charts.theme.useChartsBaseTheme();
@@ -284,6 +286,7 @@ function InternalAlertsPage() {
               onEsQueryChange={setEsQuery}
               filterControls={filterControls}
               onFilterControlsChange={setFilterControls}
+              onControlApiAvailable={setControlApi}
               showFilterBar
               services={{
                 timeFilterService,

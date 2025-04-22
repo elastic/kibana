@@ -222,10 +222,6 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
   }, [controlsUrlState, getStoredControlState, switchToEditMode]);
 
   useEffect(() => {
-    if (controlsUrlState && !urlStateInitialized) {
-      initializeUrlState();
-    }
-
     if (!controlGroup) {
       return;
     }
@@ -234,14 +230,26 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
       next: debouncedFilterUpdates,
     });
 
+    return () => {
+      filterChangedSubscription.current?.unsubscribe();
+    };
+  }, [controlGroup, debouncedFilterUpdates]);
+
+  useEffect(() => {
+    if (controlsUrlState && !urlStateInitialized) {
+      initializeUrlState();
+    }
+
+    if (!controlGroup) {
+      return;
+    }
+
     inputChangedSubscription.current = controlGroup.getInput$().subscribe({
       next: handleStateUpdates,
     });
 
     return () => {
-      [filterChangedSubscription.current, inputChangedSubscription.current].forEach((sub) => {
-        if (sub) sub.unsubscribe();
-      });
+      inputChangedSubscription.current?.unsubscribe();
     };
   }, [
     controlGroup,
