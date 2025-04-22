@@ -26,7 +26,7 @@ import { getDefaultAssistantGraph } from './graph';
 import { invokeGraph, streamGraph } from './helpers';
 import { transformESSearchToAnonymizationFields } from '../../../../ai_assistant_data_clients/anonymization_fields/helpers';
 import { DEFAULT_DATE_FORMAT_TZ } from '../../../../../common/constants';
-import { agentRunableFactory } from './agentRunnable';
+import { agentRunnableFactory } from './agentRunnable';
 
 export const callAssistantGraph: AgentExecutor<true | false> = async ({
   abortSignal,
@@ -88,9 +88,26 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
    * This function ensures that a new llmClass instance is created every time it is called.
    * This is necessary to avoid any potential side effects from shared state. By always
    * creating a new instance, we prevent other uses of llm from binding and changing
-   * the state unintentionally. For this reason, never assign this value to a variable (ex const llm = createLlmInstance())
+   * the state unintentionally. For this reason, only call createLlmInstance at runtime
    */
-  const createLlmInstance = () => chatModel;
+  const createLlmInstance = async () =>
+    inference.getChatModel({
+      request,
+      connectorId,
+      chatModelOptions: {
+        model: request.body.model,
+        signal: abortSignal,
+        temperature: getDefaultArguments(llmType).temperature,
+        // prevents the agent from retrying on failure
+        // failure could be due to bad connector, we should deliver that result to the client asap
+        maxRetries: 0,
+        metadata: {
+          connectorTelemetry: {
+            pluginId: 'security_ai_assistant',
+          },
+        },
+      },
+    });
   // new llmClass({
   //   actionsClient,
   //   connectorId,
@@ -169,9 +186,10 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
         } catch (e) {
           logger.error(`Failed to get prompt for tool: ${tool.name}`);
         }
+        const llm = await createLlmInstance();
         return tool.getTool({
           ...assistantToolParams,
-          llm: createLlmInstance(),
+          llm,
           isOssModel,
           description,
         });
@@ -204,12 +222,11 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
     prompt: defaultSystemPrompt,
     additionalPrompt: systemPrompt,
     llmType,
-    isOpenAI,
   });
 
-  const agentRunnable = await agentRunableFactory({
-    llm: createLlmInstance(),
-    isOpenAI,
+  const llm = await createLlmInstance();
+  const agentRunnable = await agentRunnableFactory({
+    llm,
     llmType,
     tools,
     isStream,

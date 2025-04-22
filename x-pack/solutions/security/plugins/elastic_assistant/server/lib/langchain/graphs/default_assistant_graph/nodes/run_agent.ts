@@ -76,8 +76,6 @@ export async function runAgent({
       config
     );
 
-  console.log('agentOutcome ==>', agentOutcome);
-
   return {
     agentOutcome,
     lastNode: NodeType.AGENT,

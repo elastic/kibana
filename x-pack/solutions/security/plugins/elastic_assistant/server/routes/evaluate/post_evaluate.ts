@@ -49,10 +49,10 @@ import {
   DefaultAssistantGraph,
   getDefaultAssistantGraph,
 } from '../../lib/langchain/graphs/default_assistant_graph/graph';
-import { getLlmClass, getLlmType, isOpenSourceModel } from '../utils';
+import { getLlmType, isOpenSourceModel } from '../utils';
 import { getGraphsFromNames } from './get_graphs_from_names';
 import { DEFAULT_DATE_FORMAT_TZ } from '../../../common/constants';
-import { agentRunableFactory } from '../../lib/langchain/graphs/default_assistant_graph/agentRunnable';
+import { agentRunnableFactory } from '../../lib/langchain/graphs/default_assistant_graph/agentRunnable';
 import { PrepareIndicesForAssistantGraphEvaluations } from './prepare_indices_for_evaluations/graph_type/assistant';
 
 const DEFAULT_SIZE = 20;
@@ -294,42 +294,26 @@ export const postEvaluateRoute = (
             connectors.map(async (connector) => {
               const llmType = getLlmType(connector.actionTypeId);
               const isOssModel = isOpenSourceModel(connector);
-              const isOpenAI = llmType === 'openai' && !isOssModel;
-              const llmClass = getLlmClass(llmType);
-              const chatModel = await inference.getChatModel({
-                request,
-                connectorId: connector.id,
-                chatModelOptions: {
-                  // model: request.body.model,
-                  signal: abortSignal,
-                  temperature: getDefaultArguments(llmType).temperature,
-                  // prevents the agent from retrying on failure
-                  // failure could be due to bad connector, we should deliver that result to the client asap
-                  maxRetries: 0,
-                  metadata: {
-                    connectorTelemetry: {
-                      pluginId: 'security_ai_assistant',
+              const createLlmInstance = async () =>
+                inference.getChatModel({
+                  request,
+                  connectorId: connector.id,
+                  chatModelOptions: {
+                    // model: request.body.model,
+                    signal: abortSignal,
+                    temperature: getDefaultArguments(llmType).temperature,
+                    // prevents the agent from retrying on failure
+                    // failure could be due to bad connector, we should deliver that result to the client asap
+                    maxRetries: 0,
+                    metadata: {
+                      connectorTelemetry: {
+                        pluginId: 'security_ai_assistant',
+                      },
                     },
                   },
-                },
-              });
-              const createLlmInstance = () => chatModel;
-              // new llmClass({
-              //   actionsClient,
-              //   connectorId: connector.id,
-              //   llmType,
-              //   logger,
-              //   temperature: getDefaultArguments(llmType).temperature,
-              //   signal: abortSignal,
-              //   streaming: false,
-              //   maxRetries: 0,
-              //   convertSystemMessageToHumanContent: false,
-              //   telemetryMetadata: {
-              //     pluginId: 'security_ai_assistant',
-              //   },
-              // });
+                });
 
-              const llm = createLlmInstance();
+              const llm = await createLlmInstance();
               const anonymizationFieldsRes =
                 await dataClients?.anonymizationFieldsDataClient?.findDocuments<EsAnonymizationFieldsSchema>(
                   {
@@ -408,9 +392,10 @@ export const postEvaluateRoute = (
                     } catch (e) {
                       logger.error(`Failed to get prompt for tool: ${tool.name}`);
                     }
+                    const chatModel = await createLlmInstance();
                     return tool.getTool({
                       ...assistantToolParams,
-                      llm: createLlmInstance(),
+                      llm: chatModel,
                       isOssModel,
                       description,
                     });
@@ -432,12 +417,11 @@ export const postEvaluateRoute = (
               const chatPromptTemplate = formatPrompt({
                 prompt: defaultSystemPrompt,
                 llmType,
-                isOpenAI,
               });
+              const chatModel = await createLlmInstance();
 
-              const agentRunnable = await agentRunableFactory({
-                llm: createLlmInstance(),
-                isOpenAI,
+              const agentRunnable = await agentRunnableFactory({
+                llm: chatModel,
                 llmType,
                 tools,
                 isStream: false,
