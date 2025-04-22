@@ -4,11 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { checkIntegrationsCardComplete } from './integrations_check_complete';
 import { installationStatuses } from '@kbn/fleet-plugin/public';
 import type { StartServices } from '../../../../../../types';
 
 import { lastValueFrom } from 'rxjs';
+import { checkIntegrationsCardComplete } from '../../integrations/integrations_check_complete';
 
 jest.mock('rxjs', () => ({
   ...jest.requireActual('rxjs'),

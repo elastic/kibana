@@ -84,6 +84,7 @@ export const KnowledgeSourceCard: OnboardingCardComponent = ({
             items={KNOWLEDGE_SOURCE_CARD_ITEMS}
             onSelect={onSelectCard}
             selectedItem={selectedCardItem}
+            cardId={OnboardingCardId.knowledgeSource}
           />
           {isIntegrationsCardAvailable && !isIntegrationsCardComplete && (
             <>

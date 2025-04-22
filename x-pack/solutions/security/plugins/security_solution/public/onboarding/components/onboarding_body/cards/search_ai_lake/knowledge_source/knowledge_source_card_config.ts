@@ -25,7 +25,7 @@ export const KNOWLEDGE_SOURCE_CARD_ITEMS: CardSelectorAssetListItem[] = [
     // FIXME: update the video
     asset: {
       type: CardAssetType.video,
-      source: '//play.vidyard.com/jpy1CcpBuowsA4a8t7gNDE',
+      source: 'https://ela.st/ai4dsoc-gs1',
       alt: i18n.translate(
         'xpack.securitySolution.onboarding.knowledgeSourceCards.install.description',
         {
@@ -47,7 +47,7 @@ export const KNOWLEDGE_SOURCE_CARD_ITEMS: CardSelectorAssetListItem[] = [
     ),
     asset: {
       type: CardAssetType.video,
-      source: '//play.vidyard.com/2q7LSLrsC8qEFQUNHFu9zf',
+      source: 'http://ela.st/ai4dsoc-gs2',
       alt: i18n.translate(
         'xpack.securitySolution.onboarding.knowledgeSourceCards.create.description',
         {

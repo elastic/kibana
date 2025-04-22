@@ -4,32 +4,32 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { i18n } from '@kbn/i18n';
 import type { OnboardingCardCheckComplete } from '../../../../../types';
 import { loadAiConnectors } from '../../common/connectors/ai_connectors';
 import { getConnectorsAuthz } from '../../common/connectors/authz';
 import type { AIConnectorCardMetadata } from './types';
 
+const completeBadgeText = (count: number) =>
+  i18n.translate('xpack.securitySolution.onboarding.llmConnector.badge.completeText', {
+    defaultMessage: '{count} AI {count, plural, one {connector} other {connectors}} added',
+    values: { count },
+  });
+
 export const checkAiConnectorsCardComplete: OnboardingCardCheckComplete<
   AIConnectorCardMetadata
-> = async ({ http, application, siemMigrations }) => {
-  let isComplete = false;
+> = async ({ http, application }) => {
   const authz = getConnectorsAuthz(application.capabilities);
 
   if (!authz.canReadConnectors) {
-    return { isComplete, metadata: { connectors: [], ...authz } };
+    return { isComplete: false, metadata: { connectors: [], ...authz } };
   }
 
   const aiConnectors = await loadAiConnectors(http);
 
-  const storedConnectorId = siemMigrations.rules.connectorIdStorage.get();
-  if (storedConnectorId) {
-    if (aiConnectors.length === 0) {
-      siemMigrations.rules.connectorIdStorage.remove();
-    } else {
-      isComplete = aiConnectors.some((connector) => connector.id === storedConnectorId);
-    }
-  }
-
-  return { isComplete, metadata: { connectors: aiConnectors, ...authz } };
+  return {
+    isComplete: aiConnectors.length > 0,
+    completeBadgeText: completeBadgeText(aiConnectors.length),
+    metadata: { connectors: aiConnectors, ...authz },
+  };
 };

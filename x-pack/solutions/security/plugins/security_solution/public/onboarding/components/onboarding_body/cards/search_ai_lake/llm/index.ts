@@ -10,9 +10,9 @@ import { AssistantIcon } from '@kbn/ai-assistant-icon';
 import type { OnboardingCardConfig } from '../../../../../types';
 import { OnboardingCardId } from '../../../../../constants';
 import { AI_CONNECTOR_CARD_TITLE } from './translations';
-import { checkAiConnectorsCardComplete } from './connectors_check_complete';
 import type { AIConnectorCardMetadata } from './types';
 import { SECURITY_FEATURE_ID } from '../../../../../../../common/constants';
+import { checkAssistantCardComplete } from '../../common/connectors/assistant_check_complete';
 
 export const llmConnectorCardConfig: OnboardingCardConfig<AIConnectorCardMetadata> = {
   id: OnboardingCardId.searchAiLakeLLM,
@@ -25,6 +25,6 @@ export const llmConnectorCardConfig: OnboardingCardConfig<AIConnectorCardMetadat
         './llm_connector_card'
       )
   ),
-  checkComplete: checkAiConnectorsCardComplete,
+  checkComplete: checkAssistantCardComplete,
   capabilitiesRequired: [`${SECURITY_FEATURE_ID}.configurations`],
 };

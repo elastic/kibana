@@ -44,7 +44,8 @@ export const OnboardingHeader = React.memo(() => {
     return (
       headerConfig.find(
         (item) =>
-          item.capabilitiesRequired && hasCapabilities(capabilities, item.capabilitiesRequired)
+          !item.capabilitiesRequired ||
+          (item.capabilitiesRequired && hasCapabilities(capabilities, item.capabilitiesRequired))
       ) ?? defaultHeaderConfig
     );
   }, [capabilities]);
