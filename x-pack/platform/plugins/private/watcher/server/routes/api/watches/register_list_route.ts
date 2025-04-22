@@ -5,8 +5,17 @@
  * 2.0.
  */
 
+import { schema } from '@kbn/config-schema';
 import { RouteDependencies } from '../../../types';
 import { Watch } from '../../../models/watch';
+
+const querySchema = schema.object({
+  pageSize: schema.string(),
+  pageIndex: schema.string(),
+  sortField: schema.string(),
+  sortDirection: schema.string(),
+  query: schema.string(),
+});
 
 export function registerListRoute({ router, license, lib: { handleEsError } }: RouteDependencies) {
   router.get(
@@ -18,12 +27,49 @@ export function registerListRoute({ router, license, lib: { handleEsError } }: R
           reason: 'Relies on es client for authorization',
         },
       },
-      validate: false,
+      validate: {
+        query: querySchema,
+      },
     },
     license.guardApiRoute(async (ctx, request, response) => {
       try {
+        const { pageSize, pageIndex, sortField, sortDirection, query } = request.query;
         const esClient = (await ctx.core).elasticsearch.client;
-        const { watches: hits } = await esClient.asCurrentUser.watcher.queryWatches();
+        const body = {
+          from: pageIndex * pageSize,
+          size: pageSize,
+          query: undefined,
+          sort: undefined,
+        };
+        if (sortField && sortDirection) {
+          body.sort = {
+            [`metadata.${sortField}.keyword`]: {
+              order: sortDirection,
+            },
+          };
+        }
+        if (query) {
+          // The Query Watch API only allows searching by _id or by metadata.* fields
+          body.query = {
+            bool: {
+              should: [
+                {
+                  wildcard: {
+                    ['metadata.name.keyword']: `*${query}*`,
+                  },
+                },
+                {
+                  match: {
+                    _id: {
+                      query,
+                    },
+                  },
+                },
+              ],
+            },
+          };
+        }
+        const { watches: hits, count } = await esClient.asCurrentUser.watcher.queryWatches(body);
         const watches = hits.map(({ _id, watch, status }) => {
           return Watch.fromUpstreamJson(
             {
@@ -42,6 +88,7 @@ export function registerListRoute({ router, license, lib: { handleEsError } }: R
         return response.ok({
           body: {
             watches: watches.map((watch) => watch.downstreamJson),
+            watchCount: count,
           },
         });
       } catch (e) {

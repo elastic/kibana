@@ -8,7 +8,6 @@
 import React, { useState, useMemo, useEffect, Fragment } from 'react';
 
 import {
-  CriteriaWithPagination,
   EuiButton,
   EuiButtonEmpty,
   EuiCallOut,
@@ -25,6 +24,7 @@ import {
   EuiPageHeader,
   EuiPageTemplate,
   EuiSearchBarOnChangeArgs,
+  EuiTablePagination,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -32,6 +32,7 @@ import { Moment } from 'moment';
 
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 
+import { Criteria } from '@elastic/eui/src/components/basic_table/basic_table';
 import { REFRESH_INTERVALS, PAGINATION, WATCH_TYPES } from '../../../../common/constants';
 import { listBreadcrumb } from '../../lib/breadcrumbs';
 import {
@@ -136,27 +137,33 @@ export const WatchListPage = () => {
   // Filter out deleted watches on the client, because the API will return 200 even though some watches
   // may not really be deleted until after they're done firing and this could take some time.
   const [deletedWatches, setDeletedWatches] = useState<string[]>([]);
-  const [pagination, setPagination] = useState({
-    pageIndex: 0,
-    pageSize: PAGINATION.initialPageSize,
-  });
 
   useEffect(() => {
     setBreadcrumbs([listBreadcrumb]);
   }, [setBreadcrumbs]);
 
+  const [pageIndex, setPageIndex] = useState(0);
+  const [pageSize, setPageSize] = useState(PAGINATION.initialPageSize);
+
+  const [sort, setSort] = useState({
+    field: 'name', // Currently we can only sort by name
+    direction: 'asc',
+  });
+
   const {
     isLoading: isWatchesLoading,
-    data: watches,
+    data,
     error,
-  } = useLoadWatches(REFRESH_INTERVALS.WATCH_LIST);
+  } = useLoadWatches(REFRESH_INTERVALS.WATCH_LIST, pageSize, pageIndex, sort.field, sort.direction, query);
 
   const [isPopoverOpen, setIsPopOverOpen] = useState<boolean>(false);
 
   const availableWatches = useMemo(
     () =>
-      watches ? watches.filter((watch: any) => !deletedWatches.includes(watch.id)) : undefined,
-    [watches, deletedWatches]
+      data?.watches
+        ? data.watches.filter((watch: any) => !deletedWatches.includes(watch.id))
+        : undefined,
+    [data?.watches, deletedWatches]
   );
 
   const watcherDescriptionText = (
@@ -279,7 +286,7 @@ export const WatchListPage = () => {
     );
   }
 
-  if (availableWatches && availableWatches.length === 0) {
+  if (availableWatches && availableWatches.length === 0 && !query) {
     const emptyPromptBody = (
       <EuiText color="subdued">
         <p>
@@ -321,7 +328,6 @@ export const WatchListPage = () => {
         name: i18n.translate('xpack.watcher.sections.watchList.watchTable.idHeader', {
           defaultMessage: 'ID',
         }),
-        sortable: true,
         truncateText: false,
         render: (id: string) => {
           return (
@@ -348,14 +354,12 @@ export const WatchListPage = () => {
       {
         field: 'watchStatus.state',
         name: stateColumnHeader,
-        sortable: true,
         width: '130px',
         render: (state: string) => <WatchStateBadge state={state} />,
       },
       {
         field: 'watchStatus.lastMetCondition',
         name: conditionLastMetHeader,
-        sortable: true,
         truncateText: true,
         width: '160px',
         render: (lastMetCondition: Moment) => {
@@ -365,7 +369,6 @@ export const WatchListPage = () => {
       {
         field: 'watchStatus.lastChecked',
         name: lastCheckedHeader,
-        sortable: true,
         truncateText: true,
         width: '160px',
         render: (lastChecked: Moment) => {
@@ -375,7 +378,6 @@ export const WatchListPage = () => {
       {
         field: 'watchStatus.comment',
         name: commentHeader,
-        sortable: true,
         truncateText: true,
       },
       {
@@ -496,24 +498,15 @@ export const WatchListPage = () => {
     content = (
       <div data-test-subj="watchesTableContainer">
         <EuiInMemoryTable
-          onTableChange={({ page: { index, size } }: CriteriaWithPagination<never>) =>
-            setPagination({ pageIndex: index, pageSize: size })
+          onTableChange={({ sort: { field, direction } }: Criteria<never>) =>
+            setSort({ field, direction })
           }
           items={availableWatches}
           itemId="id"
           columns={columns}
           search={searchConfig}
-          pagination={{
-            ...PAGINATION,
-            pageIndex: pagination.pageIndex,
-            pageSize: pagination.pageSize,
-          }}
-          sorting={{
-            sort: {
-              field: 'name',
-              direction: 'asc',
-            },
-          }}
+          pagination={false}
+          sorting={{ sort }}
           selection={selectionConfig}
           childrenBetween={
             queryError && (
@@ -547,6 +540,15 @@ export const WatchListPage = () => {
             'data-test-subj': 'cell',
           })}
           data-test-subj="watchesTable"
+        />
+        <EuiTablePagination
+          aria-label="Table pagination example"
+          pageCount={data?.watchCount ? Math.ceil(data?.watchCount / pageSize) : 0}
+          activePage={pageIndex}
+          onChangePage={setPageIndex}
+          itemsPerPage={pageSize}
+          onChangeItemsPerPage={setPageSize}
+          itemsPerPageOptions={PAGINATION.pageSizeOptions}
         />
       </div>
     );
