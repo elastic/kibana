@@ -47,6 +47,7 @@ export function TransactionOverview({
     () => getTransactionFieldConfiguration(parsedDoc),
     [parsedDoc]
   );
+  const transactionId = parsedDoc[TRANSACTION_ID_FIELD];
 
   return (
     <RootTransactionProvider traceId={traceId} indexPattern={tracesIndexPattern}>
@@ -60,8 +61,8 @@ export function TransactionOverview({
           <EuiSpacer size="m" />
           <TransactionSummaryTitle
             serviceName={parsedDoc[SERVICE_NAME_FIELD]}
-            id={parsedDoc[TRANSACTION_ID_FIELD]}
-            name={parsedDoc[TRANSACTION_NAME_FIELD]}
+            id={transactionId}
+            name={parsedDoc[TRANSACTION_NAME_FIELD]!}
           />
           <EuiSpacer size="m" />
           {transactionFields.map((fieldId) => (
@@ -83,18 +84,17 @@ export function TransactionOverview({
               />
             </>
           )}
-          {traceId && (
+          {traceId && transactionId ? (
             <>
               <EuiSpacer size="m" />
               <Trace
                 fields={fieldConfigurations}
-                serviceName={parsedDoc[SERVICE_NAME_FIELD]}
                 traceId={traceId}
-                transactionId={parsedDoc[TRANSACTION_ID_FIELD]}
+                docId={transactionId}
                 displayType="transaction"
               />
             </>
-          )}
+          ) : null}
         </EuiPanel>
       </FieldActionsProvider>
     </RootTransactionProvider>
