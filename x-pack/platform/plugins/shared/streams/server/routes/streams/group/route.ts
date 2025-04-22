@@ -14,6 +14,8 @@ import {
   isGroupStreamDefinition,
 } from '@kbn/streams-schema';
 import { createServerRoute } from '../../create_server_route';
+import { ASSET_TYPE, ASSET_UUID } from '../../../lib/streams/assets/fields';
+import { QueryAsset } from '../../../../common/assets';
 
 const readGroupRoute = createServerRoute({
   endpoint: 'GET /api/streams/{name}/_group 2023-10-31',
@@ -85,25 +87,22 @@ const upsertGroupRoute = createServerRoute({
     }
 
     const { name } = params.path;
-
-    if (name.startsWith('logs.')) {
-      throw badRequest('A group stream name can not start with [logs.]');
-    }
-
-    const assets = await assetClient.getAssets({
-      entityId: name,
-      entityType: 'stream',
-    });
+    const assets = await assetClient.getAssets(name);
 
     const groupUpsertRequest = params.body;
 
     const dashboards = assets
-      .filter((asset) => asset.assetType === 'dashboard')
-      .map((asset) => asset.assetId);
+      .filter((asset) => asset[ASSET_TYPE] === 'dashboard')
+      .map((asset) => asset[ASSET_UUID]);
+
+    const queries = assets
+      .filter((asset): asset is QueryAsset => asset[ASSET_TYPE] === 'query')
+      .map((asset) => asset.query);
 
     const upsertRequest = {
       dashboards,
       stream: groupUpsertRequest,
+      queries,
     } as GroupStreamUpsertRequest;
 
     return await streamsClient.upsertStream({

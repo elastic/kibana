@@ -183,7 +183,6 @@ export interface OutputSoRemoteElasticsearchAttributes extends OutputSoBaseAttri
   service_token?: string;
   secrets?: {
     service_token?: { id: string };
-    kibana_api_key?: { id: string };
     ssl?: {
       key?: { id: string };
     };
@@ -191,6 +190,7 @@ export interface OutputSoRemoteElasticsearchAttributes extends OutputSoBaseAttri
   sync_integrations?: boolean;
   kibana_url?: string;
   kibana_api_key?: string;
+  sync_uninstalled_integrations?: boolean;
 }
 
 interface OutputSoLogstashAttributes extends OutputSoBaseAttributes {

@@ -28,6 +28,12 @@ export interface ToolResultEvent extends ChatEventBase {
   };
 }
 
+export interface ProgressionEvent extends ChatEventBase {
+  type: 'progression';
+  progressionType: string;
+  data: Record<string, any>;
+}
+
 /**
  * Emitted when a conversation was created.
  *
@@ -66,7 +72,8 @@ export type ChatEvent =
   | MessageEvent
   | ConversationCreatedEvent
   | ConversationUpdatedEvent
-  | ToolResultEvent;
+  | ToolResultEvent
+  | ProgressionEvent;
 
 export const conversationCreatedEvent = ({
   id,

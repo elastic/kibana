@@ -39,7 +39,7 @@ import { GrokFormState, ProcessorFormState } from '../../types';
 import { useSimulatorSelector } from '../../state_management/stream_enrichment_state_machine';
 import { selectPreviewDocuments } from '../../state_management/simulation_state_machine/selectors';
 
-const INTERNAL_INFERENCE_CONNECTORS = ['Elastic-LLM'];
+const INTERNAL_INFERENCE_CONNECTORS = ['Elastic-Managed-LLM'];
 
 const RefreshButton = ({
   generatePatterns,
@@ -279,7 +279,7 @@ function InnerGrokAiSuggestions({
     content = null;
   }
 
-  const isManagedAIConnector = !INTERNAL_INFERENCE_CONNECTORS.includes(currentConnector || '');
+  const isManagedAIConnector = INTERNAL_INFERENCE_CONNECTORS.includes(currentConnector || '');
   const [isManagedAiConnectorCalloutDismissed, setManagedAiConnectorCalloutDismissed] =
     useLocalStorage('streams:managedAiConnectorCalloutDismissed', false);
 

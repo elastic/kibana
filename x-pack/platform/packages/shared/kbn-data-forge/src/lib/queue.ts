@@ -18,6 +18,9 @@ type CargoQueue = ReturnType<typeof cargoQueue<Doc, Error>>;
 let queue: CargoQueue;
 
 function calculateIndexName(config: Config, doc: Doc) {
+  if (config.indexing.slashLogs) {
+    return 'logs';
+  }
   if (doc.data_stream?.dataset) {
     const { dataset } = doc.data_stream;
     const type = doc.data_stream.type ?? 'logs';

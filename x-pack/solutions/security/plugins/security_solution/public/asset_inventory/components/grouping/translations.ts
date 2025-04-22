@@ -37,7 +37,7 @@ export const assetGroupsUnit = (
         values: { groupCount },
         defaultMessage: `{groupCount} {groupCount, plural, =1 {cloud account} other {cloud accounts}}`,
       });
-    case ASSET_GROUPING_OPTIONS.SOURCE:
+    case ASSET_GROUPING_OPTIONS.ENTITY_SOURCE:
       return i18n.translate('xpack.securitySolution.assetInventory.groupUnit.source', {
         values: { groupCount },
         defaultMessage: `{groupCount} {groupCount, plural, =1 {source} other {sources}}`,

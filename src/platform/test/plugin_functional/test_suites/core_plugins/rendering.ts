@@ -267,6 +267,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.fleet.internal.onlyAllowAgentUpgradeToKnownVersions (boolean?)',
         'xpack.fleet.developer.maxAgentPoliciesWithInactivityTimeout (number?)',
         'xpack.fleet.integrationsHomeOverride (string?)',
+        'xpack.fleet.prereleaseEnabledByDefault (boolean?)',
         'xpack.global_search.search_timeout (duration?)',
         'xpack.global_search_bar.input_max_limit (number?)',
         'xpack.graph.canEditDrillDownUrls (boolean?)',
@@ -348,8 +349,11 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.stack_connectors.enableExperimental (array?)',
         'xpack.trigger_actions_ui.enableExperimental (array?)',
         'xpack.trigger_actions_ui.enableGeoTrackingThresholdAlert (boolean?)',
+        'xpack.trigger_actions_ui.rules.enabled (boolean?)',
         'xpack.timelines.enableExperimental (array?)',
         'xpack.alerting.rules.run.alerts.max (number?)',
+        'xpack.alerting.maintenanceWindow.enabled (boolean?)',
+        'xpack.alerting.rulesSettings.enabled (boolean?)',
         'xpack.upgrade_assistant.featureSet.migrateSystemIndices (boolean?)',
         'xpack.upgrade_assistant.featureSet.mlSnapshots (boolean?)',
         'xpack.upgrade_assistant.featureSet.reindexCorrectiveActions (boolean?)',
@@ -378,7 +382,6 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.apm.featureFlags.ruleFormV2Enabled (boolean?)',
         'xpack.observability.unsafe.ruleFormV2.enabled (boolean?)',
         'xpack.slo.experimental.ruleFormV2.enabled (boolean?)',
-        'xpack.slo.experimental.management.enabled (boolean?)',
         /**/
       ];
       // We don't assert that actualExposedConfigKeys and expectedExposedConfigKeys are equal, because test failure messages with large
