@@ -238,7 +238,7 @@ class SecurityWorkflowInsightsService {
 
   private registerDefendInsightsCallbacks(
     registerCallback: (callbackId: CallbackIds, callback: Function) => void
-  ) {
+  ): void {
     registerCallback(
       CallbackIds.DefendInsightsPostCreate,
       this.createFromDefendInsights.bind(this)
@@ -250,7 +250,7 @@ class SecurityWorkflowInsightsService {
   public async onAfterFetch(
     request: KibanaRequest<unknown, unknown, DefendInsightsGetRequestQuery>,
     agentIds: string[]
-  ) {
+  ): Promise<void> {
     await this.ensureAgentIdsInCurrentSpace(request, agentIds);
   }
 
@@ -282,7 +282,10 @@ class SecurityWorkflowInsightsService {
     return Promise.all(uniqueInsights.map((insight) => this.create(insight)));
   }
 
-  public async ensureAgentIdsInCurrentSpace(request: KibanaRequest, agentIds: string[] = []) {
+  public async ensureAgentIdsInCurrentSpace(
+    request: KibanaRequest,
+    agentIds: string[] = []
+  ): Promise<void> {
     const { endpointManagementSpaceAwarenessEnabled } = this.endpointContext.experimentalFeatures;
     if (!endpointManagementSpaceAwarenessEnabled) {
       return;
