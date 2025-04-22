@@ -24,6 +24,7 @@ export const useDataView = (
 ): { dataView: DataView | undefined; status: SharedDataViewSelectionState['status'] } => {
   const {
     services: { dataViews },
+    notifications: { toasts },
   } = useKibana();
 
   const { dataViewId, status: internalStatus } = useSelector(
@@ -38,12 +39,21 @@ export const useDataView = (
         return setRetrievedDataView(undefined);
       }
 
-      // TODO: remove conditional .get call when new data view picker is stabilized
-      // this is due to the fact that many of our tests mock kibana hook and do not provide proper
-      // double for dataViews service
-      setRetrievedDataView(await dataViews?.get(dataViewId));
+      try {
+        // TODO: remove conditional .get call when new data view picker is stabilized
+        // this is due to the fact that many of our tests mock kibana hook and do not provide proper
+        // double for dataViews service
+        const currDv = await dataViews?.get(dataViewId);
+        setRetrievedDataView(currDv);
+      } catch (error) {
+        setRetrievedDataView(undefined);
+        toasts.danger({
+          title: 'Error retrieving data view',
+          body: `Error: ${error?.message ?? 'unknown'}`,
+        });
+      }
     })();
-  }, [dataViews, dataViewId, internalStatus]);
+  }, [dataViews, dataViewId, internalStatus, toasts]);
 
   return useMemo(() => {
     if (!newDataViewPickerEnabled) {
