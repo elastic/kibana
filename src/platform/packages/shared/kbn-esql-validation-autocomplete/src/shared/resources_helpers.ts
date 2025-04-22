@@ -11,6 +11,7 @@ import type { ESQLCallbacks } from './types';
 import type { ESQLRealField } from '../validation/types';
 import { buildQueryForFieldsFromSource } from '../validation/helpers';
 import { getFieldsFromES, getCurrentQueryAvailableFields } from './helpers';
+import { removeLastPipe, processPipes, toSingleLine } from './query_string_utils';
 
 export const NOT_SUGGESTED_TYPES = ['unsupported'];
 
@@ -20,31 +21,6 @@ export function buildQueryUntilPreviousCommand(ast: ESQLAst, queryString: string
 }
 
 const cache = new Map<string, ESQLRealField[]>();
-
-function removeLastPipe(inputString: string): string {
-  const lastPipeIndex = inputString.lastIndexOf('|');
-  if (lastPipeIndex !== -1) {
-    return inputString.substring(0, lastPipeIndex).trimEnd();
-  }
-  return inputString.trimEnd();
-}
-
-function processPipes(inputString: string) {
-  const parts = inputString.split('|');
-  const results = [];
-  let currentString = '';
-
-  for (let i = 0; i < parts.length; i++) {
-    const part = parts[i].trim();
-    if (i === 0) {
-      currentString = part;
-    } else {
-      currentString += ' | ' + part;
-    }
-    results.push(currentString.trim());
-  }
-  return results;
-}
 
 async function setFieldsToCache(queryText: string) {
   if (cache.has(queryText)) {
@@ -93,7 +69,8 @@ export function getFieldsByTypeHelper(queryText: string, resourceRetriever?: ESQ
     ): Promise<ESQLRealField[]> => {
       const types = Array.isArray(expectedType) ? expectedType : [expectedType];
       await getFields();
-      const cachedFields = cache.get(queryText);
+      const queryTextForCacheSearch = toSingleLine(queryText);
+      const cachedFields = cache.get(queryTextForCacheSearch);
       return (
         cachedFields?.filter(({ name, type }) => {
           const ts = Array.isArray(type) ? type : [type];
@@ -107,7 +84,8 @@ export function getFieldsByTypeHelper(queryText: string, resourceRetriever?: ESQ
     },
     getFieldsMap: async () => {
       await getFields();
-      const cachedFields = cache.get(queryText);
+      const queryTextForCacheSearch = toSingleLine(queryText);
+      const cachedFields = cache.get(queryTextForCacheSearch);
       const cacheCopy = new Map<string, ESQLRealField>();
       cachedFields?.forEach((field) => cacheCopy.set(field.name, field));
       return cacheCopy;
