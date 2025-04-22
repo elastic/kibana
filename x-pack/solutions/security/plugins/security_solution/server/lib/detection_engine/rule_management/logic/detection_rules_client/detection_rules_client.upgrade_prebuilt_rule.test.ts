@@ -176,6 +176,14 @@ describe('DetectionRulesClient.upgradePrebuiltRule', () => {
         params: {},
       },
     ];
+    installedRule.exceptions_list = [
+      {
+        id: 'exception_list',
+        list_id: 'some-id',
+        namespace_type: 'single',
+        type: 'detection',
+      },
+    ];
 
     beforeEach(() => {
       (getRuleByRuleId as jest.Mock).mockResolvedValue(installedRule);
@@ -202,6 +210,61 @@ describe('DetectionRulesClient.upgradePrebuiltRule', () => {
             params: expect.objectContaining({
               index: ruleAsset.index,
               description: ruleAsset.description,
+              exceptionsList: [
+                {
+                  id: 'exception_list',
+                  list_id: 'some-id',
+                  namespace_type: 'single',
+                  type: 'detection',
+                },
+              ],
+            }),
+          }),
+          id: installedRule.id,
+        })
+      );
+    });
+
+    it('merges exceptions lists for existing rule and new rule asset', async () => {
+      rulesClient.update.mockResolvedValue(getRuleMock(getEqlRuleParams()));
+      ruleAsset.exceptions_list = [
+        {
+          id: 'exception_list',
+          list_id: 'some-id',
+          namespace_type: 'single',
+          type: 'detection',
+        },
+        {
+          id: 'second_exception_list',
+          list_id: 'some-other-id',
+          namespace_type: 'single',
+          type: 'detection',
+        },
+      ];
+
+      await detectionRulesClient.upgradePrebuiltRule({ ruleAsset });
+      expect(rulesClient.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            name: ruleAsset.name,
+            tags: ruleAsset.tags,
+            params: expect.objectContaining({
+              index: ruleAsset.index,
+              description: ruleAsset.description,
+              exceptionsList: [
+                {
+                  id: 'second_exception_list',
+                  list_id: 'some-other-id',
+                  namespace_type: 'single',
+                  type: 'detection',
+                },
+                {
+                  id: 'exception_list',
+                  list_id: 'some-id',
+                  namespace_type: 'single',
+                  type: 'detection',
+                },
+              ],
             }),
           }),
           id: installedRule.id,
