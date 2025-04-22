@@ -9,7 +9,6 @@ import { bulkPurgeRollupSchema } from '@kbn/slo-schema';
 import { createSloServerRoute } from '../create_slo_server_route';
 import { assertPlatinumLicense } from './utils/assert_platinum_license';
 import { BulkPurgeRollupData } from '../../services/bulk_purge_rollup_data';
-import { KibanaSavedObjectsSLORepository } from '../../services';
 
 export const bulkPurgeRollupRoute = createSloServerRoute({
   endpoint: 'POST /api/observability/slos/_bulk_purge_rollup 2023-10-31',
@@ -19,13 +18,13 @@ export const bulkPurgeRollupRoute = createSloServerRoute({
     },
   },
   params: bulkPurgeRollupSchema,
-  handler: async ({ context, params, logger, plugins }) => {
+  handler: async ({ request, context, params, logger, plugins, getScopedClients }) => {
     await assertPlatinumLicense(plugins);
+
+    const { repository } = await getScopedClients({ request, logger });
 
     const core = await context.core;
     const esClient = core.elasticsearch.client.asCurrentUser;
-    const soClient = (await context.core).savedObjects.client;
-    const repository = new KibanaSavedObjectsSLORepository(soClient, logger);
     const purgeRollupData = new BulkPurgeRollupData(esClient, repository);
 
     return purgeRollupData.execute(params.body);
