@@ -15,7 +15,9 @@
       "data",
       "embeddable",
       "expressions",
-      "uiActions",
+      "uiActions"
+    ],
+    "optionalPlugins": [
       "visualizations"
     ],
     "requiredBundles": [

@@ -14,14 +14,17 @@
     "requiredPlugins": [
       "data",
       "expressions",
-      "visualizations",
       "charts",
       "dataViews"
+    ],
+    "optionalPlugins": [
+      "visualizations"
     ],
     "requiredBundles": [
       "kibanaReact",
       "visDefaultEditor",
-      "kibanaUtils"
+      "kibanaUtils",
+      "visualizations"
     ]
   }
 }

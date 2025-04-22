@@ -14,7 +14,6 @@
     "requiredPlugins": [
       "data",
       "embeddable",
-      "visualizations",
       "mapsEms",
       "expressions",
       "inspector",
@@ -23,12 +22,14 @@
       "usageCollection"
     ],
     "optionalPlugins": [
+      "visualizations",
       "home"
     ],
     "requiredBundles": [
       "kibanaUtils",
       "kibanaReact",
-      "visDefaultEditor"
+      "visDefaultEditor",
+      "visualizations"
     ]
   }
 }

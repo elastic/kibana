@@ -25,7 +25,8 @@ interface PluginSetupDependencies {
 
 export const plugin = (initializerContext: PluginInitializerContext) => ({
   setup(core: CoreSetup, plugins: PluginSetupDependencies) {
-    const { readOnly } = initializerContext.config.get<TableConfig>();
+    const { readOnly, ...rest } = initializerContext.config.get<TableConfig>();
+    console.log({ RESTCONFIG: rest });
     if (readOnly) {
       plugins.visualizations.registerReadOnlyVisType(VIS_TYPE_TABLE);
     }

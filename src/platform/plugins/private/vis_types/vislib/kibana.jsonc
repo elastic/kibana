@@ -15,16 +15,17 @@
       "charts",
       "data",
       "expressions",
-      "visualizations",
       "fieldFormats"
     ],
     "optionalPlugins": [
+      "visualizations",
       "usageCollection"
     ],
     "requiredBundles": [
       "kibanaUtils",
       "visTypeHeatmap",
-      "visTypeGauge"
+      "visTypeGauge",
+      "visualizations"
     ]
   }
 }

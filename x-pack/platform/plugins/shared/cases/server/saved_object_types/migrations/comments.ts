@@ -66,7 +66,7 @@ interface SanitizedCommentWithAssociation {
 
 export interface CreateCommentsMigrationsDeps {
   persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
-  lensEmbeddableFactory: LensServerPluginSetup['lensEmbeddableFactory'];
+  lensEmbeddableFactory?: LensServerPluginSetup['lensEmbeddableFactory'];
 }
 
 export const createCommentsMigrations = (

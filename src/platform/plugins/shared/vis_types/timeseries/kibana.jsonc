@@ -16,7 +16,6 @@
       "charts",
       "data",
       "expressions",
-      "visualizations",
       "inspector",
       "dataViews",
       "fieldFormats",
@@ -24,13 +23,15 @@
       "unifiedSearch"
     ],
     "optionalPlugins": [
-      "home"
+      "home",
+      "visualizations"
     ],
     "requiredBundles": [
       "unifiedSearch",
       "kibanaUtils",
       "kibanaReact",
-      "fieldFormats"
+      "visualizations",
+      "fieldFormats",
     ]
   }
 }

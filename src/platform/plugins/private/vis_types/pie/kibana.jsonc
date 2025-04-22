@@ -15,14 +15,17 @@
       "charts",
       "data",
       "expressions",
-      "visualizations",
       "usageCollection",
       "expressionPartitionVis",
       "dataViews"
     ],
+    "optionalPlugins": [
+      "visualizations"
+    ],
     "requiredBundles": [
       "visDefaultEditor",
-      "kibanaUtils"
+      "kibanaUtils",
+      "visualizations"
     ],
     "extraPublicDirs": [
       "common"

@@ -13,17 +13,20 @@
     "server": true,
     "requiredPlugins": [
       "expressions",
-      "visualizations",
       "fieldFormats",
       "dataViews",
       "usageCollection"
+    ],
+    "optionalPlugins": [
+      "visualizations"
     ],
     "requiredBundles": [
       "data",
       "kibanaUtils",
       "kibanaReact",
       "share",
-      "visDefaultEditor"
+      "visDefaultEditor",
+      "visualizations"
     ]
   }
 }

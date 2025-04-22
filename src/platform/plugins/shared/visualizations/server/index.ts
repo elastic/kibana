@@ -8,7 +8,7 @@
  */
 
 import { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
-import { configSchema } from '@kbn/alerting-plugin/server/config';
+import { configSchema } from './config';
 
 //  This exports static code and TypeScript types,
 //  as well as, Kibana Platform `plugin()` initializer.
@@ -16,7 +16,7 @@ import { configSchema } from '@kbn/alerting-plugin/server/config';
 export const config: PluginConfigDescriptor<any> = {
   schema: configSchema,
   exposeToBrowser: {
-    visualize: { enabled: true },
+    visualize_v2: { enabled: true },
   },
 };
 

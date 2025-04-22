@@ -22,7 +22,6 @@
       "actions",
       "data",
       "dataViews",
-      "lens",
       "ruleRegistry",
       "uiActions",
       "triggersActionsUi",
@@ -38,7 +37,8 @@
       "llmTasks"
     ],
     "optionalPlugins": [
-      "cloud"
+      "cloud",
+      "lens"
     ],
     "requiredBundles": [
       "kibanaReact",

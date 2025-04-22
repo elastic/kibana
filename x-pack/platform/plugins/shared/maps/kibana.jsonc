@@ -17,7 +17,6 @@
     "requiredPlugins": [
       "controls",
       "unifiedSearch",
-      "lens",
       "licensing",
       "features",
       "inspector",
@@ -27,7 +26,6 @@
       "uiActions",
       "navigation",
       "expressions",
-      "visualizations",
       "embeddable",
       "mapsEms",
       "share",
@@ -39,13 +37,15 @@
       "customIntegrations",
       "embeddableEnhanced",
       "home",
+      "lens",
       "savedObjectsTagging",
       "charts",
       "screenshotMode",
       "security",
       "spaces",
       "usageCollection",
-      "serverless"
+      "serverless",
+      "visualizations"
     ],
     "requiredBundles": [
       "kibanaReact",
@@ -54,7 +54,8 @@
       "unifiedSearch",
       "fieldFormats",
       "esql",
-      "savedObjects"
+      "savedObjects",
+      "visualizations"
     ],
     "extraPublicDirs": [
       "common"

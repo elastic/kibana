@@ -15,19 +15,20 @@
       "expressions",
       "data",
       "presentationUtil",
-      "visualizations",
       "dataViews",
       "unifiedSearch",
       "kibanaUtils",
       "contentManagement"
     ],
     "optionalPlugins": [
+      "visualizations",
       "savedObjectsTagging"
     ],
     "requiredBundles": [
       "data",
       "savedObjectsFinder",
-      "dataViews"
+      "dataViews",
+      "visualizations"
     ],
     "extraPublicDirs": [
       "common"
