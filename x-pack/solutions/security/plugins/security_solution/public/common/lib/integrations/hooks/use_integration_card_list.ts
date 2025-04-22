@@ -8,29 +8,20 @@ import { useMemo } from 'react';
 import type { IntegrationCardItem } from '@kbn/fleet-plugin/public';
 import { SECURITY_UI_APP_ID } from '@kbn/security-solution-navigation';
 import { useNavigation } from '../../kibana';
-import { APP_INTEGRATIONS_PATH, APP_UI_ID, ONBOARDING_PATH } from '../../../../../common/constants';
+import { APP_INTEGRATIONS_PATH, ONBOARDING_PATH } from '../../../../../common/constants';
+
 import {
   CARD_DESCRIPTION_LINE_CLAMP,
   CARD_TITLE_LINE_CLAMP,
   INTEGRATION_APP_ID,
   MAX_CARD_HEIGHT_IN_PX,
-  RETURN_APP_ID,
-  RETURN_PATH,
   TELEMETRY_INTEGRATION_CARD,
 } from '../constants';
 import type { GetAppUrl, NavigateTo } from '../../kibana';
 import type { TrackLinkClick } from './integration_context';
 import { useIntegrationContext } from './integration_context';
-
-const addPathParamToUrl = (url: string, onboardingLink: string) => {
-  const encoded = encodeURIComponent(onboardingLink);
-  const paramsString = `${RETURN_PATH}=${encoded}&${RETURN_APP_ID}=${APP_UI_ID}`;
-
-  if (url.indexOf('?') >= 0) {
-    return `${url}&${paramsString}`;
-  }
-  return `${url}?${paramsString}`;
-};
+import { getIntegrationLinkState } from '../../../hooks/integrations/use_integration_link_state';
+import { addPathParamToUrl } from '../../../utils/integrations';
 
 const extractFeaturedCards = (filteredCards: IntegrationCardItem[], featuredCardIds: string[]) => {
   return filteredCards.reduce<IntegrationCardItem[]>((acc, card) => {
@@ -75,7 +66,7 @@ const getFilteredCards = ({
   };
 };
 
-const addSecuritySpecificProps = ({
+export const addSecuritySpecificProps = ({
   navigateTo,
   getAppUrl,
   card,
@@ -89,11 +80,7 @@ const addSecuritySpecificProps = ({
 }): IntegrationCardItem => {
   const onboardingLink = getAppUrl({ appId: SECURITY_UI_APP_ID, path: ONBOARDING_PATH });
   const integrationRootUrl = getAppUrl({ appId: INTEGRATION_APP_ID });
-  const state = {
-    onCancelNavigateTo: [APP_UI_ID, { path: ONBOARDING_PATH }],
-    onCancelUrl: onboardingLink,
-    onSaveNavigateTo: [APP_UI_ID, { path: ONBOARDING_PATH }],
-  };
+  const state = getIntegrationLinkState(ONBOARDING_PATH, getAppUrl);
   const url =
     card.url.indexOf(APP_INTEGRATIONS_PATH) >= 0 && onboardingLink
       ? addPathParamToUrl(card.url, ONBOARDING_PATH)

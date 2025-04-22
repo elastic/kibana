@@ -8,8 +8,6 @@ import type { CategoryFacet } from '@kbn/fleet-plugin/public';
 
 export const INTEGRATION_CARD_HEIGHT = 156;
 export const TELEMETRY_INTEGRATION_CARD = `card`;
-export const RETURN_PATH = 'returnPath';
-export const RETURN_APP_ID = 'returnAppId';
 export const MAX_CARD_HEIGHT_IN_PX = 127; // px
 export const INTEGRATION_APP_ID = `integrations`;
 export const CARD_TITLE_LINE_CLAMP = 1; // 1 line of text
