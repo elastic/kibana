@@ -95,17 +95,10 @@ RUN microdnf install --setopt=tsflags=nodocs -y \
       microdnf clean all
 {{/ubi}}
 {{#ubuntu}}
-RUN for iter in {1..10}; do \
-      export DEBIAN_FRONTEND=noninteractive && \
-      apt-get update  && \
-      apt-get upgrade -y  && \
-      apt-get install -y --no-install-recommends \
-      fontconfig fonts-liberation libnss3 curl ca-certificates && \
+RUN export DEBIAN_FRONTEND=noninteractive && \
+      apt-get install -y --no-install-recommends fontconfig fonts-liberation libnss3 curl ca-certificates && \
       apt-get clean && \
-      rm -rf /var/lib/apt/lists/* && exit_code=0 && break || exit_code=$? && echo "apt-get error: retry $iter in 10s" && \
-      sleep 10; \
-    done; \
-    (exit $exit_code)
+      rm -rf /var/lib/apt/lists/*
 {{/ubuntu}}
 {{#wolfi}}
 RUN apk --no-cache add bash curl fontconfig font-liberation libstdc++ libnss findutils shadow ca-certificates
