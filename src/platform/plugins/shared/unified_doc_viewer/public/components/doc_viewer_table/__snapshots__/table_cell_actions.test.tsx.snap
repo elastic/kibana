@@ -75,7 +75,29 @@ Array [
 ]
 `;
 
-exports[`TableActions getFieldValueCellActions should render correctly for undefined functions 1`] = `Array []`;
+exports[`TableActions getFieldValueCellActions should render correctly for undefined functions 1`] = `
+Array [
+  <Copy
+    Component={[Function]}
+    row={
+      FieldRow {
+        "columnsMeta": undefined,
+        "dataViewField": Object {
+          "aggregatable": false,
+          "displayName": "message",
+          "filterable": false,
+          "name": "message",
+          "scripted": false,
+          "type": "string",
+        },
+        "flattenedValue": "test",
+        "isPinned": false,
+        "name": "message",
+      }
+    }
+  />,
+]
+`;
 
 exports[`TableActions getFieldValueCellActions should render the panels correctly for defined onFilter function 1`] = `
 Array [
@@ -104,6 +126,25 @@ Array [
     Component={[Function]}
     isEsqlMode={false}
     onFilter={[MockFunction]}
+    row={
+      FieldRow {
+        "columnsMeta": undefined,
+        "dataViewField": Object {
+          "aggregatable": false,
+          "displayName": "message",
+          "filterable": false,
+          "name": "message",
+          "scripted": false,
+          "type": "string",
+        },
+        "flattenedValue": "test",
+        "isPinned": false,
+        "name": "message",
+      }
+    }
+  />,
+  <Copy
+    Component={[Function]}
     row={
       FieldRow {
         "columnsMeta": undefined,

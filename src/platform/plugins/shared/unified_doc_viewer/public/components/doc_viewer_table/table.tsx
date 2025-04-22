@@ -358,7 +358,7 @@ export const DocViewerTable = ({
           defaultMessage: 'Value',
         }),
         actions: false,
-        visibleCellActions: 2,
+        visibleCellActions: 3,
         cellActions: fieldValueCellActions,
       },
     ],

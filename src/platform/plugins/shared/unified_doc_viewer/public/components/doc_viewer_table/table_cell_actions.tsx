@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { EuiDataGridColumnCellActionProps } from '@elastic/eui';
+import { EuiDataGridColumnCellActionProps, copyToClipboard } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { FieldRow } from './field_row';
@@ -16,7 +16,7 @@ import { FieldRow } from './field_row';
 interface TableActionsProps {
   Component: EuiDataGridColumnCellActionProps['Component'];
   row: FieldRow | undefined; // as we pass `rows[rowIndex]` it's safer to assume that `row` prop can be undefined
-  isEsqlMode: boolean | undefined;
+  isEsqlMode?: boolean | undefined;
 }
 
 function isFilterInOutPairDisabled(
@@ -65,6 +65,31 @@ const esqlMultivalueFilteringDisabled = i18n.translate(
     defaultMessage: 'Multivalue filtering is not supported in ES|QL',
   }
 );
+
+const Copy: React.FC<TableActionsProps> = ({ Component, row }) => {
+  if (!row) {
+    return null;
+  }
+
+  const { flattenedValue, name } = row;
+
+  const copyLabel = i18n.translate('unifiedDocViewer.docViews.table.copyValue', {
+    defaultMessage: 'Copy value',
+  });
+
+  return (
+    <Component
+      data-test-subj={`copyValueButton-${name}`}
+      iconType="copyClipboard"
+      title={copyLabel}
+      flush="left"
+      onClick={() => copyToClipboard(String(flattenedValue))}
+    >
+      <div data-testid="another test" />
+      {copyLabel}
+    </Component>
+  );
+};
 
 const FilterIn: React.FC<TableActionsProps & { onFilter: DocViewFilterFn | undefined }> = ({
   Component,
@@ -302,7 +327,7 @@ export function getFieldValueCellActions({
   isEsqlMode: boolean | undefined;
   onFilter?: DocViewFilterFn;
 }) {
-  return onFilter
+  const filterActions = onFilter
     ? [
         ({ Component, rowIndex }: EuiDataGridColumnCellActionProps) => {
           return (
@@ -326,4 +351,10 @@ export function getFieldValueCellActions({
         },
       ]
     : [];
+
+  const copyAction = ({ Component, rowIndex }: EuiDataGridColumnCellActionProps) => {
+    return <Copy row={rows[rowIndex]} Component={Component} />;
+  };
+
+  return [...filterActions, copyAction];
 }
