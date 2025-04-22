@@ -7,11 +7,11 @@
 import { v4 as uuidv4 } from 'uuid';
 import type { GetLensAttributes } from '../../../types';
 
-const layerId = uuidv4();
-const internalReferenceId = uuidv4();
-const columnCountOfRecords = uuidv4();
-const columnTimestamp = uuidv4();
-const columnTopValues = uuidv4();
+const layerId = `layer-id-${uuidv4()}`;
+const internalReferenceId = `internal-reference-id-${uuidv4()}`;
+const columnCountOfRecords = `column-count-of-records-id-${uuidv4()}`;
+const columnTimestamp = `column-timestamp-id-${uuidv4()}`;
+const columnTopValues = `column-top-values-id-${uuidv4()}`;
 
 export const getRulePreviewLensAttributes: GetLensAttributes = ({
   stackByField = 'event.category',
