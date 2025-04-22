@@ -184,13 +184,15 @@ export class AssetClient {
     }
   ) {}
 
-  async linkAsset(name: string, link: AssetLinkRequest) {
+  async linkAsset(name: string, link: AssetLinkRequest): Promise<AssetLink> {
     const document = toStorage(name, link);
 
     await this.clients.storageClient.index({
       id: document[ASSET_UUID],
       document,
     });
+
+    return toAssetLink(name, link);
   }
 
   async syncAssetList(
@@ -234,14 +236,16 @@ export class AssetClient {
     };
   }
 
-  async unlinkAsset(name: string, asset: AssetUnlinkRequest) {
+  async unlinkAsset(name: string, asset: AssetUnlinkRequest): Promise<AssetLink> {
     const id = getUuid(name, asset);
+    const assetUnlinked = await this.clients.storageClient.get({ id });
 
     const { result } = await this.clients.storageClient.delete({ id });
-
     if (result === 'not_found') {
       throw new AssetNotFoundError(`${asset[ASSET_TYPE]} not found`);
     }
+
+    return fromStorage(assetUnlinked._source!);
   }
 
   async clean() {

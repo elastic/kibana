@@ -15,6 +15,7 @@ import {
 import { z } from '@kbn/zod';
 import { ASSET_ID, ASSET_TYPE } from '../../lib/streams/assets/fields';
 import { createServerRoute } from '../create_server_route';
+import { QueryLink } from '../../../common/assets';
 export interface ListQueriesResponse {
   queries: StreamQuery[];
 }
@@ -102,7 +103,7 @@ const upsertQueryRoute = createServerRoute({
 
     await streamsClient.ensureStream(streamName);
 
-    await assetClient.linkAsset(streamName, {
+    const assetLinked = await assetClient.linkAsset(streamName, {
       [ASSET_TYPE]: 'query',
       [ASSET_ID]: queryId,
       query: {
@@ -112,6 +113,10 @@ const upsertQueryRoute = createServerRoute({
           query: body.kql.query,
         },
       },
+    });
+
+    await streamsClient.manageQueries(streamName, {
+      indexed: [assetLinked as QueryLink],
     });
 
     return {
@@ -152,9 +157,13 @@ const deleteQueryRoute = createServerRoute({
 
     await streamsClient.ensureStream(streamName);
 
-    await assetClient.unlinkAsset(streamName, {
+    const assetUnlinked = await assetClient.unlinkAsset(streamName, {
       [ASSET_TYPE]: 'query',
       [ASSET_ID]: queryId,
+    });
+
+    await streamsClient.manageQueries(streamName, {
+      deleted: [assetUnlinked as QueryLink],
     });
 
     return {

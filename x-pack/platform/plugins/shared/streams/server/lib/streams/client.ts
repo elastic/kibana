@@ -34,7 +34,7 @@ import { v5 } from 'uuid';
 import { QueryLink } from '../../../common/assets';
 import { EsqlRuleParams } from '../rules/esql/types';
 import { AssetClient } from './assets/asset_client';
-import { ASSET_ID, ASSET_TYPE } from './assets/fields';
+import { ASSET_ID, ASSET_TYPE, ASSET_UUID } from './assets/fields';
 import {
   DefinitionNotFoundError,
   isDefinitionNotFoundError,
@@ -74,7 +74,7 @@ function wrapEsCall<T>(p: Promise<T>): Promise<T> {
 }
 
 function getRuleId(query: QueryLink) {
-  return v5(query['asset.uuid'], v5.DNS);
+  return v5(query[ASSET_UUID], v5.DNS);
 }
 
 export class StreamsClient {
@@ -253,9 +253,9 @@ export class StreamsClient {
     };
   }
 
-  private async manageQueries(
+  async manageQueries(
     name: string,
-    { deleted, indexed }: { deleted: QueryLink[]; indexed: QueryLink[] }
+    { deleted = [], indexed = [] }: { deleted?: QueryLink[]; indexed?: QueryLink[] }
   ) {
     await Promise.all([this.installQueries(name, indexed), this.uninstallQueries(name, deleted)]);
   }
