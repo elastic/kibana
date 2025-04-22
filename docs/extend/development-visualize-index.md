@@ -17,7 +17,7 @@ As a result, starting in `7.5` we have removed the documentation for the legacy 
 
 We would recommend waiting until later in `7.x` to upgrade your plugins if possible. If you would like to keep up with progress on the visualizations plugin in the meantime, here are a few resources:
 
-* The [breaking changes](/release-notes/breaking-changes.md#kibana-900-breaking-changes) documentation, where we try to capture any changes to the APIs as they occur across minors.
+* The [breaking changes](/release-notes/breaking-changes.md#kibana-9.0.0-breaking-changes) documentation, where we try to capture any changes to the APIs as they occur across minors.
 * [Meta issue](https://github.com/elastic/kibana/issues/44121) which is tracking the move of the plugin to the new {{kib}} platform
 * Our [Elastic Stack workspace on Slack](https://www.elastic.co/blog/join-our-elastic-stack-workspace-on-slack).
 * The [source code](https://github.com/elastic/kibana/blob/master/src/platform/plugins/shared/visualizations), which will continue to be the most accurate source of information.
