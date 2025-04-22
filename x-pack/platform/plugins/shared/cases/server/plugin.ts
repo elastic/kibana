@@ -62,7 +62,7 @@ export class CasePlugin
   private readonly kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
   private clientFactory: CasesClientFactory;
   private securityPluginSetup?: SecurityPluginSetup;
-  private lensEmbeddableFactory?: LensServerPluginSetup['lensEmbeddableFactory'];
+  private lensEmbeddableFactory: LensServerPluginSetup['lensEmbeddableFactory'];
   private persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
   private externalReferenceAttachmentTypeRegistry: ExternalReferenceAttachmentTypeRegistry;
   private userProfileService: UserProfileService;

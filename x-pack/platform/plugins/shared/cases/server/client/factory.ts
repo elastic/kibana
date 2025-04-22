@@ -63,7 +63,7 @@ interface CasesClientFactoryArgs {
   featuresPluginStart: FeaturesPluginStart;
   actionsPluginStart: ActionsPluginStart;
   licensingPluginStart: LicensingPluginStart;
-  lensEmbeddableFactory?: LensServerPluginSetup['lensEmbeddableFactory'];
+  lensEmbeddableFactory: LensServerPluginSetup['lensEmbeddableFactory'];
   notifications: NotificationsPluginStart;
   ruleRegistry: RuleRegistryPluginStartContract;
   persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;

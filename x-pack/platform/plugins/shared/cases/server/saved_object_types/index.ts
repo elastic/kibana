@@ -20,7 +20,7 @@ interface RegisterSavedObjectsArgs {
   core: CoreSetup;
   logger: Logger;
   persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
-  lensEmbeddableFactory?: LensServerPluginSetup['lensEmbeddableFactory'];
+  lensEmbeddableFactory: LensServerPluginSetup['lensEmbeddableFactory'];
 }
 
 export const registerSavedObjects = ({

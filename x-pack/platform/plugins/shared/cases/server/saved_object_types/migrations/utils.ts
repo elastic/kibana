@@ -87,7 +87,7 @@ export const isPersistableStateAttachmentSO = (
 };
 
 interface GetLensMigrationsArgs<T> {
-  lensEmbeddableFactory?: LensServerPluginSetup['lensEmbeddableFactory'];
+  lensEmbeddableFactory: LensServerPluginSetup['lensEmbeddableFactory'];
   migratorFactory: (
     migrate: MigrateFunction,
     migrationVersion: string
