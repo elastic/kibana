@@ -14,8 +14,10 @@ import { once } from 'lodash';
 import { duration } from 'moment';
 import { ElasticsearchClient } from '@kbn/core/server';
 
-export const LOCKS_INDEX_ALIAS = '.kibana_locks';
+const LOCKS_INDEX_ALIAS = '.kibana_locks';
 export const LOCKS_CONCRETE_INDEX_NAME = `${LOCKS_INDEX_ALIAS}-000001`;
+export const LOCKS_COMPONENT_TEMPLATE_NAME = `${LOCKS_INDEX_ALIAS}-component`;
+export const LOCKS_INDEX_TEMPLATE_NAME = `${LOCKS_INDEX_ALIAS}-index-template`;
 
 export type LockId = string;
 export interface LockDocument {
@@ -38,7 +40,7 @@ export interface AcquireOptions {
   ttl?: number;
 }
 
-const createLocksWriteIndexOnce = once(createLocksWriteIndex);
+const createLockIndexAssetOnce = once(ensureTemplatesAndIndexCreated);
 
 export class LockManager {
   private token = uuid();
@@ -58,7 +60,7 @@ export class LockManager {
     ttl = duration(30, 'seconds').asMilliseconds(),
   }: AcquireOptions = {}): Promise<boolean> {
     let response: Awaited<ReturnType<ElasticsearchClient['update']>>;
-    await createLocksWriteIndexOnce(this.esClient);
+    await createLockIndexAssetOnce(this.esClient, this.logger);
     this.token = uuid();
 
     try {
@@ -303,13 +305,15 @@ export async function withLock<T>(
   }
 }
 
-export async function ensureTemplatesAndIndexCreated(esClient: ElasticsearchClient): Promise<void> {
-  const COMPONENT_TEMPLATE_NAME = `${LOCKS_INDEX_ALIAS}-component`;
-  const INDEX_TEMPLATE_NAME = `${LOCKS_INDEX_ALIAS}-index-template`;
+export async function ensureTemplatesAndIndexCreated(
+  esClient: ElasticsearchClient,
+  logger: Logger
+): Promise<void> {
+  logger.info('Creating index template and component template for locks');
   const INDEX_PATTERN = `${LOCKS_INDEX_ALIAS}*`;
 
   await esClient.cluster.putComponentTemplate({
-    name: COMPONENT_TEMPLATE_NAME,
+    name: LOCKS_COMPONENT_TEMPLATE_NAME,
     template: {
       mappings: {
         dynamic: false,
@@ -324,9 +328,9 @@ export async function ensureTemplatesAndIndexCreated(esClient: ElasticsearchClie
   });
 
   await esClient.indices.putIndexTemplate({
-    name: INDEX_TEMPLATE_NAME,
+    name: LOCKS_INDEX_TEMPLATE_NAME,
     index_patterns: [INDEX_PATTERN],
-    composed_of: [COMPONENT_TEMPLATE_NAME],
+    composed_of: [LOCKS_COMPONENT_TEMPLATE_NAME],
     priority: 500,
     template: {
       settings: {
@@ -336,9 +340,7 @@ export async function ensureTemplatesAndIndexCreated(esClient: ElasticsearchClie
       },
     },
   });
-}
 
-export async function createLocksWriteIndex(esClient: ElasticsearchClient): Promise<void> {
   await esClient.indices.create({ index: LOCKS_CONCRETE_INDEX_NAME }, { ignore: [400] });
 }
 

@@ -10,12 +10,12 @@ import { v4 as uuid } from 'uuid';
 import prettyMilliseconds from 'pretty-ms';
 import {
   LockId,
-  ensureTemplatesAndIndexCreated,
   LockManager,
   LockDocument,
   LOCKS_CONCRETE_INDEX_NAME,
-  createLocksWriteIndex,
   withLock,
+  LOCKS_INDEX_TEMPLATE_NAME,
+  LOCKS_COMPONENT_TEMPLATE_NAME,
 } from '@kbn/observability-ai-assistant-plugin/server/service/distributed_lock_manager/lock_manager_client';
 import nock from 'nock';
 import { Client } from '@elastic/elasticsearch';
@@ -32,11 +32,14 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   const logger = getLoggerMock(log);
 
   describe('LockManager', function () {
+    before(async () => {
+      // delete existing index mappings to ensure we start from a clean state
+      await deleteLockIndexAssets(es, log);
+    });
+
     describe('Manual locking API', function () {
       this.tags(['failsOnMKI']);
       before(async () => {
-        await ensureTemplatesAndIndexCreated(es);
-        await createLocksWriteIndex(es);
         await clearAllLocks(es, log);
       });
 
@@ -439,8 +442,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     describe('withLock API', function () {
       this.tags(['failsOnMKI']);
       before(async () => {
-        await ensureTemplatesAndIndexCreated(es);
-        await createLocksWriteIndex(es);
         await clearAllLocks(es, log);
       });
 
@@ -642,7 +643,56 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         });
       });
     });
+
+    describe('index assets', () => {
+      before(async () => {
+        const LOCK_ID = 'my_lock_with_mappings';
+
+        // create a lock to trigger the creation of the index mappings
+        await withLock({ esClient: es, lockId: LOCK_ID, logger }, async () => {});
+
+        // wait for the index to be created
+        await es.indices.refresh({ index: LOCKS_CONCRETE_INDEX_NAME });
+      });
+
+      describe('Index mappings', () => {
+        it('should have the correct mappings for the lock index', async () => {
+          const res = await es.indices.getMapping({ index: LOCKS_CONCRETE_INDEX_NAME });
+          const { mappings } = res[LOCKS_CONCRETE_INDEX_NAME];
+
+          const expectedMapping = {
+            dynamic: 'false',
+            properties: {
+              token: { type: 'keyword' },
+              expiresAt: { type: 'date' },
+              createdAt: { type: 'date' },
+              metadata: { enabled: false, type: 'object' },
+            },
+          };
+
+          expect(mappings).to.eql(expectedMapping);
+        });
+      });
+
+      describe('Index settings', () => {
+        it('has the right number_of_replicas', async () => {
+          const res = await es.indices.getSettings({ index: LOCKS_CONCRETE_INDEX_NAME });
+          const { settings } = res[LOCKS_CONCRETE_INDEX_NAME];
+          expect(settings?.index?.auto_expand_replicas).to.eql('0-1');
+        });
+      });
+    });
   });
+}
+
+async function deleteLockIndexAssets(es: Client, log: ToolingLog) {
+  log.debug(`Deleting index assets`);
+  await es.indices.delete({ index: LOCKS_CONCRETE_INDEX_NAME }, { ignore: [404] });
+  await es.indices.deleteIndexTemplate({ name: LOCKS_INDEX_TEMPLATE_NAME }, { ignore: [404] });
+  await es.cluster.deleteComponentTemplate(
+    { name: LOCKS_COMPONENT_TEMPLATE_NAME },
+    { ignore: [404] }
+  );
 }
 
 function clearAllLocks(es: Client, log: ToolingLog) {
