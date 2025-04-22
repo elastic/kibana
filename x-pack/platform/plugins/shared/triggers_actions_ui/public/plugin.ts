@@ -240,59 +240,61 @@ export class Plugin
       });
     }
 
-    plugins.management.sections.section.insightsAndAlerting.registerApp({
-      id: PLUGIN_ID,
-      title: featureTitle,
-      order: 1,
-      async mount(params: ManagementAppMountParams) {
-        const [coreStart, pluginsStart] = (await core.getStartServices()) as [
-          CoreStart,
-          PluginsStart,
-          unknown
-        ];
+    if (this.config.rules.enabled) {
+      plugins.management.sections.section.insightsAndAlerting.registerApp({
+        id: PLUGIN_ID,
+        title: featureTitle,
+        order: 1,
+        async mount(params: ManagementAppMountParams) {
+          const [coreStart, pluginsStart] = (await core.getStartServices()) as [
+            CoreStart,
+            PluginsStart,
+            unknown
+          ];
 
-        const { renderApp } = await import('./application/rules_app');
+          const { renderApp } = await import('./application/rules_app');
 
-        // The `/api/features` endpoint requires the "Global All" Kibana privilege. Users with a
-        // subset of this privilege are not authorized to access this endpoint and will receive a 404
-        // error that causes the Alerting view to fail to load.
-        let kibanaFeatures: KibanaFeature[];
-        try {
-          kibanaFeatures = await pluginsStart.features.getFeatures();
-        } catch (err) {
-          kibanaFeatures = [];
-        }
+          // The `/api/features` endpoint requires the "Global All" Kibana privilege. Users with a
+          // subset of this privilege are not authorized to access this endpoint and will receive a 404
+          // error that causes the Alerting view to fail to load.
+          let kibanaFeatures: KibanaFeature[];
+          try {
+            kibanaFeatures = await pluginsStart.features.getFeatures();
+          } catch (err) {
+            kibanaFeatures = [];
+          }
 
-        return renderApp({
-          ...coreStart,
-          actions: plugins.actions,
-          dashboard: pluginsStart.dashboard,
-          cloud: plugins.cloud,
-          data: pluginsStart.data,
-          dataViews: pluginsStart.dataViews,
-          dataViewEditor: pluginsStart.dataViewEditor,
-          charts: pluginsStart.charts,
-          alerting: pluginsStart.alerting,
-          spaces: pluginsStart.spaces,
-          unifiedSearch: pluginsStart.unifiedSearch,
-          isCloud: Boolean(plugins.cloud?.isCloudEnabled),
-          element: params.element,
-          theme: params.theme,
-          storage: new Storage(window.localStorage),
-          setBreadcrumbs: params.setBreadcrumbs,
-          history: params.history,
-          actionTypeRegistry,
-          ruleTypeRegistry,
-          kibanaFeatures,
-          licensing: pluginsStart.licensing,
-          expressions: pluginsStart.expressions,
-          isServerless: !!pluginsStart.serverless,
-          fieldFormats: pluginsStart.fieldFormats,
-          lens: pluginsStart.lens,
-          fieldsMetadata: pluginsStart.fieldsMetadata,
-        });
-      },
-    });
+          return renderApp({
+            ...coreStart,
+            actions: plugins.actions,
+            dashboard: pluginsStart.dashboard,
+            cloud: plugins.cloud,
+            data: pluginsStart.data,
+            dataViews: pluginsStart.dataViews,
+            dataViewEditor: pluginsStart.dataViewEditor,
+            charts: pluginsStart.charts,
+            alerting: pluginsStart.alerting,
+            spaces: pluginsStart.spaces,
+            unifiedSearch: pluginsStart.unifiedSearch,
+            isCloud: Boolean(plugins.cloud?.isCloudEnabled),
+            element: params.element,
+            theme: params.theme,
+            storage: new Storage(window.localStorage),
+            setBreadcrumbs: params.setBreadcrumbs,
+            history: params.history,
+            actionTypeRegistry,
+            ruleTypeRegistry,
+            kibanaFeatures,
+            licensing: pluginsStart.licensing,
+            expressions: pluginsStart.expressions,
+            isServerless: !!pluginsStart.serverless,
+            fieldFormats: pluginsStart.fieldFormats,
+            lens: pluginsStart.lens,
+            fieldsMetadata: pluginsStart.fieldsMetadata,
+          });
+        },
+      });
+    }
 
     plugins.management.sections.section.insightsAndAlerting.registerApp({
       id: CONNECTORS_PLUGIN_ID,
