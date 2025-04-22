@@ -11,7 +11,6 @@ import type { IntegrationTabId } from '../onboarding_body/cards/integrations/typ
 import type { CardSelectorListItem } from '../onboarding_body/cards/common/card_selector_list';
 
 const LocalStorageKey = {
-  avcBannerDismissed: 'securitySolution.onboarding.avcBannerDismissed',
   videoVisited: 'securitySolution.onboarding.videoVisited',
   completeCards: 'securitySolution.onboarding.completeCards',
   expandedCard: 'securitySolution.onboarding.expandedCard',
@@ -29,12 +28,6 @@ export const useDefinedLocalStorage = <T = undefined>(key: string, defaultValue:
   const [value, setValue] = useLocalStorage<T>(key, defaultValue);
   return [value ?? defaultValue, setValue] as const;
 };
-
-/**
- * Stores the AVC banner dismissed state
- */
-export const useStoredIsAVCBannerDismissed = () =>
-  useDefinedLocalStorage<boolean>(LocalStorageKey.avcBannerDismissed, false);
 
 /**
  * Stores the completed card IDs per space

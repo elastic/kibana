@@ -14,7 +14,6 @@ import { CenteredLoadingSpinner } from '../../common/components/centered_loading
 import { useSpaceId } from '../../common/hooks/use_space_id';
 import { PAGE_CONTENT_WIDTH } from '../constants';
 import { OnboardingContextProvider } from './onboarding_context';
-import { OnboardingAVCBanner } from './onboarding_banner';
 import { OnboardingRouter } from './onboarding_router';
 import { OnboardingFooter } from './onboarding_footer';
 
@@ -33,7 +32,6 @@ export const OnboardingPage = React.memo(() => {
   return (
     <OnboardingContextProvider spaceId={spaceId}>
       <PluginTemplateWrapper paddingSize="none" data-test-subj="onboarding-hub-page">
-        <OnboardingAVCBanner />
         <KibanaPageTemplate.Section
           grow={true}
           restrictWidth={PAGE_CONTENT_WIDTH}
