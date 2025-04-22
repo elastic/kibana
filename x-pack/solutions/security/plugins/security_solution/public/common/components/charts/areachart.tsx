@@ -95,7 +95,10 @@ export const AreaChartBaseComponent = ({
     ...get('configs.settings', chartConfigs),
   };
   return chartConfigs.width && chartConfigs.height ? (
-    <div style={{ height: chartConfigs.height, width: chartConfigs.width, position: 'relative' }}>
+    <div
+      style={{ height: chartConfigs.height, width: chartConfigs.width, position: 'relative' }}
+      data-test-subj="areaChartBaseComponent"
+    >
       <Chart>
         <Settings {...settings} />
         {data.map((series) => {
@@ -157,7 +160,7 @@ export const AreaChartComponent: React.FC<AreaChartComponentProps> = ({
   const isValidSeriesExist = useMemo(() => checkIfAnyValidSeriesExist(areaChart), [areaChart]);
 
   return (
-    <Wrapper>
+    <Wrapper data-test-subj="areaChartComponent">
       <HoverVisibilityContainer targetClassNames={[VISUALIZATION_ACTIONS_BUTTON_CLASS]}>
         {isValidSeriesExist && areaChart && (
           <ChartWrapper gutterSize="none">
