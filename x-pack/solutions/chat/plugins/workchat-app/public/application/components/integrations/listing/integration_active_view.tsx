@@ -38,25 +38,15 @@ import { integrationTypeToLabel, getIntegrationIcon } from '../utils';
 import { useAgentList } from '../../../hooks/use_agent_list';
 import { integrationLabels } from '../i18n';
 import { IntegrationListView } from './integration_list_view';
+import { useIntegrationList } from '../../../hooks/use_integration_list';
 
-interface IntegrationListViewProps {
-  integrations: Integration[];
-}
 
-export const IntegrationActiveView: React.FC<IntegrationListViewProps> = ({ integrations }) => {
+export const IntegrationActiveView: React.FC = () => {
   const { agents } = useAgentList();
+  const { integrations, isLoading } = useIntegrationList();
   const { navigateToWorkchatUrl } = useNavigation();
 
-  const [isLoading, setIsLoading] = useState(true);
 
-  // set timeout for loading
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 100);
-
-    return () => clearTimeout(timer);
-  }, [integrations]);
 
   const columns: Array<EuiBasicTableColumn<Integration>> = [
     {
