@@ -22981,6 +22981,15 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "in": "query",
+            "name": "showHidden",
+            "required": false,
+            "schema": {
+              "default": true,
+              "type": "boolean"
+            }
           }
         ],
         "responses": {
@@ -23008,6 +23017,9 @@
                           },
                           "created_at": {
                             "type": "string"
+                          },
+                          "hidden": {
+                            "type": "boolean"
                           },
                           "id": {
                             "type": "string"
@@ -23051,6 +23063,9 @@
                           },
                           "created_at": {
                             "type": "string"
+                          },
+                          "hidden": {
+                            "type": "boolean"
                           },
                           "id": {
                             "type": "string"
@@ -23202,6 +23217,9 @@
                         },
                         "created_at": {
                           "type": "string"
+                        },
+                        "hidden": {
+                          "type": "boolean"
                         },
                         "id": {
                           "type": "string"
@@ -23390,6 +23408,9 @@
                         },
                         "created_at": {
                           "type": "string"
+                        },
+                        "hidden": {
+                          "type": "boolean"
                         },
                         "id": {
                           "type": "string"
