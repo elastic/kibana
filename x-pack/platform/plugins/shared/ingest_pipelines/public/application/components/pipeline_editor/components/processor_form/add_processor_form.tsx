@@ -18,6 +18,7 @@ import {
   EuiTitle,
   EuiFlexGroup,
   EuiFlexItem,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 
 import { Form, FormDataProvider, FormHook, useFormIsModified } from '../../../../../shared_imports';
@@ -76,16 +77,23 @@ export const AddProcessorForm: FunctionComponent<Props> = ({
   );
 
   const isFormDirty = useFormIsModified({ form });
+  const pipelineTitleId = useGeneratedHtmlId();
 
   return (
     <Form data-test-subj="addProcessorForm" form={form} onSubmit={handleSubmit}>
-      <EuiFlyout size="m" maxWidth={720} onClose={closeFlyout} outsideClickCloses={!isFormDirty}>
+      <EuiFlyout
+        size="m"
+        maxWidth={720}
+        onClose={closeFlyout}
+        outsideClickCloses={!isFormDirty}
+        aria-labelledby={pipelineTitleId}
+      >
         <EuiFlyoutHeader>
           <EuiFlexGroup gutterSize="xs">
             <EuiFlexItem>
               <div>
                 <EuiTitle size="m" data-test-subj="configurePipelineHeader">
-                  <h2>{getFlyoutTitle(isOnFailure)}</h2>
+                  <h2 id={pipelineTitleId}>{getFlyoutTitle(isOnFailure)}</h2>
                 </EuiTitle>
               </div>
             </EuiFlexItem>

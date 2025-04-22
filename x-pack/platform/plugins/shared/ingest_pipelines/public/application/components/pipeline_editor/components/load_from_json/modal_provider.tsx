@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { FunctionComponent, useRef, useState, useCallback } from 'react';
-import { EuiConfirmModal, EuiSpacer, EuiText, EuiCallOut } from '@elastic/eui';
+import { EuiConfirmModal, EuiSpacer, EuiText, EuiCallOut, useGeneratedHtmlId } from '@elastic/eui';
 
 import { JsonEditor, OnJsonEditorUpdateHandler } from '../../../../../shared_imports';
 
@@ -74,16 +74,20 @@ export const ModalProvider: FunctionComponent<Props> = ({ onDone, children }) =>
     jsonContent.current = jsonUpdateData;
   }, []);
 
+  const modalTitleId = useGeneratedHtmlId();
+
   return (
     <>
       {children(() => setIsModalVisible(true))}
       {isModalVisible ? (
         <EuiConfirmModal
+          aria-labelledby={modalTitleId}
           data-test-subj="loadJsonConfirmationModal"
           title={i18nTexts.modalTitle}
           onCancel={() => {
             setIsModalVisible(false);
           }}
+          titleProps={{ id: modalTitleId }}
           onConfirm={async () => {
             try {
               const json = jsonContent.current.data.format();

@@ -21,6 +21,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 
 import { Form, FormDataProvider, FormHook, useFormIsModified } from '../../../../../shared_imports';
@@ -154,6 +155,8 @@ export const EditProcessorForm: FunctionComponent<Props> = ({
   }
 
   const isFormDirty = useFormIsModified({ form });
+  const flyoutTitleId = useGeneratedHtmlId();
+
   return (
     <Form data-test-subj="editProcessorForm" form={form} onSubmit={handleSubmit}>
       <EuiFlyout
@@ -164,13 +167,14 @@ export const EditProcessorForm: FunctionComponent<Props> = ({
           closeFlyout();
         }}
         outsideClickCloses={!isFormDirty}
+        aria-labelledby={flyoutTitleId}
       >
         <EuiFlyoutHeader>
           <EuiFlexGroup gutterSize="xs">
             <EuiFlexItem>
               <div>
                 <EuiTitle size="m">
-                  <h2>{getFlyoutTitle(isOnFailure)}</h2>
+                  <h2 id={flyoutTitleId}>{getFlyoutTitle(isOnFailure)}</h2>
                 </EuiTitle>
               </div>
             </EuiFlexItem>
