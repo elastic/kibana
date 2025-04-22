@@ -299,7 +299,6 @@ export const postEvaluateRoute = (
                   request,
                   connectorId: connector.id,
                   chatModelOptions: {
-                    // model: request.body.model,
                     signal: abortSignal,
                     temperature: getDefaultArguments(llmType).temperature,
                     // prevents the agent from retrying on failure

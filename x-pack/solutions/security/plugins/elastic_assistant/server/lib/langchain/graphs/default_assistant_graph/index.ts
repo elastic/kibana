@@ -16,7 +16,6 @@ import { localToolPrompts, promptGroupId as toolsGroupId } from '../../../prompt
 import { promptGroupId } from '../../../prompt/local_prompt_object';
 import { getFormattedTime, getModelOrOss } from '../../../prompt/helpers';
 import { getPrompt as localGetPrompt, promptDictionary } from '../../../prompt';
-import { getLlmClass } from '../../../../routes/utils';
 import { EsAnonymizationFieldsSchema } from '../../../../ai_assistant_data_clients/anonymization_fields/types';
 import { AssistantToolParams } from '../../../../types';
 import { AgentExecutor } from '../../executors/types';
@@ -61,26 +60,6 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
   responseLanguage = 'English',
 }) => {
   const logger = parentLogger.get('defaultAssistantGraph');
-  const isOpenAI = llmType === 'openai' && !isOssModel;
-  const llmClass = getLlmClass(llmType);
-
-  const chatModel = await inference.getChatModel({
-    request,
-    connectorId,
-    chatModelOptions: {
-      model: request.body.model,
-      signal: abortSignal,
-      temperature: getDefaultArguments(llmType).temperature,
-      // prevents the agent from retrying on failure
-      // failure could be due to bad connector, we should deliver that result to the client asap
-      maxRetries: 0,
-      metadata: {
-        connectorTelemetry: {
-          pluginId: 'security_ai_assistant',
-        },
-      },
-    },
-  });
 
   /**
    * Creates a new instance of llmClass.
@@ -108,27 +87,6 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
         },
       },
     });
-  // new llmClass({
-  //   actionsClient,
-  //   connectorId,
-  //   llmType,
-  //   logger,
-  //   // possible client model override,
-  //   // let this be undefined otherwise so the connector handles the model
-  //   model: request.body.model,
-  //   // ensure this is defined because we default to it in the language_models
-  //   // This is where the LangSmith logs (Metadata > Invocation Params) are set
-  //   temperature: getDefaultArguments(llmType).temperature,
-  //   signal: abortSignal,
-  //   streaming: isStream,
-  //   // prevents the agent from retrying on failure
-  //   // failure could be due to bad connector, we should deliver that result to the client asap
-  //   maxRetries: 0,
-  //   convertSystemMessageToHumanContent: false,
-  //   telemetryMetadata: {
-  //     pluginId: 'security_ai_assistant',
-  //   },
-  // });
 
   const anonymizationFieldsRes =
     await dataClients?.anonymizationFieldsDataClient?.findDocuments<EsAnonymizationFieldsSchema>({
