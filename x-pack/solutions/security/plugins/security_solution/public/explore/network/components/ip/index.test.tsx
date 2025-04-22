@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { shallow } from 'enzyme';
+import { screen, render } from '@testing-library/react';
 import React from 'react';
 
 import { TestProviders } from '../../../../common/mock/test_providers';
-import { useMountAppended } from '../../../../common/utils/use_mount_appended';
 
 import { Ip } from '.';
 
@@ -26,34 +25,35 @@ jest.mock('@elastic/eui', () => {
 jest.mock('../../../../common/components/links/link_props');
 
 describe('Port', () => {
-  const mount = useMountAppended();
-
   test('renders correctly against snapshot', () => {
-    const wrapper = shallow(
-      <Ip contextId="test" eventId="abcd" fieldName="destination.ip" value="10.1.2.3" />
+    const { container } = render(
+      <TestProviders>
+        <Ip contextId="test" eventId="abcd" fieldName="destination.ip" value="10.1.2.3" />
+      </TestProviders>
     );
-    expect(wrapper).toMatchSnapshot();
+    expect(container.children[0]).toMatchSnapshot();
   });
 
   test('it renders the the ip address', () => {
-    const wrapper = mount(
+    render(
       <TestProviders>
         <Ip contextId="test" eventId="abcd" fieldName="destination.ip" value="10.1.2.3" />
       </TestProviders>
     );
 
-    expect(wrapper.find('[data-test-subj="formatted-ip"]').first().text()).toEqual('10.1.2.3');
+    expect(screen.getByTestId('network-details')).toHaveTextContent('10.1.2.3');
   });
 
   test('it displays a button which opens the network/ip side panel', () => {
-    const wrapper = mount(
+    render(
       <TestProviders>
         <Ip contextId="test" eventId="abcd" fieldName="destination.ip" value="10.1.2.3" />
       </TestProviders>
     );
 
-    expect(wrapper.find('[data-test-subj="network-details"]').find('a').first().text()).toEqual(
-      '10.1.2.3'
+    expect(screen.getByTestId('network-details')).toHaveAttribute(
+      'href',
+      '/ip/10.1.2.3/source/events'
     );
   });
 });

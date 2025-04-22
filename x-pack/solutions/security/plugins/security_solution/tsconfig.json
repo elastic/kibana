@@ -246,6 +246,8 @@
     "@kbn/custom-icons",
     "@kbn/security-plugin-types-common",
     "@kbn/management-settings-ids",
-    "@kbn/inference-endpoint-ui-common"
+    "@kbn/inference-endpoint-ui-common",
+    "@kbn/actions-types",
+    "@kbn/triggers-actions-ui-types",
   ]
 }
