@@ -31,11 +31,11 @@ export const contentStorageSettings = {
 
 export type ContentStorageSettings = typeof contentStorageSettings;
 
-export type StoredContentPack = {
+export interface StoredContentPack {
   [STREAM_NAME]: string;
   [CONTENT_NAME]: string;
   dashboards: SavedObjectLinkWithReferences[];
-};
+}
 
 export class ContentClient {
   constructor(

@@ -13,11 +13,13 @@ type ContentPackDashboard = SavedObject<DashboardAttributes>;
 type ContentPackDataView = SavedObject<DataViewSavedObjectAttrs>;
 export type ContentPackSavedObject = ContentPackDashboard | ContentPackDataView;
 
-export type SavedObjectLink = {
+export interface SavedObjectLink {
   source_id: string;
   target_id: string;
-};
+}
 
 export type SavedObjectLinkWithReferences = SavedObjectLink & { references: SavedObjectLink[] };
 
-export type ContentPackSavedObjectLinks = { dashboards: SavedObjectLinkWithReferences[] };
+export interface ContentPackSavedObjectLinks {
+  dashboards: SavedObjectLinkWithReferences[];
+}
