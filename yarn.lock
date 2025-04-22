@@ -7934,6 +7934,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/wc-framework-types-browser@link:x-pack/solutions/chat/packages/wc-framework-types-browser":
+  version "0.0.0"
+  uid ""
+
 "@kbn/wc-framework-types-common@link:x-pack/solutions/chat/packages/wc-framework-types-common":
   version "0.0.0"
   uid ""
