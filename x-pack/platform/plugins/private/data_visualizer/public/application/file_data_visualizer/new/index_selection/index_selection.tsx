@@ -70,10 +70,7 @@ export const IndexSelection: FC<Props> = ({ allowExistingIndices = true }) => {
             ]}
             idSelected={indexCreateMode}
             onChange={(id) => setIndexCreateMode(id as UPLOAD_TYPE)}
-            name="radio group"
-            // legend={{
-            //   children: <span>This is a legend for a radio group</span>,
-            // }}
+            name="indexCreateMode"
           />
 
           <EuiSpacer />
@@ -91,7 +88,6 @@ export const IndexSelection: FC<Props> = ({ allowExistingIndices = true }) => {
                   defaultMessage: 'Select an index',
                 }
               )}
-              id={`visDefaultEditorAggSelect$`}
               options={indices.map((index) => ({
                 label: index.name,
                 value: index.name,
