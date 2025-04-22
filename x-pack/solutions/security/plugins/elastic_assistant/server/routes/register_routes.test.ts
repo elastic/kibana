@@ -228,7 +228,7 @@ describe('registerRoutes', () => {
   });
 
   it('should call `postActionsConnectorExecuteRouteMock`', () => {
-    expect(postActionsConnectorExecuteRouteMock).toHaveBeenCalledWith(server.router, undefined);
+    expect(postActionsConnectorExecuteRouteMock).toHaveBeenCalledWith(server.router);
   });
 
   it('should call `bulkActionKnowledgeBaseEntriesRouteMock`', () => {
