@@ -26,5 +26,34 @@ export default function ({ getService }: FtrProviderContext) {
         ensureSpaceIdExists(kbnServer, spaceTwoId, { log }),
       ]);
     });
+
+    describe('when creating actions', () => {
+      it('should create action if all agent ids are accessible in active space', async () => {
+        throw new Error('TODO: implement');
+      });
+
+      it('should error if at least one agent is not accessible in active space', async () => {
+        throw new Error('TODO: implement');
+      });
+    });
+
+    describe('when fetching list of actions', () => {
+      it('should return all actions sent to agents that are accessible in active space', () => {
+        throw new Error('TODO: implement');
+        // TODO: implement
+      });
+    });
+
+    describe('when fetching single action', () => {
+      it('should return action if at least 1 agent is accessible in active space', () => {
+        throw new Error('TODO: implement');
+        // TODO: implement
+      });
+
+      it('should error if none of the agents are accessible in active space', async () => {
+        throw new Error('TODO: implement');
+        // TODO: implement
+      });
+    });
   });
 }
