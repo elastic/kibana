@@ -295,6 +295,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // now remove the query
       await queryBar.clearQuery();
+
+      const datePickerQuickMenuButtonExists = await testSubjects.exists(
+        'superDatePickerToggleQuickMenuButton'
+      );
+      const datePickerPopoverIsOpen = await testSubjects.exists('superDatePickerQuickMenu');
+
+      if (datePickerQuickMenuButtonExists && datePickerPopoverIsOpen) {
+        await testSubjects.click('superDatePickerToggleQuickMenuButton');
+      }
+
       await queryBar.submitQuery();
       await discover.waitUntilSearchingHasFinished();
       // check no error state
