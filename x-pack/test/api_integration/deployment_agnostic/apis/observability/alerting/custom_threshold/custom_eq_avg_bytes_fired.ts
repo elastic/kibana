@@ -60,6 +60,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               { name: 'system.cpu.user.pct', method: 'linear', start: 2.5, end: 2.5 },
               { name: 'system.cpu.total.pct', method: 'linear', start: 0.5, end: 0.5 },
               { name: 'system.cpu.total.norm.pct', method: 'linear', start: 0.8, end: 0.8 },
+              { name: 'host.network.ingress.bytes', method: 'linear', start: 1000, end: 1000 },
+              { name: 'host.network.egress.bytes', method: 'linear', start: 1000, end: 1000 },
             ],
           },
         ],
@@ -130,8 +132,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 timeSize: 1,
                 timeUnit: 'm',
                 metrics: [
-                  { name: 'A', field: 'system.network.in.bytes', aggType: Aggregators.AVERAGE },
-                  { name: 'B', field: 'system.network.out.bytes', aggType: Aggregators.AVERAGE },
+                  { name: 'A', field: 'host.network.ingress.bytes', aggType: Aggregators.AVERAGE },
+                  { name: 'B', field: 'host.network.egress.bytes', aggType: Aggregators.AVERAGE },
                 ],
                 equation: '((A + A) / (B + B))',
               },
@@ -231,8 +233,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 timeSize: 1,
                 timeUnit: 'm',
                 metrics: [
-                  { name: 'A', field: 'system.network.in.bytes', aggType: Aggregators.AVERAGE },
-                  { name: 'B', field: 'system.network.out.bytes', aggType: Aggregators.AVERAGE },
+                  { name: 'A', field: 'host.network.ingress.bytes', aggType: Aggregators.AVERAGE },
+                  { name: 'B', field: 'host.network.egress.bytes', aggType: Aggregators.AVERAGE },
                 ],
                 equation: '((A + A) / (B + B))',
               },
@@ -254,6 +256,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(resp.hits.hits[0]._source?.alertDetailsUrl).eql(
           `${protocol}://${hostname}${port ? `:${port}` : ''}/app/observability/alerts/${alertId}`
         );
+
+        logger.info(resp.hits.hits[0]._source?.reason);
         expect(resp.hits.hits[0]._source?.reason).eql(
           `Custom equation is 1 B, above the threshold of 0.9 B. (duration: 1 min, data view: ${DATA_VIEW})`
         );
