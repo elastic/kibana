@@ -221,7 +221,6 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
 
     let response: Awaited<ChatCompleteCompositeResponse<ToolOptions, false>>;
     try {
-      console.log('inference _generate ==>');
       response = await this.completionWithRetry({
         ...this.invocationParams(options),
         system,
@@ -239,14 +238,12 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
       }
       throw e;
     }
-    console.log('inference _generate response ==>', response);
 
     const generations: ChatGeneration[] = [];
     generations.push({
       text: response.content,
       message: responseToLangchainMessage(response),
     });
-    console.log('inference generations ==>', response);
 
     return {
       generations,
