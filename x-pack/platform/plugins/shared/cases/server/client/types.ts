@@ -49,7 +49,7 @@ export interface CasesClientArgs {
   readonly user: User;
   readonly unsecuredSavedObjectsClient: SavedObjectsClientContract;
   readonly logger: Logger;
-  readonly lensEmbeddableFactory: LensServerPluginSetup['lensEmbeddableFactory'];
+  readonly lensEmbeddableFactory?: LensServerPluginSetup['lensEmbeddableFactory'];
   readonly authorization: PublicMethodsOf<Authorization>;
   readonly actionsClient: PublicMethodsOf<ActionsClient>;
   readonly persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;

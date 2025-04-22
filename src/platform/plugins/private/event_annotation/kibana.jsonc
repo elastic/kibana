@@ -27,8 +27,7 @@
     "requiredBundles": [
       "data",
       "savedObjectsFinder",
-      "dataViews",
-      "visualizations"
+      "dataViews"
     ],
     "extraPublicDirs": [
       "common"

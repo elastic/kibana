@@ -45,7 +45,8 @@
       "esUiShared",
       "kibanaReact",
       "kibanaUtils",
-      "savedObjectsFinder"
+      "savedObjectsFinder",
+      "lens"
     ],
     "extraPublicDirs": [
       "common"
