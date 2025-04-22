@@ -29,7 +29,7 @@ export const NavigationItemOpenPanel: FC<Props> = ({ item, activeNodes }: Props)
   const { title, deepLink, icon, withBadge, badgeOptions } = item;
   const { id, path } = item;
   const isExpanded = selectedNode?.path === path;
-  const isActive = isActiveFromUrl(item.path, activeNodes) || isExpanded;
+  const isActive = isActiveFromUrl(item.path, activeNodes);
 
   const dataTestSubj = classNames(`nav-item`, `nav-item-${path}`, {
     [`nav-item-deepLinkId-${deepLink?.id}`]: !!deepLink,
@@ -63,11 +63,15 @@ export const NavigationItemOpenPanel: FC<Props> = ({ item, activeNodes }: Props)
         font-weight: inherit;
         transform: none !important; /* don't translateY 1px */
         padding-inline: calc(${euiTheme.size.xs} * 1.5);
-        background-color: ${isActive ? euiTheme.colors.backgroundLightPrimary : 'transparent'};
+        background-color: ${isActive
+          ? euiTheme.colors.backgroundLightPrimary
+          : isExpanded
+          ? euiTheme.colors.backgroundBaseInteractiveHover
+          : 'transparent'};
 
         &:hover {
           background-color: ${isActive
-            ? undefined
+            ? euiTheme.colors.backgroundLightPrimary
             : euiTheme.colors.backgroundBaseInteractiveHover};
         }
       `,
@@ -80,7 +84,7 @@ export const NavigationItemOpenPanel: FC<Props> = ({ item, activeNodes }: Props)
       onClick={onLinkClick}
       iconSide="right"
       iconSize="s"
-      iconType={isExpanded ? 'arrowLeft' : 'arrowRight'}
+      iconType="arrowRight"
       size="s"
       fullWidth
       css={styles.button}
