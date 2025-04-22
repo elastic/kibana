@@ -17958,6 +17958,18 @@
                                     "secrets": {
                                       "additionalProperties": false,
                                       "properties": {
+                                        "service_token": {
+                                          "additionalProperties": false,
+                                          "properties": {
+                                            "hash": {
+                                              "type": "string"
+                                            },
+                                            "id": {
+                                              "type": "string"
+                                            }
+                                          },
+                                          "type": "object"
+                                        },
                                         "ssl": {
                                           "additionalProperties": false,
                                           "properties": {
@@ -18141,6 +18153,18 @@
                                     "secrets": {
                                       "additionalProperties": false,
                                       "properties": {
+                                        "service_token": {
+                                          "additionalProperties": false,
+                                          "properties": {
+                                            "hash": {
+                                              "type": "string"
+                                            },
+                                            "id": {
+                                              "type": "string"
+                                            }
+                                          },
+                                          "type": "object"
+                                        },
                                         "ssl": {
                                           "additionalProperties": false,
                                           "properties": {
@@ -19261,10 +19285,6 @@
                                   "type": "string"
                                 }
                               },
-                              "required": [
-                                "api_key_id",
-                                "type"
-                              ],
                               "type": "object"
                             },
                             "type": "object"
@@ -21359,10 +21379,6 @@
                                 "type": "string"
                               }
                             },
-                            "required": [
-                              "api_key_id",
-                              "type"
-                            ],
                             "type": "object"
                           },
                           "type": "object"
@@ -21840,10 +21856,6 @@
                                 "type": "string"
                               }
                             },
-                            "required": [
-                              "api_key_id",
-                              "type"
-                            ],
                             "type": "object"
                           },
                           "type": "object"
@@ -43560,6 +43572,9 @@
                       "additionalProperties": {
                         "additionalProperties": false,
                         "properties": {
+                          "error": {
+                            "type": "string"
+                          },
                           "name": {
                             "type": "string"
                           },
@@ -43701,6 +43716,9 @@
                       "additionalProperties": {
                         "additionalProperties": false,
                         "properties": {
+                          "error": {
+                            "type": "string"
+                          },
                           "name": {
                             "type": "string"
                           },
