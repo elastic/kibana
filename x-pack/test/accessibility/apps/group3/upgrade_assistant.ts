@@ -78,12 +78,12 @@ export default function upgradeAssistantPage({ getService, getPageObjects }: Ftr
         await retry.try(async () => {
           await PageObjects.upgradeAssistant.clickOpenEsDeprecationsFlyoutButton();
         });
-        
+
         // Add additional retry and wait for flyout to be fully visible
         await retry.waitFor('Deprecation logging flyout to be visible', async () => {
-          return testSubjects.exists('esDeprecationsFlyout');
+          return testSubjects.exists('esDeprecationLogsFlyout');
         });
-        
+
         const loggingEnabled = await PageObjects.upgradeAssistant.isDeprecationLoggingEnabled();
         if (loggingEnabled) {
           await retry.try(async () => {
@@ -101,12 +101,12 @@ export default function upgradeAssistantPage({ getService, getPageObjects }: Ftr
         await retry.try(async () => {
           await PageObjects.upgradeAssistant.clickOpenEsDeprecationsFlyoutButton();
         });
-        
+
         // Add additional retry and wait for flyout to be fully visible
         await retry.waitFor('Deprecation logging flyout to be visible', async () => {
-          return testSubjects.exists('esDeprecationsFlyout');
+          return testSubjects.exists('esDeprecationLogsFlyout');
         });
-        
+
         const loggingEnabled = await PageObjects.upgradeAssistant.isDeprecationLoggingEnabled();
         if (!loggingEnabled) {
           await retry.try(async () => {
