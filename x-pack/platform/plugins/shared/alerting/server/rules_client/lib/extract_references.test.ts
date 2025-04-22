@@ -11,14 +11,6 @@ import { extractReferences } from './extract_references';
 import type { RulesClientContext } from '..';
 import { savedObjectsRepositoryMock } from '@kbn/core-saved-objects-api-server-mocks';
 
-import { denormalizeArtifacts } from './denormalize_artifacts';
-
-jest.mock('./denormalize_artifacts', () => ({
-  denormalizeArtifacts: jest.fn(),
-}));
-
-const mockDenormalizeArtifacts = denormalizeArtifacts as jest.Mock;
-
 const loggerErrorMock = jest.fn();
 const getBulkMock = jest.fn();
 
@@ -64,37 +56,8 @@ const context = {
   getUserName: async () => {},
 } as unknown as RulesClientContext;
 
-jest.mock('./denormalize_artifacts', () => ({
-  denormalizeArtifacts: jest.fn(),
-}));
-
 describe('extractReferences', () => {
   it('returns dashboard artifacts and references', async () => {
-    mockDenormalizeArtifacts.mockReturnValue({
-      artifacts: {
-        dashboards: [
-          {
-            refId: 'dashboard_0',
-          },
-          {
-            refId: 'dashboard_1',
-          },
-        ],
-      },
-      references: [
-        {
-          id: '123',
-          name: 'dashboard_0',
-          type: 'dashboard',
-        },
-        {
-          id: '456',
-          name: 'dashboard_1',
-          type: 'dashboard',
-        },
-      ],
-    });
-
     const result = await extractReferences(
       context,
       ruleType,
@@ -105,14 +68,10 @@ describe('extractReferences', () => {
       }
     );
 
-    expect(mockDenormalizeArtifacts).toHaveBeenCalled();
     expect(result.artifacts).toEqual({
       dashboards: [
         {
           refId: 'dashboard_0',
-        },
-        {
-          refId: 'dashboard_1',
         },
       ],
     });
@@ -121,11 +80,6 @@ describe('extractReferences', () => {
       {
         id: '123',
         name: 'dashboard_0',
-        type: 'dashboard',
-      },
-      {
-        id: '456',
-        name: 'dashboard_1',
         type: 'dashboard',
       },
     ]);
