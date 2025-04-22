@@ -26,6 +26,7 @@ import type {
   EuiDataGridStyle,
   EuiDataGridToolBarVisibilityOptions,
 } from '@elastic/eui';
+import type { PackageListItem } from '@kbn/fleet-plugin/common';
 import { ActionsCell } from './actions_cell';
 import { AdditionalToolbarControls } from './additional_toolbar_controls';
 import { getDataViewStateFromIndexFields } from '../../../../common/containers/source/use_data_view';
@@ -36,25 +37,26 @@ import { useKibana } from '../../../../common/lib/kibana';
 import { CellValue } from './render_cell';
 import { buildTimeRangeFilter } from '../../alerts_table/helpers';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
+import type { RuleResponse } from '../../../../../common/api/detection_engine';
 
-const TIMESTAMP_COLUMN = i18n.translate(
+export const TIMESTAMP_COLUMN = i18n.translate(
   'xpack.securitySolution.alertSummary.table.column.timeStamp',
   { defaultMessage: 'Timestamp' }
 );
-const RELATION_INTEGRATION_COLUMN = i18n.translate(
+export const RELATION_INTEGRATION_COLUMN = i18n.translate(
   'xpack.securitySolution.alertSummary.table.column.relatedIntegrationName',
   { defaultMessage: 'Integration' }
 );
-const SEVERITY_COLUMN = i18n.translate(
+export const SEVERITY_COLUMN = i18n.translate(
   'xpack.securitySolution.alertSummary.table.column.severity',
   { defaultMessage: 'Severity' }
 );
-const RULE_NAME_COLUMN = i18n.translate(
+export const RULE_NAME_COLUMN = i18n.translate(
   'xpack.securitySolution.alertSummary.table.column.ruleName',
   { defaultMessage: 'Rule' }
 );
 
-const columns: EuiDataGridProps['columns'] = [
+export const columns: EuiDataGridProps['columns'] = [
   {
     id: TIMESTAMP,
     displayAsText: TIMESTAMP_COLUMN,
@@ -73,16 +75,36 @@ const columns: EuiDataGridProps['columns'] = [
   },
 ];
 
-const ACTION_COLUMN_WIDTH = 72; // px
-const ALERT_TABLE_CONSUMERS: AlertsTableProps['consumers'] = [AlertConsumers.SIEM];
-const RULE_TYPE_IDS = [ESQL_RULE_TYPE_ID, QUERY_RULE_TYPE_ID];
-const ROW_HEIGHTS_OPTIONS = { defaultHeight: 40 };
-const TOOLBAR_VISIBILITY: EuiDataGridToolBarVisibilityOptions = {
+export const ACTION_COLUMN_WIDTH = 98; // px
+export const ALERT_TABLE_CONSUMERS: AlertsTableProps['consumers'] = [AlertConsumers.SIEM];
+export const RULE_TYPE_IDS = [ESQL_RULE_TYPE_ID, QUERY_RULE_TYPE_ID];
+export const ROW_HEIGHTS_OPTIONS = { defaultHeight: 40 };
+export const TOOLBAR_VISIBILITY: EuiDataGridToolBarVisibilityOptions = {
   showDisplaySelector: false,
   showKeyboardShortcuts: false,
   showFullScreenSelector: false,
 };
-const GRID_STYLE: EuiDataGridStyle = { border: 'horizontal' };
+export const GRID_STYLE: EuiDataGridStyle = { border: 'horizontal' };
+
+export interface AdditionalTableContext {
+  /**
+   * List of installed AI for SOC integrations
+   */
+  packages: PackageListItem[];
+  /**
+   * Result from the useQuery to fetch all rules
+   */
+  ruleResponse: {
+    /**
+     * Result from fetching all rules
+     */
+    rules: RuleResponse[];
+    /**
+     * True while rules are being fetched
+     */
+    isLoading: boolean;
+  };
+}
 
 export interface TableProps {
   /**
@@ -93,13 +115,30 @@ export interface TableProps {
    * Groups filters passed from the GroupedAlertsTable component via the renderChildComponent callback
    */
   groupingFilters: Filter[];
+  /**
+   * List of installed AI for SOC integrations
+   */
+  packages: PackageListItem[];
+  /**
+   * Result from the useQuery to fetch all rules
+   */
+  ruleResponse: {
+    /**
+     * Result from fetching all rules
+     */
+    rules: RuleResponse[];
+    /**
+     * True while rules are being fetched
+     */
+    isLoading: boolean;
+  };
 }
 
 /**
  * Renders the table showing all the alerts. This component leverages the ResponseOps AlertsTable in a similar way that the alerts page does.
  * The table is used in combination with the GroupedAlertsTable component.
  */
-export const Table = memo(({ dataView, groupingFilters }: TableProps) => {
+export const Table = memo(({ dataView, groupingFilters, packages, ruleResponse }: TableProps) => {
   const {
     services: {
       application,
@@ -178,9 +217,18 @@ export const Table = memo(({ dataView, groupingFilters }: TableProps) => {
     [dataView]
   );
 
+  const additionalContext: AdditionalTableContext = useMemo(
+    () => ({
+      packages,
+      ruleResponse,
+    }),
+    [packages, ruleResponse]
+  );
+
   return (
     <AlertsTable
       actionsColumnWidth={ACTION_COLUMN_WIDTH}
+      additionalContext={additionalContext}
       browserFields={browserFields}
       columns={columns}
       consumers={ALERT_TABLE_CONSUMERS}
