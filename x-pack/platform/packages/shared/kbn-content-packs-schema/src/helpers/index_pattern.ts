@@ -14,8 +14,11 @@ import { AggregateQuery, Query } from '@kbn/es-query';
 import { getIndexPatternFromESQLQuery, replaceESQLQueryIndexPattern } from '@kbn/esql-utils';
 import type { LensAttributes } from '@kbn/lens-embeddable-utils';
 import type { IndexPatternRef } from '@kbn/lens-plugin/public/types';
-import { FieldBasedIndexPatternColumn, GenericIndexPatternColumn } from '@kbn/lens-plugin/public';
-import { TextBasedLayerColumn } from '@kbn/lens-plugin/public/datasources/form_based/esql_layer/types';
+import type {
+  FieldBasedIndexPatternColumn,
+  GenericIndexPatternColumn,
+} from '@kbn/lens-plugin/public';
+import type { TextBasedLayerColumn } from '@kbn/lens-plugin/public/datasources/form_based/esql_layer/types';
 import type { ContentPackSavedObject } from '../models';
 
 export const INDEX_PLACEHOLDER = '<stream_name_placeholder>';
