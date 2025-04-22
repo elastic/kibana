@@ -51,7 +51,6 @@ import type { DataViewFieldEditorStart } from '@kbn/data-view-field-editor-plugi
 import type { EmbeddableSetup } from '@kbn/embeddable-plugin/public';
 import type { ExploratoryViewPublicStart } from '@kbn/exploratory-view-plugin/public';
 import type { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
-import type { InvestigatePublicStart } from '@kbn/investigate-plugin/public';
 import type { LicenseManagementUIPluginSetup } from '@kbn/license-management-plugin/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
@@ -72,6 +71,7 @@ import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type { StreamsPluginStart, StreamsPluginSetup } from '@kbn/streams-plugin/public';
 import { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
+import { Start as InspectorPluginStart } from '@kbn/inspector-plugin/public';
 import { observabilityAppId, observabilityFeatureId } from '../common';
 import {
   ALERTS_PATH,
@@ -164,9 +164,9 @@ export interface ObservabilityPublicPluginsStart {
   theme: CoreStart['theme'];
   dataViewFieldEditor: DataViewFieldEditorStart;
   toastNotifications: ToastsStart;
-  investigate?: InvestigatePublicStart;
   streams?: StreamsPluginStart;
   fieldsMetadata: FieldsMetadataPublicStart;
+  inspector: InspectorPluginStart;
 }
 export type ObservabilityPublicStart = ReturnType<Plugin['start']>;
 

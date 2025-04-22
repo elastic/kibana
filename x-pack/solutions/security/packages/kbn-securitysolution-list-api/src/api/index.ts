@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { chain, fromEither, tryCatch } from 'fp-ts/lib/TaskEither';
-import { flow } from 'fp-ts/lib/function';
+import { chain, fromEither, tryCatch } from 'fp-ts/TaskEither';
+import { flow } from 'fp-ts/function';
 import { validateEither } from '@kbn/securitysolution-io-ts-utils';
 import {
   CreateEndpointListSchema,
