@@ -49,7 +49,6 @@ export interface AppLocation {
   pathname: string;
   search: string;
   hash: string;
-  key?: string;
   state?:
     | {
         isTabChange?: boolean;
