@@ -224,13 +224,21 @@ export const checkForFrozenIndices = async ({
     ? fieldCapsResponse.indices
     : [fieldCapsResponse.indices];
 
+  // Frozen indices start with `partial-`, but it's possible
+  // for some regular hot/warm index to start with that prefix as well by coincidence. If we find indices with that naming pattern,
+  // we fetch information about the index using ilm explain to verify that they are actually frozen indices.
+  const partialIndices = resolvedQueryIndices.filter((index) => index.startsWith('partial-'));
+  if (partialIndices.length <= 0) {
+    return [];
+  }
+
   const explainResponse = await internalEsClient.ilm.explainLifecycle({
     // Use the original index patterns again instead of just the concrete names of the indices:
     // the list of concrete indices could be huge and make the request URL too large, but we know the list of index patterns works
     index: inputIndices.join(','),
   });
 
-  return resolvedQueryIndices.filter((index) => {
+  return partialIndices.filter((index) => {
     const indexResponse = explainResponse.indices[index];
     return indexResponse !== undefined && indexResponse.managed && indexResponse.phase === 'frozen';
   });

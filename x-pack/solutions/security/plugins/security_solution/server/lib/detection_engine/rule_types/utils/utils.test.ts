@@ -1409,20 +1409,20 @@ describe('utils', () => {
     });
 
     it('should return frozen indices when indices are confirmed as frozen', async () => {
-      const inputIndices = ['frozen-index-*', 'regular-index'];
+      const inputIndices = ['index-*', 'regular-index'];
       const fieldCapsResponse: FieldCapsResponse = {
-        indices: ['frozen-index-1', 'frozen-index-2', 'regular-index'],
+        indices: ['partial-index-1', 'partial-index-2', 'regular-index'],
         fields: {},
       };
       const ilmExplainLifecycleResponse: IlmExplainLifecycleResponse = {
         indices: {
-          'frozen-index-1': {
-            index: 'frozen-index-1',
+          'partial-index-1': {
+            index: 'partial-index-1',
             managed: true,
             phase: 'frozen',
           },
-          'frozen-index-2': {
-            index: 'frozen-index-2',
+          'partial-index-2': {
+            index: 'partial-index-2',
             managed: true,
             phase: 'frozen',
           },
@@ -1444,7 +1444,7 @@ describe('utils', () => {
 
       const frozenIndices = await checkForFrozenIndices(params);
 
-      expect(frozenIndices).toEqual(['frozen-index-1', 'frozen-index-2']);
+      expect(frozenIndices).toEqual(['partial-index-1', 'partial-index-2']);
       expect(fieldCapsMock).toHaveBeenNthCalledWith(1, {
         index: inputIndices,
         fields: ['_id'],
@@ -1463,11 +1463,48 @@ describe('utils', () => {
         fields: {},
       };
 
+      fieldCapsMock.mockResolvedValue(fieldCapsResponse);
+
+      const params = {
+        inputIndices,
+        internalEsClient,
+        currentUserEsClient,
+        to: 'now',
+        from: 'now-1d',
+        primaryTimestamp: '@timestamp',
+        secondaryTimestamp: undefined,
+      };
+
+      const frozenIndices = await checkForFrozenIndices(params);
+
+      expect(frozenIndices).toEqual([]);
+
+      expect(fieldCapsMock).toHaveBeenCalledWith({
+        index: inputIndices,
+        fields: ['_id'],
+        ignore_unavailable: true,
+        index_filter: expect.any(Object),
+      });
+      expect(ilmExplainLifecycleMock).not.toHaveBeenCalled();
+    });
+
+    it('should return an empty array when there are indices whose name begins with "partial-", but they are not frozen', async () => {
+      const inputIndices = ['partial-index-*', 'regular-index-2'];
+      const fieldCapsResponse: FieldCapsResponse = {
+        indices: ['partial-index-1', 'partial-index-2', 'regular-index-2'],
+        fields: {},
+      };
+
       const ilmExplainLifecycleResponse: IlmExplainLifecycleResponse = {
         indices: {
-          'regular-index-1': {
-            index: 'regular-index-1',
+          'partial-index-1': {
+            index: 'partial-index-1',
             managed: false,
+          },
+          'partial-index-2': {
+            index: 'partial-index-2',
+            managed: true,
+            phase: 'warm',
           },
           'regular-index-2': {
             index: 'regular-index-2',
@@ -1493,7 +1530,6 @@ describe('utils', () => {
       const frozenIndices = await checkForFrozenIndices(params);
 
       expect(frozenIndices).toEqual([]);
-
       expect(fieldCapsMock).toHaveBeenCalledWith({
         index: inputIndices,
         fields: ['_id'],
@@ -1506,7 +1542,7 @@ describe('utils', () => {
     });
 
     it('should handle errors from fieldCaps gracefully', async () => {
-      const inputIndices = ['frozen-index-1', 'frozen-index-2'];
+      const inputIndices = ['index-1', 'index-2'];
 
       fieldCapsMock.mockRejectedValue(new Error('fieldCaps error'));
 
@@ -1530,10 +1566,10 @@ describe('utils', () => {
       });
     });
 
-    it('should handle errors from getSettings gracefully', async () => {
-      const inputIndices = ['frozen-index-1', 'frozen-index-2'];
+    it('should handle errors from ilm explain gracefully', async () => {
+      const inputIndices = ['index-1', 'index-2'];
       const fieldCapsResponse: FieldCapsResponse = {
-        indices: ['frozen-index-1', 'frozen-index-2'],
+        indices: ['partial-index-1', 'partial-index-2'],
         fields: {},
       };
 
