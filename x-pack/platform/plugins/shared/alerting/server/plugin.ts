@@ -277,9 +277,12 @@ export class AlertingPlugin {
       };
     });
 
-    plugins.features.registerKibanaFeature(getRulesSettingsFeature(this.isServerless));
-
-    plugins.features.registerKibanaFeature(maintenanceWindowFeature);
+    if (this.config.rulesSettings.enabled) {
+      plugins.features.registerKibanaFeature(getRulesSettingsFeature(this.isServerless));
+    }
+    if (this.config.maintenanceWindow.enabled) {
+      plugins.features.registerKibanaFeature(maintenanceWindowFeature);
+    }
 
     this.isESOCanEncrypt = plugins.encryptedSavedObjects.canEncrypt;
 
@@ -408,6 +411,7 @@ export class AlertingPlugin {
       config$: plugins.unifiedSearch.autocomplete.getInitializerContextConfig().create(),
       isServerless: this.isServerless,
       docLinks: core.docLinks,
+      alertingConfig: this.config,
     });
 
     registerDeprecations({ core });

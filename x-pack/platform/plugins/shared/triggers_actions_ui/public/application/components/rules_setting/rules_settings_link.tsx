@@ -14,10 +14,12 @@ import { useKibana } from '../../../common/lib/kibana';
 export const RulesSettingsLink = () => {
   const [isVisible, setIsVisible] = useState<boolean>(false);
   const {
-    application: { capabilities },
+    application: {
+      capabilities: { rulesSettings = {} },
+    },
   } = useKibana().services;
 
-  const { show, readFlappingSettingsUI, readQueryDelaySettingsUI } = capabilities.rulesSettings;
+  const { show, readFlappingSettingsUI, readQueryDelaySettingsUI } = rulesSettings;
 
   if (!show || (!readFlappingSettingsUI && !readQueryDelaySettingsUI)) {
     return null;
