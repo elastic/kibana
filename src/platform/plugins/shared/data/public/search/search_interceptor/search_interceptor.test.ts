@@ -468,16 +468,14 @@ describe('SearchInterceptor', () => {
     });
 
     test('should report telemetry on timeout', async () => {
-      mockCoreSetup.http.post.mockResolvedValue(
-        getMockSearchResponse({
-          isPartial: true,
-          isRunning: true,
-          rawResponse: {
-            foo: 'bar',
-          },
-          id: '1',
-        })
-      );
+      fetchMock.mockResolvedValue({
+        isPartial: true,
+        isRunning: true,
+        rawResponse: {
+          foo: 'bar',
+        },
+        id: '1',
+      });
 
       const response = searchInterceptor.search({}, { pollInterval: 0 });
       response.subscribe({ next, error });
