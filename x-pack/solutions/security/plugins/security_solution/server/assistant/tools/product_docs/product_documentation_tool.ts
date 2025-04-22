@@ -32,7 +32,7 @@ export const PRODUCT_DOCUMENTATION_TOOL: AssistantTool = {
   isSupported: (params: AssistantToolParams): params is AssistantToolParams => {
     return params.llmTasks != null && params.connectorId != null;
   },
-  getTool(params: AssistantToolParams) {
+  async getTool(params: AssistantToolParams) {
     if (!this.isSupported(params)) return null;
 
     const { connectorId, llmTasks, request, contentReferencesStore } =
