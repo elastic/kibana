@@ -96,7 +96,8 @@ export const getAlertsTableEmbeddableFactory = (
         filter(
           // Since the panels api doesn't have a way to listen to panel deletions
           // we have to listen to the children$ stream and check if the panel was removed
-          ([prevChildren, currentChildren]) => !!prevChildren?.[uuid] && !currentChildren?.[uuid]
+          ([prevChildren, currentChildren]) =>
+            Boolean(prevChildren?.[uuid]) && !Boolean(currentChildren?.[uuid])
         )
       )
       ?.subscribe(() => {
