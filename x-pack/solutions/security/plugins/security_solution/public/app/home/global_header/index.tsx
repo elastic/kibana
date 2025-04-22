@@ -17,7 +17,6 @@ import { i18n } from '@kbn/i18n';
 
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { DataViewManagerScopeName } from '../../../data_view_manager/constants';
-=======
 import { SECURITY_FEATURE_ID } from '../../../../common';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { MlPopover } from '../../../common/components/ml_popover/ml_popover';
