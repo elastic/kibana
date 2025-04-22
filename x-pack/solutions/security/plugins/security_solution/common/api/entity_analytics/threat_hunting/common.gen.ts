@@ -38,3 +38,10 @@ export const ThreatHuntingQuery = z.object({
   references: z.array(z.string()),
   queries: z.array(ThreatHuntingQueryQuery),
 });
+
+export type ThreatHuntingQueryWithIndexCheck = z.infer<typeof ThreatHuntingQueryWithIndexCheck>;
+export const ThreatHuntingQueryWithIndexCheck = z
+  .object({
+    indicesExist: z.boolean(),
+  })
+  .merge(ThreatHuntingQuery);

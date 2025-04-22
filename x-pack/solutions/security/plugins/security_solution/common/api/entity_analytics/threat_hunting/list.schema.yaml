@@ -43,8 +43,13 @@ paths:
             application/json:
               schema:
                 type: object
+                required:
+                  - total
+                  - queries
                 properties:
+                  total:
+                    type: integer
                   queries:
                     type: array
                     items:
-                      $ref: './common.schema.yaml#/components/schemas/ThreatHuntingQuery'
+                      $ref: './common.schema.yaml#/components/schemas/ThreatHuntingQueryWithIndexCheck'

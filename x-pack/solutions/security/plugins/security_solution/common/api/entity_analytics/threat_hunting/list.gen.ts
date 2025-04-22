@@ -16,7 +16,7 @@
 
 import { z } from '@kbn/zod';
 
-import { ThreatHuntingQuery } from './common.gen';
+import { ThreatHuntingQueryWithIndexCheck } from './common.gen';
 
 export type ThreatHuntingListRequestQuery = z.infer<typeof ThreatHuntingListRequestQuery>;
 export const ThreatHuntingListRequestQuery = z.object({
@@ -41,5 +41,6 @@ export type ThreatHuntingListRequestQueryInput = z.input<typeof ThreatHuntingLis
 
 export type ThreatHuntingListResponse = z.infer<typeof ThreatHuntingListResponse>;
 export const ThreatHuntingListResponse = z.object({
-  queries: z.array(ThreatHuntingQuery).optional(),
+  total: z.number().int(),
+  queries: z.array(ThreatHuntingQueryWithIndexCheck),
 });

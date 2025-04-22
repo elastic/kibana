@@ -75,3 +75,14 @@ components:
             type: string
         cleanedQuery:
           type: string
+
+    ThreatHuntingQueryWithIndexCheck:
+      allOf:
+        - type: object
+          required:
+            - indicesExist
+          properties:
+            indicesExist:
+              type: boolean
+        - $ref: '#/components/schemas/ThreatHuntingQuery'
+      

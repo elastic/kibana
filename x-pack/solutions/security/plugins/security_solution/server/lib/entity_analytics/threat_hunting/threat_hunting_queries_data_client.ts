@@ -9,9 +9,11 @@ import type { SearchRequest, SearchResponse } from '@elastic/elasticsearch/lib/a
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import type { AuditLogger } from '@kbn/security-plugin-types-server';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
+import _ from 'lodash';
 import type {
   ThreatHuntingQuery,
   ThreatHuntingQueryQuery,
+  ThreatHuntingQueryWithIndexCheck,
 } from '../../../../common/api/entity_analytics/threat_hunting/common.gen';
 import type { ThreatHuntingListResponse } from '../../../../common/api/entity_analytics/threat_hunting/list.gen';
 import type { ThreatHuntingQueryEsDoc } from '../../../../common/entity_analytics/threat_hunting/types';
@@ -25,10 +27,19 @@ interface ThreatHuntingQueriesClientOpts {
 
 const DEFAULT_RESPONSE_SIZE = 1000;
 const MAX_RESPONSE_SIZE = 10000;
+const INDEX_CHECK_BATCH_SIZE = 10;
+const INDEX_STATUS_CHECK_CACHE_STALE_AFTER_MS = 1000 * 60 * 5; // 5 minutes
 
 export class ThreatHuntingQueriesDataClient {
   constructor(private readonly options: ThreatHuntingQueriesClientOpts) {}
 
+  // uuid is used to identify the query
+  // true if there is data in the query indices
+  private queryDataStatusCache: Map<string, boolean> = new Map();
+
+  private lastQueryStatusCacheUpdate: number = 0;
+
+  private isCacheUpdateInProgress = false;
   /**
    *
    * A general method for searching asset criticality records.
@@ -47,6 +58,9 @@ export class ThreatHuntingQueriesDataClient {
     from?: number;
     sort?: SearchRequest['sort'];
   }): Promise<ThreatHuntingListResponse> {
+    // Check if the query status cache needs to be updated
+    await this.maybeUpdateQueryStatusCache();
+
     try {
       const response = await this.options.esClient.search<ThreatHuntingQueryEsDoc>({
         index: this.getIndex(),
@@ -90,13 +104,11 @@ export class ThreatHuntingQueriesDataClient {
   }
 
   public formatSearchResponse(response: SearchResponse<ThreatHuntingQueryEsDoc>): {
-    queries: ThreatHuntingQuery[];
+    queries: ThreatHuntingQueryWithIndexCheck[];
     total: number;
   } {
     const queries = response.hits.hits.map((hit) =>
-      ThreatHuntingQueriesDataClient.esResultToThreatHuntingQuery(
-        hit._source as ThreatHuntingQueryEsDoc
-      )
+      this.esResultToThreatHuntingQuery(hit._source as ThreatHuntingQueryEsDoc)
     );
     const total =
       typeof response.hits.total === 'number'
@@ -109,7 +121,103 @@ export class ThreatHuntingQueriesDataClient {
     };
   }
 
-  static esResultToThreatHuntingQuery(doc: ThreatHuntingQueryEsDoc): ThreatHuntingQuery {
+  private async maybeUpdateQueryStatusCache() {
+    // we only update the cache if it is empty or if the cache is stale
+    if (
+      this.queryDataStatusCache.size === 0 ||
+      Date.now() - this.lastQueryStatusCacheUpdate > INDEX_STATUS_CHECK_CACHE_STALE_AFTER_MS
+    ) {
+      await this.updateQueryStatusCache();
+    }
+  }
+
+  /**
+   * Updates the query status cache by checking the existence of indices associated with all queries.
+   * This function:
+   * 1. Retrieves all threat hunting queries
+   * 2. Collects all unique indices across these queries
+   * 3. Checks if these indices exist in Elasticsearch (in batches for efficiency)
+   * 4. Updates the queryDataStatusCache Map with each query's data availability status
+   * @returns {Promise<void>}
+   */
+  private async updateQueryStatusCache(onlyQueries?: ThreatHuntingQuery[]) {
+    if (this.isCacheUpdateInProgress && !onlyQueries) {
+      return;
+    }
+
+    if (!onlyQueries) {
+      this.isCacheUpdateInProgress = true;
+    }
+
+    let queriesToCheck: ThreatHuntingQuery[];
+
+    if (onlyQueries) {
+      queriesToCheck = onlyQueries;
+    } else {
+      const { queries = [] } = await this.search({
+        query: { match_all: {} },
+        size: MAX_RESPONSE_SIZE,
+      });
+      queriesToCheck = queries;
+    }
+
+    const indicesByQueryUuid = new Map<string, string[]>();
+    const allIndices = new Set<string>();
+
+    for (const query of queriesToCheck) {
+      const { uuid, queries: queryQueries } = query;
+      const indices = queryQueries.map((q) => q.indices).flat();
+      indicesByQueryUuid.set(uuid, indices);
+      indices.forEach((index) => allIndices.add(index));
+    }
+
+    const indexBatches: string[][] = _.chunk([...allIndices], INDEX_CHECK_BATCH_SIZE);
+    const indexExistenceResults: Array<{ index: string; exists: boolean }> = [];
+
+    for (const batch of indexBatches) {
+      try {
+        const batchIndex = batch.join(',');
+        const batchExists = await this.options.esClient.indices.exists({ index: batchIndex });
+
+        if (batchExists) {
+          batch.forEach((index) => {
+            indexExistenceResults.push({ index, exists: true });
+          });
+        } else {
+          // this means at least one index in the batch does not exist
+          // so now we need to check each index individually
+          const individualResults = await Promise.all(
+            batch.map(async (index) => {
+              const exists = await this.options.esClient.indices.exists({ index });
+              return { index, exists };
+            })
+          );
+          indexExistenceResults.push(...individualResults);
+        }
+      } catch (error) {
+        throw new Error(`Error checking index existence: ${error}`);
+      }
+    }
+
+    const indexExistsMap = new Map(
+      indexExistenceResults.map(({ index, exists }) => [index, exists])
+    );
+
+    for (const [uuid, indices] of indicesByQueryUuid.entries()) {
+      const hasExistingIndices = indices.some((index) => indexExistsMap.get(index));
+      this.queryDataStatusCache.set(uuid, hasExistingIndices);
+    }
+
+    if (onlyQueries) {
+      return;
+    }
+    this.lastQueryStatusCacheUpdate = Date.now();
+    this.isCacheUpdateInProgress = false;
+  }
+
+  private esResultToThreatHuntingQuery(
+    doc: ThreatHuntingQueryEsDoc
+  ): ThreatHuntingQueryWithIndexCheck {
     const queries: ThreatHuntingQueryQuery[] = doc.queries.map((q) => ({
       query: q.query,
       indices: q.indices,
@@ -119,6 +227,7 @@ export class ThreatHuntingQueriesDataClient {
     return {
       ...doc,
       queries,
+      indicesExist: this.queryDataStatusCache.get(doc.uuid) ?? false,
     };
   }
 }
