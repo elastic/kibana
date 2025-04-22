@@ -9,7 +9,7 @@ Breaking changes can impact your Elastic applications, potentially disrupting no
 
 If you are migrating from a version prior to version 9.0, you must first upgrade to the last 8.x version available. To learn how to upgrade, check out [Upgrade](docs-content://deploy-manage/upgrade.md).
 
-% ## Next version [kibana-nextversion-breaking-changes]
+% ## Next version [kibana-X.X.X-breaking-changes]
 
 % Use the following template to add entries to this document.
 
