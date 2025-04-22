@@ -60,7 +60,7 @@ import { useLensProps } from './hooks/use_lens_props';
 import { useStableCallback } from '../../hooks/use_stable_callback';
 import { buildBucketInterval } from './utils/build_bucket_interval';
 
-export interface ChartProps {
+export interface UnifiedHistogramChartProps {
   abortController?: AbortController;
   isChartAvailable: boolean;
   hiddenPanel?: boolean;
@@ -95,7 +95,7 @@ export interface ChartProps {
 
 const HistogramMemoized = memo(Histogram);
 
-export function Chart({
+export function UnifiedHistogramChart({
   isChartAvailable,
   services,
   dataView,
@@ -119,7 +119,7 @@ export function Chart({
   onChartLoad,
   columns,
   ...histogramProps
-}: ChartProps) {
+}: UnifiedHistogramChartProps) {
   const lensVisServiceCurrentSuggestionContext = useObservable(
     lensVisService.currentSuggestionContext$
   );

@@ -7,5 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { Chart } from './chart';
-export { checkChartAvailability } from './check_chart_availability';
+export { UnifiedHistogramChart, type UnifiedHistogramChartProps } from './chart';
+export { checkChartAvailability } from './utils/check_chart_availability';

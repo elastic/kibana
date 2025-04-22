@@ -7,5 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type { UnifiedHistogramLayoutProps } from './layout';
-export { UnifiedHistogramLayout } from './layout';
+export { UnifiedHistogramLayout, type UnifiedHistogramLayoutProps } from './layout';

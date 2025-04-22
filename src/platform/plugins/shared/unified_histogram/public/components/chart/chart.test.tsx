@@ -14,7 +14,7 @@ import type { Capabilities } from '@kbn/core/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { Suggestion } from '@kbn/lens-plugin/public';
 import type { UnifiedHistogramFetchStatus } from '../../types';
-import { Chart, type ChartProps } from './chart';
+import { UnifiedHistogramChart, type UnifiedHistogramChartProps } from './chart';
 import type { ReactWrapper } from 'enzyme';
 import { unifiedHistogramServicesMock } from '../../__mocks__/services';
 import { getLensVisMock } from '../../__mocks__/lens_vis';
@@ -23,7 +23,7 @@ import { Subject, of } from 'rxjs';
 import { dataViewWithTimefieldMock } from '../../__mocks__/data_view_with_timefield';
 import { dataViewMock } from '../../__mocks__/data_view';
 import { BreakdownFieldSelector } from './breakdown_field_selector';
-import { checkChartAvailability } from './check_chart_availability';
+import { checkChartAvailability } from './utils/check_chart_availability';
 import { allSuggestionsMock } from '../../__mocks__/suggestions';
 
 let mockUseEditVisualization: jest.Mock | undefined = jest.fn();
@@ -114,7 +114,7 @@ async function mountComponent({
     })
   ).lensService;
 
-  const props: ChartProps = {
+  const props: UnifiedHistogramChartProps = {
     lensVisService,
     dataView,
     requestParams,
@@ -140,7 +140,7 @@ async function mountComponent({
 
   let instance: ReactWrapper = {} as ReactWrapper;
   await act(async () => {
-    instance = mountWithIntl(<Chart {...props} />);
+    instance = mountWithIntl(<UnifiedHistogramChart {...props} />);
     // wait for initial async loading to complete
     await new Promise((r) => setTimeout(r, 0));
     props.input$?.next({ type: 'fetch' });

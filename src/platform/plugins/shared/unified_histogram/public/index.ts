@@ -19,10 +19,12 @@ export type {
 } from './types';
 export { UnifiedHistogramFetchStatus, UnifiedHistogramExternalVisContextStatus } from './types';
 
-export type { BreakdownFieldSelectorProps } from './components/chart/lazy';
-export { UnifiedBreakdownFieldSelector } from './components/chart/lazy';
-export { UnifiedHistogramLayout } from './components/layout';
-export { Chart as UnifiedHistogramChart } from './components/chart';
+export {
+  UnifiedBreakdownFieldSelector,
+  type BreakdownFieldSelectorProps,
+} from './components/chart/lazy';
+export { UnifiedHistogramChart, type UnifiedHistogramChartProps } from './components/chart';
+export { UnifiedHistogramLayout, type UnifiedHistogramLayoutProps } from './components/layout';
 
 export {
   useUnifiedHistogram,

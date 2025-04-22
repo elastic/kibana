@@ -12,7 +12,7 @@ import { mountWithIntl } from '@kbn/test-jest-helpers';
 import type { ReactWrapper } from 'enzyme';
 import React from 'react';
 import { of } from 'rxjs';
-import { Chart } from '../chart';
+import { UnifiedHistogramChart } from '../chart';
 import {
   UnifiedHistogramChartContext,
   UnifiedHistogramFetchStatus,
@@ -132,7 +132,9 @@ describe('Layout', () => {
       const component = await mountComponent();
       setBreakpoint(component, 's');
       const expectedHeight = component.find(ResizableLayout).prop('fixedPanelSize');
-      expect(component.find(Chart).find('div.euiFlexGroup').first().getDOMNode()).toHaveStyle({
+      expect(
+        component.find(UnifiedHistogramChart).find('div.euiFlexGroup').first().getDOMNode()
+      ).toHaveStyle({
         height: `${expectedHeight}px`,
       });
     });
@@ -141,7 +143,9 @@ describe('Layout', () => {
       const component = await mountComponent({ chart: { ...createChart(), hidden: true } });
       setBreakpoint(component, 's');
       const expectedHeight = component.find(ResizableLayout).prop('fixedPanelSize');
-      expect(component.find(Chart).find('div.euiFlexGroup').first().getDOMNode()).not.toHaveStyle({
+      expect(
+        component.find(UnifiedHistogramChart).find('div.euiFlexGroup').first().getDOMNode()
+      ).not.toHaveStyle({
         height: `${expectedHeight}px`,
       });
     });
@@ -150,7 +154,9 @@ describe('Layout', () => {
       const component = await mountComponent({ chart: null });
       setBreakpoint(component, 's');
       const expectedHeight = component.find(ResizableLayout).prop('fixedPanelSize');
-      expect(component.find(Chart).find('div.euiFlexGroup').first().getDOMNode()).not.toHaveStyle({
+      expect(
+        component.find(UnifiedHistogramChart).find('div.euiFlexGroup').first().getDOMNode()
+      ).not.toHaveStyle({
         height: `${expectedHeight}px`,
       });
     });

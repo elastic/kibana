@@ -16,7 +16,7 @@ import useMount from 'react-use/lib/useMount';
 import { pick } from 'lodash';
 import { DataView } from '@kbn/data-views-plugin/common';
 import useObservable from 'react-use/lib/useObservable';
-import { ChartProps } from '../components/chart/chart';
+import { UnifiedHistogramChartProps } from '../components/chart/chart';
 import {
   UnifiedHistogramExternalVisContextStatus,
   UnifiedHistogramInputMessage,
@@ -115,7 +115,7 @@ export type UseUnifiedHistogramResult =
   | {
       isInitialized: true;
       api: UnifiedHistogramApi;
-      chartProps: ChartProps;
+      chartProps: UnifiedHistogramChartProps;
       layoutProps: Omit<UnifiedHistogramLayoutProps, 'container' | 'chartPanel'>;
     };
 
@@ -252,7 +252,7 @@ export const useUnifiedHistogram = (props: UseUnifiedHistogramProps): UseUnified
     dataView,
     isPlainRecord: stateProps.isPlainRecord,
   });
-  const chartProps = useMemo<ChartProps | undefined>(() => {
+  const chartProps = useMemo<UnifiedHistogramChartProps | undefined>(() => {
     return lensVisService
       ? {
           ...props,

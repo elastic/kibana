@@ -8,7 +8,7 @@
  */
 
 import { type DataView, DataViewType } from '@kbn/data-views-plugin/common';
-import { UnifiedHistogramChartContext } from '../../types';
+import { UnifiedHistogramChartContext } from '../../../types';
 
 export function checkChartAvailability({
   chart,
