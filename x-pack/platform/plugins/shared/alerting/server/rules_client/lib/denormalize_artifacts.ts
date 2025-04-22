@@ -9,16 +9,20 @@ import type { Artifacts } from '../../types';
 import type { DenormalizedArtifacts } from '../types';
 
 export function denormalizeArtifacts(ruleArtifacts: Artifacts | undefined): {
-  artifacts: DenormalizedArtifacts;
+  artifacts: Required<DenormalizedArtifacts>;
   references: SavedObjectReference[];
 } {
   const references: SavedObjectReference[] = [];
-
-  const artifacts: DenormalizedArtifacts = {
+  const artifacts: Required<DenormalizedArtifacts> = {
     dashboards: [],
-    investigation_guide: ruleArtifacts?.investigation_guide,
+    investigation_guide: { blob: '' },
   };
 
+  if (ruleArtifacts && ruleArtifacts.investigation_guide) {
+    artifacts.investigation_guide = {
+      blob: ruleArtifacts.investigation_guide?.blob,
+    };
+  }
   if (ruleArtifacts && ruleArtifacts.dashboards) {
     ruleArtifacts.dashboards.forEach((dashboard, i) => {
       const refName = `dashboard_${i}`;
@@ -29,8 +33,7 @@ export function denormalizeArtifacts(ruleArtifacts: Artifacts | undefined): {
       };
       references.push(dashboardRef);
 
-      // `artifacts.dashboards` is always defined
-      artifacts.dashboards!.push({
+      artifacts.dashboards.push({
         refId: refName,
       });
     });

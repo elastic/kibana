@@ -468,21 +468,21 @@ async function updateRuleAttributesAndParamsInMemory<Params extends RuleParams>(
       attributes: rule.attributes as RawRule,
     });
 
-    const ruleArtifacts = injectReferencesIntoArtifacts(
-      rule.id,
-      rule.attributes.artifacts,
-      rule.references
-    );
-
     if (migratedActions.hasLegacyActions) {
       rule.attributes.actions = migratedActions.resultedActions;
-      rule.references = migratedActions.resultedReferences; // TODO check if this will break references that include artifacts
+      rule.references = migratedActions.resultedReferences;
     }
 
     const ruleActions = injectReferencesIntoActions(
       rule.id,
       rule.attributes.actions || [],
       rule.references || []
+    );
+
+    const ruleArtifacts = injectReferencesIntoArtifacts(
+      rule.id,
+      rule.attributes.artifacts,
+      rule.references
     );
 
     const ruleDomain: RuleDomain<Params> = transformRuleAttributesToRuleDomain<Params>(
@@ -557,7 +557,7 @@ async function updateRuleAttributesAndParamsInMemory<Params extends RuleParams>(
       ruleType,
       updatedRuleActions as NormalizedAlertActionWithGeneratedValues[],
       validatedMutatedAlertTypeParams,
-      ruleArtifacts!
+      ruleArtifacts ?? {},
     );
 
     const ruleAttributes = transformRuleDomainToRuleAttributes({
