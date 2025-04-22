@@ -12,6 +12,7 @@ import type {
   WorkChatFrameworkPluginSetupDependencies,
   WorkChatFrameworkPluginStartDependencies,
 } from './types';
+import { createServices, type InternalServices } from './services';
 
 export class WorkChatAppPlugin
   implements
@@ -22,18 +23,24 @@ export class WorkChatAppPlugin
       WorkChatFrameworkPluginStartDependencies
     >
 {
+  // @ts-expect-error unused for now.
+  private services?: InternalServices;
+
   constructor(context: PluginInitializerContext) {}
 
   public setup(
-    core: CoreSetup<WorkChatFrameworkPluginStartDependencies, WorkChatFrameworkPluginStart>
+    core: CoreSetup<WorkChatFrameworkPluginStartDependencies, WorkChatFrameworkPluginStart>,
+    pluginDeps: WorkChatFrameworkPluginSetupDependencies
   ): WorkChatFrameworkPluginSetup {
     return {};
   }
 
   public start(
-    coreStart: CoreStart,
-    pluginsStart: WorkChatFrameworkPluginStartDependencies
+    core: CoreStart,
+    pluginDeps: WorkChatFrameworkPluginStartDependencies
   ): WorkChatFrameworkPluginStart {
+    this.services = createServices({ core });
+
     return {};
   }
 
