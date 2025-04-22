@@ -11,11 +11,7 @@ import { ColorFormat } from './color';
 import { HTML_CONTEXT_TYPE } from '../content_types';
 
 describe('Color Format', () => {
-  const checkResult = (
-    text: string | number,
-    color: string = 'blue',
-    backgroundColor: string = 'yellow'
-  ) =>
+  const checkResult = (text: string | number, color: string, backgroundColor: string) =>
     `<span style=\"color:${color};background-color:${backgroundColor};display:inline-block;padding:0 8px;border-radius:3px\">${text}</span>`;
 
   describe('field is a number', () => {
@@ -35,8 +31,8 @@ describe('Color Format', () => {
       );
 
       expect(colorer.convert(99, HTML_CONTEXT_TYPE)).toBe('99');
-      expect(colorer.convert(100, HTML_CONTEXT_TYPE)).toBe(checkResult(100));
-      expect(colorer.convert(150, HTML_CONTEXT_TYPE)).toBe(checkResult(150));
+      expect(colorer.convert(100, HTML_CONTEXT_TYPE)).toBe(checkResult(100, 'blue', 'yellow'));
+      expect(colorer.convert(150, HTML_CONTEXT_TYPE)).toBe(checkResult(150, 'blue', 'yellow'));
       expect(colorer.convert(151, HTML_CONTEXT_TYPE)).toBe('151');
     });
 
@@ -75,7 +71,7 @@ describe('Color Format', () => {
         jest.fn()
       );
 
-      expect(colorer.convert(true, HTML_CONTEXT_TYPE)).toBe(checkResult('true'));
+      expect(colorer.convert(true, HTML_CONTEXT_TYPE)).toBe(checkResult('true', 'blue', 'yellow'));
       expect(colorer.convert(false, HTML_CONTEXT_TYPE)).toBe('false');
     });
   });
