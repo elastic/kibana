@@ -370,6 +370,7 @@ class AgentPolicyService {
       user?: AuthenticatedUser;
       authorizationHeader?: HTTPAuthorizationHeader | null;
       skipDeploy?: boolean;
+      hasFleetServer?: boolean;
     } = {}
   ): Promise<AgentPolicy> {
     const savedObjectType = await getAgentPolicySavedObjectType();
@@ -402,11 +403,15 @@ class AgentPolicyService {
       spaceId: soClient.getCurrentNamespace(),
       namespace: agentPolicy.namespace,
     });
+    const policyForOutputValidation = {
+      ...agentPolicy,
+      has_fleet_server: options?.hasFleetServer,
+    };
     await validateOutputForPolicy(
       soClient,
-      agentPolicy,
+      policyForOutputValidation,
       {},
-      getAllowedOutputTypesForAgentPolicy(agentPolicy)
+      getAllowedOutputTypesForAgentPolicy(policyForOutputValidation)
     );
 
     const newSo = await soClient.create<AgentPolicySOAttributes>(
