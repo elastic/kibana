@@ -9,10 +9,10 @@
 
 import React, { FC, useCallback } from 'react';
 import type { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
-import { EuiListGroupItem, useEuiTheme } from '@elastic/eui';
-import classNames from 'classnames';
-import { css } from '@emotion/css';
+import { EuiListGroupItem } from '@elastic/eui';
+import { Theme, css } from '@emotion/react';
 
+import { useNavigation } from '../../navigation';
 import { useNavigation as useServices } from '../../../services';
 import { SubItemTitle } from '../subitem_title';
 import { usePanel } from './context';
@@ -23,11 +23,11 @@ interface Props {
 
 export const PanelNavItem: FC<Props> = ({ item }) => {
   const { navigateToUrl } = useServices();
+  const { activeNodes } = useNavigation();
   const { close: closePanel } = usePanel();
   const { id, icon, deepLink, openInNewTab, isExternalLink, renderItem } = item;
 
   const href = deepLink?.url ?? item.href;
-  const { euiTheme } = useEuiTheme();
 
   const onClick = useCallback<React.MouseEventHandler>(
     (e) => {
@@ -40,26 +40,40 @@ export const PanelNavItem: FC<Props> = ({ item }) => {
     [closePanel, href, navigateToUrl]
   );
 
-  return renderItem ? (
-    renderItem()
-  ) : (
+  if (renderItem) {
+    return renderItem();
+  }
+
+  const isSelected = activeNodes[0]?.find(({ path: activePath }) => {
+    return activePath === item.path;
+  });
+
+  const styles = ({ euiTheme }: Theme) => css`
+    background-color: ${isSelected
+      ? euiTheme.colors.backgroundLightPrimary
+      : euiTheme.colors.backgroundBaseSubdued};
+    &:focus-within {
+      background-color: ${isSelected
+        ? euiTheme.colors.backgroundLightPrimary
+        : euiTheme.colors.backgroundBaseSubdued};
+    }
+    &:hover {
+      background-color: ${isSelected
+        ? euiTheme.colors.backgroundLightPrimary
+        : euiTheme.colors.backgroundBaseInteractiveHover};
+    }
+    & svg[class*='EuiExternalLinkIcon'] {
+      margin-left: auto;
+    }
+  `;
+
+  return (
     <EuiListGroupItem
       key={id}
       label={<SubItemTitle item={item} />}
       wrapText
-      className={classNames(
-        'sideNavPanelLink',
-        css`
-          background-color: ${euiTheme.colors.backgroundBaseSubdued};
-          &.sideNavPanelLink:hover {
-            background-color: ${euiTheme.colors.backgroundBaseInteractiveHover};
-          }
-          & svg[class*='EuiExternalLinkIcon'] {
-            margin-left: auto;
-          }
-        `
-      )}
       size="s"
+      css={styles}
       data-test-subj={`panelNavItem panelNavItem-id-${item.id}`}
       href={href}
       iconType={icon}
