@@ -11,7 +11,7 @@ import {
   type LoopNodeConfigType,
   WorkflowExecutionError,
 } from '@kbn/wc-framework-types-server';
-import { interpolateValue } from '../../framework/config';
+import { interpolateValue } from '../../services/runner/config';
 import { runNodeSequence } from '../utils';
 
 export const getLoopNodeTypeDefinition = (): NodeTypeDefinition<LoopNodeConfigType> => {

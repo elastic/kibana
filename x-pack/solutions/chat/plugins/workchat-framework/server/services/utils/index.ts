@@ -6,3 +6,4 @@
  */
 
 export { SimpleRegistry } from './simple_registry';
+export { createBuilder } from './so_filters';

@@ -6,7 +6,7 @@
  */
 
 import type { Registry, NodeTypeDefinition } from '@kbn/wc-framework-types-server';
-import { SimpleRegistry } from '../utils';
+import { SimpleRegistry } from '../../utils';
 
 export type NodeTypeRegistry = Registry<NodeTypeDefinition>;
 

@@ -25,7 +25,7 @@ import {
   MockedNodeFactoryBaseServices,
   MockedState,
   NodeEventReporterMock,
-} from '../../framework/test_utils';
+} from '../../services/runner/test_utils';
 
 describe('Node type: workflowExecution', () => {
   let services: MockedNodeFactoryBaseServices;

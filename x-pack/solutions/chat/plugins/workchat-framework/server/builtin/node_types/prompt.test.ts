@@ -26,7 +26,7 @@ import {
   NodeEventReporterMock,
   createMockedModel,
   MockedModel,
-} from '../../framework/test_utils';
+} from '../../services/runner/test_utils';
 
 describe('Node type: prompt', () => {
   let factory: NodeRunnerFactory<PromptNodeConfigType>;

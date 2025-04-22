@@ -11,7 +11,7 @@ import {
   type Registry,
   createToolProvider,
 } from '@kbn/wc-framework-types-server';
-import { SimpleRegistry } from '../utils';
+import { SimpleRegistry } from '../../utils';
 
 export type ToolRegistry = Registry<Tool> & {
   asToolProvider(): ToolProvider;

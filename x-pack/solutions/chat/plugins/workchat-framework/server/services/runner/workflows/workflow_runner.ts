@@ -12,10 +12,10 @@ import {
   WorkflowExecutionError,
 } from '@kbn/wc-framework-types-server';
 import type { Logger, CoreStart } from '@kbn/core/server';
+import type { WorkflowRegistry } from '../../workflow';
 import type { ModelProviderFactory } from '../model_provider';
 import type { ToolRegistry } from '../tools';
 import type { NodeTypeRegistry } from '../nodes';
-import type { WorkflowRegistry } from './registry';
 import {
   createInternalRunner,
   type WorkflowRunnerInternalContextWithoutRunner,

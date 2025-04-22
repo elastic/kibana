@@ -13,8 +13,8 @@ import type {
   WorkflowExecutionState,
 } from '@kbn/wc-framework-types-server';
 import type { Logger, KibanaRequest, IScopedClusterClient } from '@kbn/core/server';
+import type { WorkflowRegistry } from '../../workflow';
 import type { NodeTypeRegistry } from '../nodes';
-import type { WorkflowRegistry } from './registry';
 
 /**
  * Internal context being passed down during workflow execution.

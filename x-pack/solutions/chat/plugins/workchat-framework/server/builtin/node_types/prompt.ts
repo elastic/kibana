@@ -7,7 +7,7 @@
 
 import { NodeType } from '@kbn/wc-framework-types-common';
 import { NodeTypeDefinition, PromptNodeConfigType } from '@kbn/wc-framework-types-server';
-import { interpolateValue } from '../../framework/config';
+import { interpolateValue } from '../../services/runner/config';
 
 export const getPromptNodeTypeDefinition = (): NodeTypeDefinition<PromptNodeConfigType> => {
   return {

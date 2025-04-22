@@ -7,7 +7,7 @@
 
 import type { IRouter, Logger, CoreSetup } from '@kbn/core/server';
 import type { WorkChatFrameworkPluginStartDependencies } from '../types';
-import type { InternalStartServices } from '../framework';
+import type { InternalStartServices } from '../services';
 
 export interface RouteDependencies {
   router: IRouter;

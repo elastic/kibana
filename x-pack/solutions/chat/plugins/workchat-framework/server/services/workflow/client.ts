@@ -8,7 +8,7 @@
 import type { SavedObjectsClientContract, Logger, SavedObject } from '@kbn/core/server';
 import type { WorkflowDefinition } from '@kbn/wc-framework-types-server';
 import { workflowSoTypeName, type WorkflowAttributes } from '../../saved_objects/workflow';
-import { createBuilder } from '../../utils/so_filters';
+import { createBuilder } from '../utils';
 import type { UserInfo } from './types';
 import { savedObjectToModel } from './converters';
 

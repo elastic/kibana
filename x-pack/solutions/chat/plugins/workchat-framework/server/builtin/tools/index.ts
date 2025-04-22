@@ -6,7 +6,7 @@
  */
 
 import type { Tool } from '@kbn/wc-framework-types-server';
-import type { ToolRegistry } from '../../framework';
+import type { ToolRegistry } from '../../services/runner';
 import { getCalculatorTool } from './calculator';
 
 export const registerBuiltInTools = ({ registry }: { registry: ToolRegistry }) => {

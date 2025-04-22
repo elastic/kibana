@@ -31,7 +31,7 @@ import {
   NodeEventReporterMock,
   createMockedModel,
   MockedModel,
-} from '../../framework/test_utils';
+} from '../../services/runner/test_utils';
 
 jest.mock('../utils', () => ({
   runNodeSequence: jest.fn(),

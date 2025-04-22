@@ -6,7 +6,7 @@
  */
 
 import type { Registry } from '@kbn/wc-framework-types-server';
-import { SimpleRegistry } from '../utils';
+import { SimpleRegistry } from '../../utils';
 
 export type MockRegistry = jest.Mocked<Registry<any>>;
 

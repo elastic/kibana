@@ -11,7 +11,7 @@ import {
   type NodeTypeDefinition,
   type ToolExecutionNodeConfigType,
 } from '@kbn/wc-framework-types-server';
-import { interpolateValue } from '../../framework/config';
+import { interpolateValue } from '../../services/runner/config';
 
 export const getToolExecutionNodeTypeDefinition =
   (): NodeTypeDefinition<ToolExecutionNodeConfigType> => {
