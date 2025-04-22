@@ -36,7 +36,6 @@ export class EmbeddableAlertsTablePlugin
     coreServices: CoreStart,
     { uiActions }: EmbeddableAlertsTablePublicStartDependencies
   ) {
-    // Waiting for other dependent PRs to be merged to enable this
     registerAddAlertsTableAction({ coreServices, uiActions });
     return {};
   }
