@@ -6,7 +6,7 @@
  */
 
 import type { NodeTypeDefinition } from '@kbn/wc-framework-types-server';
-import type { NodeTypeRegistry } from '../../services/runner';
+import type { NodeTypeRegistry } from '../../nodes';
 import { getToolExecutionNodeTypeDefinition } from './tool_execution';
 import { getWorkflowExecutionNodeTypeDefinition } from './workflow_execution';
 import { getParallelSequencesNodeTypeDefinition } from './parallel_sequences';

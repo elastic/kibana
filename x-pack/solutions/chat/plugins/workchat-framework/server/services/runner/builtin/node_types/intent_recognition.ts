@@ -16,8 +16,8 @@ import {
   WorkflowState,
   NodeSequence,
 } from '@kbn/wc-framework-types-server';
-import { interpolateValue } from '../../services/runner/config';
-import { runNodeSequence } from '../utils';
+import { interpolateValue } from '../../state';
+import { runNodeSequence } from '../../utils';
 
 const defaultIntentionId = 'DEFAULT';
 

@@ -10,7 +10,7 @@ import type {
   NodeTypeDefinition,
   ParallelSequencesNodeConfigType,
 } from '@kbn/wc-framework-types-server';
-import { runNodeSequence } from '../utils';
+import { runNodeSequence } from '../../utils';
 
 export const getParallelSequencesNodeTypeDefinition =
   (): NodeTypeDefinition<ParallelSequencesNodeConfigType> => {

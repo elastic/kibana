@@ -24,7 +24,7 @@ import {
   MockedNodeFactoryBaseServices,
   MockedState,
   NodeEventReporterMock,
-} from '../../services/runner/test_utils';
+} from '../../test_utils';
 
 describe('Node type: toolExecution', () => {
   let services: MockedNodeFactoryBaseServices;

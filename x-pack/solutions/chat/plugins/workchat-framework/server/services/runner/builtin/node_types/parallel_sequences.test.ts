@@ -15,7 +15,7 @@ import {
   type WorkflowExecutionState,
 } from '@kbn/wc-framework-types-server';
 import { getParallelSequencesNodeTypeDefinition } from './parallel_sequences';
-import * as utils from '../utils';
+import * as utils from '../../utils';
 import {
   createMockFactoryServices,
   createMockedState,
@@ -24,9 +24,9 @@ import {
   MockedNodeFactoryBaseServices,
   MockedState,
   NodeEventReporterMock,
-} from '../../services/runner/test_utils';
+} from '../../test_utils';
 
-jest.mock('../utils', () => ({
+jest.mock('../../utils', () => ({
   runNodeSequence: jest.fn(),
 }));
 const runNodeSequenceMock = utils.runNodeSequence as jest.Mock;

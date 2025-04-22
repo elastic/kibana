@@ -20,7 +20,7 @@ import {
   type IntentRecognitionDefaultBranch,
 } from '@kbn/wc-framework-types-server/src/nodes/node_type_configs';
 import { getIntentRecognitionNodeTypeDefinition } from './intent_recognition';
-import * as utils from '../utils';
+import * as utils from '../../utils';
 import {
   createMockFactoryServices,
   createMockedState,
@@ -31,9 +31,9 @@ import {
   NodeEventReporterMock,
   createMockedModel,
   MockedModel,
-} from '../../services/runner/test_utils';
+} from '../../test_utils';
 
-jest.mock('../utils', () => ({
+jest.mock('../../utils', () => ({
   runNodeSequence: jest.fn(),
 }));
 const runNodeSequenceMock = utils.runNodeSequence as jest.Mock;

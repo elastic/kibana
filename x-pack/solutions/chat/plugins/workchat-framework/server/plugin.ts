@@ -28,7 +28,7 @@ import {
   type InternalStartServices,
 } from './services';
 import { registerRoutes } from './routes';
-import { registerBuiltInNodeTypes, registerBuiltInTools } from './builtin';
+import { registerBuiltInNodeTypes, registerBuiltInTools } from './services/runner/builtin';
 
 export class WorkChatAppPlugin
   implements
