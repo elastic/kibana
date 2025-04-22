@@ -32,7 +32,7 @@ async function getFiles(files: string[]): Promise<string[]> {
     return await git.pull('origin', 'main', { '--depth': '1' });
   }
 
-  await git.addRemote('origin', `git@github.com:elastic/serverless-gitops.gitf`);
+  await git.addRemote('origin', `git@github.com:elastic/serverless-gitops.git`);
 
   await pull()
     .catch(async () => {
