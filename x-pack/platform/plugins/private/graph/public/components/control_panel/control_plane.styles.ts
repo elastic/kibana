@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-export async function wait(delay: number) {
-  await new Promise((resolve) => {
-    setTimeout(resolve, delay);
-  });
-}
+import { css } from '@emotion/react';
+import type { UseEuiTheme } from '@elastic/eui';
+
+export const gphFormGroupSmallStyles = ({ euiTheme }: UseEuiTheme) =>
+  css`
+    margin-bottom: ${euiTheme.size.s};
+  `;
