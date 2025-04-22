@@ -237,10 +237,14 @@ const previewContentRoute = createServerRoute({
   security: {
     authz: {
       enabled: false,
-      reason: 'This API does not use any user credentials.',
+      reason:
+        'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
     },
   },
-  async handler({ params }) {
+  async handler({ request, params, getScopedClients }): Promise<ContentPack> {
+    const { streamsClient } = await getScopedClients({ request });
+    await streamsClient.ensureStream(params.path.name);
+
     return await parseArchive(params.body.content);
   },
 });
