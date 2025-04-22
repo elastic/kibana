@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-export type {
-  WorkflowDefinition,
-  GraphWorkflowDefinition,
-  FunctionWorkflowDefinition,
-} from './src/workflows';
+import type { WorkflowDefinition } from '@kbn/wc-framework-types-browser';
+
+export type GetWorkflowResponse = WorkflowDefinition;

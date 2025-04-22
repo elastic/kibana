@@ -8,6 +8,7 @@
 import { schema } from '@kbn/config-schema';
 import type { RouteDependencies } from './types';
 import { apiCapabilities } from '../../common/features';
+import type { GetWorkflowResponse } from '../../common/http_api/workflows';
 
 export const registerWorkflowsRoutes = ({ router, getServices }: RouteDependencies) => {
   router.get(
@@ -25,8 +26,9 @@ export const registerWorkflowsRoutes = ({ router, getServices }: RouteDependenci
       },
     },
     async (ctx, req, res) => {
-      // not implemented yet
-      return res.badRequest();
+      // TODO: not implemented yet, just testing types
+      const foo = {} as unknown as GetWorkflowResponse;
+      return res.ok<GetWorkflowResponse>({ body: foo });
     }
   );
 };

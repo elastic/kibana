@@ -5,8 +5,4 @@
  * 2.0.
  */
 
-export type {
-  WorkflowDefinition,
-  GraphWorkflowDefinition,
-  FunctionWorkflowDefinition,
-} from './src/workflows';
+export { WorkflowService } from './workflow_service';
