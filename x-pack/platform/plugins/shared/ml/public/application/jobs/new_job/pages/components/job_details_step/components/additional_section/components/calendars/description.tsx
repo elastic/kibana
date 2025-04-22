@@ -13,10 +13,10 @@ import { EuiDescribedFormGroup, EuiFormRow, EuiLink } from '@elastic/eui';
 import { useMlKibana } from '../../../../../../../../../contexts/kibana';
 
 interface Props {
-  calendarsTitleId: string;
+  titleId: string;
 }
 
-export const Description: FC<PropsWithChildren<Props>> = memo(({ children, calendarsTitleId }) => {
+export const Description: FC<PropsWithChildren<Props>> = memo(({ children, titleId }) => {
   const {
     services: { docLinks },
   } = useMlKibana();
@@ -29,7 +29,7 @@ export const Description: FC<PropsWithChildren<Props>> = memo(({ children, calen
   );
   return (
     <EuiDescribedFormGroup
-      title={<h3 id={calendarsTitleId}>{title}</h3>}
+      title={<h3 id={titleId}>{title}</h3>}
       description={
         <FormattedMessage
           id="xpack.ml.newJob.wizard.jobDetailsStep.additionalSection.calendarsSelection.description"

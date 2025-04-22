@@ -96,7 +96,7 @@ export const CalendarsSelection: FC<Props> = ({ isDst = false }) => {
   const Desc = isDst ? DescriptionDst : Description;
 
   return (
-    <Desc calendarsTitleId={isDst ? `Dst${calendarsTitleId}` : calendarsTitleId}>
+    <Desc titleId={isDst ? `Dst${calendarsTitleId}` : calendarsTitleId}>
       <EuiFlexGroup gutterSize="xs" alignItems="center">
         <EuiFlexItem>
           <EuiComboBox
