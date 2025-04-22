@@ -411,6 +411,7 @@ export interface ESQLStringLiteral extends ESQLAstBaseItem {
   literalType: 'keyword';
 
   value: string;
+  valueUnquoted: string;
 
   /**
    * Whether the string was parsed as "unqouted" and/or can be pretty-printed
