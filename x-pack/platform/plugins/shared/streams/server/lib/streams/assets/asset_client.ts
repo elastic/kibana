@@ -254,17 +254,32 @@ export class AssetClient {
 
   async getAssetLinks<TAssetType extends AssetType>(
     name: string,
-    types?: TAssetType[]
+    types?: TAssetType[],
+    ids?: string[]
   ): Promise<Array<Extract<AssetLink, { [ASSET_TYPE]: TAssetType }>>> {
+    if (ids?.length && types?.length !== 1) {
+      throw new Error('You must provide only one type when using ids');
+    }
+
+    const filters = [...termQuery(STREAM_NAME, name)];
+    if (types?.length) {
+      filters.push(...termsQuery(ASSET_TYPE, types));
+    }
+    if (ids?.length) {
+      filters.push(
+        ...termsQuery(
+          '_id',
+          ids.map((id) => getUuid(name, { [ASSET_TYPE]: types![0], [ASSET_ID]: id }))
+        )
+      );
+    }
+
     const assetsResponse = await this.clients.storageClient.search({
       size: 10_000,
       track_total_hits: false,
       query: {
         bool: {
-          filter: [
-            ...termQuery(STREAM_NAME, name),
-            ...(types?.length ? termsQuery(ASSET_TYPE, types) : []),
-          ],
+          filter: filters,
         },
       },
     });

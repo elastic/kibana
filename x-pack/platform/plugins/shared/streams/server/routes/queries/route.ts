@@ -9,13 +9,14 @@ import { ErrorCause } from '@elastic/elasticsearch/lib/api/types';
 import { internal } from '@hapi/boom';
 import {
   StreamQuery,
+  StreamQueryKql,
   streamQuerySchema,
   upsertStreamQueryRequestSchema,
 } from '@kbn/streams-schema';
 import { z } from '@kbn/zod';
+import { QueryLink } from '../../../common/assets';
 import { ASSET_ID, ASSET_TYPE } from '../../lib/streams/assets/fields';
 import { createServerRoute } from '../create_server_route';
-import { QueryLink } from '../../../common/assets';
 export interface ListQueriesResponse {
   queries: StreamQuery[];
 }
@@ -29,6 +30,18 @@ export interface DeleteQueryResponse {
 }
 
 export type BulkUpdateAssetsResponse = { acknowledged: boolean } | { errors: ErrorCause[] };
+
+function isDeleteOperation(
+  operation: { index: StreamQueryKql } | { delete: { id: string } }
+): operation is { delete: { id: string } } {
+  return 'delete' in operation;
+}
+
+function isIndexOperation(
+  operation: { index: StreamQueryKql } | { delete: { id: string } }
+): operation is { index: StreamQueryKql } {
+  return 'index' in operation;
+}
 
 const listQueriesRoute = createServerRoute({
   endpoint: 'GET /api/streams/{name}/queries 2023-10-31',
@@ -221,10 +234,16 @@ const bulkQueriesRoute = createServerRoute({
 
     await streamsClient.ensureStream(streamName);
 
+    const queryLinksDeleted = await assetClient.getAssetLinks(
+      streamName,
+      ['query'],
+      operations.filter(isDeleteOperation).map((op) => op.delete.id)
+    );
+
     const result = await assetClient.bulk(
       streamName,
       operations.map((operation) => {
-        if ('index' in operation) {
+        if (isIndexOperation(operation)) {
           return {
             index: {
               asset: {
@@ -254,6 +273,17 @@ const bulkQueriesRoute = createServerRoute({
       logger.error(`Error indexing some items`);
       throw internal(`Could not index all items`, { errors: result.errors });
     }
+
+    const queryLinksIndexed = await assetClient.getAssetLinks(
+      streamName,
+      ['query'],
+      operations.filter(isIndexOperation).map((op) => op.index.id)
+    );
+
+    await streamsClient.manageQueries(streamName, {
+      indexed: queryLinksIndexed,
+      deleted: queryLinksDeleted,
+    });
 
     return { acknowledged: true };
   },
