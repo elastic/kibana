@@ -40,13 +40,7 @@ import {
   LicensingApiRequestHandlerContext,
   LicensingPluginStart,
 } from '@kbn/licensing-plugin/server';
-import {
-  ActionsClientChatBedrockConverse,
-  ActionsClientChatOpenAI,
-  ActionsClientChatVertexAI,
-  ActionsClientGeminiChatModel,
-  ActionsClientLlm,
-} from '@kbn/langchain/server';
+import { ActionsClientLlm } from '@kbn/langchain/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 
 import { ProductDocBaseStartContract } from '@kbn/product-doc-base-plugin/server';
@@ -245,12 +239,6 @@ export interface AssistantTool {
   isSupported: (params: AssistantToolParams) => boolean;
   getTool: (params: AssistantToolParams) => StructuredToolInterface | null;
 }
-
-export type AssistantToolLlm =
-  | ActionsClientChatBedrockConverse
-  | ActionsClientChatOpenAI
-  | ActionsClientGeminiChatModel
-  | ActionsClientChatVertexAI;
 
 export interface AssistantToolParams {
   alertsIndexPattern?: string;
