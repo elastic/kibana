@@ -12,12 +12,6 @@ paths:
       summary: Get relevant data for performing an evaluation
       tags:
         - Evaluation API
-      parameters:
-        - name: langSmithApiKey
-          in: query
-          description: API key for LangSmith integration
-          schema:
-            type: string
       responses:
         "200":
           description: Successful response

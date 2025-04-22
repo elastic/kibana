@@ -16,7 +16,6 @@ const EVALUATION_DATA_QUERY_KEY = ['elastic-assistant', 'evaluation-data'];
 export interface UseEvaluationDataParams {
   http: HttpSetup;
   toasts?: IToasts;
-  langSmithApiKey?: string;
 }
 
 /**
@@ -28,12 +27,12 @@ export interface UseEvaluationDataParams {
  *
  * @returns {useMutation} mutation hook for setting up the Knowledge Base
  */
-export const useEvaluationData = ({ http, toasts, langSmithApiKey }: UseEvaluationDataParams) => {
+export const useEvaluationData = ({ http, toasts }: UseEvaluationDataParams) => {
   return useQuery({
     queryKey: EVALUATION_DATA_QUERY_KEY,
     queryFn: ({ signal }) => {
       // Optional params workaround: see: https://github.com/TanStack/query/issues/1077#issuecomment-1431247266
-      return getEvaluation({ http, signal, langSmithApiKey });
+      return getEvaluation({ http, signal });
     },
     retry: false,
     keepPreviousData: true,

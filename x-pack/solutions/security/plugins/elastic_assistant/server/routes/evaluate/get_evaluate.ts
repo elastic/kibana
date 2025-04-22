@@ -13,7 +13,6 @@ import {
   ELASTIC_AI_ASSISTANT_EVALUATE_URL,
   INTERNAL_API_ACCESS,
   GetEvaluateResponse,
-  GetEvaluateRequestQuery,
 } from '@kbn/elastic-assistant-common';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { buildResponse } from '../../lib/build_response';
@@ -37,9 +36,6 @@ export const getEvaluateRoute = (router: IRouter<ElasticAssistantRequestHandlerC
       {
         version: API_VERSIONS.internal.v1,
         validate: {
-          request: {
-            query: buildRouteValidationWithZod(GetEvaluateRequestQuery),
-          },
           response: {
             200: {
               body: { custom: buildRouteValidationWithZod(GetEvaluateResponse) },
@@ -66,7 +62,6 @@ export const getEvaluateRoute = (router: IRouter<ElasticAssistantRequestHandlerC
 
         const datasets = await fetchLangSmithDatasets({
           logger,
-          langSmithApiKey: request.query.langSmithApiKey,
         });
 
         try {

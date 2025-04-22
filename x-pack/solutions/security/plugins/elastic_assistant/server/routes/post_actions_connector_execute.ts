@@ -34,11 +34,9 @@ import {
   performChecks,
 } from './helpers';
 import { isOpenSourceModel } from './utils';
-import { ConfigSchema } from '../config_schema';
 
 export const postActionsConnectorExecuteRoute = (
-  router: IRouter<ElasticAssistantRequestHandlerContext>,
-  config?: ConfigSchema
+  router: IRouter<ElasticAssistantRequestHandlerContext>
 ) => {
   router.versioned
     .post({

@@ -92,7 +92,7 @@ export const registerRoutes = (
   bulkActionKnowledgeBaseEntriesRoute(router);
 
   // Actions Connector Execute (LLM Wrapper)
-  postActionsConnectorExecuteRoute(router, config);
+  postActionsConnectorExecuteRoute(router);
 
   // Evaluate
   getEvaluateRoute(router);
