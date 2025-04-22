@@ -6,6 +6,7 @@
  */
 
 import {
+  CriteriaWithPagination,
   EuiBasicTableColumn,
   EuiButtonEmpty,
   EuiCallOut,
@@ -17,7 +18,7 @@ import {
   EuiTitle,
   formatDate,
 } from '@elastic/eui';
-import React from 'react';
+import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { EuiInMemoryTable } from '@elastic/eui';
@@ -70,6 +71,12 @@ export const StdErrorLogs = ({
   ] as Array<EuiBasicTableColumn<Ping>>;
 
   const { items, loading } = useStdErrorLogs({ checkGroup });
+
+  const [pagination, setPagination] = useState({ pageIndex: 0, pageSize });
+
+  const onTableChange = ({ page }: CriteriaWithPagination<(typeof items)[number]>) => {
+    setPagination({ pageIndex: page.index, pageSize: page.size });
+  };
 
   const { discover, exploratoryView } = useKibana<ClientPluginsStart>().services;
 
@@ -139,9 +146,10 @@ export const StdErrorLogs = ({
           defaultFields: ['@timestamp', 'synthetics.payload.message'],
         }}
         pagination={{
-          pageSize,
+          ...pagination,
           pageSizeOptions: [2, 5, 10, 20, 50],
         }}
+        onTableChange={onTableChange}
       />
     </>
   );
