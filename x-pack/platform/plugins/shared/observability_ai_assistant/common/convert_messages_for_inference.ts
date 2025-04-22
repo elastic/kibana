@@ -38,7 +38,6 @@ export function convertMessagesForInference(
 
   messages.forEach((message) => {
     if (message.message.role === MessageRole.Assistant) {
-      // Reapply redaction to stored assistant content
       let assistantContent = message.message.content ?? null;
       // Stored assistant content is un‑redacted, so reapply hashes here
       // before sending the history back to the LLM.
@@ -49,12 +48,14 @@ export function convertMessagesForInference(
       // Reapply redaction inside function_call.arguments JSON, if any
       let toolCalls;
       if (message.message.function_call?.name) {
-        const rawArgsString = message.message.function_call.arguments ?? '';
+        const functionArgs = message.message.function_call.arguments;
+        const detectedEntities = message.message.detectedEntities;
         // Replace any entity values with their hashes
-        const redactedArgsString = message.message.detectedEntities?.length
-          ? redactEntities(rawArgsString, message.message.detectedEntities)
-          : rawArgsString;
-        const parsedArgs = safeJsonParse(redactedArgsString, logger);
+        const redactedArgs =
+          detectedEntities && functionArgs
+            ? redactEntities(functionArgs, detectedEntities)
+            : functionArgs;
+        const parsedArgs = safeJsonParse(redactedArgs, logger);
 
         toolCalls = [
           {

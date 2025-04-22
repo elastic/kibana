@@ -11,6 +11,7 @@ export default function aiAssistantApiIntegrationTests({
   loadTestFile,
 }: DeploymentAgnosticFtrProviderContext) {
   describe('observability AI Assistant', function () {
+    loadTestFile(require.resolve('./anonymization/anonymization.spec.ts'));
     loadTestFile(require.resolve('./conversations/conversations.spec.ts'));
     loadTestFile(require.resolve('./connectors/connectors.spec.ts'));
     loadTestFile(require.resolve('./chat/chat.spec.ts'));

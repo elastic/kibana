@@ -81,6 +81,7 @@ import { apmInstrumentation } from './operators/apm_instrumentation';
 import { reIndexKnowledgeBaseWithLock } from '../knowledge_base_service/reindex_knowledge_base';
 
 const MAX_FUNCTION_CALLS = 8;
+const NER_MODEL_ID = 'elastic__distilbert-base-uncased-finetuned-conll03-english';
 
 export class ObservabilityAIAssistantClient {
   constructor(
@@ -106,14 +107,16 @@ export class ObservabilityAIAssistantClient {
   ) {}
   async inferNER(chunks: InferenceChunk[]): Promise<DetectedEntity[]> {
     const promises = chunks.map(async ({ chunkText, charStartOffset }) => {
-      const response = await this.dependencies.esClient.asCurrentUser.ml.inferTrainedModel({
-        model_id: 'elastic__distilbert-base-uncased-finetuned-conll03-english',
-        docs: [
-          {
-            text_field: chunkText,
-          },
-        ],
-      });
+      let response;
+      try {
+        response = await this.dependencies.esClient.asCurrentUser.ml.inferTrainedModel({
+          model_id: NER_MODEL_ID,
+          docs: [{ text_field: chunkText }],
+        });
+      } catch (error) {
+        // If the model doesn't exist or the call fails, return no entities for this chunk
+        return [];
+      }
       const entities = response?.inference_results?.[0]?.entities ?? [];
       const adjustedEntities = entities.map((entity) => ({
         ...entity,
