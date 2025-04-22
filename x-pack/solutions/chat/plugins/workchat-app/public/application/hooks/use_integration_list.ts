@@ -13,20 +13,24 @@ export const useIntegrationList = () => {
   const { integrationService } = useWorkChatServices();
 
   const {
-    data: integrations,
+    data,
     isLoading,
+    isRefetching,
     refetch: refresh,
   } = useQuery({
     queryKey: queryKeys.integrations.list,
     queryFn: async () => {
       return integrationService.list();
     },
-    initialData: () => [],
   });
+
+  const integrations = data ?? [];
 
   return {
     integrations,
     isLoading,
+    isRefetching,
     refresh,
   };
 };
+

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { ReactNode, useEffect, useState } from 'react';
+import React, { ReactNode, useState } from 'react';
 import {
   Comparators,
   Criteria,
@@ -43,10 +43,8 @@ import { useIntegrationList } from '../../../hooks/use_integration_list';
 
 export const IntegrationActiveView: React.FC = () => {
   const { agents } = useAgentList();
-  const { integrations, isLoading } = useIntegrationList();
+  const { integrations, isLoading, isRefetching } = useIntegrationList();
   const { navigateToWorkchatUrl } = useNavigation();
-
-
 
   const columns: Array<EuiBasicTableColumn<Integration>> = [
     {
@@ -252,7 +250,7 @@ export const IntegrationActiveView: React.FC = () => {
       <IntegrationListView tab={'active'} />
       <EuiHorizontalRule margin="none" css={{ height: 2 }} />
       <KibanaPageTemplate.Section>
-        {isLoading ? (
+        {isLoading || isRefetching ? (
           <EuiFlexGroup alignItems="center" justifyContent="center" css={{ height: '300px' }}>
             <EuiFlexItem grow={false}>
               <EuiLoadingSpinner size="xl" />
