@@ -143,5 +143,25 @@ export function SloApiProvider({ getService }: DeploymentAgnosticFtrProviderCont
         })
       );
     },
+
+    async purgeRollupData(
+      ids: string[],
+      purgePolicy: { purgeType: 'fixed_age' | 'fixed_time'; age?: string; timestamp?: Date },
+      roleAuthc: RoleCredentials,
+      expectedStatus: number,
+      force: boolean = false
+    ) {
+      const { body } = await supertestWithoutAuth
+        .post(`/api/observability/slos/_bulk_purge_rollup${force ? '?force=true' : ''}`)
+        .set(roleAuthc.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send({
+          ids,
+          purgePolicy,
+        })
+        .expect(expectedStatus);
+
+      return body;
+    },
   };
 }
