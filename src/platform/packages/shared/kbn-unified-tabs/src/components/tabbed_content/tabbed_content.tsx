@@ -144,27 +144,26 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
       maxItemsCount,
       onDuplicate: (item) => {
         const newItem = createItem();
-        const baseLabel = item.label.replace(/\s*\(copy\)( \d+)?$/, '');
+        const copyLabel = i18n.translate('unifiedTabs.copyLabel', { defaultMessage: 'copy' });
+        const baseRegex = new RegExp(`\\s*\\(${copyLabel}\\)( \\d+)?$`);
+        const baseLabel = item.label.replace(baseRegex, '');
 
         // Find all existing copies to determine next number
-        const copyRegex = new RegExp(`^${baseLabel}\\s*\\(copy\\)( \\d+)?$`);
+        const copyRegex = new RegExp(`^${baseLabel}\\s*\\(${copyLabel}\\)( \\d+)?$`);
+        const copyNumberRegex = new RegExp(`\\(${copyLabel}\\) (\\d+)$`);
         const copies = state.items
           .filter((tab) => copyRegex.test(tab.label))
           .map((tab) => {
-            const match = tab.label.match(/\(copy\) (\d+)$/);
+            const match = tab.label.match(copyNumberRegex);
             return match && match[1] ? Number(match[1]) : 1; // match[1] is the number after (copy)
           });
 
         // Determine the next copy number
         const nextNumber = copies.length > 0 ? Math.max(...copies) + 1 : null;
 
-        newItem.label = i18n.translate('unifiedTabs.duplicatedTabLabel', {
-          defaultMessage: nextNumber ? `{baseLabel} (copy) {number}` : '{baseLabel} (copy)',
-          values: {
-            baseLabel,
-            number: nextNumber,
-          },
-        });
+        newItem.label = nextNumber
+          ? `${baseLabel} (${copyLabel}) ${nextNumber}`
+          : `${baseLabel} (${copyLabel})`;
 
         tabsBarApi.current?.moveFocusToNextSelectedItem(newItem);
         changeState((prevState) => insertTabAfter(prevState, newItem, item, maxItemsCount));
