@@ -30,7 +30,12 @@ interface Props {
 export const GroupOfGroups: React.FC<Props> = (props) => {
   return (
     <GroupOfGroupsContainer>
-      <GroupName group={props.group} onDrilldown={props.onDrilldown} options={props.options} />
+      <GroupName
+        group={props.group}
+        onDrilldown={props.onDrilldown}
+        options={props.options}
+        nodeType={props.nodeType}
+      />
       <Groups>
         {props.group.groups.map((group) => (
           <GroupOfNodes

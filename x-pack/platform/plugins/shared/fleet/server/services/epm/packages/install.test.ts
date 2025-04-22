@@ -59,6 +59,7 @@ jest.mock('../../app_context', () => {
       getSavedObjectsTagging: jest.fn(() => mockedSavedObjectTagging),
       getInternalUserSOClientForSpaceId: jest.fn(),
       getExperimentalFeatures: jest.fn(),
+      getCloud: jest.fn(),
     },
   };
 });
@@ -139,6 +140,7 @@ describe('createInstallation', () => {
       expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenCalledWith({
         action: 'create',
         id: 'test-package',
+        name: 'test-package',
         savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
       });
     });
@@ -156,6 +158,7 @@ describe('createInstallation', () => {
       expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenCalledWith({
         action: 'create',
         id: 'test-package',
+        name: 'test-package',
         savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
       });
     });

@@ -10,10 +10,12 @@ import { css } from '@emotion/css';
 import { EuiFlexItem, EuiPanel, useEuiTheme, euiScrollBarStyles } from '@elastic/eui';
 import type { AuthenticatedUser } from '@kbn/core/public';
 import { ConversationEventChanges } from '../../../../common/chat_events';
+import { useChat } from '../../hooks/use_chat';
 import { useConversation } from '../../hooks/use_conversation';
 import { useStickToBottom } from '../../hooks/use_stick_to_bottom';
 import { ChatInputForm } from './chat_input_form';
-import { ChatConversation } from './chat_conversation';
+import { ChatConversation } from './conversation/chat_conversation';
+import { ChatNewConversationPrompt } from './chat_new_conversation_prompt';
 
 interface ChatProps {
   agentId: string;
@@ -27,8 +29,11 @@ const fullHeightClassName = css`
   height: 100%;
 `;
 
-const panelClassName = css`
+const conversationPanelClass = css`
   min-height: 100%;
+  max-width: 850px;
+  margin-left: auto;
+  margin-right: auto;
 `;
 
 const scrollContainerClassName = (scrollBarStyles: string) => css`
@@ -43,12 +48,23 @@ export const Chat: React.FC<ChatProps> = ({
   onConversationUpdate,
   connectorId,
 }) => {
-  const { sendMessage, conversationEvents, chatStatus } = useConversation({
+  const { conversation } = useConversation({ conversationId });
+  const {
+    sendMessage,
+    conversationEvents,
+    setConversationEvents,
+    progressionEvents,
+    status: chatStatus,
+  } = useChat({
     conversationId,
     connectorId,
     agentId,
     onConversationUpdate,
   });
+
+  useEffect(() => {
+    setConversationEvents(conversation?.events ?? []);
+  }, [conversation, setConversationEvents]);
 
   const theme = useEuiTheme();
   const scrollBarStyles = euiScrollBarStyles(theme);
@@ -72,13 +88,18 @@ export const Chat: React.FC<ChatProps> = ({
     [sendMessage, setStickToBottom]
   );
 
+  if (!conversationId && conversationEvents.length === 0) {
+    return <ChatNewConversationPrompt agentId={agentId} onSubmit={onSubmit} />;
+  }
+
   return (
     <>
       <EuiFlexItem grow className={scrollContainerClassName(scrollBarStyles)}>
         <div ref={scrollContainerRef} className={fullHeightClassName}>
-          <EuiPanel hasBorder={false} hasShadow={false} className={panelClassName}>
+          <EuiPanel hasBorder={false} hasShadow={false} className={conversationPanelClass}>
             <ChatConversation
               conversationEvents={conversationEvents}
+              progressionEvents={progressionEvents}
               chatStatus={chatStatus}
               currentUser={currentUser}
             />

@@ -60,6 +60,7 @@ describe('use show timeline', () => {
         siemV2: {
           show: true,
           crud: true,
+          detections: true,
         },
       },
       upselling: mockUpselling,

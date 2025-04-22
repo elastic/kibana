@@ -38,7 +38,6 @@ export default function listInternalRuleTypes({ getService }: FtrProviderContext
       name: 'Recovered',
     },
     enabled_in_license: true,
-    has_fields_for_a_a_d: false,
     has_alerts_mappings: false,
     rule_task_timeout: '5m',
     solution: 'stack',
@@ -67,13 +66,12 @@ export default function listInternalRuleTypes({ getService }: FtrProviderContext
     minimum_license_required: 'basic',
     is_exportable: true,
     enabled_in_license: true,
-    has_fields_for_a_a_d: false,
     has_alerts_mappings: false,
     rule_task_timeout: '5m',
     solution: 'stack',
   };
 
-  describe('_rule_types', () => {
+  describe('_rule_types_internal', () => {
     for (const scenario of UserAtSpaceScenarios) {
       const { user, space } = scenario;
       describe(scenario.id, () => {

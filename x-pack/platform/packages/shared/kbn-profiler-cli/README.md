@@ -1,6 +1,6 @@
 # @kbn/profiler-cli
 
-Profile Kibana while it's running, and open the CPU profile in Speedscope.
+Profile Kibana (or any other Node.js processes) while it's running, and open the CPU or Heap profile in Speedscope.
 
 ## Usage
 
@@ -17,6 +17,26 @@ You can also just run it until SIGINT:
 Or with a timeout:
 
 `node scripts/profile.js --timeout=10000`
+
+### Heap profiling
+
+If you want to collect a heap profile, simply add `--heap`:
+
+`node scripts/profile.js --heap --timeout=10000`
+
+### Selecting a process
+
+By default, the profiler will look for a process running on 5603 or 5601 (in that order), where Kibana runs by default. But you can attach the profiler to any process. Add `--pid` to specify a specific process id:
+
+`node scripts/profile.js --pid 14782`
+
+Or, use `--grep` to list Node.js processes you can attach to:
+
+`node scripts/profile.js --grep`
+
+You can also already specify a filter:
+
+`node scripts/profile.js --grep myProcess`
 
 ## Examples
 

@@ -20,6 +20,7 @@ import {
 import { omit, some } from 'lodash';
 import { InstallationStatus } from '@kbn/product-doc-base-plugin/common/install_status';
 import { TrainedModelsProvider } from '@kbn/ml-plugin/server/shared_services/providers';
+import { alertSummaryFieldsFieldMap } from '../ai_assistant_data_clients/alert_summary/field_maps_configuration';
 import { attackDiscoveryFieldMap } from '../lib/attack_discovery/persistence/field_maps_configuration/field_maps_configuration';
 import { defendInsightsFieldMap } from '../lib/defend_insights/persistence/field_maps_configuration';
 import { getDefaultAnonymizationFields } from '../../common/anonymization';
@@ -52,6 +53,16 @@ import { AttackDiscoveryDataClient } from '../lib/attack_discovery/persistence';
 import { DefendInsightsDataClient } from '../lib/defend_insights/persistence';
 import { createGetElserId, ensureProductDocumentationInstalled } from './helpers';
 import { hasAIAssistantLicense } from '../routes/helpers';
+import {
+  AttackDiscoveryScheduleDataClient,
+  CreateAttackDiscoveryScheduleDataClientParams,
+} from '../lib/attack_discovery/schedules/data_client';
+import {
+  ANONYMIZATION_FIELDS_COMPONENT_TEMPLATE,
+  ANONYMIZATION_FIELDS_INDEX_PATTERN,
+  ANONYMIZATION_FIELDS_INDEX_TEMPLATE,
+  ANONYMIZATION_FIELDS_RESOURCE,
+} from './constants';
 
 const TOTAL_FIELDS_LIMIT = 2500;
 
@@ -83,7 +94,8 @@ export type CreateDataStream = (params: {
     | 'knowledgeBase'
     | 'prompts'
     | 'attackDiscovery'
-    | 'defendInsights';
+    | 'defendInsights'
+    | 'alertSummary';
   fieldMap: FieldMap;
   kibanaVersion: string;
   spaceId?: string;
@@ -99,6 +111,7 @@ export class AIAssistantService {
   private conversationsDataStream: DataStreamSpacesAdapter;
   private knowledgeBaseDataStream: DataStreamSpacesAdapter;
   private promptsDataStream: DataStreamSpacesAdapter;
+  private alertSummaryDataStream: DataStreamSpacesAdapter;
   private anonymizationFieldsDataStream: DataStreamSpacesAdapter;
   private attackDiscoveryDataStream: DataStreamSpacesAdapter;
   private defendInsightsDataStream: DataStreamSpacesAdapter;
@@ -141,6 +154,11 @@ export class AIAssistantService {
       resource: 'defendInsights',
       kibanaVersion: options.kibanaVersion,
       fieldMap: defendInsightsFieldMap,
+    });
+    this.alertSummaryDataStream = this.createDataStream({
+      resource: 'alertSummary',
+      kibanaVersion: options.kibanaVersion,
+      fieldMap: alertSummaryFieldsFieldMap,
     });
 
     this.initPromise = this.initializeResources();
@@ -418,6 +436,12 @@ export class AIAssistantService {
         logger: this.options.logger,
         pluginStop$: this.options.pluginStop$,
       });
+
+      await this.alertSummaryDataStream.install({
+        esClient,
+        logger: this.options.logger,
+        pluginStop$: this.options.pluginStop$,
+      });
     } catch (error) {
       this.options.logger.warn(`Error initializing AI assistant resources: ${error.message}`);
       this.initialized = false;
@@ -431,34 +455,38 @@ export class AIAssistantService {
 
   private readonly resourceNames: AssistantResourceNames = {
     componentTemplate: {
+      alertSummary: getResourceName('component-template-alert-summary'),
       conversations: getResourceName('component-template-conversations'),
       knowledgeBase: getResourceName('component-template-knowledge-base'),
       prompts: getResourceName('component-template-prompts'),
-      anonymizationFields: getResourceName('component-template-anonymization-fields'),
+      anonymizationFields: getResourceName(ANONYMIZATION_FIELDS_COMPONENT_TEMPLATE),
       attackDiscovery: getResourceName('component-template-attack-discovery'),
       defendInsights: getResourceName('component-template-defend-insights'),
     },
     aliases: {
+      alertSummary: getResourceName('alert-summary'),
       conversations: getResourceName('conversations'),
       knowledgeBase: getResourceName('knowledge-base'),
       prompts: getResourceName('prompts'),
-      anonymizationFields: getResourceName('anonymization-fields'),
+      anonymizationFields: getResourceName(ANONYMIZATION_FIELDS_RESOURCE),
       attackDiscovery: getResourceName('attack-discovery'),
       defendInsights: getResourceName('defend-insights'),
     },
     indexPatterns: {
+      alertSummary: getResourceName('alert-summary*'),
       conversations: getResourceName('conversations*'),
       knowledgeBase: getResourceName('knowledge-base*'),
       prompts: getResourceName('prompts*'),
-      anonymizationFields: getResourceName('anonymization-fields*'),
+      anonymizationFields: getResourceName(ANONYMIZATION_FIELDS_INDEX_PATTERN),
       attackDiscovery: getResourceName('attack-discovery*'),
       defendInsights: getResourceName('defend-insights*'),
     },
     indexTemplate: {
+      alertSummary: getResourceName('index-template-alert-summary'),
       conversations: getResourceName('index-template-conversations'),
       knowledgeBase: getResourceName('index-template-knowledge-base'),
       prompts: getResourceName('index-template-prompts'),
-      anonymizationFields: getResourceName('index-template-anonymization-fields'),
+      anonymizationFields: getResourceName(ANONYMIZATION_FIELDS_INDEX_TEMPLATE),
       attackDiscovery: getResourceName('index-template-attack-discovery'),
       defendInsights: getResourceName('index-template-defend-insights'),
     },
@@ -547,7 +575,7 @@ export class AIAssistantService {
   public async createAIAssistantKnowledgeBaseDataClient(
     opts: CreateAIAssistantClientParams &
       GetAIAssistantKnowledgeBaseDataClientParams & {
-        trainedModelsProvider: ReturnType<TrainedModelsProvider['trainedModelsProvider']>;
+        getTrainedModelsProvider: () => ReturnType<TrainedModelsProvider['trainedModelsProvider']>;
       }
   ): Promise<AIAssistantKnowledgeBaseDataClient | null> {
     // If modelIdOverride is set, swap getElserId(), and ensure the pipeline is re-created with the correct model
@@ -587,7 +615,7 @@ export class AIAssistantService {
       setIsKBSetupInProgress: this.setIsKBSetupInProgress.bind(this),
       spaceId: opts.spaceId,
       manageGlobalKnowledgeBaseAIAssistant: opts.manageGlobalKnowledgeBaseAIAssistant ?? false,
-      trainedModelsProvider: opts.trainedModelsProvider,
+      getTrainedModelsProvider: opts.getTrainedModelsProvider,
     });
   }
 
@@ -607,6 +635,14 @@ export class AIAssistantService {
       indexPatternsResourceName: this.resourceNames.aliases.attackDiscovery,
       kibanaVersion: this.options.kibanaVersion,
       spaceId: opts.spaceId,
+    });
+  }
+
+  public async createAttackDiscoverySchedulingDataClient(
+    opts: CreateAttackDiscoveryScheduleDataClientParams
+  ): Promise<AttackDiscoveryScheduleDataClient | null> {
+    return new AttackDiscoveryScheduleDataClient({
+      rulesClient: opts.rulesClient,
     });
   }
 
@@ -644,6 +680,25 @@ export class AIAssistantService {
       spaceId: opts.spaceId,
       kibanaVersion: this.options.kibanaVersion,
       indexPatternsResourceName: this.resourceNames.aliases.prompts,
+      currentUser: opts.currentUser,
+    });
+  }
+
+  public async createAlertSummaryDataClient(
+    opts: CreateAIAssistantClientParams
+  ): Promise<AIAssistantDataClient | null> {
+    const res = await this.checkResourcesInstallation(opts);
+
+    if (res === null) {
+      return null;
+    }
+
+    return new AIAssistantDataClient({
+      logger: this.options.logger,
+      elasticsearchClientPromise: this.options.elasticsearchClientPromise,
+      spaceId: opts.spaceId,
+      kibanaVersion: this.options.kibanaVersion,
+      indexPatternsResourceName: this.resourceNames.aliases.alertSummary,
       currentUser: opts.currentUser,
     });
   }
@@ -714,6 +769,12 @@ export class AIAssistantService {
       if (!anonymizationFieldsIndexName) {
         await this.anonymizationFieldsDataStream.installSpace(spaceId);
         await this.createDefaultAnonymizationFields(spaceId);
+      }
+      const alertSummaryIndexName = await this.alertSummaryDataStream.getInstalledSpaceName(
+        spaceId
+      );
+      if (!alertSummaryIndexName) {
+        await this.alertSummaryDataStream.installSpace(spaceId);
       }
     } catch (error) {
       this.options.logger.warn(
