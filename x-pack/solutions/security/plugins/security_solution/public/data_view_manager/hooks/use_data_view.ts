@@ -47,7 +47,8 @@ export const useDataView = (
         setRetrievedDataView(currDv);
       } catch (error) {
         setRetrievedDataView(undefined);
-        toasts.danger({
+        // TODO: (remove conditional call when feature flag is on (mocks are broken for some tests))
+        toasts?.danger({
           title: 'Error retrieving data view',
           body: `Error: ${error?.message ?? 'unknown'}`,
         });
