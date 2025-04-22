@@ -169,17 +169,22 @@ export const GridLayout = ({
         let gridRowTemplateString = '';
         rowIds.forEach((rowId) => {
           const currentRow = currentLayout[rowId];
-          gridRowTemplateString += `[start-${rowId}] `;
-          if (currentRow.isCollapsible) {
-            gridRowTemplateString += `auto `;
+          if (Object.values(currentRow.panels).length > 0) {
+            gridRowTemplateString += `[start-${rowId}] `;
+            if (currentRow.isCollapsible) {
+              gridRowTemplateString += `auto `;
+            }
+            if (
+              !currentRow.isCollapsible ||
+              (currentRow.isCollapsible && !currentRow.isCollapsed)
+            ) {
+              const panels = Object.values(currentRow.panels);
+              const maxRow =
+                panels.length > 0 ? Math.max(...panels.map(({ row, height }) => row + height)) : 0;
+              gridRowTemplateString += `repeat(${maxRow}, [gridRow-${rowId}] calc(var(--kbnGridRowHeight) * 1px))`;
+            }
+            gridRowTemplateString += ` [end-${rowId}] `;
           }
-          if (!currentRow.isCollapsible || (currentRow.isCollapsible && !currentRow.isCollapsed)) {
-            const panels = Object.values(currentRow.panels);
-            const maxRow =
-              panels.length > 0 ? Math.max(...panels.map(({ row, height }) => row + height)) : 0;
-            gridRowTemplateString += `repeat(${maxRow}, [gridRow-${rowId}] calc(var(--kbnGridRowHeight) * 1px))`;
-          }
-          gridRowTemplateString += ` [end-${rowId}] `;
         });
         gridRowTemplateString = gridRowTemplateString.replaceAll('] [', ' ');
 
