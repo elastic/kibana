@@ -110,7 +110,7 @@ export interface DetailParams {
   pkgkey: string;
   panel?: DetailViewPanelName;
 }
-
+const CUSTOM_INTEGRATION_SOURCES = ['custom', 'upload'];
 const Divider = styled.div`
   width: 0;
   height: 100%;
@@ -175,7 +175,7 @@ export function Detail() {
 
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [shouldAllowEdit, setShouldAllowEdit] = useState(false);
-  const [readMeContent, setReadMeContent] = useState<string>('');
+
   // Package info state
   const [packageInfo, setPackageInfo] = useState<PackageInfo | null>(null);
   const setPackageInstallStatus = useSetPackageInstallStatus();
@@ -303,7 +303,11 @@ export function Detail() {
       const packageInfoResponse = packageInfoData.item;
       setPackageInfo(packageInfoResponse);
       setShouldAllowEdit(
-        packageInfoResponse?.owner?.github?.endsWith('custom-integrations') ?? false
+        (packageInfoResponse?.installationInfo?.install_source &&
+          CUSTOM_INTEGRATION_SOURCES.includes(
+            packageInfoResponse.installationInfo?.install_source
+          )) ??
+          false
       );
       let installedVersion;
       const { name } = packageInfoData.item;
@@ -407,19 +411,9 @@ export function Detail() {
     [integrationInfo, isLoading, packageInfo, fromIntegrationsPath, queryParams]
   );
 
-  const handleEditIntegrationClick = useCallback<ReactEventHandler>(
-    (ev) => {
-      const readmePath = packageInfo?.readme;
-      if (!readmePath) {
-        return;
-      }
-      sendGetFileByPath(readmePath).then((res) => {
-        setReadMeContent(res.data || '');
-        setIsEditOpen(true);
-      });
-    },
-    [packageInfo]
-  );
+  const handleEditIntegrationClick = useCallback<ReactEventHandler>((ev) => {
+    setIsEditOpen(true);
+  }, []);
   const handleAddIntegrationPolicyClick = useCallback<ReactEventHandler>(
     (ev) => {
       ev.preventDefault();
@@ -894,8 +888,7 @@ export function Detail() {
       )}
       {isEditOpen && (
         <EditIntegrationFlyout
-          readMeContent={readMeContent}
-          integrationName={packageInfo?.title || 'UNDEFINED'}
+          integrationName={packageInfo?.title || 'Integration'}
           onClose={() => setIsEditOpen(false)}
           packageInfo={packageInfo}
           setIsEditOpen={setIsEditOpen}

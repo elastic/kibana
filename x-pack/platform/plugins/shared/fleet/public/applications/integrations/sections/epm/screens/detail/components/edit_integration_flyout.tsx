@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 import {
   EuiFlyout,
@@ -18,6 +18,7 @@ import {
   EuiMarkdownEditor,
   EuiButton,
   EuiButtonEmpty,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -25,12 +26,11 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { FleetStartServices } from '../../../../../../../plugin';
 
-import { useUpdateCustomIntegration } from '../../../../../../../hooks';
+import { sendGetFileByPath, useUpdateCustomIntegration } from '../../../../../../../hooks';
 
 import type { PackageInfo } from '../../../../../types';
 
 export const EditIntegrationFlyout: React.FunctionComponent<{
-  readMeContent: string | undefined;
   onClose: () => void;
   integrationName: string;
   miniIcon: React.ReactNode;
@@ -42,7 +42,7 @@ export const EditIntegrationFlyout: React.FunctionComponent<{
 }> = ({
   onClose,
   integrationName,
-  readMeContent,
+
   miniIcon,
   packageInfo,
   setIsEditOpen,
@@ -51,8 +51,22 @@ export const EditIntegrationFlyout: React.FunctionComponent<{
   onComplete,
 }) => {
   const updateCustomIntegration = useUpdateCustomIntegration;
-  const [editedContent, setEditedContent] = useState(readMeContent);
+  const [editedContent, setEditedContent] = useState<string>();
   const [savingEdits, setSavingEdits] = useState(false);
+  const [readmeLoading, setReadmeLoading] = useState(true);
+
+  // get the readme content from the packageInfo
+  useEffect(() => {
+    const readmePath = packageInfo?.readme;
+    if (!readmePath) {
+      setReadmeLoading(false);
+      return;
+    }
+    sendGetFileByPath(readmePath).then((res) => {
+      setEditedContent(res.data || '');
+      setReadmeLoading(false);
+    });
+  }, [packageInfo]);
 
   const saveIntegrationEdits = async (updatedReadMe: string | undefined) => {
     setSavingEdits(true);
@@ -102,26 +116,36 @@ export const EditIntegrationFlyout: React.FunctionComponent<{
           <EuiFlexItem grow={false}>{miniIcon}</EuiFlexItem>
           <EuiFlexItem>
             <EuiTitle>
-              <h2 id="editIntegrationFlyoutTitle">Editing {integrationName}</h2>
+              <h2 id="editIntegrationFlyoutTitle">
+                <FormattedMessage
+                  id="xpack.fleet.epm.editIntegrationFlyout.title"
+                  defaultMessage="Editing {integrationName}"
+                  values={{ integrationName }}
+                />
+              </h2>
             </EuiTitle>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        <EuiMarkdownEditor
-          aria-label="Edit"
-          placeholder={`${i18n.translate(
-            'xpack.fleet.epm.editIntegrationFlyout.markdownEditorPlaceholder',
-            {
-              defaultMessage: 'Edit the README content for {integrationName}...',
-              values: { integrationName },
-            }
-          )}...`}
-          value={editedContent!}
-          onChange={setEditedContent}
-          readOnly={false}
-          height={600}
-        />
+        {readmeLoading ? (
+          <EuiLoadingSpinner />
+        ) : (
+          <EuiMarkdownEditor
+            aria-label="Edit"
+            placeholder={`${i18n.translate(
+              'xpack.fleet.epm.editIntegrationFlyout.markdownEditorPlaceholder',
+              {
+                defaultMessage: 'Edit the README content for {integrationName}...',
+                values: { integrationName },
+              }
+            )}...`}
+            value={editedContent!}
+            onChange={setEditedContent}
+            readOnly={false}
+            height={600}
+          />
+        )}
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
