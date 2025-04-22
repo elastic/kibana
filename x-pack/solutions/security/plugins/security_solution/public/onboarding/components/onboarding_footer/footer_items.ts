@@ -5,43 +5,55 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
-import { COLOR_MODES_STANDARD, useEuiTheme } from '@elastic/eui';
-import documentationImage from './images/documentation.png';
-import darkDocumentationImage from './images/documentation_dark.png';
-import forumImage from './images/forum.png';
-import darkForumImge from './images/forum_dark.png';
-import demoImage from './images/demo.png';
-import darkDemoImage from './images/demo_dark.png';
-import labsImage from './images/labs.png';
-import darkLabsImage from './images/labs_dark.png';
+import useObservable from 'react-use/lib/useObservable';
 import { OnboardingFooterLinkItemId } from './constants';
+import { useKibana } from '../../../common/lib/kibana';
 
 export const useFooterItems = () => {
-  const { colorMode } = useEuiTheme();
-  const isDarkMode = colorMode === COLOR_MODES_STANDARD.dark;
+  const {
+    services: { onboarding },
+  } = useKibana();
+
+  const projectUrl = useObservable(onboarding.projectUrl$);
+  const expandProject = {
+    icon: 'arrowUp',
+    id: OnboardingFooterLinkItemId.expand,
+    title: i18n.translate('xpack.securitySolution.onboarding.footer.expand.title', {
+      defaultMessage: 'Expand your project',
+    }),
+    description: i18n.translate('xpack.securitySolution.onboarding.footer.expand.description', {
+      defaultMessage: 'Access Elastic’s full security capabilities',
+    }),
+    link: {
+      title: i18n.translate('xpack.securitySolution.onboarding.footer.expand.link.title', {
+        defaultMessage: 'Go to project settings',
+      }),
+      href: projectUrl ?? '',
+    },
+  };
 
   const footerItems = [
     {
-      icon: isDarkMode ? darkDocumentationImage : documentationImage,
+      icon: 'documents',
       id: OnboardingFooterLinkItemId.documentation,
       title: i18n.translate('xpack.securitySolution.onboarding.footer.documentation.title', {
-        defaultMessage: 'Browse documentation',
+        defaultMessage: 'Browse docs',
       }),
       description: i18n.translate(
         'xpack.securitySolution.onboarding.footer.documentation.description',
         {
-          defaultMessage: 'In-depth guides on all Elastic features',
+          defaultMessage: 'In-depth guides for all features',
         }
       ),
       link: {
         title: i18n.translate('xpack.securitySolution.onboarding.footer.documentation.link.title', {
-          defaultMessage: 'Start reading',
+          defaultMessage: 'Go to docs',
         }),
         href: 'https://docs.elastic.co/integrations/elastic-security-intro',
       },
     },
     {
-      icon: isDarkMode ? darkForumImge : forumImage,
+      icon: 'users',
       id: OnboardingFooterLinkItemId.forum,
       title: i18n.translate('xpack.securitySolution.onboarding.footer.forum.title', {
         defaultMessage: 'Explore forum',
@@ -57,38 +69,26 @@ export const useFooterItems = () => {
       },
     },
     {
-      icon: isDarkMode ? darkDemoImage : demoImage,
-      id: OnboardingFooterLinkItemId.demo,
-      title: i18n.translate('xpack.securitySolution.onboarding.footer.demo.title', {
-        defaultMessage: 'View demo project',
-      }),
-      description: i18n.translate('xpack.securitySolution.onboarding.footer.demo.description', {
-        defaultMessage: 'Discover Elastic using sample data',
-      }),
-      link: {
-        title: i18n.translate('xpack.securitySolution.onboarding.footer.demo.link.title', {
-          defaultMessage: 'Explore demo',
-        }),
-        href: 'https://www.elastic.co/demo-gallery?solutions=security&features=null',
-      },
-    },
-    {
-      icon: isDarkMode ? darkLabsImage : labsImage,
+      icon: 'beaker',
       id: OnboardingFooterLinkItemId.labs,
       title: i18n.translate('xpack.securitySolution.onboarding.footer.labs.title', {
-        defaultMessage: 'Elastic Security Labs',
+        defaultMessage: 'Help improve Elastic Security',
       }),
       description: i18n.translate('xpack.securitySolution.onboarding.footer.labs.description', {
-        defaultMessage: 'Insights from security researchers',
+        defaultMessage: 'Meet live with our user research team',
       }),
       link: {
         title: i18n.translate('xpack.securitySolution.onboarding.footer.labs.link.title', {
-          defaultMessage: 'Learn more',
+          defaultMessage: 'Opt into user research',
         }),
         href: 'https://www.elastic.co/security-labs',
       },
     },
   ] as const;
+
+  if (projectUrl) {
+    return [expandProject, ...footerItems];
+  }
 
   return footerItems;
 };

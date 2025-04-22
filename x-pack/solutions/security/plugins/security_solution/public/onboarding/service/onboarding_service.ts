@@ -17,22 +17,31 @@ export class OnboardingService {
   private isAgentlessAvailableSubject$: BehaviorSubject<IsAgentlessAvailable>;
   public isAgentlessAvailable$: Observable<IsAgentlessAvailable>;
 
+  private projectUrlSubject$: BehaviorSubject<string | undefined>;
+  public projectUrl$: Observable<string | undefined>;
+
   constructor() {
     this.usersUrlSubject$ = new BehaviorSubject<UserUrl>(undefined);
     this.usersUrl$ = this.usersUrlSubject$.asObservable();
 
     this.isAgentlessAvailableSubject$ = new BehaviorSubject<IsAgentlessAvailable>(undefined);
     this.isAgentlessAvailable$ = this.isAgentlessAvailableSubject$.asObservable();
+
+    this.projectUrlSubject$ = new BehaviorSubject<string | undefined>(undefined);
+    this.projectUrl$ = this.projectUrlSubject$.asObservable();
   }
 
   public setSettings({
     userUrl,
     isAgentlessAvailable,
+    projectUrl,
   }: {
     userUrl: UserUrl;
     isAgentlessAvailable: boolean;
+    projectUrl?: string;
   }) {
     this.usersUrlSubject$.next(userUrl);
     this.isAgentlessAvailableSubject$.next(isAgentlessAvailable);
+    this.projectUrlSubject$.next(projectUrl);
   }
 }
