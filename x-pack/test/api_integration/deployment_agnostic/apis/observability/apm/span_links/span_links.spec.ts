@@ -7,12 +7,9 @@
 import expect from '@kbn/expect';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { Readable } from 'stream';
-import {
-  ApmSynthtracePipelineTypes,
-  type ApmSynthtraceEsClient,
-  type ApmSynthtracePipelines,
-} from '@kbn/apm-synthtrace';
+import { type ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import moment from 'moment';
+import { ApmSynthtracePipelineSchema, ApmSynthtracePipelines } from '@kbn/apm-synthtrace-client';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 import { generateSpanLinksData } from './data_generator';
 
@@ -25,13 +22,13 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   const end = moment(baseTime);
 
   const scenarios: ApmSynthtracePipelines[] = [
-    ApmSynthtracePipelineTypes.Default,
-    ApmSynthtracePipelineTypes.ApmToOtel,
+    ApmSynthtracePipelineSchema.Default,
+    ApmSynthtracePipelineSchema.ApmToOtel,
   ];
 
   describe('Span Links', () => {
     scenarios.forEach((pipeline) => {
-      const isDefaultPipeline = pipeline === ApmSynthtracePipelineTypes.Default;
+      const isDefaultPipeline = pipeline === ApmSynthtracePipelineSchema.Default;
 
       describe(`contains linked children - ${isDefaultPipeline ? 'elastic APM' : 'Otel'}`, () => {
         let ids: ReturnType<typeof generateSpanLinksData>['ids'];

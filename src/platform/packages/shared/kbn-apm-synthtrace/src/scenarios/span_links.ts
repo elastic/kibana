@@ -12,6 +12,7 @@ import { Readable } from 'stream';
 import {
   apm,
   ApmFields,
+  ApmSynthtracePipelineSchema,
   generateLongId,
   generateShortId,
   Serializable,
@@ -20,7 +21,6 @@ import { Scenario } from '../cli/scenario';
 import { getSynthtraceEnvironment } from '../lib/utils/get_synthtrace_environment';
 import { withClient } from '../lib/utils/with_client';
 import { parseApmScenarioOpts } from './helpers/apm_scenario_ops_parser';
-import { ApmSynthtracePipelineTypes } from '../lib/apm/client/apm_synthtrace_es_client';
 
 const ENVIRONMENT = getSynthtraceEnvironment(__filename);
 
@@ -41,7 +41,7 @@ function getSpanLinksFromEvents(events: ApmFields[]) {
 }
 
 const scenario: Scenario<ApmFields> = async ({ logger, scenarioOpts }) => {
-  const { pipeline = ApmSynthtracePipelineTypes.Default } = parseApmScenarioOpts(scenarioOpts);
+  const { pipeline = ApmSynthtracePipelineSchema.Default } = parseApmScenarioOpts(scenarioOpts);
   return {
     bootstrap: async ({ apmEsClient }) => {
       apmEsClient.pipeline(apmEsClient.getPipeline(pipeline));

@@ -7,9 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { OtelInstance, ApmOtelFields } from '@kbn/apm-synthtrace-client';
+import {
+  OtelInstance,
+  ApmOtelFields,
+  ApmSynthtracePipelineSchema,
+} from '@kbn/apm-synthtrace-client';
 import { apm } from '@kbn/apm-synthtrace-client/src/lib/apm';
-import { ApmSynthtracePipelineTypes } from '../..';
 import { Scenario } from '../cli/scenario';
 import { withClient } from '../lib/utils/with_client';
 import { getSynthtraceEnvironment } from '../lib/utils/get_synthtrace_environment';
@@ -19,7 +22,7 @@ const ENVIRONMENT = getSynthtraceEnvironment(__filename);
 const scenario: Scenario<ApmOtelFields> = async (runOptions) => {
   return {
     bootstrap: async ({ apmEsClient }) => {
-      apmEsClient.pipeline(apmEsClient.getPipeline(ApmSynthtracePipelineTypes.Otel));
+      apmEsClient.pipeline(apmEsClient.getPipeline(ApmSynthtracePipelineSchema.Otel));
     },
     generate: ({ range, clients: { apmEsClient } }) => {
       const transactionName = 'oteldemo.AdServiceSynth/GetAds';

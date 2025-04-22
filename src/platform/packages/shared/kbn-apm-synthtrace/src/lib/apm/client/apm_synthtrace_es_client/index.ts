@@ -8,7 +8,7 @@
  */
 
 import { Client, estypes } from '@elastic/elasticsearch';
-import { ApmFields, ApmOtelFields } from '@kbn/apm-synthtrace-client';
+import { ApmFields, ApmOtelFields, ApmSynthtracePipelines } from '@kbn/apm-synthtrace-client';
 import { ValuesType } from 'utility-types';
 import { SynthtraceEsClient, SynthtraceEsClientOptions } from '../../../shared/base_client';
 import { Logger } from '../../../utils/create_logger';
@@ -25,15 +25,6 @@ export enum ComponentTemplateName {
   TracesApmRum = 'traces-apm.rum@custom',
   TracesApmSampled = 'traces-apm.sampled@custom',
 }
-export enum ApmSynthtracePipelineTypes {
-  Default = 'default', // classic APM
-  Otel = 'otel', // OTel native through APM server
-  ApmToOtel = 'apmToOtel', // convert classic APM synthtrace scenario into OTel native (useful to run existing scenarios as OTel)
-}
-export type ApmSynthtracePipelines =
-  | ApmSynthtracePipelineTypes.Default
-  | ApmSynthtracePipelineTypes.Otel
-  | ApmSynthtracePipelineTypes.ApmToOtel;
 
 export interface ApmSynthtraceEsClientOptions extends Omit<SynthtraceEsClientOptions, 'pipeline'> {
   version: string;
