@@ -74,6 +74,7 @@ describe('secrets validation', () => {
       crt: null,
       key: null,
       pfx: null,
+      clientSecret: null,
     };
     expect(validateSecrets(connectorType, secrets, { configurationUtilities })).toEqual(secrets);
   });
@@ -82,7 +83,7 @@ describe('secrets validation', () => {
     expect(() => {
       validateSecrets(connectorType, { user: 'bob' }, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type secrets: must specify one of the following schemas: user and password; crt and key (with optional password); or pfx (with optional password)"`
+      `"error validating action type secrets: must specify one of the following schemas: user and password; crt and key (with optional password); pfx (with optional password); or OAuth2 client secret"`
     );
   });
 
@@ -93,6 +94,7 @@ describe('secrets validation', () => {
       password: null,
       pfx: null,
       user: null,
+      clientSecret: null,
     });
   });
 
@@ -103,6 +105,7 @@ describe('secrets validation', () => {
       key: KEY_FILE,
       pfx: null,
       user: null,
+      clientSecret: null,
     };
     expect(validateSecrets(connectorType, secrets, { configurationUtilities })).toEqual(secrets);
 
@@ -112,6 +115,7 @@ describe('secrets validation', () => {
       pfx: null,
       user: null,
       password: null,
+      clientSecret: null,
     };
 
     expect(
@@ -126,6 +130,7 @@ describe('secrets validation', () => {
       user: null,
       crt: null,
       key: null,
+      clientSecret: null,
     };
     expect(validateSecrets(connectorType, secrets, { configurationUtilities })).toEqual(secrets);
 
@@ -135,6 +140,7 @@ describe('secrets validation', () => {
       password: null,
       crt: null,
       key: null,
+      clientSecret: null,
     };
 
     expect(
@@ -146,12 +152,12 @@ describe('secrets validation', () => {
     expect(() => {
       validateSecrets(connectorType, { crt: CRT_FILE }, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type secrets: must specify one of the following schemas: user and password; crt and key (with optional password); or pfx (with optional password)"`
+      `"error validating action type secrets: must specify one of the following schemas: user and password; crt and key (with optional password); pfx (with optional password); or OAuth2 client secret"`
     );
     expect(() => {
       validateSecrets(connectorType, { key: KEY_FILE }, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type secrets: must specify one of the following schemas: user and password; crt and key (with optional password); or pfx (with optional password)"`
+      `"error validating action type secrets: must specify one of the following schemas: user and password; crt and key (with optional password); pfx (with optional password); or OAuth2 client secret"`
     );
   });
 });

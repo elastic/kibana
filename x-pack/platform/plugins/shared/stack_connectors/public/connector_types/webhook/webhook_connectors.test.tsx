@@ -52,6 +52,36 @@ describe('WebhookActionConnectorFields renders', () => {
     expect(wrapper.find('[data-test-subj="webhookPasswordInput"]').length > 0).toBeTruthy();
   });
 
+  it('renders alweys OAuth2 option and fields', () => {
+    const actionConnector = {
+      actionTypeId: '.webhook',
+      name: 'webhook',
+      config: {
+        method: 'PUT',
+        url: 'https://test.com',
+        headers: [{ key: 'content-type', value: 'text' }],
+        hasAuth: true,
+        authType: AuthType.OAuth2,
+      },
+      secrets: {},
+      isDeprecated: false,
+    };
+
+    const { getByTestId } = render(
+      <ConnectorFormTestProvider connector={actionConnector}>
+        <WebhookActionConnectorFields
+          readOnly={false}
+          isEdit={false}
+          registerPreSubmitValidator={() => {}}
+        />
+      </ConnectorFormTestProvider>
+    );
+
+    expect(getByTestId('authOAuth2')).toBeInTheDocument();
+    expect(getByTestId('accessTokenUrlAOuth2')).toBeInTheDocument();
+    expect(getByTestId('clientIdOAuth2')).toBeInTheDocument();
+  });
+
   describe('Validation', () => {
     const onSubmit = jest.fn();
     const actionConnector = {
