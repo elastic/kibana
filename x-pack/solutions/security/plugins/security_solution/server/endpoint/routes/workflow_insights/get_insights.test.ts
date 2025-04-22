@@ -97,22 +97,19 @@ describe('Get Insights Route Handler', () => {
       });
     });
     describe('with space awareness enabled', () => {
-      const enableSpaceAwareness = () => {
+      const enableSpaceAwareness: () => {
+        mockEnsureInCurrentSpace: jest.Mock;
+      } = () => {
         // @ts-expect-error write to readonly property
         mockEndpointContext.experimentalFeatures.endpointManagementSpaceAwarenessEnabled = true;
+        return {
+          mockEnsureInCurrentSpace: mockEndpointContext.service.getInternalFleetServices()
+            .ensureInCurrentSpace as jest.Mock,
+        };
       };
 
       it('should call ensureInCurrentSpace when flag is enabled', async () => {
-        enableSpaceAwareness();
-
-        const mockEnsureInCurrentSpace = jest.fn();
-        const mockFleetService = {
-          ensureInCurrentSpace: mockEnsureInCurrentSpace,
-        };
-
-        mockEndpointContext.service.getInternalFleetServices = jest
-          .fn()
-          .mockReturnValue(mockFleetService);
+        const { mockEnsureInCurrentSpace } = enableSpaceAwareness();
 
         const mockInsights = [
           {
@@ -131,12 +128,7 @@ describe('Get Insights Route Handler', () => {
       });
 
       it('should deduplicate agent IDs before calling ensureInCurrentSpace', async () => {
-        enableSpaceAwareness();
-
-        const mockEnsureInCurrentSpace = jest.fn();
-        mockEndpointContext.service.getInternalFleetServices = jest
-          .fn()
-          .mockReturnValue({ ensureInCurrentSpace: mockEnsureInCurrentSpace });
+        const { mockEnsureInCurrentSpace } = enableSpaceAwareness();
 
         const mockInsights = [
           {
@@ -158,14 +150,9 @@ describe('Get Insights Route Handler', () => {
       });
 
       it('should return 404 if ensureInCurrentSpace throws NotFoundError', async () => {
-        enableSpaceAwareness();
+        const { mockEnsureInCurrentSpace } = enableSpaceAwareness();
 
-        const mockEnsureInCurrentSpace = jest
-          .fn()
-          .mockRejectedValue(new NotFoundError('agent not found'));
-        mockEndpointContext.service.getInternalFleetServices = jest
-          .fn()
-          .mockReturnValue({ ensureInCurrentSpace: mockEnsureInCurrentSpace });
+        mockEnsureInCurrentSpace.mockRejectedValue(new NotFoundError('agent not found'));
 
         const mockInsights = [
           {
