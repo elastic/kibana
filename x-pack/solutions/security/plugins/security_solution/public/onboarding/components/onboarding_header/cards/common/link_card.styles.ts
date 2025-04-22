@@ -15,6 +15,11 @@ export const useCardStyles = () => {
   return css`
     min-width: 315px;
     /* We needed to add the "headerCard" class to make it take priority over the default EUI card styles */
+    .headerCardLink {
+      color: ${euiTheme.colors.textPrimary};
+      font-weight: ${euiTheme.font.weight.semiBold};s
+    }
+
     &.headerCard:hover {
       *:not(.headerCardLink) {
         text-decoration: none;
@@ -23,6 +28,7 @@ export const useCardStyles = () => {
       .headerCardLink * {
         text-decoration: underline;
         text-decoration-color: ${euiTheme.colors.textPrimary};
+        color: ${euiTheme.colors.textPrimary};
       }
     }
 
@@ -31,12 +37,14 @@ export const useCardStyles = () => {
       font-size: 1rem;
     }
 
-    ${isDarkMode
-      ? `
+    ${
+      isDarkMode
+        ? `
           background-color: ${euiTheme.colors.backgroundBasePlain};
           box-shadow: none;
           border: ${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBasePlain};
         `
-      : ''}
+        : ''
+    }
   `;
 };
