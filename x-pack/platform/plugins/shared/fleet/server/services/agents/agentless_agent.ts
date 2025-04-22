@@ -102,6 +102,12 @@ class AgentlessAgentService {
       `[Agentless API] Creating agentless agent with fleetUrl ${fleetUrl} and fleet_token: [REDACTED]`
     );
 
+    if (agentlessAgentPolicy.agentless?.cloud_connectors?.enabled) {
+      logger.debug(
+        `[Agentless API] Creating agentless agent with ${agentlessAgentPolicy.agentless?.cloud_connectors?.target_csp} cloud connector enabled for agentless policy ${policyId}`
+      );
+    }
+
     logger.debug(
       `[Agentless API] Creating agentless agent with TLS cert: ${
         agentlessConfig?.api?.tls?.certificate ? '[REDACTED]' : 'undefined'
@@ -119,6 +125,7 @@ class AgentlessAgentService {
         fleet_url: fleetUrl,
         fleet_token: fleetToken,
         resources: agentlessAgentPolicy.agentless?.resources,
+        cloud_connectors: agentlessAgentPolicy.agentless?.cloud_connectors,
         labels,
       },
       method: 'POST',

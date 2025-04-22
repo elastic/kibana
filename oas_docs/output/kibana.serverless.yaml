@@ -16677,6 +16677,16 @@ paths:
                           additionalProperties: false
                           type: object
                           properties:
+                            cloud_connectors:
+                              additionalProperties: false
+                              type: object
+                              properties:
+                                enabled:
+                                  type: boolean
+                                target_csp:
+                                  type: string
+                              required:
+                                - enabled
                             resources:
                               additionalProperties: false
                               type: object
@@ -17349,6 +17359,16 @@ paths:
                   additionalProperties: false
                   type: object
                   properties:
+                    cloud_connectors:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        enabled:
+                          type: boolean
+                        target_csp:
+                          type: string
+                      required:
+                        - enabled
                     resources:
                       additionalProperties: false
                       type: object
@@ -17560,6 +17580,16 @@ paths:
                         additionalProperties: false
                         type: object
                         properties:
+                          cloud_connectors:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              enabled:
+                                type: boolean
+                              target_csp:
+                                type: string
+                            required:
+                              - enabled
                           resources:
                             additionalProperties: false
                             type: object
@@ -18251,6 +18281,16 @@ paths:
                           additionalProperties: false
                           type: object
                           properties:
+                            cloud_connectors:
+                              additionalProperties: false
+                              type: object
+                              properties:
+                                enabled:
+                                  type: boolean
+                                target_csp:
+                                  type: string
+                              required:
+                                - enabled
                             resources:
                               additionalProperties: false
                               type: object
@@ -18921,6 +18961,16 @@ paths:
                         additionalProperties: false
                         type: object
                         properties:
+                          cloud_connectors:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              enabled:
+                                type: boolean
+                              target_csp:
+                                type: string
+                            required:
+                              - enabled
                           resources:
                             additionalProperties: false
                             type: object
@@ -19591,6 +19641,16 @@ paths:
                   additionalProperties: false
                   type: object
                   properties:
+                    cloud_connectors:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        enabled:
+                          type: boolean
+                        target_csp:
+                          type: string
+                      required:
+                        - enabled
                     resources:
                       additionalProperties: false
                       type: object
@@ -19804,6 +19864,16 @@ paths:
                         additionalProperties: false
                         type: object
                         properties:
+                          cloud_connectors:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              enabled:
+                                type: boolean
+                              target_csp:
+                                type: string
+                            required:
+                              - enabled
                           resources:
                             additionalProperties: false
                             type: object
@@ -20494,6 +20564,16 @@ paths:
                         additionalProperties: false
                         type: object
                         properties:
+                          cloud_connectors:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              enabled:
+                                type: boolean
+                              target_csp:
+                                type: string
+                            required:
+                              - enabled
                           resources:
                             additionalProperties: false
                             type: object
