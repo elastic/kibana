@@ -29,6 +29,7 @@ import { useKibana } from '../../../../common/lib/kibana';
 import { FLYOUT_STORAGE_KEYS } from '../../shared/constants/local_storage';
 import { getTableTabColumns } from '../utils/table_tab_columns';
 import { useHighlightedFields } from '../../shared/hooks/use_highlighted_fields';
+
 const COUNT_PER_PAGE_OPTIONS = [25, 50, 100];
 
 const PLACEHOLDER = i18n.translate('xpack.securitySolution.flyout.table.filterPlaceholderLabel', {
@@ -119,11 +120,13 @@ export const TableTab = memo(() => {
   } = useDocumentDetailsContext();
   const { ruleId } = useBasicDataFromDetailsData(dataFormattedForFieldBrowser);
 
-  const highlightedFields = Object.keys(
-    useHighlightedFields({
-      dataFormattedForFieldBrowser,
-      investigationFields,
-    })
+  const highlightedFieldsResult = useHighlightedFields({
+    dataFormattedForFieldBrowser,
+    investigationFields,
+  });
+  const highlightedFields = useMemo(
+    () => Object.keys(highlightedFieldsResult),
+    [highlightedFieldsResult]
   );
 
   const [tableTabState, setTableTabState] = useState<TableTabState>(() => {
@@ -138,11 +141,12 @@ export const TableTab = memo(() => {
     storage.set(FLYOUT_STORAGE_KEYS.TABLE_TAB_STATE, tableTabState);
   }, [tableTabState, storage]);
 
-  const renderToolsRight = useCallback(() => {
-    return [
+  const renderToolsRight = useCallback(
+    () => [
       <TableTabSettingButton tableTabState={tableTabState} setTableTabState={setTableTabState} />,
-    ];
-  }, [tableTabState]);
+    ],
+    [tableTabState, setTableTabState]
+  );
 
   const [pagination, setPagination] = useState<{ pageIndex: number }>({
     pageIndex: 0,
@@ -219,6 +223,7 @@ export const TableTab = memo(() => {
   const onSetRowProps = useCallback(
     ({ field }: TimelineEventsDetailsItem) => ({
       className: 'flyout-table-row-small-font',
+      'data-test-subj': `flyout-table-row-${field}`,
       ...(highlightedFields.includes(field) && {
         style: { backgroundColor: euiTheme.colors.backgroundBaseWarning },
       }),
@@ -247,7 +252,6 @@ export const TableTab = memo(() => {
 
   return (
     <EuiInMemoryTable
-      className="flyout-table"
       items={items}
       itemId="field"
       columns={columns}

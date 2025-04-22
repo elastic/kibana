@@ -12,6 +12,7 @@ import {
   EuiFlexItem,
   EuiPopover,
   EuiSwitch,
+  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -78,6 +79,10 @@ export const TableTabSettingButton = ({
     setIsPopoverOpen(!isPopoverOpen);
   }, [isPopoverOpen]);
 
+  const closePopover = useCallback(() => {
+    setIsPopoverOpen(false);
+  }, []);
+
   const onToggleShowHighlightedFields = useCallback(() => {
     setTableTabState({
       ...tableTabState,
@@ -100,56 +105,58 @@ export const TableTabSettingButton = ({
   }, [hideAlertFields, setTableTabState, tableTabState]);
 
   return (
-    <EuiPopover
-      button={
-        <EuiButtonIcon
-          aria-label={TABLE_TAB_SETTING_BUTTON_LABEL}
-          onClick={onClick}
-          iconType="gear"
-          size="m"
-          css={css`
-            border: 1px solid ${euiTheme.colors.backgroundLightText};
-            margin-left: -5px;
-          `}
-        />
-      }
-      isOpen={isPopoverOpen}
-      closePopover={() => setIsPopoverOpen(false)}
-      display="block"
-      data-test-subj={TABLE_TAB_SETTING_BUTTON_TEST_ID}
-    >
-      <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexStart" direction="column">
-        <EuiFlexItem>
-          <EuiSwitch
-            data-test-subj={TABLE_TAB_SETTING_HIGHLIGHTED_FIELDS_ONLY_TEST_ID}
-            label={HIGHLIGHTED_FIELDS_ONLY_LABEL}
-            aria-label={HIGHLIGHTED_FIELDS_ONLY_LABEL}
-            checked={showHighlightedFields}
-            onChange={onToggleShowHighlightedFields}
-            compressed
+    <EuiToolTip content={TABLE_TAB_SETTING_BUTTON_LABEL}>
+      <EuiPopover
+        button={
+          <EuiButtonIcon
+            aria-label={TABLE_TAB_SETTING_BUTTON_LABEL}
+            onClick={onClick}
+            iconType="gear"
+            size="m"
+            css={css`
+              border: 1px solid ${euiTheme.colors.backgroundLightText};
+              margin-left: -5px;
+            `}
           />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiSwitch
-            data-test-subj={TABLE_TAB_SETTING_HIDE_EMPTY_FIELDS_TEST_ID}
-            label={HIDE_EMPTY_FIELDS_LABEL}
-            aria-label={HIDE_EMPTY_FIELDS_LABEL}
-            checked={hideEmptyFields}
-            onChange={onToggleHideEmptyFields}
-            compressed
-          />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiSwitch
-            data-test-subj={TABLE_TAB_SETTING_HIDE_ALERT_FIELDS_TEST_ID}
-            label={HIDE_ALERT_FIELDS_LABEL}
-            aria-label={HIDE_ALERT_FIELDS_LABEL}
-            checked={hideAlertFields}
-            onChange={onToggleHideAlertFields}
-            compressed
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiPopover>
+        }
+        isOpen={isPopoverOpen}
+        closePopover={closePopover}
+        display="block"
+        data-test-subj={TABLE_TAB_SETTING_BUTTON_TEST_ID}
+      >
+        <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexStart" direction="column">
+          <EuiFlexItem>
+            <EuiSwitch
+              data-test-subj={TABLE_TAB_SETTING_HIGHLIGHTED_FIELDS_ONLY_TEST_ID}
+              label={HIGHLIGHTED_FIELDS_ONLY_LABEL}
+              aria-label={HIGHLIGHTED_FIELDS_ONLY_LABEL}
+              checked={showHighlightedFields}
+              onChange={onToggleShowHighlightedFields}
+              compressed
+            />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiSwitch
+              data-test-subj={TABLE_TAB_SETTING_HIDE_EMPTY_FIELDS_TEST_ID}
+              label={HIDE_EMPTY_FIELDS_LABEL}
+              aria-label={HIDE_EMPTY_FIELDS_LABEL}
+              checked={hideEmptyFields}
+              onChange={onToggleHideEmptyFields}
+              compressed
+            />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiSwitch
+              data-test-subj={TABLE_TAB_SETTING_HIDE_ALERT_FIELDS_TEST_ID}
+              label={HIDE_ALERT_FIELDS_LABEL}
+              aria-label={HIDE_ALERT_FIELDS_LABEL}
+              checked={hideAlertFields}
+              onChange={onToggleHideAlertFields}
+              compressed
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiPopover>
+    </EuiToolTip>
   );
 };

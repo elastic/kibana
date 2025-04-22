@@ -83,7 +83,7 @@ describe('getTableItems', () => {
     expect(tableItems).toEqual([result.a, result.b, result.empty, result.alert]);
   });
 
-  it('should return the only highlighted fields if showHighlightedFields is true', () => {
+  it('should return only highlighted fields if showHighlightedFields is true', () => {
     const tableItems = getTableItems({
       dataFormattedForFieldBrowser: testData as unknown as TimelineEventsDetailsItem[],
       fieldsByName: mockFieldsByName,

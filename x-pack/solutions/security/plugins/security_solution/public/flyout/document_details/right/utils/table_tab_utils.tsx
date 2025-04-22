@@ -6,6 +6,7 @@
  */
 
 import { sortBy } from 'lodash/fp';
+import { ALERT_NAMESPACE } from '@kbn/rule-data-utils';
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import type { FieldSpec } from '@kbn/data-plugin/common';
 import type { TableTabState } from '../tabs/table_tab';
@@ -61,20 +62,13 @@ export const getTableItems: (props: GetTableItemsProps) => TimelineEventsDetails
       // Hide alert fields
       if (
         hideAlertFields &&
-        (curField.field.startsWith('kibana.alert.') || curField.field.startsWith('signal.'))
+        (curField.field.startsWith(ALERT_NAMESPACE) || curField.field.startsWith('signal.'))
       ) {
         return acc;
       }
 
       // Process highlighted fields
-      if (showHighlightedFields) {
-        if (highlightedFields.includes(curField.field)) {
-          if (curField.isPinned) {
-            acc.pinnedRows.push(curField);
-          } else {
-            acc.restRows.push(curField);
-          }
-        }
+      if (showHighlightedFields && !highlightedFields.includes(curField.field)) {
         return acc;
       }
 
