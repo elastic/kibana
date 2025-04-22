@@ -102,6 +102,12 @@ const solutionNodesFormatter = (
         }
       }
       deepLinks.push(deepLink);
+      return;
+    }
+
+    // Process other links with id other than security links or groups
+    if (node.children) {
+      deepLinks.push(...solutionNodesFormatter(node.children, normalizedLinks));
     }
   });
 
