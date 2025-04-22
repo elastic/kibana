@@ -25,7 +25,7 @@ export async function extractReferences<
   ruleArtifacts: Artifacts
 ): Promise<{
   actions: DenormalizedAction[];
-  artifacts: DenormalizedArtifacts;
+  artifacts: Required<DenormalizedArtifacts>;
   params: ExtractedParams;
   references: SavedObjectReference[];
 }> {

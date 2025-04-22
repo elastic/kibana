@@ -9,11 +9,11 @@ import type { Artifacts } from '../../types';
 import type { DenormalizedArtifacts } from '../types';
 
 export function denormalizeArtifacts(ruleArtifacts: Artifacts | undefined): {
-  artifacts: DenormalizedArtifacts;
+  artifacts: Required<DenormalizedArtifacts>;
   references: SavedObjectReference[];
 } {
   const references: SavedObjectReference[] = [];
-  const artifacts: DenormalizedArtifacts = {
+  const artifacts: Required<DenormalizedArtifacts> = {
     dashboards: [],
   };
 
@@ -27,8 +27,7 @@ export function denormalizeArtifacts(ruleArtifacts: Artifacts | undefined): {
       };
       references.push(dashboardRef);
 
-      // `artifacts.dashboards` is always defined
-      artifacts.dashboards!.push({
+      artifacts.dashboards.push({
         refId: refName,
       });
     });

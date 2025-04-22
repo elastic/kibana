@@ -557,7 +557,7 @@ async function updateRuleAttributesAndParamsInMemory<Params extends RuleParams>(
       ruleType,
       updatedRuleActions as NormalizedAlertActionWithGeneratedValues[],
       validatedMutatedAlertTypeParams,
-      ruleArtifacts!
+      ruleArtifacts ?? {},
     );
 
     const ruleAttributes = transformRuleDomainToRuleAttributes({

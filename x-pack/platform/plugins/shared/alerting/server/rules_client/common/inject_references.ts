@@ -83,7 +83,7 @@ export function injectReferencesIntoArtifacts(
   ruleId: string,
   artifacts?: RawRule['artifacts'],
   references?: SavedObjectReference[]
-): RuleDomain['artifacts'] {
+): Required<RuleDomain['artifacts']> {
   if (!artifacts) {
     return { dashboards: [] };
   }

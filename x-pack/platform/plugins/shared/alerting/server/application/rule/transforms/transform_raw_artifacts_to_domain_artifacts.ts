@@ -14,6 +14,6 @@ export function transformRawArtifactsToDomainArtifacts(
   id: string,
   rawArtifacts?: RawRule['artifacts'],
   references?: SavedObjectReference[]
-): RuleDomain['artifacts'] {
+): Required<RuleDomain['artifacts']> {
   return injectReferencesIntoArtifacts(id, rawArtifacts, references || []);
 }
