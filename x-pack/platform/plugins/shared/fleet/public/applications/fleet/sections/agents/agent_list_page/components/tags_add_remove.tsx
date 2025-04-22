@@ -27,10 +27,6 @@ import { sanitizeTag } from '../utils';
 
 import { TagOptions } from './tag_options';
 
-const NO_TAGS_VALUE = i18n.translate('xpack.fleet.noTagsValue', {
-  defaultMessage: 'No Tags',
-});
-
 const TruncatedEuiHighlight = styled(EuiHighlight)`
   width: 120px;
   white-space: nowrap;
@@ -59,13 +55,11 @@ export const TagsAddRemove: React.FC<Props> = ({
 }: Props) => {
   const labelsFromTags = useCallback(
     (tags: string[], selected: string[]) =>
-      tags
-        .map((tag: string) => ({
-          label: tag,
-          checked: selected.includes(tag) ? 'on' : undefined,
-          onFocusBadge: false,
-        }))
-        .filter((tag) => tag.label !== NO_TAGS_VALUE),
+      tags.map((tag: string) => ({
+        label: tag,
+        checked: selected.includes(tag) ? 'on' : undefined,
+        onFocusBadge: false,
+      })),
     []
   );
 
