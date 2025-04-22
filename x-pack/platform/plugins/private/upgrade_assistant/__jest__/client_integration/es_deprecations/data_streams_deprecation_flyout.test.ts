@@ -371,6 +371,7 @@ describe('Data streams deprecation flyout', () => {
         expect(exists('startDataStreamMigrationButton')).toBe(true);
         expect(find('startDataStreamMigrationButton').props().disabled).toBe(true);
         expect(exists('cancelDataStreamMigrationButton')).toBe(true);
+        expect(exists('startDataStreamReadonlyButton')).toBe(false);
       });
       it('reindexing success', async () => {
         httpRequestsMockHelpers.setDataStreamMigrationStatusResponse(
@@ -421,6 +422,7 @@ describe('Data streams deprecation flyout', () => {
         expect(exists('startDataStreamMigrationButton')).toBe(true);
         expect(find('startDataStreamMigrationButton').props().disabled).toBe(true);
         expect(exists('cancelDataStreamMigrationButton')).toBe(true);
+        expect(exists('startDataStreamReadonlyButton')).toBe(false);
       });
       it('reindexing error', async () => {
         httpRequestsMockHelpers.setDataStreamMigrationStatusResponse(
@@ -474,6 +476,63 @@ describe('Data streams deprecation flyout', () => {
         expect(exists('startDataStreamMigrationButton')).toBe(true);
         expect(find('startDataStreamMigrationButton').props().disabled).toBe(true);
         expect(exists('cancelDataStreamMigrationButton')).toBe(true);
+        expect(exists('startDataStreamReadonlyButton')).toBe(false);
+      });
+      describe('reindexing failed', () => {
+        it('offers read-only if reindexing fails and if read-only is not excluded', async () => {
+          httpRequestsMockHelpers.setDataStreamMigrationStatusResponse(MOCK_DS_DEPRECATION.index!, {
+            hasRequiredPrivileges: true,
+            migrationOp: { resolutionType: 'reindex', status: DataStreamMigrationStatus.failed },
+            warnings: [
+              {
+                warningType: 'incompatibleDataStream',
+                resolutionType: 'reindex',
+              },
+            ],
+          });
+          const { actions, find, exists } = testBed;
+
+          await actions.table.clickDeprecationRowAt('dataStream', 0);
+          await actions.dataStreamDeprecationFlyout.clickReindexButton();
+
+          expect(exists('dataStreamMigrationFailedCallout')).toBe(true);
+          expect(find('dataStreamMigrationFailedCallout').text()).toBe('Reindexing error');
+
+          expect(exists('startDataStreamMigrationButton')).toBe(true);
+          expect(find('startDataStreamMigrationButton').props().disabled).toBe(false);
+          expect(find('startDataStreamMigrationButton').text()).toBe('Try again');
+
+          expect(exists('startDataStreamReadonlyButton')).toBe(true);
+          expect(find('startDataStreamReadonlyButton').text()).toBe('Mark as read-only');
+        });
+        it('does not offers read-only if reindexing fails and read-only is excluded', async () => {
+          httpRequestsMockHelpers.setDataStreamMigrationStatusResponse(
+            MOCK_DS_DEPRECATION_REINDEX.index!,
+            {
+              hasRequiredPrivileges: true,
+              migrationOp: { resolutionType: 'reindex', status: DataStreamMigrationStatus.failed },
+              warnings: [
+                {
+                  warningType: 'incompatibleDataStream',
+                  resolutionType: 'reindex',
+                },
+              ],
+            }
+          );
+          const { actions, find, exists } = testBed;
+
+          await actions.table.clickDeprecationRowAt('dataStream', 1);
+          await actions.dataStreamDeprecationFlyout.clickReindexButton();
+
+          expect(exists('dataStreamMigrationFailedCallout')).toBe(true);
+          expect(find('dataStreamMigrationFailedCallout').text()).toBe('Reindexing error');
+
+          expect(exists('startDataStreamMigrationButton')).toBe(true);
+          expect(find('startDataStreamMigrationButton').props().disabled).toBe(false);
+          expect(find('startDataStreamMigrationButton').text()).toBe('Try again');
+
+          expect(exists('startDataStreamReadonlyButton')).toBe(false);
+        });
       });
     });
   });
@@ -762,20 +821,5 @@ describe('Data streams deprecation flyout', () => {
 
     expect(exists('fetchFailedCallout')).toBe(true);
     expect(find('fetchFailedCallout').text()).toBe('Migration status not available');
-  });
-
-  it('renders a callout if migration has failed', async () => {
-    httpRequestsMockHelpers.setDataStreamMigrationStatusResponse(MOCK_DS_DEPRECATION.index!, {
-      hasRequiredPrivileges: true,
-      migrationOp: { resolutionType: 'reindex', status: DataStreamMigrationStatus.failed },
-      warnings: [],
-    });
-    const { actions, find, exists } = testBed;
-
-    await actions.table.clickDeprecationRowAt('dataStream', 0);
-    await actions.dataStreamDeprecationFlyout.clickReindexButton();
-
-    expect(exists('dataStreamMigrationFailedCallout')).toBe(true);
-    expect(find('dataStreamMigrationFailedCallout').text()).toBe('Reindexing error');
   });
 });

@@ -35,7 +35,7 @@ import { AlertFieldsTable } from '@kbn/alerts-ui-shared/src/alert_fields_table';
 import { css } from '@emotion/react';
 import { omit } from 'lodash';
 import { BetaBadge } from '../../components/experimental_badge';
-import { RelatedAlerts } from './components/related_alerts';
+import { RelatedAlerts } from './components/related_alerts/related_alerts';
 import { AlertDetailsSource } from './types';
 import { SourceBar } from './components';
 import { StatusBar } from './components/status_bar';
@@ -296,7 +296,7 @@ export function AlertDetails() {
         </>
       ),
       'data-test-subj': 'relatedAlertsTab',
-      content: <RelatedAlerts alert={alertDetail?.formatted} />,
+      content: <RelatedAlerts alertData={alertDetail} />,
     },
   ];
 
@@ -333,15 +333,21 @@ export function AlertDetails() {
       }}
       data-test-subj="alertDetails"
     >
-      <StatusBar alert={alertDetail?.formatted ?? null} alertStatus={alertStatus} />
-      <EuiSpacer size="l" />
-      <HeaderMenu />
-      <EuiTabbedContent
-        data-test-subj="alertDetailsTabbedContent"
-        tabs={tabs}
-        selectedTab={tabs.find((tab) => tab.id === activeTabId)}
-        onTabClick={(tab) => handleSetTabId(tab.id as TabId)}
-      />
+      <CasesContext
+        owner={[observabilityFeatureId]}
+        permissions={userCasesPermissions}
+        features={{ alerts: { sync: false } }}
+      >
+        <StatusBar alert={alertDetail?.formatted ?? null} alertStatus={alertStatus} />
+        <EuiSpacer size="l" />
+        <HeaderMenu />
+        <EuiTabbedContent
+          data-test-subj="alertDetailsTabbedContent"
+          tabs={tabs}
+          selectedTab={tabs.find((tab) => tab.id === activeTabId)}
+          onTabClick={(tab) => handleSetTabId(tab.id as TabId)}
+        />
+      </CasesContext>
     </ObservabilityPageTemplate>
   );
 }
