@@ -16,7 +16,7 @@ describe('Color Format', () => {
     color: string = 'blue',
     backgroundColor: string = 'yellow'
   ) =>
-    `<span style=\"color:${color};background-color:${backgroundColor}\" css=\"[object Object]\">${text}</span>`;
+    `<span style=\"color:${color};background-color:${backgroundColor};display:inline-block;padding:0 8px;border-radius:3px\">${text}</span>`;
 
   describe('field is a number', () => {
     test('should add colors if the value is in range', () => {

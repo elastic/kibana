@@ -69,18 +69,14 @@ export class ColorFormat extends FieldFormat {
 
     return ReactDOM.renderToStaticMarkup(
       <span
-        // using `style` so we can test with jest
-        style={{ color: color.text, backgroundColor: color.background }}
+        // using `style` so we can test with jest and emotion does not work for these formatter utils
         // EuiBadge is not multiline, so we define custom styles here instead of using it.
-        css={{
+        style={{
+          color: color.text,
+          backgroundColor: color.background,
           display: 'inline-block',
-          verticalAlign: 'middle',
-          paddingBlock: '0',
-          paddingInline: '8px',
+          padding: '0 8px',
           borderRadius: '3px',
-          '.euiDataGrid &': {
-            marginTop: '-4px',
-          },
         }}
         dangerouslySetInnerHTML={{ __html: displayVal }} // eslint-disable-line react/no-danger
       />
