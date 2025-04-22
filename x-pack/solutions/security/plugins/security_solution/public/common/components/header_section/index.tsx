@@ -86,6 +86,10 @@ export const getHeaderAlignment = ({
   }
 };
 
+const tooltipIconProps = {
+  'data-test-subj': 'header-section-tooltip-icon',
+};
+
 const HeaderSectionComponent: React.FC<HeaderSectionProps> = ({
   alignHeader,
   border,
@@ -168,6 +172,7 @@ const HeaderSectionComponent: React.FC<HeaderSectionProps> = ({
                                 color="subdued"
                                 title={tooltipTitle}
                                 content={tooltip}
+                                iconProps={tooltipIconProps}
                                 size="l"
                                 type="iInCircle"
                               />

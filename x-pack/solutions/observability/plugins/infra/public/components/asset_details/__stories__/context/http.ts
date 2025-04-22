@@ -39,6 +39,30 @@ export const getHttp = (params: Parameters): HttpStart => {
           return processesChartHttpResponse.default();
         case '/api/metrics/snapshot':
           return snapshotAPItHttpResponse[params.mock as SnapshotAPIHttpMocks]();
+        case '/api/metrics/source/default':
+          return Promise.resolve({
+            source: {
+              status: {
+                remoteClustersExist: true,
+              },
+              configuration: {
+                metricAlias: 'metricbeat-*',
+              },
+            },
+          });
+        case '/api/infra/services':
+          return Promise.resolve({
+            services: [
+              {
+                serviceName: 'service-1',
+                agentName: 'go',
+              },
+              {
+                serviceName: 'service-2',
+                agentName: 'nodejs',
+              },
+            ],
+          });
         case INFA_ML_GET_METRICS_HOSTS_ANOMALIES_PATH:
           return anomaliesHttpResponse[params.mock as AnomaliesHttpMocks]();
         default:
