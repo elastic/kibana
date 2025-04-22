@@ -18,6 +18,7 @@ interface AdditionalFieldsProps {
   messageVariables?: ActionVariable[];
   onChange: (value: string | null) => void;
   isOptionalField?: boolean;
+  readOnly?: boolean;
 }
 
 export const AdditionalFieldsComponent: React.FC<AdditionalFieldsProps> = ({
@@ -26,6 +27,7 @@ export const AdditionalFieldsComponent: React.FC<AdditionalFieldsProps> = ({
   messageVariables,
   onChange,
   isOptionalField = false,
+  readOnly = false,
 }) => {
   return (
     <JsonEditorWithMessageVariables
@@ -50,6 +52,7 @@ export const AdditionalFieldsComponent: React.FC<AdditionalFieldsProps> = ({
       }
       onDocumentsChange={(json: string) => onChange(isEmpty(json) ? null : json)}
       isOptionalField={isOptionalField}
+      readOnly={readOnly}
     />
   );
 };

@@ -10,7 +10,6 @@ import { UseField, ValidationFuncArg } from '@kbn/es-ui-shared-plugin/static/for
 import { Field } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import { AdditionalFields } from '../components/additional_fields';
-
 import * as i18n from './translations';
 
 interface OAuth2FieldsProps {
@@ -35,12 +34,12 @@ interface AdditionalFieldsWrapperProps {
     setValue: (value: string | null) => void;
     errors?: Array<{ message: string; [key: string]: any }>;
   };
-
+  readOnly?: boolean;
   isOptionalField?: boolean;
 }
 
 const AdditionalFieldsWrapper: React.FC<AdditionalFieldsWrapperProps> = React.memo(
-  ({ field: { value, setValue, errors }, isOptionalField }) => {
+  ({ field: { value, setValue, errors }, readOnly, isOptionalField }) => {
     const handleAdditionalFieldsChange = useCallback(
       (json: string | null) => {
         setValue(json);
@@ -55,6 +54,7 @@ const AdditionalFieldsWrapper: React.FC<AdditionalFieldsWrapperProps> = React.me
         onChange={handleAdditionalFieldsChange}
         errors={errorsProp}
         isOptionalField={isOptionalField}
+        readOnly={readOnly}
       />
     );
   }
@@ -153,6 +153,7 @@ export const OAuth2Fields: React.FC<OAuth2FieldsProps> = ({ readOnly }) => {
               'data-test-subj': 'AdditionalFieldsOAuth2',
             },
             isOptionalField: true,
+            readOnly,
           }}
         />
         <EuiSpacer size="s" />
