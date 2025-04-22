@@ -70,5 +70,9 @@ export const catchAxiosErrorFormatAndThrow = (error: Error): never => {
     throw new FormattedAxiosError(error);
   }
 
+  if (!(error instanceof EndpointError)) {
+    throw new EndpointError(error.message, error);
+  }
+
   throw error;
 };
