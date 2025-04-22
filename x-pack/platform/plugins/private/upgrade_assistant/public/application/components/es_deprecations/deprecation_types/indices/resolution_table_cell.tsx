@@ -160,16 +160,19 @@ export const ReindexResolutionCell: React.FunctionComponent = () => {
         </EuiFlexGroup>
       );
     case ReindexStatus.failed:
-      return (
-        <EuiFlexGroup gutterSize="s" alignItems="center">
-          <EuiFlexItem grow={false}>
-            <EuiIcon type="warning" color="danger" />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiText size="s">{i18nTexts.reindexFailedText}</EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      );
+      if (updateIndexState.status !== 'complete') {
+        return (
+          <EuiFlexGroup gutterSize="s" alignItems="center">
+            <EuiFlexItem grow={false}>
+              <EuiIcon type="warning" color="danger" />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiText size="s">{i18nTexts.reindexFailedText}</EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        );
+      }
+      break;
     case ReindexStatus.fetchFailed:
       return (
         <EuiFlexGroup gutterSize="s" alignItems="center">

@@ -43,6 +43,7 @@ describe('UpdateIndexFlyoutStep', () => {
       <Fragment>
         <EuiFlyoutBody>
           <EuiTitle
+            data-test-subj="updateIndexFlyoutTitle"
             size="xs"
           >
             <h3>
@@ -113,6 +114,7 @@ describe('UpdateIndexFlyoutStep', () => {
       <Fragment>
         <EuiFlyoutBody>
           <EuiTitle
+            data-test-subj="updateIndexFlyoutTitle"
             size="xs"
           >
             <h3>
