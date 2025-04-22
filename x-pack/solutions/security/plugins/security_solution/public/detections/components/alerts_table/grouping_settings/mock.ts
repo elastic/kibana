@@ -97,7 +97,7 @@ export const getQuery = (
       type: 'keyword',
       script: {
         source:
-          "if (doc[params['selectedGroup']].size()==0) { emit(params['uniqueValue']) } else { emit(doc[params['selectedGroup']].join(params['uniqueValue']))}",
+          "def groupValues = doc[params['selectedGroup']]; int count = groupValues.size(); if (count == 0 || count > 100 ) { emit(params['uniqueValue']); } else { emit(groupValues.join(params['uniqueValue']))}",
         params: {
           selectedGroup,
           uniqueValue,
