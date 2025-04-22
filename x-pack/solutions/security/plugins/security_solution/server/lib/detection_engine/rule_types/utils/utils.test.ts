@@ -8,6 +8,7 @@
 import moment from 'moment';
 import sinon from 'sinon';
 import type { TransportResult } from '@elastic/elasticsearch';
+import type { IlmExplainLifecycleResponse } from 'elasticsearch-8.x/lib/api/types';
 import { ALERT_REASON, ALERT_RULE_PARAMETERS, ALERT_UUID, TIMESTAMP } from '@kbn/rule-data-utils';
 
 import type { SanitizedRuleAction } from '@kbn/alerting-plugin/common';
@@ -60,17 +61,8 @@ import { ruleExecutionLogMock } from '../../rule_monitoring/mocks';
 import type { GenericBulkCreateResponse } from '../factories';
 import type { BaseFieldsLatest } from '../../../../../common/api/detection_engine/model/alerts';
 import type { AlertingServerSetup } from '@kbn/alerting-plugin/server';
-import type {
-  FieldCapsResponse,
-  IndicesGetSettingsResponse,
-} from '@elastic/elasticsearch/lib/api/types';
+import type { FieldCapsResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { buildTimeRangeFilter } from './build_events_query';
-import { pick } from 'lodash';
-
-jest.mock('./build_events_query', () => ({
-  buildTimeRangeFilter: jest.fn(),
-}));
 
 describe('utils', () => {
   const anchor = '2020-01-01T06:06:06.666Z';
@@ -1395,66 +1387,50 @@ describe('utils', () => {
     let currentUserEsClient: ElasticsearchClient;
     let internalEsClient: ElasticsearchClient;
     let fieldCapsMock: jest.MockedFunction<ElasticsearchClient['fieldCaps']>;
-    let indicesGetSettingsMock: jest.MockedFunction<ElasticsearchClient['indices']['getSettings']>;
-    const buildTimeRangeFilterMock = buildTimeRangeFilter as jest.MockedFunction<
-      typeof buildTimeRangeFilter
+    let ilmExplainLifecycleMock: jest.MockedFunction<
+      ElasticsearchClient['ilm']['explainLifecycle']
     >;
-    const returnedTimeRangeFilterRef = {};
 
     beforeEach(() => {
       fieldCapsMock = jest.fn();
-      indicesGetSettingsMock = jest.fn();
+      ilmExplainLifecycleMock = jest.fn();
 
       currentUserEsClient = {
         fieldCaps: fieldCapsMock,
       } as unknown as ElasticsearchClient;
 
       internalEsClient = {
-        indices: {
-          getSettings: indicesGetSettingsMock,
+        ilm: {
+          explainLifecycle: ilmExplainLifecycleMock,
         },
       } as unknown as ElasticsearchClient;
 
-      buildTimeRangeFilterMock.mockReturnValue(returnedTimeRangeFilterRef);
       jest.clearAllMocks();
     });
 
-    it('should return frozen indices when partial indices are confirmed as frozen', async () => {
-      const inputIndices = ['partial-index-1', 'partial-index-2', 'regular-index'];
-      const fieldCapsResponse = {
-        indices: ['partial-index-1', 'partial-index-2', 'regular-index'],
+    it('should return frozen indices when indices are confirmed as frozen', async () => {
+      const inputIndices = ['frozen-index-*', 'regular-index'];
+      const fieldCapsResponse: FieldCapsResponse = {
+        indices: ['frozen-index-1', 'frozen-index-2', 'regular-index'],
+        fields: {},
       };
-      const getSettingsResponse = {
-        'partial-index-1': {
-          settings: {
-            index: {
-              routing: {
-                allocation: {
-                  include: {
-                    _tier_preference: 'data_frozen',
-                  },
-                },
-              },
-            },
+      const ilmExplainLifecycleResponse: IlmExplainLifecycleResponse = {
+        indices: {
+          'frozen-index-1': {
+            index: 'frozen-index-1',
+            managed: true,
+            phase: 'frozen',
           },
-        },
-        'partial-index-2': {
-          settings: {
-            index: {
-              routing: {
-                allocation: {
-                  include: {
-                    _tier_preference: 'data_frozen',
-                  },
-                },
-              },
-            },
+          'frozen-index-2': {
+            index: 'frozen-index-2',
+            managed: true,
+            phase: 'frozen',
           },
         },
       };
 
-      fieldCapsMock.mockResolvedValue(fieldCapsResponse as FieldCapsResponse);
-      indicesGetSettingsMock.mockResolvedValue(getSettingsResponse as IndicesGetSettingsResponse);
+      fieldCapsMock.mockResolvedValue(fieldCapsResponse);
+      ilmExplainLifecycleMock.mockResolvedValue(ilmExplainLifecycleResponse);
 
       const params = {
         inputIndices,
@@ -1468,61 +1444,41 @@ describe('utils', () => {
 
       const frozenIndices = await checkForFrozenIndices(params);
 
-      expect(frozenIndices).toEqual(['partial-index-1', 'partial-index-2']);
+      expect(frozenIndices).toEqual(['frozen-index-1', 'frozen-index-2']);
       expect(fieldCapsMock).toHaveBeenNthCalledWith(1, {
         index: inputIndices,
         fields: ['_id'],
         ignore_unavailable: true,
         index_filter: expect.any(Object),
       });
-      expect(buildTimeRangeFilter).toHaveBeenNthCalledWith(
-        1,
-        pick(params, ['to', 'from', 'primaryTimestamp', 'secondaryTimestamp'])
-      );
-      expect(fieldCapsMock.mock.calls[0][0]?.index_filter).toBe(returnedTimeRangeFilterRef);
-      expect(indicesGetSettingsMock).toHaveBeenNthCalledWith(1, {
-        index: ['partial-index-1', 'partial-index-2'],
-        filter_path: '*.settings.index.routing.allocation.include._tier_preference',
+      expect(ilmExplainLifecycleMock).toHaveBeenNthCalledWith(1, {
+        index: inputIndices.join(','),
       });
     });
 
     it('should return an empty array when no frozen indices are found', async () => {
       const inputIndices = ['regular-index-1', 'regular-index-2'];
-      const fieldCapsResponse = {
+      const fieldCapsResponse: FieldCapsResponse = {
         indices: ['regular-index-1', 'regular-index-2'],
+        fields: {},
       };
 
-      const getSettingsResponse = {
-        'regular-index-1': {
-          settings: {
-            index: {
-              routing: {
-                allocation: {
-                  include: {
-                    _tier_preference: 'data_content',
-                  },
-                },
-              },
-            },
+      const ilmExplainLifecycleResponse: IlmExplainLifecycleResponse = {
+        indices: {
+          'regular-index-1': {
+            index: 'regular-index-1',
+            managed: false,
           },
-        },
-        'regular-index-2': {
-          settings: {
-            index: {
-              routing: {
-                allocation: {
-                  include: {
-                    _tier_preference: 'data_content',
-                  },
-                },
-              },
-            },
+          'regular-index-2': {
+            index: 'regular-index-2',
+            managed: true,
+            phase: 'warm',
           },
         },
       };
 
-      fieldCapsMock.mockResolvedValue(fieldCapsResponse as FieldCapsResponse);
-      indicesGetSettingsMock.mockResolvedValue(getSettingsResponse as IndicesGetSettingsResponse);
+      fieldCapsMock.mockResolvedValue(fieldCapsResponse);
+      ilmExplainLifecycleMock.mockResolvedValue(ilmExplainLifecycleResponse);
 
       const params = {
         inputIndices,
@@ -1537,90 +1493,20 @@ describe('utils', () => {
       const frozenIndices = await checkForFrozenIndices(params);
 
       expect(frozenIndices).toEqual([]);
-      expect(buildTimeRangeFilterMock).toHaveBeenNthCalledWith(
-        1,
-        pick(params, ['to', 'from', 'primaryTimestamp', 'secondaryTimestamp'])
-      );
+
       expect(fieldCapsMock).toHaveBeenCalledWith({
         index: inputIndices,
         fields: ['_id'],
         ignore_unavailable: true,
         index_filter: expect.any(Object),
       });
-      expect(fieldCapsMock.mock.calls[0][0]?.index_filter).toBe(returnedTimeRangeFilterRef);
-      expect(indicesGetSettingsMock).not.toHaveBeenCalled();
-    });
-
-    it('should return an empty array when there are indices whose name begins with "partial-", but they are not frozen', async () => {
-      const inputIndices = ['partial-regular-index-1', 'regular-index-2'];
-      const fieldCapsResponse = {
-        indices: ['partial-regular-index-1', 'regular-index-2'],
-      };
-
-      const getSettingsResponse = {
-        'partial-regular-index-1': {
-          settings: {
-            index: {
-              routing: {
-                allocation: {
-                  include: {
-                    _tier_preference: 'data_content',
-                  },
-                },
-              },
-            },
-          },
-        },
-        'regular-index-2': {
-          settings: {
-            index: {
-              routing: {
-                allocation: {
-                  include: {
-                    _tier_preference: 'data_content',
-                  },
-                },
-              },
-            },
-          },
-        },
-      };
-
-      fieldCapsMock.mockResolvedValue(fieldCapsResponse as FieldCapsResponse);
-      indicesGetSettingsMock.mockResolvedValue(getSettingsResponse as IndicesGetSettingsResponse);
-
-      const params = {
-        inputIndices,
-        internalEsClient,
-        currentUserEsClient,
-        to: 'now',
-        from: 'now-1d',
-        primaryTimestamp: '@timestamp',
-        secondaryTimestamp: undefined,
-      };
-
-      const frozenIndices = await checkForFrozenIndices(params);
-
-      expect(frozenIndices).toEqual([]);
-      expect(buildTimeRangeFilterMock).toHaveBeenNthCalledWith(
-        1,
-        pick(params, ['to', 'from', 'primaryTimestamp', 'secondaryTimestamp'])
-      );
-      expect(fieldCapsMock).toHaveBeenCalledWith({
-        index: inputIndices,
-        fields: ['_id'],
-        ignore_unavailable: true,
-        index_filter: expect.any(Object),
-      });
-      expect(fieldCapsMock.mock.calls[0][0]?.index_filter).toBe(returnedTimeRangeFilterRef);
-      expect(indicesGetSettingsMock).toHaveBeenCalledWith({
-        index: ['partial-regular-index-1'],
-        filter_path: '*.settings.index.routing.allocation.include._tier_preference',
+      expect(ilmExplainLifecycleMock).toHaveBeenNthCalledWith(1, {
+        index: inputIndices.join(','),
       });
     });
 
     it('should handle errors from fieldCaps gracefully', async () => {
-      const inputIndices = ['partial-index-1', 'partial-index-2'];
+      const inputIndices = ['frozen-index-1', 'frozen-index-2'];
 
       fieldCapsMock.mockRejectedValue(new Error('fieldCaps error'));
 
@@ -1645,13 +1531,14 @@ describe('utils', () => {
     });
 
     it('should handle errors from getSettings gracefully', async () => {
-      const inputIndices = ['partial-index-1', 'partial-index-2'];
-      const fieldCapsResponse = {
-        indices: ['partial-index-1', 'partial-index-2'],
+      const inputIndices = ['frozen-index-1', 'frozen-index-2'];
+      const fieldCapsResponse: FieldCapsResponse = {
+        indices: ['frozen-index-1', 'frozen-index-2'],
+        fields: {},
       };
 
-      fieldCapsMock.mockResolvedValue(fieldCapsResponse as FieldCapsResponse);
-      indicesGetSettingsMock.mockRejectedValue(new Error('getSettings error'));
+      fieldCapsMock.mockResolvedValue(fieldCapsResponse);
+      ilmExplainLifecycleMock.mockRejectedValue(new Error('ilmExplainLifecycle error'));
 
       await expect(
         checkForFrozenIndices({
@@ -1663,7 +1550,7 @@ describe('utils', () => {
           primaryTimestamp: '@timestamp',
           secondaryTimestamp: undefined,
         })
-      ).rejects.toThrow('getSettings error');
+      ).rejects.toThrow('ilmExplainLifecycle error');
 
       expect(fieldCapsMock).toHaveBeenCalledWith({
         index: inputIndices,
@@ -1671,9 +1558,8 @@ describe('utils', () => {
         ignore_unavailable: true,
         index_filter: expect.any(Object),
       });
-      expect(indicesGetSettingsMock).toHaveBeenCalledWith({
-        index: inputIndices,
-        filter_path: '*.settings.index.routing.allocation.include._tier_preference',
+      expect(ilmExplainLifecycleMock).toHaveBeenCalledWith({
+        index: inputIndices.join(','),
       });
     });
   });

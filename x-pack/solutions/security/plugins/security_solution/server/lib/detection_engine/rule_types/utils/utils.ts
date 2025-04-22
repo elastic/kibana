@@ -220,36 +220,19 @@ export const checkForFrozenIndices = async ({
     }),
   });
 
-  const responseIndices = isArray(fieldCapsResponse.indices)
+  const resolvedQueryIndices = isArray(fieldCapsResponse.indices)
     ? fieldCapsResponse.indices
     : [fieldCapsResponse.indices];
-  // Frozen indices start with `partial-`, but it's possible
-  // for some regular hot/warm index to start with that prefix as well by coincidence. If we find indices with that naming pattern,
-  // we fetch the index settings to verify that they are actually frozen indices.
-  const partialIndices = responseIndices.filter((index) => index.startsWith('partial-'));
-  if (partialIndices.length <= 0) {
-    return [];
-  }
 
-  // See https://www.elastic.co/guide/en/elasticsearch/reference/current/data-tiers.html#data-tier-allocation for
-  // details on _tier_preference
-  const tierPreferencesResp = await internalEsClient.indices.getSettings({
-    // Use the original index patterns again instead of just the concrete names of the partial indices:
+  const explainResponse = await internalEsClient.ilm.explainLifecycle({
+    // Use the original index patterns again instead of just the concrete names of the indices:
     // the list of concrete indices could be huge and make the request URL too large, but we know the list of index patterns works
-    index: partialIndices,
-    filter_path: '*.settings.index.routing.allocation.include._tier_preference',
+    index: inputIndices.join(','),
   });
 
-  return partialIndices.filter((partialIdx) => {
-    let isFrozen = false;
-    const tiers =
-      tierPreferencesResp[partialIdx].settings?.index?.routing?.allocation?.include
-        ?._tier_preference;
-    if (tiers) {
-      const preferredTier = tiers.split(',')[0];
-      isFrozen = preferredTier === 'data_frozen';
-    }
-    return isFrozen;
+  return resolvedQueryIndices.filter((index) => {
+    const indexResponse = explainResponse.indices[index];
+    return indexResponse !== undefined && indexResponse.managed && indexResponse.phase === 'frozen';
   });
 };
 
