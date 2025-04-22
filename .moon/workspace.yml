@@ -14,3 +14,7 @@ vcs:
 
 hasher:
   batchSize: 1500
+
+unstable_remote:
+  host: "https://elastic-bazel-remote-h5qd3jkxkq-uc.a.run.app"
+  tls:
