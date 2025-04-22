@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { shallow } from 'enzyme';
+import { render } from '@testing-library/react';
 import React from 'react';
 
 import { EmptyPage } from '.';
@@ -18,8 +18,8 @@ describe('EmptyPage component', () => {
         url: 'my/url/from/nowwhere',
       },
     };
-    const EmptyComponent = shallow(<EmptyPage actions={actions} title="My Super Title" />);
-    expect(EmptyComponent).toMatchSnapshot();
+    const { container } = render(<EmptyPage actions={actions} title="My Super Title" />);
+    expect(container.children[0]).toMatchSnapshot();
   });
 
   it('renders actions with descriptions', () => {
@@ -30,7 +30,7 @@ describe('EmptyPage component', () => {
         url: 'my/url/from/nowwhere',
       },
     };
-    const EmptyComponent = shallow(<EmptyPage actions={actions} title="My Super Title" />);
-    expect(EmptyComponent).toMatchSnapshot();
+    const { container } = render(<EmptyPage actions={actions} title="My Super Title" />);
+    expect(container.children[0]).toMatchSnapshot();
   });
 });
