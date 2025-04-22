@@ -185,3 +185,11 @@ export type DenormalizedAction = DistributiveOmit<
   actionRef: string;
   actionTypeId: string;
 };
+
+interface DashboardItem {
+  refId: string;
+}
+
+export interface DenormalizedArtifacts {
+  dashboards?: DashboardItem[];
+}

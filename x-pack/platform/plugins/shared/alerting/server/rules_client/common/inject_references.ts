@@ -10,6 +10,7 @@ import { omit } from 'lodash';
 import type { SavedObjectReference, SavedObjectAttributes } from '@kbn/core/server';
 import type { UntypedNormalizedRuleType } from '../../rule_type_registry';
 import type { RawRule, RuleTypeParams } from '../../types';
+import type { RuleDomain } from '../../application/rule/types';
 import {
   preconfiguredConnectorActionRefPrefix,
   extractedSavedObjectParamReferenceNamePrefix,
@@ -76,4 +77,32 @@ export function injectReferencesIntoParams<
       `Error injecting reference into rule params for rule id ${ruleId} - ${err.message}`
     );
   }
+}
+
+export function injectReferencesIntoArtifacts(
+  ruleId: string,
+  artifacts?: RawRule['artifacts'],
+  references?: SavedObjectReference[]
+): Required<RuleDomain['artifacts']> {
+  if (!artifacts) {
+    return { dashboards: [] };
+  }
+  return {
+    ...artifacts,
+    dashboards:
+      artifacts.dashboards?.map((dashboard) => {
+        const reference = references?.find(
+          (ref) => ref.name === dashboard.refId && ref.type === 'dashboard'
+        );
+        if (!reference) {
+          throw new Error(
+            `Artifacts reference "${dashboard.refId}" not found in rule id: ${ruleId}`
+          );
+        }
+        return {
+          ...omit(dashboard, 'refId'),
+          id: reference.id,
+        };
+      }) ?? [],
+  };
 }
