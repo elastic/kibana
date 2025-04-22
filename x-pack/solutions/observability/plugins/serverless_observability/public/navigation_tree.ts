@@ -78,6 +78,17 @@ export const createNavigationTree = ({
             ? [
                 {
                   link: 'streams' as const,
+                  withBadge: true,
+                  badgeOptions: {
+                    icon: 'beaker',
+                    tooltip: i18n.translate(
+                      'xpack.serverlessObservability.nav.streamsBadgeTooltip',
+                      {
+                        defaultMessage:
+                          'This functionality is experimental and not supported. It may change or be removed at any time.',
+                      }
+                    ),
+                  },
                 },
               ]
             : []),
@@ -295,6 +306,7 @@ export const createNavigationTree = ({
                   { link: 'management:pipelines', breadcrumbStatus: 'hidden' },
                   { link: 'management:data_quality', breadcrumbStatus: 'hidden' },
                   { link: 'management:data_usage', breadcrumbStatus: 'hidden' },
+                  { link: 'management:content_connectors', breadcrumbStatus: 'hidden' },
                 ],
               },
               {
