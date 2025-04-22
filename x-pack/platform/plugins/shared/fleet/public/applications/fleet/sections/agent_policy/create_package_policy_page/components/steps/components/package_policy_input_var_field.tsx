@@ -24,6 +24,13 @@ import {
   EuiButtonEmpty,
   EuiLink,
   EuiIconTip,
+  EuiButton,
+  EuiFlyout,
+  EuiFlyoutHeader,
+  EuiFlyoutBody,
+  EuiFlyoutFooter,
+  EuiTitle,
+  EuiButtonIcon,
 } from '@elastic/eui';
 import styled from 'styled-components';
 
@@ -40,6 +47,22 @@ import { DatasetComponent } from './dataset_component';
 
 const FixedHeightDiv = styled.div`
   height: 300px;
+  position: relative;
+`;
+
+const FixedFullScreenDiv = styled.div`
+  height: 90vh;
+  max-height: 100%;
+  overflow: hidden;
+  position: relative;
+  width: 100%;
+`;
+
+const ExpandButton = styled(EuiButtonIcon)`
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 1;
 `;
 
 const FormRow = styled(EuiFormRow)`
@@ -72,6 +95,8 @@ type InputComponentProps = InputFieldProps & {
   isInvalid: boolean;
   fieldLabel: string;
   fieldTestSelector: string;
+  isFullscreenFlyoutOpen: boolean;
+  setIsFullscreenFlyoutOpen: (isFullscreenFlyoutOpen: boolean) => void;
 };
 
 export const PackagePolicyInputVarField: React.FunctionComponent<InputFieldProps> = memo(
@@ -89,6 +114,7 @@ export const PackagePolicyInputVarField: React.FunctionComponent<InputFieldProps
   }) => {
     const fleetStatus = useFleetStatus();
     const [isDirty, setIsDirty] = useState<boolean>(false);
+    const [isFullscreenFlyoutOpen, setIsFullscreenFlyoutOpen] = useState(false);
     const { required, type, title, name, description } = varDef;
     const isInvalid = Boolean((isDirty || forceShowErrors) && !!varErrors?.length);
     const errors = isInvalid ? varErrors : null;
@@ -132,6 +158,8 @@ export const PackagePolicyInputVarField: React.FunctionComponent<InputFieldProps
           fieldTestSelector={fieldTestSelector}
           isDirty={isDirty}
           setIsDirty={setIsDirty}
+          isFullscreenFlyoutOpen={isFullscreenFlyoutOpen}
+          setIsFullscreenFlyoutOpen={setIsFullscreenFlyoutOpen}
         />
       );
     } else {
@@ -145,8 +173,21 @@ export const PackagePolicyInputVarField: React.FunctionComponent<InputFieldProps
         fieldTestSelector,
         isDirty,
         setIsDirty,
+        isFullscreenFlyoutOpen,
+        setIsFullscreenFlyoutOpen,
       });
     }
+
+    // Render the flyout here at the component level
+    const yamlFlyout =
+      varDef.type === 'yaml' && isFullscreenFlyoutOpen ? (
+        <YamlEditorFlyout
+          value={value}
+          onChange={onChange}
+          onClose={() => setIsFullscreenFlyoutOpen(false)}
+          label={fieldLabel}
+        />
+      ) : null;
 
     const formRow = (
       <FormRow
@@ -171,7 +212,12 @@ export const PackagePolicyInputVarField: React.FunctionComponent<InputFieldProps
       </FormRow>
     );
 
-    return useSecretsUi ? <SecretFieldWrapper>{formRow}</SecretFieldWrapper> : formRow;
+    return (
+      <>
+        {useSecretsUi ? <SecretFieldWrapper>{formRow}</SecretFieldWrapper> : formRow}
+        {yamlFlyout}
+      </>
+    );
   }
 );
 
@@ -184,8 +230,11 @@ function getInputComponent({
   fieldLabel,
   fieldTestSelector,
   setIsDirty,
+  isFullscreenFlyoutOpen,
+  setIsFullscreenFlyoutOpen,
 }: InputComponentProps) {
   const { multi, type, options, full_width: fullWidth } = varDef;
+
   if (multi) {
     return (
       <MultiTextInput
@@ -213,39 +262,55 @@ function getInputComponent({
         />
       );
     case 'yaml':
-      return frozen ? (
-        <EuiCodeBlock language="yaml" isCopyable={false} paddingSize="s">
-          <pre>{value}</pre>
-        </EuiCodeBlock>
-      ) : (
-        <FixedHeightDiv>
-          <CodeEditor
-            languageId="yaml"
-            width="100%"
-            height="300px"
-            value={value}
-            onChange={onChange}
-            options={{
-              minimap: {
-                enabled: false,
-              },
-              ariaLabel: i18n.translate('xpack.fleet.packagePolicyField.yamlCodeEditor', {
-                defaultMessage: 'YAML Code Editor',
-              }),
-              scrollBeyondLastLine: false,
-              wordWrap: 'off',
-              wrappingIndent: 'indent',
-              tabSize: 2,
-              // To avoid left margin
-              lineNumbers: 'off',
-              lineNumbersMinChars: 0,
-              glyphMargin: false,
-              folding: false,
-              lineDecorationsWidth: 0,
-              overviewRulerBorder: false,
-            }}
-          />
-        </FixedHeightDiv>
+      return (
+        <>
+          {frozen ? (
+            <EuiCodeBlock language="yaml" isCopyable={false} paddingSize="s">
+              <pre>{value}</pre>
+            </EuiCodeBlock>
+          ) : (
+            <>
+              <FixedHeightDiv>
+                <ExpandButton
+                  iconType="expand"
+                  size="s"
+                  display="base"
+                  onClick={() => setIsFullscreenFlyoutOpen(true)}
+                  data-test-subj={`expandYamlEditor-${fieldTestSelector}`}
+                />
+                <CodeEditor
+                  languageId="yaml"
+                  width="100%"
+                  height="300px"
+                  value={value}
+                  placeholder={i18n.translate('xpack.fleet.packagePolicyField.yamlPlaceholder', {
+                    defaultMessage: 'Enter YAML Configuration',
+                  })}
+                  onChange={onChange}
+                  options={{
+                    minimap: {
+                      enabled: false,
+                    },
+                    ariaLabel: i18n.translate('xpack.fleet.packagePolicyField.yamlCodeEditor', {
+                      defaultMessage: 'YAML Code Editor',
+                    }),
+                    scrollBeyondLastLine: false,
+                    wordWrap: 'off',
+                    wrappingIndent: 'indent',
+                    tabSize: 2,
+                    // To avoid left margin
+                    lineNumbers: 'off',
+                    lineNumbersMinChars: 0,
+                    glyphMargin: false,
+                    folding: false,
+                    lineDecorationsWidth: 0,
+                    overviewRulerBorder: false,
+                  }}
+                />
+              </FixedHeightDiv>
+            </>
+          )}
+        </>
       );
     case 'bool':
       return (
@@ -310,6 +375,73 @@ function getInputComponent({
   }
 }
 
+// Create a new flyout component for the fullscreen YAML editor
+interface YamlEditorFlyoutProps {
+  value: string;
+  onChange: (value: string) => void;
+  onClose: () => void;
+  label: string;
+}
+
+const YamlEditorFlyout: React.FC<YamlEditorFlyoutProps> = ({ value, onChange, onClose, label }) => {
+  return (
+    <EuiFlyout
+      onClose={onClose}
+      size="l"
+      maxWidth={false} // Allow it to take full width
+      ownFocus
+      aria-labelledby="yamlEditorFlyoutTitle"
+    >
+      <EuiFlyoutHeader hasBorder>
+        <EuiTitle size="m">
+          <h2 id="yamlEditorFlyoutTitle">
+            {i18n.translate('xpack.fleet.packagePolicyField.yamlEditorFlyoutTitle', {
+              defaultMessage: 'Edit {label}',
+              values: { label },
+            })}
+          </h2>
+        </EuiTitle>
+      </EuiFlyoutHeader>
+      <EuiFlyoutBody>
+        <FixedFullScreenDiv>
+          <CodeEditor
+            languageId="yaml"
+            width="100%"
+            height="100%"
+            value={value}
+            onChange={onChange}
+            options={{
+              minimap: {
+                enabled: false,
+              },
+              ariaLabel: i18n.translate('xpack.fleet.packagePolicyField.yamlEditorFlyout', {
+                defaultMessage: 'Fullscreen YAML Code Editor',
+              }),
+              scrollBeyondLastLine: false,
+              wordWrap: 'off',
+              wrappingIndent: 'indent',
+              tabSize: 2,
+              lineNumbers: 'on',
+              folding: true,
+            }}
+          />
+        </FixedFullScreenDiv>
+      </EuiFlyoutBody>
+      <EuiFlyoutFooter>
+        <EuiFlexGroup justifyContent="flexEnd">
+          <EuiFlexItem grow={false}>
+            <EuiButton onClick={onClose} fill>
+              {i18n.translate('xpack.fleet.packagePolicyField.doneEditing', {
+                defaultMessage: 'Done',
+              })}
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlyoutFooter>
+    </EuiFlyout>
+  );
+};
+
 const SecretFieldWrapper = ({ children }: { children: React.ReactNode }) => {
   const { docLinks } = useStartServices();
 
@@ -371,6 +503,8 @@ function SecretInputField({
   fieldTestSelector,
   setIsDirty,
   isDirty,
+  isFullscreenFlyoutOpen,
+  setIsFullscreenFlyoutOpen,
 }: InputComponentProps) {
   const [isReplacing, setIsReplacing] = useState(isEditPage && !value);
   const valueOnFirstRender = useRef(value);
@@ -394,6 +528,8 @@ function SecretInputField({
     fieldTestSelector,
     isDirty,
     setIsDirty,
+    isFullscreenFlyoutOpen,
+    setIsFullscreenFlyoutOpen,
   });
 
   // If there's no value for this secret, display the input as its "brand new" creation state
