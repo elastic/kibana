@@ -78,6 +78,7 @@ export class RequestContextFactory implements IRequestContextFactory {
     };
 
     const savedObjectsClient = coreStart.savedObjects.getScopedClient(request);
+    const rulesClient = await startPlugins.alerting.getRulesClientWithRequest(request);
 
     return {
       core: coreContext,
@@ -142,6 +143,12 @@ export class RequestContextFactory implements IRequestContextFactory {
         });
       }),
 
+      getAttackDiscoverySchedulingDataClient: memoize(async () => {
+        return this.assistantService.createAttackDiscoverySchedulingDataClient({
+          rulesClient,
+        });
+      }),
+
       getDefendInsightsDataClient: memoize(async () => {
         const currentUser = await getCurrentUser();
         return this.assistantService.createDefendInsightsDataClient({
@@ -155,6 +162,16 @@ export class RequestContextFactory implements IRequestContextFactory {
       getAIAssistantPromptsDataClient: memoize(async () => {
         const currentUser = await getCurrentUser();
         return this.assistantService.createAIAssistantPromptsDataClient({
+          spaceId: getSpaceId(),
+          licensing: context.licensing,
+          logger: this.logger,
+          currentUser,
+        });
+      }),
+
+      getAlertSummaryDataClient: memoize(async () => {
+        const currentUser = await getCurrentUser();
+        return this.assistantService.createAlertSummaryDataClient({
           spaceId: getSpaceId(),
           licensing: context.licensing,
           logger: this.logger,

@@ -21,7 +21,7 @@ const DATE_WITH_DATA = {
 
 const ALERTS_FLYOUT_SELECTOR = 'alertsFlyout';
 const FILTER_FOR_VALUE_BUTTON_SELECTOR = 'filterForValue';
-const ALERTS_TABLE_WITH_DATA_SELECTOR = 'alertsTable';
+const ALERTS_TABLE_WITH_DATA_SELECTOR = 'alertsTableIsLoaded';
 const ALERTS_TABLE_NO_DATA_SELECTOR = 'alertsTableEmptyState';
 const ALERTS_TABLE_ERROR_PROMPT_SELECTOR = 'alertsTableErrorPrompt';
 const ALERTS_TABLE_ACTIONS_MENU_SELECTOR = 'alertsTableActionsMenu';
