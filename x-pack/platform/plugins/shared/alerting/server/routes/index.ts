@@ -10,6 +10,7 @@ import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { ConfigSchema } from '@kbn/unified-search-plugin/server/config';
 import type { Observable } from 'rxjs';
+import type { AlertingConfig } from '../config';
 import type { GetAlertIndicesAlias, ILicenseState } from '../lib';
 import type { AlertingRequestHandlerContext } from '../types';
 import { createRuleRoute } from './rule/apis/create';
@@ -96,6 +97,7 @@ export interface RouteOptions {
   config$?: Observable<ConfigSchema>;
   isServerless?: boolean;
   docLinks: DocLinksServiceSetup;
+  alertingConfig: AlertingConfig;
 }
 
 export function defineRoutes(opts: RouteOptions) {
@@ -106,6 +108,7 @@ export function defineRoutes(opts: RouteOptions) {
     usageCounter,
     config$,
     getAlertIndicesAlias,
+    alertingConfig,
   } = opts;
 
   createRuleRoute(opts);
@@ -147,25 +150,26 @@ export function defineRoutes(opts: RouteOptions) {
   muteAlertRoute(router, licenseState);
   unmuteAlertRoute(router, licenseState);
 
-  // Maintenance Window - Internal APIs
-  createMaintenanceWindowRouteInternal(router, licenseState);
-  getMaintenanceWindowRouteInternal(router, licenseState);
-  updateMaintenanceWindowRouteInternal(router, licenseState);
-  deleteMaintenanceWindowRouteInternal(router, licenseState);
-  findMaintenanceWindowsRouteInternal(router, licenseState);
-  archiveMaintenanceWindowRouteInternal(router, licenseState);
-  finishMaintenanceWindowRouteInternal(router, licenseState);
-  getActiveMaintenanceWindowsRouteInternal(router, licenseState);
-  bulkGetMaintenanceWindowRouteInternal(router, licenseState);
+  if (alertingConfig.maintenanceWindow.enabled) {
+    // Maintenance Window - Internal APIs
+    createMaintenanceWindowRouteInternal(router, licenseState);
+    getMaintenanceWindowRouteInternal(router, licenseState);
+    updateMaintenanceWindowRouteInternal(router, licenseState);
+    deleteMaintenanceWindowRouteInternal(router, licenseState);
+    findMaintenanceWindowsRouteInternal(router, licenseState);
+    archiveMaintenanceWindowRouteInternal(router, licenseState);
+    finishMaintenanceWindowRouteInternal(router, licenseState);
+    getActiveMaintenanceWindowsRouteInternal(router, licenseState);
+    bulkGetMaintenanceWindowRouteInternal(router, licenseState);
 
-  // Maintenance Window - External APIs
-  getMaintenanceWindowRoute(router, licenseState);
-  createMaintenanceWindowRoute(router, licenseState);
-  deleteMaintenanceWindowRoute(router, licenseState);
-  archiveMaintenanceWindowRoute(router, licenseState);
-  unarchiveMaintenanceWindowRoute(router, licenseState);
-  updateMaintenanceWindowRoute(router, licenseState);
-
+    // Maintenance Window - External APIs
+    getMaintenanceWindowRoute(router, licenseState);
+    createMaintenanceWindowRoute(router, licenseState);
+    deleteMaintenanceWindowRoute(router, licenseState);
+    archiveMaintenanceWindowRoute(router, licenseState);
+    unarchiveMaintenanceWindowRoute(router, licenseState);
+    updateMaintenanceWindowRoute(router, licenseState);
+  }
   // backfill APIs
   scheduleBackfillRoute(router, licenseState);
   getBackfillRoute(router, licenseState);
@@ -178,15 +182,18 @@ export function defineRoutes(opts: RouteOptions) {
   getRuleIdsWithGapsRoute(router, licenseState);
   getGapsSummaryByRuleIdsRoute(router, licenseState);
 
+  // Rules Settings APIs
+  if (alertingConfig.rulesSettings.enabled) {
+    getQueryDelaySettingsRoute(router, licenseState);
+    updateQueryDelaySettingsRoute(router, licenseState);
+    getFlappingSettingsRoute(router, licenseState);
+    updateFlappingSettingsRoute(router, licenseState);
+  }
   // Other APIs
   registerFieldsRoute(router, licenseState);
   getScheduleFrequencyRoute(router, licenseState);
-  getQueryDelaySettingsRoute(router, licenseState);
-  updateQueryDelaySettingsRoute(router, licenseState);
   getGlobalExecutionLogRoute(router, licenseState);
   getActionErrorLogRoute(router, licenseState);
-  getFlappingSettingsRoute(router, licenseState);
-  updateFlappingSettingsRoute(router, licenseState);
   runSoonRoute(router, licenseState);
   healthRoute(router, licenseState, encryptedSavedObjects);
   getGlobalExecutionKPIRoute(router, licenseState);
