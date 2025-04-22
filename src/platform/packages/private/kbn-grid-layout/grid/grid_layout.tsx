@@ -104,8 +104,12 @@ export const GridLayout = ({
     /**
      * This subscription ensures that rows get re-rendered when their orders change
      */
-    const elementsInOrderSubscription = gridLayoutStateManager.gridLayout$
+    const elementsInOrderSubscription = combineLatest([
+      gridLayoutStateManager.proposedGridLayout$,
+      gridLayoutStateManager.gridLayout$,
+    ])
       .pipe(
+        map(([proposedGridLayout, gridLayout]) => proposedGridLayout ?? gridLayout),
         map((gridLayout) => {
           const currentLayout = gridLayout;
           const rowIdsInOrder = getRowKeysInOrder(currentLayout);
@@ -193,25 +197,10 @@ export const GridLayout = ({
         layoutRef.current.style.gridTemplateRows = gridRowTemplateString;
       });
 
-    const interactionStyleSubscription = gridLayoutStateManager.interactionEvent$.subscribe(
-      (interactionEvent) => {
-        const targetRowId = interactionEvent?.targetRow;
-
-        Object.entries(gridLayoutStateManager.rowRefs.current).forEach(([rowId, rowRef]) => {
-          if (rowId === targetRowId) {
-            rowRef?.classList.add('kbnGridRow--targeted');
-          } else {
-            rowRef?.classList.remove('kbnGridRow--targeted');
-          }
-        });
-      }
-    );
-
     return () => {
       elementsInOrderSubscription.unsubscribe();
       gridLayoutClassSubscription.unsubscribe();
       mainSectionGridStyleSubscription.unsubscribe();
-      interactionStyleSubscription.unsubscribe();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

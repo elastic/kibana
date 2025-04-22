@@ -33,7 +33,7 @@ export const GridRowWrapper = React.memo(({ rowId }: GridRowProps) => {
     () => {
       /** Update the styles of the grid row via a subscription to prevent re-renders */
       const interactionStyleSubscription = gridLayoutStateManager.interactionEvent$
-        .pipe(skip(1)) // skip the first emit because the `initialStyles` will take care of it
+        // .pipe(skip(1)) // skip the first emit because the `initialStyles` will take care of it
         .subscribe((interactionEvent) => {
           const rowRef = gridLayoutStateManager.rowRefs.current[rowId];
           if (!rowRef) return;
