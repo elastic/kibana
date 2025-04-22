@@ -117,7 +117,7 @@ export async function getAdminApiClient<TServerRouteRepository extends ServerRou
       }
 
       const fields: Array<[string, any]> = Object.entries(params.body);
-      const formDataRequest = supertestWithRoleScoped[method](url)
+      const formDataRequest = supertestAdmin[method](url)
         .set(headers)
         .set('Content-type', 'multipart/form-data')
         .attach(options.file.key, params.body[options.file.key], {
