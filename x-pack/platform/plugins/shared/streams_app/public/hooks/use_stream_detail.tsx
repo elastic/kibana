@@ -11,6 +11,8 @@ import {
   IngestStreamGetResponse,
   isWiredStreamGetResponse,
   isUnwiredStreamGetResponse,
+  isFilterStreamGetResponse,
+  FilterStreamGetResponse,
 } from '@kbn/streams-schema';
 import { EuiFlexGroup, EuiLoadingSpinner } from '@elastic/eui';
 import { useStreamsAppFetch } from './use_streams_app_fetch';
@@ -21,7 +23,7 @@ export interface StreamDetailContextProviderProps {
 }
 
 export interface StreamDetailContextValue {
-  definition: IngestStreamGetResponse;
+  definition: IngestStreamGetResponse | FilterStreamGetResponse;
   loading: boolean;
   refresh: () => void;
 }
@@ -49,11 +51,15 @@ export function StreamDetailContextProvider({
           },
         })
         .then((response) => {
-          if (isWiredStreamGetResponse(response) || isUnwiredStreamGetResponse(response)) {
+          if (
+            isWiredStreamGetResponse(response) ||
+            isUnwiredStreamGetResponse(response) ||
+            isFilterStreamGetResponse(response)
+          ) {
             return response;
           }
 
-          throw new Error('Stream detail only supports IngestStreams.');
+          throw new Error('Stream detail only supports IngestStreams and FilterStreams.');
         });
     },
     [streamsRepositoryClient, name]

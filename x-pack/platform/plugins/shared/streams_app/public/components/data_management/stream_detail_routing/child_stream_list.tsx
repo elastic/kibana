@@ -80,6 +80,7 @@ export function ChildStreamList({ availableStreams }: { availableStreams: string
                   onClick={() => {
                     selectChildUnderEdit({
                       isNew: true,
+                      type: 'wired',
                       child: {
                         destination: `${definition.stream.name}.child`,
                         if: cloneDeep(ALWAYS_CONDITION),
@@ -92,6 +93,26 @@ export function ChildStreamList({ availableStreams }: { availableStreams: string
                   })}
                 </EuiButton>
               </EuiToolTip>
+
+              <EuiButton
+                iconType="filter"
+                size="s"
+                data-test-subj="streamsAppStreamDetailRoutingAddFilterButton"
+                onClick={() => {
+                  selectChildUnderEdit({
+                    isNew: true,
+                    type: 'filter',
+                    child: {
+                      destination: `${definition.stream.name}.filter`,
+                      if: cloneDeep(ALWAYS_CONDITION),
+                    },
+                  });
+                }}
+              >
+                {i18n.translate('xpack.streams.streamDetailRouting.addFilter', {
+                  defaultMessage: 'Create filter stream',
+                })}
+              </EuiButton>
             </EuiFlexItem>
           )}
         </EuiFlexGroup>
@@ -143,12 +164,13 @@ export function ChildStreamList({ availableStreams }: { availableStreams: string
                             if (child.destination === childUnderEdit?.child.destination) {
                               selectChildUnderEdit(undefined);
                             } else {
-                              selectChildUnderEdit({ isNew: false, child });
+                              selectChildUnderEdit({ isNew: false, type: 'wired', child });
                             }
                           }}
                           onChildChange={(newChild) => {
                             selectChildUnderEdit({
                               isNew: false,
+                              type: 'wired',
                               child: newChild,
                             });
                           }}
@@ -158,6 +180,10 @@ export function ChildStreamList({ availableStreams }: { availableStreams: string
                     )}
                   </EuiDraggable>
                 </EuiFlexItem>
+              ))}
+              {definition.filter_streams.map((child) => (
+                // Plus things to edit? Or navigate to etc.
+                <div key={child.name}>{child.name}</div>
               ))}
             </EuiFlexGroup>
           </EuiDroppable>
@@ -173,6 +199,7 @@ export function ChildStreamList({ availableStreams }: { availableStreams: string
                 }
                 selectChildUnderEdit({
                   isNew: true,
+                  type: childUnderEdit.type,
                   child: newChild,
                 });
               }}

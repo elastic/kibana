@@ -6,6 +6,7 @@
  */
 
 import {
+  isFilterStreamDefinition,
   isGroupStreamDefinition,
   isUnwiredStreamDefinition,
   isWiredStreamDefinition,
@@ -16,6 +17,7 @@ import type { StreamActiveRecord } from './stream_active_record';
 import { UnwiredStream } from '../streams/unwired_stream';
 import { WiredStream } from '../streams/wired_stream';
 import { GroupStream } from '../streams/group_stream';
+import { FilterStream } from '../streams/filter_stream';
 
 // This should be the only thing that knows about the various stream types
 export function streamFromDefinition(
@@ -28,6 +30,8 @@ export function streamFromDefinition(
     return new UnwiredStream(definition, dependencies);
   } else if (isGroupStreamDefinition(definition)) {
     return new GroupStream(definition, dependencies);
+  } else if (isFilterStreamDefinition(definition)) {
+    return new FilterStream(definition, dependencies);
   }
 
   throw new Error('Unsupported stream type');

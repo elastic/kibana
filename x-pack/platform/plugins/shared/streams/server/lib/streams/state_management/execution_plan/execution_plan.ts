@@ -7,6 +7,7 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 
 import { groupBy, orderBy } from 'lodash';
+import { IndicesUpdateAliasesAction } from '@elastic/elasticsearch/lib/api/types';
 import {
   deleteComponent,
   upsertComponent,
@@ -34,6 +35,7 @@ import type {
   DeleteIndexTemplateAction,
   DeleteIngestPipelineAction,
   ElasticsearchAction,
+  UpdateAliasAction,
   UpdateLifecycleAction,
   UpsertComponentTemplateAction,
   UpsertDatastreamAction,
@@ -68,6 +70,7 @@ export class ExecutionPlan {
       upsert_datastream: [],
       update_lifecycle: [],
       upsert_write_index_or_rollover: [],
+      update_alias: [],
       delete_datastream: [],
       upsert_dot_streams_document: [],
       delete_dot_streams_document: [],
@@ -107,6 +110,7 @@ export class ExecutionPlan {
         upsert_datastream,
         update_lifecycle,
         upsert_write_index_or_rollover,
+        update_alias,
         delete_datastream,
         upsert_dot_streams_document,
         delete_dot_streams_document,
@@ -133,6 +137,7 @@ export class ExecutionPlan {
       await Promise.all([
         this.upsertWriteIndexOrRollover(upsert_write_index_or_rollover),
         this.updateLifecycle(update_lifecycle),
+        this.updateAlias(update_alias),
       ]);
 
       await this.upsertIngestPipelines(upsert_ingest_pipeline);
@@ -204,6 +209,41 @@ export class ExecutionPlan {
           isServerless: this.dependencies.isServerless,
         })
       )
+    );
+  }
+
+  private async updateAlias(actions: UpdateAliasAction[]) {
+    return Promise.all(
+      actions.map((action) => {
+        const aliasActions: IndicesUpdateAliasesAction[] = [];
+
+        if (action.add.length > 0) {
+          aliasActions.push({
+            add: {
+              alias: action.name,
+              indices: action.add,
+              filter: action.filter,
+            },
+          });
+        }
+
+        if (action.remove.length > 0) {
+          aliasActions.push({
+            remove: {
+              alias: action.name,
+              indices: action.remove,
+            },
+          });
+        }
+
+        if (aliasActions.length === 0) {
+          return;
+        }
+
+        this.dependencies.scopedClusterClient.asCurrentUser.indices.updateAliases({
+          actions: aliasActions,
+        });
+      })
     );
   }
 

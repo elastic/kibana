@@ -17,7 +17,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import React, { useMemo, useState } from 'react';
 import type { SanitizedDashboardAsset } from '@kbn/streams-plugin/server/routes/dashboards/route';
-import { IngestStreamGetResponse } from '@kbn/streams-schema';
+import { FilterStreamGetResponse, IngestStreamGetResponse } from '@kbn/streams-schema';
 import { AddDashboardFlyout } from './add_dashboard_flyout';
 import { DashboardsTable } from './dashboard_table';
 import { useDashboardsApi } from '../../hooks/use_dashboards_api';
@@ -30,7 +30,7 @@ import { useKibana } from '../../hooks/use_kibana';
 export function StreamDetailDashboardsView({
   definition,
 }: {
-  definition: IngestStreamGetResponse;
+  definition: IngestStreamGetResponse | FilterStreamGetResponse;
 }) {
   const [query, setQuery] = useState('');
 

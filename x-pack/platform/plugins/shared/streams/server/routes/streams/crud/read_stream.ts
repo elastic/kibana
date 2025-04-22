@@ -10,6 +10,7 @@ import {
   WiredStreamGetResponse,
   findInheritedLifecycle,
   getInheritedFieldsFromAncestors,
+  isFilterStreamDefinition,
   isGroupStreamDefinition,
   isUnwiredStreamDefinition,
 } from '@kbn/streams-schema';
@@ -58,6 +59,14 @@ export async function readStream({
     };
   }
 
+  if (isFilterStreamDefinition(streamDefinition)) {
+    return {
+      stream: streamDefinition,
+      dashboards,
+      queries,
+    };
+  }
+
   // These queries are only relavant for IngestStreams
   const [ancestors, dataStream, privileges] = await Promise.all([
     streamsClient.getAncestors(name),
@@ -89,6 +98,10 @@ export async function readStream({
     };
   }
 
+  const filterStreams = (await streamsClient.getDescendants(streamDefinition.name)).filter(
+    isFilterStreamDefinition
+  );
+
   const body: WiredStreamGetResponse = {
     stream: streamDefinition,
     dashboards,
@@ -96,6 +109,7 @@ export async function readStream({
     queries,
     effective_lifecycle: findInheritedLifecycle(streamDefinition, ancestors),
     inherited_fields: getInheritedFieldsFromAncestors(ancestors),
+    filter_streams: filterStreams,
   };
 
   return body;

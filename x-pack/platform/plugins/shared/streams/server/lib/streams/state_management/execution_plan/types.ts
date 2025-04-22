@@ -10,6 +10,7 @@ import type {
   IndicesPutIndexTemplateRequest,
   IngestProcessorContainer,
   IngestPutPipelineRequest,
+  QueryDslQueryContainer,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { IngestStreamLifecycle, StreamDefinition } from '@kbn/streams-schema';
 
@@ -89,6 +90,14 @@ export interface UpdateLifecycleAction {
   };
 }
 
+export interface UpdateAliasAction {
+  type: 'update_alias';
+  name: string;
+  filter: QueryDslQueryContainer;
+  add: string[];
+  remove: string[];
+}
+
 export interface DeleteDatastreamAction {
   type: 'delete_datastream';
   request: {
@@ -120,6 +129,7 @@ export type ElasticsearchAction =
   | UpsertDatastreamAction
   | UpsertWriteIndexOrRolloverAction
   | UpdateLifecycleAction
+  | UpdateAliasAction
   | DeleteDatastreamAction
   | UpsertDotStreamsDocumentAction
   | DeleteDotStreamsDocumentAction;
@@ -136,6 +146,7 @@ export interface ActionsByType {
   upsert_datastream: UpsertDatastreamAction[];
   upsert_write_index_or_rollover: UpsertWriteIndexOrRolloverAction[];
   update_lifecycle: UpdateLifecycleAction[];
+  update_alias: UpdateAliasAction[];
   delete_datastream: DeleteDatastreamAction[];
   upsert_dot_streams_document: UpsertDotStreamsDocumentAction[];
   delete_dot_streams_document: DeleteDotStreamsDocumentAction[];

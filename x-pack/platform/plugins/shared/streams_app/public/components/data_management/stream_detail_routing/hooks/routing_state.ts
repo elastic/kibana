@@ -14,6 +14,7 @@ import { useDebounced } from '../../../../util/use_debounce';
 export interface ChildUnderEdit {
   isNew: boolean;
   child: RoutingDefinition;
+  type: 'wired' | 'filter';
 }
 
 export const RoutingStateContext = React.createContext<

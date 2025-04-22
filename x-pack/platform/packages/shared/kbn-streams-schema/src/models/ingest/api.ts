@@ -32,6 +32,7 @@ import {
   unwiredIngestStreamEffectiveLifecycleSchema,
   wiredIngestStreamEffectiveLifecycleSchema,
 } from './lifecycle';
+import { FilterStreamDefinition, filterStreamDefinitionSchema } from '../filter';
 
 /**
  * Ingest get response
@@ -89,6 +90,7 @@ interface WiredStreamGetResponse extends StreamGetResponseBase {
   inherited_fields: InheritedFieldDefinition;
   effective_lifecycle: WiredIngestStreamEffectiveLifecycle;
   privileges: IngestStreamPrivileges;
+  filter_streams: FilterStreamDefinition[];
 }
 
 interface UnwiredStreamGetResponse extends StreamGetResponseBase {
@@ -148,6 +150,7 @@ const wiredStreamGetResponseSchema: z.Schema<WiredStreamGetResponse> = z.interse
     inherited_fields: inheritedFieldDefinitionSchema,
     effective_lifecycle: wiredIngestStreamEffectiveLifecycleSchema,
     privileges: ingestStreamPrivilegesSchema,
+    filter_streams: z.array(filterStreamDefinitionSchema),
   })
 );
 

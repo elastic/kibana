@@ -16,7 +16,7 @@ import { cloneDeep } from 'lodash';
 import { StatusError } from '../../errors/status_error';
 import type { ElasticsearchAction } from '../execution_plan/types';
 import type { State } from '../state';
-import type { StateDependencies, StreamChange } from '../types';
+import type { StreamChange } from '../types';
 import type {
   StreamChangeStatus,
   ValidationResult,
@@ -24,10 +24,6 @@ import type {
 import { StreamActiveRecord } from '../stream_active_record/stream_active_record';
 
 export class GroupStream extends StreamActiveRecord<GroupStreamDefinition> {
-  constructor(definition: GroupStreamDefinition, dependencies: StateDependencies) {
-    super(definition, dependencies);
-  }
-
   clone(): StreamActiveRecord<GroupStreamDefinition> {
     return new GroupStream(cloneDeep(this._definition), this.dependencies);
   }

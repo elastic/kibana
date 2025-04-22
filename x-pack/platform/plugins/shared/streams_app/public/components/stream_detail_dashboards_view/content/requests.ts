@@ -7,7 +7,7 @@
 
 import { ContentPack, ContentPackIncludedObjects } from '@kbn/content-packs-schema';
 import { HttpSetup } from '@kbn/core/public';
-import { IngestStreamGetResponse } from '@kbn/streams-schema';
+import { FilterStreamGetResponse, IngestStreamGetResponse } from '@kbn/streams-schema';
 
 export async function importContent({
   file,
@@ -17,7 +17,7 @@ export async function importContent({
 }: {
   file: File;
   http: HttpSetup;
-  definition: IngestStreamGetResponse;
+  definition: IngestStreamGetResponse | FilterStreamGetResponse;
   include: ContentPackIncludedObjects;
 }) {
   const body = new FormData();
@@ -42,7 +42,7 @@ export async function previewContent({
 }: {
   http: HttpSetup;
   file: File;
-  definition: IngestStreamGetResponse;
+  definition: IngestStreamGetResponse | FilterStreamGetResponse;
 }) {
   const body = new FormData();
   body.append('content', file);

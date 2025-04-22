@@ -8,26 +8,49 @@ import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
 import { css } from '@emotion/css';
-import { IngestStreamGetResponse, isDescendantOf } from '@kbn/streams-schema';
+import {
+  IngestStreamGetResponse,
+  FilterStreamGetResponse,
+  WiredStreamGetResponse,
+  isDescendantOf,
+  isWiredStreamDefinition,
+  isFilterStreamGetResponse,
+} from '@kbn/streams-schema';
 
 import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
 import { AssetImage } from '../asset_image';
 import { StreamsList } from '../streams_list';
 import { useWiredStreams } from '../../hooks/use_wired_streams';
 
-export function ChildStreamList({ definition }: { definition?: IngestStreamGetResponse }) {
+export function ChildStreamList({
+  definition,
+}: {
+  definition?: IngestStreamGetResponse | FilterStreamGetResponse;
+}) {
   const router = useStreamsAppRouter();
 
-  const { wiredStreams } = useWiredStreams();
+  const { wiredStreams: allWiredStreams } = useWiredStreams();
 
   const childrenStreams = useMemo(() => {
     if (!definition) {
       return [];
     }
-    return wiredStreams?.filter((d) => isDescendantOf(definition.stream.name, d.name));
-  }, [definition, wiredStreams]);
 
-  if (definition && childrenStreams?.length === 0) {
+    if (isWiredStreamDefinition(definition.stream)) {
+      const filterStreams = (definition as WiredStreamGetResponse).filter_streams;
+      const wiredStreams =
+        allWiredStreams?.filter((d) => isDescendantOf(definition.stream.name, d.name)) ?? [];
+      return [...filterStreams, ...wiredStreams];
+    }
+
+    return allWiredStreams?.filter((d) => isDescendantOf(definition.stream.name, d.name)) ?? [];
+  }, [definition, allWiredStreams]);
+
+  if (definition && isFilterStreamGetResponse(definition)) {
+    return <div>FilterStreams cannot have children</div>;
+  }
+
+  if (definition && childrenStreams.length === 0) {
     return (
       <EuiFlexItem grow>
         <EuiFlexGroup alignItems="center" justifyContent="center">
