@@ -6,11 +6,14 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type { RouteDependencies } from './types';
 import { apiCapabilities } from '../../common/features';
 import type { GetWorkflowResponse } from '../../common/http_api/workflows';
+import type { RouteDependencies } from './types';
+import { getHandlerWrapper } from './wrap_handler';
 
-export const registerWorkflowsRoutes = ({ router, getServices }: RouteDependencies) => {
+export const registerWorkflowsRoutes = ({ router, logger, getServices }: RouteDependencies) => {
+  const wrapHandler = getHandlerWrapper({ logger });
+
   router.get(
     {
       path: '/internal/workchat-framework/workflows/{workflowId}',
@@ -25,10 +28,14 @@ export const registerWorkflowsRoutes = ({ router, getServices }: RouteDependenci
         }),
       },
     },
-    async (ctx, req, res) => {
-      // TODO: not implemented yet, just testing types
-      const foo = {} as unknown as GetWorkflowResponse;
-      return res.ok<GetWorkflowResponse>({ body: foo });
-    }
+    wrapHandler(async (ctx, request, response) => {
+      const { workflowId } = request.params;
+      const { workflowService } = getServices();
+
+      const scopedService = await workflowService.asScoped({ request });
+      const workflow = await scopedService.get(workflowId);
+
+      return response.ok<GetWorkflowResponse>({ body: workflow });
+    })
   );
 };
