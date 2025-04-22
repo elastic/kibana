@@ -7,7 +7,7 @@
 import type { FC } from 'react';
 import React, { useMemo, memo } from 'react';
 import { EuiSwitch, EuiToolTip } from '@elastic/eui';
-import noop from 'lodash/noop';
+import { noop } from 'lodash';
 
 import type { MlSummaryJob } from '@kbn/ml-plugin/public';
 

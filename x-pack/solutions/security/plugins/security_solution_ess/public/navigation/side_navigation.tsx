@@ -439,6 +439,20 @@ const createNavigationTree$ = (services: Services): Rx.Observable<NavigationTree
             ],
           },
           {
+            id: 'entity_analytics-landing',
+            link: securityLink(SecurityPageName.entityAnalyticsLanding),
+            title: i18nStrings.entityAnalytics.landing,
+            spaceBefore: null,
+            children: [
+              {
+                id: 'entity_analytics-privileged_user_monitoring',
+                link: securityLink(SecurityPageName.entityAnalyticsPrivilegedUserMonitoring),
+                renderAs: 'item',
+              },
+            ],
+            renderAs: 'panelOpener',
+          },
+          {
             breadcrumbStatus: 'hidden',
             children: [
               {

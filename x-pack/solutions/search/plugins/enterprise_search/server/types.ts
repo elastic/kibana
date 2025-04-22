@@ -6,6 +6,7 @@
  */
 
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/server';
+import type { SearchConnectorsPluginSetup } from '@kbn/content-connectors-plugin/server';
 import type {
   Logger,
   SavedObjectsServiceStart,
@@ -22,7 +23,6 @@ import type { GuidedOnboardingPluginSetup } from '@kbn/guided-onboarding-plugin/
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { LogsSharedPluginSetup } from '@kbn/logs-shared-plugin/server';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
-import type { SearchConnectorsPluginSetup } from '@kbn/search-connectors-plugin/server';
 import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';

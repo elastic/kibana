@@ -12,7 +12,7 @@ import semverGte from 'semver/functions/gte';
 import type { PackageClient } from '../../services';
 import { outputService } from '../../services';
 
-import { PackageNotFoundError } from '../../errors';
+import { FleetError, PackageNotFoundError } from '../../errors';
 import { FLEET_SYNCED_INTEGRATIONS_CCR_INDEX_PREFIX } from '../../services/setup/fleet_synced_integrations';
 
 import { getInstallation, removeInstallation } from '../../services/epm/packages';
@@ -36,7 +36,7 @@ export const getFollowerIndex = async (
 
   const indexNames = Object.keys(indices);
   if (indexNames.length > 1) {
-    throw new Error(
+    throw new FleetError(
       `Not supported to sync multiple indices with prefix ${FLEET_SYNCED_INTEGRATIONS_CCR_INDEX_PREFIX}`
     );
   }

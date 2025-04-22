@@ -148,11 +148,16 @@ export const i18nStrings = {
     },
   },
   entityRiskScore: i18n.translate('securitySolutionPackages.navLinks.entityRiskScore', {
-    defaultMessage: 'Entity Risk Score',
+    defaultMessage: 'Entity risk score',
   }),
   entityStore: i18n.translate('securitySolutionPackages.navLinks.entityStore', {
-    defaultMessage: 'Entity Store',
+    defaultMessage: 'Entity store',
   }),
+  entityAnalytics: {
+    landing: i18n.translate('securitySolutionPackages.navLinks.entityAnalytics', {
+      defaultMessage: 'Entity analytics',
+    }),
+  },
   devTools: i18n.translate('securitySolutionPackages.navLinks.devTools', {
     defaultMessage: 'Developer tools',
   }),
