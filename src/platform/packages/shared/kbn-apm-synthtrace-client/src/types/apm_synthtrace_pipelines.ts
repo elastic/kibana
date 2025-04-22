@@ -7,13 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SerializableRecord } from '@kbn/utility-types';
-
-export const TRANSACTION_DETAILS_BY_TRACE_ID_LOCATOR = 'TRANSACTION_DETAILS_BY_TRACE_ID_LOCATOR';
-
-export interface TransactionDetailsByTraceIdLocatorParams extends SerializableRecord {
-  rangeFrom?: string;
-  rangeTo?: string;
-  waterfallItemId?: string;
-  traceId: string;
+export enum ApmSynthtracePipelineSchema {
+  Default = 'default', // classic APM
+  Otel = 'otel', // OTel native through APM server
+  ApmToOtel = 'apmToOtel', // convert classic APM synthtrace scenario into OTel native (useful to run existing scenarios as OTel)
 }
+export type ApmSynthtracePipelines =
+  | ApmSynthtracePipelineSchema.Default
+  | ApmSynthtracePipelineSchema.Otel
+  | ApmSynthtracePipelineSchema.ApmToOtel;
