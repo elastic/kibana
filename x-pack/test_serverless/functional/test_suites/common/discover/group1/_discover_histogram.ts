@@ -302,6 +302,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // now remove the query
       await queryBar.clearQuery();
+
+      // close date picker popover
+      await PageObjects.discover.closeDatePickerPopover();
+
       await queryBar.submitQuery();
       await PageObjects.discover.waitUntilSearchingHasFinished();
       // check no error state

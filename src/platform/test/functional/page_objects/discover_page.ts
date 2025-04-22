@@ -285,6 +285,12 @@ export class DiscoverPageObject extends FtrService {
     return await this.testSubjects.exists('unifiedHistogramChart');
   }
 
+  public async closeDatePickerPopover() {
+    await this.testSubjects.exists('superDatePickerToggleQuickMenuButton');
+    await this.testSubjects.exists('superDatePickerQuickMenu');
+    await this.testSubjects.click('superDatePickerToggleQuickMenuButton');
+  }
+
   public async toggleChartVisibility() {
     if (await this.isChartVisible()) {
       await this.testSubjects.click('dscHideHistogramButton');
