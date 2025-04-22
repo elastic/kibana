@@ -23,7 +23,7 @@ RUN apk --no-cache add curl
 
 {{#usePublicArtifact}}
 RUN cd /tmp && \
-  {{#wolfi}}arch="$(apk --print-arch)" ; \ {{/wolfi}}{{#ubi}}arch="$(rpm --query --queryformat='%{ARCH}' rpm)"; \ {{/ubi}} && \
+  {{#ubuntu}}arch="$(dpkg --print-architecture)"{{/ubuntu}}{{#wolfi}}arch="$(apk --print-arch)"{{/wolfi}}{{#ubi}}arch="$(rpm --query --queryformat='%{ARCH}' rpm)"{{/ubi}} && \
   curl -f --retry 8 -s -L \
     --output kibana.tar.gz \
      https://{{publicArtifactSubdomain}}.elastic.co/downloads/kibana/{{artifactPrefix}}-$arch.tar.gz && \
