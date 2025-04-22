@@ -36,7 +36,7 @@ export const SystemMessage: React.FC<SystemMessageProps> = ({ content }) => {
             <p>
               <FormattedMessage
                 id="xpack.searchPlayground.chat.message.system.contextModelLimitError"
-                defaultMessage="{SystemMessage}: Try reducing the number of documents and fields included in the context.  {LearnMore} on optimizing your model context"
+                defaultMessage="{SystemMessage}: Try reducing the number of selected documents and fields to stay within context limits. {LearnMore}"
                 values={{
                   SystemMessage: content,
                   LearnMore: (
