@@ -28,7 +28,6 @@ export interface MicrosoftDefenderEndpointLogEsDoc {
     };
   };
   microsoft: {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    defender_endpoint: Record<string, any>;
+    defender_endpoint: Record<string, unknown>;
   };
 }
