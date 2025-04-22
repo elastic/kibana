@@ -96,7 +96,6 @@ export const KubernetesContainerCharts = React.forwardRef<
     <Section
       title={
         <TitleWithTooltip
-          tooltipAriaLabel={CONTAINER_METRIC_GROUP_TITLES[metric]}
           title={CONTAINER_METRIC_GROUP_TITLES[metric]}
           tooltipContent={
             <EuiText size="xs">
