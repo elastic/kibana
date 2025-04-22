@@ -8,15 +8,11 @@
 import { login } from '../../../tasks/login';
 import { visit } from '../../../tasks/navigation';
 import { GET_STARTED_URL } from '../../../urls/navigation';
-import { AI_SOC_NAVIGATION } from '../constants';
+import { AI_SOC_NAVIGATION } from '../../../screens/ai_soc';
 
 const visibleLinks = ['discover', 'attack_discovery', 'case', 'alert_summary', 'configurations'];
 
-const notVisibleLinks = [
-  // 'machine_learning-landing', -- TODO comment out when ML is turned off
-  'alerts',
-  'rules',
-];
+const notVisibleLinks = ['machine_learning-landing', 'alerts', 'rules'];
 
 describe('AI$DSOC Navigation', { tags: '@serverless' }, () => {
   beforeEach(() => {
