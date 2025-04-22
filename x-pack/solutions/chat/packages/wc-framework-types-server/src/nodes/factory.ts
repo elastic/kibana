@@ -8,7 +8,7 @@
 import type { Logger } from '@kbn/logging';
 import type { IScopedClusterClient } from '@kbn/core/server';
 import type { ModelProvider } from '../models/model_provider';
-import type { ToolProvider } from '../tools/registry';
+import type { ToolProvider } from '../tools';
 import type { ScopedWorkflowProvider, ScopedRunner } from '../workflows';
 import type { NodeRunner, DefaultNodeRunnerInput } from './runner';
 import type { NodeDefinition } from './definition';
