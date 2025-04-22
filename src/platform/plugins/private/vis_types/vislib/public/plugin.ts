@@ -97,7 +97,6 @@ export class VisTypeVislibPlugin
     setCoreStart(core);
     setFormatService(fieldFormats);
     setDataActions(data.actions);
-    setUiActions(uiActions);
     if (usageCollection) {
       setUsageCollectionStart(usageCollection);
     }
