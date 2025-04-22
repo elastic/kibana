@@ -54,7 +54,7 @@ export const messageRt: t.Type<Message> = t.type({
           arguments: t.string,
         }),
       ]),
-      sanitized: t.boolean,
+      anonymized: t.boolean,
       detectedEntities: t.array(detectedEntityRt),
     }),
   ]),

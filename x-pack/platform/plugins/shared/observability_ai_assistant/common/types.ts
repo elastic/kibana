@@ -42,7 +42,7 @@ export interface Message {
   message: {
     content?: string;
     detectedEntities?: DetectedEntity[];
-    sanitized?: boolean;
+    anonymized?: boolean;
     name?: string;
     role: MessageRole;
     function_call?: {

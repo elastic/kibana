@@ -176,11 +176,11 @@ export class ObservabilityAIAssistantClient {
     unhashedText += contentWithHashes.slice(cursor);
     return { unhashedText, detectedEntities };
   }
-  async sanitizeMessages(messages: Message[]): Promise<{ sanitizedMessages: Message[] }> {
+  async anonymizeMessages(messages: Message[]): Promise<{ anonymizedMessages: Message[] }> {
     const hashMap = buildDetectedEntitiesMap(messages);
 
     for (const message of messages) {
-      if (message.message.sanitized) continue;
+      if (message.message.anonymized) continue;
 
       const { role, content } = message.message;
 
@@ -217,7 +217,7 @@ export class ObservabilityAIAssistantClient {
           );
         }
 
-        message.message.sanitized = true;
+        message.message.anonymized = true;
         continue;
       }
 
@@ -226,7 +226,7 @@ export class ObservabilityAIAssistantClient {
           const { unhashedText, detectedEntities } = this.processAssistantMessage(content, hashMap);
           message.message.content = unhashedText;
           if (detectedEntities.length) message.message.detectedEntities = detectedEntities;
-          message.message.sanitized = true;
+          message.message.anonymized = true;
         }
         // TODO: unhash other places?
         if (message.message.function_call?.arguments) {
@@ -238,7 +238,7 @@ export class ObservabilityAIAssistantClient {
       }
     }
 
-    return { sanitizedMessages: messages };
+    return { anonymizedMessages: messages };
   }
   private getConversationWithMetaFields = async (
     conversationId: string
@@ -473,23 +473,23 @@ export class ObservabilityAIAssistantClient {
               ]).pipe(
                 switchMap(([addedMessages, title, systemMessage]) => {
                   // ─────────────────────────────────────────────────────────────────
-                  // Call sanitizeMessages on history + new messages:
+                  // Call anonymizeMessages on history + new messages:
                   //   • Internally builds the entity map from all detectedEntities
                   //     (from previous turns and new user lines) for un‑hashing.
-                  //   • Skips already‑sanitized messages (sanitized:true).
+                  //   • Skips already‑anonymized messages (anonymized:true).
                   //   • Runs NER/regex on new user messages and un‑hashes new assistant
                   //     placeholders, attaching new entities.
                   // ─────────────────────────────────────────────────────────────────
-                  return from(this.sanitizeMessages(initialMessages.concat(addedMessages))).pipe(
-                    switchMap(({ sanitizedMessages: allSanitizedMessages }) => {
-                      // Extract only the newly sanitised messages (the tail of allSanitizedMessages):
-                      const newSanitizedMessages = allSanitizedMessages.slice(
+                  return from(this.anonymizeMessages(initialMessages.concat(addedMessages))).pipe(
+                    switchMap(({ anonymizedMessages: allAnonymizedMessages }) => {
+                      // Extract only the newly sanitised messages (the tail of allAnonyimizedMessages):
+                      const newAnonymizedMessages = allAnonymizedMessages.slice(
                         initialMessages.length
                       );
 
                       // merge back for downstream processing
                       const initialMessagesWithAddedMessages =
-                        initialMessages.concat(newSanitizedMessages);
+                        initialMessages.concat(newAnonymizedMessages);
 
                       const lastMessage = last(initialMessagesWithAddedMessages);
 
@@ -652,8 +652,8 @@ export class ObservabilityAIAssistantClient {
     };
     if (stream) {
       return defer(() =>
-        from(this.sanitizeMessages(messages)).pipe(
-          switchMap(({ sanitizedMessages }) => {
+        from(this.anonymizeMessages(messages)).pipe(
+          switchMap(({ anonymizedMessages }) => {
             this.dependencies.logger.debug(
               () =>
                 `Calling inference client for name: "${name}" with options: ${JSON.stringify(
@@ -663,7 +663,7 @@ export class ObservabilityAIAssistantClient {
             return this.dependencies.inferenceClient.chatComplete({
               ...options,
               stream: true,
-              messages: convertMessagesForInference(sanitizedMessages, this.dependencies.logger),
+              messages: convertMessagesForInference(anonymizedMessages, this.dependencies.logger),
             });
           })
         )

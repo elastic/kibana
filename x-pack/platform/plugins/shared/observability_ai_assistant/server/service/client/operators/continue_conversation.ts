@@ -82,7 +82,7 @@ function executeFunctionAndCatchError({
   connectorId: string;
   simulateFunctionCalling: boolean;
 }): Observable<MessageOrChatEvent> {
-  // Build hash map from the messages we already sanitized
+  // Build hash map from the messages we already anonymized
   const hashMap = buildHashMap(messages);
 
   // If the function arguments contain placeholders, swap them for real values
