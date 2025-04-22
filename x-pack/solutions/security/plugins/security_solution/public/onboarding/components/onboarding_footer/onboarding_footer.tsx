@@ -15,7 +15,6 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
-  useEuiTheme,
 } from '@elastic/eui';
 import { useFooterStyles } from './onboarding_footer.styles';
 import { useFooterItems } from './footer_items';
