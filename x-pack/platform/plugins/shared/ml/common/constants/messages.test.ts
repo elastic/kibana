@@ -16,7 +16,7 @@ import {
 } from './messages.test.mock';
 
 const BASE_URL_DOCS = 'https://www.elastic.co/docs';
-const BASE_URL_API = `${BASE_URL_DOCS}/api/doc/elasticsearch/operation`;
+const BASE_URL_API = `${BASE_URL_DOCS}/api/doc/elasticsearch/v9/operation`;
 const BASE_URL_EXPLORE = `${BASE_URL_DOCS}/explore-analyze/machine-learning/anomaly-detection`;
 
 describe('Constants: Messages parseMessages()', () => {
