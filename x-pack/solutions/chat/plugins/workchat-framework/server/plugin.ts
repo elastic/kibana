@@ -19,12 +19,14 @@ import type {
   WorkChatFrameworkPluginStartDependencies,
 } from './types';
 import type { WorkChatFrameworkConfig } from './config';
+import { registerFeatures } from './features';
 import {
   createStartServices,
   createSetupServices,
   type InternalSetupServices,
   type InternalStartServices,
 } from './framework';
+import { registerRoutes } from './routes';
 import { registerBuiltInNodeTypes, registerBuiltInTools } from './builtin';
 
 export class WorkChatAppPlugin
@@ -52,6 +54,16 @@ export class WorkChatAppPlugin
     setupDeps: WorkChatFrameworkPluginSetupDependencies
   ): WorkChatFrameworkPluginSetup {
     this.setupServices = createSetupServices();
+
+    registerFeatures({ features: setupDeps.features });
+
+    const router = core.http.createRouter();
+    registerRoutes({
+      core,
+      router,
+      logger: this.logger.get(),
+      getServices: () => this.startServices!,
+    });
 
     registerBuiltInNodeTypes({
       registry: this.setupServices.nodeRegistry,

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-export const WORKCHAT_FEATURE_ID = 'workchat';
-export const WORKCHAT_FEATURE_NAME = 'WorkChat';
-export const WORKCHAT_APP_ID = 'workchat';
+export const WORKCHAT_FRAMEWORK_FEATURE_ID = 'workchat_framework';
+export const WORKCHAT_FRAMEWORK_FEATURE_NAME = 'workchat_framework';
+export const WORKCHAT_FRAMEWORK_APP_ID = 'workchat_framework';
 
 export const uiCapabilities = {
   show: 'show',
@@ -15,8 +15,8 @@ export const uiCapabilities = {
 };
 
 export const apiCapabilities = {
-  useWorkchat: 'workchat_use',
-  manageWorkchat: 'workchat_manage',
+  useWorkchatFramework: 'workchat_framework_use',
+  manageWorkchatFramework: 'workchat_framework_manage',
 };
 
 // defining feature groups here because it's less error prone when adding new capabilities
@@ -26,7 +26,7 @@ export const capabilityGroups = {
     all: [uiCapabilities.show, uiCapabilities.showManagement],
   },
   api: {
-    read: [apiCapabilities.useWorkchat],
-    all: [apiCapabilities.useWorkchat, apiCapabilities.manageWorkchat],
+    read: [apiCapabilities.useWorkchatFramework],
+    all: [apiCapabilities.useWorkchatFramework, apiCapabilities.manageWorkchatFramework],
   },
 };
