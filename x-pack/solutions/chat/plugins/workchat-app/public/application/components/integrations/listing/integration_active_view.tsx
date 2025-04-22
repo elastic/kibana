@@ -40,7 +40,6 @@ import { integrationLabels } from '../i18n';
 import { IntegrationListView } from './integration_list_view';
 import { useIntegrationList } from '../../../hooks/use_integration_list';
 
-
 export const IntegrationActiveView: React.FC = () => {
   const { agents } = useAgentList();
   const { integrations, isLoading, isRefetching } = useIntegrationList();
