@@ -31,7 +31,7 @@ import {
   StateComparators,
 } from '@kbn/presentation-publishing';
 import React from 'react';
-import { PresentationContainer } from '@kbn/presentation-containers';
+import { PresentationContainer, apiIsPresentationContainer } from '@kbn/presentation-containers';
 import { initializeUnsavedChanges } from '@kbn/presentation-containers';
 import { merge } from 'rxjs';
 import { defaultBookAttributes } from './book_state';
@@ -151,8 +151,11 @@ export const getSavedBookEmbeddableFactory = (core: CoreStart) => {
             const nextIsByReference = Boolean(result.savedBookId);
 
             // if the by reference state has changed during this edit, reinitialize the panel.
-            if (nextIsByReference !== isByReference) {
-              api.parentApi?.replacePanel<BookSerializedState>(api.uuid, {
+            if (
+              nextIsByReference !== isByReference &&
+              apiIsPresentationContainer(api.parentApi)
+            ) {
+              api.parentApi.replacePanel<BookSerializedState>(api.uuid, {
                 serializedState: serializeBook(nextIsByReference, result.savedBookId),
                 panelType: api.type,
               });
