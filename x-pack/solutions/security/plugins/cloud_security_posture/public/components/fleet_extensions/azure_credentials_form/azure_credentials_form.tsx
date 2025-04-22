@@ -130,14 +130,11 @@ export const TEMPLATE_INTERNAL_DOC_URL =
 
 export const ARM_TEMPLATE_INTERNAL_DOC_URL = `${TEMPLATE_INTERNAL_DOC_URL}#cspm-set-up-arm`;
 
-export const AGENTBASE_TEMPLATE_INTERNAL_DOC_URL =
-  `${TEMPLATE_INTERNAL_DOC_URL}#cspm-azure-agent-based`;
+export const AGENTBASE_TEMPLATE_INTERNAL_DOC_URL = `${TEMPLATE_INTERNAL_DOC_URL}#cspm-azure-agent-based`;
 
-export const AGENTLESS_TEMPLATE_INTERNAL_DOC_URL =
-  `${TEMPLATE_INTERNAL_DOC_URL}#cspm-azure-agentless`;
+export const AGENTLESS_TEMPLATE_INTERNAL_DOC_URL = `${TEMPLATE_INTERNAL_DOC_URL}#cspm-azure-agentless`;
 
-export const MANUAL_TEMPLATE_INTERNAL_DOC_URL =
-  `${TEMPLATE_INTERNAL_DOC_URL}#cspm-set-up-manual-azure`;
+export const MANUAL_TEMPLATE_INTERNAL_DOC_URL = `${TEMPLATE_INTERNAL_DOC_URL}#cspm-set-up-manual-azure`;
 
 const ArmTemplateSetup = ({
   hasArmTemplateUrl,
