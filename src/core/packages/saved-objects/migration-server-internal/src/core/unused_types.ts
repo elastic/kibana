@@ -9,8 +9,6 @@
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 
-export { REMOVED_TYPES } from '@kbn/core-saved-objects-base-server-internal';
-
 export const buildExcludeUnusedTypesQuery = (legacyTypes: string[]): QueryDslQueryContainer => {
   return {
     bool: {

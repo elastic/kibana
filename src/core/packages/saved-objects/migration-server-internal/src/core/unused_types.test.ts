@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { buildExcludeUnusedTypesQuery, REMOVED_TYPES } from './unused_types';
+import { buildExcludeUnusedTypesQuery } from './unused_types';
+import { REMOVED_TYPES } from '@kbn/core-saved-objects-base-server-internal';
 
 describe('buildExcludeUnusedTypesQuery', () => {
   it('should build the correct query with REMOVED_TYPES', () => {
