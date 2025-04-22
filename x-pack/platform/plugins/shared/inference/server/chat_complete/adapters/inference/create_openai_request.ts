@@ -10,6 +10,7 @@ import { OpenAIRequest } from '../openai/types';
 import { messagesToOpenAI, toolChoiceToOpenAI, toolsToOpenAI } from '../openai';
 import type { CreateOpenAIRequestOptions } from './types';
 import { applyProviderTransforms } from './providers';
+import { getTemperatureIfValid } from '../../utils/get_temperature';
 
 export const createRequest = (options: CreateOpenAIRequestOptions): OpenAIRequest => {
   const {
@@ -23,6 +24,7 @@ export const createRequest = (options: CreateOpenAIRequestOptions): OpenAIReques
   } = applyProviderTransforms(options);
 
   let request: OpenAIRequest;
+
   if (simulatedFunctionCalling) {
     const wrapped = wrapWithSimulatedFunctionCalling({
       system,
@@ -31,13 +33,13 @@ export const createRequest = (options: CreateOpenAIRequestOptions): OpenAIReques
       tools,
     });
     request = {
-      temperature,
+      ...getTemperatureIfValid(temperature, { connector: options.connector, modelName }),
       model: modelName,
       messages: messagesToOpenAI({ system: wrapped.system, messages: wrapped.messages }),
     };
   } else {
     request = {
-      temperature,
+      ...getTemperatureIfValid(temperature, { connector: options.connector, modelName }),
       model: modelName,
       messages: messagesToOpenAI({ system, messages }),
       tool_choice: toolChoiceToOpenAI(toolChoice),
