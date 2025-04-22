@@ -48,7 +48,7 @@ RUN chmod -R g=u /usr/share/kibana
 # Add an init process, check the checksum to make sure it's a match
 RUN set -e ; \
     TINI_BIN="" ; \
-    {{#wolfi}}arch="$(apk --print-arch)" ; \ {{/wolfi}}{{#ubi}}arch="$(rpm --query --queryformat='%{ARCH}' rpm)"; \ {{/ubi}}
+    {{#ubuntu}}arch="$(dpkg --print-architecture)"{{/ubuntu}}{{#wolfi}}arch="$(apk --print-arch)"{{/wolfi}}{{#ubi}}arch="$(rpm --query --queryformat='%{ARCH}' rpm)"{{/ubi}} ; \
     case "$arch" in \
         aarch64) \
             TINI_BIN='tini-arm64' ; \
