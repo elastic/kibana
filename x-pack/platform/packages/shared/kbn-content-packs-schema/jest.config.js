@@ -5,11 +5,8 @@
  * 2.0.
  */
 
-export * from './ingest';
-export * from './base/api';
-export * from './api';
-export * from './core';
-export * from './helpers';
-export * from './group';
-export * from './record_types';
-export * from './significant_events';
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/x-pack/platform/packages/shared/kbn-content-packs-schema'],
+};

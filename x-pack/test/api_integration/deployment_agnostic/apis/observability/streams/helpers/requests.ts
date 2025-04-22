@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { Readable } from 'stream';
 import { Client } from '@elastic/elasticsearch';
 import { JsonObject } from '@kbn/utility-types';
 import expect from '@kbn/expect';
@@ -11,6 +13,7 @@ import { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
 import { StreamUpsertRequest } from '@kbn/streams-schema';
 import { ClientRequestParamsOf } from '@kbn/server-route-repository-utils';
 import { StreamsRouteRepository } from '@kbn/streams-plugin/server';
+import { ContentPackIncludedObjects, ContentPackManifest } from '@kbn/content-packs-schema';
 import { StreamsSupertestRepositoryClient } from './repository_client';
 
 export async function enableStreams(client: StreamsSupertestRepositoryClient) {
@@ -130,6 +133,66 @@ export async function getQueries(
       params: {
         path: { name },
       },
+    })
+    .expect(expectStatusCode)
+    .then((response) => response.body);
+}
+
+export async function linkDashboard(
+  apiClient: StreamsSupertestRepositoryClient,
+  stream: string,
+  id: string
+) {
+  const response = await apiClient.fetch(
+    'PUT /api/streams/{name}/dashboards/{dashboardId} 2023-10-31',
+    {
+      params: { path: { name: stream, dashboardId: id } },
+    }
+  );
+
+  expect(response.status).to.be(200);
+}
+
+export async function exportContent(
+  apiClient: StreamsSupertestRepositoryClient,
+  name: string,
+  body: ContentPackManifest & {
+    include: ContentPackIncludedObjects;
+    replaced_patterns: string[];
+  },
+  expectStatusCode: number = 200
+) {
+  return await apiClient
+    .fetch('POST /api/streams/{name}/content/export 2023-10-31', {
+      params: {
+        path: { name },
+        body,
+      },
+    })
+    .responseType('blob')
+    .expect(expectStatusCode)
+    .then((response) => response.body);
+}
+
+export async function importContent(
+  apiClient: StreamsSupertestRepositoryClient,
+  name: string,
+  body: {
+    include: ContentPackIncludedObjects;
+    content: Readable;
+  },
+  expectStatusCode: number = 200
+) {
+  return await apiClient
+    .sendFile('POST /api/streams/{name}/content/import 2023-10-31', {
+      params: {
+        path: { name },
+        body: {
+          include: JSON.stringify(body.include),
+          content: body.content,
+        },
+      },
+      file: { key: 'content', filename: 'content_pack.zip' },
     })
     .expect(expectStatusCode)
     .then((response) => response.body);

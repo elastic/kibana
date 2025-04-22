@@ -48355,14 +48355,51 @@ paths:
         content:
           application/json:
             schema:
-              anyOf:
-                - additionalProperties: false
-                  type: object
-                  properties: {}
-                - enum:
-                    - 'null'
-                  nullable: true
-                - not: {}
+              additionalProperties: false
+              type: object
+              properties:
+                description:
+                  type: string
+                include:
+                  anyOf:
+                    - additionalProperties: false
+                      type: object
+                      properties:
+                        objects:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            dashboards:
+                              items:
+                                type: string
+                              type: array
+                          required:
+                            - dashboards
+                      required:
+                        - objects
+                    - additionalProperties: false
+                      type: object
+                      properties:
+                        all:
+                          additionalProperties: false
+                          type: object
+                          properties: {}
+                      required:
+                        - all
+                name:
+                  type: string
+                replaced_patterns:
+                  items:
+                    type: string
+                  type: array
+                version:
+                  type: string
+              required:
+                - name
+                - description
+                - version
+                - replaced_patterns
+                - include
       responses: {}
       summary: Export stream content
       tags:
@@ -48392,7 +48429,10 @@ paths:
               type: object
               properties:
                 content: {}
+                include:
+                  type: string
               required:
+                - include
                 - content
       responses: {}
       summary: Import content into a stream

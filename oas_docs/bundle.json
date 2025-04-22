@@ -53795,22 +53795,74 @@
           "content": {
             "application/json": {
               "schema": {
-                "anyOf": [
-                  {
-                    "additionalProperties": false,
-                    "properties": {},
-                    "type": "object"
+                "additionalProperties": false,
+                "properties": {
+                  "description": {
+                    "type": "string"
                   },
-                  {
-                    "enum": [
-                      "null"
-                    ],
-                    "nullable": true
+                  "include": {
+                    "anyOf": [
+                      {
+                        "additionalProperties": false,
+                        "properties": {
+                          "objects": {
+                            "additionalProperties": false,
+                            "properties": {
+                              "dashboards": {
+                                "items": {
+                                  "type": "string"
+                                },
+                                "type": "array"
+                              }
+                            },
+                            "required": [
+                              "dashboards"
+                            ],
+                            "type": "object"
+                          }
+                        },
+                        "required": [
+                          "objects"
+                        ],
+                        "type": "object"
+                      },
+                      {
+                        "additionalProperties": false,
+                        "properties": {
+                          "all": {
+                            "additionalProperties": false,
+                            "properties": {},
+                            "type": "object"
+                          }
+                        },
+                        "required": [
+                          "all"
+                        ],
+                        "type": "object"
+                      }
+                    ]
                   },
-                  {
-                    "not": {}
+                  "name": {
+                    "type": "string"
+                  },
+                  "replaced_patterns": {
+                    "items": {
+                      "type": "string"
+                    },
+                    "type": "array"
+                  },
+                  "version": {
+                    "type": "string"
                   }
-                ]
+                },
+                "required": [
+                  "name",
+                  "description",
+                  "version",
+                  "replaced_patterns",
+                  "include"
+                ],
+                "type": "object"
               }
             }
           }
@@ -53852,9 +53904,13 @@
               "schema": {
                 "additionalProperties": false,
                 "properties": {
-                  "content": {}
+                  "content": {},
+                  "include": {
+                    "type": "string"
+                  }
                 },
                 "required": [
+                  "include",
                   "content"
                 ],
                 "type": "object"

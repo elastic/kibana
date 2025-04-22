@@ -5,11 +5,5 @@
  * 2.0.
  */
 
-export * from './ingest';
-export * from './base/api';
-export * from './api';
-export * from './core';
-export * from './helpers';
-export * from './group';
-export * from './record_types';
-export * from './significant_events';
+export * from './archive';
+export * from './saved_object';
