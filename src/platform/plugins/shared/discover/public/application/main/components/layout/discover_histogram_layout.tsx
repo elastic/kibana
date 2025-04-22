@@ -32,7 +32,7 @@ export const DiscoverHistogramLayout = ({
   return (
     <UnifiedHistogramLayout
       container={container}
-      chartPanel={
+      unifiedHistogramChart={
         chartPortalNode ? <OutPortal node={chartPortalNode} panelsToggle={panelsToggle} /> : null
       }
       {...layoutProps}

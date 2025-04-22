@@ -23,11 +23,17 @@ export type UnifiedHistogramLayoutProps = PropsWithChildren<{
    * The parent container element, used to calculate the layout size
    */
   container: HTMLElement | null;
-  chartPanel: ReactNode;
+  /**
+   * The rendered UnifiedHistogramChart component
+   */
+  unifiedHistogramChart: ReactNode;
   /**
    * Context object for the chart -- leave undefined to hide the chart
    */
   chart?: UnifiedHistogramChartContext;
+  /**
+   * Flag to indicate if the chart is available for rendering
+   */
   isChartAvailable?: boolean;
   /**
    * Context object for the hits count -- leave undefined to hide the hits count
@@ -45,7 +51,7 @@ export type UnifiedHistogramLayoutProps = PropsWithChildren<{
 
 export const UnifiedHistogramLayout = ({
   container,
-  chartPanel,
+  unifiedHistogramChart,
   chart,
   isChartAvailable,
   hits,
@@ -99,7 +105,7 @@ export const UnifiedHistogramLayout = ({
         fixedPanelSize={currentTopPanelHeight}
         minFixedPanelSize={defaultTopPanelHeight}
         minFlexPanelSize={minMainPanelHeight}
-        fixedPanel={chartPanel}
+        fixedPanel={unifiedHistogramChart}
         flexPanel={<OutPortal node={mainPanelNode} />}
         data-test-subj="unifiedHistogram"
         css={chartCss}

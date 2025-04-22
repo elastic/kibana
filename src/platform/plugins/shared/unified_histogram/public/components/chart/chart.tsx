@@ -17,7 +17,6 @@ import type {
   EmbeddableComponentProps,
   LensEmbeddableInput,
   LensEmbeddableOutput,
-  LensPublicStart,
 } from '@kbn/lens-plugin/public';
 import type {
   Datatable,
@@ -90,7 +89,6 @@ export interface UnifiedHistogramChartProps {
   onBrushEnd?: LensEmbeddableInput['onBrushEnd'];
   withDefaultActions?: EmbeddableComponentProps['withDefaultActions'];
   columns?: DatatableColumn[];
-  LensEmbeddableOverride?: LensPublicStart['EmbeddableComponent'];
 }
 
 const HistogramMemoized = memo(Histogram);

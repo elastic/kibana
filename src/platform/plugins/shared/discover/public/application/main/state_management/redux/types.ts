@@ -68,7 +68,7 @@ export interface TabState extends TabItem {
   totalHitsRequest: TotalHitsRequest;
   chartRequest: ChartRequest;
   unifiedHistogramLayoutProps:
-    | Omit<UnifiedHistogramLayoutProps, 'container' | 'chartPanel'>
+    | Omit<UnifiedHistogramLayoutProps, 'container' | 'unifiedHistogramChart'>
     | undefined;
 }
 

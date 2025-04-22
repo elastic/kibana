@@ -201,7 +201,7 @@ export const useStateProps = ({
   );
 
   const onVisContextChanged: UseUnifiedHistogramProps['onVisContextChanged'] = useMemo(() => {
-    if (!originalOnVisContextChanged) {
+    if (!originalOnVisContextChanged || !isPlainRecord) {
       return undefined;
     }
 
@@ -210,7 +210,7 @@ export const useStateProps = ({
 
       originalOnVisContextChanged(minifiedVisContext, externalVisContextStatus);
     };
-  }, [originalOnVisContextChanged]);
+  }, [isPlainRecord, originalOnVisContextChanged]);
 
   /**
    * Effects

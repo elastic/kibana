@@ -12,11 +12,7 @@ import { css } from '@emotion/react';
 import React from 'react';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
-import type {
-  EmbeddableComponentProps,
-  LensEmbeddableInput,
-  LensPublicStart,
-} from '@kbn/lens-plugin/public';
+import type { EmbeddableComponentProps, LensEmbeddableInput } from '@kbn/lens-plugin/public';
 import type {
   UnifiedHistogramBucketInterval,
   UnifiedHistogramChartContext,
@@ -42,7 +38,6 @@ export interface HistogramProps {
   onFilter?: LensEmbeddableInput['onFilter'];
   onBrushEnd?: LensEmbeddableInput['onBrushEnd'];
   withDefaultActions?: EmbeddableComponentProps['withDefaultActions'];
-  LensEmbeddableOverride?: LensPublicStart['EmbeddableComponent'];
 }
 
 export function Histogram({
@@ -61,7 +56,6 @@ export function Histogram({
   onBrushEnd,
   withDefaultActions,
   abortController,
-  LensEmbeddableOverride,
 }: HistogramProps) {
   const { timeRangeText, timeRangeDisplay } = useTimeRange({
     uiSettings,
@@ -105,8 +99,6 @@ export function Histogram({
     }
   `;
 
-  const LensEmbeddable = LensEmbeddableOverride ?? lens.EmbeddableComponent;
-
   return (
     <>
       <div
@@ -116,7 +108,7 @@ export function Histogram({
         data-suggestion-type={visContext.suggestionType}
         css={chartCss}
       >
-        <LensEmbeddable
+        <lens.EmbeddableComponent
           {...lensProps}
           // forceDSL is set to true to ensure that the Lens always uses DSL to fetch the data
           // as some consumers (discover) rely on the total hits count which is not provided by ESQL

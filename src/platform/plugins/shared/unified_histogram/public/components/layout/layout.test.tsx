@@ -82,7 +82,7 @@ describe('Layout', () => {
       return (
         <UnifiedHistogramLayout
           container={null}
-          chartPanel={<UnifiedHistogramChart {...unifiedHistogram.chartProps} />}
+          unifiedHistogramChart={<UnifiedHistogramChart {...unifiedHistogram.chartProps} />}
           {...unifiedHistogram.layoutProps}
           hits={hits === undefined ? unifiedHistogram.layoutProps.hits : hits ?? undefined}
           chart={chart === undefined ? unifiedHistogram.layoutProps.chart : chart ?? undefined}

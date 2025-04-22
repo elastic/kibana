@@ -39,19 +39,22 @@ import { UnifiedHistogramLayoutProps } from '../components/layout/layout';
 import { getBreakdownField } from '../utils/local_storage_utils';
 
 export type UseUnifiedHistogramProps = Omit<UnifiedHistogramStateOptions, 'services'> & {
-  searchSessionId?: UnifiedHistogramRequestContext['searchSessionId'];
-  requestAdapter?: UnifiedHistogramRequestContext['adapter'];
-  isChartLoading?: boolean;
-  breakdownField?: string;
-  onBreakdownFieldChange?: (breakdownField: string | undefined) => void;
-  onVisContextChanged?: (
-    nextVisContext: UnifiedHistogramVisContext | undefined,
-    externalVisContextStatus: UnifiedHistogramExternalVisContextStatus
-  ) => void;
   /**
    * Required services
    */
   services: UnifiedHistogramServices;
+  /**
+   * The current search session ID
+   */
+  searchSessionId?: UnifiedHistogramRequestContext['searchSessionId'];
+  /**
+   * The request adapter to use for the inspector
+   */
+  requestAdapter?: UnifiedHistogramRequestContext['adapter'];
+  /**
+   * The abort controller to use for requests
+   */
+  abortController?: AbortController;
   /**
    * The current data view
    */
@@ -64,6 +67,10 @@ export type UseUnifiedHistogramProps = Omit<UnifiedHistogramStateOptions, 'servi
    * The current filters
    */
   filters?: Filter[];
+  /**
+   * The current breakdown field
+   */
+  breakdownField?: string;
   /**
    * The external custom Lens vis
    */
@@ -81,9 +88,21 @@ export type UseUnifiedHistogramProps = Omit<UnifiedHistogramStateOptions, 'servi
    */
   columns?: DatatableColumn[];
   /**
+   * Preloaded data table sometimes used for rendering the chart in ES|QL mode
+   */
+  table?: Datatable;
+  /**
+   * Flag indicating that the chart is currently loading
+   */
+  isChartLoading?: boolean;
+  /**
    * Disabled action IDs for the Lens embeddable
    */
   disabledActions?: LensEmbeddableInput['disabledActions'];
+  /**
+   * Allows users to enable/disable default actions
+   */
+  withDefaultActions?: EmbeddableComponentProps['withDefaultActions'];
   /**
    * Callback to pass to the Lens embeddable to handle filter changes
    */
@@ -93,11 +112,16 @@ export type UseUnifiedHistogramProps = Omit<UnifiedHistogramStateOptions, 'servi
    */
   onBrushEnd?: LensEmbeddableInput['onBrushEnd'];
   /**
-   * Allows users to enable/disable default actions
+   * Callback to update the breakdown field -- should set {@link UnifiedHistogramBreakdownContext.field} to breakdownField
    */
-  withDefaultActions?: EmbeddableComponentProps['withDefaultActions'];
-  table?: Datatable;
-  abortController?: AbortController;
+  onBreakdownFieldChange?: (breakdownField: string | undefined) => void;
+  /**
+   * Callback to notify about the change in Lens attributes
+   */
+  onVisContextChanged?: (
+    nextVisContext: UnifiedHistogramVisContext | undefined,
+    externalVisContextStatus: UnifiedHistogramExternalVisContextStatus
+  ) => void;
 };
 
 export type UnifiedHistogramApi = {
@@ -116,7 +140,7 @@ export type UseUnifiedHistogramResult =
       isInitialized: true;
       api: UnifiedHistogramApi;
       chartProps: UnifiedHistogramChartProps;
-      layoutProps: Omit<UnifiedHistogramLayoutProps, 'container' | 'chartPanel'>;
+      layoutProps: Omit<UnifiedHistogramLayoutProps, 'container' | 'unifiedHistogramChart'>;
     };
 
 const EMPTY_SUGGESTION_CONTEXT: Observable<UnifiedHistogramSuggestionContext> = of({
@@ -222,7 +246,7 @@ export const useUnifiedHistogram = (props: UseUnifiedHistogramProps): UseUnified
       breakdownField: stateProps.breakdown?.field,
       table,
       onSuggestionContextChange: stateProps.onSuggestionContextChange,
-      onVisContextChanged: stateProps.isPlainRecord ? stateProps.onVisContextChanged : undefined,
+      onVisContextChanged: stateProps.onVisContextChanged,
     });
   }, [
     columns,
@@ -265,7 +289,9 @@ export const useUnifiedHistogram = (props: UseUnifiedHistogramProps): UseUnified
         }
       : undefined;
   }, [chart, input$, isChartAvailable, lensVisService, props, requestParams, stateProps]);
-  const layoutProps = useMemo<Omit<UnifiedHistogramLayoutProps, 'container' | 'chartPanel'>>(
+  const layoutProps = useMemo<
+    Omit<UnifiedHistogramLayoutProps, 'container' | 'unifiedHistogramChart'>
+  >(
     () => ({
       chart,
       isChartAvailable,
