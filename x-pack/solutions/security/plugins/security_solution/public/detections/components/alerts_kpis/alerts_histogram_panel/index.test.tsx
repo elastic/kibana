@@ -531,7 +531,9 @@ describe('AlertsHistogramPanel', () => {
       wrapper.setProps({ filters: [] });
       wrapper.update();
 
-      expect(wrapper.find(`[data-test-subj="header-section-subtitle"]`).text()).toContain('999');
+      expect(wrapper.find(`[data-test-subj="header-section-subtitle"]`).first().text()).toContain(
+        '999'
+      );
       wrapper.unmount();
     });
 
@@ -565,7 +567,9 @@ describe('AlertsHistogramPanel', () => {
         </TestProviders>
       );
 
-      expect(wrapper.find(`[data-test-subj="header-section-subtitle"]`).text()).toContain('999');
+      expect(wrapper.find(`[data-test-subj="header-section-subtitle"]`).first().text()).toContain(
+        '999'
+      );
       wrapper.unmount();
     });
 
@@ -585,7 +589,7 @@ describe('AlertsHistogramPanel', () => {
         </TestProviders>
       );
 
-      expect(wrapper.find(`[data-test-subj="header-section-subtitle"]`).text()).toEqual('');
+      expect(wrapper.find(`[data-test-subj="header-section-subtitle"]`).first().text()).toEqual('');
       wrapper.unmount();
     });
   });
