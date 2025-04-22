@@ -141,6 +141,7 @@ export const useGetPackageInfoByKeyQuery = (
   queryOptions: {
     // If enabled is false, the query will not be fetched
     enabled?: boolean;
+    suspense?: boolean;
     refetchOnMount?: boolean | 'always';
   } = {
     enabled: true,
@@ -164,6 +165,7 @@ export const useGetPackageInfoByKeyQuery = (
         },
       }),
     {
+      suspense: queryOptions.suspense,
       enabled: queryOptions.enabled,
       refetchOnMount: queryOptions.refetchOnMount,
       retry: (_, error) => !isRegistryConnectionError(error),

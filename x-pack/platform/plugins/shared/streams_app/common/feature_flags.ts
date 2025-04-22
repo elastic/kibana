@@ -5,14 +5,4 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
-
-interface ContentPack {
-  content: string;
-}
-
-const contentPackSchema: z.Schema<ContentPack> = z.object({
-  content: z.string(),
-});
-
-export { contentPackSchema, type ContentPack };
+export const FeatureFlagStreamsContentPackUIEnabled = 'featureFlagsStreams.contentPackUIEnabled';
