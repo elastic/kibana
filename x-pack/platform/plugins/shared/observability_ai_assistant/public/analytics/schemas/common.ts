@@ -18,6 +18,60 @@ export const messageSchema: RootSchema<Message & { scopes: AssistantScope[] }> =
   },
   message: {
     properties: {
+      anonymized: {
+        type: 'boolean',
+        _meta: {
+          description: 'Whether the message was anonymized.',
+          optional: true,
+        },
+      },
+      detectedEntities: {
+        type: 'array',
+        items: {
+          properties: {
+            entity: {
+              type: 'text',
+              _meta: {
+                description: 'The entity that was detected.',
+              },
+            },
+            class_name: {
+              type: 'text',
+              _meta: {
+                description: 'The class name of the entity that was detected.',
+              },
+            },
+            start_pos: {
+              type: 'integer',
+              _meta: {
+                description: 'The start position of the entity that was detected.',
+              },
+            },
+            end_pos: {
+              type: 'integer',
+              _meta: {
+                description: 'The end position of the entity that was detected.',
+              },
+            },
+            hash: {
+              type: 'text',
+              _meta: {
+                description: 'The hash of the entity that was detected.',
+              },
+            },
+            type: {
+              type: 'text',
+              _meta: {
+                description: 'The type of the entity that was detected.',
+              },
+            },
+          },
+        },
+        _meta: {
+          description: 'The entities that were detected in the message.',
+          optional: true,
+        },
+      },
       content: {
         type: 'text',
         _meta: {
