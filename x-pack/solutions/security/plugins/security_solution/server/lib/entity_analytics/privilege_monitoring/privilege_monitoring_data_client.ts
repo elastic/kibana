@@ -27,7 +27,11 @@ import { startPrivilegeMonitoringTask } from './tasks/privilege_monitoring_task'
 import { createOrUpdateIndex } from '../utils/create_or_update_index';
 import { generateUserIndexMappings, getPrivilegedMonitorUsersIndex } from './indices';
 import { PrivilegeMonitoringEngineDescriptorClient } from './saved_object/privilege_monitoring';
-import { PRIVILEGE_MONITORING_ENGINE_STATUS } from './constants';
+import {
+  POST_EXCLUDE_INDICES,
+  PRE_EXCLUDE_INDICES,
+  PRIVILEGE_MONITORING_ENGINE_STATUS,
+} from './constants';
 import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../audit';
 import { PrivilegeMonitoringEngineActions } from './auditing/actions';
 import {
@@ -133,6 +137,28 @@ export class PrivilegeMonitoringDataClient {
         mappings: generateUserIndexMappings(),
       },
     });
+  }
+
+  public async searchPrivilegesIndices(query: string | undefined) {
+    const { indices } = await this.esClient.fieldCaps({
+      index: [query ? `*${query}*` : '*', ...PRE_EXCLUDE_INDICES],
+      types: ['keyword'],
+      fields: ['user.name'], // search for indices with field 'user.name' of type 'keyword'
+      include_unmapped: false,
+      ignore_unavailable: true,
+      allow_no_indices: true,
+      expand_wildcards: 'open',
+      include_empty_fields: false,
+      filters: '-parent',
+    });
+
+    if (!Array.isArray(indices) || indices.length === 0) {
+      return [];
+    }
+
+    return indices.filter(
+      (name) => !POST_EXCLUDE_INDICES.some((pattern) => name.startsWith(pattern))
+    );
   }
 
   public getIndex() {

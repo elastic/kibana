@@ -167,7 +167,7 @@ export const routes = [
     path: ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_PATH,
     component: withSecurityRoutePageWrapper(
       EntityAnalyticsPrivilegedUserMonitoringContainer,
-      SecurityPageName.privilegedUserMonitoring,
+      SecurityPageName.entityAnalyticsPrivilegedUserMonitoring,
       {
         redirectOnMissing: true,
       }
