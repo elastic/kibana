@@ -17,7 +17,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { ActionTypeExecutorResult, isActionTypeExecutorResult } from '@kbn/actions-plugin/common';
-import { Option, none, some } from 'fp-ts/lib/Option';
+import { Option, none, some } from 'fp-ts/Option';
 import { ReadOnlyConnectorMessage } from './read_only';
 import {
   ActionConnector,

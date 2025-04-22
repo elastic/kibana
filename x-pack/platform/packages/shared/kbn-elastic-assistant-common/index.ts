@@ -66,3 +66,9 @@ export {
   /** The default (relative) start of the date range (i.e. `now-24h`) */
   DEFAULT_START,
 } from './impl/alerts/get_open_and_acknowledged_alerts_query';
+
+export {
+  getTacticLabel,
+  getTacticMetadata,
+  replaceNewlineLiterals,
+} from './impl/utils/attack_discovery_helpers';
