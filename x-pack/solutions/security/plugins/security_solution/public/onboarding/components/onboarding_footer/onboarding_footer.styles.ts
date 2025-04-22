@@ -18,9 +18,6 @@ export const useFooterStyles = () => {
       padding: ${euiTheme.base * 0.75}px;
     }
 
-    .itemIcon {
-      color: ${euiTheme.colors.plainDark};
-    }
     .itemIconWrapper {
       display: inline-block;
       padding: ${euiTheme.size.s};
