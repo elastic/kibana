@@ -15,19 +15,19 @@ To check for security updates, go to [Security announcements for the Elastic sta
 
 % Release notes include only features, enhancements, and fixes. Add breaking changes, deprecations, and known issues to the applicable release notes sections.
 
-% ## version.next [kibana-next-release-notes]
+% ## version.next [kibana-X.X.X-release-notes]
 
-% ### Features and enhancements [kibana-next-features-enhancements]
+% ### Features and enhancements [kibana-X.X.X-features-enhancements]
 % *
 
-% ### Fixes [kibana-next-fixes]
+% ### Fixes [kibana-X.X.X-fixes]
 % *
 
-## 9.0.0 [kibana-9.0.0-release-notes]
+## 9.0.0 [kibana-900-release-notes]
 
 If you're upgrading to version 9.0.0, you first need to upgrade to version 8.18. We recommend checking the [8.18 release notes](https://www.elastic.co/guide/en/kibana/8.18/release-notes-8.18.0.html).
 
-### Features and enhancements [kibana-9.0.0-features-enhancements]
+### Features and enhancements [kibana-900-features-enhancements]
 
 **Theme**:
 
@@ -64,7 +64,7 @@ If you're upgrading to version 9.0.0, you first need to upgrade to version 8.18.
 * Sets HTTP2 as default if SSL is enabled and adds deprecation log if SSL is not enabled or protocol is set to HTTP1 [#204384]({{kib-pull}}204384).
 
 
-### Fixes [kibana-9.0.0-fixes]
+### Fixes [kibana-900-fixes]
 
 **Dashboards & Visualizations**:
 * Fixes an issue in Lens where colors behind text were not correctly assigned, such as in `Pie`, `Treemap` and `Mosaic` charts [#209632]({{kib-pull}}209632).
