@@ -12,6 +12,7 @@ import { errors } from '@elastic/elasticsearch';
 import { get } from 'lodash';
 import { StreamsRouteHandlerResources } from './types';
 import { StatusError } from '../lib/streams/errors/status_error';
+import { AggregateStatusError } from '../lib/streams/errors/aggregate_status_error';
 
 const createPlainStreamsServerRoute = createServerRouteFactory<StreamsRouteHandlerResources>();
 
@@ -33,7 +34,11 @@ export const createServerRoute: CreateServerRouteFactory<
       });
       return handler(options)
         .catch((error) => {
-          if (error instanceof StatusError || error instanceof errors.ResponseError) {
+          if (
+            error instanceof StatusError ||
+            error instanceof AggregateStatusError ||
+            error instanceof errors.ResponseError
+          ) {
             switch (error.statusCode) {
               case 400:
                 throw badRequest(error);

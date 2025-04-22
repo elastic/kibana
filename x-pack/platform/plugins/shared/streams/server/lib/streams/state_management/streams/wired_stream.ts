@@ -272,7 +272,7 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
     if (!hasSupportedStreamsRoot(this._definition.name)) {
       return {
         isValid: false,
-        errors: ['Cannot create wired stream due to unsupported root stream'],
+        errors: [new Error('Cannot create wired stream due to unsupported root stream')],
       };
     }
 
@@ -290,7 +290,9 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
           return {
             isValid: false,
             errors: [
-              `Cannot create wired stream "${this._definition.name}" due to conflict caused by existing index`,
+              new Error(
+                `Cannot create wired stream "${this._definition.name}" due to conflict caused by existing index`
+              ),
             ],
           };
         }
@@ -298,7 +300,9 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
         return {
           isValid: false,
           errors: [
-            `Cannot create wired stream "${this._definition.name}" due to conflict caused by existing data stream`,
+            new Error(
+              `Cannot create wired stream "${this._definition.name}" due to conflict caused by existing data stream`
+            ),
           ],
         };
       } catch (error) {
@@ -315,7 +319,9 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
         return {
           isValid: false,
           errors: [
-            `Child ${routing.destination} exists multiple times as child of ${this._definition.name}`,
+            new Error(
+              `Child ${routing.destination} exists multiple times as child of ${this._definition.name}`
+            ),
           ],
         };
       }
@@ -323,7 +329,9 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
         return {
           isValid: false,
           errors: [
-            `The ID of child stream ${routing.destination} must start with the parent's name (${this._definition.name}), followed by a dot and a name`,
+            new Error(
+              `The ID of child stream ${routing.destination} must start with the parent's name (${this._definition.name}), followed by a dot and a name`
+            ),
           ],
         };
       }
@@ -339,7 +347,9 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
         return {
           isValid: false,
           errors: [
-            `Child stream ${stream.definition.name} is not routed to from its parent ${this._definition.name}`,
+            new Error(
+              `Child stream ${stream.definition.name} is not routed to from its parent ${this._definition.name}`
+            ),
           ],
         };
       }
@@ -372,7 +382,7 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
     validateSystemFields(this._definition);
 
     if (this.dependencies.isServerless && isIlmLifecycle(this.getLifeCycle())) {
-      return { isValid: false, errors: ['Using ILM is not supported in Serverless'] };
+      return { isValid: false, errors: [new Error('Using ILM is not supported in Serverless')] };
     }
 
     return { isValid: true, errors: [] };

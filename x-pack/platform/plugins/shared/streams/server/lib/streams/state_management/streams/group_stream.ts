@@ -105,7 +105,9 @@ export class GroupStream extends StreamActiveRecord<Streams.GroupStream.Definiti
           return {
             isValid: false,
             errors: [
-              `Cannot create group stream "${this._definition.name}" due to conflict caused by existing index`,
+              new Error(
+                `Cannot create group stream "${this._definition.name}" due to conflict caused by existing index`
+              ),
             ],
           };
         }
@@ -113,7 +115,9 @@ export class GroupStream extends StreamActiveRecord<Streams.GroupStream.Definiti
         return {
           isValid: false,
           errors: [
-            `Cannot create group stream "${this._definition.name}" due to conflict caused by existing data stream`,
+            new Error(
+              `Cannot create group stream "${this._definition.name}" due to conflict caused by existing data stream`
+            ),
           ],
         };
       } catch (error) {
@@ -129,13 +133,13 @@ export class GroupStream extends StreamActiveRecord<Streams.GroupStream.Definiti
       if (!memberStream || memberStream.isDeleted()) {
         return {
           isValid: false,
-          errors: [`Member stream ${member} not found`],
+          errors: [new Error(`Member stream ${member} not found`)],
         };
       }
       if (!Streams.ingest.all.Definition.is(memberStream.definition)) {
         return {
           isValid: false,
-          errors: [`Member stream ${member} is neither a wired nor an unwired stream`],
+          errors: [new Error(`Member stream ${member} is neither a wired nor an unwired stream`)],
         };
       }
     }

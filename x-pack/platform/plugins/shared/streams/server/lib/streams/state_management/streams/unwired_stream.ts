@@ -112,7 +112,11 @@ export class UnwiredStream extends StreamActiveRecord<Streams.UnwiredStream.Defi
           // There is an index but no data stream
           return {
             isValid: false,
-            errors: [`Cannot create Unwired stream ${this.definition.name} due to existing index`],
+            errors: [
+              new Error(
+                `Cannot create Unwired stream ${this.definition.name} due to existing index`
+              ),
+            ],
           };
         }
       } catch (error) {
@@ -120,7 +124,9 @@ export class UnwiredStream extends StreamActiveRecord<Streams.UnwiredStream.Defi
           return {
             isValid: false,
             errors: [
-              `Cannot create Unwired stream ${this.definition.name} due to missing backing Data Stream`,
+              new Error(
+                `Cannot create Unwired stream ${this.definition.name} due to missing backing Data Stream`
+              ),
             ],
           };
         }
@@ -134,7 +140,9 @@ export class UnwiredStream extends StreamActiveRecord<Streams.UnwiredStream.Defi
         return {
           isValid: false,
           errors: [
-            'Cannot apply DSL lifecycle to a data stream that is already managed by an ILM policy',
+            new Error(
+              'Cannot apply DSL lifecycle to a data stream that is already managed by an ILM policy'
+            ),
           ],
         };
       }

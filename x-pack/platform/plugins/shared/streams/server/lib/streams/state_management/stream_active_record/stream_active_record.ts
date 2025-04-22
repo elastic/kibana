@@ -12,7 +12,7 @@ import type { State } from '../state';
 
 export interface ValidationResult {
   isValid: boolean;
-  errors: string[];
+  errors: Error[];
 }
 
 export interface PrintableStream {
@@ -129,7 +129,7 @@ export abstract class StreamActiveRecord<
 
       return { isValid: true, errors: [] };
     } catch (error) {
-      return { isValid: false, errors: [error.message] };
+      return { isValid: false, errors: [error] };
     }
   }
 

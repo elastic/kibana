@@ -144,17 +144,29 @@ function modelValidation(...args: [ModelValidation, ModelSchema] | [ModelSchema]
   const [left, right] = args;
 
   return {
-    Definition: validation(left.Definition.right, right.Definition),
-    Source: validation(left.Source.right, z.intersection(right.Definition, right.Source)),
+    Definition: validation(
+      left.Definition.right,
+      z.intersection(left.Definition.right, right.Definition)
+    ),
+    Source: validation(
+      left.Source.right,
+      z.intersection(left.Source.right, z.intersection(right.Definition, right.Source))
+    ),
     GetResponse: validation(
       left.GetResponse.right,
-      z.intersection(z.object({ stream: right.Definition }), right.GetResponse)
+      z.intersection(
+        left.GetResponse.right,
+        z.intersection(z.object({ stream: right.Definition }), right.GetResponse)
+      )
     ),
     UpsertRequest: validation(
       left.UpsertRequest.right,
       z.intersection(
-        z.object({ stream: right.Definition }),
-        z.intersection(right.UpsertRequest, z.object({ name: z.never() }).optional())
+        left.UpsertRequest.right,
+        z.intersection(
+          z.object({ stream: right.Definition }),
+          z.intersection(right.UpsertRequest, z.object({ name: z.never() }).optional())
+        )
       )
     ),
   };
