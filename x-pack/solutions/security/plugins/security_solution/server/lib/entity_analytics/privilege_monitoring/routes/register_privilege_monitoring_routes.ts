@@ -23,17 +23,16 @@ import {
 export const registerPrivilegeMonitoringRoutes = ({
   router,
   logger,
-  getStartServices,
   config,
 }: EntityAnalyticsRoutesDeps) => {
   initPrivilegeMonitoringEngineRoute(router, logger, config);
   healthCheckPrivilegeMonitoringRoute(router, logger, config);
   searchPrivilegeMonitoringIndicesRoute(router, logger, config);
-  getUserRoute(router, logger, getStartServices);
-  createUserRoute(router, logger, getStartServices);
-  deleteUserRoute(router, logger, getStartServices);
-  listUsersRoute(router, logger, getStartServices);
-  updateUserRoute(router, logger, getStartServices);
-  uploadUsersCSVRoute(router, logger, getStartServices);
-  uploadUsersJSONRoute(router, logger, getStartServices);
+  getUserRoute(router, logger);
+  createUserRoute(router, logger);
+  deleteUserRoute(router, logger);
+  listUsersRoute(router, logger);
+  updateUserRoute(router, logger);
+  uploadUsersCSVRoute(router, logger);
+  uploadUsersJSONRoute(router, logger);
 };

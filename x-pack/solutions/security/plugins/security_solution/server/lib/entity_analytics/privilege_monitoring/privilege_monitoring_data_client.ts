@@ -18,11 +18,11 @@ import type {
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import moment from 'moment';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
-import type { UpdateUserRequestBody } from '../../../../common/api/entity_analytics/privilege_monitoring/users/update.gen';
+import type { UpdatePrivMonUserRequestBody } from '../../../../common/api/entity_analytics/privilege_monitoring/users/update.gen';
 
 import type {
-  CreateUserRequestBody,
-  CreateUserResponse,
+  CreatePrivMonUserRequestBody,
+  CreatePrivMonUserResponse,
 } from '../../../../common/api/entity_analytics/privilege_monitoring/users/create.gen';
 import type { InitMonitoringEngineResponse } from '../../../../common/api/entity_analytics/privilege_monitoring/engine/init.gen';
 import type { MonitoredUserDoc } from '../../../../common/api/entity_analytics/privilege_monitoring/common.gen';
@@ -173,7 +173,7 @@ export class PrivilegeMonitoringDataClient {
     return getPrivilegedMonitorUsersIndex(this.opts.namespace);
   }
 
-  public async createUser(user: CreateUserRequestBody): Promise<CreateUserResponse> {
+  public async createUser(user: CreatePrivMonUserRequestBody): Promise<CreatePrivMonUserResponse> {
     const res = await this.esClient.index({
       index: this.getIndex(),
       document: { user: { name: user.user_name }, is_monitored: user.is_monitored },
@@ -194,7 +194,7 @@ export class PrivilegeMonitoringDataClient {
 
   public async updateUser(
     id: string,
-    user: UpdateUserRequestBody
+    user: UpdatePrivMonUserRequestBody
   ): Promise<MonitoredUserDoc | undefined> {
     await this.esClient.update<MonitoredUserDoc>({
       index: this.getIndex(),
