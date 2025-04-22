@@ -16,8 +16,7 @@ import useMount from 'react-use/lib/useMount';
 import { pick } from 'lodash';
 import { DataView } from '@kbn/data-views-plugin/common';
 import useObservable from 'react-use/lib/useObservable';
-import { ChartProps } from '../chart/chart';
-import { UnifiedHistogramStateOptions, getBreakdownField } from '../container';
+import { ChartProps } from '../components/chart/chart';
 import {
   UnifiedHistogramExternalVisContextStatus,
   UnifiedHistogramInputMessage,
@@ -28,14 +27,16 @@ import {
   UnifiedHistogramVisContext,
 } from '../types';
 import {
+  UnifiedHistogramStateOptions,
   UnifiedHistogramStateService,
   createStateService,
-} from '../container/services/state_service';
-import { useStateProps } from '../container/hooks/use_state_props';
+} from '../services/state_service';
+import { useStateProps } from './use_state_props';
 import { useRequestParams } from './use_request_params';
 import { LensVisService } from '../services/lens_vis_service';
-import { checkChartAvailability } from '../chart';
-import { UnifiedHistogramLayoutProps } from '../layout/layout';
+import { checkChartAvailability } from '../components/chart';
+import { UnifiedHistogramLayoutProps } from '../components/layout/layout';
+import { getBreakdownField } from '../utils/local_storage_utils';
 
 export type UseUnifiedHistogramProps = Omit<UnifiedHistogramStateOptions, 'services'> & {
   searchSessionId?: UnifiedHistogramRequestContext['searchSessionId'];

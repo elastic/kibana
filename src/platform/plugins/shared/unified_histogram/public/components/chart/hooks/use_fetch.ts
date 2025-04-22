@@ -7,17 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Observable } from 'rxjs';
-import { UnifiedHistogramApi } from './hooks/use_unified_histogram';
+import { useMemo } from 'react';
+import { filter, share, tap } from 'rxjs';
+import { UnifiedHistogramInput$ } from '../../../types';
 
-export const createMockUnifiedHistogramApi = () => {
-  const api: UnifiedHistogramApi = {
-    state$: new Observable(),
-    setChartHidden: jest.fn(),
-    setTopPanelHeight: jest.fn(),
-    setTimeInterval: jest.fn(),
-    setTotalHits: jest.fn(),
-    fetch: jest.fn(),
-  };
-  return api;
+export const useFetch = ({
+  input$,
+  beforeFetch,
+}: {
+  input$: UnifiedHistogramInput$;
+  beforeFetch: () => void;
+}) => {
+  return useMemo(
+    () =>
+      input$.pipe(
+        filter((message) => message.type === 'fetch'),
+        tap(beforeFetch),
+        share()
+      ),
+    [beforeFetch, input$]
+  );
 };
