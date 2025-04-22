@@ -4,14 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiText } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
 import { useWaterfallFetcher } from '../../components/app/transaction_details/use_waterfall_fetcher';
 import { Waterfall } from '../../components/app/transaction_details/waterfall_with_summary/waterfall_container/waterfall';
-import { isPending } from '../../hooks/use_fetcher';
-import type { ApmTraceWaterfallEmbeddableProps } from './react_embeddable_factory';
 import { WaterfallLegends } from '../../components/app/transaction_details/waterfall_with_summary/waterfall_container/waterfall_legends';
+import { isPending } from '../../hooks/use_fetcher';
+import { Loading } from './loading';
+import type { ApmTraceWaterfallEmbeddableEntryProps } from './react_embeddable_factory';
 
 export function TraceWaterfallEmbeddable({
   serviceName,
@@ -20,7 +20,7 @@ export function TraceWaterfallEmbeddable({
   rangeTo,
   traceId,
   displayLimit,
-}: ApmTraceWaterfallEmbeddableProps) {
+}: ApmTraceWaterfallEmbeddableEntryProps) {
   const waterfallFetchResult = useWaterfallFetcher({
     traceId,
     transactionId: entryTransactionId,
@@ -29,21 +29,7 @@ export function TraceWaterfallEmbeddable({
   });
 
   if (isPending(waterfallFetchResult.status)) {
-    return (
-      <EuiFlexGroup direction="column" alignItems="center" gutterSize="s">
-        <EuiFlexItem grow={false}>
-          <EuiLoadingSpinner size="l" />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiText>
-            {i18n.translate(
-              'xpack.apm.traceWaterfallEmbeddable.loadingTraceWaterfallSkeletonTextLabel',
-              { defaultMessage: 'Loading trace waterfall' }
-            )}
-          </EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    );
+    return <Loading />;
   }
 
   const { legends, colorBy } = waterfallFetchResult.waterfall;
