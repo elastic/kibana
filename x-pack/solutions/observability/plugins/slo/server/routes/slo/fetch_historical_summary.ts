@@ -19,11 +19,10 @@ export const fetchHistoricalSummary = createSloServerRoute({
     },
   },
   params: fetchHistoricalSummaryParamsSchema,
-  handler: async ({ context, params, plugins }) => {
+  handler: async ({ request, logger, params, plugins, getScopedClients }) => {
     await assertPlatinumLicense(plugins);
-
-    const esClient = (await context.core).elasticsearch.client.asCurrentUser;
-    const historicalSummaryClient = new HistoricalSummaryClient(esClient);
+    const { scopedClusterClient } = await getScopedClients({ request, logger });
+    const historicalSummaryClient = new HistoricalSummaryClient(scopedClusterClient.asCurrentUser);
 
     return await historicalSummaryClient.fetch(params.body);
   },
