@@ -8745,6 +8745,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -8872,6 +8875,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -8945,6 +8951,9 @@
                   "description": "Generic Error",
                   "properties": {
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -9035,6 +9044,9 @@
                   "description": "Generic Error",
                   "properties": {
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -9170,6 +9182,9 @@
                   "description": "Generic Error",
                   "properties": {
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -10243,6 +10258,9 @@
                   "description": "Generic Error",
                   "properties": {
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -11525,6 +11543,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -12545,6 +12566,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -12636,6 +12660,9 @@
                   "description": "Generic Error",
                   "properties": {
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -12809,6 +12836,9 @@
                   "description": "Generic Error",
                   "properties": {
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -13795,6 +13825,9 @@
                   "description": "Generic Error",
                   "properties": {
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -15089,6 +15122,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -16107,6 +16143,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -16187,6 +16226,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -16210,6 +16252,9 @@
                   "description": "Generic Error",
                   "properties": {
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -16740,6 +16785,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -16886,6 +16934,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -17027,6 +17078,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -17145,6 +17199,9 @@
                   "description": "Generic Error",
                   "properties": {
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -17694,6 +17751,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -17781,6 +17841,9 @@
                   "description": "Generic Error",
                   "properties": {
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -18007,6 +18070,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -18136,6 +18202,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -18193,6 +18262,9 @@
                   "description": "Generic Error",
                   "properties": {
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -18301,6 +18373,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -18406,6 +18481,9 @@
                   "description": "Generic Error",
                   "properties": {
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -18520,6 +18598,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -18632,6 +18713,9 @@
                   "description": "Generic Error",
                   "properties": {
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -18756,6 +18840,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -18835,6 +18922,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -18897,6 +18987,9 @@
                   "description": "Generic Error",
                   "properties": {
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -18989,6 +19082,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -19075,6 +19171,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -19150,6 +19249,9 @@
                   "description": "Generic Error",
                   "properties": {
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -19228,6 +19330,9 @@
                   "description": "Generic Error",
                   "properties": {
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -19687,6 +19792,9 @@
                   "description": "Generic Error",
                   "properties": {
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -20171,6 +20279,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -20375,6 +20486,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -20459,6 +20573,9 @@
                   "description": "Generic Error",
                   "properties": {
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -20556,6 +20673,9 @@
                   "description": "Generic Error",
                   "properties": {
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -20703,6 +20823,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -20811,6 +20934,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -20881,6 +21007,9 @@
                   "description": "Generic Error",
                   "properties": {
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -21026,6 +21155,9 @@
                   "description": "Generic Error",
                   "properties": {
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -21206,6 +21338,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -21338,6 +21473,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -21414,6 +21552,9 @@
                   "description": "Generic Error",
                   "properties": {
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -21513,6 +21654,9 @@
                   "description": "Generic Error",
                   "properties": {
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -21654,6 +21798,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -21751,6 +21898,9 @@
                   "description": "Generic Error",
                   "properties": {
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -21957,6 +22107,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -22069,6 +22222,9 @@
                   "description": "Generic Error",
                   "properties": {
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -22660,6 +22816,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -22840,6 +22999,9 @@
                   "description": "Generic Error",
                   "properties": {
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -23115,6 +23277,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -23344,6 +23509,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -23401,6 +23569,9 @@
                   "description": "Generic Error",
                   "properties": {
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -23475,6 +23646,9 @@
                   "description": "Generic Error",
                   "properties": {
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -23642,6 +23816,9 @@
                   "description": "Generic Error",
                   "properties": {
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -24350,6 +24527,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -24565,6 +24745,9 @@
                   "description": "Generic Error",
                   "properties": {
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -25257,6 +25440,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -25388,6 +25574,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -25456,6 +25645,9 @@
                   "description": "Generic Error",
                   "properties": {
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -25615,6 +25807,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -25670,6 +25865,9 @@
                   "description": "Generic Error",
                   "properties": {
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -25777,6 +25975,9 @@
                   "description": "Generic Error",
                   "properties": {
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -25924,6 +26125,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -25997,6 +26201,9 @@
                   "description": "Generic Error",
                   "properties": {
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -26096,6 +26303,9 @@
                   "description": "Generic Error",
                   "properties": {
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -26242,6 +26452,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -26333,6 +26546,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -26356,6 +26572,9 @@
                   "description": "Generic Error",
                   "properties": {
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -26439,6 +26658,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -26511,6 +26733,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -26534,6 +26759,9 @@
                   "description": "Generic Error",
                   "properties": {
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -26601,6 +26829,9 @@
                   "description": "Generic Error",
                   "properties": {
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -26679,6 +26910,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -26702,6 +26936,9 @@
                   "description": "Generic Error",
                   "properties": {
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -27788,6 +28025,9 @@
                   "description": "Generic Error",
                   "properties": {
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -29894,6 +30134,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -29969,6 +30212,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -29992,6 +30238,9 @@
                   "description": "Generic Error",
                   "properties": {
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -31070,6 +31319,9 @@
                   "description": "Generic Error",
                   "properties": {
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -33160,6 +33412,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -33234,6 +33489,9 @@
                   "description": "Generic Error",
                   "properties": {
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -33944,6 +34202,9 @@
                   "description": "Generic Error",
                   "properties": {
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -35198,6 +35459,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -35221,6 +35485,9 @@
                   "description": "Generic Error",
                   "properties": {
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -35896,6 +36163,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -36106,6 +36376,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -36217,6 +36490,9 @@
                   "description": "Generic Error",
                   "properties": {
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -37405,6 +37681,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -37486,6 +37765,9 @@
                   "description": "Generic Error",
                   "properties": {
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -38128,6 +38410,9 @@
                   "description": "Generic Error",
                   "properties": {
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -39401,6 +39686,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -39424,6 +39712,9 @@
                   "description": "Generic Error",
                   "properties": {
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -39545,6 +39836,9 @@
                   "description": "Generic Error",
                   "properties": {
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -39720,6 +40014,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -39793,6 +40090,9 @@
                   "description": "Generic Error",
                   "properties": {
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -39906,6 +40206,9 @@
                   "description": "Generic Error",
                   "properties": {
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -40084,6 +40387,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -40170,6 +40476,9 @@
                   "description": "Generic Error",
                   "properties": {
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -40287,6 +40596,9 @@
                   "description": "Generic Error",
                   "properties": {
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -40480,6 +40792,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -40584,6 +40899,9 @@
                   "description": "Generic Error",
                   "properties": {
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
@@ -40742,6 +41060,9 @@
                     "error": {
                       "type": "string"
                     },
+                    "errorType": {
+                      "type": "string"
+                    },
                     "message": {
                       "type": "string"
                     },
@@ -40836,6 +41157,9 @@
                   "description": "Generic Error",
                   "properties": {
                     "error": {
+                      "type": "string"
+                    },
+                    "errorType": {
                       "type": "string"
                     },
                     "message": {
