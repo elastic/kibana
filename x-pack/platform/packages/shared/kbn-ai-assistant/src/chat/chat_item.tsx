@@ -108,7 +108,7 @@ export function ChatItem({
   onRegenerateClick,
   onSendTelemetry,
   onStopGeneratingClick,
-  piiHighlightedContent,
+  anonymizedHighlightedContent,
 }: ChatItemProps) {
   const accordionId = useGeneratedHtmlId({ prefix: 'chat' });
 
@@ -163,7 +163,7 @@ export function ChatItem({
         loading={loading}
         functionCall={functionCall}
         content={content}
-        piiHighlightedContent={piiHighlightedContent}
+        anonymizedHighlightedContent={anonymizedHighlightedContent}
         role={role}
         onSubmit={handleInlineEditSubmit}
         onActionClick={onActionClick}

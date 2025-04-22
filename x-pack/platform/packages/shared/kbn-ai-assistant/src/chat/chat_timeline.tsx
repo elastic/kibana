@@ -42,7 +42,7 @@ export interface ChatTimelineItem
   error?: any;
   message: Message;
   functionCall?: Message['message']['function_call'];
-  piiHighlightedContent?: React.ReactNode;
+  anonymizedHighlightedContent?: React.ReactNode;
 }
 
 export interface ChatTimelineProps {
@@ -69,7 +69,7 @@ export interface ChatTimelineProps {
   }) => void;
 }
 
-const highlightPIIClassName = css`
+const highlightAnonymizedClassName = css`
   background-color: #ffeb3b;
   padding: 2px 4px;
   border-radius: 3px;
@@ -91,7 +91,7 @@ function highlightContent(
     }
     // Wrap the sensitive text in a span with highlight styles
     parts.push(
-      <span key={`user-highlight-${index}`} className={highlightPIIClassName}>
+      <span key={`user-highlight-${index}`} className={highlightAnonymizedClassName}>
         {content.substring(entity.start_pos, entity.end_pos)}
       </span>
     );
@@ -141,7 +141,7 @@ export function ChatTimeline({
       if (item.display.hide || !item) continue;
 
       if (role === 'user' && content && detectedEntities) {
-        item.piiHighlightedContent = highlightContent(content, detectedEntities);
+        item.anonymizedHighlightedContent = highlightContent(content, detectedEntities);
       }
 
       if (item.display.collapsed) {
