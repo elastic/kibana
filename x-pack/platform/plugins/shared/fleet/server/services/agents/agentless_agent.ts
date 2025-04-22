@@ -66,7 +66,7 @@ class AgentlessAgentService {
     };
 
     const logger = appContextService.getLogger();
-    logger.info(`[Agentless API] Creating agentless agent ${agentlessAgentPolicy.id}`);
+    logger.debug(`[Agentless API] Creating agentless agent ${agentlessAgentPolicy.id}`);
 
     const agentlessConfig = appContextService.getConfig()?.agentless;
     if (!agentlessConfig) {
@@ -96,7 +96,7 @@ class AgentlessAgentService {
       soClient
     );
 
-    logger.info(
+    logger.debug(
       `[Agentless API] Creating agentless agent with fleetUrl ${fleetUrl} and fleet_token: [REDACTED]`
     );
 
@@ -106,7 +106,7 @@ class AgentlessAgentService {
       );
     }
 
-    logger.info(
+    logger.debug(
       `[Agentless API] Creating agentless agent with TLS cert: ${
         agentlessConfig?.api?.tls?.certificate ? '[REDACTED]' : 'undefined'
       } and TLS key: ${agentlessConfig?.api?.tls?.key ? '[REDACTED]' : 'undefined'}
@@ -137,7 +137,7 @@ class AgentlessAgentService {
 
     const requestConfigDebugStatus = this.createRequestConfigDebug(requestConfig);
 
-    logger.info(
+    logger.debug(
       `[Agentless API] Creating agentless agent with request config ${requestConfigDebugStatus}`
     );
 
@@ -156,7 +156,7 @@ class AgentlessAgentService {
       }
     );
 
-    logger.info(`[Agentless API] Created an agentless agent ${response}`);
+    logger.debug(`[Agentless API] Created an agentless agent ${response}`);
     return response;
   }
 
