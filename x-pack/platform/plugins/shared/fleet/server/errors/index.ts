@@ -20,6 +20,7 @@ export { isESClientError } from './utils';
 export {
   FleetError as FleetError,
   OutputInvalidError as OutputInvalidError,
+  AgentlessAgentCreateOverProvisionedError as AgentlessAgentCreateOverProvisionnedError,
 } from '../../common/errors';
 
 export class RegistryError extends FleetError {}
@@ -60,6 +61,7 @@ export class AgentlessAgentCreateError extends FleetError {
     super(`Error creating agentless agent in Fleet, ${message}`);
   }
 }
+
 export class AgentlessAgentDeleteError extends FleetError {
   constructor(message: string) {
     super(`Error deleting agentless agent in Fleet, ${message}`);

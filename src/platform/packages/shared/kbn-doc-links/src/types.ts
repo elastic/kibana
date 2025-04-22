@@ -514,6 +514,7 @@ export interface DocLinks {
     onPremRegistry: string;
     secureLogstash: string;
     agentPolicy: string;
+    agentlessIntegrations: string;
     api: string;
     uninstallAgent: string;
     installAndUninstallIntegrationAssets: string;
