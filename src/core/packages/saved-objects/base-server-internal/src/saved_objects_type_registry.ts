@@ -21,11 +21,9 @@ export interface SavedObjectTypeRegistryConfig {
  */
 export class SavedObjectTypeRegistry implements ISavedObjectTypeRegistry {
   private readonly types = new Map<string, SavedObjectsType>();
-  private readonly legacyTypes: string[];
   private readonly legacyTypesMap: Set<string>;
 
   constructor({ legacyTypes = [] }: SavedObjectTypeRegistryConfig = {}) {
-    this.legacyTypes = legacyTypes;
     this.legacyTypesMap = new Set(legacyTypes);
   }
 
@@ -50,7 +48,7 @@ export class SavedObjectTypeRegistry implements ISavedObjectTypeRegistry {
 
   /** {@inheritDoc ISavedObjectTypeRegistry.getLegacyTypes} */
   public getLegacyTypes() {
-    return this.legacyTypes;
+    return Array.from(this.legacyTypesMap);
   }
 
   /** {@inheritDoc ISavedObjectTypeRegistry.getType} */
