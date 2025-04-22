@@ -611,9 +611,8 @@ export interface ExperimentalDataStreamFeature {
   features: Partial<Record<ExperimentalIndexingFeature, boolean>>;
 }
 
-export interface InstallFailedAttempt {
+export interface FailedAttempt {
   created_at: string;
-  target_version: string;
   error: {
     name: string;
     message: string;
@@ -621,13 +620,13 @@ export interface InstallFailedAttempt {
   };
 }
 
-export interface UninstallFailedAttempt {
-  created_at: string;
-  error: {
-    name: string;
-    message: string;
-    stack?: string;
-  };
+export interface InstallFailedAttempt extends FailedAttempt {
+  target_version: string;
+}
+
+export interface CustomAssetFailedAttempt extends FailedAttempt {
+  type: string;
+  name: string;
 }
 
 export enum INSTALL_STATES {
@@ -681,8 +680,9 @@ export interface Installation {
   internal?: boolean;
   removable?: boolean;
   latest_install_failed_attempts?: InstallFailedAttempt[];
-  latest_uninstall_failed_attempts?: UninstallFailedAttempt[];
+  latest_uninstall_failed_attempts?: FailedAttempt[];
   latest_executed_state?: InstallLatestExecutedState;
+  latest_custom_asset_install_failed_attempts?: CustomAssetFailedAttempt[];
 }
 
 export interface PackageUsageStats {

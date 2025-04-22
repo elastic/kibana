@@ -261,6 +261,12 @@ const BaseSecretsSchema = schema.object({
       }),
     })
   ),
+  service_token: schema.maybe(
+    schema.object({
+      id: schema.maybe(schema.string()),
+      hash: schema.maybe(schema.string()),
+    })
+  ),
 });
 
 export const NewAgentPolicySchema = schema.object({

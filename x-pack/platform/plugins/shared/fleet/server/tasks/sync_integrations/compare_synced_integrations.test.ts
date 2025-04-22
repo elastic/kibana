@@ -49,7 +49,7 @@ describe('getFollowerIndexInfo', () => {
         get: getIndicesMock,
       },
       search: searchMock,
-      ccr: { followInfo: jest.fn() },
+      ccr: { followInfo: jest.fn(), followStats: jest.fn() },
     };
 
     mockedLogger = loggerMock.create();
@@ -140,6 +140,35 @@ describe('getFollowerIndexInfo', () => {
     const info = await getFollowerIndexInfo(esClientMock, mockedLogger);
     expect(info).toEqual({
       error: 'Follower index fleet-synced-integrations-ccr-remote1 paused',
+    });
+  });
+
+  it('should return error if follow stats have fatal error', async () => {
+    esClientMock.ccr.followInfo.mockResolvedValue({
+      follower_indices: [
+        {
+          follower_index: 'fleet-synced-integrations-ccr-remote1',
+          status: 'active',
+        },
+      ],
+    } as any);
+    esClientMock.ccr.followStats.mockResolvedValue({
+      indices: [
+        {
+          shards: [
+            {
+              fatal_exception: {
+                reason: 'java.lang.IllegalArgumentException: port out of range:93001',
+              },
+            },
+          ],
+        },
+      ],
+    });
+
+    expect(await getFollowerIndexInfo(esClientMock, mockedLogger)).toEqual({
+      error:
+        'Follower index fleet-synced-integrations-ccr-remote1 fatal exception: java.lang.IllegalArgumentException: port out of range:93001',
     });
   });
 });
@@ -1268,7 +1297,7 @@ describe('getRemoteSyncedIntegrationsStatus', () => {
         get: getIndicesMock,
       },
       search: searchMock,
-      ccr: { followInfo: jest.fn() },
+      ccr: { followInfo: jest.fn(), followStats: jest.fn() },
     };
 
     soClientMock = savedObjectsClientMock.create();
@@ -1325,6 +1354,13 @@ describe('getRemoteSyncedIntegrationsStatus', () => {
               leader_index: 'fleet-synced-integrations',
               status: 'active',
               parameters: {},
+            },
+          ],
+        }),
+        followStats: jest.fn().mockResolvedValue({
+          indices: [
+            {
+              shards: [{}],
             },
           ],
         }),

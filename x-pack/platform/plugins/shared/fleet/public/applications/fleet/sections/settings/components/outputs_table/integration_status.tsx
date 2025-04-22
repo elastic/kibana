@@ -122,6 +122,13 @@ export const IntegrationStatus: React.FunctionComponent<{
     });
   }, [integration.package_name, integration.package_version]);
 
+  const statuses = [integration.sync_status, ...customAssets.map((asset) => asset.sync_status)];
+  const integrationStatus = statuses.some((status) => status === SyncStatus.FAILED)
+    ? SyncStatus.FAILED
+    : statuses.some((status) => status === SyncStatus.SYNCHRONIZING)
+    ? SyncStatus.SYNCHRONIZING
+    : SyncStatus.COMPLETED;
+
   return (
     <CollapsablePanel
       id={integration.package_name}
@@ -148,7 +155,7 @@ export const IntegrationStatus: React.FunctionComponent<{
                 </EuiFlexGroup>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <IntegrationStatusBadge status={integration.sync_status.toUpperCase()} />
+                <IntegrationStatusBadge status={integrationStatus.toUpperCase()} />
               </EuiFlexItem>
             </EuiFlexGroup>
           </h3>

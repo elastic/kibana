@@ -7,7 +7,7 @@
 
 import React, { memo, useMemo, useState } from 'react';
 
-import { type Output } from '../../../../../../../common/types';
+import { SyncStatus, type Output } from '../../../../../../../common/types';
 
 import { useGetRemoteSyncedIntegrationsStatusQuery } from '../../../../hooks';
 
@@ -37,20 +37,24 @@ export const IntegrationSyncStatus: React.FunctionComponent<Props> = memo(({ out
       return 'SYNCHRONIZING';
     }
 
-    const syncCompleted =
-      syncedIntegrationsStatus?.integrations.every(
-        (integration) => integration.sync_status === 'completed'
-      ) &&
-      Object.values(syncedIntegrationsStatus?.custom_assets ?? {}).every(
-        (asset) => asset.sync_status === 'completed'
-      );
+    const statuses = [
+      ...(syncedIntegrationsStatus?.integrations?.map((integration) => integration.sync_status) ||
+        []),
+      ...Object.values(syncedIntegrationsStatus?.custom_assets ?? {}).map(
+        (asset) => asset.sync_status
+      ),
+    ];
+    const integrationStatus = statuses.some((current) => current === SyncStatus.FAILED)
+      ? SyncStatus.FAILED
+      : statuses.some((current) => current === SyncStatus.SYNCHRONIZING)
+      ? SyncStatus.SYNCHRONIZING
+      : SyncStatus.COMPLETED;
 
     const newStatus =
       (error as any)?.message || syncedIntegrationsStatus?.error
         ? 'FAILED'
-        : syncCompleted
-        ? 'COMPLETED'
-        : 'SYNCHRONIZING';
+        : integrationStatus.toUpperCase();
+
     return newStatus;
   }, [output, syncedIntegrationsStatus, error]);
 

@@ -56,6 +56,16 @@ export const getFollowerIndexInfo = async (
     if (res.follower_indices[0]?.status === 'paused') {
       return { error: `Follower index ${index} paused` };
     }
+
+    const resStats = await esClient.ccr.followStats({
+      index,
+    });
+    if (resStats?.indices[0]?.shards[0]?.fatal_exception) {
+      return {
+        error: `Follower index ${index} fatal exception: ${resStats.indices[0].shards[0].fatal_exception?.reason}`,
+      };
+    }
+
     return { info: res.follower_indices[0] };
   } catch (err) {
     if (err?.body?.error?.type === 'index_not_found_exception') {
@@ -109,7 +119,12 @@ export const fetchAndCompareSyncedIntegrations = async (
       },
       {} as Record<string, SavedObjectsFindResult<Installation>>
     );
-    const customAssetsStatus = await fetchAndCompareCustomAssets(esClient, logger, ccrCustomAssets);
+    const customAssetsStatus = await fetchAndCompareCustomAssets(
+      esClient,
+      logger,
+      ccrCustomAssets,
+      installedIntegrationsByName
+    );
     const integrationsStatus = compareIntegrations(
       installedCCRIntegrations,
       installedIntegrationsByName
@@ -189,7 +204,8 @@ const compareIntegrations = (
 const fetchAndCompareCustomAssets = async (
   esClient: ElasticsearchClient,
   logger: Logger,
-  ccrCustomAssets: { [key: string]: CustomAssetsData }
+  ccrCustomAssets: { [key: string]: CustomAssetsData },
+  installedIntegrationsByName: Record<string, SavedObjectsFindResult<Installation>>
 ): Promise<RemoteSyncedCustomAssetsRecord | undefined> => {
   if (!ccrCustomAssets) return;
 
@@ -232,6 +248,7 @@ const fetchAndCompareCustomAssets = async (
         ccrCustomAsset,
         ingestPipelines: installedPipelines,
         componentTemplates,
+        installedIntegration: installedIntegrationsByName[ccrCustomAsset.package_name],
       });
       result[ccrCustomName] = res;
     });
@@ -246,10 +263,12 @@ const compareCustomAssets = ({
   ccrCustomAsset,
   ingestPipelines,
   componentTemplates,
+  installedIntegration,
 }: {
   ccrCustomAsset: CustomAssetsData;
   ingestPipelines?: IngestGetPipelineResponse;
   componentTemplates?: Record<string, ClusterComponentTemplateSummary>;
+  installedIntegration: SavedObjectsFindResult<Installation> | undefined;
 }): RemoteSyncedCustomAssetsStatus => {
   const result = {
     name: ccrCustomAsset.name,
@@ -258,12 +277,33 @@ const compareCustomAssets = ({
     package_version: ccrCustomAsset.package_version,
   };
 
+  const latestCustomAssetError =
+    installedIntegration?.attributes?.latest_custom_asset_install_failed_attempts?.find(
+      (attempt) => attempt.type === ccrCustomAsset.type && attempt.name === ccrCustomAsset.name
+    );
+  const latestFailedAttemptTime = latestCustomAssetError?.created_at
+    ? `at ${new Date(latestCustomAssetError?.created_at).toUTCString()}`
+    : '';
+  const latestFailedAttempt = latestCustomAssetError?.error?.message
+    ? `- reason: ${latestCustomAssetError.error.message}`
+    : '';
+  const latestFailedErrorMessage = `Failed to update ${ccrCustomAsset.type.replaceAll('_', ' ')} ${
+    ccrCustomAsset.name
+  } ${latestFailedAttempt} ${latestFailedAttemptTime}`;
+
   if (ccrCustomAsset.type === 'ingest_pipeline') {
     if (!ingestPipelines) {
       if (ccrCustomAsset.is_deleted === true) {
         return {
           ...result,
           sync_status: SyncStatus.COMPLETED,
+        };
+      }
+      if (latestCustomAssetError) {
+        return {
+          ...result,
+          sync_status: SyncStatus.FAILED,
+          error: latestFailedErrorMessage,
         };
       }
       return {
@@ -274,6 +314,13 @@ const compareCustomAssets = ({
 
     const installedPipeline = ingestPipelines[ccrCustomAsset?.name];
     if (ccrCustomAsset.is_deleted === true && installedPipeline) {
+      if (latestCustomAssetError) {
+        return {
+          ...result,
+          sync_status: SyncStatus.FAILED,
+          error: latestFailedErrorMessage,
+        };
+      }
       return {
         ...result,
         sync_status: SyncStatus.SYNCHRONIZING,
@@ -282,6 +329,13 @@ const compareCustomAssets = ({
       installedPipeline?.version &&
       installedPipeline.version < ccrCustomAsset.pipeline.version
     ) {
+      if (latestCustomAssetError) {
+        return {
+          ...result,
+          sync_status: SyncStatus.FAILED,
+          error: latestFailedErrorMessage,
+        };
+      }
       return {
         ...result,
         sync_status: SyncStatus.SYNCHRONIZING,
@@ -292,6 +346,13 @@ const compareCustomAssets = ({
         sync_status: SyncStatus.COMPLETED,
       };
     } else {
+      if (latestCustomAssetError) {
+        return {
+          ...result,
+          sync_status: SyncStatus.FAILED,
+          error: latestFailedErrorMessage,
+        };
+      }
       return {
         ...result,
         sync_status: SyncStatus.SYNCHRONIZING,
@@ -305,6 +366,13 @@ const compareCustomAssets = ({
           sync_status: SyncStatus.COMPLETED,
         };
       }
+      if (latestCustomAssetError) {
+        return {
+          ...result,
+          sync_status: SyncStatus.FAILED,
+          error: latestFailedErrorMessage,
+        };
+      }
       return {
         ...result,
         sync_status: SyncStatus.SYNCHRONIZING,
@@ -313,6 +381,13 @@ const compareCustomAssets = ({
 
     const installedCompTemplate = componentTemplates[ccrCustomAsset?.name];
     if (ccrCustomAsset.is_deleted === true && installedCompTemplate) {
+      if (latestCustomAssetError) {
+        return {
+          ...result,
+          sync_status: SyncStatus.FAILED,
+          error: latestFailedErrorMessage,
+        };
+      }
       return {
         ...result,
         sync_status: SyncStatus.SYNCHRONIZING,
@@ -323,6 +398,13 @@ const compareCustomAssets = ({
         sync_status: SyncStatus.COMPLETED,
       };
     } else {
+      if (latestCustomAssetError) {
+        return {
+          ...result,
+          sync_status: SyncStatus.FAILED,
+          error: latestFailedErrorMessage,
+        };
+      }
       return {
         ...result,
         sync_status: SyncStatus.SYNCHRONIZING,

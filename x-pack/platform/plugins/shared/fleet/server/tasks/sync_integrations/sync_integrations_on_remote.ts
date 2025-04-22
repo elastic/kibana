@@ -4,7 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { ElasticsearchClient, SavedObjectsClient, Logger } from '@kbn/core/server';
+import type {
+  ElasticsearchClient,
+  SavedObjectsClient,
+  Logger,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
 
 import semverEq from 'semver/functions/eq';
 import semverGte from 'semver/functions/gte';
@@ -17,8 +22,12 @@ import { FLEET_SYNCED_INTEGRATIONS_CCR_INDEX_PREFIX } from '../../services/setup
 
 import { getInstallation, removeInstallation } from '../../services/epm/packages';
 
-import type { SyncIntegrationsData } from './model';
+import type { Installation } from '../../types';
+import { PACKAGES_SAVED_OBJECT_TYPE } from '../../constants';
+import type { CustomAssetFailedAttempt } from '../../../common/types';
+
 import { installCustomAsset } from './custom_assets';
+import type { CustomAssetsData, SyncIntegrationsData } from './model';
 
 const MAX_RETRY_ATTEMPTS = 5;
 const RETRY_BACKOFF_MINUTES = [5, 10, 20, 40, 60];
@@ -243,6 +252,64 @@ export const syncIntegrationsOnRemote = async (
       await installCustomAsset(customAsset, esClient, abortController, logger);
     } catch (error) {
       logger.error(`Failed to install ${customAsset.type} ${customAsset.name}, error: ${error}`);
+      // TODO cleanup failed attempts if update succeeded
+      await updateCustomAssetFailedAttempts(soClient, customAsset, error, logger);
     }
   }
 };
+
+async function updateCustomAssetFailedAttempts(
+  savedObjectsClient: SavedObjectsClientContract,
+  customAsset: CustomAssetsData,
+  error: Error,
+  logger: Logger
+) {
+  try {
+    const pkgSo = await savedObjectsClient.get<Installation>(
+      PACKAGES_SAVED_OBJECT_TYPE,
+      customAsset.package_name
+    );
+    const updatedCustomAssetFailedAttempts = updateFailedAttempts({
+      type: customAsset.type,
+      name: customAsset.name,
+      error,
+      createdAt: new Date().toISOString(),
+      latestAttempts: pkgSo.attributes.latest_custom_asset_install_failed_attempts ?? [],
+    });
+    await savedObjectsClient.update(PACKAGES_SAVED_OBJECT_TYPE, customAsset.package_name, {
+      latest_custom_asset_install_failed_attempts: updatedCustomAssetFailedAttempts,
+    });
+  } catch (err) {
+    logger.warn(`Error occurred while updating custom asset failed attempts: ${err}`);
+  }
+}
+
+const MAX_ATTEMPTS_TO_KEEP = 5;
+
+export function updateFailedAttempts({
+  error,
+  createdAt,
+  type,
+  name,
+  latestAttempts = [],
+}: {
+  error: Error;
+  createdAt: string;
+  type: string;
+  name: string;
+  latestAttempts?: CustomAssetFailedAttempt[];
+}): CustomAssetFailedAttempt[] {
+  return [
+    {
+      created_at: createdAt,
+      error: {
+        name: error.name,
+        message: error.message,
+        stack: error.stack,
+      },
+      type,
+      name,
+    },
+    ...latestAttempts,
+  ].slice(0, MAX_ATTEMPTS_TO_KEEP);
+}
