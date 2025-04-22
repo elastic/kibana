@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { MappingDynamicTemplate } from '@elastic/elasticsearch/lib/api/types';
 import type {
   IRouter,
   CustomRequestHandlerContext,
@@ -134,6 +135,7 @@ export interface RuleExecutorOptions<
   flappingSettings: RulesSettingsFlappingProperties;
   getTimeRange: (timeWindow?: string) => GetTimeRangeResult;
   isServerless: boolean;
+  ruleExecutionTimeout?: string;
 }
 
 export interface RuleParamsAndRefs<Params extends RuleTypeParams> {
@@ -197,6 +199,7 @@ export type GetViewInAppRelativeUrlFn<Params extends RuleTypeParams> = (
 interface ComponentTemplateSpec {
   dynamic?: 'strict' | false; // defaults to 'strict'
   fieldMap: FieldMap;
+  dynamicTemplates?: Array<Record<string, MappingDynamicTemplate>>;
 }
 
 export type FormatAlert<AlertData extends RuleAlertData> = (
