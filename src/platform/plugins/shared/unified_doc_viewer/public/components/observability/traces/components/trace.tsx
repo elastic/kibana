@@ -11,7 +11,8 @@ import React, { useCallback } from 'react';
 import { ReactEmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { traceFields } from '../doc_viewer_span_overview/resources/fields';
+import { spanTraceFields } from '../doc_viewer_span_overview/resources/fields';
+import { transactionTraceFields } from '../doc_viewer_transaction_overview/resources/fields';
 import { SpanSummaryField } from '../doc_viewer_span_overview/sub_components/span_summary_field';
 import { TransactionSummaryField } from '../doc_viewer_transaction_overview/sub_components/transaction_summary_field';
 import { getUnifiedDocViewerServices } from '../../../../plugin';
@@ -58,6 +59,19 @@ export const Trace = ({
     [rangeFrom, rangeTo, displayLimit, serviceName, traceId, transactionId]
   );
 
+  const fieldRows =
+    displayType === 'span'
+      ? spanTraceFields.map((fieldId: string) => (
+          <SpanSummaryField key={fieldId} fieldId={fieldId} fieldConfiguration={fields[fieldId]} />
+        ))
+      : transactionTraceFields.map((fieldId: string) => (
+          <TransactionSummaryField
+            key={fieldId}
+            fieldId={fieldId}
+            fieldConfiguration={fields[fieldId]}
+          />
+        ));
+
   return (
     <>
       <EuiTitle size="s">
@@ -69,21 +83,7 @@ export const Trace = ({
       </EuiTitle>
       <EuiSpacer size="m" />
       <EuiFlexGroup direction="column">
-        <EuiFlexItem>
-          {traceFields.map((fieldId: string) => {
-            const props = {
-              key: fieldId,
-              fieldId,
-              fieldConfiguration: fields[fieldId],
-            };
-
-            return displayType === 'span' ? (
-              <SpanSummaryField {...props} />
-            ) : (
-              <TransactionSummaryField {...props} />
-            );
-          })}
-        </EuiFlexItem>
+        <EuiFlexItem>{fieldRows}</EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
       <ReactEmbeddableRenderer
