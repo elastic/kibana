@@ -227,10 +227,17 @@ export function getDashboardApi({
     uuid: v4(),
   } as Omit<DashboardApi, 'searchSessionId$'>;
 
+  const internalApi: DashboardInternalApi = {
+    ...panelsManager.internalApi,
+    ...unifiedSearchManager.internalApi,
+    setControlGroupApi: controlGroupManager.internalApi.setControlGroupApi,
+  };
+
   const searchSessionManager = initializeSearchSessionManager(
     creationOptions?.searchSessionSettings,
     incomingEmbeddable,
-    dashboardApi
+    dashboardApi,
+    internalApi
   );
 
   return {
@@ -238,11 +245,7 @@ export function getDashboardApi({
       ...dashboardApi,
       ...searchSessionManager.api,
     },
-    internalApi: {
-      ...panelsManager.internalApi,
-      ...unifiedSearchManager.internalApi,
-      setControlGroupApi: controlGroupManager.internalApi.setControlGroupApi,
-    } as DashboardInternalApi,
+    internalApi,
     cleanup: () => {
       dataLoadingManager.cleanup();
       dataViewsManager.cleanup();

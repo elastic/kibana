@@ -18,18 +18,11 @@ import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { DashboardPanelMap, convertPanelsArrayToPanelMap } from '../../../common';
 import type { DashboardPanel } from '../../../server/content_management';
 import type { SavedDashboardPanel } from '../../../server/dashboard_saved_object';
-import { DashboardApi, DashboardState } from '../../dashboard_api/types';
+import { DashboardApi, DashboardState, SharedDashboardState } from '../../dashboard_api/types';
 import { DASHBOARD_STATE_STORAGE_KEY, createDashboardEditUrl } from '../../utils/urls';
 import { migrateLegacyQuery } from '../../services/dashboard_content_management_service/lib/load_dashboard_state';
 import { coreServices } from '../../services/kibana_services';
 import { getPanelTooOldErrorString } from '../_dashboard_app_strings';
-
-/**
- * For BWC reasons, dashboard state is stored with panels as an array instead of a map
- */
-export type SharedDashboardState = Partial<
-  Omit<DashboardState, 'panels'> & { panels: DashboardPanel[] }
->;
 
 const panelIsLegacy = (panel: unknown): panel is SavedDashboardPanel => {
   return (panel as SavedDashboardPanel).embeddableConfig !== undefined;
@@ -89,6 +82,7 @@ export const loadAndRemoveDashboardState = (
   const rawAppStateInUrl = kbnUrlStateStorage.get<SharedDashboardState>(
     DASHBOARD_STATE_STORAGE_KEY
   );
+  console.log('rawAppStateInUrl', rawAppStateInUrl);
   if (!rawAppStateInUrl) return {};
 
   const panelsMap = getPanelsMap(rawAppStateInUrl.panels);
@@ -99,7 +93,7 @@ export const loadAndRemoveDashboardState = (
   });
   kbnUrlStateStorage.kbnUrlControls.update(nextUrl, true);
   const partialState: Partial<DashboardState> = {
-    ..._.omit(rawAppStateInUrl, ['panels', 'query']),
+    ..._.omit(rawAppStateInUrl, ['controlGroupState', 'panels', 'query']),
     ...(panelsMap ? { panels: panelsMap } : {}),
     ...(rawAppStateInUrl.query ? { query: migrateLegacyQuery(rawAppStateInUrl.query) } : {}),
   };

@@ -360,7 +360,7 @@ export function useObservabilityAIAssistantContext({
                     panelType: 'lens',
                     serializedState: {
                       rawState: { embeddableInput },
-                    }
+                    },
                   })
                   .then(() => {
                     return {
