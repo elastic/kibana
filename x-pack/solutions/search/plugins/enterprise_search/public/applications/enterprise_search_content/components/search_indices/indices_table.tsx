@@ -135,11 +135,11 @@ export const IndicesTable: React.FC<IndicesTableProps> = ({
         }
       ),
       render: (index: ElasticsearchViewIndex) => {
-        const overviewPath = generateEncodedPath(SEARCH_INDEX_PATH, { indexName: index.name });
+        const homePath = generateEncodedPath(SEARCH_INDEX_PATH, { indexName: index.name });
         const label = ingestionStatusToText(index.ingestionStatus);
         return (
           <EuiBadgeTo
-            to={overviewPath}
+            to={homePath}
             label={label}
             color={ingestionStatusToColor(index.ingestionStatus)}
           />
