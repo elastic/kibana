@@ -85,9 +85,12 @@ export const IndexSelection: FC<Props> = ({ allowExistingIndices = true }) => {
             />
           ) : (
             <EuiComboBox
-              placeholder={i18n.translate('visDefaultEditor.aggSelect.selectAggPlaceholder', {
-                defaultMessage: 'Select an index',
-              })}
+              placeholder={i18n.translate(
+                'xpack.dataVisualizer.file.existingIndexSelection.label',
+                {
+                  defaultMessage: 'Select an index',
+                }
+              )}
               id={`visDefaultEditorAggSelect$`}
               options={indices.map((index) => ({
                 label: index.name,
