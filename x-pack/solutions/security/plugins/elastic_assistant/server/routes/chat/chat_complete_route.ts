@@ -19,6 +19,7 @@ import {
   newContentReferencesStore,
   pruneContentReferences,
   ChatCompleteRequestQuery,
+  INVOKE_LLM_SERVER_TIMEOUT,
 } from '@kbn/elastic-assistant-common';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
@@ -49,6 +50,11 @@ export const chatCompleteRoute = (router: ElasticAssistantPluginRouter): void =>
       security: {
         authz: {
           requiredPrivileges: ['elasticAssistant'],
+        },
+      },
+      options: {
+        timeout: {
+          idleSocket: INVOKE_LLM_SERVER_TIMEOUT,
         },
       },
     })

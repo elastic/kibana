@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { elasticLogo } from '@kbn/expression-utils';
+import { elasticLogo } from '../../../../lib';
 
 export const getTestCustomElements = async () => {
   const testCustomElements = [

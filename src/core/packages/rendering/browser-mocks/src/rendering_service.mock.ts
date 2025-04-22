@@ -7,18 +7,32 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { PublicMethodsOf } from '@kbn/utility-types';
-import type { RenderingService } from '@kbn/core-rendering-browser-internal';
+import type { RenderingService } from '@kbn/core-rendering-browser';
 
-type RenderingServiceContract = PublicMethodsOf<RenderingService>;
+/**
+ * This is declared internally to avoid a circular dependency issue
+ */
+export interface RenderingServiceInternal {
+  start: (deps: unknown) => RenderingService;
+  renderCore: (deps: unknown, targetDomElement: HTMLElement) => void;
+}
+
+const createMockInternal = () => {
+  const mocked: jest.Mocked<RenderingServiceInternal> = {
+    start: jest.fn().mockImplementation(createMock),
+    renderCore: jest.fn(),
+  };
+  return mocked;
+};
 
 const createMock = () => {
-  const mocked: jest.Mocked<RenderingServiceContract> = {
-    start: jest.fn(),
+  const mocked: jest.Mocked<RenderingService> = {
+    addContext: jest.fn().mockImplementation((element) => element),
   };
   return mocked;
 };
 
 export const renderingServiceMock = {
+  createInternal: createMockInternal,
   create: createMock,
 };

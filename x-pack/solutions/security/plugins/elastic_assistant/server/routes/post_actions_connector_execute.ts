@@ -18,10 +18,12 @@ import {
   Replacements,
   pruneContentReferences,
   ExecuteConnectorRequestQuery,
+  INVOKE_LLM_SERVER_TIMEOUT,
+  POST_ACTIONS_CONNECTOR_EXECUTE,
 } from '@kbn/elastic-assistant-common';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
+import { getPrompt } from '../lib/prompt';
 import { INVOKE_ASSISTANT_ERROR_EVENT } from '../lib/telemetry/event_based_telemetry';
-import { POST_ACTIONS_CONNECTOR_EXECUTE } from '../../common/constants';
 import { buildResponse } from '../lib/build_response';
 import { ElasticAssistantRequestHandlerContext } from '../types';
 import {
@@ -45,6 +47,11 @@ export const postActionsConnectorExecuteRoute = (
       security: {
         authz: {
           requiredPrivileges: ['elasticAssistant'],
+        },
+      },
+      options: {
+        timeout: {
+          idleSocket: INVOKE_LLM_SERVER_TIMEOUT,
         },
       },
     })
@@ -116,7 +123,6 @@ export const postActionsConnectorExecuteRoute = (
           const conversationsDataClient =
             await assistantContext.getAIAssistantConversationsDataClient();
           const promptsDataClient = await assistantContext.getAIAssistantPromptsDataClient();
-
           const contentReferencesStore = newContentReferencesStore({
             disabled: request.query.content_references_disabled,
           });
@@ -143,6 +149,7 @@ export const postActionsConnectorExecuteRoute = (
               });
             }
           };
+          const promptIds = request.body.promptIds;
           let systemPrompt;
           if (conversationsDataClient && promptsDataClient && conversationId) {
             systemPrompt = await getSystemPromptFromUserConversation({
@@ -150,6 +157,20 @@ export const postActionsConnectorExecuteRoute = (
               conversationId,
               promptsDataClient,
             });
+          }
+          if (promptIds) {
+            const additionalSystemPrompt = await getPrompt({
+              actionsClient,
+              connectorId,
+              // promptIds is promptId and promptGroupId
+              ...promptIds,
+              savedObjectsClient,
+            });
+
+            systemPrompt =
+              systemPrompt && systemPrompt.length
+                ? `${systemPrompt}\n\n${additionalSystemPrompt}`
+                : additionalSystemPrompt;
           }
           return await langChainExecute({
             abortSignal,
