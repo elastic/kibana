@@ -5,20 +5,17 @@
  * 2.0.
  */
 
-import type { WorkflowRunner } from '@kbn/wc-framework-types-server';
 import type { CoreStart, LoggerFactory } from '@kbn/core/server';
 import type { WorkChatFrameworkPluginStartDependencies } from '../types';
 import type { WorkChatFrameworkConfig } from '../config';
-import { createModelProviderFactory } from './model_provider';
-import { WorkflowRegistry, createWorkflowRegistry, createWorkflowRunner } from './workflows';
-import { NodeTypeRegistry, createNodeTypeRegistry } from './nodes';
-import { ToolRegistry, createToolRegistry } from './tools';
-
-export interface InternalSetupServices {
-  workflowRegistry: WorkflowRegistry;
-  nodeRegistry: NodeTypeRegistry;
-  toolRegistry: ToolRegistry;
-}
+import { InternalSetupServices, InternalStartServices } from './types';
+import { createWorkflowRegistry, createWorkflowService } from './workflow';
+import {
+  createModelProviderFactory,
+  createWorkflowRunner,
+  createNodeTypeRegistry,
+  createToolRegistry,
+} from './runner';
 
 export const createSetupServices = (): InternalSetupServices => {
   const workflowRegistry = createWorkflowRegistry();
@@ -31,10 +28,6 @@ export const createSetupServices = (): InternalSetupServices => {
     toolRegistry,
   };
 };
-
-export interface InternalStartServices {
-  workflowRunner: WorkflowRunner;
-}
 
 interface CreateServicesParams {
   core: CoreStart;
@@ -63,7 +56,15 @@ export function createStartServices({
     modelProviderFactory,
   });
 
+  const workflowService = createWorkflowService({
+    registry: setupServices.workflowRegistry,
+    logger: logger.get('workflow-service'),
+    savedObjects: core.savedObjects,
+    security: core.security,
+  });
+
   return {
     workflowRunner,
+    workflowService,
   };
 }

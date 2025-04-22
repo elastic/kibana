@@ -27,6 +27,10 @@ interface WorkflowServiceArgs {
   security: SecurityServiceStart;
 }
 
+export const createWorkflowService = (args: WorkflowServiceArgs): WorkflowService => {
+  return new WorkflowServiceImpl(args);
+};
+
 export class WorkflowServiceImpl implements WorkflowService {
   private readonly savedObjects: SavedObjectsServiceStart;
   private readonly security: SecurityServiceStart;

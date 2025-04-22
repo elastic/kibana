@@ -26,7 +26,7 @@ import {
   createSetupServices,
   type InternalSetupServices,
   type InternalStartServices,
-} from './framework';
+} from './services';
 import { registerRoutes } from './routes';
 import { registerBuiltInNodeTypes, registerBuiltInTools } from './builtin';
 

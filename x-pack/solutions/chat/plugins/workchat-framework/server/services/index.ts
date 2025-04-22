@@ -5,4 +5,7 @@
  * 2.0.
  */
 
-export type { InternalServices } from './types';
+export type { InternalSetupServices, InternalStartServices } from './types';
+export { createSetupServices, createStartServices } from './create_services';
+export type { NodeTypeRegistry, ToolRegistry } from './runner';
+export type { WorkflowRegistry, WorkflowService, ScopedWorkflowService } from './workflow';

@@ -9,7 +9,7 @@ import type { WorkflowRunner } from '@kbn/wc-framework-types-server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
-import type { WorkflowRegistry, ToolRegistry } from './framework';
+import type { WorkflowRegistry, ToolRegistry } from './services';
 
 /**
  * Setup contract for the workchatFramework plugin.

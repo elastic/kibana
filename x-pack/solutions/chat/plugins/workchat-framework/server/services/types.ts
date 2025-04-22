@@ -6,7 +6,17 @@
  */
 
 import type { WorkflowRunner } from '@kbn/wc-framework-types-server';
+import type { WorkflowRegistry, WorkflowService } from './workflow';
+import type { NodeTypeRegistry } from './runner/nodes';
+import type { ToolRegistry } from './runner/tools';
 
-export interface InternalServices {
-  runner: WorkflowRunner;
+export interface InternalSetupServices {
+  workflowRegistry: WorkflowRegistry;
+  nodeRegistry: NodeTypeRegistry;
+  toolRegistry: ToolRegistry;
+}
+
+export interface InternalStartServices {
+  workflowService: WorkflowService;
+  workflowRunner: WorkflowRunner;
 }
