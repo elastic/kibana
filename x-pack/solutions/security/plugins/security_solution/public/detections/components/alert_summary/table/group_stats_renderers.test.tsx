@@ -5,57 +5,39 @@
  * 2.0.
  */
 
+import React from 'react';
+import { render } from '@testing-library/react';
 import {
   getIntegrationComponent,
   groupStatsRenderer,
-  Integration,
-  INTEGRATION_ICON_TEST_ID,
-  INTEGRATION_LOADING_TEST_ID,
+  IntegrationIcon,
+  TABLE_GROUP_STATS_TEST_ID,
 } from './group_stats_renderers';
-import type { GenericBuckets } from '@kbn/grouping/src';
-import { render } from '@testing-library/react';
-import React from 'react';
 import { useGetIntegrationFromRuleId } from '../../../hooks/alert_summary/use_get_integration_from_rule_id';
+import { useTableSectionContext } from './table_section_context';
+import type { PackageListItem } from '@kbn/fleet-plugin/common';
+import { installationStatuses } from '@kbn/fleet-plugin/common/constants';
 import { usePackageIconType } from '@kbn/fleet-plugin/public/hooks';
+import { INTEGRATION_ICON_TEST_ID } from '../common/integration_icon';
 
 jest.mock('../../../hooks/alert_summary/use_get_integration_from_rule_id');
 jest.mock('@kbn/fleet-plugin/public/hooks');
+jest.mock('./table_section_context');
 
-describe('Integration', () => {
-  it('should return a single integration icon', () => {
-    (useGetIntegrationFromRuleId as jest.Mock).mockReturnValue({
-      integration: {
-        title: 'title',
-        icons: [{ type: 'type', src: 'src' }],
-        name: 'name',
-        version: 'version',
-      },
-      isLoading: false,
-    });
-    (usePackageIconType as jest.Mock).mockReturnValue('iconType');
-
-    const bucket: GenericBuckets = { key: 'crowdstrike', doc_count: 10 };
-
-    const { getByTestId } = render(<Integration signalRuleIdBucket={bucket} />);
-
-    expect(getByTestId(INTEGRATION_ICON_TEST_ID)).toBeInTheDocument();
-  });
-
-  it('should return a single integration loading', () => {
-    (useGetIntegrationFromRuleId as jest.Mock).mockReturnValue({
-      integration: {},
-      isLoading: true,
-    });
-
-    const bucket: GenericBuckets = { key: 'crowdstrike', doc_count: 10 };
-
-    const { getByTestId } = render(<Integration signalRuleIdBucket={bucket} />);
-
-    expect(getByTestId(INTEGRATION_LOADING_TEST_ID)).toBeInTheDocument();
-  });
-});
+const integration: PackageListItem = {
+  id: 'splunk',
+  icons: [{ src: 'icon.svg', path: 'mypath/icon.svg', type: 'image/svg+xml' }],
+  name: 'splunk',
+  status: installationStatuses.NotInstalled,
+  title: 'Splunk',
+  version: '0.1.0',
+};
 
 describe('getIntegrationComponent', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('should return an empty array', () => {
     const groupStatsItems = getIntegrationComponent({
       key: '',
@@ -80,13 +62,8 @@ describe('getIntegrationComponent', () => {
 
     expect(groupStatsItems.length).toBe(1);
     expect(groupStatsItems[0].component).toMatchInlineSnapshot(`
-      <Memo(Integration)
-        signalRuleIdBucket={
-          Object {
-            "doc_count": 10,
-            "key": "crowdstrike",
-          }
-        }
+      <Memo(IntegrationIcon)
+        ruleId="crowdstrike"
       />
     `);
   });
@@ -115,7 +92,51 @@ describe('getIntegrationComponent', () => {
   });
 });
 
+describe('IntegrationIcon', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('should render integration icon', () => {
+    (usePackageIconType as jest.Mock).mockReturnValue('iconType');
+    (useTableSectionContext as jest.Mock).mockReturnValue({
+      packages: [],
+      ruleResponse: {},
+    });
+    (useGetIntegrationFromRuleId as jest.Mock).mockReturnValue({
+      integration,
+    });
+
+    const { getByTestId } = render(<IntegrationIcon ruleId={'ruleId'} />);
+
+    expect(
+      getByTestId(`${TABLE_GROUP_STATS_TEST_ID}-${INTEGRATION_ICON_TEST_ID}`)
+    ).toBeInTheDocument();
+  });
+
+  it('should not render icon', () => {
+    (usePackageIconType as jest.Mock).mockReturnValue('iconType');
+    (useTableSectionContext as jest.Mock).mockReturnValue({
+      packages: [],
+      ruleResponse: {},
+    });
+    (useGetIntegrationFromRuleId as jest.Mock).mockReturnValue({
+      integration: undefined,
+    });
+
+    const { queryByTestId } = render(<IntegrationIcon ruleId={'ruleId'} />);
+
+    expect(
+      queryByTestId(`${TABLE_GROUP_STATS_TEST_ID}-${INTEGRATION_ICON_TEST_ID}`)
+    ).not.toBeInTheDocument();
+  });
+});
+
 describe('groupStatsRenderer', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('should return array of badges for signal.rule.id field', () => {
     const badges = groupStatsRenderer('signal.rule.id', {
       key: '',
