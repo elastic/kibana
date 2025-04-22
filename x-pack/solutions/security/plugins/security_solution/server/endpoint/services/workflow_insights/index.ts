@@ -288,7 +288,7 @@ class SecurityWorkflowInsightsService {
       return;
     }
 
-    const spaceId = this.endpointContext.getSpaceId(request);
+    const { id: spaceId } = await this.endpointContext.getActiveSpace(request);
     const fleetServices = this.endpointContext.getInternalFleetServices(spaceId);
     await fleetServices.ensureInCurrentSpace({ agentIds });
   }

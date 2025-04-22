@@ -515,7 +515,11 @@ describe('SecurityWorkflowInsightsService', () => {
       } as Partial<EndpointInternalFleetServicesInterface> as EndpointInternalFleetServicesInterface;
 
       mockEndpointAppContextService.getInternalFleetServices.mockReturnValue(fleetServices);
-      mockEndpointAppContextService.getSpaceId.mockReturnValue('space-id-123');
+      mockEndpointAppContextService.getActiveSpace.mockResolvedValue({
+        id: 'space-id-123',
+        name: 'space-name',
+        disabledFeatures: [],
+      });
 
       securityWorkflowInsightsService.setup({
         kibanaVersion: kibanaPackageJson.version,
