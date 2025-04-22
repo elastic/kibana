@@ -9,7 +9,7 @@
 import classNames from 'classnames';
 import { cloneDeep } from 'lodash';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { combineLatest, distinctUntilChanged, map, pairwise } from 'rxjs';
+import { distinctUntilChanged, map, pairwise } from 'rxjs';
 
 import {
   EuiButtonIcon,
