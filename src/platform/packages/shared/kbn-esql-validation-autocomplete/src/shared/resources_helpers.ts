@@ -9,9 +9,13 @@
 import { type ESQLAst, parse } from '@kbn/esql-ast';
 import type { ESQLCallbacks } from './types';
 import type { ESQLRealField } from '../validation/types';
-import { buildQueryForFieldsFromSource } from '../validation/helpers';
 import { getFieldsFromES, getCurrentQueryAvailableFields } from './helpers';
-import { removeLastPipe, processPipes, toSingleLine } from './query_string_utils';
+import {
+  removeLastPipe,
+  processPipes,
+  toSingleLine,
+  getFirstPipeValue,
+} from './query_string_utils';
 
 export const NOT_SUGGESTED_TYPES = ['unsupported'];
 
@@ -23,7 +27,8 @@ export function buildQueryUntilPreviousCommand(ast: ESQLAst, queryString: string
 const cache = new Map<string, ESQLRealField[]>();
 
 async function setFieldsToCache(queryText: string) {
-  if (cache.has(queryText)) {
+  const existsInCache = cache.has(queryText);
+  if (existsInCache) {
     // this is already in the cache
     return;
   }
@@ -43,20 +48,17 @@ async function setFieldsToCache(queryText: string) {
 
 export function getFieldsByTypeHelper(queryText: string, resourceRetriever?: ESQLCallbacks) {
   const getFields = async () => {
-    const { root } = parse(queryText);
-    const queryForIndexFields = buildQueryForFieldsFromSource(queryText, root.commands);
-    if (queryForIndexFields === queryText && cache.has(queryForIndexFields)) {
-      // this is already in the cache
-      return;
-    }
-    // make the _query call only when the from <source> is not present in the cache
-    if (queryForIndexFields && !cache.has(queryForIndexFields)) {
-      const fieldsWithMetadata = await getFieldsFromES(queryForIndexFields, resourceRetriever);
-      cache.set(queryForIndexFields, fieldsWithMetadata);
-    } else {
-      // Cache hit for queryText
-      const output = processPipes(queryText);
-      for (const line of output) {
+    const queryForIndexFields = getFirstPipeValue(queryText);
+
+    const output = processPipes(queryText);
+    for (const line of output) {
+      if (line === queryForIndexFields) {
+        const existsInCache = cache.has(line);
+        if (!existsInCache) {
+          const fieldsWithMetadata = await getFieldsFromES(line, resourceRetriever);
+          cache.set(line, fieldsWithMetadata);
+        }
+      } else {
         await setFieldsToCache(line);
       }
     }

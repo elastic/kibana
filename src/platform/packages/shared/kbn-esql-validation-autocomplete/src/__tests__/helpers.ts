@@ -80,10 +80,6 @@ export function getCallbackMocks(): ESQLCallbacks {
       if (/unsupported_index/.test(query)) {
         return unsupported_field;
       }
-      if (/dissect|grok/.test(query)) {
-        const field: ESQLRealField = { name: 'firstWord', type: 'text' };
-        return [field];
-      }
       if (/join_index/.test(query)) {
         const field: ESQLRealField = {
           name: 'keywordField',

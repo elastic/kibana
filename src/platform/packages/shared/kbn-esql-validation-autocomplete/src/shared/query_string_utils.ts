@@ -39,3 +39,11 @@ export function toSingleLine(inputString: string): string {
     .filter((line) => line !== '')
     .join(' | ');
 }
+
+export function getFirstPipeValue(inputString: string): string {
+  const parts = inputString.split('|');
+  if (parts.length > 1) {
+    return parts[0].trim();
+  }
+  return inputString.trim();
+}
