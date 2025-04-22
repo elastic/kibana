@@ -42,6 +42,7 @@ export const SystemMessage: React.FC<SystemMessageProps> = ({ content }) => {
                   LearnMore: (
                     <EuiLink
                       href={docLinks.context}
+                      target="_blank"
                       data-test-subj="system-contentModelLimit-learnMore-documentation-link"
                     >
                       <FormattedMessage
