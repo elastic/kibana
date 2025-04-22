@@ -12,9 +12,10 @@ import React from 'react';
 export interface Props {
   color: string;
   label: string;
+  paletteSelected: string;
 }
 
-export const SwatchLabel = ({ label, color }: Props) => {
+export const ColorLabel = ({ label, color, paletteSelected }: Props) => {
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
       <EuiFlexItem grow={false}>
@@ -23,8 +24,8 @@ export const SwatchLabel = ({ label, color }: Props) => {
           color={color}
           size="xl"
           aria-label={i18n.translate('xpack.infra.legendControls.iconColorLabel', {
-            defaultMessage: '{label} color',
-            values: { label },
+            defaultMessage: '{label} {paletteSelected} color',
+            values: { label, paletteSelected },
           })}
         />
       </EuiFlexItem>
