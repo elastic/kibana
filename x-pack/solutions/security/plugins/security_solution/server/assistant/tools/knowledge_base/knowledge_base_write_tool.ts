@@ -35,7 +35,7 @@ export const KNOWLEDGE_BASE_WRITE_TOOL: AssistantTool = {
     const { isEnabledKnowledgeBase, kbDataClient } = params;
     return isEnabledKnowledgeBase && kbDataClient != null;
   },
-  getTool(params: AssistantToolParams) {
+  async getTool(params: AssistantToolParams) {
     if (!this.isSupported(params)) return null;
 
     const { telemetry, kbDataClient, logger } = params as KnowledgeBaseWriteToolParams;

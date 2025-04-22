@@ -242,7 +242,7 @@ export interface AssistantTool {
   description: string;
   sourceRegister: string;
   isSupported: (params: AssistantToolParams) => boolean;
-  getTool: (params: AssistantToolParams) => StructuredToolInterface | null;
+  getTool: (params: AssistantToolParams) => Promise<StructuredToolInterface | null>;
 }
 
 export type AssistantToolLlm =

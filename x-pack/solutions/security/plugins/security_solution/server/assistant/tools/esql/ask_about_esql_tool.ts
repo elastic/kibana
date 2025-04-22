@@ -49,7 +49,7 @@ export const ASK_ABOUT_ESQL_TOOL: AssistantTool = {
       assistantContext.getRegisteredFeatures('securitySolutionUI').advancedEsqlGeneration
     );
   },
-  getTool(params: AssistantToolParams) {
+  async getTool(params: AssistantToolParams) {
     if (!this.isSupported(params)) return null;
 
     const { connectorId, inference, logger, request, isOssModel } = params as ESQLToolParams;

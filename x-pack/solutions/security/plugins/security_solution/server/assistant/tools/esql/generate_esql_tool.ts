@@ -55,7 +55,7 @@ export const GENERATE_ESQL_TOOL: AssistantTool = {
       createLlmInstance != null
     );
   },
-  getTool(params: AssistantToolParams) {
+  async getTool(params: AssistantToolParams) {
     if (!this.isSupported(params)) return null;
 
     const { connectorId, inference, logger, request, isOssModel, esClient, createLlmInstance } =

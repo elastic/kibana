@@ -86,7 +86,7 @@ describe('AlertCountsTool', () => {
 
   describe('getTool', () => {
     it('returns a `DynamicTool` with a `func` that calls `esClient.search()` with the expected query', async () => {
-      const tool: DynamicTool = ALERT_COUNTS_TOOL.getTool({
+      const tool: DynamicTool = await ALERT_COUNTS_TOOL.getTool({
         alertsIndexPattern,
         esClient,
         replacements,
@@ -163,7 +163,7 @@ describe('AlertCountsTool', () => {
     });
 
     it('includes citations', async () => {
-      const tool: DynamicTool = ALERT_COUNTS_TOOL.getTool({
+      const tool: DynamicTool = await ALERT_COUNTS_TOOL.getTool({
         alertsIndexPattern,
         esClient,
         replacements,
@@ -197,8 +197,8 @@ describe('AlertCountsTool', () => {
       expect(tool).toBeNull();
     });
 
-    it('returns a tool instance with the expected tags', () => {
-      const tool = ALERT_COUNTS_TOOL.getTool({
+    it('returns a tool instance with the expected tags', async () => {
+      const tool = await ALERT_COUNTS_TOOL.getTool({
         alertsIndexPattern,
         esClient,
         replacements,
