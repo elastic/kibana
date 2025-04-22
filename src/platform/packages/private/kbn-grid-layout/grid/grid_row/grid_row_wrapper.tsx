@@ -8,7 +8,6 @@
  */
 
 import React, { useEffect } from 'react';
-import { skip } from 'rxjs';
 
 import { css } from '@emotion/react';
 

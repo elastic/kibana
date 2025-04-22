@@ -276,10 +276,10 @@ const styles = {
       gridColumnEnd: -1,
       gridRowStart: `start-${rowId}`,
       gridRowEnd: `auto`,
-      height: `calc(${euiTheme.size.xl} + (2 * ${euiTheme.size.s}))`,
-      border: '1px solid transparent', // prevents layout shift
+      height: `${euiTheme.size.xl}`,
+      // border: '1px solid transparent', // prevents layout shift
       '&.kbnGridRowHeader--collapsed:not(.kbnGridRowHeader--active)': {
-        borderBottom: euiTheme.border.thin,
+        // borderBottom: euiTheme.border.thin,
       },
       '.kbnGridLayout--deleteRowIcon': {
         marginLeft: euiTheme.size.xs,

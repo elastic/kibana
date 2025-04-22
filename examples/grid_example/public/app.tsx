@@ -96,7 +96,6 @@ export const GridExample = ({
             );
           }
           const hasChanges = !(panelsAreEqual && deepEqual(rows, savedState.current.rows));
-          console.log({ panels, rows });
           return { hasChanges, updatedLayout: dashboardInputToGridLayout({ panels, rows }) };
         })
       )
@@ -115,20 +114,28 @@ export const GridExample = ({
     layoutUpdated$.next();
   }, [currentLayout, layoutUpdated$]);
 
-  const renderPanelContents = useCallback((id: string) => {
-    return (
-      <EuiPanel
-        hasBorder={true}
-        hasShadow={false}
-        css={css({
-          height: '100%',
-          backgroundColor: `#${Math.floor(Math.random() * 16777215).toString(16)}`,
-        })}
-      >
-        {id}
-      </EuiPanel>
-    );
-  }, []);
+  const renderPanelContents = useCallback(
+    (id: string, setDragHandles?: (refs: Array<HTMLElement | null>) => void) => {
+      const currentPanels = mockDashboardApi.panels$.getValue();
+
+      return (
+        <ReactEmbeddableRenderer
+          key={id}
+          maybeId={id}
+          type={currentPanels[id].type}
+          getParentApi={() => mockDashboardApi}
+          panelProps={{
+            showBadges: true,
+            showBorder: true,
+            showNotifications: true,
+            showShadow: false,
+            setDragHandles,
+          }}
+        />
+      );
+    },
+    [mockDashboardApi]
+  );
 
   const onLayoutChange = useCallback(
     (newLayout: GridLayoutData) => {
@@ -136,7 +143,6 @@ export const GridExample = ({
         mockDashboardApi.panels$.getValue(),
         newLayout
       );
-      console.log('onlayoutchange', { panels, rows });
       mockDashboardApi.panels$.next(panels);
       mockDashboardApi.rows$.next(rows);
     },
@@ -274,6 +280,7 @@ export const GridExample = ({
             renderPanelContents={renderPanelContents}
             onLayoutChange={onLayoutChange}
             css={layoutStyles}
+            useCustomDragHandle={true}
           />
         </EuiPageTemplate.Section>
       </EuiPageTemplate>

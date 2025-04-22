@@ -16,7 +16,6 @@ import { combineLatest, pairwise, map, distinctUntilChanged, skip } from 'rxjs';
 import { css } from '@emotion/react';
 
 import { GridHeightSmoother } from './grid_height_smoother';
-import { GridRow } from './grid_row';
 import { GridAccessMode, GridLayoutData, GridSettings, UseCustomDragHandle } from './types';
 import { GridLayoutContext, GridLayoutContextType } from './use_grid_layout_context';
 import { useGridLayoutState } from './use_grid_layout_state';
@@ -25,6 +24,7 @@ import { getPanelKeysInOrder, getRowKeysInOrder, resolveGridRow } from './utils/
 import { GridRowHeader } from './grid_row/grid_row_header';
 import { GridPanel } from './grid_panel';
 import { GridRowWrapper } from './grid_row/grid_row_wrapper';
+import { GridRowFooter } from './grid_row/grid_row_footer';
 
 export type GridLayoutProps = {
   layout: GridLayoutData;
@@ -126,6 +126,9 @@ export const GridLayout = ({
               });
               currentElementsInOrder.push({ type: 'wrapper', id: rowId });
             }
+            if (row.isCollapsible) {
+              currentElementsInOrder.push({ type: 'footer', id: rowId });
+            }
           });
           return currentElementsInOrder;
         }),
@@ -176,7 +179,7 @@ export const GridLayout = ({
           if (Object.values(currentRow.panels).length > 0) {
             gridRowTemplateString += `[start-${rowId}] `;
             if (currentRow.isCollapsible) {
-              gridRowTemplateString += `auto `;
+              gridRowTemplateString += `auto `; // header
             }
             if (
               !currentRow.isCollapsible ||
@@ -185,9 +188,12 @@ export const GridLayout = ({
               const panels = Object.values(currentRow.panels);
               const maxRow =
                 panels.length > 0 ? Math.max(...panels.map(({ row, height }) => row + height)) : 0;
-              gridRowTemplateString += `repeat(${maxRow}, [gridRow-${rowId}] calc(var(--kbnGridRowHeight) * 1px))`;
+              gridRowTemplateString += `repeat(${maxRow}, [gridRow-${rowId}] calc(var(--kbnGridRowHeight) * 1px)) `;
             }
-            gridRowTemplateString += ` [end-${rowId}] `;
+            if (currentRow.isCollapsible) {
+              gridRowTemplateString += `auto `; // footer
+            }
+            gridRowTemplateString += `[end-${rowId}] `;
           }
         });
         gridRowTemplateString = gridRowTemplateString.replaceAll('] [', ' ');
@@ -240,6 +246,8 @@ export const GridLayout = ({
                 return <GridPanel key={element.id} panelId={element.id} rowId={element.rowId} />;
               case 'wrapper':
                 return <GridRowWrapper key={`${element.id}--wrapper`} rowId={element.id} />;
+              case 'footer':
+                return <GridRowFooter key={`${element.id}--footer`} rowId={element.id} />;
             }
           })}
         </div>
