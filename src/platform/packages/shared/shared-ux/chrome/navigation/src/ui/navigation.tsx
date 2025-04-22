@@ -81,11 +81,7 @@ const NavigationComp: FC<Props> = ({ navigationTree$, dataTestSubj }) => {
   );
 
   return (
-    <PanelProvider
-      activeNodes={activeNodes}
-      selectedNode={selectedPanelNode}
-      setSelectedNode={setSelectedPanelNode}
-    >
+    <PanelProvider selectedNode={selectedPanelNode} setSelectedNode={setSelectedPanelNode}>
       <NavigationContext.Provider value={contextValue}>
         {/* Main navigation content */}
         <EuiCollapsibleNavBeta.Body data-test-subj={dataTestSubj}>

@@ -29,19 +29,4 @@ export const getNavPanelStyles = (euiTheme: EuiThemeComputed<{}>) => css`
   background-color: ${euiTheme.colors.backgroundBaseSubdued};
   height: 100%;
   width: ${PANEL_WIDTH};
-
-  .sideNavPanelLink {
-    &:focus-within {
-      background-color: transparent;
-      a {
-        text-decoration: auto;
-      }
-    }
-    &:hover {
-      background-color: ${euiTheme.colors.backgroundBaseInteractiveHover};
-      a {
-        text-decoration: underline;
-      }
-    }
-  }
 `;
