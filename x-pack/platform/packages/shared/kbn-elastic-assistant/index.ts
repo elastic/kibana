@@ -105,6 +105,7 @@ export {
   START_LOCAL_STORAGE_KEY,
 } from './impl/assistant_context/constants';
 
+export type { AIConnector } from './impl/connectorland/connector_selector';
 export { useLoadConnectors } from './impl/connectorland/use_load_connectors';
 
 export type {
@@ -168,3 +169,13 @@ export {
   /** Your anonymization settings will apply to these alerts (label) */
   YOUR_ANONYMIZATION_SETTINGS,
 } from './impl/knowledge_base/translations';
+export { SearchAILakeConfigurationsSettingsManagement } from './impl/assistant/settings/search_ai_lake_configurations_settings_management';
+export { CONVERSATIONS_TAB } from './impl/assistant/settings/const';
+export type { ManagementSettingsTabs } from './impl/assistant/settings/types';
+
+export {
+  AlertSummary,
+  Conversations,
+  SuggestedPrompts,
+  AttackDiscoveryWidget,
+} from './impl/alerts';

@@ -15,7 +15,6 @@ import { useKibana } from '../../../../common/lib/kibana';
 import { BackgroundImageCallout } from '../background_image_callout';
 
 export function BlogPostPrebuiltRuleCustomizationCallout() {
-  // URL is currently only available in ESS. So we are only showing this callout in ESS for now.
   const blogPostUrl =
     useKibana().services.docLinks.links.securitySolution.prebuiltRuleCustomizationPromoBlog;
 
@@ -43,7 +42,7 @@ export function BlogPostPrebuiltRuleCustomizationCallout() {
     dismiss(calloutMessage);
   }, [dismiss, calloutMessage]);
 
-  if (blogPostUrl && isVisible(calloutMessage)) {
+  if (isVisible(calloutMessage)) {
     return (
       <>
         <BackgroundImageCallout
