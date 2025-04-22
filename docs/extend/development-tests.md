@@ -305,7 +305,7 @@ export default function ({ getService, getPageObject }) {
   describe('My Test Suite', () => {
 
     // most suites start with a before hook that navigates to a specific
-    // app/page and restores some archives into {es} with esArchiver
+    // app/page and restores some archives into Elasticsearch with esArchiver
     before(async () => {
       await Promise.all([
         // start by clearing Saved Objects from the .kibana index
@@ -318,7 +318,7 @@ export default function ({ getService, getPageObject }) {
     });
 
     // right after the before() hook definition, add the teardown steps
-    // that will tidy up {es} for other test suites
+    // that will tidy up Elasticsearch for other test suites
     after(async () => {
       // we clear Kibana Saved Objects but not the makelogs
       // archive because we don't make any changes to it, and subsequent

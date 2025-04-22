@@ -17,9 +17,8 @@ From 8.7.0, as a step towards *zero downtime upgrades*, plugins are no longer al
 
 Each plugin can register different object types to be used in {{kib}}. Historically, objects could be *isolated* (existing in a single [space](docs-content://deploy-manage/manage-spaces.md)) or *global* (existing in all spaces), there was no in-between. As of the 7.12 release, {{kib}} now supports two additional types of objects:
 
-|     |     |     |     |
-| --- | --- | --- | --- |
 |  | **Where it exists** | **Object IDs** | **Registered as:** |
+| --- | --- | --- | --- |
 | Global | All spaces | Globally unique | `namespaceType: 'agnostic'` |
 | Isolated | 1 space | Unique in each space | `namespaceType: 'single'` |
 | (NEW) Share-capable | 1 space | Globally unique | `namespaceType: 'multiple-isolated'` |
@@ -486,11 +485,11 @@ As mentioned in [Question 2](#sharing-saved-objects-q2), some URLs may contain m
 
     * Embeddables should use `spacesApi.ui.components.getEmbeddableLegacyUrlConflict` to render conflict errors:
 
-![Sharing Saved Objects embeddable legacy URL conflict](images/sharing-saved-objects-faq-multiple-deep-link-objects-1.png)
+        ![Sharing Saved Objects embeddable legacy URL conflict](images/sharing-saved-objects-faq-multiple-deep-link-objects-1.png)
 
         Viewing details shows the user how to disable the alias and fix the problem using the [_disable_legacy_url_aliases API](https://www.elastic.co/docs/api/doc/kibana/v8/group/endpoint-spaces):
 
-![Sharing Saved Objects embeddable legacy URL conflict (showing details)](images/sharing-saved-objects-faq-multiple-deep-link-objects-2.png)
+        ![Sharing Saved Objects embeddable legacy URL conflict (showing details)](images/sharing-saved-objects-faq-multiple-deep-link-objects-2.png)
 
     * If the secondary object is resolved by an external service (such as the index pattern service), the service should simply make the full outcome available to consumers.
 
