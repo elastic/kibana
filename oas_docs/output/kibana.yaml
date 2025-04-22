@@ -27025,6 +27025,12 @@ paths:
           required: false
           schema:
             type: string
+        - in: query
+          name: showHidden
+          required: false
+          schema:
+            default: true
+            type: boolean
       responses:
         '200':
           content:
@@ -27049,6 +27055,8 @@ paths:
                           type: string
                         created_at:
                           type: string
+                        hidden:
+                          type: boolean
                         id:
                           type: string
                         name:
@@ -27081,6 +27089,8 @@ paths:
                           type: string
                         created_at:
                           type: string
+                        hidden:
+                          type: boolean
                         id:
                           type: string
                         name:
@@ -27184,6 +27194,8 @@ paths:
                         type: string
                       created_at:
                         type: string
+                      hidden:
+                        type: boolean
                       id:
                         type: string
                       name:
@@ -27310,6 +27322,8 @@ paths:
                         type: string
                       created_at:
                         type: string
+                      hidden:
+                        type: boolean
                       id:
                         type: string
                       name:
