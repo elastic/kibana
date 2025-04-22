@@ -5,8 +5,11 @@
  * 2.0.
  */
 
-import { navigateUsingGlobalSearch, visitGetStartedPage } from '../../../../tasks/navigation';
-import { visitRulesManagementTable } from '../../../../tasks/rules_management';
+import { visitGetStartedPage } from '../../../../tasks/navigation';
+import {
+  navigateToRulesManagementTable,
+  visitRulesManagementTable,
+} from '../../../../tasks/rules_management';
 import {
   REFRESH_RULES_STATUS,
   RULES_TABLE_AUTOREFRESH_INDICATOR,
@@ -71,7 +74,7 @@ describe(
       beforeEach(() => {
         visitGetStartedPage(); // load the page without mocking timers. Deep links need timers unmocked
         mockGlobalClock(); // mock timers
-        navigateUsingGlobalSearch('rules'); // navigate to rules page
+        navigateToRulesManagementTable(); // navigate to rules page
 
         expectNumberOfRules(RULES_MANAGEMENT_TABLE, 1);
       });
@@ -98,7 +101,7 @@ describe(
       beforeEach(() => {
         visitGetStartedPage(); // load the page without mocking timers. Deep links need timers unmocked
         mockGlobalClock(); // mock timers
-        navigateUsingGlobalSearch('rules'); // navigate to rules page
+        navigateToRulesManagementTable(); // navigate to rules page
 
         expectNumberOfRules(RULES_MANAGEMENT_TABLE, 1);
       });
@@ -147,7 +150,7 @@ describe(
       it('does NOT refresh after refresh interval has passed', () => {
         visitGetStartedPage(); // load the page without mocking timers. Deep links need timers unmocked
         mockGlobalClock(); // mock timers
-        navigateUsingGlobalSearch('rules'); // navigate to rules page
+        navigateToRulesManagementTable(); // navigate to rules page
 
         expectNumberOfRules(RULES_MANAGEMENT_TABLE, 1);
 

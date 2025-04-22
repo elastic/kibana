@@ -5,14 +5,28 @@
  * 2.0.
  */
 
+import { IS_SERVERLESS } from '../env_var_names_constants';
 import { LAST_BREADCRUMB, RULE_MANAGEMENT_PAGE_BREADCRUMB } from '../screens/breadcrumbs';
+import { RULES as RULES_SERVERLESS } from '../screens/serverless_security_header';
+import { RULES as RULES_CLASSIC } from '../screens/security_header';
 import { RULES_MANAGEMENT_URL } from '../urls/rules_management';
 import { resetRulesTableState } from './common';
 import { visit } from './navigation';
+import { navigateFromHeaderTo } from './security_header';
 
 export function visitRulesManagementTable(): void {
   resetRulesTableState(); // Clear persistent rules filter data before page loading
   visit(RULES_MANAGEMENT_URL);
+}
+
+export function navigateToRulesManagementTable(): void {
+  resetRulesTableState(); // Clear persistent rules filter data before page loading
+  const isServerless = Cypress.env(IS_SERVERLESS);
+  if (isServerless) {
+    navigateFromHeaderTo(RULES_SERVERLESS, true);
+  } else {
+    navigateFromHeaderTo(RULES_CLASSIC, false);
+  }
 }
 
 export function openRuleManagementPageViaBreadcrumbs(): void {
