@@ -145,37 +145,20 @@ export const mockExtraFilter = [
 export const mockRulePreviewFilter = (internalReferenceId: string, ruleId: string) => [
   {
     meta: {
-      alias: null,
       disabled: false,
-      field: 'kibana.alert.rule.uuid',
-      index: 'mockColumnCountOfRecordsId',
+      negate: false,
+      alias: null,
+      index: internalReferenceId,
       key: 'kibana.alert.rule.uuid',
-      negate: false,
+      field: 'kibana.alert.rule.uuid',
       params: {
-        query: 'mockRuleId',
+        query: ruleId,
       },
       type: 'phrase',
     },
     query: {
       match_phrase: {
-        'kibana.alert.rule.uuid': 'mockRuleId',
-      },
-    },
-  },
-  {
-    meta: {
-      alias: null,
-      disabled: false,
-      key: 'host.id',
-      negate: false,
-      params: {
-        query: '123',
-      },
-      type: 'phrase',
-    },
-    query: {
-      match_phrase: {
-        'host.id': '123',
+        'kibana.alert.rule.uuid': ruleId,
       },
     },
   },

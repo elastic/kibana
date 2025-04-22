@@ -11,12 +11,12 @@ Object {
     },
     Object {
       "id": "security-solution-my-test",
-      "name": "indexpattern-datasource-layer-undefined",
+      "name": "indexpattern-datasource-layer-31213ae3-905b-4e88-b987-0cccb1f3209f",
       "type": "index-pattern",
     },
     Object {
       "id": "security-solution-my-test",
-      "name": "indexpattern-datasource-layer-31213ae3-905b-4e88-b987-0cccb1f3209f",
+      "name": "indexpattern-datasource-layer-b9acd453-f476-4467-ad38-203e37b73e55",
       "type": "index-pattern",
     },
   ],
@@ -26,11 +26,54 @@ Object {
         "layers": Object {
           "31213ae3-905b-4e88-b987-0cccb1f3209f": Object {
             "columnOrder": Array [
+              "430e690c-9992-414f-9bce-00812d99a5e7",
               "938b445a-a291-4bbc-84fe-4f47b69c20e4",
-              "e959c351-a3a2-4525-b244-9623f215a8fd",
             ],
             "columns": Object {
+              "430e690c-9992-414f-9bce-00812d99a5e7": Object {
+                "dataType": "string",
+                "isBucketed": true,
+                "label": "Filters",
+                "operationType": "filters",
+                "params": Object {
+                  "filters": Array [
+                    Object {
+                      "input": Object {
+                        "language": "kuery",
+                        "query": "event.outcome : \\"success\\" ",
+                      },
+                      "label": "Succ.",
+                    },
+                  ],
+                },
+                "scale": "ordinal",
+              },
               "938b445a-a291-4bbc-84fe-4f47b69c20e4": Object {
+                "dataType": "number",
+                "isBucketed": false,
+                "label": "Succ.",
+                "operationType": "count",
+                "scale": "ratio",
+                "sourceField": "___records___",
+              },
+            },
+            "incompleteColumns": Object {},
+          },
+          "b9acd453-f476-4467-ad38-203e37b73e55": Object {
+            "columnOrder": Array [
+              "e959c351-a3a2-4525-b244-9623f215a8fd",
+              "c8165fc3-7180-4f1b-8c87-bc3ea04c6df7",
+            ],
+            "columns": Object {
+              "c8165fc3-7180-4f1b-8c87-bc3ea04c6df7": Object {
+                "dataType": "number",
+                "isBucketed": false,
+                "label": "Fail",
+                "operationType": "count",
+                "scale": "ratio",
+                "sourceField": "___records___",
+              },
+              "e959c351-a3a2-4525-b244-9623f215a8fd": Object {
                 "customLabel": true,
                 "dataType": "string",
                 "isBucketed": true,
@@ -44,49 +87,6 @@ Object {
                         "query": "event.outcome:\\"failure\\" ",
                       },
                       "label": "Fail",
-                    },
-                  ],
-                },
-                "scale": "ordinal",
-              },
-              "e959c351-a3a2-4525-b244-9623f215a8fd": Object {
-                "dataType": "number",
-                "isBucketed": false,
-                "label": "Fail",
-                "operationType": "count",
-                "scale": "ratio",
-                "sourceField": "___records___",
-              },
-            },
-            "incompleteColumns": Object {},
-          },
-          "undefined": Object {
-            "columnOrder": Array [
-              "b9acd453-f476-4467-ad38-203e37b73e55",
-              "430e690c-9992-414f-9bce-00812d99a5e7",
-            ],
-            "columns": Object {
-              "430e690c-9992-414f-9bce-00812d99a5e7": Object {
-                "dataType": "number",
-                "isBucketed": false,
-                "label": "Succ.",
-                "operationType": "count",
-                "scale": "ratio",
-                "sourceField": "___records___",
-              },
-              "b9acd453-f476-4467-ad38-203e37b73e55": Object {
-                "dataType": "string",
-                "isBucketed": true,
-                "label": "Filters",
-                "operationType": "filters",
-                "params": Object {
-                  "filters": Array [
-                    Object {
-                      "input": Object {
-                        "language": "kuery",
-                        "query": "event.outcome : \\"success\\" ",
-                      },
-                      "label": "Succ.",
                     },
                   ],
                 },
@@ -229,31 +229,31 @@ Object {
       "layers": Array [
         Object {
           "accessors": Array [
-            "430e690c-9992-414f-9bce-00812d99a5e7",
+            "938b445a-a291-4bbc-84fe-4f47b69c20e4",
           ],
-          "layerId": undefined,
+          "layerId": "31213ae3-905b-4e88-b987-0cccb1f3209f",
           "layerType": "data",
           "seriesType": "bar_horizontal_stacked",
-          "xAccessor": "b9acd453-f476-4467-ad38-203e37b73e55",
+          "xAccessor": "430e690c-9992-414f-9bce-00812d99a5e7",
           "yConfig": Array [
             Object {
               "color": "#16C5C0",
-              "forAccessor": "430e690c-9992-414f-9bce-00812d99a5e7",
+              "forAccessor": "938b445a-a291-4bbc-84fe-4f47b69c20e4",
             },
           ],
         },
         Object {
           "accessors": Array [
-            "e959c351-a3a2-4525-b244-9623f215a8fd",
+            "c8165fc3-7180-4f1b-8c87-bc3ea04c6df7",
           ],
-          "layerId": "31213ae3-905b-4e88-b987-0cccb1f3209f",
+          "layerId": "b9acd453-f476-4467-ad38-203e37b73e55",
           "layerType": "data",
           "seriesType": "bar_horizontal_stacked",
-          "xAccessor": "938b445a-a291-4bbc-84fe-4f47b69c20e4",
+          "xAccessor": "e959c351-a3a2-4525-b244-9623f215a8fd",
           "yConfig": Array [
             Object {
               "color": "#EE72A6",
-              "forAccessor": "e959c351-a3a2-4525-b244-9623f215a8fd",
+              "forAccessor": "c8165fc3-7180-4f1b-8c87-bc3ea04c6df7",
             },
           ],
         },
