@@ -1,23 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`HeaderSection it renders 1`] = `
-.c0 .siemSubtitle__item {
-  color: #7a7f89;
-  font-size: 12px;
-  line-height: 1.5;
-}
-
-@media only screen and (min-width:575px) {
-  .c0 .siemSubtitle__item {
-    display: inline-block;
-    margin-right: 16px;
-  }
-
-  .c0 .siemSubtitle__item:last-child {
-    margin-right: 0;
-  }
-}
-
 <header
   class="toggle-expand siemHeaderSection css-125xqyz-header"
   data-test-subj="header-section"
@@ -69,7 +52,7 @@ exports[`HeaderSection it renders 1`] = `
       class="euiFlexItem emotion-euiFlexItem-grow-1"
     >
       <div
-        class="c0 siemSubtitle"
+        class="sc-ERObt hjkLnJ siemSubtitle"
         data-test-subj="header-section-subtitle"
       >
         <div
