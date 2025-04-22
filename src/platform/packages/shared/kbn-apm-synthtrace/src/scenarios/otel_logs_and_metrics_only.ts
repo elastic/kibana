@@ -7,31 +7,95 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { log, generateShortId } from '@kbn/apm-synthtrace-client';
-import { Readable } from 'stream';
+import {
+  OtelLogDocument,
+  generateLongId,
+  generateShortId,
+  otelLog,
+  apm,
+} from '@kbn/apm-synthtrace-client';
 import { Scenario } from '../cli/scenario';
 import { withClient } from '../lib/utils/with_client';
 
-import { getSynthtraceEnvironment } from '../lib/utils/get_synthtrace_environment';
-
 import { IndexTemplateName } from '../lib/logs/custom_logsdb_index_templates';
 
-const ENVIRONMENT = getSynthtraceEnvironment(__filename);
-
 const MESSAGE_LOG_LEVELS = [
-  { message: 'A simple log with something random <random> in the middle', level: 'info' },
-  { message: 'Yet another debug log', level: 'debug' },
-  { message: 'Error with certificate: "ca_trusted_fingerprint"', level: 'error' },
+  {
+    message: 'A simple log with something random <random> in the middle',
+    level: 'info',
+    severityNumber: 9,
+  },
+  { message: 'Yet another debug log', level: 'debug', severityNumber: 5 },
+  {
+    message: 'Error with certificate: "ca_trusted_fingerprint"',
+    level: 'error',
+    severityNumber: 17,
+  },
 ];
 
-const scenario: Scenario = async (runOptions) => {
+const scenario: Scenario<OtelLogDocument> = async (runOptions) => {
   const { logger } = runOptions;
+
+  const constructLogsCommonData = () => {
+    const index = Math.floor(Math.random() * 3);
+    const serviceName = 'otel-metrics-and-logs-only';
+    const logMessage = MESSAGE_LOG_LEVELS[index];
+
+    const commonLongEntryFields: OtelLogDocument = {
+      trace_id: generateLongId(),
+      resource: {
+        attributes: {
+          'service.name': serviceName,
+          'service.version': '1.0.0',
+          'service.environment': 'production',
+        },
+      },
+      attributes: {
+        'log.file.path': `/logs/${generateLongId()}/error.txt`,
+      },
+    };
+
+    return {
+      index,
+      serviceName,
+      logMessage,
+      commonLongEntryFields,
+    };
+  };
+
   return {
-    bootstrap: async ({ logsEsClient }) => {
+    bootstrap: async ({ logsEsClient, apmEsClient }) => {
       await logsEsClient.createIndexTemplate(IndexTemplateName.LogsDb);
+      apmEsClient.pipeline(apmEsClient.getPipeline('otelToApm'));
     },
-    generate: ({ range, clients: { logsEsClient } }) => {
-      const SYNTHTRACE_LOGS = 'synthtrace-logs';
+    generate: ({ range, clients: { logsEsClient, apmEsClient } }) => {
+      const {
+        logMessage: { level, message },
+        commonLongEntryFields,
+        serviceName,
+      } = constructLogsCommonData();
+
+      const metricsets = range
+        .interval('30s')
+        .rate(1)
+        .generator((timestamp) =>
+          apm
+            .otelService({
+              name: serviceName,
+              sdkName: 'opentelemetry',
+              sdkLanguage: 'synthtrace',
+              namespace: 'production',
+            })
+            .instance('instance-1')
+            .appMetrics({
+              'system.memory.actual.free': 800,
+              'system.memory.total': 1000,
+              'system.cpu.total.norm.pct': 0.6,
+              'system.process.cpu.total.norm.pct': 0.7,
+            })
+            .timestamp(timestamp)
+        );
+
       const apmAndLogsLogsEvents = range
         .interval('1m')
         .rate(1)
@@ -39,23 +103,22 @@ const scenario: Scenario = async (runOptions) => {
           return Array(3)
             .fill(0)
             .map(() => {
-              const index = Math.floor(Math.random() * 3);
-              const { message, level } = MESSAGE_LOG_LEVELS[index];
-              return log
-                .createMinimal({ dataset: 'generic.otel' })
+              return otelLog
+                .create()
                 .message(message.replace('<random>', generateShortId()))
                 .logLevel(level)
-                .service(SYNTHTRACE_LOGS)
-                .defaults({
-                  'agent.name': 'nodejs',
-                })
+                .defaults(commonLongEntryFields)
                 .timestamp(timestamp);
             });
         });
       return [
         withClient(
           logsEsClient,
-          logger.perf('generating_otel_logs', () => Readable.from(Array.from(apmAndLogsLogsEvents)))
+          logger.perf('generating_otel_logs', () => apmAndLogsLogsEvents)
+        ),
+        withClient(
+          apmEsClient,
+          logger.perf('generating_apm_metrics', () => metricsets)
         ),
       ];
     },

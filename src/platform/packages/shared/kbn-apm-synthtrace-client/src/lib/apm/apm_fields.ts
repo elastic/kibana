@@ -109,14 +109,6 @@ export type ApmFields = Fields<{
     'cloud.provider': string;
     'cloud.region': string;
     'cloud.service.name': string;
-    // otel events
-    'body.text': string;
-    event_name: string;
-    observed_timestamp: number;
-    severity_number: number;
-    severity_text: string;
-    message: string;
-    'log.level': string;
     // otel
     'code.stacktrace': string;
     'container.id': string;
