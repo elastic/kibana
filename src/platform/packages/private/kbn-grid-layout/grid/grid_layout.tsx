@@ -84,12 +84,13 @@ export const GridLayout = ({
     const onLayoutChangeSubscription = gridLayoutStateManager.gridLayout$
       .pipe(pairwise())
       .subscribe(([layoutBefore, layoutAfter]) => {
+        console.log({ layoutBefore, layoutAfter });
         if (!isLayoutEqual(layoutBefore, layoutAfter)) {
           onLayoutChange(layoutAfter);
 
-          // if (!deepEqual(Object.keys(layoutBefore), Object.keys(layoutAfter))) {
-          //   setRowIdsInOrder(getRowKeysInOrder(layoutAfter));
-          // }
+          if (!deepEqual(Object.keys(layoutBefore), Object.keys(layoutAfter))) {
+            // setRowIdsInOrder(getRowKeysInOrder(layoutAfter));
+          }
         }
       });
 
@@ -119,14 +120,15 @@ export const GridLayout = ({
               panelIdsInOrder.forEach((panelId) => {
                 currentElementsInOrder.push({ type: 'panel', id: panelId, rowId });
               });
+              currentElementsInOrder.push({ type: 'wrapper', id: rowId });
             }
-            currentElementsInOrder.push({ type: 'wrapper', id: rowId });
           });
           return currentElementsInOrder;
         }),
         distinctUntilChanged(deepEqual)
       )
       .subscribe((currentElementsInOrder) => {
+        console.log('currentElementsInOrder', currentElementsInOrder);
         setElementsInOrder(currentElementsInOrder);
       });
 
@@ -167,7 +169,7 @@ export const GridLayout = ({
         let gridRowTemplateString = '';
         rowIds.forEach((rowId) => {
           const currentRow = currentLayout[rowId];
-          gridRowTemplateString += `[${rowId}-start] `;
+          gridRowTemplateString += `[start-${rowId}] `;
           if (currentRow.isCollapsible) {
             gridRowTemplateString += `auto `;
           }
@@ -175,12 +177,14 @@ export const GridLayout = ({
             const panels = Object.values(currentRow.panels);
             const maxRow =
               panels.length > 0 ? Math.max(...panels.map(({ row, height }) => row + height)) : 0;
-            gridRowTemplateString += `repeat(${maxRow}, [${rowId}-gridRow] calc(var(--kbnGridRowHeight) * 1px))`;
+            gridRowTemplateString += `repeat(${maxRow}, [gridRow-${rowId}] calc(var(--kbnGridRowHeight) * 1px))`;
           }
-          gridRowTemplateString += `[${rowId}-end] `;
+          gridRowTemplateString += ` [end-${rowId}] `;
         });
         gridRowTemplateString = gridRowTemplateString.replaceAll('] [', ' ');
 
+        if (layoutRef.current.style.gridTemplateRows !== gridRowTemplateString)
+          console.log(gridRowTemplateString);
         layoutRef.current.style.gridTemplateRows = gridRowTemplateString;
       });
 

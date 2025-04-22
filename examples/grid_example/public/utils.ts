@@ -20,6 +20,8 @@ export const gridLayoutToDashboardPanelMap = (
     const { panels: rowPanels, ...rest } = row; // drop panels
     if (row.isCollapsible) {
       rows[rowId] = { ...rest, collapsed: row.isCollapsed };
+    } else {
+      rows[rowId] = rest;
     }
     Object.values(rowPanels).forEach((panelGridData) => {
       panels[panelGridData.id] = {

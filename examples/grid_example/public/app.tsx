@@ -96,6 +96,7 @@ export const GridExample = ({
             );
           }
           const hasChanges = !(panelsAreEqual && deepEqual(rows, savedState.current.rows));
+          console.log({ panels, rows });
           return { hasChanges, updatedLayout: dashboardInputToGridLayout({ panels, rows }) };
         })
       )
@@ -135,6 +136,7 @@ export const GridExample = ({
         mockDashboardApi.panels$.getValue(),
         newLayout
       );
+      console.log('onlayoutchange', { panels, rows });
       mockDashboardApi.panels$.next(panels);
       mockDashboardApi.rows$.next(rows);
     },

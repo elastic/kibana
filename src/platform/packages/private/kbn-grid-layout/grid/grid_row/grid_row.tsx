@@ -161,8 +161,8 @@ export const GridRow = React.memo(({ rowId }: GridRowProps) => {
             css={css`
               grid-column-start: 1;
               grid-column-end: -1;
-              grid-row-start: ${rowId}-gridRow; // first grid row in this row of panels
-              grid-row-end: ${rowId}-end;
+              grid-row-start: gridRow-${rowId}; // first grid row in this row of panels
+              grid-row-end: end-${rowId};
             `}
           />
         </>

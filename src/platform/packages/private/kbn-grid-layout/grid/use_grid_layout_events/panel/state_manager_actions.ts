@@ -7,15 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { cloneDeep } from 'lodash';
 import deepEqual from 'fast-deep-equal';
+import { cloneDeep } from 'lodash';
 import { MutableRefObject } from 'react';
+import { v4 as uuidv4 } from 'uuid';
+
 import { GridLayoutStateManager, GridPanelData } from '../../types';
-import { getDragPreviewRect, getSensorOffsets, getResizePreviewRect } from './utils';
-import { resolveGridRow } from '../../utils/resolve_grid_row';
 import { isGridDataEqual } from '../../utils/equality_checks';
-import { PointerPosition, UserInteractionEvent } from '../types';
+import { resolveGridRow } from '../../utils/resolve_grid_row';
 import { getSensorType, isKeyboardEvent } from '../sensors';
+import { PointerPosition, UserInteractionEvent } from '../types';
+import { getDragPreviewRect, getResizePreviewRect, getSensorOffsets } from './utils';
 
 export const startAction = (
   e: UserInteractionEvent,
@@ -88,34 +90,62 @@ export const moveAction = (
 
   // find the grid that the preview rect is over
   const lastRowId = interactionEvent.targetRow;
-  const targetRowId = (() => {
+  let targetRowId = (() => {
     // TODO: temporary blocking of moving with keyboard between sections till we have a better way to handle keyboard events between rows
     if (isResize || isKeyboardEvent(e)) return lastRowId;
     const previewBottom = previewRect.top + rowHeight;
 
     let highestOverlap = -Infinity;
     let highestOverlapRowId = '';
-    Object.entries(gridRowElements).forEach(([id, row]) => {
-      if (!row) return;
-      const rowRect = row.getBoundingClientRect();
-      const overlap =
-        Math.min(previewBottom, rowRect.bottom) - Math.max(previewRect.top, rowRect.top);
-      if (overlap > highestOverlap) {
-        highestOverlap = overlap;
-        highestOverlapRowId = id;
+    /**
+     * by spreading the grid row + header elements like this, if a row is expanded, then its wrapping DIV takes priority
+     * when calculating overlap; otherwise, use the header to calculate the target row ID
+     */
+    Object.entries({ ...gridLayoutStateManager.headerRefs.current, ...gridRowElements }).forEach(
+      ([id, row]) => {
+        if (!row) return;
+        const rowRect = row.getBoundingClientRect();
+        const overlap =
+          Math.min(previewBottom, rowRect.bottom) - Math.max(previewRect.top, rowRect.top);
+        if (overlap > highestOverlap) {
+          highestOverlap = overlap;
+          highestOverlapRowId = id;
+        }
       }
-    });
+    );
     return highestOverlapRowId;
   })();
-  const hasChangedGridRow = targetRowId !== lastRowId;
 
-  // re-render when the target row changes
-  if (hasChangedGridRow) {
-    interactionEvent$.next({
-      ...interactionEvent,
-      targetRow: targetRowId,
-    });
+  let shouldCreateNewRow = false;
+  // let previousRow;
+  let currentTargetRow = currentLayout[targetRowId];
+  if (currentTargetRow.isCollapsible && currentTargetRow.isCollapsed) {
+    const rowBelow = Object.values(currentLayout).find(
+      (r) => r.order === currentLayout[targetRowId].order + 1
+    );
+    // console.log({ rowBelow });
+
+    // // create a new, non-collapsible row
+    // previousRow = targetRowId;
+    // const newTargetRow = uuidv4();
+    // // targetRowId = uuidv4();
+    // // currentLayout[newTargetRow] = {
+    // //   id: newTargetRow,
+    // //   isCollapsible: false,
+    // //   order: currentLayout[targetRowId].order + 1,
+    // //   panels: {},
+    // // };
+    // targetRowId = newTargetRow;
+    if (!rowBelow || rowBelow.isCollapsible) {
+      shouldCreateNewRow = true;
+    } else {
+      targetRowId = rowBelow.id;
+      currentTargetRow = currentLayout[targetRowId];
+    }
   }
+  // console.log({ targetRowId, lastRowId, currentLayout });
+
+  const hasChangedGridRow = shouldCreateNewRow || targetRowId !== lastRowId;
 
   // calculate the requested grid position
   const targetedGridRow = gridRowElements[targetRowId];
@@ -135,7 +165,9 @@ export const moveAction = (
     Math.max(Math.round(localXCoordinate / (columnPixelWidth + gutterSize)), 0),
     maxColumn
   );
-  const targetRow = Math.max(Math.round(localYCoordinate / (rowHeight + gutterSize)), 0);
+  const targetRow = shouldCreateNewRow
+    ? 1
+    : Math.max(Math.round(localYCoordinate / (rowHeight + gutterSize)), 0);
 
   const requestedPanelData = { ...currentPanelData };
   if (isResize) {
@@ -146,13 +178,16 @@ export const moveAction = (
     requestedPanelData.row = targetRow;
   }
 
+  // console.log({ shouldCreateNewRow, targetRow, requestedPanelData });
+
   // resolve the new grid layout
   if (
     hasChangedGridRow ||
     !isGridDataEqual(requestedPanelData, lastRequestedPanelPosition.current)
   ) {
+    const newTargetRowId = shouldCreateNewRow ? uuidv4() : targetRowId;
     lastRequestedPanelPosition.current = { ...requestedPanelData };
-
+    // console.log({ newTargetRowId });
     const nextLayout = cloneDeep(currentLayout);
     Object.entries(nextLayout).forEach(([rowId, row]) => {
       const { [interactionEvent.id]: interactingPanel, ...otherPanels } = row.panels;
@@ -160,20 +195,48 @@ export const moveAction = (
     });
 
     // resolve destination grid
-    const destinationGrid = nextLayout[targetRowId];
+    if (shouldCreateNewRow) {
+      const newOrder = currentLayout[targetRowId].order + 1;
+      nextLayout[newTargetRowId] = {
+        id: newTargetRowId,
+        isCollapsible: false,
+        order: newOrder,
+        panels: {},
+      };
+      Object.keys(nextLayout).forEach((rowId) => {
+        if (rowId !== newTargetRowId && nextLayout[rowId].order >= newOrder) {
+          nextLayout[rowId].order += 1;
+        }
+      });
+    }
+    const destinationGrid = nextLayout[newTargetRowId];
     const resolvedDestinationGrid = resolveGridRow(destinationGrid, requestedPanelData);
-    nextLayout[targetRowId] = resolvedDestinationGrid;
-
+    nextLayout[newTargetRowId] = resolvedDestinationGrid;
     // resolve origin grid
     if (hasChangedGridRow) {
       const originGrid = nextLayout[lastRowId];
       const resolvedOriginGrid = resolveGridRow(originGrid);
       nextLayout[lastRowId] = resolvedOriginGrid;
+
+      interactionEvent$.next({
+        ...interactionEvent,
+        targetRow: newTargetRowId,
+      });
+      // debugger;
     }
     if (!deepEqual(currentLayout, nextLayout)) {
+      console.log({ currentLayout, nextLayout });
       proposedGridLayout$.next(nextLayout);
     }
   }
+
+  // // re-render when the target row changes
+  // if (hasChangedGridRow) {
+  //   interactionEvent$.next({
+  //     ...interactionEvent,
+  //     targetRow: newTargetRowId,
+  //   });
+  // }
 };
 
 export const commitAction = ({

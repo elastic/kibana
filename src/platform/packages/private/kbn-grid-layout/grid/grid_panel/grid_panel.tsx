@@ -45,7 +45,7 @@ export const GridPanel = React.memo(({ panelId, rowId }: GridPanelProps) => {
       );
       grid-column-start: ${initialPanel.column + 1};
       grid-column-end: ${initialPanel.column + 1 + initialPanel.width};
-      grid-row-start: ${rowId}-gridRow ${initialPanel.row + 1};
+      grid-row-start: gridRow-${rowId} ${initialPanel.row + 1};
       grid-row-end: span ${initialPanel.height};
       .kbnGridPanel--dragHandle,
       .kbnGridPanel--resizeHandle {
@@ -112,7 +112,7 @@ export const GridPanel = React.memo(({ panelId, rowId }: GridPanelProps) => {
 
               // undo any "lock to grid" styles **except** for the top left corner, which stays locked
               ref.style.gridColumnStart = `${panel.column + 1}`;
-              ref.style.gridRowStart = `${row}-gridRow ${panel.row + 1}`;
+              ref.style.gridRowStart = `gridRow-${row} ${panel.row + 1}`;
               ref.style.gridColumnEnd = `auto`;
               ref.style.gridRowEnd = `auto`;
             } else {
@@ -143,7 +143,7 @@ export const GridPanel = React.memo(({ panelId, rowId }: GridPanelProps) => {
             // and render the panel locked to the grid
             ref.style.gridColumnStart = `${panel.column + 1}`;
             ref.style.gridColumnEnd = `${panel.column + 1 + panel.width}`;
-            ref.style.gridRowStart = `${row}-gridRow ${panel.row + 1}`;
+            ref.style.gridRowStart = `gridRow-${row} ${panel.row + 1}`;
             ref.style.gridRowEnd = `span ${panel.height}`;
           }
         });

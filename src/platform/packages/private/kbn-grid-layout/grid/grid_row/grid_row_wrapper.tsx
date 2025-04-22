@@ -21,6 +21,14 @@ export interface GridRowProps {
 export const GridRowWrapper = React.memo(({ rowId }: GridRowProps) => {
   const { gridLayoutStateManager } = useGridLayoutContext();
 
+  useEffect(() => {
+    return () => {
+      // remove reference on unmount
+      delete gridLayoutStateManager.rowRefs.current[rowId];
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   useEffect(
     () => {
       /** Update the styles of the grid row via a subscription to prevent re-renders */
@@ -51,12 +59,14 @@ export const GridRowWrapper = React.memo(({ rowId }: GridRowProps) => {
         (gridLayoutStateManager.rowRefs.current[rowId] = element)
       }
       className={'kbnGridRowBackground'}
-      css={css`
-        grid-column-start: 1;
-        grid-column-end: -1;
-        grid-row-start: ${rowId}-gridRow; // first grid row in this row of panels
-        grid-row-end: ${rowId}-end;
-      `}
+      css={() => {
+        return css`
+          grid-column-start: 1;
+          grid-column-end: -1;
+          grid-row-start: gridRow-${rowId}; // first grid row in this row of panels
+          grid-row-end: end-${rowId};
+        `;
+      }}
     />
   );
 });

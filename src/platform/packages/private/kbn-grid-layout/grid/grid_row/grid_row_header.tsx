@@ -274,7 +274,7 @@ const styles = {
     css({
       gridColumnStart: 1,
       gridColumnEnd: -1,
-      gridRowStart: `${rowId}-start`,
+      gridRowStart: `start-${rowId}`,
       gridRowEnd: `auto`,
       height: `calc(${euiTheme.size.xl} + (2 * ${euiTheme.size.s}))`,
       border: '1px solid transparent', // prevents layout shift
