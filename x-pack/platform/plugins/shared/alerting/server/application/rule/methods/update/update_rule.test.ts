@@ -413,6 +413,9 @@ describe('update()', () => {
         },
         "artifacts": Object {
           "dashboards": Array [],
+          "investigation_guide": Object {
+            "blob": "",
+          },
         },
         "createdAt": 2019-02-12T21:01:22.479Z,
         "enabled": true,
@@ -486,7 +489,9 @@ describe('update()', () => {
         "apiKeyOwner": null,
         "artifacts": Object {
           "dashboards": Array [],
-          "investigation_guide": undefined,
+          "investigation_guide": Object {
+            "blob": "",
+          },
         },
         "consumer": "myApp",
         "createdAt": "2019-02-12T21:01:22.479Z",
@@ -755,6 +760,7 @@ describe('update()', () => {
         apiKeyOwner: null,
         artifacts: {
           dashboards: [],
+          investigation_guide: { blob: '' },
         },
         apiKeyCreatedByUser: null,
         consumer: 'myApp',
@@ -812,6 +818,9 @@ describe('update()', () => {
         ],
         "artifacts": Object {
           "dashboards": Array [],
+          "investigation_guide": Object {
+            "blob": "",
+          },
         },
         "createdAt": 2019-02-12T21:01:22.479Z,
         "enabled": true,
@@ -1008,6 +1017,7 @@ describe('update()', () => {
         apiKeyOwner: null,
         artifacts: {
           dashboards: [],
+          investigation_guide: { blob: '' },
         },
         apiKeyCreatedByUser: null,
         consumer: 'myApp',
@@ -1047,6 +1057,9 @@ describe('update()', () => {
         ],
         "artifacts": Object {
           "dashboards": Array [],
+          "investigation_guide": Object {
+            "blob": "",
+          },
         },
         "createdAt": 2019-02-12T21:01:22.479Z,
         "enabled": true,
@@ -1225,6 +1238,7 @@ describe('update()', () => {
         apiKeyOwner: null,
         artifacts: {
           dashboards: [],
+          investigation_guide: { blob: '' },
         },
         apiKeyCreatedByUser: null,
         consumer: 'myApp',
@@ -1274,6 +1288,9 @@ describe('update()', () => {
         ],
         "artifacts": Object {
           "dashboards": Array [],
+          "investigation_guide": Object {
+            "blob": "",
+          },
         },
         "createdAt": 2019-02-12T21:01:22.479Z,
         "enabled": true,
@@ -1379,6 +1396,9 @@ describe('update()', () => {
         ],
         "artifacts": Object {
           "dashboards": Array [],
+          "investigation_guide": Object {
+            "blob": "",
+          },
         },
         "createdAt": 2019-02-12T21:01:22.479Z,
         "enabled": true,
@@ -1430,7 +1450,9 @@ describe('update()', () => {
         "apiKeyOwner": "elastic",
         "artifacts": Object {
           "dashboards": Array [],
-          "investigation_guide": undefined,
+          "investigation_guide": Object {
+            "blob": "",
+          },
         },
         "consumer": "myApp",
         "createdAt": "2019-02-12T21:01:22.479Z",
@@ -1566,6 +1588,9 @@ describe('update()', () => {
         ],
         "artifacts": Object {
           "dashboards": Array [],
+          "investigation_guide": Object {
+            "blob": "",
+          },
         },
         "createdAt": 2019-02-12T21:01:22.479Z,
         "enabled": false,
@@ -1609,7 +1634,9 @@ describe('update()', () => {
         "apiKeyOwner": null,
         "artifacts": Object {
           "dashboards": Array [],
-          "investigation_guide": undefined,
+          "investigation_guide": Object {
+            "blob": "",
+          },
         },
         "consumer": "myApp",
         "createdAt": "2019-02-12T21:01:22.479Z",
@@ -2798,6 +2825,7 @@ describe('update()', () => {
         apiKeyOwner: null,
         artifacts: {
           dashboards: [],
+          investigation_guide: { blob: '' },
         },
         apiKeyCreatedByUser: null,
         consumer: 'myApp',
@@ -2837,6 +2865,9 @@ describe('update()', () => {
         ],
         "artifacts": Object {
           "dashboards": Array [],
+          "investigation_guide": Object {
+            "blob": "",
+          },
         },
         "createdAt": 2019-02-12T21:01:22.479Z,
         "enabled": true,
@@ -3397,6 +3428,7 @@ describe('update()', () => {
         apiKeyOwner: null,
         artifacts: {
           dashboards: [],
+          investigation_guide: { blob: '' },
         },
         apiKeyCreatedByUser: null,
         consumer: 'myApp',
@@ -3576,6 +3608,9 @@ describe('update()', () => {
         "apiKeyCreatedByUser": true,
         "artifacts": Object {
           "dashboards": Array [],
+          "investigation_guide": Object {
+            "blob": "",
+          },
         },
         "createdAt": 2019-02-12T21:01:22.479Z,
         "enabled": true,
@@ -3621,7 +3656,9 @@ describe('update()', () => {
         "apiKeyOwner": "elastic",
         "artifacts": Object {
           "dashboards": Array [],
-          "investigation_guide": undefined,
+          "investigation_guide": Object {
+            "blob": "",
+          },
         },
         "consumer": "myApp",
         "createdAt": "2019-02-12T21:01:22.479Z",
@@ -3882,6 +3919,7 @@ describe('update()', () => {
           apiKeyOwner: null,
           artifacts: {
             dashboards: [],
+            investigation_guide: { blob: '' },
           },
           apiKeyCreatedByUser: null,
           consumer: 'myApp',
@@ -3921,6 +3959,9 @@ describe('update()', () => {
           ],
           "artifacts": Object {
             "dashboards": Array [],
+            "investigation_guide": Object {
+              "blob": "",
+            },
           },
           "createdAt": 2019-02-12T21:01:22.479Z,
           "enabled": true,
@@ -4320,6 +4361,7 @@ describe('update()', () => {
           actions: [],
           artifacts: {
             dashboards: existingDashboards,
+            investigation_guide: { blob: '' },
           },
         },
         references: [
@@ -4355,6 +4397,7 @@ describe('update()', () => {
                 refId: 'dashboard_0',
               },
             ],
+            investigation_guide: { blob: '' },
           },
           executionStatus: {
             lastExecutionDate: '2019-02-12T21:01:22.479Z',
@@ -4394,6 +4437,7 @@ describe('update()', () => {
                 id: 'dashboard-1',
               },
             ],
+            investigation_guide: { blob: '' },
           },
         },
       });
@@ -4408,6 +4452,7 @@ describe('update()', () => {
                 refId: 'dashboard_0',
               },
             ],
+            investigation_guide: { blob: '' },
           },
         }),
         {
@@ -4424,6 +4469,7 @@ describe('update()', () => {
             id: 'dashboard-1',
           },
         ],
+        investigation_guide: { blob: '' },
       });
 
       expect(result).toMatchInlineSnapshot(`
@@ -4435,6 +4481,9 @@ describe('update()', () => {
                 "id": "dashboard-1",
               },
             ],
+            "investigation_guide": Object {
+              "blob": "",
+            },
           },
           "createdAt": 2019-02-12T21:01:22.479Z,
           "enabled": true,
@@ -4498,6 +4547,7 @@ describe('update()', () => {
           actions: [],
           artifacts: {
             dashboards: existingDashboards,
+            investigation_guide: { blob: '' },
           },
         },
         references: [
@@ -4614,6 +4664,7 @@ describe('update()', () => {
                 refId: 'dashboard_2',
               },
             ],
+            investigation_guide: { blob: '' },
           },
         }),
         {
@@ -4640,6 +4691,7 @@ describe('update()', () => {
             id: 'dashboard-3',
           },
         ],
+        investigation_guide: { blob: '' },
       });
 
       expect(result).toMatchInlineSnapshot(`
@@ -4657,6 +4709,9 @@ describe('update()', () => {
                 "id": "dashboard-3",
               },
             ],
+            "investigation_guide": Object {
+              "blob": "",
+            },
           },
           "createdAt": 2019-02-12T21:01:22.479Z,
           "enabled": true,
