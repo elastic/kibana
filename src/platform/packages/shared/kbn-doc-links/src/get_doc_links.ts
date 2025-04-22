@@ -811,7 +811,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       createTransformRequest: isServerless
         ? `${ELASTICSEARCH_SERVERLESS_APIS}operation/operation-transform-put-transform`
         : `${ELASTICSEARCH_APIS}operation/operation-transform-put-transform`,
-      cronExpressions: `${ELASTICSEARCH_DOCS}cron-expressions.html`,,
+      cronExpressions: `${ELASTICSEARCH_DOCS}cron-expressions.html`,
       executeWatchActionModes: `${ELASTICSEARCH_APIS}operation/operation-watcher-execute-watch#operation-watcher-execute-watch-body-application-json`,
       indexExists: isServerless
         ? `${ELASTICSEARCH_SERVERLESS_APIS}operation/operation-indices-exists`
