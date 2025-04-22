@@ -22,7 +22,8 @@
     ],
     "requiredBundles": [
       "kibanaUtils",
-      "visDefaultEditor"
+      "visDefaultEditor",
+      "visualizations"
     ],
     "extraPublicDirs": [
       "common",

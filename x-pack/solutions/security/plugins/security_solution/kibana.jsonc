@@ -84,7 +84,7 @@
       "kibanaUtils",
       "kibanaReact",
       "usageCollection",
-//      "lens",
+      "lens",
       "lists",
       "ml",
       "unifiedSearch",
