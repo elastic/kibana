@@ -2714,10 +2714,10 @@
   resolved "https://registry.yarnpkg.com/@faker-js/faker/-/faker-7.6.0.tgz#9ea331766084288634a9247fcd8b84f16ff4ba07"
   integrity sha512-XK6BTq1NDMo9Xqw/YkYyGjSsg44fbNwYRx7QK2CuoQgyy+f1rrTDHoExVM5PsyXCtfl2vs2vVJ0MN0yN6LppRw==
 
-"@faker-js/faker@^8.3.1":
-  version "8.3.1"
-  resolved "https://registry.yarnpkg.com/@faker-js/faker/-/faker-8.3.1.tgz#7753df0cb88d7649becf984a96dd1bd0a26f43e3"
-  integrity sha512-FdgpFxY6V6rLZE9mmIBb9hM0xpfvQOSNOLnzolzKwsE1DH+gC7lEKV1p1IbR0lAYyvYd5a4u3qWJzowUkw1bIw==
+"@faker-js/faker@^9.7.0":
+  version "9.7.0"
+  resolved "https://registry.yarnpkg.com/@faker-js/faker/-/faker-9.7.0.tgz#1cf1fecfcad5e2da2332140bf3b5f23cc1c2a7f4"
+  integrity sha512-aozo5vqjCmDoXLNUJarFZx2IN/GgGaogY4TMJ6so/WLZOWpSV7fvj2dmrV6sEAnUm1O7aCrhTibjpzeDFgNqbg==
 
 "@fast-check/jest@^2.1.0":
   version "2.1.0"
@@ -4155,6 +4155,10 @@
   uid ""
 
 "@kbn/content-management-utils@link:src/platform/packages/shared/kbn-content-management-utils":
+  version "0.0.0"
+  uid ""
+
+"@kbn/content-packs-schema@link:x-pack/platform/packages/shared/kbn-content-packs-schema":
   version "0.0.0"
   uid ""
 
@@ -12747,9 +12751,9 @@
   integrity sha512-GpSwvyXOcOOlV70vbnzjj4fW5xW/FdUF6nQEt1ENy7m4ZCczi1+/buVUPAqmGfqznsORNFzUMjctTIp8a9tuCQ==
 
 "@zip.js/zip.js@^2.7.53":
-  version "2.7.53"
-  resolved "https://registry.yarnpkg.com/@zip.js/zip.js/-/zip.js-2.7.53.tgz#bf88e90d8eed562182c01339643bc405446b0578"
-  integrity sha512-G6Bl5wN9EXXVaTUIox71vIX5Z454zEBe+akKpV4m1tUboIctT5h7ID3QXCJd/Lfy2rSvmkTmZIucf1jGRR4f5A==
+  version "2.7.60"
+  resolved "https://registry.yarnpkg.com/@zip.js/zip.js/-/zip.js-2.7.60.tgz#0de96b93519cad804c82f96faebceda836cb24c0"
+  integrity sha512-vA3rLyqdxBrVo1FWSsbyoecaqWTV+vgPRf0QKeM7kVDG0r+lHUqd7zQDv1TO9k4BcAoNzNDSNrrel24Mk6addA==
 
 a-sync-waterfall@^1.0.0:
   version "1.0.1"
