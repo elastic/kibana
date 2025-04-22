@@ -51,7 +51,7 @@ export const ConfigSchema = schema.oneOf([
         schema.literal('full'),
         schema.literal('certificate'),
         schema.literal('none'),
-      ], { defaultValue: 'full' })
+      ], { defaultValue: 'none' })
     ),
     headers: schema.maybe(schema.recordOf(schema.string(), schema.string())),
   }),
