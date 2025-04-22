@@ -23461,6 +23461,14 @@ paths:
                                     additionalProperties: false
                                     type: object
                                     properties:
+                                      service_token:
+                                        additionalProperties: false
+                                        type: object
+                                        properties:
+                                          hash:
+                                            type: string
+                                          id:
+                                            type: string
                                       ssl:
                                         additionalProperties: false
                                         type: object
@@ -23584,6 +23592,14 @@ paths:
                                     additionalProperties: false
                                     type: object
                                     properties:
+                                      service_token:
+                                        additionalProperties: false
+                                        type: object
+                                        properties:
+                                          hash:
+                                            type: string
+                                          id:
+                                            type: string
                                       ssl:
                                         additionalProperties: false
                                         type: object
@@ -24509,9 +24525,6 @@ paths:
                                 type: array
                               type:
                                 type: string
-                            required:
-                              - api_key_id
-                              - type
                           type: object
                         packages:
                           items:
@@ -24971,9 +24984,6 @@ paths:
                               type: array
                             type:
                               type: string
-                          required:
-                            - api_key_id
-                            - type
                         type: object
                       packages:
                         items:
@@ -25315,9 +25325,6 @@ paths:
                               type: array
                             type:
                               type: string
-                          required:
-                            - api_key_id
-                            - type
                         type: object
                       packages:
                         items:
@@ -40657,6 +40664,8 @@ paths:
                       additionalProperties: false
                       type: object
                       properties:
+                        error:
+                          type: string
                         name:
                           type: string
                         package_name:
@@ -40747,6 +40756,8 @@ paths:
                       additionalProperties: false
                       type: object
                       properties:
+                        error:
+                          type: string
                         name:
                           type: string
                         package_name:
