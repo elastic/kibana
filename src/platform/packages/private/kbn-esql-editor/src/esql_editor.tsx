@@ -220,7 +220,8 @@ export const ESQLEditor = memo(function ESQLEditor({
 
   useEffect(() => {
     if (editor1.current) {
-      if (code !== fixedQuery) {
+      const hasSubmittedQueryChanged = fixedQuery !== codeWhenSubmitted;
+      if (code !== fixedQuery && hasSubmittedQueryChanged) {
         setCode(fixedQuery);
       }
     }
