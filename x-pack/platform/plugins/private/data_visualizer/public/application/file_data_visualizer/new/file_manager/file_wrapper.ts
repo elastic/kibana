@@ -25,6 +25,13 @@ import { FileSizeChecker } from './file_size_check';
 
 export type ServerSettings = ReturnType<typeof processResults> | null;
 
+interface FileSizeInfo {
+  fileSize: number;
+  fileSizeFormatted: string;
+  maxFileSizeFormatted: string;
+  diffFormatted: string;
+}
+
 interface AnalysisResults {
   analysisStatus: STATUS;
   fileContents: string;
@@ -40,7 +47,6 @@ export type FileAnalysis = AnalysisResults & {
   importStatus: STATUS;
   fileName: string;
   fileContents: string;
-  fileSize: string;
   data: ArrayBuffer | null;
   fileTooLarge: boolean;
   fileCouldNotBeRead: boolean;
@@ -52,13 +58,13 @@ export type FileAnalysis = AnalysisResults & {
   docCount: number;
   supportedFormat: boolean;
   failures: ImportFailure[];
+  fileSizeInfo: FileSizeInfo;
 };
 
 export class FileWrapper {
   private analyzedFile$ = new BehaviorSubject<FileAnalysis>({
     analysisStatus: STATUS.NOT_STARTED,
     fileContents: '',
-    fileSize: '',
     results: null,
     explanation: undefined,
     serverSettings: null,
@@ -75,6 +81,12 @@ export class FileWrapper {
     docCount: 0,
     supportedFormat: true,
     failures: [],
+    fileSizeInfo: {
+      fileSize: 0,
+      fileSizeFormatted: '',
+      maxFileSizeFormatted: '',
+      diffFormatted: '',
+    },
   });
 
   private pipeline$ = new BehaviorSubject<IngestPipeline | undefined>(undefined);
@@ -91,7 +103,12 @@ export class FileWrapper {
       fileName: this.file.name,
       loaded: false,
       fileTooLarge: !this.fileSizeChecker.check(),
-      fileSize: this.fileSizeChecker.fileSizeFormatted(),
+      fileSizeInfo: {
+        fileSize: this.file.size,
+        fileSizeFormatted: this.fileSizeChecker.fileSizeFormatted(),
+        maxFileSizeFormatted: this.fileSizeChecker.maxFileSizeFormatted(),
+        diffFormatted: this.fileSizeChecker.fileSizeDiffFormatted(),
+      },
     });
   }
 
@@ -235,6 +252,14 @@ export class FileWrapper {
   }
   public getData() {
     return this.analyzedFile$.getValue().data;
+  }
+
+  public getFileSizeInfo() {
+    return {
+      fileSizeFormatted: this.fileSizeChecker.fileSizeFormatted(),
+      maxFileSizeFormatted: this.fileSizeChecker.maxFileSizeFormatted(),
+      diffFormatted: this.fileSizeChecker.fileSizeDiffFormatted(),
+    };
   }
 
   public async import(index: string, mappings: MappingTypeMapping, pipelineId: string | undefined) {

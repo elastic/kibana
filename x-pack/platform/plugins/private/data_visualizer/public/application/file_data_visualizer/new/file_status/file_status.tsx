@@ -31,7 +31,7 @@ import { AnalysisOverrides } from './analysis_overrides';
 import { useFileUploadContext } from '../use_file_upload';
 import { FieldsStatsGrid } from '../../../common/components/fields_stats_grid';
 import { FileContents } from './file_contents';
-import { FileCouldNotBeRead } from './file_error_callouts';
+import { FileCouldNotBeRead, FileTooLarge } from './file_error_callouts';
 import { AnalysisSummary } from './analysis_summary';
 import { Failures } from './failures';
 
@@ -63,7 +63,6 @@ export const FileStatus: FC<Props> = ({
     useFileUploadContext();
 
   const fileStatus = filesStatus[index];
-  const autoExpand = filesStatus.length === 1;
   const fileClash = uploadStatus.fileClashes[index] ?? {
     clash: false,
   };
@@ -83,10 +82,19 @@ export const FileStatus: FC<Props> = ({
   `;
 
   useEffect(() => {
-    if (fileStatus.analysisError !== undefined || (autoExpand && fileStatus.results !== null)) {
+    if (
+      fileStatus.analysisError !== undefined ||
+      fileStatus.fileTooLarge ||
+      (filesStatus.length === 1 && fileStatus.results !== null)
+    ) {
       setExpanded(true);
     }
-  }, [autoExpand, fileStatus]);
+  }, [fileStatus, filesStatus.length]);
+
+  const showResults =
+    fileStatus.results !== null &&
+    fileStatus.analysisError === undefined &&
+    fileStatus.fileTooLarge === false;
 
   return (
     <>
@@ -113,7 +121,7 @@ export const FileStatus: FC<Props> = ({
                 <>
                   <EuiText size="xs">
                     <span css={{ fontWeight: 'bold' }}>{fileStatus.fileName}</span>{' '}
-                    <span>{fileStatus.fileSize}</span>
+                    <span>{fileStatus.fileSizeInfo.fileSize}</span>
                   </EuiText>
 
                   <FileClashResult fileClash={fileClash} />
@@ -132,7 +140,7 @@ export const FileStatus: FC<Props> = ({
               }
               paddingSize="s"
             >
-              {fileStatus.results ? (
+              {showResults ? (
                 <>
                   <EuiTabs size="s">
                     {(lite && showFileSummary) || lite === false ? (
@@ -276,6 +284,12 @@ export const FileStatus: FC<Props> = ({
                       analyzeFileWithOverrides={fileUploadManager.analyzeFileWithOverrides(index)}
                     />
                   ) : null}
+                </>
+              ) : null}
+
+              {fileStatus.fileTooLarge ? (
+                <>
+                  <FileTooLarge fileStatus={fileStatus} />{' '}
                 </>
               ) : null}
             </EuiAccordion>

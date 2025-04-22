@@ -189,6 +189,8 @@ export class FileUploadManager {
           mappingsOk = mappingsOk && existingIndexChecks.mappingClashes.length === 0;
         }
 
+        const fileSizesOk = statuses.every((status) => status.fileTooLarge === false);
+
         if (mappingsOk && formatsOk) {
           this.updateMappings(mergedMappings);
           this.addSemanticTextField();
@@ -199,7 +201,7 @@ export class FileUploadManager {
             formatsOk === false
               ? fileClashes
               : getMappingClashInfo(mappingClashes, existingIndexChecks, statuses),
-          analysisStatus: mappingsOk && formatsOk ? STATUS.COMPLETED : STATUS.FAILED,
+          analysisStatus: mappingsOk && formatsOk && fileSizesOk ? STATUS.COMPLETED : STATUS.FAILED,
           pipelinesJsonValid: this.allPipelinesValid(),
         });
       }

@@ -12,16 +12,14 @@ import React from 'react';
 import { EuiCallOut, EuiSpacer, EuiButtonEmpty, EuiHorizontalRule } from '@elastic/eui';
 
 import type { FindFileStructureErrorResponse } from '@kbn/file-upload-plugin/common';
-import type { FileSizeChecker } from '../file_manager/file_size_check';
+import type { FileAnalysis } from '../file_manager/file_wrapper';
 
-interface FileTooLargeProps {
-  fileSizeChecker: FileSizeChecker;
+interface Props {
+  fileStatus: FileAnalysis;
 }
 
-export const FileTooLarge: FC<FileTooLargeProps> = ({ fileSizeChecker }) => {
-  // this should still be used !!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  const fileSizeFormatted = fileSizeChecker.fileSizeFormatted();
-  const maxFileSizeFormatted = fileSizeChecker.maxFileSizeFormatted();
+export const FileTooLarge: FC<Props> = ({ fileStatus }) => {
+  const { diffFormatted, maxFileSizeFormatted, fileSizeFormatted } = fileStatus.fileSizeInfo;
 
   // Format the byte values, using the second format if the difference between
   // the file size and the max is so small that the formatted values are identical
@@ -42,7 +40,6 @@ export const FileTooLarge: FC<FileTooLargeProps> = ({ fileSizeChecker }) => {
       </p>
     );
   } else {
-    const diffFormatted = fileSizeChecker.fileSizeDiffFormatted();
     errorText = (
       <p>
         <FormattedMessage
