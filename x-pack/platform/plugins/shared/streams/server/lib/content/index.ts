@@ -5,14 +5,5 @@
  * 2.0.
  */
 
-export function getApmTraceUrl({
-  traceId,
-  rangeFrom,
-  rangeTo,
-}: {
-  traceId: string;
-  rangeFrom: string;
-  rangeTo: string;
-}) {
-  return `/link-to/trace/${traceId}?` + new URLSearchParams({ rangeFrom, rangeTo }).toString();
-}
+export * from './archive';
+export * from './saved_object';
