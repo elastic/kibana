@@ -6,7 +6,7 @@
  */
 
 import type { Registry, WorkflowDefinition } from '@kbn/wc-framework-types-server';
-import { SimpleRegistry } from '../utils';
+import { SimpleRegistry } from '../../framework/utils';
 
 export type WorkflowRegistry = Registry<WorkflowDefinition>;
 
