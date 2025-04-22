@@ -68,6 +68,9 @@ const useInstallationStatusStyles = () => {
       background-color: ${isDarkMode ? euiTheme.colors.success : successBackgroundColor};
       color: ${isDarkMode ? euiTheme.colors.emptyShade : euiTheme.colors.textSuccess};
     `,
+    compressedInstallationStatusIcon: css`
+      color: ${isDarkMode ? euiTheme.colors.emptyShade : euiTheme.colors.textSuccess};
+    `,
     installationStatusCallout: css`
       padding: ${euiTheme.size.s} ${euiTheme.size.m};
       text-align: center;
@@ -103,7 +106,7 @@ export const InstallationStatus: React.FC<InstallationStatusProps> = React.memo(
     return shouldShowInstallationStatus({ installStatus, showInstallationStatus }) ? (
       compressed ? (
         <div className={cardPanelClassName}>
-          <EuiIcon type="checkInCircleFilled" color={euiTheme.colors.success} />
+          <EuiIcon type="checkInCircleFilled" className={styles.compressedInstallationStatusIcon} />
         </div>
       ) : (
         <div className={cardPanelClassName}>
