@@ -1101,6 +1101,7 @@
     }
   },
   "epm-packages": {
+    "dynamic": false,
     "properties": {
       "additional_spaces_installed_kibana": {
         "index": false,
@@ -2912,6 +2913,14 @@
       }
     }
   },
+  "privilege-monitoring-status": {
+    "dynamic": false,
+    "properties": {
+      "status": {
+        "type": "keyword"
+      }
+    }
+  },
   "product-doc-install-status": {
     "dynamic": false,
     "properties": {
@@ -3864,7 +3873,7 @@
     }
   },
   "workchat_agent": {
-    "dynamic": "strict",
+    "dynamic": false,
     "properties": {
       "access_control": {
         "properties": {

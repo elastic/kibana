@@ -9,7 +9,7 @@ import { EuiPanel, EuiFlexGroup, EuiFormRow, EuiFieldText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { RoutingDefinition } from '@kbn/streams-schema';
 import React, { useEffect, useRef } from 'react';
-import { ConditionEditor } from '../condition_editor';
+import { RoutingConditionEditor } from '../condition_editor';
 import { ControlBar } from './control_bar';
 
 export function NewRoutingStreamEntry({
@@ -51,8 +51,7 @@ export function NewRoutingStreamEntry({
               }}
             />
           </EuiFormRow>
-          <ConditionEditor
-            isNew
+          <RoutingConditionEditor
             condition={child.if}
             onConditionChange={(condition) => {
               onChildChange({
