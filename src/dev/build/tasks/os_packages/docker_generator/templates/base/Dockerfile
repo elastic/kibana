@@ -96,6 +96,7 @@ RUN microdnf install --setopt=tsflags=nodocs -y \
 {{/ubi}}
 {{#ubuntu}}
 RUN export DEBIAN_FRONTEND=noninteractive && \
+      apt-get update && \
       apt-get install -y --no-install-recommends fontconfig fonts-liberation libnss3 curl ca-certificates && \
       apt-get clean && \
       rm -rf /var/lib/apt/lists/*
