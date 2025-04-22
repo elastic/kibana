@@ -6,17 +6,9 @@
  */
 
 import { manageSLOParamsSchema } from '@kbn/slo-schema';
-import {
-  DefaultSummaryTransformManager,
-  DefaultTransformManager,
-  KibanaSavedObjectsSLORepository,
-} from '../../services';
 import { ManageSLO } from '../../services/manage_slo';
-import { DefaultSummaryTransformGenerator } from '../../services/summary_transform_generator/summary_transform_generator';
-import { createTransformGenerators } from '../../services/transform_generators';
 import { createSloServerRoute } from '../create_slo_server_route';
 import { assertPlatinumLicense } from './utils/assert_platinum_license';
-import { getSpaceId } from './utils/get_space_id';
 
 export const enableSLORoute = createSloServerRoute({
   endpoint: 'POST /api/observability/slos/{id}/enable 2023-10-31',
@@ -27,35 +19,13 @@ export const enableSLORoute = createSloServerRoute({
     },
   },
   params: manageSLOParamsSchema,
-  handler: async ({ request, response, context, params, logger, plugins }) => {
+  handler: async ({ response, request, params, logger, plugins, getScopedClients }) => {
     await assertPlatinumLicense(plugins);
 
-    const spaceId = await getSpaceId(plugins, request);
-    const dataViews = await plugins.dataViews.start();
-    const sloContext = await context.slo;
-    const core = await context.core;
-    const scopedClusterClient = core.elasticsearch.client;
-    const soClient = core.savedObjects.client;
-    const esClient = core.elasticsearch.client.asCurrentUser;
-    const dataViewsService = await dataViews.dataViewsServiceFactory(soClient, esClient);
-    const repository = new KibanaSavedObjectsSLORepository(soClient, logger);
-
-    const transformGenerators = createTransformGenerators(
-      spaceId,
-      dataViewsService,
-      sloContext.isServerless
-    );
-
-    const transformManager = new DefaultTransformManager(
-      transformGenerators,
-      scopedClusterClient,
-      logger
-    );
-    const summaryTransformManager = new DefaultSummaryTransformManager(
-      new DefaultSummaryTransformGenerator(),
-      scopedClusterClient,
-      logger
-    );
+    const { repository, transformManager, summaryTransformManager } = await getScopedClients({
+      request,
+      logger,
+    });
 
     const manageSLO = new ManageSLO(repository, transformManager, summaryTransformManager);
 
