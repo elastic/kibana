@@ -36,10 +36,4 @@ yarn genai_evals:runner:ess
 Navigate to [BuildKite](https://buildkite.com/elastic?filter=ftr-security-solution-gen-ai-evaluations) and run `ftr-security-solution-gen-ai-evaluations` pipeline.
 
 ### To manually run on BuildKite for specific PR:
-In `.buildkite/ftr_security_stateful_configs.yml`, temporarily move the `genai/evaluations/trial_license_complete_tier/configs/ess.config.ts` line down to the `enabled` section. Will see if we can do this without requiring a commit. @elastic/kibana-operations is it possible to set a buildkite env var that can be read in FTR tests when a specific GitHub label is added to the PR? I.e. can I create a `SecurityGenAI:Run Evals` label that when added will run this suite as part of the build?
-
-
-
-
-
-
+Add `ci:security-genai-run-evals` label to PR
