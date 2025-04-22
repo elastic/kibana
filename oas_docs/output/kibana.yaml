@@ -1333,6 +1333,20 @@ paths:
                     description: The owner of the API key that is associated with the rule and used to run background tasks.
                     nullable: true
                     type: string
+                  artifacts:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      dashboards:
+                        items:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                          required:
+                            - id
+                        type: array
                   consumer:
                     description: 'The name of the application or feature that owns the rule. For example: `alerts`, `apm`, `discover`, `infrastructure`, `logs`, `metrics`, `ml`, `monitoring`, `securitySolution`, `siem`, `stackAlerts`, or `uptime`.'
                     type: string
@@ -2152,6 +2166,20 @@ paths:
                       type: number
                   required:
                     - active
+                artifacts:
+                  additionalProperties: false
+                  type: object
+                  properties:
+                    dashboards:
+                      items:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          id:
+                            type: string
+                        required:
+                          - id
+                      type: array
                 consumer:
                   description: 'The name of the application or feature that owns the rule. For example: `alerts`, `apm`, `discover`, `infrastructure`, `logs`, `metrics`, `ml`, `monitoring`, `securitySolution`, `siem`, `stackAlerts`, or `uptime`.'
                   type: string
@@ -2682,6 +2710,20 @@ paths:
                     description: The owner of the API key that is associated with the rule and used to run background tasks.
                     nullable: true
                     type: string
+                  artifacts:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      dashboards:
+                        items:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                          required:
+                            - id
+                        type: array
                   consumer:
                     description: 'The name of the application or feature that owns the rule. For example: `alerts`, `apm`, `discover`, `infrastructure`, `logs`, `metrics`, `ml`, `monitoring`, `securitySolution`, `siem`, `stackAlerts`, or `uptime`.'
                     type: string
@@ -3377,6 +3419,20 @@ paths:
                       type: number
                   required:
                     - active
+                artifacts:
+                  additionalProperties: false
+                  type: object
+                  properties:
+                    dashboards:
+                      items:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          id:
+                            type: string
+                        required:
+                          - id
+                      type: array
                 flapping:
                   additionalProperties: false
                   description: When flapping detection is turned on, alerts that switch quickly between active and recovered states are identified as “flapping” and notifications are reduced.
@@ -3668,6 +3724,20 @@ paths:
                     description: The owner of the API key that is associated with the rule and used to run background tasks.
                     nullable: true
                     type: string
+                  artifacts:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      dashboards:
+                        items:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                          required:
+                            - id
+                        type: array
                   consumer:
                     description: 'The name of the application or feature that owns the rule. For example: `alerts`, `apm`, `discover`, `infrastructure`, `logs`, `metrics`, `ml`, `monitoring`, `securitySolution`, `siem`, `stackAlerts`, or `uptime`.'
                     type: string
@@ -5057,6 +5127,20 @@ paths:
                     description: The owner of the API key that is associated with the rule and used to run background tasks.
                     nullable: true
                     type: string
+                  artifacts:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      dashboards:
+                        items:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                          required:
+                            - id
+                        type: array
                   consumer:
                     description: 'The name of the application or feature that owns the rule. For example: `alerts`, `apm`, `discover`, `infrastructure`, `logs`, `metrics`, `ml`, `monitoring`, `securitySolution`, `siem`, `stackAlerts`, or `uptime`.'
                     type: string
@@ -18919,6 +19003,16 @@ paths:
                           additionalProperties: false
                           type: object
                           properties:
+                            cloud_connectors:
+                              additionalProperties: false
+                              type: object
+                              properties:
+                                enabled:
+                                  type: boolean
+                                target_csp:
+                                  type: string
+                              required:
+                                - enabled
                             resources:
                               additionalProperties: false
                               type: object
@@ -19591,6 +19685,16 @@ paths:
                   additionalProperties: false
                   type: object
                   properties:
+                    cloud_connectors:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        enabled:
+                          type: boolean
+                        target_csp:
+                          type: string
+                      required:
+                        - enabled
                     resources:
                       additionalProperties: false
                       type: object
@@ -19802,6 +19906,16 @@ paths:
                         additionalProperties: false
                         type: object
                         properties:
+                          cloud_connectors:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              enabled:
+                                type: boolean
+                              target_csp:
+                                type: string
+                            required:
+                              - enabled
                           resources:
                             additionalProperties: false
                             type: object
@@ -20493,6 +20607,16 @@ paths:
                           additionalProperties: false
                           type: object
                           properties:
+                            cloud_connectors:
+                              additionalProperties: false
+                              type: object
+                              properties:
+                                enabled:
+                                  type: boolean
+                                target_csp:
+                                  type: string
+                              required:
+                                - enabled
                             resources:
                               additionalProperties: false
                               type: object
@@ -21163,6 +21287,16 @@ paths:
                         additionalProperties: false
                         type: object
                         properties:
+                          cloud_connectors:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              enabled:
+                                type: boolean
+                              target_csp:
+                                type: string
+                            required:
+                              - enabled
                           resources:
                             additionalProperties: false
                             type: object
@@ -21833,6 +21967,16 @@ paths:
                   additionalProperties: false
                   type: object
                   properties:
+                    cloud_connectors:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        enabled:
+                          type: boolean
+                        target_csp:
+                          type: string
+                      required:
+                        - enabled
                     resources:
                       additionalProperties: false
                       type: object
@@ -22046,6 +22190,16 @@ paths:
                         additionalProperties: false
                         type: object
                         properties:
+                          cloud_connectors:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              enabled:
+                                type: boolean
+                              target_csp:
+                                type: string
+                            required:
+                              - enabled
                           resources:
                             additionalProperties: false
                             type: object
@@ -22736,6 +22890,16 @@ paths:
                         additionalProperties: false
                         type: object
                         properties:
+                          cloud_connectors:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              enabled:
+                                type: boolean
+                              target_csp:
+                                type: string
+                            required:
+                              - enabled
                           resources:
                             additionalProperties: false
                             type: object
@@ -51877,14 +52041,51 @@ paths:
         content:
           application/json:
             schema:
-              anyOf:
-                - additionalProperties: false
-                  type: object
-                  properties: {}
-                - enum:
-                    - 'null'
-                  nullable: true
-                - not: {}
+              additionalProperties: false
+              type: object
+              properties:
+                description:
+                  type: string
+                include:
+                  anyOf:
+                    - additionalProperties: false
+                      type: object
+                      properties:
+                        objects:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            dashboards:
+                              items:
+                                type: string
+                              type: array
+                          required:
+                            - dashboards
+                      required:
+                        - objects
+                    - additionalProperties: false
+                      type: object
+                      properties:
+                        all:
+                          additionalProperties: false
+                          type: object
+                          properties: {}
+                      required:
+                        - all
+                name:
+                  type: string
+                replaced_patterns:
+                  items:
+                    type: string
+                  type: array
+                version:
+                  type: string
+              required:
+                - name
+                - description
+                - version
+                - replaced_patterns
+                - include
       responses: {}
       summary: Export stream content
       tags:
@@ -51914,7 +52115,10 @@ paths:
               type: object
               properties:
                 content: {}
+                include:
+                  type: string
               required:
+                - include
                 - content
       responses: {}
       summary: Import content into a stream
