@@ -7,14 +7,12 @@
 
 import React from 'react';
 import { useBreadcrumb } from '../hooks/use_breadcrumbs';
-import { useIntegrationList } from '../hooks/use_integration_list';
 import { IntegrationActiveView } from '../components/integrations/listing/integration_active_view';
 import { IntegrationCatalogView } from '../components/integrations/listing/integration_catalog_view';
 
 export const WorkChatIntegrationsPage: React.FC = () => {
   useBreadcrumb([{ text: 'Integrations' }]);
-  const { integrations } = useIntegrationList();
-  return <IntegrationActiveView integrations={integrations} />;
+  return <IntegrationActiveView  />;
 };
 
 export const WorkChatCatalogPage: React.FC = () => {
