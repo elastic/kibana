@@ -19,7 +19,7 @@ class VaultUnavailableError extends Error {
 class VaultTimedOutError extends Error {
   constructor(cause: Error) {
     super(
-      `Vault timed out. Make sure you are connected to the VPN. See https://docs.elastic.dev/vault.`,
+      `Vault timed out. Make sure you are connected to the VPN if this is needed for the specified Vault cluster. See https://docs.elastic.dev/vault.`,
       { cause }
     );
   }
