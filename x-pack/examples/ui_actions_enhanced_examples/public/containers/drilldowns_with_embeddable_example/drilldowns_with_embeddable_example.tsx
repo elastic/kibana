@@ -95,7 +95,7 @@ export const DrilldownsWithEmbeddableExample: React.FC = () => {
         <EuiFlexItem grow={false}>{openManagerButton}</EuiFlexItem>
         <EuiFlexItem grow={false}>
           <div style={{ maxWidth: 200 }}>
-            <EmbeddableRenderer<{}>
+            <EmbeddableRenderer
               type={BUTTON_EMBEDDABLE}
               getParentApi={() => ({
                 getSerializedStateForChild: () => undefined,
