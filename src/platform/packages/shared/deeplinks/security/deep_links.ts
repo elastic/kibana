@@ -80,6 +80,8 @@ export enum SecurityPageName {
   usersAuthentications = 'users-authentications',
   usersEvents = 'users-events',
   usersRisk = 'users-risk',
+  entityAnalytics = 'entity_analytics',
+  privilegedUserMonitoring = 'privileged_user_monitoring',
   entityAnalytics = 'entity_analytics', // This is the first Entity Analytics page, that is why the name is too generic.
   entityAnalyticsManagement = 'entity_analytics-management',
   entityAnalyticsAssetClassification = 'entity_analytics-asset-classification',

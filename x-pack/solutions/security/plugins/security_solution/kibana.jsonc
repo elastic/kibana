@@ -59,7 +59,8 @@
       "inference",
       "discoverShared",
       "productDocBase",
-      "telemetry"
+      "telemetry",
+      "unifiedHistogram"
     ],
     "optionalPlugins": [
       "encryptedSavedObjects",

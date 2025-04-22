@@ -31,7 +31,7 @@ export const DEFAULT_ACTIONS: VisualizationContextMenuActions[] = [
   VisualizationContextMenuActions.addToNewCase,
   VisualizationContextMenuActions.addToExistingCase,
   VisualizationContextMenuActions.saveToLibrary,
-  VisualizationContextMenuActions.openInLens,
+  // VisualizationContextMenuActions.openInLens,
 ];
 
 export const INSPECT_ACTION: VisualizationContextMenuActions[] = [
