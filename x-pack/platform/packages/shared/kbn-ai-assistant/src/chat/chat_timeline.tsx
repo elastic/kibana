@@ -22,6 +22,7 @@ import type { UseKnowledgeBaseResult } from '../hooks/use_knowledge_base';
 import { ChatItem } from './chat_item';
 import { ChatConsolidatedItems } from './chat_consolidated_items';
 import { getTimelineItemsfromConversation } from '../utils/get_timeline_items_from_conversation';
+import { useKibana } from '../hooks/use_kibana';
 export interface ChatTimelineItem
   extends Pick<Message['message'], 'role' | 'content' | 'function_call'> {
   id: string;
@@ -120,6 +121,11 @@ export function ChatTimeline({
   onActionClick,
   chatState,
 }: ChatTimelineProps) {
+  const {
+    services: {
+      observabilityAIAssistant: { enableAnonymization },
+    },
+  } = useKibana();
   const items = useMemo(() => {
     const timelineItems = getTimelineItemsfromConversation({
       conversationId,
@@ -140,7 +146,7 @@ export function ChatTimeline({
       const { role, content, detectedEntities } = item.message.message;
       if (item.display.hide || !item) continue;
 
-      if (role === 'user' && content && detectedEntities) {
+      if (enableAnonymization && role === 'user' && content && detectedEntities) {
         item.anonymizedHighlightedContent = highlightContent(content, detectedEntities);
       }
 
@@ -168,6 +174,7 @@ export function ChatTimeline({
     isConversationOwnedByCurrentUser,
     isArchived,
     onActionClick,
+    enableAnonymization,
   ]);
 
   return (

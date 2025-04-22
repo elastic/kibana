@@ -136,6 +136,7 @@ export type ChatRegistrationRenderFunction = ({}: {
 
 export interface ConfigSchema {
   scope?: AssistantScope;
+  enableAnonymization: boolean;
 }
 
 export interface ObservabilityAIAssistantPluginSetupDependencies {
@@ -160,4 +161,5 @@ export interface ObservabilityAIAssistantPublicStart {
   useChat: typeof useChat;
   getContextualInsightMessages: ({}: { message: string; instructions: string }) => Message[];
   createScreenContextAction: typeof createScreenContextAction;
+  enableAnonymization: boolean;
 }

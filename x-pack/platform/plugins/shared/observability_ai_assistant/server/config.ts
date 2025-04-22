@@ -11,6 +11,7 @@ export const config = schema.object({
   enabled: schema.boolean({ defaultValue: true }),
   scope: schema.maybe(schema.oneOf([schema.literal('observability'), schema.literal('search')])),
   enableKnowledgeBase: schema.boolean({ defaultValue: true }),
+  enableAnonymization: schema.boolean({ defaultValue: false }),
   disableKbSemanticTextMigration: schema.boolean({ defaultValue: false }),
 });
 

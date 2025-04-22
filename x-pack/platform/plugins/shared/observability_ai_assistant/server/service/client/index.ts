@@ -177,6 +177,9 @@ export class ObservabilityAIAssistantClient {
     return { unhashedText, detectedEntities };
   }
   async anonymizeMessages(messages: Message[]): Promise<{ anonymizedMessages: Message[] }> {
+    if (!this.dependencies.config.enableAnonymization) {
+      return { anonymizedMessages: messages };
+    }
     const hashMap = buildDetectedEntitiesMap(messages);
 
     for (const message of messages) {
