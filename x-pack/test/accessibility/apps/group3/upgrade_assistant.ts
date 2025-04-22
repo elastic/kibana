@@ -78,8 +78,8 @@ export default function upgradeAssistantPage({ getService, getPageObjects }: Ftr
         // First, make sure either the enableLogsLink or viewDetailsLink is available
         await retry.waitFor('A button to open ES Deprecations flyout to be visible', async () => {
           return (
-            await testSubjects.exists('enableLogsLink') ||
-            await testSubjects.exists('viewDetailsLink')
+            (await testSubjects.exists('enableLogsLink')) ||
+            (await testSubjects.exists('viewDetailsLink'))
           );
         });
 
@@ -107,8 +107,8 @@ export default function upgradeAssistantPage({ getService, getPageObjects }: Ftr
         // First, make sure either the enableLogsLink or viewDetailsLink is available
         await retry.waitFor('A button to open ES Deprecations flyout to be visible', async () => {
           return (
-            await testSubjects.exists('enableLogsLink') ||
-            await testSubjects.exists('viewDetailsLink')
+            (await testSubjects.exists('enableLogsLink')) ||
+            (await testSubjects.exists('viewDetailsLink'))
           );
         });
 
