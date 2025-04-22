@@ -40,11 +40,12 @@ export class StreamsService {
     request: KibanaRequest;
     assetClient: AssetClient;
   }): Promise<StreamsClient> {
-    const [coreStart] = await this.coreSetup.getStartServices();
+    const [coreStart, pluginStart] = await this.coreSetup.getStartServices();
 
     const logger = this.logger;
 
     const scopedClusterClient = coreStart.elasticsearch.client.asScoped(request);
+    const rulesClient = await pluginStart.alerting.getRulesClientWithRequest(request);
 
     const isServerless = coreStart.elasticsearch.getCapabilities().serverless;
 
@@ -58,6 +59,7 @@ export class StreamsService {
       logger,
       scopedClusterClient,
       storageClient: storageAdapter.getClient(),
+      rulesClient,
       request,
       isServerless,
       isDev: this.isDev,

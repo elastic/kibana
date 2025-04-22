@@ -6,12 +6,14 @@
  */
 
 import { DiagnosticResult, errors } from '@elastic/elasticsearch';
+import { isBoom } from '@hapi/boom';
 import {
   IndicesDataStream,
   QueryDslQueryContainer,
   Result,
 } from '@elastic/elasticsearch/lib/api/types';
-import type { IScopedClusterClient, Logger, KibanaRequest } from '@kbn/core/server';
+import { RulesClient } from '@kbn/alerting-plugin/server';
+import type { IScopedClusterClient, KibanaRequest, Logger } from '@kbn/core/server';
 import { isNotFoundError } from '@kbn/es-errors';
 import {
   Condition,
@@ -19,6 +21,7 @@ import {
   StreamUpsertRequest,
   UnwiredStreamDefinition,
   WiredStreamDefinition,
+  asWiredStreamDefinition,
   assertsSchema,
   getAncestors,
   getParentId,
@@ -26,20 +29,22 @@ import {
   isIngestStreamDefinition,
   isWiredStreamDefinition,
   streamDefinitionSchema,
-  asWiredStreamDefinition,
 } from '@kbn/streams-schema';
+import { v5 } from 'uuid';
+import { QueryLink } from '../../../common/assets';
+import { EsqlRuleParams } from '../rules/esql/types';
 import { AssetClient } from './assets/asset_client';
-import { LOGS_ROOT_STREAM_NAME, rootStreamDefinition } from './root_stream_definition';
-import { StreamsStorageClient } from './service';
-import { checkAccess, checkAccessBulk } from './stream_crud';
+import { ASSET_ID, ASSET_TYPE } from './assets/fields';
 import {
   DefinitionNotFoundError,
   isDefinitionNotFoundError,
 } from './errors/definition_not_found_error';
 import { SecurityError } from './errors/security_error';
-import { State } from './state_management/state';
 import { StatusError } from './errors/status_error';
-import { ASSET_ID, ASSET_TYPE } from './assets/fields';
+import { LOGS_ROOT_STREAM_NAME, rootStreamDefinition } from './root_stream_definition';
+import { StreamsStorageClient } from './service';
+import { State } from './state_management/state';
+import { checkAccess, checkAccessBulk } from './stream_crud';
 
 interface AcknowledgeResponse<TResult extends Result> {
   acknowledged: true;
@@ -68,6 +73,10 @@ function wrapEsCall<T>(p: Promise<T>): Promise<T> {
   });
 }
 
+function getRuleId(query: QueryLink) {
+  return v5(query['asset.uuid'], v5.DNS);
+}
+
 export class StreamsClient {
   constructor(
     private readonly dependencies: {
@@ -78,6 +87,7 @@ export class StreamsClient {
       request: KibanaRequest;
       isServerless: boolean;
       isDev: boolean;
+      rulesClient: RulesClient;
     }
   ) {}
 
@@ -220,24 +230,79 @@ export class StreamsClient {
 
     const { dashboards, queries } = request;
 
-    const queryLinks = queries.map((query) => ({
-      [ASSET_ID]: query.id,
-      [ASSET_TYPE]: 'query' as const,
-      query,
-    }));
-
-    await this.dependencies.assetClient.syncAssetList(stream.name, [
+    const { deleted, indexed } = await this.dependencies.assetClient.syncAssetList(stream.name, [
       ...dashboards.map((dashboard) => ({
         [ASSET_ID]: dashboard,
         [ASSET_TYPE]: 'dashboard' as const,
       })),
-      ...queryLinks,
+      ...queries.map((query) => ({
+        [ASSET_ID]: query.id,
+        [ASSET_TYPE]: 'query' as const,
+        query,
+      })),
     ]);
+
+    await this.manageQueries(name, {
+      deleted: deleted.filter((item): item is QueryLink => item[ASSET_TYPE] === 'query'),
+      indexed: indexed.filter((item): item is QueryLink => item[ASSET_TYPE] === 'query'),
+    });
 
     return {
       acknowledged: true,
       result: result.changes.created.includes(name) ? 'created' : 'updated',
     };
+  }
+
+  private async manageQueries(
+    name: string,
+    { deleted, indexed }: { deleted: QueryLink[]; indexed: QueryLink[] }
+  ) {
+    await Promise.all([this.installQueries(name, indexed), this.uninstallQueries(name, deleted)]);
+  }
+
+  private async installQueries(name: string, queries: QueryLink[]) {
+    const { rulesClient } = this.dependencies;
+    await this.uninstallQueries(name, queries);
+
+    await Promise.all(
+      queries.map((query) => {
+        const ruleId = getRuleId(query);
+        return rulesClient.create<EsqlRuleParams>({
+          data: {
+            name: query.query.title,
+            consumer: 'streams',
+            alertTypeId: 'streams.rules.esql',
+            actions: [],
+            params: {
+              timestampField: '@timestamp',
+              query: `FROM ${name} METADATA _id, _source | WHERE KQL(\"\"\"${query.query.kql.query}\"\"\")`,
+            },
+            enabled: true,
+            tags: ['streams'],
+            schedule: {
+              interval: '1m',
+            },
+          },
+          options: {
+            id: ruleId,
+          },
+        });
+      })
+    );
+  }
+
+  private async uninstallQueries(name: string, queries: QueryLink[]) {
+    if (queries.length === 0) {
+      return;
+    }
+
+    const { rulesClient } = this.dependencies;
+    await rulesClient.bulkDeleteRules({ ids: queries.map(getRuleId) }).catch((error) => {
+      if (isBoom(error) && error.output.statusCode === 400) {
+        return;
+      }
+      throw error;
+    });
   }
 
   /**

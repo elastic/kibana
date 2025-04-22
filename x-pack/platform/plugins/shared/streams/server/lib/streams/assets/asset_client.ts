@@ -140,7 +140,7 @@ interface AssetBulkDeleteOperation {
 }
 
 function fromStorage(link: StoredAssetLink): AssetLink {
-  if (link['asset.type'] === 'query') {
+  if (link[ASSET_TYPE] === 'query') {
     return {
       ...link,
       query: {
@@ -157,7 +157,7 @@ function fromStorage(link: StoredAssetLink): AssetLink {
 
 function toStorage(name: string, request: AssetLinkRequest): StoredAssetLink {
   const link = toAssetLink(name, request);
-  if (link['asset.type'] === 'query') {
+  if (link[ASSET_TYPE] === 'query') {
     const { query, ...rest } = link;
     return {
       ...rest,
