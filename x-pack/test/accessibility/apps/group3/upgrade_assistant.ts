@@ -75,9 +75,15 @@ export default function upgradeAssistantPage({ getService, getPageObjects }: Ftr
       });
 
       it('with logs collection disabled', async () => {
-        await retry.try(async () => {
-          await PageObjects.upgradeAssistant.clickOpenEsDeprecationsFlyoutButton();
+        // First, make sure either the enableLogsLink or viewDetailsLink is available
+        await retry.waitFor('A button to open ES Deprecations flyout to be visible', async () => {
+          return (
+            await testSubjects.exists('enableLogsLink') ||
+            await testSubjects.exists('viewDetailsLink')
+          );
         });
+
+        await PageObjects.upgradeAssistant.clickOpenEsDeprecationsFlyoutButton();
 
         // Add additional retry and wait for flyout to be fully visible
         await retry.waitFor('Deprecation logging flyout to be visible', async () => {
@@ -98,9 +104,15 @@ export default function upgradeAssistantPage({ getService, getPageObjects }: Ftr
       });
 
       it('with logs collection enabled', async () => {
-        await retry.try(async () => {
-          await PageObjects.upgradeAssistant.clickOpenEsDeprecationsFlyoutButton();
+        // First, make sure either the enableLogsLink or viewDetailsLink is available
+        await retry.waitFor('A button to open ES Deprecations flyout to be visible', async () => {
+          return (
+            await testSubjects.exists('enableLogsLink') ||
+            await testSubjects.exists('viewDetailsLink')
+          );
         });
+
+        await PageObjects.upgradeAssistant.clickOpenEsDeprecationsFlyoutButton();
 
         // Add additional retry and wait for flyout to be fully visible
         await retry.waitFor('Deprecation logging flyout to be visible', async () => {
