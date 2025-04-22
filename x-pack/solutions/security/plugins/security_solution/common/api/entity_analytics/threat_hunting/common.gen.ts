@@ -39,9 +39,14 @@ export const ThreatHuntingQuery = z.object({
   queries: z.array(ThreatHuntingQueryQuery),
 });
 
+export type ThreatHuntingQueryIndexStatus = z.infer<typeof ThreatHuntingQueryIndexStatus>;
+export const ThreatHuntingQueryIndexStatus = z.enum(['all', 'some', 'none', 'unknown']);
+export type ThreatHuntingQueryIndexStatusEnum = typeof ThreatHuntingQueryIndexStatus.enum;
+export const ThreatHuntingQueryIndexStatusEnum = ThreatHuntingQueryIndexStatus.enum;
+
 export type ThreatHuntingQueryWithIndexCheck = z.infer<typeof ThreatHuntingQueryWithIndexCheck>;
 export const ThreatHuntingQueryWithIndexCheck = z
   .object({
-    indicesExist: z.boolean(),
+    indexStatus: ThreatHuntingQueryIndexStatus.optional(),
   })
   .merge(ThreatHuntingQuery);

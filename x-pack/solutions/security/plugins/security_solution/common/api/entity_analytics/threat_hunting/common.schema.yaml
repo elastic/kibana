@@ -75,6 +75,13 @@ components:
             type: string
         cleanedQuery:
           type: string
+    ThreatHuntingQueryIndexStatus:
+      type: string
+      enum:
+        - all
+        - some
+        - none
+        - unknown
 
     ThreatHuntingQueryWithIndexCheck:
       allOf:
@@ -82,7 +89,7 @@ components:
           required:
             - indicesExist
           properties:
-            indicesExist:
-              type: boolean
+            indexStatus:
+              $ref: '#/components/schemas/ThreatHuntingQueryIndexStatus'
         - $ref: '#/components/schemas/ThreatHuntingQuery'
       

@@ -21,17 +21,17 @@ import { ThreatHuntingQueryWithIndexCheck } from './common.gen';
 export type ThreatHuntingListRequestQuery = z.infer<typeof ThreatHuntingListRequestQuery>;
 export const ThreatHuntingListRequestQuery = z.object({
   /**
-   * Page number for pagination
+   * result size
    */
-  page: z.coerce.number().int().optional(),
+  size: z.coerce.number().int().optional(),
   /**
-   * Number of items per page
+   * Sort field
    */
-  perPage: z.coerce.number().int().optional(),
+  sortField: z.string().optional(),
   /**
-   * Sort order for the results
+   * Sort order
    */
-  sort: z.string().optional(),
+  sortOrder: z.enum(['asc', 'desc']).optional(),
   /**
    * Kuery string for filtering results
    */
@@ -41,6 +41,5 @@ export type ThreatHuntingListRequestQueryInput = z.input<typeof ThreatHuntingLis
 
 export type ThreatHuntingListResponse = z.infer<typeof ThreatHuntingListResponse>;
 export const ThreatHuntingListResponse = z.object({
-  total: z.number().int(),
   queries: z.array(ThreatHuntingQueryWithIndexCheck),
 });

@@ -6,6 +6,11 @@
  */
 
 import { useMemo } from 'react';
+import { THREAT_HUNTING_PUBLIC_LIST_URL } from '../../../common/entity_analytics/threat_hunting/constants';
+import type {
+  ThreatHuntingListRequestQuery,
+  ThreatHuntingListResponse,
+} from '../../../common/api/entity_analytics/threat_hunting/list.gen';
 import {
   ENTITY_STORE_INTERNAL_PRIVILEGES_URL,
   LIST_ENTITIES_URL,
@@ -284,7 +289,15 @@ export const useEntityAnalyticsRoutes = () => {
       });
     };
 
+    const listThreatHuntingQueries = (params: ThreatHuntingListRequestQuery) =>
+      http.fetch<ThreatHuntingListResponse>(THREAT_HUNTING_PUBLIC_LIST_URL, {
+        version: API_VERSIONS.public.v1,
+        method: 'POST',
+        query: params,
+      });
+
     return {
+      listThreatHuntingQueries,
       fetchRiskScorePreview,
       fetchRiskEngineStatus,
       initRiskEngine,

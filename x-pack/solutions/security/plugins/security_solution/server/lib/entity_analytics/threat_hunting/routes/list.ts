@@ -53,7 +53,7 @@ export const listThreatHuntingQueriesRoute = (
 
           return response.ok({ body });
         } catch (e) {
-          logger.error('Error in list threat hunting queries:', e);
+          logger.error(`Error in list threat hunting queries: ${JSON.stringify(e)}`);
           const error = transformError(e);
           return siemResponse.error({
             statusCode: error.statusCode,

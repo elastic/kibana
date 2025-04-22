@@ -11,24 +11,25 @@ paths:
       operationId: ThreatHuntingList
       summary: List threat hunting queries
       parameters:
-        - name: page
+        - name: size
           in: query
-          description: Page number for pagination
+          description: result size
           required: false
           schema:
             type: integer
-        - name: perPage
+        - name: sortField
           in: query
-          description: Number of items per page
-          required: false
-          schema:
-            type: integer
-        - name: sort
-          in: query
-          description: Sort order for the results
+          description: Sort field
           required: false
           schema:
             type: string
+        - name: sortOrder
+          in: query
+          description: Sort order
+          required: false
+          schema:
+            type: string
+            enum: [asc, desc]
         - name: kuery
           in: query
           description: Kuery string for filtering results
@@ -47,8 +48,6 @@ paths:
                   - total
                   - queries
                 properties:
-                  total:
-                    type: integer
                   queries:
                     type: array
                     items:

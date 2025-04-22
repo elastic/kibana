@@ -4,19 +4,21 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { ESFilter } from '@kbn/es-types';
-import type { SearchRequest, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import type { AuditLogger } from '@kbn/security-plugin-types-server';
-import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import _ from 'lodash';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type {
   ThreatHuntingQuery,
+  ThreatHuntingQueryIndexStatus,
   ThreatHuntingQueryQuery,
   ThreatHuntingQueryWithIndexCheck,
 } from '../../../../common/api/entity_analytics/threat_hunting/common.gen';
 import type { ThreatHuntingListResponse } from '../../../../common/api/entity_analytics/threat_hunting/list.gen';
-import type { ThreatHuntingQueryEsDoc } from '../../../../common/entity_analytics/threat_hunting/types';
+import type {
+  ThreatHuntingQueryESQLResult,
+  ThreatHuntingQueryEsDoc,
+} from '../../../../common/entity_analytics/threat_hunting/types';
 
 interface ThreatHuntingQueriesClientOpts {
   logger: Logger;
@@ -33,101 +35,193 @@ const INDEX_STATUS_CHECK_CACHE_STALE_AFTER_MS = 1000 * 60 * 5; // 5 minutes
 export class ThreatHuntingQueriesDataClient {
   constructor(private readonly options: ThreatHuntingQueriesClientOpts) {}
 
-  // uuid is used to identify the query
-  // true if there is data in the query indices
-  private queryDataStatusCache: Map<string, boolean> = new Map();
+  /**
+   * Initializes the cache index in Elasticsearch to store query status information
+   * @returns Promise resolving to true if index was created or already existed
+   */
+  private async initialiseCacheIndex(): Promise<boolean> {
+    const cacheIndexName = this.getCacheIndexName();
+    try {
+      // Check if index already exists
+      const indexExists = await this.options.esClient.indices.exists({
+        index: cacheIndexName,
+      });
+
+      if (indexExists) {
+        this.options.logger.debug(`Cache index ${cacheIndexName} already exists`);
+        return true;
+      }
+
+      // Create index with appropriate mappings
+      await this.options.esClient.indices.create({
+        index: cacheIndexName,
+        mappings: {
+          properties: {
+            uuid: { type: 'keyword' },
+            index_status: { type: 'keyword' },
+            index_status_numeric_sort: { type: 'integer' },
+          },
+        },
+        settings: {
+          'index.mode': 'lookup',
+        },
+      });
+
+      this.options.logger.debug(`Cache index ${cacheIndexName} created successfully`);
+
+      return true;
+    } catch (error) {
+      this.options.logger.error(`Failed to initialise cache index: ${error}`);
+      return false;
+    }
+  }
+
+  private indexStatusToNumericSort(indexStatus: ThreatHuntingQueryIndexStatus): number {
+    switch (indexStatus) {
+      case 'all':
+        return 1;
+      case 'some':
+        return 2;
+      case 'none':
+        return 3;
+      case 'unknown':
+        return 4;
+      default:
+        return 5; // Fallback for any unexpected status
+    }
+  }
+
+  private async batchUpdateCacheIndex(
+    records: Array<{ uuid: string; indexStatus: ThreatHuntingQueryIndexStatus }>
+  ): Promise<void> {
+    const cacheIndexName = this.getCacheIndexName();
+    const bulkBody: string[] = [];
+
+    records.forEach(({ uuid, indexStatus }) => {
+      bulkBody.push(
+        JSON.stringify({ update: { _index: cacheIndexName, _id: uuid } }),
+        JSON.stringify({
+          doc: {
+            uuid,
+            index_status: indexStatus,
+            index_status_numeric_sort: this.indexStatusToNumericSort(indexStatus),
+          },
+          doc_as_upsert: true,
+        })
+      );
+    });
+
+    await this.options.esClient.bulk({
+      body: bulkBody,
+      refresh: 'wait_for',
+    });
+  }
 
   private lastQueryStatusCacheUpdate: number = 0;
 
   private isCacheUpdateInProgress = false;
-  /**
-   *
-   * A general method for searching asset criticality records.
-   * @param query an ESL query to filter criticality results
-   * @param size the maximum number of records to return. Cannot exceed {@link MAX_CRITICALITY_RESPONSE_SIZE}. If unspecified, will default to {@link DEFAULT_CRITICALITY_RESPONSE_SIZE}.
-   * @returns criticality records matching the query
-   */
-  public async search({
+
+  private async searchByQueryDsl({
     query,
     size = DEFAULT_RESPONSE_SIZE,
-    from,
-    sort = ['@timestamp'], // without a default sort order the results are not deterministic which makes testing hard
+    sortField = '@timestamp',
+    sortOrder = 'desc',
   }: {
-    query: ESFilter;
+    query?: QueryDslQueryContainer;
     size?: number;
-    from?: number;
-    sort?: SearchRequest['sort'];
+    sortField?: string;
+    sortOrder?: 'asc' | 'desc';
   }): Promise<ThreatHuntingListResponse> {
-    // Check if the query status cache needs to be updated
-    await this.maybeUpdateQueryStatusCache();
+    const { hits } = await this.options.esClient.search<ThreatHuntingQueryEsDoc>({
+      index: this.getIndex(),
+      size,
+      sort: [{ [sortField]: { order: sortOrder } }],
+      query,
+    });
 
-    try {
-      const response = await this.options.esClient.search<ThreatHuntingQueryEsDoc>({
-        index: this.getIndex(),
-        ignore_unavailable: true,
-        query,
-        size: Math.min(size, MAX_RESPONSE_SIZE),
-        from,
-        sort,
-      });
-
-      return this.formatSearchResponse(response);
-    } catch (error) {
-      this.options.logger.error(`Error searching threat hunting queries: ${error}`);
-      throw error;
-    }
+    return {
+      queries: hits.hits.map((hit) =>
+        this.esResultToThreatHuntingQuery(hit._source as ThreatHuntingQueryEsDoc)
+      ),
+    };
   }
 
   public async searchByKuery({
     kuery,
-    size,
-    from,
-    sort,
+    size = DEFAULT_RESPONSE_SIZE,
+    sortField = 'index_status',
+    sortOrder = 'asc',
   }: {
     kuery?: string;
     size?: number;
-    from?: number;
-    sort?: SearchRequest['sort'];
-  }) {
-    const query = kuery ? toElasticsearchQuery(fromKueryExpression(kuery)) : { match_all: {} };
+    sortField?: string;
+    sortOrder?: 'asc' | 'desc';
+  }): Promise<ThreatHuntingListResponse> {
+    let sortFieldModified = sortField;
 
-    return this.search({
-      query,
-      size,
-      from,
-      sort,
-    });
+    if (sortField === 'index_status') {
+      sortFieldModified = 'index_status_numeric_sort';
+    }
+
+    await this.maybeUpdateQueryStatusCache();
+
+    const esql = kuery
+      ? `
+    FROM "${this.getIndex()}" 
+     | WHERE KQL("${kuery}")
+     | LOOKUP JOIN ${this.getCacheIndexName()} ON uuid
+     | SORT ${sortFieldModified} ${sortOrder}
+     | LIMIT ${size ?? DEFAULT_RESPONSE_SIZE}
+    `
+      : `
+    FROM "${this.getIndex()}"
+     | LOOKUP JOIN ${this.getCacheIndexName()} ON uuid
+     | SORT ${sortFieldModified} ${sortOrder}
+     | LIMIT ${size ?? DEFAULT_RESPONSE_SIZE}
+    `;
+
+    console.log('esql', esql);
+
+    try {
+      const { records: queries } = await this.options.esClient.helpers
+        .esql({ query: esql })
+        .toRecords<ThreatHuntingQueryESQLResult>();
+
+      return {
+        queries: queries.map((q) => this.esqlRecordToThreatHuntingQuery(q)),
+      };
+    } catch (error) {
+      this.options.logger.error(`Error executing ESQL query: ${error}`);
+      throw new Error(`Failed to execute ESQL query: ${error}`);
+    }
   }
 
   public getIndex() {
     return 'threat-hunting-queries';
   }
 
-  public formatSearchResponse(response: SearchResponse<ThreatHuntingQueryEsDoc>): {
-    queries: ThreatHuntingQueryWithIndexCheck[];
-    total: number;
-  } {
-    const queries = response.hits.hits.map((hit) =>
-      this.esResultToThreatHuntingQuery(hit._source as ThreatHuntingQueryEsDoc)
-    );
-    const total =
-      typeof response.hits.total === 'number'
-        ? response.hits.total
-        : response.hits.total?.value ?? 0;
+  public getCacheIndexName() {
+    return `${this.getIndex()}-query-status-cache`;
+  }
 
-    return {
-      queries,
-      total,
-    };
+  public getEnrichPolicyName() {
+    return `${this.getCacheIndexName()}-policy`;
   }
 
   private async maybeUpdateQueryStatusCache() {
-    // we only update the cache if it is empty or if the cache is stale
-    if (
-      this.queryDataStatusCache.size === 0 ||
-      Date.now() - this.lastQueryStatusCacheUpdate > INDEX_STATUS_CHECK_CACHE_STALE_AFTER_MS
-    ) {
+    if (Date.now() - this.lastQueryStatusCacheUpdate > INDEX_STATUS_CHECK_CACHE_STALE_AFTER_MS) {
       await this.updateQueryStatusCache();
+    }
+  }
+
+  private async checkIndexExists(indices: string[] | string): Promise<boolean> {
+    try {
+      const index = Array.isArray(indices) ? indices.join(',') : indices;
+      const result = await this.options.esClient.indices.exists({ index, allow_no_indices: false });
+      return result;
+    } catch (error) {
+      this.options.logger.error(`Error checking index existence: ${error}`);
+      throw new Error(`Failed to check index existence: ${error}`);
     }
   }
 
@@ -140,31 +234,23 @@ export class ThreatHuntingQueriesDataClient {
    * 4. Updates the queryDataStatusCache Map with each query's data availability status
    * @returns {Promise<void>}
    */
-  private async updateQueryStatusCache(onlyQueries?: ThreatHuntingQuery[]) {
-    if (this.isCacheUpdateInProgress && !onlyQueries) {
+  private async updateQueryStatusCache() {
+    if (this.isCacheUpdateInProgress) {
       return;
     }
 
-    if (!onlyQueries) {
-      this.isCacheUpdateInProgress = true;
-    }
+    await this.initialiseCacheIndex();
 
-    let queriesToCheck: ThreatHuntingQuery[];
+    this.isCacheUpdateInProgress = true;
 
-    if (onlyQueries) {
-      queriesToCheck = onlyQueries;
-    } else {
-      const { queries = [] } = await this.search({
-        query: { match_all: {} },
-        size: MAX_RESPONSE_SIZE,
-      });
-      queriesToCheck = queries;
-    }
+    const { queries = [] } = await this.searchByQueryDsl({
+      size: MAX_RESPONSE_SIZE,
+    });
 
     const indicesByQueryUuid = new Map<string, string[]>();
     const allIndices = new Set<string>();
 
-    for (const query of queriesToCheck) {
+    for (const query of queries) {
       const { uuid, queries: queryQueries } = query;
       const indices = queryQueries.map((q) => q.indices).flat();
       indicesByQueryUuid.set(uuid, indices);
@@ -172,12 +258,14 @@ export class ThreatHuntingQueriesDataClient {
     }
 
     const indexBatches: string[][] = _.chunk([...allIndices], INDEX_CHECK_BATCH_SIZE);
-    const indexExistenceResults: Array<{ index: string; exists: boolean }> = [];
+    const indexExistenceResults: Array<{
+      index: string;
+      exists: boolean;
+    }> = [];
 
     for (const batch of indexBatches) {
       try {
-        const batchIndex = batch.join(',');
-        const batchExists = await this.options.esClient.indices.exists({ index: batchIndex });
+        const batchExists = await this.checkIndexExists(batch);
 
         if (batchExists) {
           batch.forEach((index) => {
@@ -188,7 +276,7 @@ export class ThreatHuntingQueriesDataClient {
           // so now we need to check each index individually
           const individualResults = await Promise.all(
             batch.map(async (index) => {
-              const exists = await this.options.esClient.indices.exists({ index });
+              const exists = await this.checkIndexExists(index);
               return { index, exists };
             })
           );
@@ -203,21 +291,27 @@ export class ThreatHuntingQueriesDataClient {
       indexExistenceResults.map(({ index, exists }) => [index, exists])
     );
 
+    const updateRecords: Array<{ uuid: string; indexStatus: ThreatHuntingQueryIndexStatus }> = [];
     for (const [uuid, indices] of indicesByQueryUuid.entries()) {
-      const hasExistingIndices = indices.some((index) => indexExistsMap.get(index));
-      this.queryDataStatusCache.set(uuid, hasExistingIndices);
+      let indexStatus: ThreatHuntingQueryIndexStatus = 'unknown';
+
+      if (indices.every((index) => indexExistsMap.get(index))) {
+        indexStatus = 'all';
+      } else {
+        const someIndicesExist = indices.some((index) => indexExistsMap.get(index));
+        indexStatus = someIndicesExist ? 'some' : 'none';
+      }
+
+      updateRecords.push({ uuid, indexStatus });
     }
 
-    if (onlyQueries) {
-      return;
-    }
+    await this.batchUpdateCacheIndex(updateRecords);
+
     this.lastQueryStatusCacheUpdate = Date.now();
     this.isCacheUpdateInProgress = false;
   }
 
-  private esResultToThreatHuntingQuery(
-    doc: ThreatHuntingQueryEsDoc
-  ): ThreatHuntingQueryWithIndexCheck {
+  private esResultToThreatHuntingQuery(doc: ThreatHuntingQueryEsDoc): ThreatHuntingQuery {
     const queries: ThreatHuntingQueryQuery[] = doc.queries.map((q) => ({
       query: q.query,
       indices: q.indices,
@@ -227,7 +321,38 @@ export class ThreatHuntingQueriesDataClient {
     return {
       ...doc,
       queries,
-      indicesExist: this.queryDataStatusCache.get(doc.uuid) ?? false,
+    };
+  }
+
+  private esqlRecordToThreatHuntingQuery(
+    record: ThreatHuntingQueryESQLResult
+  ): ThreatHuntingQueryWithIndexCheck {
+    const queries: ThreatHuntingQueryQuery[] = [];
+
+    const queryQueries = Array.isArray(record['queries.query'])
+      ? record['queries.query']
+      : [record['queries.query']];
+
+    const queryIndices = Array.isArray(record['queries.indices'])
+      ? record['queries.indices']
+      : [record['queries.indices']];
+
+    const queryCleanedQueries = Array.isArray(record['queries.cleaned_query'])
+      ? record['queries.cleaned_query']
+      : [record['queries.cleaned_query']];
+
+    for (let i = 0; i < queryQueries.length; i++) {
+      queries.push({
+        query: queryQueries[i],
+        indices: [queryIndices?.[i]],
+        cleanedQuery: queryCleanedQueries?.[i],
+      });
+    }
+
+    return {
+      ...record,
+      queries,
+      indexStatus: record.index_status,
     };
   }
 }

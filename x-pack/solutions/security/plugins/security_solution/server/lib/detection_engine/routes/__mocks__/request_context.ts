@@ -45,6 +45,7 @@ import type { EndpointInternalFleetServicesInterface } from '../../../../endpoin
 import { siemMigrationsServiceMock } from '../../../siem_migrations/__mocks__/mocks';
 import { AssetInventoryDataClientMock } from '../../../asset_inventory/asset_inventory_data_client.mock';
 import { privilegeMonitorDataClientMock } from '../../../entity_analytics/privilege_monitoring/privilege_monitoring_data_client.mock';
+import type { ThreatHuntingQueriesDataClient } from '../../../entity_analytics/threat_hunting/threat_hunting_queries_data_client';
 
 export const createMockClients = () => {
   const core = coreMock.createRequestHandlerContext();
@@ -176,6 +177,9 @@ const createSecuritySolutionRequestContextMock = (
     getSiemRuleMigrationsClient: jest.fn(() => clients.siemRuleMigrationsClient),
     getInferenceClient: jest.fn(() => clients.getInferenceClient()),
     getAssetInventoryClient: jest.fn(() => clients.assetInventoryDataClient),
+    getThreatHuntingQueriesDataClient: jest.fn(
+      () => ({} as unknown as ThreatHuntingQueriesDataClient)
+    ),
   };
 };
 
