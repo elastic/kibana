@@ -68,7 +68,6 @@ describe('bootstrapRenderer', () => {
     packageInfo = createPackageInfo();
     userSettingsService = userSettingsServiceMock.createSetupContract();
 
-    // renderTemplateMock.mockReturnValue('borealislight');
     getPluginsBundlePathsMock.mockReturnValue(new Map());
     renderTemplateMock.mockReturnValue('__rendered__');
     getJsDependencyPathsMock.mockReturnValue([]);
@@ -84,7 +83,6 @@ describe('bootstrapRenderer', () => {
   });
 
   afterEach(() => {
-    // renderTemplateMock.mockReset();
     getPluginsBundlePathsMock.mockReset();
     renderTemplateMock.mockReset();
     getJsDependencyPathsMock.mockReset();
