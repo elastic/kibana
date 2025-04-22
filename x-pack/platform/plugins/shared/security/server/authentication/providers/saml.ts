@@ -383,7 +383,6 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
         },
       })) as any;
     } catch (err) {
-
       this.logger.error(
         `Failed to log in with SAML response, ${
           !isIdPInitiatedLogin ? `current requestIds: ${stateRequestIds}, ` : ''
