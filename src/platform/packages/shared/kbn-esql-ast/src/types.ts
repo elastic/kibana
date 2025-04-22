@@ -381,7 +381,6 @@ export interface ESQLNumericLiteral<T extends ESQLNumericLiteralType> extends ES
   type: 'literal';
   literalType: T;
   value: number;
-  valueUnquoted: string;
 }
 // We cast anything as decimal (e.g. 32.12) as generic decimal numeric type here
 // @internal
@@ -395,7 +394,6 @@ export interface ESQLBooleanLiteral extends ESQLAstBaseItem {
   type: 'literal';
   literalType: 'boolean';
   value: string;
-  valueUnquoted: string;
 }
 
 // @internal
@@ -403,7 +401,6 @@ export interface ESQLNullLiteral extends ESQLAstBaseItem {
   type: 'literal';
   literalType: 'null';
   value: string;
-  valueUnquoted: string;
 }
 
 // @internal
@@ -414,7 +411,6 @@ export interface ESQLStringLiteral extends ESQLAstBaseItem {
   literalType: 'keyword';
 
   value: string;
-  valueUnquoted: string;
 
   /**
    * Whether the string was parsed as "unqouted" and/or can be pretty-printed
@@ -439,7 +435,6 @@ export interface ESQLParamLiteral<
   paramKind: ParamKind;
   paramType: ParamType;
   value: string | number;
-  valueUnquoted: string;
 }
 
 export type ESQLParamKinds = '?' | '??';

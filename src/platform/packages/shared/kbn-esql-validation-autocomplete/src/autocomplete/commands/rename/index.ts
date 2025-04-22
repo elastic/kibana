@@ -7,37 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { i18n } from '@kbn/i18n';
-import { CommandSuggestParams } from '../../../definitions/types';
-
-import type { SuggestionRawDefinition } from '../../types';
-import { commaCompleteItem, pipeCompleteItem } from '../../complete_items';
-
-export async function suggest({
-  getColumnsByType,
-  innerText,
-}: CommandSuggestParams<'rename'>): Promise<SuggestionRawDefinition[]> {
-  if (/(?:rename|,)\s+\S+\s+a?$/i.test(innerText)) {
-    return [asCompletionItem];
-  }
-
-  if (/rename(?:\s+\S+\s+as\s+\S+\s*,)*\s+\S+\s+as\s+[^\s,]+\s+$/i.test(innerText)) {
-    return [pipeCompleteItem, { ...commaCompleteItem, text: ', ' }];
-  }
-
-  if (/as\s+$/i.test(innerText)) {
-    return [];
-  }
-
-  return getColumnsByType('any', [], { advanceCursor: true, openSuggestions: true });
-}
-
-const asCompletionItem: SuggestionRawDefinition = {
-  detail: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.asDoc', {
-    defaultMessage: 'As',
-  }),
-  kind: 'Reference',
-  label: 'AS',
-  sortText: '1',
-  text: 'AS ',
-};
+export { suggest } from './suggest';
+export { fieldsSuggestionsAfter } from './fields_suggestions_after';
