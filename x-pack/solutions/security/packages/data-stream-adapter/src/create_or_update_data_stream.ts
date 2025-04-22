@@ -83,8 +83,7 @@ const updateMapping = async ({ logger, esClient, indexName, writeIndexOnly }: Up
       () =>
         esClient.indices.putMapping({
           index: indexName,
-          // @ts-expect-error elasticsearch@9.0.0 https://github.com/elastic/elasticsearch-js/issues/2584
-          body: simulatedMapping,
+          ...simulatedMapping,
           write_index_only: writeIndexOnly,
         }),
       { logger }
