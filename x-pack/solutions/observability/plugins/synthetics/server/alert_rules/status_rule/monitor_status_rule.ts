@@ -15,7 +15,6 @@ import { syntheticsMonitorStatusRuleParamsSchema } from '@kbn/response-ops-rule-
 import { SyntheticsEsClient } from '../../lib';
 import { AlertOverviewStatus } from '../../../common/runtime_types/alert_rules/common';
 import { StatusRuleExecutorOptions } from './types';
-import { syntheticsRuleFieldMap } from '../../../common/rules/synthetics_rule_field_map';
 import { SyntheticsPluginsSetupDependencies, SyntheticsServerSetup } from '../../types';
 import { StatusRuleExecutor } from './status_rule_executor';
 import { MONITOR_STATUS } from '../../../common/constants/synthetics_alerts';
@@ -108,7 +107,6 @@ export const registerSyntheticsStatusCheckRule = (
       };
     },
     alerts: SyntheticsRuleTypeAlertDefinition,
-    fieldsForAAD: Object.keys(syntheticsRuleFieldMap),
     getViewInAppRelativeUrl: ({ rule }: GetViewInAppRelativeUrlFnOpts<{}>) =>
       observabilityPaths.ruleDetails(rule.id),
   });

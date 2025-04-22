@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGrid, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGrid, EuiFlexItem, EuiSpacer, useEuiTheme } from '@elastic/eui';
 import React, { useContext } from 'react';
 import { ThemeContext } from 'styled-components';
 import { i18n } from '@kbn/i18n';
@@ -21,6 +21,7 @@ export function EmptySections() {
   const { http, serverless: isServerless } = useKibana().services;
   const theme = useContext(ThemeContext);
   const { hasDataMap } = useHasData();
+  const { euiTheme } = useEuiTheme();
 
   const appEmptySections = getEmptySections({ http }).filter(({ id, showInServerless }) => {
     const app = hasDataMap[id];
@@ -47,6 +48,7 @@ export function EmptySections() {
               key={app.id}
               style={{
                 border: `${theme.eui.euiBorderEditable}`,
+                borderColor: euiTheme.border.color,
                 borderRadius: `${theme.eui.euiBorderRadius}`,
               }}
             >

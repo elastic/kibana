@@ -6,8 +6,6 @@
  */
 
 import * as t from 'io-ts';
-import { getAllEntityTypes, getDisabledEntityTypes } from '../utils';
-import type { ExperimentalFeatures } from '../../experimental_features';
 
 /*
  * This utility function can be used to turn a TypeScript enum into a io-ts codec.
@@ -26,11 +24,3 @@ export function fromEnum<EnumType extends string>(
     t.identity
   );
 }
-
-// TODO delete this function when the universal entity support is added
-export const getRiskEngineEntityTypes = (experimentalFeatures: ExperimentalFeatures) => {
-  const allEntityTypes = getAllEntityTypes();
-  const disabledEntityTypes = getDisabledEntityTypes(experimentalFeatures);
-
-  return allEntityTypes.filter((value) => !disabledEntityTypes.includes(value));
-};

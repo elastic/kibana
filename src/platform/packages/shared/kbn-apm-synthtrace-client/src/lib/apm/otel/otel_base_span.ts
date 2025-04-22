@@ -10,18 +10,15 @@
 import { generateLongId } from '../../utils/generate_id';
 import { AbstractSpan } from '../abstract_span';
 import { ApmOtelFields } from './apm_otel_fields';
-import { Span } from './span';
-import { Transaction } from './transaction';
+import { OtelSpan } from './otel_span';
 
 export class OtelBaseSpan extends AbstractSpan<ApmOtelFields, OtelBaseSpan> {
   constructor(fields: ApmOtelFields) {
     super({
-      'attributes.processor.event': 'span',
       'attributes.event.outcome': 'unknown',
       'data_stream.dataset': 'generic.otel',
       'data_stream.namespace': 'default',
       'data_stream.type': 'traces',
-      'resource.attributes.os.type': 'Linux',
       ...fields,
       trace_id: generateLongId(),
     });
@@ -31,9 +28,6 @@ export class OtelBaseSpan extends AbstractSpan<ApmOtelFields, OtelBaseSpan> {
     this.fields.trace_id = span.fields.trace_id;
     this.fields.parent_span_id = span.fields.span_id;
 
-    if (this.isSpan()) {
-      this.fields['attributes.transaction.id'] = span.fields['attributes.transaction.id'];
-    }
     this._children.forEach((child) => {
       child.parent(this);
     });
@@ -56,12 +50,16 @@ export class OtelBaseSpan extends AbstractSpan<ApmOtelFields, OtelBaseSpan> {
     return this;
   }
 
-  isSpan(): this is Span {
-    return this.fields['attributes.processor.event'] === 'span';
+  isSpan(): this is OtelSpan {
+    return (
+      this.fields.kind === 'Internal' ||
+      this.fields.kind === 'Client' ||
+      this.fields.kind === 'Producer'
+    );
   }
 
-  isTransaction(): this is Transaction {
-    return this.fields['attributes.processor.event'] === 'transaction';
+  isTransaction(): this is OtelSpan {
+    return this.fields.kind === 'Server' || this.fields.kind === 'Consumer';
   }
 
   override timestamp(timestamp: number) {

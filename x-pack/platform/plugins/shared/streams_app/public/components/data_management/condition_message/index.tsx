@@ -12,6 +12,7 @@ import {
   isBinaryFilterCondition,
   isFilterCondition,
   isNeverCondition,
+  isOrCondition,
 } from '@kbn/streams-schema';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
@@ -52,7 +53,7 @@ export function ConditionMessage({ condition }: { condition: Condition }) {
     return (
       <FormattedMessage
         id="xpack.streams.andDisplay.andLabel"
-        defaultMessage="{left} and {right}"
+        defaultMessage="{left} AND {right}"
         values={{
           left: <ConditionMessage condition={condition.and[0]} />,
           right: (
@@ -66,22 +67,37 @@ export function ConditionMessage({ condition }: { condition: Condition }) {
         }}
       />
     );
-  }
-  if (condition.or.length === 0) {
-    return '';
+  } else if (isOrCondition(condition)) {
+    if (condition.or.length === 0) {
+      return '';
+    }
+
+    if (condition.or.length === 1) {
+      return <ConditionMessage condition={condition.or[0]} />;
+    }
+    return (
+      <FormattedMessage
+        id="xpack.streams.orDisplay.orLabel"
+        defaultMessage="{left} OR {right}"
+        values={{
+          left: <ConditionMessage condition={condition.or[0]} />,
+          right: (
+            <ConditionMessage
+              condition={{
+                ...condition,
+                or: condition.or.slice(1),
+              }}
+            />
+          ),
+        }}
+      />
+    );
   }
 
-  if (condition.or.length === 1) {
-    return <ConditionMessage condition={condition.or[0]} />;
-  }
   return (
     <FormattedMessage
-      id="xpack.streams.orDisplay.orLabel"
-      defaultMessage="{left} or {right}"
-      values={{
-        left: <ConditionMessage condition={condition.or[0]} />,
-        right: <ConditionMessage condition={condition.or[1]} />,
-      }}
+      id="xpack.streams.orDisplay.invalidConditionLabel"
+      defaultMessage="Invalid condition format"
     />
   );
 }

@@ -15,7 +15,7 @@ import {
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
-import { IngestStreamGetResponse } from '@kbn/streams-schema';
+import { IngestStreamGetResponse, isWiredStreamGetResponse } from '@kbn/streams-schema';
 import { computeInterval } from '@kbn/visualization-utils';
 import moment, { DurationInputArg1, DurationInputArg2 } from 'moment';
 import { useKibana } from '../../../hooks/use_kibana';
@@ -23,6 +23,7 @@ import { ControlledEsqlChart } from '../../esql_chart/controlled_esql_chart';
 import { getIndexPatterns } from '../../../util/hierarchy_helpers';
 import { StreamsAppSearchBar } from '../../streams_app_search_bar';
 import { useStreamsAppFetch } from '../../../hooks/use_streams_app_fetch';
+import { useTimefilter } from '../../../hooks/use_timefilter';
 
 interface StreamChartPanelProps {
   definition: IngestStreamGetResponse;
@@ -39,12 +40,8 @@ export function StreamChartPanel({ definition }: StreamChartPanelProps) {
       },
     },
   } = useKibana();
-  const {
-    timeRange,
-    setTimeRange,
-    absoluteTimeRange: { start, end },
-    refreshAbsoluteTimeRange,
-  } = data.query.timefilter.timefilter.useTimefilter();
+
+  const { timeState } = useTimefilter();
 
   const indexPatterns = useMemo(() => {
     return getIndexPatterns(definition?.stream);
@@ -55,7 +52,10 @@ export function StreamChartPanel({ definition }: StreamChartPanelProps) {
     [share.url.locators]
   );
 
-  const bucketSize = useMemo(() => computeInterval(timeRange, data), [data, timeRange]);
+  const bucketSize = useMemo(
+    () => computeInterval(timeState.asAbsoluteTimeRange, data),
+    [data, timeState.asAbsoluteTimeRange]
+  );
 
   const queries = useMemo(() => {
     if (!indexPatterns) {
@@ -85,7 +85,7 @@ export function StreamChartPanel({ definition }: StreamChartPanelProps) {
   }, [queries?.baseQuery, discoverLocator]);
 
   const histogramQueryFetch = useStreamsAppFetch(
-    async ({ signal }) => {
+    async ({ signal, timeState: { start, end } }) => {
       if (!queries?.histogramQuery || !indexPatterns) {
         return undefined;
       }
@@ -108,11 +108,19 @@ export function StreamChartPanel({ definition }: StreamChartPanelProps) {
         signal,
       });
     },
-    [indexPatterns, dataViews, streamsRepositoryClient, queries?.histogramQuery, start, end]
+    [indexPatterns, dataViews, streamsRepositoryClient, queries?.histogramQuery],
+    {
+      withTimeRange: true,
+    }
   );
 
   const docCountFetch = useStreamsAppFetch(
-    async ({ signal }) => {
+    async ({
+      signal,
+      timeState: {
+        asAbsoluteTimeRange: { from, to },
+      },
+    }) => {
       if (!definition) {
         return undefined;
       }
@@ -123,25 +131,28 @@ export function StreamChartPanel({ definition }: StreamChartPanelProps) {
             name: definition.stream.name,
           },
           query: {
-            start: String(start),
-            end: String(end),
+            start: from,
+            end: to,
           },
         },
       });
     },
-    [definition, streamsRepositoryClient, start, end]
+    [definition, streamsRepositoryClient],
+    { withTimeRange: true }
   );
 
   const [value, unit] = bucketSize.split(' ') as [DurationInputArg1, DurationInputArg2];
 
   const xDomain = {
-    min: start,
-    max: end,
+    min: timeState.start,
+    max: timeState.end,
     minInterval: moment.duration(value, unit).asMilliseconds(),
   };
 
   const docCount = docCountFetch?.value?.details.count;
-  const formattedDocCount = docCount ? formatNumber(docCount, 'decimal0') : '-';
+  const formattedDocCount = docCount ? formatNumber(docCount, 'decimal0') : '0';
+
+  const dataStreamExists = isWiredStreamGetResponse(definition) || definition.data_stream_exists;
 
   return (
     <EuiPanel hasShadow={false} hasBorder>
@@ -170,44 +181,20 @@ export function StreamChartPanel({ definition }: StreamChartPanelProps) {
                   data-test-subj="streamsDetailOverviewOpenInDiscoverButton"
                   iconType="discoverApp"
                   href={discoverLink}
-                  isDisabled={!discoverLink}
+                  isDisabled={!discoverLink || !dataStreamExists}
                 >
                   {i18n.translate('xpack.streams.streamDetailOverview.openInDiscoverButtonLabel', {
                     defaultMessage: 'Open in Discover',
                   })}
                 </EuiButtonEmpty>
                 <StreamsAppSearchBar
-                  onQuerySubmit={({ dateRange }, isUpdate) => {
-                    if (!isUpdate) {
-                      if (!refreshAbsoluteTimeRange()) {
-                        // if absolute time range didn't change, we need to manually refresh the histogram
-                        // otherwise it will be refreshed by the changed absolute time range
-                        histogramQueryFetch.refresh();
-                        docCountFetch.refresh();
-                      }
-                      return;
-                    }
-
-                    if (dateRange) {
-                      setTimeRange({
-                        from: dateRange.from,
-                        to: dateRange?.to,
-                        mode: dateRange.mode,
-                      });
-                    }
-                  }}
-                  onRefresh={() => {
-                    histogramQueryFetch.refresh();
-                    docCountFetch.refresh();
-                  }}
                   placeholder={i18n.translate(
                     'xpack.streams.entityDetailOverview.searchBarPlaceholder',
                     {
                       defaultMessage: 'Filter data by using KQL',
                     }
                   )}
-                  dateRangeFrom={timeRange.from}
-                  dateRangeTo={timeRange.to}
+                  showDatePicker
                 />
               </EuiFlexGroup>
             </EuiFlexItem>
