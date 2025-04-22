@@ -547,7 +547,7 @@ export class AIAssistantService {
   public async createAIAssistantKnowledgeBaseDataClient(
     opts: CreateAIAssistantClientParams &
       GetAIAssistantKnowledgeBaseDataClientParams & {
-        trainedModelsProvider: ReturnType<TrainedModelsProvider['trainedModelsProvider']>;
+        getTrainedModelsProvider: () => ReturnType<TrainedModelsProvider['trainedModelsProvider']>;
       }
   ): Promise<AIAssistantKnowledgeBaseDataClient | null> {
     // If modelIdOverride is set, swap getElserId(), and ensure the pipeline is re-created with the correct model
@@ -587,7 +587,7 @@ export class AIAssistantService {
       setIsKBSetupInProgress: this.setIsKBSetupInProgress.bind(this),
       spaceId: opts.spaceId,
       manageGlobalKnowledgeBaseAIAssistant: opts.manageGlobalKnowledgeBaseAIAssistant ?? false,
-      trainedModelsProvider: opts.trainedModelsProvider,
+      getTrainedModelsProvider: opts.getTrainedModelsProvider,
     });
   }
 

@@ -22,6 +22,7 @@ import { TableIcon } from '../../../../../../../components/package_icon';
 import type { PackageListItem } from '../../../../../../../../common';
 import { type UrlPagination, useLink, useAuthz } from '../../../../../../../hooks';
 import type { InstalledPackageUIPackageListItem } from '../types';
+import { useViewPolicies } from '../hooks/use_url_filters';
 
 import { InstallationVersionStatus } from './installation_version_status';
 import { DisabledWrapperTooltip } from './disabled_wrapper_tooltip';
@@ -39,6 +40,7 @@ export const InstalledIntegrationsTable: React.FunctionComponent<{
   const authz = useAuthz();
   const { getHref } = useLink();
   const { selectedItems, setSelectedItems } = selection;
+  const { addViewPolicies } = useViewPolicies();
 
   const { setPagination } = pagination;
   const handleTablePagination = React.useCallback(
@@ -148,7 +150,7 @@ export const InstalledIntegrationsTable: React.FunctionComponent<{
                   }
                   disabled={isDisabled}
                 >
-                  <EuiLink onClick={() => {}} disabled={isDisabled}>
+                  <EuiLink onClick={() => addViewPolicies(item.name)} disabled={isDisabled}>
                     <FormattedMessage
                       id="xpack.fleet.epmInstalledIntegrations.viewAttachedPoliciesButton"
                       defaultMessage={

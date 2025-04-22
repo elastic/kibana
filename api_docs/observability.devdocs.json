@@ -8861,27 +8861,6 @@
           },
           {
             "parentPluginId": "observability",
-            "id": "def-public.ObservabilityPublicPluginsStart.investigate",
-            "type": "Object",
-            "tags": [],
-            "label": "investigate",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "investigate",
-                "scope": "public",
-                "docId": "kibInvestigatePluginApi",
-                "section": "def-public.InvestigatePublicStart",
-                "text": "InvestigatePublicStart"
-              },
-              " | undefined"
-            ],
-            "path": "x-pack/solutions/observability/plugins/observability/public/plugin.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "observability",
             "id": "def-public.ObservabilityPublicPluginsStart.streams",
             "type": "Object",
             "tags": [],

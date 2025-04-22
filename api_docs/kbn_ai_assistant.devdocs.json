@@ -1737,6 +1737,61 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/ai-assistant",
+            "id": "def-public.UseConversationContextMenuResult.archiveConversation",
+            "type": "Function",
+            "tags": [],
+            "label": "archiveConversation",
+            "description": [],
+            "signature": [
+              "(id: string, isArchived: boolean) => Promise<",
+              {
+                "pluginId": "observabilityAIAssistant",
+                "scope": "common",
+                "docId": "kibObservabilityAIAssistantPluginApi",
+                "section": "def-common.Conversation",
+                "text": "Conversation"
+              },
+              ">"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_conversation_context_menu.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/ai-assistant",
+                "id": "def-public.UseConversationContextMenuResult.archiveConversation.$1",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_conversation_context_menu.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/ai-assistant",
+                "id": "def-public.UseConversationContextMenuResult.archiveConversation.$2",
+                "type": "boolean",
+                "tags": [],
+                "label": "isArchived",
+                "description": [],
+                "signature": [
+                  "boolean"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_conversation_context_menu.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false

@@ -388,25 +388,15 @@ Object {
                       "title": "Overview",
                     },
                     Object {
-                      "id": "ml:notifications",
-                      "link": "ml:notifications",
-                      "title": "Notifications",
-                    },
-                    Object {
-                      "id": "ml:memoryUsage",
-                      "link": "ml:memoryUsage",
-                      "title": "Memory usage",
+                      "id": "ml:data_visualizer",
+                      "link": "ml:dataVisualizer",
+                      "title": "Data visualizer",
                     },
                   ],
                 },
                 Object {
                   "breadcrumbStatus": "hidden",
                   "children": Array [
-                    Object {
-                      "id": "ml:anomalyDetection",
-                      "link": "ml:anomalyDetection",
-                      "title": "Jobs",
-                    },
                     Object {
                       "id": "ml:anomalyExplorer",
                       "link": "ml:anomalyExplorer",
@@ -417,16 +407,6 @@ Object {
                       "link": "ml:singleMetricViewer",
                       "title": "Single metric viewer",
                     },
-                    Object {
-                      "id": "ml:suppliedConfigurations",
-                      "link": "ml:suppliedConfigurations",
-                      "title": "Supplied configurations",
-                    },
-                    Object {
-                      "id": "ml:settings",
-                      "link": "ml:settings",
-                      "title": "Settings",
-                    },
                   ],
                   "id": "category-anomaly_detection",
                   "title": "Anomaly detection",
@@ -434,11 +414,6 @@ Object {
                 Object {
                   "breadcrumbStatus": "hidden",
                   "children": Array [
-                    Object {
-                      "id": "ml:dataFrameAnalytics",
-                      "link": "ml:dataFrameAnalytics",
-                      "title": "Jobs",
-                    },
                     Object {
                       "id": "ml:resultExplorer",
                       "link": "ml:resultExplorer",
@@ -452,45 +427,6 @@ Object {
                   ],
                   "id": "category-data_frame analytics",
                   "title": "Data frame analytics",
-                },
-                Object {
-                  "breadcrumbStatus": "hidden",
-                  "children": Array [
-                    Object {
-                      "id": "ml:nodesOverview",
-                      "link": "ml:nodesOverview",
-                      "title": "Trained models",
-                    },
-                  ],
-                  "id": "category-model_management",
-                  "title": "Model management",
-                },
-                Object {
-                  "breadcrumbStatus": "hidden",
-                  "children": Array [
-                    Object {
-                      "id": "ml:fileUpload",
-                      "link": "ml:fileUpload",
-                      "title": "File data visualizer",
-                    },
-                    Object {
-                      "id": "ml:indexDataVisualizer",
-                      "link": "ml:indexDataVisualizer",
-                      "title": "Data view data visualizer",
-                    },
-                    Object {
-                      "id": "ml:esqlDataVisualizer",
-                      "link": "ml:esqlDataVisualizer",
-                      "title": "ES|QL data visualizer",
-                    },
-                    Object {
-                      "id": "ml:dataDrift",
-                      "link": "ml:dataDrift",
-                      "title": "Data drift",
-                    },
-                  ],
-                  "id": "category-data_visualizer",
-                  "title": "Data visualizer",
                 },
                 Object {
                   "breadcrumbStatus": "hidden",
@@ -636,6 +572,26 @@ Object {
                 },
               ],
               "title": "Alerts and Insights",
+            },
+            Object {
+              "children": Array [
+                Object {
+                  "link": "management:overview",
+                },
+                Object {
+                  "link": "management:anomaly_detection",
+                },
+                Object {
+                  "link": "management:analytics",
+                },
+                Object {
+                  "link": "management:trained_models",
+                },
+                Object {
+                  "link": "management:supplied_configurations",
+                },
+              ],
+              "title": "Machine learning",
             },
             Object {
               "children": Array [

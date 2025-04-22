@@ -207,6 +207,7 @@ export interface EditProcessorPanelProps {
 export function EditProcessorPanel({ processorRef, processorMetrics }: EditProcessorPanelProps) {
   const { euiTheme } = useEuiTheme();
   const state = useSelector(processorRef, (s) => s);
+  const canEdit = useStreamsEnrichmentSelector((s) => s.context.definition.privileges.manage);
   const previousProcessor = state.context.previousProcessor;
   const processor = state.context.processor;
 
@@ -343,6 +344,7 @@ export function EditProcessorPanel({ processorRef, processorMetrics }: EditProce
                 data-test-subj="streamsAppEditProcessorPanelButton"
                 onClick={handleOpen}
                 iconType="pencil"
+                disabled={!canEdit}
                 color="text"
                 size="xs"
                 aria-label={i18n.translate(

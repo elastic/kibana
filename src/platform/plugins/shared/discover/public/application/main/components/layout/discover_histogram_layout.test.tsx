@@ -42,6 +42,7 @@ import {
   RuntimeStateProvider,
   internalStateActions,
 } from '../../state_management/redux';
+import { TABS_ENABLED } from '../../discover_main_route';
 
 function getStateContainer(savedSearch?: SavedSearch) {
   const stateContainer = getDiscoverStateMock({ isTimeBased: true, savedSearch });
@@ -177,10 +178,12 @@ const mountComponent = async ({
 
 describe('Discover histogram layout component', () => {
   describe('render', () => {
-    it('should render null if there is no search session', async () => {
-      const { component } = await mountComponent({ searchSessionId: null });
-      expect(component.isEmptyRender()).toBe(true);
-    });
+    if (!TABS_ENABLED) {
+      it('should render null if there is no search session', async () => {
+        const { component } = await mountComponent({ searchSessionId: null });
+        expect(component.isEmptyRender()).toBe(true);
+      });
+    }
 
     it('should not render null if there is a search session', async () => {
       const { component } = await mountComponent();

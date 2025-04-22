@@ -898,7 +898,7 @@
         "tags": [],
         "label": "pruneContentReferences",
         "description": [
-          "\nReturnes a pruned copy of the ContentReferencesStore."
+          "\nReturnes a pruned copy of the ContentReferencesStore and content."
         ],
         "signature": [
           "(content: string, contentReferencesStore: ",
@@ -909,7 +909,7 @@
             "section": "def-common.ContentReferencesStore",
             "text": "ContentReferencesStore"
           },
-          ") => Zod.objectOutputType<{}, Zod.ZodUnion<[Zod.ZodObject<Zod.objectUtil.extendShape<{ id: Zod.ZodString; type: Zod.ZodString; }, { type: Zod.ZodLiteral<\"KnowledgeBaseEntry\">; knowledgeBaseEntryId: Zod.ZodString; knowledgeBaseEntryName: Zod.ZodString; }>, \"strip\", Zod.ZodTypeAny, { id: string; type: \"KnowledgeBaseEntry\"; knowledgeBaseEntryId: string; knowledgeBaseEntryName: string; }, { id: string; type: \"KnowledgeBaseEntry\"; knowledgeBaseEntryId: string; knowledgeBaseEntryName: string; }>, Zod.ZodObject<Zod.objectUtil.extendShape<{ id: Zod.ZodString; type: Zod.ZodString; }, { type: Zod.ZodLiteral<\"SecurityAlert\">; alertId: Zod.ZodString; }>, \"strip\", Zod.ZodTypeAny, { id: string; type: \"SecurityAlert\"; alertId: string; }, { id: string; type: \"SecurityAlert\"; alertId: string; }>, Zod.ZodObject<Zod.objectUtil.extendShape<{ id: Zod.ZodString; type: Zod.ZodString; }, { type: Zod.ZodLiteral<\"SecurityAlertsPage\">; }>, \"strip\", Zod.ZodTypeAny, { id: string; type: \"SecurityAlertsPage\"; }, { id: string; type: \"SecurityAlertsPage\"; }>, Zod.ZodObject<Zod.objectUtil.extendShape<{ id: Zod.ZodString; type: Zod.ZodString; }, { type: Zod.ZodLiteral<\"ProductDocumentation\">; title: Zod.ZodString; url: Zod.ZodString; }>, \"strip\", Zod.ZodTypeAny, { id: string; type: \"ProductDocumentation\"; title: string; url: string; }, { id: string; type: \"ProductDocumentation\"; title: string; url: string; }>, Zod.ZodObject<Zod.objectUtil.extendShape<{ id: Zod.ZodString; type: Zod.ZodString; }, { type: Zod.ZodLiteral<\"EsqlQuery\">; query: Zod.ZodString; label: Zod.ZodString; timerange: Zod.ZodOptional<Zod.ZodObject<{ from: Zod.ZodString; to: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { from: string; to: string; }, { from: string; to: string; }>>; }>, \"strip\", Zod.ZodTypeAny, { id: string; type: \"EsqlQuery\"; label: string; query: string; timerange?: { from: string; to: string; } | undefined; }, { id: string; type: \"EsqlQuery\"; label: string; query: string; timerange?: { from: string; to: string; } | undefined; }>]>, \"strip\">"
+          ") => { prunedContentReferencesStore: Zod.objectOutputType<{}, Zod.ZodUnion<[Zod.ZodObject<Zod.objectUtil.extendShape<{ id: Zod.ZodString; type: Zod.ZodString; }, { type: Zod.ZodLiteral<\"KnowledgeBaseEntry\">; knowledgeBaseEntryId: Zod.ZodString; knowledgeBaseEntryName: Zod.ZodString; }>, \"strip\", Zod.ZodTypeAny, { id: string; type: \"KnowledgeBaseEntry\"; knowledgeBaseEntryId: string; knowledgeBaseEntryName: string; }, { id: string; type: \"KnowledgeBaseEntry\"; knowledgeBaseEntryId: string; knowledgeBaseEntryName: string; }>, Zod.ZodObject<Zod.objectUtil.extendShape<{ id: Zod.ZodString; type: Zod.ZodString; }, { type: Zod.ZodLiteral<\"SecurityAlert\">; alertId: Zod.ZodString; }>, \"strip\", Zod.ZodTypeAny, { id: string; type: \"SecurityAlert\"; alertId: string; }, { id: string; type: \"SecurityAlert\"; alertId: string; }>, Zod.ZodObject<Zod.objectUtil.extendShape<{ id: Zod.ZodString; type: Zod.ZodString; }, { type: Zod.ZodLiteral<\"SecurityAlertsPage\">; }>, \"strip\", Zod.ZodTypeAny, { id: string; type: \"SecurityAlertsPage\"; }, { id: string; type: \"SecurityAlertsPage\"; }>, Zod.ZodObject<Zod.objectUtil.extendShape<{ id: Zod.ZodString; type: Zod.ZodString; }, { type: Zod.ZodLiteral<\"ProductDocumentation\">; title: Zod.ZodString; url: Zod.ZodString; }>, \"strip\", Zod.ZodTypeAny, { id: string; type: \"ProductDocumentation\"; title: string; url: string; }, { id: string; type: \"ProductDocumentation\"; title: string; url: string; }>, Zod.ZodObject<Zod.objectUtil.extendShape<{ id: Zod.ZodString; type: Zod.ZodString; }, { type: Zod.ZodLiteral<\"EsqlQuery\">; query: Zod.ZodString; label: Zod.ZodString; timerange: Zod.ZodOptional<Zod.ZodObject<{ from: Zod.ZodString; to: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { from: string; to: string; }, { from: string; to: string; }>>; }>, \"strip\", Zod.ZodTypeAny, { id: string; type: \"EsqlQuery\"; label: string; query: string; timerange?: { from: string; to: string; } | undefined; }, { id: string; type: \"EsqlQuery\"; label: string; query: string; timerange?: { from: string; to: string; } | undefined; }>]>, \"strip\">; prunedContent: string; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/impl/content_references/content_references_store/prune_content_references.ts",
         "deprecated": false,
@@ -957,7 +957,7 @@
           }
         ],
         "returnComment": [
-          "a new record only containing the ContentReferences that are referenced to by the content."
+          "prunedContentReferencesStore - a new record only containing the ContentReferences that are referenced to by the content. prunedContent - the content with the references that do not exist removed."
         ],
         "initialIsOpen": false
       },
@@ -1579,7 +1579,7 @@
           "\nInterface for features available to the elastic assistant"
         ],
         "signature": [
-          "{ readonly assistantModelEvaluation: boolean; readonly defendInsights: boolean; readonly assistantAttackDiscoverySchedulingEnabled: boolean; }"
+          "{ readonly assistantModelEvaluation: boolean; readonly defendInsights: boolean; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/impl/capabilities/index.ts",
         "deprecated": false,
@@ -1595,6 +1595,21 @@
         "description": [],
         "signature": [
           "\"attack-discovery\""
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.ATTACK_DISCOVERY_SCHEDULES_ENABLED_FEATURE_FLAG",
+        "type": "string",
+        "tags": [],
+        "label": "ATTACK_DISCOVERY_SCHEDULES_ENABLED_FEATURE_FLAG",
+        "description": [],
+        "signature": [
+          "\"securitySolution.assistantAttackDiscoverySchedulingEnabled\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/constants.ts",
         "deprecated": false,
@@ -3891,7 +3906,7 @@
         "label": "GetCapabilitiesResponse",
         "description": [],
         "signature": [
-          "{ assistantModelEvaluation: boolean; defendInsights: boolean; assistantAttackDiscoverySchedulingEnabled: boolean; }"
+          "{ assistantModelEvaluation: boolean; defendInsights: boolean; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/impl/schemas/capabilities/get_capabilities_route.gen.ts",
         "deprecated": false,
@@ -6142,7 +6157,7 @@
           "\nDefault features available to the elastic assistant"
         ],
         "signature": [
-          "{ readonly assistantModelEvaluation: false; readonly defendInsights: true; readonly assistantAttackDiscoverySchedulingEnabled: false; }"
+          "{ readonly assistantModelEvaluation: false; readonly defendInsights: true; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/impl/capabilities/index.ts",
         "deprecated": false,
@@ -6892,7 +6907,7 @@
         "label": "GetCapabilitiesResponse",
         "description": [],
         "signature": [
-          "Zod.ZodObject<{ assistantModelEvaluation: Zod.ZodBoolean; defendInsights: Zod.ZodBoolean; assistantAttackDiscoverySchedulingEnabled: Zod.ZodBoolean; }, \"strip\", Zod.ZodTypeAny, { assistantModelEvaluation: boolean; defendInsights: boolean; assistantAttackDiscoverySchedulingEnabled: boolean; }, { assistantModelEvaluation: boolean; defendInsights: boolean; assistantAttackDiscoverySchedulingEnabled: boolean; }>"
+          "Zod.ZodObject<{ assistantModelEvaluation: Zod.ZodBoolean; defendInsights: Zod.ZodBoolean; }, \"strip\", Zod.ZodTypeAny, { assistantModelEvaluation: boolean; defendInsights: boolean; }, { assistantModelEvaluation: boolean; defendInsights: boolean; }>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/impl/schemas/capabilities/get_capabilities_route.gen.ts",
         "deprecated": false,

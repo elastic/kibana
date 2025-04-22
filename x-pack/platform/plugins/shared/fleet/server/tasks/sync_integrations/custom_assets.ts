@@ -18,6 +18,7 @@ import { retryTransientEsErrors } from '../../services/epm/elasticsearch/retry';
 import type { CustomAssetsData, IntegrationsData, SyncIntegrationsData } from './model';
 
 const DELETED_ASSET_TTL = 7 * 24 * 60 * 60 * 1000; // 7 days
+export const CUSTOM_ASSETS_PREFIX = '*@custom';
 
 export const findIntegration = (assetName: string, integrations: IntegrationsData[]) => {
   const matches = assetName.match(/^(\w*)?(?:\-)?(\w*)(?:\-)?(?:\.)?(?:\w*)?@custom$/);
@@ -33,7 +34,7 @@ export const findIntegration = (assetName: string, integrations: IntegrationsDat
   });
 };
 
-function getComponentTemplate(
+export function getComponentTemplate(
   esClient: ElasticsearchClient,
   name: string,
   abortController: AbortController
@@ -49,7 +50,7 @@ function getComponentTemplate(
   );
 }
 
-function getPipeline(
+export function getPipeline(
   esClient: ElasticsearchClient,
   name: string,
   abortController: AbortController
@@ -71,7 +72,11 @@ export const getCustomAssets = async (
   abortController: AbortController,
   previousSyncIntegrationsData: SyncIntegrationsData | undefined
 ): Promise<CustomAssetsData[]> => {
-  const customTemplates = await getComponentTemplate(esClient, '*@custom', abortController);
+  const customTemplates = await getComponentTemplate(
+    esClient,
+    CUSTOM_ASSETS_PREFIX,
+    abortController
+  );
 
   const customAssetsComponentTemplates = customTemplates.component_templates.reduce(
     (acc: CustomAssetsData[], template) => {
@@ -90,7 +95,7 @@ export const getCustomAssets = async (
     []
   );
 
-  const ingestPipelines = await getPipeline(esClient, '*@custom', abortController);
+  const ingestPipelines = await getPipeline(esClient, CUSTOM_ASSETS_PREFIX, abortController);
 
   const customAssetsIngestPipelines = Object.keys(ingestPipelines).reduce(
     (acc: CustomAssetsData[], pipeline) => {

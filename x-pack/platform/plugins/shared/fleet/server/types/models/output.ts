@@ -157,7 +157,6 @@ export const RemoteElasticSearchSchema = {
   secrets: schema.maybe(
     schema.object({
       service_token: schema.maybe(secretRefSchema),
-      kibana_api_key: schema.maybe(secretRefSchema),
       ssl: schema.maybe(schema.object({ key: schema.maybe(secretRefSchema) })),
     })
   ),
@@ -173,7 +172,6 @@ const RemoteElasticSearchUpdateSchema = {
   secrets: schema.maybe(
     schema.object({
       service_token: schema.maybe(secretRefSchema),
-      kibana_api_key: schema.maybe(secretRefSchema),
       ssl: schema.maybe(schema.object({ key: schema.maybe(secretRefSchema) })),
     })
   ),
