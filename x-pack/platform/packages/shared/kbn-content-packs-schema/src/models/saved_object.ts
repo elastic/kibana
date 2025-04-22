@@ -9,8 +9,8 @@ import type { SavedObject } from '@kbn/core/server';
 import type { DashboardAttributes } from '@kbn/dashboard-plugin/common/content_management/v2';
 import type { DataViewSavedObjectAttrs } from '@kbn/data-views-plugin/common/data_views';
 
-type ContentPackDashboard = SavedObject<DashboardAttributes>;
-type ContentPackDataView = SavedObject<DataViewSavedObjectAttrs>;
+type ContentPackDashboard = SavedObject<DashboardAttributes> & { type: 'dashboard' };
+type ContentPackDataView = SavedObject<DataViewSavedObjectAttrs> & { type: 'index-pattern' };
 export type ContentPackSavedObject = ContentPackDashboard | ContentPackDataView;
 
 export interface SavedObjectLink {

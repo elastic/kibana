@@ -97,7 +97,7 @@ export function updateIds(
 ) {
   const existingLinks = links.dashboards.flatMap((ref) => [ref, ...ref.references]);
   const targetId = (sourceId: string) => {
-    const link = existingLinks.find(({ source_id }) => source_id === sourceId);
+    const link = existingLinks.find(({ source_id: id }) => id === sourceId);
     if (!link) {
       throw new Error(`link for [${sourceId}] was not generated`);
     }
@@ -131,9 +131,7 @@ export function savedObjectLinks(
   const dashboards = savedObjects
     .filter((object) => object.type === 'dashboard')
     .map((object) => {
-      const existingLink = existingLinks.dashboards.find(
-        ({ source_id }) => source_id === object.id
-      );
+      const existingLink = existingLinks.dashboards.find(({ source_id: id }) => id === object.id);
 
       return {
         source_id: object.id,

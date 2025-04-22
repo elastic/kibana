@@ -11,7 +11,7 @@ import { z } from '@kbn/zod';
 import { createConcatStream, createListStream, createPromiseFromStreams } from '@kbn/utils';
 import { installManagedIndexPattern } from '@kbn/fleet-plugin/server/services/epm/kibana/assets/install';
 import {
-  ContentPackEntry,
+  ContentPackSavedObject,
   contentPackIncludedObjectsSchema,
   isIncludeAll,
 } from '@kbn/content-packs-schema';
@@ -91,7 +91,7 @@ const exportContentRoute = createServerRoute({
       includeReferencesDeep: true,
     });
 
-    const savedObjects: ContentPackEntry[] = await createPromiseFromStreams([
+    const savedObjects: ContentPackSavedObject[] = await createPromiseFromStreams([
       exportStream,
       createConcatStream([]),
     ]);
