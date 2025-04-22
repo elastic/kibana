@@ -24,8 +24,8 @@ SRCS = glob(
 DEPS = []
 
 js_library(
-  name = "kibana-mount",
-  package_name = "@kbn/kibana-mount",
+  name = "react-kibana-mount",
+  package_name = "@kbn/react-kibana-mount",
   srcs = ["package.json"] + SRCS,
   deps = DEPS,
   visibility = ["//visibility:public"],
