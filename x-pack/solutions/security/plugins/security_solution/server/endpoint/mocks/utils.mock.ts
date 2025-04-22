@@ -11,7 +11,6 @@ import type { ElasticsearchClientMock } from '@kbn/core-elasticsearch-client-ser
 import type { OpenPointInTimeResponse, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { v4 as uuidV4 } from 'uuid';
 import { BaseDataGenerator } from '../../../common/endpoint/data_generators/base_data_generator';
-// import { fromKueryExpression } from '@kbn/es-query';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import { isObject, merge, reduce } from 'lodash';
 

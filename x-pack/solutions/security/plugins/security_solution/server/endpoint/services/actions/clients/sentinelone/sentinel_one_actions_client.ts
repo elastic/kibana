@@ -143,7 +143,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
     const indexNamespaces = await fleetServices.getIntegrationNamespaces(['sentinel_one']);
     const indexNames: string[] = [];
 
-    for (const [, namespaces] of Object.entries(indexNamespaces)) {
+    for (const namespaces of Object.values(indexNamespaces)) {
       if (namespaces.length > 0) {
         indexNames.push(
           ...namespaces.map((namespace) =>
@@ -188,7 +188,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
       throw new ResponseActionsClientError(
         `Unable to build list of indexes while retrieving policy information for SentinelOne agents [${agentIds.join(
           ', '
-        )}]. Check to ensure at least one integration policy exits.`,
+        )}]. Check to ensure at least one integration policy exists.`,
         400
       );
     }
