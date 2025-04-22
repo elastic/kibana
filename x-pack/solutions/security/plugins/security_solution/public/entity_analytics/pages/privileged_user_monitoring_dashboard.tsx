@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
+import React, { useRef } from 'react';
 import { EuiFlexGroup, EuiLoadingSpinner, EuiFlexItem } from '@elastic/eui';
 import { SecurityPageName } from '@kbn/deeplinks-security';
 import { getESQLAdHocDataview } from '@kbn/esql-utils';
@@ -33,6 +33,10 @@ function HistogramComponent() {
     capabilities,
   };
 
+  const containerRef = useRef(null);
+  // Create a ref for resize functionality
+  const resizeRef = useRef(null);
+
   const dataViewAsync = useAsync(() => {
     return getESQLAdHocDataview(DENY_PUSH, allServices.dataViews);
   }, [DENY_PUSH, allServices.dataViews]);
@@ -43,15 +47,16 @@ function HistogramComponent() {
 
   const dataParams = {
     dataView: dataViewAsync.value,
-    query: { query: DENY_PUSH, language: 'esql' },
+    query: { query: DENY_PUSH, language: 'kql' },
     filters: [],
     timeRange: { from: 'now-48h', to: 'now' },
-    // relativeTimeRange: { from: 900, to: 0 },
-    container: null,
+    relativeTimeRange: { from: 'now-48h', to: 'now' },
+    resizeRef: resizeRef.current,
+    container: containerRef.current,
   };
 
   return (
-    <EuiFlexItem grow={true}>
+    <EuiFlexItem grow={true} ref={containerRef}>
       <UnifiedHistogramContainer services={services} {...dataParams}>
         <>{'hello'}</>
       </UnifiedHistogramContainer>
