@@ -74,6 +74,25 @@ const setupKnowledgeBase = createObservabilityAIAssistantServerRoute({
   },
 });
 
+const warmupModelKnowledgeBase = createObservabilityAIAssistantServerRoute({
+  endpoint: 'POST /internal/observability_ai_assistant/kb/warmup_model',
+  params: t.type({
+    body: t.type({
+      inference_id: t.string,
+    }),
+  }),
+  security: {
+    authz: {
+      requiredPrivileges: ['ai_assistant'],
+    },
+  },
+  handler: async (resources): Promise<void> => {
+    const client = await resources.service.getClient({ request: resources.request });
+    const { inference_id: inferenceId } = resources.params.body;
+    return client.warmupKbModel(inferenceId);
+  },
+});
+
 const reIndexKnowledgeBase = createObservabilityAIAssistantServerRoute({
   endpoint: 'POST /internal/observability_ai_assistant/kb/reindex',
   params: t.type({
@@ -112,30 +131,6 @@ const startupMigrationsKnowledgeBase = createObservabilityAIAssistantServerRoute
   },
 });
 
-const getKnowledgeBaseUserInstructions = createObservabilityAIAssistantServerRoute({
-  endpoint: 'GET /internal/observability_ai_assistant/kb/user_instructions',
-  security: {
-    authz: {
-      requiredPrivileges: ['ai_assistant'],
-    },
-  },
-  handler: async (
-    resources
-  ): Promise<{
-    userInstructions: Array<Instruction & { public?: boolean }>;
-  }> => {
-    const client = await resources.service.getClient({ request: resources.request });
-
-    if (!client) {
-      throw notImplemented();
-    }
-
-    return {
-      userInstructions: await client.getKnowledgeBaseUserInstructions(),
-    };
-  },
-});
-
 const getKnowledgeBaseInferenceEndpoints = createObservabilityAIAssistantServerRoute({
   endpoint: 'GET /internal/observability_ai_assistant/kb/inference_endpoints',
   security: {
@@ -156,6 +151,30 @@ const getKnowledgeBaseInferenceEndpoints = createObservabilityAIAssistantServerR
 
     return {
       endpoints: await client.getPreconfiguredInferenceEndpoints(),
+    };
+  },
+});
+
+const getKnowledgeBaseUserInstructions = createObservabilityAIAssistantServerRoute({
+  endpoint: 'GET /internal/observability_ai_assistant/kb/user_instructions',
+  security: {
+    authz: {
+      requiredPrivileges: ['ai_assistant'],
+    },
+  },
+  handler: async (
+    resources
+  ): Promise<{
+    userInstructions: Array<Instruction & { public?: boolean }>;
+  }> => {
+    const client = await resources.service.getClient({ request: resources.request });
+
+    if (!client) {
+      throw notImplemented();
+    }
+
+    return {
+      userInstructions: await client.getKnowledgeBaseUserInstructions(),
     };
   },
 });
@@ -351,4 +370,5 @@ export const knowledgeBaseRoutes = {
   ...saveKnowledgeBaseEntry,
   ...deleteKnowledgeBaseEntry,
   ...getKnowledgeBaseInferenceEndpoints,
+  ...warmupModelKnowledgeBase,
 };

@@ -33,6 +33,7 @@ import { reIndexKnowledgeBaseWithLock } from './reindex_knowledge_base';
 import { LockAcquisitionError } from '../distributed_lock_manager/lock_manager_client';
 import { isSemanticTextUnsupportedError } from '../startup_migrations/run_startup_migrations';
 import { isKnowledgeBaseIndexWriteBlocked } from './index_write_block_utils';
+import { hasKbIndex } from './has_kb_index';
 
 interface Dependencies {
   core: CoreSetup<ObservabilityAIAssistantPluginStartDependencies>;
@@ -203,6 +204,13 @@ export class KnowledgeBaseService {
     if (!this.dependencies.config.enableKnowledgeBase) {
       return [];
     }
+
+    const doesKbIndexExist = await hasKbIndex({ esClient: this.dependencies.esClient });
+
+    if (!doesKbIndexExist) {
+      return [];
+    }
+
     try {
       const response = await this.dependencies.esClient.asInternalUser.search<KnowledgeBaseEntry>({
         index: resourceNames.writeIndexAlias.kb,

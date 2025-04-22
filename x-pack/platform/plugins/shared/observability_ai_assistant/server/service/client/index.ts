@@ -74,6 +74,8 @@ import { apmInstrumentation } from './operators/apm_instrumentation';
 import { getInferenceIdFromWriteIndex, waitForKbModel, warmupModel } from '../inference_endpoint';
 import { reIndexKnowledgeBaseWithLock } from '../knowledge_base_service/reindex_knowledge_base';
 import { populateMissingSemanticTextFieldWithLock } from '../startup_migrations/populate_missing_semantic_text_fields';
+import { createOrUpdateKnowledgeBaseIndexAssets } from '../index_assets/create_or_update_knowledge_base_index_assets';
+import { hasKbIndex } from '../knowledge_base_service/has_kb_index';
 
 const MAX_FUNCTION_CALLS = 8;
 
@@ -682,6 +684,18 @@ export class ObservabilityAIAssistantClient {
 
     logger.debug(`Setting up knowledge base with inference_id: ${inferenceId}`);
 
+    const doesKbIndexExist = await hasKbIndex({ esClient });
+
+    // KB index doesn't exist. Setup index assets for the KB for the first time
+    if (!doesKbIndexExist) {
+      logger.debug('Existing knowledge base index not found');
+      await createOrUpdateKnowledgeBaseIndexAssets({
+        core: this.dependencies.core,
+        logger: this.dependencies.logger,
+        inferenceId,
+      });
+    }
+
     const currentInferenceId = await getInferenceIdFromWriteIndex(esClient).catch(() => {
       logger.debug(
         `Current KB write index does not have an inference_id. This is to be expected for indices created before 8.16`
@@ -717,6 +731,15 @@ export class ObservabilityAIAssistantClient {
       });
 
     return { reindex: true, currentInferenceId, nextInferenceId: inferenceId };
+  };
+
+  warmupKbModel = (inferenceId: string) => {
+    return waitForKbModel({
+      esClient: this.dependencies.esClient,
+      logger: this.dependencies.logger,
+      config: this.dependencies.config,
+      inferenceId,
+    });
   };
 
   reIndexKnowledgeBaseWithLock = (inferenceId: string) => {

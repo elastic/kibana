@@ -10,7 +10,6 @@ import { Logger } from '@kbn/logging';
 import { last } from 'lodash';
 import pRetry from 'p-retry';
 import { CoreSetup } from '@kbn/core/server';
-import { errors } from '@elastic/elasticsearch';
 import { resourceNames } from '..';
 import { LockManagerService } from '../distributed_lock_manager/lock_manager_service';
 import { ObservabilityAIAssistantPluginStartDependencies } from '../../types';
@@ -19,6 +18,8 @@ import {
   hasIndexWriteBlock,
   removeIndexWriteBlock,
 } from './index_write_block_utils';
+import { createKnowledgeBaseIndex } from './create_knowledge_base_index';
+import { updateKnowledgeBaseWriteIndexAlias } from './update_knowledge_base_index_alias';
 
 export const KB_REINDEXING_LOCK_ID = 'observability_ai_assistant:kb_reindexing';
 export async function reIndexKnowledgeBaseWithLock({
@@ -95,7 +96,7 @@ async function reIndexKnowledgeBase({
     logger,
   });
 
-  await createTargetIndex({ esClient, logger, inferenceId, indexName: nextWriteIndexName });
+  await createKnowledgeBaseIndex({ esClient, logger, inferenceId, indexName: nextWriteIndexName });
 
   logger.info(
     `Re-indexing knowledge base from "${currentWriteIndexName}" to index "${nextWriteIndexName}"...`
@@ -120,67 +121,7 @@ async function reIndexKnowledgeBase({
   await esClient.asInternalUser.indices.delete({ index: currentWriteIndexName });
 
   // Point write index alias to the new index
-  await updateWriteIndexAlias({ esClient, logger, index: nextWriteIndexName });
-}
-
-export async function updateWriteIndexAlias({
-  esClient,
-  logger,
-  index,
-}: {
-  esClient: { asInternalUser: ElasticsearchClient };
-  logger: Logger;
-  index: string;
-}) {
-  logger.debug(`Updating write index alias to "${index}"`);
-  await esClient.asInternalUser.indices.updateAliases({
-    actions: [
-      {
-        add: {
-          index,
-          alias: resourceNames.writeIndexAlias.kb,
-          is_write_index: true,
-        },
-      },
-    ],
-  });
-}
-
-export async function createTargetIndex({
-  esClient,
-  logger,
-  inferenceId,
-  indexName,
-}: {
-  esClient: { asInternalUser: ElasticsearchClient };
-  logger: Logger;
-  inferenceId: string;
-  indexName: string;
-}) {
-  logger.debug(`Creating new write index "${indexName}"`);
-  try {
-    await esClient.asInternalUser.indices.create({
-      index: indexName,
-      mappings: {
-        properties: {
-          semantic_text: {
-            type: 'semantic_text',
-            inference_id: inferenceId,
-          },
-        },
-      },
-    });
-  } catch (error) {
-    if (
-      error instanceof errors.ResponseError &&
-      error?.body?.error?.type === 'resource_already_exists_exception'
-    ) {
-      throw new Error(
-        `Write index "${indexName}" already exists. Please delete it before re-indexing.`
-      );
-    }
-    throw error;
-  }
+  await updateKnowledgeBaseWriteIndexAlias({ esClient, logger, index: nextWriteIndexName });
 }
 
 async function getCurrentWriteIndexName(esClient: { asInternalUser: ElasticsearchClient }) {

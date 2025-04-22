@@ -8,6 +8,7 @@
 import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
+  EuiButton,
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
@@ -22,6 +23,69 @@ import usePrevious from 'react-use/lib/usePrevious';
 import { WelcomeMessageKnowledgeBaseSetupErrorPanel } from './welcome_message_knowledge_base_setup_error_panel';
 import { UseKnowledgeBaseResult } from '../hooks';
 import { SelectModelAndInstallKnowledgeBase } from './select_model_and_install_knowledge_base';
+
+const WarmUpModel = ({
+  knowledgeBase,
+  pendingDeployment = false,
+}: {
+  knowledgeBase: UseKnowledgeBaseResult;
+  pendingDeployment?: boolean;
+}) => {
+  const currentInferenceId = knowledgeBase.status.value?.endpoint?.inference_id;
+
+  const handleWarmup = () => {
+    knowledgeBase.warmupModel(currentInferenceId!);
+  };
+
+  let label;
+  if (knowledgeBase.isWarmingUpModel) {
+    label = (
+      <EuiText color="subdued" size="s">
+        {i18n.translate('xpack.aiAssistant.welcomeMessage.redeployingKnowledgeBaseTextLabel', {
+          defaultMessage: 'Re-deploying knowledge base model',
+        })}
+      </EuiText>
+    );
+  } else if (pendingDeployment) {
+    label = (
+      <EuiText color="subdued" size="s">
+        {i18n.translate('xpack.aiAssistant.welcomeMessage.knowledgeBaseStoppedTextLabel', {
+          defaultMessage: 'Your knowledge base model has been stopped.',
+        })}
+      </EuiText>
+    );
+  } else {
+    label = (
+      <EuiText color="subdued" size="s">
+        {i18n.translate('xpack.aiAssistant.welcomeMessage.knowledgeBasePausedTextLabel', {
+          defaultMessage: 'Knowledge base model paused due to inactivity.',
+        })}
+      </EuiText>
+    );
+  }
+
+  return (
+    <>
+      {label}
+      <EuiSpacer size="m" />
+      <EuiFlexGroup justifyContent="center">
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            color="primary"
+            fill
+            isLoading={knowledgeBase.isWarmingUpModel}
+            data-test-subj="observabilityAiAssistantWelcomeMessageSetUpKnowledgeBaseButton"
+            onClick={handleWarmup}
+          >
+            {i18n.translate('xpack.aiAssistant.knowledgeBase.wakeUpKnowledgeBaseModel', {
+              defaultMessage: 'Re-deploy Model',
+            })}
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </>
+  );
+};
 
 const SettingUpKnowledgeBase = () => (
   <>
@@ -105,13 +169,6 @@ export function WelcomeMessageKnowledgeBase({
     case KnowledgeBaseState.NOT_INSTALLED:
       return (
         <>
-          <EuiText color="subdued" size="s">
-            {i18n.translate(
-              'xpack.aiAssistant.welcomeMessageKnowledgeBase.yourKnowledgeBaseIsNotSetUpCorrectlyLabel',
-              { defaultMessage: `Your Knowledge base hasn't been set up.` }
-            )}
-          </EuiText>
-          <EuiSpacer size="l" />
           <EuiSpacer size="l" />
           <EuiFlexItem grow={false}>
             <SelectModelAndInstallKnowledgeBase
@@ -121,6 +178,9 @@ export function WelcomeMessageKnowledgeBase({
           </EuiFlexItem>
         </>
       );
+    // model has been stopped after installing KB and requires a re-deployment
+    case KnowledgeBaseState.PENDING_MODEL_DEPLOYMENT:
+      return <WarmUpModel knowledgeBase={knowledgeBase} pendingDeployment={true} />;
     case KnowledgeBaseState.DEPLOYING_MODEL:
       return (
         <>
@@ -128,6 +188,9 @@ export function WelcomeMessageKnowledgeBase({
           <InspectKnowledgeBasePopover knowledgeBase={knowledgeBase} />
         </>
       );
+    // model has scaled down due to inactivity
+    case KnowledgeBaseState.MODEL_PENDING_ALLOCATION:
+      return <WarmUpModel knowledgeBase={knowledgeBase} />;
     case KnowledgeBaseState.READY:
       return showSuccessBanner ? (
         <div>

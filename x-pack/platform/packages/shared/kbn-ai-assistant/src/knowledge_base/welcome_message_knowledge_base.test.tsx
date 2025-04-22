@@ -190,7 +190,7 @@ describe('WelcomeMessageKnowledgeBase', () => {
     });
     renderComponent(kb);
 
-    expect(screen.getByText(/Your Knowledge base hasn't been set up/i)).toBeInTheDocument();
+    expect(screen.getByText(/Get started by setting up the Knowledge Base/i)).toBeInTheDocument();
     expect(screen.getByText(/Install Knowledge Base/i)).toBeInTheDocument();
     expect(screen.queryByText(/Inspect/i)).toBeNull();
   });
@@ -241,7 +241,7 @@ describe('WelcomeMessageKnowledgeBase', () => {
     renderComponent(kb);
 
     expect(screen.queryByText(/We are setting up your knowledge base/i)).toBeNull();
-    expect(screen.queryByText(/Your Knowledge base hasn't been set up/i)).toBeNull();
+    expect(screen.queryByText(/Get started by setting up the Knowledge Base/i)).toBeNull();
     expect(screen.queryByText(/Knowledge base successfully installed/i)).toBeNull();
   });
 });

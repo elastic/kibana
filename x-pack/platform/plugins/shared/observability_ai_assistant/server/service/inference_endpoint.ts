@@ -39,8 +39,6 @@ export const getPreconfiguredInferenceEndpointsForEmbedding = async ({
     throw new Error('Did not find any inference endpoints');
   }
 
-  logger.debug(`Found "${endpoints.length}" inference endpoints`);
-
   const embeddingEndpoints = endpoints.filter((endpoint) =>
     SUPPORTED_TASK_TYPES.includes(endpoint.task_type)
   );
@@ -49,7 +47,7 @@ export const getPreconfiguredInferenceEndpointsForEmbedding = async ({
     throw new Error('Did not find any inference endpoints for embedding');
   }
 
-  logger.debug(`Found "${embeddingEndpoints.length}" inference endpoints for supported task types`);
+  logger.debug(`Found ${embeddingEndpoints.length} inference endpoints for supported task types`);
 
   return {
     inferenceEndpoints: embeddingEndpoints as InferenceAPIConfigResponse[],
@@ -90,6 +88,7 @@ export async function getInferenceIdFromWriteIndex(esClient: {
   });
 
   const [indexName, indexMappings] = Object.entries(response)[0];
+
   const inferenceId = (
     indexMappings.mappings.semantic_text?.mapping.semantic_text as MappingSemanticTextProperty
   )?.inference_id;
@@ -117,6 +116,7 @@ export async function getKbModelStatus({
   modelStats?: MlTrainedModelStats;
   errorMessage?: string;
   kbState: KnowledgeBaseState;
+  inferenceId?: string;
 }> {
   const enabled = config.enableKnowledgeBase;
 
@@ -158,7 +158,7 @@ export async function getKbModelStatus({
       model_id: modelId,
     });
   } catch (error) {
-    logger.error(
+    logger.debug(
       `Failed to get model stats for model "${modelId}" and inference id ${inferenceId}: ${error.message}`
     );
 
@@ -176,9 +176,11 @@ export async function getKbModelStatus({
 
   let kbState: KnowledgeBaseState;
 
-  if (!modelStats) {
-    kbState = KnowledgeBaseState.NOT_INSTALLED;
-  } else if (modelStats.deployment_stats?.state === 'failed') {
+  // TODO: Update states for serverless as serverless responses are different from stateful
+  if (trainedModelStatsResponse.trained_model_stats?.length && !modelStats) {
+    // model has been deployed at least once, but stopped later
+    kbState = KnowledgeBaseState.PENDING_MODEL_DEPLOYMENT;
+  } else if (modelStats?.deployment_stats?.state === 'failed') {
     kbState = KnowledgeBaseState.ERROR;
   } else if (
     modelStats?.deployment_stats?.state === 'starting' &&
@@ -191,6 +193,13 @@ export async function getKbModelStatus({
     modelStats?.deployment_stats?.allocation_status?.allocation_count > 0
   ) {
     kbState = KnowledgeBaseState.READY;
+  } else if (
+    modelStats?.deployment_stats?.state === 'started' &&
+    modelStats?.deployment_stats?.allocation_status?.state === 'fully_allocated' &&
+    modelStats?.deployment_stats?.allocation_status?.allocation_count === 0
+  ) {
+    // model has been scaled down due to inactivity
+    kbState = KnowledgeBaseState.MODEL_PENDING_ALLOCATION;
   } else {
     kbState = KnowledgeBaseState.ERROR;
   }

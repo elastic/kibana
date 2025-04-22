@@ -21,6 +21,8 @@ export interface UseKnowledgeBaseResult {
   isInstalling: boolean;
   isPolling: boolean;
   install: (inferenceId: string) => Promise<void>;
+  warmupModel: (inferenceId: string) => Promise<void>;
+  isWarmingUpModel: boolean;
 }
 
 export function useKnowledgeBase(): UseKnowledgeBaseResult {
@@ -35,9 +37,11 @@ export function useKnowledgeBase(): UseKnowledgeBaseResult {
   );
 
   const [isInstalling, setIsInstalling] = useState(false);
+  const [isWarmingUpModel, setIsWarmingUpModel] = useState(false);
 
   // poll for status when installing, until install is complete and the KB is ready
-  const isPolling = isInstalling && statusRequest.value?.kbState !== KnowledgeBaseState.READY;
+  const isPolling =
+    (isInstalling || isWarmingUpModel) && statusRequest.value?.kbState !== KnowledgeBaseState.READY;
 
   useEffect(() => {
     // toggle installing state to false once KB is ready
@@ -45,6 +49,13 @@ export function useKnowledgeBase(): UseKnowledgeBaseResult {
       setIsInstalling(false);
     }
   }, [isInstalling, statusRequest]);
+
+  useEffect(() => {
+    // toggle warming up state to false once KB is ready
+    if (isWarmingUpModel && statusRequest.value?.kbState === KnowledgeBaseState.READY) {
+      setIsWarmingUpModel(false);
+    }
+  }, [isWarmingUpModel, statusRequest]);
 
   const install = useCallback(
     async (inferenceId: string) => {
@@ -83,6 +94,32 @@ export function useKnowledgeBase(): UseKnowledgeBaseResult {
     [ml, service, notifications, statusRequest]
   );
 
+  const warmupModel = useCallback(
+    async (inferenceId: string) => {
+      setIsWarmingUpModel(true);
+      try {
+        await service.callApi('POST /internal/observability_ai_assistant/kb/warmup_model', {
+          params: {
+            body: {
+              inference_id: inferenceId,
+            },
+          },
+          signal: null,
+        });
+
+        // Refresh status after warming up model
+        statusRequest.refresh();
+      } catch (error) {
+        notifications!.toasts.addError(error, {
+          title: i18n.translate('xpack.aiAssistant.errorWarmingupModel', {
+            defaultMessage: 'Could not warm up knowledge base model',
+          }),
+        });
+      }
+    },
+    [service, notifications, statusRequest]
+  );
+
   // poll the status if isPolling
   useEffect(() => {
     if (!isPolling) {
@@ -108,5 +145,7 @@ export function useKnowledgeBase(): UseKnowledgeBaseResult {
     install,
     isInstalling,
     isPolling,
+    warmupModel,
+    isWarmingUpModel,
   };
 }

@@ -17,6 +17,7 @@ import { reIndexKnowledgeBaseWithLock } from '../knowledge_base_service/reindex_
 import { LockManagerService } from '../distributed_lock_manager/lock_manager_service';
 import { LockAcquisitionError } from '../distributed_lock_manager/lock_manager_client';
 import { populateMissingSemanticTextFieldWithLock } from './populate_missing_semantic_text_fields';
+import { hasKbIndex } from '../knowledge_base_service/has_kb_index';
 
 const PLUGIN_STARTUP_LOCK_ID = 'observability_ai_assistant:startup_migrations';
 
@@ -38,11 +39,9 @@ export async function runStartupMigrations({
   const lmService = new LockManagerService(core, logger);
   await lmService
     .withLock(PLUGIN_STARTUP_LOCK_ID, async () => {
-      const hasKbIndex = await esClient.asInternalUser.indices.exists({
-        index: resourceNames.writeIndexAlias.kb,
-      });
+      const doesKbIndexExist = await hasKbIndex({ esClient });
 
-      if (!hasKbIndex) {
+      if (!doesKbIndexExist) {
         logger.warn('Knowledge base index does not exist. Aborting updating index assets');
         return;
       }

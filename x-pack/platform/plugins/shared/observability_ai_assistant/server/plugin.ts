@@ -32,7 +32,7 @@ import { recallRankingEvent } from './analytics/recall_ranking';
 import { initLangtrace } from './service/client/instrumentation/init_langtrace';
 import { aiAssistantCapabilities } from '../common/capabilities';
 import { runStartupMigrations } from './service/startup_migrations/run_startup_migrations';
-import { updateExistingIndexAssets } from './service/startup_migrations/create_or_update_index_assets';
+import { updateExistingIndexAssets } from './service/index_assets/update_existing_index_assets';
 
 export class ObservabilityAIAssistantPlugin
   implements
