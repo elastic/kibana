@@ -54,7 +54,16 @@ export type EmbeddableAlertsTableApi = DefaultEmbeddableApi<EmbeddableAlertsTabl
   PublishesDataLoading &
   HasEditCapabilities;
 
+/**
+ * The type of the filters expression used in the embeddable alerts table.
+ * This will allow us to add more query types in the future (e.g. `{ type: 'kql', kuery: string }`).
+ */
+export interface EmbeddableAlertsTableQuery {
+  type: 'alertsFilters';
+  filters: AlertsFiltersExpression;
+}
+
 export interface EmbeddableAlertsTableConfig {
   solution: RuleTypeSolution;
-  filters: AlertsFiltersExpression;
+  query: EmbeddableAlertsTableQuery;
 }

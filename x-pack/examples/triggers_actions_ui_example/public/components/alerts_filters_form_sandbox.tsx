@@ -12,11 +12,14 @@ import { AlertsFiltersForm } from '@kbn/response-ops-alerts-filters-form/compone
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiPanel, EuiText } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { FlattenedExpressionItem } from '@kbn/response-ops-alerts-filters-form/types';
 import { useGetInternalRuleTypesQuery } from '@kbn/response-ops-rules-apis/hooks/use_get_internal_rule_types_query';
 import { RuleTypeSolution } from '@kbn/alerting-types';
 import { AlertsSolutionSelector } from '@kbn/response-ops-alerts-filters-form/components/alerts_solution_selector';
-import { getRuleTypeIdsForSolution } from '@kbn/response-ops-alerts-filters-form/utils';
+import {
+  getAvailableSolutions,
+  getRuleTypeIdsForSolution,
+} from '@kbn/response-ops-alerts-filters-form/utils/solutions';
+import { AlertsFiltersExpression } from '@kbn/response-ops-alerts-filters-form/types';
 
 export const AlertsFiltersFormSandbox = ({
   services: { http, notifications },
@@ -27,8 +30,16 @@ export const AlertsFiltersFormSandbox = ({
   };
 }) => {
   const [solution, setSolution] = useState<RuleTypeSolution | undefined>();
-  const [filters, setFilters] = useState<FlattenedExpressionItem[]>();
-  const { data: ruleTypes, isLoading: isLoadingRuleTypes } = useGetInternalRuleTypesQuery({ http });
+  const [filters, setFilters] = useState<AlertsFiltersExpression>();
+  const {
+    data: ruleTypes,
+    isLoading: isLoadingRuleTypes,
+    isError: cannotLoadRuleTypes,
+  } = useGetInternalRuleTypesQuery({ http });
+  const availableSolutions = useMemo(
+    () => (ruleTypes ? getAvailableSolutions(ruleTypes) : undefined),
+    [ruleTypes]
+  );
   const ruleTypeIds = useMemo(
     () => (!ruleTypes || !solution ? [] : getRuleTypeIdsForSolution(ruleTypes, solution)),
     [ruleTypes, solution]
@@ -51,7 +62,9 @@ export const AlertsFiltersFormSandbox = ({
       <EuiFlexGroup direction="column" gutterSize="m">
         <EuiFlexItem>
           <AlertsSolutionSelector
-            services={{ http }}
+            availableSolutions={availableSolutions}
+            isLoading={isLoadingRuleTypes}
+            isError={cannotLoadRuleTypes}
             solution={solution}
             onSolutionChange={(newSolution: RuleTypeSolution) => {
               if (solution != null && newSolution !== solution) {

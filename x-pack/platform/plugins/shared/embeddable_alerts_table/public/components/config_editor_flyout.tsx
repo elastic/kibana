@@ -20,13 +20,17 @@ import {
   EuiLoadingSpinner,
   EuiTitle,
 } from '@elastic/eui';
+import type { AlertsFiltersFormHandle } from '@kbn/response-ops-alerts-filters-form/components/alerts_filters_form';
 import { AlertsFiltersForm } from '@kbn/response-ops-alerts-filters-form/components/alerts_filters_form';
 import { AlertsSolutionSelector } from '@kbn/response-ops-alerts-filters-form/components/alerts_solution_selector';
-import { getRuleTypeIdsForSolution } from '@kbn/response-ops-alerts-filters-form/utils/get_rule_types_by_solution';
+import { isEmptyExpression } from '@kbn/response-ops-alerts-filters-form/utils/filters';
+import {
+  getAvailableSolutions,
+  getRuleTypeIdsForSolution,
+} from '@kbn/response-ops-alerts-filters-form/utils/solutions';
 import { useGetInternalRuleTypesQuery } from '@kbn/response-ops-rules-apis/hooks/use_get_internal_rule_types_query';
 import type { AlertsFiltersExpression } from '@kbn/response-ops-alerts-filters-form/types';
 import type { RuleTypeSolution } from '@kbn/alerting-types';
-import { isEmptyFiltersExpression } from '@kbn/response-ops-alerts-filters-form/utils/filters_expression';
 import type { EuiSuperSelect } from '@elastic/eui/src/components/form/super_select/super_select';
 import useEffectOnce from 'react-use/lib/useEffectOnce';
 import type { EmbeddableAlertsTableConfig } from '../types';
@@ -56,10 +60,7 @@ export interface ConfigEditorFlyoutProps {
   };
 }
 
-const EMPTY_FILTERS: AlertsFiltersExpression = {
-  operator: 'and',
-  operands: [{}],
-};
+const EMPTY_FILTERS: AlertsFiltersExpression = [{ filter: {} }];
 
 export const ConfigEditorFlyout = ({
   initialConfig,
@@ -70,17 +71,23 @@ export const ConfigEditorFlyout = ({
   const { http, overlays } = services;
   const flyoutBodyRef = useRef<HTMLDivElement>(null);
   const solutionSelectorRef = useRef<EuiSuperSelect<RuleTypeSolution>>(null);
-  const [solution, setSolution] = useState<EmbeddableAlertsTableConfig['solution'] | undefined>(
-    initialConfig?.solution
-  );
-  const [filters, setFilters] = useState<EmbeddableAlertsTableConfig['filters'] | undefined>(
-    initialConfig?.filters
-  );
+  const [filters, setFilters] = useState<
+    EmbeddableAlertsTableConfig['query']['filters'] | undefined
+  >(initialConfig?.query?.filters ?? EMPTY_FILTERS);
+  const formRef = useRef<AlertsFiltersFormHandle>(null);
   const {
     data: ruleTypes,
     isLoading: isLoadingRuleTypes,
     isError: cannotLoadRuleTypes,
   } = useGetInternalRuleTypesQuery({ http });
+  const availableSolutions = useMemo(
+    () => (ruleTypes ? getAvailableSolutions(ruleTypes) : undefined),
+    [ruleTypes]
+  );
+  const [solution, setSolution] = useState<EmbeddableAlertsTableConfig['solution'] | undefined>(
+    initialConfig?.solution ??
+      (availableSolutions && availableSolutions.length === 1 ? availableSolutions[0] : undefined)
+  );
   const ruleTypeIds = useMemo(
     () => (!ruleTypes || !solution ? [] : getRuleTypeIdsForSolution(ruleTypes, solution)),
     [ruleTypes, solution]
@@ -96,7 +103,7 @@ export const ConfigEditorFlyout = ({
         solution != null &&
         newSolution !== solution &&
         filters != null &&
-        !isEmptyFiltersExpression(filters)
+        !isEmptyExpression(filters)
       ) {
         // Filters are incompatible between different solutions and thus must be reset
         // Ask for confirmation before doing so
@@ -144,12 +151,16 @@ export const ConfigEditorFlyout = ({
       <EuiFlyoutBody>
         <EuiFlexGroup direction="column" gutterSize="m" ref={flyoutBodyRef}>
           <EuiFlexItem>
-            <AlertsSolutionSelector
-              ref={solutionSelectorRef}
-              solution={solution}
-              onSolutionChange={onSolutionChange}
-              services={{ http }}
-            />
+            {availableSolutions && availableSolutions.length > 1 && (
+              <AlertsSolutionSelector
+                ref={solutionSelectorRef}
+                availableSolutions={availableSolutions}
+                isLoading={isLoadingRuleTypes}
+                isError={cannotLoadRuleTypes}
+                solution={solution}
+                onSolutionChange={onSolutionChange}
+              />
+            )}
           </EuiFlexItem>
           {solution && (
             <EuiFlexItem>
@@ -187,6 +198,7 @@ export const ConfigEditorFlyout = ({
                     </EuiCallOut>
                   ) : (
                     <AlertsFiltersForm
+                      ref={formRef}
                       ruleTypeIds={ruleTypeIds}
                       value={filters}
                       onChange={setFilters}
@@ -209,13 +221,15 @@ export const ConfigEditorFlyout = ({
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton
-              isDisabled={!solution || !filters || cannotLoadRuleTypes}
-              onClick={() =>
-                onSave({
-                  solution: solution!,
-                  filters: filters!,
-                })
-              }
+              isDisabled={!solution || cannotLoadRuleTypes}
+              onClick={() => {
+                if (formRef.current?.validate()) {
+                  onSave({
+                    solution: solution!,
+                    query: { type: 'alertsFilters', filters: filters! },
+                  });
+                }
+              }}
               fill
             >
               {CONFIG_EDITOR_EDITOR_SAVE_LABEL}

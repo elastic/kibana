@@ -9,13 +9,12 @@ import React, { useMemo } from 'react';
 import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiLoadingChart } from '@elastic/eui';
 import type { RuleTypeSolution } from '@kbn/alerting-types';
 import type { TimeRange } from '@kbn/es-query';
-import type { AlertsFiltersExpression } from '@kbn/response-ops-alerts-filters-form/types';
-import { getRuleTypeIdsForSolution } from '@kbn/response-ops-alerts-filters-form/utils/get_rule_types_by_solution';
+import { alertsFiltersToEsQuery } from '@kbn/response-ops-alerts-filters-form/utils/filters';
+import { getRuleTypeIdsForSolution } from '@kbn/response-ops-alerts-filters-form/utils/solutions';
 import { useGetInternalRuleTypesQuery } from '@kbn/response-ops-rules-apis/hooks/use_get_internal_rule_types_query';
 import { getTime } from '@kbn/data-plugin/common';
 import { AlertsTable } from '@kbn/response-ops-alerts-table';
 import { AlertActionsCell } from '@kbn/response-ops-alerts-table/components/alert_actions_cell';
-import { alertsFiltersToEsQuery } from '@kbn/response-ops-alerts-filters-form/utils/alerts_filters_to_es_query';
 import { ALERT_TIME_RANGE, TIMESTAMP } from '@kbn/rule-data-utils';
 import type { AlertsTableProps } from '@kbn/response-ops-alerts-table/types';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
@@ -26,12 +25,13 @@ import {
   RULE_TYPES_LOAD_ERROR_DESCRIPTION,
   RULE_TYPES_LOAD_ERROR_TITLE,
 } from '../translations';
+import type { EmbeddableAlertsTableQuery } from '../types';
 
 export interface EmbeddableAlertsTableProps {
   id: string;
   timeRange?: TimeRange;
   solution?: RuleTypeSolution;
-  filters?: AlertsFiltersExpression;
+  query?: EmbeddableAlertsTableQuery;
   services: AlertsTableProps['services'];
 }
 
@@ -42,7 +42,7 @@ export const EmbeddableAlertsTable = ({
   id,
   timeRange,
   solution,
-  filters,
+  query,
   services,
 }: EmbeddableAlertsTableProps) => {
   const {
@@ -69,7 +69,7 @@ export const EmbeddableAlertsTable = ({
         },
       }
     : null;
-  const filtersQuery = filters ? alertsFiltersToEsQuery(filters) : null;
+  const filtersQuery = query?.filters ? alertsFiltersToEsQuery(query?.filters) : null;
   const finalQuery = {
     bool: {
       must: [timeRangeQuery, filtersQuery].filter(Boolean) as QueryDslQueryContainer[],

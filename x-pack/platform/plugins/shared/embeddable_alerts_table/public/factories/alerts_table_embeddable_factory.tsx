@@ -126,7 +126,7 @@ export const getAlertsTableEmbeddableFactory = (
                 id={persistedTableConfigKey}
                 timeRange={selectedTimeRange}
                 solution={tableConfig?.solution}
-                filters={tableConfig?.filters}
+                query={tableConfig?.query}
                 services={services}
               />
             </QueryClientProvider>

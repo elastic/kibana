@@ -48,7 +48,10 @@ describe('getEmbeddableAlertsTableFactory', () => {
         title: 'Test embeddable alerts table',
         tableConfig: {
           solution: 'observability',
-          filters: { operator: 'and', operands: [{}] },
+          query: {
+            type: 'alertsFilters',
+            filters: [{ filter: {} }],
+          },
         },
       },
       (apiRegistration) => ({ ...(apiRegistration as any), parentApi: mockPresentationContainer }),
@@ -68,7 +71,7 @@ describe('getEmbeddableAlertsTableFactory', () => {
           to: '2025-01-01T01:00:00.000Z',
         },
         solution: 'observability',
-        filters: { operator: 'and', operands: [{}] },
+        query: { type: 'alertsFilters', filters: [{ filter: {} }] },
       }),
       {}
     );
@@ -88,7 +91,10 @@ describe('getEmbeddableAlertsTableFactory', () => {
         title: 'Test embeddable alerts table',
         tableConfig: {
           solution: 'observability',
-          filters: { operator: 'and', operands: [{}] },
+          query: {
+            type: 'alertsFilters',
+            filters: [{ filter: {} }],
+          },
         },
       },
       (apiRegistration) => ({ ...(apiRegistration as any), parentApi: mockPresentationContainer }),

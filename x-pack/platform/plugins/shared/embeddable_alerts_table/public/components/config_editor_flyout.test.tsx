@@ -64,7 +64,10 @@ describe('ConfigEditorFlyout', () => {
             onCancel={jest.fn()}
             initialConfig={{
               solution: 'observability',
-              filters: { operator: 'and', operands: [{}] },
+              query: {
+                type: 'alertsFilters',
+                filters: [{ filter: {} }],
+              },
             }}
             services={core}
           />
@@ -86,9 +89,9 @@ describe('ConfigEditorFlyout', () => {
             onCancel={jest.fn()}
             initialConfig={{
               solution: 'observability',
-              filters: {
-                operator: 'and',
-                operands: [{ type: 'ruleTypes', value: ['test-o11y-rule-type'] }],
+              query: {
+                type: 'alertsFilters',
+                filters: [{ filter: { type: 'ruleTypes', value: ['test-o11y-rule-type'] } }],
               },
             }}
             services={core}
@@ -99,6 +102,7 @@ describe('ConfigEditorFlyout', () => {
     expect(await screen.findByTestId(FILTERS_FORM_SUBJ)).toBeInTheDocument();
     await userEvent.click(within(screen.getByTestId(SOLUTION_SELECTOR_SUBJ)).getByRole('button'));
     await userEvent.click(screen.getByRole('option', { name: 'Security' }));
+    screen.debug(undefined, Infinity);
     expect(screen.getAllByTestId(FILTERS_FORM_ITEM_SUBJ)).toHaveLength(1);
   });
 
@@ -111,11 +115,12 @@ describe('ConfigEditorFlyout', () => {
             onCancel={jest.fn()}
             initialConfig={{
               solution: 'observability',
-              filters: {
-                operator: 'and',
-                operands: [
-                  { type: 'ruleTypes', value: ['test-o11y-rule-type'] },
-                  { type: 'ruleTypes', value: ['test-o11y-rule-type'] },
+              query: {
+                type: 'alertsFilters',
+                filters: [
+                  { filter: { type: 'ruleTypes', value: ['test-o11y-rule-type'] } },
+                  { operator: 'and' },
+                  { filter: { type: 'ruleTypes', value: ['test-o11y-rule-type'] } },
                 ],
               },
             }}
