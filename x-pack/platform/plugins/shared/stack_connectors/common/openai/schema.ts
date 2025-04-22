@@ -32,13 +32,7 @@ export const ConfigSchema = schema.oneOf([
     apiProvider: schema.oneOf([schema.literal(OpenAiProviderType.Other)]),
     apiUrl: schema.string(),
     defaultModel: schema.string(),
-    headers: schema.maybe(schema.recordOf(schema.string(), schema.string())),
-  }),
-  schema.object({
-    apiProvider: schema.oneOf([schema.literal(OpenAiProviderType.PkiOpenAi)]),
-    apiUrl: schema.string(),
-    defaultModel: schema.string({ defaultValue: DEFAULT_OPENAI_MODEL }),
-    certificateFile: schema.maybe(
+     certificateFile: schema.maybe(
       schema.oneOf([
         schema.string({ minLength: 1 }),
         schema.arrayOf(schema.string({ minLength: 1 }), { minSize: 1 }),
@@ -52,11 +46,13 @@ export const ConfigSchema = schema.oneOf([
       ])
     ),
     privateKeyData: schema.maybe(schema.string({ minLength: 1 })),
-    verificationMode: schema.oneOf([
-      schema.literal('full'),
-      schema.literal('certificate'),
-      schema.literal('none'),
-    ], { defaultValue: 'full' }),
+    verificationMode: schema.maybe(
+      schema.oneOf([
+        schema.literal('full'),
+        schema.literal('certificate'),
+        schema.literal('none'),
+      ], { defaultValue: 'full' })
+    ),
     headers: schema.maybe(schema.recordOf(schema.string(), schema.string())),
   }),
 ]);
