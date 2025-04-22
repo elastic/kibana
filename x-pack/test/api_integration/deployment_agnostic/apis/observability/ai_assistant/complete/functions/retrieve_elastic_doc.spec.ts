@@ -9,6 +9,9 @@ import expect from '@kbn/expect';
 import { ChatCompletionStreamParams } from 'openai/lib/ChatCompletionStream';
 import { ChatCompletionMessageParam } from 'openai/resources';
 import { last } from 'lodash';
+import AdmZip from 'adm-zip';
+import path from 'path';
+import fs from 'fs';
 import { MessageAddEvent, MessageRole } from '@kbn/observability-ai-assistant-plugin/common';
 import {
   LlmProxy,
@@ -17,6 +20,7 @@ import {
 import { chatComplete } from '../../utils/conversation';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../../ftr_provider_context';
 import { installProductDoc, uninstallProductDoc } from '../../utils/product_doc_base';
+import { LOCAL_PRODUCT_DOC_PATH } from '../../../../../default_configs/stateful.config.base';
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const log = getService('log');
@@ -91,6 +95,25 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       let firstRequestBody: ChatCompletionStreamParams;
       let secondRequestBody: ChatCompletionStreamParams;
       before(async () => {
+        // Read all entries in the base path
+        const entries = fs.readdirSync(LOCAL_PRODUCT_DOC_PATH, { withFileTypes: true });
+
+        for (const entry of entries) {
+          if (entry.isDirectory()) {
+            const folderName = entry.name;
+            const folderPath = path.join(LOCAL_PRODUCT_DOC_PATH, folderName);
+
+            // Replace underscores with hyphens for the zip file name
+            const zipFileName = `${folderName.replace(/_/g, '-')}.zip`;
+            const outputZipPath = path.join(LOCAL_PRODUCT_DOC_PATH, zipFileName);
+
+            // Create and write zip
+            const zip = new AdmZip();
+            zip.addLocalFolder(folderPath);
+            zip.writeZip(outputZipPath);
+          }
+        }
+
         llmProxy = await createLlmProxy(log);
         connectorId = await observabilityAIAssistantAPIClient.createProxyActionConnector({
           port: llmProxy.getPort(),

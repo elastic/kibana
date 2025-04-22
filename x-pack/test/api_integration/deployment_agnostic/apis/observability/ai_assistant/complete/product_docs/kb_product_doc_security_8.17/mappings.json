@@ -1,0 +1,41 @@
+{
+  "dynamic": "strict",
+  "properties": {
+    "content_title": {
+      "type": "text"
+    },
+    "content_body": {
+      "type": "semantic_text",
+      "inference_id": ".default-elser"
+    },
+    "product_name": {
+      "type": "keyword"
+    },
+    "root_type": {
+      "type": "keyword"
+    },
+    "slug": {
+      "type": "keyword"
+    },
+    "url": {
+      "type": "keyword"
+    },
+    "version": {
+      "type": "version"
+    },
+    "ai_subtitle": {
+      "type": "text"
+    },
+    "ai_summary": {
+      "type": "semantic_text",
+      "inference_id": ".default-elser"
+    },
+    "ai_questions_answered": {
+      "type": "semantic_text",
+      "inference_id": ".default-elser"
+    },
+    "ai_tags": {
+      "type": "keyword"
+    }
+  }
+}
