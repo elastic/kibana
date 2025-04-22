@@ -150,7 +150,8 @@ const DashboardRendererComponent = ({
   }, [dashboardContainer, query]);
 
   useEffect(() => {
-    dashboardContainer?.setTimeRange(timeRange);
+    const { from, to } = timeRange;
+    dashboardContainer?.setTimeRange({ from, to });
   }, [dashboardContainer, timeRange]);
 
   useEffect(() => {
