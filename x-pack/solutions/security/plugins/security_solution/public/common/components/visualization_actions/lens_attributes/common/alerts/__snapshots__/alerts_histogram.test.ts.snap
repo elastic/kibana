@@ -6,7 +6,7 @@ Object {
   "references": Array [
     Object {
       "id": "security-solution-my-test",
-      "name": "indexpattern-datasource-layer-e09e0380-0740-4105-becc-0a4ca12e3944",
+      "name": "indexpattern-datasource-layer-0039eb0c-9a1a-4687-ae54-0f4e239bec75",
       "type": "index-pattern",
     },
   ],
@@ -15,25 +15,14 @@ Object {
     "datasourceStates": Object {
       "formBased": Object {
         "layers": Object {
-          "e09e0380-0740-4105-becc-0a4ca12e3944": Object {
+          "0039eb0c-9a1a-4687-ae54-0f4e239bec75": Object {
             "columnOrder": Array [
-              "aac9d7d0-13a3-480a-892b-08207a787926",
-              undefined,
               "34919782-4546-43a5-b668-06ac934d3acd",
+              "aac9d7d0-13a3-480a-892b-08207a787926",
+              "e09e0380-0740-4105-becc-0a4ca12e3944",
             ],
             "columns": Object {
               "34919782-4546-43a5-b668-06ac934d3acd": Object {
-                "dataType": "number",
-                "isBucketed": false,
-                "label": "Count of records",
-                "operationType": "count",
-                "params": Object {
-                  "emptyAsNull": true,
-                },
-                "scale": "ratio",
-                "sourceField": "___records___",
-              },
-              "aac9d7d0-13a3-480a-892b-08207a787926": Object {
                 "dataType": "string",
                 "isBucketed": true,
                 "label": "Top values of event.category",
@@ -41,7 +30,7 @@ Object {
                 "params": Object {
                   "missingBucket": false,
                   "orderBy": Object {
-                    "columnId": "34919782-4546-43a5-b668-06ac934d3acd",
+                    "columnId": "e09e0380-0740-4105-becc-0a4ca12e3944",
                     "type": "column",
                   },
                   "orderDirection": "desc",
@@ -55,7 +44,7 @@ Object {
                 "scale": "ordinal",
                 "sourceField": "event.category",
               },
-              "undefined": Object {
+              "aac9d7d0-13a3-480a-892b-08207a787926": Object {
                 "dataType": "date",
                 "isBucketed": true,
                 "label": "@timestamp",
@@ -66,6 +55,17 @@ Object {
                 },
                 "scale": "interval",
                 "sourceField": "@timestamp",
+              },
+              "e09e0380-0740-4105-becc-0a4ca12e3944": Object {
+                "dataType": "number",
+                "isBucketed": false,
+                "label": "Count of records",
+                "operationType": "count",
+                "params": Object {
+                  "emptyAsNull": true,
+                },
+                "scale": "ratio",
+                "sourceField": "___records___",
               },
             },
             "incompleteColumns": Object {},
@@ -154,15 +154,15 @@ Object {
       "layers": Array [
         Object {
           "accessors": Array [
-            "34919782-4546-43a5-b668-06ac934d3acd",
+            "e09e0380-0740-4105-becc-0a4ca12e3944",
           ],
-          "layerId": "e09e0380-0740-4105-becc-0a4ca12e3944",
+          "layerId": "0039eb0c-9a1a-4687-ae54-0f4e239bec75",
           "layerType": "data",
           "position": "top",
           "seriesType": "bar_stacked",
           "showGridlines": false,
-          "splitAccessor": "aac9d7d0-13a3-480a-892b-08207a787926",
-          "xAccessor": undefined,
+          "splitAccessor": "34919782-4546-43a5-b668-06ac934d3acd",
+          "xAccessor": "aac9d7d0-13a3-480a-892b-08207a787926",
         },
       ],
       "legend": Object {
@@ -195,7 +195,7 @@ Object {
   "references": Array [
     Object {
       "id": "security-solution-my-test",
-      "name": "indexpattern-datasource-layer-e09e0380-0740-4105-becc-0a4ca12e3944",
+      "name": "indexpattern-datasource-layer-0039eb0c-9a1a-4687-ae54-0f4e239bec75",
       "type": "index-pattern",
     },
   ],
@@ -204,25 +204,14 @@ Object {
     "datasourceStates": Object {
       "formBased": Object {
         "layers": Object {
-          "e09e0380-0740-4105-becc-0a4ca12e3944": Object {
+          "0039eb0c-9a1a-4687-ae54-0f4e239bec75": Object {
             "columnOrder": Array [
-              "aac9d7d0-13a3-480a-892b-08207a787926",
-              undefined,
               "34919782-4546-43a5-b668-06ac934d3acd",
+              "aac9d7d0-13a3-480a-892b-08207a787926",
+              "e09e0380-0740-4105-becc-0a4ca12e3944",
             ],
             "columns": Object {
               "34919782-4546-43a5-b668-06ac934d3acd": Object {
-                "dataType": "number",
-                "isBucketed": false,
-                "label": "Count of records",
-                "operationType": "count",
-                "params": Object {
-                  "emptyAsNull": true,
-                },
-                "scale": "ratio",
-                "sourceField": "___records___",
-              },
-              "aac9d7d0-13a3-480a-892b-08207a787926": Object {
                 "dataType": "string",
                 "isBucketed": true,
                 "label": "Top values of event.category",
@@ -230,7 +219,7 @@ Object {
                 "params": Object {
                   "missingBucket": false,
                   "orderBy": Object {
-                    "columnId": "34919782-4546-43a5-b668-06ac934d3acd",
+                    "columnId": "e09e0380-0740-4105-becc-0a4ca12e3944",
                     "type": "column",
                   },
                   "orderDirection": "desc",
@@ -244,7 +233,7 @@ Object {
                 "scale": "ordinal",
                 "sourceField": "event.category",
               },
-              "undefined": Object {
+              "aac9d7d0-13a3-480a-892b-08207a787926": Object {
                 "dataType": "date",
                 "isBucketed": true,
                 "label": "@timestamp",
@@ -255,6 +244,17 @@ Object {
                 },
                 "scale": "interval",
                 "sourceField": "@timestamp",
+              },
+              "e09e0380-0740-4105-becc-0a4ca12e3944": Object {
+                "dataType": "number",
+                "isBucketed": false,
+                "label": "Count of records",
+                "operationType": "count",
+                "params": Object {
+                  "emptyAsNull": true,
+                },
+                "scale": "ratio",
+                "sourceField": "___records___",
               },
             },
             "incompleteColumns": Object {},
@@ -319,15 +319,15 @@ Object {
       "layers": Array [
         Object {
           "accessors": Array [
-            "34919782-4546-43a5-b668-06ac934d3acd",
+            "e09e0380-0740-4105-becc-0a4ca12e3944",
           ],
-          "layerId": "e09e0380-0740-4105-becc-0a4ca12e3944",
+          "layerId": "0039eb0c-9a1a-4687-ae54-0f4e239bec75",
           "layerType": "data",
           "position": "top",
           "seriesType": "bar_stacked",
           "showGridlines": false,
-          "splitAccessor": "aac9d7d0-13a3-480a-892b-08207a787926",
-          "xAccessor": undefined,
+          "splitAccessor": "34919782-4546-43a5-b668-06ac934d3acd",
+          "xAccessor": "aac9d7d0-13a3-480a-892b-08207a787926",
         },
       ],
       "legend": Object {

@@ -6,11 +6,11 @@ Object {
   "references": Array [],
   "state": Object {
     "adHocDataViews": Object {
-      "1dd5663b-f062-43f8-8688-fc8166c2ca8e": Object {
+      "d594baeb-5eca-480c-8885-ba79eaf41372": Object {
         "allowNoIndex": false,
         "fieldAttrs": Object {},
         "fieldFormats": Object {},
-        "id": "1dd5663b-f062-43f8-8688-fc8166c2ca8e",
+        "id": "d594baeb-5eca-480c-8885-ba79eaf41372",
         "name": "ea_host_risk_score_latest_mockSpaceId_no_timestamp",
         "runtimeFieldMap": Object {},
         "sourceFilters": Array [],
@@ -115,7 +115,7 @@ Object {
     ],
     "internalReferences": Array [
       Object {
-        "id": "1dd5663b-f062-43f8-8688-fc8166c2ca8e",
+        "id": "d594baeb-5eca-480c-8885-ba79eaf41372",
         "name": "indexpattern-datasource-layer-2cc5663b-f062-43f8-8688-fc8166c2ca8e",
         "type": "index-pattern",
       },

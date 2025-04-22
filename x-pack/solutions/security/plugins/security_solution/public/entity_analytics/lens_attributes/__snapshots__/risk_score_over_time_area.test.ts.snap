@@ -21,30 +21,7 @@ Object {
     "datasourceStates": Object {
       "formBased": Object {
         "layers": Object {
-          "1dd5663b-f062-43f8-8688-fc8166c2ca8e": Object {
-            "columnOrder": Array [
-              "1dd5663b-f062-43f8-8688-fc8166c2ca8e",
-            ],
-            "columns": Object {
-              "1dd5663b-f062-43f8-8688-fc8166c2ca8e": Object {
-                "customLabel": true,
-                "dataType": "number",
-                "isBucketed": false,
-                "isStaticValue": true,
-                "label": "Risky threshold",
-                "operationType": "static_value",
-                "params": Object {
-                  "value": "70",
-                },
-                "references": Array [],
-                "scale": "ratio",
-              },
-            },
-            "incompleteColumns": Object {},
-            "linkToLayers": Array [],
-            "sampling": 1,
-          },
-          "f614baeb-5eca-480c-8885-ba79eaf52483": Object {
+          "e614baeb-5eca-480c-8885-ba79eaf41372": Object {
             "columnOrder": Array [
               "02a55c97-d7a4-440d-ac77-33b941c16189",
               "8886a925-4419-4d9a-8498-3bda4ecf1b0a",
@@ -83,6 +60,29 @@ Object {
               },
             },
             "incompleteColumns": Object {},
+            "sampling": 1,
+          },
+          "f614baeb-5eca-480c-8885-ba79eaf52483": Object {
+            "columnOrder": Array [
+              "1dd5663b-f062-43f8-8688-fc8166c2ca8e",
+            ],
+            "columns": Object {
+              "1dd5663b-f062-43f8-8688-fc8166c2ca8e": Object {
+                "customLabel": true,
+                "dataType": "number",
+                "isBucketed": false,
+                "isStaticValue": true,
+                "label": "Risky threshold",
+                "operationType": "static_value",
+                "params": Object {
+                  "value": "70",
+                },
+                "references": Array [],
+                "scale": "ratio",
+              },
+            },
+            "incompleteColumns": Object {},
+            "linkToLayers": Array [],
             "sampling": 1,
           },
         },
@@ -130,12 +130,12 @@ Object {
     "internalReferences": Array [
       Object {
         "id": "d594baeb-5eca-480c-8885-ba79eaf41372",
-        "name": "indexpattern-datasource-layer-f614baeb-5eca-480c-8885-ba79eaf52483",
+        "name": "indexpattern-datasource-layer-e614baeb-5eca-480c-8885-ba79eaf41372",
         "type": "index-pattern",
       },
       Object {
         "id": "d594baeb-5eca-480c-8885-ba79eaf41372",
-        "name": "indexpattern-datasource-layer-1dd5663b-f062-43f8-8688-fc8166c2ca8e",
+        "name": "indexpattern-datasource-layer-f614baeb-5eca-480c-8885-ba79eaf52483",
         "type": "index-pattern",
       },
     ],
@@ -159,7 +159,7 @@ Object {
           "accessors": Array [
             "8886a925-4419-4d9a-8498-3bda4ecf1b0a",
           ],
-          "layerId": "f614baeb-5eca-480c-8885-ba79eaf52483",
+          "layerId": "e614baeb-5eca-480c-8885-ba79eaf41372",
           "layerType": "data",
           "position": "top",
           "seriesType": "line",
@@ -176,7 +176,7 @@ Object {
           "accessors": Array [
             "1dd5663b-f062-43f8-8688-fc8166c2ca8e",
           ],
-          "layerId": "1dd5663b-f062-43f8-8688-fc8166c2ca8e",
+          "layerId": "f614baeb-5eca-480c-8885-ba79eaf52483",
           "layerType": "referenceLine",
           "yConfig": Array [
             Object {
