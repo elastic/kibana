@@ -30,6 +30,7 @@ import {
   totalHitsStatusSelector,
   lensAdaptersSelector,
   lensDataLoadingSelector$,
+  topPanelHeightSelector,
 } from '../utils/state_selectors';
 import { useStateSelector } from '../utils/use_state_selector';
 import { setBreakdownField } from '../utils/local_storage_utils';
@@ -66,12 +67,14 @@ export const useStateProps = ({
       ) => void)
     | undefined;
 }) => {
+  const topPanelHeight = useStateSelector(stateService?.state$, topPanelHeightSelector);
   const chartHidden = useStateSelector(stateService?.state$, chartHiddenSelector);
   const timeInterval = useStateSelector(stateService?.state$, timeIntervalSelector);
   const totalHitsResult = useStateSelector(stateService?.state$, totalHitsResultSelector);
   const totalHitsStatus = useStateSelector(stateService?.state$, totalHitsStatusSelector);
   const lensAdapters = useStateSelector(stateService?.state$, lensAdaptersSelector);
   const lensDataLoading$ = useStateSelector(stateService?.state$, lensDataLoadingSelector$);
+
   /**
    * Contexts
    */
@@ -143,8 +146,8 @@ export const useStateProps = ({
    */
 
   const onTopPanelHeightChange = useCallback(
-    (topPanelHeight: number | undefined) => {
-      stateService?.setTopPanelHeight(topPanelHeight);
+    (newTopPanelHeight: number | undefined) => {
+      stateService?.setTopPanelHeight(newTopPanelHeight);
     },
     [stateService]
   );
@@ -228,6 +231,7 @@ export const useStateProps = ({
   }, [chart, chartHidden, stateService]);
 
   return {
+    topPanelHeight,
     hits,
     chart,
     breakdown,

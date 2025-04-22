@@ -35,6 +35,7 @@ import { useStateProps } from '../container/hooks/use_state_props';
 import { useRequestParams } from './use_request_params';
 import { LensVisService } from '../services/lens_vis_service';
 import { checkChartAvailability } from '../chart';
+import { UnifiedHistogramLayoutProps } from '../layout/layout2';
 
 export type UseUnifiedHistogramProps = Omit<UnifiedHistogramStateOptions, 'services'> & {
   searchSessionId?: UnifiedHistogramRequestContext['searchSessionId'];
@@ -109,8 +110,13 @@ export type UnifiedHistogramApi2 = {
 >;
 
 export type UseUnifiedHistogramResult =
-  | { isInitialized: false; api?: undefined; chartProps?: undefined }
-  | { isInitialized: true; api: UnifiedHistogramApi2; chartProps: ChartProps };
+  | { isInitialized: false; api?: undefined; chartProps?: undefined; layoutProps?: undefined }
+  | {
+      isInitialized: true;
+      api: UnifiedHistogramApi2;
+      chartProps: ChartProps;
+      layoutProps: Omit<UnifiedHistogramLayoutProps, 'container' | 'chartPanel'>;
+    };
 
 const EMPTY_SUGGESTION_CONTEXT: Observable<UnifiedHistogramSuggestionContext> = of({
   suggestion: undefined,
@@ -263,6 +269,22 @@ export const useUnifiedHistogram = ({
         }
       : undefined;
   }, [chart, input$, isChartAvailable, lensVisService, props, requestParams, stateProps]);
+  const layoutProps = useMemo<Omit<UnifiedHistogramLayoutProps, 'container' | 'chartPanel'>>(
+    () => ({
+      chart,
+      isChartAvailable,
+      hits: stateProps.hits,
+      topPanelHeight: stateProps.topPanelHeight,
+      onTopPanelHeightChange: stateProps.onTopPanelHeightChange,
+    }),
+    [
+      chart,
+      isChartAvailable,
+      stateProps.hits,
+      stateProps.onTopPanelHeightChange,
+      stateProps.topPanelHeight,
+    ]
+  );
 
   if (!api || !chartProps) {
     return { isInitialized: false };
@@ -272,5 +294,6 @@ export const useUnifiedHistogram = ({
     isInitialized: true,
     api,
     chartProps,
+    layoutProps,
   };
 };

@@ -12,6 +12,7 @@ import type { DataViewListItem } from '@kbn/data-views-plugin/public';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import type { Filter, TimeRange } from '@kbn/es-query';
 import type { UnifiedHistogramVisContext } from '@kbn/unified-histogram-plugin/public';
+import type { UnifiedHistogramLayoutProps } from '@kbn/unified-histogram-plugin/public/layout/layout2';
 import type { TabItem } from '@kbn/unified-tabs';
 
 export enum LoadingStatus {
@@ -64,6 +65,7 @@ export interface TabState extends TabItem {
   documentsRequest: DocumentsRequest;
   totalHitsRequest: TotalHitsRequest;
   chartRequest: ChartRequest;
+  unifiedHistogramLayoutProps: Omit<UnifiedHistogramLayoutProps, 'container' | 'chartPanel'>;
 }
 
 export interface DiscoverInternalState {

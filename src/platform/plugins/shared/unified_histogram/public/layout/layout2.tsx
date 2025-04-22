@@ -16,13 +16,23 @@ import {
   ResizableLayoutMode,
 } from '@kbn/resizable-layout';
 import { css } from '@emotion/react';
+import { UnifiedHistogramChartContext, UnifiedHistogramHitsContext } from '../types';
 
 export type UnifiedHistogramLayoutProps = PropsWithChildren<{
   /**
    * The parent container element, used to calculate the layout size
    */
   container: HTMLElement | null;
-  chart: ReactNode;
+  chartPanel: ReactNode;
+  /**
+   * Context object for the chart -- leave undefined to hide the chart
+   */
+  chart?: UnifiedHistogramChartContext;
+  isChartAvailable?: boolean;
+  /**
+   * Context object for the hits count -- leave undefined to hide the hits count
+   */
+  hits?: UnifiedHistogramHitsContext;
   /**
    * Current top panel height -- leave undefined to use the default
    */
@@ -35,7 +45,10 @@ export type UnifiedHistogramLayoutProps = PropsWithChildren<{
 
 export const UnifiedHistogramLayout2 = ({
   container,
+  chartPanel,
   chart,
+  isChartAvailable,
+  hits,
   topPanelHeight,
   onTopPanelHeightChange,
   children,
@@ -45,14 +58,13 @@ export const UnifiedHistogramLayout2 = ({
   );
 
   const isMobile = useIsWithinBreakpoints(['xs', 's']);
-  const showChart = React.isValidElement(children);
-  const showFixedPanels = isMobile || !showChart;
+  const showFixedPanels = isMobile || !chart || chart.hidden;
   const { euiTheme } = useEuiTheme();
   const defaultTopPanelHeight = euiTheme.base * 12;
   const minMainPanelHeight = euiTheme.base * 10;
 
   const chartCss =
-    isMobile && showChart
+    isMobile && chart && !chart.hidden
       ? css`
           .unifiedHistogram__chart {
             height: ${defaultTopPanelHeight}px;
@@ -64,19 +76,21 @@ export const UnifiedHistogramLayout2 = ({
           }
         `;
 
-  const panelsMode = showChart
-    ? showFixedPanels
-      ? ResizableLayoutMode.Static
-      : ResizableLayoutMode.Resizable
-    : ResizableLayoutMode.Single;
+  const panelsMode =
+    chart || hits
+      ? showFixedPanels
+        ? ResizableLayoutMode.Static
+        : ResizableLayoutMode.Resizable
+      : ResizableLayoutMode.Single;
 
   const currentTopPanelHeight = topPanelHeight ?? defaultTopPanelHeight;
 
   return (
     <>
       <InPortal node={mainPanelNode}>
-        {/* @ts-expect-error upgrade typescript v4.9.5 */}
-        {showChart ? React.cloneElement(children, { isChartAvailable: true }) : children}
+        {React.isValidElement<{ isChartAvailable?: boolean }>(children)
+          ? React.cloneElement(children, { isChartAvailable })
+          : children}
       </InPortal>
       <ResizableLayout
         mode={panelsMode}
@@ -85,7 +99,7 @@ export const UnifiedHistogramLayout2 = ({
         fixedPanelSize={currentTopPanelHeight}
         minFixedPanelSize={defaultTopPanelHeight}
         minFlexPanelSize={minMainPanelHeight}
-        fixedPanel={chart}
+        fixedPanel={chartPanel}
         flexPanel={<OutPortal node={mainPanelNode} />}
         data-test-subj="unifiedHistogram"
         css={chartCss}

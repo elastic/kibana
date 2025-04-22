@@ -55,6 +55,7 @@ export const defaultTabState: Omit<TabState, keyof TabItem> = {
     loadingStatus: LoadingStatus.Uninitialized,
     result: {},
   },
+  unifiedHistogramLayoutProps: {},
 };
 
 const initialState: DiscoverInternalState = {
@@ -177,6 +178,14 @@ export const internalStateSlice = createSlice({
       withTab(state, action, (tab) => {
         tab.overriddenVisContextAfterInvalidation = undefined;
         state.expandedDoc = undefined;
+      }),
+
+    setUnifiedHistogramLayoutProps: (
+      state,
+      action: TabAction<{ unifiedHistogramLayoutProps: TabState['unifiedHistogramLayoutProps'] }>
+    ) =>
+      withTab(state, action, (tab) => {
+        tab.unifiedHistogramLayoutProps = action.payload.unifiedHistogramLayoutProps;
       }),
   },
   extraReducers: (builder) => {

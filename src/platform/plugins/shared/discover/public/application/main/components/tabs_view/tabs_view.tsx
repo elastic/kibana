@@ -21,6 +21,7 @@ import {
   internalStateActions,
   selectAllTabs,
   selectTabRuntimeState,
+  useCurrentTabAction,
   useInternalStateDispatch,
   useInternalStateSelector,
   useRuntimeState,
@@ -56,7 +57,6 @@ export const TabsView = (props: DiscoverSessionViewProps) => {
           <InPortal key={tabId} node={chartPortalNodes.current[tabId]}>
             <UnifiedHistogramWrapper
               tabId={tabId}
-              isSelected={false}
               runtimeStateManager={props.runtimeStateManager}
             />
           </InPortal>
@@ -95,17 +95,16 @@ const updatePortals = (portals: Record<string, HtmlPortalNode>, tabs: Array<{ id
 
 interface UnifiedHistogramWrapperProps {
   tabId: string;
-  isSelected: boolean;
   runtimeStateManager: RuntimeStateManager;
   panelsToggle?: DiscoverMainContentProps['panelsToggle'];
 }
 
 const UnifiedHistogramWrapper = ({
   tabId,
-  isSelected,
   runtimeStateManager,
   panelsToggle,
 }: UnifiedHistogramWrapperProps) => {
+  const isSelected = useInternalStateSelector((state) => state.tabs.unsafeCurrentId === tabId);
   const currentTabRuntimeState = selectTabRuntimeState(runtimeStateManager, tabId);
   const currentCustomizationService = useRuntimeState(currentTabRuntimeState.customizationService$);
   const currentStateContainer = useRuntimeState(currentTabRuntimeState.stateContainer$);
@@ -150,6 +149,10 @@ const UnifiedHistogramChartWrapper = ({
   panelsToggle,
 }: UnifiedHistogramChartProps) => {
   const isEsqlMode = useIsEsqlMode();
+  const dispatch = useInternalStateDispatch();
+  const setUnifiedHistogramLayoutProps = useCurrentTabAction(
+    internalStateActions.setUnifiedHistogramLayoutProps
+  );
   const { setUnifiedHistogramApi, ...unifiedHistogramProps } =
     useDiscoverHistogram2(stateContainer);
   const unifiedHistogram = useUnifiedHistogram(unifiedHistogramProps);
@@ -166,6 +169,16 @@ const UnifiedHistogramChartWrapper = ({
       setUnifiedHistogramApi(unifiedHistogram.api);
     }
   }, [setUnifiedHistogramApi, unifiedHistogram.api, unifiedHistogram.isInitialized]);
+
+  useEffect(() => {
+    if (unifiedHistogram.layoutProps) {
+      dispatch(
+        setUnifiedHistogramLayoutProps({
+          unifiedHistogramLayoutProps: unifiedHistogram.layoutProps,
+        })
+      );
+    }
+  }, [dispatch, setUnifiedHistogramLayoutProps, unifiedHistogram.layoutProps]);
 
   // Initialized when the first search has been requested or
   // when in ES|QL mode since search sessions are not supported

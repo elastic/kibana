@@ -9,18 +9,13 @@
 
 import React from 'react';
 import { UnifiedHistogramLayout2 } from '@kbn/unified-histogram-plugin/public';
-import { css } from '@emotion/react';
 import { OutPortal } from 'react-reverse-portal';
 import { type DiscoverMainContentProps, DiscoverMainContent } from './discover_main_content';
-import { useCurrentTabChartPortalNode } from '../../state_management/redux';
+import { useCurrentTabChartPortalNode, useCurrentTabSelector } from '../../state_management/redux';
 
 export interface DiscoverHistogramLayoutProps2 extends DiscoverMainContentProps {
   container: HTMLElement | null;
 }
-
-const histogramLayoutCss = css`
-  height: 100%;
-`;
 
 export const DiscoverHistogramLayout2 = ({
   container,
@@ -28,16 +23,15 @@ export const DiscoverHistogramLayout2 = ({
   ...mainContentProps
 }: DiscoverHistogramLayoutProps2) => {
   const chartPortalNode = useCurrentTabChartPortalNode();
+  const layoutProps = useCurrentTabSelector((tab) => tab.unifiedHistogramLayoutProps);
 
   return (
     <UnifiedHistogramLayout2
       container={container}
-      chart={
-        chartPortalNode ? (
-          <OutPortal node={chartPortalNode} isSelected={true} panelsToggle={panelsToggle} />
-        ) : null
+      chartPanel={
+        chartPortalNode ? <OutPortal node={chartPortalNode} panelsToggle={panelsToggle} /> : null
       }
-      css={histogramLayoutCss}
+      {...layoutProps}
     >
       <DiscoverMainContent {...mainContentProps} panelsToggle={panelsToggle} />
     </UnifiedHistogramLayout2>
