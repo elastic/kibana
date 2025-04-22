@@ -82,10 +82,6 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
   const { euiTheme } = useEuiTheme();
   const minBreakpointM = useEuiMinBreakpoint('m');
 
-  const newsContainerClassName = classNames({
-    'kbnOverviewSupplements--noNews': !newsFetchResult?.feedItems?.length,
-  });
-
   // Home does not have a locator implemented, so hard-code it here.
   const addDataHref = addBasePath('/app/integrations/browse');
   const devToolsHref = share.url.locators.get('CONSOLE_APP_LOCATOR')?.useUrl({});
@@ -291,7 +287,12 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
       </KibanaPageTemplate.Section>
 
       <KibanaPageTemplate.Section bottomBorder paddingSize="xl">
-        <EuiFlexGroup alignItems="flexStart" className={newsContainerClassName}>
+        <EuiFlexGroup
+          alignItems="flexStart"
+          className={classNames({
+            'kbnOverviewSupplements--noNews': !newsFetchResult?.feedItems?.length,
+          })}
+        >
           {newsFetchResult && newsFetchResult.feedItems.length ? (
             <EuiFlexItem grow={1}>
               <NewsFeed newsFetchResult={newsFetchResult} />
@@ -330,7 +331,7 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
                       >
                         <RedirectAppLinks className="kbnRedirectAppLinkImage">
                           <EuiCard
-                            className={`kbnOverviewSolution ${id}`}
+                            className={`kbnOverviewSolution--${id}`}
                             description={description ? description : ''}
                             href={addBasePath(path)}
                             icon={<KibanaSolutionAvatar name={title} iconType={icon} size="xl" />}

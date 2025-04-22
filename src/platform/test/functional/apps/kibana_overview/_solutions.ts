@@ -40,7 +40,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('contains Security and Observability solutions', async () => {
-      const solutionCards = await testSubjects.findAll('kbnOverviewMore__item');
+      const solutionCards = await testSubjects.findAll('kbnOverviewItem');
 
       expect(solutionCards.length >= 2).to.be(true);
 

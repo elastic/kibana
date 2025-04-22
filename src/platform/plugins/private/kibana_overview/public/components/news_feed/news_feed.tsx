@@ -14,7 +14,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { FetchResult } from '@kbn/newsfeed-plugin/public';
 
 interface Props {
-  newsFetchResult: FetchResult;
+  newsFetchResult: FetchResult | null | void;
 }
 const styles = ({ euiTheme }: UseEuiTheme) =>
   css({
@@ -43,7 +43,7 @@ export const NewsFeed: FC<Props> = ({ newsFetchResult }) => (
 
     <EuiSpacer size="m" />
     <div css={styles}>
-      {newsFetchResult.feedItems
+      {newsFetchResult?.feedItems
         .slice(0, 3)
         .map(({ title, description, linkUrl, publishOn }, index) => (
           <article key={title} aria-labelledby={`kbnOverviewNews__title${index}`}>
