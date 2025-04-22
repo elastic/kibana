@@ -568,6 +568,7 @@ src/platform/packages/shared/react/kibana_context/theme @elastic/appex-sharedux
 src/platform/packages/shared/react/kibana_mount @elastic/appex-sharedux
 src/platform/packages/shared/response-ops/alerts-apis @elastic/response-ops
 src/platform/packages/shared/response-ops/alerts-fields-browser @elastic/response-ops
+src/platform/packages/shared/response-ops/alerts-filters-form @elastic/response-ops
 src/platform/packages/shared/response-ops/alerts-table @elastic/response-ops
 src/platform/packages/shared/response-ops/rule_form @elastic/response-ops
 src/platform/packages/shared/response-ops/rule_params @elastic/response-ops
@@ -819,6 +820,7 @@ x-pack/platform/packages/shared/kbn-ai-assistant @elastic/search-kibana @elastic
 x-pack/platform/packages/shared/kbn-alerting-comparators @elastic/response-ops
 x-pack/platform/packages/shared/kbn-apm-types @elastic/obs-ux-infra_services-team
 x-pack/platform/packages/shared/kbn-cloud-security-posture/common @elastic/kibana-cloud-security-posture
+x-pack/platform/packages/shared/kbn-content-packs-schema @elastic/streams-program-team
 x-pack/platform/packages/shared/kbn-data-forge @elastic/obs-ux-management-team
 x-pack/platform/packages/shared/kbn-elastic-assistant @elastic/security-generative-ai
 x-pack/platform/packages/shared/kbn-elastic-assistant-common @elastic/security-generative-ai
@@ -831,6 +833,7 @@ x-pack/platform/packages/shared/kbn-kibana-api-cli @elastic/appex-ai-infra
 x-pack/platform/packages/shared/kbn-langchain @elastic/security-generative-ai
 x-pack/platform/packages/shared/kbn-profiler-cli @elastic/obs-knowledge-team
 x-pack/platform/packages/shared/kbn-sample-parser @elastic/streams-program-team
+x-pack/platform/packages/shared/kbn-search-index-documents @elastic/search-kibana
 x-pack/platform/packages/shared/kbn-slo-schema @elastic/obs-ux-management-team
 x-pack/platform/packages/shared/kbn-streams-schema @elastic/streams-program-team
 x-pack/platform/packages/shared/logs-overview @elastic/obs-ux-logs-team
@@ -872,6 +875,7 @@ x-pack/platform/plugins/private/license_api_guard @elastic/kibana-management
 x-pack/platform/plugins/private/logstash @elastic/logstash
 x-pack/platform/plugins/private/monitoring @elastic/stack-monitoring
 x-pack/platform/plugins/private/monitoring_collection @elastic/stack-monitoring
+x-pack/platform/plugins/private/observability_ai_assistant_management @elastic/obs-ai-assistant
 x-pack/platform/plugins/private/painless_lab @elastic/kibana-management
 x-pack/platform/plugins/private/remote_clusters @elastic/kibana-management
 x-pack/platform/plugins/private/reporting @elastic/response-ops
@@ -893,6 +897,7 @@ x-pack/platform/plugins/shared/apm_sources_access @elastic/obs-ux-infra_services
 x-pack/platform/plugins/shared/automatic_import @elastic/security-scalability
 x-pack/platform/plugins/shared/cases @elastic/response-ops
 x-pack/platform/plugins/shared/cloud @elastic/kibana-core
+x-pack/platform/plugins/shared/content_connectors @elastic/search-kibana
 x-pack/platform/plugins/shared/dashboard_enhanced @elastic/kibana-presentation
 x-pack/platform/plugins/shared/data_quality @elastic/obs-ux-logs-team
 x-pack/platform/plugins/shared/dataset_quality @elastic/obs-ux-logs-team
@@ -970,7 +975,6 @@ x-pack/solutions/observability/plugins/inventory/e2e @elastic/obs-ux-infra_servi
 x-pack/solutions/observability/plugins/metrics_data_access @elastic/obs-ux-infra_services-team
 x-pack/solutions/observability/plugins/observability @elastic/obs-ux-management-team
 x-pack/solutions/observability/plugins/observability_ai_assistant_app @elastic/obs-ai-assistant
-x-pack/solutions/observability/plugins/observability_ai_assistant_management @elastic/obs-ai-assistant
 x-pack/solutions/observability/plugins/observability_logs_explorer @elastic/obs-ux-logs-team
 x-pack/solutions/observability/plugins/observability_onboarding @elastic/obs-ux-logs-team
 x-pack/solutions/observability/plugins/observability_shared @elastic/observability-ui
@@ -986,11 +990,9 @@ x-pack/solutions/observability/plugins/ux @elastic/obs-ux-management-team
 x-pack/solutions/search/packages/kbn-ipynb @elastic/search-kibana
 x-pack/solutions/search/packages/kbn-search-api-keys-components @elastic/search-kibana
 x-pack/solutions/search/packages/kbn-search-api-keys-server @elastic/search-kibana
-x-pack/solutions/search/packages/kbn-search-index-documents @elastic/search-kibana
 x-pack/solutions/search/packages/shared-ui @elastic/search-kibana
 x-pack/solutions/search/plugins/enterprise_search @elastic/search-kibana
 x-pack/solutions/search/plugins/search_assistant @elastic/search-kibana
-x-pack/solutions/search/plugins/search_connectors @elastic/search-kibana
 x-pack/solutions/search/plugins/search_homepage @elastic/search-kibana
 x-pack/solutions/search/plugins/search_indices @elastic/search-kibana
 x-pack/solutions/search/plugins/search_inference_endpoints @elastic/search-kibana

@@ -247,5 +247,7 @@
     "@kbn/management-settings-ids",
     "@kbn/inference-endpoint-ui-common",
     "@kbn/core-chrome-browser",
+    "@kbn/actions-types",
+    "@kbn/triggers-actions-ui-types",
   ]
 }
