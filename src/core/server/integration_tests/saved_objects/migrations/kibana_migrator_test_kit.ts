@@ -159,7 +159,7 @@ export const getKibanaMigratorTestKit = async ({
   const rawClient = await getElasticsearchClient(configService, loggerFactory, kibanaVersion);
   const client = clientWrapperFactory ? clientWrapperFactory(rawClient) : rawClient;
 
-  const typeRegistry = new SavedObjectTypeRegistry(removedTypes);
+  const typeRegistry = new SavedObjectTypeRegistry({ legacyTypes: removedTypes });
 
   // types must be registered before instantiating the migrator
   registerTypes(typeRegistry, types);

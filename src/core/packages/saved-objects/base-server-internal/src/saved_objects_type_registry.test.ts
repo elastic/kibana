@@ -51,7 +51,7 @@ describe('SavedObjectTypeRegistry', () => {
     it('throws when trying to register a removed type: %', () => {
       const legacyTypes = ['old-removed-type', 'another_old_type', 'firstTypeEver'];
 
-      registry = new SavedObjectTypeRegistry(legacyTypes);
+      registry = new SavedObjectTypeRegistry({ legacyTypes });
 
       for (const legacyType of legacyTypes) {
         expect(() => registry.registerType(createType({ name: legacyType }))).toThrow(

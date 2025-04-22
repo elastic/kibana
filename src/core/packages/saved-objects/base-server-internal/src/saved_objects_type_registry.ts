@@ -9,7 +9,10 @@
 
 import { deepFreeze } from '@kbn/std';
 import type { SavedObjectsType, ISavedObjectTypeRegistry } from '@kbn/core-saved-objects-server';
-import { REMOVED_TYPES } from './constants';
+
+export interface SavedObjectTypeRegistryConfig {
+  legacyTypes?: string[];
+}
 
 /**
  * Core internal implementation of {@link ISavedObjectTypeRegistry}.
@@ -19,9 +22,11 @@ import { REMOVED_TYPES } from './constants';
 export class SavedObjectTypeRegistry implements ISavedObjectTypeRegistry {
   private readonly types = new Map<string, SavedObjectsType>();
   private readonly legacyTypes: string[];
+  private readonly legacyTypesMap: Set<string>;
 
-  constructor(legacyTypes: string[] = REMOVED_TYPES) {
+  constructor({ legacyTypes = [] }: SavedObjectTypeRegistryConfig = {}) {
     this.legacyTypes = legacyTypes;
+    this.legacyTypesMap = new Set(legacyTypes);
   }
 
   /**
@@ -34,7 +39,7 @@ export class SavedObjectTypeRegistry implements ISavedObjectTypeRegistry {
     if (this.types.has(type.name)) {
       throw new Error(`Type '${type.name}' is already registered`);
     }
-    if (this.legacyTypes.includes(type.name)) {
+    if (this.legacyTypesMap.has(type.name)) {
       throw new Error(
         `Type '${type.name}' can't be used because it's been added to the legacy types`
       );

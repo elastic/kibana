@@ -7,11 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SavedObjectTypeRegistry } from '@kbn/core-saved-objects-base-server-internal';
+import {
+  REMOVED_TYPES,
+  SavedObjectTypeRegistry,
+} from '@kbn/core-saved-objects-base-server-internal';
 import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
 
 export const createRegistry = (types: Array<Partial<SavedObjectsType>>) => {
-  const registry = new SavedObjectTypeRegistry();
+  const registry = new SavedObjectTypeRegistry({ legacyTypes: REMOVED_TYPES });
   types.forEach((type) =>
     registry.registerType({
       name: 'unknown',
