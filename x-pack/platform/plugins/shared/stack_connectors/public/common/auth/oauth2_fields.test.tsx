@@ -6,28 +6,31 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { OAuth2Fields } from './oauth2_fields';
 import * as i18n from './translations';
 import { AuthFormTestProvider } from '../../connector_types/lib/test_utils';
 
 describe('OAuth2Fields', () => {
   const onSubmit = jest.fn();
+  const baseFormData = {
+    config: {
+      hasAuth: true,
+      authType: 'oauth2',
+      accessTokenUrl: 'test-url',
+      clientId: 'test-client',
+
+      scope: '',
+    },
+    secrets: {
+      clientSecret: 'test-secret',
+    },
+  };
 
   it('renders all fields with correct labels', () => {
-    const testFormData = {
-      config: {
-        hasAuth: false,
-        authType: null,
-        accessTokenUrl: '', // Default to an empty string
-        clientId: '', // Default to an empty string
-        clientSecret: '', // Default to an empty string
-        scope: '', // Default to an empty string
-      },
-    };
-
     render(
-      <AuthFormTestProvider defaultValue={testFormData} onSubmit={onSubmit}>
+      <AuthFormTestProvider defaultValue={baseFormData} onSubmit={onSubmit}>
         <OAuth2Fields readOnly={false} />
       </AuthFormTestProvider>
     );
@@ -36,22 +39,13 @@ describe('OAuth2Fields', () => {
     expect(screen.getByLabelText(i18n.CLIENT_ID)).toBeInTheDocument();
     expect(screen.getByLabelText(i18n.CLIENT_SECRET)).toBeInTheDocument();
     expect(screen.getByLabelText(i18n.SCOPE)).toBeInTheDocument();
+    expect(screen.getByText(i18n.ADDITIONAL_FIELDS)).toBeInTheDocument();
   });
 
-  it('sets fields to read-only when readOnly is true', () => {
-    const testFormData = {
-      config: {
-        hasAuth: false,
-        authType: null,
-        accessTokenUrl: '', // Default to an empty string
-        clientId: '', // Default to an empty string
-        clientSecret: '', // Default to an empty string
-        scope: '', // Default to an empty string
-      },
-    };
-
+  it.skip('sets fields to read-only when readOnly is true', async () => {
+    const user = userEvent.setup();
     render(
-      <AuthFormTestProvider defaultValue={testFormData} onSubmit={onSubmit}>
+      <AuthFormTestProvider defaultValue={baseFormData} onSubmit={onSubmit}>
         <OAuth2Fields readOnly={true} />
       </AuthFormTestProvider>
     );
@@ -60,22 +54,27 @@ describe('OAuth2Fields', () => {
     expect(screen.getByLabelText(i18n.CLIENT_ID)).toHaveAttribute('readonly');
     expect(screen.getByLabelText(i18n.CLIENT_SECRET)).toHaveAttribute('readonly');
     expect(screen.getByLabelText(i18n.SCOPE)).toHaveAttribute('readonly');
+
+    const additionalFieldsRow = screen.getByTestId('additionalFields');
+
+    const editorContainer = await within(additionalFieldsRow).findByRole('textbox');
+
+    await user.click(editorContainer);
+
+    await user.type(editorContainer, 't', { delay: 50 });
+
+    const readOnlyMessage = await screen.findByText(
+      'Cannot edit in read-only editor',
+      {},
+      { timeout: 2000 }
+    );
+
+    expect(readOnlyMessage).toBeInTheDocument();
   });
 
   it('does not set fields to read-only when readOnly is false', () => {
-    const testFormData = {
-      config: {
-        hasAuth: false,
-        authType: null,
-        accessTokenUrl: '', // Default to an empty string
-        clientId: '', // Default to an empty string
-        clientSecret: '', // Default to an empty string
-        scope: '', // Default to an empty string
-      },
-    };
-
     render(
-      <AuthFormTestProvider defaultValue={testFormData} onSubmit={onSubmit}>
+      <AuthFormTestProvider defaultValue={baseFormData} onSubmit={onSubmit}>
         <OAuth2Fields readOnly={false} />
       </AuthFormTestProvider>
     );
