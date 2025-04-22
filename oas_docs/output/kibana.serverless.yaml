@@ -49,7 +49,7 @@ tags:
       Alerting enables you to define rules, which detect complex conditions within your data. When a condition is met, the rule tracks it as an alert and runs the actions that are defined in the rule. Actions typically involve the use of connectors to interact with Kibana services or third party integrations.
     externalDocs:
       description: Alerting documentation
-      url: https://www.elastic.co/docs/current/serverless/rules
+      url: https://www.elastic.co/docs/explore-analyze/alerts-cases/alerts
     x-displayName: Alerting
   - description: |
       Adjust APM agent configuration without need to redeploy your application.
@@ -72,7 +72,7 @@ tags:
       Connectors provide a central place to store connection information for services and integrations with Elastic or third party systems. Alerting rules can use connectors to run actions when rule conditions are met.
     externalDocs:
       description: Connector documentation
-      url: https://www.elastic.co/docs/current/serverless/action-connectors
+      url: https://www.elastic.co/docs/reference/kibana/connectors-kibana
     x-displayName: Connectors
   - name: Dashboards
   - name: Data streams
@@ -227,7 +227,7 @@ tags:
       Get information about the system status, resource usage, and installed plugins.
   - externalDocs:
       description: Task manager
-      url: https://www.elastic.co/guide/en/kibana/current/task-manager-production-considerations.html
+      url: https://www.elastic.co/docs/deploy-manage/distributed-architecture/kibana-tasks-management
     name: task manager
     x-displayName: Task manager
 paths:
@@ -13243,6 +13243,35 @@ paths:
       summary: Create or update a protection updates note
       tags:
         - Security Endpoint Management API
+  /api/entity_analytics/monitoring/engine/init:
+    post:
+      operationId: InitMonitoringEngine
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Security_Entity_Analytics_API_MonitoringEngineDescriptor'
+          description: Successful response
+      summary: Initialize the Privilege Monitoring Engine
+      tags:
+        - Security Entity Analytics API
+  /api/entity_analytics/monitoring/privileges/health:
+    get:
+      operationId: PrivMonHealth
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+          description: Successful response
+      summary: Health check on Privilege Monitoring
+      tags:
+        - Security Entity Analytics API
   /api/entity_store/enable:
     post:
       operationId: InitEntityStore
@@ -29489,6 +29518,8 @@ paths:
                                   type: string
                             sync_integrations:
                               type: boolean
+                            sync_uninstalled_integrations:
+                              type: boolean
                             type:
                               enum:
                                 - remote_elasticsearch
@@ -30259,6 +30290,8 @@ paths:
                           type: string
                     sync_integrations:
                       type: boolean
+                    sync_uninstalled_integrations:
+                      type: boolean
                     type:
                       enum:
                         - remote_elasticsearch
@@ -30987,6 +31020,8 @@ paths:
                                   - strict
                                 type: string
                           sync_integrations:
+                            type: boolean
+                          sync_uninstalled_integrations:
                             type: boolean
                           type:
                             enum:
@@ -31823,6 +31858,8 @@ paths:
                                 type: string
                           sync_integrations:
                             type: boolean
+                          sync_uninstalled_integrations:
+                            type: boolean
                           type:
                             enum:
                               - remote_elasticsearch
@@ -32580,6 +32617,8 @@ paths:
                           type: string
                     sync_integrations:
                       type: boolean
+                    sync_uninstalled_integrations:
+                      type: boolean
                     type:
                       enum:
                         - remote_elasticsearch
@@ -33295,6 +33334,8 @@ paths:
                                   - strict
                                 type: string
                           sync_integrations:
+                            type: boolean
+                          sync_uninstalled_integrations:
                             type: boolean
                           type:
                             enum:
@@ -38431,6 +38472,101 @@ paths:
       summary: Update a proxy
       tags:
         - Fleet proxies
+  /api/fleet/remote_synced_integrations/{outputId}/remote_status:
+    get:
+      description: '[Required authorization] Route required privileges: fleet-settings-read AND integrations-read.'
+      operationId: get-fleet-remote-synced-integrations-outputid-remote-status
+      parameters:
+        - in: path
+          name: outputId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  custom_assets:
+                    additionalProperties:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        name:
+                          type: string
+                        package_name:
+                          type: string
+                        package_version:
+                          type: string
+                        sync_status:
+                          enum:
+                            - completed
+                            - synchronizing
+                            - failed
+                          type: string
+                        type:
+                          type: string
+                      required:
+                        - type
+                        - name
+                        - package_name
+                        - package_version
+                        - sync_status
+                    type: object
+                  error:
+                    type: string
+                  integrations:
+                    items:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        error:
+                          type: string
+                        id:
+                          type: string
+                        package_name:
+                          type: string
+                        package_version:
+                          type: string
+                        sync_status:
+                          enum:
+                            - completed
+                            - synchronizing
+                            - failed
+                          type: string
+                        updated_at:
+                          type: string
+                      required:
+                        - sync_status
+                    type: array
+                required:
+                  - integrations
+        '400':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                description: Generic Error
+                type: object
+                properties:
+                  attributes: {}
+                  error:
+                    type: string
+                  errorType:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+                required:
+                  - message
+                  - attributes
+      summary: Get CCR Remote synced integrations status by outputId
+      tags:
+        - CCR Remote synced integrations
   /api/fleet/remote_synced_integrations/status:
     get:
       description: '[Required authorization] Route required privileges: fleet-settings-read AND integrations-read.'
@@ -48299,14 +48435,51 @@ paths:
         content:
           application/json:
             schema:
-              anyOf:
-                - additionalProperties: false
-                  type: object
-                  properties: {}
-                - enum:
-                    - 'null'
-                  nullable: true
-                - not: {}
+              additionalProperties: false
+              type: object
+              properties:
+                description:
+                  type: string
+                include:
+                  anyOf:
+                    - additionalProperties: false
+                      type: object
+                      properties:
+                        objects:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            dashboards:
+                              items:
+                                type: string
+                              type: array
+                          required:
+                            - dashboards
+                      required:
+                        - objects
+                    - additionalProperties: false
+                      type: object
+                      properties:
+                        all:
+                          additionalProperties: false
+                          type: object
+                          properties: {}
+                      required:
+                        - all
+                name:
+                  type: string
+                replaced_patterns:
+                  items:
+                    type: string
+                  type: array
+                version:
+                  type: string
+              required:
+                - name
+                - description
+                - version
+                - replaced_patterns
+                - include
       responses: {}
       summary: Export stream content
       tags:
@@ -48336,7 +48509,10 @@ paths:
               type: object
               properties:
                 content: {}
+                include:
+                  type: string
               required:
+                - include
                 - content
       responses: {}
       summary: Import content into a stream
@@ -62438,6 +62614,13 @@ components:
         - indexPattern
         - status
         - fieldHistoryLength
+    Security_Entity_Analytics_API_EngineMetadata:
+      type: object
+      properties:
+        Type:
+          type: string
+      required:
+        - Type
     Security_Entity_Analytics_API_EngineStatus:
       enum:
         - installing
@@ -62451,6 +62634,7 @@ components:
         - $ref: '#/components/schemas/Security_Entity_Analytics_API_UserEntity'
         - $ref: '#/components/schemas/Security_Entity_Analytics_API_HostEntity'
         - $ref: '#/components/schemas/Security_Entity_Analytics_API_ServiceEntity'
+        - $ref: '#/components/schemas/Security_Entity_Analytics_API_GenericEntity'
     Security_Entity_Analytics_API_EntityRiskLevels:
       enum:
         - Unknown
@@ -62533,7 +62717,42 @@ components:
         - user
         - host
         - service
+        - generic
       type: string
+    Security_Entity_Analytics_API_GenericEntity:
+      type: object
+      properties:
+        '@timestamp':
+          format: date-time
+          type: string
+        asset:
+          type: object
+          properties:
+            criticality:
+              $ref: '#/components/schemas/Security_Entity_Analytics_API_AssetCriticalityLevel'
+          required:
+            - criticality
+        entity:
+          type: object
+          properties:
+            category:
+              type: string
+            EngineMetadata:
+              $ref: '#/components/schemas/Security_Entity_Analytics_API_EngineMetadata'
+            id:
+              type: string
+            name:
+              type: string
+            source:
+              type: string
+            type:
+              type: string
+          required:
+            - id
+            - name
+            - type
+      required:
+        - entity
     Security_Entity_Analytics_API_HostEntity:
       type: object
       properties:
@@ -62550,13 +62769,18 @@ components:
         entity:
           type: object
           properties:
+            EngineMetadata:
+              $ref: '#/components/schemas/Security_Entity_Analytics_API_EngineMetadata'
             name:
               type: string
             source:
               type: string
+            type:
+              type: string
           required:
             - name
             - source
+            - type
         event:
           type: object
           properties:
@@ -62608,6 +62832,7 @@ components:
         - host.name
         - user.name
         - service.name
+        - entity.id
       type: string
     Security_Entity_Analytics_API_IndexPattern:
       type: string
@@ -62632,6 +62857,14 @@ components:
       type: string
     Security_Entity_Analytics_API_Metadata:
       $ref: '#/components/schemas/Security_Entity_Analytics_API_TransformStatsMetadata'
+    Security_Entity_Analytics_API_MonitoringEngineDescriptor:
+      type: object
+      properties:
+        status:
+          $ref: '#/components/schemas/Security_Entity_Analytics_API_EngineStatus'
+      required:
+        - type
+        - status
     Security_Entity_Analytics_API_RiskEngineScheduleNowErrorResponse:
       type: object
       properties:
@@ -62701,13 +62934,18 @@ components:
         entity:
           type: object
           properties:
+            EngineMetadata:
+              $ref: '#/components/schemas/Security_Entity_Analytics_API_EngineMetadata'
             name:
               type: string
             source:
               type: string
+            type:
+              type: string
           required:
             - name
             - source
+            - type
         event:
           type: object
           properties:
@@ -62815,13 +63053,18 @@ components:
         entity:
           type: object
           properties:
+            EngineMetadata:
+              $ref: '#/components/schemas/Security_Entity_Analytics_API_EngineMetadata'
             name:
               type: string
             source:
               type: string
+            type:
+              type: string
           required:
             - name
             - source
+            - type
         event:
           type: object
           properties:

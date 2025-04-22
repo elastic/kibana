@@ -34,9 +34,7 @@ import {
 } from './components/session_view';
 import { useAsyncFunction } from './hooks/use_async_function';
 import { TabsView } from './components/tabs_view';
-
-// TEMPORARY: This is a temporary flag to enable/disable tabs in Discover until the feature is fully implemented.
-export const TABS_ENABLED = false;
+import { TABS_ENABLED } from '../../constants';
 
 export interface MainRouteProps {
   customizationContext: DiscoverCustomizationContext;

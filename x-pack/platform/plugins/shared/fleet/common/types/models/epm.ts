@@ -622,6 +622,15 @@ export interface InstallFailedAttempt {
   };
 }
 
+export interface UninstallFailedAttempt {
+  created_at: string;
+  error: {
+    name: string;
+    message: string;
+    stack?: string;
+  };
+}
+
 export enum INSTALL_STATES {
   CREATE_RESTART_INSTALLATION = 'create_restart_installation',
   INSTALL_KIBANA_ASSETS = 'install_kibana_assets',
@@ -673,6 +682,7 @@ export interface Installation {
   internal?: boolean;
   removable?: boolean;
   latest_install_failed_attempts?: InstallFailedAttempt[];
+  latest_uninstall_failed_attempts?: UninstallFailedAttempt[];
   latest_executed_state?: InstallLatestExecutedState;
 }
 

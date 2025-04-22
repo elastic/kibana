@@ -6,7 +6,7 @@
  */
 
 import * as t from 'io-ts';
-import { either } from 'fp-ts/lib/Either';
+import { either } from 'fp-ts/Either';
 
 export const floatThreeDecimalPlacesRt = new t.Type<string, string, unknown>(
   'floatThreeDecimalPlacesRt',

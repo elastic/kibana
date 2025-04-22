@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import React, { useContext, useEffect, useState } from 'react';
 import styled from '@emotion/styled';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
-import { getLegacyApmHref } from '../../shared/links/apm/apm_link';
+import { getLegacyApmHref } from '../../shared/links/apm/apm_link_hooks';
 import { useLegacyUrlParams } from '../../../context/url_params_context/use_url_params';
 import type { APMQueryParams } from '../../shared/links/url_helpers';
 import { CytoscapeContext } from './cytoscape';
