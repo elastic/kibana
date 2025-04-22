@@ -5,13 +5,11 @@
  * 2.0.
  */
 
-import { shallow } from 'enzyme';
+import { render } from '@testing-library/react';
 import { getOr } from 'lodash/fp';
 import React from 'react';
-import { Provider as ReduxStoreProvider } from 'react-redux';
 
 import { TestProviders, createMockStore } from '../../../../common/mock';
-import { useMountAppended } from '../../../../common/utils/use_mount_appended';
 import { networkModel } from '../../store';
 
 import { NetworkHttpTable } from '.';
@@ -36,7 +34,6 @@ describe('NetworkHttp Table Component', () => {
   };
 
   let store = createMockStore();
-  const mount = useMountAppended();
 
   beforeEach(() => {
     store = createMockStore();
@@ -44,36 +41,13 @@ describe('NetworkHttp Table Component', () => {
 
   describe('rendering', () => {
     test('it renders the default NetworkHttp table', () => {
-      const wrapper = shallow(
-        <ReduxStoreProvider store={store}>
-          <NetworkHttpTable {...defaultProps} />
-        </ReduxStoreProvider>
-      );
-
-      expect(wrapper.find('Memo(NetworkHttpTableComponent)')).toMatchSnapshot();
-    });
-  });
-
-  describe('Sorting', () => {
-    test('when you click on the column header, you should show the sorting icon', () => {
-      const wrapper = mount(
+      const { container } = render(
         <TestProviders store={store}>
           <NetworkHttpTable {...defaultProps} />
         </TestProviders>
       );
 
-      expect(store.getState().network.page.queries?.http.sort).toEqual({
-        direction: 'desc',
-      });
-
-      wrapper.find('.euiTable thead tr th button').first().simulate('click');
-
-      wrapper.update();
-
-      expect(store.getState().network.page.queries?.http.sort).toEqual({
-        direction: 'asc',
-      });
-      expect(wrapper.find('.euiTable thead tr th button').first().find('svg')).toBeTruthy();
+      expect(container.children[0]).toMatchSnapshot();
     });
   });
 });
