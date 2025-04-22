@@ -12,8 +12,8 @@ import { css } from '@emotion/react';
 import { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import {
+  getViewModeSubject,
   initializeTitleManager,
-  useInheritedViewMode,
   useStateFromPublishingSubject,
 } from '@kbn/presentation-publishing';
 import React from 'react';
@@ -78,7 +78,9 @@ export const markdownEmbeddableFactory: ReactEmbeddableFactory<
       Component: () => {
         // get state for rendering
         const content = useStateFromPublishingSubject(content$);
-        const viewMode = useInheritedViewMode(api) ?? 'view';
+        const viewMode = useStateFromPublishingSubject(
+          getViewModeSubject(api) ?? new BehaviorSubject('view')
+        );
         const { euiTheme } = useEuiTheme();
 
         return viewMode === 'edit' ? (

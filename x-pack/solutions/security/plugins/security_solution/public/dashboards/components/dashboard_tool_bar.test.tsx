@@ -15,6 +15,7 @@ import { APP_NAME } from '../../../common/constants';
 import { NavigationProvider, SecurityPageName } from '@kbn/security-solution-navigation';
 import { TestProviders } from '../../common/mock';
 import { useNavigation } from '../../common/lib/kibana';
+import { BehaviorSubject } from 'rxjs';
 
 const mockDashboardTopNav = DashboardTopNav as jest.Mock;
 
@@ -33,7 +34,9 @@ jest.mock('@kbn/dashboard-plugin/public', () => ({
 const mockCore = coreMock.createStart();
 const mockNavigateTo = jest.fn();
 const mockGetAppUrl = jest.fn();
-const mockDashboardContainer = {} as unknown as DashboardApi;
+const mockDashboardContainer = {
+  viewMode$: new BehaviorSubject('view'),
+} as unknown as DashboardApi;
 
 const wrapper = ({ children }: { children: React.ReactNode }) => (
   <TestProviders>

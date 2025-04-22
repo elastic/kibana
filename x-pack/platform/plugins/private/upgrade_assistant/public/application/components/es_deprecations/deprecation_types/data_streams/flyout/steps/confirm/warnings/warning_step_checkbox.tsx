@@ -70,4 +70,7 @@ export interface WarningCheckboxProps {
   onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   docLinks: DocLinksStart['links'];
   id: string;
+  meta?: {
+    oldestIncompatibleDocTimestamp?: number;
+  };
 }
