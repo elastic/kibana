@@ -11,7 +11,6 @@ import type { Alert } from '@kbn/alerting-types';
 import { BasicCellRenderer } from './basic_cell_renderer';
 import { TestProviders } from '../../../../common/mock';
 import { getEmptyValue } from '../../../../common/components/empty_value';
-import { CellValue } from './render_cell';
 
 describe('BasicCellRenderer', () => {
   it('should handle missing field', () => {
@@ -58,7 +57,7 @@ describe('BasicCellRenderer', () => {
 
     const { getByText } = render(
       <TestProviders>
-        <CellValue alert={alert} columnId={columnId} />
+        <BasicCellRenderer alert={alert} field={columnId} />
       </TestProviders>
     );
 

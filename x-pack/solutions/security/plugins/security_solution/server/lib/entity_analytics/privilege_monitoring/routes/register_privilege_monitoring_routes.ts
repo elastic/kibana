@@ -7,8 +7,8 @@
 
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 import { healthCheckPrivilegeMonitoringRoute } from './health';
-
 import { initPrivilegeMonitoringEngineRoute } from './init';
+import { searchPrivilegeMonitoringIndicesRoute } from './search_indices';
 
 export const registerPrivilegeMonitoringRoutes = ({
   router,
@@ -18,4 +18,5 @@ export const registerPrivilegeMonitoringRoutes = ({
 }: EntityAnalyticsRoutesDeps) => {
   initPrivilegeMonitoringEngineRoute(router, logger, config);
   healthCheckPrivilegeMonitoringRoute(router, logger, config);
+  searchPrivilegeMonitoringIndicesRoute(router, logger, config);
 };
