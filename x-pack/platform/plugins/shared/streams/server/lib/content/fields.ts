@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export * from './index_pattern';
+export const STREAM_NAME = 'stream.name';
+export const CONTENT_NAME = 'content.name';

@@ -9,8 +9,9 @@ import { v4 } from 'uuid';
 import {
   ContentPackIncludedObjects,
   ContentPackSavedObject,
+  ContentPackSavedObjectLinks,
   INDEX_PLACEHOLDER,
-  findIndexPatterns,
+  findConfiguration,
   isIncludeAll,
   replaceIndexPatterns,
 } from '@kbn/content-packs-schema';
@@ -27,7 +28,7 @@ export function prepareForExport({
 }) {
   return savedObjects.map((object) => {
     if (object.type === 'dashboard' || object.type === 'index-pattern') {
-      const patterns = findIndexPatterns(object);
+      const { patterns } = findConfiguration(object);
       const replacements = {
         ...replacedPatterns.reduce((acc, pattern) => {
           acc[pattern] = INDEX_PLACEHOLDER;
@@ -52,10 +53,12 @@ export function prepareForImport({
   savedObjects,
   include,
   target,
+  links,
 }: {
   savedObjects: ContentPackSavedObject[];
   include: ContentPackIncludedObjects;
   target: string;
+  links: ContentPackSavedObjectLinks;
 }) {
   const uniqObjects = uniqBy(
     savedObjects
@@ -74,7 +77,7 @@ export function prepareForImport({
       ]),
     ({ id }) => id
   ).map((object) => {
-    const patterns = findIndexPatterns(object);
+    const { patterns } = findConfiguration(object);
     const replacements = patterns
       .filter((pattern) => pattern.startsWith(INDEX_PLACEHOLDER))
       .reduce((acc, pattern) => {
@@ -85,29 +88,66 @@ export function prepareForImport({
     return replaceIndexPatterns(object, replacements);
   });
 
-  return updateIds(uniqObjects);
+  return updateIds(uniqObjects, links);
 }
 
-export function updateIds(savedObjects: ContentPackSavedObject[]) {
-  const idReplacements = savedObjects.reduce((acc, object) => {
-    acc[object.id] = v4();
-    return acc;
-  }, {} as Record<string, string>);
+export function updateIds(
+  savedObjects: ContentPackSavedObject[],
+  links: ContentPackSavedObjectLinks
+) {
+  const existingLinks = links.dashboards.flatMap((ref) => [ref, ...ref.references]);
+  const targetId = (sourceId: string) => {
+    const link = existingLinks.find(({ source_id }) => source_id === sourceId);
+    if (!link) {
+      throw new Error(`link for [${sourceId}] was not generated`);
+    }
+    return link.target_id;
+  };
 
   savedObjects.forEach((object) => {
-    object.id = idReplacements[object.id];
+    object.id = targetId(object.id);
     object.references.forEach((ref) => {
       // only update the id if the reference is included in the content pack.
       // a missing reference is not necessarily an error condition since it could
       // point to a pre existing saved object, for example logs-* and metrics-*
       // data views
       if (savedObjects.find((so) => so.id === ref.id)) {
-        ref.id = idReplacements[ref.id];
+        ref.id = targetId(ref.id);
       }
     });
   });
 
   return savedObjects;
+}
+
+// when we import a saved object into a stream we create a copy of the source
+// object with a new identifier. a saved object link stores the source identifier
+// of an imported object which allows overwriting already imported objects when
+// (re)importing a content pack
+export function savedObjectLinks(
+  savedObjects: ContentPackSavedObject[],
+  existingLinks: ContentPackSavedObjectLinks
+): ContentPackSavedObjectLinks {
+  const dashboards = savedObjects
+    .filter((object) => object.type === 'dashboard')
+    .map((object) => {
+      const existingLink = existingLinks.dashboards.find(
+        ({ source_id }) => source_id === object.id
+      );
+
+      return {
+        source_id: object.id,
+        target_id: existingLink?.target_id ?? v4(),
+        references: object.references.map((ref) => ({
+          source_id: ref.id,
+          target_id:
+            existingLink?.references.find((existingRef) => ref.id === existingRef.source_id)
+              ?.target_id ?? v4(),
+        })),
+      };
+    });
+
+  return { dashboards };
 }
 
 export function referenceManagedIndexPattern(savedObjects: ContentPackSavedObject[]) {
