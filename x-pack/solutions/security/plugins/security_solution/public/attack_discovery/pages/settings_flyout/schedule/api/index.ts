@@ -7,6 +7,9 @@
 
 import { replaceParams } from '@kbn/openapi-common/shared';
 
+import type { AsApiContract } from '@kbn/actions-types';
+import { BASE_ALERTING_API_PATH } from '@kbn/alerting-plugin/common';
+import type { RuleType } from '@kbn/triggers-actions-ui-types';
 import type {
   AttackDiscoveryScheduleCreateProps,
   AttackDiscoveryScheduleUpdateProps,
@@ -26,6 +29,8 @@ import {
   ATTACK_DISCOVERY_SCHEDULES_FIND,
 } from '@kbn/elastic-assistant-common';
 import { KibanaServices } from '../../../../../common/lib/kibana';
+
+export const ALERTING_RULE_TYPES_URL = `${BASE_ALERTING_API_PATH}/rule_types` as const;
 
 export interface CreateAttackDiscoveryScheduleParams {
   /** The body containing the schedule attributes */
@@ -155,5 +160,16 @@ export const findAttackDiscoverySchedule = async ({
   return KibanaServices.get().http.get<FindAttackDiscoverySchedulesResponse>(
     ATTACK_DISCOVERY_SCHEDULES_FIND,
     { version: '1', query: { page, perPage, sortField, sortDirection }, signal }
+  );
+};
+
+/** Retrieves registered rule types. */
+export const fetchRuleTypes = async (params?: {
+  signal?: AbortSignal;
+}): Promise<Array<AsApiContract<RuleType<string, string>>>> => {
+  const { signal } = params ?? {};
+  return KibanaServices.get().http.get<Array<AsApiContract<RuleType<string, string>>>>(
+    ALERTING_RULE_TYPES_URL,
+    { signal }
   );
 };
