@@ -37,6 +37,7 @@ export const HostCharts = React.forwardRef<HTMLDivElement, Props>(
       <Section
         title={
           <TitleWithTooltip
+            tooltipAriaLabel={HOST_METRIC_GROUP_TITLES[metric]}
             title={HOST_METRIC_GROUP_TITLES[metric]}
             tooltipContent={
               <EuiText size="xs">
