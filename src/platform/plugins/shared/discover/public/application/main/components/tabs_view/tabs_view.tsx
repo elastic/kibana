@@ -29,7 +29,7 @@ import {
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { usePreviewData } from './use_preview_data';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
-import { useDiscoverHistogram2 } from '../layout/use_discover_histogram_2';
+import { useDiscoverHistogram } from '../layout/use_discover_histogram';
 import type { DiscoverStateContainer } from '../../state_management/discover_state';
 import { DiscoverCustomizationProvider } from '../../../../customizations';
 import { DiscoverMainProvider } from '../../state_management/discover_state_provider';
@@ -153,8 +153,7 @@ const UnifiedHistogramChartWrapper = ({
   const setUnifiedHistogramLayoutProps = useCurrentTabAction(
     internalStateActions.setUnifiedHistogramLayoutProps
   );
-  const { setUnifiedHistogramApi, ...unifiedHistogramProps } =
-    useDiscoverHistogram2(stateContainer);
+  const { setUnifiedHistogramApi, ...unifiedHistogramProps } = useDiscoverHistogram(stateContainer);
   const unifiedHistogram = useUnifiedHistogram(unifiedHistogramProps);
   const renderCustomChartToggleActions = useCallback(
     () =>

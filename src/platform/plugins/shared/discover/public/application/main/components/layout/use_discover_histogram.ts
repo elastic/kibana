@@ -10,10 +10,9 @@
 import { useQuerySubscriber } from '@kbn/unified-field-list/src/hooks/use_query_subscriber';
 import type {
   UnifiedHistogramApi,
-  UnifiedHistogramContainerProps,
-  UnifiedHistogramCreationOptions,
   UnifiedHistogramState,
   UnifiedHistogramVisContext,
+  UseUnifiedHistogramProps,
 } from '@kbn/unified-histogram-plugin/public';
 import {
   canImportVisContext,
@@ -43,7 +42,6 @@ import { ESQL_TABLE_TYPE } from '@kbn/data-plugin/common';
 import { useDiscoverCustomization } from '../../../../customizations';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { FetchStatus } from '../../../types';
-import type { InspectorAdapters } from '../../hooks/use_inspector';
 import { checkHitCount, sendErrorTo } from '../../hooks/use_saved_search_messages';
 import type { DiscoverStateContainer } from '../../state_management/discover_state';
 import { addLog } from '../../../../utils/add_log';
@@ -65,23 +63,15 @@ import {
 const EMPTY_ESQL_COLUMNS: DatatableColumn[] = [];
 const EMPTY_FILTERS: Filter[] = [];
 
-export interface UseDiscoverHistogramProps {
-  stateContainer: DiscoverStateContainer;
-  inspectorAdapters: InspectorAdapters;
-}
-
-export const useDiscoverHistogram = ({
-  stateContainer,
-  inspectorAdapters,
-}: UseDiscoverHistogramProps): Omit<
-  UnifiedHistogramContainerProps,
-  'container' | 'getCreationOptions'
-> & {
-  ref: (api: UnifiedHistogramApi | null) => void;
-  getCreationOptions: () => UnifiedHistogramCreationOptions;
-} => {
+export const useDiscoverHistogram = (
+  stateContainer: DiscoverStateContainer
+): UseUnifiedHistogramProps & { setUnifiedHistogramApi: (api: UnifiedHistogramApi) => void } => {
   const services = useDiscoverServices();
-  const { main$, documents$, totalHits$ } = stateContainer.dataState.data$;
+  const {
+    data$: { main$, documents$, totalHits$ },
+    inspectorAdapters,
+    getAbortController,
+  } = stateContainer.dataState;
   const savedSearchState = useSavedSearch();
   const isEsqlMode = useIsEsqlMode();
 
@@ -89,53 +79,38 @@ export const useDiscoverHistogram = ({
    * API initialization
    */
 
-  const [unifiedHistogram, ref] = useState<UnifiedHistogramApi | null>();
+  const [unifiedHistogramApi, setUnifiedHistogramApi] = useState<UnifiedHistogramApi>();
   const [isSuggestionLoading, setIsSuggestionLoading] = useState(false);
-
-  const getCreationOptions = useCallback(() => {
-    const { hideChart: chartHidden, interval: timeInterval } = stateContainer.appState.getState();
-
-    return {
-      localStorageKeyPrefix: 'discover',
-      disableAutoFetching: true,
-      initialState: {
-        chartHidden,
-        timeInterval,
-        totalHitsStatus: UnifiedHistogramFetchStatus.loading,
-        totalHitsResult: undefined,
-      },
-    };
-  }, [stateContainer.appState]);
 
   /**
    * Sync Unified Histogram state with Discover state
    */
 
   useEffect(() => {
-    const subscription = createUnifiedHistogramStateObservable(unifiedHistogram?.state$)?.subscribe(
-      (changes) => {
-        const { lensRequestAdapter, ...stateChanges } = changes;
-        const appState = stateContainer.appState.getState();
-        const oldState = {
-          hideChart: appState.hideChart,
-          interval: appState.interval,
-        };
-        const newState = { ...oldState, ...stateChanges };
+    const subscription = createUnifiedHistogramStateObservable(
+      unifiedHistogramApi?.state$
+    )?.subscribe((changes) => {
+      const { lensRequestAdapter, ...stateChanges } = changes;
+      const appState = stateContainer.appState.getState();
+      const oldState = {
+        hideChart: appState.hideChart,
+        interval: appState.interval,
+      };
+      const newState = { ...oldState, ...stateChanges };
 
-        if ('lensRequestAdapter' in changes) {
-          inspectorAdapters.lensRequests = lensRequestAdapter;
-        }
-
-        if (!isEqual(oldState, newState)) {
-          stateContainer.appState.update(newState);
-        }
+      if ('lensRequestAdapter' in changes) {
+        inspectorAdapters.lensRequests = lensRequestAdapter;
       }
-    );
+
+      if (!isEqual(oldState, newState)) {
+        stateContainer.appState.update(newState);
+      }
+    });
 
     return () => {
       subscription?.unsubscribe();
     };
-  }, [inspectorAdapters, stateContainer.appState, unifiedHistogram?.state$]);
+  }, [inspectorAdapters, stateContainer.appState, unifiedHistogramApi?.state$]);
 
   /**
    * Sync URL query params with Unified Histogram
@@ -145,11 +120,11 @@ export const useDiscoverHistogram = ({
     const subscription = createAppStateObservable(stateContainer.appState.state$).subscribe(
       (changes) => {
         if ('timeInterval' in changes && changes.timeInterval) {
-          unifiedHistogram?.setTimeInterval(changes.timeInterval);
+          unifiedHistogramApi?.setTimeInterval(changes.timeInterval);
         }
 
         if ('chartHidden' in changes && typeof changes.chartHidden === 'boolean') {
-          unifiedHistogram?.setChartHidden(changes.chartHidden);
+          unifiedHistogramApi?.setChartHidden(changes.chartHidden);
         }
       }
     );
@@ -157,7 +132,7 @@ export const useDiscoverHistogram = ({
     return () => {
       subscription?.unsubscribe();
     };
-  }, [stateContainer.appState.state$, unifiedHistogram]);
+  }, [stateContainer.appState.state$, unifiedHistogramApi]);
 
   /**
    * Total hits
@@ -166,7 +141,7 @@ export const useDiscoverHistogram = ({
   const setTotalHitsError = useMemo(() => sendErrorTo(totalHits$), [totalHits$]);
 
   useEffect(() => {
-    const subscription = createTotalHitsObservable(unifiedHistogram?.state$)?.subscribe(
+    const subscription = createTotalHitsObservable(unifiedHistogramApi?.state$)?.subscribe(
       ({ status, result }) => {
         if (isEsqlMode) {
           // ignore histogram's total hits updates for ES|QL as Discover manages them during docs fetching
@@ -219,7 +194,7 @@ export const useDiscoverHistogram = ({
     totalHits$,
     setTotalHitsError,
     stateContainer.appState,
-    unifiedHistogram?.state$,
+    unifiedHistogramApi?.state$,
   ]);
 
   /**
@@ -280,7 +255,7 @@ export const useDiscoverHistogram = ({
 
   // Handle unified histogram refetching
   useEffect(() => {
-    if (!unifiedHistogram) {
+    if (!unifiedHistogramApi) {
       return;
     }
 
@@ -295,7 +270,7 @@ export const useDiscoverHistogram = ({
     //    a refetch anyway and result in multiple unnecessary fetches.
     if (isEsqlMode) {
       fetchChart$ = merge(
-        createCurrentSuggestionObservable(unifiedHistogram.state$).pipe(map(() => 'lens')),
+        createCurrentSuggestionObservable(unifiedHistogramApi.state$).pipe(map(() => 'lens')),
         esqlFetchComplete$.pipe(map(() => 'discover'))
       ).pipe(debounceTime(50));
     } else {
@@ -305,13 +280,13 @@ export const useDiscoverHistogram = ({
     const subscription = fetchChart$.subscribe((source) => {
       if (source === 'discover') addLog('Unified Histogram - Discover refetch');
       if (source === 'lens') addLog('Unified Histogram - Lens suggestion refetch');
-      unifiedHistogram.fetch();
+      unifiedHistogramApi.fetch();
     });
 
     return () => {
       subscription.unsubscribe();
     };
-  }, [isEsqlMode, stateContainer.dataState.fetchChart$, esqlFetchComplete$, unifiedHistogram]);
+  }, [isEsqlMode, stateContainer.dataState.fetchChart$, esqlFetchComplete$, unifiedHistogramApi]);
 
   const dataView = useCurrentDataView();
 
@@ -378,10 +353,12 @@ export const useDiscoverHistogram = ({
     [dispatch, setOverriddenVisContextAfterInvalidation, stateContainer.savedSearchState]
   );
 
+  const chartHidden = useAppStateSelector((state) => state.hideChart);
+  const timeInterval = useAppStateSelector((state) => state.interval);
   const breakdownField = useAppStateSelector((state) => state.breakdownField);
 
   const onBreakdownFieldChange = useCallback<
-    NonNullable<UnifiedHistogramContainerProps['onBreakdownFieldChange']>
+    NonNullable<UseUnifiedHistogramProps['onBreakdownFieldChange']>
   >(
     (nextBreakdownField) => {
       if (nextBreakdownField !== breakdownField) {
@@ -392,9 +369,17 @@ export const useDiscoverHistogram = ({
   );
 
   return {
-    ref,
-    getCreationOptions,
+    setUnifiedHistogramApi,
     services,
+    localStorageKeyPrefix: 'discover',
+    requestAdapter: inspectorAdapters.requests,
+    abortController: getAbortController(),
+    initialState: {
+      chartHidden,
+      timeInterval,
+      totalHitsStatus: UnifiedHistogramFetchStatus.loading,
+      totalHitsResult: undefined,
+    },
     dataView: isEsqlMode ? esqlDataView : dataView,
     query: isEsqlMode ? esqlQuery : query,
     filters: filtersMemoized,

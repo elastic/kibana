@@ -7,64 +7,33 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback } from 'react';
-import { UnifiedHistogramContainer } from '@kbn/unified-histogram-plugin/public';
-import { css } from '@emotion/react';
-import { useDiscoverHistogram } from './use_discover_histogram';
+import React from 'react';
+import { UnifiedHistogramLayout } from '@kbn/unified-histogram-plugin/public';
+import { OutPortal } from 'react-reverse-portal';
 import { type DiscoverMainContentProps, DiscoverMainContent } from './discover_main_content';
-import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
+import { useCurrentTabChartPortalNode, useCurrentTabSelector } from '../../state_management/redux';
 
-export interface DiscoverHistogramLayoutProps extends DiscoverMainContentProps {
+export interface DiscoverHistogramLayoutProps2 extends DiscoverMainContentProps {
   container: HTMLElement | null;
 }
 
-const histogramLayoutCss = css`
-  height: 100%;
-`;
-
 export const DiscoverHistogramLayout = ({
-  dataView,
-  stateContainer,
   container,
   panelsToggle,
   ...mainContentProps
-}: DiscoverHistogramLayoutProps) => {
-  const { dataState } = stateContainer;
-  const isEsqlMode = useIsEsqlMode();
-  const unifiedHistogramProps = useDiscoverHistogram({
-    stateContainer,
-    inspectorAdapters: dataState.inspectorAdapters,
-  });
-
-  const renderCustomChartToggleActions = useCallback(
-    () =>
-      React.isValidElement(panelsToggle)
-        ? React.cloneElement(panelsToggle, { renderedFor: 'histogram' })
-        : panelsToggle,
-    [panelsToggle]
-  );
-
-  // Initialized when the first search has been requested or
-  // when in ES|QL mode since search sessions are not supported
-  if (!unifiedHistogramProps.searchSessionId && !isEsqlMode) {
-    return null;
-  }
+}: DiscoverHistogramLayoutProps2) => {
+  const chartPortalNode = useCurrentTabChartPortalNode();
+  const layoutProps = useCurrentTabSelector((tab) => tab.unifiedHistogramLayoutProps);
 
   return (
-    <UnifiedHistogramContainer
-      {...unifiedHistogramProps}
-      requestAdapter={dataState.inspectorAdapters.requests}
+    <UnifiedHistogramLayout
       container={container}
-      css={histogramLayoutCss}
-      renderCustomChartToggleActions={renderCustomChartToggleActions}
-      abortController={stateContainer.dataState.getAbortController()}
+      chartPanel={
+        chartPortalNode ? <OutPortal node={chartPortalNode} panelsToggle={panelsToggle} /> : null
+      }
+      {...layoutProps}
     >
-      <DiscoverMainContent
-        {...mainContentProps}
-        stateContainer={stateContainer}
-        dataView={dataView}
-        panelsToggle={panelsToggle}
-      />
-    </UnifiedHistogramContainer>
+      <DiscoverMainContent {...mainContentProps} panelsToggle={panelsToggle} />
+    </UnifiedHistogramLayout>
   );
 };

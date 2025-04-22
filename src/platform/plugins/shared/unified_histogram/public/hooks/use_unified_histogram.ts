@@ -35,7 +35,7 @@ import { useStateProps } from '../container/hooks/use_state_props';
 import { useRequestParams } from './use_request_params';
 import { LensVisService } from '../services/lens_vis_service';
 import { checkChartAvailability } from '../chart';
-import { UnifiedHistogramLayoutProps } from '../layout/layout2';
+import { UnifiedHistogramLayoutProps } from '../layout/layout';
 
 export type UseUnifiedHistogramProps = Omit<UnifiedHistogramStateOptions, 'services'> & {
   searchSessionId?: UnifiedHistogramRequestContext['searchSessionId'];
@@ -99,7 +99,7 @@ export type UseUnifiedHistogramProps = Omit<UnifiedHistogramStateOptions, 'servi
   abortController?: AbortController;
 };
 
-export type UnifiedHistogramApi2 = {
+export type UnifiedHistogramApi = {
   /**
    * Trigger a fetch of the data
    */
@@ -113,7 +113,7 @@ export type UseUnifiedHistogramResult =
   | { isInitialized: false; api?: undefined; chartProps?: undefined; layoutProps?: undefined }
   | {
       isInitialized: true;
-      api: UnifiedHistogramApi2;
+      api: UnifiedHistogramApi;
       chartProps: ChartProps;
       layoutProps: Omit<UnifiedHistogramLayoutProps, 'container' | 'chartPanel'>;
     };
@@ -123,18 +123,14 @@ const EMPTY_SUGGESTION_CONTEXT: Observable<UnifiedHistogramSuggestionContext> = 
   type: UnifiedHistogramSuggestionType.unsupported,
 });
 
-export const useUnifiedHistogram = ({
-  onBreakdownFieldChange,
-  onVisContextChanged,
-  ...props
-}: UseUnifiedHistogramProps): UseUnifiedHistogramResult => {
+export const useUnifiedHistogram = (props: UseUnifiedHistogramProps): UseUnifiedHistogramResult => {
   const [stateService] = useState(() => {
     const { services, initialState, localStorageKeyPrefix } = props;
     return createStateService({ services, initialState, localStorageKeyPrefix });
   });
   const [lensVisService, setLensVisService] = useState<LensVisService>();
   const [input$] = useState(() => new Subject<UnifiedHistogramInputMessage>());
-  const [api, setApi] = useState<UnifiedHistogramApi2>();
+  const [api, setApi] = useState<UnifiedHistogramApi>();
 
   // Load async services and initialize API
   useMount(async () => {
@@ -185,10 +181,9 @@ export const useUnifiedHistogram = ({
     searchSessionId,
     requestAdapter,
     columns,
-    breakdownField: initialBreakdownField,
-    ...pick(props, 'breakdownField'),
-    onBreakdownFieldChange,
-    onVisContextChanged,
+    breakdownField: 'breakdownField' in props ? props.breakdownField : initialBreakdownField,
+    onBreakdownFieldChange: props.onBreakdownFieldChange,
+    onVisContextChanged: props.onVisContextChanged,
   });
   const columnsMap = useMemo(() => {
     return columns?.reduce<Record<string, DatatableColumn>>((acc, column) => {
@@ -226,7 +221,7 @@ export const useUnifiedHistogram = ({
       breakdownField: stateProps.breakdown?.field,
       table,
       onSuggestionContextChange: stateProps.onSuggestionContextChange,
-      onVisContextChanged: stateProps.isPlainRecord ? onVisContextChanged : undefined,
+      onVisContextChanged: stateProps.isPlainRecord ? stateProps.onVisContextChanged : undefined,
     });
   }, [
     columns,
@@ -235,13 +230,13 @@ export const useUnifiedHistogram = ({
     externalVisContext,
     isChartLoading,
     lensVisService,
-    onVisContextChanged,
     requestParams.filters,
     requestParams.query,
     stateProps.breakdown?.field,
     stateProps.chart?.timeInterval,
     stateProps.isPlainRecord,
     stateProps.onSuggestionContextChange,
+    stateProps.onVisContextChanged,
     table,
     timeRange,
   ]);

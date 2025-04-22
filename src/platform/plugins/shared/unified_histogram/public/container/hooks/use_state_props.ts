@@ -34,8 +34,8 @@ import {
 } from '../utils/state_selectors';
 import { useStateSelector } from '../utils/use_state_selector';
 import { setBreakdownField } from '../utils/local_storage_utils';
-import { UnifiedHistogramLayoutProps } from '../../layout';
 import { exportVisContext } from '../../utils/external_vis_context';
+import { UseUnifiedHistogramProps } from '../../hooks/use_unified_histogram';
 
 export const useStateProps = ({
   services,
@@ -200,7 +200,7 @@ export const useStateProps = ({
     [stateService]
   );
 
-  const onVisContextChange: UnifiedHistogramLayoutProps['onVisContextChanged'] = useMemo(() => {
+  const onVisContextChanged: UseUnifiedHistogramProps['onVisContextChanged'] = useMemo(() => {
     if (!originalOnVisContextChanged) {
       return undefined;
     }
@@ -246,6 +246,6 @@ export const useStateProps = ({
     onChartLoad,
     onBreakdownFieldChange,
     onSuggestionContextChange,
-    onVisContextChange,
+    onVisContextChanged,
   };
 };

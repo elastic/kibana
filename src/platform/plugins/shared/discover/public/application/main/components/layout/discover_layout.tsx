@@ -58,7 +58,7 @@ import { sendErrorMsg } from '../../hooks/use_saved_search_messages';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
 import { useCurrentDataView, useCurrentTabSelector } from '../../state_management/redux';
 import { TABS_ENABLED } from '../../../../constants';
-import { DiscoverHistogramLayout2 } from './discover_histogram_layout2';
+import { DiscoverHistogramLayout } from './discover_histogram_layout';
 
 const SidebarMemoized = React.memo(DiscoverSidebarResponsive);
 const TopNavMemoized = React.memo(DiscoverTopNav);
@@ -321,7 +321,7 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
 
     return (
       <>
-        <DiscoverHistogramLayout2
+        <DiscoverHistogramLayout
           dataView={dataView}
           stateContainer={stateContainer}
           columns={currentColumns}

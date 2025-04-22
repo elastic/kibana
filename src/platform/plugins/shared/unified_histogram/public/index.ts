@@ -12,15 +12,8 @@ import { UnifiedHistogramPublicPlugin } from './plugin';
 export type { BreakdownFieldSelectorProps } from './chart/lazy';
 export { UnifiedBreakdownFieldSelector } from './chart/lazy';
 
-export type {
-  UnifiedHistogramApi,
-  UnifiedHistogramContainerProps,
-  UnifiedHistogramCreationOptions,
-  UnifiedHistogramState,
-  UnifiedHistogramStateOptions,
-} from './container';
+export type { UnifiedHistogramState, UnifiedHistogramStateOptions } from './container';
 export {
-  UnifiedHistogramContainer,
   getChartHidden,
   getTopPanelHeight,
   getBreakdownField,
@@ -39,7 +32,10 @@ export { canImportVisContext } from './utils/external_vis_context';
 
 export const plugin = () => new UnifiedHistogramPublicPlugin();
 
-export { UnifiedHistogramContainer2 } from './container/container2';
-export { UnifiedHistogramLayout2 } from './layout/layout2';
-export { useUnifiedHistogram, type UseUnifiedHistogramProps } from './hooks/use_unified_histogram';
+export { UnifiedHistogramLayout } from './layout/layout';
+export {
+  useUnifiedHistogram,
+  type UseUnifiedHistogramProps,
+  type UnifiedHistogramApi,
+} from './hooks/use_unified_histogram';
 export { Chart as UnifiedHistogramChart } from './chart';
