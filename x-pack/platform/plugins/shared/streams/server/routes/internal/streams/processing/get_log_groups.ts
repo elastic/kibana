@@ -15,7 +15,7 @@ export interface LogGroup {
 }
 
 /**
- * Groups a list logs by pattern and calculates their probability.
+ * Groups a list of logs by pattern and calculates their probability.
  */
 export function getLogGroups(logs: string[], maxDepth = 2) {
   if (maxDepth <= 0) {
