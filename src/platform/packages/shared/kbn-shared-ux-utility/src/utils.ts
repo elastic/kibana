@@ -23,7 +23,7 @@ export const hasActiveModifierKey = (event: MouseEvent): boolean => {
 export const getClosestLink = (
   element: HTMLElement | null | undefined,
   container?: HTMLElement,
-  maxDepth = 10
+  maxDepth = 25
 ): HTMLAnchorElement | undefined => {
   let current = element;
   let currentDepth = 1;
