@@ -13,7 +13,7 @@ import { logQueryRequest } from '../utils/logged_requests';
 import * as i18n from '../translations';
 import type { SignalSource } from '../types';
 
-interface FetchedDocument {
+export interface FetchedDocument {
   fields: estypes.SearchHit['fields'];
   _source?: SignalSource;
   _index: estypes.SearchHit['_index'];

@@ -16,11 +16,13 @@ import {
 import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import { buildEsqlSearchRequest } from './build_esql_search_request';
 import { performEsqlRequest } from './esql_request';
+import type { EsqlTable } from './esql_request';
 import { wrapEsqlAlerts } from './wrap_esql_alerts';
 import { wrapSuppressedEsqlAlerts } from './wrap_suppressed_esql_alerts';
 import { bulkCreateSuppressedAlertsInMemory } from '../utils/bulk_create_suppressed_alerts_in_memory';
 import { rowToDocument, mergeEsqlResultInSource, getMvExpandUsage } from './utils';
 import { fetchSourceDocuments } from './fetch_source_documents';
+import type { FetchedDocument } from './fetch_source_documents';
 import { buildReasonMessageForEsqlAlert } from '../utils/reason_formatters';
 import type { RulePreviewLoggedRequest } from '../../../../../common/api/detection_engine/rule_preview/rule_preview.gen';
 import type { SecurityRuleServices, SecuritySharedParams, SignalSource } from '../types';
@@ -240,7 +242,14 @@ export const esqlExecutor = async ({
           );
           break;
         }
-        excludedDocumentIds.push(...Object.keys(sourceDocuments));
+
+        updatedExcludedIds(
+          excludedDocumentIds,
+          hasMvExpand,
+          sourceDocuments,
+          response,
+          isRuleAggregating
+        );
         iteration++;
       }
     } catch (error) {
@@ -253,4 +262,30 @@ export const esqlExecutor = async ({
 
     return { ...result, state, ...(isLoggedRequestsEnabled ? { loggedRequests } : {}) };
   });
+};
+
+const updatedExcludedIds = (
+  excludedDocumentIds: string[],
+  hasMvExpand: boolean,
+  sourceDocuments: Record<string, FetchedDocument>,
+  results: EsqlTable,
+  isRuleAggregating: boolean
+): string[] => {
+  // aggregating queries do not have event _id, so we will not exclude any documents
+  if (isRuleAggregating) {
+    return excludedDocumentIds;
+  }
+  const documentIds = Object.keys(sourceDocuments);
+
+  if (!hasMvExpand || documentIds.length === 1) {
+    excludedDocumentIds.push(...documentIds);
+    return excludedDocumentIds;
+  }
+
+  const idColumnIndex = results.columns.findIndex((column) => column.name === '_id');
+  const lastId = results.values[results.values.length - 1][idColumnIndex];
+
+  excludedDocumentIds.push(...documentIds.filter((id) => id !== lastId));
+
+  return excludedDocumentIds;
 };
