@@ -57,7 +57,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       upgradingStackOnCloud: `${ELASTIC_WEBSITE_URL}guide/en/elastic-stack/current/upgrade-elastic-stack-for-elastic-cloud.html`,
     },
     apm: {
-      kibanaSettings: `https://staging-website.elastic.co/docs/solutions/observability/apm/applications-ui-settings`,
+      kibanaSettings: `https://www.elastic.co/docs/solutions/observability/apm/applications-ui-settings`,
       supportedServiceMaps: `https://www.elastic.co/docs/solutions/observability/apm/service-map`,
       customLinks: `https://www.elastic.co/docs/solutions/observability/apm/create-custom-links`,
       droppedTransactionSpans: `https://www.elastic.co/docs/solutions/observability/apm/spans#apm-data-model-dropped-spans`,
