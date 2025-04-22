@@ -138,6 +138,7 @@ export interface TransactionTraceFields {
 }
 
 export interface SpanTraceFields {
+  'span.id': string;
   'span.name'?: string;
   'span.action'?: string;
   'span.duration.us'?: number;
