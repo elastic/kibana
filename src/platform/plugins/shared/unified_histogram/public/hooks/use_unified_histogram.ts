@@ -96,13 +96,13 @@ export type UseUnifiedHistogramProps = Omit<UnifiedHistogramStateOptions, 'servi
    */
   isChartLoading?: boolean;
   /**
-   * Disabled action IDs for the Lens embeddable
-   */
-  disabledActions?: LensEmbeddableInput['disabledActions'];
-  /**
    * Allows users to enable/disable default actions
    */
   withDefaultActions?: EmbeddableComponentProps['withDefaultActions'];
+  /**
+   * Disabled action IDs for the Lens embeddable
+   */
+  disabledActions?: LensEmbeddableInput['disabledActions'];
   /**
    * Callback to pass to the Lens embeddable to handle filter changes
    */
