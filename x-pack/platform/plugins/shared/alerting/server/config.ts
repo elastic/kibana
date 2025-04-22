@@ -80,7 +80,9 @@ export const configSchema = schema.object({
   maintenanceWindow: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
   }),
-  disabledRuleTypes: schema.arrayOf(schema.string({ minLength: 1 }), { defaultValue: [] }),
+  disabledRuleTypes: schema.maybe(
+    schema.arrayOf(schema.string({ minLength: 1 }), { defaultValue: [] })
+  ),
 });
 
 export type AlertingConfig = TypeOf<typeof configSchema>;

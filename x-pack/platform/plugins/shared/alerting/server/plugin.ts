@@ -232,7 +232,7 @@ export class AlertingPlugin {
   private readonly isServerless: boolean;
   private nodeRoles: PluginInitializerContext['node']['roles'];
   private readonly connectorAdapterRegistry = new ConnectorAdapterRegistry();
-  private readonly disabledRuleTypes = new Set<string>();
+  private readonly disabledRuleTypes: Set<string>;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get();
@@ -249,7 +249,7 @@ export class AlertingPlugin {
     this.inMemoryMetrics = new InMemoryMetrics(initializerContext.logger.get('in_memory_metrics'));
     this.pluginStop$ = new ReplaySubject(1);
     this.isServerless = initializerContext.env.packageInfo.buildFlavor === 'serverless';
-    this.disabledRuleTypes = new Set(this.config.disabledRuleTypes);
+    this.disabledRuleTypes = new Set(this.config.disabledRuleTypes || []);
   }
 
   public setup(
