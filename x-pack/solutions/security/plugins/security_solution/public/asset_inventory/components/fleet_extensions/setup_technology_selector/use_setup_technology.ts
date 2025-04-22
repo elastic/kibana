@@ -8,7 +8,9 @@ import { useState, useEffect } from 'react';
 
 import type { NewPackagePolicyInput } from '@kbn/fleet-plugin/common';
 import { SetupTechnology } from '@kbn/fleet-plugin/public';
-import { CLOUDBEAT_AWS, CLOUDBEAT_GCP, CLOUDBEAT_AZURE } from '../constants';
+import { CLOUDBEAT_AWS } from '../aws_credentials_form/constants';
+import { CLOUDBEAT_GCP } from '../gcp_credentials_form/constants';
+import { CLOUDBEAT_AZURE } from '../azure_credentials_form/constants';
 
 export const useSetupTechnology = ({
   input,

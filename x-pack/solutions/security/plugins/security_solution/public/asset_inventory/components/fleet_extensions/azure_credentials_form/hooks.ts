@@ -7,27 +7,20 @@
 
 import { useEffect, useRef } from 'react';
 import type { NewPackagePolicy, PackageInfo } from '@kbn/fleet-plugin/common';
-import {
-  AZURE_CREDENTIALS_TYPE,
-  AZURE_SETUP_FORMAT,
-  type SetupFormat,
-} from './azure_credentials_form';
+import { AZURE_CREDENTIALS_TYPE, AZURE_SETUP_FORMAT, CLOUDBEAT_AZURE } from './constants';
 import { assetIntegrationDocsNavigation } from '../../../constants';
-import {
-  getArmTemplateUrlFromAssetPackage,
-  getAssetPolicy,
-  type NewPackagePolicyAssetInput,
-} from '../utils';
+import { getArmTemplateUrlFromAssetPackage, getAssetPolicy } from '../utils';
 import {
   getAzureCredentialsFormOptions,
   getInputVarsFields,
-} from './get_azure_credentials_form_options';
-import { CLOUDBEAT_AZURE } from '../constants';
-import type { AzureCredentialsType } from '../types';
+} from './azure_credentials_form_options';
+
+import type { NewPackagePolicyAssetInput } from '../types';
+import type { AzureCredentialsType, AzureSetupFormat } from './types';
 
 const getSetupFormatFromInput = (
   input: Extract<NewPackagePolicyAssetInput, { type: 'cloudbeat/asset_inventory_azure' }>
-): SetupFormat => {
+): AzureSetupFormat => {
   const credentialsType = getAzureCredentialsType(input);
   if (!credentialsType) {
     return AZURE_SETUP_FORMAT.ARM_TEMPLATE;
@@ -78,7 +71,7 @@ const useUpdateAzureArmTemplate = ({
   packageInfo: PackageInfo;
   newPolicy: NewPackagePolicy;
   updatePolicy: (policy: NewPackagePolicy) => void;
-  setupFormat: SetupFormat;
+  setupFormat: AzureSetupFormat;
 }) => {
   useEffect(() => {
     const azureArmTemplateUrl = getAzureArmTemplateUrl(newPolicy);
@@ -104,15 +97,11 @@ export const useAzureCredentialsForm = ({
   newPolicy,
   input,
   packageInfo,
-  onChange,
-  // setIsValid,
   updatePolicy,
 }: {
   newPolicy: NewPackagePolicy;
   input: Extract<NewPackagePolicyAssetInput, { type: 'cloudbeat/asset_inventory_azure' }>;
   packageInfo: PackageInfo;
-  onChange: (opts: { isValid: boolean; updatedPolicy: NewPackagePolicy }) => void;
-  // setIsValid: (isValid: boolean) => void;
   updatePolicy: (updatedPolicy: NewPackagePolicy) => void;
 }) => {
   const azureCredentialsType: AzureCredentialsType =
@@ -127,17 +116,6 @@ export const useAzureCredentialsForm = ({
   const fieldsSnapshot = useRef({});
   const lastManualCredentialsType = useRef<string | undefined>(undefined);
 
-  // useEffect(() => {
-  //   const isInvalid = setupFormat === AZURE_SETUP_FORMAT.ARM_TEMPLATE && !hasArmTemplateUrl;
-  //   setIsValid(!isInvalid);
-
-  //   onChange({
-  //     isValid: !isInvalid,
-  //     updatedPolicy: newPolicy,
-  //   });
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, [setupFormat, input.type]);
-
   const documentationLink = assetIntegrationDocsNavigation.azureGetStartedPath;
 
   useUpdateAzureArmTemplate({
@@ -149,7 +127,7 @@ export const useAzureCredentialsForm = ({
 
   const defaultAzureManualCredentialType = AZURE_CREDENTIALS_TYPE.MANAGED_IDENTITY;
 
-  const onSetupFormatChange = (newSetupFormat: SetupFormat) => {
+  const onSetupFormatChange = (newSetupFormat: AzureSetupFormat) => {
     if (newSetupFormat === AZURE_SETUP_FORMAT.ARM_TEMPLATE) {
       fieldsSnapshot.current = Object.fromEntries(
         fields?.map((field) => [field.id, { value: field.value }])
@@ -185,7 +163,6 @@ export const useAzureCredentialsForm = ({
     group,
     fields,
     documentationLink,
-    // hasArmTemplateUrl,
     onSetupFormatChange,
   };
 };

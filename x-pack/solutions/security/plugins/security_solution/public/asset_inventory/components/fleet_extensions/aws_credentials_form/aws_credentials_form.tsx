@@ -21,38 +21,24 @@ import type { NewPackagePolicyInput, PackageInfo } from '@kbn/fleet-plugin/commo
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
-import { getAssetPolicy, type NewPackagePolicyAssetInput } from '../utils';
+import { getAssetPolicy } from '../utils';
 import type { AssetRadioOption } from '../asset_boxed_radio_group';
 import { RadioGroup } from '../asset_boxed_radio_group';
 import {
   AWS_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJ,
   AWS_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ,
 } from '../test_subjects';
-import { AWS_ORGANIZATION_ACCOUNT } from '../constants';
-import type { AwsCredentialsTypeOptions } from './get_aws_credentials_form_options';
-import { getAwsCredentialsFormManualOptions } from './get_aws_credentials_form_options';
+import { AWS_ORGANIZATION_ACCOUNT, AWS_SETUP_FORMAT } from './constants';
+import type { AwsCredentialsTypeOptions } from './aws_credentials_form_options';
+import { getAwsCredentialsFormManualOptions } from './aws_credentials_form_options';
 import { AwsInputVarFields } from './aws_input_var_fields';
-import type { AwsCredentialsType } from '../types';
+import type { AwsCredentialsType, AwsSetupFormat } from './types';
 import { useAwsCredentialsForm } from './hooks';
+import type { NewPackagePolicyAssetInput } from '../types';
 
 interface AWSSetupInfoContentProps {
   info: ReactNode;
 }
-
-export type SetupFormat = typeof AWS_SETUP_FORMAT.CLOUD_FORMATION | typeof AWS_SETUP_FORMAT.MANUAL;
-
-export const AWS_SETUP_FORMAT = {
-  CLOUD_FORMATION: 'cloud_formation',
-  MANUAL: 'manual',
-} as const;
-
-export const AWS_CREDENTIALS_TYPE = {
-  ASSUME_ROLE: 'assume_role',
-  DIRECT_ACCESS_KEYS: 'direct_access_keys',
-  TEMPORARY_KEYS: 'temporary_keys',
-  SHARED_CREDENTIALS: 'shared_credentials',
-  CLOUD_FORMATION: 'cloud_formation',
-} as const;
 
 export const AWSSetupInfoContent = ({ info }: AWSSetupInfoContentProps) => {
   return (
@@ -94,12 +80,6 @@ export interface AwsFormProps {
   input: Extract<NewPackagePolicyAssetInput, { type: 'cloudbeat/asset_inventory_aws' }>;
   updatePolicy(updatedPolicy: NewPackagePolicy): void;
   packageInfo: PackageInfo;
-  onChange: (opts: {
-    isValid: boolean;
-    updatedPolicy: Partial<NewPackagePolicy>;
-    isExtensionLoaded?: boolean;
-  }) => void;
-  setIsValid: (isValid: boolean) => void;
   disabled: boolean;
   hasInvalidRequiredVars: boolean;
 }
@@ -212,8 +192,6 @@ export const AwsCredentialsForm = ({
   newPolicy,
   updatePolicy,
   packageInfo,
-  onChange,
-  setIsValid,
   disabled,
   hasInvalidRequiredVars,
 }: AwsFormProps) => {
@@ -229,8 +207,6 @@ export const AwsCredentialsForm = ({
     newPolicy,
     input,
     packageInfo,
-    onChange,
-    setIsValid,
     updatePolicy,
   });
 
@@ -260,7 +236,7 @@ export const AwsCredentialsForm = ({
         size="m"
         options={getSetupFormatOptions()}
         idSelected={setupFormat}
-        onChange={(selectedSetupFormat: SetupFormat) =>
+        onChange={(selectedSetupFormat: AwsSetupFormat) =>
           selectedSetupFormat !== setupFormat && onSetupFormatChange(selectedSetupFormat)
         }
       />

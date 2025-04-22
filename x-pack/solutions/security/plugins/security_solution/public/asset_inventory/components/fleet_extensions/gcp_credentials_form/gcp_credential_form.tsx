@@ -23,8 +23,8 @@ import type { NewPackagePolicyInput, PackageInfo } from '@kbn/fleet-plugin/commo
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
-import type { GcpCredentialsType } from '../types';
-import { CLOUDBEAT_GCP, GCP_ORGANIZATION_ACCOUNT } from '../constants';
+import type { NewPackagePolicyAssetInput } from '../types';
+import { CLOUDBEAT_GCP, GCP_ORGANIZATION_ACCOUNT } from './constants';
 import type { AssetRadioOption } from '../asset_boxed_radio_group';
 import { RadioGroup } from '../asset_boxed_radio_group';
 import {
@@ -33,13 +33,13 @@ import {
   getCspmCloudShellDefaultValue,
   getAssetPolicy,
 } from '../utils';
-import type { NewPackagePolicyAssetInput } from '../utils';
 import { assetIntegrationDocsNavigation } from '../../../constants';
 import { ReadDocumentation } from '../aws_credentials_form/aws_credentials_form';
 import {
   CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS,
   GCP_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJ,
 } from '../test_subjects';
+import type { GcpCredentialsType } from './types';
 
 export const GCP_SETUP_ACCESS = {
   CLOUD_SHELL: 'google_cloud_shell',

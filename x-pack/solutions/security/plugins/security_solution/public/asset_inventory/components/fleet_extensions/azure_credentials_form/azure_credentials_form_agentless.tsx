@@ -17,13 +17,13 @@ import {
   AzureSetupInfoContent,
   AzureInputVarFields,
   ARM_TEMPLATE_EXTERNAL_DOC_URL,
-  AZURE_CREDENTIALS_TYPE,
 } from './azure_credentials_form';
 import { getAssetPolicy } from '../utils';
 import {
   getAzureCredentialsFormOptions,
   getInputVarsFields,
-} from './get_azure_credentials_form_options';
+} from './azure_credentials_form_options';
+import { AZURE_CREDENTIALS_TYPE } from './constants';
 
 export const AzureCredentialsFormAgentless = ({
   input,

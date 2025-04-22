@@ -5,7 +5,15 @@
  * 2.0.
  */
 
-import type { SUPPORTED_CLOUDBEAT_INPUTS, SUPPORTED_POLICY_TEMPLATES } from './constants';
+import type { NewPackagePolicyInput } from '@kbn/fleet-plugin/common';
+import type {
+  ASSET_POLICY_TEMPLATE,
+  SUPPORTED_CLOUDBEAT_INPUTS,
+  SUPPORTED_POLICY_TEMPLATES,
+} from './constants';
+import type { CLOUDBEAT_GCP } from './gcp_credentials_form/constants';
+import type { CLOUDBEAT_AWS } from './aws_credentials_form/constants';
+import type { CLOUDBEAT_AZURE } from './azure_credentials_form/constants';
 
 export type AssetInput = (typeof SUPPORTED_CLOUDBEAT_INPUTS)[number];
 export type AssetInventoryPolicyTemplate = (typeof SUPPORTED_POLICY_TEMPLATES)[number];
@@ -30,23 +38,10 @@ export interface CloudAssetInventoryIntegrationProps {
   }>;
 }
 
-export type AwsCredentialsType =
-  | 'assume_role'
-  | 'direct_access_keys'
-  | 'temporary_keys'
-  | 'shared_credentials'
-  | 'cloud_formation';
+type AssetPolicyInput =
+  | { type: typeof CLOUDBEAT_AZURE; policy_template: typeof ASSET_POLICY_TEMPLATE }
+  | { type: typeof CLOUDBEAT_GCP; policy_template: typeof ASSET_POLICY_TEMPLATE }
+  | { type: typeof CLOUDBEAT_AWS; policy_template: typeof ASSET_POLICY_TEMPLATE };
 
-export type GcpCredentialsType = 'credentials-file' | 'credentials-json' | 'credentials-none';
-
-export type GcpCredentialsTypeFieldMap = {
-  [key in GcpCredentialsType]: string[];
-};
-
-export type AzureCredentialsType =
-  | 'arm_template'
-  | 'manual'
-  | 'service_principal_with_client_secret'
-  | 'service_principal_with_client_certificate'
-  | 'service_principal_with_client_username_and_password'
-  | 'managed_identity';
+// Extend NewPackagePolicyInput with known string literals for input type and policy template
+export type NewPackagePolicyAssetInput = NewPackagePolicyInput & AssetPolicyInput;

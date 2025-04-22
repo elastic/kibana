@@ -7,17 +7,15 @@
 
 import { useEffect, useRef } from 'react';
 import type { NewPackagePolicy, PackageInfo } from '@kbn/fleet-plugin/common';
-import type { NewPackagePolicyAssetInput } from '../utils';
+import type { NewPackagePolicyAssetInput } from '../types';
 import { getAwsCredentialsType, getCspmCloudFormationDefaultValue, getAssetPolicy } from '../utils';
 import {
   DEFAULT_MANUAL_AWS_CREDENTIALS_TYPE,
   getAwsCredentialsFormOptions,
   getInputVarsFields,
-} from './get_aws_credentials_form_options';
-import type { SetupFormat } from './aws_credentials_form';
-import { AWS_CREDENTIALS_TYPE, AWS_SETUP_FORMAT } from './aws_credentials_form';
-import type { AwsCredentialsType } from '../types';
-import { CLOUDBEAT_AWS } from '../constants';
+} from './aws_credentials_form_options';
+import type { AwsSetupFormat, AwsCredentialsType } from './types';
+import { AWS_CREDENTIALS_TYPE, AWS_SETUP_FORMAT, CLOUDBEAT_AWS } from './constants';
 import { assetIntegrationDocsNavigation } from '../../../constants';
 /**
  * Update CloudFormation template and stack name in the Agent Policy
@@ -27,7 +25,7 @@ import { assetIntegrationDocsNavigation } from '../../../constants';
 const getSetupFormatFromInput = (
   input: Extract<NewPackagePolicyAssetInput, { type: 'cloudbeat/asset_inventory_aws' }>,
   hasCloudFormationTemplate: boolean
-): SetupFormat => {
+): AwsSetupFormat => {
   const credentialsType = getAwsCredentialsType(input);
   // CloudFormation is the default setup format if the integration has a CloudFormation template
   if (!credentialsType && hasCloudFormationTemplate) {
@@ -44,21 +42,11 @@ export const useAwsCredentialsForm = ({
   newPolicy,
   input,
   packageInfo,
-  onChange,
-  setIsValid,
   updatePolicy,
 }: {
   newPolicy: NewPackagePolicy;
   input: Extract<NewPackagePolicyAssetInput, { type: 'cloudbeat/asset_inventory_aws' }>;
   packageInfo: PackageInfo;
-  onChange: (opts: {
-    /** is current form state is valid */
-    isValid: boolean;
-    /** The updated Integration Policy to be merged back and included in the API call */
-    updatedPolicy: Partial<NewPackagePolicy>;
-    isExtensionLoaded?: boolean;
-  }) => void;
-  setIsValid: (isValid: boolean) => void;
   updatePolicy: (updatedPolicy: NewPackagePolicy) => void;
 }) => {
   // We only have a value for 'aws.credentials.type' once the form has mounted.
@@ -82,9 +70,8 @@ export const useAwsCredentialsForm = ({
   useEffect(() => {
     // This should ony set the credentials after the initial render
     if (!getAwsCredentialsType(input) && !lastManualCredentialsType.current) {
-      onChange({
-        isValid: true,
-        updatedPolicy: getAssetPolicy(newPolicy, input.type, {
+      updatePolicy({
+        ...getAssetPolicy(newPolicy, input.type, {
           'aws.credentials.type': {
             value: awsCredentialsType,
             type: 'text',
@@ -92,20 +79,7 @@ export const useAwsCredentialsForm = ({
         }),
       });
     }
-  }, [awsCredentialsType, input, newPolicy, onChange]);
-
-  useEffect(() => {
-    const isInvalid =
-      setupFormat === AWS_SETUP_FORMAT.CLOUD_FORMATION && !hasCloudFormationTemplate;
-
-    setIsValid(!isInvalid);
-
-    onChange({
-      isValid: !isInvalid,
-      updatedPolicy: newPolicy,
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [setupFormat, input.type]);
+  }, [awsCredentialsType, input, newPolicy, updatePolicy]);
 
   const elasticDocLink = assetIntegrationDocsNavigation.awsGetStartedPath;
 
@@ -116,7 +90,7 @@ export const useAwsCredentialsForm = ({
     setupFormat,
   });
 
-  const onSetupFormatChange = (newSetupFormat: SetupFormat) => {
+  const onSetupFormatChange = (newSetupFormat: AwsSetupFormat) => {
     if (newSetupFormat === AWS_SETUP_FORMAT.CLOUD_FORMATION) {
       // We need to store the current manual fields to restore them later
       fieldsSnapshot.current = Object.fromEntries(
@@ -197,7 +171,7 @@ const useCloudFormationTemplate = ({
   packageInfo: PackageInfo;
   newPolicy: NewPackagePolicy;
   updatePolicy: (policy: NewPackagePolicy) => void;
-  setupFormat: SetupFormat;
+  setupFormat: AwsSetupFormat;
 }) => {
   useEffect(() => {
     const policyInputCloudFormationTemplate = getAwsCloudFormationTemplate(newPolicy);

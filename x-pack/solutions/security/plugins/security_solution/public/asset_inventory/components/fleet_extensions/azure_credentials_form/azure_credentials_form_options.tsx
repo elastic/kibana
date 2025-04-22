@@ -10,9 +10,9 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiText } from '@elastic/eui';
-import type { AzureCredentialsType } from '../types';
+import type { AzureCredentialsType } from './types';
 import { CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS } from '../test_subjects';
-import { AZURE_CREDENTIALS_TYPE } from './azure_credentials_form';
+import { AZURE_CREDENTIALS_TYPE } from './constants';
 
 export type AzureCredentialsFields = Record<
   string,

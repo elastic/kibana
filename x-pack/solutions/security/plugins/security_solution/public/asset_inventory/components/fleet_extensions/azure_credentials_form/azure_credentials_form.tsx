@@ -25,41 +25,21 @@ import { LazyPackagePolicyInputVarField } from '@kbn/fleet-plugin/public';
 import {
   type AzureOptions,
   getAzureCredentialsFormManualOptions,
-} from './get_azure_credentials_form_options';
-import type { AzureCredentialsType } from '../types';
+} from './azure_credentials_form_options';
+import type { AzureCredentialsType, AzureSetupFormat } from './types';
 import { useAzureCredentialsForm } from './hooks';
-import {
-  fieldIsInvalid,
-  findVariableDef,
-  getAssetPolicy,
-  type NewPackagePolicyAssetInput,
-} from '../utils';
+import { fieldIsInvalid, findVariableDef, getAssetPolicy } from '../utils';
 import { type AssetRadioOption, RadioGroup } from '../asset_boxed_radio_group';
 import {
   CIS_AZURE_SETUP_FORMAT_TEST_SUBJECTS,
   AZURE_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ,
 } from '../test_subjects';
+import type { NewPackagePolicyAssetInput } from '../types';
+import { AZURE_SETUP_FORMAT } from './constants';
 
 interface AzureSetupInfoContentProps {
   documentationLink: string;
 }
-
-export type SetupFormat = typeof AZURE_SETUP_FORMAT.ARM_TEMPLATE | typeof AZURE_SETUP_FORMAT.MANUAL;
-
-export const AZURE_SETUP_FORMAT = {
-  ARM_TEMPLATE: 'arm_template',
-  MANUAL: 'manual',
-} as const;
-
-export const AZURE_CREDENTIALS_TYPE = {
-  ARM_TEMPLATE: 'arm_template',
-  MANUAL: 'manual',
-  SERVICE_PRINCIPAL_WITH_CLIENT_SECRET: 'service_principal_with_client_secret',
-  SERVICE_PRINCIPAL_WITH_CLIENT_CERTIFICATE: 'service_principal_with_client_certificate',
-  SERVICE_PRINCIPAL_WITH_CLIENT_USERNAME_AND_PASSWORD:
-    'service_principal_with_client_username_and_password',
-  MANAGED_IDENTITY: 'managed_identity',
-} as const;
 
 export const AzureSetupInfoContent = ({ documentationLink }: AzureSetupInfoContentProps) => {
   return (
@@ -114,7 +94,6 @@ export interface AzureCredentialsFormProps {
   input: Extract<NewPackagePolicyAssetInput, { type: 'cloudbeat/asset_inventory_azure' }>;
   updatePolicy(updatedPolicy: NewPackagePolicy): void;
   packageInfo: PackageInfo;
-  onChange: any;
   disabled: boolean;
   hasInvalidRequiredVars: boolean;
 }
@@ -300,7 +279,6 @@ export const AzureCredentialsForm = ({
   newPolicy,
   updatePolicy,
   packageInfo,
-  onChange,
   disabled,
   hasInvalidRequiredVars,
 }: AzureCredentialsFormProps) => {
@@ -315,7 +293,6 @@ export const AzureCredentialsForm = ({
     newPolicy,
     input,
     packageInfo,
-    onChange,
     updatePolicy,
   });
 
@@ -324,14 +301,6 @@ export const AzureCredentialsForm = ({
       onSetupFormatChange(AZURE_SETUP_FORMAT.ARM_TEMPLATE);
     }
   }, [setupFormat, onSetupFormatChange]);
-
-  useEffect(() => {
-    onChange({
-      isValid: true,
-      updatedPolicy: newPolicy,
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [input, packageInfo, setupFormat]);
 
   return (
     <>
@@ -342,7 +311,7 @@ export const AzureCredentialsForm = ({
         size="m"
         options={getSetupFormatOptions()}
         idSelected={setupFormat}
-        onChange={(idSelected: SetupFormat) =>
+        onChange={(idSelected: AzureSetupFormat) =>
           idSelected !== setupFormat && onSetupFormatChange(idSelected)
         }
       />

@@ -20,13 +20,7 @@ import semverLt from 'semver/functions/lt';
 import type { PackagePolicyValidationResults } from '@kbn/fleet-plugin/common/services';
 import { getFlattenedObject } from '@kbn/std';
 import { i18n } from '@kbn/i18n';
-import {
-  SUPPORTED_CLOUDBEAT_INPUTS,
-  ASSET_POLICY_TEMPLATE,
-  CLOUDBEAT_AWS,
-  CLOUDBEAT_AZURE,
-  CLOUDBEAT_GCP,
-} from './constants';
+import { SUPPORTED_CLOUDBEAT_INPUTS, ASSET_POLICY_TEMPLATE, ASSET_NAMESPACE } from './constants';
 
 // import type { ASSET_POLICY_TEMPLATE } from './constants';
 // import type {
@@ -39,22 +33,18 @@ import {
   DEFAULT_AGENTLESS_AWS_CREDENTIALS_TYPE,
   DEFAULT_AWS_CREDENTIALS_TYPE,
   DEFAULT_MANUAL_AWS_CREDENTIALS_TYPE,
-} from './aws_credentials_form/get_aws_credentials_form_options';
+} from './aws_credentials_form/aws_credentials_form_options';
 import { GCP_CREDENTIALS_TYPE } from './gcp_credentials_form/gcp_credential_form';
-import { AZURE_CREDENTIALS_TYPE } from './azure_credentials_form/azure_credentials_form';
-import type { CloudAssetInventoryIntegrations, AssetInput, AwsCredentialsType } from './types';
+import type {
+  CloudAssetInventoryIntegrations,
+  AssetInput,
+  NewPackagePolicyAssetInput,
+} from './types';
+import type { AwsCredentialsType } from './aws_credentials_form/types';
 import googleCloudLogo from './assets/icons/google_cloud_logo.svg';
-
-// Posture policies only support the default namespace
-export const ASSET_NAMESPACE = 'default';
-
-type AssetPolicyInput =
-  | { type: typeof CLOUDBEAT_AZURE; policy_template: typeof ASSET_POLICY_TEMPLATE }
-  | { type: typeof CLOUDBEAT_GCP; policy_template: typeof ASSET_POLICY_TEMPLATE }
-  | { type: typeof CLOUDBEAT_AWS; policy_template: typeof ASSET_POLICY_TEMPLATE };
-
-// Extend NewPackagePolicyInput with known string literals for input type and policy template
-export type NewPackagePolicyAssetInput = NewPackagePolicyInput & AssetPolicyInput;
+import { AWS_CREDENTIALS_TYPE, CLOUDBEAT_AWS } from './aws_credentials_form/constants';
+import { CLOUDBEAT_GCP } from './gcp_credentials_form/constants';
+import { AZURE_CREDENTIALS_TYPE, CLOUDBEAT_AZURE } from './azure_credentials_form/constants';
 
 export function assert(condition: unknown, message: string): asserts condition {
   if (!condition) {
@@ -378,6 +368,58 @@ export const isBelowMinVersion = (version: string, minVersion: string) => {
   const semanticVersion = semverValid(version);
   const versionNumberOnly = semverCoerce(semanticVersion) || '';
   return semverLt(versionNumberOnly, minVersion);
+};
+
+export const getDefaultCloudCredentialsType = (
+  isAgentless: boolean,
+  inputType: Extract<
+    AssetInput,
+    | 'cloudbeat/asset_inventory_aws'
+    | 'cloudbeat/asset_inventory_azure'
+    | 'cloudbeat/asset_inventory_gcp'
+  >
+) => {
+  const credentialsTypes: Record<
+    Extract<
+      AssetInput,
+      | 'cloudbeat/asset_inventory_aws'
+      | 'cloudbeat/asset_inventory_azure'
+      | 'cloudbeat/asset_inventory_gcp'
+    >,
+    {
+      [key: string]: {
+        value: string;
+        type: 'text';
+      };
+    }
+  > = {
+    'cloudbeat/asset_inventory_aws': {
+      'aws.credentials.type': {
+        value: isAgentless
+          ? AWS_CREDENTIALS_TYPE.DIRECT_ACCESS_KEYS
+          : AWS_CREDENTIALS_TYPE.CLOUD_FORMATION,
+        type: 'text',
+      },
+    },
+    'cloudbeat/asset_inventory_gcp': {
+      'gcp.credentials.type': {
+        value: isAgentless
+          ? GCP_CREDENTIALS_TYPE.CREDENTIALS_JSON
+          : GCP_CREDENTIALS_TYPE.CREDENTIALS_NONE,
+        type: 'text',
+      },
+    },
+    'cloudbeat/asset_inventory_azure': {
+      'azure.credentials.type': {
+        value: isAgentless
+          ? AZURE_CREDENTIALS_TYPE.SERVICE_PRINCIPAL_WITH_CLIENT_SECRET
+          : AZURE_CREDENTIALS_TYPE.ARM_TEMPLATE,
+        type: 'text',
+      },
+    },
+  };
+
+  return credentialsTypes[inputType];
 };
 
 /**

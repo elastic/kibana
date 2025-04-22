@@ -10,8 +10,8 @@ import { EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import type { NewPackagePolicyInput } from '@kbn/fleet-plugin/common';
-import type { AwsCredentialsType } from '../types';
-import { AWS_CREDENTIALS_TYPE } from './aws_credentials_form';
+import type { AwsCredentialsType } from './types';
+import { AWS_CREDENTIALS_TYPE } from './constants';
 
 const AssumeRoleDescription = (
   <div>

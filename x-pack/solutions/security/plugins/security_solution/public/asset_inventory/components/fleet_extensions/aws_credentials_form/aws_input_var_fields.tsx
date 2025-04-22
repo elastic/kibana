@@ -11,7 +11,7 @@ import type { PackageInfo } from '@kbn/fleet-plugin/common';
 import { css } from '@emotion/react';
 import { LazyPackagePolicyInputVarField } from '@kbn/fleet-plugin/public';
 import { i18n } from '@kbn/i18n';
-import type { AwsOptions } from './get_aws_credentials_form_options';
+import type { AwsOptions } from './aws_credentials_form_options';
 import { findVariableDef, fieldIsInvalid } from '../utils';
 
 export const AwsInputVarFields = ({

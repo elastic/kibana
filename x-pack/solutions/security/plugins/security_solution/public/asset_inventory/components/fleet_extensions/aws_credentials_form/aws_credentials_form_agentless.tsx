@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiAccordion, EuiButton, EuiCallOut, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiAccordion, EuiButton, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
@@ -21,7 +21,7 @@ import {
   getAwsCredentialsFormAgentlessOptions,
   getAwsCredentialsFormOptions,
   getInputVarsFields,
-} from './get_aws_credentials_form_options';
+} from './aws_credentials_form_options';
 import { getAwsCredentialsType, getAssetPolicy, getTemplateUrlFromPackageInfo } from '../utils';
 import { AwsInputVarFields } from './aws_input_var_fields';
 import {
@@ -238,17 +238,6 @@ export const AwsCredentialsFormAgentless = ({
         }}
       />
       <EuiSpacer size="m" />
-      {awsCredentialsType === DEFAULT_AGENTLESS_AWS_CREDENTIALS_TYPE && (
-        <>
-          <EuiCallOut color="warning">
-            <FormattedMessage
-              id="xpack.csp.fleetIntegration.awsCloudCredentials.cloudFormationSupportedMessage"
-              defaultMessage="Launch Cloud Formation for Automated Credentials not supported in current integration version. Please upgrade to the latest version to enable Launch CloudFormation for automated credentials."
-            />
-          </EuiCallOut>
-          <EuiSpacer size="m" />
-        </>
-      )}
       {awsCredentialsType === DEFAULT_AGENTLESS_AWS_CREDENTIALS_TYPE && (
         <>
           <EuiSpacer size="m" />

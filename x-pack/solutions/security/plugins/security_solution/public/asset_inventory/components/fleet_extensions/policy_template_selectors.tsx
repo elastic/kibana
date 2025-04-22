@@ -11,9 +11,8 @@ import type {
   PackageInfo,
 } from '@kbn/fleet-plugin/common';
 import { SetupTechnology } from '@kbn/fleet-plugin/public';
-import type { PackagePolicyReplaceDefineStepExtensionComponentProps } from '@kbn/fleet-plugin/public/types';
-import type { AssetInput } from './types';
-import { getPolicyTemplateInputOptions, type NewPackagePolicyAssetInput } from './utils';
+import type { AssetInput, NewPackagePolicyAssetInput } from './types';
+import { getPolicyTemplateInputOptions } from './utils';
 import { RadioGroup } from './asset_boxed_radio_group';
 import { AzureCredentialsForm } from './azure_credentials_form/azure_credentials_form';
 import { AzureCredentialsFormAgentless } from './azure_credentials_form/azure_credentials_form_agentless';
@@ -27,8 +26,6 @@ export interface PolicyTemplateVarsFormProps {
   input: NewPackagePolicyAssetInput;
   updatePolicy(updatedPolicy: NewPackagePolicy): void;
   packageInfo: PackageInfo;
-  onChange: PackagePolicyReplaceDefineStepExtensionComponentProps['onChange'];
-  setIsValid: (isValid: boolean) => void;
   disabled: boolean;
   setupTechnology: SetupTechnology;
   isEditPage?: boolean;
@@ -41,8 +38,6 @@ export const PolicyTemplateVarsForm = ({
   newPolicy,
   updatePolicy,
   packageInfo,
-  onChange,
-  setIsValid,
   disabled,
   isEditPage,
   hasInvalidRequiredVars,
@@ -57,9 +52,9 @@ export const PolicyTemplateVarsForm = ({
             newPolicy={newPolicy}
             updatePolicy={updatePolicy}
             packageInfo={packageInfo}
-            onChange={onChange}
             hasInvalidRequiredVars={hasInvalidRequiredVars}
             input={input}
+            disabled={disabled}
           />
         );
       }
@@ -68,8 +63,6 @@ export const PolicyTemplateVarsForm = ({
           newPolicy={newPolicy}
           updatePolicy={updatePolicy}
           packageInfo={packageInfo}
-          onChange={onChange}
-          setIsValid={setIsValid}
           disabled={disabled}
           hasInvalidRequiredVars={hasInvalidRequiredVars}
           input={input}
@@ -108,6 +101,7 @@ export const PolicyTemplateVarsForm = ({
             packageInfo={packageInfo}
             hasInvalidRequiredVars={hasInvalidRequiredVars}
             input={input}
+            disabled={disabled}
           />
         );
       }
@@ -118,7 +112,6 @@ export const PolicyTemplateVarsForm = ({
           newPolicy={newPolicy}
           updatePolicy={updatePolicy}
           packageInfo={packageInfo}
-          onChange={onChange}
           disabled={disabled}
           hasInvalidRequiredVars={hasInvalidRequiredVars}
         />

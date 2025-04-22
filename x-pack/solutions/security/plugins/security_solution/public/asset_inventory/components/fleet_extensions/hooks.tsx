@@ -4,23 +4,44 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { useEffect } from 'react';
 import {
   type PackagePolicy,
   packagePolicyRouteService,
   SO_SEARCH_LIMIT,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
 } from '@kbn/fleet-plugin/common';
+import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
 import { useQuery } from '@tanstack/react-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import { DETECTION_RULE_RULES_API_CURRENT_VERSION } from '@kbn/cloud-security-posture-common';
+import { getAssetPolicy } from './utils';
+import type { NewPackagePolicyAssetInput } from './types';
+import { ASSET_NAMESPACE } from './constants';
 
 interface PackagePolicyListData {
   items: PackagePolicy[];
 }
 
 const PACKAGE_POLICY_LIST_QUERY_KEY = ['packagePolicyList'];
+
+export const useEnsureDefaultNamespace = ({
+  newPolicy,
+  input,
+  updatePolicy,
+}: {
+  newPolicy: NewPackagePolicy;
+  input: NewPackagePolicyAssetInput;
+  updatePolicy: (policy: NewPackagePolicy, isExtensionLoaded?: boolean) => void;
+}) => {
+  useEffect(() => {
+    if (newPolicy.namespace === ASSET_NAMESPACE) return;
+
+    const policy = { ...getAssetPolicy(newPolicy, input.type), namespace: ASSET_NAMESPACE };
+    updatePolicy(policy);
+  }, [newPolicy, input, updatePolicy]);
+};
 
 export const usePackagePolicyList = (packageInfoName: string, { enabled = true }) => {
   const { http } = useKibana<CoreStart>().services;
