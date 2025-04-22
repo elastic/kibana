@@ -4,9 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { Config, ParsedSchedule } from '../../../types';
 
-export async function wait(delay: number) {
-  await new Promise((resolve) => {
-    setTimeout(resolve, delay);
-  });
+export function getInterval(config: Config, schedule: ParsedSchedule) {
+  return schedule.interval ?? config.indexing.interval;
 }
