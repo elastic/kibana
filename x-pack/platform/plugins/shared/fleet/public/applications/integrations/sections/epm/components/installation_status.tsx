@@ -96,7 +96,6 @@ export const shouldShowInstallationStatus = ({
 
 export const InstallationStatus: React.FC<InstallationStatusProps> = React.memo(
   ({ installStatus, showInstallationStatus, compressed }) => {
-    const { euiTheme } = useEuiTheme();
     const styles = useInstallationStatusStyles();
 
     const cardPanelClassName = compressed
