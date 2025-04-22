@@ -27,6 +27,32 @@ jest.mock('../../../common/hooks/integrations/use_integration_link_state', () =>
   useIntegrationLinkState: jest.fn(() => ({})),
 }));
 
+jest.mock('./hooks/use_integrations', () => ({
+  useEntityAnalyticsIntegrations: jest.fn(() => [
+    {
+      name: 'Okta',
+      version: '1.0.0',
+      title: 'Okta Integration',
+      description: 'Okta integration description',
+      icon: 'oktaIcon',
+    },
+    {
+      name: 'Entra ID',
+      version: '1.0.0',
+      title: 'Entra ID Integration',
+      description: 'Entra ID integration description',
+      icon: 'entraIdIcon',
+    },
+    {
+      name: 'Active Directory',
+      version: '1.0.0',
+      title: 'Active Directory Integration',
+      description: 'Active Directory integration description',
+      icon: 'adIcon',
+    },
+  ]),
+}));
+
 describe('AddDataSourcePanel', () => {
   it('renders the panel title and description', () => {
     render(<AddDataSourcePanel />, { wrapper: TestProviders });
@@ -39,7 +65,7 @@ describe('AddDataSourcePanel', () => {
     ).toBeInTheDocument();
   });
 
-  it('renders integration cards and handles navigation on click', () => {
+  it('renders integration cards and handles navigation on click', async () => {
     const mockNavigateTo = jest.fn();
     mockUseNavigation.mockReturnValue({
       navigateTo: mockNavigateTo,
@@ -47,10 +73,11 @@ describe('AddDataSourcePanel', () => {
 
     render(<AddDataSourcePanel />, { wrapper: TestProviders });
 
-    const integrationCards = screen.getAllByTestId('entity_analytics-integration-card');
+    const integrationCards = await screen.findAllByTestId('entity_analytics-integration-card');
     expect(integrationCards.length).toBe(3);
 
-    fireEvent.click(integrationCards[0]);
+    const firstButton = integrationCards[0]?.querySelector('button')!;
+    fireEvent.click(firstButton);
     expect(mockNavigateTo).toHaveBeenCalled();
   });
 
