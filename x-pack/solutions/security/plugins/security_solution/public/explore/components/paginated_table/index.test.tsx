@@ -7,6 +7,7 @@
 
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import React from 'react';
+import 'jest-styled-components';
 
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../common/constants';
 

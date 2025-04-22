@@ -8,6 +8,7 @@
 import { render } from '@testing-library/react';
 import { getOr } from 'lodash/fp';
 import React from 'react';
+import 'jest-styled-components';
 
 import { FlowTargetSourceDest } from '../../../../../common/search_strategy/security_solution/network';
 import { mockIndexPattern, createMockStore, TestProviders } from '../../../../common/mock';

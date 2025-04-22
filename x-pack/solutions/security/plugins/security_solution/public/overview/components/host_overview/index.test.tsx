@@ -7,6 +7,7 @@
 
 import { render } from '@testing-library/react';
 import React from 'react';
+import 'jest-styled-components';
 import { TestProviders } from '../../../common/mock';
 
 import { HostOverview } from '.';

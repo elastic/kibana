@@ -8,6 +8,7 @@
 import { screen, render, fireEvent } from '@testing-library/react';
 import { getOr } from 'lodash/fp';
 import React from 'react';
+import 'jest-styled-components';
 
 import { TestProviders, createMockStore } from '../../../../common/mock';
 import { networkModel } from '../../store';

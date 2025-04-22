@@ -7,6 +7,7 @@
 
 import { render } from '@testing-library/react';
 import React from 'react';
+import 'jest-styled-components';
 
 import { getRenderedFieldValue, PointToolTipContentComponent } from './point_tool_tip_content';
 import { TestProviders } from '../../../../../common/mock';
