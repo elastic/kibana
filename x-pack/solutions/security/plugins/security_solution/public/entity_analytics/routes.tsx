@@ -17,15 +17,14 @@ import {
   ENTITY_ANALYTICS_ENTITY_STORE_MANAGEMENT_PATH,
   ENTITY_ANALYTICS_LANDING_PATH,
   ENTITY_ANALYTICS_MANAGEMENT_PATH,
-  ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_PATH,
+  ENTITY_ANALYTICS_THREAT_HUNTING_QUERIES_PATH,
   SecurityPageName,
 } from '../../common/constants';
 import { EntityAnalyticsManagementPage } from './pages/entity_analytics_management_page';
 import { PluginTemplateWrapper } from '../common/components/plugin_template_wrapper';
 import { EntityStoreManagementPage } from './pages/entity_store_management_page';
 import { EntityAnalyticsLandingPage } from './pages/entity_analytics_landing';
-import { EntityAnalyticsPrivilegedUserMonitoringPage } from './pages/entity_analytics_privileged_user_monitoring_page';
-import { PrivilegedUserMonitoringPage } from './pages/privileged_user_monitoring_dashboard';
+import { ThreatHuntingQueriesPage } from './pages/threat_hunting_queries';
 
 const EntityAnalyticsManagementTelemetry = () => (
   <PluginTemplateWrapper>
@@ -123,30 +122,30 @@ const EntityAnalyticsLandingContainer: React.FC = React.memo(() => {
 
 EntityAnalyticsLandingContainer.displayName = 'EntityAnalyticsLandingContainer';
 
-const EntityAnalyticsPrivilegedUserMonitoringTelemetry = () => (
+const EntityAnalyticsThreatHuntingQueriesTelemetry = () => (
   <PluginTemplateWrapper>
-    <TrackApplicationView viewId={SecurityPageName.privilegedUserMonitoring}>
-      <PrivilegedUserMonitoringPage />
-      <SpyRoute pageName={SecurityPageName.privilegedUserMonitoring} />
+    <TrackApplicationView viewId={SecurityPageName.threatHuntingQueries}>
+      <ThreatHuntingQueriesPage />
+      <SpyRoute pageName={SecurityPageName.threatHuntingQueries} />
     </TrackApplicationView>
   </PluginTemplateWrapper>
 );
 
-const EntityAnalyticsPrivilegedUserMonitoringContainer: React.FC = React.memo(() => {
+const EntityAnalyticsthreatHuntingQueriesContainer: React.FC = React.memo(() => {
   return (
     <Routes>
       <Route
-        path={ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_PATH}
+        path={ENTITY_ANALYTICS_THREAT_HUNTING_QUERIES_PATH}
         exact
-        component={EntityAnalyticsPrivilegedUserMonitoringTelemetry}
+        component={EntityAnalyticsThreatHuntingQueriesTelemetry}
       />
       <Route component={NotFoundPage} />
     </Routes>
   );
 });
 
-EntityAnalyticsPrivilegedUserMonitoringContainer.displayName =
-  'EntityAnalyticsPrivilegedUserMonitoringContainer';
+EntityAnalyticsthreatHuntingQueriesContainer.displayName =
+  'EntityAnalyticsthreatHuntingQueriesContainer';
 
 export const routes = [
   {
@@ -166,7 +165,7 @@ export const routes = [
     component: EntityAnalyticsLandingContainer,
   },
   {
-    path: ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_PATH,
-    component: EntityAnalyticsPrivilegedUserMonitoringContainer,
+    path: ENTITY_ANALYTICS_THREAT_HUNTING_QUERIES_PATH,
+    component: EntityAnalyticsthreatHuntingQueriesContainer,
   },
 ];

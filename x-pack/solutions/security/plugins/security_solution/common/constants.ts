@@ -131,8 +131,8 @@ export const ENTITY_ANALYTICS_ASSET_CRITICALITY_PATH =
 export const ENTITY_ANALYTICS_ENTITY_STORE_MANAGEMENT_PATH =
   `/entity_analytics_entity_store` as const;
 export const ENTITY_ANALYTICS_LANDING_PATH = '/entity_analytics_landing' as const;
-export const ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_PATH =
-  '/entity_analytics_privileged_user_monitoring' as const;
+export const ENTITY_ANALYTICS_THREAT_HUNTING_QUERIES_PATH =
+  '/entity_analytics_threat_hunting_queries' as const;
 export const APP_ALERTS_PATH = `${APP_PATH}${ALERTS_PATH}` as const;
 export const APP_CASES_PATH = `${APP_PATH}${CASES_PATH}` as const;
 export const APP_ENDPOINTS_PATH = `${APP_PATH}${ENDPOINTS_PATH}` as const;

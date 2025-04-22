@@ -23,7 +23,7 @@ import { DetectionResponse } from './pages/detection_response';
 import { PluginTemplateWrapper } from '../common/components/plugin_template_wrapper';
 import { EntityAnalyticsPage } from '../entity_analytics/pages/entity_analytics_dashboard';
 import { SecurityRoutePageWrapper } from '../common/components/security_route_page_wrapper';
-import { PrivilegedUserMonitoringPage } from '../entity_analytics/pages/privileged_user_monitoring_dashboard';
+import { ThreatHuntingQueriesPage } from '../entity_analytics/pages/threat_hunting_queries';
 
 const OverviewRoutes = () => (
   <PluginTemplateWrapper>
@@ -52,7 +52,7 @@ const EntityAnalyticsRoutes = () => (
 const PrivUserMonRoutes = () => (
   <PluginTemplateWrapper>
     <SecurityRoutePageWrapper pageName={SecurityPageName.privilegedUserMonitoring}>
-      <PrivilegedUserMonitoringPage />
+      <ThreatHuntingQueriesPage />
     </SecurityRoutePageWrapper>
   </PluginTemplateWrapper>
 );

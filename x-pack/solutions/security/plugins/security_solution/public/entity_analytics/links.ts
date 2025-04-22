@@ -10,7 +10,7 @@ import {
   SecurityPageName,
   SECURITY_FEATURE_ID,
   ENTITY_ANALYTICS_LANDING_PATH,
-  ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_PATH,
+  ENTITY_ANALYTICS_THREAT_HUNTING_QUERIES_PATH,
 } from '../../common/constants';
 import type { LinkItem } from '../common/links/types';
 import { ENTITY_ANALYTICS, ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING } from '../app/translations';
@@ -26,7 +26,7 @@ const privMonLinks: LinkItem = {
       defaultMessage: '???????????????????', // TODO
     }
   ),
-  path: ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_PATH,
+  path: ENTITY_ANALYTICS_THREAT_HUNTING_QUERIES_PATH,
   globalSearchKeywords: [
     i18n.translate('xpack.securitySolution.appLinks.privilegedUserMonitoring', {
       defaultMessage: 'Privileged User Monitoring',

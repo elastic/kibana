@@ -12,17 +12,17 @@ import { SecuritySolutionPageWrapper } from '../../common/components/page_wrappe
 import { SpyRoute } from '../../common/utils/route/spy_routes';
 
 const PAGE_TITLE = i18n.translate(
-  'xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.pageTitle',
+  'xpack.securitySolution.entityAnalytics.threatHuntingQueries.pageTitle',
   {
-    defaultMessage: 'Privileged User Monitoring',
+    defaultMessage: 'Threat Hunting Queries',
   }
 );
 
-export const EntityAnalyticsPrivilegedUserMonitoringPage = () => {
+export const EntityAnalyticsThreatHuntingQueriesPage = () => {
   return (
     <SecuritySolutionPageWrapper>
       <HeaderPage title={PAGE_TITLE} />
-      <SpyRoute pageName={SecurityPageName.privilegedUserMonitoring} />
+      <SpyRoute pageName={SecurityPageName.threatHuntingQueries} />
     </SecuritySolutionPageWrapper>
   );
 };
