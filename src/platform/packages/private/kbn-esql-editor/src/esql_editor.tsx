@@ -225,7 +225,7 @@ export const ESQLEditor = memo(function ESQLEditor({
         setCode(fixedQuery);
       }
     }
-  }, [code, fixedQuery]);
+  }, [code, fixedQuery, codeWhenSubmitted]);
 
   // Enable the variables service if the feature is supported in the consumer app
   useEffect(() => {
