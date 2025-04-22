@@ -90,7 +90,7 @@ export class FileWrapper {
   });
 
   private pipeline$ = new BehaviorSubject<IngestPipeline | undefined>(undefined);
-  public readonly pipelineObvs$ = this.pipeline$.asObservable(); // rename!!!!
+  public readonly pipelineObvs$ = this.pipeline$.asObservable();
   private pipelineJsonValid$ = new BehaviorSubject<boolean>(true);
 
   public readonly fileStatus$ = this.analyzedFile$.asObservable();

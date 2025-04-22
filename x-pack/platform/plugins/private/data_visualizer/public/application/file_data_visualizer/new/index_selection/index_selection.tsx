@@ -63,7 +63,7 @@ export const IndexSelection: FC<Props> = ({ allowExistingIndices = true }) => {
               },
               {
                 id: UPLOAD_TYPE.EXISTING,
-                label: i18n.translate('xpack.', {
+                label: i18n.translate('xpack.dataVisualizer.file.existingIndexSelection.label', {
                   defaultMessage: 'Upload to existing index',
                 }),
               },
@@ -82,12 +82,9 @@ export const IndexSelection: FC<Props> = ({ allowExistingIndices = true }) => {
             />
           ) : (
             <EuiComboBox
-              placeholder={i18n.translate(
-                'xpack.dataVisualizer.file.existingIndexSelection.label',
-                {
-                  defaultMessage: 'Select an index',
-                }
-              )}
+              placeholder={i18n.translate('xpack.dataVisualizer.file.existingIndexSelect.label', {
+                defaultMessage: 'Select an index',
+              })}
               options={indices.map((index) => ({
                 label: index.name,
                 value: index.name,
