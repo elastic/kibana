@@ -139,7 +139,7 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
       throw new ResponseActionsClientError(
         `Unable to build list of indexes while retrieving policy information for Microsoft Defender agents [${agentIds.join(
           ', '
-        )}]. Check to ensure at least one integration policy exits.`,
+        )}]. Check to ensure at least one integration policy exists.`,
         400
       );
     }

@@ -133,7 +133,7 @@ export class CrowdstrikeActionsClient extends ResponseActionsClientImpl {
       throw new ResponseActionsClientError(
         `Unable to build list of indexes while retrieving policy information for Crowdstrike agents [${agentIds.join(
           ', '
-        )}]. Check to ensure at least one integration policy exits.`,
+        )}]. Check to ensure at least one integration policy exists.`,
         400
       );
     }
