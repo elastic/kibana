@@ -24,7 +24,6 @@ import {
   setDataActions,
   setCoreStart,
   setUsageCollectionStart,
-  setUiActions,
 } from './services';
 import { heatmapVisTypeDefinition } from './heatmap';
 
