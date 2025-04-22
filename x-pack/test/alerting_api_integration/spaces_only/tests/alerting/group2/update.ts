@@ -467,6 +467,9 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
                 id: 'dashboard-1',
               },
             ],
+            investigation_guide: {
+              blob: '## Summary',
+            },
           },
         };
 
@@ -505,6 +508,9 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             notify_when: 'onThrottleInterval',
             artifacts: {
               dashboards: [{ id: 'dashboard-1' }, { id: 'dashboard-2' }],
+              investigation_guide: {
+                blob: '## Summary',
+              },
             },
           })
           .expect(200);
