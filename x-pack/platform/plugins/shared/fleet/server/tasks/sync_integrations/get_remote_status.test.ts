@@ -6,7 +6,7 @@
  */
 
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
-import fetch from 'node-fetch';
+import fetch, { FetchError } from 'node-fetch';
 
 import { loggerMock } from '@kbn/logging-mocks';
 import type { Logger } from '@kbn/core/server';
@@ -86,25 +86,11 @@ describe('getRemoteSyncedIntegrationsInfoByOutputId', () => {
     jest
       .spyOn(mockedAppContextService, 'getExperimentalFeatures')
       .mockReturnValue({ enableSyncIntegrationsOnRemote: true } as any);
-    mockedOutputService.get.mockImplementation(() => {
-      throw new FleetNotFoundError(
-        'Saved object [ingest-outputs/remote-es-not-existent] not found'
-      );
-    });
+    mockedOutputService.get.mockRejectedValue({ isBoom: true, output: { statusCode: 404 } } as any);
 
     await expect(
       getRemoteSyncedIntegrationsInfoByOutputId(soClientMock, 'remote-es-not-existent')
-    ).rejects.toThrowError();
-  });
-
-  it('should throw error if the output returns undefined', async () => {
-    jest
-      .spyOn(mockedAppContextService, 'getExperimentalFeatures')
-      .mockReturnValue({ enableSyncIntegrationsOnRemote: true } as any);
-    mockedOutputService.get.mockResolvedValue(undefined as any);
-    await expect(
-      getRemoteSyncedIntegrationsInfoByOutputId(soClientMock, 'remote2')
-    ).rejects.toThrowError('No output found with id remote2');
+    ).rejects.toThrowError('No output found with id remote-es-not-existent');
   });
 
   it('should throw error if the passed outputId is not of type remote_elasticsearch', async () => {
@@ -222,8 +208,9 @@ describe('getRemoteSyncedIntegrationsInfoByOutputId', () => {
       kibana_api_key: 'APIKEY',
     } as any);
     const statusWithErrorRes = {
-      error: 'No integrations found on fleet-synced-integrations-ccr-*',
-      integrations: [],
+      statusCode: 404,
+      error: 'Not Found',
+      message: 'No integrations found on fleet-synced-integrations-ccr-*',
     };
 
     mockedFetch.mockResolvedValueOnce({
@@ -232,9 +219,11 @@ describe('getRemoteSyncedIntegrationsInfoByOutputId', () => {
       ok: true,
     } as any);
 
-    expect(await getRemoteSyncedIntegrationsInfoByOutputId(soClientMock, 'remote1')).toEqual(
-      statusWithErrorRes
-    );
+    expect(await getRemoteSyncedIntegrationsInfoByOutputId(soClientMock, 'remote1')).toEqual({
+      integrations: [],
+      error:
+        'GET http://remote-kibana-host/api/fleet/remote_synced_integrations/status failed with status 404. No integrations found on fleet-synced-integrations-ccr-*',
+    });
   });
 
   it('should throw if the remote api returns error', async () => {
@@ -254,5 +243,33 @@ describe('getRemoteSyncedIntegrationsInfoByOutputId', () => {
     await expect(
       getRemoteSyncedIntegrationsInfoByOutputId(soClientMock, 'remote1')
     ).rejects.toThrowError('some error');
+  });
+
+  it('should return error if the fetch returns invalid-json error', async () => {
+    jest
+      .spyOn(mockedAppContextService, 'getExperimentalFeatures')
+      .mockReturnValue({ enableSyncIntegrationsOnRemote: true } as any);
+    mockedOutputService.get.mockResolvedValue({
+      ...output,
+      sync_integrations: true,
+      kibana_url: 'http://remote-kibana-host/invalid',
+      kibana_api_key: 'APIKEY',
+    } as any);
+
+    mockedFetch.mockResolvedValueOnce({
+      json: () => {
+        const err = new FetchError(`some error`, 'invalid-json');
+        err.type = 'invalid-json';
+        err.message = `some error`;
+        throw err;
+      },
+      status: 404,
+      statusText: 'Not Found',
+    } as any);
+    expect(await getRemoteSyncedIntegrationsInfoByOutputId(soClientMock, 'remote1')).toEqual({
+      integrations: [],
+      error:
+        'GET http://remote-kibana-host/invalid/api/fleet/remote_synced_integrations/status failed with status 404. some error',
+    });
   });
 });

@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import type { GetOutputHealthResponse } from '../../../common/types';
+import { useQuery } from '@tanstack/react-query';
+
+import type {
+  GetOutputHealthResponse,
+  GetRemoteSyncedIntegrationsStatusResponse,
+} from '../../../common/types';
 
 import { outputRoutesService } from '../../services';
 import type {
@@ -17,7 +22,7 @@ import type {
 
 import { API_VERSIONS } from '../../../common/constants';
 
-import { sendRequest, useRequest } from './use_request';
+import { sendRequest, sendRequestForRq, useRequest } from './use_request';
 
 export function useGetOutputs() {
   return useRequest<GetOutputsResponse>({
@@ -74,4 +79,29 @@ export function sendGetOutputHealth(outputId: string) {
     path: outputRoutesService.getOutputHealthPath(outputId),
     version: API_VERSIONS.public.v1,
   });
+}
+
+export function sendGetRemoteSyncedIntegrationsStatus(outputId: string) {
+  return sendRequestForRq<GetRemoteSyncedIntegrationsStatusResponse>({
+    method: 'get',
+    path: outputRoutesService.getRemoteSyncedIntegrationsStatusPath(outputId),
+    version: API_VERSIONS.public.v1,
+  });
+}
+
+const SYNC_STATUS_REFETCH_INTERVAL = 10000;
+
+export function useGetRemoteSyncedIntegrationsStatusQuery(
+  outputId: string,
+  options: Partial<{ enabled: boolean }> = {}
+) {
+  return useQuery(
+    [`remote_synced_integrations_status_${outputId}`],
+    () => sendGetRemoteSyncedIntegrationsStatus(outputId),
+    {
+      enabled: options.enabled,
+      refetchInterval: SYNC_STATUS_REFETCH_INTERVAL,
+      retry: false,
+    }
+  );
 }
