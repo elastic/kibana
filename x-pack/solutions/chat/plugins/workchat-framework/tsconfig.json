@@ -23,6 +23,7 @@
     "@kbn/logging-mocks",
     "@kbn/zod",
     "@kbn/inference-langchain",
+    "@kbn/wc-framework-types-browser",
   ],
   "exclude": [
     "target/**/*",
