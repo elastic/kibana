@@ -54,7 +54,7 @@ tags:
       Alerting enables you to define rules, which detect complex conditions within your data. When a condition is met, the rule tracks it as an alert and runs the actions that are defined in the rule. Actions typically involve the use of connectors to interact with Kibana services or third party integrations.
     externalDocs:
       description: Alerting documentation
-      url: https://www.elastic.co/guide/en/kibana/8.x/alerting-getting-started.html
+      url: https://www.elastic.co/docs/explore-analyze/alerts-cases/alerts
     x-displayName: Alerting
   - description: |
       Adjust APM agent configuration without need to redeploy your application.
@@ -74,14 +74,14 @@ tags:
     name: cases
     externalDocs:
       description: Cases documentation
-      url: https://www.elastic.co/guide/en/kibana/8.x/cases.html
+      url: https://www.elastic.co/docs/explore-analyze/alerts-cases/cases
     x-displayName: Cases
   - name: connectors
     description: |
       Connectors provide a central place to store connection information for services and integrations with Elastic or third party systems. Alerting rules can use connectors to run actions when rule conditions are met.
     externalDocs:
       description: Connector documentation
-      url: https://www.elastic.co/guide/en/kibana/8.x/action-types.html
+      url: https://www.elastic.co/docs/reference/kibana/connectors-kibana
     x-displayName: Connectors
   - name: Dashboards
   - description: Data view APIs enable you to manage data views, formerly known as Kibana index patterns.

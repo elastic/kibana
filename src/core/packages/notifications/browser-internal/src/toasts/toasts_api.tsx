@@ -11,6 +11,7 @@ import React from 'react';
 import * as Rx from 'rxjs';
 import { omitBy, isUndefined } from 'lodash';
 
+import { apm } from '@elastic/apm-rum';
 import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
 import type { I18nStart } from '@kbn/core-i18n-browser';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
@@ -35,6 +36,24 @@ const normalizeToast = (toastOrTitle: ToastInput): ToastInputFields => {
     };
   }
   return omitBy(toastOrTitle, isUndefined);
+};
+
+const getToastTitleOrText = (toastOrTitle: ToastInput): string => {
+  if (typeof toastOrTitle === 'string') {
+    return toastOrTitle;
+  } else if (typeof toastOrTitle.title === 'string') {
+    return toastOrTitle.title;
+  } else if (typeof toastOrTitle.text === 'string') {
+    return toastOrTitle.text;
+  }
+
+  return 'No title or text is provided.';
+};
+
+const getApmLabels = (errorType: 'ToastError' | 'ToastDanger') => {
+  return {
+    errorType,
+  };
 };
 
 interface StartDeps {
@@ -158,6 +177,10 @@ export class ToastsApi implements IToasts {
    * @returns a {@link Toast}
    */
   public addDanger(toastOrTitle: ToastInput, options?: ToastOptions) {
+    const toastTitle = getToastTitleOrText(toastOrTitle);
+    apm.captureError(toastTitle, {
+      labels: getApmLabels('ToastDanger'),
+    });
     return this.add({
       color: 'danger',
       iconType: 'error',
@@ -175,6 +198,9 @@ export class ToastsApi implements IToasts {
    * @returns a {@link Toast}
    */
   public addError(error: Error, options: ErrorToastOptions) {
+    apm.captureError(error, {
+      labels: getApmLabels('ToastError'),
+    });
     const message = options.toastMessage || error.message;
     return this.add({
       color: 'danger',
