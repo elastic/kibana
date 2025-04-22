@@ -55,9 +55,7 @@ export function initSelectionsManager(
         'filters$',
         apiPublishesFilters,
         []
-      ).subscribe((newFilters) => {
-        unpublishedFilters$.next(newFilters);
-      })
+      ).subscribe((newFilters) => unpublishedFilters$.next(newFilters))
     );
 
     subscriptions.push(
