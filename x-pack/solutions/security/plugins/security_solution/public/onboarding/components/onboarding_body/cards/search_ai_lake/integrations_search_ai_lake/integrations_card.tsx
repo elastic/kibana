@@ -22,6 +22,7 @@ import { WithFilteredIntegrations } from '../../../../../../common/lib/integrati
 import { IntegrationsCardGridTabsComponent } from '../../../../../../common/lib/integrations/components/integration_card_grid_tabs_component';
 import { DEFAULT_CHECK_COMPLETE_METADATA } from '../../../../../../common/lib/integrations/components/integration_card_grid_tabs';
 import { IntegrationContextProvider } from '../../../../../../common/lib/integrations/hooks/integration_context';
+import { ONBOARDING_PATH } from '../../../../../../../common/constants';
 
 const IntegrationsCardGridTabs: RenderChildrenType = ({
   allowedIntegrations,
@@ -32,6 +33,7 @@ const IntegrationsCardGridTabs: RenderChildrenType = ({
   const { available: list } = useEnhancedIntegrationCards(allowedIntegrations, {
     showInstallationStatus: true,
     showCompressedInstallationStatus: true,
+    returnPath: ONBOARDING_PATH,
   });
   const { installedIntegrationsCount, isAgentRequired } = checkCompleteMetadata;
 

@@ -13,6 +13,12 @@ import { CONFIGURATIONS_PATH } from '../../../../../../common/constants';
 import { IntegrationsFacets } from '../../../../../configurations/constants';
 import { RETURN_APP_ID, RETURN_PATH } from './constants';
 
+export interface EnhancedCardOptions {
+  showInstallationStatus?: boolean;
+  showCompressedInstallationStatus?: boolean;
+  returnPath?: string;
+}
+
 const FEATURED_INTEGRATION_SORT_ORDER = [
   'epr:splunk',
   'epr:google_secops',
@@ -39,12 +45,9 @@ export const getCategoryBadgeIfAny = (categories: string[]): string | null => {
 export const applyCategoryBadgeAndStyling = (
   card: IntegrationCardItem,
   callerView: IntegrationsFacets,
-  options?: {
-    showInstallationStatus?: boolean;
-    showCompressedInstallationStatus?: boolean;
-  }
+  options?: EnhancedCardOptions
 ): IntegrationCardItem => {
-  const returnPath = `${CONFIGURATIONS_PATH}/integrations/${callerView}`;
+  const returnPath = options?.returnPath ?? `${CONFIGURATIONS_PATH}/integrations/${callerView}`;
   const url = addPathParamToUrl(card.url, returnPath);
   const categoryBadge = getCategoryBadgeIfAny(card.categories);
   return {
@@ -79,10 +82,7 @@ const applyCustomDisplayOrder = (
 
 export const useEnhancedIntegrationCards = (
   integrationsList: IntegrationCardItem[],
-  options?: {
-    showInstallationStatus?: boolean;
-    showCompressedInstallationStatus?: boolean;
-  }
+  options?: EnhancedCardOptions
 ): { available: IntegrationCardItem[]; installed: IntegrationCardItem[] } => {
   const sorted = applyCustomDisplayOrder(integrationsList);
 
