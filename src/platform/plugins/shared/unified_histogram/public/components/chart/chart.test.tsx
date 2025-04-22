@@ -38,7 +38,6 @@ async function mountComponent({
   noHits,
   noBreakdown,
   chartHidden = false,
-  appendHistogram,
   dataView = dataViewWithTimefieldMock,
   allSuggestions,
   isPlainRecord,
@@ -51,7 +50,6 @@ async function mountComponent({
   noHits?: boolean;
   noBreakdown?: boolean;
   chartHidden?: boolean;
-  appendHistogram?: ReactElement;
   dataView?: DataView;
   allSuggestions?: Suggestion[];
   isPlainRecord?: boolean;
@@ -129,7 +127,6 @@ async function mountComponent({
     breakdown: noBreakdown ? undefined : { field: undefined },
     isChartLoading: Boolean(isChartLoading),
     isPlainRecord,
-    appendHistogram,
     onChartHiddenChange: jest.fn(),
     onTimeIntervalChange: jest.fn(),
     withDefaultActions: undefined,
@@ -337,12 +334,6 @@ describe('Chart', () => {
         .simulate('click');
     });
     expect(mockUseEditVisualization).toHaveBeenCalled();
-  });
-
-  it('should render the element passed to appendHistogram', async () => {
-    const appendHistogram = <div data-test-subj="appendHistogram" />;
-    const component = await mountComponent({ appendHistogram });
-    expect(component.find('[data-test-subj="appendHistogram"]').exists()).toBeTruthy();
   });
 
   it('should not render chart if data view is not time based', async () => {

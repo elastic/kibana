@@ -20,8 +20,10 @@ import {
 } from '../../types';
 import { dataViewWithTimefieldMock } from '../../__mocks__/data_view_with_timefield';
 import { unifiedHistogramServicesMock } from '../../__mocks__/services';
-import { UnifiedHistogramLayout, UnifiedHistogramLayoutProps } from './layout';
+import { UnifiedHistogramLayout } from './layout';
 import { ResizableLayout, ResizableLayoutMode } from '@kbn/resizable-layout';
+import { UseUnifiedHistogramProps, useUnifiedHistogram } from '../../hooks/use_unified_histogram';
+import { act } from 'react-dom/test-utils';
 
 let mockBreakpoint = 'l';
 
@@ -36,54 +38,65 @@ jest.mock('@elastic/eui', () => {
 });
 
 describe('Layout', () => {
-  const createHits = (): UnifiedHistogramHitsContext => ({
-    status: UnifiedHistogramFetchStatus.complete,
-    total: 10,
-  });
-
-  const createChart = (): UnifiedHistogramChartContext => ({
-    hidden: false,
-    timeInterval: 'auto',
-  });
-
   const mountComponent = async ({
     services = unifiedHistogramServicesMock,
-    hits = createHits(),
-    chart = createChart(),
-    container = null,
+    hits,
+    chart,
+    topPanelHeight,
     ...rest
-  }: Partial<Omit<UnifiedHistogramLayoutProps, 'hits' | 'chart'>> & {
+  }: Partial<UseUnifiedHistogramProps> & {
     hits?: UnifiedHistogramHitsContext | null;
     chart?: UnifiedHistogramChartContext | null;
+    topPanelHeight?: number | null;
   } = {}) => {
     (searchSourceInstanceMock.fetch$ as jest.Mock).mockImplementation(
       jest.fn().mockReturnValue(of({ rawResponse: { hits: { total: 2 } } }))
     );
-
-    const component = mountWithIntl(
-      <UnifiedHistogramLayout
-        services={services}
-        hits={hits ?? undefined}
-        chart={chart ?? undefined}
-        container={container}
-        dataView={dataViewWithTimefieldMock}
-        query={{
+    const Wrapper = () => {
+      const unifiedHistogram = useUnifiedHistogram({
+        services,
+        initialState: {
+          totalHitsStatus: hits?.status ?? UnifiedHistogramFetchStatus.complete,
+          totalHitsResult: hits?.total ?? 10,
+          chartHidden: chart?.hidden ?? false,
+          timeInterval: chart?.timeInterval ?? 'auto',
+        },
+        dataView: dataViewWithTimefieldMock,
+        query: {
           language: 'kuery',
           query: '',
-        }}
-        filters={[]}
-        timeRange={{
+        },
+        filters: [],
+        timeRange: {
           from: '2020-05-14T11:05:13.590',
           to: '2020-05-14T11:20:13.590',
-        }}
-        lensSuggestionsApi={jest.fn()}
-        onSuggestionContextChange={jest.fn()}
-        isChartLoading={false}
-        {...rest}
-      />
-    );
+        },
+        isChartLoading: false,
+        ...rest,
+      });
 
-    return component;
+      if (!unifiedHistogram.isInitialized) {
+        return null;
+      }
+
+      return (
+        <UnifiedHistogramLayout
+          container={null}
+          chartPanel={<UnifiedHistogramChart {...unifiedHistogram.chartProps} />}
+          {...unifiedHistogram.layoutProps}
+          hits={hits === undefined ? unifiedHistogram.layoutProps.hits : hits ?? undefined}
+          chart={chart === undefined ? unifiedHistogram.layoutProps.chart : chart ?? undefined}
+          topPanelHeight={
+            topPanelHeight === undefined
+              ? unifiedHistogram.layoutProps.topPanelHeight
+              : topPanelHeight ?? undefined
+          }
+        />
+      );
+    };
+    const component = mountWithIntl(<Wrapper />);
+    await act(() => new Promise((resolve) => setTimeout(resolve, 0)));
+    return component.update();
   };
 
   const setBreakpoint = (component: ReactWrapper, breakpoint: string) => {
@@ -109,12 +122,7 @@ describe('Layout', () => {
     });
 
     it('should set the layout mode to ResizableLayoutMode.Static if chart.hidden is true', async () => {
-      const component = await mountComponent({
-        chart: {
-          ...createChart(),
-          hidden: true,
-        },
-      });
+      const component = await mountComponent({ chart: { timeInterval: 'auto', hidden: true } });
       expect(component.find(ResizableLayout).prop('mode')).toBe(ResizableLayoutMode.Static);
     });
 
@@ -140,7 +148,7 @@ describe('Layout', () => {
     });
 
     it('should not set a fixed height for Chart when layout mode is ResizableLayoutMode.Static and chart.hidden is true', async () => {
-      const component = await mountComponent({ chart: { ...createChart(), hidden: true } });
+      const component = await mountComponent({ chart: { timeInterval: 'auto', hidden: true } });
       setBreakpoint(component, 's');
       const expectedHeight = component.find(ResizableLayout).prop('fixedPanelSize');
       expect(
@@ -164,7 +172,7 @@ describe('Layout', () => {
 
   describe('topPanelHeight', () => {
     it('should pass a default fixedPanelSize to ResizableLayout when the topPanelHeight prop is undefined', async () => {
-      const component = await mountComponent({ topPanelHeight: undefined });
+      const component = await mountComponent({ topPanelHeight: null });
       expect(component.find(ResizableLayout).prop('fixedPanelSize')).toBeGreaterThan(0);
     });
   });

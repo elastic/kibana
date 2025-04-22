@@ -64,6 +64,7 @@ describe('useStateProps', () => {
         columns: undefined,
         breakdownField: undefined,
         onBreakdownFieldChange: undefined,
+        onVisContextChanged: undefined,
       })
     );
     expect(result.current).toMatchInlineSnapshot(`
@@ -123,6 +124,7 @@ describe('useStateProps', () => {
         "onTimeIntervalChange": [Function],
         "onTopPanelHeightChange": [Function],
         "onTotalHitsChange": [Function],
+        "onVisContextChanged": undefined,
         "request": Object {
           "adapter": RequestAdapter {
             "_events": Object {},
@@ -135,6 +137,7 @@ describe('useStateProps', () => {
           },
           "searchSessionId": "123",
         },
+        "topPanelHeight": 100,
       }
     `);
   });
@@ -153,6 +156,7 @@ describe('useStateProps', () => {
         columns: undefined,
         breakdownField: undefined,
         onBreakdownFieldChange: undefined,
+        onVisContextChanged: undefined,
       })
     );
     expect(result.current).toMatchInlineSnapshot(`
@@ -212,6 +216,7 @@ describe('useStateProps', () => {
         "onTimeIntervalChange": [Function],
         "onTopPanelHeightChange": [Function],
         "onTotalHitsChange": [Function],
+        "onVisContextChanged": undefined,
         "request": Object {
           "adapter": RequestAdapter {
             "_events": Object {},
@@ -224,6 +229,7 @@ describe('useStateProps', () => {
           },
           "searchSessionId": "123",
         },
+        "topPanelHeight": 100,
       }
     `);
 
@@ -251,6 +257,7 @@ describe('useStateProps', () => {
         columns: undefined,
         breakdownField: undefined,
         onBreakdownFieldChange: undefined,
+        onVisContextChanged: undefined,
       })
     );
     expect(result.current.chart).toStrictEqual({ hidden: false, timeInterval: 'auto' });
@@ -290,6 +297,7 @@ describe('useStateProps', () => {
         columns: esqlColumns,
         breakdownField,
         onBreakdownFieldChange: undefined,
+        onVisContextChanged: undefined,
       })
     );
 
@@ -332,6 +340,7 @@ describe('useStateProps', () => {
         columns: esqlColumns,
         breakdownField: undefined,
         onBreakdownFieldChange: undefined,
+        onVisContextChanged: undefined,
       })
     );
     const { onBreakdownFieldChange } = result.current;
@@ -357,6 +366,7 @@ describe('useStateProps', () => {
         columns: undefined,
         breakdownField: undefined,
         onBreakdownFieldChange: undefined,
+        onVisContextChanged: undefined,
       })
     );
     expect(result.current).toMatchInlineSnapshot(`
@@ -411,6 +421,7 @@ describe('useStateProps', () => {
         "onTimeIntervalChange": [Function],
         "onTopPanelHeightChange": [Function],
         "onTotalHitsChange": [Function],
+        "onVisContextChanged": undefined,
         "request": Object {
           "adapter": RequestAdapter {
             "_events": Object {},
@@ -423,6 +434,7 @@ describe('useStateProps', () => {
           },
           "searchSessionId": "123",
         },
+        "topPanelHeight": 100,
       }
     `);
   });
@@ -441,6 +453,7 @@ describe('useStateProps', () => {
         columns: undefined,
         breakdownField: undefined,
         onBreakdownFieldChange: undefined,
+        onVisContextChanged: undefined,
       })
     );
     expect(result.current).toMatchInlineSnapshot(`
@@ -495,6 +508,7 @@ describe('useStateProps', () => {
         "onTimeIntervalChange": [Function],
         "onTopPanelHeightChange": [Function],
         "onTotalHitsChange": [Function],
+        "onVisContextChanged": undefined,
         "request": Object {
           "adapter": RequestAdapter {
             "_events": Object {},
@@ -507,6 +521,7 @@ describe('useStateProps', () => {
           },
           "searchSessionId": "123",
         },
+        "topPanelHeight": 100,
       }
     `);
   });
@@ -525,6 +540,7 @@ describe('useStateProps', () => {
         columns: undefined,
         breakdownField: undefined,
         onBreakdownFieldChange: undefined,
+        onVisContextChanged: undefined,
       })
     );
 
@@ -602,6 +618,7 @@ describe('useStateProps', () => {
         columns: undefined,
         breakdownField: undefined,
         onBreakdownFieldChange: undefined,
+        onVisContextChanged: undefined,
       })
     );
     (stateService.setLensRequestAdapter as jest.Mock).mockClear();
@@ -626,6 +643,7 @@ describe('useStateProps', () => {
       columns: undefined,
       breakdownField: undefined,
       onBreakdownFieldChange: undefined,
+      onVisContextChanged: undefined,
     };
     const hook = renderHook((props: Parameters<typeof useStateProps>[0]) => useStateProps(props), {
       initialProps,
