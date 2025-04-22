@@ -88,7 +88,7 @@ export class StreamsPlugin
           const [[coreStart, pluginsStart], assetClient, contentClient] = await Promise.all([
             core.getStartServices(),
             assetService.getClientWithRequest({ request }),
-            contentService.getClientWithRequest({ request }),
+            contentService.getClient(),
           ]);
 
           const streamsClient = await streamsService.getClientWithRequest({ request, assetClient });

@@ -8,7 +8,6 @@ import {
   ContentPackSavedObjectLinks,
   SavedObjectLinkWithReferences,
 } from '@kbn/content-packs-schema';
-import { SavedObjectsClientContract } from '@kbn/core/server';
 import { IStorageClient, IndexStorageSettings, types } from '@kbn/storage-adapter';
 import objectHash from 'object-hash';
 import { CONTENT_NAME, STREAM_NAME } from './fields';
@@ -41,7 +40,6 @@ export class ContentClient {
   constructor(
     private readonly clients: {
       storageClient: IStorageClient<ContentStorageSettings, StoredContentPack>;
-      soClient: SavedObjectsClientContract;
     }
   ) {}
 
@@ -56,7 +54,7 @@ export class ContentClient {
       },
     });
 
-    return response;
+    return response.hits.hits.map((hit) => hit._source);
   }
 
   async getStoredContentPack(streamName: string, contentName: string) {

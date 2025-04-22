@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CoreSetup, KibanaRequest, Logger } from '@kbn/core/server';
+import { CoreSetup, Logger } from '@kbn/core/server';
 import { StorageIndexAdapter } from '@kbn/storage-adapter';
 import { StreamsPluginStartDependencies } from '../../types';
 import {
@@ -21,7 +21,7 @@ export class ContentService {
     private readonly logger: Logger
   ) {}
 
-  async getClientWithRequest({ request }: { request: KibanaRequest }): Promise<ContentClient> {
+  async getClient(): Promise<ContentClient> {
     const [coreStart] = await this.coreSetup.getStartServices();
 
     const adapter = new StorageIndexAdapter<ContentStorageSettings, StoredContentPack>(
@@ -32,7 +32,6 @@ export class ContentService {
 
     return new ContentClient({
       storageClient: adapter.getClient(),
-      soClient: coreStart.savedObjects.getScopedClient(request),
     });
   }
 }
