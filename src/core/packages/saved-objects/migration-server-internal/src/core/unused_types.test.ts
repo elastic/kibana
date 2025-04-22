@@ -10,7 +10,7 @@
 import { buildExcludeUnusedTypesQuery } from './unused_types';
 
 describe('buildExcludeUnusedTypesQuery', () => {
-  it('should build the correct query with REMOVED_TYPES', () => {
+  it('should build the correct query with some excluded types', () => {
     const query = buildExcludeUnusedTypesQuery(['exclude-type', 'exclude_type', 'excludeType']);
     expect(query).toMatchInlineSnapshot(`
       Object {
