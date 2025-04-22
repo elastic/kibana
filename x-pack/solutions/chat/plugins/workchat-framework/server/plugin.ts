@@ -20,6 +20,7 @@ import type {
 } from './types';
 import type { WorkChatFrameworkConfig } from './config';
 import { registerFeatures } from './features';
+import { registerTypes } from './saved_objects';
 import {
   createStartServices,
   createSetupServices,
@@ -54,6 +55,8 @@ export class WorkChatAppPlugin
     setupDeps: WorkChatFrameworkPluginSetupDependencies
   ): WorkChatFrameworkPluginSetup {
     this.setupServices = createSetupServices();
+
+    registerTypes({ savedObjects: core.savedObjects });
 
     registerFeatures({ features: setupDeps.features });
 
