@@ -10,6 +10,8 @@ import { createMockEndpointAppContext, getRegisteredVersionedRouteMock } from '.
 import { registerGetInsightsRoute } from './get_insights';
 import { WORKFLOW_INSIGHTS_ROUTE } from '../../../../common/endpoint/constants';
 import { NotFoundError } from '../../errors';
+import type { EndpointAppContext } from '../../types';
+import type { SecuritySolutionPluginRouterMock } from '../../../mocks';
 
 jest.mock('../../services', () => ({
   securityWorkflowInsightsService: {
@@ -23,11 +25,13 @@ const fetchMock = jest.requireMock('../../services').securityWorkflowInsightsSer
 describe('Get Insights Route Handler', () => {
   let mockResponse: ReturnType<typeof httpServerMock.createResponseFactory>;
   let callRoute: (params: Record<string, string>, authz?: Record<string, boolean>) => Promise<void>;
-  const mockEndpointContext = createMockEndpointAppContext();
-  const router = httpServiceMock.createRouter();
+  let mockEndpointContext: EndpointAppContext;
+  let router: SecuritySolutionPluginRouterMock;
 
   beforeEach(() => {
     mockResponse = httpServerMock.createResponseFactory();
+    mockEndpointContext = createMockEndpointAppContext();
+    router = httpServiceMock.createRouter();
     registerGetInsightsRoute(router, mockEndpointContext);
 
     callRoute = async (params, authz = { canReadWorkflowInsights: true }) => {
