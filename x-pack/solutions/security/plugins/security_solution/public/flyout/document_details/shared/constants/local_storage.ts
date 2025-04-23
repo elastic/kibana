@@ -9,4 +9,5 @@ export const FLYOUT_STORAGE_KEYS = {
   OVERVIEW_TAB_EXPANDED_SECTIONS:
     'securitySolution.documentDetailsFlyout.overviewSectionExpanded.v8.14',
   RIGHT_PANEL_SELECTED_TABS: 'securitySolution.documentDetailsFlyout.rightPanel.selectedTabs.v8.14',
+  TABLE_TAB_STATE: 'securitySolution.documentDetailsFlyout.tableTabState.v8.19',
 };
