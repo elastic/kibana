@@ -21,6 +21,7 @@ import {
 } from '@kbn/presentation-publishing';
 import { css } from '@emotion/react';
 
+import { apiIsPresentationContainer } from '@kbn/presentation-containers';
 import {
   CONTENT_ID,
   DASHBOARD_LINK_TYPE,
@@ -181,14 +182,14 @@ export const getLinksEmbeddableFactory = () => {
 
             // if the by reference state has changed during this edit, reinitialize the panel.
             const nextIsByReference = Boolean(newState?.savedObjectId);
-            if (nextIsByReference !== isByReference) {
+            if (nextIsByReference !== isByReference && apiIsPresentationContainer(api.parentApi)) {
               const serializedState = serializeLinksState(
                 nextIsByReference,
                 newState?.savedObjectId
               );
               (serializedState.rawState as SerializedTitles).title = newState.title;
 
-              api.parentApi?.replacePanel<LinksSerializedState>(api.uuid, {
+              api.parentApi.replacePanel<LinksSerializedState>(api.uuid, {
                 serializedState,
                 panelType: api.type,
               });

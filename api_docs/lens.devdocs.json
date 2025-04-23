@@ -75,31 +75,7 @@
             "section": "def-public.PublishingSubject",
             "text": "PublishingSubject"
           },
-          "<string[] | undefined>; setDisabledActionIds: (ids: string[] | undefined) => void; getAllTriggersDisabled?: (() => boolean) | undefined; parentApi?: (",
-          {
-            "pluginId": "@kbn/presentation-containers",
-            "scope": "public",
-            "docId": "kibKbnPresentationContainersPluginApi",
-            "section": "def-public.PresentationContainer",
-            "text": "PresentationContainer"
-          },
-          " & Partial<Pick<",
-          {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.PublishesTitle",
-            "text": "PublishesTitle"
-          },
-          ", \"hideTitle$\"> & ",
-          {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.PublishesViewMode",
-            "text": "PublishesViewMode"
-          },
-          ">) | undefined; hasLockedHoverActions$?: ",
+          "<string[] | undefined>; setDisabledActionIds: (ids: string[] | undefined) => void; getAllTriggersDisabled?: (() => boolean) | undefined; parentApi?: unknown; hasLockedHoverActions$?: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -16629,31 +16605,7 @@
             "section": "def-public.PublishingSubject",
             "text": "PublishingSubject"
           },
-          "<string[] | undefined>; setDisabledActionIds: (ids: string[] | undefined) => void; getAllTriggersDisabled?: (() => boolean) | undefined; parentApi?: (",
-          {
-            "pluginId": "@kbn/presentation-containers",
-            "scope": "public",
-            "docId": "kibKbnPresentationContainersPluginApi",
-            "section": "def-public.PresentationContainer",
-            "text": "PresentationContainer"
-          },
-          " & Partial<Pick<",
-          {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.PublishesTitle",
-            "text": "PublishesTitle"
-          },
-          ", \"hideTitle$\"> & ",
-          {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.PublishesViewMode",
-            "text": "PublishesViewMode"
-          },
-          ">) | undefined; hasLockedHoverActions$?: ",
+          "<string[] | undefined>; setDisabledActionIds: (ids: string[] | undefined) => void; getAllTriggersDisabled?: (() => boolean) | undefined; parentApi?: unknown; hasLockedHoverActions$?: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -18975,31 +18927,7 @@
             "section": "def-public.PublishingSubject",
             "text": "PublishingSubject"
           },
-          "<string[] | undefined>; setDisabledActionIds: (ids: string[] | undefined) => void; getAllTriggersDisabled?: (() => boolean) | undefined; parentApi?: (",
-          {
-            "pluginId": "@kbn/presentation-containers",
-            "scope": "public",
-            "docId": "kibKbnPresentationContainersPluginApi",
-            "section": "def-public.PresentationContainer",
-            "text": "PresentationContainer"
-          },
-          " & Partial<Pick<",
-          {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.PublishesTitle",
-            "text": "PublishesTitle"
-          },
-          ", \"hideTitle$\"> & ",
-          {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.PublishesViewMode",
-            "text": "PublishesViewMode"
-          },
-          ">) | undefined; hasLockedHoverActions$?: ",
+          "<string[] | undefined>; setDisabledActionIds: (ids: string[] | undefined) => void; getAllTriggersDisabled?: (() => boolean) | undefined; parentApi?: unknown; hasLockedHoverActions$?: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
