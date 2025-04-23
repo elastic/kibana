@@ -119,6 +119,7 @@ src/platform/packages/shared/content-management/table_list_view_common @elastic/
 src/platform/packages/shared/content-management/table_list_view_table @elastic/appex-sharedux
 src/platform/packages/shared/content-management/user_profiles @elastic/appex-sharedux
 src/platform/packages/shared/kbn-content-management-utils @elastic/kibana-data-discovery
+x-pack/platform/packages/shared/kbn-content-packs-schema @elastic/streams-program-team
 examples/controls_example @elastic/kibana-presentation
 src/platform/plugins/shared/controls @elastic/kibana-presentation
 src/core @elastic/kibana-core
