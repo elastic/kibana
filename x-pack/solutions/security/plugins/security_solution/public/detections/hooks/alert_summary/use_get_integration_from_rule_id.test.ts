@@ -6,12 +6,10 @@
  */
 
 import { renderHook } from '@testing-library/react';
-import { useFindRulesQuery } from '../../../detection_engine/rule_management/api/hooks/use_find_rules_query';
-import { useFetchIntegrations } from './use_fetch_integrations';
 import { useGetIntegrationFromRuleId } from './use_get_integration_from_rule_id';
-
-jest.mock('../../../detection_engine/rule_management/api/hooks/use_find_rules_query');
-jest.mock('./use_fetch_integrations');
+import type { PackageListItem } from '@kbn/fleet-plugin/common';
+import type { RuleResponse } from '../../../../common/api/detection_engine';
+import { installationStatuses } from '@kbn/fleet-plugin/common/constants';
 
 describe('useGetIntegrationFromRuleId', () => {
   beforeEach(() => {
@@ -19,63 +17,38 @@ describe('useGetIntegrationFromRuleId', () => {
   });
 
   it('should return undefined integration when no matching rule is found', () => {
-    (useFindRulesQuery as jest.Mock).mockReturnValue({ data: { rules: [] }, isLoading: false });
-    (useFetchIntegrations as jest.Mock).mockReturnValue({
-      installedPackages: [],
-      isLoading: false,
-    });
+    const packages: PackageListItem[] = [];
+    const ruleId = '';
+    const rules: RuleResponse[] = [];
 
-    const { result } = renderHook(() => useGetIntegrationFromRuleId({ ruleId: '' }));
+    const { result } = renderHook(() => useGetIntegrationFromRuleId({ packages, ruleId, rules }));
 
-    expect(result.current.isLoading).toBe(false);
-    expect(result.current.integration).toBe(undefined);
-  });
-
-  it('should render loading true is rules are loading', () => {
-    (useFindRulesQuery as jest.Mock).mockReturnValue({
-      data: undefined,
-      isLoading: true,
-    });
-    (useFetchIntegrations as jest.Mock).mockReturnValue({
-      installedPackages: [{ name: 'rule_name' }],
-      isLoading: false,
-    });
-
-    const { result } = renderHook(() => useGetIntegrationFromRuleId({ ruleId: '' }));
-
-    expect(result.current.isLoading).toBe(true);
-    expect(result.current.integration).toBe(undefined);
-  });
-
-  it('should render loading true if packages are loading', () => {
-    (useFindRulesQuery as jest.Mock).mockReturnValue({
-      data: { rules: [] },
-      isLoading: false,
-    });
-    (useFetchIntegrations as jest.Mock).mockReturnValue({
-      installedPackages: [],
-      isLoading: true,
-    });
-
-    const { result } = renderHook(() => useGetIntegrationFromRuleId({ ruleId: '' }));
-
-    expect(result.current.isLoading).toBe(true);
     expect(result.current.integration).toBe(undefined);
   });
 
   it('should render a matching integration', () => {
-    (useFindRulesQuery as jest.Mock).mockReturnValue({
-      data: { rules: [{ id: 'rule_id', name: 'rule_name' }] },
-      isLoading: false,
-    });
-    (useFetchIntegrations as jest.Mock).mockReturnValue({
-      installedPackages: [{ name: 'rule_name' }],
-      isLoading: false,
-    });
+    const packages: PackageListItem[] = [
+      {
+        id: 'splunk',
+        icons: [{ src: 'icon.svg', path: 'mypath/icon.svg', type: 'image/svg+xml' }],
+        name: 'splunk',
+        status: installationStatuses.NotInstalled,
+        title: 'Splunk',
+        version: '0.1.0',
+      },
+    ];
+    const ruleId = 'rule_id';
+    const rules: RuleResponse[] = [{ id: 'rule_id', name: 'splunk' } as RuleResponse];
 
-    const { result } = renderHook(() => useGetIntegrationFromRuleId({ ruleId: 'rule_id' }));
+    const { result } = renderHook(() => useGetIntegrationFromRuleId({ packages, ruleId, rules }));
 
-    expect(result.current.isLoading).toBe(false);
-    expect(result.current.integration).toEqual({ name: 'rule_name' });
+    expect(result.current.integration).toEqual({
+      id: 'splunk',
+      icons: [{ src: 'icon.svg', path: 'mypath/icon.svg', type: 'image/svg+xml' }],
+      name: 'splunk',
+      status: installationStatuses.NotInstalled,
+      title: 'Splunk',
+      version: '0.1.0',
+    });
   });
 });
