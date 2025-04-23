@@ -1882,7 +1882,7 @@ src/platform/plugins/shared/discover/public/context_awareness/profile_providers/
 /x-pack/test/licensing_plugin @elastic/kibana-core
 /x-pack/test/functional_execution_context @elastic/kibana-core
 /x-pack/test/api_integration/apis/telemetry @elastic/kibana-core
-/x-pack/test/api_integration/apis/status @elastic/kibana-core
+/x-pack/platform/test/api_integration/apis/status @elastic/kibana-core
 /x-pack/platform/test/api_integration/apis/stats @elastic/kibana-core
 /x-pack/platform/test/api_integration/apis/kibana/stats @elastic/kibana-core
 /x-pack/test/api_integration/deployment_agnostic/apis/core/ @elastic/kibana-core

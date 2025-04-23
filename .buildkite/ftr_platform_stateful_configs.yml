@@ -169,7 +169,6 @@ enabled:
   - x-pack/test/api_integration/apis/searchprofiler/config.ts
   - x-pack/test/api_integration/apis/security/config.ts
   - x-pack/test/api_integration/apis/spaces/config.ts
-  - x-pack/test/api_integration/apis/status/config.ts
   - x-pack/test/api_integration/apis/synthetics/config.ts
   - x-pack/test/api_integration/apis/telemetry/config.ts
   - x-pack/test/api_integration/apis/transform/config.ts
@@ -389,3 +388,4 @@ enabled:
   - x-pack/platform/test/api_integration/apis/grok_debugger/config.ts
   - x-pack/platform/test/api_integration/apis/kibana/config.ts
   - x-pack/platform/test/api_integration/apis/stats/config.ts
+  - x-pack/platform/test/api_integration/apis/status/config.ts
