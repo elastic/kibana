@@ -21,7 +21,7 @@ const baseAllowlistFields: AllowlistFields = {
   pe: true,
   uptime: true,
   origin_referrer_url: true,
-  origin_url: true,  
+  origin_url: true,
   Ext: {
     ancestry: true,
     api: true,
@@ -63,7 +63,7 @@ const allowlistBaseEventFields: AllowlistFields = {
     malware_signature: true,
     pe: true,
     origin_referrer_url: true,
-    origin_url: true,    
+    origin_url: true,
     Ext: {
       code_signature: true,
       device: true,
