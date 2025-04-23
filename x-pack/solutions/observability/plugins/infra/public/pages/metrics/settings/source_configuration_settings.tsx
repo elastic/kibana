@@ -13,10 +13,7 @@ import {
   Prompt,
   useEditableSettings,
 } from '@kbn/observability-shared-plugin/public';
-import {
-  enableInfrastructureProfilingIntegration,
-  enableInfrastructureAssetCustomDashboards,
-} from '@kbn/observability-plugin/common';
+import { enableInfrastructureProfilingIntegration } from '@kbn/observability-plugin/common';
 import { loadRuleAggregations } from '@kbn/triggers-actions-ui-plugin/public';
 import type { HttpSetup } from '@kbn/core-http-browser';
 import {
@@ -90,10 +87,7 @@ export const SourceConfigurationSettings = ({
     formStateChanges,
     getUnsavedChanges,
   } = useSourceConfigurationFormState(source?.configuration);
-  const infraUiSettings = useEditableSettings([
-    enableInfrastructureProfilingIntegration,
-    enableInfrastructureAssetCustomDashboards,
-  ]);
+  const infraUiSettings = useEditableSettings([enableInfrastructureProfilingIntegration]);
 
   const resetAllUnsavedChanges = useCallback(() => {
     resetForm();
