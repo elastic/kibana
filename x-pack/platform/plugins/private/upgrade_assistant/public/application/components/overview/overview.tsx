@@ -25,12 +25,7 @@ import { METRIC_TYPE } from '@kbn/analytics';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { withRouter, RouteComponentProps } from 'react-router-dom';
 
-import {
-  ALTERNATIVE_VERSION_UPGRADE_FROM,
-  ALTERNATIVE_VERSION_UPGRADE_TO,
-  LATEST_VERSION,
-  MIN_VERSION_TO_UPGRADE_TO_LATEST,
-} from '../../../../common/constants';
+import { LATEST_VERSION, MIN_VERSION_TO_UPGRADE_TO_LATEST } from '../../../../common/constants';
 import { useAppContext } from '../../app_context';
 import { uiMetricService, UIM_OVERVIEW_PAGE_LOAD } from '../../lib/ui_metric';
 import { getBackupStep } from './backup_step';
@@ -88,13 +83,10 @@ export const Overview = withRouter(({ history }: RouteComponentProps) => {
         content={
           <FormattedMessage
             id="xpack.upgradeAssistant.overview.latestMinVersionTooltip"
-            defaultMessage="Upgrading to v{latestVersion} requires v{minVersionToUpgradeToLatest}.
-            An alternative upgrade path is v{alternativeVersionUpgradeFrom} to v{alternativeVersionUpgradeTo} (when available)."
+            defaultMessage="Upgrading to v{latestVersion} requires v{minVersionToUpgradeToLatest}."
             values={{
               latestVersion: LATEST_VERSION,
               minVersionToUpgradeToLatest: MIN_VERSION_TO_UPGRADE_TO_LATEST,
-              alternativeVersionUpgradeFrom: ALTERNATIVE_VERSION_UPGRADE_FROM,
-              alternativeVersionUpgradeTo: ALTERNATIVE_VERSION_UPGRADE_TO,
             }}
           />
         }
