@@ -26,6 +26,7 @@ import {
   isDefendInsightsEnabled,
   invokeDefendInsightsGraph,
   handleGraphError,
+  runExternalCallbacks,
 } from './helpers';
 import { CallbackIds, appContextService } from '../../services/app_context';
 
@@ -110,6 +111,8 @@ export const postDefendInsightsRoute = (router: IRouter<ElasticAssistantRequestH
             });
           }
 
+          await runExternalCallbacks(CallbackIds.DefendInsightsPreCreate, request);
+
           const {
             endpointIds,
             insightType,
@@ -162,6 +165,7 @@ export const postDefendInsightsRoute = (router: IRouter<ElasticAssistantRequestH
                 logger,
                 startTime,
                 telemetry,
+                insightType,
               }).then(() => insights)
             )
             .then((insights) =>

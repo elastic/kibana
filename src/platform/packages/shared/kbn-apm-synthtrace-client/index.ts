@@ -11,7 +11,11 @@ export { observer } from './src/lib/agent_config';
 export type { AgentConfigFields } from './src/lib/agent_config/agent_config_fields';
 export { apm, apmOtel } from './src/lib/apm';
 export type { ApmFields } from './src/lib/apm/apm_fields';
-export type { ApmOtelFields } from './src/lib/apm/otel/apm_otel_fields';
+export type {
+  ApmOtelFields,
+  ApmOtelAttributes,
+  SpanKind,
+} from './src/lib/apm/otel/apm_otel_fields';
 export type { Instance } from './src/lib/apm/instance';
 export type { OtelInstance } from './src/lib/apm/otel/otel_instance';
 export { MobileDevice } from './src/lib/apm/mobile_device';
@@ -39,12 +43,15 @@ export {
   setIdGeneratorStrategy,
 } from './src/lib/utils/generate_id';
 export { appendHash, hashKeysOf } from './src/lib/utils/hash';
-export type {
-  ESDocumentWithOperation,
-  SynthtraceESAction,
-  SynthtraceGenerator,
-  SynthtraceDynamicTemplate,
+export {
+  type ESDocumentWithOperation,
+  type SynthtraceESAction,
+  type SynthtraceGenerator,
+  type SynthtraceDynamicTemplate,
+  type ApmSynthtracePipelines,
+  ApmSynthtracePipelineSchema,
 } from './src/types';
 export { log, type LogDocument, LONG_FIELD_NAME } from './src/lib/logs';
+export { otelLog, type OtelLogDocument } from './src/lib/otel_logs';
 export { syntheticsMonitor, type SyntheticsMonitorDocument } from './src/lib/synthetics';
 export { type EntityFields, entities } from './src/lib/entities';

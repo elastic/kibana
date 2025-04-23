@@ -12,13 +12,12 @@ import {
   FleetUnauthorizedError,
   type PackageClient,
 } from '@kbn/fleet-plugin/server';
-import { dump } from 'js-yaml';
+import { load, dump } from 'js-yaml';
 import { PackageDataStreamTypes, Output } from '@kbn/fleet-plugin/common/types';
 import { transformOutputToFullPolicyOutput } from '@kbn/fleet-plugin/server/services/output_client';
 import { OBSERVABILITY_ONBOARDING_TELEMETRY_EVENT } from '../../../common/telemetry_events';
 import { getObservabilityOnboardingFlow, saveObservabilityOnboardingFlow } from '../../lib/state';
 import type { SavedObservabilityOnboardingFlow } from '../../saved_objects/observability_onboarding_status';
-import { ObservabilityOnboardingFlow } from '../../saved_objects/observability_onboarding_status';
 import { createObservabilityOnboardingServerRoute } from '../create_observability_onboarding_server_route';
 import { getHasLogs } from './get_has_logs';
 import { getKibanaUrl } from '../../lib/get_fallback_urls';
@@ -28,46 +27,6 @@ import { createShipperApiKey } from '../../lib/api_key/create_shipper_api_key';
 import { createInstallApiKey } from '../../lib/api_key/create_install_api_key';
 import { hasLogMonitoringPrivileges } from '../../lib/api_key/has_log_monitoring_privileges';
 import { makeTar, type Entry } from './make_tar';
-
-const updateOnboardingFlowRoute = createObservabilityOnboardingServerRoute({
-  endpoint: 'PUT /internal/observability_onboarding/flow/{onboardingId}',
-  security: {
-    authz: {
-      enabled: false,
-      reason: 'Authorization is checked by the Saved Object client',
-    },
-  },
-  params: t.type({
-    path: t.type({
-      onboardingId: t.string,
-    }),
-    body: t.partial({
-      state: t.record(t.string, t.unknown),
-    }),
-  }),
-  async handler(resources): Promise<{ onboardingId: string }> {
-    const {
-      params: {
-        path: { onboardingId },
-        body: { state },
-      },
-      core,
-      request,
-    } = resources;
-    const coreStart = await core.start();
-    const savedObjectsClient = coreStart.savedObjects.getScopedClient(request);
-    const { id } = await saveObservabilityOnboardingFlow({
-      savedObjectsClient,
-      savedObjectId: onboardingId,
-      observabilityOnboardingState: {
-        type: 'logFiles',
-        state,
-        progress: {},
-      } as ObservabilityOnboardingFlow,
-    });
-    return { onboardingId: id };
-  },
-});
 
 const stepProgressUpdateRoute = createObservabilityOnboardingServerRoute({
   endpoint: 'POST /internal/observability_onboarding/flow/{id}/step/{name}',
@@ -210,10 +169,6 @@ const getProgressRoute = createObservabilityOnboardingServerRoute({
  * Elastic agent.
  *
  * If the user does not have all necessary privileges a 403 Forbidden response is returned.
- *
- * This endpoint differs from the existing `POST /internal/observability_onboarding/logs/flow`
- * endpoint in that it caters for the auto-detect flow where integrations are detected and installed
- * on the host system, rather than in the Kibana UI.
  */
 const createFlowRoute = createObservabilityOnboardingServerRoute({
   endpoint: 'POST /internal/observability_onboarding/flow',
@@ -481,7 +436,10 @@ async function ensureInstalledIntegrations(
       if (installSource === 'registry') {
         const installation = await packageClient.ensureInstalledPackage({ pkgName });
         const pkg = installation.package;
-        const config = await packageClient.getAgentPolicyConfigYAML(pkg.name, pkg.version);
+        const config = filterUnsupportedInputs(
+          await packageClient.getAgentPolicyConfigYAML(pkg.name, pkg.version)
+        );
+
         const { packageInfo } = await packageClient.getPackage(pkg.name, pkg.version);
 
         return {
@@ -550,6 +508,21 @@ async function ensureInstalledIntegrations(
       }
     })
   );
+}
+
+function filterUnsupportedInputs(policyYML: string): string {
+  const policy = load(policyYML);
+
+  if (!policy) {
+    return policyYML;
+  }
+
+  return dump({
+    ...policy,
+    inputs: (policy.inputs || []).filter((input: any) => {
+      return input.type !== 'httpjson';
+    }),
+  });
 }
 
 /**
@@ -656,7 +629,6 @@ function generateAgentConfigTar(output: Output, installedIntegrations: Installed
 
 export const flowRouteRepository = {
   ...createFlowRoute,
-  ...updateOnboardingFlowRoute,
   ...stepProgressUpdateRoute,
   ...getProgressRoute,
   ...integrationsInstallRoute,

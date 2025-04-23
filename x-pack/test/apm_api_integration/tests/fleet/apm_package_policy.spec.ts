@@ -20,7 +20,7 @@ import { createEsClientForFtrConfig } from '@kbn/test';
 import {
   APM_AGENT_CONFIGURATION_INDEX,
   APM_SOURCE_MAP_INDEX,
-} from '@kbn/apm-plugin/server/routes/settings/apm_indices/apm_system_index_constants';
+} from '@kbn/apm-sources-access-plugin/server';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createAgentPolicy,

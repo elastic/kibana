@@ -161,6 +161,14 @@ export const CreateDockerCloudFIPS: Task = {
       fips: true,
       cloud: true,
     });
+    await runDockerGenerator(config, log, build, {
+      architecture: 'aarch64',
+      baseImage: 'wolfi',
+      context: false,
+      image: true,
+      fips: true,
+      cloud: true,
+    });
   },
 };
 
