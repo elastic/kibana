@@ -149,6 +149,7 @@ export function registerSearchApplicationsRoutes({ log, router }: RouteDependenc
           name: request.params.engine_name,
           search_application: {
             indices: request.body.indices,
+            // @ts-expect-error elasticsearch@9.0.0 has this parameter been renamed to analytics_collection_name?
             name: request.params.engine_name,
             template:
               script == null
