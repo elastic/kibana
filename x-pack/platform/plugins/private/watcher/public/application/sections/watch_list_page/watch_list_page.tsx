@@ -265,7 +265,7 @@ export const WatchListPage = () => {
     </EuiPopover>
   );
 
-  const updateQuery = useCallback(({ queryText}: EuiSearchBarOnChangeArgs) => {
+  const updateQuery = useCallback(({ queryText }: EuiSearchBarOnChangeArgs) => {
     setQuery(queryText);
   }, []);
 

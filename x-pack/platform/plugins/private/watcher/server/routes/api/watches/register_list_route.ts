@@ -41,7 +41,7 @@ export function registerListRoute({ router, license, lib: { handleEsError } }: R
           size: pageSize,
         };
         if (sortField && sortDirection) {
-          const order: 'asc' | 'desc' = sortDirection === 'desc' ? 'desc' : 'asc'
+          const order: 'asc' | 'desc' = sortDirection === 'desc' ? 'desc' : 'asc';
           // The Query Watch API only allows sorting by metadata.* fields
           body.sort = [
             {
