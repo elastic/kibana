@@ -136,7 +136,8 @@ export const useUpdateCustomIntegration = async (
     method: 'put',
     version: API_VERSIONS.public.v1,
     body: {
-      fields,
+      readMeData: fields.readMeData,
+      categories: fields.categories,
     },
   });
 };

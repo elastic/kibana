@@ -88,9 +88,7 @@ export default function (providerContext: FtrProviderContext) {
           .put(`/api/fleet/epm/custom_integrations/${testCustomIntegrationName}`)
           .set('kbn-xsrf', 'xxxx')
           .send({
-            fields: {
-              readMeData: newReadmeContent,
-            },
+            readMeData: newReadmeContent,
           })
           .expect(200);
 
@@ -122,9 +120,7 @@ export default function (providerContext: FtrProviderContext) {
           .put(`/api/fleet/epm/custom_integrations/non-existent-integration`)
           .set('kbn-xsrf', 'xxxx')
           .send({
-            fields: {
-              readMeData: 'New content',
-            },
+            readMeData: 'New content',
           })
           .expect(404);
       });

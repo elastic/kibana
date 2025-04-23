@@ -398,11 +398,16 @@ export const updateCustomIntegrationHandler: FleetRequestHandler<
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const soClient = coreContext.savedObjects.client;
 
-  const { fields } = request.body as TypeOf<typeof CustomIntegrationRequestSchema.body>;
+  const { readMeData, categories } = request.body as TypeOf<
+    typeof CustomIntegrationRequestSchema.body
+  >;
   const { pkgName } = request.params as unknown as TypeOf<
     typeof CustomIntegrationRequestSchema.params
   >;
-  const result = await updateCustomIntegration(esClient, soClient, pkgName, fields);
+  const result = await updateCustomIntegration(esClient, soClient, pkgName, {
+    readMeData,
+    categories,
+  });
 
   return response.ok({
     body: {
