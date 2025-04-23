@@ -18,7 +18,7 @@ import {
   VisualizeFieldContext,
 } from '@kbn/ui-actions-plugin/public';
 import type { VisualizeEditorContext } from '../../types';
-import { FormBasedPersistedState, FormBasedPrivateState, FormBasedLayer } from './types';
+import { FormBasedPersistedState, FormBasedPrivateState, FormBasedLayer, CombinedFormBasedPersistedState, isPersistedFormBasedLayer } from './types';
 
 import { memoizedGetAvailableOperationsByMetadata, updateLayerIndexPattern } from './operations';
 import { readFromStorage, writeToStorage } from '../../settings_storage';
@@ -64,7 +64,7 @@ export function extractReferences({ layers }: FormBasedPrivateState) {
 }
 
 export function injectReferences(
-  state: FormBasedPersistedState,
+  state: CombinedFormBasedPersistedState,
   references: SavedObjectReference[]
 ) {
   const layers: Record<string, FormBasedLayer> = {};
@@ -73,7 +73,7 @@ export function injectReferences(
       ({ name }) => name === getLayerReferenceName(layerId)
     )?.id;
 
-    if (indexPatternId) {
+    if (indexPatternId && isPersistedFormBasedLayer(persistedLayer)) {
       layers[layerId] = {
         ...persistedLayer,
         indexPatternId,
@@ -89,7 +89,7 @@ function createStateFromPersisted({
   persistedState,
   references,
 }: {
-  persistedState?: FormBasedPersistedState;
+  persistedState?: CombinedFormBasedPersistedState;
   references?: SavedObjectReference[];
 }) {
   return persistedState && references ? injectReferences(persistedState, references) : undefined;
@@ -143,7 +143,7 @@ export function loadInitialState({
   indexPatternRefs = [],
   indexPatterns = {},
 }: {
-  persistedState?: FormBasedPersistedState;
+  persistedState?: CombinedFormBasedPersistedState;
   references?: SavedObjectReference[];
   defaultIndexPatternId?: string;
   storage: IStorageWrapper;

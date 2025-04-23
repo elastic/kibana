@@ -237,6 +237,7 @@ describe('Text based languages utils', () => {
       const state = {
         layers: {
           first: {
+            type: 'esql' as const,
             columns: [],
             query: undefined,
             index: '',
@@ -344,6 +345,7 @@ describe('Text based languages utils', () => {
             columns: [],
             query: undefined,
             index: '',
+            type: 'esql' as const,
           },
         },
         indexPatternRefs: [],
@@ -445,6 +447,7 @@ describe('Text based languages utils', () => {
       const state = {
         layers: {
           first: {
+            type: 'esql' as const,
             columns: [],
             query: undefined,
             index: '',

@@ -35,7 +35,7 @@ import type {
   VisualizationInfo,
 } from '../../types';
 import { renewIDs } from '../../utils';
-import type { FormBasedLayer, FormBasedPersistedState, FormBasedPrivateState } from './types';
+import type { CombinedFormBasedPersistedState, FormBasedLayer, FormBasedPrivateState } from './types';
 import type { ReferenceBasedIndexPatternColumn } from './operations/definitions/column_types';
 
 import {
@@ -270,7 +270,7 @@ const accuracyModeEnabledWarning = (
 });
 
 export function getSearchWarningMessages(
-  state: FormBasedPersistedState,
+  state: CombinedFormBasedPersistedState,
   warning: SearchResponseWarning,
   request: estypes.SearchRequest,
   response: estypes.SearchResponse,

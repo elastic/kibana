@@ -121,6 +121,7 @@ export async function getStateFromAggregateQuery(
   const tempState = {
     layers: {
       [newLayerId]: {
+        type: 'esql' as const,
         index: dataViewId,
         query,
         columns: state.layers[newLayerId].columns ?? [],

@@ -88,7 +88,7 @@ import {
   getReferenceRoot,
   reorderByGroups,
 } from './operations/layer_helpers';
-import { FormBasedPrivateState, FormBasedPersistedState, DataViewDragDropOperation } from './types';
+import { FormBasedPrivateState, DataViewDragDropOperation, CombinedFormBasedPersistedState } from './types';
 import { mergeLayer, mergeLayers } from './state_helpers';
 import type { Datasource, VisualizeEditorContext } from '../../types';
 import { deleteColumn, isReferenced } from './operations';
@@ -220,12 +220,12 @@ export function getFormBasedDatasource({
   const ALIAS_IDS = ['indexpattern'];
 
   // Not stateful. State is persisted to the frame
-  const formBasedDatasource: Datasource<FormBasedPrivateState, FormBasedPersistedState, Query> = {
+  const formBasedDatasource: Datasource<FormBasedPrivateState, CombinedFormBasedPersistedState, Query> = {
     id: DATASOURCE_ID,
     alias: ALIAS_IDS,
 
     initialize(
-      persistedState?: FormBasedPersistedState,
+      persistedState?: CombinedFormBasedPersistedState,
       references?: SavedObjectReference[],
       initialContext?: VisualizeFieldContext | VisualizeEditorContext,
       indexPatternRefs?: IndexPatternRef[],
@@ -853,9 +853,9 @@ export function getFormBasedDatasource({
       );
     },
     isEqual: (
-      persistableState1: FormBasedPersistedState,
+      persistableState1: CombinedFormBasedPersistedState,
       references1: SavedObjectReference[],
-      persistableState2: FormBasedPersistedState,
+      persistableState2: CombinedFormBasedPersistedState,
       references2: SavedObjectReference[]
     ) =>
       isEqual(
