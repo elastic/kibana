@@ -29,7 +29,6 @@ export {
   apmServiceGroupMaxNumberOfServices,
   apmLabsButton,
   enableInfrastructureProfilingIntegration,
-  enableInfrastructureAssetCustomDashboards,
   apmEnableTableSearchBar,
   entityCentricExperience,
   apmAWSLambdaPriceFactor,
