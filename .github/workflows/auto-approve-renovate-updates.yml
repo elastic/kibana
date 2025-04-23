@@ -9,7 +9,9 @@ jobs:
   approve:
     name: Auto-approve renovate bot PRs
     runs-on: ubuntu-latest
-    if: startsWith(github.event.pull_request.head.ref, 'renovate')
+    if: |
+      startsWith(github.event.pull_request.head.ref, 'renovate') &&
+      github.actor == 'renovate[bot]'
     permissions:
       pull-requests: write
     steps:
