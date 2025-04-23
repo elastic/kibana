@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ReactElement } from 'react';
 import React from 'react';
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import { renderHook, act } from '@testing-library/react';
@@ -15,7 +14,6 @@ import { BehaviorSubject, Subject } from 'rxjs';
 import { FetchStatus } from '../../../types';
 import type { DiscoverStateContainer } from '../../state_management/discover_state';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import type { UseDiscoverHistogramProps } from './use_discover_histogram';
 import { useDiscoverHistogram } from './use_discover_histogram';
 import { setTimeout } from 'timers/promises';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
@@ -25,7 +23,6 @@ import type { UnifiedHistogramState } from '@kbn/unified-histogram-plugin/public
 import { UnifiedHistogramFetchStatus } from '@kbn/unified-histogram-plugin/public';
 import { createMockUnifiedHistogramApi } from '@kbn/unified-histogram-plugin/public/mocks';
 import { checkHitCount, sendErrorTo } from '../../hooks/use_saved_search_messages';
-import type { InspectorAdapters } from '../../hooks/use_inspector';
 import type { UnifiedHistogramCustomization } from '../../../../customizations/customization_types/histogram_customization';
 import { useDiscoverCustomization } from '../../../../customizations';
 import type { DiscoverCustomizationId } from '../../../../customizations/customization_service';
@@ -111,41 +108,26 @@ describe('useDiscoverHistogram', () => {
     return stateContainer;
   };
 
-  const renderUseDiscoverHistogram = async ({
-    stateContainer = getStateContainer(),
-    inspectorAdapters = { requests: new RequestAdapter() },
-  }: {
-    stateContainer?: DiscoverStateContainer;
-    inspectorAdapters?: InspectorAdapters;
-  } = {}) => {
-    const initialProps = {
-      stateContainer,
-      inspectorAdapters,
-    };
-
+  const renderUseDiscoverHistogram = async (
+    stateContainer: DiscoverStateContainer = getStateContainer()
+  ) => {
     const Wrapper = ({ children }: React.PropsWithChildren<unknown>) => (
       <CurrentTabProvider currentTabId={stateContainer.getCurrentTab().id}>
         <DiscoverMainProvider value={stateContainer}>
           <RuntimeStateProvider currentDataView={dataViewMockWithTimeField} adHocDataViews={[]}>
-            {children as ReactElement}
+            {children}
           </RuntimeStateProvider>
         </DiscoverMainProvider>
       </CurrentTabProvider>
     );
 
-    const hook = renderHook(
-      (props: UseDiscoverHistogramProps) => {
-        return useDiscoverHistogram(props);
-      },
-      {
-        wrapper: Wrapper,
-        initialProps,
-      }
-    );
+    const hook = renderHook(() => useDiscoverHistogram(stateContainer), {
+      wrapper: Wrapper,
+    });
 
     await act(() => setTimeout(0));
 
-    return { hook, initialProps };
+    return { hook };
   };
 
   beforeEach(() => {
@@ -166,9 +148,9 @@ describe('useDiscoverHistogram', () => {
   });
 
   describe('initialization', () => {
-    it('should return the expected parameters from getCreationOptions', async () => {
+    it('should return the expected parameters', async () => {
       const { hook } = await renderUseDiscoverHistogram();
-      const params = hook.result.current.getCreationOptions();
+      const params = hook.result.current;
       expect(params?.localStorageKeyPrefix).toBe('discover');
       expect(Object.keys(params?.initialState ?? {})).toEqual([
         'chartHidden',
@@ -197,7 +179,7 @@ describe('useDiscoverHistogram', () => {
       const api = createMockUnifiedHistogramApi();
       jest.spyOn(api.state$, 'subscribe');
       act(() => {
-        hook.result.current.ref(api);
+        hook.result.current.setUnifiedHistogramApi(api);
       });
       expect(api.state$.subscribe).toHaveBeenCalledTimes(2);
     });
@@ -205,7 +187,8 @@ describe('useDiscoverHistogram', () => {
     it('should sync Unified Histogram state with the state container', async () => {
       const stateContainer = getStateContainer();
       const inspectorAdapters = { requests: new RequestAdapter(), lensRequests: undefined };
-      const { hook } = await renderUseDiscoverHistogram({ stateContainer, inspectorAdapters });
+      stateContainer.dataState.inspectorAdapters = inspectorAdapters;
+      const { hook } = await renderUseDiscoverHistogram(stateContainer);
       const lensRequestAdapter = new RequestAdapter();
       const state = {
         timeInterval: '1m',
@@ -216,7 +199,7 @@ describe('useDiscoverHistogram', () => {
       const api = createMockUnifiedHistogramApi();
       api.state$ = new BehaviorSubject({ ...state, lensRequestAdapter });
       act(() => {
-        hook.result.current.ref(api);
+        hook.result.current.setUnifiedHistogramApi(api);
       });
       expect(inspectorAdapters.lensRequests).toBe(lensRequestAdapter);
       expect(stateContainer.appState.update).toHaveBeenCalledWith({
@@ -227,7 +210,7 @@ describe('useDiscoverHistogram', () => {
 
     it('should not sync Unified Histogram state with the state container if there are no changes', async () => {
       const stateContainer = getStateContainer();
-      const { hook } = await renderUseDiscoverHistogram({ stateContainer });
+      const { hook } = await renderUseDiscoverHistogram(stateContainer);
       const containerState = stateContainer.appState.getState();
       const state = {
         timeInterval: containerState.interval,
@@ -238,14 +221,14 @@ describe('useDiscoverHistogram', () => {
       const api = createMockUnifiedHistogramApi();
       api.state$ = new BehaviorSubject(state);
       act(() => {
-        hook.result.current.ref(api);
+        hook.result.current.setUnifiedHistogramApi(api);
       });
       expect(stateContainer.appState.update).not.toHaveBeenCalled();
     });
 
     it('should sync the state container state with Unified Histogram', async () => {
       const stateContainer = getStateContainer();
-      const { hook } = await renderUseDiscoverHistogram({ stateContainer });
+      const { hook } = await renderUseDiscoverHistogram(stateContainer);
       const api = createMockUnifiedHistogramApi();
       let params: Partial<UnifiedHistogramState> = {};
       api.setTotalHits = jest.fn((p) => {
@@ -258,7 +241,7 @@ describe('useDiscoverHistogram', () => {
         params = { ...params, timeInterval };
       });
       act(() => {
-        hook.result.current.ref(api);
+        hook.result.current.setUnifiedHistogramApi(api);
       });
       stateContainer.appState.update({ hideChart: true, interval: '1m' });
       expect(api.setTotalHits).not.toHaveBeenCalled();
@@ -269,7 +252,7 @@ describe('useDiscoverHistogram', () => {
 
     it('should exclude totalHitsStatus and totalHitsResult from Unified Histogram state updates', async () => {
       const stateContainer = getStateContainer();
-      const { hook } = await renderUseDiscoverHistogram({ stateContainer });
+      const { hook } = await renderUseDiscoverHistogram(stateContainer);
       const containerState = stateContainer.appState.getState();
       const state = {
         timeInterval: containerState.interval,
@@ -285,7 +268,7 @@ describe('useDiscoverHistogram', () => {
       const subject$ = new BehaviorSubject(state);
       api.state$ = subject$;
       act(() => {
-        hook.result.current.ref(api);
+        hook.result.current.setUnifiedHistogramApi(api);
       });
       stateContainer.appState.update({ hideChart: true });
       expect(Object.keys(params ?? {})).toEqual(['chartHidden']);
@@ -303,7 +286,7 @@ describe('useDiscoverHistogram', () => {
 
     it('should update total hits when the total hits state changes', async () => {
       const stateContainer = getStateContainer();
-      const { hook } = await renderUseDiscoverHistogram({ stateContainer });
+      const { hook } = await renderUseDiscoverHistogram(stateContainer);
       const containerState = stateContainer.appState.getState();
       const state = {
         timeInterval: containerState.interval,
@@ -322,7 +305,7 @@ describe('useDiscoverHistogram', () => {
         result: 100,
       });
       act(() => {
-        hook.result.current.ref(api);
+        hook.result.current.setUnifiedHistogramApi(api);
       });
       expect(stateContainer.dataState.data$.totalHits$.value).toEqual({
         fetchStatus: FetchStatus.COMPLETE,
@@ -346,7 +329,7 @@ describe('useDiscoverHistogram', () => {
 
       mockData.query.getState = () => mockQueryState;
       const stateContainer = getStateContainer();
-      const { hook } = await renderUseDiscoverHistogram({ stateContainer });
+      const { hook } = await renderUseDiscoverHistogram(stateContainer);
       const containerState = stateContainer.appState.getState();
       const error = new Error('test');
       const state = {
@@ -366,7 +349,7 @@ describe('useDiscoverHistogram', () => {
         error,
       });
       act(() => {
-        hook.result.current.ref(api);
+        hook.result.current.setUnifiedHistogramApi(api);
       });
       expect(sendErrorTo).toHaveBeenCalledWith(stateContainer.dataState.data$.totalHits$);
       expect(stateContainer.dataState.data$.totalHits$.value).toEqual({
@@ -381,7 +364,7 @@ describe('useDiscoverHistogram', () => {
       const stateContainer = getStateContainer();
       stateContainer.appState.update({ query: { esql: 'from *' } });
       stateContainer.dataState.fetchChart$ = fetch$;
-      const { hook } = await renderUseDiscoverHistogram({ stateContainer });
+      const { hook } = await renderUseDiscoverHistogram(stateContainer);
       act(() => {
         fetch$.next();
       });
@@ -401,7 +384,7 @@ describe('useDiscoverHistogram', () => {
           },
         })
       );
-      const { hook } = await renderUseDiscoverHistogram({ stateContainer });
+      const { hook } = await renderUseDiscoverHistogram(stateContainer);
       act(() => {
         fetch$.next();
       });
@@ -415,10 +398,10 @@ describe('useDiscoverHistogram', () => {
       const savedSearchFetch$ = new Subject<void>();
       const stateContainer = getStateContainer();
       stateContainer.dataState.fetchChart$ = savedSearchFetch$;
-      const { hook } = await renderUseDiscoverHistogram({ stateContainer });
+      const { hook } = await renderUseDiscoverHistogram(stateContainer);
       const api = createMockUnifiedHistogramApi();
       act(() => {
-        hook.result.current.ref(api);
+        hook.result.current.setUnifiedHistogramApi(api);
       });
       expect(api.fetch).not.toHaveBeenCalled();
       act(() => {
@@ -432,7 +415,7 @@ describe('useDiscoverHistogram', () => {
     test('should use custom values provided by customization fwk ', async () => {
       mockUseCustomizations = true;
       const stateContainer = getStateContainer();
-      const { hook } = await renderUseDiscoverHistogram({ stateContainer });
+      const { hook } = await renderUseDiscoverHistogram(stateContainer);
 
       expect(hook.result.current.onFilter).toEqual(mockHistogramCustomization.onFilter);
       expect(hook.result.current.onBrushEnd).toEqual(mockHistogramCustomization.onBrushEnd);
