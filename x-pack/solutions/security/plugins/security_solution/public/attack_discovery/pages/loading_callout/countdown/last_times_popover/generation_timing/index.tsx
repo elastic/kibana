@@ -30,7 +30,7 @@ const GenerationTimingComponent: React.FC<Props> = ({ interval }) => {
       <EuiFlexItem grow={false}>
         <EuiBadge
           css={css`
-            width: ${MAX_SECONDS_BADGE_WIDTH}px;
+            max-width: ${MAX_SECONDS_BADGE_WIDTH}px;
           `}
           color="hollow"
           data-test-subj="clockBadge"

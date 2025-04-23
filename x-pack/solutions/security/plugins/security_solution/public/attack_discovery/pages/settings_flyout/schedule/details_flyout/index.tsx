@@ -127,6 +127,7 @@ export const DetailsFlyout: React.FC<Props> = React.memo(({ scheduleId, onClose 
     isLoading,
     onSave: onUpdateSchedule,
     saveButtonTitle: i18n.SCHEDULE_SAVE_BUTTON_TITLE,
+    stats: null,
   });
 
   const scheduleDetails = useMemo(() => {
