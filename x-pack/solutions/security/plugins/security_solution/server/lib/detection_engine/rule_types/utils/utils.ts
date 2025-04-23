@@ -191,6 +191,18 @@ export const hasTimestampFields = async (args: {
   return { foundNoIndices: false, warningMessage: undefined };
 };
 
+/**
+ * Identifies frozen indices from the provided input indices.
+ * If any of the input indices resolve to frozen indices within the specified time range, they are returned by this function.
+ * @param {string[]} params.inputIndices - The list of input index patterns or indices to check.
+ * @param {ElasticsearchClient} params.internalEsClient - A client to be used to query the elasticsearch cluster on behalf of the internal Kibana user.
+ * @param {ElasticsearchClient} params.currentUserEsClient - A client to be used to query the elasticsearch cluster on behalf of the user that initiated the request to the Kibana server.
+ * @param {string} params.to - The end of the time range for the query (e.g., "now").
+ * @param {string} params.from - The start of the time range for the query (e.g., "now-1d").
+ * @param {string} params.primaryTimestamp - The primary timestamp field used for filtering.
+ * @param {string | undefined} params.secondaryTimestamp - The secondary timestamp field used for filtering, if applicable.
+ * @returns {Promise<string[]>} A promise that resolves to a list of frozen indices.
+ */
 export const checkForFrozenIndices = async ({
   inputIndices,
   internalEsClient,
