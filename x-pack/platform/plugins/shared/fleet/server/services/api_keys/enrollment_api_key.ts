@@ -36,7 +36,6 @@ export async function listEnrollmentApiKeys(
     page?: number;
     perPage?: number;
     kuery?: string;
-    showHidden?: boolean; // default to true
     query?: ReturnType<typeof toElasticsearchQuery>;
     showInactive?: boolean;
     spaceId?: string;
@@ -64,10 +63,6 @@ export async function listEnrollmentApiKeys(
       } else {
         filters.push(`namespaces:"${spaceId}"`);
       }
-    }
-
-    if (options.showHidden === false) {
-      filters.push(`not hidden:true`);
     }
 
     const kueryNode = _joinFilters(filters);

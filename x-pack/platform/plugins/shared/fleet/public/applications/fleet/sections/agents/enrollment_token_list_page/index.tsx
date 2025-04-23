@@ -96,6 +96,8 @@ const DeleteButton: React.FunctionComponent<{ apiKey: EnrollmentAPIKey; refresh:
   );
 };
 
+const NOT_HIDDEN_KUERY = 'not hidden:true';
+
 export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
   useBreadcrumbs('enrollment_tokens');
   const [isModalOpen, setModalOpen] = useState(false);
@@ -105,8 +107,7 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
   const enrollmentAPIKeysRequest = useGetEnrollmentAPIKeysQuery({
     page: pagination.currentPage,
     perPage: pagination.pageSize,
-    kuery: search.trim() !== '' ? search : undefined,
-    showHidden: false,
+    kuery: search.trim() !== '' ? `(${search}) and (${NOT_HIDDEN_KUERY})` : NOT_HIDDEN_KUERY,
   });
   const agentPoliciesRequest = useGetAgentPolicies({
     page: 1,

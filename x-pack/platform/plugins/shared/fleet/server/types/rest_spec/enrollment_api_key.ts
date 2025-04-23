@@ -33,7 +33,6 @@ export const GetEnrollmentAPIKeysRequestSchema = {
         },
       })
     ),
-    showHidden: schema.boolean({ defaultValue: true }),
   }),
 };
 

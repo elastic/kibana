@@ -68,9 +68,9 @@ export default function (providerContext: FtrProviderContext) {
         expect(apiResponse).to.have.keys('items');
       });
 
-      it('should allow to filter hidden api keys', async () => {
+      it('should allow to filter hidden api keys with kuery', async () => {
         const { body: apiResponse } = await supertest
-          .get(`/api/fleet/enrollment_api_keys?showHidden=false`)
+          .get(`/api/fleet/enrollment_api_keys?kuery=not hidden:true`)
           .expect(200);
 
         expect(apiResponse.total).to.be(1);
