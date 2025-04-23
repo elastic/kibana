@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-export default function ({ loadTestFile }) {
-  describe('kibana', () => {
+import type { FtrProviderContext } from '../../../ftr_provider_context';
+
+export default function ({ loadTestFile }: FtrProviderContext) {
+  describe('stats', () => {
     loadTestFile(require.resolve('./stats'));
-    loadTestFile(require.resolve('./kql_telemetry'));
   });
 }
