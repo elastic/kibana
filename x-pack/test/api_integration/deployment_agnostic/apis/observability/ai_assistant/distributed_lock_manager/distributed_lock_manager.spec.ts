@@ -655,20 +655,47 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     });
 
     describe('index assets', () => {
-      before(async () => {
-        const LOCK_ID = 'my_lock_with_mappings';
+      describe('when lock index is created with incorrect mappings', () => {
+        before(async () => {
+          await deleteLockIndexAssets(es, log);
+          await es.index({
+            refresh: true,
+            index: LOCKS_CONCRETE_INDEX_NAME,
+            id: 'my_lock_with_incorrect_mappings',
+            document: {
+              token: 'my token',
+              expiresAt: new Date(Date.now() + 100000),
+              createdAt: new Date(),
+              metadata: { foo: 'bar' },
+            },
+          });
+        });
 
-        // create a lock to trigger the creation of the index mappings
-        await withLock({ esClient: es, lockId: LOCK_ID, logger }, async () => {});
+        it('should delete the index and re-create it', async () => {
+          const mappingsBefore = await getMappings(es);
+          log.debug(`Mappings before: ${JSON.stringify(mappingsBefore)}`);
+          expect(mappingsBefore.properties?.token.type).to.eql('text');
 
-        // wait for the index to be created
-        await es.indices.refresh({ index: LOCKS_CONCRETE_INDEX_NAME });
+          // Simulate a scenario where the index mappings are incorrect and a lock is added
+          // it should delete the index and re-create it with the correct mappings
+          await withLock({ esClient: es, lockId: uuid(), logger }, async () => {});
+
+          const mappingsAfter = await getMappings(es);
+          log.debug(`Mappings after: ${JSON.stringify(mappingsAfter)}`);
+          expect(mappingsAfter.properties?.token.type).to.be('keyword');
+        });
       });
 
-      describe('Index mappings', () => {
+      describe('when lock index is created with correct mappings', () => {
+        before(async () => {
+          await withLock({ esClient: es, lockId: uuid(), logger }, async () => {});
+
+          // wait for the index to be created
+          await es.indices.refresh({ index: LOCKS_CONCRETE_INDEX_NAME });
+        });
+
         it('should have the correct mappings for the lock index', async () => {
-          const res = await es.indices.getMapping({ index: LOCKS_CONCRETE_INDEX_NAME });
-          const { mappings } = res[LOCKS_CONCRETE_INDEX_NAME];
+          const mappings = await getMappings(es);
 
           const expectedMapping = {
             dynamic: 'false',
@@ -682,55 +709,20 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
           expect(mappings).to.eql(expectedMapping);
         });
-      });
 
-      describe('Index settings', () => {
         it('has the right number_of_replicas', async () => {
-          const res = await es.indices.getSettings({ index: LOCKS_CONCRETE_INDEX_NAME });
-          const { settings } = res[LOCKS_CONCRETE_INDEX_NAME];
+          const settings = await getSettings(es);
           expect(settings?.index?.auto_expand_replicas).to.eql('0-1');
         });
-      });
-    });
 
-    describe('when lock index is created with incorrect mappings', () => {
-      async function getMappings() {
-        const res = await es.indices.getMapping({ index: LOCKS_CONCRETE_INDEX_NAME });
-        const { mappings } = res[LOCKS_CONCRETE_INDEX_NAME];
-        return mappings;
-      }
+        it('does not delete the index when adding a new lock', async () => {
+          const settingsBefore = await getSettings(es);
 
-      before(async () => {
-        await deleteLockIndexAssets(es, log);
+          await withLock({ esClient: es, lockId: uuid(), logger }, async () => {});
 
-        await es.index({
-          refresh: true,
-          index: LOCKS_CONCRETE_INDEX_NAME,
-          id: 'my_lock_with_incorrect_mappings',
-          document: {
-            token: 'my token',
-            expiresAt: new Date(Date.now() + 100000),
-            createdAt: new Date(),
-            metadata: { foo: 'bar' },
-          },
+          const settingsAfter = await getSettings(es);
+          expect(settingsAfter?.uuid).to.be(settingsBefore?.uuid);
         });
-      });
-
-      it('should delete the index and re-create it', async () => {
-        const mappingsBefore = await getMappings();
-        log.debug(`Mappings before: ${JSON.stringify(mappingsBefore)}`);
-        expect(mappingsBefore.properties?.token.type).to.eql('text');
-
-        // Simulate a scenario where the index mappings are incorrect
-        // await setuplockManagerIndex(es, logger);
-        await withLock(
-          { esClient: es, lockId: 'my_lock_with_correct_mappings', logger },
-          async () => {}
-        );
-
-        const mappingsAfter = await getMappings();
-        log.debug(`Mappings after: ${JSON.stringify(mappingsAfter)}`);
-        expect(mappingsAfter.properties?.token.type).to.be('keyword');
       });
     });
   });
@@ -796,4 +788,16 @@ async function getLockById(esClient: Client, lockId: LockId): Promise<LockDocume
   );
 
   return res._source;
+}
+
+async function getMappings(es: Client) {
+  const res = await es.indices.getMapping({ index: LOCKS_CONCRETE_INDEX_NAME });
+  const { mappings } = res[LOCKS_CONCRETE_INDEX_NAME];
+  return mappings;
+}
+
+async function getSettings(es: Client) {
+  const res = await es.indices.getSettings({ index: LOCKS_CONCRETE_INDEX_NAME });
+  const { settings } = res[LOCKS_CONCRETE_INDEX_NAME];
+  return settings;
 }
