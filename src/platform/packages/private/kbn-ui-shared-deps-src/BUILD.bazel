@@ -44,6 +44,7 @@ webpack_cli(
     "//src/platform/packages/shared/react/kibana_context/render",
     "//src/platform/packages/shared/react/kibana_context/theme",
     "//src/platform/packages/shared/shared-ux/router/impl:shared-ux-router",
+    "//src/platform/packages/shared/react/kibana_mount:react-kibana-mount"
   ],
   output_dir = True,
   args = [
