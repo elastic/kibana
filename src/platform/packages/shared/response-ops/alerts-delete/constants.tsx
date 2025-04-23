@@ -23,4 +23,4 @@ export const DEFAULT_THRESHOLD_ENABLED = false;
 export const DEFAULT_THRESHOLD = 3;
 export const DEFAULT_THRESHOLD_UNIT: EuiSelectOption = THRESHOLD_UNITS[1];
 
-export const BASE_ALERTING_API_PATH = '/internal/alerting';
+export const INTERNAL_BASE_ALERTING_API_PATH = '/internal/alerting';
