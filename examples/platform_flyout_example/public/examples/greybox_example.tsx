@@ -19,7 +19,7 @@ import {
   EuiTextArea,
 } from '@elastic/eui';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import { JourneyFlyout } from '../journey_flyouts/journey_flyout';
 import { FlyoutApi, FlyoutProps } from '../journey_flyouts/types';
 
@@ -33,13 +33,19 @@ const FlyoutOne: React.FC<FlyoutProps<FlyoutOneState>> = ({ openNextFlyout, stat
   const name = useStateFromPublishingSubject(name$);
   const description = useStateFromPublishingSubject(description$);
 
+  const [iWillReset, setIWillReset] = useState('');
+
   return (
     <>
       <EuiText>
         <h2>Main flyout one</h2>
         this is some other text. To see more text, continue to flyout 2.
       </EuiText>
+      <EuiSpacer />
       <EuiForm>
+        <EuiText>
+          The following two inputs will have their state saved by the provided state manager.
+        </EuiText>
         <EuiFormRow label="Name">
           <EuiFieldText
             value={name}
@@ -53,6 +59,17 @@ const FlyoutOne: React.FC<FlyoutProps<FlyoutOneState>> = ({ openNextFlyout, stat
             value={description}
             onChange={(e) => {
               setDescription(e.target.value);
+            }}
+          />
+        </EuiFormRow>
+        <EuiText>
+          The following input is using a useState hook instead. This will not be saved.
+        </EuiText>
+        <EuiFormRow label="I will reset">
+          <EuiFieldText
+            value={iWillReset}
+            onChange={(e) => {
+              setIWillReset(e.target.value);
             }}
           />
         </EuiFormRow>
