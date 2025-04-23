@@ -2135,7 +2135,7 @@
             {
               "parentPluginId": "elasticAssistant",
               "id": "def-server.ElasticAssistantPluginStart.registerCallback.$1",
-              "type": "string",
+              "type": "Enum",
               "tags": [],
               "label": "callbackId",
               "description": [],
