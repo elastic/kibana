@@ -155,6 +155,7 @@ export const createMockEndpointAppContextService = (
       name: 'default',
       disabledFeatures: [],
     })),
+    getSpaceId: jest.fn().mockReturnValue('default'),
   } as unknown as jest.Mocked<EndpointAppContextService>;
 };
 
