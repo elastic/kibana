@@ -8,7 +8,7 @@
 import React from 'react';
 
 import type { EuiSwitchProps } from '@elastic/eui';
-import { EuiSpacer, EuiSwitch } from '@elastic/eui';
+import { EuiIcon, EuiSpacer, EuiSwitch, EuiToolTip } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
@@ -60,6 +60,9 @@ export const InstallSection: React.FunctionComponent<Props> = ({
         onChange={onChangeShowCompleteAgentInstructions}
         compressed
       />
+      <EuiToolTip position="top" content={addElasticAgentCompleteTooltipContent}>
+        <EuiIcon tabIndex={0} type="questionInCircle" />
+      </EuiToolTip>
       <EuiSpacer size="m" />
       <PlatformSelector
         fullCopyButton={fullCopyButton}
@@ -77,8 +80,15 @@ export const InstallSection: React.FunctionComponent<Props> = ({
 };
 
 const addElasticAgentCompleteLabel = i18n.translate(
-  'xpack.fleet.enrollmentInstructions.completeAgent',
+  'xpack.fleet.enrollmentInstructions.completeAgent.label',
   {
-    defaultMessage: 'Add elastic agent complete which is required for synthetics browser test',
+    defaultMessage: 'Use the elastic-agent-complete docker image',
+  }
+);
+
+const addElasticAgentCompleteTooltipContent = i18n.translate(
+  'xpack.fleet.enrollmentInstructions.completeAgent.tooltip',
+  {
+    defaultMessage: 'Required to run Synthetics browser tests',
   }
 );
