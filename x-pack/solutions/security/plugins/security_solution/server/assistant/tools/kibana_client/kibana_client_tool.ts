@@ -8,6 +8,7 @@ import type { AssistantTool, AssistantToolParams } from '@kbn/elastic-assistant-
 import { APP_UI_ID } from '../../../../common';
 import { ActionsClientChatBedrockConverse, ActionsClientChatVertexAI, ActionsClientChatOpenAI } from '@kbn/langchain/server';
 import { KibanaClientTool } from './kibana_client_open_api';
+import { memoize } from 'lodash';
 
 export interface KibanaClientToolParams extends AssistantToolParams {
     createLlmInstance: () =>
@@ -15,6 +16,10 @@ export interface KibanaClientToolParams extends AssistantToolParams {
         | ActionsClientChatVertexAI
         | ActionsClientChatOpenAI;
 }
+
+const getKibanaClientTool = memoize(KibanaClientTool.create, (args)=>{
+    return args?.options?.apiSpecPath
+})
 
 const toolDetails = {
     // note: this description is overwritten when `getTool` is called
@@ -36,11 +41,10 @@ export const KIBANA_CLIENT_TOOL: AssistantTool = {
         if (!this.isSupported(params)) return null;
 
         const kibanaClientToolParams = params as KibanaClientToolParams;
+        const kibanaClientTool = await getKibanaClientTool();
 
-        const kibanaClientTool = new KibanaClientTool({
+        return kibanaClientTool.getTool({
             assistantToolParams: kibanaClientToolParams,
-        })
-
-        return kibanaClientTool.getTool();
+        });
     },
 };

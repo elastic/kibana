@@ -9,6 +9,8 @@ import { SystemMessage, HumanMessage } from "@langchain/core/messages";
 import { z } from "zod";
 import path from 'path';
 import { KibanaClientToolParams } from "./kibana_client_tool";
+import Oas from "oas";
+import { parse } from 'yaml';
 
 // TODO: Handle serverless case
 export const kibanaServerlessOpenApiSpec = path.join(__dirname, '../../../../../../../../../oas_docs/output/kibana.serverless.yaml');
@@ -19,10 +21,13 @@ const defaultOptions: Options = {
 }
 
 type Options = {
-    apiSpecPath: string; 
+    apiSpecPath: string;
 }
-export class KibanaClientTool extends OpenApiTool {
-    private assistantToolParams: KibanaClientToolParams;
+
+type RuntimeOptions = {
+    assistantToolParams: KibanaClientToolParams
+}
+export class KibanaClientTool extends OpenApiTool<RuntimeOptions> {
     private copiedHeaderNames = [
         'accept-encoding',
         'accept-language',
@@ -38,42 +43,45 @@ export class KibanaClientTool extends OpenApiTool {
         'x-elastic-product-origin',
         'x-kbn-context',
     ];
-    private opts: Options;
+    private options: Options;
 
-    constructor({
-        assistantToolParams,
-        opts = defaultOptions
+    protected constructor({
+        options = defaultOptions,
+        dereferencedOas
     }: {
-        assistantToolParams: KibanaClientToolParams;
-        opts?: Options;
+        options: Options;
+        dereferencedOas: Oas;
     }) {
 
-        const options = {
-            ...defaultOptions,
-            ...opts
-        }
-
-        const apiSpecPromise = new Promise((resolve, reject) => {
-            fs.readFile(options.apiSpecPath, 'utf8', (err, data) => {
-                if (err) {
-                    reject(err);
-                }
-                resolve(data);
-            });
-        })
-
         super({
-            apiSpec: apiSpecPromise
+            dereferencedOas: dereferencedOas
         });
-        
-        this.opts = options;
-        this.assistantToolParams = assistantToolParams;
+
+        this.options = options;
     }
 
-    protected async getToolForOperation({ operation }: { operation: Operation; }) {
+    static async create(args?: {
+        options?: Options;
+    }) {
+        const options = {
+            ...defaultOptions,
+            ...args?.options ?? {}
+        }
+        const yamlOpenApiSpec = await fs.promises.readFile(options.apiSpecPath, 'utf8');
+        const jsonOpenApiSpec = await parse(yamlOpenApiSpec);
+        const dereferencedOas = new Oas(jsonOpenApiSpec);
+        await dereferencedOas.dereference();
+        return new KibanaClientTool({
+            options: options,
+            dereferencedOas
+        });
+    }
+
+    protected async getToolForOperation({ operation, assistantToolParams }: RuntimeOptions & { operation: Operation }) {
+
         return tool(async (input) => {
 
-            const { request } = this.assistantToolParams
+            const { request } = assistantToolParams
             const { origin } = request.rewrittenUrl || request.url;
 
             const serializedQuery = Object.entries(input.query ?? {}).map(([key, value]) => {
@@ -106,7 +114,7 @@ export class KibanaClientTool extends OpenApiTool {
             name: operation.getOperationId(),
             description: [operation.getDescription(), ...operation.getTags().map(tag => tag.description).filter(tag => !!tag)].join('\n'),
             tags: operation.getTags().map(tag => tag.name),
-            schema: await this.getParametersAsZodSchema({
+            schema: this.getParametersAsZodSchema({
                 operation
             }),
             verbose: true,
@@ -114,14 +122,15 @@ export class KibanaClientTool extends OpenApiTool {
         })
     }
 
-    protected async getInternalNode(args: {
-        tools: StructuredToolInterface[]
+    protected async getInternalNode(args: RuntimeOptions & {
+        tools: Promise<StructuredToolInterface[]>
         name: string
         description: string
     }): Promise<StructuredToolInterface> {
+        const { tools, name, description, assistantToolParams } = args;
         const agent = createReactAgent({
-            llm: this.assistantToolParams.createLlmInstance(),
-            tools: args.tools,
+            llm: assistantToolParams.createLlmInstance(),
+            tools: await tools,
         })
         return tool(async ({ input }) => {
             const inputs = {
@@ -132,10 +141,10 @@ export class KibanaClientTool extends OpenApiTool {
             const lastMessage = result.messages[result.messages.length - 1];
             return lastMessage.content;
         }, {
-            name: args.name,
-            description: args.description,
+            name: name,
+            description: description,
             schema: z.object({
-                input: z.string().describe('The action that should be performed'),
+                input: z.string().describe('The action that should be performed relevant parameters. Include as much detail as possible.'),
             })
         })
     }
