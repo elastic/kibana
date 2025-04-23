@@ -142,6 +142,9 @@ export const epmRouteService = {
       pkgVersion
     );
   },
+  getUpdateCustomIntegrationsPath: (pkgName: string) => {
+    return EPM_API_ROUTES.UPDATE_CUSTOM_INTEGRATIONS_PATTERN.replace('{pkgName}', pkgName);
+  },
 };
 
 export const packagePolicyRouteService = {

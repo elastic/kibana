@@ -25575,6 +25575,63 @@ paths:
       summary: Create a custom integration
       tags:
         - Elastic Package Manager (EPM)
+  /api/fleet/epm/custom_integrations/{pkgName}:
+    put:
+      description: '[Required authorization] Route required privileges: fleet-settings-all AND integrations-all.'
+      operationId: put-fleet-epm-custom-integrations-pkgname
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - in: path
+          name: pkgName
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                categories:
+                  items:
+                    type: string
+                  type: array
+                readMeData:
+                  type: string
+              required:
+                - readMeData
+      responses:
+        '200': {}
+        '400':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                description: Generic Error
+                type: object
+                properties:
+                  attributes: {}
+                  error:
+                    type: string
+                  errorType:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+                required:
+                  - message
+                  - attributes
+      summary: Update a custom integration
+      tags:
+        - Elastic Package Manager (EPM)
   /api/fleet/epm/data_streams:
     get:
       description: '[Required authorization] Route required privileges: integrations-read OR fleet-setup OR fleet-all.'
