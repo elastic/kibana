@@ -92,7 +92,7 @@ export const conversationComponentTemplate: ClusterComponentTemplate['component_
                     trigger: keyword,
                   },
                 },
-                detectedEntities: {
+                detected_entities: {
                   type: 'object',
                   properties: {
                     entity: keyword,

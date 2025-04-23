@@ -41,7 +41,7 @@ export interface Message {
   '@timestamp': string;
   message: {
     content?: string;
-    detectedEntities?: DetectedEntity[];
+    detected_entities?: DetectedEntity[];
     anonymized?: boolean;
     name?: string;
     role: MessageRole;

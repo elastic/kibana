@@ -143,7 +143,7 @@ export function ChatTimeline({
     let currentGroup: ChatTimelineItem[] | null = null;
 
     for (const item of timelineItems) {
-      const { role, content, detectedEntities } = item.message.message;
+      const { role, content, detected_entities: detectedEntities } = item.message.message;
       if (item.display.hide || !item) continue;
 
       if (enableAnonymization && role === 'user' && content && detectedEntities) {

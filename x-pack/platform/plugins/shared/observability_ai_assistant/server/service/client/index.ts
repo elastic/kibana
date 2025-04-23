@@ -202,7 +202,7 @@ export class ObservabilityAIAssistantClient {
         );
 
         if (deduped.length) {
-          message.message.detectedEntities = deduped.map((ent) => ({
+          message.message.detected_entities = deduped.map((ent) => ({
             entity: ent.entity,
             class_name: ent.class_name,
             start_pos: ent.start_pos,
@@ -228,7 +228,7 @@ export class ObservabilityAIAssistantClient {
         if (content) {
           const { unhashedText, detectedEntities } = this.processAssistantMessage(content, hashMap);
           message.message.content = unhashedText;
-          if (detectedEntities.length) message.message.detectedEntities = detectedEntities;
+          if (detectedEntities.length) message.message.detected_entities = detectedEntities;
           message.message.anonymized = true;
         }
         // TODO: unhash other places?

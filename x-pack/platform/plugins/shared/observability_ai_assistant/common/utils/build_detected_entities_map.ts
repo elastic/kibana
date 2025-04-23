@@ -19,7 +19,7 @@ export function buildDetectedEntitiesMap(
   >();
   for (const { message } of messages) {
     if (message.role !== 'user') continue;
-    message.detectedEntities?.forEach((ent) => {
+    message.detected_entities?.forEach((ent) => {
       if (!map.has(ent.hash)) {
         map.set(ent.hash, {
           value: ent.entity,

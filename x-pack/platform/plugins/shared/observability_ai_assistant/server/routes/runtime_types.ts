@@ -55,7 +55,7 @@ export const messageRt: t.Type<Message> = t.type({
         }),
       ]),
       anonymized: t.boolean,
-      detectedEntities: t.array(detectedEntityRt),
+      detected_entities: t.array(detectedEntityRt),
     }),
   ]),
 });

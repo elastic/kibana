@@ -41,15 +41,15 @@ export function convertMessagesForInference(
       let assistantContent = message.message.content ?? null;
       // Stored assistant content is un‑redacted, so reapply hashes here
       // before sending the history back to the LLM.
-      if (message.message.detectedEntities?.length && assistantContent) {
-        assistantContent = redactEntities(assistantContent, message.message.detectedEntities);
+      if (message.message.detected_entities?.length && assistantContent) {
+        assistantContent = redactEntities(assistantContent, message.message.detected_entities);
       }
 
       // Reapply redaction inside function_call.arguments JSON, if any
       let toolCalls;
       if (message.message.function_call?.name) {
         const functionArgs = message.message.function_call.arguments;
-        const detectedEntities = message.message.detectedEntities;
+        const detectedEntities = message.message.detected_entities;
         // Replace any entity values with their hashes
         const redactedArgs =
           detectedEntities && functionArgs
@@ -90,10 +90,10 @@ export function convertMessagesForInference(
         throw new Error(`Could not find tool call request for ${message.message.name}`);
       }
       let contentWithToolCallForInference = message.message.content ?? '';
-      if (message.message.detectedEntities && message.message.detectedEntities.length > 0) {
+      if (message.message.detected_entities && message.message.detected_entities.length > 0) {
         contentWithToolCallForInference = redactEntities(
           message.message.content ?? '',
-          message.message.detectedEntities
+          message.message.detected_entities
         );
       }
 
@@ -110,10 +110,10 @@ export function convertMessagesForInference(
     if (isUserMessage) {
       let contentForInference = message.message.content ?? '';
       // If nerEntities exist, remove them
-      if (message.message.detectedEntities && message.message.detectedEntities.length > 0) {
+      if (message.message.detected_entities && message.message.detected_entities.length > 0) {
         contentForInference = redactEntities(
           message.message.content ?? '',
-          message.message.detectedEntities
+          message.message.detected_entities
         );
       }
       inferenceMessages.push({

@@ -25,7 +25,7 @@ export const messageSchema: RootSchema<Message & { scopes: AssistantScope[] }> =
           optional: true,
         },
       },
-      detectedEntities: {
+      detected_entities: {
         type: 'array',
         items: {
           properties: {

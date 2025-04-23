@@ -43,7 +43,7 @@ import { extractMessages } from './extract_messages';
 function buildHashMap(messages: Message[]): Map<string, string> {
   const map = new Map<string, string>();
   for (const msg of messages) {
-    msg.message.detectedEntities?.forEach((ent) => {
+    msg.message.detected_entities?.forEach((ent) => {
       if (!map.has(ent.hash)) {
         map.set(ent.hash, ent.entity);
       }

@@ -20,7 +20,7 @@ type BuildMessageProps = DeepPartial<Message> & {
       name: string;
       trigger: MessageRole.Assistant | MessageRole.User | MessageRole.Elastic;
     };
-    detectedEntities?: Message['message']['detectedEntities'];
+    detected_entities?: Message['message']['detected_entities'];
   };
 };
 
