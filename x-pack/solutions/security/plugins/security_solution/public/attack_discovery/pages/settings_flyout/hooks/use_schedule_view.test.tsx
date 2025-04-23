@@ -34,13 +34,19 @@ const mockUseSourcererDataView = useSourcererDataView as jest.MockedFunction<
 const mockUseFindAttackDiscoverySchedules = useFindAttackDiscoverySchedules as jest.MockedFunction<
   typeof useFindAttackDiscoverySchedules
 >;
+const getBooleanValueMock = jest.fn();
 
 describe('useScheduleView', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
+    getBooleanValueMock.mockReturnValue(false);
+
     mockUseKibana.mockReturnValue({
       services: {
+        featureFlags: {
+          getBooleanValue: getBooleanValueMock,
+        },
         lens: {
           EmbeddableComponent: () => <div data-test-subj="mockEmbeddableComponent" />,
         },
@@ -75,7 +81,7 @@ describe('useScheduleView', () => {
       isLoading: false,
     } as unknown as jest.Mocked<ReturnType<typeof useFindAttackDiscoverySchedules>>);
 
-    const { result } = renderHook(() => useScheduleView());
+    const { result } = renderHook(() => useScheduleView(null));
 
     render(<TestProviders>{result.current.scheduleView}</TestProviders>);
 
@@ -88,7 +94,7 @@ describe('useScheduleView', () => {
       isLoading: false,
     } as unknown as jest.Mocked<ReturnType<typeof useFindAttackDiscoverySchedules>>);
 
-    const { result } = renderHook(() => useScheduleView());
+    const { result } = renderHook(() => useScheduleView(null));
 
     render(<TestProviders>{result.current.actionButtons}</TestProviders>);
 
@@ -96,7 +102,7 @@ describe('useScheduleView', () => {
   });
 
   it('should return the `attack discovery schedules table` if there are existing schedules', () => {
-    const { result } = renderHook(() => useScheduleView());
+    const { result } = renderHook(() => useScheduleView(null));
 
     render(<TestProviders>{result.current.scheduleView}</TestProviders>);
 
@@ -104,7 +110,7 @@ describe('useScheduleView', () => {
   });
 
   it('should return `create new schedule` action button if there are existing schedules', () => {
-    const { result } = renderHook(() => useScheduleView());
+    const { result } = renderHook(() => useScheduleView(null));
 
     render(<TestProviders>{result.current.actionButtons}</TestProviders>);
 
@@ -112,7 +118,7 @@ describe('useScheduleView', () => {
   });
 
   it('should show create schedule flyout on `create new schedule` action button click', async () => {
-    const { result } = renderHook(() => useScheduleView());
+    const { result } = renderHook(() => useScheduleView(null));
 
     render(<TestProviders>{result.current.actionButtons}</TestProviders>);
 
