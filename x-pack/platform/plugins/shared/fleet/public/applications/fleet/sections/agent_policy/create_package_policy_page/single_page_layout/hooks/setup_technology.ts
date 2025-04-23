@@ -24,6 +24,10 @@ import {
   AGENTLESS_GLOBAL_TAG_NAME_TEAM,
   AGENTLESS_AGENT_POLICY_INACTIVITY_TIMEOUT,
   AGENTLESS_AGENT_POLICY_MONITORING,
+  SERVERLESS_DEFAULT_OUTPUT_ID,
+  DEFAULT_OUTPUT_ID,
+  SERVERLESS_DEFAULT_FLEET_SERVER_HOST_ID,
+  DEFAULT_FLEET_SERVER_HOST_ID,
 } from '../../../../../../../../common/constants';
 import {
   isAgentlessIntegration as isAgentlessIntegrationFn,
@@ -58,6 +62,8 @@ export const useAgentless = () => {
     isAgentlessDefault,
     isAgentlessAgentPolicy,
     isAgentlessIntegration,
+    isServerless,
+    isCloud,
   };
 };
 
@@ -82,7 +88,7 @@ export function useSetupTechnology({
   agentPolicies?: AgentPolicy[];
   integrationToEnable?: string;
 }) {
-  const { isAgentlessEnabled, isAgentlessDefault } = useAgentless();
+  const { isAgentlessEnabled, isAgentlessDefault, isServerless, isCloud } = useAgentless();
 
   // this is a placeholder for the new agent-BASED policy that will be used when the user switches from agentless to agent-based and back
   const orginalAgentPolicyRef = useRef<NewAgentPolicy>({ ...newAgentPolicy });
@@ -112,6 +118,16 @@ export function useSetupTechnology({
   }, [isAgentlessEnabled, isAgentlessDefault, packageInfo, integrationToEnable]);
 
   const agentlessPolicyName = getAgentlessAgentPolicyNameFromPackagePolicyName(packagePolicy.name);
+  const agentlessPolicyOutputId = isServerless
+    ? SERVERLESS_DEFAULT_OUTPUT_ID
+    : isCloud
+    ? DEFAULT_OUTPUT_ID
+    : undefined;
+  const agentlessPolicyFleetServerHostId = isServerless
+    ? SERVERLESS_DEFAULT_FLEET_SERVER_HOST_ID
+    : isCloud
+    ? DEFAULT_FLEET_SERVER_HOST_ID
+    : undefined;
 
   const handleSetupTechnologyChange = useCallback(
     (setupTechnology: SetupTechnology) => {
@@ -145,6 +161,10 @@ export function useSetupTechnology({
         inactivity_timeout: AGENTLESS_AGENT_POLICY_INACTIVITY_TIMEOUT,
         supports_agentless: true,
         monitoring_enabled: AGENTLESS_AGENT_POLICY_MONITORING,
+        ...(agentlessPolicyOutputId ? { data_output_id: agentlessPolicyOutputId } : {}),
+        ...(agentlessPolicyFleetServerHostId
+          ? { fleet_server_host_id: agentlessPolicyFleetServerHostId }
+          : {}),
       }),
       name: agentlessPolicyName,
       global_data_tags: getGlobaDataTags(packageInfo),
