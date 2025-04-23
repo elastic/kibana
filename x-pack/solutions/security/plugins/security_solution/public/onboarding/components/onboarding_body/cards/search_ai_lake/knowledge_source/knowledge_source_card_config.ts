@@ -14,12 +14,12 @@ export const KNOWLEDGE_SOURCE_CARD_ITEMS: CardSelectorAssetListItem[] = [
   {
     id: KnowledgeSourceCardItemId.install,
     title: i18n.translate('xpack.securitySolution.onboarding.knowledgeSourceCards.install.title', {
-      defaultMessage: 'Install knowledge source',
+      defaultMessage: 'How to add knowledge sources',
     }),
     description: i18n.translate(
       'xpack.securitySolution.onboarding.knowledgeSourceCards.install.description',
       {
-        defaultMessage: 'Quickly add and enable the knowledge source you need',
+        defaultMessage: 'Connect internal data to enrich the AI Assistant’s context',
       }
     ),
     // FIXME: update the video
@@ -29,7 +29,7 @@ export const KNOWLEDGE_SOURCE_CARD_ITEMS: CardSelectorAssetListItem[] = [
       alt: i18n.translate(
         'xpack.securitySolution.onboarding.knowledgeSourceCards.install.description',
         {
-          defaultMessage: 'Quickly add and enable the knowledge source you need',
+          defaultMessage: 'Connect internal data to enrich the AI Assistant’s context',
         }
       ),
     },
@@ -37,12 +37,12 @@ export const KNOWLEDGE_SOURCE_CARD_ITEMS: CardSelectorAssetListItem[] = [
   {
     id: KnowledgeSourceCardItemId.create,
     title: i18n.translate('xpack.securitySolution.onboarding.knowledgeSourceCards.create.title', {
-      defaultMessage: 'Create a custom knowledge source',
+      defaultMessage: 'Leveraging knowledge sources in a cyber context',
     }),
     description: i18n.translate(
       'xpack.securitySolution.onboarding.knowledgeSourceCards.create.description',
       {
-        defaultMessage: 'Create a custom knowledge source',
+        defaultMessage: 'Use custom data to improve threat detection and response',
       }
     ),
     asset: {
@@ -51,7 +51,7 @@ export const KNOWLEDGE_SOURCE_CARD_ITEMS: CardSelectorAssetListItem[] = [
       alt: i18n.translate(
         'xpack.securitySolution.onboarding.knowledgeSourceCards.create.description',
         {
-          defaultMessage: 'Create a custom knowledge source',
+          defaultMessage: 'Use custom data to improve threat detection and response',
         }
       ),
     },
