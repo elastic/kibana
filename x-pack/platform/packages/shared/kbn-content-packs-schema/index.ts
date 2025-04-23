@@ -7,3 +7,8 @@
 
 export * from './src/helpers';
 export * from './src/models';
+
+export const CONTENT_PACKS_FEATURE_ID = 'content_packs';
+export const CONTENT_PACKS_FEATURE_PRIVILEGES = {
+  manage: 'manage_content_pack',
+};

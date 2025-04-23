@@ -10,6 +10,7 @@ import { z } from '@kbn/zod';
 import { createConcatStream, createListStream, createPromiseFromStreams } from '@kbn/utils';
 import { installManagedIndexPattern } from '@kbn/fleet-plugin/server/services/epm/kibana/assets/install';
 import {
+  CONTENT_PACKS_FEATURE_PRIVILEGES,
   ContentPackEntry,
   contentPackIncludedObjectsSchema,
   isIncludeAll,
@@ -50,9 +51,7 @@ const exportContentRoute = createServerRoute({
   }),
   security: {
     authz: {
-      enabled: false,
-      reason:
-        'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
+      requiredPrivileges: [CONTENT_PACKS_FEATURE_PRIVILEGES.manage],
     },
   },
   async handler({ params, request, response, getScopedClients, context }) {
@@ -134,9 +133,7 @@ const importContentRoute = createServerRoute({
   }),
   security: {
     authz: {
-      enabled: false,
-      reason:
-        'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
+      requiredPrivileges: [CONTENT_PACKS_FEATURE_PRIVILEGES.manage],
     },
   },
   async handler({ params, request, getScopedClients, context }) {
@@ -210,8 +207,7 @@ const previewContentRoute = createServerRoute({
   }),
   security: {
     authz: {
-      enabled: false,
-      reason: 'This API does not use any user credentials.',
+      requiredPrivileges: [CONTENT_PACKS_FEATURE_PRIVILEGES.manage],
     },
   },
   async handler({ params }) {

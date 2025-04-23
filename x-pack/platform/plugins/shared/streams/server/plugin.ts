@@ -26,6 +26,7 @@ import { AssetService } from './lib/streams/assets/asset_service';
 import { RouteHandlerScopedClients } from './routes/types';
 import { StreamsService } from './lib/streams/service';
 import { StreamsTelemetryService } from './lib/telemetry/service';
+import { contentPacksFeature } from './feature';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface StreamsPluginSetup {}
@@ -50,7 +51,7 @@ export class StreamsPlugin
   public logger: Logger;
   public server?: StreamsServer;
   private isDev: boolean;
-  private telemtryService = new StreamsTelemetryService();
+  private telemetryService = new StreamsTelemetryService();
 
   constructor(context: PluginInitializerContext<StreamsConfig>) {
     this.isDev = context.env.mode.dev;
@@ -67,17 +68,19 @@ export class StreamsPlugin
       logger: this.logger,
     } as StreamsServer;
 
-    this.telemtryService.setup(core.analytics);
+    this.telemetryService.setup(core.analytics);
 
     const assetService = new AssetService(core, this.logger);
     const streamsService = new StreamsService(core, this.logger, this.isDev);
+
+    plugins.features.registerKibanaFeature(contentPacksFeature);
 
     registerRoutes({
       repository: streamsRouteRepository,
       dependencies: {
         assets: assetService,
         server: this.server,
-        telemetry: this.telemtryService.getClient(),
+        telemetry: this.telemetryService.getClient(),
         getScopedClients: async ({
           request,
         }: {
