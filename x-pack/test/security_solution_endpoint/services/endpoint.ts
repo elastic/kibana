@@ -11,13 +11,8 @@ import { Client, errors } from '@elastic/elasticsearch';
 import { AGENTS_INDEX } from '@kbn/fleet-plugin/common';
 import {
   HOST_METADATA_GET_ROUTE,
-  METADATA_CURRENT_TRANSFORM_V2,
   METADATA_DATASTREAM,
   METADATA_UNITED_INDEX,
-  METADATA_UNITED_TRANSFORM,
-  METADATA_UNITED_TRANSFORM_V2,
-  metadataCurrentIndexPattern,
-  metadataTransformPrefix,
 } from '@kbn/security-solution-plugin/common/endpoint/constants';
 import {
   deleteIndexedHostsAndAlerts,
@@ -29,7 +24,6 @@ import { getEndpointPackageInfo } from '@kbn/security-solution-plugin/common/end
 import { isEndpointPackageV2 } from '@kbn/security-solution-plugin/common/endpoint/utils/package_v2';
 import { installOrUpgradeEndpointFleetPackage } from '@kbn/security-solution-plugin/common/endpoint/data_loaders/setup_fleet_for_endpoint';
 import { EndpointError } from '@kbn/security-solution-plugin/common/endpoint/errors';
-import { STARTED_TRANSFORM_STATES } from '@kbn/security-solution-plugin/common/constants';
 import { DeepPartial } from 'utility-types';
 import { HostInfo, HostMetadata } from '@kbn/security-solution-plugin/common/endpoint/types';
 import { EndpointDocGenerator } from '@kbn/security-solution-plugin/common/endpoint/generate_data';
@@ -44,6 +38,10 @@ import { isServerlessKibanaFlavor } from '@kbn/security-solution-plugin/common/e
 import { DEFAULT_SPACE_ID, addSpaceIdToPath } from '@kbn/spaces-plugin/common';
 import { createKbnClient } from '@kbn/security-solution-plugin/scripts/endpoint/common/stack_services';
 import { catchAxiosErrorFormatAndThrow } from '@kbn/security-solution-plugin/common/endpoint/format_axios_error';
+import {
+  startMetadataTransforms,
+  stopMetadataTransforms,
+} from '@kbn/security-solution-plugin/common/endpoint/utils/transforms';
 import { FtrService } from '../../functional/ftr_provider_context';
 
 export type IndexedHostsAndAlertsResponseExtended = IndexedHostsAndAlertsResponse & {
@@ -102,44 +100,6 @@ export class EndpointTestResources extends FtrService {
     return createKbnClient(kbnClientOptions);
   }
 
-  async stopTransform(transformId: string) {
-    const stopRequest = {
-      transform_id: `${transformId}*`,
-      force: true,
-      wait_for_completion: true,
-      allow_no_match: true,
-    };
-    return this.esClient.transform.stopTransform(stopRequest);
-  }
-
-  async startTransform(transformId: string) {
-    const transformsResponse = await this.esClient.transform.getTransformStats({
-      transform_id: `${transformId}*`,
-    });
-    return Promise.all(
-      transformsResponse.transforms.map((transform) => {
-        if (STARTED_TRANSFORM_STATES.has(transform.state)) {
-          return Promise.resolve();
-        }
-        return this.esClient.transform.startTransform({ transform_id: transform.id });
-      })
-    );
-  }
-
-  async getMetadataTransformIds(spaceId: string = DEFAULT_SPACE_ID): Promise<{
-    currentTransformId: string;
-    unitedTransformId: string;
-  }> {
-    const kbnClient = this.getScopedKbnClient(spaceId);
-    const endpointPackage = await getEndpointPackageInfo(kbnClient);
-    const isV2 = isEndpointPackageV2(endpointPackage.version);
-
-    return {
-      currentTransformId: isV2 ? METADATA_CURRENT_TRANSFORM_V2 : metadataTransformPrefix,
-      unitedTransformId: isV2 ? METADATA_UNITED_TRANSFORM_V2 : METADATA_UNITED_TRANSFORM,
-    };
-  }
-
   /**
    * Loads endpoint host/alert/event data into elasticsearch
    * @param [options]
@@ -180,22 +140,12 @@ export class EndpointTestResources extends FtrService {
     } = options;
 
     const kbnClient = this.getScopedKbnClient(spaceId);
-
-    let currentTransformName = metadataTransformPrefix;
-    let unitedTransformName = METADATA_UNITED_TRANSFORM;
-
-    if (waitUntilTransformed && customIndexFn) {
-      const transformIds = await this.getMetadataTransformIds(spaceId);
-
-      currentTransformName = transformIds.currentTransformId;
-      unitedTransformName = transformIds.unitedTransformId;
-    }
+    const endpointPackage = await getEndpointPackageInfo(kbnClient);
 
     if (waitUntilTransformed && customIndexFn) {
       // need this before indexing docs so that the united transform doesn't
       // create a checkpoint with a timestamp after the doc timestamps
-      await this.stopTransform(currentTransformName);
-      await this.stopTransform(unitedTransformName);
+      await stopMetadataTransforms(this.esClient, endpointPackage.version);
     }
 
     const isServerless = await isServerlessKibanaFlavor(kbnClient);
@@ -226,10 +176,11 @@ export class EndpointTestResources extends FtrService {
         );
 
     if (waitUntilTransformed && customIndexFn) {
-      await this.startTransform(currentTransformName);
-      const metadataIds = Array.from(new Set(indexedData.hosts.map((host) => host.agent.id)));
-      await this.waitForEndpoints(metadataIds, waitTimeout);
-      await this.startTransform(unitedTransformName);
+      await startMetadataTransforms(
+        this.esClient,
+        Array.from(new Set(indexedData.hosts.map((host) => host.agent.id))),
+        endpointPackage.version
+      );
     }
 
     if (waitUntilTransformed) {
@@ -298,38 +249,6 @@ export class EndpointTestResources extends FtrService {
         throw new EndpointError(error.message, error);
       }
     });
-  }
-
-  /**
-   * Waits for endpoints to show up on the `metadata-current` index.
-   * Optionally, specific endpoint IDs (agent.id) can be provided to ensure those specific ones show up.
-   *
-   * @param [ids] optional list of ids to check for. If empty, it will just check if data exists in the index
-   * @param [timeout] optional max timeout to waitFor in ms. default is 20000.
-   */
-  async waitForEndpoints(ids: string[] = [], timeout = this.config.get('timeouts.waitFor')) {
-    const body = ids.length
-      ? {
-          query: {
-            bool: {
-              filter: [
-                {
-                  terms: {
-                    'agent.id': ids,
-                  },
-                },
-              ],
-            },
-          },
-        }
-      : {
-          size: 1,
-          query: {
-            match_all: {},
-          },
-        };
-
-    await this.waitForIndex(ids, metadataCurrentIndexPattern, body, timeout);
   }
 
   /**
@@ -406,14 +325,9 @@ export class EndpointTestResources extends FtrService {
     spaceId: string = DEFAULT_SPACE_ID
   ): Promise<HostInfo> {
     const currentMetadata = await this.fetchEndpointMetadata(endpointAgentId, spaceId);
-    const transformIds = await this.getMetadataTransformIds(spaceId);
+    const endpointPackage = await getEndpointPackageInfo(this.getScopedKbnClient(spaceId));
 
-    // Stop the transforms before putting together the metadata update doc. and indexing it.
-    await Promise.all([
-      this.stopTransform(transformIds.currentTransformId),
-      this.stopTransform(transformIds.unitedTransformId),
-    ]);
-
+    await stopMetadataTransforms(this.esClient, endpointPackage.version);
     const generatedMetadataDoc = new EndpointDocGenerator().generateHostMetadata();
 
     const updatedMetadataDoc = merge(
@@ -434,10 +348,7 @@ export class EndpointTestResources extends FtrService {
       })
       .catch(catchAxiosErrorFormatAndThrow);
 
-    await Promise.all([
-      this.startTransform(transformIds.currentTransformId),
-      this.startTransform(transformIds.unitedTransformId),
-    ]);
+    await startMetadataTransforms(this.esClient, [], endpointPackage.version);
 
     this.log.info(
       `Endpoint metadata update was indexed for endpoint agent id [${endpointAgentId}] in space [${spaceId}]`
