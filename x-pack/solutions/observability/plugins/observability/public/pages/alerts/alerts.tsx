@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { BrushEndListener, XYBrushEvent } from '@elastic/charts';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { BoolQuery, Filter } from '@kbn/es-query';
@@ -117,6 +117,13 @@ function InternalAlertsPage() {
       });
     }
   };
+
+  const onGroupingsChange = useCallback(
+    ({ activeGroups }: { activeGroups: string[] }) => {
+      alertSearchBarStateProps.onGroupingsChange(activeGroups);
+    },
+    [alertSearchBarStateProps]
+  );
 
   useEffect(() => {
     return setScreenContext?.({
@@ -312,6 +319,12 @@ function InternalAlertsPage() {
                 globalQuery={{ query: alertSearchBarStateProps.kuery, language: 'kuery' }}
                 groupingId={ALERTS_PAGE_ALERTS_TABLE_CONFIG_ID}
                 defaultGroupingOptions={DEFAULT_GROUPING_OPTIONS}
+                initialGroupings={
+                  alertSearchBarStateProps?.groupings?.length
+                    ? alertSearchBarStateProps.groupings
+                    : undefined
+                }
+                onGroupingsChange={onGroupingsChange}
                 getAggregationsByGroupingField={getAggregationsByGroupingField}
                 renderGroupPanel={renderGroupPanel}
                 getGroupStats={getGroupStats}
