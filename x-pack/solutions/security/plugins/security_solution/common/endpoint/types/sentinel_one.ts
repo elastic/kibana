@@ -36,7 +36,7 @@ export interface SentinelOneActivityEsDoc<TData = unknown> {
  * The `agent` records that are ingested by the SentinelOne integration into Elasticsearch
  *
  * NOTE:  not all properties are currently mapped below. Check the index definition if wanting to
- *        see what else is available and add it bellow if needed
+ *        see what else is available and add it below if needed
  */
 export interface SentinelOneAgentEsDoc {
   agent: {
