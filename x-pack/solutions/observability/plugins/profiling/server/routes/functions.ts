@@ -8,7 +8,6 @@
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { kqlQuery } from '@kbn/observability-plugin/server';
-import { profilingFetchTopNFunctionsFromStacktraces } from '@kbn/observability-plugin/common';
 import type { RouteRegisterParameters } from '.';
 import { IDLE_SOCKET_TIMEOUT } from '.';
 import { getRoutePaths } from '../../common';
@@ -71,27 +70,16 @@ export function registerTopNFunctionsSearchRoute({
           },
         };
 
-        const useStacktracesAPI = await core.uiSettings.client.get<boolean>(
-          profilingFetchTopNFunctionsFromStacktraces
-        );
         const totalSeconds = endSecs - startSecs;
 
-        const topNFunctions = useStacktracesAPI
-          ? await profilingDataAccess.services.fetchFunctions({
-              core,
-              esClient,
-              startIndex,
-              endIndex,
-              totalSeconds,
-              query,
-            })
-          : await profilingDataAccess.services.fetchESFunctions({
-              core,
-              esClient,
-              query,
-              aggregationFields: ['service.name'],
-              totalSeconds,
-            });
+        const topNFunctions = await profilingDataAccess.services.fetchFunctions({
+          core,
+          esClient,
+          startIndex,
+          endIndex,
+          totalSeconds,
+          query,
+        });
 
         return response.ok({
           body: topNFunctions,
