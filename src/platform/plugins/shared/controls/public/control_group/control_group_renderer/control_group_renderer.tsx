@@ -7,24 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { omit } from 'lodash';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { BehaviorSubject, Subject, map } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
 
 import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
-import { SerializedPanelState, useSearchApi, type ViewMode } from '@kbn/presentation-publishing';
+import { useSearchApi, type ViewMode } from '@kbn/presentation-publishing';
 
 import type { ControlGroupApi } from '../..';
 import {
   CONTROL_GROUP_TYPE,
-  DEFAULT_CONTROL_LABEL_POSITION,
   type ControlGroupRuntimeState,
   type ControlGroupSerializedState,
-  DEFAULT_CONTROL_CHAINING,
-  DEFAULT_AUTO_APPLY_SELECTIONS,
-  DEFAULT_IGNORE_PARENT_SETTINGS,
 } from '../../../common';
 import {
   type ControlGroupStateBuilder,
@@ -32,27 +27,7 @@ import {
 } from '../utils/control_group_state_builder';
 import type { ControlGroupCreationOptions, ControlGroupRendererApi } from './types';
 import { deserializeControlGroup } from '../utils/serialization_utils';
-
-const defaultRuntimeState = {
-  labelPosition: DEFAULT_CONTROL_LABEL_POSITION,
-  chainingSystem: DEFAULT_CONTROL_CHAINING,
-  autoApplySelections: DEFAULT_AUTO_APPLY_SELECTIONS,
-  ignoreParentSettings: DEFAULT_IGNORE_PARENT_SETTINGS,
-};
-
-function serializeState(
-  runtimeState: Partial<ControlGroupRuntimeState>
-): SerializedPanelState<ControlGroupSerializedState> {
-  return {
-    rawState: {
-      ...defaultRuntimeState,
-      ...omit(runtimeState, ['initialChildControlState']),
-      controls: Object.entries(runtimeState?.initialChildControlState ?? {}).map(
-        ([controlId, value]) => ({ ...value, id: controlId })
-      ),
-    },
-  };
-}
+import { defaultRuntimeState, serializeRuntimeState } from '../utils/serialize_runtime_state';
 
 export interface ControlGroupRendererProps {
   onApiAvailable: (api: ControlGroupRendererApi) => void;
@@ -78,7 +53,7 @@ export const ControlGroupRenderer = ({
   dataLoading,
   compressed,
 }: ControlGroupRendererProps) => {
-  const lastState$Ref = useRef(new BehaviorSubject(serializeState(defaultRuntimeState)));
+  const lastState$Ref = useRef(new BehaviorSubject(serializeRuntimeState({})));
   const id = useMemo(() => uuidv4(), []);
   const [isStateLoaded, setIsStateLoaded] = useState(false);
   const [controlGroup, setControlGroup] = useState<ControlGroupRendererApi | undefined>();
@@ -142,7 +117,7 @@ export const ControlGroupRenderer = ({
           ...(initialState ?? defaultRuntimeState),
           editorConfig,
         } as ControlGroupRuntimeState;
-        lastState$Ref.current.next(serializeState(initialRuntimeState));
+        lastState$Ref.current.next(serializeRuntimeState(initialRuntimeState));
         setIsStateLoaded(true);
       })
       .catch();
@@ -176,7 +151,7 @@ export const ControlGroupRenderer = ({
           reload: () => reload$.next(),
           updateInput: (newInput: Partial<ControlGroupRuntimeState>) => {
             lastState$Ref.current.next(
-              serializeState({
+              serializeRuntimeState({
                 ...lastState$Ref.current.value,
                 ...newInput,
               })
