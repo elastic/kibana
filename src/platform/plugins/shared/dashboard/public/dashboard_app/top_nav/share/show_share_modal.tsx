@@ -153,7 +153,6 @@ export function ShowShareModal({
   shareService.toggleShareContextMenu({
     isDirty,
     anchorElement,
-    allowEmbed: true,
     allowShortUrl,
     shareableUrl,
     objectId: savedObjectId,

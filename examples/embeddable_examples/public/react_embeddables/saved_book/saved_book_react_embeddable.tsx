@@ -151,10 +151,7 @@ export const getSavedBookEmbeddableFactory = (core: CoreStart) => {
             const nextIsByReference = Boolean(result.savedBookId);
 
             // if the by reference state has changed during this edit, reinitialize the panel.
-            if (
-              nextIsByReference !== isByReference &&
-              apiIsPresentationContainer(api.parentApi)
-            ) {
+            if (nextIsByReference !== isByReference && apiIsPresentationContainer(api.parentApi)) {
               api.parentApi.replacePanel<BookSerializedState>(api.uuid, {
                 serializedState: serializeBook(nextIsByReference, result.savedBookId),
                 panelType: api.type,
