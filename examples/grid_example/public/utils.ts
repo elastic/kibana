@@ -16,14 +16,9 @@ export const gridLayoutToDashboardPanelMap = (
 ): { panels: MockedDashboardPanelMap; rows: MockedDashboardRowMap } => {
   const panels: MockedDashboardPanelMap = {};
   const rows: MockedDashboardRowMap = {};
-  Object.entries(layout).forEach(([rowId, row]) => {
-    const { panels: rowPanels, ...rest } = row; // drop panels
-    if (row.isCollapsible) {
-      rows[rowId] = { ...rest, collapsed: row.isCollapsed };
-    } else {
-      rows[rowId] = rest;
-    }
-    Object.values(rowPanels).forEach((panelGridData) => {
+  Object.entries(layout).forEach(([widgetId, widget]) => {
+    if (widget.type === 'panel') {
+      const panelGridData = widget;
       panels[panelGridData.id] = {
         ...panelState[panelGridData.id],
         gridData: {
@@ -32,11 +27,27 @@ export const gridLayoutToDashboardPanelMap = (
           x: panelGridData.column,
           w: panelGridData.width,
           h: panelGridData.height,
-          row: rowId,
         },
       };
-    });
+    } else {
+      const { panels: rowPanels, isCollapsed, row, ...rest } = widget; // drop panels
+      rows[widgetId] = { ...rest, y: row, collapsed: isCollapsed };
+      Object.values(rowPanels).forEach((panelGridData) => {
+        panels[panelGridData.id] = {
+          ...panelState[panelGridData.id],
+          gridData: {
+            i: panelGridData.id,
+            y: panelGridData.row,
+            x: panelGridData.column,
+            w: panelGridData.width,
+            h: panelGridData.height,
+            row: widgetId,
+          },
+        };
+      });
+    }
   });
+
   return { panels, rows };
 };
 
@@ -47,33 +58,38 @@ export const dashboardInputToGridLayout = ({
   panels: MockedDashboardPanelMap;
   rows: MockedDashboardRowMap;
 }): GridLayoutData => {
-  const layout: GridLayoutData = {
-    first: {
-      id: 'first',
-      order: 0,
-      panels: {},
-      isCollapsible: false,
-    },
-  };
+  const layout: GridLayoutData = {};
   Object.values(rows).forEach((row) => {
-    const { id, order, isCollapsible } = row;
+    const { collapsed, y, ...rest } = row;
     layout[row.id] = {
-      id,
-      order,
+      ...rest,
+      type: 'section',
+      row: y,
       panels: {},
-      isCollapsible,
-      ...(isCollapsible ? { isCollapsed: row.collapsed, title: row.title } : {}),
-    } as GridRowData;
+      isCollapsed: collapsed,
+    };
   });
+
   Object.keys(panels).forEach((panelId) => {
     const gridData = panels[panelId].gridData;
-    layout[gridData.row ?? 'first'].panels[panelId] = {
-      id: panelId,
-      row: gridData.y,
-      column: gridData.x,
-      width: gridData.w,
-      height: gridData.h,
-    };
+    if (gridData.row) {
+      (layout[gridData.row] as GridRowData).panels[panelId] = {
+        id: panelId,
+        row: gridData.y,
+        column: gridData.x,
+        width: gridData.w,
+        height: gridData.h,
+      };
+    } else {
+      layout[panelId] = {
+        id: panelId,
+        type: 'panel',
+        row: gridData.y,
+        column: gridData.x,
+        width: gridData.w,
+        height: gridData.h,
+      };
+    }
   });
 
   return layout;

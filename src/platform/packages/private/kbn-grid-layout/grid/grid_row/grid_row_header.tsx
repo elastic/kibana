@@ -28,6 +28,7 @@ import { deleteRow } from '../utils/row_management';
 import { DeleteGridRowModal } from './delete_grid_row_modal';
 import { GridRowDragPreview } from './grid_row_drag_preview';
 import { GridRowTitle } from './grid_row_title';
+import { GridRowData } from '../types';
 
 export interface GridRowHeaderProps {
   rowId: string;
@@ -46,7 +47,7 @@ export const GridRowHeader = React.memo(({ rowId }: GridRowHeaderProps) => {
     gridLayoutStateManager.accessMode$.getValue() === 'VIEW'
   );
   const [panelCount, setPanelCount] = useState<number>(
-    Object.keys(gridLayoutStateManager.gridLayout$.getValue()[rowId].panels).length
+    Object.keys((gridLayoutStateManager.gridLayout$.getValue()[rowId] as GridRowData).panels).length
   );
 
   useEffect(() => {
@@ -73,7 +74,7 @@ export const GridRowHeader = React.memo(({ rowId }: GridRowHeaderProps) => {
      */
     const panelCountSubscription = gridLayoutStateManager.gridLayout$
       .pipe(
-        map((layout) => Object.keys(layout[rowId]?.panels ?? {}).length),
+        map((layout) => Object.keys((layout[rowId] as GridRowData)?.panels ?? {}).length),
         distinctUntilChanged()
       )
       .subscribe((count) => {
@@ -123,8 +124,8 @@ export const GridRowHeader = React.memo(({ rowId }: GridRowHeaderProps) => {
     const collapsedStateSubscription = gridLayoutStateManager.gridLayout$
       .pipe(
         map((gridLayout) => {
-          const row = gridLayout[rowId];
-          return row && row.isCollapsible && row.isCollapsed;
+          const row = gridLayout[rowId] as GridRowData;
+          return row && row.isCollapsed;
         })
       )
       .subscribe((collapsed) => {
@@ -162,8 +163,7 @@ export const GridRowHeader = React.memo(({ rowId }: GridRowHeaderProps) => {
 
   const toggleIsCollapsed = useCallback(() => {
     const newLayout = cloneDeep(gridLayoutStateManager.gridLayout$.value);
-    const row = newLayout[rowId];
-    if (row.isCollapsible) row.isCollapsed = !row.isCollapsed;
+    (newLayout[rowId] as GridRowData).isCollapsed = !(newLayout[rowId] as GridRowData).isCollapsed;
     gridLayoutStateManager.gridLayout$.next(newLayout);
   }, [gridLayoutStateManager, rowId]);
 

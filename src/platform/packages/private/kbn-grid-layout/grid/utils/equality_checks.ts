@@ -22,27 +22,29 @@ export const isGridDataEqual = (a?: GridPanelData, b?: GridPanelData) => {
 
 export const isLayoutEqual = (a: GridLayoutData, b: GridLayoutData) => {
   if (!deepEqual(Object.keys(a), Object.keys(b))) return false;
-
   let isEqual = true;
-  const keys = Object.keys(a); // keys of A are equal to keys of b
+  const keys = Object.keys(a); // keys of A are equal to keys of B
   for (const key of keys) {
-    const rowA = a[key];
-    const rowB = b[key];
+    const widgetA = a[key];
+    const widgetB = b[key];
 
-    isEqual =
-      rowA.order === rowB.order &&
-      rowA.title === rowB.title &&
-      rowA.isCollapsed === rowB.isCollapsed &&
-      Object.keys(rowA.panels).length === Object.keys(rowB.panels).length;
+    if (widgetA.type === 'panel' && widgetB.type === 'panel') {
+      isEqual = isGridDataEqual(widgetA, widgetB);
+    } else if (widgetA.type === 'section' && widgetB.type === 'section') {
+      isEqual =
+        widgetA.row === widgetB.row &&
+        widgetA.title === widgetB.title &&
+        widgetA.isCollapsed === widgetB.isCollapsed &&
+        Object.keys(widgetA.panels).length === Object.keys(widgetB.panels).length;
 
-    if (isEqual) {
-      for (const panelKey of Object.keys(rowA.panels)) {
-        isEqual = isGridDataEqual(rowA.panels[panelKey], rowB.panels[panelKey]);
+      for (const panelKey of Object.keys(widgetA.panels)) {
         if (!isEqual) break;
+        isEqual = isGridDataEqual(widgetA.panels[panelKey], widgetB.panels[panelKey]);
       }
+    } else {
+      isEqual = widgetA.row === widgetB.row;
     }
     if (!isEqual) break;
   }
-
   return isEqual;
 };

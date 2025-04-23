@@ -16,11 +16,23 @@ import { combineLatest, pairwise, map, distinctUntilChanged, skip } from 'rxjs';
 import { css } from '@emotion/react';
 
 import { GridHeightSmoother } from './grid_height_smoother';
-import { GridAccessMode, GridLayoutData, GridSettings, UseCustomDragHandle } from './types';
+import {
+  GridAccessMode,
+  GridLayoutData,
+  GridPanelData,
+  GridRowData,
+  GridSettings,
+  UseCustomDragHandle,
+} from './types';
 import { GridLayoutContext, GridLayoutContextType } from './use_grid_layout_context';
 import { useGridLayoutState } from './use_grid_layout_state';
 import { isLayoutEqual } from './utils/equality_checks';
-import { getPanelKeysInOrder, getRowKeysInOrder, resolveGridRow } from './utils/resolve_grid_row';
+import {
+  getMainLayoutInOrder,
+  getPanelKeysInOrder,
+  getRowKeysInOrder,
+  resolveGridRow,
+} from './utils/resolve_grid_row';
 import { GridRowHeader } from './grid_row/grid_row_header';
 import { GridPanel } from './grid_panel';
 import { GridRowWrapper } from './grid_row/grid_row_wrapper';
@@ -58,47 +70,47 @@ export const GridLayout = ({
   /**
    * Update the `gridLayout$` behaviour subject in response to the `layout` prop changing
    */
-  useEffect(() => {
-    if (!isLayoutEqual(layout, gridLayoutStateManager.gridLayout$.getValue())) {
-      const newLayout = cloneDeep(layout);
-      /**
-       * the layout sent in as a prop is not guaranteed to be valid (i.e it may have floating panels) -
-       * so, we need to loop through each row and ensure it is compacted
-       */
-      Object.entries(newLayout).forEach(([rowId, row]) => {
-        newLayout[rowId] = resolveGridRow(row);
-      });
-      gridLayoutStateManager.gridLayout$.next(newLayout);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [layout]);
+  // useEffect(() => {
+  //   if (!isLayoutEqual(layout, gridLayoutStateManager.gridLayout$.getValue())) {
+  //     const newLayout = cloneDeep(layout);
+  //     /**
+  //      * the layout sent in as a prop is not guaranteed to be valid (i.e it may have floating panels) -
+  //      * so, we need to loop through each row and ensure it is compacted
+  //      */
+  //     Object.entries(newLayout).forEach(([rowId, row]) => {
+  //       newLayout[rowId] = resolveGridRow(row);
+  //     });
+  //     gridLayoutStateManager.gridLayout$.next(newLayout);
+  //   }
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, [layout]);
 
   /**
    * Set up subscriptions
    */
-  useEffect(() => {
-    /**
-     * This subscription calls the passed `onLayoutChange` callback when the layout changes;
-     * if the row IDs have changed, it also sets `rowIdsInOrder` to trigger a re-render
-     */
-    const onLayoutChangeSubscription = gridLayoutStateManager.gridLayout$
-      .pipe(pairwise())
-      .subscribe(([layoutBefore, layoutAfter]) => {
-        console.log({ layoutBefore, layoutAfter });
-        if (!isLayoutEqual(layoutBefore, layoutAfter)) {
-          onLayoutChange(layoutAfter);
+  // useEffect(() => {
+  //   /**
+  //    * This subscription calls the passed `onLayoutChange` callback when the layout changes;
+  //    * if the row IDs have changed, it also sets `rowIdsInOrder` to trigger a re-render
+  //    */
+  //   const onLayoutChangeSubscription = gridLayoutStateManager.gridLayout$
+  //     .pipe(pairwise())
+  //     .subscribe(([layoutBefore, layoutAfter]) => {
+  //       console.log({ layoutBefore, layoutAfter });
+  //       if (!isLayoutEqual(layoutBefore, layoutAfter)) {
+  //         onLayoutChange(layoutAfter);
 
-          if (!deepEqual(Object.keys(layoutBefore), Object.keys(layoutAfter))) {
-            // setRowIdsInOrder(getRowKeysInOrder(layoutAfter));
-          }
-        }
-      });
+  //         if (!deepEqual(Object.keys(layoutBefore), Object.keys(layoutAfter))) {
+  //           // setRowIdsInOrder(getRowKeysInOrder(layoutAfter));
+  //         }
+  //       }
+  //     });
 
-    return () => {
-      onLayoutChangeSubscription.unsubscribe();
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [onLayoutChange]);
+  //   return () => {
+  //     onLayoutChangeSubscription.unsubscribe();
+  //   };
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, [onLayoutChange]);
 
   useEffect(() => {
     /**
@@ -110,24 +122,22 @@ export const GridLayout = ({
     ])
       .pipe(
         map(([proposedGridLayout, gridLayout]) => proposedGridLayout ?? gridLayout),
-        map((gridLayout) => {
-          const currentLayout = gridLayout;
-          const rowIdsInOrder = getRowKeysInOrder(currentLayout);
+        map((currentLayout) => {
           const currentElementsInOrder: unknown[] = [];
-          rowIdsInOrder.forEach((rowId) => {
-            const row = currentLayout[rowId];
-            if (row.isCollapsible) {
-              currentElementsInOrder.push({ type: 'header', id: rowId });
-            }
-            if (!row.isCollapsible || !row.isCollapsed) {
-              const panelIdsInOrder = getPanelKeysInOrder(currentLayout[rowId]?.panels);
-              panelIdsInOrder.forEach((panelId) => {
-                currentElementsInOrder.push({ type: 'panel', id: panelId, rowId });
-              });
-              currentElementsInOrder.push({ type: 'wrapper', id: rowId });
-            }
-            if (row.isCollapsible) {
-              currentElementsInOrder.push({ type: 'footer', id: rowId });
+          const widgets = getMainLayoutInOrder(currentLayout);
+          widgets.forEach(({ type, id }) => {
+            if (type === 'section') {
+              currentElementsInOrder.push({ type: 'header', id });
+              const currentRow = currentLayout[id] as GridRowData;
+              if (!currentRow.isCollapsed) {
+                const panelIds = getPanelKeysInOrder(currentRow.panels);
+                panelIds.forEach((panelId) => {
+                  currentElementsInOrder.push({ type: 'panel', id: panelId, rowId: id });
+                });
+              }
+              currentElementsInOrder.push({ type: 'footer', id });
+            } else {
+              currentElementsInOrder.push({ type: 'panel', id, rowId: 'main' });
             }
           });
           return currentElementsInOrder;
@@ -135,7 +145,6 @@ export const GridLayout = ({
         distinctUntilChanged(deepEqual)
       )
       .subscribe((currentElementsInOrder) => {
-        console.log('currentElementsInOrder', currentElementsInOrder);
         setElementsInOrder(currentElementsInOrder);
       });
 
@@ -172,34 +181,36 @@ export const GridLayout = ({
       )
       .subscribe((currentLayout) => {
         if (!layoutRef.current) return;
-        const rowIds = getRowKeysInOrder(currentLayout);
+        const widgets = getMainLayoutInOrder(currentLayout);
+
         let gridRowTemplateString = '';
-        rowIds.forEach((rowId) => {
-          const currentRow = currentLayout[rowId];
-          if (Object.values(currentRow.panels).length > 0) {
-            gridRowTemplateString += `[start-${rowId}] `;
-            if (currentRow.isCollapsible) {
-              gridRowTemplateString += `auto `; // header
+        for (let i = 0; i < widgets.length; i++) {
+          const { type, id } = widgets[i];
+
+          if (type === 'panel') {
+            let maxRow = -Infinity;
+            while (widgets[i].type === 'panel') {
+              const currentPanel = currentLayout[widgets[i].id] as GridPanelData;
+              maxRow = Math.max(maxRow, currentPanel.row + currentPanel.height);
+              i++;
             }
-            if (
-              !currentRow.isCollapsible ||
-              (currentRow.isCollapsible && !currentRow.isCollapsed)
-            ) {
+            gridRowTemplateString += `repeat(${maxRow}, calc(var(--kbnGridRowHeight) * 1px)) `;
+            i--;
+          } else {
+            // section
+            const currentRow = currentLayout[id] as GridRowData;
+            gridRowTemplateString += `[start-${id}] auto `; // header
+            if (!currentRow.isCollapsed) {
               const panels = Object.values(currentRow.panels);
               const maxRow =
                 panels.length > 0 ? Math.max(...panels.map(({ row, height }) => row + height)) : 0;
-              gridRowTemplateString += `repeat(${maxRow}, [gridRow-${rowId}] calc(var(--kbnGridRowHeight) * 1px)) `;
+              gridRowTemplateString += `repeat(${maxRow}, [gridRow-${id}] calc(var(--kbnGridRowHeight) * 1px)) `;
             }
-            if (currentRow.isCollapsible) {
-              gridRowTemplateString += `auto `; // footer
-            }
-            gridRowTemplateString += `[end-${rowId}] `;
+            gridRowTemplateString += `auto [end-${id}] `; // footer
           }
-        });
+        }
         gridRowTemplateString = gridRowTemplateString.replaceAll('] [', ' ');
 
-        if (layoutRef.current.style.gridTemplateRows !== gridRowTemplateString)
-          console.log(gridRowTemplateString);
         layoutRef.current.style.gridTemplateRows = gridRowTemplateString;
       });
 

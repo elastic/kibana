@@ -22,6 +22,7 @@ import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 
 import { useGridLayoutContext } from '../use_grid_layout_context';
+import { GridRowData } from '../types';
 
 export const GridRowTitle = React.memo(
   ({
@@ -42,7 +43,7 @@ export const GridRowTitle = React.memo(
     const { gridLayoutStateManager } = useGridLayoutContext();
 
     const inputRef = useRef<HTMLInputElement | null>(null);
-    const currentRow = gridLayoutStateManager.gridLayout$.getValue()[rowId];
+    const currentRow = gridLayoutStateManager.gridLayout$.value[rowId] as GridRowData;
     const [rowTitle, setRowTitle] = useState<string>(currentRow.title);
 
     useEffect(() => {
@@ -51,7 +52,7 @@ export const GridRowTitle = React.memo(
        */
       const titleSubscription = gridLayoutStateManager.gridLayout$
         .pipe(
-          map((gridLayout) => gridLayout[rowId]?.title ?? ''),
+          map((gridLayout) => (gridLayout[rowId] as GridRowData)?.title ?? ''),
           distinctUntilChanged()
         )
         .subscribe((title) => {
@@ -75,7 +76,7 @@ export const GridRowTitle = React.memo(
     const updateTitle = useCallback(
       (title: string) => {
         const newLayout = cloneDeep(gridLayoutStateManager.gridLayout$.getValue());
-        newLayout[rowId].title = title;
+        (newLayout[rowId] as GridRowData).title = title;
         gridLayoutStateManager.gridLayout$.next(newLayout);
         setEditTitleOpen(false);
       },

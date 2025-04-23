@@ -17,6 +17,7 @@ import { useGridLayoutContext } from '../use_grid_layout_context';
 import { DefaultDragHandle } from './drag_handle/default_drag_handle';
 import { useDragHandleApi } from './drag_handle/use_drag_handle_api';
 import { ResizeHandle } from './grid_panel_resize_handle';
+import { GridPanelData, GridRowData } from '../types';
 
 export interface GridPanelProps {
   panelId: string;
@@ -32,8 +33,15 @@ export const GridPanel = React.memo(({ panelId, rowId }: GridPanelProps) => {
 
   /** Set initial styles based on state at mount to prevent styles from "blipping" */
   const initialStyles = useMemo(() => {
-    const initialPanel = (gridLayoutStateManager.proposedGridLayout$.getValue() ??
-      gridLayoutStateManager.gridLayout$.getValue())[rowId].panels[panelId];
+    const layout =
+      gridLayoutStateManager.proposedGridLayout$.getValue() ??
+      gridLayoutStateManager.gridLayout$.getValue();
+    let initialPanel: GridPanelData;
+    if (rowId === 'main') {
+      initialPanel = layout[panelId] as GridPanelData;
+    } else {
+      initialPanel = (layout[rowId] as GridRowData)?.panels[panelId];
+    }
     return css`
       position: relative;
       height: calc(
@@ -45,7 +53,7 @@ export const GridPanel = React.memo(({ panelId, rowId }: GridPanelProps) => {
       );
       grid-column-start: ${initialPanel.column + 1};
       grid-column-end: ${initialPanel.column + 1 + initialPanel.width};
-      grid-row-start: gridRow-${rowId} ${initialPanel.row + 1};
+      grid-row-start: ${rowId === 'main' ? '' : `gridRow-${rowId}`} ${initialPanel.row + 1};
       grid-row-end: span ${initialPanel.height};
       .kbnGridPanel--dragHandle,
       .kbnGridPanel--resizeHandle {
@@ -77,18 +85,14 @@ export const GridPanel = React.memo(({ panelId, rowId }: GridPanelProps) => {
           const activeLayout = proposedGridLayout ?? gridLayout;
           const currentInteractionEvent = gridLayoutStateManager.interactionEvent$.getValue();
           const isPanelActive = activePanel?.id === panelId;
-          let row = currentInteractionEvent?.targetRow ? currentInteractionEvent.targetRow : rowId;
 
-          let panel = activeLayout[row]?.panels[panelId];
-          // TODO: this is a workaround for the case when the panel is moved to another row and dropped
-          if (!panel) {
-            Object.entries(activeLayout).forEach(([rId, rowData]) => {
-              if (rowData.panels[panelId]) {
-                panel = rowData.panels[panelId];
-                row = rId;
-              }
-            });
+          let panel;
+          if (rowId === 'main') {
+            panel = activeLayout[panelId] as GridPanelData;
+          } else {
+            panel = (activeLayout[rowId] as GridRowData)?.panels[panelId];
           }
+
           if (!ref || !panel) return;
 
           if (isPanelActive) {
@@ -112,7 +116,9 @@ export const GridPanel = React.memo(({ panelId, rowId }: GridPanelProps) => {
 
               // undo any "lock to grid" styles **except** for the top left corner, which stays locked
               ref.style.gridColumnStart = `${panel.column + 1}`;
-              ref.style.gridRowStart = `gridRow-${row} ${panel.row + 1}`;
+              ref.style.gridRowStart = `${rowId === 'main' ? '' : `gridRow-${rowId}`} ${
+                panel.row + 1
+              }`;
               ref.style.gridColumnEnd = `auto`;
               ref.style.gridRowEnd = `auto`;
             } else {
@@ -143,7 +149,9 @@ export const GridPanel = React.memo(({ panelId, rowId }: GridPanelProps) => {
             // and render the panel locked to the grid
             ref.style.gridColumnStart = `${panel.column + 1}`;
             ref.style.gridColumnEnd = `${panel.column + 1 + panel.width}`;
-            ref.style.gridRowStart = `gridRow-${row} ${panel.row + 1}`;
+            ref.style.gridRowStart = `${rowId === 'main' ? '' : `gridRow-${rowId}`} ${
+              panel.row + 1
+            }`;
             ref.style.gridRowEnd = `span ${panel.height}`;
           }
         });
@@ -155,7 +163,12 @@ export const GridPanel = React.memo(({ panelId, rowId }: GridPanelProps) => {
         (expandedPanelId) => {
           const ref = gridLayoutStateManager.panelRefs.current[panelId];
           const gridLayout = gridLayoutStateManager.gridLayout$.getValue();
-          const panel = gridLayout[rowId].panels[panelId];
+          let panel: GridPanelData;
+          if (rowId === 'main') {
+            panel = gridLayout[panelId] as GridPanelData;
+          } else {
+            panel = (gridLayout[rowId] as GridRowData)?.panels[panelId];
+          }
           if (!ref || !panel) return;
 
           if (expandedPanelId && expandedPanelId === panelId) {
