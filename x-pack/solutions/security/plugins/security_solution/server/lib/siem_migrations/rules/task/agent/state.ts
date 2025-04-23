@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { BaseMessage } from '@langchain/core/messages';
-import { Annotation, messagesStateReducer } from '@langchain/langgraph';
+import { Annotation } from '@langchain/langgraph';
 import { uniq } from 'lodash/fp';
 import type { RuleTranslationResult } from '../../../../../../common/siem_migrations/constants';
 import type {
@@ -14,13 +13,11 @@ import type {
   OriginalRule,
   RuleMigration,
 } from '../../../../../../common/siem_migrations/model/rule_migration.gen';
+import type { RuleMigrationResources } from '../retrievers/rule_resource_retriever';
 
 export const migrateRuleState = Annotation.Root({
-  messages: Annotation<BaseMessage[]>({
-    reducer: messagesStateReducer,
-    default: () => [],
-  }),
   original_rule: Annotation<OriginalRule>(),
+  resources: Annotation<RuleMigrationResources>(),
   elastic_rule: Annotation<ElasticRulePartial>({
     reducer: (state, action) => ({ ...state, ...action }),
   }),
@@ -38,5 +35,4 @@ export const migrateRuleState = Annotation.Root({
     reducer: (current, value) => uniq(value ? (current ?? []).concat(value) : current),
     default: () => [],
   }),
-  response: Annotation<string>(),
 });
