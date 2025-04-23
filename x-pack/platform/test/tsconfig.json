@@ -20,7 +20,6 @@
     "@kbn/test-suites-src",
     "@kbn/telemetry-collection-manager-plugin",
     "@kbn/features-plugin",
-    "@kbn/features-plugin",
     "@kbn/test",
     "@kbn/expect",
     "@kbn/core-http-common",
