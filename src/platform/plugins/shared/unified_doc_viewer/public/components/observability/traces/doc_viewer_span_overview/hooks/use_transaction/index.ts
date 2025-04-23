@@ -18,7 +18,7 @@ import {
   TRANSACTION_ID_FIELD,
   TRANSACTION_NAME_FIELD,
 } from '@kbn/discover-utils';
-import { getUnifiedDocViewerServices } from '../../../../../plugin';
+import { getUnifiedDocViewerServices } from '../../../../../../plugin';
 
 interface UseTransactionPrams {
   transactionId?: string;
