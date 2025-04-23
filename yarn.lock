@@ -7938,6 +7938,18 @@
   version "0.0.0"
   uid ""
 
+"@kbn/wc-framework-types-browser@link:x-pack/solutions/chat/packages/wc-framework-types-browser":
+  version "0.0.0"
+  uid ""
+
+"@kbn/wc-framework-types-common@link:x-pack/solutions/chat/packages/wc-framework-types-common":
+  version "0.0.0"
+  uid ""
+
+"@kbn/wc-framework-types-server@link:x-pack/solutions/chat/packages/wc-framework-types-server":
+  version "0.0.0"
+  uid ""
+
 "@kbn/wc-genai-utils@link:x-pack/solutions/chat/packages/wc-genai-utils":
   version "0.0.0"
   uid ""
@@ -7983,6 +7995,10 @@
   uid ""
 
 "@kbn/workchat-app@link:x-pack/solutions/chat/plugins/workchat-app":
+  version "0.0.0"
+  uid ""
+
+"@kbn/workchat-framework-plugin@link:x-pack/solutions/chat/plugins/workchat-framework":
   version "0.0.0"
   uid ""
 

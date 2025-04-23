@@ -11117,6 +11117,21 @@
                           "agentless": {
                             "additionalProperties": false,
                             "properties": {
+                              "cloud_connectors": {
+                                "additionalProperties": false,
+                                "properties": {
+                                  "enabled": {
+                                    "type": "boolean"
+                                  },
+                                  "target_csp": {
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "enabled"
+                                ],
+                                "type": "object"
+                              },
                               "resources": {
                                 "additionalProperties": false,
                                 "properties": {
@@ -12122,6 +12137,21 @@
                   "agentless": {
                     "additionalProperties": false,
                     "properties": {
+                      "cloud_connectors": {
+                        "additionalProperties": false,
+                        "properties": {
+                          "enabled": {
+                            "type": "boolean"
+                          },
+                          "target_csp": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "enabled"
+                        ],
+                        "type": "object"
+                      },
                       "resources": {
                         "additionalProperties": false,
                         "properties": {
@@ -12424,6 +12454,21 @@
                         "agentless": {
                           "additionalProperties": false,
                           "properties": {
+                            "cloud_connectors": {
+                              "additionalProperties": false,
+                              "properties": {
+                                "enabled": {
+                                  "type": "boolean"
+                                },
+                                "target_csp": {
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "enabled"
+                              ],
+                              "type": "object"
+                            },
                             "resources": {
                               "additionalProperties": false,
                               "properties": {
@@ -13455,6 +13500,21 @@
                           "agentless": {
                             "additionalProperties": false,
                             "properties": {
+                              "cloud_connectors": {
+                                "additionalProperties": false,
+                                "properties": {
+                                  "enabled": {
+                                    "type": "boolean"
+                                  },
+                                  "target_csp": {
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "enabled"
+                                ],
+                                "type": "object"
+                              },
                               "resources": {
                                 "additionalProperties": false,
                                 "properties": {
@@ -14732,6 +14792,21 @@
                         "agentless": {
                           "additionalProperties": false,
                           "properties": {
+                            "cloud_connectors": {
+                              "additionalProperties": false,
+                              "properties": {
+                                "enabled": {
+                                  "type": "boolean"
+                                },
+                                "target_csp": {
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "enabled"
+                              ],
+                              "type": "object"
+                            },
                             "resources": {
                               "additionalProperties": false,
                               "properties": {
@@ -15735,6 +15810,21 @@
                   "agentless": {
                     "additionalProperties": false,
                     "properties": {
+                      "cloud_connectors": {
+                        "additionalProperties": false,
+                        "properties": {
+                          "enabled": {
+                            "type": "boolean"
+                          },
+                          "target_csp": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "enabled"
+                        ],
+                        "type": "object"
+                      },
                       "resources": {
                         "additionalProperties": false,
                         "properties": {
@@ -16040,6 +16130,21 @@
                         "agentless": {
                           "additionalProperties": false,
                           "properties": {
+                            "cloud_connectors": {
+                              "additionalProperties": false,
+                              "properties": {
+                                "enabled": {
+                                  "type": "boolean"
+                                },
+                                "target_csp": {
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "enabled"
+                              ],
+                              "type": "object"
+                            },
                             "resources": {
                               "additionalProperties": false,
                               "properties": {
@@ -17071,6 +17176,21 @@
                         "agentless": {
                           "additionalProperties": false,
                           "properties": {
+                            "cloud_connectors": {
+                              "additionalProperties": false,
+                              "properties": {
+                                "enabled": {
+                                  "type": "boolean"
+                                },
+                                "target_csp": {
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "enabled"
+                              ],
+                              "type": "object"
+                            },
                             "resources": {
                               "additionalProperties": false,
                               "properties": {
