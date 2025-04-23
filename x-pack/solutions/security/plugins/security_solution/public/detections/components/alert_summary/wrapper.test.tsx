@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { act, render } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import type { PackageListItem } from '@kbn/fleet-plugin/common';
 import { installationStatuses } from '@kbn/fleet-plugin/common/constants';
 import {
@@ -67,11 +67,11 @@ describe('<Wrapper />', () => {
       },
     });
 
-    await act(async () => {
-      const { getByTestId } = render(<Wrapper packages={packages} ruleResponse={ruleResponse} />);
+    render(<Wrapper packages={packages} ruleResponse={ruleResponse} />);
 
-      expect(getByTestId(DATA_VIEW_LOADING_PROMPT_TEST_ID)).toBeInTheDocument();
-      expect(getByTestId(SKELETON_TEST_ID)).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByTestId(DATA_VIEW_LOADING_PROMPT_TEST_ID)).toBeInTheDocument();
+      expect(screen.getByTestId(SKELETON_TEST_ID)).toBeInTheDocument();
     });
   });
 
@@ -92,14 +92,12 @@ describe('<Wrapper />', () => {
       useEffect: jest.fn((f) => f()),
     }));
 
-    await act(async () => {
-      const { getByTestId } = render(<Wrapper packages={packages} ruleResponse={ruleResponse} />);
+    render(<Wrapper packages={packages} ruleResponse={ruleResponse} />);
 
-      await new Promise(process.nextTick);
-
-      expect(getByTestId(DATA_VIEW_LOADING_PROMPT_TEST_ID)).toBeInTheDocument();
-      expect(getByTestId(DATA_VIEW_ERROR_TEST_ID)).toHaveTextContent('Unable to create data view');
-    });
+    expect(await screen.findByTestId(DATA_VIEW_LOADING_PROMPT_TEST_ID)).toBeInTheDocument();
+    expect(await screen.findByTestId(DATA_VIEW_ERROR_TEST_ID)).toHaveTextContent(
+      'Unable to create data view'
+    );
   });
 
   it('should render the content if the dataView is created correctly', async () => {
@@ -127,21 +125,17 @@ describe('<Wrapper />', () => {
       useEffect: jest.fn((f) => f()),
     }));
 
-    await act(async () => {
-      const { getByTestId } = render(
-        <TestProviders>
-          <Wrapper packages={packages} ruleResponse={ruleResponse} />
-        </TestProviders>
-      );
+    render(
+      <TestProviders>
+        <Wrapper packages={packages} ruleResponse={ruleResponse} />
+      </TestProviders>
+    );
 
-      await new Promise(process.nextTick);
-
-      expect(getByTestId(DATA_VIEW_LOADING_PROMPT_TEST_ID)).toBeInTheDocument();
-      expect(getByTestId(CONTENT_TEST_ID)).toBeInTheDocument();
-      expect(getByTestId(ADD_INTEGRATIONS_BUTTON_TEST_ID)).toBeInTheDocument();
-      expect(getByTestId(SEARCH_BAR_TEST_ID)).toBeInTheDocument();
-      expect(getByTestId(KPIS_SECTION)).toBeInTheDocument();
-      expect(getByTestId(GROUPED_TABLE_TEST_ID)).toBeInTheDocument();
-    });
+    expect(await screen.findByTestId(DATA_VIEW_LOADING_PROMPT_TEST_ID)).toBeInTheDocument();
+    expect(await screen.findByTestId(CONTENT_TEST_ID)).toBeInTheDocument();
+    expect(await screen.findByTestId(ADD_INTEGRATIONS_BUTTON_TEST_ID)).toBeInTheDocument();
+    expect(await screen.findByTestId(SEARCH_BAR_TEST_ID)).toBeInTheDocument();
+    expect(await screen.findByTestId(KPIS_SECTION)).toBeInTheDocument();
+    expect(await screen.findByTestId(GROUPED_TABLE_TEST_ID)).toBeInTheDocument();
   });
 });
