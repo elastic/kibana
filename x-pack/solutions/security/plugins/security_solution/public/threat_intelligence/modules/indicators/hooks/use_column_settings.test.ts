@@ -93,15 +93,21 @@ describe('useColumnSettings()', () => {
 
         expect(result.current.columnVisibility.visibleColumns).toMatchInlineSnapshot(`
           Array [
+            "@timestamp",
             "threat.indicator.name",
+            "threat.indicator.type",
+            "threat.feed.name",
+            "threat.indicator.first_seen",
             "threat.indicator.last_seen",
-            "tags",
-            "stream",
           ]
         `);
 
         expect(result.current.columns).toMatchInlineSnapshot(`
           Array [
+            Object {
+              "displayAsText": "@timestamp",
+              "id": "@timestamp",
+            },
             Object {
               "displayAsText": "Indicator",
               "id": "threat.indicator.name",
@@ -122,27 +128,10 @@ describe('useColumnSettings()', () => {
               "displayAsText": "Last seen",
               "id": "threat.indicator.last_seen",
             },
-            Object {
-              "displayAsText": "tags",
-              "id": "tags",
-            },
-            Object {
-              "displayAsText": "stream",
-              "id": "stream",
-            },
           ]
         `);
 
-        expect(result.current.sorting.columns).toMatchInlineSnapshot(`
-          Object {
-            "columns": Array [
-              Object {
-                "direction": "asc",
-                "id": "threat.indicator.name",
-              },
-            ],
-          }
-        `);
+        expect(result.current.sorting.columns).toMatchInlineSnapshot(`Array []`);
       });
     });
   });

@@ -19,6 +19,7 @@ import { useSecurityContext } from '../../../hooks/use_security_context';
 import { useStyles } from './styles';
 import { useAddToTimeline } from '../hooks/use_add_to_timeline';
 import { TITLE } from './translations';
+import { useAddToTimelineButton } from '../hooks/use_add_to_timeline_button';
 
 const ICON_TYPE = 'timeline';
 
@@ -57,8 +58,7 @@ export const AddToTimelineButtonIcon: FC<AddToTimelineProps> = ({
   field,
   'data-test-subj': dataTestSubj,
 }) => {
-  const addToTimelineButton =
-    useKibana().services.timelines.getHoverActions().getAddToTimelineButton;
+  const addToTimelineButton = useAddToTimelineButton();
   const securitySolutionContext = useSecurityContext();
 
   const { addToTimelineProps } = useAddToTimeline({ indicator: data, field });
@@ -92,9 +92,9 @@ export const AddToTimelineButtonEmpty: FC<AddToTimelineProps> = ({
   const securitySolutionContext = useSecurityContext();
   const buttonRef = useRef<HTMLButtonElement>(null);
 
-  const { timelines, analytics, i18n: i18nStart, theme } = useKibana().services;
+  const { analytics, i18n: i18nStart, theme } = useKibana().services;
   const startServices = { analytics, i18n: i18nStart, theme };
-  const addToTimelineButton = timelines.getHoverActions().getAddToTimelineButton;
+  const addToTimelineButton = useAddToTimelineButton();
 
   const { key, value } =
     typeof data === 'string' ? { key: field, value: data } : getIndicatorFieldAndValue(data, field);
@@ -153,10 +153,10 @@ export const AddToTimelineContextMenu: FC<AddToTimelineProps> = ({
   const securitySolutionContext = useSecurityContext();
   const contextMenuRef = useRef<HTMLButtonElement>(null);
 
-  const { timelines, analytics, i18n: i18nStart, theme } = useKibana().services;
+  const { analytics, i18n: i18nStart, theme } = useKibana().services;
   const startServices = { analytics, i18n: i18nStart, theme };
 
-  const addToTimelineButton = timelines.getHoverActions().getAddToTimelineButton;
+  const addToTimelineButton = useAddToTimelineButton();
 
   const { key, value } =
     typeof data === 'string' ? { key: field, value: data } : getIndicatorFieldAndValue(data, field);
@@ -209,9 +209,8 @@ export const AddToTimelineCellAction: FC<AddToTimelineCellActionProps> = ({
   Component,
   'data-test-subj': dataTestSubj,
 }) => {
-  const addToTimelineButton =
-    useKibana().services.timelines.getHoverActions().getAddToTimelineButton;
   const securitySolutionContext = useSecurityContext();
+  const addToTimelineButton = useAddToTimelineButton();
 
   const { addToTimelineProps } = useAddToTimeline({ indicator: data, field });
   if (!securitySolutionContext?.hasAccessToTimeline || !addToTimelineProps) {

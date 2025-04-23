@@ -43,6 +43,7 @@ export const localStorageMock = (): IStorage => {
 
 export const mockedSearchService = {
   search: jest.fn(),
+  showError: jest.fn(),
 } as unknown as ISearchStart;
 
 const fixedMoment = moment(new Date('2025-05-16 00:00:00'));

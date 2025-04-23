@@ -34,12 +34,8 @@ describe('useToolbarOptions()', () => {
           onToggleColumn={[Function]}
         />,
         "prepend": <EuiText
+          css="unknown styles"
           size="xs"
-          style={
-            Object {
-              "display": "inline",
-            }
-          }
         >
           <React.Fragment>
             -
@@ -82,22 +78,13 @@ describe('useToolbarOptions()', () => {
           onToggleColumn={[Function]}
         />,
         "prepend": <EuiText
+          css="unknown styles"
           size="xs"
-          style={
-            Object {
-              "display": "inline",
-            }
-          }
         >
           <React.Fragment>
-            Showing 
-            1
-            -
-            25
-             of
-             
-            25
-             indicators
+            
+                        Showing 1-25 of 25 indicators
+                      
           </React.Fragment>
         </EuiText>,
       }
@@ -137,22 +124,13 @@ describe('useToolbarOptions()', () => {
           onToggleColumn={[Function]}
         />,
         "prepend": <EuiText
+          css="unknown styles"
           size="xs"
-          style={
-            Object {
-              "display": "inline",
-            }
-          }
         >
           <React.Fragment>
-            Showing 
-            26
-            -
-            50
-             of
-             
-            50
-             indicators
+            
+                        Showing 26-50 of 50 indicators
+                      
           </React.Fragment>
         </EuiText>,
       }

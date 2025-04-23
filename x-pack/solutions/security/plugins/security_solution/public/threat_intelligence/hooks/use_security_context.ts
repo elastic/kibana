@@ -39,7 +39,7 @@ export const useSecurityContext = (): SecuritySolutionPluginContext => {
 
   const canWriteBlocklist = useUserPrivileges().endpointPrivileges.canWriteBlocklist;
 
-  const contextValue: SecuritySolutionPluginContext = useMemo(
+  return useMemo(
     () => ({
       securitySolutionStore,
       getPageWrapper: () => SecuritySolutionPageWrapper,
@@ -81,6 +81,4 @@ export const useSecurityContext = (): SecuritySolutionPluginContext => {
     }),
     [canWriteBlocklist, http, securitySolutionStore, sourcererDataView, hasAccessToTimeline]
   );
-
-  return contextValue;
 };
