@@ -9,10 +9,10 @@
 
 import * as t from 'io-ts';
 import { jsonRt } from '.';
-import { isRight, Either, isLeft, fold } from 'fp-ts/lib/Either';
-import { Right } from 'fp-ts/lib/Either';
-import { pipe } from 'fp-ts/lib/pipeable';
-import { identity } from 'fp-ts/lib/function';
+import { isRight, Either, isLeft, fold } from 'fp-ts/Either';
+import { Right } from 'fp-ts/Either';
+import { pipe } from 'fp-ts/pipeable';
+import { identity } from 'fp-ts/function';
 
 function getValueOrThrow<TEither extends Either<any, any>>(either: TEither): Right<TEither> {
   const value = pipe(
