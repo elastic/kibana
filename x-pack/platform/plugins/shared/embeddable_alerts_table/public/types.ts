@@ -10,6 +10,7 @@ import type { DefaultEmbeddableApi, EmbeddableSetup } from '@kbn/embeddable-plug
 import type { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
 import type {
   HasEditCapabilities,
+  HasParentApi,
   PublishesDataLoading,
   SerializedTimeRange,
   SerializedTitles,
@@ -21,6 +22,7 @@ import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 import type { RuleTypeSolution } from '@kbn/alerting-types';
 import type { AlertsFiltersExpression } from '@kbn/response-ops-alerts-filters-form/types';
+import type { PresentationContainer } from '@kbn/presentation-containers';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface EmbeddableAlertsTablePublicSetup {}
@@ -52,7 +54,8 @@ export type EmbeddableAlertsTableRuntimeState = EmbeddableAlertsTableSerializedS
 
 export type EmbeddableAlertsTableApi = DefaultEmbeddableApi<EmbeddableAlertsTableSerializedState> &
   PublishesDataLoading &
-  HasEditCapabilities;
+  HasEditCapabilities &
+  Partial<HasParentApi<PresentationContainer>>;
 
 /**
  * The type of the filters expression used in the embeddable alerts table.
