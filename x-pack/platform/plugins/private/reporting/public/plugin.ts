@@ -15,7 +15,7 @@ import { i18n } from '@kbn/i18n';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { ManagementSetup, ManagementStart } from '@kbn/management-plugin/public';
 import type { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/public';
-import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
+import type { SharePluginSetup, SharePluginStart, ExportShare } from '@kbn/share-plugin/public';
 import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 
 import { durationToNumber } from '@kbn/reporting-common';
@@ -24,8 +24,9 @@ import { ReportingAPIClient } from '@kbn/reporting-public';
 
 import {
   getSharedComponents,
-  reportingCsvShareModalProvider,
-  reportingExportModalProvider,
+  reportingCsvExportProvider,
+  reportingPDFExportProvider,
+  reportingPNGExportProvider,
 } from '@kbn/reporting-public/share';
 import { ReportingCsvPanelAction } from '@kbn/reporting-csv-share-panel';
 import { InjectedIntl } from '@kbn/i18n-react';
@@ -211,8 +212,10 @@ export class ReportingPublicPlugin
 
     startServices$.subscribe(([{ application }, { licensing }]) => {
       licensing.license$.subscribe((license) => {
-        shareSetup.register(
-          reportingCsvShareModalProvider({
+        shareSetup.registerShareIntegration<ExportShare>(
+          'search',
+          // TODO: export the reporting pdf export provider for registration in the actual plugins that depend on it
+          reportingCsvExportProvider({
             apiClient,
             license,
             application,
@@ -221,8 +224,19 @@ export class ReportingPublicPlugin
         );
 
         if (this.config.export_types.pdf.enabled || this.config.export_types.png.enabled) {
-          shareSetup.register(
-            reportingExportModalProvider({
+          shareSetup.registerShareIntegration<ExportShare>(
+            // TODO: export the reporting pdf export provider for registration in the actual plugins that depend on it
+            reportingPDFExportProvider({
+              apiClient,
+              license,
+              application,
+              startServices$,
+            })
+          );
+
+          shareSetup.registerShareIntegration<ExportShare>(
+            // TODO: export the reporting pdf export provider for registration in the actual plugins that depend on it
+            reportingPNGExportProvider({
               apiClient,
               license,
               application,
