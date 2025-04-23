@@ -44,8 +44,13 @@ class ErrorBoundaryInternal extends React.Component<
     apm.captureError(error, {
       labels: getErrorBoundaryLabels('PageFatalReactError'),
     });
+    // eslint-disable-next-line no-console
+    console.log(
+      "getErrorBoundaryLabels('PageFatalReactError'):",
+      getErrorBoundaryLabels('PageFatalReactError')
+    );
     console.error('Error caught by Kibana React Error Boundary'); // eslint-disable-line no-console
-    console.error(error); // eslint-disable-line no-console
+    // console.error(error); // eslint-disable-line no-console
 
     const { name, isFatal } = this.props.services.errorService.registerError(error, errorInfo);
     this.setState(() => {

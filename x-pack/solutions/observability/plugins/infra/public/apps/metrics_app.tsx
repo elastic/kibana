@@ -34,6 +34,8 @@ export const renderApp = (
 ) => {
   const storage = new Storage(window.localStorage);
 
+  throw new Error('Mary: React fatal error');
+
   prepareMountElement(element, METRICS_APP_DATA_TEST_SUBJ);
 
   ReactDOM.render(
