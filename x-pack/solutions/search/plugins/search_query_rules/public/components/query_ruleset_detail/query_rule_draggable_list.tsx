@@ -44,7 +44,7 @@ export const QueryRuleDraggableList: React.FC<QueryRuleDraggableListProps> = ({
     <EuiText size="s">
       <EuiBadge>{criteria.metadata}</EuiBadge>&nbsp;
       <EuiTextColor color={colors.textPrimary}>{criteria.type}</EuiTextColor>&nbsp;
-      {criteria.values?.join(',')}
+      {criteria.values?.join(', ')}
     </EuiText>
   );
   const actionIcon = (queryRule: QueryRulesQueryRule) => (
@@ -84,7 +84,7 @@ export const QueryRuleDraggableList: React.FC<QueryRuleDraggableListProps> = ({
         }
       }}
     >
-      <EuiDroppable droppableId="droppable1" spacing="m">
+      <EuiDroppable droppableId="queryRuleListDropabble" spacing="m">
         {rules.map((queryRule, index) => (
           <EuiDraggable
             spacing="m"

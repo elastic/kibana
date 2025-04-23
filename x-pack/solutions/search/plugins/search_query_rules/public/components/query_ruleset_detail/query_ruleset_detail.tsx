@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useParams } from 'react-router-dom';
 import { QueryRulesQueryRule } from '@elastic/elasticsearch/lib/api/types';
-import { useKibana } from '../../hooks/use_kibana';
-import { QueryRuleDraggableList } from './query_rule_draggable_list';
 import { useFetchQueryRuleset } from '../../hooks/use_fetch_query_ruleset';
 import { ErrorPrompt } from '../error_prompt/error_prompt';
 import { isNotFoundError, isPermissionError } from '../../utils/query_rules_utils';
+import { QueryRulesPageTemplate } from '../../layout/query_rules_page_template';
+import { QueryRuleDetailPanel } from './query_rule_detail_panel';
 
 export const QueryRulesetDetail: React.FC = () => {
   const { rulesetId = '' } = useParams<{
@@ -30,14 +30,6 @@ export const QueryRulesetDetail: React.FC = () => {
     error,
   } = useFetchQueryRuleset(rulesetId);
 
-  const {
-    services: { console: consolePlugin, history, searchNavigation },
-  } = useKibana();
-
-  const embeddableConsole = useMemo(
-    () => (consolePlugin?.EmbeddableConsole ? <consolePlugin.EmbeddableConsole /> : null),
-    [consolePlugin]
-  );
   const [rules, setRules] = useState<QueryRulesQueryRule[]>(queryRulesetData?.rules ?? []);
 
   useEffect(() => {
@@ -47,14 +39,7 @@ export const QueryRulesetDetail: React.FC = () => {
   }, [queryRulesetData?.rules]);
 
   return (
-    <KibanaPageTemplate
-      offset={0}
-      restrictWidth
-      grow={false}
-      data-test-subj="queryRulesetDetailPage"
-      solutionNav={searchNavigation?.useClassicNavigation(history)}
-      color="primary"
-    >
+    <QueryRulesPageTemplate>
       {!isInitialLoading && !isError && !!queryRulesetData && (
         <KibanaPageTemplate.Header
           pageTitle={rulesetId}
@@ -98,57 +83,7 @@ export const QueryRulesetDetail: React.FC = () => {
           ]}
         />
       )}
-      {!isError && (
-        <KibanaPageTemplate.Section restrictWidth>
-          <EuiFlexGroup justifyContent="spaceBetween" direction="column">
-            <EuiFlexItem grow={false}>
-              <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
-                <EuiFlexItem grow={false}>
-                  <EuiFlexGroup alignItems="center">
-                    <EuiFlexItem>
-                      <EuiButton
-                        iconType="plusInCircle"
-                        color="primary"
-                        data-test-subj="queryRulesetDetailAddRuleButton"
-                        onClick={() => {
-                          // Logic to add a new rule
-                        }}
-                      >
-                        <FormattedMessage
-                          id="xpack.queryRules.queryRulesetDetail.addRuleButton"
-                          defaultMessage="Add rule"
-                        />
-                      </EuiButton>
-                    </EuiFlexItem>
-                    <EuiFlexItem>
-                      <EuiText>
-                        {rules.length > 1 ? (
-                          <FormattedMessage
-                            id="xpack.queryRules.queryRulesetDetail.ruleCountPlural"
-                            defaultMessage="{ruleCount} rules"
-                            values={{ ruleCount: rules.length }}
-                            data-test-subj="queryRulesetDetailRuleCount"
-                          />
-                        ) : (
-                          <FormattedMessage
-                            id="xpack.queryRules.queryRulesetDetail.ruleCountSingular"
-                            defaultMessage="{ruleCount} rule"
-                            values={{ ruleCount: rules.length }}
-                            data-test-subj="queryRulesetDetailRuleCount"
-                          />
-                        )}
-                      </EuiText>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <QueryRuleDraggableList rules={rules} onReorder={setRules} />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </KibanaPageTemplate.Section>
-      )}
+      {!isError && <QueryRuleDetailPanel rules={rules} setRules={setRules} />}
       {isError && (
         <ErrorPrompt
           errorType={
@@ -161,7 +96,6 @@ export const QueryRulesetDetail: React.FC = () => {
           data-test-subj="queryRulesetDetailErrorPrompt"
         />
       )}
-      {embeddableConsole}
-    </KibanaPageTemplate>
+    </QueryRulesPageTemplate>
   );
 };
