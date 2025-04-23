@@ -479,8 +479,6 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       signalsMigrationApi: isServerless
         ? `${KIBANA_APIS}group/endpoint-security-detections-api`
         : `${KIBANA_SERVERLESS_APIS}group/endpoint-security-detections-api`,
-      legacyEndpointManagementApiDeprecations: `${ELASTIC_DOCS}release-notes/security/breaking-changes`,
-      legacyRuleManagementBulkApiDeprecations: `${ELASTIC_DOCS}release-notes/security/breaking-changes`,
       siemMigrations: `${ELASTIC_DOCS}solutions/security/get-started/automatic-migration`,
       llmPerformanceMatrix: `${ELASTIC_DOCS}solutions/security/ai/large-language-model-performance-matrix`,
     },
@@ -697,7 +695,6 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       mappingRoles: `${ELASTIC_DOCS}deploy-manage/users-roles/cluster-or-deployment-auth/mapping-users-groups-to-roles`,
       mappingRolesFieldRules: `${ELASTIC_DOCS}deploy-manage/users-roles/cluster-or-deployment-auth/role-mapping-resources#mapping-roles-rule-field`,
       runAsPrivilege: `${ELASTIC_DOCS}reference/elasticsearch/security-privileges#_run_as_privilege`,
-      deprecatedV1Endpoints: `${ELASTIC_DOCS}release-notes/security/breaking-changes`,
       enableElasticSearchSecurityFeatures: `${ELASTIC_DOCS}deploy-manage/security/set-up-minimal-security#_enable_es_security_features`,
     },
     spaces: {
