@@ -8,8 +8,9 @@
  */
 
 import React, { createContext, useMemo } from 'react';
-import { cloneDeep } from 'lodash';
+import { cloneDeep, isUndefined, omitBy } from 'lodash';
 import { BehaviorSubject, merge } from 'rxjs';
+import deepEqual from 'fast-deep-equal';
 import { EuiListGroup, EuiPanel, UseEuiTheme } from '@elastic/eui';
 
 import { PanelIncompatibleError, EmbeddableFactory } from '@kbn/embeddable-plugin/public';
@@ -146,7 +147,30 @@ export const getLinksEmbeddableFactory = () => {
         getComparators: () => {
           return {
             ...titleComparators,
-            attributes: isByReference ? 'skip' : 'deepEquality',
+            attributes: isByReference
+              ? 'skip'
+              : (
+                  a?: LinksByValueSerializedState['attributes'],
+                  b?: LinksByValueSerializedState['attributes']
+                ) => {
+                  if (
+                    a?.title !== b?.title ||
+                    a?.description !== b?.description ||
+                    a?.layout !== b?.layout ||
+                    a?.links?.length !== b?.links?.length
+                  ) {
+                    return false;
+                  }
+
+                  const hasLinkDifference = (a?.links ?? []).some((linkFromA, index) => {
+                    const linkFromB = b?.links?.[index];
+                    return !deepEqual(
+                      omitBy(linkFromA, isUndefined),
+                      omitBy(linkFromB, isUndefined)
+                    );
+                  });
+                  return !hasLinkDifference;
+                },
             savedObjectId: 'skip',
           };
         },
