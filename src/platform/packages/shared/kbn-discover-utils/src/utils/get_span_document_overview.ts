@@ -25,6 +25,7 @@ export function getSpanDocumentOverview(doc: DataTableRecord): SpanDocumentOverv
     fieldConstants.TRANSACTION_ID_FIELD,
     fieldConstants.TRANSACTION_NAME_FIELD,
     fieldConstants.SPAN_NAME_FIELD,
+    fieldConstants.SPAN_ID_FIELD,
     fieldConstants.SPAN_ACTION_FIELD,
     fieldConstants.SPAN_DURATION_FIELD,
     fieldConstants.SPAN_TYPE_FIELD,

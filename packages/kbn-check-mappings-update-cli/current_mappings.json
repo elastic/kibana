@@ -2749,6 +2749,27 @@
       }
     }
   },
+  "onechat_workflow": {
+    "dynamic": false,
+    "properties": {
+      "access_control": {
+        "properties": {
+          "public": {
+            "type": "boolean"
+          }
+        }
+      },
+      "categories": {
+        "type": "keyword"
+      },
+      "user_id": {
+        "type": "keyword"
+      },
+      "workflow_id": {
+        "type": "keyword"
+      }
+    }
+  },
   "osquery-manager-usage-metric": {
     "properties": {
       "count": {
@@ -2910,6 +2931,14 @@
       "note": {
         "index": false,
         "type": "text"
+      }
+    }
+  },
+  "privilege-monitoring-status": {
+    "dynamic": false,
+    "properties": {
+      "status": {
+        "type": "keyword"
       }
     }
   },
@@ -3865,7 +3894,7 @@
     }
   },
   "workchat_agent": {
-    "dynamic": "strict",
+    "dynamic": false,
     "properties": {
       "access_control": {
         "properties": {

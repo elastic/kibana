@@ -150,6 +150,7 @@ export interface TransactionFields {
 }
 
 export interface SpanFields {
+  'span.id': string;
   'span.name': string;
   'span.action': string;
   'span.duration.us': number;
