@@ -117,7 +117,7 @@ export class NLPCleanupTask {
       });
 
       if (
-        this.productTier !== ProductTier.complete ||
+        this.productTier !== ProductTier.complete &&
         this.productTier !== ProductTier.searchAiLake
       ) {
         // In case the task was previously ran and is scheduled for later in the future, run now
