@@ -5,11 +5,14 @@
  * 2.0.
  */
 
-/** Allow list of integrations to be available in the AI4DSOC integrations page */
-export const SEARCH_AI_LAKE_ALLOWED_INTEGRATIONS: string[] = [
-  'crowdstrike',
-  'google_secops',
-  'microsoft_sentinel',
-  'sentinel_one',
-  'splunk',
-];
+export interface UpdateCustomIntegrationRequest {
+  readMeData?: string;
+  categories?: string[];
+}
+export interface UpdateCustomIntegrationResponse {
+  id: string;
+  result: {
+    version: string;
+    status: string;
+  };
+}

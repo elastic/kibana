@@ -5,4 +5,6 @@
  * 2.0.
  */
 
-// TODO: implement editing flyout component
+export interface ClientConfigType {
+  ui: { enabled: boolean };
+}
