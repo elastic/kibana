@@ -16,11 +16,6 @@ export const rawRuleDashboardsSchema = schema.arrayOf(
 
 export const artifactsSchema = schema.object({
   dashboards: schema.maybe(rawRuleDashboardsSchema),
-  investigation_guide: schema.maybe(
-    schema.object({
-      blob: schema.string(),
-    })
-  ),
 });
 
 export const rawRuleSchema = rawRuleSchemaV4.extends({

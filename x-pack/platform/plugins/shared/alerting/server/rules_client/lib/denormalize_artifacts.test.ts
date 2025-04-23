@@ -12,7 +12,7 @@ describe('denormalizeArtifacts', () => {
     const { artifacts, references } = denormalizeArtifacts(undefined);
     expect(artifacts).toEqual({
       dashboards: [],
-      investigation_guide: undefined,
+      investigation_guide: { blob: '' },
     });
     expect(references).toEqual([]);
   });

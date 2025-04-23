@@ -83,12 +83,15 @@ export function injectReferencesIntoArtifacts(
   ruleId: string,
   artifacts?: RawRule['artifacts'],
   references?: SavedObjectReference[]
-): RuleDomain['artifacts'] {
+): Required<RuleDomain['artifacts']> {
   if (!artifacts) {
-    return { dashboards: [] };
+    return { dashboards: [], investigation_guide: { blob: '' } };
   }
   return {
     ...artifacts,
+    investigation_guide: {
+      blob: artifacts.investigation_guide?.blob ?? '',
+    },
     dashboards:
       artifacts.dashboards?.map((dashboard) => {
         const reference = references?.find(

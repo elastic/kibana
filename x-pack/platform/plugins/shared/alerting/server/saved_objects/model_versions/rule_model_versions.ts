@@ -12,6 +12,7 @@ import {
   rawRuleSchemaV3,
   rawRuleSchemaV4,
   rawRuleSchemaV5,
+  rawRuleSchemaV6,
 } from '../schemas/raw_rule';
 
 export const ruleModelVersions: SavedObjectsModelVersionMap = {
@@ -48,6 +49,13 @@ export const ruleModelVersions: SavedObjectsModelVersionMap = {
     schemas: {
       forwardCompatibility: rawRuleSchemaV5.extends({}, { unknowns: 'ignore' }),
       create: rawRuleSchemaV5,
+    },
+  },
+  '6': {
+    changes: [],
+    schemas: {
+      forwardCompatibility: rawRuleSchemaV6.extends({}, { unknowns: 'ignore' }),
+      create: rawRuleSchemaV6,
     },
   },
 };

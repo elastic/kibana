@@ -764,6 +764,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
               getTestRuleData({
                 artifacts: {
                   dashboards: [{ id: 'dashboard-1' }, { id: 'dashboard-2' }],
+                  investigation_guide: { blob: 'Sample investigation guide' },
                 },
               })
             );
@@ -786,6 +787,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
                       id: dashboardId,
                     },
                   ],
+                  investigation_guide: { blob: 'Sample investigation guide' },
                 },
               })
             );
