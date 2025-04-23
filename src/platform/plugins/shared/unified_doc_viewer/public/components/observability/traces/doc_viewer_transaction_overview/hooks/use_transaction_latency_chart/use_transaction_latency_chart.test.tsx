@@ -100,7 +100,7 @@ describe('useTransactionLatencyChart', () => {
     expect(result.current.data).toBeNull();
     expect(mockAddDanger).toHaveBeenCalledWith(
       expect.objectContaining({
-        title: expect.any(String),
+        title: 'An error occurred while fetching the latency histogram',
         text: 'Fetch error',
       })
     );
