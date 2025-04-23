@@ -30,8 +30,8 @@ export const useAddIntegrationsUrl = () => {
   const { navigateTo } = useNavigateTo();
 
   const isThreatIntelligence = isThreatIntelligencePath(pathname);
-  const hasSearchAILakeConfigurationsAccess = hasCapabilities(capabilities, [
-    [`${SECURITY_FEATURE_ID}.configurations`],
+  const hasSearchAILakeAccess = hasCapabilities(capabilities, [
+    [`${SECURITY_FEATURE_ID}.external_detections`],
   ]);
 
   const searchAILakeIntegrationsPath = getAppUrl({
@@ -41,7 +41,7 @@ export const useAddIntegrationsUrl = () => {
 
   const integrationsUrl = isThreatIntelligence
     ? ADD_THREAT_INTELLIGENCE_DATA_PATH
-    : hasSearchAILakeConfigurationsAccess
+    : hasSearchAILakeAccess
     ? searchAILakeIntegrationsPath
     : ADD_DATA_PATH;
 

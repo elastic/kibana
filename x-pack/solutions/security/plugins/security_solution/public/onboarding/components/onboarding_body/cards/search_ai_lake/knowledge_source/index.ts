@@ -27,5 +27,5 @@ export const knowledgeSourceCardConfig: OnboardingCardConfig = {
       )
   ),
   checkComplete: checkKnowledgeSourceComplete,
-  capabilitiesRequired: [`${SECURITY_FEATURE_ID}.configurations`],
+  capabilitiesRequired: [`${SECURITY_FEATURE_ID}.external_detections`],
 };

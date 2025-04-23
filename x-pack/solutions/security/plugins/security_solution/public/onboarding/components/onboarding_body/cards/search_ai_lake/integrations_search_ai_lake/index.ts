@@ -30,5 +30,5 @@ export const integrationsSearchAILakeCardConfig: OnboardingCardConfig<Integratio
       )
   ),
   checkComplete: checkIntegrationsCardComplete,
-  capabilitiesRequired: [`${SECURITY_FEATURE_ID}.configurations`],
+  capabilitiesRequired: [`${SECURITY_FEATURE_ID}.external_detections`],
 };

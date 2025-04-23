@@ -28,6 +28,6 @@ export const headerConfig: HeaderConfig[] = [
     getTitle: i18n.ONBOARDING_PAGE_TITLE,
     subTitle: i18n.ONBOARDING_SEARCH_AI_LAKE_PAGE_TITLE,
     description: i18n.ONBOARDING_SEARCH_AI_LAKE_PAGE_SUB_DESCRIPTION,
-    capabilitiesRequired: [`${SECURITY_FEATURE_ID}.configurations`],
+    capabilitiesRequired: [`${SECURITY_FEATURE_ID}.external_detections`],
   },
 ];

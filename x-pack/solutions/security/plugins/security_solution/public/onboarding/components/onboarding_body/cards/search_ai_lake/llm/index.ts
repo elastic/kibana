@@ -26,5 +26,5 @@ export const llmConnectorCardConfig: OnboardingCardConfig<AIConnectorCardMetadat
       )
   ),
   checkComplete: checkAssistantCardComplete,
-  capabilitiesRequired: [`${SECURITY_FEATURE_ID}.configurations`],
+  capabilitiesRequired: [`${SECURITY_FEATURE_ID}.external_detections`],
 };
