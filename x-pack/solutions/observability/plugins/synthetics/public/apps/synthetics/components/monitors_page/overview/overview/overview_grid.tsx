@@ -56,7 +56,7 @@ interface ListItem {
   locationId: string;
 }
 
-type View = 'cardView' | 'compactView';
+export type View = 'cardView' | 'compactView';
 
 const CARD_VIEW_LABEL = i18n.translate('xpack.synthetics.overview.grid.cardView.label', {
   defaultMessage: 'Card view',
@@ -257,7 +257,7 @@ export const OverviewGrid = memo(() => {
                 <OverviewLoader />
               )
             ) : (
-              <GridItemsByGroup setFlyoutConfigCallback={setFlyoutConfigCallback} />
+              <GridItemsByGroup setFlyoutConfigCallback={setFlyoutConfigCallback} view={view} />
             )}
             <EuiSpacer size="m" />
           </div>

@@ -22,11 +22,14 @@ import { ConfigKey } from '../../../../../../../../common/runtime_types';
 import { selectOverviewState, selectServiceLocationsState } from '../../../../../state';
 import { FlyoutParamProps } from '../types';
 import { selectOverviewStatus } from '../../../../../state/overview_status';
+import { View } from '../overview_grid';
 
 export const GridItemsByGroup = ({
   setFlyoutConfigCallback,
+  view,
 }: {
   setFlyoutConfigCallback: (params: FlyoutParamProps) => void;
+  view: View;
 }) => {
   const [fullScreenGroup, setFullScreenGroup] = useState('');
   const {
@@ -149,6 +152,7 @@ export const GridItemsByGroup = ({
                 setFlyoutConfigCallback={setFlyoutConfigCallback}
                 setFullScreenGroup={setFullScreenGroup}
                 fullScreenGroup={fullScreenGroup}
+                view={view}
               />
             </WrappedPanel>
             <EuiSpacer size="m" />
@@ -164,6 +168,7 @@ export const GridItemsByGroup = ({
             setFlyoutConfigCallback={setFlyoutConfigCallback}
             setFullScreenGroup={setFullScreenGroup}
             fullScreenGroup={fullScreenGroup}
+            view={view}
           />
         </WrappedPanel>
       )}

@@ -13,7 +13,6 @@ import { TagsList } from '@kbn/observability-shared-plugin/public';
 
 import { useDispatch } from 'react-redux';
 import { setFlyoutConfig } from '../../../../../../state';
-import { useMonitorsSortedByStatus } from '../../../../../../hooks/use_monitors_sorted_by_status';
 import {
   MonitorTypeEnum,
   OverviewStatusMetaData,
@@ -22,6 +21,7 @@ import { MonitorTypeBadge } from '../../../../../common/components/monitor_type_
 import { getFilterForTypeMessage } from '../../../../management/monitor_list_table/labels';
 import { useOverviewStatus } from '../../../../hooks/use_overview_status';
 import { BadgeStatus } from '../../../../../common/components/monitor_status';
+import { FlyoutParamProps } from '../../types';
 
 const STATUS = i18n.translate('xpack.synthetics.overview.compactView.monitorStatus', {
   defaultMessage: 'Status',
@@ -64,31 +64,34 @@ export const useOverviewCompactView = () => {
 
   const dispatch = useDispatch();
 
+  const setFlyoutConfigCallback = useCallback(
+    (params: FlyoutParamProps) => {
+      dispatch(setFlyoutConfig(params));
+    },
+    [dispatch]
+  );
+
   const getRowProps = useCallback(
     (monitor: OverviewStatusMetaData) => {
       const { configId, locationLabel, locationId, spaceId } = monitor;
       return {
         onClick: () => {
-          dispatch(
-            setFlyoutConfig({
-              configId,
-              id: configId,
-              location: locationLabel,
-              locationId,
-              spaceId,
-            })
-          );
+          setFlyoutConfigCallback({
+            configId,
+            id: configId,
+            location: locationLabel,
+            locationId,
+            spaceId,
+          });
         },
       };
     },
-    [dispatch]
+    [setFlyoutConfigCallback]
   );
 
   const { loaded } = useOverviewStatus({
     scopeStatusByLocation: true,
   });
-
-  const monitorsSortedByStatus: OverviewStatusMetaData[] = useMonitorsSortedByStatus();
 
   const columns: Array<EuiBasicTableColumn<OverviewStatusMetaData>> = useMemo(
     () => [
@@ -126,5 +129,10 @@ export const useOverviewCompactView = () => {
     [onClickMonitorTag, onClickMonitorType]
   );
 
-  return { columns, items: monitorsSortedByStatus, loading: !loaded, getRowProps };
+  return {
+    columns,
+    loading: !loaded,
+    getRowProps,
+    setFlyoutConfigCallback,
+  };
 };
