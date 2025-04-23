@@ -59,15 +59,23 @@ export const initializeSingleMetricViewerControls = (
   };
 
   const singleMetricViewerComparators: StateComparators<SingleMetricViewerControlsState> = {
-    jobIds: [jobIds, (ids) => jobIds.next(ids), fastIsEqual],
-    forecastId: [forecastId, (id) => forecastId.next(id)],
-    selectedDetectorIndex: [selectedDetectorIndex, (index) => selectedDetectorIndex.next(index)],
-    selectedEntities: [selectedEntities, (items) => selectedEntities.next(items), fastIsEqual],
-    functionDescription: [
-      functionDescription,
-      (description) => functionDescription.next(description),
-    ],
+    jobIds: 'referenceEquality',
+    forecastId: 'referenceEquality',
+    selectedDetectorIndex: 'referenceEquality',
+    selectedEntities: 'referenceEquality',
+    functionDescription: 'referenceEquality',
   };
+
+  // const singleMetricViewerComparators: StateComparators<SingleMetricViewerControlsState> = {
+  //   jobIds: [jobIds, (ids) => jobIds.next(ids), fastIsEqual],
+  //   forecastId: [forecastId, (id) => forecastId.next(id)],
+  //   selectedDetectorIndex: [selectedDetectorIndex, (index) => selectedDetectorIndex.next(index)],
+  //   selectedEntities: [selectedEntities, (items) => selectedEntities.next(items), fastIsEqual],
+  //   functionDescription: [
+  //     functionDescription,
+  //     (description) => functionDescription.next(description),
+  //   ],
+  // };
 
   return {
     singleMetricViewerControlsApi: {
