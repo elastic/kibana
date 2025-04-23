@@ -10,7 +10,7 @@ import React, { useState, useMemo, useEffect, Fragment, useCallback } from 'reac
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiCallOut,
+  EuiSearchBar,
   EuiInMemoryTable,
   EuiIcon,
   EuiLink,
@@ -133,7 +133,6 @@ export const WatchListPage = () => {
     links: { watcherGettingStartedUrl },
   } = useAppContext();
   const [query, setQuery] = useState('');
-  const [queryError, setQueryError] = useState<string | null>(null);
 
   const [selection, setSelection] = useState([]);
   const [watchesToDelete, setWatchesToDelete] = useState<string[]>([]);
@@ -266,13 +265,8 @@ export const WatchListPage = () => {
     </EuiPopover>
   );
 
-  const updateQuery = useCallback(({ queryText, error: searchError }: EuiSearchBarOnChangeArgs) => {
-    if (!searchError) {
-      setQuery(queryText);
-      setQueryError(null);
-    } else {
-      setQueryError(searchError.message);
-    }
+  const updateQuery = useCallback(({ queryText}: EuiSearchBarOnChangeArgs) => {
+    setQuery(queryText);
   }, []);
 
   const debouncedUpdateQuery = useMemo(() => {
@@ -479,39 +473,48 @@ export const WatchListPage = () => {
           : '',
     };
 
-    const searchConfig = {
-      onChange: debouncedUpdateQuery,
-      query,
-      box: {
-        incremental: true,
-      },
-      toolsLeft:
-        selection.length > 0 ? (
-          <EuiButton
-            data-test-subj="btnDeleteWatches"
-            onClick={() => {
-              setWatchesToDelete(selection.map((selected: any) => selected.id));
-            }}
-            color="danger"
-          >
-            {selection.length > 1 ? (
-              <FormattedMessage
-                id="xpack.watcher.sections.watchList.deleteMultipleWatchesButtonLabel"
-                defaultMessage="Delete watches"
-              />
-            ) : (
-              <FormattedMessage
-                id="xpack.watcher.sections.watchList.deleteSingleWatchButtonLabel"
-                defaultMessage="Delete watch"
-              />
-            )}
-          </EuiButton>
-        ) : undefined,
-      toolsRight: createWatchContextMenu,
-    };
-
     content = (
       <div data-test-subj="watchesTableContainer">
+        <EuiSearchBar
+          query={query}
+          box={{
+            placeholder: i18n.translate(
+              'xpack.watcher.sections.watchList.watchTable.searchBar.placeholder',
+              {
+                defaultMessage: 'Search by name or ID',
+              }
+            ),
+            incremental: true,
+          }}
+          onChange={debouncedUpdateQuery}
+          toolsLeft={
+            selection.length > 0 ? (
+              <EuiButton
+                data-test-subj="btnDeleteWatches"
+                onClick={() => {
+                  setWatchesToDelete(selection.map((selected: any) => selected.id));
+                }}
+                color="danger"
+              >
+                {selection.length > 1 ? (
+                  <FormattedMessage
+                    id="xpack.watcher.sections.watchList.deleteMultipleWatchesButtonLabel"
+                    defaultMessage="Delete watches"
+                  />
+                ) : (
+                  <FormattedMessage
+                    id="xpack.watcher.sections.watchList.deleteSingleWatchButtonLabel"
+                    defaultMessage="Delete watch"
+                  />
+                )}
+              </EuiButton>
+            ) : undefined
+          }
+          toolsRight={createWatchContextMenu}
+        />
+
+        <EuiSpacer size="l" />
+
         <EuiInMemoryTable
           onTableChange={({ sort: newSort }: Criteria<BaseWatch>) => {
             if (newSort) {
@@ -521,29 +524,9 @@ export const WatchListPage = () => {
           items={availableWatches}
           itemId="id"
           columns={columns}
-          search={searchConfig}
           pagination={false}
           sorting={{ sort: sort as PropertySort }}
           selection={selectionConfig}
-          childrenBetween={
-            queryError && (
-              <>
-                <EuiCallOut
-                  data-test-subj="watcherListSearchError"
-                  iconType="warning"
-                  color="danger"
-                  title={
-                    <FormattedMessage
-                      id="xpack.watcher.sections.watchList.watchTable.errorOnSearch"
-                      defaultMessage="Invalid search: {queryError}"
-                      values={{ queryError }}
-                    />
-                  }
-                />
-                <EuiSpacer />
-              </>
-            )
-          }
           message={
             <FormattedMessage
               id="xpack.watcher.sections.watchList.watchTable.noWatchesMessage"
@@ -558,6 +541,9 @@ export const WatchListPage = () => {
           })}
           data-test-subj="watchesTable"
         />
+
+        <EuiSpacer size="l" />
+
         <EuiTablePagination
           aria-label="Table pagination example"
           pageCount={data?.watchCount ? Math.ceil(data?.watchCount / pageSize) : 0}

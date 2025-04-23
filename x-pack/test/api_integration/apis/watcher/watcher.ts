@@ -13,6 +13,7 @@ export default function ({ getService }: FtrProviderContext) {
   const log = getService('log');
   const supertest = getService('supertest');
   const transform = getService('transform');
+  const
 
   describe('watcher', () => {
     before(async () => {
@@ -34,6 +35,17 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('POST /api/watcher/indices/index_patterns', () => {
+      it('returns list of index patterns', async () => {
+        const response = await supertest
+          .get('/api/watcher/indices/index_patterns')
+          .set('kbn-xsrf', 'kibana')
+          .expect(200);
+
+        expect(response.body).to.contain('ft_ecommerce');
+      });
+    });
+
+    describe('GET /api/watcher/watches', () => {
       it('returns list of index patterns', async () => {
         const response = await supertest
           .get('/api/watcher/indices/index_patterns')
