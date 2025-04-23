@@ -10,25 +10,23 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { CoreStart, ThemeServiceStart, ToastsSetup, UserProfileService } from '@kbn/core/public';
+import { CoreStart, ThemeServiceStart, UserProfileService } from '@kbn/core/public';
 import { ShowShareMenuOptions } from '../types';
-import { ShareMenuRegistryStart } from './share_menu_registry';
-import { AnonymousAccessServiceContract } from '../../common/anonymous_access';
-import type { BrowserUrlService, ShareMenuItemV2 } from '../types';
+import { ShareRegistry } from './share_menu_registry';
+import type { ShareConfigs } from '../types';
 import { ShareMenu } from '../components/share_tabs';
+
+interface ShareMenuManagerStartDeps {
+  core: CoreStart;
+  isServerless: boolean;
+  resolveShareItemsForShareContext: ShareRegistry['resolveShareItemsForShareContext'];
+}
 
 export class ShareMenuManager {
   private isOpen = false;
-
   private container = document.createElement('div');
 
-  start(
-    core: CoreStart,
-    urlService: BrowserUrlService,
-    shareRegistry: ShareMenuRegistryStart,
-    disableEmbed: boolean,
-    anonymousAccessServiceProvider?: () => AnonymousAccessServiceContract
-  ) {
+  start({ core, resolveShareItemsForShareContext, isServerless }: ShareMenuManagerStartDeps) {
     return {
       /**
        * Collects share menu items from registered providers and mounts the share context menu under
@@ -40,17 +38,18 @@ export class ShareMenuManager {
           this.onClose();
           options.onClose?.();
         };
-        const menuItems = shareRegistry.getShareMenuItems({ ...options, onClose });
-        const anonymousAccess = anonymousAccessServiceProvider?.();
+
+        const menuItems = resolveShareItemsForShareContext({
+          ...options,
+          isServerless,
+          onClose,
+        });
+
         this.toggleShareContextMenu({
           ...options,
-          allowEmbed: disableEmbed ? false : options.allowEmbed,
           onClose,
           menuItems,
-          urlService,
-          anonymousAccess,
-          toasts: core.notifications.toasts,
-          publicAPIEnabled: !disableEmbed,
+          publicAPIEnabled: !isServerless,
           ...core,
         });
       },
@@ -64,7 +63,6 @@ export class ShareMenuManager {
 
   private toggleShareContextMenu({
     anchorElement,
-    allowEmbed,
     allowShortUrl,
     objectId,
     objectType,
@@ -73,26 +71,13 @@ export class ShareMenuManager {
     menuItems,
     shareableUrl,
     shareableUrlLocatorParams,
-    embedUrlParamExtensions,
-    showPublicUrlSwitch,
-    urlService,
-    anonymousAccess,
-    snapshotShareWarning,
     onClose,
-    disabledShareUrl,
     isDirty,
-    toasts,
-    delegatedShareUrlHandler,
     publicAPIEnabled,
     ...startServices
   }: ShowShareMenuOptions & {
-    anchorElement: HTMLElement;
-    menuItems: ShareMenuItemV2[];
-    urlService: BrowserUrlService;
-    anonymousAccess: AnonymousAccessServiceContract | undefined;
+    menuItems: ShareConfigs[];
     onClose: () => void;
-    isDirty: boolean;
-    toasts: ToastsSetup;
     userProfile: UserProfileService;
     theme: ThemeServiceStart;
     i18n: CoreStart['i18n'];
@@ -110,26 +95,17 @@ export class ShareMenuManager {
     const mount = toMountPoint(
       <ShareMenu
         shareContext={{
-          publicAPIEnabled,
-          anchorElement,
-          allowEmbed,
-          allowShortUrl,
           objectId,
           objectType,
           objectTypeMeta,
+          anchorElement,
+          publicAPIEnabled,
+          allowShortUrl,
           sharingData,
           shareableUrl,
           shareableUrlLocatorParams,
-          delegatedShareUrlHandler,
-          embedUrlParamExtensions,
-          anonymousAccess,
-          showPublicUrlSwitch,
-          urlService,
-          snapshotShareWarning,
-          disabledShareUrl,
           isDirty,
           shareMenuItems: menuItems,
-          toasts,
           onClose: () => {
             onClose();
             unmount();
