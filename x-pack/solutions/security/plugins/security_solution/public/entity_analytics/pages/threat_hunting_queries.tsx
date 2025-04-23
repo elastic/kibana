@@ -9,7 +9,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
-  EuiLink,
   EuiBadge,
   EuiText,
   EuiFieldSearch,
@@ -29,51 +28,15 @@ import { SecuritySolutionPageWrapper } from '../../common/components/page_wrappe
 import { HeaderPage } from '../../common/components/header_page';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { useListThreatHuntingQueries } from '../api/hooks/use_list_threat_hunting_queries';
-import { useOpenThreatHuntingQueryInDiscover } from '../hooks/use_open_threat_hunting_query_in_discover';
 import { ThreatHuntingQueryPanelKey } from '../../flyout/threat_hunting_query_details/right';
-const CATEGORY_COLOUR_MAP: Record<string, string> = {
-  windows: '#a7d0f4',
-  linux: '#ffebc0',
-  macos: '#c1ecea',
-  llm: '#f4d0cf',
-  azure: '#d7c8f2',
-  okta: '#c0e8e5',
-  aws: '#fbd0e6',
-};
-
-const IndexStatusBadge: React.FC<{ status?: ThreatHuntingQueryIndexStatus }> = ({ status }) => {
-  return (
-    <EuiBadge
-      color={
-        status === 'all'
-          ? 'success'
-          : status === 'some'
-          ? 'warning'
-          : status === 'none'
-          ? 'danger'
-          : 'ghost'
-      }
-      iconType={status === 'all' ? 'check' : status === 'some' ? 'warning' : 'cross'}
-      iconSide="left"
-    >
-      {status === 'all'
-        ? 'All indices available'
-        : status === 'some'
-        ? 'Some indices available'
-        : status === 'none'
-        ? 'No indices available'
-        : 'Unknown'}
-    </EuiBadge>
-  );
-};
-
-const CategoryBadge: React.FC<{ category?: string }> = ({ category }) => {
-  if (!category) {
-    return <EuiBadge color="hollow">{'misc'}</EuiBadge>;
-  }
-
-  return <EuiBadge color={CATEGORY_COLOUR_MAP[category] || 'hollow'}>{category}</EuiBadge>;
-};
+import { ThreatHuntingQueryDiscoverLink } from '../components/threat_hunting_query_discover_link';
+import {
+  CategoryBadge,
+  IndexStatusBadge,
+  ESQLBadge,
+  CATEGORY_COLOUR_MAP,
+  QueryCountBadge,
+} from '../components/threat_hunting_badges';
 
 const toShortenedDescription = (description: string) => {
   // everything up up to the first period or 100 characters
@@ -86,7 +49,6 @@ const toShortenedDescription = (description: string) => {
 
 const QueryPanel: React.FC<{ query: ThreatHuntingQueryWithIndexCheck }> = ({ query }) => {
   const { name, description, indexStatus, category } = query;
-  const discoverLogsLink = useOpenThreatHuntingQueryInDiscover(query.queries[0]);
   const { openFlyout } = useExpandableFlyoutApi();
 
   const shortenedDescription = toShortenedDescription(description);
@@ -118,15 +80,13 @@ const QueryPanel: React.FC<{ query: ThreatHuntingQueryWithIndexCheck }> = ({ que
               <CategoryBadge category={category} />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiBadge iconType="search" color="primary">{`ES|QL`}</EuiBadge>
+              <ESQLBadge />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <IndexStatusBadge status={indexStatus} />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiBadge color="hollow" iconType="search">
-                {`${query.queries.length} ${query.queries.length === 1 ? 'query' : 'queries'}`}
-              </EuiBadge>
+              <QueryCountBadge query={query} />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
@@ -136,13 +96,11 @@ const QueryPanel: React.FC<{ query: ThreatHuntingQueryWithIndexCheck }> = ({ que
           </EuiText>
         </EuiFlexItem>
 
-        {query.queries.length === 1 && discoverLogsLink && (
+        {query.queries.length === 1 && (
           <EuiFlexItem>
             <EuiFlexGroup justifyContent="flexEnd">
               <EuiFlexItem grow={false}>
-                <EuiLink href={discoverLogsLink} target="_blank">
-                  {'Open in Discover'}
-                </EuiLink>
+                <ThreatHuntingQueryDiscoverLink query={query.queries[0]} />
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>

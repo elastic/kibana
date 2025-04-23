@@ -6,7 +6,11 @@
  */
 
 import { useMemo } from 'react';
-import { THREAT_HUNTING_PUBLIC_LIST_URL } from '../../../common/entity_analytics/threat_hunting/constants';
+import type { ThreatHuntingGetByUuidResponse } from '../../../common/api/entity_analytics/threat_hunting/get_by_uuid.gen';
+import {
+  THREAT_HUNTING_PUBLIC_LIST_URL,
+  THREAT_HUNTING_PUBLIC_URL,
+} from '../../../common/entity_analytics/threat_hunting/constants';
 import type {
   ThreatHuntingListRequestQuery,
   ThreatHuntingListResponse,
@@ -296,7 +300,14 @@ export const useEntityAnalyticsRoutes = () => {
         query: params,
       });
 
+    const getThreatHuntingQueryByUuid = (uuid: string) =>
+      http.fetch<ThreatHuntingGetByUuidResponse>(`${THREAT_HUNTING_PUBLIC_URL}/queries/${uuid}`, {
+        version: API_VERSIONS.public.v1,
+        method: 'GET',
+      });
+
     return {
+      getThreatHuntingQueryByUuid,
       listThreatHuntingQueries,
       fetchRiskScorePreview,
       fetchRiskEngineStatus,

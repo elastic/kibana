@@ -6,6 +6,7 @@
  */
 
 import type { EntityAnalyticsRoutesDeps } from '../../types';
+import { getThreatHuntingQueryByUuidRoute } from './get_by_uuid';
 import { listThreatHuntingQueriesRoute } from './list';
 
 export const registerThreatHuntingRoutes = ({
@@ -15,4 +16,5 @@ export const registerThreatHuntingRoutes = ({
   config,
 }: EntityAnalyticsRoutesDeps) => {
   listThreatHuntingQueriesRoute(router, logger);
+  getThreatHuntingQueryByUuidRoute(router, logger);
 };

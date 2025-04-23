@@ -1,0 +1,31 @@
+openapi: 3.0.0
+
+info:
+  title: Threat Hunting API
+  version: "2023-10-31"
+paths:
+  /api/entity_analytics/threat_hunting/queries/{uuid}:
+    get:
+      x-labels: [ess, serverless]
+      x-codegen-enabled: true
+      operationId: ThreatHuntingGetByUuid
+      summary: Get threat hunting query by UUID
+      parameters:
+        - name: uuid
+          in: path
+          required: true
+          description: UUID of the threat hunting query to retrieve
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - query
+                properties:
+                  query:
+                    $ref: './common.schema.yaml#/components/schemas/ThreatHuntingQueryWithIndexCheck'

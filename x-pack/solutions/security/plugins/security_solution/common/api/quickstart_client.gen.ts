@@ -283,6 +283,10 @@ import type {
   PreviewRiskScoreResponse,
 } from './entity_analytics/risk_engine/preview_route.gen';
 import type {
+  ThreatHuntingGetByUuidRequestParamsInput,
+  ThreatHuntingGetByUuidResponse,
+} from './entity_analytics/threat_hunting/get_by_uuid.gen';
+import type {
   ThreatHuntingListRequestQueryInput,
   ThreatHuntingListResponse,
 } from './entity_analytics/threat_hunting/list.gen';
@@ -2268,6 +2272,18 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  async threatHuntingGetByUuid(props: ThreatHuntingGetByUuidProps) {
+    this.log.info(`${new Date().toISOString()} Calling API ThreatHuntingGetByUuid`);
+    return this.kbnClient
+      .request<ThreatHuntingGetByUuidResponse>({
+        path: replaceParams('/api/entity_analytics/threat_hunting/queries/{uuid}', props.params),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'GET',
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
   async threatHuntingList(props: ThreatHuntingListProps) {
     this.log.info(`${new Date().toISOString()} Calling API ThreatHuntingList`);
     return this.kbnClient
@@ -2654,6 +2670,9 @@ export interface StopRuleMigrationProps {
 }
 export interface SuggestUserProfilesProps {
   query: SuggestUserProfilesRequestQueryInput;
+}
+export interface ThreatHuntingGetByUuidProps {
+  params: ThreatHuntingGetByUuidRequestParamsInput;
 }
 export interface ThreatHuntingListProps {
   query: ThreatHuntingListRequestQueryInput;

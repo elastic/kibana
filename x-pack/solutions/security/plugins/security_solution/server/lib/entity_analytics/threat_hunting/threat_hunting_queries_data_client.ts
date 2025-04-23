@@ -146,6 +146,51 @@ export class ThreatHuntingQueriesDataClient {
     };
   }
 
+  public async getByUuid({
+    uuid,
+  }: {
+    uuid: string;
+  }): Promise<ThreatHuntingQueryWithIndexCheck | null> {
+    const { hits } = await this.options.esClient.search<ThreatHuntingQueryEsDoc>({
+      index: this.getIndex(),
+      size: 1,
+      query: {
+        term: {
+          uuid,
+        },
+      },
+    });
+
+    if (hits.hits.length === 0) {
+      return null;
+    }
+
+    const query = this.esResultToThreatHuntingQuery(
+      hits.hits[0]._source as ThreatHuntingQueryEsDoc
+    );
+
+    const indexStatus = await this.options.esClient.search<{
+      index_status: ThreatHuntingQueryIndexStatus;
+    }>({
+      index: this.getCacheIndexName(),
+      size: 1,
+      query: {
+        term: {
+          uuid,
+        },
+      },
+    });
+
+    const indexStatusDoc = indexStatus.hits?.hits?.[0]?._source;
+
+    const indexStatusValue = indexStatusDoc?.index_status || 'unknown';
+
+    return {
+      ...query,
+      indexStatus: indexStatusValue,
+    } as ThreatHuntingQueryWithIndexCheck;
+  }
+
   public async searchByKuery({
     searchText = '',
     kuery,
@@ -205,8 +250,6 @@ export class ThreatHuntingQueriesDataClient {
       | SORT ${sortFieldModified} ${sortOrder}
       | LIMIT ${size ?? DEFAULT_RESPONSE_SIZE}
     `;
-
-    console.log('esql', esql);
 
     try {
       const { records: queries } = await this.options.esClient.helpers

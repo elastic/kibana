@@ -148,6 +148,7 @@ import {
 import { StopEntityEngineRequestParamsInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/engine/stop.gen';
 import { StopRuleMigrationRequestParamsInput } from '@kbn/security-solution-plugin/common/siem_migrations/model/api/rules/rule_migration.gen';
 import { SuggestUserProfilesRequestQueryInput } from '@kbn/security-solution-plugin/common/api/detection_engine/users/suggest_user_profiles_route.gen';
+import { ThreatHuntingGetByUuidRequestParamsInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/threat_hunting/get_by_uuid.gen';
 import { ThreatHuntingListRequestQueryInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/threat_hunting/list.gen';
 import { TriggerRiskScoreCalculationRequestBodyInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/risk_engine/entity_calculation_route.gen';
 import { UpdateRuleRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/crud/update_rule/update_rule_route.gen';
@@ -1623,6 +1624,18 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .query(props.query);
     },
+    threatHuntingGetByUuid(props: ThreatHuntingGetByUuidProps, kibanaSpace: string = 'default') {
+      return supertest
+        .get(
+          routeWithNamespace(
+            replaceParams('/api/entity_analytics/threat_hunting/queries/{uuid}', props.params),
+            kibanaSpace
+          )
+        )
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+    },
     threatHuntingList(props: ThreatHuntingListProps, kibanaSpace: string = 'default') {
       return supertest
         .get(routeWithNamespace('/api/entity_analytics/threat_hunting/queries/list', kibanaSpace))
@@ -1984,6 +1997,9 @@ export interface StopRuleMigrationProps {
 }
 export interface SuggestUserProfilesProps {
   query: SuggestUserProfilesRequestQueryInput;
+}
+export interface ThreatHuntingGetByUuidProps {
+  params: ThreatHuntingGetByUuidRequestParamsInput;
 }
 export interface ThreatHuntingListProps {
   query: ThreatHuntingListRequestQueryInput;
