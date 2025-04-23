@@ -98,7 +98,7 @@ export const CreateFlyout: React.FC<Props> = React.memo(({ onClose, stats }) => 
       onClose={onClose}
       paddingSize="m"
       side="right"
-      size="s"
+      size="m"
       type="overlay"
     >
       <EuiFlyoutHeader hasBorder>
