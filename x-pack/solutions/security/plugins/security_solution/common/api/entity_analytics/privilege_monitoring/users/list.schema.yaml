@@ -25,4 +25,4 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: "../common.schema.yaml#/components/schemas/MonitoredUserDoc"
+                  $ref: "./common.schema.yaml#/components/schemas/MonitoredUserDoc"

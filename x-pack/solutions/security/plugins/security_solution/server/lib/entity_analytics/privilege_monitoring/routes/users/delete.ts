@@ -18,7 +18,7 @@ export const deleteUserRoute = (router: EntityAnalyticsRoutesDeps['router'], log
   router.versioned
     .delete({
       access: 'public',
-      path: '/api/entity_analytics/monitoring/users',
+      path: '/api/entity_analytics/monitoring/users/{id}',
       security: {
         authz: {
           requiredPrivileges: ['securitySolution', `${APP_ID}-entity-analytics`],
@@ -40,7 +40,7 @@ export const deleteUserRoute = (router: EntityAnalyticsRoutesDeps['router'], log
         try {
           const secSol = await context.securitySolution;
           await secSol.getPrivilegeMonitoringDataClient().deleteUser(request.params.id);
-          return response.ok({ body: { success: true } });
+          return response.ok({ body: { aknowledged: true } });
         } catch (e) {
           const error = transformError(e);
           logger.error(`Error deleting user: ${error.message}`);

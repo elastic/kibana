@@ -16,7 +16,7 @@
 
 import { z } from '@kbn/zod';
 
-import { MonitoredUserDoc } from '../common.gen';
+import { MonitoredUserDoc } from './common.gen';
 
 export type UpdatePrivMonUserRequestParams = z.infer<typeof UpdatePrivMonUserRequestParams>;
 export const UpdatePrivMonUserRequestParams = z.object({

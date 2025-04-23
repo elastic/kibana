@@ -18,6 +18,7 @@ import type {
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import moment from 'moment';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
+import { merge } from 'lodash';
 import type { UpdatePrivMonUserRequestBody } from '../../../../common/api/entity_analytics/privilege_monitoring/users/update.gen';
 
 import type {
@@ -25,7 +26,7 @@ import type {
   CreatePrivMonUserResponse,
 } from '../../../../common/api/entity_analytics/privilege_monitoring/users/create.gen';
 import type { InitMonitoringEngineResponse } from '../../../../common/api/entity_analytics/privilege_monitoring/engine/init.gen';
-import type { MonitoredUserDoc } from '../../../../common/api/entity_analytics/privilege_monitoring/common.gen';
+import type { MonitoredUserDoc } from '../../../../common/api/entity_analytics/privilege_monitoring/users/common.gen';
 import {
   EngineComponentResourceEnum,
   type EngineComponentResource,
@@ -46,6 +47,8 @@ import {
   PRIVMON_ENGINE_INITIALIZATION_EVENT,
   PRIVMON_ENGINE_RESOURCE_INIT_FAILURE_EVENT,
 } from '../../telemetry/event_based/events';
+import type { PrivMonUserSource } from './types';
+import { fromRequestBody } from './users/model';
 
 interface PrivilegeMonitoringClientOpts {
   logger: Logger;
@@ -173,13 +176,19 @@ export class PrivilegeMonitoringDataClient {
     return getPrivilegedMonitorUsersIndex(this.opts.namespace);
   }
 
-  public async createUser(user: CreatePrivMonUserRequestBody): Promise<CreatePrivMonUserResponse> {
+  public async createUser(
+    user: CreatePrivMonUserRequestBody,
+    source: PrivMonUserSource
+  ): Promise<CreatePrivMonUserResponse> {
+    const doc = merge(fromRequestBody(user), {
+      labels: { sources: [source] },
+    });
     const res = await this.esClient.index({
       index: this.getIndex(),
-      document: { user: { name: user.user_name }, is_monitored: user.is_monitored },
+      document: doc,
     });
 
-    return { ...user, id: res._id };
+    return { ...doc, id: res._id };
   }
 
   public async getUser(id: string): Promise<MonitoredUserDoc | undefined> {
@@ -199,7 +208,7 @@ export class PrivilegeMonitoringDataClient {
     await this.esClient.update<MonitoredUserDoc>({
       index: this.getIndex(),
       id,
-      doc: user,
+      doc: fromRequestBody(user),
     });
     return this.getUser(id);
   }

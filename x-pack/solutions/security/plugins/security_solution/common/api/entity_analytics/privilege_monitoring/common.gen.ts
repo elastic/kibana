@@ -46,14 +46,3 @@ export const EngineComponentStatus = z.object({
     )
     .optional(),
 });
-
-export type MonitoredUserDoc = z.infer<typeof MonitoredUserDoc>;
-export const MonitoredUserDoc = z.object({
-  id: z.string().optional(),
-  user: z
-    .object({
-      name: z.string().optional(),
-    })
-    .optional(),
-  is_monitored: z.boolean().optional(),
-});

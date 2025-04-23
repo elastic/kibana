@@ -16,7 +16,7 @@
 
 import { z } from '@kbn/zod';
 
-import { MonitoredUserDoc } from '../common.gen';
+import { MonitoredUserDoc } from './common.gen';
 
 export type GetPrivMonUserRequestParams = z.infer<typeof GetPrivMonUserRequestParams>;
 export const GetPrivMonUserRequestParams = z.object({

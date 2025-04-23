@@ -508,7 +508,7 @@ For detailed information on Kibana actions and alerting, and additional API call
       return supertest
         .delete(
           routeWithNamespace(
-            replaceParams('/api/entity_analytics/monitoring/users', props.params),
+            replaceParams('/api/entity_analytics/monitoring/users/{id}', props.params),
             kibanaSpace
           )
         )

@@ -34,4 +34,4 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "../common.schema.yaml#/components/schemas/MonitoredUserDoc"
+                $ref: "./common.schema.yaml#/components/schemas/MonitoredUserDoc"

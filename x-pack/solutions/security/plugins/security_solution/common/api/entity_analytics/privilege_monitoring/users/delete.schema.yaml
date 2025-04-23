@@ -4,7 +4,7 @@ info:
   version: "2023-10-31"
 
 paths:
-  /api/entity_analytics/monitoring/users:
+  /api/entity_analytics/monitoring/users/{id}:
     delete:
       x-labels: [ess, serverless]
       x-codegen-enabled: true
@@ -26,7 +26,7 @@ paths:
                 required:
                   - success
                 properties:
-                  success:
+                  aknowledged:
                     type: boolean
                     description: Indicates if the deletion was successful
                   message:

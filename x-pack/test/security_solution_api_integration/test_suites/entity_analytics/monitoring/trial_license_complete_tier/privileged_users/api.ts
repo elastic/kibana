@@ -65,7 +65,7 @@ export default ({ getService }: FtrProviderContext) => {
           body: { is_monitored: true, user_name: 'test_user' },
         });
         const res = await api.updatePrivMonUser({
-          body: { is_monitored: false },
+          body: { is_monitored: false, user_name: 'updated' },
           params: { id: body.id },
         });
 
@@ -75,7 +75,8 @@ export default ({ getService }: FtrProviderContext) => {
         }
 
         expect(res.status).eql(200);
-        expect(res.body.is_monitored).eql(false);
+        expect(res.body.is_monitored).to.be(undefined);
+        expect(res.body.user.name).to.be('updated');
       });
 
       it('should list users', async () => {
@@ -103,7 +104,7 @@ export default ({ getService }: FtrProviderContext) => {
         }
 
         expect(res.status).eql(200);
-        expect(res.body).to.eql({ acknowledged: true });
+        expect(res.body).to.eql({ aknowledged: true });
       });
     });
   });

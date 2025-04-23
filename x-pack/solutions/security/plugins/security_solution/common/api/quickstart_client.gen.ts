@@ -836,7 +836,7 @@ For detailed information on Kibana actions and alerting, and additional API call
     this.log.info(`${new Date().toISOString()} Calling API DeletePrivMonUser`);
     return this.kbnClient
       .request<DeletePrivMonUserResponse>({
-        path: replaceParams('/api/entity_analytics/monitoring/users', props.params),
+        path: replaceParams('/api/entity_analytics/monitoring/users/{id}', props.params),
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
         },
