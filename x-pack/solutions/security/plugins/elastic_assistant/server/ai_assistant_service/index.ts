@@ -8,6 +8,7 @@
 import { DataStreamSpacesAdapter, FieldMap } from '@kbn/data-stream-adapter';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import type { AuthenticatedUser, Logger, ElasticsearchClient } from '@kbn/core/server';
+import { ATTACK_DISCOVERY_ALERTS_AD_HOC_INDEX_RESOURCE_PREFIX } from '@kbn/elastic-assistant-common';
 import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
 import { Subject } from 'rxjs';
@@ -49,6 +50,7 @@ import {
   GetAIAssistantKnowledgeBaseDataClientParams,
 } from '../ai_assistant_data_clients/knowledge_base';
 import { AttackDiscoveryDataClient } from '../lib/attack_discovery/persistence';
+import { attackDiscoveryAlertFieldMap } from '../lib/attack_discovery/schedules/fields';
 import { DefendInsightsDataClient } from '../ai_assistant_data_clients/defend_insights';
 import { createGetElserId, ensureProductDocumentationInstalled } from './helpers';
 import { hasAIAssistantLicense } from '../routes/helpers';
@@ -77,6 +79,7 @@ export interface AIAssistantServiceOpts {
   taskManager: TaskManagerSetupContract;
   pluginStop$: Subject<void>;
   productDocManager: Promise<ProductDocBaseStartContract['management']>;
+  savedAttackDiscoveries?: boolean; // feature flag
 }
 
 export interface CreateAIAssistantClientParams {
@@ -93,7 +96,9 @@ export type CreateDataStream = (params: {
     | 'knowledgeBase'
     | 'prompts'
     | 'attackDiscovery'
-    | 'defendInsights';
+    | 'defendInsights'
+    | 'alertSummary'
+    | 'attackDiscoveryAlerts';
   fieldMap: FieldMap;
   kibanaVersion: string;
   spaceId?: string;
@@ -111,6 +116,7 @@ export class AIAssistantService {
   private promptsDataStream: DataStreamSpacesAdapter;
   private anonymizationFieldsDataStream: DataStreamSpacesAdapter;
   private attackDiscoveryDataStream: DataStreamSpacesAdapter;
+  private attackDiscoveryAlertsDataStream: DataStreamSpacesAdapter | null;
   private defendInsightsDataStream: DataStreamSpacesAdapter;
   private resourceInitializationHelper: ResourceInstallationHelper;
   private initPromise: Promise<InitializationPromise>;
@@ -118,10 +124,13 @@ export class AIAssistantService {
   private hasInitializedV2KnowledgeBase: boolean = false;
   private productDocManager?: ProductDocBaseStartContract['management'];
   private isProductDocumentationInProgress: boolean = false;
+  private savedAttackDiscoveries: boolean = false; // feature flag
 
   constructor(private readonly options: AIAssistantServiceOpts) {
     this.initialized = false;
     this.getElserId = createGetElserId(options.ml.trainedModelsProvider);
+    this.savedAttackDiscoveries = options.savedAttackDiscoveries ?? false;
+
     this.conversationsDataStream = this.createDataStream({
       resource: 'conversations',
       kibanaVersion: options.kibanaVersion,
@@ -147,6 +156,18 @@ export class AIAssistantService {
       kibanaVersion: options.kibanaVersion,
       fieldMap: attackDiscoveryFieldMap,
     });
+
+    if (options.savedAttackDiscoveries) {
+      // the `savedAttackDiscoveries` feature flag is enabled
+      this.attackDiscoveryAlertsDataStream = this.createDataStream({
+        resource: 'attackDiscoveryAlerts',
+        kibanaVersion: options.kibanaVersion,
+        fieldMap: attackDiscoveryAlertFieldMap,
+      });
+    } else {
+      this.attackDiscoveryAlertsDataStream = null;
+    }
+
     this.defendInsightsDataStream = this.createDataStream({
       resource: 'defendInsights',
       kibanaVersion: options.kibanaVersion,
@@ -423,6 +444,15 @@ export class AIAssistantService {
         pluginStop$: this.options.pluginStop$,
       });
 
+      if (this.savedAttackDiscoveries && this.attackDiscoveryAlertsDataStream != null) {
+        // The `savedAttackDiscoveries` feature flag is enabled
+        await this.attackDiscoveryAlertsDataStream.install({
+          esClient,
+          logger: this.options.logger,
+          pluginStop$: this.options.pluginStop$,
+        });
+      }
+
       await this.defendInsightsDataStream.install({
         esClient,
         logger: this.options.logger,
@@ -446,6 +476,9 @@ export class AIAssistantService {
       prompts: getResourceName('component-template-prompts'),
       anonymizationFields: getResourceName(ANONYMIZATION_FIELDS_COMPONENT_TEMPLATE),
       attackDiscovery: getResourceName('component-template-attack-discovery'),
+      attackDiscoveryAlerts: getResourceName(
+        `${ATTACK_DISCOVERY_ALERTS_AD_HOC_INDEX_RESOURCE_PREFIX}-component-template`
+      ),
       defendInsights: getResourceName('component-template-defend-insights'),
     },
     aliases: {
@@ -454,6 +487,7 @@ export class AIAssistantService {
       prompts: getResourceName('prompts'),
       anonymizationFields: getResourceName(ANONYMIZATION_FIELDS_RESOURCE),
       attackDiscovery: getResourceName('attack-discovery'),
+      attackDiscoveryAlerts: ATTACK_DISCOVERY_ALERTS_AD_HOC_INDEX_RESOURCE_PREFIX,
       defendInsights: getResourceName('defend-insights'),
     },
     indexPatterns: {
@@ -462,6 +496,7 @@ export class AIAssistantService {
       prompts: getResourceName('prompts*'),
       anonymizationFields: getResourceName(ANONYMIZATION_FIELDS_INDEX_PATTERN),
       attackDiscovery: getResourceName('attack-discovery*'),
+      attackDiscoveryAlerts: `${ATTACK_DISCOVERY_ALERTS_AD_HOC_INDEX_RESOURCE_PREFIX}*`,
       defendInsights: getResourceName('defend-insights*'),
     },
     indexTemplate: {
@@ -470,6 +505,7 @@ export class AIAssistantService {
       prompts: getResourceName('index-template-prompts'),
       anonymizationFields: getResourceName(ANONYMIZATION_FIELDS_INDEX_TEMPLATE),
       attackDiscovery: getResourceName('index-template-attack-discovery'),
+      attackDiscoveryAlerts: `${ATTACK_DISCOVERY_ALERTS_AD_HOC_INDEX_RESOURCE_PREFIX}-index-template`,
       defendInsights: getResourceName('index-template-defend-insights'),
     },
     pipelines: {
@@ -611,6 +647,8 @@ export class AIAssistantService {
     }
 
     return new AttackDiscoveryDataClient({
+      attackDiscoveryAlertsIndexPatternsResourceName:
+        this.resourceNames.aliases.attackDiscoveryAlerts,
       logger: this.options.logger.get('attackDiscovery'),
       currentUser: opts.currentUser,
       elasticsearchClientPromise: this.options.elasticsearchClientPromise,
