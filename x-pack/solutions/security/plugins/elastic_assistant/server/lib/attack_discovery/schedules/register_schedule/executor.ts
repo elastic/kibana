@@ -70,9 +70,16 @@ export const attackDiscoveryScheduleExecutor = async ({
   });
   const anonymizationFields = transformESSearchToAnonymizationFields(result.data);
 
+  const { query, filters, combinedFilter, ...restParams } = params;
+
   const { anonymizedAlerts, attackDiscoveries, replacements } = await generateAttackDiscoveries({
     actionsClient,
-    config: { ...params, anonymizationFields, subAction: 'invokeAI' },
+    config: {
+      ...restParams,
+      filter: combinedFilter,
+      anonymizationFields,
+      subAction: 'invokeAI',
+    },
     esClient,
     logger,
     savedObjectsClient,

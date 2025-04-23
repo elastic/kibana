@@ -74,7 +74,11 @@ export const configSchema = schema.object({
   cancelAlertsOnRuleTimeout: schema.boolean({ defaultValue: true }),
   rules: rulesSchema,
   rulesSettings: schema.object({
+    enabled: schema.boolean({ defaultValue: true }),
     cacheInterval: schema.number({ defaultValue: DEFAULT_CACHE_INTERVAL_MS }),
+  }),
+  maintenanceWindow: schema.object({
+    enabled: schema.boolean({ defaultValue: true }),
   }),
 });
 
