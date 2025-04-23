@@ -5,8 +5,14 @@
  * 2.0.
  */
 
-export * from './rule_schemas';
-export * from './action_schemas';
-export * from './notify_when_schema';
-export * from './flapping_schema';
-export * from './artifacts_schema';
+import { schema } from '@kbn/config-schema';
+
+export const dashboardsSchema = schema.arrayOf(
+  schema.object({
+    id: schema.string(),
+  })
+);
+
+export const artifactsSchema = schema.object({
+  dashboards: schema.maybe(dashboardsSchema),
+});
