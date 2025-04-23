@@ -154,7 +154,7 @@ export async function getKbModelStatus({
 
   let kbState: KnowledgeBaseState;
 
-  // TODO: Update states for serverless as serverless responses are different from stateful
+  // TODO: Verify the behaviour in serverless once the allocation_status is included in the response
   if (trainedModelStatsResponse.trained_model_stats?.length && !modelStats) {
     // model has been deployed at least once, but stopped later
     kbState = KnowledgeBaseState.PENDING_MODEL_DEPLOYMENT;
