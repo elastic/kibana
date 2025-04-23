@@ -47,6 +47,7 @@ import { registerCaseFileKinds } from './files';
 import type { ConfigType } from './config';
 import { registerConnectorTypes } from './connectors';
 import { registerSavedObjects } from './saved_object_types';
+import { createCasesAnalyticsIndices } from './cases_analytics_index';
 
 export class CasePlugin
   implements
@@ -189,6 +190,13 @@ export class CasePlugin
     if (plugins.taskManager) {
       scheduleCasesTelemetryTask(plugins.taskManager, this.logger);
     }
+
+    createCasesAnalyticsIndices({
+      esClient: core.elasticsearch.client.asInternalUser,
+      logger: this.logger,
+      // TODO
+      isServerless: false,
+    });
 
     this.userProfileService.initialize({
       spaces: plugins.spaces,
