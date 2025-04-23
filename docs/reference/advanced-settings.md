@@ -348,9 +348,6 @@ $$$observability-enable-inspect-es-queries$$$`observability:enableInspectEsQueri
 $$$observability-apm-enable-service-groups$$$`observability:enableServiceGroups`
 :   [preview] When enabled, allows users to create Service Groups from the APM Service Inventory page.
 
-$$$observability-apm-trace-explorer-tab$$$`observability:apmTraceExplorerTab`
-:   [preview] Enable the APM Trace Explorer feature, that allows you to search and inspect traces with KQL or EQL.
-
 $$$observability-infrastructure-profiling-integration$$$`observability:enableInfrastructureProfilingIntegration`
 :   [preview] Enables the Profiling view in Host details within Infrastructure.
 

@@ -11,7 +11,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
-  EuiLink,
   EuiPagination,
   EuiPanel,
   EuiSkeletonText,
@@ -40,7 +39,6 @@ import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
 import type { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { isPending, isSuccess } from '../../../../hooks/use_fetcher';
-import { useTraceExplorerEnabledSetting } from '../../../../hooks/use_trace_explorer_enabled_setting';
 import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { TransactionDetailLink } from '../../../shared/links/apm/transaction_detail_link';
 import { DiscoverErrorLink } from '../../../shared/links/discover_links/discover_error_link';
@@ -96,8 +94,6 @@ export function ErrorSampleDetails({
   const { uiActions, core } = useApmPluginContext();
 
   const router = useApmRouter();
-
-  const isTraceExplorerEnabled = useTraceExplorerEnabledSetting();
 
   const {
     path: { groupId },
@@ -216,22 +212,6 @@ export function ErrorSampleDetails({
             />
           )}
         </EuiFlexItem>
-        {isTraceExplorerEnabled && (
-          <EuiFlexItem grow={false}>
-            <EuiLink data-test-subj="apmErrorSampleDetailsLink" href={traceExplorerLink}>
-              <EuiFlexGroup alignItems="center" gutterSize="s">
-                <EuiFlexItem>
-                  <EuiIcon type="apmTrace" />
-                </EuiFlexItem>
-                <EuiFlexItem css={{ whiteSpace: 'nowrap' }}>
-                  {i18n.translate('xpack.apm.errorSampleDetails.viewOccurrencesInTraceExplorer', {
-                    defaultMessage: 'Explore traces with this error',
-                  })}
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiLink>
-          </EuiFlexItem>
-        )}
         {externalContextMenuItems.value?.length ? (
           <ErrorUiActionsContextMenu items={externalContextMenuItems.value} />
         ) : undefined}
