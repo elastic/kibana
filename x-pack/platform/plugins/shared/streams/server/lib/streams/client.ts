@@ -275,7 +275,7 @@ export class StreamsClient {
             actions: [],
             params: {
               timestampField: '@timestamp',
-              query: `FROM ${name} METADATA _id, _source | WHERE KQL(\"\"\"${query.query.kql.query}\"\"\")`,
+              query: `FROM ${name},${name}.* METADATA _id, _source | WHERE KQL(\"\"\"${query.query.kql.query}\"\"\")`,
             },
             enabled: true,
             tags: ['streams'],
