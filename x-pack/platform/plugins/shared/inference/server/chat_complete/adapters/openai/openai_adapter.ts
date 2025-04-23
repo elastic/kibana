@@ -28,7 +28,7 @@ export const openAIAdapter: InferenceConnectorAdapter = {
     tools,
     temperature = 0,
     functionCalling = 'auto',
-    modelName: _modelName,
+    modelName: modelName,
     logger,
     abortSignal,
     metadata,
@@ -40,7 +40,6 @@ export const openAIAdapter: InferenceConnectorAdapter = {
         : functionCalling === 'simulated';
 
     let request: OpenAIRequest;
-    const modelName = _modelName ?? connector?.name;
 
     if (useSimulatedFunctionCalling) {
       const wrapped = wrapWithSimulatedFunctionCalling({

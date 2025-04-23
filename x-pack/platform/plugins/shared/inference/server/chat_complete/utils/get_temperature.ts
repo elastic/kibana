@@ -14,10 +14,12 @@ export const getTemperatureIfValid = (
 ) => {
   if (temperature === undefined) return {};
 
-  if (connector?.type === InferenceConnectorType.OpenAI && modelName) {
-    const normalizedModelName = modelName.toLowerCase();
-    const shouldExcludeTemperature = OPENAI_MODELS_WITHOUT_TEMPERATURE.some((model) =>
-      normalizedModelName.includes(model)
+  const model = modelName ?? connector?.config?.defaultModel;
+
+  if (connector?.type === InferenceConnectorType.OpenAI && model) {
+    const normalizedModelName = model.toLowerCase();
+    const shouldExcludeTemperature = OPENAI_MODELS_WITHOUT_TEMPERATURE.some((m) =>
+      normalizedModelName.includes(m)
     );
     return shouldExcludeTemperature ? {} : { temperature };
   }
