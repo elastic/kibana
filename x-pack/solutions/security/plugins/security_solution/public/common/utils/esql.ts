@@ -7,6 +7,7 @@
 
 import { parse, mutate, BasicPrettyPrinter, synth } from '@kbn/esql-ast';
 import { isString } from 'lodash/fp';
+import type { ESQLSearchResponse } from '@kbn/es-types';
 import { escapeKQLStringParam } from '../../../common/utils/kql';
 
 /**
@@ -26,3 +27,20 @@ export const buildESQLWithKQLQuery = (esql: string, kqlQuery: string | undefined
   }
   return esql;
 };
+
+// Function copied from elasticsearch-8.x/lib/helpers
+export function esqlResponseToRecords<TDocument>(
+  response: ESQLSearchResponse | undefined
+): TDocument[] {
+  if (!response) return [];
+  const { columns, values } = response;
+  return values.map((row) => {
+    const doc: Partial<TDocument> = {};
+    row.forEach((cell, index) => {
+      const { name } = columns[index];
+      // @ts-expect-error
+      doc[name] = cell;
+    });
+    return doc as TDocument;
+  });
+}
