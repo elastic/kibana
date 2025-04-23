@@ -773,13 +773,16 @@ export default ({ getService }: FtrProviderContext) => {
 
             expect(alertsResponse.hits.hits.length).toBe(200);
 
-            const agentTypeCounts = alertsResponse.hits.hits.reduce((acc, curr) => {
-              const agentType = curr._source?.['agent.type'];
-              if (agentType) {
-                acc[agentType] = (acc[agentType] || 0) + 1;
-              }
-              return acc;
-            }, {});
+            const agentTypeCounts = alertsResponse.hits.hits.reduce<Record<string, number>>(
+              (acc, curr) => {
+                const agentType = curr._source?.['agent.type'] as string;
+                if (agentType) {
+                  acc[agentType] = (acc[agentType] || 0) + 1;
+                }
+                return acc;
+              },
+              {}
+            );
 
             expect(agentTypeCounts).toEqual({
               auditbeat: 101, // because we use max_signals +1 as ES|QL limit we ending up with 101 alerts
