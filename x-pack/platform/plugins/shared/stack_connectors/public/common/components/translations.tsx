@@ -413,20 +413,6 @@ export const EVENT_ACTION_LABEL = i18n.translate(
   }
 );
 
-export const ADDITIONAL_INFO = i18n.translate(
-  'xpack.stackConnectors.components.serviceNowITOM.additionalInfoLabel',
-  {
-    defaultMessage: 'Additional info',
-  }
-);
-
-export const ADDITIONAL_INFO_HELP = i18n.translate(
-  'xpack.stackConnectors.components.serviceNowITOM.additionalInfoHelpTooltip',
-  {
-    defaultMessage: 'Additional info help',
-  }
-);
-
 export const ADDITIONAL_INFO_HELP_TEXT = i18n.translate(
   'xpack.stackConnectors.components.serviceNowITOM.additionalInfoHelpTooltipText',
   {
@@ -453,14 +439,6 @@ export const ADDITIONAL_FIELDS_HELP = i18n.translate(
   'xpack.stackConnectors.components.servicenow.additionalFieldsHelpTooltip',
   {
     defaultMessage: 'Additional fields help',
-  }
-);
-
-export const ADDITIONAL_FIELDS_HELP_TEXT = i18n.translate(
-  'xpack.stackConnectors.components.servicenow.additionalFieldsHelpTooltipText',
-  {
-    defaultMessage:
-      'Additional fields in JSON format as defined in the Elastic ServiceNow application',
   }
 );
 

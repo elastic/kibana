@@ -14,7 +14,7 @@ import userEvent from '@testing-library/user-event';
 describe('Credentials', () => {
   const onChange = jest.fn();
   const value = JSON.stringify({ foo: 'test' });
-  const props = { value, errors: [], onChange };
+  const props = { value, errors: [], onChange, helpText: 'help text' };
 
   it('renders the additional fields correctly', async () => {
     render(

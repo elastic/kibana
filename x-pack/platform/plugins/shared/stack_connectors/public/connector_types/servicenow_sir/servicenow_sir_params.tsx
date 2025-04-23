@@ -309,6 +309,7 @@ const ServiceNowSIRParamsFields: React.FunctionComponent<
           errors={errors['subActionParams.incident.additional_fields'] as string[]}
           onChange={additionalFieldsOnChange}
           isOptionalField
+          helpText={i18n.ADDITIONAL_FIELDS_HELP_SERVICENOW_TEXT}
         />
       )}
     </>

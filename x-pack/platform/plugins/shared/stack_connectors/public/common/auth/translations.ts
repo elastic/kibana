@@ -212,7 +212,7 @@ export const AUTHENTICATION_OAUTH2 = i18n.translate(
 );
 
 export const INVALID_JSON = i18n.translate(
-  'xpack.stackConnectors.components.otherFieldsFormatErrorMessage',
+  'xpack.stackConnectors.components.additionalFieldsFormatErrorMessage',
   {
     defaultMessage: 'Invalid JSON',
   }
@@ -223,5 +223,12 @@ export const ADDITIONAL_FIELDS = i18n.translate(
   {
     defaultMessage: 'Additional fields',
     description: 'Title for the additional fields section',
+  }
+);
+
+export const ADDITIONAL_FIELDS_HELP_WEBHOOK_TEXT = i18n.translate(
+  'xpack.stackConnectors.components.servicenow.additionalFieldsHelpTooltipText',
+  {
+    defaultMessage: 'Additional fields in JSON format as defined by access token provider',
   }
 );

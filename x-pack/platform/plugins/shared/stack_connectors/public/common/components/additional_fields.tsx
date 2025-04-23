@@ -19,6 +19,7 @@ interface AdditionalFieldsProps {
   onChange: (value: string | null) => void;
   isOptionalField?: boolean;
   readOnly?: boolean;
+  helpText: string;
 }
 
 export const AdditionalFieldsComponent: React.FC<AdditionalFieldsProps> = ({
@@ -28,6 +29,7 @@ export const AdditionalFieldsComponent: React.FC<AdditionalFieldsProps> = ({
   onChange,
   isOptionalField = false,
   readOnly = false,
+  helpText,
 }) => {
   return (
     <JsonEditorWithMessageVariables
@@ -46,7 +48,7 @@ export const AdditionalFieldsComponent: React.FC<AdditionalFieldsProps> = ({
             className="eui-alignTop"
             data-test-subj="otherFieldsHelpTooltip"
             aria-label={i18n.ADDITIONAL_FIELDS_HELP}
-            content={i18n.ADDITIONAL_FIELDS_HELP_TEXT}
+            content={helpText}
           />
         </>
       }

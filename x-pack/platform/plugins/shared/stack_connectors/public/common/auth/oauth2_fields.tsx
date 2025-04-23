@@ -55,6 +55,7 @@ const AdditionalFieldsWrapper: React.FC<AdditionalFieldsWrapperProps> = React.me
         errors={errorsProp}
         isOptionalField={isOptionalField}
         readOnly={readOnly}
+        helpText={i18n.ADDITIONAL_FIELDS_HELP_WEBHOOK_TEXT}
       />
     );
   }

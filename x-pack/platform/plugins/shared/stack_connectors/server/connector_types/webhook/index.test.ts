@@ -863,8 +863,8 @@ describe('execute()', () => {
     connectorType.executor(execOptions);
 
     // Extract the interceptor callback
-    const mockRequestCallback = (axiosInstanceMock.interceptors.request.use as jest.Mock).mock
-      .calls[0][0];
+    const mockRequestCallback = ((await axiosInstanceMock.interceptors.request.use) as jest.Mock)
+      .mock.calls[0][0];
 
     // Call the interceptor and expect it to throw
     await expect(() =>
@@ -899,8 +899,8 @@ describe('execute()', () => {
     connectorType.executor(execOptions);
 
     // Extract the interceptor callback
-    const mockRequestCallback = (axiosInstanceMock.interceptors.request.use as jest.Mock).mock
-      .calls[0][0];
+    const mockRequestCallback = ((await axiosInstanceMock.interceptors.request.use) as jest.Mock)
+      .mock.calls[0][0];
 
     const config = { headers: {} };
     const result = await mockRequestCallback(config);
@@ -933,8 +933,8 @@ describe('execute()', () => {
 
     connectorType.executor(execOptions);
 
-    const mockRequestCallback = (axiosInstanceMock.interceptors.request.use as jest.Mock).mock
-      .calls[0][0];
+    const mockRequestCallback = ((await axiosInstanceMock.interceptors.request.use) as jest.Mock)
+      .mock.calls[0][0];
 
     const config = { headers: { 'X-Custom': 'value' } };
     const result = await mockRequestCallback(config);
