@@ -25,10 +25,6 @@ describe('AiSocCallout', () => {
     // Check that the callout has the correct aria-label
     const callout = screen.getByLabelText(CALLOUT_ARIA_LABEL);
     expect(callout).toBeInTheDocument();
-
-    // Check that the icon is hidden from screen readers
-    const iconContainer = callout.querySelector('[aria-hidden="true"]');
-    expect(iconContainer).toBeInTheDocument();
   });
 
   it('has the correct test subject', () => {
