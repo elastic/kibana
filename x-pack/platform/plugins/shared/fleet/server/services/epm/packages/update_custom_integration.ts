@@ -111,14 +111,16 @@ export async function incrementVersionAndUpdate(
     return acc;
   }, new Map<string, Buffer | undefined>());
 
-  // update the categories asset as well by editing the manifest.yml
-  const manifestPath = `${pkgName}-${data.version}/manifest.yml`;
-  const manifest = assetsMap.get(manifestPath);
-  if (manifest) {
-    const yaml = load(manifest?.toString());
-    if (yaml) {
-      yaml.categories = data.categories || [];
-      assetsMap.set(manifestPath, Buffer.from(dump(yaml)));
+  // update the categories asset as well by editing the manifest.yml, but only if categories is actually defined in the request as its optional and we dont want to replace categories if they dont pass any in
+  if (data.categories) {
+    const manifestPath = `${pkgName}-${data.version}/manifest.yml`;
+    const manifest = assetsMap.get(manifestPath);
+    if (manifest) {
+      const yaml = load(manifest?.toString());
+      if (yaml) {
+        yaml.categories = data.categories || [];
+        assetsMap.set(manifestPath, Buffer.from(dump(yaml)));
+      }
     }
   }
 

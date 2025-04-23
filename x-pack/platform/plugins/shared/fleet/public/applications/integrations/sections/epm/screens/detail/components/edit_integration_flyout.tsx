@@ -157,7 +157,7 @@ export const EditIntegrationFlyout: React.FunctionComponent<{
               <h2 id="editIntegrationFlyoutTitle">
                 <FormattedMessage
                   id="xpack.fleet.epm.editIntegrationFlyout.title"
-                  defaultMessage="Editing {integrationName}"
+                  defaultMessage="Editings {integrationName}"
                   values={{ integrationName }}
                 />
               </h2>
