@@ -25,7 +25,6 @@ import {
   enableAwsLambdaMetrics,
   apmAWSLambdaPriceFactor,
   apmAWSLambdaRequestCostPerMillion,
-  enableCriticalPath,
   syntheticsThrottlingEnabled,
   enableLegacyUptimeApp,
   apmEnableProfilingIntegration,
@@ -403,24 +402,6 @@ export const uiSettings: Record<string, UiSettings> = {
     }),
     value: 0.2,
     schema: schema.number({ min: 0 }),
-    solution: 'oblt',
-  },
-  [enableCriticalPath]: {
-    category: [observabilityFeatureId],
-    name: i18n.translate('xpack.observability.enableCriticalPath', {
-      defaultMessage: 'Critical path',
-    }),
-    description: i18n.translate('xpack.observability.enableCriticalPathDescription', {
-      defaultMessage: '{technicalPreviewLabel} Optionally display the critical path of a trace.',
-      values: {
-        technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>`,
-      },
-    }),
-    schema: schema.boolean(),
-    value: false,
-    requiresPageReload: true,
-    type: 'boolean',
-    showInLabs: true,
     solution: 'oblt',
   },
   [syntheticsThrottlingEnabled]: {

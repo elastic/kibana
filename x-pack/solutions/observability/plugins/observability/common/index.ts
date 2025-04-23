@@ -38,7 +38,6 @@ export {
   entityCentricExperience,
   apmAWSLambdaPriceFactor,
   apmAWSLambdaRequestCostPerMillion,
-  enableCriticalPath,
   syntheticsThrottlingEnabled,
   apmEnableProfilingIntegration,
   profilingShowErrorFrames,

@@ -10,7 +10,6 @@ import { i18n } from '@kbn/i18n';
 import type { History } from 'history';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
-import { useCriticalPathFeatureEnabledSetting } from '../../../../../hooks/use_critical_path_feature_enabled_setting';
 import { fromQuery, toQuery } from '../../../../shared/links/url_helpers';
 import { TechnicalPreviewBadge } from '../../../../shared/technical_preview_badge';
 import { Waterfall } from './waterfall';
@@ -54,7 +53,6 @@ export function WaterfallContainer({
   onShowCriticalPathChange,
 }: Props) {
   const history = useHistory();
-  const isCriticalPathFeatureEnabled = useCriticalPathFeatureEnabledSetting();
 
   if (!waterfall) {
     return null;
@@ -63,29 +61,28 @@ export function WaterfallContainer({
 
   return (
     <EuiFlexGroup direction="column">
-      {isCriticalPathFeatureEnabled ? (
-        <EuiFlexItem>
-          <EuiSwitch
-            id="showCriticalPath"
-            label={
-              <EuiFlexGroup gutterSize="s">
-                <EuiFlexItem grow={false}>
-                  {i18n.translate('xpack.apm.waterfall.showCriticalPath', {
-                    defaultMessage: 'Show critical path',
-                  })}
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <TechnicalPreviewBadge icon="beaker" />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            }
-            checked={showCriticalPath}
-            onChange={(event) => {
-              onShowCriticalPathChange(event.target.checked);
-            }}
-          />
-        </EuiFlexItem>
-      ) : null}
+      <EuiFlexItem>
+        <EuiSwitch
+          id="showCriticalPath"
+          label={
+            <EuiFlexGroup gutterSize="s">
+              <EuiFlexItem grow={false}>
+                {i18n.translate('xpack.apm.waterfall.showCriticalPath', {
+                  defaultMessage: 'Show critical path',
+                })}
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <TechnicalPreviewBadge icon="beaker" />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          }
+          checked={showCriticalPath}
+          onChange={(event) => {
+            onShowCriticalPathChange(event.target.checked);
+          }}
+        />
+      </EuiFlexItem>
+
       <EuiFlexItem>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>

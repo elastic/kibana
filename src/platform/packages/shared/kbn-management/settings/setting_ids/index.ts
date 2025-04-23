@@ -108,7 +108,6 @@ export const OBSERVABILITY_APM_AWS_LAMBDA_REQUEST_COST_PER_MILLION_ID =
 export const OBSERVABILITY_APM_AGENT_EXPLORER_VIEW_ID = 'observability:apmAgentExplorerView';
 export const OBSERVABILITY_APM_DEFAULT_SERVICE_ENVIRONMENT_ID =
   'observability:apmDefaultServiceEnvironment';
-export const OBSERVABILITY_APM_ENABLE_CRITICAL_PATH_ID = 'observability:apmEnableCriticalPath';
 export const OBSERVABILITY_APM_LABS_BUTTON_ID = 'observability:apmLabsButton';
 export const OBSERVABILITY_APM_PROGRESSIVE_LOADING_ID = 'observability:apmProgressiveLoading';
 export const OBSERVABILITY_APM_SERVICE_GROUP_MAX_NUMBER_OF_SERVCIE_ID =

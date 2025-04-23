@@ -315,9 +315,6 @@ $$$apm-aws-request$$$`observability:apmAWSLambdaRequestCostPerMillion`
 $$$observability-apm-labs$$$`observability:apmLabsButton`
 :   Enable or disable the APM Labs button — a quick way to enable and disable technical preview features in APM.
 
-$$$observability-apm-critical-path$$$`observability:apmEnableCriticalPath`
-:   When enabled, displays the critical path of a trace.
-
 $$$observability-enable-progressive-loading$$$`observability:apmProgressiveLoading`
 :   [preview] When enabled, uses progressive loading of some APM views. Data may be requested with a lower sampling rate first, with lower accuracy but faster response times, while the unsampled data loads in the background.
 
