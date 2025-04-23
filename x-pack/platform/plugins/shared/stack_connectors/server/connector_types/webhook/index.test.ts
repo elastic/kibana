@@ -42,7 +42,6 @@ const axiosInstanceMock = {
     response: { eject: jest.fn(), use: jest.fn() },
   },
 };
-// createAxiosInstanceMock.mockReturnValue(axiosInstanceMock);
 
 jest.mock('@kbn/actions-plugin/server/lib/axios_utils', () => {
   const originalUtils = jest.requireActual('@kbn/actions-plugin/server/lib/axios_utils');
@@ -56,10 +55,7 @@ jest.mock('@kbn/actions-plugin/server/lib/get_oauth_client_credentials_access_to
   getOAuthClientCredentialsAccessToken: jest.fn(),
 }));
 
-// axios.create = jest.fn(() => axios);
 const requestMock = utils.request as jest.Mock;
-
-// axios.create = jest.fn(() => axios);
 
 const services: Services = actionsMock.createServices();
 const mockedLogger: jest.Mocked<Logger> = loggerMock.create();
@@ -349,7 +345,6 @@ describe('execute()', () => {
 
   beforeEach(() => {
     jest.resetAllMocks();
-    // createAxiosInstanceMock.mockReturnValue(axiosInstanceMock);
     requestMock.mockReset();
     requestMock.mockResolvedValue({
       status: 200,

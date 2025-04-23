@@ -72,10 +72,7 @@ export const OAuth2Fields: React.FC<OAuth2FieldsProps> = ({ readOnly }) => {
             label: i18n.ACCESS_TOKEN_URL,
             validations: [
               {
-                validator: emptyField(i18n.ACCESS_TOKEN_URL_REQUIRED),
-              },
-              {
-                validator: urlField(i18n.ACCESS_TOKEN_URL_REQUIRED), // change notification text!
+                validator: urlField(i18n.ACCESS_TOKEN_URL_REQUIRED),
               },
             ],
           }}
