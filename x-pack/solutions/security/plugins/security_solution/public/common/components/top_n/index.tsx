@@ -149,7 +149,6 @@ const StatefulTopNComponent: React.FC<Props> = ({
   return (
     <TopN
       filterQuery={combinedQueries?.filterQuery}
-      data-test-subj="top-n"
       defaultView={defaultView}
       deleteQuery={isActiveTimeline(scopeId ?? '') ? undefined : deleteQuery}
       field={field as AlertsStackByField}
