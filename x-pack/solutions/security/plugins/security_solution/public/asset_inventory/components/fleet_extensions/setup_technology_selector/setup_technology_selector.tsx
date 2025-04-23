@@ -17,8 +17,6 @@ import {
   EuiTitle,
   type EuiRadioGroupOption,
   EuiText,
-  EuiCallOut,
-  EuiLink,
 } from '@elastic/eui';
 import { SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ } from '../test_subjects';
 
@@ -49,14 +47,14 @@ export const SetupTechnologySelector = ({
         <>
           <strong>
             <FormattedMessage
-              id="xpack.csp.fleetIntegration.setupTechnology.agentlessRadioLabel"
+              id="xpack.securitySolution.assetInventory.fleetIntegration.setupTechnology.agentlessRadioLabel"
               defaultMessage="Agentless"
             />
           </strong>
           <EuiText size="s">
             <p>
               <FormattedMessage
-                id="xpack.csp.fleetIntegration.setupTechnology.agentBasedRadioDescription"
+                id="xpack.securitySolution.assetInventory.fleetIntegration.setupTechnology.agentBasedRadioDescription"
                 defaultMessage="Setup integration without an agent"
               />
             </p>
@@ -72,14 +70,14 @@ export const SetupTechnologySelector = ({
         <>
           <strong>
             <FormattedMessage
-              id="xpack.csp.fleetIntegration.setupTechnology.agentBasedRadioLabel"
+              id="xpack.securitySolution.assetInventory.fleetIntegration.setupTechnology.agentBasedRadioLabel"
               defaultMessage="Agent-based"
             />
           </strong>
           <EuiText size="s">
             <p>
               <FormattedMessage
-                id="xpack.csp.fleetIntegration.setupTechnology.agentBasedRadioDescription"
+                id="xpack.securitySolution.assetInventory.fleetIntegration.setupTechnology.agentBasedRadioDescription"
                 defaultMessage="Deploy an Elastic Agent into your cloud environment"
               />
             </p>
@@ -100,38 +98,17 @@ export const SetupTechnologySelector = ({
     );
   };
 
-  const limitationsMessage = (
-    <FormattedMessage
-      id="xpack.csp.setupTechnologySelector.comingSoon"
-      defaultMessage="Agentless deployment is not supported if you are using {link}."
-      values={{
-        link: (
-          <EuiLink
-            href="https://www.elastic.co/guide/en/cloud-enterprise/current/ece-traffic-filtering-deployment-configuration.html"
-            target="_blank"
-          >
-            {'Traffic filtering'}
-          </EuiLink>
-        ),
-      }}
-    />
-  );
-
   return (
     <>
       <EuiSpacer size="l" />
       <EuiTitle size="xs">
         <h2>
           <FormattedMessage
-            id="xpack.csp.setupTechnologySelector.deploymentOptionsTitle"
+            id="xpack.securitySolution.assetInventory.fleetIntegration.setupTechnologySelector.deploymentOptionsTitle"
             defaultMessage="Deployment options"
           />
         </h2>
       </EuiTitle>
-      <EuiSpacer size="m" />
-      {showLimitationsMessage && (
-        <EuiCallOut title={limitationsMessage} color="warning" iconType="alert" size="m" />
-      )}
       <EuiSpacer size="m" />
       <EuiRadioGroup
         disabled={disabled}

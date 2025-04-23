@@ -17,7 +17,7 @@ const AssumeRoleDescription = (
   <div>
     <EuiText color={'subdued'} size="s">
       <FormattedMessage
-        id="xpack.csp.awsIntegration.assumeRoleDescription"
+        id="xpack.securitySolution.assetInventory.fleetIntegration.assumeRoleDescription"
         defaultMessage="An IAM role Amazon Resource Name (ARN) is an IAM identity that you can create in your AWS
       account. When creating an IAM role, users can define the role’s permissions. Roles do not have
       standard long-term credentials such as passwords or access keys."
@@ -30,7 +30,7 @@ const DirectAccessKeysDescription = (
   <div>
     <EuiText color={'subdued'} size="s">
       <FormattedMessage
-        id="xpack.csp.awsIntegration.directAccessKeysDescription"
+        id="xpack.securitySolution.assetInventory.fleetIntegration.directAccessKeysDescription"
         defaultMessage="Access keys are long-term credentials for an IAM user or the AWS account root user."
       />
     </EuiText>
@@ -41,7 +41,7 @@ const TemporaryKeysDescription = (
   <div>
     <EuiText color={'subdued'} size="s">
       <FormattedMessage
-        id="xpack.csp.awsIntegration.temporaryKeysDescription"
+        id="xpack.securitySolution.assetInventory.fleetIntegration.temporaryKeysDescription"
         defaultMessage="You can configure temporary security credentials in AWS to last for a specified duration. They
       consist of an access key ID, a secret access key, and a security token, which is typically
       found using GetSessionToken."
@@ -54,7 +54,7 @@ const SharedCredentialsDescription = (
   <div>
     <EuiText color={'subdued'} size="s">
       <FormattedMessage
-        id="xpack.csp.awsIntegration.sharedCredentialsDescription"
+        id="xpack.securitySolution.assetInventory.fleetIntegration.sharedCredentialsDescription"
         defaultMessage="If you use different AWS credentials for different tools or applications, you can use profiles
       to define multiple access keys in the same configuration file."
       />
@@ -63,12 +63,18 @@ const SharedCredentialsDescription = (
 );
 
 const AWS_FIELD_LABEL = {
-  access_key_id: i18n.translate('xpack.csp.awsIntegration.accessKeyIdLabel', {
-    defaultMessage: 'Access Key ID',
-  }),
-  secret_access_key: i18n.translate('xpack.csp.awsIntegration.secretAccessKeyLabel', {
-    defaultMessage: 'Secret Access Key',
-  }),
+  access_key_id: i18n.translate(
+    'xpack.securitySolution.assetInventory.fleetIntegration.accessKeyIdLabel',
+    {
+      defaultMessage: 'Access Key ID',
+    }
+  ),
+  secret_access_key: i18n.translate(
+    'xpack.securitySolution.assetInventory.fleetIntegration.secretAccessKeyLabel',
+    {
+      defaultMessage: 'Secret Access Key',
+    }
+  ),
 };
 
 export type AwsCredentialsFields = Record<
@@ -133,23 +139,32 @@ export const DEFAULT_AGENTLESS_AWS_CREDENTIALS_TYPE = AWS_CREDENTIALS_TYPE.DIREC
 
 export const getAwsCredentialsFormOptions = (): AwsOptions => ({
   [AWS_CREDENTIALS_TYPE.ASSUME_ROLE]: {
-    label: i18n.translate('xpack.csp.awsIntegration.assumeRoleLabel', {
-      defaultMessage: 'Assume role',
-    }),
+    label: i18n.translate(
+      'xpack.securitySolution.assetInventory.fleetIntegration.assumeRoleLabel',
+      {
+        defaultMessage: 'Assume role',
+      }
+    ),
     info: AssumeRoleDescription,
     fields: {
       'aws.role_arn': {
-        label: i18n.translate('xpack.csp.awsIntegration.roleArnLabel', {
-          defaultMessage: 'Role ARN',
-        }),
+        label: i18n.translate(
+          'xpack.securitySolution.assetInventory.fleetIntegration.roleArnLabel',
+          {
+            defaultMessage: 'Role ARN',
+          }
+        ),
         dataTestSubj: 'awsRoleArnInput',
       },
     },
   },
   [AWS_CREDENTIALS_TYPE.DIRECT_ACCESS_KEYS]: {
-    label: i18n.translate('xpack.csp.awsIntegration.directAccessKeyLabel', {
-      defaultMessage: 'Direct access keys',
-    }),
+    label: i18n.translate(
+      'xpack.securitySolution.assetInventory.fleetIntegration.directAccessKeyLabel',
+      {
+        defaultMessage: 'Direct access keys',
+      }
+    ),
     info: DirectAccessKeysDescription,
     fields: {
       'aws.access_key_id': {
@@ -166,9 +181,12 @@ export const getAwsCredentialsFormOptions = (): AwsOptions => ({
   },
   [AWS_CREDENTIALS_TYPE.TEMPORARY_KEYS]: {
     info: TemporaryKeysDescription,
-    label: i18n.translate('xpack.csp.awsIntegration.temporaryKeysLabel', {
-      defaultMessage: 'Temporary keys',
-    }),
+    label: i18n.translate(
+      'xpack.securitySolution.assetInventory.fleetIntegration.temporaryKeysLabel',
+      {
+        defaultMessage: 'Temporary keys',
+      }
+    ),
     fields: {
       'aws.access_key_id': {
         label: AWS_FIELD_LABEL.access_key_id,
@@ -181,29 +199,41 @@ export const getAwsCredentialsFormOptions = (): AwsOptions => ({
         isSecret: true,
       },
       'aws.session_token': {
-        label: i18n.translate('xpack.csp.awsIntegration.sessionTokenLabel', {
-          defaultMessage: 'Session Token',
-        }),
+        label: i18n.translate(
+          'xpack.securitySolution.assetInventory.fleetIntegration.sessionTokenLabel',
+          {
+            defaultMessage: 'Session Token',
+          }
+        ),
         dataTestSubj: 'awsTemporaryKeysSessionToken',
       },
     },
   },
   [AWS_CREDENTIALS_TYPE.SHARED_CREDENTIALS]: {
-    label: i18n.translate('xpack.csp.awsIntegration.sharedCredentialLabel', {
-      defaultMessage: 'Shared credentials',
-    }),
+    label: i18n.translate(
+      'xpack.securitySolution.assetInventory.fleetIntegration.sharedCredentialLabel',
+      {
+        defaultMessage: 'Shared credentials',
+      }
+    ),
     info: SharedCredentialsDescription,
     fields: {
       'aws.shared_credential_file': {
-        label: i18n.translate('xpack.csp.awsIntegration.sharedCredentialFileLabel', {
-          defaultMessage: 'Shared Credential File',
-        }),
+        label: i18n.translate(
+          'xpack.securitySolution.assetInventory.fleetIntegration.sharedCredentialFileLabel',
+          {
+            defaultMessage: 'Shared Credential File',
+          }
+        ),
         dataTestSubj: 'awsSharedCredentialFile',
       },
       'aws.credential_profile_name': {
-        label: i18n.translate('xpack.csp.awsIntegration.credentialProfileNameLabel', {
-          defaultMessage: 'Credential Profile Name',
-        }),
+        label: i18n.translate(
+          'xpack.securitySolution.assetInventory.fleetIntegration.credentialProfileNameLabel',
+          {
+            defaultMessage: 'Credential Profile Name',
+          }
+        ),
         dataTestSubj: 'awsCredentialProfileName',
       },
     },

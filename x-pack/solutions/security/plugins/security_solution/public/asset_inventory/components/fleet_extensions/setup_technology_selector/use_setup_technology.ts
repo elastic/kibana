@@ -25,10 +25,10 @@ export const useSetupTechnology = ({
   defaultSetupTechnology?: SetupTechnology;
   isEditPage?: boolean;
 }) => {
-  const isCspmAws = input.type === CLOUDBEAT_AWS;
-  const isCspmGcp = input.type === CLOUDBEAT_GCP;
-  const isCspmAzure = input.type === CLOUDBEAT_AZURE;
-  const isAgentlessSupportedForCloudProvider = isCspmAws || isCspmGcp || isCspmAzure;
+  const isAssetAws = input.type === CLOUDBEAT_AWS;
+  const isAssetGcp = input.type === CLOUDBEAT_GCP;
+  const isAssetAzure = input.type === CLOUDBEAT_AZURE;
+  const isAgentlessSupportedForCloudProvider = isAssetAws || isAssetGcp || isAssetAzure;
   const isAgentlessAvailable = isAgentlessSupportedForCloudProvider && isAgentlessEnabled;
   const defaultEditSetupTechnology =
     isEditPage && isAgentlessAvailable ? SetupTechnology.AGENTLESS : SetupTechnology.AGENT_BASED;

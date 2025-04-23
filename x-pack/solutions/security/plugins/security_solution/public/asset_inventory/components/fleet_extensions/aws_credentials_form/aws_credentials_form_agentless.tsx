@@ -43,7 +43,7 @@ export const CloudFormationCloudCredentialsGuide = ({
   return (
     <EuiText size="s" color="subdued">
       <FormattedMessage
-        id="xpack.csp.agentlessForm.cloudFormation.guide.description"
+        id="xpack.securitySolution.assetInventory.fleetIntegration.agentlessForm.cloudFormation.guide.description"
         defaultMessage="Access keys are long-term credentials for an IAM user or the AWS account root user.
 Utilize AWS CloudFormation (a built-in AWS tool) or a series of manual steps to set up access. {learnMore}."
         values={{
@@ -55,7 +55,7 @@ Utilize AWS CloudFormation (a built-in AWS tool) or a series of manual steps to 
               data-test-subj="externalLink"
             >
               <FormattedMessage
-                id="xpack.csp.agentlessForm.cloudFormation.guide.learnMoreLinkText"
+                id="xpack.securitySolution.assetInventory.fleetIntegration.agentlessForm.cloudFormation.guide.learnMoreLinkText"
                 defaultMessage="Learn more about CloudFormation"
               />
             </EuiLink>
@@ -68,7 +68,7 @@ Utilize AWS CloudFormation (a built-in AWS tool) or a series of manual steps to 
           {isOrganization ? (
             <li>
               <FormattedMessage
-                id="xpack.csp.agentlessForm.cloudFormation.guide.steps.organizationLogin"
+                id="xpack.securitySolution.assetInventory.fleetIntegration.agentlessForm.cloudFormation.guide.steps.organizationLogin"
                 defaultMessage="Log in as an {admin} in the management account of the AWS Organization you want to onboard"
                 values={{
                   admin: <strong>{'admin'}</strong>,
@@ -78,7 +78,7 @@ Utilize AWS CloudFormation (a built-in AWS tool) or a series of manual steps to 
           ) : (
             <li>
               <FormattedMessage
-                id="xpack.csp.agentlessForm.cloudFormation.guide.steps.singleLogin"
+                id="xpack.securitySolution.assetInventory.fleetIntegration.agentlessForm.cloudFormation.guide.steps.singleLogin"
                 defaultMessage="Log in as an {admin} in the AWS account you want to onboard"
                 values={{
                   admin: <strong>{'admin'}</strong>,
@@ -89,7 +89,7 @@ Utilize AWS CloudFormation (a built-in AWS tool) or a series of manual steps to 
           <EuiSpacer size="xs" />
           <li>
             <FormattedMessage
-              id="xpack.csp.agentlessForm.cloudFormation.guide.steps.launch"
+              id="xpack.securitySolution.assetInventory.fleetIntegration.agentlessForm.cloudFormation.guide.steps.launch"
               defaultMessage="Click the {launchCloudFormation} button below."
               values={{
                 launchCloudFormation: <strong>{'Launch CloudFormation'}</strong>,
@@ -99,7 +99,7 @@ Utilize AWS CloudFormation (a built-in AWS tool) or a series of manual steps to 
           <EuiSpacer size="xs" />
           <li>
             <FormattedMessage
-              id="xpack.csp.agentlessForm.cloudFormation.steps.region"
+              id="xpack.securitySolution.assetInventory.fleetIntegration.agentlessForm.cloudFormation.steps.region"
               defaultMessage="(Optional) Change the {amazonRegion} in the upper right corner to the region you want to deploy your stack to"
               values={{
                 amazonRegion: <strong>{'AWS region'}</strong>,
@@ -109,13 +109,13 @@ Utilize AWS CloudFormation (a built-in AWS tool) or a series of manual steps to 
           <EuiSpacer size="xs" />
           <li>
             <FormattedMessage
-              id="xpack.csp.agentlessForm.cloudFormation.steps.accept"
+              id="xpack.securitySolution.assetInventory.fleetIntegration.agentlessForm.cloudFormation.steps.accept"
               defaultMessage="Tick the checkbox under {capabilities} in the opened CloudFormation stack review form: {acknowledge}"
               values={{
                 acknowledge: (
                   <strong>
                     <FormattedMessage
-                      id="xpack.csp.agentlessForm.cloudFormation.steps.accept.acknowledge"
+                      id="xpack.securitySolution.assetInventory.fleetIntegration.agentlessForm.cloudFormation.steps.accept.acknowledge"
                       defaultMessage="I acknowledge that AWS CloudFormation might create IAM resources."
                     />
                   </strong>
@@ -123,7 +123,7 @@ Utilize AWS CloudFormation (a built-in AWS tool) or a series of manual steps to 
                 capabilities: (
                   <strong>
                     <FormattedMessage
-                      id="xpack.csp.agentlessForm.cloudFormation.steps.accept.capabilties"
+                      id="xpack.securitySolution.assetInventory.fleetIntegration.agentlessForm.cloudFormation.steps.accept.capabilties"
                       defaultMessage="capabilities"
                     />
                   </strong>
@@ -134,7 +134,7 @@ Utilize AWS CloudFormation (a built-in AWS tool) or a series of manual steps to 
           <EuiSpacer size="xs" />
           <li>
             <FormattedMessage
-              id="xpack.csp.agentlessForm.cloudFormation.steps.create"
+              id="xpack.securitySolution.assetInventory.fleetIntegration.agentlessForm.cloudFormation.steps.create"
               defaultMessage="Click {createStack}."
               values={{
                 createStack: <strong>{'Create stack'}</strong>,
@@ -144,7 +144,7 @@ Utilize AWS CloudFormation (a built-in AWS tool) or a series of manual steps to 
           <EuiSpacer size="xs" />
           <li>
             <FormattedMessage
-              id="xpack.csp.agentlessForm.cloudFormation.steps.stackStatus"
+              id="xpack.securitySolution.assetInventory.fleetIntegration.agentlessForm.cloudFormation.steps.stackStatus"
               defaultMessage="Once  stack status is {createComplete} then click the Outputs tab"
               values={{
                 createComplete: <strong>{'CREATE_COMPLETE'}</strong>,
@@ -154,7 +154,7 @@ Utilize AWS CloudFormation (a built-in AWS tool) or a series of manual steps to 
           <EuiSpacer size="xs" />
           <li>
             <FormattedMessage
-              id="xpack.csp.agentlessForm.cloudFormation.steps.credentials"
+              id="xpack.securitySolution.assetInventory.fleetIntegration.agentlessForm.cloudFormation.steps.credentials"
               defaultMessage="Copy {accessKeyId} and {secretAccessKey} then paste the credentials below"
               values={{
                 accessKeyId: <strong>{'Access Key Id'}</strong>,
@@ -207,13 +207,13 @@ export const AwsCredentialsFormAgentless = ({
       <AWSSetupInfoContent
         info={
           <FormattedMessage
-            id="xpack.csp.awsIntegration.gettingStarted.setupInfoContentAgentless"
-            defaultMessage="Utilize AWS Access Keys to set up and deploy CSPM for assessing your AWS environment's security posture. Refer to our {gettingStartedLink} guide for details."
+            id="xpack.securitySolution.assetInventory.fleetIntegration.gettingStarted.setupInfoContentAgentless"
+            defaultMessage="Utilize AWS Access Keys to set up and deploy Cloud Asset Inventory for assessing your AWS environment's assets. Refer to our {gettingStartedLink} guide for details."
             values={{
               gettingStartedLink: (
                 <EuiLink href={documentationLink} target="_blank">
                   <FormattedMessage
-                    id="xpack.csp.awsIntegration.gettingStarted.setupInfoContentLink"
+                    id="xpack.securitySolution.assetInventory.fleetIntegration.gettingStarted.setupInfoContentLink"
                     defaultMessage="Getting Started"
                   />
                 </EuiLink>
@@ -224,9 +224,12 @@ export const AwsCredentialsFormAgentless = ({
       />
       <EuiSpacer size="l" />
       <AwsCredentialTypeSelector
-        label={i18n.translate('xpack.csp.awsIntegration.awsCredentialTypeSelectorLabelAgentless', {
-          defaultMessage: 'Preferred method',
-        })}
+        label={i18n.translate(
+          'xpack.securitySolution.assetInventory.fleetIntegration.awsCredentialTypeSelectorLabelAgentless',
+          {
+            defaultMessage: 'Preferred method',
+          }
+        )}
         type={awsCredentialsType}
         options={getAwsCredentialsFormAgentlessOptions()}
         onChange={(optionId) => {
@@ -258,7 +261,7 @@ export const AwsCredentialsFormAgentless = ({
             href={automationCredentialTemplate}
           >
             <FormattedMessage
-              id="xpack.csp.agentlessForm.agentlessAWSCredentialsForm.cloudFormation.launchButton"
+              id="xpack.securitySolution.assetInventory.fleetIntegration.agentlessForm.agentlessAWSCredentialsForm.cloudFormation.launchButton"
               defaultMessage="Launch CloudFormation"
             />
           </EuiButton>

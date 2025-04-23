@@ -52,7 +52,7 @@ export const AzureCredentialsFormAgentless = ({
       <EuiSpacer size="m" />
       <EuiText color="subdued" size="s">
         <FormattedMessage
-          id="xpack.csp.azureIntegration.armTemplateSetupNote"
+          id="xpack.securitySolution.assetInventory.fleetIntegration.azureIntegration.armTemplateSetupNote"
           defaultMessage="Read the {documentation} for more details"
           values={{
             documentation: (
@@ -62,9 +62,12 @@ export const AzureCredentialsFormAgentless = ({
                 rel="noopener nofollow noreferrer"
                 data-test-subj="externalLink"
               >
-                {i18n.translate('xpack.csp.azureIntegration.documentationLinkText', {
-                  defaultMessage: 'documentation',
-                })}
+                {i18n.translate(
+                  'xpack.securitySolution.assetInventory.fleetIntegration.azureIntegration.documentationLinkText',
+                  {
+                    defaultMessage: 'documentation',
+                  }
+                )}
               </EuiLink>
             ),
           }}

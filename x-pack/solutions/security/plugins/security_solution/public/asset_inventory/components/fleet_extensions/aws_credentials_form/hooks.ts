@@ -8,7 +8,11 @@
 import { useEffect, useRef } from 'react';
 import type { NewPackagePolicy, PackageInfo } from '@kbn/fleet-plugin/common';
 import type { NewPackagePolicyAssetInput } from '../types';
-import { getAwsCredentialsType, getCspmCloudFormationDefaultValue, getAssetPolicy } from '../utils';
+import {
+  getAwsCredentialsType,
+  getAssetCloudFormationDefaultValue,
+  getAssetPolicy,
+} from '../utils';
 import {
   DEFAULT_MANUAL_AWS_CREDENTIALS_TYPE,
   getAwsCredentialsFormOptions,
@@ -54,7 +58,7 @@ export const useAwsCredentialsForm = ({
 
   const options = getAwsCredentialsFormOptions();
 
-  const hasCloudFormationTemplate = !!getCspmCloudFormationDefaultValue(packageInfo);
+  const hasCloudFormationTemplate = !!getAssetCloudFormationDefaultValue(packageInfo);
 
   const setupFormat = getSetupFormatFromInput(input, hasCloudFormationTemplate);
   const lastManualCredentialsType = useRef<string | undefined>(undefined);
@@ -182,7 +186,7 @@ const useCloudFormationTemplate = ({
       }
       return;
     }
-    const templateUrl = getCspmCloudFormationDefaultValue(packageInfo);
+    const templateUrl = getAssetCloudFormationDefaultValue(packageInfo);
 
     // If the template is not available, do not update the policy
     if (templateUrl === '') return;

@@ -22,13 +22,6 @@ import { getFlattenedObject } from '@kbn/std';
 import { i18n } from '@kbn/i18n';
 import { SUPPORTED_CLOUDBEAT_INPUTS, ASSET_POLICY_TEMPLATE, ASSET_NAMESPACE } from './constants';
 
-// import type { ASSET_POLICY_TEMPLATE } from './constants';
-// import type {
-//   AwsCredentialsType,
-//   PostureInput,
-//   CloudSecurityPolicyTemplate,
-// } from '../../../common/types_old';
-
 import {
   DEFAULT_AGENTLESS_AWS_CREDENTIALS_TYPE,
   DEFAULT_AWS_CREDENTIALS_TYPE,
@@ -81,7 +74,7 @@ const getDeploymentType = (policyTemplateInput: AssetInput) => {
   }
 };
 
-const getPostureInput = (
+const getAssetInput = (
   input: NewPackagePolicyInput,
   inputType: AssetInput,
   inputVars?: Record<string, PackagePolicyConfigRecordEntry>
@@ -117,11 +110,11 @@ export const getAssetPolicy = (
   ...newPolicy,
   namespace: ASSET_NAMESPACE,
   // Enable new policy input and disable all others
-  inputs: newPolicy.inputs.map((item) => getPostureInput(item, inputType, inputVars)),
+  inputs: newPolicy.inputs.map((item) => getAssetInput(item, inputType, inputVars)),
   // Set hidden policy vars
   vars: merge({}, newPolicy.vars, {
     deployment: { value: getDeploymentType(inputType) },
-    posture: { value: getAssetType(inputType) },
+    asset: { value: getAssetType(inputType) },
   }),
 });
 
@@ -137,7 +130,7 @@ export const hasPolicyTemplateInputs = (
   return Object.hasOwn(policyTemplate, 'inputs');
 };
 
-export const getCspmCloudFormationDefaultValue = (packageInfo: PackageInfo): string => {
+export const getAssetCloudFormationDefaultValue = (packageInfo: PackageInfo): string => {
   if (!packageInfo.policy_templates) return '';
 
   const policyTemplate = packageInfo.policy_templates.find((p) => p.name === ASSET_POLICY_TEMPLATE);
@@ -164,7 +157,7 @@ export const getDefaultAwsCredentialsType = (
     return DEFAULT_AGENTLESS_AWS_CREDENTIALS_TYPE;
   }
 
-  const hasCloudFormationTemplate = !!getCspmCloudFormationDefaultValue(packageInfo);
+  const hasCloudFormationTemplate = !!getAssetCloudFormationDefaultValue(packageInfo);
   if (hasCloudFormationTemplate) {
     return DEFAULT_AWS_CREDENTIALS_TYPE;
   }
@@ -214,7 +207,7 @@ export const getDefaultGcpHiddenVars = (
     };
   }
 
-  const hasCloudShellUrl = !!getCspmCloudShellDefaultValue(packageInfo);
+  const hasCloudShellUrl = !!getAssetCloudShellDefaultValue(packageInfo);
   if (hasCloudShellUrl) {
     return {
       'gcp.credentials.type': {
@@ -235,7 +228,7 @@ export const getDefaultGcpHiddenVars = (
 /**
  * Input vars that are hidden from the user
  */
-export const getPostureInputHiddenVars = (
+export const getAssetInputHiddenVars = (
   inputType: AssetInput,
   packageInfo: PackageInfo,
   setupTechnology: SetupTechnology
@@ -265,45 +258,69 @@ export const getPostureInputHiddenVars = (
 const assetInventoryIntegrations: CloudAssetInventoryIntegrations = {
   asset_inventory: {
     policyTemplate: ASSET_POLICY_TEMPLATE,
-    name: i18n.translate('xpack.csp.cspmIntegration.integration.nameTitle', {
-      defaultMessage: 'Cloud Asset Inventory',
-    }),
-    shortName: i18n.translate('xpack.csp.cspmIntegration.integration.shortNameTitle', {
-      defaultMessage: 'CAI',
-    }),
+    name: i18n.translate(
+      'xpack.securitySolution.assetInventory.fleetIntegration.cspmIntegration.nameTitle',
+      {
+        defaultMessage: 'Cloud Asset Inventory',
+      }
+    ),
+    shortName: i18n.translate(
+      'xpack.securitySolution.assetInventory.fleetIntegration.cspmIntegration.shortNameTitle',
+      {
+        defaultMessage: 'CAI',
+      }
+    ),
     options: [
       {
         type: CLOUDBEAT_AWS,
-        name: i18n.translate('xpack.csp.cspmIntegration.awsOption.nameTitle', {
-          defaultMessage: 'AWS',
-        }),
-        benchmark: i18n.translate('xpack.csp.cspmIntegration.awsOption.benchmarkTitle', {
-          defaultMessage: 'CIS AWS',
-        }),
+        name: i18n.translate(
+          'xpack.securitySolution.assetInventory.fleetIntegration.cspmIntegration.awsOption.nameTitle',
+          {
+            defaultMessage: 'AWS',
+          }
+        ),
+        benchmark: i18n.translate(
+          'xpack.securitySolution.assetInventory.fleetIntegration.cspmIntegration.awsOption.benchmarkTitle',
+          {
+            defaultMessage: 'CAI AWS',
+          }
+        ),
         icon: 'logoAWS',
-        testId: 'cisAwsTestId',
+        testId: 'caiAwsTestId',
       },
       {
         type: CLOUDBEAT_GCP,
-        name: i18n.translate('xpack.csp.cspmIntegration.gcpOption.nameTitle', {
-          defaultMessage: 'GCP',
-        }),
-        benchmark: i18n.translate('xpack.csp.cspmIntegration.gcpOption.benchmarkTitle', {
-          defaultMessage: 'CIS GCP',
-        }),
+        name: i18n.translate(
+          'xpack.securitySolution.assetInventory.fleetIntegration.cspmIntegration.gcpOption.nameTitle',
+          {
+            defaultMessage: 'GCP',
+          }
+        ),
+        benchmark: i18n.translate(
+          'xpack.securitySolution.assetInventory.fleetIntegration.cspmIntegration.gcpOption.benchmarkTitle',
+          {
+            defaultMessage: 'CAI GCP',
+          }
+        ),
         icon: googleCloudLogo,
-        testId: 'cisGcpTestId',
+        testId: 'caiGcpTestId',
       },
       {
         type: CLOUDBEAT_AZURE,
-        name: i18n.translate('xpack.csp.cspmIntegration.azureOption.nameTitle', {
-          defaultMessage: 'Azure',
-        }),
-        benchmark: i18n.translate('xpack.csp.cspmIntegration.azureOption.benchmarkTitle', {
-          defaultMessage: 'CIS Azure',
-        }),
+        name: i18n.translate(
+          'xpack.securitySolution.assetInventory.fleetIntegration.cspmIntegration.azureOption.nameTitle',
+          {
+            defaultMessage: 'Azure',
+          }
+        ),
+        benchmark: i18n.translate(
+          'xpack.securitySolution.assetInventory.fleetIntegration.cspmIntegration.azureOption.benchmarkTitle',
+          {
+            defaultMessage: 'CAI Azure',
+          }
+        ),
         icon: 'logoAzure',
-        testId: 'cisAzureTestId',
+        testId: 'caiAzureTestId',
       },
     ],
   },
@@ -321,27 +338,7 @@ export const getPolicyTemplateInputOptions = () =>
     testId: o.testId,
   }));
 
-// export const getMaxPackageName = (
-//   packageName: string,
-//   packagePolicies?: Array<{ name: string }>
-// ) => {
-//   // Retrieve the highest number appended to package policy name and increment it by one
-//   const pkgPoliciesNamePattern = new RegExp(`${packageName}-(\\d+)`);
-
-//   const maxPkgPolicyName = Math.max(
-//     ...(packagePolicies ?? [])
-//       .filter((ds) => Boolean(ds.name.match(pkgPoliciesNamePattern)))
-//       .map((ds) => {
-//         const match = ds.name.match(pkgPoliciesNamePattern);
-//         return match ? parseInt(match[1], 10) : 0;
-//       }),
-//     0
-//   );
-
-//   return `${packageName}-${maxPkgPolicyName + 1}`;
-// };
-
-export const getCspmCloudShellDefaultValue = (packageInfo: PackageInfo): string => {
+export const getAssetCloudShellDefaultValue = (packageInfo: PackageInfo): string => {
   if (!packageInfo.policy_templates) return '';
 
   const policyTemplate = packageInfo.policy_templates.find((p) => p.name === ASSET_POLICY_TEMPLATE);

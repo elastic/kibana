@@ -17,7 +17,7 @@ import { i18n } from '@kbn/i18n';
 // // import { useIsSubscriptionStatusValid } from '../../common/hooks/use_is_subscription_status_valid';
 // // import { SubscriptionNotAllowed } from '../subscription_not_allowed';
 import {
-  getPostureInputHiddenVars,
+  getAssetInputHiddenVars,
   getAssetPolicy,
   hasErrors,
   getDefaultCloudCredentialsType,
@@ -38,7 +38,7 @@ const EditScreenStepTitle = () => (
     <EuiTitle size="s">
       <h4>
         <FormattedMessage
-          id="xpack.csp.fleetIntegration.integrationSettingsTitle"
+          id="xpack.securitySolution.assetInventory.fleetIntegration.integrationSettingsTitle"
           defaultMessage="Integration Settings"
         />
       </h4>
@@ -73,7 +73,6 @@ const getSelectedOption = (
 ) => {
   // Looks for the enabled deployment (aka input). By default, all inputs are disabled.
   // Initial state when all inputs are disabled is to choose the first available of the relevant policyTemplate
-  // Default selected policy template is CSPM
   const selectedOption = options.find((i) => i.enabled) || options[0];
 
   return selectedOption as NewPackagePolicyAssetInput;
@@ -120,7 +119,7 @@ export const CloudAssetInventoryPolicyTemplateForm =
       //  */
       const setEnabledPolicyInput = useCallback(
         (inputType: AssetInput) => {
-          const inputVars = getPostureInputHiddenVars(inputType, packageInfo, setupTechnology);
+          const inputVars = getAssetInputHiddenVars(inputType, packageInfo, setupTechnology);
           const policy = getAssetPolicy(newPolicy, inputType, inputVars);
           updatePolicy(policy);
         },
@@ -163,7 +162,7 @@ export const CloudAssetInventoryPolicyTemplateForm =
           error: validationResults?.name || null,
           label: (
             <FormattedMessage
-              id="xpack.csp.fleetIntegration.integrationNameLabel"
+              id="xpack.securitySolution.assetInventory.fleetIntegration.integrationNameLabel"
               defaultMessage="Name"
             />
           ),
@@ -174,7 +173,7 @@ export const CloudAssetInventoryPolicyTemplateForm =
           error: validationResults?.description || null,
           label: (
             <FormattedMessage
-              id="xpack.csp.fleetIntegration.integrationDescriptionLabel"
+              id="xpack.securitySolution.assetInventory.fleetIntegration.integrationDescriptionLabel"
               defaultMessage="Description"
             />
           ),
@@ -192,16 +191,19 @@ export const CloudAssetInventoryPolicyTemplateForm =
           {isEditPage && (
             <>
               <EuiCallOut
-                title={i18n.translate('xpack.csp.fleetIntegration.editWarning.calloutTitle', {
-                  defaultMessage: 'Modifying Integration Details',
-                })}
+                title={i18n.translate(
+                  'xpack.securitySolution.assetInventory.fleetIntegration.editWarning.calloutTitle',
+                  {
+                    defaultMessage: 'Modifying Integration Details',
+                  }
+                )}
                 color="warning"
                 iconType="warning"
               >
                 <p>
                   <FormattedMessage
-                    id="xpack.csp.fleetIntegration.editWarning.calloutDescription"
-                    defaultMessage="In order to change the cloud service provider (CSP) you want to monitor, add more accounts, or change where CSPM is deployed (Organization vs Single Account), please add a new CSPM integration."
+                    id="xpack.securitySolution.assetInventory.fleetIntegration.editWarning.calloutDescription"
+                    defaultMessage="In order to change the cloud service provider (CSP) you want to monitor, add more accounts, or change where Cloud Asset Inventory is deployed (Organization vs Single Account), please add a new Cloud Asset Inventory integration."
                   />
                 </p>
               </EuiCallOut>
@@ -210,7 +212,7 @@ export const CloudAssetInventoryPolicyTemplateForm =
           )}
 
           <FormattedMessage
-            id="xpack.csp.fleetIntegration.configureCspmIntegrationDescription"
+            id="xpack.securitySolution.assetInventory.fleetIntegration.configureAssetIntegrationDescription"
             defaultMessage="Select the cloud service provider (CSP) you want to monitor and then fill in the name and description to help identify this integration"
           />
           <EuiSpacer size="l" />

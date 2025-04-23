@@ -47,7 +47,7 @@ export const AWSSetupInfoContent = ({ info }: AWSSetupInfoContentProps) => {
       <EuiTitle size="xs">
         <h2>
           <FormattedMessage
-            id="xpack.csp.awsIntegration.setupInfoContentTitle"
+            id="xpack.securitySolution.assetInventory.fleetIntegration.awsIntegration.setupInfoContentTitle"
             defaultMessage="Setup Access"
           />
         </h2>
@@ -68,9 +68,12 @@ const getSetupFormatOptions = (): AssetRadioOption[] => [
   },
   {
     id: AWS_SETUP_FORMAT.MANUAL,
-    label: i18n.translate('xpack.csp.awsIntegration.setupFormatOptions.manual', {
-      defaultMessage: 'Manual',
-    }),
+    label: i18n.translate(
+      'xpack.securitySolution.assetInventory.fleetIntegration.awsIntegration.setupFormatOptions.manual',
+      {
+        defaultMessage: 'Manual',
+      }
+    ),
     testId: AWS_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJ.MANUAL,
   },
 ];
@@ -95,7 +98,7 @@ const CloudFormationSetup = ({
     return (
       <EuiCallOut color="warning">
         <FormattedMessage
-          id="xpack.csp.awsIntegration.cloudFormationSetupStep.notSupported"
+          id="xpack.securitySolution.assetInventory.fleetIntegration.awsIntegration.cloudFormationSetupStep.notSupported"
           defaultMessage="CloudFormation is not supported on the current Integration version, please upgrade your integration to the latest version to use CloudFormation"
         />
       </EuiCallOut>
@@ -114,34 +117,34 @@ const CloudFormationSetup = ({
         >
           <li>
             <FormattedMessage
-              id="xpack.csp.awsIntegration.cloudFormationSetupStep.hostRequirement"
+              id="xpack.securitySolution.assetInventory.fleetIntegration.awsIntegration.cloudFormationSetupStep.hostRequirement"
               defaultMessage='Ensure "New hosts" is selected in the "Where to add this integration?" section below'
             />
           </li>
           {accountType === AWS_ORGANIZATION_ACCOUNT ? (
             <li>
               <FormattedMessage
-                id="xpack.csp.awsIntegration.cloudFormationSetupStep.organizationLogin"
+                id="xpack.securitySolution.assetInventory.fleetIntegration.awsIntegration.cloudFormationSetupStep.organizationLogin"
                 defaultMessage="Log in as an admin in your organization's AWS management account"
               />
             </li>
           ) : (
             <li>
               <FormattedMessage
-                id="xpack.csp.awsIntegration.cloudFormationSetupStep.login"
+                id="xpack.securitySolution.assetInventory.fleetIntegration.awsIntegration.cloudFormationSetupStep.login"
                 defaultMessage="Log in as an admin to the AWS Account you want to onboard"
               />
             </li>
           )}
           <li>
             <FormattedMessage
-              id="xpack.csp.awsIntegration.cloudFormationSetupStep.save"
+              id="xpack.securitySolution.assetInventory.fleetIntegration.awsIntegration.cloudFormationSetupStep.save"
               defaultMessage="Click the Save and continue button on the bottom right of this page"
             />
           </li>
           <li>
             <FormattedMessage
-              id="xpack.csp.awsIntegration.cloudFormationSetupStep.launch"
+              id="xpack.securitySolution.assetInventory.fleetIntegration.awsIntegration.cloudFormationSetupStep.launch"
               defaultMessage="On the subsequent pop-up modal, click the Launch CloudFormation button."
             />
           </li>
@@ -171,14 +174,17 @@ export const ReadDocumentation = ({ url }: { url: string }) => {
   return (
     <EuiText color="subdued" size="s">
       <FormattedMessage
-        id="xpack.csp.awsIntegration.cloudFormationSetupNote"
+        id="xpack.securitySolution.assetInventory.fleetIntegration.awsIntegration.cloudFormationSetupNote"
         defaultMessage="Read the {documentation} for more details"
         values={{
           documentation: (
             <Link url={url}>
-              {i18n.translate('xpack.csp.awsIntegration.documentationLinkText', {
-                defaultMessage: 'documentation',
-              })}
+              {i18n.translate(
+                'xpack.securitySolution.assetInventory.fleetIntegration.documentationLinkText',
+                {
+                  defaultMessage: 'documentation',
+                }
+              )}
             </Link>
           ),
         }}
@@ -215,13 +221,13 @@ export const AwsCredentialsForm = ({
       <AWSSetupInfoContent
         info={
           <FormattedMessage
-            id="xpack.csp.awsIntegration.gettingStarted.setupInfoContent"
-            defaultMessage="Utilize AWS CloudFormation (a built-in AWS tool) or a series of manual steps to set up and deploy CSPM for assessing your AWS environment's security posture. Refer to our {gettingStartedLink} guide for details."
+            id="xpack.securitySolution.assetInventory.fleetIntegration.gettingStarted.setupInfoContent"
+            defaultMessage="Utilize AWS CloudFormation (a built-in AWS tool) or a series of manual steps to set up and deploy Cloud Asset Inventory for assessing your AWS environment's assets. Refer to our {gettingStartedLink} guide for details."
             values={{
               gettingStartedLink: (
                 <EuiLink href={elasticDocLink} target="_blank">
                   <FormattedMessage
-                    id="xpack.csp.awsIntegration.gettingStarted.setupInfoContentLink"
+                    id="xpack.securitySolution.assetInventory.fleetIntegration.gettingStarted.setupInfoContentLink"
                     defaultMessage="Getting Started"
                   />
                 </EuiLink>
@@ -247,9 +253,12 @@ export const AwsCredentialsForm = ({
       {setupFormat === AWS_SETUP_FORMAT.MANUAL && (
         <>
           <AwsCredentialTypeSelector
-            label={i18n.translate('xpack.csp.awsIntegration.awsCredentialTypeSelectorLabel', {
-              defaultMessage: 'Preferred manual method',
-            })}
+            label={i18n.translate(
+              'xpack.securitySolution.assetInventory.fleetIntegration.awsCredentialTypeSelectorLabel',
+              {
+                defaultMessage: 'Preferred manual method',
+              }
+            )}
             options={getAwsCredentialsFormManualOptions()}
             type={awsCredentialsType}
             onChange={(optionId: string) => {

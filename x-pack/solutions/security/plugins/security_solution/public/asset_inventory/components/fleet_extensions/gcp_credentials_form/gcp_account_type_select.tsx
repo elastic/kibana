@@ -21,16 +21,22 @@ type GcpAccountType = typeof GCP_SINGLE_ACCOUNT | typeof GCP_ORGANIZATION_ACCOUN
 const getGcpAccountTypeOptions = (): AssetRadioGroupProps['options'] => [
   {
     id: GCP_ORGANIZATION_ACCOUNT,
-    label: i18n.translate('xpack.csp.fleetIntegration.gcpAccountType.gcpOrganizationLabel', {
-      defaultMessage: 'GCP Organization',
-    }),
+    label: i18n.translate(
+      'xpack.securitySolution.assetInventory.fleetIntegration.gcpAccountType.gcpOrganizationLabel',
+      {
+        defaultMessage: 'GCP Organization',
+      }
+    ),
     testId: 'gcpOrganizationAccountTestId',
   },
   {
     id: GCP_SINGLE_ACCOUNT,
-    label: i18n.translate('xpack.csp.fleetIntegration.gcpAccountType.gcpSingleAccountLabel', {
-      defaultMessage: 'Single Project',
-    }),
+    label: i18n.translate(
+      'xpack.securitySolution.assetInventory.fleetIntegration.gcpAccountType.gcpSingleAccountLabel',
+      {
+        defaultMessage: 'Single Project',
+      }
+    ),
     testId: 'gcpSingleAccountTestId',
   },
 ];
@@ -114,7 +120,7 @@ export const GcpAccountTypeSelect = ({
     <>
       <EuiText color="subdued" size="s">
         <FormattedMessage
-          id="xpack.csp.fleetIntegration.gcpAccountTypeDescriptionLabel"
+          id="xpack.securitySolution.assetInventory.fleetIntegration.gcpAccountTypeDescriptionLabel"
           defaultMessage="Select between single project or organization, and then fill in the name and description to help identify this integration."
         />
       </EuiText>
@@ -133,7 +139,7 @@ export const GcpAccountTypeSelect = ({
           <EuiSpacer size="l" />
           <EuiText color="subdued" size="s">
             <FormattedMessage
-              id="xpack.csp.fleetIntegration.gcpAccountType.gcpOrganizationDescription"
+              id="xpack.securitySolution.assetInventory.fleetIntegration.gcpAccountType.gcpOrganizationDescription"
               defaultMessage="Connect Elastic to every GCP Project (current and future) in your environment by providing Elastic with read-only (configuration) access to your GCP organization"
             />
           </EuiText>
@@ -144,8 +150,8 @@ export const GcpAccountTypeSelect = ({
           <EuiSpacer size="l" />
           <EuiText color="subdued" size="s">
             <FormattedMessage
-              id="xpack.csp.fleetIntegration.gcpAccountType.gcpSingleAccountDescription"
-              defaultMessage="Deploying to a single project is suitable for an initial POC. To ensure complete coverage, it is strongly recommended to deploy CSPM at the organization-level, which automatically connects all projects (both current and future)."
+              id="xpack.securitySolution.assetInventory.fleetIntegration.gcpAccountType.gcpSingleAccountDescription"
+              defaultMessage="Deploying to a single project is suitable for an initial POC. To ensure complete coverage, it is strongly recommended to deploy Cloud Asset Inventory at the organization-level, which automatically connects all projects (both current and future)."
             />
           </EuiText>
         </>

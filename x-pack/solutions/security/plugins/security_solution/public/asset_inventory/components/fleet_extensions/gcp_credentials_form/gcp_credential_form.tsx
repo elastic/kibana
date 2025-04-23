@@ -30,7 +30,7 @@ import { RadioGroup } from '../asset_boxed_radio_group';
 import {
   fieldIsInvalid,
   findVariableDef,
-  getCspmCloudShellDefaultValue,
+  getAssetCloudShellDefaultValue,
   getAssetPolicy,
 } from '../utils';
 import { assetIntegrationDocsNavigation } from '../../../constants';
@@ -60,7 +60,7 @@ export const GCPSetupInfoContent = ({ isAgentless }: { isAgentless: boolean }) =
     <EuiTitle size="xs">
       <h2>
         <FormattedMessage
-          id="xpack.csp.gcpIntegration.setupInfoContentTitle"
+          id="xpack.securitySolution.assetInventory.fleetIntegration.gcpIntegration.setupInfoContentTitle"
           defaultMessage="Setup Access"
         />
       </h2>
@@ -69,14 +69,13 @@ export const GCPSetupInfoContent = ({ isAgentless }: { isAgentless: boolean }) =
     <EuiText color={'subdued'} size="s">
       {isAgentless ? (
         <FormattedMessage
-          id="xpack.csp.gcpIntegration.agentlessSetupInfoContent"
-          defaultMessage="The integration will need elevated access to run some CIS benchmark rules.You can follow these
-    step-by-step instructions to generate the necessary credentials. Refer to our {gettingStartedLink} guide for details."
+          id="xpack.securitySolution.assetInventory.fleetIntegration.gcpIntegration.agentlessSetupInfoContent"
+          defaultMessage="You can follow these step-by-step instructions to generate the necessary credentials. Refer to our {gettingStartedLink} guide for details."
           values={{
             gettingStartedLink: (
               <EuiLink href={assetIntegrationDocsNavigation.gcpGetStartedPath} target="_blank">
                 <FormattedMessage
-                  id="xpack.csp.azureIntegration.gettingStarted.agentlessSetupInfoContentLink"
+                  id="xpack.securitySolution.assetInventory.fleetIntegration.azureIntegration.gettingStarted.agentlessSetupInfoContentLink"
                   defaultMessage="Getting Started"
                 />
               </EuiLink>
@@ -85,15 +84,13 @@ export const GCPSetupInfoContent = ({ isAgentless }: { isAgentless: boolean }) =
         />
       ) : (
         <FormattedMessage
-          id="xpack.csp.gcpIntegration.setupInfoContent"
-          defaultMessage="The integration will need elevated access to run some CIS benchmark rules. Select your preferred
-method of providing the GCP credentials this integration will use. You can follow these
-step-by-step instructions to generate the necessary credentials. Refer to our {gettingStartedLink} guide for details."
+          id="xpack.securitySolution.assetInventory.fleetIntegration.gcpIntegration.setupInfoContent"
+          defaultMessage="Select your preferred method of providing the GCP credentials this integration will use. You can follow these step-by-step instructions to generate the necessary credentials. Refer to our {gettingStartedLink} guide for details."
           values={{
             gettingStartedLink: (
               <EuiLink href={assetIntegrationDocsNavigation.gcpGetStartedPath} target="_blank">
                 <FormattedMessage
-                  id="xpack.csp.azureIntegration.gettingStarted.setupInfoContentLink"
+                  id="xpack.securitySolution.assetInventory.fleetIntegration.azureIntegration.gettingStarted.setupInfoContentLink"
                   defaultMessage="Getting Started"
                 />
               </EuiLink>
@@ -146,27 +143,27 @@ const GoogleCloudShellSetup = ({
         >
           <li>
             <FormattedMessage
-              id="xpack.csp.gcpIntegration.cloudShellSetupStep.hostRequirement"
+              id="xpack.securitySolution.assetInventory.fleetIntegration.gcpIntegration.cloudShellSetupStep.hostRequirement"
               defaultMessage='Ensure "New hosts" is selected in the "Where to add this integration?" section below'
             />
           </li>
           <li>
             <FormattedMessage
-              id="xpack.csp.gcpIntegration.cloudShellSetupStep.login"
+              id="xpack.securitySolution.assetInventory.fleetIntegration.gcpIntegration.cloudShellSetupStep.login"
               defaultMessage="Log into your Google Cloud Console"
             />
           </li>
           {accountType === GCP_ORGANIZATION_ACCOUNT ? (
             <li>
               <FormattedMessage
-                id="xpack.csp.gcpIntegration.organizationCloudShellSetupStep.save"
+                id="xpack.securitySolution.assetInventory.fleetIntegration.gcpIntegration.organizationCloudShellSetupStep.save"
                 defaultMessage="Note down the GCP organization ID of the organization you wish to monitor and project ID where you want to provision resources for monitoring purposes and provide them in the input boxes below"
               />
             </li>
           ) : (
             <li>
               <FormattedMessage
-                id="xpack.csp.gcpIntegration.cloudShellSetupStep.save"
+                id="xpack.securitySolution.assetInventory.fleetIntegration.gcpIntegration.cloudShellSetupStep.save"
                 defaultMessage="Note down the GCP project ID of the project you wish to monitor"
               />
             </li>
@@ -174,7 +171,7 @@ const GoogleCloudShellSetup = ({
 
           <li>
             <FormattedMessage
-              id="xpack.csp.gcpIntegration.cloudShellSetupStep.launch"
+              id="xpack.securitySolution.assetInventory.fleetIntegration.gcpIntegration.cloudShellSetupStep.launch"
               defaultMessage='Click "Save and Continue" at the bottom right of the page. Then, on the pop-up modal, click "Launch Google Cloud Shell"'
             />
           </li>
@@ -226,16 +223,22 @@ const GoogleCloudShellSetup = ({
 
 const credentialOptionsList = [
   {
-    text: i18n.translate('xpack.csp.gcpIntegration.credentialsFileOption', {
-      defaultMessage: 'Credentials File',
-    }),
+    text: i18n.translate(
+      'xpack.securitySolution.assetInventory.fleetIntegration.gcpIntegration.credentialsFileOption',
+      {
+        defaultMessage: 'Credentials File',
+      }
+    ),
     value: GCP_CREDENTIALS_TYPE.CREDENTIALS_FILE,
     'data-test-subj': 'credentials_file_option_test_id',
   },
   {
-    text: i18n.translate('xpack.csp.gcpIntegration.credentialsJsonOption', {
-      defaultMessage: 'Credentials JSON',
-    }),
+    text: i18n.translate(
+      'xpack.securitySolution.assetInventory.fleetIntegration.gcpIntegration.credentialsJsonOption',
+      {
+        defaultMessage: 'Credentials JSON',
+      }
+    ),
     value: GCP_CREDENTIALS_TYPE.CREDENTIALS_JSON,
     'data-test-subj': 'credentials_json_option_test_id',
   },
@@ -253,33 +256,45 @@ interface GcpInputFields {
 export const gcpField: GcpInputFields = {
   fields: {
     'gcp.organization_id': {
-      label: i18n.translate('xpack.csp.gcpIntegration.organizationIdFieldLabel', {
-        defaultMessage: 'Organization ID',
-      }),
+      label: i18n.translate(
+        'xpack.securitySolution.assetInventory.fleetIntegration.gcpIntegration.organizationIdFieldLabel',
+        {
+          defaultMessage: 'Organization ID',
+        }
+      ),
       type: 'text',
     },
     'gcp.project_id': {
-      label: i18n.translate('xpack.csp.gcpIntegration.projectidFieldLabel', {
-        defaultMessage: 'Project ID',
-      }),
+      label: i18n.translate(
+        'xpack.securitySolution.assetInventory.fleetIntegration.gcpIntegration.projectidFieldLabel',
+        {
+          defaultMessage: 'Project ID',
+        }
+      ),
       type: 'text',
     },
     'gcp.credentials.file': {
-      label: i18n.translate('xpack.csp.findings.gcpIntegration.gcpInputText.credentialFileText', {
-        defaultMessage: 'Path to JSON file containing the credentials and key used to subscribe',
-      }),
+      label: i18n.translate(
+        'xpack.securitySolution.assetInventory.fleetIntegration.gcpIntegration.gcpInputText.credentialFileText',
+        {
+          defaultMessage: 'Path to JSON file containing the credentials and key used to subscribe',
+        }
+      ),
       type: 'text',
     },
     'gcp.credentials.json': {
-      label: i18n.translate('xpack.csp.findings.gcpIntegration.gcpInputText.credentialJSONText', {
-        defaultMessage: 'JSON blob containing the credentials and key used to subscribe',
-      }),
+      label: i18n.translate(
+        'xpack.securitySolution.assetInventory.fleetIntegration.gcpIntegration.gcpInputText.credentialJSONText',
+        {
+          defaultMessage: 'JSON blob containing the credentials and key used to subscribe',
+        }
+      ),
       type: 'password',
       isSecret: true,
     },
     'gcp.credentials.type': {
       label: i18n.translate(
-        'xpack.csp.findings.gcpIntegration.gcpInputText.credentialSelectBoxTitle',
+        'xpack.securitySolution.assetInventory.fleetIntegration.gcpIntegration.gcpInputText.credentialSelectBoxTitle',
         {
           defaultMessage: 'Credential',
         }
@@ -292,17 +307,23 @@ export const gcpField: GcpInputFields = {
 const getSetupFormatOptions = (): AssetRadioOption[] => [
   {
     id: GCP_SETUP_ACCESS.CLOUD_SHELL,
-    label: i18n.translate('xpack.csp.gcpIntegration.setupFormatOptions.googleCloudShell', {
-      defaultMessage: 'Google Cloud Shell',
-    }),
+    label: i18n.translate(
+      'xpack.securitySolution.assetInventory.fleetIntegration.gcpIntegration.setupFormatOptions.googleCloudShell',
+      {
+        defaultMessage: 'Google Cloud Shell',
+      }
+    ),
     disabled: false,
     testId: GCP_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJ.CLOUD_SHELL,
   },
   {
     id: GCP_SETUP_ACCESS.MANUAL,
-    label: i18n.translate('xpack.csp.gcpIntegration.setupFormatOptions.manual', {
-      defaultMessage: 'Manual',
-    }),
+    label: i18n.translate(
+      'xpack.securitySolution.assetInventory.fleetIntegration.gcpIntegration.setupFormatOptions.manual',
+      {
+        defaultMessage: 'Manual',
+      }
+    ),
     disabled: false,
     testId: GCP_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJ.MANUAL,
   },
@@ -396,7 +417,7 @@ const useCloudShellUrl = ({
       }
       return;
     }
-    const templateUrl = getCspmCloudShellDefaultValue(packageInfo);
+    const templateUrl = getAssetCloudShellDefaultValue(packageInfo);
 
     // If the template is not available, do not update the policy
     if (templateUrl === '') return;
@@ -549,7 +570,7 @@ export const GcpInputVarFields = ({
     hasInvalidRequiredVars
   );
   const organizationIdError = i18n.translate(
-    'xpack.csp.cspmIntegration.integration.fieldRequired',
+    'xpack.securitySolution.assetInventory.fleetIntegration.assetIntegration.integration.fieldRequired',
     {
       defaultMessage: '{field} is required',
       values: {
@@ -560,12 +581,15 @@ export const GcpInputVarFields = ({
 
   const projectIdFields = getFieldById('gcp.project_id');
   const projectIdValueInvalid = fieldIsInvalid(projectIdFields?.value, hasInvalidRequiredVars);
-  const projectIdError = i18n.translate('xpack.csp.cspmIntegration.integration.fieldRequired', {
-    defaultMessage: '{field} is required',
-    values: {
-      field: projectIdFields?.label,
-    },
-  });
+  const projectIdError = i18n.translate(
+    'xpack.securitySolution.assetInventory.fleetIntegration.assetIntegration.integration.fieldRequired',
+    {
+      defaultMessage: '{field} is required',
+      values: {
+        field: projectIdFields?.label,
+      },
+    }
+  );
 
   const credentialsTypeFields = getFieldById('gcp.credentials.type');
 
@@ -575,7 +599,7 @@ export const GcpInputVarFields = ({
     hasInvalidRequiredVars
   );
   const credentialFilesError = i18n.translate(
-    'xpack.csp.cspmIntegration.integration.fieldRequired',
+    'xpack.securitySolution.assetInventory.fleetIntegration.assetIntegration.integration.fieldRequired',
     {
       defaultMessage: '{field} is required',
       values: {
@@ -590,7 +614,7 @@ export const GcpInputVarFields = ({
     hasInvalidRequiredVars
   );
   const credentialJSONError = i18n.translate(
-    'xpack.csp.cspmIntegration.integration.fieldRequired',
+    'xpack.securitySolution.assetInventory.fleetIntegration.assetIntegration.integration.fieldRequired',
     {
       defaultMessage: '{field} is required',
       values: {

@@ -48,7 +48,7 @@ export const AzureSetupInfoContent = ({ documentationLink }: AzureSetupInfoConte
       <EuiTitle size="xs">
         <h2>
           <FormattedMessage
-            id="xpack.csp.azureIntegration.setupInfoContentTitle"
+            id="xpack.securitySolution.assetInventory.fleetIntegration.azureIntegration.setupInfoContentTitle"
             defaultMessage="Setup Access"
           />
         </h2>
@@ -56,13 +56,13 @@ export const AzureSetupInfoContent = ({ documentationLink }: AzureSetupInfoConte
       <EuiSpacer size="l" />
       <EuiText color="subdued" size="s">
         <FormattedMessage
-          id="xpack.csp.azureIntegration.gettingStarted.setupInfoContent"
-          defaultMessage="Utilize an Azure Resource Manager (ARM) template (a built-in Azure IaC tool) or a series of manual steps to set up and deploy CSPM for assessing your Azure environment's security posture. Refer to our {gettingStartedLink} guide for details."
+          id="xpack.securitySolution.assetInventory.fleetIntegration.azureIntegration.gettingStarted.setupInfoContent"
+          defaultMessage="Utilize an Azure Resource Manager (ARM) template (a built-in Azure IaC tool) or a series of manual steps to set up and deploy Cloud Asset Inventory for assessing your Azure environment's assets. Refer to our {gettingStartedLink} guide for details."
           values={{
             gettingStartedLink: (
               <EuiLink href={documentationLink} target="_blank">
                 <FormattedMessage
-                  id="xpack.csp.azureIntegration.gettingStarted.setupInfoContentLink"
+                  id="xpack.securitySolution.assetInventory.fleetIntegration.azureIntegration.gettingStarted.setupInfoContentLink"
                   defaultMessage="Getting Started"
                 />
               </EuiLink>
@@ -82,9 +82,12 @@ const getSetupFormatOptions = (): AssetRadioOption[] => [
   },
   {
     id: AZURE_SETUP_FORMAT.MANUAL,
-    label: i18n.translate('xpack.csp.azureIntegration.setupFormatOptions.manual', {
-      defaultMessage: 'Manual',
-    }),
+    label: i18n.translate(
+      'xpack.securitySolution.assetInventory.fleetIntegration.azureIntegration.setupFormatOptions.manual',
+      {
+        defaultMessage: 'Manual',
+      }
+    ),
     testId: CIS_AZURE_SETUP_FORMAT_TEST_SUBJECTS.MANUAL,
   },
 ];
@@ -112,25 +115,25 @@ const ArmTemplateSetup = () => {
         >
           <li>
             <FormattedMessage
-              id="xpack.csp.azureIntegration.armTemplateSetupStep.hostRequirement"
+              id="xpack.securitySolution.assetInventory.fleetIntegration.azureIntegration.armTemplateSetupStep.hostRequirement"
               defaultMessage='Ensure "New hosts" is selected in the "Where to add this integration?" section below'
             />
           </li>
           <li>
             <FormattedMessage
-              id="xpack.csp.azureIntegration.armTemplateSetupStep.login"
+              id="xpack.securitySolution.assetInventory.fleetIntegration.azureIntegration.armTemplateSetupStep.login"
               defaultMessage="Log in to your Azure portal."
             />
           </li>
           <li>
             <FormattedMessage
-              id="xpack.csp.azureIntegration.armTemplateSetupStep.save"
+              id="xpack.securitySolution.assetInventory.fleetIntegration.azureIntegration.armTemplateSetupStep.save"
               defaultMessage="Click the Save and continue button on the bottom right of this page."
             />
           </li>
           <li>
             <FormattedMessage
-              id="xpack.csp.azureIntegration.armTemplateSetupStep.launch"
+              id="xpack.securitySolution.assetInventory.fleetIntegration.azureIntegration.armTemplateSetupStep.launch"
               defaultMessage="On the subsequent pop-up modal, copy the relevant Bash command, then click on the Launch ARM Template button."
             />
           </li>
@@ -139,7 +142,7 @@ const ArmTemplateSetup = () => {
       <EuiSpacer size="l" />
       <EuiText color="subdued" size="s">
         <FormattedMessage
-          id="xpack.csp.azureIntegration.armTemplateSetupNote"
+          id="xpack.securitySolution.assetInventory.fleetIntegration.azureIntegration.armTemplateSetupNote"
           defaultMessage="Read the {documentation} for more details"
           values={{
             documentation: (
@@ -149,9 +152,12 @@ const ArmTemplateSetup = () => {
                 rel="noopener nofollow noreferrer"
                 data-test-subj="externalLink"
               >
-                {i18n.translate('xpack.csp.azureIntegration.documentationLinkText', {
-                  defaultMessage: 'documentation',
-                })}
+                {i18n.translate(
+                  'xpack.securitySolution.assetInventory.fleetIntegration.azureIntegration.documentationLinkText',
+                  {
+                    defaultMessage: 'documentation',
+                  }
+                )}
               </EuiLink>
             ),
           }}
@@ -170,9 +176,12 @@ const AzureCredentialTypeSelector = ({
 }) => (
   <EuiFormRow
     fullWidth
-    label={i18n.translate('xpack.csp.azureIntegration.azureCredentialTypeSelectorLabel', {
-      defaultMessage: 'Preferred manual method',
-    })}
+    label={i18n.translate(
+      'xpack.securitySolution.assetInventory.fleetIntegration.azureIntegration.azureCredentialTypeSelectorLabel',
+      {
+        defaultMessage: 'Preferred manual method',
+      }
+    )}
   >
     <EuiSelect
       fullWidth
@@ -201,12 +210,15 @@ export const AzureInputVarFields = ({
     <div>
       {fields.map((field, index) => {
         const invalid = fieldIsInvalid(field.value, hasInvalidRequiredVars);
-        const invalidError = i18n.translate('xpack.csp.cspmIntegration.integration.fieldRequired', {
-          defaultMessage: '{field} is required',
-          values: {
-            field: field.label,
-          },
-        });
+        const invalidError = i18n.translate(
+          'xpack.securitySolution.assetInventory.fleetIntegration.cspmIntegration.integration.fieldRequired',
+          {
+            defaultMessage: '{field} is required',
+            values: {
+              field: field.label,
+            },
+          }
+        );
         return (
           <div key={index}>
             {field.type === 'password' && field.isSecret === true && (
@@ -343,7 +355,7 @@ export const AzureCredentialsForm = ({
       <EuiSpacer size="m" />
       <EuiText color="subdued" size="s">
         <FormattedMessage
-          id="xpack.csp.azureIntegration.manualCredentialType.documentation"
+          id="xpack.securitySolution.assetInventory.fleetIntegration.azureIntegration.manualCredentialType.documentation"
           defaultMessage="Read the {documentation} for more details"
           values={{
             documentation: (
@@ -353,9 +365,12 @@ export const AzureCredentialsForm = ({
                 rel="noopener nofollow noreferrer"
                 data-test-subj="externalLink"
               >
-                {i18n.translate('xpack.csp.azureIntegration.documentationLinkText', {
-                  defaultMessage: 'documentation',
-                })}
+                {i18n.translate(
+                  'xpack.securitySolution.assetInventory.fleetIntegration.azureIntegration.documentationLinkText',
+                  {
+                    defaultMessage: 'documentation',
+                  }
+                )}
               </EuiLink>
             ),
           }}

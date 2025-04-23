@@ -26,16 +26,22 @@ const getAwsAccountTypeOptions = (): AssetRadioGroupProps['options'] => {
   return [
     {
       id: AWS_ORGANIZATION_ACCOUNT,
-      label: i18n.translate('xpack.csp.fleetIntegration.awsAccountType.awsOrganizationLabel', {
-        defaultMessage: 'AWS Organization',
-      }),
+      label: i18n.translate(
+        'xpack.securitySolution.assetInventory.fleetIntegration.awsAccountType.awsOrganizationLabel',
+        {
+          defaultMessage: 'AWS Organization',
+        }
+      ),
       testId: 'awsOrganizationTestId',
     },
     {
       id: AWS_SINGLE_ACCOUNT,
-      label: i18n.translate('xpack.csp.fleetIntegration.awsAccountType.singleAccountLabel', {
-        defaultMessage: 'Single Account',
-      }),
+      label: i18n.translate(
+        'xpack.securitySolution.assetInventory.fleetIntegration.awsAccountType.singleAccountLabel',
+        {
+          defaultMessage: 'Single Account',
+        }
+      ),
       testId: 'awsSingleTestId',
     },
   ];
@@ -74,7 +80,7 @@ export const AwsAccountTypeSelect = ({
     <>
       <EuiText color="subdued" size="s">
         <FormattedMessage
-          id="xpack.csp.fleetIntegration.awsAccountTypeDescriptionLabel"
+          id="xpack.securitySolution.assetInventory.fleetIntegration.awsAccountTypeDescriptionLabel"
           defaultMessage="Select between single account or organization, and then fill in the name and description to help identify this integration."
         />
       </EuiText>
@@ -100,7 +106,7 @@ export const AwsAccountTypeSelect = ({
           <EuiSpacer size="l" />
           <EuiText color="subdued" size="s">
             <FormattedMessage
-              id="xpack.csp.fleetIntegration.awsAccountType.awsOrganizationDescription"
+              id="xpack.securitySolution.assetInventory.fleetIntegration.awsAccountType.awsOrganizationDescription"
               defaultMessage="Connect Elastic to every AWS Account (current and future) in your environment by providing Elastic with read-only (configuration) access to your AWS organization."
             />
           </EuiText>
@@ -111,8 +117,8 @@ export const AwsAccountTypeSelect = ({
           <EuiSpacer size="l" />
           <EuiText color="subdued" size="s">
             <FormattedMessage
-              id="xpack.csp.fleetIntegration.awsAccountType.singleAccountDescription"
-              defaultMessage="Deploying to a single account is suitable for an initial POC. To ensure complete coverage, it is strongly recommended to deploy CSPM at the organization-level, which automatically connects all accounts (both current and future)."
+              id="xpack.securitySolution.assetInventory.fleetIntegration.awsAccountType.singleAccountDescription"
+              defaultMessage="Deploying to a single account is suitable for an initial POC. To ensure complete coverage, it is strongly recommended to deploy Cloud Asset Inventory at the organization-level, which automatically connects all accounts (both current and future)."
             />
           </EuiText>
         </>
