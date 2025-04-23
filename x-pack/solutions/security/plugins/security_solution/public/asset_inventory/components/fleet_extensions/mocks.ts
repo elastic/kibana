@@ -7,56 +7,19 @@
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
 import type { PackageInfo, PackagePolicyConfigRecord } from '@kbn/fleet-plugin/common';
 import { createNewPackagePolicyMock } from '@kbn/fleet-plugin/common/mocks';
-import { RegistryRelease, RegistryVarType } from '@kbn/fleet-plugin/common/types';
-import {
-  CLOUDBEAT_GCP,
-  CLOUDBEAT_AZURE,
-  CLOUDBEAT_EKS,
-  CLOUDBEAT_VANILLA,
-  CLOUDBEAT_AWS,
-  CLOUDBEAT_VULN_MGMT_AWS,
-} from '../../../common/constants';
-import type { PostureInput } from '../../../common/types_old';
+import type { RegistryRelease, RegistryVarType } from '@kbn/fleet-plugin/common/types';
+import { CLOUDBEAT_AWS } from './aws_credentials_form/constants';
+import { CLOUDBEAT_GCP } from './gcp_credentials_form/constants';
+import { CLOUDBEAT_AZURE } from './azure_credentials_form/constants';
+import type { AssetInput } from './types';
 
 export const getMockPolicyAWS = (vars?: PackagePolicyConfigRecord) =>
-  getPolicyMock(CLOUDBEAT_AWS, 'cspm', 'aws', vars);
+  getPolicyMock(CLOUDBEAT_AWS, 'asset_inventory', 'aws', vars);
 export const getMockPolicyGCP = (vars?: PackagePolicyConfigRecord) =>
-  getPolicyMock(CLOUDBEAT_GCP, 'cspm', 'gcp', vars);
+  getPolicyMock(CLOUDBEAT_GCP, 'asset_inventory', 'gcp', vars);
 export const getMockPolicyAzure = (vars?: PackagePolicyConfigRecord) =>
-  getPolicyMock(CLOUDBEAT_AZURE, 'cspm', 'azure', vars);
-export const getMockPolicyK8s = () => getPolicyMock(CLOUDBEAT_VANILLA, 'kspm', 'self_managed');
-export const getMockPolicyEKS = (vars?: PackagePolicyConfigRecord) =>
-  getPolicyMock(CLOUDBEAT_EKS, 'kspm', 'eks', vars);
-export const getMockPolicyVulnMgmtAWS = () =>
-  getPolicyMock(CLOUDBEAT_VULN_MGMT_AWS, 'vuln_mgmt', 'aws');
+  getPolicyMock(CLOUDBEAT_AZURE, 'asset_inventory', 'azure', vars);
 export const getMockPackageInfo = () => getPackageInfoMock();
-
-export const getMockPackageInfoVulnMgmtAWS = () => {
-  return {
-    policy_templates: [
-      {
-        title: '',
-        description: '',
-        name: 'vuln_mgmt',
-        inputs: [
-          {
-            type: 'cloudbeat/vuln_mgmt_aws',
-            title: '',
-            description: '',
-            vars: [
-              {
-                type: 'text',
-                name: 'cloud_formation_template',
-                default: 's3_url',
-                show_user: false,
-              },
-            ],
-          },
-        ],
-      },
-    ],
-  } as PackageInfo;
-};
 
 export const getMockPackageInfoCspmAWS = (packageVersion = '1.5.0') => {
   return {
@@ -132,7 +95,7 @@ export const getMockPackageInfoCspmAzure = (packageVersion = '1.6.0') => {
 };
 
 const getPolicyMock = (
-  type: PostureInput,
+  type: AssetInput,
   posture: string,
   deployment: string,
   vars: object = {}
@@ -147,16 +110,6 @@ const getPolicyMock = (
     credential_profile_name: { type: 'text' },
     role_arn: { type: 'text' },
     'aws.credentials.type': { value: 'cloud_formation', type: 'text' },
-  };
-
-  const eksVarsMock = {
-    access_key_id: { type: 'text' },
-    secret_access_key: { type: 'password', isSecret: true },
-    session_token: { type: 'text' },
-    shared_credential_file: { type: 'text' },
-    credential_profile_name: { type: 'text' },
-    role_arn: { type: 'text' },
-    'aws.credentials.type': { value: 'assume_role', type: 'text' },
   };
 
   const gcpVarsMock = {
@@ -199,26 +152,8 @@ const getPolicyMock = (
     },
     inputs: [
       {
-        type: CLOUDBEAT_VANILLA,
-        policy_template: 'kspm',
-        enabled: type === CLOUDBEAT_VANILLA,
-        streams: [{ enabled: type === CLOUDBEAT_VANILLA, data_stream: dataStream }],
-      },
-      {
-        type: CLOUDBEAT_EKS,
-        policy_template: 'kspm',
-        enabled: type === CLOUDBEAT_EKS,
-        streams: [
-          {
-            enabled: type === CLOUDBEAT_EKS,
-            data_stream: dataStream,
-            vars: { ...eksVarsMock, ...vars },
-          },
-        ],
-      },
-      {
         type: CLOUDBEAT_AWS,
-        policy_template: 'cspm',
+        policy_template: 'asset_inventory',
         enabled: type === CLOUDBEAT_AWS,
         streams: [
           {
@@ -252,12 +187,6 @@ const getPolicyMock = (
           },
         ],
       },
-      {
-        type: CLOUDBEAT_VULN_MGMT_AWS,
-        policy_template: 'vuln_mgmt',
-        enabled: type === CLOUDBEAT_VULN_MGMT_AWS,
-        streams: [{ enabled: type === CLOUDBEAT_VULN_MGMT_AWS, data_stream: dataStream }],
-      },
     ],
   };
 };
@@ -279,19 +208,6 @@ export const getPackageInfoMock = () => {
             input: 'cloudbeat/asset_inventory_aws',
             template_path: 'aws.yml.hbs',
             title: 'CIS AWS Benchmark',
-            vars: [
-              {
-                name: 'secret_access_key',
-                title: 'Secret Access Key',
-                secret: true,
-                type: 'text' as RegistryVarType,
-              },
-            ],
-          },
-          {
-            input: 'cloudbeat/cis_eks',
-            template_path: 'eks.yml.hbs',
-            title: 'Amazon EKS Benchmark',
             vars: [
               {
                 name: 'secret_access_key',
