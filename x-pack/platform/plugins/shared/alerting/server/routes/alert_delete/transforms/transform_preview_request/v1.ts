@@ -10,8 +10,6 @@ import type { AlertDeleteCategoryIds } from '../../../../../common/constants/ale
 import type { AlertDeletePreviewQueryV1 } from '../../../../../common/routes/alert_delete';
 
 export const transformRequestToAlertDeletePreview = ({
-  is_active_alert_delete_enabled: isActiveAlertDeleteEnabled,
-  is_inactive_alert_delete_enabled: isInactiveAlertDeleteEnabled,
   active_alert_delete_threshold: activeAlertDeleteThreshold,
   inactive_alert_delete_threshold: inactiveAlertDeleteThreshold,
   category_ids: _categoryIds,
@@ -23,11 +21,14 @@ export const transformRequestToAlertDeletePreview = ({
     return Array.isArray(input) ? input : [input];
   };
 
+  const isActiveAlertDeleteEnabled = Boolean(activeAlertDeleteThreshold);
+  const isInactiveAlertDeleteEnabled = Boolean(inactiveAlertDeleteThreshold);
+
   return {
     isActiveAlertDeleteEnabled,
     isInactiveAlertDeleteEnabled,
-    activeAlertDeleteThreshold,
-    inactiveAlertDeleteThreshold,
+    activeAlertDeleteThreshold: activeAlertDeleteThreshold ?? 1,
+    inactiveAlertDeleteThreshold: inactiveAlertDeleteThreshold ?? 1,
     categoryIds: getCategoryIds(_categoryIds),
   };
 };

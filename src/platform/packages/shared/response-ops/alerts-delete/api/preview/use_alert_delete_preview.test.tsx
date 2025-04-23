@@ -40,8 +40,6 @@ describe('useAlertDeletePreview', () => {
           services: { http },
           isEnabled: true,
           queryParams: {
-            isActiveAlertDeleteEnabled: true,
-            isInactiveAlertDeleteEnabled: false,
             activeAlertDeleteThreshold: 10,
             inactiveAlertDeleteThreshold: 0,
             categoryIds: ['observability'],
@@ -50,19 +48,35 @@ describe('useAlertDeletePreview', () => {
       { wrapper }
     );
 
-    await waitFor(() => expect(result.current.affectedAlertsCount).toBeTruthy());
+    await waitFor(() => expect(result.current.data?.affectedAlertCount).toBeTruthy());
 
     expect(alertDeletePreviewApiCall).toHaveBeenCalledWith({
       services: { http },
       requestQuery: {
-        isActiveAlertDeleteEnabled: true,
-        isInactiveAlertDeleteEnabled: false,
         activeAlertDeleteThreshold: 10,
         inactiveAlertDeleteThreshold: 0,
         categoryIds: ['observability'],
       },
     });
-    expect(result.current.affectedAlertsCount).toBe(42);
+    expect(result.current.data?.affectedAlertCount).toBe(42);
+  });
+
+  it('should not include thresholds when not enabled', () => {
+    renderHook(
+      () =>
+        useAlertDeletePreview({
+          services: { http },
+          isEnabled: false,
+          queryParams: {
+            activeAlertDeleteThreshold: 0,
+            inactiveAlertDeleteThreshold: 0,
+            categoryIds: ['securitySolution'],
+          },
+        }),
+      { wrapper }
+    );
+
+    expect(alertDeletePreviewApiCall).not.toHaveBeenCalled();
   });
 
   it('handles API errors gracefully', async () => {
@@ -74,8 +88,6 @@ describe('useAlertDeletePreview', () => {
           services: { http },
           isEnabled: true,
           queryParams: {
-            isActiveAlertDeleteEnabled: true,
-            isInactiveAlertDeleteEnabled: false,
             activeAlertDeleteThreshold: 1,
             inactiveAlertDeleteThreshold: 0,
             categoryIds: ['securitySolution'],
@@ -85,6 +97,6 @@ describe('useAlertDeletePreview', () => {
     );
 
     expect(alertDeletePreviewApiCall).toHaveBeenCalled();
-    expect(result.current.affectedAlertsCount).toBe(undefined);
+    expect(result.current.data?.affectedAlertCount).toBe(undefined);
   });
 });

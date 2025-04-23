@@ -38,6 +38,12 @@ describe('alertDeletePreviewRoute', () => {
       }),
       expect.any(Function)
     );
+    expect(router.get).toHaveBeenCalledWith(
+      expect.objectContaining({
+        options: expect.objectContaining({ access: 'internal' }),
+      }),
+      expect.any(Function)
+    );
   });
 
   it('gets the amount of affected alerts', async () => {
@@ -62,10 +68,8 @@ describe('alertDeletePreviewRoute', () => {
       },
       {
         query: {
-          isActiveAlertDeleteEnabled: true,
-          isInactiveAlertDeleteEnabled: true,
-          activeAlertDeleteThreshold: 100,
-          inactiveAlertDeleteThreshold: 100,
+          active_alert_delete_threshold: 100,
+          inactive_alert_delete_threshold: 100,
         },
       },
       ['ok']
@@ -83,6 +87,35 @@ describe('alertDeletePreviewRoute', () => {
       body: {
         affected_alert_count: 100,
       },
+    });
+  });
+
+  it('returns badRequest if both thresholds are undefined', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+
+    alertDeletePreviewRoute(router, licenseState);
+
+    const [, handler] = router.get.mock.calls[0];
+
+    const [context, req, res] = mockHandlerArguments(
+      {
+        alertDeletionClient,
+        rulesClient,
+      },
+      {
+        query: {
+          active_alert_delete_threshold: undefined,
+          inactive_alert_delete_threshold: undefined,
+        },
+      },
+      ['badRequest']
+    );
+
+    await handler(context, req, res);
+
+    expect(res.badRequest).toHaveBeenCalledWith({
+      body: 'Both active_alert_delete_threshold and inactive_alert_delete_threshold cannot be undefined.',
     });
   });
 });

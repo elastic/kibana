@@ -10,29 +10,22 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import type { HttpStart } from '@kbn/core-http-browser';
-import type { RulesSettingsAlertDeleteProperties } from '@kbn/alerting-types/rule_settings';
 import useDebounce from 'react-use/lib/useDebounce';
+import type { AlertDeletePreviewQuery } from '@kbn/alerting-plugin/common/routes/alert_delete';
+import type { SnakeToCamelCase } from '@kbn/cases-plugin/common/types';
 import { alertDeletePreviewApiCall } from './alert_delete_preview_api_call';
 
 export interface UseAlertDeletePreviewParams {
   isEnabled: boolean;
   services: { http: HttpStart };
-  queryParams: RulesSettingsAlertDeleteProperties;
+  queryParams: SnakeToCamelCase<AlertDeletePreviewQuery>;
 }
 export const useAlertDeletePreview = ({
   isEnabled,
   services: { http },
-  queryParams: {
-    isActiveAlertDeleteEnabled,
-    isInactiveAlertDeleteEnabled,
-    activeAlertDeleteThreshold,
-    inactiveAlertDeleteThreshold,
-    categoryIds,
-  },
+  queryParams: { activeAlertDeleteThreshold, inactiveAlertDeleteThreshold, categoryIds },
 }: UseAlertDeletePreviewParams) => {
   const [params, setParams] = useState({
-    isActiveAlertDeleteEnabled,
-    isInactiveAlertDeleteEnabled,
     activeAlertDeleteThreshold,
     inactiveAlertDeleteThreshold,
     categoryIds,
@@ -41,26 +34,18 @@ export const useAlertDeletePreview = ({
   useDebounce(
     () => {
       setParams({
-        isActiveAlertDeleteEnabled,
-        isInactiveAlertDeleteEnabled,
         activeAlertDeleteThreshold,
         inactiveAlertDeleteThreshold,
         categoryIds,
       });
     },
     500,
-    [
-      isActiveAlertDeleteEnabled,
-      isInactiveAlertDeleteEnabled,
-      activeAlertDeleteThreshold,
-      inactiveAlertDeleteThreshold,
-      categoryIds,
-    ]
+    [activeAlertDeleteThreshold, inactiveAlertDeleteThreshold, categoryIds]
   );
 
   const key = ['alertDeletePreview', params];
 
-  const { data } = useQuery({
+  return useQuery({
     queryKey: key,
     queryFn: () => {
       return alertDeletePreviewApiCall({
@@ -69,11 +54,9 @@ export const useAlertDeletePreview = ({
       });
     },
     keepPreviousData: true,
+    staleTime: 1000 * 60, // 1 minutes
     enabled:
-      isEnabled && (params.isActiveAlertDeleteEnabled || params.isInactiveAlertDeleteEnabled),
+      isEnabled &&
+      (Boolean(params.activeAlertDeleteThreshold) || Boolean(params.inactiveAlertDeleteThreshold)),
   });
-
-  return {
-    affectedAlertsCount: data?.affectedAlertCount,
-  };
 };

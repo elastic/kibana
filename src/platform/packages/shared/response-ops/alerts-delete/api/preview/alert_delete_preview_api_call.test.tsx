@@ -23,8 +23,6 @@ describe('alertDeletePreviewApiCall', () => {
     const result = await alertDeletePreviewApiCall({
       services: { http },
       requestQuery: {
-        isActiveAlertDeleteEnabled: true,
-        isInactiveAlertDeleteEnabled: false,
         activeAlertDeleteThreshold: 10,
         inactiveAlertDeleteThreshold: 0,
         categoryIds: ['management'],
@@ -32,11 +30,9 @@ describe('alertDeletePreviewApiCall', () => {
     });
 
     expect(http.get).toHaveBeenCalledWith(
-      expect.stringContaining('_alert_delete_preview'),
+      expect.stringContaining('/internal/alerting/rules/settings/_alert_delete_preview'),
       expect.objectContaining({
         query: {
-          is_active_alert_delete_enabled: true,
-          is_inactive_alert_delete_enabled: false,
           active_alert_delete_threshold: 10,
           inactive_alert_delete_threshold: 0,
           category_ids: ['management'],
@@ -54,8 +50,6 @@ describe('alertDeletePreviewApiCall', () => {
       alertDeletePreviewApiCall({
         services: { http },
         requestQuery: {
-          isActiveAlertDeleteEnabled: true,
-          isInactiveAlertDeleteEnabled: false,
           activeAlertDeleteThreshold: 1,
           inactiveAlertDeleteThreshold: 0,
           categoryIds: ['management'],

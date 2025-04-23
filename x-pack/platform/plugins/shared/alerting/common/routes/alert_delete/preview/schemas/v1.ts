@@ -9,33 +9,25 @@ import { schema } from '@kbn/config-schema';
 import { alertDeleteCategoryIds } from '../../../../constants';
 
 export const alertDeletePreviewQuerySchema = schema.object({
-  is_active_alert_delete_enabled: schema.boolean({
-    meta: {
-      description: 'Enable deletion of active alerts when set to true',
-    },
-  }),
-  active_alert_delete_threshold: schema.number({
-    min: 1,
-    max: 1000,
-    meta: {
-      description:
-        'Threshold (in days) for deleting active alerts older than this value, applies only when deletion is enabled',
-    },
-  }),
-  is_inactive_alert_delete_enabled: schema.boolean({
-    meta: {
-      description:
-        'Enable deletion of inactive alerts (recovered/closed/untracked) when set to true',
-    },
-  }),
-  inactive_alert_delete_threshold: schema.number({
-    min: 1,
-    max: 1000,
-    meta: {
-      description:
-        'Threshold (in days) for deleting inactive alerts (recovered/closed/untracked) older than this value, applies only when deletion is enabled',
-    },
-  }),
+  active_alert_delete_threshold: schema.maybe(
+    schema.number({
+      min: 1,
+      max: 1000,
+      meta: {
+        description: 'Threshold (in days) for deleting active alerts older than this value',
+      },
+    })
+  ),
+  inactive_alert_delete_threshold: schema.maybe(
+    schema.number({
+      min: 1,
+      max: 1000,
+      meta: {
+        description:
+          'Threshold (in days) for deleting inactive alerts (recovered/closed/untracked) older than this value',
+      },
+    })
+  ),
   category_ids: schema.maybe(
     schema.oneOf([
       schema.arrayOf(

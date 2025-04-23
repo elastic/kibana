@@ -165,34 +165,35 @@ export const AlertDeleteModal = ({
   const isValidThreshold =
     validations.isActiveThresholdValid && validations.isInactiveThresholdValid;
 
-  const { affectedAlertsCount: previewAffectedAlertsCount } = useAlertDeletePreview({
+  const {
+    data: { affectedAlertCount: previewAffectedAlertsCount } = { affectedAlertCount: undefined },
+  } = useAlertDeletePreview({
     services: {
       http,
     },
     isEnabled: isValidThreshold,
     queryParams: {
-      isActiveAlertDeleteEnabled: activeState.checked,
-      isInactiveAlertDeleteEnabled: inactiveState.checked,
-      activeAlertDeleteThreshold: getThresholdInDays(
-        activeState.threshold,
-        activeState.thresholdUnit
-      ),
-      inactiveAlertDeleteThreshold: getThresholdInDays(
-        inactiveState.threshold,
-        inactiveState.thresholdUnit
-      ),
+      activeAlertDeleteThreshold: activeState.checked
+        ? getThresholdInDays(activeState.threshold, activeState.thresholdUnit)
+        : undefined,
+      inactiveAlertDeleteThreshold: inactiveState.checked
+        ? getThresholdInDays(inactiveState.threshold, inactiveState.thresholdUnit)
+        : undefined,
       categoryIds,
     },
   });
+
+  const currentSettingsWouldDeleteAlerts =
+    (activeState.checked || inactiveState.checked) &&
+    previewAffectedAlertsCount &&
+    previewAffectedAlertsCount > 0;
 
   const isFormValid =
     validations.isDeleteConfirmationValid &&
     validations.isActiveThresholdValid &&
     validations.isInactiveThresholdValid &&
     deleteConfirmation.length > 0 &&
-    (activeState.checked || inactiveState.checked) &&
-    previewAffectedAlertsCount &&
-    previewAffectedAlertsCount > 0;
+    currentSettingsWouldDeleteAlerts;
 
   const activeAlertsCallbacks = {
     onChangeEnabled: (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -348,11 +349,7 @@ export const AlertDeleteModal = ({
           >
             <EuiFieldText
               value={deleteConfirmation}
-              disabled={
-                isDisabled ||
-                (!activeState.checked && !inactiveState.checked) ||
-                previewAffectedAlertsCount === 0
-              }
+              disabled={isDisabled || !currentSettingsWouldDeleteAlerts}
               onChange={onChangeDeleteConfirmation}
               data-test-subj="alert-delete-delete-confirmation"
             />

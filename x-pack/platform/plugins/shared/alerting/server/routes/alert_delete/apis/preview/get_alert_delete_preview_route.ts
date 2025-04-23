@@ -45,6 +45,12 @@ export const alertDeletePreviewRoute = (
         const spaceId = rulesClient.getSpaceId();
         const settings = transformRequestToAlertDeletePreviewV1(req.query);
 
+        if (!settings.isActiveAlertDeleteEnabled && !settings.isInactiveAlertDeleteEnabled) {
+          return res.badRequest({
+            body: 'Both active_alert_delete_threshold and inactive_alert_delete_threshold cannot be undefined.',
+          });
+        }
+
         const affectedAlertCount = await alertDeletionClient.previewTask(
           settings,
           spaceId || 'default'
