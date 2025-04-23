@@ -35,7 +35,7 @@ import {
   useUpdateCustomIntegration,
 } from '../../../../../../../hooks';
 
-import type { PackageInfo } from '../../../../../types';
+import type { PackageInfo, PackageSpecCategory } from '../../../../../types';
 
 export const EditIntegrationFlyout: React.FunctionComponent<{
   onClose: () => void;
@@ -46,7 +46,7 @@ export const EditIntegrationFlyout: React.FunctionComponent<{
   integration: string | null;
   services: FleetStartServices;
   onComplete: (arg0: {}) => void;
-  existingCategories: string[];
+  existingCategories: Array<PackageSpecCategory | undefined>;
 }> = ({
   onClose,
   integrationName,
