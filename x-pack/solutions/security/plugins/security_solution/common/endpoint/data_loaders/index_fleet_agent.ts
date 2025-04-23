@@ -16,6 +16,7 @@ import { AGENTS_INDEX } from '@kbn/fleet-plugin/common';
 import type { DeepPartial } from 'utility-types';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { usageTracker } from './usage_tracker';
 import type { HostMetadata } from '../types';
 import { FleetAgentGenerator } from '../data_generators/fleet_agent_generator';
 import { createToolingLogger, wrapErrorAndRejectPromise } from './utils';
@@ -27,12 +28,58 @@ export interface IndexedFleetAgentResponse {
   fleetAgentsIndex: string;
 }
 
+/**
+ * Indexes a Fleet Agent
+ * (NOTE: ensure that fleet is setup first before calling this loading function)
+ *
+ * @param esClient
+ * @param endpointHost
+ * @param agentPolicyId
+ * @param [kibanaVersion]
+ * @param [fleetAgentGenerator]
+ */
+export const indexFleetAgentForHost = usageTracker.track(
+  'indexFleetAgentForHost',
+  async (
+    esClient: Client,
+    endpointHost: HostMetadata,
+    agentPolicyId: string,
+    kibanaVersion: string = '8.0.0',
+    fleetAgentGenerator: FleetAgentGenerator = defaultFleetAgentGenerator,
+    spaceId: string | string[] = DEFAULT_SPACE_ID
+  ): Promise<IndexedFleetAgentResponse> => {
+    const agentDoc = generateFleetAgentEsHitForEndpointHost(
+      endpointHost,
+      agentPolicyId,
+      kibanaVersion,
+      fleetAgentGenerator,
+      spaceId
+    );
+
+    await esClient
+      .index<FleetServerAgent>({
+        index: agentDoc._index,
+        id: agentDoc._id,
+        body: agentDoc._source,
+        op_type: 'create',
+        refresh: 'wait_for',
+      })
+      .catch(wrapErrorAndRejectPromise);
+
+    return {
+      fleetAgentsIndex: agentDoc._index,
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      agents: [agentDoc._source!],
+    };
+  }
+);
+
 const generateFleetAgentEsHitForEndpointHost = (
   endpointHost: HostMetadata,
   agentPolicyId: string,
   kibanaVersion: string = '8.0.0',
   fleetAgentGenerator: FleetAgentGenerator = defaultFleetAgentGenerator,
-  spaceId: string = DEFAULT_SPACE_ID
+  spaceId: string | string[] = DEFAULT_SPACE_ID
 ) => {
   return fleetAgentGenerator.generateEsHit({
     _id: endpointHost.agent.id,
@@ -56,7 +103,7 @@ const generateFleetAgentEsHitForEndpointHost = (
         },
       },
       policy_id: agentPolicyId,
-      namespaces: [spaceId],
+      namespaces: Array.isArray(spaceId) ? spaceId : [spaceId],
     },
   });
 };
