@@ -92,6 +92,6 @@ export async function ensureTemplatesAndIndexCreated(
 }
 
 export async function setuplockManagerIndex(esClient: ElasticsearchClient, logger: Logger) {
-  await removeLockIndexWithIncorrectMappings(esClient, logger); // TODO: should be remove in the future (after 9.1). See https://github.com/elastic/kibana/issues/218944
+  await removeLockIndexWithIncorrectMappings(esClient, logger); // TODO: should be removed in the future (after 9.1). See https://github.com/elastic/kibana/issues/218944
   await ensureTemplatesAndIndexCreated(esClient, logger);
 }
