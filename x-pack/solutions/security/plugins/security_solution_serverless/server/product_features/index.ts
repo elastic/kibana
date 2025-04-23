@@ -61,15 +61,23 @@ export const registerProductFeatures = (
 };
 
 /**
- * Get the security product tier from the security product type in the config
+ * Get the security product tier from the security product type in the config. If not available, will check aiSoc
+ * product type and return the search_ai_lake tier.
  */
 export const getSecurityProductTier = (config: ServerlessSecurityConfig, logger: Logger): Tier => {
   const securityProductType = config.productTypes.find(
     (productType) => productType.product_line === ProductLine.security
   );
-  const tier = securityProductType ? securityProductType.product_tier : 'none';
+  const ai4SocProductType = config.productTypes.find(
+    (productType) => productType.product_line === ProductLine.aiSoc
+  );
+  const tier = securityProductType
+    ? securityProductType.product_tier
+    : ai4SocProductType
+    ? ai4SocProductType.product_tier
+    : 'none';
   if (tier === 'none') {
-    logger.error(`Failed to fetch security product tier, config: ${JSON.stringify(config)}`);
+    logger.error(`Failed to fetch security/aiSoc product tier, config: ${JSON.stringify(config)}`);
   }
 
   return tier;
