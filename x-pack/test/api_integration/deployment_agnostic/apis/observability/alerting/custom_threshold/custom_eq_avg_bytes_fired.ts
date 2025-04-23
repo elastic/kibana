@@ -37,7 +37,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const expectedConsumer = isServerless ? 'observability' : 'logs';
 
   // Failing: See https://github.com/elastic/kibana/issues/218881
-  describe.skip('CUSTOM_EQ - AVG - BYTES - FIRED', () => {
+  describe('CUSTOM_EQ - AVG - BYTES - FIRED', () => {
     const CUSTOM_THRESHOLD_RULE_ALERT_INDEX = '.alerts-observability.threshold.alerts-default';
     const DATA_VIEW = 'kbn-data-forge-fake_hosts.fake_hosts-*';
     const ALERT_ACTION_INDEX = 'alert-action-threshold';
