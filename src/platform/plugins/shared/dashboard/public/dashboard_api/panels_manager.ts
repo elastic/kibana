@@ -112,23 +112,24 @@ export function initializePanelsManager(
   };
 
   const resetPanels = (lastSavedPanels: DashboardPanelMap) => {
-    const { layout, childState: resetChildState } = deserializePanels(lastSavedPanels);
+    const { layout: lastSavedLayout, childState: lstSavedChildState } = deserializePanels(lastSavedPanels);
 
-    layout$.next(layout);
-    currentChildState = resetChildState;
-    let resetChangedPanelCount = false;
-    const currentChildren = children$.value;
+    layout$.next(lastSavedLayout);
+    currentChildState = lstSavedChildState;
+    let childrenModified = false;
+    const currentChildren = { ...children$.value };
     for (const uuid of Object.keys(currentChildren)) {
-      if (layout[uuid]) {
+      if (lastSavedLayout[uuid]) {
         const child = currentChildren[uuid];
         if (apiPublishesUnsavedChanges(child)) child.resetUnsavedChanges();
       } else {
         // if reset resulted in panel removal, we need to update the list of children
         delete currentChildren[uuid];
-        resetChangedPanelCount = true;
+        delete currentChildState[uuid];
+        childrenModified = true;
       }
     }
-    if (resetChangedPanelCount) children$.next(currentChildren);
+    if (childrenModified) children$.next(currentChildren);
   };
 
   // --------------------------------------------------------------------------------------

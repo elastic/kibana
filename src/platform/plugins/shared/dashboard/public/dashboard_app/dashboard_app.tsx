@@ -43,13 +43,10 @@ import {
   getSessionURLObservable,
   removeSearchSessionIdFromURL,
 } from './url/search_sessions_integration';
-import {
-  loadAndRemoveDashboardState,
-  startSyncingExpandedPanelState,
-  type SharedDashboardState,
-} from './url/url_utils';
+import { loadAndRemoveDashboardState, startSyncingExpandedPanelState } from './url/url_utils';
 import { DashboardRenderer } from '../dashboard_renderer/dashboard_renderer';
 import { DASHBOARD_STATE_STORAGE_KEY, createDashboardEditUrl } from '../utils/urls';
+import { SharedDashboardState } from '../dashboard_api/types';
 
 export interface DashboardAppProps {
   history: History;
