@@ -24,41 +24,46 @@ export const getInlineQueryNode = ({ model, logger }: GetInlineQueryNodeParams):
     // Check before to avoid unnecessary LLM calls
     let unsupportedComment = getUnsupportedComment(query);
     if (unsupportedComment) {
-      return { comments: [generateAssistantComment(unsupportedComment)] };
-    }
-    if (!isEmpty(state.resources)) {
-      const replaceQueryParser = new StringOutputParser();
-      const replaceQueryResourcePrompt =
-        REPLACE_QUERY_RESOURCE_PROMPT.pipe(model).pipe(replaceQueryParser);
-      const resourceContext = getResourcesContext(state.resources);
-      const response = await replaceQueryResourcePrompt.invoke({
-        query: state.original_rule.query,
-        macros: resourceContext.macros,
-        lookups: resourceContext.lookups,
-      });
-      const inlineQuery = response.match(/```spl\n([\s\S]*?)\n```/)?.[1].trim() ?? '';
-      if (!inlineQuery) {
-        logger.warn('Failed to retrieve inline query');
-        const summary = '## Inlining Summary\n\nFailed to retrieve inline query';
-        return {
-          inline_query: query,
-          comments: [generateAssistantComment(summary)],
-        };
-      }
-
-      // Check after replacing in case the replacements made it untranslatable
-      unsupportedComment = getUnsupportedComment(inlineQuery);
-      if (unsupportedComment) {
-        return { comments: [generateAssistantComment(unsupportedComment)] };
-      }
-
-      const inliningSummary = response.match(/## Inlining Summary[\s\S]*$/)?.[0] ?? '';
       return {
-        inline_query: inlineQuery,
-        comments: [generateAssistantComment(cleanMarkdown(inliningSummary))],
+        inline_query: undefined, // No inline query if unsupported to jump to the end of the graph
+        comments: [generateAssistantComment(unsupportedComment)],
       };
     }
-    return { inline_query: query };
+
+    if (isEmpty(state.resources)) {
+      return { inline_query: query };
+    }
+
+    const replaceQueryParser = new StringOutputParser();
+    const replaceQueryResourcePrompt =
+      REPLACE_QUERY_RESOURCE_PROMPT.pipe(model).pipe(replaceQueryParser);
+    const resourceContext = getResourcesContext(state.resources);
+    const response = await replaceQueryResourcePrompt.invoke({
+      query: state.original_rule.query,
+      macros: resourceContext.macros,
+      lookups: resourceContext.lookups,
+    });
+    const inlineQuery = response.match(/```spl\n([\s\S]*?)\n```/)?.[1].trim() ?? '';
+    if (!inlineQuery) {
+      logger.warn('Failed to retrieve inline query');
+      const summary = '## Inlining Summary\n\nFailed to retrieve inline query';
+      return {
+        inline_query: query,
+        comments: [generateAssistantComment(summary)],
+      };
+    }
+
+    // Check after replacing in case the replacements made it untranslatable
+    unsupportedComment = getUnsupportedComment(inlineQuery);
+    if (unsupportedComment) {
+      return { comments: [generateAssistantComment(unsupportedComment)] };
+    }
+
+    const inliningSummary = response.match(/## Inlining Summary[\s\S]*$/)?.[0] ?? '';
+    return {
+      inline_query: inlineQuery,
+      comments: [generateAssistantComment(cleanMarkdown(inliningSummary))],
+    };
   };
 };
 

@@ -48,8 +48,9 @@ export const registerSiemRuleMigrationsRoutes = (
 
   registerSiemRuleMigrationsGetMissingPrivilegesRoute(router, logger);
 
-  // Use the same experimental feature flag as the assistant model evaluation for now
   if (config.experimentalFeatures.assistantModelEvaluation) {
+    // Use the same experimental feature flag as the assistant model evaluation.
+    // This route is not intended to be used by the end user, but rather for internal purposes.
     registerSiemRuleMigrationsEvaluateRoute(router, logger);
   }
 };

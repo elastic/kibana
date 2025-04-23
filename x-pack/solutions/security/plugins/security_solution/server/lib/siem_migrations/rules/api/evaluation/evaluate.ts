@@ -72,7 +72,7 @@ export const registerSiemRuleMigrationsEvaluateRoute = (
             return res.ok({ body: { evaluationId } });
           } catch (err) {
             logger.error(err);
-            return res.customError({ body: err.message, statusCode: err.statusCode ?? 400 });
+            return res.customError({ body: err.message, statusCode: err.statusCode ?? 500 });
           }
         }
       )
