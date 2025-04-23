@@ -47,7 +47,10 @@ import { registerCaseFileKinds } from './files';
 import type { ConfigType } from './config';
 import { registerConnectorTypes } from './connectors';
 import { registerSavedObjects } from './saved_object_types';
-import { createCasesAnalyticsIndices } from './cases_analytics_index';
+import {
+  createCasesAnalyticsIndices,
+  registerCasesAnalyticsIndicesTasks,
+} from './cases_analytics_index';
 
 export class CasePlugin
   implements
@@ -78,7 +81,10 @@ export class CasePlugin
     this.userProfileService = new UserProfileService(this.logger);
   }
 
-  public setup(core: CoreSetup, plugins: CasesServerSetupDependencies): CasesServerSetup {
+  public setup(
+    core: CoreSetup<CasesServerStartDependencies>,
+    plugins: CasesServerSetupDependencies
+  ): CasesServerSetup {
     this.logger.debug(
       `Setting up Case Workflow with core contract [${Object.keys(
         core
@@ -91,6 +97,11 @@ export class CasePlugin
     );
 
     registerCaseFileKinds(this.caseConfig.files, plugins.files, core.security.fips.isEnabled());
+    registerCasesAnalyticsIndicesTasks({
+      taskManagerSetup: plugins.taskManager,
+      logger: this.logger,
+      core,
+    });
 
     this.securityPluginSetup = plugins.security;
     this.lensEmbeddableFactory = plugins.lens.lensEmbeddableFactory;
@@ -194,8 +205,8 @@ export class CasePlugin
     createCasesAnalyticsIndices({
       esClient: core.elasticsearch.client.asInternalUser,
       logger: this.logger,
-      // TODO
-      isServerless: false,
+      isServerless: false, // todo
+      taskManager: plugins.taskManager,
     });
 
     this.userProfileService.initialize({
