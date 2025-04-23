@@ -203,9 +203,7 @@ export const NodeSquare = ({
             ellipsisMode && (
               <ValueInner aria-label={nodeAriaLabel}>
                 {}
-                <Label color={color}>
-                  {i18n.translate('xpack.infra.nodeSquare.label.Label', { defaultMessage: '...' })}
-                </Label>
+                <Label color={color}>{'...'}</Label>
               </ValueInner>
             )
           )}
