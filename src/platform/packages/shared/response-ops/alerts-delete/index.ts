@@ -15,6 +15,7 @@ export {
   useAlertDeletePreview,
 } from './api/preview/use_alert_delete_preview';
 export {
-  type AlertDeletePreviewApiCallParams,
+  type GetAlertDeletePreviewParams,
+  type GetAlertDeletePreviewResponse,
   getAlertDeletePreview,
 } from './api/preview/get_alert_delete_preview';

@@ -15,16 +15,16 @@ import type { HttpStart } from '@kbn/core/public';
 import type { SnakeToCamelCase } from '@kbn/cases-plugin/common/types';
 import { INTERNAL_BASE_ALERTING_API_PATH } from '../../constants';
 
-export type AlertDeletePreviewApiCallResponse = SnakeToCamelCase<AlertDeletePreviewResponse>;
+export type GetAlertDeletePreviewResponse = SnakeToCamelCase<AlertDeletePreviewResponse>;
 
-export interface AlertDeletePreviewApiCallParams {
+export interface GetAlertDeletePreviewParams {
   services: { http: HttpStart };
   requestQuery: SnakeToCamelCase<AlertDeletePreviewQuery>;
 }
 export const getAlertDeletePreview = async ({
   services: { http },
   requestQuery: { activeAlertDeleteThreshold, inactiveAlertDeleteThreshold, categoryIds },
-}: AlertDeletePreviewApiCallParams): Promise<AlertDeletePreviewApiCallResponse> => {
+}: GetAlertDeletePreviewParams): Promise<GetAlertDeletePreviewResponse> => {
   const { affected_alert_count: affectedAlertCount } = await http.get<AlertDeletePreviewResponse>(
     `${INTERNAL_BASE_ALERTING_API_PATH}/rules/settings/_alert_delete_preview`,
     {
