@@ -173,6 +173,18 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
       getTrainedModelsProvider: this.options.getTrainedModelsProvider,
     });
 
+  public createInferenceEndpoint = async (): Promise<void> => {
+    const esClient = await this.options.elasticsearchClientPromise;
+
+    await createInferenceEndpoint({
+      elserId: await this.options.getElserId(),
+      esClient,
+      logger: this.options.logger,
+      inferenceId: await getInferenceEndpointId({ esClient }),
+      getTrainedModelsProvider: this.options.getTrainedModelsProvider,
+    });
+  };
+
   /**
    * Downloads and deploys recommended ELSER (if not already), then loads ES|QL docs
    *
@@ -922,8 +934,6 @@ export const hasDedicatedInferenceEndpointIndexEntries = async ({
     // Track if we've already created an inference endpoint to ensure we only create it once
     let inferenceEndpointUsed = false;
 
-    logger.error(`hassdddd ${index}`);
-
     // Pull knowledge base entries of type "index"
     const results = await findDocuments<EsIndexEntry>({
       perPage: 100,
@@ -1138,8 +1148,6 @@ export const ensureDedicatedInferenceEndpoint = async ({
       logger,
     });
 
-    logger.error(`isEndpointUsed ${isEndpointUsed}`);
-
     const inferenceEndpointExists = await isInferenceEndpointExists({
       elserId,
       esClient,
@@ -1147,8 +1155,6 @@ export const ensureDedicatedInferenceEndpoint = async ({
       getTrainedModelsProvider,
       logger,
     });
-
-    logger.error(`inferenceEndpointExists ${inferenceEndpointExists}`);
 
     if (!isEndpointUsed) {
       if (inferenceEndpointExists) {
