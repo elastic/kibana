@@ -29,6 +29,7 @@ import type { DefaultAlert, FieldMap } from '@kbn/alerts-as-data-utils';
 import type { Alert } from '@kbn/alerts-as-data-utils';
 import type { ActionsApiRequestHandlerContext, ActionsClient } from '@kbn/actions-plugin/server';
 import type { AlertsHealth, RuleTypeSolution } from '@kbn/alerting-types';
+import type { TaskPriority } from '@kbn/task-manager-plugin/server';
 import type { RuleTypeRegistry as OrigruleTypeRegistry } from './rule_type_registry';
 import type { AlertingServerSetup, AlertingServerStart } from './plugin';
 import type { RulesClient } from './rules_client';
@@ -337,6 +338,11 @@ export interface RuleType<
    */
   autoRecoverAlerts?: boolean;
   getViewInAppRelativeUrl?: GetViewInAppRelativeUrlFn<Params>;
+  /**
+   * Task priority allowing for tasks to be ran at lower priority, defaults to
+   * normal priority.
+   */
+  priority?: TaskPriority;
 }
 export type UntypedRuleType = RuleType<
   RuleTypeParams,

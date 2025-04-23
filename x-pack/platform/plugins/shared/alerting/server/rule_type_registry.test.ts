@@ -19,6 +19,7 @@ import { alertsServiceMock } from './alerts_service/alerts_service.mock';
 import { schema } from '@kbn/config-schema';
 import type { RecoveredActionGroupId } from '../common';
 import type { AlertingConfig } from './config';
+import { TaskPriority } from '@kbn/task-manager-plugin/server';
 
 const logger = loggingSystemMock.create().get();
 let mockedLicenseState: jest.Mocked<ILicenseState>;
@@ -497,6 +498,70 @@ describe('Create Lifecycle', () => {
         ...actionGroups,
         { id: 'recovered', name: 'Recovered' },
       ]);
+    });
+
+    test('allows RuleType to specify a priority', () => {
+      const ruleType: RuleType<never, never, never, never, never, 'default', 'backToAwesome', {}> =
+        {
+          id: 'test',
+          name: 'Test',
+          actionGroups: [
+            {
+              id: 'default',
+              name: 'Default',
+            },
+          ],
+          defaultActionGroupId: 'default',
+          recoveryActionGroup: {
+            id: 'backToAwesome',
+            name: 'Back To Awesome',
+          },
+          priority: TaskPriority.Low,
+          executor: jest.fn(),
+          category: 'test',
+          producer: 'alerts',
+          solution: 'stack',
+          minimumLicenseRequired: 'basic',
+          isExportable: true,
+          validate: {
+            params: { validate: (params) => params },
+          },
+        };
+      const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
+      registry.register(ruleType);
+    });
+
+    test('throws if RuleType priority provided is invalid', () => {
+      const ruleType: RuleType<never, never, never, never, never, 'default', 'backToAwesome', {}> =
+        {
+          id: 'test',
+          name: 'Test',
+          actionGroups: [
+            {
+              id: 'default',
+              name: 'Default',
+            },
+          ],
+          defaultActionGroupId: 'default',
+          recoveryActionGroup: {
+            id: 'backToAwesome',
+            name: 'Back To Awesome',
+          },
+          priority: 100 as TaskPriority,
+          executor: jest.fn(),
+          category: 'test',
+          producer: 'alerts',
+          solution: 'stack',
+          minimumLicenseRequired: 'basic',
+          isExportable: true,
+          validate: {
+            params: { validate: (params) => params },
+          },
+        };
+      const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
+      expect(() => registry.register(ruleType)).toThrowError(
+        new Error(`Rule type \"test\" has invalid priority: 100.`)
+      );
     });
 
     test('throws if the custom recovery group is contained in the RuleType action groups', () => {

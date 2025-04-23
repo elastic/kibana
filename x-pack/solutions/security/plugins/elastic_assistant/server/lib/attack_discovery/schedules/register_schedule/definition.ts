@@ -11,6 +11,7 @@ import {
   AttackDiscoveryScheduleParams,
 } from '@kbn/elastic-assistant-common';
 
+import { TaskPriority } from '@kbn/task-manager-plugin/server';
 import { ATTACK_DISCOVERY_ALERTS_AAD_CONFIG } from '../constants';
 import { AttackDiscoveryExecutorOptions, AttackDiscoveryScheduleType } from '../types';
 import { attackDiscoveryScheduleExecutor } from './executor';
@@ -30,6 +31,7 @@ export const getAttackDiscoveryScheduleType = ({
     category: DEFAULT_APP_CATEGORIES.security.id,
     producer: 'assistant',
     solution: 'security',
+    priority: TaskPriority.Low,
     validate: {
       params: {
         validate: (object: unknown) => {

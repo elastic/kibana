@@ -13,6 +13,7 @@ import {
 
 import { getAttackDiscoveryScheduleType } from '.';
 import { ATTACK_DISCOVERY_ALERTS_AAD_CONFIG } from '../constants';
+import { TaskPriority } from '@kbn/task-manager-plugin/server';
 
 describe('getAttackDiscoveryScheduleType', () => {
   const mockLogger = loggerMock.create();
@@ -33,6 +34,7 @@ describe('getAttackDiscoveryScheduleType', () => {
         category: 'securitySolution',
         producer: 'assistant',
         solution: 'security',
+        priority: TaskPriority.Low,
         schemas: {
           params: { type: 'zod', schema: AttackDiscoveryScheduleParams },
         },
