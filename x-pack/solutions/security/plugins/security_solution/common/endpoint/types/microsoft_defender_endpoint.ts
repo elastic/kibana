@@ -14,7 +14,7 @@ export interface MicrosoftDefenderEndpointActionRequestCommonMeta {
  * The log record that is ingested into Elasticsearch by the Microsoft Defender for Endpoint integration
  *
  * NOTE:  not all properties are currently mapped below. Check the index definition if wanting to
- *        see what else is available and add it bellow if needed
+ *        see what else is available and add it below if needed
  */
 export interface MicrosoftDefenderEndpointLogEsDoc {
   agent: {
