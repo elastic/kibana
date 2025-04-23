@@ -211,7 +211,7 @@ export const AUTHENTICATION_OAUTH2 = i18n.translate(
   }
 );
 
-export const INVALID_JSON_FORMAT = i18n.translate(
+export const INVALID_JSON = i18n.translate(
   'xpack.stackConnectors.components.otherFieldsFormatErrorMessage',
   {
     defaultMessage: 'Invalid JSON',

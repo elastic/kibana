@@ -74,7 +74,6 @@ export const JsonEditorWithMessageVariables: React.FunctionComponent<Props> = ({
   isOptionalField = false,
   readOnly = false,
 }) => {
-  console.log('readOnly', readOnly);
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor>();
   const editorDisposables = useRef<monaco.IDisposable[]>([]);
   const [showErrorMessage, setShowErrorMessage] = useState(false);

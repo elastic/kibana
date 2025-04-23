@@ -24,7 +24,7 @@ const jsonValidator = ({ value }: ValidationFuncArg<any, string | null | undefin
     JSON.parse(value);
     return undefined;
   } catch (e) {
-    return { message: i18n.INVALID_JSON_FORMAT };
+    return { message: i18n.INVALID_JSON };
   }
 };
 
