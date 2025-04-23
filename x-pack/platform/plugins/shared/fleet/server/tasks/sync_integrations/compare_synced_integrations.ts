@@ -298,6 +298,7 @@ const compareCustomAssets = ({
       if (ccrCustomAsset.is_deleted === true) {
         return {
           ...result,
+          is_deleted: true,
           sync_status: SyncStatus.COMPLETED,
         };
       }
@@ -317,12 +318,14 @@ const compareCustomAssets = ({
       if (latestCustomAssetError) {
         return {
           ...result,
+          is_deleted: true,
           sync_status: SyncStatus.FAILED,
           error: latestFailedErrorMessage,
         };
       }
       return {
         ...result,
+        is_deleted: true,
         sync_status: SyncStatus.SYNCHRONIZING,
       };
     } else if (
@@ -364,6 +367,7 @@ const compareCustomAssets = ({
       if (ccrCustomAsset.is_deleted === true) {
         return {
           ...result,
+          is_deleted: true,
           sync_status: SyncStatus.COMPLETED,
         };
       }
@@ -383,12 +387,14 @@ const compareCustomAssets = ({
       if (latestCustomAssetError) {
         return {
           ...result,
+          is_deleted: true,
           sync_status: SyncStatus.FAILED,
           error: latestFailedErrorMessage,
         };
       }
       return {
         ...result,
+        is_deleted: true,
         sync_status: SyncStatus.SYNCHRONIZING,
       };
     } else if (isEqual(installedCompTemplate, ccrCustomAsset?.template)) {

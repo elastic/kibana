@@ -1205,6 +1205,7 @@ describe('fetchAndCompareSyncedIntegrations', () => {
       expect(res).toEqual({
         custom_assets: {
           'component_template:logs-system.auth@custom': {
+            is_deleted: true,
             name: 'logs-system.auth@custom',
             package_name: 'system',
             package_version: '1.67.3',
@@ -1212,6 +1213,7 @@ describe('fetchAndCompareSyncedIntegrations', () => {
             type: 'component_template',
           },
           'ingest_pipeline:logs-system.auth@custom': {
+            is_deleted: true,
             name: 'logs-system.auth@custom',
             package_name: 'system',
             package_version: '1.67.3',
@@ -1292,6 +1294,7 @@ describe('fetchAndCompareSyncedIntegrations', () => {
       expect(res).toEqual({
         custom_assets: {
           'component_template:logs-system.auth@custom': {
+            is_deleted: true,
             name: 'logs-system.auth@custom',
             package_name: 'system',
             package_version: '1.67.3',
@@ -1299,6 +1302,7 @@ describe('fetchAndCompareSyncedIntegrations', () => {
             type: 'component_template',
           },
           'ingest_pipeline:logs-system.auth@custom': {
+            is_deleted: true,
             name: 'logs-system.auth@custom',
             package_name: 'system',
             package_version: '1.67.3',

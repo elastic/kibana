@@ -18,6 +18,7 @@ import {
   EuiCallOut,
   EuiIcon,
   EuiLoadingSpinner,
+  EuiBadge,
 } from '@elastic/eui';
 
 import type { EuiAccordionProps } from '@elastic/eui/src/components/accordion';
@@ -185,7 +186,23 @@ export const IntegrationStatus: React.FunctionComponent<{
             <EuiAccordion
               id={`${customAsset.type}:${customAsset.name}`}
               key={`${customAsset.type}:${customAsset.name}`}
-              buttonContent={customAsset.name}
+              buttonContent={
+                <EuiFlexGroup alignItems="baseline" gutterSize="xs">
+                  <EuiFlexItem grow={false}>
+                    <EuiText size="s">{customAsset.name}</EuiText>
+                  </EuiFlexItem>
+                  {customAsset.is_deleted && (
+                    <EuiFlexItem grow={false}>
+                      <EuiBadge color="hollow">
+                        <FormattedMessage
+                          id="xpack.fleet.integrationSyncStatus.deletedText"
+                          defaultMessage="Deleted"
+                        />
+                      </EuiBadge>
+                    </EuiFlexItem>
+                  )}
+                </EuiFlexGroup>
+              }
               data-test-subj={`${customAsset.type}:${customAsset.name}-accordion`}
               extraAction={
                 customAsset.sync_status === SyncStatus.SYNCHRONIZING ? (
