@@ -14,6 +14,7 @@ import {
   contentPackIncludedObjectsSchema,
   isIncludeAll,
 } from '@kbn/content-packs-schema';
+import { STREAMS_FEATURE_PRIVILEGES } from '../../../common/constants';
 import { Asset } from '../../../common';
 import { DashboardAsset, DashboardLink } from '../../../common/assets';
 import { createServerRoute } from '../create_server_route';
@@ -50,9 +51,7 @@ const exportContentRoute = createServerRoute({
   }),
   security: {
     authz: {
-      enabled: false,
-      reason:
-        'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
+      requiredPrivileges: [STREAMS_FEATURE_PRIVILEGES.assets],
     },
   },
   async handler({ params, request, response, getScopedClients, context }) {

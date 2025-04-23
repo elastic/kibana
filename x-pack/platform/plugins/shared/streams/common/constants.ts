@@ -6,3 +6,8 @@
  */
 
 export const ASSET_VERSION = 1;
+
+export const STREAMS_FEATURE_PRIVILEGES = {
+  assets: 'manage_assets',
+  show: 'show',
+} as const;

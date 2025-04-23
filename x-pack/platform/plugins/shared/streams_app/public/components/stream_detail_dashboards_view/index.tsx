@@ -56,7 +56,14 @@ export function StreamDetailDashboardsView({
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const {
-    core: { featureFlags },
+    core: {
+      featureFlags,
+      application: {
+        capabilities: {
+          streams: { link_assets: canLinkAssets },
+        },
+      },
+    },
   } = useKibana();
 
   const renderContentPackItems = featureFlags.getBooleanValue(
@@ -124,6 +131,7 @@ export function StreamDetailDashboardsView({
                   iconType="importAction"
                   iconSide="left"
                   color="primary"
+                  disabled={!canLinkAssets}
                   onClick={() => setIsPopoverOpen(true)}
                 >
                   {i18n.translate(
@@ -182,6 +190,7 @@ export function StreamDetailDashboardsView({
             <EuiButton
               data-test-subj="streamsAppStreamDetailAddDashboardButton"
               iconType="plusInCircle"
+              disabled={!canLinkAssets}
               onClick={() => {
                 setIsAddDashboardFlyoutOpen(true);
               }}
@@ -199,7 +208,7 @@ export function StreamDetailDashboardsView({
           dashboards={filteredDashboards}
           loading={dashboardsFetch.loading}
           selectedDashboards={selectedDashboards}
-          setSelectedDashboards={setSelectedDashboards}
+          setSelectedDashboards={canLinkAssets ? setSelectedDashboards : undefined}
         />
         {definition && isAddDashboardFlyoutOpen ? (
           <AddDashboardFlyout

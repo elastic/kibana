@@ -7,6 +7,7 @@
 
 import { z } from '@kbn/zod';
 import { conflict } from '@hapi/boom';
+import { STREAMS_FEATURE_PRIVILEGES } from '../../../../common/constants';
 import { NameTakenError } from '../../../lib/streams/errors/name_taken_error';
 import { DisableStreamsResponse, EnableStreamsResponse } from '../../../lib/streams/client';
 import { createServerRoute } from '../../create_server_route';
@@ -60,9 +61,7 @@ export const disableStreamsRoute = createServerRoute({
   },
   security: {
     authz: {
-      enabled: false,
-      reason:
-        'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
+      requiredPrivileges: [STREAMS_FEATURE_PRIVILEGES.assets],
     },
   },
   handler: async ({ request, getScopedClients }): Promise<DisableStreamsResponse> => {
