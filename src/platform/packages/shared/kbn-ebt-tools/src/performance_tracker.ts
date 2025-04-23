@@ -80,6 +80,7 @@ interface PerformanceTrackerOptions {
  */
 export const createPerformanceTracker = ({ type, instance, logger }: PerformanceTrackerOptions) => {
   const id = uuidv4();
+  const isProduction = process.env.NODE_ENV === 'production';
   const createMarkName = (name: string) => `${type}:${instance}:${name}`;
 
   return {
@@ -89,10 +90,12 @@ export const createPerformanceTracker = ({ type, instance, logger }: Performance
      * @returns The created performance mark
      */
     mark: (name: PerformanceTrackerMarks) => {
-      try {
-        performance.mark(createMarkName(name), { detail: { id } });
-      } catch (error) {
-        logger?.error('Error creating performance mark:', error);
+      if (!isProduction) {
+        try {
+          performance.mark(createMarkName(name), { detail: { id } });
+        } catch (error) {
+          logger?.error('Error creating performance mark:', error);
+        }
       }
     },
   };

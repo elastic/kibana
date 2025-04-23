@@ -131,10 +131,10 @@ function reportPerformanceMetrics({
 }) {
   const duration =
     loadType === 'dashboardSubsequentLoad' ? timeToData : Math.max(timeToData, totalLoadTime);
-
   const groupedPerformanceMarkers = getPerformanceTrackersGroupedById(
     PERFORMANCE_TRACKER_TYPES.LENS
   );
+  const isProduction = process.env.NODE_ENV === 'production';
 
   // `groupedPerformanceMarkers` is a map of performance markers grouped by id.
   // Each group contains the performance markers for a single Lens embeddable.
@@ -157,18 +157,20 @@ function reportPerformanceMetrics({
       marker.name.endsWith(`:${PERFORMANCE_TRACKER_MARKS.RENDER_COMPLETE}`)
     )?.startTime;
 
-    if (markerName && preRenderStart && renderStart) {
-      performance.measure(`${markerName}:${PERFORMANCE_TRACKER_MEASURES.PRE_RENDER_DURATION}`, {
-        start: preRenderStart,
-        end: renderStart,
-      });
-    }
+    if (!isProduction && markerName) {
+      if (preRenderStart && renderStart) {
+        performance.measure(`${markerName}:${PERFORMANCE_TRACKER_MEASURES.PRE_RENDER_DURATION}`, {
+          start: preRenderStart,
+          end: renderStart,
+        });
+      }
 
-    if (markerName && renderComplete && renderStart) {
-      performance.measure(`${markerName}:${PERFORMANCE_TRACKER_MEASURES.RENDER_DURATION}`, {
-        start: renderStart,
-        end: renderComplete,
-      });
+      if (renderComplete && renderStart) {
+        performance.measure(`${markerName}:${PERFORMANCE_TRACKER_MEASURES.RENDER_DURATION}`, {
+          start: renderStart,
+          end: renderComplete,
+        });
+      }
     }
 
     return {
