@@ -120,7 +120,8 @@ export function useMonitorFiltersState() {
         const currentUseLogicalAndFor = urlParams.useLogicalAndFor || [];
         newUrlParams.useLogicalAndFor = serializeFilterValue(
           'useLogicalAndFor',
-          isLogicalAND
+          // When all the values are deselected remove the useLogicalAndFor for the field
+          isLogicalAND && selectedValues?.length
             ? [...currentUseLogicalAndFor, field]
             : currentUseLogicalAndFor.filter((item: string) => item !== field)
         );
