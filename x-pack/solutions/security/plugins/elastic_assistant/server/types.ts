@@ -40,17 +40,12 @@ import {
   LicensingApiRequestHandlerContext,
   LicensingPluginStart,
 } from '@kbn/licensing-plugin/server';
-import {
-  ActionsClientChatBedrockConverse,
-  ActionsClientChatOpenAI,
-  ActionsClientChatVertexAI,
-  ActionsClientGeminiChatModel,
-  ActionsClientLlm,
-} from '@kbn/langchain/server';
+import { ActionsClientLlm } from '@kbn/langchain/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 
 import { ProductDocBaseStartContract } from '@kbn/product-doc-base-plugin/server';
 import { AlertingServerSetup, AlertingServerStart } from '@kbn/alerting-plugin/server';
+import { InferenceChatModel } from '@kbn/inference-langchain';
 import type { GetAIAssistantKnowledgeBaseDataClientParams } from './ai_assistant_data_clients/knowledge_base';
 import { AttackDiscoveryDataClient } from './lib/attack_discovery/persistence';
 import {
@@ -245,12 +240,6 @@ export interface AssistantTool {
   getTool: (params: AssistantToolParams) => StructuredToolInterface | null;
 }
 
-export type AssistantToolLlm =
-  | ActionsClientChatBedrockConverse
-  | ActionsClientChatOpenAI
-  | ActionsClientGeminiChatModel
-  | ActionsClientChatVertexAI;
-
 export interface AssistantToolParams {
   alertsIndexPattern?: string;
   assistantContext?: ElasticAssistantApiRequestHandlerContext;
@@ -263,7 +252,7 @@ export interface AssistantToolParams {
   esClient: ElasticsearchClient;
   kbDataClient?: AIAssistantKnowledgeBaseDataClient;
   langChainTimeout?: number;
-  llm?: ActionsClientLlm | AssistantToolLlm;
+  llm?: ActionsClientLlm | InferenceChatModel;
   llmTasks?: LlmTasksPluginStart;
   isOssModel?: boolean;
   logger: Logger;
@@ -276,8 +265,5 @@ export interface AssistantToolParams {
   >;
   size?: number;
   telemetry?: AnalyticsServiceSetup;
-  createLlmInstance?: () =>
-    | ActionsClientChatBedrockConverse
-    | ActionsClientChatVertexAI
-    | ActionsClientChatOpenAI;
+  createLlmInstance?: () => Promise<InferenceChatModel>;
 }

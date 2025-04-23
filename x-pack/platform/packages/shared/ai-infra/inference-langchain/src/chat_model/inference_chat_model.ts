@@ -97,6 +97,7 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
 
   protected temperature?: number;
   protected functionCallingMode?: FunctionCallingMode;
+  protected maxRetries?: number;
   protected model?: string;
   protected signal?: AbortSignal;
 
@@ -109,6 +110,8 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
     this.functionCallingMode = args.functionCallingMode;
     this.model = args.model;
     this.signal = args.signal;
+    this.maxRetries = args.maxRetries;
+    this.metadata = args.metadata;
   }
 
   static lc_name() {
@@ -183,6 +186,8 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
       tools: options.tools ? toolDefinitionToInference(options.tools) : undefined,
       toolChoice: options.tool_choice ? toolChoiceToInference(options.tool_choice) : undefined,
       abortSignal: options.signal ?? this.signal,
+      maxRetries: this.maxRetries,
+      metadata: this.metadata,
     };
   }
 
