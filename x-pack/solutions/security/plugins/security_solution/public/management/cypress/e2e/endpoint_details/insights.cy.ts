@@ -163,6 +163,11 @@ describe(
 
       it('should requery until all expected insights are received', () => {
         interceptPostDefendInsightsApiCall();
+        stubDefendInsightsApiResponse({
+          status: 'succeeded',
+          insights: [],
+        });
+
         loadEndpointDetailsFlyout(endpointId);
         clickScanButton();
         scanButtonShouldBe('disabled');
@@ -177,10 +182,12 @@ describe(
         expectPostDefendInsightsApiToBeCalled();
         expectDefendInsightsApiToBeCalled();
         expectWorkflowInsightsApiToBeCalled();
+        scanButtonShouldBe('disabled');
 
         // should be called again since workflow insights is still 0
         expectWorkflowInsightsApiToBeCalled();
         insightsEmptyResultsCalloutDoesNotExist();
+        scanButtonShouldBe('disabled');
 
         // workflow insights is now 2
         stubWorkflowInsightsApiResponse(endpointId, 2);
@@ -188,9 +195,11 @@ describe(
         // insights should be displayed now
         expectWorkflowInsightsApiToBeCalled();
         insightsResultExists();
+        scanButtonShouldBe('enabled');
 
-        // confirm that workflow insights is not called again
+        // ensure that GET workflow insights is not called again
         cy.get('@getWorkflowInsights.all').should('have.length', 3);
+        // eslint-disable-next-line cypress/no-unnecessary-waiting
         cy.wait(3000);
         cy.get('@getWorkflowInsights.all').should('have.length', 3);
       });
