@@ -53606,7 +53606,7 @@
     },
     "/api/streams/{name}/content/export": {
       "post": {
-        "description": "Exports the content associated to a stream.",
+        "description": "Exports the content associated to a stream.<br/><br/>[Required authorization] Route required privileges: manage_content_pack.",
         "operationId": "post-streams-name-content-export",
         "parameters": [
           {
@@ -53713,7 +53713,7 @@
     },
     "/api/streams/{name}/content/import": {
       "post": {
-        "description": "Links content objects to a stream.",
+        "description": "Links content objects to a stream.<br/><br/>[Required authorization] Route required privileges: manage_content_pack.",
         "operationId": "post-streams-name-content-import",
         "parameters": [
           {
