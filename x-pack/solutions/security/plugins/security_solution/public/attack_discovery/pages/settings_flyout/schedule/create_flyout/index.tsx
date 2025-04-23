@@ -16,8 +16,7 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { useAssistantContext, useLoadConnectors } from '@kbn/elastic-assistant';
-
-import * as i18n from './translations';
+import type { AttackDiscoveryStats } from '@kbn/elastic-assistant-common';
 
 import { useKibana } from '../../../../../common/lib/kibana';
 import { useSourcererDataView } from '../../../../../sourcerer/containers';
@@ -26,13 +25,15 @@ import { MIN_FLYOUT_WIDTH } from '../../constants';
 import { useEditForm } from '../edit_form';
 import type { AttackDiscoveryScheduleSchema } from '../edit_form/types';
 import { useCreateAttackDiscoverySchedule } from '../logic/use_create_schedule';
+import * as i18n from './translations';
 import { convertFormDataInBaseSchedule } from '../utils/convert_form_data';
 
 interface Props {
   onClose: () => void;
+  stats: AttackDiscoveryStats | null;
 }
 
-export const CreateFlyout: React.FC<Props> = React.memo(({ onClose }) => {
+export const CreateFlyout: React.FC<Props> = React.memo(({ onClose, stats }) => {
   const flyoutTitleId = useGeneratedHtmlId({
     prefix: 'attackDiscoveryScheduleCreateFlyoutTitle',
   });
@@ -86,6 +87,7 @@ export const CreateFlyout: React.FC<Props> = React.memo(({ onClose }) => {
     isLoading: isLoadingConnectors || isLoadingQuery,
     onSave: onCreateSchedule,
     saveButtonTitle: i18n.SCHEDULE_CREATE_BUTTON_TITLE,
+    stats,
   });
 
   return (
