@@ -1428,7 +1428,7 @@ src/platform/plugins/shared/discover/public/context_awareness/profile_providers/
 /x-pack/test/functional/services/monitoring @elastic/stack-monitoring
 /x-pack/test/functional/apps/monitoring @elastic/stack-monitoring
 /x-pack/test/api_integration/apis/monitoring @elastic/stack-monitoring
-/x-pack/test/api_integration/apis/monitoring_collection @elastic/stack-monitoring
+/x-pack/platform/test/api_integration/apis/monitoring_collection @elastic/stack-monitoring
 /x-pack/test/accessibility/apps/group1/kibana_overview.ts @elastic/stack-monitoring
 /x-pack/test/accessibility/apps/group3/stack_monitoring.ts @elastic/stack-monitoring
 
