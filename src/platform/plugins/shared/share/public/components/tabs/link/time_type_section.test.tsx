@@ -7,10 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
+import React, { ComponentProps } from 'react';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { render, screen } from '@testing-library/react';
 import { TimeTypeSection } from './time_type_section';
 import * as timeUtils from '../../../lib/time_utils';
+
+const renderComponent = (props: ComponentProps<typeof TimeTypeSection>) => {
+  render(
+    <IntlProvider locale="en">
+      <TimeTypeSection {...props} />
+    </IntlProvider>
+  );
+};
 
 describe('TimeTypeSection', () => {
   beforeEach(() => {
@@ -30,90 +39,108 @@ describe('TimeTypeSection', () => {
   });
 
   it('renders null when timeRange is not provided', () => {
-    const component = mountWithIntl(
-      <TimeTypeSection isAbsoluteTime={false} changeTimeType={jest.fn()} />
-    );
-    expect(component.html()).toBeNull();
+    const changeTimeType = jest.fn();
+
+    renderComponent({
+      isAbsoluteTime: false,
+      changeTimeType,
+    });
+
+    const timeRangeSwitch = screen.queryByRole('switch');
+
+    expect(timeRangeSwitch).not.toBeInTheDocument();
   });
 
   it('renders with absolute time range', () => {
     const timeRange = { from: '2022-01-01T00:00:00.000Z', to: '2022-01-02T00:00:00.000Z' };
-    const changeTypeHandler = jest.fn();
+    const changeTimeType = jest.fn();
 
-    const component = mountWithIntl(
-      <TimeTypeSection
-        timeRange={timeRange}
-        isAbsoluteTime={true}
-        changeTimeType={changeTypeHandler}
-      />
-    );
+    renderComponent({
+      timeRange,
+      isAbsoluteTime: true,
+      changeTimeType,
+    });
 
-    expect(component.find('EuiSwitch').prop('checked')).toBe(true);
-    expect(component.find('[data-test-subj="absoluteTimeInfoText"]')).toHaveLength(1);
+    const timeRangeSwitch = screen.getByRole('switch');
+
+    expect(timeRangeSwitch).toBeChecked();
+
+    const absoluteTimeInfoText = screen.getByTestId('absoluteTimeInfoText');
+
+    expect(absoluteTimeInfoText).toBeInTheDocument();
   });
 
   it('renders with relative time range (from now to specific time)', () => {
     const timeRange = { from: 'now', to: 'now+15m' };
-    const changeTypeHandler = jest.fn();
+    const changeTimeType = jest.fn();
 
-    const component = mountWithIntl(
-      <TimeTypeSection
-        timeRange={timeRange}
-        isAbsoluteTime={false}
-        changeTimeType={changeTypeHandler}
-      />
-    );
+    renderComponent({
+      timeRange,
+      isAbsoluteTime: false,
+      changeTimeType,
+    });
 
-    expect(component.find('EuiSwitch').prop('checked')).toBe(false);
-    expect(component.find('[data-test-subj="relativeTimeInfoTextFromNow"]')).toHaveLength(1);
+    const timeRangeSwitch = screen.getByRole('switch');
+
+    expect(timeRangeSwitch).not.toBeChecked();
+
+    const relativeTimeFromNowInfoText = screen.getByTestId('relativeTimeInfoTextFromNow');
+
+    expect(relativeTimeFromNowInfoText).toBeInTheDocument();
   });
 
   it('renders with relative time range (from specific time to now)', () => {
     const timeRange = { from: 'now-30m', to: 'now' };
-    const changeTypeHandler = jest.fn();
+    const changeTimeType = jest.fn();
 
-    const component = mountWithIntl(
-      <TimeTypeSection
-        timeRange={timeRange}
-        isAbsoluteTime={false}
-        changeTimeType={changeTypeHandler}
-      />
-    );
+    renderComponent({
+      timeRange,
+      isAbsoluteTime: false,
+      changeTimeType,
+    });
 
-    expect(component.find('EuiSwitch').prop('checked')).toBe(false);
-    expect(component.find('[data-test-subj="relativeTimeInfoTextToNow"]')).toHaveLength(1);
+    const timeRangeSwitch = screen.getByRole('switch');
+
+    expect(timeRangeSwitch).not.toBeChecked();
+
+    const relativeTimeToNowInfoText = screen.getByTestId('relativeTimeInfoTextToNow');
+
+    expect(relativeTimeToNowInfoText).toBeInTheDocument();
   });
 
   it('renders with relative time range (between two relative times)', () => {
     const timeRange = { from: 'now-30m', to: 'now-1m' };
-    const changeTypeHandler = jest.fn();
+    const changeTimeType = jest.fn();
 
-    const component = mountWithIntl(
-      <TimeTypeSection
-        timeRange={timeRange}
-        isAbsoluteTime={false}
-        changeTimeType={changeTypeHandler}
-      />
-    );
+    renderComponent({
+      timeRange,
+      isAbsoluteTime: false,
+      changeTimeType,
+    });
 
-    expect(component.find('EuiSwitch').prop('checked')).toBe(false);
-    expect(component.find('[data-test-subj="relativeTimeInfoTextDefault"]')).toHaveLength(1);
+    const timeRangeSwitch = screen.getByRole('switch');
+
+    expect(timeRangeSwitch).not.toBeChecked();
+
+    const relativeTimeInfoText = screen.getByTestId('relativeTimeInfoTextDefault');
+
+    expect(relativeTimeInfoText).toBeInTheDocument();
   });
 
   it('disables switch when timeRange is already absolute', () => {
     const timeRange = { from: '2022-01-01T00:00:00.000Z', to: '2022-01-02T00:00:00.000Z' };
-    const changeTypeHandler = jest.fn();
+    const changeTimeType = jest.fn();
 
     jest.spyOn(timeUtils, 'isTimeRangeAbsoluteTime').mockReturnValue(true);
 
-    const component = mountWithIntl(
-      <TimeTypeSection
-        timeRange={timeRange}
-        isAbsoluteTime={true}
-        changeTimeType={changeTypeHandler}
-      />
-    );
+    renderComponent({
+      timeRange,
+      isAbsoluteTime: false,
+      changeTimeType,
+    });
 
-    expect(component.find('EuiSwitch').prop('disabled')).toBe(true);
+    const timeRangeSwitch = screen.queryByRole('switch');
+
+    expect(timeRangeSwitch).not.toBeInTheDocument();
   });
 });
