@@ -13273,33 +13273,6 @@ paths:
       tags:
         - Security Entity Analytics API
   /api/entity_analytics/monitoring/users:
-    delete:
-      operationId: DeletePrivMonUser
-      parameters:
-        - in: path
-          name: id
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    description: A message providing additional information about the deletion status
-                    type: string
-                  success:
-                    description: Indicates if the deletion was successful
-                    type: boolean
-                required:
-                  - success
-          description: User deleted successfully
-      summary: Delete a monitored user
-      tags:
-        - Security Entity Analytics API
     post:
       operationId: CreatePrivMonUser
       requestBody:
@@ -13382,6 +13355,33 @@ paths:
       tags:
         - Security Entity Analytics API
   /api/entity_analytics/monitoring/users/{id}:
+    delete:
+      operationId: DeletePrivMonUser
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  aknowledged:
+                    description: Indicates if the deletion was successful
+                    type: boolean
+                  message:
+                    description: A message providing additional information about the deletion status
+                    type: string
+                required:
+                  - success
+          description: User deleted successfully
+      summary: Delete a monitored user
+      tags:
+        - Security Entity Analytics API
     get:
       operationId: GetPrivMonUser
       parameters:
@@ -62959,10 +62959,57 @@ components:
     Security_Entity_Analytics_API_MonitoredUserDoc:
       type: object
       properties:
+        '@timestamp':
+          format: date-time
+          type: string
+        entity_analytics_monitoring:
+          type: object
+          properties:
+            labels:
+              items:
+                type: object
+                properties:
+                  field:
+                    type: string
+                  source:
+                    type: string
+                  value:
+                    type: string
+              type: array
+        event:
+          type: object
+          properties:
+            ingested:
+              format: date-time
+              type: string
         id:
           type: string
-        is_monitored:
-          type: boolean
+        labels:
+          type: object
+          properties:
+            monitoring:
+              type: object
+              properties:
+                privileged_users:
+                  enum:
+                    - monitored
+                    - deleted
+                  type: string
+            source_indices:
+              items:
+                type: string
+              type: array
+            source_integrations:
+              items:
+                type: string
+              type: array
+            sources:
+              items:
+                enum:
+                  - csv
+                  - index_sync
+                  - api
+              type: array
         user:
           type: object
           properties:
