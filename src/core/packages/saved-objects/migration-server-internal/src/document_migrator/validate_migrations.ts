@@ -33,18 +33,6 @@ export function validateTypeMigrations({
   kibanaVersion: string;
   convertVersion?: string;
 }) {
-  if (type.switchToModelVersionAt) {
-    const switchToModelVersionAt = Semver.parse(type.switchToModelVersionAt);
-    if (!switchToModelVersionAt) {
-      throw new Error(
-        `Type ${type.name}: invalid version specified for switchToModelVersionAt: ${type.switchToModelVersionAt}`
-      );
-    }
-    if (switchToModelVersionAt.patch !== 0) {
-      throw new Error(`Type ${type.name}: can't use a patch version for switchToModelVersionAt`);
-    }
-  }
-
   if (type.migrations) {
     assertObjectOrFunction(
       type.migrations,
@@ -62,11 +50,6 @@ export function validateTypeMigrations({
     Object.entries(migrationMap).forEach(([version, migration]) => {
       assertValidSemver(kibanaVersion, version, type.name);
       assertValidTransform(migration, version, type.name);
-      if (type.switchToModelVersionAt && Semver.gte(version, type.switchToModelVersionAt)) {
-        throw new Error(
-          `Migration for type ${type.name} for version ${version} registered after switchToModelVersionAt (${type.switchToModelVersionAt})`
-        );
-      }
     });
   }
 
@@ -79,11 +62,6 @@ export function validateTypeMigrations({
 
     Object.entries(schemaMap).forEach(([version, schema]) => {
       assertValidSemver(kibanaVersion, version, type.name);
-      if (type.switchToModelVersionAt && Semver.gte(version, type.switchToModelVersionAt)) {
-        throw new Error(
-          `Schema for type ${type.name} for version ${version} registered after switchToModelVersionAt (${type.switchToModelVersionAt})`
-        );
-      }
     });
   }
 
@@ -92,12 +70,6 @@ export function validateTypeMigrations({
       typeof type.modelVersions === 'function' ? type.modelVersions() : type.modelVersions ?? {};
 
     if (Object.keys(modelVersionMap).length > 0) {
-      if (!type.switchToModelVersionAt) {
-        throw new Error(
-          `Type ${type.name}: Using modelVersions requires to specify switchToModelVersionAt`
-        );
-      }
-
       Object.entries(modelVersionMap).forEach(([version, definition]) => {
         assertValidModelVersion(version);
       });

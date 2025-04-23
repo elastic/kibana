@@ -15,7 +15,6 @@ const createType = (type: Partial<SavedObjectsType>): SavedObjectsType => ({
   hidden: false,
   namespaceType: 'single' as 'single',
   mappings: { properties: {} },
-  migrations: {},
   ...type,
 });
 
@@ -302,9 +301,6 @@ describe('SavedObjectTypeRegistry', () => {
       registry.registerType(
         createType({
           name: 'typeB',
-          migrations: {
-            '1.0.0': jest.fn(),
-          },
         })
       );
 

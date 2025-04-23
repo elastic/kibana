@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import Semver from 'semver';
 import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
 import { assertValidModelVersion, modelVersionToVirtualVersion } from './conversion';
 
@@ -44,14 +43,6 @@ export const getLatestModelVersion = (type: SavedObjectsType): number => {
   }, 0);
 };
 
-export const getLatestMigrationVersion = (type: SavedObjectsType): string => {
-  const migrationMap =
-    typeof type.migrations === 'function' ? type.migrations() : type.migrations ?? {};
-  return Object.keys(migrationMap).reduce<string>((memo, current) => {
-    return Semver.gt(memo, current) ? memo : current;
-  }, '0.0.0');
-};
-
 /**
  * Build a version map for the given types.
  */
@@ -64,17 +55,10 @@ export const getModelVersionMapForTypes = (types: SavedObjectsType[]): ModelVers
 
 /**
  * Returns the current virtual version for the given type.
- * It will either be the latest model version if the type
- * already switched to using them (switchToModelVersionAt is set),
- * or the latest migration version for the type otherwise.
  */
 export const getCurrentVirtualVersion = (type: SavedObjectsType): string => {
-  if (type.switchToModelVersionAt) {
-    const modelVersion = getLatestModelVersion(type);
-    return modelVersionToVirtualVersion(modelVersion);
-  } else {
-    return getLatestMigrationVersion(type);
-  }
+  const modelVersion = getLatestModelVersion(type);
+  return modelVersionToVirtualVersion(modelVersion);
 };
 
 /**
@@ -106,17 +90,10 @@ export const getLatestMappingsVersionNumber = (type: SavedObjectsType): number =
 
 /**
  * Returns the latest model version that includes changes in the mappings, for the given type.
- * It will either be a model version if the type
- * already switched to using them (switchToModelVersionAt is set),
- * or the latest migration version for the type otherwise.
  */
 export const getLatestMappingsModelVersion = (type: SavedObjectsType): string => {
-  if (type.switchToModelVersionAt) {
-    const modelVersion = getLatestMappingsVersionNumber(type);
-    return modelVersionToVirtualVersion(modelVersion);
-  } else {
-    return getLatestMigrationVersion(type);
-  }
+  const modelVersion = getLatestMappingsVersionNumber(type);
+  return modelVersionToVirtualVersion(modelVersion);
 };
 
 /**

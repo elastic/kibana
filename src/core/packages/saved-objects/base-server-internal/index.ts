@@ -56,7 +56,6 @@ export {
 } from './src/utils';
 export {
   modelVersionVirtualMajor,
-  globalSwitchToModelVersionAt,
   assertValidModelVersion,
   isVirtualModelVersion,
   virtualVersionToModelVersion,

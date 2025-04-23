@@ -381,8 +381,7 @@ describe('SavedObjectsService', () => {
         };
         const returnedType = {
           ...inputType,
-          switchToModelVersionAt: '9.9.9',
-        };
+                  };
 
         applyTypeDefaultsMock.mockReturnValue(returnedType);
 

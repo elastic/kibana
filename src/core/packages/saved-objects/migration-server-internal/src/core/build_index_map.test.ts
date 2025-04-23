@@ -19,7 +19,6 @@ const createRegistry = (...types: Array<Partial<SavedObjectsType>>) => {
       namespaceType: 'single',
       hidden: false,
       mappings: { properties: {} },
-      migrations: {},
       ...type,
     })
   );

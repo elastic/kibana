@@ -30,7 +30,6 @@ describe('SavedObjectsRepository#createRepository', () => {
         name: { type: 'keyword' },
       },
     },
-    migrations: {},
   });
 
   typeRegistry.registerType({
@@ -43,7 +42,6 @@ describe('SavedObjectsRepository#createRepository', () => {
         name: { type: 'keyword' },
       },
     },
-    migrations: {},
   });
   typeRegistry.registerType({
     name: 'hiddenType',
@@ -54,7 +52,6 @@ describe('SavedObjectsRepository#createRepository', () => {
         name: { type: 'keyword' },
       },
     },
-    migrations: {},
   });
 
   const migrator = kibanaMigratorMock.create({ types: typeRegistry.getAllTypes() });

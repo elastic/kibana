@@ -27,7 +27,6 @@ export const getMigrationHash = (soType: SavedObjectsType): SavedObjectTypeMigra
     migInfo.migrationVersions.join(','),
     migInfo.schemaVersions.join(','),
     JSON.stringify(migInfo.mappings, Object.keys(migInfo.mappings).sort()),
-    migInfo.switchToModelVersionAt ?? 'none',
     migInfo.modelVersions.map(serializeModelVersion).join(','),
   ];
   const hashFeed = hashParts.join('-');

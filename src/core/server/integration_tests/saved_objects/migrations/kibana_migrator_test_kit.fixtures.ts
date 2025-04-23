@@ -39,8 +39,7 @@ const defaultType: SavedObjectsType<any> = {
       changes: [],
     },
   },
-  switchToModelVersionAt: '8.10.0',
-  migrations: {},
+    migrations: {},
 };
 
 export const baselineTypes: Array<SavedObjectsType<any>> = [

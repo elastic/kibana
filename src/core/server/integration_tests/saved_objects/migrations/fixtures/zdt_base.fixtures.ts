@@ -53,8 +53,7 @@ export const getFooType = () => {
         someField: { type: 'text' },
       },
     },
-    switchToModelVersionAt: '8.7.0',
-    modelVersions: {
+        modelVersions: {
       '1': dummyModelVersion,
       '2': dummyModelVersion,
     },
@@ -69,8 +68,7 @@ export const getBarType = () => {
         aKeyword: { type: 'keyword' },
       },
     },
-    switchToModelVersionAt: '8.7.0',
-    modelVersions: {
+        modelVersions: {
       '1': dummyModelVersion,
     },
   });
@@ -85,8 +83,7 @@ export const getSampleAType = () => {
         boolean: { type: 'boolean' },
       },
     },
-    switchToModelVersionAt: '8.7.0',
-    modelVersions: {
+        modelVersions: {
       '1': dummyModelVersion,
     },
   });
@@ -101,8 +98,7 @@ export const getSampleBType = () => {
         text2: { type: 'text' },
       },
     },
-    switchToModelVersionAt: '8.7.0',
-    modelVersions: {
+        modelVersions: {
       '1': dummyModelVersion,
     },
   });
@@ -117,8 +113,7 @@ export const getDeletedType = () => {
         text: { type: 'text' },
       },
     },
-    switchToModelVersionAt: '8.7.0',
-    modelVersions: {
+        modelVersions: {
       '1': dummyModelVersion,
     },
   });
@@ -133,8 +128,7 @@ export const getExcludedType = () => {
         value: { type: 'integer' },
       },
     },
-    switchToModelVersionAt: '8.7.0',
-    modelVersions: {
+        modelVersions: {
       '1': dummyModelVersion,
     },
     excludeOnUpgrade: () => {

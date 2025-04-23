@@ -205,49 +205,13 @@ describe('ModelVersion map utilities', () => {
     });
   });
 
-  describe('getCurrentVirtualVersion', () => {
-    it('returns the latest registered migration if switchToModelVersionAt is unset', () => {
-      expect(
-        getCurrentVirtualVersion(
-          buildType({
-            migrations: {
-              '7.17.2': dummyMigration,
-              '8.6.0': dummyMigration,
-            },
-            modelVersions: {
-              1: dummyModelVersion(),
-            },
-          })
-        )
-      ).toEqual('8.6.0');
-    });
-
-    it('returns the virtual version of the latest model version if switchToModelVersionAt is set', () => {
-      expect(
-        getCurrentVirtualVersion(
-          buildType({
-            switchToModelVersionAt: '8.7.0',
-            migrations: {
-              '7.17.2': dummyMigration,
-              '8.6.0': dummyMigration,
-            },
-            modelVersions: {
-              1: dummyModelVersion(),
-            },
-          })
-        )
-      ).toEqual('10.1.0');
-    });
-  });
-
   describe('getVirtualVersionMap', () => {
     it('returns the virtual version for each of the provided types', () => {
       expect(
         getVirtualVersionMap([
           buildType({
             name: 'foo',
-            switchToModelVersionAt: '8.7.0',
-            migrations: {
+                        migrations: {
               '7.17.2': dummyMigration,
               '8.6.0': dummyMigration,
             },
@@ -267,8 +231,7 @@ describe('ModelVersion map utilities', () => {
           }),
           buildType({
             name: 'dolly',
-            switchToModelVersionAt: '8.7.0',
-            migrations: {
+                        migrations: {
               '7.17.2': dummyMigration,
               '8.6.0': dummyMigration,
             },
@@ -343,51 +306,13 @@ describe('ModelVersion map utilities', () => {
     });
   });
 
-  describe('getLatestMappingsModelVersion', () => {
-    it('returns the latest registered migration if switchToModelVersionAt is unset', () => {
-      expect(
-        getLatestMappingsModelVersion(
-          buildType({
-            migrations: {
-              '7.17.2': dummyMigration,
-              '8.6.0': dummyMigration,
-            },
-            modelVersions: {
-              1: dummyModelVersionWithMappingsChanges(),
-              2: dummyModelVersion(),
-            },
-          })
-        )
-      ).toEqual('8.6.0');
-    });
-
-    it('returns the virtual version of the latest model version if switchToModelVersionAt is set', () => {
-      expect(
-        getLatestMappingsModelVersion(
-          buildType({
-            switchToModelVersionAt: '8.7.0',
-            migrations: {
-              '7.17.2': dummyMigration,
-              '8.6.0': dummyMigration,
-            },
-            modelVersions: {
-              1: dummyModelVersionWithMappingsChanges(),
-              2: dummyModelVersion(),
-            },
-          })
-        )
-      ).toEqual('10.1.0');
-    });
-  });
-
   describe('getLatestMappingsVirtualVersionMap', () => {
     it('returns the virtual version for each of the provided types', () => {
       expect(
         getLatestMappingsVirtualVersionMap([
           buildType({
             name: 'foo',
-            switchToModelVersionAt: '8.7.0',
-            migrations: {
+                        migrations: {
               '7.17.2': dummyMigration,
               '8.6.0': dummyMigration,
             },
@@ -409,8 +334,7 @@ describe('ModelVersion map utilities', () => {
           }),
           buildType({
             name: 'dolly',
-            switchToModelVersionAt: '8.7.0',
-            migrations: {
+                        migrations: {
               '7.17.2': dummyMigration,
               '8.6.0': dummyMigration,
             },
