@@ -10,9 +10,9 @@ import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { Logger } from '@kbn/core/server';
 
-import { getPackageSavedObjects } from '../../services/epm/packages/get';
+import { appContextService } from '../../services/app_context';
 
-import { appContextService } from '../../services';
+import { getPackageSavedObjects } from '../../services/epm/packages/get';
 
 import { installCustomAsset, getPipeline, getComponentTemplate } from './custom_assets';
 import {
@@ -21,13 +21,12 @@ import {
   getRemoteSyncedIntegrationsStatus,
 } from './compare_synced_integrations';
 
-jest.mock('../../services');
+jest.mock('../../services/app_context');
 jest.mock('./custom_assets', () => {
   return { getPipeline: jest.fn(), getComponentTemplate: jest.fn(), installCustomAsset: jest.fn() };
 });
 jest.mock('../../services/epm/packages/get', () => {
   return {
-    ...jest.requireActual('../../services/epm/packages/get'),
     getPackageSavedObjects: jest.fn(),
   };
 });
@@ -197,11 +196,19 @@ describe('fetchAndCompareSyncedIntegrations', () => {
                   package_name: 'elastic_agent',
                   package_version: '2.2.0',
                   updated_at: '2025-03-20T14:18:40.076Z',
+                  install_status: 'installed',
                 },
                 {
                   package_name: 'system',
                   package_version: '1.67.3',
                   updated_at: '2025-03-20T14:18:40.111Z',
+                  install_status: 'installed',
+                },
+                {
+                  package_name: 'fleet_server',
+                  package_version: '1.67.3',
+                  updated_at: '2025-03-20T14:18:40.111Z',
+                  install_status: 'not_installed',
                 },
               ],
             },
@@ -243,11 +250,13 @@ describe('fetchAndCompareSyncedIntegrations', () => {
                   package_name: 'elastic_agent',
                   package_version: '2.2.0',
                   updated_at: '2025-03-20T14:18:40.076Z',
+                  install_status: 'installed',
                 },
                 {
                   package_name: 'system',
                   package_version: '1.67.3',
                   updated_at: '2025-03-20T14:18:40.111Z',
+                  install_status: 'installed',
                 },
               ],
             },
@@ -317,16 +326,19 @@ describe('fetchAndCompareSyncedIntegrations', () => {
                   package_name: 'elastic_agent',
                   package_version: '2.2.0',
                   updated_at: '2025-03-20T14:18:40.076Z',
+                  install_status: 'installed',
                 },
                 {
                   package_name: 'system',
                   package_version: '1.67.3',
                   updated_at: '2025-03-20T14:18:40.111Z',
+                  install_status: 'installed',
                 },
                 {
                   package_name: 'synthetics',
                   package_version: '1.4.1',
                   updated_at: '2025-03-17T15:21:14.092Z',
+                  install_status: 'installed',
                 },
               ],
             },
@@ -362,7 +374,7 @@ describe('fetchAndCompareSyncedIntegrations', () => {
           id: 'synthetics',
           attributes: {
             version: '1.4.1',
-            install_status: 'not_installed',
+            install_status: 'install_failed',
             latest_install_failed_attempts: [
               {
                 created_at: '2023-06-20T08:47:31.457Z',
@@ -398,7 +410,7 @@ describe('fetchAndCompareSyncedIntegrations', () => {
           error: 'Found incorrect installed version 1.67.2',
         },
         {
-          error: `Installation status: not_installed - reason: installation failure at Tue, 20 Jun 2023 08:47:31 GMT`,
+          error: `Installation status: install_failed - reason: installation failure at Tue, 20 Jun 2023 08:47:31 GMT`,
           package_name: 'synthetics',
           package_version: '1.4.1',
           sync_status: 'failed',
@@ -469,6 +481,7 @@ describe('fetchAndCompareSyncedIntegrations', () => {
                     package_name: 'system',
                     package_version: '1.67.3',
                     updated_at: '2025-03-20T14:18:40.076Z',
+                    install_status: 'installed',
                   },
                 ],
                 custom_assets: {
@@ -686,6 +699,7 @@ describe('fetchAndCompareSyncedIntegrations', () => {
                     package_name: 'system',
                     package_version: '1.67.3',
                     updated_at: '2025-03-20T14:18:40.076Z',
+                    install_status: 'installed',
                   },
                 ],
                 custom_assets: {
@@ -886,6 +900,7 @@ describe('fetchAndCompareSyncedIntegrations', () => {
                     package_name: 'system',
                     package_version: '1.67.3',
                     updated_at: '2025-03-20T14:18:40.076Z',
+                    install_status: 'installed',
                   },
                 ],
                 custom_assets: {
@@ -968,6 +983,7 @@ describe('fetchAndCompareSyncedIntegrations', () => {
                     package_name: 'system',
                     package_version: '1.67.3',
                     updated_at: '2025-03-20T14:18:40.076Z',
+                    install_status: 'installed',
                   },
                 ],
                 custom_assets: {
@@ -1081,6 +1097,7 @@ describe('fetchAndCompareSyncedIntegrations', () => {
                     package_name: 'system',
                     package_version: '1.67.3',
                     updated_at: '2025-03-20T14:18:40.076Z',
+                    install_status: 'installed',
                   },
                 ],
                 custom_assets: {
