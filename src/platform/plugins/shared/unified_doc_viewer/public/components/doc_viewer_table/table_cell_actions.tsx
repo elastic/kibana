@@ -85,9 +85,12 @@ const Copy: React.FC<TableActionsProps & { toasts: IToasts }> = ({ Component, ro
       title={copyLabel}
       flush="left"
       onClick={() => {
-        const errorMessage = i18n.translate('tableCellActions.copyFailedErrorText', {
-          defaultMessage: 'Unable to copy to clipboard in this browser',
-        });
+        const errorMessage = i18n.translate(
+          'unifiedDocViewer.tableCellActions.copyFailedErrorText',
+          {
+            defaultMessage: 'Unable to copy to clipboard in this browser',
+          }
+        );
 
         if (!formattedAsText) {
           toasts.addWarning({
@@ -105,9 +108,12 @@ const Copy: React.FC<TableActionsProps & { toasts: IToasts }> = ({ Component, ro
         }
 
         toasts.addInfo({
-          title: i18n.translate('tableCellActions.copyValueToClipboard.toastTitle', {
-            defaultMessage: 'Copied to clipboard',
-          }),
+          title: i18n.translate(
+            'unifiedDocViewer.tableCellActions.copyValueToClipboard.toastTitle',
+            {
+              defaultMessage: 'Copied to clipboard',
+            }
+          ),
         });
       }}
     >
