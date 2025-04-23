@@ -26,7 +26,7 @@ components:
           type: integer
           minimum: 0
         frozen_indices_queried_count:
-          description: Count of frozen indices queried during the rule execution
+          description: Count of frozen indices queried during the rule execution. These indices could not be entirely excluded after applying the time range filter.
           type: integer
           minimum: 0
         gap_range:
