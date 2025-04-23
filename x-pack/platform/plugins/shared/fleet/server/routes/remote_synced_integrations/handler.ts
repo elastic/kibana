@@ -42,14 +42,8 @@ export const getRemoteSyncedIntegrationsInfoHandler: RequestHandler<
   try {
     const res: GetRemoteSyncedIntegrationsStatusResponse =
       await getRemoteSyncedIntegrationsInfoByOutputId(soClient, request.params.outputId);
-
     return response.ok({ body: res });
   } catch (error) {
-    if (error.isBoom && error.output.statusCode === 404) {
-      return response.notFound({
-        body: { message: `${request.params.outputId} not found` },
-      });
-    }
     throw error;
   }
 };

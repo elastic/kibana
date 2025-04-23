@@ -105,10 +105,12 @@ export class VisLegend extends PureComponent<VisLegendProps, VisLegendState> {
       return false;
     }
 
-    const filters = this.props.hasCompatibleActions ? await this.props.hasCompatibleActions({
-      name: VALUE_CLICK_TRIGGER,
-      data: item.values,
-    }) : false;
+    const filters = this.props.hasCompatibleActions
+      ? await this.props.hasCompatibleActions({
+          name: VALUE_CLICK_TRIGGER,
+          data: item.values,
+        })
+      : false;
     return filters;
   };
 

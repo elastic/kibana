@@ -449,16 +449,13 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
         return false;
       }
       const eventName = get(VIS_EVENT_TO_TRIGGER, event.name, event.name);
-      const actions = await uiActions.getTriggerCompatibleActions(
-        eventName,
-        {
-          data: event.data,
-          embeddable: this,
-        }
-      );
+      const actions = await uiActions.getTriggerCompatibleActions(eventName, {
+        data: event.data,
+        embeddable: this,
+      });
 
       return actions.length > 0;
-    }
+    };
 
     const expressions = getExpressions();
     this.handler = await expressions.loader(this.domNode, undefined, {
