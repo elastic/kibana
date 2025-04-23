@@ -317,7 +317,6 @@ function defineModelVersionWithMigration(core: CoreSetup<PluginsStart>, deps: Pl
     hidden: false,
     management: { importableAndExportable: true },
     namespaceType: 'multiple-isolated',
-    switchToModelVersionAt: '8.10.0',
     mappings: {
       properties: {
         nonEncryptedAttribute: {
