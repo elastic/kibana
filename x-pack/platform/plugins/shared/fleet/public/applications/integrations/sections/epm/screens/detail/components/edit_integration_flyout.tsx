@@ -46,7 +46,7 @@ export const EditIntegrationFlyout: React.FunctionComponent<{
   integration: string | null;
   services: FleetStartServices;
   onComplete: (arg0: {}) => void;
-  existingCategories: any[];
+  existingCategories: string[];
 }> = ({
   onClose,
   integrationName,
