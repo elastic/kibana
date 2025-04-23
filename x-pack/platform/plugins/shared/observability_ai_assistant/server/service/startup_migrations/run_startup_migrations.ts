@@ -10,7 +10,6 @@ import type { CoreSetup, Logger } from '@kbn/core/server';
 import pRetry from 'p-retry';
 import { errors } from '@elastic/elasticsearch';
 import { resourceNames } from '..';
-import { getInferenceIdFromWriteIndex } from '../inference_endpoint';
 import { ObservabilityAIAssistantPluginStartDependencies } from '../../types';
 import { ObservabilityAIAssistantConfig } from '../../config';
 import { reIndexKnowledgeBaseWithLock } from '../knowledge_base_service/reindex_knowledge_base';
@@ -18,6 +17,7 @@ import { LockManagerService } from '../distributed_lock_manager/lock_manager_ser
 import { LockAcquisitionError } from '../distributed_lock_manager/lock_manager_client';
 import { populateMissingSemanticTextFieldWithLock } from './populate_missing_semantic_text_fields';
 import { hasKbIndex } from '../knowledge_base_service/has_kb_index';
+import { getInferenceIdFromWriteIndex } from '../knowledge_base_service/get_inference_id_from_write_index';
 
 const PLUGIN_STARTUP_LOCK_ID = 'observability_ai_assistant:startup_migrations';
 

@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { resourceNames } from '@kbn/observability-ai-assistant-plugin/server/service';
-import { getInferenceIdFromWriteIndex } from '@kbn/observability-ai-assistant-plugin/server/service/inference_endpoint';
+import { getInferenceIdFromWriteIndex } from '@kbn/observability-ai-assistant-plugin/server/service/knowledge_base_service/get_inference_id_from_write_index';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 import {
   TINY_ELSER_INFERENCE_ID,

@@ -10,7 +10,6 @@ import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { Logger } from '@kbn/logging';
 import {
   InferenceInferenceEndpointInfo,
-  MappingSemanticTextProperty,
   MlGetTrainedModelsStatsResponse,
   MlTrainedModelStats,
 } from '@elastic/elasticsearch/lib/api/types';
@@ -18,7 +17,7 @@ import { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 import pRetry from 'p-retry';
 import { KnowledgeBaseState } from '../../common';
 import { ObservabilityAIAssistantConfig } from '../config';
-import { resourceNames } from '.';
+import { getInferenceIdFromWriteIndex } from './knowledge_base_service/get_inference_id_from_write_index';
 
 const SUPPORTED_TASK_TYPES = ['sparse_embedding', 'text_embedding'];
 
@@ -77,27 +76,6 @@ export function isInferenceEndpointMissingOrUnavailable(error: Error) {
     (error.body?.error?.type === 'resource_not_found_exception' ||
       error.body?.error?.type === 'status_exception')
   );
-}
-
-export async function getInferenceIdFromWriteIndex(esClient: {
-  asInternalUser: ElasticsearchClient;
-}): Promise<string> {
-  const response = await esClient.asInternalUser.indices.getFieldMapping({
-    index: resourceNames.writeIndexAlias.kb,
-    fields: 'semantic_text',
-  });
-
-  const [indexName, indexMappings] = Object.entries(response)[0];
-
-  const inferenceId = (
-    indexMappings.mappings.semantic_text?.mapping.semantic_text as MappingSemanticTextProperty
-  )?.inference_id;
-
-  if (!inferenceId) {
-    throw new Error(`inference_id not found in field mappings for index ${indexName}`);
-  }
-
-  return inferenceId as string;
 }
 
 export async function getKbModelStatus({

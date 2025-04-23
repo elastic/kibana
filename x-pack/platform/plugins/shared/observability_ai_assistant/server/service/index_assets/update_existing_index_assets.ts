@@ -11,6 +11,7 @@ import { createOrUpdateConversationIndexAssets } from './create_or_update_conver
 import { createOrUpdateKnowledgeBaseIndexAssets } from './create_or_update_knowledge_base_index_assets';
 import { resourceNames } from '..';
 import { hasKbIndex } from '../knowledge_base_service/has_kb_index';
+import { getInferenceIdFromWriteIndex } from '../knowledge_base_service/get_inference_id_from_write_index';
 
 export async function updateExistingIndexAssets({
   logger,
@@ -42,6 +43,16 @@ export async function updateExistingIndexAssets({
 
   if (doesKbIndexExist) {
     logger.debug('Found index for knowledge base. Updating index assets.');
-    await createOrUpdateKnowledgeBaseIndexAssets({ logger, core, inferenceId });
+
+    const currentInferenceId = await getInferenceIdFromWriteIndex(
+      coreStart.elasticsearch.client
+    ).catch(() => {
+      logger.debug(
+        `Current KB write index does not have an inference_id. This is to be expected for indices created before 8.16`
+      );
+      return undefined;
+    });
+
+    await createOrUpdateKnowledgeBaseIndexAssets({ logger, core, inferenceId: currentInferenceId });
   }
 }

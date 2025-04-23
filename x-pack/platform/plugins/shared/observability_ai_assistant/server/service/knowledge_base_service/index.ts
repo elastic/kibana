@@ -22,7 +22,6 @@ import { getCategoryQuery } from '../util/get_category_query';
 import { getSpaceQuery } from '../util/get_space_query';
 import {
   getPreconfiguredInferenceEndpointsForEmbedding,
-  getInferenceIdFromWriteIndex,
   getKbModelStatus,
   isInferenceEndpointMissingOrUnavailable,
 } from '../inference_endpoint';
@@ -34,6 +33,7 @@ import { LockAcquisitionError } from '../distributed_lock_manager/lock_manager_c
 import { isSemanticTextUnsupportedError } from '../startup_migrations/run_startup_migrations';
 import { isKnowledgeBaseIndexWriteBlocked } from './index_write_block_utils';
 import { hasKbIndex } from './has_kb_index';
+import { getInferenceIdFromWriteIndex } from './get_inference_id_from_write_index';
 
 interface Dependencies {
   core: CoreSetup<ObservabilityAIAssistantPluginStartDependencies>;

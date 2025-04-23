@@ -11,11 +11,12 @@ import type { CoreSetup, Logger } from '@kbn/core/server';
 import { uniq } from 'lodash';
 import { KnowledgeBaseEntry } from '../../../common';
 import { resourceNames } from '..';
-import { getInferenceIdFromWriteIndex, waitForKbModel } from '../inference_endpoint';
+import { waitForKbModel } from '../inference_endpoint';
 import { ObservabilityAIAssistantPluginStartDependencies } from '../../types';
 import { ObservabilityAIAssistantConfig } from '../../config';
 import { LockManagerService } from '../distributed_lock_manager/lock_manager_service';
 import { sleep } from '../util/sleep';
+import { getInferenceIdFromWriteIndex } from '../knowledge_base_service/get_inference_id_from_write_index';
 
 const POPULATE_MISSING_SEMANTIC_TEXT_FIELDS_LOCK_ID = 'populate_missing_semantic_text_fields';
 export async function populateMissingSemanticTextFieldWithLock({

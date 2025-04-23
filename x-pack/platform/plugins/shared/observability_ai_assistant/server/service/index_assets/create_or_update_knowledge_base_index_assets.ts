@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-// import { createConcreteWriteIndex, getDataStreamAdapter } from '@kbn/alerting-plugin/server';
 import type { CoreSetup, Logger } from '@kbn/core/server';
 import type { ObservabilityAIAssistantPluginStartDependencies } from '../../types';
 import {
@@ -15,6 +14,7 @@ import {
 import { resourceNames } from '..';
 import { createKnowledgeBaseIndex } from '../knowledge_base_service/create_knowledge_base_index';
 import { updateKnowledgeBaseWriteIndexAlias } from '../knowledge_base_service/update_knowledge_base_index_alias';
+import { hasKbIndex } from '../knowledge_base_service/has_kb_index';
 
 export async function createOrUpdateKnowledgeBaseIndexAssets({
   logger,
@@ -52,18 +52,62 @@ export async function createOrUpdateKnowledgeBaseIndexAssets({
       },
     });
 
+    const name = resourceNames.concreteWriteIndexName.kb;
+    const alias = resourceNames.writeIndexAlias.kb;
+
+    const indexExists = await hasKbIndex({ esClient: coreStart.elasticsearch.client });
+
+    if (indexExists) {
+      const aliasInfo = await asInternalUser.indices.getAlias({
+        name: alias,
+        ignore_unavailable: true,
+      });
+
+      const isWriteIndex = Object.entries(aliasInfo).some(
+        ([_indexName, aliasData]) => aliasData.aliases?.[alias]?.is_write_index
+      );
+
+      if (isWriteIndex) {
+        logger.info(
+          `Knowledge base write index [${name}] already exists and is assigned as a write index. Skipping creation.`
+        );
+
+        const resolved = await asInternalUser.indices.simulateTemplate({
+          name: resourceNames.indexTemplate.kb,
+        });
+
+        const resolvedProperties = resolved.template?.mappings?.properties;
+
+        if (resolvedProperties) {
+          await asInternalUser.indices.putMapping({
+            index: name,
+            properties: resolvedProperties,
+          });
+          logger.info(
+            `Updated mappings for index [${name}] from template [${resourceNames.indexTemplate.kb}].`
+          );
+        } else {
+          logger.warn(
+            `No mappings found in index template [${resourceNames.indexTemplate.kb}], skipping mapping update.`
+          );
+        }
+      }
+
+      return;
+    }
+
     // Knowledge base: write index
     await createKnowledgeBaseIndex({
       esClient: coreStart.elasticsearch.client,
       logger,
       inferenceId,
-      indexName: resourceNames.concreteWriteIndexName.kb,
+      indexName: name,
     });
 
     await updateKnowledgeBaseWriteIndexAlias({
       esClient: coreStart.elasticsearch.client,
       logger,
-      index: resourceNames.concreteWriteIndexName.kb,
+      index: name,
     });
 
     logger.info('Successfully set up knowledge base index assets');
