@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -19,6 +19,7 @@ import {
   EuiComboBox,
 } from '@elastic/eui';
 import { SecurityPageName } from '@kbn/deeplinks-security';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import type {
   ThreatHuntingQueryIndexStatus,
   ThreatHuntingQueryWithIndexCheck,
@@ -28,6 +29,7 @@ import { HeaderPage } from '../../common/components/header_page';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { useListThreatHuntingQueries } from '../api/hooks/use_list_threat_hunting_queries';
 import { useOpenThreatHuntingQueryInDiscover } from '../hooks/use_open_threat_hunting_query_in_discover';
+import { ThreatHuntingQueryPanelKey } from '../../flyout/threat_hunting_query_details/right';
 
 const CATEGORY_COLOUR_MAP: Record<string, string> = {
   windows: '#a7d0f4',
@@ -85,10 +87,25 @@ const toShortenedDescription = (description: string) => {
 const QueryPanel: React.FC<{ query: ThreatHuntingQueryWithIndexCheck }> = ({ query }) => {
   const { name, description, indexStatus, category } = query;
   const discoverLogsLink = useOpenThreatHuntingQueryInDiscover(query.queries[0]);
+  const { openFlyout } = useExpandableFlyoutApi();
 
   const shortenedDescription = toShortenedDescription(description);
+
+  const onOpenFlyout = useCallback(
+    () =>
+      openFlyout({
+        right: {
+          id: ThreatHuntingQueryPanelKey,
+          params: {
+            queryUuid: query.uuid,
+          },
+        },
+      }),
+    [openFlyout, query.uuid]
+  );
+
   return (
-    <EuiPanel>
+    <EuiPanel onClick={onOpenFlyout}>
       <EuiFlexGroup direction="column" gutterSize="s">
         <EuiFlexItem>
           <EuiTitle size="xs">

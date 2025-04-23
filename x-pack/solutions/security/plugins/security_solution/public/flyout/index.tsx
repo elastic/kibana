@@ -65,6 +65,11 @@ import { ServiceDetailsPanel, ServiceDetailsPanelKey } from './entity_details/se
 import { MisconfigurationFindingsPanelKey } from './csp_details/findings_flyout/constants';
 import { FindingsMisconfigurationPanel } from './csp_details/findings_flyout/findings_right';
 import { IOCPanelKey } from './ai_for_soc/constants/panel_keys';
+import type { ThreatHuntingQueryPanelExpandableFlyoutProps } from './threat_hunting_query_details/right';
+import {
+  ThreatHuntingQueryPanel,
+  ThreatHuntingQueryPanelKey,
+} from './threat_hunting_query_details/right';
 
 /**
  * List of all panels that will be used within the document details expandable flyout.
@@ -208,6 +213,14 @@ const expandableFlyoutDocumentsPanels: ExpandableFlyoutProps['registeredPanels']
       <AIForSOCDetailsProvider {...(props as AIForSOCDetailsProps).params}>
         <AIForSOCPanel />
       </AIForSOCDetailsProvider>
+    ),
+  },
+  {
+    key: ThreatHuntingQueryPanelKey,
+    component: (props) => (
+      <ThreatHuntingQueryPanel
+        {...(props as ThreatHuntingQueryPanelExpandableFlyoutProps).params}
+      />
     ),
   },
 ];
