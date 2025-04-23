@@ -107,6 +107,7 @@ export function updateObjectsSpacesTestSuiteFactory(
               }
               const searchResponse = await es.search({
                 index: ALL_SAVED_OBJECT_INDICES,
+                ignore_unavailable: true,
                 size: 0,
                 query: { terms: { type: ['legacy-url-alias'] } },
                 track_total_hits: true,
