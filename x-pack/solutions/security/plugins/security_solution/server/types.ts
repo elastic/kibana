@@ -41,7 +41,7 @@ import type { SiemRuleMigrationsClient } from './lib/siem_migrations/rules/siem_
 import type { AssetInventoryDataClient } from './lib/asset_inventory/asset_inventory_data_client';
 import type { PrivilegeMonitoringDataClient } from './lib/entity_analytics/privilege_monitoring/privilege_monitoring_data_client';
 import type { ApiKeyManager } from './lib/entity_analytics/entity_store/auth/api_key';
-
+import type { ProductFeaturesService } from './lib/product_features_service';
 export { AppClient };
 
 export interface SecuritySolutionApiRequestHandlerContext {
@@ -70,6 +70,7 @@ export interface SecuritySolutionApiRequestHandlerContext {
   getSiemRuleMigrationsClient: () => SiemRuleMigrationsClient;
   getInferenceClient: () => InferenceClient;
   getAssetInventoryClient: () => AssetInventoryDataClient;
+  getProductFeatureService: () => ProductFeaturesService;
 }
 
 export type SecuritySolutionRequestHandlerContext = CustomRequestHandlerContext<{
