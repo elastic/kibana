@@ -46,6 +46,11 @@ function getErrorMessage(error: Error): string {
   return error.stack ?? error.message;
 }
 
+// Aggregate errors by default will only produce the
+// aggregate error's stack. `getAggregateErrorMessage`
+// also outputs the part of the _aggregated_ errors
+// stack traces that is not shared with the aggregate
+// error's stack trace.
 function getAggregateErrorMessage(error: AggregateError): string {
   const [head, ...tail] = error.stack?.split('\n') ?? [];
 
