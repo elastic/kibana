@@ -6,6 +6,7 @@
  */
 
 import { CasesDeepLinkId, CasesPublicStart, getCasesDeepLinks } from '@kbn/cases-plugin/public';
+import { DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
 import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
@@ -133,6 +134,7 @@ export interface ObservabilityPublicPluginsStart {
   cases: CasesPublicStart;
   charts: ChartsPluginStart;
   contentManagement: ContentManagementPublicStart;
+  dashboard: DashboardStart;
   data: DataPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
   dataViewEditor: DataViewEditorStart;

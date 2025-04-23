@@ -118,7 +118,8 @@
     "@kbn/dashboard-plugin",
     "@kbn/fields-metadata-plugin",
     "@kbn/controls-plugin",
-    "@kbn/core-http-browser"
+    "@kbn/core-http-browser",
+    "@kbn/dashboard-plugin",
   ],
   "exclude": ["target/**/*"]
 }
