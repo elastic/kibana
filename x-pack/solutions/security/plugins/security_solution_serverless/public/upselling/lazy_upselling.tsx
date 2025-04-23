@@ -67,6 +67,14 @@ export const AttackDiscoveryUpsellingPageLazy = withSuspenseUpsell(
   )
 );
 
+export const TimelinesPaywallLazy = withSuspenseUpsell(
+  lazy(() =>
+    import('./pages/timelines_paywall').then(({ TimelinesPaywall }) => ({
+      default: TimelinesPaywall,
+    }))
+  )
+);
+
 export const InvestigationsPaywallLazy = withSuspenseUpsell(
   lazy(() =>
     import('./pages/investigations_paywall').then(({ InvestigationsPaywall }) => ({

@@ -37,6 +37,7 @@ import {
   SiemMigrationsTranslatedRulesUpsellPageLazy,
   ThreatIntelligencePaywallLazy,
   InvestigationsPaywallLazy,
+  TimelinesPaywallLazy,
 } from './lazy_upselling';
 import * as i18n from './translations';
 import { AutomaticImportLazy } from './sections/automatic_import';
@@ -99,6 +100,11 @@ export const upsellingPages: UpsellingPages = [
     component: () => (
       <InvestigationsPaywallLazy requiredPLI={ProductFeatureKey.investigationGuide} />
     ),
+  },
+  {
+    pageName: SecurityPageName.timelines,
+    pli: ProductFeatureKey.timeline,
+    component: () => <TimelinesPaywallLazy requiredPLI={ProductFeatureKey.timeline} />,
   },
 ];
 
