@@ -25,7 +25,7 @@ export const contentPacksFeature: KibanaFeatureConfig = {
       api: [CONTENT_PACKS_FEATURE_PRIVILEGES.manage],
       ui: [CONTENT_PACKS_FEATURE_PRIVILEGES.manage],
       savedObject: {
-        all: ['dashboard', 'index-pattern'],
+        all: [],
         read: [],
       },
     },

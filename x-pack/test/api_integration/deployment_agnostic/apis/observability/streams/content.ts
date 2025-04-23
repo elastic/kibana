@@ -161,7 +161,7 @@ export default function (ftrContext: DeploymentAgnosticFtrProviderContext) {
           {
             spaces: ['*'],
             base: [],
-            feature: { logs: ['all'], ...feature },
+            feature: { logs: ['all'], savedObjectsManagement: ['all'], ...feature },
           },
         ],
       });
