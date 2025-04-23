@@ -48,6 +48,8 @@ jest.mock('../constants', () => ({
     'limitedToTwo',
     'limitedToFive',
     'yawn',
+    'sampleTaskSharedConcurrencyType1',
+    'sampleTaskSharedConcurrencyType2',
   ],
 }));
 
@@ -84,6 +86,16 @@ taskDefinitions.registerTaskDefinitions({
     title: 'yawn',
     cost: TaskCost.Tiny,
     maxConcurrency: 1,
+    createTaskRunner: jest.fn(),
+  },
+  sampleTaskSharedConcurrencyType1: {
+    title: 'Shared Concurrency Task Type 1',
+    maxConcurrency: 2,
+    createTaskRunner: jest.fn(),
+  },
+  sampleTaskSharedConcurrencyType2: {
+    title: 'Shared Concurrency Task Type 2',
+    maxConcurrency: 2,
     createTaskRunner: jest.fn(),
   },
 });
@@ -890,6 +902,166 @@ describe('TaskClaiming', () => {
         staleTasks: 0,
       });
       expect(result.docs.length).toEqual(4);
+    });
+
+    test('should correctly handle shared concurrency tasks', async () => {
+      const store = taskStoreMock.create({ taskManagerId: 'test-test' });
+      store.convertToSavedObjectIds.mockImplementation((ids) => ids.map((id) => `task:${id}`));
+
+      const fetchedTasks = [
+        mockInstance({ id: `id-1`, taskType: 'report' }),
+        mockInstance({ id: `id-2`, taskType: 'report' }),
+        mockInstance({ id: `id-3`, taskType: 'yawn' }),
+        mockInstance({ id: `id-4`, taskType: 'yawn' }),
+        mockInstance({ id: `id-5`, taskType: 'report' }),
+        mockInstance({ id: `id-6`, taskType: 'yawn' }),
+      ];
+
+      const { versionMap, docLatestVersions } = getVersionMapsFromTasks(fetchedTasks);
+      store.msearch.mockResolvedValueOnce({ docs: fetchedTasks, versionMap });
+      store.getDocVersions.mockResolvedValueOnce(docLatestVersions);
+
+      store.bulkGet.mockResolvedValueOnce(
+        [fetchedTasks[0], fetchedTasks[1], fetchedTasks[2], fetchedTasks[4]].map(asOk)
+      );
+      store.bulkPartialUpdate.mockResolvedValueOnce(
+        [fetchedTasks[0], fetchedTasks[1], fetchedTasks[2], fetchedTasks[4]].map(
+          getPartialUpdateResult
+        )
+      );
+
+      const taskClaiming = new TaskClaiming({
+        logger: taskManagerLogger,
+        strategy: CLAIM_STRATEGY_MGET,
+        definitions: taskDefinitions,
+        taskStore: store,
+        excludedTaskTypes: [],
+        maxAttempts: 2,
+        getAvailableCapacity: (type?: string) => {
+          if (type === 'sampleTaskSharedConcurrencyType1') {
+            return 2;
+          } else if (type === 'sampleTaskSharedConcurrencyType1') {
+            return 10;
+          } else {
+            return 10;
+          }
+        },
+        taskPartitioner,
+      });
+
+      const resultOrErr = await taskClaiming.claimAvailableTasksIfCapacityIsAvailable({
+        claimOwnershipUntil: new Date(),
+      });
+
+      if (!isOk<ClaimOwnershipResult, FillPoolResult>(resultOrErr)) {
+        expect(resultOrErr).toBe(undefined);
+      }
+
+      unwrap(resultOrErr) as ClaimOwnershipResult;
+
+      expect(taskManagerLogger.debug).toHaveBeenCalledWith(
+        'task claimer claimed: 4; stale: 0; conflicts: 0; missing: 0; capacity reached: 0; updateErrors: 0; getErrors: 0;',
+        { tags: ['taskClaiming', 'claimAvailableTasksMget'] }
+      );
+
+      const mockSearch = store.msearch.mock.calls[0][0];
+
+      // should be 3 searches
+      expect(mockSearch?.length).toEqual(3);
+
+      // last search should be shared concurrency
+      expect(mockSearch?.[2].query).toMatchObject({
+        bool: {
+          must: [
+            {
+              bool: {
+                must: [{ term: { 'task.enabled': true } }],
+              },
+            },
+            {
+              bool: {
+                must: [
+                  {
+                    terms: {
+                      'task.taskType': [
+                        'sampleTaskSharedConcurrencyType1',
+                        'sampleTaskSharedConcurrencyType2',
+                      ],
+                    },
+                  },
+                ],
+              },
+            },
+            {
+              bool: {
+                should: [
+                  {
+                    bool: {
+                      must: [
+                        {
+                          term: {
+                            'task.status': 'idle',
+                          },
+                        },
+                        {
+                          range: {
+                            'task.runAt': {
+                              lte: 'now',
+                            },
+                          },
+                        },
+                      ],
+                    },
+                  },
+                  {
+                    bool: {
+                      must: [
+                        {
+                          bool: {
+                            should: [
+                              {
+                                term: {
+                                  'task.status': 'running',
+                                },
+                              },
+                              {
+                                term: {
+                                  'task.status': 'claiming',
+                                },
+                              },
+                            ],
+                          },
+                        },
+                        {
+                          range: {
+                            'task.retryAt': {
+                              lte: 'now',
+                            },
+                          },
+                        },
+                      ],
+                    },
+                  },
+                ],
+              },
+            },
+            {
+              bool: {
+                must_not: [
+                  {
+                    term: {
+                      'task.status': 'unrecognized',
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+        },
+      });
+      // size of search should match the shared concurrency task with the
+      // lower capacity (* cost multiplier)
+      expect(mockSearch?.[2].size).toEqual(4);
     });
 
     test('should handle individual errors when bulk getting the full task doc', async () => {
