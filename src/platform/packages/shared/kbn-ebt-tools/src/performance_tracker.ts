@@ -12,6 +12,8 @@ import { groupBy } from 'lodash';
 
 import type { Logger } from '@kbn/logging';
 
+const isProduction = process.env.NODE_ENV === 'production';
+
 /**
  * PERFORMANCE_TRACKER_TYPES defines top-level categories to be use as
  * the mark name. They are used to group marks and measures by type.
@@ -80,7 +82,6 @@ interface PerformanceTrackerOptions {
  */
 export const createPerformanceTracker = ({ type, instance, logger }: PerformanceTrackerOptions) => {
   const id = uuidv4();
-  const isProduction = process.env.NODE_ENV === 'production';
   const createMarkName = (name: string) => `${type}:${instance}:${name}`;
 
   return {
@@ -105,23 +106,39 @@ export const createPerformanceTracker = ({ type, instance, logger }: Performance
  * Get all performance trackers by type.
  * @param type - High-level type of the performance tracker, for example "Lens".
  */
-export const getPerformanceTrackersByType = (type: PerformanceTrackerTypes) =>
-  performance
-    .getEntriesByType('mark')
-    .filter((marker) => marker.name.startsWith(`${type}:`)) as PerformanceMark[];
+export const getPerformanceTrackersByType = (type: PerformanceTrackerTypes) => {
+  try {
+    return performance
+      .getEntriesByType('mark')
+      .filter((marker) => marker.name.startsWith(`${type}:`)) as PerformanceMark[];
+  } catch (e) {
+    // Fail silently if performance API is not supported.
+    return [];
+  }
+};
 
 /**
  * Get all performance trackers grouped by id.
  * @param type - High-level type of the performance tracker, for example "Lens".
  * @returns A map of performance trackers grouped by id.
  */
-export const getPerformanceTrackersGroupedById = (type: PerformanceTrackerTypes) =>
-  groupBy(getPerformanceTrackersByType(type), (marker) => marker.detail.id);
+export const getPerformanceTrackersGroupedById = (type: PerformanceTrackerTypes) => {
+  try {
+    return groupBy(getPerformanceTrackersByType(type), (marker) => marker.detail?.id);
+  } catch (e) {
+    // Fail silently if performance API is not supported.
+    return {};
+  }
+};
 
 /**
  * Clear all performance trackers by type.
  * @param type - High-level type of the performance tracker, for example "Lens".
  */
 export const clearPerformanceTrackersByType = (type: PerformanceTrackerTypes) => {
-  getPerformanceTrackersByType(type).forEach((marker) => performance.clearMarks(marker.name));
+  try {
+    getPerformanceTrackersByType(type).forEach((marker) => performance.clearMarks(marker.name));
+  } catch (e) {
+    // Fail silently if performance API is not supported.
+  }
 };
