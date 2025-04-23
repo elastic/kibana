@@ -278,9 +278,10 @@ const compareCustomAssets = ({
   };
 
   const latestCustomAssetError =
-    installedIntegration?.attributes?.latest_custom_asset_install_failed_attempts?.find(
-      (attempt) => attempt.type === ccrCustomAsset.type && attempt.name === ccrCustomAsset.name
-    );
+    installedIntegration?.attributes?.latest_custom_asset_install_failed_attempts?.[
+      `${ccrCustomAsset.type}:${ccrCustomAsset.name}`
+    ];
+
   const latestFailedAttemptTime = latestCustomAssetError?.created_at
     ? `at ${new Date(latestCustomAssetError?.created_at).toUTCString()}`
     : '';
@@ -292,7 +293,8 @@ const compareCustomAssets = ({
   } ${latestFailedAttempt} ${latestFailedAttemptTime}`;
 
   if (ccrCustomAsset.type === 'ingest_pipeline') {
-    if (!ingestPipelines) {
+    const installedPipeline = ingestPipelines?.[ccrCustomAsset.name];
+    if (!installedPipeline) {
       if (ccrCustomAsset.is_deleted === true) {
         return {
           ...result,
@@ -311,8 +313,6 @@ const compareCustomAssets = ({
         sync_status: SyncStatus.SYNCHRONIZING,
       };
     }
-
-    const installedPipeline = ingestPipelines[ccrCustomAsset?.name];
     if (ccrCustomAsset.is_deleted === true && installedPipeline) {
       if (latestCustomAssetError) {
         return {
@@ -359,7 +359,8 @@ const compareCustomAssets = ({
       };
     }
   } else if (ccrCustomAsset.type === 'component_template') {
-    if (!componentTemplates) {
+    const installedCompTemplate = componentTemplates?.[ccrCustomAsset.name];
+    if (!installedCompTemplate) {
       if (ccrCustomAsset.is_deleted === true) {
         return {
           ...result,
@@ -378,8 +379,6 @@ const compareCustomAssets = ({
         sync_status: SyncStatus.SYNCHRONIZING,
       };
     }
-
-    const installedCompTemplate = componentTemplates[ccrCustomAsset?.name];
     if (ccrCustomAsset.is_deleted === true && installedCompTemplate) {
       if (latestCustomAssetError) {
         return {

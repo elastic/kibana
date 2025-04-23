@@ -683,7 +683,7 @@ export interface Installation {
   latest_install_failed_attempts?: InstallFailedAttempt[];
   latest_uninstall_failed_attempts?: FailedAttempt[];
   latest_executed_state?: InstallLatestExecutedState;
-  latest_custom_asset_install_failed_attempts?: CustomAssetFailedAttempt[];
+  latest_custom_asset_install_failed_attempts?: { [asset: string]: CustomAssetFailedAttempt };
 }
 
 export interface PackageUsageStats {

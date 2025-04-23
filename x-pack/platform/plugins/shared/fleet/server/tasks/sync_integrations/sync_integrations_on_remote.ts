@@ -14,6 +14,8 @@ import type {
 import semverEq from 'semver/functions/eq';
 import semverGte from 'semver/functions/gte';
 
+import { uniq } from 'lodash';
+
 import type { PackageClient } from '../../services';
 import { outputService } from '../../services';
 
@@ -22,9 +24,7 @@ import { FLEET_SYNCED_INTEGRATIONS_CCR_INDEX_PREFIX } from '../../services/setup
 
 import { getInstallation, removeInstallation } from '../../services/epm/packages';
 
-import type { Installation } from '../../types';
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../constants';
-import type { CustomAssetFailedAttempt } from '../../../common/types';
 
 import { installCustomAsset } from './custom_assets';
 import type { CustomAssetsData, SyncIntegrationsData } from './model';
@@ -244,6 +244,8 @@ export const syncIntegrationsOnRemote = async (
     await uninstallPackageIfInstalled(esClient, soClient, pkg, logger);
   }
 
+  await clearCustomAssetFailedAttempts(soClient, syncIntegrationsDoc);
+
   for (const customAsset of Object.values(syncIntegrationsDoc?.custom_assets ?? {})) {
     if (abortController.signal.aborted) {
       throw new Error('Task was aborted');
@@ -252,11 +254,26 @@ export const syncIntegrationsOnRemote = async (
       await installCustomAsset(customAsset, esClient, abortController, logger);
     } catch (error) {
       logger.error(`Failed to install ${customAsset.type} ${customAsset.name}, error: ${error}`);
-      // TODO cleanup failed attempts if update succeeded
       await updateCustomAssetFailedAttempts(soClient, customAsset, error, logger);
     }
   }
 };
+
+async function clearCustomAssetFailedAttempts(
+  soClient: SavedObjectsClientContract,
+  syncIntegrationsDoc?: SyncIntegrationsData
+) {
+  const customAssetPackages = uniq(
+    Object.values(syncIntegrationsDoc?.custom_assets ?? {}).map((customAsset) => {
+      return customAsset.package_name;
+    })
+  );
+  for (const pkgName of customAssetPackages) {
+    await soClient.update(PACKAGES_SAVED_OBJECT_TYPE, pkgName, {
+      latest_custom_asset_install_failed_attempts: {},
+    });
+  }
+}
 
 async function updateCustomAssetFailedAttempts(
   savedObjectsClient: SavedObjectsClientContract,
@@ -265,51 +282,21 @@ async function updateCustomAssetFailedAttempts(
   logger: Logger
 ) {
   try {
-    const pkgSo = await savedObjectsClient.get<Installation>(
-      PACKAGES_SAVED_OBJECT_TYPE,
-      customAsset.package_name
-    );
-    const updatedCustomAssetFailedAttempts = updateFailedAttempts({
-      type: customAsset.type,
-      name: customAsset.name,
-      error,
-      createdAt: new Date().toISOString(),
-      latestAttempts: pkgSo.attributes.latest_custom_asset_install_failed_attempts ?? [],
-    });
     await savedObjectsClient.update(PACKAGES_SAVED_OBJECT_TYPE, customAsset.package_name, {
-      latest_custom_asset_install_failed_attempts: updatedCustomAssetFailedAttempts,
+      latest_custom_asset_install_failed_attempts: {
+        [`${customAsset.type}:${customAsset.name}`]: {
+          type: customAsset.type,
+          name: customAsset.name,
+          error: {
+            name: error.name,
+            message: error.message,
+            stack: error.stack,
+          },
+          created_at: new Date().toISOString(),
+        },
+      },
     });
   } catch (err) {
     logger.warn(`Error occurred while updating custom asset failed attempts: ${err}`);
   }
-}
-
-const MAX_ATTEMPTS_TO_KEEP = 5;
-
-export function updateFailedAttempts({
-  error,
-  createdAt,
-  type,
-  name,
-  latestAttempts = [],
-}: {
-  error: Error;
-  createdAt: string;
-  type: string;
-  name: string;
-  latestAttempts?: CustomAssetFailedAttempt[];
-}): CustomAssetFailedAttempt[] {
-  return [
-    {
-      created_at: createdAt,
-      error: {
-        name: error.name,
-        message: error.message,
-        stack: error.stack,
-      },
-      type,
-      name,
-    },
-    ...latestAttempts,
-  ].slice(0, MAX_ATTEMPTS_TO_KEEP);
 }

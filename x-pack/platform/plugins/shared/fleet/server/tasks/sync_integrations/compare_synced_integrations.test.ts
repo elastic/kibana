@@ -618,6 +618,121 @@ describe('fetchAndCompareSyncedIntegrations', () => {
       });
     });
 
+    it('should return failed state if custom asset failure is found', async () => {
+      (getPipelineMock as jest.MockedFunction<any>).mockResolvedValue({
+        'logs-system.auth@custom': {
+          processors: [
+            {
+              user_agent: {
+                field: 'user_agent',
+              },
+            },
+          ],
+        },
+      });
+      (getComponentTemplateMock as jest.MockedFunction<any>).mockResolvedValue({
+        component_templates: [
+          {
+            name: 'logs-system.auth@custom',
+            component_template: {
+              template: {
+                mappings: {
+                  properties: {
+                    new_field: {
+                      type: 'text',
+                    },
+                  },
+                },
+              },
+            },
+          },
+        ],
+      });
+
+      esClientMock = {
+        search: searchMockWithCustomAssets,
+      };
+      (getPackageSavedObjects as jest.MockedFunction<any>).mockReturnValue({
+        page: 1,
+        per_page: 10000,
+        total: 1,
+        saved_objects: [
+          {
+            type: 'epm-packages',
+            id: 'system',
+            attributes: {
+              version: '1.67.3',
+              install_status: 'installed',
+              latest_custom_asset_install_failed_attempts: {
+                'component_template:logs-system.auth@custom': {
+                  created_at: '2023-06-20T08:47:31.457Z',
+                  error: {
+                    message: 'installation failure',
+                  },
+                  type: 'component_template',
+                  name: 'logs-system.auth@custom',
+                },
+                'ingest_pipeline:logs-system.auth@custom': {
+                  created_at: '2023-06-20T08:47:31.457Z',
+                  error: {
+                    message: 'installation failure',
+                  },
+                  type: 'ingest_pipeline',
+                  name: 'logs-system.auth@custom',
+                },
+              },
+            },
+            updated_at: '2025-03-26T14:06:27.611Z',
+          },
+        ],
+      });
+
+      const res = await fetchAndCompareSyncedIntegrations(
+        esClientMock,
+        soClientMock,
+        'fleet-synced-integrations-ccr-*',
+        mockedLogger
+      );
+
+      expect(res).toEqual({
+        integrations: [
+          {
+            package_name: 'system',
+            package_version: '1.67.3',
+            sync_status: 'completed',
+            updated_at: expect.any(String),
+          },
+        ],
+        custom_assets: {
+          'component_template:logs-system.auth@custom': {
+            name: 'logs-system.auth@custom',
+            package_name: 'system',
+            package_version: '1.67.3',
+            sync_status: 'failed',
+            type: 'component_template',
+            error:
+              'Failed to update component template logs-system.auth@custom - reason: installation failure at Tue, 20 Jun 2023 08:47:31 GMT',
+          },
+          'ingest_pipeline:logs-system.auth@custom': {
+            name: 'logs-system.auth@custom',
+            package_name: 'system',
+            package_version: '1.67.3',
+            sync_status: 'failed',
+            type: 'ingest_pipeline',
+            error:
+              'Failed to update ingest pipeline logs-system.auth@custom - reason: installation failure at Tue, 20 Jun 2023 08:47:31 GMT',
+          },
+          'ingest_pipeline:filestream-pipeline1': {
+            name: 'filestream-pipeline1',
+            package_name: 'filestream',
+            package_version: '1.1.0',
+            sync_status: 'synchronizing',
+            type: 'ingest_pipeline',
+          },
+        },
+      });
+    });
+
     it('should return status = completed if custom assets are equal', async () => {
       (getPipelineMock as jest.MockedFunction<any>).mockResolvedValueOnce({
         'logs-system.auth@custom': {
@@ -1162,6 +1277,10 @@ describe('fetchAndCompareSyncedIntegrations', () => {
             updated_at: '2025-03-26T14:06:27.611Z',
           },
         ],
+      });
+      (getPipelineMock as jest.MockedFunction<any>).mockResolvedValue({});
+      (getComponentTemplateMock as jest.MockedFunction<any>).mockResolvedValue({
+        component_templates: [],
       });
 
       const res = await fetchAndCompareSyncedIntegrations(
