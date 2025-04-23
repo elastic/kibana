@@ -28,7 +28,6 @@ export {
   apmProgressiveLoading,
   apmServiceInventoryOptimizedSorting,
   apmServiceGroupMaxNumberOfServices,
-  apmTraceExplorerTab,
   apmLabsButton,
   enableInfrastructureProfilingIntegration,
   enableInfrastructureAssetCustomDashboards,

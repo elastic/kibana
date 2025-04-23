@@ -4,16 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { TraceSearchType } from '../../../../common/trace_explorer';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../hooks/use_apm_router';
 import { useApmRoutePath } from '../../../hooks/use_apm_route_path';
-import { useTraceExplorerEnabledSetting } from '../../../hooks/use_trace_explorer_enabled_setting';
 import { ApmMainTemplate } from '../../routing/templates/apm_main_template';
-import { TechnicalPreviewBadge } from '../../shared/technical_preview_badge';
 import { Breadcrumb } from '../breadcrumb';
 import { TransactionTab } from '../transaction_details/waterfall_with_summary/transaction_tabs';
 
@@ -22,8 +19,6 @@ type Tab = Required<
 >['tabs'][number];
 
 export function TraceOverview({ children }: { children: React.ReactElement }) {
-  const isTraceExplorerEnabled = useTraceExplorerEnabledSetting();
-
   const router = useApmRouter();
 
   const { query } = useApmParams('/traces');
@@ -67,34 +62,6 @@ export function TraceOverview({ children }: { children: React.ReactElement }) {
     },
   });
 
-  const tabs: Tab[] = isTraceExplorerEnabled
-    ? [
-        {
-          href: topTracesLink,
-          label: i18n.translate('xpack.apm.traceOverview.topTracesTab', {
-            defaultMessage: 'Top traces',
-          }),
-          isSelected: routePath === '/traces',
-        },
-        {
-          href: explorerLink,
-          label: (
-            <EuiFlexGroup gutterSize="s">
-              <EuiFlexItem grow={false}>
-                {i18n.translate('xpack.apm.traceOverview.traceExplorerTab', {
-                  defaultMessage: 'Explorer',
-                })}
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <TechnicalPreviewBadge icon="beaker" style={{ verticalAlign: 'middle' }} />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          ),
-          isSelected: routePath.startsWith('/traces/explorer'),
-        },
-      ]
-    : [];
-
   return (
     <Breadcrumb href="/traces" title={title} omitOnServerless>
       <ApmMainTemplate
@@ -108,7 +75,7 @@ export function TraceOverview({ children }: { children: React.ReactElement }) {
           },
         }}
         pageHeader={{
-          tabs,
+          tabs: [],
         }}
       >
         {children}
