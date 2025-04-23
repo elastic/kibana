@@ -63,7 +63,7 @@ export const NavigationItemOpenPanel: FC<Props> = ({ item, activeNodes }: Props)
         color: inherit;
         font-weight: inherit;
         transform: none !important; /* don't translateY 1px */
-        padding-inline: calc(${euiTheme.size.xs} * 1.5);
+        padding-inline: calc(${euiTheme.size.xs} * 2);
         background-color: ${isActive
           ? euiTheme.colors.backgroundLightPrimary
           : isExpanded
@@ -77,7 +77,7 @@ export const NavigationItemOpenPanel: FC<Props> = ({ item, activeNodes }: Props)
         }
       `,
     flexGroup: ({ euiTheme }: Theme) => css`
-      gap: calc(${euiTheme.size.xs} * 1.5);
+      gap: calc(${euiTheme.size.s} / 1.5);
     `,
   };
   return (
