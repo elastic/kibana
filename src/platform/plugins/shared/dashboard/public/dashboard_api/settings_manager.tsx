@@ -61,7 +61,7 @@ export function initializeSettingsManager(initialState?: DashboardState) {
     return {
       title: titleState.title ?? '',
       description: titleState.description,
-      hidePanelTitles: titleState.hideTitle ?? DEFAULT_DASHBOARD_STATE.hidePanelTitles,
+      hidePanelTitles: titleState.hidePanelTitles ?? DEFAULT_DASHBOARD_STATE.hidePanelTitles,
       syncColors: syncColors$.value,
       syncCursor: syncCursor$.value,
       syncTooltips: syncTooltips$.value,

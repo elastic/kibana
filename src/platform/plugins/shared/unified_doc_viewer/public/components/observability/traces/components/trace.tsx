@@ -20,21 +20,12 @@ import { FieldConfiguration } from '../resources/get_field_configuration';
 
 export interface TraceProps {
   fields: Record<string, FieldConfiguration>;
-  serviceName: string;
   traceId: string;
-  transactionId?: string;
   displayType: 'span' | 'transaction';
-  displayLimit?: number;
+  docId: string;
 }
 
-export const Trace = ({
-  serviceName,
-  traceId,
-  transactionId,
-  fields,
-  displayType,
-  displayLimit = 5,
-}: TraceProps) => {
+export const Trace = ({ traceId, fields, displayType, docId }: TraceProps) => {
   const { data } = getUnifiedDocViewerServices();
 
   const {
@@ -47,16 +38,14 @@ export const Trace = ({
     () => ({
       getSerializedStateForChild: () => ({
         rawState: {
-          serviceName,
           traceId,
-          entryTransactionId: transactionId,
           rangeFrom,
           rangeTo,
-          displayLimit,
+          docId,
         },
       }),
     }),
-    [rangeFrom, rangeTo, displayLimit, serviceName, traceId, transactionId]
+    [docId, rangeFrom, rangeTo, traceId]
   );
 
   const fieldRows =
