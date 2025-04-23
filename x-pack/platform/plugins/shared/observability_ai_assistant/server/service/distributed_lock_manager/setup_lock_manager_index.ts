@@ -38,7 +38,7 @@ export async function removeLockIndexWithIncorrectMappings(
     mappings.properties?.expiresAt?.type !== 'date';
 
   if (hasIncorrectMappings) {
-    logger.warn(`Lock index "${LOCKS_CONCRETE_INDEX_NAME}" has incorrect mappings. Removing it...`);
+    logger.warn(`Lock index "${LOCKS_CONCRETE_INDEX_NAME}" has incorrect mappings.`);
     try {
       await esClient.indices.delete({ index: LOCKS_CONCRETE_INDEX_NAME });
       logger.info(`Lock index "${LOCKS_CONCRETE_INDEX_NAME}" removed successfully.`);
@@ -52,7 +52,6 @@ export async function ensureTemplatesAndIndexCreated(
   esClient: ElasticsearchClient,
   logger: Logger
 ): Promise<void> {
-  logger.info('Creating index template and component template for locks');
   const INDEX_PATTERN = `${LOCKS_INDEX_ALIAS}*`;
 
   await esClient.cluster.putComponentTemplate({
@@ -69,6 +68,9 @@ export async function ensureTemplatesAndIndexCreated(
       },
     },
   });
+  logger.info(
+    `Component template ${LOCKS_COMPONENT_TEMPLATE_NAME} created or updated successfully.`
+  );
 
   await esClient.indices.putIndexTemplate({
     name: LOCKS_INDEX_TEMPLATE_NAME,
@@ -83,8 +85,10 @@ export async function ensureTemplatesAndIndexCreated(
       },
     },
   });
+  logger.info(`Index template ${LOCKS_INDEX_TEMPLATE_NAME} created or updated successfully.`);
 
   await esClient.indices.create({ index: LOCKS_CONCRETE_INDEX_NAME }, { ignore: [400] });
+  logger.info(`Index ${LOCKS_CONCRETE_INDEX_NAME} created or updated successfully.`);
 }
 
 export async function setuplockManagerIndex(esClient: ElasticsearchClient, logger: Logger) {
