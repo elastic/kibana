@@ -2151,6 +2151,54 @@
       },
       {
         "parentPluginId": "@kbn/esql-utils",
+        "id": "def-common.replaceESQLQueryIndexPattern",
+        "type": "Function",
+        "tags": [],
+        "label": "replaceESQLQueryIndexPattern",
+        "description": [],
+        "signature": [
+          "(esql: string, replacements: Record<string, string>) => string"
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/replace_index_pattern.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-utils",
+            "id": "def-common.replaceESQLQueryIndexPattern.$1",
+            "type": "string",
+            "tags": [],
+            "label": "esql",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/replace_index_pattern.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/esql-utils",
+            "id": "def-common.replaceESQLQueryIndexPattern.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "replacements",
+            "description": [],
+            "signature": [
+              "Record<string, string>"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/replace_index_pattern.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-utils",
         "id": "def-common.retrieveMetadataColumns",
         "type": "Function",
         "tags": [],
