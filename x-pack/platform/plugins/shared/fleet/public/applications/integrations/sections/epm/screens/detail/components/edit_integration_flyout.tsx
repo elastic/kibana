@@ -76,7 +76,7 @@ export const EditIntegrationFlyout: React.FunctionComponent<{
 
   // Set initial categories only once when data is available
   useEffect(() => {
-    // Only run this effect if we haven't initialized categories yet
+    // Only run this effect if we haven't initialized categories yet.
     if (!categoriesInitialized && parentCategories?.length && existingCategories.length) {
       const initialCategories = existingCategories
         .map((categoryId) => parentCategories.find((cat) => cat.id === categoryId)?.title)
