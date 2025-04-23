@@ -50,5 +50,8 @@ export const benchmarkScoreMapping: MappingTypeMapping = {
     is_enabled_rules_score: {
       type: 'boolean',
     },
+    'data_stream.namespace': {
+      type: 'keyword',
+    },
   },
 };
