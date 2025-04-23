@@ -35,7 +35,7 @@ const TABLE_TAB_SETTING_BUTTON_LABEL = i18n.translate(
 const HIGHLIGHTED_FIELDS_ONLY_LABEL = i18n.translate(
   'xpack.securitySolution.flyout.documentDetails.right.tableTabSettingButton.highlightedFieldsOnlyLabel',
   {
-    defaultMessage: 'Highlighted fields only',
+    defaultMessage: 'Show highlighted fields only',
   }
 );
 
@@ -49,7 +49,7 @@ const HIDE_EMPTY_FIELDS_LABEL = i18n.translate(
 const HIDE_ALERT_FIELDS_LABEL = i18n.translate(
   'xpack.securitySolution.flyout.documentDetails.right.tableTabSettingButton.hideAlertFieldsLabel',
   {
-    defaultMessage: 'Hide kibana alert fields',
+    defaultMessage: 'Hide Kibana alert fields',
   }
 );
 
