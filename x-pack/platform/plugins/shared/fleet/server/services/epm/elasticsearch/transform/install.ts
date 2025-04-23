@@ -801,9 +801,7 @@ async function handleTransformInstall({
         if (
           transformHealth &&
           transformHealth.status === 'red' &&
-          // @ts-expect-error TransformGetTransformStatsTransformStatsHealth should have 'issues'
           Array.isArray(transformHealth.issues) &&
-          // @ts-expect-error TransformGetTransformStatsTransformStatsHealth should have 'issues'
           transformHealth.issues.find(
             (i: { issue: string }) => i.issue === 'Privileges check failed'
           )

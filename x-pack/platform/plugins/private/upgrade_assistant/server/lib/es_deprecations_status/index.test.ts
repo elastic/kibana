@@ -150,7 +150,6 @@ describe('getESUpgradeStatus', () => {
         ],
       },
       data_streams: {},
-      // @ts-expect-error not in types yet
       ilm_policies: {},
       templates: {},
     });
@@ -262,7 +261,6 @@ describe('getESUpgradeStatus', () => {
       ml_settings: [],
       index_settings: {},
       data_streams: {},
-      // @ts-expect-error not in types yet
       ilm_policies: {},
       templates: {},
     });
@@ -337,7 +335,6 @@ describe('getESUpgradeStatus', () => {
           },
         ],
       },
-      // @ts-expect-error not in types yet
       ilm_policies: {},
       templates: {},
     });
@@ -393,7 +390,6 @@ describe('getESUpgradeStatus', () => {
         ],
       },
       data_streams: {},
-      // @ts-expect-error not in types yet
       ilm_policies: {},
       templates: {},
     });
@@ -432,7 +428,6 @@ describe('getESUpgradeStatus', () => {
       ml_settings: [],
       index_settings: {},
       data_streams: {},
-      // @ts-expect-error not in types yet
       ilm_policies: {},
       templates: {},
     });
