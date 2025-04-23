@@ -496,6 +496,9 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
           enabled: true,
           updatedBy: null,
           apiKeyOwner: null,
+          artifacts: {
+            dashboards: [],
+          },
           apiKeyCreatedByUser: null,
           muteAll: false,
           mutedInstanceIds: [],
