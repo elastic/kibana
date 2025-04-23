@@ -25,7 +25,7 @@ import { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
 
 import { UiActionsPublicStart } from '@kbn/ui-actions-plugin/public/plugin';
 import { ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/public';
-import { LinksRuntimeState } from './types';
+import { LinksRuntimeState, LinksSerializedState } from './types';
 import { APP_ICON, APP_NAME, CONTENT_ID, LATEST_VERSION } from '../common';
 import { LinksCrudTypes } from '../common/content_management';
 import { getLinksClient } from './content_management/links_content_management_client';
@@ -64,11 +64,13 @@ export class LinksPlugin
 
       plugins.embeddable.registerAddFromLibraryType({
         onAdd: async (container, savedObject) => {
-          const { deserializeLinksSavedObject } = await import('./lib/deserialize_from_library');
-          const initialState = await deserializeLinksSavedObject(savedObject);
-          container.addNewPanel<LinksRuntimeState>({
+          container.addNewPanel<LinksSerializedState>({
             panelType: CONTENT_ID,
-            initialState,
+            serializedState: {
+              rawState: {
+                savedObjectId: savedObject.id,
+              },
+            },
           });
         },
         savedObjectType: CONTENT_ID,
