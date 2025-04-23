@@ -102,7 +102,7 @@ describe('TraceLink', () => {
   });
 
   describe('transaction page', () => {
-    it('renders with date range params', () => {
+    it('renders with date range and waterfall params', () => {
       const transaction = {
         service: { name: 'foo' },
         transaction: {
@@ -125,13 +125,14 @@ describe('TraceLink', () => {
         query: {
           rangeFrom: 'now-24h',
           rangeTo: 'now',
+          waterfallItemId: '789',
         },
       });
 
       const component = shallow(<TraceLink />);
 
       expect(component.prop('to')).toEqual(
-        '/services/foo/transactions/view?traceId=123&transactionId=456&transactionName=bar&transactionType=GET&rangeFrom=now-24h&rangeTo=now&waterfallItemId='
+        '/services/foo/transactions/view?traceId=123&transactionId=456&transactionName=bar&transactionType=GET&rangeFrom=now-24h&rangeTo=now&waterfallItemId=789'
       );
     });
 
