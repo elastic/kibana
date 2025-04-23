@@ -214,6 +214,11 @@ export const GreyboxExample = () => {
       <EuiSpacer />
       <EuiButton
         onClick={() =>
+          /**
+           * FLYOUTS-TODO: here, we need to specify the type of the state explicitly. It would be ideal if it could be inferred by the props type of the passed component.
+           * This way, users of the API would be forced to provide the correct initial state type. If left alone, this could lead to a situation where the type of state manager
+           * created is different from the type of the state manager the component expects. This would cause runtime errors.
+           */
           flyoutApi.current?.openFlyout<FlyoutOneState>({
             Component: FlyoutOne,
             width: 800,

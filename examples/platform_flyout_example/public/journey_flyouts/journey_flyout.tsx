@@ -43,9 +43,20 @@ interface ActiveFlyoutEntry<StateType extends object = {}> {
   activeChildFlyoutId?: string;
 }
 
+/**
+ * FLYOUTS TODO: The state management of this component is extremely messy. Currently, the state is managed with an object in a useRef, useState hooks that drive rendering, and a lot of imperative setters which keep
+ * the two in sync on user input.
+ *
+ * A better approach would be to set up a POJO API / state manager on first render. The state manager would contain RXJS subjects for the source of truth state, and Observable streams for all derived state used for
+ * rendering then send back methods for interacting with the state. i.e. openNextFlyout, goBack, goForward, openChildFlyout etc. Then this React component would be a wrapper around the API used mostly for rendering.
+ */
 export const JourneyFlyout = forwardRef<FlyoutApi, { childBackgroundColor?: string }>(
   ({ childBackgroundColor }, ref) => {
     const { euiTheme } = useEuiTheme();
+
+    /**
+     * FLYOUTS TODO: Widths in this system are passed as numbers. Instead it would make the API simpler if we provided size strings e.g. "s", "m", "l" etc.
+     */
     const [width, setWidth] = useState(800);
     const [childWidth, setChildWidth] = useState(800);
 
@@ -55,6 +66,10 @@ export const JourneyFlyout = forwardRef<FlyoutApi, { childBackgroundColor?: stri
     const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
     const [isAnimating, setIsAnimating] = useState(false);
 
+    /**
+     * FLYOUTS TODO: The swapping behaviour where one the Components are rendered into one of two DOM nodes which swap places is handled in this component.
+     * This leads to a lot of ternaries like "isAActive ? aIndex : bIndex". It would be much cleaner to build a generic div-swapper component that encapsulates this logic.
+     */
     const aRef = useRef<HTMLDivElement>(null);
     const bRef = useRef<HTMLDivElement>(null);
 
@@ -118,6 +133,10 @@ export const JourneyFlyout = forwardRef<FlyoutApi, { childBackgroundColor?: stri
         if (isAnimating || activeIndex === undefined) return;
         const flyoutId = v4();
 
+        /**
+         * FLYOUTS TODO: Much of the code for setting up state managers, pushing to history, and setting the flyout width is duplicated in many of these API functions.
+         * This could be cleaned up.
+         */
         const state = flyoutEntry.initialState ?? {};
         const stateManager = initializeStateManager(state, state);
         activeFlyouts.current[flyoutId] = {
@@ -189,6 +208,10 @@ export const JourneyFlyout = forwardRef<FlyoutApi, { childBackgroundColor?: stri
       triggerAnimationOnRef(flyoutRef.current, 'slide-in').then(() => {
         setIsAnimating(false);
         // stop rendering the inactive flyout
+        /**
+         * FLYOUTS TODO: We should unmount the inactive (bottom) flyout after the animation is finished. This would make our virtualization
+         * show only one flyout at a time rather than two.
+         */
         // (isAActive ? setAIndex : setBIndex)(undefined);
       });
     }, [activeIndex, historyEntries, isAActive, isAnimating, width]);
