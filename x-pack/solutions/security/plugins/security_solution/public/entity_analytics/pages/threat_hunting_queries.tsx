@@ -20,6 +20,7 @@ import {
 } from '@elastic/eui';
 import { SecurityPageName } from '@kbn/deeplinks-security';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import debounce from 'lodash/debounce';
 import type {
   ThreatHuntingQueryIndexStatus,
   ThreatHuntingQueryWithIndexCheck,
@@ -30,7 +31,6 @@ import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { useListThreatHuntingQueries } from '../api/hooks/use_list_threat_hunting_queries';
 import { useOpenThreatHuntingQueryInDiscover } from '../hooks/use_open_threat_hunting_query_in_discover';
 import { ThreatHuntingQueryPanelKey } from '../../flyout/threat_hunting_query_details/right';
-
 const CATEGORY_COLOUR_MAP: Record<string, string> = {
   windows: '#a7d0f4',
   linux: '#ffebc0',
@@ -175,6 +175,20 @@ const SearchBar = ({ onSearch }: { onSearch: (searchState: SearchState) => void 
     categories: [] as string[],
     indexStatuses: [] as string[],
   });
+  const [searchQuery, setSearchQuery] = useState('');
+
+  // Use a debounced function for text search
+  const debouncedSearch = useCallback(
+    (newSearch: string) => {
+      const handler = debounce((search: string) => {
+        const updatedFilters = { ...searchState, q: search } as SearchState;
+        setSearchState(updatedFilters);
+        onSearch(updatedFilters);
+      }, 300);
+      handler(newSearch);
+    },
+    [searchState, onSearch]
+  );
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleFilterChange = (field: keyof typeof searchState, value: any) => {
@@ -184,7 +198,9 @@ const SearchBar = ({ onSearch }: { onSearch: (searchState: SearchState) => void 
   };
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    handleFilterChange('q', e.target.value);
+    const newValue = e.target.value;
+    setSearchQuery(newValue);
+    debouncedSearch(newValue);
   };
 
   const handleCategoryChange = (selectedOptions: Array<{ value: string }>) => {
@@ -208,7 +224,7 @@ const SearchBar = ({ onSearch }: { onSearch: (searchState: SearchState) => void 
           <EuiFieldSearch
             css={{ minWidth: 500 }}
             placeholder="Search threat hunting queries..."
-            value={searchState.q}
+            value={searchQuery}
             onChange={handleSearchChange}
             aria-label="Search"
             fullWidth
