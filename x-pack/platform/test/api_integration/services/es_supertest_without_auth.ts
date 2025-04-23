@@ -6,8 +6,9 @@
  */
 
 import { format as formatUrl } from 'url';
-
 import supertest from 'supertest';
+
+import { FtrProviderContext } from '../ftr_provider_context';
 
 /**
  * Supertest provider that doesn't include user credentials into base URL that is passed
