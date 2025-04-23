@@ -22,12 +22,11 @@ export type {
 
 export type {
   ShareContext,
-  ShareMenuProvider,
   ShareMenuItemLegacy,
-  ShareMenuItemV2,
   ShowShareMenuOptions,
   ShareContextMenuPanelItem,
   BrowserUrlService,
+  ExportShare,
 } from './types';
 
 export type { RedirectOptions } from '../common/url_service';

@@ -1975,6 +1975,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     async openCSVDownloadShare() {
       await this.ensureShareMenuIsOpen('export');
       await testSubjects.click('export');
+      await testSubjects.click('lens_csv-radioOption');
     },
 
     async setCSVDownloadDebugFlag(value: boolean = true) {
