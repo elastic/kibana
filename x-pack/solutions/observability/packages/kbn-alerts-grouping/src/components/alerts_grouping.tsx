@@ -128,8 +128,9 @@ const AlertsGroupingInternal = <T extends BaseAlertsGroupAggregations>(
       updateGrouping({
         activeGroups: selectedGroups,
       });
-      // fire state transition if provided
-    } else if (onGroupingsChange) {
+    }
+    // fire state transition if provided
+    if (onGroupingsChange) {
       onGroupingsChange({
         activeGroups: selectedGroups,
       });
