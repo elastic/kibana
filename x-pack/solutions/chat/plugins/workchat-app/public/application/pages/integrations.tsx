@@ -13,4 +13,3 @@ export const WorkChatIntegrationsPage: React.FC = () => {
   useBreadcrumb([{ text: 'Integrations' }]);
   return <IntegrationActiveView />;
 };
-

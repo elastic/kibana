@@ -13,8 +13,6 @@ import { useNavigation } from '../../../hooks/use_navigation';
 import { appPaths } from '../../../app_paths';
 import { integrationLabels } from '../i18n';
 
-
-
 export const IntegrationListView: React.FC<{ tab?: string }> = ({ tab }) => {
   const { navigateToWorkchatUrl } = useNavigation();
 

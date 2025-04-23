@@ -31,6 +31,7 @@ import {
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { IntegrationType } from '@kbn/wci-common';
 import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/css';
 import type { Integration } from '../../../../../common/integrations';
 import { useNavigation } from '../../../hooks/use_navigation';
 import { appPaths } from '../../../app_paths';
@@ -39,12 +40,11 @@ import { useAgentList } from '../../../hooks/use_agent_list';
 import { integrationLabels } from '../i18n';
 import { IntegrationListView } from './integration_list_view';
 import { useIntegrationList } from '../../../hooks/use_integration_list';
-import { css } from '@emotion/css';
 import PlugSvg from '../../../../assets/plug.svg';
 
 export const IntegrationActiveView: React.FC = () => {
   const { agents } = useAgentList();
-  const { integrations, isLoading} = useIntegrationList();
+  const { integrations, isLoading } = useIntegrationList();
   const { navigateToWorkchatUrl } = useNavigation();
 
   const columns: Array<EuiBasicTableColumn<Integration>> = [
@@ -248,8 +248,8 @@ export const IntegrationActiveView: React.FC = () => {
 
   // emotion styling
   const horizontalRuleStyle = css`
-  height: 2px;
-`;
+    height: 2px;
+  `;
 
   const loadingStyle = css`
     height: 300px;
@@ -278,26 +278,18 @@ export const IntegrationActiveView: React.FC = () => {
             </EuiFlexItem>
           </EuiFlexGroup>
         ) : integrations.length === 0 ? (
-          <EuiFlexGroup
-            alignItems="center"
-            className={noIntegrationStyle}
-          >
+          <EuiFlexGroup alignItems="center" className={noIntegrationStyle}>
             <EuiPanel>
               <EuiFlexItem grow={false}>
-                <span
-                  role="img"
-                  aria-label="plug emoji"
-                  className={plugStyle}
-                >
-                <EuiIcon size="xxl" type={PlugSvg}>
-                </EuiIcon>
+                <span role="img" aria-label="plug emoji" className={plugStyle}>
+                  <EuiIcon size="xxl" type={PlugSvg} />
                 </span>
               </EuiFlexItem>
               <EuiEmptyPrompt
                 title={
                   <h2>
                     {i18n.translate('workchatApp.integrations.listView.noIntegrationTitle', {
-                      defaultMessage: 'You haven\'t connected anything',
+                      defaultMessage: "You haven't connected anything",
                     })}
                   </h2>
                 }

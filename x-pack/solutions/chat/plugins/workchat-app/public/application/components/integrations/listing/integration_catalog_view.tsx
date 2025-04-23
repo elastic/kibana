@@ -20,11 +20,11 @@ import {
 import { IntegrationType } from '@kbn/wci-common';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/css';
 import { IntegrationListView } from './integration_list_view';
 import { getIntegrationIcon } from '../utils';
 import { useNavigation } from '../../../hooks/use_navigation';
 import { appPaths } from '../../../app_paths';
-import { css } from '@emotion/css';
 
 interface IntegrationCardData {
   title: string;
@@ -73,31 +73,31 @@ export const IntegrationCatalogView: React.FC = () => {
   const { euiTheme } = useEuiTheme();
 
   const backgroundCircle = css`
-  background-color: ${euiTheme.colors.backgroundBaseSubdued};
-  border-radius: 50%;
-  width: 60px;
-  height: 60px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-left: -10px;
-  margin-right: 15px;
-`
+    background-color: ${euiTheme.colors.backgroundBaseSubdued};
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: -10px;
+    margin-right: 15px;
+  `;
   const iconStyle = css`
-  margin-left: 8px;
-  cursor: pointer;
+    margin-left: 8px;
+    cursor: pointer;
   `;
 
   const titleStyle = css`
-  display: flex;
-  align-items: center;
-`;
+    display: flex;
+    align-items: center;
+  `;
 
   const cardStyle = css`
-  border: 1px solid ${euiTheme.colors.backgroundBaseHighlighted};
-  border-radius: 4px;
-  width: 400px;
-  height: 150px;
+    border: 1px solid ${euiTheme.colors.backgroundBaseHighlighted};
+    border-radius: 4px;
+    width: 400px;
+    height: 150px;
   `;
 
   return (
@@ -119,20 +119,14 @@ export const IntegrationCatalogView: React.FC = () => {
               <EuiCard
                 layout="horizontal"
                 icon={
-                  <div
-                    className={backgroundCircle}
-                  >
+                  <div className={backgroundCircle}>
                     <EuiIcon size="xl" type={cardData.icon} />
                   </div>
                 }
                 title={
                   <div className={titleStyle}>
                     {cardData.title}
-                      <EuiIcon
-                        type="iInCircle"
-                        size="s"
-                        className={iconStyle}
-                      />
+                    <EuiIcon type="iInCircle" size="s" className={iconStyle} />
                   </div>
                 }
                 titleSize="xs"
