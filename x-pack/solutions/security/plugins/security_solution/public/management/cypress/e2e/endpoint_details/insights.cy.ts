@@ -172,10 +172,10 @@ describe(
         clickScanButton();
         scanButtonShouldBe('disabled');
 
-        // defend insights is 2 but workflow insights is 0
+        // defend insights is 3 but workflow insights is 0
         stubDefendInsightsApiResponse({
           status: 'succeeded',
-          insights: [{ id: '1' }, { id: '2' }],
+          insights: [{ events: [{}, {}] }, { events: [{}] }],
         });
         stubWorkflowInsightsApiResponse(endpointId, 0);
 
@@ -189,8 +189,8 @@ describe(
         insightsEmptyResultsCalloutDoesNotExist();
         scanButtonShouldBe('disabled');
 
-        // workflow insights is now 2
-        stubWorkflowInsightsApiResponse(endpointId, 2);
+        // workflow insights is now 3
+        stubWorkflowInsightsApiResponse(endpointId, 3);
 
         // insights should be displayed now
         expectWorkflowInsightsApiToBeCalled();

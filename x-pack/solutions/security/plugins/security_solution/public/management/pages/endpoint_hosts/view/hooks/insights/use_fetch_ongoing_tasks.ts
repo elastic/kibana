@@ -62,7 +62,12 @@ export const useFetchLatestScan = ({
         }
 
         if (status === DefendInsightStatusEnum.succeeded) {
-          const expectedCount = insight.insights.length;
+          const expectedCount = insight.insights.reduce((acc, insight) => {
+            if (!insight.events) {
+              return acc;
+            }
+            return acc + insight.events.length;
+          }, 0);
           onSuccess(expectedCount);
         }
 
