@@ -39,6 +39,7 @@ export const snapshot: Command = {
       --ready-timeout   Customize the ready check timeout, in seconds or "Xm" format, defaults to 1m
       --plugins         Comma seperated list of Elasticsearch plugins to install
       --secure-files     Comma seperated list of secure_setting_name=/path pairs
+      --use-existing    If the install dir exists already, don't overwrite
 
     Example:
 
@@ -64,10 +65,11 @@ export const snapshot: Command = {
         skipReadyCheck: 'skip-ready-check',
         readyTimeout: 'ready-timeout',
         secureFiles: 'secure-files',
+        useExisting: 'use-existing',
       },
 
       string: ['version', 'ready-timeout'],
-      boolean: ['download-only', 'use-cached', 'skip-ready-check'],
+      boolean: ['download-only', 'use-cached', 'skip-ready-check', 'use-existing'],
 
       default: defaults,
     });
@@ -91,6 +93,7 @@ export const snapshot: Command = {
         useCached: options.useCached,
         password: options.password,
         esArgs: options.esArgs,
+        useExisting: options.useExisting,
       });
 
       if (options.dataArchive) {

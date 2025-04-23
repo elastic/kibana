@@ -1,0 +1,30 @@
+{
+  "type": "plugin",
+  "id": "@kbn/cck-plugin",
+  "owner": "@elastic/streams-program-team",
+  "description": "Cross cluster Kibana",
+  "group": "platform",
+  "visibility": "shared",
+  "plugin": {
+    "id": "cck",
+    "configPath": ["xpack", "cck"],
+    "browser": false,
+    "server": true,
+    "requiredPlugins": [
+      "data",
+      "security",
+      "encryptedSavedObjects",
+      "usageCollection",
+      "licensing",
+      "taskManager",
+      "alerting",
+      "inference"
+    ],
+    "optionalPlugins": [
+      "cloud",
+      "serverless"
+    ],
+    "requiredBundles": [
+    ]
+  }
+}

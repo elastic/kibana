@@ -3970,6 +3970,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/cck-plugin@link:x-pack/platform/plugins/shared/cck":
+  version "0.0.0"
+  uid ""
+
 "@kbn/cell-actions@link:src/platform/packages/shared/kbn-cell-actions":
   version "0.0.0"
   uid ""

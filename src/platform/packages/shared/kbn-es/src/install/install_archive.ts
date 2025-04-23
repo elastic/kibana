@@ -52,39 +52,41 @@ export async function installArchive(archive: string, options?: InstallArchiveOp
     await artifact.download(dest);
   }
 
-  if (fs.existsSync(installPath)) {
-    log.info('install directory already exists, removing');
-    await del(installPath, { force: true });
+  if (!options?.useExisting) {
+    if (fs.existsSync(installPath)) {
+      log.info('install directory already exists, removing');
+      await del(installPath, { force: true });
+    }
+
+    log.info('extracting %s', chalk.bold(dest));
+    await extract({
+      archivePath: dest,
+      targetDir: installPath,
+      stripComponents: 1,
+    });
+    log.info('extracted to %s', chalk.bold(installPath));
+
+    /**
+     * If we're running inside a Vagrant VM, and this is running in a synced folder,
+     * ES will fail to start due to ML being unable to write a pipe in the synced folder.
+     * Disabling allows ES to write to the OS's /tmp directory.
+     */
+    if (!disableEsTmpDir) {
+      const tmpdir = path.resolve(installPath, 'ES_TMPDIR');
+      fs.mkdirSync(tmpdir, { recursive: true });
+      log.info('created %s', chalk.bold(tmpdir));
+    }
+
+    // starting in 6.3, security is disabled by default. Since we bootstrap
+    // the keystore, we can enable security ourselves.
+    await appendToConfig(installPath, 'xpack.security.enabled', 'true');
+
+    await appendToConfig(installPath, 'xpack.license.self_generated.type', license);
+    await configureKeystore(installPath, log, [
+      ['bootstrap.password', password],
+      ...parseSettings(esArgs, { filter: SettingsFilter.SecureOnly }),
+    ]);
   }
-
-  log.info('extracting %s', chalk.bold(dest));
-  await extract({
-    archivePath: dest,
-    targetDir: installPath,
-    stripComponents: 1,
-  });
-  log.info('extracted to %s', chalk.bold(installPath));
-
-  /**
-   * If we're running inside a Vagrant VM, and this is running in a synced folder,
-   * ES will fail to start due to ML being unable to write a pipe in the synced folder.
-   * Disabling allows ES to write to the OS's /tmp directory.
-   */
-  if (!disableEsTmpDir) {
-    const tmpdir = path.resolve(installPath, 'ES_TMPDIR');
-    fs.mkdirSync(tmpdir, { recursive: true });
-    log.info('created %s', chalk.bold(tmpdir));
-  }
-
-  // starting in 6.3, security is disabled by default. Since we bootstrap
-  // the keystore, we can enable security ourselves.
-  await appendToConfig(installPath, 'xpack.security.enabled', 'true');
-
-  await appendToConfig(installPath, 'xpack.license.self_generated.type', license);
-  await configureKeystore(installPath, log, [
-    ['bootstrap.password', password],
-    ...parseSettings(esArgs, { filter: SettingsFilter.SecureOnly }),
-  ]);
 
   // copy resources to ES config directory
   if (resources) {
