@@ -8,7 +8,10 @@
 import moment from 'moment';
 import sinon from 'sinon';
 import type { TransportResult } from '@elastic/elasticsearch';
-import type { IlmExplainLifecycleResponse } from 'elasticsearch-8.x/lib/api/types';
+import type {
+  FieldCapsResponse,
+  IlmExplainLifecycleResponse,
+} from '@elastic/elasticsearch/lib/api/types';
 import { ALERT_REASON, ALERT_RULE_PARAMETERS, ALERT_UUID, TIMESTAMP } from '@kbn/rule-data-utils';
 
 import type { SanitizedRuleAction } from '@kbn/alerting-plugin/common';
@@ -61,7 +64,6 @@ import { ruleExecutionLogMock } from '../../rule_monitoring/mocks';
 import type { GenericBulkCreateResponse } from '../factories';
 import type { BaseFieldsLatest } from '../../../../../common/api/detection_engine/model/alerts';
 import type { AlertingServerSetup } from '@kbn/alerting-plugin/server';
-import type { FieldCapsResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
 
 describe('utils', () => {
