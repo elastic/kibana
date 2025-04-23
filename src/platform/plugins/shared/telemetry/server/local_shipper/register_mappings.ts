@@ -43,21 +43,21 @@ async function registerIngestPipeline(getElasticsearchClient: () => Promise<Elas
   const esClient = await getElasticsearchClient();
 
   // Generate key and value processors programmatically
-  const keyProcessors = Array.from({ length: 9 }, (_, i) => ({
+  const keyProcessors: IngestProcessorContainer[] = Array.from({ length: 9 }, (_, i) => ({
     set: {
       field: `key${i + 1}`,
       value: `{{properties.key${i + 1}}}`,
       ignore_empty_value: true,
     },
   }));
-  const valueProcessors = Array.from({ length: 9 }, (_, i) => ({
+  const valueProcessors: IngestProcessorContainer[] = Array.from({ length: 9 }, (_, i) => ({
     set: {
       field: `value${i + 1}`,
       value: `{{properties.value${i + 1}}}`,
       ignore_empty_value: true,
     },
   }));
-  const valueConvertProcessors = Array.from({ length: 9 }, (_, i) => ({
+  const valueConvertProcessors: IngestProcessorContainer[] = Array.from({ length: 9 }, (_, i) => ({
     convert: {
       field: `value${i + 1}`,
       type: 'double',
@@ -101,7 +101,7 @@ async function registerIngestPipeline(getElasticsearchClient: () => Promise<Elas
   ];
 
   try {
-    const putPipelineResp = await esClient.ingest.putPipeline({
+    await esClient.ingest.putPipeline({
       id: 'ebt-kibana-browser',
       processors,
       on_failure: [
@@ -112,6 +112,7 @@ async function registerIngestPipeline(getElasticsearchClient: () => Promise<Elas
       ],
     });
   } catch (err) {
+    // eslint-disable-next-line no-console
     console.error('Error creating pipeline:', err);
   }
 }
