@@ -38,39 +38,6 @@
       },
       {
         "parentPluginId": "@kbn/search-shared-ui",
-        "id": "def-public.DecorativeHorizontalStepper",
-        "type": "Function",
-        "tags": [],
-        "label": "DecorativeHorizontalStepper",
-        "description": [],
-        "signature": [
-          "({ stepCount, }: DecorativeHorizontalStepperProps) => React.JSX.Element"
-        ],
-        "path": "x-pack/solutions/search/packages/shared-ui/src/decorative_horizontal_stepper/decorative_horizontal_stepper.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/search-shared-ui",
-            "id": "def-public.DecorativeHorizontalStepper.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "{\n  stepCount = 2,\n}",
-            "description": [],
-            "signature": [
-              "DecorativeHorizontalStepperProps"
-            ],
-            "path": "x-pack/solutions/search/packages/shared-ui/src/decorative_horizontal_stepper/decorative_horizontal_stepper.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/search-shared-ui",
         "id": "def-public.FormInfoField",
         "type": "Function",
         "tags": [],

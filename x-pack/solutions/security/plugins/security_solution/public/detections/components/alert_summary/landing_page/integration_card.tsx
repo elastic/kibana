@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import React, { memo, useCallback } from 'react';
+import React, { memo, useCallback, useMemo } from 'react';
 import { css } from '@emotion/react';
-import { EuiBadge, EuiCard } from '@elastic/eui';
+import { EuiBadge, EuiCard, useEuiTheme } from '@elastic/eui';
 import type { PackageListItem } from '@kbn/fleet-plugin/common';
 import { INTEGRATIONS_PLUGIN_ID } from '@kbn/fleet-plugin/common';
-import { CardIcon, useLink } from '@kbn/fleet-plugin/public';
+import { useLink } from '@kbn/fleet-plugin/public';
 import { i18n } from '@kbn/i18n';
+import { IntegrationIcon } from '../common/integration_icon';
 import { useKibana } from '../../../../common/lib/kibana';
 
 const SIEM_BADGE = i18n.translate('xpack.securitySolution.alertSummary.integrations.siemBadge', {
@@ -39,6 +40,9 @@ export interface IntegrationCardProps {
  */
 export const IntegrationCard = memo(
   ({ integration, 'data-test-subj': dataTestSubj }: IntegrationCardProps) => {
+    const { euiTheme } = useEuiTheme();
+    const iconStyle = useMemo(() => ({ marginInlineEnd: euiTheme.size.base }), [euiTheme]);
+
     const {
       services: { application },
     } = useKibana();
@@ -65,13 +69,13 @@ export const IntegrationCard = memo(
         display="plain"
         hasBorder
         icon={
-          <CardIcon
-            icons={integration.icons}
-            integrationName={integration.title}
-            packageName={integration.name}
-            size="xl"
-            version={integration.version}
-          />
+          <div style={iconStyle}>
+            <IntegrationIcon
+              data-test-subj={dataTestSubj}
+              iconSize="xl"
+              integration={integration}
+            />
+          </div>
         }
         layout="horizontal"
         onClick={onClick}

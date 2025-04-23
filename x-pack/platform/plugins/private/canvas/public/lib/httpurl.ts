@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-// A cheap regex to distinguish an HTTP URL string from a data URL string
-const httpurlRegex = /^https?:\/\/\S+(?:[0-9]+)?\/\S{1,}/;
-
 export function isValidHttpUrl(str: string): boolean {
-  return httpurlRegex.test(str);
+  try {
+    const url = new URL(str);
+    return url.protocol === 'http:' || url.protocol === 'https:';
+  } catch {
+    return false;
+  }
 }
