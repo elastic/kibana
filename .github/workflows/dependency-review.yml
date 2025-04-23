@@ -1,17 +1,17 @@
 name: Dependency Review
 on:
   pull_request:
-    paths: # Trigger only if package.json changes
-      - '**/package.json'
-  push:
-    paths: # Trigger only if package.json changes
+    paths:
       - '**/package.json'
 
 jobs:
   analyze:
     name: Analyze new dependencies
     runs-on: ubuntu-latest
-    if: github.repository == 'elastic/kibana' # Hack: Do not run on forks
+    if: |
+      github.repository == 'elastic/kibana' &&
+      github.actor != 'renovate[bot]' &&
+      !startsWith(github.event.pull_request.head.ref, 'renovate')
     steps:
     - name: Checkout kibana-operations
       uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
@@ -35,7 +35,6 @@ jobs:
         SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         SNYK_ORG_ID: ${{ secrets.SNYK_ORG_ID }}
         EVENT_NAME: ${{ github.event_name }}
-        AFTER_SHA: ${{ github.event.after }}
       run: |
         npm ci --omit=dev
         node dependency-health-score.js
