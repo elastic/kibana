@@ -814,6 +814,9 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
           scheduledTaskId: response.body.scheduledTaskId,
           updatedBy: null,
           apiKeyOwner: null,
+          artifacts: {
+            dashboards: [],
+          },
           apiKeyCreatedByUser: null,
           throttle: '1m',
           notifyWhen: 'onThrottleInterval',

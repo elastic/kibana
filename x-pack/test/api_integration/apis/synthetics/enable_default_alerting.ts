@@ -239,6 +239,9 @@ const defaultAlertRules = {
     enabled: true,
     throttle: null,
     apiKeyOwner: 'elastic',
+    artifacts: {
+      dashboards: [],
+    },
     apiKeyCreatedByUser: false,
     createdBy: 'elastic',
     updatedBy: 'elastic',
@@ -271,6 +274,9 @@ const defaultAlertRules = {
     enabled: true,
     throttle: null,
     apiKeyOwner: 'elastic',
+    artifacts: {
+      dashboards: [],
+    },
     apiKeyCreatedByUser: false,
     createdBy: 'elastic',
     updatedBy: 'elastic',
