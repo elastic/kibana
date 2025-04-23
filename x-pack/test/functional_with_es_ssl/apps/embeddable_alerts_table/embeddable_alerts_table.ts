@@ -238,23 +238,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           expect(tags.every((tag) => tag === ruleName)).to.equal(true);
         });
 
-        it('should cleanup any stored table configurations from localStorage when deleting the panel', async () => {
-          const panel = await testSubjects.find(DASHBOARD_PANEL_TEST_SUBJ);
-          const panelId = (await panel.getAttribute('id'))!.replace('panel-', '');
-          // Move a column to trigger a localStorage save
-          const statusHeaderCell = await testSubjects.find(
-            'dataGridHeaderCell-kibana.alert.status'
-          );
-          await statusHeaderCell.moveMouseTo();
-          await testSubjects.click('dataGridHeaderCellActionButton-kibana.alert.status');
-          await find.clickByCssSelector('button:has([title="Move right"])');
-          // Delete the panel
-          await testSubjects.click('embeddablePanelToggleMenuIcon');
-          await testSubjects.click('embeddablePanelAction-deletePanel');
-          const lsItem = await browser.getLocalStorageItem(`embeddable-alerts-table-${panelId}`);
-          expect(lsItem).to.equal(null);
-        });
-
         after(async () => {
           await security.testUser.restoreDefaults();
         });

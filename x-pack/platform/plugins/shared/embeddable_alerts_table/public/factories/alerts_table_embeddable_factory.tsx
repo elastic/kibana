@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import deepEqual from 'react-fast-compare';
-import { BehaviorSubject, filter, pairwise, startWith } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import type { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import type { PresentationContainer } from '@kbn/presentation-containers';
@@ -88,23 +88,6 @@ export const getAlertsTableEmbeddableFactory = (
         tableConfig: [tableConfig$, (value) => tableConfig$.next(value), (a, b) => deepEqual(a, b)],
       }
     );
-    const persistedTableConfigKey = `${PERSISTED_TABLE_CONFIG_KEY_PREFIX}-${uuid}`;
-    const onDeleteSubscription = api.parentApi?.children$
-      ?.pipe(
-        startWith(null),
-        pairwise(),
-        filter(
-          // Since the panels api doesn't have a way to listen to panel deletions
-          // we have to listen to the children$ stream and check if the panel was removed
-          ([prevChildren, currentChildren]) =>
-            Boolean(prevChildren?.[uuid]) && !Boolean(currentChildren?.[uuid])
-        )
-      )
-      ?.subscribe(() => {
-        // Clean up the persisted table configuration when the panel
-        // is deleted from the dashboard
-        localStorage.removeItem(persistedTableConfigKey);
-      });
 
     return {
       api,
@@ -112,19 +95,11 @@ export const getAlertsTableEmbeddableFactory = (
         const { timeRange: selectedTimeRange } = useFetchContext(api);
         const [tableConfig] = useBatchedPublishingSubjects(tableConfig$);
 
-        useEffect(() => {
-          if (onDeleteSubscription) {
-            return () => {
-              onDeleteSubscription.unsubscribe();
-            };
-          }
-        }, []);
-
         return (
           <KibanaContextProvider services={services}>
             <QueryClientProvider client={queryClient}>
               <EmbeddableAlertsTable
-                id={persistedTableConfigKey}
+                id={`${PERSISTED_TABLE_CONFIG_KEY_PREFIX}-${uuid}`}
                 timeRange={selectedTimeRange}
                 solution={tableConfig?.solution}
                 query={tableConfig?.query}
