@@ -3158,6 +3158,20 @@
             "path": "x-pack/platform/plugins/shared/alerting/server/application/rule/types/rule.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-server.Rule.artifacts",
+            "type": "Object",
+            "tags": [],
+            "label": "artifacts",
+            "description": [],
+            "signature": [
+              "Readonly<{ dashboards?: Readonly<{} & { id: string; }>[] | undefined; } & {}> | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/alerting/server/application/rule/types/rule.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3409,6 +3423,20 @@
             "tags": [],
             "label": "isServerless",
             "description": [],
+            "path": "x-pack/platform/plugins/shared/alerting/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-server.RuleExecutorOptions.ruleExecutionTimeout",
+            "type": "string",
+            "tags": [],
+            "label": "ruleExecutionTimeout",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/platform/plugins/shared/alerting/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6774,6 +6802,41 @@
       },
       {
         "parentPluginId": "alerting",
+        "id": "def-common.Artifacts",
+        "type": "Interface",
+        "tags": [],
+        "label": "Artifacts",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.Artifacts.dashboards",
+            "type": "Array",
+            "tags": [],
+            "label": "dashboards",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/alerting-types",
+                "scope": "common",
+                "docId": "kibKbnAlertingTypesPluginApi",
+                "section": "def-common.Dashboard",
+                "text": "Dashboard"
+              },
+              "[] | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
         "id": "def-common.BulkActionSkipResult",
         "type": "Interface",
         "tags": [],
@@ -8227,6 +8290,27 @@
                 "docId": "kibKbnAlertingTypesPluginApi",
                 "section": "def-common.Flapping",
                 "text": "Flapping"
+              },
+              " | null | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.Rule.artifacts",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "artifacts",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/alerting-types",
+                "scope": "common",
+                "docId": "kibKbnAlertingTypesPluginApi",
+                "section": "def-common.Artifacts",
+                "text": "Artifacts"
               },
               " | null | undefined"
             ],
@@ -10238,21 +10322,6 @@
         "tags": [],
         "label": "DELETE_MAINTENANCE_WINDOW_API_PATH",
         "description": [],
-        "path": "x-pack/platform/plugins/shared/alerting/common/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "alerting",
-        "id": "def-common.ENABLE_MAINTENANCE_WINDOWS",
-        "type": "boolean",
-        "tags": [],
-        "label": "ENABLE_MAINTENANCE_WINDOWS",
-        "description": [],
-        "signature": [
-          "true"
-        ],
         "path": "x-pack/platform/plugins/shared/alerting/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
