@@ -281,18 +281,21 @@ export const ContextApp = ({ dataView, anchorId, referrer }: ContextAppProps) =>
               >
                 <FormattedMessage
                   id="discover.context.contextOfTitle"
-                  defaultMessage="Documents surrounding"
+                  defaultMessage="Documents surrounding {anchorId}"
+                  values={{
+                    anchorId: (
+                      <span
+                        css={css`
+                          background-color: ${euiTheme.colors.backgroundBaseWarning};
+                          color: ${euiTheme.colors.textWarning};
+                          padding: 0 ${euiTheme.size.xs};
+                        `}
+                      >
+                        #{anchorId}
+                      </span>
+                    ),
+                  }}
                 />
-                <span
-                  css={css`
-                    background-color: ${euiTheme.colors.backgroundBaseWarning};
-                    color: ${euiTheme.colors.textWarning};
-                    padding: 0 ${euiTheme.size.xs};
-                    margin-left: ${euiTheme.size.xs};
-                  `}
-                >
-                  {anchorId}
-                </span>
               </EuiText>
               <EuiSpacer size="s" />
               <ContextAppContentMemoized
