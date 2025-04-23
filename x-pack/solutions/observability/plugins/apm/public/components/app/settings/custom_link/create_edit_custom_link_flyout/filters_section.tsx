@@ -16,12 +16,12 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
-import React from 'react';
+import React, { useMemo } from 'react';
 import type { Filter, FilterKey } from '../../../../../../common/custom_link/custom_link_types';
 import { DEFAULT_OPTION, FILTER_SELECT_OPTIONS, getSelectOptions } from './helper';
 import { SuggestionsSelect } from '../../../../shared/suggestions_select';
 
-export function FiltersSection({
+export const FiltersSection = React.memo(function FiltersSection({
   filters,
   onChangeFilters,
 }: {
@@ -33,6 +33,9 @@ export function FiltersSection({
     newFilters[idx] = { key, value };
     onChangeFilters(newFilters);
   };
+
+  const start = useMemo(() => moment().subtract(24, 'h').toISOString(), []);
+  const end = useMemo(() => moment().toISOString(), []);
 
   const onRemoveFilter = (idx: number) => {
     // remove without mutating original array
@@ -80,6 +83,12 @@ export function FiltersSection({
             <EuiFlexGroup gutterSize="s" alignItems="center">
               <EuiFlexItem>
                 <EuiSelect
+                  aria-label={i18n.translate(
+                    'xpack.apm.settings.customLink.flyout.filters.ariaLabel',
+                    {
+                      defaultMessage: 'Choose a field to filter by',
+                    }
+                  )}
                   data-test-subj={filterId}
                   id={filterId}
                   fullWidth
@@ -97,7 +106,7 @@ export function FiltersSection({
               </EuiFlexItem>
               <EuiFlexItem>
                 <SuggestionsSelect
-                  key={key}
+                  key={filterId}
                   dataTestSubj={`${key}.value`}
                   fieldName={key}
                   placeholder={i18n.translate(
@@ -107,12 +116,18 @@ export function FiltersSection({
                   onChange={(selectedValue) => onChangeFilter(key, selectedValue as string, idx)}
                   defaultValue={value}
                   isInvalid={!isEmpty(key) && isEmpty(value)}
-                  start={moment().subtract(24, 'h').toISOString()}
-                  end={moment().toISOString()}
+                  start={start}
+                  end={end}
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty
+                  aria-label={i18n.translate(
+                    'xpack.apm.settings.customLink.flyout.filters.removeButton.ariaLabel',
+                    {
+                      defaultMessage: 'Remove filter',
+                    }
+                  )}
                   data-test-subj="apmCustomLinkFiltersSectionButton"
                   iconType="trash"
                   onClick={() => onRemoveFilter(idx)}
@@ -134,11 +149,17 @@ export function FiltersSection({
       />
     </>
   );
-}
+});
 
 function AddFilterButton({ onClick, isDisabled }: { onClick: () => void; isDisabled: boolean }) {
   return (
     <EuiButtonEmpty
+      aria-label={i18n.translate(
+        'xpack.apm.settings.customLink.flyout.filters.addAnotherFilter.ariaLabel',
+        {
+          defaultMessage: 'Add another filter',
+        }
+      )}
       data-test-subj="apmCustomLinkAddFilterButtonAddAnotherFilterButton"
       iconType="plusInCircle"
       onClick={onClick}
