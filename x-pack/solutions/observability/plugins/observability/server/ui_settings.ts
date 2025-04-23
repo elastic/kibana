@@ -19,7 +19,6 @@ import {
   apmServiceGroupMaxNumberOfServices,
   apmTraceExplorerTab,
   apmLabsButton,
-  enableAgentExplorerView,
   apmEnableTableSearchBar,
   entityCentricExperience,
   enableAwsLambdaMetrics,
@@ -291,23 +290,6 @@ export const uiSettings: Record<string, UiSettings> = {
     requiresPageReload: true,
     type: 'boolean',
     showInLabs: true,
-    solution: 'oblt',
-  },
-  [enableAgentExplorerView]: {
-    category: [observabilityFeatureId],
-    name: i18n.translate('xpack.observability.enableAgentExplorer', {
-      defaultMessage: 'Agent explorer',
-    }),
-    description: i18n.translate('xpack.observability.enableAgentExplorerDescription', {
-      defaultMessage: '{betaLabel} Enables Agent explorer view.',
-      values: {
-        betaLabel: `<em>[${betaLabel}]</em>`,
-      },
-    }),
-    schema: schema.boolean(),
-    value: true,
-    requiresPageReload: true,
-    type: 'boolean',
     solution: 'oblt',
   },
   [apmEnableTableSearchBar]: {
