@@ -223,6 +223,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
 
           let result = createResultObject(state);
 
+          let frozenIndicesQueriedCount = 0;
           const wrapperWarnings = [];
           const wrapperErrors = [];
 
@@ -318,10 +319,6 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                 }
               }
             } catch (exc) {
-              await ruleExecutionLogger.logStatusChange({
-                newStatus: RuleExecutionStatusEnum['partial failure'],
-                message: `Check privileges failed to execute ${exc}`,
-              });
               wrapperWarnings.push(`Check privileges failed to execute ${exc}`);
             }
 
@@ -353,10 +350,6 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
               }
               skipExecution = foundNoIndices;
             } catch (exc) {
-              await ruleExecutionLogger.logStatusChange({
-                newStatus: RuleExecutionStatusEnum['partial failure'],
-                message: `Timestamp fields check failed to execute ${exc}`,
-              });
               wrapperWarnings.push(`Timestamp fields check failed to execute ${exc}`);
             }
 
@@ -373,21 +366,15 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                 });
 
                 if (frozenIndices.length > 0) {
-                  await ruleExecutionLogger.logStatusChange({
-                    newStatus: RuleExecutionStatusEnum.succeeded,
-                    message: `This rule found frozen indices that could not be excluded by the time range filter ${frozenIndices
+                  frozenIndicesQueriedCount = frozenIndices.length;
+                  wrapperWarnings.push(
+                    `This rule found frozen indices that could not be excluded by the time range filter ${frozenIndices
                       .sort()
-                      .join(', ')}`,
-                    metrics: {
-                      frozenIndicesQueriedCount: frozenIndices.length,
-                    },
-                  });
+                      .join(', ')}`
+                  );
                 }
               } catch (exc) {
-                await ruleExecutionLogger.logStatusChange({
-                  newStatus: RuleExecutionStatusEnum['partial failure'],
-                  message: `Frozen indices check failed to execute ${exc}`,
-                });
+                wrapperWarnings.push(`Frozen indices check failed to execute ${exc}`);
               }
             }
           }
@@ -569,6 +556,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                   searchDurations: result.searchAfterTimes,
                   indexingDurations: result.bulkCreateTimes,
                   enrichmentDurations: result.enrichmentTimes,
+                  frozenIndicesQueriedCount,
                 },
               });
             }
@@ -616,6 +604,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                 searchDurations: result.searchAfterTimes,
                 indexingDurations: result.bulkCreateTimes,
                 enrichmentDurations: result.enrichmentTimes,
+                frozenIndicesQueriedCount,
               },
             });
           }
