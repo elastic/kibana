@@ -259,13 +259,13 @@ const assetInventoryIntegrations: CloudAssetInventoryIntegrations = {
   asset_inventory: {
     policyTemplate: ASSET_POLICY_TEMPLATE,
     name: i18n.translate(
-      'xpack.securitySolution.assetInventory.fleetIntegration.cspmIntegration.nameTitle',
+      'xpack.securitySolution.assetInventory.assetIntegration.googleCloudShellCredentials.nameTitle',
       {
         defaultMessage: 'Cloud Asset Inventory',
       }
     ),
     shortName: i18n.translate(
-      'xpack.securitySolution.assetInventory.fleetIntegration.cspmIntegration.shortNameTitle',
+      'xpack.securitySolution.assetInventory.assetIntegration.googleCloudShellCredentials.shortNameTitle',
       {
         defaultMessage: 'CAI',
       }
@@ -274,13 +274,13 @@ const assetInventoryIntegrations: CloudAssetInventoryIntegrations = {
       {
         type: CLOUDBEAT_AWS,
         name: i18n.translate(
-          'xpack.securitySolution.assetInventory.fleetIntegration.cspmIntegration.awsOption.nameTitle',
+          'xpack.securitySolution.assetInventory.assetIntegration.googleCloudShellCredentials.awsOption.nameTitle',
           {
             defaultMessage: 'AWS',
           }
         ),
         benchmark: i18n.translate(
-          'xpack.securitySolution.assetInventory.fleetIntegration.cspmIntegration.awsOption.benchmarkTitle',
+          'xpack.securitySolution.assetInventory.assetIntegration.googleCloudShellCredentials.awsOption.benchmarkTitle',
           {
             defaultMessage: 'CAI AWS',
           }
@@ -291,13 +291,13 @@ const assetInventoryIntegrations: CloudAssetInventoryIntegrations = {
       {
         type: CLOUDBEAT_GCP,
         name: i18n.translate(
-          'xpack.securitySolution.assetInventory.fleetIntegration.cspmIntegration.gcpOption.nameTitle',
+          'xpack.securitySolution.assetInventory.assetIntegration.googleCloudShellCredentials.gcpOption.nameTitle',
           {
             defaultMessage: 'GCP',
           }
         ),
         benchmark: i18n.translate(
-          'xpack.securitySolution.assetInventory.fleetIntegration.cspmIntegration.gcpOption.benchmarkTitle',
+          'xpack.securitySolution.assetInventory.assetIntegration.googleCloudShellCredentials.gcpOption.benchmarkTitle',
           {
             defaultMessage: 'CAI GCP',
           }
@@ -308,13 +308,13 @@ const assetInventoryIntegrations: CloudAssetInventoryIntegrations = {
       {
         type: CLOUDBEAT_AZURE,
         name: i18n.translate(
-          'xpack.securitySolution.assetInventory.fleetIntegration.cspmIntegration.azureOption.nameTitle',
+          'xpack.securitySolution.assetInventory.assetIntegration.googleCloudShellCredentials.azureOption.nameTitle',
           {
             defaultMessage: 'Azure',
           }
         ),
         benchmark: i18n.translate(
-          'xpack.securitySolution.assetInventory.fleetIntegration.cspmIntegration.azureOption.benchmarkTitle',
+          'xpack.securitySolution.assetInventory.assetIntegration.googleCloudShellCredentials.azureOption.benchmarkTitle',
           {
             defaultMessage: 'CAI Azure',
           }

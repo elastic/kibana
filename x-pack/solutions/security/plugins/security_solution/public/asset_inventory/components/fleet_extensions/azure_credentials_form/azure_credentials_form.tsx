@@ -211,7 +211,7 @@ export const AzureInputVarFields = ({
       {fields.map((field, index) => {
         const invalid = fieldIsInvalid(field.value, hasInvalidRequiredVars);
         const invalidError = i18n.translate(
-          'xpack.securitySolution.assetInventory.fleetIntegration.cspmIntegration.integration.fieldRequired',
+          'xpack.securitySolution.assetInventory.assetIntegration.googleCloudShellCredentials.integration.fieldRequired',
           {
             defaultMessage: '{field} is required',
             values: {
