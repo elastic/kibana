@@ -12,11 +12,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiDescribedFormGroup, EuiFormRow, EuiLink } from '@elastic/eui';
 import { useMlKibana } from '../../../../../../../../../contexts/kibana';
 
-interface Props {
-  titleId: string;
-}
-
-export const Description: FC<PropsWithChildren<Props>> = memo(({ children, titleId }) => {
+export const Description: FC<PropsWithChildren<unknown>> = memo(({ children }) => {
   const {
     services: { docLinks },
   } = useMlKibana();
@@ -29,7 +25,7 @@ export const Description: FC<PropsWithChildren<Props>> = memo(({ children, title
   );
   return (
     <EuiDescribedFormGroup
-      title={<h3 id={titleId}>{title}</h3>}
+      title={<h3>{title}</h3>}
       description={
         <FormattedMessage
           id="xpack.ml.newJob.wizard.jobDetailsStep.additionalSection.calendarsSelection.description"
