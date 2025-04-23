@@ -18,6 +18,7 @@ import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_cont
 import {
   StreamsSupertestRepositoryClient,
   createStreamsRepositoryAdminClient,
+  createStreamsRepositoryCustomRoleClient,
 } from './helpers/repository_client';
 import {
   disableStreams,
@@ -29,11 +30,14 @@ import {
   getStream,
 } from './helpers/requests';
 import { loadDashboards, unloadDashboards } from './helpers/dashboards';
+import { CustomRoleScopedSupertestProvider } from '../../../services/custom_role_scoped_supertest';
 
-export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
+export default function (ftrContext: DeploymentAgnosticFtrProviderContext) {
+  const { getService } = ftrContext;
   const roleScopedSupertest = getService('roleScopedSupertest');
   let apiClient: StreamsSupertestRepositoryClient;
   const kibanaServer = getService('kibanaServer');
+  const samlAuth = getService('samlAuth');
 
   const SPACE_ID = 'default';
   const ARCHIVES = [
@@ -138,6 +142,109 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         [dashboard, indexPattern].forEach((object) => {
           const patterns = findIndexPatterns(object as ContentPackSavedObject);
           expect(patterns).to.eql(['logs.importstream']);
+        });
+      });
+    });
+
+    describe('Privileges', () => {
+      let customRoleClient: StreamsSupertestRepositoryClient;
+
+      const roleDescriptors = (feature: { content_packs?: ['all'] }) => ({
+        elasticsearch: {
+          cluster: ['all'],
+          indices: [
+            { names: ['*'], privileges: ['all'], field_security: { grant: ['*'], except: [] } },
+          ],
+          run_as: [],
+        },
+        kibana: [
+          {
+            spaces: ['*'],
+            base: [],
+            feature: { logs: ['all'], ...feature },
+          },
+        ],
+      });
+
+      describe('without content_packs privilege', () => {
+        before(async () => {
+          await samlAuth.setCustomRole(roleDescriptors({}));
+          customRoleClient = await createStreamsRepositoryCustomRoleClient(
+            CustomRoleScopedSupertestProvider(ftrContext)
+          );
+        });
+
+        after(async () => {
+          await samlAuth.deleteCustomRole();
+        });
+
+        it('import fails with forbidden', async () => {
+          const archive = await generateArchive(contentPack, contentPack.entries);
+          await importContent(
+            customRoleClient,
+            'logs.importstream',
+            {
+              include: { all: {} },
+              content: Readable.from(archive),
+            },
+            403
+          );
+        });
+
+        it('export fails with forbidden', async () => {
+          await exportContent(
+            customRoleClient,
+            'logs',
+            {
+              name: 'logs-content_pack',
+              version: '1.0.0',
+              description: 'my content pack',
+              include: { all: {} },
+              replaced_patterns: [],
+            },
+            403
+          );
+        });
+      });
+
+      describe('with content_packs privilege', () => {
+        before(async () => {
+          await samlAuth.setCustomRole(roleDescriptors({ content_packs: ['all'] }));
+          customRoleClient = await createStreamsRepositoryCustomRoleClient(
+            CustomRoleScopedSupertestProvider(ftrContext)
+          );
+        });
+
+        after(async () => {
+          await samlAuth.deleteCustomRole();
+        });
+
+        it('import succeeds', async () => {
+          const archive = await generateArchive(contentPack, contentPack.entries);
+          await importContent(
+            customRoleClient,
+            'logs.importstream',
+            {
+              include: { all: {} },
+              content: Readable.from(archive),
+            },
+            200
+          );
+        });
+
+        it('export succeeds', async () => {
+          await exportContent(
+            customRoleClient,
+            'logs.importstream',
+            {
+              name: 'logs.importstream-content_pack',
+              version: '1.0.0',
+              description: 'my content pack',
+              include: { all: {} },
+              replaced_patterns: [],
+            },
+            200
+          );
         });
       });
     });
