@@ -24191,27 +24191,18 @@
               "schema": {
                 "additionalProperties": false,
                 "properties": {
-                  "fields": {
-                    "additionalProperties": false,
-                    "properties": {
-                      "categories": {
-                        "items": {
-                          "type": "string"
-                        },
-                        "type": "array"
-                      },
-                      "readMeData": {
-                        "type": "string"
-                      }
+                  "categories": {
+                    "items": {
+                      "type": "string"
                     },
-                    "required": [
-                      "readMeData"
-                    ],
-                    "type": "object"
+                    "type": "array"
+                  },
+                  "readMeData": {
+                    "type": "string"
                   }
                 },
                 "required": [
-                  "fields"
+                  "readMeData"
                 ],
                 "type": "object"
               }
