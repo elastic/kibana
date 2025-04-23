@@ -73,7 +73,7 @@ export const Details: React.FC<Props> = memo(({ packageInfo, integrationInfo }) 
     changelog,
     isLoading: isChangelogLoading,
     error: changelogError,
-  } = useChangelog(packageInfo.name, packageInfo.latestVersion);
+  } = useChangelog(packageInfo.name, packageInfo.version);
 
   const mergedCategories: Array<string | undefined> = useMemo(() => {
     let allCategories: Array<string | undefined> = [];
