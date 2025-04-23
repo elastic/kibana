@@ -20,10 +20,9 @@ import {
 
 import type { AgentPolicySOAttributes } from '../types';
 
-import { getAgentPolicySavedObjectType } from './agent_policy';
+import { getAgentPolicySavedObjectType, agentPolicyService } from './agent_policy';
 
 import { appContextService } from '.';
-import { agentPolicyService } from './agent_policy';
 
 export async function ensureCorrectAgentlessSettingsIds(esClient: ElasticsearchClient) {
   const cloudSetup = appContextService.getCloud();
