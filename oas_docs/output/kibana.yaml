@@ -23622,23 +23622,15 @@ paths:
                                 type: object
                                 properties:
                                   secrets:
-                                    additionalProperties: false
+                                    additionalProperties: true
                                     type: object
                                     properties:
-                                      service_token:
-                                        additionalProperties: false
-                                        type: object
-                                        properties:
-                                          hash:
-                                            type: string
-                                          id:
-                                            type: string
                                       ssl:
-                                        additionalProperties: false
+                                        additionalProperties: true
                                         type: object
                                         properties:
                                           key:
-                                            additionalProperties: false
+                                            additionalProperties: true
                                             type: object
                                             properties:
                                               id:
@@ -23753,23 +23745,15 @@ paths:
                                   proxy_url:
                                     type: string
                                   secrets:
-                                    additionalProperties: false
+                                    additionalProperties: true
                                     type: object
                                     properties:
-                                      service_token:
-                                        additionalProperties: false
-                                        type: object
-                                        properties:
-                                          hash:
-                                            type: string
-                                          id:
-                                            type: string
                                       ssl:
-                                        additionalProperties: false
+                                        additionalProperties: true
                                         type: object
                                         properties:
                                           key:
-                                            additionalProperties: false
+                                            additionalProperties: true
                                             type: object
                                             properties:
                                               id:
@@ -40830,6 +40814,8 @@ paths:
                       properties:
                         error:
                           type: string
+                        is_deleted:
+                          type: boolean
                         name:
                           type: string
                         package_name:
@@ -40922,6 +40908,8 @@ paths:
                       properties:
                         error:
                           type: string
+                        is_deleted:
+                          type: boolean
                         name:
                           type: string
                         package_name:
