@@ -47,6 +47,41 @@ describe('persistTokenCloudData', () => {
     );
   });
 
+  it('creates a new saved object if none exists and resourceData is provided', async () => {
+    (mockSavedObjectsClient.get as jest.Mock).mockRejectedValue(
+      SavedObjectsErrorHelpers.createGenericNotFoundError()
+    );
+    await persistTokenCloudData(mockSavedObjectsClient, {
+      logger: mockLogger,
+      solutionType: 'test_solution',
+      resourceData: {
+        project: {
+          search: {
+            type: 'general',
+          },
+        },
+      },
+    });
+
+    expect(mockSavedObjectsClient.create).toHaveBeenCalledWith(
+      CLOUD_DATA_SAVED_OBJECT_TYPE,
+      {
+        onboardingData: {
+          solutionType: 'test_solution',
+          token: '',
+        },
+        resourceData: {
+          project: {
+            search: {
+              type: 'general',
+            },
+          },
+        },
+      },
+      { id: CLOUD_DATA_SAVED_OBJECT_ID }
+    );
+  });
+
   it('creates a new saved object if none exists and security details are provided', async () => {
     (mockSavedObjectsClient.get as jest.Mock).mockRejectedValue(
       SavedObjectsErrorHelpers.createGenericNotFoundError()
@@ -105,6 +140,52 @@ describe('persistTokenCloudData', () => {
         onboardingData: {
           solutionType: 'test_solution',
           token: 'new_token',
+        },
+      }
+    );
+  });
+
+  it('updates an existing saved object if resourceData is provided and different', async () => {
+    (mockSavedObjectsClient.get as jest.Mock).mockResolvedValue({
+      id: CLOUD_DATA_SAVED_OBJECT_ID,
+      attributes: {
+        onboardingData: {
+          token: 'test_token',
+          solutionType: 'test_solution',
+          resourceData: {
+            project: {
+              search: {
+                type: 'general',
+              },
+            },
+          },
+        },
+      },
+    });
+    await persistTokenCloudData(mockSavedObjectsClient, {
+      resourceData: {
+        project: {
+          search: {
+            type: 'vector',
+          },
+        },
+      },
+    });
+
+    expect(mockSavedObjectsClient.update).toHaveBeenCalledWith(
+      CLOUD_DATA_SAVED_OBJECT_TYPE,
+      CLOUD_DATA_SAVED_OBJECT_ID,
+      {
+        onboardingData: {
+          solutionType: 'test_solution',
+          token: 'test_token',
+        },
+        resourceData: {
+          project: {
+            search: {
+              type: 'vector',
+            },
+          },
         },
       }
     );
