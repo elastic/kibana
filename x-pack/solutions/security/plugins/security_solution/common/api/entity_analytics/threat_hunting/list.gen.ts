@@ -15,8 +15,9 @@
  */
 
 import { z } from '@kbn/zod';
+import { ArrayFromString } from '@kbn/zod-helpers';
 
-import { ThreatHuntingQueryWithIndexCheck } from './common.gen';
+import { ThreatHuntingQueryIndexStatus, ThreatHuntingQueryWithIndexCheck } from './common.gen';
 
 export type ThreatHuntingListRequestQuery = z.infer<typeof ThreatHuntingListRequestQuery>;
 export const ThreatHuntingListRequestQuery = z.object({
@@ -36,6 +37,18 @@ export const ThreatHuntingListRequestQuery = z.object({
    * Kuery string for filtering results
    */
   kuery: z.string().optional(),
+  /**
+   * Categories to filter by
+   */
+  categories: ArrayFromString(z.string()).optional(),
+  /**
+   * Index statuses to filter by
+   */
+  indexStatuses: ArrayFromString(ThreatHuntingQueryIndexStatus).optional(),
+  /**
+   * Query string for filtering results
+   */
+  q: z.string().optional(),
 });
 export type ThreatHuntingListRequestQueryInput = z.input<typeof ThreatHuntingListRequestQuery>;
 

@@ -45,11 +45,19 @@ export const listThreatHuntingQueriesRoute = (
       async (context, request, response): Promise<IKibanaResponse<ThreatHuntingListResponse>> => {
         const siemResponse = buildSiemResponse(response);
 
+        const { kuery, size, sortField, sortOrder, q, categories, indexStatuses } = request.query;
+
         try {
           const secSol = await context.securitySolution;
-          const body = await secSol
-            .getThreatHuntingQueriesDataClient()
-            .searchByKuery(request.query);
+          const body = await secSol.getThreatHuntingQueriesDataClient().searchByKuery({
+            kuery,
+            size,
+            sortField,
+            sortOrder,
+            searchText: q,
+            includeCategories: categories,
+            includeIndexStatuses: indexStatuses,
+          });
 
           return response.ok({ body });
         } catch (e) {

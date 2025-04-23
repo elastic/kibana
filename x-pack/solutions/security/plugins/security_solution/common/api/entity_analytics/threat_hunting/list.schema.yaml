@@ -36,7 +36,28 @@ paths:
           required: false
           schema:
             type: string
-
+        - name: categories
+          in: query
+          description: Categories to filter by
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+        - name: indexStatuses
+          in: query
+          description: Index statuses to filter by
+          required: false
+          schema:
+            type: array
+            items:
+              $ref: './common.schema.yaml#/components/schemas/ThreatHuntingQueryIndexStatus'
+        - name: q
+          in: query
+          description: Query string for filtering results
+          required: false
+          schema:
+            type: string
       responses:
         "200":
           description: Successful response

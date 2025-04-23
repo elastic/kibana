@@ -147,37 +147,63 @@ export class ThreatHuntingQueriesDataClient {
   }
 
   public async searchByKuery({
+    searchText = '',
     kuery,
     size = DEFAULT_RESPONSE_SIZE,
+    includeIndexStatuses,
+    includeCategories,
     sortField = 'index_status',
     sortOrder = 'asc',
   }: {
+    searchText?: string;
+    includeCategories?: string[];
+    includeIndexStatuses?: ThreatHuntingQueryIndexStatus[];
     kuery?: string;
     size?: number;
     sortField?: string;
     sortOrder?: 'asc' | 'desc';
   }): Promise<ThreatHuntingListResponse> {
+    await this.maybeUpdateQueryStatusCache();
+
     let sortFieldModified = sortField;
 
     if (sortField === 'index_status') {
       sortFieldModified = 'index_status_numeric_sort';
     }
 
-    await this.maybeUpdateQueryStatusCache();
+    const whereClauses: string[] = [];
 
-    const esql = kuery
+    if (searchText) {
+      whereClauses.push(`MATCH(name, "${searchText}",{"fuzziness": 2})`);
+    }
+
+    if (includeCategories && includeCategories.length > 0) {
+      whereClauses.push(`category IN ("${includeCategories.join('", "')}")`);
+    }
+
+    if (includeIndexStatuses && includeIndexStatuses.length > 0) {
+      whereClauses.push(`index_status IN ("${includeIndexStatuses.join('", "')}")`);
+    }
+
+    if (kuery) {
+      whereClauses.push(`KQL("${kuery}")`);
+    }
+
+    const whereStatement = whereClauses.length > 0 ? `| WHERE ${whereClauses.join(' AND ')}` : '';
+
+    const esql = whereStatement
       ? `
-    FROM "${this.getIndex()}" 
-     | WHERE KQL("${kuery}")
-     | LOOKUP JOIN ${this.getCacheIndexName()} ON uuid
-     | SORT ${sortFieldModified} ${sortOrder}
-     | LIMIT ${size ?? DEFAULT_RESPONSE_SIZE}
+    FROM "${this.getIndex()}"
+      | LOOKUP JOIN ${this.getCacheIndexName()} ON uuid
+      ${whereStatement}
+      | SORT ${sortFieldModified} ${sortOrder}
+      | LIMIT ${size ?? DEFAULT_RESPONSE_SIZE}
     `
       : `
     FROM "${this.getIndex()}"
-     | LOOKUP JOIN ${this.getCacheIndexName()} ON uuid
-     | SORT ${sortFieldModified} ${sortOrder}
-     | LIMIT ${size ?? DEFAULT_RESPONSE_SIZE}
+      | LOOKUP JOIN ${this.getCacheIndexName()} ON uuid
+      | SORT ${sortFieldModified} ${sortOrder}
+      | LIMIT ${size ?? DEFAULT_RESPONSE_SIZE}
     `;
 
     console.log('esql', esql);
