@@ -101,6 +101,7 @@ export function useFetchAgentsData() {
 
   const history = useHistory();
   const { urlParams, toUrlParams } = useUrlParams();
+  const showAgentless = (urlParams.showAgentless as string) === 'true';
   const defaultKuery: string = (urlParams.kuery as string) || '';
   const urlHasInactive = (urlParams.showInactive as string) === 'true';
 
@@ -161,8 +162,9 @@ export function useFetchAgentsData() {
       selectedAgentPolicies,
       selectedTags,
       selectedStatus,
+      showAgentless,
     });
-  }, [search, selectedAgentPolicies, selectedStatus, selectedTags]);
+  }, [search, selectedAgentPolicies, selectedStatus, selectedTags, showAgentless]);
 
   kuery =
     includeUnenrolled && kuery ? `status:* AND (${kuery})` : includeUnenrolled ? `status:*` : kuery;
