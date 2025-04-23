@@ -1,5 +1,6 @@
 import Oas from "oas";
-import { formatToolName, isOperation, Operation } from "./utils";
+import { fixOpenApiSpecIteratively, formatToolName, isOperation, Operation } from "./utils";
+import { parse } from 'yaml'
 import { JsonSchema, jsonSchemaToZod } from '@n8n/json-schema-to-zod';
 import { SchemaObject } from 'oas/dist/types.cjs';
 import { z } from "zod";
@@ -10,14 +11,25 @@ export abstract class OpenApiTool {
     private dereferencedOas: Promise<Oas>
 
     constructor(args: {
-        apiSpec: string
+        apiSpec: Promise<any>
     }) {
         const { apiSpec } = args;
-        const oas = new Oas(apiSpec);
+
         this.dereferencedOas = new Promise<Oas>(async (resolve, reject) => {
-            await oas.dereference()
-                .then(() => resolve(oas))
-                .catch((error) => reject(error));
+            try {
+                const apiSpecString = await apiSpec
+                const api = await parse(apiSpecString);
+                // Fix OpenAPI spec to make it valid
+                const fixedApiSpec = fixOpenApiSpecIteratively(api);
+                const oas = new Oas(fixedApiSpec);
+                await oas.dereference()
+                    .then(async () => {
+                        resolve(oas)
+                    })
+            } catch (error) {
+                reject(error)
+                return
+            }
         })
     }
 
@@ -93,6 +105,4 @@ export abstract class OpenApiTool {
         name: string
         description: string
     }): Promise<StructuredToolInterface>;
-
-
 }

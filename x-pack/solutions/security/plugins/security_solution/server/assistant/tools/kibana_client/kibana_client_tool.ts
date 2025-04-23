@@ -21,7 +21,7 @@ const toolDetails = {
     // local definitions exist ../elastic_assistant/server/lib/prompt/tool_prompts.ts
     // local definitions can be overwritten by security-ai-prompt integration definitions
     description:
-        "Call this tool to use the Kibana client",
+        "Call this tool to use the Kibana client. It can be used to interact with the Kibana API and perform various GET/POST/PUT/DELETE operations.",
     id: 'kibana-client-tool',
     name: 'KibanaClientTool',
 };
@@ -29,8 +29,8 @@ export const KIBANA_CLIENT_TOOL: AssistantTool = {
     ...toolDetails,
     sourceRegister: APP_UI_ID,
     isSupported: (params: AssistantToolParams): params is KibanaClientToolParams => {
-        const { createLlmInstance } = params;
-        return createLlmInstance != null;
+        const { createLlmInstance, assistantContext } = params;
+        return createLlmInstance != null && assistantContext != null && assistantContext.getRegisteredFeatures('securitySolutionUI').kibanaClientToolEnabled;
     },
     async getTool(params: AssistantToolParams) {
         if (!this.isSupported(params)) return null;

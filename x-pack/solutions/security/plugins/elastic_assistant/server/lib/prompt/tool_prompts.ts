@@ -32,6 +32,13 @@ export const localToolPrompts: Prompt[] = [
     },
   },
   {
+    promptId: 'KibanaClientTool',
+    promptGroupId,
+    prompt: {
+      default: "Call this tool to use the Kibana client. It can be used to interact with the Kibana API and perform various GET/POST/PUT/DELETE operations.",
+    },
+  },
+  {
     promptId: 'GenerateESQLTool',
     promptGroupId,
     prompt: {

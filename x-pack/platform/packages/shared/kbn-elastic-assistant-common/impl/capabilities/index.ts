@@ -22,4 +22,5 @@ export const defaultAssistantFeatures = Object.freeze({
   assistantModelEvaluation: false,
   defendInsights: true,
   advancedEsqlGeneration: false,
+  kibanaClientToolEnabled: false,
 });
