@@ -6,12 +6,13 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { WatcherQueryWatchesRequest } from '@elastic/elasticsearch/lib/api/types';
 import { RouteDependencies } from '../../../types';
 import { Watch } from '../../../models/watch';
 
 const querySchema = schema.object({
-  pageSize: schema.string(),
-  pageIndex: schema.string(),
+  pageSize: schema.number(),
+  pageIndex: schema.number(),
   sortField: schema.string(),
   sortDirection: schema.string(),
   query: schema.string(),
@@ -35,18 +36,20 @@ export function registerListRoute({ router, license, lib: { handleEsError } }: R
       try {
         const { pageSize, pageIndex, sortField, sortDirection, query } = request.query;
         const esClient = (await ctx.core).elasticsearch.client;
-        const body = {
+        const body: WatcherQueryWatchesRequest = {
           from: pageIndex * pageSize,
           size: pageSize,
-          query: undefined,
-          sort: undefined,
         };
         if (sortField && sortDirection) {
-          body.sort = {
-            [`metadata.${sortField}.keyword`]: {
-              order: sortDirection,
+          const order: 'asc' | 'desc' = sortDirection === 'desc' ? 'desc' : 'asc'
+          // The Query Watch API only allows sorting by metadata.* fields
+          body.sort = [
+            {
+              [`metadata.${sortField}.keyword`]: {
+                order,
+              },
             },
-          };
+          ];
         }
         if (query) {
           // The Query Watch API only allows searching by _id or by metadata.* fields

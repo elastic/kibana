@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useMemo, useEffect, Fragment } from 'react';
+import React, { useState, useMemo, useEffect, Fragment, useCallback } from 'react';
 
 import {
   EuiButton,
@@ -33,7 +33,10 @@ import { Moment } from 'moment';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 
 import { Criteria } from '@elastic/eui/src/components/basic_table/basic_table';
+import { debounce } from 'lodash';
+import { PropertySort } from '@elastic/eui/src/services/sort/property_sort';
 import { REFRESH_INTERVALS, PAGINATION, WATCH_TYPES } from '../../../../common/constants';
+import { BaseWatch } from '../../../../common/types';
 import { listBreadcrumb } from '../../lib/breadcrumbs';
 import {
   getPageErrorCode,
@@ -145,7 +148,7 @@ export const WatchListPage = () => {
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(PAGINATION.initialPageSize);
 
-  const [sort, setSort] = useState({
+  const [sort, setSort] = useState<Criteria<BaseWatch>['sort']>({
     field: 'name', // Currently we can only sort by name
     direction: 'asc',
   });
@@ -154,7 +157,14 @@ export const WatchListPage = () => {
     isLoading: isWatchesLoading,
     data,
     error,
-  } = useLoadWatches(REFRESH_INTERVALS.WATCH_LIST, pageSize, pageIndex, sort.field, sort.direction, query);
+  } = useLoadWatches(
+    REFRESH_INTERVALS.WATCH_LIST,
+    pageSize,
+    pageIndex,
+    sort?.field,
+    sort?.direction,
+    query
+  );
 
   const [isPopoverOpen, setIsPopOverOpen] = useState<boolean>(false);
 
@@ -255,6 +265,20 @@ export const WatchListPage = () => {
       />
     </EuiPopover>
   );
+
+  const updateQuery = useCallback(({ queryText, error: searchError }: EuiSearchBarOnChangeArgs) => {
+    if (!searchError) {
+      setQuery(queryText);
+      setQueryError(null);
+    } else {
+      setQueryError(searchError.message);
+    }
+  }, []);
+
+  const debouncedUpdateQuery = useMemo(() => {
+    // Trigger update 500 ms after the user stopped typing to reduce fetch requests to the server
+    return debounce(updateQuery, 500);
+  }, [updateQuery]);
 
   if (isWatchesLoading) {
     return (
@@ -445,8 +469,8 @@ export const WatchListPage = () => {
     ];
 
     const selectionConfig = {
-      onSelectionChange: setSelection,
-      selectable: (watch: any) => !watch.isSystemWatch,
+      onSelectionChange: setSelection as (selection: BaseWatch[]) => void,
+      selectable: (watch: BaseWatch) => !watch.isSystemWatch,
       selectableMessage: (selectable: boolean) =>
         !selectable
           ? i18n.translate('xpack.watcher.sections.watchList.watchTable.disabledWatchTooltipText', {
@@ -455,17 +479,8 @@ export const WatchListPage = () => {
           : '',
     };
 
-    const handleOnChange = ({ queryText, error: searchError }: EuiSearchBarOnChangeArgs) => {
-      if (!searchError) {
-        setQuery(queryText);
-        setQueryError(null);
-      } else {
-        setQueryError(searchError.message);
-      }
-    };
-
     const searchConfig = {
-      onChange: handleOnChange,
+      onChange: debouncedUpdateQuery,
       query,
       box: {
         incremental: true,
@@ -498,15 +513,17 @@ export const WatchListPage = () => {
     content = (
       <div data-test-subj="watchesTableContainer">
         <EuiInMemoryTable
-          onTableChange={({ sort: { field, direction } }: Criteria<never>) =>
-            setSort({ field, direction })
-          }
+          onTableChange={({ sort: newSort }: Criteria<BaseWatch>) => {
+            if (newSort) {
+              setSort(newSort);
+            }
+          }}
           items={availableWatches}
           itemId="id"
           columns={columns}
           search={searchConfig}
           pagination={false}
-          sorting={{ sort }}
+          sorting={{ sort: sort as PropertySort }}
           selection={selectionConfig}
           childrenBetween={
             queryError && (

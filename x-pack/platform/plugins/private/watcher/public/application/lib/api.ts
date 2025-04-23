@@ -7,7 +7,6 @@
 
 import { HttpSetup } from '@kbn/core/public';
 
-import { PropertySort } from '@kbn/shared-ux-table-persist/src/types';
 import { Settings } from '../models/settings';
 import { Watch } from '../models/watch';
 import { WatchHistoryItem } from '../models/watch_history_item';
@@ -47,8 +46,8 @@ export const useLoadWatches = (
   pollIntervalMs: number,
   pageSize: number,
   pageIndex: number,
-  sortField: string,
-  sortDirection: 'asc' | 'desc',
+  sortField?: string,
+  sortDirection?: string,
   query?: string
 ) => {
   return useRequest({
