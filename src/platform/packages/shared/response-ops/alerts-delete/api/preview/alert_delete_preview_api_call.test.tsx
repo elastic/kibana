@@ -50,8 +50,8 @@ describe('alertDeletePreviewApiCall', () => {
   it('throws an error if the API call fails', async () => {
     http.get.mockRejectedValue(new Error('API Error'));
 
-    await expect(
-      () => alertDeletePreviewApiCall({
+    await expect(() =>
+      alertDeletePreviewApiCall({
         services: { http },
         requestQuery: {
           isActiveAlertDeleteEnabled: true,
