@@ -41,8 +41,9 @@ import seedrandom from 'seedrandom';
 import { fetchFleetLatestAvailableAgentVersion } from '@kbn/security-solution-plugin/common/endpoint/utils/fetch_fleet_version';
 import { KbnClient } from '@kbn/test';
 import { isServerlessKibanaFlavor } from '@kbn/security-solution-plugin/common/endpoint/utils/kibana_status';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { DEFAULT_SPACE_ID, addSpaceIdToPath } from '@kbn/spaces-plugin/common';
 import { createKbnClient } from '@kbn/security-solution-plugin/scripts/endpoint/common/stack_services';
+import { catchAxiosErrorFormatAndThrow } from '@kbn/security-solution-plugin/common/endpoint/format_axios_error';
 import { FtrService } from '../../functional/ftr_provider_context';
 
 export type IndexedHostsAndAlertsResponseExtended = IndexedHostsAndAlertsResponse & {
@@ -125,6 +126,20 @@ export class EndpointTestResources extends FtrService {
     );
   }
 
+  async getMetadataTransformIds(spaceId: string = DEFAULT_SPACE_ID): Promise<{
+    currentTransformId: string;
+    unitedTransformId: string;
+  }> {
+    const kbnClient = this.getScopedKbnClient(spaceId);
+    const endpointPackage = await getEndpointPackageInfo(kbnClient);
+    const isV2 = isEndpointPackageV2(endpointPackage.version);
+
+    return {
+      currentTransformId: isV2 ? METADATA_CURRENT_TRANSFORM_V2 : metadataTransformPrefix,
+      unitedTransformId: isV2 ? METADATA_UNITED_TRANSFORM_V2 : METADATA_UNITED_TRANSFORM,
+    };
+  }
+
   /**
    * Loads endpoint host/alert/event data into elasticsearch
    * @param [options]
@@ -148,6 +163,7 @@ export class EndpointTestResources extends FtrService {
       waitTimeout: number;
       customIndexFn: () => Promise<IndexedHostsAndAlertsResponse>;
       spaceId: string;
+      withResponseActions: boolean;
     }> = {}
   ): Promise<IndexedHostsAndAlertsResponseExtended> {
     const {
@@ -160,6 +176,7 @@ export class EndpointTestResources extends FtrService {
       waitTimeout = 120000,
       customIndexFn,
       spaceId = DEFAULT_SPACE_ID,
+      withResponseActions = true,
     } = options;
 
     const kbnClient = this.getScopedKbnClient(spaceId);
@@ -168,13 +185,10 @@ export class EndpointTestResources extends FtrService {
     let unitedTransformName = METADATA_UNITED_TRANSFORM;
 
     if (waitUntilTransformed && customIndexFn) {
-      const endpointPackage = await getEndpointPackageInfo(kbnClient);
-      const isV2 = isEndpointPackageV2(endpointPackage.version);
+      const transformIds = await this.getMetadataTransformIds(spaceId);
 
-      if (isV2) {
-        currentTransformName = METADATA_CURRENT_TRANSFORM_V2;
-        unitedTransformName = METADATA_UNITED_TRANSFORM_V2;
-      }
+      currentTransformName = transformIds.currentTransformId;
+      unitedTransformName = transformIds.unitedTransformId;
     }
 
     if (waitUntilTransformed && customIndexFn) {
@@ -204,7 +218,7 @@ export class EndpointTestResources extends FtrService {
           enableFleetIntegration,
           undefined,
           CurrentKibanaVersionDocGenerator,
-          undefined,
+          withResponseActions,
           undefined,
           undefined,
           undefined,
@@ -367,10 +381,14 @@ export class EndpointTestResources extends FtrService {
   /**
    * Fetch (GET) the details of an endpoint
    * @param endpointAgentId
+   * @param spaceId
    */
-  async fetchEndpointMetadata(endpointAgentId: string): Promise<HostInfo> {
+  async fetchEndpointMetadata(
+    endpointAgentId: string,
+    spaceId: string = DEFAULT_SPACE_ID
+  ): Promise<HostInfo> {
     return this.supertest
-      .get(HOST_METADATA_GET_ROUTE.replace('{id}', endpointAgentId))
+      .get(addSpaceIdToPath('/', spaceId, HOST_METADATA_GET_ROUTE.replace('{id}', endpointAgentId)))
       .set('kbn-xsrf', 'true')
       .set('Elastic-Api-Version', '2023-10-31')
       .send()
@@ -384,9 +402,18 @@ export class EndpointTestResources extends FtrService {
    */
   async sendEndpointMetadataUpdate(
     endpointAgentId: string,
-    updates: DeepPartial<HostMetadata> = {}
+    updates: DeepPartial<HostMetadata> = {},
+    spaceId: string = DEFAULT_SPACE_ID
   ): Promise<HostInfo> {
-    const currentMetadata = await this.fetchEndpointMetadata(endpointAgentId);
+    const currentMetadata = await this.fetchEndpointMetadata(endpointAgentId, spaceId);
+    const transformIds = await this.getMetadataTransformIds(spaceId);
+
+    // Stop the transforms before putting together the metadata update doc. and indexing it.
+    await Promise.all([
+      this.stopTransform(transformIds.currentTransformId),
+      this.stopTransform(transformIds.unitedTransformId),
+    ]);
+
     const generatedMetadataDoc = new EndpointDocGenerator().generateHostMetadata();
 
     const updatedMetadataDoc = merge(
@@ -399,19 +426,30 @@ export class EndpointTestResources extends FtrService {
       updates
     );
 
-    await this.esClient.index({
-      index: METADATA_DATASTREAM,
-      body: updatedMetadataDoc,
-      op_type: 'create',
-    });
+    await this.esClient
+      .index({
+        index: METADATA_DATASTREAM,
+        body: updatedMetadataDoc,
+        op_type: 'create',
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+
+    await Promise.all([
+      this.startTransform(transformIds.currentTransformId),
+      this.startTransform(transformIds.unitedTransformId),
+    ]);
+
+    this.log.info(
+      `Endpoint metadata update was indexed for endpoint agent id [${endpointAgentId}] in space [${spaceId}]`
+    );
 
     let response: HostInfo | undefined;
 
     // Wait for the update to show up on Metadata API (after transform runs)
     await this.retry.waitFor(
-      `Waiting for update to endpoint id [${endpointAgentId}] to be processed by transform`,
+      `update to endpoint id [${endpointAgentId}] to be processed by transform`,
       async () => {
-        response = await this.fetchEndpointMetadata(endpointAgentId);
+        response = await this.fetchEndpointMetadata(endpointAgentId, spaceId);
 
         return response.metadata.event.id === updatedMetadataDoc.event.id;
       }
@@ -421,7 +459,8 @@ export class EndpointTestResources extends FtrService {
       throw new Error(`Response object not set. Issue fetching endpoint metadata`);
     }
 
-    this.log.info(`Endpoint metadata doc update done: \n${JSON.stringify(response)}`);
+    this.log.info(`Endpoint metadata doc update done for agent ID [${endpointAgentId}]`);
+    this.log.verbose(JSON.stringify(response, null, 2));
 
     return response;
   }
