@@ -39,7 +39,6 @@ const defaultType: SavedObjectsType<any> = {
       changes: [],
     },
   },
-  switchToModelVersionAt: '8.10.0',
   migrations: {},
 };
 

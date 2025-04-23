@@ -26,7 +26,6 @@ describe('Higher version doc conversion', () => {
   const getTestType = () => {
     return createType({
       name: 'test-type',
-      switchToModelVersionAt: '8.0.0',
       modelVersions: {
         1: {
           changes: [],
