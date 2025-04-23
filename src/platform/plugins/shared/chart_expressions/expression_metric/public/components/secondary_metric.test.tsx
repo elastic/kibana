@@ -69,7 +69,7 @@ describe('Secondary metric', () => {
   describe('with badge', () => {
     describe('static color', () => {
       it('should render a badge with a static color', () => {
-        const color = faker.internet.color();
+        const color = faker.color.rgb();
 
         renderSecondaryMetric({ color });
 
@@ -81,7 +81,7 @@ describe('Secondary metric', () => {
       });
 
       it('should return the N/A string if no value is provided', () => {
-        const color = faker.internet.color();
+        const color = faker.color.rgb();
 
         renderSecondaryMetric({
           color,
@@ -99,9 +99,9 @@ describe('Secondary metric', () => {
 
     describe('dynamic color', () => {
       const palette: [string, string, string] = [
-        faker.internet.color(),
-        faker.internet.color(),
-        faker.internet.color(),
+        faker.color.rgb(),
+        faker.color.rgb(),
+        faker.color.rgb(),
       ];
 
       const trendCombinations = [
