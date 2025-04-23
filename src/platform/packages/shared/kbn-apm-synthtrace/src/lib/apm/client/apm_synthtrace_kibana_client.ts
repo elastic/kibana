@@ -36,16 +36,21 @@ export class ApmSynthtraceKibanaClient {
       const url = `${this.getFleetApmPackagePath()}?prerelease=${prerelease}`;
       this.logger.debug(`Fetching from URL: ${url}`);
 
-      const response = await this.kibanaClient
-        .fetch<{ item: { latestVersion?: string } }>(url, {
-          method: 'GET',
-        })
-        .catch((error) => {
-          const statusCode = error instanceof KibanaClientHttpError ? error.statusCode : 0;
-          throw new Error(
-            `Failed to fetch APM package version, received HTTP ${statusCode} and message: ${error.message}`
-          );
-        });
+      const response = await pRetry(
+        async () => {
+          return this.kibanaClient
+            .fetch<{ item: { latestVersion?: string } }>(url, {
+              method: 'GET',
+            })
+            .catch((error) => {
+              const statusCode = error instanceof KibanaClientHttpError ? error.statusCode : 0;
+              throw new Error(
+                `Failed to fetch APM package version, received HTTP ${statusCode} and message: ${error.message}`
+              );
+            });
+        },
+        { retries: 5 }
+      );
 
       if (!response.item.latestVersion) {
         throw new Error(`Failed to fetch APM package version`);
