@@ -43,6 +43,13 @@ import { deleteKnowledgeBaseEntryRoute } from './knowledge_base/entries/delete_r
 import { updateKnowledgeBaseEntryRoute } from './knowledge_base/entries/update_route';
 import { getKnowledgeBaseEntryRoute } from './knowledge_base/entries/get_route';
 import { bulkAlertSummaryRoute } from './alert_summary/bulk_actions_route';
+import { createAttackDiscoverySchedulesRoute } from './attack_discovery/schedules/create';
+import { getAttackDiscoverySchedulesRoute } from './attack_discovery/schedules/get';
+import { updateAttackDiscoverySchedulesRoute } from './attack_discovery/schedules/update';
+import { deleteAttackDiscoverySchedulesRoute } from './attack_discovery/schedules/delete';
+import { findAttackDiscoverySchedulesRoute } from './attack_discovery/schedules/find';
+import { disableAttackDiscoverySchedulesRoute } from './attack_discovery/schedules/disable';
+import { enableAttackDiscoverySchedulesRoute } from './attack_discovery/schedules/enable';
 
 export const registerRoutes = (
   router: ElasticAssistantPluginRouter,
@@ -102,6 +109,15 @@ export const registerRoutes = (
   getAttackDiscoveryRoute(router);
   postAttackDiscoveryRoute(router);
   cancelAttackDiscoveryRoute(router);
+
+  // Attack Discovery Schedules
+  createAttackDiscoverySchedulesRoute(router);
+  getAttackDiscoverySchedulesRoute(router);
+  findAttackDiscoverySchedulesRoute(router);
+  updateAttackDiscoverySchedulesRoute(router);
+  deleteAttackDiscoverySchedulesRoute(router);
+  disableAttackDiscoverySchedulesRoute(router);
+  enableAttackDiscoverySchedulesRoute(router);
 
   // Alert Summary
   bulkAlertSummaryRoute(router, logger);
