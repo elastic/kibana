@@ -8,23 +8,28 @@ import { useMemo } from 'react';
 
 import { useGetFileByPathQuery } from '../../../../../hooks';
 import { getBreakingChanges, parseYamlChangelog } from '../utils';
-import { type PackageInfo } from '../../../../../types';
 
 /**
  * @param packageName the package to get the changelog for
  * @param latestVersion the version of changelog for the specified package
  * @param currentVersion is used to display the changelog starting from this version up to the latest version
  */
-export const useChangelog = (packageInfo: PackageInfo, currentVersion?: string) => {
-  const path = 'path' in packageInfo ? packageInfo.path : null;
+export const useChangelog = (
+  packageName: string,
+  latestVersion: string,
+  currentVersion?: string
+) => {
+  const {
+    data,
+    error: getFileError,
+    isLoading,
+  } = useGetFileByPathQuery(`/package/${packageName}/${latestVersion}/changelog.yml`);
 
-  const { data, error, isLoading } = useGetFileByPathQuery(`${path}/changelog.yml`, {
-    enabled: Boolean(path),
-  });
+  const error = getFileError?.statusCode === 404 ? null : getFileError;
 
   const changelog = useMemo(() => {
-    return parseYamlChangelog(data, packageInfo.latestVersion, currentVersion);
-  }, [data, packageInfo.latestVersion, currentVersion]);
+    return parseYamlChangelog(data, latestVersion, currentVersion);
+  }, [data, latestVersion, currentVersion]);
 
   const breakingChanges = useMemo(() => {
     const _breakingChanges = getBreakingChanges(changelog);
