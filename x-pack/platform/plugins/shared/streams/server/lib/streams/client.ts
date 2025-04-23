@@ -6,12 +6,12 @@
  */
 
 import { DiagnosticResult, errors } from '@elastic/elasticsearch';
-import { isBoom } from '@hapi/boom';
 import {
   IndicesDataStream,
   QueryDslQueryContainer,
   Result,
 } from '@elastic/elasticsearch/lib/api/types';
+import { isBoom } from '@hapi/boom';
 import { RulesClient } from '@kbn/alerting-plugin/server';
 import type { IScopedClusterClient, KibanaRequest, Logger } from '@kbn/core/server';
 import { isNotFoundError } from '@kbn/es-errors';
@@ -30,11 +30,11 @@ import {
   isWiredStreamDefinition,
   streamDefinitionSchema,
 } from '@kbn/streams-schema';
-import { v5 } from 'uuid';
 import { QueryLink } from '../../../common/assets';
 import { EsqlRuleParams } from '../rules/esql/types';
 import { AssetClient } from './assets/asset_client';
-import { ASSET_ID, ASSET_TYPE, ASSET_UUID } from './assets/fields';
+import { ASSET_ID, ASSET_TYPE } from './assets/fields';
+import { getRuleIdFromQueryLink } from './assets/helpers/query';
 import {
   DefinitionNotFoundError,
   isDefinitionNotFoundError,
@@ -71,10 +71,6 @@ function wrapEsCall<T>(p: Promise<T>): Promise<T> {
     caughtError.stack += error.stack;
     throw caughtError;
   });
-}
-
-function getRuleId(query: QueryLink) {
-  return v5(query[ASSET_UUID], v5.DNS);
 }
 
 export class StreamsClient {
@@ -266,7 +262,7 @@ export class StreamsClient {
 
     await Promise.all(
       queries.map((query) => {
-        const ruleId = getRuleId(query);
+        const ruleId = getRuleIdFromQueryLink(query);
         return rulesClient.create<EsqlRuleParams>({
           data: {
             name: query.query.title,
@@ -297,12 +293,14 @@ export class StreamsClient {
     }
 
     const { rulesClient } = this.dependencies;
-    await rulesClient.bulkDeleteRules({ ids: queries.map(getRuleId) }).catch((error) => {
-      if (isBoom(error) && error.output.statusCode === 400) {
-        return;
-      }
-      throw error;
-    });
+    await rulesClient
+      .bulkDeleteRules({ ids: queries.map(getRuleIdFromQueryLink) })
+      .catch((error) => {
+        if (isBoom(error) && error.output.statusCode === 400) {
+          return;
+        }
+        throw error;
+      });
   }
 
   /**

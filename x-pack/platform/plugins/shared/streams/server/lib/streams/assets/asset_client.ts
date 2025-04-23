@@ -70,7 +70,7 @@ function termsQuery<T extends string>(
   return [{ terms: { [field]: filteredValues } }];
 }
 
-function getUuid(name: string, asset: Pick<AssetLink, 'asset.id' | 'asset.type'>) {
+export function getUuid(name: string, asset: Pick<AssetLink, 'asset.id' | 'asset.type'>) {
   return objectHash({
     [STREAM_NAME]: name,
     [ASSET_ID]: asset[ASSET_ID],
