@@ -8,15 +8,10 @@ import { useMemo, useCallback } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import type { SecurityPageName } from '@kbn/security-solution-navigation';
 import { securityLink } from '@kbn/security-solution-navigation/links';
-import type { AppLinkItems, LinkInfo, NormalizedLink, NormalizedLinks } from './types';
+import type { LinkInfo, NormalizedLink, NormalizedLinks } from './types';
 import { applicationLinksUpdater } from '../../app/links/application_links_updater';
 import { useKibana } from '../lib/kibana/kibana_react';
 
-/**
- * Hook to get the app links updated value
- */
-export const useAppLinks = (): AppLinkItems =>
-  useObservable(applicationLinksUpdater.links$, applicationLinksUpdater.getLinksValue());
 /**
  * Hook to get the normalized app links updated value
  */

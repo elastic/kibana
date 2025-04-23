@@ -79,9 +79,7 @@ describe('ApplicationLinks - filterAppLinks', () => {
     const links: AppLinkItems = [{ ...link, capabilities: ['advanced_access'] }];
 
     const params = createMockParams({
-      upselling: {
-        isPageUpsellable: jest.fn((id: string) => id === 'test'),
-      } as unknown as UpsellingService,
+      upselling: { isPageUpsellable: jest.fn(() => true) } as unknown as UpsellingService,
     });
 
     const result = appLinks.filterAppLinks(links, params);
@@ -95,9 +93,7 @@ describe('ApplicationLinks - filterAppLinks', () => {
     const links: AppLinkItems = [{ ...link, uiSettingRequired: 'showBeta' }];
 
     const params = createMockParams({
-      uiSettingsClient: {
-        get: jest.fn().mockImplementation((key: string) => key !== 'showBeta'),
-      } as unknown as IUiSettingsClient,
+      uiSettingsClient: { get: jest.fn(() => false) } as unknown as IUiSettingsClient,
     });
 
     const result = appLinks.filterAppLinks(links, params);
@@ -113,9 +109,7 @@ describe('ApplicationLinks - filterAppLinks', () => {
     ];
 
     const params = createMockParams({
-      experimentalFeatures: {
-        labsEnabled: false,
-      } as unknown as ExperimentalFeatures,
+      experimentalFeatures: { labsEnabled: false } as unknown as ExperimentalFeatures,
     });
 
     const result = appLinks.filterAppLinks(links, params);
@@ -152,9 +146,7 @@ describe('ApplicationLinks - filterAppLinks', () => {
     ];
 
     const params = createMockParams({
-      upselling: {
-        isPageUpsellable: jest.fn().mockReturnValue(false),
-      } as unknown as UpsellingService,
+      upselling: { isPageUpsellable: jest.fn(() => false) } as unknown as UpsellingService,
     });
 
     const result = appLinks.filterAppLinks(links, params);

@@ -17,7 +17,7 @@ export const createStackManagementNavigationTree = (): GroupDefinition => ({
   breadcrumbStatus: 'hidden',
   children: [
     {
-      id: 'stack_management', // this ID is necessary for the landing page button
+      id: 'stack_management', // This id can't be changed as we use it to open the panel programmatically
       title: i18nStrings.stackManagement.title,
       renderAs: 'panelOpener',
       spaceBefore: null,
