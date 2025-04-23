@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { rawRuleSchema as rawRuleSchemaV5 } from './v5';
+import { rawRuleSchema as rawRuleSchemaV5, rawRuleDashboardsSchema } from './v5';
 
 export const rawRuleInvestigationGuideSchema = schema.object({
   blob: schema.string(),
