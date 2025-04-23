@@ -6,7 +6,8 @@
  */
 
 import moment from 'moment';
-import type { UserRowData, VisualizationStackByOption } from './types';
+import type { UserRowData } from './types';
+import type { VisualizationStackByOption } from '../esql_dashboard_panel';
 
 export const PAGE_SIZE = 10;
 export const CURRENT_TIME = moment();
@@ -70,7 +71,7 @@ export const GRANTED_RIGHTS_DATA: UserRowData[] = [
   },
 ];
 
-export const stackByOptions: VisualizationStackByOption[] = [
+export const GRANTED_RIGHTS_STACK_BY_OPTIONS: VisualizationStackByOption[] = [
   {
     text: 'Privileged User',
     value: 'privileged_user',

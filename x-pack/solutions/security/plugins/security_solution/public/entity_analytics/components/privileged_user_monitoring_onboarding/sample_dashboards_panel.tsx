@@ -5,7 +5,6 @@
  * 2.0.
  */
 import React from 'react';
-
 import { EuiPanel, EuiSpacer, EuiTextColor, EuiTitle, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -24,8 +23,7 @@ export const PrivilegedUserMonitoringSampleDashboardsPanel = () => {
       `}
     >
       <DashboardsSectionHeader />
-      <EuiPanel hasShadow={false} hasBorder={false} />
-
+      <PrivilegedUserMonitoringSampleDashboard />
       <EuiSpacer size="s" />
     </EuiPanel>
   );
@@ -57,8 +55,6 @@ const DashboardsSectionHeader = () => {
         </h3>
       </EuiTitle>
       <EuiSpacer size="s" />
-
-      <PrivilegedUserMonitoringSampleDashboard />
     </EuiPanel>
   );
 };

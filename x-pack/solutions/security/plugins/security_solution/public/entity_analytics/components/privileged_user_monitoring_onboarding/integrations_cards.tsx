@@ -22,7 +22,7 @@ import { useEntityAnalyticsIntegrations } from './hooks/use_integrations';
 export const IntegrationCards = () => {
   const state = useIntegrationLinkState(ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_PATH);
   const { navigateTo } = useNavigation();
-  const integrations = useEntityAnalyticsIntegrations(); // I think this component should be wrapped by suspense
+  const integrations = useEntityAnalyticsIntegrations();
   const navigateToIntegration = useCallback(
     (id: string, version: string) => {
       navigateTo({
@@ -40,7 +40,7 @@ export const IntegrationCards = () => {
   return (
     <EuiFlexGroup direction="row" justifyContent="spaceBetween">
       {integrations.map(({ name, title, icons, description, version }) => (
-        <EuiFlexItem grow={1} key={name}>
+        <EuiFlexItem grow={1} key={name} data-test-subj="entity_analytics-integration-card">
           <LazyPackageCard
             description={description ?? ''}
             icons={icons ?? []}

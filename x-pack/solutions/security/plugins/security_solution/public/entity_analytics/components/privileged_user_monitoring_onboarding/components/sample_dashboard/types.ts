@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export interface TableItemType {
+export interface TableItemType extends Record<string, string> {
   privileged_user: string;
   target_user: string;
   right: string;
@@ -19,9 +19,4 @@ export interface UserRowData {
   target: string;
   right: string;
   ip: string;
-}
-
-export interface VisualizationStackByOption {
-  text: string;
-  value: string;
 }

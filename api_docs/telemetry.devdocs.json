@@ -817,12 +817,12 @@
           "trackAdoption": false,
           "references": [
             {
-              "plugin": "datasetQuality",
-              "path": "x-pack/platform/plugins/shared/dataset_quality/server/services/data_telemetry/data_telemetry_service.ts"
-            },
-            {
               "plugin": "fleet",
               "path": "x-pack/platform/plugins/shared/fleet/server/telemetry/sender.ts"
+            },
+            {
+              "plugin": "datasetQuality",
+              "path": "x-pack/platform/plugins/shared/dataset_quality/server/services/data_telemetry/data_telemetry_service.ts"
             },
             {
               "plugin": "securitySolution",

@@ -43,16 +43,14 @@ export const generateESQLSource = () => {
             | DROP row`;
 };
 
-export const generateListESQLQuery = (
-  sortField: string,
-  sortDirection: string,
-  currentPage: number,
-  esqlSource: string
-) => `${esqlSource}
-        | SORT ${sortField} ${sortDirection}
+export const generateListESQLQuery =
+  (esqlSource: string) =>
+  (sortField: string | number | symbol, sortDirection: string, currentPage: number) =>
+    `${esqlSource}
+        | SORT ${String(sortField)} ${sortDirection}
         | LIMIT ${1 + currentPage * PAGE_SIZE}`; // Load one extra item for the pagination
 
-export const generateVisualizationESQLQuery = (stackByField: string, esqlSource: string) =>
+export const generateVisualizationESQLQuery = (esqlSource: string) => (stackByField: string) =>
   `${esqlSource}
     | EVAL timestamp=DATE_TRUNC(1 hour, TO_DATETIME(@timestamp))
     | STATS results = COUNT(*) by timestamp, ${stackByField}`;
