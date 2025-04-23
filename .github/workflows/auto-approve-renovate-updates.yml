@@ -1,6 +1,6 @@
 on:
   pull_request_target:
-    branches-ignore:
+    branches:
       - main
     types:
       - opened
