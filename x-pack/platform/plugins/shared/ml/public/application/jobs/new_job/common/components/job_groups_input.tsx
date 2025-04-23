@@ -24,6 +24,7 @@ export interface JobGroupsInputProps {
 export const JobGroupsInput: FC<JobGroupsInputProps> = memo(
   ({ existingGroups, selectedGroups, onChange, validation }) => {
     const { euiTheme } = useEuiTheme();
+
     const options = existingGroups.map<EuiComboBoxOptionOption>((g) => ({
       label: g,
       color: tabColor(g, euiTheme),
