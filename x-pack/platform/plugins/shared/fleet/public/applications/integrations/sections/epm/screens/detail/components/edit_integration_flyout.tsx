@@ -19,6 +19,9 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiLoadingSpinner,
+  EuiComboBox,
+  EuiFormRow,
+  EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -26,9 +29,13 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { FleetStartServices } from '../../../../../../../plugin';
 
-import { sendGetFileByPath, useUpdateCustomIntegration } from '../../../../../../../hooks';
+import {
+  sendGetFileByPath,
+  useUpdateCustomIntegration,
+  useGetCategoriesQuery,
+} from '../../../../../../../hooks';
 
-import type { PackageInfo } from '../../../../../types';
+import type { PackageInfo, PackageSpecCategory } from '../../../../../types';
 
 export const EditIntegrationFlyout: React.FunctionComponent<{
   onClose: () => void;
@@ -39,6 +46,7 @@ export const EditIntegrationFlyout: React.FunctionComponent<{
   integration: string | null;
   services: FleetStartServices;
   onComplete: (arg0: {}) => void;
+  existingCategories: Array<PackageSpecCategory | undefined>;
 }> = ({
   onClose,
   integrationName,
@@ -49,11 +57,39 @@ export const EditIntegrationFlyout: React.FunctionComponent<{
   integration,
   services,
   onComplete,
+  existingCategories,
 }) => {
   const updateCustomIntegration = useUpdateCustomIntegration;
-  const [editedContent, setEditedContent] = useState<string>();
+
+  // Get all the possible categories
+  const { data: categoriesData } = useGetCategoriesQuery({
+    prerelease: true,
+  });
+  // We only need the parent categories for now, filter out any with parent_id fields to only leave the parents
+  const parentCategories = categoriesData?.items.filter((item) => item.parent_id === undefined);
+
+  // state section
   const [savingEdits, setSavingEdits] = useState(false);
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [editedContent, setEditedContent] = useState<string>();
   const [readmeLoading, setReadmeLoading] = useState(true);
+  const [categoriesInitialized, setCategoriesInitialized] = useState(false);
+
+  // Set initial categories only once when data is available
+  useEffect(() => {
+    // Only run this effect if we haven't initialized categories yet.
+    if (!categoriesInitialized && parentCategories?.length && existingCategories.length) {
+      const initialCategories = existingCategories
+        .map((categoryId) => parentCategories.find((cat) => cat.id === categoryId)?.title)
+        .filter((title): title is string => Boolean(title));
+
+      if (initialCategories.length) {
+        setSelectedCategories(initialCategories);
+        // Mark that we've initialized categories to prevent future runs when the combobox changes and causes a re-render
+        setCategoriesInitialized(true);
+      }
+    }
+  }, [parentCategories, existingCategories, categoriesInitialized]);
 
   // get the readme content from the packageInfo
   useEffect(() => {
@@ -73,7 +109,9 @@ export const EditIntegrationFlyout: React.FunctionComponent<{
 
     const res = await updateCustomIntegration(packageInfo?.name || '', {
       readMeData: updatedReadMe,
-      categories: [],
+      categories: selectedCategories
+        .map((title) => parentCategories?.find((cat) => cat.title === title)?.id) // map the chosen titles back to ids as we store those
+        .filter((id): id is string => id !== undefined), // filter out any undefined values due to typing
     });
 
     setSavingEdits(false);
@@ -82,12 +120,12 @@ export const EditIntegrationFlyout: React.FunctionComponent<{
     // if everything is okay, then show success and redirect to new page
     if (!res.error) {
       services.notifications.toasts.addSuccess({
-        title: i18n.translate('xpack.fleet.epm.editReadMeSuccessToastTitle', {
-          defaultMessage: 'README updated',
+        title: i18n.translate('xpack.fleet.epm.editIntegrationSuccessToastTitle', {
+          defaultMessage: 'Integration updated',
         }),
-        text: i18n.translate('xpack.fleet.epm.editReadMeSuccessToastText', {
+        text: i18n.translate('xpack.fleet.epm.editIntegrationSuccessToastText', {
           defaultMessage:
-            'The README content has been updated successfully. Redirecting you to the updated integration.',
+            'The integration has been updated successfully. Redirecting you to the updated integration.',
         }),
       });
       setTimeout(() => {
@@ -100,11 +138,11 @@ export const EditIntegrationFlyout: React.FunctionComponent<{
       }, 2000);
     } else {
       services.notifications.toasts.addError(res.error, {
-        title: i18n.translate('xpack.fleet.epm.editReadMeErrorToastTitle', {
-          defaultMessage: 'Error updating README file',
+        title: i18n.translate('xpack.fleet.epm.editIntegrationErrorToastTitle', {
+          defaultMessage: 'Error updating integration.',
         }),
-        toastMessage: i18n.translate('xpack.fleet.epm.editReadMeErrorToastText', {
-          defaultMessage: 'There was an error updating the README content.',
+        toastMessage: i18n.translate('xpack.fleet.epm.editIntegrationErrorToastText', {
+          defaultMessage: 'There was an error updating the integration.',
         }),
       });
     }
@@ -128,6 +166,42 @@ export const EditIntegrationFlyout: React.FunctionComponent<{
         </EuiFlexGroup>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
+        <EuiFormRow
+          fullWidth
+          label={
+            <FormattedMessage
+              id="xpack.fleet.epm.editIntegrationFlyout.categoriesLabel"
+              defaultMessage="Integration Categories"
+            />
+          }
+          helpText={
+            <FormattedMessage
+              id="xpack.fleet.epm.editIntegrationFlyout.categoriesHelpText"
+              defaultMessage="You can assign up to two categories to your integration."
+            />
+          }
+        >
+          <EuiComboBox
+            fullWidth
+            data-test-subj="editIntegrationFlyoutCategories"
+            aria-label="Select categories"
+            placeholder="Select categories"
+            selectedOptions={selectedCategories.map((category) => ({
+              label: category,
+            }))}
+            options={parentCategories?.map((category) => ({
+              label: category.title,
+              value: category.id,
+              disabled: selectedCategories.length >= 2,
+            }))}
+            onChange={(selectedOptions) => {
+              const selectedValues = selectedOptions.map((option) => option.label);
+              setSelectedCategories(selectedValues ?? []);
+            }}
+          />
+        </EuiFormRow>
+        <EuiSpacer size="m" />
+
         {readmeLoading ? (
           <EuiLoadingSpinner />
         ) : (
