@@ -30,6 +30,7 @@ export const EmotionReact = require('@emotion/react');
 export const Moment = require('moment');
 export const MomentTimezone = require('moment-timezone/moment-timezone');
 
+export const FpTs = require('fp-ts');
 export const IoTs = require('io-ts');
 export const IoTsReporter = require('io-ts/Reporter');
 export const IoTsPathReporter = require('io-ts/PathReporter');
@@ -97,3 +98,4 @@ export const KbnReactKibanaContextRoot = require('@kbn/react-kibana-context-root
 export const KbnReactKibanaContextRender = require('@kbn/react-kibana-context-render');
 export const KbnReactKibanaContextTheme = require('@kbn/react-kibana-context-theme');
 export const KbnSharedUxRouter = require('@kbn/shared-ux-router');
+export const KbnReactKibanaMount = require('@kbn/react-kibana-mount');

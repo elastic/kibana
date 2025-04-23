@@ -10,9 +10,9 @@ import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { Logger } from '@kbn/core/server';
 
-import { getPackageSavedObjects } from '../../services/epm/packages/get';
+import { appContextService } from '../../services/app_context';
 
-import { appContextService } from '../../services';
+import { getPackageSavedObjects } from '../../services/epm/packages/get';
 
 import { installCustomAsset, getPipeline, getComponentTemplate } from './custom_assets';
 import {
@@ -21,13 +21,12 @@ import {
   getRemoteSyncedIntegrationsStatus,
 } from './compare_synced_integrations';
 
-jest.mock('../../services');
+jest.mock('../../services/app_context');
 jest.mock('./custom_assets', () => {
   return { getPipeline: jest.fn(), getComponentTemplate: jest.fn(), installCustomAsset: jest.fn() };
 });
 jest.mock('../../services/epm/packages/get', () => {
   return {
-    ...jest.requireActual('../../services/epm/packages/get'),
     getPackageSavedObjects: jest.fn(),
   };
 });
@@ -197,11 +196,19 @@ describe('fetchAndCompareSyncedIntegrations', () => {
                   package_name: 'elastic_agent',
                   package_version: '2.2.0',
                   updated_at: '2025-03-20T14:18:40.076Z',
+                  install_status: 'installed',
                 },
                 {
                   package_name: 'system',
                   package_version: '1.67.3',
                   updated_at: '2025-03-20T14:18:40.111Z',
+                  install_status: 'installed',
+                },
+                {
+                  package_name: 'fleet_server',
+                  package_version: '1.67.3',
+                  updated_at: '2025-03-20T14:18:40.111Z',
+                  install_status: 'not_installed',
                 },
               ],
             },
@@ -243,11 +250,13 @@ describe('fetchAndCompareSyncedIntegrations', () => {
                   package_name: 'elastic_agent',
                   package_version: '2.2.0',
                   updated_at: '2025-03-20T14:18:40.076Z',
+                  install_status: 'installed',
                 },
                 {
                   package_name: 'system',
                   package_version: '1.67.3',
                   updated_at: '2025-03-20T14:18:40.111Z',
+                  install_status: 'installed',
                 },
               ],
             },
@@ -317,16 +326,19 @@ describe('fetchAndCompareSyncedIntegrations', () => {
                   package_name: 'elastic_agent',
                   package_version: '2.2.0',
                   updated_at: '2025-03-20T14:18:40.076Z',
+                  install_status: 'installed',
                 },
                 {
                   package_name: 'system',
                   package_version: '1.67.3',
                   updated_at: '2025-03-20T14:18:40.111Z',
+                  install_status: 'installed',
                 },
                 {
                   package_name: 'synthetics',
                   package_version: '1.4.1',
                   updated_at: '2025-03-17T15:21:14.092Z',
+                  install_status: 'installed',
                 },
               ],
             },
@@ -362,7 +374,7 @@ describe('fetchAndCompareSyncedIntegrations', () => {
           id: 'synthetics',
           attributes: {
             version: '1.4.1',
-            install_status: 'not_installed',
+            install_status: 'install_failed',
             latest_install_failed_attempts: [
               {
                 created_at: '2023-06-20T08:47:31.457Z',
@@ -398,7 +410,7 @@ describe('fetchAndCompareSyncedIntegrations', () => {
           error: 'Found incorrect installed version 1.67.2',
         },
         {
-          error: `Installation status: not_installed - reason: installation failure at Tue, 20 Jun 2023 08:47:31 GMT`,
+          error: `Installation status: install_failed - reason: installation failure at Tue, 20 Jun 2023 08:47:31 GMT`,
           package_name: 'synthetics',
           package_version: '1.4.1',
           sync_status: 'failed',
@@ -444,6 +456,16 @@ describe('fetchAndCompareSyncedIntegrations', () => {
         ],
       },
     };
+    const customPipelineFromVar = {
+      type: 'ingest_pipeline',
+      name: 'filestream-pipeline1',
+      package_name: 'filestream',
+      package_version: '1.1.0',
+      is_deleted: false,
+      pipeline: {
+        processors: [{}],
+      },
+    };
 
     afterEach(() => {
       jest.resetAllMocks();
@@ -459,11 +481,13 @@ describe('fetchAndCompareSyncedIntegrations', () => {
                     package_name: 'system',
                     package_version: '1.67.3',
                     updated_at: '2025-03-20T14:18:40.076Z',
+                    install_status: 'installed',
                   },
                 ],
                 custom_assets: {
                   'component_template:logs-system.auth@custom': customComponentTemplate,
                   'ingest_pipeline:logs-system.auth@custom': customPipeline,
+                  'ingest_pipeline:filestream-pipeline1': customPipelineFromVar,
                 },
               },
             },
@@ -554,12 +578,19 @@ describe('fetchAndCompareSyncedIntegrations', () => {
             sync_status: 'synchronizing',
             type: 'ingest_pipeline',
           },
+          'ingest_pipeline:filestream-pipeline1': {
+            name: 'filestream-pipeline1',
+            package_name: 'filestream',
+            package_version: '1.1.0',
+            sync_status: 'synchronizing',
+            type: 'ingest_pipeline',
+          },
         },
       });
     });
 
     it('should return status = completed if custom assets are equal', async () => {
-      (getPipelineMock as jest.MockedFunction<any>).mockResolvedValue({
+      (getPipelineMock as jest.MockedFunction<any>).mockResolvedValueOnce({
         'logs-system.auth@custom': {
           processors: [
             {
@@ -569,6 +600,11 @@ describe('fetchAndCompareSyncedIntegrations', () => {
               },
             },
           ],
+        },
+      });
+      (getPipelineMock as jest.MockedFunction<any>).mockResolvedValueOnce({
+        'filestream-pipeline1': {
+          processors: [{}],
         },
       });
       (getComponentTemplateMock as jest.MockedFunction<any>).mockResolvedValue({
@@ -642,6 +678,13 @@ describe('fetchAndCompareSyncedIntegrations', () => {
             sync_status: 'completed',
             type: 'ingest_pipeline',
           },
+          'ingest_pipeline:filestream-pipeline1': {
+            name: 'filestream-pipeline1',
+            package_name: 'filestream',
+            package_version: '1.1.0',
+            sync_status: 'completed',
+            type: 'ingest_pipeline',
+          },
         },
       });
     });
@@ -656,6 +699,7 @@ describe('fetchAndCompareSyncedIntegrations', () => {
                     package_name: 'system',
                     package_version: '1.67.3',
                     updated_at: '2025-03-20T14:18:40.076Z',
+                    install_status: 'installed',
                   },
                 ],
                 custom_assets: {
@@ -676,6 +720,17 @@ describe('fetchAndCompareSyncedIntegrations', () => {
                       ],
                       version: 2,
                     },
+                  },
+                  'ingest_pipeline:filestream-pipeline1': {
+                    type: 'ingest_pipeline',
+                    name: 'filestream-pipeline1',
+                    package_name: 'filestream',
+                    package_version: '1.1.0',
+                    is_deleted: false,
+                    pipeline: {
+                      processors: [{}],
+                    },
+                    version: 2,
                   },
                 },
               },
@@ -760,6 +815,13 @@ describe('fetchAndCompareSyncedIntegrations', () => {
             sync_status: 'synchronizing',
             type: 'ingest_pipeline',
           },
+          'ingest_pipeline:filestream-pipeline1': {
+            name: 'filestream-pipeline1',
+            package_name: 'filestream',
+            package_version: '1.1.0',
+            sync_status: 'synchronizing',
+            type: 'ingest_pipeline',
+          },
         },
       });
     });
@@ -784,6 +846,7 @@ describe('fetchAndCompareSyncedIntegrations', () => {
           },
         ],
       });
+      (getPipelineMock as jest.MockedFunction<any>).mockResolvedValue({});
 
       const res = await fetchAndCompareSyncedIntegrations(
         esClientMock,
@@ -804,6 +867,13 @@ describe('fetchAndCompareSyncedIntegrations', () => {
             name: 'logs-system.auth@custom',
             package_name: 'system',
             package_version: '1.67.3',
+            sync_status: 'synchronizing',
+            type: 'ingest_pipeline',
+          },
+          'ingest_pipeline:filestream-pipeline1': {
+            name: 'filestream-pipeline1',
+            package_name: 'filestream',
+            package_version: '1.1.0',
             sync_status: 'synchronizing',
             type: 'ingest_pipeline',
           },
@@ -830,6 +900,7 @@ describe('fetchAndCompareSyncedIntegrations', () => {
                     package_name: 'system',
                     package_version: '1.67.3',
                     updated_at: '2025-03-20T14:18:40.076Z',
+                    install_status: 'installed',
                   },
                 ],
                 custom_assets: {
@@ -912,6 +983,7 @@ describe('fetchAndCompareSyncedIntegrations', () => {
                     package_name: 'system',
                     package_version: '1.67.3',
                     updated_at: '2025-03-20T14:18:40.076Z',
+                    install_status: 'installed',
                   },
                 ],
                 custom_assets: {
@@ -1025,6 +1097,7 @@ describe('fetchAndCompareSyncedIntegrations', () => {
                     package_name: 'system',
                     package_version: '1.67.3',
                     updated_at: '2025-03-20T14:18:40.076Z',
+                    install_status: 'installed',
                   },
                 ],
                 custom_assets: {

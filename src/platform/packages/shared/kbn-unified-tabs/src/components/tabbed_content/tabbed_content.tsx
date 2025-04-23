@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
+import { i18n } from '@kbn/i18n';
 import { htmlIdGenerator, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { TabsBar, type TabsBarProps } from '../tabs_bar';
+import { TabsBar, type TabsBarProps, type TabsBarApi } from '../tabs_bar';
 import { getTabAttributes } from '../../utils/get_tab_attributes';
 import { getTabMenuItemsFn } from '../../utils/get_tab_menu_items';
 import {
@@ -65,6 +66,7 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
   onChanged,
   getPreviewData,
 }) => {
+  const tabsBarApi = useRef<TabsBarApi | null>(null);
   const [tabContentId] = useState(() => htmlIdGenerator()());
   const [state, _setState] = useState<TabbedContentState>(() => {
     return {
@@ -94,6 +96,7 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
   const onLabelEdited = useCallback(
     async (item: TabItem, newLabel: string) => {
       const editedItem = { ...item, label: newLabel };
+      tabsBarApi.current?.moveFocusToNextSelectedItem(editedItem);
       changeState((prevState) => replaceTabWith(prevState, item, editedItem));
     },
     [changeState]
@@ -108,13 +111,30 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
 
   const onClose = useCallback(
     async (item: TabItem) => {
-      changeState((prevState) => closeTab(prevState, item));
+      changeState((prevState) => {
+        const nextState = closeTab(prevState, item);
+        if (nextState.selectedItem) {
+          tabsBarApi.current?.moveFocusToNextSelectedItem(nextState.selectedItem);
+        }
+        return nextState;
+      });
+    },
+    [changeState]
+  );
+
+  const onReorder = useCallback(
+    (reorderedItems: TabItem[]) => {
+      changeState((prevState) => ({
+        ...prevState,
+        items: reorderedItems,
+      }));
     },
     [changeState]
   );
 
   const onAdd = useCallback(async () => {
     const newItem = createItem();
+    tabsBarApi.current?.moveFocusToNextSelectedItem(newItem);
     changeState((prevState) => addTab(prevState, newItem, maxItemsCount));
   }, [changeState, createItem, maxItemsCount]);
 
@@ -124,7 +144,28 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
       maxItemsCount,
       onDuplicate: (item) => {
         const newItem = createItem();
-        newItem.label = `${item.label} (copy)`;
+        const copyLabel = i18n.translate('unifiedTabs.copyLabel', { defaultMessage: 'copy' });
+        const baseRegex = new RegExp(`\\s*\\(${copyLabel}\\)( \\d+)?$`);
+        const baseLabel = item.label.replace(baseRegex, '');
+
+        // Find all existing copies to determine next number
+        const copyRegex = new RegExp(`^${baseLabel}\\s*\\(${copyLabel}\\)( \\d+)?$`);
+        const copyNumberRegex = new RegExp(`\\(${copyLabel}\\) (\\d+)$`);
+        const copies = state.items
+          .filter((tab) => copyRegex.test(tab.label))
+          .map((tab) => {
+            const match = tab.label.match(copyNumberRegex);
+            return match && match[1] ? Number(match[1]) : 1; // match[1] is the number after (copy)
+          });
+
+        // Determine the next copy number
+        const nextNumber = copies.length > 0 ? Math.max(...copies) + 1 : null;
+
+        newItem.label = nextNumber
+          ? `${baseLabel} (${copyLabel}) ${nextNumber}`
+          : `${baseLabel} (${copyLabel})`;
+
+        tabsBarApi.current?.moveFocusToNextSelectedItem(newItem);
         changeState((prevState) => insertTabAfter(prevState, newItem, item, maxItemsCount));
       },
       onCloseOtherTabs: (item) => changeState((prevState) => closeOtherTabs(prevState, item)),
@@ -142,6 +183,7 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
     >
       <EuiFlexItem grow={false}>
         <TabsBar
+          ref={tabsBarApi}
           items={items}
           selectedItem={selectedItem}
           recentlyClosedItems={RECENTLY_CLOSED_TABS_MOCK}
@@ -152,6 +194,7 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
           onAdd={onAdd}
           onLabelEdited={onLabelEdited}
           onSelect={onSelect}
+          onReorder={onReorder}
           onClose={onClose}
           getPreviewData={getPreviewData}
         />

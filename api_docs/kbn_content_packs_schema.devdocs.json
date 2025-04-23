@@ -1,0 +1,525 @@
+{
+  "id": "@kbn/content-packs-schema",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/content-packs-schema",
+        "id": "def-common.findIndexPatterns",
+        "type": "Function",
+        "tags": [],
+        "label": "findIndexPatterns",
+        "description": [],
+        "signature": [
+          "(savedObject: ",
+          {
+            "pluginId": "@kbn/content-packs-schema",
+            "scope": "common",
+            "docId": "kibKbnContentPacksSchemaPluginApi",
+            "section": "def-common.ContentPackSavedObject",
+            "text": "ContentPackSavedObject"
+          },
+          ") => string[]"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/helpers/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-packs-schema",
+            "id": "def-common.findIndexPatterns.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "savedObject",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/content-packs-schema",
+                "scope": "common",
+                "docId": "kibKbnContentPacksSchemaPluginApi",
+                "section": "def-common.ContentPackSavedObject",
+                "text": "ContentPackSavedObject"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/helpers/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-packs-schema",
+        "id": "def-common.isIncludeAll",
+        "type": "Function",
+        "tags": [],
+        "label": "isIncludeAll",
+        "description": [],
+        "signature": [
+          "(value: ",
+          {
+            "pluginId": "@kbn/content-packs-schema",
+            "scope": "common",
+            "docId": "kibKbnContentPacksSchemaPluginApi",
+            "section": "def-common.ContentPackIncludedObjects",
+            "text": "ContentPackIncludedObjects"
+          },
+          ") => value is ",
+          {
+            "pluginId": "@kbn/content-packs-schema",
+            "scope": "common",
+            "docId": "kibKbnContentPacksSchemaPluginApi",
+            "section": "def-common.ContentPackIncludeAll",
+            "text": "ContentPackIncludeAll"
+          }
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-packs-schema",
+            "id": "def-common.isIncludeAll.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "value",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/content-packs-schema",
+                "scope": "common",
+                "docId": "kibKbnContentPacksSchemaPluginApi",
+                "section": "def-common.ContentPackIncludedObjects",
+                "text": "ContentPackIncludedObjects"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-packs-schema",
+        "id": "def-common.isIndexPlaceholder",
+        "type": "Function",
+        "tags": [],
+        "label": "isIndexPlaceholder",
+        "description": [],
+        "signature": [
+          "(index: string) => boolean"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/helpers/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-packs-schema",
+            "id": "def-common.isIndexPlaceholder.$1",
+            "type": "string",
+            "tags": [],
+            "label": "index",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/helpers/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-packs-schema",
+        "id": "def-common.replaceIndexPatterns",
+        "type": "Function",
+        "tags": [],
+        "label": "replaceIndexPatterns",
+        "description": [],
+        "signature": [
+          "(savedObject: ",
+          {
+            "pluginId": "@kbn/content-packs-schema",
+            "scope": "common",
+            "docId": "kibKbnContentPacksSchemaPluginApi",
+            "section": "def-common.ContentPackSavedObject",
+            "text": "ContentPackSavedObject"
+          },
+          ", replacements: Record<string, string>) => ",
+          {
+            "pluginId": "@kbn/content-packs-schema",
+            "scope": "common",
+            "docId": "kibKbnContentPacksSchemaPluginApi",
+            "section": "def-common.ContentPackSavedObject",
+            "text": "ContentPackSavedObject"
+          }
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/helpers/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-packs-schema",
+            "id": "def-common.replaceIndexPatterns.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "savedObject",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/content-packs-schema",
+                "scope": "common",
+                "docId": "kibKbnContentPacksSchemaPluginApi",
+                "section": "def-common.ContentPackSavedObject",
+                "text": "ContentPackSavedObject"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/helpers/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/content-packs-schema",
+            "id": "def-common.replaceIndexPatterns.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "replacements",
+            "description": [],
+            "signature": [
+              "Record<string, string>"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/helpers/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/content-packs-schema",
+        "id": "def-common.ContentPack",
+        "type": "Interface",
+        "tags": [],
+        "label": "ContentPack",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/content-packs-schema",
+            "scope": "common",
+            "docId": "kibKbnContentPacksSchemaPluginApi",
+            "section": "def-common.ContentPack",
+            "text": "ContentPack"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/content-packs-schema",
+            "scope": "common",
+            "docId": "kibKbnContentPacksSchemaPluginApi",
+            "section": "def-common.ContentPackManifest",
+            "text": "ContentPackManifest"
+          }
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-packs-schema",
+            "id": "def-common.ContentPack.entries",
+            "type": "Array",
+            "tags": [],
+            "label": "entries",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/content-packs-schema",
+                "scope": "common",
+                "docId": "kibKbnContentPacksSchemaPluginApi",
+                "section": "def-common.ContentPackSavedObject",
+                "text": "ContentPackSavedObject"
+              },
+              "[]"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-packs-schema",
+        "id": "def-common.ContentPackIncludeAll",
+        "type": "Interface",
+        "tags": [],
+        "label": "ContentPackIncludeAll",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-packs-schema",
+            "id": "def-common.ContentPackIncludeAll.all",
+            "type": "Object",
+            "tags": [],
+            "label": "all",
+            "description": [],
+            "signature": [
+              "{}"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-packs-schema",
+        "id": "def-common.ContentPackIncludeObjects",
+        "type": "Interface",
+        "tags": [],
+        "label": "ContentPackIncludeObjects",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-packs-schema",
+            "id": "def-common.ContentPackIncludeObjects.objects",
+            "type": "Object",
+            "tags": [],
+            "label": "objects",
+            "description": [],
+            "signature": [
+              "{ dashboards: string[]; }"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-packs-schema",
+        "id": "def-common.ContentPackManifest",
+        "type": "Interface",
+        "tags": [],
+        "label": "ContentPackManifest",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-packs-schema",
+            "id": "def-common.ContentPackManifest.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-packs-schema",
+            "id": "def-common.ContentPackManifest.description",
+            "type": "string",
+            "tags": [],
+            "label": "description",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-packs-schema",
+            "id": "def-common.ContentPackManifest.version",
+            "type": "string",
+            "tags": [],
+            "label": "version",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/content-packs-schema",
+        "id": "def-common.ContentPackEntry",
+        "type": "Type",
+        "tags": [],
+        "label": "ContentPackEntry",
+        "description": [],
+        "signature": [
+          "ContentPackDashboard | ContentPackDataView"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-packs-schema",
+        "id": "def-common.ContentPackIncludedObjects",
+        "type": "Type",
+        "tags": [],
+        "label": "ContentPackIncludedObjects",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/content-packs-schema",
+            "scope": "common",
+            "docId": "kibKbnContentPacksSchemaPluginApi",
+            "section": "def-common.ContentPackIncludeObjects",
+            "text": "ContentPackIncludeObjects"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/content-packs-schema",
+            "scope": "common",
+            "docId": "kibKbnContentPacksSchemaPluginApi",
+            "section": "def-common.ContentPackIncludeAll",
+            "text": "ContentPackIncludeAll"
+          }
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-packs-schema",
+        "id": "def-common.ContentPackSavedObject",
+        "type": "Type",
+        "tags": [],
+        "label": "ContentPackSavedObject",
+        "description": [],
+        "signature": [
+          "ContentPackDashboard | ContentPackDataView"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-packs-schema",
+        "id": "def-common.INDEX_PLACEHOLDER",
+        "type": "string",
+        "tags": [],
+        "label": "INDEX_PLACEHOLDER",
+        "description": [],
+        "signature": [
+          "\"<stream_name_placeholder>\""
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/helpers/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/content-packs-schema",
+        "id": "def-common.contentPackIncludedObjectsSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "contentPackIncludedObjectsSchema",
+        "description": [],
+        "signature": [
+          "Zod.ZodType<",
+          {
+            "pluginId": "@kbn/content-packs-schema",
+            "scope": "common",
+            "docId": "kibKbnContentPacksSchemaPluginApi",
+            "section": "def-common.ContentPackIncludedObjects",
+            "text": "ContentPackIncludedObjects"
+          },
+          ", Zod.ZodTypeDef, ",
+          {
+            "pluginId": "@kbn/content-packs-schema",
+            "scope": "common",
+            "docId": "kibKbnContentPacksSchemaPluginApi",
+            "section": "def-common.ContentPackIncludedObjects",
+            "text": "ContentPackIncludedObjects"
+          },
+          ">"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-packs-schema",
+        "id": "def-common.contentPackManifestSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "contentPackManifestSchema",
+        "description": [],
+        "signature": [
+          "Zod.ZodType<",
+          {
+            "pluginId": "@kbn/content-packs-schema",
+            "scope": "common",
+            "docId": "kibKbnContentPacksSchemaPluginApi",
+            "section": "def-common.ContentPackManifest",
+            "text": "ContentPackManifest"
+          },
+          ", Zod.ZodTypeDef, ",
+          {
+            "pluginId": "@kbn/content-packs-schema",
+            "scope": "common",
+            "docId": "kibKbnContentPacksSchemaPluginApi",
+            "section": "def-common.ContentPackManifest",
+            "text": "ContentPackManifest"
+          },
+          ">"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-content-packs-schema/src/models/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ]
+  }
+}

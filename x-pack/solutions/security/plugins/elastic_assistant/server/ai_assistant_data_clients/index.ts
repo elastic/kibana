@@ -105,6 +105,7 @@ export class AIAssistantDataClient {
     sortOrder,
     filter,
     fields,
+    index,
     aggs,
     mSearch,
   }: {
@@ -114,6 +115,7 @@ export class AIAssistantDataClient {
     sortOrder?: string;
     filter?: string;
     fields?: string[];
+    index?: string;
     aggs?: Record<string, estypes.AggregationsAggregationContainer>;
     mSearch?: {
       filter: string;
@@ -128,7 +130,7 @@ export class AIAssistantDataClient {
       perPage,
       filter,
       sortField,
-      index: this.indexTemplateAndPattern.alias,
+      index: index ?? this.indexTemplateAndPattern.alias,
       sortOrder: sortOrder as estypes.SortOrder,
       logger: this.options.logger,
       aggs,

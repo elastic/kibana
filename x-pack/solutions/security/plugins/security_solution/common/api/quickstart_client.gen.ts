@@ -258,6 +258,12 @@ import type {
   GetEntityStoreStatusRequestQueryInput,
   GetEntityStoreStatusResponse,
 } from './entity_analytics/entity_store/status.gen';
+import type {
+  SearchPrivilegesIndicesRequestQueryInput,
+  SearchPrivilegesIndicesResponse,
+} from './entity_analytics/monitoring/search_indices.gen';
+import type { InitMonitoringEngineResponse } from './entity_analytics/privilege_monitoring/engine/init.gen';
+import type { PrivMonHealthResponse } from './entity_analytics/privilege_monitoring/health.gen';
 import type { CleanUpRiskEngineResponse } from './entity_analytics/risk_engine/engine_cleanup_route.gen';
 import type {
   ConfigureRiskEngineSavedObjectRequestBodyInput,
@@ -1664,6 +1670,18 @@ finalize it.
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  async initMonitoringEngine() {
+    this.log.info(`${new Date().toISOString()} Calling API InitMonitoringEngine`);
+    return this.kbnClient
+      .request<InitMonitoringEngineResponse>({
+        path: '/api/entity_analytics/monitoring/engine/init',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'POST',
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
   /**
    * Initializes the Risk Engine by creating the necessary indices and mappings, removing old transforms, and starting the new risk engine
    */
@@ -1907,6 +1925,18 @@ The edit action is idempotent, meaning that if you add a tag to a rule that alre
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  async privMonHealth() {
+    this.log.info(`${new Date().toISOString()} Calling API PrivMonHealth`);
+    return this.kbnClient
+      .request<PrivMonHealthResponse>({
+        path: '/api/entity_analytics/monitoring/privileges/health',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'GET',
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
   async readAlertsIndex() {
     this.log.info(`${new Date().toISOString()} Calling API ReadAlertsIndex`);
     return this.kbnClient
@@ -2109,6 +2139,20 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
         },
         method: 'POST',
         body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  async searchPrivilegesIndices(props: SearchPrivilegesIndicesProps) {
+    this.log.info(`${new Date().toISOString()} Calling API SearchPrivilegesIndices`);
+    return this.kbnClient
+      .request<SearchPrivilegesIndicesResponse>({
+        path: '/api/entity_analytics/monitoring/privileges/indices',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'GET',
+
+        query: props.query,
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
@@ -2585,6 +2629,9 @@ export interface RunScriptActionProps {
 }
 export interface SearchAlertsProps {
   body: SearchAlertsRequestBodyInput;
+}
+export interface SearchPrivilegesIndicesProps {
+  query: SearchPrivilegesIndicesRequestQueryInput;
 }
 export interface SetAlertAssigneesProps {
   body: SetAlertAssigneesRequestBodyInput;
