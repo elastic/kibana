@@ -18,6 +18,14 @@ interface Props {
   output: Output;
 }
 
+export function getIntegrationStatus(statuses: SyncStatus[]): SyncStatus {
+  return statuses.some((current) => current === SyncStatus.FAILED)
+    ? SyncStatus.FAILED
+    : statuses.some((current) => current === SyncStatus.SYNCHRONIZING)
+    ? SyncStatus.SYNCHRONIZING
+    : SyncStatus.COMPLETED;
+}
+
 export const IntegrationSyncStatus: React.FunctionComponent<Props> = memo(({ output }) => {
   const { data: syncedIntegrationsStatus, error } = useGetRemoteSyncedIntegrationsStatusQuery(
     output.id,
@@ -44,16 +52,10 @@ export const IntegrationSyncStatus: React.FunctionComponent<Props> = memo(({ out
         (asset) => asset.sync_status
       ),
     ];
-    const integrationStatus = statuses.some((current) => current === SyncStatus.FAILED)
-      ? SyncStatus.FAILED
-      : statuses.some((current) => current === SyncStatus.SYNCHRONIZING)
-      ? SyncStatus.SYNCHRONIZING
-      : SyncStatus.COMPLETED;
+    const integrationStatus = getIntegrationStatus(statuses).toUpperCase();
 
     const newStatus =
-      (error as any)?.message || syncedIntegrationsStatus?.error
-        ? 'FAILED'
-        : integrationStatus.toUpperCase();
+      (error as any)?.message || syncedIntegrationsStatus?.error ? 'FAILED' : integrationStatus;
 
     return newStatus;
   }, [output, syncedIntegrationsStatus, error]);

@@ -36,6 +36,7 @@ import { PackageIcon } from '../../../../../../components';
 import { sendGetPackageInfoByKeyForRq } from '../../../../hooks';
 
 import { IntegrationStatusBadge } from './integration_status_badge';
+import { getIntegrationStatus } from './integration_sync_status';
 
 const StyledEuiPanel = styled(EuiPanel)`
   border: solid 1px ${(props) => props.theme.eui.euiFormBorderColor};
@@ -123,11 +124,7 @@ export const IntegrationStatus: React.FunctionComponent<{
   }, [integration.package_name, integration.package_version]);
 
   const statuses = [integration.sync_status, ...customAssets.map((asset) => asset.sync_status)];
-  const integrationStatus = statuses.some((status) => status === SyncStatus.FAILED)
-    ? SyncStatus.FAILED
-    : statuses.some((status) => status === SyncStatus.SYNCHRONIZING)
-    ? SyncStatus.SYNCHRONIZING
-    : SyncStatus.COMPLETED;
+  const integrationStatus = getIntegrationStatus(statuses).toUpperCase();
 
   return (
     <CollapsablePanel
@@ -155,7 +152,7 @@ export const IntegrationStatus: React.FunctionComponent<{
                 </EuiFlexGroup>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <IntegrationStatusBadge status={integrationStatus.toUpperCase()} />
+                <IntegrationStatusBadge status={integrationStatus} />
               </EuiFlexItem>
             </EuiFlexGroup>
           </h3>
