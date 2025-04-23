@@ -11,7 +11,6 @@ import React, { useMemo } from 'react';
 import { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import { EuiPanel, EuiSpacer } from '@elastic/eui';
 import {
-  SERVICE_NAME_FIELD,
   SPAN_DURATION_FIELD,
   TRACE_ID_FIELD,
   SPAN_ID_FIELD,
@@ -71,18 +70,13 @@ export function SpanOverview({
               <SpanDurationSummary duration={spanDuration} />
             </>
           )}
-          {transactionId && (
-            <>
-              <EuiSpacer size="m" />
-              <Trace
-                fields={fieldConfigurations}
-                serviceName={parsedDoc[SERVICE_NAME_FIELD]}
-                traceId={parsedDoc[TRACE_ID_FIELD]}
-                transactionId={transactionId}
-                displayType="span"
-              />
-            </>
-          )}
+          <EuiSpacer size="m" />
+          <Trace
+            fields={fieldConfigurations}
+            traceId={parsedDoc[TRACE_ID_FIELD]}
+            docId={parsedDoc[SPAN_ID_FIELD]}
+            displayType="span"
+          />
         </EuiPanel>
       </FieldActionsProvider>
     </TransactionProvider>
