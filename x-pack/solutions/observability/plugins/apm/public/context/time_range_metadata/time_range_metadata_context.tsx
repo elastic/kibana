@@ -5,10 +5,7 @@
  * 2.0.
  */
 import React, { createContext } from 'react';
-import {
-  apmEnableServiceMetrics,
-  apmEnableContinuousRollups,
-} from '@kbn/observability-plugin/common';
+import { apmEnableContinuousRollups } from '@kbn/observability-plugin/common';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import type { TimeRangeMetadata } from '../../../common/time_range_metadata';
 import { useApmParams } from '../../hooks/use_apm_params';
@@ -76,8 +73,6 @@ export function TimeRangeMetadataContextProvider({
   end: string;
   kuery: string;
 }) {
-  const enableServiceTransactionMetrics = uiSettings.get<boolean>(apmEnableServiceMetrics, true);
-
   const enableContinuousRollups = uiSettings.get<boolean>(apmEnableContinuousRollups, true);
 
   const fetcherResult = useFetcher(
@@ -89,13 +84,12 @@ export function TimeRangeMetadataContextProvider({
             end,
             kuery,
             useSpanName,
-            enableServiceTransactionMetrics,
             enableContinuousRollups,
           },
         },
       });
     },
-    [start, end, kuery, useSpanName, enableServiceTransactionMetrics, enableContinuousRollups]
+    [start, end, kuery, useSpanName, enableContinuousRollups]
   );
 
   return (
