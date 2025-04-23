@@ -51,7 +51,8 @@ export const buildESQLTheme = ({
       // commands
       ...buildRuleGroup(
         [
-          'dev_metrics',
+          'dev_time_series',
+          'dev_rerank',
           'dev_fork',
           'metadata',
           'mv_expand',
@@ -87,9 +88,10 @@ export const buildESQLTheme = ({
           'nulls_order',
           'join_lookup',
           'join',
-          'dev_change_point',
+          'change_point',
           'dev_insist',
           'dev_rrf',
+          'dev_completion',
         ],
         euiTheme.colors.accent,
         true // isBold

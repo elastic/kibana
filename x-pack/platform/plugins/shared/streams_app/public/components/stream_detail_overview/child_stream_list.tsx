@@ -50,23 +50,24 @@ export function ChildStreamList({ definition }: { definition?: IngestStreamGetRe
                     'Create sub streams to split out data with different retention policies, schemas, and more.',
                 })}
               </EuiText>
-              <EuiFlexGroup justifyContent="center">
-                <EuiButton
-                  data-test-subj="streamsAppChildStreamListCreateChildStreamButton"
-                  iconType="plusInCircle"
-                  href={router.link('/{key}/{tab}/{subtab}', {
-                    path: {
-                      key: definition.stream.name,
-                      tab: 'management',
-                      subtab: 'route',
-                    },
-                  })}
-                >
-                  {i18n.translate('xpack.streams.entityDetailOverview.createChildStream', {
-                    defaultMessage: 'Create child stream',
-                  })}
-                </EuiButton>
-              </EuiFlexGroup>
+              {definition.privileges.manage && (
+                <EuiFlexGroup justifyContent="center">
+                  <EuiButton
+                    data-test-subj="streamsAppChildStreamListCreateChildStreamButton"
+                    iconType="plusInCircle"
+                    href={router.link('/{key}/management/{tab}', {
+                      path: {
+                        key: definition.stream.name,
+                        tab: 'route',
+                      },
+                    })}
+                  >
+                    {i18n.translate('xpack.streams.entityDetailOverview.createChildStream', {
+                      defaultMessage: 'Create child stream',
+                    })}
+                  </EuiButton>
+                </EuiFlexGroup>
+              )}
             </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>

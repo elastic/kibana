@@ -1,6 +1,6 @@
-.chooseEmbeddingModelSelectedBorder {
+.chooseEmbeddingModelSelectedBorder::before {
   border: 1px solid $euiColorPrimary;
 }
-.chooseEmbeddingModelBorder {
+.chooseEmbeddingModelBorder::before {
   border: 1px solid $euiColorLightShade;
 }

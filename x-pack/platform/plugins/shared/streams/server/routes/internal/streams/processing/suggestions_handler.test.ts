@@ -154,7 +154,7 @@ describe('handleProcessingSuggestion', () => {
     });
   });
 
-  it('filters out simulation when simulateProcessing returns an unsuccessful result', async () => {
+  it('returns non-matching simulations only when there are not matching simulations at all', async () => {
     const messages = [{ message: 'Error 999: failed' }, { message: 'Error 999: failed duplicate' }];
     const newBody = {
       field: 'message',
@@ -184,9 +184,8 @@ describe('handleProcessingSuggestion', () => {
       streamsClientMock
     );
 
-    // Expect that unsuccessful simulation is filtered, so no simulation is returned.
-    expect(result.simulations.length).toBe(0);
-    expect(result.patterns).toEqual([]);
+    expect(result.simulations.length).toBe(1);
+    expect(result.patterns).toEqual(['%{common:message}']);
   });
 });
 

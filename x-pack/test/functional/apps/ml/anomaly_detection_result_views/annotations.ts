@@ -55,8 +55,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('creates annotation', async () => {
         await ml.testExecution.logTestStep('loads from job list row link');
-        await ml.navigation.navigateToMl();
-        await ml.navigation.navigateToJobManagement();
+        await ml.navigation.navigateToStackManagementMlSection('anomaly_detection', 'ml-jobs-list');
 
         await ml.jobTable.filterWithSearchString(jobId, 1);
 
@@ -88,7 +87,7 @@ export default function ({ getService }: FtrProviderContext) {
         });
 
         await ml.testExecution.logTestStep('should display created annotation in job list');
-        await ml.navigation.navigateToJobManagement();
+        await ml.navigation.navigateToStackManagementMlSection('anomaly_detection', 'ml-jobs-list');
         await ml.jobTable.filterWithSearchString(jobId, 1);
         await ml.jobExpandedDetails.openAnnotationsTab(jobId);
         await ml.jobAnnotations.assertAnnotationExists({
@@ -120,8 +119,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('displays the original annotation correctly', async () => {
         await ml.testExecution.logTestStep('loads from job list row link');
-        await ml.navigation.navigateToMl();
-        await ml.navigation.navigateToJobManagement();
+        await ml.navigation.navigateToStackManagementMlSection('anomaly_detection', 'ml-jobs-list');
 
         await ml.jobTable.filterWithSearchString(jobId, 1);
         await ml.jobExpandedDetails.openAnnotationsTab(jobId);
@@ -175,7 +173,7 @@ export default function ({ getService }: FtrProviderContext) {
         await ml.jobAnnotations.assertAnnotationContentById(annotationId, expectedEditedAnnotation);
 
         await ml.testExecution.logTestStep('should display edited annotation in job list');
-        await ml.navigation.navigateToJobManagement();
+        await ml.navigation.navigateToStackManagementMlSection('anomaly_detection', 'ml-jobs-list');
         await ml.jobTable.filterWithSearchString(jobId, 1);
         await ml.jobExpandedDetails.openAnnotationsTab(jobId);
         await ml.jobAnnotations.assertAnnotationContentById(annotationId, expectedEditedAnnotation);
@@ -194,8 +192,7 @@ export default function ({ getService }: FtrProviderContext) {
           'should display delayed data action in annotations table'
         );
 
-        await ml.navigation.navigateToMl();
-        await ml.navigation.navigateToJobManagement();
+        await ml.navigation.navigateToStackManagementMlSection('anomaly_detection', 'ml-jobs-list');
         await ml.jobTable.filterWithSearchString(jobId, 1);
         await ml.jobExpandedDetails.openAnnotationsTab(jobId);
 
@@ -213,8 +210,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('displays the original annotation', async () => {
         await ml.testExecution.logTestStep('loads from job list row link');
-        await ml.navigation.navigateToMl();
-        await ml.navigation.navigateToJobManagement();
+        await ml.navigation.navigateToStackManagementMlSection('anomaly_detection', 'ml-jobs-list');
 
         await ml.jobTable.filterWithSearchString(jobId, 1);
 
@@ -250,7 +246,7 @@ export default function ({ getService }: FtrProviderContext) {
         await ml.jobAnnotations.assertAnnotationsRowMissing(annotationId);
 
         await ml.testExecution.logTestStep('does not show the deleted annotation in job list');
-        await ml.navigation.navigateToJobManagement();
+        await ml.navigation.navigateToStackManagementMlSection('anomaly_detection', 'ml-jobs-list');
         await ml.jobTable.filterWithSearchString(jobId, 1);
         await ml.jobExpandedDetails.openAnnotationsTab(jobId);
         await ml.jobAnnotations.assertAnnotationsRowMissing(annotationId);

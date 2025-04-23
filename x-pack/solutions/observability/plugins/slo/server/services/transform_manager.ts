@@ -107,7 +107,12 @@ export class DefaultTransformManager implements TransformManager {
       await retryTransientEsErrors(
         () =>
           this.scopedClusterClient.asSecondaryAuthUser.transform.stopTransform(
-            { transform_id: transformId, wait_for_completion: true, force: true },
+            {
+              transform_id: transformId,
+              wait_for_completion: true,
+              force: true,
+              allow_no_match: true,
+            },
             { ignore: [404] }
           ),
         { logger: this.logger }

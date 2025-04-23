@@ -194,6 +194,7 @@ export async function upgradeBatch(
     ...rollingUpgradeOptions,
     namespaces,
     is_automatic: options.isAutomatic,
+    policyId: agentsToUpdate[0]?.policy_id,
   });
 
   await createErrorActionResults(

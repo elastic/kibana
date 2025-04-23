@@ -23,7 +23,12 @@ export const buildToolName = ({ integrationId, toolName }: ToolNameAndIntegratio
 export const parseToolName = (fullToolName: string): ToolNameAndIntegrationId => {
   const splits = fullToolName.split(TOOL_NAME_SEPARATOR);
   if (splits.length !== 2) {
-    throw new Error(`Invalid tool name format : "${fullToolName}"`);
+    // TODO: figure out later
+    return {
+      toolName: splits[0],
+      integrationId: '',
+    };
+    // throw new Error(`Invalid tool name format : "${fullToolName}"`);
   }
   return {
     toolName: splits[0],
