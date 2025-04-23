@@ -31,6 +31,7 @@ export const getInlineQueryNode = ({ model, logger }: GetInlineQueryNodeParams):
     }
 
     if (isEmpty(state.resources)) {
+      // No resources identified in the query, no need to replace
       return { inline_query: query };
     }
 
@@ -56,7 +57,10 @@ export const getInlineQueryNode = ({ model, logger }: GetInlineQueryNodeParams):
     // Check after replacing in case the replacements made it untranslatable
     unsupportedComment = getUnsupportedComment(inlineQuery);
     if (unsupportedComment) {
-      return { comments: [generateAssistantComment(unsupportedComment)] };
+      return {
+        inline_query: undefined, // No inline query if unsupported to jump to the end of the graph
+        comments: [generateAssistantComment(unsupportedComment)],
+      };
     }
 
     const inliningSummary = response.match(/## Inlining Summary[\s\S]*$/)?.[0] ?? '';
