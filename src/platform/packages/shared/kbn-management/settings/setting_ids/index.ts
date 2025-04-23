@@ -105,7 +105,6 @@ export const NOTIFICATIONS_LIFETIME_WARNING_ID = 'notifications:lifetime:warning
 export const OBSERVABILITY_APM_AWS_LAMBDA_PRICE_FACTOR_ID = 'observability:apmAWSLambdaPriceFactor';
 export const OBSERVABILITY_APM_AWS_LAMBDA_REQUEST_COST_PER_MILLION_ID =
   'observability:apmAWSLambdaRequestCostPerMillion';
-export const OBSERVABILITY_APM_AGENT_EXPLORER_VIEW_ID = 'observability:apmAgentExplorerView';
 export const OBSERVABILITY_APM_DEFAULT_SERVICE_ENVIRONMENT_ID =
   'observability:apmDefaultServiceEnvironment';
 export const OBSERVABILITY_APM_LABS_BUTTON_ID = 'observability:apmLabsButton';

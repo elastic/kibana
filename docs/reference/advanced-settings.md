@@ -303,9 +303,6 @@ $$$notifications-lifetime-warning$$$`notifications:lifetime:warning`
 $$$apm-enable-service-overview$$$`apm:enableServiceOverview`
 :   When enabled, displays the **Overview** tab for services in **APM**.
 
-$$$apm-agent-explorer$$$`observability:apmAgentExplorerView`
-:   [beta] Enables the Agent explorer view.
-
 $$$apm-aws-price$$$`observability:apmAWSLambdaPriceFactor`
 :   Set the price per Gb-second for your AWS Lambda functions.
 

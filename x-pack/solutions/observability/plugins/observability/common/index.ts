@@ -31,7 +31,6 @@ export {
   apmLabsButton,
   enableInfrastructureProfilingIntegration,
   enableInfrastructureAssetCustomDashboards,
-  enableAgentExplorerView,
   apmEnableTableSearchBar,
   entityCentricExperience,
   apmAWSLambdaPriceFactor,
