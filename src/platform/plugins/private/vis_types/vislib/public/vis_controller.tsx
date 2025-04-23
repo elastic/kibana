@@ -81,7 +81,7 @@ export const createVislibVisController = (
       }
 
       const { Vis: Vislib } = await import('./vislib/vis');
-      const { uiState, event: fireEvent } = handlers;
+      const { uiState, event: fireEvent, hasCompatibleActions } = handlers;
 
       this.vislibVis = new Vislib(this.chartEl, visParams, core, charts);
       this.vislibVis.on('brush', fireEvent);
@@ -102,6 +102,7 @@ export const createVislibVisController = (
             esResponse,
             visParams,
             fireEvent,
+            hasCompatibleActions,
             uiState as PersistedState
           );
         }
@@ -128,6 +129,7 @@ export const createVislibVisController = (
           esResponse,
           visParams,
           fireEvent,
+          hasCompatibleActions,
           uiState as PersistedState
         );
       }
@@ -140,6 +142,7 @@ export const createVislibVisController = (
       visData: unknown,
       visParams: BasicVislibParams,
       fireEvent: IInterpreterRenderHandlers['event'],
+      hasCompatibleActions: IInterpreterRenderHandlers['hasCompatibleActions'],
       uiState?: PersistedState
     ) {
       const { legendPosition } = visParams;
@@ -150,6 +153,7 @@ export const createVislibVisController = (
           visData={visData}
           uiState={uiState}
           fireEvent={fireEvent}
+          hasCompatibleActions={hasCompatibleActions}
           addLegend={this.showLegend(visParams)}
           position={legendPosition}
         />,

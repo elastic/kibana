@@ -33,6 +33,7 @@ jest.mock('../../../services', () => ({
 }));
 
 const fireEvent = jest.fn();
+const hasCompatibleActions = jest.fn().mockReturnValue(true);
 
 const vislibVis = {
   handler: {
@@ -88,6 +89,7 @@ const getWrapper = async (props?: Partial<VisLegendProps>) => {
         addLegend
         position="top"
         fireEvent={fireEvent}
+        hasCompatibleActions={hasCompatibleActions}
         vislibVis={vislibVis}
         visData={visData}
         uiState={uiState}
