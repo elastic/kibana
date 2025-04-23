@@ -157,7 +157,6 @@ export interface UsageStats {
   'observability:enableAwsLambdaMetrics': boolean;
   'observability:apmProgressiveLoading': string;
   'observability:apmServiceGroupMaxNumberOfServices': number;
-  'observability:apmServiceInventoryOptimizedSorting': boolean;
   'observability:apmTraceExplorerTab': boolean;
   'observability:apmEnableCriticalPath': boolean;
   'observability:apmEnableProfilingIntegration': boolean;
