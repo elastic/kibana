@@ -27,6 +27,7 @@ export type ThreatHuntingQuery = z.infer<typeof ThreatHuntingQuery>;
 export const ThreatHuntingQuery = z.object({
   '@timestamp': z.string().datetime().optional(),
   author: z.string(),
+  category: z.string().optional(),
   description: z.string(),
   integration: z.array(z.string()),
   uuid: z.string().uuid(),

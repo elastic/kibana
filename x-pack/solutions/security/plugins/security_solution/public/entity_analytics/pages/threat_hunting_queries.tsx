@@ -26,7 +26,7 @@ import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { useListThreatHuntingQueries } from '../api/hooks/use_list_threat_hunting_queries';
 import { useOpenThreatHuntingQueryInDiscover } from '../hooks/use_open_threat_hunting_query_in_discover';
 
-const IndexStatus: React.FC<{ status?: ThreatHuntingQueryIndexStatus }> = ({ status }) => {
+const IndexStatusBadge: React.FC<{ status?: ThreatHuntingQueryIndexStatus }> = ({ status }) => {
   return (
     <EuiBadge
       color={
@@ -52,6 +52,20 @@ const IndexStatus: React.FC<{ status?: ThreatHuntingQueryIndexStatus }> = ({ sta
   );
 };
 
+const CategoryBadge: React.FC<{ category?: string }> = ({ category }) => {
+  const categoryColorMap: Record<string, string> = {
+    windows: '#a7d0f4', // even lighter blue
+    linux: '#ffebc0', // even lighter amber
+    macos: '#c1ecea', // even lighter teal
+    llm: '#f4d0cf', // even lighter red
+    azure: '#d7c8f2', // even lighter purple
+    okta: '#c0e8e5', // even lighter green
+    aws: '#fbd0e6', // even lighter pink
+  };
+
+  return <EuiBadge color={categoryColorMap[category] || 'hollow'}>{category}</EuiBadge>;
+};
+
 const toShortenedDescription = (description: string) => {
   // everything up up to the first period or 100 characters
   const periodIndex = description.indexOf('.');
@@ -61,7 +75,9 @@ const toShortenedDescription = (description: string) => {
   return description.length > 100 ? `${description.substring(0, 100)}...` : description;
 };
 const QueryPanel: React.FC<{ query: ThreatHuntingQueryWithIndexCheck }> = ({ query }) => {
-  const { name, description, indexStatus } = query;
+  const { name, description, indexStatus, category } = query;
+  console.log('query', query);
+  console.log('category', category);
   const discoverLogsLink = useOpenThreatHuntingQueryInDiscover(query.queries[0]);
 
   const shortenedDescription = toShortenedDescription(description);
@@ -76,19 +92,22 @@ const QueryPanel: React.FC<{ query: ThreatHuntingQueryWithIndexCheck }> = ({ que
         <EuiFlexItem>
           <EuiFlexGroup gutterSize="xs">
             <EuiFlexItem grow={false}>
+              <CategoryBadge category={category} />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
               <EuiBadge iconType="search" color="primary">{`ES|QL`}</EuiBadge>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <IndexStatus status={indexStatus} />
+              <IndexStatusBadge status={indexStatus} />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiBadge color="hollow" iconType="search">
-                {`${query.queries.length} queries`}
+                {`${query.queries.length} ${query.queries.length === 1 ? 'query' : 'queries'}`}
               </EuiBadge>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
-        <EuiFlexItem>
+        <EuiFlexItem css={{ minHeight: 60 }}>
           <EuiText size="s" color="subdued">
             {shortenedDescription}
           </EuiText>
@@ -96,9 +115,13 @@ const QueryPanel: React.FC<{ query: ThreatHuntingQueryWithIndexCheck }> = ({ que
 
         {discoverLogsLink && (
           <EuiFlexItem>
-            <EuiLink href={discoverLogsLink} target="_blank">
-              {'Open in Discover'}
-            </EuiLink>
+            <EuiFlexGroup justifyContent="flexEnd">
+              <EuiFlexItem grow={false}>
+                <EuiLink href={discoverLogsLink} target="_blank">
+                  {'Open in Discover'}
+                </EuiLink>
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
@@ -118,7 +141,7 @@ const ThreatHuntingQueriesComponent = () => {
             ) : (
               <EuiFlexGroup gutterSize="m" css={{ maxWidth: 1200 }} wrap>
                 {threatHuntingQueries?.queries.map((query) => (
-                  <EuiFlexItem key={query.uuid} grow={5}>
+                  <EuiFlexItem key={query.uuid} grow={5} css={{ minWidth: 400 }}>
                     <QueryPanel query={query} />
                   </EuiFlexItem>
                 ))}

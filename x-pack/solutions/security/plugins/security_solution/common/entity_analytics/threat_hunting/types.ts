@@ -10,6 +10,7 @@ import type { ThreatHuntingQueryIndexStatus } from '../../api/entity_analytics/t
 export interface ThreatHuntingQueryEsDoc {
   '@timestamp': string;
   author: string;
+  category: string;
   description: string;
   integration: string[];
   uuid: string;
@@ -35,6 +36,7 @@ export interface ThreatHuntingQueryEsDocQuery {
 export interface ThreatHuntingQueryESQLResult {
   '@timestamp': string;
   author: string;
+  category: string;
   description: string;
   integration: string[];
   uuid: string;

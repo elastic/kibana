@@ -26,6 +26,8 @@ components:
           format: date-time
         author:
           type: string
+        category:
+          type: string
         description:
           type: string
         integration:
