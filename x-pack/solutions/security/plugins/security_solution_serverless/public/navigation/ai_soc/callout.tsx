@@ -6,14 +6,20 @@
  */
 
 import React from 'react';
-import { EuiCallOut, EuiText, EuiSpacer } from '@elastic/eui';
-import { ElasticAiIcon } from './icons';
+import { EuiCallOut, EuiText, EuiSpacer, useEuiTheme } from '@elastic/eui';
+import { AssistantBeacon } from '@kbn/ai-assistant-icon';
 import { CALLOUT_TITLE, CALLOUT_DESCRIPTION, CALLOUT_ARIA_LABEL } from './translations';
 
 export const AiSocCallout: React.FC = () => {
+  const { euiTheme } = useEuiTheme();
+
   return (
     <EuiCallOut color="accent" data-test-subj={'ai-soc-callout'} aria-label={CALLOUT_ARIA_LABEL}>
-      <ElasticAiIcon aria-hidden="true" />
+      <AssistantBeacon
+        size={'m'}
+        ringsColor={euiTheme.colors.vis.euiColorVis4}
+        backgroundColor={'backgroundBaseAccent'}
+      />
       <EuiText size="xs">
         <h4>{CALLOUT_TITLE}</h4>
         <EuiSpacer size="xs" />

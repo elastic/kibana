@@ -50,5 +50,3 @@ export const IconFilebeatChartLazy = withSuspenseIcon(
 export const IconAiForTheSocLazy = withSuspenseIcon(
   React.lazy(() => import('./icons/ai_for_the_soc'))
 );
-
-export const IconElasticAiLazy = withSuspenseIcon(React.lazy(() => import('./icons/elastic_ai')));
