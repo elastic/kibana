@@ -126,6 +126,7 @@ export function createServerlessTestConfig<T extends DeploymentAgnosticCommonSer
           '--xpack.uptime.service.username=localKibanaIntegrationTestsUser',
           '--xpack.uptime.service.devUrl=mockDevUrl',
           '--xpack.uptime.service.manifestUrl=mockDevUrl',
+          '--xpack.observabilityAIAssistant.enableAnonymization=true',
         ],
       },
       testFiles: options.testFiles,
