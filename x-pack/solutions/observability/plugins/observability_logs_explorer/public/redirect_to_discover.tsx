@@ -10,13 +10,19 @@ import ReactDOM from 'react-dom';
 import { useLocation } from 'react-router-dom';
 import { Router } from '@kbn/shared-ux-router';
 import { AppMountParameters, CoreStart } from '@kbn/core/public';
-import { DISCOVER_APP_ID } from '@kbn/deeplinks-analytics';
-import { encode, safeDecode } from '@kbn/rison';
+import { safeDecode } from '@kbn/rison';
+import { DiscoverStart } from '@kbn/discover-plugin/public';
+import { type DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
+import { normalizeUrlState } from './logs_explorer_url_schema';
 
-export const renderDiscoverRedirect = (core: CoreStart, appParams: AppMountParameters) => {
+export const renderDiscoverRedirect = (
+  core: CoreStart,
+  discover: DiscoverStart,
+  appParams: AppMountParameters
+) => {
   ReactDOM.render(
     <Router history={appParams.history}>
-      <DiscoverRedirect core={core} />
+      <DiscoverRedirect core={core} discover={discover} />
     </Router>,
     appParams.element
   );
@@ -26,37 +32,38 @@ export const renderDiscoverRedirect = (core: CoreStart, appParams: AppMountParam
   };
 };
 
-export const DiscoverRedirect = ({ core }: { core: CoreStart }) => {
+export const DiscoverRedirect = ({
+  core,
+  discover,
+}: {
+  core: CoreStart;
+  discover: DiscoverStart;
+}) => {
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
   const pageStateEncoded = searchParams.get('pageState') || '';
-  const pageState = (safeDecode(pageStateEncoded) || {}) as {
-    time?: { from: string; to: string };
-    query?: { language: string; query: string };
-    filters?: any[];
-    columns?: any[];
-    refreshInterval?: { pause: boolean; value: number };
-  };
+  const rawPageState = safeDecode(pageStateEncoded) || {};
 
-  const gState = {
-    time: pageState.time || { from: 'now-15m', to: 'now' },
-    filters: [],
-    refreshInterval: pageState.refreshInterval || { pause: true, value: 60000 },
-  };
+  const parsedState = normalizeUrlState(rawPageState);
 
-  const aState = {
-    query: pageState.query,
-    filters: Array.isArray(pageState.filters) ? pageState.filters : [],
-    columns: Array.isArray(pageState.columns) ? pageState.columns : [],
-  };
+  if (parsedState) {
+    const discoverParams: DiscoverAppLocatorParams = {
+      timeRange: parsedState.time,
+      refreshInterval: parsedState.refreshInterval,
+      filters: parsedState.filters,
+      query: parsedState.query,
+      breakdownField: parsedState.chart?.breakdownField ?? undefined,
+      columns: parsedState.grid?.columns?.map((column) => column.field),
+      grid: {
+        rowHeight: parsedState.grid?.rows?.rowHeight,
+        rowsPerPage: parsedState.grid?.rows?.rowsPerPage,
+      },
+    };
 
-  const gEncoded = encode(gState);
-  const aEncoded = encode(aState);
-
-  const newSearch = `#/?_g=${gEncoded}&_a=${aEncoded}`;
-  const path = `${location.pathname}${newSearch}`;
-
-  core.application.navigateToApp(DISCOVER_APP_ID, { replace: true, path });
+    discover.locator?.navigate(discoverParams);
+  } else {
+    discover.locator?.navigate({});
+  }
 
   return <></>;
 };

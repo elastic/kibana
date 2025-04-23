@@ -102,9 +102,8 @@ export const LogsPageContent: React.FunctionComponent = () => {
         <RedirectWithQueryParams from={'/analysis'} to={routes.logsAnomalies.path} exact />
         <RedirectWithQueryParams from={'/log-rate'} to={routes.logsAnomalies.path} exact />
         <RedirectWithQueryParams from={'/'} to={routes.logsAnomalies.path} exact />
-        {i18n.translate('xpack.infra.logsPageContent.routes.LegacyRendersAndLabel', {
-          defaultMessage: '// Legacy renders and redirects',
-        })}
+        {/* Legacy renders and redirects */}
+
         <Route
           path="/settings"
           exact
