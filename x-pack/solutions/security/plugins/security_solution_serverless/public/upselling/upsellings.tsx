@@ -36,6 +36,7 @@ import {
   SiemMigrationsStartUpsellSectionLazy,
   SiemMigrationsTranslatedRulesUpsellPageLazy,
   ThreatIntelligencePaywallLazy,
+  InvestigationsPaywallLazy,
 } from './lazy_upselling';
 import * as i18n from './translations';
 import { AutomaticImportLazy } from './sections/automatic_import';
@@ -91,6 +92,13 @@ export const upsellingPages: UpsellingPages = [
     pageName: SecurityPageName.siemMigrationsRules,
     pli: ProductFeatureKey.siemMigrations,
     component: () => <SiemMigrationsTranslatedRulesUpsellPageLazy />,
+  },
+  {
+    pageName: SecurityPageName.investigations,
+    pli: ProductFeatureKey.investigationGuide,
+    component: () => (
+      <InvestigationsPaywallLazy requiredPLI={ProductFeatureKey.investigationGuide} />
+    ),
   },
 ];
 
