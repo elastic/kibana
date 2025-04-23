@@ -6,21 +6,19 @@
  */
 
 import React from 'react';
-import { EuiPanel, EuiText, EuiSpacer } from '@elastic/eui';
+import { EuiCallOut, EuiText, EuiSpacer } from '@elastic/eui';
 import { ElasticAiIcon } from './icons';
 import { CALLOUT_TITLE, CALLOUT_DESCRIPTION, CALLOUT_ARIA_LABEL } from './translations';
 
 export const AiSocCallout: React.FC = () => {
   return (
-    <EuiPanel color="accent" data-test-subj={'ai-soc-callout'} aria-label={CALLOUT_ARIA_LABEL}>
+    <EuiCallOut color="accent" data-test-subj={'ai-soc-callout'} aria-label={CALLOUT_ARIA_LABEL}>
       <ElasticAiIcon aria-hidden="true" />
       <EuiText size="xs">
         <h4>{CALLOUT_TITLE}</h4>
         <EuiSpacer size="xs" />
-        <p>
-          <small>{CALLOUT_DESCRIPTION}</small>
-        </p>
+        <small>{CALLOUT_DESCRIPTION}</small>
       </EuiText>
-    </EuiPanel>
+    </EuiCallOut>
   );
 };
