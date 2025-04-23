@@ -13,21 +13,17 @@
     "server": true,
     "requiredPlugins": [
       "charts",
+      "visualizations",
       "data",
       "expressions",
       "dataViews"
     ],
-    "optionalPlugins": [
-      "visualizations"
-    ],
     "requiredBundles": [
       "kibanaUtils",
-      "visDefaultEditor",
-      "visualizations"
+      "visDefaultEditor"
     ],
     "extraPublicDirs": [
-      "common",
-      "visualizations"
+      "common"
     ]
   }
 }
