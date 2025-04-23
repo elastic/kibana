@@ -111,6 +111,46 @@
       },
       {
         "parentPluginId": "fleet",
+        "id": "def-public.LazyPackageCard",
+        "type": "Function",
+        "tags": [],
+        "label": "LazyPackageCard",
+        "description": [],
+        "signature": [
+          "React.LazyExoticComponent<({ description, name, title, version, type, icons, integration, url, release, id, fromIntegrations, isReauthorizationRequired, isUnverified, isUpdateAvailable, showLabels, showInstallationStatus, extraLabelsBadges, isQuickstart, installStatus, onCardClick: onClickProp, isCollectionCard, titleLineClamp, descriptionLineClamp, maxCardHeight, showDescription, showReleaseBadge, }: ",
+          {
+            "pluginId": "fleet",
+            "scope": "public",
+            "docId": "kibFleetPluginApi",
+            "section": "def-public.IntegrationCardItem",
+            "text": "IntegrationCardItem"
+          },
+          ") => React.JSX.Element>"
+        ],
+        "path": "x-pack/platform/plugins/shared/fleet/public/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "fleet",
+            "id": "def-public.LazyPackageCard.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
         "id": "def-public.LazyPackagePolicyInputVarField",
         "type": "Function",
         "tags": [],
@@ -361,6 +401,190 @@
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
+        "id": "def-public.useGetPackageInfoByKeyQuery",
+        "type": "Function",
+        "tags": [],
+        "label": "useGetPackageInfoByKeyQuery",
+        "description": [],
+        "signature": [
+          "(pkgName: string, pkgVersion?: string | undefined, options?: { ignoreUnverified?: boolean | undefined; prerelease?: boolean | undefined; full?: boolean | undefined; withMetadata?: boolean | undefined; } | undefined, queryOptions?: { enabled?: boolean | undefined; suspense?: boolean | undefined; refetchOnMount?: boolean | \"always\" | undefined; }) => ",
+          "UseQueryResult",
+          "<",
+          {
+            "pluginId": "fleet",
+            "scope": "common",
+            "docId": "kibFleetPluginApi",
+            "section": "def-common.GetInfoResponse",
+            "text": "GetInfoResponse"
+          },
+          ", ",
+          "RequestError",
+          ">"
+        ],
+        "path": "x-pack/platform/plugins/shared/fleet/public/hooks/use_request/epm.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "fleet",
+            "id": "def-public.useGetPackageInfoByKeyQuery.$1",
+            "type": "string",
+            "tags": [],
+            "label": "pkgName",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/platform/plugins/shared/fleet/public/hooks/use_request/epm.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-public.useGetPackageInfoByKeyQuery.$2",
+            "type": "string",
+            "tags": [],
+            "label": "pkgVersion",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/fleet/public/hooks/use_request/epm.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-public.useGetPackageInfoByKeyQuery.$3",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/fleet/public/hooks/use_request/epm.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "fleet",
+                "id": "def-public.useGetPackageInfoByKeyQuery.$3.ignoreUnverified",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "ignoreUnverified",
+                "description": [],
+                "signature": [
+                  "boolean | undefined"
+                ],
+                "path": "x-pack/platform/plugins/shared/fleet/public/hooks/use_request/epm.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "fleet",
+                "id": "def-public.useGetPackageInfoByKeyQuery.$3.prerelease",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "prerelease",
+                "description": [],
+                "signature": [
+                  "boolean | undefined"
+                ],
+                "path": "x-pack/platform/plugins/shared/fleet/public/hooks/use_request/epm.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "fleet",
+                "id": "def-public.useGetPackageInfoByKeyQuery.$3.full",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "full",
+                "description": [],
+                "signature": [
+                  "boolean | undefined"
+                ],
+                "path": "x-pack/platform/plugins/shared/fleet/public/hooks/use_request/epm.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "fleet",
+                "id": "def-public.useGetPackageInfoByKeyQuery.$3.withMetadata",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "withMetadata",
+                "description": [],
+                "signature": [
+                  "boolean | undefined"
+                ],
+                "path": "x-pack/platform/plugins/shared/fleet/public/hooks/use_request/epm.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-public.useGetPackageInfoByKeyQuery.$4",
+            "type": "Object",
+            "tags": [],
+            "label": "queryOptions",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/fleet/public/hooks/use_request/epm.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "fleet",
+                "id": "def-public.useGetPackageInfoByKeyQuery.$4.enabled",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "enabled",
+                "description": [],
+                "signature": [
+                  "boolean | undefined"
+                ],
+                "path": "x-pack/platform/plugins/shared/fleet/public/hooks/use_request/epm.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "fleet",
+                "id": "def-public.useGetPackageInfoByKeyQuery.$4.suspense",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "suspense",
+                "description": [],
+                "signature": [
+                  "boolean | undefined"
+                ],
+                "path": "x-pack/platform/plugins/shared/fleet/public/hooks/use_request/epm.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "fleet",
+                "id": "def-public.useGetPackageInfoByKeyQuery.$4.refetchOnMount",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "refetchOnMount",
+                "description": [],
+                "signature": [
+                  "boolean | \"always\" | undefined"
+                ],
+                "path": "x-pack/platform/plugins/shared/fleet/public/hooks/use_request/epm.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
         "returnComment": [],
         "initialIsOpen": false
       },
