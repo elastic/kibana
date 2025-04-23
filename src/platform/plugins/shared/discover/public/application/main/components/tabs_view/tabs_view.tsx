@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { UnifiedTabs } from '@kbn/unified-tabs';
-import React from 'react';
+import { UnifiedTabs, type UnifiedTabsProps } from '@kbn/unified-tabs';
+import React, { useCallback } from 'react';
 import { DiscoverSessionView, type DiscoverSessionViewProps } from '../session_view';
 import {
   CurrentTabProvider,
@@ -32,6 +32,27 @@ export const TabsView = (props: DiscoverSessionViewProps) => {
   }));
   const { getPreviewData } = usePreviewData(props.runtimeStateManager);
 
+  const onChanged: UnifiedTabsProps['onChanged'] = useCallback(
+    (updateState) => {
+      const updateTabsAction = internalStateActions.updateTabs(updateState);
+      return dispatch(updateTabsAction);
+    },
+    [dispatch]
+  );
+
+  const createItem: UnifiedTabsProps['createItem'] = useCallback(
+    () => createTabItem(allTabs),
+    [allTabs]
+  );
+
+  const renderContent: UnifiedTabsProps['renderContent'] = useCallback(() => {
+    return (
+      <CurrentTabProvider key={currentTabId} currentTabId={currentTabId}>
+        <DiscoverSessionView key={currentTabId} {...props} />
+      </CurrentTabProvider>
+    );
+  }, [currentTabId, props]);
+
   return (
     <UnifiedTabs
       key={groupId}
@@ -39,17 +60,10 @@ export const TabsView = (props: DiscoverSessionViewProps) => {
       initialItems={allTabs}
       initialSelectedItemId={currentTabId}
       recentlyClosedItems={recentlyClosedItems}
-      onChanged={(updateState) => {
-        const updateTabsAction = internalStateActions.updateTabs(updateState);
-        return dispatch(updateTabsAction);
-      }}
-      createItem={() => createTabItem(allTabs)}
+      createItem={createItem}
       getPreviewData={getPreviewData}
-      renderContent={() => (
-        <CurrentTabProvider currentTabId={currentTabId}>
-          <DiscoverSessionView key={currentTabId} {...props} />
-        </CurrentTabProvider>
-      )}
+      renderContent={renderContent}
+      onChanged={onChanged}
     />
   );
 };

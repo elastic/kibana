@@ -42,7 +42,11 @@ export const defaultTabState: Omit<TabState, keyof TabItem> = {
   lastPersistedGlobalState: {},
   dataViewId: undefined,
   isDataViewLoading: false,
-  dataRequestParams: {},
+  dataRequestParams: {
+    timeRangeAbsolute: undefined,
+    timeRangeRelative: undefined,
+    searchSessionId: undefined,
+  },
   overriddenVisContextAfterInvalidation: undefined,
   resetDefaultProfileState: {
     resetId: '',

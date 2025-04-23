@@ -40,9 +40,9 @@ export type TotalHitsRequest = RequestState<number>;
 export type ChartRequest = RequestState<{}>;
 
 export interface InternalStateDataRequestParams {
-  timeRangeAbsolute?: TimeRange;
-  timeRangeRelative?: TimeRange;
-  searchSessionId?: string;
+  timeRangeAbsolute: TimeRange | undefined;
+  timeRangeRelative: TimeRange | undefined;
+  searchSessionId: string | undefined;
 }
 
 export interface TabState extends TabItem {

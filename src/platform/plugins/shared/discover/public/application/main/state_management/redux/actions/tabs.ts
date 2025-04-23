@@ -9,7 +9,7 @@
 
 import type { TabbedContentState } from '@kbn/unified-tabs/src/components/tabbed_content/tabbed_content';
 import { v4 as uuidv4 } from 'uuid';
-import { cloneDeep, differenceBy, omit } from 'lodash';
+import { cloneDeep, differenceBy, omit, pick } from 'lodash';
 import type { QueryState } from '@kbn/data-plugin/common';
 import type { TabState } from '../types';
 import { selectAllTabs, selectTab } from '../selectors';
@@ -74,7 +74,11 @@ export const updateTabs: InternalStateThunkActionCreator<
     const currentTab = selectTab(currentState, currentState.tabs.unsafeCurrentId);
     const updatedTabs = items.map<TabState>((item) => {
       const existingTab = selectTab(currentState, item.id);
-      return existingTab ? { ...existingTab, ...item } : { ...defaultTabState, ...item };
+      return {
+        ...defaultTabState,
+        ...existingTab,
+        ...pick(item, 'id', 'label', 'closedAt'),
+      };
     });
 
     if (selectedItem?.id !== currentTab.id) {
