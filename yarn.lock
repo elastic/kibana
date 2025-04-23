@@ -23985,10 +23985,10 @@ msgpackr@^1.9.9:
   optionalDependencies:
     msgpackr-extract "^3.0.2"
 
-msw@~2.7.3:
-  version "2.7.3"
-  resolved "https://registry.yarnpkg.com/msw/-/msw-2.7.3.tgz#5ad569fae7c7cdb8be2eeba3d041c185600b25a0"
-  integrity sha512-+mycXv8l2fEAjFZ5sjrtjJDmm2ceKGjrNbBr1durRg6VkU9fNUE/gsmQ51hWbHqs+l35W1iM+ZsmOD9Fd6lspw==
+msw@~2.7.4:
+  version "2.7.5"
+  resolved "https://registry.yarnpkg.com/msw/-/msw-2.7.5.tgz#8e73e58ac84d490e819d30b2ad8ce4cb3f9b7f94"
+  integrity sha512-00MyTlY3TJutBa5kiU+jWiz2z5pNJDYHn2TgPkGkh92kMmNH43RqvMXd8y/7HxNn8RjzUbvZWYZjcS36fdb6sw==
   dependencies:
     "@bundled-es-modules/cookie" "^2.0.1"
     "@bundled-es-modules/statuses" "^1.0.1"
