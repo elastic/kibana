@@ -19,7 +19,12 @@ import {
   type TabActionPayload,
   type InternalStateThunkActionCreator,
 } from '../internal_state';
-import { createTabRuntimeState, selectTabRuntimeState } from '../runtime_state';
+import {
+  createTabRuntimeState,
+  selectTabRuntimeState,
+  selectTabRuntimeAppState,
+  selectTabRuntimeGlobalState,
+} from '../runtime_state';
 import { APP_STATE_URL_KEY, GLOBAL_STATE_URL_KEY } from '../../../../../../common/constants';
 import type { DiscoverAppState } from '../../discover_app_state_container';
 import { createTabItem } from '../utils';
@@ -87,7 +92,6 @@ export const updateTabs: InternalStateThunkActionCreator<
 
         return {
           ...tab,
-          lastPersistedAppState: previousTabStateContainer?.appState.getState() ?? {},
           lastPersistedGlobalState: { timeRange, refreshInterval, filters },
         };
       });
@@ -143,14 +147,12 @@ export const updateTabs: InternalStateThunkActionCreator<
 
 export const updateTabAppStateAndGlobalState: InternalStateThunkActionCreator<[TabActionPayload]> =
   ({ tabId }) =>
-  (dispatch, _, { runtimeStateManager }) => {
-    const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tabId);
-    const stateContainer = tabRuntimeState.stateContainer$.getValue();
+  (dispatch, _, { runtimeStateManager, tabsStorageManager }) => {
     dispatch(
       internalStateSlice.actions.setTabAppStateAndGlobalState({
         tabId,
-        lastPersistedAppState: stateContainer?.appState.getState() ?? {},
-        lastPersistedGlobalState: stateContainer?.globalState.get() ?? {},
+        appState: selectTabRuntimeAppState(runtimeStateManager, tabId),
+        globalState: selectTabRuntimeGlobalState(runtimeStateManager, tabId),
       })
     );
   };

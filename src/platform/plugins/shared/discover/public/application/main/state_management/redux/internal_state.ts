@@ -22,7 +22,7 @@ import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import type { TabItem } from '@kbn/unified-tabs';
 import type { DiscoverCustomizationContext } from '../../../../customizations';
 import type { DiscoverServices } from '../../../../build_services';
-import { type RuntimeStateManager } from './runtime_state';
+import { type RuntimeStateManager, selectTabRuntimeAppState } from './runtime_state';
 import {
   LoadingStatus,
   type DiscoverInternalState,
@@ -33,12 +33,12 @@ import {
 import { loadDataViewList } from './actions/data_views';
 import { selectTab } from './selectors';
 import type { TabsStorageManager } from '../tabs_storage_manager';
+import type { DiscoverAppState } from '../discover_app_state_container';
 
 const MIDDLEWARE_THROTTLE_MS = 300;
 const MIDDLEWARE_THROTTLE_OPTIONS = { leading: false, trailing: true };
 
 export const defaultTabState: Omit<TabState, keyof TabItem> = {
-  lastPersistedAppState: {},
   lastPersistedGlobalState: {},
   dataViewId: undefined,
   isDataViewLoading: false,
@@ -157,13 +157,12 @@ export const internalStateSlice = createSlice({
     setTabAppStateAndGlobalState: (
       state,
       action: TabAction<{
-        lastPersistedAppState: TabState['lastPersistedAppState'];
-        lastPersistedGlobalState: TabState['lastPersistedGlobalState'];
+        appState: DiscoverAppState | undefined;
+        globalState: TabState['lastPersistedGlobalState'] | undefined;
       }>
     ) =>
       withTab(state, action, (tab) => {
-        tab.lastPersistedAppState = action.payload.lastPersistedAppState;
-        tab.lastPersistedGlobalState = action.payload.lastPersistedGlobalState;
+        tab.lastPersistedGlobalState = action.payload.globalState || {};
       }),
 
     setOverriddenVisContextAfterInvalidation: (
@@ -217,15 +216,23 @@ export const internalStateSlice = createSlice({
   },
 });
 
-const createMiddleware = ({ tabsStorageManager }: { tabsStorageManager: TabsStorageManager }) => {
+const createMiddleware = ({
+  tabsStorageManager,
+  runtimeStateManager,
+}: {
+  tabsStorageManager: TabsStorageManager;
+  runtimeStateManager: RuntimeStateManager;
+}) => {
   const listenerMiddleware = createListenerMiddleware();
 
   listenerMiddleware.startListening({
     actionCreator: internalStateSlice.actions.setTabs,
     effect: throttle(
       (action) => {
+        const getTabAppState = (tabId: string) =>
+          selectTabRuntimeAppState(runtimeStateManager, tabId);
         // console.log('persistLocally', action.payload);
-        void tabsStorageManager.persistLocally(action.payload);
+        void tabsStorageManager.persistLocally(action.payload, getTabAppState);
       },
       MIDDLEWARE_THROTTLE_MS,
       MIDDLEWARE_THROTTLE_OPTIONS

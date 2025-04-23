@@ -65,7 +65,7 @@ export const initializeSession: InternalStateThunkActionCreator<
   async (
     dispatch,
     getState,
-    { services, customizationContext, runtimeStateManager, urlStateStorage }
+    { services, customizationContext, runtimeStateManager, urlStateStorage, tabsStorageManager }
   ) => {
     dispatch(disconnectTab({ tabId }));
     dispatch(internalStateSlice.actions.resetOnSavedSearchChange({ tabId }));
@@ -81,7 +81,9 @@ export const initializeSession: InternalStateThunkActionCreator<
     const discoverSessionLoadTracker =
       services.ebtManager.trackPerformanceEvent('discoverLoadSavedSearch');
     const urlState = cleanupUrlState(
-      defaultUrlState ?? urlStateStorage.get<AppStateUrl>(APP_STATE_URL_KEY),
+      tabsStorageManager.loadTabAppStateFromLocalCache(tabId) ?? // TODO: do something similar for globalState
+        defaultUrlState ??
+        urlStateStorage.get<AppStateUrl>(APP_STATE_URL_KEY),
       services.uiSettings
     );
     const persistedDiscoverSession = discoverSessionId
