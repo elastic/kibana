@@ -6,7 +6,7 @@
  */
 
 import { IntegrationType } from '@kbn/wci-common';
-import SalesforceSvg from '../icons/assets/salesforce.svg';
+import SalesforceSvg from '../../../assets/salesforce.svg';
 
 export const integrationTypeToLabel = (type: IntegrationType) => {
   switch (type) {

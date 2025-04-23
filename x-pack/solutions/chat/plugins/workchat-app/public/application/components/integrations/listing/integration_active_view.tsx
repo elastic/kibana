@@ -39,10 +39,12 @@ import { useAgentList } from '../../../hooks/use_agent_list';
 import { integrationLabels } from '../i18n';
 import { IntegrationListView } from './integration_list_view';
 import { useIntegrationList } from '../../../hooks/use_integration_list';
+import { css } from '@emotion/css';
+import PlugSvg from '../../../../assets/plug.svg';
 
 export const IntegrationActiveView: React.FC = () => {
   const { agents } = useAgentList();
-  const { integrations, isLoading, isRefetching } = useIntegrationList();
+  const { integrations, isLoading} = useIntegrationList();
   const { navigateToWorkchatUrl } = useNavigation();
 
   const columns: Array<EuiBasicTableColumn<Integration>> = [
@@ -244,13 +246,33 @@ export const IntegrationActiveView: React.FC = () => {
     ...columns,
   ];
 
+  // emotion styling
+  const horizontalRuleStyle = css`
+  height: 2px;
+`;
+
+  const loadingStyle = css`
+    height: 300px;
+  `;
+
+  const noIntegrationStyle = css`
+    width: 500px;
+    height: 500px;
+    margin: auto;
+  `;
+
+  const plugStyle = css`
+    margin: auto;
+    font-size: 50px;
+  `;
+
   return (
     <KibanaPageTemplate data-test-subj="integrationsListPage">
       <IntegrationListView tab={'active'} />
-      <EuiHorizontalRule margin="none" css={{ height: 2 }} />
+      <EuiHorizontalRule margin="none" className={horizontalRuleStyle} />
       <KibanaPageTemplate.Section>
-        {isLoading || isRefetching ? (
-          <EuiFlexGroup alignItems="center" justifyContent="center" css={{ height: '300px' }}>
+        {isLoading ? (
+          <EuiFlexGroup alignItems="center" justifyContent="center" className={loadingStyle}>
             <EuiFlexItem grow={false}>
               <EuiLoadingSpinner size="xl" />
             </EuiFlexItem>
@@ -258,24 +280,27 @@ export const IntegrationActiveView: React.FC = () => {
         ) : integrations.length === 0 ? (
           <EuiFlexGroup
             alignItems="center"
-            css={{
-              width: '500px',
-              height: '500px',
-              margin: '0 auto',
-            }}
+            className={noIntegrationStyle}
           >
             <EuiPanel>
               <EuiFlexItem grow={false}>
                 <span
                   role="img"
                   aria-label="plug emoji"
-                  style={{ margin: '0 auto', fontSize: '50px' }}
+                  className={plugStyle}
                 >
-                  🔌
+                <EuiIcon size="xxl" type={PlugSvg}>
+                </EuiIcon>
                 </span>
               </EuiFlexItem>
               <EuiEmptyPrompt
-                title={<h2>You haven&apos;t connected anything</h2>}
+                title={
+                  <h2>
+                    {i18n.translate('workchatApp.integrations.listView.noIntegrationTitle', {
+                      defaultMessage: 'You haven\'t connected anything',
+                    })}
+                  </h2>
+                }
                 body={i18n.translate('workchatApp.integrations.listView.noIntegrationBody', {
                   defaultMessage:
                     "Your connected tools will show up here once you've set up an integration. Until then, nothing for me to work with!",
@@ -296,7 +321,12 @@ export const IntegrationActiveView: React.FC = () => {
           </EuiFlexGroup>
         ) : (
           <>
-            <EuiText size="xs">Showing {resultsCount}</EuiText>
+            <EuiText size="xs">
+              {i18n.translate('workchatApp.integrations.listView.pagination', {
+                defaultMessage: 'Showing ',
+              })}
+              {resultsCount}
+            </EuiText>
             <EuiSpacer size="s" />
             <EuiBasicTable
               columns={columnsWithExpandingRowToggle}

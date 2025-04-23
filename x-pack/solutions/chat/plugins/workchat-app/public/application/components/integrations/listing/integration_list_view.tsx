@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { EuiButton } from '@elastic/eui';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { i18n } from '@kbn/i18n';
@@ -13,31 +13,35 @@ import { useNavigation } from '../../../hooks/use_navigation';
 import { appPaths } from '../../../app_paths';
 import { integrationLabels } from '../i18n';
 
+
+
 export const IntegrationListView: React.FC<{ tab?: string }> = ({ tab }) => {
   const { navigateToWorkchatUrl } = useNavigation();
 
-  const renderTabs = () => [
-    {
-      id: 'active',
-      label: i18n.translate('workchatApp.integrations.listView.activeTab', {
-        defaultMessage: 'Active',
-      }),
-      isSelected: tab === 'active',
-      onClick: () => {
-        navigateToWorkchatUrl(appPaths.integrations.list);
+  const tabs = useMemo(() => {
+    return [
+      {
+        id: 'active',
+        label: i18n.translate('workchatApp.integrations.listView.activeTab', {
+          defaultMessage: 'Active',
+        }),
+        isSelected: tab === 'active',
+        onClick: () => {
+          navigateToWorkchatUrl(appPaths.integrations.list);
+        },
       },
-    },
-    {
-      id: 'catalog',
-      label: i18n.translate('workchatApp.integrations.listView.catalogTab', {
-        defaultMessage: 'Catalog',
-      }),
-      isSelected: tab === 'catalog',
-      onClick: () => {
-        navigateToWorkchatUrl(appPaths.integrations.catalog);
+      {
+        id: 'catalog',
+        label: i18n.translate('workchatApp.integrations.listView.catalogTab', {
+          defaultMessage: 'Catalog',
+        }),
+        isSelected: tab === 'catalog',
+        onClick: () => {
+          navigateToWorkchatUrl(appPaths.integrations.catalog);
+        },
       },
-    },
-  ];
+    ];
+  }, [tab, appPaths]);
 
   return (
     <KibanaPageTemplate.Header
@@ -46,7 +50,7 @@ export const IntegrationListView: React.FC<{ tab?: string }> = ({ tab }) => {
         defaultMessage:
           'Connect to your tools and data so you can easily find, understand, and act on the information that matters.',
       })}
-      tabs={renderTabs()}
+      tabs={tabs}
       rightSideItems={[
         <EuiButton
           onClick={() => {

@@ -16,7 +16,6 @@ export const useIntegrationList = () => {
     data,
     isLoading,
     isRefetching,
-    refetch: refresh,
   } = useQuery({
     queryKey: queryKeys.integrations.list,
     queryFn: async () => {
@@ -28,8 +27,6 @@ export const useIntegrationList = () => {
 
   return {
     integrations,
-    isLoading,
-    isRefetching,
-    refresh,
+    isLoading: isLoading || isRefetching
   };
 };

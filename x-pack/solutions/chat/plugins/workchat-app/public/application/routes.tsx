@@ -11,9 +11,10 @@ import { WorkChatHomePage } from './pages/home';
 import { WorkchatChatPage } from './pages/chat';
 import { WorkChatAssistantsPage } from './pages/assistants';
 import { WorkChatAssistantOverviewPage } from './pages/assistant_details';
-import { WorkChatCatalogPage, WorkChatIntegrationsPage } from './pages/integrations';
+import { WorkChatIntegrationsPage } from './pages/integrations';
 import { WorkChatIntegrationEditOrCreatePage } from './pages/integration_edit_or_create';
 import { WorkChatAssistantWorkflowPage } from './pages/assistant_workflow';
+import { WorkChatCatalogPage } from './pages/integrations_catalog';
 export const WorkchatAppRoutes: React.FC<{}> = () => {
   return (
     <Routes>
