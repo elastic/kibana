@@ -24,6 +24,7 @@ import { METRIC_TYPE } from '@kbn/analytics';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { withRouter, RouteComponentProps } from 'react-router-dom';
 
+import { LATEST_VERSION, MIN_VERSION_TO_UPGRADE_TO_LATEST } from '../../../../common/constants';
 import { useAppContext } from '../../app_context';
 import { uiMetricService, UIM_OVERVIEW_PAGE_LOAD } from '../../lib/ui_metric';
 import { getBackupStep } from './backup_step';
@@ -65,6 +66,30 @@ export const Overview = withRouter(({ history }: RouteComponentProps) => {
       ...completedStepsMap,
       [step]: isCompleted,
     });
+  };
+
+  const versionTooltipContent = () => {
+    if (currentVersion >= MIN_VERSION_TO_UPGRADE_TO_LATEST) {
+      return null;
+    }
+
+    return (
+      <EuiToolTip
+        position="right"
+        content={
+          <FormattedMessage
+            id="xpack.upgradeAssistant.overview.latestMinVersionTooltip"
+            defaultMessage="Upgrading to v{latestVersion} requires v{minVersionToUpgradeToLatest}."
+            values={{
+              latestVersion: LATEST_VERSION,
+              minVersionToUpgradeToLatest: MIN_VERSION_TO_UPGRADE_TO_LATEST,
+            }}
+          />
+        }
+      >
+        <EuiIcon type="iInCircle" size="s" />
+      </EuiToolTip>
+    );
   };
 
   return (
