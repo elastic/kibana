@@ -22,5 +22,7 @@ export function useKnowledgeBase(): UseKnowledgeBaseResult {
         enabled: true,
       },
     },
+    warmupModel: async () => {},
+    isWarmingUpModel: false,
   };
 }
