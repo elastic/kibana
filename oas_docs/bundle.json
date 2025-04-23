@@ -18202,25 +18202,13 @@
                                   "additionalProperties": false,
                                   "properties": {
                                     "secrets": {
-                                      "additionalProperties": false,
+                                      "additionalProperties": true,
                                       "properties": {
-                                        "service_token": {
-                                          "additionalProperties": false,
-                                          "properties": {
-                                            "hash": {
-                                              "type": "string"
-                                            },
-                                            "id": {
-                                              "type": "string"
-                                            }
-                                          },
-                                          "type": "object"
-                                        },
                                         "ssl": {
-                                          "additionalProperties": false,
+                                          "additionalProperties": true,
                                           "properties": {
                                             "key": {
-                                              "additionalProperties": false,
+                                              "additionalProperties": true,
                                               "properties": {
                                                 "id": {
                                                   "type": "string"
@@ -18397,25 +18385,13 @@
                                       "type": "string"
                                     },
                                     "secrets": {
-                                      "additionalProperties": false,
+                                      "additionalProperties": true,
                                       "properties": {
-                                        "service_token": {
-                                          "additionalProperties": false,
-                                          "properties": {
-                                            "hash": {
-                                              "type": "string"
-                                            },
-                                            "id": {
-                                              "type": "string"
-                                            }
-                                          },
-                                          "type": "object"
-                                        },
                                         "ssl": {
-                                          "additionalProperties": false,
+                                          "additionalProperties": true,
                                           "properties": {
                                             "key": {
-                                              "additionalProperties": false,
+                                              "additionalProperties": true,
                                               "properties": {
                                                 "id": {
                                                   "type": "string"
@@ -43821,6 +43797,9 @@
                           "error": {
                             "type": "string"
                           },
+                          "is_deleted": {
+                            "type": "boolean"
+                          },
                           "name": {
                             "type": "string"
                           },
@@ -43964,6 +43943,9 @@
                         "properties": {
                           "error": {
                             "type": "string"
+                          },
+                          "is_deleted": {
+                            "type": "boolean"
                           },
                           "name": {
                             "type": "string"
