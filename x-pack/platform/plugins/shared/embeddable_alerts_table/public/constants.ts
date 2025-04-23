@@ -10,3 +10,5 @@ export const PLUGIN_NAME = 'Embeddable alerts table';
 export const EMBEDDABLE_ALERTS_TABLE_ID = 'alerts_table';
 export const ADD_ALERTS_TABLE_ACTION_ID = 'add_alerts_table';
 export const PERSISTED_TABLE_CONFIG_KEY_PREFIX = 'embeddable-alerts-table';
+export const SAVE_CONFIG_BUTTON_SUBJ = 'saveConfigButton';
+export const NO_AUTHORIZED_RULE_TYPE_PROMPT_SUBJ = 'noAuthorizedRuleTypesPrompt';

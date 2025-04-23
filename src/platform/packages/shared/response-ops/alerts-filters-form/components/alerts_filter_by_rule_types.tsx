@@ -14,6 +14,7 @@ import { EuiComboBoxProps } from '@elastic/eui/src/components/combo_box/combo_bo
 import { SetRequired } from 'type-fest';
 import { nodeBuilder, toKqlExpression } from '@kbn/es-query';
 import { ALERT_RULE_TYPE_ID } from '@kbn/rule-data-utils';
+import { RULE_TYPES_FILTER_SUBJ } from '../constants';
 import { AlertsFilterComponentType, AlertsFilterMetadata } from '../types';
 import { useAlertsFiltersFormContext } from '../contexts/alerts_filters_form_context';
 import {
@@ -87,6 +88,7 @@ export const AlertsFilterByRuleTypes: AlertsFilterComponentType<string[]> = ({
           !options.length ? RULE_TYPES_FILTER_NO_OPTIONS_PLACEHOLDER : RULE_TYPES_FILTER_PLACEHOLDER
         }
         fullWidth
+        data-test-subj={RULE_TYPES_FILTER_SUBJ}
       />
     </EuiFormRow>
   );

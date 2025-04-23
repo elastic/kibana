@@ -26,6 +26,7 @@ import {
   RULE_TYPES_LOAD_ERROR_TITLE,
 } from '../translations';
 import type { EmbeddableAlertsTableQuery } from '../types';
+import { NO_AUTHORIZED_RULE_TYPE_PROMPT_SUBJ } from '../constants';
 
 export interface EmbeddableAlertsTableProps {
   id: string;
@@ -106,6 +107,7 @@ export const EmbeddableAlertsTable = ({
         title={<h2>{NO_AUTHORIZED_RULE_TYPE_PROMPT_TITLE}</h2>}
         body={<p>{getSolutionRuleTypesAuthPromptBody(solution)}</p>}
         iconType="securityApp"
+        data-test-subj={NO_AUTHORIZED_RULE_TYPE_PROMPT_SUBJ}
       />
     );
   }

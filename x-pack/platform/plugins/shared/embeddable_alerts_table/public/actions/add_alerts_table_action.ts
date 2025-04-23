@@ -7,7 +7,6 @@
 
 import { ADD_PANEL_VISUALIZATION_GROUP } from '@kbn/embeddable-plugin/public';
 import { getInternalRuleTypes } from '@kbn/response-ops-rules-apis/apis/get_internal_rule_types';
-import { ALERTS_FEATURE_ID } from '@kbn/alerts-ui-shared/src/common/constants';
 import { apiIsPresentationContainer } from '@kbn/presentation-containers';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
@@ -25,19 +24,7 @@ const checkRuleTypesPermissions = async (http: CoreStart['http']) => {
     // We cannot use the `useGetInternalRuleTypesQuery` hook since this check happens outside
     // of React but we can set the query data in the client to avoid duplicated requests
     queryClient.setQueryData(getInternalRuleTypesQueryKey(), ruleTypes);
-    if (!ruleTypes.length) {
-      // If the user cannot read any rule type we should not show the action
-      return false;
-    }
-    const isAuthorized = ruleTypes.some((ruleType) => {
-      const alertsConsumer = ruleType.authorizedConsumers[ALERTS_FEATURE_ID];
-      return alertsConsumer?.all || alertsConsumer?.read;
-    });
-    if (isAuthorized) {
-      // If at least one rule type is authorized we should show the action
-      return true;
-    }
-    return false;
+    return Boolean(ruleTypes.length);
   } catch (error) {
     return false;
   }

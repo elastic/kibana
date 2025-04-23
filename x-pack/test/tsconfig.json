@@ -193,5 +193,7 @@
     "@kbn/aiops-change-point-detection",
     "@kbn/es-errors",
     "@kbn/content-packs-schema",
+    "@kbn/response-ops-alerts-filters-form",
+    "@kbn/embeddable-alerts-table-plugin",
   ]
 }

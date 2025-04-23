@@ -13,6 +13,7 @@ import React, { useCallback, useMemo } from 'react';
 import { EuiComboBoxProps } from '@elastic/eui/src/components/combo_box/combo_box';
 import { nodeBuilder, toKqlExpression } from '@kbn/es-query';
 import { ALERT_RULE_TAGS } from '@kbn/rule-data-utils';
+import { RULE_TAGS_FILTER_SUBJ } from '../constants';
 import {
   RULE_TAGS_FILTER_LABEL,
   RULE_TAGS_FILTER_NO_OPTIONS_PLACEHOLDER,
@@ -91,6 +92,7 @@ export const AlertsFilterByRuleTags: AlertsFilterComponentType<string[]> = ({
           !options.length ? RULE_TAGS_FILTER_NO_OPTIONS_PLACEHOLDER : RULE_TAGS_FILTER_PLACEHOLDER
         }
         fullWidth
+        data-test-subj={RULE_TAGS_FILTER_SUBJ}
       />
     </EuiFormRow>
   );

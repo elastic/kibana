@@ -33,6 +33,7 @@ import type { AlertsFiltersExpression } from '@kbn/response-ops-alerts-filters-f
 import type { RuleTypeSolution } from '@kbn/alerting-types';
 import type { EuiSuperSelect } from '@elastic/eui/src/components/form/super_select/super_select';
 import useEffectOnce from 'react-use/lib/useEffectOnce';
+import { SAVE_CONFIG_BUTTON_SUBJ } from '../constants';
 import type { EmbeddableAlertsTableConfig } from '../types';
 import {
   CONFIG_EDITOR_ADD_TABLE_TITLE,
@@ -231,6 +232,7 @@ export const ConfigEditorFlyout = ({
                 }
               }}
               fill
+              data-test-subj={SAVE_CONFIG_BUTTON_SUBJ}
             >
               {CONFIG_EDITOR_EDITOR_SAVE_LABEL}
             </EuiButton>
