@@ -11,6 +11,7 @@ import React from 'react';
 import { EuiDataGridColumnCellActionProps, copyToClipboard } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
+import { IToasts } from '@kbn/core/public';
 import { FieldRow } from './field_row';
 
 interface TableActionsProps {
@@ -66,12 +67,12 @@ const esqlMultivalueFilteringDisabled = i18n.translate(
   }
 );
 
-const Copy: React.FC<TableActionsProps> = ({ Component, row }) => {
+const Copy: React.FC<TableActionsProps & { toasts: IToasts }> = ({ Component, row, toasts }) => {
   if (!row) {
     return null;
   }
 
-  const { flattenedValue, name } = row;
+  const { formattedAsText, name } = row;
 
   const copyLabel = i18n.translate('unifiedDocViewer.docViews.table.copyValue', {
     defaultMessage: 'Copy value',
@@ -83,7 +84,32 @@ const Copy: React.FC<TableActionsProps> = ({ Component, row }) => {
       iconType="copyClipboard"
       title={copyLabel}
       flush="left"
-      onClick={() => copyToClipboard(String(flattenedValue))}
+      onClick={() => {
+        const errorMessage = i18n.translate('tableCellActions.copyFailedErrorText', {
+          defaultMessage: 'Unable to copy to clipboard in this browser',
+        });
+
+        if (!formattedAsText) {
+          toasts.addWarning({
+            title: errorMessage,
+          });
+          return;
+        }
+
+        const copied = copyToClipboard(formattedAsText);
+        if (!copied) {
+          toasts.addWarning({
+            title: errorMessage,
+          });
+          return;
+        }
+
+        toasts.addInfo({
+          title: i18n.translate('tableCellActions.copyValueToClipboard.toastTitle', {
+            defaultMessage: 'Copied to clipboard',
+          }),
+        });
+      }}
     >
       {copyLabel}
     </Component>
@@ -321,10 +347,12 @@ export function getFieldValueCellActions({
   rows,
   isEsqlMode,
   onFilter,
+  toasts,
 }: {
   rows: FieldRow[];
   isEsqlMode: boolean | undefined;
   onFilter?: DocViewFilterFn;
+  toasts: IToasts;
 }) {
   const filterActions = onFilter
     ? [
@@ -352,7 +380,7 @@ export function getFieldValueCellActions({
     : [];
 
   const copyAction = ({ Component, rowIndex }: EuiDataGridColumnCellActionProps) => {
-    return <Copy row={rows[rowIndex]} Component={Component} />;
+    return <Copy toasts={toasts} row={rows[rowIndex]} Component={Component} />;
   };
 
   return [...filterActions, copyAction];

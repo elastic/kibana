@@ -95,6 +95,18 @@ Array [
         "name": "message",
       }
     }
+    toasts={
+      Object {
+        "add": [MockFunction],
+        "addDanger": [MockFunction],
+        "addError": [MockFunction],
+        "addInfo": [MockFunction],
+        "addSuccess": [MockFunction],
+        "addWarning": [MockFunction],
+        "get$": [MockFunction],
+        "remove": [MockFunction],
+      }
+    }
   />,
 ]
 `;
@@ -159,6 +171,18 @@ Array [
         "flattenedValue": "test",
         "isPinned": false,
         "name": "message",
+      }
+    }
+    toasts={
+      Object {
+        "add": [MockFunction],
+        "addDanger": [MockFunction],
+        "addError": [MockFunction],
+        "addInfo": [MockFunction],
+        "addSuccess": [MockFunction],
+        "addWarning": [MockFunction],
+        "get$": [MockFunction],
+        "remove": [MockFunction],
       }
     }
   />,
