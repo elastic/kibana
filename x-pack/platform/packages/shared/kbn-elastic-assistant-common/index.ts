@@ -67,6 +67,8 @@ export {
   DEFAULT_START,
 } from './impl/alerts/get_open_and_acknowledged_alerts_query';
 
+export { getAttackDiscoveryLoadingMessage } from './impl/utils/get_attack_discovery_loading_message';
+
 export {
   getTacticLabel,
   getTacticMetadata,

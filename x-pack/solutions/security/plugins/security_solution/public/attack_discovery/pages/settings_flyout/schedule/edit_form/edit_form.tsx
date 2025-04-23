@@ -75,8 +75,6 @@ export const EditForm: React.FC<FormProps> = React.memo((props) => {
     [setFieldValue]
   );
 
-  const { settingsView } = useSettingsView({ settings, onSettingsChanged });
-
   const [connectorId, setConnectorId] = React.useState<string | undefined>(
     initialValue?.connectorId
   );
@@ -88,6 +86,15 @@ export const EditForm: React.FC<FormProps> = React.memo((props) => {
     },
     [setFieldValue]
   );
+
+  const { settingsView } = useSettingsView({
+    connectorId,
+    onConnectorIdSelected,
+    onSettingsChanged,
+    settings,
+    showConnectorSelector: true,
+    stats: null,
+  });
 
   const messageVariables = useMemo(() => {
     return {

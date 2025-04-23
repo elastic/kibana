@@ -16,6 +16,7 @@ import {
   EuiPanel,
   EuiText,
 } from '@elastic/eui';
+import type { AttackDiscoveryStats } from '@kbn/elastic-assistant-common';
 import { css } from '@emotion/react';
 
 import * as i18n from './translations';
@@ -23,7 +24,11 @@ import * as i18n from './translations';
 import ScheduleIconSVG from '../icons/schedule.svg';
 import { CreateFlyout } from '../create_flyout';
 
-export const EmptyPage: React.FC = React.memo(() => {
+interface Props {
+  stats: AttackDiscoveryStats | null;
+}
+
+export const EmptyPage: React.FC<Props> = React.memo(({ stats }) => {
   // showing / hiding the flyout:
   const [showFlyout, setShowFlyout] = useState<boolean>(false);
   const openFlyout = useCallback(() => setShowFlyout(true), []);
@@ -78,7 +83,7 @@ export const EmptyPage: React.FC = React.memo(() => {
           </EuiPanel>
         </EuiFlexItem>
       </EuiFlexGroup>
-      {showFlyout && <CreateFlyout onClose={onClose} />}
+      {showFlyout && <CreateFlyout onClose={onClose} stats={stats} />}
     </>
   );
 });

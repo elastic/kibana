@@ -27,6 +27,8 @@ jest.mock('../../../../sourcerer/containers');
 jest.mock('../schedule/logic/use_find_schedules');
 
 const defaultProps = {
+  connectorId: undefined,
+  onConnectorIdSelected: jest.fn(),
   onSettingsReset: jest.fn(),
   onSettingsSave: jest.fn(),
   onSettingsChanged: jest.fn(),
@@ -37,6 +39,7 @@ const defaultProps = {
     size: 100,
     start: 'now-15m',
   },
+  stats: null,
 };
 
 const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;

@@ -81,6 +81,12 @@ export const ATTACK_DISCOVERY = `${ELASTIC_AI_ASSISTANT_INTERNAL_URL}/attack_dis
 export const ATTACK_DISCOVERY_BY_CONNECTOR_ID = `${ATTACK_DISCOVERY}/{connectorId}` as const;
 export const ATTACK_DISCOVERY_CANCEL_BY_CONNECTOR_ID =
   `${ATTACK_DISCOVERY}/cancel/{connectorId}` as const;
+export const ATTACK_DISCOVERY_FIND = `${ATTACK_DISCOVERY}/_find` as const;
+export const ATTACK_DISCOVERY_GENERATIONS = `${ATTACK_DISCOVERY}/generations` as const;
+export const ATTACK_DISCOVERY_GENERATIONS_BY_ID =
+  `${ATTACK_DISCOVERY_GENERATIONS}/{execution_uuid}` as const;
+export const ATTACK_DISCOVERY_GENERATIONS_BY_ID_DISMISS =
+  `${ATTACK_DISCOVERY_GENERATIONS_BY_ID}/_dismiss` as const;
 export const ATTACK_DISCOVERY_SCHEDULES = `${ATTACK_DISCOVERY}/schedules` as const;
 export const ATTACK_DISCOVERY_SCHEDULES_BY_ID = `${ATTACK_DISCOVERY_SCHEDULES}/{id}` as const;
 export const ATTACK_DISCOVERY_SCHEDULES_BY_ID_ENABLE =
@@ -88,6 +94,36 @@ export const ATTACK_DISCOVERY_SCHEDULES_BY_ID_ENABLE =
 export const ATTACK_DISCOVERY_SCHEDULES_BY_ID_DISABLE =
   `${ATTACK_DISCOVERY_SCHEDULES}/{id}/_disable` as const;
 export const ATTACK_DISCOVERY_SCHEDULES_FIND = `${ATTACK_DISCOVERY_SCHEDULES}/_find` as const;
+
+/** A fake `kibana.alert.rule.uuid` for ad hock rules */
+export const ATTACK_DISCOVERY_AD_HOC_RULE_ID = 'attack_discovery_ad_hoc_rule_id' as const;
+
+/** A fake `kibana.alert.rule.rule_type_id` for ad hock rules */
+export const ATTACK_DISCOVERY_AD_HOC_RULE_TYPE_ID = 'attack_discovery_ad_hoc_rule_type_id' as const;
+
+/**
+ * This feature flag enables the Attack discoveries alerts feature.
+ *
+ * It may be overridden via the following setting in `kibana.yml` or `kibana.dev.yml`:
+ * ```
+ * feature_flags.overrides:
+ *   securitySolution.attackDiscoveryAlertsEnabled: true
+ * ```
+ */
+export const ATTACK_DISCOVERY_ALERTS_ENABLED_FEATURE_FLAG =
+  'securitySolution.attackDiscoveryAlertsEnabled' as const;
+
+/**
+ * The common prefix for all (ad hoc and scheduled) Attack discovery alerts indices
+ */
+export const ATTACK_DISCOVERY_ALERTS_COMMON_INDEX_PREFIX =
+  '.alerts-security.attack.discovery.alerts' as const;
+
+/**
+ * The prefix for all ad hoc Attack discovery alerts index resources.
+ */
+export const ATTACK_DISCOVERY_ALERTS_AD_HOC_INDEX_RESOURCE_PREFIX =
+  `${ATTACK_DISCOVERY_ALERTS_COMMON_INDEX_PREFIX}-ad-hoc` as const;
 
 /**
  * The server timeout is set to 4 minutes to allow for long-running requests.

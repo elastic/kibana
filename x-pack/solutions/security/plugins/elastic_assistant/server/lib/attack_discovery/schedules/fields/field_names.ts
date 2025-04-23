@@ -20,6 +20,8 @@ export const ALERT_ATTACK_DISCOVERY_ENTITY_SUMMARY_MARKDOWN =
   `${ALERT_ATTACK_DISCOVERY}.entity_summary_markdown` as const;
 export const ALERT_ATTACK_DISCOVERY_ENTITY_SUMMARY_MARKDOWN_WITH_REPLACEMENTS =
   `${ALERT_ATTACK_DISCOVERY}.entity_summary_markdown_with_replacements` as const;
+export const ALERT_ATTACK_DISCOVERY_GENERATION_UUID =
+  `${ALERT_ATTACK_DISCOVERY}.generation_uuid` as const;
 export const ALERT_ATTACK_DISCOVERY_MITRE_ATTACK_TACTICS =
   `${ALERT_ATTACK_DISCOVERY}.mitre_attack_tactics` as const;
 export const ALERT_ATTACK_DISCOVERY_SUMMARY_MARKDOWN =
