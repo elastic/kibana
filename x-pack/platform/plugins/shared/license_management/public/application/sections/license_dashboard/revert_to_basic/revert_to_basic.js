@@ -48,8 +48,8 @@ export class RevertToBasic extends React.PureComponent {
             defaultMessage="Confirm"
           />
         }
-        aria-labelledby={"revertToBasicModalTitleId"}
-        titleProps={{ id: "revertToBasicModalTitleId" }}
+        aria-labelledby={'revertToBasicModalTitleId'}
+        titleProps={{ id: 'revertToBasicModalTitleId' }}
       >
         <div>
           <EuiText>{firstLine}</EuiText>
