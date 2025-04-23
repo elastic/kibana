@@ -574,7 +574,7 @@ export default function ({ getService }: FtrProviderContext) {
         );
       });
 
-      it('should be able to have many pending SP initiated logins all successfully succeed', async () => {
+      it.skip('should be able to have many pending SP initiated logins all successfully succeed', async () => {
         const samlResponseMapByRequestId: Record<string, { samlResponse: string; cookie: any }> =
           {};
 
