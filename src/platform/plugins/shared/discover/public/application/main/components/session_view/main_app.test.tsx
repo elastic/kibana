@@ -8,6 +8,7 @@
  */
 
 import React from 'react';
+import { EuiProvider } from '@elastic/eui';
 import { act } from 'react-dom/test-utils';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import type { DataViewListItem } from '@kbn/data-views-plugin/public';
@@ -20,7 +21,11 @@ import { Router } from '@kbn/shared-ux-router';
 import { createMemoryHistory } from 'history';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
 import { DiscoverMainProvider } from '../../state_management/discover_state_provider';
-import { RuntimeStateProvider, internalStateActions } from '../../state_management/redux';
+import {
+  CurrentTabProvider,
+  RuntimeStateProvider,
+  internalStateActions,
+} from '../../state_management/redux';
 
 discoverServiceMock.data.query.timefilter.timefilter.getTime = () => {
   return { from: '2020-05-14T11:05:13.590', to: '2020-05-14T11:20:13.590' };
@@ -44,15 +49,19 @@ describe('DiscoverMainApp', () => {
 
     await act(async () => {
       const component = mountWithIntl(
-        <Router history={history}>
-          <KibanaContextProvider services={discoverServiceMock}>
-            <DiscoverMainProvider value={stateContainer}>
-              <RuntimeStateProvider currentDataView={dataViewMock} adHocDataViews={[]}>
-                <DiscoverMainApp {...props} />
-              </RuntimeStateProvider>
-            </DiscoverMainProvider>
-          </KibanaContextProvider>
-        </Router>
+        <EuiProvider>
+          <Router history={history}>
+            <KibanaContextProvider services={discoverServiceMock}>
+              <CurrentTabProvider currentTabId={stateContainer.getCurrentTab().id}>
+                <DiscoverMainProvider value={stateContainer}>
+                  <RuntimeStateProvider currentDataView={dataViewMock} adHocDataViews={[]}>
+                    <DiscoverMainApp {...props} />
+                  </RuntimeStateProvider>
+                </DiscoverMainProvider>
+              </CurrentTabProvider>
+            </KibanaContextProvider>
+          </Router>
+        </EuiProvider>
       );
 
       // wait for lazy modules

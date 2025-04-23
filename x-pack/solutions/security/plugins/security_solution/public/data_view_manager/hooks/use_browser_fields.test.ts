@@ -9,17 +9,17 @@ import { renderHook } from '@testing-library/react';
 import { TestProviders } from '../../common/mock';
 import { useBrowserFields } from './use_browser_fields';
 import { DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID, DataViewManagerScopeName } from '../constants';
-import { useDataView } from './use_data_view';
+import { useDataViewSpec } from './use_data_view_spec';
 import { type FieldSpec } from '@kbn/data-views-plugin/common';
 
-jest.mock('./use_data_view', () => ({
-  useDataView: jest.fn(),
+jest.mock('./use_data_view_spec', () => ({
+  useDataViewSpec: jest.fn(),
 }));
 
 describe('useBrowserFields', () => {
   beforeAll(() => {
-    jest.mocked(useDataView).mockReturnValue({
-      dataView: {
+    jest.mocked(useDataViewSpec).mockReturnValue({
+      dataViewSpec: {
         id: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID,
         fields: {
           '@timestamp': {

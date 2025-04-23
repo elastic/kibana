@@ -41,8 +41,7 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.testResources.setKibanaTimeZoneToUTC();
 
       await ml.securityUI.loginAsMlPowerUser();
-      await ml.navigation.navigateToStackManagement();
-      await ml.navigation.navigateToStackManagementJobsListPage();
+      await ml.navigation.navigateToJobManagement();
     });
 
     after(async () => {
@@ -72,7 +71,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('ensures jobs have been imported', async () => {
         if (testData.expected.jobType === 'anomaly-detector') {
-          await ml.navigation.navigateToStackManagementJobsListPageAnomalyDetectionTab();
+          await ml.navigation.navigateToJobManagement();
           await ml.stackManagementJobs.refreshList();
           for (const id of testData.expected.jobIds) {
             await ml.stackManagementJobs.filterTableWithSearchString('anomaly-detector', id);
@@ -81,7 +80,7 @@ export default function ({ getService }: FtrProviderContext) {
             await ml.stackManagementJobs.filterTableWithSearchString('anomaly-detector', id, 0);
           }
         } else {
-          await ml.navigation.navigateToStackManagementJobsListPageAnalyticsTab();
+          await ml.navigation.navigateToDataFrameAnalytics();
           await ml.stackManagementJobs.refreshList();
           for (const id of testData.expected.jobIds) {
             await ml.stackManagementJobs.filterTableWithSearchString('data-frame-analytics', id);

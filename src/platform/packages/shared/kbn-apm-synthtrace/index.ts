@@ -23,7 +23,6 @@ export { LogsSynthtraceEsClient } from './src/lib/logs/logs_synthtrace_es_client
 export { EntitiesSynthtraceEsClient } from './src/lib/entities/entities_synthtrace_es_client';
 export { EntitiesSynthtraceKibanaClient } from './src/lib/entities/entities_synthtrace_kibana_client';
 export { SyntheticsSynthtraceEsClient } from './src/lib/synthetics/synthetics_synthtrace_es_client';
-export { OtelSynthtraceEsClient } from './src/lib/otel/otel_synthtrace_es_client';
 export {
   addObserverVersionTransform,
   deleteSummaryFieldTransform,

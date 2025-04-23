@@ -91,6 +91,13 @@ export const AvailablePackagesHook = () => {
   );
 };
 
-export { useGetPackagesQuery } from './hooks/use_request/epm';
+export const LazyPackageCard = lazy(() =>
+  import('./applications/integrations/sections/epm/components/package_card').then((module) => ({
+    default: module.PackageCard,
+  }))
+);
+
+export { useGetDataStreams } from './hooks/use_request/data_stream';
+export { useGetPackagesQuery, useGetPackageInfoByKeyQuery } from './hooks/use_request/epm';
 export { useGetSettingsQuery } from './hooks/use_request/settings';
 export { useLink } from './hooks/use_link';

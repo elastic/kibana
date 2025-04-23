@@ -49,46 +49,17 @@ export const mlAppLink: LinkItem = {
 export const mlNavCategories: SolutionLinkCategory[] = [
   {
     type: LinkCategoryType.separator,
-    linkIds: [
-      ExternalPageName.mlOverview,
-      ExternalPageName.mlNotifications,
-      ExternalPageName.mlMemoryUsage,
-    ],
+    linkIds: [ExternalPageName.mlOverview, ExternalPageName.mlDataVisualizer],
   },
   {
     type: LinkCategoryType.title,
     label: i18n.ANOMALY_DETECTION_CATEGORY,
-    linkIds: [
-      ExternalPageName.mlAnomalyDetection,
-      ExternalPageName.mlAnomalyExplorer,
-      ExternalPageName.mlSingleMetricViewer,
-      ExternalPageName.mlSuppliedConfigurations,
-      ExternalPageName.mlSettings,
-    ],
+    linkIds: [ExternalPageName.mlAnomalyExplorer, ExternalPageName.mlSingleMetricViewer],
   },
   {
     type: LinkCategoryType.title,
     label: i18n.DATA_FRAME_ANALYTICS_CATEGORY,
-    linkIds: [
-      ExternalPageName.mlDataFrameAnalytics,
-      ExternalPageName.mlResultExplorer,
-      ExternalPageName.mlAnalyticsMap,
-    ],
-  },
-  {
-    type: LinkCategoryType.title,
-    label: i18n.MODEL_MANAGEMENT_CATEGORY,
-    linkIds: [ExternalPageName.mlNodesOverview],
-  },
-  {
-    type: LinkCategoryType.title,
-    label: i18n.DATA_VISUALIZER_CATEGORY,
-    linkIds: [
-      ExternalPageName.mlFileUpload,
-      ExternalPageName.mlIndexDataVisualizer,
-      ExternalPageName.mlESQLdataVisualizer,
-      ExternalPageName.mlDataDrift,
-    ],
+    linkIds: [ExternalPageName.mlResultExplorer, ExternalPageName.mlAnalyticsMap],
   },
   {
     type: LinkCategoryType.title,
@@ -108,6 +79,12 @@ export const mlNavLinks: SolutionNavLink[] = [
     title: i18n.OVERVIEW_TITLE,
     landingIcon: IconLensLazy,
     description: i18n.OVERVIEW_DESC,
+  },
+  {
+    id: ExternalPageName.mlDataVisualizer,
+    title: i18n.DATA_VISUALIZER_TITLE,
+    landingIcon: IconLensLazy,
+    description: i18n.DATA_VISUALIZER_DESC,
   },
   {
     id: ExternalPageName.mlNotifications,

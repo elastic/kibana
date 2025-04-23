@@ -14,7 +14,7 @@ import { AssetInventoryFilters } from '../components/filters/asset_inventory_fil
 import { AssetInventoryBarChart } from '../components/asset_inventory_bar_chart';
 import { AssetInventoryTableSection } from '../components/asset_inventory_table_section';
 import { AssetInventoryTitle } from '../components/asset_inventory_title';
-import { useFetchChartData } from '../hooks/use_fetch_chart_data';
+import { useFetchChartData } from '../hooks/use_fetch_chart_data/use_fetch_chart_data';
 import {
   useAssetInventoryURLState,
   type AssetsBaseURLQuery,
@@ -22,6 +22,7 @@ import {
 } from '../hooks/use_asset_inventory_url_state/use_asset_inventory_url_state';
 
 import { LOCAL_STORAGE_COLUMNS_KEY, LOCAL_STORAGE_DATA_TABLE_PAGE_SIZE_KEY } from '../constants';
+import { OnboardingSuccessCallout } from '../components/onboarding/onboarding_success_callout';
 
 const getDefaultQuery = ({ query, filters }: AssetsBaseURLQuery): URLQuery => ({
   query,
@@ -53,11 +54,12 @@ export const AllAssets = () => {
       <AssetInventorySearchBar query={urlQuery} setQuery={setUrlQuery} />
       <EuiPageTemplate.Section>
         <AssetInventoryTitle />
+        <OnboardingSuccessCallout />
         <AssetInventoryFilters setQuery={setUrlQuery} />
         <AssetInventoryBarChart
           isLoading={isLoadingChartData}
           isFetching={isFetchingChartData}
-          entities={!!chartData && chartData.length > 0 ? chartData : []}
+          assetInventoryChartData={!!chartData && chartData.length > 0 ? chartData : []}
         />
         <AssetInventoryTableSection state={state} />
       </EuiPageTemplate.Section>

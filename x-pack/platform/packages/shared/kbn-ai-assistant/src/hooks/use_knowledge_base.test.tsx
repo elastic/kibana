@@ -47,8 +47,6 @@ describe('useKnowledgeBase', () => {
     const { result } = renderHook(() => useKnowledgeBase());
 
     expect(result.current.status.value).toBeUndefined();
-    expect(result.current.isInstalling).toBe(false);
-    expect(result.current.installError).toBeUndefined();
   });
 
   it('calls GET /status once on mount', async () => {
@@ -65,28 +63,27 @@ describe('useKnowledgeBase', () => {
     });
   });
 
-  it('install() handles error and sets installError state', async () => {
-    const error = new Error('Setup failed');
+  it('calls install function', async () => {
+    const successResponse = { ready: true };
     mockCallApi
       .mockResolvedValueOnce({ ready: false }) // Initial GET /status
-      .mockRejectedValueOnce(error); // POST /setup fails
+      .mockResolvedValueOnce(successResponse); // POST /setup succeeds
 
     const { result } = renderHook(() => useKnowledgeBase());
 
-    // Trigger install
+    // Trigger setup
     act(() => {
       result.current.install();
     });
 
-    // Wait for error state
+    // Verify that the install was called
     await waitFor(() => {
-      expect(result.current.isInstalling).toBe(false);
-      expect(result.current.installError).toBe(error);
-    });
-
-    // Verify the error toast was shown
-    expect(mockAddError).toHaveBeenCalledWith(error, {
-      title: expect.any(String),
+      expect(mockCallApi).toHaveBeenCalledWith(
+        'POST /internal/observability_ai_assistant/kb/setup',
+        {
+          signal: null,
+        }
+      );
     });
   });
 });

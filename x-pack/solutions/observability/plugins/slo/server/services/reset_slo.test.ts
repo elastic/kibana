@@ -7,7 +7,6 @@
 
 import { SecurityHasPrivilegesResponse } from '@elastic/elasticsearch/lib/api/types';
 import {
-  ElasticsearchClientMock,
   elasticsearchServiceMock,
   httpServiceMock,
   loggingSystemMock,
@@ -31,7 +30,6 @@ describe('ResetSLO', () => {
   let mockRepository: jest.Mocked<SLORepository>;
   let mockTransformManager: jest.Mocked<TransformManager>;
   let mockSummaryTransformManager: jest.Mocked<TransformManager>;
-  let mockEsClient: ElasticsearchClientMock;
   let mockScopedClusterClient: ScopedClusterClientMock;
   let loggerMock: jest.Mocked<MockedLogger>;
   let resetSLO: ResetSLO;
@@ -40,11 +38,9 @@ describe('ResetSLO', () => {
     loggerMock = loggingSystemMock.createLogger();
     mockRepository = createSLORepositoryMock();
     mockTransformManager = createTransformManagerMock();
-    mockEsClient = elasticsearchServiceMock.createElasticsearchClient();
     mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
     mockSummaryTransformManager = createSummaryTransformManagerMock();
     resetSLO = new ResetSLO(
-      mockEsClient,
       mockScopedClusterClient,
       mockRepository,
       mockTransformManager,
@@ -62,7 +58,7 @@ describe('ResetSLO', () => {
 
   describe('happy path', () => {
     beforeEach(() => {
-      mockEsClient.security.hasPrivileges.mockResolvedValue({
+      mockScopedClusterClient.asCurrentUser.security.hasPrivileges.mockResolvedValue({
         has_all_requested: true,
       } as SecurityHasPrivilegesResponse);
     });
@@ -75,13 +71,10 @@ describe('ResetSLO', () => {
       await resetSLO.execute(slo.id);
 
       // delete existing resources and data
-      expect(mockSummaryTransformManager.stop).toMatchSnapshot();
       expect(mockSummaryTransformManager.uninstall).toMatchSnapshot();
-
-      expect(mockTransformManager.stop).toMatchSnapshot();
       expect(mockTransformManager.uninstall).toMatchSnapshot();
 
-      expect(mockEsClient.deleteByQuery).toMatchSnapshot();
+      expect(mockScopedClusterClient.asCurrentUser.deleteByQuery).toMatchSnapshot();
 
       // install resources
       expect(mockSummaryTransformManager.install).toMatchSnapshot();
@@ -92,7 +85,7 @@ describe('ResetSLO', () => {
       expect(mockTransformManager.install).toMatchSnapshot();
       expect(mockTransformManager.start).toMatchSnapshot();
 
-      expect(mockEsClient.index).toMatchSnapshot();
+      expect(mockScopedClusterClient.asCurrentUser.index).toMatchSnapshot();
 
       expect(mockRepository.update).toHaveBeenCalledWith({
         ...slo,
@@ -104,7 +97,7 @@ describe('ResetSLO', () => {
 
   describe('unhappy path', () => {
     beforeEach(() => {
-      mockEsClient.security.hasPrivileges.mockResolvedValue({
+      mockScopedClusterClient.asCurrentUser.security.hasPrivileges.mockResolvedValue({
         has_all_requested: false,
       } as SecurityHasPrivilegesResponse);
     });

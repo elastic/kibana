@@ -7,10 +7,12 @@
 import { EuiFlexGroup } from '@elastic/eui';
 import React from 'react';
 import { SloManagementTable } from './slo_management_table';
+import { SloOutdatedFilterCallout } from './slo_management_outdated_filter_callout';
 
 export function SloManagementContent() {
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
+      <SloOutdatedFilterCallout />
       <SloManagementTable />
     </EuiFlexGroup>
   );

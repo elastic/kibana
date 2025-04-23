@@ -41,7 +41,7 @@ import {
   isEsqlSource,
 } from '../../../../common/data_sources';
 import type { DiscoverSavedSearchContainer } from './discover_saved_search_container';
-import type { InternalStateStore } from './redux';
+import type { InternalStateStore, TabActionInjector } from './redux';
 import { internalStateActions } from './redux';
 import { APP_STATE_URL_KEY } from '../../../../common';
 
@@ -181,15 +181,19 @@ export const { Provider: DiscoverAppStateProvider, useSelector: useAppStateSelec
  * @param services
  */
 export const getDiscoverAppStateContainer = ({
+  tabId,
   stateStorage,
   internalState,
   savedSearchContainer,
   services,
+  injectCurrentTab,
 }: {
+  tabId: string;
   stateStorage: IKbnUrlStateStorage;
   internalState: InternalStateStore;
   savedSearchContainer: DiscoverSavedSearchContainer;
   services: DiscoverServices;
+  injectCurrentTab: TabActionInjector;
 }): DiscoverAppStateContainer => {
   let initialState = getInitialState({
     initialUrlState: getCurrentUrlState(stateStorage, services),
@@ -243,7 +247,11 @@ export const getDiscoverAppStateContainer = ({
   const replaceUrlState = async (newPartial: DiscoverAppState = {}, merge = true) => {
     addLog('[appState] replaceUrlState', { newPartial, merge });
     const state = merge ? { ...enhancedAppContainer.getState(), ...newPartial } : newPartial;
-    await stateStorage.set(APP_STATE_URL_KEY, state, { replace: true });
+    if (internalState.getState().tabs.unsafeCurrentId === tabId) {
+      await stateStorage.set(APP_STATE_URL_KEY, state, { replace: true });
+    } else {
+      enhancedAppContainer.set(state);
+    }
   };
 
   const startAppStateUrlSync = () => {
@@ -267,10 +275,12 @@ export const getDiscoverAppStateContainer = ({
 
       // Only set default state which is not already set in the URL
       internalState.dispatch(
-        internalStateActions.setResetDefaultProfileState({
-          columns: columns === undefined,
-          rowHeight: rowHeight === undefined,
-          breakdownField: breakdownField === undefined,
+        injectCurrentTab(internalStateActions.setResetDefaultProfileState)({
+          resetDefaultProfileState: {
+            columns: columns === undefined,
+            rowHeight: rowHeight === undefined,
+            breakdownField: breakdownField === undefined,
+          },
         })
       );
     }

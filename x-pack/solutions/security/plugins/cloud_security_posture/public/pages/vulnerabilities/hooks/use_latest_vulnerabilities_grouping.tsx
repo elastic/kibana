@@ -12,6 +12,7 @@ import {
   isNoneGroup,
   NamedAggregation,
   parseGroupingQuery,
+  MAX_RUNTIME_FIELD_SIZE,
 } from '@kbn/grouping/src';
 import { useMemo } from 'react';
 import {
@@ -19,11 +20,14 @@ import {
   VULNERABILITIES_SEVERITY,
 } from '@kbn/cloud-security-posture-common';
 import { buildEsQuery, Filter } from '@kbn/es-query';
+import { checkIsFlattenResults } from '@kbn/grouping/src/containers/query/helpers';
 import {
   LOCAL_STORAGE_VULNERABILITIES_GROUPING_KEY,
   VULNERABILITY_GROUPING_OPTIONS,
   VULNERABILITY_FIELDS,
   CDR_VULNERABILITY_GROUPING_RUNTIME_MAPPING_FIELDS,
+  EVENT_ID,
+  VULNERABILITY_GROUPING_MULTIPLE_VALUE_FIELDS,
 } from '../../../common/constants';
 import { useDataViewContext } from '../../../common/contexts/data_view_context';
 import {
@@ -132,6 +136,56 @@ const getRuntimeMappingsByGroupField = (
 };
 
 /**
+ * Returns the root aggregations query for the vulnerabilities grouping
+ */
+const getRootAggregations = (currentSelectedGroup: string): NamedAggregation[] => {
+  // Skip creating null group if "None" is selected
+  if (isNoneGroup([currentSelectedGroup])) {
+    return [{}];
+  }
+
+  const shouldFlattenMultiValueField = checkIsFlattenResults(
+    currentSelectedGroup,
+    VULNERABILITY_GROUPING_MULTIPLE_VALUE_FIELDS
+  );
+
+  // Create null group filter based on whether we need to flatten results
+  const nullGroupFilter = shouldFlattenMultiValueField
+    ? {
+        // For multi-value fields, check if field doesn't exist OR has too many values
+        bool: {
+          should: [
+            {
+              bool: {
+                must_not: {
+                  exists: { field: currentSelectedGroup },
+                },
+              },
+            },
+            {
+              script: {
+                script: {
+                  source: `doc['${currentSelectedGroup}'].size() > ${MAX_RUNTIME_FIELD_SIZE}`,
+                  lang: 'painless',
+                },
+              },
+            },
+          ],
+          minimum_should_match: 1,
+        },
+      }
+    : undefined; // Not used for simple fields
+
+  return [
+    {
+      nullGroupItems: shouldFlattenMultiValueField
+        ? { filter: nullGroupFilter }
+        : { missing: { field: currentSelectedGroup } },
+    },
+  ];
+};
+
+/**
  * Type Guard for checking if the given source is a VulnerabilitiesRootGroupingAggregation
  */
 export const isVulnerabilitiesRootGroupingAggregation = (
@@ -203,15 +257,9 @@ export const useLatestVulnerabilitiesGrouping = ({
     sort: [{ groupByField: { order: 'desc' } }],
     statsAggregations: getAggregationsByGroupField(currentSelectedGroup),
     runtimeMappings: getRuntimeMappingsByGroupField(currentSelectedGroup),
-    rootAggregations: [
-      {
-        ...(!isNoneGroup([currentSelectedGroup]) && {
-          nullGroupItems: {
-            missing: { field: currentSelectedGroup },
-          },
-        }),
-      },
-    ],
+    rootAggregations: getRootAggregations(currentSelectedGroup),
+    multiValueFieldsToFlatten: VULNERABILITY_GROUPING_MULTIPLE_VALUE_FIELDS,
+    countByKeyForMultiValueFields: EVENT_ID,
   });
 
   const { data, isFetching } = useGroupedVulnerabilities({

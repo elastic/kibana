@@ -10,7 +10,11 @@ import moment from 'moment';
 import { ReplaySubject } from 'rxjs';
 
 import type { ElasticsearchClient, KibanaRequest, Logger } from '@kbn/core/server';
-import type { DefendInsight, DefendInsightsPostRequestBody } from '@kbn/elastic-assistant-common';
+import type {
+  DefendInsight,
+  DefendInsightsGetRequestQuery,
+  DefendInsightsPostRequestBody,
+} from '@kbn/elastic-assistant-common';
 import type { SearchHit, UpdateResponse } from '@elastic/elasticsearch/lib/api/types';
 
 import { DataStreamSpacesAdapter } from '@kbn/data-stream-adapter';
@@ -488,6 +492,104 @@ describe('SecurityWorkflowInsightsService', () => {
         },
         size: searchParams.size,
         from: searchParams.from,
+      });
+    });
+  });
+
+  describe('agent space-awareness and lifecycle hooks', () => {
+    let request: KibanaRequest<unknown, unknown, DefendInsightsGetRequestQuery>;
+
+    const setupWithMockFleet = () => {
+      // @ts-expect-error write to readonly property
+      mockEndpointAppContextService.experimentalFeatures.endpointManagementSpaceAwarenessEnabled =
+        true;
+
+      const { ensureInCurrentSpace } = mockEndpointAppContextService.getInternalFleetServices();
+
+      securityWorkflowInsightsService.setup({
+        kibanaVersion: kibanaPackageJson.version,
+        logger,
+        isFeatureEnabled: true,
+        endpointContext: mockEndpointAppContextService,
+      });
+
+      return { ensureInCurrentSpace };
+    };
+
+    beforeEach(async () => {
+      await securityWorkflowInsightsService.start({
+        esClient,
+        registerDefendInsightsCallback: jest.fn(),
+      });
+
+      request = {} as KibanaRequest<unknown, unknown, DefendInsightsGetRequestQuery>;
+    });
+
+    describe('ensureAgentIdsInCurrentSpace', () => {
+      it('should not call fleetServices.ensureInCurrentSpace when the experimental feature is disabled', async () => {
+        // @ts-expect-error write to readonly property
+        mockEndpointAppContextService.experimentalFeatures.endpointManagementSpaceAwarenessEnabled =
+          false;
+
+        await securityWorkflowInsightsService.ensureAgentIdsInCurrentSpace(request, ['agent-1']);
+
+        expect(mockEndpointAppContextService.getInternalFleetServices).not.toHaveBeenCalled();
+      });
+
+      it('should call fleetServices.ensureInCurrentSpace with correct agent IDs when feature is enabled', async () => {
+        const { ensureInCurrentSpace } = setupWithMockFleet();
+
+        await securityWorkflowInsightsService.ensureAgentIdsInCurrentSpace(request, [
+          'agent-123',
+          'agent-456',
+        ]);
+
+        expect(ensureInCurrentSpace).toHaveBeenCalledWith({
+          agentIds: ['agent-123', 'agent-456'],
+        });
+      });
+
+      it('should default to empty agentIds if none provided', async () => {
+        const { ensureInCurrentSpace } = setupWithMockFleet();
+
+        await securityWorkflowInsightsService.ensureAgentIdsInCurrentSpace(request);
+
+        expect(ensureInCurrentSpace).toHaveBeenCalledWith({ agentIds: [] });
+      });
+    });
+
+    describe('onBeforeCreate', () => {
+      it('should extract agent IDs from request body and ensure they’re in current space', async () => {
+        const { ensureInCurrentSpace } = setupWithMockFleet();
+
+        const req = {
+          body: {
+            endpointIds: ['agent-A', 'agent-B'],
+          },
+        } as KibanaRequest<unknown, unknown, DefendInsightsPostRequestBody>;
+
+        await securityWorkflowInsightsService.onBeforeCreate(req);
+
+        expect(ensureInCurrentSpace).toHaveBeenCalledWith({
+          agentIds: ['agent-A', 'agent-B'],
+        });
+      });
+
+      it('should handle undefined request body gracefully', async () => {
+        const req = {} as KibanaRequest<unknown, unknown, DefendInsightsPostRequestBody>;
+
+        await expect(securityWorkflowInsightsService.onBeforeCreate(req)).resolves.not.toThrow();
+      });
+    });
+
+    describe('onAfterFetch', () => {
+      it('should forward agent IDs to ensureAgentIdsInCurrentSpace', async () => {
+        const { ensureInCurrentSpace } = setupWithMockFleet();
+
+        const agentIds = ['agent-X', 'agent-Y'];
+        await securityWorkflowInsightsService.onAfterFetch(request, agentIds);
+
+        expect(ensureInCurrentSpace).toHaveBeenCalledWith({ agentIds });
       });
     });
   });

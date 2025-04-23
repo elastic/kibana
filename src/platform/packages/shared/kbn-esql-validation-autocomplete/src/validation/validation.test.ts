@@ -7,34 +7,33 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { join } from 'path';
-import { writeFile, readFile } from 'fs/promises';
-import { ignoreErrorsMap, validateQuery } from './validation';
-import { scalarFunctionDefinitions } from '../definitions/generated/scalar_functions';
-import { getFunctionSignatures } from '../definitions/helpers';
-import {
-  FieldType,
-  FunctionDefinition,
-  SupportedDataType,
-  dataTypes,
-  fieldTypes as _fieldTypes,
-} from '../definitions/types';
-import { timeUnits, timeUnitsToSuggest } from '../definitions/literals';
-import { aggFunctionDefinitions } from '../definitions/generated/aggregation_functions';
-import capitalize from 'lodash/capitalize';
+import { readFile, writeFile } from 'fs/promises';
 import { camelCase } from 'lodash';
-import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
-import { nonNullable } from '../shared/helpers';
+import capitalize from 'lodash/capitalize';
+import { join } from 'path';
 import {
-  fields,
   enrichFields,
+  fields,
   getCallbackMocks,
   indexes,
   policies,
   unsupported_field,
 } from '../__tests__/helpers';
-import { validationFromCommandTestSuite as runFromTestSuite } from './__tests__/test_suites/validation.command.from';
+import { aggFunctionDefinitions } from '../definitions/generated/aggregation_functions';
+import { scalarFunctionDefinitions } from '../definitions/generated/scalar_functions';
+import { getFunctionSignatures } from '../definitions/helpers';
+import { timeUnits, timeUnitsToSuggest } from '../definitions/literals';
+import {
+  FieldType,
+  FunctionDefinition,
+  SupportedDataType,
+  fieldTypes as _fieldTypes,
+  dataTypes,
+} from '../definitions/types';
+import { nonNullable } from '../shared/helpers';
 import { Setup, setup } from './__tests__/helpers';
+import { validationFromCommandTestSuite as runFromTestSuite } from './__tests__/test_suites/validation.command.from';
+import { ignoreErrorsMap, validateQuery } from './validation';
 
 const fieldTypes = _fieldTypes.filter((type) => type !== 'unsupported');
 
@@ -226,7 +225,7 @@ describe('validation logic', () => {
           const callbackMocks = getCallbackMocks();
           const { warnings, errors } = await validateQuery(
             statement,
-            getAstAndSyntaxErrors,
+
             undefined,
             callbackMocks
           );
@@ -537,16 +536,16 @@ describe('validation logic', () => {
       ]);
       testErrorsAndWarnings('from index | keep `any#Char$Field`', []);
       testErrorsAndWarnings('from index | project ', [
-        "SyntaxError: mismatched input 'project' expecting {'enrich', 'dissect', 'eval', 'grok', 'limit', 'sort', 'stats', 'where', 'lookup', 'mv_expand', 'drop', 'keep', 'rename'}",
+        "SyntaxError: mismatched input 'project' expecting {'change_point', 'enrich', 'dissect', 'eval', 'grok', 'limit', 'sort', 'stats', 'where', 'lookup', 'mv_expand', 'drop', 'keep', 'rename'}",
       ]);
       testErrorsAndWarnings('from index | project textField, doubleField, dateField', [
-        "SyntaxError: mismatched input 'project' expecting {'enrich', 'dissect', 'eval', 'grok', 'limit', 'sort', 'stats', 'where', 'lookup', 'mv_expand', 'drop', 'keep', 'rename'}",
+        "SyntaxError: mismatched input 'project' expecting {'change_point', 'enrich', 'dissect', 'eval', 'grok', 'limit', 'sort', 'stats', 'where', 'lookup', 'mv_expand', 'drop', 'keep', 'rename'}",
       ]);
       testErrorsAndWarnings('from index | PROJECT textField, doubleField, dateField', [
-        "SyntaxError: mismatched input 'PROJECT' expecting {'enrich', 'dissect', 'eval', 'grok', 'limit', 'sort', 'stats', 'where', 'lookup', 'mv_expand', 'drop', 'keep', 'rename'}",
+        "SyntaxError: mismatched input 'PROJECT' expecting {'change_point', 'enrich', 'dissect', 'eval', 'grok', 'limit', 'sort', 'stats', 'where', 'lookup', 'mv_expand', 'drop', 'keep', 'rename'}",
       ]);
       testErrorsAndWarnings('from index | project missingField, doubleField, dateField', [
-        "SyntaxError: mismatched input 'project' expecting {'enrich', 'dissect', 'eval', 'grok', 'limit', 'sort', 'stats', 'where', 'lookup', 'mv_expand', 'drop', 'keep', 'rename'}",
+        "SyntaxError: mismatched input 'project' expecting {'change_point', 'enrich', 'dissect', 'eval', 'grok', 'limit', 'sort', 'stats', 'where', 'lookup', 'mv_expand', 'drop', 'keep', 'rename'}",
       ]);
       testErrorsAndWarnings('from index | keep k*', []);
       testErrorsAndWarnings('from index | keep *Field', []);
@@ -892,6 +891,9 @@ describe('validation logic', () => {
       );
 
       for (const field of fieldTypes) {
+        if (field.indexOf('counter_') !== -1 || field.indexOf('named_parameters') !== -1) {
+          continue; // skip counter fields and named parameters
+        }
         testErrorsAndWarnings(`from a_index | where ${fieldNameFromType(field)} IS NULL`, []);
         testErrorsAndWarnings(`from a_index | where ${fieldNameFromType(field)} IS null`, []);
         testErrorsAndWarnings(`from a_index | where ${fieldNameFromType(field)} is null`, []);
@@ -955,6 +957,9 @@ describe('validation logic', () => {
       testErrorsAndWarnings('from a_index | eval a=null', []);
 
       for (const field of fieldTypes) {
+        if (field.indexOf('counter_') !== -1 || field.indexOf('named_parameters') !== -1) {
+          continue; // skip counter fields and named parameters
+        }
         testErrorsAndWarnings(`from a_index | eval ${fieldNameFromType(field)} IS NULL`, []);
         testErrorsAndWarnings(`from a_index | eval ${fieldNameFromType(field)} IS null`, []);
         testErrorsAndWarnings(`from a_index | eval ${fieldNameFromType(field)} is null`, []);
@@ -1541,20 +1546,20 @@ describe('validation logic', () => {
     describe('callbacks', () => {
       it(`should not fetch source and fields list when a row command is set`, async () => {
         const callbackMocks = getCallbackMocks();
-        await validateQuery(`row a = 1 | eval a`, getAstAndSyntaxErrors, undefined, callbackMocks);
+        await validateQuery(`row a = 1 | eval a`, undefined, callbackMocks);
         expect(callbackMocks.getColumnsFor).not.toHaveBeenCalled();
         expect(callbackMocks.getSources).not.toHaveBeenCalled();
       });
 
       it(`should not fetch policies if no enrich command is found`, async () => {
         const callbackMocks = getCallbackMocks();
-        await validateQuery(`row a = 1 | eval a`, getAstAndSyntaxErrors, undefined, callbackMocks);
+        await validateQuery(`row a = 1 | eval a`, undefined, callbackMocks);
         expect(callbackMocks.getPolicies).not.toHaveBeenCalled();
       });
 
       it(`should not fetch source and fields for empty command`, async () => {
         const callbackMocks = getCallbackMocks();
-        await validateQuery(` `, getAstAndSyntaxErrors, undefined, callbackMocks);
+        await validateQuery(` `, undefined, callbackMocks);
         expect(callbackMocks.getColumnsFor).not.toHaveBeenCalled();
         expect(callbackMocks.getSources).not.toHaveBeenCalled();
       });
@@ -1563,7 +1568,7 @@ describe('validation logic', () => {
         const callbackMocks = getCallbackMocks();
         await validateQuery(
           `row a = 1 | eval b  = a | enrich policy`,
-          getAstAndSyntaxErrors,
+
           undefined,
           callbackMocks
         );
@@ -1577,12 +1582,7 @@ describe('validation logic', () => {
 
       it('should call fields callbacks also for show command', async () => {
         const callbackMocks = getCallbackMocks();
-        await validateQuery(
-          `show info | keep name`,
-          getAstAndSyntaxErrors,
-          undefined,
-          callbackMocks
-        );
+        await validateQuery(`show info | keep name`, undefined, callbackMocks);
         expect(callbackMocks.getSources).not.toHaveBeenCalled();
         expect(callbackMocks.getPolicies).not.toHaveBeenCalled();
         expect(callbackMocks.getColumnsFor).toHaveBeenCalledTimes(1);
@@ -1595,7 +1595,7 @@ describe('validation logic', () => {
         const callbackMocks = getCallbackMocks();
         await validateQuery(
           `from a_index | eval b  = a | enrich policy`,
-          getAstAndSyntaxErrors,
+
           undefined,
           callbackMocks
         );
@@ -1611,7 +1611,7 @@ describe('validation logic', () => {
         try {
           await validateQuery(
             `from a_index | eval b  = a | enrich policy | dissect textField "%{firstWord}"`,
-            getAstAndSyntaxErrors,
+
             undefined,
             {
               getColumnsFor: undefined,
@@ -1627,8 +1627,7 @@ describe('validation logic', () => {
       it(`should not crash if no callbacks are passed`, async () => {
         try {
           await validateQuery(
-            `from a_index | eval b  = a | enrich policy | dissect textField "%{firstWord}"`,
-            getAstAndSyntaxErrors
+            `from a_index | eval b  = a | enrich policy | dissect textField "%{firstWord}"`
           );
         } catch {
           fail('Should not throw');
@@ -1767,7 +1766,7 @@ describe('validation logic', () => {
           .map(({ query }) =>
             validateQuery(
               query,
-              getAstAndSyntaxErrors,
+
               { ignoreOnMissingCallbacks: true },
               getCallbackMocks()
             )
@@ -1795,7 +1794,6 @@ describe('validation logic', () => {
           filteredTestCases.map(({ query }) =>
             validateQuery(
               query,
-              getAstAndSyntaxErrors,
               { ignoreOnMissingCallbacks: true },
               getPartialCallbackMocks(excludedCallback)
             )
@@ -1820,7 +1818,7 @@ describe('validation logic', () => {
           excludeErrorsByContent(excludedCallbacks).every((regexp) => regexp?.test(message))
         )
       )) {
-        const { errors } = await validateQuery(testCase.query, getAstAndSyntaxErrors, {
+        const { errors } = await validateQuery(testCase.query, {
           ignoreOnMissingCallbacks: true,
         });
         expect(

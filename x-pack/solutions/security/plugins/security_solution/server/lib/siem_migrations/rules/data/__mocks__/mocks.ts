@@ -7,6 +7,7 @@
 
 import type { RuleMigrationsDataIntegrationsClient } from '../rule_migrations_data_integrations_client';
 import type { RuleMigrationsDataLookupsClient } from '../rule_migrations_data_lookups_client';
+import type { RuleMigrationsDataMigrationClient } from '../rule_migrations_data_migration_client';
 import type { RuleMigrationsDataPrebuiltRulesClient } from '../rule_migrations_data_prebuilt_rules_client';
 import type { RuleMigrationsDataResourcesClient } from '../rule_migrations_data_resources_client';
 import type { RuleMigrationsDataRulesClient } from '../rule_migrations_data_rules_client';
@@ -57,6 +58,10 @@ export const mockRuleMigrationsDataLookupsClient = {
   create: jest.fn().mockResolvedValue(undefined),
   indexData: jest.fn().mockResolvedValue(undefined),
 } as unknown as jest.Mocked<RuleMigrationsDataLookupsClient>;
+export const mockRuleMigrationsDataMigrationsClient = {
+  create: jest.fn().mockResolvedValue(undefined),
+  get: jest.fn().mockResolvedValue(undefined),
+} as unknown as jest.Mocked<RuleMigrationsDataMigrationClient>;
 
 // Rule migrations data client
 export const createRuleMigrationsDataClientMock = () => ({
@@ -65,6 +70,7 @@ export const createRuleMigrationsDataClientMock = () => ({
   integrations: mockRuleMigrationsDataIntegrationsClient,
   prebuiltRules: mockRuleMigrationsDataPrebuiltRulesClient,
   lookups: mockRuleMigrationsDataLookupsClient,
+  migrations: mockRuleMigrationsDataMigrationsClient,
 });
 
 export const MockRuleMigrationsDataClient = jest

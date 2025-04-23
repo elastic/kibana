@@ -189,9 +189,6 @@ xpack.fleet.internal.registry.excludePackages: [
 
     # Profiling integrations
     'profiler_agent',
-
-    # Search connectors
-    'elastic_connectors',
   ]
 
 ## Required for force installation of integration packages
@@ -216,7 +213,7 @@ xpack.observabilityAIAssistant.scope: "observability"
 telemetry.labels.serverless: observability
 
 xpack.ml.ad.enabled: true
-xpack.ml.dfa.enabled: false
+xpack.ml.dfa.enabled: true
 xpack.ml.nlp:
   enabled: true
   modelDeployment:

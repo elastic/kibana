@@ -9,6 +9,7 @@ import { EuiButtonEmpty, EuiText, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css, cx } from '@emotion/css';
 import { findInventoryFields } from '@kbn/metrics-data-access-plugin/common';
+import { i18n } from '@kbn/i18n';
 import { useKubernetesCharts } from '../hooks/use_host_metrics_charts';
 import { Section } from '../components/section';
 import { SectionTitle, TitleWithTooltip } from '../components/section_title';
@@ -45,6 +46,12 @@ export const KubernetesNodeCharts = React.forwardRef<HTMLDivElement, MetricsChar
         extraAction={
           onShowAll ? (
             <EuiButtonEmpty
+              aria-label={i18n.translate(
+                'xpack.infra.assetDetails.charts.kubernetes.showAllButton.ariaLabel',
+                {
+                  defaultMessage: 'Show all Kubernetes charts',
+                }
+              )}
               data-test-subj="infraAssetDetailsKubernetesChartsShowAllButton"
               onClick={() => onShowAll('kubernetes')}
               size="xs"
@@ -127,6 +134,10 @@ export const KubernetesContainerCharts = React.forwardRef<
       extraAction={
         onShowAll ? (
           <EuiButtonEmpty
+            aria-label={i18n.translate(
+              'xpack.infra.kubernetesContainerCharts.showallButton.ariaLabel',
+              { defaultMessage: 'Show all {metric} charts', values: { metric } }
+            )}
             data-test-subj="infraAssetDetailsKubernetesChartsShowAllButton"
             onClick={() => onShowAll(metric)}
             size="xs"

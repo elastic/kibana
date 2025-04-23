@@ -33,9 +33,7 @@ describe('extractAuthzDescription', () => {
       },
     };
     const description = extractAuthzDescription(routeSecurity);
-    expect(description).toBe(
-      '[Required authorization] Route required privileges: ALL of [manage_spaces].'
-    );
+    expect(description).toBe('[Required authorization] Route required privileges: manage_spaces.');
   });
 
   it('should return route authz description for privilege groups', () => {
@@ -46,9 +44,7 @@ describe('extractAuthzDescription', () => {
         },
       };
       const description = extractAuthzDescription(routeSecurity);
-      expect(description).toBe(
-        '[Required authorization] Route required privileges: ALL of [console].'
-      );
+      expect(description).toBe('[Required authorization] Route required privileges: console.');
     }
     {
       const routeSecurity: RouteSecurity = {
@@ -62,7 +58,7 @@ describe('extractAuthzDescription', () => {
       };
       const description = extractAuthzDescription(routeSecurity);
       expect(description).toBe(
-        '[Required authorization] Route required privileges: ANY of [manage_spaces OR taskmanager].'
+        '[Required authorization] Route required privileges: manage_spaces OR taskmanager.'
       );
     }
     {
@@ -78,7 +74,25 @@ describe('extractAuthzDescription', () => {
       };
       const description = extractAuthzDescription(routeSecurity);
       expect(description).toBe(
-        '[Required authorization] Route required privileges: ALL of [console, filesManagement] AND ANY of [manage_spaces OR taskmanager].'
+        '[Required authorization] Route required privileges: (console AND filesManagement) AND (manage_spaces OR taskmanager).'
+      );
+    }
+    {
+      const routeSecurity: RouteSecurity = {
+        authz: {
+          requiredPrivileges: [
+            {
+              anyRequired: [
+                { allOf: ['manage_spaces', 'taskmanager'] },
+                { allOf: ['console', 'filesManagement'] },
+              ],
+            },
+          ],
+        },
+      };
+      const description = extractAuthzDescription(routeSecurity);
+      expect(description).toBe(
+        '[Required authorization] Route required privileges: (manage_spaces AND taskmanager) OR (console AND filesManagement).'
       );
     }
   });

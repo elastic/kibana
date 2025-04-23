@@ -37,6 +37,8 @@ const {
   scanButtonShouldBe,
   clickTrustedAppFormSubmissionButton,
   validateErrorToastContent,
+  surveySectionExists,
+  surveySectionDoesNotExist,
 } = workflowInsightsSelectors;
 
 describe(
@@ -104,6 +106,8 @@ describe(
         selectConnector(connectorId);
         chooseConnectorButtonExistsWithLabel(connectorName);
 
+        surveySectionDoesNotExist();
+
         scanButtonShouldBe('enabled');
       });
 
@@ -135,6 +139,7 @@ describe(
       it('should properly initialize workflow insights with a connector already defined', () => {
         loadEndpointDetailsFlyout(endpointId);
         chooseConnectorButtonExistsWithLabel(connectorName);
+        surveySectionDoesNotExist();
         scanButtonShouldBe('enabled');
       });
 
@@ -163,6 +168,8 @@ describe(
         loadEndpointDetailsFlyout(endpointId);
 
         insightsResultExists();
+        surveySectionExists();
+
         insightsEmptyResultsCalloutDoesNotExist();
         clickInsightsResultRemediationButton();
 
