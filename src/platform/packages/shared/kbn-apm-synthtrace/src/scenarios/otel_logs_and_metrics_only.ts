@@ -13,10 +13,10 @@ import {
   generateShortId,
   otelLog,
   apm,
+  ApmSynthtracePipelineSchema,
 } from '@kbn/apm-synthtrace-client';
 import { Scenario } from '../cli/scenario';
 import { withClient } from '../lib/utils/with_client';
-
 import { IndexTemplateName } from '../lib/logs/custom_logsdb_index_templates';
 
 const MESSAGE_LOG_LEVELS = [
@@ -66,7 +66,7 @@ const scenario: Scenario<OtelLogDocument> = async (runOptions) => {
   return {
     bootstrap: async ({ logsEsClient, apmEsClient }) => {
       await logsEsClient.createIndexTemplate(IndexTemplateName.LogsDb);
-      apmEsClient.pipeline(apmEsClient.getPipeline('otelToApm'));
+      apmEsClient.pipeline(apmEsClient.getPipeline(ApmSynthtracePipelineSchema.Otel));
     },
     generate: ({ range, clients: { logsEsClient, apmEsClient } }) => {
       const {
