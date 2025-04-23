@@ -80,7 +80,8 @@ export interface TabsStorageManager {
     defaultTabState: Omit<TabState, keyof TabItem>;
     defaultGroupId: string;
   }) => TabsInternalStatePayload;
-  loadTabAppStateFromLocalCache: (tabId: string) => DiscoverAppState | undefined;
+  loadTabAppStateFromLocalCache: (tabId: string) => TabStateInLocalStorage['appState'];
+  loadTabGlobalStateFromLocalCache: (tabId: string) => TabStateInLocalStorage['globalState'];
   getNRecentlyClosedTabs: (
     previousRecentlyClosedTabs: RecentlyClosedTabState[],
     newClosedTabs: TabState[]
@@ -302,11 +303,26 @@ export const createTabsStorageManager = ({
     }
     const appState = tabsInStorageCache.get(tabId)?.appState;
 
-    if (!appState || !Object.keys(appState).length) {
+    if (!appState || !Object.values(appState).filter(Boolean).length) {
       return undefined;
     }
 
     return appState;
+  };
+
+  const loadTabGlobalStateFromLocalCache: TabsStorageManager['loadTabGlobalStateFromLocalCache'] = (
+    tabId
+  ) => {
+    if (!enabled) {
+      return undefined;
+    }
+    const globalState = tabsInStorageCache.get(tabId)?.globalState;
+
+    if (!globalState || !Object.values(globalState).filter(Boolean).length) {
+      return undefined;
+    }
+
+    return globalState;
   };
 
   const loadLocally: TabsStorageManager['loadLocally'] = ({
@@ -407,6 +423,7 @@ export const createTabsStorageManager = ({
     updateTabStateLocally,
     loadLocally,
     loadTabAppStateFromLocalCache,
+    loadTabGlobalStateFromLocalCache,
     getNRecentlyClosedTabs,
   };
 };

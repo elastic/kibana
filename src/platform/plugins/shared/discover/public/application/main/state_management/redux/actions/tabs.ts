@@ -65,10 +65,14 @@ export const updateTabs: InternalStateThunkActionCreator<
   Promise<void>
 > =
   ({ items, selectedItem, groupId }) =>
-  async (dispatch, getState, { services, runtimeStateManager, urlStateStorage }) => {
+  async (
+    dispatch,
+    getState,
+    { services, runtimeStateManager, urlStateStorage, tabsStorageManager }
+  ) => {
     const currentState = getState();
     const currentTab = selectTab(currentState, currentState.tabs.unsafeCurrentId);
-    let updatedTabs = items.map<TabState>((item) => {
+    const updatedTabs = items.map<TabState>((item) => {
       const existingTab = selectTab(currentState, item.id);
       return existingTab ? { ...existingTab, ...item } : { ...defaultTabState, ...item };
     });
@@ -78,23 +82,6 @@ export const updateTabs: InternalStateThunkActionCreator<
       const previousTabStateContainer = previousTabRuntimeState.stateContainer$.getValue();
 
       previousTabStateContainer?.actions.stopSyncing();
-
-      updatedTabs = updatedTabs.map((tab) => {
-        if (tab.id !== currentTab.id) {
-          return tab;
-        }
-
-        const {
-          time: timeRange,
-          refreshInterval,
-          filters,
-        } = previousTabStateContainer?.globalState.get() ?? {};
-
-        return {
-          ...tab,
-          lastPersistedGlobalState: { timeRange, refreshInterval, filters },
-        };
-      });
 
       const nextTab = selectedItem ? selectTab(currentState, selectedItem.id) : undefined;
       const nextTabRuntimeState = selectedItem
@@ -169,7 +156,6 @@ export const initiateTabs: InternalStateThunkActionCreator<[{ userId: string; sp
     });
 
     dispatch(setTabs(initialTabsState));
-    // TODO: should we restore appState and globalState from the local storage or we rely on the current URL state
   };
 
 export const clearAllTabs: InternalStateThunkActionCreator = () => (dispatch) => {

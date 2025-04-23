@@ -74,18 +74,48 @@ export const initializeSession: InternalStateThunkActionCreator<
       dispatch(clearAllTabs());
     }
 
+    const discoverSessionLoadTracker =
+      services.ebtManager.trackPerformanceEvent('discoverLoadSavedSearch');
+
+    const { currentDataView$, stateContainer$, customizationService$ } = selectTabRuntimeState(
+      runtimeStateManager,
+      tabId
+    );
+    let initialUrlState = defaultUrlState ?? urlStateStorage.get<AppStateUrl>(APP_STATE_URL_KEY);
+
+    /**
+     * New tab initialization with the restored data if available
+     */
+
+    const wasTabInitialized = Boolean(stateContainer$.getValue());
+
+    if (!wasTabInitialized) {
+      const tabGlobalStateFromLocalStorage =
+        tabsStorageManager.loadTabGlobalStateFromLocalCache(tabId);
+
+      if (tabGlobalStateFromLocalStorage?.filters) {
+        services.filterManager.setGlobalFilters(cloneDeep(tabGlobalStateFromLocalStorage.filters));
+      }
+
+      if (tabGlobalStateFromLocalStorage?.timeRange) {
+        services.timefilter.setTime(tabGlobalStateFromLocalStorage.timeRange);
+      }
+      if (tabGlobalStateFromLocalStorage?.refreshInterval) {
+        services.timefilter.setRefreshInterval(tabGlobalStateFromLocalStorage.refreshInterval);
+      }
+
+      const tabAppStateFromLocalStorage = tabsStorageManager.loadTabAppStateFromLocalCache(tabId);
+
+      if (tabAppStateFromLocalStorage) {
+        initialUrlState = tabAppStateFromLocalStorage;
+      }
+    }
+
     /**
      * "No data" checks
      */
+    const urlState = cleanupUrlState(initialUrlState, services.uiSettings);
 
-    const discoverSessionLoadTracker =
-      services.ebtManager.trackPerformanceEvent('discoverLoadSavedSearch');
-    const urlState = cleanupUrlState(
-      tabsStorageManager.loadTabAppStateFromLocalCache(tabId) ?? // TODO: do something similar for globalState
-        defaultUrlState ??
-        urlStateStorage.get<AppStateUrl>(APP_STATE_URL_KEY),
-      services.uiSettings
-    );
     const persistedDiscoverSession = discoverSessionId
       ? await services.savedSearch.get(discoverSessionId)
       : undefined;
@@ -132,10 +162,6 @@ export const initializeSession: InternalStateThunkActionCreator<
       setBreadcrumbs({ services, titleBreadcrumbText: persistedDiscoverSession.title });
     }
 
-    const { currentDataView$, stateContainer$, customizationService$ } = selectTabRuntimeState(
-      runtimeStateManager,
-      tabId
-    );
     let dataView: DataView;
 
     if (isOfAggregateQueryType(initialQuery)) {
