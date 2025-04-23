@@ -118,8 +118,7 @@ describe('TableActions', () => {
     });
 
     describe('when clicking "Copy value"', () => {
-      it('should call the copy function', () => {
-        // Given
+      beforeEach(() => {
         const actions = getFieldValueCellActions({
           rows: getRows(),
           toasts: toastsMock,
@@ -133,8 +132,11 @@ describe('TableActions', () => {
           />
         ));
 
-        // When
         render(<>{actions}</>);
+      });
+
+      it('should call the copy function', () => {
+        // When
         fireEvent.click(screen.getByText('Copy value'));
 
         // Then
@@ -144,22 +146,9 @@ describe('TableActions', () => {
       describe('when the copy fails', () => {
         it('should show a warning toast', () => {
           // Given
-          const actions = getFieldValueCellActions({
-            rows: getRows(),
-            toasts: toastsMock,
-            isEsqlMode: false,
-            onFilter: undefined,
-          }).map((Action, i) => (
-            <Action
-              key={i}
-              {...EuiCellParams}
-              Component={(props: any) => <div {...props}>{props.children}</div>}
-            />
-          ));
           mockCopyToClipboard.mockReturnValue(false);
 
           // When
-          render(<>{actions}</>);
           fireEvent.click(screen.getByText('Copy value'));
 
           // Then
@@ -170,22 +159,9 @@ describe('TableActions', () => {
       describe('when the copy succeeds', () => {
         it('should show an info toast', () => {
           // Given
-          const actions = getFieldValueCellActions({
-            rows: getRows(),
-            toasts: toastsMock,
-            isEsqlMode: false,
-            onFilter: undefined,
-          }).map((Action, i) => (
-            <Action
-              key={i}
-              {...EuiCellParams}
-              Component={(props: any) => <div {...props}>{props.children}</div>}
-            />
-          ));
           mockCopyToClipboard.mockReturnValue(true);
 
           // When
-          render(<>{actions}</>);
           fireEvent.click(screen.getByText('Copy value'));
 
           // Then
