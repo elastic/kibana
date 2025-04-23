@@ -112,4 +112,26 @@ describe('useOnboardingTelemetry', () => {
       );
     });
   });
+
+  describe('when clicking a card selector', () => {
+    it('should report card selector clicked event on the default topic', () => {
+      const { result } = renderHook(useOnboardingTelemetry);
+      result.current.reportCardSelectorClicked('testCard' as OnboardingCardId, 'selector1');
+
+      expect(telemetryMock.reportEvent).toHaveBeenCalledWith(
+        OnboardingHubEventTypes.OnboardingHubStepSelectorClicked,
+        { originStepId: 'testCard', selectorId: 'selector1' }
+      );
+    });
+
+    it('should report card selector clicked event on another topic', () => {
+      const { result } = renderHook(useOnboardingTelemetry);
+      result.current.reportCardSelectorClicked('testCard2' as OnboardingCardId, 'selector2');
+
+      expect(telemetryMock.reportEvent).toHaveBeenCalledWith(
+        OnboardingHubEventTypes.OnboardingHubStepSelectorClicked,
+        { originStepId: 'testTopic#testCard2', selectorId: 'selector2' }
+      );
+    });
+  });
 });
