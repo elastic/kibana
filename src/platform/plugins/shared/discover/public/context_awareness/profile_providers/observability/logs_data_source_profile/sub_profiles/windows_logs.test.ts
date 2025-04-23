@@ -13,10 +13,7 @@ import { createEsqlDataSource } from '../../../../../../common/data_sources';
 import type { RootContext } from '../../../../profiles';
 import { DataSourceCategory, SolutionType } from '../../../../profiles';
 import { createContextAwarenessMocks } from '../../../../__mocks__';
-import {
-  createLogsDataSourceProfileProvider,
-  type LogOverViewAccordionExpandedValue,
-} from '../profile';
+import { createLogsDataSourceProfileProvider, type LogOverviewContext } from '../profile';
 import { createWindowsLogsDataSourceProfileProvider } from './windows_logs';
 import type { ContextWithProfileId } from '../../../../profile_service';
 import { OBSERVABILITY_ROOT_PROFILE_ID } from '../../consts';
@@ -42,9 +39,7 @@ describe('createWindowsLogsDataSourceProfileProvider', () => {
       isMatch: true,
       context: {
         category: DataSourceCategory.Logs,
-        initialLogOverviewAccordionSection$: new BehaviorSubject<LogOverViewAccordionExpandedValue>(
-          undefined
-        ),
+        logOverviewContext$: new BehaviorSubject<LogOverviewContext | undefined>(undefined),
       },
     });
   });
@@ -62,9 +57,7 @@ describe('createWindowsLogsDataSourceProfileProvider', () => {
     const getDefaultAppState = dataSourceProfileProvider.profile.getDefaultAppState?.(() => ({}), {
       context: {
         category: DataSourceCategory.Logs,
-        initialLogOverviewAccordionSection$: new BehaviorSubject<LogOverViewAccordionExpandedValue>(
-          undefined
-        ),
+        logOverviewContext$: new BehaviorSubject<LogOverviewContext | undefined>(undefined),
       },
     });
     expect(getDefaultAppState?.({ dataView: dataViewWithTimefieldMock })).toEqual({

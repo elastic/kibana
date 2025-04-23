@@ -45,7 +45,10 @@ export const getRowAdditionalLeadingControls: LogsDataSourceProfileProvider['pro
             return;
           }
 
-          context.initialLogOverviewAccordionSection$.next(actionName);
+          context.logOverviewContext$.next({
+            recordId: props.record.id,
+            initialAccordionSection: actionName,
+          });
           setExpandedDoc(props.record, 'doc_view_logs_overview');
 
           const dataTestSubj = {
