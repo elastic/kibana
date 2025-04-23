@@ -62,6 +62,15 @@ describe('registerTransactionDurationRuleType', () => {
           'http://localhost:5601/eyr/app/observability/alerts/'
         ),
         environment: 'development',
+        grouping: {
+          service: {
+            environment: 'development',
+            name: 'opbeans-java',
+          },
+          transaction: {
+            type: 'request',
+          },
+        },
         interval: '5 mins',
         reason:
           'Avg. latency is 5.5 s in the last 5 mins for service: opbeans-java, env: development, type: request. Alert when > 3.0 s.',
@@ -141,6 +150,16 @@ describe('registerTransactionDurationRuleType', () => {
           'http://localhost:5601/eyr/app/observability/alerts/'
         ),
         environment: 'development',
+        grouping: {
+          service: {
+            environment: 'development',
+            name: 'opbeans-java',
+          },
+          transaction: {
+            type: 'request',
+            name: 'GET /products',
+          },
+        },
         interval: '5 mins',
         reason:
           'Avg. latency is 5.5 s in the last 5 mins for service: opbeans-java, env: development, type: request, name: GET /products. Alert when > 3.0 s.',
@@ -221,6 +240,15 @@ describe('registerTransactionDurationRuleType', () => {
           'http://localhost:5601/eyr/app/observability/alerts/'
         ),
         environment: 'development',
+        grouping: {
+          service: {
+            environment: 'development',
+            name: 'opbeans-java',
+          },
+          transaction: {
+            type: 'request',
+          },
+        },
         interval: '5 mins',
         reason:
           'Avg. latency is 5.5 s in the last 5 mins for service: opbeans-java, env: development, type: request. Alert when > 3.0 s.',
@@ -300,6 +328,16 @@ describe('registerTransactionDurationRuleType', () => {
           'http://localhost:5601/eyr/app/observability/alerts/'
         ),
         environment: 'Not defined',
+        grouping: {
+          service: {
+            environment: 'ENVIRONMENT_NOT_DEFINED',
+            name: 'opbeans-java',
+          },
+          transaction: {
+            type: 'request',
+            name: 'tx-java',
+          },
+        },
         interval: '5 mins',
         reason:
           'Avg. latency is 5.5 s in the last 5 mins for service: opbeans-java, env: Not defined, type: request, name: tx-java. Alert when > 3.0 s.',
@@ -386,6 +424,15 @@ describe('registerTransactionDurationRuleType', () => {
           'http://localhost:5601/eyr/app/observability/alerts/'
         ),
         environment: 'development',
+        grouping: {
+          service: {
+            environment: 'development',
+            name: 'opbeans-java',
+          },
+          transaction: {
+            type: 'request',
+          },
+        },
         interval: '5 mins',
         reason:
           'Avg. latency is 5.5 s in the last 5 mins for service: opbeans-java, env: development, type: request. Alert when > 3.0 s.',
@@ -472,6 +519,7 @@ describe('registerTransactionDurationRuleType', () => {
             windowSize: 5,
             windowUnit: 'd',
             environment: 'ENVIRONMENT_ALL',
+            groupBy: ['service.name', 'service.environment', 'transaction.type'],
           },
           'kibana.alert.rule.producer': 'apm',
           'kibana.alert.rule.revision': 15,
@@ -519,6 +567,15 @@ describe('registerTransactionDurationRuleType', () => {
       context: {
         alertDetailsUrl: 'http://localhost:5601/eyr/app/observability/alerts/test-uuid',
         environment: 'Synthtrace: many_errors',
+        grouping: {
+          service: {
+            environment: 'Synthtrace: many_errors',
+            name: 'synthtrace-high-cardinality-0',
+          },
+          transaction: {
+            type: 'request',
+          },
+        },
         interval: '5 mins',
         reason:
           'Avg. latency is 1,000 ms in the last 5 days for service: synthtrace-high-cardinality-0, env: Synthtrace: many_errors, type: request. Alert when > 149 ms.',

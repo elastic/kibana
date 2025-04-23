@@ -3,7 +3,7 @@ id: kibFeatureFlagsService
 slug: /kibana-dev-docs/tutorials/feature-flags-service
 title: Feature Flags service
 description: The Feature Flags service provides the necessary APIs to evaluate dynamic feature flags.
-date: 2024-07-26
+date: 2024-10-16
 tags: ['kibana', 'dev', 'contributor', 'api docs', 'a/b testing', 'feature flags', 'flags']
 ---
 
@@ -12,7 +12,13 @@ tags: ['kibana', 'dev', 'contributor', 'api docs', 'a/b testing', 'feature flags
 The Feature Flags service provides the necessary APIs to evaluate dynamic feature flags.
 
 The service is always enabled, however, it will return the fallback value if a feature flags provider hasn't been attached.
-Kibana only registers a provider when running on Elastic Cloud Hosted/Serverless.
+Kibana only registers a provider when running on Elastic Cloud Hosted/Serverless. And even in those scenarios, we expect that some customers might 
+have network restrictions that might not allow the flags to evaluate. The fallback value must provide a non-broken experience to users.
+
+:warning: Feature Flags are considered dynamic configuration and cannot be used for settings that require restarting Kibana.
+One example of invalid use cases are settings used during the `setup` lifecycle of the plugin, such as settings that define 
+if an HTTP route is registered or not. Instead, you should always register the route, and return `404 - Not found` in the route 
+handler if the feature flag returns a _disabled_ state.  
 
 For a code example, refer to the [Feature Flags Example plugin](../../../examples/feature_flags_example)
 
@@ -28,7 +34,7 @@ import type { PluginInitializerContext } from '@kbn/core-plugins-server';
 
 export const featureFlags: FeatureFlagDefinitions = [
   {
-    key: 'my-cool-feature',
+    key: 'myPlugin.myCoolFeature',
     name: 'My cool feature',
     description: 'Enables the cool feature to auto-hide the navigation bar',
     tags: ['my-plugin', 'my-service', 'ui'],
@@ -114,7 +120,7 @@ async (context, request, response) => {
   const { featureFlags } = await context.core;
   return response.ok({
     body: {
-      number: await featureFlags.getNumberValue('example-number', 1),
+      number: await featureFlags.getNumberValue('myPlugin.exampleNumber', 1),
     },
   });
 }
@@ -138,7 +144,7 @@ provider. In the `kibana.yml`, the following config sets the overrides:
 
 ```yaml
 feature_flags.overrides:
-  my-feature-flag: 'my-forced-value'
+  myPlugin.myFeatureFlag: 'my-forced-value'
 ```
 
 > [!WARNING]  

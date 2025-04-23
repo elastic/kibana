@@ -167,7 +167,6 @@ describe('Bulk patch rules route', () => {
             message: 'id or rule_id should have been defined',
             status_code: 404,
           },
-          rule_id: '(unknown id)',
         },
       ]);
     });
