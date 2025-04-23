@@ -25,5 +25,6 @@
     "@kbn/expect",
     "@kbn/core-http-common",
     "@kbn/scout-info",
+    "@kbn/data-plugin",
   ]
 }
