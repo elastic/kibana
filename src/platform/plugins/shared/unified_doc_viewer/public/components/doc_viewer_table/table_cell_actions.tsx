@@ -85,7 +85,6 @@ const Copy: React.FC<TableActionsProps> = ({ Component, row }) => {
       flush="left"
       onClick={() => copyToClipboard(String(flattenedValue))}
     >
-      <div data-testid="another test" />
       {copyLabel}
     </Component>
   );
