@@ -92,7 +92,7 @@ export const EditForm: React.FC<FormProps> = React.memo((props) => {
     onConnectorIdSelected,
     onSettingsChanged,
     settings,
-    showConnectorSelector: true,
+    showConnectorSelector: false,
     stats: null,
   });
 
