@@ -18,7 +18,10 @@ export const checkIntegrationsCardComplete: OnboardingCardCheckComplete<
   IntegrationCardMetadata
 > = async (services: StartServices) => {
   const packageData = await services.http
-    .get<GetPackagesResponse>(EPM_API_ROUTES.INSTALL_BY_UPLOAD_PATTERN, {
+    .get<GetPackagesResponse>(`${EPM_API_ROUTES.INSTALLED_LIST_PATTERN}`, {
+      query: {
+        showOnlyActiveDataStreams: true,
+      },
       version: '2023-10-31',
     })
     .catch((err: Error) => {

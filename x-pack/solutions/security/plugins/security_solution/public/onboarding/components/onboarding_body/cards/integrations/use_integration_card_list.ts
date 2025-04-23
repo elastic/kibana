@@ -20,6 +20,7 @@ import {
 } from './constants';
 import type { GetAppUrl, NavigateTo } from '../../../../../common/lib/kibana';
 import { trackOnboardingLinkClick } from '../../../lib/telemetry';
+import { useFetchInstalledIntegrations } from './use_installed_integrations';
 
 const extractFeaturedCards = (filteredCards: IntegrationCardItem[], featuredCardIds: string[]) => {
   return filteredCards.reduce<IntegrationCardItem[]>((acc, card) => {
@@ -106,6 +107,12 @@ export const useIntegrationCardList = ({
   featuredCardIds?: string[] | undefined;
 }): IntegrationCardItem[] => {
   const { navigateTo, getAppUrl } = useNavigation();
+  const {
+    status,
+    data: installedIntegrations,
+    error,
+    isFetching,
+  } = useFetchInstalledIntegrations();
 
   const { featuredCards, integrationCards } = useMemo(
     () => getFilteredCards({ navigateTo, getAppUrl, integrationsList, featuredCardIds }),
