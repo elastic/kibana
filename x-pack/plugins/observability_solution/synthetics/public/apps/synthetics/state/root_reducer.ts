@@ -14,12 +14,7 @@ import { overviewStatusReducer, OverviewStatusStateReducer } from './overview_st
 import { browserJourneyReducer } from './browser_journey';
 import { defaultAlertingReducer, DefaultAlertingState } from './alert_rules';
 import { manualTestRunsReducer, ManualTestRunsState } from './manual_test_runs';
-import {
-  dynamicSettingsReducer,
-  DynamicSettingsState,
-  settingsReducer,
-  SettingsState,
-} from './settings';
+import { dynamicSettingsReducer, DynamicSettingsState } from './settings';
 import { elasticsearchReducer, QueriesState } from './elasticsearch';
 import { agentPoliciesReducer, AgentPoliciesState } from './private_locations';
 import { networkEventsReducer, NetworkEventsState } from './network_events';
@@ -34,7 +29,6 @@ import { monitorStatusHeatmapReducer, MonitorStatusHeatmap } from './status_heat
 
 export interface SyntheticsAppState {
   ui: UiState;
-  settings: SettingsState;
   elasticsearch: QueriesState;
   monitorList: MonitorListState;
   overview: MonitorOverviewState;
@@ -56,7 +50,6 @@ export interface SyntheticsAppState {
 
 export const rootReducer = combineReducers<SyntheticsAppState>({
   ui: uiReducer,
-  settings: settingsReducer,
   monitorList: monitorListReducer,
   overview: monitorOverviewReducer,
   globalParams: globalParamsReducer,

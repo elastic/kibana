@@ -105,6 +105,7 @@ export const EditSpaceAssignedRolesTab: FC<Props> = ({ space, features, isReadOn
           size: 'm',
           maxWidth: true,
           maskProps: { headerZindexLocation: 'below' },
+          'aria-labelledby': 'space-assign-role-privilege-form-title',
         }
       );
     },
