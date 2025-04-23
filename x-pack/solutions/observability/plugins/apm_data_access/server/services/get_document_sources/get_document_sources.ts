@@ -23,7 +23,6 @@ export interface DocumentSourcesRequest {
   start: number;
   end: number;
   kuery: string;
-  enableServiceTransactionMetrics: boolean;
   enableContinuousRollups: boolean;
 }
 
@@ -61,18 +60,16 @@ export async function getDocumentSources({
   start,
   end,
   kuery,
-  enableServiceTransactionMetrics,
   enableContinuousRollups,
 }: {
   apmEventClient: APMEventClient;
   start: number;
   end: number;
   kuery: string;
-  enableServiceTransactionMetrics: boolean;
   enableContinuousRollups: boolean;
 }): Promise<TimeRangeMetadata['sources']> {
   const documentTypesToCheck = [
-    ...(enableServiceTransactionMetrics ? [ApmDocumentType.ServiceTransactionMetric as const] : []),
+    ApmDocumentType.ServiceTransactionMetric as const,
     ApmDocumentType.TransactionMetric as const,
   ];
 
