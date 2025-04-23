@@ -86,6 +86,9 @@ export default function createAlertsAsDataFlappingTest({ getService }: FtrProvid
             params: ruleParameters,
             actions: [],
             notify_when: RuleNotifyWhen.CHANGE,
+            alert_delay: {
+              active: 1,
+            },
           })
         );
 
@@ -218,6 +221,9 @@ export default function createAlertsAsDataFlappingTest({ getService }: FtrProvid
             params: ruleParameters,
             actions: [],
             notify_when: RuleNotifyWhen.CHANGE,
+            alert_delay: {
+              active: 1,
+            },
           })
         );
 
