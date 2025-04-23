@@ -73,7 +73,12 @@ export interface AgentTargetVersion {
   percentage: number;
 }
 
+export interface CloudConnectors {
+  target_csp?: string;
+  enabled?: boolean;
+}
 export interface AgentlessPolicy {
+  cloud_connectors?: CloudConnectors;
   resources?: {
     requests?: {
       memory?: string;
