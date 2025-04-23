@@ -12,4 +12,5 @@ export enum OnboardingFooterLinkItemId {
   expand = 'expand',
   forum = 'forum',
   labs = 'labs',
+  manageDeployment = 'manageDeployment',
 }

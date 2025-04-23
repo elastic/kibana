@@ -15,6 +15,7 @@ export const useFooterItems = () => {
   } = useKibana();
 
   const projectUrl = useObservable(onboarding.projectUrl$);
+  const deploymentUrl = useObservable(onboarding.deploymentUrl$);
   const expandProject = {
     icon: 'arrowUp',
     id: OnboardingFooterLinkItemId.expand,
@@ -29,6 +30,29 @@ export const useFooterItems = () => {
         defaultMessage: 'Go to project settings',
       }),
       href: projectUrl ?? '',
+    },
+  };
+
+  const manageDeployment = {
+    icon: 'arrowUp',
+    id: OnboardingFooterLinkItemId.manageDeployment,
+    title: i18n.translate('xpack.securitySolution.onboarding.footer.manageDeployment.title', {
+      defaultMessage: 'Manage your deployment',
+    }),
+    description: i18n.translate(
+      'xpack.securitySolution.onboarding.footer.manageDeployment.description',
+      {
+        defaultMessage: 'Access Elastic’s full security capabilities',
+      }
+    ),
+    link: {
+      title: i18n.translate(
+        'xpack.securitySolution.onboarding.footer.manageDeployment.link.title',
+        {
+          defaultMessage: 'Go to settings',
+        }
+      ),
+      href: deploymentUrl ?? '',
     },
   };
 
@@ -56,16 +80,16 @@ export const useFooterItems = () => {
       icon: 'users',
       id: OnboardingFooterLinkItemId.forum,
       title: i18n.translate('xpack.securitySolution.onboarding.footer.forum.title', {
-        defaultMessage: 'Explore forum',
+        defaultMessage: 'Join the Slack',
       }),
       description: i18n.translate('xpack.securitySolution.onboarding.footer.forum.description', {
-        defaultMessage: 'Exchange thoughts about Elastic',
+        defaultMessage: 'Discuss Elastic with fellow users',
       }),
       link: {
         title: i18n.translate('xpack.securitySolution.onboarding.footer.forum.link.title', {
-          defaultMessage: 'Discuss Forum',
+          defaultMessage: 'Go to Elastic community Slack',
         }),
-        href: 'https://discuss.elastic.co/c/security/83',
+        href: 'https://www.elastic.co/blog/join-our-elastic-stack-workspace-on-slack',
       },
     },
     {
@@ -88,6 +112,10 @@ export const useFooterItems = () => {
 
   if (projectUrl) {
     return [expandProject, ...footerItems];
+  }
+
+  if (deploymentUrl) {
+    return [manageDeployment, ...footerItems];
   }
 
   return footerItems;

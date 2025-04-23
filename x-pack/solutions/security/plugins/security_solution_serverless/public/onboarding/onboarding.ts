@@ -15,9 +15,9 @@ export const setOnboardingSettings = (services: Services) => {
 
   securitySolution.setOnboardingSettings({
     userUrl: getCloudUrl('usersAndRoles', cloud),
-    projectUrl: `${getCloudUrl('projects', cloud)}${
-      projectId ? `${ProductLine.security}/${projectId}` : ''
-    }`,
+    projectUrl: projectId
+      ? `${getCloudUrl('projects', cloud)}${`${ProductLine.security}/${projectId}`}`
+      : undefined,
     isAgentlessAvailable: true,
   });
 };
