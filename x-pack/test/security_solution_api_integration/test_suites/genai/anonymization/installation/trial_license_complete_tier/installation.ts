@@ -5,7 +5,6 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
-import { delay } from 'lodash';
 import * as uuid from 'uuid';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 export default function ({ getService }: FtrProviderContext) {
@@ -162,9 +161,6 @@ export default function ({ getService }: FtrProviderContext) {
 
       log.debug('First request completed');
 
-      // Wait a moment to simulate delay
-      // await delay(() => {}, 1000);
-
       // Make second request
       await supertest
         .get(
@@ -186,47 +182,6 @@ export default function ({ getService }: FtrProviderContext) {
       log.debug(`Found ${fields.hits.total.value} anonymization fields after delayed requests`);
       expect(fields.hits.total.value).to.equal(expectedAnonymizationFieldsCount);
     });
-
-    // it.skip('Scenario 4: Tests initialization retry logic with server restart', async () => {
-    //   // First initialize
-    //   await supertest
-    //     .get(
-    //       `/s/${spaceId}/api/security_ai_assistant/anonymization_fields/_find?page=1&per_page=1000`
-    //     )
-    //     .set('kbn-xsrf', 'true')
-    //     .expect(200);
-
-    //   log.debug('First initialization completed');
-
-    //   // Restart Kibana to simulate server restart
-    //   log.debug('Restarting Kibana server...');
-    //   await kibanaServer.stop();
-    //   await delay(() => {}, 2000);
-    //   await kibanaServer.start();
-    //   await kibanaServer.waitForStatus('green');
-    //   log.debug('Kibana server restarted');
-
-    //   // Initialize again after restart
-    //   await supertest
-    //     .get(
-    //       `/s/${spaceId}/api/security_ai_assistant/anonymization_fields/_find?page=1&per_page=1000`
-    //     )
-    //     .set('kbn-xsrf', 'true')
-    //     .expect(200);
-
-    //   log.debug('Second initialization completed after server restart');
-
-    //   // Check for duplicate fields
-    //   const fields = await es.search({
-    //     index: `.kibana-elastic-ai-assistant-anonymization-fields-${spaceId}`,
-    //     body: {
-    //       query: { match_all: {} },
-    //     },
-    //   });
-
-    //   log.debug(`Found ${fields.hits.total.value} anonymization fields after server restart`);
-    //   expect(fields.hits.total.value).to.equal(expectedAnonymizationFieldsCount);
-    // });
 
     it('Scenario 5: Tests initialization with multiple endpoints', async () => {
       // Test with multiple different endpoints that might trigger initialization
@@ -480,9 +435,6 @@ export default function ({ getService }: FtrProviderContext) {
           query: { match_all: {} },
         },
       });
-
-      // The new space might take a moment to initialize fully
-      // await delay(() => {}, 2000);
 
       const newSpaceFields = await es.search({
         index: `.kibana-elastic-ai-assistant-anonymization-fields-${newSpaceId}`,
