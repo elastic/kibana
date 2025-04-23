@@ -60,7 +60,7 @@ export function StreamDetailDashboardsView({
       featureFlags,
       application: {
         capabilities: {
-          streams: { link_assets: canLinkAssets },
+          streams: { manage_assets: canLinkAssets },
         },
       },
     },
