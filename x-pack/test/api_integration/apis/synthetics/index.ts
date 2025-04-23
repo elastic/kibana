@@ -37,5 +37,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./test_now_monitor'));
     loadTestFile(require.resolve('./suggestions'));
     loadTestFile(require.resolve('./private_location_apis'));
+    loadTestFile(require.resolve('./list_monitors'));
   });
 }
