@@ -52,6 +52,7 @@ export const getAlertSummaryRoute = (router: IRouter<RacRequestHandlerContext>) 
     async (context, request, response) => {
       try {
         const racContext = await context.rac;
+        const cckClient = await racContext.cckClientGetter();
         const alertsClient = await racContext.getAlertsClient();
         const {
           gte,
@@ -84,8 +85,53 @@ export const getAlertSummaryRoute = (router: IRouter<RacRequestHandlerContext>) 
           filter: filter as estypes.QueryDslQueryContainer[],
           fixedInterval,
         });
+
+        const remoteAggs = await cckClient.request<typeof aggs>(
+          'POST',
+          '/internal/rac/alerts/_alert_summary',
+          request.body
+        );
+
+        /* aggs is  {
+    activeAlertCount: number;
+    recoveredAlertCount: number;
+    activeAlerts: estypes.AggregationsBuckets<estypes.AggregationsDateHistogramBucket>;
+    recoveredAlerts: estypes.AggregationsBuckets<...>;
+}*/
+        function mergeBuckets(
+          buckets: estypes.AggregationsDateHistogramBucket[],
+          remoteBuckets: estypes.AggregationsDateHistogramBucket[]
+        ) {
+          const merged = [...buckets];
+          remoteBuckets.forEach((bucket) => {
+            const existingBucket = merged.find((b) => b.key === bucket.key);
+            if (existingBucket) {
+              existingBucket.doc_count += bucket.doc_count;
+            } else {
+              merged.push(bucket);
+            }
+          });
+          return merged;
+        }
+        const mergedAggs = remoteAggs.reduce((acc, curr) => {
+          if (curr.status === 'rejected') {
+            return acc;
+          }
+          const { data } = curr.value;
+          acc.activeAlertCount += data.activeAlertCount;
+          acc.recoveredAlertCount += data.recoveredAlertCount;
+          acc.activeAlerts = mergeBuckets(
+            acc.activeAlerts as estypes.AggregationsDateHistogramBucket[],
+            data.activeAlerts as estypes.AggregationsDateHistogramBucket[]
+          );
+          acc.recoveredAlerts = mergeBuckets(
+            acc.recoveredAlerts as estypes.AggregationsDateHistogramBucket[],
+            data.recoveredAlerts as estypes.AggregationsDateHistogramBucket[]
+          );
+          return acc;
+        }, aggs);
         return response.ok({
-          body: aggs,
+          body: mergedAggs,
         });
       } catch (exc) {
         const err = transformError(exc);

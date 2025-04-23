@@ -163,6 +163,7 @@ export const updateBodySchema = schema.object({
   notify_when: schema.maybe(schema.nullable(notifyWhenSchemaV1)),
   alert_delay: schema.maybe(alertDelaySchemaV1),
   flapping: schema.maybe(schema.nullable(flappingSchemaV1)),
+  server: schema.maybe(schema.string()),
 });
 
 export const updateParamsSchema = schema.object({

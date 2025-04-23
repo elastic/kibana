@@ -104,10 +104,15 @@ export const ruleRegistrySearchStrategyProvider = (
             (ruleTypeId: string) => !EXCLUDED_RULE_TYPE_IDS.includes(ruleTypeId)
           );
 
-          const indices = alerting.getAlertIndicesAlias(ruleTypes, space?.id);
+          let indices = alerting.getAlertIndicesAlias(ruleTypes, space?.id);
 
           if (indices.length === 0) {
             return of(EMPTY_RESPONSE);
+          }
+
+          if (request.server && request.server !== '_local') {
+            // add the remote server in front of each index
+            indices = indices.map((index) => `${request.server}:${index}`);
           }
 
           const filter = request.query?.bool?.filter
@@ -176,11 +181,7 @@ export const ruleRegistrySearchStrategyProvider = (
               ...(request.trackScores ? { track_scores: request.trackScores } : {}),
             },
           };
-          return (isAnyRuleTypeESAuthorized ? requestUserEs : internalUserEs).search(
-            { id: request.id, params },
-            options,
-            deps
-          );
+          return requestUserEs.search({ id: request.id, params }, options, deps);
         }),
         map((response: RuleRegistrySearchResponse) => {
           // Do we have to loop over each hit? Yes.

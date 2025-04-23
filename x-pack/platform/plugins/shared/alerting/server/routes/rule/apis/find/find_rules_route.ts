@@ -60,7 +60,9 @@ export const findRulesRoute = (
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
-        const rulesClient = await (await context.alerting).getRulesClient();
+        const alertingContext = await context.alerting;
+        const cckClient = alertingContext.cckClientGetter();
+        const rulesClient = await alertingContext.getRulesClient();
 
         const query: FindRulesRequestQueryV1 = req.query;
 
@@ -83,6 +85,11 @@ export const findRulesRoute = (
           });
         }
 
+        const remoteResults = await cckClient.request<FindRulesResponseV1<RuleParamsV1>['body']>(
+          'GET',
+          `/api/alerting/rules/_find${req.url.search}`
+        );
+
         const findResult = await rulesClient.find({
           options,
           excludeFromPublicApi: true,
@@ -92,8 +99,29 @@ export const findRulesRoute = (
         const responseBody: FindRulesResponseV1<RuleParamsV1>['body'] =
           transformFindRulesResponseV1<RuleParamsV1>(findResult, options.fields);
 
+        const mergedResponseBody = remoteResults.reduce((acc, remoteResult) => {
+          if (remoteResult.status === 'rejected') {
+            return acc;
+          }
+          const { data } = remoteResult.value;
+          const { page, per_page: perPage, total, data: remoteData } = data;
+          return {
+            ...acc,
+            page,
+            per_page: perPage + acc.per_page,
+            total: total + acc.total,
+            data: [
+              ...acc.data,
+              ...remoteData.map((rule) => ({
+                ...rule,
+                server: remoteResult.server,
+              })),
+            ],
+          };
+        }, responseBody);
+
         return res.ok({
-          body: responseBody,
+          body: mergedResponseBody,
         });
       })
     )

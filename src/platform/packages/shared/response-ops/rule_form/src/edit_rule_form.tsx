@@ -101,7 +101,7 @@ export const EditRuleForm = (props: EditRuleFormProps) => {
   });
 
   const onSave = useCallback(
-    (newFormData: RuleFormData) => {
+    (newFormData: RuleFormData, servers: string[]) => {
       mutate({
         id,
         formData: {
@@ -113,6 +113,7 @@ export const EditRuleForm = (props: EditRuleFormProps) => {
           alertDelay: newFormData.alertDelay,
           flapping: newFormData.flapping,
         },
+        servers,
       });
     },
     [id, mutate]

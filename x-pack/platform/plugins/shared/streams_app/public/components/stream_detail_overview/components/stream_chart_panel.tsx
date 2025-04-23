@@ -18,6 +18,7 @@ import React, { useMemo } from 'react';
 import { IngestStreamGetResponse, isWiredStreamGetResponse } from '@kbn/streams-schema';
 import { computeInterval } from '@kbn/visualization-utils';
 import moment, { DurationInputArg1, DurationInputArg2 } from 'moment';
+import { useStreamDetail } from '../../../hooks/use_stream_detail';
 import { useKibana } from '../../../hooks/use_kibana';
 import { ControlledEsqlChart } from '../../esql_chart/controlled_esql_chart';
 import { getIndexPatterns } from '../../../util/hierarchy_helpers';
@@ -29,6 +30,7 @@ interface StreamChartPanelProps {
 }
 
 export function StreamChartPanel({ definition }: StreamChartPanelProps) {
+  const { server } = useStreamDetail();
   const {
     dependencies: {
       start: {
@@ -47,8 +49,8 @@ export function StreamChartPanel({ definition }: StreamChartPanelProps) {
   } = data.query.timefilter.timefilter.useTimefilter();
 
   const indexPatterns = useMemo(() => {
-    return getIndexPatterns(definition?.stream);
-  }, [definition]);
+    return getIndexPatterns(definition?.stream, server);
+  }, [definition, server]);
 
   const discoverLocator = useMemo(
     () => share.url.locators.get('DISCOVER_APP_LOCATOR'),
@@ -125,11 +127,12 @@ export function StreamChartPanel({ definition }: StreamChartPanelProps) {
           query: {
             start: String(start),
             end: String(end),
+            server,
           },
         },
       });
     },
-    [definition, streamsRepositoryClient, start, end]
+    [definition, streamsRepositoryClient, start, end, server]
   );
 
   const [value, unit] = bucketSize.split(' ') as [DurationInputArg1, DurationInputArg2];

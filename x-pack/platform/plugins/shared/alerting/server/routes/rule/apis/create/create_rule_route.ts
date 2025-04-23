@@ -7,7 +7,6 @@
 
 import type { RouteOptions } from '../../..';
 import type {
-  CreateRuleRequestBodyV1,
   CreateRuleRequestParamsV1,
   CreateRuleResponseV1,
 } from '../../../../../common/routes/rule/apis/create';
@@ -73,7 +72,20 @@ export const createRuleRoute = ({ router, licenseState, usageCounter }: RouteOpt
           const rulesSettingsClient = (await context.alerting).getRulesSettingsClient(true);
 
           // Assert versioned inputs
-          const createRuleData: CreateRuleRequestBodyV1<RuleParamsV1> = req.body;
+          const { server, ...createRuleData } = req.body;
+
+          if (server && server !== '_local') {
+            const cckClient = alertingContext.cckClientGetter([server]);
+            const response = (
+              await cckClient.request('POST', `/api/alerting/rule/${req.params.id}`, createRuleData)
+            )[0];
+            if (response.status === 'rejected') {
+              throw response.reason;
+            }
+            return res.ok({
+              body: response.value.data,
+            });
+          }
           const params: CreateRuleRequestParamsV1 = req.params;
 
           countUsageOfPredefinedIds({

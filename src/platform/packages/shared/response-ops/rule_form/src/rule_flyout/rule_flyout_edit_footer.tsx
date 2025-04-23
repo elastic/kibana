@@ -10,22 +10,30 @@
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiButtonIcon,
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyoutFooter,
+  EuiPopover,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import React from 'react';
+import { useAbortableAsync, useBoolean } from '@kbn/react-hooks';
+import { i18n } from '@kbn/i18n';
 import {
   RULE_FLYOUT_FOOTER_CANCEL_TEXT,
   RULE_FLYOUT_FOOTER_SAVE_TEXT,
   RULE_PAGE_FOOTER_SHOW_REQUEST_TEXT,
 } from '../translations';
+import { useRuleFormState } from '../hooks';
 
 export interface RuleFlyoutEditFooterProps {
   isSaving: boolean;
   hasErrors: boolean;
   onCancel: () => void;
-  onSave: () => void;
+  onSave: (servers: string[]) => void;
   onShowRequest: () => void;
 }
 export const RuleFlyoutEditFooter = ({
@@ -35,6 +43,32 @@ export const RuleFlyoutEditFooter = ({
   hasErrors,
   isSaving,
 }: RuleFlyoutEditFooterProps) => {
+  const {
+    plugins: { http },
+  } = useRuleFormState();
+
+  const [isPopoverOpen, { off: closePopover, toggle: togglePopover }] = useBoolean(false);
+  const [selectedServers, setSelectedServers] = React.useState<string[]>([]);
+  const splitButtonPopoverId = useGeneratedHtmlId({
+    prefix: 'splitButtonPopover',
+  });
+  const { loading: loadingServerList, value: serverList } = useAbortableAsync(
+    async ({ signal: s }) => {
+      const response = await http.get<{
+        servers: Array<{ error: true } | { error: false; name: string }>;
+      }>('/api/cck/status', {
+        signal: s,
+      });
+      return [
+        '_local',
+        ...response.servers
+          .filter((server): server is { error: false; name: string } => !server.error)
+          .map((server) => server.name),
+      ];
+    },
+    [http]
+  );
+
   return (
     <EuiFlyoutFooter>
       <EuiFlexGroup justifyContent="spaceBetween">
@@ -64,11 +98,54 @@ export const RuleFlyoutEditFooter = ({
                 type="submit"
                 isDisabled={isSaving || hasErrors}
                 isLoading={isSaving}
-                onClick={onSave}
+                onClick={() => onSave(selectedServers)}
               >
                 {RULE_FLYOUT_FOOTER_SAVE_TEXT}
               </EuiButton>
             </EuiFlexItem>
+            {serverList && serverList.length > 1 && (
+              <EuiFlexItem grow={false}>
+                <EuiPopover
+                  id={splitButtonPopoverId}
+                  isOpen={isPopoverOpen}
+                  button={
+                    <EuiButtonIcon
+                      data-test-subj="streamsAppGrokAiPickConnectorButton"
+                      onClick={togglePopover}
+                      display="base"
+                      size="s"
+                      iconType="boxesVertical"
+                      aria-label={i18n.translate(
+                        'xpack.streams.refreshButton.euiButtonIcon.moreLabel',
+                        {
+                          defaultMessage: 'More',
+                        }
+                      )}
+                    />
+                  }
+                >
+                  <EuiContextMenuPanel
+                    size="s"
+                    items={serverList.map((server) => (
+                      <EuiContextMenuItem
+                        key={server}
+                        icon={selectedServers.some((s) => s === server) ? 'check' : 'empty'}
+                        onClick={() => {
+                          setSelectedServers((prev) => {
+                            if (prev.includes(server)) {
+                              return prev.filter((s) => s !== server);
+                            }
+                            return [...prev, server];
+                          });
+                        }}
+                      >
+                        {server}
+                      </EuiContextMenuItem>
+                    ))}
+                  />
+                </EuiPopover>
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>

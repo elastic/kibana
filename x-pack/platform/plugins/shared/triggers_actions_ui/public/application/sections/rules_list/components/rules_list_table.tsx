@@ -453,6 +453,25 @@ export const RulesListTable = (props: RulesListTableProps) => {
         },
       },
       {
+        id: 'server',
+        field: 'server',
+        selectorName: 'Cluster',
+        name: i18n.translate(
+          'xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.serverTitle',
+          { defaultMessage: 'Cluster' }
+        ),
+        sortable: true,
+        width: '10%',
+        'data-test-subj': 'rulesTableCell-server',
+        render: (server: string) => {
+          return (
+            <EuiText size="s" color="subdued">
+              {server}
+            </EuiText>
+          );
+        },
+      },
+      {
         id: 'ruleExecutionStatusLastDate',
         field: 'executionStatus.lastExecutionDate',
         selectorName: i18n.translate(

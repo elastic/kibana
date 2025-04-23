@@ -13,6 +13,7 @@ import type { UsageCollectionSetup, UsageCounter } from '@kbn/usage-collection-p
 import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { PluginSetup as DataPluginSetup } from '@kbn/data-plugin/server';
 import type { PluginStart as DataViewsPluginStart } from '@kbn/data-views-plugin/server';
+import type { CckPluginStart, CckPluginSetup } from '@kbn/cck-plugin/server';
 import type {
   EncryptedSavedObjectsPluginSetup,
   EncryptedSavedObjectsPluginStart,
@@ -190,6 +191,7 @@ export interface AlertingPluginsSetup {
   data: DataPluginSetup;
   features: FeaturesPluginSetup;
   unifiedSearch: UnifiedSearchServerPluginSetup;
+  cck: CckPluginSetup;
 }
 
 export interface AlertingPluginsStart {
@@ -204,6 +206,7 @@ export interface AlertingPluginsStart {
   data: DataPluginStart;
   dataViews: DataViewsPluginStart;
   share: SharePluginStart;
+  cck: CckPluginStart;
 }
 
 export class AlertingPlugin {
@@ -667,10 +670,13 @@ export class AlertingPlugin {
       maintenanceWindowClientFactory,
     } = this;
     return async function alertsRouteHandlerContext(context, request) {
-      const [{ savedObjects }] = await core.getStartServices();
+      const [{ savedObjects }, { cck }] = await core.getStartServices();
       return {
         getRulesClient: () => {
           return rulesClientFactory!.create(request, savedObjects);
+        },
+        cckClientGetter: (servers?: string[]) => {
+          return cck.getMultiCCKClient(servers);
         },
         getRulesSettingsClient: (withoutAuth?: boolean) => {
           if (withoutAuth) {

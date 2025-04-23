@@ -27,6 +27,7 @@ interface Options {
   end?: number;
   size?: number;
   streamDefinition: WiredStreamGetResponse;
+  server?: string;
 }
 
 export const useAsyncSample = (options: Options) => {
@@ -55,6 +56,11 @@ export const useAsyncSample = (options: Options) => {
     return condition && isAlwaysCondition(condition) ? undefined : condition;
   }, [options.condition]);
 
+  const indexName =
+    !options.server || options.server === '_local'
+      ? options.streamDefinition.stream.name
+      : `${options.server}:${options.streamDefinition.stream.name}`;
+
   useEffect(() => {
     if (!options.start || !options.end) {
       setDocuments([]);
@@ -70,7 +76,7 @@ export const useAsyncSample = (options: Options) => {
     const documentSubscription = data.search
       .search({
         params: {
-          index: options.streamDefinition.stream.name,
+          index: indexName,
           body: getDocumentsSearchBody(options, runtimeMappings, convertedCondition),
         },
       })
@@ -113,7 +119,7 @@ export const useAsyncSample = (options: Options) => {
 
           return data.search.search({
             params: {
-              index: options.streamDefinition.stream.name,
+              index: indexName,
               body: getDocumentCountsSearchBody(
                 options,
                 runtimeMappings,
@@ -166,6 +172,7 @@ export const useAsyncSample = (options: Options) => {
     options.size,
     options.streamDefinition,
     refreshId,
+    indexName,
   ]);
 
   return {

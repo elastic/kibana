@@ -80,12 +80,29 @@ const upsertIngestRoute = createServerRoute({
     path: z.object({
       name: z.string(),
     }),
+    query: z.object({
+      server: z.string().optional(),
+    }),
     body: ingestUpsertRequestSchema,
   }),
   handler: async ({ params, request, getScopedClients }) => {
-    const { streamsClient, assetClient } = await getScopedClients({
+    const { streamsClient, assetClient, cckClientGetter } = await getScopedClients({
       request,
     });
+    const server = params.query.server;
+    if (server && server !== '_local') {
+      const response = (
+        await cckClientGetter([server]).request<IngestGetResponse>(
+          'PUT',
+          `/api/streams/${params.path.name}/_ingest`,
+          params.body
+        )
+      )[0];
+      if (response.status === 'rejected') {
+        throw response;
+      }
+      return response.value.data;
+    }
 
     if (
       isWiredStreamDefinition({ name: params.path.name, ...params.body }) &&

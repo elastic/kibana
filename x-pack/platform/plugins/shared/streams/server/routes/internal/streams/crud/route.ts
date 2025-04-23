@@ -6,10 +6,11 @@
  */
 
 import { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
-import { StreamDefinition, isGroupStreamDefinition } from '@kbn/streams-schema';
+import { StreamDefinition } from '@kbn/streams-schema';
 import { z } from '@kbn/zod';
 import { estypes } from '@elastic/elasticsearch';
 import { UnwiredIngestStreamEffectiveLifecycle } from '@kbn/streams-schema';
+import { mapSettledResponses } from '@kbn/cck-plugin/common';
 import { createServerRoute } from '../../../create_server_route';
 import { getDataStreamLifecycle } from '../../../../lib/streams/stream_crud';
 
@@ -17,6 +18,7 @@ export interface ListStreamDetail {
   stream: StreamDefinition;
   effective_lifecycle: UnwiredIngestStreamEffectiveLifecycle;
   data_stream?: estypes.IndicesDataStream;
+  server: string;
 }
 
 export const listStreamsRoute = createServerRoute({
@@ -33,7 +35,9 @@ export const listStreamsRoute = createServerRoute({
     },
   },
   handler: async ({ request, getScopedClients }): Promise<{ streams: ListStreamDetail[] }> => {
-    const { streamsClient, scopedClusterClient } = await getScopedClients({ request });
+    const { streamsClient, scopedClusterClient, cckClientGetter } = await getScopedClients({
+      request,
+    });
     const streams = await streamsClient.listStreamsWithDataStreamExistence();
     const dataStreams = await scopedClusterClient.asCurrentUser.indices.getDataStream({
       name: streams.filter((stream) => stream.data_stream_exists).map((stream) => stream.name),
@@ -45,11 +49,27 @@ export const listStreamsRoute = createServerRoute({
         stream,
         effective_lifecycle: getDataStreamLifecycle(match ?? null),
         data_stream: match,
+        server: '_local',
       });
       return acc;
     }, []);
 
-    return { streams: enrichedStreams };
+    const allServerClient = cckClientGetter();
+    const remoteResponses = await allServerClient.request<{ streams: ListStreamDetail[] }>(
+      'GET',
+      '/internal/streams'
+    );
+    const allStreams = [
+      ...enrichedStreams.map((stream) => ({ ...stream, server: '_local' })),
+      ...mapSettledResponses(
+        remoteResponses,
+        (response, server) => response.streams.map((stream) => ({ ...stream, server })),
+        (error) => []
+      ).flat(),
+    ];
+    return {
+      streams: allStreams,
+    };
   },
 });
 
@@ -76,18 +96,20 @@ export const streamDetailRoute = createServerRoute({
     query: z.object({
       start: z.string(),
       end: z.string(),
+      server: z.string().optional(),
     }),
   }),
   handler: async ({ params, request, getScopedClients }): Promise<StreamDetailsResponse> => {
-    const { scopedClusterClient, streamsClient } = await getScopedClients({ request });
-    const streamEntity = await streamsClient.getStream(params.path.name);
+    const { scopedClusterClient } = await getScopedClients({ request });
+    // const streamEntity = await streamsClient.getStream(params.path.name);
 
-    const indexPattern = isGroupStreamDefinition(streamEntity)
-      ? streamEntity.group.members.join(',')
-      : streamEntity.name;
+    // const indexPattern = isGroupStreamDefinition(streamEntity)
+    //   ? streamEntity.group.members.join(',')
+    //   : streamEntity.name;
     // check doc count
+    const server = params.query.server;
     const docCountResponse = await scopedClusterClient.asCurrentUser.search({
-      index: indexPattern,
+      index: !server || server === '_local' ? params.path.name : `${server}:${params.path.name}`,
       track_total_hits: true,
       ignore_unavailable: true,
       query: {

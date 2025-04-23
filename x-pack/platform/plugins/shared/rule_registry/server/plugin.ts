@@ -27,6 +27,7 @@ import type {
   PluginSetup as DataPluginSetup,
 } from '@kbn/data-plugin/server';
 
+import type { CckPluginSetup, CckPluginStart } from '@kbn/cck-plugin/server';
 import type { RuleRegistryPluginConfig } from './config';
 import { type IRuleDataService, RuleDataService, Dataset } from './rule_data_plugin_service';
 import { AlertsClientFactory } from './alert_data_client/alerts_client_factory';
@@ -39,12 +40,14 @@ export interface RuleRegistryPluginSetupDependencies {
   security?: SecurityPluginSetup;
   data: DataPluginSetup;
   alerting: AlertingServerSetup;
+  cck: CckPluginSetup;
 }
 
 export interface RuleRegistryPluginStartDependencies {
   alerting: AlertingServerStart;
   data: DataPluginStart;
   spaces?: SpacesPluginStart;
+  cck: CckPluginStart;
 }
 
 export interface RuleRegistryPluginSetupContract {
@@ -142,7 +145,7 @@ export class RuleRegistryPlugin
     const router = core.http.createRouter<RacRequestHandlerContext>();
     core.http.registerRouteHandlerContext<RacRequestHandlerContext, 'rac'>(
       'rac',
-      this.createRouteHandlerContext()
+      this.createRouteHandlerContext(plugins)
     );
 
     defineRoutes(router);
@@ -183,13 +186,18 @@ export class RuleRegistryPlugin
     };
   }
 
-  private createRouteHandlerContext = (): IContextProvider<RacRequestHandlerContext, 'rac'> => {
+  private createRouteHandlerContext = (
+    plugins: RuleRegistryPluginSetupDependencies
+  ): IContextProvider<RacRequestHandlerContext, 'rac'> => {
     const { alertsClientFactory } = this;
     return function alertsRouteHandlerContext(context, request): RacApiRequestHandlerContext {
       return {
         getAlertsClient: async () => {
           const createdClient = await alertsClientFactory.create(request);
           return createdClient;
+        },
+        cckClientGetter: (servers?: string[]) => {
+          return plugins.cck.getMultiCCKClient(servers);
         },
       };
     };

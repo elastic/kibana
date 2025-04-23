@@ -17,7 +17,7 @@ import {
 } from '@elastic/eui';
 import { checkActionFormActionTypeEnabled } from '@kbn/alerts-ui-shared';
 import { isEmpty } from 'lodash';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import { RuleFormStepId } from '../constants';
 import { useRuleFormHorizontalSteps, useRuleFormState } from '../hooks';
 import {
@@ -30,13 +30,12 @@ import { hasRuleErrors } from '../validation';
 import { RuleFlyoutCreateFooter } from './rule_flyout_create_footer';
 import { RuleFlyoutEditFooter } from './rule_flyout_edit_footer';
 import { RuleFlyoutEditTabs } from './rule_flyout_edit_tabs';
-import { ConfirmCreateRule } from '../components';
 
 interface RuleFlyoutBodyProps {
   isEdit?: boolean;
   isSaving?: boolean;
   onCancel: () => void;
-  onSave: (formData: RuleFormData) => void;
+  onSave: (formData: RuleFormData, servers: string[]) => void;
   onInteraction: () => void;
   onShowRequest: () => void;
   onChangeMetaData?: (metadata?: RuleFormState['metadata']) => void;
@@ -53,8 +52,6 @@ export const RuleFlyoutBody = ({
   onShowRequest,
   onChangeMetaData = () => {},
 }: RuleFlyoutBodyProps) => {
-  const [showCreateConfirmation, setShowCreateConfirmation] = useState<boolean>(false);
-
   const {
     formData,
     multiConsumerSelection,
@@ -115,29 +112,25 @@ export const RuleFlyoutBody = ({
     });
   }, [actions, connectors, connectorTypes]);
 
-  const onSaveInternal = useCallback(() => {
-    onSave({
-      ...formData,
-      ...(multiConsumerSelection ? { consumer: multiConsumerSelection } : {}),
-    });
-  }, [onSave, formData, multiConsumerSelection]);
+  const onSaveInternal = useCallback(
+    (servers: string[]) => {
+      onSave(
+        {
+          ...formData,
+          ...(multiConsumerSelection ? { consumer: multiConsumerSelection } : {}),
+        },
+        servers
+      );
+    },
+    [onSave, formData, multiConsumerSelection]
+  );
 
-  const onClickSave = useCallback(() => {
-    if (!hasActionsDisabled && actions.length === 0) {
-      setShowCreateConfirmation(true);
-    } else {
-      onSaveInternal();
-    }
-  }, [actions.length, hasActionsDisabled, onSaveInternal]);
-
-  const onCreateConfirmClick = useCallback(() => {
-    setShowCreateConfirmation(false);
-    onSaveInternal();
-  }, [onSaveInternal]);
-
-  const onCreateCancelClick = useCallback(() => {
-    setShowCreateConfirmation(false);
-  }, []);
+  const onClickSave = useCallback(
+    (servers: string[]) => {
+      onSaveInternal(servers);
+    },
+    [onSaveInternal]
+  );
 
   return (
     <>
@@ -185,9 +178,6 @@ export const RuleFlyoutBody = ({
           hasPreviousStep={hasPreviousStep}
           hasErrors={hasErrors}
         />
-      )}
-      {showCreateConfirmation && (
-        <ConfirmCreateRule onConfirm={onCreateConfirmClick} onCancel={onCreateCancelClick} />
       )}
     </>
   );

@@ -17,6 +17,7 @@ import type {
   RuleExecutorServices,
   RuleType,
 } from '@kbn/alerting-plugin/server';
+import type { CckMultiClient } from '@kbn/cck-plugin/server';
 import type { AlertsClient } from './alert_data_client/alerts_client';
 
 type SimpleAlertType<
@@ -67,6 +68,7 @@ export type AlertExecutorOptionsWithExtraServices<
  */
 export interface RacApiRequestHandlerContext {
   getAlertsClient: () => Promise<AlertsClient>;
+  cckClientGetter: (servers?: string[]) => CckMultiClient;
 }
 
 /**

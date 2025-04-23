@@ -102,6 +102,7 @@ export const enhancedEsSearchStrategyProvider = (
       ...(await getDefaultAsyncSubmitParams(uiSettingsClient, searchConfig, options)),
       ...request.params,
     };
+    // console.log(JSON.stringify(params));
     const { body, headers, meta } = await client.asyncSearch.submit(params, {
       ...options.transport,
       signal: options.abortSignal,

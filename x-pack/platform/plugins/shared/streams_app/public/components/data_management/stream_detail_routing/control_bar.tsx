@@ -5,12 +5,24 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiButton, EuiFlexItem, EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiButton,
+  EuiFlexItem,
+  EuiButtonEmpty,
+  EuiToolTip,
+  EuiPopover,
+  useGeneratedHtmlId,
+  EuiButtonIcon,
+  EuiContextMenuPanel,
+  EuiContextMenuItem,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { IngestUpsertRequest, isCondition } from '@kbn/streams-schema';
-import React from 'react';
-import { useAbortController } from '@kbn/react-hooks';
+import React, { useEffect } from 'react';
+import { useAbortController, useAbortableAsync, useBoolean } from '@kbn/react-hooks';
+import { useStreamDetail } from '../../../hooks/use_stream_detail';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
 import { emptyEqualsToAlways } from '../../../util/condition';
@@ -27,8 +39,47 @@ export function ControlBar() {
     },
   } = useKibana();
 
+  const { server: currentServer } = useStreamDetail();
+
   const { notifications } = core;
   const router = useStreamsAppRouter();
+
+  const [isPopoverOpen, { off: closePopover, toggle: togglePopover }] = useBoolean(false);
+  const splitButtonPopoverId = useGeneratedHtmlId({
+    prefix: 'splitButtonPopover',
+  });
+
+  const { loading: loadingServerList, value: serverList } = useAbortableAsync(
+    async ({ signal: s }) => {
+      const response = await core.http.get<{
+        servers: Array<{ error: true } | { error: false; name: string }>;
+      }>('/api/cck/status', {
+        signal: s,
+      });
+      return [
+        '_local',
+        ...response.servers
+          .filter((server): server is { error: false; name: string } => !server.error)
+          .map((server) => server.name),
+      ];
+    },
+    [core.http]
+  );
+
+  const [selectedServers, setSelectedServers] = React.useState<string[]>([]);
+
+  useEffect(() => {
+    if (!loadingServerList && serverList?.length) {
+      setSelectedServers((prev) => {
+        if (prev.length === 0) {
+          return [...serverList];
+        } else if (!prev.includes(currentServer)) {
+          return [...prev, currentServer];
+        }
+        return prev;
+      });
+    }
+  }, [loadingServerList, serverList, currentServer]);
 
   const { definition, routingAppState, refreshDefinition } = useRoutingStateContext();
 
@@ -51,20 +102,27 @@ export function ControlBar() {
       return;
     }
 
-    return streamsRepositoryClient.fetch('POST /api/streams/{name}/_fork 2023-10-31', {
-      signal,
-      params: {
-        path: {
-          name: definition.stream.name,
-        },
-        body: {
-          if: emptyEqualsToAlways(routingAppState.childUnderEdit.child.if),
-          stream: {
-            name: routingAppState.childUnderEdit.child.destination,
+    const childUnderEdit = routingAppState.childUnderEdit;
+
+    return Promise.all(
+      selectedServers.map((server) =>
+        streamsRepositoryClient.fetch('POST /api/streams/{name}/_fork 2023-10-31', {
+          signal,
+          params: {
+            path: {
+              name: definition.stream.name,
+            },
+            body: {
+              server,
+              if: emptyEqualsToAlways(childUnderEdit.child.if),
+              stream: {
+                name: childUnderEdit.child.destination,
+              },
+            },
           },
-        },
-      },
-    });
+        })
+      )
+    );
   }
 
   // Persists edits to child streams and reorders of the child streams
@@ -90,15 +148,22 @@ export function ControlBar() {
       },
     } as IngestUpsertRequest;
 
-    return streamsRepositoryClient.fetch('PUT /api/streams/{name}/_ingest 2023-10-31', {
-      signal,
-      params: {
-        path: {
-          name: stream.name,
-        },
-        body: request,
-      },
-    });
+    return Promise.all(
+      selectedServers.map((server) =>
+        streamsRepositoryClient.fetch('PUT /api/streams/{name}/_ingest 2023-10-31', {
+          signal,
+          params: {
+            path: {
+              name: stream.name,
+            },
+            query: {
+              server,
+            },
+            body: request,
+          },
+        })
+      )
+    );
   }
 
   async function saveOrUpdateChildren() {
@@ -224,6 +289,49 @@ export function ControlBar() {
                 })}
           </EuiButton>
         </EuiToolTip>
+        {serverList && serverList.length > 1 && (
+          <EuiFlexItem grow={false}>
+            <EuiPopover
+              id={splitButtonPopoverId}
+              isOpen={isPopoverOpen}
+              button={
+                <EuiButtonIcon
+                  data-test-subj="streamsAppGrokAiPickConnectorButton"
+                  onClick={togglePopover}
+                  display="base"
+                  size="s"
+                  iconType="boxesVertical"
+                  aria-label={i18n.translate(
+                    'xpack.streams.refreshButton.euiButtonIcon.moreLabel',
+                    {
+                      defaultMessage: 'More',
+                    }
+                  )}
+                />
+              }
+            >
+              <EuiContextMenuPanel
+                size="s"
+                items={serverList.map((server) => (
+                  <EuiContextMenuItem
+                    key={server}
+                    icon={selectedServers.some((s) => s === server) ? 'check' : 'empty'}
+                    onClick={() => {
+                      setSelectedServers((prev) => {
+                        if (prev.includes(server)) {
+                          return prev.filter((s) => s !== server);
+                        }
+                        return [...prev, server];
+                      });
+                    }}
+                  >
+                    {server}
+                  </EuiContextMenuItem>
+                ))}
+              />
+            </EuiPopover>
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
     </EuiFlexGroup>
   );

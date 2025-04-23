@@ -125,7 +125,7 @@ export const CreateRuleForm = (props: CreateRuleFormProps) => {
   });
 
   const onSave = useCallback(
-    (newFormData: RuleFormData) => {
+    (newFormData: RuleFormData, servers: string[]) => {
       mutate({
         formData: {
           name: newFormData.name,
@@ -139,6 +139,7 @@ export const CreateRuleForm = (props: CreateRuleFormProps) => {
           alertDelay: newFormData.alertDelay,
           flapping: newFormData.flapping,
         },
+        servers,
       });
     },
     [mutate]

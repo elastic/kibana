@@ -6,27 +6,14 @@ export function getCCKClient(server: CckServerDefinition): AxiosInstance {
   const client = axios.create({
     baseURL: server.endpoint,
     headers: {
-      Authorization: `Bearer ${server.apiKey}`,
+      Authorization: `ApiKey ${server.apiKey}`,
       'Content-Type': 'application/json',
+      'x-elastic-internal-origin': 'Kibana',
+      'kbn-xsrf': 'foo',
     },
   });
 
   return client;
-}
-
-export function mapSettledResponses<T, R>(
-  responses: Array<PromiseSettledResult<AxiosResponse<T>>>,
-  successCallback: (data: T, index: number) => R,
-  errorCallback: (error: any, index: number) => R
-): R[] {
-  return responses.map((response, index) => {
-    if (response.status === 'fulfilled') {
-      // Call the success callback with the response data
-      return successCallback(response.value.data, index);
-    } else {
-      return errorCallback(response.reason, index);
-    }
-  });
 }
 
 export function getMultiCCKClient(servers: CckServerDefinition[]): {
@@ -35,7 +22,7 @@ export function getMultiCCKClient(servers: CckServerDefinition[]): {
     url: string,
     data?: any,
     config?: AxiosRequestConfig
-  ) => Promise<Array<PromiseSettledResult<AxiosResponse<T>>>>;
+  ) => Promise<Array<PromiseSettledResult<AxiosResponse<T>> & { server: string }>>;
 } {
   const clients = servers.map((server) => getCCKClient(server));
 
@@ -45,7 +32,7 @@ export function getMultiCCKClient(servers: CckServerDefinition[]): {
       url: string,
       data?: any,
       config?: AxiosRequestConfig
-    ): Promise<Array<PromiseSettledResult<AxiosResponse<T>>>> => {
+    ): Promise<Array<PromiseSettledResult<AxiosResponse<T>> & { server: string }>> => {
       const requests = clients.map((client) => {
         // Use the appropriate axios method based on the provided method string
         switch (method.toUpperCase()) {
@@ -69,7 +56,10 @@ export function getMultiCCKClient(servers: CckServerDefinition[]): {
         }
       });
 
-      return Promise.allSettled(requests);
+      return (await Promise.allSettled(requests)).map((response, index) => ({
+        ...response,
+        server: servers[index].name,
+      }));
     },
   };
 }

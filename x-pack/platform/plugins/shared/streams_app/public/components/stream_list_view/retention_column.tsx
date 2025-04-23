@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiText, EuiLink, EuiBadge, EuiIcon } from '@elastic/eui';
+import { EuiText, EuiLink, EuiBadge, EuiIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { ILM_LOCATOR_ID, IlmLocatorParams } from '@kbn/index-lifecycle-management-common-shared';
@@ -16,21 +16,51 @@ import {
   isIlmLifecycle,
 } from '@kbn/streams-schema';
 import { useKibana } from '../../hooks/use_kibana';
+import { StreamTreeWithLevel } from './tree_table';
 
-export function RetentionColumn({ lifecycle }: { lifecycle: IngestStreamEffectiveLifecycle }) {
+export function RetentionColumn({ stream }: { stream: StreamTreeWithLevel }) {
+  // group stream.definitions by their effective lifecycle and collect in a map. afterwards render the required retention badges
+  const retentionBadges = stream.definitions.reduce((acc, definition) => {
+    if (definition.effective_lifecycle) {
+      const lifecycleKey = JSON.stringify(definition.effective_lifecycle);
+      acc[lifecycleKey] = acc[lifecycleKey] || [];
+      acc[lifecycleKey].push(definition.server);
+    }
+    return acc;
+  }, {} as Record<string, string[]>);
+
+  return (
+    <EuiText color="subdued">
+      {Object.entries(retentionBadges).map(([lifecycle, servers]) => (
+        <RetentionBadge
+          key={lifecycle}
+          lifecycle={JSON.parse(lifecycle) as IngestStreamEffectiveLifecycle}
+          servers={servers}
+        />
+      ))}
+    </EuiText>
+  );
+}
+
+function RetentionBadge({
+  lifecycle,
+  servers,
+}: {
+  lifecycle: IngestStreamEffectiveLifecycle;
+  servers: string[];
+}) {
   const {
     dependencies: {
       start: { share },
     },
   } = useKibana();
   const ilmLocator = share.url.locators.get<IlmLocatorParams>(ILM_LOCATOR_ID);
+  let badge: React.ReactNode = null;
 
   if (isErrorLifecycle(lifecycle)) {
-    return <EuiBadge color="hollow">{lifecycle.error.message}</EuiBadge>;
-  }
-
-  if (isIlmLifecycle(lifecycle)) {
-    return (
+    badge = <EuiBadge color="hollow">{lifecycle.error.message}</EuiBadge>;
+  } else if (isIlmLifecycle(lifecycle)) {
+    badge = (
       <EuiBadge color="hollow">
         <EuiLink
           data-test-subj="streamsAppLifecycleBadgeIlmPolicyNameLink"
@@ -50,17 +80,21 @@ export function RetentionColumn({ lifecycle }: { lifecycle: IngestStreamEffectiv
         </EuiLink>
       </EuiBadge>
     );
-  }
-
-  if (isDslLifecycle(lifecycle)) {
-    return lifecycle.dsl.data_retention || <EuiIcon type="infinity" size="m" />;
+  } else if (isDslLifecycle(lifecycle)) {
+    badge = lifecycle.dsl.data_retention || <EuiIcon type="infinity" size="m" />;
+  } else {
+    badge = (
+      <EuiText color="subdued">
+        {i18n.translate('xpack.streams.streamsRetentionColumn.disabledLifecycleBadgeLabel', {
+          defaultMessage: 'Disabled',
+        })}
+      </EuiText>
+    );
   }
 
   return (
-    <EuiText color="subdued">
-      {i18n.translate('xpack.streams.streamsRetentionColumn.disabledLifecycleBadgeLabel', {
-        defaultMessage: 'Disabled',
-      })}
-    </EuiText>
+    <EuiToolTip content={servers.join(', ')} position="top" delay="long">
+      <span>{badge}</span>
+    </EuiToolTip>
   );
 }

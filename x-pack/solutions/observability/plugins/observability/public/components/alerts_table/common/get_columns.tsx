@@ -50,6 +50,11 @@ export const getColumns = (
       initialWidth: 120,
     },
     {
+      displayAsText: 'Cluster',
+      id: 'server',
+      initialWidth: 120,
+    },
+    {
       displayAsText: i18n.translate('xpack.observability.alertsTGrid.triggeredColumnDescription', {
         defaultMessage: 'Triggered',
       }),

@@ -21,7 +21,7 @@ interface RuleFlyoutProps {
   isEdit?: boolean;
   isSaving?: boolean;
   onCancel?: () => void;
-  onSave: (formData: RuleFormData) => void;
+  onSave: (formData: RuleFormData, servers: string[]) => void;
   onChangeMetaData?: (metadata?: RuleTypeMetaData) => void;
 }
 

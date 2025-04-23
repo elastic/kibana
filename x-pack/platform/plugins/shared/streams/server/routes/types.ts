@@ -10,6 +10,7 @@ import { DefaultRouteHandlerResources } from '@kbn/server-route-repository';
 import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { InferenceClient } from '@kbn/inference-plugin/server';
+import { CckMultiClient } from '@kbn/cck-plugin/server';
 import { StreamsServer } from '../types';
 import { AssetService } from '../lib/streams/assets/asset_service';
 import { AssetClient } from '../lib/streams/assets/asset_client';
@@ -28,6 +29,7 @@ export interface RouteHandlerScopedClients {
   assetClient: AssetClient;
   streamsClient: StreamsClient;
   inferenceClient: InferenceClient;
+  cckClientGetter: (servers?: string[]) => CckMultiClient;
 }
 
 export interface RouteDependencies {

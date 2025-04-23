@@ -13,7 +13,6 @@ export const configSchema = schema.object({
       name: schema.string(),
       endpoint: schema.string(),
       apiKey: schema.string(),
-      elasticsearchRemoteName: schema.string(),
     })
   ),
 });

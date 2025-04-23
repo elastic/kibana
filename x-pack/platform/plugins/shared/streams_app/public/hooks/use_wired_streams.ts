@@ -8,8 +8,10 @@
 import { isWiredStreamDefinition } from '@kbn/streams-schema';
 import { useKibana } from './use_kibana';
 import { useStreamsAppFetch } from './use_streams_app_fetch';
+import { useStreamDetail } from './use_stream_detail';
 
 export const useWiredStreams = () => {
+  const { server } = useStreamDetail();
   const {
     dependencies: {
       start: {
@@ -19,8 +21,16 @@ export const useWiredStreams = () => {
   } = useKibana();
 
   const result = useStreamsAppFetch(
-    async ({ signal }) => streamsRepositoryClient.fetch('GET /api/streams 2023-10-31', { signal }),
-    [streamsRepositoryClient]
+    async ({ signal }) =>
+      streamsRepositoryClient.fetch('GET /api/streams 2023-10-31', {
+        signal,
+        params: {
+          query: {
+            server,
+          },
+        },
+      }),
+    [server, streamsRepositoryClient]
   );
 
   return {

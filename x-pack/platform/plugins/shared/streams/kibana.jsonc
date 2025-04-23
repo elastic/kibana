@@ -18,6 +18,7 @@
       "licensing",
       "taskManager",
       "alerting",
+      "cck",
       "inference"
     ],
     "optionalPlugins": [

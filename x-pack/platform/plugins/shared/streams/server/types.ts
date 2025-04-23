@@ -16,6 +16,7 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
+import type { CckPluginStart } from '@kbn/cck-plugin/server';
 import type { AlertingServerSetup, AlertingServerStart } from '@kbn/alerting-plugin/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { StreamsConfig } from '../common/config';
@@ -46,4 +47,5 @@ export interface StreamsPluginStartDependencies {
   taskManager: TaskManagerStartContract;
   alerting: AlertingServerStart;
   inference: InferenceServerStart;
+  cck: CckPluginStart;
 }

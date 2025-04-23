@@ -315,6 +315,7 @@ const AlertsTableContent = typedForwardRef(
       isFetching: isLoadingAlerts,
     } = useSearchAlertsQuery({
       data,
+      http,
       ...queryParams,
     });
     const {

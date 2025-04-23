@@ -32,7 +32,7 @@ export interface RulePageProps {
   isEdit?: boolean;
   isSaving?: boolean;
   onCancel?: () => void;
-  onSave: (formData: RuleFormData) => void;
+  onSave: (formData: RuleFormData, servers: string[]) => void;
 }
 
 export const RulePage = (props: RulePageProps) => {
@@ -51,12 +51,18 @@ export const RulePage = (props: RulePageProps) => {
     background-color: transparent;
   `;
 
-  const onSaveInternal = useCallback(() => {
-    onSave({
-      ...formData,
-      ...(multiConsumerSelection ? { consumer: multiConsumerSelection } : {}),
-    });
-  }, [onSave, formData, multiConsumerSelection]);
+  const onSaveInternal = useCallback(
+    (servers: string[]) => {
+      onSave(
+        {
+          ...formData,
+          ...(multiConsumerSelection ? { consumer: multiConsumerSelection } : {}),
+        },
+        servers
+      );
+    },
+    [onSave, formData, multiConsumerSelection]
+  );
 
   const onCancelInternal = useCallback(() => {
     if (touched) {
@@ -101,11 +107,11 @@ export const RulePage = (props: RulePageProps) => {
             alignItems="flexStart"
             className="eui-fullWidth"
           >
-            <EuiFlexItem grow={false} style={{ alignItems: 'start' }}>
+            <EuiFlexItem grow={false} css={{ alignItems: 'start' }}>
               <EuiButtonEmpty
                 data-test-subj="rulePageReturnButton"
                 onClick={onCancelInternal}
-                style={{ padding: 0 }}
+                css={{ padding: 0 }}
                 iconType="arrowLeft"
                 iconSide="left"
                 aria-label="Return link"

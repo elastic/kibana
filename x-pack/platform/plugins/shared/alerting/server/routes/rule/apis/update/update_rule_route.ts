@@ -7,7 +7,6 @@
 
 import type { IRouter } from '@kbn/core/server';
 import type {
-  UpdateRuleRequestBodyV1,
   UpdateRuleRequestParamsV1,
   UpdateRuleResponseV1,
 } from '../../../../../common/routes/rule/apis/update';
@@ -77,7 +76,20 @@ export const updateRuleRoute = (
           const rulesSettingsClient = (await context.alerting).getRulesSettingsClient(true);
 
           // Assert versioned inputs
-          const updateRuleData: UpdateRuleRequestBodyV1<RuleParamsV1> = req.body;
+          const { server, ...updateRuleData } = req.body;
+
+          if (server && server !== '_local') {
+            const cckClient = alertingContext.cckClientGetter([server]);
+            const response = (
+              await cckClient.request('PUT', `/api/alerting/rule/${req.params.id}`, updateRuleData)
+            )[0];
+            if (response.status === 'rejected') {
+              throw response.reason;
+            }
+            return res.ok({
+              body: response.value.data,
+            });
+          }
           const updateRuleParams: UpdateRuleRequestParamsV1 = req.params;
 
           try {

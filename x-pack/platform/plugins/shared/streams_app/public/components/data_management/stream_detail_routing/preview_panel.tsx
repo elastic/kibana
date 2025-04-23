@@ -17,6 +17,7 @@ import { i18n } from '@kbn/i18n';
 import { WiredStreamGetResponse } from '@kbn/streams-schema';
 import { css } from '@emotion/css';
 import React from 'react';
+import { useStreamDetail } from '../../../hooks/use_stream_detail';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useAsyncSample } from '../../../hooks/queries/use_async_sample';
 import { PreviewTable } from '../preview_table';
@@ -44,6 +45,8 @@ export function PreviewPanel({
     absoluteTimeRange: { start, end },
   } = data.query.timefilter.timefilter.useTimefilter();
 
+  const { server } = useStreamDetail();
+
   const {
     isLoadingDocuments,
     documents,
@@ -60,6 +63,7 @@ export function PreviewPanel({
     end: end?.valueOf(),
     size: 100,
     streamDefinition: definition,
+    server,
   });
 
   let content;

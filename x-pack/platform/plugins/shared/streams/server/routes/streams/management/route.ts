@@ -31,18 +31,43 @@ export const forkStreamsRoute = createServerRoute({
     path: z.object({
       name: z.string(),
     }),
-    body: z.object({ stream: z.object({ name: z.string() }), if: conditionSchema }),
+    body: z.object({
+      stream: z.object({ name: z.string() }),
+      if: conditionSchema,
+      server: z.string(),
+    }),
   }),
   handler: async ({ params, request, getScopedClients }): Promise<{ acknowledged: true }> => {
-    const { streamsClient } = await getScopedClients({
+    const { streamsClient, cckClientGetter } = await getScopedClients({
       request,
     });
 
-    return await streamsClient.forkStream({
-      parent: params.path.name,
-      if: params.body.if,
-      name: params.body.stream.name,
-    });
+    const server = params.body.server;
+
+    if (server === '_local') {
+      return await streamsClient.forkStream({
+        parent: params.path.name,
+        if: params.body.if,
+        name: params.body.stream.name,
+      });
+    }
+
+    const cckClient = cckClientGetter([server]);
+
+    const response = (
+      await cckClient.request<{ acknowledged: true }>(
+        'POST',
+        `/api/streams/${params.path.name}/_fork`,
+        {
+          stream: params.body.stream,
+          if: params.body.if,
+        }
+      )
+    )[0];
+    if (response.status === 'rejected') {
+      throw response.reason;
+    }
+    return response.value.data;
   },
 });
 

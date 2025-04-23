@@ -7,7 +7,7 @@
 
 import { StreamDefinition, isUnwiredStreamDefinition } from '@kbn/streams-schema';
 
-export function getIndexPatterns(stream: StreamDefinition | undefined) {
+export function getIndexPatterns(stream: StreamDefinition | undefined, server?: string) {
   if (!stream) {
     return undefined;
   }
@@ -15,7 +15,8 @@ export function getIndexPatterns(stream: StreamDefinition | undefined) {
     return [stream.name];
   }
   const isRoot = stream.name.indexOf('.') === -1;
-  const dataStreamOfDefinition = stream.name;
+  const dataStreamOfDefinition =
+    !server || server === '_local' ? stream.name : `${server}:${stream.name}`;
   return isRoot
     ? [dataStreamOfDefinition, `${dataStreamOfDefinition}.*`]
     : [`${dataStreamOfDefinition}*`];

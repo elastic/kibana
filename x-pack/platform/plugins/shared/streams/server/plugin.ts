@@ -93,8 +93,17 @@ export class StreamsPlugin
           const scopedClusterClient = coreStart.elasticsearch.client.asScoped(request);
           const soClient = coreStart.savedObjects.getScopedClient(request);
           const inferenceClient = pluginsStart.inference.getClient({ request });
+          const cckClientGetter = (servers?: string[]) =>
+            pluginsStart.cck.getMultiCCKClient(servers);
 
-          return { scopedClusterClient, soClient, assetClient, streamsClient, inferenceClient };
+          return {
+            scopedClusterClient,
+            soClient,
+            assetClient,
+            streamsClient,
+            inferenceClient,
+            cckClientGetter,
+          };
         },
       },
       core,

@@ -189,6 +189,7 @@ export const createBodySchema = schema.object({
   notify_when: schema.maybe(schema.nullable(notifyWhenSchemaV1)),
   alert_delay: schema.maybe(alertDelaySchemaV1),
   flapping: schema.maybe(schema.nullable(flappingSchemaV1)),
+  server: schema.maybe(schema.string()),
 });
 
 export { createRuleParamsExamplesV1 };

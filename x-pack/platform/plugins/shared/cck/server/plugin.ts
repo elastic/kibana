@@ -32,7 +32,6 @@ export class CckPlugin implements Plugin<CckPluginSetup, CckPluginStart> {
         this.config.servers.map((server) => ({
           name: server.name,
           endpoint: server.endpoint,
-          elasticsearchRemoteName: server.elasticsearchRemoteName,
         })),
       getCCKClient: (name: string) => {
         const server = this.config.servers.find((s) => s.name === name);
@@ -41,8 +40,11 @@ export class CckPlugin implements Plugin<CckPluginSetup, CckPluginStart> {
         }
         return getCCKClient(server);
       },
-      getMultiCCKClient: () => {
-        return getMultiCCKClient(this.config.servers);
+      getMultiCCKClient: (servers?: string[]) => {
+        const serverConfig = servers
+          ? this.config.servers.filter((server) => servers.includes(server.name))
+          : this.config.servers;
+        return getMultiCCKClient(serverConfig);
       },
     };
   }

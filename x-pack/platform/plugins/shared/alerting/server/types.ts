@@ -25,6 +25,7 @@ import type {
 import type { ObjectType } from '@kbn/config-schema';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { SharePluginStart } from '@kbn/share-plugin/server';
+import type { CckMultiClient } from '@kbn/cck-plugin/server';
 import type { DefaultAlert, FieldMap } from '@kbn/alerts-as-data-utils';
 import type { Alert } from '@kbn/alerts-as-data-utils';
 import type { ActionsApiRequestHandlerContext, ActionsClient } from '@kbn/actions-plugin/server';
@@ -64,6 +65,7 @@ export type { RuleTypeParams };
  */
 export interface AlertingApiRequestHandlerContext {
   getRulesClient: () => Promise<RulesClient>;
+  cckClientGetter: (servers?: string[]) => CckMultiClient;
   getRulesSettingsClient: (withoutAuth?: boolean) => RulesSettingsClient;
   getMaintenanceWindowClient: () => MaintenanceWindowClient;
   listTypes: RuleTypeRegistry['list'];

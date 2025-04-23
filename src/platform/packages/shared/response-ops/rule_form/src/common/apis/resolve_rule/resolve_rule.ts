@@ -20,8 +20,38 @@ export async function resolveRule({
   http: HttpSetup;
   id: string;
 }): Promise<ResolvedRule> {
-  const res = await http.get<AsApiContract<ResolvedRule>>(
-    `${INTERNAL_BASE_ALERTING_API_PATH}/rule/${encodeURIComponent(id)}/_resolve`
+  const remoteRules = Object.fromEntries(
+    Object.entries(
+      await http.get<AsApiContract<Record<string, ResolvedRule | { error: any }>>>(
+        `/internal/alerting/rule/${encodeURIComponent(id)}/_resolve/_remote`
+      )
+    ).map(([key, value]) => {
+      if ('error' in value) {
+        return [key, value];
+      }
+      return [key, transformResolvedRule(value)];
+    })
   );
-  return transformResolvedRule(res);
+  try {
+    const res = await http.get<AsApiContract<ResolvedRule>>(
+      `${INTERNAL_BASE_ALERTING_API_PATH}/rule/${encodeURIComponent(id)}/_resolve`
+    );
+    return {
+      ...transformResolvedRule(res),
+      remoteRules: {
+        ...remoteRules,
+        _local: transformResolvedRule(res),
+      },
+    };
+  } catch (e) {
+    const hasRemoteRules = Object.entries(remoteRules).some((rule) => !('error' in rule));
+    if (!hasRemoteRules) {
+      throw e;
+    }
+    const firstRemoteRuleResponse = Object.values(remoteRules).find((r) => !('error' in r));
+    if (firstRemoteRuleResponse) {
+      return { ...firstRemoteRuleResponse, remoteRules };
+    }
+    throw e;
+  }
 }

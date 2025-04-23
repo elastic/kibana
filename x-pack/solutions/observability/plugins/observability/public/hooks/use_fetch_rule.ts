@@ -27,7 +27,9 @@ export interface UseFetchRuleResponse {
   rule: Rule | undefined;
   refetch: <TPageData>(
     options?: (RefetchOptions & RefetchQueryFilters<TPageData>) | undefined
-  ) => Promise<QueryObserverResult<Rule | undefined, unknown>>;
+  ) => Promise<
+    QueryObserverResult<(Rule & Record<string, Rule | { error: any }>) | undefined, unknown>
+  >;
 }
 
 export function useFetchRule({ ruleId }: { ruleId?: string }): UseFetchRuleResponse {
@@ -40,19 +42,49 @@ export function useFetchRule({ ruleId }: { ruleId?: string }): UseFetchRuleRespo
     {
       queryKey: ['fetchRule', ruleId],
       queryFn: async ({ signal }) => {
-        try {
-          if (!ruleId) return;
+        if (!ruleId) return;
 
-          const res = await http.get<AsApiContract<Rule>>(
-            `${INTERNAL_BASE_ALERTING_API_PATH}/rule/${encodeURIComponent(ruleId)}`,
-            {
-              signal,
+        const remoteRules = Object.fromEntries(
+          Object.entries(
+            await http.get<AsApiContract<Record<string, Rule | { error: any }>>>(
+              `/internal/alerting/rule/${encodeURIComponent(ruleId)}/_remote`
+            )
+          ).map(([key, value]) => {
+            if ('error' in value) {
+              return [key, value];
             }
-          );
+            return [key, transformRule(value)];
+          })
+        );
+        try {
+          try {
+            const res = await http.get<AsApiContract<Rule>>(
+              `${INTERNAL_BASE_ALERTING_API_PATH}/rule/${encodeURIComponent(ruleId)}`,
+              {
+                signal,
+              }
+            );
 
-          return transformRule(res);
-        } catch (error) {
-          throw error;
+            return {
+              ...transformRule(res),
+              remoteRules: {
+                ...remoteRules,
+                _local: transformRule(res),
+              },
+            };
+          } catch (error) {
+            throw error;
+          }
+        } catch (e) {
+          const hasRemoteRules = Object.entries(remoteRules).some((rule) => !('error' in rule));
+          if (!hasRemoteRules) {
+            throw e;
+          }
+          const firstRemoteRuleResponse = Object.values(remoteRules).find((r) => !('error' in r));
+          if (firstRemoteRuleResponse) {
+            return { ...firstRemoteRuleResponse, remoteRules };
+          }
+          throw e;
         }
       },
       keepPreviousData: true,

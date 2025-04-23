@@ -11,18 +11,8 @@
     "browser": false,
     "server": true,
     "requiredPlugins": [
-      "data",
-      "security",
-      "encryptedSavedObjects",
-      "usageCollection",
-      "licensing",
-      "taskManager",
-      "alerting",
-      "inference"
     ],
     "optionalPlugins": [
-      "cloud",
-      "serverless"
     ],
     "requiredBundles": [
     ]

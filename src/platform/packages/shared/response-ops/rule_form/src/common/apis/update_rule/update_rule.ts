@@ -39,16 +39,22 @@ export async function updateRule({
   http,
   rule,
   id,
+  servers,
 }: {
   http: HttpSetup;
   rule: UpdateRuleBody;
   id: string;
+  servers: string[];
 }): Promise<Rule> {
-  const res = await http.put<AsApiContract<Rule>>(
-    `${BASE_ALERTING_API_PATH}/rule/${encodeURIComponent(id)}`,
-    {
-      body: JSON.stringify(transformUpdateRuleBody(pick(rule, UPDATE_FIELDS_WITH_ACTIONS))),
-    }
+  const allResponses = await Promise.all(
+    servers.map((server) =>
+      http.put<AsApiContract<Rule>>(`${BASE_ALERTING_API_PATH}/rule/${encodeURIComponent(id)}`, {
+        body: JSON.stringify({
+          ...transformUpdateRuleBody(pick(rule, UPDATE_FIELDS_WITH_ACTIONS)),
+          server,
+        }),
+      })
+    )
   );
-  return transformRule(res);
+  return transformRule(allResponses[0]);
 }

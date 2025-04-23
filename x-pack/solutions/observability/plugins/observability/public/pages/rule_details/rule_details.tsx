@@ -9,7 +9,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
 import { DEFAULT_CONTROLS } from '@kbn/alerts-ui-shared/src/alert_filter_controls/constants';
 import type { FilterGroupHandler } from '@kbn/alerts-ui-shared';
-import { EuiSpacer, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiBadge, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { RuleExecutionStatusErrorReasons } from '@kbn/alerting-plugin/common';
 import { RuleFormFlyout } from '@kbn/response-ops-rule-form/flyout';
@@ -233,8 +233,21 @@ export function RuleDetailsPage() {
       }}
     >
       <HeaderMenu />
+      <div>
+        <EuiText size="s">
+          {i18n.translate('xpack.observability.ruleDetailsPage.thisRuleIsPresentTextLabel', {
+            defaultMessage: 'This rule is present on:',
+          })}
+          {Object.entries(rule.remoteRules)
+            .filter(([_, r]) => !('error' in r))
+            .map(([key], index) => (
+              <EuiBadge key={key}>{key}</EuiBadge>
+            ))}
+        </EuiText>
+      </div>
+      <EuiSpacer size="m" />
       <EuiFlexGroup wrap gutterSize="m">
-        <EuiFlexItem style={{ minWidth: 350 }}>
+        <EuiFlexItem css={{ minWidth: 350 }}>
           <RuleStatusPanel
             rule={rule}
             isEditable={isEditable}
@@ -244,7 +257,7 @@ export function RuleDetailsPage() {
           />
         </EuiFlexItem>
 
-        <EuiFlexItem style={{ minWidth: 350 }}>
+        <EuiFlexItem css={{ minWidth: 350 }}>
           <AlertSummaryWidget
             ruleTypeIds={OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES}
             consumers={observabilityAlertFeatureIds}

@@ -22,10 +22,11 @@ export interface UseCreateRuleProps {
 export const useCreateRule = (props: UseCreateRuleProps) => {
   const { http, onSuccess, onError } = props;
 
-  const mutationFn = ({ formData }: { formData: CreateRuleBody }) => {
+  const mutationFn = ({ formData, servers }: { formData: CreateRuleBody; servers: string[] }) => {
     return createRule({
       http,
       rule: formData,
+      servers,
     });
   };
 

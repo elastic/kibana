@@ -18,7 +18,8 @@
     "requiredPlugins": [
       "alerting",
       "data",
-      "triggersActionsUi"
+      "triggersActionsUi",
+      "cck"
     ],
     "optionalPlugins": [
       "security",

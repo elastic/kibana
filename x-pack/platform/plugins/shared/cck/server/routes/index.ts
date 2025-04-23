@@ -1,6 +1,7 @@
 import type { IRouter } from '@kbn/core/server';
 import { CckConfig } from '../../common/config';
-import { getMultiCCKClient, mapSettledResponses } from '../client';
+import { getMultiCCKClient } from '../client';
+import { mapSettledResponses } from '../../common';
 
 export function defineRoutes(router: IRouter, config: CckConfig) {
   router.get(
@@ -22,11 +23,13 @@ export function defineRoutes(router: IRouter, config: CckConfig) {
         body: {
           servers: mapSettledResponses(
             responses,
-            (data, index) => ({
+            (data, server, index) => ({
+              name: server,
               endpoint: config.servers[index].endpoint,
               status: data,
             }),
-            (error, index) => ({
+            (error, server, index) => ({
+              name: server,
               endpoint: config.servers[index].endpoint,
               status: {
                 error: true,

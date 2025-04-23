@@ -22,11 +22,20 @@ export interface UseUpdateRuleProps {
 export const useUpdateRule = (props: UseUpdateRuleProps) => {
   const { http, onSuccess, onError } = props;
 
-  const mutationFn = ({ id, formData }: { id: string; formData: UpdateRuleBody }) => {
+  const mutationFn = ({
+    id,
+    formData,
+    servers,
+  }: {
+    id: string;
+    formData: UpdateRuleBody;
+    servers: string[];
+  }) => {
     return updateRule({
       id,
       http,
       rule: formData,
+      servers,
     });
   };
 

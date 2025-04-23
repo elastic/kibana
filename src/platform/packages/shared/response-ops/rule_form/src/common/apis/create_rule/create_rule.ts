@@ -18,12 +18,23 @@ import { transformRule } from '../../transformations';
 export async function createRule({
   http,
   rule,
+  servers,
 }: {
   http: HttpSetup;
   rule: CreateRuleBody;
+  servers: string[];
 }): Promise<Rule> {
-  const res = await http.post<AsApiContract<Rule>>(`${BASE_ALERTING_API_PATH}/rule`, {
-    body: JSON.stringify(transformCreateRuleBody(rule)),
-  });
-  return transformRule(res);
+  // generate id
+  const generatedId = `rule-${Date.now()}`;
+  const allResponses = await Promise.all(
+    servers.map((server) =>
+      http.post<AsApiContract<Rule>>(
+        `${BASE_ALERTING_API_PATH}/rule/${encodeURIComponent(generatedId)}`,
+        {
+          body: JSON.stringify({ ...transformCreateRuleBody(rule), server }),
+        }
+      )
+    )
+  );
+  return transformRule(allResponses[0]);
 }

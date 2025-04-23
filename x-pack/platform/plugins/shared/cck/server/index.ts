@@ -11,4 +11,4 @@ export async function plugin(initializerContext: PluginInitializerContext) {
 
 export { config };
 
-export type { CckPluginSetup, CckPluginStart } from './types';
+export type { CckPluginSetup, CckPluginStart, CckMultiClient } from './types';

@@ -79,6 +79,7 @@ export type ResolvedRule = Omit<
 > & {
   ruleTypeId: ResolvedSanitizedRule['alertTypeId'];
   actions: RuleUiAction[];
+  remoteRules: Record<string, ResolvedRule | { error: any }>;
 };
 
 export type Rule<Params extends RuleTypeParams = RuleTypeParams> = SanitizedRule<Params>;

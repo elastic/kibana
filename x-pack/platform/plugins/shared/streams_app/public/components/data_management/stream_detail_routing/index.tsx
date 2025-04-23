@@ -15,6 +15,7 @@ import { css } from '@emotion/css';
 import { WiredStreamGetResponse } from '@kbn/streams-schema';
 import React from 'react';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
+import { useStreamDetail } from '../../../hooks/use_stream_detail';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../../hooks/use_streams_app_fetch';
 import { StreamDeleteModal } from '../../stream_delete_modal';
@@ -42,13 +43,20 @@ export function StreamDetailRouting({
     },
   } = useKibana();
 
+  const { server } = useStreamDetail();
+
   const streamsListFetch = useStreamsAppFetch(
     ({ signal }) => {
       return streamsRepositoryClient.fetch('GET /api/streams 2023-10-31', {
         signal,
+        params: {
+          query: {
+            server,
+          },
+        },
       });
     },
-    [streamsRepositoryClient]
+    [server, streamsRepositoryClient]
   );
 
   const availableStreams = streamsListFetch.value?.streams.map((stream) => stream.name) ?? [];

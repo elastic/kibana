@@ -24,12 +24,13 @@ import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
 import { useKibana } from '../../hooks/use_kibana';
 import { esqlResultToTimeseries } from '../../util/esql_result_to_timeseries';
 import { useTimeFilter } from '../../hooks/use_timefilter';
+import { StreamTreeWithLevel } from './tree_table';
 
 export function DocumentsColumn({
-  indexPattern,
+  stream,
   numDataPoints,
 }: {
-  indexPattern: string;
+  stream: StreamTreeWithLevel;
   numDataPoints: number;
 }) {
   const {
@@ -43,6 +44,16 @@ export function DocumentsColumn({
 
   const { absoluteTimeRange } = useTimeFilter();
   const minInterval = Math.floor((absoluteTimeRange.end - absoluteTimeRange.start) / numDataPoints);
+
+  const indexPattern = stream.definitions
+    .filter((d) => d.data_stream)
+    .map((d) => {
+      if (d.server === '_local') {
+        return d.stream.name;
+      }
+      return `${d.server}:${d.stream.name}`;
+    })
+    .join(',');
 
   const histogramQueryFetch = useStreamsAppFetch(
     async ({ signal }) => {

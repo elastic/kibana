@@ -30,6 +30,7 @@ export type RulesListVisibleColumns =
   | 'ruleName'
   | 'ruleTags'
   | 'ruleExecutionStatusLastDate'
+  | 'server'
   | 'ruleSnoozeNotify'
   | 'ruleScheduleInterval'
   | 'ruleExecutionStatusLastDuration'
@@ -42,6 +43,7 @@ export const originalRulesListVisibleColumns: RulesListVisibleColumns[] = [
   'ruleName',
   'ruleTags',
   'ruleExecutionStatusLastDate',
+  'server',
   'ruleSnoozeNotify',
   'ruleScheduleInterval',
   'ruleExecutionStatusLastDuration',

@@ -6,7 +6,15 @@
  */
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiIcon, EuiInMemoryTable } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLink,
+  EuiIcon,
+  EuiInMemoryTable,
+  EuiBadge,
+  EuiToolTip,
+} from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { css } from '@emotion/css';
 import {
@@ -67,6 +75,11 @@ export function StreamsTreeTable({
                   {name}
                 </EuiLink>
               </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiToolTip content={item.definitions.map((d) => d.server).join(', ')}>
+                  <EuiBadge>{item.definitions.length}</EuiBadge>
+                </EuiToolTip>
+              </EuiFlexItem>
             </EuiFlexGroup>
           ),
         },
@@ -77,8 +90,8 @@ export function StreamsTreeTable({
           }),
           width: '40%',
           render: (_, item) =>
-            item.data_stream ? (
-              <DocumentsColumn indexPattern={item.name} numDataPoints={25} />
+            item.definitions.some((d) => d.data_stream) ? (
+              <DocumentsColumn stream={item} numDataPoints={25} />
             ) : null,
         },
         {
@@ -87,7 +100,7 @@ export function StreamsTreeTable({
             defaultMessage: 'Retention',
           }),
           width: '20%',
-          render: (_, item) => <RetentionColumn lifecycle={item.effective_lifecycle} />,
+          render: (_, item) => <RetentionColumn stream={item} />,
         },
       ]}
       itemId="name"
@@ -120,17 +133,30 @@ export function StreamsTreeTable({
   );
 }
 
-export interface StreamTree extends ListStreamDetail {
+export interface StreamTree {
   name: string;
   type: 'wired' | 'root' | 'classic';
+  definitions: ListStreamDetail[];
   children: StreamTree[];
+}
+
+function mergeStreams(streams: ListStreamDetail[]) {
+  const mergedStreams: Record<string, { name: string; definitions: ListStreamDetail[] }> = {};
+  streams.forEach((stream) => {
+    if (!mergedStreams[stream.stream.name]) {
+      mergedStreams[stream.stream.name] = { name: stream.stream.name, definitions: [stream] };
+    } else {
+      mergedStreams[stream.stream.name].definitions.push(stream);
+    }
+  });
+  return Object.values(mergedStreams);
 }
 
 export function asTrees(streams: ListStreamDetail[]) {
   const trees: StreamTree[] = [];
-  const sortedStreams = streams
+  const sortedStreams = mergeStreams(streams)
     .slice()
-    .sort((a, b) => getSegments(a.stream.name).length - getSegments(b.stream.name).length);
+    .sort((a, b) => getSegments(a.name).length - getSegments(b.name).length);
 
   sortedStreams.forEach((streamDetail) => {
     let currentTree = trees;
@@ -138,9 +164,7 @@ export function asTrees(streams: ListStreamDetail[]) {
     // traverse the tree following the prefix of the current name.
     // once we reach the leaf, the current name is added as child - this works because the ids are sorted by depth
     while (
-      (existingNode = currentTree.find((node) =>
-        isDescendantOf(node.name, streamDetail.stream.name)
-      ))
+      (existingNode = currentTree.find((node) => isDescendantOf(node.name, streamDetail.name)))
     ) {
       currentTree = existingNode.children;
     }
@@ -148,11 +172,11 @@ export function asTrees(streams: ListStreamDetail[]) {
     if (!existingNode) {
       const newNode: StreamTree = {
         ...streamDetail,
-        name: streamDetail.stream.name,
+        name: streamDetail.name,
         children: [],
-        type: isUnwiredStreamDefinition(streamDetail.stream)
+        type: isUnwiredStreamDefinition(streamDetail.definitions[0].stream)
           ? 'classic'
-          : isRootStreamDefinition(streamDetail.stream)
+          : isRootStreamDefinition(streamDetail.definitions[0].stream)
           ? 'root'
           : 'wired',
       };
@@ -163,7 +187,7 @@ export function asTrees(streams: ListStreamDetail[]) {
   return trees;
 }
 
-interface StreamTreeWithLevel extends StreamTree {
+export interface StreamTreeWithLevel extends StreamTree {
   level: number;
 }
 

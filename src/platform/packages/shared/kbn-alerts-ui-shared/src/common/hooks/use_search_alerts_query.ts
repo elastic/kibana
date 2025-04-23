@@ -27,7 +27,7 @@ export const queryKeyPrefix = ['alerts', searchAlerts.name];
  * When testing components that depend on this hook, prefer mocking the {@link searchAlerts} function instead of the hook itself.
  * @external https://tanstack.com/query/v4/docs/framework/react/guides/testing
  */
-export const useSearchAlertsQuery = ({ data, ...params }: UseSearchAlertsQueryParams) => {
+export const useSearchAlertsQuery = ({ data, http, ...params }: UseSearchAlertsQueryParams) => {
   const {
     ruleTypeIds,
     consumers,
@@ -48,21 +48,55 @@ export const useSearchAlertsQuery = ({ data, ...params }: UseSearchAlertsQueryPa
   } = params;
   return useQuery({
     queryKey: queryKeyPrefix.concat(JSON.stringify(params)),
-    queryFn: ({ signal }) =>
-      searchAlerts({
-        data,
+    queryFn: async ({ signal }) => {
+      const response = await http.get<{
+        servers: Array<{ error: true } | { error: false; name: string }>;
+      }>('/api/cck/status', {
         signal,
-        ruleTypeIds,
-        consumers,
-        fields,
-        query,
-        sort,
-        runtimeMappings,
-        pageIndex,
-        pageSize,
-        minScore,
-        trackScores,
-      }),
+      });
+      const servers = [
+        '_local',
+        ...response.servers
+          .filter((server): server is { error: false; name: string } => !server.error)
+          .map((server) => server.name),
+      ];
+      const allAlerts = await Promise.all(
+        servers.map((server) =>
+          searchAlerts({
+            data,
+            http,
+            signal,
+            ruleTypeIds,
+            consumers,
+            fields,
+            query,
+            sort,
+            runtimeMappings,
+            pageIndex,
+            pageSize,
+            minScore,
+            trackScores,
+            server,
+          })
+        )
+      );
+
+      return allAlerts.reduce(
+        (acc, { alerts, oldAlertsData, ecsAlertsData, total }, index) => {
+          acc.alerts.push(...alerts.map((alert) => ({ ...alert, server: servers[index] })));
+          acc.oldAlertsData.push(...oldAlertsData);
+          acc.ecsAlertsData.push(...ecsAlertsData);
+          acc.total += total;
+          return acc;
+        },
+        {
+          alerts: [],
+          oldAlertsData: [],
+          ecsAlertsData: [],
+          total: 0,
+        }
+      );
+    },
     refetchOnWindowFocus: false,
     context: AlertsQueryContext,
     enabled: ruleTypeIds.length > 0,
