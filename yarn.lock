@@ -2700,10 +2700,10 @@
   resolved "https://registry.yarnpkg.com/@faker-js/faker/-/faker-7.6.0.tgz#9ea331766084288634a9247fcd8b84f16ff4ba07"
   integrity sha512-XK6BTq1NDMo9Xqw/YkYyGjSsg44fbNwYRx7QK2CuoQgyy+f1rrTDHoExVM5PsyXCtfl2vs2vVJ0MN0yN6LppRw==
 
-"@faker-js/faker@^8.3.1":
-  version "8.3.1"
-  resolved "https://registry.yarnpkg.com/@faker-js/faker/-/faker-8.3.1.tgz#7753df0cb88d7649becf984a96dd1bd0a26f43e3"
-  integrity sha512-FdgpFxY6V6rLZE9mmIBb9hM0xpfvQOSNOLnzolzKwsE1DH+gC7lEKV1p1IbR0lAYyvYd5a4u3qWJzowUkw1bIw==
+"@faker-js/faker@^9.7.0":
+  version "9.7.0"
+  resolved "https://registry.yarnpkg.com/@faker-js/faker/-/faker-9.7.0.tgz#1cf1fecfcad5e2da2332140bf3b5f23cc1c2a7f4"
+  integrity sha512-aozo5vqjCmDoXLNUJarFZx2IN/GgGaogY4TMJ6so/WLZOWpSV7fvj2dmrV6sEAnUm1O7aCrhTibjpzeDFgNqbg==
 
 "@fastify/busboy@^2.0.0":
   version "2.0.0"
@@ -6345,7 +6345,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/observability-ai-assistant-management-plugin@link:x-pack/solutions/observability/plugins/observability_ai_assistant_management":
+"@kbn/observability-ai-assistant-management-plugin@link:x-pack/platform/plugins/private/observability_ai_assistant_management":
   version "0.0.0"
   uid ""
 
@@ -8017,25 +8017,25 @@
     ncp "^2.0.0"
     typescript "^5.5.3"
 
-"@launchdarkly/js-sdk-common@2.14.0":
-  version "2.14.0"
-  resolved "https://registry.yarnpkg.com/@launchdarkly/js-sdk-common/-/js-sdk-common-2.14.0.tgz#e82dd47b02cf0b77490c4a8a6a8bdf94fda55a49"
-  integrity sha512-nCnhJclokmCDBhyHXalUycv453OLhpBOU6/Ay9z1FUHKS+jAhmTuu3qTtM/Q+WrLksUl8y1vvrBlr4nNMd5BRA==
+"@launchdarkly/js-sdk-common@2.15.0":
+  version "2.15.0"
+  resolved "https://registry.yarnpkg.com/@launchdarkly/js-sdk-common/-/js-sdk-common-2.15.0.tgz#9964895fb3c5d010800edaf4a9ae3939291a4d2d"
+  integrity sha512-M5ZI8CwKrK+snz1liRVPCfB35tu3NAIRI747ENgLZaTbF23pDUHElhISND/mn1wwSwrhoacqcYNKRwASdJDeig==
 
-"@launchdarkly/js-server-sdk-common@2.13.0":
-  version "2.13.0"
-  resolved "https://registry.yarnpkg.com/@launchdarkly/js-server-sdk-common/-/js-server-sdk-common-2.13.0.tgz#19536da19aba76e073e81d5286b7a45fae46e1ee"
-  integrity sha512-3lk52Qc5/5uunaMEEeP5dSduvy6MRihwFDFx60FDj7b5eRixKjx83f/zM3qIJujjghZwLYnMVi8dbp7g2taUyw==
+"@launchdarkly/js-server-sdk-common@2.14.0":
+  version "2.14.0"
+  resolved "https://registry.yarnpkg.com/@launchdarkly/js-server-sdk-common/-/js-server-sdk-common-2.14.0.tgz#2ed3a47e50fff29ed819bf56b95c48d2d48d9314"
+  integrity sha512-ykcRxkLf4poppZxBu9VkJ3+fHY8AbVY2odzCb6ZEHtI7qVG2/TfIOJ/896UqKJt+AryotUBNmKJNWJdQ3JFeog==
   dependencies:
-    "@launchdarkly/js-sdk-common" "2.14.0"
+    "@launchdarkly/js-sdk-common" "2.15.0"
     semver "7.5.4"
 
-"@launchdarkly/node-server-sdk@^9.7.7":
-  version "9.7.7"
-  resolved "https://registry.yarnpkg.com/@launchdarkly/node-server-sdk/-/node-server-sdk-9.7.7.tgz#14920b4a01ed23036f33b4215177dccd63d2567b"
-  integrity sha512-2HbFwCrvYVQ2KakBd4Rqd/WFPODbmAi90BaIkI70wizkEPzOTW9hWG914KLDNsikji+XIuFzz/C6hFHKWB+CRA==
+"@launchdarkly/node-server-sdk@^9.8.0":
+  version "9.8.0"
+  resolved "https://registry.yarnpkg.com/@launchdarkly/node-server-sdk/-/node-server-sdk-9.8.0.tgz#12381683c5c564513a1f525c9aec3cb92c39615e"
+  integrity sha512-GQwXlK3dIY9ZjYL73jz9GKSiWOUjDHIDSGUVpa+XziaomVtG8qQXXbZXTvZvPGy7VkYXmeEyayuRBHNFA3cFrw==
   dependencies:
-    "@launchdarkly/js-server-sdk-common" "2.13.0"
+    "@launchdarkly/js-server-sdk-common" "2.14.0"
     https-proxy-agent "^5.0.1"
     launchdarkly-eventsource "2.0.3"
 
@@ -9112,10 +9112,10 @@
     require-from-string "^2.0.2"
     uri-js-replace "^1.0.1"
 
-"@redocly/cli@^1.34.1":
-  version "1.34.1"
-  resolved "https://registry.yarnpkg.com/@redocly/cli/-/cli-1.34.1.tgz#e237107f3f9aa9f3290f9651268c4c15c08458aa"
-  integrity sha512-12aTw7A/0n+8T7yKM1E8qlFRFPZnm2i1me0sZ1WOAiGT4I2j4iUcCp+93B0nrjIs1ZdNmrT0TTrMYLhsMJYjaQ==
+"@redocly/cli@^1.34.2":
+  version "1.34.2"
+  resolved "https://registry.yarnpkg.com/@redocly/cli/-/cli-1.34.2.tgz#e67ea4be0a4663ff1ee063cbcacf937ce97d2586"
+  integrity sha512-XnKG7yrr0GUZ7MyqHk9hRt//HGUSnLDwwEXI8HDQdyDFp+YFbddqcQPOWc/sDeDBTEiBXqwPOb3/VKA+8NtSMw==
   dependencies:
     "@opentelemetry/api" "1.9.0"
     "@opentelemetry/exporter-trace-otlp-http" "0.53.0"
@@ -9123,8 +9123,8 @@
     "@opentelemetry/sdk-trace-node" "1.26.0"
     "@opentelemetry/semantic-conventions" "1.27.0"
     "@redocly/config" "^0.22.0"
-    "@redocly/openapi-core" "1.34.1"
-    "@redocly/respect-core" "1.34.1"
+    "@redocly/openapi-core" "1.34.2"
+    "@redocly/respect-core" "1.34.2"
     abort-controller "^3.0.0"
     chokidar "^3.5.1"
     colorette "^1.2.0"
@@ -9149,10 +9149,10 @@
   resolved "https://registry.yarnpkg.com/@redocly/config/-/config-0.22.1.tgz#e14461c009ac53b74f82c9788f9c43fc2c718f24"
   integrity sha512-1CqQfiG456v9ZgYBG9xRQHnpXjt8WoSnDwdkX6gxktuK69v2037hTAR1eh0DGIqpZ1p4k82cGH8yTNwt7/pI9g==
 
-"@redocly/openapi-core@1.34.1", "@redocly/openapi-core@^1.4.0":
-  version "1.34.1"
-  resolved "https://registry.yarnpkg.com/@redocly/openapi-core/-/openapi-core-1.34.1.tgz#d303c0f129c9166e293e7e6ee88de77e29fd6e16"
-  integrity sha512-KI1QOGvDk6oREbTu0JORxZX1NBxraXUbXczv0LYDs9EPp06coq874hQORqSHGEUV/DX2A6gjv4Ax33g/LFJBww==
+"@redocly/openapi-core@1.34.2", "@redocly/openapi-core@^1.4.0":
+  version "1.34.2"
+  resolved "https://registry.yarnpkg.com/@redocly/openapi-core/-/openapi-core-1.34.2.tgz#859de74a3261fb09a3dc695be4a8d9b1f2059d75"
+  integrity sha512-glfkQFJizLdq2fBkNvc2FJW0sxDb5exd0wIXhFk+WHaFLMREBC3CxRo2Zq7uJIdfV9U3YTceMbXJklpDfmmwFQ==
   dependencies:
     "@redocly/ajv" "^8.11.2"
     "@redocly/config" "^0.22.0"
@@ -9164,14 +9164,14 @@
     pluralize "^8.0.0"
     yaml-ast-parser "0.0.43"
 
-"@redocly/respect-core@1.34.1":
-  version "1.34.1"
-  resolved "https://registry.yarnpkg.com/@redocly/respect-core/-/respect-core-1.34.1.tgz#707e31d444c7cb5a44e6463fa266c8ef676226fa"
-  integrity sha512-Lzea25WqwxVK5+aCiq/pr7lUFdsZPYSqNzl05Z4jEtuP1DEIxJNG31ID75dZt30pPtyxjaa/dBuccruYlYflzw==
+"@redocly/respect-core@1.34.2":
+  version "1.34.2"
+  resolved "https://registry.yarnpkg.com/@redocly/respect-core/-/respect-core-1.34.2.tgz#6d83359dceceb39ae2403c90f8cfcc3505931b95"
+  integrity sha512-X6VR9bbHXrI01Wh5t6TIHxFCVHcP4Iy42micKLIk/Cg6EmHVbaSDGOD6mxChXtEIrwnY+bqyUbjlXr9+YM7B9A==
   dependencies:
     "@faker-js/faker" "^7.6.0"
     "@redocly/ajv" "8.11.2"
-    "@redocly/openapi-core" "1.34.1"
+    "@redocly/openapi-core" "1.34.2"
     better-ajv-errors "^1.2.0"
     colorette "^2.0.20"
     concat-stream "^2.0.0"
