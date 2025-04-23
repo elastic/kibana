@@ -13,8 +13,8 @@ import { Watch } from '../../../models/watch';
 const querySchema = schema.object({
   pageSize: schema.number(),
   pageIndex: schema.number(),
-  sortField: schema.string(),
-  sortDirection: schema.string(),
+  sortField: schema.maybe(schema.string()),
+  sortDirection: schema.maybe(schema.string()),
   query: schema.string(),
 });
 
