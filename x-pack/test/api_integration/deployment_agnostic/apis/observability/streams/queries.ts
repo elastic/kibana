@@ -8,15 +8,21 @@
 import expect from '@kbn/expect';
 import { WiredIngestUpsertRequest } from '@kbn/streams-schema';
 import { v4 } from 'uuid';
+import { ESQL_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import {
   StreamsSupertestRepositoryClient,
   createStreamsRepositoryAdminClient,
 } from './helpers/repository_client';
 import { disableStreams, enableStreams, getQueries, putStream } from './helpers/requests';
+import { RoleCredentials } from '../../../services';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');
+  const alertingApi = getService('alertingApi');
+  const samlAuth = getService('samlAuth');
+  let roleAuthc: RoleCredentials;
+
   let apiClient: StreamsSupertestRepositoryClient;
 
   const STREAM_NAME = 'logs.queries-test';
@@ -37,12 +43,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
   describe('Queries API', () => {
     before(async () => {
+      roleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('admin');
       apiClient = await createStreamsRepositoryAdminClient(roleScopedSupertest);
       await enableStreams(apiClient);
     });
 
     after(async () => {
       await disableStreams(apiClient);
+      await samlAuth.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
 
     beforeEach(async () => {
@@ -78,6 +86,16 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       const getQueriesResponse = await getQueries(apiClient, STREAM_NAME);
       expect(getQueriesResponse.queries).to.eql(queries);
+
+      const rules = await alertingApi.searchRules(
+        roleAuthc,
+        'alert.attributes.name:OutOfMemoryError'
+      );
+      expect(rules.body.data).to.have.length(1);
+      expect(rules.body.data[0].rule_type_id).to.eql(ESQL_RULE_TYPE_ID);
+      expect(rules.body.data[0].params.query).to.eql(
+        `FROM ${STREAM_NAME},${STREAM_NAME}.* METADATA _id, _source | WHERE KQL("""message:'OutOfMemoryError'""")`
+      );
     });
 
     it('inserts a query when inexistant', async () => {
@@ -98,6 +116,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       const getQueriesResponse = await getQueries(apiClient, STREAM_NAME);
       expect(getQueriesResponse.queries).to.eql([query]);
+
+      const rules = await alertingApi.searchRules(roleAuthc, '');
+      expect(rules.body.data).to.have.length(1);
     });
 
     it('updates a query when already defined', async () => {
@@ -136,6 +157,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           kql: { query: "message:'Something else'" },
         },
       ]);
+
+      const rules = await alertingApi.searchRules(roleAuthc, '');
+      expect(rules.body.data).to.have.length(1);
+      expect(rules.body.data[0].name).to.eql('Another title');
     });
 
     it('deletes an existing query successfully', async () => {
@@ -162,6 +187,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       const getQueriesResponse = await getQueries(apiClient, STREAM_NAME);
       expect(getQueriesResponse.queries).to.eql([]);
+
+      const rules = await alertingApi.searchRules(roleAuthc, '');
+      expect(rules.body.data).to.have.length(0);
     });
 
     it('throws when deleting an inexistant query', async () => {
@@ -233,6 +261,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       const getQueriesResponse = await getQueries(apiClient, STREAM_NAME);
       expect(getQueriesResponse.queries).to.eql([newQuery1, newQuery2]);
+
+      const rules = await alertingApi.searchRules(roleAuthc, '');
+      expect(rules.body.data).to.have.length(2);
+      const ruleNames = rules.body.data.map((rule: any) => rule.name);
+      expect(ruleNames.includes(newQuery1.title)).to.be(true);
+      expect(ruleNames.includes(newQuery2.title)).to.be(true);
     });
   });
 }
