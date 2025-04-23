@@ -939,6 +939,20 @@ paths:
                     description: The owner of the API key that is associated with the rule and used to run background tasks.
                     nullable: true
                     type: string
+                  artifacts:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      dashboards:
+                        items:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                          required:
+                            - id
+                        type: array
                   consumer:
                     description: 'The name of the application or feature that owns the rule. For example: `alerts`, `apm`, `discover`, `infrastructure`, `logs`, `metrics`, `ml`, `monitoring`, `securitySolution`, `siem`, `stackAlerts`, or `uptime`.'
                     type: string
@@ -1758,6 +1772,20 @@ paths:
                       type: number
                   required:
                     - active
+                artifacts:
+                  additionalProperties: false
+                  type: object
+                  properties:
+                    dashboards:
+                      items:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          id:
+                            type: string
+                        required:
+                          - id
+                      type: array
                 consumer:
                   description: 'The name of the application or feature that owns the rule. For example: `alerts`, `apm`, `discover`, `infrastructure`, `logs`, `metrics`, `ml`, `monitoring`, `securitySolution`, `siem`, `stackAlerts`, or `uptime`.'
                   type: string
@@ -2288,6 +2316,20 @@ paths:
                     description: The owner of the API key that is associated with the rule and used to run background tasks.
                     nullable: true
                     type: string
+                  artifacts:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      dashboards:
+                        items:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                          required:
+                            - id
+                        type: array
                   consumer:
                     description: 'The name of the application or feature that owns the rule. For example: `alerts`, `apm`, `discover`, `infrastructure`, `logs`, `metrics`, `ml`, `monitoring`, `securitySolution`, `siem`, `stackAlerts`, or `uptime`.'
                     type: string
@@ -2983,6 +3025,20 @@ paths:
                       type: number
                   required:
                     - active
+                artifacts:
+                  additionalProperties: false
+                  type: object
+                  properties:
+                    dashboards:
+                      items:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          id:
+                            type: string
+                        required:
+                          - id
+                      type: array
                 flapping:
                   additionalProperties: false
                   description: When flapping detection is turned on, alerts that switch quickly between active and recovered states are identified as “flapping” and notifications are reduced.
@@ -3274,6 +3330,20 @@ paths:
                     description: The owner of the API key that is associated with the rule and used to run background tasks.
                     nullable: true
                     type: string
+                  artifacts:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      dashboards:
+                        items:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                          required:
+                            - id
+                        type: array
                   consumer:
                     description: 'The name of the application or feature that owns the rule. For example: `alerts`, `apm`, `discover`, `infrastructure`, `logs`, `metrics`, `ml`, `monitoring`, `securitySolution`, `siem`, `stackAlerts`, or `uptime`.'
                     type: string
@@ -4663,6 +4733,20 @@ paths:
                     description: The owner of the API key that is associated with the rule and used to run background tasks.
                     nullable: true
                     type: string
+                  artifacts:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      dashboards:
+                        items:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                          required:
+                            - id
+                        type: array
                   consumer:
                     description: 'The name of the application or feature that owns the rule. For example: `alerts`, `apm`, `discover`, `infrastructure`, `logs`, `metrics`, `ml`, `monitoring`, `securitySolution`, `siem`, `stackAlerts`, or `uptime`.'
                     type: string
@@ -16677,6 +16761,16 @@ paths:
                           additionalProperties: false
                           type: object
                           properties:
+                            cloud_connectors:
+                              additionalProperties: false
+                              type: object
+                              properties:
+                                enabled:
+                                  type: boolean
+                                target_csp:
+                                  type: string
+                              required:
+                                - enabled
                             resources:
                               additionalProperties: false
                               type: object
@@ -17349,6 +17443,16 @@ paths:
                   additionalProperties: false
                   type: object
                   properties:
+                    cloud_connectors:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        enabled:
+                          type: boolean
+                        target_csp:
+                          type: string
+                      required:
+                        - enabled
                     resources:
                       additionalProperties: false
                       type: object
@@ -17560,6 +17664,16 @@ paths:
                         additionalProperties: false
                         type: object
                         properties:
+                          cloud_connectors:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              enabled:
+                                type: boolean
+                              target_csp:
+                                type: string
+                            required:
+                              - enabled
                           resources:
                             additionalProperties: false
                             type: object
@@ -18251,6 +18365,16 @@ paths:
                           additionalProperties: false
                           type: object
                           properties:
+                            cloud_connectors:
+                              additionalProperties: false
+                              type: object
+                              properties:
+                                enabled:
+                                  type: boolean
+                                target_csp:
+                                  type: string
+                              required:
+                                - enabled
                             resources:
                               additionalProperties: false
                               type: object
@@ -18921,6 +19045,16 @@ paths:
                         additionalProperties: false
                         type: object
                         properties:
+                          cloud_connectors:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              enabled:
+                                type: boolean
+                              target_csp:
+                                type: string
+                            required:
+                              - enabled
                           resources:
                             additionalProperties: false
                             type: object
@@ -19591,6 +19725,16 @@ paths:
                   additionalProperties: false
                   type: object
                   properties:
+                    cloud_connectors:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        enabled:
+                          type: boolean
+                        target_csp:
+                          type: string
+                      required:
+                        - enabled
                     resources:
                       additionalProperties: false
                       type: object
@@ -19804,6 +19948,16 @@ paths:
                         additionalProperties: false
                         type: object
                         properties:
+                          cloud_connectors:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              enabled:
+                                type: boolean
+                              target_csp:
+                                type: string
+                            required:
+                              - enabled
                           resources:
                             additionalProperties: false
                             type: object
@@ -20494,6 +20648,16 @@ paths:
                         additionalProperties: false
                         type: object
                         properties:
+                          cloud_connectors:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              enabled:
+                                type: boolean
+                              target_csp:
+                                type: string
+                            required:
+                              - enabled
                           resources:
                             additionalProperties: false
                             type: object
@@ -49663,11 +49827,11 @@ paths:
       summary: Create an SLO
       tags:
         - slo
-  /s/{spaceId}/api/observability/slos/_bulk_delete:
+  /s/{spaceId}/api/observability/slos/_bulk_purge_rollup:
     post:
       description: |
-        Bulk delete SLO definitions and their associated summary and rollup data.  This endpoint initiates a bulk deletion operation for SLOs, which may take some time to complete.  The status of the operation can be checked using the `GET /api/slo/_bulk_delete/{taskId}` endpoint.
-      operationId: bulkDeleteOp
+        The deletion occurs for the specified list of `sloId`. You must have `all` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges.
+      operationId: deleteRollupDataOp
       parameters:
         - $ref: '#/components/parameters/SLOs_kbn_xsrf'
         - $ref: '#/components/parameters/SLOs_space_id'
@@ -49675,15 +49839,15 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/SLOs_bulk_delete_request'
+              $ref: '#/components/schemas/SLOs_bulk_purge_rollup_request'
         required: true
       responses:
         '200':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SLOs_bulk_delete_response'
-          description: Successful response
+                $ref: '#/components/schemas/SLOs_bulk_purge_rollup_response'
+          description: Successful request
         '400':
           content:
             application/json:
@@ -49702,50 +49866,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/SLOs_403_response'
           description: Unauthorized response
-      summary: Bulk delete SLO definitions and their associated summary and rollup data.
-      tags:
-        - slo
-  /s/{spaceId}/api/observability/slos/_bulk_delete/{taskId}:
-    get:
-      description: |
-        Retrieve the status of the bulk deletion operation for SLOs.  This endpoint returns the status of the bulk deletion operation, including whether it is completed and the results of the operation.
-      operationId: bulkDeleteStatusOp
-      parameters:
-        - $ref: '#/components/parameters/SLOs_kbn_xsrf'
-        - $ref: '#/components/parameters/SLOs_space_id'
-        - description: The task id of the bulk delete operation
-          in: path
-          name: taskId
-          required: true
-          schema:
-            example: 8853df00-ae2e-11ed-90af-09bb6422b258
-            type: string
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/SLOs_bulk_delete_status_response'
-          description: Successful response
-        '400':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/SLOs_400_response'
-          description: Bad request
-        '401':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/SLOs_401_response'
-          description: Unauthorized response
-        '403':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/SLOs_403_response'
-          description: Unauthorized response
-      summary: Retrieve the status of the bulk deletion
+      summary: Batch delete rollup and summary data
       tags:
         - slo
   /s/{spaceId}/api/observability/slos/_delete_instances:
@@ -65580,61 +65701,57 @@ components:
       example: occurrences
       title: Budgeting method
       type: string
-    SLOs_bulk_delete_request:
+    SLOs_bulk_purge_rollup_request:
       description: |
-        The bulk delete SLO request takes a list of SLOs Definition id to delete.
+        The bulk purge rollup data request takes a list of SLO ids and a purge policy, then deletes the rollup data according to the purge policy. This API can be used to remove the staled data of an instance SLO that no longer get updated.
       properties:
         list:
-          description: An array of SLO Definition id
+          description: An array of slo ids
           items:
             description: The SLO Definition id
             example: 8853df00-ae2e-11ed-90af-09bb6422b258
             type: string
           type: array
+        purgePolicy:
+          description: Policy that dictates which SLI documents to purge based on age
+          oneOf:
+            - type: object
+              properties:
+                age:
+                  description: The duration to determine which documents to purge, formatted as {duration}{unit}. This value should be greater than or equal to the time window of every SLO provided.
+                  example: 7d
+                  type: string
+                purgeType:
+                  description: Specifies whether documents will be purged based on a specific age or on a timestamp
+                  enum:
+                    - fixed-age
+                  type: string
+            - type: object
+              properties:
+                purgeType:
+                  description: Specifies whether documents will be purged based on a specific age or on a timestamp
+                  enum:
+                    - fixed-time
+                  type: string
+                timestamp:
+                  description: The timestamp to determine which documents to purge, formatted in ISO. This value should be older than the applicable time window of every SLO provided.
+                  example: '2024-12-31T00:00:00.000Z'
+                  type: string
+          type: object
       required:
         - list
-      title: Bulk delete SLO request
+        - purgePolicy
+      title: Bulk Purge Rollup data request
       type: object
-    SLOs_bulk_delete_response:
+    SLOs_bulk_purge_rollup_response:
       description: |
-        The bulk delete SLO response returns a taskId that can be used to poll for its status
+        The bulk purge rollup data response returns a task id from the elasticsearch deleteByQuery response.
       properties:
         taskId:
-          description: The taskId of the bulk delete operation
-          example: d08506b7-f0e8-4f8b-a06a-a83940f4db91
+          description: The task id of the purge operation
+          example: 8853df00-ae2e-11ed-90af-09bb6422b258
           type: string
-      title: Bulk delete SLO response
-      type: object
-    SLOs_bulk_delete_status_response:
-      description: Indicates if the bulk deletion is completed, with the detailed results of the operation.
-      properties:
-        error:
-          description: The error message if the bulk deletion operation failed
-          example: Task not found
-          type: string
-        isDone:
-          description: Indicates if the bulk deletion operation is completed
-          example: true
-          type: boolean
-        results:
-          description: The results of the bulk deletion operation, including the success status and any errors for each SLO
-          items:
-            type: object
-            properties:
-              error:
-                description: The error message if the deletion operation failed for this SLO
-                example: SLO [d08506b7-f0e8-4f8b-a06a-a83940f4db91] not found
-                type: string
-              id:
-                description: The ID of the SLO that was deleted
-                example: d08506b7-f0e8-4f8b-a06a-a83940f4db91
-                type: string
-              success:
-                description: The result of the deletion operation for this SLO
-                example: true
-                type: boolean
-          type: array
-      title: The status of the bulk deletion
+      title: Bulk Purge Rollup data response
       type: object
     SLOs_create_slo_request:
       description: |

@@ -13,7 +13,8 @@ export class ManageSLO {
   constructor(
     private repository: SLORepository,
     private transformManager: TransformManager,
-    private summaryTransformManager: TransformManager
+    private summaryTransformManager: TransformManager,
+    private userId: string
   ) {}
 
   async enable(sloId: string) {
@@ -25,6 +26,7 @@ export class ManageSLO {
     await this.summaryTransformManager.start(getSLOSummaryTransformId(slo.id, slo.revision));
     await this.transformManager.start(getSLOTransformId(slo.id, slo.revision));
     slo.enabled = true;
+    slo.updatedBy = this.userId;
     slo.updatedAt = new Date();
     await this.repository.update(slo);
   }
@@ -38,6 +40,7 @@ export class ManageSLO {
     await this.summaryTransformManager.stop(getSLOSummaryTransformId(slo.id, slo.revision));
     await this.transformManager.stop(getSLOTransformId(slo.id, slo.revision));
     slo.enabled = false;
+    slo.updatedBy = this.userId;
     slo.updatedAt = new Date();
     await this.repository.update(slo);
   }
