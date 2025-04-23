@@ -7,7 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiSpacer, EuiSwitch, EuiSwitchEvent, EuiText, useEuiTheme } from '@elastic/eui';
+import {
+  EuiCallOut,
+  EuiSpacer,
+  EuiSwitch,
+  EuiSwitchEvent,
+  EuiText,
+  useEuiTheme,
+} from '@elastic/eui';
 import React, { ReactNode, useEffect, useState } from 'react';
 import { FormattedMessage, FormattedRelativeTime, FormattedDate } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
@@ -132,15 +139,18 @@ export const TimeTypeSection = ({ timeRange, isAbsoluteTime, changeTimeType }: P
 
   return (
     <>
-      <EuiSwitch
-        label={i18n.translate('share.link.timeRange.switchLabel', {
-          defaultMessage: 'Use absolute time range',
-        })}
-        checked={isAbsoluteTime}
-        disabled={isAbsoluteTimeByDefault}
-        onChange={changeTimeType}
-      />
-      <EuiSpacer size="m" />
+      {!isAbsoluteTimeByDefault && (
+        <>
+          <EuiSwitch
+            label={i18n.translate('share.link.timeRange.switchLabel', {
+              defaultMessage: 'Use absolute time range',
+            })}
+            checked={isAbsoluteTime}
+            onChange={changeTimeType}
+          />
+          <EuiSpacer size="m" />
+        </>
+      )}
       <EuiText size="s">
         {isAbsoluteTime ? (
           <FormattedMessage
@@ -157,6 +167,14 @@ export const TimeTypeSection = ({ timeRange, isAbsoluteTime, changeTimeType }: P
         )}
       </EuiText>
       <EuiSpacer size="m" />
+      {isAbsoluteTimeByDefault && (
+        <EuiCallOut
+          size="s"
+          title={i18n.translate('share.link.timeRange.relativeTimeCallout', {
+            defaultMessage: 'To use a relative time range, select it in the time picker first.',
+          })}
+        />
+      )}
     </>
   );
 };

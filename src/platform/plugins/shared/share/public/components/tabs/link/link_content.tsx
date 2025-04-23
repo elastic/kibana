@@ -15,7 +15,6 @@ import {
   EuiForm,
   EuiSpacer,
   EuiSwitchEvent,
-  EuiText,
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -139,13 +138,6 @@ export const LinkContent = ({
           isAbsoluteTime={isAbsoluteTime}
           changeTimeType={changeTimeType}
         />
-        <EuiText size="s">
-          <FormattedMessage
-            id="share.link.helpText"
-            defaultMessage="Share a direct link to this {objectType}."
-            values={{ objectType }}
-          />
-        </EuiText>
         {isDirty && DraftModeCallout && (
           <>
             <EuiSpacer size="m" />
