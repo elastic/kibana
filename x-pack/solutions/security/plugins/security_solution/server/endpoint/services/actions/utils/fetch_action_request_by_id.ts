@@ -47,5 +47,10 @@ export const fetchActionRequestById = async <
     throw new NotFoundError(`Action with id '${actionId}' not found.`);
   }
 
+  // Ensure `agent.policy` is an array
+  if (!Array.isArray(actionRequest.agent.policy)) {
+    actionRequest.agent.policy = actionRequest.agent.policy ? [actionRequest.agent.policy] : [];
+  }
+
   return actionRequest;
 };

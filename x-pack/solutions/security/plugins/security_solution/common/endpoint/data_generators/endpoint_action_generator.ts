@@ -50,10 +50,22 @@ export class EndpointActionGenerator extends BaseDataGenerator {
     overrides: DeepPartial<LogsEndpointAction<TParameters, TOutputContent, TMeta>> = {}
   ): LogsEndpointAction<TParameters, TOutputContent, TMeta> {
     const timeStamp = overrides['@timestamp'] ? new Date(overrides['@timestamp']) : new Date();
+    const agent = (overrides.agent?.id ?? [
+      this.seededUUIDv4(),
+    ]) as LogsEndpointAction['agent']['id'];
+    const agentId = Array.isArray(agent) ? (agent[0] as string) : agent;
     const doc: LogsEndpointAction<TParameters, TOutputContent, TMeta> = {
       '@timestamp': timeStamp.toISOString(),
       agent: {
-        id: [this.seededUUIDv4()],
+        id: agent,
+        policy: [
+          {
+            agentId,
+            elasticAgentId: agentId,
+            integrationPolicyId: 'integration-policy-1',
+            agentPolicyId: 'agent-policy-1',
+          },
+        ],
       },
       EndpointActions: {
         action_id: this.seededUUIDv4(),

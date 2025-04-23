@@ -35,6 +35,7 @@ describe('EndpointServiceFactory', () => {
       'endpointPolicyKuery',
       'ensureInCurrentSpace',
       'getPolicyNamespace',
+      'getIntegrationNamespaces',
     ]);
   });
 
@@ -119,7 +120,7 @@ describe('EndpointServiceFactory', () => {
     });
   });
 
-  describe('#getPolicyNamespace()', () => {
+  describe('Policy namespace methods', () => {
     let integrationPolicy: PackagePolicy;
     let agentPolicy1: AgentPolicy;
     let agentPolicy2: AgentPolicy;
@@ -143,39 +144,87 @@ describe('EndpointServiceFactory', () => {
       );
     });
 
-    it('should return namespace from agent policies if integration policy does not have one defined', async () => {
-      await expect(
-        fleetServicesMock.getPolicyNamespace({
-          integrationPolicies: [integrationPolicy.id],
-        })
-      ).resolves.toEqual({
-        integrationPolicy: {
-          [integrationPolicy.id]: ['foo1', 'foo2'],
-        },
+    describe('#getPolicyNamespace()', () => {
+      it('should return namespace from agent policies if integration policy does not have one defined', async () => {
+        await expect(
+          fleetServicesMock.getPolicyNamespace({
+            integrationPolicies: [integrationPolicy.id],
+          })
+        ).resolves.toEqual({
+          integrationPolicy: {
+            [integrationPolicy.id]: ['foo1', 'foo2'],
+          },
+        });
+        expect(
+          fleetServicesFactoryMock.dependencies.fleetDependencies.agentPolicyService.getByIds
+        ).toHaveBeenCalledWith(expect.anything(), [agentPolicy1.id, agentPolicy2.id]);
       });
-      expect(
-        fleetServicesFactoryMock.dependencies.fleetDependencies.agentPolicyService.getByIds
-      ).toHaveBeenCalledWith(expect.anything(), [agentPolicy1.id, agentPolicy2.id]);
+
+      it('should return namespace from integration policy if defined', async () => {
+        integrationPolicy.namespace = 'bar';
+
+        await expect(
+          fleetServicesMock.getPolicyNamespace({
+            integrationPolicies: [integrationPolicy.id],
+          })
+        ).resolves.toEqual({
+          integrationPolicy: {
+            [integrationPolicy.id]: ['bar'],
+          },
+        });
+
+        // The agentPolicy sevice should not have been called because the package policy has
+        // a namespace id, so no need.
+        expect(
+          fleetServicesFactoryMock.dependencies.fleetDependencies.agentPolicyService.getByIds
+        ).not.toHaveBeenCalled();
+      });
     });
 
-    it('should return namespace from integration policy if defined', async () => {
-      integrationPolicy.namespace = 'bar';
+    describe('#getIntegrationNamespaces()', () => {
+      beforeEach(() => {
+        integrationPolicy.package!.name = 'packageOne';
 
-      await expect(
-        fleetServicesMock.getPolicyNamespace({
-          integrationPolicies: [integrationPolicy.id],
-        })
-      ).resolves.toEqual({
-        integrationPolicy: {
-          [integrationPolicy.id]: ['bar'],
-        },
+        fleetServicesFactoryMock.dependencies.fleetDependencies.packagePolicyService.list.mockResolvedValue(
+          {
+            items: [integrationPolicy],
+            page: 1,
+            total: 1,
+            perPage: 20,
+          }
+        );
       });
 
-      // The agentPolicy sevice should not have been called because the package policy has
-      // a namespace id, so no need.
-      expect(
-        fleetServicesFactoryMock.dependencies.fleetDependencies.agentPolicyService.getByIds
-      ).not.toHaveBeenCalled();
+      it('should call fleet package policy service with expected arguments', async () => {
+        await expect(fleetServicesMock.getIntegrationNamespaces(['packageOne', 'packageTwo']))
+          .resolves;
+        expect(
+          fleetServicesFactoryMock.dependencies.fleetDependencies.packagePolicyService.list
+        ).toHaveBeenCalledWith(expect.anything(), {
+          perPage: 10_000,
+          kuery: 'ingest-package-policies.package.name: (packageOne OR packageTwo)',
+        });
+      });
+
+      it('should return namespaces from integration policy when defined', async () => {
+        integrationPolicy.namespace = 'ns_one';
+
+        await expect(
+          fleetServicesMock.getIntegrationNamespaces(['packageOne', 'packageTwo'])
+        ).resolves.toEqual({
+          packageOne: ['ns_one'],
+          packageTwo: [],
+        });
+      });
+
+      it('should return namespaces from agent policies if integration policy does not have one defined', async () => {
+        await expect(
+          fleetServicesMock.getIntegrationNamespaces(['packageOne', 'packageTwo'])
+        ).resolves.toEqual({
+          packageOne: ['foo1', 'foo2'],
+          packageTwo: [],
+        });
+      });
     });
   });
 });
