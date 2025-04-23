@@ -97,7 +97,6 @@ export type CreateDataStream = (params: {
     | 'prompts'
     | 'attackDiscovery'
     | 'defendInsights'
-    | 'alertSummary'
     | 'attackDiscoveryAlerts';
   fieldMap: FieldMap;
   kibanaVersion: string;
