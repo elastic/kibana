@@ -189,8 +189,9 @@ export async function executor(
   if (authType === AuthType.OAuth2) {
     if (!connectorTokenClient) {
       const serviceMessage = 'ConnectorTokenClient is not available for OAuth2 flow.';
-      logger.error(`Error executing webhook action "${actionId}": ${serviceMessage}`);
-      throw new Error('ERROR');
+      const errorMessage = `Error executing webhook action "${actionId}": ${serviceMessage}`;
+      logger.error(errorMessage);
+      throw new Error(errorMessage);
     }
     if (!accessTokenUrl || !clientId || !clientSecret) {
       const missingItems = [];
@@ -199,8 +200,9 @@ export async function executor(
       if (!clientSecret) missingItems.push('Client Secret');
 
       const serviceMessage = `Missing required OAuth2 configuration: ${missingItems.join(', ')}`;
-      logger.error(`Error executing webhook action "${actionId}": ${serviceMessage}`);
-      throw new Error('ERROR');
+      const errorMessage = `Error executing webhook action "${actionId}": ${serviceMessage}`;
+      logger.error(errorMessage);
+      throw new Error(errorMessage);
     }
 
     axiosInstance.interceptors.request.use(
@@ -225,12 +227,8 @@ export async function executor(
           throw new Error(`Unable to retrieve access token for connectorId: ${actionId}`);
         }
 
-        // Log the access token for debugging
-        logger.debug(`Obtained access token: ${accessToken}`);
-
-        // Add token to headers with "Bearer"
-        axiosConfig.headers.Authorization = `Bearer ${accessToken}`;
         logger.debug(`Successfully obtained OAuth2 token for connector "${actionId}"`);
+        axiosConfig.headers.Authorization = `Bearer ${accessToken}`;
 
         return axiosConfig;
       },
