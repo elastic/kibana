@@ -229,10 +229,10 @@
             "signature": [
               "(pipeline: ",
               {
-                "pluginId": "@kbn/apm-synthtrace",
-                "scope": "server",
-                "docId": "kibKbnApmSynthtracePluginApi",
-                "section": "def-server.ApmSynthtracePipelines",
+                "pluginId": "@kbn/apm-synthtrace-client",
+                "scope": "common",
+                "docId": "kibKbnApmSynthtraceClientPluginApi",
+                "section": "def-common.ApmSynthtracePipelines",
                 "text": "ApmSynthtracePipelines"
               },
               ", options?: { includeSerialization?: boolean | undefined; versionOverride?: string | undefined; }) => ((base: ",
@@ -256,10 +256,10 @@
                 "description": [],
                 "signature": [
                   {
-                    "pluginId": "@kbn/apm-synthtrace",
-                    "scope": "server",
-                    "docId": "kibKbnApmSynthtracePluginApi",
-                    "section": "def-server.ApmSynthtracePipelines",
+                    "pluginId": "@kbn/apm-synthtrace-client",
+                    "scope": "common",
+                    "docId": "kibKbnApmSynthtraceClientPluginApi",
+                    "section": "def-common.ApmSynthtracePipelines",
                     "text": "ApmSynthtracePipelines"
                   }
                 ],
@@ -1831,21 +1831,6 @@
       }
     ],
     "misc": [
-      {
-        "parentPluginId": "@kbn/apm-synthtrace",
-        "id": "def-server.ApmSynthtracePipelines",
-        "type": "Type",
-        "tags": [],
-        "label": "ApmSynthtracePipelines",
-        "description": [],
-        "signature": [
-          "\"default\" | \"otelToApm\" | \"apmToOtel\""
-        ],
-        "path": "src/platform/packages/shared/kbn-apm-synthtrace/src/lib/apm/client/apm_synthtrace_es_client/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
       {
         "parentPluginId": "@kbn/apm-synthtrace",
         "id": "def-server.Logger",
