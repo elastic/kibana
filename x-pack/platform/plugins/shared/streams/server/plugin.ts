@@ -16,16 +16,17 @@ import {
 } from '@kbn/core/server';
 import { registerRoutes } from '@kbn/server-route-repository';
 import { StreamsConfig, configSchema, exposeToBrowserConfig } from '../common/config';
+import { esqlRuleType } from './lib/rules/esql';
+import { AssetService } from './lib/streams/assets/asset_service';
+import { StreamsService } from './lib/streams/service';
+import { StreamsTelemetryService } from './lib/telemetry/service';
 import { streamsRouteRepository } from './routes';
+import { RouteHandlerScopedClients } from './routes/types';
 import {
   StreamsPluginSetupDependencies,
   StreamsPluginStartDependencies,
   StreamsServer,
 } from './types';
-import { AssetService } from './lib/streams/assets/asset_service';
-import { RouteHandlerScopedClients } from './routes/types';
-import { StreamsService } from './lib/streams/service';
-import { StreamsTelemetryService } from './lib/telemetry/service';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface StreamsPluginSetup {}
@@ -101,6 +102,8 @@ export class StreamsPlugin
       logger: this.logger,
       runDevModeChecks: this.isDev,
     });
+
+    plugins.alerting.registerType(esqlRuleType());
 
     return {};
   }
