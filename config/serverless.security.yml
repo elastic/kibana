@@ -94,7 +94,9 @@ xpack.cloud.serverless.project_type: security
 xpack.securitySolutionServerless.enabled: true
 xpack.securitySolutionServerless.productTypes:
   [
-    { product_line: 'ai_soc', product_tier: 'search_ai_lake' }
+    { product_line: 'security', product_tier: 'complete' },
+    { product_line: 'endpoint', product_tier: 'complete' },
+    { product_line: 'cloud', product_tier: 'complete' },
   ]
 
 xpack.securitySolution.offeringSettings: {

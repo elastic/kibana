@@ -6,18 +6,9 @@
  */
 
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
-import { createSpacesAndUsers, deleteSpacesAndUsers } from '../utils/auth';
 
 export default function ({ loadTestFile, getService }: FtrProviderContext) {
   describe('@ess GenAI - anonymization installation', function () {
-    // before(async () => {
-    //   await createSpacesAndUsers(getService);
-    // });
-
-    // after(async () => {
-    //   await deleteSpacesAndUsers(getService);
-    // });
-
     loadTestFile(require.resolve('./installation'));
   });
 }
