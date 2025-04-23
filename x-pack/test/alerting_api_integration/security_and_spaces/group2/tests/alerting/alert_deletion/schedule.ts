@@ -8,6 +8,8 @@
 import expect from '@kbn/expect';
 import { ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
 import type { IValidatedEvent } from '@kbn/event-log-plugin/server';
+import { ALERT_CASE_IDS } from '@kbn/rule-data-utils';
+import moment from 'moment';
 import {
   DOCUMENT_SOURCE,
   createEsDocument,
@@ -35,6 +37,8 @@ import {
   inactiveStackAlertsOlderThan90,
   inactiveStackAlertsNewerThan90,
   getTestAlertDocs,
+  getRecoveredAlert,
+  getActiveAlert,
 } from './alert_deletion_test_utils';
 
 // eslint-disable-next-line import/no-default-export
@@ -978,6 +982,126 @@ export default function alertDeletionTests({ getService }: FtrProviderContext) {
                 ...activeStackAlertsOlderThan90,
                 ...inactiveSecurityAlertsOlderThan90,
                 ...activeSecurityAlertsOlderThan90,
+              ];
+
+              await testExpectedAlertsAreDeleted(
+                expectedAlerts.map((a) => a.space1.id),
+                deletedAlerts.map((a) => a.space1.id)
+              );
+              break;
+            default:
+              throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
+          }
+        });
+
+        it('should not delete alerts linked to a case', async () => {
+          // index some additional docs with case ids
+          const alert0 = getRecoveredAlert(
+            '8d25ae10-77fb-4a04-a16c-150ad19de114',
+            'stack',
+            moment.utc().subtract(100, 'days').toISOString(),
+            'space1'
+          );
+          const alert1 = getRecoveredAlert(
+            '5e67d9e5-c5af-4720-80e8-f7bab999ae5a',
+            'o11y',
+            moment.utc().subtract(99, 'days').toISOString(),
+            'space1'
+          );
+          const alert2 = getActiveAlert(
+            '10979c00-9b16-4105-b2a2-7b981ef82881',
+            'o11y',
+            moment.utc().subtract(99, 'days').toISOString(),
+            'space1'
+          );
+          const alert3 = getActiveAlert(
+            '30cf6c43-3ab6-456d-b8b6-5c1e3df00ec1',
+            'security',
+            moment.utc().subtract(99, 'days').toISOString(),
+            'space1'
+          );
+          const testAlertDocsWithCases = [
+            {
+              ...alert0,
+              _source: {
+                ...alert0._source,
+                [ALERT_CASE_IDS]: ['case-id-1', 'case-id-2', 'case-id-3', 'case-id-4'],
+              },
+            },
+            {
+              ...alert1,
+              _source: {
+                ...alert1._source,
+                [ALERT_CASE_IDS]: [],
+              },
+            },
+            {
+              ...alert2,
+              _source: {
+                ...alert2._source,
+                [ALERT_CASE_IDS]: ['case-id-1'],
+              },
+            },
+            {
+              ...alert3,
+              _source: {
+                ...alert3._source,
+                [ALERT_CASE_IDS]: ['abcdef'],
+              },
+            },
+          ];
+          const operations = testAlertDocsWithCases.flatMap(({ _index, _id, _source: doc }) => {
+            return [{ index: { _index, _id } }, doc];
+          });
+          await es.bulk({ refresh: 'wait_for', operations });
+
+          // schedule the task
+          const scheduleResponse = await supertest
+            .post(`${getUrlPrefix(scenario.space.id)}/api/alerts_fixture/schedule_alert_deletion`)
+            .set('kbn-xsrf', 'foo')
+            .send({
+              isActiveAlertDeleteEnabled: true,
+              isInactiveAlertDeleteEnabled: true,
+              activeAlertDeleteThreshold: 90,
+              inactiveAlertDeleteThreshold: 90,
+            });
+
+          switch (scenario.id) {
+            // case 'no_kibana_privileges at space1':
+            // case 'space_1_all at space2':
+            // case 'space_1_all_with_restricted_fixture at space1':
+            // case 'space_1_all_alerts_none_actions at space1':
+            //   // when schedule route is available, expect a forbidden error
+            //   // current test route does not gate on rules settings permissions
+            //   break;
+            case 'global_read at space1':
+            case 'superuser at space1':
+            case 'space_1_all at space1':
+              expect(scheduleResponse.status).to.eql(200);
+
+              const expectedAlerts = [
+                ...inactiveStackAlertsNewerThan90,
+                ...activeStackAlertsNewerThan90,
+                ...inactiveO11yAlertsNewerThan90,
+                ...activeO11yAlertsNewerThan90,
+                ...inactiveSecurityAlertsNewerThan90,
+                ...activeSecurityAlertsNewerThan90,
+
+                // all of these are older than 90 days but have attached cases
+                { space1: { id: testAlertDocsWithCases[0]._id } },
+                { space1: { id: testAlertDocsWithCases[2]._id } },
+                { space1: { id: testAlertDocsWithCases[3]._id } },
+              ];
+
+              const deletedAlerts = [
+                ...inactiveStackAlertsOlderThan90,
+                ...activeStackAlertsOlderThan90,
+                ...inactiveO11yAlertsOlderThan90,
+                ...activeO11yAlertsOlderThan90,
+                ...inactiveSecurityAlertsOlderThan90,
+                ...activeSecurityAlertsOlderThan90,
+                // kibana.alert.case_ids is empty so should be deleted
+                { space1: { id: testAlertDocsWithCases[1]._id } },
               ];
 
               await testExpectedAlertsAreDeleted(
