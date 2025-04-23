@@ -90,30 +90,30 @@ export const StateManagementExample = ({ uiActions }: { uiActions: UiActionsStar
       <EuiCallOut>
         <p>
           Each embeddable manages its own state. The page is only responsible for persisting and
-          providing the last persisted state to the embeddable.
+          providing the last saved state or last unsaved state to the embeddable.
         </p>
 
         <p>
-          The page renders the embeddable with <strong>ReactEmbeddableRenderer</strong> component.
-          On mount, ReactEmbeddableRenderer component calls{' '}
-          <strong>pageApi.getSerializedStateForChild</strong> to get the last saved state.
-          ReactEmbeddableRenderer component then calls{' '}
-          <strong>pageApi.getRuntimeStateForChild</strong> to get the last session&apos;s unsaved
-          changes. ReactEmbeddableRenderer merges last saved state with unsaved changes and passes
-          the merged state to the embeddable factory. ReactEmbeddableRender passes the embeddableApi
-          to the page by calling <strong>onApiAvailable</strong>.
+          The page renders the embeddable with <strong>EmbeddableRenderer</strong> component.
+          EmbeddableRender passes the embeddableApi to the page by calling{' '}
+          <strong>onApiAvailable</strong>.
         </p>
 
         <p>
-          The page subscribes to <strong>embeddableApi.unsavedChanges</strong> to receive embeddable
+          The page subscribes to <strong>embeddableApi.hasUnsavedChanges</strong> to by notified of
           unsaved changes. The page persists unsaved changes in session storage. The page provides
-          unsaved changes to the embeddable with <strong>pageApi.getRuntimeStateForChild</strong>.
+          unsaved changes to the embeddable with <strong>pageApi.getSerializedStateForChild</strong>
+          .
         </p>
 
         <p>
           The page gets embeddable state by calling <strong>embeddableApi.serializeState</strong>.
-          The page persists embeddable state in session storage. The page provides last saved state
-          to the embeddable with <strong>pageApi.getSerializedStateForChild</strong>.
+          The page persists embeddable state in session storage.
+        </p>
+
+        <p>
+          The page provides unsaved state or last saved state to the embeddable with{' '}
+          <strong>pageApi.getSerializedStateForChild</strong>.
         </p>
 
         <p>

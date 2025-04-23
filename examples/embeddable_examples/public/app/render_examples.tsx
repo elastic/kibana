@@ -74,12 +74,12 @@ export const RenderExamples = () => {
         <EuiFlexItem>
           <EuiText>
             <p>
-              Use <strong>ReactEmbeddableRenderer</strong> to render embeddables.
+              Use <strong>EmbeddableRenderer</strong> to render embeddables.
             </p>
           </EuiText>
 
           <EuiCodeBlock language="jsx" fontSize="m" paddingSize="m">
-            {`<ReactEmbeddableRenderer<State, Api>
+            {`<EmbeddableRenderer<State, Api>
   type={SEARCH_EMBEDDABLE_TYPE}
   getParentApi={() => parentApi}
   onApiAvailable={(newApi) => {
@@ -112,7 +112,7 @@ export const RenderExamples = () => {
 
         <EuiFlexItem>
           <EuiText>
-            <p>To avoid leaking embeddable details, wrap ReactEmbeddableRenderer in a component.</p>
+            <p>To avoid leaking embeddable details, wrap EmbeddableRenderer in a component.</p>
           </EuiText>
 
           <EuiCodeBlock language="jsx" fontSize="m" paddingSize="m">
