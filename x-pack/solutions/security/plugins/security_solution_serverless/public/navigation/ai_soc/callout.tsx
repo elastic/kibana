@@ -17,7 +17,9 @@ export const AiSocCallout: React.FC = () => {
       <EuiText size="xs">
         <h4>{CALLOUT_TITLE}</h4>
         <EuiSpacer size="xs" />
-        <small>{CALLOUT_DESCRIPTION}</small>
+        <p>
+          <small>{CALLOUT_DESCRIPTION}</small>
+        </p>
       </EuiText>
     </EuiCallOut>
   );
