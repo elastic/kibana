@@ -112,7 +112,8 @@ export function initializePanelsManager(
   };
 
   const resetPanels = (lastSavedPanels: DashboardPanelMap) => {
-    const { layout: lastSavedLayout, childState: lstSavedChildState } = deserializePanels(lastSavedPanels);
+    const { layout: lastSavedLayout, childState: lstSavedChildState } =
+      deserializePanels(lastSavedPanels);
 
     layout$.next(lastSavedLayout);
     currentChildState = lstSavedChildState;
@@ -158,7 +159,7 @@ export function initializePanelsManager(
     }
     const getCustomPlacementSettingFunc = getDashboardPanelPlacementSetting(type);
     const customPlacementSettings = getCustomPlacementSettingFunc
-      ? await getCustomPlacementSettingFunc(serializedState?.rawState)
+      ? await getCustomPlacementSettingFunc(serializedState)
       : undefined;
     const { newPanelPlacement, otherPanels } = runPanelPlacementStrategy(
       customPlacementSettings?.strategy ?? PanelPlacementStrategy.findTopLeftMostOpenSpace,

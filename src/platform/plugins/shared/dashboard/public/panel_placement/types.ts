@@ -8,6 +8,7 @@
  */
 
 import { MaybePromise } from '@kbn/utility-types';
+import { SerializedPanelState } from '@kbn/presentation-publishing';
 import type { GridData } from '../../server/content_management';
 import { PanelPlacementStrategy } from '../plugin_constants';
 import { DashboardLayout } from '../dashboard_api/types';
@@ -30,5 +31,5 @@ export interface PanelPlacementProps {
 }
 
 export type GetPanelPlacementSettings<SerializedState extends object = object> = (
-  serializedState?: SerializedState
+  serializedState?: SerializedPanelState<SerializedState>
 ) => MaybePromise<PanelPlacementSettings>;

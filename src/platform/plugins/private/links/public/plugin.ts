@@ -25,7 +25,8 @@ import { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
 
 import { UiActionsPublicStart } from '@kbn/ui-actions-plugin/public/plugin';
 import { ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/public';
-import { LinksRuntimeState, LinksSerializedState } from './types';
+import { SerializedPanelState } from '@kbn/presentation-publishing';
+import { LinksSerializedState } from './types';
 import { APP_ICON, APP_NAME, CONTENT_ID, LATEST_VERSION } from '../common';
 import { LinksCrudTypes } from '../common/content_management';
 import { getLinksClient } from './content_management/links_content_management_client';
@@ -144,8 +145,10 @@ export class LinksPlugin
 
     plugins.dashboard.registerDashboardPanelPlacementSetting(
       CONTENT_ID,
-      async (runtimeState?: LinksRuntimeState) => {
-        if (!runtimeState) return {};
+      async (serializedState?: SerializedPanelState<LinksSerializedState>) => {
+        if (!serializedState) return {};
+        const { deserializeState } = await import('./embeddable/links_embeddable');
+        const runtimeState = await deserializeState(serializedState);
         const isHorizontal = runtimeState.layout === 'horizontal';
         const width = isHorizontal ? DASHBOARD_GRID_COLUMN_COUNT : 8;
         const height = isHorizontal ? 4 : (runtimeState.links?.length ?? 1 * 3) + 4;
