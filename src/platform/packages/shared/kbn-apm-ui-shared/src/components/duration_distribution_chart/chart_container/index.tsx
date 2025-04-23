@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiLoadingChart, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingChart, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { FETCH_STATUS, isPending } from '../../../enums';
@@ -38,16 +38,17 @@ export function ChartContainer({ children, height, status, hasData, id }: ChartC
 
 function LoadingChartPlaceholder({ height }: { height: number }) {
   return (
-    <div
-      style={{
+    <EuiFlexGroup
+      css={{
         height,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
       }}
+      justifyContent="center"
+      alignItems="center"
     >
-      <EuiLoadingChart data-test-subj="loading" size={'xl'} />
-    </div>
+      <EuiFlexItem grow={false}>
+        <EuiLoadingChart data-test-subj="loading" size={'xl'} />
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 }
 
