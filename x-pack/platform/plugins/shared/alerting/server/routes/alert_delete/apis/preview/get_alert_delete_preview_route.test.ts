@@ -115,7 +115,9 @@ describe('alertDeletePreviewRoute', () => {
     await handler(context, req, res);
 
     expect(res.badRequest).toHaveBeenCalledWith({
-      body: 'Both active_alert_delete_threshold and inactive_alert_delete_threshold cannot be undefined.',
+      body: {
+        message: 'active_alert_delete_threshold or inactive_alert_delete_threshold must be set',
+      },
     });
   });
 });

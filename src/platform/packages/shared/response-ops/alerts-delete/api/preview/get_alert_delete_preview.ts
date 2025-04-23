@@ -7,19 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
-  AlertDeletePreviewQuery,
-  AlertDeletePreviewResponse,
-} from '@kbn/alerting-plugin/common/routes/alert_delete';
+import type { AlertDeletePreviewResponse } from '@kbn/alerting-plugin/common/routes/alert_delete';
 import type { HttpStart } from '@kbn/core/public';
-import type { SnakeToCamelCase } from '@kbn/cases-plugin/common/types';
+import type { AlertDeleteParams, AlertDeletePreview } from '@kbn/alerting-types/alert_delete_types';
 import { INTERNAL_BASE_ALERTING_API_PATH } from '../../constants';
 
-export type GetAlertDeletePreviewResponse = SnakeToCamelCase<AlertDeletePreviewResponse>;
+export type GetAlertDeletePreviewResponse = AlertDeletePreview;
 
 export interface GetAlertDeletePreviewParams {
   services: { http: HttpStart };
-  requestQuery: SnakeToCamelCase<AlertDeletePreviewQuery>;
+  requestQuery: AlertDeleteParams;
 }
 export const getAlertDeletePreview = async ({
   services: { http },

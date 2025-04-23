@@ -11,14 +11,13 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import type { HttpStart } from '@kbn/core-http-browser';
 import useDebounce from 'react-use/lib/useDebounce';
-import type { AlertDeletePreviewQuery } from '@kbn/alerting-plugin/common/routes/alert_delete';
-import type { SnakeToCamelCase } from '@kbn/cases-plugin/common/types';
+import type { AlertDeleteParams } from '@kbn/alerting-types/alert_delete_types';
 import { getAlertDeletePreview } from './get_alert_delete_preview';
 
 export interface UseAlertDeletePreviewParams {
   isEnabled: boolean;
   services: { http: HttpStart };
-  queryParams: SnakeToCamelCase<AlertDeletePreviewQuery>;
+  queryParams: AlertDeleteParams;
 }
 export const useAlertDeletePreview = ({
   isEnabled,
