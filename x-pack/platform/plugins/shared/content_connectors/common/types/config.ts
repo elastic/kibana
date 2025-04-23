@@ -5,10 +5,6 @@
  * 2.0.
  */
 
-import { useKibanaServices } from '../use_kibana';
-
-export const useConnectorTypes = () => {
-  const { contentConnectors } = useKibanaServices();
-
-  return contentConnectors?.getConnectorTypes() || [];
-};
+export interface ClientConfigType {
+  ui: { enabled: boolean };
+}
