@@ -12,12 +12,12 @@ import { renderHook, waitFor } from '@testing-library/react';
 import { useAlertDeletePreview } from './use_alert_delete_preview';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { httpServiceMock } from '@kbn/core/public/mocks';
-import { alertDeletePreviewApiCall } from './alert_delete_preview_api_call';
+import { getAlertDeletePreview } from './get_alert_delete_preview';
 
 const http = httpServiceMock.createStartContract();
 
-jest.mock('./alert_delete_preview_api_call', () => ({
-  alertDeletePreviewApiCall: jest.fn(),
+jest.mock('./get_alert_delete_preview', () => ({
+  getAlertDeletePreview: jest.fn(),
 }));
 
 describe('useAlertDeletePreview', () => {
@@ -32,7 +32,7 @@ describe('useAlertDeletePreview', () => {
   });
 
   it('calls the API with correct parameters', async () => {
-    (alertDeletePreviewApiCall as jest.Mock).mockResolvedValueOnce({ affectedAlertCount: 42 });
+    (getAlertDeletePreview as jest.Mock).mockResolvedValueOnce({ affectedAlertCount: 42 });
 
     const { result } = renderHook(
       () =>
@@ -50,7 +50,7 @@ describe('useAlertDeletePreview', () => {
 
     await waitFor(() => expect(result.current.data?.affectedAlertCount).toBeTruthy());
 
-    expect(alertDeletePreviewApiCall).toHaveBeenCalledWith({
+    expect(getAlertDeletePreview).toHaveBeenCalledWith({
       services: { http },
       requestQuery: {
         activeAlertDeleteThreshold: 10,
@@ -76,11 +76,11 @@ describe('useAlertDeletePreview', () => {
       { wrapper }
     );
 
-    expect(alertDeletePreviewApiCall).not.toHaveBeenCalled();
+    expect(getAlertDeletePreview).not.toHaveBeenCalled();
   });
 
   it('handles API errors gracefully', async () => {
-    (alertDeletePreviewApiCall as jest.Mock).mockRejectedValueOnce(new Error('API Error'));
+    (getAlertDeletePreview as jest.Mock).mockRejectedValueOnce(new Error('API Error'));
 
     const { result } = renderHook(
       () =>
@@ -96,7 +96,7 @@ describe('useAlertDeletePreview', () => {
       { wrapper }
     );
 
-    expect(alertDeletePreviewApiCall).toHaveBeenCalled();
+    expect(getAlertDeletePreview).toHaveBeenCalled();
     expect(result.current.data?.affectedAlertCount).toBe(undefined);
   });
 });

@@ -8,11 +8,11 @@
  */
 
 import { httpServiceMock } from '@kbn/core/public/mocks';
-import { alertDeletePreviewApiCall } from './alert_delete_preview_api_call';
+import { getAlertDeletePreview } from './get_alert_delete_preview';
 
 const http = httpServiceMock.createStartContract();
 
-describe('alertDeletePreviewApiCall', () => {
+describe('getAlertDeletePreview', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -20,7 +20,7 @@ describe('alertDeletePreviewApiCall', () => {
   it('sends the correct HTTP request and parses the response', async () => {
     http.get.mockResolvedValue({ affected_alert_count: 42 });
 
-    const result = await alertDeletePreviewApiCall({
+    const result = await getAlertDeletePreview({
       services: { http },
       requestQuery: {
         activeAlertDeleteThreshold: 10,
@@ -47,7 +47,7 @@ describe('alertDeletePreviewApiCall', () => {
     http.get.mockRejectedValue(new Error('API Error'));
 
     await expect(() =>
-      alertDeletePreviewApiCall({
+      getAlertDeletePreview({
         services: { http },
         requestQuery: {
           activeAlertDeleteThreshold: 1,

@@ -13,7 +13,7 @@ import type { HttpStart } from '@kbn/core-http-browser';
 import useDebounce from 'react-use/lib/useDebounce';
 import type { AlertDeletePreviewQuery } from '@kbn/alerting-plugin/common/routes/alert_delete';
 import type { SnakeToCamelCase } from '@kbn/cases-plugin/common/types';
-import { alertDeletePreviewApiCall } from './alert_delete_preview_api_call';
+import { getAlertDeletePreview } from './get_alert_delete_preview';
 
 export interface UseAlertDeletePreviewParams {
   isEnabled: boolean;
@@ -48,13 +48,13 @@ export const useAlertDeletePreview = ({
   return useQuery({
     queryKey: key,
     queryFn: () => {
-      return alertDeletePreviewApiCall({
+      return getAlertDeletePreview({
         services: { http },
         requestQuery: params,
       });
     },
     keepPreviousData: true,
-    staleTime: 1000 * 60, // 1 minutes
+    staleTime: 1000 * 60,
     enabled:
       isEnabled &&
       (Boolean(params.activeAlertDeleteThreshold) || Boolean(params.inactiveAlertDeleteThreshold)),

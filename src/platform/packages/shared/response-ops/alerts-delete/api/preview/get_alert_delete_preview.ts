@@ -21,7 +21,7 @@ export interface AlertDeletePreviewApiCallParams {
   services: { http: HttpStart };
   requestQuery: SnakeToCamelCase<AlertDeletePreviewQuery>;
 }
-export const alertDeletePreviewApiCall = async ({
+export const getAlertDeletePreview = async ({
   services: { http },
   requestQuery: { activeAlertDeleteThreshold, inactiveAlertDeleteThreshold, categoryIds },
 }: AlertDeletePreviewApiCallParams): Promise<AlertDeletePreviewApiCallResponse> => {

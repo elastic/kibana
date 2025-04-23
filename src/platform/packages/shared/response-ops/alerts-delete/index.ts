@@ -16,5 +16,5 @@ export {
 } from './api/preview/use_alert_delete_preview';
 export {
   type AlertDeletePreviewApiCallParams,
-  alertDeletePreviewApiCall,
-} from './api/preview/alert_delete_preview_api_call';
+  getAlertDeletePreview,
+} from './api/preview/get_alert_delete_preview';
