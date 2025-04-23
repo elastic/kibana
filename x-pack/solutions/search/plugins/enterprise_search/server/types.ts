@@ -33,6 +33,7 @@ import type { ConfigType } from '.';
 
 export interface PluginsSetup {
   cloud?: CloudSetup;
+  contentConnectors?: SearchConnectorsPluginSetup;
   customIntegrations?: CustomIntegrationsPluginSetup;
   features: FeaturesPluginSetup;
   globalSearch: GlobalSearchPluginSetup;
@@ -40,7 +41,6 @@ export interface PluginsSetup {
   licensing: LicensingPluginStart;
   logsShared: LogsSharedPluginSetup;
   ml?: MlPluginSetup;
-  searchConnectors?: SearchConnectorsPluginSetup;
   security: SecurityPluginSetup;
   usageCollection?: UsageCollectionSetup;
 }
