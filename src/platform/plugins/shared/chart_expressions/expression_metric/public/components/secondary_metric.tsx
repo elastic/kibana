@@ -30,17 +30,24 @@ const notAvailable = i18n.translate('expressionMetricVis.secondaryMetric.notAvai
 });
 
 function getDeltaValue(rawValue: number | undefined, baselineValue: number | undefined) {
-  // Return 0 delta for now if either side of the formula is not a number
-  if (rawValue == null || baselineValue == null || Number.isNaN(baselineValue)) {
-    return 0;
+  // Return NAN delta for now if either side of the formula is not a number
+  if (rawValue == null || baselineValue == null || Number.isFinite(baselineValue)) {
+    return NaN;
   }
   return rawValue - baselineValue;
 }
 
 function getBadgeConfiguration(trendConfig: TrendConfig, deltaValue: number) {
+  if (Number.isNaN(deltaValue)) {
+    return {
+      icon: undefined,
+      iconLabel: notAvailable,
+      color: trendConfig.palette[1],
+    };
+  }
   if (deltaValue < 0) {
     return {
-      icon: trendConfig.icon ? 'arrowDown' : undefined,
+      icon: trendConfig.icon ? '\u{2193}' : undefined,
       iconLabel: i18n.translate('expressionMetricVis.secondaryMetric.trend.decrease', {
         defaultMessage: 'downward direction',
       }),
@@ -49,7 +56,7 @@ function getBadgeConfiguration(trendConfig: TrendConfig, deltaValue: number) {
   }
   if (deltaValue > 0) {
     return {
-      icon: trendConfig.icon ? 'arrowUp' : undefined,
+      icon: trendConfig.icon ? '\u{2191}' : undefined,
       iconLabel: i18n.translate('expressionMetricVis.secondaryMetric.trend.increase', {
         defaultMessage: 'upward direction',
       }),
@@ -57,7 +64,7 @@ function getBadgeConfiguration(trendConfig: TrendConfig, deltaValue: number) {
     };
   }
   return {
-    icon: trendConfig.icon ? 'grab' : undefined,
+    icon: trendConfig.icon ? '\u{003D}' : undefined,
     iconLabel: i18n.translate('expressionMetricVis.secondaryMetric.trend.stable', {
       defaultMessage: 'stable',
     }),
@@ -89,6 +96,22 @@ function getBadgeColor(color: string, euiTheme: EuiThemeComputed<{}>) {
   );
 }
 
+function getValueToShow(
+  value: string,
+  deltaValue: number,
+  formatter: FieldFormatConvertFunction | undefined,
+  compareToPrimary: boolean
+) {
+  // In comparison mode the NaN delta should be converted to N/A
+  if (compareToPrimary) {
+    if (Number.isNaN(deltaValue)) {
+      return notAvailable;
+    }
+    return formatter?.(deltaValue) ?? deltaValue;
+  }
+  return value;
+}
+
 function SecondaryMetricValue({
   rawValue,
   formattedValue,
@@ -115,10 +138,6 @@ function SecondaryMetricValue({
         ? `border: 1px solid ${trendConfig.borderColor};`
         : ''
     }
-    svg {
-        inline-size: ${fontSize}px !important;
-        block-size: ${fontSize}px !important;
-    }
   `);
 
   if (trendConfig && (typeof rawValue === 'number' || rawValue == null)) {
@@ -127,9 +146,12 @@ function SecondaryMetricValue({
     const deltaValue = deltaFactor * getDeltaValue(rawValue, trendConfig.baselineValue);
     const { icon, color: trendColor, iconLabel } = getBadgeConfiguration(trendConfig, deltaValue);
     const translatedColor = getBadgeColor(trendColor, euiTheme);
-    const valueToShow = trendConfig.compareToPrimary
-      ? formatter?.(deltaValue) ?? deltaValue
-      : safeFormattedValue;
+    const valueToShow = getValueToShow(
+      safeFormattedValue,
+      deltaValue,
+      formatter,
+      trendConfig.compareToPrimary
+    );
     return (
       <EuiBadge
         aria-label={
@@ -145,13 +167,12 @@ function SecondaryMetricValue({
                 },
               })
         }
-        iconType={icon}
-        iconSide="left"
         color={translatedColor}
         data-test-subj={`expressionMetricVis-secondaryMetric-badge-${rawValue}`}
         css={badgeCss}
       >
         {trendConfig.value ? valueToShow : null}
+        {trendConfig.icon && icon ? ` ${icon}` : null}
       </EuiBadge>
     );
   }
@@ -184,13 +205,13 @@ function getMetricColumnAndFormatter(
   config: SecondaryMetricProps['config'],
   getMetricFormatter: SecondaryMetricProps['getMetricFormatter']
 ) {
-  let metricColumn: DatatableColumn | undefined;
-  let metricFormatter: ReturnType<typeof getMetricFormatter> | undefined;
-  if (config.dimensions.secondaryMetric) {
-    metricColumn = getColumnByAccessor(config.dimensions.secondaryMetric, columns);
-    metricFormatter = getMetricFormatter(config.dimensions.secondaryMetric, columns);
+  if (!config.dimensions.secondaryMetric) {
+    return;
   }
-  return { metricFormatter, metricColumn };
+  return {
+    metricColumn: getColumnByAccessor(config.dimensions.secondaryMetric, columns),
+    metricFormatter: getMetricFormatter(config.dimensions.secondaryMetric, columns),
+  };
 }
 
 export function SecondaryMetric({
@@ -202,11 +223,8 @@ export function SecondaryMetric({
   color,
   fontSize,
 }: SecondaryMetricProps) {
-  const { metricFormatter, metricColumn } = getMetricColumnAndFormatter(
-    columns,
-    config,
-    getMetricFormatter
-  );
+  const { metricFormatter, metricColumn } =
+    getMetricColumnAndFormatter(columns, config, getMetricFormatter) || {};
   const prefix = config.metric.secondaryPrefix ?? metricColumn?.name;
   const value = metricColumn ? row[metricColumn.id] : undefined;
 
@@ -216,7 +234,7 @@ export function SecondaryMetric({
       {prefix ? ' ' : ''}
       <SecondaryMetricValue
         rawValue={value}
-        formattedValue={value != null ? metricFormatter!(value) : undefined}
+        formattedValue={metricFormatter?.(value)}
         trendConfig={color ? undefined : trendConfig}
         color={color}
         fontSize={fontSize}
