@@ -198,5 +198,6 @@
     "@kbn/inference-common",
     "@kbn/aiops-change-point-detection",
     "@kbn/es-errors",
+    "@kbn/content-packs-schema",
   ]
 }

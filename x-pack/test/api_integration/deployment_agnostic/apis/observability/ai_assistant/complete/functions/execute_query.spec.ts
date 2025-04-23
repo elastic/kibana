@@ -128,7 +128,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
       describe('The second request - Structured output validation', () => {
         it('contains the correct number of messages', () => {
-          expect(secondRequestBody.messages.length).to.be(6);
+          expect(secondRequestBody.messages.length).to.be(5);
         });
 
         it('contains the `structuredOutput` tool choice', () => {

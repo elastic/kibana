@@ -250,7 +250,7 @@ export const SystemIndicesFlyout = ({
     <>
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="s" data-test-subj="flyoutTitle">
-          <h2>{i18nTexts.flyoutTitle}</h2>
+          <h2 id="migrateSystemIndicesFlyoutTitle">{i18nTexts.flyoutTitle}</h2>
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody data-test-subj="flyoutDetails">

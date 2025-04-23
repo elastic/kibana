@@ -43,7 +43,9 @@ export class SLOPlugin
   implements Plugin<SLOPublicSetup, SLOPublicStart, SLOPublicPluginsSetup, SLOPublicPluginsStart>
 {
   private readonly appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
-  private experimentalFeatures: ExperimentalFeatures = { ruleFormV2: { enabled: false } };
+  private experimentalFeatures: ExperimentalFeatures = {
+    ruleFormV2: { enabled: false },
+  };
 
   constructor(private readonly initContext: PluginInitializerContext<SLOConfig>) {
     this.experimentalFeatures =
