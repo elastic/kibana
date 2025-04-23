@@ -50,7 +50,7 @@ RUN set -e ; \
     TINI_BIN="" ; \
     {{#ubuntu}}arch="$(dpkg --print-architecture)"{{/ubuntu}}{{#wolfi}}arch="$(apk --print-arch)"{{/wolfi}}{{#ubi}}arch="$(rpm --query --queryformat='%{ARCH}' rpm)"{{/ubi}} ; \
     case "$arch" in \
-        aarch64) \
+        {{#ubuntu}}arm64{{/ubuntu}}{{^ubuntu}}aarch64{{/ubuntu}}) \
             TINI_BIN='tini-arm64' ; \
             ;; \
         {{#ubuntu}}amd64{{/ubuntu}}{{^ubuntu}}x86_64{{/ubuntu}}) \
