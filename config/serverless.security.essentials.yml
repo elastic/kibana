@@ -58,10 +58,6 @@ xpack.features.overrides:
   visualize_v2.hidden: true
   maps.hidden: true
   maps_v2.hidden: true
-  ### Machine Learning feature is moved from Analytics category to the Security one as the last item.
-  ml:
-    category: "security"
-    order: 1101
   ### Security's feature privileges are fine-tuned to grant access to Discover, Dashboard, Maps, and Visualize apps.
   siemV2:
     privileges:

@@ -14,6 +14,12 @@ xpack.inventory.enabled: false
 xpack.searchIndices.enabled: false
 xpack.searchSynonyms.enabled: false
 
+## Fine-tune the security solution feature privileges. Also, refer to `serverless.yml` for the project-agnostic overrides.
+xpack.features.overrides:
+  ### Machine Learning feature is moved from Analytics category to the Security one as the last item.
+  ml:
+    category: "security"
+    order: 1101
 ## Cloud settings
 xpack.cloud.serverless.project_type: security
 
