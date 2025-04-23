@@ -82,7 +82,7 @@ export abstract class OpenApiTool {
         const tools = await Promise.all(Object.entries(groupedToolsByOperationTags).filter(([tag, _]) => !!tag).map(async ([tag, toolsAndOperations]) => {
             const internalNode = await this.getInternalNode({
                 tools: toolsAndOperations.map(toolAndOperation => toolAndOperation.tool),
-                name: formatToolName(`kibana_${tag}_tool`),
+                name: formatToolName(`kibana_${tag}_agent`),
                 description: toolsAndOperations.map(toolAndOperation => toolAndOperation.operation.getOperationId()).join('\n')
             })
             return internalNode
