@@ -193,7 +193,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await find.clickByCssSelector(`button#ruleTags`);
         await testSubjects.click('comboBoxToggleListButton');
         const options = await comboBox.getOptions(RULE_TAGS_FILTER_SUBJ);
-        options[0].click();
+        await options[0].click();
 
         await testSubjects.click(SOLUTION_SELECTOR_SUBJ);
         await find.clickByCssSelector(`button#security`);
@@ -227,7 +227,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           const options = await comboBox.getOptions(RULE_TAGS_FILTER_SUBJ);
           expect(options.length).to.equal(1);
           expect(await options[0].getVisibleText()).to.equal(ruleName);
-          options[0].click();
+          await options[0].click();
           await testSubjects.click(SAVE_CONFIG_BUTTON_SUBJ);
           await retry.try(() => testSubjects.exists(DASHBOARD_PANEL_TEST_SUBJ));
           await pageObjects.dashboard.verifyNoRenderErrors();
