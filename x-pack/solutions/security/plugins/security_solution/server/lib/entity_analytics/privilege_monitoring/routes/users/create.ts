@@ -39,7 +39,9 @@ export const createUserRoute = (router: EntityAnalyticsRoutesDeps['router'], log
 
         try {
           const secSol = await context.securitySolution;
-          const body = await secSol.getPrivilegeMonitoringDataClient().createUser(request.body);
+          const body = await secSol
+            .getPrivilegeMonitoringDataClient()
+            .createUser(request.body, 'api');
           return response.ok({ body });
         } catch (e) {
           const error = transformError(e);
