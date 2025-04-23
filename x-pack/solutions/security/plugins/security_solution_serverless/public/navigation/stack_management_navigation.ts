@@ -58,6 +58,10 @@ export const createStackManagementNavigationTree = (): GroupDefinition => ({
               link: 'management:data_usage',
               breadcrumbStatus: 'hidden',
             },
+            {
+              link: 'management:content_connectors',
+              breadcrumbStatus: 'hidden',
+            },
           ],
         },
         {
@@ -102,6 +106,16 @@ export const createStackManagementNavigationTree = (): GroupDefinition => ({
               link: securityLink(SecurityPageName.entityAnalyticsEntityStoreManagement),
               breadcrumbStatus: 'hidden',
             },
+          ],
+        },
+        {
+          title: i18nStrings.ml.title,
+          children: [
+            { link: 'management:overview' },
+            { link: 'management:anomaly_detection' },
+            { link: 'management:analytics' },
+            { link: 'management:trained_models' },
+            { link: 'management:supplied_configurations' },
           ],
         },
         {

@@ -164,19 +164,25 @@ describe('GridLayout', () => {
     it('panel gets active when dragged', () => {
       renderGridLayout();
       const panelHandle = getPanelHandle('panel1');
-      expect(screen.getByLabelText('panelId:panel1').closest('div')).toHaveClass('kbnGridPanel', {
-        exact: true,
-      });
+      expect(screen.getByLabelText('panelId:panel1').closest('div')).toHaveClass(
+        'kbnGridPanel css-c5ixg-initialStyles',
+        {
+          exact: true,
+        }
+      );
       mouseStartDragging(panelHandle);
       mouseMoveTo({ clientX: 256, clientY: 128 });
       expect(screen.getByLabelText('panelId:panel1').closest('div')).toHaveClass(
-        'kbnGridPanel kbnGridPanel--active',
+        'kbnGridPanel css-c5ixg-initialStyles kbnGridPanel--active',
         { exact: true }
       );
       mouseDrop(panelHandle);
-      expect(screen.getByLabelText('panelId:panel1').closest('div')).toHaveClass('kbnGridPanel', {
-        exact: true,
-      });
+      expect(screen.getByLabelText('panelId:panel1').closest('div')).toHaveClass(
+        'kbnGridPanel css-c5ixg-initialStyles',
+        {
+          exact: true,
+        }
+      );
     });
   });
 
