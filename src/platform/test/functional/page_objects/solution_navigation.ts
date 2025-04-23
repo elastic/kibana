@@ -102,7 +102,7 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
             { timeout: TIMEOUT_CHECK }
           );
         } else if ('navId' in by) {
-          await testSubjects.existOrFail(`~nav-item-id-${by.navId} & ~nav-item-isExpanded`, {
+          await testSubjects.existOrFail(`~nav-item-id-${by.navId} & ~nav-item-isActive`, {
             timeout: TIMEOUT_CHECK,
           });
         } else {

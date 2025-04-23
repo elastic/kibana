@@ -34,8 +34,7 @@ export const NavigationItemOpenPanel: FC<Props> = ({ item, activeNodes }: Props)
   const dataTestSubj = classNames(`nav-item`, `nav-item-${path}`, {
     [`nav-item-deepLinkId-${deepLink?.id}`]: !!deepLink,
     [`nav-item-id-${id}`]: id,
-    [`nav-item-isActive`]: isActive,
-    [`nav-item-isExpanded`]: isExpanded,
+    [`nav-item-isActive`]: isActive || isExpanded,
   });
 
   const togglePanel = useCallback(
