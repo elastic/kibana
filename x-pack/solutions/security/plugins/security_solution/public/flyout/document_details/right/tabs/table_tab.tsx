@@ -163,6 +163,14 @@ export const TableTab = memo(() => {
     setPagination({ pageIndex: index });
   }, []);
 
+  const paginationSettings = useMemo(
+    () => ({
+      ...pagination,
+      pageSizeOptions: COUNT_PER_PAGE_OPTIONS,
+    }),
+    [pagination]
+  );
+
   const getScope = useMemo(() => {
     if (isTimelineScope(scopeId)) {
       return timelineSelectors.getTimelineByIdSelector();
@@ -266,10 +274,7 @@ export const TableTab = memo(() => {
         itemId="field"
         columns={columns}
         onTableChange={onTableChange}
-        pagination={{
-          ...pagination,
-          pageSizeOptions: COUNT_PER_PAGE_OPTIONS,
-        }}
+        pagination={paginationSettings}
         rowProps={onSetRowProps}
         search={search}
         sorting={false}

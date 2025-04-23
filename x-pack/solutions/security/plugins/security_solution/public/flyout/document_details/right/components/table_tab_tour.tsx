@@ -61,7 +61,9 @@ const TOUR_INITIAL_STATE = {
   currentTourStep: 1,
   isTourActive: true,
   tourPopoverWidth: 360,
-  tourSubtitle: 'Customize the Table tab',
+  tourSubtitle: i18n.translate('xpack.securitySolution.flyout.tour.tableTab.title', {
+    defaultMessage: 'Customize the Table tab',
+  }),
 };
 
 /**
@@ -78,10 +80,7 @@ export const TableTabTour = ({
 
   const [state, setState] = useState(() => {
     const initialState = storage.get(FLYOUT_STORAGE_KEYS.TABLE_TAB_TOUR);
-    if (initialState) {
-      return initialState;
-    }
-    return TOUR_INITIAL_STATE;
+    return initialState || TOUR_INITIAL_STATE;
   });
 
   useEffect(() => {
