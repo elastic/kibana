@@ -627,6 +627,10 @@
                 "path": "src/platform/packages/shared/shared-ux/chrome/navigation/src/services.tsx"
               },
               {
+                "plugin": "data",
+                "path": "src/platform/plugins/shared/data/public/search/search_interceptor/search_interceptor.ts"
+              },
+              {
                 "plugin": "spaces",
                 "path": "x-pack/platform/plugins/shared/spaces/public/analytics/event_tracker.ts"
               },
@@ -864,6 +868,14 @@
               },
               {
                 "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/privilege_monitoring/privilege_monitoring_data_client.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/privilege_monitoring/privilege_monitoring_data_client.ts"
+              },
+              {
+                "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/entity_store/tasks/data_view_refresh/data_view_refresh_task.ts"
               },
               {
@@ -1045,10 +1057,6 @@
               {
                 "plugin": "observabilityOnboarding",
                 "path": "x-pack/solutions/observability/plugins/observability_onboarding/public/application/quickstart_flows/shared/feedback_buttons.tsx"
-              },
-              {
-                "plugin": "observabilityOnboarding",
-                "path": "x-pack/solutions/observability/plugins/observability_onboarding/public/application/quickstart_flows/custom_logs/install_elastic_agent.tsx"
               },
               {
                 "plugin": "observabilityOnboarding",
@@ -1261,6 +1269,14 @@
               {
                 "plugin": "@kbn/core",
                 "path": "src/core/packages/analytics/browser-mocks/src/analytics_service.mock.ts"
+              },
+              {
+                "plugin": "data",
+                "path": "src/platform/plugins/shared/data/public/search/search_interceptor/search_interceptor.test.ts"
+              },
+              {
+                "plugin": "data",
+                "path": "src/platform/plugins/shared/data/public/search/search_interceptor/search_interceptor.test.ts"
               },
               {
                 "plugin": "@kbn/core",

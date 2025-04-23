@@ -7,8 +7,8 @@
 
 import * as rt from 'io-ts';
 import moment from 'moment';
-import { pipe } from 'fp-ts/lib/pipeable';
-import { chain } from 'fp-ts/lib/Either';
+import { pipe } from 'fp-ts/pipeable';
+import { chain } from 'fp-ts/Either';
 
 export const timestampFromStringRT = new rt.Type<number, string>(
   'timestampFromStringRT',

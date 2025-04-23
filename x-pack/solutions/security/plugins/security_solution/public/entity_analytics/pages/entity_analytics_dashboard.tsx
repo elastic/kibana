@@ -22,7 +22,7 @@ import { EntityAnalyticsAnomalies } from '../components/entity_analytics_anomali
 import { EntityStoreDashboardPanels } from '../components/entity_store/components/dashboard_entity_store_panels';
 import { EntityAnalyticsRiskScores } from '../components/entity_analytics_risk_score';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
-import { useStoreEntityTypes } from '../hooks/use_enabled_entity_types';
+import { useEntityAnalyticsTypes } from '../hooks/use_enabled_entity_types';
 
 const EntityAnalyticsComponent = () => {
   const [skipEmptyPrompt, setSkipEmptyPrompt] = React.useState(false);
@@ -30,7 +30,7 @@ const EntityAnalyticsComponent = () => {
   const { indicesExist, loading: isSourcererLoading, sourcererDataView } = useSourcererDataView();
   const isEntityStoreFeatureFlagDisabled = useIsExperimentalFeatureEnabled('entityStoreDisabled');
   const showEmptyPrompt = !indicesExist && !skipEmptyPrompt;
-  const entityTypes = useStoreEntityTypes();
+  const entityTypes = useEntityAnalyticsTypes();
 
   return (
     <>
