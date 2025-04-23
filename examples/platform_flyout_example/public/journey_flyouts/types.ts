@@ -7,16 +7,26 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export interface JourneyFlyoutEntry {
-  Component: React.FC<JourneyFlyoutProps>;
+import { StateManager, WithAllKeys } from '@kbn/presentation-publishing';
+
+export interface FlyoutEntry<StateType extends object = {}> {
+  Component: React.FC<FlyoutProps<StateType>>;
   width: number;
+  initialState?: WithAllKeys<StateType>;
 }
 
-export interface JourneyFlyoutProps {
-  openNextFlyout: (props: JourneyFlyoutEntry) => void;
-  openChildFlyout: (props: JourneyFlyoutEntry) => void;
+export interface FlyoutProps<ThisFlyoutState extends object = {}> {
+  openNextFlyout: <NextFlyoutState extends object = {}>(
+    entry: FlyoutEntry<NextFlyoutState>
+  ) => void;
+  openChildFlyout: <ChildFlyoutState extends object = {}>(
+    entry: FlyoutEntry<ChildFlyoutState>
+  ) => void;
+  stateManager: StateManager<ThisFlyoutState>;
 }
 
-export interface JourneyFlyoutApi {
-  openFlyout: (props: JourneyFlyoutEntry) => void;
+export interface FlyoutApi {
+  openFlyout: <InitialFlyoutState extends object = {}>(
+    entry: FlyoutEntry<InitialFlyoutState>
+  ) => void;
 }

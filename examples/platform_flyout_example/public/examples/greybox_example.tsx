@@ -7,18 +7,56 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiFieldText,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiForm,
+  EuiFormRow,
+  EuiSpacer,
+  EuiText,
+  EuiTextArea,
+} from '@elastic/eui';
+import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import React, { useRef } from 'react';
-import { JourneyFlyoutApi, JourneyFlyoutProps } from '../journey_flyouts/types';
 import { JourneyFlyout } from '../journey_flyouts/journey_flyout';
+import { FlyoutApi, FlyoutProps } from '../journey_flyouts/types';
 
-const FlyoutOne: React.FC<JourneyFlyoutProps> = ({ openNextFlyout }) => {
+interface FlyoutOneState {
+  name: string;
+  description?: string;
+}
+const FlyoutOne: React.FC<FlyoutProps<FlyoutOneState>> = ({ openNextFlyout, stateManager }) => {
+  const { name$, description$, setName, setDescription } = stateManager.api;
+
+  const name = useStateFromPublishingSubject(name$);
+  const description = useStateFromPublishingSubject(description$);
+
   return (
     <>
       <EuiText>
         <h2>Main flyout one</h2>
         this is some other text. To see more text, continue to flyout 2.
       </EuiText>
+      <EuiForm>
+        <EuiFormRow label="Name">
+          <EuiFieldText
+            value={name}
+            onChange={(e) => {
+              setName(e.target.value);
+            }}
+          />
+        </EuiFormRow>
+        <EuiFormRow label="Description">
+          <EuiTextArea
+            value={description}
+            onChange={(e) => {
+              setDescription(e.target.value);
+            }}
+          />
+        </EuiFormRow>
+      </EuiForm>
       <EuiSpacer />
       <EuiButton onClick={() => openNextFlyout({ Component: FlyoutTwo, width: 800 })}>
         Open flyout 2
@@ -27,7 +65,7 @@ const FlyoutOne: React.FC<JourneyFlyoutProps> = ({ openNextFlyout }) => {
   );
 };
 
-const FlyoutTwo: React.FC<JourneyFlyoutProps> = ({ openNextFlyout }) => {
+const FlyoutTwo: React.FC<FlyoutProps> = ({ openNextFlyout }) => {
   return (
     <>
       <EuiText>
@@ -42,7 +80,7 @@ const FlyoutTwo: React.FC<JourneyFlyoutProps> = ({ openNextFlyout }) => {
   );
 };
 
-const FlyoutThree: React.FC<JourneyFlyoutProps> = ({ openNextFlyout, openChildFlyout }) => {
+const FlyoutThree: React.FC<FlyoutProps> = ({ openNextFlyout, openChildFlyout }) => {
   return (
     <>
       <EuiText>
@@ -75,7 +113,7 @@ const FlyoutThree: React.FC<JourneyFlyoutProps> = ({ openNextFlyout, openChildFl
   );
 };
 
-const FlyoutThreeChildOne: React.FC<JourneyFlyoutProps> = ({ openChildFlyout, openNextFlyout }) => {
+const FlyoutThreeChildOne: React.FC<FlyoutProps> = ({ openChildFlyout, openNextFlyout }) => {
   return (
     <>
       <EuiText>This is a detail flyout!</EuiText>
@@ -89,7 +127,7 @@ const FlyoutThreeChildOne: React.FC<JourneyFlyoutProps> = ({ openChildFlyout, op
   );
 };
 
-const FlyoutThreeChildOneChild: React.FC<JourneyFlyoutProps> = ({}) => {
+const FlyoutThreeChildOneChild: React.FC<FlyoutProps> = ({}) => {
   return (
     <>
       <EuiText>Another detail flyout</EuiText>
@@ -97,7 +135,7 @@ const FlyoutThreeChildOneChild: React.FC<JourneyFlyoutProps> = ({}) => {
   );
 };
 
-const FlyoutThreeChildTwo: React.FC<JourneyFlyoutProps> = () => {
+const FlyoutThreeChildTwo: React.FC<FlyoutProps> = () => {
   return (
     <EuiText>
       <h2>A second detail flyout</h2>
@@ -106,7 +144,7 @@ const FlyoutThreeChildTwo: React.FC<JourneyFlyoutProps> = () => {
   );
 };
 
-const FlyoutFour: React.FC<JourneyFlyoutProps> = ({ openNextFlyout }) => {
+const FlyoutFour: React.FC<FlyoutProps> = ({ openNextFlyout }) => {
   return (
     <>
       <EuiText>
@@ -120,7 +158,7 @@ const FlyoutFour: React.FC<JourneyFlyoutProps> = ({ openNextFlyout }) => {
   );
 };
 
-const FlyoutFive: React.FC<JourneyFlyoutProps> = ({}) => {
+const FlyoutFive: React.FC<FlyoutProps> = ({}) => {
   return (
     <EuiText>
       <h2>Main flyout Five</h2>
@@ -130,7 +168,7 @@ const FlyoutFive: React.FC<JourneyFlyoutProps> = ({}) => {
 };
 
 export const GreyboxExample = () => {
-  const flyoutApi = useRef<JourneyFlyoutApi | null>(null);
+  const flyoutApi = useRef<FlyoutApi | null>(null);
 
   return (
     <>
@@ -158,7 +196,13 @@ export const GreyboxExample = () => {
       </EuiText>
       <EuiSpacer />
       <EuiButton
-        onClick={() => flyoutApi.current?.openFlyout({ Component: FlyoutOne, width: 800 })}
+        onClick={() =>
+          flyoutApi.current?.openFlyout<FlyoutOneState>({
+            Component: FlyoutOne,
+            width: 800,
+            initialState: { name: 'Main flyout one', description: undefined },
+          })
+        }
       >
         Open showcase flyout
       </EuiButton>

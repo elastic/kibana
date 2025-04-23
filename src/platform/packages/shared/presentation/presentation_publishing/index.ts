@@ -9,6 +9,7 @@
 
 export { isEmbeddableApiContext, type EmbeddableApiContext } from './embeddable_api_context';
 
+export { type WithAllKeys, initializeStateManager, type StateManager } from './state_manager';
 export {
   getInitialValuesFromComparators,
   getUnchangingComparator,

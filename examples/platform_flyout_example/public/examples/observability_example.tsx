@@ -11,7 +11,7 @@ import { EuiButton, EuiButtonEmpty } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useRef } from 'react';
 import { JourneyFlyout } from '../journey_flyouts/journey_flyout';
-import { JourneyFlyoutApi, JourneyFlyoutProps } from '../journey_flyouts/types';
+import { FlyoutApi, FlyoutProps } from '../journey_flyouts/types';
 import hostsFlyoutImage from './screenshots/HostsFlyout.png';
 import alertsImage from './screenshots/Alerts.png';
 import metadataFieldsImage from './screenshots/MetadataFields.png';
@@ -59,7 +59,7 @@ const ServiceMetrics = () => {
   );
 };
 
-export const HostFlyout = ({ openChildFlyout }: JourneyFlyoutProps) => {
+export const HostFlyout = ({ openChildFlyout }: FlyoutProps) => {
   return (
     <div
       css={css`
@@ -128,7 +128,7 @@ export const HostFlyout = ({ openChildFlyout }: JourneyFlyoutProps) => {
 };
 
 export const ObservabilityExample = () => {
-  const flyoutApi = useRef<JourneyFlyoutApi | null>(null);
+  const flyoutApi = useRef<FlyoutApi | null>(null);
 
   return (
     <>

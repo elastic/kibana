@@ -12,5 +12,5 @@
     "../../typings/**/*"
   ],
   "exclude": ["target/**/*"],
-  "kbn_references": ["@kbn/core", "@kbn/developer-examples-plugin"]
+  "kbn_references": ["@kbn/core", "@kbn/developer-examples-plugin", "@kbn/presentation-publishing"]
 }

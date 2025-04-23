@@ -11,7 +11,7 @@ import { EuiBadge, EuiButton, EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui
 import { css } from '@emotion/react';
 import React, { useCallback, useRef, useState } from 'react';
 import { JourneyFlyout } from '../journey_flyouts/journey_flyout';
-import { JourneyFlyoutApi, JourneyFlyoutProps } from '../journey_flyouts/types';
+import { FlyoutApi, FlyoutProps } from '../journey_flyouts/types';
 import securityAlertsImage from './screenshots/Security/AlertsPage.png';
 import analyzerGraphImage from './screenshots/Security/AnalyzerGraph.png';
 import analyzerGraphAlertImage from './screenshots/Security/AnalyzerGraphAlert.png';
@@ -23,7 +23,7 @@ import showLogsImage from './screenshots/Security/ShowLogs.png';
 
 const pageWidth = '1750px';
 
-const Detection = ({ openNextFlyout, openChildFlyout }: JourneyFlyoutProps) => {
+const Detection = ({ openNextFlyout, openChildFlyout }: FlyoutProps) => {
   return (
     <div
       css={css`
@@ -55,7 +55,7 @@ const Detection = ({ openNextFlyout, openChildFlyout }: JourneyFlyoutProps) => {
   );
 };
 
-const AnalyzerGraph = ({ openNextFlyout, openChildFlyout }: JourneyFlyoutProps) => {
+const AnalyzerGraph = ({ openNextFlyout, openChildFlyout }: FlyoutProps) => {
   const [imageToShow, setImageToShow] = useState<'base' | 'alert' | 'malware'>('base');
 
   const getImage = useCallback(() => {
@@ -123,7 +123,7 @@ const AnalyzerGraph = ({ openNextFlyout, openChildFlyout }: JourneyFlyoutProps) 
   );
 };
 
-const EventDetails = ({ openNextFlyout, openChildFlyout }: JourneyFlyoutProps) => {
+const EventDetails = ({ openNextFlyout, openChildFlyout }: FlyoutProps) => {
   return (
     <div
       css={css`
@@ -154,7 +154,7 @@ const EventDetails = ({ openNextFlyout, openChildFlyout }: JourneyFlyoutProps) =
   );
 };
 
-const HostRiskSummary = ({ openNextFlyout, openChildFlyout }: JourneyFlyoutProps) => {
+const HostRiskSummary = ({ openNextFlyout, openChildFlyout }: FlyoutProps) => {
   return (
     <div
       css={css`
@@ -187,7 +187,7 @@ const HostRiskSummary = ({ openNextFlyout, openChildFlyout }: JourneyFlyoutProps
   );
 };
 
-const ShowLogs = ({ openNextFlyout, openChildFlyout }: JourneyFlyoutProps) => {
+const ShowLogs = ({ openNextFlyout, openChildFlyout }: FlyoutProps) => {
   return (
     <div
       css={css`
@@ -202,7 +202,7 @@ const ShowLogs = ({ openNextFlyout, openChildFlyout }: JourneyFlyoutProps) => {
 };
 
 export const SecurityExample = () => {
-  const flyoutApi = useRef<JourneyFlyoutApi | null>(null);
+  const flyoutApi = useRef<FlyoutApi | null>(null);
 
   return (
     <>

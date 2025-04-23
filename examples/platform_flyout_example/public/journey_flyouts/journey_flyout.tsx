@@ -17,6 +17,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { StateManager, initializeStateManager } from '@kbn/presentation-publishing';
 import React, {
   forwardRef,
   useCallback,
@@ -33,19 +34,22 @@ import {
   getZIndex,
   triggerAnimationOnRef,
 } from './journey_flyout.styles';
-import { JourneyFlyoutApi, JourneyFlyoutEntry, JourneyFlyoutProps } from './types';
+import { FlyoutApi, FlyoutEntry, FlyoutProps } from './types';
 
-interface JourneyFlyoutEntryState extends JourneyFlyoutEntry {
-  ActiveChild?: JourneyFlyoutEntry;
+interface ActiveFlyoutEntry<StateType extends object = {}> {
+  Component: FlyoutEntry<StateType>['Component'];
+  width: FlyoutEntry<StateType>['width'];
+  stateManager: StateManager<StateType>;
+  activeChildFlyoutId?: string;
 }
 
-export const JourneyFlyout = forwardRef<JourneyFlyoutApi, { childBackgroundColor?: string }>(
+export const JourneyFlyout = forwardRef<FlyoutApi, { childBackgroundColor?: string }>(
   ({ childBackgroundColor }, ref) => {
     const { euiTheme } = useEuiTheme();
     const [width, setWidth] = useState(800);
     const [childWidth, setChildWidth] = useState(800);
 
-    const componentsMap = useRef<{ [key: string]: JourneyFlyoutEntryState }>({});
+    const activeFlyouts = useRef<{ [key: string]: ActiveFlyoutEntry<object> }>({});
     const [historyEntries, setHistoryEntries] = useState<string[]>([]);
 
     const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
@@ -79,7 +83,7 @@ export const JourneyFlyout = forwardRef<JourneyFlyoutApi, { childBackgroundColor
 
     useEffect(() => {
       setHasChildFlyout(
-        Boolean(componentsMap.current[isAActive ? componentAId : componentBId]?.ActiveChild)
+        Boolean(activeFlyouts.current[isAActive ? componentAId : componentBId]?.activeChildFlyoutId)
       );
     }, [activeIndex, componentAId, componentBId, isAActive]);
 
@@ -87,7 +91,7 @@ export const JourneyFlyout = forwardRef<JourneyFlyoutApi, { childBackgroundColor
       setIsFlyoutOpen(false);
       setAIndex(undefined);
       setBIndex(undefined);
-      componentsMap.current = {};
+      activeFlyouts.current = {};
       setHistoryEntries([]);
       setIsAActive(true);
     }, []);
@@ -98,17 +102,28 @@ export const JourneyFlyout = forwardRef<JourneyFlyoutApi, { childBackgroundColor
         const flyoutId = v4();
         setHistoryEntries([flyoutId]);
         setWidth(flyoutEntry.width);
-        componentsMap.current[flyoutId] = flyoutEntry;
+        const state = flyoutEntry.initialState ?? {};
+        const stateManager = initializeStateManager(state, state);
+        activeFlyouts.current[flyoutId] = {
+          stateManager,
+          ...flyoutEntry,
+        } as ActiveFlyoutEntry<object>;
         setIsFlyoutOpen(true);
         setAIndex(0);
       },
     }));
 
-    const openNextFlyout: JourneyFlyoutProps['openNextFlyout'] = useCallback(
+    const openNextFlyout: FlyoutProps['openNextFlyout'] = useCallback(
       (flyoutEntry) => {
         if (isAnimating || activeIndex === undefined) return;
         const flyoutId = v4();
-        componentsMap.current[flyoutId] = flyoutEntry;
+
+        const state = flyoutEntry.initialState ?? {};
+        const stateManager = initializeStateManager(state, state);
+        activeFlyouts.current[flyoutId] = {
+          ...flyoutEntry,
+          stateManager,
+        } as ActiveFlyoutEntry<object>;
         const nextHistoryEntries = historyEntries.slice(0, activeIndex + 1);
         nextHistoryEntries.push(flyoutId);
         setHistoryEntries(nextHistoryEntries);
@@ -139,9 +154,13 @@ export const JourneyFlyout = forwardRef<JourneyFlyoutApi, { childBackgroundColor
       // slide the currently active flyout out of frame. Then make the inactive flyout active.
       const flyoutRef = isAActive ? aRef : bRef;
       setIsAnimating(true);
-      const flyoutEntry = componentsMap.current[historyEntries[activeIndex - 1]];
+      const flyoutEntry = activeFlyouts.current[historyEntries[activeIndex - 1]];
       setWidth(flyoutEntry.width);
-      setChildWidth(flyoutEntry.ActiveChild?.width ?? width);
+
+      const childEntry = flyoutEntry.activeChildFlyoutId
+        ? activeFlyouts.current[flyoutEntry.activeChildFlyoutId]
+        : undefined;
+      setChildWidth(childEntry?.width ?? width);
       triggerAnimationOnRef(flyoutRef.current, 'slide-out').then(() => {
         setIsAActive(!isAActive);
         // then delete the last flyout entry.
@@ -155,9 +174,13 @@ export const JourneyFlyout = forwardRef<JourneyFlyoutApi, { childBackgroundColor
       // use the currently inactive flyout as the next active flyout.
       const setIndexForNextActiveFlyout = isAActive ? setBIndex : setAIndex;
       setIndexForNextActiveFlyout(activeIndex + 1);
-      const flyoutEntry = componentsMap.current[historyEntries[activeIndex + 1]];
+      const flyoutEntry = activeFlyouts.current[historyEntries[activeIndex + 1]];
       setWidth(flyoutEntry.width);
-      setChildWidth(flyoutEntry.ActiveChild?.width ?? width);
+
+      const childEntry = flyoutEntry.activeChildFlyoutId
+        ? activeFlyouts.current[flyoutEntry.activeChildFlyoutId]
+        : undefined;
+      setChildWidth(childEntry?.width ?? width);
       setIsAActive(!isAActive);
       setIsAnimating(true);
 
@@ -170,30 +193,36 @@ export const JourneyFlyout = forwardRef<JourneyFlyoutApi, { childBackgroundColor
       });
     }, [activeIndex, historyEntries, isAActive, isAnimating, width]);
 
-    const openChildFlyout: JourneyFlyoutProps['openChildFlyout'] = useCallback(
-      ({ Component, width: nextChildWidth }) => {
+    const openChildFlyout: FlyoutProps['openChildFlyout'] = useCallback(
+      ({ Component, width: nextChildWidth, initialState }) => {
         if (activeIndex === undefined) return;
-        const activeFlyout = componentsMap?.current[historyEntries[activeIndex]];
+        const activeFlyout = activeFlyouts?.current[historyEntries[activeIndex]];
         if (!activeFlyout) return;
-        activeFlyout.ActiveChild = { Component, width: nextChildWidth };
+
+        const state = initialState ?? {};
+        const stateManager = initializeStateManager(state, state);
+        const nextChildId = v4();
+        activeFlyouts.current[nextChildId] = {
+          Component,
+          width: nextChildWidth,
+          stateManager,
+        } as ActiveFlyoutEntry<object>;
+        activeFlyout.activeChildFlyoutId = nextChildId;
         setHasChildFlyout(true);
         setChildWidth(nextChildWidth);
-        setChildId(v4());
+        setChildId(nextChildId);
       },
       [activeIndex, historyEntries]
     );
 
     const { ComponentA, ComponentB, CurrentChildComponent } = useMemo(() => {
       return {
-        ComponentA: componentsMap?.current[componentAId]?.Component,
-        ComponentB: componentsMap?.current[componentBId]?.Component,
+        ComponentA: activeFlyouts?.current[componentAId]?.Component,
+        ComponentB: activeFlyouts?.current[componentBId]?.Component,
         CurrentChildComponent:
-          hasChildFlyout && childId
-            ? componentsMap?.current[isAActive ? componentAId : componentBId]?.ActiveChild
-                ?.Component
-            : null,
+          hasChildFlyout && childId ? activeFlyouts?.current[childId]?.Component : null,
       };
-    }, [componentAId, componentBId, hasChildFlyout, childId, isAActive]);
+    }, [componentAId, componentBId, hasChildFlyout, childId]);
 
     if (!isFlyoutOpen) return null;
     return (
@@ -212,8 +241,6 @@ export const JourneyFlyout = forwardRef<JourneyFlyoutApi, { childBackgroundColor
                   iconType="cross"
                   onClick={() => {
                     setHasChildFlyout(false);
-                    delete componentsMap?.current[isAActive ? componentAId : componentBId]
-                      .ActiveChild;
                   }}
                   aria-label="Close journey flyout"
                 />
@@ -226,10 +253,11 @@ export const JourneyFlyout = forwardRef<JourneyFlyoutApi, { childBackgroundColor
               padding: ${euiTheme.size.s};
             `}
           >
-            {CurrentChildComponent && (
+            {CurrentChildComponent && childId && (
               <CurrentChildComponent
                 openNextFlyout={openNextFlyout}
                 openChildFlyout={openChildFlyout}
+                stateManager={activeFlyouts.current[childId]?.stateManager as StateManager<object>}
               />
             )}
           </div>
@@ -280,13 +308,21 @@ export const JourneyFlyout = forwardRef<JourneyFlyoutApi, { childBackgroundColor
           <div className="journey-flyout-content-container">
             <div ref={aRef} className="journey-flyout-content" css={getZIndex(isAActive)}>
               {ComponentA && (
-                <ComponentA openNextFlyout={openNextFlyout} openChildFlyout={openChildFlyout} />
+                <ComponentA
+                  openNextFlyout={openNextFlyout}
+                  openChildFlyout={openChildFlyout}
+                  stateManager={activeFlyouts.current[componentAId]?.stateManager}
+                />
               )}
             </div>
             <div className="journey-flyout-shadow" />
             <div ref={bRef} className="journey-flyout-content" css={getZIndex(!isAActive)}>
               {ComponentB && (
-                <ComponentB openNextFlyout={openNextFlyout} openChildFlyout={openChildFlyout} />
+                <ComponentB
+                  openNextFlyout={openNextFlyout}
+                  openChildFlyout={openChildFlyout}
+                  stateManager={activeFlyouts.current[componentBId]?.stateManager}
+                />
               )}
             </div>
           </div>
