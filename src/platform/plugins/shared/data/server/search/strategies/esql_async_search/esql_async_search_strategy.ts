@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { IScopedClusterClient, Logger } from '@kbn/core/server';
+import { IScopedClusterClient, Logger } from '@kbn/core/server';
 import { catchError, tap } from 'rxjs';
 import { getKbnServerError } from '@kbn/kibana-utils-plugin/server';
 import type { IKibanaSearchResponse, IKibanaSearchRequest } from '@kbn/search-types';
@@ -62,7 +62,9 @@ export const esqlAsyncSearchStrategyProvider = (
     const client = useInternalUser ? esClient.asInternalUser : esClient.asCurrentUser;
     const { dropNullColumns, ...requestParams } = request.params ?? {};
     const search = async () => {
-      const params = id
+      const params = options.retrieveResults
+        ? {}
+        : id
         ? {
             ...getCommonDefaultAsyncGetParams(searchConfig, options),
             ...(request.params?.keep_alive ? { keep_alive: request.params.keep_alive } : {}),
@@ -74,7 +76,20 @@ export const esqlAsyncSearchStrategyProvider = (
             ...(await getCommonDefaultAsyncSubmitParams(searchConfig, options)),
             ...requestParams,
           };
-      const response = id
+      const response = options.retrieveResults
+        ? await client.transport.request<SqlGetAsyncResponse>(
+            {
+              method: 'POST',
+              path: `/_query/async/${id}/stop`,
+            },
+            {
+              ...options.transport,
+              signal: options.abortSignal,
+              meta: true,
+              asStream: options.stream,
+            }
+          )
+        : id
         ? await client.transport.request<SqlGetAsyncResponse>(
             {
               method: 'GET',
