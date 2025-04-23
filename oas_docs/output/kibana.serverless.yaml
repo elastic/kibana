@@ -48500,7 +48500,7 @@ paths:
       x-state: Technical Preview
   /api/streams/{name}/content/export:
     post:
-      description: Exports the content associated to a stream.
+      description: 'Exports the content associated to a stream.<br/><br/>[Required authorization] Route required privileges: manage_content_pack.'
       operationId: post-streams-name-content-export
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -48570,7 +48570,7 @@ paths:
         - streams
   /api/streams/{name}/content/import:
     post:
-      description: Links content objects to a stream.
+      description: 'Links content objects to a stream.<br/><br/>[Required authorization] Route required privileges: manage_content_pack.'
       operationId: post-streams-name-content-import
       parameters:
         - description: A required header to protect against CSRF attacks
