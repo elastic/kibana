@@ -10,6 +10,7 @@ xpack.cloud.serverless.project_type: search
 uiSettings.overrides.defaultRoute: /app/workchat
 
 ## Enable workchat plugins
+xpack.workchatFramework.enabled: true
 xpack.workchatApp.enabled: true
 xpack.wciSalesforce.enabled: true
 xpack.wciIndexSource.enabled: true
