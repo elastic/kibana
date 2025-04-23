@@ -142,7 +142,7 @@ describe('TableActions', () => {
       });
 
       describe('when the copy fails', () => {
-        it('should show a toast', () => {
+        it('should show a warning toast', () => {
           // Given
           const actions = getFieldValueCellActions({
             rows: getRows(),
@@ -168,7 +168,7 @@ describe('TableActions', () => {
       });
 
       describe('when the copy succeeds', () => {
-        it('should not show a toast', () => {
+        it('should show an info toast', () => {
           // Given
           const actions = getFieldValueCellActions({
             rows: getRows(),
