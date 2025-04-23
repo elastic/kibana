@@ -60,7 +60,7 @@ import { createStartServicesGetter } from '@kbn/kibana-utils-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { AdvancedUiActionsSetup } from '@kbn/ui-actions-enhanced-plugin/public';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
-import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
+import type { SharePluginSetup, SharePluginStart, ExportShare } from '@kbn/share-plugin/public';
 import {
   ContentManagementPublicSetup,
   ContentManagementPublicStart,
@@ -75,7 +75,7 @@ import type {
   FormBasedDatasourceSetupPlugins,
   FormulaPublicApi,
 } from './datasources/form_based';
-import type { TextBasedDatasource as TextBasedDatasourceType } from './datasources/text_based';
+import type { TextBasedDatasource as TextBasedDatasourceType } from './datasources/form_based/esql_layer';
 
 import type {
   XyVisualization as XyVisualizationType,
@@ -133,7 +133,7 @@ import { getSearchProvider } from './search_provider';
 import { OpenInDiscoverDrilldown } from './trigger_actions/open_in_discover_drilldown';
 import { ChartInfoApi } from './chart_info_api';
 import { type LensAppLocator, LensAppLocatorDefinition } from '../common/locator/locator';
-import { downloadCsvShareProvider } from './app_plugin/csv_download_provider/csv_download_provider';
+import { downloadCsvLensShareProvider } from './app_plugin/csv_download_provider/csv_download_provider';
 import { LensDocument } from './persistence/saved_object_store';
 import {
   CONTENT_ID,
@@ -427,8 +427,9 @@ export class LensPlugin {
     if (share) {
       this.locator = share.url.locators.create(new LensAppLocatorDefinition());
 
-      share.register(
-        downloadCsvShareProvider({
+      share.registerShareIntegration<ExportShare>(
+        'lens',
+        downloadCsvLensShareProvider({
           uiSettings: core.uiSettings,
           formatFactoryFn: () => startServices().plugins.fieldFormats.deserialize,
           atLeastGold: () => {
