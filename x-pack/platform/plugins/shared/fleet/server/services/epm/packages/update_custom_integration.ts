@@ -63,22 +63,22 @@ export async function updateCustomIntegration(
     integration.attributes.install_source !== 'upload'
   ) {
     throw new NotACustomIntegrationError(`Integration with ID ${id} is not a custom integration`);
-  } else {
-    // add one to the patch version in the semver
-    const newVersion = integration.attributes.version.split('.');
-    newVersion[2] = (parseInt(newVersion[2], 10) + 1).toString();
-    const newVersionString = newVersion.join('.');
-    // Increment the version of everything and create a new package
-    const res = await incrementVersionAndUpdate(soClient, esClient, id, {
-      version: newVersionString,
-      readme: fields.readMeData,
-      categories: fields.categories,
-    });
-    return {
-      version: newVersionString,
-      status: res.status,
-    };
   }
+
+  // add one to the patch version in the semver
+  const newVersion = integration.attributes.version.split('.');
+  newVersion[2] = (parseInt(newVersion[2], 10) + 1).toString();
+  const newVersionString = newVersion.join('.');
+  // Increment the version of everything and create a new package
+  const res = await incrementVersionAndUpdate(soClient, esClient, id, {
+    version: newVersionString,
+    readme: fields.readMeData,
+    categories: fields.categories,
+  });
+  return {
+    version: newVersionString,
+    status: res.status,
+  };
 }
 // Increments the version of everything, then creates a new package with the new version, readme, etc.
 export async function incrementVersionAndUpdate(

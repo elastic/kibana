@@ -47,7 +47,6 @@ import {
   usePermissionCheckQuery,
   useIntegrationsStateContext,
   useGetSettingsQuery,
-  sendGetFileByPath,
 } from '../../../../hooks';
 import { useAgentless } from '../../../../../fleet/sections/agent_policy/create_package_policy_page/single_page_layout/hooks/setup_technology';
 import { INTEGRATIONS_ROUTING_PATHS } from '../../../../constants';
@@ -110,7 +109,7 @@ export interface DetailParams {
   pkgkey: string;
   panel?: DetailViewPanelName;
 }
-
+const CUSTOM_INTEGRATION_SOURCES = ['custom', 'upload'];
 const Divider = styled.div`
   width: 0;
   height: 100%;
@@ -142,7 +141,7 @@ export function Detail() {
   const { getHref, getPath } = useLink();
   const history = useHistory();
   const { pathname, search, hash } = useLocation();
-  const { isAgentlessIntegration } = useAgentless();
+  const { isAgentlessIntegration, isAgentlessDefault } = useAgentless();
   const queryParams = useMemo(() => new URLSearchParams(search), [search]);
   const integration = useMemo(() => queryParams.get('integration'), [queryParams]);
   const prerelease = useMemo(() => Boolean(queryParams.get('prerelease')), [queryParams]);
@@ -175,7 +174,7 @@ export function Detail() {
 
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [shouldAllowEdit, setShouldAllowEdit] = useState(false);
-  const [readMeContent, setReadMeContent] = useState<string>('');
+
   // Package info state
   const [packageInfo, setPackageInfo] = useState<PackageInfo | null>(null);
   const setPackageInstallStatus = useSetPackageInstallStatus();
@@ -303,7 +302,11 @@ export function Detail() {
       const packageInfoResponse = packageInfoData.item;
       setPackageInfo(packageInfoResponse);
       setShouldAllowEdit(
-        packageInfoResponse?.owner?.github?.endsWith('custom-integrations') ?? false
+        (packageInfoResponse?.installationInfo?.install_source &&
+          CUSTOM_INTEGRATION_SOURCES.includes(
+            packageInfoResponse.installationInfo?.install_source
+          )) ??
+          false
       );
       let installedVersion;
       const { name } = packageInfoData.item;
@@ -407,19 +410,9 @@ export function Detail() {
     [integrationInfo, isLoading, packageInfo, fromIntegrationsPath, queryParams]
   );
 
-  const handleEditIntegrationClick = useCallback<ReactEventHandler>(
-    (ev) => {
-      const readmePath = packageInfo?.readme;
-      if (!readmePath) {
-        return;
-      }
-      sendGetFileByPath(readmePath).then((res) => {
-        setReadMeContent(res.data || '');
-        setIsEditOpen(true);
-      });
-    },
-    [packageInfo]
-  );
+  const handleEditIntegrationClick = useCallback<ReactEventHandler>((ev) => {
+    setIsEditOpen(true);
+  }, []);
   const handleAddIntegrationPolicyClick = useCallback<ReactEventHandler>(
     (ev) => {
       ev.preventDefault();
@@ -440,6 +433,7 @@ export function Detail() {
         isGuidedOnboardingActive,
         pkgkey,
         isAgentlessIntegration: isAgentlessIntegration(packageInfo || undefined),
+        isAgentlessDefault,
       });
 
       /** Users from Security and Observability Solution onboarding pages will have returnAppId and returnPath
@@ -469,6 +463,7 @@ export function Detail() {
       history,
       integration,
       isAgentlessIntegration,
+      isAgentlessDefault,
       isCloud,
       isFirstTimeAgentUser,
       isGuidedOnboardingActive,
@@ -894,14 +889,13 @@ export function Detail() {
       )}
       {isEditOpen && (
         <EditIntegrationFlyout
-          readMeContent={readMeContent}
-          integrationName={packageInfo?.title || 'UNDEFINED'}
+          integrationName={packageInfo?.title || 'Integration'}
           onClose={() => setIsEditOpen(false)}
           packageInfo={packageInfo}
           setIsEditOpen={setIsEditOpen}
           integration={integration}
           services={services}
-          existingCategories={packageInfo?.categories || []}
+          existingCategories={packageInfo?.categories ?? []}
           onComplete={(urlParts) => {
             const path = getPath('integration_details_overview', urlParts);
             history.push(path);

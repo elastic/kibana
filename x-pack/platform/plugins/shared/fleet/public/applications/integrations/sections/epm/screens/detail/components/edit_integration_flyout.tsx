@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 import {
   EuiFlyout,
@@ -21,6 +21,7 @@ import {
   EuiComboBox,
   EuiFormRow,
   EuiSpacer,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -28,12 +29,15 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { FleetStartServices } from '../../../../../../../plugin';
 
-import { useGetCategoriesQuery, useUpdateCustomIntegration } from '../../../../../../../hooks';
+import {
+  sendGetFileByPath,
+  useGetCategoriesQuery,
+  useUpdateCustomIntegration,
+} from '../../../../../../../hooks';
 
 import type { PackageInfo } from '../../../../../types';
 
 export const EditIntegrationFlyout: React.FunctionComponent<{
-  readMeContent: string | undefined;
   onClose: () => void;
   integrationName: string;
   miniIcon: React.ReactNode;
@@ -46,7 +50,6 @@ export const EditIntegrationFlyout: React.FunctionComponent<{
 }> = ({
   onClose,
   integrationName,
-  readMeContent,
   miniIcon,
   packageInfo,
   setIsEditOpen,
@@ -57,23 +60,48 @@ export const EditIntegrationFlyout: React.FunctionComponent<{
 }) => {
   const updateCustomIntegration = useUpdateCustomIntegration;
 
+  // Get all the possible categories
   const { data: categoriesData } = useGetCategoriesQuery({
     prerelease: true,
   });
-  // we only need the parent categories for now, filter out any with parent_id fields to only leave the parents
+  // We only need the parent categories for now, filter out any with parent_id fields to only leave the parents
   const parentCategories = categoriesData?.items.filter((item) => item.parent_id === undefined);
 
-  // since the existing integration categories are stored as an array of ids, we need to map them to the titles from the parentCategories
-  const initialSelectedCategories = existingCategories.map(
-    (category) => parentCategories?.find((cat) => cat.id === category)?.title
-  );
-
   // state section
-  const [editedContent, setEditedContent] = useState(readMeContent);
   const [savingEdits, setSavingEdits] = useState(false);
-  const [selectedCategories, setSelectedCategories] = useState<string[]>(
-    initialSelectedCategories.filter((category): category is string => category !== undefined)
-  );
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [editedContent, setEditedContent] = useState<string>();
+  const [readmeLoading, setReadmeLoading] = useState(true);
+  const [categoriesInitialized, setCategoriesInitialized] = useState(false);
+
+  // Set initial categories only once when data is available
+  useEffect(() => {
+    // Only run this effect if we haven't initialized categories yet
+    if (!categoriesInitialized && parentCategories?.length && existingCategories.length) {
+      const initialCategories = existingCategories
+        .map((categoryId) => parentCategories.find((cat) => cat.id === categoryId)?.title)
+        .filter((title): title is string => Boolean(title));
+
+      if (initialCategories.length) {
+        setSelectedCategories(initialCategories);
+        // Mark that we've initialized categories to prevent future runs when the combobox changes and causes a re-render
+        setCategoriesInitialized(true);
+      }
+    }
+  }, [parentCategories, existingCategories, categoriesInitialized]);
+
+  // get the readme content from the packageInfo
+  useEffect(() => {
+    const readmePath = packageInfo?.readme;
+    if (!readmePath) {
+      setReadmeLoading(false);
+      return;
+    }
+    sendGetFileByPath(readmePath).then((res) => {
+      setEditedContent(res.data || '');
+      setReadmeLoading(false);
+    });
+  }, [packageInfo]);
 
   const saveIntegrationEdits = async (updatedReadMe: string | undefined) => {
     setSavingEdits(true);
@@ -125,7 +153,13 @@ export const EditIntegrationFlyout: React.FunctionComponent<{
           <EuiFlexItem grow={false}>{miniIcon}</EuiFlexItem>
           <EuiFlexItem>
             <EuiTitle>
-              <h2 id="editIntegrationFlyoutTitle">Editing {integrationName}</h2>
+              <h2 id="editIntegrationFlyoutTitle">
+                <FormattedMessage
+                  id="xpack.fleet.epm.editIntegrationFlyout.title"
+                  defaultMessage="Editing {integrationName}"
+                  values={{ integrationName }}
+                />
+              </h2>
             </EuiTitle>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -161,25 +195,30 @@ export const EditIntegrationFlyout: React.FunctionComponent<{
             }))}
             onChange={(selectedOptions) => {
               const selectedValues = selectedOptions.map((option) => option.label);
-              setSelectedCategories(selectedValues);
+              setSelectedCategories(selectedValues ?? []);
             }}
           />
         </EuiFormRow>
         <EuiSpacer size="m" />
-        <EuiMarkdownEditor
-          aria-label="Edit"
-          placeholder={`${i18n.translate(
-            'xpack.fleet.epm.editIntegrationFlyout.markdownEditorPlaceholder',
-            {
-              defaultMessage: 'Edit the README content for {integrationName}...',
-              values: { integrationName },
-            }
-          )}...`}
-          value={editedContent!}
-          onChange={setEditedContent}
-          readOnly={false}
-          height={600}
-        />
+
+        {readmeLoading ? (
+          <EuiLoadingSpinner />
+        ) : (
+          <EuiMarkdownEditor
+            aria-label="Edit"
+            placeholder={`${i18n.translate(
+              'xpack.fleet.epm.editIntegrationFlyout.markdownEditorPlaceholder',
+              {
+                defaultMessage: 'Edit the README content for {integrationName}...',
+                values: { integrationName },
+              }
+            )}...`}
+            value={editedContent!}
+            onChange={setEditedContent}
+            readOnly={false}
+            height={600}
+          />
+        )}
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
