@@ -53,6 +53,13 @@ function validateCPU(s: string) {
   }
 }
 
+function validateCloudProvider(s: string) {
+  const csps = ['aws', 'azure', 'gcp'];
+  if (!csps.includes(s)) {
+    return 'Invalid cloud provider';
+  }
+}
+
 export const AgentPolicyBaseSchema = {
   id: schema.maybe(schema.string()),
   space_ids: schema.maybe(schema.arrayOf(schema.string())),
@@ -148,6 +155,12 @@ export const AgentPolicyBaseSchema = {
   ),
   agentless: schema.maybe(
     schema.object({
+      cloud_connectors: schema.maybe(
+        schema.object({
+          target_csp: schema.maybe(schema.string({ validate: validateCloudProvider })),
+          enabled: schema.boolean(),
+        })
+      ),
       resources: schema.maybe(
         schema.object({
           requests: schema.maybe(
@@ -245,6 +258,24 @@ function validateGlobalDataTagInput(tags: GlobalDataTag[]): string | undefined {
   }
 }
 
+const BaseSSLSchema = schema.object({
+  verification_mode: schema.maybe(schema.string()),
+  certificate_authorities: schema.maybe(schema.arrayOf(schema.string())),
+  certificate: schema.maybe(schema.string()),
+  key: schema.maybe(schema.string()),
+  renegotiation: schema.maybe(schema.string()),
+});
+
+const BaseSecretsSchema = schema.object({
+  ssl: schema.maybe(
+    schema.object({
+      key: schema.object({
+        id: schema.maybe(schema.string()),
+      }),
+    })
+  ),
+});
+
 export const NewAgentPolicySchema = schema.object({
   ...AgentPolicyBaseSchema,
   force: schema.maybe(schema.boolean()),
@@ -295,6 +326,17 @@ export const GetAgentPolicyResponseSchema = schema.object({
   item: AgentPolicyResponseSchema,
 });
 
+export const GetAutoUpgradeAgentsStatusResponseSchema = schema.object({
+  currentVersions: schema.arrayOf(
+    schema.object({
+      version: schema.string(),
+      agents: schema.number(),
+      failedUpgradeAgents: schema.number(),
+    })
+  ),
+  totalAgents: schema.number(),
+});
+
 export const FullAgentPolicyResponseSchema = schema.object({
   id: schema.string(),
   namespaces: schema.maybe(schema.arrayOf(schema.string())),
@@ -321,15 +363,8 @@ export const FullAgentPolicyResponseSchema = schema.object({
         hosts: schema.arrayOf(schema.string()),
         proxy_url: schema.maybe(schema.string()),
         proxy_headers: schema.maybe(schema.any()),
-        ssl: schema.maybe(
-          schema.object({
-            verification_mode: schema.maybe(schema.string()),
-            certificate_authorities: schema.maybe(schema.arrayOf(schema.string())),
-            certificate: schema.maybe(schema.string()),
-            key: schema.maybe(schema.string()),
-            renegotiation: schema.maybe(schema.string()),
-          })
-        ),
+        ssl: schema.maybe(BaseSSLSchema),
+        secrets: schema.maybe(BaseSecretsSchema),
       }),
       schema.object({
         kibana: schema.object({
@@ -413,6 +448,8 @@ export const FullAgentPolicyResponseSchema = schema.object({
       }),
       download: schema.object({
         sourceURI: schema.string(),
+        ssl: schema.maybe(BaseSSLSchema),
+        secrets: schema.maybe(BaseSecretsSchema),
       }),
       features: schema.recordOf(
         schema.string(),

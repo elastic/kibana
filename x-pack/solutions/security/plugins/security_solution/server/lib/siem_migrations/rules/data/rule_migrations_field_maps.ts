@@ -10,7 +10,7 @@ import type {
   RuleMigration,
   RuleMigrationResource,
 } from '../../../../../common/siem_migrations/model/rule_migration.gen';
-import type { RuleMigrationIntegration, RuleMigrationPrebuiltRule } from '../types';
+import type { SiemMigration, RuleMigrationIntegration, RuleMigrationPrebuiltRule } from '../types';
 
 export const ruleMigrationsFieldMap: FieldMap<SchemaFieldMapKeys<Omit<RuleMigration, 'id'>>> = {
   '@timestamp': { type: 'date', required: false },
@@ -26,6 +26,7 @@ export const ruleMigrationsFieldMap: FieldMap<SchemaFieldMapKeys<Omit<RuleMigrat
   'original_rule.query_language': { type: 'keyword', required: true },
   'original_rule.annotations': { type: 'object', required: false },
   'original_rule.annotations.mitre_attack': { type: 'keyword', array: true, required: false },
+  'original_rule.severity': { type: 'keyword', required: false },
   elastic_rule: { type: 'object', required: false },
   'elastic_rule.title': { type: 'text', required: true, fields: { keyword: { type: 'keyword' } } },
   'elastic_rule.integration_ids': { type: 'keyword', required: false, array: true },
@@ -74,4 +75,9 @@ export const prebuiltRulesFieldMap: FieldMap<SchemaFieldMapKeys<RuleMigrationPre
   elser_embedding: { type: 'semantic_text', required: true },
   rule_id: { type: 'keyword', required: true },
   mitre_attack_ids: { type: 'keyword', array: true, required: false },
+};
+
+export const migrationsFieldMaps: FieldMap<SchemaFieldMapKeys<SiemMigration>> = {
+  created_at: { type: 'date', required: true },
+  created_by: { type: 'keyword', required: true },
 };

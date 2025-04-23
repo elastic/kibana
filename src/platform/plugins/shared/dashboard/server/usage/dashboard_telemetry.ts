@@ -85,7 +85,6 @@ export const collectPanelsByType = (
     collectorData.panels.by_type[type].details = embeddableService.telemetry(
       {
         ...panel.embeddableConfig,
-        id: panel.id || '',
         type: panel.type,
       },
       collectorData.panels.by_type[type].details
@@ -101,7 +100,6 @@ export const controlsCollectorFactory =
         {
           ...attributes.controlGroupInput,
           type: CONTROL_GROUP_TYPE,
-          id: `DASHBOARD_${CONTROL_GROUP_TYPE}`,
         },
         collectorData.controls
       ) as ControlGroupTelemetry;

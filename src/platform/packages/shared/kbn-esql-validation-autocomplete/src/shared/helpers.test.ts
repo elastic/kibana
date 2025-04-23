@@ -9,7 +9,7 @@
 
 import { parse } from '@kbn/esql-ast';
 import { getBracketsToClose, getExpressionType, shouldBeQuotedSource } from './helpers';
-import { SupportedDataType } from '../definitions/types';
+import { SupportedDataType, FunctionDefinitionTypes, Location } from '../definitions/types';
 import { setTestFunctions } from './test_functions';
 
 describe('shouldBeQuotedSource', () => {
@@ -184,10 +184,10 @@ describe('getExpressionType', () => {
     beforeAll(() => {
       setTestFunctions([
         {
-          type: 'scalar',
+          type: FunctionDefinitionTypes.SCALAR,
           name: 'test',
           description: 'Test function',
-          supportedCommands: ['eval'],
+          locationsAvailable: [Location.EVAL],
           signatures: [
             { params: [{ name: 'arg', type: 'keyword' }], returnType: 'keyword' },
             { params: [{ name: 'arg', type: 'double' }], returnType: 'double' },
@@ -201,17 +201,17 @@ describe('getExpressionType', () => {
           ],
         },
         {
-          type: 'scalar',
+          type: FunctionDefinitionTypes.SCALAR,
           name: 'returns_keyword',
           description: 'Test function',
-          supportedCommands: ['eval'],
+          locationsAvailable: [Location.EVAL],
           signatures: [{ params: [], returnType: 'keyword' }],
         },
         {
-          type: 'scalar',
+          type: FunctionDefinitionTypes.SCALAR,
           name: 'accepts_dates',
           description: 'Test function',
-          supportedCommands: ['eval'],
+          locationsAvailable: [Location.EVAL],
           signatures: [
             {
               params: [
@@ -297,10 +297,10 @@ describe('getExpressionType', () => {
     it('accounts for the "any" parameter type', () => {
       setTestFunctions([
         {
-          type: 'scalar',
+          type: FunctionDefinitionTypes.SCALAR,
           name: 'test',
           description: 'Test function',
-          supportedCommands: ['eval'],
+          locationsAvailable: [Location.EVAL],
           signatures: [{ params: [{ name: 'arg', type: 'any' }], returnType: 'keyword' }],
         },
       ]);

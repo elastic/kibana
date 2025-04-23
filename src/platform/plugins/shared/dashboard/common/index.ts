@@ -9,11 +9,7 @@
 
 export type { DashboardCapabilities } from './types';
 
-export type {
-  DashboardPanelMap,
-  DashboardPanelState,
-  DashboardContainerByReferenceInput,
-} from './dashboard_container/types';
+export type { DashboardPanelMap, DashboardPanelState } from './dashboard_container/types';
 
 export {
   type InjectExtractDeps,

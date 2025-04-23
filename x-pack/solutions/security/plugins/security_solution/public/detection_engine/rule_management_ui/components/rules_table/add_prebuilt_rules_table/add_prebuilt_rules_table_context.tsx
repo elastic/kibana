@@ -144,7 +144,7 @@ export const AddPrebuiltRulesTableContextProvider = ({
     enabled: isUpgradeReviewRequestEnabled({
       canUserCRUD,
       isUpgradingSecurityPackages,
-      prebuiltRulesStatus,
+      prebuiltRulesStatus: prebuiltRulesStatus?.stats,
     }),
   });
 

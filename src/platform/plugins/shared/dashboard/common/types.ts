@@ -8,7 +8,6 @@
  */
 
 import type { Reference } from '@kbn/content-management-utils';
-import type { EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
 import type { DashboardPanelMap } from './dashboard_container/types';
 import type { DashboardAttributes } from '../server/content_management';
 
@@ -22,10 +21,11 @@ export interface DashboardCapabilities {
 /**
  * A partially parsed version of the Dashboard Attributes used for inject and extract logic for both the Dashboard Container and the Dashboard Saved Object.
  */
-export type ParsedDashboardAttributesWithType = EmbeddableStateWithType & {
+export interface ParsedDashboardAttributesWithType {
+  id: string;
   panels: DashboardPanelMap;
   type: 'dashboard';
-};
+}
 
 export interface DashboardAttributesAndReferences {
   attributes: DashboardAttributes;

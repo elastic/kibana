@@ -19,7 +19,6 @@ import { createKbnUrlStateStorage, withNotifyOnErrors } from '@kbn/kibana-utils-
 import { ViewMode } from '@kbn/presentation-publishing';
 import { DashboardApi, DashboardCreationOptions } from '..';
 import { DASHBOARD_APP_ID } from '../plugin_constants';
-import { DashboardRedirect } from '../dashboard_container/types';
 import { DashboardTopNav } from '../dashboard_top_nav';
 import {
   coreServices,
@@ -37,7 +36,7 @@ import {
   isDashboardAppInNoDataState,
 } from './no_data/dashboard_app_no_data';
 import { DashboardTabTitleSetter } from './tab_title_setter/dashboard_tab_title_setter';
-import { type DashboardEmbedSettings } from './types';
+import { DashboardRedirect, type DashboardEmbedSettings } from './types';
 import {
   createSessionRestorationDataProvider,
   getSearchSessionIdFromURL,
@@ -49,7 +48,7 @@ import {
   startSyncingExpandedPanelState,
   type SharedDashboardState,
 } from './url/url_utils';
-import { DashboardRenderer } from '../dashboard_container/external_api/dashboard_renderer';
+import { DashboardRenderer } from '../dashboard_renderer/dashboard_renderer';
 import { DASHBOARD_STATE_STORAGE_KEY, createDashboardEditUrl } from '../utils/urls';
 
 export interface DashboardAppProps {

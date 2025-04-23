@@ -142,7 +142,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
           params: {
             rollup_index: rollupIndex,
           },
-          aggs: rollupIndicesCapabilities[rollupIndex].aggs,
+          aggs: rollupCaps?.aggs,
         };
       }
 
@@ -176,6 +176,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
   const isLoadingSources = useObservable(dataViewEditorService.isLoadingSources$, true);
   const existingDataViewNames = useObservable(dataViewEditorService.dataViewNames$);
   const rollupIndex = useObservable(dataViewEditorService.rollupIndex$);
+  const rollupCaps = useObservable(dataViewEditorService.rollupCaps$);
   const rollupIndicesCapabilities = useObservable(dataViewEditorService.rollupIndicesCaps$, {});
 
   useDebounce(
@@ -194,7 +195,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
     dataViewEditorService.setType(type);
   }, [dataViewEditorService, type]);
 
-  const getRollupIndices = (rollupCaps: RollupIndicesCapsResponse) => Object.keys(rollupCaps);
+  const getRollupIndices = (rollupCapsRes: RollupIndicesCapsResponse) => Object.keys(rollupCapsRes);
 
   const onTypeChange = useCallback(
     (newType: INDEX_PATTERN_TYPE) => {

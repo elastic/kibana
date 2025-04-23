@@ -10,23 +10,18 @@ import {
   AttackDiscoveryPostRequestBody,
   AttackDiscoveryPostResponse,
   API_VERSIONS,
-  Replacements,
+  ATTACK_DISCOVERY,
 } from '@kbn/elastic-assistant-common';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { transformError } from '@kbn/securitysolution-es-utils';
 
-import moment from 'moment/moment';
-import { ATTACK_DISCOVERY } from '../../../../common/constants';
-import { handleGraphError } from './helpers/handle_graph_error';
-import { updateAttackDiscoveries, updateAttackDiscoveryStatusToRunning } from '../helpers/helpers';
+import { updateAttackDiscoveryStatusToRunning } from '../helpers/helpers';
 import { buildResponse } from '../../../lib/build_response';
 import { ElasticAssistantRequestHandlerContext } from '../../../types';
-import { invokeAttackDiscoveryGraph } from './helpers/invoke_attack_discovery_graph';
 import { requestIsValid } from './helpers/request_is_valid';
+import { generateAndUpdateAttackDiscoveries } from '../helpers/generate_and_update_discoveries';
 
 const ROUTE_HANDLER_TIMEOUT = 10 * 60 * 1000; // 10 * 60 seconds = 10 minutes
-const LANG_CHAIN_TIMEOUT = ROUTE_HANDLER_TIMEOUT - 10_000; // 9 minutes 50 seconds
-const CONNECTOR_TIMEOUT = LANG_CHAIN_TIMEOUT - 10_000; // 9 minutes 40 seconds
 
 export const postAttackDiscoveryRoute = (
   router: IRouter<ElasticAssistantRequestHandlerContext>
@@ -61,7 +56,6 @@ export const postAttackDiscoveryRoute = (
         },
       },
       async (context, request, response): Promise<IKibanaResponse<AttackDiscoveryPostResponse>> => {
-        const startTime = moment(); // start timing the generation
         const resp = buildResponse(response);
         const assistantContext = await context.elasticAssistant;
         const logger: Logger = assistantContext.logger;
@@ -73,7 +67,7 @@ export const postAttackDiscoveryRoute = (
           const actions = (await context.elasticAssistant).actions;
           const actionsClient = await actions.getActionsClientWithRequest(request);
           const dataClient = await assistantContext.getAttackDiscoveryDataClient();
-          const authenticatedUser = assistantContext.getCurrentUser();
+          const authenticatedUser = await assistantContext.getCurrentUser();
           if (authenticatedUser == null) {
             return resp.error({
               body: `Authenticated user not found`,
@@ -89,17 +83,7 @@ export const postAttackDiscoveryRoute = (
 
           // get parameters from the request body
           const alertsIndexPattern = decodeURIComponent(request.body.alertsIndexPattern);
-          const {
-            apiConfig,
-            anonymizationFields,
-            end,
-            filter,
-            langSmithApiKey,
-            langSmithProject,
-            replacements,
-            size,
-            start,
-          } = request.body;
+          const { apiConfig, size } = request.body;
 
           if (
             !requestIsValid({
@@ -117,12 +101,6 @@ export const postAttackDiscoveryRoute = (
           // get an Elasticsearch client for the authenticated user:
           const esClient = (await context.core).elasticsearch.client.asCurrentUser;
 
-          // callback to accumulate the latest replacements:
-          let latestReplacements: Replacements = { ...replacements };
-          const onNewReplacements = (newReplacements: Replacements) => {
-            latestReplacements = { ...latestReplacements, ...newReplacements };
-          };
-
           const { currentAd, attackDiscoveryId } = await updateAttackDiscoveryStatusToRunning(
             dataClient,
             authenticatedUser,
@@ -131,54 +109,17 @@ export const postAttackDiscoveryRoute = (
           );
 
           // Don't await the results of invoking the graph; (just the metadata will be returned from the route handler):
-          invokeAttackDiscoveryGraph({
+          generateAndUpdateAttackDiscoveries({
             actionsClient,
-            alertsIndexPattern,
-            anonymizationFields,
-            apiConfig,
-            connectorTimeout: CONNECTOR_TIMEOUT,
-            end,
+            executionUuid: attackDiscoveryId,
+            authenticatedUser,
+            config: request.body,
+            dataClient,
             esClient,
-            filter,
-            langSmithProject,
-            langSmithApiKey,
-            latestReplacements,
             logger,
-            onNewReplacements,
             savedObjectsClient,
-            size,
-            start,
-          })
-            .then(({ anonymizedAlerts, attackDiscoveries }) =>
-              updateAttackDiscoveries({
-                anonymizedAlerts,
-                apiConfig,
-                attackDiscoveries,
-                attackDiscoveryId,
-                authenticatedUser,
-                dataClient,
-                hasFilter: !!(filter && Object.keys(filter).length),
-                end,
-                latestReplacements,
-                logger,
-                size,
-                start,
-                startTime,
-                telemetry,
-              })
-            )
-            .catch((err) =>
-              handleGraphError({
-                apiConfig,
-                attackDiscoveryId,
-                authenticatedUser,
-                dataClient,
-                err,
-                latestReplacements,
-                logger,
-                telemetry,
-              })
-            );
+            telemetry,
+          }).catch(() => {}); // to silence @typescript-eslint/no-floating-promises
 
           return response.ok({
             body: currentAd,

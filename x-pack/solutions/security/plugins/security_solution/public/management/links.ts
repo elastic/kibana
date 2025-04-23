@@ -42,7 +42,6 @@ import {
 import { licenseService } from '../common/hooks/use_license';
 import type { LinkItem } from '../common/links/types';
 import type { StartPlugins } from '../types';
-import { cloudDefendLink } from '../cloud_defend/links';
 import { links as notesLink } from '../notes/links';
 import { IconConsole } from '../common/icons/console';
 import { IconShield } from '../common/icons/shield';
@@ -58,7 +57,7 @@ import { IconAssetCriticality } from '../common/icons/asset_criticality';
 const categories = [
   {
     label: i18n.translate('xpack.securitySolution.appLinks.category.entityAnalytics', {
-      defaultMessage: 'Entity Analytics',
+      defaultMessage: 'Entity analytics',
     }),
     linkIds: [
       SecurityPageName.entityAnalyticsManagement,
@@ -80,12 +79,6 @@ const categories = [
     ],
   },
   {
-    label: i18n.translate('xpack.securitySolution.appLinks.category.cloudSecurity', {
-      defaultMessage: 'Cloud Security',
-    }),
-    linkIds: [SecurityPageName.cloudDefendPolicies],
-  },
-  {
     label: i18n.translate('xpack.securitySolution.appLinks.category.investigations', {
       defaultMessage: 'Investigations',
     }),
@@ -99,7 +92,7 @@ export const links: LinkItem = {
   path: MANAGE_PATH,
   skipUrlState: true,
   hideTimeline: true,
-  globalNavPosition: 11,
+  globalNavPosition: 12,
   capabilities: [`${SECURITY_FEATURE_ID}.show`],
   globalSearchKeywords: [
     i18n.translate('xpack.securitySolution.appLinks.manage', {
@@ -216,7 +209,6 @@ export const links: LinkItem = {
       skipUrlState: true,
       hideTimeline: true,
     },
-    cloudDefendLink,
     notesLink,
   ],
 };
@@ -261,7 +253,6 @@ export const getManagementFilteredLinks = async (
 
   if (!canReadPolicyManagement) {
     linksToExclude.push(SecurityPageName.policies);
-    linksToExclude.push(SecurityPageName.cloudDefendPolicies);
   }
 
   if (!canReadActionsLogManagement) {

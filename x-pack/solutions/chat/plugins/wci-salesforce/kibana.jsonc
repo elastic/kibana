@@ -1,0 +1,17 @@
+{
+  "type": "plugin",
+  "id": "@kbn/wci-salesforce",
+  "owner": "@elastic/search-kibana",
+  "group": "chat",
+  "visibility": "private",
+  "description": "WorkChat Salesforce Integration plugin",
+  "plugin": {
+    "id": "wciSalesforce",
+    "server": true,
+    "browser": true,
+    "configPath": ["xpack", "wciSalesforce"],
+    "requiredPlugins": ["inference", "workchatApp"],
+    "optionalPlugins": [],
+    "requiredBundles": []
+  }
+}

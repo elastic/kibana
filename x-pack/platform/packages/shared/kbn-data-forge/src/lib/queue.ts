@@ -18,6 +18,9 @@ type CargoQueue = ReturnType<typeof cargoQueue<Doc, Error>>;
 let queue: CargoQueue;
 
 function calculateIndexName(config: Config, doc: Doc) {
+  if (config.indexing.slashLogs) {
+    return 'logs';
+  }
   if (doc.data_stream?.dataset) {
     const { dataset } = doc.data_stream;
     const type = doc.data_stream.type ?? 'logs';
@@ -33,16 +36,16 @@ export const createQueue = (config: Config, client: Client, logger: ToolingLog):
   if (queue != null) return queue;
   queue = cargoQueue<Doc, Error>(
     (docs, callback) => {
-      const body: object[] = [];
+      const operations: object[] = [];
       const startTs = Date.now();
       docs.forEach((doc) => {
         const indexName = calculateIndexName(config, doc);
         indices.add(indexName);
-        body.push({ create: { _index: indexName } });
-        body.push(omit(doc, 'namespace'));
+        operations.push({ create: { _index: indexName } });
+        operations.push(omit(doc, 'namespace'));
       });
       client
-        .bulk({ body, refresh: false })
+        .bulk({ operations, refresh: false })
         .then((resp) => {
           if (resp.errors) {
             logger.error(`Failed to index: ${resp.errors}`);

@@ -6,6 +6,7 @@
  */
 
 import { PromptResponse } from '@kbn/elastic-assistant-common';
+import { SystemPromptSettings } from '../../assistant/settings/use_settings_updater/use_system_prompt_updater';
 
 export const mockSystemPrompt: PromptResponse = {
   id: 'mock-system-prompt-1',
@@ -49,4 +50,10 @@ export const mockSystemPrompts: PromptResponse[] = [
   mockSystemPrompt,
   mockSuperheroSystemPrompt,
   defaultSystemPrompt,
+];
+
+export const mockSystemPromptSettings: SystemPromptSettings[] = [
+  { ...mockSystemPrompt, conversations: [] },
+  { ...mockSuperheroSystemPrompt, conversations: [] },
+  { ...defaultSystemPrompt, conversations: [] },
 ];

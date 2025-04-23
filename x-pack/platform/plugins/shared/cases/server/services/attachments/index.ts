@@ -13,7 +13,7 @@ import type {
   SavedObjectsUpdateResponse,
 } from '@kbn/core/server';
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import { fromKueryExpression } from '@kbn/es-query';
 import { AttachmentAttributesRt, AttachmentType } from '../../../common/types/domain';
 import { decodeOrThrow } from '../../common/runtime_types';

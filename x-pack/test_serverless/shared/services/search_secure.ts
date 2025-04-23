@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-// NOTE: This is pretty much a copy/paste from packages/kbn-ftr-common-functional-services/services/bsearch.ts
+// NOTE: This is pretty much a copy/paste from src/platform/packages/shared/kbn-ftr-common-functional-services/services/bsearch.ts
 // but with the ability to provide custom auth
 
 import expect from '@kbn/expect';

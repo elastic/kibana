@@ -22,6 +22,7 @@ import {
 } from '../../../../../lib/attack_discovery/graphs/default_attack_discovery_graph/constants';
 import { GraphState } from '../../../../../lib/attack_discovery/graphs/default_attack_discovery_graph/types';
 import { throwIfErrorCountsExceeded } from '../throw_if_error_counts_exceeded';
+import { throwIfInvalidAnonymization } from '../throw_if_invalid_anonymization';
 import { getLlmType } from '../../../../utils';
 import { getAttackDiscoveryPrompts } from '../../../../../lib/attack_discovery/graphs/default_attack_discovery_graph/nodes/helpers/prompts';
 
@@ -63,6 +64,8 @@ export const invokeAttackDiscoveryGraph = async ({
   anonymizedAlerts: Document[];
   attackDiscoveries: AttackDiscovery[] | null;
 }> => {
+  throwIfInvalidAnonymization(anonymizationFields);
+
   const llmType = getLlmType(apiConfig.actionTypeId);
   const model = apiConfig.model;
   const tags = [ATTACK_DISCOVERY_TAG, llmType, model].flatMap((tag) => tag ?? []);
@@ -83,9 +86,13 @@ export const invokeAttackDiscoveryGraph = async ({
     connectorId: apiConfig.connectorId,
     llmType,
     logger,
+    model,
     temperature: 0, // zero temperature for attack discovery, because we want structured JSON output
     timeout: connectorTimeout,
     traceOptions,
+    telemetryMetadata: {
+      pluginId: 'security_attack_discovery',
+    },
   });
 
   if (llm == null) {
@@ -126,6 +133,7 @@ export const invokeAttackDiscoveryGraph = async ({
       tags,
     }
   );
+
   const {
     attackDiscoveries,
     anonymizedAlerts,

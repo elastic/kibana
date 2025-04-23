@@ -43,14 +43,12 @@ export const deleteListItemByValue = async ({
     value: values,
   });
   await esClient.deleteByQuery({
-    body: {
-      query: {
-        bool: {
-          filter,
-        },
+    index: listItemIndex,
+    query: {
+      bool: {
+        filter,
       },
     },
-    index: listItemIndex,
     refresh,
   });
   return listItems;

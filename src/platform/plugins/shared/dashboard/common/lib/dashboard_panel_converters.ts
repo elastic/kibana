@@ -10,7 +10,6 @@
 import { v4 } from 'uuid';
 import { omit } from 'lodash';
 
-import type { SavedObjectEmbeddableInput } from '@kbn/embeddable-plugin/common';
 import type { Reference } from '@kbn/content-management-utils';
 import type { DashboardPanelMap } from '..';
 import type { DashboardPanel } from '../../server/content_management';
@@ -23,13 +22,11 @@ import {
 export const convertPanelsArrayToPanelMap = (panels?: DashboardPanel[]): DashboardPanelMap => {
   const panelsMap: DashboardPanelMap = {};
   panels?.forEach((panel, idx) => {
-    const panelIndex = panel.panelIndex ?? String(idx);
     panelsMap![panel.panelIndex ?? String(idx)] = {
       type: panel.type,
       gridData: panel.gridData,
       panelRefName: panel.panelRefName,
       explicitInput: {
-        id: panelIndex,
         ...(panel.id !== undefined && { savedObjectId: panel.id }),
         ...(panel.title !== undefined && { title: panel.title }),
         ...panel.panelConfig,
@@ -44,9 +41,9 @@ export const convertPanelMapToPanelsArray = (
   panels: DashboardPanelMap,
   removeLegacyVersion?: boolean
 ) => {
-  return Object.values(panels).map((panelState) => {
-    const savedObjectId = (panelState.explicitInput as SavedObjectEmbeddableInput).savedObjectId;
-    const panelIndex = panelState.explicitInput.id;
+  return Object.entries(panels).map(([panelId, panelState]) => {
+    const savedObjectId = (panelState.explicitInput as { savedObjectId?: string }).savedObjectId;
+    const title = (panelState.explicitInput as { title?: string }).title;
     return {
       /**
        * Version information used to be stored in the panel until 8.11 when it was moved to live inside the
@@ -57,11 +54,9 @@ export const convertPanelMapToPanelsArray = (
 
       type: panelState.type,
       gridData: panelState.gridData,
-      panelIndex,
+      panelIndex: panelId,
       panelConfig: omit(panelState.explicitInput, ['id', 'savedObjectId', 'title']),
-      ...(panelState.explicitInput.title !== undefined && {
-        title: panelState.explicitInput.title,
-      }),
+      ...(title !== undefined && { title }),
       ...(savedObjectId !== undefined && { id: savedObjectId }),
       ...(panelState.panelRefName !== undefined && { panelRefName: panelState.panelRefName }),
     };
@@ -80,7 +75,7 @@ export const generateNewPanelIds = (panels: DashboardPanelMap, references?: Refe
     newPanelsMap[newId] = {
       ...panel,
       gridData: { ...panel.gridData, i: newId },
-      explicitInput: { ...panel.explicitInput, id: newId },
+      explicitInput: panel.explicitInput ?? {},
     };
     newReferences.push(
       ...prefixReferencesFromPanel(newId, getReferencesForPanelId(oldId, references ?? []))

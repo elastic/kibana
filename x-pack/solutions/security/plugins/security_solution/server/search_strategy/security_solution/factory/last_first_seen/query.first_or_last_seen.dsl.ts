@@ -19,24 +19,22 @@ export const buildFirstOrLastSeenQuery = (options: FirstLastSeenRequestOptions) 
     index: defaultIndex,
     ignore_unavailable: true,
     track_total_hits: false,
-    body: {
-      query: { bool: { filter } },
-      _source: false,
-      fields: [
-        {
-          field: '@timestamp',
-          format: 'strict_date_optional_time',
+    query: { bool: { filter } },
+    _source: false,
+    fields: [
+      {
+        field: '@timestamp',
+        format: 'strict_date_optional_time',
+      },
+    ],
+    size: 1,
+    sort: [
+      {
+        '@timestamp': {
+          order,
         },
-      ],
-      size: 1,
-      sort: [
-        {
-          '@timestamp': {
-            order,
-          },
-        },
-      ],
-    },
+      },
+    ],
   };
 
   return dslQuery;

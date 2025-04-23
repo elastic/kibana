@@ -76,7 +76,7 @@ export const createEndgameProcessRowRenderer = ({
         contextId={`endgame-process-${actionName}-${scopeId}`}
         showMessage={false}
         text={text}
-        timelineId={scopeId}
+        scopeId={scopeId}
       />
     </RowRendererContainer>
   ),
@@ -106,7 +106,7 @@ export const createFimRowRenderer = ({
         contextId={`fim-${actionName}-${scopeId}`}
         showMessage={false}
         text={text}
-        timelineId={scopeId}
+        scopeId={scopeId}
       />
     </RowRendererContainer>
   ),
@@ -156,7 +156,7 @@ export const createEndpointAlertsRowRenderer = ({
         skipRedundantFileDetails={skipRedundantFileDetails}
         skipRedundantProcessDetails={skipRedundantProcessDetails}
         text={text}
-        timelineId={scopeId}
+        scopeId={scopeId}
       />
     </RowRendererContainer>
   ),
@@ -184,7 +184,7 @@ export const createEndpointLibraryRowRenderer = ({
         data={data}
         showMessage={false}
         text={text}
-        timelineId={scopeId}
+        scopeId={scopeId}
       />
     </RowRendererContainer>
   ),
@@ -214,7 +214,7 @@ export const createGenericFileRowRenderer = ({
         contextId={`${actionName}-${scopeId}`}
         data={data}
         text={text}
-        timelineId={scopeId}
+        scopeId={scopeId}
       />
     </RowRendererContainer>
   ),
@@ -238,7 +238,7 @@ export const createSocketRowRenderer = ({
         contextId={`socket-${actionName}-${scopeId}`}
         data={data}
         text={text}
-        timelineId={scopeId}
+        scopeId={scopeId}
       />
     </RowRendererContainer>
   ),
@@ -307,7 +307,12 @@ export const createEndpointRegistryRowRenderer = ({
   },
   renderRow: ({ data, scopeId }) => (
     <RowRendererContainer>
-      <RegistryEventDetails contextId={`registry-event-${scopeId}`} data={data} text={text} />
+      <RegistryEventDetails
+        contextId={`registry-event-${scopeId}`}
+        data={data}
+        text={text}
+        scopeId={scopeId}
+      />
     </RowRendererContainer>
   ),
 });

@@ -1,0 +1,12 @@
+{
+  "type": "plugin",
+  "id": "@kbn/status-plugin-a-plugin",
+  "owner": "@elastic/kibana-core",
+  "group": "platform",
+  "visibility": "private",
+  "plugin": {
+    "id": "statusPluginA",
+    "server": true,
+    "browser": false
+  }
+}

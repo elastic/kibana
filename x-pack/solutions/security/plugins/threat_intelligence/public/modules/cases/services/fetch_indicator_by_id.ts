@@ -66,11 +66,9 @@ export const createFetchIndicatorById =
       searchService,
       {
         params: {
-          body: {
-            query,
-            fields,
-            size: 1,
-          },
+          query,
+          fields,
+          size: 1,
         },
       },
       {

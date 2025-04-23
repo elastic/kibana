@@ -37,11 +37,12 @@ import { css } from '@emotion/react';
 import {
   apiCanLockHoverActions,
   EmbeddableApiContext,
+  PublishesTitle,
   useBatchedOptionalPublishingSubjects,
   ViewMode,
 } from '@kbn/presentation-publishing';
 import { ActionWithContext } from '@kbn/ui-actions-plugin/public/context_menu/build_eui_context_menu_panels';
-import { Subscription } from 'rxjs';
+import { Subscription, switchMap } from 'rxjs';
 import { uiActions } from '../../kibana_services';
 import {
   CONTEXT_MENU_TRIGGER,
@@ -79,7 +80,13 @@ const QUICK_ACTION_IDS = {
     'ACTION_OPEN_IN_DISCOVER',
     'ACTION_VIEW_SAVED_SEARCH',
   ],
-  view: ['ACTION_OPEN_IN_DISCOVER', 'ACTION_VIEW_SAVED_SEARCH', 'openInspector', 'togglePanel'],
+  view: [
+    'ACTION_SHOW_CONFIG_PANEL',
+    'ACTION_OPEN_IN_DISCOVER',
+    'ACTION_VIEW_SAVED_SEARCH',
+    'openInspector',
+    'togglePanel',
+  ],
 } as const;
 
 const ALLOWED_NOTIFICATIONS = ['ACTION_FILTERS_NOTIFICATION'] as const;
@@ -141,7 +148,7 @@ export const PresentationPanelHoverActions = ({
       api?.description$,
       api?.hideTitle$,
       api?.hasLockedHoverActions$,
-      api?.parentApi?.hideTitle$
+      (api?.parentApi as Partial<PublishesTitle>)?.hideTitle$
     );
 
   const hideTitle = hidePanelTitle || parentHideTitle;
@@ -188,17 +195,24 @@ export const PresentationPanelHoverActions = ({
 
       for (const frequentlyChangingAction of frequentlyChangingActions) {
         if ((quickActionIds as readonly string[]).includes(frequentlyChangingAction.id)) {
-          subscriptions.add(
-            frequentlyChangingAction.subscribeToCompatibilityChanges(
-              apiContext,
-              (isCompatible, action) =>
-                handleActionCompatibilityChange(
-                  'quickActions',
-                  isCompatible,
-                  action as AnyApiAction
-                )
+          const compatibilitySubscription = frequentlyChangingAction
+            .getCompatibilityChangesSubject(apiContext)
+            ?.pipe(
+              switchMap(async () => {
+                return await frequentlyChangingAction.isCompatible({
+                  ...apiContext,
+                  trigger: contextMenuTrigger,
+                });
+              })
             )
-          );
+            .subscribe(async (isCompatible) => {
+              handleActionCompatibilityChange(
+                'quickActions',
+                isCompatible,
+                frequentlyChangingAction as AnyApiAction
+              );
+            });
+          subscriptions.add(compatibilitySubscription);
         }
       }
 
@@ -214,17 +228,24 @@ export const PresentationPanelHoverActions = ({
         if (
           (ALLOWED_NOTIFICATIONS as readonly string[]).includes(frequentlyChangingNotification.id)
         ) {
-          subscriptions.add(
-            frequentlyChangingNotification.subscribeToCompatibilityChanges(
-              apiContext,
-              (isCompatible, action) =>
-                handleActionCompatibilityChange(
-                  'notifications',
-                  isCompatible,
-                  action as AnyApiAction
-                )
+          const compatibilitySubscription = frequentlyChangingNotification
+            .getCompatibilityChangesSubject(apiContext)
+            ?.pipe(
+              switchMap(async () => {
+                return await frequentlyChangingNotification.isCompatible({
+                  ...apiContext,
+                  trigger: panelNotificationTrigger,
+                });
+              })
             )
-          );
+            .subscribe(async (isCompatible) => {
+              handleActionCompatibilityChange(
+                'notifications',
+                isCompatible,
+                frequentlyChangingNotification as AnyApiAction
+              );
+            });
+          subscriptions.add(compatibilitySubscription);
         }
       }
     })();

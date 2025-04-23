@@ -7,13 +7,11 @@
 
 import type { RulesClientApi } from '@kbn/alerting-plugin/server/types';
 import type { SavedObjectsClientContract, Logger } from '@kbn/core/server';
+import type { RuleResponse } from '../../../../../../../common/api/detection_engine';
 import type {
   ClusterHealthParameters,
-  ClusterHealthSnapshot,
   RuleHealthParameters,
-  RuleHealthSnapshot,
   SpaceHealthParameters,
-  SpaceHealthSnapshot,
 } from '../../../../../../../common/api/detection_engine/rule_monitoring';
 import { RULE_SAVED_OBJECT_TYPE } from '../../event_log/event_log_constants';
 import { DETECTION_RULES_FILTER } from './filters';
@@ -26,6 +24,7 @@ import {
   normalizeSpaceHealthAggregationResult,
 } from './aggregations/health_stats_for_space';
 import { fetchRuleById } from './fetch_rule_by_id';
+import type { HealthOverviewState } from '../event_log/aggregations/types';
 
 /**
  * Client for calculating health stats based on rule objects (saved objects of type "alert").
@@ -50,9 +49,32 @@ export interface IRuleObjectsHealthClient {
   calculateClusterHealth(args: ClusterHealthParameters): Promise<ClusterHealth>;
 }
 
-type RuleHealth = Pick<RuleHealthSnapshot, 'state_at_the_moment' | 'debug'>;
-type SpaceHealth = Pick<SpaceHealthSnapshot, 'state_at_the_moment' | 'debug'>;
-type ClusterHealth = Pick<ClusterHealthSnapshot, 'state_at_the_moment' | 'debug'>;
+interface Debuggable {
+  debug?: Record<string, unknown>;
+}
+
+interface RuleHealth extends Debuggable {
+  /**
+   * Health state at the moment of the calculation request.
+   */
+  state_at_the_moment: {
+    rule: RuleResponse;
+  };
+}
+
+interface SpaceHealth extends Debuggable {
+  /**
+   * Health state at the moment of the calculation request.
+   */
+  state_at_the_moment: HealthOverviewState;
+}
+
+interface ClusterHealth extends Debuggable {
+  /**
+   * Health state at the moment of the calculation request.
+   */
+  state_at_the_moment: HealthOverviewState;
+}
 
 export const createRuleObjectsHealthClient = (
   rulesClient: RulesClientApi,

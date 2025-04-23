@@ -23,6 +23,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/react';
 import { EuiSelectableOption } from '@elastic/eui/src/components/selectable/selectable_option';
 import { getIndicesWithNoSourceFields } from '../utils/create_query';
 import { useIndicesFields } from '../hooks/use_indices_fields';
@@ -40,9 +41,23 @@ export const SelectIndicesFlyout: React.FC<SelectIndicesFlyout> = ({ onClose }) 
   const [selectedTempIndices, setSelectedTempIndices] = useState<string[]>(selectedIndices);
   const handleSelectOptions = (options: EuiSelectableOption[]) => {
     setSelectedTempIndices(
-      options.filter((option) => option.checked === 'on').map((option) => option.label)
+      Array.from(
+        new Set([
+          ...selectedTempIndices.filter((index) => !unselectedOptions(options).includes(index)),
+          ...selectedOptions(options),
+        ])
+      )
     );
   };
+
+  const selectedOptions = (options: EuiSelectableOption[]): string[] => {
+    return options.filter((option) => option.checked === 'on').map((option) => option.label);
+  };
+
+  const unselectedOptions = (options: EuiSelectableOption[]): string[] => {
+    return options.filter((option) => option.checked === undefined).map((option) => option.label);
+  };
+
   const handleSearchChange = (searchValue: string) => {
     setQuery(searchValue);
   };
@@ -62,6 +77,10 @@ export const SelectIndicesFlyout: React.FC<SelectIndicesFlyout> = ({ onClose }) 
           <EuiSpacer />
           <EuiSelectable
             searchable
+            height="full"
+            css={css`
+              height: 70vh;
+            `}
             searchProps={{
               onChange: handleSearchChange,
             }}

@@ -38,37 +38,35 @@ export async function getNodeIds(
     size: 0,
     ignore_unavailable: true,
     filter_path: ['aggregations.composite_data.buckets'],
-    body: {
-      query: createQuery({
-        type: dataset,
-        dsDataset: getElasticsearchDataset(dataset),
-        metricset: dataset,
-        start,
-        end,
-        metric: ElasticsearchMetric.getMetricFields(),
-        clusterUuid,
-      }),
-      aggs: {
-        composite_data: {
-          composite: {
-            size,
-            sources: [
-              {
-                name: {
-                  terms: {
-                    field: 'source_node.name',
-                  },
+    query: createQuery({
+      type: dataset,
+      dsDataset: getElasticsearchDataset(dataset),
+      metricset: dataset,
+      start,
+      end,
+      metric: ElasticsearchMetric.getMetricFields(),
+      clusterUuid,
+    }),
+    aggs: {
+      composite_data: {
+        composite: {
+          size,
+          sources: [
+            {
+              name: {
+                terms: {
+                  field: 'source_node.name',
                 },
               },
-              {
-                uuid: {
-                  terms: {
-                    field: 'source_node.uuid',
-                  },
+            },
+            {
+              uuid: {
+                terms: {
+                  field: 'source_node.uuid',
                 },
               },
-            ],
-          },
+            },
+          ],
         },
       },
     },

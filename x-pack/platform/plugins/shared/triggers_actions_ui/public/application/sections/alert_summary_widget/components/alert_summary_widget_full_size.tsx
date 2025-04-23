@@ -17,10 +17,10 @@ import {
   Settings,
   Tooltip,
 } from '@elastic/charts';
-import { EuiFlexItem, EuiPanel, EuiSpacer } from '@elastic/eui';
+import { EuiFlexItem, EuiPanel, EuiSpacer, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { AlertCounts } from './alert_counts';
-import { ALL_ALERT_COLOR, TOOLTIP_DATE_FORMAT } from './constants';
+import { TOOLTIP_DATE_FORMAT } from './constants';
 import { Alert, ChartProps, DependencyProps } from '../types';
 
 export interface AlertSummaryWidgetFullSizeProps {
@@ -46,6 +46,8 @@ export const AlertSummaryWidgetFullSize = ({
   hideStats,
   dependencyProps: { baseTheme },
 }: AlertSummaryWidgetFullSizeProps) => {
+  const { euiTheme } = useEuiTheme();
+
   const chartData = activeAlerts.map((alert) => alert.doc_count);
   const domain = {
     max: Math.max(...chartData) * 1.1, // add 10% headroom
@@ -90,7 +92,6 @@ export const AlertSummaryWidgetFullSize = ({
                   },
                 },
               ]}
-              baseTheme={baseTheme}
               onBrushEnd={onBrushEnd}
               locale={i18n.getLocale()}
             />
@@ -127,7 +128,7 @@ export const AlertSummaryWidgetFullSize = ({
               yScaleType={ScaleType.Linear}
               xAccessor="key"
               yAccessors={['doc_count']}
-              color={[ALL_ALERT_COLOR]}
+              color={[euiTheme.colors.vis.euiColorVis0]}
               data={activeAlerts}
               lineSeriesStyle={{
                 line: {

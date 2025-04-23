@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import type { UserAuthenticationsRequestOptions } from '../../../../../../../common/api/search_strategy';
 import { createQueryFilterClauses } from '../../../../../../utils/build_query';
 import { authenticationsFields } from '../helpers';
@@ -36,73 +36,71 @@ export const buildQuery = ({
     allow_no_indices: true,
     index: defaultIndex,
     ignore_unavailable: true,
-    body: {
-      aggregations: {
-        stack_by_count: {
-          cardinality: {
-            field: stackByField,
-          },
+    aggregations: {
+      stack_by_count: {
+        cardinality: {
+          field: stackByField,
         },
-        stack_by: {
-          terms: {
-            size: querySize,
-            field: stackByField,
-            order: [
-              { 'successes.doc_count': 'desc' as const },
-              { 'failures.doc_count': 'desc' as const },
-            ] as estypes.AggregationsAggregateOrder,
-          },
-          aggs: {
-            failures: {
-              filter: {
-                term: {
-                  'event.outcome': 'failure',
-                },
+      },
+      stack_by: {
+        terms: {
+          size: querySize,
+          field: stackByField,
+          order: [
+            { 'successes.doc_count': 'desc' as const },
+            { 'failures.doc_count': 'desc' as const },
+          ] as estypes.AggregationsAggregateOrder,
+        },
+        aggs: {
+          failures: {
+            filter: {
+              term: {
+                'event.outcome': 'failure',
               },
-              aggs: {
-                lastFailure: {
-                  top_hits: {
-                    size: 1,
-                    _source: false,
-                    sort: [{ '@timestamp': { order: 'desc' as const } }],
-                  },
+            },
+            aggs: {
+              lastFailure: {
+                top_hits: {
+                  size: 1,
+                  _source: false,
+                  sort: [{ '@timestamp': { order: 'desc' as const } }],
                 },
               },
             },
-            successes: {
-              filter: {
-                term: {
-                  'event.outcome': 'success',
-                },
+          },
+          successes: {
+            filter: {
+              term: {
+                'event.outcome': 'success',
               },
-              aggs: {
-                lastSuccess: {
-                  top_hits: {
-                    size: 1,
-                    _source: false,
-                    sort: [{ '@timestamp': { order: 'desc' as const } }],
-                  },
+            },
+            aggs: {
+              lastSuccess: {
+                top_hits: {
+                  size: 1,
+                  _source: false,
+                  sort: [{ '@timestamp': { order: 'desc' as const } }],
                 },
               },
             },
           },
         },
       },
-      query: {
-        bool: {
-          filter,
-        },
-      },
-      size: 0,
-      _source: false,
-      fields: [
-        ...queryFields,
-        {
-          field: '@timestamp',
-          format: 'strict_date_optional_time',
-        },
-      ],
     },
+    query: {
+      bool: {
+        filter,
+      },
+    },
+    size: 0,
+    _source: false,
+    fields: [
+      ...queryFields,
+      {
+        field: '@timestamp',
+        format: 'strict_date_optional_time',
+      },
+    ],
     track_total_hits: false,
   };
 

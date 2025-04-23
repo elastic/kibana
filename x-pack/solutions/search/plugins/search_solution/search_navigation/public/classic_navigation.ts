@@ -39,7 +39,7 @@ export const classicNavigationFactory = (
 
   return {
     items,
-    icon: 'logoEnterpriseSearch',
+    icon: 'logoElasticsearch',
     name: i18n.translate('xpack.searchNavigation.classicNav.name', {
       defaultMessage: 'Elasticsearch',
     }),

@@ -65,28 +65,6 @@ export const chatFeedbackEventSchema: EventTypeOpts<ChatFeedback> = {
                 description: 'The timestamp of the last message in the conversation.',
               },
             },
-            token_count: {
-              properties: {
-                completion: {
-                  type: 'long',
-                  _meta: {
-                    description: 'The number of tokens in the completion.',
-                  },
-                },
-                prompt: {
-                  type: 'long',
-                  _meta: {
-                    description: 'The number of tokens in the prompt.',
-                  },
-                },
-                total: {
-                  type: 'long',
-                  _meta: {
-                    description: 'The total number of tokens in the conversation.',
-                  },
-                },
-              },
-            },
           },
         },
         labels: {
@@ -111,6 +89,13 @@ export const chatFeedbackEventSchema: EventTypeOpts<ChatFeedback> = {
           type: 'boolean',
           _meta: {
             description: 'Whether the conversation is public or not.',
+          },
+        },
+        archived: {
+          type: 'boolean',
+          _meta: {
+            description: 'Whether the conversation is archived or not.',
+            optional: true,
           },
         },
       },

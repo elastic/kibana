@@ -21,7 +21,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('server log connector screenshots', async () => {
       await pageObjects.common.navigateToApp('connectors');
       await pageObjects.header.waitUntilLoadingHasFinished();
-      await testSubjects.click('createFirstActionButton');
+      await testSubjects.click('createConnectorButton');
       await testSubjects.click(`.server-log-card`);
       await testSubjects.setValue('nameInput', 'Server log test connector');
       await svlCommonScreenshots.takeScreenshot('serverlog-connector', screenshotDirectories);

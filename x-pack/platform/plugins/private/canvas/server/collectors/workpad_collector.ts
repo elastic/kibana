@@ -384,7 +384,7 @@ const workpadCollector: TelemetryCollector = async function (getIndexForType, es
     index,
     ignore_unavailable: true,
     filter_path: ['hits.hits._source.canvas-workpad', '-hits.hits._source.canvas-workpad.assets'],
-    body: { query: { bool: { filter: { term: { type: CANVAS_TYPE } } } } },
+    query: { bool: { filter: { term: { type: CANVAS_TYPE } } } },
   };
 
   const esResponse = await esClient.search<WorkpadSearch>(searchParams);

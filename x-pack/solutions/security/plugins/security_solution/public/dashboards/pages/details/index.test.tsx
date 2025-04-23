@@ -11,7 +11,6 @@ import { Router } from '@kbn/shared-ux-router';
 import { DashboardView } from '.';
 import { useCapabilities } from '../../../common/lib/kibana';
 import { TestProviders } from '../../../common/mock';
-import { ViewMode } from '@kbn/embeddable-plugin/public';
 
 jest.mock('react-router-dom', () => {
   const actual = jest.requireActual('react-router-dom');
@@ -69,7 +68,7 @@ describe('DashboardView', () => {
   test('render when no error state', () => {
     const { queryByTestId } = render(
       <Router history={mockHistory}>
-        <DashboardView initialViewMode={ViewMode.VIEW} />
+        <DashboardView initialViewMode={'view'} />
       </Router>,
       { wrapper: TestProviders }
     );
@@ -84,7 +83,7 @@ describe('DashboardView', () => {
     });
     const { queryByTestId } = render(
       <Router history={mockHistory}>
-        <DashboardView initialViewMode={ViewMode.VIEW} />
+        <DashboardView initialViewMode={'view'} />
       </Router>,
       { wrapper: TestProviders }
     );
@@ -96,7 +95,7 @@ describe('DashboardView', () => {
   test('render dashboard view with height', () => {
     const { queryByTestId } = render(
       <Router history={mockHistory}>
-        <DashboardView initialViewMode={ViewMode.VIEW} />
+        <DashboardView initialViewMode={'view'} />
       </Router>,
       { wrapper: TestProviders }
     );

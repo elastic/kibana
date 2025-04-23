@@ -53,7 +53,6 @@ import {
   type TrainedModelDeploymentStatsResponse,
 } from '../../../common/types/trained_models';
 import { type CloudInfo, getNewJobLimits } from '../services/ml_server_info';
-import type { MlStartTrainedModelDeploymentRequestNew } from './deployment_params_mapper';
 import { DeploymentParamsMapper } from './deployment_params_mapper';
 
 import type { HttpService } from '../services/http_service';
@@ -244,7 +243,7 @@ export const DeploymentSetup: FC<DeploymentSetupProps> = ({
               'xpack.ml.trainedModels.modelsList.startDeployment.cloudAutoscaling.lowCpuAdaptiveHelp',
               {
                 defaultMessage:
-                  'This level limits resources to the minimum required for ELSER to run if supported by your Cloud console selection. It may not be sufficient for a production application.',
+                  'This level limits resources to the minimum required for the model to run if supported by your Cloud console selection. It may not be sufficient for a production application.',
               }
             );
           case 'medium':
@@ -275,7 +274,7 @@ export const DeploymentSetup: FC<DeploymentSetupProps> = ({
               'xpack.ml.trainedModels.modelsList.startDeployment.cloudAutoscaling.lowCpuStaticHelp',
               {
                 defaultMessage:
-                  'This level sets resources to the minimum required for ELSER to run if supported by your Cloud console selection. It may not be sufficient for a production application.',
+                  'This level sets resources to the minimum required for the model to run if supported by your Cloud console selection. It may not be sufficient for a production application.',
               }
             );
           case 'medium':
@@ -342,7 +341,7 @@ export const DeploymentSetup: FC<DeploymentSetupProps> = ({
               'xpack.ml.trainedModels.modelsList.startDeployment.hardwareLimits.lowCpuStaticHelp',
               {
                 defaultMessage:
-                  'This level sets resources to the minimum required for ELSER to run. It may not be sufficient for a production application.',
+                  'This level sets resources to the minimum required for the model to run. It may not be sufficient for a production application.',
               }
             );
           case 'medium':
@@ -924,9 +923,8 @@ export const getUserInputModelDeploymentParamsProvider =
     modelId: string,
     initialParams?: TrainedModelDeploymentStatsResponse,
     deploymentIds?: string[]
-  ): Promise<MlStartTrainedModelDeploymentRequestNew | void> => {
+  ): Promise<DeploymentParamsUI | void> => {
     const deploymentParamsMapper = new DeploymentParamsMapper(
-      modelId,
       getNewJobLimits(),
       cloudInfo,
       showNodeInfo,
@@ -953,7 +951,8 @@ export const getUserInputModelDeploymentParamsProvider =
                 modelId={modelId}
                 onConfigChange={(config) => {
                   modalSession.close();
-                  resolve(deploymentParamsMapper.mapUiToApiDeploymentParams(config));
+
+                  resolve(config);
                 }}
                 onClose={() => {
                   modalSession.close();

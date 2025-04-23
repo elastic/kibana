@@ -22,7 +22,8 @@ export async function invalidateAgentKey({
   const esClient = (await context.core).elasticsearch.client;
   const { invalidated_api_keys: invalidatedAgentKeys } =
     await esClient.asCurrentUser.security.invalidateApiKey({
-      body: { ids: [id], owner: !isAdmin },
+      ids: [id],
+      owner: !isAdmin,
     });
 
   return {

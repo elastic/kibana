@@ -111,7 +111,7 @@ export class ContentStream extends Duplex {
 
     this.logger.debug(`Reading report contents.`);
 
-    const response = await this.client.search<ReportSource>({ body, index });
+    const response = await this.client.search<ReportSource>({ ...body, index });
     const hits = response?.hits?.hits?.[0];
 
     this.jobSize = hits?._source?.output?.size;
@@ -139,7 +139,7 @@ export class ContentStream extends Duplex {
     this.logger.debug(`Reading chunk #${this.chunksRead}.`);
 
     const response = await this.client.search<ChunkSource>({
-      body,
+      ...body,
       index: REPORTING_DATA_STREAM_WILDCARD_WITH_LEGACY,
     });
     const hits = response?.hits?.hits?.[0];
@@ -179,10 +179,8 @@ export class ContentStream extends Duplex {
 
     await this.client.deleteByQuery({
       index,
-      body: {
-        query: {
-          match: { parent_id: id },
-        },
+      query: {
+        match: { parent_id: id },
       },
     });
   }
@@ -192,10 +190,8 @@ export class ContentStream extends Duplex {
 
     const body = await this.client.update<ReportSource>({
       ...this.document,
-      body: {
-        doc: {
-          output: { content },
-        },
+      doc: {
+        output: { content },
       },
     });
 
@@ -212,7 +208,7 @@ export class ContentStream extends Duplex {
       id,
       index: REPORTING_DATA_STREAM_ALIAS,
       op_type: 'create',
-      body: {
+      document: {
         parent_id: parentId,
         '@timestamp': new Date(0).toISOString(), // required for data streams compatibility
         output: {

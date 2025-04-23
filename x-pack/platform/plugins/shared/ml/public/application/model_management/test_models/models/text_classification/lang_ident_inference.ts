@@ -14,6 +14,7 @@ import { getGeneralInputComponent } from '../text_input';
 import { getLangIdentOutputComponent } from './lang_ident_output';
 import type { TextClassificationResponse, RawTextClassificationResponse } from './common';
 import type { trainedModelsApiProvider } from '../../../../services/ml_api_service/trained_models';
+import type { ITelemetryClient } from '../../../../services/telemetry/types';
 
 export class LangIdentInference extends InferenceBase<TextClassificationResponse> {
   protected inferenceType: InferenceType = 'classification';
@@ -32,9 +33,10 @@ export class LangIdentInference extends InferenceBase<TextClassificationResponse
     trainedModelsApi: ReturnType<typeof trainedModelsApiProvider>,
     model: estypes.MlTrainedModelConfig,
     inputType: INPUT_TYPE,
-    deploymentId: string
+    deploymentId: string,
+    telemetryClient: ITelemetryClient
   ) {
-    super(trainedModelsApi, model, inputType, deploymentId);
+    super(trainedModelsApi, model, inputType, deploymentId, telemetryClient);
 
     this.initialize();
   }

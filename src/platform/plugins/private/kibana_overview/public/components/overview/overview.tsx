@@ -7,10 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import './overview.scss';
-
 import { snakeCase } from 'lodash';
-import React, { FC, useState, useEffect } from 'react';
+import React, { FC, useState, useEffect, useMemo } from 'react';
+import { css } from '@emotion/react';
 import useObservable from 'react-use/lib/useObservable';
 import {
   EuiCard,
@@ -20,6 +19,9 @@ import {
   EuiSpacer,
   EuiTitle,
   EuiLoadingSpinner,
+  useEuiMinBreakpoint,
+  UseEuiTheme,
+  useEuiTheme,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { CoreStart } from '@kbn/core/public';
@@ -41,6 +43,7 @@ import {
   FeatureCatalogueCategory,
 } from '@kbn/home-plugin/public';
 import { withSuspense } from '@kbn/shared-ux-utility';
+import classNames from 'classnames';
 import { PLUGIN_ID, PLUGIN_PATH } from '../../../common';
 import { AppPluginStartDependencies } from '../../types';
 import { AddData } from '../add_data';
@@ -76,6 +79,8 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
   } = services;
   const addBasePath = http.basePath.prepend;
   const currentTheme = useObservable(theme.theme$, { darkMode: false, name: 'amsterdam' });
+  const { euiTheme } = useEuiTheme();
+  const minBreakpointM = useEuiMinBreakpoint('m');
 
   // Home does not have a locator implemented, so hard-code it here.
   const addDataHref = addBasePath('/app/integrations/browse');
@@ -97,7 +102,6 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
   const addDataFeatures = getFeaturesByCategory('data');
   const manageDataFeatures = getFeaturesByCategory('admin');
   const devTools = findFeatureById('console');
-
   // Show card for console if none of the manage data plugins are available, most likely in OSS
   if (manageDataFeatures.length < 1 && devTools) {
     manageDataFeatures.push(devTools);
@@ -165,6 +169,18 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
   // Dashboard and discover are displayed in larger cards
   const mainApps = ['dashboards', 'discover'];
   const remainingApps = kibanaApps.map(({ id }) => id).filter((id) => !mainApps.includes(id));
+  const mainAppsUserHasAccessTo = useMemo(() => {
+    const applications = [];
+    if (application.capabilities.dashboard_v2?.show) {
+      applications.push('dashboards');
+    }
+
+    if (application.capabilities.discover_v2?.show) {
+      applications.push('discover');
+    }
+
+    return applications;
+  }, [application.capabilities]);
 
   const onDataViewCreated = () => {
     setNewKibanaInstance(false);
@@ -229,6 +245,7 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
 
   return (
     <KibanaPageTemplate
+      css={styles(euiTheme, minBreakpointM)}
       pageHeader={{
         iconType: 'logoKibana',
         pageTitle: <FormattedMessage defaultMessage="Analytics" id="kibanaOverview.header.title" />,
@@ -245,24 +262,17 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
       }}
       panelled={false}
     >
-      <KibanaPageTemplate.Section
-        bottomBorder
-        aria-labelledby="kbnOverviewApps__title"
-        className="kbnOverviewApps"
-      >
+      <KibanaPageTemplate.Section bottomBorder aria-labelledby="kbnOverviewApps__title">
         <EuiScreenReaderOnly>
           <h2 id="kbnOverviewApps__title">
             <FormattedMessage id="kibanaOverview.apps.title" defaultMessage="Explore these apps" />
           </h2>
         </EuiScreenReaderOnly>
 
-        {mainApps.length ? (
+        {mainAppsUserHasAccessTo.length ? (
           <>
-            <EuiFlexGroup
-              className="kbnOverviewApps__group kbnOverviewApps__group--primary"
-              justifyContent="center"
-            >
-              {mainApps.map(renderAppCard)}
+            <EuiFlexGroup className="kbnOverviewMainApps" justifyContent="center">
+              {mainAppsUserHasAccessTo.map(renderAppCard)}
             </EuiFlexGroup>
 
             <EuiSpacer size="l" />
@@ -270,10 +280,7 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
         ) : null}
 
         {remainingApps.length ? (
-          <EuiFlexGroup
-            className="kbnOverviewApps__group kbnOverviewApps__group--secondary"
-            justifyContent="center"
-          >
+          <EuiFlexGroup className="kbnOverviewRemainingApps" justifyContent="center">
             {remainingApps.map(renderAppCard)}
           </EuiFlexGroup>
         ) : null}
@@ -282,11 +289,9 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
       <KibanaPageTemplate.Section bottomBorder paddingSize="xl">
         <EuiFlexGroup
           alignItems="flexStart"
-          className={`kbnOverviewSupplements ${
-            newsFetchResult && newsFetchResult.feedItems.length
-              ? 'kbnOverviewSupplements--hasNews'
-              : 'kbnOverviewSupplements--noNews'
-          }`}
+          className={classNames({
+            'kbnOverviewSupplements--noNews': !newsFetchResult?.feedItems?.length,
+          })}
         >
           {newsFetchResult && newsFetchResult.feedItems.length ? (
             <EuiFlexItem grow={1}>
@@ -296,7 +301,7 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
 
           <EuiFlexItem grow={3}>
             {solutions.length ? (
-              <section aria-labelledby="kbnOverviewMore__title" className="kbnOverviewMore">
+              <section aria-labelledby="kbnOverviewMore__title">
                 <EuiTitle size="s">
                   <h2 id="kbnOverviewMore__title">
                     <FormattedMessage
@@ -308,9 +313,13 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
 
                 <EuiSpacer size="m" />
 
-                <EuiFlexGroup className="kbnOverviewMore__content">
+                <EuiFlexGroup>
                   {solutions.map(({ id, title, description, icon, path }) => (
-                    <EuiFlexItem className="kbnOverviewMore__item" key={id}>
+                    <EuiFlexItem
+                      data-test-subj="kbnOverviewItem"
+                      key={id}
+                      className="kbnOverviewItemSolution"
+                    >
                       <RedirectAppLinksKibanaProvider
                         coreStart={{
                           application: {
@@ -320,9 +329,9 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
                         }}
                         {...application}
                       >
-                        <RedirectAppLinks>
+                        <RedirectAppLinks className="kbnRedirectAppLinkImage">
                           <EuiCard
-                            className={`kbnOverviewSolution ${id}`}
+                            className={`kbnOverviewSolution--${id}`}
                             description={description ? description : ''}
                             href={addBasePath(path)}
                             icon={<KibanaSolutionAvatar name={title} iconType={icon} size="xl" />}
@@ -342,11 +351,11 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
               </section>
             ) : (
               <EuiFlexGroup
-                className={`kbnOverviewData ${
-                  addDataFeatures.length === 1 && manageDataFeatures.length === 1
-                    ? 'kbnOverviewData--compressed'
-                    : 'kbnOverviewData--expanded'
-                }`}
+                css={css({
+                  ...(addDataFeatures.length > 1 && manageDataFeatures.length > 1
+                    ? { flexDirection: 'column' }
+                    : {}),
+                })}
               >
                 <EuiFlexItem>
                   <AddData addBasePath={addBasePath} features={addDataFeatures} />
@@ -374,3 +383,48 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
     </KibanaPageTemplate>
   );
 };
+
+const styles = (euiTheme: UseEuiTheme['euiTheme'], minBreakpointM: string) =>
+  css({
+    '.kbnRedirectAppLinkImage': {
+      '.enterpriseSearch': {
+        '.euiCard__image': {
+          backgroundColor: euiTheme.colors.warning,
+        },
+      },
+      '.observability': {
+        '.euiCard__image': {
+          backgroundColor: euiTheme.colors.accent,
+        },
+      },
+      '.securitySolution': {
+        '.euiCard__image': {
+          backgroundColor: euiTheme.colors.accentSecondary,
+        },
+      },
+    },
+    '.kbnOverviewItemSolution': {
+      [minBreakpointM]: {
+        maxWidth: `calc(33.333% - ${euiTheme.size.l})`,
+      },
+    },
+    '.kbnOverviewRemainingApps': {
+      '.kbnOverviewApps__item': {
+        [minBreakpointM]: {
+          maxWidth: `calc(25% - ${euiTheme.size.l})`,
+        },
+      },
+    },
+    '.kbnOverviewMainApps': {
+      '.kbnOverviewApps__item': {
+        [minBreakpointM]: {
+          maxWidth: `calc(50% - ${euiTheme.size.l})`,
+        },
+      },
+    },
+    '.kbnOverviewSupplements--noNews h2': {
+      [minBreakpointM]: {
+        textAlign: 'center',
+      },
+    },
+  });

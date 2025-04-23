@@ -14,7 +14,7 @@ import type {
   MlDatafeedState,
   MlJobState,
   MlJobStats,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+} from '@elastic/elasticsearch/lib/api/types';
 import type {
   ActionGroup,
   AlertInstanceContext,
@@ -249,6 +249,7 @@ export function registerJobsMonitoringRuleType({
     },
     category: DEFAULT_APP_CATEGORIES.management.id,
     producer: PLUGIN_ID,
+    solution: 'stack',
     minimumLicenseRequired: MINIMUM_FULL_LICENSE,
     isExportable: true,
     doesSetRecoveryContext: true,

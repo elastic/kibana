@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { Truthy } from 'lodash';
 import type { BaseCspSetupStatus, BenchmarksCisId } from '@kbn/cloud-security-posture-common';
 import {
   NewPackagePolicy,
@@ -15,6 +14,7 @@ import {
   PackagePolicyInput,
   UpdatePackagePolicy,
 } from '@kbn/fleet-plugin/common';
+import type { BenchmarkId } from '@kbn/cloud-security-posture-common';
 import type { BenchmarkRuleSelectParams } from '@kbn/cloud-security-posture-common/schema/rules/latest';
 import type { BenchmarkRuleSelectParams as BenchmarkRuleSelectParamsV4 } from '@kbn/cloud-security-posture-common/schema/rules/v4';
 import {
@@ -26,7 +26,6 @@ import {
   AZURE_CREDENTIALS_TYPE_TO_FIELDS_MAP,
 } from '../constants';
 import type {
-  BenchmarkId,
   Score,
   AwsCredentialsType,
   GcpCredentialsType,
@@ -42,7 +41,7 @@ import type {
 export const isNonNullable = <T extends unknown>(v: T): v is NonNullable<T> =>
   v !== null && v !== undefined;
 
-export const truthy = <T>(value: T): value is Truthy<T> => !!value;
+// export const truthy = <T>(value: T): value is Truthy<T> => !!value;
 
 export const getBenchmarkFilter = (type: BenchmarkId, section?: RuleSection): string =>
   `${CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE}.attributes.metadata.benchmark.id: "${type}"${

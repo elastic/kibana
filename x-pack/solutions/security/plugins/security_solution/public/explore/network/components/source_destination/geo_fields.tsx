@@ -74,7 +74,8 @@ const GeoFieldValues = React.memo<{
   eventId: string;
   fieldName: string;
   values?: string[] | null;
-}>(({ contextId, eventId, fieldName, values }) =>
+  scopeId: string;
+}>(({ contextId, eventId, fieldName, values, scopeId }) =>
   values != null ? (
     <>
       {uniq(values).map((value) => (
@@ -89,6 +90,7 @@ const GeoFieldValues = React.memo<{
 
             <EuiFlexItem grow={false}>
               <DefaultDraggable
+                scopeId={scopeId}
                 data-test-subj={fieldName}
                 field={fieldName}
                 id={`geo-field-values-default-draggable-${contextId}-${eventId}-${fieldName}-${value}`}
@@ -114,13 +116,14 @@ GeoFieldValues.displayName = 'GeoFieldValues';
  * - `source|destination.geo.city_name`
  */
 export const GeoFields = React.memo<GeoFieldsProps>((props) => {
-  const { contextId, eventId, type } = props;
+  const { contextId, eventId, type, scopeId } = props;
 
   const propNameToFieldName = getGeoFieldPropNameToFieldNameMap(type);
   return (
     <EuiFlexGroup alignItems="center" gutterSize="none">
       {uniq(propNameToFieldName).map((geo) => (
         <GeoFieldValues
+          scopeId={scopeId}
           contextId={contextId}
           eventId={eventId}
           fieldName={geo.fieldName}

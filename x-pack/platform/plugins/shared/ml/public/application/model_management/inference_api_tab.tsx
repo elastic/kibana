@@ -16,7 +16,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/types';
 
 export interface InferenceAPITabProps {
   inferenceApis: InferenceInferenceEndpointInfo[];

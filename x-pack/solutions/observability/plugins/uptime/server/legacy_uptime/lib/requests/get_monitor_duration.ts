@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import {
   EXCLUDE_RUN_ONCE_FILTER,
   SUMMARY_FILTER,
@@ -64,7 +64,7 @@ export const getMonitorDurationChart: UMElasticsearchQueryFn<
     },
   };
 
-  const { body: result } = await uptimeEsClient.search({ body: params });
+  const { body: result } = await uptimeEsClient.search(params);
 
   const dateHistogramBuckets: any[] = result?.aggregations?.timeseries?.buckets ?? [];
 

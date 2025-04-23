@@ -333,7 +333,8 @@ export default function ({ getService }: FtrProviderContext) {
       // 3. Remove `createdAt` field for the latest sessions emulating legacy sessions.
       await es.updateByQuery({
         index: '.kibana_security_session*',
-        body: { script: 'ctx._source.remove("createdAt")', query: { ids: { values: sessionIds } } },
+        script: 'ctx._source.remove("createdAt")',
+        query: { ids: { values: sessionIds } },
         refresh: true,
       });
 

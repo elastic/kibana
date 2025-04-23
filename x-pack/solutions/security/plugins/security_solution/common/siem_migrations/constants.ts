@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import type { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
-
 export const SIEM_MIGRATIONS_ASSISTANT_USER = 'assistant';
 
 export const SIEM_MIGRATIONS_PATH = '/internal/siem_migrations' as const;
@@ -60,9 +58,6 @@ export enum RuleTranslationResult {
   PARTIAL = 'partial',
   UNTRANSLATABLE = 'untranslatable',
 }
-
-export const DEFAULT_TRANSLATION_RISK_SCORE = 21;
-export const DEFAULT_TRANSLATION_SEVERITY: Severity = 'low';
 
 export const DEFAULT_TRANSLATION_FIELDS = {
   from: 'now-360s',

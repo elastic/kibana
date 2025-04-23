@@ -782,9 +782,9 @@
         "label": "ServerRoute",
         "description": [],
         "signature": [
-          "{ endpoint: TEndpoint; handler: ServerRouteHandler<TRouteHandlerResources, TRouteParamsRT, TReturnType>; security?: ",
+          "{ endpoint: TEndpoint; handler: ServerRouteHandler<TRouteHandlerResources, TRouteParamsRT, TReturnType>; security: ",
           "RouteSecurity",
-          " | undefined; } & (TRouteParamsRT extends ",
+          "; } & (TRouteParamsRT extends ",
           {
             "pluginId": "@kbn/server-route-repository-utils",
             "scope": "common",
@@ -867,7 +867,7 @@
             "label": "body",
             "description": [],
             "signature": [
-              "Zod.ZodAny"
+              "KbnPassThroughAny"
             ],
             "path": "src/platform/packages/shared/kbn-server-route-repository/src/validation_objects.ts",
             "deprecated": false,
@@ -881,7 +881,7 @@
             "label": "params",
             "description": [],
             "signature": [
-              "Zod.ZodAny"
+              "KbnPassThroughAny"
             ],
             "path": "src/platform/packages/shared/kbn-server-route-repository/src/validation_objects.ts",
             "deprecated": false,
@@ -895,7 +895,7 @@
             "label": "query",
             "description": [],
             "signature": [
-              "Zod.ZodAny"
+              "KbnPassThroughAny"
             ],
             "path": "src/platform/packages/shared/kbn-server-route-repository/src/validation_objects.ts",
             "deprecated": false,

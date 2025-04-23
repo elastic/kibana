@@ -28,6 +28,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import type { IndicesIndexSettings } from '@elastic/elasticsearch/lib/api/types';
 import type { FileUploadResults } from '@kbn/file-upload-common';
+import type { FlyoutContent } from '@kbn/file-upload-common/src/types';
 import type { ResultLinks } from '../../common/app';
 import type { GetAdditionalLinks } from '../application/common/components/results_links';
 import { FileClashWarning } from './file_clash_warning';
@@ -52,6 +53,8 @@ interface Props {
   autoAddInference?: string;
   autoCreateDataView?: boolean;
   indexSettings?: IndicesIndexSettings;
+  initialIndexName?: string;
+  flyoutContent?: FlyoutContent;
   onClose?: () => void;
 }
 
@@ -63,6 +66,8 @@ export const FileUploadLiteView: FC<Props> = ({
   autoAddInference,
   autoCreateDataView,
   indexSettings,
+  initialIndexName,
+  flyoutContent,
   onClose,
 }) => {
   const {
@@ -125,10 +130,14 @@ export const FileUploadLiteView: FC<Props> = ({
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="s">
           <h3>
-            <FormattedMessage
-              id="xpack.dataVisualizer.file.uploadView.uploadFileTitle"
-              defaultMessage="Upload a file"
-            />
+            {flyoutContent?.title ? (
+              flyoutContent.title
+            ) : (
+              <FormattedMessage
+                id="xpack.dataVisualizer.file.uploadView.uploadFileTitle"
+                defaultMessage="Upload a file"
+              />
+            )}
           </h3>
         </EuiTitle>
       </EuiFlyoutHeader>
@@ -140,27 +149,31 @@ export const FileUploadLiteView: FC<Props> = ({
               <>
                 <EuiText>
                   <p>
-                    <FormattedMessage
-                      id="xpack.dataVisualizer.file.uploadView.uploadFileDescription"
-                      defaultMessage="Upload your file, analyze its data, and import the data into an Elasticsearch index. The data can also be automatically vectorized using semantic text."
-                    />
-
-                    <br />
-
-                    <FormattedMessage
-                      id="xpack.dataVisualizer.file.uploadView.uploadFileDescriptionLink"
-                      defaultMessage="If you need to customize the file upload process, the full version is available {fullToolLink}."
-                      values={{
-                        fullToolLink: (
-                          <EuiLink onClick={fullFileUpload}>
-                            <FormattedMessage
-                              id="xpack.dataVisualizer.file.uploadView.uploadFileDescriptionLinkText"
-                              defaultMessage="here"
-                            />
-                          </EuiLink>
-                        ),
-                      }}
-                    />
+                    {flyoutContent?.description ? (
+                      flyoutContent.description
+                    ) : (
+                      <>
+                        <FormattedMessage
+                          id="xpack.dataVisualizer.file.uploadView.uploadFileDescription"
+                          defaultMessage="Upload your file, analyze its data, and import the data into an Elasticsearch index. The data can also be automatically vectorized using semantic text."
+                        />
+                        <br />
+                        <FormattedMessage
+                          id="xpack.dataVisualizer.file.uploadView.uploadFileDescriptionLink"
+                          defaultMessage="If you need to customize the file upload process, the full version is available {fullToolLink}."
+                          values={{
+                            fullToolLink: (
+                              <EuiLink onClick={fullFileUpload}>
+                                <FormattedMessage
+                                  id="xpack.dataVisualizer.file.uploadView.uploadFileDescriptionLinkText"
+                                  defaultMessage="here"
+                                />
+                              </EuiLink>
+                            ),
+                          }}
+                        />{' '}
+                      </>
+                    )}
                   </p>
                 </EuiText>
 
@@ -179,6 +192,8 @@ export const FileUploadLiteView: FC<Props> = ({
                     key={i}
                     deleteFile={() => deleteFile(i)}
                     index={i}
+                    showFileContentPreview={flyoutContent?.showFileContentPreview}
+                    showFileSummary={flyoutContent?.showFileSummary}
                   />
                 ))}
 
@@ -201,6 +216,7 @@ export const FileUploadLiteView: FC<Props> = ({
                   setIndexName={setIndexName}
                   setIndexValidationStatus={setIndexValidationStatus}
                   fileUpload={fileUpload}
+                  initialIndexName={initialIndexName}
                 />
               </>
             ) : null}

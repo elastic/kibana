@@ -299,6 +299,9 @@ export const getOptionsListControlFactory = (): DataControlFactory<
             if (invalidSelections$.getValue().size) invalidSelections$.next(new Set([]));
           },
           hasSelections$: hasSelections$ as PublishingSubject<boolean | undefined>,
+          setSelectedOptions: (options: OptionsListSelection[] | undefined) => {
+            selections.setSelectedOptions(options);
+          },
         },
         {
           ...dataControl.comparators,

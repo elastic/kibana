@@ -59,9 +59,11 @@ import {
 import { ServerlessPluginSetup, ServerlessPluginStart } from '@kbn/serverless/public';
 import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
-import { DashboardStart, DashboardSetup } from '@kbn/dashboard-plugin/public';
+import { DashboardStart } from '@kbn/dashboard-plugin/public';
 import { SLOPublicStart } from '@kbn/slo-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
+import { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
+import { EmbeddableEnhancedPluginStart } from '@kbn/embeddable-enhanced-plugin/public';
 import { registerSyntheticsEmbeddables } from './apps/embeddables/register_embeddables';
 import { kibanaService } from './utils/kibana_service';
 import { PLUGIN } from '../common/constants/plugin';
@@ -87,7 +89,6 @@ export interface ClientPluginsSetup {
   embeddable: EmbeddableSetup;
   serverless?: ServerlessPluginSetup;
   uiActions: UiActionsSetup;
-  dashboard: DashboardSetup;
 }
 
 export interface ClientPluginsStart {
@@ -97,6 +98,7 @@ export interface ClientPluginsStart {
   discover: DiscoverStart;
   inspector: InspectorPluginStart;
   embeddable: EmbeddableStart;
+  embeddableEnhanced?: EmbeddableEnhancedPluginStart;
   exploratoryView: ExploratoryViewPublicStart;
   observability: ObservabilityPublicStart;
   observabilityShared: ObservabilitySharedPluginStart;
@@ -122,6 +124,7 @@ export interface ClientPluginsStart {
   dashboard: DashboardStart;
   charts: ChartsPluginStart;
   uiActions: UiActionsStart;
+  fieldsMetadata: FieldsMetadataPublicStart;
 }
 
 export interface SyntheticsPluginServices extends Partial<CoreStart> {

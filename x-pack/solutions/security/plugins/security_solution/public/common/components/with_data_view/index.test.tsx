@@ -9,6 +9,7 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import { render, screen } from '@testing-library/react';
 import { withDataView } from '.';
 import { useGetScopedSourcererDataView } from '../../../sourcerer/components/use_get_sourcerer_data_view';
+import { TestProviders } from '../../mock';
 
 interface TestComponentProps {
   dataView: DataView;
@@ -39,18 +40,18 @@ describe('withDataViewId', () => {
   });
   it('should render default error components when there is not fallback provided and dataViewId is null', async () => {
     const RenderedComponent = withDataView(TestComponent);
-    render(<RenderedComponent />);
+    render(<RenderedComponent />, { wrapper: TestProviders });
     expect(screen.getByTestId(TEST_ID.DATA_VIEW_ERROR_COMPONENT)).toBeVisible();
   });
   it('should render provided fallback and dataViewId is null', async () => {
     const RenderedComponent = withDataView(TestComponent, <FallbackComponent />);
-    render(<RenderedComponent />);
+    render(<RenderedComponent />, { wrapper: TestProviders });
     expect(screen.getByTestId(TEST_ID.FALLBACK_COMPONENT)).toBeVisible();
   });
   it('should render provided component when dataViewId is not null', async () => {
     (useGetScopedSourcererDataView as jest.Mock).mockReturnValue({ id: 'test' });
     const RenderedComponent = withDataView(TestComponent);
-    render(<RenderedComponent />);
+    render(<RenderedComponent />, { wrapper: TestProviders });
     expect(screen.getByTestId(TEST_ID.TEST_COMPONENT)).toBeVisible();
     expect(dataViewMockFn).toHaveBeenCalledWith({ id: 'test' });
   });

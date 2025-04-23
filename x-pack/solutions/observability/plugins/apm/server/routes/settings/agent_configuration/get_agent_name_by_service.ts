@@ -22,18 +22,16 @@ export async function getAgentNameByService({
     apm: {
       events: [ProcessorEvent.transaction, ProcessorEvent.error, ProcessorEvent.metric],
     },
-    body: {
-      track_total_hits: false,
-      size: 0,
-      query: {
-        bool: {
-          filter: [{ term: { [SERVICE_NAME]: serviceName } }],
-        },
+    track_total_hits: false,
+    size: 0,
+    query: {
+      bool: {
+        filter: [{ term: { [SERVICE_NAME]: serviceName } }],
       },
-      aggs: {
-        agent_names: {
-          terms: { field: AGENT_NAME, size: 1 },
-        },
+    },
+    aggs: {
+      agent_names: {
+        terms: { field: AGENT_NAME, size: 1 },
       },
     },
   };

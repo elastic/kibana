@@ -61,7 +61,8 @@ export default function ({ getService }: FtrProviderContext) {
       assertUser(user, 'elastic-agent-no-secret');
 
       const { access_token: accessToken } = await es.security.getToken({
-        body: { grant_type: 'password', ...adminTestUser },
+        grant_type: 'password',
+        ...adminTestUser,
       });
       const { body: accessTokenUser } = await supertest
         .get('/internal/security/me')

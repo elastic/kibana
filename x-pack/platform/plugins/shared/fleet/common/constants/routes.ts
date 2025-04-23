@@ -22,12 +22,15 @@ export const LIMITED_CONCURRENCY_ROUTE_TAG = 'ingest:limited-concurrency';
 // EPM API routes
 const EPM_PACKAGES_MANY = `${EPM_API_ROOT}/packages`;
 const EPM_PACKAGES_INSTALLED = `${EPM_API_ROOT}/packages/installed`;
-const EPM_PACKAGES_BULK = `${EPM_PACKAGES_MANY}/_bulk`;
 const EPM_PACKAGES_ONE_WITHOUT_VERSION = `${EPM_PACKAGES_MANY}/{pkgName}`;
 const EPM_PACKAGES_ONE = `${EPM_PACKAGES_MANY}/{pkgName}/{pkgVersion}`;
 const EPM_PACKAGES_ONE_WITH_OPTIONAL_VERSION = `${EPM_PACKAGES_MANY}/{pkgName}/{pkgVersion?}`;
 export const EPM_API_ROUTES = {
-  BULK_INSTALL_PATTERN: EPM_PACKAGES_BULK,
+  BULK_INSTALL_PATTERN: `${EPM_PACKAGES_MANY}/_bulk`,
+  BULK_UPGRADE_PATTERN: `${EPM_PACKAGES_MANY}/_bulk_upgrade`,
+  BULK_UPGRADE_INFO_PATTERN: `${EPM_PACKAGES_MANY}/_bulk_upgrade/{taskId}`,
+  BULK_UNINSTALL_PATTERN: `${EPM_PACKAGES_MANY}/_bulk_uninstall`,
+  BULK_UNINSTALL_INFO_PATTERN: `${EPM_PACKAGES_MANY}/_bulk_uninstall/{taskId}`,
   LIST_PATTERN: EPM_PACKAGES_MANY,
   INSTALLED_LIST_PATTERN: EPM_PACKAGES_INSTALLED,
   LIMITED_LIST_PATTERN: `${EPM_PACKAGES_MANY}/limited`,
@@ -81,6 +84,8 @@ export const AGENT_POLICY_API_ROUTES = {
   FULL_INFO_DOWNLOAD_PATTERN: `${AGENT_POLICY_API_ROOT}/{agentPolicyId}/download`,
   LIST_OUTPUTS_PATTERN: `${AGENT_POLICY_API_ROOT}/outputs`,
   INFO_OUTPUTS_PATTERN: `${AGENT_POLICY_API_ROOT}/{agentPolicyId}/outputs`,
+  AUTO_UPGRADE_AGENTS_STATUS_PATTERN: `${AGENT_POLICY_API_ROOT}/{agentPolicyId}/auto_upgrade_agents_status`,
+  CREATE_WITH_PACKAGE_POLICIES: `${INTERNAL_ROOT}/agent_and_package_policies`,
 };
 
 // Kubernetes Manifest API routes
@@ -204,6 +209,11 @@ export const DOWNLOAD_SOURCE_API_ROUTES = {
   CREATE_PATTERN: `${API_ROOT}/agent_download_sources`,
   UPDATE_PATTERN: `${API_ROOT}/agent_download_sources/{sourceId}`,
   DELETE_PATTERN: `${API_ROOT}/agent_download_sources/{sourceId}`,
+};
+
+export const REMOTE_SYNCED_INTEGRATIONS_API_ROUTES = {
+  STATUS_PATTERN: `${API_ROOT}/remote_synced_integrations/status`,
+  INFO_PATTERN: `${API_ROOT}/remote_synced_integrations/{outputId}/remote_status`,
 };
 
 export const CREATE_STANDALONE_AGENT_API_KEY_ROUTE = `${INTERNAL_ROOT}/create_standalone_agent_api_key`;

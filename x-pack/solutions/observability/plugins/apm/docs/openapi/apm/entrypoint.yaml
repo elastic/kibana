@@ -10,7 +10,11 @@ tags:
     description: >
       Adjust APM agent configuration without need to redeploy your application.
   - name: APM sourcemaps
-    description: Configure APM source maps.
+    description: >
+      Configure APM source maps.
+      A source map allows minified files to be mapped back to original source code--allowing you to maintain the speed advantage of minified code, without losing the ability to quickly and easily debug your application.
+      
+      For best results, uploading source maps should become a part of your deployment procedure, and not something you only do when you see unhelpful errors. That's because uploading source maps after errors happen won't make old errors magically readable--errors must occur again for source mapping to occur.
   - name: APM annotations
     description: >
       Annotate visualizations in the APM app with significant events.

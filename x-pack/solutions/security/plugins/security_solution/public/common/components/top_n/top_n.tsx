@@ -52,7 +52,7 @@ export interface Props extends Pick<GlobalTimeArgs, 'from' | 'to' | 'deleteQuery
   defaultView: TimelineEventsType;
   field: AlertsStackByField;
   filters: Filter[];
-  indexPattern?: DataViewSpec;
+  dataViewSpec?: DataViewSpec;
   options: TopNOption[];
   paddingSize?: 's' | 'm' | 'l' | 'none';
   query: Query;
@@ -70,7 +70,7 @@ const TopNComponent: React.FC<Props> = ({
   filters,
   field,
   from,
-  indexPattern,
+  dataViewSpec,
   options,
   paddingSize,
   query,
@@ -124,7 +124,7 @@ const TopNComponent: React.FC<Props> = ({
             filters={applicableFilters}
             from={from}
             headerChildren={headerChildren}
-            dataViewSpec={indexPattern}
+            dataViewSpec={dataViewSpec}
             onlyField={field}
             paddingSize={paddingSize}
             query={query}

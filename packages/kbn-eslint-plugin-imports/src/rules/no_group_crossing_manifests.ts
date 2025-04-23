@@ -13,7 +13,7 @@ import type { Rule } from 'eslint';
 import type { Node } from 'estree';
 import { getPackages, getPluginPackagesFilter } from '@kbn/repo-packages';
 import { REPO_ROOT } from '@kbn/repo-info';
-import type { ModuleGroup, ModuleVisibility } from '@kbn/repo-info/types';
+import type { ModuleGroup, ModuleVisibility } from '@kbn/projects-solutions-groups';
 import { getSourcePath } from '../helpers/source';
 import { getImportResolver } from '../get_import_resolver';
 import { getRepoSourceClassifier } from '../helpers/repo_source_classifier';

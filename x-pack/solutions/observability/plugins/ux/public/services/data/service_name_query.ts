@@ -18,17 +18,15 @@ export function serviceNameQuery(start: number, end: number, uiFilters?: UxUIFil
     end,
   });
   const params = mergeProjection(projection, {
-    body: {
-      size: 0,
-      query: {
-        bool: projection.body.query.bool,
-      },
-      aggs: {
-        services: {
-          terms: {
-            field: SERVICE_NAME,
-            size: 1000,
-          },
+    size: 0,
+    query: {
+      bool: projection.query.bool,
+    },
+    aggs: {
+      services: {
+        terms: {
+          field: SERVICE_NAME,
+          size: 1000,
         },
       },
     },

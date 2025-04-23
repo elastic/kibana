@@ -7,7 +7,7 @@
 
 import React, { useEffect, useMemo, useState } from 'react';
 import { BrushEndListener, XYBrushEvent } from '@elastic/charts';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { BoolQuery, Filter } from '@kbn/es-query';
 import { usePerformanceContext } from '@kbn/ebt-tools';
 import { i18n } from '@kbn/i18n';
@@ -18,7 +18,6 @@ import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 import { AlertsGrouping } from '@kbn/alerts-grouping';
 
 import { rulesLocatorID } from '../../../common';
-import { ALERT_STATUS_FILTER } from '../../components/alert_search_bar/constants';
 import { renderGroupPanel } from '../../components/alerts_table/grouping/render_group_panel';
 import { getGroupStats } from '../../components/alerts_table/grouping/get_group_stats';
 import { getAggregationsByGroupingField } from '../../components/alerts_table/grouping/get_aggregations_by_grouping_field';
@@ -54,6 +53,7 @@ import { HeaderMenu } from '../overview/components/header_menu/header_menu';
 import { buildEsQuery } from '../../utils/build_es_query';
 import { renderRuleStats, RuleStatsState } from './components/rule_stats';
 import { mergeBoolQueries } from './helpers/merge_bool_queries';
+import { GroupingToolbarControls } from '../../components/alerts_table/grouping/grouping_toolbar_controls';
 
 const ALERTS_SEARCH_BAR_ID = 'alerts-search-bar-o11y';
 const ALERTS_PER_PAGE = 50;
@@ -77,6 +77,7 @@ function InternalAlertsPage() {
     share: {
       url: { locators },
     },
+    spaces,
     triggersActionsUi: {
       getAlertsSearchBar: AlertsSearchBar,
       getAlertSummaryWidget: AlertSummaryWidget,
@@ -91,6 +92,7 @@ function InternalAlertsPage() {
     },
   } = data;
   const { ObservabilityPageTemplate } = usePluginContext();
+  const [filterControls, setFilterControls] = useState<Filter[]>([]);
   const alertSearchBarStateProps = useAlertSearchBarStateContainer(ALERTS_URL_STORAGE_KEY, {
     replace: false,
   });
@@ -145,10 +147,7 @@ function InternalAlertsPage() {
       alertSearchBarStateProps.onRangeToChange(new Date(end).toISOString());
     }
   };
-  const chartProps = {
-    baseTheme: charts.theme.useChartsBaseTheme(),
-    onBrushEnd,
-  };
+
   const [ruleStatsLoading, setRuleStatsLoading] = useState<boolean>(false);
   const [ruleStats, setRuleStats] = useState<RuleStatsState>({
     total: 0,
@@ -269,9 +268,22 @@ function InternalAlertsPage() {
               {...alertSearchBarStateProps}
               appName={ALERTS_SEARCH_BAR_ID}
               onEsQueryChange={setEsQuery}
+              filterControls={filterControls}
+              onFilterControlsChange={setFilterControls}
               showFilterBar
-              services={{ timeFilterService, AlertsSearchBar, useToasts, uiSettings }}
+              services={{
+                timeFilterService,
+                AlertsSearchBar,
+                http,
+                data,
+                dataViews,
+                notifications,
+                spaces,
+                useToasts,
+                uiSettings,
+              }}
             />
+            <EuiSpacer size="s" />
           </EuiFlexItem>
           <EuiFlexItem>
             <AlertSummaryWidget
@@ -280,7 +292,10 @@ function InternalAlertsPage() {
               filter={esQuery}
               fullSize
               timeRange={alertSummaryTimeRange}
-              chartProps={chartProps}
+              chartProps={{
+                themeOverrides: charts.theme.useChartsBaseTheme(),
+                onBrushEnd,
+              }}
             />
           </EuiFlexItem>
           <EuiFlexItem>
@@ -288,12 +303,12 @@ function InternalAlertsPage() {
               <AlertsGrouping<AlertsByGroupingAgg>
                 ruleTypeIds={OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES}
                 consumers={observabilityAlertFeatureIds}
-                defaultFilters={
-                  ALERT_STATUS_FILTER[alertSearchBarStateProps.status] ?? DEFAULT_FILTERS
-                }
                 from={alertSearchBarStateProps.rangeFrom}
                 to={alertSearchBarStateProps.rangeTo}
-                globalFilters={alertSearchBarStateProps.filters ?? DEFAULT_FILTERS}
+                globalFilters={[
+                  ...(alertSearchBarStateProps.filters ?? DEFAULT_FILTERS),
+                  ...filterControls,
+                ]}
                 globalQuery={{ query: alertSearchBarStateProps.kuery, language: 'kuery' }}
                 groupingId={ALERTS_PAGE_ALERTS_TABLE_CONFIG_ID}
                 defaultGroupingOptions={DEFAULT_GROUPING_OPTIONS}
@@ -319,6 +334,12 @@ function InternalAlertsPage() {
                       initialPageSize={ALERTS_PER_PAGE}
                       onUpdate={onUpdate}
                       columns={tableColumns}
+                      renderAdditionalToolbarControls={() => (
+                        <GroupingToolbarControls
+                          groupingId={ALERTS_PAGE_ALERTS_TABLE_CONFIG_ID}
+                          ruleTypeIds={OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES}
+                        />
+                      )}
                       showInspectButton
                     />
                   );

@@ -37,7 +37,7 @@
           },
           ") => Promise<void>"
         ],
-        "path": "packages/kbn-openapi-generator/src/openapi_generator.ts",
+        "path": "src/platform/packages/shared/kbn-openapi-generator/src/openapi_generator.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -57,7 +57,7 @@
                 "text": "GeneratorConfig"
               }
             ],
-            "path": "packages/kbn-openapi-generator/src/openapi_generator.ts",
+            "path": "src/platform/packages/shared/kbn-openapi-generator/src/openapi_generator.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -84,7 +84,7 @@
           },
           ") => Promise<void>"
         ],
-        "path": "packages/kbn-openapi-generator/src/openapi_linter.ts",
+        "path": "src/platform/packages/shared/kbn-openapi-generator/src/openapi_linter.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -104,7 +104,7 @@
                 "text": "LinterConfig"
               }
             ],
-            "path": "packages/kbn-openapi-generator/src/openapi_linter.ts",
+            "path": "src/platform/packages/shared/kbn-openapi-generator/src/openapi_linter.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -123,7 +123,7 @@
         "signature": [
           "() => void"
         ],
-        "path": "packages/kbn-openapi-generator/src/cli.ts",
+        "path": "src/platform/packages/shared/kbn-openapi-generator/src/cli.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -139,7 +139,7 @@
         "tags": [],
         "label": "GeneratorConfig",
         "description": [],
-        "path": "packages/kbn-openapi-generator/src/openapi_generator.ts",
+        "path": "src/platform/packages/shared/kbn-openapi-generator/src/openapi_generator.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -153,7 +153,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-openapi-generator/src/openapi_generator.ts",
+            "path": "src/platform/packages/shared/kbn-openapi-generator/src/openapi_generator.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -164,7 +164,7 @@
             "tags": [],
             "label": "rootDir",
             "description": [],
-            "path": "packages/kbn-openapi-generator/src/openapi_generator.ts",
+            "path": "src/platform/packages/shared/kbn-openapi-generator/src/openapi_generator.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -175,7 +175,7 @@
             "tags": [],
             "label": "sourceGlob",
             "description": [],
-            "path": "packages/kbn-openapi-generator/src/openapi_generator.ts",
+            "path": "src/platform/packages/shared/kbn-openapi-generator/src/openapi_generator.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -189,7 +189,7 @@
             "signature": [
               "\"zod_operation_schema\""
             ],
-            "path": "packages/kbn-openapi-generator/src/openapi_generator.ts",
+            "path": "src/platform/packages/shared/kbn-openapi-generator/src/openapi_generator.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -203,7 +203,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "packages/kbn-openapi-generator/src/openapi_generator.ts",
+            "path": "src/platform/packages/shared/kbn-openapi-generator/src/openapi_generator.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -217,7 +217,7 @@
             "signature": [
               "{ outFile: string; } | undefined"
             ],
-            "path": "packages/kbn-openapi-generator/src/openapi_generator.ts",
+            "path": "src/platform/packages/shared/kbn-openapi-generator/src/openapi_generator.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -231,7 +231,7 @@
         "tags": [],
         "label": "LinterConfig",
         "description": [],
-        "path": "packages/kbn-openapi-generator/src/openapi_linter.ts",
+        "path": "src/platform/packages/shared/kbn-openapi-generator/src/openapi_linter.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -242,7 +242,7 @@
             "tags": [],
             "label": "rootDir",
             "description": [],
-            "path": "packages/kbn-openapi-generator/src/openapi_linter.ts",
+            "path": "src/platform/packages/shared/kbn-openapi-generator/src/openapi_linter.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -253,7 +253,7 @@
             "tags": [],
             "label": "sourceGlob",
             "description": [],
-            "path": "packages/kbn-openapi-generator/src/openapi_linter.ts",
+            "path": "src/platform/packages/shared/kbn-openapi-generator/src/openapi_linter.ts",
             "deprecated": false,
             "trackAdoption": false
           }

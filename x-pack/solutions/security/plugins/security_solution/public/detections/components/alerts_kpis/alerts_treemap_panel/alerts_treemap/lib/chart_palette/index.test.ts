@@ -10,7 +10,7 @@ import {
   RISK_SCORE_MEDIUM,
   RISK_SCORE_HIGH,
   RISK_SCORE_CRITICAL,
-} from '../../../../../../../common/constants';
+} from '../../../../../../../../common/detection_engine/constants';
 import { getFillColor, getRiskScorePalette, RISK_SCORE_STEPS } from '.';
 import { renderHook } from '@testing-library/react';
 import { getRiskSeverityColors } from '../../../../../../../common/utils/risk_color_palette';

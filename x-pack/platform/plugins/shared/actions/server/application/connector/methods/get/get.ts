@@ -8,10 +8,10 @@
 import Boom from '@hapi/boom';
 import { getConnectorSo } from '../../../../data/connector';
 import { connectorSchema } from '../../schemas';
-import { Connector } from '../../types';
+import type { Connector } from '../../types';
 import { ConnectorAuditAction, connectorAuditEvent } from '../../../../lib/audit_events';
 import { isConnectorDeprecated } from '../../lib';
-import { GetParams } from './types';
+import type { GetParams } from './types';
 
 export async function get({
   context,

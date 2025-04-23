@@ -57,6 +57,12 @@ export function registerAPIRoutes({
         stability: 'experimental',
       },
     },
+    security: {
+      authz: {
+        enabled: false,
+        reason: 'Relies on Content Client for authorization',
+      },
+    },
   });
 
   createRoute.addVersion(
@@ -130,6 +136,12 @@ export function registerAPIRoutes({
         stability: 'experimental',
       },
     },
+    security: {
+      authz: {
+        enabled: false,
+        reason: 'Relies on Content Client for authorization',
+      },
+    },
   });
 
   updateRoute.addVersion(
@@ -175,8 +187,7 @@ export function registerAPIRoutes({
         }
         return res.badRequest(e.message);
       }
-
-      return res.created({ body: result });
+      return res.ok({ body: result });
     }
   );
 
@@ -190,6 +201,12 @@ export function registerAPIRoutes({
       tags: ['oas-tag:Dashboards'],
       availability: {
         stability: 'experimental',
+      },
+    },
+    security: {
+      authz: {
+        enabled: false,
+        reason: 'Relies on Content Client for authorization',
       },
     },
   });
@@ -237,7 +254,15 @@ export function registerAPIRoutes({
       let result;
       try {
         // TODO add filtering
-        ({ result } = await client.search({ cursor: page.toString(), limit }));
+        ({ result } = await client.search(
+          {
+            cursor: page.toString(),
+            limit,
+          },
+          {
+            fields: ['title', 'description', 'timeRestore'],
+          }
+        ));
       } catch (e) {
         if (e.isBoom && e.output.statusCode === 403) {
           return res.forbidden();
@@ -264,6 +289,12 @@ export function registerAPIRoutes({
       tags: ['oas-tag:Dashboards'],
       availability: {
         stability: 'experimental',
+      },
+    },
+    security: {
+      authz: {
+        enabled: false,
+        reason: 'Relies on Content Client for authorization',
       },
     },
   });
@@ -325,6 +356,12 @@ export function registerAPIRoutes({
       tags: ['oas-tag:Dashboards'],
       availability: {
         stability: 'experimental',
+      },
+    },
+    security: {
+      authz: {
+        enabled: false,
+        reason: 'Relies on Content Client for authorization',
       },
     },
   });

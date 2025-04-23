@@ -9,7 +9,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiText, useEuiTheme } from '@elastic/eui';
 import React, { useCallback, useState } from 'react';
 
 import { css } from '@emotion/css';
-import type { AttackDiscoveryStats } from '@kbn/elastic-assistant-common';
+import type { ApiConfig, AttackDiscoveryStats } from '@kbn/elastic-assistant-common';
 import { AIConnector, ConnectorSelector } from '../connector_selector';
 import { Conversation } from '../../..';
 import { useAssistantContext } from '../../assistant_context';
@@ -23,7 +23,7 @@ interface Props {
   selectedConnectorId?: string;
   selectedConversation?: Conversation;
   onConnectorIdSelected?: (connectorId: string) => void;
-  onConnectorSelected?: (conversation: Conversation) => void;
+  onConnectorSelected?: (conversation: Conversation, apiConfig?: ApiConfig) => void;
   stats?: AttackDiscoveryStats | null;
 }
 
@@ -81,20 +81,30 @@ export const ConnectorSelectorInline: React.FC<Props> = React.memo(
         setIsOpen(false);
 
         if (selectedConversation != null) {
-          const conversation = await setApiConfig({
-            conversation: selectedConversation,
-            apiConfig: {
+          if (selectedConversation.id === '' && onConnectorSelected != null) {
+            onConnectorSelected(selectedConversation, {
               ...selectedConversation.apiConfig,
-              actionTypeId: connector.actionTypeId,
               connectorId,
-              // With the inline component, prefer config args to handle 'new connector' case
+              actionTypeId: connector.actionTypeId,
               provider: apiProvider,
               model,
-            },
-          });
+            });
+          } else {
+            const conversation = await setApiConfig({
+              conversation: selectedConversation,
+              apiConfig: {
+                ...selectedConversation.apiConfig,
+                actionTypeId: connector.actionTypeId,
+                connectorId,
+                // With the inline component, prefer config args to handle 'new connector' case
+                provider: apiProvider,
+                model,
+              },
+            });
 
-          if (conversation && onConnectorSelected != null) {
-            onConnectorSelected(conversation);
+            if (conversation && onConnectorSelected != null) {
+              onConnectorSelected(conversation);
+            }
           }
         }
 

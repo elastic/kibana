@@ -10,7 +10,7 @@ import { useMemo } from 'react';
 import { mapValues } from 'lodash';
 import { observabilityFeatureIds, stackFeatureIds } from '@kbn/response-ops-alerts-table/constants';
 import { MULTI_CONSUMER_RULE_TYPE_IDS } from '../../../constants';
-import { RuleTypeIndex } from '../../../../types';
+import type { RuleTypeIndex } from '../../../../types';
 
 export type RuleTypeIdsByFeatureId<T = string[]> = Partial<
   Record<

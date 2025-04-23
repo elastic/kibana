@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import { map, reduce, mapValues, has, get, keys, pickBy } from 'lodash';
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { Filter, FilterMeta, FilterMetaParams } from './types';
@@ -189,12 +189,13 @@ export const buildRangeFilter = (
 
 export const buildSimpleNumberRangeFilter = (
   fieldName: string,
+  fieldType: 'number' | 'date',
   params: RangeFilterParams,
   value: string,
   dataViewId: string
 ) => {
   return buildRangeFilter(
-    { name: fieldName, type: 'number' },
+    { name: fieldName, type: fieldType },
     params,
     { id: dataViewId, title: dataViewId },
     value

@@ -14,6 +14,7 @@ import {
   enableDefaultAlertingSilentlyAction,
   getDefaultAlertingAction,
   inspectStatusRuleAction,
+  inspectTLSRuleAction,
   updateDefaultAlertingAction,
 } from './actions';
 
@@ -78,6 +79,18 @@ export const defaultAlertingReducer = createReducer(initialSettingState, (builde
       state.inspectError = null;
     })
     .addCase(inspectStatusRuleAction.fail, (state, action) => {
+      state.inspectError = action.payload;
+      state.inspectLoading = false;
+    })
+    .addCase(inspectTLSRuleAction.get, (state) => {
+      state.inspectLoading = true;
+    })
+    .addCase(inspectTLSRuleAction.success, (state, action) => {
+      state.inspectData = action.payload;
+      state.inspectLoading = false;
+      state.inspectError = null;
+    })
+    .addCase(inspectTLSRuleAction.fail, (state, action) => {
       state.inspectError = action.payload;
       state.inspectLoading = false;
     });

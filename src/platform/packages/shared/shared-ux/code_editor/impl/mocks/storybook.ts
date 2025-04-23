@@ -35,38 +35,38 @@ export class CodeEditorStorybookMock extends AbstractStorybookMock<
   propArguments = {
     languageId: {
       control: {
-        type: 'radio',
+        control: 'radio',
       },
       options: ['json', 'loglang', 'plaintext'],
       defaultValue: 'json',
     },
     value: {
       control: {
-        type: 'text',
+        control: 'text',
       },
       defaultValue: '',
     },
     'aria-label': {
       control: {
-        type: 'text',
+        control: 'text',
       },
       defaultValue: 'code editor',
     },
     allowFullScreen: {
       control: {
-        type: 'boolean',
+        control: 'boolean',
       },
       defaultValue: false,
     },
     transparentBackground: {
       control: {
-        type: 'boolean',
+        control: 'boolean',
       },
       defaultValue: false,
     },
     placeholder: {
       control: {
-        type: 'text',
+        control: 'text',
       },
       defaultValue: 'myplaceholder',
     },

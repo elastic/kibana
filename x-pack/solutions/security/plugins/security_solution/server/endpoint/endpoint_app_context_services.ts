@@ -25,7 +25,9 @@ import type { AlertingServerStart } from '@kbn/alerting-plugin/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { FleetActionsClientInterface } from '@kbn/fleet-plugin/server/services/actions/types';
 import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
+import type { Space } from '@kbn/spaces-plugin/common';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import type { SpacesServiceStart } from '@kbn/spaces-plugin/server';
 import type { TelemetryConfigProvider } from '../../common/telemetry_config/telemetry_config_provider';
 import { SavedObjectsClientFactory } from './services/saved_objects';
 import type { ResponseActionsClient } from './services';
@@ -88,6 +90,7 @@ export interface EndpointAppContextServiceStartContract {
   savedObjectsServiceStart: SavedObjectsServiceStart;
   connectorActions: ActionsPluginStartContract;
   telemetryConfigProvider: TelemetryConfigProvider;
+  spacesService: SpacesServiceStart | undefined;
 }
 
 /**
@@ -158,11 +161,8 @@ export class EndpointAppContextService {
       licenseService,
       telemetryConfigProvider,
       exceptionListsClient,
-      featureUsageService,
-      esClient,
       productFeaturesService,
     } = this.startDependencies;
-    const endpointMetadataService = this.getEndpointMetadataService();
     const soClient = this.savedObjects.createInternalScopedSoClient({ readonly: false });
     const logger = this.createLogger('endpointFleetExtension');
 
@@ -185,7 +185,6 @@ export class EndpointAppContextService {
         this.setupDependencies.securitySolutionRequestContextFactory,
         alerting,
         licenseService,
-        exceptionListsClient,
         this.setupDependencies.cloud,
         productFeaturesService,
         telemetryConfigProvider
@@ -196,15 +195,7 @@ export class EndpointAppContextService {
 
     registerFleetCallback(
       'packagePolicyUpdate',
-      getPackagePolicyUpdateCallback(
-        logger,
-        licenseService,
-        featureUsageService,
-        endpointMetadataService,
-        this.setupDependencies.cloud,
-        esClient,
-        productFeaturesService
-      )
+      getPackagePolicyUpdateCallback(this, this.setupDependencies.cloud, productFeaturesService)
     );
 
     registerFleetCallback('packagePolicyPostUpdate', getPackagePolicyPostUpdateCallback(this));
@@ -429,5 +420,13 @@ export class EndpointAppContextService {
       throw new EndpointAppContentServicesNotSetUpError();
     }
     return this.setupDependencies.telemetry;
+  }
+
+  public getActiveSpace(httpRequest: KibanaRequest): Promise<Space> {
+    if (!this.startDependencies?.spacesService) {
+      throw new EndpointAppContentServicesNotStartedError();
+    }
+
+    return this.startDependencies.spacesService.getActiveSpace(httpRequest);
   }
 }

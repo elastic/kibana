@@ -10,10 +10,21 @@
 import React, { ReactElement, useEffect, useState } from 'react';
 import { EuiButton, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
 import { ADD_PANEL_TRIGGER, UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import {
+  PublishingSubject,
+  ViewMode,
+  apiPublishesViewMode,
+  useStateFromPublishingSubject,
+} from '@kbn/presentation-publishing';
+import { of } from 'rxjs';
 
 export function AddButton({ pageApi, uiActions }: { pageApi: unknown; uiActions: UiActionsStart }) {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [items, setItems] = useState<ReactElement[]>([]);
+
+  const viewMode = useStateFromPublishingSubject(
+    apiPublishesViewMode(pageApi) ? pageApi?.viewMode$ : (of('edit') as PublishingSubject<ViewMode>)
+  );
 
   useEffect(() => {
     let cancelled = false;
@@ -59,6 +70,7 @@ export function AddButton({ pageApi, uiActions }: { pageApi: unknown; uiActions:
           onClick={() => {
             setIsPopoverOpen(!isPopoverOpen);
           }}
+          disabled={viewMode !== 'edit'}
         >
           Add panel
         </EuiButton>

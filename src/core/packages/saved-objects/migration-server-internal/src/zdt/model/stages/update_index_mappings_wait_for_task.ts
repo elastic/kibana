@@ -8,7 +8,7 @@
  */
 
 import {} from 'lodash';
-import * as Either from 'fp-ts/lib/Either';
+import * as Either from 'fp-ts/Either';
 import { delayRetryState } from '../../../model/retry_state';
 import { throwBadResponse } from '../../../model/helpers';
 import { isTypeof } from '../../actions';
@@ -16,7 +16,7 @@ import type { ModelStage } from '../types';
 
 export const updateIndexMappingsWaitForTask: ModelStage<
   'UPDATE_INDEX_MAPPINGS_WAIT_FOR_TASK',
-  'UPDATE_MAPPING_MODEL_VERSIONS' | 'FATAL'
+  'UPDATE_MAPPING_MODEL_VERSIONS' | 'UPDATE_INDEX_MAPPINGS' | 'FATAL'
 > = (state, res, context) => {
   if (Either.isLeft(res)) {
     const left = res.left;
@@ -26,6 +26,16 @@ export const updateIndexMappingsWaitForTask: ModelStage<
       // exponential delay.  We will basically keep polling forever until the
       // Elasticsearch task succeeds or fails.
       return delayRetryState(state, left.message, Number.MAX_SAFE_INTEGER);
+    } else if (isTypeof(left, 'task_completed_with_retriable_error')) {
+      return delayRetryState(
+        {
+          ...state,
+          controlState: 'UPDATE_INDEX_MAPPINGS',
+          skipRetryReset: true,
+        },
+        left.message,
+        context.maxRetryAttempts
+      );
     } else {
       throwBadResponse(state, left);
     }

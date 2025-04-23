@@ -24,6 +24,8 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { CREATE_RULE_ROUTE, EDIT_RULE_ROUTE, RuleForm } from '@kbn/response-ops-rule-form';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
+import { AlertsFiltersFormSandbox } from './components/alerts_filters_form_sandbox';
 import { TriggersActionsUiExamplePublicStartDeps } from './plugin';
 
 import { Page } from './components/page';
@@ -39,6 +41,7 @@ import { RuleStatusDropdownSandbox } from './components/rule_status_dropdown_san
 import { RuleStatusFilterSandbox } from './components/rule_status_filter_sandbox';
 import { AlertsTableSandbox } from './components/alerts_table_sandbox';
 import { RulesSettingsLinkSandbox } from './components/rules_settings_link_sandbox';
+import { TaskWithApiKeySandbox } from './components/task_with_api_key_sandbox';
 
 export interface TriggersActionsUiExampleComponentParams {
   http: CoreStart['http'];
@@ -58,6 +61,7 @@ export interface TriggersActionsUiExampleComponentParams {
   unifiedSearch: UnifiedSearchPublicPluginStart;
   fieldFormats: FieldFormatsStart;
   licensing: LicensingPluginStart;
+  fieldsMetadata: FieldsMetadataPublicStart;
 }
 
 const TriggersActionsUiExampleApp = ({
@@ -246,6 +250,29 @@ const TriggersActionsUiExampleApp = ({
               </Page>
             )}
           />
+          <Route
+            exact
+            path="/task_manager_with_api_key"
+            render={() => (
+              <Page title="Task Manager with API Key">
+                <TaskWithApiKeySandbox http={http} />
+              </Page>
+            )}
+          />
+          <Route
+            exact
+            path="/alerts_filters_form"
+            render={() => (
+              <Page title="Alerts filters form">
+                <AlertsFiltersFormSandbox
+                  services={{
+                    http,
+                    notifications,
+                  }}
+                />
+              </Page>
+            )}
+          />
         </Routes>
       </EuiPage>
     </Router>
@@ -284,6 +311,7 @@ export const renderApp = (
               unifiedSearch={deps.unifiedSearch}
               fieldFormats={deps.fieldFormats}
               licensing={deps.licensing}
+              fieldsMetadata={deps.fieldsMetadata}
               {...core}
             />
           </IntlProvider>

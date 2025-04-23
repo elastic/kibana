@@ -29,22 +29,20 @@ describe('getEventCount', () => {
     });
 
     expect(esClient.count).toHaveBeenCalledWith({
-      body: {
-        query: {
-          bool: {
-            filter: [
-              { bool: { must: [], filter: [], should: [], must_not: [] } },
-              {
-                range: {
-                  '@timestamp': {
-                    lte: '2022-01-14T05:00:00.000Z',
-                    gte: '2022-01-13T05:00:00.000Z',
-                    format: 'strict_date_optional_time',
-                  },
+      query: {
+        bool: {
+          filter: [
+            { bool: { must: [], filter: [], should: [], must_not: [] } },
+            {
+              range: {
+                '@timestamp': {
+                  lte: '2022-01-14T05:00:00.000Z',
+                  gte: '2022-01-13T05:00:00.000Z',
+                  format: 'strict_date_optional_time',
                 },
               },
-            ],
-          },
+            },
+          ],
         },
       },
       ignore_unavailable: true,
@@ -67,45 +65,43 @@ describe('getEventCount', () => {
     });
 
     expect(esClient.count).toHaveBeenCalledWith({
-      body: {
-        query: {
-          bool: {
-            filter: [
-              { bool: { must: [], filter: [], should: [], must_not: [] } },
-              {
-                bool: {
-                  should: [
-                    {
-                      range: {
-                        'event.ingested': {
-                          lte: '2022-01-14T05:00:00.000Z',
-                          gte: '2022-01-13T05:00:00.000Z',
-                          format: 'strict_date_optional_time',
-                        },
+      query: {
+        bool: {
+          filter: [
+            { bool: { must: [], filter: [], should: [], must_not: [] } },
+            {
+              bool: {
+                should: [
+                  {
+                    range: {
+                      'event.ingested': {
+                        lte: '2022-01-14T05:00:00.000Z',
+                        gte: '2022-01-13T05:00:00.000Z',
+                        format: 'strict_date_optional_time',
                       },
                     },
-                    {
-                      bool: {
-                        filter: [
-                          {
-                            range: {
-                              '@timestamp': {
-                                lte: '2022-01-14T05:00:00.000Z',
-                                gte: '2022-01-13T05:00:00.000Z',
-                                format: 'strict_date_optional_time',
-                              },
+                  },
+                  {
+                    bool: {
+                      filter: [
+                        {
+                          range: {
+                            '@timestamp': {
+                              lte: '2022-01-14T05:00:00.000Z',
+                              gte: '2022-01-13T05:00:00.000Z',
+                              format: 'strict_date_optional_time',
                             },
                           },
-                          { bool: { must_not: { exists: { field: 'event.ingested' } } } },
-                        ],
-                      },
+                        },
+                        { bool: { must_not: { exists: { field: 'event.ingested' } } } },
+                      ],
                     },
-                  ],
-                  minimum_should_match: 1,
-                },
+                  },
+                ],
+                minimum_should_match: 1,
               },
-            ],
-          },
+            },
+          ],
         },
       },
       ignore_unavailable: true,
@@ -127,22 +123,20 @@ describe('getEventCount', () => {
     });
 
     expect(esClient.count).toHaveBeenCalledWith({
-      body: {
-        query: {
-          bool: {
-            filter: [
-              { bool: { must: [], filter: [], should: [], must_not: [] } },
-              {
-                range: {
-                  'event.ingested': {
-                    lte: '2022-01-14T05:00:00.000Z',
-                    gte: '2022-01-13T05:00:00.000Z',
-                    format: 'strict_date_optional_time',
-                  },
+      query: {
+        bool: {
+          filter: [
+            { bool: { must: [], filter: [], should: [], must_not: [] } },
+            {
+              range: {
+                'event.ingested': {
+                  lte: '2022-01-14T05:00:00.000Z',
+                  gte: '2022-01-13T05:00:00.000Z',
+                  format: 'strict_date_optional_time',
                 },
               },
-            ],
-          },
+            },
+          ],
         },
       },
       ignore_unavailable: true,

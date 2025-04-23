@@ -21,13 +21,11 @@ export default function ({ getService }: FtrProviderContext) {
         try {
           // Configure some deprecated cluster settings
           await es.cluster.putSettings({
-            body: {
-              persistent: {
-                'cluster.routing.allocation.exclude._tier': 'data_cold',
-              },
-              transient: {
-                'cluster.routing.allocation.include._tier': 'data_hot',
-              },
+            persistent: {
+              'cluster.routing.allocation.exclude._tier': 'data_cold',
+            },
+            transient: {
+              'cluster.routing.allocation.include._tier': 'data_hot',
             },
           });
         } catch (e) {

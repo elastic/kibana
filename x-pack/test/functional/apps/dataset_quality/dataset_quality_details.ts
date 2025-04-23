@@ -329,8 +329,10 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
         await discoverButton.click();
 
         // Confirm dataset selector text in observability logs explorer
-        const datasetSelectorText = await PageObjects.discover.getCurrentDataViewId();
-        originalExpect(datasetSelectorText).toMatch(regularDatasetName);
+        await retry.try(async () => {
+          const datasetSelectorText = await PageObjects.discover.getCurrentDataViewId();
+          originalExpect(datasetSelectorText).toMatch(regularDatasetName);
+        });
       });
 
       it('should go discover for degraded docs when the button next to breakdown selector is clicked', async () => {
@@ -343,8 +345,10 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
         );
 
         // Confirm dataset selector text in observability logs explorer
-        const datasetSelectorText = await PageObjects.discover.getCurrentDataViewId();
-        originalExpect(datasetSelectorText).toMatch(apacheAccessDatasetName);
+        await retry.try(async () => {
+          const datasetSelectorText = await PageObjects.discover.getCurrentDataViewId();
+          originalExpect(datasetSelectorText).toMatch(apacheAccessDatasetName);
+        });
       });
     });
 

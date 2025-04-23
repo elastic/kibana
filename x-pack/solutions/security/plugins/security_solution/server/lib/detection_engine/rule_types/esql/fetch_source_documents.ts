@@ -6,7 +6,7 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type * as estypes from '@elastic/elasticsearch/lib/api/types';
+import type { estypes } from '@elastic/elasticsearch';
 import type { RulePreviewLoggedRequest } from '../../../../../common/api/detection_engine/rule_preview/rule_preview.gen';
 import { logQueryRequest } from '../utils/logged_requests';
 import * as i18n from '../translations';
@@ -76,7 +76,7 @@ export const fetchSourceDocuments = async ({
 
   const response = await esClient.search<SignalSource>({
     index,
-    body: searchBody,
+    ...searchBody,
     ignore_unavailable: ignoreUnavailable,
   });
 

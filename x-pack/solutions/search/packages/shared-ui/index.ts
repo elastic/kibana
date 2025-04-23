@@ -6,6 +6,7 @@
  */
 
 export * from './src/connector_icon';
-export * from './src/decorative_horizontal_stepper';
 export * from './src/form_info_field/form_info_field';
 export * from './src/search_empty_prompt';
+export * from './src/constants';
+export * from './src/types';

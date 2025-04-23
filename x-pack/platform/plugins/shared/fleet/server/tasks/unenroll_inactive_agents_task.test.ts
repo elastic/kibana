@@ -24,12 +24,7 @@ import { unenrollBatch } from '../services/agents/unenroll_action_runner';
 
 import type { AgentPolicy } from '../types';
 
-import {
-  UnenrollInactiveAgentsTask,
-  TYPE,
-  VERSION,
-  POLICIES_BATCHSIZE,
-} from './unenroll_inactive_agents_task';
+import { UnenrollInactiveAgentsTask, TYPE, VERSION } from './unenroll_inactive_agents_task';
 
 jest.mock('../services');
 jest.mock('../services/agents');
@@ -62,6 +57,7 @@ describe('UnenrollInactiveAgentsTask', () => {
   let mockTaskManagerSetup: jest.Mocked<TaskManagerSetupContract>;
   const mockedUnenrollBatch = jest.mocked(unenrollBatch);
 
+  const unenrollBatchSize = 3;
   const agents = [
     {
       id: 'agent-1',
@@ -96,6 +92,7 @@ describe('UnenrollInactiveAgentsTask', () => {
       core: mockCore,
       taskManager: mockTaskManagerSetup,
       logFactory: loggingSystemMock.create(),
+      unenrollBatchSize,
     });
   });
 
@@ -180,16 +177,9 @@ describe('UnenrollInactiveAgentsTask', () => {
       expect(mockedUnenrollBatch).not.toHaveBeenCalled();
     });
 
-    it('Should process large numbers of policies in batches', async () => {
-      const firstAgentPoliciesBatch = Array.from({ length: POLICIES_BATCHSIZE }, (_, i) =>
-        createAgentPolicyMock({ id: `agent-policy-${i + 1}` })
-      );
-      const secondAgentPoliciesBatch = Array.from({ length: 3 }, (_, i) =>
-        createAgentPolicyMock({
-          id: `agent-policy-${POLICIES_BATCHSIZE + 1}`,
-          unenroll_timeout: 1000,
-        })
-      );
+    it('Should process agent policies in batches', async () => {
+      const firstAgentPoliciesBatch = [createAgentPolicyMock({ id: 'agent-policy-1' })];
+      const secondAgentPoliciesBatch = [createAgentPolicyMock({ id: 'agent-policy-2' })];
       mockAgentPolicyService.fetchAllAgentPolicies = jest.fn().mockResolvedValue(
         jest.fn(async function* () {
           yield firstAgentPoliciesBatch;
@@ -198,18 +188,18 @@ describe('UnenrollInactiveAgentsTask', () => {
       );
       const secondAgentPoliciesBatchAgents = [
         {
-          id: 'agent-501',
-          policy_id: 'agent-policy-501',
+          id: 'agent-21',
+          policy_id: 'agent-policy-2',
           status: 'inactive',
         },
         {
-          id: 'agent-502',
-          policy_id: 'agent-policy-502',
+          id: 'agent-22',
+          policy_id: 'agent-policy-2',
           status: 'inactive',
         },
         {
-          id: 'agent-503',
-          policy_id: 'agent-policy-503',
+          id: 'agent-23',
+          policy_id: 'agent-policy-2',
           status: 'active',
         },
       ];

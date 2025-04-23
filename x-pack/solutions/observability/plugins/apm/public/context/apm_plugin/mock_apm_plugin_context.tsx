@@ -6,10 +6,11 @@
  */
 
 import { coreMock } from '@kbn/core/public/mocks';
+import type { SharePublicStart } from '@kbn/share-plugin/public/plugin';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { LogsLocatorParams } from '@kbn/logs-shared-plugin/common';
-import { MlLocatorDefinition } from '@kbn/ml-plugin/public';
+import { MlLocatorDefinition, MlManagementLocatorInternal } from '@kbn/ml-plugin/public';
 import { apmEnableProfilingIntegration } from '@kbn/observability-plugin/common';
 import {
   createObservabilityRuleTypeRegistryMock,
@@ -32,6 +33,21 @@ import type { ApmPluginContextValue } from './apm_plugin_context';
 import { ApmPluginContext } from './apm_plugin_context';
 
 const coreStart = coreMock.createStart({ basePath: '/basepath' });
+
+const mockShareService = {
+  url: {
+    locators: {
+      get: jest.fn(() => {
+        // MlManagementLocatorInternal wraps the management locator (getUrl mocked below) and adds path formatting to match ML app paths
+        return {
+          getUrl: async ({ sectionId, appId }: { sectionId: string; appId: string }) => {
+            return `/app/management/${sectionId}/${appId}`;
+          },
+        };
+      }),
+    },
+  },
+};
 
 const mockCore = merge({}, coreStart, {
   application: {
@@ -119,10 +135,14 @@ const urlService = new UrlService({
   shortUrls: () => ({ get: () => {} } as any),
 });
 const locator = urlService.locators.create(new MlLocatorDefinition());
+const mlManagementLocator = new MlManagementLocatorInternal(
+  mockShareService as unknown as SharePublicStart
+);
 
 const mockPlugin = {
   ml: {
     locator,
+    managementLocator: mlManagementLocator,
   },
   data: {
     query: {
@@ -207,6 +227,9 @@ export function MockApmPluginContextWrapper({
   if (contextValue.core) {
     createCallApmApi(contextValue.core);
   }
+
+  performance.mark = jest.fn();
+  performance.clearMeasures = jest.fn();
 
   const contextHistory = useHistory();
 

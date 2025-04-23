@@ -331,5 +331,144 @@ describe('SiemRulesMigrationsService', () => {
       // Restore real timers.
       jest.useRealTimers();
     });
+
+    describe('when a stopped migration is found', () => {
+      it('should not start a stopped migration if migration had errors', async () => {
+        jest.useFakeTimers();
+        const stoppedMigration = {
+          id: 'mig-1',
+          status: SiemMigrationTaskStatus.STOPPED,
+          last_error: 'some failure',
+        };
+        const finishedMigration = { id: 'mig-1', status: SiemMigrationTaskStatus.FINISHED };
+
+        service.getRuleMigrationsStats = jest
+          .fn()
+          .mockResolvedValue([finishedMigration])
+          .mockResolvedValueOnce([stoppedMigration]);
+
+        jest.spyOn(service.connectorIdStorage, 'get').mockReturnValue('connector-123');
+        jest.spyOn(service, 'hasMissingCapabilities').mockReturnValueOnce(false);
+
+        // Start polling
+        service.startPolling();
+
+        // Resolve the first getRuleMigrationsStats promise
+        await Promise.resolve();
+
+        // Fast-forward the timer by the polling interval
+        jest.advanceTimersByTime(REQUEST_POLLING_INTERVAL_SECONDS * 1000);
+        // Resolve the timeout promise
+        await Promise.resolve();
+
+        expect(startRuleMigrationAPI).not.toHaveBeenCalled();
+
+        // Restore real timers.
+        jest.useRealTimers();
+      });
+
+      it('should not start a stopped migration if no connector configured', async () => {
+        jest.useFakeTimers();
+        const stoppedMigration = { id: 'mig-1', status: SiemMigrationTaskStatus.STOPPED };
+        const finishedMigration = { id: 'mig-1', status: SiemMigrationTaskStatus.FINISHED };
+
+        service.getRuleMigrationsStats = jest
+          .fn()
+          .mockResolvedValue([finishedMigration])
+          .mockResolvedValueOnce([stoppedMigration]);
+
+        jest.spyOn(service.connectorIdStorage, 'get').mockReturnValue(undefined);
+        jest.spyOn(service, 'hasMissingCapabilities').mockReturnValueOnce(false);
+
+        // Start polling
+        service.startPolling();
+
+        // Resolve the first getRuleMigrationsStats promise
+        await Promise.resolve();
+
+        // Fast-forward the timer by the polling interval
+        jest.advanceTimersByTime(REQUEST_POLLING_INTERVAL_SECONDS * 1000);
+        // Resolve the timeout promise
+        await Promise.resolve();
+
+        // Expect that the migration was resumed
+        expect(startRuleMigrationAPI).not.toHaveBeenCalled();
+
+        // Restore real timers.
+        jest.useRealTimers();
+      });
+
+      it('should not start a stopped migration if user is missing capabilities', async () => {
+        // Use fake timers to simulate delays inside the polling loop.
+        jest.useFakeTimers();
+        // Simulate a migration that is first reported as STOPPED and then FINISHED.
+        const stoppedMigration = { id: 'mig-1', status: SiemMigrationTaskStatus.STOPPED };
+        const finishedMigration = { id: 'mig-1', status: SiemMigrationTaskStatus.FINISHED };
+
+        // Override getRuleMigrationsStats to return our sequence:
+        // First call: stopped, then finished, then empty array.
+        const getStatsMock = jest
+          .fn()
+          .mockResolvedValue([finishedMigration])
+          .mockResolvedValueOnce([stoppedMigration]);
+
+        service.getRuleMigrationsStats = getStatsMock;
+
+        // Ensure a valid connector is present (so that a STOPPED migration would be resumed, if needed)
+        jest.spyOn(service.connectorIdStorage, 'get').mockReturnValue('connector-123');
+        jest.spyOn(service, 'hasMissingCapabilities').mockReturnValueOnce(true);
+
+        // Start polling
+        service.startPolling();
+
+        // Resolve the first getRuleMigrationsStats promise
+        await Promise.resolve();
+
+        // Fast-forward the timer by the polling interval
+        jest.advanceTimersByTime(REQUEST_POLLING_INTERVAL_SECONDS * 1000);
+        // Resolve the timeout promise
+        await Promise.resolve();
+
+        // Expect that the migration was resumed
+        expect(startRuleMigrationAPI).not.toHaveBeenCalled();
+
+        // Restore real timers.
+        jest.useRealTimers();
+      });
+
+      it('should automatically start the stopped migration', async () => {
+        jest.useFakeTimers();
+        const stoppedMigration = { id: 'mig-1', status: SiemMigrationTaskStatus.STOPPED };
+        const finishedMigration = { id: 'mig-1', status: SiemMigrationTaskStatus.FINISHED };
+
+        service.getRuleMigrationsStats = jest
+          .fn()
+          .mockResolvedValue([finishedMigration])
+          .mockResolvedValueOnce([stoppedMigration]);
+
+        jest.spyOn(service.connectorIdStorage, 'get').mockReturnValue('connector-123');
+        jest.spyOn(service, 'hasMissingCapabilities').mockReturnValueOnce(false);
+
+        // Start polling
+        service.startPolling();
+
+        // Resolve the first getRuleMigrationsStats promise
+        await Promise.resolve();
+
+        // Fast-forward the timer by the polling interval
+        jest.advanceTimersByTime(REQUEST_POLLING_INTERVAL_SECONDS * 1000);
+        // Resolve the timeout promise
+        await Promise.resolve();
+
+        // Expect that the migration was resumed
+        expect(startRuleMigrationAPI).toHaveBeenCalledWith({
+          migrationId: 'mig-1',
+          connectorId: 'connector-123',
+        });
+
+        // Restore real timers.
+        jest.useRealTimers();
+      });
+    });
   });
 });

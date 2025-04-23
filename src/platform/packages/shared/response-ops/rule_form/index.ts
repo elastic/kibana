@@ -10,7 +10,7 @@
 export * from './src/types';
 export * from './src/rule_type_modal';
 
-export { RuleForm } from './src/rule_form';
+export { RuleForm, type RuleFormProps } from './src/rule_form';
 
 export {
   fetchUiConfig,
@@ -29,4 +29,5 @@ export {
   RuleActionsNotifyWhen,
   RuleActionsAlertsFilter,
   RuleActionsAlertsFilterTimeframe,
+  NOTIFY_WHEN_OPTIONS,
 } from './src/rule_actions';

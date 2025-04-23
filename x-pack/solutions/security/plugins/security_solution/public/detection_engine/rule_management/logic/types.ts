@@ -11,7 +11,10 @@ import type { RuleSnooze } from '@kbn/alerting-plugin/common';
 import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { NamespaceType } from '@kbn/securitysolution-io-ts-list-types';
 import type { RuleSnoozeSettings } from '@kbn/triggers-actions-ui-plugin/public/types';
-import type { WarningSchema } from '../../../../common/api/detection_engine';
+import type {
+  RuleCustomizationStatus,
+  WarningSchema,
+} from '../../../../common/api/detection_engine';
 import type { RuleExecutionStatus } from '../../../../common/api/detection_engine/rule_monitoring';
 
 import { SortOrder } from '../../../../common/api/detection_engine';
@@ -103,7 +106,7 @@ export interface FilterOptions {
   excludeRuleTypes?: Type[];
   enabled?: boolean; // undefined is to display all the rules
   ruleExecutionStatus?: RuleExecutionStatus; // undefined means "all"
-  ruleSource?: RuleCustomizationEnum[]; // undefined is to display all the rules
+  ruleSource?: RuleCustomizationStatus[]; // undefined is to display all the rules
   showRulesWithGaps?: boolean;
   gapSearchRange?: GapRangeValue;
 }
@@ -208,9 +211,4 @@ export interface FindRulesReferencedByExceptionsListProp {
 export interface FindRulesReferencedByExceptionsProps {
   lists: FindRulesReferencedByExceptionsListProp[];
   signal?: AbortSignal;
-}
-
-export enum RuleCustomizationEnum {
-  customized = 'CUSTOMIZED',
-  not_customized = 'NOT_CUSTOMIZED',
 }

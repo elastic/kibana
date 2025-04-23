@@ -41,7 +41,7 @@ describe('Create or Update Custom link', () => {
     expect(internalClientIndexMock).toHaveBeenCalledWith('create_or_update_custom_link', {
       refresh: 'wait_for',
       index: '.apm-custom-link',
-      body: {
+      document: {
         '@timestamp': 1570737000000,
         label: 'foo',
         url: 'http://elastic.com/{{trace.id}}',
@@ -60,7 +60,7 @@ describe('Create or Update Custom link', () => {
       refresh: 'wait_for',
       index: '.apm-custom-link',
       id: 'bar',
-      body: {
+      document: {
         '@timestamp': 1570737000000,
         label: 'foo',
         url: 'http://elastic.com/{{trace.id}}',

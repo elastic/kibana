@@ -97,14 +97,6 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
     }
   }, []);
 
-  const providerIcon = useMemo(
-    () =>
-      Object.keys(SERVICE_PROVIDERS).includes(config?.provider)
-        ? SERVICE_PROVIDERS[config?.provider as ServiceProviderKeys].icon
-        : undefined,
-    [config?.provider]
-  );
-
   const providerName = useMemo(
     () =>
       Object.keys(SERVICE_PROVIDERS).includes(config?.provider)
@@ -252,7 +244,7 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
         isDisabled={isEdit}
         isInvalid={isInvalid}
         fullWidth
-        icon={!config?.provider ? { type: 'sparkles', side: 'left' } : providerIcon}
+        icon={!config?.provider ? { type: 'sparkles', side: 'left' } : undefined}
       >
         <EuiFieldText
           onClick={toggleProviderPopover}
@@ -278,7 +270,6 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
       isEdit,
       onClearProvider,
       config?.provider,
-      providerIcon,
       toggleProviderPopover,
       handleProviderKeyboardOpen,
       providerName,

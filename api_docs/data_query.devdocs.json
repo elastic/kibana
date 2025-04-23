@@ -3333,6 +3333,73 @@
       },
       {
         "parentPluginId": "data",
+        "id": "def-public.TimefilterHook",
+        "type": "Interface",
+        "tags": [],
+        "label": "TimefilterHook",
+        "description": [],
+        "path": "src/platform/plugins/shared/data/public/query/timefilter/use_timefilter.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-public.TimefilterHook.timeState",
+            "type": "Object",
+            "tags": [],
+            "label": "timeState",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.TimeState",
+                "text": "TimeState"
+              }
+            ],
+            "path": "src/platform/plugins/shared/data/public/query/timefilter/use_timefilter.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-public.TimefilterHook.refresh",
+            "type": "Function",
+            "tags": [],
+            "label": "refresh",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "src/platform/plugins/shared/data/public/query/timefilter/use_timefilter.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-public.TimefilterHook.timeState$",
+            "type": "Object",
+            "tags": [],
+            "label": "timeState$",
+            "description": [],
+            "signature": [
+              "Observable",
+              "<",
+              "TimeStateUpdate",
+              ">"
+            ],
+            "path": "src/platform/plugins/shared/data/public/query/timefilter/use_timefilter.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
         "id": "def-public.TimefilterSetup",
         "type": "Interface",
         "tags": [],
@@ -3350,7 +3417,15 @@
             "label": "timefilter",
             "description": [],
             "signature": [
-              "{ isTimeRangeSelectorEnabled: () => boolean; isAutoRefreshSelectorEnabled: () => boolean; isTimeTouched: () => boolean; isRefreshIntervalTouched: () => boolean; getEnabledUpdated$: () => ",
+              "{ readonly useTimefilter: () => ",
+              {
+                "pluginId": "data",
+                "scope": "public",
+                "docId": "kibDataQueryPluginApi",
+                "section": "def-public.TimefilterHook",
+                "text": "TimefilterHook"
+              },
+              "; isTimeRangeSelectorEnabled: () => boolean; isAutoRefreshSelectorEnabled: () => boolean; isTimeTouched: () => boolean; isRefreshIntervalTouched: () => boolean; getEnabledUpdated$: () => ",
               "Observable",
               "<boolean>; getTimeUpdate$: () => ",
               "Observable",
@@ -3754,7 +3829,15 @@
         "label": "TimefilterContract",
         "description": [],
         "signature": [
-          "{ isTimeRangeSelectorEnabled: () => boolean; isAutoRefreshSelectorEnabled: () => boolean; isTimeTouched: () => boolean; isRefreshIntervalTouched: () => boolean; getEnabledUpdated$: () => ",
+          "{ readonly useTimefilter: () => ",
+          {
+            "pluginId": "data",
+            "scope": "public",
+            "docId": "kibDataQueryPluginApi",
+            "section": "def-public.TimefilterHook",
+            "text": "TimefilterHook"
+          },
+          "; isTimeRangeSelectorEnabled: () => boolean; isAutoRefreshSelectorEnabled: () => boolean; isTimeTouched: () => boolean; isRefreshIntervalTouched: () => boolean; getEnabledUpdated$: () => ",
           "Observable",
           "<boolean>; getTimeUpdate$: () => ",
           "Observable",

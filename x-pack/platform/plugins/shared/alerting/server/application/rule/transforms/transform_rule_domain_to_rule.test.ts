@@ -6,7 +6,7 @@
  */
 
 import { transformRuleDomainToRule } from './transform_rule_domain_to_rule';
-import { RuleDomain } from '../types';
+import type { RuleDomain } from '../types';
 
 describe('transformRuleDomainToRule', () => {
   const MOCK_API_KEY = Buffer.from('123:abc').toString('base64');
@@ -187,6 +187,93 @@ describe('transformRuleDomainToRule', () => {
       flapping: {
         lookBackWindow: 20,
         statusChangeThreshold: 20,
+      },
+    });
+  });
+
+  it('should include artifacts', () => {
+    const ruleWithArtifacts: RuleDomain<{}> = {
+      id: 'test',
+      enabled: false,
+      name: 'my rule name',
+      tags: ['foo'],
+      alertTypeId: 'myType',
+      consumer: 'myApp',
+      schedule: { interval: '1m' },
+      actions: [defaultAction],
+      systemActions: [systemAction],
+      params: {},
+      mapped_params: {},
+      createdBy: 'user',
+      createdAt: new Date('2019-02-12T21:01:22.479Z'),
+      updatedAt: new Date('2019-02-12T21:01:22.479Z'),
+      legacyId: 'legacyId',
+      muteAll: false,
+      mutedInstanceIds: [],
+      snoozeSchedule: [],
+      scheduledTaskId: 'task-123',
+      executionStatus: {
+        lastExecutionDate: new Date('2019-02-12T21:01:22.479Z'),
+        status: 'pending' as const,
+      },
+      throttle: null,
+      notifyWhen: null,
+      revision: 0,
+      updatedBy: 'user',
+      apiKey: MOCK_API_KEY,
+      apiKeyOwner: 'user',
+      flapping: {
+        lookBackWindow: 20,
+        statusChangeThreshold: 20,
+      },
+      artifacts: {
+        dashboards: [
+          {
+            id: 'dashboard-1',
+          },
+        ],
+      },
+    };
+    const result = transformRuleDomainToRule(ruleWithArtifacts);
+
+    expect(result).toEqual({
+      id: 'test',
+      enabled: false,
+      name: 'my rule name',
+      tags: ['foo'],
+      alertTypeId: 'myType',
+      consumer: 'myApp',
+      schedule: { interval: '1m' },
+      actions: [defaultAction],
+      systemActions: [systemAction],
+      params: {},
+      mapped_params: {},
+      createdBy: 'user',
+      createdAt: new Date('2019-02-12T21:01:22.479Z'),
+      updatedAt: new Date('2019-02-12T21:01:22.479Z'),
+      muteAll: false,
+      mutedInstanceIds: [],
+      snoozeSchedule: [],
+      scheduledTaskId: 'task-123',
+      executionStatus: {
+        lastExecutionDate: new Date('2019-02-12T21:01:22.479Z'),
+        status: 'pending' as const,
+      },
+      throttle: null,
+      notifyWhen: null,
+      revision: 0,
+      updatedBy: 'user',
+      apiKeyOwner: 'user',
+      flapping: {
+        lookBackWindow: 20,
+        statusChangeThreshold: 20,
+      },
+      artifacts: {
+        dashboards: [
+          {
+            id: 'dashboard-1',
+          },
+        ],
       },
     });
   });

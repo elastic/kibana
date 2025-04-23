@@ -12,14 +12,12 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
-import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { MlServicesContext } from '../../../application/app';
 
 interface StartPlugins {
   data: DataPublicPluginStart;
   share: SharePluginStart;
   lens: LensPublicStart;
-  dashboardService: DashboardStart;
 }
 export type StartServices = CoreStart & StartPlugins & MlServicesContext;
 export const useMlFromLensKibanaContext = () => useKibana<StartServices>();

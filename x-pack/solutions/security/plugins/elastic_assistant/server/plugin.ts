@@ -7,7 +7,10 @@
 
 import { PluginInitializerContext, CoreStart, Plugin, Logger } from '@kbn/core/server';
 
-import { AssistantFeatures } from '@kbn/elastic-assistant-common';
+import {
+  ATTACK_DISCOVERY_SCHEDULES_ENABLED_FEATURE_FLAG,
+  AssistantFeatures,
+} from '@kbn/elastic-assistant-common';
 import { ReplaySubject, type Subject } from 'rxjs';
 import { MlPluginSetup } from '@kbn/ml-plugin/server';
 import { events } from './lib/telemetry/event_based_telemetry';
@@ -24,8 +27,9 @@ import { AIAssistantService } from './ai_assistant_service';
 import { RequestContextFactory } from './routes/request_context_factory';
 import { PLUGIN_ID } from '../common/constants';
 import { registerRoutes } from './routes/register_routes';
-import { appContextService } from './services/app_context';
+import { CallbackIds, appContextService } from './services/app_context';
 import { createGetElserId, removeLegacyQuickPrompt } from './ai_assistant_service/helpers';
+import { getAttackDiscoveryScheduleType } from './lib/attack_discovery/schedules/register_schedule/definition';
 
 export class ElasticAssistantPlugin
   implements
@@ -89,6 +93,32 @@ export class ElasticAssistantPlugin
 
     registerRoutes(router, this.logger, this.getElserId);
 
+    // The featureFlags service is not available in the core setup, so we need
+    // to wait for the start services to be available to read the feature flags.
+    // This can take a while, but the plugin setup phase cannot run for a long time.
+    // As a workaround, this promise does not block the setup phase.
+    core
+      .getStartServices()
+      .then(([{ featureFlags }]) => {
+        // read all feature flags:
+        void Promise.all([
+          featureFlags.getBooleanValue(ATTACK_DISCOVERY_SCHEDULES_ENABLED_FEATURE_FLAG, false),
+          // add more feature flags here
+        ]).then(([assistantAttackDiscoverySchedulingEnabled]) => {
+          if (assistantAttackDiscoverySchedulingEnabled) {
+            // Register Attack Discovery Schedule type
+            plugins.alerting.registerType(
+              getAttackDiscoveryScheduleType({
+                logger: this.logger,
+              })
+            );
+          }
+        });
+      })
+      .catch((error) => {
+        this.logger.error(`error in security assistant plugin setup: ${error}`);
+      });
+
     return {
       actions: plugins.actions,
       getRegisteredFeatures: (pluginName: string) => {
@@ -133,6 +163,9 @@ export class ElasticAssistantPlugin
       },
       registerTools: (pluginName: string, tools: AssistantTool[]) => {
         return appContextService.registerTools(pluginName, tools);
+      },
+      registerCallback: (callbackId: CallbackIds, callback: Function) => {
+        return appContextService.registerCallback(callbackId, callback);
       },
     };
   }

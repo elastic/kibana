@@ -17,7 +17,7 @@ import {
 } from '../translations';
 import { useRuleFormScreenContext, useRuleFormState } from '../hooks';
 import { hasRuleErrors } from '../validation';
-import { RulePageConfirmCreateRule } from './rule_page_confirm_create_rule';
+import { ConfirmCreateRule } from '../components';
 
 export interface RulePageFooterProps {
   isEdit?: boolean;
@@ -131,10 +131,7 @@ export const RulePageFooter = (props: RulePageFooterProps) => {
         </EuiFlexItem>
       </EuiFlexGroup>
       {showCreateConfirmation && (
-        <RulePageConfirmCreateRule
-          onConfirm={onCreateConfirmClick}
-          onCancel={onCreateCancelClick}
-        />
+        <ConfirmCreateRule onConfirm={onCreateConfirmClick} onCancel={onCreateCancelClick} />
       )}
     </>
   );

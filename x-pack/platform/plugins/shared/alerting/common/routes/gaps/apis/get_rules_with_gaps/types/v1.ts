@@ -6,7 +6,7 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
-import { getRuleIdsWithGapBodySchemaV1, getRuleIdsWithGapResponseSchemaV1 } from '..';
+import type { getRuleIdsWithGapBodySchemaV1, getRuleIdsWithGapResponseSchemaV1 } from '..';
 
 export type GetRuleIdsWithGapBody = TypeOf<typeof getRuleIdsWithGapBodySchemaV1>;
 export type GetRuleIdsWithGapResponseBody = TypeOf<typeof getRuleIdsWithGapResponseSchemaV1>;

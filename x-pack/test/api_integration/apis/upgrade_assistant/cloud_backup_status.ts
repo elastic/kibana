@@ -35,11 +35,9 @@ export default function ({ getService }: FtrProviderContext) {
       snapshot: snapshotName,
       wait_for_completion: true,
       // Configure snapshot so no indices are captured, so the request completes ASAP.
-      body: {
-        indices: 'this_index_doesnt_exist',
-        ignore_unavailable: true,
-        include_global_state: false,
-      },
+      indices: 'this_index_doesnt_exist',
+      ignore_unavailable: true,
+      include_global_state: false,
     });
   };
 

@@ -58,7 +58,10 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
         expect(response.status).to.be(200);
 
-        expect(response.body).to.eql({ agentName: 'nodejs', runtimeName: 'node' });
+        expect(response.body).to.eql({
+          agentName: 'nodejs',
+          runtimeName: 'node',
+        });
       });
     });
   });

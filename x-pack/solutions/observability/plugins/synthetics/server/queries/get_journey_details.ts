@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { createEsParams, SyntheticsEsClient } from '../lib';
 import { JourneyStep, Ping, SyntheticsJourneyApiResponse } from '../../common/runtime_types';
 
@@ -22,25 +22,23 @@ export const getJourneyDetails = async ({
   syntheticsEsClient: SyntheticsEsClient;
 }): Promise<SyntheticsJourneyApiResponse['details']> => {
   const params = createEsParams({
-    body: {
-      query: {
-        bool: {
-          filter: [
-            {
-              term: {
-                'monitor.check_group': checkGroup,
-              },
+    query: {
+      bool: {
+        filter: [
+          {
+            term: {
+              'monitor.check_group': checkGroup,
             },
-            {
-              terms: {
-                'synthetics.type': ['journey/start', 'heartbeat/summary'],
-              },
+          },
+          {
+            terms: {
+              'synthetics.type': ['journey/start', 'heartbeat/summary'],
             },
-          ],
-        },
+          },
+        ],
       },
-      size: 2,
     },
+    size: 2,
   });
 
   const { body: thisJourney } = await syntheticsEsClient.search<DocumentSource, typeof params>(
@@ -62,84 +60,78 @@ export const getJourneyDetails = async ({
 
   if (journeySource && foundJourney) {
     const baseSiblingParams = createEsParams({
-      body: {
-        query: {
-          bool: {
-            must_not: [
-              {
-                term: {
-                  'monitor.check_group': {
-                    value: journeySource.monitor.check_group,
-                  },
+      query: {
+        bool: {
+          must_not: [
+            {
+              term: {
+                'monitor.check_group': {
+                  value: journeySource.monitor.check_group,
                 },
               },
-            ],
-            filter: [
-              {
-                term: {
-                  'monitor.id': journeySource.monitor.id,
-                },
+            },
+          ],
+          filter: [
+            {
+              term: {
+                'monitor.id': journeySource.monitor.id,
               },
-              {
-                term: {
-                  'observer.geo.name': journeySource.observer?.geo?.name,
-                },
+            },
+            {
+              term: {
+                'observer.geo.name': journeySource.observer?.geo?.name,
               },
-              {
-                terms: {
-                  'synthetics.type': ['journey/start', 'heartbeat/summary'],
-                },
+            },
+            {
+              terms: {
+                'synthetics.type': ['journey/start', 'heartbeat/summary'],
               },
-            ] as QueryDslQueryContainer[],
-          },
+            },
+          ] as QueryDslQueryContainer[],
         },
-        _source: ['@timestamp', 'monitor.check_group'],
-        size: 1,
       },
+      _source: ['@timestamp', 'monitor.check_group'],
+      size: 1,
     });
 
     const previousParams = createEsParams({
-      body: {
-        ...baseSiblingParams.body,
-        query: {
-          bool: {
-            must_not: baseSiblingParams.body.query.bool.must_not,
-            filter: [
-              ...baseSiblingParams.body.query.bool.filter,
-              {
-                range: {
-                  '@timestamp': {
-                    lt: journeySource['@timestamp'],
-                  },
+      ...baseSiblingParams,
+      query: {
+        bool: {
+          must_not: baseSiblingParams.query.bool.must_not,
+          filter: [
+            ...baseSiblingParams.query.bool.filter,
+            {
+              range: {
+                '@timestamp': {
+                  lt: journeySource['@timestamp'],
                 },
               },
-            ],
-          },
+            },
+          ],
         },
-        sort: [{ '@timestamp': { order: 'desc' as const } }],
       },
+      sort: [{ '@timestamp': { order: 'desc' as const } }],
     });
 
     const nextParams = createEsParams({
-      body: {
-        ...baseSiblingParams.body,
-        query: {
-          bool: {
-            must_not: baseSiblingParams.body.query.bool.must_not,
-            filter: [
-              ...baseSiblingParams.body.query.bool.filter,
-              {
-                range: {
-                  '@timestamp': {
-                    gt: journeySource['@timestamp'],
-                  },
+      ...baseSiblingParams,
+      query: {
+        bool: {
+          must_not: baseSiblingParams.query.bool.must_not,
+          filter: [
+            ...baseSiblingParams.query.bool.filter,
+            {
+              range: {
+                '@timestamp': {
+                  gt: journeySource['@timestamp'],
                 },
               },
-            ],
-          },
+            },
+          ],
         },
-        sort: [{ '@timestamp': { order: 'asc' as const } }],
       },
+      sort: [{ '@timestamp': { order: 'asc' as const } }],
     });
 
     const [previousJourneyPromise, nextJourneyPromise] = await Promise.all([

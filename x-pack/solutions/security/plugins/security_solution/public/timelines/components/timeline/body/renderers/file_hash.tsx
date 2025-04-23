@@ -21,9 +21,10 @@ interface Props {
   contextId: string;
   eventId: string;
   fileHashSha256: string | null | undefined;
+  scopeId: string;
 }
 
-export const FileHash = React.memo<Props>(({ contextId, eventId, fileHashSha256 }) => {
+export const FileHash = React.memo<Props>(({ contextId, eventId, fileHashSha256, scopeId }) => {
   if (isNillEmptyOrNotFinite(fileHashSha256)) {
     return null;
   }
@@ -32,6 +33,7 @@ export const FileHash = React.memo<Props>(({ contextId, eventId, fileHashSha256 
     <HashFlexGroup alignItems="center" direction="column" gutterSize="none">
       <TokensFlexItem grow={false} component="div">
         <DraggableBadge
+          scopeId={scopeId}
           contextId={contextId}
           eventId={eventId}
           field="file.hash.sha256"

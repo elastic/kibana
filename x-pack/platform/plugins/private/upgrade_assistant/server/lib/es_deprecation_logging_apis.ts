@@ -27,20 +27,18 @@ export async function setDeprecationLogging(
   isEnabled: boolean
 ): Promise<DeprecationLoggingStatus> {
   const response = await dataClient.asCurrentUser.cluster.putSettings({
-    body: {
-      persistent: {
-        'logger.deprecation': isEnabled ? 'WARN' : 'ERROR',
-        'cluster.deprecation_indexing.enabled': isEnabled,
-      },
-      /*
-       * If we only set the persistent setting, we can end up in a situation in which a user has
-       * set transient on/off. And when toggling and reloading the page the transient setting will
-       * have priority over it thus "overriding" whatever the user selected.
-       */
-      transient: {
-        'logger.deprecation': isEnabled ? 'WARN' : 'ERROR',
-        'cluster.deprecation_indexing.enabled': isEnabled,
-      },
+    persistent: {
+      'logger.deprecation': isEnabled ? 'WARN' : 'ERROR',
+      'cluster.deprecation_indexing.enabled': isEnabled,
+    },
+    /*
+     * If we only set the persistent setting, we can end up in a situation in which a user has
+     * set transient on/off. And when toggling and reloading the page the transient setting will
+     * have priority over it thus "overriding" whatever the user selected.
+     */
+    transient: {
+      'logger.deprecation': isEnabled ? 'WARN' : 'ERROR',
+      'cluster.deprecation_indexing.enabled': isEnabled,
     },
   });
 

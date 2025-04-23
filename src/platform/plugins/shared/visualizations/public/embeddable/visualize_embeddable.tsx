@@ -308,7 +308,13 @@ export const getVisualizeEmbeddableFactory: (deps: {
           },
         ],
         savedObjectProperties: getUnchangingComparator(),
-        linkedToLibrary: [linkedToLibrary$, (value) => linkedToLibrary$.next(value)],
+        linkedToLibrary: [
+          linkedToLibrary$,
+          (value) => linkedToLibrary$.next(value),
+          (a, b) => {
+            return a === undefined || b === undefined ? true : a === b;
+          },
+        ],
       }
     );
 
@@ -478,7 +484,7 @@ export const getVisualizeEmbeddableFactory: (deps: {
           >
             {/* Replicate the loading state for the expression renderer to avoid FOUC  */}
             <EuiFlexGroup css={{ height: '100%' }} justifyContent="center" alignItems="center">
-              {isLoading && <EuiLoadingChart size="l" mono />}
+              {isLoading && <EuiLoadingChart size="l" />}
               {!isLoading && error && (
                 <EuiEmptyPrompt
                   iconType="error"

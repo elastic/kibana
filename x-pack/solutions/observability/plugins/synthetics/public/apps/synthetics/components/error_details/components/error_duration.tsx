@@ -19,7 +19,7 @@ export const ErrorDuration: React.FC = () => {
 
   const { killerState } = useFindMyKillerState();
 
-  const endsAt = killerState?.timestamp ? moment(killerState?.timestamp) : moment();
+  const endsAt = killerState?.['@timestamp'] ? moment(killerState?.['@timestamp']) : moment();
   const startedAt = moment(state?.started_at);
 
   const duration = state ? getErrorDuration(startedAt, endsAt) : 0;

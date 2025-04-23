@@ -24,7 +24,7 @@ const args: Args = {
   placeholder: '# Place holder example',
 };
 
-export const YamlCodeEditorWithPlaceholder = ({ width, placeholder }: Args) => {
+const YamlCodeEditorWithPlaceholderComponent = ({ width, placeholder }: Args) => {
   const [value, setValue] = useState('');
 
   // This component is not renderable in tests
@@ -39,4 +39,10 @@ export const YamlCodeEditorWithPlaceholder = ({ width, placeholder }: Args) => {
   );
 };
 
-YamlCodeEditorWithPlaceholder.args = args;
+export const YamlCodeEditorWithPlaceholder = {
+  render: ({ width, placeholder }: Args) => (
+    <YamlCodeEditorWithPlaceholderComponent width={width} placeholder={placeholder} />
+  ),
+
+  args,
+};

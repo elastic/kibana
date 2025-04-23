@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MsearchMultisearchBody } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { MsearchMultisearchBody } from '@elastic/elasticsearch/lib/api/types';
 import { ElasticsearchClient } from '@kbn/core/server';
 import {
   ALL_VALUE,

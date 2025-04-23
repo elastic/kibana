@@ -38,39 +38,6 @@
       },
       {
         "parentPluginId": "@kbn/search-shared-ui",
-        "id": "def-public.DecorativeHorizontalStepper",
-        "type": "Function",
-        "tags": [],
-        "label": "DecorativeHorizontalStepper",
-        "description": [],
-        "signature": [
-          "({ stepCount, }: DecorativeHorizontalStepperProps) => React.JSX.Element"
-        ],
-        "path": "x-pack/solutions/search/packages/shared-ui/src/decorative_horizontal_stepper/decorative_horizontal_stepper.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/search-shared-ui",
-            "id": "def-public.DecorativeHorizontalStepper.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "{\n  stepCount = 2,\n}",
-            "description": [],
-            "signature": [
-              "DecorativeHorizontalStepperProps"
-            ],
-            "path": "x-pack/solutions/search/packages/shared-ui/src/decorative_horizontal_stepper/decorative_horizontal_stepper.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/search-shared-ui",
         "id": "def-public.FormInfoField",
         "type": "Function",
         "tags": [],
@@ -138,7 +105,38 @@
     ],
     "interfaces": [],
     "enums": [],
-    "misc": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/search-shared-ui",
+        "id": "def-public.WORKFLOW_LOCALSTORAGE_KEY",
+        "type": "string",
+        "tags": [],
+        "label": "WORKFLOW_LOCALSTORAGE_KEY",
+        "description": [],
+        "signature": [
+          "\"search_onboarding_workflow\""
+        ],
+        "path": "x-pack/solutions/search/packages/shared-ui/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-shared-ui",
+        "id": "def-public.WorkflowId",
+        "type": "Type",
+        "tags": [],
+        "label": "WorkflowId",
+        "description": [],
+        "signature": [
+          "\"default\" | \"vector\" | \"semantic\""
+        ],
+        "path": "x-pack/solutions/search/packages/shared-ui/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "objects": []
   },
   "server": {

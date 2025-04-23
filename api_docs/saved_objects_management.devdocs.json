@@ -326,9 +326,11 @@
                 "section": "def-public.SavedObjectsManagementRecord",
                 "text": "SavedObjectsManagementRecord"
               },
-              ") => React.ReactNode) | undefined; height?: string | number | undefined; align?: ",
+              ") => React.ReactNode) | undefined; align?: ",
               "HorizontalAlignment",
-              " | undefined; readOnly?: boolean | undefined; colSpan?: number | undefined; rowSpan?: number | undefined; valign?: \"top\" | \"bottom\" | \"middle\" | \"baseline\" | undefined; textOnly?: boolean | undefined; truncateText?: boolean | { lines: number; } | undefined; mobileOptions?: (Omit<",
+              " | undefined; height?: string | number | undefined; readOnly?: boolean | undefined; colSpan?: number | undefined; rowSpan?: number | undefined; valign?: \"top\" | \"bottom\" | \"middle\" | \"baseline\" | undefined; nameTooltip?: ",
+              "EuiTableColumnNameTooltipProps",
+              " | undefined; textOnly?: boolean | undefined; truncateText?: boolean | { lines: number; } | undefined; mobileOptions?: (Omit<",
               "EuiTableRowCellMobileOptionsShape",
               ", \"render\"> & { render?: ((item: ",
               {

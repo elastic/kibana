@@ -668,7 +668,15 @@
               "\ntimefilter service."
             ],
             "signature": [
-              "{ isTimeRangeSelectorEnabled: () => boolean; isAutoRefreshSelectorEnabled: () => boolean; isTimeTouched: () => boolean; isRefreshIntervalTouched: () => boolean; getEnabledUpdated$: () => ",
+              "{ readonly useTimefilter: () => ",
+              {
+                "pluginId": "data",
+                "scope": "public",
+                "docId": "kibDataQueryPluginApi",
+                "section": "def-public.TimefilterHook",
+                "text": "TimefilterHook"
+              },
+              "; isTimeRangeSelectorEnabled: () => boolean; isAutoRefreshSelectorEnabled: () => boolean; isTimeTouched: () => boolean; isRefreshIntervalTouched: () => boolean; getEnabledUpdated$: () => ",
               "Observable",
               "<boolean>; getTimeUpdate$: () => ",
               "Observable",

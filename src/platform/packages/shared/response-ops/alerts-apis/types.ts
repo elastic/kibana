@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
+import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
 
 export type ServerError = IHttpFetchError<ResponseErrorBody>;
 

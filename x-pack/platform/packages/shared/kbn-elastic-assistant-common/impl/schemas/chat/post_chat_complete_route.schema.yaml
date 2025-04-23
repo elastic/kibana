@@ -12,6 +12,14 @@ paths:
       summary: Create a model response
       tags:
         - Chat Complete API
+      parameters:
+        - name: content_references_disabled
+          in: query
+          required: false
+          description: If true, the response will not include content references.
+          schema:
+            type: boolean
+            default: false
       requestBody:
         required: true
         content:
@@ -83,7 +91,7 @@ components:
       type: object
       properties:
         conversationId:
-          type: string
+          $ref: '../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
         promptId:
           type: string
         isStream:
@@ -103,7 +111,7 @@ components:
         messages:
           type: array
           items:
-              $ref: '#/components/schemas/ChatMessage'
+            $ref: '#/components/schemas/ChatMessage'
       required:
         - messages
         - persist

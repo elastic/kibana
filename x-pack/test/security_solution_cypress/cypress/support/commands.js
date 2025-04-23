@@ -89,3 +89,8 @@ Cypress.Commands.add('waitUntil', { prevSubject: 'optional' }, waitUntil);
 Cypress.Commands.add('setCurrentSpace', (spaceId) => cy.state('currentSpaceId', spaceId));
 // Reads non-default space id
 Cypress.Commands.add('currentSpace', () => cy.state('currentSpaceId'));
+
+// finds elements that contain the given selector
+Cypress.Commands.add('getByTestSubjContains', (selector, ...args) =>
+  cy.get(`[data-test-subj*="${selector}"]`, ...args)
+);

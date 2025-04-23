@@ -6,8 +6,8 @@
  */
 
 import { omit, isEmpty } from 'lodash';
-import { Logger, SavedObjectReference } from '@kbn/core/server';
-import {
+import type { Logger, SavedObjectReference } from '@kbn/core/server';
+import type {
   Rule,
   PartialRule,
   RawRule,
@@ -22,7 +22,7 @@ import {
   convertMonitoringFromRawAndVerify,
   getRuleSnoozeEndTime,
 } from '../../lib';
-import { UntypedNormalizedRuleType } from '../../rule_type_registry';
+import type { UntypedNormalizedRuleType } from '../../rule_type_registry';
 import { getActiveScheduledSnoozes } from '../../lib/is_rule_snoozed';
 import { injectReferencesIntoParams } from '../common';
 import {
@@ -30,6 +30,7 @@ import {
   transformRawActionsToDomainSystemActions,
 } from '../../application/rule/transforms/transform_raw_actions_to_domain_actions';
 import { fieldsToExcludeFromPublicApi } from '../rules_client';
+import { transformRawArtifactsToDomainArtifacts } from '../../application/rule/transforms/transform_raw_artifacts_to_domain_artifacts';
 
 export interface GetAlertFromRawParams {
   id: string;
@@ -123,6 +124,7 @@ function getPartialRuleFromRaw<Params extends RuleTypeParams>(
     snoozeSchedule,
     lastRun,
     isSnoozedUntil: DoNotUseIsSnoozedUntil,
+    artifacts,
     ...partialRawRule
   } = rawRule;
 
@@ -169,6 +171,7 @@ function getPartialRuleFromRaw<Params extends RuleTypeParams>(
           omitGeneratedValues,
         })
       : [],
+    artifacts: transformRawArtifactsToDomainArtifacts(opts.id, artifacts, opts.references),
     params: injectReferencesIntoParams(
       opts.id,
       opts.ruleType,

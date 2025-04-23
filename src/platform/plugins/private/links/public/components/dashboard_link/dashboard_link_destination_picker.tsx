@@ -21,6 +21,7 @@ import {
   EuiFlexGroup,
   EuiComboBoxOptionOption,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 
 import { DashboardItem } from '../../types';
 import { DashboardLinkStrings } from './dashboard_link_strings';
@@ -100,7 +101,7 @@ export const DashboardLinkDestinationPicker = ({
       return (
         <EuiFlexGroup gutterSize="s" alignItems="center" className={contentClassName}>
           {dashboardId === parentDashboardId && (
-            <EuiFlexItem grow={false}>
+            <EuiFlexItem grow={false} className={'linksDashboardItem--current'}>
               <EuiBadge>{DashboardLinkStrings.getCurrentDashboardLabel()}</EuiBadge>
             </EuiFlexItem>
           )}
@@ -143,6 +144,25 @@ export const DashboardLinkDestinationPicker = ({
         }
       }}
       data-test-subj="links--linkEditor--dashboardLink--comboBox"
+      inputPopoverProps={{ panelProps: { css: styles } }}
     />
   );
 };
+
+const styles = css({
+  '.linksDashboardItem': {
+    '.linksDashboardItem--current': {
+      cursor: 'pointer !important',
+    },
+    // in order to ensure that the "Current" badge doesn't recieve an underline on hover, we have to set the
+    // text-decoration to `none` for the entire list item and manually set the underline **only** on the text
+    '&:hover': {
+      textDecoration: 'none !important',
+    },
+    '.linksPanelEditorLinkText': {
+      '&:hover': {
+        textDecoration: 'underline !important',
+      },
+    },
+  },
+});

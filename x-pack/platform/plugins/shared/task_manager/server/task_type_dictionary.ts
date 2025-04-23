@@ -5,15 +5,10 @@
  * 2.0.
  */
 
-import { ObjectType } from '@kbn/config-schema';
-import { Logger } from '@kbn/core/server';
-import {
-  TaskDefinition,
-  taskDefinitionSchema,
-  TaskRunCreatorFunction,
-  TaskPriority,
-  TaskCost,
-} from './task';
+import type { ObjectType } from '@kbn/config-schema';
+import type { Logger } from '@kbn/core/server';
+import type { TaskDefinition, TaskRunCreatorFunction, TaskPriority, TaskCost } from './task';
+import { taskDefinitionSchema } from './task';
 import { CONCURRENCY_ALLOW_LIST_BY_TASK_TYPE } from './constants';
 
 /**
@@ -32,6 +27,9 @@ export const REMOVED_TYPES: string[] = [
 
   'cleanup_failed_action_executions',
   'reports:monitor',
+
+  // deprecated in https://github.com/elastic/kibana/pull/216916
+  'obs-ai-assistant:knowledge-base-migration',
 ];
 
 /**

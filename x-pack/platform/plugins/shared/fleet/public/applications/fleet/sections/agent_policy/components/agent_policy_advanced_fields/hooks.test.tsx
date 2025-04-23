@@ -682,6 +682,11 @@ describe('useFleetServerHostsOptions', () => {
           "value": "@@##DEFAULT_SELECT##@@",
         },
         Object {
+          "disabled": false,
+          "inputDisplay": "Default",
+          "value": "default-host",
+        },
+        Object {
           "disabled": true,
           "inputDisplay": "Internal",
           "value": "internal-output",

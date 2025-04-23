@@ -21,6 +21,25 @@ FldList [
     "subType": undefined,
     "type": "string",
   },
+  Object {
+    "aggregatable": true,
+    "conflictDescriptions": undefined,
+    "count": 50,
+    "customDescription": undefined,
+    "customLabel": undefined,
+    "defaultFormatter": undefined,
+    "esTypes": Array [
+      "keyword",
+    ],
+    "lang": undefined,
+    "name": "wrongCountType",
+    "readFromDocValues": false,
+    "script": undefined,
+    "scripted": false,
+    "searchable": true,
+    "subType": undefined,
+    "type": "string",
+  },
 ]
 `;
 
@@ -39,6 +58,9 @@ Object {
       "count": 5,
       "customLabel": "A Runtime Field",
     },
+    "wrongCountType": Object {
+      "count": 50,
+    },
   },
   "fieldFormats": Object {
     "field": Object {},
@@ -51,6 +73,12 @@ Object {
     "aRuntimeField": Object {
       "script": Object {
         "source": "emit('hello')",
+      },
+      "type": "keyword",
+    },
+    "wrongCountType": Object {
+      "script": Object {
+        "source": "emit('test')",
       },
       "type": "keyword",
     },

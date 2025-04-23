@@ -10,7 +10,6 @@ import type {
   AggregateName,
   AggregationsMultiTermsAggregate,
   BulkOperationContainer,
-  CreateRequest,
   IndicesCreateRequest,
   MsearchRequestItem,
   SearchHit,
@@ -381,7 +380,7 @@ export class SessionIndex {
       const response = await this.options.elasticsearchClient.deleteByQuery({
         index: this.aliasName,
         refresh: false,
-        body: { query: deleteQuery },
+        query: deleteQuery,
       });
       return response.deleted as number;
     } catch (err) {
@@ -783,10 +782,10 @@ export class SessionIndex {
         id: sid,
         // We write to the alias for `create` operations so that we can prevent index auto-creation in the event it is missing.
         index: this.aliasName,
-        body: sessionValueToStore,
+        document: sessionValueToStore,
         refresh: false,
-        require_alias: true,
-      } as CreateRequest,
+        querystring: { require_alias: true },
+      },
       { meta: true, ignore: ignore404 ? [404] : [] }
     );
 

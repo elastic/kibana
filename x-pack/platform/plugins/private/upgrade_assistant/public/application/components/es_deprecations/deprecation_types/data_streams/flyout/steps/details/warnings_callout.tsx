@@ -22,20 +22,26 @@ export const DurationClarificationCallOut: React.FunctionComponent<Props> = ({
     <EuiCallOut color="primary">
       <p>
         <FormattedMessage
-          id="xpack.upgradeAssistant.dataStream.reindexing.flyout.warningsStep.indicesNeedReindexing"
+          id="xpack.upgradeAssistant.dataStream.migration.flyout.warningsStep.indicesNeedReindexing"
           defaultMessage="Indices created on or before {formattedDate} need to be reindexed to a compatible format or marked as read-only."
           values={{ formattedDate }}
         />
         <br />
         <br />
         <FormattedMessage
-          id="xpack.upgradeAssistant.dataStream.reindexing.flyout.warningsStep.suggestReadOnly"
+          id="xpack.upgradeAssistant.dataStream.migration.flyout.warningsStep.backingIndicesUnfrozen"
+          defaultMessage="If any of the backing indices of the data stream are frozen, they will be converted to non-frozen indices during the update process."
+        />
+        <br />
+        <br />
+        <FormattedMessage
+          id="xpack.upgradeAssistant.dataStream.migration.flyout.warningsStep.suggestReadOnly"
           defaultMessage="Depending on size and resources, reindexing may take extended time and your data will be in a read-only state until the job has completed. {learnMoreHtml}"
           values={{
             learnMoreHtml: (
               <EuiLink href={learnMoreUrl} target="_blank">
                 <FormattedMessage
-                  id="xpack.upgradeAssistant.dataStream.reindexing.flyout.warningsStep.learnMoreLink"
+                  id="xpack.upgradeAssistant.dataStream.migration.flyout.warningsStep.learnMoreLink"
                   defaultMessage="Learn more"
                 />
               </EuiLink>

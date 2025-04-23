@@ -13,11 +13,10 @@ import type {
   TimeRange,
 } from '@kbn/es-query';
 import type { Adapters, InspectorOptions } from '@kbn/inspector-plugin/public';
-import type { ESQLControlVariable } from '@kbn/esql-validation-autocomplete';
+import type { ESQLControlVariable } from '@kbn/esql-types';
 import type {
   HasEditCapabilities,
   HasLibraryTransforms,
-  HasParentApi,
   HasSupportedTriggers,
   PublishesBlockingError,
   PublishesDataLoading,
@@ -64,7 +63,6 @@ import type { AllowedGaugeOverrides } from '@kbn/expression-gauge-plugin/common'
 import type { AllowedPartitionOverrides } from '@kbn/expression-partition-vis-plugin/common';
 import type { AllowedXYOverrides } from '@kbn/expression-xy-plugin/common';
 import type { Action } from '@kbn/ui-actions-plugin/public';
-import { PresentationContainer } from '@kbn/presentation-containers';
 import { PublishesSearchSession } from '@kbn/presentation-publishing/interfaces/fetch/publishes_search_session';
 import type { LegacyMetricState } from '../../common';
 import type { LensDocument } from '../persistence';
@@ -91,7 +89,7 @@ import type { LensPluginStartDependencies } from '../plugin';
 import type { TableInspectorAdapter } from '../editor_frame_service/types';
 import type { PieVisualizationState } from '../../common/types';
 import type { FormBasedPersistedState } from '..';
-import type { TextBasedPersistedState } from '../datasources/text_based/types';
+import type { TextBasedPersistedState } from '../datasources/form_based/esql_layer/types';
 import type { GaugeVisualizationState } from '../visualizations/gauge/constants';
 import type { MetricVisualizationState } from '../visualizations/metric/types';
 
@@ -401,8 +399,6 @@ export type LensApi = Simplify<
     HasLibraryTransforms<LensSerializedState, LensSerializedState> &
     // Let the container know the view mode
     PublishesViewMode &
-    // forward the parentApi, note that will be exposed only if it satisfy the PresentationContainer interface
-    Partial<HasParentApi<PresentationContainer>> &
     // Let the container know the saved object id
     PublishesSavedObjectId &
     // Lens specific API methods:

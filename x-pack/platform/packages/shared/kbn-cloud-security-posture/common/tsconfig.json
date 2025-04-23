@@ -21,5 +21,6 @@
     "@kbn/analytics",
     "@kbn/usage-collection-plugin",
     "@kbn/es-query",
+    "@kbn/core",
   ]
 }

@@ -1010,6 +1010,11 @@ Object {
       "required": true,
       "type": "date",
     },
+    "kibana.alert.pending_recovered_count": Object {
+      "array": false,
+      "required": false,
+      "type": "long",
+    },
     "kibana.alert.previous_action_group": Object {
       "array": false,
       "required": false,
@@ -2127,6 +2132,11 @@ Object {
       "array": false,
       "required": true,
       "type": "date",
+    },
+    "kibana.alert.pending_recovered_count": Object {
+      "array": false,
+      "required": false,
+      "type": "long",
     },
     "kibana.alert.previous_action_group": Object {
       "array": false,
@@ -3246,6 +3256,11 @@ Object {
       "required": true,
       "type": "date",
     },
+    "kibana.alert.pending_recovered_count": Object {
+      "array": false,
+      "required": false,
+      "type": "long",
+    },
     "kibana.alert.previous_action_group": Object {
       "array": false,
       "required": false,
@@ -4364,6 +4379,11 @@ Object {
       "required": true,
       "type": "date",
     },
+    "kibana.alert.pending_recovered_count": Object {
+      "array": false,
+      "required": false,
+      "type": "long",
+    },
     "kibana.alert.previous_action_group": Object {
       "array": false,
       "required": false,
@@ -5481,6 +5501,11 @@ Object {
       "array": false,
       "required": true,
       "type": "date",
+    },
+    "kibana.alert.pending_recovered_count": Object {
+      "array": false,
+      "required": false,
+      "type": "long",
     },
     "kibana.alert.previous_action_group": Object {
       "array": false,
@@ -6606,6 +6631,11 @@ Object {
       "required": true,
       "type": "date",
     },
+    "kibana.alert.pending_recovered_count": Object {
+      "array": false,
+      "required": false,
+      "type": "long",
+    },
     "kibana.alert.previous_action_group": Object {
       "array": false,
       "required": false,
@@ -7724,6 +7754,11 @@ Object {
       "required": true,
       "type": "date",
     },
+    "kibana.alert.pending_recovered_count": Object {
+      "array": false,
+      "required": false,
+      "type": "long",
+    },
     "kibana.alert.previous_action_group": Object {
       "array": false,
       "required": false,
@@ -8841,6 +8876,11 @@ Object {
       "array": false,
       "required": true,
       "type": "date",
+    },
+    "kibana.alert.pending_recovered_count": Object {
+      "array": false,
+      "required": false,
+      "type": "long",
     },
     "kibana.alert.previous_action_group": Object {
       "array": false,

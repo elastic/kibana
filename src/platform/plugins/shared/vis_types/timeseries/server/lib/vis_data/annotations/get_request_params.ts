@@ -66,11 +66,9 @@ export async function getAnnotationRequestParams(
 
   return {
     index: annotationIndex.indexPatternString,
-    body: {
-      ...request,
-      runtime_mappings: annotationIndex.indexPattern?.getComputedFields().runtimeFields ?? {},
-      timeout: esShardTimeout > 0 ? `${esShardTimeout}ms` : undefined,
-    },
+    ...request,
+    runtime_mappings: annotationIndex.indexPattern?.getComputedFields().runtimeFields ?? {},
+    timeout: esShardTimeout > 0 ? `${esShardTimeout}ms` : undefined,
     trackingEsSearchMeta: {
       requestId: annotation.id,
       requestLabel: i18n.translate('visTypeTimeseries.annotationRequest.label', {
