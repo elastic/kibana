@@ -61,7 +61,7 @@ describe('OAuth2Fields', () => {
 
     await user.click(editorContainer);
 
-    await user.type(editorContainer, 't', { delay: 50 });
+    await user.type(editorContainer, 't');
 
     const readOnlyMessage = await screen.findByText(
       'Cannot edit in read-only editor',

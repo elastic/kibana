@@ -860,11 +860,11 @@ describe('execute()', () => {
     (getOAuthClientCredentialsAccessToken as jest.Mock).mockResolvedValueOnce(undefined);
 
     // Call the code that registers the interceptor
-    connectorType.executor(execOptions);
+    await connectorType.executor(execOptions);
 
     // Extract the interceptor callback
-    const mockRequestCallback = ((await axiosInstanceMock.interceptors.request.use) as jest.Mock)
-      .mock.calls[0][0];
+    const mockRequestCallback = (axiosInstanceMock.interceptors.request.use as jest.Mock).mock
+      .calls[0][0];
 
     // Call the interceptor and expect it to throw
     await expect(() =>
@@ -896,11 +896,11 @@ describe('execute()', () => {
       services: { connectorTokenClient: {} },
     };
 
-    connectorType.executor(execOptions);
+    await connectorType.executor(execOptions);
 
     // Extract the interceptor callback
-    const mockRequestCallback = ((await axiosInstanceMock.interceptors.request.use) as jest.Mock)
-      .mock.calls[0][0];
+    const mockRequestCallback = (axiosInstanceMock.interceptors.request.use as jest.Mock).mock
+      .calls[0][0];
 
     const config = { headers: {} };
     const result = await mockRequestCallback(config);
@@ -931,10 +931,10 @@ describe('execute()', () => {
       services: { connectorTokenClient: {} },
     };
 
-    connectorType.executor(execOptions);
+    await connectorType.executor(execOptions);
 
-    const mockRequestCallback = ((await axiosInstanceMock.interceptors.request.use) as jest.Mock)
-      .mock.calls[0][0];
+    const mockRequestCallback = (axiosInstanceMock.interceptors.request.use as jest.Mock).mock
+      .calls[0][0];
 
     const config = { headers: { 'X-Custom': 'value' } };
     const result = await mockRequestCallback(config);

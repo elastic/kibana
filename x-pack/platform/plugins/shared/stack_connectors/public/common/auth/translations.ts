@@ -227,7 +227,7 @@ export const ADDITIONAL_FIELDS = i18n.translate(
 );
 
 export const ADDITIONAL_FIELDS_HELP_WEBHOOK_TEXT = i18n.translate(
-  'xpack.stackConnectors.components.servicenow.additionalFieldsHelpTooltipText',
+  'xpack.stackConnectors.components.webhhok.additionalFieldsHelpTooltipText',
   {
     defaultMessage: 'Additional fields in JSON format as defined by access token provider',
   }
