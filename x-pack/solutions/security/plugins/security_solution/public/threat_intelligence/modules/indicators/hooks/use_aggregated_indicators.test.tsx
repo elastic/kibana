@@ -10,9 +10,15 @@ import type { UseAggregatedIndicatorsParam } from './use_aggregated_indicators';
 import { useAggregatedIndicators } from './use_aggregated_indicators';
 import { createFetchAggregatedIndicators } from '../services/fetch_aggregated_indicators';
 import { mockTimeRange } from '../../../mocks/mock_indicators_filters_context';
-import { TestProvidersComponent, mockedTimefilterService } from '../../../mocks/test_providers';
+import {
+  TestProvidersComponent,
+  mockedQueryService,
+  mockedSearchService,
+} from '../../../mocks/test_providers';
+import { useKibana } from '../../../hooks/use_kibana';
 
 jest.mock('../services/fetch_aggregated_indicators');
+jest.mock('../../../hooks/use_kibana', () => ({ useKibana: jest.fn() }));
 
 const useAggregatedIndicatorsParams: UseAggregatedIndicatorsParam = {
   timeRange: mockTimeRange,
@@ -28,6 +34,12 @@ const renderUseAggregatedIndicators = () =>
 
 describe('useAggregatedIndicators()', () => {
   beforeEach(jest.clearAllMocks);
+
+  beforeEach(() => {
+    jest.mocked(useKibana).mockReturnValue({
+      services: { data: { search: mockedSearchService, query: mockedQueryService } },
+    } as unknown as ReturnType<typeof useKibana>);
+  });
 
   type MockedCreateFetchAggregatedIndicators = jest.MockedFunction<
     typeof createFetchAggregatedIndicators
@@ -56,8 +68,6 @@ describe('useAggregatedIndicators()', () => {
     ).toHaveBeenCalledTimes(1);
     expect(aggregatedIndicatorsQuery).toHaveBeenCalledTimes(1);
 
-    // Ensure the timefilter service is called
-    expect(mockedTimefilterService.timefilter.calculateBounds).toHaveBeenCalled();
     // Call the query function
     expect(aggregatedIndicatorsQuery).toHaveBeenLastCalledWith(
       expect.objectContaining({
@@ -65,6 +75,8 @@ describe('useAggregatedIndicators()', () => {
       }),
       expect.any(AbortSignal)
     );
+
+    expect(mockedQueryService.timefilter.timefilter.calculateBounds).toHaveBeenCalled();
 
     await act(async () =>
       rerender({
@@ -87,8 +99,8 @@ describe('useAggregatedIndicators()', () => {
     expect(result.current).toMatchInlineSnapshot(`
       Object {
         "dateRange": Object {
-          "max": "2022-01-02T00:00:00.000Z",
-          "min": "2022-01-01T00:00:00.000Z",
+          "max": "2025-05-15T22:00:00.000Z",
+          "min": "2025-05-15T22:00:00.000Z",
         },
         "isFetching": false,
         "isLoading": false,
