@@ -102,11 +102,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           if (entry.isDirectory()) {
             const folderName = entry.name;
             const folderPath = path.join(LOCAL_PRODUCT_DOC_PATH, folderName);
-
-            // Replace underscores with hyphens for the zip file name
-            const zipFileName = `${folderName.replace(/_/g, '-')}.zip`;
-            const outputZipPath = path.join(LOCAL_PRODUCT_DOC_PATH, zipFileName);
-
+            const outputZipPath = path.join(LOCAL_PRODUCT_DOC_PATH, `${folderName}.zip`);
             // Create and write zip
             const zip = new AdmZip();
             zip.addLocalFolder(folderPath);
@@ -198,16 +194,14 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           expect(lastMessage.content).to.be.a('string');
         });
 
-        it('should send 3 documents to the llm', () => {
-          expect(parsedContent.documents.length).to.be(3);
+        it('should send 1 documents to the llm', () => {
+          expect(parsedContent.documents.length).to.be(1);
         });
 
-        it('should contain the word "lens" in the document content', () => {
-          const document = parsedContent.documents.find(
-            (doc) => doc.title === 'Enhancements and bug fixes'
-          );
+        it('should contain the word "Lens" in the document content', () => {
+          const document = parsedContent.documents[0];
           expect(document).to.not.be(undefined);
-          expect(document?.content).to.contain('lens');
+          expect(document?.content).to.contain('Lens');
         });
       });
     });
