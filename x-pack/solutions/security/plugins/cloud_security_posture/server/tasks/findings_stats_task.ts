@@ -22,7 +22,7 @@ import type { ISavedObjectsRepository, Logger } from '@kbn/core/server';
 import { getMutedRulesFilterQuery } from '../routes/benchmark_rules/get_states/v1';
 import { getSafePostureTypeRuntimeMapping } from '../../common/runtime_mappings/get_safe_posture_type_runtime_mapping';
 import { getIdentifierRuntimeMapping } from '../../common/runtime_mappings/get_identifier_runtime_mapping';
-import { FindingsStatsTaskResult, ScoreByPolicyTemplateBucket, VulnSeverityAggs } from './types';
+import { FindingsStatsTaskResult, ScoreAggregationResponse, VulnSeverityAggs } from './types';
 import {
   BENCHMARK_SCORE_INDEX_DEFAULT_NS,
   CSPM_FINDINGS_STATS_INTERVAL,
@@ -128,6 +128,93 @@ export function taskRunner(coreStartServices: CspServerPluginStartServices, logg
     };
   };
 }
+const getScoreAggregationQuery = () => ({
+  score_by_policy_template: {
+    terms: {
+      field: 'safe_posture_type',
+    },
+    aggs: {
+      total_findings: {
+        value_count: {
+          field: 'result.evaluation',
+        },
+      },
+      passed_findings: {
+        filter: {
+          term: {
+            'result.evaluation': 'passed',
+          },
+        },
+      },
+      failed_findings: {
+        filter: {
+          term: {
+            'result.evaluation': 'failed',
+          },
+        },
+      },
+      score_by_cluster_id: {
+        terms: {
+          field: 'asset_identifier',
+        },
+        aggs: {
+          total_findings: {
+            value_count: {
+              field: 'result.evaluation',
+            },
+          },
+          passed_findings: {
+            filter: {
+              term: {
+                'result.evaluation': 'passed',
+              },
+            },
+          },
+          failed_findings: {
+            filter: {
+              term: {
+                'result.evaluation': 'failed',
+              },
+            },
+          },
+        },
+      },
+      score_by_benchmark_id: {
+        terms: {
+          field: 'rule.benchmark.id',
+        },
+        aggs: {
+          benchmark_versions: {
+            terms: {
+              field: 'rule.benchmark.version',
+            },
+            aggs: {
+              total_findings: {
+                value_count: {
+                  field: 'result.evaluation',
+                },
+              },
+              passed_findings: {
+                filter: {
+                  term: {
+                    'result.evaluation': 'passed',
+                  },
+                },
+              },
+              failed_findings: {
+                filter: {
+                  term: {
+                    'result.evaluation': 'failed',
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  },
+});
 
 const getScoreQuery = (filteredRules: QueryDslQueryContainer[]): SearchRequest => ({
   index: LATEST_FINDINGS_INDEX_DEFAULT_NS,
@@ -140,90 +227,15 @@ const getScoreQuery = (filteredRules: QueryDslQueryContainer[]): SearchRequest =
     },
   },
   aggs: {
-    score_by_policy_template: {
+    score_by_namespace: {
       terms: {
-        field: 'safe_posture_type',
+        field: 'data_stream.namespace',
       },
-      aggs: {
-        total_findings: {
-          value_count: {
-            field: 'result.evaluation',
-          },
-        },
-        passed_findings: {
-          filter: {
-            term: {
-              'result.evaluation': 'passed',
-            },
-          },
-        },
-        failed_findings: {
-          filter: {
-            term: {
-              'result.evaluation': 'failed',
-            },
-          },
-        },
-        score_by_cluster_id: {
-          terms: {
-            field: 'asset_identifier',
-          },
-          aggregations: {
-            total_findings: {
-              value_count: {
-                field: 'result.evaluation',
-              },
-            },
-            passed_findings: {
-              filter: {
-                term: {
-                  'result.evaluation': 'passed',
-                },
-              },
-            },
-            failed_findings: {
-              filter: {
-                term: {
-                  'result.evaluation': 'failed',
-                },
-              },
-            },
-          },
-        },
-        score_by_benchmark_id: {
-          terms: {
-            field: 'rule.benchmark.id',
-          },
-          aggregations: {
-            benchmark_versions: {
-              terms: {
-                field: 'rule.benchmark.version',
-              },
-              aggs: {
-                total_findings: {
-                  value_count: {
-                    field: 'result.evaluation',
-                  },
-                },
-                passed_findings: {
-                  filter: {
-                    term: {
-                      'result.evaluation': 'passed',
-                    },
-                  },
-                },
-                failed_findings: {
-                  filter: {
-                    term: {
-                      'result.evaluation': 'failed',
-                    },
-                  },
-                },
-              },
-            },
-          },
-        },
-      },
+      aggs: getScoreAggregationQuery(),
+    },
+    all_namespaces: {
+      global: {}, // The global aggregation resets the scope to include all documents, ignoring any filters or bucketing above it.
+      aggs: getScoreAggregationQuery(),
     },
   },
 });
@@ -283,7 +295,7 @@ const getVulnStatsTrendQuery = (): SearchRequest => ({
 
 const getFindingsScoresDocIndexingPromises = (
   esClient: ElasticsearchClient,
-  scoresByPolicyTemplatesBuckets: ScoreByPolicyTemplateBucket['score_by_policy_template']['buckets'],
+  scoresByPolicyTemplatesBuckets: ScoreAggregationResponse['all_namespaces']['score_by_policy_template']['buckets'],
   isCustomScore: boolean
 ) =>
   scoresByPolicyTemplatesBuckets.map((policyTemplateTrend) => {
@@ -335,9 +347,68 @@ const getFindingsScoresDocIndexingPromises = (
         score_by_cluster_id: clustersStats,
         score_by_benchmark_id: benchmarkStats,
         is_enabled_rules_score: isCustomScore,
+        'data_stream.namespace': 'all',
       },
     });
   });
+
+const getFindingsScoresByNamespaceIndexingPromises = (
+  esClient: ElasticsearchClient,
+  scoresByNamespaceBuckets: ScoreAggregationResponse['score_by_namespace']['buckets'],
+  isCustomScore: boolean
+) => {
+  return scoresByNamespaceBuckets.flatMap((namespaceBucket) => {
+    const namespace = namespaceBucket.key || 'unspecified'; // default fallback if key is empty
+
+    return namespaceBucket.score_by_policy_template.buckets.map((policyTemplateTrend) => {
+      const clustersStats = Object.fromEntries(
+        policyTemplateTrend.score_by_cluster_id.buckets.map((clusterStats) => {
+          return [
+            clusterStats.key,
+            {
+              total_findings: clusterStats.total_findings.value,
+              passed_findings: clusterStats.passed_findings.doc_count,
+              failed_findings: clusterStats.failed_findings.doc_count,
+            },
+          ];
+        })
+      );
+
+      const benchmarkStats = Object.fromEntries(
+        policyTemplateTrend.score_by_benchmark_id.buckets.map((benchmarkIdBucket) => {
+          const benchmarkVersions = Object.fromEntries(
+            benchmarkIdBucket.benchmark_versions.buckets.map((benchmarkVersionBucket) => {
+              return [
+                toBenchmarkMappingFieldKey(benchmarkVersionBucket.key),
+                {
+                  total_findings: benchmarkVersionBucket.total_findings.value,
+                  passed_findings: benchmarkVersionBucket.passed_findings.doc_count,
+                  failed_findings: benchmarkVersionBucket.failed_findings.doc_count,
+                },
+              ];
+            })
+          );
+
+          return [benchmarkIdBucket.key, benchmarkVersions];
+        })
+      );
+
+      return esClient.index({
+        index: BENCHMARK_SCORE_INDEX_DEFAULT_NS,
+        document: {
+          policy_template: policyTemplateTrend.key,
+          passed_findings: policyTemplateTrend.passed_findings.doc_count,
+          failed_findings: policyTemplateTrend.failed_findings.doc_count,
+          total_findings: policyTemplateTrend.total_findings.value,
+          score_by_cluster_id: clustersStats,
+          score_by_benchmark_id: benchmarkStats,
+          is_enabled_rules_score: isCustomScore,
+          'data_stream.namespace': namespace,
+        },
+      });
+    });
+  });
+};
 
 export const getVulnStatsTrendDocIndexingPromises = (
   esClient: ElasticsearchClient,
@@ -385,11 +456,11 @@ export const aggregateLatestFindings = async (
 
     const rulesFilter = await getMutedRulesFilterQuery(encryptedSoClient);
 
-    const customScoreIndexQueryResult = await esClient.search<unknown, ScoreByPolicyTemplateBucket>(
+    const customScoreIndexQueryResult = await esClient.search<unknown, ScoreAggregationResponse>(
       getScoreQuery(rulesFilter)
     );
 
-    const fullScoreIndexQueryResult = await esClient.search<unknown, ScoreByPolicyTemplateBucket>(
+    const fullScoreIndexQueryResult = await esClient.search<unknown, ScoreAggregationResponse>(
       getScoreQuery([])
     );
 
@@ -411,10 +482,17 @@ export const aggregateLatestFindings = async (
 
     // getting score per policy template buckets
     const customScoresByPolicyTemplatesBuckets =
-      customScoreIndexQueryResult.aggregations?.score_by_policy_template.buckets || [];
+      customScoreIndexQueryResult.aggregations?.all_namespaces.score_by_policy_template.buckets ||
+      [];
+
+    const customScoresByNamespaceBuckets =
+      customScoreIndexQueryResult.aggregations?.score_by_namespace.buckets || [];
 
     const fullScoresByPolicyTemplatesBuckets =
-      fullScoreIndexQueryResult.aggregations?.score_by_policy_template.buckets || [];
+      fullScoreIndexQueryResult.aggregations?.all_namespaces.score_by_policy_template.buckets || [];
+
+    const fullScoresByNamespaceBuckets =
+      fullScoreIndexQueryResult.aggregations?.score_by_namespace.buckets || [];
 
     // iterating over the buckets and return promises which will index a modified document into the scores index
     const findingsCustomScoresDocIndexingPromises = getFindingsScoresDocIndexingPromises(
@@ -423,11 +501,17 @@ export const aggregateLatestFindings = async (
       true
     );
 
+    const findingsCustomScoresByNamespaceDocIndexingPromises =
+      getFindingsScoresByNamespaceIndexingPromises(esClient, customScoresByNamespaceBuckets, true);
+
     const findingsFullScoresDocIndexingPromises = getFindingsScoresDocIndexingPromises(
       esClient,
       fullScoresByPolicyTemplatesBuckets,
       false
     );
+
+    const findingsFullScoresByNamespaceDocIndexingPromises =
+      getFindingsScoresByNamespaceIndexingPromises(esClient, fullScoresByNamespaceBuckets, false);
 
     const vulnStatsTrendDocIndexingPromises = getVulnStatsTrendDocIndexingPromises(
       esClient,
@@ -440,7 +524,9 @@ export const aggregateLatestFindings = async (
     await Promise.all(
       [
         ...findingsCustomScoresDocIndexingPromises,
+        findingsCustomScoresByNamespaceDocIndexingPromises,
         findingsFullScoresDocIndexingPromises,
+        findingsFullScoresByNamespaceDocIndexingPromises,
         vulnStatsTrendDocIndexingPromises,
       ].filter(Boolean)
     );
