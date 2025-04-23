@@ -258,13 +258,16 @@ export const useGetFileByPath = (filePath: string) => {
   });
 };
 
-export const useGetFileByPathQuery = (filePath: string) => {
-  return useQuery<string, RequestError>(['get-file', filePath], () =>
-    sendRequestForRq<string>({
-      path: epmRouteService.getFilePath(filePath),
-      method: 'get',
-      version: API_VERSIONS.public.v1,
-    })
+export const useGetFileByPathQuery = (filePath: string, options?: { enabled?: boolean }) => {
+  return useQuery<string, RequestError>(
+    ['get-file', filePath],
+    () =>
+      sendRequestForRq<string>({
+        path: epmRouteService.getFilePath(filePath),
+        method: 'get',
+        version: API_VERSIONS.public.v1,
+      }),
+    { enabled: options?.enabled }
   );
 };
 

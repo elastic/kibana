@@ -73,7 +73,7 @@ export const Details: React.FC<Props> = memo(({ packageInfo, integrationInfo }) 
     changelog,
     isLoading: isChangelogLoading,
     error: changelogError,
-  } = useChangelog(packageInfo.name, packageInfo.version);
+  } = useChangelog(packageInfo);
 
   const mergedCategories: Array<string | undefined> = useMemo(() => {
     let allCategories: Array<string | undefined> = [];
@@ -284,7 +284,11 @@ export const Details: React.FC<Props> = memo(({ packageInfo, integrationInfo }) 
       description: (
         <>
           <p>
-            <EuiLink onClick={toggleChangelogModal}>View Changelog</EuiLink>
+            {changelog.length > 0 ? (
+              <EuiLink onClick={toggleChangelogModal}>View Changelog</EuiLink>
+            ) : (
+              '-'
+            )}
           </p>
         </>
       ),
@@ -292,6 +296,7 @@ export const Details: React.FC<Props> = memo(({ packageInfo, integrationInfo }) 
 
     return items;
   }, [
+    changelog,
     packageCategories,
     packageInfo.assets,
     packageInfo.conditions?.elastic?.subscription,

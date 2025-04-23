@@ -112,7 +112,7 @@ export const SettingsPage: React.FC<Props> = memo(
       breakingChanges,
       isLoading: isChangelogLoading,
       error: changelogError,
-    } = useChangelog(name, latestVersion, version);
+    } = useChangelog(packageInfo, version);
 
     const packagePolicyIds = useMemo(
       () => packagePoliciesData?.items.map(({ id }) => id),
