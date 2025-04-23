@@ -14,6 +14,7 @@ import {
   actionRequestSchema,
   systemActionRequestSchema,
   flappingSchema,
+  artifactsSchema,
 } from '../../../schemas';
 
 export const createRuleDataSchema = schema.object(
@@ -39,6 +40,7 @@ export const createRuleDataSchema = schema.object(
     notifyWhen: schema.maybe(schema.nullable(notifyWhenSchema)),
     alertDelay: schema.maybe(alertDelaySchema),
     flapping: schema.maybe(schema.nullable(flappingSchema)),
+    artifacts: schema.maybe(artifactsSchema),
   },
   { unknowns: 'allow' }
 );

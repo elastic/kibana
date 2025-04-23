@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { shallow } from 'enzyme';
+import { render } from '@testing-library/react';
 import React from 'react';
 import type { ActionCreator } from 'typescript-fsa';
 
@@ -23,7 +23,7 @@ describe('IP Overview Component', () => {
   describe('rendering', () => {
     const mockProps = {
       anomaliesData: mockAnomalies,
-      data: mockData.IpOverview,
+      data: mockData.complete,
       endDate: '2019-06-18T06:00:00.000Z',
       flowTarget: FlowTargetSourceDest.source,
       loading: false,
@@ -43,13 +43,13 @@ describe('IP Overview Component', () => {
     };
 
     test('it renders the default IP Overview', () => {
-      const wrapper = shallow(
+      const { container } = render(
         <TestProviders>
           <IpOverview {...mockProps} />
         </TestProviders>
       );
 
-      expect(wrapper.find('IpOverview')).toMatchSnapshot();
+      expect(container.children[0]).toMatchSnapshot();
     });
 
     test('it renders the side panel IP overview', () => {
@@ -57,13 +57,13 @@ describe('IP Overview Component', () => {
         ...mockProps,
         isInDetailsSidePanel: true,
       };
-      const wrapper = shallow(
+      const { container } = render(
         <TestProviders>
           <IpOverview {...panelViewProps} />
         </TestProviders>
       );
 
-      expect(wrapper.find('IpOverview')).toMatchSnapshot();
+      expect(container.children[0]).toMatchSnapshot();
     });
   });
 });
