@@ -24,7 +24,7 @@ import {
   loadInitial,
   initExisting,
   initEmpty,
-  LensStoreDeps,
+  type LensStoreDeps,
 } from '../../../state_management';
 import { generateId } from '../../../id_generator';
 import type { DatasourceMap, VisualizationMap } from '../../../types';
@@ -165,6 +165,7 @@ export async function getEditLensConfiguration(
     }
     const [currentAttributes, setCurrentAttributes] =
       useState<TypedLensSerializedState['attributes']>(attributes);
+
     /**
      * During inline editing of a by reference panel, the panel is converted to a by value one.
      * When the user applies the changes we save them to the Lens SO
