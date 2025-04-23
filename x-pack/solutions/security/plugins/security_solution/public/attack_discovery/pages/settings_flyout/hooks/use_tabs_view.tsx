@@ -66,7 +66,7 @@ export const useTabsView = ({
     showConnectorSelector: true,
     stats,
   });
-  const { scheduleView, actionButtons: scheduleTabButtons } = useScheduleView(stats);
+  const { scheduleView, actionButtons: scheduleTabButtons } = useScheduleView();
 
   const settingsTab: EuiTabbedContentTab = useMemo(
     () => ({
