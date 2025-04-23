@@ -2164,7 +2164,7 @@ x-pack/test/api_integration/apis/management/index_management/inference_endpoints
 /x-pack/test/functional/apps/watcher @elastic/kibana-management
 /x-pack/test/api_integration/apis/watcher @elastic/kibana-management
 /x-pack/test/api_integration/apis/upgrade_assistant @elastic/kibana-core
-/x-pack/test/api_integration/apis/searchprofiler @elastic/kibana-management
+/x-pack/platform/test/api_integration/apis/searchprofiler @elastic/kibana-management
 /x-pack/test/api_integration/apis/console @elastic/kibana-management
 /x-pack/test_serverless/**/test_suites/common/index_management/ @elastic/kibana-management
 /x-pack/test_serverless/**/test_suites/common/management/index_management/ @elastic/kibana-management
