@@ -69,13 +69,13 @@ export const reportingCsvExportProvider = ({
       };
     };
 
-    const { reportType, decoratedJobParams } = getSearchCsvJobParams({
-      apiClient,
-      searchModeParams: getSearchModeParams(true),
-      title: sharingData.title as string,
-    });
-
     const generateReportingJobCSV = ({ intl }: { intl: InjectedIntl }) => {
+      const { reportType, decoratedJobParams } = getSearchCsvJobParams({
+        apiClient,
+        searchModeParams: getSearchModeParams(false),
+        title: sharingData.title as string,
+      });
+
       return apiClient
         .createReportingShareJob(reportType, decoratedJobParams)
         .then(() => firstValueFrom(startServices$))
@@ -124,6 +124,12 @@ export const reportingCsvExportProvider = ({
 
     const panelTitle = i18n.translate('reporting.share.contextMenu.export.csvReportsButtonLabel', {
       defaultMessage: 'Export',
+    });
+
+    const { reportType, decoratedJobParams } = getSearchCsvJobParams({
+      apiClient,
+      searchModeParams: getSearchModeParams(true),
+      title: sharingData.title as string,
     });
 
     const relativePath = apiClient.getReportingPublicJobPath(reportType, decoratedJobParams);
