@@ -52,7 +52,9 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
   useBreadcrumbs('policies_list');
   const { getPath } = useLink();
   const hasFleetAllAgentPoliciesPrivileges = useAuthz().fleet.allAgentPolicies;
-
+  const agentPolicySavedObjectType = isSpaceAwarenessEnabled
+    ? AGENT_POLICY_SAVED_OBJECT_TYPE
+    : LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE;
   const {
     agents: { enabled: isFleetEnabled },
   } = useConfig();
@@ -87,6 +89,12 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
     [getPath, history, isCreateAgentPolicyFlyoutOpen, toUrlParams, urlParams]
   );
 
+  // Hide agentless policies
+  const getSearchWithDefaults = (newSearch: string) => {
+    const defaultSearch = `NOT ${agentPolicySavedObjectType}.supports_agentless:true`;
+    return newSearch.trim() ? `(${defaultSearch}) AND (${newSearch})` : defaultSearch;
+  };
+
   // Fetch agent policies
   const {
     isLoading,
@@ -97,7 +105,7 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
     perPage: pagination.pageSize,
     sortField: sorting?.field,
     sortOrder: sorting?.direction,
-    kuery: search,
+    kuery: getSearchWithDefaults(search),
     withAgentCount: true, // Explicitly fetch agent count
     full: true,
   });
@@ -328,11 +336,7 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
           <SearchBar
             value={search}
             indexPattern={INGEST_SAVED_OBJECT_INDEX}
-            fieldPrefix={
-              isSpaceAwarenessEnabled
-                ? AGENT_POLICY_SAVED_OBJECT_TYPE
-                : LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE
-            }
+            fieldPrefix={agentPolicySavedObjectType}
             onChange={(newSearch) => {
               setPagination({
                 ...pagination,

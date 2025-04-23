@@ -41,7 +41,10 @@ export const AgentPolicyDetailsPage: React.FunctionComponent = () => {
   } = useRouteMatch<{ policyId: string; tabId?: string }>();
   const { getHref } = useLink();
   const agentPolicyRequest = useGetOneAgentPolicy(policyId);
-  const agentPolicy = agentPolicyRequest.data ? agentPolicyRequest.data.item : null;
+  const agentPolicy =
+    agentPolicyRequest.data?.item && !agentPolicyRequest.data.item.supports_agentless // Hide agentless policies
+      ? agentPolicyRequest.data.item
+      : null;
   const { isLoading, error, sendRequest: refreshAgentPolicy } = agentPolicyRequest;
   const queryParams = new URLSearchParams(useLocation().search);
   const openEnrollmentFlyoutOpenByDefault = queryParams.get('openEnrollmentFlyout') === 'true';
