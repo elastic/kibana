@@ -2367,4 +2367,59 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       }
     ),
   },
+  {
+    key: 'linux.advanced.memory_protection.scan_on_network_event',
+    first_supported_version: '8.17.6',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.memory_protection.scan_on_network_event',
+      {
+        defaultMessage:
+          'Allow Memory Protection to perform memory scans in response to network activity. Default: true',
+      }
+    ),
+  },
+  {
+    key: 'mac.advanced.memory_protection.scan_on_network_event',
+    first_supported_version: '8.17.6',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.memory_protection.scan_on_network_event',
+      {
+        defaultMessage:
+          'Allow Memory Protection to perform memory scans in response to network activity. Default: true',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.memory_protection.scan_on_network_event',
+    first_supported_version: '8.17.6',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.memory_protection.scan_on_network_event',
+      {
+        defaultMessage:
+          'Allow Memory Protection to perform memory scans in response to network activity. Default: true',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.memory_protection.scan_on_api_event',
+    first_supported_version: '8.17.6',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.memory_protection.scan_on_api_event',
+      {
+        defaultMessage:
+          'Allow Memory Protection to perform memory scans in response to API events. Default: true',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.memory_protection.scan_on_image_load_event',
+    first_supported_version: '8.17.6',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.memory_protection.scan_on_image_load_event',
+      {
+        defaultMessage:
+          'Allow Memory Protection to perform memory scans in response to image loads. Default: true',
+      }
+    ),
+  },
 ];
