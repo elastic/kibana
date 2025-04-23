@@ -381,7 +381,7 @@ describe('SavedObjectsService', () => {
         };
         const returnedType = {
           ...inputType,
-                  };
+        };
 
         applyTypeDefaultsMock.mockReturnValue(returnedType);
 

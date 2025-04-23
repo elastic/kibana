@@ -34,7 +34,7 @@ describe('generateAdditiveMappingDiff', () => {
   const getTypes = () => {
     const foo = createType({
       name: 'foo',
-            modelVersions: {
+      modelVersions: {
         1: stubModelVersion,
         2: stubModelVersion,
       },

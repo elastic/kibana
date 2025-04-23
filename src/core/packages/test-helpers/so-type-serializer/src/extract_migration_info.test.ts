@@ -161,7 +161,6 @@ describe('extractMigrationInfo', () => {
   });
 
   describe('modelVersions', () => {
-
     it('returns a proper summary o the model versions', () => {
       const type = createType({
         modelVersions: {
@@ -311,7 +310,7 @@ describe('extractMigrationInfo', () => {
 
     it('returns the correct values for schemas', () => {
       const type = createType({
-                modelVersions: {
+        modelVersions: {
           1: {
             changes: [],
             schemas: {
@@ -365,14 +364,14 @@ describe('extractMigrationInfo', () => {
             ],
           },
         },
-              });
+      });
 
       const output = extractMigrationInfo(type);
 
       expect(output).toEqual(
         expect.objectContaining({
           migrationVersions: ['7.17.7', '8.0.2', '8.3.3'],
-                    modelVersions: [
+          modelVersions: [
             {
               version: '1',
               changeTypes: ['data_backfill'],

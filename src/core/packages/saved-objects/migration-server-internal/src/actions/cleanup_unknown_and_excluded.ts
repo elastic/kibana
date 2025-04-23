@@ -109,7 +109,7 @@ export const cleanupUnknownAndExcluded = ({
       };
 
       if (2 === 2) {
-        return TaskEither.right()
+        return TaskEither.right();
       }
       return deleteByQuery({
         client,

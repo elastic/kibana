@@ -12,10 +12,8 @@ import {
   getModelVersionMapForTypes,
   getLatestModelVersion,
   getLatestMigrationVersion,
-  getCurrentVirtualVersion,
   getVirtualVersionMap,
   getLatestMappingsVersionNumber,
-  getLatestMappingsModelVersion,
   getLatestMappingsVirtualVersionMap,
 } from './version_map';
 
@@ -211,7 +209,7 @@ describe('ModelVersion map utilities', () => {
         getVirtualVersionMap([
           buildType({
             name: 'foo',
-                        migrations: {
+            migrations: {
               '7.17.2': dummyMigration,
               '8.6.0': dummyMigration,
             },
@@ -231,7 +229,7 @@ describe('ModelVersion map utilities', () => {
           }),
           buildType({
             name: 'dolly',
-                        migrations: {
+            migrations: {
               '7.17.2': dummyMigration,
               '8.6.0': dummyMigration,
             },
@@ -312,7 +310,7 @@ describe('ModelVersion map utilities', () => {
         getLatestMappingsVirtualVersionMap([
           buildType({
             name: 'foo',
-                        migrations: {
+            migrations: {
               '7.17.2': dummyMigration,
               '8.6.0': dummyMigration,
             },
@@ -334,7 +332,7 @@ describe('ModelVersion map utilities', () => {
           }),
           buildType({
             name: 'dolly',
-                        migrations: {
+            migrations: {
               '7.17.2': dummyMigration,
               '8.6.0': dummyMigration,
             },

@@ -39,7 +39,7 @@ const defaultType: SavedObjectsType<any> = {
       changes: [],
     },
   },
-    migrations: {},
+  migrations: {},
 };
 
 export const baselineTypes: Array<SavedObjectsType<any>> = [

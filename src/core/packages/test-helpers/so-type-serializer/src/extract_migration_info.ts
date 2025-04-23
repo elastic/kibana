@@ -79,7 +79,7 @@ export const extractMigrationInfo = (soType: SavedObjectsType): SavedObjectTypeM
     mappings: getFlattenedObject(soType.mappings ?? {}),
     hasExcludeOnUpgrade: !!soType.excludeOnUpgrade,
     modelVersions,
-      };
+  };
 };
 
 const changesWithTransform = ['data_backfill', 'data_removal', 'unsafe_transform'];

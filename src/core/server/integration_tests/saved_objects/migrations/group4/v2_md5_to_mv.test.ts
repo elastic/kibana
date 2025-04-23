@@ -26,7 +26,7 @@ import '../jest_matchers';
 const logFilePath = Path.join(__dirname, 'v2_md5_to_mv.test.log');
 
 const SOME_TYPE = createType({
-    name: 'some-type',
+  name: 'some-type',
   modelVersions: {
     1: {
       changes: [],
@@ -41,7 +41,7 @@ const SOME_TYPE = createType({
 });
 
 const ANOTHER_TYPE = createType({
-    name: 'another-type',
+  name: 'another-type',
   modelVersions: {
     '1': {
       changes: [],
@@ -55,7 +55,7 @@ const ANOTHER_TYPE = createType({
   },
 });
 const ANOTHER_TYPE_UPDATED = createType({
-    name: 'another-type',
+  name: 'another-type',
   modelVersions: {
     '1': {
       changes: [],

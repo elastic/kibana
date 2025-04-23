@@ -13,7 +13,7 @@ import { createType } from '../test_helpers';
 const getTestTypes = () => {
   const foo = createType({
     name: 'foo',
-        modelVersions: {
+    modelVersions: {
       1: { changes: [] },
       2: { changes: [] },
     },
@@ -21,14 +21,14 @@ const getTestTypes = () => {
   });
   const bar = createType({
     name: 'bar',
-        modelVersions: {
+    modelVersions: {
       1: { changes: [] },
     },
     mappings: { properties: { barField: { type: 'text' } } },
   });
   const dolly = createType({
     name: 'dolly',
-        modelVersions: () => ({
+    modelVersions: () => ({
       1: { changes: [] },
       2: { changes: [] },
       3: { changes: [] },

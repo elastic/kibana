@@ -69,7 +69,7 @@ describe('SOR - update API', () => {
       management: {
         importableAndExportable: true,
       },
-            modelVersions: versionMap,
+      modelVersions: versionMap,
     };
   };
 
@@ -85,7 +85,7 @@ describe('SOR - update API', () => {
       management: {
         importableAndExportable: true,
       },
-            modelVersions: {},
+      modelVersions: {},
     };
   };
 

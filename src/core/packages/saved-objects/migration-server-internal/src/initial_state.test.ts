@@ -82,7 +82,7 @@ describe('createInitialState', () => {
           changes: [],
         },
       },
-          });
+    });
     typeRegistry.registerType({
       name: 'bar',
       hidden: false,
@@ -98,7 +98,7 @@ describe('createInitialState', () => {
           changes: [{ type: 'mappings_addition', addedMappings: {} }],
         },
       },
-          });
+    });
     docLinks = docLinksServiceMock.createSetupContract();
     logger = mockLogger.get();
     createInitialStateParams = {

@@ -36,7 +36,7 @@ export const slo: SavedObjectsType = {
   name: SO_SLO_TYPE,
   hidden: false,
   namespaceType: 'multiple-isolated',
-    modelVersions: {
+  modelVersions: {
     1: {
       changes: [
         { type: 'mappings_addition', addedMappings: { version: { type: 'long' } } },

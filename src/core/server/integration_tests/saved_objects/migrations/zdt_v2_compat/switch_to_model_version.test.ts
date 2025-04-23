@@ -68,7 +68,7 @@ describe('ZDT with v2 compat - type switching from migration to model version', 
         };
       },
     },
-        modelVersions: {
+    modelVersions: {
       1: {
         changes: [
           {

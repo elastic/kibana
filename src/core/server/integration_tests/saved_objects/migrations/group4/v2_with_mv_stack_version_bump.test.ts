@@ -54,7 +54,7 @@ describe('V2 algorithm - using model versions - stack version bump scenario', ()
 
     if (!beforeUpgrade) {
       Object.assign<typeof type, Partial<typeof type>>(type, {
-                modelVersions: {
+        modelVersions: {
           1: {
             changes: [
               {
@@ -90,7 +90,7 @@ describe('V2 algorithm - using model versions - stack version bump scenario', ()
       name: 'test_mv',
       namespaceType: 'single',
       migrations: {},
-            modelVersions: {
+      modelVersions: {
         1: {
           changes: [],
         },

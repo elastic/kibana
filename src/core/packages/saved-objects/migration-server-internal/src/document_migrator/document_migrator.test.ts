@@ -1415,7 +1415,7 @@ describe('DocumentMigrator', () => {
 
       const fooType = createType({
         name: 'foo',
-                modelVersions: {
+        modelVersions: {
           1: {
             changes: [],
             schemas: {
@@ -1457,7 +1457,7 @@ describe('DocumentMigrator', () => {
 
       const fooType = createType({
         name: 'foo',
-                modelVersions: {
+        modelVersions: {
           1: {
             changes: [],
             schemas: {

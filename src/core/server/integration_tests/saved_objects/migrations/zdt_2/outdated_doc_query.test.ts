@@ -52,7 +52,7 @@ describe('getOutdatedDocumentsQuery', () => {
 
     return createType({
       name: 'test-type',
-            modelVersions,
+      modelVersions,
       mappings: {
         dynamic: false,
         properties: {
