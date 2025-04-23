@@ -53,7 +53,7 @@ RUN set -e ; \
         aarch64) \
             TINI_BIN='tini-arm64' ; \
             ;; \
-        x86_64) \
+        {{#ubuntu}}amd64{{/ubuntu}}{{^ubuntu}}x86_64{{/ubuntu}}) \
             TINI_BIN='tini-amd64' ; \
             ;; \
         *) echo >&2 "Unsupported architecture $arch" ; exit 1 ;; \
