@@ -9,13 +9,13 @@ import { Locator } from '@kbn/scout';
 import { ScoutPage } from '@kbn/scout/src/playwright';
 
 export class PainlessLab {
-  public outputValueElement: Locator;
+  public editorOutputPane: Locator;
   public requestFlyoutHeader: Locator;
   public viewRequestButton: Locator;
   public flyoutResponseTab: Locator;
 
   constructor(private readonly page: ScoutPage) {
-    this.outputValueElement = this.page.testSubj.locator('painlessTabs-loaded');
+    this.editorOutputPane = this.page.testSubj.locator('painlessTabs-loaded');
     this.requestFlyoutHeader = this.page.testSubj.locator('painlessLabRequestFlyoutHeader');
     this.viewRequestButton = this.page.testSubj.locator('btnViewRequest');
     this.flyoutResponseTab = this.page.locator('#response');
@@ -25,15 +25,15 @@ export class PainlessLab {
     return this.page.gotoApp('dev_tools', { hash: 'painless_lab' });
   }
 
-  async waitForRenderComplete() {
+  async waitForEditorToLoad() {
     // wait for page to be rendered
     await this.page.testSubj.locator('kibanaCodeEditor').waitFor({ state: 'visible' });
-    await this.page.testSubj.locator('painlessTabs-loaded').waitFor({ state: 'visible' });
+    await this.editorOutputPane.waitFor({ state: 'visible' });
   }
 
-  async setCodeEditorValue(value: any, nthIndex?: any) {
+  async setCodeEditorValue(value: string, nthIndex?: number): Promise<void> {
     await this.page.evaluate(
-      ([editorIndex, codeEditorValue]) => {
+      ({ editorIndex, codeEditorValue }) => {
         const editor = window.MonacoEnvironment!.monaco!.editor;
         const textModels = editor.getModels();
 
@@ -43,7 +43,7 @@ export class PainlessLab {
           textModels.forEach((model) => model.setValue(codeEditorValue));
         }
       },
-      [nthIndex, value]
+      { editorIndex: nthIndex, codeEditorValue: value }
     );
   }
 
