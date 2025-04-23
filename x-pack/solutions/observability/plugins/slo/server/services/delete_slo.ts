@@ -6,7 +6,7 @@
  */
 
 import { RulesClientApi } from '@kbn/alerting-plugin/server/types';
-import { ElasticsearchClient, IScopedClusterClient } from '@kbn/core/server';
+import { IScopedClusterClient } from '@kbn/core/server';
 import {
   SLI_DESTINATION_INDEX_PATTERN,
   SUMMARY_DESTINATION_INDEX_PATTERN,
@@ -24,7 +24,6 @@ export class DeleteSLO {
     private repository: SLORepository,
     private transformManager: TransformManager,
     private summaryTransformManager: TransformManager,
-    private esClient: ElasticsearchClient,
     private scopedClusterClient: IScopedClusterClient,
     private rulesClient: RulesClientApi
   ) {}
@@ -60,7 +59,7 @@ export class DeleteSLO {
   }
 
   private async deleteRollupData(sloId: string): Promise<void> {
-    await this.esClient.deleteByQuery({
+    await this.scopedClusterClient.asCurrentUser.deleteByQuery({
       index: SLI_DESTINATION_INDEX_PATTERN,
       wait_for_completion: false,
       conflicts: 'proceed',
@@ -78,7 +77,7 @@ export class DeleteSLO {
   }
 
   private async deleteSummaryData(sloId: string): Promise<void> {
-    await this.esClient.deleteByQuery({
+    await this.scopedClusterClient.asCurrentUser.deleteByQuery({
       index: SUMMARY_DESTINATION_INDEX_PATTERN,
       refresh: true,
       wait_for_completion: false,
