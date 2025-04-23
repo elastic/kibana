@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ActionTypeModel as ConnectorTypeModel } from '@kbn/triggers-actions-ui-plugin/public';
-import { Config, Secrets, ExecutorParams } from '../../../common/xsoar/types';
+import type { ActionTypeModel as ConnectorTypeModel } from '@kbn/triggers-actions-ui-plugin/public';
+import type { Config, Secrets, ExecutorParams } from '../../../common/xsoar/types';
 
 export type XSOARConnector = ConnectorTypeModel<Config, Secrets, ExecutorParams>;

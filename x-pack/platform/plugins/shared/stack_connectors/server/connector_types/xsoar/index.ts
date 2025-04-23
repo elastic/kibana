@@ -5,15 +5,13 @@
  * 2.0.
  */
 
-import {
-  SubActionConnectorType,
-  ValidatorType,
-} from '@kbn/actions-plugin/server/sub_action_framework/types';
+import type { SubActionConnectorType } from '@kbn/actions-plugin/server/sub_action_framework/types';
+import { ValidatorType } from '@kbn/actions-plugin/server/sub_action_framework/types';
 import { SecurityConnectorFeatureId } from '@kbn/actions-plugin/common';
 import { urlAllowListValidator } from '@kbn/actions-plugin/server';
 import { XSOAR_CONNECTOR_ID, XSOAR_TITLE } from '../../../common/xsoar/constants';
 import { ConfigSchema, SecretsSchema } from '../../../common/xsoar/schema';
-import { Config, Secrets } from '../../../common/xsoar/types';
+import type { Config, Secrets } from '../../../common/xsoar/types';
 import { XSOARConnector } from './xsoar';
 import { renderParameterTemplates } from './render';
 

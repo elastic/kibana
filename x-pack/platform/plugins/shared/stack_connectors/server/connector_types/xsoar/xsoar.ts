@@ -6,8 +6,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ServiceParams, SubActionConnector } from '@kbn/actions-plugin/server';
-import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
+import type { ServiceParams } from '@kbn/actions-plugin/server';
+import { SubActionConnector } from '@kbn/actions-plugin/server';
+import type { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 import type { AxiosError } from 'axios';
 
 import type {

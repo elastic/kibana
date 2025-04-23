@@ -12,7 +12,7 @@ import {
   XSOARPlaybooksResponse,
 } from '@kbn/actions-simulators-plugin/server/xsoar_simulation';
 import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
-import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 
 const connectorTypeId = '.xsoar';
 const name = 'XSOAR action';

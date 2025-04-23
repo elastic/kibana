@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { XSOARConnectorType, getConnectorType } from '.';
+import type { XSOARConnectorType } from '.';
+import { getConnectorType } from '.';
 
 let connectorType: XSOARConnectorType;
 

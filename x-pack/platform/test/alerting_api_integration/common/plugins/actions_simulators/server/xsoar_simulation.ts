@@ -5,15 +5,16 @@
  * 2.0.
  */
 
-import http from 'http';
-import {
+import type http from 'http';
+import type {
   RequestHandlerContext,
   KibanaRequest,
   KibanaResponseFactory,
   IKibanaResponse,
   IRouter,
 } from '@kbn/core/server';
-import { ProxyArgs, Simulator } from './simulator';
+import type { ProxyArgs } from './simulator';
+import { Simulator } from './simulator';
 
 export const XSOARPlaybook0 = {
   id: '8db0105c-f674-4d83-8095-f95a9f61e77a',
