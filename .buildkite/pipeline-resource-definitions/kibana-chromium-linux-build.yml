@@ -3,13 +3,13 @@ apiVersion: backstage.io/v1alpha1
 kind: Resource
 metadata:
   name: bk-kibana-chromium-linux-build
-  description: Create chromium linux build
+  description: Create chromium linux builds for the Kibana Reporting feature
   links:
     - title: Pipeline link
       url: https://buildkite.com/elastic/kibana-chromium-linux-build
 spec:
   type: buildkite-pipeline
-  owner: group:appex-sharedux
+  owner: group:response-ops
   system: buildkite
   implementation:
     apiVersion: buildkite.elastic.dev/v1
@@ -19,7 +19,7 @@ spec:
       description: Creates headless Chromium Linux builds
     spec:
       env:
-        SLACK_NOTIFICATIONS_CHANNEL: "#appex-sharedux"
+        SLACK_NOTIFICATIONS_CHANNEL: "#kibana-alerting"
         ELASTIC_SLACK_NOTIFICATIONS_ENABLED: "false"
       repository: elastic/kibana
       branch_configuration: main
@@ -31,6 +31,8 @@ spec:
         kibana-operations:
           access_level: MANAGE_BUILD_AND_READ
         appex-sharedux:
+          access_level: MANAGE_BUILD_AND_READ
+        response-ops:
           access_level: MANAGE_BUILD_AND_READ
         everyone:
           access_level: READ_ONLY

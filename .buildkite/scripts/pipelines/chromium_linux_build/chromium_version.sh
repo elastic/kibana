@@ -7,6 +7,8 @@ source .buildkite/scripts/common/util.sh
 
 echo "---Attempting to compute chromium version for provided puppeteer version"
 
-echo "$(node scripts/chromium_version $PUPPETEER_VERSION)" | grep -i "chromium commit" | awk '{print $5}' | buildkite-agent meta-data set "chromium_commit_hash"
-echo "$(node scripts/chromium_version $PUPPETEER_VERSION)" | grep -i "chrome version" | awk '{print $5}' | buildkite-agent meta-data set "chromium_version"
-echo "$(node scripts/chromium_version $PUPPETEER_VERSION)" | grep -i "chromium revision" | awk '{print $5}' | buildkite-agent meta-data set "chromium_revision"
+CHROMIUM_VERSION_OUTPUT=$(node scripts/chromium_version $PUPPETEER_VERSION)
+
+echo "$CHROMIUM_VERSION_OUTPUT" | grep -i "chromium commit" | awk '{print $5}' | buildkite-agent meta-data set "chromium_commit_hash"
+echo "$CHROMIUM_VERSION_OUTPUT" | grep -i "chrome version" | awk '{print $5}' | buildkite-agent meta-data set "chromium_version"
+echo "$CHROMIUM_VERSION_OUTPUT" | grep -i "chromium revision" | awk '{print $5}' | buildkite-agent meta-data set "chromium_revision"
