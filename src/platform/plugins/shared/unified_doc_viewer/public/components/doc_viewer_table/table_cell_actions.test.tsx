@@ -22,7 +22,7 @@ jest.mock('@elastic/eui', () => ({
 }));
 const mockCopyToClipboard = jest.mocked(copyToClipboard);
 
-afterAll(() => {
+afterEach(() => {
   jest.clearAllMocks();
 });
 
