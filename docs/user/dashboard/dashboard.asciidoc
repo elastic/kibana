@@ -293,11 +293,9 @@ To make changes without changing the original version, open the panel menu, then
 
 * *Convert to Lens* &mdash; Opens *TSVB* and aggregation-based visualizations in *Lens*.
 
-* *Panel settings* &mdash; Opens the *Panel settings* window to change the *title*, *description*, and *time range*.
+* *Settings* &mdash; Opens the *Panel settings* window to change the *title*, *description*, and *time range*.
 
-* *More > Replace panel* &mdash; Opens the *Visualize Library* so you can select a new panel to replace the existing panel.
-
-* *More > Delete from dashboard* &mdash; Removes the panel from the dashboard. 
+* *Remove* &mdash; Removes the panel from the dashboard. 
 +
 If you want to use the panel later, make sure that you save the panel to the *Visualize Library*.  
 
@@ -305,24 +303,24 @@ If you want to use the panel later, make sure that you save the panel to the *Vi
 [[duplicate-panels]]
 == Duplicate panels
 
-To duplicate a panel and the configured functionality, use the clone and copy panel options. Cloned and copied panels replicate all of the functionality from the original panel, 
+To duplicate a panel and the configured functionality, use the duplicate and copy panel options. Duplicated and copied panels replicate all of the functionality from the original panel, 
 including renaming, editing, and cloning. 
 
 [float]
-[[clone-panels]]
-=== Clone panels
+[[duplicate]]
+=== Duplicate
 
-Cloned panels appear next to the original panel, and move the other panels to provide a space on the dashboard.
+Duplicated panels appear next to the original panel, and move the other panels to provide a space on the dashboard.
 
 . In the toolbar, click *Edit*.
 
-. Open the panel menu, then select *Clone panel*. 
+. Open the panel menu, then select *Duplicate*. 
 +
-When cloned panels are saved in the *Visualize Library*, image:dashboard/images/visualize-library-icon.png[Visualize Library icon] appears in the header.
+When duplicated panels are saved in the *Visualize Library*, image:dashboard/images/visualize-library-icon.png[Visualize Library icon] appears in the header.
 
 [float]
 [[copy-to-dashboard]]
-=== Copy panels
+=== Copy to dashboard
 
 Copy panels from one dashboard to another dashboard.
 
