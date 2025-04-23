@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { EuiFormRow, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFormRow, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import styled from 'styled-components';
 
 import { EsFieldSelector } from '@kbn/securitysolution-autocomplete';
@@ -57,16 +57,18 @@ export const EntryItem: React.FC<EntryItemProps> = ({
 
   const renderFieldInput = useMemo(() => {
     const comboBox = (
-      <EsFieldSelector
-        placeholder={i18n.FIELD_PLACEHOLDER}
-        indexPattern={indexPattern}
-        selectedField={entry.field}
-        isClearable={false}
-        isLoading={false}
-        isDisabled={indexPattern == null}
-        onChange={handleFieldChange}
-        data-test-subj="entryField"
-      />
+      <EuiToolTip position="top" content={entry.field?.name}>
+        <EsFieldSelector
+          placeholder={i18n.FIELD_PLACEHOLDER}
+          indexPattern={indexPattern}
+          selectedField={entry.field}
+          isClearable={false}
+          isLoading={false}
+          isDisabled={indexPattern == null}
+          onChange={handleFieldChange}
+          data-test-subj="entryField"
+        />
+      </EuiToolTip>
     );
 
     if (showLabel) {
@@ -86,16 +88,18 @@ export const EntryItem: React.FC<EntryItemProps> = ({
 
   const renderThreatFieldInput = useMemo(() => {
     const comboBox = (
-      <EsFieldSelector
-        placeholder={i18n.FIELD_PLACEHOLDER}
-        indexPattern={threatIndexPatterns}
-        selectedField={entry.value}
-        isClearable={false}
-        isLoading={false}
-        isDisabled={threatIndexPatterns == null}
-        onChange={handleThreatFieldChange}
-        data-test-subj="threatEntryField"
-      />
+      <EuiToolTip position="top" content={entry.value?.name}>
+        <EsFieldSelector
+          placeholder={i18n.FIELD_PLACEHOLDER}
+          indexPattern={threatIndexPatterns}
+          selectedField={entry.value}
+          isClearable={false}
+          isLoading={false}
+          isDisabled={threatIndexPatterns == null}
+          onChange={handleThreatFieldChange}
+          data-test-subj="threatEntryField"
+        />
+      </EuiToolTip>
     );
 
     if (showLabel) {
