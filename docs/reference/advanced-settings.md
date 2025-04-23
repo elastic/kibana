@@ -312,12 +312,6 @@ $$$apm-aws-price$$$`observability:apmAWSLambdaPriceFactor`
 $$$apm-aws-request$$$`observability:apmAWSLambdaRequestCostPerMillion`
 :   Set the AWS Lambda cost per million requests.
 
-$$$apm-continuous-rollups$$$`observability:apmEnableContinuousRollups`
-:   [beta] When continuous rollups is enabled, the UI will select metrics with the appropriate resolution. On larger time ranges, lower resolution metrics will be used, which will improve loading times.
-
-$$$apm-enable-service-metrics$$$`observability:apmEnableServiceMetrics`
-:   [beta] Enables the usage of service transaction metrics, which are low cardinality metrics that can be used by certain views like the service inventory for faster loading times.
-
 $$$observability-apm-labs$$$`observability:apmLabsButton`
 :   Enable or disable the APM Labs button — a quick way to enable and disable technical preview features in APM.
 
@@ -392,9 +386,6 @@ $$$observability-profiling-aws-cost-discount-rate$$$`observability:profilingAWSC
 
 $$$observability-profiling-azure-cost-discount-rate$$$`observability:profilingAzureCostDiscountRate`
 :   If you have an Azure Enterprise Agreement with Microsoft, enter your discount rate to update the profiling cost calculation.
-
-$$$observability-profiling-use-topNFunctions-from-stacktraces$$$`observability:profilingFetchTopNFunctionsFromStacktraces`
-:   Switch to fetch the TopN Functions from the Stacktraces API.
 
 $$$observability-profiling-cost-per-vcpu-per-hour$$$`observability:profilingCostPervCPUPerHour`
 :   Default Hourly Cost per CPU Core for machines not on AWS or Azure.
