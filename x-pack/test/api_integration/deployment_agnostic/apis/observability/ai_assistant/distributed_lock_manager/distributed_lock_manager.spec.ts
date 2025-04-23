@@ -12,16 +12,19 @@ import {
   LockId,
   LockManager,
   LockDocument,
-  LOCKS_CONCRETE_INDEX_NAME,
   withLock,
-  LOCKS_INDEX_TEMPLATE_NAME,
-  LOCKS_COMPONENT_TEMPLATE_NAME,
+  runSetupIndexAssetEveryTime,
 } from '@kbn/observability-ai-assistant-plugin/server/service/distributed_lock_manager/lock_manager_client';
 import nock from 'nock';
 import { Client } from '@elastic/elasticsearch';
 import { times } from 'lodash';
 import { ToolingLog } from '@kbn/tooling-log';
 import pRetry from 'p-retry';
+import {
+  LOCKS_COMPONENT_TEMPLATE_NAME,
+  LOCKS_CONCRETE_INDEX_NAME,
+  LOCKS_INDEX_TEMPLATE_NAME,
+} from '@kbn/observability-ai-assistant-plugin/server/service/distributed_lock_manager/setup_lock_manager_index';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 import { getLoggerMock } from '../utils/logger';
 import { dateAsTimestamp, durationAsMs, sleep } from '../utils/time';
@@ -34,6 +37,13 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   describe('LockManager', function () {
     before(async () => {
       // delete existing index mappings to ensure we start from a clean state
+      await deleteLockIndexAssets(es, log);
+
+      // ensure that the index and templates are created
+      runSetupIndexAssetEveryTime();
+    });
+
+    after(async () => {
       await deleteLockIndexAssets(es, log);
     });
 
@@ -680,6 +690,47 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           const { settings } = res[LOCKS_CONCRETE_INDEX_NAME];
           expect(settings?.index?.auto_expand_replicas).to.eql('0-1');
         });
+      });
+    });
+
+    describe('when lock index is created with incorrect mappings', () => {
+      async function getMappings() {
+        const res = await es.indices.getMapping({ index: LOCKS_CONCRETE_INDEX_NAME });
+        const { mappings } = res[LOCKS_CONCRETE_INDEX_NAME];
+        return mappings;
+      }
+
+      before(async () => {
+        await deleteLockIndexAssets(es, log);
+
+        await es.index({
+          refresh: true,
+          index: LOCKS_CONCRETE_INDEX_NAME,
+          id: 'my_lock_with_incorrect_mappings',
+          document: {
+            token: 'my token',
+            expiresAt: new Date(Date.now() + 100000),
+            createdAt: new Date(),
+            metadata: { foo: 'bar' },
+          },
+        });
+      });
+
+      it('should delete the index and re-create it', async () => {
+        const mappingsBefore = await getMappings();
+        log.debug(`Mappings before: ${JSON.stringify(mappingsBefore)}`);
+        expect(mappingsBefore.properties?.token.type).to.eql('text');
+
+        // Simulate a scenario where the index mappings are incorrect
+        // await setuplockManagerIndex(es, logger);
+        await withLock(
+          { esClient: es, lockId: 'my_lock_with_correct_mappings', logger },
+          async () => {}
+        );
+
+        const mappingsAfter = await getMappings();
+        log.debug(`Mappings after: ${JSON.stringify(mappingsAfter)}`);
+        expect(mappingsAfter.properties?.token.type).to.be('keyword');
       });
     });
   });
