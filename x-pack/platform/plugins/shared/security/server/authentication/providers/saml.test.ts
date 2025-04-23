@@ -448,7 +448,7 @@ describe('SAMLAuthenticationProvider', () => {
           method: 'POST',
           path: '/_security/saml/prepare',
           body: {
-            acs: 'test-protocol://test-hostname:1234/mock-server-basepath/api/security/saml/callback',
+            acs: 'test-protocol://test-hostname:1234/mock-server-basepath/api/security/v1/saml',
           },
         });
       });
