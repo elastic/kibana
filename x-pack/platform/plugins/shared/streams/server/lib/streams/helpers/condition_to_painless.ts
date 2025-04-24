@@ -17,6 +17,7 @@ import {
   isNeverCondition,
   isOrCondition,
   isUnaryFilterCondition,
+  parsePath,
 } from '@kbn/streams-schema';
 
 function safePainlessField(conditionOrField: FilterCondition | string) {
@@ -116,8 +117,8 @@ function extractAllFields(condition: Condition, fields: string[] = []): string[]
   return uniq(fields);
 }
 
-function generateFieldDefinition(field: string) {
-  const parts = field.split('.');
+export function generateFieldDefinition(field: string) {
+  const parts = parsePath(field);
   const firstPart = parts[0];
   let code = `relevant_fields['${field}'] = ctx['${firstPart}'];\n`;
   for (let i = 1; i < parts.length; i++) {

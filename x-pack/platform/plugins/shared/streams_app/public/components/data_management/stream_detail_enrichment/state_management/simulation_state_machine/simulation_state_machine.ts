@@ -13,14 +13,8 @@ import {
   setup,
 } from 'xstate5';
 import { getPlaceholderFor } from '@kbn/xstate-utils';
-import {
-  FlattenRecord,
-  SampleDocument,
-  isSchema,
-  processorDefinitionSchema,
-} from '@kbn/streams-schema';
+import { SampleDocument, isSchema, processorDefinitionSchema } from '@kbn/streams-schema';
 import { isEmpty, isEqual } from 'lodash';
-import { flattenObjectNestedLast } from '@kbn/object-utils';
 import { BehaviorSubject, map } from 'rxjs';
 import { TimeState } from '@kbn/es-query';
 import { ProcessorDefinitionWithUIAttributes } from '../../types';
@@ -270,7 +264,7 @@ export const simulationMachine = setup({
         src: 'runSimulation',
         input: ({ context }) => ({
           streamName: context.streamName,
-          documents: context.samples.map(flattenObjectNestedLast) as FlattenRecord[],
+          documents: context.samples,
           processors: context.processors,
           detectedFields: context.detectedSchemaFields,
         }),

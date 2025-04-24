@@ -6,7 +6,7 @@
  */
 import { EuiDataGrid } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { SampleDocument } from '@kbn/streams-schema';
+import { SampleDocument, normalizeForLucene, parsePath } from '@kbn/streams-schema';
 import { isEmpty } from 'lodash';
 import React, { useMemo } from 'react';
 
@@ -59,7 +59,19 @@ export function PreviewTable({
         if (!doc || typeof doc !== 'object') {
           return '';
         }
-        const value = (doc as SampleDocument)[columnId];
+        const path = parsePath(columnId);
+        const value = path.reduce((acc, key) => {
+          if (acc === undefined || acc === null) {
+            return acc;
+          }
+          if (typeof acc !== 'object') {
+            return acc;
+          }
+          if (Array.isArray(acc)) {
+            return acc.map((item) => item[key]);
+          }
+          return acc[key] as SampleDocument;
+        }, doc as SampleDocument);
         if (value === undefined || value === null) {
           return '';
         }

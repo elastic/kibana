@@ -13,31 +13,33 @@ import {
   isAndCondition,
   isOrCondition,
 } from '../models';
+import { normalizeForLucene } from './parse_path';
 
 function conditionToClause(condition: FilterCondition) {
+  const field = normalizeForLucene(condition.field);
   switch (condition.operator) {
     case 'neq':
-      return { bool: { must_not: { match: { [condition.field]: condition.value } } } };
+      return { bool: { must_not: { match: { [field]: condition.value } } } };
     case 'eq':
-      return { match: { [condition.field]: condition.value } };
+      return { match: { [field]: condition.value } };
     case 'exists':
-      return { exists: { field: condition.field } };
+      return { exists: { field } };
     case 'gt':
-      return { range: { [condition.field]: { gt: condition.value } } };
+      return { range: { [field]: { gt: condition.value } } };
     case 'gte':
-      return { range: { [condition.field]: { gte: condition.value } } };
+      return { range: { [field]: { gte: condition.value } } };
     case 'lt':
-      return { range: { [condition.field]: { lt: condition.value } } };
+      return { range: { [field]: { lt: condition.value } } };
     case 'lte':
-      return { range: { [condition.field]: { lte: condition.value } } };
+      return { range: { [field]: { lte: condition.value } } };
     case 'contains':
-      return { wildcard: { [condition.field]: `*${condition.value}*` } };
+      return { wildcard: { [field]: `*${condition.value}*` } };
     case 'startsWith':
-      return { prefix: { [condition.field]: condition.value } };
+      return { prefix: { [field]: condition.value } };
     case 'endsWith':
-      return { wildcard: { [condition.field]: `*${condition.value}` } };
+      return { wildcard: { [field]: `*${condition.value}` } };
     case 'notExists':
-      return { bool: { must_not: { exists: { field: condition.field } } } };
+      return { bool: { must_not: { exists: { field } } } };
     default:
       return { match_none: {} };
   }

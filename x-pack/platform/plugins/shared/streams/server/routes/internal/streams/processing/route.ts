@@ -6,8 +6,6 @@
  */
 
 import {
-  FlattenRecord,
-  flattenRecord,
   namedFieldDefinitionConfigSchema,
   processorWithIdDefinitionSchema,
 } from '@kbn/streams-schema';
@@ -22,7 +20,7 @@ const paramsSchema = z.object({
   path: z.object({ name: z.string() }),
   body: z.object({
     processing: z.array(processorWithIdDefinitionSchema),
-    documents: z.array(flattenRecord),
+    documents: z.array(z.unknown()),
     detected_fields: z.array(namedFieldDefinitionConfigSchema).optional(),
   }),
 }) satisfies z.Schema<ProcessingSimulationParams>;
@@ -55,13 +53,13 @@ export const simulateProcessorRoute = createServerRoute({
 export interface ProcessingSuggestionBody {
   field: string;
   connectorId: string;
-  samples: FlattenRecord[];
+  samples: unknown[];
 }
 
 const processingSuggestionSchema = z.object({
   field: z.string(),
   connectorId: z.string(),
-  samples: z.array(flattenRecord),
+  samples: z.array(z.unknown()),
 });
 
 const suggestionsParamsSchema = z.object({

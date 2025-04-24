@@ -12,3 +12,4 @@ export * from './condition_fields';
 export * from './condition_to_query_dsl';
 export * from './field_definition';
 export * from './namespaced_ecs';
+export * from './parse_path';

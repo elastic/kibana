@@ -44,7 +44,7 @@ export interface ProcessingSimulationParams {
   };
   body: {
     processing: ProcessorDefinitionWithId[];
-    documents: FlattenRecord[];
+    documents: unknown[];
     detected_fields?: NamedFieldDefinitionConfig[];
   };
 }
@@ -193,10 +193,7 @@ export const simulateProcessing = async ({
   return prepareSimulationResponse(docReports, processorsMetrics, detectedFields);
 };
 
-const prepareSimulationDocs = (
-  documents: FlattenRecord[],
-  streamName: string
-): IngestDocument[] => {
+const prepareSimulationDocs = (documents: unknown[], streamName: string): IngestDocument[] => {
   return documents.map((doc, id) => ({
     _index: streamName,
     _id: id.toString(),
@@ -238,33 +235,9 @@ const prepareSimulationProcessors = (
     } as ProcessorDefinition;
   });
 
-  const dotExpanderProcessors: Array<Pick<IngestProcessorContainer, 'dot_expander'>> = [
-    {
-      dot_expander: {
-        field: '*',
-        ignore_failure: true,
-        override: true,
-      },
-    },
-    {
-      dot_expander: {
-        path: 'resource.attributes',
-        field: '*',
-        ignore_failure: true,
-      },
-    },
-    {
-      dot_expander: {
-        path: 'attributes',
-        field: '*',
-        ignore_failure: true,
-      },
-    },
-  ];
-
   const formattedProcessors = formatToIngestProcessors(processors);
 
-  return [...dotExpanderProcessors, ...formattedProcessors];
+  return [...formattedProcessors];
 };
 
 const prepareSimulationData = (params: ProcessingSimulationParams) => {
@@ -535,8 +508,7 @@ const getDocumentStatus = (
   if (ingestDocErrors.some((error) => error.type === 'field_mapping_failure')) {
     return 'failed';
   }
-  // Remove the always present base processor for dot expanders
-  const processorResults = doc.processor_results.slice(3);
+  const processorResults = doc.processor_results;
 
   if (processorResults.every(isSkippedProcessor)) {
     return 'skipped';
@@ -560,20 +532,18 @@ const getLastDoc = (
 ) => {
   const status = getDocumentStatus(docResult, ingestDocErrors);
   const lastDocSource =
-    docResult.processor_results
-      .slice(3) // Remove the always present base processors for dot expander
-      .filter((proc) => !isSkippedProcessor(proc))
-      .at(-1)?.doc?._source ?? sample;
+    docResult.processor_results.filter((proc) => !isSkippedProcessor(proc)).at(-1)?.doc?._source ??
+    sample;
 
   if (status === 'parsed') {
     return {
-      value: flattenObjectNestedLast(lastDocSource),
+      value: lastDocSource,
       errors: [] as SimulationError[],
       status,
     };
   } else {
     const { _errors = [], ...value } = lastDocSource;
-    return { value: flattenObjectNestedLast(value), errors: _errors as SimulationError[], status };
+    return { value, errors: _errors as SimulationError[], status };
   }
 };
 
