@@ -67,8 +67,9 @@ export const getApmDataAccessClient = ({
         end: number;
         kuery?: string;
       }) => {
-        const enableServiceTransactionMetrics =
-          uiSettingsClient.get<boolean>(apmEnableServiceMetrics);
+        const enableServiceTransactionMetrics = await uiSettingsClient.get<boolean>(
+          apmEnableServiceMetrics
+        );
 
         return services.getDocumentSources({
           start,
