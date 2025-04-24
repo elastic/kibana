@@ -8,33 +8,73 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { AlertDeleteModal } from './modal';
 import * as i18n from '../translations';
+import { httpServiceMock } from '@kbn/core/public/mocks';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+
+const http = httpServiceMock.createStartContract();
 
 describe('AlertDelete Modal', () => {
   const closeModalMock = jest.fn();
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: {
+        retry: false,
+        refetchOnWindowFocus: false,
+        refetchOnReconnect: false,
+        cacheTime: 0,
+      },
+    },
+  });
+
+  const wrapper = ({ children }: { children: React.ReactNode }) => (
+    <IntlProvider locale="en">
+      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+    </IntlProvider>
+  );
 
   beforeEach(() => {
+    jest.clearAllMocks();
     closeModalMock.mockClear();
   });
 
   it('renders the modal with initial state', () => {
-    render(<AlertDeleteModal onCloseModal={closeModalMock} isVisible />);
+    render(
+      <AlertDeleteModal
+        onCloseModal={closeModalMock}
+        isVisible
+        services={{ http }}
+        categoryIds={['management']}
+      />,
+      { wrapper }
+    );
 
     expect(screen.getByText(i18n.MODAL_TITLE)).toBeInTheDocument();
     expect(screen.getByText(i18n.MODAL_DESCRIPTION)).toBeInTheDocument();
     expect(screen.getByText(i18n.ACTIVE_ALERTS)).toBeInTheDocument();
     expect(screen.getByText(i18n.INACTIVE_ALERTS)).toBeInTheDocument();
-    expect(screen.getByText(i18n.DELETE_CONFIRMATION)).toBeInTheDocument();
     expect(screen.getByTestId('alert-delete-active-threshold')).toBeDisabled();
     expect(screen.getByTestId('alert-delete-active-threshold-unit')).toBeDisabled();
     expect(screen.getByTestId('alert-delete-inactive-threshold')).toBeDisabled();
     expect(screen.getByTestId('alert-delete-inactive-threshold-unit')).toBeDisabled();
+    expect(screen.getByTestId('alert-delete-preview-message').textContent).toEqual(
+      'Select the type of alerts you wish to delete'
+    );
   });
 
   it('enables the active alerts threshold when the checkbox is checked', () => {
-    render(<AlertDeleteModal onCloseModal={closeModalMock} isVisible />);
+    render(
+      <AlertDeleteModal
+        onCloseModal={closeModalMock}
+        isVisible
+        services={{ http }}
+        categoryIds={['management']}
+      />,
+      { wrapper }
+    );
 
     const activeCheckbox = screen.getByTestId('alert-delete-active-checkbox');
     fireEvent.click(activeCheckbox);
@@ -45,7 +85,15 @@ describe('AlertDelete Modal', () => {
   });
 
   it('enables the inactive alerts threshold when the checkbox is checked', () => {
-    render(<AlertDeleteModal onCloseModal={closeModalMock} isVisible />);
+    render(
+      <AlertDeleteModal
+        onCloseModal={closeModalMock}
+        isVisible
+        services={{ http }}
+        categoryIds={['management']}
+      />,
+      { wrapper }
+    );
 
     const inactiveCheckbox = screen.getByTestId('alert-delete-inactive-checkbox');
     fireEvent.click(inactiveCheckbox);
@@ -55,8 +103,24 @@ describe('AlertDelete Modal', () => {
     expect(screen.getByTestId('alert-delete-inactive-threshold-unit')).not.toBeDisabled();
   });
 
-  it('validates the delete confirmation input', () => {
-    render(<AlertDeleteModal onCloseModal={closeModalMock} isVisible />);
+  it('validates the delete confirmation input', async () => {
+    const apiResponse = {
+      affected_alert_count: 100,
+    };
+    http.get.mockResolvedValueOnce(apiResponse);
+
+    render(
+      <AlertDeleteModal
+        onCloseModal={closeModalMock}
+        isVisible
+        categoryIds={['management']}
+        services={{ http }}
+      />,
+      { wrapper }
+    );
+
+    const activeCheckbox = screen.getByTestId('alert-delete-active-checkbox');
+    fireEvent.click(activeCheckbox);
 
     const deleteInput = screen.getByTestId('alert-delete-delete-confirmation');
     fireEvent.change(deleteInput, { target: { value: 'wrong-passkey' } });
@@ -67,14 +131,23 @@ describe('AlertDelete Modal', () => {
     fireEvent.change(deleteInput, { target: { value: i18n.DELETE_PASSKEY } });
     expect(deleteInput).toHaveValue(i18n.DELETE_PASSKEY);
 
-    const inactiveCheckbox = screen.getByTestId('alert-delete-inactive-checkbox');
-    fireEvent.click(inactiveCheckbox);
+    await waitFor(() =>
+      expect(screen.getByTestId('alert-delete-preview-message').textContent).toContain('100 alerts')
+    );
 
     expect(screen.getByTestId('alert-delete-submit')).not.toBeDisabled();
   });
 
   it('calls closeModal when the cancel button is clicked', () => {
-    render(<AlertDeleteModal onCloseModal={closeModalMock} isVisible />);
+    render(
+      <AlertDeleteModal
+        onCloseModal={closeModalMock}
+        isVisible
+        services={{ http }}
+        categoryIds={['management']}
+      />,
+      { wrapper }
+    );
 
     const cancelButton = screen.getByText('Cancel');
     fireEvent.click(cancelButton);
@@ -82,18 +155,61 @@ describe('AlertDelete Modal', () => {
     expect(closeModalMock).toHaveBeenCalledTimes(1);
   });
 
-  it('submits the form when all validations pass', () => {
-    render(<AlertDeleteModal onCloseModal={closeModalMock} isVisible />);
+  it('submits the form when all validations pass', async () => {
+    const apiResponse = {
+      affected_alert_count: 100,
+    };
+    http.get.mockResolvedValueOnce(apiResponse);
+
+    render(
+      <AlertDeleteModal
+        onCloseModal={closeModalMock}
+        isVisible
+        services={{ http }}
+        categoryIds={['management']}
+      />,
+      { wrapper }
+    );
 
     const activeCheckbox = screen.getByTestId('alert-delete-active-checkbox');
     fireEvent.click(activeCheckbox);
 
-    const deleteInput = screen.getByTestId('alert-delete-delete-confirmation');
+    const deleteInput = await screen.findByTestId('alert-delete-delete-confirmation');
     fireEvent.change(deleteInput, { target: { value: i18n.DELETE_PASSKEY } });
 
     const submitButton = screen.getByTestId('alert-delete-submit');
     fireEvent.click(submitButton);
 
-    expect(submitButton).not.toBeDisabled();
+    await waitFor(() => expect(submitButton).not.toBeDisabled());
+  });
+
+  it('disables the submit button when no alert would be deleted with current settings', async () => {
+    const apiResponse = {
+      affected_alert_count: 0,
+    };
+    http.get.mockResolvedValueOnce(apiResponse);
+
+    render(
+      <AlertDeleteModal
+        onCloseModal={closeModalMock}
+        isVisible
+        services={{ http }}
+        categoryIds={['management']}
+      />,
+      { wrapper }
+    );
+
+    const activeCheckbox = screen.getByTestId('alert-delete-active-checkbox');
+    fireEvent.click(activeCheckbox);
+
+    const submitButton = screen.getByTestId('alert-delete-submit');
+    fireEvent.click(submitButton);
+
+    await waitFor(() =>
+      expect(screen.getByTestId('alert-delete-preview-message').textContent).toContain(
+        'No alerts match the selected criteria.'
+      )
+    );
+    expect(submitButton).toBeDisabled();
   });
 });

@@ -40,7 +40,7 @@ export interface RulesSettingsAlertDeleteProperties {
   isInactiveAlertDeleteEnabled: boolean;
   activeAlertDeleteThreshold: number;
   inactiveAlertDeleteThreshold: number;
-  categoryIds?: string[] | null;
+  categoryIds?: Array<'securitySolution' | 'observability' | 'management'>;
 }
 
 export interface RulesSettingsProperties {

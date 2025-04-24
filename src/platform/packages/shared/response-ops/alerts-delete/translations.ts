@@ -14,8 +14,7 @@ export const MODAL_TITLE = i18n.translate('responseOpsAlertDelete.modalTitle', {
 });
 
 export const MODAL_DESCRIPTION = i18n.translate('responseOpsAlertDelete.modalDescription', {
-  defaultMessage:
-    'Clean up alert history by removing old active alerts and long-inactive alerts based on customizable time thresholds',
+  defaultMessage: 'Remove alerts that exceed a threshold age or duration',
 });
 
 export const FORM_TITLE = i18n.translate('responseOpsAlertDelete.modalFormTitle', {
@@ -23,24 +22,25 @@ export const FORM_TITLE = i18n.translate('responseOpsAlertDelete.modalFormTitle'
 });
 
 export const ACTIVE_ALERTS = i18n.translate('responseOpsAlertDelete.activeAlerts', {
-  defaultMessage: 'Active Alerts',
+  defaultMessage: 'Active alerts',
 });
 
 export const ACTIVE_ALERTS_DESCRIPTION = i18n.translate(
   'responseOpsAlertDelete.activeAlertsDescription',
   {
-    defaultMessage: 'Active alert was created more than N days ago',
+    defaultMessage: 'Remove alerts that are active and older than the threshold',
   }
 );
 
 export const INACTIVE_ALERTS = i18n.translate('responseOpsAlertDelete.inactiveAlerts', {
-  defaultMessage: 'Inactive Alerts',
+  defaultMessage: 'Inactive alerts',
 });
 
 export const INACTIVE_ALERTS_DESCRIPTION = i18n.translate(
   'responseOpsAlertDelete.inactiveAlertsDescription',
   {
-    defaultMessage: 'Recovered, closed or untracked more than N days ago',
+    defaultMessage:
+      'Remove alerts that were recovered, closed, or untracked longer than the threshold',
   }
 );
 
@@ -62,11 +62,6 @@ export const MONTHS = i18n.translate('responseOpsAlertDelete.months', {
 
 export const YEARS = i18n.translate('responseOpsAlertDelete.years', {
   defaultMessage: 'years',
-});
-
-export const PREVIEW = i18n.translate('responseOpsAlertDelete.preview', {
-  defaultMessage:
-    "This action will permanently delete a total of 4000 alerts and you won't be able to restore them.",
 });
 
 export const DELETE_PASSKEY = i18n.translate('responseOpsAlertDelete.deletePasskey', {

@@ -136,7 +136,7 @@ export function RulesPage({ activeTab = RULES_TAB_NAME }: RulesPageProps) {
           </EuiButton>,
         ]
       : []),
-    <RulesSettingsLink />,
+    <RulesSettingsLink alertDeleteCategoryIds={['observability']} />,
     <EuiButtonEmpty
       data-test-subj="documentationLink"
       href={docLinks.links.observability.createAlerts}

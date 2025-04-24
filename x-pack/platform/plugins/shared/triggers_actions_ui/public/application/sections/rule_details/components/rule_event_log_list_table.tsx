@@ -194,7 +194,10 @@ export const RuleEventLogListTable = <T extends RuleEventLogListOptions>(
   }, [sortingColumns]);
 
   useEffect(() => {
-    setHeaderActions?.([<RulesSettingsLink />, <RulesListDocLink />]);
+    setHeaderActions?.([
+      <RulesSettingsLink alertDeleteCategoryIds={['management']} />,
+      <RulesListDocLink />,
+    ]);
     return () => setHeaderActions?.();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

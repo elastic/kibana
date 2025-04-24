@@ -11,8 +11,35 @@ import React, { useState } from 'react';
 import type { StoryObj } from '@storybook/react';
 import { EuiButton } from '@elastic/eui';
 import { EuiFlyout, EuiFlyoutBody } from '@elastic/eui';
-import { AlertDeleteRuleSettingsSection } from './components/rule_settings_section';
+import { HttpStart } from '@kbn/core/public';
+import { AlertDeleteDescriptiveFormGroup } from './components/descriptive_form_group';
 import { AlertDeleteModal } from './components/modal';
+
+const http = {
+  get: async (path: string, { query }: { query?: Record<string, string> }) => {
+    if (path.includes('_alert_delete_preview')) {
+      if (
+        !query ||
+        (Boolean(query?.is_active_alert_delete_enabled) === true &&
+          parseInt(query?.active_alert_delete_threshold, 10) === 30)
+      ) {
+        return {
+          affected_alert_count: 0,
+        };
+      }
+      if (parseInt(query.active_alert_delete_threshold, 10) > 30) {
+        return {
+          affected_alert_count:
+            Math.floor(parseInt(query.active_alert_delete_threshold, 10) / 30) - 1,
+        };
+      }
+      return {
+        affected_alert_count: Math.floor(Math.random() * 100),
+      };
+    }
+    throw new Error('Not implemented');
+  },
+} as unknown as HttpStart;
 
 const meta = {
   title: 'alertDelete',
@@ -20,7 +47,7 @@ const meta = {
 
 export default meta;
 
-const DefaultStory = () => {
+const DefaultStory = ({ isDisabled = false }: { isDisabled?: boolean }) => {
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(true);
   const closeFlyout = () => setIsFlyoutVisible(false);
   const showFlyout = () => setIsFlyoutVisible(true);
@@ -28,34 +55,70 @@ const DefaultStory = () => {
   return isFlyoutVisible ? (
     <EuiFlyout type="push" onClose={closeFlyout} maxWidth={440}>
       <EuiFlyoutBody>
-        <AlertDeleteRuleSettingsSection />
+        <AlertDeleteDescriptiveFormGroup
+          services={{ http }}
+          isDisabled={isDisabled}
+          categoryIds={['management']}
+        />
       </EuiFlyoutBody>
     </EuiFlyout>
   ) : (
-    <EuiButton onClick={showFlyout}>Click Me!</EuiButton>
+    <>
+      <EuiButton onClick={showFlyout}>Click Me!</EuiButton>
+      <p style={{ marginTop: '20px' }}>
+        <strong>Warning:</strong> The preview API is mocked. It will return the number of months
+        chosen in active alerts threshold - 1
+      </p>
+    </>
   );
 };
 
 export const RuleSettingsFlyout: StoryObj<typeof DefaultStory> = {
+  args: {
+    isDisabled: false,
+  },
+  argTypes: {
+    isDisabled: {
+      control: 'boolean',
+      description: 'Controls the disabled state',
+    },
+  },
   render: DefaultStory,
 };
 
-const ModalOnlyStory = () => {
+const ModalOnlyStory = ({ isDisabled = false }: { isDisabled?: boolean }) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const hideModal = () => setIsModalVisible(false);
-  const showFlyout = () => setIsModalVisible(true);
+  const showModal = () => setIsModalVisible(true);
 
   return isModalVisible ? (
-    <AlertDeleteModal isVisible={isModalVisible} onCloseModal={hideModal} />
+    <AlertDeleteModal
+      services={{ http }}
+      isVisible={isModalVisible}
+      onCloseModal={hideModal}
+      isDisabled={isDisabled}
+      categoryIds={['observability']}
+    />
   ) : (
-    <EuiButton onClick={showFlyout}>Open Modal</EuiButton>
+    <>
+      <EuiButton onClick={showModal}>Open Modal</EuiButton>
+      <p style={{ marginTop: '20px' }}>
+        <strong>Warning:</strong> The preview API is mocked. It will return the number of months
+        chosen in active alerts threshold - 1
+      </p>
+    </>
   );
 };
 
 export const ModalOnly: StoryObj<typeof AlertDeleteModal> = {
   args: {
-    isVisible: false,
-    onCloseModal: () => {},
+    isDisabled: false,
+  },
+  argTypes: {
+    isDisabled: {
+      control: 'boolean',
+      description: 'Controls the disabled state',
+    },
   },
   render: ModalOnlyStory,
 };

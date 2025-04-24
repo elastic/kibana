@@ -75,6 +75,7 @@ import { registerFieldsRoute } from './suggestions/fields_rules';
 import { registerAlertsValueSuggestionsRoute } from './suggestions/values_suggestion_alerts';
 import { getQueryDelaySettingsRoute } from './rules_settings/apis/get/get_query_delay_settings';
 import { updateQueryDelaySettingsRoute } from './rules_settings/apis/update/update_query_delay_settings';
+import { alertDeletePreviewRoute } from './alert_delete/apis/preview/get_alert_delete_preview_route';
 
 // backfill API
 import { scheduleBackfillRoute } from './backfill/apis/schedule/schedule_backfill_route';
@@ -149,6 +150,7 @@ export function defineRoutes(opts: RouteOptions) {
   bulkUntrackAlertsByQueryRoute(router, licenseState);
   muteAlertRoute(router, licenseState);
   unmuteAlertRoute(router, licenseState);
+  alertDeletePreviewRoute(router, licenseState);
 
   if (alertingConfig.maintenanceWindow.enabled) {
     // Maintenance Window - Internal APIs

@@ -56,6 +56,7 @@ export const ModalThresholdSelector = ({
         <EuiFlexGroup gutterSize="s" responsive={false}>
           <EuiFlexItem grow={1}>
             <EuiFieldNumber
+              key={error.join('')} // Force re-render when error changes because the error might happen when changing the threshold
               min={1}
               max={1000}
               value={threshold}

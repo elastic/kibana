@@ -11,11 +11,22 @@ import React, { lazy, Suspense, useState } from 'react';
 import { EuiButton, EuiDescribedFormGroup } from '@elastic/eui';
 import { EuiText } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { HttpStart } from '@kbn/core/public';
+import type { AlertDeleteCategoryIds } from '@kbn/alerting-plugin/common/constants/alert_delete';
 import * as i18n from '../translations';
 
 const ModalComponent = lazy(() => import('./modal'));
 
-export const AlertDeleteRuleSettingsSection = () => {
+interface AlertDeleteDescriptiveFormGroupProps {
+  services: { http: HttpStart };
+  categoryIds: AlertDeleteCategoryIds[];
+  isDisabled?: boolean;
+}
+export const AlertDeleteDescriptiveFormGroup = ({
+  services: { http },
+  categoryIds,
+  isDisabled = false,
+}: AlertDeleteDescriptiveFormGroupProps) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const onCloseModal = () => setIsModalOpen(false);
@@ -43,12 +54,19 @@ export const AlertDeleteRuleSettingsSection = () => {
           iconType={'broom'}
           css={{ alignSelf: 'flex-start', width: 'auto' }}
           data-test-subj="alert-delete-open-modal-button"
+          disabled={isDisabled}
         >
           {i18n.RUN_CLEANUP_TASK}
         </EuiButton>
       </EuiDescribedFormGroup>
       <Suspense fallback={<></>}>
-        <ModalComponent onCloseModal={onCloseModal} isVisible={isModalOpen} />
+        <ModalComponent
+          services={{ http }}
+          onCloseModal={onCloseModal}
+          isVisible={isModalOpen}
+          isDisabled={isDisabled}
+          categoryIds={categoryIds}
+        />
       </Suspense>
     </>
   );
