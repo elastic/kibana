@@ -88,6 +88,7 @@ export const AlertsFilterByRuleTypes: AlertsFilterComponentType<string[]> = ({
           !options.length ? RULE_TYPES_FILTER_NO_OPTIONS_PLACEHOLDER : RULE_TYPES_FILTER_PLACEHOLDER
         }
         fullWidth
+        compressed
         data-test-subj={RULE_TYPES_FILTER_SUBJ}
       />
     </EuiFormRow>

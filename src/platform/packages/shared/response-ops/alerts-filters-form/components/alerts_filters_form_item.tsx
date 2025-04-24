@@ -70,6 +70,7 @@ export const AlertsFiltersFormItem = <T,>({
           disabled={isDisabled}
           placeholder={FORM_ITEM_FILTER_BY_PLACEHOLDER}
           fullWidth
+          compressed
           popoverProps={{
             repositionOnScroll: true,
             ownFocus: true,

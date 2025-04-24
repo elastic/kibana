@@ -77,6 +77,7 @@ export const AlertsSolutionSelector = forwardRef<
         valueOfSelected={solution}
         onChange={(newSol) => onSolutionChange(newSol)}
         fullWidth
+        compressed
         popoverProps={{
           repositionOnScroll: true,
           ownFocus: true,
