@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import { visitGetStartedPage } from '../../../../tasks/navigation';
-import {
-  navigateToRulesManagementTable,
-  visitRulesManagementTable,
-} from '../../../../tasks/rules_management';
+import { visitRulesManagementTable } from '../../../../tasks/rules_management';
 import {
   REFRESH_RULES_STATUS,
   RULES_TABLE_AUTOREFRESH_INDICATOR,
@@ -28,6 +24,7 @@ import {
   selectRulesByName,
   getRuleRow,
   setRulesTableAutoRefreshIntervalSetting,
+  enableAutoRefresh,
 } from '../../../../tasks/alerts_detection_rules';
 import { login } from '../../../../tasks/login';
 
@@ -72,9 +69,10 @@ describe(
 
     describe('when enabled', () => {
       beforeEach(() => {
-        visitGetStartedPage(); // load the page without mocking timers. Deep links need timers unmocked
-        mockGlobalClock(); // mock timers
-        navigateToRulesManagementTable(); // navigate to rules page
+        visitRulesManagementTable();
+        disableAutoRefresh();
+        mockGlobalClock();
+        enableAutoRefresh();
 
         expectNumberOfRules(RULES_MANAGEMENT_TABLE, 1);
       });
@@ -99,9 +97,10 @@ describe(
 
     describe('when disabled', () => {
       beforeEach(() => {
-        visitGetStartedPage(); // load the page without mocking timers. Deep links need timers unmocked
-        mockGlobalClock(); // mock timers
-        navigateToRulesManagementTable(); // navigate to rules page
+        visitRulesManagementTable();
+        disableAutoRefresh();
+        mockGlobalClock();
+        enableAutoRefresh();
 
         expectNumberOfRules(RULES_MANAGEMENT_TABLE, 1);
       });
@@ -148,9 +147,10 @@ describe(
 
     describe('when one rule is selected', () => {
       it('does NOT refresh after refresh interval has passed', () => {
-        visitGetStartedPage(); // load the page without mocking timers. Deep links need timers unmocked
-        mockGlobalClock(); // mock timers
-        navigateToRulesManagementTable(); // navigate to rules page
+        visitRulesManagementTable();
+        disableAutoRefresh();
+        mockGlobalClock();
+        enableAutoRefresh();
 
         expectNumberOfRules(RULES_MANAGEMENT_TABLE, 1);
 
