@@ -7,12 +7,14 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import {
-  replaceAnonymizedValuesWithOriginalValues,
   type AttackDiscovery,
+  replaceAnonymizedValuesWithOriginalValues,
   type Replacements,
 } from '@kbn/elastic-assistant-common';
 import React, { useMemo } from 'react';
 
+import { SECURITY_FEATURE_ID } from '../../../../../../common';
+import { useKibana } from '../../../../../common/lib/kibana';
 import { AttackDiscoveryMarkdownFormatter } from '../../attack_discovery_markdown_formatter';
 import { ViewInAiAssistant } from '../view_in_ai_assistant';
 
@@ -27,6 +29,13 @@ const ActionableSummaryComponent: React.FC<Props> = ({
   replacements,
   showAnonymized = false,
 }) => {
+  const {
+    application: { capabilities },
+  } = useKibana().services;
+  // TODO We shouldn't have to check capabilities here, this should be done at a much higher level.
+  //  https://github.com/elastic/kibana/issues/xxxxxx
+  const disabledActions = Boolean(capabilities[SECURITY_FEATURE_ID].configurations);
+
   const entitySummary = useMemo(
     () =>
       showAnonymized
@@ -60,7 +69,7 @@ const ActionableSummaryComponent: React.FC<Props> = ({
       <EuiFlexGroup alignItems="center" gutterSize="none" justifyContent="spaceBetween">
         <EuiFlexItem data-test-subj="entitySummaryMarkdown" grow={false}>
           <AttackDiscoveryMarkdownFormatter
-            disableActions={showAnonymized}
+            disableActions={disabledActions}
             markdown={entitySummaryOrTitle}
           />
         </EuiFlexItem>
