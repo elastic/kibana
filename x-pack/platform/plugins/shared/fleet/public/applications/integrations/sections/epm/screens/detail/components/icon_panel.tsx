@@ -50,3 +50,14 @@ export function LoadingIconPanel() {
     </Panel>
   );
 }
+
+export interface MiniIconProps
+  extends Pick<UsePackageIconType, 'packageName' | 'integrationName' | 'version' | 'icons'> {
+  size?: number; // Optional size multiplier
+}
+
+export function MiniIcon({ packageName, integrationName, version, icons }: MiniIconProps) {
+  const iconType = usePackageIconType({ packageName, integrationName, version, icons });
+
+  return <EuiIcon type={iconType} size="l" />;
+}
