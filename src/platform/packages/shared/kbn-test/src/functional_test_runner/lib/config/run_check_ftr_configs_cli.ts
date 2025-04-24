@@ -40,7 +40,9 @@ export async function runCheckFtrConfigsCli() {
               )}`
           )
           .join('\n\n');
-        throw createFailError(`Duplicate FTR config entries found:\n\n${errorMessage}`);
+        throw createFailError(
+          `Duplicate FTR config entries detected. Please remove the duplicates:\n\n${errorMessage}`
+        );
       }
 
       const { stdout } = await execa('git', [
@@ -164,7 +166,8 @@ Serverless tests:\n${(manifestPaths.serverless as string[]).join('\n')}
       }
     },
     {
-      description: 'Check that all FTR configs are listed in manifest files',
+      description:
+        'Check that all FTR configs are listed in manifest files and there are no duplicates',
     }
   );
 }
