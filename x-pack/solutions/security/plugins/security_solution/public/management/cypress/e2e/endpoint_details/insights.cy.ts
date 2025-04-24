@@ -151,11 +151,20 @@ describe(
 
       it('should trigger insight generation on Scan button click', () => {
         interceptPostDefendInsightsApiCall();
+        stubDefendInsightsApiResponse({
+          status: 'succeeded',
+          insights: [],
+        });
         interceptGetWorkflowInsightsApiCall();
-        interceptGetDefendInsightsApiCall();
 
         loadEndpointDetailsFlyout(endpointId);
         clickScanButton();
+        scanButtonShouldBe('disabled');
+
+        stubDefendInsightsApiResponse({
+          status: 'succeeded',
+          insights: [{ events: [{}] }],
+        });
 
         expectPostDefendInsightsApiToBeCalled();
         expectDefendInsightsApiToBeCalled();
@@ -213,6 +222,14 @@ describe(
       });
 
       it('should render existing Insights', () => {
+        stubDefendInsightsApiResponse({
+          status: 'succeeded',
+          insights: [
+            {
+              events: [{}],
+            },
+          ],
+        });
         stubWorkflowInsightsApiResponse(endpointId);
 
         loadEndpointDetailsFlyout(endpointId);

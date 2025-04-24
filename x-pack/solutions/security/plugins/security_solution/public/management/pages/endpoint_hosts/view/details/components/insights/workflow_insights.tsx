@@ -53,6 +53,7 @@ export const WorkflowInsights = React.memo(({ endpointId }: WorkflowInsightsProp
   const { data: insights } = useFetchInsights({
     endpointId,
     onSuccess: setScanCompleted,
+    scanCompleted,
     expectedCount,
   });
 
@@ -72,12 +73,24 @@ export const WorkflowInsights = React.memo(({ endpointId }: WorkflowInsightsProp
   });
 
   useEffect(() => {
+    setExpectedCount(null);
+    setScanOngoing();
+  }, [endpointId]);
+
+  useEffect(() => {
     const isInsightRunning = latestScan?.status === DefendInsightStatusEnum.running;
-    const hasPendingInsights = expectedCount !== null && insights?.length !== expectedCount;
+    const hasPendingInsights = !!expectedCount && insights?.length !== expectedCount;
     setIsScanButtonDisabled(
       isPostDefendInsightsLoading || isLoadingLatestScan || isInsightRunning || hasPendingInsights
     );
-  }, [isPostDefendInsightsLoading, isLoadingLatestScan, latestScan, insights, expectedCount]);
+  }, [
+    endpointId,
+    isPostDefendInsightsLoading,
+    isLoadingLatestScan,
+    latestScan,
+    insights,
+    expectedCount,
+  ]);
 
   const lastResultCaption = useMemo(() => {
     if (!insights?.length) {
@@ -95,10 +108,12 @@ export const WorkflowInsights = React.memo(({ endpointId }: WorkflowInsightsProp
     );
   }, [insights]);
 
-  const activeInsights = useMemo(
-    () => (insights ?? []).filter((insight) => insight.action.type === ActionType.Refreshed),
-    [insights]
-  );
+  const activeInsights = useMemo(() => {
+    if (isScanButtonDisabled) {
+      return [];
+    }
+    return (insights ?? []).filter((insight) => insight.action.type === ActionType.Refreshed);
+  }, [isScanButtonDisabled, insights]);
 
   const onScanButtonClick = useCallback(
     ({ actionTypeId, connectorId }: { actionTypeId: string; connectorId: string }) => {
@@ -159,7 +174,12 @@ export const WorkflowInsights = React.memo(({ endpointId }: WorkflowInsightsProp
         <EuiSpacer size={'m'} />
         <WorkflowInsightsResults
           results={activeInsights}
-          scanCompleted={!insightGenerationFailures && scanCompleted && userTriggeredScan}
+          scanCompleted={
+            !isScanButtonDisabled &&
+            !insightGenerationFailures &&
+            scanCompleted &&
+            userTriggeredScan
+          }
           endpointId={endpointId}
         />
       </EuiAccordion>

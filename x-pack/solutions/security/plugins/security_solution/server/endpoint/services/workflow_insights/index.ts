@@ -20,9 +20,10 @@ import type {
 import { combineLatest, firstValueFrom, ReplaySubject } from 'rxjs';
 import { CallbackIds } from '@kbn/elastic-assistant-plugin/server/types';
 
-import type {
-  SearchParams,
-  SecurityWorkflowInsight,
+import {
+  ActionType,
+  type SearchParams,
+  type SecurityWorkflowInsight,
 } from '../../../../common/endpoint/types/workflow_insights';
 import type { EndpointAppContextService } from '../../endpoint_app_context_services';
 import { SecurityWorkflowInsightsFailedInitialized } from './errors';
@@ -150,7 +151,7 @@ class SecurityWorkflowInsightsService {
     });
 
     if (remediationExists) {
-      return;
+      insight.action.type = ActionType.Remediated;
     }
 
     // if insight already exists, update instead
