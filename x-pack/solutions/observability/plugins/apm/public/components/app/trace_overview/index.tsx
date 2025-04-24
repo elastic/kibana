@@ -6,60 +6,18 @@
  */
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { TraceSearchType } from '../../../../common/trace_explorer';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../hooks/use_apm_router';
-import { useApmRoutePath } from '../../../hooks/use_apm_route_path';
 import { ApmMainTemplate } from '../../routing/templates/apm_main_template';
 import { Breadcrumb } from '../breadcrumb';
-import { TransactionTab } from '../transaction_details/waterfall_with_summary/transaction_tabs';
-
-type Tab = Required<
-  Required<React.ComponentProps<typeof ApmMainTemplate>>['pageHeader']
->['tabs'][number];
 
 export function TraceOverview({ children }: { children: React.ReactElement }) {
   const router = useApmRouter();
 
   const { query } = useApmParams('/traces');
 
-  const routePath = useApmRoutePath();
-
-  const topTracesLink = router.link('/traces', {
-    query: {
-      comparisonEnabled: query.comparisonEnabled,
-      environment: query.environment,
-      kuery: query.kuery,
-      rangeFrom: query.rangeFrom,
-      rangeTo: query.rangeTo,
-      offset: query.offset,
-      refreshInterval: query.refreshInterval,
-      refreshPaused: query.refreshPaused,
-    },
-  });
-
   const title = i18n.translate('xpack.apm.views.traceOverview.title', {
     defaultMessage: 'Traces',
-  });
-
-  const explorerLink = router.link('/traces/explorer/waterfall', {
-    query: {
-      comparisonEnabled: query.comparisonEnabled,
-      environment: query.environment,
-      kuery: query.kuery,
-      rangeFrom: query.rangeFrom,
-      rangeTo: query.rangeTo,
-      offset: query.offset,
-      refreshInterval: query.refreshInterval,
-      refreshPaused: query.refreshPaused,
-      query: '',
-      type: TraceSearchType.kql,
-      waterfallItemId: '',
-      traceId: '',
-      transactionId: '',
-      detailTab: TransactionTab.timeline,
-      showCriticalPath: false,
-    },
   });
 
   return (

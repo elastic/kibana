@@ -171,9 +171,9 @@ export function Popover({ focusedServiceName, environment, kuery, start, end }: 
       closePopover={() => {}}
       isOpen={isOpen}
       ref={popoverRef}
-      css={popoverStyle}
+      style={popoverStyle}
     >
-      <EuiFlexGroup direction="column" gutterSize="s" css={{ minWidth: popoverWidth }}>
+      <EuiFlexGroup direction="column" gutterSize="s" style={{ minWidth: popoverWidth }}>
         <EuiFlexItem>
           <EuiTitle size="xxs">
             <h3 style={{ wordBreak: 'break-all' }}>
