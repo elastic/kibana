@@ -163,9 +163,11 @@ export const OverviewGrid = memo(() => {
           <ShowAllSpaces />
         </EuiFlexItem>
 
-        <EuiFlexItem grow={false}>
-          <AddToDashboard type={SYNTHETICS_MONITORS_EMBEDDABLE} asButton />
-        </EuiFlexItem>
+        {view === 'cardView' ? (
+          <EuiFlexItem grow={false}>
+            <AddToDashboard type={SYNTHETICS_MONITORS_EMBEDDABLE} asButton />
+          </EuiFlexItem>
+        ) : null}
 
         <EuiFlexItem grow={false}>
           <SortFields />

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
-import { EuiBasicTableColumn } from '@elastic/eui';
+import React, { useCallback, useMemo, useState } from 'react';
+import { EuiBasicTableColumn, EuiLink } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { TagsList } from '@kbn/observability-shared-plugin/public';
@@ -22,6 +22,7 @@ import { getFilterForTypeMessage } from '../../../../management/monitor_list_tab
 import { useOverviewStatus } from '../../../../hooks/use_overview_status';
 import { BadgeStatus } from '../../../../../common/components/monitor_status';
 import { FlyoutParamProps } from '../../types';
+import { ActionsPopover } from '../../actions_popover';
 
 const STATUS = i18n.translate('xpack.synthetics.overview.compactView.monitorStatus', {
   defaultMessage: 'Status',
@@ -42,6 +43,24 @@ const LOCATIONS = i18n.translate('xpack.synthetics.overview.compactView.monitorL
 const TAGS = i18n.translate('xpack.synthetics.overview.compactView.monitorTags', {
   defaultMessage: 'Tags',
 });
+
+const ACTIONS = i18n.translate('xpack.synthetics.overview.compactView.monitorActions', {
+  defaultMessage: 'Actions',
+});
+
+const MonitorActions = ({ monitor }: { monitor: OverviewStatusMetaData }) => {
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+
+  return (
+    <ActionsPopover
+      isPopoverOpen={isPopoverOpen}
+      locationId={monitor.locationId}
+      monitor={monitor}
+      position="default"
+      setIsPopoverOpen={setIsPopoverOpen}
+    />
+  );
+};
 
 export const useOverviewCompactView = () => {
   const history = useHistory();
@@ -71,22 +90,15 @@ export const useOverviewCompactView = () => {
     [dispatch]
   );
 
-  const getRowProps = useCallback(
+  const openFlyout = useCallback(
     (monitor: OverviewStatusMetaData) => {
       const { configId, locationLabel, locationId, spaceId } = monitor;
-      return {
-        onClick: () => {
-          setFlyoutConfigCallback({
-            configId,
-            id: configId,
-            location: locationLabel,
-            locationId,
-            spaceId,
-          });
-        },
-      };
+
+      dispatch(
+        setFlyoutConfig({ configId, id: configId, location: locationLabel, locationId, spaceId })
+      );
     },
-    [setFlyoutConfigCallback]
+    [dispatch]
   );
 
   const { loaded } = useOverviewStatus({
@@ -105,8 +117,21 @@ export const useOverviewCompactView = () => {
       {
         field: 'name',
         name: NAME,
+        render: (name: OverviewStatusMetaData['name'], monitor) => (
+          <EuiLink data-test-subj="syntheticsColumnsLink" onClick={() => openFlyout(monitor)}>
+            {name}
+          </EuiLink>
+        ),
       },
-      { field: 'locationLabel', name: LOCATIONS },
+      {
+        field: 'locationLabel',
+        name: LOCATIONS,
+        render: (locationLabel: OverviewStatusMetaData['locationLabel'], monitor) => (
+          <EuiLink data-test-subj="syntheticsColumnsLink" onClick={() => openFlyout(monitor)}>
+            {locationLabel}
+          </EuiLink>
+        ),
+      },
       {
         field: 'type',
         name: TYPE,
@@ -125,14 +150,18 @@ export const useOverviewCompactView = () => {
           <TagsList tags={tags} onClick={onClickMonitorTag} />
         ),
       },
+      {
+        name: ACTIONS,
+        render: (monitor: OverviewStatusMetaData) => <MonitorActions monitor={monitor} />,
+        align: 'right',
+      },
     ],
-    [onClickMonitorTag, onClickMonitorType]
+    [onClickMonitorTag, onClickMonitorType, openFlyout]
   );
 
   return {
     columns,
     loading: !loaded,
-    getRowProps,
     setFlyoutConfigCallback,
   };
 };

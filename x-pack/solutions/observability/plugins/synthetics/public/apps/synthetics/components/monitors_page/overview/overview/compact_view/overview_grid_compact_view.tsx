@@ -29,7 +29,7 @@ export const OverviewGridCompactView = () => {
 };
 
 export const MonitorTable = ({ items }: { items: OverviewStatusMetaData[] }) => {
-  const { columns, loading, getRowProps } = useOverviewCompactView();
+  const { columns, loading } = useOverviewCompactView();
 
-  return <EuiBasicTable items={items} columns={columns} loading={loading} rowProps={getRowProps} />;
+  return <EuiBasicTable items={items} columns={columns} loading={loading} />;
 };
