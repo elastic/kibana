@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ModelValidation, joinValidation } from './validation';
+import { ModelValidation, joinValidation } from './validation/model_validation';
 import { base as nBase } from './base';
 import { GroupStream as nGroupStream } from './group';
 import { ingest as nIngest } from './ingest';

@@ -414,7 +414,7 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
   private async isStreamNameTaken(name: string): Promise<boolean> {
     try {
       const definition = await this.dependencies.streamsClient.getStream(name);
-      return Streams.WiredStream.Definition.is(definition);
+      return Streams.UnwiredStream.Definition.is(definition);
     } catch (error) {
       if (!isDefinitionNotFoundError(error)) {
         throw error;

@@ -7,7 +7,8 @@
 import { z } from '@kbn/zod';
 import { base as nBase } from '../base';
 import { IngestBase, ingestBase as nIngestBase } from './base';
-import { ModelValidation, Validation, joinValidation, validation } from '../validation';
+import { ModelValidation, joinValidation } from '../validation/model_validation';
+import { Validation, validation } from '../validation/validation';
 import { UnwiredIngest, UnwiredStream } from './unwired';
 import { WiredIngest, WiredStream } from './wired';
 

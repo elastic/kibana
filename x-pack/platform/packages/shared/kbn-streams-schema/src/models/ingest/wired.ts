@@ -5,7 +5,6 @@
  * 2.0.
  */
 import { z } from '@kbn/zod';
-import { ModelValidation, Validation, modelValidation, validation } from '../validation';
 import { IngestBase, ingestBase } from './base';
 import { RoutingDefinition, routingDefinitionSchema } from './routing';
 import { base } from '../base';
@@ -20,6 +19,8 @@ import {
   fieldDefinitionSchema,
   inheritedFieldDefinitionSchema,
 } from '../../fields';
+import { Validation, validation } from '../validation/validation';
+import { ModelValidation, modelValidation } from '../validation/model_validation';
 
 /* eslint-disable @typescript-eslint/no-namespace */
 

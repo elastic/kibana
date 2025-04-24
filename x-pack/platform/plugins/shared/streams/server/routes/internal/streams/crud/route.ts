@@ -35,10 +35,10 @@ export const listStreamsRoute = createServerRoute({
     const { streamsClient, scopedClusterClient } = await getScopedClients({ request });
     const streams = await streamsClient.listStreamsWithDataStreamExistence();
     const dataStreams = await scopedClusterClient.asCurrentUser.indices.getDataStream({
-      name: streams.filter((stream) => stream.data_stream_exists).map((stream) => stream.name),
+      name: streams.filter(({ exists }) => exists).map(({ stream }) => stream.name),
     });
 
-    const enrichedStreams = streams.reduce<ListStreamDetail[]>((acc, stream) => {
+    const enrichedStreams = streams.reduce<ListStreamDetail[]>((acc, { stream }) => {
       const match = dataStreams.data_streams.find((dataStream) => dataStream.name === stream.name);
       acc.push({
         stream,

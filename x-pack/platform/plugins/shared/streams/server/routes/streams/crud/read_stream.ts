@@ -82,8 +82,7 @@ export async function readStream({
       effective_lifecycle: getDataStreamLifecycle(dataStream),
       dashboards,
       queries,
-      inherited_fields: {},
-    };
+    } satisfies Streams.UnwiredStream.GetResponse;
   }
 
   const body: Streams.WiredStream.GetResponse = {

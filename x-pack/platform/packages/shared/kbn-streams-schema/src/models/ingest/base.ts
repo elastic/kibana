@@ -6,10 +6,11 @@
  */
 import { z } from '@kbn/zod';
 import { base } from '../base';
-import { ModelValidation, Validation, modelValidation, validation } from '../validation';
 import { IngestStreamLifecycle, ingestStreamLifecycleSchema } from './lifecycle';
 import { ProcessorDefinition, processorDefinitionSchema } from './processors';
 import { OmitName } from '../core';
+import { Validation, validation } from '../validation/validation';
+import { ModelValidation, modelValidation } from '../validation/model_validation';
 
 interface IngestStreamPrivileges {
   // User can change everything about the stream

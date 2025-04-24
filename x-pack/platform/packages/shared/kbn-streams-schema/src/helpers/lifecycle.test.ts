@@ -45,8 +45,8 @@ describe('Lifecycle helpers', () => {
       const definition = createMockWiredStream('one.two.three.four', { inherit: {} });
       const ancestors = [
         createMockWiredStream('one', { ilm: { policy: 'one ' } }),
-        createMockWiredStream('one.two', { inherit: {} }),
-        createMockWiredStream('one.two.three', { dsl: { data_retention: '1d' } }),
+        createMockWiredStream('one.two.three', { inherit: {} }),
+        createMockWiredStream('one.two', { dsl: { data_retention: '1d' } }),
       ] satisfies Streams.WiredStream.Definition[];
 
       const lifecycle = findInheritedLifecycle(definition, ancestors);

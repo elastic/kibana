@@ -5,7 +5,6 @@
  * 2.0.
  */
 import { z } from '@kbn/zod';
-import { ModelValidation, Validation, modelValidation, validation } from '../validation';
 import { IngestBase, ingestBase } from './base';
 import {
   UnwiredIngestStreamEffectiveLifecycle,
@@ -14,6 +13,8 @@ import {
 import { base } from '../base';
 import { ElasticsearchAssets, elasticsearchAssetsSchema } from './common';
 import { OmitName } from '../core';
+import { Validation, validation } from '../validation/validation';
+import { ModelValidation, modelValidation } from '../validation/model_validation';
 
 /* eslint-disable @typescript-eslint/no-namespace */
 

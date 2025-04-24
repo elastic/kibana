@@ -6,8 +6,9 @@
  */
 import { z } from '@kbn/zod';
 import { base } from '../base';
-import { ModelValidation, Validation, modelValidation, validation } from '../validation';
 import { OmitName } from '../core';
+import { Validation, validation } from '../validation/validation';
+import { ModelValidation, modelValidation } from '../validation/model_validation';
 
 export interface Group {
   members: string[];

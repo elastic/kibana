@@ -103,10 +103,9 @@ export const editStreamRoute = createServerRoute({
   }),
   handler: async ({ params, request, getScopedClients }): Promise<UpsertStreamResponse> => {
     const { streamsClient } = await getScopedClients({ request });
-    const streamDefinition = { ...params.body.stream, name: params.path.name };
 
     if (
-      !Streams.UnwiredStream.Definition.is(streamDefinition) &&
+      !Streams.UnwiredStream.UpsertRequest.is(params.body) &&
       !(await streamsClient.isStreamsEnabled())
     ) {
       throw badData('Streams are not enabled for Wired and Group streams.');
