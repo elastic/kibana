@@ -12,12 +12,12 @@ import { expectTextsInDocument, expectTextsNotInDocument } from '../../../utils/
 describe('EnvironmentBadge', () => {
   it('shows unset when evironments list is empty', () => {
     const component = render(EnvironmentBadge({ environments: [] }));
-    expectTextsInDocument(component, ['Unset']);
+    expectTextsInDocument(component, ['Not defined']);
   });
   it('shows environment set', () => {
     const component = render(EnvironmentBadge({ environments: ['DEMO'] }));
     expectTextsInDocument(component, ['DEMO']);
-    expectTextsNotInDocument(component, ['Unset']);
+    expectTextsNotInDocument(component, ['Not defined']);
   });
   it('handles multiple environments', () => {
     const component = render(EnvironmentBadge({ environments: ['DEMO', 'DEV'] }));
@@ -27,11 +27,11 @@ describe('EnvironmentBadge', () => {
   it('handles empty object', () => {
     // @ts-ignore-next-line
     const component = render(EnvironmentBadge({}));
-    expectTextsInDocument(component, ['Unset']);
+    expectTextsInDocument(component, ['Not defined']);
   });
   it('handled undefined environments', () => {
     // @ts-ignore-next-line
     const component = render(EnvironmentBadge({ environments: undefined }));
-    expectTextsInDocument(component, ['Unset']);
+    expectTextsInDocument(component, ['Not defined']);
   });
 });
