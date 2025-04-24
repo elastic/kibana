@@ -67,8 +67,12 @@ export const useMonitorsTableColumns = ({
       {
         field: 'status',
         name: STATUS,
-        render: (status: OverviewStatusMetaData['status'], { type }) => (
-          <BadgeStatus status={status} isBrowserType={type === MonitorTypeEnum.BROWSER} />
+        render: (status: OverviewStatusMetaData['status'], monitor) => (
+          <BadgeStatus
+            status={status}
+            isBrowserType={monitor.type === MonitorTypeEnum.BROWSER}
+            onClickBadge={() => openFlyout(monitor)}
+          />
         ),
       },
       {

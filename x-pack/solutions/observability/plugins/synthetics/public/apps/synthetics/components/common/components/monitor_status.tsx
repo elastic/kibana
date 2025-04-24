@@ -12,15 +12,24 @@ import { EncryptedSyntheticsMonitor } from '../../../../../../common/runtime_typ
 export const BadgeStatus = ({
   status,
   isBrowserType,
+  onClickBadge,
 }: {
   status?: string;
   isBrowserType: boolean;
+  onClickBadge?: () => void;
 }) => {
   const { color, dataTestSubj, labels } = badgeMapping[status || 'unknown'];
   const label = isBrowserType && labels.browser ? labels.browser : labels.default;
 
   return (
-    <EuiBadge color={color} data-test-subj={dataTestSubj}>
+    <EuiBadge
+      color={color}
+      data-test-subj={dataTestSubj}
+      onClick={() => {
+        if (onClickBadge) onClickBadge();
+      }}
+      onClickAriaLabel={CLICK_BADGE_ARIA_LABEL}
+    >
       {label}
     </EuiBadge>
   );
@@ -85,6 +94,13 @@ const DOWN_LABEL = i18n.translate('xpack.synthetics.monitorStatus.downLabel', {
 const DISABLED_LABEL = i18n.translate('xpack.synthetics.monitorStatus.disabledLabel', {
   defaultMessage: 'Disabled',
 });
+
+const CLICK_BADGE_ARIA_LABEL = i18n.translate(
+  'xpack.synthetics.monitorStatus.clickBadgeAriaLabel',
+  {
+    defaultMessage: 'Click to trigger the related action',
+  }
+);
 
 interface BadgeData {
   color: string;
