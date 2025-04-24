@@ -66,8 +66,6 @@ describe('APM service template', () => {
         { agentName: 'js-base' },
         { agentName: 'rum-js' },
         { agentName: 'opentelemetry/webjs' },
-        { serverlessType: ServerlessType.AWS_LAMBDA },
-        { serverlessType: ServerlessType.AZURE_FUNCTIONS },
       ].map((input) => {
         it(`when input ${JSON.stringify(input)}`, () => {
           expect(isMetricsTabHidden(input)).toBeTruthy();
@@ -86,6 +84,8 @@ describe('APM service template', () => {
         { agentName: 'ruby', runtimeName: 'jruby' },
         { agentName: 'java' },
         { agentName: 'opentelemetry/java' },
+        { serverlessType: ServerlessType.AWS_LAMBDA },
+        { serverlessType: ServerlessType.AZURE_FUNCTIONS },
       ].map((input) => {
         it(`when input ${JSON.stringify(input)}`, () => {
           expect(isMetricsTabHidden(input)).toBeFalsy();
