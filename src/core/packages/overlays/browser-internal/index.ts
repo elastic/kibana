@@ -13,5 +13,9 @@ export {
   type InternalOverlayBannersStart,
   type OverlayBanner,
 } from './src/banners';
-export { FlyoutService } from './src/flyout';
+export {
+  FlyoutService,
+  useSyncPushFlyoutStyles,
+  euiPushFlyoutPaddingInlineEnd,
+} from './src/flyout';
 export { ModalService } from './src/modal';

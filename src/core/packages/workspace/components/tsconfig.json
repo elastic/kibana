@@ -20,5 +20,6 @@
   ],
   "kbn_references": [
     "@kbn/core-workspace-state",
+    "@kbn/core-overlays-browser-internal",
   ]
 }

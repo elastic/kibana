@@ -10,7 +10,6 @@
 /* eslint-disable max-classes-per-file */
 
 import { css } from '@emotion/react';
-import { WorkspaceFlyout, WorkspaceFlyoutResizable } from '@kbn/core-workspace-components';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Subject } from 'rxjs';
@@ -22,6 +21,8 @@ import type { MountPoint, OverlayRef } from '@kbn/core-mount-utils-browser';
 import { MountWrapper } from '@kbn/core-mount-utils-browser-internal';
 import type { OverlayFlyoutOpenOptions, OverlayFlyoutStart } from '@kbn/core-overlays-browser';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+
+import { WorkspaceFlyout, WorkspaceFlyoutResizable } from './workspace/flyouts';
 
 /**
  * A FlyoutRef is a reference to an opened flyout panel. It offers methods to

@@ -10,9 +10,9 @@
 import React from 'react';
 import { Global, css } from '@emotion/react';
 import { useEuiTheme, euiShadowSmall } from '@elastic/eui';
+import { useSyncPushFlyoutStyles } from '@kbn/core-overlays-browser-internal';
 import type { ToolbarSize } from './types';
 import svg from './illustration_main_bg.svg';
-import { useSyncPushFlyoutStyles } from './flyouts/use_sync_push_flyout_styles';
 
 export interface WorkspaceGlobalCSSComponentProps {
   isToolbarOpen: boolean;

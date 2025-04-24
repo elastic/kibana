@@ -48,7 +48,7 @@
     "@kbn/apm-ui-shared",
     "@kbn/react-hooks",
     "@kbn/embeddable-plugin",
-    "@kbn/core-workspace-components"
+    "@kbn/core-overlays-browser-internal"
   ],
   "exclude": [
     "target/**/*"

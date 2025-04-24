@@ -14,7 +14,6 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFlyoutResizable,
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
@@ -29,7 +28,7 @@ import {
   EuiFlyoutProps,
   isDOMNode,
 } from '@elastic/eui';
-import { WorkspaceFlyoutResizable } from '@kbn/core-workspace-components';
+import { WorkspaceFlyoutResizable } from '@kbn/core-overlays-browser-internal/src/flyout';
 import type { DataTableRecord, DataTableColumnsMeta } from '@kbn/discover-utils/types';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import type { ToastsStart } from '@kbn/core-notifications-browser';
@@ -249,6 +248,7 @@ export function UnifiedDocViewerFlyout({
 
   return (
     <EuiPortal>
+      {/* @ts-expect-error Issue with ref type */}
       <WorkspaceFlyoutResizable
         className="DiscoverFlyout" // used to override the z-index of the flyout from SecuritySolution
         onClose={onClose}

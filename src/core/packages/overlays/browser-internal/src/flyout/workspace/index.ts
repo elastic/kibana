@@ -7,12 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { FlyoutService } from './flyout_service';
 export {
-  useSyncPushFlyoutStyles,
   WorkspaceFlyout,
   type WorkspaceFlyoutProps,
   WorkspaceFlyoutResizable,
   type WorkspaceFlyoutResizableProps,
+} from './flyouts';
+export {
+  useSyncPushFlyoutStyles,
   euiPushFlyoutPaddingInlineEnd,
-} from './workspace';
+} from './use_sync_push_flyout_styles';

@@ -31,7 +31,6 @@
     "@kbn/core-analytics-browser",
     "@kbn/core-user-profile-browser-mocks",
     "@kbn/core-user-profile-browser",
-    "@kbn/core-workspace-components"
   ],
   "exclude": [
     "target/**/*"
