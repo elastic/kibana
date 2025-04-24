@@ -12,6 +12,7 @@ import {
   AssistantFeatures,
 } from '@kbn/elastic-assistant-common';
 import { ReplaySubject, type Subject } from 'rxjs';
+import { MlPluginSetup } from '@kbn/ml-plugin/server';
 import { events } from './lib/telemetry/event_based_telemetry';
 import {
   AssistantTool,
@@ -27,7 +28,7 @@ import { RequestContextFactory } from './routes/request_context_factory';
 import { PLUGIN_ID } from '../common/constants';
 import { registerRoutes } from './routes/register_routes';
 import { CallbackIds, appContextService } from './services/app_context';
-import { removeLegacyQuickPrompt } from './ai_assistant_service/helpers';
+import { createGetElserId, removeLegacyQuickPrompt } from './ai_assistant_service/helpers';
 import { getAttackDiscoveryScheduleType } from './lib/attack_discovery/schedules/register_schedule/definition';
 import { ConfigSchema } from './config_schema';
 
@@ -44,6 +45,8 @@ export class ElasticAssistantPlugin
   private assistantService: AIAssistantService | undefined;
   private pluginStop$: Subject<void>;
   private readonly kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
+  private mlTrainedModelsProvider?: MlPluginSetup['trainedModelsProvider'];
+  private getElserId?: () => Promise<string>;
   private readonly config: ConfigSchema;
 
   constructor(initializerContext: PluginInitializerContext) {
@@ -64,7 +67,6 @@ export class ElasticAssistantPlugin
       ml: plugins.ml,
       taskManager: plugins.taskManager,
       kibanaVersion: this.kibanaVersion,
-      elserInferenceId: this.config.elserInferenceId,
       elasticsearchClientPromise: core
         .getStartServices()
         .then(([{ elasticsearch }]) => elasticsearch.client.asInternalUser),
@@ -89,7 +91,10 @@ export class ElasticAssistantPlugin
     );
     events.forEach((eventConfig) => core.analytics.registerEventType(eventConfig));
 
-    registerRoutes(router, this.logger, this.config);
+    this.mlTrainedModelsProvider = plugins.ml.trainedModelsProvider;
+    this.getElserId = createGetElserId(this.mlTrainedModelsProvider);
+
+    registerRoutes(router, this.logger, this.getElserId, this.config);
 
     // The featureFlags service is not available in the core setup, so we need
     // to wait for the start services to be available to read the feature flags.
@@ -134,6 +139,12 @@ export class ElasticAssistantPlugin
   ): ElasticAssistantPluginStart {
     this.logger.debug('elasticAssistant: Started');
     appContextService.start({ logger: this.logger });
+
+    plugins.licensing.license$.subscribe(() => {
+      if (this.mlTrainedModelsProvider) {
+        this.getElserId = createGetElserId(this.mlTrainedModelsProvider);
+      }
+    });
 
     removeLegacyQuickPrompt(core.elasticsearch.client.asInternalUser)
       .then((res) => {

@@ -13,7 +13,6 @@ import {
   DocumentationProduct,
   type ProductName,
 } from '@kbn/product-doc-common';
-import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import type { ProductDocInstallClient } from '../doc_install_status';
 import {
   downloadToDisk,
@@ -38,7 +37,6 @@ interface PackageInstallerOpts {
   productDocClient: ProductDocInstallClient;
   artifactRepositoryUrl: string;
   kibanaVersion: string;
-  elserInferenceId?: string;
 }
 
 export class PackageInstaller {
@@ -48,7 +46,6 @@ export class PackageInstaller {
   private readonly productDocClient: ProductDocInstallClient;
   private readonly artifactRepositoryUrl: string;
   private readonly currentVersion: string;
-  private readonly elserInferenceId?: string;
 
   constructor({
     artifactsFolder,
@@ -56,7 +53,6 @@ export class PackageInstaller {
     esClient,
     productDocClient,
     artifactRepositoryUrl,
-    elserInferenceId,
     kibanaVersion,
   }: PackageInstallerOpts) {
     this.esClient = esClient;
@@ -65,7 +61,6 @@ export class PackageInstaller {
     this.artifactRepositoryUrl = artifactRepositoryUrl;
     this.currentVersion = majorMinor(kibanaVersion);
     this.log = logger;
-    this.elserInferenceId = elserInferenceId || defaultInferenceEndpoints.ELSER;
   }
 
   /**
@@ -151,11 +146,9 @@ export class PackageInstaller {
         productVersion,
       });
 
-      if (this.elserInferenceId === defaultInferenceEndpoints.ELSER) {
-        await ensureDefaultElserDeployed({
-          client: this.esClient,
-        });
-      }
+      await ensureDefaultElserDeployed({
+        client: this.esClient,
+      });
 
       const artifactFileName = getArtifactName({ productName, productVersion });
       const artifactUrl = `${this.artifactRepositoryUrl}/${artifactFileName}`;
@@ -181,7 +174,6 @@ export class PackageInstaller {
         mappings,
         manifestVersion,
         esClient: this.esClient,
-        elserInferenceId: this.elserInferenceId,
         log: this.log,
       });
 

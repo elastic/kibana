@@ -7,12 +7,8 @@
 
 import { schema, type TypeOf } from '@kbn/config-schema';
 import type { PluginConfigDescriptor } from '@kbn/core/server';
-import { internalElserInferenceId } from '../common/consts';
 
 const configSchema = schema.object({
-  elserInferenceId: schema.string({
-    defaultValue: internalElserInferenceId,
-  }),
   artifactRepositoryUrl: schema.string({
     defaultValue: 'https://kibana-knowledge-base-artifacts.elastic.co',
   }),

@@ -78,7 +78,7 @@ import { AUDIT_OUTCOME, KnowledgeBaseAuditAction, knowledgeBaseAuditEvent } from
  * configuration after initial plugin start
  */
 export interface GetAIAssistantKnowledgeBaseDataClientParams {
-  elserInferenceId?: string;
+  modelIdOverride?: string;
   manageGlobalKnowledgeBaseAIAssistant?: boolean;
 }
 
@@ -91,7 +91,7 @@ export interface KnowledgeBaseDataClientParams extends AIAssistantDataClientPara
   setIsKBSetupInProgress: (spaceId: string, isInProgress: boolean) => void;
   manageGlobalKnowledgeBaseAIAssistant: boolean;
   getTrainedModelsProvider: () => ReturnType<TrainedModelsProvider['trainedModelsProvider']>;
-  elserInferenceId?: string;
+  modelIdOverride?: boolean;
 }
 export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
   constructor(public readonly options: KnowledgeBaseDataClientParams) {
@@ -164,8 +164,8 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
 
   public getInferenceEndpointId = async () => {
     // Don't use default enpdpoint for pt_tiny_elser
-    if (this.options.elserInferenceId) {
-      return this.options.elserInferenceId;
+    if (this.options.modelIdOverride) {
+      return ASSISTANT_ELSER_INFERENCE_ID;
     }
     const esClient = await this.options.elasticsearchClientPromise;
 
@@ -198,10 +198,10 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
     try {
       const esClient = await this.options.elasticsearchClientPromise;
 
-      const inferenceExists = await esClient.inference.get({
+      const inferenceExists = !!(await esClient.inference.get({
         inference_id: inferenceId,
         task_type: 'sparse_embedding',
-      });
+      }));
 
       if (!inferenceExists) {
         return false;
@@ -356,7 +356,7 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
   }): Promise<void> => {
     const esClient = await this.options.elasticsearchClientPromise;
 
-    if (this.options.getIsKBSetupInProgress(this.spaceId)) {
+    if (this.options.elserInferenceId(this.spaceId)) {
       this.options.logger.debug('Knowledge Base setup already in progress');
       return;
     }
@@ -394,41 +394,39 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
         this.options.logger.info('No legacy ESQL or Security Labs knowledge base docs to delete');
       }
 
-      if (!this.options.elserInferenceId) {
-        /*
+      /*
           #1 Check if ELSER model is downloaded
           #2 Check if inference endpoint is deployed
           #3 Dry run ELSER model deployment if not already deployed
           #4 Create inference endpoint if not deployed / delete and create inference endpoint if model was not deployed
           #5 Load Security Labs docs
         */
-        const isInstalled = await this.isModelInstalled();
-        if (!isInstalled) {
-          await this.installModel();
-          await pRetry(
-            async () =>
-              (await this.isModelInstalled())
-                ? Promise.resolve()
-                : Promise.reject(new Error('Model not installed')),
-            { minTimeout: 30000, maxTimeout: 30000, retries: 20 }
-          );
-          this.options.logger.debug(`ELSER model '${elserId}' successfully installed!`);
-        } else {
-          this.options.logger.debug(`ELSER model '${elserId}' is already installed`);
-        }
+      const isInstalled = await this.isModelInstalled();
+      if (!isInstalled) {
+        await this.installModel();
+        await pRetry(
+          async () =>
+            (await this.isModelInstalled())
+              ? Promise.resolve()
+              : Promise.reject(new Error('Model not installed')),
+          { minTimeout: 30000, maxTimeout: 30000, retries: 20 }
+        );
+        this.options.logger.debug(`ELSER model '${elserId}' successfully installed!`);
+      } else {
+        this.options.logger.debug(`ELSER model '${elserId}' is already installed`);
+      }
 
-        const inferenceExists = await this.isInferenceEndpointExists();
-        if (!inferenceExists) {
-          await this.createInferenceEndpoint();
+      const inferenceExists = await this.isInferenceEndpointExists();
+      if (!inferenceExists) {
+        await this.createInferenceEndpoint();
 
-          this.options.logger.debug(
-            `Inference endpoint for ELSER model '${elserId}' successfully deployed!`
-          );
-        } else {
-          this.options.logger.debug(
-            `Inference endpoint for ELSER model '${elserId}' is already deployed`
-          );
-        }
+        this.options.logger.debug(
+          `Inference endpoint for ELSER model '${elserId}' successfully deployed!`
+        );
+      } else {
+        this.options.logger.debug(
+          `Inference endpoint for ELSER model '${elserId}' is already deployed`
+        );
       }
 
       if (!ignoreSecurityLabs) {

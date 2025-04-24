@@ -58,7 +58,6 @@ export const EvaluationSettings: React.FC = React.memo(() => {
   });
   const { data: evalData } = useEvaluationData({
     http,
-    langSmithApiKey: traceOptions.langSmithApiKey,
   });
   const defaultGraphs = useMemo(() => (evalData as GetEvaluateResponse)?.graphs ?? [], [evalData]);
   const datasets = useMemo(() => (evalData as GetEvaluateResponse)?.datasets ?? [], [evalData]);

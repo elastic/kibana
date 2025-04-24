@@ -48,7 +48,6 @@ export const postEvaluation = async ({
 export interface GetEvaluationParams {
   http: HttpSetup;
   signal?: AbortSignal | undefined;
-  langSmithApiKey?: string;
 }
 
 /**
@@ -63,11 +62,9 @@ export interface GetEvaluationParams {
 export const getEvaluation = async ({
   http,
   signal,
-  langSmithApiKey,
 }: GetEvaluationParams): Promise<GetEvaluateResponse | IHttpFetchError> => {
   try {
     return await http.get<GetEvaluateResponse>(ELASTIC_AI_ASSISTANT_EVALUATE_URL, {
-      query: { langSmithApiKey },
       signal,
       version: API_VERSIONS.internal.v1,
     });

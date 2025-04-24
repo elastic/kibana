@@ -177,7 +177,6 @@ export class Plugin implements ISecuritySolutionPlugin {
       this.config,
       this.pluginContext.logger,
       this.pluginContext.env.packageInfo.version,
-      this.config.siemRuleMigrations?.elserInferenceId
     );
 
     this.ruleMonitoringService = createRuleMonitoringService(this.config, this.logger);
