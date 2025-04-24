@@ -17,8 +17,6 @@ import {
   EuiText,
   EuiAutoSizer,
   EuiAutoSize,
-  EuiButtonGroup,
-  IconType,
 } from '@elastic/eui';
 import { MetricItem } from './metric_item/metric_item';
 import { ShowAllSpaces } from '../../common/show_all_spaces';
@@ -44,6 +42,7 @@ import { useSyntheticsRefreshContext } from '../../../../contexts';
 import { FlyoutParamProps } from './types';
 import { MaybeMonitorDetailsFlyout } from './monitor_detail_flyout';
 import { OverviewGridCompactView } from './compact_view/overview_grid_compact_view';
+import { ViewButtons } from './view_buttons';
 
 const ITEM_HEIGHT = 172;
 const ROW_COUNT = 4;
@@ -56,33 +55,6 @@ interface ListItem {
   locationId: string;
 }
 
-export type View = 'cardView' | 'compactView';
-
-const CARD_VIEW_LABEL = i18n.translate('xpack.synthetics.overview.grid.cardView.label', {
-  defaultMessage: 'Card view',
-});
-
-const COMPACT_VIEW_LABEL = i18n.translate('xpack.synthetics.overview.grid.compactView.label', {
-  defaultMessage: 'Compact view',
-});
-
-const VIEW_LEGEND = i18n.translate('xpack.synthetics.overview.grid.view.legend', {
-  defaultMessage: 'Monitors view',
-});
-
-const toggleButtonsIcons: Array<{ id: View; iconType: IconType; label: string }> = [
-  {
-    id: `cardView`,
-    iconType: 'apps',
-    label: CARD_VIEW_LABEL,
-  },
-  {
-    id: 'compactView',
-    iconType: 'tableDensityCompact',
-    label: COMPACT_VIEW_LABEL,
-  },
-];
-
 export const OverviewGrid = memo(() => {
   const { status, allConfigs, loaded } = useOverviewStatus({
     scopeStatusByLocation: true,
@@ -92,6 +64,7 @@ export const OverviewGrid = memo(() => {
   const {
     pageState,
     groupBy: { field: groupField },
+    view,
   } = useSelector(selectOverviewState);
   const trendData = useSelector(selectOverviewTrends);
   const { perPage } = pageState;
@@ -106,8 +79,6 @@ export const OverviewGrid = memo(() => {
     [dispatch]
   );
   const { lastRefresh } = useSyntheticsRefreshContext();
-
-  const [view, setView] = useState<View>('compactView');
 
   useEffect(() => {
     const trendRequests = monitorsSortedByStatus.reduce((acc, item) => {
@@ -173,15 +144,7 @@ export const OverviewGrid = memo(() => {
           <GroupFields />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButtonGroup
-            buttonSize="compressed"
-            options={toggleButtonsIcons}
-            idSelected={view}
-            onChange={(id) => setView(id as View)}
-            isIconOnly
-            isDisabled={!loaded}
-            legend={VIEW_LEGEND}
-          />
+          <ViewButtons />
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />

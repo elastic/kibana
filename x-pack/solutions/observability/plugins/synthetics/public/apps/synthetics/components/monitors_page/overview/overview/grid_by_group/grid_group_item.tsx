@@ -26,7 +26,7 @@ import { useFilteredGroupMonitors } from './use_filtered_group_monitors';
 import { OverviewStatusMetaData } from '../../types';
 import { selectOverviewStatus } from '../../../../../state/overview_status';
 import { MetricItem } from '../metric_item/metric_item';
-import { View } from '../overview_grid';
+import { OverviewView } from '../../../../../state';
 import { MonitorsTable } from '../compact_view/components/monitors_table';
 
 const PER_ROW = 4;
@@ -108,7 +108,7 @@ export const GroupGridItem = ({
   fullScreenGroup: string;
   setFullScreenGroup: (group: string) => void;
   setFlyoutConfigCallback: (params: FlyoutParamProps) => void;
-  view: View;
+  view: OverviewView;
 }) => {
   const { status: overviewStatus } = useSelector(selectOverviewStatus);
 
