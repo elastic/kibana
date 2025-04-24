@@ -8,10 +8,7 @@
 import moment from 'moment';
 import sinon from 'sinon';
 import type { TransportResult } from '@elastic/elasticsearch';
-import type {
-  FieldCapsResponse,
-  IlmExplainLifecycleResponse,
-} from '@elastic/elasticsearch/lib/api/types';
+import type { FieldCapsResponse } from '@elastic/elasticsearch/lib/api/types';
 import { ALERT_REASON, ALERT_RULE_PARAMETERS, ALERT_UUID, TIMESTAMP } from '@kbn/rule-data-utils';
 
 import type { SanitizedRuleAction } from '@kbn/alerting-plugin/common';
@@ -47,7 +44,6 @@ import {
   getDisabledActionsWarningText,
   calculateFromValue,
   stringifyAfterKey,
-  checkForFrozenIndices,
 } from './utils';
 import type { SearchAfterAndBulkCreateReturnType } from '../types';
 import {
@@ -64,7 +60,6 @@ import { ruleExecutionLogMock } from '../../rule_monitoring/mocks';
 import type { GenericBulkCreateResponse } from '../factories';
 import type { BaseFieldsLatest } from '../../../../../common/api/detection_engine/model/alerts';
 import type { AlertingServerSetup } from '@kbn/alerting-plugin/server';
-import type { ElasticsearchClient } from '@kbn/core/server';
 
 describe('utils', () => {
   const anchor = '2020-01-01T06:06:06.666Z';
@@ -1382,223 +1377,6 @@ describe('utils', () => {
       expect(warning).toEqual(
         'Rule action connector .webhook is not enabled. To send notifications, you need a higher Security Analytics license / tier'
       );
-    });
-  });
-
-  describe('checkForFrozenIndices', () => {
-    let currentUserEsClient: ElasticsearchClient;
-    let internalEsClient: ElasticsearchClient;
-    let fieldCapsMock: jest.MockedFunction<ElasticsearchClient['fieldCaps']>;
-    let ilmExplainLifecycleMock: jest.MockedFunction<
-      ElasticsearchClient['ilm']['explainLifecycle']
-    >;
-
-    beforeEach(() => {
-      fieldCapsMock = jest.fn();
-      ilmExplainLifecycleMock = jest.fn();
-
-      currentUserEsClient = {
-        fieldCaps: fieldCapsMock,
-      } as unknown as ElasticsearchClient;
-
-      internalEsClient = {
-        ilm: {
-          explainLifecycle: ilmExplainLifecycleMock,
-        },
-      } as unknown as ElasticsearchClient;
-
-      jest.clearAllMocks();
-    });
-
-    it('should return frozen indices when indices are confirmed as frozen', async () => {
-      const inputIndices = ['index-*', 'regular-index'];
-      const fieldCapsResponse: FieldCapsResponse = {
-        indices: ['partial-index-1', 'partial-index-2', 'regular-index'],
-        fields: {},
-      };
-      const ilmExplainLifecycleResponse: IlmExplainLifecycleResponse = {
-        indices: {
-          'partial-index-1': {
-            index: 'partial-index-1',
-            managed: true,
-            phase: 'frozen',
-          },
-          'partial-index-2': {
-            index: 'partial-index-2',
-            managed: true,
-            phase: 'frozen',
-          },
-        },
-      };
-
-      fieldCapsMock.mockResolvedValue(fieldCapsResponse);
-      ilmExplainLifecycleMock.mockResolvedValue(ilmExplainLifecycleResponse);
-
-      const params = {
-        inputIndices,
-        internalEsClient,
-        currentUserEsClient,
-        to: 'now',
-        from: 'now-1d',
-        primaryTimestamp: '@timestamp',
-        secondaryTimestamp: undefined,
-      };
-
-      const frozenIndices = await checkForFrozenIndices(params);
-
-      expect(frozenIndices).toEqual(['partial-index-1', 'partial-index-2']);
-      expect(fieldCapsMock).toHaveBeenNthCalledWith(1, {
-        index: inputIndices,
-        fields: ['_id'],
-        ignore_unavailable: true,
-        index_filter: expect.any(Object),
-      });
-      expect(ilmExplainLifecycleMock).toHaveBeenNthCalledWith(1, {
-        index: inputIndices.join(','),
-      });
-    });
-
-    it('should return an empty array when no frozen indices are found', async () => {
-      const inputIndices = ['regular-index-1', 'regular-index-2'];
-      const fieldCapsResponse: FieldCapsResponse = {
-        indices: ['regular-index-1', 'regular-index-2'],
-        fields: {},
-      };
-
-      fieldCapsMock.mockResolvedValue(fieldCapsResponse);
-
-      const params = {
-        inputIndices,
-        internalEsClient,
-        currentUserEsClient,
-        to: 'now',
-        from: 'now-1d',
-        primaryTimestamp: '@timestamp',
-        secondaryTimestamp: undefined,
-      };
-
-      const frozenIndices = await checkForFrozenIndices(params);
-
-      expect(frozenIndices).toEqual([]);
-
-      expect(fieldCapsMock).toHaveBeenCalledWith({
-        index: inputIndices,
-        fields: ['_id'],
-        ignore_unavailable: true,
-        index_filter: expect.any(Object),
-      });
-      expect(ilmExplainLifecycleMock).not.toHaveBeenCalled();
-    });
-
-    it('should return an empty array when there are indices whose name begins with "partial-", but they are not frozen', async () => {
-      const inputIndices = ['partial-index-*', 'regular-index-2'];
-      const fieldCapsResponse: FieldCapsResponse = {
-        indices: ['partial-index-1', 'partial-index-2', 'regular-index-2'],
-        fields: {},
-      };
-
-      const ilmExplainLifecycleResponse: IlmExplainLifecycleResponse = {
-        indices: {
-          'partial-index-1': {
-            index: 'partial-index-1',
-            managed: false,
-          },
-          'partial-index-2': {
-            index: 'partial-index-2',
-            managed: true,
-            phase: 'warm',
-          },
-          'regular-index-2': {
-            index: 'regular-index-2',
-            managed: true,
-            phase: 'warm',
-          },
-        },
-      };
-
-      fieldCapsMock.mockResolvedValue(fieldCapsResponse);
-      ilmExplainLifecycleMock.mockResolvedValue(ilmExplainLifecycleResponse);
-
-      const params = {
-        inputIndices,
-        internalEsClient,
-        currentUserEsClient,
-        to: 'now',
-        from: 'now-1d',
-        primaryTimestamp: '@timestamp',
-        secondaryTimestamp: undefined,
-      };
-
-      const frozenIndices = await checkForFrozenIndices(params);
-
-      expect(frozenIndices).toEqual([]);
-      expect(fieldCapsMock).toHaveBeenCalledWith({
-        index: inputIndices,
-        fields: ['_id'],
-        ignore_unavailable: true,
-        index_filter: expect.any(Object),
-      });
-      expect(ilmExplainLifecycleMock).toHaveBeenNthCalledWith(1, {
-        index: inputIndices.join(','),
-      });
-    });
-
-    it('should handle errors from fieldCaps gracefully', async () => {
-      const inputIndices = ['index-1', 'index-2'];
-
-      fieldCapsMock.mockRejectedValue(new Error('fieldCaps error'));
-
-      await expect(
-        checkForFrozenIndices({
-          inputIndices,
-          internalEsClient,
-          currentUserEsClient,
-          to: 'now',
-          from: 'now-1d',
-          primaryTimestamp: '@timestamp',
-          secondaryTimestamp: undefined,
-        })
-      ).rejects.toThrow('fieldCaps error');
-
-      expect(fieldCapsMock).toHaveBeenCalledWith({
-        index: inputIndices,
-        fields: ['_id'],
-        ignore_unavailable: true,
-        index_filter: expect.any(Object),
-      });
-    });
-
-    it('should handle errors from ilm explain gracefully', async () => {
-      const inputIndices = ['index-1', 'index-2'];
-      const fieldCapsResponse: FieldCapsResponse = {
-        indices: ['partial-index-1', 'partial-index-2'],
-        fields: {},
-      };
-
-      fieldCapsMock.mockResolvedValue(fieldCapsResponse);
-      ilmExplainLifecycleMock.mockRejectedValue(new Error('ilmExplainLifecycle error'));
-
-      await expect(
-        checkForFrozenIndices({
-          inputIndices,
-          internalEsClient,
-          currentUserEsClient,
-          to: 'now',
-          from: 'now-1d',
-          primaryTimestamp: '@timestamp',
-          secondaryTimestamp: undefined,
-        })
-      ).rejects.toThrow('ilmExplainLifecycle error');
-
-      expect(fieldCapsMock).toHaveBeenCalledWith({
-        index: inputIndices,
-        fields: ['_id'],
-        ignore_unavailable: true,
-        index_filter: expect.any(Object),
-      });
-      expect(ilmExplainLifecycleMock).toHaveBeenCalledWith({
-        index: inputIndices.join(','),
-      });
     });
   });
 });
