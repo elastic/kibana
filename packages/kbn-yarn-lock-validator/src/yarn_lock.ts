@@ -21,9 +21,9 @@ import * as YarnLockFile from '@yarnpkg/lockfile';
 export interface YarnLock {
   /** a simple map of `name@versionrange` tags to metadata about a package */
   [key: string]: {
-    /** resolved version installed for this pacakge */
+    /** resolved version installed for this package */
     version: string;
-    /** resolved url for this pacakge */
+    /** resolved url for this package */
     resolved: string;
     /** yarn calculated integrity value for this package */
     integrity: string;

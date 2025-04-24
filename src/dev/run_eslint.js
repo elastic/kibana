@@ -18,13 +18,15 @@ if (process.argv.includes('--no-quiet')) {
   process.argv.push('--quiet');
 }
 
-const options = yargs(process.argv).argv;
-process.env.KIBANA_RESOLVER_HARD_CACHE = 'true';
+if (!process.argv.includes('--help')) {
+  const options = yargs(process.argv).argv;
 
-if (!options._.length && !options.printConfig) {
-  process.argv.push('.');
+  if (!options._.length && !options.printConfig) {
+    process.argv.push('.');
+  }
 }
 
+process.env.KIBANA_RESOLVER_HARD_CACHE = 'true';
 if (!process.argv.includes('--no-cache')) {
   process.argv.push('--cache');
 }

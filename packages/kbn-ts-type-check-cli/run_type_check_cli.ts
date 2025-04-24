@@ -108,6 +108,11 @@ run(
 
     const created = await createTypeCheckConfigs(log, projects);
 
+    if (flagsReader.boolean('configs-only')) {
+      log.success('Generated tsconfig.type_check.json files, exiting.');
+      return;
+    }
+
     let pluginBuildResult;
     try {
       log.info(
@@ -166,7 +171,7 @@ run(
     `,
     flags: {
       string: ['project'],
-      boolean: ['clean-cache', 'cleanup'],
+      boolean: ['clean-cache', 'cleanup', 'configs-only'],
       help: `
         --project [path]        Path to a tsconfig.json file determines the project to check
         --help                  Show this message
@@ -175,6 +180,7 @@ run(
                                   files in place makes subsequent executions faster because ts can
                                   identify that none of the imports have changed (it uses creation/update
                                   times) but cleaning them prevents leaving garbage around the repo.
+        --configs-only          Only generate the tsconfig.type_check.json files, do not run the type check
       `,
     },
   }

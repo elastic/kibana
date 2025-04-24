@@ -1,2 +1,4 @@
 # use stylelint
 *.scss
+/.nx/cache
+/.nx/workspace-data

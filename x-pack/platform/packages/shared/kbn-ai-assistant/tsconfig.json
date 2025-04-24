@@ -13,7 +13,7 @@
     "**/*.ts",
     "**/*.tsx",
     ".storybook/**/*.ts",
-    ".storybook/**/*.tsx",
+    ".storybook/**/*.tsx"
   ],
   "exclude": [
     "target/**/*"
@@ -41,6 +41,6 @@
     "@kbn/storybook",
     "@kbn/ai-assistant-icon",
     "@kbn/datemath",
-    "@kbn/security-plugin-types-common",
+    "@kbn/security-plugin-types-common"
   ]
 }
