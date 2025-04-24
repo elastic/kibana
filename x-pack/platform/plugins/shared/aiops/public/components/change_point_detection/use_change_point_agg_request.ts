@@ -69,7 +69,7 @@ function getChangePointDetectionRequestBody(
           select: {
             bucket_selector: {
               buckets_path: { p_value: 'change_point_request.p_value' },
-              script: 'params.p_value < 1',
+              script: 'params.p_value <= 1',
             },
           },
           sort: {
@@ -151,7 +151,9 @@ export function useChangePointResults(
   const fetchResults = useCallback(
     async (pageNumber: number = 1, afterKey?: string) => {
       try {
+        // For split field with no cardinality, return empty results immediately
         if (!isSingleMetric && !totalAggPages) {
+          setResults([]);
           setProgress(null);
           return;
         }
@@ -212,7 +214,7 @@ export function useChangePointResults(
           return;
         }
 
-        const isFetchCompleted = !(
+        let isFetchCompleted = !(
           isDefined(result.rawResponse.aggregations?.groupings?.after_key?.splitFieldTerm) &&
           pageNumber < totalAggPages
         );
@@ -223,39 +225,76 @@ export function useChangePointResults(
             : result.rawResponse.aggregations.groupings.buckets
         ) as ChangePointAggResponse['aggregations']['groupings']['buckets'];
 
+        // If there are no buckets on first page, it means there is no data for the selected time range
+        if (
+          pageNumber === 1 &&
+          ((!isSingleMetric && (!buckets || buckets.length === 0)) ||
+            (isSingleMetric && (!buckets || buckets[0].over_time.buckets.length === 0)))
+        ) {
+          setResults([]);
+          setProgress(null);
+          return;
+        }
+
         setProgress(
           isFetchCompleted ? null : Math.min(Math.round((pageNumber / totalAggPages) * 100), 100)
         );
 
-        let groups = buckets
-          .map((v) => {
-            const changePointType = Object.keys(v.change_point_request.type)[0] as ChangePointType;
-            const timeAsString = v.change_point_request.bucket?.key;
-            const rawPValue = v.change_point_request.type[changePointType].p_value;
+        const mappedBuckets = buckets.map((v) => {
+          const changePointType = Object.keys(v.change_point_request.type)[0] as ChangePointType;
+          const timeAsString = v.change_point_request.bucket?.key;
+          const rawPValue = v.change_point_request.type[changePointType].p_value;
 
-            return {
-              ...(isSingleMetric
-                ? {}
-                : {
-                    group: {
-                      name: fieldConfig.splitField,
-                      value: v.key.splitFieldTerm,
-                    },
-                  }),
-              type: changePointType,
-              p_value: rawPValue,
-              timestamp: timeAsString,
-              label: changePointType,
-              reason: v.change_point_request.type[changePointType].reason,
-              id: isSingleMetric
-                ? 'single_metric'
-                : `${fieldConfig.splitField}_${v.key?.splitFieldTerm}`,
-            } as ChangePointAnnotation;
-          })
-          .filter((v) => !EXCLUDED_CHANGE_POINT_TYPES.has(v.type));
+          return {
+            ...(isSingleMetric
+              ? {}
+              : {
+                  group: {
+                    name: fieldConfig.splitField,
+                    value: v.key.splitFieldTerm,
+                  },
+                }),
+            kind: 'changePoint',
+            type: changePointType,
+            p_value: rawPValue,
+            timestamp: timeAsString,
+            label: changePointType,
+            reason: v.change_point_request.type[changePointType].reason,
+            id: isSingleMetric
+              ? 'single_metric'
+              : `${fieldConfig.splitField}_${v.key?.splitFieldTerm}`,
+          } as ChangePointAnnotation;
+        });
+
+        // Filter for real change points
+        let groups = mappedBuckets.filter(
+          (v) => v.kind === 'changePoint' && !EXCLUDED_CHANGE_POINT_TYPES.has(v.type)
+        );
 
         if (Array.isArray(requestParams.changePointType)) {
-          groups = groups.filter((v) => requestParams.changePointType!.includes(v.type));
+          groups = groups.filter(
+            (v) => v.kind === 'changePoint' && requestParams.changePointType!.includes(v.type)
+          );
+        }
+
+        // If filtering removed all results but we have buckets,
+        // it means we have data but no change points
+        if (groups.length === 0 && mappedBuckets.length > 0) {
+          const firstBucket = mappedBuckets[0];
+          groups = [
+            {
+              ...firstBucket,
+              kind: 'noChangePoints',
+              label: 'No change points found',
+              p_value: null,
+              timestamp: null,
+            },
+          ];
+
+          // Results are sorted by p_value, so we can stop fetching at this point,
+          // if we have no change points
+          isFetchCompleted = true;
+          setProgress(null);
         }
 
         setResults((prev) => {
@@ -336,7 +375,12 @@ export function useChangePointResults(
     ]
   );
 
-  return { results, isLoading: progress !== null, reset, progress };
+  return {
+    results,
+    isLoading: progress !== null,
+    reset,
+    progress,
+  };
 }
 
 /**

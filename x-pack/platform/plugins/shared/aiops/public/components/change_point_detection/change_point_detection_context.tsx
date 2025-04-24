@@ -71,18 +71,30 @@ export const ChangePointDetectionContext = createContext<{
   setSelectedChangePoints: () => {},
 });
 
-export interface ChangePointAnnotation {
+interface BaseChangePointAnnotationProperties {
   id: string;
-  label: string;
-  reason: string;
-  timestamp: string;
   group?: {
     name: string;
     value: string;
   };
+  label: string;
   type: ChangePointType;
-  p_value: number;
+  reason?: string;
 }
+
+export type ChangePoint = BaseChangePointAnnotationProperties & {
+  kind: 'changePoint';
+  p_value: number;
+  timestamp: string;
+};
+
+type NoChangePointsEntry = BaseChangePointAnnotationProperties & {
+  kind: 'noChangePoints';
+  p_value: null;
+  timestamp: null;
+};
+
+export type ChangePointAnnotation = ChangePoint | NoChangePointsEntry;
 
 export type SelectedChangePoint = FieldConfig & ChangePointAnnotation;
 

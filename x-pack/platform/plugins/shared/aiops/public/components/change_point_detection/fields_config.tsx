@@ -57,6 +57,7 @@ import { useChangePointResults } from './use_change_point_agg_request';
 import { useSplitFieldCardinality } from './use_split_field_cardinality';
 import { ViewTypeSelector } from './view_type_selector';
 import { CASES_TOAST_MESSAGES_TITLES } from '../../cases/constants';
+import { hasChangePoints } from './types';
 
 const selectControlCss = { width: '350px' };
 
@@ -731,6 +732,8 @@ export const ChangePointResults: FC<ChangePointResultsProps> = ({
   const cardinalityExceeded =
     splitFieldCardinality && splitFieldCardinality > SPLIT_FIELD_CARDINALITY_LIMIT;
 
+  const containsChangePoints = useMemo(() => hasChangePoints(annotations), [annotations]);
+
   return (
     <>
       <EuiSpacer size="s" />
@@ -753,6 +756,26 @@ export const ChangePointResults: FC<ChangePointResultsProps> = ({
                   cardinalityLimit: SPLIT_FIELD_CARDINALITY_LIMIT,
                   splitField: fieldConfig.splitField,
                 },
+              })}
+            </p>
+          </EuiCallOut>
+          <EuiSpacer size="m" />
+        </>
+      ) : null}
+
+      {!containsChangePoints && annotations.length > 0 ? (
+        <>
+          <EuiSpacer size="s" />
+          <EuiCallOut
+            title={i18n.translate('xpack.aiops.changePointDetection.noChangePointsFoundTitle', {
+              defaultMessage: 'No change points found',
+            })}
+            color="warning"
+            iconType="warning"
+          >
+            <p>
+              {i18n.translate('xpack.aiops.changePointDetection.noChangePointsFoundMessage', {
+                defaultMessage: 'No change points detected - showing sample metric data',
               })}
             </p>
           </EuiCallOut>

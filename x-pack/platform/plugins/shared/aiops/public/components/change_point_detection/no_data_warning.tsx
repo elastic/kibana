@@ -9,7 +9,7 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiEmptyPrompt } from '@elastic/eui';
 
-export const NoChangePointsWarning = (props: { onRenderComplete?: () => void }) => {
+export const NoDataFoundWarning = (props: { onRenderComplete?: () => void }) => {
   props.onRenderComplete?.();
 
   return (
@@ -18,16 +18,16 @@ export const NoChangePointsWarning = (props: { onRenderComplete?: () => void }) 
       title={
         <h2>
           <FormattedMessage
-            id="xpack.aiops.changePointDetection.noChangePointsFoundTitle"
-            defaultMessage="No change points found"
+            id="xpack.aiops.changePointDetection.noDataFoundTitle"
+            defaultMessage="No data found"
           />
         </h2>
       }
       body={
         <p>
           <FormattedMessage
-            id="xpack.aiops.changePointDetection.noChangePointsFoundMessage"
-            defaultMessage="Detect statistically significant change points such as dips, spikes, and distribution changes in a metric. Select a metric and set a time range to start detecting change points in your data."
+            id="xpack.aiops.changePointDetection.noDataFoundMessage"
+            defaultMessage="No data was found for the selected metric and time range. Please adjust your selection to include data from your indices."
           />
         </p>
       }

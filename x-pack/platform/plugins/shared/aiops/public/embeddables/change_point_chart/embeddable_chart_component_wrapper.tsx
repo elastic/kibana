@@ -23,7 +23,7 @@ import { useDataSource } from '../../hooks/use_data_source';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { useChangePointResults } from '../../components/change_point_detection/use_change_point_agg_request';
 import { ChartsGrid } from '../../components/change_point_detection/charts_grid';
-import { NoChangePointsWarning } from '../../components/change_point_detection/no_change_points_warning';
+import { NoDataFoundWarning } from '../../components/change_point_detection/no_data_warning';
 
 const defaultSort = {
   field: 'p_value' as keyof ChangePointAnnotation,
@@ -151,7 +151,7 @@ export const ChartGridEmbeddableWrapper: FC<ChangePointDetectionProps> = ({
         emptyState ? (
           emptyState
         ) : (
-          <NoChangePointsWarning onRenderComplete={onRenderComplete} />
+          <NoDataFoundWarning onRenderComplete={onRenderComplete} />
         )
       ) : null}
     </div>
