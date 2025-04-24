@@ -49,6 +49,7 @@ const useTrackedFetchMethod = (fetchMethod: FetchMethod, queryName: string): Fet
 
   const monitoredFetchMethod = useMemo<FetchMethod>(() => {
     return async <Hit, Aggs>(params: QueryAlerts) => {
+      console.log({ params });
       const { endTracking } = startTracking({ name: queryName });
       let result: AlertSearchResponse<Hit, Aggs>;
       try {
@@ -104,6 +105,9 @@ export const useQueryAlerts = <Hit, Aggs>({
           query,
           signal: abortCtrl.signal,
         });
+
+        console.log(alertResponse);
+        console.log(query);
 
         if (isSubscribed) {
           setAlerts({

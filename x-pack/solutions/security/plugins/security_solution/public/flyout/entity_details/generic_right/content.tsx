@@ -11,6 +11,8 @@ import {
   MISCONFIGURATION_INSIGHT_HOST_ENTITY_OVERVIEW,
   VULNERABILITIES_INSIGHT_HOST_ENTITY_OVERVIEW,
 } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
+import { EuiHorizontalRule } from '@elastic/eui';
+import { useExpandSection } from '../../document_details/right/hooks/use_expand_section';
 import { AlertCountInsight } from '../../document_details/shared/components/alert_count_insight';
 import { GENERIC_FLYOUT_STORAGE_KEYS } from './constants';
 import type { GenericEntityRecord } from '../../../asset_inventory/types/generic_entity_record';
@@ -30,6 +32,16 @@ interface GenericEntityFlyoutContentProps {
 }
 
 export const GenericEntityFlyoutContent = ({ source }: GenericEntityFlyoutContentProps) => {
+  const fieldsSectionExpandedState = useExpandSection({
+    title: GENERIC_FLYOUT_STORAGE_KEYS.OVERVIEW_FIELDS_SECTION,
+    defaultValue: true,
+  });
+
+  const insightsSectionExpandedState = useExpandSection({
+    title: GENERIC_FLYOUT_STORAGE_KEYS.OVERVIEW_INSIGHTS_SECTION,
+    defaultValue: true,
+  });
+
   return (
     <FlyoutBody>
       <ExpandableSection
@@ -39,7 +51,7 @@ export const GenericEntityFlyoutContent = ({ source }: GenericEntityFlyoutConten
             defaultMessage="Fields"
           />
         }
-        expanded
+        expanded={fieldsSectionExpandedState}
         localStorageKey={GENERIC_FLYOUT_STORAGE_KEYS.OVERVIEW_FIELDS_SECTION}
       >
         <FieldsTable
@@ -48,6 +60,8 @@ export const GenericEntityFlyoutContent = ({ source }: GenericEntityFlyoutConten
         />
       </ExpandableSection>
 
+      <EuiHorizontalRule />
+
       <ExpandableSection
         title={
           <FormattedMessage
@@ -55,12 +69,14 @@ export const GenericEntityFlyoutContent = ({ source }: GenericEntityFlyoutConten
             defaultMessage="Insights"
           />
         }
-        expanded
+        expanded={insightsSectionExpandedState}
         localStorageKey={GENERIC_FLYOUT_STORAGE_KEYS.OVERVIEW_INSIGHTS_SECTION}
       >
         <AlertCountInsight
-          fieldName={'entity.id'}
-          name={source?.entity?.id}
+          // fieldName={'entity.id'}
+          // name={source?.entity?.id}
+          fieldName={'agent.type'}
+          name={'cloudbeat'}
           // openDetailsPanel={openDetailsPanel}
           data-test-subj={ENTITIES_HOST_OVERVIEW_ALERT_COUNT_TEST_ID}
         />
