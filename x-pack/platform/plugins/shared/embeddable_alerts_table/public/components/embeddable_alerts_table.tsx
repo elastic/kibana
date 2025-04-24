@@ -6,6 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
+import type { EuiDataGridColumn } from '@elastic/eui';
 import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiLoadingChart } from '@elastic/eui';
 import type { RuleTypeSolution } from '@kbn/alerting-types';
 import type { TimeRange } from '@kbn/es-query';
@@ -19,6 +20,7 @@ import { ALERT_TIME_RANGE, TIMESTAMP } from '@kbn/rule-data-utils';
 import type { AlertsTableProps } from '@kbn/response-ops-alerts-table/types';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { GENERAL_CASES_OWNER } from '@kbn/cases-plugin/common';
+import { defaultAlertsTableColumns } from '@kbn/response-ops-alerts-table/configuration';
 import {
   getSolutionRuleTypesAuthPromptBody,
   NO_AUTHORIZED_RULE_TYPE_PROMPT_TITLE,
@@ -38,6 +40,13 @@ export interface EmbeddableAlertsTableProps {
 }
 
 const inMemoryStorage = new InMemoryStorage();
+const columns = defaultAlertsTableColumns.map<EuiDataGridColumn>((column) => ({
+  ...column,
+  actions: false,
+  isResizable: false,
+  isSortable: false,
+  cellActions: [],
+}));
 
 /**
  * Renders the AlertsTable based on the embeddable table config
@@ -120,12 +129,18 @@ export const EmbeddableAlertsTable = ({
       id={id}
       ruleTypeIds={ruleTypeIds}
       query={finalQuery}
+      columns={columns}
       showAlertStatusWithFlapping
       renderActionsCell={AlertActionsCell}
       toolbarVisibility={{
         // Disabling the fullscreen toggle since it breaks in Dashboards
         // and panels can be maximized on their own
         showFullScreenSelector: false,
+        // Disable data grid customizations
+        showColumnSelector: false,
+        showSortSelector: false,
+        showKeyboardShortcuts: false,
+        showDisplaySelector: false,
       }}
       emptyStateHeight="flex"
       casesConfiguration={{
@@ -135,6 +150,8 @@ export const EmbeddableAlertsTable = ({
       // Saves the configuration in memory in case we want to add a shared configuration saved in
       // the panel config in the future (and avoid localStorage migrations or deletions tasks)
       configurationStorage={inMemoryStorage}
+      // Disable columns customziation
+      browserFields={{}}
       services={services}
     />
   );
