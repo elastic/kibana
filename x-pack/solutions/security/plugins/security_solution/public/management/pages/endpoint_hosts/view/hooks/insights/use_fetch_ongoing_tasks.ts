@@ -46,23 +46,23 @@ export const useFetchLatestScan = ({
           },
         });
 
-        const insight = response.data[0];
-        if (!insight) {
+        const defendInsight = response.data[0];
+        if (!defendInsight) {
           return undefined;
         }
 
-        const status = insight.status;
+        const status = defendInsight.status;
 
         if (status === DefendInsightStatusEnum.failed) {
           toasts.addDanger({
             title: WORKFLOW_INSIGHTS.toasts.fetchPendingInsightsError,
-            text: insight.failureReason,
+            text: defendInsight.failureReason,
           });
           onInsightGenerationFailure();
         }
 
         if (status === DefendInsightStatusEnum.succeeded) {
-          const expectedCount = insight.insights.reduce((acc, insight) => {
+          const expectedCount = defendInsight.insights.reduce((acc, insight) => {
             if (!insight.events) {
               return acc;
             }
@@ -71,7 +71,7 @@ export const useFetchLatestScan = ({
           onSuccess(expectedCount);
         }
 
-        return insight;
+        return defendInsight;
       } catch (error) {
         toasts.addDanger({
           title: WORKFLOW_INSIGHTS.toasts.fetchPendingInsightsError,
