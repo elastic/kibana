@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useCallback } from 'react';
+import React, { useCallback } from 'react';
 import {
   EuiButtonIcon,
   EuiFlexGroup,
@@ -62,6 +62,14 @@ interface TableTabSettingButtonProps {
    * The function to set the state of the table tab
    */
   setTableTabState: (tableTabState: TableTabState) => void;
+  /**
+   * The current state of the popover
+   */
+  isPopoverOpen: boolean;
+  /**
+   * The function to set the state of the popover
+   */
+  setIsPopoverOpen: (isPopoverOpen: boolean) => void;
 }
 
 /**
@@ -70,18 +78,19 @@ interface TableTabSettingButtonProps {
 export const TableTabSettingButton = ({
   tableTabState,
   setTableTabState,
+  isPopoverOpen,
+  setIsPopoverOpen,
 }: TableTabSettingButtonProps) => {
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const { showHighlightedFields, hideEmptyFields, hideAlertFields } = tableTabState;
   const { euiTheme } = useEuiTheme();
 
   const onClick = useCallback(() => {
     setIsPopoverOpen(!isPopoverOpen);
-  }, [isPopoverOpen]);
+  }, [isPopoverOpen, setIsPopoverOpen]);
 
   const closePopover = useCallback(() => {
     setIsPopoverOpen(false);
-  }, []);
+  }, [setIsPopoverOpen]);
 
   const onToggleShowHighlightedFields = useCallback(() => {
     setTableTabState({

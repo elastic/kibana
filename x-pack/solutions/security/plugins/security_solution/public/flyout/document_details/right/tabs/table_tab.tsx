@@ -29,6 +29,7 @@ import { useKibana } from '../../../../common/lib/kibana';
 import { FLYOUT_STORAGE_KEYS } from '../../shared/constants/local_storage';
 import { getTableTabColumns } from '../utils/table_tab_columns';
 import { useHighlightedFields } from '../../shared/hooks/use_highlighted_fields';
+import { TableTabTour } from '../components/table_tab_tour';
 
 const COUNT_PER_PAGE_OPTIONS = [25, 50, 100];
 
@@ -141,11 +142,18 @@ export const TableTab = memo(() => {
     storage.set(FLYOUT_STORAGE_KEYS.TABLE_TAB_STATE, tableTabState);
   }, [tableTabState, storage]);
 
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+
   const renderToolsRight = useCallback(
     () => [
-      <TableTabSettingButton tableTabState={tableTabState} setTableTabState={setTableTabState} />,
+      <TableTabSettingButton
+        tableTabState={tableTabState}
+        setTableTabState={setTableTabState}
+        isPopoverOpen={isPopoverOpen}
+        setIsPopoverOpen={setIsPopoverOpen}
+      />,
     ],
-    [tableTabState, setTableTabState]
+    [tableTabState, setTableTabState, isPopoverOpen, setIsPopoverOpen]
   );
 
   const [pagination, setPagination] = useState<{ pageIndex: number }>({
@@ -154,6 +162,14 @@ export const TableTab = memo(() => {
   const onTableChange = useCallback(({ page: { index } }: { page: { index: number } }) => {
     setPagination({ pageIndex: index });
   }, []);
+
+  const paginationSettings = useMemo(
+    () => ({
+      ...pagination,
+      pageSizeOptions: COUNT_PER_PAGE_OPTIONS,
+    }),
+    [pagination]
+  );
 
   const getScope = useMemo(() => {
     if (isTimelineScope(scopeId)) {
@@ -251,25 +267,25 @@ export const TableTab = memo(() => {
   }, [renderToolsRight]);
 
   return (
-    <EuiInMemoryTable
-      items={items}
-      itemId="field"
-      columns={columns}
-      onTableChange={onTableChange}
-      pagination={{
-        ...pagination,
-        pageSizeOptions: COUNT_PER_PAGE_OPTIONS,
-      }}
-      rowProps={onSetRowProps}
-      search={search}
-      sorting={false}
-      data-test-subj={TABLE_TAB_CONTENT_TEST_ID}
-      css={css`
-        .euiTableRow {
-          font-size: ${smallFontSize};
-        }
-      `}
-    />
+    <>
+      <TableTabTour setIsPopoverOpen={setIsPopoverOpen} />
+      <EuiInMemoryTable
+        items={items}
+        itemId="field"
+        columns={columns}
+        onTableChange={onTableChange}
+        pagination={paginationSettings}
+        rowProps={onSetRowProps}
+        search={search}
+        sorting={false}
+        data-test-subj={TABLE_TAB_CONTENT_TEST_ID}
+        css={css`
+          .euiTableRow {
+            font-size: ${smallFontSize};
+          }
+        `}
+      />
+    </>
   );
 });
 

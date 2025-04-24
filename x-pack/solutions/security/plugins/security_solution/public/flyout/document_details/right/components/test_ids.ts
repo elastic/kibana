@@ -25,6 +25,7 @@ export const TABLE_TAB_SETTING_HIDE_EMPTY_FIELDS_TEST_ID =
   `${FLYOUT_TABLE_TEST_ID}HideEmptyFields` as const;
 export const TABLE_TAB_SETTING_HIDE_ALERT_FIELDS_TEST_ID =
   `${FLYOUT_TABLE_TEST_ID}HideAlertFields` as const;
+export const TABLE_TAB_TOUR_TEST_ID = `${FLYOUT_TABLE_TEST_ID}Tour` as const;
 
 /* Header */
 
