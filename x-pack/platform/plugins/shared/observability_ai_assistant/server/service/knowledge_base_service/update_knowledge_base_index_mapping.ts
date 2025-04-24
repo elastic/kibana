@@ -9,7 +9,7 @@ import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { Logger } from '@kbn/logging';
 import { resourceNames } from '..';
 
-export async function updateKnowledgeBaseIndexMapping({
+export async function updateKnowledgeBaseIndexMappingFromIndexTemplate({
   esClient,
   logger,
 }: {
@@ -21,18 +21,18 @@ export async function updateKnowledgeBaseIndexMapping({
   });
 
   const resolvedProperties = resolved.template?.mappings?.properties;
-
-  if (resolvedProperties) {
-    await esClient.asInternalUser.indices.putMapping({
-      index: resourceNames.writeIndexAlias.kb,
-      properties: resolvedProperties,
-    });
-    logger.info(
-      `Updated mappings for index [${resourceNames.writeIndexAlias.kb}] from template [${resourceNames.indexTemplate.kb}].`
-    );
-  } else {
+  if (!resolvedProperties) {
     logger.warn(
       `No mappings found in index template [${resourceNames.indexTemplate.kb}], skipping mapping update.`
     );
+    return;
   }
+
+  await esClient.asInternalUser.indices.putMapping({
+    index: resourceNames.writeIndexAlias.kb,
+    properties: resolvedProperties,
+  });
+  logger.info(
+    `Updated mappings for index [${resourceNames.writeIndexAlias.kb}] from template [${resourceNames.indexTemplate.kb}].`
+  );
 }

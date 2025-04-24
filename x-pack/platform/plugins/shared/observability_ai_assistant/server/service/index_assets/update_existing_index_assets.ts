@@ -13,14 +13,14 @@ import { resourceNames } from '..';
 import { hasKbIndex } from '../knowledge_base_service/has_kb_index';
 import { getInferenceIdFromWriteIndex } from '../knowledge_base_service/get_inference_id_from_write_index';
 
+export const DEFAULT_INFERENCE_ENDPOINT = '.elser-2-elasticsearch';
+
 export async function updateExistingIndexAssets({
   logger,
   core,
-  inferenceId,
 }: {
   logger: Logger;
   core: CoreSetup<ObservabilityAIAssistantPluginStartDependencies>;
-  inferenceId?: string;
 }) {
   const [coreStart] = await core.getStartServices();
   const { asInternalUser } = coreStart.elasticsearch.client;
@@ -50,7 +50,7 @@ export async function updateExistingIndexAssets({
       logger.debug(
         `Current KB write index does not have an inference_id. This is to be expected for indices created before 8.16`
       );
-      return undefined;
+      return DEFAULT_INFERENCE_ENDPOINT;
     });
 
     await createOrUpdateKnowledgeBaseIndexAssets({ logger, core, inferenceId: currentInferenceId });

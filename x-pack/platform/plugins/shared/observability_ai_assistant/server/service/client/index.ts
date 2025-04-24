@@ -675,7 +675,7 @@ export class ObservabilityAIAssistantClient {
   };
 
   setupKnowledgeBase = async (
-    inferenceId: string
+    nextInferenceId: string
   ): Promise<{
     reindex: boolean;
     currentInferenceId: string | undefined;
@@ -683,17 +683,17 @@ export class ObservabilityAIAssistantClient {
   }> => {
     const { esClient, core, logger } = this.dependencies;
 
-    logger.debug(`Setting up knowledge base with inference_id: ${inferenceId}`);
+    logger.debug(`Setting up knowledge base with inference_id: ${nextInferenceId}`);
 
     const doesKbIndexExist = await hasKbIndex({ esClient });
 
     // KB index doesn't exist. Setup index assets for the KB for the first time
     if (!doesKbIndexExist) {
-      logger.debug('Existing knowledge base index not found');
+      logger.debug('Knowledge base index does not exist. Creating index assets.');
       await createOrUpdateKnowledgeBaseIndexAssets({
         core: this.dependencies.core,
         logger: this.dependencies.logger,
-        inferenceId,
+        inferenceId: nextInferenceId,
       });
     }
 
@@ -704,19 +704,29 @@ export class ObservabilityAIAssistantClient {
       return undefined;
     });
 
-    if (currentInferenceId === inferenceId) {
+    if (currentInferenceId === nextInferenceId) {
       logger.debug('Inference ID is unchanged. No need to re-index knowledge base.');
-      warmupModel({ esClient, logger, inferenceId }).catch(() => {});
-      return { reindex: false, currentInferenceId, nextInferenceId: inferenceId };
+      warmupModel({ esClient, logger, inferenceId: nextInferenceId }).catch(() => {});
+      return { reindex: false, currentInferenceId, nextInferenceId };
     }
 
-    waitForKbModel({ esClient, logger, config: this.dependencies.config, inferenceId })
+    waitForKbModel({
+      esClient,
+      logger,
+      config: this.dependencies.config,
+      inferenceId: nextInferenceId,
+    })
       .then(async () => {
         logger.info(
-          `Inference ID has changed from "${currentInferenceId}" to "${inferenceId}". Re-indexing knowledge base.`
+          `Inference ID has changed from "${currentInferenceId}" to "${nextInferenceId}". Re-indexing knowledge base.`
         );
 
-        await reIndexKnowledgeBaseWithLock({ core, logger, esClient, inferenceId });
+        await reIndexKnowledgeBaseWithLock({
+          core,
+          logger,
+          esClient,
+          inferenceId: nextInferenceId,
+        });
         await populateMissingSemanticTextFieldWithLock({
           core,
           logger,
@@ -726,12 +736,12 @@ export class ObservabilityAIAssistantClient {
       })
       .catch((e) => {
         logger.error(
-          `Failed to setup knowledge base with inference_id: ${inferenceId}. Error: ${e.message}`
+          `Failed to setup knowledge base with inference_id: ${nextInferenceId}. Error: ${e.message}`
         );
         logger.debug(e);
       });
 
-    return { reindex: true, currentInferenceId, nextInferenceId: inferenceId };
+    return { reindex: true, currentInferenceId, nextInferenceId };
   };
 
   warmupKbModel = (inferenceId: string) => {

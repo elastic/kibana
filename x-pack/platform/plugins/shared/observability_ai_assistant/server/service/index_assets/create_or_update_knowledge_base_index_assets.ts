@@ -7,24 +7,21 @@
 
 import type { CoreSetup, Logger } from '@kbn/core/server';
 import type { ObservabilityAIAssistantPluginStartDependencies } from '../../types';
-import {
-  DEFAULT_INFERENCE_ENDPOINT,
-  getComponentTemplate,
-} from './templates/kb_component_template';
+import { getComponentTemplate } from './templates/kb_component_template';
 import { resourceNames } from '..';
 import { createKnowledgeBaseIndex } from '../knowledge_base_service/create_knowledge_base_index';
 import { updateKnowledgeBaseWriteIndexAlias } from '../knowledge_base_service/update_knowledge_base_index_alias';
 import { hasKbIndex } from '../knowledge_base_service/has_kb_index';
-import { updateKnowledgeBaseIndexMapping } from '../knowledge_base_service/update_knowledge_base_index_mapping';
+import { updateKnowledgeBaseIndexMappingFromIndexTemplate } from '../knowledge_base_service/update_knowledge_base_index_mapping';
 
 export async function createOrUpdateKnowledgeBaseIndexAssets({
   logger,
   core,
-  inferenceId = DEFAULT_INFERENCE_ENDPOINT, // TODO: use `.elser-v2-elastic` for serverless on EIS
+  inferenceId,
 }: {
   logger: Logger;
   core: CoreSetup<ObservabilityAIAssistantPluginStartDependencies>;
-  inferenceId?: string;
+  inferenceId: string;
 }) {
   try {
     logger.debug('Setting up knowledge base index assets');
@@ -53,30 +50,14 @@ export async function createOrUpdateKnowledgeBaseIndexAssets({
       },
     });
 
-    const indexExists = await hasKbIndex({ esClient: coreStart.elasticsearch.client });
-
     // Knowledge base: update write index if index exists
+    const indexExists = await hasKbIndex({ esClient: coreStart.elasticsearch.client });
     if (indexExists) {
-      const kbWriteIndexAlias = resourceNames.writeIndexAlias.kb;
-
-      const aliasInfo = await asInternalUser.indices.getAlias({
-        name: kbWriteIndexAlias,
-        ignore_unavailable: true,
+      logger.debug('Knowledge base index already exists, updating index mapping');
+      await updateKnowledgeBaseIndexMappingFromIndexTemplate({
+        esClient: coreStart.elasticsearch.client,
+        logger,
       });
-
-      const isWriteIndex = Object.entries(aliasInfo).some(
-        ([_indexName, aliasData]) => aliasData.aliases?.[kbWriteIndexAlias]?.is_write_index
-      );
-
-      if (isWriteIndex) {
-        logger.info(
-          `Knowledge base write index [${kbWriteIndexAlias}] already exists and is assigned as a write index. Skipping creation.`
-        );
-
-        // Knowledge base: update write index
-        updateKnowledgeBaseIndexMapping({ esClient: coreStart.elasticsearch.client, logger });
-      }
-
       return;
     }
 

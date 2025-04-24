@@ -7,8 +7,6 @@
 
 import { ClusterComponentTemplate } from '@elastic/elasticsearch/lib/api/types';
 
-export const DEFAULT_INFERENCE_ENDPOINT = '.elser-2-elasticsearch'; // TODO: use `.elser-v2-elastic` for serverless on EIS
-
 const keyword = {
   type: 'keyword' as const,
   ignore_above: 1024,
