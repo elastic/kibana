@@ -13,7 +13,6 @@ import type { KibanaRequest, KibanaResponseFactory, Logger } from '@kbn/core/ser
 import { i18n } from '@kbn/i18n';
 import { PUBLIC_ROUTES } from '@kbn/reporting-common';
 import type { BaseParams } from '@kbn/reporting-common/types';
-import { cryptoFactory } from '@kbn/reporting-server';
 import rison from '@kbn/rison';
 
 import { type Counters, getCounters } from '..';
@@ -41,30 +40,45 @@ const validation = {
  * Serves report job handling in the context of the request to generate the report
  */
 export class RequestHandler {
+  protected reporting: ReportingCore;
+  protected user: ReportingUser;
+  protected context: ReportingRequestHandlerContext;
+  protected path: string;
+  protected req: KibanaRequest<
+    TypeOf<(typeof validation)['params']>,
+    TypeOf<(typeof validation)['query']>,
+    TypeOf<(typeof validation)['body']>
+  >;
+  protected res: KibanaResponseFactory;
+  protected logger: Logger;
+
   constructor(
-    private reporting: ReportingCore,
-    private user: ReportingUser,
-    private context: ReportingRequestHandlerContext,
-    private path: string,
-    private req: KibanaRequest<
+    reporting: ReportingCore,
+    user: ReportingUser,
+    context: ReportingRequestHandlerContext,
+    path: string,
+    req: KibanaRequest<
       TypeOf<(typeof validation)['params']>,
       TypeOf<(typeof validation)['query']>,
       TypeOf<(typeof validation)['body']>
     >,
-    private res: KibanaResponseFactory,
-    private logger: Logger
-  ) {}
-
-  private async encryptHeaders() {
-    const { encryptionKey } = this.reporting.getConfig();
-    const crypto = cryptoFactory(encryptionKey);
-    return await crypto.encrypt(this.req.headers);
+    res: KibanaResponseFactory,
+    logger: Logger
+  ) {
+    this.reporting = reporting;
+    this.user = user;
+    this.context = context;
+    this.path = path;
+    this.req = req;
+    this.res = res;
+    this.logger = logger;
   }
 
   public async enqueueJob(exportTypeId: string, jobParams: BaseParams) {
     const { reporting, logger, context, req, user } = this;
 
     const exportType = reporting.getExportTypesRegistry().getById(exportTypeId);
+    const { securityService } = await reporting.getPluginStartDeps();
 
     if (exportType == null) {
       throw new Error(`Export type ${exportTypeId} does not exist in the registry!`);
@@ -79,15 +93,29 @@ export class RequestHandler {
     // 1. Ensure the incoming params have a version field (should be set by the UI)
     jobParams.version = checkParamsVersion(jobParams, logger);
 
-    // 2. Encrypt request headers to store for the running report job to authenticate itself with Kibana
-    const headers = await this.encryptHeaders();
+    // 2. Generate API key
+    if (!securityService) {
+      throw new Error(`Security plugin requiredto generate API keys for report`);
+    }
+
+    const createAPIKeyResult = await securityService.authc.apiKeys.grantAsInternalUser(req, {
+      name: `Reporting ${exportType.name} API Key`,
+      role_descriptors: {},
+      metadata: { managed: true },
+    });
+    if (!createAPIKeyResult) {
+      throw new Error(`Error creating API key for report`);
+    }
+
+    const apiKey = Buffer.from(`${createAPIKeyResult.id}:${createAPIKeyResult.api_key}`).toString(
+      'base64'
+    );
 
     // 3. Create a payload object by calling exportType.createJob(), and adding some automatic parameters
     const job = await exportType.createJob(jobParams, context, req);
 
     const payload = {
       ...job,
-      headers,
       title: job.title,
       objectType: jobParams.objectType,
       browserTimezone: jobParams.browserTimezone,
@@ -113,7 +141,7 @@ export class RequestHandler {
     logger.debug(`Successfully stored pending job: ${report._index}/${report._id}`);
 
     // 5. Schedule the report with Task Manager
-    const task = await reporting.scheduleTask(report.toReportTaskJSON());
+    const task = await reporting.scheduleOneTimeTask(report.toReportTaskJSON(), apiKey);
     logger.info(
       `Scheduled ${exportType.name} reporting task. Task ID: task:${task.id}. Report ID: ${report._id}`
     );
@@ -233,7 +261,7 @@ export class RequestHandler {
     }
   }
 
-  private handleError(err: Error | Boom.Boom, counters: Counters, jobtype?: string) {
+  protected handleError(err: Error | Boom.Boom, counters: Counters, jobtype?: string) {
     this.logger.error(err);
 
     if (err instanceof Boom.Boom) {
