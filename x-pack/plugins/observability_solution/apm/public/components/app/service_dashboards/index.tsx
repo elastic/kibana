@@ -18,11 +18,7 @@ import {
 } from '@elastic/eui';
 
 import { ViewMode } from '@kbn/embeddable-plugin/public';
-import {
-  DashboardApi,
-  DashboardCreationOptions,
-  DashboardRenderer,
-} from '@kbn/dashboard-plugin/public';
+import { DashboardCreationOptions, DashboardRenderer } from '@kbn/dashboard-plugin/public';
 import { SerializableRecord } from '@kbn/utility-types';
 
 import { EmptyDashboards } from './empty_dashboards';
@@ -59,7 +55,6 @@ export function ServiceDashboards() {
   const checkForEntities = serviceEntitySummary?.dataStreamTypes
     ? isLogsOnlySignal(serviceEntitySummary.dataStreamTypes)
     : false;
-  const [dashboard, setDashboard] = useState<DashboardApi | undefined>();
   const [serviceDashboards, setServiceDashboards] = useState<MergedServiceDashboard[]>([]);
   const [currentDashboard, setCurrentDashboard] = useState<MergedServiceDashboard>();
   const { data: allAvailableDashboards } = useDashboardFetcher();
@@ -106,25 +101,18 @@ export function ServiceDashboards() {
     const getInitialInput = () => ({
       viewMode: ViewMode.VIEW,
       timeRange: { from: rangeFrom, to: rangeTo },
+      query: { query: kuery, language: 'kuery' },
+      filters:
+        dataView &&
+        currentDashboard?.serviceEnvironmentFilterEnabled &&
+        currentDashboard?.serviceNameFilterEnabled
+          ? getFilters(serviceName, environment, dataView)
+          : [],
     });
     return Promise.resolve<DashboardCreationOptions>({
       getInitialInput,
     });
-  }, [rangeFrom, rangeTo]);
-
-  useEffect(() => {
-    if (!dashboard) return;
-
-    dashboard.setFilters(
-      dataView &&
-        currentDashboard?.serviceEnvironmentFilterEnabled &&
-        currentDashboard?.serviceNameFilterEnabled
-        ? getFilters(serviceName, environment, dataView)
-        : []
-    );
-    dashboard.setQuery({ query: kuery, language: 'kuery' });
-    dashboard.setTimeRange({ from: rangeFrom, to: rangeTo });
-  }, [dataView, serviceName, environment, kuery, dashboard, rangeFrom, rangeTo, currentDashboard]);
+  }, [dataView, serviceName, environment, rangeFrom, rangeTo, currentDashboard, kuery]);
 
   const getLocatorParams = useCallback(
     (params: any) => {
@@ -217,7 +205,6 @@ export function ServiceDashboards() {
                 locator={locator}
                 savedObjectId={dashboardId}
                 getCreationOptions={getCreationOptions}
-                onApiAvailable={setDashboard}
               />
             )}
           </EuiFlexItem>
