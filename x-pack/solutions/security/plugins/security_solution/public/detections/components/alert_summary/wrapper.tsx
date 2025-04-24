@@ -16,9 +16,12 @@ import {
 import { i18n } from '@kbn/i18n';
 import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { PackageListItem } from '@kbn/fleet-plugin/common';
+import type { RuleResponse } from '../../../../common/api/detection_engine';
 import { useKibana } from '../../../common/lib/kibana';
 import { KPIsSection } from './kpis/kpis_section';
+import { IntegrationSection } from './integrations/integration_section';
 import { SearchBarSection } from './search_bar/search_bar_section';
+import { TableSection } from './table/table_section';
 
 const DATAVIEW_ERROR = i18n.translate('xpack.securitySolution.alertSummary.dataViewError', {
   defaultMessage: 'Unable to create data view',
@@ -36,6 +39,19 @@ export interface WrapperProps {
    * List of installed AI for SOC integrations
    */
   packages: PackageListItem[];
+  /**
+   * Result from the useQuery to fetch all rules
+   */
+  ruleResponse: {
+    /**
+     * Result from fetching all rules
+     */
+    rules: RuleResponse[];
+    /**
+     * True while rules are being fetched
+     */
+    isLoading: boolean;
+  };
 }
 
 /**
@@ -44,7 +60,7 @@ export interface WrapperProps {
  * Once the dataView is correctly created, we render the content.
  * If the creation fails, we show an error message.
  */
-export const Wrapper = memo(({ packages }: WrapperProps) => {
+export const Wrapper = memo(({ packages, ruleResponse }: WrapperProps) => {
   const { data } = useKibana().services;
   const [dataView, setDataView] = useState<DataView | undefined>(undefined);
   const [loading, setLoading] = useState<boolean>(true);
@@ -52,16 +68,20 @@ export const Wrapper = memo(({ packages }: WrapperProps) => {
   useEffect(() => {
     let dv: DataView;
     const createDataView = async () => {
-      dv = await data.dataViews.create(dataViewSpec);
-      setDataView(dv);
-      setLoading(false);
+      try {
+        dv = await data.dataViews.create(dataViewSpec);
+        setDataView(dv);
+        setLoading(false);
+      } catch (err) {
+        setLoading(false);
+      }
     };
     createDataView();
 
     // clearing after leaving the page
     return () => {
       if (dv?.id) {
-        data.dataViews.clearInstanceCache(dv?.id);
+        data.dataViews.clearInstanceCache(dv.id);
       }
     };
   }, [data.dataViews]);
@@ -92,9 +112,17 @@ export const Wrapper = memo(({ packages }: WrapperProps) => {
             />
           ) : (
             <div data-test-subj={CONTENT_TEST_ID}>
-              <SearchBarSection dataView={dataView} packages={packages} />
+              <IntegrationSection packages={packages} />
+              <EuiHorizontalRule />
+              <SearchBarSection
+                dataView={dataView}
+                packages={packages}
+                ruleResponse={ruleResponse}
+              />
               <EuiSpacer />
               <KPIsSection dataView={dataView} />
+              <EuiSpacer />
+              <TableSection dataView={dataView} packages={packages} ruleResponse={ruleResponse} />
             </div>
           )}
         </>

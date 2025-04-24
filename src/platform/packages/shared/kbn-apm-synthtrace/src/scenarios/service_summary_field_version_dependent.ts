@@ -7,9 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ApmFields, apm } from '@kbn/apm-synthtrace-client';
+import { ApmFields, ApmSynthtracePipelineSchema, apm } from '@kbn/apm-synthtrace-client';
 import { random } from 'lodash';
-import { Readable } from 'stream';
 import semver from 'semver';
 import { Scenario } from '../cli/scenario';
 import { withClient } from '../lib/utils/with_client';
@@ -25,11 +24,11 @@ const scenario: Scenario<ApmFields> = async ({
   return {
     bootstrap: async ({ apmEsClient }) => {
       if (isLegacy) {
-        apmEsClient.pipeline((base: Readable) => {
-          return apmEsClient.getDefaultPipeline({
+        apmEsClient.pipeline(
+          apmEsClient.getPipeline(ApmSynthtracePipelineSchema.Default, {
             versionOverride: version,
-          })(base);
-        });
+          })
+        );
       }
     },
     generate: ({ range, clients: { apmEsClient } }) => {

@@ -46,7 +46,7 @@ export function getTableColumns(
 ) {
   const uniqueProcessorsFields = uniq(getSourceFields(processors));
 
-  if (filter === 'outcome_filter_unmatched') {
+  if (filter === 'outcome_filter_failed' || filter === 'outcome_filter_skipped') {
     return uniqueProcessorsFields;
   }
 
@@ -60,10 +60,14 @@ export function filterSimulationDocuments(
   filter: PreviewDocsFilterOption
 ) {
   switch (filter) {
-    case 'outcome_filter_matched':
+    case 'outcome_filter_parsed':
       return documents.filter((doc) => doc.status === 'parsed').map((doc) => doc.value);
-    case 'outcome_filter_unmatched':
-      return documents.filter((doc) => doc.status !== 'parsed').map((doc) => doc.value);
+    case 'outcome_filter_partially_parsed':
+      return documents.filter((doc) => doc.status === 'partially_parsed').map((doc) => doc.value);
+    case 'outcome_filter_skipped':
+      return documents.filter((doc) => doc.status === 'skipped').map((doc) => doc.value);
+    case 'outcome_filter_failed':
+      return documents.filter((doc) => doc.status === 'failed').map((doc) => doc.value);
     case 'outcome_filter_all':
     default:
       return documents.map((doc) => doc.value);

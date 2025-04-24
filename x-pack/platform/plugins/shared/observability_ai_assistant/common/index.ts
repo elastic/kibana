@@ -47,4 +47,4 @@ export { concatenateChatCompletionChunks } from './utils/concatenate_chat_comple
 
 export { ShortIdTable } from './utils/short_id_table';
 
-export { KnowledgeBaseType } from './types';
+export { KnowledgeBaseType, KnowledgeBaseState } from './types';

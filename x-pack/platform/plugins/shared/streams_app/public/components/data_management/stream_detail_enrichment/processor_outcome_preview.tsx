@@ -16,9 +16,7 @@ import {
   EuiProgress,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useSelector } from '@xstate5/react';
 import { isEmpty, isEqual } from 'lodash';
-import { StreamsAppSearchBar, StreamsAppSearchBarProps } from '../../streams_app_search_bar';
 import { PreviewTable } from '../preview_table';
 import { AssetImage } from '../../asset_image';
 import {
@@ -31,6 +29,7 @@ import {
   previewDocsFilterOptions,
 } from './state_management/simulation_state_machine';
 import { selectPreviewDocuments } from './state_management/simulation_state_machine/selectors';
+import { StreamsAppSearchBar } from '../../streams_app_search_bar';
 
 export const ProcessorOutcomePreview = () => {
   const isLoading = useSimulatorSelector(
@@ -51,36 +50,30 @@ export const ProcessorOutcomePreview = () => {
     </>
   );
 };
+const formatter = new Intl.NumberFormat('en-US', {
+  style: 'percent',
+  maximumFractionDigits: 0,
+});
+
+const formatRateToPercentage = (rate?: number) =>
+  (rate ? formatter.format(rate) : undefined) as any; // This is a workaround for the type error, since the numFilters & numActiveFilters props are defined as number | undefined
 
 const OutcomeControls = () => {
   const { changePreviewDocsFilter } = useStreamEnrichmentEvents();
 
   const previewDocsFilter = useSimulatorSelector((state) => state.context.previewDocsFilter);
-  const simulationFailureRate = useSimulatorSelector((state) =>
-    state.context.simulation
-      ? state.context.simulation.failure_rate + state.context.simulation.skipped_rate
-      : undefined
+  const simulationFailedRate = useSimulatorSelector((state) =>
+    formatRateToPercentage(state.context.simulation?.documents_metrics.failed_rate)
   );
-  const simulationSuccessRate = useSimulatorSelector(
-    (state) => state.context.simulation?.success_rate
+  const simulationSkippedRate = useSimulatorSelector((state) =>
+    formatRateToPercentage(state.context.simulation?.documents_metrics.skipped_rate)
   );
-
-  const dateRangeRef = useSimulatorSelector((state) => state.context.dateRangeRef);
-  const timeRange = useSelector(dateRangeRef, (state) => state.context.timeRange);
-  const handleRefresh = () => dateRangeRef.send({ type: 'dateRange.refresh' });
-
-  const handleQuerySubmit: StreamsAppSearchBarProps['onQuerySubmit'] = (
-    { dateRange },
-    isUpdate
-  ) => {
-    if (!isUpdate) {
-      return handleRefresh();
-    }
-
-    if (dateRange) {
-      dateRangeRef.send({ type: 'dateRange.update', range: dateRange });
-    }
-  };
+  const simulationPartiallyParsedRate = useSimulatorSelector((state) =>
+    formatRateToPercentage(state.context.simulation?.documents_metrics.partially_parsed_rate)
+  );
+  const simulationParsedRate = useSimulatorSelector((state) =>
+    formatRateToPercentage(state.context.simulation?.documents_metrics.parsed_rate)
+  );
 
   const getFilterButtonPropsFor = (filter: PreviewDocsFilterOption) => ({
     hasActiveFilters: previewDocsFilter === filter,
@@ -101,30 +94,39 @@ const OutcomeControls = () => {
           {previewDocsFilterOptions.outcome_filter_all.label}
         </EuiFilterButton>
         <EuiFilterButton
-          {...getFilterButtonPropsFor(previewDocsFilterOptions.outcome_filter_matched.id)}
+          {...getFilterButtonPropsFor(previewDocsFilterOptions.outcome_filter_parsed.id)}
           badgeColor="success"
-          numActiveFilters={
-            simulationSuccessRate ? parseFloat((simulationSuccessRate * 100).toFixed(2)) : undefined
-          }
+          numFilters={simulationParsedRate}
+          numActiveFilters={simulationParsedRate}
         >
-          {previewDocsFilterOptions.outcome_filter_matched.label}
+          {previewDocsFilterOptions.outcome_filter_parsed.label}
         </EuiFilterButton>
         <EuiFilterButton
-          {...getFilterButtonPropsFor(previewDocsFilterOptions.outcome_filter_unmatched.id)}
+          {...getFilterButtonPropsFor(previewDocsFilterOptions.outcome_filter_partially_parsed.id)}
           badgeColor="accent"
-          numActiveFilters={
-            simulationFailureRate ? parseFloat((simulationFailureRate * 100).toFixed(2)) : undefined
-          }
+          numFilters={simulationPartiallyParsedRate}
+          numActiveFilters={simulationPartiallyParsedRate}
         >
-          {previewDocsFilterOptions.outcome_filter_unmatched.label}
+          {previewDocsFilterOptions.outcome_filter_partially_parsed.label}
+        </EuiFilterButton>
+        <EuiFilterButton
+          {...getFilterButtonPropsFor(previewDocsFilterOptions.outcome_filter_skipped.id)}
+          badgeColor="accent"
+          numFilters={simulationSkippedRate}
+          numActiveFilters={simulationSkippedRate}
+        >
+          {previewDocsFilterOptions.outcome_filter_skipped.label}
+        </EuiFilterButton>
+        <EuiFilterButton
+          {...getFilterButtonPropsFor(previewDocsFilterOptions.outcome_filter_failed.id)}
+          badgeColor="accent"
+          numFilters={simulationFailedRate}
+          numActiveFilters={simulationFailedRate}
+        >
+          {previewDocsFilterOptions.outcome_filter_failed.label}
         </EuiFilterButton>
       </EuiFilterGroup>
-      <StreamsAppSearchBar
-        onQuerySubmit={handleQuerySubmit}
-        onRefresh={handleRefresh}
-        dateRangeFrom={timeRange?.from}
-        dateRangeTo={timeRange?.to}
-      />
+      <StreamsAppSearchBar showDatePicker />
     </EuiFlexGroup>
   );
 };

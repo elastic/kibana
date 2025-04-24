@@ -11,7 +11,6 @@ import type {
   EuiSelectableOption,
   EuiSelectableOptionCheckedType,
 } from '@elastic/eui/src/components/selectable/selectable_option';
-import { useFindRulesQuery } from '../../../detection_engine/rule_management/api/hooks/use_find_rules_query';
 import { filterExistsInFiltersArray } from '../../utils/filter';
 import { useKibana } from '../../../common/lib/kibana';
 import type { RuleResponse } from '../../../../common/api/detection_engine';
@@ -24,6 +23,19 @@ export interface UseIntegrationsParams {
    * List of installed AI for SOC integrations
    */
   packages: PackageListItem[];
+  /**
+   * Result from the useQuery to fetch all rules
+   */
+  ruleResponse: {
+    /**
+     * Result from fetching all rules
+     */
+    rules: RuleResponse[];
+    /**
+     * True while rules are being fetched
+     */
+    isLoading: boolean;
+  };
 }
 
 export interface UseIntegrationsResult {
@@ -42,10 +54,10 @@ export interface UseIntegrationsResult {
  * If there is no match between a package and the rules, the integration is not returned.
  * If a filter exists (we assume that this filter is negated) we do not mark the integration as checked for the EuiFilterButton.
  */
-export const useIntegrations = ({ packages }: UseIntegrationsParams): UseIntegrationsResult => {
-  // Fetch all rules. For the AI for SOC effort, there should only be one rule per integration (which means for now 5-6 rules total)
-  const { data, isLoading } = useFindRulesQuery({});
-
+export const useIntegrations = ({
+  packages,
+  ruleResponse,
+}: UseIntegrationsParams): UseIntegrationsResult => {
   const {
     data: {
       query: { filterManager },
@@ -59,19 +71,23 @@ export const useIntegrations = ({ packages }: UseIntegrationsParams): UseIntegra
     const result: EuiSelectableOption[] = [];
 
     packages.forEach((p: PackageListItem) => {
-      const matchingRule = (data?.rules || []).find((r: RuleResponse) =>
+      const matchingRule = ruleResponse.rules.find((r: RuleResponse) =>
         r.related_integrations.map((ri) => ri.package).includes(p.name)
       );
 
       if (matchingRule) {
         // Retrieves the filter from the key/value pair
-        const currentFilter = filterExistsInFiltersArray(currentFilters, FILTER_KEY, p.title);
+        const currentFilter = filterExistsInFiltersArray(
+          currentFilters,
+          FILTER_KEY,
+          matchingRule.id
+        );
 
         // A EuiSelectableOption is checked only if there is no matching filter for that rule
         const integration = {
           'data-test-subj': `${INTEGRATION_OPTION_TEST_ID}${p.title}`,
           ...(!currentFilter && { checked: 'on' as EuiSelectableOptionCheckedType }),
-          key: matchingRule?.name,
+          key: matchingRule?.id, // we save the rule id that we will match again the signal.rule.id field on the alerts
           label: p.title,
         };
         result.push(integration);
@@ -79,13 +95,13 @@ export const useIntegrations = ({ packages }: UseIntegrationsParams): UseIntegra
     });
 
     return result;
-  }, [currentFilters, data, packages]);
+  }, [currentFilters, packages, ruleResponse.rules]);
 
   return useMemo(
     () => ({
       integrations,
-      isLoading,
+      isLoading: ruleResponse.isLoading,
     }),
-    [integrations, isLoading]
+    [integrations, ruleResponse.isLoading]
   );
 };

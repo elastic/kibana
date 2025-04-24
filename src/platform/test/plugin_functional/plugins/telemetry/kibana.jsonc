@@ -2,6 +2,8 @@
   "type": "plugin",
   "id": "@kbn/telemetry-test-plugin",
   "owner": "@elastic/kibana-core",
+  "group": "platform",
+  "visibility": "private",
   "plugin": {
     "id": "telemetryTestPlugin",
     "server": false,
