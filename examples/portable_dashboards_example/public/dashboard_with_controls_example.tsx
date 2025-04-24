@@ -29,7 +29,6 @@ export const DashboardWithControlsExample = ({ dataView }: { dataView: DataView 
       .addNewPanel(
         {
           panelType: FILTER_DEBUGGER_EMBEDDABLE_ID,
-          initialState: {},
         },
         true
       )
