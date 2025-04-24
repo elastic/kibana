@@ -730,6 +730,22 @@ Object {
       "type": "navGroup",
     },
   ],
+  "callout": Array [
+    Object {
+      "children": Array [
+        Object {
+          "id": "ai_soc_callout",
+          "renderItem": [Function],
+          "title": "",
+        },
+      ],
+      "defaultIsCollapsed": false,
+      "id": "calloutGroup",
+      "isCollapsible": false,
+      "title": "",
+      "type": "navGroup",
+    },
+  ],
   "footer": Array [
     Object {
       "icon": "launch",
