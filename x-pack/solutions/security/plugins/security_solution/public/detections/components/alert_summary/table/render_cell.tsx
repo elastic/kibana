@@ -18,7 +18,7 @@ const styles = { display: 'flex', alignItems: 'center', height: '100%' };
 
 const DATETIME_SCHEMA = 'datetime';
 
-export type CellValueComponentProps = Pick<
+export type CellValueProps = Pick<
   ComponentProps<GetTableProp<'renderCellValue'>>,
   /**
    * Alert data passed from the renderCellValue callback via the AlertWithLegacyFormats interface
@@ -49,7 +49,7 @@ export type CellValueComponentProps = Pick<
  *  - datetime
  * Finally it renders the rest as basic strings.
  */
-export const CellValue = memo(({ alert, columnId, packages, schema }: CellValueComponentProps) => {
+export const CellValue = memo(({ alert, columnId, packages, schema }: CellValueProps) => {
   let component;
 
   if (columnId === ALERT_RULE_PARAMETERS) {
