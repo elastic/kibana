@@ -26,7 +26,7 @@ export interface FindingsMisconfigurationFlyoutHeaderProps {
   finding: CspFinding;
 }
 
-export const CopyableText = (textToBeCopied: string) => {
+export const TruncatedCopyableText = ({ textToCopy }: { textToCopy: string }) => {
   return (
     <EuiText
       size="s"
@@ -45,9 +45,9 @@ export const CopyableText = (textToBeCopied: string) => {
           marginRight: '4px',
         }}
       >
-        {textToBeCopied}
+        {textToCopy}
       </div>
-      <EuiCopy textToCopy={textToBeCopied}>
+      <EuiCopy textToCopy={textToCopy}>
         {(copy) => (
           <EuiIcon
             css={css`
@@ -103,7 +103,7 @@ export const FindingsMisconfigurationFlyoutHeader = ({
                     </EuiFlexItem>
                     <EuiFlexItem>
                       <EuiToolTip content={resourceName} position="top">
-                        {CopyableText(resourceName)}
+                        <TruncatedCopyableText textToCopy={resourceName} />
                       </EuiToolTip>
                     </EuiFlexItem>
                   </EuiFlexGroup>

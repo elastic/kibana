@@ -36,7 +36,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CspClientPluginStartDeps } from '@kbn/cloud-security-posture';
 import { CodeBlock, CspFlyoutMarkdown, EMPTY_VALUE } from './findings_flyout';
 import { FindingsDetectionRuleCounter } from './findings_detection_rule_counter';
-import { CopyableText } from './findings_right/header';
+import { TruncatedCopyableText } from './findings_right/header';
 
 type Accordion = Pick<EuiAccordionProps, 'title' | 'id' | 'initialIsOpen'> &
   Pick<EuiDescriptionListProps, 'listItems'>;
@@ -51,7 +51,11 @@ const columns: Array<EuiBasicTableColumn<any>> = [
     field: 'value',
     name: 'Value',
     truncateText: false,
-    render: (value: string) => <>{CopyableText(value)}</>,
+    render: (value: string) => (
+      <>
+        <TruncatedCopyableText textToCopy={value} />
+      </>
+    ),
   },
 ];
 
