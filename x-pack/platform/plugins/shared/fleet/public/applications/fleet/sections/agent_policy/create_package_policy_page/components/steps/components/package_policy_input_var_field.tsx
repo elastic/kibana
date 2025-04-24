@@ -40,7 +40,6 @@ import { DatasetComponent } from './dataset_component';
 
 const FixedHeightDiv = styled.div`
   height: 300px;
-  position: relative;
 `;
 
 const FormRow = styled(EuiFormRow)`
