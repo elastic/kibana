@@ -23,12 +23,15 @@ const mockTableTabState = {
   hideAlertFields: false,
 };
 const mockSetTableTabState = jest.fn();
+const mockSetIsPopoverOpen = jest.fn();
 
 const renderComponent = () => {
   return render(
     <TableTabSettingButton
       tableTabState={mockTableTabState}
       setTableTabState={mockSetTableTabState}
+      isPopoverOpen={false}
+      setIsPopoverOpen={mockSetIsPopoverOpen}
     />
   );
 };
