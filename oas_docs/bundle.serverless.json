@@ -46507,7 +46507,7 @@
     },
     "/api/streams/_disable": {
       "post": {
-        "description": "Disables wired streams and deletes all existing stream definitions. The data of wired streams is deleted, but the data of classic streams is preserved.",
+        "description": "Disables wired streams and deletes all existing stream definitions. The data of wired streams is deleted, but the data of classic streams is preserved.<br/><br/>[Required authorization] Route required privileges: manage_assets.",
         "operationId": "post-streams-disable",
         "parameters": [
           {
@@ -46651,7 +46651,7 @@
     },
     "/api/streams/{name}": {
       "delete": {
-        "description": "Deletes a stream definition and the underlying data stream",
+        "description": "Deletes a stream definition and the underlying data stream<br/><br/>[Required authorization] Route required privileges: manage_assets.",
         "operationId": "delete-streams-name",
         "parameters": [
           {
@@ -46749,7 +46749,7 @@
         "x-state": "Technical Preview"
       },
       "put": {
-        "description": "Creates or updates a stream definition. Classic streams can not be created through this API, only updated",
+        "description": "Creates or updates a stream definition. Classic streams can not be created through this API, only updated<br/><br/>[Required authorization] Route required privileges: manage_assets.",
         "operationId": "put-streams-name",
         "parameters": [
           {
@@ -53693,7 +53693,7 @@
     },
     "/api/streams/{name}/content/export": {
       "post": {
-        "description": "Exports the content associated to a stream.",
+        "description": "Exports the content associated to a stream.<br/><br/>[Required authorization] Route required privileges: manage_assets.",
         "operationId": "post-streams-name-content-export",
         "parameters": [
           {
@@ -53897,7 +53897,7 @@
     },
     "/api/streams/{name}/dashboards/_bulk": {
       "post": {
-        "description": "Bulk update dashboards linked to a stream. Can link new dashboards and delete existing ones.",
+        "description": "Bulk update dashboards linked to a stream. Can link new dashboards and delete existing ones.<br/><br/>[Required authorization] Route required privileges: manage_assets.",
         "operationId": "post-streams-name-dashboards-bulk",
         "parameters": [
           {
@@ -53993,7 +53993,7 @@
     },
     "/api/streams/{name}/dashboards/{dashboardId}": {
       "delete": {
-        "description": "Unlinks a dashboard from a stream. Noop if the dashboard is not linked to the stream.",
+        "description": "Unlinks a dashboard from a stream. Noop if the dashboard is not linked to the stream.<br/><br/>[Required authorization] Route required privileges: manage_assets.",
         "operationId": "delete-streams-name-dashboards-dashboardid",
         "parameters": [
           {
@@ -54055,7 +54055,7 @@
         "x-state": "Technical Preview"
       },
       "put": {
-        "description": "Links a dashboard to a stream. Noop if the dashboard is already linked to the stream.",
+        "description": "Links a dashboard to a stream. Noop if the dashboard is already linked to the stream.<br/><br/>[Required authorization] Route required privileges: manage_assets.",
         "operationId": "put-streams-name-dashboards-dashboardid",
         "parameters": [
           {
