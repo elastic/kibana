@@ -101,7 +101,7 @@ export const ExecutionHistoryPanel = () => {
     : '';
 
   const watchHistoryDetailFlyoutId = useGeneratedHtmlId({ prefix: 'watchFlyout' });
-  const watchHistoryErrorDetailsFlyoutTitleId = useGeneratedHtmlId({ prefix: 'watchFlyout' });
+  const watchHistoryErrorDetailsFlyoutTitleId = useGeneratedHtmlId({ prefix: 'watchErrorFlyout' });
 
   if (historyError) {
     return (
