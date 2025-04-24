@@ -12,7 +12,6 @@ import { loggerMock } from '@kbn/logging-mocks';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { AIMessage } from '@langchain/core/messages';
 import { INCLUDE_CITATIONS } from '../../../../prompt/prompts';
-import { Content } from '@kbn/home-plugin/public/application/components/tutorial/content';
 import { newContentReferencesStoreMock } from '@kbn/elastic-assistant-common/impl/content_references/content_references_store/__mocks__/content_references_store.mock';
 
 jest.mock('../../../../prompt', () => ({
@@ -90,18 +89,21 @@ describe('runAgent', () => {
     expect(invokeMock).toHaveBeenCalledTimes(1);
     expect(invokeMock).toHaveBeenCalledWith(
       expect.objectContaining({
-        citations_prompt: INCLUDE_CITATIONS
+        citations_prompt: INCLUDE_CITATIONS,
       }),
       undefined
     );
   });
 
   it('invoked without citations prompt', async () => {
-    await runAgent({...testParams, contentReferencesStore: newContentReferencesStoreMock({ disabled: true })});
+    await runAgent({
+      ...testParams,
+      contentReferencesStore: newContentReferencesStoreMock({ disabled: true }),
+    });
     expect(invokeMock).toHaveBeenCalledTimes(1);
     expect(invokeMock).toHaveBeenCalledWith(
       expect.objectContaining({
-        citations_prompt: ""
+        citations_prompt: '',
       }),
       undefined
     );
