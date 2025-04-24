@@ -13,12 +13,12 @@ import type {
   UnifiedHistogramState,
   UnifiedHistogramVisContext,
   UseUnifiedHistogramProps,
-} from '@kbn/unified-histogram-plugin/public';
+} from '@kbn/unified-histogram';
 import {
   canImportVisContext,
   UnifiedHistogramExternalVisContextStatus,
   UnifiedHistogramFetchStatus,
-} from '@kbn/unified-histogram-plugin/public';
+} from '@kbn/unified-histogram';
 import { isEqual } from 'lodash';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { Observable } from 'rxjs';

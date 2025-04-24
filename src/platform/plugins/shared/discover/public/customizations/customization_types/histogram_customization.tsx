@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { UseUnifiedHistogramProps } from '@kbn/unified-histogram-plugin/public';
+import type { UseUnifiedHistogramProps } from '@kbn/unified-histogram';
 
 interface UnifiedHistogramCustomizationId {
   id: 'unified_histogram';

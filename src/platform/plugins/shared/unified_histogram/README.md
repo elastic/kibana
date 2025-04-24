@@ -7,7 +7,7 @@ It manages its own state and data fetching, and can easily be dropped into pages
 
 ```tsx
 // Import the container component
-import { UnifiedHistogramContainer } from '@kbn/unified-histogram-plugin/public';
+import { UnifiedHistogramContainer } from '@kbn/unified-histogram';
 
 // Import modules required for your application
 import { useServices, useResizeRef, useRequestParams, MyLayout, MyButton } from './my-modules';
@@ -47,7 +47,7 @@ return (
 import {
   UnifiedHistogramContainer,
   type UnifiedHistogramApi,
-} from '@kbn/unified-histogram-plugin/public';
+} from '@kbn/unified-histogram';
 
 // Import modules required for your application
 import {

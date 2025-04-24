@@ -11,7 +11,7 @@ import type {
   MultiClickTriggerEvent,
 } from '@kbn/charts-plugin/public';
 import type { CustomizationCallback } from '@kbn/discover-plugin/public';
-import type { UseUnifiedHistogramProps } from '@kbn/unified-histogram-plugin/public';
+import type { UseUnifiedHistogramProps } from '@kbn/unified-histogram';
 import { ACTION_GLOBAL_APPLY_FILTER } from '@kbn/unified-search-plugin/public';
 import { useCallback } from 'react';
 import { EsqlInTimelineTrigger } from '../../../../../../app/actions/constants';

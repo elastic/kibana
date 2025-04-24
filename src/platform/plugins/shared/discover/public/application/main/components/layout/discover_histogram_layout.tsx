@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { UnifiedHistogramLayout } from '@kbn/unified-histogram-plugin/public';
+import { UnifiedHistogramLayout } from '@kbn/unified-histogram';
 import { OutPortal } from 'react-reverse-portal';
 import { type DiscoverMainContentProps, DiscoverMainContent } from './discover_main_content';
 import { useCurrentChartPortalNode, useCurrentTabSelector } from '../../state_management/redux';

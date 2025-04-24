@@ -14,7 +14,7 @@ import type { Filter, TimeRange } from '@kbn/es-query';
 import type {
   UnifiedHistogramLayoutProps,
   UnifiedHistogramVisContext,
-} from '@kbn/unified-histogram-plugin/public';
+} from '@kbn/unified-histogram';
 import type { TabItem } from '@kbn/unified-tabs';
 
 export enum LoadingStatus {

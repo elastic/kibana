@@ -9,7 +9,7 @@
 
 import React, { type PropsWithChildren, useCallback, useEffect, useRef } from 'react';
 import { type HtmlPortalNode, InPortal, createHtmlPortalNode } from 'react-reverse-portal';
-import { UnifiedHistogramChart, useUnifiedHistogram } from '@kbn/unified-histogram-plugin/public';
+import { UnifiedHistogramChart, useUnifiedHistogram } from '@kbn/unified-histogram';
 import { DiscoverCustomizationProvider } from '../../../../customizations';
 import {
   useInternalStateSelector,
