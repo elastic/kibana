@@ -35,6 +35,7 @@ import type { TypeOfFieldMap } from '@kbn/rule-registry-plugin/common/field_map'
 import type { Filter } from '@kbn/es-query';
 
 import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
+import type { DocLinksServiceSetup } from '@kbn/core/server';
 import type { RulePreviewLoggedRequest } from '../../../../common/api/detection_engine/rule_preview/rule_preview.gen';
 import type { RuleResponseAction } from '../../../../common/api/detection_engine/model/rule_response_actions';
 import type { ConfigType } from '../../../config';
@@ -139,6 +140,7 @@ export type SecurityAlertType<
 export interface CreateSecurityRuleTypeWrapperProps {
   lists: SetupPlugins['lists'];
   actions: SetupPlugins['actions'];
+  docLinks: DocLinksServiceSetup;
   logger: Logger;
   config: ConfigType;
   publicBaseUrl: string | undefined;
