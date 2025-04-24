@@ -39,6 +39,7 @@ describe('renderApp', () => {
     params: coreMock.createAppMountParameters(),
     plugins: {
       charts: chartPluginMock.createStartContract(),
+      contentConnectors: searchConnectorsMock.createStart(),
       data: dataPluginMock.createStartContract(),
       guidedOnboarding: guidedOnboardingMock.createStart(),
       indexManagement: {
@@ -47,7 +48,6 @@ describe('renderApp', () => {
       lens: lensPluginMock.createStartContract(),
       licensing: licensingMock.createStart(),
       navigation: navigationPluginMock.createStartContract(),
-      searchConnectors: searchConnectorsMock.createStart(),
       security: securityMock.createStart(),
       share: sharePluginMock.createStartContract(),
       ml: mlPluginMock.createStartContract(),
