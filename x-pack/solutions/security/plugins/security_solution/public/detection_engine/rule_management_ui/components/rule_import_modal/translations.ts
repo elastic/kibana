@@ -132,3 +132,10 @@ export const ACTION_CONNECTORS_ADDITIONAL_PRIVILEGES = i18n.translate(
     defaultMessage: 'You need additional privileges to import rules with actions.',
   }
 );
+
+export const MULTIPLE_ISSUES = i18n.translate(
+  'xpack.securitySolution.detectionEngine.components.importRuleModal.multipleIssuesError',
+  {
+    defaultMessage: 'Multiple issues. See the full error for details.',
+  }
+);

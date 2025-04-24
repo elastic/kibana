@@ -16,7 +16,7 @@ export function getFailedConnectorsCount(actionConnectorsErrors: ErrorSchema[]) 
   const connectorIds = new Set(
     actionConnectorsErrors
       .filter((connectorError) => connectorError.id)
-      .flatMap((connectorError) => connectorError.id.split(','))
+      .flatMap((connectorError) => (connectorError.id || '').split(','))
   );
 
   return connectorIds.size;
@@ -31,7 +31,7 @@ function getShortErrorMessage(errorMessages: string[]): string {
     return errorMessages[0];
   }
 
-  return 'Multiple issues. See the full error for details.';
+  return i18n.MULTIPLE_ISSUES;
 }
 
 function getUserFriendlyConnectorMessages(actionConnectorsErrors: ErrorSchema[]): string[] {
