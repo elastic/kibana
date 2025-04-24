@@ -67,9 +67,7 @@ const listDashboardsRoute = createServerRoute({
   }),
   security: {
     authz: {
-      enabled: false,
-      reason:
-        'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
+      requiredPrivileges: [STREAMS_FEATURE_PRIVILEGES.read],
     },
   },
   async handler({ params, request, getScopedClients }): Promise<ListDashboardsResponse> {

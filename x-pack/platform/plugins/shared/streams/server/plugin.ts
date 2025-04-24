@@ -92,7 +92,11 @@ export class StreamsPlugin
             all: [],
             read: [],
           },
-          api: [STREAMS_FEATURE_PRIVILEGES.assets],
+          api: [
+            STREAMS_FEATURE_PRIVILEGES.assets,
+            STREAMS_FEATURE_PRIVILEGES.read,
+            STREAMS_FEATURE_PRIVILEGES.write,
+          ],
           ui: [STREAMS_FEATURE_PRIVILEGES.show, STREAMS_FEATURE_PRIVILEGES.assets],
         },
         read: {
@@ -101,7 +105,7 @@ export class StreamsPlugin
             all: [],
             read: [],
           },
-          api: [],
+          api: [STREAMS_FEATURE_PRIVILEGES.read],
           ui: [STREAMS_FEATURE_PRIVILEGES.show],
         },
       },

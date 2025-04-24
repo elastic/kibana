@@ -30,9 +30,7 @@ export const readStreamRoute = createServerRoute({
   },
   security: {
     authz: {
-      enabled: false,
-      reason:
-        'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
+      requiredPrivileges: [STREAMS_FEATURE_PRIVILEGES.read],
     },
   },
   params: z.object({
@@ -66,9 +64,7 @@ export const listStreamsRoute = createServerRoute({
   },
   security: {
     authz: {
-      enabled: false,
-      reason:
-        'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
+      requiredPrivileges: [STREAMS_FEATURE_PRIVILEGES.read],
     },
   },
   params: z.object({}),

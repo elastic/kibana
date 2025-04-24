@@ -9,5 +9,7 @@ export const ASSET_VERSION = 1;
 
 export const STREAMS_FEATURE_PRIVILEGES = {
   assets: 'manage_assets',
+  read: 'read',
+  write: 'manage_streams',
   show: 'show',
 } as const;

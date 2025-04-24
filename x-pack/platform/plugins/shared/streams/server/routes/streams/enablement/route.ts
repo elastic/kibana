@@ -25,9 +25,7 @@ export const enableStreamsRoute = createServerRoute({
   },
   security: {
     authz: {
-      enabled: false,
-      reason:
-        'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
+      requiredPrivileges: [STREAMS_FEATURE_PRIVILEGES.write],
     },
   },
   handler: async ({ request, getScopedClients }): Promise<EnableStreamsResponse> => {
@@ -61,7 +59,7 @@ export const disableStreamsRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [STREAMS_FEATURE_PRIVILEGES.assets],
+      requiredPrivileges: [STREAMS_FEATURE_PRIVILEGES.assets, STREAMS_FEATURE_PRIVILEGES.write],
     },
   },
   handler: async ({ request, getScopedClients }): Promise<DisableStreamsResponse> => {

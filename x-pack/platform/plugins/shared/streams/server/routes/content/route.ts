@@ -51,7 +51,7 @@ const exportContentRoute = createServerRoute({
   }),
   security: {
     authz: {
-      requiredPrivileges: [STREAMS_FEATURE_PRIVILEGES.assets],
+      requiredPrivileges: [STREAMS_FEATURE_PRIVILEGES.assets, STREAMS_FEATURE_PRIVILEGES.read],
     },
   },
   async handler({ params, request, response, getScopedClients, context }) {
@@ -133,9 +133,7 @@ const importContentRoute = createServerRoute({
   }),
   security: {
     authz: {
-      enabled: false,
-      reason:
-        'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
+      requiredPrivileges: [STREAMS_FEATURE_PRIVILEGES.read],
     },
   },
   async handler({ params, request, getScopedClients, context }) {
@@ -209,8 +207,7 @@ const previewContentRoute = createServerRoute({
   }),
   security: {
     authz: {
-      enabled: false,
-      reason: 'This API does not use any user credentials.',
+      requiredPrivileges: [STREAMS_FEATURE_PRIVILEGES.read],
     },
   },
   async handler({ params }) {
