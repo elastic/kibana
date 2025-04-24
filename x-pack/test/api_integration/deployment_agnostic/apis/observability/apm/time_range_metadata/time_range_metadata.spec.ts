@@ -39,7 +39,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         query: {
           start: overrides.start.toISOString(),
           end: overrides.end.toISOString(),
-          enableContinuousRollups: true,
           enableServiceTransactionMetrics: true,
           useSpanName: false,
           kuery: '',
@@ -338,7 +337,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           const response = await getTimeRangeMedata({
             start,
             end,
-            enableContinuousRollups: false,
           });
 
           expect(response.sources).to.eql([

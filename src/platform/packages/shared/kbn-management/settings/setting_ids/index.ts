@@ -126,8 +126,6 @@ export const OBSERVABILITY_MAX_SUGGESTIONS_ID = 'observability:maxSuggestions';
 export const OBSERVABILITY_PROFILING_ELASTICSEARCH_PLUGIN_ID =
   'observability:profilingElasticsearchPlugin';
 export const OBSERVABILITY_APM_ENABLE_SERVICE_METRICS_ID = 'observability:apmEnableServiceMetrics';
-export const OBSERVABILITY_APM_ENABLE_CONTINUOUS_ROLLUPS_ID =
-  'observability:apmEnableContinuousRollups';
 export const OBSERVABILITY_APM_ENABLE_PROFILING_INTEGRATION_ID =
   'observability:apmEnableProfilingIntegration';
 export const OBSERVABILITY_APM_ENABLE_TABLE_SEARCH_BAR = 'observability:apmEnableTableSearchBar';

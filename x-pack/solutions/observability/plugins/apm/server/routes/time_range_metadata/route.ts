@@ -20,7 +20,6 @@ export const timeRangeMetadataRoute = createApmServerRoute({
       t.type({
         useSpanName: toBooleanRt,
         enableServiceTransactionMetrics: toBooleanRt,
-        enableContinuousRollups: toBooleanRt,
       }),
       kueryRt,
       rangeRt,
@@ -32,14 +31,7 @@ export const timeRangeMetadataRoute = createApmServerRoute({
     const apmDataAccessServices = await getApmDataAccessServices({ apmEventClient, ...resources });
 
     const {
-      query: {
-        useSpanName,
-        start,
-        end,
-        kuery,
-        enableServiceTransactionMetrics,
-        enableContinuousRollups,
-      },
+      query: { useSpanName, start, end, kuery, enableServiceTransactionMetrics },
     } = resources.params;
 
     const [isUsingServiceDestinationMetrics, sources] = await Promise.all([
@@ -55,7 +47,6 @@ export const timeRangeMetadataRoute = createApmServerRoute({
         end,
         kuery,
         enableServiceTransactionMetrics,
-        enableContinuousRollups,
       }),
     ]);
 

@@ -26,7 +26,6 @@ import {
   apmAWSLambdaPriceFactor,
   apmAWSLambdaRequestCostPerMillion,
   apmEnableServiceMetrics,
-  apmEnableContinuousRollups,
   enableCriticalPath,
   syntheticsThrottlingEnabled,
   enableLegacyUptimeApp,
@@ -417,21 +416,6 @@ export const uiSettings: Record<string, UiSettings> = {
     description: i18n.translate('xpack.observability.apmEnableServiceMetricsDescription', {
       defaultMessage:
         '{betaLabel} Enables the usage of service transaction metrics, which are low cardinality metrics that can be used by certain views like the service inventory for faster loading times.',
-      values: { betaLabel: `<em>[${betaLabel}]</em>` },
-    }),
-    schema: schema.boolean(),
-    requiresPageReload: true,
-    solution: 'oblt',
-  },
-  [apmEnableContinuousRollups]: {
-    category: [observabilityFeatureId],
-    name: i18n.translate('xpack.observability.apmEnableContinuousRollups', {
-      defaultMessage: 'Continuous rollups',
-    }),
-    value: true,
-    description: i18n.translate('xpack.observability.apmEnableContinuousRollupsDescription', {
-      defaultMessage:
-        '{betaLabel} When continuous rollups is enabled, the UI will select metrics with the appropriate resolution. On larger time ranges, lower resolution metrics will be used, which will improve loading times.',
       values: { betaLabel: `<em>[${betaLabel}]</em>` },
     }),
     schema: schema.boolean(),
