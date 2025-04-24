@@ -22,7 +22,11 @@ import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { SEARCH_SESSION_ID } from '../../plugin_constants';
 import { convertPanelMapToPanelsArray } from '../../../common';
 import { dataService } from '../../services/kibana_services';
-import { DashboardApi, DashboardLocatorParams } from '../../dashboard_api/types';
+import {
+  DashboardApi,
+  DashboardInternalApi,
+  DashboardLocatorParams,
+} from '../../dashboard_api/types';
 
 export const removeSearchSessionIdFromURL = (kbnUrlStateStorage: IKbnUrlStateStorage) => {
   kbnUrlStateStorage.kbnUrlControls.updateAsync((nextUrl) => {
@@ -45,15 +49,24 @@ export const getSessionURLObservable = (history: History) =>
   );
 
 export function createSessionRestorationDataProvider(
-  dashboardApi: DashboardApi
+  dashboardApi: DashboardApi,
+  dashboardInternalApi: DashboardInternalApi
 ): SearchSessionInfoProvider<DashboardLocatorParams> {
   return {
     getName: async () =>
       dashboardApi.title$.value ?? dashboardApi.savedObjectId$.value ?? dashboardApi.uuid,
     getLocatorData: async () => ({
       id: DASHBOARD_APP_LOCATOR,
-      initialState: getLocatorParams({ dashboardApi, shouldRestoreSearchSession: false }),
-      restoreState: getLocatorParams({ dashboardApi, shouldRestoreSearchSession: true }),
+      initialState: getLocatorParams({
+        dashboardApi,
+        dashboardInternalApi,
+        shouldRestoreSearchSession: false,
+      }),
+      restoreState: getLocatorParams({
+        dashboardApi,
+        dashboardInternalApi,
+        shouldRestoreSearchSession: true,
+      }),
     }),
   };
 }
@@ -64,12 +77,15 @@ export function createSessionRestorationDataProvider(
  */
 function getLocatorParams({
   dashboardApi,
+  dashboardInternalApi,
   shouldRestoreSearchSession,
 }: {
   dashboardApi: DashboardApi;
+  dashboardInternalApi: DashboardInternalApi;
   shouldRestoreSearchSession: boolean;
 }): DashboardLocatorParams {
   const savedObjectId = dashboardApi.savedObjectId$.value;
+  const { panels, references } = dashboardInternalApi.serializePanels();
   return {
     viewMode: dashboardApi.viewMode$.value ?? 'view',
     useHash: false,
@@ -89,10 +105,11 @@ function getLocatorParams({
           value: 0,
         }
       : undefined,
-    panels: savedObjectId
-      ? undefined
-      : (convertPanelMapToPanelsArray(
-          dashboardApi.panels$.value
-        ) as DashboardLocatorParams['panels']),
+    ...(savedObjectId
+      ? {}
+      : {
+          panels: convertPanelMapToPanelsArray(panels) as DashboardLocatorParams['panels'],
+          references: references as DashboardLocatorParams['references'],
+        }),
   };
 }

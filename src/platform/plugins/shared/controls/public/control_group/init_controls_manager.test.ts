@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject } from 'rxjs';
-import type { ControlPanelState, ControlPanelsState, DefaultDataControlState } from '../../common';
+import type { ControlPanelState, DefaultDataControlState } from '../../common';
 import type { DefaultControlApi } from '../controls/types';
 import { getLastUsedDataViewId, initControlsManager } from './init_controls_manager';
 
@@ -22,13 +21,12 @@ describe('PresentationContainer api', () => {
     bravo: { type: 'testControl', order: 1 },
     charlie: { type: 'testControl', order: 2 },
   };
-  const lastSavedControlsState$ = new BehaviorSubject<ControlPanelsState>(intialControlsState);
 
   test('addNewPanel should add control at end of controls', async () => {
-    const controlsManager = initControlsManager(intialControlsState, lastSavedControlsState$);
+    const controlsManager = initControlsManager(intialControlsState);
     const addNewPanelPromise = controlsManager.api.addNewPanel({
       panelType: 'testControl',
-      initialState: {},
+      serializedState: { rawState: {} },
     });
     controlsManager.setControlApi('delta', {} as unknown as DefaultControlApi);
     await addNewPanelPromise;
@@ -41,7 +39,7 @@ describe('PresentationContainer api', () => {
   });
 
   test('removePanel should remove control', () => {
-    const controlsManager = initControlsManager(intialControlsState, lastSavedControlsState$);
+    const controlsManager = initControlsManager(intialControlsState);
     controlsManager.api.removePanel('bravo');
     expect(controlsManager.controlsInOrder$.value.map((element) => element.id)).toEqual([
       'alpha',
@@ -50,10 +48,10 @@ describe('PresentationContainer api', () => {
   });
 
   test('replacePanel should replace control', async () => {
-    const controlsManager = initControlsManager(intialControlsState, lastSavedControlsState$);
+    const controlsManager = initControlsManager(intialControlsState);
     const replacePanelPromise = controlsManager.api.replacePanel('bravo', {
       panelType: 'testControl',
-      initialState: {},
+      serializedState: { rawState: {} },
     });
     controlsManager.setControlApi('delta', {} as unknown as DefaultControlApi);
     await replacePanelPromise;
@@ -66,7 +64,7 @@ describe('PresentationContainer api', () => {
 
   describe('untilInitialized', () => {
     test('should not resolve until all controls are initialized', async () => {
-      const controlsManager = initControlsManager(intialControlsState, lastSavedControlsState$);
+      const controlsManager = initControlsManager(intialControlsState);
       let isDone = false;
       controlsManager.api.untilInitialized().then(() => {
         isDone = true;
@@ -88,7 +86,7 @@ describe('PresentationContainer api', () => {
     });
 
     test('should resolve when all control already initialized ', async () => {
-      const controlsManager = initControlsManager(intialControlsState, lastSavedControlsState$);
+      const controlsManager = initControlsManager(intialControlsState);
       controlsManager.setControlApi('alpha', {} as unknown as DefaultControlApi);
       controlsManager.setControlApi('bravo', {} as unknown as DefaultControlApi);
       controlsManager.setControlApi('charlie', {} as unknown as DefaultControlApi);
@@ -100,40 +98,6 @@ describe('PresentationContainer api', () => {
 
       await new Promise((resolve) => setTimeout(resolve, 0));
       expect(isDone).toBe(true);
-    });
-  });
-});
-
-describe('snapshotControlsRuntimeState', () => {
-  const intialControlsState = {
-    alpha: { type: 'testControl', order: 1 },
-    bravo: { type: 'testControl', order: 0 },
-  };
-  const lastSavedControlsState$ = new BehaviorSubject<ControlPanelsState>(intialControlsState);
-
-  test('should snapshot runtime state for all controls', async () => {
-    const controlsManager = initControlsManager(intialControlsState, lastSavedControlsState$);
-    controlsManager.setControlApi('alpha', {
-      snapshotRuntimeState: () => {
-        return { key1: 'alpha value' };
-      },
-    } as unknown as DefaultControlApi);
-    controlsManager.setControlApi('bravo', {
-      snapshotRuntimeState: () => {
-        return { key1: 'bravo value' };
-      },
-    } as unknown as DefaultControlApi);
-    expect(controlsManager.snapshotControlsRuntimeState()).toEqual({
-      alpha: {
-        key1: 'alpha value',
-        order: 1,
-        type: 'testControl',
-      },
-      bravo: {
-        key1: 'bravo value',
-        order: 0,
-        type: 'testControl',
-      },
     });
   });
 });
@@ -175,8 +139,7 @@ describe('resetControlsUnsavedChanges', () => {
       alpha: { type: 'testControl', order: 0 },
     };
     // last saved state is empty control group
-    const lastSavedControlsState$ = new BehaviorSubject<ControlPanelsState>({});
-    const controlsManager = initControlsManager(intialControlsState, lastSavedControlsState$);
+    const controlsManager = initControlsManager(intialControlsState);
     controlsManager.setControlApi('alpha', {} as unknown as DefaultControlApi);
 
     expect(controlsManager.controlsInOrder$.value).toEqual([
@@ -186,7 +149,8 @@ describe('resetControlsUnsavedChanges', () => {
       },
     ]);
 
-    controlsManager.resetControlsUnsavedChanges();
+    // last saved state is empty control group
+    controlsManager.resetControlsUnsavedChanges({});
     expect(controlsManager.controlsInOrder$.value).toEqual([]);
   });
 
@@ -194,15 +158,14 @@ describe('resetControlsUnsavedChanges', () => {
     const intialControlsState = {
       alpha: { type: 'testControl', order: 0 },
     };
-    const lastSavedControlsState$ = new BehaviorSubject<ControlPanelsState>(intialControlsState);
-    const controlsManager = initControlsManager(intialControlsState, lastSavedControlsState$);
+    const controlsManager = initControlsManager(intialControlsState);
     controlsManager.setControlApi('alpha', {} as unknown as DefaultControlApi);
 
     // delete control
     controlsManager.api.removePanel('alpha');
 
     // deleted control should exist on reset
-    controlsManager.resetControlsUnsavedChanges();
+    controlsManager.resetControlsUnsavedChanges(intialControlsState);
     expect(controlsManager.controlsInOrder$.value).toEqual([
       {
         id: 'alpha',
@@ -213,22 +176,14 @@ describe('resetControlsUnsavedChanges', () => {
 
   test('should restore controls to last saved state', () => {
     const intialControlsState = {};
-    const lastSavedControlsState$ = new BehaviorSubject<ControlPanelsState>(intialControlsState);
-    const controlsManager = initControlsManager(intialControlsState, lastSavedControlsState$);
+    const controlsManager = initControlsManager(intialControlsState);
 
     // add control
     controlsManager.api.addNewPanel({ panelType: 'testControl' });
-    controlsManager.setControlApi('delta', {
-      snapshotRuntimeState: () => {
-        return {};
-      },
-    } as unknown as DefaultControlApi);
-
-    // simulate save
-    lastSavedControlsState$.next(controlsManager.snapshotControlsRuntimeState());
+    controlsManager.setControlApi('delta', {} as unknown as DefaultControlApi);
 
     // saved control should exist on reset
-    controlsManager.resetControlsUnsavedChanges();
+    controlsManager.resetControlsUnsavedChanges({ delta: { type: 'testControl', order: 0 } });
     expect(controlsManager.controlsInOrder$.value).toEqual([
       {
         id: 'delta',
@@ -243,8 +198,7 @@ describe('resetControlsUnsavedChanges', () => {
     const intialControlsState = {
       alpha: { type: 'testControl', order: 0 },
     };
-    const lastSavedControlsState$ = new BehaviorSubject<ControlPanelsState>(intialControlsState);
-    const controlsManager = initControlsManager(intialControlsState, lastSavedControlsState$);
+    const controlsManager = initControlsManager(intialControlsState);
     controlsManager.setControlApi('alpha', {} as unknown as DefaultControlApi);
 
     // add another control
@@ -253,7 +207,7 @@ describe('resetControlsUnsavedChanges', () => {
     expect(Object.keys(controlsManager.api.children$.value).length).toBe(2);
 
     // reset to lastSavedControlsState
-    controlsManager.resetControlsUnsavedChanges();
+    controlsManager.resetControlsUnsavedChanges(intialControlsState);
     // children$ should no longer contain control removed by resetting back to original control baseline
     expect(Object.keys(controlsManager.api.children$.value).length).toBe(1);
   });
@@ -261,7 +215,7 @@ describe('resetControlsUnsavedChanges', () => {
 
 describe('getNewControlState', () => {
   test('should contain defaults when there are no existing controls', () => {
-    const controlsManager = initControlsManager({}, new BehaviorSubject<ControlPanelsState>({}));
+    const controlsManager = initControlsManager({});
     expect(controlsManager.getNewControlState()).toEqual({
       grow: false,
       width: 'medium',
@@ -279,10 +233,7 @@ describe('getNewControlState', () => {
         grow: false,
       } as ControlPanelState & Pick<DefaultDataControlState, 'dataViewId'>,
     };
-    const controlsManager = initControlsManager(
-      intialControlsState,
-      new BehaviorSubject<ControlPanelsState>(intialControlsState)
-    );
+    const controlsManager = initControlsManager(intialControlsState);
     expect(controlsManager.getNewControlState()).toEqual({
       grow: false,
       width: 'medium',
@@ -291,13 +242,15 @@ describe('getNewControlState', () => {
   });
 
   test('should contain values of last added control', () => {
-    const controlsManager = initControlsManager({}, new BehaviorSubject<ControlPanelsState>({}));
+    const controlsManager = initControlsManager({});
     controlsManager.api.addNewPanel({
       panelType: 'testControl',
-      initialState: {
-        grow: false,
-        width: 'small',
-        dataViewId: 'myOtherDataViewId',
+      serializedState: {
+        rawState: {
+          grow: false,
+          width: 'small',
+          dataViewId: 'myOtherDataViewId',
+        },
       },
     });
     expect(controlsManager.getNewControlState()).toEqual({

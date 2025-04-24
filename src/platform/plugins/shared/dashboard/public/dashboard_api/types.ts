@@ -8,7 +8,11 @@
  */
 
 import type { Reference } from '@kbn/content-management-utils';
-import { ControlGroupApi, ControlGroupSerializedState } from '@kbn/controls-plugin/public';
+import {
+  ControlGroupApi,
+  ControlGroupRuntimeState,
+  ControlGroupSerializedState,
+} from '@kbn/controls-plugin/public';
 import { RefreshInterval, SearchSessionInfoProvider } from '@kbn/data-plugin/public';
 import type { DefaultEmbeddableApi, EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
 import { Filter, Query, TimeRange } from '@kbn/es-query';
@@ -84,7 +88,10 @@ export interface DashboardCreationOptions {
     sessionIdUrlChangeObservable?: Observable<string | undefined>;
     getSearchSessionIdFromURL: () => string | undefined;
     removeSessionIdFromUrl: () => void;
-    createSessionRestorationDataProvider: (dashboardApi: DashboardApi) => SearchSessionInfoProvider;
+    createSessionRestorationDataProvider: (
+      dashboardApi: DashboardApi,
+      dashboardInternalApi: DashboardInternalApi
+    ) => SearchSessionInfoProvider;
   };
 
   useSessionStorageIntegration?: boolean;
@@ -125,12 +132,30 @@ export interface DashboardState extends DashboardSettings {
    * Serialized control group state.
    * Contains state loaded from dashboard saved object
    */
-  controlGroupInput?: ControlGroupSerializedState | undefined;
+  controlGroupInput?: ControlGroupSerializedState;
 }
 
-export type DashboardLocatorParams = Partial<
-  Omit<DashboardState, 'panels' | 'controlGroupInput' | 'references'>
-> & {
+/**
+ * Dashboard state stored in dashboard URLs
+ * Do not change type without considering BWC of stored URLs
+ */
+export type SharedDashboardState = Partial<
+  Omit<DashboardState, 'panels'> & {
+    controlGroupInput?: DashboardState['controlGroupInput'] & SerializableRecord;
+
+    /**
+     * Runtime control group state.
+     * @deprecated use controlGroupInput
+     */
+    controlGroupState?: Partial<ControlGroupRuntimeState> & SerializableRecord;
+
+    panels: DashboardPanel[];
+
+    references?: DashboardState['references'] & SerializableRecord;
+  }
+>;
+
+export type DashboardLocatorParams = Partial<SharedDashboardState> & {
   /**
    * If given, the dashboard saved object with this id will be loaded. If not given,
    * a new, unsaved dashboard will be loaded up.
@@ -156,11 +181,6 @@ export type DashboardLocatorParams = Partial<
    * (Background search)
    */
   searchSessionId?: string;
-
-  /**
-   * List of dashboard panels
-   */
-  panels?: Array<DashboardPanel & SerializableRecord>; // used SerializableRecord here to force the GridData type to be read as serializable
 };
 
 export type DashboardApi = CanExpandPanels &
@@ -196,6 +216,11 @@ export type DashboardApi = CanExpandPanels &
       attributes: DashboardAttributes;
       references: Reference[];
     };
+    getDashboardPanelFromId: (id: string) => {
+      type: string;
+      gridData: GridData;
+      serializedState: SerializedPanelState;
+    };
     hasOverlays$: PublishingSubject<boolean>;
     hasUnsavedChanges$: PublishingSubject<boolean>;
     highlightPanel: (panelRef: HTMLDivElement) => void;
@@ -223,7 +248,7 @@ export interface DashboardInternalApi {
   controlGroupReload$: Subject<void>;
   panelsReload$: Subject<void>;
   layout$: BehaviorSubject<DashboardLayout>;
-  getStateForControlGroup: () => SerializedPanelState<ControlGroupSerializedState>;
   registerChildApi: (api: DefaultEmbeddableApi) => void;
   setControlGroupApi: (controlGroupApi: ControlGroupApi) => void;
+  serializePanels: () => { references: Reference[]; panels: DashboardPanelMap };
 }

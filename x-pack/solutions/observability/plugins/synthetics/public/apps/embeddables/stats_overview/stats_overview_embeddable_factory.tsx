@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 
 import React, { useEffect } from 'react';
-import { DefaultEmbeddableApi, ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import { DefaultEmbeddableApi, EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import {
   initializeTitleManager,
   useBatchedPublishingSubjects,
@@ -17,14 +17,15 @@ import {
   PublishesTitle,
   SerializedTitles,
   HasEditCapabilities,
-  getUnchangingComparator,
   HasSupportedTriggers,
+  titleComparators,
 } from '@kbn/presentation-publishing';
-import { BehaviorSubject, Subject } from 'rxjs';
+import { initializeUnsavedChanges } from '@kbn/presentation-containers';
+import { BehaviorSubject, Observable, Subject, map, merge } from 'rxjs';
 import type { StartServicesAccessor } from '@kbn/core-lifecycle-browser';
 import {
   DynamicActionsSerializedState,
-  ReactEmbeddableDynamicActionsApi,
+  EmbeddableDynamicActionsManager,
 } from '@kbn/embeddable-enhanced-plugin/public/plugin';
 import { HasDynamicActions } from '@kbn/embeddable-enhanced-plugin/public';
 import { MonitorFilters } from '../monitors_overview/types';
@@ -38,10 +39,13 @@ export const getOverviewPanelTitle = () =>
     defaultMessage: 'Synthetics Stats Overview',
   });
 
+interface OverviewState {
+  filters: MonitorFilters;
+}
+
 export type OverviewEmbeddableState = SerializedTitles &
-  DynamicActionsSerializedState & {
-    filters: MonitorFilters;
-  };
+  DynamicActionsSerializedState &
+  OverviewState;
 
 export type StatsOverviewApi = DefaultEmbeddableApi<OverviewEmbeddableState> &
   PublishesWritableTitle &
@@ -53,118 +57,150 @@ export type StatsOverviewApi = DefaultEmbeddableApi<OverviewEmbeddableState> &
 type DynamicActionsData = {
   serializedDynamicActions: DynamicActionsSerializedState;
   stopDynamicActions?: () => void;
-} & Pick<ReactEmbeddableDynamicActionsApi, 'dynamicActionsApi' | 'dynamicActionsComparator'>;
+} & Pick<
+  EmbeddableDynamicActionsManager,
+  'anyStateChange$' | 'api' | 'comparators' | 'reinitializeState'
+>;
+
+const defaultOverviewState: OverviewState = {
+  filters: {
+    projects: [],
+    tags: [],
+    monitorIds: [],
+    monitorTypes: [],
+    locations: [],
+  },
+};
 
 const getDynamicActionsData = (
-  extractor?: () => ReactEmbeddableDynamicActionsApi
+  extractor?: () => EmbeddableDynamicActionsManager
 ): DynamicActionsData => {
   if (extractor) {
     const {
-      serializeDynamicActions,
+      getLatestState,
       startDynamicActions,
-      dynamicActionsApi,
-      dynamicActionsComparator,
+      api,
+      comparators,
+      anyStateChange$,
+      reinitializeState,
     } = extractor();
     return {
-      serializedDynamicActions: serializeDynamicActions(),
+      serializedDynamicActions: getLatestState(),
       stopDynamicActions: startDynamicActions().stopDynamicActions,
-      dynamicActionsApi,
-      dynamicActionsComparator,
+      api,
+      comparators,
+      anyStateChange$,
+      reinitializeState,
     };
   }
 
   return {
     serializedDynamicActions: {},
     stopDynamicActions: undefined,
-    dynamicActionsApi: {},
-    dynamicActionsComparator: {
-      enhancements: getUnchangingComparator(),
+    api: {},
+    anyStateChange$: new Observable<void>(),
+    comparators: {
+      enhancements: 'skip',
     },
+    reinitializeState: () => {},
   };
 };
 
 export const getStatsOverviewEmbeddableFactory = (
   getStartServices: StartServicesAccessor<ClientPluginsStart>
 ) => {
-  const factory: ReactEmbeddableFactory<
-    OverviewEmbeddableState,
-    OverviewEmbeddableState,
-    StatsOverviewApi
-  > = {
+  const factory: EmbeddableFactory<OverviewEmbeddableState, StatsOverviewApi> = {
     type: SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE,
-    deserializeState: (state) => {
-      return state.rawState as OverviewEmbeddableState;
-    },
-    buildEmbeddable: async (state, buildApi, uuid) => {
+    buildEmbeddable: async ({ initialState, finalizeApi, parentApi, uuid }) => {
       const [coreStart, pluginStart] = await getStartServices();
 
-      const titleManager = initializeTitleManager(state);
+      const titleManager = initializeTitleManager(initialState.rawState);
       const defaultTitle$ = new BehaviorSubject<string | undefined>(getOverviewPanelTitle());
       const reload$ = new Subject<boolean>();
-      const filters$ = new BehaviorSubject(state.filters);
+      const filters$ = new BehaviorSubject(initialState.rawState.filters);
 
       const { embeddableEnhanced } = pluginStart;
       const {
-        dynamicActionsApi,
-        dynamicActionsComparator,
+        api: dynamicActionsApi,
+        comparators: dynamicActionsComparator,
         serializedDynamicActions,
+        anyStateChange$: dynamicActionsAnyStateChange$,
+        reinitializeState: dynamicActionsReinitializeState,
         stopDynamicActions,
       } = getDynamicActionsData(
         embeddableEnhanced
           ? () =>
-              embeddableEnhanced.initializeReactEmbeddableDynamicActions(
+              embeddableEnhanced.initializeEmbeddableDynamicActions(
                 uuid,
                 () => titleManager.api.title$.getValue(),
-                state
+                initialState.rawState
               )
           : undefined
       );
 
-      const api = buildApi(
-        {
-          ...titleManager.api,
-          ...dynamicActionsApi,
-          supportedTriggers: () => [],
-          defaultTitle$,
-          getTypeDisplayName: () =>
-            i18n.translate('xpack.synthetics.editSloOverviewEmbeddableTitle.typeDisplayName', {
-              defaultMessage: 'filters',
-            }),
+      function serializeState() {
+        return {
+          rawState: {
+            ...titleManager.getLatestState(),
+            filters: filters$.getValue(),
+            ...serializedDynamicActions,
+          },
+        };
+      }
 
-          isEditingEnabled: () => true,
-          onEdit: async () => {
-            try {
-              const result = await openMonitorConfiguration({
-                coreStart,
-                pluginStart,
-                initialState: {
-                  filters: filters$.getValue(),
-                },
-                title: i18n.translate('xpack.synthetics.editSloOverviewEmbeddableTitle.title', {
-                  defaultMessage: 'Create monitor stats',
-                }),
-              });
-              filters$.next(result.filters);
-            } catch (e) {
-              return Promise.reject();
-            }
-          },
-          serializeState: () => {
-            return {
-              rawState: {
-                ...titleManager.serialize(),
-                filters: filters$.getValue(),
-                ...serializedDynamicActions,
-              },
-            };
-          },
-        },
-        {
-          ...titleManager.comparators,
-          filters: [filters$, (value) => filters$.next(value)],
+      const unsavedChangesApi = initializeUnsavedChanges<OverviewEmbeddableState>({
+        parentApi,
+        uuid,
+        serializeState,
+        anyStateChange$: merge(
+          titleManager.anyStateChange$,
+          filters$,
+          dynamicActionsAnyStateChange$
+        ).pipe(map(() => undefined)),
+        getComparators: () => ({
+          ...titleComparators,
+          filters: 'referenceEquality',
           ...dynamicActionsComparator,
-        }
-      );
+        }),
+        defaultState: defaultOverviewState,
+        onReset: (lastSaved) => {
+          dynamicActionsReinitializeState(lastSaved?.rawState ?? {});
+          titleManager.reinitializeState(lastSaved?.rawState);
+          filters$.next(lastSaved?.rawState.filters ?? defaultOverviewState.filters);
+        },
+      });
+
+      const api = finalizeApi({
+        ...titleManager.api,
+        ...dynamicActionsApi,
+        ...unsavedChangesApi,
+        supportedTriggers: () => [],
+        defaultTitle$,
+        getTypeDisplayName: () =>
+          i18n.translate('xpack.synthetics.editSloOverviewEmbeddableTitle.typeDisplayName', {
+            defaultMessage: 'filters',
+          }),
+
+        isEditingEnabled: () => true,
+        onEdit: async () => {
+          try {
+            const result = await openMonitorConfiguration({
+              coreStart,
+              pluginStart,
+              initialState: {
+                filters: filters$.getValue(),
+              },
+              title: i18n.translate('xpack.synthetics.editSloOverviewEmbeddableTitle.title', {
+                defaultMessage: 'Create monitor stats',
+              }),
+            });
+            filters$.next(result.filters);
+          } catch (e) {
+            return Promise.reject();
+          }
+        },
+        serializeState,
+      });
 
       const fetchSubscription = fetch$(api)
         .pipe()

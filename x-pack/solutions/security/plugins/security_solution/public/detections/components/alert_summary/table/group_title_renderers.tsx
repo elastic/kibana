@@ -9,7 +9,8 @@ import { EuiFlexGroup, EuiFlexItem, EuiSkeletonText, EuiTitle } from '@elastic/e
 import { isArray } from 'lodash/fp';
 import React, { memo } from 'react';
 import type { GroupPanelRenderer } from '@kbn/grouping/src';
-import { CardIcon } from '@kbn/fleet-plugin/public';
+import { IntegrationIcon } from '../common/integration_icon';
+import { useTableSectionContext } from './table_section_context';
 import { useGetIntegrationFromRuleId } from '../../../hooks/alert_summary/use_get_integration_from_rule_id';
 import { GroupWithIconContent, RuleNameGroupContent } from '../../alerts_table/grouping_settings';
 import type { AlertsGroupingAggregation } from '../../alerts_table/grouping_settings/types';
@@ -79,22 +80,27 @@ export const INTEGRATION_GROUP_RENDERER_LOADING_TEST_ID = 'integration-group-ren
 export const INTEGRATION_GROUP_RENDERER_TEST_ID = 'integration-group-renderer';
 export const INTEGRATION_GROUP_RENDERER_INTEGRATION_NAME_TEST_ID =
   'integration-group-renderer-integration-name';
-export const INTEGRATION_GROUP_RENDERER_INTEGRATION_ICON_TEST_ID =
-  'integration-group-renderer-integration-icon';
+export const INTEGRATION_GROUP_RENDERER_INTEGRATION_ICON_TEST_ID = 'integration-group-renderer';
 export const SIGNAL_RULE_ID_GROUP_RENDERER_TEST_ID = 'signal-rule-id-group-renderer';
 
 /**
  * Renders an icon and name of an integration.
+ * This component needs to be used within the TableSectionContext which provides the installed packages as well as all the rules.
  */
 export const IntegrationNameGroupContent = memo<{
   title: string | string[];
 }>(({ title }) => {
-  const { integration, isLoading } = useGetIntegrationFromRuleId({ ruleId: title });
+  const { packages, ruleResponse } = useTableSectionContext();
+  const { integration } = useGetIntegrationFromRuleId({
+    packages,
+    ruleId: title,
+    rules: ruleResponse.rules,
+  });
 
   return (
     <EuiSkeletonText
       data-test-subj={INTEGRATION_GROUP_RENDERER_LOADING_TEST_ID}
-      isLoading={isLoading}
+      isLoading={ruleResponse.isLoading}
       lines={1}
     >
       {integration ? (
@@ -104,13 +110,10 @@ export const IntegrationNameGroupContent = memo<{
           alignItems="center"
         >
           <EuiFlexItem grow={false}>
-            <CardIcon
+            <IntegrationIcon
               data-test-subj={INTEGRATION_GROUP_RENDERER_INTEGRATION_ICON_TEST_ID}
-              icons={integration.icons}
-              integrationName={integration.title}
-              packageName={integration.name}
-              size="xl"
-              version={integration.version}
+              iconSize="xl"
+              integration={integration}
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>

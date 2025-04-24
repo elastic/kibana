@@ -8,7 +8,6 @@
  */
 
 import type { Reference } from '@kbn/content-management-utils';
-import { ControlGroupApi } from '@kbn/controls-plugin/public';
 import { HasLastSavedChildState, childrenUnsavedChanges$ } from '@kbn/presentation-containers';
 import {
   PublishesSavedObjectId,
@@ -16,13 +15,26 @@ import {
   apiHasSerializableState,
 } from '@kbn/presentation-publishing';
 import { omit } from 'lodash';
-import { BehaviorSubject, Observable, combineLatest, debounceTime, map, of, tap } from 'rxjs';
+import {
+  BehaviorSubject,
+  Observable,
+  combineLatest,
+  debounceTime,
+  map,
+  skipWhile,
+  switchMap,
+  tap,
+} from 'rxjs';
 import { getDashboardBackupService } from '../services/dashboard_backup_service';
 import { initializePanelsManager } from './panels_manager';
 import { initializeSettingsManager } from './settings_manager';
 import { DashboardCreationOptions, DashboardState } from './types';
 import { initializeUnifiedSearchManager } from './unified_search_manager';
 import { initializeViewModeManager } from './view_mode_manager';
+import {
+  CONTROL_GROUP_EMBEDDABLE_ID,
+  initializeControlGroupManager,
+} from './control_group_manager';
 
 const DEBOUNCE_TIME = 100;
 
@@ -33,15 +45,15 @@ export function initializeUnsavedChangesManager({
   settingsManager,
   viewModeManager,
   creationOptions,
-  controlGroupApi$,
-  getPanelReferences,
+  controlGroupManager,
+  getReferences,
   unifiedSearchManager,
 }: {
   lastSavedState: DashboardState;
   creationOptions?: DashboardCreationOptions;
-  getPanelReferences: (id: string) => Reference[];
+  getReferences: (id: string) => Reference[];
   savedObjectId$: PublishesSavedObjectId['savedObjectId$'];
-  controlGroupApi$: PublishingSubject<ControlGroupApi | undefined>;
+  controlGroupManager: ReturnType<typeof initializeControlGroupManager>;
   panelsManager: ReturnType<typeof initializePanelsManager>;
   viewModeManager: ReturnType<typeof initializeViewModeManager>;
   settingsManager: ReturnType<typeof initializeSettingsManager>;
@@ -89,7 +101,12 @@ export function initializeUnsavedChangesManager({
     viewModeManager.api.viewMode$,
     dashboardStateChanges$,
     hasPanelChanges$,
-    of(false), // SERIALIZED STATE ONLY TODO reinstate Dashboard diff checking of Controls state
+    controlGroupManager.api.controlGroupApi$.pipe(
+      skipWhile((controlGroupApi) => !controlGroupApi),
+      switchMap((controlGroupApi) => {
+        return controlGroupApi!.hasUnsavedChanges$;
+      })
+    ),
   ])
     .pipe(debounceTime(DEBOUNCE_TIME))
     .subscribe(([viewMode, dashboardChanges, hasPanelChanges, hasControlGroupChanges]) => {
@@ -111,23 +128,38 @@ export function initializeUnsavedChangesManager({
         dashboardStateToBackup.viewMode = viewMode;
 
         // Backup latest state from children that have unsaved changes
-        if (hasPanelChanges) {
+        if (hasPanelChanges || hasControlGroupChanges) {
           const { panels, references } = panelsManager.internalApi.serializePanels();
-          dashboardStateToBackup.panels = panels;
-          dashboardStateToBackup.references = references;
+          const { controlGroupInput, controlGroupReferences } =
+            controlGroupManager.internalApi.serializeControlGroup();
+          // dashboardStateToBackup.references will be used instead of savedObjectResult.references
+          // To avoid missing references, make sure references contains all references
+          // even if panels or control group does not have unsaved changes
+          dashboardStateToBackup.references = [...references, ...controlGroupReferences];
+          if (hasPanelChanges) dashboardStateToBackup.panels = panels;
+          if (hasControlGroupChanges) dashboardStateToBackup.controlGroupInput = controlGroupInput;
         }
 
-        // SERIALIZED STATE ONLY TODO back up controls state.
         getDashboardBackupService().setState(savedObjectId$.value, dashboardStateToBackup);
       }
     });
 
-  const getLastSavedStateForChild = (panelId: string) => {
+  const getLastSavedStateForChild = (childId: string) => {
     const lastSavedDashboardState = lastSavedState$.value;
-    if (!lastSavedDashboardState.panels[panelId]) return;
+
+    if (childId === CONTROL_GROUP_EMBEDDABLE_ID) {
+      return lastSavedDashboardState.controlGroupInput
+        ? {
+            rawState: lastSavedDashboardState.controlGroupInput,
+            references: getReferences(CONTROL_GROUP_EMBEDDABLE_ID),
+          }
+        : undefined;
+    }
+
+    if (!lastSavedDashboardState.panels[childId]) return;
     return {
-      rawState: lastSavedDashboardState.panels[panelId].explicitInput,
-      references: getPanelReferences(panelId),
+      rawState: lastSavedDashboardState.panels[childId].explicitInput,
+      references: getReferences(childId),
     };
   };
 
@@ -138,8 +170,7 @@ export function initializeUnsavedChangesManager({
         unifiedSearchManager.internalApi.reset(lastSavedState$.value);
         settingsManager.internalApi.reset(lastSavedState$.value);
 
-        // SERIALIZED STATE ONLY TODO: Remove asyncResetUnsavedChanges because the reset function can now be async.
-        await controlGroupApi$.value?.asyncResetUnsavedChanges();
+        await controlGroupManager.api.controlGroupApi$.value?.resetUnsavedChanges();
       },
       hasUnsavedChanges$,
       lastSavedStateForChild$: (panelId: string) =>

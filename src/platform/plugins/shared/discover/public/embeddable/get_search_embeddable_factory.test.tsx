@@ -90,11 +90,6 @@ describe('saved search embeddable', () => {
     type: factory.type,
     parentApi: mockedDashboardApi,
     phase$: new BehaviorSubject<PhaseEvent | undefined>(undefined),
-    resetUnsavedChanges: jest.fn(),
-    snapshotRuntimeState: jest.fn(),
-    unsavedChanges: new BehaviorSubject<Partial<SearchEmbeddableRuntimeState> | undefined>(
-      undefined
-    ),
   });
 
   const getInitialRuntimeState = ({
