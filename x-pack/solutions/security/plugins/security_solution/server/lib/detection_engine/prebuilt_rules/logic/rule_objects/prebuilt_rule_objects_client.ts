@@ -7,6 +7,7 @@
 
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type {
+  RuleObjectId,
   RuleResponse,
   RuleSignatureId,
   RuleTagArray,
@@ -49,15 +50,18 @@ interface FetchInstalledRulesByIdsArgs {
   sortOrder?: SortOrder;
 }
 
+type RuleSummary = RuleVersionSpecifier & {
+  id: RuleObjectId;
+  tags: RuleTagArray;
+};
+
 export interface IPrebuiltRuleObjectsClient {
   fetchInstalledRulesByIds(args: FetchInstalledRulesByIdsArgs): Promise<RuleResponse[]>;
   fetchInstalledRules(args?: FetchAllInstalledRulesArgs): Promise<RuleResponse[]>;
   fetchInstalledRuleVersionsByIds(
     args: FetchInstalledRuleVersionsByIdsArgs
-  ): Promise<Array<RuleVersionSpecifier & { tags: RuleTagArray }>>;
-  fetchInstalledRuleVersions(
-    args?: FetchAllInstalledRuleVersionsArgs
-  ): Promise<Array<RuleVersionSpecifier & { tags: RuleTagArray }>>;
+  ): Promise<RuleSummary[]>;
+  fetchInstalledRuleVersions(args?: FetchAllInstalledRuleVersionsArgs): Promise<RuleSummary[]>;
 }
 
 export const createPrebuiltRuleObjectsClient = (
@@ -125,6 +129,7 @@ export const createPrebuiltRuleObjectsClient = (
             fields: ['params.ruleId', 'params.version', 'tags'],
           });
           return rulesData.data.map((rule) => ({
+            id: rule.id,
             rule_id: rule.params.ruleId,
             version: rule.params.version,
             tags: rule.tags,
@@ -151,6 +156,7 @@ export const createPrebuiltRuleObjectsClient = (
           fields: ['params.ruleId', 'params.version', 'tags'],
         });
         return rulesData.data.map((rule) => ({
+          id: rule.id,
           rule_id: rule.params.ruleId,
           version: rule.params.version,
           tags: rule.tags,

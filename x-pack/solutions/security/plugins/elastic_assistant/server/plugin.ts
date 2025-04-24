@@ -25,7 +25,9 @@ import {
 } from './types';
 import { AIAssistantService } from './ai_assistant_service';
 import { RequestContextFactory } from './routes/request_context_factory';
+import { createEventLogger } from './create_event_logger';
 import { PLUGIN_ID } from '../common/constants';
+import { registerEventLogProvider } from './register_event_log_provider';
 import { registerRoutes } from './routes/register_routes';
 import { CallbackIds, appContextService } from './services/app_context';
 import { createGetElserId, removeLegacyQuickPrompt } from './ai_assistant_service/helpers';
@@ -59,6 +61,9 @@ export class ElasticAssistantPlugin
   ) {
     this.logger.debug('elasticAssistant: Setup');
 
+    registerEventLogProvider(plugins.eventLog);
+    const eventLogger = createEventLogger(plugins.eventLog); // must be created during setup phase
+
     this.assistantService = new AIAssistantService({
       logger: this.logger.get('service'),
       ml: plugins.ml,
@@ -71,6 +76,7 @@ export class ElasticAssistantPlugin
         .getStartServices()
         .then(([_, { productDocBase }]) => productDocBase.management),
       pluginStop$: this.pluginStop$,
+      savedAttackDiscoveries: true,
     });
 
     const requestContextFactory = new RequestContextFactory({
@@ -84,7 +90,13 @@ export class ElasticAssistantPlugin
     const router = core.http.createRouter<ElasticAssistantRequestHandlerContext>();
     core.http.registerRouteHandlerContext<ElasticAssistantRequestHandlerContext, typeof PLUGIN_ID>(
       PLUGIN_ID,
-      (context, request) => requestContextFactory.create(context, request)
+      (context, request) =>
+        requestContextFactory.create(
+          context,
+          request,
+          plugins.eventLog.getIndexPattern(),
+          eventLogger
+        )
     );
     events.forEach((eventConfig) => core.analytics.registerEventType(eventConfig));
 
