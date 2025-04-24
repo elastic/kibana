@@ -8,7 +8,7 @@
 import React, { useCallback } from 'react';
 import {
   DefaultEmbeddableApi,
-  ReactEmbeddableFactory,
+  EmbeddableFactory,
   VALUE_CLICK_TRIGGER,
 } from '@kbn/embeddable-plugin/public';
 import { EuiCard, EuiFlexItem, EuiIcon } from '@elastic/eui';
@@ -16,21 +16,20 @@ import { AdvancedUiActionsStart } from '@kbn/ui-actions-enhanced-plugin/public';
 import { BUTTON_EMBEDDABLE } from './register_button_embeddable';
 
 export const getButtonEmbeddableFactory = (uiActionsEnhanced: AdvancedUiActionsStart) => {
-  const factory: ReactEmbeddableFactory<{}, {}, DefaultEmbeddableApi<{}>> = {
+  const factory: EmbeddableFactory<{}, DefaultEmbeddableApi<{}>> = {
     type: BUTTON_EMBEDDABLE,
-    deserializeState: (state) => state.rawState,
-    buildEmbeddable: async (state, buildApi, uuid, parentApi) => {
-      const api = buildApi(
-        {
-          serializeState: () => {
-            return {
-              rawState: {},
-              references: [],
-            };
-          },
-        },
-        {}
-      );
+    buildEmbeddable: async ({ initialState, finalizeApi, parentApi, uuid }) => {
+      function serializeState() {
+        return {
+          rawState: {},
+          references: [],
+          // references: if this embeddable had any references - this is where we would extract them.
+        };
+      }
+
+      const api = finalizeApi({
+        serializeState,
+      });
       return {
         api,
         Component: () => {

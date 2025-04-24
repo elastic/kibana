@@ -25,6 +25,6 @@ export const getControlGroupMock = () => {
     openAddDataControlFlyout: jest.fn(),
     filters$: controlGroupFilterOutputMock$,
     setChainingSystem: jest.fn(),
-    snapshotRuntimeState: jest.fn(),
+    getInput: jest.fn(),
   };
 };

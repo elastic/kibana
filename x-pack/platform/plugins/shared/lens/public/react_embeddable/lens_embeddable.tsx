@@ -59,7 +59,7 @@ export const createLensEmbeddableFactory = (
     buildEmbeddable: async ({ initialState, finalizeApi, parentApi, uuid }) => {
       const titleManager = initializeTitleManager(initialState.rawState);
 
-      const runtimeState = await deserializeState(
+      const initialRuntimeState = await deserializeState(
         services,
         initialState.rawState,
         initialState.references
@@ -69,15 +69,20 @@ export const createLensEmbeddableFactory = (
        * Observables and functions declared here are used internally to store mutating state values
        * This is an internal API not exposed outside of the embeddable.
        */
-      const internalApi = initializeInternalApi(runtimeState, parentApi, titleManager, services);
+      const internalApi = initializeInternalApi(
+        initialRuntimeState,
+        parentApi,
+        titleManager,
+        services
+      );
 
       /**
        * Initialize various configurations required to build all the required
        * parts for the Lens embeddable.
        */
-      const stateConfig = initializeStateManagement(runtimeState, internalApi);
+      const stateConfig = initializeStateManagement(initialRuntimeState, internalApi);
       const dashboardConfig = initializeDashboardServices(
-        runtimeState,
+        initialRuntimeState,
         getLatestState,
         internalApi,
         stateConfig,
@@ -89,7 +94,7 @@ export const createLensEmbeddableFactory = (
       const inspectorConfig = initializeInspector(services);
 
       const searchContextConfig = initializeSearchContext(
-        runtimeState,
+        initialRuntimeState,
         internalApi,
         parentApi,
         services
@@ -97,7 +102,7 @@ export const createLensEmbeddableFactory = (
 
       const editConfig = initializeEditApi(
         uuid,
-        runtimeState,
+        initialRuntimeState,
         getLatestState,
         internalApi,
         stateConfig.api,
@@ -111,7 +116,7 @@ export const createLensEmbeddableFactory = (
       const integrationsConfig = initializeIntegrations(getLatestState, services);
       const actionsConfig = initializeActionApi(
         uuid,
-        runtimeState,
+        initialRuntimeState,
         getLatestState,
         parentApi,
         searchContextConfig.api,

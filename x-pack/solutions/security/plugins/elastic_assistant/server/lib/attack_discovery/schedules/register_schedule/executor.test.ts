@@ -36,12 +36,52 @@ describe('attackDiscoveryScheduleExecutor', () => {
   const actionsClient = actionsClientMock.create();
   const spaceId = 'test-space';
   const params = {
+    alertsIndexPattern: 'test-index-*',
     apiConfig: {
       connectorId: 'test-connector',
       actionTypeId: 'testing',
       model: 'model-1',
       name: 'Test Connector',
     },
+    query: 'host.name : *',
+    filters: [
+      {
+        meta: {
+          disabled: false,
+          negate: false,
+          alias: null,
+          index: '530a0bfd-8996-441a-b788-c8bba251bdf3',
+          key: '@timestamp',
+          field: '@timestamp',
+          value: 'exists',
+          type: 'exists',
+        },
+        query: {
+          exists: {
+            field: '@timestamp',
+          },
+        },
+        $state: {
+          store: 'appState',
+        },
+      },
+    ],
+    combinedFilter: {
+      bool: {
+        must: [],
+        filter: [
+          {
+            exists: {
+              field: '@timestamp',
+            },
+          },
+        ],
+        should: [],
+        must_not: [],
+      },
+    },
+    size: '123',
+    start: 'now-24h',
   };
   const executorOptions = {
     params,
@@ -125,9 +165,10 @@ describe('attackDiscoveryScheduleExecutor', () => {
       },
     ];
 
+    const { query, filters, combinedFilter, ...restParams } = params;
     expect(generateAttackDiscoveries).toHaveBeenCalledWith({
       actionsClient,
-      config: { ...params, anonymizationFields, subAction: 'invokeAI' },
+      config: { ...restParams, filter: combinedFilter, anonymizationFields, subAction: 'invokeAI' },
       esClient: services.scopedClusterClient.asCurrentUser,
       logger: mockLogger,
       savedObjectsClient: services.savedObjectsClient,
@@ -139,6 +180,7 @@ describe('attackDiscoveryScheduleExecutor', () => {
 
     await attackDiscoveryScheduleExecutor({ logger: mockLogger, options });
 
+    const { id, ...restDiscovery } = mockAttackDiscoveries[0];
     expect(services.alertsClient.report).toHaveBeenCalledWith({
       id: expect.anything(),
       actionGroup: 'default',
@@ -189,6 +231,7 @@ describe('attackDiscoveryScheduleExecutor', () => {
         'kibana.alert.attack_discovery.title_with_replacements':
           'Critical Malware and Phishing Alerts on host Test-Host-1',
       },
+      context: { attack: restDiscovery },
     });
   });
 });
