@@ -103,7 +103,8 @@
     "@kbn/embeddable-enhanced-plugin",
     "@kbn/shared-ux-page-analytics-no-data-types",
     "@kbn/core-application-browser-mocks",
-    "@kbn/unified-tabs"
+    "@kbn/unified-tabs",
+    "@kbn/unified-histogram"
   ],
   "exclude": ["target/**/*"]
 }
