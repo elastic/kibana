@@ -21,6 +21,8 @@ jest.mock('../../../../../services');
 jest.mock('../../../../../hooks', () => ({
   ...jest.requireActual('../../../../../hooks'),
   sendGetOneAgentPolicy: jest.fn(),
+  sendGetOneFleetServerHost: jest.fn().mockResolvedValue({}),
+  sendGetOneOutput: jest.fn().mockResolvedValue({}),
   useStartServices: jest.fn(),
   useConfig: jest.fn(),
 }));
@@ -731,8 +733,6 @@ describe('useSetupTechnology', () => {
       expect(setNewAgentPolicy).toHaveBeenCalledWith({
         name: 'Agentless policy for endpoint-1',
         supports_agentless: true,
-        data_output_id: 'fleet-default-output',
-        fleet_server_host_id: 'fleet-default-fleet-server-host',
         global_data_tags: undefined,
         inactivity_timeout: 3600,
         monitoring_enabled: ['logs', 'metrics'],
@@ -777,8 +777,6 @@ describe('useSetupTechnology', () => {
     expect(setNewAgentPolicy).toHaveBeenCalledWith({
       name: 'Agentless policy for endpoint-1',
       supports_agentless: true,
-      data_output_id: 'fleet-default-output',
-      fleet_server_host_id: 'fleet-default-fleet-server-host',
       global_data_tags: undefined,
       inactivity_timeout: 3600,
       monitoring_enabled: ['logs', 'metrics'],
@@ -799,8 +797,6 @@ describe('useSetupTechnology', () => {
       expect(result.current.selectedSetupTechnology).toBe(SetupTechnology.AGENTLESS);
       expect(setNewAgentPolicy).toHaveBeenCalledWith({
         name: 'Agentless policy for endpoint-2',
-        data_output_id: 'fleet-default-output',
-        fleet_server_host_id: 'fleet-default-fleet-server-host',
         global_data_tags: undefined,
         inactivity_timeout: 3600,
         monitoring_enabled: ['logs', 'metrics'],
@@ -949,8 +945,6 @@ describe('useSetupTechnology', () => {
         name: 'Agentless policy for endpoint-1',
         supports_agentless: true,
         inactivity_timeout: 3600,
-        data_output_id: 'es-default-output',
-        fleet_server_host_id: 'default-fleet-server',
         monitoring_enabled: ['logs', 'metrics'],
         global_data_tags: [
           { name: 'organization', value: 'org' },
@@ -1210,8 +1204,6 @@ describe('useSetupTechnology', () => {
       expect(setNewAgentPolicy).toHaveBeenCalledWith({
         name: 'Agentless policy for endpoint-1',
         supports_agentless: true,
-        data_output_id: 'fleet-default-output',
-        fleet_server_host_id: 'fleet-default-fleet-server-host',
         global_data_tags: undefined,
         inactivity_timeout: 3600,
         monitoring_enabled: ['logs', 'metrics'],
@@ -1288,8 +1280,6 @@ describe('useSetupTechnology', () => {
       expect(setNewAgentPolicy).toHaveBeenCalledWith({
         name: 'Agentless policy for endpoint-1',
         supports_agentless: true,
-        data_output_id: 'fleet-default-output',
-        fleet_server_host_id: 'fleet-default-fleet-server-host',
         global_data_tags: undefined,
         inactivity_timeout: 3600,
         monitoring_enabled: ['logs', 'metrics'],
@@ -1337,8 +1327,6 @@ describe('useSetupTechnology', () => {
       expect(setNewAgentPolicy).toHaveBeenCalledWith({
         name: 'Agentless policy for endpoint-1',
         supports_agentless: true,
-        data_output_id: 'fleet-default-output',
-        fleet_server_host_id: 'fleet-default-fleet-server-host',
         global_data_tags: undefined,
         inactivity_timeout: 3600,
         monitoring_enabled: ['logs', 'metrics'],

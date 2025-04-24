@@ -7,7 +7,7 @@
 
 import { useCallback, useRef, useState, useEffect, useMemo } from 'react';
 
-import { useConfig } from '../../../../../hooks';
+import { useConfig, sendGetOneFleetServerHost, sendGetOneOutput } from '../../../../../hooks';
 import { generateNewAgentPolicyWithDefaults } from '../../../../../../../../common/services/generate_new_agent_policy';
 import type {
   AgentPolicy,
@@ -118,16 +118,43 @@ export function useSetupTechnology({
   }, [isAgentlessEnabled, isAgentlessDefault, packageInfo, integrationToEnable]);
 
   const agentlessPolicyName = getAgentlessAgentPolicyNameFromPackagePolicyName(packagePolicy.name);
-  const agentlessPolicyOutputId = isServerless
-    ? SERVERLESS_DEFAULT_OUTPUT_ID
-    : isCloud
-    ? DEFAULT_OUTPUT_ID
-    : undefined;
-  const agentlessPolicyFleetServerHostId = isServerless
-    ? SERVERLESS_DEFAULT_FLEET_SERVER_HOST_ID
-    : isCloud
-    ? DEFAULT_FLEET_SERVER_HOST_ID
-    : undefined;
+  const [agentlessPolicyOutputId, setAgentlessPolicyOutputId] = useState<string | undefined>();
+  const [agentlessPolicyFleetServerHostId, setAgentlessPolicyFleetServerHostId] = useState<
+    string | undefined
+  >();
+
+  useEffect(() => {
+    const fetchOutputId = async () => {
+      const outputId = isServerless
+        ? SERVERLESS_DEFAULT_OUTPUT_ID
+        : isCloud
+        ? DEFAULT_OUTPUT_ID
+        : undefined;
+      if (outputId) {
+        const outputData = await sendGetOneOutput(outputId);
+        setAgentlessPolicyOutputId(outputData.data?.item ? outputId : undefined);
+      } else {
+        setAgentlessPolicyOutputId(undefined);
+      }
+    };
+    const fetchFleetServerHostId = async () => {
+      const hostId = isServerless
+        ? SERVERLESS_DEFAULT_FLEET_SERVER_HOST_ID
+        : isCloud
+        ? DEFAULT_FLEET_SERVER_HOST_ID
+        : undefined;
+
+      if (hostId) {
+        const hostData = await sendGetOneFleetServerHost(hostId);
+        setAgentlessPolicyFleetServerHostId(hostData.data?.item ? hostId : undefined);
+      } else {
+        setAgentlessPolicyFleetServerHostId(undefined);
+      }
+    };
+
+    fetchOutputId();
+    fetchFleetServerHostId();
+  }, [isCloud, isServerless]);
 
   const handleSetupTechnologyChange = useCallback(
     (setupTechnology: SetupTechnology) => {

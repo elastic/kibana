@@ -35,6 +35,22 @@ jest.mock('./agent_policy', () => ({
   getAgentPolicySavedObjectType: jest.fn().mockResolvedValue('ingest-agent-policies'),
 }));
 
+jest.mock('./output', () => ({
+  outputService: {
+    get: jest.fn().mockResolvedValue({
+      id: 'es-default-output',
+    }),
+  },
+}));
+
+jest.mock('./fleet_server_host', () => ({
+  fleetServerHostService: {
+    get: jest.fn().mockResolvedValue({
+      id: 'default-fleet-server',
+    }),
+  },
+}));
+
 describe('correct agentless policy settings', () => {
   it('should correct agentless policy settings', async () => {
     await ensureCorrectAgentlessSettingsIds(undefined as any);

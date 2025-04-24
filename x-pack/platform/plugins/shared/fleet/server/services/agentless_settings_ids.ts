@@ -21,6 +21,8 @@ import {
 import type { AgentPolicySOAttributes } from '../types';
 
 import { getAgentPolicySavedObjectType, agentPolicyService } from './agent_policy';
+import { fleetServerHostService } from './fleet_server_host';
+import { outputService } from './output';
 
 import { appContextService } from '.';
 
@@ -38,40 +40,77 @@ export async function ensureCorrectAgentlessSettingsIds(esClient: ElasticsearchC
     : isCloud
     ? DEFAULT_FLEET_SERVER_HOST_ID
     : undefined;
+  let fixOutput = false;
+  let fixFleetServer = false;
 
-  if (!correctOutputId) {
+  if (!correctOutputId && !correctFleetServerId) {
     return;
   }
 
   const agentPolicySavedObjectType = await getAgentPolicySavedObjectType();
   const internalSoClientWithoutSpaceExtension =
     appContextService.getInternalUserSOClientWithoutSpaceExtension();
-  const agentlessOutputIdsToFix = (
-    await internalSoClientWithoutSpaceExtension.find<AgentPolicySOAttributes>({
-      type: agentPolicySavedObjectType,
-      page: 1,
-      perPage: SO_SEARCH_LIMIT,
-      filter: `${agentPolicySavedObjectType}.attributes.supports_agentless:true AND NOT ${agentPolicySavedObjectType}.attributes.data_output_id:${correctOutputId}`,
-      fields: [`id`],
-      namespaces: ['*'],
-    })
-  )?.saved_objects.map((so) => so.id);
-  const agentlessFleetServerIdsToFix = (
-    await internalSoClientWithoutSpaceExtension.find<AgentPolicySOAttributes>({
-      type: agentPolicySavedObjectType,
-      page: 1,
-      perPage: SO_SEARCH_LIMIT,
-      filter: `${agentPolicySavedObjectType}.attributes.supports_agentless:true AND NOT ${agentPolicySavedObjectType}.attributes.fleet_server_host_id:${correctFleetServerId}`,
-      fields: [`id`],
-      namespaces: ['*'],
-    })
-  )?.saved_objects.map((so) => so.id);
+
+  const agentlessOutputIdsToFix = correctOutputId
+    ? (
+        await internalSoClientWithoutSpaceExtension.find<AgentPolicySOAttributes>({
+          type: agentPolicySavedObjectType,
+          page: 1,
+          perPage: SO_SEARCH_LIMIT,
+          filter: `${agentPolicySavedObjectType}.attributes.supports_agentless:true AND NOT ${agentPolicySavedObjectType}.attributes.data_output_id:${correctOutputId}`,
+          fields: [`id`],
+          namespaces: ['*'],
+        })
+      )?.saved_objects.map((so) => so.id)
+    : [];
+
+  const agentlessFleetServerIdsToFix = correctFleetServerId
+    ? (
+        await internalSoClientWithoutSpaceExtension.find<AgentPolicySOAttributes>({
+          type: agentPolicySavedObjectType,
+          page: 1,
+          perPage: SO_SEARCH_LIMIT,
+          filter: `${agentPolicySavedObjectType}.attributes.supports_agentless:true AND NOT ${agentPolicySavedObjectType}.attributes.fleet_server_host_id:${correctFleetServerId}`,
+          fields: [`id`],
+          namespaces: ['*'],
+        })
+      )?.saved_objects.map((so) => so.id)
+    : [];
+
+  try {
+    // Check that the output ID exists
+    if (correctOutputId && agentlessOutputIdsToFix?.length > 0) {
+      const output = await outputService.get(
+        internalSoClientWithoutSpaceExtension,
+        correctOutputId
+      );
+      fixOutput = output != null;
+    }
+  } catch (e) {
+    // Silently swallow
+  }
+
+  try {
+    // Check that the fleet server host ID exists
+    if (correctFleetServerId && agentlessFleetServerIdsToFix?.length > 0) {
+      const fleetServerHost = await fleetServerHostService.get(
+        internalSoClientWithoutSpaceExtension,
+        correctFleetServerId
+      );
+      fixFleetServer = fleetServerHost != null;
+    }
+  } catch (e) {
+    // Silently swallow
+  }
 
   const allIdsToFix = Array.from(
-    new Set([...(agentlessOutputIdsToFix ?? []), ...(agentlessFleetServerIdsToFix ?? [])])
+    new Set([
+      ...(fixOutput ? agentlessOutputIdsToFix : []),
+      ...(fixFleetServer ? agentlessFleetServerIdsToFix : []),
+    ])
   );
 
-  if (agentlessOutputIdsToFix.length === 0 && agentlessFleetServerIdsToFix.length === 0) {
+  if (allIdsToFix.length === 0) {
     return;
   }
 
