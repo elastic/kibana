@@ -15,7 +15,6 @@ import {
 } from '@elastic/eui';
 import { ATTACK_DISCOVERY_SCHEDULES_ENABLED_FEATURE_FLAG } from '@kbn/elastic-assistant-common';
 
-import type { AttackDiscoveryStats } from '@kbn/elastic-assistant-common';
 import React, { useCallback, useMemo, useState } from 'react';
 import * as i18n from './translations';
 
@@ -30,7 +29,7 @@ export interface UseScheduleView {
   actionButtons: React.ReactNode;
 }
 
-export const useScheduleView = (stats: AttackDiscoveryStats | null): UseScheduleView => {
+export const useScheduleView = (): UseScheduleView => {
   const {
     services: { featureFlags },
   } = useKibana();
@@ -60,12 +59,12 @@ export const useScheduleView = (stats: AttackDiscoveryStats | null): UseSchedule
               <EuiSkeletonText />
             </>
           }
-          loadedContent={!total ? <EmptyPage stats={stats} /> : <SchedulesTable />}
+          loadedContent={!total ? <EmptyPage /> : <SchedulesTable />}
         />
-        {showFlyout && <CreateFlyout stats={stats} onClose={onClose} />}
+        {showFlyout && <CreateFlyout onClose={onClose} />}
       </>
     );
-  }, [isDataLoading, onClose, showFlyout, stats, total]);
+  }, [isDataLoading, onClose, showFlyout, total]);
 
   const actionButtons = useMemo(() => {
     return total ? (
