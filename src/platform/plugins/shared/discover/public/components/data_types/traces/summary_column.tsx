@@ -9,13 +9,13 @@
 
 import React from 'react';
 import { getShouldShowFieldHandler } from '@kbn/discover-utils';
-import { DataView } from '@kbn/data-views-plugin/common';
-import {
+import type { DataView } from '@kbn/data-views-plugin/common';
+import type {
   AllSummaryColumnProps,
-  LazySummaryColumn,
   SummaryColumnProps,
 } from '@kbn/discover-contextual-components';
-import { CellRenderersExtensionParams } from '../../../context_awareness';
+import { LazySummaryColumn } from '@kbn/discover-contextual-components';
+import type { CellRenderersExtensionParams } from '../../../context_awareness';
 import { useDiscoverServices } from '../../../hooks/use_discover_services';
 
 export type SummaryColumnGetterDeps = CellRenderersExtensionParams;

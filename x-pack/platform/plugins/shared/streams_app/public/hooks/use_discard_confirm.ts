@@ -9,6 +9,10 @@ import { i18n } from '@kbn/i18n';
 import { OverlayModalConfirmOptions } from '@kbn/core/public';
 import { useKibana } from './use_kibana';
 
+export interface DiscardPromptOptions extends OverlayModalConfirmOptions {
+  message: string;
+}
+
 const defaultMessage = i18n.translate('xpack.streams.cancelModal.message', {
   defaultMessage: 'Are you sure you want to discard your changes?',
 });

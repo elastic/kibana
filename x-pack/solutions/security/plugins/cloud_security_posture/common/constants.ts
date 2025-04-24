@@ -32,12 +32,11 @@ export const CSP_BENCHMARK_RULES_BULK_ACTION_API_CURRENT_VERSION = '1';
 export const GET_DETECTION_RULE_ALERTS_STATUS_PATH =
   '/internal/cloud_security_posture/detection_engine_rules/alerts/_status';
 export const DETECTION_RULE_ALERTS_STATUS_API_CURRENT_VERSION = '1';
-export const DETECTION_RULE_RULES_API_CURRENT_VERSION = '2023-10-31';
 
 export const CLOUD_SECURITY_POSTURE_PACKAGE_NAME = 'cloud_security_posture';
 
 export const FINDINGS_INDEX_NAME = 'logs-cloud_security_posture.findings';
-export const FINDINGS_INDEX_PATTERN = 'logs-cloud_security_posture.findings-default*';
+
 export const FINDINGS_INDEX_DEFAULT_NS = 'logs-cloud_security_posture.findings-default';
 
 export const LATEST_FINDINGS_INDEX_TEMPLATE_NAME = 'logs-cloud_security_posture.findings_latest';

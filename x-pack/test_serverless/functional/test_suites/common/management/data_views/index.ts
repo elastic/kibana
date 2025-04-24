@@ -14,12 +14,14 @@ export default ({ getService, loadTestFile, getPageObject }: FtrProviderContext)
 
     before(async () => {
       await svlCommonPage.loginAsAdmin();
-      await esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
-      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/makelogs');
+      await esArchiver.unload(
+        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
+      );
+      await esArchiver.loadIfNeeded('src/platform/test/functional/fixtures/es_archiver/makelogs');
     });
 
     after(async () => {
-      await esArchiver.unload('test/functional/fixtures/es_archiver/makelogs');
+      await esArchiver.unload('src/platform/test/functional/fixtures/es_archiver/makelogs');
     });
 
     loadTestFile(require.resolve('./serverless'));

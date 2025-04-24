@@ -8,12 +8,13 @@
 import sinon from 'sinon';
 import { v4 as uuidv4 } from 'uuid';
 import { getMigrations } from '.';
-import { RawRule, RawRuleAction } from '../../types';
-import { SavedObjectMigrationContext, SavedObjectUnsanitizedDoc } from '@kbn/core/server';
+import type { RawRule, RawRuleAction } from '../../types';
+import type { SavedObjectMigrationContext, SavedObjectUnsanitizedDoc } from '@kbn/core/server';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { migrationMocks } from '@kbn/core/server/mocks';
 import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
-import { RuleType, ruleTypeMappings } from '@kbn/securitysolution-rules';
+import type { RuleType } from '@kbn/securitysolution-rules';
+import { ruleTypeMappings } from '@kbn/securitysolution-rules';
 import { isAnyActionSupportIncidents } from './7.11';
 import { RULE_SAVED_OBJECT_TYPE } from '..';
 
@@ -3173,7 +3174,7 @@ function getUpdatedAt(): string {
 
 function getMockData(
   overwrites: Record<string, unknown> = {},
-  withSavedObjectUpdatedAt: boolean = false
+  withSavedObjectUpdatedAt = false
 ): SavedObjectUnsanitizedDoc<Partial<RawRule>> {
   return {
     attributes: {

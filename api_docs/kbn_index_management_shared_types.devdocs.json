@@ -22,6 +22,88 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/index-management-shared-types",
+        "id": "def-common.ComponentTemplateFlyoutProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "ComponentTemplateFlyoutProps",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/index-management-shared-types",
+            "id": "def-common.ComponentTemplateFlyoutProps.componentTemplateName",
+            "type": "string",
+            "tags": [],
+            "label": "componentTemplateName",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/index-management-shared-types",
+            "id": "def-common.ComponentTemplateFlyoutProps.onClose",
+            "type": "Function",
+            "tags": [],
+            "label": "onClose",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/index-management-shared-types",
+        "id": "def-common.DatastreamFlyoutProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "DatastreamFlyoutProps",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/index-management-shared-types",
+            "id": "def-common.DatastreamFlyoutProps.datastreamName",
+            "type": "string",
+            "tags": [],
+            "label": "datastreamName",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/index-management-shared-types",
+            "id": "def-common.DatastreamFlyoutProps.onClose",
+            "type": "Function",
+            "tags": [],
+            "label": "onClose",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/index-management-shared-types",
         "id": "def-common.EmptyListContent",
         "type": "Interface",
         "tags": [],
@@ -1143,7 +1225,9 @@
                 "section": "def-common.Index",
                 "text": "Index"
               },
-              "; getUrlForApp: (appId: string, options?: { path?: string | undefined; absolute?: boolean | undefined; deepLinkId?: string | undefined; } | undefined) => string; }) => React.ReactElement<any, any> | null"
+              "; getUrlForApp: (appId: string, options?: { path?: string | undefined; absolute?: boolean | undefined; deepLinkId?: string | undefined; } | undefined) => string; euiTheme: ",
+              "EuiThemeComputed",
+              "<{}>; }) => React.ReactElement<any, any> | null"
             ],
             "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/home_sections.ts",
             "deprecated": false,
@@ -1221,6 +1305,82 @@
                         "trackAdoption": false
                       }
                     ]
+                  },
+                  {
+                    "parentPluginId": "@kbn/index-management-shared-types",
+                    "id": "def-common.IndexDetailsTab.renderTabContent.$1.euiTheme",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "euiTheme",
+                    "description": [],
+                    "signature": [
+                      "{ colors: { primary: string; accent: string; accentSecondary: string; success: string; warning: string; danger: string; primaryText: string; accentText: string; successText: string; warningText: string; dangerText: string; textPrimary: string; textAccent: string; textAccentSecondary: string; textSuccess: string; textWarning: string; textDanger: string; emptyShade: string; lightestShade: string; lightShade: string; mediumShade: string; darkShade: string; darkestShade: string; fullShade: string; body: string; highlight: string; disabled: string; disabledText: string; shadow: string; text: string; title: string; subduedText: string; link: string; textParagraph: string; textHeading: string; textSubdued: string; textDisabled: string; textInverse: string; backgroundBasePrimary: string; backgroundBaseAccent: string; backgroundBaseAccentSecondary: string; backgroundBaseSuccess: string; backgroundBaseWarning: string; backgroundBaseDanger: string; backgroundBaseSubdued: string; backgroundBasePlain: string; backgroundBaseDisabled: string; backgroundBaseHighlighted: string; backgroundBaseFormsPrepend: string; backgroundBaseFormsControlDisabled: string; backgroundBaseInteractiveHover: string; backgroundBaseInteractiveSelect: string; backgroundBaseInteractiveOverlay: string; backgroundBaseSkeletonEdge: string; backgroundBaseSkeletonMiddle: string; backgroundLightPrimary: string; backgroundLightAccent: string; backgroundLightAccentSecondary: string; backgroundLightSuccess: string; backgroundLightWarning: string; backgroundLightDanger: string; backgroundLightText: string; backgroundFilledPrimary: string; backgroundFilledAccent: string; backgroundFilledAccentSecondary: string; backgroundFilledSuccess: string; backgroundFilledWarning: string; backgroundFilledDanger: string; backgroundFilledText: string; backgroundTransparent: string; backgroundTransparentPrimary: string; backgroundTransparentAccent: string; backgroundTransparentAccentSecondary: string; backgroundTransparentSuccess: string; backgroundTransparentWarning: string; backgroundTransparentDanger: string; backgroundTransparentSubdued: string; backgroundTransparentHighlighted: string; backgroundTransparentPlain: string; borderBasePrimary: string; borderBaseAccent: string; borderBaseAccentSecondary: string; borderBaseSuccess: string; borderBaseWarning: string; borderBaseDanger: string; borderBasePlain: string; borderBaseSubdued: string; borderBaseDisabled: string; borderBaseFloating: string; borderBaseFormsColorSwatch: string; borderBaseFormsControl: string; borderStrongPrimary: string; borderStrongAccent: string; borderStrongAccentSecondary: string; borderStrongSuccess: string; borderStrongWarning: string; borderStrongDanger: string; LIGHT: { primary: string; accent: string; accentSecondary: string; success: string; warning: string; danger: string; primaryText: string; accentText: string; successText: string; warningText: string; dangerText: string; textPrimary: string; textAccent: string; textAccentSecondary: string; textSuccess: string; textWarning: string; textDanger: string; emptyShade: string; lightestShade: string; lightShade: string; mediumShade: string; darkShade: string; darkestShade: string; fullShade: string; body: string; highlight: string; disabled: string; disabledText: string; shadow: string; text: string; title: string; subduedText: string; link: string; textParagraph: string; textHeading: string; textSubdued: string; textDisabled: string; textInverse: string; backgroundBasePrimary: string; backgroundBaseAccent: string; backgroundBaseAccentSecondary: string; backgroundBaseSuccess: string; backgroundBaseWarning: string; backgroundBaseDanger: string; backgroundBaseSubdued: string; backgroundBasePlain: string; backgroundBaseDisabled: string; backgroundBaseHighlighted: string; backgroundBaseFormsPrepend: string; backgroundBaseFormsControlDisabled: string; backgroundBaseInteractiveHover: string; backgroundBaseInteractiveSelect: string; backgroundBaseInteractiveOverlay: string; backgroundBaseSkeletonEdge: string; backgroundBaseSkeletonMiddle: string; backgroundLightPrimary: string; backgroundLightAccent: string; backgroundLightAccentSecondary: string; backgroundLightSuccess: string; backgroundLightWarning: string; backgroundLightDanger: string; backgroundLightText: string; backgroundFilledPrimary: string; backgroundFilledAccent: string; backgroundFilledAccentSecondary: string; backgroundFilledSuccess: string; backgroundFilledWarning: string; backgroundFilledDanger: string; backgroundFilledText: string; backgroundTransparent: string; backgroundTransparentPrimary: string; backgroundTransparentAccent: string; backgroundTransparentAccentSecondary: string; backgroundTransparentSuccess: string; backgroundTransparentWarning: string; backgroundTransparentDanger: string; backgroundTransparentSubdued: string; backgroundTransparentHighlighted: string; backgroundTransparentPlain: string; borderBasePrimary: string; borderBaseAccent: string; borderBaseAccentSecondary: string; borderBaseSuccess: string; borderBaseWarning: string; borderBaseDanger: string; borderBasePlain: string; borderBaseSubdued: string; borderBaseDisabled: string; borderBaseFloating: string; borderBaseFormsColorSwatch: string; borderBaseFormsControl: string; borderStrongPrimary: string; borderStrongAccent: string; borderStrongAccentSecondary: string; borderStrongSuccess: string; borderStrongWarning: string; borderStrongDanger: string; }; DARK: { primary: string; accent: string; accentSecondary: string; success: string; warning: string; danger: string; primaryText: string; accentText: string; successText: string; warningText: string; dangerText: string; textPrimary: string; textAccent: string; textAccentSecondary: string; textSuccess: string; textWarning: string; textDanger: string; emptyShade: string; lightestShade: string; lightShade: string; mediumShade: string; darkShade: string; darkestShade: string; fullShade: string; body: string; highlight: string; disabled: string; disabledText: string; shadow: string; text: string; title: string; subduedText: string; link: string; textParagraph: string; textHeading: string; textSubdued: string; textDisabled: string; textInverse: string; backgroundBasePrimary: string; backgroundBaseAccent: string; backgroundBaseAccentSecondary: string; backgroundBaseSuccess: string; backgroundBaseWarning: string; backgroundBaseDanger: string; backgroundBaseSubdued: string; backgroundBasePlain: string; backgroundBaseDisabled: string; backgroundBaseHighlighted: string; backgroundBaseFormsPrepend: string; backgroundBaseFormsControlDisabled: string; backgroundBaseInteractiveHover: string; backgroundBaseInteractiveSelect: string; backgroundBaseInteractiveOverlay: string; backgroundBaseSkeletonEdge: string; backgroundBaseSkeletonMiddle: string; backgroundLightPrimary: string; backgroundLightAccent: string; backgroundLightAccentSecondary: string; backgroundLightSuccess: string; backgroundLightWarning: string; backgroundLightDanger: string; backgroundLightText: string; backgroundFilledPrimary: string; backgroundFilledAccent: string; backgroundFilledAccentSecondary: string; backgroundFilledSuccess: string; backgroundFilledWarning: string; backgroundFilledDanger: string; backgroundFilledText: string; backgroundTransparent: string; backgroundTransparentPrimary: string; backgroundTransparentAccent: string; backgroundTransparentAccentSecondary: string; backgroundTransparentSuccess: string; backgroundTransparentWarning: string; backgroundTransparentDanger: string; backgroundTransparentSubdued: string; backgroundTransparentHighlighted: string; backgroundTransparentPlain: string; borderBasePrimary: string; borderBaseAccent: string; borderBaseAccentSecondary: string; borderBaseSuccess: string; borderBaseWarning: string; borderBaseDanger: string; borderBasePlain: string; borderBaseSubdued: string; borderBaseDisabled: string; borderBaseFloating: string; borderBaseFormsColorSwatch: string; borderBaseFormsControl: string; borderStrongPrimary: string; borderStrongAccent: string; borderStrongAccentSecondary: string; borderStrongSuccess: string; borderStrongWarning: string; borderStrongDanger: string; }; ghost: string; ink: string; plainLight: string; plainDark: string; vis: { euiColorVis0: string; euiColorVis1: string; euiColorVis2: string; euiColorVis3: string; euiColorVis4: string; euiColorVis5: string; euiColorVis6: string; euiColorVis7: string; euiColorVis8: string; euiColorVis9: string; euiColorVisBehindText0: string; euiColorVisBehindText1: string; euiColorVisBehindText2: string; euiColorVisBehindText3: string; euiColorVisBehindText4: string; euiColorVisBehindText5: string; euiColorVisBehindText6: string; euiColorVisBehindText7: string; euiColorVisBehindText8: string; euiColorVisBehindText9: string; euiColorVisAsTextLight0: string; euiColorVisAsTextLight1: string; euiColorVisAsTextLight2: string; euiColorVisAsTextLight3: string; euiColorVisAsTextLight4: string; euiColorVisAsTextLight5: string; euiColorVisAsTextLight6: string; euiColorVisAsTextDark0: string; euiColorVisAsTextDark1: string; euiColorVisAsTextDark2: string; euiColorVisAsTextDark3: string; euiColorVisAsTextDark4: string; euiColorVisAsTextDark5: string; euiColorVisAsTextDark6: string; euiColorVisSuccess0: string; euiColorVisSuccess1: string; euiColorVisWarning0: string; euiColorVisDanger0: string; euiColorVisDanger1: string; euiColorVisNeutral0: string; euiColorSeverity0: string; euiColorSeverity1: string; euiColorSeverity2: string; euiColorSeverity3: string; euiColorSeverity4: string; euiColorSeverity5: string; euiColorSeverity6: string; euiColorSeverity7: string; euiColorSeverity8: string; euiColorSeverity9: string; euiColorSeverity10: string; euiColorSeverity11: string; euiColorSeverity12: string; euiColorSeverity13: string; euiColorSeverity14: string; euiColorVisGrey0: string; euiColorVisGrey1: string; euiColorVisGrey2: string; euiColorVisGrey3: string; euiColorVisWarm0: string; euiColorVisWarm1: string; euiColorVisWarm2: string; euiColorVisCool0: string; euiColorVisCool1: string; euiColorVisCool2: string; euiColorVisComplementary0: string; euiColorVisComplementary1: string; }; }; base: number; size: { xxs: string; xs: string; s: string; m: string; base: string; l: string; xl: string; xxl: string; xxxl: string; xxxxl: string; }; font: { family: string; familyCode?: string | undefined; familySerif?: string | undefined; featureSettings?: string | undefined; defaultUnits: \"em\" | \"px\" | \"rem\"; baseline: number; lineHeightMultiplier: number; scale: { m: number; s: number; l: number; xs: number; xl: number; xxl: number; xxs: number; xxxs: number; }; weight: { light: ",
+                      "Property",
+                      ".FontWeight | undefined; regular: ",
+                      "Property",
+                      ".FontWeight | undefined; medium: ",
+                      "Property",
+                      ".FontWeight | undefined; semiBold: ",
+                      "Property",
+                      ".FontWeight | undefined; bold: ",
+                      "Property",
+                      ".FontWeight | undefined; }; body: { scale: \"m\" | \"s\" | \"l\" | \"xs\" | \"xl\" | \"xxl\" | \"xxs\" | \"xxxs\"; weight: keyof ",
+                      "_EuiThemeFontWeights",
+                      "; }; title: { weight: keyof ",
+                      "_EuiThemeFontWeights",
+                      "; }; }; border: { width: { thin: ",
+                      "Property",
+                      ".BorderWidth<string | number> | undefined; thick: ",
+                      "Property",
+                      ".BorderWidth<string | number> | undefined; }; radius: { medium: ",
+                      "Property",
+                      ".BorderRadius<string | number> | undefined; small: ",
+                      "Property",
+                      ".BorderRadius<string | number> | undefined; }; color: string; thin: ",
+                      "Property",
+                      ".Border<string | number> | undefined; thick: ",
+                      "Property",
+                      ".Border<string | number> | undefined; editable: ",
+                      "Property",
+                      ".Border<string | number> | undefined; }; focus: { color: string; width: ",
+                      "Property",
+                      ".BorderWidth<string | number> | undefined; transparency: number; backgroundColor: string; }; animation: { bounce: ",
+                      "Property",
+                      ".AnimationTimingFunction | undefined; resistance: ",
+                      "Property",
+                      ".AnimationTimingFunction | undefined; extraFast: ",
+                      "Property",
+                      ".AnimationDuration<string & {}> | undefined; fast: ",
+                      "Property",
+                      ".AnimationDuration<string & {}> | undefined; normal: ",
+                      "Property",
+                      ".AnimationDuration<string & {}> | undefined; slow: ",
+                      "Property",
+                      ".AnimationDuration<string & {}> | undefined; extraSlow: ",
+                      "Property",
+                      ".AnimationDuration<string & {}> | undefined; }; breakpoint: { [x: string]: number; xs: number; s: number; m: number; l: number; xl: number; }; levels: { toast: ",
+                      "Property",
+                      ".ZIndex; modal: ",
+                      "Property",
+                      ".ZIndex; mask: ",
+                      "Property",
+                      ".ZIndex; navigation: ",
+                      "Property",
+                      ".ZIndex; menu: ",
+                      "Property",
+                      ".ZIndex; header: ",
+                      "Property",
+                      ".ZIndex; flyout: ",
+                      "Property",
+                      ".ZIndex; maskBelowHeader: ",
+                      "Property",
+                      ".ZIndex; content: ",
+                      "Property",
+                      ".ZIndex; }; components: { badgeBackground: string; badgeBackgroundSubdued: string; badgeBorderColorHollow: string; badgeIconButtonBackgroundHover: string; bottomBarBackground: string; breadcrumbsApplicationBackground: string; breadcrumbsApplicationColor: string; buttonGroupBackgroundDisabledSelected: string; buttonGroupBorderColor: string; buttonGroupBorderColorSelected: string; buttonGroupFocusColor: string; codeBackground: string; codeBackgroundSelected: string; codeColor: string; codeInlineColor: string; codeCommentColor: string; codeSelectorColor: string; codeStringColor: string; codeTagColor: string; codeNameColor: string; codeNumberColor: string; codeInlineCodeKeywordColor: string; codeKeywordColor: string; codeFunctionTitleColor: string; codeTypeColor: string; codeAttributeColor: string; codeSymbolColor: string; codeParamsColor: string; codeMetaColor: string; codeTitleColor: string; codeSectionColor: string; codeAdditionColor: string; codeDeletionColor: string; codeSelectorClassColor: string; codeSelectorIdColor: string; collapsibleNavGroupBackground: string; collapsibleNavGroupBackgroundDark: string; dataGridBorderColor: string; dataGridVerticalLineBorderColor: string; dataGridRowBackgroundStriped: string; dataGridRowBackgroundHover: string; dataGridRowBackgroundSelect: string; dragDropDraggingBackground: string; dragDropDraggingOverBackground: string; headerBackground: string; headerDarkBackground: string; headerDarkSearchBorderColor: string; headerDarkSectionItemBackgroundFocus: string; filterSelectItemBackgroundFocusDisabled: string; flyoutFooterBackground: string; flyoutCloseButtonInsideBackground: string; keyPadMenuItemBackgroundDisabledSelect: string; listGroupItemBackgroundPrimaryActive: string; listGroupItemBackgroundSubduedActive: string; listGroupItemBackgroundHover: string; listGroupItemBackgroundPrimaryHover: string; loadingSpinnerBorder: string; loadingSpinnerHighlight: string; loadingChartMonoBackground0: string; loadingChartMonoBackground1: string; loadingChartMonoBackground2: string; loadingChartMonoBackground3: string; markBackground: string; markdownFormatTableBorderColor: string; overlayMaskBackground: string; overlayMaskBackgroundHighContrast: string; popoverPanelBackground: string; popoverFooterBorderColor: string; scrollbarTrackColor: string; sideNavItemEmphasizedBackground: string; selectableListItemBorderColor: string; skeletonBackgroundSkeletonMiddleHighContrast: string; superDatePickerBackgroundSuccees: string; switchBackgroundOn: string; switchBackgroundOff: string; switchUncompressedBackgroundDisabled: string; switchCompressedBackgroundDisabled: string; switchMiniBackgroundDisabled: string; switchThumbBackgroundDisabled: string; switchThumbBorderOn: string; switchThumbBorderOff: string; switchIconDisabled: string; tableRowBackgroundHover: string; tableRowBackgroundSelected: string; tableRowBackgroundSelectedHover: string; tableRowInteractiveBackgroundHover: string; tableRowInteractiveBackgroundFocus: string; tableCellSortableIconColor: string; tooltipBackground: string; tooltipBorder: string; tooltipBorderFloating: string; tourFooterBackground: string; treeViewItemBackgroundHover: string; buttons: { backgroundPrimary: string; backgroundAccent: string; backgroundAccentSecondary: string; backgroundSuccess: string; backgroundWarning: string; backgroundDanger: string; backgroundText: string; backgroundDisabled: string; backgroundFilledPrimary: string; backgroundFilledAccent: string; backgroundFilledAccentSecondary: string; backgroundFilledSuccess: string; backgroundFilledWarning: string; backgroundFilledDanger: string; backgroundFilledText: string; backgroundFilledDisabled: string; backgroundEmptyPrimaryHover: string; backgroundEmptyAccentHover: string; backgroundEmptyAccentSecondaryHover: string; backgroundEmptySuccessHover: string; backgroundEmptyWarningHover: string; backgroundEmptyDangerHover: string; backgroundEmptyTextHover: string; textColorPrimary: string; textColorAccent: string; textColorAccentSecondary: string; textColorSuccess: string; textColorWarning: string; textColorDanger: string; textColorText: string; textColorDisabled: string; textColorFilledPrimary: string; textColorFilledAccent: string; textColorFilledAccentSecondary: string; textColorFilledSuccess: string; textColorFilledWarning: string; textColorFilledDanger: string; textColorFilledText: string; textColorFilledDisabled: string; LIGHT: { backgroundPrimary: string; backgroundAccent: string; backgroundAccentSecondary: string; backgroundSuccess: string; backgroundWarning: string; backgroundDanger: string; backgroundText: string; backgroundDisabled: string; backgroundFilledPrimary: string; backgroundFilledAccent: string; backgroundFilledAccentSecondary: string; backgroundFilledSuccess: string; backgroundFilledWarning: string; backgroundFilledDanger: string; backgroundFilledText: string; backgroundFilledDisabled: string; backgroundEmptyPrimaryHover: string; backgroundEmptyAccentHover: string; backgroundEmptyAccentSecondaryHover: string; backgroundEmptySuccessHover: string; backgroundEmptyWarningHover: string; backgroundEmptyDangerHover: string; backgroundEmptyTextHover: string; textColorPrimary: string; textColorAccent: string; textColorAccentSecondary: string; textColorSuccess: string; textColorWarning: string; textColorDanger: string; textColorText: string; textColorDisabled: string; textColorFilledPrimary: string; textColorFilledAccent: string; textColorFilledAccentSecondary: string; textColorFilledSuccess: string; textColorFilledWarning: string; textColorFilledDanger: string; textColorFilledText: string; textColorFilledDisabled: string; }; DARK: { backgroundPrimary: string; backgroundAccent: string; backgroundAccentSecondary: string; backgroundSuccess: string; backgroundWarning: string; backgroundDanger: string; backgroundText: string; backgroundDisabled: string; backgroundFilledPrimary: string; backgroundFilledAccent: string; backgroundFilledAccentSecondary: string; backgroundFilledSuccess: string; backgroundFilledWarning: string; backgroundFilledDanger: string; backgroundFilledText: string; backgroundFilledDisabled: string; backgroundEmptyPrimaryHover: string; backgroundEmptyAccentHover: string; backgroundEmptyAccentSecondaryHover: string; backgroundEmptySuccessHover: string; backgroundEmptyWarningHover: string; backgroundEmptyDangerHover: string; backgroundEmptyTextHover: string; textColorPrimary: string; textColorAccent: string; textColorAccentSecondary: string; textColorSuccess: string; textColorWarning: string; textColorDanger: string; textColorText: string; textColorDisabled: string; textColorFilledPrimary: string; textColorFilledAccent: string; textColorFilledAccentSecondary: string; textColorFilledSuccess: string; textColorFilledWarning: string; textColorFilledDanger: string; textColorFilledText: string; textColorFilledDisabled: string; }; }; forms: { background: string; backgroundDisabled: string; backgroundReadOnly: string; backgroundFocused: string; backgroundAutofilled: string; prependBackground: string; border: string; borderAutofilled: string; controlBorder: string; controlBorderSelected: string; controlBorderDisabled: string; controlBackgroundUnselected: string; controlBackgroundDisabled: string; colorHasPlaceholder: string; colorDisabled: string; iconDisabled: string; maxWidth: string; LIGHT: { background: string; backgroundDisabled: string; backgroundReadOnly: string; backgroundFocused: string; backgroundAutofilled: string; prependBackground: string; border: string; borderAutofilled: string; controlBorder: string; controlBorderSelected: string; controlBorderDisabled: string; controlBackgroundUnselected: string; controlBackgroundDisabled: string; colorHasPlaceholder: string; colorDisabled: string; iconDisabled: string; }; DARK: { background: string; backgroundDisabled: string; backgroundReadOnly: string; backgroundFocused: string; backgroundAutofilled: string; prependBackground: string; border: string; borderAutofilled: string; controlBorder: string; controlBorderSelected: string; controlBorderDisabled: string; controlBackgroundUnselected: string; controlBackgroundDisabled: string; colorHasPlaceholder: string; colorDisabled: string; iconDisabled: string; }; }; LIGHT: { badgeBackground: string; badgeBackgroundSubdued: string; badgeBorderColorHollow: string; badgeIconButtonBackgroundHover: string; bottomBarBackground: string; breadcrumbsApplicationBackground: string; breadcrumbsApplicationColor: string; buttonGroupBackgroundDisabledSelected: string; buttonGroupBorderColor: string; buttonGroupBorderColorSelected: string; buttonGroupFocusColor: string; codeBackground: string; codeBackgroundSelected: string; codeColor: string; codeInlineColor: string; codeCommentColor: string; codeSelectorColor: string; codeStringColor: string; codeTagColor: string; codeNameColor: string; codeNumberColor: string; codeInlineCodeKeywordColor: string; codeKeywordColor: string; codeFunctionTitleColor: string; codeTypeColor: string; codeAttributeColor: string; codeSymbolColor: string; codeParamsColor: string; codeMetaColor: string; codeTitleColor: string; codeSectionColor: string; codeAdditionColor: string; codeDeletionColor: string; codeSelectorClassColor: string; codeSelectorIdColor: string; collapsibleNavGroupBackground: string; collapsibleNavGroupBackgroundDark: string; dataGridBorderColor: string; dataGridVerticalLineBorderColor: string; dataGridRowBackgroundStriped: string; dataGridRowBackgroundHover: string; dataGridRowBackgroundSelect: string; dragDropDraggingBackground: string; dragDropDraggingOverBackground: string; headerBackground: string; headerDarkBackground: string; headerDarkSearchBorderColor: string; headerDarkSectionItemBackgroundFocus: string; filterSelectItemBackgroundFocusDisabled: string; flyoutFooterBackground: string; flyoutCloseButtonInsideBackground: string; keyPadMenuItemBackgroundDisabledSelect: string; listGroupItemBackgroundPrimaryActive: string; listGroupItemBackgroundSubduedActive: string; listGroupItemBackgroundHover: string; listGroupItemBackgroundPrimaryHover: string; loadingSpinnerBorder: string; loadingSpinnerHighlight: string; loadingChartMonoBackground0: string; loadingChartMonoBackground1: string; loadingChartMonoBackground2: string; loadingChartMonoBackground3: string; markBackground: string; markdownFormatTableBorderColor: string; overlayMaskBackground: string; overlayMaskBackgroundHighContrast: string; popoverPanelBackground: string; popoverFooterBorderColor: string; scrollbarTrackColor: string; sideNavItemEmphasizedBackground: string; selectableListItemBorderColor: string; skeletonBackgroundSkeletonMiddleHighContrast: string; superDatePickerBackgroundSuccees: string; switchBackgroundOn: string; switchBackgroundOff: string; switchUncompressedBackgroundDisabled: string; switchCompressedBackgroundDisabled: string; switchMiniBackgroundDisabled: string; switchThumbBackgroundDisabled: string; switchThumbBorderOn: string; switchThumbBorderOff: string; switchIconDisabled: string; tableRowBackgroundHover: string; tableRowBackgroundSelected: string; tableRowBackgroundSelectedHover: string; tableRowInteractiveBackgroundHover: string; tableRowInteractiveBackgroundFocus: string; tableCellSortableIconColor: string; tooltipBackground: string; tooltipBorder: string; tooltipBorderFloating: string; tourFooterBackground: string; treeViewItemBackgroundHover: string; }; DARK: { badgeBackground: string; badgeBackgroundSubdued: string; badgeBorderColorHollow: string; badgeIconButtonBackgroundHover: string; bottomBarBackground: string; breadcrumbsApplicationBackground: string; breadcrumbsApplicationColor: string; buttonGroupBackgroundDisabledSelected: string; buttonGroupBorderColor: string; buttonGroupBorderColorSelected: string; buttonGroupFocusColor: string; codeBackground: string; codeBackgroundSelected: string; codeColor: string; codeInlineColor: string; codeCommentColor: string; codeSelectorColor: string; codeStringColor: string; codeTagColor: string; codeNameColor: string; codeNumberColor: string; codeInlineCodeKeywordColor: string; codeKeywordColor: string; codeFunctionTitleColor: string; codeTypeColor: string; codeAttributeColor: string; codeSymbolColor: string; codeParamsColor: string; codeMetaColor: string; codeTitleColor: string; codeSectionColor: string; codeAdditionColor: string; codeDeletionColor: string; codeSelectorClassColor: string; codeSelectorIdColor: string; collapsibleNavGroupBackground: string; collapsibleNavGroupBackgroundDark: string; dataGridBorderColor: string; dataGridVerticalLineBorderColor: string; dataGridRowBackgroundStriped: string; dataGridRowBackgroundHover: string; dataGridRowBackgroundSelect: string; dragDropDraggingBackground: string; dragDropDraggingOverBackground: string; headerBackground: string; headerDarkBackground: string; headerDarkSearchBorderColor: string; headerDarkSectionItemBackgroundFocus: string; filterSelectItemBackgroundFocusDisabled: string; flyoutFooterBackground: string; flyoutCloseButtonInsideBackground: string; keyPadMenuItemBackgroundDisabledSelect: string; listGroupItemBackgroundPrimaryActive: string; listGroupItemBackgroundSubduedActive: string; listGroupItemBackgroundHover: string; listGroupItemBackgroundPrimaryHover: string; loadingSpinnerBorder: string; loadingSpinnerHighlight: string; loadingChartMonoBackground0: string; loadingChartMonoBackground1: string; loadingChartMonoBackground2: string; loadingChartMonoBackground3: string; markBackground: string; markdownFormatTableBorderColor: string; overlayMaskBackground: string; overlayMaskBackgroundHighContrast: string; popoverPanelBackground: string; popoverFooterBorderColor: string; scrollbarTrackColor: string; sideNavItemEmphasizedBackground: string; selectableListItemBorderColor: string; skeletonBackgroundSkeletonMiddleHighContrast: string; superDatePickerBackgroundSuccees: string; switchBackgroundOn: string; switchBackgroundOff: string; switchUncompressedBackgroundDisabled: string; switchCompressedBackgroundDisabled: string; switchMiniBackgroundDisabled: string; switchThumbBackgroundDisabled: string; switchThumbBorderOn: string; switchThumbBorderOff: string; switchIconDisabled: string; tableRowBackgroundHover: string; tableRowBackgroundSelected: string; tableRowBackgroundSelectedHover: string; tableRowInteractiveBackgroundHover: string; tableRowInteractiveBackgroundFocus: string; tableCellSortableIconColor: string; tooltipBackground: string; tooltipBorder: string; tooltipBorderFloating: string; tourFooterBackground: string; treeViewItemBackgroundHover: string; }; }; flags: { hasGlobalFocusColor: boolean; hasVisColorAdjustment: boolean; }; } & { themeName: string; }"
+                    ],
+                    "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/home_sections.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
                   }
                 ]
               }
@@ -1364,6 +1524,52 @@
             "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/index-management-shared-types",
+            "id": "def-common.IndexManagementPluginSetup.renderIndexManagementApp",
+            "type": "Function",
+            "tags": [],
+            "label": "renderIndexManagementApp",
+            "description": [],
+            "signature": [
+              "(params: ",
+              {
+                "pluginId": "@kbn/index-management-shared-types",
+                "scope": "common",
+                "docId": "kibKbnIndexManagementSharedTypesPluginApi",
+                "section": "def-common.IndexManagementAppMountParams",
+                "text": "IndexManagementAppMountParams"
+              },
+              ") => Promise<() => void>"
+            ],
+            "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/index-management-shared-types",
+                "id": "def-common.IndexManagementPluginSetup.renderIndexManagementApp.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/index-management-shared-types",
+                    "scope": "common",
+                    "docId": "kibKbnIndexManagementSharedTypesPluginApi",
+                    "section": "def-common.IndexManagementAppMountParams",
+                    "text": "IndexManagementAppMountParams"
+                  }
+                ],
+                "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "@kbn/index-management-shared-types",
@@ -1529,6 +1735,171 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/index-management-shared-types",
+            "id": "def-common.IndexManagementPluginStart.getComponentTemplateFlyoutComponent",
+            "type": "Function",
+            "tags": [],
+            "label": "getComponentTemplateFlyoutComponent",
+            "description": [],
+            "signature": [
+              "(deps: { history: ",
+              "ScopedHistory",
+              "<unknown>; }) => React.FC<",
+              {
+                "pluginId": "@kbn/index-management-shared-types",
+                "scope": "common",
+                "docId": "kibKbnIndexManagementSharedTypesPluginApi",
+                "section": "def-common.ComponentTemplateFlyoutProps",
+                "text": "ComponentTemplateFlyoutProps"
+              },
+              ">"
+            ],
+            "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/index-management-shared-types",
+                "id": "def-common.IndexManagementPluginStart.getComponentTemplateFlyoutComponent.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "deps",
+                "description": [],
+                "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/index-management-shared-types",
+                    "id": "def-common.IndexManagementPluginStart.getComponentTemplateFlyoutComponent.$1.history",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "history",
+                    "description": [],
+                    "signature": [
+                      "ScopedHistory",
+                      "<unknown>"
+                    ],
+                    "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/index-management-shared-types",
+            "id": "def-common.IndexManagementPluginStart.getIndexTemplateFlyoutComponent",
+            "type": "Function",
+            "tags": [],
+            "label": "getIndexTemplateFlyoutComponent",
+            "description": [],
+            "signature": [
+              "(deps: { history: ",
+              "ScopedHistory",
+              "<unknown>; }) => React.FC<",
+              {
+                "pluginId": "@kbn/index-management-shared-types",
+                "scope": "common",
+                "docId": "kibKbnIndexManagementSharedTypesPluginApi",
+                "section": "def-common.IndexTemplateFlyoutProps",
+                "text": "IndexTemplateFlyoutProps"
+              },
+              ">"
+            ],
+            "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/index-management-shared-types",
+                "id": "def-common.IndexManagementPluginStart.getIndexTemplateFlyoutComponent.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "deps",
+                "description": [],
+                "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/index-management-shared-types",
+                    "id": "def-common.IndexManagementPluginStart.getIndexTemplateFlyoutComponent.$1.history",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "history",
+                    "description": [],
+                    "signature": [
+                      "ScopedHistory",
+                      "<unknown>"
+                    ],
+                    "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/index-management-shared-types",
+            "id": "def-common.IndexManagementPluginStart.getDatastreamFlyoutComponent",
+            "type": "Function",
+            "tags": [],
+            "label": "getDatastreamFlyoutComponent",
+            "description": [],
+            "signature": [
+              "(deps: { history: ",
+              "ScopedHistory",
+              "<unknown>; }) => React.FC<",
+              {
+                "pluginId": "@kbn/index-management-shared-types",
+                "scope": "common",
+                "docId": "kibKbnIndexManagementSharedTypesPluginApi",
+                "section": "def-common.DatastreamFlyoutProps",
+                "text": "DatastreamFlyoutProps"
+              },
+              ">"
+            ],
+            "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/index-management-shared-types",
+                "id": "def-common.IndexManagementPluginStart.getDatastreamFlyoutComponent.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "deps",
+                "description": [],
+                "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/index-management-shared-types",
+                    "id": "def-common.IndexManagementPluginStart.getDatastreamFlyoutComponent.$1.history",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "history",
+                    "description": [],
+                    "signature": [
+                      "ScopedHistory",
+                      "<unknown>"
+                    ],
+                    "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -1631,6 +2002,63 @@
             "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/index-management-shared-types",
+        "id": "def-common.IndexTemplateFlyoutProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "IndexTemplateFlyoutProps",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/index-management-shared-types",
+            "id": "def-common.IndexTemplateFlyoutProps.indexTemplateName",
+            "type": "string",
+            "tags": [],
+            "label": "indexTemplateName",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/index-management-shared-types",
+            "id": "def-common.IndexTemplateFlyoutProps.onClose",
+            "type": "Function",
+            "tags": [],
+            "label": "onClose",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/index-management-shared-types",
+            "id": "def-common.IndexTemplateFlyoutProps.reload",
+            "type": "Function",
+            "tags": [],
+            "label": "reload",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -2091,6 +2519,29 @@
       },
       {
         "parentPluginId": "@kbn/index-management-shared-types",
+        "id": "def-common.IndexManagementAppMountParams",
+        "type": "Type",
+        "tags": [],
+        "label": "IndexManagementAppMountParams",
+        "description": [],
+        "signature": [
+          "Pick<",
+          {
+            "pluginId": "management",
+            "scope": "public",
+            "docId": "kibManagementPluginApi",
+            "section": "def-public.ManagementAppMountParams",
+            "text": "ManagementAppMountParams"
+          },
+          ", \"history\" | \"setBreadcrumbs\"> & { element: HTMLElement | null; }"
+        ],
+        "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/index-management-shared-types",
         "id": "def-common.IndexManagementLocator",
         "type": "Type",
         "tags": [],
@@ -2134,7 +2585,7 @@
             "section": "def-common.SerializableRecord",
             "text": "SerializableRecord"
           },
-          " & ({ page: \"data_streams_details\"; dataStreamName?: string | undefined; } | { page: \"index_template\"; indexTemplate: string; } | { page: \"component_template\"; componentTemplate: string; })"
+          " & ({ page: \"index_list\"; filter?: string | undefined; includeHiddenIndices?: boolean | undefined; } | { page: \"data_stream_index_list\"; dataStreamName: string; } | { page: \"data_streams_details\"; dataStreamName?: string | undefined; } | { page: \"index_template\"; indexTemplate: string; } | { page: \"index_template_edit\"; indexTemplate: string; } | { page: \"index_template_clone\"; indexTemplate: string; } | { page: \"component_template\"; componentTemplate: string; } | { page: \"component_template_list\"; filter?: string | undefined; } | { page: \"edit_component_template\"; componentTemplate: string; } | { page: \"clone_component_template\"; componentTemplate: string; } | { page: \"create_component_template\"; componentTemplate: string; })"
         ],
         "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
         "deprecated": false,

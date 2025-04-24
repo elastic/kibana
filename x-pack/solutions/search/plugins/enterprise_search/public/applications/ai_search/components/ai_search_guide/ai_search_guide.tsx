@@ -27,7 +27,6 @@ import { SetAiSearchChrome as SetPageChrome } from '../../../shared/kibana_chrom
 import { EnterpriseSearchAISearchPageTemplate } from '../layout/page_template';
 
 import { SetAISearchChromeSearchDocsSection } from './ai_search_docs_section';
-import { MeasurePerformanceSection } from './measure_performance_section';
 import { RankAggregationSection } from './rank_aggregation_section';
 import { SemanticSearchSection } from './semantic_search_section';
 
@@ -82,10 +81,6 @@ export const AISearchGuide: React.FC = () => {
           <EuiHorizontalRule />
           <EuiFlexItem grow>
             <SetAISearchChromeSearchDocsSection />
-          </EuiFlexItem>
-          <EuiHorizontalRule />
-          <EuiFlexItem grow>
-            <MeasurePerformanceSection />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPanel>

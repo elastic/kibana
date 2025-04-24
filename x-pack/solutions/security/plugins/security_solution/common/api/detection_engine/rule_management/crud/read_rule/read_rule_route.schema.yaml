@@ -9,7 +9,15 @@ paths:
       x-codegen-enabled: true
       operationId: ReadRule
       summary: Retrieve a detection rule
-      description: Retrieve a detection rule using the `rule_id` or `id` field.
+      description: |
+        Retrieve a detection rule using the `rule_id` or `id` field.
+
+        The URL query must include one of the following:
+
+        * `id` - `GET /api/detection_engine/rules?id=<id>`
+        * `rule_id` - `GET /api/detection_engine/rules?rule_id=<rule_id>`
+
+        The difference between the `id` and `rule_id` is that the `id` is a unique rule identifier that is randomly generated when a rule is created and cannot be set, whereas `rule_id` is a stable rule identifier that can be assigned during rule creation.
       tags:
         - Rules API
       parameters:
@@ -25,10 +33,85 @@ paths:
           description: The rule's `rule_id` value.
           schema:
             $ref: '../../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/RuleSignatureId'
+      x-codeSamples:
+        - lang: cURL
+          source: |
+            curl \
+              --request GET https://localhost:5601/api/detection_engine/rules?rule_id=bfeaf89b-a2a7-48a3-817f-e41829dc61ee \
+              --header "Content-Type: application/json; Elastic-Api-Version=2023-10-31"
       responses:
         200:
-          description: Indicates a successful call.
+          description: |
+            Indicates a successful call.
+            > info
+            > These fields are under development and their usage or schema may change: execution_summary.
           content:
             application/json:
               schema:
                 $ref: '../../../model/rule_schema/rule_schemas.schema.yaml#/components/schemas/RuleResponse'
+              examples:
+                example1:
+                  summary: Example response for a retrieved rule
+                  value:
+                    created_at: '2020-02-03T11:19:04.259Z'
+                    updated_at: '2020-02-03T11:19:04.462Z'
+                    created_by: 'elastic'
+                    description: 'Process started by MS Office program in user folder'
+                    enabled: false
+                    false_positives: []
+                    filters:
+                      - query:
+                          match:
+                            event.action:
+                              query: 'Process Create (rule: ProcessCreate)'
+                              type: 'phrase'
+                    from: 'now-4200s'
+                    id: 'c41d170b-8ba6-4de6-b8ec-76440a35ace3'
+                    immutable: false
+                    interval: '1h'
+                    rule_id: 'process_started_by_ms_office_user_folder'
+                    related_integrations:
+                      - package: 'o365'
+                        version: '^2.3.2'
+                    required_fields:
+                      - name: 'process.name'
+                        type: 'keyword'
+                        ecs: true
+                      - name: 'process.parent.name'
+                        type: 'keyword'
+                        ecs: true
+                    setup: ''
+                    language: 'kuery'
+                    max_signals: 100
+                    risk_score: 21
+                    name: 'MS Office child process'
+                    query: 'process.parent.name:EXCEL.EXE or process.parent.name:MSPUB.EXE or process.parent.name:OUTLOOK.EXE or process.parent.name:POWERPNT.EXE or process.parent.name:VISIO.EXE or process.parent.name:WINWORD.EXE'
+                    references: []
+                    severity: 'low'
+                    updated_by: 'elastic'
+                    tags:
+                      - 'child process'
+                      - 'ms office'
+                    to: 'now-300s'
+                    type: 'query'
+                    threat:
+                      - framework: 'MITRE ATT&CK'
+                        tactic:
+                          id: 'TA0001'
+                          reference: 'https://attack.mitre.org/tactics/TA0001'
+                          name: 'Initial Access'
+                        technique:
+                          - id: 'T1193'
+                            name: 'Spearphishing Attachment'
+                            reference: 'https://attack.mitre.org/techniques/T1193'
+                    execution_summary:
+                      last_execution:
+                        date: '2022-03-23T16:06:12.787Z'
+                        status: 'partial failure'
+                        status_order: 20
+                        message: 'This rule attempted to query data from Elasticsearch indices listed in the "Index pattern" section of the rule definition, but no matching index was found.'
+                        metrics:
+                          total_search_duration_ms: 135
+                          total_indexing_duration_ms: 15
+                          execution_gap_duration_s: 0
+                    version: 1

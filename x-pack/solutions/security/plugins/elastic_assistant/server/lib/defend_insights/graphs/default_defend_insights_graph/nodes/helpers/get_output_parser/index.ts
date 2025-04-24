@@ -8,9 +8,15 @@
 import { StructuredOutputParser } from 'langchain/output_parsers';
 import type { DefendInsightType } from '@kbn/elastic-assistant-common';
 
-import { getSchema } from '../../generate/schema';
+import { DefendInsightsGenerationPrompts } from '../prompts/incompatible_antivirus';
+import { getDefendInsightsSchema } from '../../generate/schema';
 
-export function getOutputParser({ type }: { type: DefendInsightType }) {
-  const schema = getSchema({ type });
-  return StructuredOutputParser.fromZodSchema(schema);
+export function getOutputParser({
+  type,
+  prompts,
+}: {
+  type: DefendInsightType;
+  prompts: DefendInsightsGenerationPrompts;
+}) {
+  return StructuredOutputParser.fromZodSchema(getDefendInsightsSchema({ type, prompts }));
 }

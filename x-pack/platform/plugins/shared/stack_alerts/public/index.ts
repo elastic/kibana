@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PluginInitializerContext } from '@kbn/core/public';
+import type { PluginInitializerContext } from '@kbn/core/public';
 import { StackAlertsPublicPlugin } from './plugin';
 
 export { DataViewSelectPopover } from './rule_types/components/data_view_select_popover';

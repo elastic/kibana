@@ -1,0 +1,83 @@
+{
+  "id": "serverlessChat",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [],
+    "setup": {
+      "parentPluginId": "serverlessChat",
+      "id": "def-public.ChatServerlessPluginSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "ChatServerlessPluginSetup",
+      "description": [],
+      "path": "x-pack/solutions/chat/plugins/serverless_chat/public/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "serverlessChat",
+      "id": "def-public.ChatServerlessPluginStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "ChatServerlessPluginStart",
+      "description": [],
+      "path": "x-pack/solutions/chat/plugins/serverless_chat/public/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [],
+    "setup": {
+      "parentPluginId": "serverlessChat",
+      "id": "def-server.ServerlessChatPluginSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "ServerlessChatPluginSetup",
+      "description": [],
+      "path": "x-pack/solutions/chat/plugins/serverless_chat/server/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "serverlessChat",
+      "id": "def-server.ServerlessChatPluginStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "ServerlessChatPluginStart",
+      "description": [],
+      "path": "x-pack/solutions/chat/plugins/serverless_chat/server/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

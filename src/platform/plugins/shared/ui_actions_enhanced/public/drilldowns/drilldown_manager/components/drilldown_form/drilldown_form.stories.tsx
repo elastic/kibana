@@ -8,7 +8,6 @@
  */
 
 import * as React from 'react';
-import { storiesOf } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import { DrilldownForm } from '.';
 import type { TriggerPickerProps } from '../trigger_picker';
@@ -31,22 +30,32 @@ const triggers: TriggerPickerProps = {
   onChange: () => {},
 };
 
-storiesOf('components/DrilldownForm', module)
-  .add('Default', () => {
+export default {
+  title: 'components/DrilldownForm',
+};
+
+export const Default = () => {
+  return (
+    <DrilldownForm name={'...'} triggers={triggers} onNameChange={action('onNameChange')}>
+      children...
+    </DrilldownForm>
+  );
+};
+
+export const WithLicenseLink = {
+  render: () => {
     return (
       <DrilldownForm name={'...'} triggers={triggers} onNameChange={action('onNameChange')}>
         children...
       </DrilldownForm>
     );
-  })
-  .add('With license link', () => {
-    return (
-      <DrilldownForm name={'...'} triggers={triggers} onNameChange={action('onNameChange')}>
-        children...
-      </DrilldownForm>
-    );
-  })
-  .add('No triggers', () => {
+  },
+
+  name: 'With license link',
+};
+
+export const NoTriggers = {
+  render: () => {
     return (
       <DrilldownForm
         name={'...'}
@@ -61,4 +70,7 @@ storiesOf('components/DrilldownForm', module)
         children...
       </DrilldownForm>
     );
-  });
+  },
+
+  name: 'No triggers',
+};

@@ -7,7 +7,7 @@
 
 import type { Client } from '@elastic/elasticsearch';
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 
 // from: x-pack/test/alerting_api_integration/common/config.ts
 const ACTION_ID = 'preconfigured-es-index-action';

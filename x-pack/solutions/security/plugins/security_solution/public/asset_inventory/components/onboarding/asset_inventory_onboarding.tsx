@@ -10,6 +10,9 @@ import type { FC, PropsWithChildren } from 'react';
 import { GetStarted } from './get_started';
 import { AssetInventoryLoading } from '../asset_inventory_loading';
 import { useAssetInventoryStatus } from '../../hooks/use_asset_inventory_status';
+import { Initializing } from './initializing';
+import { NoDataFound } from './no_data_found';
+import { PermissionDenied } from './permission_denied';
 
 /**
  * This component serves as a wrapper to render appropriate onboarding screens
@@ -27,19 +30,15 @@ export const AssetInventoryOnboarding: FC<PropsWithChildren> = ({ children }) =>
 
   // Render different screens based on the onboarding status.
   switch (status) {
+    case 'inactive_feature':
     case 'disabled': // The user has not yet started the onboarding process.
       return <GetStarted />;
-    case 'initializing': // Todo: The onboarding process is currently initializing.
-      return <div>{'Initializing...'}</div>;
-    case 'empty': // Todo: Onboarding cannot proceed because no relevant data was found.
-      return <div>{'No data found.'}</div>;
-    case 'permission_denied': // Todo: User lacks the necessary permissions to proceed.
-      return (
-        <div>
-          {'Permission denied.'}
-          <pre>{JSON.stringify(privileges)}</pre>
-        </div>
-      );
+    case 'initializing': // The onboarding process is currently initializing.
+      return <Initializing />;
+    case 'empty': // Onboarding cannot proceed because no relevant data was found.
+      return <NoDataFound />;
+    case 'insufficient_privileges': // User lacks the necessary permissions to proceed.
+      return <PermissionDenied privileges={privileges} />;
     default:
       // If no onboarding status matches, render the child components.
       return children;

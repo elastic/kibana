@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
-import { notFound } from '@hapi/boom';
+import { notFound, forbidden } from '@hapi/boom';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { CoreSetup, ElasticsearchClient, IUiSettingsClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
@@ -46,7 +46,7 @@ import {
 import { convertMessagesForInference } from '../../../common/convert_messages_for_inference';
 import { CompatibleJSONSchema } from '../../../common/functions/types';
 import {
-  type AdHocInstruction,
+  type Instruction,
   type Conversation,
   type ConversationCreateRequest,
   type ConversationUpdateRequest,
@@ -67,14 +67,12 @@ import { continueConversation } from './operators/continue_conversation';
 import { convertInferenceEventsToStreamingEvents } from './operators/convert_inference_events_to_streaming_events';
 import { extractMessages } from './operators/extract_messages';
 import { getGeneratedTitle } from './operators/get_generated_title';
-import {
-  reIndexKnowledgeBaseAndPopulateSemanticTextField,
-  scheduleKbSemanticTextMigrationTask,
-} from '../task_manager_definitions/register_kb_semantic_text_migration_task';
+import { populateMissingSemanticTextFieldMigration } from '../startup_migrations/populate_missing_semantic_text_field_migration';
 import { ObservabilityAIAssistantPluginStartDependencies } from '../../types';
 import { ObservabilityAIAssistantConfig } from '../../config';
 import { getElserModelId } from '../knowledge_base_service/get_elser_model_id';
 import { apmInstrumentation } from './operators/apm_instrumentation';
+import { reIndexKnowledgeBaseWithLock } from '../knowledge_base_service/reindex_knowledge_base';
 
 const MAX_FUNCTION_CALLS = 8;
 
@@ -140,7 +138,7 @@ export class ObservabilityAIAssistantClient {
       return false;
     }
 
-    return conversation.user.id
+    return conversation.user.id && user.id
       ? conversation.user.id === user.id
       : conversation.user.name === user.name;
   };
@@ -161,6 +159,10 @@ export class ObservabilityAIAssistantClient {
       throw notFound();
     }
 
+    if (!this.isConversationOwnedByUser(conversation._source!)) {
+      throw forbidden('Deleting a conversation is only allowed for the owner of the conversation.');
+    }
+
     await this.dependencies.esClient.asInternalUser.delete({
       id: conversation._id!,
       index: conversation._index,
@@ -172,7 +174,7 @@ export class ObservabilityAIAssistantClient {
     functionClient,
     connectorId,
     simulateFunctionCalling = false,
-    instructions: adHocInstructions = [],
+    userInstructions: apiUserInstructions = [],
     messages: initialMessages,
     signal,
     persist,
@@ -191,7 +193,7 @@ export class ObservabilityAIAssistantClient {
     title?: string;
     isPublic?: boolean;
     kibanaPublicUrl?: string;
-    instructions?: AdHocInstruction[];
+    userInstructions?: Instruction[];
     simulateFunctionCalling?: boolean;
     disableFunctions?:
       | boolean
@@ -207,18 +209,16 @@ export class ObservabilityAIAssistantClient {
         const conversationId = persist ? predefinedConversationId || v4() : '';
 
         if (persist && !isConversationUpdate && kibanaPublicUrl) {
-          adHocInstructions.push({
-            instruction_type: 'application_instruction',
-            text: `This conversation will be persisted in Kibana and available at this url: ${
+          functionClient.registerInstruction(
+            `This conversation will be persisted in Kibana and available at this url: ${
               kibanaPublicUrl + `/app/observabilityAIAssistant/conversations/${conversationId}`
-            }.`,
-          });
+            }.`
+          );
         }
 
-        const userInstructions$ = from(this.getKnowledgeBaseUserInstructions()).pipe(shareReplay());
-
-        const registeredAdhocInstructions = functionClient.getAdhocInstructions();
-        const allAdHocInstructions = adHocInstructions.concat(registeredAdhocInstructions);
+        const kbUserInstructions$ = from(this.getKnowledgeBaseUserInstructions()).pipe(
+          shareReplay()
+        );
 
         // if it is:
         // - a new conversation
@@ -243,12 +243,12 @@ export class ObservabilityAIAssistantClient {
                 tracer: completeTracer,
               }).pipe(shareReplay());
 
-        const systemMessage$ = userInstructions$.pipe(
-          map((userInstructions) => {
+        const systemMessage$ = kbUserInstructions$.pipe(
+          map((kbUserInstructions) => {
             return getSystemMessageFromInstructions({
               applicationInstructions: functionClient.getInstructions(),
-              userInstructions,
-              adHocInstructions: allAdHocInstructions,
+              kbUserInstructions,
+              apiUserInstructions,
               availableFunctionNames: functionClient.getFunctions().map((fn) => fn.definition.name),
             });
           }),
@@ -257,8 +257,8 @@ export class ObservabilityAIAssistantClient {
 
         // we continue the conversation here, after resolving both the materialized
         // messages and the knowledge base instructions
-        const nextEvents$ = forkJoin([systemMessage$, userInstructions$]).pipe(
-          switchMap(([systemMessage, userInstructions]) => {
+        const nextEvents$ = forkJoin([systemMessage$, kbUserInstructions$]).pipe(
+          switchMap(([systemMessage, kbUserInstructions]) => {
             // if needed, inject a context function request here
             const contextRequest = functionClient.hasFunction(CONTEXT_FUNCTION_NAME)
               ? getContextFunctionRequestIfNeeded(initialMessages)
@@ -285,8 +285,8 @@ export class ObservabilityAIAssistantClient {
                 // start out with the max number of function calls
                 functionCallsLeft: MAX_FUNCTION_CALLS,
                 functionClient,
-                userInstructions,
-                adHocInstructions,
+                kbUserInstructions,
+                apiUserInstructions,
                 signal,
                 logger: this.dependencies.logger,
                 disableFunctions,
@@ -388,6 +388,7 @@ export class ObservabilityAIAssistantClient {
                       numeric_labels: {},
                       systemMessage,
                       messages: initialMessagesWithAddedMessages,
+                      archived: false,
                     })
                   ).pipe(
                     map((conversationCreated): ConversationCreateEvent => {
@@ -410,26 +411,24 @@ export class ObservabilityAIAssistantClient {
             return throwError(() => error);
           }),
           tap((event) => {
-            if (this.dependencies.logger.isLevelEnabled('debug')) {
-              switch (event.type) {
-                case StreamingChatResponseEventType.MessageAdd:
-                  this.dependencies.logger.debug(
-                    () => `Added message: ${JSON.stringify(event.message)}`
-                  );
-                  break;
+            switch (event.type) {
+              case StreamingChatResponseEventType.MessageAdd:
+                this.dependencies.logger.debug(
+                  () => `Added message: ${JSON.stringify(event.message)}`
+                );
+                break;
 
-                case StreamingChatResponseEventType.ConversationCreate:
-                  this.dependencies.logger.debug(
-                    () => `Created conversation: ${JSON.stringify(event.conversation)}`
-                  );
-                  break;
+              case StreamingChatResponseEventType.ConversationCreate:
+                this.dependencies.logger.debug(
+                  () => `Created conversation: ${JSON.stringify(event.conversation)}`
+                );
+                break;
 
-                case StreamingChatResponseEventType.ConversationUpdate:
-                  this.dependencies.logger.debug(
-                    () => `Updated conversation: ${JSON.stringify(event.conversation)}`
-                  );
-                  break;
-              }
+              case StreamingChatResponseEventType.ConversationUpdate:
+                this.dependencies.logger.debug(
+                  () => `Updated conversation: ${JSON.stringify(event.conversation)}`
+                );
+                break;
             }
           }),
           shareReplay()
@@ -486,15 +485,19 @@ export class ObservabilityAIAssistantClient {
     const options = {
       connectorId,
       system: systemMessage,
-      messages: convertMessagesForInference(messages),
+      messages: convertMessagesForInference(messages, this.dependencies.logger),
       toolChoice,
       tools,
       functionCalling: (simulateFunctionCalling ? 'simulated' : 'auto') as FunctionCallingMode,
+      metadata: {
+        connectorTelemetry: {
+          pluginId: 'observability_ai_assistant',
+        },
+      },
     };
 
     this.dependencies.logger.debug(
-      () =>
-        `Calling inference client with for name: "${name}" with options: ${JSON.stringify(options)}`
+      () => `Calling inference client for name: "${name}" with options: ${JSON.stringify(options)}`
     );
 
     if (stream) {
@@ -508,10 +511,7 @@ export class ObservabilityAIAssistantClient {
         apmInstrumentation(name),
         failOnNonExistingFunctionCall({ functions }),
         tap((event) => {
-          if (
-            event.type === StreamingChatResponseEventType.ChatCompletionChunk &&
-            this.dependencies.logger.isLevelEnabled('trace')
-          ) {
+          if (event.type === StreamingChatResponseEventType.ChatCompletionChunk) {
             this.dependencies.logger.trace(`Received chunk: ${JSON.stringify(event.message)}`);
           }
         }),
@@ -561,7 +561,7 @@ export class ObservabilityAIAssistantClient {
     }
 
     if (!this.isConversationOwnedByUser(persistedConversation._source!)) {
-      throw new Error('Cannot update conversation that is not owned by the user');
+      throw forbidden('Updating a conversation is only allowed for the owner of the conversation.');
     }
 
     const updatedConversation: Conversation = merge(
@@ -574,35 +574,6 @@ export class ObservabilityAIAssistantClient {
       id: persistedConversation._id!,
       index: persistedConversation._index,
       doc: updatedConversation,
-      refresh: true,
-    });
-
-    return updatedConversation;
-  };
-
-  setTitle = async ({ conversationId, title }: { conversationId: string; title: string }) => {
-    const document = await this.getConversationWithMetaFields(conversationId);
-    if (!document) {
-      throw notFound();
-    }
-
-    const conversation = await this.get(conversationId);
-
-    if (!conversation) {
-      throw notFound();
-    }
-
-    const updatedConversation: Conversation = merge(
-      {},
-      conversation,
-      { conversation: { title } },
-      this.getConversationUpdateValues(new Date().toISOString())
-    );
-
-    await this.dependencies.esClient.asInternalUser.update({
-      id: document._id!,
-      index: document._index,
-      doc: { conversation: { title } },
       refresh: true,
     });
 
@@ -631,6 +602,26 @@ export class ObservabilityAIAssistantClient {
     return createdConversation;
   };
 
+  updatePartial = async ({
+    conversationId,
+    updates,
+  }: {
+    conversationId: string;
+    updates: Partial<{ public: boolean; archived: boolean }>;
+  }): Promise<Conversation> => {
+    const conversation = await this.get(conversationId);
+    if (!conversation) {
+      throw notFound();
+    }
+
+    const updatedConversation: Conversation = merge({}, conversation, {
+      ...(updates.public !== undefined && { public: updates.public }),
+      ...(updates.archived !== undefined && { archived: updates.archived }),
+    });
+
+    return this.update(conversationId, updatedConversation);
+  };
+
   duplicateConversation = async (conversationId: string): Promise<Conversation> => {
     const conversation = await this.getConversationWithMetaFields(conversationId);
 
@@ -645,6 +636,7 @@ export class ObservabilityAIAssistantClient {
         id: v4(),
       },
       public: false,
+      archived: false,
     });
   };
 
@@ -684,14 +676,15 @@ export class ObservabilityAIAssistantClient {
     // setup the knowledge base
     const res = await knowledgeBaseService.setup(esClient, modelId);
 
-    core
-      .getStartServices()
-      .then(([_, pluginsStart]) =>
-        scheduleKbSemanticTextMigrationTask({ taskManager: pluginsStart.taskManager, logger })
-      )
-      .catch((error) => {
-        logger.error(`Failed to schedule semantic text migration task: ${error}`);
-      });
+    populateMissingSemanticTextFieldMigration({
+      core,
+      logger,
+      config: this.dependencies.config,
+    }).catch((e) => {
+      this.dependencies.logger.error(
+        `Failed to populate missing semantic text fields: ${e.message}`
+      );
+    });
 
     return res;
   };
@@ -701,14 +694,21 @@ export class ObservabilityAIAssistantClient {
     return this.dependencies.knowledgeBaseService.reset(esClient);
   };
 
-  reIndexKnowledgeBaseAndPopulateSemanticTextField = () => {
-    return reIndexKnowledgeBaseAndPopulateSemanticTextField({
+  reIndexKnowledgeBaseWithLock = () => {
+    return reIndexKnowledgeBaseWithLock({
+      core: this.dependencies.core,
       esClient: this.dependencies.esClient,
+      logger: this.dependencies.logger,
+    });
+  };
+
+  reIndexKnowledgeBaseAndPopulateSemanticTextField = () => {
+    return populateMissingSemanticTextFieldMigration({
+      core: this.dependencies.core,
       logger: this.dependencies.logger,
       config: this.dependencies.config,
     });
   };
-
   addUserInstruction = async ({
     entry,
   }: {
@@ -769,7 +769,12 @@ export class ObservabilityAIAssistantClient {
     sortBy: string;
     sortDirection: 'asc' | 'desc';
   }) => {
-    return this.dependencies.knowledgeBaseService.getEntries({ query, sortBy, sortDirection });
+    return this.dependencies.knowledgeBaseService.getEntries({
+      query,
+      sortBy,
+      sortDirection,
+      namespace: this.dependencies.namespace,
+    });
   };
 
   deleteKnowledgeBaseEntry = async (id: string) => {

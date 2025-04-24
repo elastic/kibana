@@ -7,19 +7,11 @@
 
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { isPlainObject } from 'lodash';
-import {
-  EuiCode,
-  EuiFilePicker,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormRow,
-  EuiText,
-} from '@elastic/eui';
+import { EuiFilePicker, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiText } from '@elastic/eui';
 import type {
   EuiFilePickerClass,
   EuiFilePickerProps,
 } from '@elastic/eui/src/components/form/file_picker/file_picker';
-import { FormattedMessage } from '@kbn/i18n-react';
 import type { CreateRuleMigrationRequestBody } from '../../../../../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import type { OriginalRule } from '../../../../../../../../../common/siem_migrations/model/rule_migration.gen';
 import type { CreateMigration } from '../../../../../../service/hooks/use_create_migration';
@@ -74,22 +66,9 @@ export const RulesFileUpload = React.memo<RulesFileUploadProps>(
     const isButtonDisabled = isDisabled || rulesToUpload.length === 0;
 
     return (
-      <EuiFlexGroup direction="column">
+      <EuiFlexGroup direction="column" gutterSize="s">
         <EuiFlexItem>
-          <EuiFormRow
-            helpText={
-              <EuiText color="subdued" size="xs">
-                <FormattedMessage
-                  id="xpack.securitySolution.siemMigrations.rulesFileUpload.disclaimer"
-                  defaultMessage="Note: To avoid exceeding your LLM API rate limit when translating a large number of queries, consider exporting rules in batches, for example by adding {operator} to the query above"
-                  values={{ operator: <EuiCode>{'| head'}</EuiCode> }}
-                />
-              </EuiText>
-            }
-            isInvalid={error != null}
-            fullWidth
-            error={error}
-          >
+          <EuiFormRow isInvalid={error != null} fullWidth error={error}>
             <EuiFilePicker
               id="rulesFilePicker"
               ref={filePickerRef as React.Ref<Omit<EuiFilePickerProps, 'stylesMemoizer'>>}

@@ -22,15 +22,5 @@ export const ingestStreamConfig = {
         },
       },
     ],
-    routing: [
-      {
-        name: 'logs.errors',
-        condition: {
-          field: 'log.level',
-          operator: 'eq',
-          value: 'error',
-        },
-      },
-    ],
   },
 };

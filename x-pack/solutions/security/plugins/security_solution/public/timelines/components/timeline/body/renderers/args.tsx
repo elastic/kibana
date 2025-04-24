@@ -15,9 +15,10 @@ interface Props {
   contextId: string;
   eventId: string;
   processTitle: string | null | undefined;
+  scopeId: string;
 }
 
-export const ArgsComponent = ({ args, contextId, eventId, processTitle }: Props) => {
+export const ArgsComponent = ({ args, contextId, eventId, processTitle, scopeId }: Props) => {
   if (isNillEmptyOrNotFinite(args) && isNillEmptyOrNotFinite(processTitle)) {
     return null;
   }
@@ -28,6 +29,7 @@ export const ArgsComponent = ({ args, contextId, eventId, processTitle }: Props)
         args.map((arg, i) => (
           <TokensFlexItem key={`${contextId}-args-${i}-${arg}`} grow={false} component="span">
             <DraggableBadge
+              scopeId={scopeId}
               contextId={`${contextId}-args-${i}-${arg}`}
               eventId={eventId}
               field="process.args"
@@ -41,6 +43,7 @@ export const ArgsComponent = ({ args, contextId, eventId, processTitle }: Props)
       {!isNillEmptyOrNotFinite(processTitle) && (
         <TokensFlexItem grow={false} component="span">
           <DraggableBadge
+            scopeId={scopeId}
             contextId={contextId}
             eventId={eventId}
             field="process.title"

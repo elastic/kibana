@@ -20,15 +20,15 @@ describe('parseSuggestionScores', () => {
     ).toEqual([
       {
         id: 'my-id',
-        score: 1,
+        llmScore: 1,
       },
       {
         id: 'my-other-id',
-        score: 7,
+        llmScore: 7,
       },
       {
         id: 'my-another-id',
-        score: 10,
+        llmScore: 10,
       },
     ]);
   });
@@ -37,15 +37,15 @@ describe('parseSuggestionScores', () => {
     expect(parseSuggestionScores(`idone,1;idtwo,7;idthree,10`)).toEqual([
       {
         id: 'idone',
-        score: 1,
+        llmScore: 1,
       },
       {
         id: 'idtwo',
-        score: 7,
+        llmScore: 7,
       },
       {
         id: 'idthree',
-        score: 10,
+        llmScore: 10,
       },
     ]);
   });
@@ -54,15 +54,15 @@ describe('parseSuggestionScores', () => {
     expect(parseSuggestionScores(`a,1 b,7 c,10`)).toEqual([
       {
         id: 'a',
-        score: 1,
+        llmScore: 1,
       },
       {
         id: 'b',
-        score: 7,
+        llmScore: 7,
       },
       {
         id: 'c',
-        score: 10,
+        llmScore: 10,
       },
     ]);
   });

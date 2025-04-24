@@ -8,14 +8,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { AstProviderFn, ESQLAstItem } from '@kbn/esql-ast';
+import { parse, type ESQLAstItem } from '@kbn/esql-ast';
 import {
   getAstContext,
   getFunctionDefinition,
   getFunctionSignatures,
   isSourceItem,
-  isSettingItem,
-  getCommandDefinition,
   type ESQLCallbacks,
   getPolicyHelper,
   collectVariables,
@@ -34,8 +32,11 @@ import {
   TIME_SYSTEM_PARAMS,
 } from '@kbn/esql-validation-autocomplete/src/autocomplete/factories';
 import { isESQLFunction, isESQLNamedParamLiteral } from '@kbn/esql-ast/src/types';
+import { ENRICH_MODES } from '@kbn/esql-validation-autocomplete/src/definitions/commands_helpers';
+import { modeDescription } from '@kbn/esql-validation-autocomplete/src/autocomplete/commands/enrich/util';
 import { monacoPositionToOffset } from '../shared/utils';
 import { monaco } from '../../../../monaco_imports';
+import { getVariablesHoverContent } from './helpers';
 
 const ACCEPTABLE_TYPES_HOVER = i18n.translate('monaco.esql.hover.acceptableTypes', {
   defaultMessage: 'Acceptable types',
@@ -44,8 +45,6 @@ const ACCEPTABLE_TYPES_HOVER = i18n.translate('monaco.esql.hover.acceptableTypes
 async function getHoverItemForFunction(
   model: monaco.editor.ITextModel,
   position: monaco.Position,
-  token: monaco.CancellationToken,
-  astProvider: AstProviderFn,
   resourceRetriever?: ESQLCallbacks
 ) {
   const context: EditorContext = {
@@ -58,7 +57,7 @@ async function getHoverItemForFunction(
   const innerText = fullText.substring(0, offset);
 
   const correctedQuery = correctQuerySyntax(innerText, context);
-  const { ast } = await astProvider(correctedQuery);
+  const { ast } = parse(correctedQuery);
   const astContext = getAstContext(innerText, ast, offset);
 
   const { node } = astContext;
@@ -69,7 +68,7 @@ async function getHoverItemForFunction(
       buildQueryUntilPreviousCommand(ast, correctedQuery),
       ast
     );
-    const { getFieldsMap } = getFieldsByTypeRetriever(queryForFields, resourceRetriever);
+    const { getFieldsMap } = getFieldsByTypeRetriever(queryForFields, resourceRetriever, innerText);
 
     const fnDefinition = getFunctionDefinition(node.name);
     // early exit on no hit
@@ -139,30 +138,31 @@ async function getHoverItemForFunction(
 export async function getHoverItem(
   model: monaco.editor.ITextModel,
   position: monaco.Position,
-  token: monaco.CancellationToken,
-  astProvider: AstProviderFn,
+  _token: monaco.CancellationToken,
   resourceRetriever?: ESQLCallbacks
 ) {
   const fullText = model.getValue();
   const offset = monacoPositionToOffset(fullText, position);
 
-  const { ast } = await astProvider(fullText);
+  const { ast } = parse(fullText);
   const astContext = getAstContext(fullText, ast, offset);
-
   const { getPolicyMetadata } = getPolicyHelper(resourceRetriever);
 
-  let hoverContent: monaco.languages.Hover = {
+  const variables = resourceRetriever?.getVariables?.();
+  const variablesContent = getVariablesHoverContent(astContext.node, variables);
+
+  const hoverContent: monaco.languages.Hover = {
     contents: [],
   };
-  const hoverItemsForFunction = await getHoverItemForFunction(
-    model,
-    position,
-    token,
-    astProvider,
-    resourceRetriever
-  );
+
+  if (variablesContent.length) {
+    hoverContent.contents.push(...variablesContent);
+  }
+
+  const hoverItemsForFunction = await getHoverItemForFunction(model, position, resourceRetriever);
   if (hoverItemsForFunction) {
-    hoverContent = hoverItemsForFunction;
+    hoverContent.contents.push(...hoverItemsForFunction.contents);
+    hoverContent.range = hoverItemsForFunction.range;
   }
 
   if (['newCommand', 'list'].includes(astContext.type)) {
@@ -208,22 +208,16 @@ export async function getHoverItem(
           );
         }
       }
-      if (isSettingItem(astContext.node)) {
-        const commandDef = getCommandDefinition(astContext.command.name);
-        const settingDef = commandDef?.modes.find(({ values }) =>
-          values.some(({ name }) => name === astContext.node!.name)
+      if (astContext.node.type === 'mode') {
+        const mode = ENRICH_MODES.find(({ name }) => name === astContext.node!.name)!;
+        hoverContent.contents.push(
+          ...[
+            { value: modeDescription },
+            {
+              value: `**${mode.name}**: ${mode.description}`,
+            },
+          ]
         );
-        if (settingDef) {
-          const mode = settingDef.values.find(({ name }) => name === astContext.node!.name)!;
-          hoverContent.contents.push(
-            ...[
-              { value: settingDef.description },
-              {
-                value: `**${mode.name}**: ${mode.description}`,
-              },
-            ]
-          );
-        }
       }
     }
   }

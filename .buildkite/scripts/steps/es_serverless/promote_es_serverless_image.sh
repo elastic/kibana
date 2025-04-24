@@ -8,7 +8,7 @@ BASE_ES_SERVERLESS_REPO=docker.elastic.co/elasticsearch-ci/elasticsearch-serverl
 TARGET_IMAGE=docker.elastic.co/kibana-ci/elasticsearch-serverless:latest-verified
 
 SOURCE_IMAGE_OR_TAG=$1
-if [[ $SOURCE_IMAGE_OR_TAG =~ :[a-zA-Z_-]+$ ]]; then
+if [[ $SOURCE_IMAGE_OR_TAG =~ :[a-zA-Z0-9_.-]+$ ]]; then
   # $SOURCE_IMAGE_OR_TAG was a full image
   SOURCE_IMAGE=$SOURCE_IMAGE_OR_TAG
 else
@@ -77,6 +77,7 @@ steps:
     async: true
     build:
       env:
-        IMAGES_CONFIG: "kibana/images.yml"
+        IMAGES_CONFIG: 'kibana/image_cache.yml'
+        BASE_IMAGES_CONFIG: 'core/images.yml,kibana/base_image.yml'
         RETRY: "1"
 EOF

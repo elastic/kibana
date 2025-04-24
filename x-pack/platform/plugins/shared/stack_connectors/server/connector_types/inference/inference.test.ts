@@ -12,7 +12,7 @@ import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { Readable, Transform } from 'stream';
 import {} from '@kbn/actions-plugin/server/types';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
-import { InferenceInferenceResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { InferenceInferenceResponse } from '@elastic/elasticsearch/lib/api/types';
 
 const OPENAI_CONNECTOR_ID = '123';
 const DEFAULT_OPENAI_MODEL = 'gpt-4o';
@@ -70,6 +70,7 @@ describe('InferenceConnector', () => {
 
       const response = await connector.performApiUnifiedCompletion({
         body: { messages: [{ content: 'What is Elastic?', role: 'user' }] },
+        telemetryMetadata: { pluginId: 'security_ai_assistant' },
       });
       expect(mockEsClient.transport.request).toBeCalledTimes(1);
       expect(mockEsClient.transport.request).toHaveBeenCalledWith(
@@ -86,7 +87,13 @@ describe('InferenceConnector', () => {
           method: 'POST',
           path: '_inference/chat_completion/test/_stream',
         },
-        { asStream: true, meta: true }
+        {
+          asStream: true,
+          meta: true,
+          headers: {
+            'X-Elastic-Product-Use-Case': 'security_ai_assistant',
+          },
+        }
       );
       expect(response.choices[0].message.content).toEqual(' you');
     });
@@ -109,12 +116,12 @@ describe('InferenceConnector', () => {
       rerank: [
         {
           index: 2,
-          score: 0.011597361,
+          relevance_score: 0.011597361,
           text: 'leia',
         },
         {
           index: 0,
-          score: 0.006338922,
+          relevance_score: 0.006338922,
           text: 'luke',
         },
       ],
@@ -158,7 +165,9 @@ describe('InferenceConnector', () => {
         },
         { asStream: false }
       );
-      expect(response).toEqual(mockResponseRerank.rerank);
+      expect(response).toEqual(
+        mockResponseRerank.rerank.map(({ relevance_score: score, ...rest }) => ({ ...rest, score }))
+      );
     });
   });
 
@@ -290,7 +299,10 @@ describe('InferenceConnector', () => {
           method: 'POST',
           path: '_inference/chat_completion/test/_stream',
         },
-        { asStream: true, meta: true }
+        {
+          asStream: true,
+          meta: true,
+        }
       );
     });
 
@@ -312,7 +324,11 @@ describe('InferenceConnector', () => {
           method: 'POST',
           path: '_inference/chat_completion/test/_stream',
         },
-        { asStream: true, meta: true, signal }
+        {
+          asStream: true,
+          meta: true,
+          signal,
+        }
       );
     });
 

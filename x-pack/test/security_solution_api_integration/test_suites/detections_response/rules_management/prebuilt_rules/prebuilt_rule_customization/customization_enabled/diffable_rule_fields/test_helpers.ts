@@ -10,7 +10,9 @@ import { isUndefined, omitBy } from 'lodash';
 import type {
   PartialRuleDiff,
   RuleResponse,
+  UpgradeConflictResolution,
 } from '@kbn/security-solution-plugin/common/api/detection_engine';
+import { UpgradeConflictResolutionEnum } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { ModeEnum } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import {
   ThreeWayDiffConflict,
@@ -170,6 +172,7 @@ export function testFieldUpgradeReview(
 
 interface TestFieldUpgradesToMergedValueParams {
   ruleUpgradeAssets: TestFieldRuleUpgradeAssets;
+  onConflict?: UpgradeConflictResolution;
   diffableRuleFieldName: string;
   expectedFieldsAfterUpgrade: Partial<RuleResponse>;
 }
@@ -187,6 +190,7 @@ interface TestFieldUpgradesToMergedValueParams {
 export function testFieldUpgradesToMergedValue(
   {
     ruleUpgradeAssets,
+    onConflict = UpgradeConflictResolutionEnum.SKIP,
     diffableRuleFieldName,
     expectedFieldsAfterUpgrade,
   }: TestFieldUpgradesToMergedValueParams,
@@ -215,6 +219,7 @@ export function testFieldUpgradesToMergedValue(
 
     const response = await performUpgradePrebuiltRules(es, supertest, {
       mode: ModeEnum.SPECIFIC_RULES,
+      on_conflict: onConflict,
       rules: [
         {
           rule_id: ruleUpgradeAssets.upgrade.rule_id ?? DEFAULT_TEST_RULE_ID,

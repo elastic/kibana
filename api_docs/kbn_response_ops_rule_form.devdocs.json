@@ -2082,10 +2082,10 @@
           },
           {
             "parentPluginId": "@kbn/response-ops-rule-form",
-            "id": "def-public.RuleFormState.aadTemplateFields",
+            "id": "def-public.RuleFormState.alertFields",
             "type": "Array",
             "tags": [],
-            "label": "aadTemplateFields",
+            "label": "alertFields",
             "description": [],
             "signature": [
               {
@@ -2766,7 +2766,7 @@
             "label": "setRuleProperty",
             "description": [],
             "signature": [
-              "<Prop extends \"params\" | \"id\" | \"consumer\" | \"name\" | \"monitoring\" | \"tags\" | \"actions\" | \"enabled\" | \"schedule\" | \"mapped_params\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"apiKeyCreatedByUser\" | \"throttle\" | \"muteAll\" | \"notifyWhen\" | \"mutedInstanceIds\" | \"executionStatus\" | \"snoozeSchedule\" | \"activeSnoozes\" | \"isSnoozedUntil\" | \"lastRun\" | \"nextRun\" | \"revision\" | \"running\" | \"viewInAppRelativeUrl\" | \"alertDelay\" | \"flapping\" | \"ruleTypeId\">(key: Prop, value: ",
+              "<Prop extends \"params\" | \"id\" | \"consumer\" | \"name\" | \"monitoring\" | \"tags\" | \"actions\" | \"enabled\" | \"schedule\" | \"mapped_params\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"apiKeyCreatedByUser\" | \"throttle\" | \"muteAll\" | \"notifyWhen\" | \"mutedInstanceIds\" | \"executionStatus\" | \"snoozeSchedule\" | \"activeSnoozes\" | \"isSnoozedUntil\" | \"lastRun\" | \"nextRun\" | \"revision\" | \"running\" | \"viewInAppRelativeUrl\" | \"alertDelay\" | \"flapping\" | \"artifacts\" | \"ruleTypeId\">(key: Prop, value: ",
               {
                 "pluginId": "@kbn/alerts-ui-shared",
                 "scope": "public",
@@ -3106,6 +3106,22 @@
           ">, \"params\" | \"consumer\" | \"tags\" | \"actions\" | \"schedule\">"
         ],
         "path": "src/platform/packages/shared/response-ops/rule_form/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/response-ops-rule-form",
+        "id": "def-public.NOTIFY_WHEN_OPTIONS",
+        "type": "Array",
+        "tags": [],
+        "label": "NOTIFY_WHEN_OPTIONS",
+        "description": [],
+        "signature": [
+          "NotifyWhenSelectOptions",
+          "[]"
+        ],
+        "path": "src/platform/packages/shared/response-ops/rule_form/src/rule_actions/rule_actions_notify_when.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

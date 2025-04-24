@@ -68,14 +68,13 @@ export const importRules = async ({
           });
         }
 
-        const { immutable, ruleSource } = ruleSourceImporter.calculateRuleSource(rule);
-
         const [exceptionErrors, exceptions] = checkRuleExceptionReferences({
           rule,
           existingLists,
         });
         errors.push(...exceptionErrors);
 
+        const { immutable, ruleSource } = ruleSourceImporter.calculateRuleSource(rule);
         const importedRule = await detectionRulesClient.importRule({
           ruleToImport: {
             ...rule,

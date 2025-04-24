@@ -24,6 +24,7 @@ import type { NetflowProps } from './types';
 export const Netflow = React.memo<NetflowProps>(
   ({
     contextId,
+    scopeId,
     destinationBytes,
     destinationGeoContinentName,
     destinationGeoCountryName,
@@ -68,6 +69,7 @@ export const Netflow = React.memo<NetflowProps>(
     >
       <EuiFlexItem grow={false}>
         <NetflowColumns
+          scopeId={scopeId}
           contextId={contextId}
           destinationBytes={destinationBytes}
           destinationGeoContinentName={destinationGeoContinentName}
@@ -103,6 +105,7 @@ export const Netflow = React.memo<NetflowProps>(
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <Fingerprints
+          scopeId={scopeId}
           contextId={contextId}
           eventId={eventId}
           tlsClientCertificateFingerprintSha1={tlsClientCertificateFingerprintSha1}

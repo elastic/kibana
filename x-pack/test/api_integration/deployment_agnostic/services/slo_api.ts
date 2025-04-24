@@ -7,7 +7,22 @@
 
 import { RoleCredentials } from '@kbn/ftr-common-functional-services';
 import { CreateSLOInput, FindSLODefinitionsResponse, UpdateSLOInput } from '@kbn/slo-schema';
+import { StoredSLODefinition } from '@kbn/slo-plugin/server/domain/models/slo';
 import { DeploymentAgnosticFtrProviderContext } from '../ftr_provider_context';
+
+interface SavedObject<Attributes extends Record<string, any>> {
+  attributes: Attributes;
+  id: string;
+  type: string;
+  updated_at?: string;
+  version?: string;
+}
+interface SavedObjectResponse {
+  page: number;
+  per_page: number;
+  total: number;
+  saved_objects: Array<SavedObject<StoredSLODefinition>>;
+}
 
 export function SloApiProvider({ getService }: DeploymentAgnosticFtrProviderContext) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
@@ -21,6 +36,21 @@ export function SloApiProvider({ getService }: DeploymentAgnosticFtrProviderCont
         .set(samlAuth.getInternalRequestHeader())
         .send(slo)
         .expect(200);
+      return body;
+    },
+
+    async createWithSpace(
+      slo: CreateSLOInput & { id?: string },
+      spaceId: string,
+      roleAuthc: RoleCredentials,
+      expectedStatus: 200 | 409
+    ) {
+      const { body } = await supertestWithoutAuth
+        .post(`/s/${spaceId}/api/observability/slos`)
+        .set(roleAuthc.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send(slo)
+        .expect(expectedStatus);
       return body;
     },
 
@@ -69,14 +99,44 @@ export function SloApiProvider({ getService }: DeploymentAgnosticFtrProviderCont
       return body;
     },
 
-    async findDefinitions(roleAuthc: RoleCredentials): Promise<FindSLODefinitionsResponse> {
+    async findDefinitions(
+      roleAuthc: RoleCredentials,
+      params?: Record<string, string>
+    ): Promise<FindSLODefinitionsResponse> {
       const { body } = await supertestWithoutAuth
         .get(`/api/observability/slos/_definitions`)
+        .query(params || {})
+        .set(roleAuthc.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send();
+
+      return body;
+    },
+
+    async getSavedObject(roleAuthc: RoleCredentials, sloId: string): Promise<SavedObjectResponse> {
+      const { body } = await supertestWithoutAuth
+        .get(`/api/saved_objects/_find?type=slo&filter=slo.attributes.id:(${sloId})`)
         .set(roleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
         .send()
         .expect(200);
 
+      return body;
+    },
+
+    async updateSavedObject(
+      roleAuthc: RoleCredentials,
+      slo: StoredSLODefinition,
+      id: string
+    ): Promise<SavedObjectResponse> {
+      const { body } = await supertestWithoutAuth
+        .put(`/api/saved_objects/slo/${id}`)
+        .set(roleAuthc.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send({
+          attributes: slo,
+        })
+        .expect(200);
       return body;
     },
 
@@ -97,6 +157,26 @@ export function SloApiProvider({ getService }: DeploymentAgnosticFtrProviderCont
             .expect(204);
         })
       );
+    },
+
+    async purgeRollupData(
+      ids: string[],
+      purgePolicy: { purgeType: 'fixed_age' | 'fixed_time'; age?: string; timestamp?: Date },
+      roleAuthc: RoleCredentials,
+      expectedStatus: number,
+      force: boolean = false
+    ) {
+      const { body } = await supertestWithoutAuth
+        .post(`/api/observability/slos/_bulk_purge_rollup${force ? '?force=true' : ''}`)
+        .set(roleAuthc.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send({
+          ids,
+          purgePolicy,
+        })
+        .expect(expectedStatus);
+
+      return body;
     },
   };
 }

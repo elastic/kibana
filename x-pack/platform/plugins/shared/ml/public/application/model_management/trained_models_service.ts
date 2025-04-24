@@ -10,7 +10,6 @@ import {
   Subscription,
   of,
   from,
-  forkJoin,
   takeWhile,
   exhaustMap,
   firstValueFrom,
@@ -42,9 +41,9 @@ import {
 import type {
   UpdateAllocationParams,
   DeleteModelParams,
+  StartAllocationParams,
 } from '../services/ml_api_service/trained_models';
 import { type TrainedModelsApiService } from '../services/ml_api_service/trained_models';
-import type { SavedObjectsApiService } from '../services/ml_api_service/saved_objects';
 import type { ITelemetryClient } from '../services/telemetry/types';
 import type { DeploymentParamsUI } from './deployment_setup';
 import type { DeploymentParamsMapper } from './deployment_params_mapper';
@@ -60,8 +59,6 @@ interface TrainedModelsServiceInit {
   setScheduledDeployments: (deployments: ScheduledDeployment[]) => void;
   displayErrorToast: (error: ErrorType, title?: string) => void;
   displaySuccessToast: (toast: { title: string; text: string }) => void;
-  savedObjectsApiService: SavedObjectsApiService;
-  canManageSpacesAndSavedObjects: boolean;
   telemetryService: ITelemetryClient;
   deploymentParamsMapper: DeploymentParamsMapper;
 }
@@ -91,8 +88,6 @@ export class TrainedModelsService {
   private _scheduledDeployments$ = new BehaviorSubject<ScheduledDeployment[]>([]);
   private destroySubscription?: Subscription;
   private readonly _isLoading$ = new BehaviorSubject<boolean>(true);
-  private savedObjectsApiService!: SavedObjectsApiService;
-  private canManageSpacesAndSavedObjects!: boolean;
   private isInitialized = false;
   private telemetryService!: ITelemetryClient;
   private deploymentParamsMapper!: DeploymentParamsMapper;
@@ -104,8 +99,6 @@ export class TrainedModelsService {
     setScheduledDeployments,
     displayErrorToast,
     displaySuccessToast,
-    savedObjectsApiService,
-    canManageSpacesAndSavedObjects,
     telemetryService,
     deploymentParamsMapper,
   }: TrainedModelsServiceInit) {
@@ -119,14 +112,12 @@ export class TrainedModelsService {
 
     this.subscription = new Subscription();
     this.isInitialized = true;
-    this.canManageSpacesAndSavedObjects = canManageSpacesAndSavedObjects;
     this.deploymentParamsMapper = deploymentParamsMapper;
 
     this.setScheduledDeployments = setScheduledDeployments;
     this._scheduledDeployments$ = scheduledDeployments$;
     this.displayErrorToast = displayErrorToast;
     this.displaySuccessToast = displaySuccessToast;
-    this.savedObjectsApiService = savedObjectsApiService;
     this.telemetryService = telemetryService;
 
     this.setupFetchingSubscription();
@@ -170,12 +161,10 @@ export class TrainedModelsService {
   }
 
   public downloadModel(modelId: string) {
-    this.downloadInProgress.add(modelId);
     this._isLoading$.next(true);
     from(this.trainedModelsApiService.installElasticTrainedModelConfig(modelId))
       .pipe(
         finalize(() => {
-          this.downloadInProgress.delete(modelId);
           this.fetchModels();
         })
       )
@@ -188,44 +177,65 @@ export class TrainedModelsService {
               values: { modelId },
             })
           );
+          this.telemetryService.trackTrainedModelsModelDownload({
+            model_id: modelId,
+            result: 'failure',
+          });
         },
       });
   }
 
   public updateModelDeployment(modelId: string, config: DeploymentParamsUI) {
+    const apiParams = this.deploymentParamsMapper.mapUiToApiDeploymentParams(modelId, config);
+
     from(
       this.trainedModelsApiService.updateModelDeployment(
         modelId,
         config.deploymentId!,
-        this.getUpdateModelAllocationParams(modelId, config)
+        this.getUpdateModelAllocationParams(apiParams)
       )
     )
       .pipe(
+        tap({
+          next: () => {
+            this.displaySuccessToast?.({
+              title: i18n.translate('xpack.ml.trainedModels.modelsList.updateSuccess', {
+                defaultMessage: 'Deployment updated',
+              }),
+              text: i18n.translate('xpack.ml.trainedModels.modelsList.updateSuccessText', {
+                defaultMessage: '"{deploymentId}" has been updated successfully.',
+                values: { deploymentId: config.deploymentId },
+              }),
+            });
+          },
+          error: (error) => {
+            this.displayErrorToast?.(
+              error,
+              i18n.translate('xpack.ml.trainedModels.modelsList.updateFailed', {
+                defaultMessage: 'Failed to update "{deploymentId}"',
+                values: { deploymentId: config.deploymentId },
+              })
+            );
+          },
+        }),
+        map(() => ({ success: true })),
+        catchError(() => of({ success: false })),
         finalize(() => {
           this.fetchModels();
         })
       )
-      .subscribe({
-        next: () => {
-          this.displaySuccessToast?.({
-            title: i18n.translate('xpack.ml.trainedModels.modelsList.updateSuccess', {
-              defaultMessage: 'Deployment updated',
-            }),
-            text: i18n.translate('xpack.ml.trainedModels.modelsList.updateSuccessText', {
-              defaultMessage: '"{deploymentId}" has been updated successfully.',
-              values: { deploymentId: config.deploymentId },
-            }),
-          });
-        },
-        error: (error) => {
-          this.displayErrorToast?.(
-            error,
-            i18n.translate('xpack.ml.trainedModels.modelsList.updateFailed', {
-              defaultMessage: 'Failed to update "{deploymentId}"',
-              values: { deploymentId: config.deploymentId },
-            })
-          );
-        },
+      .subscribe((result) => {
+        this.telemetryService.trackTrainedModelsDeploymentUpdated({
+          adaptive_resources: config.adaptiveResources,
+          model_id: modelId,
+          optimized: config.optimized,
+          vcpu_usage: config.vCPUUsage,
+          max_number_of_allocations: apiParams.adaptiveAllocationsParams?.max_number_of_allocations,
+          min_number_of_allocations: apiParams.adaptiveAllocationsParams?.min_number_of_allocations,
+          number_of_allocations: apiParams.deploymentParams.number_of_allocations,
+          threads_per_allocation: apiParams.deploymentParams.threads_per_allocation,
+          result: result.success ? 'success' : 'failure',
+        });
       });
   }
 
@@ -348,27 +358,20 @@ export class TrainedModelsService {
     this.abortedDownloads.add(modelId);
   }
 
-  private mergeModelItems(
-    items: TrainedModelUIItem[],
-    spaces: Record<string, string[]>
-  ): TrainedModelUIItem[] {
+  private mergeModelItems(items: TrainedModelUIItem[]): TrainedModelUIItem[] {
     const existingItems = this._modelItems$.getValue();
 
     return items.map((item) => {
       const previous = existingItems.find((m) => m.model_id === item.model_id);
-      const merged = {
-        ...item,
-        spaces: spaces[item.model_id] ?? [],
-      };
 
       if (!previous || !isBaseNLPModelItem(previous) || !isBaseNLPModelItem(item)) {
-        return merged;
+        return item;
       }
 
       // Preserve "DOWNLOADING" state and the accompanying progress if still in progress
       if (previous.state === MODEL_STATE.DOWNLOADING) {
         return {
-          ...merged,
+          ...item,
           state: previous.state,
           downloadState: previous.downloadState,
         };
@@ -381,12 +384,12 @@ export class TrainedModelsService {
         item.state !== MODEL_STATE.STARTED
       ) {
         return {
-          ...merged,
+          ...item,
           state: previous.state,
         };
       }
 
-      return merged;
+      return item;
     });
   }
 
@@ -397,7 +400,7 @@ export class TrainedModelsService {
           tap(() => this._isLoading$.next(true)),
           debounceTime(100),
           switchMap(() => {
-            const modelsList$ = from(this.trainedModelsApiService.getTrainedModelsList()).pipe(
+            return from(this.trainedModelsApiService.getTrainedModelsList()).pipe(
               catchError((error) => {
                 this.displayErrorToast?.(
                   error,
@@ -406,29 +409,13 @@ export class TrainedModelsService {
                   })
                 );
                 return of([] as TrainedModelUIItem[]);
-              })
-            );
-
-            const spaces$ = this.canManageSpacesAndSavedObjects
-              ? from(this.savedObjectsApiService.trainedModelsSpaces()).pipe(
-                  catchError(() => of({})),
-                  map(
-                    (spaces) =>
-                      ('trainedModels' in spaces ? spaces.trainedModels : {}) as Record<
-                        string,
-                        string[]
-                      >
-                  )
-                )
-              : of({} as Record<string, string[]>);
-
-            return forkJoin([modelsList$, spaces$]).pipe(
+              }),
               finalize(() => this._isLoading$.next(false))
             );
           })
         )
-        .subscribe(([items, spaces]) => {
-          const updatedItems = this.mergeModelItems(items, spaces);
+        .subscribe((items) => {
+          const updatedItems = this.mergeModelItems(items);
           this._modelItems$.next(updatedItems);
           this.startDownloadStatusPolling();
         })
@@ -486,20 +473,7 @@ export class TrainedModelsService {
         return firstValueFrom(
           this.trainedModelsApiService.startModelAllocation(apiParams).pipe(
             tap({
-              next: ({ assignment }) => {
-                this.telemetryService.trackTrainedModelsDeploymentCreated({
-                  model_id: apiParams.modelId,
-                  optimized: deployment.optimized,
-                  adaptive_resources: deployment.adaptiveResources,
-                  vcpu_usage: deployment.vCPUUsage,
-                  number_of_allocations: apiParams.deploymentParams.number_of_allocations,
-                  threads_per_allocation: assignment.task_parameters.threads_per_allocation,
-                  min_number_of_allocations:
-                    assignment.adaptive_allocations?.min_number_of_allocations,
-                  max_number_of_allocations:
-                    assignment.adaptive_allocations?.max_number_of_allocations,
-                });
-
+              next: () => {
                 this.displaySuccessToast?.({
                   title: i18n.translate('xpack.ml.trainedModels.modelsList.startSuccess', {
                     defaultMessage: 'Deployment started',
@@ -513,6 +487,7 @@ export class TrainedModelsService {
                 });
               },
             }),
+            map(() => ({ success: true })),
             catchError((error) => {
               this.displayErrorToast?.(
                 error,
@@ -523,8 +498,24 @@ export class TrainedModelsService {
                   },
                 })
               );
-              // Return null to allow stream to continue
-              return of(null);
+
+              // Return observable to allow stream to continue
+              return of({ success: false });
+            }),
+            tap((result) => {
+              this.telemetryService.trackTrainedModelsDeploymentCreated({
+                model_id: apiParams.modelId,
+                optimized: deployment.optimized,
+                adaptive_resources: deployment.adaptiveResources,
+                vcpu_usage: deployment.vCPUUsage,
+                number_of_allocations: apiParams.deploymentParams.number_of_allocations,
+                threads_per_allocation: apiParams.deploymentParams.threads_per_allocation,
+                min_number_of_allocations:
+                  apiParams.adaptiveAllocationsParams?.min_number_of_allocations,
+                max_number_of_allocations:
+                  apiParams.adaptiveAllocationsParams?.max_number_of_allocations,
+                result: result.success ? 'success' : 'failure',
+              });
             }),
             finalize(() => {
               this.removeScheduledDeployments({
@@ -544,12 +535,7 @@ export class TrainedModelsService {
     );
   }
 
-  private getUpdateModelAllocationParams(
-    modelId: string,
-    uiParams: DeploymentParamsUI
-  ): UpdateAllocationParams {
-    const apiParams = this.deploymentParamsMapper.mapUiToApiDeploymentParams(modelId, uiParams);
-
+  private getUpdateModelAllocationParams(apiParams: StartAllocationParams): UpdateAllocationParams {
     return apiParams.adaptiveAllocationsParams
       ? {
           adaptive_allocations: apiParams.adaptiveAllocationsParams,
@@ -624,9 +610,22 @@ export class TrainedModelsService {
                 // Aborted
                 this.abortedDownloads.delete(item.model_id);
                 newItem.state = MODEL_STATE.NOT_DOWNLOADED;
+
+                this.telemetryService.trackTrainedModelsModelDownload({
+                  model_id: item.model_id,
+                  result: 'cancelled',
+                });
               } else if (downloadInProgress.has(item.model_id) || !item.state) {
                 // Finished downloading
                 newItem.state = MODEL_STATE.DOWNLOADED;
+
+                // Only track success if the model was downloading
+                if (downloadInProgress.has(item.model_id)) {
+                  this.telemetryService.trackTrainedModelsModelDownload({
+                    model_id: item.model_id,
+                    result: 'success',
+                  });
+                }
               }
               downloadInProgress.delete(item.model_id);
               return newItem;
@@ -651,6 +650,13 @@ export class TrainedModelsService {
         error: (error) => {
           this.stopPolling();
           this.downloadStatusFetchInProgress = false;
+
+          downloadInProgress.forEach((modelId) => {
+            this.telemetryService.trackTrainedModelsModelDownload({
+              model_id: modelId,
+              result: 'failure',
+            });
+          });
         },
       });
   }

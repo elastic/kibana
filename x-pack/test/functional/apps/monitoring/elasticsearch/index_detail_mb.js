@@ -28,7 +28,7 @@ export default function ({ getService, getPageObjects }) {
           'x-pack/test/functional/es_archives/monitoring/singlecluster_three_nodes_shard_relocation_mb',
           {
             from: 'Oct 5, 2017 @ 20:31:48.354',
-            to: 'Oct 5, 2017 @ 20:35:12.176',
+            to: 'Oct 5, 2017 @ 20:35:30.176',
             useCreate: true,
           }
         );
@@ -81,6 +81,12 @@ export default function ({ getService, getPageObjects }) {
           unassignedShards: 'Unassigned shards\n1',
           health: 'Health: yellow',
         });
+      });
+
+      it('should show the link to view more index logs', async () => {
+        await indicesList.clickRowByName('phone-home');
+
+        expect(await indexDetail.viewLogsLinkIsShowing()).to.be(true);
       });
     });
   });

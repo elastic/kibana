@@ -578,7 +578,7 @@ function getElasticSubscription(packageInfo: ArchivePackage) {
   return subscription || packageInfo.license || 'basic';
 }
 
-async function installPackageWithStateMachine(options: {
+export async function installPackageWithStateMachine(options: {
   pkgName: string;
   pkgVersion: string;
   installSource: InstallSource;
@@ -1061,6 +1061,7 @@ export const updateVersion = async (
   auditLoggingService.writeCustomSoAuditLog({
     action: 'update',
     id: pkgName,
+    name: pkgName,
     savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
   });
 
@@ -1085,6 +1086,7 @@ export const updateInstallStatusToFailed = async ({
   auditLoggingService.writeCustomSoAuditLog({
     action: 'update',
     id: pkgName,
+    name: pkgName,
     savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
   });
   try {
@@ -1126,6 +1128,7 @@ export async function restartInstallation(options: {
   auditLoggingService.writeCustomSoAuditLog({
     action: 'update',
     id: pkgName,
+    name: pkgName,
     savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
   });
 
@@ -1178,6 +1181,7 @@ export async function createInstallation(options: {
   auditLoggingService.writeCustomSoAuditLog({
     action: 'create',
     id: pkgName,
+    name: pkgName,
     savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
   });
 
@@ -1199,12 +1203,13 @@ export const kibanaAssetsToAssetsRef = (
 export const saveKibanaAssetsRefs = async (
   savedObjectsClient: SavedObjectsClientContract,
   pkgName: string,
-  assetRefs: KibanaAssetReference[],
+  assetRefs: KibanaAssetReference[] | null,
   saveAsAdditionnalSpace = false
 ) => {
   auditLoggingService.writeCustomSoAuditLog({
     action: 'update',
     id: pkgName,
+    name: pkgName,
     savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
   });
 
@@ -1236,11 +1241,11 @@ export const saveKibanaAssetsRefs = async (
                   installation?.attributes?.additional_spaces_installed_kibana ?? {},
                   spaceId
                 ),
-                ...(assetRefs.length > 0 ? { [spaceId]: assetRefs } : {}),
+                ...(assetRefs !== null ? { [spaceId]: assetRefs } : {}),
               },
             }
           : {
-              installed_kibana: assetRefs,
+              installed_kibana: assetRefs !== null ? assetRefs : [],
             },
         { refresh: false }
       );
@@ -1248,7 +1253,7 @@ export const saveKibanaAssetsRefs = async (
     { retries: 20 } // Use a number of retries higher than the number of es asset update operations
   );
 
-  return assetRefs;
+  return assetRefs !== null ? assetRefs : [];
 };
 
 export async function ensurePackagesCompletedInstall(

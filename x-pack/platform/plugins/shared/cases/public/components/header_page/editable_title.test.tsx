@@ -6,9 +6,9 @@
  */
 
 import React from 'react';
+import { screen } from '@testing-library/react';
 
-import type { AppMockRenderer } from '../../common/mock';
-import { createAppMockRenderer, readCasesPermissions, TestProviders } from '../../common/mock';
+import { readCasesPermissions, renderWithTestingProviders, TestProviders } from '../../common/mock';
 import type { EditableTitleProps } from './editable_title';
 import { EditableTitle } from './editable_title';
 import { useMountAppended } from '../../utils/use_mount_appended';
@@ -22,16 +22,13 @@ describe('EditableTitle', () => {
     isLoading: false,
   };
 
-  let appMock: AppMockRenderer;
-
   beforeEach(() => {
     jest.clearAllMocks();
-    appMock = createAppMockRenderer();
   });
 
   it('renders', () => {
-    const renderResult = appMock.render(<EditableTitle {...defaultProps} />);
-    expect(renderResult.getByText('Test title')).toBeInTheDocument();
+    renderWithTestingProviders(<EditableTitle {...defaultProps} />);
+    expect(screen.getByText('Test title')).toBeInTheDocument();
   });
 
   it('inline edit defaults to readOnly when the user does not have the edit permissions', () => {
@@ -309,27 +306,29 @@ describe('EditableTitle', () => {
 
   describe('Badges', () => {
     it('does not render the badge if the release is ga', () => {
-      const renderResult = appMock.render(<EditableTitle {...defaultProps} />);
+      renderWithTestingProviders(<EditableTitle {...defaultProps} />);
 
-      expect(renderResult.getByText('Test title')).toBeInTheDocument();
-      expect(renderResult.queryByText('Beta')).toBeFalsy();
-      expect(renderResult.queryByText('Technical preview')).toBeFalsy();
+      expect(screen.getByText('Test title')).toBeInTheDocument();
+      expect(screen.queryByText('Beta')).toBeFalsy();
+      expect(screen.queryByText('Technical preview')).toBeFalsy();
     });
 
     it('does render the beta badge', () => {
-      appMock = createAppMockRenderer({ releasePhase: 'beta' });
-      const renderResult = appMock.render(<EditableTitle {...defaultProps} />);
+      renderWithTestingProviders(<EditableTitle {...defaultProps} />, {
+        wrapperProps: { releasePhase: 'beta' },
+      });
 
-      expect(renderResult.getByText('Test title')).toBeInTheDocument();
-      expect(renderResult.getByText('Beta')).toBeInTheDocument();
+      expect(screen.getByText('Test title')).toBeInTheDocument();
+      expect(screen.getByText('Beta')).toBeInTheDocument();
     });
 
     it('does render the experimental badge', () => {
-      appMock = createAppMockRenderer({ releasePhase: 'experimental' });
-      const renderResult = appMock.render(<EditableTitle {...defaultProps} />);
+      renderWithTestingProviders(<EditableTitle {...defaultProps} />, {
+        wrapperProps: { releasePhase: 'experimental' },
+      });
 
-      expect(renderResult.getByText('Test title')).toBeInTheDocument();
-      expect(renderResult.getByText('Technical preview')).toBeInTheDocument();
+      expect(screen.getByText('Test title')).toBeInTheDocument();
+      expect(screen.getByText('Technical preview')).toBeInTheDocument();
     });
   });
 });

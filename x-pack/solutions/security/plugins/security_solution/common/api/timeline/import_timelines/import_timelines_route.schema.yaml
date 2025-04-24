@@ -29,6 +29,7 @@ paths:
                   enum:
                     - 'true'
                     - 'false'
+                  description: Whether the Timeline should be immutable
                 file: {}
       responses:
         '200':
@@ -45,12 +46,13 @@ paths:
               schema:
                 type: object
                 properties:
-                  id:
-                    type: string
                   body:
                     type: string
+                    description: The error message
+                    example: Invalid file extension
                   statusCode:
                     type: number
+                    example: 400
 
         '404':
           description: Indicates that we were unable to locate the saved object client necessary to handle the import.
@@ -59,10 +61,13 @@ paths:
               schema:
                 type: object
                 properties:
-                  id:
+                  body:
                     type: string
+                    description: The error message
+                    example: Unable to find saved object client
                   statusCode:
                     type: number
+                    example: 404
         '409':
           description: Indicates the import of Timelines was unsuccessful.
           content:
@@ -70,9 +75,10 @@ paths:
               schema:
                 type: object
                 properties:
-                  id:
-                    type: string
                   body:
                     type: string
+                    description: The error message
+                    example: Could not import timelines
                   statusCode:
                     type: number
+                    example: 409

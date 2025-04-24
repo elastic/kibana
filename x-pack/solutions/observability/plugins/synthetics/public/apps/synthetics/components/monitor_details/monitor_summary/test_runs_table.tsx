@@ -135,7 +135,7 @@ export const TestRunsTable = ({
                   <JourneyLastScreenshot
                     checkGroupId={item.monitor.check_group}
                     size={THUMBNAIL_SCREENSHOT_SIZE_MOBILE}
-                    timestamp={item.timestamp}
+                    timestamp={item['@timestamp']}
                   />
                 </EuiFlexGroup>
               ),
@@ -332,7 +332,11 @@ export const MobileRowDetails = ({
 }) => {
   return (
     <EuiFlexGroup direction="column" gutterSize="m">
-      <TestDetailsLink isBrowserMonitor={isBrowserMonitor} timestamp={ping.timestamp} ping={ping} />
+      <TestDetailsLink
+        isBrowserMonitor={isBrowserMonitor}
+        timestamp={ping['@timestamp']}
+        ping={ping}
+      />
       <EuiFlexGroup
         justifyContent="spaceBetween"
         alignItems="center"

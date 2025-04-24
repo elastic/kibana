@@ -65,6 +65,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           query: { match_all: {} },
         });
         await kibanaServer.uiSettings.unset('timepicker:timeDefaults');
+        await kibanaServer.uiSettings.unset('defaultIndex');
       });
 
       afterEach(async () => {
@@ -115,6 +116,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await kibanaServer.importExport.unload(
           'x-pack/test/functional/fixtures/kbn_archiver/reporting/ecommerce_76.json'
         );
+        await kibanaServer.uiSettings.unset('defaultIndex');
       });
 
       afterEach(async () => {

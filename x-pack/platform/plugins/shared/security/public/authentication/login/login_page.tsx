@@ -158,7 +158,6 @@ export class LoginPage extends Component<Props, State> {
       <div className="loginWelcome login-form">
         <header className="loginWelcome__header">
           <div className={contentHeaderClasses}>
-            <EuiSpacer size="xxl" />
             <span className="loginWelcome__logo" style={logoStyle}>
               {logo}
             </span>
@@ -170,7 +169,6 @@ export class LoginPage extends Component<Props, State> {
                 />
               </h1>
             </EuiTitle>
-            <EuiSpacer size="xl" />
           </div>
         </header>
         <div className={contentBodyClasses}>

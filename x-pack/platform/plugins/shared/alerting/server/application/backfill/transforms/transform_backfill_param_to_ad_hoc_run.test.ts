@@ -6,8 +6,8 @@
  */
 
 import { adHocRunStatus } from '../../../../common/constants';
-import { RuleDomain } from '../../rule/types';
-import { ScheduleBackfillParam } from '../methods/schedule/types';
+import type { RuleDomain } from '../../rule/types';
+import type { ScheduleBackfillParam } from '../methods/schedule/types';
 import { transformBackfillParamToAdHocRun } from './transform_backfill_param_to_ad_hoc_run';
 
 function getMockData(overwrites: Record<string, unknown> = {}): ScheduleBackfillParam {

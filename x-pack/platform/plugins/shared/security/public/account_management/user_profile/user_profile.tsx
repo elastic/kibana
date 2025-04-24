@@ -49,7 +49,11 @@ import {
   useFormChangesContext,
 } from '@kbn/security-form-components';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import type { DarkModeValue, UserProfileData } from '@kbn/user-profile-components';
+import type {
+  ContrastModeValue,
+  DarkModeValue,
+  UserProfileData,
+} from '@kbn/user-profile-components';
 import { UserAvatar, useUpdateUserProfile } from '@kbn/user-profile-components';
 
 import { createImageHandler, getRandomColor, VALID_HEX_COLOR } from './utils';
@@ -110,6 +114,7 @@ export interface UserProfileFormValues {
     };
     userSettings: {
       darkMode: DarkModeValue;
+      contrastMode: ContrastModeValue;
     };
   };
   avatarType: 'initials' | 'image';
@@ -189,13 +194,13 @@ const UserSettingsEditor: FunctionComponent<UserSettingsEditorProps> = ({
     return null;
   }
 
-  let idSelected = formik.values.data.userSettings.darkMode;
+  let colorModeIdSelected = formik.values.data.userSettings.darkMode;
 
   if (isThemeOverridden) {
     if (isOverriddenThemeDarkMode) {
-      idSelected = 'dark';
+      colorModeIdSelected = 'dark';
     } else {
-      idSelected = 'light';
+      colorModeIdSelected = 'light';
     }
   }
 
@@ -212,7 +217,7 @@ const UserSettingsEditor: FunctionComponent<UserSettingsEditorProps> = ({
         label={label}
         data-test-subj={`themeKeyPadItem${id}`}
         checkable="single"
-        isSelected={idSelected === id}
+        isSelected={colorModeIdSelected === id}
         isDisabled={isThemeOverridden}
         onChange={() => formik.setFieldValue('data.userSettings.darkMode', id)}
       >
@@ -236,7 +241,7 @@ const UserSettingsEditor: FunctionComponent<UserSettingsEditorProps> = ({
             <FormLabel for="data.userSettings.darkMode">
               <FormattedMessage
                 id="xpack.security.accountManagement.userProfile.userSettings.theme"
-                defaultMessage="Mode"
+                defaultMessage="Color mode"
               />
             </FormLabel>
           ),
@@ -292,7 +297,7 @@ const UserSettingsEditor: FunctionComponent<UserSettingsEditorProps> = ({
     );
   };
 
-  const deprecatedWarning = idSelected === 'space_default' && (
+  const deprecatedWarning = colorModeIdSelected === 'space_default' && (
     <>
       <EuiSpacer size="s" />
       <EuiCallOut
@@ -318,6 +323,71 @@ const UserSettingsEditor: FunctionComponent<UserSettingsEditorProps> = ({
     </>
   );
 
+  const contrastModeIdSelected = formik.values.data.userSettings.contrastMode;
+  const contrastItem = ({ id, label, icon }: ThemeKeyPadItem) => {
+    return (
+      <EuiKeyPadMenuItem
+        name={id}
+        label={label}
+        data-test-subj={`contrastKeyPadItem${id}`}
+        checkable="single"
+        isSelected={contrastModeIdSelected === id}
+        onChange={() => formik.setFieldValue('data.userSettings.contrastMode', id)}
+      >
+        <EuiIcon type={icon} size="l" />
+      </EuiKeyPadMenuItem>
+    );
+  };
+
+  const contrastModeMenu = () => {
+    return (
+      <EuiKeyPadMenu
+        aria-label={i18n.translate(
+          'xpack.security.accountManagement.userProfile.userSettings.interfaceContrastGroupDescription',
+          {
+            defaultMessage: 'Interface contrast',
+          }
+        )}
+        data-test-subj="contrastMenu"
+        checkable={{
+          legend: (
+            <FormLabel for="data.userSettings.contrastMode">
+              <FormattedMessage
+                id="xpack.security.accountManagement.userProfile.userSettings.contrastMode"
+                defaultMessage="Interface contrast"
+              />
+            </FormLabel>
+          ),
+        }}
+      >
+        {contrastItem({
+          id: 'system',
+          label: i18n.translate(
+            'xpack.security.accountManagement.userProfile.contrastModeSystemButton',
+            { defaultMessage: 'System' }
+          ),
+          icon: 'desktop',
+        })}
+        {contrastItem({
+          id: 'standard',
+          label: i18n.translate(
+            'xpack.security.accountManagement.userProfile.contrastModeStandardButton',
+            { defaultMessage: 'Normal' }
+          ),
+          icon: 'contrast',
+        })}
+        {contrastItem({
+          id: 'high',
+          label: i18n.translate(
+            'xpack.security.accountManagement.userProfile.contrastModeHighButton',
+            { defaultMessage: 'High' }
+          ),
+          icon: 'contrastHigh',
+        })}
+      </EuiKeyPadMenu>
+    );
+  };
+
   return (
     <EuiDescribedFormGroup
       fullWidth
@@ -326,7 +396,7 @@ const UserSettingsEditor: FunctionComponent<UserSettingsEditorProps> = ({
         <h2>
           <FormattedMessage
             id="xpack.security.accountManagement.userProfile.userSettingsTitle"
-            defaultMessage="Theme"
+            defaultMessage="Appearance"
           />
         </h2>
       }
@@ -342,6 +412,10 @@ const UserSettingsEditor: FunctionComponent<UserSettingsEditorProps> = ({
           {themeMenu(isThemeOverridden)}
           {deprecatedWarning}
         </>
+      </FormRow>
+
+      <FormRow name="data.userSettings.contrastMode" fullWidth>
+        {contrastModeMenu()}
       </FormRow>
     </EuiDescribedFormGroup>
   );
@@ -872,6 +946,7 @@ export function useUserProfileForm({ user, data }: UserProfileProps) {
           },
           userSettings: {
             darkMode: data.userSettings?.darkMode || 'space_default',
+            contrastMode: data.userSettings?.contrastMode || 'system',
           },
         }
       : undefined,
@@ -924,7 +999,10 @@ export function useUserProfileForm({ user, data }: UserProfileProps) {
       resetInitialValues(values);
 
       let isRefreshRequired = false;
-      if (initialValues.data?.userSettings.darkMode !== values.data?.userSettings.darkMode) {
+      if (
+        initialValues.data?.userSettings.darkMode !== values.data?.userSettings.darkMode ||
+        initialValues.data?.userSettings.contrastMode !== values.data?.userSettings.contrastMode
+      ) {
         isRefreshRequired = true;
       }
       showSuccessNotification({ isRefreshRequired });

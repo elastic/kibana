@@ -21,7 +21,7 @@ export const successfulResolveResponse = {
   aliases: [
     {
       name: 'f-alias',
-      indices: ['freeze-index', 'my-index'],
+      indices: ['my-index'],
     },
   ],
   data_streams: [
@@ -67,6 +67,16 @@ describe('getIndices', () => {
     expect(result[0].name).toBe('f-alias');
     expect(result[1].name).toBe('foo');
     expect(result[2].name).toBe('remoteCluster1:bar-01');
+  });
+
+  it('should work with rollup indices based on aliases', async () => {
+    const isRollupIdx = (indexName: string) => indexName === 'my-index';
+    const result = await getIndices({
+      http,
+      pattern: 'kibana',
+      isRollupIndex: isRollupIdx,
+    });
+    expect(result[0].tags[1].key).toBe('rollup');
   });
 
   it('should ignore ccs query-all', async () => {

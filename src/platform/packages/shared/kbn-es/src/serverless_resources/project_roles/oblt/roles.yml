@@ -1,5 +1,5 @@
 # -----
-# Source: project-controller/blob/main/internal/project/security/config/roles.yml
+# Copy from internal roles config in elasticsearch-controller
 # -----
 viewer:
   cluster: []

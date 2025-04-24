@@ -10,12 +10,15 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import type {
   PerformRuleUpgradeRequestBody,
   PerformRuleUpgradeResponseBody,
+  RuleUpgradeSpecifier,
   SkippedRuleUpgrade,
+  ThreeWayDiff,
 } from '../../../../../../common/api/detection_engine/prebuilt_rules';
 import {
   ModeEnum,
   PickVersionValuesEnum,
   SkipRuleUpgradeReasonEnum,
+  ThreeWayDiffConflict,
   UpgradeConflictResolutionEnum,
 } from '../../../../../../common/api/detection_engine/prebuilt_rules';
 import type { SecuritySolutionRequestHandlerContext } from '../../../../../types';
@@ -35,6 +38,7 @@ import type {
 } from '../../../../../../common/api/detection_engine';
 import type { PromisePoolError } from '../../../../../utils/promise_pool';
 import { zipRuleVersions } from '../../logic/rule_versions/zip_rule_versions';
+import type { RuleVersions } from '../../logic/diff/calculate_rule_diff';
 import { calculateRuleDiff } from '../../logic/diff/calculate_rule_diff';
 import type { RuleTriad } from '../../model/rule_groups/get_rule_groups';
 
@@ -155,12 +159,18 @@ export const performRuleUpgradeHandler = async (
 
         // Check there's no conflicts
         if (onConflict === UpgradeConflictResolutionEnum.SKIP) {
-          const ruleDiff = calculateRuleDiff(ruleVersions);
-          const hasConflict = ruleDiff.ruleDiff.num_fields_with_conflicts > 0;
-          if (hasConflict) {
+          const ruleUpgradeSpecifier =
+            request.body.mode === ModeEnum.SPECIFIC_RULES
+              ? request.body.rules.find((x) => x.rule_id === targetRule.rule_id)
+              : undefined;
+
+          const conflict = getRuleUpgradeConflictState(ruleVersions, ruleUpgradeSpecifier);
+
+          if (conflict !== ThreeWayDiffConflict.NONE) {
             skippedRules.push({
               rule_id: targetRule.rule_id,
               reason: SkipRuleUpgradeReasonEnum.CONFLICT,
+              conflict,
             });
             return;
           }
@@ -233,3 +243,39 @@ export const performRuleUpgradeHandler = async (
     });
   }
 };
+
+function getRuleUpgradeConflictState(
+  ruleVersions: RuleVersions,
+  ruleUpgradeSpecifier?: RuleUpgradeSpecifier
+): ThreeWayDiffConflict {
+  const { ruleDiff } = calculateRuleDiff(ruleVersions);
+
+  if (ruleDiff.num_fields_with_conflicts === 0) {
+    return ThreeWayDiffConflict.NONE;
+  }
+
+  if (!ruleUpgradeSpecifier) {
+    return ruleDiff.num_fields_with_non_solvable_conflicts > 0
+      ? ThreeWayDiffConflict.NON_SOLVABLE
+      : ThreeWayDiffConflict.SOLVABLE;
+  }
+
+  let result = ThreeWayDiffConflict.NONE;
+
+  // filter out resolved fields
+  for (const [fieldName, fieldThreeWayDiff] of Object.entries<ThreeWayDiff<unknown>>(
+    ruleDiff.fields
+  )) {
+    const hasResolvedValue =
+      ruleUpgradeSpecifier.fields?.[fieldName as keyof typeof ruleUpgradeSpecifier.fields]
+        ?.pick_version === 'RESOLVED';
+
+    if (fieldThreeWayDiff.conflict === ThreeWayDiffConflict.NON_SOLVABLE && !hasResolvedValue) {
+      return ThreeWayDiffConflict.NON_SOLVABLE;
+    } else if (fieldThreeWayDiff.conflict === ThreeWayDiffConflict.SOLVABLE && !hasResolvedValue) {
+      result = ThreeWayDiffConflict.SOLVABLE;
+    }
+  }
+
+  return result;
+}

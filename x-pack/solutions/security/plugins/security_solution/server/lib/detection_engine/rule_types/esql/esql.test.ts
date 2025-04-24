@@ -5,20 +5,17 @@
  * 2.0.
  */
 
-import dateMath from '@kbn/datemath';
 import { KbnServerError } from '@kbn/kibana-utils-plugin/server';
 
-import type { RuleExecutorServicesMock } from '@kbn/alerting-plugin/server/mocks';
-import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
-import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
-import type { ExperimentalFeatures } from '../../../../../common';
+import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { getIndexVersion } from '../../routes/index/get_index_version';
 import { SIGNALS_TEMPLATE_VERSION } from '../../routes/index/get_signals_template';
-import type { EsqlRuleParams } from '../../rule_schema';
-import { getCompleteRuleMock, getEsqlRuleParams } from '../../rule_schema/mocks';
-import { ruleExecutionLogMock } from '../../rule_monitoring/mocks';
+import { getEsqlRuleParams } from '../../rule_schema/mocks';
 import { esqlExecutor } from './esql';
 import { getDataTierFilter } from '../utils/get_data_tier_filter';
+import { getSharedParamsMock } from '../__mocks__/shared_params';
+import type { PersistenceExecutorOptionsMock } from '@kbn/rule-registry-plugin/server/utils/create_persistence_rule_type_wrapper.mock';
+import { createPersistenceExecutorOptionsMock } from '@kbn/rule-registry-plugin/server/utils/create_persistence_rule_type_wrapper.mock';
 
 jest.mock('../../routes/index/get_index_version');
 jest.mock('../utils/get_data_tier_filter', () => ({ getDataTierFilter: jest.fn() }));
@@ -26,53 +23,33 @@ jest.mock('../utils/get_data_tier_filter', () => ({ getDataTierFilter: jest.fn()
 const getDataTierFilterMock = getDataTierFilter as jest.Mock;
 
 describe('esqlExecutor', () => {
-  const version = '9.1.0';
-  const ruleExecutionLogger = ruleExecutionLogMock.forExecutors.create();
-  let alertServices: RuleExecutorServicesMock;
+  let ruleServices: PersistenceExecutorOptionsMock;
   (getIndexVersion as jest.Mock).mockReturnValue(SIGNALS_TEMPLATE_VERSION);
   const params = getEsqlRuleParams();
-  const esqlCompleteRule = getCompleteRuleMock<EsqlRuleParams>(params);
-  const tuple = {
-    from: dateMath.parse(params.from)!,
-    to: dateMath.parse(params.to)!,
-    maxSignals: params.maxSignals,
-  };
-  const mockExperimentalFeatures = {} as ExperimentalFeatures;
   const mockScheduleNotificationResponseActionsService = jest.fn();
-  const SPACE_ID = 'space';
-  const PUBLIC_BASE_URL = 'http://testkibanabaseurl.com';
+  const licensing = licensingMock.createSetup();
 
   let mockedArguments: Parameters<typeof esqlExecutor>[0];
 
+  const sharedParams = getSharedParamsMock({ ruleParams: params });
+
   beforeEach(() => {
     jest.clearAllMocks();
-    alertServices = alertsMock.createRuleExecutorServices();
+    ruleServices = createPersistenceExecutorOptionsMock();
     getDataTierFilterMock.mockResolvedValue([]);
 
     mockedArguments = {
-      runOpts: {
-        completeRule: esqlCompleteRule,
-        tuple,
-        ruleExecutionLogger,
-        bulkCreate: jest.fn(),
-        mergeStrategy: 'allFields',
-        primaryTimestamp: '@timestamp',
-        alertWithSuppression: jest.fn(),
-        unprocessedExceptions: [getExceptionListItemSchemaMock()],
-        publicBaseUrl: PUBLIC_BASE_URL,
-      },
-      services: alertServices,
-      version,
-      licensing: {},
-      spaceId: SPACE_ID,
-      experimentalFeatures: mockExperimentalFeatures,
+      sharedParams,
+      services: ruleServices,
+      licensing,
       scheduleNotificationResponseActionsService: mockScheduleNotificationResponseActionsService,
-    } as unknown as Parameters<typeof esqlExecutor>[0];
+      state: {},
+    };
   });
 
   describe('errors', () => {
     it('should return result with user error equal true when request fails with data verification exception', async () => {
-      alertServices.scopedClusterClient.asCurrentUser.transport.request.mockRejectedValue(
+      ruleServices.scopedClusterClient.asCurrentUser.transport.request.mockRejectedValue(
         new KbnServerError(
           'verification_exception: Found 1 problem\nline 1:45: invalid [test_not_lookup] resolution in lookup mode to an index in [standard] mode',
           400,
@@ -102,7 +79,7 @@ describe('esqlExecutor', () => {
     });
 
     it('should return result without user error when request fails with non-categorized error', async () => {
-      alertServices.scopedClusterClient.asCurrentUser.transport.request.mockRejectedValue(
+      ruleServices.scopedClusterClient.asCurrentUser.transport.request.mockRejectedValue(
         new KbnServerError('Unknown Error', 500, {
           error: {
             root_cause: [

@@ -228,7 +228,7 @@ describe('SecurityUsageReportingTask', () => {
   });
 
   describe('Mocked meteringCallback', () => {
-    async function setupMocks() {
+    async function setupMocks(backfillConfig?: { enabled: boolean; maxRecords?: number }) {
       await setupBaseMocks();
       meteringCallbackMock = jest.fn().mockResolvedValueOnce({
         latestRecordTimestamp: usageRecord.usage_timestamp,
@@ -239,6 +239,7 @@ describe('SecurityUsageReportingTask', () => {
         config: {
           usageApi: USAGE_API_CONFIG,
         } as ServerlessSecurityConfig,
+        backfillConfig,
       });
       mockTask = new SecurityUsageReportingTask(taskArgs);
     }
@@ -308,6 +309,149 @@ describe('SecurityUsageReportingTask', () => {
         expect(reportUsageMock).not.toHaveBeenCalled();
         expect(meteringCallbackMock).not.toHaveBeenCalled();
       });
+
+      describe('backfill configuration', () => {
+        it('should throw error when backfill is enabled without maxRecords', async () => {
+          await expect(setupMocks({ enabled: true })).rejects.toThrow(
+            'maxRecords is required when backfill is enabled'
+          );
+        });
+
+        it('should create task successfully with valid backfill config', async () => {
+          await setupMocks({ enabled: true, maxRecords: 1000 });
+          expect(mockTask).toBeInstanceOf(SecurityUsageReportingTask);
+        });
+      });
+
+      describe('backfill functionality', () => {
+        beforeEach(async () => {
+          await setupMocks({ enabled: true, maxRecords: 1000 });
+        });
+
+        it('should store records in state when API call fails', async () => {
+          reportUsageMock.mockRejectedValueOnce(new Error('API Error'));
+
+          const task = await runTask();
+
+          expect(task?.state.backfillRecords).toEqual([usageRecord]);
+        });
+
+        it('should prepend existing backfill records to new records', async () => {
+          const oldRecord = { ...usageRecord, id: 'old-record' };
+          const taskInstance = buildMockTaskInstance({
+            state: {
+              backfillRecords: [oldRecord],
+              lastSuccessfulReport: new Date().toISOString(),
+            },
+          });
+
+          await runTask(taskInstance);
+
+          expect(reportUsageMock).toHaveBeenCalledWith(
+            expect.arrayContaining([
+              expect.objectContaining({ id: oldRecord.id }),
+              expect.objectContaining({ id: usageRecord.id }),
+            ])
+          );
+        });
+
+        it('should clear backfill records after successful API call', async () => {
+          reportUsageMock.mockResolvedValueOnce({ ok: true, status: 201 });
+          const oldRecord = { ...usageRecord, id: 'old-record' };
+          const taskInstance = buildMockTaskInstance({
+            state: {
+              backfillRecords: [oldRecord],
+              lastSuccessfulReport: new Date().toISOString(),
+            },
+          });
+
+          const task = await runTask(taskInstance);
+
+          expect(task?.state.backfillRecords).toEqual([]);
+        });
+
+        it('should send all backfill records along with new records', async () => {
+          const backfillRecords = Array.from({ length: 2 }, (_, i) => ({
+            ...usageRecord,
+            id: `backfill-${i + 1}`,
+          }));
+
+          const newRecord = { ...usageRecord, id: 'new-record' };
+
+          reportUsageMock.mockReset();
+          reportUsageMock.mockResolvedValueOnce({ ok: true, status: 201 });
+
+          meteringCallbackMock.mockReset();
+          meteringCallbackMock.mockResolvedValueOnce({
+            latestRecordTimestamp: new Date().toISOString(),
+            records: [newRecord],
+            shouldRunAgain: false,
+          });
+
+          const taskInstance = buildMockTaskInstance({
+            state: {
+              backfillRecords,
+              lastSuccessfulReport: new Date().toISOString(),
+            },
+          });
+
+          await runTask(taskInstance);
+
+          // Verify all records are sent
+          const expectedRecords = [
+            expect.objectContaining({ id: 'backfill-1' }),
+            expect.objectContaining({ id: 'backfill-2' }),
+            expect.objectContaining({ id: 'new-record' }),
+          ];
+
+          expect(reportUsageMock).toHaveBeenCalledWith(expect.arrayContaining(expectedRecords));
+          expect(reportUsageMock.mock.calls[0][0]).toHaveLength(3);
+        });
+
+        it('should enforce maxRecords limit on backfill records', async () => {
+          const maxRecords = 2;
+          await setupMocks({ enabled: true, maxRecords });
+
+          reportUsageMock.mockReset();
+          reportUsageMock.mockRejectedValueOnce(new Error('API Error'));
+
+          const existingBackfillRecords = Array.from({ length: 2 }, (_, i) => ({
+            ...usageRecord,
+            id: `old-${i + 1}`,
+            usage_timestamp: new Date(Date.now() - 1000).toISOString(),
+          }));
+
+          const newRecords = Array.from({ length: 2 }, (_, i) => ({
+            ...usageRecord,
+            id: `new-${i + 1}`,
+            usage_timestamp: new Date().toISOString(),
+          }));
+
+          meteringCallbackMock.mockReset();
+          meteringCallbackMock.mockResolvedValueOnce({
+            latestRecordTimestamp: new Date().toISOString(),
+            records: newRecords,
+            shouldRunAgain: false,
+          });
+
+          const taskInstance = buildMockTaskInstance({
+            state: {
+              backfillRecords: existingBackfillRecords,
+              lastSuccessfulReport: new Date().toISOString(),
+            },
+          });
+
+          const task = await runTask(taskInstance);
+
+          // should only keep the last 2 records
+          expect(task?.state.backfillRecords).toHaveLength(maxRecords);
+          expect(task?.state.backfillRecords).toEqual([
+            expect.objectContaining({ id: 'new-1' }),
+            expect.objectContaining({ id: 'new-2' }),
+          ]);
+        });
+      });
+
       describe('lastSuccessfulReport', () => {
         it('should set lastSuccessfulReport correctly if report success', async () => {
           reportUsageMock.mockResolvedValueOnce({ status: 201 });

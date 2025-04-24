@@ -50,6 +50,8 @@ import {
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 
 import { ProductDocBaseStartContract } from '@kbn/product-doc-base-plugin/server';
+import { AlertingServerSetup, AlertingServerStart } from '@kbn/alerting-plugin/server';
+import type { IEventLogger, IEventLogService } from '@kbn/event-log-plugin/server';
 import type { GetAIAssistantKnowledgeBaseDataClientParams } from './ai_assistant_data_clients/knowledge_base';
 import { AttackDiscoveryDataClient } from './lib/attack_discovery/persistence';
 import {
@@ -61,6 +63,7 @@ import { CallbackIds } from './services/app_context';
 import { AIAssistantDataClient } from './ai_assistant_data_clients';
 import { AIAssistantKnowledgeBaseDataClient } from './ai_assistant_data_clients/knowledge_base';
 import type { DefendInsightsDataClient } from './lib/defend_insights/persistence';
+import { AttackDiscoveryScheduleDataClient } from './lib/attack_discovery/schedules/data_client';
 
 export const PLUGIN_ID = 'elasticAssistant' as const;
 export { CallbackIds };
@@ -120,12 +123,15 @@ export interface ElasticAssistantPluginStart {
 
 export interface ElasticAssistantPluginSetupDependencies {
   actions: ActionsPluginSetup;
+  alerting: AlertingServerSetup;
+  eventLog: IEventLogService; // for writing to the event log
   ml: MlPluginSetup;
   taskManager: TaskManagerSetupContract;
   spaces?: SpacesPluginSetup;
 }
 export interface ElasticAssistantPluginStartDependencies {
   actions: ActionsPluginStart;
+  alerting: AlertingServerStart;
   llmTasks: LlmTasksPluginStart;
   inference: InferenceServerStart;
   spaces?: SpacesPluginStart;
@@ -137,6 +143,8 @@ export interface ElasticAssistantApiRequestHandlerContext {
   core: CoreRequestHandlerContext;
   actions: ActionsPluginStart;
   auditLogger?: AuditLogger;
+  eventLogger: IEventLogger;
+  eventLogIndex: string;
   getRegisteredFeatures: GetRegisteredFeatures;
   getRegisteredTools: GetRegisteredTools;
   logger: Logger;
@@ -150,8 +158,10 @@ export interface ElasticAssistantApiRequestHandlerContext {
     params?: GetAIAssistantKnowledgeBaseDataClientParams
   ) => Promise<AIAssistantKnowledgeBaseDataClient | null>;
   getAttackDiscoveryDataClient: () => Promise<AttackDiscoveryDataClient | null>;
+  getAttackDiscoverySchedulingDataClient: () => Promise<AttackDiscoveryScheduleDataClient | null>;
   getDefendInsightsDataClient: () => Promise<DefendInsightsDataClient | null>;
   getAIAssistantPromptsDataClient: () => Promise<AIAssistantDataClient | null>;
+  getAlertSummaryDataClient: () => Promise<AIAssistantDataClient | null>;
   getAIAssistantAnonymizationFieldsDataClient: () => Promise<AIAssistantDataClient | null>;
   llmTasks: LlmTasksPluginStart;
   inference: InferenceServerStart;
@@ -177,35 +187,43 @@ export type GetElser = () => Promise<string> | never;
 
 export interface AssistantResourceNames {
   componentTemplate: {
+    alertSummary: string;
     conversations: string;
     knowledgeBase: string;
     prompts: string;
     anonymizationFields: string;
     attackDiscovery: string;
+    attackDiscoveryAlerts: string;
     defendInsights: string;
   };
   indexTemplate: {
+    alertSummary: string;
     conversations: string;
     knowledgeBase: string;
     prompts: string;
     anonymizationFields: string;
     attackDiscovery: string;
+    attackDiscoveryAlerts: string;
     defendInsights: string;
   };
   aliases: {
+    alertSummary: string;
     conversations: string;
     knowledgeBase: string;
     prompts: string;
     anonymizationFields: string;
     attackDiscovery: string;
+    attackDiscoveryAlerts: string;
     defendInsights: string;
   };
   indexPatterns: {
+    alertSummary: string;
     conversations: string;
     knowledgeBase: string;
     prompts: string;
     anonymizationFields: string;
     attackDiscovery: string;
+    attackDiscoveryAlerts: string;
     defendInsights: string;
   };
   pipelines: {
@@ -243,11 +261,12 @@ export type AssistantToolLlm =
 
 export interface AssistantToolParams {
   alertsIndexPattern?: string;
+  assistantContext?: ElasticAssistantApiRequestHandlerContext;
   anonymizationFields?: AnonymizationFieldResponse[];
   inference?: InferenceServerStart;
   isEnabledKnowledgeBase: boolean;
   connectorId?: string;
-  contentReferencesStore: ContentReferencesStore | undefined;
+  contentReferencesStore: ContentReferencesStore;
   description?: string;
   esClient: ElasticsearchClient;
   kbDataClient?: AIAssistantKnowledgeBaseDataClient;
@@ -265,4 +284,8 @@ export interface AssistantToolParams {
   >;
   size?: number;
   telemetry?: AnalyticsServiceSetup;
+  createLlmInstance?: () =>
+    | ActionsClientChatBedrockConverse
+    | ActionsClientChatVertexAI
+    | ActionsClientChatOpenAI;
 }

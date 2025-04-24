@@ -14,7 +14,7 @@ import { mockHandlerArguments } from '../../../_mock_handler_arguments';
 import type { CreateRuleRequestBodyV1 } from '../../../../../common/routes/rule/apis/create';
 import { rulesClientMock } from '../../../../rules_client.mock';
 import { RuleTypeDisabledError } from '../../../../lib';
-import { RuleAction, RuleSystemAction, SanitizedRule } from '../../../../types';
+import type { RuleAction, RuleSystemAction, SanitizedRule } from '../../../../types';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
 import { actionsClientMock } from '@kbn/actions-plugin/server/mocks';
@@ -34,6 +34,39 @@ describe('createRuleRoute', () => {
   const docLinks = docLinksServiceMock.createSetupContract();
   const createdAt = new Date();
   const updatedAt = new Date();
+  const alertingConfigMock = {
+    healthCheck: {
+      interval: '60m',
+    },
+    invalidateApiKeysTask: {
+      interval: '5m',
+      removalDelay: '1h',
+    },
+    enableFrameworkAlerts: true,
+    cancelAlertsOnRuleTimeout: true,
+    rules: {
+      minimumScheduleInterval: {
+        value: '1m',
+        enforce: false,
+      },
+      maxScheduledPerMinute: 32000,
+      run: {
+        actions: {
+          max: 100000,
+        },
+        alerts: {
+          max: 1000,
+        },
+      },
+    },
+    rulesSettings: {
+      enabled: true,
+      cacheInterval: 60000,
+    },
+    maintenanceWindow: {
+      enabled: true,
+    },
+  };
   const action: RuleAction = {
     actionTypeId: 'test',
     group: 'default',
@@ -154,6 +187,7 @@ describe('createRuleRoute', () => {
       encryptedSavedObjects,
       usageCounter: mockUsageCounter,
       docLinks,
+      alertingConfig: alertingConfigMock,
     });
 
     const [config, handler] = router.post.mock.calls[0];
@@ -268,6 +302,7 @@ describe('createRuleRoute', () => {
       encryptedSavedObjects,
       usageCounter: mockUsageCounter,
       docLinks,
+      alertingConfig: alertingConfigMock,
     });
 
     const [config, handler] = router.post.mock.calls[0];
@@ -386,6 +421,7 @@ describe('createRuleRoute', () => {
       encryptedSavedObjects,
       usageCounter: mockUsageCounter,
       docLinks,
+      alertingConfig: alertingConfigMock,
     });
 
     const [config, handler] = router.post.mock.calls[0];
@@ -505,6 +541,7 @@ describe('createRuleRoute', () => {
       encryptedSavedObjects,
       usageCounter: mockUsageCounter,
       docLinks,
+      alertingConfig: alertingConfigMock,
     });
 
     const [config, handler] = router.post.mock.calls[0];
@@ -612,7 +649,13 @@ describe('createRuleRoute', () => {
     const router = httpServiceMock.createRouter();
     const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup({ canEncrypt: true });
 
-    createRuleRoute({ router, licenseState, encryptedSavedObjects, docLinks });
+    createRuleRoute({
+      router,
+      licenseState,
+      encryptedSavedObjects,
+      docLinks,
+      alertingConfig: alertingConfigMock,
+    });
 
     const [, handler] = router.post.mock.calls[0];
 
@@ -634,7 +677,13 @@ describe('createRuleRoute', () => {
       throw new Error('OMG');
     });
 
-    createRuleRoute({ router, licenseState, encryptedSavedObjects, docLinks });
+    createRuleRoute({
+      router,
+      licenseState,
+      encryptedSavedObjects,
+      docLinks,
+      alertingConfig: alertingConfigMock,
+    });
 
     const [, handler] = router.post.mock.calls[0];
 
@@ -652,7 +701,13 @@ describe('createRuleRoute', () => {
     const router = httpServiceMock.createRouter();
     const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup({ canEncrypt: true });
 
-    createRuleRoute({ router, licenseState, encryptedSavedObjects, docLinks });
+    createRuleRoute({
+      router,
+      licenseState,
+      encryptedSavedObjects,
+      docLinks,
+      alertingConfig: alertingConfigMock,
+    });
 
     const [, handler] = router.post.mock.calls[0];
 
@@ -684,6 +739,7 @@ describe('createRuleRoute', () => {
         encryptedSavedObjects,
         usageCounter: mockUsageCounter,
         docLinks,
+        alertingConfig: alertingConfigMock,
       });
 
       const [_, handler] = router.post.mock.calls[0];
@@ -767,6 +823,7 @@ describe('createRuleRoute', () => {
         encryptedSavedObjects,
         usageCounter: mockUsageCounter,
         docLinks,
+        alertingConfig: alertingConfigMock,
       });
 
       const [_, handler] = router.post.mock.calls[0];
@@ -824,6 +881,7 @@ describe('createRuleRoute', () => {
         encryptedSavedObjects,
         usageCounter: mockUsageCounter,
         docLinks,
+        alertingConfig: alertingConfigMock,
       });
 
       const [_, handler] = router.post.mock.calls[0];

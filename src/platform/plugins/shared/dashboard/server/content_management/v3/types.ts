@@ -81,12 +81,30 @@ export type SavedObjectToItemReturn<T> =
       error: Error;
     };
 
-export type ItemAttrsToSavedObjectAttrsReturn =
+export interface ItemAttrsToSavedObjectParams {
+  attributes: DashboardAttributes;
+  incomingReferences?: SavedObjectReference[];
+}
+
+export type ItemAttrsToSavedObjectReturn =
   | {
       attributes: DashboardSavedObjectAttributes;
+      references: SavedObjectReference[];
       error: null;
     }
   | {
       attributes: null;
+      references: null;
       error: Error;
     };
+
+export interface ItemAttrsToSavedObjectWithTagsParams extends ItemAttrsToSavedObjectParams {
+  replaceTagReferencesByName?: (
+    params: ReplaceTagReferencesByNameParams
+  ) => Promise<SavedObjectReference[]>;
+}
+
+export interface ReplaceTagReferencesByNameParams {
+  references: SavedObjectReference[];
+  newTagNames: string[];
+}

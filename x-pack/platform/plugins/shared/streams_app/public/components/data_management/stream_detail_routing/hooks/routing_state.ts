@@ -16,11 +16,28 @@ export interface ChildUnderEdit {
   child: RoutingDefinition;
 }
 
+export const RoutingStateContext = React.createContext<
+  | {
+      routingAppState: ReturnType<typeof useRoutingState>;
+      definition: WiredStreamGetResponse;
+      refreshDefinition: () => void;
+    }
+  | undefined
+>(undefined);
+
+export function useRoutingStateContext() {
+  const context = React.useContext(RoutingStateContext);
+  if (!context) {
+    throw new Error('useRoutingStateContext must be used within a RoutingStateContextProvider');
+  }
+  return context;
+}
+
 export function useRoutingState({
   definition,
   toasts,
 }: {
-  definition?: WiredStreamGetResponse;
+  definition: WiredStreamGetResponse;
   toasts: IToasts;
 }) {
   const [lastDisplayedToast, setLastDisplayedToast] = React.useState<Toast | undefined>();
@@ -39,15 +56,15 @@ export function useRoutingState({
 
   // Child streams: either represents the child streams as they are, or the new order from drag and drop.
   const [childStreams, setChildStreams] = React.useState<
-    WiredStreamGetResponse['stream']['ingest']['routing']
-  >(definition?.stream.ingest.routing ?? []);
+    WiredStreamGetResponse['stream']['ingest']['wired']['routing']
+  >(definition.stream.ingest.wired.routing ?? []);
 
   useEffect(() => {
-    setChildStreams(definition?.stream.ingest.routing ?? []);
+    setChildStreams(definition.stream.ingest.wired.routing ?? []);
   }, [definition]);
 
   // Note: just uses reference equality to check if the order has changed as onChildStreamReorder will create a new array.
-  const hasChildStreamsOrderChanged = childStreams !== definition?.stream.ingest.routing;
+  const hasChildStreamsOrderChanged = childStreams !== definition.stream.ingest.wired.routing;
 
   // Child stream currently being dragged
   const [draggingChildStream, setDraggingChildStream] = React.useState<string | undefined>();
@@ -73,8 +90,8 @@ export function useRoutingState({
 
   const cancelChanges = useCallback(() => {
     setChildUnderEdit(undefined);
-    setChildStreams(definition?.stream.ingest.routing ?? []);
-  }, [definition?.stream.ingest.routing]);
+    setChildStreams(definition.stream.ingest.wired.routing);
+  }, [definition.stream.ingest.wired.routing]);
 
   const debouncedChildUnderEdit = useDebounced(childUnderEdit, 300);
 

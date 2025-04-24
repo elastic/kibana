@@ -16,6 +16,18 @@
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "searchPlayground",
+        "id": "def-public.PlaygroundPageMode",
+        "type": "Enum",
+        "tags": [],
+        "label": "PlaygroundPageMode",
+        "description": [],
+        "path": "x-pack/solutions/search/plugins/search_playground/public/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
       }
     ],
     "misc": [],

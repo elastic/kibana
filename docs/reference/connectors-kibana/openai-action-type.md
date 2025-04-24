@@ -14,10 +14,8 @@ The OpenAI connector uses [axios](https://github.com/axios/axios) to send a POST
 
 You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**.  For example:
 
-:::{image} ../../images/gen-ai-connector.png
-:alt: OpenAI connector
-:class: screenshot
-:::
+% TO DO: Use `:class: screenshot`
+![OpenAI connector](../images/gen-ai-connector.png)
 
 ::::{important}
 Elastic provides no official support for connecting to the Azure OpenAI service through a proxy. However if you must use a proxy, ensure that the proxy supports streaming and is SSE-compatible. Elastic will only parse streamed responses.
@@ -52,10 +50,8 @@ API key
 
 You can test connectors as you’re creating or editing the connector in {{kib}}. For example:
 
-:::{image} ../../images/gen-ai-params-test.png
-:alt: OpenAI params test
-:class: screenshot
-:::
+% TO DO: Use `:class: screenshot`
+![OpenAI params test](../images/gen-ai-params-test.png)
 
 The OpenAI actions have the following configuration properties.
 

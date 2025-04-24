@@ -6,7 +6,6 @@
  */
 
 import { EuiSpacer } from '@elastic/eui';
-import type { Filter, Query } from '@kbn/es-query';
 import React from 'react';
 
 import { getAlertSummaryEsqlQuery } from '../../alert_summary_tab/get_alert_summary_esql_query';
@@ -16,6 +15,7 @@ import { getAlertsPreviewLensAttributes } from '../../alerts_preview_tab/get_ale
 import { PreviewTab } from '../../preview_tab';
 import * as i18n from '../../translations';
 import type { Sorting } from '../../types';
+import type { AlertsSelectionSettings } from '../../../types';
 
 const SUMMARY_TAB_EMBEDDABLE_ID = 'alertSummaryEmbeddable--id';
 const PREVIEW_TAB_EMBEDDABLE_ID = 'alertsPreviewEmbeddable--id';
@@ -42,25 +42,17 @@ export interface TabInfo {
 interface GetTabs {
   alertsPreviewStackBy0: string;
   alertSummaryStackBy0: string;
-  end: string;
-  filters: Filter[];
-  maxAlerts: number;
-  query: Query;
+  settings: AlertsSelectionSettings;
   setAlertsPreviewStackBy0: React.Dispatch<React.SetStateAction<string>>;
   setAlertSummaryStackBy0: React.Dispatch<React.SetStateAction<string>>;
-  start: string;
 }
 
 export const getTabs = ({
   alertsPreviewStackBy0,
   alertSummaryStackBy0,
-  end,
-  filters,
-  maxAlerts,
-  query,
+  settings,
   setAlertsPreviewStackBy0,
   setAlertSummaryStackBy0,
-  start,
 }: GetTabs): TabInfo[] => [
   {
     id: 'attackDiscoverySettingsAlertSummaryTab--id',
@@ -71,14 +63,14 @@ export const getTabs = ({
         <PreviewTab
           dataTestSubj={ALERT_SUMMARY_TEST_SUBJ}
           embeddableId={SUMMARY_TAB_EMBEDDABLE_ID}
-          end={end}
-          filters={filters}
+          end={settings.end}
+          filters={settings.filters}
           getLensAttributes={getAlertSummaryLensAttributes}
           getPreviewEsqlQuery={getAlertSummaryEsqlQuery}
-          maxAlerts={maxAlerts}
-          query={query}
+          maxAlerts={settings.size}
+          query={settings.query}
           setTableStackBy0={setAlertSummaryStackBy0}
-          start={start}
+          start={settings.start}
           tableStackBy0={alertSummaryStackBy0}
         />
       </>
@@ -93,14 +85,14 @@ export const getTabs = ({
         <PreviewTab
           dataTestSubj={ALERTS_PREVIEW_TEST_SUBJ}
           embeddableId={PREVIEW_TAB_EMBEDDABLE_ID}
-          end={end}
-          filters={filters}
+          end={settings.end}
+          filters={settings.filters}
           getLensAttributes={getAlertsPreviewLensAttributes}
           getPreviewEsqlQuery={getAlertsPreviewEsqlQuery}
-          maxAlerts={maxAlerts}
-          query={query}
+          maxAlerts={settings.size}
+          query={settings.query}
           setTableStackBy0={setAlertsPreviewStackBy0}
-          start={start}
+          start={settings.start}
           tableStackBy0={alertsPreviewStackBy0}
         />
       </>

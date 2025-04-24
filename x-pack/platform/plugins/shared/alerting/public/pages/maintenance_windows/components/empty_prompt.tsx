@@ -7,7 +7,7 @@
 
 import React, { useMemo } from 'react';
 import { EuiButton, EuiButtonEmpty, EuiPageTemplate } from '@elastic/eui';
-import { DocLinks } from '@kbn/doc-links';
+import type { DocLinks } from '@kbn/doc-links';
 import * as i18n from '../translations';
 
 interface EmptyPromptProps {

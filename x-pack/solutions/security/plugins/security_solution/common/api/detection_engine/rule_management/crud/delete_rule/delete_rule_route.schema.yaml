@@ -9,7 +9,15 @@ paths:
       x-codegen-enabled: true
       operationId: DeleteRule
       summary: Delete a detection rule
-      description: Delete a detection rule using the `rule_id` or `id` field.
+      description: |
+        Delete a detection rule using the `rule_id` or `id` field.
+
+        The URL query must include one of the following:
+
+        * `id` - `DELETE /api/detection_engine/rules?id=<id>`
+        * `rule_id`- `DELETE /api/detection_engine/rules?rule_id=<rule_id>`
+
+        The difference between the `id` and `rule_id` is that the `id` is a unique rule identifier that is randomly generated when a rule is created and cannot be set, whereas `rule_id` is a stable rule identifier that can be assigned during rule creation.
       tags:
         - Rules API
       parameters:
@@ -25,6 +33,12 @@ paths:
           description: The rule's `rule_id` value.
           schema:
             $ref: '../../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/RuleSignatureId'
+      x-codeSamples:
+        - lang: cURL
+          source: |
+            curl \
+              --request DELETE https://localhost:5601/api/detection_engine/rules?rule_id=bfeaf89b-a2a7-48a3-817f-e41829dc61ee \
+              --header "Content-Type: application/json; Elastic-Api-Version=2023-10-31"
       responses:
         200:
           description: Indicates a successful call.

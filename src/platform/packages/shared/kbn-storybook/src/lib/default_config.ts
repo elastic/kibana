@@ -9,18 +9,28 @@
 
 import * as path from 'path';
 import fs from 'fs';
-import type { StorybookConfig } from '@storybook/core-common';
-import webpack, { Configuration } from 'webpack';
-import { merge as webpackMerge } from 'webpack-merge';
+import type { StorybookConfig as BaseStorybookConfig } from '@storybook/react-webpack5';
+import type { TypescriptOptions } from '@storybook/preset-react-webpack';
+import webpack from 'webpack';
+import { resolve } from 'path';
+import UiSharedDepsNpm from '@kbn/ui-shared-deps-npm';
+import * as UiSharedDepsSrc from '@kbn/ui-shared-deps-src';
+import ReactRefreshWebpackPlugin from '@pmmmwh/react-refresh-webpack-plugin';
 import { REPO_ROOT } from './constants';
 import { default as WebpackConfig } from '../webpack.config';
 
 const MOCKS_DIRECTORY = '__storybook_mocks__';
 const EXTENSIONS = ['.ts', '.js'];
 
-export type { StorybookConfig };
+/*
+ * false is a valid option for typescript.reactDocgen,
+ * but it is not in the type definition
+ */
+interface StorybookConfig extends BaseStorybookConfig {
+  typescript: Partial<TypescriptOptions>;
+}
 
-const toPath = (_path: string) => path.join(REPO_ROOT, _path);
+export type { StorybookConfig };
 
 // This ignore pattern excludes all of node_modules EXCEPT for `@kbn`.  This allows for
 // changes to packages to cause a refresh in Storybook.
@@ -32,37 +42,110 @@ const IGNORE_GLOBS = [
 ];
 
 export const defaultConfig: StorybookConfig = {
-  addons: ['@kbn/storybook/preset', '@storybook/addon-a11y', '@storybook/addon-essentials'],
-  core: {
-    builder: 'webpack5',
+  addons: [
+    '@kbn/storybook/preset',
+    '@storybook/addon-a11y',
+    '@storybook/addon-webpack5-compiler-babel',
+    // https://storybook.js.org/docs/essentials
+    '@storybook/addon-essentials',
+    '@storybook/addon-jest',
+    {
+      /**
+       * This addon replaces rules in the default SB webpack config
+       * to avoid duplicate rule issues caused by directly using the rules
+       * in the custom webpack config.
+       */
+      name: '@storybook/addon-styling-webpack',
+      options: {
+        rules: [
+          {
+            test: /\.css$/,
+            use: ['style-loader', 'css-loader'],
+          },
+          {
+            test: /\.scss$/,
+            exclude: /\.module.(s(a|c)ss)$/,
+            use: [
+              { loader: 'style-loader' },
+              { loader: 'css-loader', options: { importLoaders: 2 } },
+              {
+                loader: 'postcss-loader',
+                options: {
+                  postcssOptions: {
+                    config: require.resolve('@kbn/optimizer/postcss.config'),
+                  },
+                },
+              },
+              {
+                loader: 'sass-loader',
+                options: {
+                  additionalData(content: string, loaderContext: any) {
+                    const req = JSON.stringify(
+                      loaderContext.utils.contextify(
+                        loaderContext.context || loaderContext.rootContext,
+                        resolve(REPO_ROOT, 'src/core/public/styles/core_app/_globals_v8light.scss')
+                      )
+                    );
+                    return `@import ${req};\n${content}`;
+                  },
+                  implementation: require('sass-embedded'),
+                  sassOptions: {
+                    includePaths: [resolve(REPO_ROOT, 'node_modules')],
+                    quietDeps: true,
+                  },
+                },
+              },
+            ],
+          },
+        ],
+      },
+    },
+  ],
+  stories: ['../**/*.stories.tsx', '../**/*.mdx'],
+  framework: {
+    name: '@storybook/react-webpack5',
+    options: {},
   },
-  stories: ['../**/*.stories.tsx', '../**/*.stories.mdx'],
   typescript: {
     reactDocgen: false,
   },
-  features: {
-    postcss: false,
+  core: {
+    disableTelemetry: true,
   },
-  // @ts-expect-error StorybookConfig type is incomplete
-  // https://storybook.js.org/docs/react/configure/babel#custom-configuration
-  babel: async (options) => {
-    options.presets.push([
-      require.resolve('@emotion/babel-preset-css-prop'),
+  async babel(config: any, options: any) {
+    if (!config?.presets) {
+      config.presets = [];
+    }
+
+    config.presets.push(
+      require.resolve('@kbn/babel-preset/common_preset'),
+      [
+        require.resolve('@emotion/babel-preset-css-prop'),
+        {
+          // There's an issue where emotion classnames may be duplicated,
+          // (e.g. `[hash]-[filename]--[local]_[filename]--[local]`)
+          // https://github.com/emotion-js/emotion/issues/2417
+          autoLabel: 'always',
+          labelFormat: '[filename]--[local]',
+        },
+      ],
       {
-        // There's an issue where emotion classnames may be duplicated,
-        // (e.g. `[hash]-[filename]--[local]_[filename]--[local]`)
-        // https://github.com/emotion-js/emotion/issues/2417
-        autoLabel: 'always',
-        labelFormat: '[filename]--[local]',
-      },
-    ]);
-    return options;
+        plugins: [
+          process.env.NODE_ENV !== 'production' && require.resolve('react-refresh/babel'),
+        ].filter(Boolean),
+      }
+    );
+
+    return config;
   },
   webpackFinal: (config, options) => {
     if (process.env.CI) {
       config.parallelism = 4;
       config.cache = true;
     }
+
+    // required for react refresh
+    config.target = 'web';
 
     // This will go over every component which is imported and check its import statements.
     // For every import which starts with ./ it will do a check to see if a file with the same name
@@ -106,6 +189,14 @@ export const defaultConfig: StorybookConfig = {
       })
     );
 
+    if (process.env.NODE_ENV !== 'production') {
+      config.plugins?.push(
+        new ReactRefreshWebpackPlugin({
+          overlay: false,
+        })
+      );
+    }
+
     config.resolve = {
       ...config.resolve,
       fallback: {
@@ -113,43 +204,40 @@ export const defaultConfig: StorybookConfig = {
         fs: false,
       },
     };
-    config.watch = true;
+
     config.watchOptions = {
       ...config.watchOptions,
       ignored: IGNORE_GLOBS,
     };
 
-    // Remove when @storybook has moved to @emotion v11
-    // https://github.com/storybookjs/storybook/issues/13145
-    const emotion11CompatibleConfig = {
-      ...config,
-      resolve: {
-        ...config.resolve,
-        alias: {
-          ...config.resolve?.alias,
-          '@emotion/core': toPath('node_modules/@emotion/react'),
-          '@emotion/styled': toPath('node_modules/@emotion/styled'),
-          'emotion-theming': toPath('node_modules/@emotion/react'),
-        },
-      },
-    };
-
-    return emotion11CompatibleConfig;
-  },
-};
-
-// defaultConfigWebFinal and mergeWebpackFinal have been moved here  because webpackFinal usage in
-// storybook main.ts somehow is  causing issues with newly added dependency of ts-node most likely
-// an issue with storybook typescript setup see this issue for more details
-// https://github.com/storybookjs/storybook/issues/9610
-
-export const defaultConfigWebFinal: StorybookConfig = {
-  ...defaultConfig,
-  webpackFinal: (config: Configuration) => {
     return WebpackConfig({ config });
   },
-};
+  previewHead: (head) => `
+  ${head}
+  <meta name="eui-global" />
+  <meta name="emotion" />
+  <script>
+    window.__kbnPublicPath__ = { 'kbn-ui-shared-deps-npm': '', 'kbn-ui-shared-deps-src': '' };
+    window.__kbnHardenPrototypes__ = false;
+  </script>
+  <script src="kbn-ui-shared-deps-npm.dll.js"></script>
+  <script src="kbn-ui-shared-deps-src.js"></script>
+  <link href="kbn-ui-shared-deps-src.css" rel="stylesheet" />
 
-export const mergeWebpackFinal = (extraConfig: Configuration) => {
-  return { webpackFinal: (config: Configuration) => webpackMerge(config, extraConfig) };
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300..700&family=Roboto+Mono:ital,wght@0,400..700;1,400..700&display=swap"
+    rel="stylesheet">
+
+  <meta name="eui-utilities" />
+  `,
+  staticDirs: [
+    UiSharedDepsNpm.distDir,
+    UiSharedDepsSrc.distDir,
+    {
+      from: `${REPO_ROOT}/src/platform/plugins/shared/kibana_react/public/assets`,
+      to: 'plugins/kibanaReact/assets',
+    },
+  ],
 };

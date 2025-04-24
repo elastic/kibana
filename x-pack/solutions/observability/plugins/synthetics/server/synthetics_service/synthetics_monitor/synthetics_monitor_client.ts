@@ -6,8 +6,8 @@
  */
 import { SavedObject, SavedObjectsClientContract, SavedObjectsFindResult } from '@kbn/core/server';
 import { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
+import { MonitorConfigRepository } from '../../services/monitor_config_repository';
 import { SyntheticsServerSetup } from '../../types';
-import { syntheticsMonitorType } from '../../../common/types/saved_objects';
 import { normalizeSecrets } from '../utils';
 import {
   PrivateConfig,
@@ -162,11 +162,7 @@ export class SyntheticsMonitorClient {
 
     return { failedPolicyUpdates, publicSyncErrors };
   }
-  async deleteMonitors(
-    monitors: SyntheticsMonitorWithId[],
-    savedObjectsClient: SavedObjectsClientContract,
-    spaceId: string
-  ) {
+  async deleteMonitors(monitors: SyntheticsMonitorWithId[], spaceId: string) {
     const privateDeletePromise = this.privateLocationAPI.deleteMonitors(monitors, spaceId);
 
     const publicDeletePromise = this.syntheticsService.deleteConfigs(
@@ -179,7 +175,6 @@ export class SyntheticsMonitorClient {
 
   async testNowConfigs(
     monitor: { monitor: MonitorFields; id: string; testRunId: string },
-    savedObjectsClient: SavedObjectsClientContract,
     allPrivateLocations: PrivateLocationAttributes[],
     spaceId: string,
     runOnce?: true
@@ -274,8 +269,10 @@ export class SyntheticsMonitorClient {
     spaceId,
     allPrivateLocations,
     encryptedSavedObjects,
+    soClient,
   }: {
     spaceId: string;
+    soClient: SavedObjectsClientContract;
     allPrivateLocations: PrivateLocationAttributes[];
     encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
   }) {
@@ -285,6 +282,7 @@ export class SyntheticsMonitorClient {
 
     const { allConfigs: monitors, paramsBySpace } = await this.getAllMonitorConfigs({
       encryptedSavedObjects,
+      soClient,
       spaceId,
     });
 
@@ -309,14 +307,20 @@ export class SyntheticsMonitorClient {
 
   async getAllMonitorConfigs({
     spaceId,
+    soClient,
     encryptedSavedObjects,
   }: {
     spaceId: string;
+    soClient: SavedObjectsClientContract;
     encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
   }) {
     const paramsBySpacePromise = this.syntheticsService.getSyntheticsParams({ spaceId });
+    const monitorConfigRepository = new MonitorConfigRepository(
+      soClient,
+      encryptedSavedObjects.getClient()
+    );
 
-    const monitorsPromise = this.getAllMonitors({ encryptedSavedObjects, spaceId });
+    const monitorsPromise = monitorConfigRepository.findDecryptedMonitors({ spaceId });
 
     const [paramsBySpace, monitors] = await Promise.all([paramsBySpacePromise, monitorsPromise]);
 
@@ -324,37 +328,6 @@ export class SyntheticsMonitorClient {
       allConfigs: this.mixParamsWithMonitors(spaceId, monitors, paramsBySpace),
       paramsBySpace,
     };
-  }
-
-  async getAllMonitors({
-    spaceId,
-    encryptedSavedObjects,
-  }: {
-    spaceId: string;
-    encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
-  }) {
-    const encryptedClient = encryptedSavedObjects.getClient();
-
-    const monitors: Array<SavedObjectsFindResult<SyntheticsMonitorWithSecretsAttributes>> = [];
-
-    const finder =
-      await encryptedClient.createPointInTimeFinderDecryptedAsInternalUser<SyntheticsMonitorWithSecretsAttributes>(
-        {
-          type: syntheticsMonitorType,
-          perPage: 1000,
-          namespaces: [spaceId],
-        }
-      );
-
-    for await (const response of finder.find()) {
-      response.saved_objects.forEach((monitor) => {
-        monitors.push(monitor);
-      });
-    }
-
-    finder.close().catch(() => {});
-
-    return monitors;
   }
 
   mixParamsWithMonitors(

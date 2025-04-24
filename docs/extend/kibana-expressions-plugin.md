@@ -34,9 +34,7 @@ filters
 [/source]
 ```
 
-:::{image} ../images/expressions_plugin.png
-:alt: Rendered metric
-:class: screenshot
-:::
+% TO DO: Use `:class: screenshot`
+![Rendered metric](images/expressions_plugin.png)
 
 

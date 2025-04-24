@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ActionConnectorWithoutId } from '../../../types';
+import type { ActionConnectorWithoutId } from '../../../types';
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import { updateActionConnector } from '.';
 

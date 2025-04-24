@@ -11,7 +11,7 @@ import {
   AlertingConnectorFeatureId,
   SecurityConnectorFeatureId,
 } from '@kbn/actions-plugin/common';
-import { Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import { renderMustacheString } from '@kbn/actions-plugin/server/lib/mustache_renderer';
 import type { ValidatorServices } from '@kbn/actions-plugin/server/types';
 import { i18n } from '@kbn/i18n';

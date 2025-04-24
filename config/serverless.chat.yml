@@ -1,0 +1,50 @@
+# Chat Project Config
+
+## Enable the Serverless Chat plugin
+xpack.serverless.chat.enabled: true
+
+## Cloud settings
+xpack.cloud.serverless.project_type: search
+
+## Set the home route
+uiSettings.overrides.defaultRoute: /app/workchat
+
+## Enable workchat plugins
+xpack.workchatFramework.enabled: true
+xpack.workchatApp.enabled: true
+xpack.wciSalesforce.enabled: true
+xpack.wciIndexSource.enabled: true
+xpack.wciExternalServer.enabled: true
+
+# Disable spaces
+xpack.spaces.maxSpaces: 1
+
+
+## Disable plugins that belong to other solutions
+xpack.apm.enabled: false
+xpack.infra.enabled: false
+xpack.inventory.enabled: false
+xpack.observability.enabled: false
+xpack.observabilityAIAssistantApp.enabled: false
+xpack.observabilityLogsExplorer.enabled: false
+xpack.profiling.enabled: false
+xpack.serverless.observability.enabled: false
+xpack.slo.enabled: false
+xpack.uptime.enabled: false
+xpack.legacy_uptime.enabled: false
+xpack.ux.enabled: false
+xpack.search.enabled: false
+xpack.searchAssistant.enabled: false
+xpack.searchHomepage.enabled: false
+xpack.searchIndices.enabled: false
+xpack.searchInferenceEndpoints.enabled: false
+xpack.searchNotebooks.enabled: false
+xpack.searchPlayground.enabled: false
+xpack.searchSynonyms.enabled: false
+xpack.serverless.search.enabled: false
+xpack.cloudSecurityPosture.enabled: false
+xpack.securitySolution.enabled: false
+xpack.securitySolutionEss.enabled: false
+xpack.securitySolutionServerless.enabled: false
+## Content Connectors in stack management
+xpack.contentConnectors.enabled: false

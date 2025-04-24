@@ -8,8 +8,8 @@
  */
 
 import { chain } from 'lodash';
-import * as Either from 'fp-ts/lib/Either';
-import * as Option from 'fp-ts/lib/Option';
+import * as Either from 'fp-ts/Either';
+import * as Option from 'fp-ts/Option';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import type { SavedObjectsRawDoc } from '@kbn/core-saved-objects-server';
 import {
@@ -66,6 +66,7 @@ import type { ResponseType } from '../next';
 import { createInitialProgress } from './progress';
 import { model } from './model';
 import type { BulkIndexOperationTuple, BulkOperation } from './create_batches';
+import { TaskCompletedWithRetriableError } from '../actions/wait_for_task';
 
 describe('migrations v2 model', () => {
   const indexMapping: IndexMapping = {
@@ -88,6 +89,7 @@ describe('migrations v2 model', () => {
     kibanaVersion: '7.11.0',
     logs: [],
     retryCount: 0,
+    skipRetryReset: false,
     retryDelay: 0,
     retryAttempts: 15,
     batchSize: 1000,
@@ -2973,6 +2975,9 @@ describe('migrations v2 model', () => {
         expect(newState.updateTargetMappingsTaskId).toEqual('update target mappings task');
         expect(newState.retryCount).toEqual(0);
         expect(newState.retryDelay).toEqual(0);
+        // make sure the updated types query is still in the new state since
+        // we might want to come back if the wait for task state fails
+        expect(newState.updatedTypesQuery).toEqual(updateTargetMappingsState.updatedTypesQuery);
       });
     });
 
@@ -2984,6 +2989,17 @@ describe('migrations v2 model', () => {
         sourceIndex: Option.some('.kibana') as Option.Some<string>,
         targetIndex: '.kibana_7.11.0_001',
         updateTargetMappingsTaskId: 'update target mappings task',
+        updatedTypesQuery: Option.fromNullable({
+          bool: {
+            should: [
+              {
+                term: {
+                  type: 'type123',
+                },
+              },
+            ],
+          },
+        }),
       };
 
       test('UPDATE_TARGET_MAPPINGS_PROPERTIES_WAIT_FOR_TASK -> UPDATE_TARGET_MAPPINGS_META if response is right', () => {
@@ -3021,6 +3037,105 @@ describe('migrations v2 model', () => {
         expect(newState.controlState).toEqual('UPDATE_TARGET_MAPPINGS_PROPERTIES_WAIT_FOR_TASK');
         expect(newState.retryCount).toEqual(2);
         expect(newState.retryDelay).toEqual(4000);
+      });
+
+      test('UPDATE_TARGET_MAPPINGS_PROPERTIES_WAIT_FOR_TASK -> UPDATE_TARGET_MAPPINGS_PROPERTIES when there is an error that makes us want to retry the original task', () => {
+        const res: ResponseType<'UPDATE_TARGET_MAPPINGS_PROPERTIES_WAIT_FOR_TASK'> = Either.left({
+          message: 'Some error happened that makes us want to retry the original task',
+          type: 'task_completed_with_retriable_error',
+        });
+        const newState = model(
+          updateTargetMappingsWaitForTaskState,
+          res
+        ) as UpdateTargetMappingsPropertiesWaitForTaskState;
+        expect(newState.controlState).toEqual('UPDATE_TARGET_MAPPINGS_PROPERTIES');
+        expect(newState.retryCount).toEqual(1);
+        expect(newState.updatedTypesQuery).toEqual(
+          updateTargetMappingsWaitForTaskState.updatedTypesQuery
+        );
+      });
+
+      test('UPDATE_TARGET_MAPPINGS_PROPERTIES_WAIT_FOR_TASK -> UPDATE_TARGET_MAPPINGS_PROPERTIES updates correcly the retry number', () => {
+        const state = Object.assign({}, updateTargetMappingsWaitForTaskState, { retryCount: 3 });
+        const res: ResponseType<'UPDATE_TARGET_MAPPINGS_PROPERTIES_WAIT_FOR_TASK'> = Either.left({
+          message: 'Some error happened that makes us want to retry the original task',
+          type: 'task_completed_with_retriable_error',
+        });
+        const newState = model(state, res) as UpdateTargetMappingsPropertiesWaitForTaskState;
+        expect(newState.controlState).toEqual('UPDATE_TARGET_MAPPINGS_PROPERTIES');
+        expect(newState.retryCount).toEqual(4);
+        expect(newState.updatedTypesQuery).toEqual(
+          updateTargetMappingsWaitForTaskState.updatedTypesQuery
+        );
+      });
+
+      test('UPDATE_TARGET_MAPPINGS_PROPERTIES_WAIT_FOR_TASK -> UPDATE_TARGET_MAPPINGS_PROPERTIES -> UPDATE_TARGET_MAPPINGS_PROPERTIES_WAIT_FOR_TASK updates retry attributes correctly', () => {
+        const initialRetryCount = 3;
+
+        // First, we are in UPDATE_TARGET_MAPPINGS_PROPERTIES_WAIT_FOR_TASK
+        const initialWaitState = Object.assign({}, updateTargetMappingsWaitForTaskState, {
+          retryCount: initialRetryCount,
+        });
+        expect(initialWaitState.retryCount).toBe(initialRetryCount);
+        expect(initialWaitState.skipRetryReset).toBeFalsy();
+
+        // Move to UPDATE_TARGET_MAPPINGS_PROPERTIES and retry it (+1 retry)
+        const retryingMappingsUpdate = model(
+          initialWaitState,
+          Either.left({
+            message: 'Some error happened that makes us want to retry the original task',
+            type: 'task_completed_with_retriable_error',
+          } as TaskCompletedWithRetriableError)
+        ) as UpdateTargetMappingsPropertiesWaitForTaskState;
+        expect(retryingMappingsUpdate.retryCount).toBe(initialRetryCount + 1);
+        expect(retryingMappingsUpdate.skipRetryReset).toBe(true);
+
+        // Retry UPDATE_TARGET_MAPPINGS_PROPERTIES again (+1 retry)
+        const retryingMappingsUpdateAgain = model(
+          retryingMappingsUpdate,
+          Either.left({
+            type: 'retryable_es_client_error',
+            message: 'random retryable error',
+          } as RetryableEsClientError)
+        ) as UpdateTargetMappingsPropertiesWaitForTaskState;
+        expect(retryingMappingsUpdateAgain.retryCount).toBe(initialRetryCount + 2);
+        expect(retryingMappingsUpdateAgain.skipRetryReset).toBe(true);
+
+        // Go again to the wait state, so retryCount should remain the same
+        const finalWaitStateBeforeCompletion = model(
+          retryingMappingsUpdateAgain,
+          Either.right({
+            taskId: 'update target mappings task',
+          }) as ResponseType<'UPDATE_TARGET_MAPPINGS_PROPERTIES'>
+        ) as UpdateTargetMappingsPropertiesWaitForTaskState;
+        expect(finalWaitStateBeforeCompletion.retryCount).toBe(initialRetryCount + 2);
+        expect(finalWaitStateBeforeCompletion.skipRetryReset).toBeFalsy();
+
+        // The wait state completes successfully, so retryCount should reset
+        const postUpdateState = model(
+          finalWaitStateBeforeCompletion,
+          Either.right(
+            'pickup_updated_mappings_succeeded'
+          ) as ResponseType<'UPDATE_TARGET_MAPPINGS_PROPERTIES_WAIT_FOR_TASK'>
+        ) as UpdateTargetMappingsMeta;
+        expect(postUpdateState.retryCount).toBe(0);
+        expect(postUpdateState.skipRetryReset).toBeFalsy();
+      });
+
+      test('UPDATE_TARGET_MAPPINGS_PROPERTIES_WAIT_FOR_TASK -> FATAL if task_completed_with_retriable_error has no more retry attemps', () => {
+        const state = Object.assign({}, updateTargetMappingsWaitForTaskState, {
+          retryCount: 8,
+          retryAttempts: 8,
+        });
+        const res: ResponseType<'UPDATE_TARGET_MAPPINGS_PROPERTIES_WAIT_FOR_TASK'> = Either.left({
+          message: 'some_retryable_error_during_update',
+          type: 'task_completed_with_retriable_error',
+        });
+        const newState = model(state, res) as FatalState;
+        expect(newState.controlState).toEqual('FATAL');
+        expect(newState.reason).toMatchInlineSnapshot(
+          `"Unable to complete the UPDATE_TARGET_MAPPINGS_PROPERTIES step after 8 attempts, terminating. The last failure message was: some_retryable_error_during_update"`
+        );
       });
     });
 

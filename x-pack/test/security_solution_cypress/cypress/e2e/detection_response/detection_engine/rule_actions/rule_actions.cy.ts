@@ -38,8 +38,7 @@ import { openRuleManagementPageViaBreadcrumbs } from '../../../../tasks/rules_ma
 import { CREATE_RULE_URL } from '../../../../urls/navigation';
 
 // TODO: https://github.com/elastic/kibana/issues/161539
-// Failing: See https://github.com/elastic/kibana/issues/211959
-describe.skip(
+describe(
   'Rule actions during detection rule creation',
   { tags: ['@ess', '@serverless', '@skipInServerless'] },
   () => {
@@ -114,21 +113,21 @@ describe.skip(
     });
 
     it('Forwards the correct rule type id to the Cases system action', () => {
+      cy.intercept('GET', '/internal/data_views/fields*').as('getAlertsFields');
       visit(CREATE_RULE_URL);
       fillDefineCustomRuleAndContinue(rule);
       fillAboutRuleAndContinue(rule);
       fillScheduleRuleAndContinue(rule);
       createCasesAction();
 
-      cy.get(CASES_CONNECTOR_GROUP_BY_ALERT_FIELD_SELECTOR).click();
-      cy.get(CASES_CONNECTOR_GROUP_BY_ALERT_FIELD_OPTIONS_LIST).should('be.visible');
-      cy.waitUntil(() => {
-        return cy
-          .get(`${CASES_CONNECTOR_GROUP_BY_ALERT_FIELD_OPTIONS_LIST} button[role=option]`)
-          .then(($items) => {
-            return $items.length > 0;
-          });
+      cy.wait('@getAlertsFields', { timeout: 10000 });
+      cy.get(CASES_CONNECTOR_GROUP_BY_ALERT_FIELD_SELECTOR).within(() => {
+        cy.get('[data-test-subj=comboBoxToggleListButton]').click();
       });
+      cy.get(CASES_CONNECTOR_GROUP_BY_ALERT_FIELD_OPTIONS_LIST).should('be.visible');
+      cy.get(`${CASES_CONNECTOR_GROUP_BY_ALERT_FIELD_OPTIONS_LIST} button[role=option]`).then(
+        ($items) => $items.length > 0
+      );
     });
   }
 );

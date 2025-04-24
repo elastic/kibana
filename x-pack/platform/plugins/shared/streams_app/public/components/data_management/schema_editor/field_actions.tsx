@@ -125,6 +125,10 @@ export const FieldActionsCell = ({ field }: { field: SchemaField }) => {
     ];
   }, [closePopover, context, core, field, schemaEditorContext]);
 
+  if (field.type === 'system') {
+    return null;
+  }
+
   return (
     <EuiPopover
       id={contextMenuPopoverId}

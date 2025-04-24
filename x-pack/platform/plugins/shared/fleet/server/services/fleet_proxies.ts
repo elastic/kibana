@@ -224,7 +224,7 @@ async function updateRelatedSavedObject(
   );
 
   await pMap(downloadSources, (downloadSource) =>
-    downloadSourceService.update(soClient, downloadSource.id, {
+    downloadSourceService.update(soClient, esClient, downloadSource.id, {
       ...omit(downloadSource, 'id'),
       proxy_id: null,
     })

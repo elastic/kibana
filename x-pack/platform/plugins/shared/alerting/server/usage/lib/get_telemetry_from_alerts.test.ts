@@ -6,7 +6,8 @@
  */
 
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
-import { MockedLogger, loggerMock } from '@kbn/logging-mocks';
+import type { MockedLogger } from '@kbn/logging-mocks';
+import { loggerMock } from '@kbn/logging-mocks';
 import { getTotalAlertsCountAggregations } from './get_telemetry_from_alerts';
 import { errors } from '@elastic/elasticsearch';
 

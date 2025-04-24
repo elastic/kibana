@@ -5,19 +5,80 @@
  * 2.0.
  */
 
-export function getIncompatibleAntivirusPrompt(events?: string[]): string {
-  const defaultPrompt =
-    'You are an Elastic Security user tasked with analyzing file events from Elastic Security to identify antivirus processes. Only focus on detecting antivirus processes. Ignore processes that belong to Elastic Agent or Elastic Defend, that are not antivirus processes, or are typical processes built into the operating system. Accuracy is of the utmost importance, try to minimize false positives. Group the processes by the antivirus program, keeping track of the agent.id and _id associated to each of the individual events as endpointId and eventId respectively. If there are no events, ignore the group field. Escape backslashes to respect JSON validation. New lines must always be escaped with double backslashes, i.e. \\\\n to ensure valid JSON. Only return JSON output, as described above. Do not add any additional text to describe your output.';
+import { PublicMethodsOf } from '@kbn/utility-types';
+import type { ActionsClient } from '@kbn/actions-plugin/server';
+import type { Connector } from '@kbn/actions-plugin/server/application/connector/types';
+import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import { promptDictionary, getPromptsByGroupId } from '../../../../../../prompt';
+import { promptGroupId } from '../../../../../../prompt/local_prompt_object';
 
-  if (!events) {
-    return defaultPrompt;
-  }
+// We may need to differentiate between insights in the future, keeping the type for now
+export interface DefendInsightsPrompts {
+  default: string;
+  refine: string;
+  continue: string;
+}
+// We may need to differentiate between insights in the future, keeping the type for now
+export interface DefendInsightsGenerationPrompts {
+  group: string;
+  events: string;
+  eventsId: string;
+  eventsEndpointId: string;
+  eventsValue: string;
+}
 
-  return `${defaultPrompt}
+export interface DefendInsightsCombinedPrompts
+  extends DefendInsightsPrompts,
+    DefendInsightsGenerationPrompts {}
 
-  Use context from the following process events to provide insights:
-  """
-  ${events.join('\n\n')}
-  """
-  `;
+export async function getIncompatibleAntivirusPrompt({
+  actionsClient,
+  connector,
+  connectorId,
+  model,
+  provider,
+  savedObjectsClient,
+}: {
+  actionsClient: PublicMethodsOf<ActionsClient>;
+  connector?: Connector;
+  connectorId: string;
+  model?: string;
+  provider?: string;
+  savedObjectsClient: SavedObjectsClientContract;
+}): Promise<DefendInsightsCombinedPrompts> {
+  const prompts = await getPromptsByGroupId({
+    actionsClient,
+    connector,
+    connectorId,
+    model,
+    provider,
+    savedObjectsClient,
+    promptGroupId: promptGroupId.defendInsights.incompatibleAntivirus,
+    promptIds: [
+      promptDictionary.defendInsightsIncompatibleAntivirusDefault,
+      promptDictionary.defendInsightsIncompatibleAntivirusRefine,
+      promptDictionary.defendInsightsIncompatibleAntivirusContinue,
+      promptDictionary.defendInsightsIncompatibleAntivirusGroup,
+      promptDictionary.defendInsightsIncompatibleAntivirusEvents,
+      promptDictionary.defendInsightsIncompatibleAntivirusEventsId,
+      promptDictionary.defendInsightsIncompatibleAntivirusEventsEndpointId,
+      promptDictionary.defendInsightsIncompatibleAntivirusEventsValue,
+    ],
+  });
+
+  const getPromptById = (id: string) =>
+    prompts.find((prompt) => prompt.promptId === id)?.prompt || '';
+
+  return {
+    default: getPromptById(promptDictionary.defendInsightsIncompatibleAntivirusDefault),
+    refine: getPromptById(promptDictionary.defendInsightsIncompatibleAntivirusRefine),
+    continue: getPromptById(promptDictionary.defendInsightsIncompatibleAntivirusContinue),
+    group: getPromptById(promptDictionary.defendInsightsIncompatibleAntivirusGroup),
+    events: getPromptById(promptDictionary.defendInsightsIncompatibleAntivirusEvents),
+    eventsId: getPromptById(promptDictionary.defendInsightsIncompatibleAntivirusEventsId),
+    eventsEndpointId: getPromptById(
+      promptDictionary.defendInsightsIncompatibleAntivirusEventsEndpointId
+    ),
+    eventsValue: getPromptById(promptDictionary.defendInsightsIncompatibleAntivirusEventsValue),
+  };
 }

@@ -10,23 +10,16 @@
 import React, { useCallback, useMemo } from 'react';
 import type { DataView } from '@kbn/data-plugin/common';
 import { i18n } from '@kbn/i18n';
-import {
-  AppMenuActionId,
-  AppMenuActionSubmenuSecondary,
-  AppMenuActionType,
-} from '@kbn/discover-utils';
-import {
-  AlertConsumers,
-  ES_QUERY_ID,
-  RuleCreationValidConsumer,
-  STACK_ALERTS_FEATURE_ID,
-} from '@kbn/rule-data-utils';
-import { RuleTypeMetaData } from '@kbn/alerting-plugin/common';
+import type { AppMenuActionSubmenuSecondary } from '@kbn/discover-utils';
+import { AppMenuActionId, AppMenuActionType } from '@kbn/discover-utils';
+import type { RuleCreationValidConsumer } from '@kbn/rule-data-utils';
+import { AlertConsumers, ES_QUERY_ID, STACK_ALERTS_FEATURE_ID } from '@kbn/rule-data-utils';
+import type { RuleTypeMetaData } from '@kbn/alerting-plugin/common';
 import { RuleFormFlyout } from '@kbn/response-ops-rule-form/flyout';
 import { isValidRuleFormPlugins } from '@kbn/response-ops-rule-form/lib';
-import { DiscoverStateContainer } from '../../../state_management/discover_state';
-import { AppMenuDiscoverParams } from './types';
-import { DiscoverServices } from '../../../../../build_services';
+import type { DiscoverStateContainer } from '../../../state_management/discover_state';
+import type { AppMenuDiscoverParams } from './types';
+import type { DiscoverServices } from '../../../../../build_services';
 
 const EsQueryValidConsumer: RuleCreationValidConsumer[] = [
   AlertConsumers.INFRASTRUCTURE,

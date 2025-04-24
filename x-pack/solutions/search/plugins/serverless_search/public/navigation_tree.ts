@@ -27,6 +27,24 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
         breadcrumbStatus: 'hidden',
         children: [
           {
+            id: 'analyze',
+            title: i18n.translate('xpack.serverlessSearch.nav.analyze', {
+              defaultMessage: 'Analyze',
+            }),
+            spaceBefore: 'm',
+            children: [
+              {
+                link: 'discover',
+              },
+              {
+                link: 'dashboards',
+                getIsActive: ({ pathNameSerialized, prepend }) => {
+                  return pathNameSerialized.startsWith(prepend('/app/dashboards'));
+                },
+              },
+            ],
+          },
+          {
             id: 'data',
             title: i18n.translate('xpack.serverlessSearch.nav.data', {
               defaultMessage: 'Data',
@@ -37,13 +55,13 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
                 title: i18n.translate('xpack.serverlessSearch.nav.content.indices', {
                   defaultMessage: 'Index Management',
                 }),
-                link: 'management:index_management',
+                link: 'elasticsearchIndexManagement',
                 breadcrumbStatus:
                   'hidden' /* management sub-pages set their breadcrumbs themselves */,
                 getIsActive: ({ pathNameSerialized, prepend }) => {
                   return (
                     pathNameSerialized.startsWith(
-                      prepend('/app/management/data/index_management/')
+                      prepend('/app/elasticsearch/index_management/indices')
                     ) ||
                     pathNameSerialized.startsWith(prepend('/app/elasticsearch/indices')) ||
                     pathNameSerialized.startsWith(prepend('/app/elasticsearch/start'))
@@ -110,23 +128,12 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
                 }),
                 link: 'searchSynonyms',
               },
-            ],
-          },
-          {
-            id: 'analyze',
-            title: i18n.translate('xpack.serverlessSearch.nav.analyze', {
-              defaultMessage: 'Analyze',
-            }),
-            spaceBefore: 'm',
-            children: [
               {
-                link: 'discover',
-              },
-              {
-                link: 'dashboards',
-                getIsActive: ({ pathNameSerialized, prepend }) => {
-                  return pathNameSerialized.startsWith(prepend('/app/dashboards'));
-                },
+                id: 'searchQueryRules',
+                title: i18n.translate('xpack.serverlessSearch.nav.relevance.searchQueryRules', {
+                  defaultMessage: 'Query Rules',
+                }),
+                link: 'searchQueryRules',
               },
             ],
           },
@@ -161,9 +168,9 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
         breadcrumbStatus: 'hidden',
         children: [
           {
-            link: 'ml:modelManagement',
+            link: 'management:trained_models',
             title: i18n.translate('xpack.serverlessSearch.nav.trainedModels', {
-              defaultMessage: 'Trained models',
+              defaultMessage: 'Trained Models',
             }),
           },
           {
@@ -215,6 +222,10 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
                   { link: 'management:triggersActions', breadcrumbStatus: 'hidden' },
                   { link: 'management:triggersActionsConnectors', breadcrumbStatus: 'hidden' },
                 ],
+              },
+              {
+                title: 'Machine Learning',
+                children: [{ link: 'management:trained_models', breadcrumbStatus: 'hidden' }],
               },
               {
                 title: i18n.translate('xpack.serverlessSearch.nav.mngt.content', {

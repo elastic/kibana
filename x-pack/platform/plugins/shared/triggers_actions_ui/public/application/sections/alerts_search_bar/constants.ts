@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DataView } from '@kbn/data-views-plugin/common';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 
 export const NO_INDEX_PATTERNS: DataView[] = [];

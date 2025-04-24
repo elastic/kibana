@@ -14,8 +14,8 @@ export const rootStreamDefinition: WiredStreamDefinition = {
   ingest: {
     lifecycle: { dsl: {} },
     processing: [],
-    routing: [],
     wired: {
+      routing: [],
       fields: {
         '@timestamp': {
           type: 'date',
@@ -30,7 +30,7 @@ export const rootStreamDefinition: WiredStreamDefinition = {
           type: 'keyword',
         },
         'stream.name': {
-          type: 'keyword',
+          type: 'system',
         },
       },
     },

@@ -24,13 +24,16 @@ describe('isExplicitSynonym util function', () => {
 
 describe('getExplicitSynonym util function', () => {
   it('should return an array with the explicit synonym', () => {
-    expect(getExplicitSynonym('synonym1 => synonym2')).toEqual(['synonym1', 'synonym2']);
-    expect(getExplicitSynonym('synonym1,synonym2, synonym5 => synonym2')).toEqual([
-      'synonym1,synonym2, synonym5',
-      'synonym2',
-    ]);
+    expect(getExplicitSynonym('synonym1 => synonym2')).toEqual({
+      mapFromString: 'synonym1',
+      mapToString: 'synonym2',
+    });
+    expect(getExplicitSynonym('synonym1,synonym2, synonym5 => synonym2')).toEqual({
+      mapFromString: 'synonym1,synonym2, synonym5',
+      mapToString: 'synonym2',
+    });
     expect(
       getExplicitSynonym('       synonym1,synonym2, synonym5        => synonym2      ')
-    ).toEqual(['synonym1,synonym2, synonym5', 'synonym2']);
+    ).toEqual({ mapFromString: 'synonym1,synonym2, synonym5', mapToString: 'synonym2' });
   });
 });

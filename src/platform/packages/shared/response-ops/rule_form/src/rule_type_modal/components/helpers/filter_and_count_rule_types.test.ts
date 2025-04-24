@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { RuleTypeWithDescription } from '../../types';
+import type { RuleTypeWithDescription } from '../../types';
 import { filterAndCountRuleTypes } from './filter_and_count_rule_types';
 
 const mockRuleType: (
@@ -27,6 +27,7 @@ const mockRuleType: (
   actionGroups: [],
   defaultActionGroupId: 'default',
   category: 'my-category',
+  isExportable: true,
 });
 
 const pickRuleTypeName = (ruleType: RuleTypeWithDescription) => ({ name: ruleType.name });

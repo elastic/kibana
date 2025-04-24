@@ -240,10 +240,11 @@ export class DiscoverCustomizationExamplesPlugin implements Plugin {
             ControlGroupRendererApi | undefined
           >();
           const stateStorage = stateContainer.stateStorage;
+          const currentTabId = stateContainer.getCurrentTab().id;
           const dataView = useObservable(
-            stateContainer.internalState.state$,
-            stateContainer.internalState.getState()
-          ).dataView;
+            stateContainer.runtimeStateManager.tabs.byId[currentTabId].currentDataView$,
+            stateContainer.runtimeStateManager.tabs.byId[currentTabId].currentDataView$.getValue()
+          );
 
           useEffect(() => {
             if (!controlGroupAPI) {
@@ -262,7 +263,6 @@ export class DiscoverCustomizationExamplesPlugin implements Plugin {
             });
 
             const filterSubscription = controlGroupAPI.filters$.subscribe((newFilters = []) => {
-              stateContainer.internalState.transitions.setCustomFilters(newFilters);
               stateContainer.actions.fetchData();
             });
 

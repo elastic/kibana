@@ -27,6 +27,9 @@ export function LatencyAggregationTypeSelect({
     <EuiSelect
       data-test-subj="apmLatencyChartSelect"
       compressed
+      aria-label={i18n.translate('xpack.apm.serviceOverview.latencyChartTitle.selector', {
+        defaultMessage: 'Metric selector',
+      })}
       prepend={i18n.translate('xpack.apm.serviceOverview.latencyChartTitle.prepend', {
         defaultMessage: 'Metric',
       })}

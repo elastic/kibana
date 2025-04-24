@@ -12,21 +12,12 @@ import { SERVER_APP_ID } from '../../../../../common/constants';
 
 import { ThreatRuleParams } from '../../rule_schema';
 import { indicatorMatchExecutor } from './indicator_match';
-import type { CreateRuleOptions, SecurityAlertType, SignalSourceHit } from '../types';
+import type { SecurityAlertType, SignalSourceHit } from '../types';
 import { validateIndexPatterns } from '../utils';
 import { wrapSuppressedAlerts } from '../utils/wrap_suppressed_alerts';
 import type { BuildReasonMessage } from '../utils/reason_formatters';
 
-export const createIndicatorMatchAlertType = (
-  createOptions: CreateRuleOptions
-): SecurityAlertType<ThreatRuleParams, {}, {}, 'default'> => {
-  const {
-    eventsTelemetry,
-    version,
-    licensing,
-    experimentalFeatures,
-    scheduleNotificationResponseActionsService,
-  } = createOptions;
+export const createIndicatorMatchAlertType = (): SecurityAlertType<ThreatRuleParams, {}> => {
   return {
     id: INDICATOR_RULE_TYPE_ID,
     name: 'Indicator Match Rule',
@@ -66,29 +57,9 @@ export const createIndicatorMatchAlertType = (
     isExportable: false,
     category: DEFAULT_APP_CATEGORIES.security.id,
     producer: SERVER_APP_ID,
+    solution: 'security',
     async executor(execOptions) {
-      const {
-        runOpts: {
-          inputIndex,
-          runtimeMappings,
-          completeRule,
-          tuple,
-          listClient,
-          ruleExecutionLogger,
-          searchAfterSize,
-          bulkCreate,
-          wrapHits,
-          primaryTimestamp,
-          secondaryTimestamp,
-          exceptionFilter,
-          unprocessedExceptions,
-          intendedTimestamp,
-        },
-        services,
-        spaceId,
-        state,
-      } = execOptions;
-      const runOpts = execOptions.runOpts;
+      const { sharedParams, services, state } = execOptions;
 
       const wrapSuppressedHits = (
         events: SignalSourceHit[],
@@ -96,41 +67,18 @@ export const createIndicatorMatchAlertType = (
       ) =>
         wrapSuppressedAlerts({
           events,
-          spaceId,
-          completeRule,
-          mergeStrategy: runOpts.mergeStrategy,
-          indicesToQuery: runOpts.inputIndex,
           buildReasonMessage,
-          alertTimestampOverride: runOpts.alertTimestampOverride,
-          ruleExecutionLogger,
-          publicBaseUrl: runOpts.publicBaseUrl,
-          primaryTimestamp,
-          secondaryTimestamp,
-          intendedTimestamp,
+          sharedParams,
         });
 
       const result = await indicatorMatchExecutor({
-        inputIndex,
-        runtimeMappings,
-        completeRule,
-        tuple,
-        listClient,
+        sharedParams,
         services,
-        version,
-        searchAfterSize,
-        ruleExecutionLogger,
-        eventsTelemetry,
-        bulkCreate,
-        wrapHits,
-        primaryTimestamp,
-        secondaryTimestamp,
-        exceptionFilter,
-        unprocessedExceptions,
+        eventsTelemetry: sharedParams.eventsTelemetry,
         wrapSuppressedHits,
-        runOpts,
-        licensing,
-        experimentalFeatures,
-        scheduleNotificationResponseActionsService,
+        licensing: sharedParams.licensing,
+        scheduleNotificationResponseActionsService:
+          sharedParams.scheduleNotificationResponseActionsService,
       });
       return { ...result, state };
     },

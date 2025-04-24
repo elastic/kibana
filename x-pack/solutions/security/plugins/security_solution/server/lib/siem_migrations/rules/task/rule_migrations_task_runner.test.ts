@@ -15,9 +15,12 @@ import { loggerMock } from '@kbn/logging-mocks';
 const mockRetrieverInitialize = jest.fn().mockResolvedValue(undefined);
 jest.mock('./retrievers', () => ({
   ...jest.requireActual('./retrievers'),
-  RuleMigrationsRetriever: jest
-    .fn()
-    .mockImplementation(() => ({ initialize: mockRetrieverInitialize })),
+  RuleMigrationsRetriever: jest.fn().mockImplementation(() => ({
+    initialize: mockRetrieverInitialize,
+    resources: {
+      getResources: jest.fn(() => ({})),
+    },
+  })),
 }));
 
 const mockCreateModel = jest.fn(() => ({ model: 'test-model' }));
@@ -124,7 +127,9 @@ describe('RuleMigrationTaskRunner', () => {
       await expect(taskRunner.run({})).resolves.toBeUndefined();
 
       expect(mockRuleMigrationsDataClient.rules.saveProcessing).toHaveBeenCalled();
-      expect(mockTimeout).toHaveBeenCalledTimes(1); // execution sleep
+      expect(mockTimeout).toHaveBeenCalledTimes(1); // random execution sleep
+      expect(mockTimeout).toHaveBeenNthCalledWith(1, expect.any(Function), expect.any(Number));
+
       expect(mockInvoke).toHaveBeenCalledTimes(1);
       expect(mockRuleMigrationsDataClient.rules.saveCompleted).toHaveBeenCalled();
       expect(mockRuleMigrationsDataClient.rules.get).toHaveBeenCalledTimes(2); // One with data, one without
@@ -150,10 +155,8 @@ describe('RuleMigrationTaskRunner', () => {
           mockRetrieverInitialize.mockRejectedValueOnce(new Error(errorMessage));
 
           runPromise = taskRunner.run({});
-          await expect(runPromise).resolves.toBeUndefined(); // Ensure the function handles abort gracefully
-
-          expect(mockLogger.error).toHaveBeenCalledWith(
-            `Error initializing migration: Error: ${errorMessage}`
+          await expect(runPromise).rejects.toEqual(
+            Error('Migration initialization failed. Error: Test error message')
           );
         });
       });
@@ -171,7 +174,10 @@ describe('RuleMigrationTaskRunner', () => {
 
         it('should handle abort error correctly', async () => {
           runPromise = taskRunner.run({});
-          await Promise.resolve(); // Wait for the initialization to complete
+          // Wait for the initialization to complete, needs 2 ticks
+          await Promise.resolve();
+          await Promise.resolve();
+
           abortController.abort(); // Trigger the abort signal
 
           await expect(runPromise).resolves.toBeUndefined(); // Ensure the function handles abort gracefully
@@ -230,16 +236,16 @@ describe('RuleMigrationTaskRunner', () => {
              * rule 2 -> success
              */
             expect(mockInvoke).toHaveBeenCalledTimes(6);
-            expect(mockTimeout).toHaveBeenCalledTimes(6); // 3 backoff sleeps + 3 execution sleeps
+            expect(mockTimeout).toHaveBeenCalledTimes(6); // 2 execution sleeps + 3 backoff sleeps + 1 execution sleep
             expect(mockTimeout).toHaveBeenNthCalledWith(
               1,
               expect.any(Function),
-              expect.any(Number)
+              expect.any(Number) // exec random sleep
             );
             expect(mockTimeout).toHaveBeenNthCalledWith(
               2,
               expect.any(Function),
-              expect.any(Number)
+              expect.any(Number) // exec random sleep
             );
             expect(mockTimeout).toHaveBeenNthCalledWith(3, expect.any(Function), 1000);
             expect(mockTimeout).toHaveBeenNthCalledWith(4, expect.any(Function), 2000);
@@ -247,7 +253,7 @@ describe('RuleMigrationTaskRunner', () => {
             expect(mockTimeout).toHaveBeenNthCalledWith(
               6,
               expect.any(Function),
-              expect.any(Number)
+              expect.any(Number) // exec random sleep
             );
 
             expect(mockLogger.debug).toHaveBeenCalledWith(
@@ -264,7 +270,7 @@ describe('RuleMigrationTaskRunner', () => {
 
             // maxRetries = 8
             expect(mockInvoke).toHaveBeenCalledTimes(10); // 8 retries + 2 executions
-            expect(mockTimeout).toHaveBeenCalledTimes(10); // 8 backoff sleeps + 2 execution sleeps
+            expect(mockTimeout).toHaveBeenCalledTimes(10); // 2 execution sleeps + 8 backoff sleeps
 
             expect(mockRuleMigrationsDataClient.rules.saveError).toHaveBeenCalledTimes(2); // 2 rules
           });

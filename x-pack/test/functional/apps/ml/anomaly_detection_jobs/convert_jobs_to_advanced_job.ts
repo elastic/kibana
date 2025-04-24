@@ -260,8 +260,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('multi-metric job creation loads the multi-metric job wizard for the source data', async () => {
         await ml.testExecution.logTestStep('job creation loads the job management page');
-        await ml.navigation.navigateToMl();
-        await ml.navigation.navigateToJobManagement();
+        await ml.navigation.navigateToStackManagementMlSection('anomaly_detection', 'ml-jobs-list');
 
         await ml.testExecution.logTestStep('job creation loads the new job source selection page');
         await ml.jobManagement.navigateToNewJobSourceSelection();
@@ -480,8 +479,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('population job creation loads the population wizard for the source data', async () => {
         await ml.testExecution.logTestStep('job creation loads the job management page');
-        await ml.navigation.navigateToMl();
-        await ml.navigation.navigateToJobManagement();
+        await ml.navigation.navigateToStackManagementMlSection('anomaly_detection', 'ml-jobs-list');
 
         await ml.testExecution.logTestStep('job creation loads the new job source selection page');
         await ml.jobManagement.navigateToNewJobSourceSelection();
@@ -653,8 +651,7 @@ export default function ({ getService }: FtrProviderContext) {
           'categorization job creation loads the job management page'
         );
         await ml.testExecution.logTestStep('');
-        await ml.navigation.navigateToMl();
-        await ml.navigation.navigateToJobManagement();
+        await ml.navigation.navigateToStackManagementMlSection('anomaly_detection', 'ml-jobs-list');
 
         await ml.testExecution.logTestStep(
           'categorization job creation loads the new job source selection page'

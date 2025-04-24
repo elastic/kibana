@@ -20,6 +20,9 @@ import { ImportTimelineResult } from '../model/components.gen';
 
 export type ImportTimelinesRequestBody = z.infer<typeof ImportTimelinesRequestBody>;
 export const ImportTimelinesRequestBody = z.object({
+  /**
+   * Whether the Timeline should be immutable
+   */
   isImmutable: z.enum(['true', 'false']).optional(),
   file: z.unknown(),
 });

@@ -21,7 +21,7 @@ const assetsAppLink: LinkItem = {
   capabilities: [`${SECURITY_FEATURE_ID}.show`],
   hideTimeline: true,
   skipUrlState: true,
-  links: [], // endpoints and cloudDefend links are added in createAssetsLinkFromManage
+  links: [], // endpoints links are added in createAssetsLinkFromManage
 };
 
 export const createAssetsLinkFromManage = (manageLink: LinkItem): LinkItem => {

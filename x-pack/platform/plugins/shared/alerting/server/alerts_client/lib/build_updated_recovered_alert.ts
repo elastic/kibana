@@ -17,10 +17,10 @@ import {
   ALERT_RULE_EXECUTION_UUID,
   TIMESTAMP,
 } from '@kbn/rule-data-utils';
-import { RawAlertInstance } from '@kbn/alerting-state-types';
+import type { RawAlertInstance } from '@kbn/alerting-state-types';
 import { get, omit } from 'lodash';
-import { RuleAlertData } from '../../types';
-import { AlertRule } from '../types';
+import type { RuleAlertData } from '../../types';
+import type { AlertRule } from '../types';
 import { removeUnflattenedFieldsFromAlert, replaceRefreshableAlertFields } from './format_alert';
 
 interface BuildUpdatedRecoveredAlertOpts<AlertData extends RuleAlertData> {

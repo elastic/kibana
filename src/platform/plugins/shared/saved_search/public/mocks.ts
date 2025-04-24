@@ -10,12 +10,12 @@
 import { of } from 'rxjs';
 import type { IKibanaSearchResponse } from '@kbn/search-types';
 import { SearchSource } from '@kbn/data-plugin/public';
-import { SearchSourceDependencies } from '@kbn/data-plugin/common/search';
+import type { SearchSourceDependencies } from '@kbn/data-plugin/common/search';
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { SavedSearchPublicPluginStart } from './plugin';
-import { SavedSearch } from '../common';
-import { SerializableSavedSearch } from '../common/types';
-import { SavedSearchUnwrapResult } from './services/saved_searches';
+import type { SavedSearch } from '../common';
+import type { SerializableSavedSearch } from '../common/types';
+import type { SavedSearchUnwrapResult } from './services/saved_searches';
 
 const createEmptySearchSource = jest.fn(() => {
   const deps = {

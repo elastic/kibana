@@ -11,15 +11,13 @@ import userEvent from '@testing-library/user-event';
 
 import { Description } from './description';
 import { schema } from '../create/schema';
-import type { AppMockRenderer } from '../../common/mock';
-import { createAppMockRenderer } from '../../common/mock';
+
 import { MAX_DESCRIPTION_LENGTH } from '../../../common/constants';
 import { FormTestComponent } from '../../common/test_utils';
 import type { FormSchema } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { renderWithTestingProviders } from '../../common/mock';
 
-// FLAKY: https://github.com/elastic/kibana/issues/187526
-describe.skip('Description', () => {
-  let appMockRender: AppMockRenderer;
+describe('Description', () => {
   const onSubmit = jest.fn();
   const draftStorageKey = `cases.caseView.createCase.description.markdownEditor`;
   const defaultProps = {
@@ -29,7 +27,7 @@ describe.skip('Description', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    appMockRender = createAppMockRenderer();
+
     window.sessionStorage.clear();
   });
 
@@ -38,7 +36,7 @@ describe.skip('Description', () => {
   });
 
   it('it renders', async () => {
-    appMockRender.render(
+    renderWithTestingProviders(
       <FormTestComponent onSubmit={onSubmit}>
         <Description {...defaultProps} />
       </FormTestComponent>
@@ -48,7 +46,7 @@ describe.skip('Description', () => {
   });
 
   it('it changes the description', async () => {
-    appMockRender.render(
+    renderWithTestingProviders(
       <FormTestComponent
         onSubmit={onSubmit}
         formDefaultValue={{
@@ -73,7 +71,7 @@ describe.skip('Description', () => {
   });
 
   it('shows an error when description is empty', async () => {
-    appMockRender.render(
+    renderWithTestingProviders(
       <FormTestComponent
         onSubmit={onSubmit}
         formDefaultValue={{
@@ -103,7 +101,7 @@ describe.skip('Description', () => {
   it('shows an error when description is too long', async () => {
     const longDescription = 'a'.repeat(MAX_DESCRIPTION_LENGTH + 1);
 
-    appMockRender.render(
+    renderWithTestingProviders(
       <FormTestComponent
         onSubmit={onSubmit}
         formDefaultValue={{

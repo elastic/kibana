@@ -32,6 +32,7 @@ import {
 import { useFleetServerUnhealthy } from '../hooks/use_fleet_server_unhealthy';
 
 import { AgentRequestDiagnosticsModal } from '../components/agent_request_diagnostics_modal';
+import { ManageAutoUpgradeAgentsModal } from '../components/manage_auto_upgrade_agents_modal';
 
 import type { SelectionMode } from './components/types';
 
@@ -62,6 +63,9 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     isOpen: false,
   });
   const [isAgentActivityFlyoutOpen, setAgentActivityFlyoutOpen] = useState(false);
+  const [isManageAutoUpgradeModalOpen, setManageAutoUpgradeModalOpen] = useState(false);
+
+  const [selectedPolicyId, setSelectedPolicyId] = useState<string | undefined>();
   const flyoutContext = useFlyoutContext();
 
   // Agent actions states
@@ -285,9 +289,23 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
           <AgentActivityFlyout
             onAbortSuccess={fetchData}
             onClose={() => setAgentActivityFlyoutOpen(false)}
+            openManageAutoUpgradeModal={(policyId: string) => {
+              setSelectedPolicyId(policyId);
+
+              setManageAutoUpgradeModalOpen(true);
+            }}
             refreshAgentActivity={isLoading}
             setSearch={setSearch}
             setSelectedStatus={setSelectedStatus}
+          />
+        </EuiPortal>
+      ) : null}
+      {isManageAutoUpgradeModalOpen ? (
+        <EuiPortal>
+          <ManageAutoUpgradeAgentsModal
+            key={selectedPolicyId}
+            onClose={() => setManageAutoUpgradeModalOpen(false)}
+            agentPolicy={allAgentPolicies.find((p) => p.id === selectedPolicyId)!}
           />
         </EuiPortal>
       ) : null}

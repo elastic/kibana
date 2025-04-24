@@ -101,7 +101,7 @@ function getFieldsMeta(esDocsBase: string) {
     },
     indexMode: {
       title: i18n.translate('xpack.idxMgmt.templateForm.stepLogistics.indexModeTitle', {
-        defaultMessage: 'Data stream index mode',
+        defaultMessage: 'Index mode',
       }),
       description: i18n.translate('xpack.idxMgmt.templateForm.stepLogistics.indexModeDescription', {
         defaultMessage:
@@ -401,19 +401,6 @@ export const StepLogistics: React.FunctionComponent<Props> = React.memo(
             </FormRow>
           )}
 
-          <FormRow title={indexMode.title} description={indexMode.description}>
-            <UseField
-              path="indexMode"
-              componentProps={{
-                euiFieldProps: {
-                  hasDividers: true,
-                  'data-test-subj': indexMode.testSubject,
-                  options: indexMode.options,
-                },
-              }}
-            />
-          </FormRow>
-
           {/*
             Since data stream and data retention are settings that are only allowed for non legacy,
             we only need to check if data stream is set to true to show the data retention.
@@ -468,6 +455,20 @@ export const StepLogistics: React.FunctionComponent<Props> = React.memo(
               )}
             </FormRow>
           )}
+
+          {/* Index mode */}
+          <FormRow title={indexMode.title} description={indexMode.description}>
+            <UseField
+              path="indexMode"
+              componentProps={{
+                euiFieldProps: {
+                  hasDividers: true,
+                  'data-test-subj': indexMode.testSubject,
+                  options: indexMode.options,
+                },
+              }}
+            />
+          </FormRow>
 
           {/* Order */}
           {isLegacy && (

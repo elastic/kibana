@@ -8,7 +8,6 @@
  */
 
 import React from 'react';
-import { storiesOf } from '@storybook/react';
 import { from } from 'rxjs';
 import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
 import { Datatable, DatatableColumn, TextAlignment } from '@kbn/expressions-plugin/common';
@@ -147,11 +146,16 @@ const metricVisRenderer = () =>
     getStartDeps,
   });
 
-storiesOf('renderers/visMetric', module)
-  .add('Default', () => {
-    return <Render renderer={metricVisRenderer} config={config} {...containerSize} />;
-  })
-  .add('Without labels', () => {
+export default {
+  title: 'renderers/visMetric',
+};
+
+export const Default = () => {
+  return <Render renderer={metricVisRenderer} config={config} {...containerSize} />;
+};
+
+export const WithoutLabels = {
+  render: () => {
     return (
       <Render
         renderer={metricVisRenderer}
@@ -172,8 +176,13 @@ storiesOf('renderers/visMetric', module)
         {...containerSize}
       />
     );
-  })
-  .add('With custom font size', () => {
+  },
+
+  name: 'Without labels',
+};
+
+export const WithCustomFontSize = {
+  render: () => {
     return (
       <Render
         renderer={metricVisRenderer}
@@ -193,8 +202,13 @@ storiesOf('renderers/visMetric', module)
         {...containerSize}
       />
     );
-  })
-  .add('With label position is top and custom font for label', () => {
+  },
+
+  name: 'With custom font size',
+};
+
+export const WithLabelPositionIsTopAndCustomFontForLabel = {
+  render: () => {
     return (
       <Render
         renderer={metricVisRenderer}
@@ -223,8 +237,13 @@ storiesOf('renderers/visMetric', module)
         {...containerSize}
       />
     );
-  })
-  .add('With color ranges, background color mode', () => {
+  },
+
+  name: 'With label position is top and custom font for label',
+};
+
+export const WithColorRangesBackgroundColorMode = {
+  render: () => {
     return (
       <Render
         renderer={metricVisRenderer}
@@ -246,8 +265,13 @@ storiesOf('renderers/visMetric', module)
         {...containerSize}
       />
     );
-  })
-  .add('With color ranges, labels color mode', () => {
+  },
+
+  name: 'With color ranges, background color mode',
+};
+
+export const WithColorRangesLabelsColorMode = {
+  render: () => {
     return (
       <Render
         renderer={metricVisRenderer}
@@ -269,8 +293,13 @@ storiesOf('renderers/visMetric', module)
         {...containerSize}
       />
     );
-  })
-  .add('With color ranges, labels color mode, reverse mode', () => {
+  },
+
+  name: 'With color ranges, labels color mode',
+};
+
+export const WithColorRangesLabelsColorModeReverseMode = {
+  render: () => {
     return (
       <Render
         renderer={metricVisRenderer}
@@ -292,8 +321,13 @@ storiesOf('renderers/visMetric', module)
         {...containerSize}
       />
     );
-  })
-  .add('With bucket', () => {
+  },
+
+  name: 'With color ranges, labels color mode, reverse mode',
+};
+
+export const WithBucket = {
+  render: () => {
     return (
       <Render
         renderer={metricVisRenderer}
@@ -312,8 +346,13 @@ storiesOf('renderers/visMetric', module)
         {...containerSize}
       />
     );
-  })
-  .add('With empty results', () => {
+  },
+
+  name: 'With bucket',
+};
+
+export const WithEmptyResults = {
+  render: () => {
     return (
       <Render
         renderer={metricVisRenderer}
@@ -321,8 +360,13 @@ storiesOf('renderers/visMetric', module)
         {...containerSize}
       />
     );
-  })
-  .add('With colorizing full container', () => {
+  },
+
+  name: 'With empty results',
+};
+
+export const WithColorizingFullContainer = {
+  render: () => {
     return (
       <Render
         renderer={metricVisRenderer}
@@ -368,4 +412,7 @@ storiesOf('renderers/visMetric', module)
         {...containerSize}
       />
     );
-  });
+  },
+
+  name: 'With colorizing full container',
+};

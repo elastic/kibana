@@ -10,6 +10,7 @@ import type { Alert } from '@kbn/alerts-as-data-utils';
 import {
   ALERT_ACTION_GROUP,
   ALERT_CONSECUTIVE_MATCHES,
+  ALERT_PENDING_RECOVERED_COUNT,
   ALERT_DURATION,
   ALERT_FLAPPING,
   ALERT_FLAPPING_HISTORY,
@@ -25,10 +26,10 @@ import {
   TIMESTAMP,
   VERSION,
 } from '@kbn/rule-data-utils';
-import { DeepPartial } from '@kbn/utility-types';
+import type { DeepPartial } from '@kbn/utility-types';
 import { get, omit } from 'lodash';
-import { Alert as LegacyAlert } from '../../alert/alert';
-import { AlertInstanceContext, AlertInstanceState, RuleAlertData } from '../../types';
+import type { Alert as LegacyAlert } from '../../alert/alert';
+import type { AlertInstanceContext, AlertInstanceState, RuleAlertData } from '../../types';
 import type { AlertRule } from '../types';
 import { stripFrameworkFields } from './strip_framework_fields';
 import { nanosToMicros } from './nanos_to_micros';
@@ -108,6 +109,7 @@ export const buildOngoingAlert = <
     [ALERT_MAINTENANCE_WINDOW_IDS]: legacyAlert.getMaintenanceWindowIds(),
     // Set latest match count
     [ALERT_CONSECUTIVE_MATCHES]: legacyAlert.getActiveCount(),
+    [ALERT_PENDING_RECOVERED_COUNT]: legacyAlert.getPendingRecoveredCount(),
     // Set the time range
     ...(legacyAlert.getState().start
       ? {

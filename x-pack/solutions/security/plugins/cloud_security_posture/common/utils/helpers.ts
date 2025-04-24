@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { Truthy } from 'lodash';
 import type { BaseCspSetupStatus, BenchmarksCisId } from '@kbn/cloud-security-posture-common';
 import {
   NewPackagePolicy,
@@ -42,7 +41,7 @@ import type {
 export const isNonNullable = <T extends unknown>(v: T): v is NonNullable<T> =>
   v !== null && v !== undefined;
 
-export const truthy = <T>(value: T): value is Truthy<T> => !!value;
+// export const truthy = <T>(value: T): value is Truthy<T> => !!value;
 
 export const getBenchmarkFilter = (type: BenchmarkId, section?: RuleSection): string =>
   `${CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE}.attributes.metadata.benchmark.id: "${type}"${

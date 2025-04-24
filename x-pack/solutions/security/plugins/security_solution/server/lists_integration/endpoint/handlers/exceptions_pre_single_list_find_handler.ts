@@ -6,6 +6,8 @@
  */
 
 import type { ExceptionsListPreSingleListFindServerExtension } from '@kbn/lists-plugin/server';
+import { EndpointArtifactExceptionValidationError } from '../validators/errors';
+import { setFindRequestFilterScopeToActiveSpace } from '../utils';
 import type { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
 import {
   BlocklistValidator,
@@ -15,54 +17,63 @@ import {
   TrustedAppValidator,
 } from '../validators';
 
-type ValidatorCallback = ExceptionsListPreSingleListFindServerExtension['callback'];
 export const getExceptionsPreSingleListFindHandler = (
   endpointAppContextService: EndpointAppContextService
-): ValidatorCallback => {
+): ExceptionsListPreSingleListFindServerExtension['callback'] => {
   return async function ({ data, context: { request } }) {
     if (data.namespaceType !== 'agnostic') {
       return data;
     }
 
+    let isEndpointArtifact = false;
+
     const { listId } = data;
 
-    // Validate Trusted applications
     if (TrustedAppValidator.isTrustedApp({ listId })) {
+      // Validate Trusted applications
+      isEndpointArtifact = true;
       await new TrustedAppValidator(endpointAppContextService, request).validatePreSingleListFind();
-      return data;
-    }
-
-    // Host Isolation Exceptions
-    if (HostIsolationExceptionsValidator.isHostIsolationException({ listId })) {
+    } else if (HostIsolationExceptionsValidator.isHostIsolationException({ listId })) {
+      // Host Isolation Exceptions
+      isEndpointArtifact = true;
       await new HostIsolationExceptionsValidator(
         endpointAppContextService,
         request
       ).validatePreSingleListFind();
-      return data;
-    }
-
-    // Event Filters Exceptions
-    if (EventFilterValidator.isEventFilter({ listId })) {
+    } else if (EventFilterValidator.isEventFilter({ listId })) {
+      // Event Filters Exceptions
+      isEndpointArtifact = true;
       await new EventFilterValidator(
         endpointAppContextService,
         request
       ).validatePreSingleListFind();
-      return data;
     }
 
     // Validate Blocklists
     if (BlocklistValidator.isBlocklist({ listId })) {
       await new BlocklistValidator(endpointAppContextService, request).validatePreSingleListFind();
-      return data;
-    }
-
-    // Validate Endpoint Exceptions
-    if (EndpointExceptionsValidator.isEndpointException({ listId })) {
+    } else if (EndpointExceptionsValidator.isEndpointException({ listId })) {
+      // Validate Endpoint Exceptions
+      isEndpointArtifact = true;
       await new EndpointExceptionsValidator(
         endpointAppContextService,
         request
       ).validatePreSingleListFind();
-      return data;
+    } else if (EndpointExceptionsValidator.isEndpointException({ listId })) {
+      // Validate Endpoint Exceptions
+      isEndpointArtifact = true;
+      await new EndpointExceptionsValidator(
+        endpointAppContextService,
+        request
+      ).validatePreSingleListFind();
+    }
+
+    if (isEndpointArtifact) {
+      if (!request) {
+        throw new EndpointArtifactExceptionValidationError(`Missing HTTP Request object`);
+      }
+
+      await setFindRequestFilterScopeToActiveSpace(endpointAppContextService, request, data);
     }
 
     return data;

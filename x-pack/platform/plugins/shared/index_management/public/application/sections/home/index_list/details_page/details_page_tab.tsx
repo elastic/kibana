@@ -6,7 +6,7 @@
  */
 
 import React, { FunctionComponent, useEffect } from 'react';
-import { EuiBreadcrumb } from '@elastic/eui';
+import { EuiBreadcrumb, useEuiTheme } from '@elastic/eui';
 import { breadcrumbService, IndexManagementBreadcrumb } from '../../../../services/breadcrumbs';
 import { Index } from '../../../../../../common';
 import { IndexDetailsTab, IndexDetailsTabId } from '../../../../../../common/constants';
@@ -24,13 +24,15 @@ export const DetailsPageTab: FunctionComponent<Props> = ({ tabs, tab, index }) =
     core: { getUrlForApp },
   } = useAppContext();
 
+  const { euiTheme } = useEuiTheme();
+
   useEffect(() => {
     const breadcrumb: EuiBreadcrumb = selectedTab?.breadcrumb ?? { text: selectedTab?.name };
     breadcrumbService.setBreadcrumbs(IndexManagementBreadcrumb.indexDetails, breadcrumb);
   }, [selectedTab]);
 
   return selectedTab ? (
-    selectedTab.renderTabContent({ index, getUrlForApp })
+    selectedTab.renderTabContent({ index, getUrlForApp, euiTheme })
   ) : (
     <DetailsPageOverview indexDetails={index} />
   );

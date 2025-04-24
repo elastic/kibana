@@ -75,14 +75,14 @@ export const groupingContainerCssLevel = (euiTheme: EuiThemeComputed<{}>) => css
   }
 `;
 
-export const StyledContextMenu = euiStyled(EuiContextMenu)<{ euiTheme: EuiThemeComputed }>`
+export const StyledContextMenu = euiStyled(EuiContextMenu)<{ border: EuiThemeComputed['border'] }>`
   width: 250px;
   & .euiContextMenuItem__text {
     overflow: hidden;
     text-overflow: ellipsis;
   }
   .euiContextMenuItem {
-    border-bottom: ${(props) => props.euiTheme.border.thin};
+    border-bottom: ${(props) => props.border.thin};
   }
   .euiContextMenuItem:last-child {
     border: none;

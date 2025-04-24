@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
-import { PluginInitializerContext } from '@kbn/core/server';
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
+import type { PluginInitializerContext } from '@kbn/core/server';
 
+import type { ExperimentalFeatures } from '../common/experimental_features';
 import {
-  ExperimentalFeatures,
   getExperimentalAllowedValues,
   isValidExperimentalValue,
   parseExperimentalConfigValue,
@@ -18,6 +19,9 @@ import {
 const allowedExperimentalValues = getExperimentalAllowedValues();
 
 export const configSchema = schema.object({
+  rules: schema.object({
+    enabled: schema.boolean({ defaultValue: true }),
+  }),
   enableGeoTrackingThresholdAlert: schema.maybe(schema.boolean({ defaultValue: false })),
   enableExperimental: schema.arrayOf(schema.string(), {
     defaultValue: () => [],

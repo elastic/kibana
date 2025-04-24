@@ -36,7 +36,9 @@ export const UpgradePrebuiltRulesTableButtons = ({
 
   const doAllSelectedRulesHaveConflicts =
     isRulesCustomizationEnabled &&
-    selectedRules.every(({ hasUnresolvedConflicts }) => hasUnresolvedConflicts);
+    selectedRules.every(
+      ({ hasNonSolvableUnresolvedConflicts }) => hasNonSolvableUnresolvedConflicts
+    );
 
   const { selectedRulesButtonTooltip, allRulesButtonTooltip } = useBulkUpdateButtonsTooltipContent({
     canUserEditRules,

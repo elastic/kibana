@@ -69,7 +69,8 @@ export const RuleMigrationsPanels = React.memo<RuleMigrationsPanelsProps>(
 
         {latestMigrationsStats.map((migrationStats) => (
           <EuiFlexItem grow={false} key={migrationStats.id}>
-            {migrationStats.status === SiemMigrationTaskStatus.READY && (
+            {(migrationStats.status === SiemMigrationTaskStatus.READY ||
+              migrationStats.status === SiemMigrationTaskStatus.STOPPED) && (
               <MigrationReadyPanel migrationStats={migrationStats} />
             )}
             {migrationStats.status === SiemMigrationTaskStatus.RUNNING && (
