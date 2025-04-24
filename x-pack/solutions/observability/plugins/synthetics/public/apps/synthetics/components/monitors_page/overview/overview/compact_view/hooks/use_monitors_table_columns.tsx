@@ -5,64 +5,27 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { EuiBasicTableColumn, EuiLink } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
-import { i18n } from '@kbn/i18n';
 import { TagsList } from '@kbn/observability-shared-plugin/public';
-
 import { useDispatch } from 'react-redux';
-import { setFlyoutConfig } from '../../../../../../state';
 import {
   MonitorTypeEnum,
   OverviewStatusMetaData,
 } from '../../../../../../../../../common/runtime_types';
 import { MonitorTypeBadge } from '../../../../../common/components/monitor_type_badge';
 import { getFilterForTypeMessage } from '../../../../management/monitor_list_table/labels';
-import { useOverviewStatus } from '../../../../hooks/use_overview_status';
 import { BadgeStatus } from '../../../../../common/components/monitor_status';
 import { FlyoutParamProps } from '../../types';
-import { ActionsPopover } from '../../actions_popover';
+import { MonitorsActions } from '../components/monitors_actions';
+import { STATUS, ACTIONS, LOCATIONS, NAME, TAGS, TYPE } from '../labels';
 
-const STATUS = i18n.translate('xpack.synthetics.overview.compactView.monitorStatus', {
-  defaultMessage: 'Status',
-});
-
-const NAME = i18n.translate('xpack.synthetics.overview.compactView.monitorName', {
-  defaultMessage: 'Name',
-});
-
-const TYPE = i18n.translate('xpack.synthetics.overview.compactView.monitorType', {
-  defaultMessage: 'Type',
-});
-
-const LOCATIONS = i18n.translate('xpack.synthetics.overview.compactView.monitorLocations', {
-  defaultMessage: 'Locations',
-});
-
-const TAGS = i18n.translate('xpack.synthetics.overview.compactView.monitorTags', {
-  defaultMessage: 'Tags',
-});
-
-const ACTIONS = i18n.translate('xpack.synthetics.overview.compactView.monitorActions', {
-  defaultMessage: 'Actions',
-});
-
-const MonitorActions = ({ monitor }: { monitor: OverviewStatusMetaData }) => {
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-
-  return (
-    <ActionsPopover
-      isPopoverOpen={isPopoverOpen}
-      locationId={monitor.locationId}
-      monitor={monitor}
-      position="default"
-      setIsPopoverOpen={setIsPopoverOpen}
-    />
-  );
-};
-
-export const useOverviewCompactView = () => {
+export const useMonitorsTableColumns = ({
+  setFlyoutConfigCallback,
+}: {
+  setFlyoutConfigCallback: (params: FlyoutParamProps) => void;
+}) => {
   const history = useHistory();
 
   const onClickMonitorType = useCallback(
@@ -83,27 +46,21 @@ export const useOverviewCompactView = () => {
 
   const dispatch = useDispatch();
 
-  const setFlyoutConfigCallback = useCallback(
-    (params: FlyoutParamProps) => {
-      dispatch(setFlyoutConfig(params));
-    },
-    [dispatch]
-  );
-
   const openFlyout = useCallback(
     (monitor: OverviewStatusMetaData) => {
       const { configId, locationLabel, locationId, spaceId } = monitor;
-
       dispatch(
-        setFlyoutConfig({ configId, id: configId, location: locationLabel, locationId, spaceId })
+        setFlyoutConfigCallback({
+          configId,
+          id: configId,
+          location: locationLabel,
+          locationId,
+          spaceId,
+        })
       );
     },
-    [dispatch]
+    [dispatch, setFlyoutConfigCallback]
   );
-
-  const { loaded } = useOverviewStatus({
-    scopeStatusByLocation: true,
-  });
 
   const columns: Array<EuiBasicTableColumn<OverviewStatusMetaData>> = useMemo(
     () => [
@@ -152,7 +109,7 @@ export const useOverviewCompactView = () => {
       },
       {
         name: ACTIONS,
-        render: (monitor: OverviewStatusMetaData) => <MonitorActions monitor={monitor} />,
+        render: (monitor: OverviewStatusMetaData) => <MonitorsActions monitor={monitor} />,
         align: 'right',
       },
     ],
@@ -161,7 +118,5 @@ export const useOverviewCompactView = () => {
 
   return {
     columns,
-    loading: !loaded,
-    setFlyoutConfigCallback,
   };
 };

@@ -296,7 +296,9 @@ export const OverviewGrid = memo(() => {
             )}
         </>
       ) : null}
-      {view === 'compactView' ? <OverviewGridCompactView /> : null}
+      {view === 'compactView' ? (
+        <OverviewGridCompactView setFlyoutConfigCallback={setFlyoutConfigCallback} />
+      ) : null}
       <MaybeMonitorDetailsFlyout setFlyoutConfigCallback={setFlyoutConfigCallback} />
     </>
   );

@@ -27,7 +27,7 @@ import { OverviewStatusMetaData } from '../../types';
 import { selectOverviewStatus } from '../../../../../state/overview_status';
 import { MetricItem } from '../metric_item/metric_item';
 import { View } from '../overview_grid';
-import { MonitorTable } from '../compact_view/overview_grid_compact_view';
+import { MonitorsTable } from '../compact_view/components/monitors_table';
 
 const PER_ROW = 4;
 const DEFAULT_ROW_SIZE = 2;
@@ -210,7 +210,9 @@ export const GroupGridItem = ({
           groupMonitors={groupMonitors}
         />
       ) : null}
-      {view === 'compactView' ? <MonitorTable items={groupMonitors} /> : null}
+      {view === 'compactView' ? (
+        <MonitorsTable items={groupMonitors} setFlyoutConfigCallback={setFlyoutConfigCallback} />
+      ) : null}
     </EuiAccordion>
   );
 };

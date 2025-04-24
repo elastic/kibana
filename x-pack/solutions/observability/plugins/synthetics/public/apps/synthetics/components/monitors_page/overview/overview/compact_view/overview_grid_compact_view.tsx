@@ -5,31 +5,30 @@
  * 2.0.
  */
 
-import { EuiBasicTable } from '@elastic/eui';
 import React from 'react';
 import { useSelector } from 'react-redux';
 import { useMonitorsSortedByStatus } from '../../../../../hooks/use_monitors_sorted_by_status';
 import { selectOverviewState } from '../../../../../state';
-import { useOverviewCompactView } from './hooks/use_overview_compact_view';
 import { GridItemsByGroup } from '../grid_by_group/grid_items_by_group';
-import { OverviewStatusMetaData } from '../../types';
+import { FlyoutParamProps } from '../types';
+import { MonitorsTable } from './components/monitors_table';
 
-export const OverviewGridCompactView = () => {
+export const OverviewGridCompactView = ({
+  setFlyoutConfigCallback,
+}: {
+  setFlyoutConfigCallback: (params: FlyoutParamProps) => void;
+}) => {
   const {
     groupBy: { field: groupField },
   } = useSelector(selectOverviewState);
-  const { setFlyoutConfigCallback } = useOverviewCompactView();
   const monitorsSortedByStatus = useMonitorsSortedByStatus();
 
   return groupField === 'none' ? (
-    <MonitorTable items={monitorsSortedByStatus} />
+    <MonitorsTable
+      items={monitorsSortedByStatus}
+      setFlyoutConfigCallback={setFlyoutConfigCallback}
+    />
   ) : (
     <GridItemsByGroup setFlyoutConfigCallback={setFlyoutConfigCallback} view="compactView" />
   );
-};
-
-export const MonitorTable = ({ items }: { items: OverviewStatusMetaData[] }) => {
-  const { columns, loading } = useOverviewCompactView();
-
-  return <EuiBasicTable items={items} columns={columns} loading={loading} />;
 };
