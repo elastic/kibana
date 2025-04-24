@@ -72,6 +72,7 @@ describe('Fleet - storedPackagePoliciesToAgentInputs', () => {
         compiled_stream: {
           fooKey: 'fooValue1',
           fooKey2: ['fooValue2'],
+          data_stream: { dataset: 'foo' }, // data_stream.dataset can be set in the compiled stream, ensure that rest of data_stream object is properly merged.
         },
       },
       {
@@ -124,6 +125,7 @@ describe('Fleet - storedPackagePoliciesToAgentInputs', () => {
         compiled_stream: {
           fooKey: 'fooValue1',
           fooKey2: ['fooValue2'],
+          data_stream: { dataset: 'foo' }, // data_stream.dataset can be set in the compiled stream, ensure that rest of data_stream object is properly merged.
         },
       },
     ],
