@@ -736,9 +736,7 @@ TODO: Check why for the legacy API Dmitrii has added 2 integration tests for `ru
 - `should update outdated prebuilt rules when previous historical versions available`
 - `should update outdated prebuilt rules when previous historical versions unavailable`
 
-:::{note}
-The second scenario tests that, if a new version of a rule is released, it can upgrade the current instance of that rule even if the historical versions of that rule are no longer in the package)
-:::
+(NOTE: the second scenario tests that, if a new version of a rule is released, it can upgrade the current instance of that rule even if the historical versions of that rule are no longer in the package)
 
 Notes:
 
