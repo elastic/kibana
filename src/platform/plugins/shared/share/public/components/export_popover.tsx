@@ -28,6 +28,7 @@ import {
   EuiSwitch,
   EuiCallOut,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n-react';
 import { ShareMenuProvider, type IShareContext, useShareTabsContext } from './context';
 import { ExportShareConfig } from '../types';
@@ -136,6 +137,8 @@ function ExportMenuPopover({ intl }: ExportMenuProps) {
                 iconType={menuItem.config.icon}
                 key={menuItem.id}
                 label={menuItem.config.label}
+                data-test-subj={`exportMenuItem-${menuItem.config.label}`}
+                isDisabled={menuItem.config.disabled}
                 onClick={() => {
                   setSelectedMenuItemId(menuItem.id);
                   setIsFlyoutVisible(true);
@@ -147,10 +150,16 @@ function ExportMenuPopover({ intl }: ExportMenuProps) {
       </EuiWrappingPopover>
       {isFlyoutVisible && (
         <EuiFlyout
-          data-test-subj="exportShareFlyout"
+          data-test-subj="exportItemDetailsFlyout"
           size="s"
           onClose={flyoutOnCloseHandler}
+          css={() => ({
+            ['--euiFixedHeadersOffset']: 0,
+          })}
           ownFocus
+          maskProps={{
+            headerZindexLocation: 'above',
+          }}
         >
           <EuiFlyoutHeader hasBorder>
             <EuiTitle>
@@ -199,9 +208,13 @@ function ExportMenuPopover({ intl }: ExportMenuProps) {
                       </EuiFlexItem>
                       <EuiFlexItem>
                         <EuiCodeBlock
+                          data-test-subj="exportAssetValue"
                           css={{ overflowWrap: 'break-word' }}
-                          language="json"
+                          language="text"
                           isCopyable
+                          copyAriaLabel={i18n.translate('share.export.copyPostURLAriaLabel', {
+                            defaultMessage: 'Copy export asset value',
+                          })}
                         >
                           {selectedMenuItem?.config.generateAssetURIValue({
                             intl,
@@ -239,7 +252,15 @@ function ExportMenuPopover({ intl }: ExportMenuProps) {
           <EuiFlyoutFooter>
             <EuiFlexGroup justifyContent="spaceBetween">
               <EuiFlexItem grow={false}>
-                <EuiButtonEmpty onClick={() => setIsFlyoutVisible(false)}>Close</EuiButtonEmpty>
+                <EuiButtonEmpty
+                  data-test-subj="exportFlyoutCloseButton"
+                  onClick={flyoutOnCloseHandler}
+                >
+                  <FormattedMessage
+                    id="share.export.closeFlyoutButtonLabel"
+                    defaultMessage="Close"
+                  />
+                </EuiButtonEmpty>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiButton

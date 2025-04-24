@@ -36,7 +36,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
   const queryBar = getService('queryBar');
   const dataViews = getService('dataViews');
 
-  const { common, header, timePicker, dashboard, timeToVisualize, unifiedSearch, share } =
+  const { common, header, timePicker, dashboard, timeToVisualize, unifiedSearch, share, exports } =
     getPageObjects([
       'common',
       'header',
@@ -45,6 +45,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       'timeToVisualize',
       'unifiedSearch',
       'share',
+      'exports',
     ]);
 
   return logWrapper('lensPage', log, {
@@ -1907,11 +1908,19 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       return await testSubjects.click('lnsApp_shareButton');
     },
 
+    async clickExportButton() {
+      return await testSubjects.click('lnsApp_exportButton');
+    },
+
     async isShareable() {
       return await testSubjects.isEnabled('lnsApp_shareButton');
     },
 
-    async isShareActionEnabled(action: 'export' | 'link') {
+    isExportActionEnabled() {
+      return testSubjects.isEnabled('lnsApp_exportButton');
+    },
+
+    async isShareActionEnabled(action: 'link') {
       switch (action) {
         case 'link':
           return await testSubjects.isEnabled('link');
@@ -1920,7 +1929,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       }
     },
 
-    async ensureShareMenuIsOpen(action: 'export' | 'link') {
+    async ensureShareMenuIsOpen(action: 'link') {
       await this.clickShareModal();
 
       if (!(await testSubjects.exists('shareContextModal'))) {
@@ -1941,6 +1950,30 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       return share.closeShareModal();
     },
 
+    closeExportFlyout() {
+      return exports.closeExportFlyout();
+    },
+
+    async isPopoverItemEnabled(label: string) {
+      await this.clickExportButton();
+
+      return await exports.isPopoverItemEnabled(label);
+    },
+
+    async clickPopoverItem(label: string) {
+      log.debug(`clickPopoverItem label: ${label}`);
+
+      await retry.waitFor('ascertain that export popover is open', async () => {
+        const isExportPopoverOpen = await exports.isExportPopoverOpen();
+        if (!isExportPopoverOpen) {
+          await this.clickExportButton();
+        }
+        return isExportPopoverOpen;
+      });
+
+      await testSubjects.click(`exportMenuItem-${label}`);
+    },
+
     async getUrl() {
       await this.ensureShareMenuIsOpen('link');
       const url = await share.getSharedUrl();
@@ -1954,10 +1987,9 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       return url;
     },
 
-    async openCSVDownloadShare() {
-      await this.ensureShareMenuIsOpen('export');
-      await testSubjects.click('export');
-      await testSubjects.click('lens_csv-radioOption');
+    async openCSVDownloadExport() {
+      await this.clickExportButton();
+      await exports.clickPopoverItem('CSV');
     },
 
     async setCSVDownloadDebugFlag(value: boolean = true) {
@@ -1967,14 +1999,8 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     async openReportingShare(type: 'PNG' | 'PDF') {
-      await this.ensureShareMenuIsOpen(`export`);
-      await testSubjects.click(`export`);
-      if (type === 'PDF') {
-        return await testSubjects.click('printablePdfV2-radioOption');
-      }
-      if (type === 'PNG') {
-        return await testSubjects.click('pngV2-radioOption');
-      }
+      await this.clickExportButton();
+      await exports.clickPopoverItem(type);
     },
 
     async getCSVContent() {

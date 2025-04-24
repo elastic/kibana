@@ -45,7 +45,7 @@ export class SharePageObject extends FtrService {
     return this.testSubjects.click('shareTopNavButton');
   }
 
-  async openShareModalItem(itemTitle: 'link' | 'export' | 'embed') {
+  async openShareModalItem(itemTitle: 'link' | 'embed') {
     this.log.debug(`openShareModalItem title: ${itemTitle}`);
     const isShareModalOpen = await this.isShareModalOpen();
     if (!isShareModalOpen) {
