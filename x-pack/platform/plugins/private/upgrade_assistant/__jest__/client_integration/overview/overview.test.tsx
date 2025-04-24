@@ -9,12 +9,7 @@ import { act } from 'react-dom/test-utils';
 import { waitFor } from '@testing-library/react';
 import SemVer from 'semver/classes/semver';
 
-import {
-  ALTERNATIVE_VERSION_UPGRADE_FROM,
-  ALTERNATIVE_VERSION_UPGRADE_TO,
-  LATEST_VERSION,
-  MIN_VERSION_TO_UPGRADE_TO_LATEST,
-} from '../../../common/constants';
+import { LATEST_VERSION, MIN_VERSION_TO_UPGRADE_TO_LATEST } from '../../../common/constants';
 import { setupEnvironment } from '../helpers';
 import { OverviewTestBed, setupOverviewPage } from './overview.helpers';
 
@@ -98,7 +93,7 @@ describe('Overview Page', () => {
           find('overviewPageHeader').find('.euiToolTipAnchor').first().simulate('mouseOver');
           const toolTipText = document.querySelector('.euiToolTipPopover')?.textContent;
           expect(toolTipText).toBe(
-            `Upgrading to v${LATEST_VERSION} requires v${MIN_VERSION_TO_UPGRADE_TO_LATEST}. An alternative upgrade path is v${ALTERNATIVE_VERSION_UPGRADE_FROM} to v${ALTERNATIVE_VERSION_UPGRADE_TO} (when available).`
+            `Upgrading to v${LATEST_VERSION} requires v${MIN_VERSION_TO_UPGRADE_TO_LATEST}.`
           );
         });
       });

@@ -20,6 +20,7 @@ describe('UpdateIndexFlyoutStep', () => {
     isReadonly: false,
     isClosedIndex: false,
     reindexName: 'some_index-reindexed-for-9',
+    isFollowerIndex: false,
   };
 
   const defaultUpdateIndexState: UpdateIndexState = {
@@ -42,6 +43,7 @@ describe('UpdateIndexFlyoutStep', () => {
       <Fragment>
         <EuiFlyoutBody>
           <EuiTitle
+            data-test-subj="updateIndexFlyoutTitle"
             size="xs"
           >
             <h3>
@@ -112,6 +114,7 @@ describe('UpdateIndexFlyoutStep', () => {
       <Fragment>
         <EuiFlyoutBody>
           <EuiTitle
+            data-test-subj="updateIndexFlyoutTitle"
             size="xs"
           >
             <h3>

@@ -7,7 +7,11 @@
 import { RulesClientApi } from '@kbn/alerting-plugin/server/types';
 import { CoreSetup, KibanaRequest, Logger } from '@kbn/core/server';
 import { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
-import { RuleDataPluginService } from '@kbn/rule-registry-plugin/server';
+import type { DashboardPluginStart } from '@kbn/dashboard-plugin/server';
+import {
+  RuleDataPluginService,
+  RuleRegistryPluginStartContract,
+} from '@kbn/rule-registry-plugin/server';
 import { registerRoutes as registerServerRoutes } from '@kbn/server-route-repository';
 import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { AlertDetailsContextualInsightsService } from '../services';
@@ -27,6 +31,8 @@ export interface RegisterRoutesDependencies {
   dataViews: DataViewsServerPluginStart;
   spaces?: SpacesPluginStart;
   ruleDataService: RuleDataPluginService;
+  ruleRegistry: RuleRegistryPluginStartContract;
+  dashboard: DashboardPluginStart;
   assistant: {
     alertDetailsContextualInsightsService: AlertDetailsContextualInsightsService;
   };
