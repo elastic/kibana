@@ -17,8 +17,9 @@ interface CreateTestConfigOptions {
   license: string;
   ssl?: boolean;
   services?: any;
+  esSnapshotStorageConfig?: { size: `${number}GB`; path: string };
+  ilmPollInterval?: `${number}${'s' | 'm'}`;
 }
-
 // test.not-enabled is specifically not enabled
 const enabledActionTypes = [
   '.cases',
@@ -38,7 +39,13 @@ const enabledActionTypes = [
 ];
 
 export function createTestConfig(options: CreateTestConfigOptions, testFiles?: string[]) {
-  const { license = 'trial', ssl = false, services = baseServices } = options;
+  const {
+    license = 'trial',
+    ssl = false,
+    services = baseServices,
+    esSnapshotStorageConfig,
+    ilmPollInterval,
+  } = options;
 
   return async ({ readConfigFile }: FtrConfigProviderContext) => {
     const xPackApiIntegrationTestsConfig = await readConfigFile(
@@ -64,7 +71,16 @@ export function createTestConfig(options: CreateTestConfigOptions, testFiles?: s
         ...xPackApiIntegrationTestsConfig.get('esTestCluster'),
         license,
         ssl,
-        serverArgs: [`xpack.license.self_generated.type=${license}`],
+        serverArgs: [
+          `xpack.license.self_generated.type=${license}`,
+          ...(esSnapshotStorageConfig
+            ? [
+                `path.repo=${esSnapshotStorageConfig.path}`,
+                `xpack.searchable.snapshot.shared_cache.size=${esSnapshotStorageConfig.size}`,
+              ]
+            : []),
+          ...(ilmPollInterval ? [`indices.lifecycle.poll_interval=${ilmPollInterval}`] : []),
+        ],
       },
       kbnTestServer: {
         ...xPackApiIntegrationTestsConfig.get('kbnTestServer'),
