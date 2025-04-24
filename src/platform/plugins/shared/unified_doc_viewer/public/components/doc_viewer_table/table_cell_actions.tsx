@@ -17,7 +17,7 @@ import { FieldRow } from './field_row';
 interface TableActionsProps {
   Component: EuiDataGridColumnCellActionProps['Component'];
   row: FieldRow | undefined; // as we pass `rows[rowIndex]` it's safer to assume that `row` prop can be undefined
-  isEsqlMode?: boolean | undefined;
+  isEsqlMode: boolean | undefined;
 }
 
 function isFilterInOutPairDisabled(
@@ -72,7 +72,7 @@ const Copy: React.FC<TableActionsProps & { toasts: IToasts }> = ({ Component, ro
     return null;
   }
 
-  const { formattedAsText, name } = row;
+  const { name } = row;
 
   const copyLabel = i18n.translate('unifiedDocViewer.docViews.table.copyValue', {
     defaultMessage: 'Copy value',
@@ -92,14 +92,14 @@ const Copy: React.FC<TableActionsProps & { toasts: IToasts }> = ({ Component, ro
           }
         );
 
-        if (!formattedAsText) {
+        if (!row.formattedAsText) {
           toasts.addWarning({
             title: errorMessage,
           });
           return;
         }
 
-        const copied = copyToClipboard(formattedAsText);
+        const copied = copyToClipboard(row.formattedAsText);
         if (!copied) {
           toasts.addWarning({
             title: errorMessage,
@@ -386,7 +386,15 @@ export function getFieldValueCellActions({
     : [];
 
   const copyAction = ({ Component, rowIndex }: EuiDataGridColumnCellActionProps) => {
-    return <Copy toasts={toasts} row={rows[rowIndex]} Component={Component} />;
+    return (
+      <Copy
+        toasts={toasts}
+        row={rows[rowIndex]}
+        Component={Component}
+        // The copy action doesn't need this flag but we still want to keep it in the type so we don't forget about it
+        isEsqlMode={undefined}
+      />
+    );
   };
 
   return [...filterActions, copyAction];
