@@ -14,22 +14,21 @@ import { CLOUDBEAT_AZURE } from './azure_credentials_form/constants';
 import type { AssetInput } from './types';
 
 export const getMockPolicyAWS = (vars?: PackagePolicyConfigRecord) =>
-  getPolicyMock(CLOUDBEAT_AWS, 'asset_inventory', 'aws', vars);
+  getPolicyMock(CLOUDBEAT_AWS, 'aws', vars);
 export const getMockPolicyGCP = (vars?: PackagePolicyConfigRecord) =>
-  getPolicyMock(CLOUDBEAT_GCP, 'asset_inventory', 'gcp', vars);
+  getPolicyMock(CLOUDBEAT_GCP, 'gcp', vars);
 export const getMockPolicyAzure = (vars?: PackagePolicyConfigRecord) =>
-  getPolicyMock(CLOUDBEAT_AZURE, 'asset_inventory', 'azure', vars);
+  getPolicyMock(CLOUDBEAT_AZURE, 'azure', vars);
 export const getMockPackageInfo = () => getPackageInfoMock();
 
-export const getMockPackageInfoCspmAWS = (packageVersion = '1.5.0') => {
+export const getMockPackageInfoAssetInventoryAWS = () => {
   return {
-    version: packageVersion,
-    name: 'cspm',
+    name: 'cloud_asset_inventory',
     policy_templates: [
       {
         title: '',
         description: '',
-        name: 'cspm',
+        name: 'asset_inventory',
         inputs: [
           {
             type: CLOUDBEAT_AWS,
@@ -50,15 +49,14 @@ export const getMockPackageInfoCspmAWS = (packageVersion = '1.5.0') => {
   } as PackageInfo;
 };
 
-export const getMockPackageInfoCspmGCP = (packageVersion = '1.5.2') => {
+export const getMockPackageInfoAssetInfoGCP = () => {
   return {
-    version: packageVersion,
-    name: 'cspm',
+    name: 'cloud_asset_inventory',
     policy_templates: [
       {
         title: '',
         description: '',
-        name: 'cspm',
+        name: 'asset_inventory',
         inputs: [
           {
             type: CLOUDBEAT_GCP,
@@ -72,15 +70,14 @@ export const getMockPackageInfoCspmGCP = (packageVersion = '1.5.2') => {
   } as PackageInfo;
 };
 
-export const getMockPackageInfoCspmAzure = (packageVersion = '1.6.0') => {
+export const getMockPackageInfoAssetInfoAzure = () => {
   return {
-    version: packageVersion,
-    name: 'cspm',
+    name: 'cloud_asset_inventory',
     policy_templates: [
       {
         title: '',
         description: '',
-        name: 'cspm',
+        name: 'asset_inventory',
         inputs: [
           {
             type: CLOUDBEAT_AZURE,
@@ -96,20 +93,20 @@ export const getMockPackageInfoCspmAzure = (packageVersion = '1.6.0') => {
 
 const getPolicyMock = (
   type: AssetInput,
-  posture: string,
   deployment: string,
   vars: object = {}
 ): NewPackagePolicy => {
   const mockPackagePolicy = createNewPackagePolicyMock();
 
   const awsVarsMock = {
-    access_key_id: { type: 'text' },
-    secret_access_key: { type: 'password', isSecret: true },
-    session_token: { type: 'text' },
-    shared_credential_file: { type: 'text' },
-    credential_profile_name: { type: 'text' },
-    role_arn: { type: 'text' },
-    'aws.credentials.type': { value: 'cloud_formation', type: 'text' },
+    'aws.account_type': { value: 'single-account' },
+    'aws.access_key_id': { type: 'text' },
+    'aws.secret_access_key': { type: 'password', isSecret: true },
+    'aws.session_token': { type: 'text' },
+    'aws.shared_credential_file': { type: 'text' },
+    'aws.credential_profile_name': { type: 'text' },
+    'aws.role_arn': { type: 'text' },
+    'aws.credentials.type': { value: 'cloud_formation' },
   };
 
   const gcpVarsMock = {
@@ -118,7 +115,7 @@ const getPolicyMock = (
     'gcp.credentials.file': { type: 'text' },
     'gcp.credentials.json': { type: 'text' },
     'gcp.credentials.type': { type: 'text' },
-    'gcp.account_type': { value: 'organization-account', type: 'text' },
+    'gcp.account_type': { value: 'single-account', type: 'text' },
   };
 
   const azureVarsMock = {
@@ -137,15 +134,15 @@ const getPolicyMock = (
 
   return {
     ...mockPackagePolicy,
-    name: 'cloud_security_posture-policy',
+    name: 'cloud_asset_inventory-policy',
     package: {
-      name: 'cloud_security_posture',
+      name: 'cloud_asset_inventory',
       title: 'Security Posture Management (CSPM/KSPM)',
       version: '1.1.1',
     },
     vars: {
-      posture: {
-        value: posture,
+      asset: {
+        value: 'asset_inventory',
         type: 'text',
       },
       deployment: { value: deployment, type: 'text' },

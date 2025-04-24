@@ -108,7 +108,7 @@ export const CloudAssetInventoryPolicyTemplateForm =
 
       const updatePolicy = useCallback(
         (updatedPolicy: NewPackagePolicy) => {
-          onChange({ isValid: true, updatedPolicy, isExtensionLoaded: true });
+          onChange({ isValid: true, updatedPolicy });
         },
         [onChange]
       );

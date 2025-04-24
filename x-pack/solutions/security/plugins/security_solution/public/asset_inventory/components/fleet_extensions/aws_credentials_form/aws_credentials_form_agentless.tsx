@@ -11,8 +11,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
 import {
-  ORGANIZATION_ACCOUNT,
-  SINGLE_ACCOUNT,
   SUPPORTED_TEMPLATES_URL_FROM_PACKAGE_INFO_INPUT_VARS,
   TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR,
 } from '../constants';
@@ -31,6 +29,7 @@ import {
   ReadDocumentation,
 } from './aws_credentials_form';
 import { assetIntegrationDocsNavigation } from '../../../constants';
+import { AWS_ORGANIZATION_ACCOUNT, AWS_SINGLE_ACCOUNT } from './constants';
 
 const CLOUD_FORMATION_EXTERNAL_DOC_URL =
   'https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/cfn-whatis-howdoesitwork.html';
@@ -180,7 +179,7 @@ export const AwsCredentialsFormAgentless = ({
   const group = options[awsCredentialsType];
   const fields = getInputVarsFields(input, group.fields);
   const documentationLink = assetIntegrationDocsNavigation.awsGetStartedPath;
-  const accountType = input?.streams?.[0].vars?.['aws.account_type']?.value ?? SINGLE_ACCOUNT;
+  const accountType = input?.streams?.[0].vars?.['aws.account_type']?.value ?? AWS_SINGLE_ACCOUNT;
 
   // This should ony set the credentials after the initial render
   if (!getAwsCredentialsType(input)) {
@@ -200,7 +199,7 @@ export const AwsCredentialsFormAgentless = ({
     SUPPORTED_TEMPLATES_URL_FROM_PACKAGE_INFO_INPUT_VARS.CLOUD_FORMATION_CREDENTIALS
   )?.replace(TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR, accountType);
 
-  const isOrganization = accountType === ORGANIZATION_ACCOUNT;
+  const isOrganization = accountType === AWS_ORGANIZATION_ACCOUNT;
 
   return (
     <>
