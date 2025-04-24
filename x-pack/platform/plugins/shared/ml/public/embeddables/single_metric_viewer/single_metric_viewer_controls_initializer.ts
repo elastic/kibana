@@ -59,10 +59,10 @@ export const initializeSingleMetricViewerControls = (
   };
 
   const singleMetricViewerComparators: StateComparators<SingleMetricViewerControlsState> = {
-    jobIds: 'referenceEquality',
+    jobIds: 'deepEquality',
     forecastId: 'referenceEquality',
     selectedDetectorIndex: 'referenceEquality',
-    selectedEntities: 'referenceEquality',
+    selectedEntities: 'deepEquality',
     functionDescription: 'referenceEquality',
   };
 

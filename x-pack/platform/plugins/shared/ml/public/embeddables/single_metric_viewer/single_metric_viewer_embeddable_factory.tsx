@@ -81,8 +81,13 @@ export const getSingleMetricViewerEmbeddableFactory = (
         parentApi,
         serializeState,
         anyStateChange$: merge(
-          titleManager.anyStateChange$
-          // timeRangeManager.anyStateChange$
+          titleManager.anyStateChange$,
+          timeRangeManager.anyStateChange$,
+          singleMetricViewerControlsApi.jobIds,
+          singleMetricViewerControlsApi.forecastId,
+          singleMetricViewerControlsApi.selectedDetectorIndex,
+          singleMetricViewerControlsApi.selectedEntities,
+          singleMetricViewerControlsApi.functionDescription
         ).pipe(map(() => undefined)),
         // getComparators: () => {
         //   /**
