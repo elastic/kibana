@@ -27,8 +27,8 @@ export const getIntegrationList = async (
    */
   availableIntegrations?: Array<IntegrationCardItem['id']>
 ) => {
-  const packageData = await services.http
-    .get<GetPackagesResponse>(EPM_API_ROUTES.INSTALL_BY_UPLOAD_PATTERN, {
+  const installedPackageData = await services.http
+    .get<GetPackagesResponse>(`${EPM_API_ROUTES.INSTALLED_LIST_PATTERN}`, {
       version: '2023-10-31',
     })
     .catch((err: Error) => {
@@ -44,17 +44,13 @@ export const getIntegrationList = async (
       return { items: emptyItems };
     });
 
-  const installedPackages = packageData?.items?.filter((pkg) => {
-    const integrationCardId = `epr:${pkg.id}`;
+  const installedPackages = installedPackageData?.items?.filter((pkg) => {
     const isInstalled =
       pkg.status === installationStatuses.Installed ||
       pkg.status === installationStatuses.InstallFailed;
     return availableIntegrations
       ? isInstalled &&
-          availableIntegrations.some(
-            (availableIntegration) =>
-              availableIntegration === integrationCardId || availableIntegration === pkg.name
-          )
+          availableIntegrations.some((availableIntegration) => availableIntegration === pkg.name)
       : isInstalled;
   });
   const isComplete = installedPackages && installedPackages.length > 0;

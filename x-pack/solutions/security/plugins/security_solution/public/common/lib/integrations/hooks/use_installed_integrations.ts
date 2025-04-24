@@ -6,7 +6,7 @@
  */
 import { useQuery } from '@tanstack/react-query';
 import { EPM_API_ROUTES } from '@kbn/fleet-plugin/common';
-import { useKibana } from '../../../../../common/lib/kibana';
+import { useKibana } from '../../kibana';
 
 export const useFetchInstalledIntegrations = () => {
   const { http } = useKibana().services;
