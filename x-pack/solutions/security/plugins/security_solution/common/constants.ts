@@ -170,6 +170,9 @@ export const DEFAULT_INDEX_PATTERN = [...INCLUDE_INDEX_PATTERN, ...EXCLUDE_ELAST
 /** This Kibana Advanced Setting enables the `Security news` feed widget */
 export const ENABLE_NEWS_FEED_SETTING = 'securitySolution:enableNewsFeed' as const;
 
+/** This Kibana Advanced Setting sets a default AI connector for serverless AI features (AI for SOC) */
+export const DEFAULT_AI_CONNECTOR = 'securitySolution:defaultAIConnector' as const;
+
 /** This Kibana Advanced Setting allows users to enable/disable querying cold and frozen data tiers in analyzer */
 export const EXCLUDE_COLD_AND_FROZEN_TIERS_IN_ANALYZER =
   'securitySolution:excludeColdAndFrozenTiersInAnalyzer' as const;
@@ -521,3 +524,16 @@ export const MAX_MANUAL_RULE_RUN_BULK_SIZE = 100;
  * Whether it is a Jest environment
  */
 export const JEST_ENVIRONMENT = typeof jest !== 'undefined';
+
+export const AI_FOR_SOC_INTEGRATIONS = [
+  'splunk',
+  'google_secops',
+  'microsoft_sentinel',
+  'sentinel_one',
+  'crowdstrike',
+];
+
+/*
+ * The tag to mark promotion rules that are related to the AI for SOC integrations
+ */
+export const PROMOTION_RULE_TAG = 'Promotion';
