@@ -8,7 +8,7 @@
 import { useKibanaServices } from '../use_kibana';
 
 export const useConnectorTypes = () => {
-  const { searchConnectors } = useKibanaServices();
+  const { contentConnectors } = useKibanaServices();
 
-  return searchConnectors?.getConnectorTypes() || [];
+  return contentConnectors?.getConnectorTypes() || [];
 };
