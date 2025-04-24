@@ -523,7 +523,6 @@ export class DataViewsService {
       this.dataViewLazyCache.delete(id);
       this.dataViewCache.delete(id);
     } else {
-      debugger;
       this.dataViewLazyCache.clear();
       this.dataViewCache.clear();
     }
