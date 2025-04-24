@@ -67,7 +67,11 @@ const esqlMultivalueFilteringDisabled = i18n.translate(
   }
 );
 
-const Copy: React.FC<TableActionsProps & { toasts: IToasts }> = ({ Component, row, toasts }) => {
+const Copy: React.FC<Omit<TableActionsProps, 'isEsqlMode'> & { toasts: IToasts }> = ({
+  Component,
+  row,
+  toasts,
+}) => {
   if (!row) {
     return null;
   }
@@ -386,15 +390,7 @@ export function getFieldValueCellActions({
     : [];
 
   const copyAction = ({ Component, rowIndex }: EuiDataGridColumnCellActionProps) => {
-    return (
-      <Copy
-        toasts={toasts}
-        row={rows[rowIndex]}
-        Component={Component}
-        // The copy action doesn't need this flag but we still want to keep it in the type so we don't forget about it
-        isEsqlMode={undefined}
-      />
-    );
+    return <Copy toasts={toasts} row={rows[rowIndex]} Component={Component} />;
   };
 
   return [...filterActions, copyAction];
