@@ -131,7 +131,13 @@ export const attackDiscoveryScheduleExecutor = async ({
         replacements,
       }),
     };
-    alertsClient.report({ id: uuidv4(), actionGroup: 'default', payload });
+    const { id, ...restAttack } = attack;
+    alertsClient.report({
+      id: uuidv4(),
+      actionGroup: 'default',
+      payload,
+      context: { attack: restAttack },
+    });
   });
 
   return { state: {} };
