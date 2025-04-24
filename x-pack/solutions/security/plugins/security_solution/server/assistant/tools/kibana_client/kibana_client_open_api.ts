@@ -120,7 +120,7 @@ export class KibanaClientTool extends OpenApiTool<RuntimeOptions> {
                 body: JSON.stringify(input.body)
             }
 
-            return await fetch(url.toString(), requestOptions).then((res) => res.text())
+            return fetch(url.toString(), requestOptions).then((res) => res.text())
         }, {
             name: operation.getOperationId(),
             description: [operation.getDescription(), ...operation.getTags().map(tag => tag.description).filter(tag => !!tag)].join('\n'),
