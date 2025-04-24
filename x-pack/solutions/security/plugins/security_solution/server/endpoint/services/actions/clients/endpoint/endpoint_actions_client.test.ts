@@ -122,6 +122,35 @@ describe('EndpointActionsClient', () => {
     );
   });
 
+  it('should write action request with agent policy info when space awareness is enabled', async () => {
+    // @ts-expect-error assign to readonly property
+    classConstructorOptions.endpointService.experimentalFeatures.endpointManagementSpaceAwarenessEnabled =
+      true;
+
+    await endpointActionsClient.isolate(
+      responseActionsClientMock.createIsolateOptions(getCommonResponseActionOptions())
+    );
+
+    expect(classConstructorOptions.esClient.index).toHaveBeenCalledWith(
+      expect.objectContaining({
+        document: expect.objectContaining({
+          agent: {
+            id: ['1-2-3'],
+            policy: [
+              {
+                agentId: '1-2-3',
+                agentPolicyId: '6f12b025-fcb0-4db4-99e5-4927e3502bb8',
+                elasticAgentId: '1-2-3',
+                integrationPolicyId: '90d62689-f72d-4a05-b5e3-500cad0dc366',
+              },
+            ],
+          },
+        }),
+      }),
+      expect.anything()
+    );
+  });
+
   it('should write correct comment when invalid agent ids', async () => {
     await endpointActionsClient.isolate(
       responseActionsClientMock.createIsolateOptions({
@@ -320,7 +349,7 @@ describe('EndpointActionsClient', () => {
 
     // NOTE: checking only the keys in order to avoid confusion - because the use of Mocks would
     // have returned a action details that would not match the request sent in this test.
-    await expect(Object.keys(actionResponse)).toEqual([
+    expect(Object.keys(actionResponse)).toEqual([
       'action',
       'id',
       'agentType',
