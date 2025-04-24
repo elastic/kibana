@@ -692,6 +692,8 @@
       "@kbn/core-user-settings-server-mocks/*": ["src/core/packages/user-settings/server-mocks/*"],
       "@kbn/core-workspace-components": ["src/core/packages/workspace/components"],
       "@kbn/core-workspace-components/*": ["src/core/packages/workspace/components/*"],
+      "@kbn/core-workspace-kibana": ["src/core/packages/workspace/kibana"],
+      "@kbn/core-workspace-kibana/*": ["src/core/packages/workspace/kibana/*"],
       "@kbn/core-workspace-state": ["src/core/packages/workspace/state"],
       "@kbn/core-workspace-state/*": ["src/core/packages/workspace/state/*"],
       "@kbn/cross-cluster-replication-plugin": ["x-pack/platform/plugins/private/cross_cluster_replication"],
