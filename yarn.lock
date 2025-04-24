@@ -7790,6 +7790,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/unified-histogram@link:src/platform/packages/shared/kbn-unified-histogram":
+  version "0.0.0"
+  uid ""
+
 "@kbn/unified-search-plugin@link:src/platform/plugins/shared/unified_search":
   version "0.0.0"
   uid ""
