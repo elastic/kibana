@@ -10,14 +10,12 @@ import { ASSETS_PATH } from '../../common/constants';
 import type { SecuritySubPluginRoutes } from '../app/types';
 import { Assets } from './assets';
 import { PluginTemplateWrapper } from '../common/components/plugin_template_wrapper';
-import { SecurityRoutePageWrapper } from '../common/components/security_route_page_wrapper';
+import { withSecurityRoutePageWrapper } from '../common/components/security_route_page_wrapper';
 
 const AssetsPage = React.memo(function AssetsPage() {
   return (
     <PluginTemplateWrapper>
-      <SecurityRoutePageWrapper pageName={SecurityPageName.assets} redirectOnMissing>
-        <Assets />
-      </SecurityRoutePageWrapper>
+      <Assets />
     </PluginTemplateWrapper>
   );
 });
@@ -25,6 +23,8 @@ const AssetsPage = React.memo(function AssetsPage() {
 export const routes: SecuritySubPluginRoutes = [
   {
     path: ASSETS_PATH,
-    component: AssetsPage,
+    component: withSecurityRoutePageWrapper(AssetsPage, SecurityPageName.assets, {
+      redirectOnMissing: true,
+    }),
   },
 ];

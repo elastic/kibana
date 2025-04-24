@@ -10,14 +10,12 @@ import { INVESTIGATIONS_PATH } from '../../common/constants';
 import type { SecuritySubPluginRoutes } from '../app/types';
 import { Investigations } from './investigations';
 import { PluginTemplateWrapper } from '../common/components/plugin_template_wrapper';
-import { SecurityRoutePageWrapper } from '../common/components/security_route_page_wrapper';
+import { withSecurityRoutePageWrapper } from '../common/components/security_route_page_wrapper';
 
 const InvestigationsPage = React.memo(function InvestigationsPage() {
   return (
     <PluginTemplateWrapper>
-      <SecurityRoutePageWrapper pageName={SecurityPageName.investigations} redirectOnMissing>
-        <Investigations />
-      </SecurityRoutePageWrapper>
+      <Investigations />
     </PluginTemplateWrapper>
   );
 });
@@ -25,6 +23,8 @@ const InvestigationsPage = React.memo(function InvestigationsPage() {
 export const routes: SecuritySubPluginRoutes = [
   {
     path: INVESTIGATIONS_PATH,
-    component: InvestigationsPage,
+    component: withSecurityRoutePageWrapper(InvestigationsPage, SecurityPageName.investigations, {
+      redirectOnMissing: true,
+    }),
   },
 ];
