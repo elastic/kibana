@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useCallback, useMemo } from 'react';
+import React, { useMemo } from 'react';
 
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { EuiLink, Query, Ast } from '@elastic/eui';
@@ -22,12 +22,12 @@ export const DashboardsCell: React.FunctionComponent<{ package: PackageListItem 
   const { spaceId = DEFAULT_SPACE_ID } = useFleetStatus();
   const core = useStartServices();
 
-  const packageTagQueryClause = useCallback(() => {
+  const packageTagQueryClause = useMemo(() => {
     const ast = Ast.create([]);
     return new Query(ast.addOrFieldValue('tag', title, true, 'eq')).text;
   }, [title]);
 
-  const link = core.http.basePath.prepend(`/app/dashboards#/list?s=${packageTagQueryClause()}`);
+  const link = core.http.basePath.prepend(`/app/dashboards#/list?s=${packageTagQueryClause}`);
 
   const dashboardsCount = useMemo(() => {
     if (!installationInfo) {
