@@ -51,7 +51,7 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
   const setExpandedDocWithInitialTab = useCallback(
     (doc: DataTableRecord | undefined, options?: { initialTabId?: string }) => {
       setExpandedDoc(doc);
-      if (options.initialTabId) {
+      if (options?.initialTabId) {
         setResetTabId(uuidv4());
         setInitialTabId(options.initialTabId);
       }
