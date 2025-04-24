@@ -12,8 +12,8 @@ import { useIntegrationLinkState } from '../../../common/hooks/integrations/use_
 import { addPathParamToUrl } from '../../../common/utils/integrations';
 import { ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_PATH } from '../../../../common/constants';
 import { useNavigation } from '../../../common/lib/kibana';
-import { INTEGRATION_APP_ID } from '../../../onboarding/components/onboarding_body/cards/integrations/constants';
 import { useEntityAnalyticsIntegrations } from './hooks/use_integrations';
+import { INTEGRATION_APP_ID } from '../../../common/lib/integrations/constants';
 
 /**
  * This component has to be wrapped by react Suspense.
