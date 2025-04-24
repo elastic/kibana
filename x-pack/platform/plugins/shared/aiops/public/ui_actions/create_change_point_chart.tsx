@@ -68,7 +68,9 @@ export function createAddChangePointChartAction(
 
         presentationContainerParent.addNewPanel({
           panelType: EMBEDDABLE_CHANGE_POINT_CHART_TYPE,
-          initialState,
+          serializedState: {
+            rawState: initialState,
+          },
         });
       } catch (e) {
         return Promise.reject();

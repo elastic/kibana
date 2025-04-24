@@ -43,11 +43,11 @@ import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { DataSourceContextProvider } from '../../hooks/use_data_source';
 import { FilterQueryContextProvider } from '../../hooks/use_filters_query';
 import { DEFAULT_SERIES } from './const';
-import type { ChangePointEmbeddableRuntimeState } from './types';
+import type { ChangePointEmbeddableState } from './types';
 
 export interface AnomalyChartsInitializerProps {
-  initialInput?: Partial<ChangePointEmbeddableRuntimeState>;
-  onCreate: (props: ChangePointEmbeddableRuntimeState) => void;
+  initialInput?: Partial<ChangePointEmbeddableState>;
+  onCreate: (props: ChangePointEmbeddableState) => void;
   onCancel: () => void;
 }
 
@@ -204,7 +204,7 @@ export const ChangePointChartInitializer: FC<AnomalyChartsInitializerProps> = ({
 };
 
 export type FormControlsProps = Pick<
-  ChangePointEmbeddableRuntimeState,
+  ChangePointEmbeddableState,
   'metricField' | 'splitField' | 'fn' | 'maxSeriesToPlot' | 'partitions'
 >;
 
