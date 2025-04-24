@@ -76,12 +76,14 @@ export class BulkDeleteTask {
               const transformManager = new DefaultTransformManager(
                 {} as Record<IndicatorTypes, TransformGenerator>,
                 scopedClusterClient,
-                this.logger
+                this.logger,
+                this.abortController
               );
               const summaryTransformManager = new DefaultSummaryTransformManager(
                 new DefaultSummaryTransformGenerator(),
                 scopedClusterClient,
-                this.logger
+                this.logger,
+                this.abortController
               );
 
               const deleteSLO = new DeleteSLO(
@@ -89,7 +91,8 @@ export class BulkDeleteTask {
                 transformManager,
                 summaryTransformManager,
                 scopedClusterClient,
-                rulesClient
+                rulesClient,
+                this.abortController
               );
 
               try {
@@ -100,6 +103,7 @@ export class BulkDeleteTask {
                   scopedClusterClient,
                   rulesClient,
                   logger: this.logger,
+                  abortController: this.abortController,
                 });
 
                 return {

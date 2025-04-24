@@ -29,7 +29,8 @@ export class DeleteSLO {
     private transformManager: TransformManager,
     private summaryTransformManager: TransformManager,
     private scopedClusterClient: IScopedClusterClient,
-    private rulesClient: RulesClientApi
+    private rulesClient: RulesClientApi,
+    private abortController: AbortController = new AbortController()
   ) {}
 
   public async execute(
@@ -51,7 +52,7 @@ export class DeleteSLO {
       retryTransientEsErrors(() =>
         this.scopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline(
           { id: getWildcardPipelineId(slo.id, slo.revision) },
-          { ignore: [404] }
+          { ignore: [404], signal: this.abortController.signal }
         )
       ),
       this.repository.deleteById(slo.id, { ignoreNotFound: true }),
@@ -69,21 +70,24 @@ export class DeleteSLO {
       return;
     }
 
-    await this.scopedClusterClient.asCurrentUser.deleteByQuery({
-      index: SLI_DESTINATION_INDEX_PATTERN,
-      wait_for_completion: false,
-      conflicts: 'proceed',
-      slices: 'auto',
-      query: {
-        bool: {
-          filter: {
-            term: {
-              'slo.id': sloId,
+    await this.scopedClusterClient.asCurrentUser.deleteByQuery(
+      {
+        index: SLI_DESTINATION_INDEX_PATTERN,
+        wait_for_completion: false,
+        conflicts: 'proceed',
+        slices: 'auto',
+        query: {
+          bool: {
+            filter: {
+              term: {
+                'slo.id': sloId,
+              },
             },
           },
         },
       },
-    });
+      { signal: this.abortController.signal }
+    );
   }
 
   private async deleteSummaryData(sloId: string, skip: boolean): Promise<void> {
@@ -91,22 +95,25 @@ export class DeleteSLO {
       return;
     }
 
-    await this.scopedClusterClient.asCurrentUser.deleteByQuery({
-      index: SUMMARY_DESTINATION_INDEX_PATTERN,
-      refresh: false,
-      wait_for_completion: false,
-      conflicts: 'proceed',
-      slices: 'auto',
-      query: {
-        bool: {
-          filter: {
-            term: {
-              'slo.id': sloId,
+    await this.scopedClusterClient.asCurrentUser.deleteByQuery(
+      {
+        index: SUMMARY_DESTINATION_INDEX_PATTERN,
+        refresh: false,
+        wait_for_completion: false,
+        conflicts: 'proceed',
+        slices: 'auto',
+        query: {
+          bool: {
+            filter: {
+              term: {
+                'slo.id': sloId,
+              },
             },
           },
         },
       },
-    });
+      { signal: this.abortController.signal }
+    );
   }
   private async deleteAssociatedRules(sloId: string, skip: boolean): Promise<void> {
     if (skip) {

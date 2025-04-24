@@ -20,13 +20,14 @@ interface Dependencies {
   rulesClient: RulesClientApi;
   deleteSLO: DeleteSLO;
   logger: Logger;
+  abortController: AbortController;
 }
 
 export async function runBulkDelete(
   params: BulkDeleteParams,
   dependencies: Dependencies
 ): Promise<BulkDeleteResult[]> {
-  const { scopedClusterClient, rulesClient, deleteSLO, logger } = dependencies;
+  const { scopedClusterClient, rulesClient, deleteSLO, logger, abortController } = dependencies;
 
   logger.debug(`Starting bulk deletion for SLO [${params.list.join(', ')}]`);
 
@@ -56,38 +57,45 @@ export async function runBulkDelete(
 
   try {
     await Promise.all([
-      scopedClusterClient.asCurrentUser.deleteByQuery({
-        index: SLI_DESTINATION_INDEX_PATTERN,
-        refresh: false,
-        wait_for_completion: false,
-        conflicts: 'proceed',
-        slices: 'auto',
-        query: {
-          bool: {
-            filter: {
-              terms: {
-                'slo.id': itemsDeletedSuccessfully,
+      scopedClusterClient.asCurrentUser.deleteByQuery(
+        {
+          index: SLI_DESTINATION_INDEX_PATTERN,
+          refresh: false,
+          wait_for_completion: false,
+          conflicts: 'proceed',
+          slices: 'auto',
+          query: {
+            bool: {
+              filter: {
+                terms: {
+                  'slo.id': itemsDeletedSuccessfully,
+                },
               },
             },
           },
         },
-      }),
-      scopedClusterClient.asCurrentUser.deleteByQuery({
-        index: SUMMARY_DESTINATION_INDEX_PATTERN,
-        refresh: false,
-        wait_for_completion: false,
-        conflicts: 'proceed',
-        slices: 'auto',
-        query: {
-          bool: {
-            filter: {
-              terms: {
-                'slo.id': itemsDeletedSuccessfully,
+        { signal: abortController.signal }
+      ),
+      scopedClusterClient.asCurrentUser.deleteByQuery(
+        {
+          index: SUMMARY_DESTINATION_INDEX_PATTERN,
+
+          refresh: false,
+          wait_for_completion: false,
+          conflicts: 'proceed',
+          slices: 'auto',
+          query: {
+            bool: {
+              filter: {
+                terms: {
+                  'slo.id': itemsDeletedSuccessfully,
+                },
               },
             },
           },
         },
-      }),
+        { signal: abortController.signal }
+      ),
     ]);
   } catch (err) {
     logger.debug(`Error scheduling tasks for data deletion: ${err}`);
