@@ -85,7 +85,7 @@ export function createAddSingleMetricViewerPanelAction(
               ...initialState,
               title: initialState.panelTitle,
             },
-          }
+          },
         });
       } catch (e) {
         return Promise.reject();

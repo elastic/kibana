@@ -81,7 +81,7 @@ export function createAddSwimlanePanelAction(
               ...initialState,
               title: initialState.panelTitle,
             },
-          }
+          },
         });
       } catch (e) {
         return Promise.reject();
