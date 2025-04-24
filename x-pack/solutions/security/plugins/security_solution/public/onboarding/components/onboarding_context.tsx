@@ -19,6 +19,7 @@ import type {
 } from '../types';
 import { onboardingConfig } from '../config';
 import { useOnboardingTelemetry, type OnboardingTelemetry } from './onboarding_telemetry';
+import type { TrackLinkClick } from './lib/telemetry';
 
 export type OnboardingConfig = Map<OnboardingTopicId, TopicConfig>;
 export interface OnboardingContextValue {
@@ -28,18 +29,19 @@ export interface OnboardingContextValue {
 }
 const OnboardingContext = createContext<OnboardingContextValue | null>(null);
 
-export const OnboardingContextProvider: React.FC<PropsWithChildren<{ spaceId: string }>> =
-  React.memo(({ children, spaceId }) => {
-    const config = useFilteredConfig();
-    const telemetry = useOnboardingTelemetry();
+export const OnboardingContextProvider: React.FC<
+  PropsWithChildren<{ spaceId: string; trackLinkClick?: TrackLinkClick }>
+> = React.memo(({ children, spaceId, trackLinkClick }) => {
+  const config = useFilteredConfig();
+  const telemetry = useOnboardingTelemetry({ trackLinkClick });
 
-    const value = useMemo<OnboardingContextValue>(
-      () => ({ spaceId, telemetry, config }),
-      [spaceId, telemetry, config]
-    );
+  const value = useMemo<OnboardingContextValue>(
+    () => ({ spaceId, telemetry, config }),
+    [spaceId, telemetry, config]
+  );
 
-    return <OnboardingContext.Provider value={value}>{children}</OnboardingContext.Provider>;
-  });
+  return <OnboardingContext.Provider value={value}>{children}</OnboardingContext.Provider>;
+});
 OnboardingContextProvider.displayName = 'OnboardingContextProvider';
 
 export const useOnboardingContext = () => {
