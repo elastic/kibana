@@ -6,7 +6,6 @@
  */
 
 import type { StateComparators, TitlesApi } from '@kbn/presentation-publishing';
-import fastIsEqual from 'fast-deep-equal';
 import { BehaviorSubject } from 'rxjs';
 import type { JobId } from '../../../common/types/anomaly_detection_jobs';
 import type {
@@ -65,17 +64,6 @@ export const initializeSingleMetricViewerControls = (
     selectedEntities: 'deepEquality',
     functionDescription: 'referenceEquality',
   };
-
-  // const singleMetricViewerComparators: StateComparators<SingleMetricViewerControlsState> = {
-  //   jobIds: [jobIds, (ids) => jobIds.next(ids), fastIsEqual],
-  //   forecastId: [forecastId, (id) => forecastId.next(id)],
-  //   selectedDetectorIndex: [selectedDetectorIndex, (index) => selectedDetectorIndex.next(index)],
-  //   selectedEntities: [selectedEntities, (items) => selectedEntities.next(items), fastIsEqual],
-  //   functionDescription: [
-  //     functionDescription,
-  //     (description) => functionDescription.next(description),
-  //   ],
-  // };
 
   return {
     singleMetricViewerControlsApi: {
