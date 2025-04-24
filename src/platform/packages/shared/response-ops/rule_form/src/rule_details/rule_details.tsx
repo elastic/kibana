@@ -8,6 +8,7 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
+import { css } from '@emotion/react';
 import {
   EuiDescribedFormGroup,
   EuiFormRow,
@@ -32,6 +33,17 @@ export const RuleDetails = () => {
   const dispatch = useRuleFormDispatch();
 
   const { tags = [], name } = formData;
+
+  const ruleDetailsContainerCss = css`
+    @container (max-width: 767px) {
+      &.euiDescribedFormGroup {
+        flex-direction: column;
+      }
+      &.euiDescribedFormGroup > .euiFlexItem {
+        width: 100%;
+      }
+    }
+  `;
 
   const tagsOptions = useMemo(() => {
     return tags.map((tag: string) => ({ label: tag }));
@@ -78,6 +90,7 @@ export const RuleDetails = () => {
 
   return (
     <EuiDescribedFormGroup
+      css={ruleDetailsContainerCss}
       fullWidth
       title={<h3>{RULE_DETAILS_TITLE}</h3>}
       description={

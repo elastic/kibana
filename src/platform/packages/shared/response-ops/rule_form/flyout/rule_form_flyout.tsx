@@ -50,7 +50,7 @@ const RuleFormFlyoutRenderer = <MetaData extends RuleTypeMetaData>(
       css={inLineContainerCss}
       onClose={onClose}
       aria-labelledby="flyoutTitle"
-      size={620}
+      size={500}
       minWidth={500}
       hideCloseButton={hideCloseButton}
     >
