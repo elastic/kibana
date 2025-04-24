@@ -957,7 +957,7 @@ async function getEcsMetadata(resourceRetriever?: ESQLCallbacks) {
     return results?.fields;
   }
 }
-
+// Get the fields from the FROM clause, enrich them with ECS metadata
 export async function getFieldsFromES(query: string, resourceRetriever?: ESQLCallbacks) {
   const metadata = await getEcsMetadata();
   const fieldsOfType = await resourceRetriever?.getColumnsFor?.({ query });
@@ -965,6 +965,12 @@ export async function getFieldsFromES(query: string, resourceRetriever?: ESQLCal
   return fieldsWithMetadata;
 }
 
+/**
+ * @param query, the ES|QL query
+ * @param commands, the AST commands
+ * @param previousPipeFields, the fields from the previous pipe
+ * @returns a list of fields that are available for the current pipe
+ */
 export async function getCurrentQueryAvailableFields(
   query: string,
   commands: ESQLAstCommand[],
@@ -975,6 +981,7 @@ export async function getCurrentQueryAvailableFields(
   const lastCommand = commands[commands.length - 1];
   const commandDef = getCommandDefinition(lastCommand.name);
 
+  // If the command has a fieldsSuggestionsAfter function, use it to get the fields
   if (commandDef.fieldsSuggestionsAfter) {
     const userDefinedColumns = collectVariables([lastCommand], cacheCopy, query);
     const arrayOfUserDefinedColumns: ESQLRealField[] = transformMapToRealFields(
@@ -987,6 +994,7 @@ export async function getCurrentQueryAvailableFields(
       arrayOfUserDefinedColumns
     );
   } else {
+    // If the command doesn't have a fieldsSuggestionsAfter function, use the default behavior
     const userDefinedColumns = collectVariables(commands, cacheCopy, query);
     const arrayOfUserDefinedColumns: ESQLRealField[] = transformMapToRealFields(
       userDefinedColumns ?? new Map<string, ESQLVariable[]>()

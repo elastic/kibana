@@ -26,6 +26,7 @@ export function buildQueryUntilPreviousCommand(ast: ESQLAst, queryString: string
 
 const cache = new Map<string, ESQLRealField[]>();
 
+// Function to check if a key exists in the cache, ignoring case
 function checkCacheInsensitive(keyToCheck: string) {
   for (const key of cache.keys()) {
     if (key.toLowerCase() === keyToCheck.toLowerCase()) {
@@ -35,6 +36,7 @@ function checkCacheInsensitive(keyToCheck: string) {
   return false;
 }
 
+// Function to get a value from the cache, ignoring case
 function getValueInsensitive(keyToCheck: string) {
   for (const key of cache.keys()) {
     if (key.toLowerCase() === keyToCheck.toLowerCase()) {
@@ -66,20 +68,25 @@ async function setFieldsToCache(queryText: string) {
 
 export function getFieldsByTypeHelper(queryText: string, resourceRetriever?: ESQLCallbacks) {
   const getFields = async () => {
+    // in some cases (as in the case of ROW or SHOW) the query is not set
     if (!queryText) {
       return;
     }
+    // We will use the from clause to get the fields from the ES
     const queryForIndexFields = getFirstPipeValue(queryText);
 
     const output = processPipes(queryText);
     for (const line of output) {
       if (line === queryForIndexFields) {
         const existsInCache = getValueInsensitive(line);
+        // retrieve the index fields from ES ONLY if the FROM clause is not in the cache
         if (!existsInCache) {
           const fieldsWithMetadata = await getFieldsFromES(line, resourceRetriever);
           cache.set(line, fieldsWithMetadata);
         }
       } else {
+        // retrieve the fields by parsing the query
+        // and set them to the cache, no extra call to ES
         await setFieldsToCache(line);
       }
     }
