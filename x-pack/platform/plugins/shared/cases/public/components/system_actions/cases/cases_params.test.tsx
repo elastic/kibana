@@ -369,6 +369,24 @@ describe('CasesParamsFields renders', () => {
       expect(editAction.mock.calls[0][1].timeWindow).toEqual('6d');
     });
 
+    it('renders time window warning', async () => {
+      const { rerender } = render(<CasesParamsFields {...defaultProps} />);
+
+      expect(screen.queryByTestId('show-time-window-warning')).not.toBeInTheDocument();
+
+      const updatedProps = {
+        ...defaultProps,
+        actionParams: {
+          ...defaultProps.actionParams,
+          subActionParams: { ...defaultProps.actionParams.subActionParams, timeWindow: '10m' },
+        },
+      };
+
+      rerender(<CasesParamsFields {...updatedProps} />);
+
+      expect(await screen.findByTestId('show-time-window-warning')).toBeInTheDocument();
+    });
+
     it('updates reopenClosedCases', async () => {
       render(<CasesParamsFields {...defaultProps} />);
 

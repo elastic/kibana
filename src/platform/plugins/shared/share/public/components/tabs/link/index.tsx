@@ -55,11 +55,10 @@ const LinkTabContent: ILinkTab['content'] = ({ state, dispatch }) => {
     objectId,
     isDirty,
     shareableUrl,
-    urlService,
     shareableUrlLocatorParams,
     allowShortUrl,
-    delegatedShareUrlHandler,
-  } = useShareTabsContext()!;
+    shareMenuItems,
+  } = useShareTabsContext('link');
 
   const setDashboardLink = useCallback(
     (url: string) => {
@@ -87,11 +86,11 @@ const LinkTabContent: ILinkTab['content'] = ({ state, dispatch }) => {
     <LinkContent
       {...{
         objectType,
-        objectConfig: objectTypeMeta?.config?.link,
+        objectConfig: objectTypeMeta?.config,
         objectId,
         isDirty,
         shareableUrl,
-        urlService,
+        shortUrlService: shareMenuItems.config.shortUrlService,
         shareableUrlLocatorParams,
         dashboardLink: state?.dashboardUrl,
         setDashboardLink,
@@ -99,7 +98,6 @@ const LinkTabContent: ILinkTab['content'] = ({ state, dispatch }) => {
         setIsNotSaved,
         allowShortUrl,
         setIsClicked: state?.setIsClicked,
-        delegatedShareUrlHandler,
       }}
     />
   );
