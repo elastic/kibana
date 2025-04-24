@@ -28,6 +28,7 @@ import { useInstalledIntegrationsActions } from '../hooks/use_installed_integrat
 
 import { InstallationVersionStatus } from './installation_version_status';
 import { DisabledWrapperTooltip } from './disabled_wrapper_tooltip';
+import { DashboardsCell } from './dashboards_cell';
 
 function wrapActionWithDisabledTooltip(
   action: Action<InstalledPackageUIPackageListItem>,
@@ -142,7 +143,10 @@ export const InstalledIntegrationsTable: React.FunctionComponent<{
             name: i18n.translate('xpack.fleet.epmInstalledIntegrations.dashboardsColumnTitle', {
               defaultMessage: 'Dashboards',
             }),
-            render: () => '-',
+            render: ({ installationInfo }: InstalledPackageUIPackageListItem) => {
+              if (!installationInfo) return '-';
+              return <DashboardsCell installation={installationInfo} />;
+            },
           },
           {
             name: i18n.translate(
