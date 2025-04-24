@@ -8,7 +8,7 @@
  */
 
 import React, { type FC, useMemo, useEffect, useState, useCallback } from 'react';
-import { css } from '@emotion/react';
+import { Theme, css } from '@emotion/react';
 import {
   EuiTitle,
   EuiCollapsibleNavItem,
@@ -563,9 +563,13 @@ export const NavigationSectionUI: FC<Props> = React.memo(({ navNode: _navNode })
     return null;
   }
 
-  const navItemStyles = css`
+  const navItemStyles = ({ euiTheme }: Theme) => css`
     .euiAccordion__childWrapper {
       transition: none; // Remove the transition as it does not play well with dynamic links added to the accordion
+    }
+    .euiAccordion__children .euiCollapsibleNavItem__items {
+      padding-inline-start: ${euiTheme.size.m};
+      margin-inline-start: ${euiTheme.size.m};
     }
   `;
 
