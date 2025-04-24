@@ -65,6 +65,7 @@ describe('cleanupUnknownAndExcluded', () => {
     );
     mockDeleteByQuery.mockReturnValueOnce(async () =>
       Either.right({
+        type: 'delete_by_query_response',
         taskId: '1234',
       })
     );
@@ -132,6 +133,7 @@ describe('cleanupUnknownAndExcluded', () => {
       );
       mockDeleteByQuery.mockReturnValueOnce(async () =>
         Either.right({
+          type: 'delete_by_query_response',
           taskId: '1234',
         })
       );
@@ -173,6 +175,7 @@ describe('cleanupUnknownAndExcluded', () => {
       );
       mockDeleteByQuery.mockReturnValueOnce(async () =>
         Either.right({
+          type: 'delete_by_query_response',
           taskId: '1234',
         })
       );
@@ -224,6 +227,7 @@ describe('cleanupUnknownAndExcluded', () => {
     );
     mockDeleteByQuery.mockReturnValueOnce(async () =>
       Either.right({
+        type: 'delete_by_query_response',
         taskId: '1234',
       })
     );
@@ -272,6 +276,35 @@ describe('cleanupUnknownAndExcluded', () => {
       taskId: '1234',
       unknownDocs,
       errorsByType,
+    });
+  });
+
+  it('returns cleanup_not_needed if the conditions for the query are empty (removedTypes, unknownDocs and filterClauses)', async () => {
+    mockCheckForUnknownDocs.mockReturnValueOnce(async () => Either.right({}));
+    mockCalculateExcludeFilters.mockReturnValueOnce(async () =>
+      Either.right({
+        filterClauses: [],
+        errorsByType: {},
+      })
+    );
+
+    const task = cleanupUnknownAndExcluded({
+      client: emptyResponseClientMock,
+      indexName: '.kibana_8.0.0',
+      discardUnknownDocs: false,
+      excludeOnUpgradeQuery: initialExcludeOnUpgradeQueryMock,
+      excludeFromUpgradeFilterHooks,
+      hookTimeoutMs: 50,
+      knownTypes: ['foo', 'bar'],
+      removedTypes: [],
+    });
+
+    const result = await task();
+
+    expect(Either.isRight(result)).toBe(true);
+    expect(deleteByQuery).toHaveBeenCalledTimes(0);
+    expect((result as Either.Right<any>).right).toEqual({
+      type: 'cleanup_not_needed' as const,
     });
   });
 });
