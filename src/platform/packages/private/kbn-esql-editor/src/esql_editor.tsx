@@ -104,6 +104,7 @@ export const ESQLEditor = memo(function ESQLEditor({
   disableAutoFocus,
   controlsContext,
   esqlVariables,
+  expandToFitQueryOnMount,
 }: ESQLEditorProps) {
   const popoverRef = useRef<HTMLDivElement>(null);
   const editorModel = useRef<monaco.editor.ITextModel>();
@@ -849,8 +850,22 @@ export const ESQLEditor = memo(function ESQLEditor({
                       monaco.KeyMod.CtrlCmd | monaco.KeyCode.Slash,
                       onCommentLine
                     );
-
                     setMeasuredEditorWidth(editor.getLayoutInfo().width);
+                    if (expandToFitQueryOnMount) {
+                      const { wrappingColumn } = editor.getLayoutInfo();
+                      const totalLines = editor
+                        .getValue()
+                        .split('\n')
+                        .map((line) => {
+                          const wrappedLines = Math.ceil(line.length / (wrappingColumn - 1));
+                          return wrappedLines;
+                        })
+                        .reduce((a, b) => a + b);
+                      const lineHeight = editor.getOption(monaco.editor.EditorOption.lineHeight);
+                      const padding = lineHeight * 1.25; // Extra line at the bottom, plus a bit more to compensate for hidden vertical scrollbars
+                      const expandedHeight = totalLines * lineHeight + padding;
+                      if (expandedHeight > editorHeight) setEditorHeight(expandedHeight);
+                    }
                     editor.onDidLayoutChange((layoutInfoEvent) => {
                       onLayoutChangeRef.current(layoutInfoEvent);
                     });

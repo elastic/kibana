@@ -176,17 +176,7 @@ export const EsqlQueryExpression: React.FC<
 
   return (
     <Fragment>
-      <EuiFormRow
-        id="queryEditor"
-        data-test-subj="queryEsqlEditor"
-        fullWidth
-        label={
-          <FormattedMessage
-            id="xpack.stackAlerts.esQuery.ui.defineEsqlQueryPrompt"
-            defaultMessage="Define your query using ES|QL"
-          />
-        }
-      >
+      <EuiFormRow id="queryEditor" data-test-subj="queryEsqlEditor" fullWidth>
         <ESQLLangEditor
           query={query}
           onTextLangQueryChange={(q: AggregateQuery) => {
@@ -196,9 +186,11 @@ export const EsqlQueryExpression: React.FC<
           }}
           onTextLangQuerySubmit={async () => {}}
           detectedTimestamp={detectedTimestamp}
-          hideRunQueryText={true}
+          hideRunQueryText
+          hideRunQueryButton
           isLoading={isLoading}
           editorIsInline
+          expandToFitQueryOnMount
           hasOutline
         />
       </EuiFormRow>
