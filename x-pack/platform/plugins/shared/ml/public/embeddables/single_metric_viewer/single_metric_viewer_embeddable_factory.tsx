@@ -126,7 +126,7 @@ export const getSingleMetricViewerEmbeddableFactory = (
         ...singleMetricViewerControlsApi,
         dataLoading$,
         blockingError$,
-           serializeState,
+        serializeState,
       });
 
       const { singleMetricViewerData$, onDestroy } = initializeSingleMetricViewerDataFetcher(
