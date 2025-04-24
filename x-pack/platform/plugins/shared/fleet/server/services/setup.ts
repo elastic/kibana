@@ -80,15 +80,17 @@ export interface SetupStatus {
 }
 
 export async function _runSetupWithLock(setupFn: () => Promise<SetupStatus>) {
-  const withLock = appContextService.getLockManagerService()!.withLock;
-  return await pRetry(() => withLock('fleet-setup', () => setupFn()), {
-    onFailedAttempt: async (error) => {
-      if (!(error instanceof LockAcquisitionError)) {
-        throw error;
-      }
-    },
-    maxRetryTime: 5 * 60 * 1000, // Retry for 5 minute to get the lock
-  });
+  return await pRetry(
+    () => appContextService.getLockManagerService()!.withLock('fleet-setup', () => setupFn()),
+    {
+      onFailedAttempt: async (error) => {
+        if (!(error instanceof LockAcquisitionError)) {
+          throw error;
+        }
+      },
+      maxRetryTime: 5 * 60 * 1000, // Retry for 5 minute to get the lock
+    }
+  );
 }
 
 export async function setupFleet(
