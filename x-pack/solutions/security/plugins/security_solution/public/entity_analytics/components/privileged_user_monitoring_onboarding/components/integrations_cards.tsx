@@ -8,11 +8,11 @@
 import React, { useCallback } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { LazyPackageCard } from '@kbn/fleet-plugin/public';
+import { INTEGRATION_APP_ID } from '../../../../common/lib/integrations/constants';
 import { useIntegrationLinkState } from '../../../../common/hooks/integrations/use_integration_link_state';
 import { addPathParamToUrl } from '../../../../common/utils/integrations';
 import { ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_PATH } from '../../../../../common/constants';
 import { useNavigation } from '../../../../common/lib/kibana';
-import { INTEGRATION_APP_ID } from '../../../../onboarding/components/onboarding_body/cards/integrations/constants';
 import { useEntityAnalyticsIntegrations } from '../hooks/use_integrations';
 
 /**
