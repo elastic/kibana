@@ -3017,6 +3017,23 @@
             "trackAdoption": false,
             "children": [],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "securitySolution",
+            "id": "def-server.SecuritySolutionApiRequestHandlerContext.getProductFeatureService",
+            "type": "Function",
+            "tags": [],
+            "label": "getProductFeatureService",
+            "description": [],
+            "signature": [
+              "() => ",
+              "ProductFeaturesService"
+            ],
+            "path": "x-pack/solutions/security/plugins/security_solution/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false

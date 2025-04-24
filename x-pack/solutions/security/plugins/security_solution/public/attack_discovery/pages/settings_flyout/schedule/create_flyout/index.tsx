@@ -16,7 +16,6 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { useAssistantContext, useLoadConnectors } from '@kbn/elastic-assistant';
-import type { AttackDiscoveryStats } from '@kbn/elastic-assistant-common';
 
 import { useKibana } from '../../../../../common/lib/kibana';
 import { useSourcererDataView } from '../../../../../sourcerer/containers';
@@ -30,10 +29,9 @@ import { convertFormDataInBaseSchedule } from '../utils/convert_form_data';
 
 interface Props {
   onClose: () => void;
-  stats: AttackDiscoveryStats | null;
 }
 
-export const CreateFlyout: React.FC<Props> = React.memo(({ onClose, stats }) => {
+export const CreateFlyout: React.FC<Props> = React.memo(({ onClose }) => {
   const flyoutTitleId = useGeneratedHtmlId({
     prefix: 'attackDiscoveryScheduleCreateFlyoutTitle',
   });
@@ -87,7 +85,6 @@ export const CreateFlyout: React.FC<Props> = React.memo(({ onClose, stats }) => 
     isLoading: isLoadingConnectors || isLoadingQuery,
     onSave: onCreateSchedule,
     saveButtonTitle: i18n.SCHEDULE_CREATE_BUTTON_TITLE,
-    stats,
   });
 
   return (
@@ -98,7 +95,7 @@ export const CreateFlyout: React.FC<Props> = React.memo(({ onClose, stats }) => 
       onClose={onClose}
       paddingSize="m"
       side="right"
-      size="s"
+      size="m"
       type="overlay"
     >
       <EuiFlyoutHeader hasBorder>
