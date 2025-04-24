@@ -39,7 +39,7 @@ export const IntegrationListView: React.FC<{ tab?: string }> = ({ tab }) => {
         },
       },
     ];
-  }, [tab, appPaths]);
+  }, [tab, navigateToWorkchatUrl]);
 
   return (
     <KibanaPageTemplate.Header
