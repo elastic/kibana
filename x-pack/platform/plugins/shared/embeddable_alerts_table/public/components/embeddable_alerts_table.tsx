@@ -143,6 +143,7 @@ export const EmbeddableAlertsTable = ({
         showDisplaySelector: false,
       }}
       emptyStateHeight="flex"
+      emptyStateVariant="transparent"
       casesConfiguration={{
         featureId: 'alerts',
         owner: [GENERAL_CASES_OWNER],

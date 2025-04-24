@@ -188,6 +188,7 @@ const AlertsTableContent = typedForwardRef(
       shouldHighlightRow,
       dynamicRowHeight = false,
       emptyStateHeight,
+      emptyStateVariant,
       additionalContext,
       renderCellValue,
       renderCellPopover,
@@ -594,6 +595,7 @@ const AlertsTableContent = typedForwardRef(
               alertsQuerySnapshot={alertsQuerySnapshot}
               showInspectButton={showInspectButton}
               height={emptyStateHeight}
+              variant={emptyStateVariant}
             />
           </InspectButtonContainer>
         )}

@@ -27,12 +27,19 @@ const panelStyle = {
 
 export const EmptyState: React.FC<{
   height?: keyof typeof heights | 'flex';
+  variant?: 'subdued' | 'transparent';
   additionalToolbarControls?: ReactNode;
   alertsQuerySnapshot?: EsQuerySnapshot;
   showInspectButton?: boolean;
-}> = ({ height = 'tall', additionalToolbarControls, alertsQuerySnapshot, showInspectButton }) => {
+}> = ({
+  height = 'tall',
+  variant = 'subdued',
+  additionalToolbarControls,
+  alertsQuerySnapshot,
+  showInspectButton,
+}) => {
   return (
-    <EuiPanel color="subdued" data-test-subj="alertsTableEmptyState">
+    <EuiPanel color={variant} data-test-subj="alertsTableEmptyState">
       <EuiFlexGroup
         direction="column"
         css={css`
@@ -59,12 +66,12 @@ export const EmptyState: React.FC<{
 
         <EuiFlexItem
           grow={height === 'flex'}
-          style={height !== 'flex' ? { height: heights[height] } : undefined}
+          css={height !== 'flex' ? { height: heights[height] } : undefined}
         >
           <EuiFlexGroup alignItems="center" justifyContent="center">
             <EuiFlexItem grow={false}>
-              <EuiPanel hasBorder={true} style={panelStyle}>
-                <EuiFlexGroup>
+              <EuiPanel hasBorder={variant === 'subdued'} css={panelStyle} hasShadow={false}>
+                <EuiFlexGroup alignItems={variant === 'transparent' ? 'center' : 'flexStart'}>
                   <EuiFlexItem>
                     <EuiText size="s">
                       <EuiTitle>
@@ -84,7 +91,7 @@ export const EmptyState: React.FC<{
                     </EuiText>
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
-                    <EuiImage style={{ width: 200, height: 148 }} size="200" alt="" url={icon} />
+                    <EuiImage css={{ width: 200, height: 148 }} size="200" alt="" url={icon} />
                   </EuiFlexItem>
                 </EuiFlexGroup>
               </EuiPanel>
