@@ -886,6 +886,17 @@
             "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ui-shared-deps-src",
+            "id": "def-common.externals.kbnreactkibanamount",
+            "type": "string",
+            "tags": [],
+            "label": "'@kbn/react-kibana-mount'",
+            "description": [],
+            "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
