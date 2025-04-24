@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
 import {
   EuiFlyout,
@@ -36,6 +36,11 @@ import {
 } from '../../../../../../../hooks';
 
 import type { PackageInfo, PackageSpecCategory } from '../../../../../types';
+interface SelectOption {
+  label: string;
+  value: string;
+  disabled?: boolean;
+}
 
 export const EditIntegrationFlyout: React.FunctionComponent<{
   onClose: () => void;
@@ -70,26 +75,29 @@ export const EditIntegrationFlyout: React.FunctionComponent<{
 
   // state section
   const [savingEdits, setSavingEdits] = useState(false);
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [selectedCategories, setSelectedCategories] = useState<SelectOption[]>([]);
   const [editedContent, setEditedContent] = useState<string>();
   const [readmeLoading, setReadmeLoading] = useState(true);
-  const [categoriesInitialized, setCategoriesInitialized] = useState(false);
+  const categoriesInitialized = useRef(false);
 
-  // Set initial categories only once when data is available
-  useEffect(() => {
-    // Only run this effect if we haven't initialized categories yet.
-    if (!categoriesInitialized && parentCategories?.length && existingCategories.length) {
-      const initialCategories = existingCategories
-        .map((categoryId) => parentCategories.find((cat) => cat.id === categoryId)?.title)
-        .filter((title): title is string => Boolean(title));
-
-      if (initialCategories.length) {
-        setSelectedCategories(initialCategories);
-        // Mark that we've initialized categories to prevent future runs when the combobox changes and causes a re-render
-        setCategoriesInitialized(true);
-      }
+  // Only run this when we havent initialized and we have everything we need. No need for an effect
+  if (parentCategories?.length && existingCategories.length && !categoriesInitialized.current) {
+    const initialCategories = existingCategories
+      .map((categoryId) => {
+        const category = parentCategories.find((cat) => cat.id === categoryId);
+        if (category) {
+          return {
+            label: category.title,
+            value: category.id,
+          };
+        }
+      })
+      .filter((cat): cat is SelectOption => cat !== undefined); // filter out any undefined values due to typing
+    if (initialCategories.length) {
+      setSelectedCategories(initialCategories);
+      categoriesInitialized.current = true;
     }
-  }, [parentCategories, existingCategories, categoriesInitialized]);
+  }
 
   // get the readme content from the packageInfo
   useEffect(() => {
@@ -109,9 +117,7 @@ export const EditIntegrationFlyout: React.FunctionComponent<{
 
     const res = await updateCustomIntegration(packageInfo?.name || '', {
       readMeData: updatedReadMe,
-      categories: selectedCategories
-        .map((title) => parentCategories?.find((cat) => cat.title === title)?.id) // map the chosen titles back to ids as we store those
-        .filter((id): id is string => id !== undefined), // filter out any undefined values due to typing
+      categories: selectedCategories.map((item) => item.value), // filter out any undefined values due to typing
     });
 
     setSavingEdits(false);
@@ -186,17 +192,19 @@ export const EditIntegrationFlyout: React.FunctionComponent<{
             data-test-subj="editIntegrationFlyoutCategories"
             aria-label="Select categories"
             placeholder="Select categories"
-            selectedOptions={selectedCategories.map((category) => ({
-              label: category,
-            }))}
+            selectedOptions={selectedCategories}
             options={parentCategories?.map((category) => ({
               label: category.title,
               value: category.id,
               disabled: selectedCategories.length >= 2,
             }))}
             onChange={(selectedOptions) => {
-              const selectedValues = selectedOptions.map((option) => option.label);
-              setSelectedCategories(selectedValues ?? []);
+              const selectedValues = selectedOptions as SelectOption[];
+              setSelectedCategories(
+                selectedValues.filter(
+                  (option): option is SelectOption => option.value !== undefined
+                )
+              );
             }}
           />
         </EuiFormRow>
