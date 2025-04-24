@@ -57,10 +57,6 @@ export const IndexSourceConfigurationForm: React.FC<IntegrationConfigurationForm
   const { isLoading, data } = useIndexNameAutocomplete({ query });
   const [selectedOptions, setSelected] = useState<EuiComboBoxOptionOption[]>([]);
 
-  const onIndexNameChange = (onChangeSelectedOptions: EuiComboBoxOptionOption[]) => {
-    setSelected(onChangeSelectedOptions);
-  };
-
   const onSearchChange = (searchValue: string) => {
     setQuery(searchValue);
   };
@@ -129,36 +125,46 @@ export const IndexSourceConfigurationForm: React.FC<IntegrationConfigurationForm
           <Controller
             name="configuration.index"
             control={control}
-            render={({ field }) => (
-              <EuiComboBox
-                data-test-subj="workchatAppIntegrationEditViewIndex"
-                placeholder="Select an index"
-                isLoading={isLoading}
-                selectedOptions={selectedOptions}
-                singleSelection={{ asPlainText: true }}
-                options={data.map((option) => ({ label: option, key: option }))}
-                onChange={onIndexNameChange}
-                fullWidth={true}
-                onSearchChange={onSearchChange}
-                append={
-                  <EuiButtonEmpty
-                    size="xs"
-                    iconType="gear"
-                    onClick={() => {
-                      if (selectedOptions.length === 0) return;
-                      if (!selectedOptions[0].key) return;
+            render={({ field }) => {
+              if (field.value) {
+                selectedOptions.push({ label: field.value, key: field.value });
+              }
+              return (
+                <EuiComboBox
+                  data-test-subj="workchatAppIntegrationEditViewIndex"
+                  placeholder={'Select an index'}
+                  {...field}
+                  isLoading={isLoading}
+                  selectedOptions={selectedOptions}
+                  singleSelection={{ asPlainText: true }}
+                  options={data.map((option) => ({ label: option, key: option }))}
+                  onChange={(selected) => {
+                    const index = selected.length > 0 ? selected[0].key : '';
+                    field.onChange(index);
+                    setSelected(selected);
+                  }}
+                  fullWidth={true}
+                  onSearchChange={onSearchChange}
+                  append={
+                    <EuiButtonEmpty
+                      size="xs"
+                      iconType="gear"
+                      onClick={() => {
+                        if (selectedOptions.length === 0) return;
+                        if (!selectedOptions[0].key) return;
 
-                      generateSchema(
-                        { indexName: selectedOptions[0].key },
-                        { onSuccess: onSchemaGenerated }
-                      );
-                    }}
-                  >
-                    Generate configuration
-                  </EuiButtonEmpty>
-                }
-              />
-            )}
+                        generateSchema(
+                          { indexName: selectedOptions[0].key },
+                          { onSuccess: onSchemaGenerated }
+                        );
+                      }}
+                    >
+                      Generate configuration
+                    </EuiButtonEmpty>
+                  }
+                />
+              );
+            }}
           />
         </EuiFormRow>
 
