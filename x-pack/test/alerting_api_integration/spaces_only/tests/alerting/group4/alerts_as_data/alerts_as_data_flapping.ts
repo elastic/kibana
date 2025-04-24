@@ -15,6 +15,7 @@ import {
   ALERT_FLAPPING_HISTORY,
   ALERT_RULE_UUID,
   ALERT_PENDING_RECOVERED_COUNT,
+  ALERT_STATUS,
 } from '@kbn/rule-data-utils';
 import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { Spaces } from '../../../../scenarios';
@@ -91,6 +92,9 @@ export default function createAlertsAsDataFlappingTest({ getService }: FtrProvid
             params: ruleParameters,
             actions: [],
             notify_when: RuleNotifyWhen.CHANGE,
+            alert_delay: {
+              active: 1,
+            },
           })
         );
 
@@ -121,6 +125,9 @@ export default function createAlertsAsDataFlappingTest({ getService }: FtrProvid
       // active, recovered, recovered, active, recovered
       expect(alertDocs.length).to.equal(2);
 
+      expect(alertDocs[1]._source![ALERT_STATUS]).to.eql('recovered');
+      expect(alertDocs[0]._source![ALERT_STATUS]).to.eql('recovered');
+
       // Newest alert doc is first
       // Flapping history for newest alert doc should match flapping history in state
       expect(alertDocs[0]._source![ALERT_FLAPPING_HISTORY]).to.eql(
@@ -149,6 +156,10 @@ export default function createAlertsAsDataFlappingTest({ getService }: FtrProvid
       // Should be 3 alert docs now because alert became active again
       expect(alertDocs.length).to.equal(3);
 
+      expect(alertDocs[2]._source![ALERT_STATUS]).to.eql('recovered');
+      expect(alertDocs[1]._source![ALERT_STATUS]).to.eql('recovered');
+      expect(alertDocs[0]._source![ALERT_STATUS]).to.eql('active');
+
       // Newest alert doc is first
       // Flapping history for newest alert doc should match flapping history in state
       expect(alertDocs[0]._source![ALERT_FLAPPING_HISTORY]).to.eql(
@@ -176,6 +187,10 @@ export default function createAlertsAsDataFlappingTest({ getService }: FtrProvid
 
       // Should still be 3 alert docs
       expect(alertDocs.length).to.equal(3);
+
+      expect(alertDocs[2]._source![ALERT_STATUS]).to.eql('recovered');
+      expect(alertDocs[1]._source![ALERT_STATUS]).to.eql('recovered');
+      expect(alertDocs[0]._source![ALERT_STATUS]).to.eql('recovered');
 
       // Newest alert doc is first
       // Flapping history for newest alert doc should match flapping history in state
@@ -221,6 +236,9 @@ export default function createAlertsAsDataFlappingTest({ getService }: FtrProvid
             params: ruleParameters,
             actions: [],
             notify_when: RuleNotifyWhen.CHANGE,
+            alert_delay: {
+              active: 1,
+            },
           })
         );
 
@@ -249,6 +267,8 @@ export default function createAlertsAsDataFlappingTest({ getService }: FtrProvid
       // Should be 2 alert docs because alert pattern was:
       // active, recovered, recovered, active, recovered
       expect(alertDocs.length).to.equal(2);
+      expect(alertDocs[1]._source![ALERT_STATUS]).to.eql('recovered');
+      expect(alertDocs[0]._source![ALERT_STATUS]).to.eql('recovered');
 
       // Newest alert doc is first
       // Flapping history for newest alert doc should match flapping history in state
@@ -277,6 +297,9 @@ export default function createAlertsAsDataFlappingTest({ getService }: FtrProvid
 
       // Should be 3 alert docs now because alert became active again
       expect(alertDocs.length).to.equal(3);
+      expect(alertDocs[2]._source![ALERT_STATUS]).to.eql('recovered');
+      expect(alertDocs[1]._source![ALERT_STATUS]).to.eql('recovered');
+      expect(alertDocs[0]._source![ALERT_STATUS]).to.eql('active');
 
       // Newest alert doc is first
       // Flapping history for newest alert doc should match flapping history in state
@@ -305,6 +328,9 @@ export default function createAlertsAsDataFlappingTest({ getService }: FtrProvid
 
       // Should still be 3 alert docs
       expect(alertDocs.length).to.equal(3);
+      expect(alertDocs[2]._source![ALERT_STATUS]).to.eql('recovered');
+      expect(alertDocs[1]._source![ALERT_STATUS]).to.eql('recovered');
+      expect(alertDocs[0]._source![ALERT_STATUS]).to.eql('recovered');
 
       // Newest alert doc is first
       // Flapping history for newest alert doc should match flapping history in state
