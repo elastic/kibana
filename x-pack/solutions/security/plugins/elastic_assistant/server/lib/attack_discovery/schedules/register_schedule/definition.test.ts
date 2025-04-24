@@ -27,6 +27,7 @@ describe('getAttackDiscoveryScheduleType', () => {
     expect(scheduleType).toEqual({
       id: ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID,
       name: 'Attack Discovery Schedule',
+      ruleTaskTimeout: '30m',
       actionGroups: [{ id: 'default', name: 'Default' }],
       defaultActionGroupId: 'default',
       category: 'securitySolution',
