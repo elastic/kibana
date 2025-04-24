@@ -42,7 +42,6 @@ const getAllFtrConfigsManifests = () => {
 
 export const getAllFtrConfigsAndManifests = () => {
   const manifestPaths = getAllFtrConfigsManifests();
-  const allFtrConfigs: string[] = [];
   const ftrConfigEntries = new Map<string, string[]>();
 
   for (const manifestRelPath of manifestPaths.all) {
@@ -66,13 +65,7 @@ export const getAllFtrConfigsAndManifests = () => {
       }
       ftrConfigEntries.get(config)!.push(manifestRelPath);
     }
-
-    allFtrConfigs.push(...ftrConfigsInManifest);
   }
 
-  const duplicateEntries = Array.from(ftrConfigEntries.entries()).filter(
-    ([, paths]) => paths.length > 1
-  );
-
-  return { allFtrConfigs, manifestPaths, duplicateEntries };
+  return { ftrConfigEntries, manifestPaths };
 };

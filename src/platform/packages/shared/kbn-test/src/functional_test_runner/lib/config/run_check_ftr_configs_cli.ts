@@ -29,7 +29,10 @@ const IGNORED_PATHS = [
 export async function runCheckFtrConfigsCli() {
   run(
     async ({ log }) => {
-      const { allFtrConfigs, manifestPaths, duplicateEntries } = getAllFtrConfigsAndManifests();
+      const { ftrConfigEntries, manifestPaths } = getAllFtrConfigsAndManifests();
+      const duplicateEntries = Array.from(ftrConfigEntries.entries()).filter(
+        ([, paths]) => paths.length > 1
+      );
 
       if (duplicateEntries.length > 0) {
         const errorMessage = duplicateEntries
@@ -149,6 +152,7 @@ export async function runCheckFtrConfigsCli() {
         log.info(`${loadingConfigs.length} files were loaded as FTR configs for validation`);
       }
 
+      const allFtrConfigs = Array.from(ftrConfigEntries.keys());
       const invalid = possibleConfigs.filter((path) => !allFtrConfigs.includes(path));
       if (invalid.length) {
         const invalidList =
