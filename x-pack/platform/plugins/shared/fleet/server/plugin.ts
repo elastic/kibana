@@ -51,6 +51,7 @@ import type {
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import { LockManagerService } from '@kbn/observability-ai-assistant-plugin/server/service/distributed_lock_manager/lock_manager_service';
 
 import type { SavedObjectTaggingStart } from '@kbn/saved-objects-tagging-plugin/server';
 
@@ -207,6 +208,7 @@ export interface FleetAppContext {
   taskManagerStart?: TaskManagerStartContract;
   fetchUsage?: (abortController: AbortController) => Promise<FleetUsage | undefined>;
   syncIntegrationsTask: SyncIntegrationsTask;
+  lockManagerService?: LockManagerService;
 }
 
 export type FleetSetupContract = void;
@@ -317,6 +319,7 @@ export class FleetPlugin
   private packagePolicyService?: PackagePolicyService;
   private policyWatcher?: PolicyWatcher;
   private fetchUsage?: (abortController: AbortController) => Promise<FleetUsage | undefined>;
+  private lockManagerService?: LockManagerService;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config$ = this.initializerContext.config.create<FleetConfigType>();
@@ -673,6 +676,7 @@ export class FleetPlugin
       taskManager: deps.taskManager,
       logFactory: this.initializerContext.logger,
     });
+    this.lockManagerService = new LockManagerService(core, this.initializerContext.logger.get());
 
     // Register fields metadata extractors
     registerFieldsMetadataExtractors({ core, fieldsMetadata: deps.fieldsMetadata });
@@ -725,6 +729,7 @@ export class FleetPlugin
       taskManagerStart: plugins.taskManager,
       fetchUsage: this.fetchUsage,
       syncIntegrationsTask: this.syncIntegrationsTask!,
+      lockManagerService: this.lockManagerService,
     });
     licenseService.start(plugins.licensing.license$);
     this.telemetryEventsSender.start(plugins.telemetry, core).catch(() => {});

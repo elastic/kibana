@@ -11,6 +11,7 @@ import { kibanaPackageJson } from '@kbn/repo-info';
 
 import type { HttpServiceSetup, KibanaRequest } from '@kbn/core-http-server';
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
+import type { LockManagerService } from '@kbn/observability-ai-assistant-plugin/server/service/distributed_lock_manager/lock_manager_service';
 
 import type { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
 import type {
@@ -49,10 +50,10 @@ import type { FleetAppContext } from '../plugin';
 import type { TelemetryEventsSender } from '../telemetry/sender';
 import { UNINSTALL_TOKENS_SAVED_OBJECT_TYPE } from '../constants';
 import type { MessageSigningServiceInterface } from '..';
+import type { FleetUsage } from '../collectors/register';
 
 import type { BulkActionsResolver } from './agents/bulk_actions_resolver';
 import { type UninstallTokenServiceInterface } from './security/uninstall_token_service';
-import type { FleetUsage } from '../collectors/register';
 
 class AppContextService {
   private encryptedSavedObjects: EncryptedSavedObjectsClient | undefined;
@@ -82,6 +83,7 @@ class AppContextService {
   private uninstallTokenService: UninstallTokenServiceInterface | undefined;
   private taskManagerStart: TaskManagerStartContract | undefined;
   private fetchUsage?: (abortController: AbortController) => Promise<FleetUsage | undefined>;
+  private lockManagerService: LockManagerService | undefined;
 
   public start(appContext: FleetAppContext) {
     this.data = appContext.data;
@@ -108,6 +110,7 @@ class AppContextService {
     this.uninstallTokenService = appContext.uninstallTokenService;
     this.taskManagerStart = appContext.taskManagerStart;
     this.fetchUsage = appContext.fetchUsage;
+    this.lockManagerService = appContext.lockManagerService;
 
     if (appContext.config$) {
       this.config$ = appContext.config$;
@@ -350,6 +353,10 @@ class AppContextService {
 
   public getFetchUsage() {
     return this.fetchUsage;
+  }
+
+  public getLockManagerService() {
+    return this.lockManagerService;
   }
 }
 
