@@ -18,9 +18,11 @@ describe('useEnvronmentsFetcher', () => {
           },
         },
       },
-      get_environments: {
+      get_suggestions_with_terms_aggregation: {
         aggregations: {
-          environments: {},
+          items: {
+            buckets: [],
+          },
         },
       },
     };
@@ -45,9 +47,9 @@ describe('useEnvronmentsFetcher', () => {
       has_unset_value_for_field: {
         hits: {},
       },
-      get_environments: {
+      get_suggestions_with_terms_aggregation: {
         aggregations: {
-          environments: {
+          items: {
             buckets: [{ key: 'dev' }, { key: 'test' }],
           },
         },
@@ -78,9 +80,9 @@ describe('useEnvronmentsFetcher', () => {
           },
         },
       },
-      get_environments: {
+      get_suggestions_with_terms_aggregation: {
         aggregations: {
-          environments: {
+          items: {
             buckets: [{ key: 'dev' }, { key: 'test' }],
           },
         },
@@ -111,9 +113,9 @@ describe('useEnvronmentsFetcher', () => {
           },
         },
       },
-      get_environments: {
+      get_suggestions_with_terms_aggregation: {
         aggregations: {
-          environments: {
+          items: {
             buckets: [{ key: 'dev' }, { key: 'test' }],
           },
         },
