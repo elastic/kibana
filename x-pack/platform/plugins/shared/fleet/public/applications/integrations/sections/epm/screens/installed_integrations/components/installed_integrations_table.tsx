@@ -143,10 +143,7 @@ export const InstalledIntegrationsTable: React.FunctionComponent<{
             name: i18n.translate('xpack.fleet.epmInstalledIntegrations.dashboardsColumnTitle', {
               defaultMessage: 'Dashboards',
             }),
-            render: ({ installationInfo }: InstalledPackageUIPackageListItem) => {
-              if (!installationInfo) return '-';
-              return <DashboardsCell installation={installationInfo} />;
-            },
+            render: (item: InstalledPackageUIPackageListItem) => <DashboardsCell package={item} />,
           },
           {
             name: i18n.translate(

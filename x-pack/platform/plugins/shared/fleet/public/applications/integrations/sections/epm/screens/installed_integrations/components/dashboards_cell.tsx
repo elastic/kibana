@@ -4,30 +4,43 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { EuiLink, Query, Ast } from '@elastic/eui';
 
 import {
   type InstallationInfo,
+  type PackageListItem,
   KibanaSavedObjectType,
 } from '../../../../../../../../common/types/models';
-import { useFleetStatus } from '../../../../../hooks';
+import { useFleetStatus, useStartServices } from '../../../../../hooks';
 
-export const DashboardsCell: React.FunctionComponent<{ installation: InstallationInfo }> = ({
-  installation,
+export const DashboardsCell: React.FunctionComponent<{ package: PackageListItem }> = ({
+  package: { title, installationInfo },
 }) => {
   const { spaceId = DEFAULT_SPACE_ID } = useFleetStatus();
+  const core = useStartServices();
+
+  const packageTagQueryClause = useCallback(() => {
+    const ast = Ast.create([]);
+    return new Query(ast.addOrFieldValue('tag', title, true, 'eq')).text;
+  }, [title]);
+
+  const link = core.http.basePath.prepend(`/app/dashboards#/list?s=${packageTagQueryClause()}`);
 
   const dashboardsCount = useMemo(() => {
-    return getDashboardsCount(installation, spaceId);
-  }, [installation, spaceId]);
+    if (!installationInfo) {
+      return 0;
+    }
+    return getDashboardsCount(installationInfo, spaceId);
+  }, [installationInfo, spaceId]);
 
   if (dashboardsCount === 0) {
     return '-';
   }
 
-  return <>{dashboardsCount}</>;
+  return <EuiLink href={link}> {dashboardsCount}</EuiLink>;
 };
 
 const getDashboardsCount = (installation: InstallationInfo, spaceId: string) => {
