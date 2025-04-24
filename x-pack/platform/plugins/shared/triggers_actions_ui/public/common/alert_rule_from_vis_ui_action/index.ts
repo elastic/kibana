@@ -97,7 +97,12 @@ export class AlertRuleFromVisAction implements Action<Context> {
           // If last escaped character is an underscore, remove it
           .replace(/_$/, '');
         // Add this to the renameQuery as a side effect
-        renameQuery += `| RENAME \`${fieldName}\` as ${colName} `;
+        if (fieldName.includes('*')) {
+          // Wildcards cannot be used in RENAME
+          renameQuery += `| EVAL ${colName} = \`${fieldName}\``;
+        } else {
+          renameQuery += `| RENAME \`${fieldName}\` as ${colName} `;
+        }
         return colName;
       }
       return fieldName;
