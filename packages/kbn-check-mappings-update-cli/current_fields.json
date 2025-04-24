@@ -819,6 +819,13 @@
     "state",
     "type"
   ],
+  "onechat_workflow": [
+    "access_control",
+    "access_control.public",
+    "categories",
+    "user_id",
+    "workflow_id"
+  ],
   "osquery-manager-usage-metric": [
     "count",
     "errors"
@@ -920,6 +927,9 @@
     "username"
   ],
   "search-telemetry": [],
+  "search_playground": [
+    "name"
+  ],
   "security-ai-prompt": [
     "description",
     "model",
