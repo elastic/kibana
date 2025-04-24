@@ -7,8 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useCallback, useEffect, useRef } from 'react';
+import deepEqual from 'fast-deep-equal';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { BehaviorSubject, distinctUntilChanged, map, skip } from 'rxjs';
 
+import { GridPanelData } from '../../types';
 import { useGridLayoutContext } from '../../use_grid_layout_context';
 import { useGridLayoutPanelEvents } from '../../use_grid_layout_events';
 import { UserInteractionEvent } from '../../use_grid_layout_events/types';
@@ -19,13 +22,31 @@ export interface DragHandleApi {
 }
 
 export const useDragHandleApi = ({
-  panelId,
-  rowId,
+  panel$,
 }: {
-  panelId: string;
-  rowId: string;
+  panel$: BehaviorSubject<GridPanelData & { rowId: string }>;
 }): DragHandleApi => {
   const { useCustomDragHandle } = useGridLayoutContext();
+
+  const [panelId, setPanelId] = useState(panel$.getValue().id);
+  const [rowId, setRowId] = useState(panel$.getValue().rowId);
+
+  useEffect(() => {
+    const subscription = panel$
+      .pipe(
+        skip(1),
+        map((panel) => ({ id: panel.id, rowId: panel.rowId })),
+        distinctUntilChanged(deepEqual)
+      )
+      .subscribe(({ id, rowId: currentRow }) => {
+        setPanelId(id);
+        setRowId(currentRow);
+      });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [panel$]);
 
   const { startDrag } = useGridLayoutPanelEvents({
     interactionType: 'drag',

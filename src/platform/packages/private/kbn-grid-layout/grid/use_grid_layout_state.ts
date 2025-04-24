@@ -15,7 +15,7 @@ import { BehaviorSubject, combineLatest, debounceTime, distinctUntilChanged } fr
 import useResizeObserver, { type ObservedSize } from 'use-resize-observer/polyfilled';
 
 import {
-  ActivePanel,
+  ActivePanelEvent,
   ActiveRowEvent,
   GridAccessMode,
   GridLayoutData,
@@ -91,10 +91,9 @@ export const useGridLayoutState = ({
     });
 
     const gridLayout$ = new BehaviorSubject<GridLayoutData>(resolvedLayout);
-    const proposedGridLayout$ = new BehaviorSubject<GridLayoutData | undefined>(undefined);
     const gridDimensions$ = new BehaviorSubject<ObservedSize>({ width: 0, height: 0 });
     const interactionEvent$ = new BehaviorSubject<PanelInteractionEvent | undefined>(undefined);
-    const activePanel$ = new BehaviorSubject<ActivePanel | undefined>(undefined);
+    const activePanel$ = new BehaviorSubject<ActivePanelEvent | undefined>(undefined);
     const activeRowEvent$ = new BehaviorSubject<ActiveRowEvent | undefined>(undefined);
 
     return {
@@ -102,7 +101,6 @@ export const useGridLayoutState = ({
       rowRefs,
       headerRefs,
       panelRefs,
-      proposedGridLayout$,
       gridLayout$,
       activePanel$,
       activeRowEvent$,

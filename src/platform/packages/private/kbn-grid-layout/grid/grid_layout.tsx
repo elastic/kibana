@@ -9,13 +9,16 @@
 
 import classNames from 'classnames';
 import deepEqual from 'fast-deep-equal';
-import { cloneDeep } from 'lodash';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { combineLatest, pairwise, map, distinctUntilChanged, skip } from 'rxjs';
+import { combineLatest, distinctUntilChanged, map } from 'rxjs';
 
 import { css } from '@emotion/react';
 
 import { GridHeightSmoother } from './grid_height_smoother';
+import { GridPanel } from './grid_panel';
+import { GridRowFooter } from './grid_row/grid_row_footer';
+import { GridRowHeader } from './grid_row/grid_row_header';
+import { GridRowWrapper } from './grid_row/grid_row_wrapper';
 import {
   GridAccessMode,
   GridLayoutData,
@@ -28,16 +31,7 @@ import {
 import { GridLayoutContext, GridLayoutContextType } from './use_grid_layout_context';
 import { useGridLayoutState } from './use_grid_layout_state';
 import { isLayoutEqual } from './utils/equality_checks';
-import {
-  getMainLayoutInOrder,
-  getPanelKeysInOrder,
-  getRowKeysInOrder,
-  resolveGridRow,
-} from './utils/resolve_grid_row';
-import { GridRowHeader } from './grid_row/grid_row_header';
-import { GridPanel } from './grid_panel';
-import { GridRowWrapper } from './grid_row/grid_row_wrapper';
-import { GridRowFooter } from './grid_row/grid_row_footer';
+import { getMainLayoutInOrder, getPanelKeysInOrder } from './utils/resolve_grid_row';
 
 export type GridLayoutProps = {
   layout: GridLayoutData;
@@ -151,6 +145,7 @@ export const GridLayout = ({
         distinctUntilChanged(deepEqual)
       )
       .subscribe((currentElementsInOrder: GridLayoutElementsInOrder) => {
+        console.log(currentElementsInOrder);
         setElementsInOrder(currentElementsInOrder);
       });
 
@@ -177,10 +172,48 @@ export const GridLayout = ({
       }
     });
 
+    const mainSectionGridStyleSubscription = gridLayoutStateManager.gridLayout$
+      .pipe(distinctUntilChanged(isLayoutEqual))
+      .subscribe((currentLayout) => {
+        if (!layoutRef.current) return;
+        const widgets = getMainLayoutInOrder(currentLayout);
+
+        let gridRowTemplateString = '';
+        for (let i = 0; i < widgets.length; i++) {
+          const { type, id } = widgets[i];
+
+          if (type === 'panel') {
+            let maxRow = -Infinity;
+            const startingRow = (currentLayout[id] as GridPanelData).row;
+            while (widgets[i].type === 'panel') {
+              const currentPanel = currentLayout[widgets[i].id] as GridPanelData;
+              maxRow = Math.max(maxRow, currentPanel.row + currentPanel.height - startingRow);
+              i++;
+            }
+            gridRowTemplateString += `repeat(${maxRow}, [gridRow-main] calc(var(--kbnGridRowHeight) * 1px)) `;
+            i--;
+          } else {
+            // section
+            const currentRow = currentLayout[id] as GridRowData;
+            gridRowTemplateString += `[gridRow-main start-${id}] auto `; // header
+            if (!currentRow.isCollapsed) {
+              const panels = Object.values(currentRow.panels);
+              const maxRow =
+                panels.length > 0 ? Math.max(...panels.map(({ row, height }) => row + height)) : 0;
+              gridRowTemplateString += `repeat(${maxRow}, [gridRow-${id}] calc(var(--kbnGridRowHeight) * 1px)) `;
+            }
+            gridRowTemplateString += `auto [end-${id}] `; // footer
+          }
+        }
+        gridRowTemplateString = gridRowTemplateString.replaceAll('] [', ' ');
+
+        layoutRef.current.style.gridTemplateRows = gridRowTemplateString;
+      });
+
     return () => {
       elementsInOrderSubscription.unsubscribe();
       gridLayoutClassSubscription.unsubscribe();
-      // mainSectionGridStyleSubscription.unsubscribe();
+      mainSectionGridStyleSubscription.unsubscribe();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -194,42 +227,6 @@ export const GridLayout = ({
       } as GridLayoutContextType),
     [renderPanelContents, useCustomDragHandle, gridLayoutStateManager]
   );
-
-  useEffect(() => {
-    const currentLayout =
-      gridLayoutStateManager.proposedGridLayout$.getValue() ??
-      gridLayoutStateManager.gridLayout$.getValue();
-
-    let gridRowTemplateString = '';
-    for (let i = 0; i < elementsInOrder.length; i++) {
-      const { type, id, ...rest } = elementsInOrder[i];
-      if (type === 'header') {
-        gridRowTemplateString += `[gridRow-main start-${id}] auto `;
-      } else if (type === 'panel') {
-        const { rowId } = rest as { rowId: string };
-
-        let maxRow = -Infinity;
-        const panel =
-          rowId === 'main' ? currentLayout[id] : (currentLayout[rowId] as GridRowData).panels[id];
-        const startingRow = panel.row;
-        while (elementsInOrder[i].type === 'panel') {
-          const currentPanel =
-            rowId === 'main'
-              ? (currentLayout[elementsInOrder[i].id] as GridPanelData)
-              : (currentLayout[rowId] as GridRowData).panels[elementsInOrder[i].id];
-          maxRow = Math.max(maxRow, currentPanel.row + currentPanel.height - startingRow);
-          i++;
-        }
-        gridRowTemplateString += `repeat(${maxRow}, [gridRow-${rowId}] calc(var(--kbnGridRowHeight) * 1px)) `;
-        i--;
-      } else if (type === 'footer') {
-        gridRowTemplateString += `auto [end-${id}] `;
-      }
-    }
-    gridRowTemplateString = gridRowTemplateString.replaceAll('] [', ' ');
-
-    if (layoutRef.current) layoutRef.current.style.gridTemplateRows = gridRowTemplateString;
-  }, [gridLayoutStateManager, elementsInOrder]);
 
   return (
     <GridLayoutContext.Provider value={memoizedContext}>
@@ -253,7 +250,7 @@ export const GridLayout = ({
               case 'header':
                 return <GridRowHeader key={element.id} rowId={element.id} />;
               case 'panel':
-                return <GridPanel key={element.id} panelId={element.id} rowId={element.rowId} />;
+                return <GridPanel key={element.id} panelId={element.id} />;
               case 'wrapper':
                 return <GridRowWrapper key={`${element.id}--wrapper`} rowId={element.id} />;
               case 'footer':

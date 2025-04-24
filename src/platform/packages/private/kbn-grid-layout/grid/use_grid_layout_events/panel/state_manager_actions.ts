@@ -36,8 +36,6 @@ export const startAction = (
     sensorType: getSensorType(e),
     sensorOffsets: getSensorOffsets(e, panelRect),
   });
-
-  gridLayoutStateManager.proposedGridLayout$.next(gridLayoutStateManager.gridLayout$.value);
 };
 
 export const moveAction = (
@@ -49,18 +47,18 @@ export const moveAction = (
   const {
     runtimeSettings$: { value: runtimeSettings },
     interactionEvent$,
-    proposedGridLayout$,
+    gridLayout$,
     activePanel$,
     layoutRef: { current: gridLayoutElement },
     rowRefs: { current: gridRowElements },
   } = gridLayoutStateManager;
   const interactionEvent = interactionEvent$.value;
-  const currentLayout = proposedGridLayout$.value;
+  const currentLayout = gridLayout$.value;
   if (!interactionEvent || !runtimeSettings || !gridRowElements || !currentLayout) {
     // if no interaction event return early
     return;
   }
-  console.log(interactionEvent.targetRow);
+  // console.log(interactionEvent.targetRow);
   const targetRowIsMain = interactionEvent.targetRow === 'main';
   const currentPanelData: GridPanelData = targetRowIsMain
     ? (currentLayout[interactionEvent.id] as GridPanelData)
@@ -109,7 +107,7 @@ export const moveAction = (
     });
     return highestOverlap > 0 ? highestOverlapRowId : lastRowId;
   })();
-  console.log({ targetRowId, lastRowId });
+  // console.log({ targetRowId, lastRowId });
   const hasChangedGridRow = targetRowId !== lastRowId;
 
   // re-render when the target row changes
@@ -202,7 +200,7 @@ export const moveAction = (
       }
     }
     if (currentLayout && !isLayoutEqual(currentLayout, nextLayout)) {
-      proposedGridLayout$.next(nextLayout);
+      gridLayout$.next(nextLayout);
     }
   }
 };
@@ -210,20 +208,11 @@ export const moveAction = (
 export const commitAction = ({
   activePanel$,
   interactionEvent$,
-  gridLayout$,
-  proposedGridLayout$,
   panelRefs,
 }: GridLayoutStateManager) => {
   const event = interactionEvent$.getValue();
   activePanel$.next(undefined);
   interactionEvent$.next(undefined);
-  if (
-    proposedGridLayout$.value &&
-    !isLayoutEqual(proposedGridLayout$.value, gridLayout$.getValue())
-  ) {
-    gridLayout$.next(cloneDeep(proposedGridLayout$.value));
-  }
-  proposedGridLayout$.next(undefined);
 
   if (!event) return;
   panelRefs.current[event.id]?.scrollIntoView({
@@ -232,12 +221,7 @@ export const commitAction = ({
   });
 };
 
-export const cancelAction = ({
-  activePanel$,
-  interactionEvent$,
-  proposedGridLayout$,
-}: GridLayoutStateManager) => {
+export const cancelAction = ({ activePanel$, interactionEvent$ }: GridLayoutStateManager) => {
   activePanel$.next(undefined);
   interactionEvent$.next(undefined);
-  proposedGridLayout$.next(undefined);
 };

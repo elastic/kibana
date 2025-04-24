@@ -60,7 +60,7 @@ export interface GridSettings {
  */
 export type RuntimeGridSettings = GridSettings & { columnPixelWidth: number };
 
-export interface ActivePanel {
+export interface ActivePanelEvent {
   id: string;
   position: {
     top: number;
@@ -85,13 +85,12 @@ export interface ActiveRowEvent {
 
 export interface GridLayoutStateManager {
   gridLayout$: BehaviorSubject<GridLayoutData>;
-  proposedGridLayout$: BehaviorSubject<GridLayoutData | undefined>; // temporary state for layout during drag and drop operations
   expandedPanelId$: BehaviorSubject<string | undefined>;
   isMobileView$: BehaviorSubject<boolean>;
   accessMode$: BehaviorSubject<GridAccessMode>;
   gridDimensions$: BehaviorSubject<ObservedSize>;
   runtimeSettings$: BehaviorSubject<RuntimeGridSettings>;
-  activePanel$: BehaviorSubject<ActivePanel | undefined>;
+  activePanel$: BehaviorSubject<ActivePanelEvent | undefined>;
   activeRowEvent$: BehaviorSubject<ActiveRowEvent | undefined>;
   interactionEvent$: BehaviorSubject<PanelInteractionEvent | undefined>;
 
