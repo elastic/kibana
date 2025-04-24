@@ -89,18 +89,21 @@ describe('runAgent', () => {
     expect(invokeMock).toHaveBeenCalledTimes(1);
     expect(invokeMock).toHaveBeenCalledWith(
       expect.objectContaining({
-        citations_prompt: INCLUDE_CITATIONS
+        citations_prompt: INCLUDE_CITATIONS,
       }),
       undefined
     );
   });
 
   it('invoked without citations prompt', async () => {
-    await runAgent({...testParams, contentReferencesStore: newContentReferencesStoreMock({ disabled: true })});
+    await runAgent({
+      ...testParams,
+      contentReferencesStore: newContentReferencesStoreMock({ disabled: true }),
+    });
     expect(invokeMock).toHaveBeenCalledTimes(1);
     expect(invokeMock).toHaveBeenCalledWith(
       expect.objectContaining({
-        citations_prompt: ""
+        citations_prompt: '',
       }),
       undefined
     );
