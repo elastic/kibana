@@ -14,11 +14,11 @@ export const AiSocCallout: React.FC = () => {
   const { euiTheme } = useEuiTheme();
 
   return (
-    <EuiCallOut color="accent" data-test-subj={'ai-soc-callout'} aria-label={CALLOUT_ARIA_LABEL}>
+    <EuiCallOut color="accent" data-test-subj="ai-soc-callout" aria-label={CALLOUT_ARIA_LABEL}>
       <AssistantBeacon
-        size={'m'}
+        size="m"
         ringsColor={euiTheme.colors.vis.euiColorVis4}
-        backgroundColor={'backgroundBaseAccent'}
+        backgroundColor="backgroundBaseAccent"
       />
       <EuiText size="xs">
         <h4>{CALLOUT_TITLE}</h4>
