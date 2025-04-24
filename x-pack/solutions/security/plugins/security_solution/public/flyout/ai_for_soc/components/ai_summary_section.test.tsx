@@ -42,7 +42,7 @@ jest.mock('../../../common/lib/kibana', () => {
 });
 
 describe('AISummarySection', () => {
-  it('should render the switch in the unchecked state by default', () => {
+  it('should render the AI summary section', () => {
     (useAIForSOCDetailsContext as jest.Mock).mockReturnValue({
       eventId: 'eventId',
       dataFormattedForFieldBrowser: [],

@@ -28,6 +28,10 @@ jest.mock('@kbn/expandable-flyout', () => ({
 }));
 
 jest.mock('./context');
+jest.mock('@kbn/elastic-assistant/impl/alerts/attack_discovery', () => ({
+  ...jest.requireActual('@kbn/elastic-assistant/impl/alerts/attack_discovery'),
+  AttackDiscoveryWidget: jest.fn(),
+}));
 
 const mockedUseKibana = {
   ...mockUseKibana(),
