@@ -64,11 +64,9 @@ export default function ({ getService }: FtrProviderContext) {
           await es.watcher.putWatch({
             id: `test-watch-${i}`,
             active: true,
-            body: {
-              ...DEFAULT_WATCH_BODY,
-              metadata: {
-                name: `My watch ${i}`,
-              },
+            ...DEFAULT_WATCH_BODY,
+            metadata: {
+              name: `My watch ${i}`,
             },
           });
         } catch (error) {
