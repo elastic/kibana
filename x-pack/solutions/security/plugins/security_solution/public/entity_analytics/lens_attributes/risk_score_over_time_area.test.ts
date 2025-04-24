@@ -71,12 +71,12 @@ describe('getRiskScoreOverTimeAreaAttributes', () => {
       )
     ).toEqual(
       expect.objectContaining({
-        layerId: '1dd5663b-f062-43f8-8688-fc8166c2ca8e',
+        layerId: 'layer-id2-generated-uuid',
         layerType: 'referenceLine',
-        accessors: ['1dd5663b-f062-43f8-8688-fc8166c2ca8e'],
+        accessors: ['layer2-column-id-generated-uuid'],
         yConfig: [
           {
-            forAccessor: '1dd5663b-f062-43f8-8688-fc8166c2ca8e',
+            forAccessor: 'layer2-column-id-generated-uuid',
             axisMode: 'left',
             lineWidth: 2,
             color: '#aa6556',
