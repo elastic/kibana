@@ -30,3 +30,7 @@ export const TAGS = i18n.translate('xpack.synthetics.overview.compactView.monito
 export const ACTIONS = i18n.translate('xpack.synthetics.overview.compactView.monitorActions', {
   defaultMessage: 'Actions',
 });
+
+export const DURATION = i18n.translate('xpack.synthetics.overview.compactView.monitorDuration', {
+  defaultMessage: 'Duration',
+});

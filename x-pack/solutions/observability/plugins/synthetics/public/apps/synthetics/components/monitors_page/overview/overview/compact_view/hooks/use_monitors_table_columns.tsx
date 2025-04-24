@@ -19,7 +19,8 @@ import { getFilterForTypeMessage } from '../../../../management/monitor_list_tab
 import { BadgeStatus } from '../../../../../common/components/monitor_status';
 import { FlyoutParamProps } from '../../types';
 import { MonitorsActions } from '../components/monitors_actions';
-import { STATUS, ACTIONS, LOCATIONS, NAME, TAGS, TYPE } from '../labels';
+import { STATUS, ACTIONS, LOCATIONS, NAME, TAGS, TYPE, DURATION } from '../labels';
+import { MonitorsDuration } from '../components/monitors_duration';
 
 export const useMonitorsTableColumns = ({
   setFlyoutConfigCallback,
@@ -110,6 +111,10 @@ export const useMonitorsTableColumns = ({
         render: (tags: OverviewStatusMetaData['tags']) => (
           <TagsList tags={tags} onClick={onClickMonitorTag} />
         ),
+      },
+      {
+        name: DURATION,
+        render: (monitor: OverviewStatusMetaData) => <MonitorsDuration monitor={monitor} />,
       },
       {
         name: ACTIONS,

@@ -110,20 +110,17 @@ export const OverviewGrid = memo(() => {
   const [view, setView] = useState<View>('compactView');
 
   useEffect(() => {
-    if (monitorsSortedByStatus.length) {
-      const batch: TrendRequest[] = [];
-      const chunk = monitorsSortedByStatus.slice(0, (maxItem + 1) * ROW_COUNT);
-      for (const item of chunk) {
-        if (trendData[item.configId + item.locationId] === undefined) {
-          batch.push({
-            configId: item.configId,
-            locationId: item.locationId,
-            schedule: item.schedule,
-          });
-        }
+    const trendRequests = monitorsSortedByStatus.reduce((acc, item) => {
+      if (trendData[item.configId + item.locationId] === undefined) {
+        acc.push({
+          configId: item.configId,
+          locationId: item.locationId,
+          schedule: item.schedule,
+        });
       }
-      if (batch.length) dispatch(trendStatsBatch.get(batch));
-    }
+      return acc;
+    }, [] as TrendRequest[]);
+    if (trendRequests.length) dispatch(trendStatsBatch.get(trendRequests));
   }, [dispatch, maxItem, monitorsSortedByStatus, trendData]);
 
   const listHeight = Math.min(
