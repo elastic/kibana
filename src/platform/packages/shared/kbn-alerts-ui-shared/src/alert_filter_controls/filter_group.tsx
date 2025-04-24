@@ -22,7 +22,6 @@ import type {
 } from '@kbn/controls-plugin/public';
 import React, { PropsWithChildren, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import type { Subscription } from 'rxjs';
 import { debounce, isEqual, isEqualWith } from 'lodash';
 import type { FilterGroupProps, FilterControlConfig } from './types';
 import { FilterGroupLoading } from './loading';
@@ -62,8 +61,6 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
     disableLocalStorageSync = false,
   } = props;
 
-  const filterChangedSubscription = useRef<Subscription>();
-  const inputChangedSubscription = useRef<Subscription>();
   const [urlStateInitialized, setUrlStateInitialized] = useState(false);
 
   const [controlsFromUrl, setControlsFromUrl] = useState(controlsUrlState ?? []);
@@ -120,14 +117,6 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
   const [showFiltersChangedBanner, setShowFiltersChangedBanner] = useState(false);
 
   const urlDataApplied = useRef<boolean>(false);
-
-  useEffect(() => {
-    return () => {
-      [filterChangedSubscription.current, inputChangedSubscription.current].forEach((sub) => {
-        if (sub) sub.unsubscribe();
-      });
-    };
-  }, []);
 
   const { filters: validatedFilters, query: validatedQuery } = useMemo(() => {
     try {
@@ -225,42 +214,31 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
     if (!controlGroup) {
       return;
     }
+    const filterSubscription = controlGroup.filters$.subscribe({ next: debouncedFilterUpdates });
+    return () => {
+      filterSubscription.unsubscribe();
+    };
+  }, [controlGroup, debouncedFilterUpdates]);
 
-    filterChangedSubscription.current = controlGroup.filters$.subscribe({
-      next: debouncedFilterUpdates,
+  useEffect(() => {
+    if (!controlGroup) {
+      return;
+    }
+
+    const inputSubscription = controlGroup.getInput$().subscribe({
+      next: handleStateUpdates,
     });
 
     return () => {
-      filterChangedSubscription.current?.unsubscribe();
+      inputSubscription.unsubscribe();
     };
-  }, [controlGroup, debouncedFilterUpdates]);
+  }, [controlGroup, handleStateUpdates]);
 
   useEffect(() => {
     if (controlsUrlState && !urlStateInitialized) {
       initializeUrlState();
     }
-
-    if (!controlGroup) {
-      return;
-    }
-
-    inputChangedSubscription.current = controlGroup.getInput$().subscribe({
-      next: handleStateUpdates,
-    });
-
-    return () => {
-      inputChangedSubscription.current?.unsubscribe();
-    };
-  }, [
-    controlGroup,
-    controlsUrlState,
-    debouncedFilterUpdates,
-    getStoredControlState,
-    handleStateUpdates,
-    initializeUrlState,
-    switchToEditMode,
-    urlStateInitialized,
-  ]);
+  }, [controlsUrlState, initializeUrlState, urlStateInitialized]);
 
   const onControlGroupLoadHandler = useCallback(
     (controlGroupRendererApi: ControlGroupRendererApi | undefined) => {
