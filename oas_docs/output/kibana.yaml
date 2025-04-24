@@ -23622,15 +23622,15 @@ paths:
                                 type: object
                                 properties:
                                   secrets:
-                                    additionalProperties: false
+                                    additionalProperties: true
                                     type: object
                                     properties:
                                       ssl:
-                                        additionalProperties: false
+                                        additionalProperties: true
                                         type: object
                                         properties:
                                           key:
-                                            additionalProperties: false
+                                            additionalProperties: true
                                             type: object
                                             properties:
                                               id:
@@ -23745,15 +23745,15 @@ paths:
                                   proxy_url:
                                     type: string
                                   secrets:
-                                    additionalProperties: false
+                                    additionalProperties: true
                                     type: object
                                     properties:
                                       ssl:
-                                        additionalProperties: false
+                                        additionalProperties: true
                                         type: object
                                         properties:
                                           key:
-                                            additionalProperties: false
+                                            additionalProperties: true
                                             type: object
                                             properties:
                                               id:
@@ -24673,9 +24673,6 @@ paths:
                                 type: array
                               type:
                                 type: string
-                            required:
-                              - api_key_id
-                              - type
                           type: object
                         packages:
                           items:
@@ -25135,9 +25132,6 @@ paths:
                               type: array
                             type:
                               type: string
-                          required:
-                            - api_key_id
-                            - type
                         type: object
                       packages:
                         items:
@@ -25479,9 +25473,6 @@ paths:
                               type: array
                             type:
                               type: string
-                          required:
-                            - api_key_id
-                            - type
                         type: object
                       packages:
                         items:
@@ -40878,6 +40869,10 @@ paths:
                       additionalProperties: false
                       type: object
                       properties:
+                        error:
+                          type: string
+                        is_deleted:
+                          type: boolean
                         name:
                           type: string
                         package_name:
@@ -40968,6 +40963,10 @@ paths:
                       additionalProperties: false
                       type: object
                       properties:
+                        error:
+                          type: string
+                        is_deleted:
+                          type: boolean
                         name:
                           type: string
                         package_name:
