@@ -200,7 +200,6 @@ const SYNTH_HOSTS = [
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const browser = getService('browser');
-  const security = getService('security');
   const esArchiver = getService('esArchiver');
   const esClient = getService('es');
   const find = getService('find');
