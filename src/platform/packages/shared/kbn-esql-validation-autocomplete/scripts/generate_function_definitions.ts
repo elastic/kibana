@@ -837,7 +837,7 @@ function printGeneratedFunctionsFile(
       functionDefinition;
 
     let functionName = operator?.toLowerCase() ?? name.toLowerCase();
-    if (functionName.includes('not')) {
+    if (functionName.includes('not') && functionName !== 'is_not_null') {
       functionName = name;
     }
     if (name.toLowerCase() === 'match') {
@@ -963,36 +963,15 @@ ${
     const functionDefinition = getFunctionDefinition(ESDefinition);
     const isLikeOperator = functionDefinition.name.toLowerCase().includes('like');
     const arePredicates = functionDefinition.name.toLowerCase().includes('predicates');
+    if (arePredicates) {
+      continue;
+    }
 
     if (functionDefinition.name.toLowerCase() === 'match') {
       scalarFunctionDefinitions.push({
         ...functionDefinition,
         type: FunctionDefinitionTypes.SCALAR,
       });
-      continue;
-    }
-
-    if (arePredicates) {
-      const nullFunctions: FunctionDefinition[] = [
-        {
-          name: 'is null',
-          description: 'Predicate for NULL comparison: returns true if the value is NULL',
-          operator: 'is null',
-        },
-        {
-          name: 'is not null',
-          description: 'Predicate for NULL comparison: returns true if the value is not NULL',
-          operator: 'is not null',
-        },
-      ].map<FunctionDefinition>(({ name, description, operator }) => {
-        return {
-          ...functionDefinition,
-          name,
-          operator,
-          description,
-        };
-      });
-      operatorDefinitions.push(...nullFunctions);
       continue;
     }
 
