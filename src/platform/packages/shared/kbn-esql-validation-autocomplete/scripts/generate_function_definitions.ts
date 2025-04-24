@@ -710,7 +710,8 @@ const enrichOperators = (
       Object.hasOwn(operatorsMeta, op.name) && operatorsMeta[op.name]?.isComparisonOperator;
 
     // IS NULL | IS NOT NULL
-    const arePredicates = op.name === 'is null' || op.name === 'is not null';
+    const arePredicates =
+      op.operator?.toLowerCase() === 'is null' || op.operator?.toLowerCase() === 'is not null';
 
     const isInOperator = op.name === 'in' || op.name === 'not_in';
     const isLikeOperator = /like/i.test(op.name);
@@ -837,7 +838,7 @@ function printGeneratedFunctionsFile(
       functionDefinition;
 
     let functionName = operator?.toLowerCase() ?? name.toLowerCase();
-    if (functionName.includes('not') && functionName !== 'is_not_null') {
+    if (functionName.includes('not') && functionName !== 'is not null') {
       functionName = name;
     }
     if (name.toLowerCase() === 'match') {
