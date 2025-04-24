@@ -28,7 +28,7 @@ export default function emailNotificationTest({ getService }: FtrProviderContext
     it('succeeds as notification', async () => {
       const startDate = new Date().toISOString();
 
-      // The route sends two notifications, which will send two emails.
+      // The route sends three notifications, which will send three emails.
       // see: x-pack/test/alerting_api_integration/common/plugins/alerts/server/routes.ts
       const body = {
         to,
@@ -69,7 +69,7 @@ export default function emailNotificationTest({ getService }: FtrProviderContext
         });
 
         const filteredEvents = events_.filter((event) => event!['@timestamp']! >= startDate);
-        if (filteredEvents.length < 2) throw new Error('no recent events found yet');
+        if (filteredEvents.length < 3) throw new Error('no recent events found yet');
 
         return filteredEvents;
       });
