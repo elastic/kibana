@@ -46,6 +46,7 @@ interface Props {
   onEsQueryChange: (query: { bool: BoolQuery }) => void;
   onSetTabId: (tabId: TabId) => void;
   onControlApiAvailable?: (controlGroupHandler: FilterGroupHandler | undefined) => void;
+  controlApi?: FilterGroupHandler;
 }
 
 const tableColumns = getColumns();
@@ -60,14 +61,15 @@ export function RuleDetailsTabs({
   onSetTabId,
   onEsQueryChange,
   onControlApiAvailable,
+  controlApi,
 }: Props) {
   const {
     triggersActionsUi: { getRuleEventLogList: RuleEventLogList },
   } = useKibana().services;
   const [filterControls, setFilterControls] = useState<Filter[] | undefined>();
   const hasInitialControlLoadingFinished = useMemo(
-    () => Array.isArray(filterControls),
-    [filterControls]
+    () => controlApi && Array.isArray(filterControls),
+    [controlApi, filterControls]
   );
 
   const ruleFilters = useRef<Filter[]>([
@@ -104,7 +106,7 @@ export function RuleDetailsTabs({
           />
           <EuiSpacer size="s" />
 
-          <EuiFlexGroup style={{ minHeight: 450 }} direction={'column'}>
+          <EuiFlexGroup css={{ minHeight: 450 }} direction={'column'}>
             <EuiFlexItem>
               {esQuery && ruleTypeIds && hasInitialControlLoadingFinished && (
                 <ObservabilityAlertsTable
@@ -127,7 +129,7 @@ export function RuleDetailsTabs({
       }),
       'data-test-subj': 'eventLogListTab',
       content: (
-        <EuiFlexGroup style={{ minHeight: 600 }} direction={'column'}>
+        <EuiFlexGroup css={{ minHeight: 600 }} direction={'column'}>
           <EuiFlexItem>
             {rule && ruleType ? <RuleEventLogList ruleId={rule.id} ruleType={ruleType} /> : null}
           </EuiFlexItem>
