@@ -114,7 +114,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables the Assistant Model Evaluation advanced setting and API endpoint, introduced in `8.11.0`.
    */
-  assistantModelEvaluation: false,
+  assistantModelEvaluation: true,
 
   /**
    * Enables advanced ESQL generation for the Assistant.
