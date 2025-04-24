@@ -53,7 +53,7 @@ export const GridPanel = React.memo(({ panelId, rowId }: GridPanelProps) => {
       );
       grid-column-start: ${initialPanel.column + 1};
       grid-column-end: ${initialPanel.column + 1 + initialPanel.width};
-      grid-row-start: ${rowId === 'main' ? '' : `gridRow-${rowId}`} ${initialPanel.row + 1};
+      grid-row-start: ${`gridRow-${rowId}`} ${initialPanel.row + 1};
       grid-row-end: span ${initialPanel.height};
       .kbnGridPanel--dragHandle,
       .kbnGridPanel--resizeHandle {
@@ -87,10 +87,11 @@ export const GridPanel = React.memo(({ panelId, rowId }: GridPanelProps) => {
           const isPanelActive = activePanel?.id === panelId;
 
           let panel;
-          if (rowId === 'main') {
+          const targetRow = currentInteractionEvent?.targetRow ?? rowId;
+          if (targetRow === 'main') {
             panel = activeLayout[panelId] as GridPanelData;
           } else {
-            panel = (activeLayout[rowId] as GridRowData)?.panels[panelId];
+            panel = (activeLayout[targetRow] as GridRowData)?.panels[panelId];
           }
 
           if (!ref || !panel) return;
@@ -149,9 +150,7 @@ export const GridPanel = React.memo(({ panelId, rowId }: GridPanelProps) => {
             // and render the panel locked to the grid
             ref.style.gridColumnStart = `${panel.column + 1}`;
             ref.style.gridColumnEnd = `${panel.column + 1 + panel.width}`;
-            ref.style.gridRowStart = `${rowId === 'main' ? '' : `gridRow-${rowId}`} ${
-              panel.row + 1
-            }`;
+            ref.style.gridRowStart = `${`gridRow-${rowId}`} ${panel.row + 1}`;
             ref.style.gridRowEnd = `span ${panel.height}`;
           }
         });

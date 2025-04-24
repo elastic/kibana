@@ -19,6 +19,7 @@ import { GridHeightSmoother } from './grid_height_smoother';
 import {
   GridAccessMode,
   GridLayoutData,
+  GridLayoutElementsInOrder,
   GridPanelData,
   GridRowData,
   GridSettings,
@@ -65,7 +66,7 @@ export const GridLayout = ({
     expandedPanelId,
     accessMode,
   });
-  const [elementsInOrder, setElementsInOrder] = useState<unknown[]>([]);
+  const [elementsInOrder, setElementsInOrder] = useState<GridLayoutElementsInOrder>([]);
 
   /**
    * Update the `gridLayout$` behaviour subject in response to the `layout` prop changing
@@ -116,35 +117,40 @@ export const GridLayout = ({
     /**
      * This subscription ensures that rows get re-rendered when their orders change
      */
-    const elementsInOrderSubscription = combineLatest([
-      gridLayoutStateManager.proposedGridLayout$,
-      gridLayoutStateManager.gridLayout$,
-    ])
+    const elementsInOrderSubscription = gridLayoutStateManager.gridLayout$
       .pipe(
-        map(([proposedGridLayout, gridLayout]) => proposedGridLayout ?? gridLayout),
         map((currentLayout) => {
-          const currentElementsInOrder: unknown[] = [];
+          const currentElementsInOrder: GridLayoutElementsInOrder = [];
           const widgets = getMainLayoutInOrder(currentLayout);
           widgets.forEach(({ type, id }) => {
             if (type === 'section') {
-              currentElementsInOrder.push({ type: 'header', id });
               const currentRow = currentLayout[id] as GridRowData;
+              currentElementsInOrder.push({ type: 'header', id });
               if (!currentRow.isCollapsed) {
                 const panelIds = getPanelKeysInOrder(currentRow.panels);
                 panelIds.forEach((panelId) => {
-                  currentElementsInOrder.push({ type: 'panel', id: panelId, rowId: id });
+                  currentElementsInOrder.push({
+                    type: 'panel',
+                    id: panelId,
+                    rowId: id,
+                  });
                 });
+                currentElementsInOrder.push({ type: 'wrapper', id });
               }
               currentElementsInOrder.push({ type: 'footer', id });
             } else {
-              currentElementsInOrder.push({ type: 'panel', id, rowId: 'main' });
+              currentElementsInOrder.push({
+                type: 'panel',
+                id,
+                rowId: `main`,
+              });
             }
           });
           return currentElementsInOrder;
         }),
         distinctUntilChanged(deepEqual)
       )
-      .subscribe((currentElementsInOrder) => {
+      .subscribe((currentElementsInOrder: GridLayoutElementsInOrder) => {
         setElementsInOrder(currentElementsInOrder);
       });
 
@@ -171,53 +177,10 @@ export const GridLayout = ({
       }
     });
 
-    const mainSectionGridStyleSubscription = combineLatest([
-      gridLayoutStateManager.proposedGridLayout$,
-      gridLayoutStateManager.gridLayout$,
-    ])
-      .pipe(
-        map(([proposedGridLayout, gridLayout]) => proposedGridLayout ?? gridLayout),
-        distinctUntilChanged(isLayoutEqual)
-      )
-      .subscribe((currentLayout) => {
-        if (!layoutRef.current) return;
-        const widgets = getMainLayoutInOrder(currentLayout);
-
-        let gridRowTemplateString = '';
-        for (let i = 0; i < widgets.length; i++) {
-          const { type, id } = widgets[i];
-
-          if (type === 'panel') {
-            let maxRow = -Infinity;
-            while (widgets[i].type === 'panel') {
-              const currentPanel = currentLayout[widgets[i].id] as GridPanelData;
-              maxRow = Math.max(maxRow, currentPanel.row + currentPanel.height);
-              i++;
-            }
-            gridRowTemplateString += `repeat(${maxRow}, calc(var(--kbnGridRowHeight) * 1px)) `;
-            i--;
-          } else {
-            // section
-            const currentRow = currentLayout[id] as GridRowData;
-            gridRowTemplateString += `[start-${id}] auto `; // header
-            if (!currentRow.isCollapsed) {
-              const panels = Object.values(currentRow.panels);
-              const maxRow =
-                panels.length > 0 ? Math.max(...panels.map(({ row, height }) => row + height)) : 0;
-              gridRowTemplateString += `repeat(${maxRow}, [gridRow-${id}] calc(var(--kbnGridRowHeight) * 1px)) `;
-            }
-            gridRowTemplateString += `auto [end-${id}] `; // footer
-          }
-        }
-        gridRowTemplateString = gridRowTemplateString.replaceAll('] [', ' ');
-
-        layoutRef.current.style.gridTemplateRows = gridRowTemplateString;
-      });
-
     return () => {
       elementsInOrderSubscription.unsubscribe();
       gridLayoutClassSubscription.unsubscribe();
-      mainSectionGridStyleSubscription.unsubscribe();
+      // mainSectionGridStyleSubscription.unsubscribe();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -231,6 +194,42 @@ export const GridLayout = ({
       } as GridLayoutContextType),
     [renderPanelContents, useCustomDragHandle, gridLayoutStateManager]
   );
+
+  useEffect(() => {
+    const currentLayout =
+      gridLayoutStateManager.proposedGridLayout$.getValue() ??
+      gridLayoutStateManager.gridLayout$.getValue();
+
+    let gridRowTemplateString = '';
+    for (let i = 0; i < elementsInOrder.length; i++) {
+      const { type, id, ...rest } = elementsInOrder[i];
+      if (type === 'header') {
+        gridRowTemplateString += `[gridRow-main start-${id}] auto `;
+      } else if (type === 'panel') {
+        const { rowId } = rest as { rowId: string };
+
+        let maxRow = -Infinity;
+        const panel =
+          rowId === 'main' ? currentLayout[id] : (currentLayout[rowId] as GridRowData).panels[id];
+        const startingRow = panel.row;
+        while (elementsInOrder[i].type === 'panel') {
+          const currentPanel =
+            rowId === 'main'
+              ? (currentLayout[elementsInOrder[i].id] as GridPanelData)
+              : (currentLayout[rowId] as GridRowData).panels[elementsInOrder[i].id];
+          maxRow = Math.max(maxRow, currentPanel.row + currentPanel.height - startingRow);
+          i++;
+        }
+        gridRowTemplateString += `repeat(${maxRow}, [gridRow-${rowId}] calc(var(--kbnGridRowHeight) * 1px)) `;
+        i--;
+      } else if (type === 'footer') {
+        gridRowTemplateString += `auto [end-${id}] `;
+      }
+    }
+    gridRowTemplateString = gridRowTemplateString.replaceAll('] [', ' ');
+
+    if (layoutRef.current) layoutRef.current.style.gridTemplateRows = gridRowTemplateString;
+  }, [gridLayoutStateManager, elementsInOrder]);
 
   return (
     <GridLayoutContext.Provider value={memoizedContext}>

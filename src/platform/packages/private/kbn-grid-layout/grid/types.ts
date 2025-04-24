@@ -37,6 +37,11 @@ export type GridLayoutWidget =
   | (GridPanelData & { type: 'panel' })
   | (GridRowData & { type: 'section' });
 
+export type GridLayoutElementsInOrder = Array<
+  | { type: 'header' | 'wrapper' | 'footer'; id: string }
+  | { type: 'panel'; id: string; rowId: string }
+>;
+
 export interface GridLayoutData {
   [key: string]: GridLayoutWidget;
 }
