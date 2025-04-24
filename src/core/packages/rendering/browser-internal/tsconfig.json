@@ -28,12 +28,14 @@
     "@kbn/core-analytics-browser",
     "@kbn/core-i18n-browser",
     "@kbn/core-theme-browser",
-    "@kbn/core-rendering-browser",
     "@kbn/core-user-profile-browser",
     "@kbn/core-user-profile-browser-mocks",
     "@kbn/core-execution-context-browser-mocks",
     "@kbn/core-execution-context-browser",
-    "@kbn/react-kibana-context-render"
+    "@kbn/react-kibana-context-render",
+    "@kbn/core-chrome-browser",
+    "@kbn/core-rendering-browser",
+    "@kbn/core-workspace-kibana",
   ],
   "exclude": [
     "target/**/*"

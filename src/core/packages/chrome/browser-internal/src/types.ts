@@ -21,6 +21,7 @@ import type {
   SolutionId,
 } from '@kbn/core-chrome-browser';
 import type { Observable } from 'rxjs';
+import { ProjectNavigationService } from './project_navigation';
 
 /** @internal */
 export interface InternalChromeStart extends ChromeStart {
@@ -120,4 +121,5 @@ export interface InternalChromeStart extends ChromeStart {
      */
     changeActiveSolutionNavigation(id: SolutionId | null): void;
   };
+  projectNavigation: ReturnType<ProjectNavigationService['start']>;
 }

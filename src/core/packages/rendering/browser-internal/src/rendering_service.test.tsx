@@ -73,9 +73,9 @@ describe('RenderingService', () => {
       return rendering.start({
         analytics,
         i18n,
-        executionContext,
         theme,
         userProfile,
+        executionContext,
       });
     };
 

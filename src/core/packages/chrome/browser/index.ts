@@ -61,4 +61,20 @@ export type {
   EuiSideNavItemTypeEnhanced,
   RenderAs,
   SolutionId,
+  WorkspaceButtonProps,
+  WorkspaceKnownTool,
+  WorkspaceTool,
+  WorkspaceToolProps,
+  WorkspaceService,
+  WorkspaceStart,
+} from './src';
+
+export {
+  WORKSPACE_KNOWN_TOOLS,
+  WORKSPACE_TOOL_AI_ASSISTANT,
+  WORKSPACE_TOOL_FEEDBACK,
+  WORKSPACE_TOOL_HELP,
+  WORKSPACE_TOOL_NEWSFEED,
+  WORKSPACE_TOOL_PROFILE,
+  WORKSPACE_TOOL_RECENT,
 } from './src';
