@@ -6,8 +6,8 @@
  */
 import React, { useCallback } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import { UseField, ValidationFuncArg } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { Field } from '@kbn/es-ui-shared-plugin/static/forms/components';
+import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { Field, PasswordField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import { AdditionalFields } from '../components/additional_fields';
 import * as i18n from './translations';
@@ -16,12 +16,15 @@ interface OAuth2FieldsProps {
   readOnly: boolean;
 }
 
-const jsonValidator = ({ value }: ValidationFuncArg<any, string | null | undefined>) => {
+export const jsonValidator = ({ value }: { value: string | null | undefined }) => {
   if (!value) {
     return undefined;
   }
   try {
-    JSON.parse(value);
+    const parsedValue = JSON.parse(value);
+    if (typeof parsedValue !== 'object' || Array.isArray(parsedValue)) {
+      return { message: i18n.INVALID_JSON };
+    }
     return undefined;
   } catch (e) {
     return { message: i18n.INVALID_JSON };
@@ -112,7 +115,7 @@ export const OAuth2Fields: React.FC<OAuth2FieldsProps> = ({ readOnly }) => {
               },
             ],
           }}
-          component={Field}
+          component={PasswordField}
           componentProps={{
             euiFieldProps: {
               'data-test-subj': 'clientSecretOAuth2',

@@ -421,13 +421,6 @@ export const ADDITIONAL_INFO_HELP_TEXT = i18n.translate(
   }
 );
 
-export const ADDITIONAL_INFO_JSON_ERROR = i18n.translate(
-  'xpack.stackConnectors.components.serviceNowITOM.additionalInfoError',
-  {
-    defaultMessage: 'The additional info field does not have a valid JSON format.',
-  }
-);
-
 export const ADDITIONAL_FIELDS = i18n.translate(
   'xpack.stackConnectors.components.servicenow.additionalFieldsTooltip',
   {

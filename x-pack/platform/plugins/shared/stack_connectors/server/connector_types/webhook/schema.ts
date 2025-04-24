@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { AuthConfiguration } from '../../../common/auth/schema';
+import { WebhookAuthConfiguration } from '../../../common/auth/schema';
 import { WebhookMethods } from '../../../common/auth/constants';
 
 export const HeadersSchema = schema.recordOf(schema.string(), schema.string());
@@ -17,15 +17,15 @@ const configSchemaProps = {
     defaultValue: WebhookMethods.POST,
   }),
   headers: schema.nullable(HeadersSchema),
-  hasAuth: AuthConfiguration.hasAuth,
-  authType: AuthConfiguration.authType,
-  certType: AuthConfiguration.certType,
-  ca: AuthConfiguration.ca,
-  verificationMode: AuthConfiguration.verificationMode,
-  accessTokenUrl: AuthConfiguration.accessTokenUrl,
-  clientId: AuthConfiguration.clientId,
-  scope: AuthConfiguration.scope,
-  additionalFields: AuthConfiguration.additionalFields,
+  hasAuth: WebhookAuthConfiguration.hasAuth,
+  authType: WebhookAuthConfiguration.authType,
+  certType: WebhookAuthConfiguration.certType,
+  ca: WebhookAuthConfiguration.ca,
+  verificationMode: WebhookAuthConfiguration.verificationMode,
+  accessTokenUrl: WebhookAuthConfiguration.accessTokenUrl,
+  clientId: WebhookAuthConfiguration.clientId,
+  scope: WebhookAuthConfiguration.scope,
+  additionalFields: WebhookAuthConfiguration.additionalFields,
 };
 
 export const ConfigSchema = schema.object(configSchemaProps);

@@ -41,7 +41,7 @@ import { isOk, promiseResult } from '../lib/result_type';
 import { ConfigSchema, ParamsSchema } from './schema';
 import { buildConnectorAuth } from '../../../common/auth/utils';
 import { AuthType } from '../../../common/auth/constants';
-import { SecretConfigurationSchema } from '../../../common/auth/schema';
+import { WebhookSecretConfigurationSchema } from '../../../common/auth/schema';
 
 export const ConnectorTypeId = '.webhook';
 
@@ -64,7 +64,7 @@ export function getConnectorType(): WebhookConnectorType {
         customValidator: validateConnectorTypeConfig,
       },
       secrets: {
-        schema: SecretConfigurationSchema,
+        schema: WebhookSecretConfigurationSchema,
       },
       params: {
         schema: ParamsSchema,
@@ -228,7 +228,7 @@ export async function executor(
         }
 
         logger.debug(`Successfully obtained OAuth2 token for connector "${actionId}"`);
-        axiosConfig.headers.Authorization = `Bearer ${accessToken}`;
+        axiosConfig.headers.Authorization = accessToken;
 
         return axiosConfig;
       },

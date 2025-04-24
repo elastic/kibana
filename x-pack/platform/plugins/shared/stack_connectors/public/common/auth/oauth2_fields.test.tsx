@@ -8,7 +8,7 @@
 import React from 'react';
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { OAuth2Fields } from './oauth2_fields';
+import { OAuth2Fields, jsonValidator } from './oauth2_fields';
 import * as i18n from './translations';
 import { AuthFormTestProvider } from '../../connector_types/lib/test_utils';
 
@@ -83,5 +83,34 @@ describe('OAuth2Fields', () => {
     expect(screen.getByLabelText(i18n.CLIENT_ID)).not.toHaveAttribute('readonly');
     expect(screen.getByLabelText(i18n.CLIENT_SECRET)).not.toHaveAttribute('readonly');
     expect(screen.getByLabelText(i18n.SCOPE)).not.toHaveAttribute('readonly');
+  });
+});
+
+describe('jsonValidator', () => {
+  it('returns undefined for empty value', () => {
+    expect(jsonValidator({ value: undefined })).toBeUndefined();
+    expect(jsonValidator({ value: null })).toBeUndefined();
+    expect(jsonValidator({ value: '' })).toBeUndefined();
+  });
+
+  it('returns undefined for valid JSON object', () => {
+    expect(jsonValidator({ value: '{"foo":"bar"}' })).toBeUndefined();
+    expect(jsonValidator({ value: '{}' })).toBeUndefined();
+  });
+
+  it('returns error for invalid JSON', () => {
+    expect(jsonValidator({ value: '{foo:bar}' })).toEqual({ message: i18n.INVALID_JSON });
+    expect(jsonValidator({ value: '{' })).toEqual({ message: i18n.INVALID_JSON });
+  });
+
+  it('returns error for JSON array', () => {
+    expect(jsonValidator({ value: '["foo","bar"]' })).toEqual({ message: i18n.INVALID_JSON });
+    expect(jsonValidator({ value: '[]' })).toEqual({ message: i18n.INVALID_JSON });
+  });
+
+  it('returns error for JSON number or string', () => {
+    expect(jsonValidator({ value: '"foo"' })).toEqual({ message: i18n.INVALID_JSON });
+    expect(jsonValidator({ value: '123' })).toEqual({ message: i18n.INVALID_JSON });
+    expect(jsonValidator({ value: 'true' })).toEqual({ message: i18n.INVALID_JSON });
   });
 });
