@@ -30,8 +30,6 @@ import { useHistory } from 'react-router-dom';
 import useAsync from 'react-use/lib/useAsync';
 import { ExceptionStacktrace, PlaintextStacktrace, Stacktrace } from '@kbn/event-stacktrace';
 import type { AT_TIMESTAMP } from '../../../../../common/es_fields/apm';
-import { ERROR_GROUP_ID } from '../../../../../common/es_fields/apm';
-import { TraceSearchType } from '../../../../../common/trace_explorer';
 import type { APMError } from '../../../../../typings/es_schemas/ui/apm_error';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
@@ -48,7 +46,6 @@ import { Summary } from '../../../shared/summary';
 import { HttpInfoSummaryItem } from '../../../shared/summary/http_info_summary_item';
 import { UserAgentSummaryItem } from '../../../shared/summary/user_agent_summary_item';
 import { TimestampTooltip } from '../../../shared/timestamp_tooltip';
-import { TransactionTab } from '../../transaction_details/waterfall_with_summary/transaction_tabs';
 import type { ErrorTab } from './error_tabs';
 import { ErrorTabKey, getTabs } from './error_tabs';
 import { ErrorUiActionsContextMenu } from './error_ui_actions_context_menu';
@@ -176,19 +173,6 @@ export function ErrorSampleDetails({
   const environment = error.service.environment;
   const serviceVersion = error.service.version;
   const isUnhandled = error.error.exception?.[0]?.handled === false;
-
-  const traceExplorerLink = router.link('/traces/explorer/waterfall', {
-    query: {
-      ...query,
-      showCriticalPath: false,
-      query: `${ERROR_GROUP_ID}:${groupId}`,
-      type: TraceSearchType.kql,
-      traceId: '',
-      transactionId: '',
-      waterfallItemId: '',
-      detailTab: TransactionTab.timeline,
-    },
-  });
 
   return (
     <EuiPanel hasBorder={true}>
