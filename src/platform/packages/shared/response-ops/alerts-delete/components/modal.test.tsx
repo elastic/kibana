@@ -25,6 +25,7 @@ describe('AlertDelete Modal', () => {
         retry: false,
         refetchOnWindowFocus: false,
         refetchOnReconnect: false,
+        cacheTime: 0,
       },
     },
   });
