@@ -34,18 +34,18 @@ const extractFeaturedCards = (filteredCards: IntegrationCardItem[], featuredCard
 const getFilteredCards = ({
   featuredCardIds,
   getAppUrl,
-  installedIntegrationList,
   integrationsList,
   navigateTo,
+  installedIntegrations,
 }: {
   featuredCardIds?: string[];
   getAppUrl: GetAppUrl;
-  installedIntegrationList?: IntegrationCardItem[];
   integrationsList: IntegrationCardItem[];
   navigateTo: NavigateTo;
+  installedIntegrations: [];
 }) => {
   const securityIntegrationsList = integrationsList.map((card) =>
-    addSecuritySpecificProps({ navigateTo, getAppUrl, card, installedIntegrationList })
+    addSecuritySpecificProps({ navigateTo, getAppUrl, card, installedIntegrations })
   );
   if (!featuredCardIds) {
     return { featuredCards: [], integrationCards: securityIntegrationsList };
@@ -61,11 +61,12 @@ export const addSecuritySpecificProps = ({
   navigateTo,
   getAppUrl,
   card,
+  installedIntegrations,
 }: {
   navigateTo: NavigateTo;
   getAppUrl: GetAppUrl;
   card: IntegrationCardItem;
-  installedIntegrationList?: IntegrationCardItem[];
+  installedIntegrations: IntegrationCardItem[];
 }): IntegrationCardItem => {
   const onboardingLink = getAppUrl({ appId: SECURITY_UI_APP_ID, path: ONBOARDING_PATH });
   const integrationRootUrl = getAppUrl({ appId: INTEGRATION_APP_ID });
@@ -74,28 +75,36 @@ export const addSecuritySpecificProps = ({
     card.url.indexOf(APP_INTEGRATIONS_PATH) >= 0 && onboardingLink
       ? addPathParamToUrl(card.url, ONBOARDING_PATH)
       : card.url;
+
+  const isInstalled = installedIntegrations?.some(
+    (installedList) => installedList.name.toLowerCase() === card.name.toLowerCase()
+  );
+
+  const handleCardClick = () => {
+    const trackId = `${TELEMETRY_INTEGRATION_CARD}_${card.id}`;
+    trackOnboardingLinkClick(trackId);
+
+    if (url.startsWith(APP_INTEGRATIONS_PATH)) {
+      navigateTo({
+        appId: INTEGRATION_APP_ID,
+        path: url.slice(integrationRootUrl.length),
+        state,
+      });
+    } else if (url.startsWith('http') || url.startsWith('https')) {
+      window.open(url, '_blank');
+    } else {
+      navigateTo({ url, state });
+    }
+  };
+
   return {
     ...card,
     titleLineClamp: CARD_TITLE_LINE_CLAMP,
     descriptionLineClamp: CARD_DESCRIPTION_LINE_CLAMP,
     maxCardHeight: MAX_CARD_HEIGHT_IN_PX,
-    showInstallationStatus: true,
+    showInstallationStatus: isInstalled,
     url,
-    onCardClick: () => {
-      const trackId = `${TELEMETRY_INTEGRATION_CARD}_${card.id}`;
-      trackOnboardingLinkClick(trackId);
-      if (url.startsWith(APP_INTEGRATIONS_PATH)) {
-        navigateTo({
-          appId: INTEGRATION_APP_ID,
-          path: url.slice(integrationRootUrl.length),
-          state,
-        });
-      } else if (url.startsWith('http') || url.startsWith('https')) {
-        window.open(url, '_blank');
-      } else {
-        navigateTo({ url, state });
-      }
-    },
+    onCardClick: handleCardClick,
   };
 };
 
@@ -107,16 +116,18 @@ export const useIntegrationCardList = ({
   featuredCardIds?: string[] | undefined;
 }): IntegrationCardItem[] => {
   const { navigateTo, getAppUrl } = useNavigation();
-  const {
-    status,
-    data: installedIntegrations,
-    error,
-    isFetching,
-  } = useFetchInstalledIntegrations();
+  const { data: installedIntegrations } = useFetchInstalledIntegrations();
 
   const { featuredCards, integrationCards } = useMemo(
-    () => getFilteredCards({ navigateTo, getAppUrl, integrationsList, featuredCardIds }),
-    [navigateTo, getAppUrl, integrationsList, featuredCardIds]
+    () =>
+      getFilteredCards({
+        navigateTo,
+        getAppUrl,
+        integrationsList,
+        featuredCardIds,
+        installedIntegrations: installedIntegrations?.items ?? [],
+      }),
+    [navigateTo, getAppUrl, integrationsList, featuredCardIds, installedIntegrations]
   );
 
   if (featuredCardIds && featuredCardIds.length > 0) {

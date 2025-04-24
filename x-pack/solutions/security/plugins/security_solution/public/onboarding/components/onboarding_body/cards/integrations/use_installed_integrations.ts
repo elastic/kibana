@@ -6,19 +6,22 @@
  */
 import { useQuery } from '@tanstack/react-query';
 import { EPM_API_ROUTES } from '@kbn/fleet-plugin/common';
-
-interface Response {}
+import { useKibana } from '../../../../../common/lib/kibana';
 
 export const useFetchInstalledIntegrations = () => {
-  // const { security } = useKibana().services;
-  // const { addError } = useAppToasts();
+  const { http } = useKibana().services;
 
   return useQuery({
     queryKey: ['get'],
-    queryFn: async (): Promise<Response[]> => {
-      const response = await fetch(`${EPM_API_ROUTES.INSTALLED_LIST_PATTERN}`);
-      const parsedResponse = await response.json();
-      return parsedResponse;
+    queryFn: async () => {
+      const response = await http.fetch(`${EPM_API_ROUTES.INSTALLED_LIST_PATTERN}`, {
+        method: 'GET',
+        version: '2023-10-31',
+        query: {
+          showOnlyActiveDataStreams: true,
+        },
+      });
+      return response;
     },
   });
 };
