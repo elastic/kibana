@@ -19,7 +19,7 @@ export const MonitorsTable = ({
   items: OverviewStatusMetaData[];
   setFlyoutConfigCallback: (params: FlyoutParamProps) => void;
 }) => {
-  const { loaded } = useOverviewStatus({
+  const { loaded, status } = useOverviewStatus({
     scopeStatusByLocation: true,
   });
   const { columns } = useMonitorsTableColumns({ setFlyoutConfigCallback });
@@ -27,11 +27,13 @@ export const MonitorsTable = ({
     totalItems: items,
   });
 
+  const loading = !status || !loaded;
+
   return (
     <EuiBasicTable
       items={pageOfItems}
       columns={columns}
-      loading={!loaded}
+      loading={loading}
       pagination={pagination}
       onChange={onTableChange}
     />
