@@ -50,7 +50,7 @@ export const OutputPane: FunctionComponent<Props> = ({ isLoading, response }) =>
     <div className="painlessLabRightPane">
       <EuiTabbedContent
         className="painlessLabRightPane__tabs"
-        data-test-subj="painlessTabs"
+        data-test-subj={isLoading ? `painlessTabs-loading` : `painlessTabs-loaded`}
         size="s"
         tabs={[
           {
