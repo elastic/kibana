@@ -9,7 +9,7 @@ import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { AttackDiscoveryWidget } from '.';
 import { useAssistantContext } from '../../assistant_context';
-import { useFetchAttackDiscovery } from './use_fetch_attack_discovery';
+import { useFindAttackDiscoveries } from './use_find_attack_discoveries';
 import * as i18n from './translations';
 
 // Mock the custom hooks
@@ -17,8 +17,8 @@ jest.mock('../../assistant_context', () => ({
   useAssistantContext: jest.fn(),
 }));
 
-jest.mock('./use_fetch_attack_discovery', () => ({
-  useFetchAttackDiscovery: jest.fn(),
+jest.mock('./use_find_attack_discoveries', () => ({
+  useFindAttackDiscoveries: jest.fn(),
 }));
 const mockData = {
   alertIds: ['alert-id-xyz789'],
@@ -47,46 +47,46 @@ describe('AttackDiscoveryWidget', () => {
   });
 
   it('renders loading spinner when data is being fetched', () => {
-    (useFetchAttackDiscovery as jest.Mock).mockReturnValue({
+    (useFindAttackDiscoveries as jest.Mock).mockReturnValue({
       isFetching: true,
       data: null,
     });
 
-    render(<AttackDiscoveryWidget />);
+    render(<AttackDiscoveryWidget id={'123'} />);
 
     expect(screen.getByRole('progressbar')).toBeInTheDocument();
   });
 
   it('renders no results message when no data is available', () => {
-    (useFetchAttackDiscovery as jest.Mock).mockReturnValue({
+    (useFindAttackDiscoveries as jest.Mock).mockReturnValue({
       isFetching: false,
       data: null,
     });
 
-    render(<AttackDiscoveryWidget />);
+    render(<AttackDiscoveryWidget id={'123'} />);
 
     expect(screen.getByText(i18n.NO_RESULTS)).toBeInTheDocument();
   });
 
   it('renders attack discovery details when data is available', () => {
-    (useFetchAttackDiscovery as jest.Mock).mockReturnValue({
+    (useFindAttackDiscoveries as jest.Mock).mockReturnValue({
       isFetching: false,
       data: mockData,
     });
 
-    render(<AttackDiscoveryWidget />);
+    render(<AttackDiscoveryWidget id={'123'} />);
 
     expect(screen.getByText(mockData.title)).toBeInTheDocument();
     expect(screen.getByTestId('alertsBadge')).toHaveTextContent('1');
   });
 
   it('navigates to attack discovery page when "View Details" button is clicked', () => {
-    (useFetchAttackDiscovery as jest.Mock).mockReturnValue({
+    (useFindAttackDiscoveries as jest.Mock).mockReturnValue({
       isFetching: false,
       data: mockData,
     });
 
-    render(<AttackDiscoveryWidget />);
+    render(<AttackDiscoveryWidget id={'123'} />);
 
     fireEvent.click(screen.getByTestId('attackDiscoveryViewDetails'));
 
