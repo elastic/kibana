@@ -12,7 +12,7 @@ import { difference, isArray, isPlainObject } from 'lodash';
 
 function getFlattenedKeys(obj: unknown, parentKey = '', keys: Set<string> = new Set()) {
   if (isPlainObject(obj)) {
-    Object.entries(obj).forEach(([key, value]) => {
+    Object.entries(obj as Record<string, any>).forEach(([key, value]) => {
       getFlattenedKeys(value, parentKey ? `${parentKey}.${key}` : key, keys);
     });
   } else if (isArray(obj)) {
