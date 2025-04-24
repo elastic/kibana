@@ -14,5 +14,5 @@ export const newContentReferencesStoreMock: (options?: Options) => ContentRefere
       return creator({ id: 'exampleContentReferenceId' });
     }),
     getStore: jest.fn().mockReturnValue({}),
-    options
+    options,
   }));

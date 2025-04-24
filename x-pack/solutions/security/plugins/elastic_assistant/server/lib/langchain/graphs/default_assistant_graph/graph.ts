@@ -67,7 +67,7 @@ export const getDefaultAssistantGraph = ({
       actionsClient,
       logger,
       savedObjectsClient,
-      contentReferencesStore
+      contentReferencesStore,
     };
 
     const stateAnnotation = getStateAnnotation({ getFormattedTime });

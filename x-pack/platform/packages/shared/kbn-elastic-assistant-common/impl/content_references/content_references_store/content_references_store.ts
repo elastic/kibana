@@ -11,7 +11,6 @@ import { ContentReferencesStore, Options } from '../types';
 const CONTENT_REFERENCE_ID_ALPHABET =
   'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 
-
 /**
  * Creates a new ContentReferencesStore used for storing references (also known as citations)
  */
@@ -54,6 +53,6 @@ export const newContentReferencesStore: (options?: Options) => ContentReferences
   return {
     add,
     getStore,
-    options
+    options,
   };
 };
