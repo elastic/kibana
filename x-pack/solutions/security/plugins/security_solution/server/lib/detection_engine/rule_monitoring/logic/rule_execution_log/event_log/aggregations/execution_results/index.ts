@@ -310,6 +310,17 @@ const mapSecurityFieldsFromExecutionBucket = (bucket: ExecutionUuidAggBucket) =>
   search_duration_ms: bucket?.securityMetrics?.searchDuration?.value ?? 0,
   gap_duration_s: bucket?.securityMetrics?.gapDuration?.value ?? 0,
   frozen_indices_queried_count: bucket?.securityMetrics?.frozenIndicesQueriedCount.value ?? 0,
+  // If security_status isn't available, use platform status from `event.outcome`, but translate to RuleExecutionStatus
+  security_status:
+    bucket?.securityStatus?.status?.hits?.hits[0]?._source?.kibana?.alert?.rule?.execution
+      ?.status ??
+    mapPlatformStatusToRuleExecutionStatus(
+      bucket?.ruleExecution?.outcomeAndMessage?.hits?.hits[0]?._source?.event?.outcome
+    ),
+  // If security_message isn't available, use `error.message` instead for platform errors since it is more descriptive than `message`
+  security_message:
+    bucket?.securityStatus?.message?.hits?.hits[0]?._source?.message ??
+    bucket?.ruleExecution?.outcomeAndMessage?.hits?.hits[0]?._source?.error?.message,
 });
 
 /**
@@ -345,17 +356,6 @@ export const formatAggExecutionEventFromBucket = (
     schedule_delay_ms: scheduleDelayUs / ONE_MILLISECOND_AS_NANOSECONDS,
     timed_out: timedOut,
     ...mapSecurityFieldsFromExecutionBucket(bucket),
-    // If security_status isn't available, use platform status from `event.outcome`, but translate to RuleExecutionStatus
-    security_status:
-      bucket?.securityStatus?.status?.hits?.hits[0]?._source?.kibana?.alert?.rule?.execution
-        ?.status ??
-      mapPlatformStatusToRuleExecutionStatus(
-        bucket?.ruleExecution?.outcomeAndMessage?.hits?.hits[0]?._source?.event?.outcome
-      ),
-    // If security_message isn't available, use `error.message` instead for platform errors since it is more descriptive than `message`
-    security_message:
-      bucket?.securityStatus?.message?.hits?.hits[0]?._source?.message ??
-      bucket?.ruleExecution?.outcomeAndMessage?.hits?.hits[0]?._source?.error?.message,
     backfill,
   };
 };
