@@ -168,6 +168,7 @@ enabled:
   - x-pack/test/api_integration/apis/monitoring_collection/config.ts
   - x-pack/test/api_integration/apis/search/config.ts
   - x-pack/test/api_integration/apis/searchprofiler/config.ts
+  - x-pack/test/api_integration/apis/search_playground/config.ts
   - x-pack/test/api_integration/apis/security/config.ts
   - x-pack/test/api_integration/apis/spaces/config.ts
   - x-pack/test/api_integration/apis/stats/config.ts

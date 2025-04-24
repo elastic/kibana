@@ -8,13 +8,7 @@
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('Serverless search API', function () {
-    this.tags(['esGate']);
-
-    loadTestFile(require.resolve('./cases/find_cases'));
-    loadTestFile(require.resolve('./cases/post_case'));
-    loadTestFile(require.resolve('./serverless_search'));
-    loadTestFile(require.resolve('./platform_security'));
-    loadTestFile(require.resolve('./search_playground'));
+  describe('search_playground apis', () => {
+    loadTestFile(require.resolve('./playgrounds'));
   });
 }

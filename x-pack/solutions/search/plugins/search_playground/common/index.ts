@@ -21,3 +21,9 @@ export const DEFAULT_PAGINATION: Pagination = {
   size: 10,
   total: 0,
 };
+
+export enum ROUTE_VERSIONS {
+  v1 = '1',
+}
+
+export const PLAYGROUND_SAVED_OBJECT_TYPE = 'search_playground';
