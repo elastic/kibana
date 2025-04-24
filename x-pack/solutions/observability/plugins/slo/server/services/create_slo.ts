@@ -8,11 +8,7 @@ import {
   IngestPutPipelineRequest,
   TransformPutTransformRequest,
 } from '@elastic/elasticsearch/lib/api/types';
-import {
-  IBasePath,
-  IScopedClusterClient,
-  Logger
-} from '@kbn/core/server';
+import { IBasePath, IScopedClusterClient, Logger } from '@kbn/core/server';
 import { ALL_VALUE, CreateSLOParams, CreateSLOResponse } from '@kbn/slo-schema';
 import { asyncForEach } from '@kbn/std';
 import { merge } from 'lodash';

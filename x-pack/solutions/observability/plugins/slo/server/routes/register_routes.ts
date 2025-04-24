@@ -15,12 +15,7 @@ interface RegisterRoutes {
   dependencies: SLORoutesDependencies;
 }
 
-export function registerServerRoutes({
-  repository,
-  core,
-  logger,
-  dependencies,
-}: RegisterRoutes) {
+export function registerServerRoutes({ repository, core, logger, dependencies }: RegisterRoutes) {
   registerRoutes<SLORoutesDependencies>({
     repository,
     dependencies,
