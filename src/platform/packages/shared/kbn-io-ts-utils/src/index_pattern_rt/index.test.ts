@@ -8,7 +8,7 @@
  */
 
 import { indexPatternRt } from '.';
-import { isRight } from 'fp-ts/lib/Either';
+import { isRight } from 'fp-ts/Either';
 
 describe('indexPatternRt', () => {
   test('passes on valid index pattern strings', () => {
