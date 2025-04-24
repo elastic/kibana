@@ -28,9 +28,11 @@ export interface TryInConsoleButtonProps {
   sharePlugin?: SharePluginStart;
   content?: string | React.ReactElement;
   showIcon?: boolean;
+  iconType?: string;
   type?: 'link' | 'button' | 'emptyButton';
   telemetryId?: string;
   onClick?: () => void;
+  'data-test-subj'?: string;
 }
 export const TryInConsoleButton = ({
   request,
@@ -39,9 +41,11 @@ export const TryInConsoleButton = ({
   sharePlugin,
   content = RUN_IN_CONSOLE,
   showIcon = true,
+  iconType = 'play',
   type = 'emptyButton',
   telemetryId,
   onClick: onClickProp,
+  'data-test-subj': dataTestSubj,
 }: TryInConsoleButtonProps) => {
   const url = sharePlugin?.url;
   const canShowDevtools = !!application?.capabilities?.dev_tools?.show;
@@ -87,26 +91,30 @@ export const TryInConsoleButton = ({
   };
 
   const commonProps = {
-    'data-test-subj': type === 'link' ? 'tryInConsoleLink' : 'tryInConsoleButton',
+    'data-test-subj': dataTestSubj
+      ? dataTestSubj
+      : type === 'link'
+      ? 'tryInConsoleLink'
+      : 'tryInConsoleButton',
     'aria-label': getAriaLabel(),
     'data-telemetry-id': telemetryId,
     onClick,
   };
-  const iconType = showIcon ? 'play' : undefined;
+  const btnIconType = showIcon ? iconType : undefined;
 
   switch (type) {
     case 'link':
       return <EuiLink {...commonProps}>{content}</EuiLink>;
     case 'button':
       return (
-        <EuiButton color="primary" iconType={iconType} size="s" {...commonProps}>
+        <EuiButton color="primary" iconType={btnIconType} size="s" {...commonProps}>
           {content}
         </EuiButton>
       );
     case 'emptyButton':
     default:
       return (
-        <EuiButtonEmpty iconType={iconType} size="s" {...commonProps}>
+        <EuiButtonEmpty iconType={btnIconType} size="s" {...commonProps}>
           {content}
         </EuiButtonEmpty>
       );
