@@ -763,8 +763,16 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
         const inputVars = getPostureInputHiddenVars(inputType, packageInfo, setupTechnology);
         const policy = getPosturePolicy(newPolicy, inputType, inputVars);
         updatePolicy(policy);
+        if (
+          (inputType === 'cloudbeat/cis_aws' ||
+            inputType === 'cloudbeat/cis_azure' ||
+            inputType === 'cloudbeat/cis_gcp') &&
+          setupTechnology !== SetupTechnology.AGENTLESS
+        ) {
+          updateSetupTechnology(SetupTechnology.AGENTLESS);
+        }
       },
-      [setupTechnology, packageInfo, newPolicy, updatePolicy]
+      [packageInfo, setupTechnology, newPolicy, updatePolicy, updateSetupTechnology]
     );
 
     // search for non null fields of the validation?.vars object
@@ -810,6 +818,7 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
       // Required for mount only to ensure a single input type is selected
       // This will remove errors in validationResults.vars
       setEnabledPolicyInput(DEFAULT_INPUT_TYPE[input.policy_template]);
+
       refetch();
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isLoading, input.policy_template, isEditPage]);
@@ -891,7 +900,7 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
               selectedTemplate={input.policy_template}
               policy={newPolicy}
               setPolicyTemplate={(template) => {
-                setEnabledPolicyInput(DEFAULT_INPUT_TYPE[template]);
+                // setEnabledPolicyInput(DEFAULT_INPUT_TYPE[template]);
                 setIntegrationToEnable?.(template);
               }}
               disabled={isEditPage}
